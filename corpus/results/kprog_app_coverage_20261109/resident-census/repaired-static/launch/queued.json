@@ -1,0 +1,27 @@
+{
+  "source_head": "abf7ddc0b2a481b43e42410aa998ea1f806b3edc",
+  "driver": "/var/tmp/kprog-tmp/A/resident-census-repaired/source/kprog/corpus_resident_verifier.py",
+  "scratch": "/var/tmp/kprog-tmp/A/resident-census-repaired",
+  "controller_pid": 4158913,
+  "waiting_for": 3891389,
+  "instances": 274,
+  "applications": {
+    "bcc/set": 25,
+    "katran": 1,
+    "cilium/agent": 72,
+    "otelcol-ebpf-profiler/profiling": 13,
+    "tracee/monitor": 151,
+    "tetragon/observer": 12
+  },
+  "native_execution_requests": 0,
+  "queued_at": "2026-11-09T14:28:49.748170+00:00",
+  "command": [
+    "setsid",
+    "nohup",
+    "bash",
+    "/var/tmp/kprog-tmp/A/resident-census-repaired/queue.sh"
+  ],
+  "source_export_files": 1003,
+  "snapshot_bytes": 44824928,
+  "output": "/workspaces/repository/corpus/results/kprog_app_coverage_20261109/resident-census/repaired-static"
+}
