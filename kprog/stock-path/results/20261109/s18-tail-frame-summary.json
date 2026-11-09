@@ -1,0 +1,92 @@
+{
+  "lane": "S18",
+  "fixture_exit": 0,
+  "kernel": "35ea2cde39fc88b01f2f49b2a357e7cf7102e4c8",
+  "physical_tail_frame": {
+    "retval": 2,
+    "r12_preserved": 1,
+    "rsp_preserved": 1,
+    "rbp_preserved": 1
+  },
+  "tail": [
+    {
+      "jit_stack_depth": 0,
+      "jit_stack_pop": 0
+    },
+    {
+      "route": "stock",
+      "retval": 2,
+      "invocations": 34,
+      "tail_transfers": 33
+    },
+    {
+      "route": "native",
+      "retval": 2,
+      "invocations": 34,
+      "tail_transfers": 33
+    },
+    {
+      "route": "native_frame_probe",
+      "invocations": 34,
+      "tail_transfers": 33
+    }
+  ],
+  "original_observation": {
+    "client_exit": 1,
+    "retval": 2,
+    "r12_preserved": 1,
+    "rsp_preserved": 1,
+    "rbp_preserved": 0,
+    "cause": "Compiler assigned retval to EBP between the call and the after snapshot"
+  },
+  "repair": "Fixture compiler retains RBP as the frame pointer; native JIT and P bytes retain their published sources",
+  "host_cpu_affinity": "8-23",
+  "guest_memory_mib": 2048,
+  "source_pins": "run/frame-pins.json",
+  "proof_scope": "Finite physical caller observation across 33 successful tail transfers; universal composition retains its shared proof obligations",
+  "archive": {
+    "file": "s18-tail-frame-raw.tar.gz",
+    "sha256": "f2eed02f109caf1d890b637b3188c275c763afe1c9657c5bd43ee5e7dc244eb7",
+    "bytes": 796052,
+    "members": {
+      "S18/run/x86-tail-frame/client.err": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "S18/run/x86-tail-frame/client.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "S18/run/x86-tail-frame/client.out": "8a3ca4e6076bb7cb3fb48ea59682e6ebf770438a24f1a4c4c61caf39f9b1486f",
+      "S18/run/x86-tail-frame/dmesg": "b444e6c85a8115b6b0fcf30a0bb1381933bc7b58c03f0cface8f7b304ed104c6",
+      "S18/run/x86-tail-frame/jited-1.bin": "4db9b973668262008d23d7391d3c47429f378dea9e0e148deb5f43bebbec7cd9",
+      "S18/run/x86-tail-frame/jited-1.txt": "539a95b83ec0ad7677d9bfd6a072095493daca723970ec27e975eee48cf5d68c",
+      "S18/run/x86-tail-frame/native.bin": "4db9b973668262008d23d7391d3c47429f378dea9e0e148deb5f43bebbec7cd9",
+      "S18/run/x86-tail-frame/requests/1.success.tar.gz": "7722eba7034079d5c55afd42488eac3afe66e81898811235cb1533da3a8d871e",
+      "S18/run/x86-tail-frame/requests/request.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "S18/run/x86-tail-frame/requests/requests.jsonl": "51cd7fcf32e7a95075252927c334dde84b857824491c51ee6f66713b03c6717b",
+      "S18/run/x86-tail-frame/service.log": "f05f28d2c70994ab0ac0eeed98e638ffda3e07549da5bf274a732f21039a4442",
+      "S18/run/frame-console.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "S18/run/frame-command.json": "39d6935aea20b2bc0c26ac81eaa9f922793f4ea63766524aaba530f325e8e47b",
+      "S18/run/frame-guest.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "S18/run/frame-pins.json": "f3cf490e54e265feaf0fa489f9af23a8afcb70dc744a7764646e2af31e98eba3",
+      "S18/build-frame.sh": "f17563e3d32078bf8548fe403d7658d15fa6ed74975c3ac4723389fc07718c28",
+      "S18/build-frame.log": "9b972cfe0cae71b9a8ac6acb98e4c3b1baeb425a0cc2fe68769f3c52e57b2b08",
+      "S18/build-frame.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "S18/guest-frame.sh": "56e10c0cd8163f313fd58119b57ce1e40cd428390c0f563c67bd8a555058625a",
+      "S18/run-guest.py": "dff1c298f04e97ffd5444b585978229e685a9b44aa568862e21fb0abdfa1ae78",
+      "S18/frameprobe/disassembly.txt": "e16b2da409f4f6b3059c06b37216c0de182f7af9b6a9097aefca31e6577f0481",
+      "S18/frameprobe/original-disassembly.txt": "879f52f7c37447de934df338a90112720fda3db699940c1b18fbe70a7f1487b0",
+      "S18/frameprobe/build/tail_frame_probe.ko": "d4127aebc6e38abbe3f396decbc1eae9c2ca59331e4bf7a0a7c936e6f7e83d2a",
+      "S18/setup-first/frame-command.json": "7e4c9053a56b379196862c4e40045e15c1e015b2a1eed8a01ef3e1e8eb4b3b87",
+      "S18/setup-first/frame-console.log": "2cb950fd1cd8ea61af29ec66bbef8dc826a0fa9d404beb5defbf88148103999e",
+      "S18/setup-first/frame-guest.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "S18/setup-first/frame-pins.json": "f3cf490e54e265feaf0fa489f9af23a8afcb70dc744a7764646e2af31e98eba3",
+      "S17/frameprobe/client.cpp": "e06765117423415e97097c7347d6ccf733ce84c0e300b2f5cc9dc3597366bc2e",
+      "S17/frameprobe/client": "881791a75c0cf95b4e3114855600dceea8dfd1e292477ad6f45ffdc4e23b7eee",
+      "S17/frameprobe/module/tail_frame_probe.c": "fe4e88dceba3c4c905e61092b011fd6f66f3e12805ebe8c4fc358c0ddedeb9fa",
+      "S17/frameprobe/module/Makefile": "b9178332f8b58954ccb2ec060c23461e3d968a4fa84dc3d1ed0092d662dd84f3",
+      "S17/run/x86-tail-frame/client.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "S17/run/x86-tail-frame/client.err": "2b6e4f3b8bbe04012c805d1c4b02767c3a2aa78c608dfde9a1a0e1a285a7aaf0",
+      "S17/run/x86-tail-frame/dmesg": "4102665934caf9dcca0d5cc90fa1996f5e5e9b08db034ddde93bfce1766553c5",
+      "S17/tail/tail.bpf.o": "1f551b1b709a2d26d0ff94819039eaf1bf75d2c806299112b7e94be6b7d64976",
+      "S17/tail/tail.native.o": "e676613d2ae8dc73bfac060aafddfcc4b58c6591cf197e0abd6cd9a88e61012f",
+      "fixed-fixture/Makefile": "38ea2458479c3ae861b78f12597814e3d04cc1e83676c211f60c6a6d0a33913f",
+      "fixed-fixture/tail_frame_probe.c": "fe4e88dceba3c4c905e61092b011fd6f66f3e12805ebe8c4fc358c0ddedeb9fa"
+    }
+  }
+}
