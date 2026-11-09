@@ -1,0 +1,54 @@
+{
+  "utc": "2026-11-09T11:06:12.239007+00:00",
+  "policy": "all source edits in repository master; subsequent guests and builds consume read-only committed exports",
+  "read_only_current_export": "/var/tmp/kprog-tmp/C/signed-idiv/committed-2942313a7508",
+  "retirement": [
+    {
+      "path": "/var/tmp/kprog-tmp/C/signed-idiv/source",
+      "archive": "corpus/results/kprog_app_coverage_20261109/signed-idiv/raw.tar.gz",
+      "state": "retired_archived_private_source_copy",
+      "files": 3,
+      "archive_sha256": "83cc4f9877c17b392122bebd8c32f0576a0911ecea4e13694a64839c5ed89127"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/C/signed-idiv/parent",
+      "archive": "corpus/results/kprog_app_coverage_20261109/signed-idiv/raw.tar.gz",
+      "state": "retired_archived_private_source_copy",
+      "files": 3,
+      "archive_sha256": "83cc4f9877c17b392122bebd8c32f0576a0911ecea4e13694a64839c5ed89127"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/C/helper-output-range/source",
+      "archive": "corpus/results/kprog_app_coverage_20261109/helper-output-range/raw.tar.gz",
+      "state": "retained_with_archive_lookup_pending"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/C/xdp-helper-output-range/source",
+      "archive": "corpus/results/kprog_app_coverage_20261109/xdp-helper-output-range/raw.tar.gz",
+      "state": "retired_archived_private_source_copy",
+      "files": 157,
+      "archive_sha256": "e89168f938b5c5465e4322acf220af3c528ef95444c7f21f88a0f5a7fb87dd87"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/C/xdp-adjust-head-caller-frame/source",
+      "archive": "corpus/results/kprog_app_coverage_20261109/xdp-adjust-head-caller-frame/raw.tar.gz",
+      "state": "retired_archived_private_source_copy",
+      "files": 157,
+      "archive_sha256": "bef72cd064c18380b9833973841d102adf56d815774d7b9e5548e94d474664b3"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/C/helper-output-range-application/source",
+      "archive": "corpus/results/kprog_app_coverage_20261109/helper-output-range/application-current-shim/runtime-inputs.tar.gz",
+      "state": "retired_archived_private_source_copy",
+      "files": 157,
+      "archive_sha256": "157b7aaf36829013b5d93928ed252725d16eaf1147ae04322f338e34601398cf"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/C/bcc-native-profile-runtime/source",
+      "archive": "corpus/results/kprog_app_coverage_20261109/bcc-native-profile-runtime/runtime-inputs.tar.gz",
+      "state": "retired_archived_private_source_copy",
+      "files": 157,
+      "archive_sha256": "0a3e62cda3d1f8757fe21b3915f3cf472d8f292ae1e060a456882f4c06a31974"
+    }
+  ]
+}
