@@ -1,5 +1,5 @@
 {
-  "archive_sha256": "c30107cfe8641bfece763559d620b345bc16d769859d04fbcbb059c434df2fbd",
+  "archive_sha256": "3f78c9f41869d24f7f7212e379ef78b98dbbaab6c625cf669a6241bf11b6ac79",
   "files": {
     "final/checks.json": {
       "sha256": "d01d1683e6a8e9b0be217193c23dfa252c9b4c09d31a4f99b86b1e8999298543",
@@ -657,6 +657,14 @@
       "sha256": "48b0b67400ceb458fbc769160a0b889a35e3364a621bf15120f97437c951a20d",
       "bytes": 328
     },
+    "initial/fixture-build.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "initial/fixture-build.log": {
+      "sha256": "6d65aa2026a9251b324625c53ca5b2fceef96ea00322445c034fcaa36b920bae",
+      "bytes": 5848845
+    },
     "initial/followup/compile-results.json": {
       "sha256": "2cb19f692dd0366c445d78b11a532c62631949b70597ea26f5fe69cf633457f9",
       "bytes": 1791
@@ -677,9 +685,17 @@
       "sha256": "5d79ddfa7c20560ffb2b640fe5a22e765301c906d23d9b5d244403d2b2719e79",
       "bytes": 652271
     },
+    "initial/guest-only.sh": {
+      "sha256": "b1e584964bc5fa1cf4d2cdc26ebec36ad484f59a554f7a8565f9c7d44d4116ec",
+      "bytes": 570
+    },
     "initial/guest.log": {
       "sha256": "10026e343a6586c913a5eaf60b897f0fefa4c0293d8271e2998ba541a4fb5eba",
       "bytes": 1655
+    },
+    "initial/guest.mk": {
+      "sha256": "b8b4be07253cdd6c9d315cfb293c707163071cbc5156dbb38a48781a5caeeb22",
+      "bytes": 399
     },
     "initial/host-all.log": {
       "sha256": "380857408c48998e5dc972e1ddd565e9832c019d63a7c95287fa1737ee47d87d",
@@ -709,6 +725,14 @@
       "sha256": "2f3439d111ab3e62cca23f04bae1b54428d57c6a389d45728b2b1ac0de035354",
       "bytes": 31470958
     },
+    "initial/variants.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "initial/variants.mk": {
+      "sha256": "be254f6f27513da2e0ba3f7a7366dab23e1c0b409169f41ca7f8e6152107fa89",
+      "bytes": 2113
+    },
     "observed-artifacts/bpf_x86_native_lab.ko.json": {
       "sha256": "01156695f467e55dc5e4f8cb161ff8a747ffcc0118360c96092b254b8b86f1c8",
       "bytes": 204
@@ -733,9 +757,21 @@
       "sha256": "0de21dc7cbb2006b30b05a5915d116f10f88a94f3fb809def83096a9ae2387e5",
       "bytes": 96
     },
+    "observed-artifacts/libnative_loader.a.json": {
+      "sha256": "8326a0648f15e34862aa593e683317aad9d4b029c4c3a452b7ac9aa6039af6ca",
+      "bytes": 128
+    },
+    "observed-artifacts/native-link.json": {
+      "sha256": "4d8886b493834c6a7e5c0ff4d09990916c4c364506108df593bc55e3ea80c3a8",
+      "bytes": 128
+    },
     "observed-artifacts/native.o.json": {
       "sha256": "ddbeada2ab6825b5750e06513c3a274b8a74e6468873d41daf4c0d6b5676702c",
       "bytes": 96
+    },
+    "observed-artifacts/native_load_fault_module.ko.json": {
+      "sha256": "2c1106f969e3c2413da7167b4fa9dcb80b3cd84851c26405bb89211bec574b7d",
+      "bytes": 127
     },
     "observed-artifacts/pop.o.json": {
       "sha256": "a581790eacb36fb443639d273f6c726dbff5052bbaf56fc5f949362693c2b8e9",
