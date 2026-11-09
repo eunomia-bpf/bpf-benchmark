@@ -63,7 +63,7 @@ static unsigned long xdp_cases;
 static void xdp_rsp(void){for(unsigned fs=0;fs<64;fs++)for(unsigned vi=0;vi<NVALUES;vi++){
  X86_SIM_L_DECLARE_STATE();X86_SIM_L_DECLARE_STACK();__u8 __x86_sim_abi_kind=KPROG_ABI_KIND_XDP;
  struct xdp_md ctx={};ctx.data=(__u32)values[vi];ctx.data_end=(__u32)~values[vi];struct xdp_md copy=ctx;
- __x86_native_stack_base=0x100000;__x86_sim_is_xdp=1;__x86_sim_helper_ctx=&ctx;X86_SIM_L_WRITE_REG_PTR_TAG(X86_RDI,&ctx,X86_SIM_TAG_ABI);
+ __x86_native_stack_base=0x100000;__x86_sim_is_xdp=1;__x86_sim_helper_ctx=&ctx;__x86_sim_helper_abi_base=&ctx;X86_SIM_L_WRITE_REG_PTR_TAG(X86_RDI,&ctx,X86_SIM_TAG_ABI);
  __u64 old=flagword(fs);__x86_cf=!!(old&1);__x86_pf=!!(old&4);__x86_af=!!(old&16);__x86_zf=!!(old&64);__x86_sf=!!(old&128);__x86_of=!!(old&2048);
  XDP_SITE(KPROG_ABI_XDP_DATA_OFF,ctx.data);XDP_SITE(KPROG_ABI_XDP_DATA_END_OFF,ctx.data_end);
  __u64 flags=__x86_cf|((__u64)__x86_pf<<2)|((__u64)__x86_af<<4)|((__u64)__x86_zf<<6)|((__u64)__x86_sf<<7)|((__u64)__x86_of<<11);
