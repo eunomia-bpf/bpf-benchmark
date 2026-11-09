@@ -78010,5 +78010,39 @@
       "source-Arm64Mul.lean.txt": "7507b5a8876587220ce1e2b92989c176cfda0ffb6a3e345b20f84106a55a1b46"
     },
     "scope": "Eight multiply/divide operations + preceding3raw gates; allGPR/tag/origin/width/result and complete architectural image. Concrete production dispatcher equality and arbitrary unusedSRC3 bytes included. Native long/high width domain, entry origin, C extraction/union/physical/compiler interfaces explicit; B forwarding and callee comparisons independent."
+  },
+  "arm64_raw_shift_unary_refinement": {
+    "proof": {
+      "process_exit": 0,
+      "module_and_root_exit": 0,
+      "root_sha256": "c08dedfa21216380b9f8595e635c476de4bb7a155bfbe8f114f3fb1243fac057",
+      "source_sha256": "ea76c1af0fea8399104c6a2e9920cbdb078aaa36251f78ba649c64ab7e15732f",
+      "sorryAx": 0,
+      "reduction_bridge": 27,
+      "scope": "Raw SHIFT_IMM/SHIFT_REG/MVN/NEG and preceding11 raw gates; whole SHIFT AUX0..3, byte unary modifier/amount, full architectural image and production dispatcher correspondence; independent of B forwarding layout. Entry/C-union/source extraction/compiler/physical origin binding remain explicit."
+    },
+    "operations": [
+      "ARM64_OP_SHIFT_IMM",
+      "ARM64_OP_SHIFT_REG",
+      "ARM64_OP_MVN",
+      "ARM64_OP_NEG"
+    ],
+    "raw_operation_count": 15,
+    "new_audits": 17,
+    "total_audits": 40,
+    "archive": "arm-raw-shift-unary.log.gz",
+    "source_snapshots": {
+      "source-arm64_shift.h.txt": "f6ea479b7dd1cad90a3da8ab3ad3b7139a39d8c6d3b9fef1f9ffc7e32584e972",
+      "source-arm64_mod.h.txt": "43019ec31b5719d677dd190e2eb5cc01577ea6184f75241bcb92261949d78a72",
+      "source-arm64_sim_local_bpf.h.txt": "9cb5d58f9595124300d5bfd8fdcfdecba53f763e4d9ee34567345dd12cba1c13",
+      "source-Arm64Shift.lean.txt": "f9468a04f9b1686311679ca43f96089ccf76b00a6ca4a52cb424fa8fb721945a",
+      "source-Arm64RawRegister.lean.txt": "5e3950c2e1d5471f9769329e1e840fdeeeb6ec2bdaea8b4a479a6b29c3f81cb2",
+      "source-Arm64Dispatcher.lean.txt": "944f7a21b4d9b2c5b0e41c00bb60f98df62a530143694c180698925f851daeef",
+      "source-generate_micro_sim_proofs.py.txt": "d186c9596aeddea227ec0bae0a29e70ba7d7877607eb3ab0b3906ea45cd2114c",
+      "source-AArch64.lean.txt": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789",
+      "source-arm64_sim.h.txt": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd",
+      "source-arm64_unary.h.txt": "2f0081297ce74a7b68f4a5a0065c484abcd8a4658a62491bc99b3ca87945bca0"
+    },
+    "scope": "Whole SHIFT AUX0..3 native producer domain and actual unary byte1/byte2; allrawGPR/tag/origin/width writes/complete architecture image and production dispatcher equality. Fullunused bytefields retained. Entry/C extraction/union/physical/compiler interfaces explicit; Bforwarding and calleecomparisons independent."
   }
 }

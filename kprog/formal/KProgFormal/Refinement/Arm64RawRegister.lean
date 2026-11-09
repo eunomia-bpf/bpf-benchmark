@@ -343,3 +343,261 @@ end KProgFormal.Refinement.Arm64RawRegister.Multiply
 
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Multiply.unused_accumulator
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Multiply.production_unused_addend
+namespace KProgFormal.Refinement.Arm64RawRegister.ShiftUnary
+open Reference
+open Reference.AArch64 (Register Width ShiftKind)
+
+/-- SHIFT consumes the complete AUX word in the C switch. -/
+def kindAux (kind : ShiftKind) : BitVec 32 :=
+  BitVec.ofNat 32 (GeneratedArm64ShiftDecode.code (Arm64Shift.shiftCode kind))
+
+theorem whole_kind (kind : ShiftKind) :
+    Arm64Shift.decodeKind (kindAux kind).toNat = some kind := by cases kind <;> rfl
+
+theorem numeric_kind (kind : ShiftKind) :
+    kindAux kind = Arm64Shift.packedAux kind 0 0 0 := by cases kind <;> rfl
+
+def shiftBody (op : GeneratedArm64ImmOperand.ImmOp) (kind : ShiftKind) (width : Width)
+    (dst src count : Register) (value : Word) (origins : Origins) (state : State) : Transition State :=
+  let amount := if GeneratedArm64ImmOperand.immediate op then value else readRegister origins state count
+  let result := GeneratedArm64Shift.value (Arm64Shift.shiftCode kind)
+    (readRegister origins state src) amount (Arm64Register.handlerWidth width)
+  ⟨advance (writeRegister state dst result width), [], none⟩
+
+theorem shift_projects (op : GeneratedArm64ImmOperand.ImmOp) (kind : ShiftKind) (width : Width)
+    (dst src count : Register) (value : Word) (origins : Origins) (state : State) :
+    observe origins (shiftBody op kind width dst src count value origins state) =
+      Arm64Shift.rawStep op kind width dst src count value (image origins state) := by
+  simp only [shiftBody, observe, advance_refines, write_refines, read_refines,
+    Arm64Shift.rawStep, Arm64Register.read_refines, Arm64Register.write_refines]
+  rfl
+
+/-- Source modifier byte1 and amount byte2 precede unary result/writeback. -/
+def unaryBody (op : GeneratedArm64Unary.Unary) (aux : BitVec 32) (width : Width)
+    (dst src : Register) (origins : Origins) (state : State) : Transition State :=
+  let modified := GeneratedArm64Mod.value
+    (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat)
+    (readRegister origins state src) ((GeneratedArm64Aux.b2 aux).setWidth 64)
+    (Arm64Register.handlerWidth width)
+  let result := GeneratedArm64Unary.value op modified (Arm64Register.handlerWidth width)
+  ⟨advance (writeRegister state dst result width), [], none⟩
+
+theorem unary_projects (op : GeneratedArm64Unary.Unary) (aux : BitVec 32) (width : Width)
+    (dst src : Register) (origins : Origins) (state : State) :
+    observe origins (unaryBody op aux width dst src origins state) =
+      Arm64Dispatcher.unaryBody op aux width (Arm64Register.registerCode dst)
+        (Arm64Register.registerCode src) (image origins state) := by
+  simp only [unaryBody, observe, advance_refines, write_refines, read_refines,
+    Arm64Dispatcher.unaryBody, Arm64Move.Fields.register_read, Arm64Move.Fields.register_write,
+    Arm64Register.read_refines, Arm64Register.write_refines]
+  rfl
+
+/-- Covered disjoint opcode gates extend the preceding eleven-operation lift.
+Production reachability is derived separately for each added opcode. -/
+def dispatch (code : Nat) (aux : BitVec 32) (width : Width)
+    (dst src count addend : Register) (value : Word) (origins : Origins) (state : State) :
+    Option (Transition State) :=
+  match Multiply.dispatch code aux width dst src count addend value origins state with
+  | some result => some result
+  | none => match Arm64Shift.decodeOpcode code with
+    | some op => (Arm64Shift.decodeKind aux.toNat).map
+        (fun kind => shiftBody op kind width dst src count value origins state)
+    | none => (Arm64Shift.Unary.decodeOpcode code).map
+        (fun op => unaryBody op aux width dst src origins state)
+
+theorem before_shift (immediate : Bool) (aux : BitVec 32) (width : Width)
+    (dst src count addend : Register) (value : Word) (origins : Origins) (state : State) :
+    Multiply.dispatch (Arm64Dispatcher.shiftOpcode immediate) aux width dst src count addend value origins state = none := by
+  cases immediate <;> rfl
+
+theorem shift_reached (immediate : Bool) (kind : ShiftKind) (width : Width)
+    (dst src count addend : Register) (value : Word) (origins : Origins) (state : State) :
+    dispatch (Arm64Dispatcher.shiftOpcode immediate) (kindAux kind) width dst src count addend value origins state =
+      some (shiftBody (if immediate then .shiftImm else .shiftReg) kind width dst src count value origins state) := by
+  have decoded : Arm64Shift.decodeOpcode (Arm64Dispatcher.shiftOpcode immediate) =
+      some (if immediate then .shiftImm else .shiftReg) := by cases immediate <;> rfl
+  simp only [dispatch, before_shift, decoded, whole_kind, Option.map_some]
+  rfl
+
+theorem unary_reached (op : GeneratedArm64Unary.Unary) (aux : BitVec 32) (width : Width)
+    (dst src count addend : Register) (value : Word) (origins : Origins) (state : State) :
+    dispatch (GeneratedArm64Unary.code op) aux width dst src count addend value origins state =
+      some (unaryBody op aux width dst src origins state) := by
+  have leading : Multiply.dispatch (GeneratedArm64Unary.code op) aux width dst src count addend value origins state = none := by
+    cases op <;> rfl
+  have shift : Arm64Shift.decodeOpcode (GeneratedArm64Unary.code op) = none := by cases op <;> rfl
+  have known : Arm64Shift.Unary.decodeOpcode (GeneratedArm64Unary.code op) = some op := by cases op <;> rfl
+  simp only [dispatch, leading, shift, known, Option.map_some]
+  rfl
+
+/-- Actual ordered production gates, including arbitrary unused SRC3. -/
+theorem production_shift (immediate : Bool) (kind : ShiftKind) (width : Width)
+    (dst src count addend : Register) (src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool)
+    (origins : Origins) (state : State) :
+    (dispatch (Arm64Dispatcher.shiftOpcode immediate) (kindAux kind) width dst src count addend value origins state).map
+      (observe origins) =
+    Arm64Dispatcher.dispatchThroughUnary (Arm64Dispatcher.shiftOpcode immediate) (kindAux kind) width
+      (Arm64Register.registerCode dst) (Arm64Register.registerCode src) (Arm64Register.registerCode count)
+      src3 value sourceScalar sourceStack (image origins state) := by
+  have reached := Arm64Dispatcher.shift_reached immediate (kindAux kind) width
+    (Arm64Register.registerCode dst) (Arm64Register.registerCode src) (Arm64Register.registerCode count)
+    value sourceScalar sourceStack (image origins state)
+  rw [numeric_kind, Arm64Shift.packed_kind] at reached
+  simp only [Arm64Dispatcher.dispatchThroughUnary, Arm64Dispatcher.dispatchThroughMultiply,
+    numeric_kind, reached, Arm64Dispatcher.shift_body_typed]
+  rw [← numeric_kind, shift_reached]
+  exact congrArg some (shift_projects _ kind width dst src count value origins state)
+
+/-- Immediate SHIFT keeps every unused count byte, including NONE255. -/
+theorem production_immediate_count (kind : ShiftKind) (width : Width)
+    (dst src count addend : Register) (src2 src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool)
+    (origins : Origins) (state : State) :
+    (dispatch (Arm64Dispatcher.shiftOpcode true) (kindAux kind) width dst src count addend value origins state).map
+      (observe origins) =
+    Arm64Dispatcher.dispatchThroughUnary (Arm64Dispatcher.shiftOpcode true) (kindAux kind) width
+      (Arm64Register.registerCode dst) (Arm64Register.registerCode src) src2 src3 value
+      sourceScalar sourceStack (image origins state) := by
+  have reached := Arm64Dispatcher.shift_reached true (kindAux kind) width
+    (Arm64Register.registerCode dst) (Arm64Register.registerCode src) src2 value sourceScalar sourceStack (image origins state)
+  rw [numeric_kind, Arm64Shift.packed_kind] at reached
+  simp only [Arm64Dispatcher.dispatchThroughUnary, Arm64Dispatcher.dispatchThroughMultiply, numeric_kind, reached, Option.map, ↓reduceIte]
+  rw [Arm64Dispatcher.shift_immediate_ignores_count kind width _ _ src2 (Arm64Register.registerCode count),
+    Arm64Dispatcher.shift_body_typed, ← numeric_kind, shift_reached]
+  exact congrArg some (shift_projects .shiftImm kind width dst src count value origins state)
+
+theorem production_unary (op : GeneratedArm64Unary.Unary) (aux : BitVec 32) (width : Width)
+    (dst src count addend : Register) (src2 src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool)
+    (origins : Origins) (state : State) :
+    (dispatch (GeneratedArm64Unary.code op) aux width dst src count addend value origins state).map (observe origins) =
+    Arm64Dispatcher.dispatchThroughUnary (GeneratedArm64Unary.code op) aux width
+      (Arm64Register.registerCode dst) (Arm64Register.registerCode src) src2 src3 value
+      sourceScalar sourceStack (image origins state) := by
+  rw [unary_reached, Arm64Dispatcher.unary_reached]
+  exact congrArg some (unary_projects op aux width dst src origins state)
+
+theorem immediate_refines (width : Width) (kind : ShiftKind) (amount : Fin width.bits)
+    (dst src count addend : Register) (origins : Origins) (state : State) :
+    (dispatch (Arm64Dispatcher.shiftOpcode true) (kindAux kind) width dst src count addend
+      (BitVec.ofNat 64 amount.val) origins state).map (observe origins) =
+      some (Reference.AArch64.step (.shift (.immediate width kind amount dst src)) (image origins state)) := by
+  rw [production_shift true kind width dst src count addend 255 _ false false origins state, numeric_kind]
+  simp only [Arm64Dispatcher.dispatchThroughUnary, Arm64Dispatcher.dispatchThroughMultiply,
+    Arm64Dispatcher.shift_immediate_refines]
+
+theorem register_refines (width : Width) (kind : ShiftKind) (dst src count addend : Register)
+    (value : Word) (origins : Origins) (state : State) :
+    (dispatch (Arm64Dispatcher.shiftOpcode false) (kindAux kind) width dst src count addend value origins state).map
+      (observe origins) = some (Reference.AArch64.step (.shift (.register width kind dst src count)) (image origins state)) := by
+  rw [production_shift false kind width dst src count addend 255 _ false false origins state, numeric_kind]
+  simp only [Arm64Dispatcher.dispatchThroughUnary, Arm64Dispatcher.dispatchThroughMultiply,
+    Arm64Dispatcher.shift_register_refines]
+
+theorem invert_refines (width : Width) (kind : ShiftKind) (amount : Fin width.bits)
+    (dst src count addend : Register) (value : Word) (lane0 lane3 : Byte) (origins : Origins) (state : State) :
+    (dispatch (GeneratedArm64Unary.code .mvn)
+      (Arm64Shift.Unary.packedAux (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane0 lane3)
+      width dst src count addend value origins state).map (observe origins) =
+      some (Reference.AArch64.step (.shift (.invert width kind amount dst src)) (image origins state)) := by
+  rw [production_unary .mvn _ width dst src count addend 255 255 value false false origins state]
+  exact Arm64Dispatcher.unary_invert_refines width kind amount dst src 255 255 lane0 lane3 value false false _
+
+theorem negate_refines (width : Width) (kind : Fin 3) (amount : Fin width.bits)
+    (dst src count addend : Register) (value : Word) (lane0 lane3 : Byte) (origins : Origins) (state : State) :
+    (dispatch (GeneratedArm64Unary.code .neg)
+      (Arm64Shift.Unary.packedAux (Arm64Shift.modifier (Reference.AArch64.arithmeticShift kind))
+        (BitVec.ofNat 8 amount.val) lane0 lane3) width dst src count addend value origins state).map (observe origins) =
+      some (Reference.AArch64.step (.shift (.negate width kind amount dst src)) (image origins state)) := by
+  rw [production_unary .neg _ width dst src count addend 255 255 value false false origins state]
+  exact Arm64Dispatcher.unary_negate_refines width kind amount dst src 255 255 lane0 lane3 value false false _
+
+theorem unmodified_refines (op : GeneratedArm64Unary.Unary) (width : Width)
+    (dst src count addend : Register) (value : Word) (amount lane0 lane3 : Byte) (origins : Origins) (state : State) :
+    (dispatch (GeneratedArm64Unary.code op) (Arm64Shift.Unary.packedAux .none amount lane0 lane3)
+      width dst src count addend value origins state).map (observe origins) =
+      some (Reference.AArch64.step (.shift (if op = .mvn then
+        .invert width .lsl ⟨0, by cases width <;> decide⟩ dst src else
+        .negate width 0 ⟨0, by cases width <;> decide⟩ dst src)) (image origins state)) := by
+  rw [production_unary op _ width dst src count addend 255 255 value false false origins state]
+  exact Arm64Dispatcher.unary_unmodified_refines op width dst src 255 255 amount lane0 lane3 value false false _
+
+theorem earlier_step (origins : Origins) (state : State) (code : Nat) (aux : BitVec 32)
+    (width : Width) (dst src count addend : Register) (value : Word) (instruction : Reference.AArch64.Instruction)
+    (binding : Multiply.Binding code aux width dst src count addend value instruction) :
+    (dispatch code aux width dst src count addend value origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  have result := Multiply.step_refines origins state code aux width dst src count addend value instruction binding
+  unfold dispatch
+  cases leading : Multiply.dispatch code aux width dst src count addend value origins state with
+  | none => simp [leading] at result
+  | some output => simpa only [leading] using result
+
+/-- Native opcode, operand, whole SHIFT AUX and unary modifier identities.
+All shift amount bounds describe encoded native instruction fields. -/
+inductive Binding : Nat → BitVec 32 → Width → Register → Register → Register → Register →
+    Word → Reference.AArch64.Instruction → Prop where
+  | leading (code : Nat) (aux : BitVec 32) (width : Width) (dst src count addend : Register)
+      (value : Word) (instruction : Reference.AArch64.Instruction)
+      (binding : Multiply.Binding code aux width dst src count addend value instruction) :
+      Binding code aux width dst src count addend value instruction
+  | immediate (width : Width) (kind : ShiftKind) (amount : Fin width.bits) (dst src count addend : Register) :
+      Binding (Arm64Dispatcher.shiftOpcode true) (kindAux kind) width dst src count addend
+        (BitVec.ofNat 64 amount.val) (.shift (.immediate width kind amount dst src))
+  | register (width : Width) (kind : ShiftKind) (dst src count addend : Register) (value : Word) :
+      Binding (Arm64Dispatcher.shiftOpcode false) (kindAux kind) width dst src count addend value
+        (.shift (.register width kind dst src count))
+  | invert (width : Width) (kind : ShiftKind) (amount : Fin width.bits) (dst src count addend : Register)
+      (value : Word) (lane0 lane3 : Byte) :
+      Binding (GeneratedArm64Unary.code .mvn)
+        (Arm64Shift.Unary.packedAux (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane0 lane3)
+        width dst src count addend value (.shift (.invert width kind amount dst src))
+  | negate (width : Width) (kind : Fin 3) (amount : Fin width.bits) (dst src count addend : Register)
+      (value : Word) (lane0 lane3 : Byte) :
+      Binding (GeneratedArm64Unary.code .neg)
+        (Arm64Shift.Unary.packedAux (Arm64Shift.modifier (Reference.AArch64.arithmeticShift kind))
+          (BitVec.ofNat 8 amount.val) lane0 lane3) width dst src count addend value
+        (.shift (.negate width kind amount dst src))
+  | unmodified (op : GeneratedArm64Unary.Unary) (width : Width) (dst src count addend : Register)
+      (value : Word) (amount lane0 lane3 : Byte) :
+      Binding (GeneratedArm64Unary.code op) (Arm64Shift.Unary.packedAux .none amount lane0 lane3)
+        width dst src count addend value (.shift (if op = .mvn then
+          .invert width .lsl ⟨0, by cases width <;> decide⟩ dst src else
+          .negate width 0 ⟨0, by cases width <;> decide⟩ dst src))
+
+theorem step_refines (origins : Origins) (state : State) (code : Nat) (aux : BitVec 32)
+    (width : Width) (dst src count addend : Register) (value : Word) (instruction : Reference.AArch64.Instruction)
+    (binding : Binding code aux width dst src count addend value instruction) :
+    (dispatch code aux width dst src count addend value origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  cases binding with
+  | leading code aux width dst src count addend value instruction bound =>
+      exact earlier_step origins state code aux width dst src count addend value instruction bound
+  | immediate width kind amount dst src count addend =>
+      exact immediate_refines width kind amount dst src count addend origins state
+  | register width kind dst src count addend value =>
+      exact register_refines width kind dst src count addend value origins state
+  | invert width kind amount dst src count addend value lane0 lane3 =>
+      exact invert_refines width kind amount dst src count addend value lane0 lane3 origins state
+  | negate width kind amount dst src count addend value lane0 lane3 =>
+      exact negate_refines width kind amount dst src count addend value lane0 lane3 origins state
+  | unmodified op width dst src count addend value amount lane0 lane3 =>
+      exact unmodified_refines op width dst src count addend value amount lane0 lane3 origins state
+
+end KProgFormal.Refinement.Arm64RawRegister.ShiftUnary
+
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.whole_kind
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.numeric_kind
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.shift_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.unary_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.before_shift
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.shift_reached
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.unary_reached
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.production_shift
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.production_immediate_count
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.production_unary
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.immediate_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.register_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.invert_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.negate_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.unmodified_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.earlier_step
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.step_refines

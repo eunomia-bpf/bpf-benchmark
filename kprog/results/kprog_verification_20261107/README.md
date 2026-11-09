@@ -10,8 +10,8 @@ specialization token also has its own row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 74 / 74 |
 | Reference step family defined | 67/75 | 74/74 |
-| Raw register handler refinement | 32/75 | 11/74 |
-| Raw register dispatcher arm composition | 32/75 | 11/74 |
+| Raw register handler refinement | 32/75 | 15/74 |
+| Raw register dispatcher arm composition | 32/75 | 15/74 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/74 |
 | Addressed memory model / composed step | 29/75 | 0/74 |
 | Additional partial-model handler families | 1/75 | 0 |
@@ -6425,3 +6425,32 @@ image, memory/flags/SP/SIMD/monitor/environment, ordered empty events and fault
 result retain equality. Entry origin identity, source extraction/union access
 and physical/compiler transport remain interfaces. This proof uses register
 words/tags and stays independent of B forwarding and callee comparisons.
+
+### ARM raw shift and unary refinement
+
+SHIFT_IMM, SHIFT_REG, MVN and NEG now compose incoming raw64-bit words and
+all256 tags, STACK4/RETURN10 numeric materialization, generated source/count
+selection, modifier and width/scalar-tag writeback. Native W/X forms cover all
+GPR aliases and XZR, full register counts, immediate bounds and the shared
+architectural frame. Unary omitted modifiers retain arbitrary amount bytes;
+unused SRC2/SRC3 fields retain all byte values, including NONE255.
+
+The SHIFT C body at arm64_sim_local_bpf.h:1583 passes the complete AUX word
+to the generated switch. Its producer ARM64_AUX_SHIFT fills upper bytes with0.
+The new raw dispatcher binds the complete AUX to0..3. Its numerical production
+comparison uses exactly those whole-word encodings. The existing numerical
+low-byte decoder retains a wider abstract domain; source correspondence for that
+older domain requires the explicit upper-byte0 identity. Updating that older
+interface stays on the shared TODO. Unary consumes actual AUX byte1/byte2 and
+retains arbitrary AUX0/AUX3. Native NEG uses LSL/LSR/ASR, and MVN also uses ROR.
+
+`ShiftUnary.production_shift`, `production_immediate_count` and
+`production_unary` derive production dispatcher equality. `step_refines`
+composes the preceding eleven operations into one fifteen-operation theorem.
+Seventeen new and23 preceding laws audit with module/root checks0, sorryAx0
+and27 inherited Lean.ofReduceBool dependencies. The
+[raw shift/unary receipt](arm-raw-shift-unary.log.gz) preserves canonical/source
+snapshots, the exact prior source prefix, original first-attempt diagnostics,
+final module and all proof outcomes. Raw ARM totals advance11to15/74. Entry
+origin identity, C extraction/union access and physical/compiler transport stay
+explicit, independently of B forwarding and callee comparison storage.
