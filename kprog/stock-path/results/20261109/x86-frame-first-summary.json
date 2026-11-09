@@ -1,0 +1,16 @@
+{
+  "lane": "S17",
+  "cases": 46,
+  "stages": {
+    "valid_executed": 9,
+    "verifier_rejected": 32,
+    "accepted_finding": 3,
+    "specialization_rejected": 1,
+    "positive_infrastructure_error": 1
+  },
+  "negative_native_test_run": 0,
+  "scope": "Original45 plus R12 preservation control, S7/S11/S14/S15 generator integration",
+  "positive_precision": "valid_r12_preserved reaches scalar-id equality precision; current-source successor follows",
+  "credential_expectation": "uninitialized_stack privileged acceptance follows stock allow_uninit_stack; CAP_BPF-only rejection is published separately",
+  "kinsn_receipt": "kprog/results/kprog_exit_stack_20261109/summary.json"
+}
