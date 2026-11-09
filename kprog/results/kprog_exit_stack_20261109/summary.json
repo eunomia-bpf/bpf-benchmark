@@ -5,7 +5,10 @@
     "98013a7f6b72a37d64f29ef3c18849e78f4758eb",
     "da42f496cce7aba11b90196aa01c23b0a76e9584",
     "117eb020a313e8d734e79d18ac7661ee9393b49a",
-    "088a292b0374b728d86a6172b96ff7e4c7622c65"
+    "088a292b0374b728d86a6172b96ff7e4c7622c65",
+    "f7c517c0a95a8e7df2e38b6aaaf2bba0e0d9efe2",
+    "25a373adf2359e094910004481bf86af17fd437a",
+    "cc245743cfc34f873fe51c79864756873ccf4f27"
   ],
   "host": {
     "gcc": "pass",
@@ -20,7 +23,8 @@
     "native_below_sp_overwrite": {
       "x86": "host CPU",
       "arm64": "AArch64 instructions under qemu-user"
-    }
+    },
+    "opaque_output": "GCC and Clang pass both ISAs; helper, memcpy, memset fault arm and allocated-frame/source controls"
   },
   "micro": {
     "x86": {
@@ -35,12 +39,12 @@
     }
   },
   "x86_safety": {
-    "cases": 42,
+    "cases": 45,
     "stages": {
-      "accepted_finding": 2,
-      "specialization_rejected": 1,
       "valid_executed": 9,
-      "verifier_rejected": 30
+      "verifier_rejected": 33,
+      "specialization_rejected": 1,
+      "accepted_finding": 2
     },
     "positive_controls": {
       "valid_control": "valid_executed",
@@ -57,7 +61,14 @@
       "exit_frame_pointer_map": "verifier_rejected",
       "exit_stack_pointer": "verifier_rejected",
       "below_sp_call": "verifier_rejected",
+      "below_sp_helper_output": "verifier_rejected",
+      "below_sp_memset_output": "verifier_rejected",
+      "below_sp_memcpy_output": "verifier_rejected",
       "exit_r12": "verifier_rejected"
+    },
+    "stack_enforcement": {
+      "stack_oob": "verifier_rejected",
+      "uninitialized_stack": "verifier_rejected"
     },
     "accepted_old_cases": [
       "immediate_push_branch",
@@ -66,12 +77,12 @@
     "negative_native_test_run": 0
   },
   "arm64_safety": {
-    "cases": 38,
+    "cases": 41,
     "stages": {
-      "accepted_finding": 7,
-      "specialization_rejected": 2,
       "valid_executed": 4,
-      "verifier_rejected": 25
+      "verifier_rejected": 28,
+      "specialization_rejected": 3,
+      "accepted_finding": 6
     },
     "positive_controls": {
       "valid_control": "valid_executed",
@@ -83,10 +94,16 @@
       "exit_frame_pointer_map": "verifier_rejected",
       "exit_stack_pointer": "verifier_rejected",
       "below_sp_call": "verifier_rejected",
+      "below_sp_helper_output": "verifier_rejected",
+      "below_sp_memset_output": "verifier_rejected",
+      "below_sp_memcpy_output": "verifier_rejected",
       "exit_x19": "verifier_rejected"
     },
+    "stack_enforcement": {
+      "stack_oob": "verifier_rejected",
+      "uninitialized_stack": "verifier_rejected"
+    },
     "accepted_old_cases": [
-      "scalar_vector_load_clear_high",
       "unpaired_stxr_failure",
       "unpaired_stlxr_failure",
       "paired_stxr_failure",
@@ -94,12 +111,7 @@
       "entry_return_address_flags",
       "stack_base_flags"
     ],
-    "negative_native_test_run": 0,
-    "transport": {
-      "guest_exit": 1,
-      "qemu_returncode": 0,
-      "source_hashes_unchanged": true
-    }
+    "negative_native_test_run": 0
   },
   "native_compile": {
     "x86_red_zone_flags": [
@@ -111,24 +123,17 @@
     "coverage_proposals": 4,
     "status": "partial current C/Lean/compiled-body composition; V owns ledger merge and full check"
   },
-  "scope_completed": false,
+  "scope_completed": true,
   "requested_cases_completed": true,
-  "remaining_goal": "Cover opaque helper/libc output destinations below the caller SP and their native callee control/frame effect; coordinator decision and S13 physical helper relation remain pending.",
+  "remaining_goal": "Universal exit/stack C-to-Lean, compiled-body and physical-call composition remain V/S13 ledger obligations.",
   "compile_checks": {
-    "x86_make_exit": 0,
-    "negative_micro_make_exit": 0,
-    "arm64_final_make_exit": 0
-  },
-  "diff_size": {
-    "production_added": 236,
-    "production_removed": 81,
-    "tests_added": 150,
-    "tests_removed": 16
+    "output-micro": 0
   },
   "remaining": {
-    "formal": "V owns universal current exit/stack C-to-Lean and compiled-body composition, ledger merge, and older whole-state oracle reference alignment",
-    "tail_transfer": "S11/S13 own physical successful native tail unwind/transfer",
-    "read_recovery": "S9/S10 own original fault-recovery expectation changes and complete-effective-address interpretation"
+    "formal": "V owns universal current exit/stack C-to-Lean and compiled-body composition, ledger merge and whole-state oracle alignment",
+    "tail_transfer": "S11/S13 own successful native tail unwind/transfer composition",
+    "older_fixtures": "A/coordinator own recovery-trigger annotation and broader ARM ALU interpretation",
+    "application_precision": "A07:35 reported unchanged BCC sys_enter/capable caller-frame equality precision; preserved raw archive corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/bcc/trusted-arm64-bcc-result/run-20261109T071141599137Z.tar.gz requests2/3. Current finite S7 frame controls retain their measured stages; generic application precision remains an integration goal."
   },
   "runtime_hashes": {
     "x86": {
@@ -208,7 +213,7 @@
       "kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
       "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "1fc36bb214862ede6fe6d9c0f530e5a7199b7da7a8fef25c07890bd493b1b16c",
       "kprog/tv/build-x86/bpf_x86_native_lab.ko": "193c5b59448d7529db9871731e2ec80431e7ec460dc6e605fb4e4e4463e4b602",
-      "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "9659359bd0eeeaea9674a0b6fd1a63d23cd744cfed173c692d82b380b52bf928",
+      "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "8efacee948b75a7f8a85b28d88cdf62db5d0b2bd8ebfee2f62a9c4291502a978",
       "kprog/x86/micro-prog/generated_x86_alu_decode.py": "106ba0f45de9218244ac1ca9aed6686306a3fa91fc358bdb9a4ec5c5a4040a90",
       "kprog/x86/micro-prog/generated_x86_cc_decode.py": "099d0b7ed401af1ceca7e57264cea88cce566434646036d59d02bd7b941d98ea",
       "kprog/x86/micro-prog/generated_x86_full_condition.py": "648c6e0f09083376768900eddfe3454e6f3e506797cf641bd0dc4c51a3dbb276",
@@ -219,20 +224,20 @@
       "kprog/x86/native_lab/native_link/target/release/native-link": "a58076fb72ebbfcf11ee1316d8cd622cda4426e5682daa7ee5ae22be87e1ddd4",
       "kprog/x86/trusted_specializer.py": "657b60f9e7534bb044891a95f0755e7d17b62bfccd642954e7d460564e3060f6",
       "kprog/x86/x86_sim.h": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3",
-      "kprog/x86/x86_sim_local_bpf.h": "94ba89885d1c30880fdf578babb0629c0759833e0f6906c6fb088543dea1485d"
+      "kprog/x86/x86_sim_local_bpf.h": "e5209c7135b333201c66086d7bd1050abf4c929e665f5ed9a0023c74756f780b"
     },
     "arm64": {
       "kinsn/module/arm64/build-native-resources/bpf_arm64_native_lab.ko": "00c138817ea8bc8354ed1967294d054ab8eb796d624a0c523e87054f33462cd6",
       "kinsn/module/include/native_lab_input.h": "e48ddf8c7158b23115028b51a0b36e9ab199e821f31943f963c8bdc82f053918",
       "kprog/arm64/arm64_sim.h": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd",
       "kprog/arm64/arm64_sim_direct.h": "d676394dc964a64a224f23eb04e918462119680526023389ad76b186c7386831",
-      "kprog/arm64/arm64_sim_local_bpf.h": "78be1b5a526791c31bb43e89b7f963a5b3675fc1a430c114513c09227db3709a",
+      "kprog/arm64/arm64_sim_local_bpf.h": "2f98fec109486f186be41e39ed1fc4188f42a319e2f68655b1aa35d663492983",
       "kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link": "f7262afbc882ae4ae04448f8856a7ff8231282bab86ea4978ce103ce956eb955",
       "kprog/arm64/micro-prog/arm64_abi.py": "3650db8111e5e18c1355a08e86a7658ed0c2f2bcfa8014c3390ad80f86e43461",
-      "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "b5d9bdb9877aeba971cb12df2352966d755c4948e0a828a896819506bdcd9780",
+      "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "ac4f78382db53902600994fb24c71e625c1306ed50fcf7e4dcfc361c9252775e",
       "kprog/arm64/micro-prog/generated_arm64_cc_decode.py": "da883b8b8f40516b8cfe88cc08adaed1e66376cee82787a91715b8c459e29511",
       "kprog/arm64/micro-prog/generated_arm64_decode.py": "2a2ae48c6b70328e5a389adb91a9503cdbc856c85d390d6b1c81e291d27d36d2",
-      "kprog/arm64/micro-prog/generated_arm64_helper_idents.py": "1cae48ac1ddc7e504434c08632c3632e599e4f642eafee1785355efed8ee56fa",
+      "kprog/arm64/micro-prog/generated_arm64_helper_idents.py": "3e115004d8a313b932b9497432083ace190d8629b2ec22fd80d071aca042af90",
       "kprog/arm64/trusted_specializer.py": "51eddfaa7b8aaf7aad776c9bcf0e0996de65b5d0af1e72030f4d3e86838c99fe",
       "kprog/formal/generated/abi_load.h": "c4dae571789dc6d938ec993cf391428d3cd8ceb8ba55f27fa9443dbc4daa9546",
       "kprog/formal/generated/arm64_adrp.h": "da2004614c5ac4af1888b56f90398444e7d2f33c9e11391ab51e2f2a57fc4e20",
@@ -309,5 +314,24 @@
       "kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
       "vendor/build/arm64/linux/arch/arm64/boot/Image": "8f38106e7aa3d7e2369aa5626bb852ad17cb39312ee28f4e4c0a2ea235b57be5"
     }
+  },
+  "prior_source_diff_size": {
+    "production_added": 236,
+    "production_removed": 81,
+    "tests_added": 150,
+    "tests_removed": 16
+  },
+  "followup_source_commits": [
+    "f7c517c0a",
+    "25a373adf",
+    "cc245743c"
+  ],
+  "followup_diffstat": "38\t31\tkprog/arm64/arm64_sim_local_bpf.h\n37\t0\tkprog/formal/oracles/test_stack_output_lifetime_host.c\n34\t27\tkprog/x86/x86_sim_local_bpf.h\n6\t0\tkprog/fidelity/negative.py\n3\t3\tkprog/formal/oracles/test_stack_output_lifetime_host.c\n",
+  "terminal_transport": {
+    "x86_make_exit": 2,
+    "arm64_make_exit": 2,
+    "arm64_guest_exit": 1,
+    "arm64_qemu_returncode": 0,
+    "arm64_hashes_unchanged": true
   }
 }

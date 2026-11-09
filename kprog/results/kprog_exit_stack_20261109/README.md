@@ -1,6 +1,6 @@
 # Native exit and stack lifetime contract
 
-Lane S7 implements the outer-return and primitive below-SP contracts in both production
+Lane S7 implements the outer-return and below-SP contracts in both production
 simulator headers. At an outer return, x86-64 preserves entry RBX, RBP,
 R12-R15 and RSP; AArch64 preserves entry X19-X29 and SP, alongside the existing
 X30 return identity. A differing frame reaches the existing verifier-visible
@@ -11,7 +11,7 @@ Stack aliases, calls, libc copies/fills and ARM atomic accesses share that
 lifetime. Full-width SP ADD/SUB retains its relative coordinate and the existing
 numeric result/flag semantics.
 
-Source commits: `48eb036f5`, `98013a7f6`, `da42f496c`, `117eb020a`, `088a292b0`.
+Source commits: `48eb036f5`, `98013a7f6`, `da42f496c`, `117eb020a`, `088a292b0`, `f7c517c0a`, `25a373adf`, `cc245743c`.
 The changes use the five-step kernel-copy/service/verifier/JIT route. Admission
 gate additions: 0. Frozen workload and paper path changes: 0.
 
@@ -57,9 +57,8 @@ negative uses the existing load-only probe convention; negative TEST_RUN count0.
 
 | ISA | Valid controls executed | New S7 cases rejected by verifier | Other negative outcomes |
 | --- | ---: | ---: | --- |
-| x86-64 | 9 | 4/4 | accepted_finding=2, specialization_rejected=1, verifier_rejected=26 |
-| AArch64 QEMU | 4 | 4/4 | accepted_finding=7, specialization_rejected=2, verifier_rejected=21 |
-
+| x86 | 9 | 7/7 | accepted_finding=2, specialization_rejected=1, verifier_rejected=26 |
+| arm64 | 4 | 7/7 | accepted_finding=6, specialization_rejected=3, verifier_rejected=21 |
 
 The x86 acceptance changes, `immediate_push_branch` and `stack_base_flags`,
 select S9's approved known-zero read recovery. S9 retains the original expected
@@ -72,16 +71,9 @@ Final paired ARM execution uses the retained recovery Image/module, current
 runner bridge and the established host compiler broker with the runtime root
 as its ARM sysroot.
 
-The exact remaining physical boundary is an opaque helper/libc output through
-a caller below-SP pointer. Benign address-only ABI observers on both ISAs show
-that such a pointer can equal the callee saved-return slot. The current B call
-writes its reserved arena and forgets those bytes, while the native call can
-affect its own frame during that operation. The coordinator has the case for
-an existing-fault-arm decision; S13 owns the typed-helper/frame-effect relation.
-This boundary remains open alongside the completed requested regression cases.
-The address-only sources and outputs appear in the host archive.
+The coordinator's07:25 decision closes the opaque-output boundary in B. Helper output arguments and libc destinations below the caller SP select the existing architectural-fault arm on both ISAs. Source routing covers26x86 and29ARM output helpers. Actual GCC and Clang host checks exercise their common output-pointer primitive, a helper destination, memcpy/memset and live-frame controls. Three additional load-only output cases perISA reach stock-verifier rejection. The earlier benign address-only observers remain in the host archive as reproduction evidence. S13/V retain universal typed-helper/frame and compiled-body composition.
 
-AArch64 acceptance changes under the captured S10 recovery model: `scalar_vector_load_clear_high`, `unpaired_stxr_failure`, `unpaired_stlxr_failure`, `paired_stxr_failure`, `paired_stlxr_failure`, `entry_return_address_flags`, `stack_base_flags`. These retain the original negative expectations and remain load-only.
+AArch64 accepted original labels in this captured epoch: `unpaired_stxr_failure`, `unpaired_stlxr_failure`, `paired_stxr_failure`, `paired_stlxr_failure`, `entry_return_address_flags`, `stack_base_flags`. Every original expectation and measured stage remains in the receipts. Concurrent scalar-native policy can shift SIMD fixtures to generation rejection; protected-read recovery continues to account for the original NULL-load-trigger labels.
 
 Generic C-to-Lean and compiled-body composition for the changed exit/stack
 contracts remains under V. Four exact26-column RET row proposals appear in
@@ -98,5 +90,6 @@ short standalone host probes inherited Workspace affinity; the final host
 reruns are explicitly pinned, and R has that concurrency receipt. Final small
 receipts are published here and the lane's own temporary outputs are retired.
 
-The full suites return their expected-failure diagnostics for the listed accepted
-older fixtures: x86 guest exit1 and ARM guest exit1. The requested regression predicate covers all8new verifier rejections, all13valid control executions and both30-case compile batches. The opaque-call below-SP destination boundary remains an exact open goal. The source repair retains explicit global proof and read-recovery ownership boundaries.
+The A07:35 whole-application receipt additionally identifies caller-frame equality precision for unchanged sys_enter and kprobe__cap_capable_entry. The source-and-host archive retains the precise scalar-alias equality/fault contexts and original archive paths. Current standalone spilled-SP/frame controls pass; this application-coverage integration remains explicit in summary.json.
+
+The terminal source-captured replay records45x86 cases and the measured ARM count in summary.json. All14newS7 cases and the original stack_oob/uninitialized_stack cases reach stock-verifier rejection; all13positive controls execute, including both spilled-SP controls. Both30-case compile batches pass. Full suite diagnostic exit codes remain explicit in summary.json alongside accepted original fixtures. The requested exit/stack source repair and finite regression scope are complete; the universal proof and physical composition interfaces retain the owners recorded above.
