@@ -26,3 +26,6 @@ Current transport diagnosis (2026-11-09): the canonical module creates `native_s
 
 
 Compiler replay for the return-identity frontier: `make -f corpus/results/kprog_app_coverage_20261109/katran-regression-current/Makefile constant-offset-compile PHASE=baseline` compiles the captured complete application's B source against the current main-tree model using the original compiler command. The recipe preserves the input and header bytes, compiler diagnostics, object and disassembly under `/var/tmp/kprog-tmp/C/katran-constant-offset/<phase>/`. The baseline controller runs detached on CPUs20-23. A subsequent phase can measure a model change with identical captured P and flags; stock verification and native execution remain their separate recorded stages.
+
+
+The external helper-stack-application target passes NATIVE_PRODUCER to the existing runtime.py producer argument, defaulting to the normal inlined four-object payload. The same runtime recipe can replay the retained caller-register allocation8 producer at /var/tmp/kprog-tmp/C/katran-caller-registers/native/katran. Its prior actual frontier was BPF stack624; current packed metadata and scoped stack-coordinate source can be measured with exactly the same native objects. This selects P before image packaging while preserving the frozen framework and workload.

@@ -13,6 +13,7 @@ BPFREJIT_CORPUS_BPF_STATS ?= 1
 SAMPLES ?= 1
 WORKLOAD_DURATION ?= 2
 APPS ?= katran
+NATIVE_PRODUCER ?= /var/tmp/kprog-tmp/C/katran-regression-current/inline-producer/native/katran
 .PHONY: corpus guest
 corpus:
 	install -d $(STATE)/var-tmp
@@ -44,7 +45,7 @@ helper-stack-safety:
 	PYTHONDONTWRITEBYTECODE=1 python3 -B $(ROOT)/corpus/results/kprog_app_coverage_20261109/katran-regression-current/safety-replay.py $(SOURCE_COMMIT) $(WAIT_PID)
 
 helper-stack-application:
-	PYTHONDONTWRITEBYTECODE=1 python3 -B $(ROOT)/corpus/results/kprog_app_coverage_20261109/katran-regression-current/runtime.py $(SOURCE_COMMIT) /var/tmp/kprog-tmp/C/katran-regression-current/inline-producer/native/katran
+	PYTHONDONTWRITEBYTECODE=1 python3 -B $(ROOT)/corpus/results/kprog_app_coverage_20261109/katran-regression-current/runtime.py $(SOURCE_COMMIT) $(NATIVE_PRODUCER)
 
 .PHONY: constant-offset-compile
 constant-offset-compile:
