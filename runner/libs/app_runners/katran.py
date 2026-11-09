@@ -856,13 +856,14 @@ class KatranRunner(AppRunner):
                 stdout=tail_text(self._pktgen_read(f"/proc/net/pktgen/{alias}"), max_lines=200000, max_chars=8388608),
                 stderr="",
                 config={"tool": "kernel_pktgen", "namespace": ROUTER_NS, "iface": alias,
-                        "thread_id": int(thread_id), "shared_skb": True,
+                        "thread_id": int(thread_id), "shared_skb": False,
                         "xmit_mode": "start_xmit", "pkt_size": DEFAULT_PKTGEN_PKT_SIZE,
                         "clone_skb": DEFAULT_PKTGEN_CLONE_SKB,
                         "src_ip": CLIENT_IP, "dst_ip": VIP_IP, "dst_port": VIP_PORT,
                         "proto": UDP_PROTO},
             )
-            for thread_id, alias in zip(pktgen_thread_ids, aliases, strict=True)
+            for thread_id, alias in zip(KATRAN_PKTGEN_THREAD_IDS, aliases,
+                                            strict=True)
         )
         return WorkloadResult(
             workload_name="katran_kernel_pktgen_l2_udp",
@@ -872,10 +873,10 @@ class KatranRunner(AppRunner):
             stdout="",
             stderr=tail_text(stderr or "", max_lines=200000, max_chars=8388608),
             config={"tool": "kernel_pktgen", "namespace": ROUTER_NS, "iface": ROUTER_LB_IFACE,
-                    "shared_skb": True, "xmit_mode": "start_xmit",
+                    "shared_skb": False, "xmit_mode": "start_xmit",
                     "pkt_size": DEFAULT_PKTGEN_PKT_SIZE,
                     "clone_skb": DEFAULT_PKTGEN_CLONE_SKB,
-                    "threads": list(pktgen_thread_ids),
+                    "threads": list(KATRAN_PKTGEN_THREAD_IDS),
                     "src_ip": CLIENT_IP, "dst_ip": VIP_IP, "dst_port": VIP_PORT, "proto": UDP_PROTO},
             components=components,
         )
