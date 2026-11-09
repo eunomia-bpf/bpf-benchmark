@@ -57,8 +57,12 @@ Actual returning BPF CALL laws also retain the pre-call argument snapshot,
 full-width resolved identity, result/memory/effects and caller/callee/ghost frame
 through identity-preserving resolution; physical/native ABI and C/compiler
 correspondence remain explicit.
-Outer invocation/return-slot, physical memory/provenance, native-to-B entry
-coverage and C/compiler correspondence remain explicit.
+The existing x86/ARM callee-tag/value/SP exit predicates now derive the
+quantified ABI contract and exact normal-return value/frame. The x86 RET-token
+guard and native-return/JIT-result laws compose this contract under explicit
+snapshot, stack-origin and tag-projection inputs. Internal return stack erasure,
+ARM return-mode/LR binding, native-to-B entry and C/compiler/physical transport
+remain explicit.
 
 Architectural profiles are stated in the reference and theorem premises:
 x86 near control uses 48/57-bit canonical addresses with CET disabled, and

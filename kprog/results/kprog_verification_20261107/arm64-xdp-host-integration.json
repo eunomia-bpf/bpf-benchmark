@@ -24419,6 +24419,287 @@
       "SP"
     ]
   },
+  "invocation_exit_source_contract": {
+    "additional_token_laws": [
+      "ret_contract_body_matches",
+      "ret_invocation_contract",
+      "ret_subroutine_guard_preserves"
+    ],
+    "archive": "kprog/results/kprog_verification_20261107/invocation-exit-contract.log.gz",
+    "compiled_scalar_families": 13,
+    "complete_C_model_families": 71,
+    "composition": {
+      "audit_input": "import SimulatorComposition\nimport ControlABIComposition\nimport KProgFormal.X86RemainingTokenO2\n#print axioms KProgTV.SimulatorComposition.native_to_interpreted\n#print axioms KProgTV.SimulatorComposition.interpreted_to_specialized\n#print axioms KProgTV.SimulatorComposition.specialized_reflects\n#print axioms KProgTV.SimulatorComposition.program_block_validation\n#print axioms KProgTV.SimulatorComposition.program_effects_checked\n#print axioms KProgTV.SimulatorComposition.actual_program_block_validation\n#print axioms KProgTV.SimulatorComposition.actual_program_effects_checked\n#print axioms KProgFormal.X86RemainingTokenO2.ret_contract_body_matches\n#print axioms KProgFormal.X86RemainingTokenO2.ret_invocation_contract\n#print axioms KProgFormal.X86RemainingTokenO2.ret_subroutine_guard_preserves\n",
+      "exit": 0,
+      "reduction_bridge": 5,
+      "sorryAx": 0
+    },
+    "integration": [
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/invocation-exit-contract/olean/KProgFormal/X86RemainingTokenO2.olean",
+          "/workspaces/repository/kprog/formal/KProgFormal/X86RemainingTokenO2.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/formal/KProgFormal/X86RemainingTokenO2.lean",
+        "source_sha256": "cd50c39c6327040b6fd712a383510f907bcfdc182782f18386e4b7e3867fc6e4"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/invocation-exit-contract/olean/KProgFormal.olean",
+          "/workspaces/repository/kprog/formal/KProgFormal.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/formal/KProgFormal.lean",
+        "source_sha256": "31bd595dd0e05a660cb3380e6a198b225df416894fe8451ddd46a9a8f6c6f107"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/invocation-exit-contract/tv-olean/BPF.olean",
+          "/workspaces/repository/kprog/tv/BPF.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/tv/BPF.lean",
+        "source_sha256": "c7321c6be0ecaedaef5ec87ca70215cb780e250d241c062a308c88b08555c8f9"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/invocation-exit-contract/tv-olean/Composition.olean",
+          "/workspaces/repository/kprog/tv/Composition.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/tv/Composition.lean",
+        "source_sha256": "696fa9b36c99fc8fce42be4ae37f04051b9338b35a8c8ac903dee32526828771"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/invocation-exit-contract/tv-olean/BPFPath.olean",
+          "/workspaces/repository/kprog/tv/BPFPath.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/tv/BPFPath.lean",
+        "source_sha256": "55c5ceb95b9122ad7435ffbc1f653ac258f29d0ce9337f9424825245612b6d6d"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/invocation-exit-contract/tv-olean/SimulatorComposition.olean",
+          "/workspaces/repository/kprog/tv/SimulatorComposition.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/tv/SimulatorComposition.lean",
+        "source_sha256": "60e601baadb4891ce18172adedf3ec8f3f7237c5455299bf6aaf7f9e533681df"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/invocation-exit-contract/tv-olean/BPFPlatform.olean",
+          "/workspaces/repository/kprog/tv/BPFPlatform.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/tv/BPFPlatform.lean",
+        "source_sha256": "3f0fa34feb680209dd97e112e2fd15da06135e64d1797cb3c4a5b15701a483b1"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/invocation-exit-contract/tv-olean/PrivateSpills.olean",
+          "/workspaces/repository/kprog/tv/PrivateSpills.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/tv/PrivateSpills.lean",
+        "source_sha256": "76b19113e8ab5ddfe556caf98f37ef6ac80c2e56cc70ef4b037ee470a0d645bf"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/invocation-exit-contract/tv-olean/PrivateSpillProjection.olean",
+          "/workspaces/repository/kprog/tv/PrivateSpillProjection.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/tv/PrivateSpillProjection.lean",
+        "source_sha256": "c0481ace1c6091938759445692144933b653be162b127221334340bf95728037"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/invocation-exit-contract/tv-olean/ControlABIComposition.olean",
+          "/workspaces/repository/kprog/tv/ControlABIComposition.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/tv/ControlABIComposition.lean",
+        "source_sha256": "d34350665fc7257b7f52bd5a9784b05e83e911777e9ae5be76e3c9069e2e3628"
+      }
+    ],
+    "remaining_interfaces": [
+      "Internal SUB_RET stack release/valid/tag/lifetime realization",
+      "Producer return-mode selection on both ISAs and x86 saved-return/ARM LR-to-native address/result binding",
+      "Source snapshot/tag/stack projection correspondence",
+      "Actual C/B/compiler/physical entry and exit correspondence"
+    ],
+    "ret_and_entry_o4_status": "partial; unchanged",
+    "runtime_admission_additions": 0,
+    "sole_full_source": "099a096fb81c9143663db0bf256eae35400be26a",
+    "summary": {
+      "audit_exit": 0,
+      "audit_input": "import KProgFormal.ControlABI\n#print axioms KProgFormal.ControlABI.InvocationExit.x86_callee_cases\n#print axioms KProgFormal.ControlABI.InvocationExit.arm64_callee_cases\n#print axioms KProgFormal.ControlABI.InvocationExit.x86_accepted_iff\n#print axioms KProgFormal.ControlABI.InvocationExit.arm64_accepted_iff\n#print axioms KProgFormal.ControlABI.InvocationExit.x86_body_contract\n#print axioms KProgFormal.ControlABI.InvocationExit.arm64_body_contract\n#print axioms KProgFormal.ControlABI.InvocationExit.x86_returned_contract\n#print axioms KProgFormal.ControlABI.InvocationExit.arm64_returned_contract\n#print axioms KProgFormal.ControlABI.InvocationExit.x86_source_exit\n#print axioms KProgFormal.ControlABI.InvocationExit.arm64_source_exit\n#print axioms KProgFormal.ControlABI.InvocationExit.x86_source_physical_return\n#print axioms KProgFormal.ControlABI.InvocationExit.arm64_source_jit_result\n",
+      "compile": [
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/invocation-exit-contract/olean/KProgFormal/X86DivHandler.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/X86DivHandler.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/X86DivHandler",
+          "reused": true,
+          "source_sha256": "61b49c832251f4624a04b0fa2c2b96df04feec349a3d4dfaa10fefe6b6564c23"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/invocation-exit-contract/olean/KProgFormal/Refinement/X86Divide.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86Divide.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Refinement/X86Divide",
+          "reused": true,
+          "source_sha256": "0e6ac9d8b37135cf513a3d0b291190a6f0fbc5b566fb829935553c292bc7012e"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/invocation-exit-contract/olean/KProgFormal/Refinement/X86NumericAddress.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86NumericAddress.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Refinement/X86NumericAddress",
+          "reused": true,
+          "source_sha256": "046318642d07af25e07866248dde928f59f6ca240d0ce30eb709767c89891d1b"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/invocation-exit-contract/olean/KProgFormal/Refinement/X86Dispatcher.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86Dispatcher.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Refinement/X86Dispatcher",
+          "reused": true,
+          "source_sha256": "9a4a1428f4f3da1694e7db8d05676f042043228b9f193d82943949001d12448b"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/invocation-exit-contract/olean/KProgFormal/ControlABI.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/ControlABI.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/ControlABI",
+          "source_sha256": "656d0ad02d53333a314c99822e0318b8021814331fc8d146e34204ec0ee291ea"
+        }
+      ],
+      "laws": [
+        "x86_callee_cases",
+        "arm64_callee_cases",
+        "x86_accepted_iff",
+        "arm64_accepted_iff",
+        "x86_body_contract",
+        "arm64_body_contract",
+        "x86_returned_contract",
+        "arm64_returned_contract",
+        "x86_source_exit",
+        "arm64_source_exit",
+        "x86_source_physical_return",
+        "arm64_source_jit_result"
+      ],
+      "reduction_bridge": 0,
+      "scope": "Existing x86 six-callee and ARM eleven-callee raw tag/value/SP source predicates, normal uint32 return and complete-state fault outcome. Source-accepted and normally-returning outcomes derive quantified callee/SP contracts, which compose the existing native-return/JIT-result laws under explicit snapshot/stack/tag-projection and saved-return/LR premises. Existing C guards modeled; runtime additions0.",
+      "sorryAx": 0,
+      "source": [
+        {
+          "line": 3594,
+          "macro": "#define X86_SIM_X86_RET()                                                  \\\n\tdo {                                                               \\\n        if (__x86_rbx_tag != X86_SIM_TAG_SCALAR || __x86_rbx.ptr != __x86_entry_rbx || \\\n            __x86_rbp_tag != X86_SIM_TAG_SCALAR || __x86_rbp.ptr != __x86_entry_rbp || \\\n            __x86_r12_tag != X86_SIM_TAG_SCALAR || __x86_r12.ptr != __x86_entry_r12 || \\\n            __x86_r13_tag != X86_SIM_TAG_SCALAR || __x86_r13.ptr != __x86_entry_r13 || \\\n            __x86_r14_tag != X86_SIM_TAG_SCALAR || __x86_r14.ptr != __x86_entry_r14 || \\\n            __x86_r15_tag != X86_SIM_TAG_SCALAR || __x86_r15.ptr != __x86_entry_r15 || __x86_rsp.ptr != (void *)0) X86_SIM_L_ARCHITECTURAL_FAULT(); \\\n\t\treturn (__u32)X86_SIM_L_READ_REG(X86_RAX);                 \\\n\t} while (0)\n\n",
+          "macro_sha256": "4dc527ab8a7e22e2e44e8c1954d43777305154078501fbf02cd58b5909f05a16",
+          "path": "kprog/x86/x86_sim_local_bpf.h",
+          "sha256": "f9e729ec3fa99b1d3561ee9e030b9cf21ad72c12b8a2e17b69103287f4962891"
+        },
+        {
+          "line": 2357,
+          "macro": "#define ARM64_SIM_RET()                                                     \\\n\tdo {                                                               \\\n        if (__a64_x19_tag != ARM64_SIM_TAG_SCALAR || __a64_x19.x != __a64_entry_x19 || \\\n            __a64_x20_tag != ARM64_SIM_TAG_SCALAR || __a64_x20.x != __a64_entry_x20 || \\\n            __a64_x21_tag != ARM64_SIM_TAG_SCALAR || __a64_x21.x != __a64_entry_x21 || \\\n            __a64_x22_tag != ARM64_SIM_TAG_SCALAR || __a64_x22.x != __a64_entry_x22 || \\\n            __a64_x23_tag != ARM64_SIM_TAG_SCALAR || __a64_x23.x != __a64_entry_x23 || \\\n            __a64_x24_tag != ARM64_SIM_TAG_SCALAR || __a64_x24.x != __a64_entry_x24 || \\\n            __a64_x25_tag != ARM64_SIM_TAG_SCALAR || __a64_x25.x != __a64_entry_x25 || \\\n            __a64_x26_tag != ARM64_SIM_TAG_SCALAR || __a64_x26.x != __a64_entry_x26 || \\\n            __a64_x27_tag != ARM64_SIM_TAG_SCALAR || __a64_x27.x != __a64_entry_x27 || \\\n            __a64_x28_tag != ARM64_SIM_TAG_SCALAR || __a64_x28.x != __a64_entry_x28 || \\\n            __a64_x29_tag != ARM64_SIM_TAG_SCALAR || __a64_x29.x != __a64_entry_x29 || __a64_sp != 0) ARM64_SIM_L_REJECT_PC(); \\\n\t\treturn (__u32)ARM64_SIM_L_READ_REG(ARM64_X0);                                  \\\n\t} while (0)\n\n",
+          "macro_sha256": "c2a238a5a17b38321952ed56ac2216b8d417b104ccd82895b1f8951a0f90aaf3",
+          "path": "kprog/arm64/arm64_sim_local_bpf.h",
+          "sha256": "9cb5d58f9595124300d5bfd8fdcfdecba53f763e4d9ee34567345dd12cba1c13"
+        }
+      ]
+    },
+    "todo": "kprog/docs/todo.md"
+  },
   "kernel_bpf_protected_load_platform": {
     "actual_existing_integration_exit": 0,
     "actual_private_proof_exit": 0,

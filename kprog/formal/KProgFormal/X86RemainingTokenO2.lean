@@ -1,3 +1,4 @@
+import KProgFormal.ControlABI
 import KProgFormal.X86HelperDispatch
 import KProgFormal.Refinement.X86Dispatcher
 
@@ -184,6 +185,87 @@ theorem remaining_token_identity :
     GeneratedX86Specialization.dispatch .ret = .branchHandler ∧
     GeneratedX86Specialization.tokenName .ret = GeneratedX86Opcode.define .ret := by
   decide
+
+/-- The current outer exit uses the existing callee/SP fault arm; internal
+returns retain their saved-word/continuation outcome and complete frame. -/
+inductive ContractReturnOutcome where
+  | fault (state : X86CallMemBody.Frame)
+  | normal (result : ReturnOutcome)
+
+def guardReturn (snapshot : Reference.X86.Register → Word)
+    (tags : Reference.X86.Register → Byte) (result : Option ReturnOutcome) :
+    Option ContractReturnOutcome :=
+  match result with
+  | none => none
+  | some outcome =>
+      match outcome with
+      | .invocation _ state =>
+          if ControlABI.InvocationExit.x86Reject snapshot state.registers.raw.gpr tags
+              (state.registers.raw.gpr 4) then some (.fault state) else some (.normal outcome)
+      | .subroutine _ _ => some (.normal outcome)
+
+def returnContractDispatch (env : Refinement.EntryEnvironment.Environment)
+    (entry : Refinement.EntryEnvironment.Frame) (arena : Word)
+    (snapshot : Reference.X86.Register → Word) (tags : Reference.X86.Register → Byte)
+    (state : X86CallMemBody.Frame) (mode : ReturnMode) (code : Nat) : Option ContractReturnOutcome :=
+  guardReturn snapshot tags (returnDispatch env entry arena state mode code)
+
+def returnContractTokenBody (env : Refinement.EntryEnvironment.Environment)
+    (entry : Refinement.EntryEnvironment.Frame) (arena : Word) (fresh : Nat → Bool) (current : Nat)
+    (snapshot : Reference.X86.Register → Word) (tags : Reference.X86.Register → Byte)
+    (state : X86CallMemBody.Frame) (mode : ReturnMode)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Word) :
+    Option ContractReturnOutcome :=
+  guardReturn snapshot tags (returnTokenBody env entry arena fresh current state mode
+    flags aux dst src value nextPc)
+
+theorem ret_contract_body_matches (env : Refinement.EntryEnvironment.Environment)
+    (entry : Refinement.EntryEnvironment.Frame) (arena : Word) (fresh : Nat → Bool) (current : Nat)
+    (snapshot : Reference.X86.Register → Word) (tags : Reference.X86.Register → Byte)
+    (state : X86CallMemBody.Frame) (mode : ReturnMode)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Word) :
+    returnContractTokenBody env entry arena fresh current snapshot tags state mode flags aux dst src value nextPc =
+      returnContractDispatch env entry arena snapshot tags state mode (GeneratedX86Opcode.code .ret) := by
+  unfold returnContractTokenBody returnContractDispatch
+  rw [ret_body_matches]
+
+/-- Every original tag/raw cell and every possible entered callee value is
+quantified; the source condition precisely decides the uint32 result/fault. -/
+theorem ret_invocation_contract (env : Refinement.EntryEnvironment.Environment)
+    (entry : Refinement.EntryEnvironment.Frame) (arena : Word) (fresh : Nat → Bool) (current : Nat)
+    (snapshot : Reference.X86.Register → Word) (tags : Reference.X86.Register → Byte)
+    (state : X86CallMemBody.Frame) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Word) :
+    returnContractTokenBody env entry arena fresh current snapshot tags state .invocation
+        flags aux dst src value nextPc =
+      if ControlABI.InvocationExit.x86Contract snapshot state.registers.raw.gpr tags
+          (state.registers.raw.gpr 4) then
+        some (.normal (.invocation ((nativeRegisters env entry arena state.registers).gpr 0 |>.setWidth 32) state))
+      else some (.fault state) := by
+  classical
+  by_cases accepted : ControlABI.InvocationExit.x86Reject snapshot state.registers.raw.gpr tags
+      (state.registers.raw.gpr 4) = false
+  · have contract := (ControlABI.InvocationExit.x86_accepted_iff _ _ _ _).mp accepted
+    simp only [returnContractTokenBody, returnTokenBody, guardReturn, accepted,
+      Bool.false_eq_true, ↓reduceIte, contract]
+  · have rejected : ControlABI.InvocationExit.x86Reject snapshot state.registers.raw.gpr tags
+        (state.registers.raw.gpr 4) = true := by
+      cases h : ControlABI.InvocationExit.x86Reject snapshot state.registers.raw.gpr tags
+        (state.registers.raw.gpr 4) <;> simp_all
+    have contract := mt (ControlABI.InvocationExit.x86_accepted_iff _ _ _ _).mpr accepted
+    simp only [returnContractTokenBody, returnTokenBody, guardReturn, rejected, ↓reduceIte, contract]
+
+theorem ret_subroutine_guard_preserves (env : Refinement.EntryEnvironment.Environment)
+    (entry : Refinement.EntryEnvironment.Frame) (arena : Word) (fresh : Nat → Bool) (current : Nat)
+    (snapshot : Reference.X86.Register → Word) (tags : Reference.X86.Register → Byte)
+    (state : X86CallMemBody.Frame) (targets : List Word) (flags : Byte) (aux : BitVec 32)
+    (dst src : Byte) (value nextPc : Word) :
+    returnContractTokenBody env entry arena fresh current snapshot tags state (.subroutine targets)
+        flags aux dst src value nextPc =
+      some (.normal (.subroutine (subroutineFrame env entry arena state)
+        (generatedReturnDispatch env entry arena state.registers targets))) := by
+  rw [ret_contract_body_matches]
+  rfl
 
 end KProgFormal.X86RemainingTokenO2
 

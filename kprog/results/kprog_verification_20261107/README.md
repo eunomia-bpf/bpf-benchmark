@@ -6215,3 +6215,18 @@ compiled scalar coverage remains13/75. C-language source interpretation,
 actual BPF compilation and physical memory/entry/ABI transport retain their
 shared obligations in the [unified TODO](../../docs/todo.md). These numbers
 record model-level equality; the prior receipts retain their exact source epochs.
+
+### Existing invocation-exit predicate and ABI composition
+
+`ControlABI.InvocationExit` interprets the existing x86 RBX/RBP/R12-R15 and
+ARM X19-X29 scalar-tag/value checks plus their zero raw-SP checks. Twelve
+universal laws prove equivalence to the quantified ABI contract, derive the
+exact low32 result and complete frame from normal returns, and compose the
+existing native-return/JIT-result laws under stated entry snapshot/origin/tag
+projection and saved-return/LR premises. Three current x86 RET-token laws add
+both outer fault/return outcomes and preserve the internal continuation/default
+model. The [exit receipt](invocation-exit-contract.log.gz) retains source macro
+identities, dependency compiles and axiom audits. RET and INVOCATION_ENTRY_ABI
+retain partial status; internal stack-release/valid-tag lifetime, ARM mode/LR
+binding and actual C/B/compiler/physical correspondence remain active in the
+unified TODO. C-model71/75 and compiled scalar13/75 totals retain their scope.

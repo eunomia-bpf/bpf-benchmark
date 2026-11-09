@@ -1,3 +1,4 @@
+import KProgFormal.Refinement.X86NumericAddress
 import KProgFormal.InvocationABI
 import KProgFormal.TailCallBinding
 import KProgFormal.HelperABI
@@ -412,3 +413,259 @@ end KProgFormal.ControlABI
 #print axioms KProgFormal.ControlABI.rcu_derives_retained
 #print axioms KProgFormal.ControlABI.resolver_identity_signature
 #print axioms KProgFormal.ControlABI.compiler_spill_cfg
+
+namespace KProgFormal.ControlABI.InvocationExit
+open Reference
+
+/-- The exact existing x86 C exit predicate, in its emitted register order. -/
+def x86Reject (snapshot raw : X86.Register → Reference.Word) (tags : X86.Register → Reference.Byte)
+    (sp : Reference.Word) : Bool :=
+  tags 3 != 0 || raw 3 != snapshot 3 || tags 5 != 0 || raw 5 != snapshot 5 ||
+  tags 12 != 0 || raw 12 != snapshot 12 || tags 13 != 0 || raw 13 != snapshot 13 ||
+  tags 14 != 0 || raw 14 != snapshot 14 || tags 15 != 0 || raw 15 != snapshot 15 || sp != 0
+
+/-- The exact existing ARM C exit predicate, including X29 and raw SP. -/
+def arm64Reject (snapshot raw : AArch64.Gpr → Reference.Word) (tags : AArch64.Gpr → Reference.Byte)
+    (sp : Reference.Word) : Bool :=
+  tags 19 != 0 || raw 19 != snapshot 19 || tags 20 != 0 || raw 20 != snapshot 20 ||
+  tags 21 != 0 || raw 21 != snapshot 21 || tags 22 != 0 || raw 22 != snapshot 22 ||
+  tags 23 != 0 || raw 23 != snapshot 23 || tags 24 != 0 || raw 24 != snapshot 24 ||
+  tags 25 != 0 || raw 25 != snapshot 25 || tags 26 != 0 || raw 26 != snapshot 26 ||
+  tags 27 != 0 || raw 27 != snapshot 27 || tags 28 != 0 || raw 28 != snapshot 28 ||
+  tags 29 != 0 || raw 29 != snapshot 29 || sp != 0
+
+def x86Contract (snapshot raw : X86.Register → Reference.Word) (tags : X86.Register → Reference.Byte)
+    (sp : Reference.Word) : Prop :=
+  sp = 0 ∧ ∀ r, x86Callee r → tags r = 0 ∧ raw r = snapshot r
+
+def arm64Contract (snapshot raw : AArch64.Gpr → Reference.Word) (tags : AArch64.Gpr → Reference.Byte)
+    (sp : Reference.Word) : Prop :=
+  sp = 0 ∧ ∀ r, arm64Callee r → tags r = 0 ∧ raw r = snapshot r
+
+theorem x86_callee_cases (r : X86.Register) :
+    x86Callee r ↔ r = 3 ∨ r = 5 ∨ r = 12 ∨ r = 13 ∨ r = 14 ∨ r = 15 := by
+  simp only [x86Callee, List.mem_cons, List.mem_singleton, List.not_mem_nil, or_false, Fin.ext_iff]
+  change (r.val = 3 ∨ r.val = 5 ∨ r.val = 12 ∨ r.val = 13 ∨ r.val = 14 ∨ r.val = 15) ↔
+    (r.val = 3 ∨ r.val = 5 ∨ r.val = 12 ∨ r.val = 13 ∨ r.val = 14 ∨ r.val = 15)
+  rfl
+
+theorem arm64_callee_cases (r : AArch64.Gpr) :
+    arm64Callee r ↔ r = 19 ∨ r = 20 ∨ r = 21 ∨ r = 22 ∨ r = 23 ∨ r = 24 ∨
+      r = 25 ∨ r = 26 ∨ r = 27 ∨ r = 28 ∨ r = 29 := by
+  simp only [arm64Callee, Fin.ext_iff]
+  omega
+
+theorem x86_accepted_iff (snapshot raw : X86.Register → Reference.Word)
+    (tags : X86.Register → Reference.Byte) (sp : Reference.Word) :
+    x86Reject snapshot raw tags sp = false ↔ x86Contract snapshot raw tags sp := by
+  constructor
+  · intro accepted
+    simp only [x86Reject, Bool.or_eq_false_iff, bne_eq_false_iff_eq, and_assoc] at accepted
+    rcases accepted with ⟨t3, v3,t5, v5,t12, v12,t13, v13,t14, v14,t15, v15, stack⟩
+    constructor
+    · exact stack
+    · intro r saved
+      rcases (x86_callee_cases r).mp saved with rfl | rfl | rfl | rfl | rfl | rfl
+      · exact ⟨t3, v3⟩
+      · exact ⟨t5, v5⟩
+      · exact ⟨t12, v12⟩
+      · exact ⟨t13, v13⟩
+      · exact ⟨t14, v14⟩
+      · exact ⟨t15, v15⟩
+  · intro contract
+    simp only [x86Reject, Bool.or_eq_false_iff, bne_eq_false_iff_eq, and_assoc]
+    exact ⟨(contract.2 3 (by decide)).1, (contract.2 3 (by decide)).2, (contract.2 5 (by decide)).1, (contract.2 5 (by decide)).2, (contract.2 12 (by decide)).1, (contract.2 12 (by decide)).2, (contract.2 13 (by decide)).1, (contract.2 13 (by decide)).2, (contract.2 14 (by decide)).1, (contract.2 14 (by decide)).2, (contract.2 15 (by decide)).1, (contract.2 15 (by decide)).2, contract.1⟩
+
+instance x86ContractDecidable (snapshot raw : X86.Register → Reference.Word)
+    (tags : X86.Register → Reference.Byte) (sp : Reference.Word) :
+    Decidable (x86Contract snapshot raw tags sp) :=
+  if accepted : x86Reject snapshot raw tags sp = false then
+    isTrue ((x86_accepted_iff _ _ _ _).mp accepted)
+  else isFalse (fun contract => accepted ((x86_accepted_iff _ _ _ _).mpr contract))
+
+theorem arm64_accepted_iff (snapshot raw : AArch64.Gpr → Reference.Word)
+    (tags : AArch64.Gpr → Reference.Byte) (sp : Reference.Word) :
+    arm64Reject snapshot raw tags sp = false ↔ arm64Contract snapshot raw tags sp := by
+  constructor
+  · intro accepted
+    simp only [arm64Reject, Bool.or_eq_false_iff, bne_eq_false_iff_eq, and_assoc] at accepted
+    rcases accepted with ⟨t19, v19,t20, v20,t21, v21,t22, v22,t23, v23,t24, v24,t25, v25,t26, v26,t27, v27,t28, v28,t29, v29, stack⟩
+    constructor
+    · exact stack
+    · intro r saved
+      rcases (arm64_callee_cases r).mp saved with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+      · exact ⟨t19, v19⟩
+      · exact ⟨t20, v20⟩
+      · exact ⟨t21, v21⟩
+      · exact ⟨t22, v22⟩
+      · exact ⟨t23, v23⟩
+      · exact ⟨t24, v24⟩
+      · exact ⟨t25, v25⟩
+      · exact ⟨t26, v26⟩
+      · exact ⟨t27, v27⟩
+      · exact ⟨t28, v28⟩
+      · exact ⟨t29, v29⟩
+  · intro contract
+    simp only [arm64Reject, Bool.or_eq_false_iff, bne_eq_false_iff_eq, and_assoc]
+    exact ⟨(contract.2 19 (by decide)).1, (contract.2 19 (by decide)).2, (contract.2 20 (by decide)).1, (contract.2 20 (by decide)).2, (contract.2 21 (by decide)).1, (contract.2 21 (by decide)).2, (contract.2 22 (by decide)).1, (contract.2 22 (by decide)).2, (contract.2 23 (by decide)).1, (contract.2 23 (by decide)).2, (contract.2 24 (by decide)).1, (contract.2 24 (by decide)).2, (contract.2 25 (by decide)).1, (contract.2 25 (by decide)).2, (contract.2 26 (by decide)).1, (contract.2 26 (by decide)).2, (contract.2 27 (by decide)).1, (contract.2 27 (by decide)).2, (contract.2 28 (by decide)).1, (contract.2 28 (by decide)).2, (contract.2 29 (by decide)).1, (contract.2 29 (by decide)).2, contract.1⟩
+
+instance arm64ContractDecidable (snapshot raw : AArch64.Gpr → Reference.Word)
+    (tags : AArch64.Gpr → Reference.Byte) (sp : Reference.Word) :
+    Decidable (arm64Contract snapshot raw tags sp) :=
+  if accepted : arm64Reject snapshot raw tags sp = false then
+    isTrue ((arm64_accepted_iff _ _ _ _).mp accepted)
+  else isFalse (fun contract => accepted ((arm64_accepted_iff _ _ _ _).mpr contract))
+
+/-- Both branches retain the complete C state, including arbitrary memory,
+register metadata, fresh inputs and caller-owned ghost fields. -/
+inductive Result (State : Type) where
+  | fault (state : State)
+  | returned (value : BitVec 32) (state : State)
+
+def body {State : Type} (reject : Bool) (value : Reference.Word) (state : State) : Result State :=
+  if reject then .fault state else .returned (value.setWidth 32) state
+
+theorem x86_body_contract {State : Type} (snapshot raw : X86.Register → Reference.Word)
+    (tags : X86.Register → Reference.Byte) (sp value : Reference.Word) (state : State) :
+    body (x86Reject snapshot raw tags sp) value state =
+      if x86Contract snapshot raw tags sp then .returned (value.setWidth 32) state else .fault state := by
+  by_cases accepted : x86Reject snapshot raw tags sp = false
+  · have contract := (x86_accepted_iff snapshot raw tags sp).mp accepted
+    simp only [body, accepted, Bool.false_eq_true, ↓reduceIte, contract]
+  · have rejected : x86Reject snapshot raw tags sp = true := by
+      cases h : x86Reject snapshot raw tags sp <;> simp_all
+    have contract := mt (x86_accepted_iff snapshot raw tags sp).mpr accepted
+    simp only [body, rejected, ↓reduceIte, contract]
+
+theorem arm64_body_contract {State : Type} (snapshot raw : AArch64.Gpr → Reference.Word)
+    (tags : AArch64.Gpr → Reference.Byte) (sp value : Reference.Word) (state : State) :
+    body (arm64Reject snapshot raw tags sp) value state =
+      if arm64Contract snapshot raw tags sp then .returned (value.setWidth 32) state else .fault state := by
+  by_cases accepted : arm64Reject snapshot raw tags sp = false
+  · have contract := (arm64_accepted_iff snapshot raw tags sp).mp accepted
+    simp only [body, accepted, Bool.false_eq_true, ↓reduceIte, contract]
+  · have rejected : arm64Reject snapshot raw tags sp = true := by
+      cases h : arm64Reject snapshot raw tags sp <;> simp_all
+    have contract := mt (arm64_accepted_iff snapshot raw tags sp).mpr accepted
+    simp only [body, rejected, ↓reduceIte, contract]
+
+/-- A normal modeled C return derives the ABI predicate and retains the
+exact uint32 value and complete frame; the guard is obtained from the outcome. -/
+theorem x86_returned_contract {State : Type} (snapshot raw : X86.Register → Reference.Word)
+    (tags : X86.Register → Reference.Byte) (sp value : Reference.Word) (state final : State)
+    (output : BitVec 32)
+    (returned : body (x86Reject snapshot raw tags sp) value state = .returned output final) :
+    x86Contract snapshot raw tags sp ∧ output = value.setWidth 32 ∧ final = state := by
+  have accepted : x86Reject snapshot raw tags sp = false := by
+    cases decision : x86Reject snapshot raw tags sp with
+    | false => rfl
+    | true => simp [body, decision] at returned
+  have fields : Result.returned (value.setWidth 32) state = Result.returned output final := by
+    simpa [body, accepted] using returned
+  have pair := Result.returned.inj fields
+  exact ⟨(x86_accepted_iff _ _ _ _).mp accepted, pair.1.symm, pair.2.symm⟩
+
+/-- A normal modeled C return derives the ABI predicate and retains the
+exact uint32 value and complete frame; the guard is obtained from the outcome. -/
+theorem arm64_returned_contract {State : Type} (snapshot raw : AArch64.Gpr → Reference.Word)
+    (tags : AArch64.Gpr → Reference.Byte) (sp value : Reference.Word) (state final : State)
+    (output : BitVec 32)
+    (returned : body (arm64Reject snapshot raw tags sp) value state = .returned output final) :
+    arm64Contract snapshot raw tags sp ∧ output = value.setWidth 32 ∧ final = state := by
+  have accepted : arm64Reject snapshot raw tags sp = false := by
+    cases decision : arm64Reject snapshot raw tags sp with
+    | false => rfl
+    | true => simp [body, decision] at returned
+  have fields : Result.returned (value.setWidth 32) state = Result.returned output final := by
+    simpa [body, accepted] using returned
+  have pair := Result.returned.inj fields
+  exact ⟨(arm64_accepted_iff _ _ _ _).mp accepted, pair.1.symm, pair.2.symm⟩
+
+/-- Accepted source cells derive the complete native callee-save relation.
+The tag projection and entry snapshot/origin are explicit representation inputs. -/
+theorem x86_source_exit (env : Refinement.EntryEnvironment.Environment)
+    (frame : Refinement.EntryEnvironment.Frame) (arena : Reference.Word)
+    (snapshot : X86.Register → Reference.Word) (tags : X86.Register → Reference.Byte)
+    (raw : Refinement.X86NumericAddress.RegisterState) (entry : X86.State)
+    (entryStack : entry.gpr 4 = Refinement.EntryEnvironment.base env frame .stack)
+    (entryRegisters : ∀ r, x86Callee r → entry.gpr r = snapshot r)
+    (tagProjection : ∀ r, raw.stack r = (tags r == 4))
+    (accepted : x86Reject snapshot raw.raw.gpr tags (raw.raw.gpr 4) = false) :
+    x86Exit entry (Refinement.X86NumericAddress.nativeRegisters env frame arena raw) := by
+  have contract := (x86_accepted_iff _ _ _ _).mp accepted
+  constructor
+  · change raw.raw.gpr 4 + Refinement.EntryEnvironment.base env frame .stack = entry.gpr 4
+    simpa [contract.1, Reference.Word] using entryStack.symm
+  · intro r saved
+    have scalar := (contract.2 r saved).1
+    have bits := (contract.2 r saved).2
+    have regular : r ≠ 4 := by
+      have values : r.val = 3 ∨ r.val = 5 ∨ r.val = 12 ∨ r.val = 13 ∨ r.val = 14 ∨ r.val = 15 := by
+        simpa only [x86Callee, List.mem_cons, List.mem_singleton, List.not_mem_nil, or_false] using saved
+      intro eq
+      have index : r.val = 4 := congrArg Fin.val eq
+      omega
+    have tag : raw.stack r = false := by rw [tagProjection, scalar]; rfl
+    change Refinement.X86NumericAddress.registerValue env frame arena raw r = entry.gpr r
+    simp only [Refinement.X86NumericAddress.registerValue, regular, ↓reduceIte, tag,
+      Bool.false_eq_true]
+    exact bits.trans (entryRegisters r saved).symm
+
+/-- Source raw SP is an offset from the entered native stack origin. All
+other architectural fields, including memory/flags/LR, retain their raw image. -/
+def arm64Native (origin : Reference.Word) (raw : AArch64.State) : AArch64.State :=
+  { raw with sp := raw.sp + origin }
+
+theorem arm64_source_exit (snapshot : AArch64.Gpr → Reference.Word)
+    (tags : AArch64.Gpr → Reference.Byte) (origin : Reference.Word) (raw entry : AArch64.State)
+    (entryStack : entry.sp = origin)
+    (entryRegisters : ∀ r, arm64Callee r → entry.gpr r = snapshot r)
+    (accepted : arm64Reject snapshot raw.gpr tags raw.sp = false) :
+    arm64Exit entry (arm64Native origin raw) := by
+  have contract := (arm64_accepted_iff _ _ _ _).mp accepted
+  constructor
+  · change raw.sp + origin = entry.sp
+    simpa [contract.1, Reference.Word] using entryStack.symm
+  · intro r saved
+    exact (contract.2 r saved).2.trans (entryRegisters r saved).symm
+
+/-- The actual source exit condition supplies the previously separate ABI
+premise of the physical x86 return law, for every input/program prefix. -/
+theorem x86_source_physical_return (env : Refinement.EntryEnvironment.Environment)
+    (frame : Refinement.EntryEnvironment.Frame) (arena : Reference.Word)
+    (snapshot : X86.Register → Reference.Word) (tags : X86.Register → Reference.Byte)
+    (raw : Refinement.X86NumericAddress.RegisterState) (entry : X86.State)
+    (target ignored : Reference.Word) (event : Event)
+    (entryStack : entry.gpr 4 = Refinement.EntryEnvironment.base env frame .stack)
+    (entryRegisters : ∀ r, x86Callee r → entry.gpr r = snapshot r)
+    (tagProjection : ∀ r, raw.stack r = (tags r == 4))
+    (accepted : x86Reject snapshot raw.raw.gpr tags (raw.raw.gpr 4) = false)
+    (saved : readMemory raw.raw.memory
+      ((Refinement.X86NumericAddress.nativeRegisters env frame arena raw).gpr 4) 8 = .ok (target, event))
+    (canonical : X86.canonicalTarget raw.raw.addressWidth target = true) :
+    let body := Refinement.X86NumericAddress.nativeRegisters env frame arena raw
+    X86.step (.returnNear 0 ignored) (x86Restore entry body) =
+      ⟨{ body with
+          gpr := fun r => if r = 4 then body.gpr 4 + 8 else body.gpr r
+          pc := target }, [event], none⟩ := by
+  exact x86_physical_return entry _ target ignored event
+    (x86_source_exit env frame arena snapshot tags raw entry entryStack entryRegisters tagProjection accepted)
+    saved canonical
+
+/-- The source ARM condition also supplies the JIT return law's complete
+callee/SP premise; saved LR and actual result-register binding remain explicit. -/
+theorem arm64_source_jit_result (snapshot : AArch64.Gpr → Reference.Word)
+    (tags : AArch64.Gpr → Reference.Byte) (origin outer : Reference.Word) (raw entry : AArch64.State)
+    (entryStack : entry.sp = origin)
+    (entryRegisters : ∀ r, arm64Callee r → entry.gpr r = snapshot r)
+    (accepted : arm64Reject snapshot raw.gpr tags raw.sp = false)
+    (saved : raw.gpr 30 = outer) :
+    AArch64.step (.branchRegister false 30)
+      (arm64ResultMove (arm64Restore entry (arm64Native origin raw))) =
+      ⟨{ arm64ResultMove (arm64Native origin raw) with pc := outer }, [], none⟩ ∧
+    ((arm64ResultMove (arm64Native origin raw)).gpr 0).setWidth 32 =
+      (raw.gpr 7).setWidth 32 := by
+  exact arm64_jit_result entry _ outer
+    (arm64_source_exit snapshot tags origin raw entry entryStack entryRegisters accepted) saved
+
+end KProgFormal.ControlABI.InvocationExit
