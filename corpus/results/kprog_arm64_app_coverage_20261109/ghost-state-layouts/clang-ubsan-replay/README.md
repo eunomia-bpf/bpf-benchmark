@@ -1,0 +1,5 @@
+Existing ARM Clang UBSan runtime replay
+
+The original three Clang18 host failures7c4636d38 were linker diagnostics for the absent libclang_rt.ubsan_standalone-x86_64.a. The exact same private ghost-payload model, original source cases/assertions and original sanitizer options run again with compiler-rt18.1.3 extracted into private storage. The existing Clang include directory remains selected through a resource symlink; system tools/packages retain their installed state. Exact package version/hash, source, compiler commands, binaries and logs accompany this receipt.
+
+Actual outcomes:[{"label": "clang-18-test_arm64_return_token_host", "exit": 0}, {"label": "clang-18-test_arm64_dq_mem_route_host", "exit": 0}, {"label": "clang-18-test_arm64_vreg_route_host", "exit": 0}]. The original23successful host observations and three original dependency errors remain archived; this report supplies the three dependency-complete executions. Published model555 and current guest snapshots retain source. Runtime predicates added:0.

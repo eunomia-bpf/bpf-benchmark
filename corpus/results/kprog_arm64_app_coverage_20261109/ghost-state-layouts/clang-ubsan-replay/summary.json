@@ -1,0 +1,26 @@
+{
+  "utc": "2026-11-09T10:16:33.192213+00:00",
+  "rows": [
+    {
+      "label": "clang-18-test_arm64_return_token_host",
+      "exit": 0
+    },
+    {
+      "label": "clang-18-test_arm64_dq_mem_route_host",
+      "exit": 0
+    },
+    {
+      "label": "clang-18-test_arm64_vreg_route_host",
+      "exit": 0
+    }
+  ],
+  "dependency": {
+    "package": "libclang-rt-18-dev",
+    "version": "1:18.1.3-1ubuntu1",
+    "deb": "libclang-rt-18-dev_1%3a18.1.3-1ubuntu1_amd64.deb",
+    "deb_sha256": "82d5d27d12c0abdf4cefbafa6044e7544a4cbbbec9c04784f5ce326979842b2b",
+    "private_resource_dir": "/var/tmp/kprog-tmp/A/clang-ubsan-replay/resource"
+  },
+  "original_scope": "Three original link failures from7c4636d38; original13ARM groups/23successful host outcomes retained.",
+  "runtime_admission_additions": 0
+}
