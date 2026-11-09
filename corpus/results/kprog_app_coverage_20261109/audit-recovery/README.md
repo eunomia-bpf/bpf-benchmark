@@ -17,3 +17,7 @@ The prior fixed f05af452e positive tail replay completes at guest/make exit0.
 Its original native/BPF fixtures and physical R12/RBP/RSP observation are retained
 in step1-tail-raw.tar.gz. The 96b fixed census continues with its captured runtime.
 One final same-model app and safety replay follows the requested restoration steps.
+
+## Step 2: original x86 stack metadata
+
+Forward commits undo the x86 hunks of 5d8c38d3a, b1d4012f1, 670b6e430, 8001a5459, b3c912c1e, a3a4470c3, ebe984e0f and 53dc94561. The declaration block matches aee6b236d exactly: architectural bytes plus one pointer and one byte tag per selected word. Scalar forwarding values, validity bits and their generator selection are removed. The later SP-lifetime reading semantics and stock load-fault recovery remain. The four read-only helper selections return to their earlier helper wrappers. ARM representation changes remain lane A ownership.
