@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "controller_exit": 0,
+  "archive_sha256": "084f90bbc34a1b5a47c6eadb97714f680c54183e3321093911bcb018be909220",
+  "archive_bytes": 746054,
+  "forms": [
+    {
+      "symbol": "entry_pair",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/probe",
+        "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/arm64.o",
+        "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/native_load_fault_module.ko",
+        "entry_pair"
+      ],
+      "exit": 0,
+      "stdout": "{\"native_prog_id\":1,\"attach_btf_id\":69911,\"verified_insns\":132,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "stderr": ""
+    }
+  ],
+  "source_model": "5363b5ff68146eecd27afaf97a5d3c0a0f18ae74",
+  "observation": "64-bit LDP retained; first parity plus second full-word zero comparison through CMP/CSET"
+}

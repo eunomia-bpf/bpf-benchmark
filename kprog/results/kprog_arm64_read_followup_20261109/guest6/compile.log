@@ -1,0 +1,17 @@
+In file included from /var/tmp/kprog-tmp/S10/pair-control/arm64.c:2:
+/var/tmp/kprog-tmp/S10/fixture/vmlinux.h:32055:2: warning: declaration does not declare anything [-Wmissing-declarations]
+ 32055 |         struct aes_enckey;
+       |         ^
+/var/tmp/kprog-tmp/S10/fixture/vmlinux.h:44954:3: warning: declaration does not declare anything [-Wmissing-declarations]
+ 44954 |                 struct ns_tree;
+       |                 ^
+/var/tmp/kprog-tmp/S10/fixture/vmlinux.h:58738:2: warning: declaration does not declare anything [-Wmissing-declarations]
+ 58738 |         struct __filename_head;
+       |         ^
+/var/tmp/kprog-tmp/S10/fixture/vmlinux.h:89046:2: warning: declaration does not declare anything [-Wmissing-declarations]
+ 89046 |         union pipe_index;
+       |         ^
+/var/tmp/kprog-tmp/S10/fixture/vmlinux.h:98755:4: warning: declaration does not declare anything [-Wmissing-declarations]
+ 98755 |                         struct freelist_counters;
+       |                         ^
+5 warnings generated.

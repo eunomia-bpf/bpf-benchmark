@@ -1,0 +1,16 @@
+
+/var/tmp/kprog-tmp/S10/pair-control/arm64.o:     file format elf64-littleaarch64
+
+
+Disassembly of section lsm/file_open:
+
+0000000000000090 <entry_pair>:
+  90:	f9400008 	ldr	x8, [x0]
+  94:	9101c108 	add	x8, x8, #0x70
+  98:	a9402508 	ldp	x8, x9, [x8]
+  9c:	92400108 	and	x8, x8, #0x1
+  a0:	f100013f 	cmp	x9, #0x0
+  a4:	1a9f07e9 	cset	w9, ne	// ne = any
+  a8:	aa090108 	orr	x8, x8, x9
+  ac:	cb0803e0 	neg	x0, x8
+  b0:	d65f03c0 	ret

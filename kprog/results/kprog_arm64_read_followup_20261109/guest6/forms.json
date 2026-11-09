@@ -1,0 +1,14 @@
+[
+  {
+    "symbol": "entry_pair",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/probe",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/arm64.o",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/native_load_fault_module.ko",
+      "entry_pair"
+    ],
+    "exit": 0,
+    "stdout": "{\"native_prog_id\":1,\"attach_btf_id\":69911,\"verified_insns\":132,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+    "stderr": ""
+  }
+]

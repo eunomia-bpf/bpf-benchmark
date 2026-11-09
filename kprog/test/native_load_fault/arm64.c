@@ -13,7 +13,9 @@ ENTRY(entry_pair)
 {
     ADDRESS; unsigned long first,second;
     asm volatile("ldp %0,%1,[%2]" : "=r"(first),"=r"(second) : "r"(base) : "memory");
-    return -((first|second)&1UL);
+    unsigned long second_nonzero;
+    asm volatile("cmp %1,#0; cset %w0,ne" : "=r"(second_nonzero) : "r"(second) : "cc");
+    return -((first & 1UL) | second_nonzero);
 }
 ENTRY(entry_pre)
 {
