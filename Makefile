@@ -376,7 +376,7 @@ clean-build:
 		"$(ARTIFACT_ROOT)/aws-x86/runs" \
 		"$(ARTIFACT_ROOT)/aws-x86/state"
 	rm -rf "$(ROOT_DIR)"/vendor/build
-	rm -rf "$(ROOT_DIR)"/module/x86/build "$(ROOT_DIR)"/module/arm64/build
+	rm -rf "$(ROOT_DIR)"/kinsn/module/x86/build "$(ROOT_DIR)"/kinsn/module/arm64/build
 	rm -rf "$(ROOT_DIR)"/kprog/test/build-x86 "$(ROOT_DIR)"/kprog/test/build-arm64
 
 clean-results:
