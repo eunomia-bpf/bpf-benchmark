@@ -1,0 +1,3 @@
+ARM ordinary-copy shared successor
+
+Coordinator direct instruction narrows the single1GiB extent bound to actual x86 emitted chunk copying. Shared successor c2b96d6c3 keeps ordinary ELF SUBMIT/SUBMIT_RESOURCES lookup and allocation on ARM. This private incremental module consumes that exact shared-header successor over the captured ARM include tree and paired S10 three-descriptor recovery source. Its existing warm module/kernel outputs are reused. Historical c6df module and d433 NULL cohort retain their captured epochs; current full-catalog, Tracee and probe-read queue keep their runtime bytes. ARM runtime admission rules added:0.
