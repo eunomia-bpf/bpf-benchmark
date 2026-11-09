@@ -498,8 +498,8 @@ spans, or timing the body alone against the whole run instead.
 
 **The overhead, stated:** the instrumented build costs 1,956,385 cycles
 against the published build's 442,342 for the same work, a 4.4x factor,
-because each of the five `rdtsc` pairs carries a serializing read plus a
-volatile store. The measured spans account for 1,503,744 of the
+because each of its six `rdtsc` reads carries a serializing read and the
+marks add a volatile store. The measured spans account for 1,503,744 of the
 instrumented total, leaving 452,641 cycles of the program outside them,
 against 442,342 uninstrumented -- so the boundaries sit where the spans say
 they do, and the shares are the shares of the instrumented run, not
