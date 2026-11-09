@@ -1,0 +1,5 @@
+Tracee UNIX address length signedness
+
+Actual paired width-source09f40af86/526933c44 progresses through the prior string offset and reaches stock JIT sys_dup_exit_tail B2140. get_unix_sock_addr uses signed local intlen from the kernel field, subtracts the2byte sun_path offset and reaches its existing upper clamp with a negative lower bound. This edit changes only that local type tou32, matching the helper size argument. Existing offsetof subtraction, update_min UNIX_PATH_MAX cap, helper destination/source, zero-initialized sockaddr and return remain. Valid UNIX address lengths preserve their copied bytes; unnamed/read-error and negative intermediate lengths wrap in the unsigned type and take the existing upper cap, yielding a bounded helper read. Every existing numeric bound and condition remains in source. Both native/JIT/embeddedbinary use the same complete selected C tree, including09fstring-width source. Kernel selftests and benchmark framework retain bytes. Runtime admission additions:0.
+
+Actual paired Makeexit:0
