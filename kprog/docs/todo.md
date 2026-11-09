@@ -81,7 +81,7 @@
 - [ ] **V** O4：物理异常表一步、thunk 与物理栈有效性的组合、真实 JIT 对应关系、成功尾调用组合，并解除条件定理的 O1/O2 前提。
 - [ ] **V、C** 编译后的 B 与 C 模型的差距：按 token 单元验证，或走经过验证的编译路径。
 - [ ] **C/A** O3：两个 ISA 的有界间接跳转。
-- [ ] **C/A** selftests：停在 specialization 的部分（x86-64 151/315，AArch64 246/380）；`__failure` x86-64 99/101、AArch64 64/67 的差异项。
+- [ ] **C/A** selftests：停在 specialization 的部分（x86-64 151/315，AArch64 268/380）；`__failure` x86-64 99/101、AArch64 84/87 的差异项。ARM 同源头文件批次 5102f3ca7 记录安装 18、verifier 拒绝 94；3 条安装的 failure 为 test_dynptr_reg_type、misaligned_access_read、global_func14，按原始规则、P/B 访问和异常恢复语义继续说明。
 - [x] **V** 全量检查通过（本提交归档的源版本 099a096fb，实际 make check exit0）；后续模型批次按第5节继续全量检查。
 - [ ] **V** TCB 统计，在提交论文的版本上重新计数。
 - [ ] **协调者** 全量检查通过后重核论文的 O1、O2、O4 数字。
