@@ -132,9 +132,25 @@ struct NativeArrayLookups : llvm::PassInfoMixin<NativeArrayLookups> {
             auto *assembly = llvm::dyn_cast<llvm::InlineAsm>(barrier->getCalledOperand());
             if (!assembly || !assembly->getAsmString().empty() || barrier->arg_empty())
                 return false;
-            id = barrier->getArgOperand(0);
+            // Read/write output constraints tie the helper number to an input.
+            // Clang places that input after the explicit helper arguments.
+            const auto constraints = assembly->ParseConstraints();
+            llvm::Value *tied = nullptr;
+            if (!constraints.empty() && !constraints[0].isIndirect &&
+                !constraints[0].isMultipleAlternative) {
+                unsigned argument = 0;
+                for (unsigned index = 0; index < constraints.size(); ++index) {
+                    if (!constraints[index].hasArg())
+                        continue;
+                    if (constraints[0].MatchingInput == static_cast<int>(index) &&
+                        !constraints[index].isMultipleAlternative)
+                        tied = barrier->getArgOperand(argument);
+                    ++argument;
+                }
+            }
+            id = tied;
         }
-        auto *number = llvm::dyn_cast<llvm::ConstantInt>(id);
+        auto *number = llvm::dyn_cast_or_null<llvm::ConstantInt>(id);
         return number && number->equalsInt(1);
     }
 
