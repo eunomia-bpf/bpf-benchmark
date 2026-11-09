@@ -252,6 +252,17 @@ ja target
 The `ja` uses the flags produced by `cmp`; it must not assert anything about
 the current value of `rdx`.
 
+## Returning helper caller frames
+
+The map lookup/update/delete, skb-store and L3/L4 checksum wrappers retain the
+allocated caller stack's bytes and provenance through the existing returning
+call-frame operation. That operation applies the current released-slot lifetime
+model below SP. The real BPF helper call supplies map, packet and context effects,
+including verifier packet-pointer invalidation. The wrapper retains the scalar
+or pointer result and applies the modeled SysV caller-register, flag and SIMD
+clobbers. Native-frame ownership, typed object lifetime and compiler/ABI
+correspondence provide the universal framing premises.
+
 ## Calls And Returns
 
 `call target`:
