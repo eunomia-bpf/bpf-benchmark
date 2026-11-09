@@ -29982,6 +29982,26 @@
     },
     "utc": "2026-11-09T00:56:45.013685+00:00"
   },
+  "signed_div_reference": {
+    "archive": "kprog/results/kprog_verification_20261107/signed-div-reference.log.gz",
+    "canonical_module_compiles": {
+      "X86": 0,
+      "X86Path": 0
+    },
+    "compiled_scalar_families": "13/75",
+    "current_complete_x86_C_model_families": "70/75",
+    "fault_cases": 932,
+    "prior_complete_x86_C_model_families": "71/75",
+    "publication": "e86a82a47055fd0f857505ea3c0b436a3e5aa317",
+    "reference_execution_exit": 0,
+    "remaining": "Signed actual C-body arithmetic/capture/read/fault/write/fresh flags/dispatcher AUX and compiler/native transport.",
+    "runtime_predicate_additions": 0,
+    "signed_cases": 554,
+    "source_production": "2942313a7",
+    "status": "canonical-signed-reference-defined-C-branch-partial",
+    "total_cases": 1852,
+    "unsigned_cases": 1298
+  },
   "source_emission_composition": {
     "commands": [
       {

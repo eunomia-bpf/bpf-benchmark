@@ -20,7 +20,7 @@ specialization token also has its own row.
 | Control handler model / composed step | 3/75 | 0/74 |
 | Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/74 |
 | Memory-call full-frame C body model | 4/75 | 0/74 |
-| O2 C-model token-body equality | 71/75 | 73/74 |
+| O2 C-model token-body equality | 70/75 | 73/74 |
 | Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8; SHIFTX6; POPCNT3; ANDN2; BZHI2; RORX2; MOV_IMM5; LEA12) | 13/75 | 0/74 |
 | Actual clang returning helper bodies (partial CALL_HELPER) | 2 sparse IDs (1/5) | 0 |
 | Additional returning-helper interface equality | 2/75 | 0/74 |
@@ -5987,3 +5987,21 @@ when directly planting each byte image. All original scenes and assertions
 remain active. The sole full successor runs at `8f62cbf0e2f81de135ab83347b31ef4da2ae564c`
 with the published REP shared-stream laws and these fixtures; its terminal
 result receives a separate immutable receipt.
+
+### Signed IDIV reference and current DIV scope
+
+The [canonical signed reference](signed-div-reference.log.gz), published as
+`e86a82a47055fd0f857505ea3c0b436a3e5aa317`, decodes F6/F7 group7 and gives the complete
+signed double-width dividend, truncation toward zero, signed quotient bounds,
+remainder sign and width-aware writes. The existing division suite retains
+1,298 unsigned cases and adds554 signed cases; all1,852 states agree, including
+932 divide/read faults. Reference/X86 and X86Path compile successfully, and the
+current ReferenceMain interpreter executes the same definitions.
+
+Production `2942313a7` adds the signed AUX1 branch. Existing unsigned DIV
+C-model/dispatcher laws retain their AUX0 domain; signed C-body, dispatcher,
+fresh flags and compiler composition remain active. Complete current x86
+C-model coverage therefore changes from71/75 to70/75. The DIV operation/token
+rows are `partial-unsigned-C-model`. Historical counts retain their source
+epochs. Compiled scalar family coverage remains13/75; the sole full at
+`8f62cbf0e2f81de135ab83347b31ef4da2ae564c` uses its earlier reference epoch.
