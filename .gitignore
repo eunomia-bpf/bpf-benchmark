@@ -666,3 +666,10 @@ kprog/perf/measure/
 /corpus/results/x86_kvm_corpus_20261109_052718_072225/
 /corpus/results/x86_kvm_corpus_20261109_063555_370967/
 /corpus/results/x86_kvm_corpus_20261109_064130_129207/
+
+# Closed run output preserved by the 2026-11-09 shared-tree cleanup (older-probe-output).
+/corpus/results/kprog_app_coverage_20261106/
+/corpus/results/kprog_arm64_app_coverage_20261106/trusted-bcc-frame-result/
+/corpus/results/kprog_arm64_app_coverage_20261107/readonly-byte-exact/
+/corpus/results/kprog_arm64_app_coverage_20261107/tetragon-mixed-probe/
+/corpus/results/kprog_arm64_app_coverage_20261108/tetragon-execve/
