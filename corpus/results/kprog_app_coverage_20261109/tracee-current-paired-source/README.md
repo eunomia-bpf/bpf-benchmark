@@ -1,0 +1,5 @@
+# Tracee paired current published string-offset source
+
+This incremental producer adopts the published09f40af86 u64 local string-offset/register operands in both native and original JIT BPF frontends. The prior source20096 image in53b44c83b reaches syscall__execveat_enter map32536/off32142/size4096 in its baseline. The captured current complete C/header tree builds native P, JIT BPF and the embedded Tracee executable through the existing make targets. Every original limit, condition, output field and program selection retains the source-ledger definition.
+
+Actual paired make0, native3objects/114manifest rows. Native directory `/var/tmp/kprog-tmp/C/tracee-current-paired-source/payload`; actual baseline BPF/embedded binary in `/var/tmp/kprog-tmp/C/tracee-current-paired-source/dist`. summary.json identifies every source/native/BPF/binary hash. compiler.tar.gz retains source, commands, diagnostics and outputs. Actual complete application/verifier/work follows the coherent shim/loader runtime successor. Frozen framework and original38 retain their published bytes.
