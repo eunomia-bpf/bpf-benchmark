@@ -45,6 +45,7 @@ typedef signed int __s32;
 #include "../arm64/arm64_sim_local_bpf.h"
 
 #include <stdio.h>
+#include "stack_store_model_host.h"
 #include <string.h>
 
 /* The simulator header expects this hook. Its call count is the observable that
@@ -120,7 +121,10 @@ static void model_write_reg_width(unsigned reg, __u64 value, unsigned width)
 	__u64 next = KPROG_ARM64_APPLY_WIDTH(value, width);
 
 	if (reg == ARM64_SP) {
-		msp = (__s64)next;
+        __s64 prior_sp = msp;
+        msp = (__s64)next;
+        host_stack_release_zero(stk_exp, stk_tag_exp, STACK_BYTES,
+                                ARM64_SIM_STACK_BIAS, prior_sp, msp);
 	} else if (reg != ARM64_XZR && reg != ARM64_REG_NONE) {
 		if (width == ARM64_WIDTH_32)
 			mreg[reg] = (__u32)next;

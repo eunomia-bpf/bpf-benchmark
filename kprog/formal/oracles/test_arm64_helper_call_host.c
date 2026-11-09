@@ -885,9 +885,11 @@ static void * bpf_map_lookup_percpu_elem(void * arg0, const void * arg1, __u32 a
     check_arg(2, (__u64)(unsigned long)arg2);
     return (void *)(unsigned long)RETURN_BITS;
 }
+void arm64_sim_unsupported_opcode(void) { abort(); }
 #define CHECK_HELPER(NAME, RESULT, MASK, TAG, SIZE_ARG, ...) \
     do { \
         ARM64_SIM_ENTRY_XDP(&ctx); \
+        __a64_sp = -16; /* Own helper arguments, including output bytes. */ \
         for (unsigned i=0; i<31; i++) { \
             ARM64_SIM_L_WRITE_REG_WIDTH(i, value_for(i), ARM64_WIDTH_64); \
             if (stack_mode && ((MASK) & (1ULL<<i))) \
@@ -906,7 +908,7 @@ static void * bpf_map_lookup_percpu_elem(void * arg0, const void * arg1, __u32 a
             if (i < 19) { want=0; tag=ARM64_SIM_TAG_SCALAR; } \
             if (ARM64_SIM_L_READ_REG(i)!=want || ARM64_SIM_L_REG_TAG(i)!=tag) failures++; \
         } \
-        if (__a64_sp != 0 || __a64_lr != 0 || __a64_v0 != 0 || __a64_v0_hi != 0) failures++; \
+        if (__a64_sp != -16 || __a64_lr != 0 || __a64_v0 != 0 || __a64_v0_hi != 0) failures++; \
         (void)__a64_sim_skb_ctx; (void)__a64_sim_abi_kind; \
         (void)&__a64_stack; (void)__a64_stack_tag[0]; \
         cases++; \
@@ -1227,6 +1229,7 @@ static void run_output_effects(void) {
     for (unsigned id=105; id<=163; id+=58) {
         for (unsigned r=0; r<3; r++) {
             ARM64_SIM_ENTRY_XDP(&ctx);
+            __a64_sp = -16;
             const unsigned slot=(ARM64_SIM_STACK_BIAS-16)/8;
             for (unsigned i=0;i<16;i++) __a64_stack.b[slot*8+i]=0xa5;
             ARM64_SIM_L_TAG_SET(slot,ARM64_SIM_TAG_STACK);

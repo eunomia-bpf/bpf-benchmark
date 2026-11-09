@@ -52,13 +52,16 @@ static __u32 execute(unsigned src,unsigned tag,__u64 target,unsigned table,unsig
  (void)&__a64_stack;(void)&__a64_stack_payload;(void)&__a64_stack_tag;
  struct arm64_sim_skb_abi __a64_sim_abi={};
  __a64_sim_helper_ctx=skb?&context:NULL;
- for(unsigned i=0;i<31;i++){__a64_cells[i]->x=0x1122334455667788ULL+i*0x102030405ULL;*__a64_tag_cells[i]=0;}
+ for(unsigned i=0;i<31;i++){
+  __a64_cells[i]->x=(i>=19&&i<=29&&!(pattern&2))?0:0x1122334455667788ULL+i*0x102030405ULL;
+  *__a64_tag_cells[i]=0;
+ }
  const __u64 values[]={0,1,0xffffffffULL,0x100000000ULL,0x8000000000000000ULL,0xffffffffffffffffULL,0x1234567887654321ULL,0xfedcba9876543210ULL};
  const unsigned tags[]={0,4,9,10};
  __a64_x0.x=values[pattern%8];__a64_x0_tag=tags[pattern%4];
  if(src<31){__a64_cells[src]->x=target;*__a64_tag_cells[src]=tag;}
  for(unsigned i=0;i<32;i++){__a64_vectors[i].lo=0x123456789abcdef0ULL+i;__a64_vectors[i].hi=0x876543210fedcba9ULL-i;}
- __a64_sp=0x1234;__a64_lr=0x987654321ULL;
+ __a64_sp=(pattern&1)?0x1234:0;__a64_lr=0x987654321ULL;
  __a64_n=pattern&1;__a64_z=(pattern>>1)&1;__a64_c=(pattern>>2)&1;__a64_v=(pattern>>3)&1;
  memset(&context,0xa5,sizeof(context));
  for(unsigned i=0;i<5;i++)__a64_sim_abi.cb[i]=0x12345678U+i*0x12121212U+pattern;
@@ -92,7 +95,10 @@ int main(void)
   int denied=invoke(src,tag,values[vi],table,skb,pattern);
   __u64 target=src==31?0:values[vi];unsigned effective_tag=src==31?0:tag;
   int member=table==1?target==0:table==2&&(target==0||target==1||target==256||target==0xffffffffffffffffULL);
-  int expected=target==0&&effective_tag==10?0:effective_tag==9&&member?1:-1;
+  int frame_ok=out.before.sp==0;
+  for(unsigned i=19;i<=29;i++)
+   frame_ok=frame_ok&&out.before.regs[i]==0&&out.before.tags[i]==0;
+  int expected=target==0&&effective_tag==10?(frame_ok?0:-1):effective_tag==9&&member?1:-1;
   if(out.route!=expected||!!denied!=(expected==-1)){fprintf(stderr,"route src=%u tag=%u value=%llu table=%u\n",src,tag,(unsigned long long)target,table);return 1;}
   struct snapshot want=out.before;want.lr=target;
   unsigned input_count=0;

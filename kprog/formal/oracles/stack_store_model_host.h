@@ -12,4 +12,22 @@ static inline void host_stack_store_tags(unsigned char *tags, unsigned index,
         tags[word] = bytes == 8U && index % 8U == 0U ? tag : 0;
 }
 
+/* A fixed host fresh input is zero. Releasing the half-open native SP
+ * interval forgets its private bytes and every pointer tag overlapping it. */
+static inline void host_stack_release_zero(unsigned char *bytes,
+                                           unsigned char *tags,
+                                           unsigned size, unsigned bias,
+                                           long long prior, long long current)
+{
+    if (current <= prior) return;
+    for (unsigned i = 0; i < size; i++) {
+        long long at = (long long)i - (long long)bias;
+        if (at >= prior && at < current) bytes[i] = 0;
+    }
+    for (unsigned word = 0; word < (size + 7U) / 8U; word++) {
+        long long start = (long long)(word * 8U) - (long long)bias;
+        if (start < current && start + 8 > prior) tags[word] = 0;
+    }
+}
+
 #endif

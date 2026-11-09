@@ -37,12 +37,34 @@ typedef signed int __s32;
 #include "guarded_memory_host.h"
 
 static __s64 __a64_sp;
-ARM64_SIM_L_DECLARE_STATE();
+/* Bind the actual invocation-local state to the route drivers. Entry
+ * snapshots must be captured at function scope, as in generated B. */
+static union arm64_sim_gpr *const *host_cells;
+static __u8 *const *host_tag_cells;
+#define __a64_cells host_cells
+#define __a64_tag_cells host_tag_cells
+static __u64 *host___a64_numeric_sp;
+#define __a64_numeric_sp (*host___a64_numeric_sp)
+static __u64 *host___a64_numeric_return;
+#define __a64_numeric_return (*host___a64_numeric_return)
+static __u8 *host___a64_numeric_sp_valid;
+#define __a64_numeric_sp_valid (*host___a64_numeric_sp_valid)
+static __u8 *host___a64_numeric_return_valid;
+#define __a64_numeric_return_valid (*host___a64_numeric_return_valid)
+static __u8 *host___a64_sim_is_xdp;
+#define __a64_sim_is_xdp (*host___a64_sim_is_xdp)
+static void * *host___a64_sim_helper_ctx;
+#define __a64_sim_helper_ctx (*host___a64_sim_helper_ctx)
+static void * *host___a64_sim_helper_abi_base;
+#define __a64_sim_helper_abi_base (*host___a64_sim_helper_abi_base)
 typedef union {
     __u8 b[ARM64_SIM_STACK_BYTES];
     __u64 q[KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)];
 } host_stack_arena;
 static volatile host_stack_arena *host_stack;
+/* The guarded arena supplies the bytes; entry-private metadata is fresh. */
+static __u8 __a64_stack_tag[KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)];
+static __u8 __a64_stack_scalar_valid[KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)];
 #define __a64_stack (*host_stack)
 static void access_boundary(void *argument)
 {
@@ -145,8 +167,28 @@ static void check_selector(void)
 	}
 }
 
+#undef __a64_numeric_sp
+#undef __a64_numeric_return
+#undef __a64_numeric_sp_valid
+#undef __a64_numeric_return_valid
+#undef __a64_sim_is_xdp
+#undef __a64_sim_helper_ctx
+#undef __a64_sim_helper_abi_base
+#undef __a64_cells
+#undef __a64_tag_cells
 int main(void)
 {
+    ARM64_SIM_L_DECLARE_STATE();
+    host_cells = __a64_cells;
+    host_tag_cells = __a64_tag_cells;
+    host___a64_numeric_sp = &__a64_numeric_sp;
+    host___a64_numeric_return = &__a64_numeric_return;
+    host___a64_numeric_sp_valid = &__a64_numeric_sp_valid;
+    host___a64_numeric_return_valid = &__a64_numeric_return_valid;
+    host___a64_sim_is_xdp = &__a64_sim_is_xdp;
+    host___a64_sim_helper_ctx = &__a64_sim_helper_ctx;
+    host___a64_sim_helper_abi_base = &__a64_sim_helper_abi_base;
+
     struct host_guarded_memory guarded=host_guarded_memory(ARM64_SIM_STACK_BYTES);
     host_stack=(volatile host_stack_arena *)guarded.data;
 	/* The stack-tagged pointer values keep the biased arena index a valid
