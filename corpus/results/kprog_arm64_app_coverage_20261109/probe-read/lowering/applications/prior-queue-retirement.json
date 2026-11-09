@@ -1,0 +1,15 @@
+{
+  "utc": "2026-11-09T06:22:18.755557+00:00",
+  "prior_queue": "bea15aae73ca5b774b661fdb9ffd750ba58055f7",
+  "phase": "closed_before_guest_for_LSE_target_continuation",
+  "native_application_executions": 0,
+  "reason": "Candidate vfsstat contains10LDXR/10STXR sites; established verified BCC b937 producer selects Armv8.1LSE",
+  "compiler_predecessor": "8a3dc898b781eb97786e8bbadb8ab7a8333f266c",
+  "retired": [
+    "/var/tmp/kprog-tmp/A/probe-read/lowering/applications/bcc",
+    "/var/tmp/kprog-tmp/A/probe-read/lowering/applications/tracee",
+    "/var/tmp/kprog-tmp/A/probe-read/lowering/applications/runtime",
+    "/var/tmp/kprog-tmp/A/probe-read/lowering/applications/paired-modules",
+    "/var/tmp/kprog-tmp/A/probe-read/lowering/applications/module-output"
+  ]
+}
