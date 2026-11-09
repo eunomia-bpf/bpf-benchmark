@@ -1284,7 +1284,7 @@
     }
   },
   "runtime": {
-    "bpf_arm64_native_lab.ko": "00c138817ea8bc8354ed1967294d054ab8eb796d624a0c523e87054f33462cd6",
+    "bpf_arm64_native_lab.ko": "00f4e64ae7ef0db79eda4cccc15400a7b8f8700f86247cacb6506f0c7cdad2f0",
     "Image": "8f38106e7aa3d7e2369aa5626bb852ad17cb39312ee28f4e4c0a2ea235b57be5",
     "native-link": "f7262afbc882ae4ae04448f8856a7ff8231282bab86ea4978ce103ce956eb955",
     "libnative_loader.so": "4fa65b5324d3aa70d01fe4c6a964db3d62e53c34c0e4456ba701afcafddeacba",
@@ -1342,5 +1342,29 @@
     },
     "derived_header": "kprog/arm64/arm64_sim_direct.h",
     "derivation": "Existing owning Makefile target with existing libbpf host include"
+  },
+  "runtime_overlay": {
+    "build_publication": "3e3f44f33fe548cb7803eb6ed8aa118b48e39a2b",
+    "existing_control_publication": "a95f777c8d558fb2d348c07f45ff9f4eabec3360",
+    "scope": "Paired3-slot S10 module with shared ordinary ELF submit successor c2b96d6c3",
+    "archive": "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/ordinary-copy-runtime-delta.tar.gz",
+    "archive_sha256": "df3a1376100bd63c658d2223607338775cfe763a6db1ef57631568fc2f28c7bc",
+    "files": {
+      "runtime/bpf_arm64_native_lab.ko": "00f4e64ae7ef0db79eda4cccc15400a7b8f8700f86247cacb6506f0c7cdad2f0",
+      "module-output/bpf_arm64_native_lab.ko": "00f4e64ae7ef0db79eda4cccc15400a7b8f8700f86247cacb6506f0c7cdad2f0"
+    },
+    "ARM_runtime_admission_rules_added": 0
+  },
+  "execution_order_update": {
+    "utc": "2026-11-09T07:11:37.912797+00:00",
+    "previous_controller": 2962445,
+    "previous_phase": "waiting_existing_full_and_Tracee",
+    "reason": "Completed paired Tracee860e77f17 releases8GiB slot; complete catalog continues with private inputs",
+    "guest_schedule": "BCC2GiB then Tracee8GiB on16-19; complete catalog2GiB on8-11; maximum10GiB",
+    "prior_launch": "129220421df883cac2eefc942ead0a36ef653ed4",
+    "predecessor_Tracee": "860e77f17fdf0199126a79fd43f165b9aeaf258f",
+    "original_full_controller_retained": 2792901,
+    "source_and_workload": "Existing complete prepared32BCC/123Tracee manifest rows and paired source retained",
+    "runtime_admission_additions": 0
   }
 }
