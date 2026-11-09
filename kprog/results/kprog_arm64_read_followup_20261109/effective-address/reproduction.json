@@ -1,0 +1,24 @@
+{
+  "commit": "5363b5ff68146eecd27afaf97a5d3c0a0f18ae74",
+  "header_sha256": "7d100984405db1c4f49fb87abc067593e018f692163a61147cdb835ef50c5438",
+  "baseline": "arm64 read follow-up host: FAIL (5711 checks; 4099 discrepancies)",
+  "final_gcc": "arm64 read follow-up host: OK (5711 checks; 0 discrepancies)",
+  "final_clang": "arm64 read follow-up host: OK (5711 checks; 0 discrepancies)",
+  "final_ubsan": "arm64 read follow-up host: OK (5711 checks; 0 discrepancies)",
+  "lse_units": 12,
+  "lse_compile_exits": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "physical_profile": "CONFIG_ARM64_4K_PAGES=y; zero page unmapped; positive owned-memory indexed control"
+}

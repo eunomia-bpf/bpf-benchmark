@@ -1,0 +1,34 @@
+{
+  "commands": 116,
+  "make_exit": 2,
+  "banners": 114,
+  "passing_banners": 105,
+  "assertion_diagnostics": [
+    "arm64 alu operand select route host cross-check: FAIL (3)",
+    "arm64 dispatch singleton route host cross-check: FAIL (11)",
+    "arm64 ldrsx op route host cross-check: FAIL (96)",
+    "arm64 dq_mem_extra route host cross-check: FAIL (64)",
+    "arm64 vreg field route host cross-check: FAIL (64)",
+    "arm64 dq_mem route host cross-check: FAIL (64)",
+    "arm64 pair_mem route host cross-check: FAIL (128)",
+    "arm64 mem_prepost route host cross-check: FAIL (128)",
+    "arm64 vreg route host cross-check: FAIL (64)"
+  ],
+  "failed_targets": [
+    "s10-oracle-16",
+    "s10-oracle-24",
+    "s10-oracle-45",
+    "s10-oracle-53",
+    "s10-oracle-62",
+    "s10-oracle-91",
+    "s10-oracle-93",
+    "s10-oracle-97",
+    "s10-oracle-99",
+    "s10-oracle-103",
+    "s10-oracle-105",
+    "s10-oracle-107",
+    "s10-oracle-109"
+  ],
+  "baseline_comparison": "../host-comparison.json",
+  "source_commit": "5363b5ff68146eecd27afaf97a5d3c0a0f18ae74"
+}
