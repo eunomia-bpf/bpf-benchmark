@@ -1,5 +1,5 @@
 {
-  "utc": "2026-11-09T00:52:22.661462+00:00",
+  "utc": "2026-11-09T01:07:48.491658+00:00",
   "head": "bfd15434357aba3f85b226288ede40d2c586e33b",
   "closed_cohorts": {
     "BCC and Katran": {
@@ -181,30 +181,39 @@
   "active": {
     "cilium-map-caller-frame": {
       "directory": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-map-caller-frame",
-      "controller_pid": 2638985,
+      "controller_pid": 2643565,
       "status": {
-        "state": "queued_after_tracee"
+        "state": "running",
+        "image": "sha256:9f62f0733f6f52a9acb2bc4d182ad13a2df04490dc627981539727368b7674ae",
+        "command": [
+          "make",
+          "-f",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-map-caller-frame/Makefile",
+          "corpus",
+          "STATE=/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/cilium-map-caller-frame",
+          "CPUS=20-23",
+          "VM_CPUS=8",
+          "VM_MEM=12G",
+          "APPS=cilium/agent",
+          "SAMPLES=3",
+          "WORKLOAD_DURATION=180"
+        ]
       }
     },
     "tracee-clamp-macro": {
       "directory": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tracee-clamp-macro",
-      "controller_pid": 2637628,
+      "controller_pid": 2652943,
       "status": {
-        "state": "running",
-        "image": "sha256:075f1c21a4055382a181356be05b79a9663ff052271410fabb4e94ba5e98814e",
-        "command": [
-          "make",
-          "-f",
-          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tracee-clamp-macro/Makefile",
-          "corpus",
-          "STATE=/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tracee-clamp-macro",
-          "CPUS=20-23",
-          "VM_CPUS=8",
-          "VM_MEM=12G",
-          "APPS=tracee/monitor",
-          "SAMPLES=3",
-          "WORKLOAD_DURATION=180"
-        ]
+        "state": "queued_after_cilium"
+      }
+    },
+    "protected-mov-model": {
+      "directory": "/workspaces/.agent-state/kprog-lanes/C/design-only/load-fault-recovery/mov-fault-model",
+      "controller_pid": 2652164,
+      "status": {
+        "state": "finished",
+        "make_exit": 2,
+        "commit": "84c2e433f94e503ee96ced0fd6fd2618d68459d6"
       }
     }
   },
@@ -219,5 +228,27 @@
     "scope": "x86 SMAP dispatch before protected-read recovery",
     "coordinator_case": "2026-11-09T00:38:32.000545+00:00",
     "candidate": "/workspaces/.agent-state/kprog-lanes/C/design-only/load-fault-recovery/smap-fault-candidate.patch"
+  },
+  "continuation": {
+    "mov_component": {
+      "status": {
+        "state": "finished",
+        "make_exit": 2,
+        "commit": "84c2e433f94e503ee96ced0fd6fd2618d68459d6"
+      },
+      "gcc_observation": "2061312 full-state cases OK",
+      "result": "corpus/results/kprog_app_coverage_20261109/protected-mov-model"
+    },
+    "smap_case": {
+      "commit": "a66cfcc6753a1272a8efaf9ae7a4a6ec60fe3bd5",
+      "path": "kprog/results/kprog_design_only_20261108/load-fault-recovery/smap-dispatch-case",
+      "disposition": "coordinator"
+    },
+    "tracee_terminal": "e076764e7153bf959a43c51bdd7a2f9b5c497043",
+    "framework_baseline": {
+      "definition": "9f3855f6f",
+      "owner": "R",
+      "current_compatibility_cohort": "captured prior epoch"
+    }
   }
 }
