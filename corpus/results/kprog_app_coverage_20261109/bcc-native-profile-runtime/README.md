@@ -9,7 +9,7 @@ The active functional replay pairs matched46125883be kernel/module, shim2312b25f
 R timing command, after the complete functional work receipt, each stats mode0and1 on R CPUs0-7:
 
 ```sh
-make -f /var/tmp/kprog-tmp/C/bcc-native-profile-runtime/Makefile corpus STATE=/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-native-profile-runtime CPUS=0-7 VM_CPUS=8 VM_MEM=64G APPS=bcc/set,katran SAMPLES=3 WORKLOAD_DURATION=180 BPFREJIT_CORPUS_BPF_STATS=0
+unshare --mount --propagation private python3 /var/tmp/kprog-tmp/C/bcc-native-profile-runtime/mount.py make -f /var/tmp/kprog-tmp/C/bcc-native-profile-runtime/Makefile corpus STATE=/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/bcc-native-profile-runtime CPUS=0-7 VM_CPUS=8 VM_MEM=64G APPS=bcc/set,katran SAMPLES=3 WORKLOAD_DURATION=180 BPFREJIT_CORPUS_BPF_STATS=0
 ```
 
 The native profile, application results and work counters remain separately attributed. Baseline and native program invocations, events/samples, packets sent/received, named drops and XDP actions accompany R throughput. Katran packet work keeps its restored four workers and65535flows. The selected image contains matching kernel/modules, current loader/shim, native_division.so and complete native manifests. The controller uses the existing make-backed guest and collector; the raw launch contract is retained here.
