@@ -164,6 +164,8 @@ def failure_class(row):
     if stage == "native_selection_failed":
         return "native_manifest_selection_gap"
     for phrase, label in [
+        ("PLT32 reloc", "native_kernel_link_relocation"),
+        ("type=scalar expected=func", "verifier_callback_argument"),
         ("BPF stack limit is exceeded", "compiler_stack_storage"),
         ("bpf_object__open_file", "source_elf_open"),
         ("maps/BTF object prepare", "source_maps_btf_prepare"),

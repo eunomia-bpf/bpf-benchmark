@@ -37,7 +37,7 @@
 549 个常驻程序的静态普查（`corpus/results/kprog_app_coverage_20261109/resident-census/`）第一轮：选择缺口 275、资源准备 238、ELF 名称语法 23、context 下沉 1；实际生成 12、编译 11、verifier 接受 7、拒绝 4。后续 stock guest 资源回放完成 238/238（bc3104df7），资源阶段与 native 生成、编译和 verifier 结果分别计数。
 
 - [x] Tetragon 275 个选择缺口（271ddeee9、5dbd5d481、8922e4bde）。
-- [ ] **A** 这 275 个程序的静态结果，按 native body 分组并行：27 个候选入口组；实际 linked body 27 组，完成 27 组，覆盖 275/275 加权实例。模型 4f5b7ae6d；分类和原始记录见 resident-census/grouped-static，随后修最大的一类。
+- [x] **A** 275实例的分组静态普查完成：27/27实际代表、275/275加权实例；B生成275、编译242、verifier接受0/拒绝231，native kernel link PLT32失败11。与其余274原始行的549总表见 grouped-static/ranked-all-549.md；完整原始结果无损gzip保存。本提交本地完成，GitHub发布按限定历史修复case处理；最大storage类157继续按下方通用修复项收尾。
 - [x] **A/C** 资源准备 238/238 完成：Tracee 151、OTel 13（3daeea9b2），Cilium 72（aba3e9d46），BCC 2（7b4876f7a）；汇总 bc3104df7，本提交补记统一 TODO。通用路径适配局部入口符号、资源专用重定位视图、临时 pinning 生命周期和原应用运行时 map 参数。Cilium 的 CILIUM_PIN_REPLACE=16 与 BCC stackmap 的空模板字段均按实际 loader 语义处理。
 - [x] **A** 23 条数字开头 ELF 名称的元数据语法修复：原始 kernel metadata/facts 全部规范化，23 份 map 声明编译与 ELF 名称保留通过，现有 6 项元数据测试通过（eeec0f52a，本提交补记统一 TODO）。
 - [x] **A** 静态普查合并发布保留 previous-results 路径与 worker PID 各自语义；已完成的 guest 记录可独立发布，运行中的 275 行批次沿用原 guest 和模型。本提交修复 harness 的变量覆盖，代码位于冻结路径之外。 每行携带模型提交号，合并表保留各版本的实际行数。
@@ -46,7 +46,8 @@
 - [x] **A** 普查按原始 commands.jsonl 保留失败编译器的命令、退出码和 stderr，并将 BPF stack-size 编译错误单列；现有两条编译失败均属此类，本提交纳入统一分类路径。 八行实际分类和原始档案见 resident-census/linked-progress-8。
 - [x] **A** 普查 B 的 forwarding cells 按现有整字读取布局收缩（本提交）：捕获的 8 行全部生成，6 行减少声明，其余生成行逐字相等；4 项布局用例保持旧 extent。结果见 resident-census/stack-forwarding-layout。
 - [x] **A** forwarding tag8 与 valid1 合并为16位状态（本提交），保留所有256tag值与两个valid状态；GCC/Clang18、array/named两种布局的完整512状态与原栈生命周期用例共8组构建/运行通过，host UBSan 启用。编译B的stack占用与stock verifier继续按下一行收尾。
-- [ ] **A/C** stack storage 后续编译与 stock verifier：8 行中的 verifier stack access 3、compiler stack storage 2 保留实际阶段；process_event 的 unknown alias 仍选全部 63 cells，继续通用存储处理。
+- [ ] **A/C** 最大native storage类157（verifier124、compiler33）的通用修复及stock回放。Packing670b五体全部编译；process_filter直接R10从-2176降至-1632，仍需继续。宽constant-barrier1760/d3f的编译记录保留为撤回trial；C原38例中的entry_return_slot_overwrite要求保留原访问barrier，后续使用f202/05b等canonical source。
+- [ ] **A/C** native kernel link的PLT32编码11实例（3体）及bpf_loop callback参数1实例（1体），分别保留B已生成/已编译与实际verifier阶段，使用通用链接/回调下沉处理。
 - [ ] **A** 用已发布资源和名称修复回放其余 274 行的完整 native 生成、编译及 stock verifier 阶段；逐行记录模型/源码版本，harness 位于冻结路径之外。协调者 14:35 优先275行分组普查，旧等待队列已结束；源abf7ddc0b及274行输入保留于 repaired-static/launch 对应 scratch。
 - [ ] **C** verifier 拒绝 4（scalar memory access）、编译失败 1、context 下沉 1；23 条名称问题的后续 native 阶段由上述 274 行回放记录。
 - [ ] **C** x86-64 六个应用全部走通 verified 路径。

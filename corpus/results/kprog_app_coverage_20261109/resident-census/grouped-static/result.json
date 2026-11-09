@@ -1,25 +1,23 @@
 {
   "instances": 275,
   "native_body_groups": 27,
-  "groups_completed": 26,
-  "represented_instances": 274,
+  "groups_completed": 27,
+  "represented_instances": 275,
   "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
   "body_identity": "SHA256 of complete native-link proof ELF, including executable/data sections and relocation identities",
   "weighted_classes": {
-    "verifier_stack_access": 123,
+    "verifier_stack_access": 124,
     "verifier_scalar_memory_access": 106,
     "compiler_stack_storage": 33,
-    "generation_failed": 11,
-    "pending": 1,
-    "verifier_rejected": 1
+    "native_kernel_link_relocation": 11,
+    "verifier_callback_argument": 1
   },
   "unique_body_classes": {
-    "verifier_stack_access": 11,
+    "verifier_stack_access": 12,
     "verifier_scalar_memory_access": 10,
     "compiler_stack_storage": 1,
-    "generation_failed": 3,
-    "pending": 1,
-    "verifier_rejected": 1
+    "native_kernel_link_relocation": 3,
+    "verifier_callback_argument": 1
   },
   "instance_scope": "Class distribution weighted by identical-body membership; each outcome is the actual representative submission",
   "native_execution_requests": 0,
@@ -386,7 +384,7 @@
         91
       ],
       "stage": "generation_failed",
-      "failure_class": "generation_failed",
+      "failure_class": "native_kernel_link_relocation",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "group representative submission",
       "outcome_key": "0b52860af10c09b963fb8c5698bea800829bc12ce455242193e569465b72c457"
@@ -478,7 +476,7 @@
         214
       ],
       "stage": "generation_failed",
-      "failure_class": "generation_failed",
+      "failure_class": "native_kernel_link_relocation",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "group representative submission",
       "outcome_key": "589f81a75e9a10d8780928a26abb6a9b5b810421c79357dd396cec334efeba0e"
@@ -520,7 +518,7 @@
         217
       ],
       "stage": "generation_failed",
-      "failure_class": "generation_failed",
+      "failure_class": "native_kernel_link_relocation",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "group representative submission",
       "outcome_key": "a4b0557544fdf874551de9aecdf21e9cd85804516a9cc8db33766b12ff27589e"
@@ -547,11 +545,11 @@
       "member_ids": [
         219
       ],
-      "stage": "pending",
-      "failure_class": "pending",
+      "stage": "verifier_rejected",
+      "failure_class": "verifier_stack_access",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
-      "observation": "queued representative",
-      "outcome_key": null
+      "observation": "group representative submission",
+      "outcome_key": "392f46e3ff1d0571d872fbeedc26b82eebe6078bfd5d735ee7f17be28c439ce2"
     },
     {
       "body_sha256": "bf74e76fc01d63e87d6cb3223dc02abfef58b28ef4f3d803270a9d06d24aaec7",
@@ -618,7 +616,7 @@
         29
       ],
       "stage": "verifier_rejected",
-      "failure_class": "verifier_rejected",
+      "failure_class": "verifier_callback_argument",
       "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
       "observation": "group representative submission",
       "outcome_key": "47c884e9b47493b89f7740942af047c8519859527cca2e027cf979ccc95c2fde"
