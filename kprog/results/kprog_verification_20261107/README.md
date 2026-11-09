@@ -6839,3 +6839,12 @@ sorryAx0. The [raw-control receipt](x86-raw-control.log.gz) records source and
 module identities. Numeric raw coverage advances32→34/75; the separate control
 model count retains CALL. Native label extraction/placement, entry image and
 C flag packing/physical/compiler transport remain explicit interfaces.
+
+### Committed source full check 9c112535f
+
+`make check` on immutable committed9c112535f exits0. All1289 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_9c112535f`. Every check retains its exact committed source identity.
+
+Full raw archive: [full-make-check-9c112535f.log.gz](full-make-check-9c112535f.log.gz).

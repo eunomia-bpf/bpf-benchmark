@@ -27058,6 +27058,29 @@
     "temporary_export_retired": true,
     "verified_committed_source_count": 1289
   },
+  "full_make_check_9c112535f": {
+    "actual_exit": 0,
+    "archive_block_sha256": "554d0b19bfe02305a6ea8b6d48c0ab6aaf5c20eb2764705e44f21df2af4d089a",
+    "archive_file": "kprog/results/kprog_verification_20261107/full-make-check-9c112535f.log.gz",
+    "archive_marker": "=== FULL MAKE CHECK 9C112535F PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/o1-move-full.archive-writer.py": "f596c82a0b06a2aa0635489447454b3ece99b1944e04a8e07c2c2153cc21ea0b",
+      "/workspaces/.agent-state/kprog-lanes/V/o1-move-full.cpu.jsonl.gz": "c64b4df997a401aad897d0c3fdd0b64b312b174c6932730840228ca7ed1cc163",
+      "/workspaces/.agent-state/kprog-lanes/V/o1-move-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/o1-move-full.head": "705ec43c0a2714d2e422a1d716c29e3126f99b4747cd8f0feb3982d888e91eb2",
+      "/workspaces/.agent-state/kprog-lanes/V/o1-move-full.launch.log": "d27c5fb7c4db71d1b0b233eed75ced736b28cce54bd0ef1184270ad2ef3cd22c",
+      "/workspaces/.agent-state/kprog-lanes/V/o1-move-full.log": "ddfdfc919e0d92b7447042c549e278ce8097e3ecf40fe0bdf1fc51139c122b55",
+      "/workspaces/.agent-state/kprog-lanes/V/o1-move-full.py": "15fc66a9bec61c5ec1cb54caa7185e1f35651e2cdadb713c76ced13251c36d31",
+      "/workspaces/.agent-state/kprog-lanes/V/o1-move-full.source-committed.txt": "705ec43c0a2714d2e422a1d716c29e3126f99b4747cd8f0feb3982d888e91eb2",
+      "/workspaces/.agent-state/kprog-lanes/V/o1-move-full.sources": "ac9b449ff815200daac1e6ee91b54d79275d75f92ee0226bfb91ffcb4bad8431",
+      "/workspaces/.agent-state/kprog-lanes/V/o1-move-full.state": "4babd3f89761d0ea60aae16bce14a6b710d72a29b0483b4944dbd087110703e6"
+    },
+    "committed_source": "9c112535fe7cee92278bca4c6b968a24f91e8b9a",
+    "every_source_sha256_verified_against_git": true,
+    "scope": "Complete formal make check of the exact committed source tree 9c112535fe7cee92278bca4c6b968a24f91e8b9a. Other source epochs retain separate receipts.",
+    "temporary_export_retired": true,
+    "verified_committed_source_count": 1289
+  },
   "full_make_check_9db407602": {
     "actual_exit": 0,
     "archive_block_sha256": "316cd0150ebfb8d337b18b348b2a08abe5f1be24f56c8845e84def7d91d72940",
@@ -71584,6 +71607,25 @@
     "oracle_source_sha256": "fe756d79579a436f506408264caff28fce6cab19de729f137ced53e4b13b1579",
     "ubsan": true
   },
+  "x86_raw_source_control_refinement": {
+    "archive": "x86-raw-control.log.gz",
+    "archive_sha256": "5f42f3d6fbadd7cbb6fd25b48b300a2e82bdbac9f1bf6a7d90212863169e9ba4",
+    "arm64_raw_operation_count": 58,
+    "module_exit": 0,
+    "new_audits": 10,
+    "operations": [
+      "X86_OP_JCC",
+      "X86_OP_JMP"
+    ],
+    "production": "KProgFormal.Refinement.X86Dispatcher.RawControl.production",
+    "root_exit": 0,
+    "scope": "JCC/JMP retain all raw64 words/byte tags/flags/XMM/memory and architecture frame while changing PC. Generated PF-aware condition and actual source forward/backward shape compose through an arbitrary native label map with independent ordering. Current specialized branch tokens retain arbitrary ignored FLAGS/DST/SRC/fresh inputs and JMP AUX. Native label extraction/current-next-target placement, RSP-offset/STACK4-arena entry image, C flag packing and physical/compiler interfaces explicit.",
+    "sorryAx": 0,
+    "source_sha256": "8e4b16c4df71229bcc97bd60228b3f51a1575ad0c5d5effb3c4ad9ae45bfafbe",
+    "theorem": "KProgFormal.Refinement.X86Dispatcher.RawControl.step_refines",
+    "total_module_audits": 16,
+    "x86_raw_operation_count": 34
+  },
   "x86_register_dispatch": {
     "archive_block_sha256": "c64593924d5c982002aad5bc770ac30cbba627ce9cdc4cacb5f314933fad4ca1",
     "cmov_conditions": 16,
@@ -78741,24 +78783,5 @@
       "vendor/libbpf/src/bpf_helpers.h": "04575f99655917175eef6f44ecc50c081f4e4bfe9b1242d5ecc82f2a57cb3865"
     },
     "source_stable": true
-  },
-  "x86_raw_source_control_refinement": {
-    "operations": [
-      "X86_OP_JCC",
-      "X86_OP_JMP"
-    ],
-    "x86_raw_operation_count": 34,
-    "arm64_raw_operation_count": 58,
-    "new_audits": 10,
-    "total_module_audits": 16,
-    "module_exit": 0,
-    "root_exit": 0,
-    "sorryAx": 0,
-    "theorem": "KProgFormal.Refinement.X86Dispatcher.RawControl.step_refines",
-    "production": "KProgFormal.Refinement.X86Dispatcher.RawControl.production",
-    "archive": "x86-raw-control.log.gz",
-    "archive_sha256": "5f42f3d6fbadd7cbb6fd25b48b300a2e82bdbac9f1bf6a7d90212863169e9ba4",
-    "source_sha256": "8e4b16c4df71229bcc97bd60228b3f51a1575ad0c5d5effb3c4ad9ae45bfafbe",
-    "scope": "JCC/JMP retain all raw64 words/byte tags/flags/XMM/memory and architecture frame while changing PC. Generated PF-aware condition and actual source forward/backward shape compose through an arbitrary native label map with independent ordering. Current specialized branch tokens retain arbitrary ignored FLAGS/DST/SRC/fresh inputs and JMP AUX. Native label extraction/current-next-target placement, RSP-offset/STACK4-arena entry image, C flag packing and physical/compiler interfaces explicit."
   }
 }
