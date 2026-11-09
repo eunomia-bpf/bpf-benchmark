@@ -3369,3 +3369,70 @@ theorem rep_full_count_frame_matches_indexed (env : Environment) (frame : Frame)
   exact (X86RepMovs.Indexed.handler_matches_progress width nextPc _ successful).symm
 
 end KProgFormal.Refinement.X86NumericAddress
+
+namespace KProgFormal.Refinement.X86NumericAddress.SignedDivision
+open Reference EntryEnvironment
+open X86Divide.SourceState
+
+/-- The C signed branch captures numeric operands before either implicit
+write, masks the divisor, then scalarizes generated RAX/RDX writes. The raw
+frame keeps unrelated pointer tags and normalizes only actual destinations. -/
+def wordStep (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (operand nextPc : NativeWord) (fresh : Nat → Bool) : Transition Reference.X86.State :=
+  let native := nativeRegisters env frame arena state
+  match outcome width native operand with
+  | none => ⟨native, [.fault .divide], some .divide⟩
+  | some (quotient, remainder) =>
+      let negative := X86Divide.Capture.sourceNegative width (X86Divide.Capture.highWord width native)
+      let qnegative := Bool.xor negative (X86Divide.Capture.sourceNegative width operand)
+      let qword := restoredWord qnegative quotient
+      let rword := restoredWord negative remainder
+      let written := if width = .w8 then
+        writeRegister env frame arena state .w16 (.low 0) (packedBytes qword rword)
+      else writeRegister env frame arena
+        (writeRegister env frame arena state width (.low 0) qword) width (.low 2) rword
+      let flagged := registerFlags written (freshFlags state.raw.rflags fresh)
+      ⟨nativeRegisters env frame arena (registerPc flagged nextPc), [], none⟩
+
+theorem word_frame_matches (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (operand nextPc : NativeWord) (fresh : Nat → Bool) :
+    wordStep env frame arena state width operand nextPc fresh =
+      handlerStep width (.immediate operand) nextPc fresh (nativeRegisters env frame arena state) := by
+  have readWrite (current : RegisterState) (access : Reference.X86.ScalarWidth)
+      (destination : Reference.X86.RegisterSlice) (value : NativeWord) (reg : Reference.X86.Register) :
+      registerValue env frame arena (writeRegister env frame arena current access destination value) reg =
+        if reg = destination.reg then Reference.X86.scalarWriteValue
+          (registerValue env frame arena current reg) value access destination
+        else registerValue env frame arena current reg :=
+    congrArg (fun native => native.gpr reg) (native_register_write env frame arena current access destination value)
+  unfold wordStep handlerStep arithmeticStep
+  simp only [X86Scalar.read_refines, Reference.X86.scalarRead]
+  cases result : outcome width (nativeRegisters env frame arena state) operand with
+  | none => simp only [result, refresh, Option.isSome_some, ↓reduceIte, List.nil_append]
+  | some pair =>
+      rcases pair with ⟨quotient, remainder⟩
+      simp only [result]
+      by_cases byte : width = .w8
+      · simp only [byte, ↓reduceIte, refresh, Option.isSome_none, Bool.false_eq_true,
+          native_register_pc, native_register_flags, native_register_write, X86Divide.write_refines]
+        rfl
+      · simp only [byte, ↓reduceIte, refresh, Option.isSome_none, Bool.false_eq_true,
+          native_register_pc, native_register_flags, native_register_write, readWrite, X86Divide.write_refines]
+        congr 2
+        funext reg
+        by_cases low : reg = 0 <;> by_cases high : reg = 2 <;>
+          simp_all [Reference.X86.RegisterSlice.reg, Reference.X86.scalarWriteValue,
+            Reference.X86.RegisterSlice.shift, nativeRegisters]
+
+theorem word_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (operand nextPc : NativeWord) (fresh : Nat → Bool) :
+    Reference.X86.Step (.signedDivide width (.immediate operand) nextPc)
+      (nativeRegisters env frame arena state)
+      (wordStep env frame arena state width operand nextPc fresh) := by
+  rw [word_frame_matches]
+  exact handler_refines width (.immediate operand) nextPc fresh _
+
+end KProgFormal.Refinement.X86NumericAddress.SignedDivision
