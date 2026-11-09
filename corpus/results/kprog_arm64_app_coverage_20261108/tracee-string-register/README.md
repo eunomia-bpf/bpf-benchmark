@@ -1,0 +1,3 @@
+Paired ARM Tracee checked string register lifetime
+
+Whole20096 source result2fe12fb01 reaches syscall__execveat_enter in the original JIT baseline before native requests0. At B2443, the checked narrow offset uses one register while helper pointer arithmetic reuses a broader alias, reaching mapoff32142/size4096 against32536. Two empty +r asm statements on the existing local offset preserve its checked value identity through the compiler. All original branches, limits, helper arguments and buffer output updates retain their definitions. The complete selected C tree feeds native/JIT/embedded binary compilers together; actual paired compiler outcomes follow. The source patch and required shared ledger record the two-line edit. Runtime admission additions:0.
