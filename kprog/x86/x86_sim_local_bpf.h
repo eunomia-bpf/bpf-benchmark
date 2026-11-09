@@ -711,12 +711,11 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 #define X86_SIM_L_STACK_WRITE_RAW(OFF, WIDTH, VALUE) \
     do { __s64 __x86_loss_off=(OFF); __u8 __x86_loss_width=X86_SIM_L_EFFECTIVE_WIDTH(WIDTH); \
       __u64 __x86_loss_value=(VALUE); \
-      if (__x86_loss_off>=X86_SIM_L_STACK_SP()) \
-        X86_SIM_L_STACK_WRITE_OWNED(__x86_loss_off,__x86_loss_width,__x86_loss_value); \
-      else { _Pragma("unroll") \
+      X86_SIM_L_STACK_WRITE_OWNED(__x86_loss_off,__x86_loss_width,__x86_loss_value); \
+      if (__x86_loss_off<X86_SIM_L_STACK_SP()) { _Pragma("unroll") \
         for (__u32 __x86_loss_i=0; __x86_loss_i<8U; ++__x86_loss_i) \
-          if (__x86_loss_i<__x86_loss_width && __x86_loss_off+__x86_loss_i>=X86_SIM_L_STACK_SP()) \
-            X86_SIM_L_STACK_WRITE_OWNED(__x86_loss_off+__x86_loss_i,1U,__x86_loss_value>>(__x86_loss_i*8U)); \
+          if (__x86_loss_i<__x86_loss_width && __x86_loss_off+__x86_loss_i<X86_SIM_L_STACK_SP()) \
+            X86_SIM_L_STACK_WRITE_OWNED(__x86_loss_off+__x86_loss_i,1U,X86_SIM_L_UNSPECIFIED()); \
       } \
     } while(0)
 
@@ -761,9 +760,9 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
     } while(0)
 
 #define X86_SIM_L_STACK_READ(OFF, WIDTH) \
-    ((__s64)(OFF)<X86_SIM_L_STACK_SP() ? \
-      x86_apply_width(X86_SIM_L_UNSPECIFIED(),X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)) : \
-      X86_SIM_L_STACK_READ_OWNED((OFF),(WIDTH)))
+    ({ __u64 __x86_observed=X86_SIM_L_STACK_READ_OWNED((OFF),(WIDTH)); \
+       if ((__s64)(OFF)<X86_SIM_L_STACK_SP()) __x86_observed=x86_apply_width(X86_SIM_L_UNSPECIFIED(),X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)); \
+       __x86_observed; })
 
 #define X86_SIM_L_STACK_READ_OWNED(OFF, WIDTH)                                    \
 	({                                                                 \
@@ -836,15 +835,18 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 #endif
 
 #define X86_SIM_L_STACK_ALIAS_OFFSET(ADDR) \
-    ((__s64)((__u64)(long)(ADDR)-(__u64)(long)&__x86_stack_mem.b[0])-(__s64)X86_SIM_STACK_BYTES)
+    ({ __u64 __x86_alias_delta=(__u64)(long)(ADDR)-(__u64)(long)X86_SIM_L_STACK_PTR(0); \
+       X86_SIM_L_BARRIER_VAR(__x86_alias_delta); (__s64)__x86_alias_delta; })
 #define X86_SIM_L_LOAD_ADDR_TAGGED(ADDR, WIDTH, TAG) \
-    ((TAG)==X86_SIM_TAG_STACK && X86_SIM_L_STACK_ALIAS_OFFSET(ADDR)<X86_SIM_L_STACK_SP() ? \
-      x86_apply_width(X86_SIM_L_UNSPECIFIED(),X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)) : \
-      X86_SIM_L_LOAD_ADDR((ADDR),(WIDTH)))
+    ({ __u64 __x86_alias_observed=X86_SIM_L_LOAD_ADDR((ADDR),(WIDTH)); \
+       if ((TAG)==X86_SIM_TAG_STACK && X86_SIM_L_STACK_ALIAS_OFFSET(ADDR)<X86_SIM_L_STACK_SP()) \
+         __x86_alias_observed=x86_apply_width(X86_SIM_L_UNSPECIFIED(),X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)); \
+       __x86_alias_observed; })
 #define X86_SIM_L_NATIVE_DATA_LOAD_TAGGED(BASE, OFF, WIDTH, TAG) \
-    ((TAG)==X86_SIM_TAG_STACK && X86_SIM_L_STACK_ALIAS_OFFSET(KPROG_PTR_ADD64_BITS((BASE),(OFF)))<X86_SIM_L_STACK_SP() ? \
-      x86_apply_width(X86_SIM_L_UNSPECIFIED(),X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)) : \
-      X86_SIM_L_NATIVE_DATA_LOAD((BASE),(OFF),(WIDTH)))
+    ({ __u64 __x86_alias_observed=X86_SIM_L_NATIVE_DATA_LOAD((BASE),(OFF),(WIDTH)); \
+       if ((TAG)==X86_SIM_TAG_STACK && X86_SIM_L_STACK_ALIAS_OFFSET(KPROG_PTR_ADD64_BITS((BASE),(OFF)))<X86_SIM_L_STACK_SP()) \
+         __x86_alias_observed=x86_apply_width(X86_SIM_L_UNSPECIFIED(),X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)); \
+       __x86_alias_observed; })
 
 #if defined(__BPF__) || defined(__bpf__)
 #define X86_SIM_L_LOAD_PTR_ADDR(ADDR) (*(void * volatile *)(ADDR))
@@ -1724,6 +1726,11 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			X86_SIM_L_SET_ALU_FLAGS(__x86_l_lhs, __x86_l_rhs,  \
 						__x86_l_result, __x86_l_alu,\
 						__x86_l_width);        \
+            if ((DST)==X86_RSP && __x86_l_width==X86_WIDTH_64 && \
+                (__x86_l_alu==X86_ALU_ADD || __x86_l_alu==X86_ALU_SUB)) \
+                X86_SIM_L_WRITE_REG_PTR_TAG((DST), KPROG_PTR_ADD64_BITS(__x86_rsp.ptr, \
+                    __x86_l_alu==X86_ALU_ADD ? __x86_l_rhs : -__x86_l_rhs),X86_SIM_TAG_SCALAR); \
+            else \
 			X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST), __x86_l_result,\
 				__x86_l_width, __x86_l_dst_shift);           \
 		}                                                         \
@@ -1777,6 +1784,11 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			X86_SIM_L_SET_ALU_FLAGS(__x86_l_lhs, __x86_l_rhs,  \
 						__x86_l_result, __x86_l_alu,\
 						__x86_l_width);        \
+            if ((DST)==X86_RSP && __x86_l_width==X86_WIDTH_64 && \
+                (__x86_l_alu==X86_ALU_ADD || __x86_l_alu==X86_ALU_SUB)) \
+                X86_SIM_L_WRITE_REG_PTR_TAG((DST), KPROG_PTR_ADD64_BITS(__x86_rsp.ptr, \
+                    __x86_l_alu==X86_ALU_ADD ? __x86_l_rhs : -__x86_l_rhs),X86_SIM_TAG_SCALAR); \
+            else \
 			X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST), __x86_l_result,\
 				__x86_l_width, __x86_l_dst_shift);           \
 		}                                                         \
@@ -2310,7 +2322,9 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 /* Full-width MOV keeps source selection separate from native destination writeback. */
 #define X86_SIM_L_WRITE_MOV_REG_PTR(DST, SRC, VALUE, TAG)                   \
 	do {                                                               \
-		if (KPROG_X86_MOV_REG_ARM(KPROG_X86_MOV_REG_FULL_WIDTH, (DST)) == KPROG_X86_MOV_REG_ARM_STACK_PTR) \
+        if ((DST)==X86_RSP && (TAG)==X86_SIM_TAG_STACK) \
+            X86_SIM_L_WRITE_REG_PTR_TAG((DST), (void *)(long)X86_SIM_L_STACK_ALIAS_OFFSET(VALUE), X86_SIM_TAG_SCALAR); \
+        else if (KPROG_X86_MOV_REG_ARM(KPROG_X86_MOV_REG_FULL_WIDTH, (DST)) == KPROG_X86_MOV_REG_ARM_STACK_PTR) \
 			X86_SIM_L_WRITE_REG_WIDTH((DST), X86_SIM_L_READ_REG(SRC), KPROG_X86_MOV_REG_FULL_WIDTH); \
 		else                                                       \
 			X86_SIM_L_WRITE_REG_PTR_TAG((DST), (VALUE), (TAG)); \
@@ -2945,7 +2959,7 @@ extern void __x86_sim_unsupported_helper(void)
 #define X86_SIM_L_UNSUPPORTED_HELPER() __x86_sim_unsupported_helper()
 
 #define X86_SIM_L_HELPER_REGISTER_CLOBBERS() \
-    do { \
+    do { X86_SIM_L_STACK_RELEASE(-(__s64)X86_SIM_STACK_BYTES); \
         __x86_rcx.ptr = (void *)X86_SIM_L_UNSPECIFIED(); \
         __x86_rcx_tag = X86_SIM_TAG_SCALAR; \
         __x86_rdx.ptr = (void *)X86_SIM_L_UNSPECIFIED(); \

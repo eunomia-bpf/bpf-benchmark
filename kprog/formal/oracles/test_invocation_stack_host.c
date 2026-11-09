@@ -35,12 +35,22 @@ int main(void) {
     SET_SP(-16);
     BYTE(-24)=0x91;
     WRITE(-24,8,3);
-    REQUIRE(BYTE(-24)==0x91);
+    REQUIRE(BYTE(-24)==0x5a);
     unsigned long before=draws;
     REQUIRE(READ(-24,8)==0x5a5a5a5a5a5a5a5aULL && draws==before+1);
     WRITE(-20,8,0x0807060504030201ULL);
     REQUIRE(READ(-16,4)==0x08070605ULL);
 #ifdef TEST_ARM64
+    __a64_x3.ptr=(void *)-24; __a64_x3_tag=ARM64_SIM_TAG_STACK;
+    __a64_x2.x=1;
+    BYTE(-24)=3;
+    ARM64_SIM_L_ATOMIC_RMW(__atomic_fetch_add,0,ARM64_X1,ARM64_X2,ARM64_X3,ARM64_WIDTH_8,0);
+    REQUIRE(__a64_x1.x==0x5a && BYTE(-24)==0x5a);
+    __a64_x0.ptr=(void *)-16; __a64_x0_tag=ARM64_SIM_TAG_STACK;
+    __a64_x1.ptr=(void *)-24; __a64_x1_tag=ARM64_SIM_TAG_STACK;
+    __a64_x2.x=1;
+    ARM64_SIM_LIBC_MEMCPY();
+    REQUIRE(BYTE(-16)==0x5a);
     ARM64_SIM_L_STACK_WRITE_TAG(-24,8,0,ARM64_SIM_TAG_RETURN);
     REQUIRE(ARM64_SIM_L_STACK_READ_TAG(-24,8)==ARM64_SIM_TAG_SCALAR);
 #else
@@ -49,8 +59,17 @@ int main(void) {
     before=draws;
     REQUIRE(X86_SIM_L_LOAD_ADDR_TAGGED(X86_SIM_L_STACK_PTR(-24),8,X86_SIM_TAG_STACK)==0x5a5a5a5a5a5a5a5aULL && draws==before+1);
     X86_SIM_L_STORE_ADDR_TAGGED(X86_SIM_L_STACK_PTR(-24),8,9,X86_SIM_TAG_STACK);
-    REQUIRE(BYTE(-24)==0x91);
+    REQUIRE(BYTE(-24)==0x5a);
 #endif
+    /* A helper output below SP loses its bytes before later allocation. */
+    BYTE(-24)=0x12;
+#ifdef TEST_ARM64
+    ARM64_SIM_L_HELPER_CLOBBERS();
+#else
+    X86_SIM_L_HELPER_CLOBBERS();
+#endif
+    SET_SP(-32);
+    REQUIRE(READ(-24,8)==0x5a5a5a5a5a5a5a5aULL);
     puts("stack lifetime PASS: allocated, released, below-SP, boundary and provenance cases");
     return 0;
 }

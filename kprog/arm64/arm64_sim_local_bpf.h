@@ -645,9 +645,9 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
     } while(0)
 
 #define ARM64_SIM_L_STACK_READ(OFF, WIDTH) \
-    ((__s64)(OFF)<ARM64_SIM_L_STACK_SP() ? \
-      KPROG_ARM64_APPLY_WIDTH(ARM64_SIM_L_UNSPECIFIED(),(WIDTH)) : \
-      ARM64_SIM_L_STACK_READ_OWNED((OFF),(WIDTH)))
+    ({ __u64 __a64_observed=ARM64_SIM_L_STACK_READ_OWNED((OFF),(WIDTH)); \
+       if ((__s64)(OFF)<ARM64_SIM_L_STACK_SP()) __a64_observed=KPROG_ARM64_APPLY_WIDTH(ARM64_SIM_L_UNSPECIFIED(),(WIDTH)); \
+       __a64_observed; })
 
 #define ARM64_SIM_L_STACK_READ_OWNED(OFF, WIDTH)                                  \
 	({                                                                 \
@@ -702,12 +702,11 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 
 #define ARM64_SIM_L_STACK_WRITE_TAG(OFF, WIDTH, VALUE, TAG) \
     do { __s64 __a64_loss_off=(OFF); __u8 __a64_loss_width=(WIDTH); __u64 __a64_loss_value=(VALUE); \
-      if (__a64_loss_off>=ARM64_SIM_L_STACK_SP()) \
-        ARM64_SIM_L_STACK_WRITE_OWNED(__a64_loss_off,__a64_loss_width,__a64_loss_value,(TAG)); \
-      else { _Pragma("unroll") \
+      ARM64_SIM_L_STACK_WRITE_OWNED(__a64_loss_off,__a64_loss_width,__a64_loss_value,(TAG)); \
+      if (__a64_loss_off<ARM64_SIM_L_STACK_SP()) { _Pragma("unroll") \
         for (__u32 __a64_loss_i=0; __a64_loss_i<8U; ++__a64_loss_i) \
-          if (__a64_loss_i<__a64_loss_width && __a64_loss_off+__a64_loss_i>=ARM64_SIM_L_STACK_SP()) \
-            ARM64_SIM_L_STACK_WRITE_OWNED(__a64_loss_off+__a64_loss_i,1U,__a64_loss_value>>(__a64_loss_i*8U),ARM64_SIM_TAG_SCALAR); \
+          if (__a64_loss_i<__a64_loss_width && __a64_loss_off+__a64_loss_i<ARM64_SIM_L_STACK_SP()) \
+            ARM64_SIM_L_STACK_WRITE_OWNED(__a64_loss_off+__a64_loss_i,1U,ARM64_SIM_L_UNSPECIFIED(),ARM64_SIM_TAG_SCALAR); \
       } \
     } while(0)
 
@@ -1424,12 +1423,12 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 
 /* LSE atomic RMW returns the pre-update value; operands precede destination writeback.
  * Arm Instruction Set Reference 100076, section D3.6. */
-#if defined(__bpf__)
-extern __u64 bpf_arm64_native_lab_atomic8(__u8 *word, __u64 value, __u32 operation, __u32 order) __ksym;
-extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 operation, __u32 order) __ksym;
 #define ARM64_SIM_L_ATOMIC_KIND___atomic_fetch_add 0U
 #define ARM64_SIM_L_ATOMIC_KIND___atomic_fetch_or 1U
 #define ARM64_SIM_L_ATOMIC_KIND___atomic_fetch_and 2U
+#if defined(__bpf__)
+extern __u64 bpf_arm64_native_lab_atomic8(__u8 *word, __u64 value, __u32 operation, __u32 order) __ksym;
+extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 operation, __u32 order) __ksym;
 #define ARM64_SIM_L_ATOMIC_BYTE(FETCH, ADDR, VALUE, ORDER) \
  ((__u8)bpf_arm64_native_lab_atomic8((__u8 *)(ADDR), (VALUE), ARM64_SIM_L_ATOMIC_KIND_##FETCH, (ORDER)))
 #define ARM64_SIM_L_ATOMIC_HALF(FETCH, ADDR, VALUE, ORDER) \
@@ -1464,6 +1463,13 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
         __a64_la_old = ARM64_SIM_L_ATOMIC_HALF(FETCH, __a64_la_addr, __a64_la_add, __a64_la_order); \
     else \
         __a64_la_old = ARM64_SIM_L_ATOMIC_BYTE(FETCH, __a64_la_addr, __a64_la_add, __a64_la_order); \
+    if (ARM64_SIM_L_REG_TAG(BASE)==ARM64_SIM_TAG_STACK && \
+        (__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE)<ARM64_SIM_L_STACK_SP()) { \
+        __a64_la_old=KPROG_ARM64_APPLY_WIDTH(ARM64_SIM_L_UNSPECIFIED(),(WIDTH)); \
+        __u64 __a64_la_next=ARM64_SIM_L_ATOMIC_KIND_##FETCH==0U ? __a64_la_old+__a64_la_add : \
+            ARM64_SIM_L_ATOMIC_KIND_##FETCH==1U ? __a64_la_old|__a64_la_add : __a64_la_old&__a64_la_add; \
+        ARM64_SIM_L_MEM_WRITE((BASE),ARM64_REG_NONE,__a64_la_mem_aux,0,0,(WIDTH),__a64_la_next,ARM64_SIM_TAG_SCALAR); \
+    } \
     __u64 __a64_la_payload = ARM64_SIM_L_MEM_PAYLOAD((BASE), ARM64_REG_NONE, __a64_la_mem_aux, 0, 0, __a64_la_old, __a64_la_tag); \
     ARM64_SIM_L_MEMORY_TAG_TRANSFER((__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE), ARM64_SIM_L_REG_TAG(BASE), 0, ARM64_SIM_TAG_SCALAR, (WIDTH), 0); \
     if (ARM64_SIM_L_LOAD_TAG_PRESERVE(ARM64_OP_LOAD, __a64_la_tag, (WIDTH))) \
@@ -1774,6 +1780,8 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
                 if (!__a64_mt_i || !(__a64_mt_at & 7U)) { \
                     __u8 __a64_mt_tag = ARM64_SIM_TAG_SCALAR; \
                     if ((COPY) && (STAG) == ARM64_SIM_TAG_STACK && \
+                        (__s64)(SRC)+(__s64)__a64_mt_i>=ARM64_SIM_L_STACK_SP() && \
+                        (__s64)(DST)+(__s64)__a64_mt_i>=ARM64_SIM_L_STACK_SP() && \
                         !(__a64_mt_at & 7U) && __a64_mt_len - __a64_mt_i >= 8U) { \
                         __u64 __a64_mt_src = ARM64_SIM_L_STACK_INDEX(SRC) + __a64_mt_i; \
                         if (!(__a64_mt_src & 7U)) { \
@@ -1791,11 +1799,10 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
 /* Native libc calls use their actual length; there is no simulator trip cap. */
 #define ARM64_SIM_LIBC_MEMSET()                                            \
 	do {                                                               \
-		__u8 *__a64_lib_dst = ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0);  \
 		__u8 __a64_lib_byte = (__u8)ARM64_SIM_L_READ_REG(ARM64_X1);  \
 		__u64 __a64_lib_len = ARM64_SIM_L_READ_REG(ARM64_X2);       \
 		for (__u64 __a64_lib_i = 0; __a64_lib_i < __a64_lib_len; __a64_lib_i++) \
-			__a64_lib_dst[__a64_lib_i] = __a64_lib_byte;               \
+			ARM64_SIM_L_MEM_WRITE(ARM64_X0,ARM64_REG_NONE,ARM64_AUX_MEM(ARM64_REG_NONE,ARM64_MOD_NONE,0,0),0,__a64_lib_i,ARM64_WIDTH_8,__a64_lib_byte,ARM64_SIM_TAG_SCALAR);               \
 		ARM64_SIM_L_MEMORY_TAG_TRANSFER((__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0), ARM64_SIM_L_REG_TAG(ARM64_X0), 0, ARM64_SIM_TAG_SCALAR, __a64_lib_len, 0); \
 		ARM64_SIM_L_HELPER_CLOBBERS(); \
 	} while (0)
@@ -1804,17 +1811,16 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
 	do {                                                               \
 		if (ARM64_SIM_L_REG_TAG(ARM64_X1) == ARM64_SIM_TAG_SCALAR) \
 			ARM64_SIM_L_UNSUPPORTED_OPCODE();                       \
-		__u8 *__a64_lib_dst = ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0);  \
-		const __u8 *__a64_lib_src = ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1); \
 		__u64 __a64_lib_len = ARM64_SIM_L_READ_REG(ARM64_X2);       \
 		for (__u64 __a64_lib_i = 0; __a64_lib_i < __a64_lib_len; __a64_lib_i++) \
-			__a64_lib_dst[__a64_lib_i] = __a64_lib_src[__a64_lib_i]; \
+			ARM64_SIM_L_MEM_WRITE(ARM64_X0,ARM64_REG_NONE,ARM64_AUX_MEM(ARM64_REG_NONE,ARM64_MOD_NONE,0,0),0,__a64_lib_i,ARM64_WIDTH_8, \
+                ARM64_SIM_L_MEM_READ(ARM64_X1,ARM64_REG_NONE,ARM64_AUX_MEM(ARM64_REG_NONE,ARM64_MOD_NONE,0,0),0,__a64_lib_i,ARM64_WIDTH_8),ARM64_SIM_TAG_SCALAR); \
 		ARM64_SIM_L_MEMORY_TAG_TRANSFER((__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0), ARM64_SIM_L_REG_TAG(ARM64_X0), (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X1), ARM64_SIM_L_REG_TAG(ARM64_X1), __a64_lib_len, 1); \
 		ARM64_SIM_L_HELPER_CLOBBERS(); \
 	} while (0)
 
 #define ARM64_SIM_L_HELPER_CLOBBERS() \
-    do { \
+    do { ARM64_SIM_L_STACK_RELEASE(-(__s64)ARM64_SIM_STACK_BIAS); \
         __a64_x1.x = ARM64_SIM_L_UNSPECIFIED(); \
         __a64_x1_tag = ARM64_SIM_TAG_SCALAR; \
         __a64_x2.x = ARM64_SIM_L_UNSPECIFIED(); \

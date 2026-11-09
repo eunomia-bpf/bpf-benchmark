@@ -21,8 +21,8 @@ typedef signed int __s32;
 
 #define __always_inline inline
 
-/* This arena-geometry fixture reserves the complete arena in its native frame. */
-#define ARM64_SIM_L_STACK_SP() (-(__s64)ARM64_SIM_STACK_BIAS)
+/* This storage-geometry fixture allocates the arena and its guard windows. */
+#define ARM64_SIM_L_STACK_SP() (-(__s64)ARM64_SIM_STACK_BIAS - 64)
 #include "../arm64/arm64_sim_local_bpf.h"
 
 #include <stdio.h>

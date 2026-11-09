@@ -38,8 +38,8 @@ typedef signed int __s32;
 
 #define __always_inline inline
 
-/* This arena-geometry fixture reserves the complete arena in its native frame. */
-#define X86_SIM_L_STACK_SP() (-(__s64)X86_SIM_STACK_BYTES)
+/* This storage-geometry fixture allocates the arena and its guard windows. */
+#define X86_SIM_L_STACK_SP() (-(__s64)X86_SIM_STACK_BYTES - 64)
 #include "../x86/x86_sim_local_bpf.h"
 
 #include <stdio.h>
