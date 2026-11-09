@@ -1,5 +1,5 @@
 {
-  "as_of_utc": "2026-11-08T23:22:53.741794+00:00",
+  "as_of_utc": "2026-11-09T00:47:40.005654+00:00",
   "scope": "Six closed first-pass application cohorts. Load attempts retain probes and retries; resident rows, service requests and application outcomes have separate denominators. Repairs and full-application replays continue.",
   "applications": [
     {
@@ -160,12 +160,13 @@
   ],
   "raw_startup_rows": 577,
   "latest_closed_cohorts": {
-    "as_of_utc": "2026-11-08T17:02:45.734640+00:00",
+    "as_of_utc": "2026-11-09T00:47:40.005654+00:00",
     "scope": "Latest closed complete-application cohorts with distinct captured epochs. Baseline resident snapshots, service source IDs, generated C, compiled B and installed programs retain separate denominators.",
     "applications": [
       {
         "application": "BCC",
-        "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/bcc-execution-queued/trusted-arm64-bcc-result/coverage.json",
+        "publication": "8f6f3331b65ef79ad2e1ab6b4a671fc1a099615e",
+        "coverage": "corpus/results/kprog_arm64_app_coverage_20261108/native-load-recovery/arm64/applications/trusted-arm64-bcc-result/coverage.json",
         "baseline_resident": 23,
         "service_source_ids": 23,
         "generated": 23,
@@ -177,22 +178,12 @@
         "application_status": [
           "ok"
         ],
-        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/bcc-execution-queued/trusted-arm64-bcc-result/run-20261108T104956143024Z.tar.gz",
-        "raw_archive_sha256": "31170272ba221d22dc9f1fcc20c7389dcc596c41e417b5e0973a455288f2e09b",
+        "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/native-load-recovery/arm64/applications/trusted-arm64-bcc-result/run-20261109T002133269181Z.tar.gz",
+        "raw_archive_sha256": "451f7518f911b5b04922acc0a3a2ab8d7f695dd023ee3021baa8343c8ab4e51d",
         "host_ok": true,
         "guest_exit": 0,
-        "runtime_epoch": "five_step_e2d3_LSE_bcc-execution-queued",
-        "baseline_bpf_calls": 441319,
-        "native_bpf_calls": 443267,
-        "execution_counter_positive": {
-          "baseline": 20,
-          "native": 20
-        },
-        "execution_counter_zero": {
-          "baseline": 3,
-          "native": 3
-        },
-        "work_counters": "corpus/results/kprog_arm64_app_coverage_20261108/bcc-execution/trusted-arm64-bcc-result/work-counters.json",
+        "runtime_epoch": "f1 native-load recovery / e5 paired symbols / LSE23",
+        "work_counters": "corpus/results/kprog_arm64_app_coverage_20261108/native-load-recovery/arm64/applications/trusted-arm64-bcc-result/work-counters.json",
         "execution_counter_rows": {
           "baseline": {
             "total": 23,
