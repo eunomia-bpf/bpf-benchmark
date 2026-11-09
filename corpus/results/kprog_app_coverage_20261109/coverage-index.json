@@ -1,9 +1,10 @@
 {
-  "utc": "2026-11-09T05:09:52.468134+00:00",
-  "head": "bfd15434357aba3f85b226288ede40d2c586e33b",
+  "utc": "2026-11-09T06:39:44.833531+00:00",
+  "head": "4dabac7c5c68dd3f067c8326d06bd926c3d65755",
   "closed_cohorts": {
     "BCC and Katran": {
-      "path": "kprog/results/kprog_design_only_20261108/same-copy-link/bcc-katran",
+      "path": "corpus/results/kprog_app_coverage_20261109/smap-recovery/bcc-katran",
+      "commit": "605968ec9ff103913f73ddf0fa2620eac971eaaa",
       "counts": {
         "native_requests": 26,
         "generated": 26,
@@ -25,13 +26,14 @@
         }
       ],
       "artifacts": {
-        "runtime.tar.gz": "fcedcf8cbeaa68a925a4130a2e0c8f3eb4376d954146c54fdc234842968714c4",
-        "service.tar.gz": "ed3ddddaf047f613111de4d4d1c7846665acd5502861fbd03e00820e584d1961",
-        "coverage.json": "d9370883ed9ba98fa0978e1a98bbebf8a40641a9f9b70308da006f588f802e67",
-        "README.md": "cfe98667eb00ce91e560785ac794d5afb697a37e22ee3f3113992dbb7f563609",
-        "work.json": "242ccbbc7dcc0ae28a56074f265cc61eea6133a13bd3c8d0f30035bfc2eafba6",
-        "result.tar.gz": "3c24f18f418cba82893a3d7f3a55d9b0c5c10c93fed5987cde8103d9763f258c",
-        "summary.json": "e11a4d01c77b6908940200a38652d773a00b3c640c0271f4cd555cbc8ab00c48"
+        "runtime.tar.gz": "f9909d8fa69751e2f7bddec26631a5888df6fe8bc40c91d5645f2d76c440d716",
+        "service.tar.gz": "8088bc121815969b0fa24c34f38bec509d1bca64e53eb1f535200f2c44611950",
+        "coverage.json": "1d62f9eac0e7bba0a7d4ee8bdaf062fa6b0fde0d0e58d8a79a763ae4ef5339a6",
+        "README.md": "e4524820540e6c85610fdb15100c90d01b035ed261927bb1797ce4450467ebd8",
+        "work.json": "554d65138832fd0c1f7357992364756ba4d6889b99fa3b4fe3e6f1b5b0dbc6fd",
+        "result.tar.gz": "70b1a4d94085b223074eccd0fea6d0e52f98b44ea9bf42aefa5e8cf1edc0a88b",
+        "summary.json": "d9c9d203a942536fc97436da727091c7238a8156d84d3a405820c6b06600522d",
+        "work-analysis.json": "5986fa8433e4fcc7b3c195c1e9775130ff0843b7f4e744a906c9bc21caa8ff9f"
       }
     },
     "OTel": {

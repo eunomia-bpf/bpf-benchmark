@@ -1,5 +1,5 @@
 {
-  "utc": "2026-11-09T05:23:03.398863+00:00",
+  "utc": "2026-11-09T06:39:44.833531+00:00",
   "source": "aee6b236d75286cf2a0291a47aae2592d72591f0",
   "build": {
     "state": "finished",
@@ -32,8 +32,16 @@
     "native_risk_executions": 0
   },
   "bcc_katran": {
-    "state": "running",
-    "image": "sha256:714f4261db8f36c35a3aa5f4dfe3fdfc1327967d79e22da47f7006ec33d7b8a7"
+    "state": "finished",
+    "commit": "605968ec9ff103913f73ddf0fa2620eac971eaaa",
+    "counts": {
+      "make_exit": 0,
+      "native_requests": 26,
+      "generated": 26,
+      "compiled": 26,
+      "installed": 26,
+      "failed": 0
+    }
   },
   "alu_component": {
     "state": "finished",
