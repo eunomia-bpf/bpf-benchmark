@@ -1,0 +1,33 @@
+{
+  "source": "retained 7.0 per-architecture headers; tracked index and HEAD agreement",
+  "rows": [
+    {
+      "path": "vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h",
+      "current": "762812f923caa5cf13b94c68ad5a55a3e41c855345576ede300f8fe2776f9d2e",
+      "HEAD": "4f5c298504a0a069bc30684a83cab4a986cf4058b7b9807f06146d36418e07aa",
+      ":": "4f5c298504a0a069bc30684a83cab4a986cf4058b7b9807f06146d36418e07aa",
+      "recovered": "4f5c298504a0a069bc30684a83cab4a986cf4058b7b9807f06146d36418e07aa"
+    },
+    {
+      "path": "vendor/bpf/bcc/libbpf-tools/arm64/vmlinux.h",
+      "current": "762812f923caa5cf13b94c68ad5a55a3e41c855345576ede300f8fe2776f9d2e",
+      "HEAD": "542114e2d5d456ba323322a26c95b2a7e03160825baff790c6b9ba768d985f01",
+      ":": "542114e2d5d456ba323322a26c95b2a7e03160825baff790c6b9ba768d985f01",
+      "recovered": "542114e2d5d456ba323322a26c95b2a7e03160825baff790c6b9ba768d985f01"
+    },
+    {
+      "path": "vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h",
+      "current": "73fe1217cc39dfb136e107343b2aad6deecfef343672a0945c4c07ac06dfe102",
+      "HEAD": "77831295eea153892ebd7e48663541c09ae7696fae0435c74bff1bb8536e0e1a",
+      ":": "77831295eea153892ebd7e48663541c09ae7696fae0435c74bff1bb8536e0e1a",
+      "recovered": "77831295eea153892ebd7e48663541c09ae7696fae0435c74bff1bb8536e0e1a"
+    },
+    {
+      "path": "vendor/bpf/tetragon/bpf/include/vmlinux_generated_arm64.h",
+      "current": "db8d47592115ab178c43d182be0584abc38c8705ed5e91da4fec691a7997e7be",
+      "HEAD": "16388dbc7bc154d1f78bb012c5d81fa79a65021b59f0d77978ef9efafae544ae",
+      ":": "16388dbc7bc154d1f78bb012c5d81fa79a65021b59f0d77978ef9efafae544ae",
+      "recovered": "16388dbc7bc154d1f78bb012c5d81fa79a65021b59f0d77978ef9efafae544ae"
+    }
+  ]
+}

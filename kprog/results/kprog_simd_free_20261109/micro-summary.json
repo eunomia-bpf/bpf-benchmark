@@ -1,0 +1,789 @@
+{
+  "rows": [
+    {
+      "arch": "x86",
+      "name": "simple",
+      "control": {
+        "bytes": 61,
+        "sha256": "c71a8cfa324e8809dea974c34e236736498e10770d31d6df129e71af30661ef2"
+      },
+      "scalar": {
+        "bytes": 61,
+        "sha256": "c71a8cfa324e8809dea974c34e236736498e10770d31d6df129e71af30661ef2"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "simple_packet",
+      "control": {
+        "bytes": 52,
+        "sha256": "1e264cb68e5827df8aeab644e06b49a476da9eea7f57d7d84bf147bb91d2217f"
+      },
+      "scalar": {
+        "bytes": 52,
+        "sha256": "1e264cb68e5827df8aeab644e06b49a476da9eea7f57d7d84bf147bb91d2217f"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "bitmap_popcount_scan",
+      "control": {
+        "bytes": 149,
+        "sha256": "9920a79b343dc762777d0a84d3f4b3df3698792770b7ab18017b880a7a6e809c"
+      },
+      "scalar": {
+        "bytes": 149,
+        "sha256": "9920a79b343dc762777d0a84d3f4b3df3698792770b7ab18017b880a7a6e809c"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "sorted_rule_binary_search",
+      "control": {
+        "bytes": 198,
+        "sha256": "0b18455ae171d59f16f983e01bf183ac424f3ce20709569c0faa7347d8563867"
+      },
+      "scalar": {
+        "bytes": 198,
+        "sha256": "0b18455ae171d59f16f983e01bf183ac424f3ce20709569c0faa7347d8563867"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "bcc_runqlat_log2_histogram_bucket",
+      "control": {
+        "bytes": 340,
+        "sha256": "1f3da5733d3df6078c0c04441ff3e9cca9742333bcb9f021fab21bbe732d6310"
+      },
+      "scalar": {
+        "bytes": 340,
+        "sha256": "1f3da5733d3df6078c0c04441ff3e9cca9742333bcb9f021fab21bbe732d6310"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "trace_event_type_switch_dispatch",
+      "control": {
+        "bytes": 1641,
+        "sha256": "542e9f8a3930221dd20ab0f015bfa7221a8656da7ae5cbc339ce3e5965a4e089"
+      },
+      "scalar": {
+        "bytes": 1641,
+        "sha256": "542e9f8a3930221dd20ab0f015bfa7221a8656da7ae5cbc339ce3e5965a4e089"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "packet_checksum_fold",
+      "control": {
+        "bytes": 222,
+        "sha256": "08ad83a1bd498044a318415bcd562cb03ab0a4b34ebd75de4fc695d8d3c059aa"
+      },
+      "scalar": {
+        "bytes": 222,
+        "sha256": "08ad83a1bd498044a318415bcd562cb03ab0a4b34ebd75de4fc695d8d3c059aa"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "payload_prefix_memcmp_scan",
+      "control": {
+        "bytes": 801,
+        "sha256": "5e39923143409beb58dc2939927321e5d183165c9182c6f15b47ea8e5395cd0e"
+      },
+      "scalar": {
+        "bytes": 801,
+        "sha256": "5e39923143409beb58dc2939927321e5d183165c9182c6f15b47ea8e5395cd0e"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "packet_vlan_tcpopt_parser",
+      "control": {
+        "bytes": 683,
+        "sha256": "d2a5e023435ecce5e1eac3cc4a91f448a8cc6d1f4b7946267f850a31cfe5ebdb"
+      },
+      "scalar": {
+        "bytes": 683,
+        "sha256": "d2a5e023435ecce5e1eac3cc4a91f448a8cc6d1f4b7946267f850a31cfe5ebdb"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "bpf_local_call_fanout_dispatch",
+      "control": {
+        "bytes": 797,
+        "sha256": "80cac1dba5db7576f07cfb4101f99452e07fd5df5682fd81b8a3ce4c077ad5ff"
+      },
+      "scalar": {
+        "bytes": 797,
+        "sha256": "80cac1dba5db7576f07cfb4101f99452e07fd5df5682fd81b8a3ce4c077ad5ff"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "flow_5tuple_rss_hash",
+      "control": {
+        "bytes": 517,
+        "sha256": "e0544a9c8cca91dffbe4d8050ef95cfa2ebe3b74a10d8897fc7ada6777332354"
+      },
+      "scalar": {
+        "bytes": 517,
+        "sha256": "e0544a9c8cca91dffbe4d8050ef95cfa2ebe3b74a10d8897fc7ada6777332354"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "katran_lb_consistent_hash_select",
+      "control": {
+        "bytes": 1943,
+        "sha256": "58a321a3d8a5852983d5f30dadf68174c5b53b3cdae7bddd28da32737bbb0806"
+      },
+      "scalar": {
+        "bytes": 1943,
+        "sha256": "58a321a3d8a5852983d5f30dadf68174c5b53b3cdae7bddd28da32737bbb0806"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "cilium_policy_guard_tree_filter",
+      "control": {
+        "bytes": 383,
+        "sha256": "be06bea74e353593088bcc17cb74efd1efe8535b88446c2be3f081001f9830bc"
+      },
+      "scalar": {
+        "bytes": 383,
+        "sha256": "be06bea74e353593088bcc17cb74efd1efe8535b88446c2be3f081001f9830bc"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "siphash_rotate64_mixer",
+      "control": {
+        "bytes": 1377,
+        "sha256": "84e111c79cf05e36ccb67f5be3e20917c56e6b8ff5247ec58e6fedd28eecaec5"
+      },
+      "scalar": {
+        "bytes": 1377,
+        "sha256": "84e111c79cf05e36ccb67f5be3e20917c56e6b8ff5247ec58e6fedd28eecaec5"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "packet_record_bounds_window",
+      "control": {
+        "bytes": 259,
+        "sha256": "7eec90376fc97f10a6191e8f15311b701cf9129ebf7cbb6a8aa3d38ea2c5909a"
+      },
+      "scalar": {
+        "bytes": 259,
+        "sha256": "7eec90376fc97f10a6191e8f15311b701cf9129ebf7cbb6a8aa3d38ea2c5909a"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "flow_record_field_scan",
+      "control": {
+        "bytes": 300,
+        "sha256": "5be250255b5038517107660d8386c9e9dbc1b7af24e298204f81013faf42091d"
+      },
+      "scalar": {
+        "bytes": 300,
+        "sha256": "5be250255b5038517107660d8386c9e9dbc1b7af24e298204f81013faf42091d"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "packed_header_bitfield_decode",
+      "control": {
+        "bytes": 670,
+        "sha256": "81ecef60fdb3a2755c308ec0a2f5b5cfb823ec51fc53cc0f915b1c8b69b0a441"
+      },
+      "scalar": {
+        "bytes": 670,
+        "sha256": "81ecef60fdb3a2755c308ec0a2f5b5cfb823ec51fc53cc0f915b1c8b69b0a441"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "bpftrace_string_search_prefix_scan",
+      "control": {
+        "bytes": 459,
+        "sha256": "0f02c5207afa4f6c0ac2e45f061afa338b963ecac33e76bf1767f2ae6bcdb527"
+      },
+      "scalar": {
+        "bytes": 459,
+        "sha256": "0f02c5207afa4f6c0ac2e45f061afa338b963ecac33e76bf1767f2ae6bcdb527"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "tracee_syscall_name_table_lookup",
+      "control": {
+        "bytes": 849,
+        "sha256": "44ec20a506bb710afc2cb22dd2d66fa75c155d6f0024aa38d06228081f19545a"
+      },
+      "scalar": {
+        "bytes": 849,
+        "sha256": "44ec20a506bb710afc2cb22dd2d66fa75c155d6f0024aa38d06228081f19545a"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "tracee_http_method_prefix_detect",
+      "control": {
+        "bytes": 646,
+        "sha256": "26c03d2c583d4ab6ac536204e75bdc2487cb05668fd0380fbb652b70a1ac6c1d"
+      },
+      "scalar": {
+        "bytes": 646,
+        "sha256": "26c03d2c583d4ab6ac536204e75bdc2487cb05668fd0380fbb652b70a1ac6c1d"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "cilium_socket_lb_service_select",
+      "control": {
+        "bytes": 361,
+        "sha256": "2772f57ce15a80e61eaa2bf8790cb1771f149f9e5a4e24ecde7c8f90070e9ed6"
+      },
+      "scalar": {
+        "bytes": 361,
+        "sha256": "2772f57ce15a80e61eaa2bf8790cb1771f149f9e5a4e24ecde7c8f90070e9ed6"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "bcc_tcpconnect_ipv4_tuple_filter",
+      "control": {
+        "bytes": 478,
+        "sha256": "f5b0b5453227bce1b1750be5986743040d6795c134c46ecb25f55a9321b0168d"
+      },
+      "scalar": {
+        "bytes": 478,
+        "sha256": "f5b0b5453227bce1b1750be5986743040d6795c134c46ecb25f55a9321b0168d"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "tetragon_process_event_arg_filter",
+      "control": {
+        "bytes": 792,
+        "sha256": "0b395a043d180c1df4a82eedac5f621c1d87cc32581cac484a75234ffe482aaa"
+      },
+      "scalar": {
+        "bytes": 792,
+        "sha256": "0b395a043d180c1df4a82eedac5f621c1d87cc32581cac484a75234ffe482aaa"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "otel_stack_frame_unwind_scan",
+      "control": {
+        "bytes": 404,
+        "sha256": "c0f8a64fe29706a726c47a9b801896fbbbc03ad25eb006685153e79a77ccab59"
+      },
+      "scalar": {
+        "bytes": 404,
+        "sha256": "c0f8a64fe29706a726c47a9b801896fbbbc03ad25eb006685153e79a77ccab59"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "cilium_ct_nat_tuple_rewrite",
+      "control": {
+        "bytes": 368,
+        "sha256": "dc0ff5a1e5d4bd4d12bafeed0cec4cba1a5a70cdca94f5d9a80266aec7ba6bd1"
+      },
+      "scalar": {
+        "bytes": 368,
+        "sha256": "dc0ff5a1e5d4bd4d12bafeed0cec4cba1a5a70cdca94f5d9a80266aec7ba6bd1"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "packet_toeplitz_rss_hash",
+      "control": {
+        "bytes": 799,
+        "sha256": "a3fa65da3191bd4d3ec199d88ba6d503cf5dde76ecb451515e3bef8db3393b18"
+      },
+      "scalar": {
+        "bytes": 799,
+        "sha256": "a3fa65da3191bd4d3ec199d88ba6d503cf5dde76ecb451515e3bef8db3393b18"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "bpftrace_comm_key_fnv_hash",
+      "control": {
+        "bytes": 800,
+        "sha256": "b520f1f4126ceb407f1816d01af72c380c1e0683623a26580af6f38211c0d703"
+      },
+      "scalar": {
+        "bytes": 800,
+        "sha256": "b520f1f4126ceb407f1816d01af72c380c1e0683623a26580af6f38211c0d703"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "tc_packet_checksum_fold",
+      "control": {
+        "bytes": 290,
+        "sha256": "6777e2eed520f079d9ae277e66bfedd035862d8dbcb4f8841b91f88c041e12d2"
+      },
+      "scalar": {
+        "bytes": 290,
+        "sha256": "6777e2eed520f079d9ae277e66bfedd035862d8dbcb4f8841b91f88c041e12d2"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "cgroup_skb_hash_chain",
+      "control": {
+        "bytes": 561,
+        "sha256": "f905c0a4ee15ce9bed0081924a595094d1fa091e65935f7a8d03020f86e0916f"
+      },
+      "scalar": {
+        "bytes": 561,
+        "sha256": "f905c0a4ee15ce9bed0081924a595094d1fa091e65935f7a8d03020f86e0916f"
+      },
+      "changed": false
+    },
+    {
+      "arch": "x86",
+      "name": "unchecked_packet_read",
+      "control": {
+        "bytes": 8,
+        "sha256": "56d6ca087e5b6ee09e74d2fab61faa2f5409b55c7db171565bfefa67287aa9c0"
+      },
+      "scalar": {
+        "bytes": 8,
+        "sha256": "56d6ca087e5b6ee09e74d2fab61faa2f5409b55c7db171565bfefa67287aa9c0"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "simple",
+      "control": {
+        "bytes": 76,
+        "sha256": "5420f1331ef05ce1f9983ed7e8b10ba5ba2bc359f1f2760a637eca029326d0e8"
+      },
+      "scalar": {
+        "bytes": 76,
+        "sha256": "5420f1331ef05ce1f9983ed7e8b10ba5ba2bc359f1f2760a637eca029326d0e8"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "simple_packet",
+      "control": {
+        "bytes": 64,
+        "sha256": "a40d0c990862a8846e050f4cad814d14c303dcb5558416cf45dc5bbfbe380500"
+      },
+      "scalar": {
+        "bytes": 64,
+        "sha256": "a40d0c990862a8846e050f4cad814d14c303dcb5558416cf45dc5bbfbe380500"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "bitmap_popcount_scan",
+      "control": {
+        "bytes": 164,
+        "sha256": "f42bd0057fe5c207e419cdfc801a473d7ea73dd0afd0b165a1a6bcc5af5d5d7b"
+      },
+      "scalar": {
+        "bytes": 164,
+        "sha256": "f42bd0057fe5c207e419cdfc801a473d7ea73dd0afd0b165a1a6bcc5af5d5d7b"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "sorted_rule_binary_search",
+      "control": {
+        "bytes": 316,
+        "sha256": "b537e141f05394be38bebcd70ef96554133a1adf8ece13bb9e1ee61ea1b0d7cc"
+      },
+      "scalar": {
+        "bytes": 316,
+        "sha256": "b537e141f05394be38bebcd70ef96554133a1adf8ece13bb9e1ee61ea1b0d7cc"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "bcc_runqlat_log2_histogram_bucket",
+      "control": {
+        "bytes": 308,
+        "sha256": "967612a506793f2f3a127976ef20d4b82057f01105b9cdfda0a6c9dd4e786342"
+      },
+      "scalar": {
+        "bytes": 308,
+        "sha256": "967612a506793f2f3a127976ef20d4b82057f01105b9cdfda0a6c9dd4e786342"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "trace_event_type_switch_dispatch",
+      "control": {
+        "bytes": 1464,
+        "sha256": "821dc715e1459f454129b4f40429101f7209bad825cfd880548fc69ef9047acc"
+      },
+      "scalar": {
+        "bytes": 1464,
+        "sha256": "821dc715e1459f454129b4f40429101f7209bad825cfd880548fc69ef9047acc"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "packet_checksum_fold",
+      "control": {
+        "bytes": 196,
+        "sha256": "b642c8b6902acb3ea513e03b3a0b08d236643ba3722a77c966436ca618a0e375"
+      },
+      "scalar": {
+        "bytes": 196,
+        "sha256": "b642c8b6902acb3ea513e03b3a0b08d236643ba3722a77c966436ca618a0e375"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "payload_prefix_memcmp_scan",
+      "control": {
+        "bytes": 476,
+        "sha256": "7b56ffdc58e3899335484cfe1feda8500003bee036ff4e1a0740f8f065a4299a"
+      },
+      "scalar": {
+        "bytes": 476,
+        "sha256": "7b56ffdc58e3899335484cfe1feda8500003bee036ff4e1a0740f8f065a4299a"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "packet_vlan_tcpopt_parser",
+      "control": {
+        "bytes": 656,
+        "sha256": "d726911066c6023426e9905243a09fb752e30d20501a65b4a4da192ac4cc80ae"
+      },
+      "scalar": {
+        "bytes": 656,
+        "sha256": "d726911066c6023426e9905243a09fb752e30d20501a65b4a4da192ac4cc80ae"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "bpf_local_call_fanout_dispatch",
+      "control": {
+        "bytes": 792,
+        "sha256": "d37c3454a3870e40c741c326fe7eabae2c7424f937b1c66c15a26365d1cde60d"
+      },
+      "scalar": {
+        "bytes": 792,
+        "sha256": "d37c3454a3870e40c741c326fe7eabae2c7424f937b1c66c15a26365d1cde60d"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "flow_5tuple_rss_hash",
+      "control": {
+        "bytes": 488,
+        "sha256": "a90e09cc75602242a428cf06d319ec06da1122ba79f1295323bc64eb5738bef6"
+      },
+      "scalar": {
+        "bytes": 488,
+        "sha256": "a90e09cc75602242a428cf06d319ec06da1122ba79f1295323bc64eb5738bef6"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "katran_lb_consistent_hash_select",
+      "control": {
+        "bytes": 1588,
+        "sha256": "9cb6f8c4fd653f942efd77eaa3d253cb109e6a8b09d291665804cea2c76c5392"
+      },
+      "scalar": {
+        "bytes": 1588,
+        "sha256": "9cb6f8c4fd653f942efd77eaa3d253cb109e6a8b09d291665804cea2c76c5392"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "cilium_policy_guard_tree_filter",
+      "control": {
+        "bytes": 392,
+        "sha256": "a8d88c9192181819a75f053ab0f14ff4e08c6b47b7098ff60c84d0fec78b5463"
+      },
+      "scalar": {
+        "bytes": 392,
+        "sha256": "a8d88c9192181819a75f053ab0f14ff4e08c6b47b7098ff60c84d0fec78b5463"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "siphash_rotate64_mixer",
+      "control": {
+        "bytes": 1004,
+        "sha256": "26a2458b93c63f544858b5bfa802a42701b9ff819dd1d83a5e09a83ded6a2eaf"
+      },
+      "scalar": {
+        "bytes": 1004,
+        "sha256": "26a2458b93c63f544858b5bfa802a42701b9ff819dd1d83a5e09a83ded6a2eaf"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "packet_record_bounds_window",
+      "control": {
+        "bytes": 280,
+        "sha256": "a32e4a19d04a7a89d3fe8b2f3c54d366983f6bafbd66afc6504b6024ba4fa59a"
+      },
+      "scalar": {
+        "bytes": 280,
+        "sha256": "a32e4a19d04a7a89d3fe8b2f3c54d366983f6bafbd66afc6504b6024ba4fa59a"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "flow_record_field_scan",
+      "control": {
+        "bytes": 304,
+        "sha256": "d2709f9121a74fabc11ad31b6da66b693cb23c126d8255f91debe45263cc5238"
+      },
+      "scalar": {
+        "bytes": 304,
+        "sha256": "d2709f9121a74fabc11ad31b6da66b693cb23c126d8255f91debe45263cc5238"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "packed_header_bitfield_decode",
+      "control": {
+        "bytes": 692,
+        "sha256": "c0409891a90dababffad8f825e209c47d4556ffa6d397cfe9db674376255663c"
+      },
+      "scalar": {
+        "bytes": 692,
+        "sha256": "c0409891a90dababffad8f825e209c47d4556ffa6d397cfe9db674376255663c"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "bpftrace_string_search_prefix_scan",
+      "control": {
+        "bytes": 516,
+        "sha256": "ed31e48e5aa7529507d797955826fa5a895ab124ef2882040f161552c84a0292"
+      },
+      "scalar": {
+        "bytes": 516,
+        "sha256": "ed31e48e5aa7529507d797955826fa5a895ab124ef2882040f161552c84a0292"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "tracee_syscall_name_table_lookup",
+      "control": {
+        "bytes": 948,
+        "sha256": "d3f33c00a40616f8f1c92fe6f02810898284fb9e671cd346ac1d876f9106d829"
+      },
+      "scalar": {
+        "bytes": 948,
+        "sha256": "d3f33c00a40616f8f1c92fe6f02810898284fb9e671cd346ac1d876f9106d829"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "tracee_http_method_prefix_detect",
+      "control": {
+        "bytes": 716,
+        "sha256": "8e6cccb8bd956f78786f0b7b82d6908147cb619b6579529d99d65baa0a19705b"
+      },
+      "scalar": {
+        "bytes": 716,
+        "sha256": "8e6cccb8bd956f78786f0b7b82d6908147cb619b6579529d99d65baa0a19705b"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "cilium_socket_lb_service_select",
+      "control": {
+        "bytes": 376,
+        "sha256": "287bf83c80bb6a6c08bd403b93e462506802b5126b6d1994ffc60bf7c3b07b96"
+      },
+      "scalar": {
+        "bytes": 376,
+        "sha256": "287bf83c80bb6a6c08bd403b93e462506802b5126b6d1994ffc60bf7c3b07b96"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "bcc_tcpconnect_ipv4_tuple_filter",
+      "control": {
+        "bytes": 504,
+        "sha256": "963446f84979ef5472871a6d1ffc9d5d90728b9600573efa34738f49d44a87c4"
+      },
+      "scalar": {
+        "bytes": 504,
+        "sha256": "963446f84979ef5472871a6d1ffc9d5d90728b9600573efa34738f49d44a87c4"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "tetragon_process_event_arg_filter",
+      "control": {
+        "bytes": 744,
+        "sha256": "663f3e0b0d1f97c3995f55ce2bb173ed0fb8d4cdb74d6e0a506ce166a151241a"
+      },
+      "scalar": {
+        "bytes": 744,
+        "sha256": "663f3e0b0d1f97c3995f55ce2bb173ed0fb8d4cdb74d6e0a506ce166a151241a"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "otel_stack_frame_unwind_scan",
+      "control": {
+        "bytes": 416,
+        "sha256": "115c4b8e980a32a4dcd61544016b170331b7f269c6d003571eda7092dc18ef20"
+      },
+      "scalar": {
+        "bytes": 416,
+        "sha256": "115c4b8e980a32a4dcd61544016b170331b7f269c6d003571eda7092dc18ef20"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "cilium_ct_nat_tuple_rewrite",
+      "control": {
+        "bytes": 364,
+        "sha256": "375428127a8c206e37bd9740dd1c95ef72d1fb0c4718309af828da4f3fb4a16d"
+      },
+      "scalar": {
+        "bytes": 364,
+        "sha256": "375428127a8c206e37bd9740dd1c95ef72d1fb0c4718309af828da4f3fb4a16d"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "packet_toeplitz_rss_hash",
+      "control": {
+        "bytes": 800,
+        "sha256": "321c390217ced8ee39e3482f75bce9ed9f4d0fd08615714b7b6fc428b896909a"
+      },
+      "scalar": {
+        "bytes": 800,
+        "sha256": "321c390217ced8ee39e3482f75bce9ed9f4d0fd08615714b7b6fc428b896909a"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "bpftrace_comm_key_fnv_hash",
+      "control": {
+        "bytes": 684,
+        "sha256": "b8175c618bf94ad4efb6f3364cf664f75e46ca530362ab7627f1d6a4dc63d32e"
+      },
+      "scalar": {
+        "bytes": 684,
+        "sha256": "b8175c618bf94ad4efb6f3364cf664f75e46ca530362ab7627f1d6a4dc63d32e"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "tc_packet_checksum_fold",
+      "control": {
+        "bytes": 264,
+        "sha256": "2fe935d5685b798f7a475876e0158a8b2ca2e3be08c4c8ffa64bb0cab39df196"
+      },
+      "scalar": {
+        "bytes": 264,
+        "sha256": "2fe935d5685b798f7a475876e0158a8b2ca2e3be08c4c8ffa64bb0cab39df196"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "cgroup_skb_hash_chain",
+      "control": {
+        "bytes": 648,
+        "sha256": "02ae25bb747c3c9de6842a430a313e5626d00cd6b00decff170b90f51f7291a7"
+      },
+      "scalar": {
+        "bytes": 648,
+        "sha256": "02ae25bb747c3c9de6842a430a313e5626d00cd6b00decff170b90f51f7291a7"
+      },
+      "changed": false
+    },
+    {
+      "arch": "arm64",
+      "name": "unchecked_packet_read",
+      "control": {
+        "bytes": 12,
+        "sha256": "c2a3a826ea183efe5ca82c83e7263843e5ee73ce0d442600e2a454deb700087c"
+      },
+      "scalar": {
+        "bytes": 12,
+        "sha256": "c2a3a826ea183efe5ca82c83e7263843e5ee73ce0d442600e2a454deb700087c"
+      },
+      "changed": false
+    }
+  ],
+  "count": 60,
+  "changed": 0,
+  "simd_fp_lines": [],
+  "native_objects_scanned": 120,
+  "simulator_compiles": 60
+}

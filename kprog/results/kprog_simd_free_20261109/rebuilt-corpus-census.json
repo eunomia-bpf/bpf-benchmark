@@ -1,0 +1,1606 @@
+{
+  "objects": 198,
+  "by_arch_app": {
+    "arm64/bcc": 8,
+    "arm64/cilium": 7,
+    "arm64/katran": 4,
+    "arm64/otel": 15,
+    "arm64/tetragon": 62,
+    "arm64/lsm_support": 2,
+    "arm64/tracee": 1,
+    "x86/bcc": 8,
+    "x86/cilium": 7,
+    "x86/katran": 4,
+    "x86/otel": 15,
+    "x86/tetragon": 62,
+    "x86/lsm_support": 2,
+    "x86/tracee": 1
+  },
+  "simd_objects": 0,
+  "rows": [
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/bcc/biosnoop.native.o",
+      "arch": "arm64",
+      "app": "bcc",
+      "bytes": 909344,
+      "sha256": "cd1722538f626bf1ccfc940892ee140b887c996d04d967389f0e890a62b8d190",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/bcc/capable.native.o",
+      "arch": "arm64",
+      "app": "bcc",
+      "bytes": 906960,
+      "sha256": "e3c650c83a0ea4f8a43b62f258cda72ca3194d5a904e9be1c347848a6518d782",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/bcc/opensnoop.native.o",
+      "arch": "arm64",
+      "app": "bcc",
+      "bytes": 16304,
+      "sha256": "cec5a1c8fc42439264df4206c28d491013d14eb2af90be53477ddff8b61fd3f7",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/bcc/runqlat.native.o",
+      "arch": "arm64",
+      "app": "bcc",
+      "bytes": 913240,
+      "sha256": "f50d186eded5073763d318f7a2731a11ecc873861508b6892dfd180c75847467",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/bcc/syscount.native.o",
+      "arch": "arm64",
+      "app": "bcc",
+      "bytes": 904800,
+      "sha256": "f876ee07d979ba41d8174afe3783b24f93426011dc49960aa36f5cdf01f224a6",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/bcc/tcpconnect.native.o",
+      "arch": "arm64",
+      "app": "bcc",
+      "bytes": 913424,
+      "sha256": "8dc1190b9022e342e916afaee8d1178415b2743e3c1e8c393a4b79f6d80ff01b",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/bcc/tcplife.native.o",
+      "arch": "arm64",
+      "app": "bcc",
+      "bytes": 937464,
+      "sha256": "c8f6a834fdece420709341f77824bd15506319f9ccad0ac6d0814cd2bdf9b360",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/bcc/vfsstat.native.o",
+      "arch": "arm64",
+      "app": "bcc",
+      "bytes": 12680,
+      "sha256": "7c1e5f13c08039e834270154c250d58a2667ae5a2443fc197dda4cdd74c2b7b6",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/cilium/bpf_alignchecker.native.o",
+      "arch": "arm64",
+      "app": "cilium",
+      "bytes": 114704,
+      "sha256": "e544b0b26cb12d5aaa1aff06aa6d28444326b66400e426da18b2bad0bfe9d968",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/cilium/bpf_host.native.o",
+      "arch": "arm64",
+      "app": "cilium",
+      "bytes": 174696,
+      "sha256": "05e47638e2d17e48e0a92167786c9d10172992cb599ca37e1c48fe6b8ee70052",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/cilium/bpf_lxc.native.o",
+      "arch": "arm64",
+      "app": "cilium",
+      "bytes": 160536,
+      "sha256": "61fbbf03b3969ae7a1ed7f3a09bd0c81222614926664fa1c6276d3201f4c9fbc",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/cilium/bpf_overlay.native.o",
+      "arch": "arm64",
+      "app": "cilium",
+      "bytes": 115664,
+      "sha256": "c93a6216c7388ec271f35bcc883de3df62e037b02218a9e3e00fb61747c9ed1b",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/cilium/bpf_sock.native.o",
+      "arch": "arm64",
+      "app": "cilium",
+      "bytes": 29720,
+      "sha256": "ef6371eb043a27fe591d3ed4f0b9d02e46bf957f6c1bb96bf99b9746d1acbf1b",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/cilium/bpf_wireguard.native.o",
+      "arch": "arm64",
+      "app": "cilium",
+      "bytes": 112624,
+      "sha256": "9df6114c5fe18b2bd4d28a4e80aa49202d88712171eff6d9764d0df1625402fa",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/cilium/bpf_xdp.native.o",
+      "arch": "arm64",
+      "app": "cilium",
+      "bytes": 81304,
+      "sha256": "3564d0cd0bba0ee860c457802f728f31b642c70483b812e6ea2c0d6bcae8e8e1",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/katran/balancer.native.o",
+      "arch": "arm64",
+      "app": "katran",
+      "bytes": 69592,
+      "sha256": "f9026c532b9658c772f862438edc7dc023faa957d5b5c649f2aecef8f0ae5a6f",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/katran/healthchecking.native.o",
+      "arch": "arm64",
+      "app": "katran",
+      "bytes": 22296,
+      "sha256": "820e23f0a1d5391096edea58131737024a3b5115cc3b349146733bc4f2720378",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/katran/healthchecking_ipip.native.o",
+      "arch": "arm64",
+      "app": "katran",
+      "bytes": 11424,
+      "sha256": "ab0b571c0c62c58ffd1695b478e2fee7a29028015c9c01d117c8b1764afb1dc6",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/katran/xdp_root.native.o",
+      "arch": "arm64",
+      "app": "katran",
+      "bytes": 6264,
+      "sha256": "2edeaa3477e5f9d9579a480379458b1cdfd85daf32f1b0a8ecbf950380816341",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/otel/custom_trace.native.o",
+      "arch": "arm64",
+      "app": "otel",
+      "bytes": 54488,
+      "sha256": "92c109154a4fa9879553b234eb7022b81bbef4be9025c15871016d0b4852c640",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/otel/dotnet_tracer.native.o",
+      "arch": "arm64",
+      "app": "otel",
+      "bytes": 299624,
+      "sha256": "dbd7827605158d21cb188f416da93e864542b48025aaeb54e57a51917c40c9c0",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/otel/go_labels.native.o",
+      "arch": "arm64",
+      "app": "otel",
+      "bytes": 50176,
+      "sha256": "72428309891b11297f1973924a605a2534e32084e6558852ae61096e68d19f8a",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/otel/hotspot_tracer.native.o",
+      "arch": "arm64",
+      "app": "otel",
+      "bytes": 275648,
+      "sha256": "3670c69e7c0e55cf39233ee2af8a018388c717766dcfb339ebb6dbbba0e4c869",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/otel/interpreter_dispatcher.native.o",
+      "arch": "arm64",
+      "app": "otel",
+      "bytes": 94288,
+      "sha256": "a0c6f2df3d13effea67305ea0810c0613aff02f4d036ebf4cb99e0e0075690c1",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/otel/native_stack_trace.native.o",
+      "arch": "arm64",
+      "app": "otel",
+      "bytes": 155496,
+      "sha256": "82273283be603044584198920ceaa2eae09ce82b7b9695dcc4e86a653f4ffb88",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/otel/off_cpu.native.o",
+      "arch": "arm64",
+      "app": "otel",
+      "bytes": 58240,
+      "sha256": "9c7e88e1cd52865d5f29466ab0bdb6bbcfef0015d49c7f2627c7f295eda717c0",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/otel/perl_tracer.native.o",
+      "arch": "arm64",
+      "app": "otel",
+      "bytes": 270104,
+      "sha256": "fdb3cfd4e5c070722b6b144c8b5ac49b863317af833224c0490f58f928fffc8d",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/otel/php_tracer.native.o",
+      "arch": "arm64",
+      "app": "otel",
+      "bytes": 238936,
+      "sha256": "ef0aed477b6d45b5814f6a21f71e18560771489fb9f9c6fa6186a9747966f253",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/otel/python_tracer.native.o",
+      "arch": "arm64",
+      "app": "otel",
+      "bytes": 159616,
+      "sha256": "eab2eb14be64fadadafa6f72a62715a4f8c5bcae87025ef5b172d17eb97ca1a1",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/otel/ruby_tracer.native.o",
+      "arch": "arm64",
+      "app": "otel",
+      "bytes": 207720,
+      "sha256": "8c33f35da53d29592bb3fff6e8a19f329de1ad9f0e79f094fc2f58f96b19066a",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/otel/sched_monitor.native.o",
+      "arch": "arm64",
+      "app": "otel",
+      "bytes": 30120,
+      "sha256": "9d781b259280a3b6b85042e146d484d817e9d05adcb958b7fd7a0b10534ad36c",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/otel/system_config.native.o",
+      "arch": "arm64",
+      "app": "otel",
+      "bytes": 10016,
+      "sha256": "e55f8d779b0149c1df126a39b4da61f41411a6c9e22a0c3c6e7f68fc8a50aac6",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/otel/uprobe.native.o",
+      "arch": "arm64",
+      "app": "otel",
+      "bytes": 53064,
+      "sha256": "896e969013c1d042967fceeb7c15875f12a9c384f88fb07d13f1ce0db5d3550b",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/otel/v8_tracer.native.o",
+      "arch": "arm64",
+      "app": "otel",
+      "bytes": 286080,
+      "sha256": "18f1bac844fd0e4bcc111eb4628debaf0957cf8a96c399ee8627ba474a04c498",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_cgroup_mkdir_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 928408,
+      "sha256": "9816fd20aef38f2eb942e383360d83ded70231fb9f241cf2db378e5a1311cf11",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_cgroup_release_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 926384,
+      "sha256": "5f083187d9e995f09eeadbc75dfdade932a5078ad5813066c6bb1a756dddcf7b",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_cgroup_rmdir_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 926360,
+      "sha256": "158cfcd77f638b699a809fb5ce8ddd82ce07dfc3ca418badb0fb2e0c0c42603a",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_execve_event_v310.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1003800,
+      "sha256": "8b6784baa1e475b34bd1ff1a248b4942c1cb6fed7416d7d9f9b8e79ea45cac73",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_execve_event_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1027400,
+      "sha256": "01e3b6f152b3029f04900106bdcdcf3e3482a60406a07cefd5baaf377836a544",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_execve_event_v53.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1012200,
+      "sha256": "b62b409219a163162920ae57c46aaab2c816533a132fbe7dbc8eeba7f3edbe55",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_execve_event_v61.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1027200,
+      "sha256": "2c8cd26b5079f6124593976fddd24532b6bc3d0a3a2987af310b599722a4a15b",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_execve_map_update_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 22848,
+      "sha256": "8ed696466a5f3e20073ade35a247722420a0e52930796d5af0b6ee721c8cdda7",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_execve_map_update_v53.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 20840,
+      "sha256": "2298ac9a0c4b3720e8e885bb0b4b23e1cd1abd89052e75865b55482e78c18d42",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_execve_map_update_v61.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 22880,
+      "sha256": "c7928c370b920067a5eb75c000575538b80071cc707023b0a0d7a96bfd9c6510",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_exit_v310.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 924200,
+      "sha256": "82ae066ea9a8287cad9696ee8802a7884d4305bcc6719d9df6f3078e5c965805",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_exit_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 929472,
+      "sha256": "8739861fda3e1e4fb41c0462292b90b88e2eeac10e5245ad143babeab36b0456",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_fork_v310.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 929376,
+      "sha256": "9d8f7bcd6806fbf38fe45379b3b93407bf35e185e72ade40ff682d505c336e9f",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_fork_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 942736,
+      "sha256": "98bec6264cfd1b6f56eb1c6e3809b3b11eb3a31f07bb8e4ae407cbc3b5332781",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_fentry_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1477216,
+      "sha256": "804d8cf9cb23d48b295a74352bf1cf8b35e598d480c1986ca4fddc453352c087",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_fentry_v53.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1445272,
+      "sha256": "6e9fb63737eefaf32ffcd790d07478ff14b1b2583c161b7aacfa74d5d89da618",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_fentry_v61.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1214200,
+      "sha256": "6eda67e5ba7dccec71176c71572983265342ab7c725ed1d58ec071773d291da1",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_fexit_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1123040,
+      "sha256": "f092ad459ffa5e5df9dc0e66b7d4958b8d730200ec7d8fc7fc074ecb14074a93",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_fexit_v53.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1104816,
+      "sha256": "19e088d4ea745d3c184808accb42e6c328001a22fa9e56cb2ecd6926a3b9175e",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_fexit_v61.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1109912,
+      "sha256": "ea3be4299f238f5b15f1c449aa03554b820eff20a74b3fadda9b737c62226665",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_kprobe_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1495080,
+      "sha256": "a60d704fa13cd782ca6ed5bb6e11ff63440df7212ca0bbc7cf011dcf2b01b528",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_kprobe_v53.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1461976,
+      "sha256": "a5d7afa7cacce592c8308da3d31d13bbef285f7bbb88481940e9ac00a0e14d40",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_kprobe_v61.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1228632,
+      "sha256": "23eae8f7b3252862bbec6eb6729968daf3311998ff8022aba03581fd4fb7b76f",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_core_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1465752,
+      "sha256": "c224f866e6a54ba5f7f76b4c3b1276a3c190d06c6af9ed3de47b7627a39f47ed",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_core_v61.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1203408,
+      "sha256": "8d55c4a8ad4940550c2238b4aa91f55eac65d20885c188752599c309f15d707b",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_ima_bprm_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 924832,
+      "sha256": "97e3dabd84aeb807b3bce585e0f9020b3212087a255412b5cda149a823fe2811",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_ima_bprm_v61.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 924528,
+      "sha256": "9151d4868e38a046ab98be8c08ce905d260143d98599be97ec74163020330749",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_ima_file_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 924808,
+      "sha256": "2f139bc3e73e45ebb0b133a1a3c4309701fa0c1408e81f79417bd78a071d148f",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_ima_file_v61.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 924504,
+      "sha256": "b84703b13d86dd61dd571e2bb522f017f93285222021ce9c1de2596ee49ba4ed",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_output_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 940024,
+      "sha256": "77ce46b51c3657f4ef10904adb729c4bb67753368890fedbcecae5b3e81113de",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_output_v61.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 939720,
+      "sha256": "ad32cdcda7b67429d3ca1fbb52cd9e7ba0cd94b5b0022001b30367db75017a8d",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_rawtp_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1473872,
+      "sha256": "89c7016886456fa8f0d5c1fb695b6bbe37a72f110c5aea7f58f141b7cac1c998",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_rawtp_v53.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1441816,
+      "sha256": "5cd05f17c9f5015abb0faf5b4d4ce32568d3ed4f46baf57f4de2f58edeedc0e6",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_rawtp_v61.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1210696,
+      "sha256": "910f615e3f09aca8299db17e167931528cc7132e0bf5f8fd3cdf80d5bc384998",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_retkprobe_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1124336,
+      "sha256": "4d756807c1d3d84aa0f9291f87f565a7d0f48d2f4749ad6e840ae1306c0c6279",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_retkprobe_v53.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1106248,
+      "sha256": "58e29a3a68cb3b0ba165f718e30d5f174252e3f6a5993380deb66d370e217dde",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_retkprobe_v61.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1111168,
+      "sha256": "90e98c306064b56dd949a37a5a69ca03f30195f5097bc48cf3418f28b5c60064",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_retuprobe_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1123680,
+      "sha256": "bd522844714ff77bd0b8b42c0c97a2c82e08b21da158c6fc98f4389083c04a17",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_retuprobe_v53.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1103400,
+      "sha256": "2d9ea84aaff5f165a15750d167368b142cffaf3e38f7d349a340508e691fed0c",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_retuprobe_v61.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1110520,
+      "sha256": "486fa22be589d14de03f39ba4b037e787770d45971e37efae6ffe0e79786ed95",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_tracepoint_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1307296,
+      "sha256": "a24e840666266b1161d90ce9bb9250373db2c6d1b9bdef3f741888b2713ed03b",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_tracepoint_v53.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1275704,
+      "sha256": "87199537f2d5798499d5e77a898cced6eed4932fe3ef8a2c84fa88fcedba027c",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_tracepoint_v61.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1286240,
+      "sha256": "79a6095e9fcfa00df00b1edfe5909bfd75822c0e04e24c3d0821db9774e8d896",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_uprobe_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1598400,
+      "sha256": "3593e41b031de90e091985f3abdab3944df28fa78935d6e054076638937f7666",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_uprobe_v53.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1521448,
+      "sha256": "61b0a6924260faa1daa94bc16c7a057f8c6fe3a517f3717df5aa85d5fa336ffa",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_uprobe_v61.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1235096,
+      "sha256": "d22b9a1a99e0167d3de3da7404dfa6cffa21a28f5db0c617f70e633abe5ce67d",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_usdt_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1594200,
+      "sha256": "35053cdfc51ba35892e4d43a1af4b6ee321f0f51623f5e55bb0eda0988db74a5",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_usdt_v53.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1512552,
+      "sha256": "115aa13c0f6632cc0183e4d1e4cfca61b5e720d9bfd1a466f22e176656051c6b",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_usdt_v61.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1249384,
+      "sha256": "7fc301cc2e51f78355904d94d2051f483e34b85bfa0311ca7347aa93072c4ae0",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_loader_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 921008,
+      "sha256": "9a37dbe67bcd3b0de2c761e9e778373be183a6d2fda372d12f753b938ed5b1bd",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_kprobe_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1495328,
+      "sha256": "2593e2675d457090a3c9ac326e4bcf76b117548679d4569703a69b56cdcc7ef7",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_kprobe_v53.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1462216,
+      "sha256": "abd44f38d868fd7f5fe3d91664c1b5d73eb04ccba98bce6065688a78375c5394",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_kprobe_v61.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1228936,
+      "sha256": "3b4b57d27289ba19e5f8be4a6a6662b492c31503f65f5a8c917cd50eb3140174",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_retkprobe_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1123816,
+      "sha256": "169327ddc817e805d29815801689050671676004700f34f11810ad668331b0d6",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_retkprobe_v53.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1106488,
+      "sha256": "f3c7f0edf9dac8b9570c7cae6f493d84794cddaf92b2c36535afa4ff14a7b4b8",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_retkprobe_v61.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1110688,
+      "sha256": "92896236fe8480f3453597e1309912d6cdfe57ab9c10fd1fd30e8465db7447da",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_retuprobe_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1123928,
+      "sha256": "fde1ac70d9e3a9a43bd0a794ad9b692ed488550609a38ac919e465bf8c552c66",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_retuprobe_v61.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1110768,
+      "sha256": "2a57a83a6552baa4325e486a775fcded367af98ed0e1d9d048af1e4585736414",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_uprobe_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1598840,
+      "sha256": "69c8b7bca9c92fef9fefb3c67e2c0f9d4af16c298eb35ef9bd750c99a9a5ff49",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_uprobe_v61.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1235640,
+      "sha256": "5e2d1025cb65e1925124dfd9b226a8abca27249f15841f03835898d726a969d5",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_usdt_v511.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1594656,
+      "sha256": "f3d5f42948046c3f0c252ad17df625e5f54da88ce78098f6d12df1adfb25fb15",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_usdt_v61.native.o",
+      "arch": "arm64",
+      "app": "tetragon",
+      "bytes": 1249904,
+      "sha256": "161b07465f4d3f2f99d666f7e61c0ab39cf784744abec5602d50e1ea5679c678",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tracee/lsm_support/kprobe_check.native.o",
+      "arch": "arm64",
+      "app": "lsm_support",
+      "bytes": 7808,
+      "sha256": "dcf8d50dfcfce31147663012cdf6108d0c94f9e5c9e4f146ab1e1ee04de549dc",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tracee/lsm_support/lsm_check.native.o",
+      "arch": "arm64",
+      "app": "lsm_support",
+      "bytes": 6704,
+      "sha256": "1b49bc02b87a6873d6be422d5fee44dfcebd404a6c0a01d784f91488c493b779",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/arm64/7.0.0-30-generic/native/tracee/tracee.native.o",
+      "arch": "arm64",
+      "app": "tracee",
+      "bytes": 10073696,
+      "sha256": "77bbf012378fefb4c6c233dc59328b354e27760a4ce3a85585264d0f19c3ff2d",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/bcc/biosnoop.native.o",
+      "arch": "x86",
+      "app": "bcc",
+      "bytes": 1094296,
+      "sha256": "a2a3e0ed3a88ebc134e69e79748e785144eae6d59892aa1e7ea2564f42550186",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/bcc/capable.native.o",
+      "arch": "x86",
+      "app": "bcc",
+      "bytes": 1091704,
+      "sha256": "dbb9e64adf7debc7eaba215b54a46e93fe2153d04940448b9be58bfbea0ec8f7",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/bcc/opensnoop.native.o",
+      "arch": "x86",
+      "app": "bcc",
+      "bytes": 15456,
+      "sha256": "1fccc37898eeb465bfc242c266f9bc3365686b2ea34edfb074f7f5e081caafa1",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/bcc/runqlat.native.o",
+      "arch": "x86",
+      "app": "bcc",
+      "bytes": 1098896,
+      "sha256": "2092e82bf497cd7dd33b54b78f4b788408a056c55783e9b707310b88b2ec5b11",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/bcc/syscount.native.o",
+      "arch": "x86",
+      "app": "bcc",
+      "bytes": 1090128,
+      "sha256": "ebe098b394f00b33c35c491c949dfdd09991533f167d23c1b3f5746fa1323c40",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/bcc/tcpconnect.native.o",
+      "arch": "x86",
+      "app": "bcc",
+      "bytes": 1098536,
+      "sha256": "da051ac06f46cd624d8502577d2192f0dc30f3c509f4300706a8d4ab1750225a",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/bcc/tcplife.native.o",
+      "arch": "x86",
+      "app": "bcc",
+      "bytes": 1099256,
+      "sha256": "bed61774e10733e39fd42d1ce1fd571d8c719ce34c2c91cab88774e68d83c05d",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/bcc/vfsstat.native.o",
+      "arch": "x86",
+      "app": "bcc",
+      "bytes": 11768,
+      "sha256": "1620d8ec88ce23c82ed368d05aa30b24310f940d1702aa2dc6b9748412b17ed5",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/cilium/bpf_alignchecker.native.o",
+      "arch": "x86",
+      "app": "cilium",
+      "bytes": 112088,
+      "sha256": "b01967ed127660d9d7a5514d0ccf6ff46120667ae1a68b889fdda4f9341a9097",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/cilium/bpf_host.native.o",
+      "arch": "x86",
+      "app": "cilium",
+      "bytes": 170512,
+      "sha256": "5043c01507e3e8e75bba3961bb57122bbfac185b1db3f72eb2eb176e27edd0b8",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/cilium/bpf_lxc.native.o",
+      "arch": "x86",
+      "app": "cilium",
+      "bytes": 156752,
+      "sha256": "1d9a76a984ff113a7370b5dde765b5903ba84742a7fc795ea595cbb5375b9b6c",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/cilium/bpf_overlay.native.o",
+      "arch": "x86",
+      "app": "cilium",
+      "bytes": 113912,
+      "sha256": "979b42065ee800086ad1b121c33ac60a4934a4d7ec485b0854a31c612f15afd5",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/cilium/bpf_sock.native.o",
+      "arch": "x86",
+      "app": "cilium",
+      "bytes": 29312,
+      "sha256": "2f92a5bb54956b79d7f46d42a3f734e5d0406a39f2fd4a9e4429c2076d7447b9",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/cilium/bpf_wireguard.native.o",
+      "arch": "x86",
+      "app": "cilium",
+      "bytes": 109568,
+      "sha256": "5a6670737274fb6eaaab1a73b89c368fcc081082ac9ea4a3d9d029611292a0e9",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/cilium/bpf_xdp.native.o",
+      "arch": "x86",
+      "app": "cilium",
+      "bytes": 81072,
+      "sha256": "227e08251da9ac426808ec7d5813cbf4ad2fe7dd4880390336eecef662d38bf0",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/katran/balancer.native.o",
+      "arch": "x86",
+      "app": "katran",
+      "bytes": 67872,
+      "sha256": "36f3daf9b98a3907d9a87307ab21133acf1225da88421035c4bb65f3dc95f751",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/katran/healthchecking.native.o",
+      "arch": "x86",
+      "app": "katran",
+      "bytes": 21472,
+      "sha256": "5e71e9698730fadaad830a8144b7e84bd9de837ae6e1a09eda4b557b11e1f835",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/katran/healthchecking_ipip.native.o",
+      "arch": "x86",
+      "app": "katran",
+      "bytes": 10664,
+      "sha256": "fb3a1236c31a9deff63780da83e03071d4228d6c37d4cdead7e0b7f1bd3550a0",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/katran/xdp_root.native.o",
+      "arch": "x86",
+      "app": "katran",
+      "bytes": 5784,
+      "sha256": "7ba2c59eb847412edd95d360c60a33acd5319d01573d9706c7e4005e1a04ff18",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/otel/custom_trace.native.o",
+      "arch": "x86",
+      "app": "otel",
+      "bytes": 54248,
+      "sha256": "2eb7e283363ec64043c0cc8c9cb34a03a4d680f2b1255918e5761684f56c9248",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/otel/dotnet_tracer.native.o",
+      "arch": "x86",
+      "app": "otel",
+      "bytes": 277344,
+      "sha256": "06a44c1eb28f83009c1e1347a8a705356682ca87081ab58b13c04025966363a7",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/otel/go_labels.native.o",
+      "arch": "x86",
+      "app": "otel",
+      "bytes": 49936,
+      "sha256": "2372047b9e460e3fb5a30f034fde350803484e1e8459afabc54762738e650ca2",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/otel/hotspot_tracer.native.o",
+      "arch": "x86",
+      "app": "otel",
+      "bytes": 324416,
+      "sha256": "6cb642439ab47010c258c028eb64ffa6abd66456f25874b310c0e56a33397023",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/otel/interpreter_dispatcher.native.o",
+      "arch": "x86",
+      "app": "otel",
+      "bytes": 95376,
+      "sha256": "e9146f27c0b872b1991fcc3596519c940b19983c13b340a5f46233ac19deb693",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/otel/native_stack_trace.native.o",
+      "arch": "x86",
+      "app": "otel",
+      "bytes": 143080,
+      "sha256": "a27d8b652c52263aab54191eafaa7c048a751b41f82fd6f9b1f7c739b8f29268",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/otel/off_cpu.native.o",
+      "arch": "x86",
+      "app": "otel",
+      "bytes": 57816,
+      "sha256": "4b1d3e9115fff3704666dd972c548e0f24f26c23657ba2ae12f5048d453a56e7",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/otel/perl_tracer.native.o",
+      "arch": "x86",
+      "app": "otel",
+      "bytes": 281296,
+      "sha256": "13c99838425304c98fcabaa5f0b6f66b2f8e784485889cf409546edcd844fcef",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/otel/php_tracer.native.o",
+      "arch": "x86",
+      "app": "otel",
+      "bytes": 233544,
+      "sha256": "d059c185582dd44b81b0948b9bb5e121167730ce8fdd4eaf6df1bda83de0b595",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/otel/python_tracer.native.o",
+      "arch": "x86",
+      "app": "otel",
+      "bytes": 159008,
+      "sha256": "b87429ff4b531c17430f64b5024b257887aea44228f8e3af932c714efb37fec9",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/otel/ruby_tracer.native.o",
+      "arch": "x86",
+      "app": "otel",
+      "bytes": 203224,
+      "sha256": "df7cda2732c011ab1b46a3bdc274ed036471b8d6da6575a7ee3d0252005ae4bf",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/otel/sched_monitor.native.o",
+      "arch": "x86",
+      "app": "otel",
+      "bytes": 29096,
+      "sha256": "1ff7244ceb1be395e237e06751f87154ed97fd1d8086cdf10a70352b726aad3e",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/otel/system_config.native.o",
+      "arch": "x86",
+      "app": "otel",
+      "bytes": 9696,
+      "sha256": "01149f8305f7184f2f2bf385e5bbdb84f4f3a3f9c3596f9f8c58745c04510169",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/otel/uprobe.native.o",
+      "arch": "x86",
+      "app": "otel",
+      "bytes": 52808,
+      "sha256": "729076db93a94e9974bc232d9c9fbae533339db68459b991fd8f44b205b203ca",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/otel/v8_tracer.native.o",
+      "arch": "x86",
+      "app": "otel",
+      "bytes": 275704,
+      "sha256": "90c8cb8f34b76ace1a87c969ace78975ca4724b0bf05594b5054214c534d9c44",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_cgroup_mkdir_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1113792,
+      "sha256": "29d64aa39de9d069ddff6853e1c0e8c36c1181d12c238eec6d247e5e360b4462",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_cgroup_release_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1111816,
+      "sha256": "091f9ec316873e919e78428d7d0e20989321fe902205d673a4aebe8beb9ea1a3",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_cgroup_rmdir_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1111808,
+      "sha256": "ac0488abe9329a76fafe215b846455cd8932c849ad6dd65f04351a76991ba776",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_execve_event_v310.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1187776,
+      "sha256": "5847dc71e55efd9683d92f17dc057053d30cbdf3988aa9aedeb985e58a5d7617",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_execve_event_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1210880,
+      "sha256": "124b2652c4cd7ae97ccfc1a96ef243e201d4ce959f516a1dda0daef2e5b18be8",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_execve_event_v53.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1195960,
+      "sha256": "7fe339bcd830b331afc7becbe62c55f81c60db3df55d7c2e1afd509bf2d9b7f6",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_execve_event_v61.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1210040,
+      "sha256": "c6e1cf3bfafb1c745e3c36fbbe7112460e5514eb443031f9332825247dcd0317",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_execve_map_update_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 22192,
+      "sha256": "a4b3726f369f814c46c45019be7446e92a7270640a3f373ce3c6e2ffa316ca4d",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_execve_map_update_v53.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 20184,
+      "sha256": "28a771bd70437b9c693d2c44899bd0cf127f4491d1bad09fc822f25b36b5c938",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_execve_map_update_v61.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 22192,
+      "sha256": "a4b3726f369f814c46c45019be7446e92a7270640a3f373ce3c6e2ffa316ca4d",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_exit_v310.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1110112,
+      "sha256": "8408c815bbe0475a21deb10dfcb3a0527b65f76d1fc18e5fe50c54e003bb995b",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_exit_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1114344,
+      "sha256": "f8eba966094490c10d95af624ef6ac8fba3295749860bc7bb4d4be2fc8a59124",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_fork_v310.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1115624,
+      "sha256": "cfff11ee632533d4159779941bdf8921c51e88e44a705a575073d6500163842f",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_fork_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1128520,
+      "sha256": "776e372da7b8d43907866b9557d49b6d64133ccf45a2b1c763e0c0d0857b5313",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_fentry_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1666520,
+      "sha256": "ce502150da808e3e5aac26b4f170300f21cfeb8fa6268f4ede28eaf7da858d2d",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_fentry_v53.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1638872,
+      "sha256": "9ee46118209e8bc62dc189d0d1b22d0384b3d93dc5368591c55b25da722d332c",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_fentry_v61.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1391272,
+      "sha256": "6954d12a1f28d2149b3c8344821d4538394b8e6826e9504635ed1849e83f4fbd",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_fexit_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1307736,
+      "sha256": "a2a0da726dc2b0c605c3163afa5365c62065e425ae9b172b1901962c62727f7e",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_fexit_v53.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1290240,
+      "sha256": "5f9fe76c5e50032f9b71185f40df6cadc840dad04fbcf8e1201d5fac7845aa81",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_fexit_v61.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1289184,
+      "sha256": "9028a845ae1840c86ffa880e446efb1fa87cf377fe6a10d8a9c19798dc59a998",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_kprobe_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1680072,
+      "sha256": "d47bb02bbf5a8117658dbf74a38fbaf9a63465730f7a6b1ee1a624ebe2f1b924",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_kprobe_v53.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1650424,
+      "sha256": "7caf67e54f182e339fb19a40a358e9e803ce4731e0db18e5f86f227ac26de6f5",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_kprobe_v61.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1403144,
+      "sha256": "905114f0ccfbe5e99754a3721bf1cde1bae764ba560d56f5b20a65485270c3a9",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_core_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1655944,
+      "sha256": "c4bb96d4c8463ec30b182b5bbf927869bc7a4618bbdc0cb4ab7645b441a3fc2b",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_core_v61.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1381360,
+      "sha256": "62d80354a8d7908c4260af08b8907bbc3b8aa0318f21739976fccfd616fae2c4",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_ima_bprm_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1110696,
+      "sha256": "3eae0e0b2834dcba64d2211138708fc24c977032dd664ebdf2de628f935385cc",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_ima_bprm_v61.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1110392,
+      "sha256": "1565cb2993d91a466c98992087bd3ce1b66eb9630a28784c84f62447680c5a16",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_ima_file_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1110664,
+      "sha256": "d20b98a338d9e6a874d97cfdb359039cbe1bdf7d1ce99fabb74b1d5547a67aef",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_ima_file_v61.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1110360,
+      "sha256": "dc4b0e189dbfd1d5a6cf5de5ba8e193fc5c3e9608c7614fb8ad0b0c687ec30c1",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_output_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1125416,
+      "sha256": "bbfe076806e52c2f4c9d54500075081b06c30e57f83ad87474c5110146bcd693",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_output_v61.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1125112,
+      "sha256": "c550bcf08d7fc3194e5b9c61831896fc92c7286a8f8ce6d36631ec61139952b8",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_rawtp_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1662880,
+      "sha256": "a0d6a6019f79cf3b796d5f41dbffa29070d814534e541d7cbc73cee4ec8dfb28",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_rawtp_v53.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1635344,
+      "sha256": "a7342e9f8182414461be47abd17e44e21d9d23b84a57d805061ddd69443d72e8",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_rawtp_v61.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1387776,
+      "sha256": "7e993a54943470554194cd5215917348c7f563b8b09c2a3fe041e87905f21a48",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_retkprobe_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1308664,
+      "sha256": "d3e6a0e24b00cf144d2c4b22fcc698330c5075c199b6d1d28485c9c4c421a229",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_retkprobe_v53.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1289616,
+      "sha256": "ff3d8cc02c29e32fd431edfb3d83cf569af2b5f370301d88c6902c88411b54a8",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_retkprobe_v61.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1289968,
+      "sha256": "dbd7412a058f98c0235b81778503c174f212a80f71b08ad033736160c73cbb71",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_retuprobe_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1309584,
+      "sha256": "3043d1c795a04f4e3511c123dd5593938c8dd2635fff1c87f6f56f4b86c14604",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_retuprobe_v53.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1290520,
+      "sha256": "b979575f380843018e06a888b790c8f92383c9f00f0a342e520d907ec4184ad9",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_retuprobe_v61.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1291080,
+      "sha256": "72dedbfffc580bb9bc1682029ab9ed46103bc23a59fef1ef079d3a8f6a0f70f4",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_tracepoint_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1488840,
+      "sha256": "7d6b7bd69d82899de65c8364548059533f7e7dc2042c885612d6b2f809011448",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_tracepoint_v53.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1460184,
+      "sha256": "5f52cc0d4e38996c3fb6cbe6cc2d01f12ceae47e1c6a49dfa3ada6699b594b6f",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_tracepoint_v61.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1460088,
+      "sha256": "d2b7f791020dc621986d4006666c39d6634717fc6391de428084d7606d253262",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_uprobe_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1795312,
+      "sha256": "eafb25f81f9b65747b69acc312ee7abdb263ace03b851953c608ba6effa73a8c",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_uprobe_v53.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1706968,
+      "sha256": "66e766bd11046e8ee731b47a6e2d47dd6e4d8328c0754e8f9b112573adf1dfc3",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_uprobe_v61.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1406936,
+      "sha256": "ebc15f957236d3259382fa3e34cf0377f3abe82d99e047a35adb27b690729893",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_usdt_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1773544,
+      "sha256": "92c42535e96305230a3ae37d854ffbb20cf603a9b2405f4bd2d3aa91823ef542",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_usdt_v53.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1699144,
+      "sha256": "51c0880475351f23476cca7d61650632a71e657ec5d77cab47dc934d075f9890",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_generic_usdt_v61.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1417288,
+      "sha256": "d19e034508840ffd6c1aa5b693d6f4f0f4c25fbb55e1244a754cc44a0e3edda7",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_loader_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1107056,
+      "sha256": "12ca62595833893935721500b806ebc6c3e30bf13a0e80cdceac831465a3675e",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_multi_kprobe_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1680352,
+      "sha256": "ed6436781e62209ae7d5636978c1e8789ea1d972bb945e207107b12b062b1c92",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_multi_kprobe_v53.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1650696,
+      "sha256": "47a0d34b7ccf25408294474ed301b23dd11ae01d61aec144a30cd8b950afab23",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_multi_kprobe_v61.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1403424,
+      "sha256": "162752e747afe79ada1ae0d2553902e997c07f1c092f2dae34ed301bebb37b6f",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_multi_retkprobe_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1308936,
+      "sha256": "7482ddc7bddb4cd4932d3a0ddf487788e436ef9aeee402c591b85087fee517c6",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_multi_retkprobe_v53.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1291512,
+      "sha256": "58acd4dc8f20510c9a12ab454bb43d7cff53ec7fc56a6c4d7a2484f2fb7ab9d5",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_multi_retkprobe_v61.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1290240,
+      "sha256": "8b6f6f9553de29dd40a1252e94230f7f52f25bb955a26eec2ed1dc7e149ec574",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_multi_retuprobe_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1309856,
+      "sha256": "af25ba9ee0463a49e5d0d3f43032a0974b244fcc98ece2804468bfdae1903925",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_multi_retuprobe_v61.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1291336,
+      "sha256": "945870d9c216c02d89c5a512d08ee8a8d49eed1e33b64f69e3bb7b6907d945a8",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_multi_uprobe_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1779832,
+      "sha256": "b29bed50e7beb49e92b1947fac3c50c5be54485efdc311f7c59fb5a68c673509",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_multi_uprobe_v61.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1407400,
+      "sha256": "d178898b2b4045eeb86e411583d221b5420bd9ff547f922a6ce21ca2ad4c50ad",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_multi_usdt_v511.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1774016,
+      "sha256": "27d0e2bf521d39e1c0ab1d2eaffd74f44c2d7ff15460b43fdbb50dce30cf32d1",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tetragon/bpf_multi_usdt_v61.native.o",
+      "arch": "x86",
+      "app": "tetragon",
+      "bytes": 1417752,
+      "sha256": "7800589d0be0929d30d4ff0c438590fee0b252ed4f149d33f3d7caf35211ebf9",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tracee/lsm_support/kprobe_check.native.o",
+      "arch": "x86",
+      "app": "lsm_support",
+      "bytes": 7936,
+      "sha256": "a72d786b5e35c32b50814e52e04324b0c280cdd50d40ed87de7a6ddced661516",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tracee/lsm_support/lsm_check.native.o",
+      "arch": "x86",
+      "app": "lsm_support",
+      "bytes": 6056,
+      "sha256": "30c5a32bc8dfd1b181f36761ae4b40bc200377832dc2762d08f9f5b037092da3",
+      "simd_fp_lines": []
+    },
+    {
+      "path": "corpus-final/x86/7.0.0-30-generic/native/tracee/tracee.native.o",
+      "arch": "x86",
+      "app": "tracee",
+      "bytes": 9846928,
+      "sha256": "0f5df8045866bd19abeffc11ce08f45510dafeb296face487ad75a122e288d3b",
+      "simd_fp_lines": []
+    }
+  ]
+}

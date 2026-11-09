@@ -1,0 +1,111 @@
+[
+  {
+    "arch": "x86",
+    "name": "movaps_load",
+    "instruction": "movaps xmm0, XMMWORD PTR [rdi]",
+    "stage": "generation_failure",
+    "error": "unsupported mnemonic: movaps xmm0,XMMWORD PTR [rdi]",
+    "native_executions": 0,
+    "compile_command": [
+      "clang-18",
+      "-c",
+      "/var/tmp/kprog-tmp/S14/rejection/x86/movaps_load/input.S",
+      "-o",
+      "/var/tmp/kprog-tmp/S14/rejection/x86/movaps_load/input.o"
+    ]
+  },
+  {
+    "arch": "x86",
+    "name": "movups_store",
+    "instruction": "movups XMMWORD PTR [rdi], xmm0",
+    "stage": "generation_failure",
+    "error": "unsupported mnemonic: movups XMMWORD PTR [rdi],xmm0",
+    "native_executions": 0,
+    "compile_command": [
+      "clang-18",
+      "-c",
+      "/var/tmp/kprog-tmp/S14/rejection/x86/movups_store/input.S",
+      "-o",
+      "/var/tmp/kprog-tmp/S14/rejection/x86/movups_store/input.o"
+    ]
+  },
+  {
+    "arch": "x86",
+    "name": "x87",
+    "instruction": "fldz",
+    "stage": "generation_failure",
+    "error": "unsupported mnemonic: fldz",
+    "native_executions": 0,
+    "compile_command": [
+      "clang-18",
+      "-c",
+      "/var/tmp/kprog-tmp/S14/rejection/x86/x87/input.S",
+      "-o",
+      "/var/tmp/kprog-tmp/S14/rejection/x86/x87/input.o"
+    ]
+  },
+  {
+    "arch": "arm64",
+    "name": "q_load",
+    "instruction": "ldr q0, [x0]",
+    "stage": "generation_failure",
+    "error": "unsupported register: q0",
+    "native_executions": 0,
+    "compile_command": [
+      "clang-18",
+      "--target=aarch64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/S14/rejection/arm64/q_load/input.S",
+      "-o",
+      "/var/tmp/kprog-tmp/S14/rejection/arm64/q_load/input.o"
+    ]
+  },
+  {
+    "arch": "arm64",
+    "name": "d_store",
+    "instruction": "str d0, [x0]",
+    "stage": "generation_failure",
+    "error": "unsupported register: d0",
+    "native_executions": 0,
+    "compile_command": [
+      "clang-18",
+      "--target=aarch64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/S14/rejection/arm64/d_store/input.S",
+      "-o",
+      "/var/tmp/kprog-tmp/S14/rejection/arm64/d_store/input.o"
+    ]
+  },
+  {
+    "arch": "arm64",
+    "name": "fmov",
+    "instruction": "fmov d0, x0",
+    "stage": "generation_failure",
+    "error": "unsupported arm64 instruction: fmov d0, x0",
+    "native_executions": 0,
+    "compile_command": [
+      "clang-18",
+      "--target=aarch64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/S14/rejection/arm64/fmov/input.S",
+      "-o",
+      "/var/tmp/kprog-tmp/S14/rejection/arm64/fmov/input.o"
+    ]
+  },
+  {
+    "arch": "arm64",
+    "name": "cnt",
+    "instruction": "cnt v0.16b, v0.16b",
+    "stage": "generation_failure",
+    "error": "unsupported arm64 instruction: cnt v0.16b, v0.16b",
+    "native_executions": 0,
+    "compile_command": [
+      "clang-18",
+      "--target=aarch64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/S14/rejection/arm64/cnt/input.S",
+      "-o",
+      "/var/tmp/kprog-tmp/S14/rejection/arm64/cnt/input.o"
+    ]
+  }
+]
