@@ -1,6 +1,23 @@
---- native_loader.cpp.orig	2026-11-09 06:19:56.947355477 +0000
-+++ kprog/libnativeloader/src/native_loader.cpp	2026-11-09 06:19:56.956879064 +0000
-@@ -1364,7 +1364,8 @@
+--- a/kprog/libnativeloader/src/native_loader.cpp
++++ b/kprog/libnativeloader/src/native_loader.cpp
+@@ -971,7 +971,7 @@
+     int service_fd, uint64_t request_id, const std::vector<bpf_insn> &proof_program,
+     const std::vector<NativeBlobChunk> &chunks, const std::vector<uint8_t> &blob,
+     const std::vector<NativeLabReloc> &relocs,
+-    const std::vector<native_lab_load_site> &load_sites)
++    const std::vector<native_lab_load_site> &load_sites, uint32_t callee_saved_mask)
+ {
+     const auto proof = bound_proof_sequence(proof_program);
+     const std::vector<bpf_insn> continuation{{
+@@ -994,6 +994,7 @@
+         native_lab_trusted_chunk input{};
+         input.load_sites_user = ptr_to_u64(chunk_loads.data());
+         input.load_site_count = chunk_loads.size();
++        input.reserved = callee_saved_mask;
+         input.request_id = request_id;
+         input.native_user = ptr_to_u64(blob.data() + chunks[i].offset);
+         input.native_size = chunks[i].len;
+@@ -1369,7 +1370,8 @@
                     const StubLoadAttrs &attrs,
                     bool tail_call_reachable,
                     const std::string &prog_name,
@@ -10,7 +27,7 @@
  {
      ScopedFd source_btf_fd;
      if (attrs.source_btf_id) {
-@@ -1372,111 +1373,9 @@
+@@ -1377,111 +1379,9 @@
          if (source_btf_fd.fd < 0)
              fail("open original entry BTF: " + std::string(std::strerror(errno)));
      }
@@ -125,7 +142,7 @@
      if (fd_array.size() > std::numeric_limits<uint32_t>::max()) {
          fail("native_kernel fd_array too large");
      }
-@@ -4411,7 +4310,7 @@
+@@ -4416,7 +4316,7 @@
      {
          ensure_debugfs_mounted();
          relocs = parse_native_lab_relocs(linked.relocs, linked.blob.size());
@@ -134,7 +151,16 @@
          out.native_blob_fnv64 = native_blob_fnv64(linked.blob);
          out.native_reloc_count = static_cast<uint32_t>(relocs.size());
          out.native_chunk_count = static_cast<uint32_t>(chunks.size());
-@@ -4477,8 +4376,8 @@
+@@ -4466,7 +4366,7 @@
+             native_loader_kmsg_line(msg.str());
+         }
+         handles = upload_native_chunks(service_fd, request_id, proof_insns,
+-            chunks, linked.blob, relocs, linked.load_sites);
++            chunks, linked.blob, relocs, linked.load_sites, linked.callee_saved_mask);
+         upload_end = std::chrono::steady_clock::now();
+         {
+             std::ostringstream msg;
+@@ -4482,8 +4382,8 @@
  
          const auto prog_load_start = std::chrono::steady_clock::now();
          native_loader_kmsg_line("stub-btf-lookup-begin name=" + prog_name);
@@ -145,7 +171,7 @@
          {
              std::ostringstream msg;
              msg << "stub-btf-lookup-done"
-@@ -4499,7 +4398,8 @@
+@@ -4504,7 +4404,8 @@
                  attrs,
                  tail_call_reachable,
                  prog_name,
@@ -155,7 +181,7 @@
          } catch (const std::exception &e) {
              const std::string load_error = e.what();
              const size_t first_line_end = load_error.find('\n');
-@@ -5382,7 +5282,22 @@
+@@ -5387,7 +5288,22 @@
      companion.prog_type = prog_info.type;
      companion.expected_attach_type = options.expected_attach_type;
      bind_source_map_symbols(companion, source_map_bindings, source_insns);
@@ -179,7 +205,7 @@
          const auto selected = std::find_if(companion.maps.begin(), companion.maps.end(),
              [&](const auto &map) { return map.kernel_id == binding.map_id; });
          MapMeta map{};
-@@ -5436,7 +5351,7 @@
+@@ -5441,7 +5357,7 @@
              simulator_program, prog_info, companion, proof_insns);
          if (trusted_externs)
              relocate_source_map_proof(simulator_object.get(), simulator_object_path, simulator_program,

@@ -15,8 +15,14 @@
 #include <linux/string.h>
 #include <linux/uaccess.h>
 #include <linux/ptrace.h>
-#define NATIVE_LAB_ARCH_X86 1U
-#define NATIVE_LAB_BINDING_ARCH NATIVE_LAB_ARCH_X86
+#include <linux/unaligned.h>
+#ifdef CONFIG_ARM64
+#define NATIVE_LAB_BINDING_ARCH 2U
+#define NATIVE_LAB_DIRECTORY "bpf_arm64_native_lab"
+#else
+#define NATIVE_LAB_BINDING_ARCH 1U
+#define NATIVE_LAB_DIRECTORY "bpf_x86_native_lab"
+#endif
 #include "native_lab_trusted.h"
 
 static struct dentry *debugfs_root;
@@ -30,8 +36,27 @@ static void free_partial_image(struct bpf_native_image *image)
 }
 
 /* Registers are indexed by x86 encoding; fixup matches the stock handler. */
-static u32 site_fixup(const struct native_lab_load_site *site)
+static u32 site_fixup(const struct native_lab_load_site *site, const u8 *bytes)
 {
+#ifdef CONFIG_ARM64
+	u32 word = get_unaligned_le32(bytes + site->offset);
+	u32 reg = site->destination < 31 ? site->destination : 31;
+	u32 fixup = BPF_NATIVE_ARM64_LOAD | (reg << 27);
+	u32 second = 31;
+	bool pair = false;
+
+	if ((word & 0x3e400000U) == 0x28400000U ||
+	    (word & 0x3fe00000U) == 0x08600000U) {
+		second = (word >> 10) & 31;
+		pair = true;
+	} else if ((word & 0xbfa07c00U) == 0x08207c00U) {
+		second = (reg + 1) & 31;
+		pair = true;
+	}
+	if (pair)
+		fixup |= BPF_NATIVE_ARM64_PAIR | (second << 16);
+	return fixup;
+#else
 	static const u16 registers[] = {
 		offsetof(struct pt_regs, ax), offsetof(struct pt_regs, cx),
 		offsetof(struct pt_regs, dx), offsetof(struct pt_regs, bx),
@@ -46,6 +71,7 @@ static u32 site_fixup(const struct native_lab_load_site *site)
 		registers[site->destination] : 1; /* stock DONT_CLEAR */
 
 	return site->insn_len | (reg << 8);
+#endif
 }
 
 static int native_lab_store_chunk(void __user *argument)
@@ -70,6 +96,7 @@ static int native_lab_store_chunk(void __user *argument)
 		goto out;
 	}
 	image->len = input.native_size;
+	image->callee_saved_mask = input.reserved;
 	copy = vmemdup_user(u64_to_user_ptr(input.native_user), input.native_size);
 	if (IS_ERR(copy)) {
 		err = PTR_ERR(copy);
@@ -102,7 +129,7 @@ static int native_lab_store_chunk(void __user *argument)
 		}
 		for (i = 0; i < input.load_site_count; i++) {
 			image_sites[i].offset = sites[i].offset;
-			image_sites[i].fixup = site_fixup(&sites[i]);
+			image_sites[i].fixup = site_fixup(&sites[i], image->bytes);
 		}
 		image->sites = image_sites;
 		image->nr_sites = input.load_site_count;
@@ -258,7 +285,7 @@ static const struct file_operations map_update_elem_fops = {
 
 static int __init kprog_stock_init(void)
 {
-	debugfs_root = debugfs_create_dir("bpf_x86_native_lab", NULL);
+	debugfs_root = debugfs_create_dir(NATIVE_LAB_DIRECTORY, NULL);
 	if (IS_ERR(debugfs_root))
 		return PTR_ERR(debugfs_root);
 	debugfs_create_file("native_submit", 0600, debugfs_root, NULL, &native_lab_trusted_fops);
