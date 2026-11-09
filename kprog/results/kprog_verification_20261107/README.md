@@ -5973,3 +5973,17 @@ Existing paths alias those same incremental contents. The MOVK semantic
 cleanup `94bd567a2` retains schema/column/generated C-Lean checks and passes
 the existing20145-case host oracle. Each publication uses path-scoped
 `git commit -F <msg> -- <paths>` and immediate push.
+
+### ARM manual stack fixture continuation
+
+The full at `cb44dce14ebe17ceceb99383bb27cfc0dd2e8583` finished exit2
+at Makefile627: five manually planted stack fixtures require the production
+scalar-forwarding cache storage. The [fixture receipt](arm-stack-fixtures.log.gz),
+published as `8f62cbf0e2f81de135ab83347b31ef4da2ae564c`, includes the original immutable
+source/log/CPU and all five repaired host runs. Existing lanes3,843,515,
+arena2,814,832, arm167,480, read-tag60,144 and write-tag9,285,536 cases pass.
+Their manual arenas now declare the existing cache and clear its valid bits
+when directly planting each byte image. All original scenes and assertions
+remain active. The sole full successor runs at `8f62cbf0e2f81de135ab83347b31ef4da2ae564c`
+with the published REP shared-stream laws and these fixtures; its terminal
+result receives a separate immutable receipt.

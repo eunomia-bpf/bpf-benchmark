@@ -3467,6 +3467,251 @@
       "source_immediate_alias_binding"
     ]
   },
+  "arm_manual_stack_fixture_cache": {
+    "archive": "kprog/results/kprog_verification_20261107/arm-stack-fixtures.log.gz",
+    "cases": {
+      "test_arm64_stack_arena_route_host": 2814832,
+      "test_arm64_stack_arm_route_host": 167480,
+      "test_arm64_stack_read_tag_source_route_host": 60144,
+      "test_arm64_stack_write_lanes_route_host": 3843515,
+      "test_arm64_stack_write_tag_action_route_host": 9285536
+    },
+    "host_results": [
+      {
+        "commands": [
+          [
+            "cc",
+            "-include",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog/formal/oracles/arm64_entry_environment_host.h",
+            "-DKPROG_TEST_EXCLUSIVE_FAILURE=0",
+            "-include",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog/formal/oracles/arm64_exclusive_choice_host.h",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-I/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog/formal",
+            "-I/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog/arm64",
+            "-I/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog",
+            "-I/workspaces/repository/vendor/libbpf/src",
+            "-E",
+            "/workspaces/repository/kprog/formal/oracles/test_arm64_stack_write_lanes_route_host.c",
+            "-o",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/test_arm64_stack_write_lanes_route_host.i"
+          ],
+          [
+            "cc",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/test_arm64_stack_write_lanes_route_host.i",
+            "-o",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/test_arm64_stack_write_lanes_route_host"
+          ],
+          [
+            "taskset",
+            "-c",
+            "12-15",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/test_arm64_stack_write_lanes_route_host"
+          ]
+        ],
+        "exits": [
+          0,
+          0,
+          0
+        ],
+        "source": "kprog/formal/oracles/test_arm64_stack_write_lanes_route_host.c",
+        "source_sha256": "163eea7aaa596b841b2b201c8b02137d9464f419f013551920e5c5c859757dc3"
+      },
+      {
+        "commands": [
+          [
+            "cc",
+            "-include",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog/formal/oracles/arm64_entry_environment_host.h",
+            "-DKPROG_TEST_EXCLUSIVE_FAILURE=0",
+            "-include",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog/formal/oracles/arm64_exclusive_choice_host.h",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-I/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog/formal",
+            "-I/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog/arm64",
+            "-I/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog",
+            "-I/workspaces/repository/vendor/libbpf/src",
+            "-E",
+            "/workspaces/repository/kprog/formal/oracles/test_arm64_stack_arena_route_host.c",
+            "-o",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/test_arm64_stack_arena_route_host.i"
+          ],
+          [
+            "cc",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/test_arm64_stack_arena_route_host.i",
+            "-o",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/test_arm64_stack_arena_route_host"
+          ],
+          [
+            "taskset",
+            "-c",
+            "12-15",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/test_arm64_stack_arena_route_host"
+          ]
+        ],
+        "exits": [
+          0,
+          0,
+          0
+        ],
+        "source": "kprog/formal/oracles/test_arm64_stack_arena_route_host.c",
+        "source_sha256": "1051aa68121b65bff5ffed8bed5e180253afdfd2c9d32f481ce5f1210e0be3dc"
+      },
+      {
+        "commands": [
+          [
+            "cc",
+            "-include",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog/formal/oracles/arm64_entry_environment_host.h",
+            "-DKPROG_TEST_EXCLUSIVE_FAILURE=0",
+            "-include",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog/formal/oracles/arm64_exclusive_choice_host.h",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-I/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog/formal",
+            "-I/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog/arm64",
+            "-I/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog",
+            "-I/workspaces/repository/vendor/libbpf/src",
+            "-E",
+            "/workspaces/repository/kprog/formal/oracles/test_arm64_stack_arm_route_host.c",
+            "-o",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/test_arm64_stack_arm_route_host.i"
+          ],
+          [
+            "cc",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/test_arm64_stack_arm_route_host.i",
+            "-o",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/test_arm64_stack_arm_route_host"
+          ],
+          [
+            "taskset",
+            "-c",
+            "12-15",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/test_arm64_stack_arm_route_host"
+          ]
+        ],
+        "exits": [
+          0,
+          0,
+          0
+        ],
+        "source": "kprog/formal/oracles/test_arm64_stack_arm_route_host.c",
+        "source_sha256": "eddc90787f9060eeb14ecfe7aa9aa05f18ebdccb138b809d0d069bc7545b5b46"
+      },
+      {
+        "commands": [
+          [
+            "cc",
+            "-include",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog/formal/oracles/arm64_entry_environment_host.h",
+            "-DKPROG_TEST_EXCLUSIVE_FAILURE=0",
+            "-include",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog/formal/oracles/arm64_exclusive_choice_host.h",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-I/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog/formal",
+            "-I/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog/arm64",
+            "-I/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog",
+            "-I/workspaces/repository/vendor/libbpf/src",
+            "-E",
+            "/workspaces/repository/kprog/formal/oracles/test_arm64_stack_read_tag_source_route_host.c",
+            "-o",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/test_arm64_stack_read_tag_source_route_host.i"
+          ],
+          [
+            "cc",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/test_arm64_stack_read_tag_source_route_host.i",
+            "-o",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/test_arm64_stack_read_tag_source_route_host"
+          ],
+          [
+            "taskset",
+            "-c",
+            "12-15",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/test_arm64_stack_read_tag_source_route_host"
+          ]
+        ],
+        "exits": [
+          0,
+          0,
+          0
+        ],
+        "source": "kprog/formal/oracles/test_arm64_stack_read_tag_source_route_host.c",
+        "source_sha256": "615857582a186922c752faf4ea580bbc9bf562844cffd524e3de412e572cf494"
+      },
+      {
+        "commands": [
+          [
+            "cc",
+            "-include",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog/formal/oracles/arm64_entry_environment_host.h",
+            "-DKPROG_TEST_EXCLUSIVE_FAILURE=0",
+            "-include",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog/formal/oracles/arm64_exclusive_choice_host.h",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-I/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog/formal",
+            "-I/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog/arm64",
+            "-I/var/tmp/kprog-tmp/V/arm-stack-fixtures/published-input/kprog",
+            "-I/workspaces/repository/vendor/libbpf/src",
+            "-E",
+            "/workspaces/repository/kprog/formal/oracles/test_arm64_stack_write_tag_action_route_host.c",
+            "-o",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/test_arm64_stack_write_tag_action_route_host.i"
+          ],
+          [
+            "cc",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/test_arm64_stack_write_tag_action_route_host.i",
+            "-o",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/test_arm64_stack_write_tag_action_route_host"
+          ],
+          [
+            "taskset",
+            "-c",
+            "12-15",
+            "/var/tmp/kprog-tmp/V/arm-stack-fixtures/test_arm64_stack_write_tag_action_route_host"
+          ]
+        ],
+        "exits": [
+          0,
+          0,
+          0
+        ],
+        "source": "kprog/formal/oracles/test_arm64_stack_write_tag_action_route_host.c",
+        "source_sha256": "0a98ade02a1948f2c451ec9c50ad9c1018403d90c061b7b4eb1310c71716c8fb"
+      }
+    ],
+    "original_failure": "Makefile627 manual ARM stack cache declarations",
+    "original_full_exit": 2,
+    "original_full_source": "cb44dce14ebe17ceceb99383bb27cfc0dd2e8583",
+    "publication": "8f62cbf0e2f81de135ab83347b31ef4da2ae564c",
+    "runtime_predicate_additions": 0,
+    "scope": "Production scalar forwarding storage declared in the five manual byte-image host arenas; cache validity reset with directly planted byte images. Original scenes/assertions retained. Production/runtime predicates retained.",
+    "successor_full_source": "8f62cbf0e2f81de135ab83347b31ef4da2ae564c",
+    "successor_full_status": "running; eventual immutable receipt separate"
+  },
   "arm_reserved_default_opcode": {
     "all_three_components_pass": true,
     "archive_compressed_prefix_bytes": 95511705,
