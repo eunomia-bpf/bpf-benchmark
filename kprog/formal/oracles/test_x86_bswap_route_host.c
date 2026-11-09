@@ -69,8 +69,21 @@ static __u64 mreg[16];
 static __u8 mtag[16];
 static __u8 mcf, mzf, msf, mof;
 
-/* The stack arena image a case must leave untouched. */
+/* Expected private arena, including SP lifetime release. */
 static __u8 exp_stack[X86_SIM_STACK_BYTES];
+
+/* Released private bytes take the fixed host-fresh value zero; bytes
+ * outside the released native SP interval retain their planted image. */
+static void model_stack_release(__u64 prior, __u64 current)
+{
+    if ((__s64)current <= (__s64)prior) return;
+    for (unsigned i = 0; i < X86_SIM_STACK_BYTES; i++) {
+        __s64 offset = (__s64)i - (__s64)X86_SIM_STACK_BYTES;
+        if (offset >= (__s64)prior && offset < (__s64)current)
+            exp_stack[i] = 0;
+    }
+}
+
 
 /* An arena base the pointer reads may name; the body must read the raw
  * register bits only, so a body that dereferences the mapped pointer lands
@@ -262,8 +275,8 @@ static const char *route_ctx;
 		}                                                         \
 	} while (0)
 
-/* No BSWAP arm writes memory: the stack-arena image must come back exactly
- * as planted. */
+/* BSWAP preserves architectural memory; an SP destination releases private
+ * bytes. Compare the complete image including that lifetime effect. */
 #define COMPARE_MEMORY()                                                   \
 	do {                                                               \
 		unsigned __cm_i;                                          \
@@ -295,12 +308,14 @@ static void check_bswap(unsigned dst, unsigned flags, unsigned aux,
 	unsigned w;
 
 	route_ctx = "bswap";
-	memcpy(exp_stack, __x86_stack_mem.b, sizeof(exp_stack));
 	PLANT_REGS();
 	REPLANT_LANES(dst, dstv);
 	STAGE_FLAGS();
+    for (unsigned i = 0; i < X86_SIM_STACK_BYTES; i++)
+        exp_stack[i] = __x86_stack_mem.b[i] = (__u8)(i * 13U + 0x6dU);
 
 	/* ---- independent model ---- */
+    __u64 prior_sp = mreg[X86_RSP];
 	w = resolve_width(flags);
 	/* The whole-cell read, the byte reversal at the resolved width, the
 	 * width-local writeback, and the tag the narrowed writeback
@@ -312,6 +327,7 @@ static void check_bswap(unsigned dst, unsigned flags, unsigned aux,
 						    w),
 					w);
 	mtag[dst] = X86_SIM_TAG_SCALAR;
+    if (dst == X86_RSP) model_stack_release(prior_sp, mreg[dst]);
 
 	/* ---- the real routed arm ---- */
 	X86_SIM_L_EXEC(X86_OP_BSWAP, dst, 0U, flags, aux, 0ULL);

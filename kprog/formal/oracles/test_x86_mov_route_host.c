@@ -75,8 +75,21 @@ static __u64 mreg[16];
 static __u8 mtag[16];
 static __u8 mcf, mzf, msf, mof;
 
-/* The stack arena image a case must leave untouched. */
+/* Expected private arena, including SP lifetime release. */
 static __u8 exp_stack[X86_SIM_STACK_BYTES];
+
+/* Released private bytes take the fixed host-fresh value zero; bytes
+ * outside the released native SP interval retain their planted image. */
+static void model_stack_release(__u64 prior, __u64 current)
+{
+    if ((__s64)current <= (__s64)prior) return;
+    for (unsigned i = 0; i < X86_SIM_STACK_BYTES; i++) {
+        __s64 offset = (__s64)i - (__s64)X86_SIM_STACK_BYTES;
+        if (offset >= (__s64)prior && offset < (__s64)current)
+            exp_stack[i] = 0;
+    }
+}
+
 
 /* An arena base the pointer reads may name; the stack rebind indexes the
  * modeled `__x86_stack_mem` array directly, so the model needs no copy. */
@@ -161,8 +174,10 @@ static __u64 model_native_value(unsigned reg)
 static void model_native_write(unsigned dst, __u64 value, unsigned width,
                                unsigned shift)
 {
+    __u64 prior = mreg[dst];
     mreg[dst] = model_partial_write(model_native_value(dst), value, width, shift);
     mtag[dst] = X86_SIM_TAG_SCALAR;
+    if (dst == X86_RSP) model_stack_release(prior, mreg[dst]);
 }
 
 #define DECLARE_SIM_STATE()                                                \
@@ -281,8 +296,8 @@ static const char *route_ctx;
 		}                                                         \
 	} while (0)
 
-/* No MOV arm writes memory: the stack-arena image must come back exactly as
- * planted. */
+/* MOV preserves architectural memory; private bytes released by an SP
+ * destination take the fixed host fresh value. Compare the complete image. */
 #define COMPARE_MEMORY()                                                   \
 	do {                                                               \
 		unsigned __cm_i;                                          \
@@ -326,9 +341,10 @@ static void check_mov_imm(unsigned dst, unsigned flags, unsigned aux,
 	unsigned w;
 
 	route_ctx = "mov imm";
-	memcpy(exp_stack, __x86_stack_mem.b, sizeof(exp_stack));
 	PLANT_REGS();
 	STAGE_FLAGS();
+    for (unsigned i = 0; i < X86_SIM_STACK_BYTES; i++)
+        exp_stack[i] = __x86_stack_mem.b[i] = (__u8)(i * 13U + 0x6dU);
 
 	/* ---- independent model ---- */
 	w = resolve_width(flags);
@@ -357,10 +373,11 @@ static void check_mov_reg(unsigned dst, unsigned src, unsigned flags,
 	unsigned w;
 
 	route_ctx = "mov reg";
-	memcpy(exp_stack, __x86_stack_mem.b, sizeof(exp_stack));
 	PLANT_REGS();
 	REPLANT_LANES(dst, dstv, src, srcv);
 	STAGE_FLAGS();
+    for (unsigned i = 0; i < X86_SIM_STACK_BYTES; i++)
+        exp_stack[i] = __x86_stack_mem.b[i] = (__u8)(i * 13U + 0x6dU);
 
 	/* ---- independent model ---- */
 	w = resolve_width(flags);
