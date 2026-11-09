@@ -1,0 +1,33 @@
+{
+  "utc": "2026-11-09T10:32:06.297315+00:00",
+  "source_publication": "e2e6dc6c034375365d6f359f5faca766e360a271",
+  "parent": {
+    "cohort": "parent",
+    "phase": "compiled",
+    "frame_extent_bytes": 520,
+    "result": {
+      "native_object": "/var/tmp/kprog-tmp/A/opensnoop-last-word/generated/parent/request.native.o",
+      "native_proof_object": "/var/tmp/kprog-tmp/A/opensnoop-last-word/generated/parent/trusted_arm64.proof.o",
+      "simulator_object": "/var/tmp/kprog-tmp/A/opensnoop-last-word/generated/parent/trusted_arm64.bpf.o",
+      "simulator_program": "trusted_arm64_arm64_sim_xdp",
+      "symbol": "tracepoint__syscalls__sys_exit_openat",
+      "native_sha256": "16d282f6ae9deb77b9dfffa4d528a70756115d7066fe7274e962dd22f85d9782"
+    }
+  },
+  "candidate": {
+    "cohort": "payload",
+    "phase": "compiled",
+    "frame_extent_bytes": 512,
+    "result": {
+      "native_object": "/var/tmp/kprog-tmp/A/opensnoop-last-word/generated/payload/request.native.o",
+      "native_proof_object": "/var/tmp/kprog-tmp/A/opensnoop-last-word/generated/payload/trusted_arm64.proof.o",
+      "simulator_object": "/var/tmp/kprog-tmp/A/opensnoop-last-word/generated/payload/trusted_arm64.bpf.o",
+      "simulator_program": "trusted_arm64_arm64_sim_xdp",
+      "symbol": "tracepoint__syscalls__sys_exit_openat",
+      "native_sha256": "16d282f6ae9deb77b9dfffa4d528a70756115d7066fe7274e962dd22f85d9782"
+    }
+  },
+  "source_edit": "4474ab41ee049913fe45b0a2431c47bb4f335b45",
+  "scope": "Matched exact reordered native P/metadata; maximum directly observed BPF r10 displacement is a compilation-layout observation; actual stock-verifier/application outcomes follow the full cohort.",
+  "runtime_admission_additions": 0
+}
