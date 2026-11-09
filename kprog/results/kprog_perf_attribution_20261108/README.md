@@ -452,10 +452,16 @@ not a measurement of a steady state:
 | `..._132145_835225` | 834,765 | 853,270 | **1.022** |
 | `..._135025_542160` | 839,838 | 823,201 | 0.980 |
 
+**All three of these rows had the shim off** (`SKIP_REJIT=all`), so their
+"native" arm was eBPF; see the next section. They are kept because the JIT
+arm they measured is valid and stable.
+
 So the JIT arm is stable across three runs to 1.1% (834,765 to 843,755),
-which is what "the JIT arm returns" means here, and the native arm is not:
-it ranges 0.859x to 1.022x of JIT. **Katran's native arm is at parity with
-±12% spread and no reliable advantage**, where the archive recorded 1.102x.
+which is what "the JIT arm returns" means here. The apparent native spread
+below is not native at all -- those arms had the shim off, so the rows say
+the same eBPF code resampled three times varies 0.859x to 1.022x, which is
+the **workload's own run-to-run spread**. With the shim actually attached the
+archive's 1.102x returns at 1.087x; see the next section.
 
 One thing this rerun could not reproduce is the archive's per-invocation
 counters. `BPFREJIT_CORPUS_BPF_STATS=1` records `bpf_stats: true` in the
@@ -465,6 +471,45 @@ archived 2026-05-29 run of the same app has 13 programs and `native_tracer_e`
 at 3,210.4 then 216.7 ns. So the archived counts came from a collection step
 this rebuilt definition does not perform, and the comparison above is
 throughput only.
+
+### The May-29 number returns, once the shim is actually attached
+
+Every earlier rerun in this section had the shim **off**. I set
+`SKIP_REJIT=all` to avoid the bpfopt loadtime plan, and in this tree
+`skip_rejit_disables_shim()` returns `{"SKIP_REJIT": "all"} -> omitted
+LD_PRELOAD` (`runner/libs/agent.py`, `runner/libs/rejit.py:42`), so both arms
+ran plain eBPF. The tell is in the output: `rejit_result {"mode": "loadtime",
+"status": "skipped"}` and `skip_rejit: true`.
+
+`SKIP_REJIT=norejit` skips the plan **and keeps the shim**. With that, run
+`x86_kvm_corpus_20261109_153901_098451` (status ok, 3 samples per arm,
+180 s each, CPUs 0-7) gives:
+
+| arm | invocations | BPF ns | ns per invocation | pps |
+| --- | ---: | ---: | ---: | ---: |
+| JIT | 1,319,025,496 | 232,808,718,078 | **176.5** | 818,636 |
+| native | 1,449,559,890 | 209,827,342,449 | **144.8** | 889,572 |
+
+| comparison | archive | this run |
+| --- | ---: | ---: |
+| JIT ns per invocation | 178.3 | **176.5** |
+| native ns per invocation | 142.4 | **144.8** |
+| per-invocation speedup | 1.252x | **1.219x** |
+| workload throughput native/JIT | 1.102x | **1.087x** |
+
+**The archived Katran figure returns.** The native arm is genuinely native:
+the shim logged `native-loader replaced prog=balancer_ingres`, and the
+program the kernel held records `jited` 10,196 bytes against the JIT arm's
+13,641, with `xlated` 1,288 against 23,840.
+
+Equal work, as the operator requires before counting it: both arms ran four
+workers on threads 0-3 with `Flags: FLOW_RND`, and the native arm sent
+**1,449,559,888 packets against 1,319,025,496** -- 10% *more*. So its 1.087x
+throughput is conservative rather than inflated by doing less work.
+
+That also revises the ceiling section below: the earlier 4.03% BPF share and
+the 0.86x-1.02x range were measured with the shim off, and both were
+measuring eBPF.
 
 ### The May-29 runs: equal work, and what they can and cannot say
 
@@ -569,6 +614,10 @@ one. Both complete current-ABI runs, eight guest CPUs:
 | app | arm | BPF seconds | duration | share of 8 CPUs |
 | --- | --- | ---: | ---: | ---: |
 | bcc/set | JIT | 777.5 | 542.1 s | **17.93%** |
+
+(These two runs also had the shim off, so the rows below are the eBPF-against-eBPF
+runs; the JIT column is the valid one, since the JIT arm runs the same code
+either way.)
 | bcc/set | native-requested | 784.3 | 541.1 s | 18.12% |
 | katran | JIT | 174.1 | 540.2 s | **4.03%** |
 | katran | native-requested | 175.4 | 540.3 s | 4.06% |
