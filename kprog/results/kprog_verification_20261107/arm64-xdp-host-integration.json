@@ -30166,6 +30166,108 @@
     "total_cases": 1852,
     "unsigned_cases": 1298
   },
+  "signed_div_source_arithmetic_capture": {
+    "compiled_scalar_families": "13/75",
+    "current_complete_C_model_families": "70/75",
+    "records": {
+      "signed-div-capture": {
+        "archive": "kprog/results/kprog_verification_20261107/signed-div-capture.log.gz",
+        "audit_exit": 0,
+        "audit_input": "import KProgFormal.Refinement.X86Divide\n#print axioms KProgFormal.Refinement.X86Divide.Capture.dividend_value\n#print axioms KProgFormal.Refinement.X86Divide.Capture.dividend_integer\n#print axioms KProgFormal.Refinement.X86Divide.Capture.dividend_magnitude\n#print axioms KProgFormal.Refinement.X86Divide.Capture.word_negative\n#print axioms KProgFormal.Refinement.X86Divide.Capture.dividend_negative\n#print axioms KProgFormal.Refinement.X86Divide.Capture.divisor_negative\n#print axioms KProgFormal.Refinement.X86Divide.Capture.divisor_magnitude\n#print axioms KProgFormal.Refinement.X86Divide.Capture.quotient_negative\n",
+        "compile": [
+          {
+            "command": [
+              "taskset",
+              "-c",
+              "12-15",
+              "lean",
+              "-o",
+              "/var/tmp/kprog-tmp/V/signed-div-capture/olean/KProgFormal/X86DivHandler.olean",
+              "/workspaces/repository/kprog/formal/KProgFormal/X86DivHandler.lean"
+            ],
+            "exit": 0,
+            "module": "KProgFormal/X86DivHandler",
+            "reused": true,
+            "source_sha256": "58fb229546d228f15c85d7448765db3b5bea9f5291c7dc3b6e5899d8dfb10de7"
+          },
+          {
+            "command": [
+              "taskset",
+              "-c",
+              "12-15",
+              "lean",
+              "-o",
+              "/var/tmp/kprog-tmp/V/signed-div-capture/olean/KProgFormal/Refinement/X86Divide.olean",
+              "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86Divide.lean"
+            ],
+            "exit": 0,
+            "module": "KProgFormal/Refinement/X86Divide",
+            "source_sha256": "22f17c9ad3214057c024729e5328234a927dc209cd5a8575af4823f7863121d5"
+          }
+        ],
+        "laws": [
+          "dividend_value",
+          "dividend_integer",
+          "dividend_magnitude",
+          "word_negative",
+          "dividend_negative",
+          "divisor_negative",
+          "divisor_magnitude",
+          "quotient_negative"
+        ],
+        "publication": "5a4c66f463e6fa5b478349510b5b879920255a52",
+        "reduction_bridge": 7,
+        "scope": "Universal arbitrary-state RAX/RDX/AX and source-word sign/magnitude capture, actual64-bit masks and carry linked to canonical signed integers for all widths. Whole C arithmetic/state/freshflags/AUX source extraction and physical/compiler transport remain explicit.",
+        "sorryAx": 0
+      },
+      "signed-div-gate": {
+        "archive": "kprog/results/kprog_verification_20261107/signed-div-gate.log.gz",
+        "audit_exit": 0,
+        "audit_input": "import KProgFormal.Refinement.X86Divide\n#print axioms KProgFormal.Refinement.X86Divide.SignedArithmetic.limit_lt_base\n#print axioms KProgFormal.Refinement.X86Divide.SignedArithmetic.quot_rem_matches\n#print axioms KProgFormal.Refinement.X86Divide.SignedArithmetic.preliminary_overflow\n#print axioms KProgFormal.Refinement.X86Divide.SignedArithmetic.guarded_matches\n#print axioms KProgFormal.Refinement.X86Divide.SignedArithmetic.accepted_result_bounds\n",
+        "compile_exit": 0,
+        "laws": [
+          "limit_lt_base",
+          "quot_rem_matches",
+          "preliminary_overflow",
+          "guarded_matches",
+          "accepted_result_bounds"
+        ],
+        "publication": "28ab6ad3bf81866e1a63867791b24fab291e407f",
+        "reduction_bridge": 0,
+        "scope": "Universal preliminary high-limb overflow subsumption, narrow/qword-fast/restoring-loop route equivalence, both arithmetic fault sites and successful word bounds. Captured C limb/source extraction, actual loop realization, fresh flags/AUX dispatch and compiler/native interfaces remain explicit.",
+        "sorryAx": 0,
+        "source_sha256": "96c89b99c9b940c426aee31f83d3d9db9263436b9f027ad24c30654acee2cbfd"
+      },
+      "signed-div-limbs": {
+        "archive": "kprog/results/kprog_verification_20261107/signed-div-limbs.log.gz",
+        "audit_exit": 0,
+        "audit_input": "import KProgFormal.X86DivHandler\n#print axioms KProgFormal.X86SignedDivision.masked_limb_refines\n#print axioms KProgFormal.X86SignedDivision.source_pair_magnitude_matches\n#print axioms KProgFormal.X86SignedDivision.join_eq_add\n#print axioms KProgFormal.X86SignedDivision.join_to_nat\n#print axioms KProgFormal.X86SignedDivision.source_pair_magnitude_to_nat\n",
+        "compile_exit": 0,
+        "laws": [
+          "masked_limb_refines",
+          "source_pair_magnitude_matches",
+          "join_eq_add",
+          "join_to_nat",
+          "source_pair_magnitude_to_nat"
+        ],
+        "publication": "daabf50e798cb2a46ad86b739e82e08fe2746db0",
+        "reduction_bridge": 5,
+        "scope": "Universal actual64-bit mask/sign/low-negation/high-complement-carry normalization to the signed double-width magnitude and exact limb join arithmetic. Source capture/state projection, whole handler/fresh flags/AUX dispatch/source extraction/compiler/native interfaces remain explicit.",
+        "sorryAx": 0,
+        "source_sha256": "58fb229546d228f15c85d7448765db3b5bea9f5291c7dc3b6e5899d8dfb10de7"
+      }
+    },
+    "remaining": "Assemble actual source word arithmetic/state finish, primitive restoring-loop implementation correspondence, six fresh flags, AUX0/AUX1 dispatcher/token binding, compiler/physical memory/ABI transport.",
+    "runtime_predicate_additions": 0,
+    "source_profile": {
+      "body_preserved": true,
+      "division_body_sha256": "8b4b9357a4692db638edf4f8e1646aca98b37cd41b7e67f655dd4eaa4629e96d",
+      "header": "kprog/x86/x86_sim_local_bpf.h",
+      "observed_published_head": "6e070eadb464f4f32ace64f2160c64cd14e19f4f",
+      "original_production": "2942313a7"
+    },
+    "status": "partial-universal-C-arithmetic-capture-components"
+  },
   "source_emission_composition": {
     "commands": [
       {

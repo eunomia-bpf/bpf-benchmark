@@ -6039,3 +6039,26 @@ The sole full successor runs at `852e65822e058cb95beeee04dab475c89a1457ef`, inco
 the signed IDIV reference, ten magnitude/state component laws and this host
 environment. Its terminal receipt records the actual source and exit. Current
 complete C-model and compiled-family scope stays70/75 and13/75 respectively.
+
+### Signed IDIV source arithmetic and input capture
+
+The [five arithmetic-route laws](signed-div-gate.log.gz), published as
+`28ab6ad3bf81866e1a63867791b24fab291e407f`, prove that the preliminary high-magnitude fault
+implies signed quotient overflow, and that the narrow division, zero-high qword
+fast path and restoring-loop model give the same quotient/remainder. Accepted
+results fit the emitted width. The [five masked-word laws](signed-div-limbs.log.gz),
+published as `daabf50e798cb2a46ad86b739e82e08fe2746db0`, connect the actual64-bit mask,
+sign/low-negation/high-complement carry sequence to the complete magnitude.
+
+The [eight capture laws](signed-div-capture.log.gz), published as
+`5a4c66f463e6fa5b478349510b5b879920255a52`, connect arbitrary RAX/RDX, the byte AX
+case, divisor magnitude/sign and quotient-sign XOR to the canonical signed
+inputs. All three module compilations and axiom audits finish exit0; their
+reports state executable-reduction dependencies. The observed published DIV
+source region remains byte-identical to production `2942313a7`.
+
+Whole source-state assembly, the concrete loop primitive, six fresh flags,
+AUX0/AUX1 token/dispatcher binding and C/compiler/physical-memory/ABI transport
+remain explicit interfaces. Current complete x86 C-model families stay70/75,
+with13/75 compiled scalar families. Full source `852e65822` keeps its earlier
+immutable epoch; these eighteen later laws have their separate compile receipts.
