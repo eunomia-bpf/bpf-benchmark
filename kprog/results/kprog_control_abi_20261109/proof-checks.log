@@ -1,0 +1,62 @@
+'KProgFormal.ControlABI.x86_physical_return' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ControlABI.arm64_jit_result' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ControlABI.rcu_derives_retained' does not depend on any axioms
+'KProgFormal.ControlABI.resolver_identity_signature' depends on axioms: [propext]
+'KProgFormal.ControlABI.compiler_spill_cfg' depends on axioms: [propext]
+'KProgTV.ControlABIComposition.successful_B_outcome' depends on axioms: [propext]
+'KProgTV.ControlABIComposition.tail_transfer_simulation' depends on axioms: [propext]
+'KProgTV.ControlABIComposition.control_effects_checked' depends on axioms: [propext]
+'KProgTV.ControlABIComposition.compiled_spill_execution' depends on axioms: [propext, Quot.sound]
+'KProgTV.ControlABIComposition.compiled_spill_effects_checked' depends on axioms: [propext, Quot.sound]
+'KProgTV.ControlABIComposition.resolved_returning_helper_execute' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ControlABI.x86_frame_unwind' depends on axioms: [propext]
+'KProgFormal.ControlABI.arm64_frame_unwind' depends on axioms: [propext]
+'KProgFormal.ControlABI.x86_tail_counter_address' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgFormal.ControlABI.x86_tail_stack_unwind' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgFormal.ControlABI.x86_tail_count_disp32' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgFormal.ControlABI.x86_tail_stack_imm32' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgFormal.ControlABI.x86_restore_exit' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ControlABI.arm64_restore_exit' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ControlABI.x86_physical_return' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ControlABI.arm64_jit_result' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ControlABI.x86_jit_push_bytes' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ControlABI.x86_jit_frame_bytes' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ControlABI.x86_tail_pop_bytes' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ControlABI.x86_jit_ret_bytes' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ControlABI.x86_jit_push' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ControlABI.x86_jit_frame' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ControlABI.x86_jit_pop' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ControlABI.arm64_jit_result_bytes' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ControlABI.arm64_jit_push_frame_bytes' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ControlABI.arm64_jit_pop_frame_bytes' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ControlABI.arm64_jit_result_move' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ControlABI.rcu_use_before_reclaim' does not depend on any axioms
+'KProgFormal.ControlABI.rcu_derives_retained' does not depend on any axioms
+'KProgFormal.ControlABI.rcu_selected_payload' does not depend on any axioms
+'KProgFormal.ControlABI.resolved_helper' depends on axioms: [propext]
+'KProgFormal.ControlABI.resolver_identity_signature' depends on axioms: [propext]
+'KProgFormal.ControlABI.typed_arguments_live' depends on axioms: [propext]
+'KProgFormal.ControlABI.resolved_arguments_typed' depends on axioms: [propext]
+'KProgFormal.ControlABI.arguments_live_of_retention' does not depend on any axioms
+'KProgFormal.ControlABI.compiler_cfg_frame' depends on axioms: [propext]
+'KProgFormal.ControlABI.compiler_spill_cfg' depends on axioms: [propext]
+'KProgTV.ControlABIComposition.control_simulation' does not depend on any axioms
+'KProgTV.ControlABIComposition.successful_B_outcome' depends on axioms: [propext]
+'KProgTV.ControlABIComposition.tail_transfer_simulation' depends on axioms: [propext]
+'KProgTV.ControlABIComposition.control_effects_checked' depends on axioms: [propext]
+'KProgTV.ControlABIComposition.resolved_returning_helper_execute' depends on axioms: [propext, Quot.sound]
+'KProgTV.ControlABIComposition.cfg_path_execution' does not depend on any axioms
+'KProgTV.ControlABIComposition.compiled_spill_execution' depends on axioms: [propext, Quot.sound]
+'KProgTV.ControlABIComposition.compiled_spill_effects_checked' depends on axioms: [propext, Quot.sound]
