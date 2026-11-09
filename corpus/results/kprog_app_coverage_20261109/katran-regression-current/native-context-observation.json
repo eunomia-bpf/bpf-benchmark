@@ -1,0 +1,14 @@
+{
+  "entry": "balancer_ingress",
+  "native_sha256": "212aabfff8c539c64f3ad5ec41f9fa08918a65d44483abc3903ae44e32a9e3f7",
+  "model_sha256": "f9e729ec3fa99b1d3561ee9e030b9cf21ad72c12b8a2e17b69103287f4962891",
+  "result": {
+    "native_object": "/var/tmp/kprog-tmp/C/katran-regression-current/native-context/generated/request.native.o",
+    "native_proof_object": "/var/tmp/kprog-tmp/C/katran-regression-current/native-context/generated/trusted_x86.proof.o",
+    "simulator_object": "/var/tmp/kprog-tmp/C/katran-regression-current/native-context/generated/trusted_x86.bpf.o",
+    "simulator_program": "trusted_x86_x86_sim_xdp",
+    "symbol": "balancer_ingress",
+    "native_sha256": "212aabfff8c539c64f3ad5ec41f9fa08918a65d44483abc3903ae44e32a9e3f7"
+  },
+  "status": "compiled"
+}

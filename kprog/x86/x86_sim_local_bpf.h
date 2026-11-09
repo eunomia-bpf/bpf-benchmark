@@ -487,8 +487,8 @@ struct x86_sim_state {
 	__x86_native_stack_base = X86_SIM_L_ENTRY_STACK_BASE();             \
 	__x86_sim_is_xdp = 1;                                        \
 	__x86_sim_helper_ctx = (void *)(CTX);                            \
-	__x86_sim_helper_abi_base = (void *)(CTX);                        \
-	__x86_rdi.ptr = (void *)(CTX);                                     \
+	__x86_sim_helper_abi_base = bpf_cast_to_kern_ctx((void *)(CTX));                        \
+	__x86_rdi.ptr = __x86_sim_helper_abi_base;                                     \
 	__x86_rdi_tag = X86_SIM_TAG_ABI
 
 #define X86_SIM_ENTRY_SKB(CTX)                                               \
@@ -1113,15 +1113,13 @@ typedef void *x86_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
 	KPROG_X86_XMM0_ARM((BASE_REG) == X86_RSP)
 
 
-/* Preserve context identity for writes; native pointer-width reads use the
- * corresponding typed BPF context field. Unknown layouts fail specialization. */
-extern void x86_sim_unmapped_xdp_read(void)
-	__attribute__((error("unmapped native XDP context read")));
+/* Preserve native kernel context identity; packet fields use their live
+ * verifier context values and other reads use the existing memory primitive. */
 /* Entry-selected representation, erased by specialization. A pointer-null
  * test would add a branch that the verifier need not eliminate. */
 #define X86_SIM_L_LIVE_XDP() (__x86_sim_is_xdp)
 #define X86_SIM_L_XDP_OFFSET(BASE, OFF)                                   \
-	((__s64)((__u64)(long)(BASE) - (__u64)(long)__x86_sim_helper_ctx + (__u64)(OFF)))
+	((__s64)((__u64)(long)(BASE) - (__u64)(long)__x86_sim_helper_abi_base + (__u64)(OFF)))
 #define X86_SIM_L_XDP_READ(BASE, OFF, WIDTH)                               \
 	({                                                               \
 		__s64 __x86_xdp_off = X86_SIM_L_XDP_OFFSET((BASE), (OFF)); \
@@ -1139,7 +1137,7 @@ extern void x86_sim_unmapped_xdp_read(void)
 			__x86_xdp_value = (__u64)(long)(void *)(long)     \
 				__x86_xdp_ctx->data_meta;                 \
 		else                                                     \
-			x86_sim_unmapped_xdp_read();                     \
+			__x86_xdp_value = X86_SIM_L_SKB_NATIVE_READ((BASE), (OFF), (WIDTH));                     \
 		X86_SIM_L_BARRIER_VAR(__x86_xdp_value);                    \
 		__x86_xdp_value;                                         \
 	})
