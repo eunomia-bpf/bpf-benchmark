@@ -1,0 +1,312 @@
+{
+  "reference_capture": "973fabf0a",
+  "candidate": "f828386bdb07c64422e8c2e837c97e226a8af4ae",
+  "source_dependency_hashes_equal": true,
+  "O3_executable_bytes": 17815,
+  "Os_executable_bytes": 16443,
+  "rows": [
+    {
+      "object": "native/bcc/biosnoop.native.o",
+      "O3_bytes": 1293,
+      "Os_bytes": 1208,
+      "delta_bytes": -85,
+      "Os_over_O3": 0.934261407579273,
+      "sections": [
+        {
+          "section": "kprobe/blk_account_io_merge_bio",
+          "O3_bytes": 121,
+          "Os_bytes": 120
+        },
+        {
+          "section": "tp_btf/block_rq_insert",
+          "O3_bytes": 328,
+          "Os_bytes": 306
+        },
+        {
+          "section": "tp_btf/block_rq_issue",
+          "O3_bytes": 385,
+          "Os_bytes": 371
+        },
+        {
+          "section": "tp_btf/block_rq_complete",
+          "O3_bytes": 459,
+          "Os_bytes": 411
+        }
+      ]
+    },
+    {
+      "object": "native/bcc/capable.native.o",
+      "O3_bytes": 646,
+      "Os_bytes": 647,
+      "delta_bytes": 1,
+      "Os_over_O3": 1.001547987616099,
+      "sections": [
+        {
+          "section": "kprobe/cap_capable",
+          "O3_bytes": 131,
+          "Os_bytes": 128
+        },
+        {
+          "section": "kretprobe/cap_capable",
+          "O3_bytes": 515,
+          "Os_bytes": 519
+        }
+      ]
+    },
+    {
+      "object": "native/bcc/opensnoop.native.o",
+      "O3_bytes": 824,
+      "Os_bytes": 830,
+      "delta_bytes": 6,
+      "Os_over_O3": 1.0072815533980584,
+      "sections": [
+        {
+          "section": "tracepoint/syscalls/sys_enter_open",
+          "O3_bytes": 148,
+          "Os_bytes": 144
+        },
+        {
+          "section": "tracepoint/syscalls/sys_enter_openat",
+          "O3_bytes": 148,
+          "Os_bytes": 144
+        },
+        {
+          "section": "tracepoint/syscalls/sys_exit_open",
+          "O3_bytes": 264,
+          "Os_bytes": 271
+        },
+        {
+          "section": "tracepoint/syscalls/sys_exit_openat",
+          "O3_bytes": 264,
+          "Os_bytes": 271
+        }
+      ]
+    },
+    {
+      "object": "native/bcc/runqlat.native.o",
+      "O3_bytes": 1477,
+      "Os_bytes": 1249,
+      "delta_bytes": -228,
+      "Os_over_O3": 0.8456330399458362,
+      "sections": [
+        {
+          "section": ".text",
+          "O3_bytes": 869,
+          "Os_bytes": 857
+        },
+        {
+          "section": "tp_btf/sched_wakeup",
+          "O3_bytes": 119,
+          "Os_bytes": 56
+        },
+        {
+          "section": "tp_btf/sched_wakeup_new",
+          "O3_bytes": 119,
+          "Os_bytes": 56
+        },
+        {
+          "section": "tp_btf/sched_switch",
+          "O3_bytes": 21,
+          "Os_bytes": 21
+        },
+        {
+          "section": "raw_tp/sched_wakeup",
+          "O3_bytes": 164,
+          "Os_bytes": 119
+        },
+        {
+          "section": "raw_tp/sched_wakeup_new",
+          "O3_bytes": 164,
+          "Os_bytes": 119
+        },
+        {
+          "section": "raw_tp/sched_switch",
+          "O3_bytes": 21,
+          "Os_bytes": 21
+        }
+      ]
+    },
+    {
+      "object": "native/bcc/syscount.native.o",
+      "O3_bytes": 540,
+      "Os_bytes": 529,
+      "delta_bytes": -11,
+      "Os_over_O3": 0.9796296296296296,
+      "sections": [
+        {
+          "section": "tracepoint/raw_syscalls/sys_enter",
+          "O3_bytes": 112,
+          "Os_bytes": 110
+        },
+        {
+          "section": "tracepoint/raw_syscalls/sys_exit",
+          "O3_bytes": 428,
+          "Os_bytes": 419
+        }
+      ]
+    },
+    {
+      "object": "native/bcc/tcpconnect.native.o",
+      "O3_bytes": 1540,
+      "Os_bytes": 1374,
+      "delta_bytes": -166,
+      "Os_over_O3": 0.8922077922077922,
+      "sections": [
+        {
+          "section": "kprobe/tcp_v4_connect",
+          "O3_bytes": 100,
+          "Os_bytes": 100
+        },
+        {
+          "section": "kretprobe/tcp_v4_connect",
+          "O3_bytes": 649,
+          "Os_bytes": 578
+        },
+        {
+          "section": "kprobe/tcp_v6_connect",
+          "O3_bytes": 100,
+          "Os_bytes": 100
+        },
+        {
+          "section": "kretprobe/tcp_v6_connect",
+          "O3_bytes": 691,
+          "Os_bytes": 596
+        }
+      ]
+    },
+    {
+      "object": "native/bcc/tcplife.native.o",
+      "O3_bytes": 1494,
+      "Os_bytes": 1054,
+      "delta_bytes": -440,
+      "Os_over_O3": 0.7054886211512718,
+      "sections": [
+        {
+          "section": "tracepoint/sock/inet_sock_set_state",
+          "O3_bytes": 1494,
+          "Os_bytes": 1054
+        }
+      ]
+    },
+    {
+      "object": "native/bcc/vfsstat.native.o",
+      "O3_bytes": 148,
+      "Os_bytes": 148,
+      "delta_bytes": 0,
+      "Os_over_O3": 1.0,
+      "sections": [
+        {
+          "section": "kprobe/vfs_read",
+          "O3_bytes": 14,
+          "Os_bytes": 14
+        },
+        {
+          "section": "kprobe/vfs_write",
+          "O3_bytes": 15,
+          "Os_bytes": 15
+        },
+        {
+          "section": "kprobe/vfs_fsync",
+          "O3_bytes": 15,
+          "Os_bytes": 15
+        },
+        {
+          "section": "kprobe/vfs_open",
+          "O3_bytes": 15,
+          "Os_bytes": 15
+        },
+        {
+          "section": "kprobe/vfs_create",
+          "O3_bytes": 15,
+          "Os_bytes": 15
+        },
+        {
+          "section": "fentry/vfs_read",
+          "O3_bytes": 14,
+          "Os_bytes": 14
+        },
+        {
+          "section": "fentry/vfs_write",
+          "O3_bytes": 15,
+          "Os_bytes": 15
+        },
+        {
+          "section": "fentry/vfs_fsync",
+          "O3_bytes": 15,
+          "Os_bytes": 15
+        },
+        {
+          "section": "fentry/vfs_open",
+          "O3_bytes": 15,
+          "Os_bytes": 15
+        },
+        {
+          "section": "fentry/vfs_create",
+          "O3_bytes": 15,
+          "Os_bytes": 15
+        }
+      ]
+    },
+    {
+      "object": "native/katran/balancer.native.o",
+      "O3_bytes": 8250,
+      "Os_bytes": 7879,
+      "delta_bytes": -371,
+      "Os_over_O3": 0.955030303030303,
+      "sections": [
+        {
+          "section": ".text",
+          "O3_bytes": 319,
+          "Os_bytes": 304
+        },
+        {
+          "section": "xdp",
+          "O3_bytes": 7931,
+          "Os_bytes": 7575
+        }
+      ]
+    },
+    {
+      "object": "native/katran/healthchecking.native.o",
+      "O3_bytes": 1154,
+      "Os_bytes": 1121,
+      "delta_bytes": -33,
+      "Os_over_O3": 0.9714038128249567,
+      "sections": [
+        {
+          "section": "tc",
+          "O3_bytes": 1154,
+          "Os_bytes": 1121
+        }
+      ]
+    },
+    {
+      "object": "native/katran/healthchecking_ipip.native.o",
+      "O3_bytes": 381,
+      "Os_bytes": 336,
+      "delta_bytes": -45,
+      "Os_over_O3": 0.8818897637795275,
+      "sections": [
+        {
+          "section": "tc",
+          "O3_bytes": 381,
+          "Os_bytes": 336
+        }
+      ]
+    },
+    {
+      "object": "native/katran/xdp_root.native.o",
+      "O3_bytes": 68,
+      "Os_bytes": 68,
+      "delta_bytes": 0,
+      "Os_over_O3": 1.0,
+      "sections": [
+        {
+          "section": "xdp",
+          "O3_bytes": 68,
+          "Os_bytes": 68
+        }
+      ]
+    }
+  ]
+}

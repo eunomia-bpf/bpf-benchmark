@@ -1,0 +1,51 @@
+{
+  "utc": "2026-11-09T05:47:20.727560+00:00",
+  "source_sha256": {
+    "kprog/libnativeloader/src/native_loader.cpp": "1f48ebc162bb8a8ae8452682d42e8acaf617f4202aba59bf517ab57b901abf68",
+    "kprog/libnativeloader/src/native_loader_link_schema.hpp": "decf61d65e72c2c2bb8db6e5aedb76d1faa32f160518471131d6589775362ac8",
+    "vendor/bpf/Makefile": "3d2529d3ccd41b39a81b0bb509050d83db31b5aad5ff999399f4aaf695085a50"
+  },
+  "observations": [
+    {
+      "path": "kprog/libnativeloader/src/native_loader.cpp",
+      "lines": [
+        5420,
+        5424,
+        5137,
+        5218,
+        5221
+      ],
+      "fact": "Required-bound application submission reads the native ELF and passes its bytes through native_submit before worker native-link."
+    },
+    {
+      "path": "kprog/libnativeloader/src/native_loader_link_schema.hpp",
+      "lines": [
+        90,
+        194,
+        196
+      ],
+      "fact": "The trusted worker resolves submitted helper calls through their ABI; optimize_helpers is selected for the unbound link path. Optimized instructions belong in P before submission."
+    },
+    {
+      "path": "kprog/libnativeloader/src/native_loader.cpp",
+      "lines": [
+        3408,
+        3422,
+        3430,
+        3444,
+        3451,
+        3459
+      ],
+      "fact": "Existing map-lowering plan handles array, percpu array, hash, LRU hash and percpu hash from actual map shape and captured kernel layout."
+    },
+    {
+      "path": "vendor/bpf/Makefile",
+      "lines": [
+        55,
+        63
+      ],
+      "fact": "Current candidate changes the two native optimization flag definitions from O3 to Os; original C/helper ABI/division pass remain the compile inputs."
+    }
+  ],
+  "next_work": "Collect full matching-work receipts from the existing canonical and Os application queue; R applies the restored05-29 recipe. Structural helper/map lowering belongs in the pre-submit ELF producer with the existing map/function relocations and universal model/link correspondence."
+}
