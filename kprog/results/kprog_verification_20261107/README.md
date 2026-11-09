@@ -6024,3 +6024,18 @@ compiler transport remain explicit interfaces. Both module compilations and
 axiom audits finish exit0; the reports disclose inherited executable reduction.
 The DIV rows retain their partial signed-body scope and complete current
 C-model coverage remains70/75, with13/75 compiled scalar families.
+
+### ARM helper oracle environment and full-check continuation
+
+The full at `8f62cbf0e2f81de135ab83347b31ef4da2ae564c` finished exit2
+at Makefile645: the helper-route oracle requires its existing unsupported-opcode
+callback definition at link time. The [environment receipt](arm-helper-environment.log.gz),
+published as `852e65822e058cb95beeee04dab475c89a1457ef`, retains the immutable source/log/CPU
+and the repaired original18,770 helper ABI/register/stack/tag/effect scenes,
+which finish exit0. The host callback reports an unexpected fault as a failed
+scene; all original scenes complete through their expected operation bodies.
+
+The sole full successor runs at `852e65822e058cb95beeee04dab475c89a1457ef`, incorporating
+the signed IDIV reference, ten magnitude/state component laws and this host
+environment. Its terminal receipt records the actual source and exit. Current
+complete C-model and compiled-family scope stays70/75 and13/75 respectively.

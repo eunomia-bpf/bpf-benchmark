@@ -2596,6 +2596,67 @@
     "updated_stlxr_cases": 686110,
     "updated_ubsan_exit": 0
   },
+  "arm_helper_oracle_environment": {
+    "archive": "kprog/results/kprog_verification_20261107/arm-helper-environment.log.gz",
+    "cases": 18770,
+    "current_complete_x86_C_model_families": "70/75",
+    "host_callback": "Existing host failure environment; original scenes complete with this callback unreached.",
+    "host_results": [
+      {
+        "commands": [
+          [
+            "cc",
+            "-include",
+            "/var/tmp/kprog-tmp/V/arm-helper-environment/published-input/kprog/formal/oracles/arm64_entry_environment_host.h",
+            "-DKPROG_TEST_EXCLUSIVE_FAILURE=0",
+            "-include",
+            "/var/tmp/kprog-tmp/V/arm-helper-environment/published-input/kprog/formal/oracles/arm64_exclusive_choice_host.h",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-I/var/tmp/kprog-tmp/V/arm-helper-environment/published-input/kprog/formal",
+            "-I/var/tmp/kprog-tmp/V/arm-helper-environment/published-input/kprog/arm64",
+            "-I/var/tmp/kprog-tmp/V/arm-helper-environment/published-input/kprog",
+            "-I/workspaces/repository/vendor/libbpf/src",
+            "-E",
+            "/workspaces/repository/kprog/formal/oracles/helper_route_host.c",
+            "-o",
+            "/var/tmp/kprog-tmp/V/arm-helper-environment/helper_route_host.i"
+          ],
+          [
+            "cc",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "/var/tmp/kprog-tmp/V/arm-helper-environment/helper_route_host.i",
+            "-o",
+            "/var/tmp/kprog-tmp/V/arm-helper-environment/helper_route_host"
+          ],
+          [
+            "taskset",
+            "-c",
+            "12-15",
+            "/var/tmp/kprog-tmp/V/arm-helper-environment/helper_route_host"
+          ]
+        ],
+        "exits": [
+          0,
+          0,
+          0
+        ],
+        "source": "kprog/formal/oracles/helper_route_host.c",
+        "source_sha256": "64bf9943a667d2c2722eecd9270091958d29fc9f6bb9fe970de694eec143dda6"
+      }
+    ],
+    "original_failure": "Makefile645 helper_route_host link: undefined existing unsupported-opcode callback",
+    "original_full_exit": 2,
+    "original_full_source": "8f62cbf0e2f81de135ab83347b31ef4da2ae564c",
+    "publication": "852e65822e058cb95beeee04dab475c89a1457ef",
+    "runtime_predicate_additions": 0,
+    "scope": "Original helper ABI/register/stack/tag/effect observations retained; production simulator/loader admission predicates retained.",
+    "successor_full_source": "852e65822e058cb95beeee04dab475c89a1457ef",
+    "successor_full_status": "running; eventual immutable terminal receipt separate"
+  },
   "arm_immediate_alias_f051_epoch": {
     "adopted_source": "f0517e4931be058ddd8ce0d0df87612ee3ffb250",
     "all17_alias_sources_in_full_manifest": true,
