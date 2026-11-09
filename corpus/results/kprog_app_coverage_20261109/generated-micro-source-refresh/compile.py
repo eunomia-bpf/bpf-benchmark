@@ -2,21 +2,24 @@ from pathlib import Path
 import sys,json,subprocess,tarfile,hashlib,os,resource,traceback
 from datetime import datetime,timezone
 resource.setrlimit(resource.RLIMIT_CORE,(0,0))
-R=Path('/workspaces/repository');G=Path('/var/tmp/kprog-tmp/C/generated-micro-source-refresh');O=R/'corpus/results/kprog_app_coverage_20261109/generated-micro-source-refresh';G.mkdir(exist_ok=True);h=sys.argv[1]
+R=Path('/workspaces/repository');BASE=Path('/var/tmp/kprog-tmp/C/generated-micro-source-refresh');resume='--with-test-includes' in sys.argv;G=Path(str(BASE)+'-includes')if resume else BASE;O=R/'corpus/results/kprog_app_coverage_20261109/generated-micro-source-refresh';G.mkdir(exist_ok=True);h=sys.argv[1]
 def state(**d):(G/'status.json').write_text(json.dumps(d,indent=2)+'\n')
 try:
  files=json.loads((O/'sources.json').read_text());E=G/'committed-source';E.mkdir()
- paths=files+['kprog/x86/x86_sim.h','kprog/x86/x86_sim_local_bpf.h','kprog/formal/generated','kinsn/module/include/native_lab_input.h']
+ paths=files+['kprog/x86/x86_sim.h','kprog/x86/x86_sim_local_bpf.h','kprog/formal/generated','kinsn/module/include/native_lab_input.h','kprog/test/include']
  p=subprocess.Popen(['git','archive',h,'--',*paths],cwd=R,stdout=subprocess.PIPE)
  with tarfile.open(fileobj=p.stdout,mode='r|')as t:t.extractall(E,filter='data')
  p.stdout.close();p.wait()
  for p in E.rglob('*'):
   if p.is_file():p.chmod(0o444)
  for p in sorted([p for p in E.rglob('*')if p.is_dir()],key=lambda p:len(p.parts),reverse=True):p.chmod(0o555)
- E.chmod(0o555);rows=[];(G/'objects').mkdir()
+ E.chmod(0o555);rows=[];(G/'objects').mkdir();prior={x['source']:x for x in json.loads((BASE/'compiled.json').read_text())}if resume else {}
  state(state='compiling',source_commit=h,total=len(files))
  for n in files:
   src=E/n;obj=G/'objects'/(src.stem+'.o');cmd=['clang-18','-g','-O2','-target','bpf','-mllvm','-bpf-stack-size=4096','-D__TARGET_ARCH_x86','-I'+str(R/'vendor/libbpf/include/uapi'),'-I'+str(R/'vendor/libbpf/src'),'-I/usr/include/x86_64-linux-gnu','-c',str(src),'-o',str(obj)]
+  if resume and prior.get(n,{}).get('exit')==0:
+   import shutil
+   shutil.copy2(BASE/'objects'/obj.name,obj);shutil.copy2(BASE/'objects'/(src.stem+'.log'),G/'objects'/(src.stem+'.log'));row=dict(prior[n],reused_from=str(BASE));rows.append(row);(G/'compiled.json').write_text(json.dumps(rows,indent=2)+'\n');continue
   with(G/'objects'/(src.stem+'.log')).open('w')as f:q=subprocess.run(cmd,stdout=f,stderr=subprocess.STDOUT)
   row=dict(source=n,source_sha256=hashlib.sha256(src.read_bytes()).hexdigest(),command=cmd,exit=q.returncode)
   if obj.exists():row['object_sha256']=hashlib.sha256(obj.read_bytes()).hexdigest()
