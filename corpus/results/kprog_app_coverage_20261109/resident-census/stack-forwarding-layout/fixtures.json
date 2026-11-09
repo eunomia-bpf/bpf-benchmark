@@ -1,0 +1,58 @@
+[
+  {
+    "instructions": [
+      "sub rsp,0x40",
+      "mov QWORD PTR [rsp+0x10],rdi",
+      "mov rax,QWORD PTR [rsp+0x10]",
+      "add rsp,0x40",
+      "ret"
+    ],
+    "geometry": 64,
+    "reads": [
+      -48,
+      0
+    ],
+    "macro": "#define X86_SIM_STACK_VALUE_WORDS(M) M(2)"
+  },
+  {
+    "instructions": [
+      "push rbx",
+      "pop rbx",
+      "ret"
+    ],
+    "geometry": 8,
+    "reads": [
+      -8,
+      0
+    ],
+    "macro": "#define X86_SIM_STACK_VALUE_WORDS(M) M(0)"
+  },
+  {
+    "instructions": [
+      "sub rsp,0x20",
+      "lea rbx,[rsp+0x8]",
+      "mov QWORD PTR [rbx],rdi",
+      "mov rax,QWORD PTR [rbx]",
+      "add rsp,0x20",
+      "ret"
+    ],
+    "geometry": 32,
+    "reads": [
+      -24,
+      0
+    ],
+    "macro": "#define X86_SIM_STACK_VALUE_WORDS(M) M(1)"
+  },
+  {
+    "instructions": [
+      "mov rax,QWORD PTR [rsi]",
+      "ret"
+    ],
+    "geometry": 0,
+    "reads": [
+      0,
+      null
+    ],
+    "macro": "#define X86_SIM_STACK_VALUE_WORDS(M) M(0)"
+  }
+]

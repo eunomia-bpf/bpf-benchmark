@@ -1,0 +1,90 @@
+[
+  {
+    "id": 100,
+    "name": "generic_kprobe_process_filter",
+    "stage": "verifier_rejected",
+    "old_cells": 35,
+    "new_cells": 33,
+    "other_generated_lines_equal": true,
+    "source_bytes": 372104,
+    "source_sha256": "63d56f66198f94b44dea80b7410113c469bb30360051b179b87ed122ed07c4ed",
+    "native_proof_sha256": "93484b8bc5df7736c9b8bb0205970ab63a4344da188585cdeb20439fc383acfa"
+  },
+  {
+    "id": 101,
+    "name": "generic_kprobe_event",
+    "stage": "verifier_rejected",
+    "old_cells": 23,
+    "new_cells": 19,
+    "other_generated_lines_equal": true,
+    "source_bytes": 69165,
+    "source_sha256": "753475072a019f2afb8ba734c851cd24d125db0bec703723a80d79ca410063ad",
+    "native_proof_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e"
+  },
+  {
+    "id": 102,
+    "name": "generic_kprobe_process_event",
+    "stage": "compilation_failed",
+    "old_cells": 63,
+    "new_cells": 63,
+    "other_generated_lines_equal": true,
+    "source_bytes": 561621,
+    "source_sha256": "368893350383f94223f2366a52e467ad59ca002f4e65351f6702cc786e18890d",
+    "native_proof_sha256": "b4ca5042842530bec06aa483561507e29830f2db1ae941f92fdb0dd7ea069e3c"
+  },
+  {
+    "id": 103,
+    "name": "generic_kprobe_setup_event",
+    "stage": "verifier_rejected",
+    "old_cells": 11,
+    "new_cells": 4,
+    "other_generated_lines_equal": true,
+    "source_bytes": 38009,
+    "source_sha256": "4c6e3e87a20d5d11cbe046a53613413c00dd214b9d1a4ee0e99d23a0bc523384",
+    "native_proof_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620"
+  },
+  {
+    "id": 104,
+    "name": "generic_kprobe_actions",
+    "stage": "verifier_rejected",
+    "old_cells": 29,
+    "new_cells": 18,
+    "other_generated_lines_equal": true,
+    "source_bytes": 131917,
+    "source_sha256": "407d52cb29fe737773916ee4c5c7d73e619d6a5bb336e8e0f4f6a5b68e530c12",
+    "native_proof_sha256": "3969f989cfcfc2d7a95fcfbef34da98f1d6d36b9c918c347881d491558ab1108"
+  },
+  {
+    "id": 105,
+    "name": "generic_kprobe_output",
+    "stage": "verifier_rejected",
+    "old_cells": 21,
+    "new_cells": 19,
+    "other_generated_lines_equal": true,
+    "source_bytes": 64825,
+    "source_sha256": "af27335a6c767e6afc966ec18c0f12f876ca435ac39b064bd6f6f22481c75231",
+    "native_proof_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585"
+  },
+  {
+    "id": 106,
+    "name": "generic_kprobe_process_event",
+    "stage": "compilation_failed",
+    "old_cells": 63,
+    "new_cells": 63,
+    "other_generated_lines_equal": true,
+    "source_bytes": 561621,
+    "source_sha256": "368893350383f94223f2366a52e467ad59ca002f4e65351f6702cc786e18890d",
+    "native_proof_sha256": "b4ca5042842530bec06aa483561507e29830f2db1ae941f92fdb0dd7ea069e3c"
+  },
+  {
+    "id": 107,
+    "name": "generic_kprobe_process_filter",
+    "stage": "verifier_rejected",
+    "old_cells": 35,
+    "new_cells": 33,
+    "other_generated_lines_equal": true,
+    "source_bytes": 372104,
+    "source_sha256": "63d56f66198f94b44dea80b7410113c469bb30360051b179b87ed122ed07c4ed",
+    "native_proof_sha256": "93484b8bc5df7736c9b8bb0205970ab63a4344da188585cdeb20439fc383acfa"
+  }
+]

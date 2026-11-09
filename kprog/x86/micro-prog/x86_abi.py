@@ -31,7 +31,7 @@ class State:
     pointers: dict[int, int | bool | frozenset[ReturnAddress] | PointerAlternatives | None]
     constants: tuple[int | None, ...]
 
-def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
+def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stack_reads=None):
     regs = (*dict.fromkeys((r[0] for r in decode.REGS.values())), 'X86_XMM0')
     index = {reg: i for i, reg in enumerate(regs)}
 
@@ -52,6 +52,19 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
     states = {((), insns[0].addr): initial}
     queue = deque(states)
     lowest_stack = 0
+
+    def observe_stack_read(location, width):
+        # Layout metadata selects optional whole-word forwarding cells.
+        # Unknown aliases retain the complete forwarding layout.
+        if stack_reads is None or width < 64:
+            return
+        if type(location) is int:
+            stack_reads.update(location + offset for offset in range(0, width // 8, 8))
+        elif isinstance(location, PointerAlternatives):
+            for offset in location.offsets:
+                observe_stack_read(offset, width)
+        elif location is None:
+            stack_reads.add(None)
 
     def same(a, b):
         return type(a) is type(b) and a == b
@@ -168,6 +181,7 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
             return offset_pointer(origin, disp)
 
         def read_alias(location, width):
+            observe_stack_read(location, width)
             if type(location) is int:
                 value = sum((opaque.get(location + j, 255) << 8 * j for j in range(width // 8)))
                 return (value, pointers.get(location, False) if width == 64 else False)
@@ -271,6 +285,7 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
             width = insn.stack_width or (ri(args[0])[1] if ri(args[0]) else decode.operand_width(args[0]))
             size = 2 if width == 16 else 8
             offset = alias[rsp]
+            observe_stack_read(offset, width)
             value = sum((opaque.get(offset + j, 255) << 8 * j for j in range(size))) if type(offset) is int else 0
             pointer = pointers.get(offset, False) if type(offset) is int and size == 8 else False
             alias[rsp] = offset + size if type(offset) is int else None
@@ -527,6 +542,8 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
                             if name in HELPER_COPY_SOURCES:
                                 source = incoming.aliases[ri(arg_regs[HELPER_COPY_SOURCES[name]])[0]]
                                 origins = source.offsets if isinstance(source, PointerAlternatives) else {source} if type(source) is int else set()
+                                if stack_reads is not None and (origins or source is None):
+                                    stack_reads.add(None)
                                 for origin in origins:
                                     for p, v in state.opaque.items():
                                         if origin <= p < origin + length:
@@ -571,6 +588,7 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
                     pointers[alias[rsp]] = frozenset({ReturnAddress(context, next_pc)})
                 push(child, target, State(tuple(bits), tuple(alias), flags, opaque, pointers, tuple(constants)))
         elif op == 'ret':
+            observe_stack_read(alias[rsp], 64)
             destinations = pointers.get(alias[rsp])
             for destination in destinations if isinstance(destinations, frozenset) else ():
                 if destination.target is None:

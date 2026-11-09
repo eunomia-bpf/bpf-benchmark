@@ -1714,8 +1714,9 @@ def render_program(name: str, insns: list[NativeInsn],
         insns[0].addr, *(fn[0].addr for fn in subfunctions.values() if fn)
     }) if has_indirect else {}
     native_return_sites = set()
+    stack_reads = set()
     stack_bytes = check_definedness(all_insns, targets, exit_addr,
-        sys.modules[__name__], return_sites=native_return_sites)
+        sys.modules[__name__], return_sites=native_return_sites, stack_reads=stack_reads)
     if kind == "raw":
         if not program_section:
             raise ValueError("raw context requires its real BPF program section")
@@ -1769,8 +1770,13 @@ def render_program(name: str, insns: list[NativeInsn],
         lines.append('#define X86_SIM_ENABLE_STACK 1')
         lines.append(f'#define X86_SIM_STACK_BYTES {max(1,(stack_bytes+7)//8*8)}U')
     stack_storage = max(1, (stack_bytes + 7) // 8 * 8) if has_stack else 1
+    stack_words = (stack_storage + 7) // 8
+    forwarding_words = (range(stack_words) if None in stack_reads else sorted({
+        (stack_storage + offset) // 8 for offset in stack_reads
+        if offset % 8 == 0 and 0 <= stack_storage + offset <= stack_storage - 8
+    }))
     lines.append('#define X86_SIM_STACK_VALUE_WORDS(M) ' +
-                 ' '.join(f'M({i})' for i in range((stack_storage + 7) // 8)))
+                 ' '.join(f'M({i})' for i in forwarding_words))
     if original_source is not None:
         lines.extend(['#define LICENSE __x86_original_license',
                       f'#include {json.dumps(str(original_source.resolve()))}',
