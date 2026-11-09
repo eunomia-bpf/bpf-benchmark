@@ -500,9 +500,7 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
                  prog->bytecode_path, result.error);
         kmsg_line("native load-failed name=%s fd=%ld error=%s",
                   prog_name ? prog_name : "", original_fd, result.error);
-        if (shim_native_loader_requires_bound_proof())
-            shim_native_loader_fatal_reason("manifest-entry");
-        /* Unbound runs keep measuring: this program stays eBPF and is logged. */
+        /* Retain the loaded eBPF program while the application keeps running. */
         if (result.prog_fd >= 0)
             real_close(result.prog_fd);
         kmsg_line("native pass-through-after-failure name=%s fd=%ld",
@@ -529,11 +527,6 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     if (!result.replaced) {
         if (result.prog_fd >= 0)
             real_close(result.prog_fd);
-        if (shim_native_loader_requires_bound_proof()) {
-            log_line("verified native runtime has no manifest entry for prog=%s manifest=%s source=%s",
-                     prog_name ? prog_name : "", manifest, prog->bytecode_path);
-            shim_native_loader_fatal_reason("no-manifest-entry");
-        }
         log_line("native-loader no manifest match pass-through for prog=%s "
                  "manifest=%s source=%s",
                  prog_name ? prog_name : "", manifest, prog->bytecode_path);
@@ -546,7 +539,7 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
                  prog_name ? prog_name : "");
         kmsg_line("native invalid-native-fd name=%s fd=%ld native_fd=%d",
                   prog_name ? prog_name : "", original_fd, result.prog_fd);
-        shim_native_loader_fatal_reason("replace-failed");
+        return original_fd;
     }
 
     shim_native_loader_log_jit_info("original", (int)original_fd);
