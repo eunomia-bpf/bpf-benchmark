@@ -26,6 +26,7 @@ linker:
 	CARGO_TARGET_DIR=$(STATE)/native-link-target cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml --features stock-entry-frame
 
 REVISION ?= HEAD
+NATIVE_LINK ?= $(STATE)/native-link-target/release/native-link
 .PHONY: prepare isa48 selftests315 census
 prepare isa48 selftests315 census:
-	PYTHONDONTWRITEBYTECODE=1 python3 -B $(HERE)/replay.py $@ --revision $(REVISION)
+	PYTHONDONTWRITEBYTECODE=1 python3 -B $(HERE)/replay.py $@ --revision $(REVISION) --native-link $(NATIVE_LINK)

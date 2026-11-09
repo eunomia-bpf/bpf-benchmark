@@ -14,7 +14,7 @@ import threading
 
 ROOT = Path('/workspaces/repository')
 STATE = Path('/var/tmp/kprog-tmp/C/stock-entry')
-HERE = ROOT / 'corpus/results/kprog_app_coverage_20261109/entry-frame'
+NATIVE_LINK = STATE / 'native-link-target/release/native-link'
 
 
 def write(path, value):
@@ -82,7 +82,7 @@ def prepare(epoch):
           kernel_base='35ea2cde39fc88b01f2f49b2a357e7cf7102e4c8',
           kernel_patch='kprog/stock-path/x86-entry-frame.patch',
           kernel_image=str(STATE / 'kernel-build/arch/x86/boot/bzImage'),
-          native_link=str(STATE / 'native-link-target/release/native-link'),
+          native_link=str(NATIVE_LINK),
           isa_cases=48, upstream_programs=315, census_bodies=27, census_instances=275))
 
 
@@ -95,13 +95,16 @@ def namespace(epoch):
     for name in ['libnative_loader.so', 'trusted-native-loader']:
         bind(Path('/var/tmp/kprog-tmp/S17/loader-once/build') / name,
              ROOT / 'kprog/libnativeloader/build' / name)
-    bind(STATE / 'native-link-target/release/native-link',
+    bind(NATIVE_LINK,
          ROOT / 'kprog/x86/native_lab/native_link/target/release/native-link')
 
 
 def safety(epoch, suite):
     namespace(epoch)
     work = epoch / suite
+    write(work / 'runtime.json', {str(p): hashlib.sha256(p.read_bytes()).hexdigest()
+        for p in [STATE / 'kernel-build/arch/x86/boot/bzImage',
+                  STATE / 'module/kprog_stock.ko', NATIVE_LINK]})
     if suite == 'selftests315':
         bind(work / 'table', ROOT / 'kprog/selftests/build')
     output = work / 'out'
@@ -116,7 +119,7 @@ def safety(epoch, suite):
         'export KPROG_STOCK_MODULE=' + str(STATE / 'module/kprog_stock.ko') + '\n' +
         'export KPROG_STOCK_LOADER=' + str(ROOT / 'kprog/libnativeloader/build') + '\n' +
         'export KPROG_STOCK_BOUND_PROBE=/var/tmp/kprog-tmp/S17/bp/bound-probe\n' +
-        'export KPROG_STOCK_NATIVE_LINK=' + str(STATE / 'native-link-target/release/native-link') + '\n' +
+        'export KPROG_STOCK_NATIVE_LINK=' + str(NATIVE_LINK) + '\n' +
         'OUT=' + str(output) + '\n. ' + str(ROOT / 'kprog/stock-path/guest/common.sh') + '\n' +
         'export TMPDIR=' + str(work) + ' CLANG=' + str(work / 'stock-compile-proxy') + '\n' +
         'set +e\n' + command + ' > "$OUT/suite.log" 2>&1\nresult=$?\n' +
@@ -154,7 +157,7 @@ def census(epoch):
             data['source_head'] = epoch.name
         write(inputs / name, data)
     link(epoch / 'source', inputs / 'source')
-    link(STATE / 'native-link-target/release/native-link', inputs / 'native-link')
+    link(NATIVE_LINK, inputs / 'native-link')
     runtime = inputs / 'stock-runtime'
     runtime.mkdir(exist_ok=True)
     link(STATE / 'module/kprog_stock.ko', runtime / 'kprog_stock.ko')
@@ -185,10 +188,13 @@ def census(epoch):
 
 
 def main():
+    global NATIVE_LINK
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mode', choices=['prepare', 'isa48', 'selftests315', 'census'])
     parser.add_argument('--revision', default='HEAD')
+    parser.add_argument('--native-link', type=Path, default=NATIVE_LINK)
     args = parser.parse_args()
+    NATIVE_LINK = args.native_link
     revision = subprocess.check_output(['git', 'rev-parse', args.revision],
                                        cwd=ROOT, text=True).strip()
     epoch = STATE / 'replays' / revision
