@@ -438,13 +438,13 @@
   "counts": {
     "control": {
       "entries": 25,
-      "compiled": 0,
-      "diagnostic": 25
+      "compiled": 24,
+      "diagnostic": 1
     },
     "candidate": {
       "entries": 25,
-      "compiled": 0,
-      "diagnostic": 25
+      "compiled": 24,
+      "diagnostic": 1
     }
   },
   "programs": [
@@ -457,9 +457,15 @@
       "member": "corpus/requests/1.success.tar.gz",
       "canonical_native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
       "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/1'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/1'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/1/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/1/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/1/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "fentry_vfs_read",
+        "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -470,9 +476,15 @@
       "member": "corpus/requests/2.success.tar.gz",
       "canonical_native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
       "native_sha256": "a75fa794049d47e444f59a7f966104ba44e7bc6cb0c12925b997afdc2458f5c8",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/2'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/2'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/2/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/2/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/2/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_enter_open",
+        "native_sha256": "a75fa794049d47e444f59a7f966104ba44e7bc6cb0c12925b997afdc2458f5c8"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -483,9 +495,15 @@
       "member": "corpus/requests/3.success.tar.gz",
       "canonical_native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
       "native_sha256": "437b717312ad4946aa252ac783c24d1eefb13ebf3e3dc5882c172270e11324e9",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/3'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/3'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/3/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/3/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/3/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "blk_account_io_merge_bio",
+        "native_sha256": "437b717312ad4946aa252ac783c24d1eefb13ebf3e3dc5882c172270e11324e9"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -496,9 +514,15 @@
       "member": "corpus/requests/4.success.tar.gz",
       "canonical_native_sha256": "e2b187dc6e17939c6f5ecc15addf236b90a506ccd673876cb15ec4f79bcc5cc1",
       "native_sha256": "f5c4ead55a230bdc32b28fee562bc3d693b08536d0ed7688512d1c03ca0ec095",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/4'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/4'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/4/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/4/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/4/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "inet_sock_set_state",
+        "native_sha256": "f5c4ead55a230bdc32b28fee562bc3d693b08536d0ed7688512d1c03ca0ec095"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -509,9 +533,15 @@
       "member": "corpus/requests/5.success.tar.gz",
       "canonical_native_sha256": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26",
       "native_sha256": "6f54568325e3eadb23095ff68ccd39685272dd3093e3a9810d74af4ad778aef5",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/5'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/5'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/5/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/5/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/5/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "kprobe__cap_capable_entry",
+        "native_sha256": "6f54568325e3eadb23095ff68ccd39685272dd3093e3a9810d74af4ad778aef5"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -522,9 +552,15 @@
       "member": "corpus/requests/6.success.tar.gz",
       "canonical_native_sha256": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070",
       "native_sha256": "72606e15d326a3b5f76000db22c5aa77bbb111acdf04dd900b468ab504c11741",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/6'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/6'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/6/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/6/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/6/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "sys_enter",
+        "native_sha256": "72606e15d326a3b5f76000db22c5aa77bbb111acdf04dd900b468ab504c11741"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -535,9 +571,15 @@
       "member": "corpus/requests/7.success.tar.gz",
       "canonical_native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
       "native_sha256": "3b5ea3cc68724165d2d61e4cc843abf20e790a08f7f9c81fd7c2656b7916a6b0",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/7'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/7'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/7/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/7/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/7/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tcp_v4_connect",
+        "native_sha256": "3b5ea3cc68724165d2d61e4cc843abf20e790a08f7f9c81fd7c2656b7916a6b0"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -548,9 +590,15 @@
       "member": "corpus/requests/8.success.tar.gz",
       "canonical_native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
       "native_sha256": "861b58d9676a36496c2a26ed7dc4ce27e3a1eaffa5b6bcc89beaad3bc93ea8c0",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/8'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/8'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/8/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/8/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/8/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "sched_wakeup",
+        "native_sha256": "861b58d9676a36496c2a26ed7dc4ce27e3a1eaffa5b6bcc89beaad3bc93ea8c0"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -561,9 +609,15 @@
       "member": "corpus/requests/9.success.tar.gz",
       "canonical_native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
       "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/9'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/9'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/9/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/9/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/9/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "fentry_vfs_write",
+        "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -574,9 +628,15 @@
       "member": "corpus/requests/10.success.tar.gz",
       "canonical_native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
       "native_sha256": "a75fa794049d47e444f59a7f966104ba44e7bc6cb0c12925b997afdc2458f5c8",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/10'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/10'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/10/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/10/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/10/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_enter_openat",
+        "native_sha256": "a75fa794049d47e444f59a7f966104ba44e7bc6cb0c12925b997afdc2458f5c8"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -587,9 +647,15 @@
       "member": "corpus/requests/11.success.tar.gz",
       "canonical_native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
       "native_sha256": "437b717312ad4946aa252ac783c24d1eefb13ebf3e3dc5882c172270e11324e9",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/11'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/11'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/11/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/11/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/11/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "block_rq_insert",
+        "native_sha256": "437b717312ad4946aa252ac783c24d1eefb13ebf3e3dc5882c172270e11324e9"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -600,9 +666,15 @@
       "member": "corpus/requests/12.success.tar.gz",
       "canonical_native_sha256": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26",
       "native_sha256": "6f54568325e3eadb23095ff68ccd39685272dd3093e3a9810d74af4ad778aef5",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/12'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/12'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/12/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/12/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/12/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "kprobe__cap_capable_exit",
+        "native_sha256": "6f54568325e3eadb23095ff68ccd39685272dd3093e3a9810d74af4ad778aef5"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -613,9 +685,15 @@
       "member": "corpus/requests/13.success.tar.gz",
       "canonical_native_sha256": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070",
       "native_sha256": "72606e15d326a3b5f76000db22c5aa77bbb111acdf04dd900b468ab504c11741",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/13'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/13'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/13/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/13/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/13/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "sys_exit",
+        "native_sha256": "72606e15d326a3b5f76000db22c5aa77bbb111acdf04dd900b468ab504c11741"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -626,9 +704,15 @@
       "member": "corpus/requests/14.success.tar.gz",
       "canonical_native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
       "native_sha256": "3b5ea3cc68724165d2d61e4cc843abf20e790a08f7f9c81fd7c2656b7916a6b0",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/14'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/14'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/14/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/14/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/14/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tcp_v4_connect_ret",
+        "native_sha256": "3b5ea3cc68724165d2d61e4cc843abf20e790a08f7f9c81fd7c2656b7916a6b0"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -639,9 +723,15 @@
       "member": "corpus/requests/15.success.tar.gz",
       "canonical_native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
       "native_sha256": "861b58d9676a36496c2a26ed7dc4ce27e3a1eaffa5b6bcc89beaad3bc93ea8c0",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/15'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/15'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/15/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/15/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/15/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "sched_wakeup_new",
+        "native_sha256": "861b58d9676a36496c2a26ed7dc4ce27e3a1eaffa5b6bcc89beaad3bc93ea8c0"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -652,9 +742,15 @@
       "member": "corpus/requests/16.success.tar.gz",
       "canonical_native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
       "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/16'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/16'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/16/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/16/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/16/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "fentry_vfs_fsync",
+        "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -665,9 +761,15 @@
       "member": "corpus/requests/17.success.tar.gz",
       "canonical_native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
       "native_sha256": "a75fa794049d47e444f59a7f966104ba44e7bc6cb0c12925b997afdc2458f5c8",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/17'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/17'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/17/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/17/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/17/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_exit_open",
+        "native_sha256": "a75fa794049d47e444f59a7f966104ba44e7bc6cb0c12925b997afdc2458f5c8"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -678,9 +780,15 @@
       "member": "corpus/requests/18.success.tar.gz",
       "canonical_native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
       "native_sha256": "437b717312ad4946aa252ac783c24d1eefb13ebf3e3dc5882c172270e11324e9",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/18'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/18'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/18/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/18/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/18/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "block_rq_issue",
+        "native_sha256": "437b717312ad4946aa252ac783c24d1eefb13ebf3e3dc5882c172270e11324e9"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -691,9 +799,15 @@
       "member": "corpus/requests/19.success.tar.gz",
       "canonical_native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
       "native_sha256": "3b5ea3cc68724165d2d61e4cc843abf20e790a08f7f9c81fd7c2656b7916a6b0",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/19'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/19'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/19/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/19/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/19/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tcp_v6_connect",
+        "native_sha256": "3b5ea3cc68724165d2d61e4cc843abf20e790a08f7f9c81fd7c2656b7916a6b0"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -705,8 +819,8 @@
       "canonical_native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
       "native_sha256": "861b58d9676a36496c2a26ed7dc4ce27e3a1eaffa5b6bcc89beaad3bc93ea8c0",
       "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/20'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/20'\n"
+      "error": "unsupported mnemonic: idiv   rcx",
+      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 48, in specialize\n    text = gen.render_program(name, instructions, functions, kind=kind,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1848, in render_program\n    lines.append(render_x86_subroutine(\n                 ^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1578, in render_x86_subroutine\n    append_branch_or_ret(lines, insn, addrs, subroutine=True,\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1529, in append_branch_or_ret\n    append_step(lines, insn, indent, step_macro, rodata_idents)\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1367, in append_step\n    encoded = encode(insn, rodata_idents or {})\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1095, in encode\n    raise ValueError(f\"unsupported mnemonic: {insn.raw}\")\nValueError: unsupported mnemonic: idiv   rcx\n"
     },
     {
       "label": "control",
@@ -717,9 +831,15 @@
       "member": "corpus/requests/21.success.tar.gz",
       "canonical_native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
       "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/21'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/21'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/21/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/21/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/21/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "fentry_vfs_open",
+        "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -730,9 +850,15 @@
       "member": "corpus/requests/22.success.tar.gz",
       "canonical_native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
       "native_sha256": "a75fa794049d47e444f59a7f966104ba44e7bc6cb0c12925b997afdc2458f5c8",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/22'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/22'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/22/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/22/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/22/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_exit_openat",
+        "native_sha256": "a75fa794049d47e444f59a7f966104ba44e7bc6cb0c12925b997afdc2458f5c8"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -743,9 +869,15 @@
       "member": "corpus/requests/23.success.tar.gz",
       "canonical_native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
       "native_sha256": "437b717312ad4946aa252ac783c24d1eefb13ebf3e3dc5882c172270e11324e9",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/23'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/23'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/23/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/23/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/23/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "block_rq_complete",
+        "native_sha256": "437b717312ad4946aa252ac783c24d1eefb13ebf3e3dc5882c172270e11324e9"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -756,9 +888,15 @@
       "member": "corpus/requests/24.success.tar.gz",
       "canonical_native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
       "native_sha256": "3b5ea3cc68724165d2d61e4cc843abf20e790a08f7f9c81fd7c2656b7916a6b0",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/24'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/24'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/24/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/24/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/24/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tcp_v6_connect_ret",
+        "native_sha256": "3b5ea3cc68724165d2d61e4cc843abf20e790a08f7f9c81fd7c2656b7916a6b0"
+      },
+      "status": "compiled"
     },
     {
       "label": "control",
@@ -769,9 +907,15 @@
       "member": "corpus/requests/25.success.tar.gz",
       "canonical_native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
       "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/25'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/control/25'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/25/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/25/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/control/25/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "fentry_vfs_create",
+        "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -782,9 +926,15 @@
       "member": "corpus/requests/1.success.tar.gz",
       "canonical_native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
       "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/1'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/1'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/1/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/1/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/1/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "fentry_vfs_read",
+        "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -795,9 +945,15 @@
       "member": "corpus/requests/2.success.tar.gz",
       "canonical_native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
       "native_sha256": "1fe73bb6874c4f8fbfb39b9d68e216e9ba297c1fe3d69af5620bb705b713f5d4",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/2'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/2'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/2/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/2/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/2/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_enter_open",
+        "native_sha256": "1fe73bb6874c4f8fbfb39b9d68e216e9ba297c1fe3d69af5620bb705b713f5d4"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -808,9 +964,15 @@
       "member": "corpus/requests/3.success.tar.gz",
       "canonical_native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
       "native_sha256": "2f3460b9a7b38b6a0b2a06165b3782c008ca51c8c8825a5caa80f1f9b54f0ea1",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/3'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/3'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/3/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/3/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/3/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "blk_account_io_merge_bio",
+        "native_sha256": "2f3460b9a7b38b6a0b2a06165b3782c008ca51c8c8825a5caa80f1f9b54f0ea1"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -821,9 +983,15 @@
       "member": "corpus/requests/4.success.tar.gz",
       "canonical_native_sha256": "e2b187dc6e17939c6f5ecc15addf236b90a506ccd673876cb15ec4f79bcc5cc1",
       "native_sha256": "02569e84e1ad0efdc195b640df87631e372568dc01050a245d918b864a739af0",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/4'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/4'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/4/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/4/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/4/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "inet_sock_set_state",
+        "native_sha256": "02569e84e1ad0efdc195b640df87631e372568dc01050a245d918b864a739af0"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -834,9 +1002,15 @@
       "member": "corpus/requests/5.success.tar.gz",
       "canonical_native_sha256": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26",
       "native_sha256": "af9f1d5de8b2c703dd51059de1e9c66c3d53ce69b5ddad794e2dfa33ae162d7c",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/5'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/5'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/5/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/5/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/5/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "kprobe__cap_capable_entry",
+        "native_sha256": "af9f1d5de8b2c703dd51059de1e9c66c3d53ce69b5ddad794e2dfa33ae162d7c"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -847,9 +1021,15 @@
       "member": "corpus/requests/6.success.tar.gz",
       "canonical_native_sha256": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070",
       "native_sha256": "bff53460e37271dca3d81ec792b52da240ae8c5cc19542642f206f9c9298d44b",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/6'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/6'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/6/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/6/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/6/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "sys_enter",
+        "native_sha256": "bff53460e37271dca3d81ec792b52da240ae8c5cc19542642f206f9c9298d44b"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -860,9 +1040,15 @@
       "member": "corpus/requests/7.success.tar.gz",
       "canonical_native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
       "native_sha256": "6544cbf567abcabbf92985ea7fee2b679237f1f4fe3656153e5dc17008d13a3b",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/7'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/7'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/7/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/7/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/7/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tcp_v4_connect",
+        "native_sha256": "6544cbf567abcabbf92985ea7fee2b679237f1f4fe3656153e5dc17008d13a3b"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -873,9 +1059,15 @@
       "member": "corpus/requests/8.success.tar.gz",
       "canonical_native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
       "native_sha256": "e712b17337dde49c3940ba705e43b35e643ae4737fac0e2e0e4c85e42ae5c89a",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/8'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/8'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/8/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/8/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/8/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "sched_wakeup",
+        "native_sha256": "e712b17337dde49c3940ba705e43b35e643ae4737fac0e2e0e4c85e42ae5c89a"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -886,9 +1078,15 @@
       "member": "corpus/requests/9.success.tar.gz",
       "canonical_native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
       "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/9'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/9'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/9/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/9/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/9/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "fentry_vfs_write",
+        "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -899,9 +1097,15 @@
       "member": "corpus/requests/10.success.tar.gz",
       "canonical_native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
       "native_sha256": "1fe73bb6874c4f8fbfb39b9d68e216e9ba297c1fe3d69af5620bb705b713f5d4",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/10'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/10'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/10/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/10/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/10/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_enter_openat",
+        "native_sha256": "1fe73bb6874c4f8fbfb39b9d68e216e9ba297c1fe3d69af5620bb705b713f5d4"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -912,9 +1116,15 @@
       "member": "corpus/requests/11.success.tar.gz",
       "canonical_native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
       "native_sha256": "2f3460b9a7b38b6a0b2a06165b3782c008ca51c8c8825a5caa80f1f9b54f0ea1",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/11'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/11'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/11/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/11/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/11/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "block_rq_insert",
+        "native_sha256": "2f3460b9a7b38b6a0b2a06165b3782c008ca51c8c8825a5caa80f1f9b54f0ea1"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -925,9 +1135,15 @@
       "member": "corpus/requests/12.success.tar.gz",
       "canonical_native_sha256": "b8ecbc3fe84527b779c4127758471a837dd90dc20b354cc45346f4b8742a3d26",
       "native_sha256": "af9f1d5de8b2c703dd51059de1e9c66c3d53ce69b5ddad794e2dfa33ae162d7c",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/12'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/12'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/12/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/12/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/12/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "kprobe__cap_capable_exit",
+        "native_sha256": "af9f1d5de8b2c703dd51059de1e9c66c3d53ce69b5ddad794e2dfa33ae162d7c"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -938,9 +1154,15 @@
       "member": "corpus/requests/13.success.tar.gz",
       "canonical_native_sha256": "f6d0b24d4269ee29a0987fb233e0cc93d17cd45b23c2817595022ef28bba0070",
       "native_sha256": "bff53460e37271dca3d81ec792b52da240ae8c5cc19542642f206f9c9298d44b",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/13'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/13'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/13/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/13/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/13/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "sys_exit",
+        "native_sha256": "bff53460e37271dca3d81ec792b52da240ae8c5cc19542642f206f9c9298d44b"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -951,9 +1173,15 @@
       "member": "corpus/requests/14.success.tar.gz",
       "canonical_native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
       "native_sha256": "6544cbf567abcabbf92985ea7fee2b679237f1f4fe3656153e5dc17008d13a3b",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/14'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/14'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/14/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/14/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/14/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tcp_v4_connect_ret",
+        "native_sha256": "6544cbf567abcabbf92985ea7fee2b679237f1f4fe3656153e5dc17008d13a3b"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -964,9 +1192,15 @@
       "member": "corpus/requests/15.success.tar.gz",
       "canonical_native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
       "native_sha256": "e712b17337dde49c3940ba705e43b35e643ae4737fac0e2e0e4c85e42ae5c89a",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/15'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/15'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/15/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/15/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/15/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "sched_wakeup_new",
+        "native_sha256": "e712b17337dde49c3940ba705e43b35e643ae4737fac0e2e0e4c85e42ae5c89a"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -977,9 +1211,15 @@
       "member": "corpus/requests/16.success.tar.gz",
       "canonical_native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
       "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/16'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/16'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/16/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/16/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/16/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "fentry_vfs_fsync",
+        "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -990,9 +1230,15 @@
       "member": "corpus/requests/17.success.tar.gz",
       "canonical_native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
       "native_sha256": "1fe73bb6874c4f8fbfb39b9d68e216e9ba297c1fe3d69af5620bb705b713f5d4",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/17'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/17'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/17/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/17/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/17/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_exit_open",
+        "native_sha256": "1fe73bb6874c4f8fbfb39b9d68e216e9ba297c1fe3d69af5620bb705b713f5d4"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -1003,9 +1249,15 @@
       "member": "corpus/requests/18.success.tar.gz",
       "canonical_native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
       "native_sha256": "2f3460b9a7b38b6a0b2a06165b3782c008ca51c8c8825a5caa80f1f9b54f0ea1",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/18'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/18'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/18/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/18/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/18/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "block_rq_issue",
+        "native_sha256": "2f3460b9a7b38b6a0b2a06165b3782c008ca51c8c8825a5caa80f1f9b54f0ea1"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -1016,9 +1268,15 @@
       "member": "corpus/requests/19.success.tar.gz",
       "canonical_native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
       "native_sha256": "6544cbf567abcabbf92985ea7fee2b679237f1f4fe3656153e5dc17008d13a3b",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/19'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/19'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/19/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/19/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/19/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tcp_v6_connect",
+        "native_sha256": "6544cbf567abcabbf92985ea7fee2b679237f1f4fe3656153e5dc17008d13a3b"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -1030,8 +1288,8 @@
       "canonical_native_sha256": "fe7dde42285fd9c5690cbbf1832478178b3fe82bce56bd9ebba86c5b6ea74585",
       "native_sha256": "e712b17337dde49c3940ba705e43b35e643ae4737fac0e2e0e4c85e42ae5c89a",
       "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/20'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/20'\n"
+      "error": "unsupported mnemonic: idiv   rcx",
+      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 48, in specialize\n    text = gen.render_program(name, instructions, functions, kind=kind,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1848, in render_program\n    lines.append(render_x86_subroutine(\n                 ^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1578, in render_x86_subroutine\n    append_branch_or_ret(lines, insn, addrs, subroutine=True,\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1529, in append_branch_or_ret\n    append_step(lines, insn, indent, step_macro, rodata_idents)\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1367, in append_step\n    encoded = encode(insn, rodata_idents or {})\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1095, in encode\n    raise ValueError(f\"unsupported mnemonic: {insn.raw}\")\nValueError: unsupported mnemonic: idiv   rcx\n"
     },
     {
       "label": "candidate",
@@ -1042,9 +1300,15 @@
       "member": "corpus/requests/21.success.tar.gz",
       "canonical_native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
       "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/21'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/21'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/21/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/21/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/21/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "fentry_vfs_open",
+        "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -1055,9 +1319,15 @@
       "member": "corpus/requests/22.success.tar.gz",
       "canonical_native_sha256": "601bd805843cc4064c15efc7fb106c9bdd2dcdc484a73b59575de3b86673204a",
       "native_sha256": "1fe73bb6874c4f8fbfb39b9d68e216e9ba297c1fe3d69af5620bb705b713f5d4",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/22'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/22'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/22/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/22/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/22/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_exit_openat",
+        "native_sha256": "1fe73bb6874c4f8fbfb39b9d68e216e9ba297c1fe3d69af5620bb705b713f5d4"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -1068,9 +1338,15 @@
       "member": "corpus/requests/23.success.tar.gz",
       "canonical_native_sha256": "3a142c5210dcd6d924dcbf6b99c8a59409dfab32fe9948d31791a901d4a75de3",
       "native_sha256": "2f3460b9a7b38b6a0b2a06165b3782c008ca51c8c8825a5caa80f1f9b54f0ea1",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/23'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/23'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/23/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/23/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/23/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "block_rq_complete",
+        "native_sha256": "2f3460b9a7b38b6a0b2a06165b3782c008ca51c8c8825a5caa80f1f9b54f0ea1"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -1081,9 +1357,15 @@
       "member": "corpus/requests/24.success.tar.gz",
       "canonical_native_sha256": "f15b534a457ee4722e78fa0f0f929d09d39ee5b9db4801bdc9de7300bf45481d",
       "native_sha256": "6544cbf567abcabbf92985ea7fee2b679237f1f4fe3656153e5dc17008d13a3b",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/24'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/24'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/24/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/24/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/24/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "tcp_v6_connect_ret",
+        "native_sha256": "6544cbf567abcabbf92985ea7fee2b679237f1f4fe3656153e5dc17008d13a3b"
+      },
+      "status": "compiled"
     },
     {
       "label": "candidate",
@@ -1094,9 +1376,15 @@
       "member": "corpus/requests/25.success.tar.gz",
       "canonical_native_sha256": "39946d3cca51a153ab3c1f38f4e171ceba85bf457c94604af43f60d26eef4f95",
       "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
-      "status": "diagnostic",
-      "error": "[Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/25'",
-      "traceback": "Traceback (most recent call last):\n  File \"/var/tmp/kprog-tmp/C/bcc-frozen-config-set/compile-all-b.py\", line 27, in <module>\n    row['result']=specialize(obj.read_bytes(),item['entry'],metadata,destination,R/'kprog/x86/native_lab/native_link/target/release/native-link');row['status']='compiled'\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 30, in specialize\n    output_dir.mkdir(parents=True, mode=0o700)\n  File \"/usr/lib/python3.12/pathlib.py\", line 1313, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated/candidate/25'\n"
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/25/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/25/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/generated-v2/candidate/25/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "fentry_vfs_create",
+        "native_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd"
+      },
+      "status": "compiled"
     }
   ],
   "native_executions": 0
