@@ -90,6 +90,7 @@ inductive Helper
   | bpf_ima_file_hash
   | bpf_kptr_xchg
   | bpf_map_lookup_percpu_elem
+  | bpf_dynptr_from_mem
   | bpf_ringbuf_reserve_dynptr
   | bpf_ringbuf_submit_dynptr
   | bpf_ringbuf_discard_dynptr
@@ -183,6 +184,7 @@ def id : Helper -> Nat
   | .bpf_ima_file_hash => 193
   | .bpf_kptr_xchg => 194
   | .bpf_map_lookup_percpu_elem => 195
+  | .bpf_dynptr_from_mem => 197
   | .bpf_ringbuf_reserve_dynptr => 198
   | .bpf_ringbuf_submit_dynptr => 199
   | .bpf_ringbuf_discard_dynptr => 200
@@ -275,6 +277,7 @@ def name : Helper -> String
   | .bpf_ima_file_hash => "bpf_ima_file_hash"
   | .bpf_kptr_xchg => "bpf_kptr_xchg"
   | .bpf_map_lookup_percpu_elem => "bpf_map_lookup_percpu_elem"
+  | .bpf_dynptr_from_mem => "bpf_dynptr_from_mem"
   | .bpf_ringbuf_reserve_dynptr => "bpf_ringbuf_reserve_dynptr"
   | .bpf_ringbuf_submit_dynptr => "bpf_ringbuf_submit_dynptr"
   | .bpf_ringbuf_discard_dynptr => "bpf_ringbuf_discard_dynptr"

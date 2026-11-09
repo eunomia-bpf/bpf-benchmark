@@ -2,12 +2,12 @@
 #ifndef KPROG_FORMAL_GENERATED_ARM64_HELPER_IDENTS_H
 #define KPROG_FORMAL_GENERATED_ARM64_HELPER_IDENTS_H
 /*
- * The AArch64 artifact encoder's BPF helper-ident table: the 91 kernel
+ * The AArch64 artifact encoder's BPF helper-ident table: the 92 kernel
  * ids the AArch64 simulator recognizes, in id-sorted order.
  * KPROG_ARM64_HELPER_ROW maps a kernel id to its 1-based position in that
  * order, 0 outside. Each name invokes its actual Linux helper ID.
  */
-#define KPROG_ARM64_HELPER_IDENTS_COUNT 91U
+#define KPROG_ARM64_HELPER_IDENTS_COUNT 92U
 /*
  * The 1-based position of a kernel id in the id-sorted table. The input is
  * evaluated once; an id outside the table reaches the 0 default.
@@ -101,11 +101,12 @@
 	 (KERNEL_ID) == 193 ? 86U : \
 	 (KERNEL_ID) == 194 ? 87U : \
 	 (KERNEL_ID) == 195 ? 88U : \
-	 (KERNEL_ID) == 198 ? 89U : \
-	 (KERNEL_ID) == 199 ? 90U : \
-	 (KERNEL_ID) == 200 ? 91U : \
+	 (KERNEL_ID) == 197 ? 89U : \
+	 (KERNEL_ID) == 198 ? 90U : \
+	 (KERNEL_ID) == 199 ? 91U : \
+	 (KERNEL_ID) == 200 ? 92U : \
 	 0)
-_Static_assert(KPROG_ARM64_HELPER_IDENTS_COUNT == 91U,
+_Static_assert(KPROG_ARM64_HELPER_IDENTS_COUNT == 92U,
 	       "AArch64 helper idents count drift");
 _Static_assert(KPROG_ARM64_HELPER_ROW(1) == 1U, "AArch64 helper idents row selection drift");
 _Static_assert(KPROG_ARM64_HELPER_ROW(2) == 2U, "AArch64 helper idents row selection drift");
@@ -195,9 +196,10 @@ _Static_assert(KPROG_ARM64_HELPER_ROW(191) == 85U, "AArch64 helper idents row se
 _Static_assert(KPROG_ARM64_HELPER_ROW(193) == 86U, "AArch64 helper idents row selection drift");
 _Static_assert(KPROG_ARM64_HELPER_ROW(194) == 87U, "AArch64 helper idents row selection drift");
 _Static_assert(KPROG_ARM64_HELPER_ROW(195) == 88U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(198) == 89U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(199) == 90U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(200) == 91U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(197) == 89U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(198) == 90U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(199) == 91U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(200) == 92U, "AArch64 helper idents row selection drift");
 /* The selector is total: a kernel id past the table reaches the default. */
 _Static_assert(KPROG_ARM64_HELPER_ROW(0x100) == 0U,
 	       "AArch64 helper idents out-of-range id must reach the default arm");

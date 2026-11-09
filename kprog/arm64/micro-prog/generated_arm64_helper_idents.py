@@ -88,6 +88,7 @@ HELPER_IDENTS = {
     193: "bpf_ima_file_hash",
     194: "bpf_kptr_xchg",
     195: "bpf_map_lookup_percpu_elem",
+    197: "bpf_dynptr_from_mem",
     198: "bpf_ringbuf_reserve_dynptr",
     199: "bpf_ringbuf_submit_dynptr",
     200: "bpf_ringbuf_discard_dynptr",

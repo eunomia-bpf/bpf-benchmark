@@ -2119,6 +2119,15 @@ extern __u64 bpf_arm64_native_lab_atomic8(__u8 *word, __u64 value, __u32 operati
 #define ARM64_SIM_BPF_CALL_bpf_map_lookup_percpu_elem() \
 	ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_map_lookup_percpu_elem((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2)))
 
+/* LOCAL dynptr initialization writes all opaque bytes on success and error. */
+#define ARM64_SIM_BPF_CALL_bpf_dynptr_from_mem() \
+    do { \
+        __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X3); \
+        __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X3); \
+        ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_dynptr_from_mem((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u64)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2), (struct bpf_dynptr *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X3))); \
+        ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, sizeof(struct bpf_dynptr), 0); \
+    } while (0)
+
 /* The paired ringbuf helpers write the complete opaque dynptr on all returns. */
 #define ARM64_SIM_BPF_CALL_bpf_ringbuf_reserve_dynptr() \
     do { \
