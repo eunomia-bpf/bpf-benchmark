@@ -1,0 +1,5 @@
+# Paired complete BCC read-only-configuration application queue
+
+Controller3126829 waits for the existing Cilium caller-frame replay2876280, following the current Os and constant-division cohorts. The controller captures published model 4636128014f700fc072cfd00e3157a3017caa7a7 with the canonical SMAP runtime and full paired eight-object native manifests. It runs the original38 unchanged native fixtures, then complete BCC control/candidate arms with one sample and two-second functional windows. Source hashes, actual annotations/outcomes, generated B, verifier and work logs accompany automatic result publication. R owns the frozen05-29 timing request cbd1b1097. Bulk state uses /var/tmp/kprog-tmp/C/bcc-readonly-config-application.
+
+The frozen May29 syscount CLI supplies measure_latency1 and five filter/aggregation fields0. Each paired producer retains those input bindings in its evidence; the candidate consumes them during native compilation before P submission. Current-source safety observations retain their own epoch alongside earlier canonical9/28/1. Runtime admission additions0.
