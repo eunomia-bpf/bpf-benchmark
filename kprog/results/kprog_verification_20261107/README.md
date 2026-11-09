@@ -10,8 +10,8 @@ specialization token also has its own row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 74 / 74 |
 | Reference step family defined | 67/75 | 74/74 |
-| Raw register handler refinement | 32/75 | 22/74 |
-| Raw register dispatcher arm composition | 32/75 | 22/74 |
+| Raw register handler refinement | 32/75 | 30/74 |
+| Raw register dispatcher arm composition | 32/75 | 30/74 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/74 |
 | Addressed memory model / composed step | 29/75 | 0/74 |
 | Additional partial-model handler families | 1/75 | 0 |
@@ -6499,3 +6499,31 @@ actual C/generated contracts, exact previous public source prefix, compiled
 module, all original proof logs and source identities. Raw ARM totals advance
 15to22/74; existing C-model/O2 and physical/compiler interfaces retain their
 separate categories.
+
+### ARM raw conditional-select and tagged-copy refinement
+
+CSEL, CSINC, CSINV, CSNEG, CINC, CINV, CSET and CSETM now compose actual
+incoming NZCV/source capture with the generated pointer-copy gate or scalar
+width writeback. CSEL/X retains the selected raw64-bit word and every byte
+tag; `read_tagged_materializes`, `write_tagged_projects`, `copy_projects`
+and `copy_tag_frame` connect the concrete GPR/ZR cell selectors to complete
+architectural projection. Every other row uses its generated scalar value
+and scalarizes the destination tag. All aliases and XZR keep input capture
+and full architecture/events/fault behavior.
+
+`ConditionalSelect.production` derives actual numerical production dispatcher
+equality. `production_alias_unused` retains arbitrary SRC2 for CINC/CINV and
+both source bytes for CSET/CSETM, including NONE255, together with arbitrary
+unused SRC3/IMM. Native alias condition inversion/ZR fields and producer NV15
+to AL14 normalization compose through separate native bindings. Whole AUX
+condition decoding keeps the actual C domain. Entry origin identity, union/
+C extraction and physical/compiler transport stay explicit and independent
+of B forwarding or callee comparison storage.
+
+Fifteen new and54 preceding laws audit with module/root checks0, sorryAx0
+and49 inherited Lean.ofReduceBool dependencies. `step_refines` composes one
+30-operation raw step theorem. The
+[raw conditional-select receipt](arm-raw-select.log.gz) retains exact canonical
+and C/generated snapshots, the complete prior public source prefix, original
+proof drafts/diagnostics and final module/root outcomes. Raw ARM totals advance
+22to30/74; C-model/O2 and compiled/physical interfaces retain separate scope.

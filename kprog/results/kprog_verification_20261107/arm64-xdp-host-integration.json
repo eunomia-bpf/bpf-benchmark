@@ -78216,5 +78216,43 @@
       "source-arm64_sim.h.txt": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd"
     },
     "scope": "Raw EXTR/REV/REV16/SXTB/SXTH/SXTW/CNEG and preceding15 gates; actual operand materialization/input narrowing/NZCV condition/widthtagwriteback/completearchitecture. Production dispatcher equality and unused bytefields incl255/unusedIMM retained. Native amount/condition, entry/C extraction/union/physical/compiler interfaces explicit, independent of Bforwarding/calleecomparison."
+  },
+  "arm64_raw_conditional_select_refinement": {
+    "proof": {
+      "process_exit": 0,
+      "module_and_root_exit": 0,
+      "root_sha256": "c08dedfa21216380b9f8595e635c476de4bb7a155bfbe8f114f3fb1243fac057",
+      "source_sha256": "b2bf8ee689f4931dd1a4cf76f0d1b09612099d768328bb308b122366c9376d52",
+      "sorryAx": 0,
+      "reduction_bridge": 49,
+      "scope": "Eight raw conditional-select operations and prior22 raw gates; CSEL/X preserves selected raw word and byte tag, scalar rows materialize operands and width/scalar-tag writeback. Native condition/alias/NV normalization, complete architectural image, production dispatcher equality and arbitrary unused fields. Independent of B forwarding layout. Entry/C-union/source extraction/compiler/physical origin binding remain explicit."
+    },
+    "operations": [
+      "ARM64_OP_CSEL",
+      "ARM64_OP_CSINC",
+      "ARM64_OP_CSINV",
+      "ARM64_OP_CSNEG",
+      "ARM64_OP_CINC",
+      "ARM64_OP_CINV",
+      "ARM64_OP_CSET",
+      "ARM64_OP_CSETM"
+    ],
+    "raw_operation_count": 30,
+    "new_audits": 15,
+    "total_audits": 69,
+    "archive": "arm-raw-select.log.gz",
+    "source_snapshots": {
+      "source-Arm64Select.lean.txt": "876850c5f8b86dd4f99f28bb9e2d6e1f9de87280736cf1e514f5990ce4c91500",
+      "source-arm64_csel.h.txt": "26b1a756a3920767761dee9be3a021dd1b691024ab4d622165de13f08d541fc7",
+      "source-Arm64Condition.lean.txt": "cfb849fd6dcb166848b5c9d18b940b84012df60fe91a29568a4a031328ea8d4d",
+      "source-arm64_cond.h.txt": "d70d31c6911d0b6e731ee081e314de27ce232abc3f06935b49ba2dd248dab04a",
+      "source-arm64_csel_ptr.h.txt": "d3404e00574770ac890fb93d3704d4f613a8f3ac59c162a083b31317a83deff5",
+      "source-arm64_sim_local_bpf.h.txt": "9cb5d58f9595124300d5bfd8fdcfdecba53f763e4d9ee34567345dd12cba1c13",
+      "source-Arm64RawRegister.lean.txt": "0c95b453a3c60dbfae7ef0baafad878aa42e8b503067c1faa5cbae395b10e086",
+      "source-Arm64Dispatcher.lean.txt": "0388b0836263a0b05d0b3460344f83595b0bf0e9933b458675ecfe72d1362b20",
+      "source-AArch64.lean.txt": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789",
+      "source-arm64_sim.h.txt": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd"
+    },
+    "scope": "Eight conditional-select operations and preceding22 raw gates. CSEL/X actual rawword/tag copy, scalarrows materializedoperand/widthtagwrite, inputNZCV/aliases/XZR/fullarchitecture. Productiondispatcher equality and arbitraryunusedfield bytes include255; nativealias and NVnormalization explicit. Entry/C extraction/union/physical/compiler interfaces explicit, independent of Bforwarding/calleecomparison."
   }
 }

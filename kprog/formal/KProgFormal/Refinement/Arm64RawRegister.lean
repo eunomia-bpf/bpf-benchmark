@@ -811,3 +811,230 @@ end KProgFormal.Refinement.Arm64RawRegister.ExtractReverse
 #print axioms KProgFormal.Refinement.Arm64RawRegister.ExtractReverse.conditional_refines
 #print axioms KProgFormal.Refinement.Arm64RawRegister.ExtractReverse.earlier_step
 #print axioms KProgFormal.Refinement.Arm64RawRegister.ExtractReverse.step_refines
+namespace KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect
+open Reference
+open Reference.AArch64 (Register Gpr Width SelectElse)
+
+/-- The GPR/ZR domain of READ_REG_PTR and REG_TAG captures the raw word and
+its byte tag before any destination update. Native field31 supplies scalar0. -/
+def readTagged (state : State) (src : Register) : Word × Byte :=
+  match GeneratedArm64RegDispatch.cellOf (Arm64Register.registerCode src) with
+  | some index =>
+      let cell : Gpr := ⟨index % 31, Nat.mod_lt _ (by decide)⟩
+      (state.raw.gpr cell, state.tags cell)
+  | none => (0, 0)
+
+theorem read_tagged_materializes (origins : Origins) (state : State) (src : Register) :
+    materialize origins (readTagged state src).1 (readTagged state src).2 = readRegister origins state src := by
+  cases cell : GeneratedArm64RegDispatch.cellOf (Arm64Register.registerCode src) <;>
+    simp [readTagged, readRegister, cell, materialize]
+
+/-- The native GPR/ZR arm of WRITE_REG_PTR_TAG retains the supplied raw word
+and tag, using the concrete generated destination cell/writable selector. -/
+def writeTagged (state : State) (dst : Register) (word : Word) (tag : Byte) : State :=
+  let selected := fun r : Gpr => GeneratedArm64RegPresence.writable (Arm64Register.registerCode dst) &&
+    (GeneratedArm64RegDispatch.cellOf (Arm64Register.registerCode dst) == some r.val)
+  { raw := { state.raw with gpr := fun r => if selected r then word else state.raw.gpr r }
+    tags := fun r => if selected r then tag else state.tags r }
+
+theorem write_tagged_projects (origins : Origins) (state : State) (dst : Register) (word : Word) (tag : Byte) :
+    image origins (writeTagged state dst word tag) =
+      Reference.AArch64.writeReg (image origins state) dst (materialize origins word tag) := by
+  simp only [image, writeTagged, Arm64Register.write_selection, Reference.AArch64.writeReg]
+  congr 1
+  funext r
+  by_cases same : r.val = dst.val <;> simp [same, materialize]
+
+def copyRegister (state : State) (dst src : Register) : State :=
+  let captured := readTagged state src
+  writeTagged state dst captured.1 captured.2
+
+theorem copy_projects (origins : Origins) (state : State) (dst src : Register) :
+    image origins (copyRegister state dst src) =
+      Reference.AArch64.writeReg (image origins state) dst (Reference.AArch64.readReg (image origins state) src) := by
+  simp only [copyRegister, write_tagged_projects, read_tagged_materializes, read_refines]
+
+theorem copy_tag_frame (state : State) (dst src : Register) (r : Gpr) :
+    (copyRegister state dst src).tags r = if r.val = dst.val then (readTagged state src).2 else state.tags r := by
+  simp [copyRegister, writeTagged, Arm64Register.write_selection]
+
+/-- CSEL/X copies the chosen incoming raw word/tag; the other rows use
+materialized operands, generated scalar values and scalarizing width writes. -/
+def body (op : GeneratedArm64Csel.Csel) (predicate : Arm64Cond) (width : Width)
+    (dst lhs rhs : Register) (origins : Origins) (state : State) : Transition State :=
+  let taken := generatedArm64Cond (Arm64Condition.flags state.raw.flags) predicate
+  let next := if GeneratedArm64CselPtr.ptrTagPath op (Arm64Register.handlerWidth width) then
+      copyRegister state dst (if taken then lhs else rhs)
+    else writeRegister state dst (GeneratedArm64Csel.value op taken
+      (readRegister origins state lhs) (readRegister origins state rhs)) width
+  ⟨advance next, [], none⟩
+
+theorem body_projects (op : GeneratedArm64Csel.Csel) (predicate : Arm64Cond) (width : Width)
+    (dst lhs rhs : Register) (origins : Origins) (state : State) :
+    observe origins (body op predicate width dst lhs rhs origins state) =
+      Arm64Select.rawStep op width dst lhs rhs predicate (image origins state) := by
+  have flag_image : (image origins state).flags = state.raw.flags := rfl
+  cases op <;> cases width <;>
+    simp only [body, observe, GeneratedArm64CselPtr.ptrTagPath, Arm64Register.handlerWidth,
+      Bool.false_eq_true, ↓reduceIte, advance_refines, copy_projects, write_refines, read_refines,
+      Arm64Select.rawStep, Arm64Register.read_refines, Arm64Register.write_refines, flag_image]
+  all_goals first | rfl | (cases taken : generatedArm64Cond (Arm64Condition.flags state.raw.flags) predicate <;> simp only [taken, Bool.false_eq_true, ↓reduceIte] <;> rfl)
+
+/-- Covered disjoint select opcodes extend the preceding22-operation lift. -/
+def dispatch (code : Nat) (aux : BitVec 32) (width : Width) (dst lhs rhs src3 : Register)
+    (value : Word) (origins : Origins) (state : State) : Option (Transition State) :=
+  match ExtractReverse.dispatch code aux width dst lhs rhs src3 value origins state with
+  | some result => some result
+  | none => (Arm64Select.decodeOpcode code).bind (fun op =>
+      (Arm64Condition.decode aux.toNat).map (fun predicate => body op predicate width dst lhs rhs origins state))
+
+theorem before_select (op : GeneratedArm64Csel.Csel) (aux : BitVec 32) (width : Width)
+    (dst lhs rhs src3 : Register) (value : Word) (origins : Origins) (state : State) :
+    ExtractReverse.dispatch (GeneratedArm64Csel.code op) aux width dst lhs rhs src3 value origins state = none := by
+  cases op <;> rfl
+
+theorem reached (op : GeneratedArm64Csel.Csel) (predicate : Arm64Cond) (width : Width)
+    (dst lhs rhs src3 : Register) (value : Word) (origins : Origins) (state : State) :
+    dispatch (GeneratedArm64Csel.code op) (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate))
+      width dst lhs rhs src3 value origins state = some (body op predicate width dst lhs rhs origins state) := by
+  simp only [dispatch, before_select, Arm64Select.decode_code, Option.bind_some,
+    Arm64Dispatcher.select_condition_decode]
+  rfl
+
+theorem production (op : GeneratedArm64Csel.Csel) (predicate : Arm64Cond) (width : Width)
+    (dst lhs rhs src3 : Register) (unused3 : Byte) (value : Word) (sourceScalar sourceStack : Bool)
+    (origins : Origins) (state : State) :
+    (dispatch (GeneratedArm64Csel.code op) (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate))
+      width dst lhs rhs src3 value origins state).map (observe origins) =
+      Arm64Dispatcher.dispatchThroughSelect (GeneratedArm64Csel.code op)
+        (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)) width (Arm64Register.registerCode dst)
+        (Arm64Register.registerCode lhs) (Arm64Register.registerCode rhs) unused3 value
+        sourceScalar sourceStack (image origins state) := by
+  rw [reached, Arm64Dispatcher.select_reached, Arm64Dispatcher.select_condition_decode]
+  change some (observe origins (body op predicate width dst lhs rhs origins state)) = _
+  simp only [Option.map]
+  rw [Arm64Dispatcher.select_body_typed, body_projects]
+
+theorem alias_unused (alias : Arm64Select.Alias) (predicate : Arm64Cond) (width : Width)
+    (dst src rhs other : Register) (origins : Origins) (state : State) :
+    body (Arm64Select.aliasOpcode alias) predicate width dst src rhs origins state =
+      body (Arm64Select.aliasOpcode alias) predicate width dst src other origins state := by
+  cases alias <;> cases width <;> rfl
+
+/-- CINC/CINV ignore SRC2; CSET/CSETM ignore both source bytes. All these
+rows retain every unused byte, including NONE255, through production routing. -/
+theorem production_alias_unused (alias : Arm64Select.Alias) (predicate : Arm64Cond) (width : Width)
+    (dst src rhs src3 : Register) (unusedSrc unused2 unused3 : Byte) (value : Word)
+    (sourceScalar sourceStack : Bool) (origins : Origins) (state : State) :
+    (dispatch (GeneratedArm64Csel.code (Arm64Select.aliasOpcode alias))
+      (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)) width dst src rhs src3 value origins state).map
+      (observe origins) =
+    Arm64Dispatcher.dispatchThroughSelect (GeneratedArm64Csel.code (Arm64Select.aliasOpcode alias))
+      (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)) width (Arm64Register.registerCode dst)
+      (match alias with | .increment | .invert => Arm64Register.registerCode src | .set | .mask => unusedSrc)
+      unused2 unused3 value sourceScalar sourceStack (image origins state) := by
+  rw [reached, Arm64Dispatcher.select_reached, Arm64Dispatcher.select_condition_decode]
+  change some (observe origins (body (Arm64Select.aliasOpcode alias) predicate width dst src rhs origins state)) = _
+  simp only [Option.map]
+  rw [alias_unused alias predicate width dst src rhs 31]
+  apply congrArg some
+  have ignored := Arm64Dispatcher.select_alias_unused alias predicate width dst src unusedSrc unused2 (image origins state)
+  have typed := Arm64Dispatcher.select_body_typed (Arm64Select.aliasOpcode alias) predicate width dst src 31 (image origins state)
+  exact (body_projects (Arm64Select.aliasOpcode alias) predicate width dst src 31 origins state).trans
+    (typed.symm.trans ignored.symm)
+
+theorem select_refines (width : Width) (alternative : SelectElse) (dst lhs rhs src3 : Register)
+    (predicate : Arm64Cond) (value : Word) (origins : Origins) (state : State) :
+    (dispatch (GeneratedArm64Csel.code (Arm64Select.opcode alternative))
+      (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)) width dst lhs rhs src3 value origins state).map
+      (observe origins) = some (Reference.AArch64.step
+        (.select width alternative dst lhs rhs (Arm64Condition.nativeCode predicate)) (image origins state)) := by
+  rw [reached]
+  change some (observe origins (body (Arm64Select.opcode alternative) predicate width dst lhs rhs origins state)) = _
+  rw [body_projects, Arm64Select.raw_step_refines]
+
+theorem alias_refines (alias : Arm64Select.Alias) (width : Width) (dst src rhs src3 : Register)
+    (predicate : Arm64Cond) (value : Word) (origins : Origins) (state : State) (valid : predicate ≠ .al) :
+    (dispatch (GeneratedArm64Csel.code (Arm64Select.aliasOpcode alias))
+      (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)) width dst src rhs src3 value origins state).map
+      (observe origins) = some (Reference.AArch64.step
+        (.select width (Arm64Select.aliasAlternative alias) dst (Arm64Select.aliasSource alias src)
+          (Arm64Select.aliasSource alias src) (Arm64Condition.nativeCode (Arm64Select.inverse predicate)))
+        (image origins state)) := by
+  rw [reached]
+  change some (observe origins (body (Arm64Select.aliasOpcode alias) predicate width dst src rhs origins state)) = _
+  rw [body_projects, Arm64Select.raw_alias_refines width alias dst src rhs predicate _ valid]
+
+theorem normalized_nv_refines (width : Width) (alternative : SelectElse) (dst lhs rhs src3 : Register)
+    (value : Word) (origins : Origins) (state : State) :
+    (dispatch (GeneratedArm64Csel.code (Arm64Select.opcode alternative))
+      (BitVec.ofNat 32 (GeneratedArm64CcDecode.code .nv)) width dst lhs rhs src3 value origins state).map
+      (observe origins) = some (Reference.AArch64.step (.select width alternative dst lhs rhs 15) (image origins state)) :=
+  select_refines width alternative dst lhs rhs src3 .al value origins state
+
+theorem earlier_step (origins : Origins) (state : State) (code : Nat) (aux : BitVec 32)
+    (width : Width) (dst lhs rhs src3 : Register) (value : Word) (instruction : Reference.AArch64.Instruction)
+    (binding : ExtractReverse.Binding code aux width dst lhs rhs src3 value instruction) :
+    (dispatch code aux width dst lhs rhs src3 value origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  have result := ExtractReverse.step_refines origins state code aux width dst lhs rhs src3 value instruction binding
+  unfold dispatch
+  cases leading : ExtractReverse.dispatch code aux width dst lhs rhs src3 value origins state with
+  | none => simp [leading] at result
+  | some output => simpa only [leading] using result
+
+/-- Native fields, condition inversion and producer NV-to-AL normalization
+extend the prior22 operations. Handler equality is derived by the step law. -/
+inductive Binding : Nat → BitVec 32 → Width → Register → Register → Register → Register →
+    Word → Reference.AArch64.Instruction → Prop where
+  | leading (code : Nat) (aux : BitVec 32) (width : Width) (dst lhs rhs src3 : Register)
+      (value : Word) (instruction : Reference.AArch64.Instruction)
+      (binding : ExtractReverse.Binding code aux width dst lhs rhs src3 value instruction) :
+      Binding code aux width dst lhs rhs src3 value instruction
+  | select (width : Width) (alternative : SelectElse) (dst lhs rhs src3 : Register)
+      (predicate : Arm64Cond) (value : Word) :
+      Binding (GeneratedArm64Csel.code (Arm64Select.opcode alternative))
+        (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)) width dst lhs rhs src3 value
+        (.select width alternative dst lhs rhs (Arm64Condition.nativeCode predicate))
+  | alias (alias : Arm64Select.Alias) (width : Width) (dst src rhs src3 : Register)
+      (predicate : Arm64Cond) (value : Word) (valid : predicate ≠ .al) :
+      Binding (GeneratedArm64Csel.code (Arm64Select.aliasOpcode alias))
+        (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)) width dst src rhs src3 value
+        (.select width (Arm64Select.aliasAlternative alias) dst (Arm64Select.aliasSource alias src)
+          (Arm64Select.aliasSource alias src) (Arm64Condition.nativeCode (Arm64Select.inverse predicate)))
+  | normalizedNv (width : Width) (alternative : SelectElse) (dst lhs rhs src3 : Register) (value : Word) :
+      Binding (GeneratedArm64Csel.code (Arm64Select.opcode alternative))
+        (BitVec.ofNat 32 (GeneratedArm64CcDecode.code .nv)) width dst lhs rhs src3 value
+        (.select width alternative dst lhs rhs 15)
+
+theorem step_refines (origins : Origins) (state : State) (code : Nat) (aux : BitVec 32)
+    (width : Width) (dst lhs rhs src3 : Register) (value : Word) (instruction : Reference.AArch64.Instruction)
+    (binding : Binding code aux width dst lhs rhs src3 value instruction) :
+    (dispatch code aux width dst lhs rhs src3 value origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  cases binding with
+  | leading code aux width dst lhs rhs src3 value instruction bound =>
+      exact earlier_step origins state code aux width dst lhs rhs src3 value instruction bound
+  | select width alternative dst lhs rhs src3 predicate value =>
+      exact select_refines width alternative dst lhs rhs src3 predicate value origins state
+  | alias => apply alias_refines; assumption
+  | normalizedNv width alternative dst lhs rhs src3 value =>
+      exact normalized_nv_refines width alternative dst lhs rhs src3 value origins state
+
+end KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect
+
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect.read_tagged_materializes
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect.write_tagged_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect.copy_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect.copy_tag_frame
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect.body_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect.before_select
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect.reached
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect.production
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect.alias_unused
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect.production_alias_unused
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect.select_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect.alias_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect.normalized_nv_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect.earlier_step
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect.step_refines

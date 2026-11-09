@@ -62,39 +62,17 @@ stream and preserve memory/exclusive state with23 consumed inputs. Complete
 flags/tag/GPR-frame, operand mapping and physical/compiler transport remain
 explicit interfaces.
 
-ARM raw-register refinement covers NOP, MOV_IMM and MOVK across all32 native
-destination fields, raw64-bit register values and the full byte-tag domain.
-Thirteen laws derive concrete cell reads/writes, STACK/RETURN materialization,
-XZR discard and one opcode/field-bound dispatcher-step theorem. The complete
-projected architectural state matches the single AArch64 reference. Entry
-origin identity, C extraction/union access and physical/compiler transport
-remain explicit. These laws are independent of stack-forwarding storage.
-
-ARM raw multiply/divide adds eight operations to the preceding three gates,
-bringing raw handler/dispatcher coverage to11/74. Concrete tagged operand reads,
-UDIV source narrowing and width/tag writeback compose through the production
-multiply arm and one eleven-operation step theorem. Native long/high products
-retain their X-width domain; unused SRC3 bytes keep their full byte domain.
-Ten new laws plus the13 preceding laws compile and audit together. Entry,
-C extraction/union and physical/compiler transport remain interfaces.
-
-ARM raw SHIFT_IMM/SHIFT_REG/MVN/NEG extends the unified step to15/74.
-Seventeen new laws plus23 prior laws audit and compile with module/root0.
-SHIFT binds the whole AUX kind0..3 used by its C switch and producer; the
-numerical handler, dispatcher and scalar token also decode the complete AUX. Unary consumes
-AUX byte1/byte2, retains arbitrary unused bytes and omitted-modifier amounts,
-and preserves the native NEG/MVN modifier domains. Complete raw words/tags,
-register aliases/XZR and architectural image compose independently of B layout.
-Entry, C extraction/union and physical/compiler transport remain interfaces.
-
-ARM raw EXTR/REV/REV16/SXTB/SXTH/SXTW/CNEG extends the unified step to22/74.
-Fourteen new laws and40 prior laws audit with module/root0 and sorryAx0.
-Concrete operand/tag materialization, EXTR input narrowing, CNEG input NZCV
-and scalarizing width/tag writes preserve the complete architectural image.
-Production dispatcher equality covers arbitrary unused byte fields, including
-NONE255, and immediate values for the rows that ignore them. Native EXTR
-amount and CNEG alias-condition domains remain explicit. Entry/C extraction/
-union and physical/compiler transport remain interfaces independent of B layout.
+ARM raw handler/dispatcher refinement covers30/74 operations: immediate moves,
+multiply/divide, shift/unary, extract/reverse/extension and conditional select.
+Sixty-nine laws audit and compile with module/root0 and sorryAx0. All raw64-bit
+words, byte tags, STACK4/RETURN10 materialization, register aliases/XZR and the
+complete architectural image compose through one30-operation step theorem.
+CSEL/X retains its selected raw word/tag; scalar results use width/scalar-tag
+writes. SHIFT and conditions consume the actual whole AUX, while unary uses
+AUX byte1/byte2. Native widths, amount/alias domains and NV normalization stay
+explicit. The ledger retains production dispatcher equalities and arbitrary
+unused-field domains. Entry origin identity, C extraction/union and physical/
+compiler transport remain interfaces independent of B forwarding storage.
 
 ## Specification and proof scope
 
