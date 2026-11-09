@@ -1,0 +1,90 @@
+{
+  "input_scope": "Same captured native-generated C and simulator snapshot; entry-frame ABI declaration selected by the retained input header",
+  "compiler": [
+    {
+      "phase": "before",
+      "command": [
+        "/usr/lib/llvm-18/bin/clang",
+        "-include",
+        "/var/tmp/kprog-tmp/C/stock-entry/input-before.h",
+        "-g",
+        "-O3",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-c",
+        "/var/tmp/kprog-tmp/C/stock-entry/captured.bpf.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/stock-entry/compile-before/program.bpf.o"
+      ],
+      "input_sha256": "f07af2fd602f2b578cd1bceb593cf3275c261bc11e99ee87d52fdb54670be2c3",
+      "input_header_sha256": "48587beac53e83497f4a5f530fcc485f58134fe6e50d3c8393ce66b617375765",
+      "simulator_header_sha256": "0162d4fc93b1cff999983d47892a943ff76bd1e706f03a4807628eda87108a4f",
+      "source_commit": "7563f5fb6369dab57ba1e5a693cf2a292f517cf4",
+      "returncode": 0,
+      "wall_seconds": 387.0700340438634,
+      "bpf_insns": 29661,
+      "program_sha256": "c8e1cb0311f32ecf356b794e77ffe1211a3cb59c8779e4048c833f664cbe9015"
+    },
+    {
+      "phase": "after",
+      "command": [
+        "/usr/lib/llvm-18/bin/clang",
+        "-include",
+        "/workspaces/repository/kprog/stock-path/include/stock_native_input.h",
+        "-g",
+        "-O3",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-c",
+        "/var/tmp/kprog-tmp/C/stock-entry/captured.bpf.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/stock-entry/compile-after/program.bpf.o"
+      ],
+      "input_sha256": "f07af2fd602f2b578cd1bceb593cf3275c261bc11e99ee87d52fdb54670be2c3",
+      "input_header_sha256": "c9d4ad9441f85bde9e9ea9154407beb2dc3f76f81c37525a74a4a39ddc6d67db",
+      "simulator_header_sha256": "0162d4fc93b1cff999983d47892a943ff76bd1e706f03a4807628eda87108a4f",
+      "source_commit": "7563f5fb6369dab57ba1e5a693cf2a292f517cf4",
+      "returncode": 0,
+      "wall_seconds": 386.81876447377726,
+      "bpf_insns": 28549,
+      "program_sha256": "b088715e9ae942c47a84f99346464025812444542a3a3e5f966be2749fa03565"
+    }
+  ],
+  "linker_tests": {
+    "default": 19,
+    "stock_entry_frame": 19,
+    "returncode": 0
+  },
+  "linker_sha256": "45a83095da15e14b22f8cca9d596cea5356cdc3a3141e2ec73921bc5a573232c",
+  "kernel_base": "35ea2cde39fc88b01f2f49b2a357e7cf7102e4c8",
+  "kernel_patch_preparation": "git apply --check against existing CK source passed",
+  "kernel_build": "pending one-tree disposition",
+  "safety_replay": "pending matching kernel",
+  "census": "pending matching kernel",
+  "census_baseline": {
+    "bodies": 27,
+    "instances": 275,
+    "scalar_bodies": 10,
+    "scalar_instances": 106
+  }
+}

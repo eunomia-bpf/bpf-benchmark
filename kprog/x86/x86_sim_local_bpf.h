@@ -3598,14 +3598,21 @@ extern void __x86_sim_unsupported_helper(void)
 #define X86_SIM_BPF_CALL_REG(REG)                                           \
 	X86_SIM_BPF_CALL_ID(X86_SIM_L_READ_REG(REG))
 
-#define X86_SIM_X86_RET()                                                  \
-	do {                                                               \
-        if (__x86_rbx_tag != X86_SIM_TAG_SCALAR || __x86_rbx.ptr != __x86_entry_rbx || \
+#ifdef KPROG_X86_ENTRY_SAVES_CALLEE
+#define X86_SIM_L_CALLEE_EXIT_FAULT 0
+#else
+#define X86_SIM_L_CALLEE_EXIT_FAULT \
+        (__x86_rbx_tag != X86_SIM_TAG_SCALAR || __x86_rbx.ptr != __x86_entry_rbx || \
             __x86_rbp_tag != X86_SIM_TAG_SCALAR || __x86_rbp.ptr != __x86_entry_rbp || \
             __x86_r12_tag != X86_SIM_TAG_SCALAR || __x86_r12.ptr != __x86_entry_r12 || \
             __x86_r13_tag != X86_SIM_TAG_SCALAR || __x86_r13.ptr != __x86_entry_r13 || \
             __x86_r14_tag != X86_SIM_TAG_SCALAR || __x86_r14.ptr != __x86_entry_r14 || \
-            __x86_r15_tag != X86_SIM_TAG_SCALAR || __x86_r15.ptr != __x86_entry_r15 || __x86_rsp.ptr != (void *)0) X86_SIM_L_ARCHITECTURAL_FAULT(); \
+            __x86_r15_tag != X86_SIM_TAG_SCALAR || __x86_r15.ptr != __x86_entry_r15)
+#endif
+
+#define X86_SIM_X86_RET()                                                  \
+	do {                                                               \
+        if (X86_SIM_L_CALLEE_EXIT_FAULT || __x86_rsp.ptr != (void *)0) X86_SIM_L_ARCHITECTURAL_FAULT(); \
 		return (__u32)X86_SIM_L_READ_REG(X86_RAX);                 \
 	} while (0)
 

@@ -4216,7 +4216,13 @@ fn build_x86_tail_call_inline(
 
     bytes.extend_from_slice(&[0x48, 0x83, 0x00, 0x01]); // add qword ptr [rax], 1
     bytes.extend_from_slice(native_cleanup);
-    append_x86_stub_callee_pop(&mut bytes, callee_saved_mask);
+    if cfg!(feature = "stock-entry-frame") {
+        bytes.extend_from_slice(&[0x5D, 0x41, 0x5C]); // pop rbp; pop r12
+    }
+    append_x86_stub_callee_pop(
+        &mut bytes,
+        if cfg!(feature = "stock-entry-frame") { 15 } else { callee_saved_mask },
+    );
     bytes.extend_from_slice(&[0x58, 0x58]); // pop tail_call_cnt_ptr; pop tail_call_cnt
     bytes.extend_from_slice(&[0x48, 0x81, 0xC4]); // add rsp, rounded JIT stack depth
     let stack_offset = bytes.len();
@@ -5257,14 +5263,23 @@ mod tests {
             (X86_BPF_PROG_BPF_FUNC_OFFSET_KEY.to_string(), 0),
             (X86_TAIL_CALL_OFFSET_KEY.to_string(), 0),
         ]);
-        for saved_rbp in [None, Some(24)] {
+        for (mask, saved_rbp) in [0u8, 1, 15].into_iter()
+            .flat_map(|mask| [(mask, None), (mask, Some(24))]) {
             let (instructions, count, stack, thunk) = build_x86_tail_call_inline(
-                &helpers, 15, &[], saved_rbp, saved_rbp.is_none())?;
+                &helpers, mask, &[], saved_rbp, saved_rbp.is_none())?;
             let encoded = encode_x86_local_block("tail", 0, &instructions,
                 &vec![u64::MAX; instructions.len()])?;
             let bytes = encoded.code_buffer;
             assert_eq!(&bytes[count-3..count],
                 if saved_rbp.is_some() { &[0x48,0x8b,0x80] } else { &[0x48,0x8b,0x85] });
+            let restores: &[u8] = if cfg!(feature = "stock-entry-frame") {
+                &[0x5d,0x41,0x5c,0x41,0x5f,0x41,0x5e,0x41,0x5d,0x5b]
+            } else { match mask {
+                0 => &[], 1 => &[0x5b],
+                15 => &[0x41,0x5f,0x41,0x5e,0x41,0x5d,0x5b], _ => unreachable!(),
+            }};
+            assert_eq!(&bytes[stack-5-restores.len()..stack-5], restores);
+            assert_eq!(&bytes[stack-5..stack-3], &[0x58,0x58]);
             assert_eq!(&bytes[stack-3..stack], &[0x48,0x81,0xc4]);
             assert_eq!(bytes[thunk-1],0xe9);
             assert_eq!(&bytes[thunk..thunk+4],&[0,0,0,0]);
