@@ -74884,5 +74884,74 @@
     },
     "scope": "Nine new generic source read/forwarding/lifetime laws. Declared byte/scalar coherence supplies canonical saved-word premise. Computed source index/union/signed profile, code-label/native-address and actual compiler/physical relations remain interfaces; Cmodel71/75 and compiled13/75 unchanged.",
     "archive": "ret-owned-read.log.gz"
+  },
+  "x86_ret_source_coherence": {
+    "status": "partial-source-live-memory-composition",
+    "proof": {
+      "laws": [
+        "source_index_word",
+        "source_coordinate",
+        "source_byte_address",
+        "load64_congr",
+        "release_coherent",
+        "source_read_native",
+        "source_index_advance",
+        "source_sp_advance",
+        "source_sub_return_projection",
+        "source_sub_return_coherent",
+        "source_sub_return_step",
+        "source_return_token"
+      ],
+      "compile": [
+        {
+          "module": "KProgFormal/X86RemainingTokenO2",
+          "exit": 0,
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/ret-source-coherence/olean/KProgFormal/X86RemainingTokenO2.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/X86RemainingTokenO2.lean"
+          ],
+          "source_sha256": "09f82514dffe89c243cc3471bfca46dcff88f9a9f628823eef125850ef5abc7a"
+        }
+      ],
+      "audit_exit": 0,
+      "sorryAx": 0,
+      "reduction_bridge": 1,
+      "audit_input": "import KProgFormal.X86RemainingTokenO2\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.source_index_word\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.source_coordinate\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.source_byte_address\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.load64_congr\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.release_coherent\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.source_read_native\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.source_index_advance\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.source_sp_advance\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.source_sub_return_projection\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.source_sub_return_coherent\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.source_sub_return_step\n#print axioms KProgFormal.X86RemainingTokenO2.StackRelease.source_return_token\n"
+    },
+    "integration": {
+      "audit_input": "import SimulatorComposition\nimport ControlABIComposition\nimport KProgFormal.X86RemainingTokenO2\n#print axioms KProgTV.SimulatorComposition.native_to_interpreted\n#print axioms KProgTV.SimulatorComposition.interpreted_to_specialized\n#print axioms KProgTV.SimulatorComposition.specialized_reflects\n#print axioms KProgTV.SimulatorComposition.program_block_validation\n#print axioms KProgTV.SimulatorComposition.program_effects_checked\n#print axioms KProgTV.SimulatorComposition.actual_program_block_validation\n#print axioms KProgTV.SimulatorComposition.actual_program_effects_checked\n#print axioms KProgFormal.X86RemainingTokenO2.ret_contract_body_matches\n#print axioms KProgFormal.X86RemainingTokenO2.ret_invocation_contract\n#print axioms KProgFormal.X86RemainingTokenO2.ret_subroutine_guard_preserves\n",
+      "exit": 0,
+      "sorryAx": 0,
+      "reduction_bridge": 5
+    },
+    "source": {
+      "head": "be84837ff402b1f14f6a98c40b8011efeec15f74",
+      "path": "kprog/x86/x86_sim_local_bpf.h",
+      "sha256": "5b11b9052ff3427ba0c88dd30275bd1c061b510978acc35e75dbeb166579d74a",
+      "source_bindings": {
+        "sourceIndex": "KPROG_X86_STACK_INDEX: uint64(capacity)+uint64(rawSP), full wrapping word",
+        "source_coordinate": "allocated unsigned source index <= capacity, capacity<2^63 implies signed source offset = rawSP.toInt",
+        "source_byte_address": "source arena base+byte index equals rawSP+native stack origin+byte lane, physical base wraps64bits",
+        "source_sp_advance": "allocated eight-byte interval gives rawSP+8 signed exact; source signed newSP-8 equals previous SP",
+        "Coherent": "live source bytes and valid scalar slots agree with canonical native memory; relation quantified over every source image",
+        "release_coherent": "signed source release retains Coherent at increasingSP, including arbitrary fresh stream",
+        "source_sub_return_step": "computed source read + frame/register effects + source memory lifetime compose existing native ISA return Step under read permission/canonical target",
+        "source_return_token": "actual captured owned word selects finite label/unresolved alternatives with full released image"
+      },
+      "premises": {
+        "source_coordinate_domain": "capacity <2^63 and allocated index+8 <=capacity; theorem representation/allocated domain",
+        "source_native_coherence": "source union byte/scalar identity and actual C/compiler establishment remain explicit",
+        "producer_control": "emitted invocation/subroutine choice and code-label/native-PC transport remain explicit",
+        "physical": "actual native entry/exit/JIT/B/compiler transport remain explicit"
+      },
+      "runtime_additions": 0
+    },
+    "scope": "Twelve generic actual source-index/signed-coordinate/native-address/coherence laws. The live source byte/scalar relation supplies saved-read equality and survives release, composing current native RET step and specialized selected/default token. Actual C/union/compiler establishment of relation and producer/physical/control transport remain explicit. RETpartial/Cmodel71/75/compiled13/75 retained.",
+    "archive": "ret-source-coherence.log.gz"
   }
 }

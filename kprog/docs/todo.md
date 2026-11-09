@@ -79,7 +79,9 @@
 - [x] **V** RET：现有 x86/ARM callee 标签/值/SP 退出判定、正常返回的完整 frame、x86 RET token guard，以及 native-return/JIT-result 的 callee/SP 前提组合（本提交，15 条组件定理）。
 - [x] **V** RET：内部 STACK_RELEASE 的区间 fresh 字节、已声明 below-SP word 的 tag/valid 清除、payload/live cell 保留、saved-word 捕获与 selected/default token 组合（本提交，17 条组件定理）。
 - [x] **V** RET：owned64read 的 scalar forwarding/非对齐字节路径、字节/scalar coherence 推导 saved-read 前提、live-read 保留与重新分配读取当前字节（本提交，9 条定理；前序 17 条 lifetime 重新审计）。
-- [ ] **V** RET：实际 source index/union/signed 域与 live-stack/native-memory coherence，两个 ISA 的 return-mode 及 x86 saved-return/ARM LR 映射、实际 C/B/编译/物理入口出口对应关系。
+- [x] **V** RET：实际 wrapping source index/有符号坐标/native byte 地址，已分配 8 字节域的 signed SP 推进、Coherent 推导 saved-read 并在 release 后保持，接入 native Step 与 selected/default token（本提交，12 条定理）。
+- [ ] **V** RET：实际 C/union/编译器建立 live-stack/native-memory Coherent 关系，两个 ISA 的 return-mode 及 x86 saved-return/ARM LR 映射、实际 C/B/编译/物理入口出口对应关系。
+- [ ] **V** RET source-coordinate/coherence 批次全量检查（本提交；当前 d399 full 与已排队 5e9636767 批次依次完成后复用增量缓存）。
 - [ ] **V** RET 栈生命周期/owned-read 组件批次全量检查（本提交；沿用共享增量缓存，当前唯一 full 源 d39918760）。
 - [ ] **V** O4：物理异常表一步、thunk 与物理栈有效性的组合、真实 JIT 对应关系、成功尾调用组合，并解除条件定理的 O1/O2 前提。
 - [ ] **V、C** 编译后的 B 与 C 模型的差距：按 token 单元验证，或走经过验证的编译路径。

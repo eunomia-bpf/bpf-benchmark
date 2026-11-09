@@ -26,6 +26,14 @@ reallocation. Source byte/scalar coherence supplies the saved-read premise;
 computed index, union memory and physical/compiler transport retain their
 explicit source profile.
 
+Twelve source-coordinate/coherence laws connect the actual wrapping generated
+stack index, signed raw-SP coordinate and native byte addresses. An allocated
+eight-byte return interval derives exact signed RSP advance and supplies the
+source read projection. The live byte/scalar relation survives release and
+composes current source RET with the reference step and selected/default token.
+C/compiler establishment of that relation, producer mode and physical control
+transport remain explicit interfaces.
+
 ## Specification and proof scope
 
 The reference ISA is defined once in

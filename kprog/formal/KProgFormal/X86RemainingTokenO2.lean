@@ -682,7 +682,247 @@ theorem reallocated_word_reads_bytes (size : Nat) (words : List Nat) (oldSp newS
   rw [owned_read_matches]
   simp [ownedReadSpec, zero]
 
+
+/-- Actual generated source index retains the complete wrapping raw SP. -/
+def sourceIndex (size : Nat) (sp : Word) : Nat :=
+  (GeneratedX86StackIndex.index (BitVec.ofNat 64 size) sp).toNat
+
+theorem source_index_word (size : Nat) (sp : Word) :
+    BitVec.ofNat 64 (sourceIndex size sp) = BitVec.ofNat 64 size + sp := by
+  simp only [sourceIndex, GeneratedX86StackIndex.index, BitVec.ofNat_toNat, BitVec.setWidth_eq]
+
+/-- Every allocated source coordinate has the same signed value as raw SP.
+The capacity premise is the representation domain of the existing signed C
+subtraction; the index premise is the allocated source interval. -/
+theorem source_coordinate (size : Nat) (sp : Word)
+    (capacity : size < 2 ^ 63) (inside : sourceIndex size sp ≤ size) :
+    offset size (sourceIndex size sp) = sp.toInt := by
+  let cap : Word := BitVec.ofNat 64 size
+  let idx : Word := GeneratedX86StackIndex.index cap sp
+  have capNat : cap.toNat = size := by
+    simp only [cap, BitVec.toNat_ofNat]
+    apply Nat.mod_eq_of_lt
+    omega
+  have idxNat : idx.toNat = sourceIndex size sp := rfl
+  have capInt : cap.toInt = (size : Int) := by
+    rw [BitVec.toInt_eq_toNat_of_lt (by rw [capNat]; omega), capNat]
+  have idxInt : idx.toInt = (sourceIndex size sp : Int) := by
+    rw [BitVec.toInt_eq_toNat_of_lt (by rw [idxNat]; omega), idxNat]
+  have origin : idx - cap = sp := by
+    simp only [idx, GeneratedX86StackIndex.index]
+    rw [BitVec.add_comm, BitVec.add_sub_cancel]
+  have exactInt : (idx - cap).toInt = (sourceIndex size sp : Int) - (size : Int) := by
+    rw [BitVec.toInt_sub, idxInt, capInt]
+    apply Int.bmod_eq_self_of_le <;> omega
+  simpa only [origin, offset] using exactInt.symm
+
+/-- The source arena and the native stack origin name each byte identically,
+including wrapping physical arena addresses. -/
+theorem source_byte_address (size : Nat) (sp origin : Word) (i : Nat) :
+    origin + BitVec.ofNat 64 (sourceIndex size sp + i) =
+      sp + (origin + BitVec.ofNat 64 size) + BitVec.ofNat 64 i := by
+  rw [BitVec.ofNat_add, source_index_word]
+  ac_rfl
+
+/-- Exactly the eight bytes used by the generated full-word load matter. -/
+theorem load64_congr (a b : Nat → Reference.Byte) (same : ∀ i, i < 8 → a i = b i) :
+    GeneratedX86MemAccess.load a .w64 = GeneratedX86MemAccess.load b .w64 := by
+  simp only [GeneratedX86MemAccess.load, GeneratedX86MemAccess.assemble,
+    same 0 (by decide), same 1 (by decide), same 2 (by decide), same 3 (by decide),
+    same 4 (by decide), same 5 (by decide), same 6 (by decide), same 7 (by decide)]
+
+/-- Source values and active scalar identities represent the native memory
+only in the allocated live interval. Released bytes are arbitrary fresh data. -/
+def Coherent (size : Nat) (origin : Word) (sp : Int) (image : Image) (memory : Reference.Memory) : Prop :=
+  (∀ i, i < size → sp ≤ offset size i → image.bytes i = memory.value (origin + BitVec.ofNat 64 i)) ∧
+  (∀ slot, slot * 8 + 8 ≤ size → sp ≤ offset size (slot * 8) →
+    (image.cells slot).valid ≠ 0#8 → (image.cells slot).scalar =
+      GeneratedX86MemAccess.load (fun i => memory.value (origin + BitVec.ofNat 64 (slot * 8 + i))) .w64)
+
+/-- Release preserves the representation of every surviving allocated byte
+and active scalar word, for every supplied fresh stream. -/
+theorem release_coherent (size : Nat) (words : List Nat) (origin : Word)
+    (oldSp newSp : Int) (image : Image) (memory : Reference.Memory)
+    (fresh : Nat → Reference.Byte) (increasing : oldSp ≤ newSp)
+    (coherent : Coherent size origin oldSp image memory) :
+    Coherent size origin newSp (body size words oldSp newSp fresh image) memory := by
+  constructor
+  · intro i inside live
+    rw [retained_byte size words oldSp newSp fresh image i (by omega)]
+    exact coherent.1 i inside (by omega)
+  · intro slot inside live valid
+    have same := live_cell_preserved size words oldSp newSp fresh image slot live
+    rw [same] at valid ⊢
+    exact coherent.2 slot inside (by omega) valid
+
+/-- Actual index, live byte image and scalar forwarding together derive the
+saved-read projection used by the current internal RET token. -/
+theorem source_read_native (size : Nat) (words : List Nat)
+    (env : Refinement.EntryEnvironment.Environment) (entry : Refinement.EntryEnvironment.Frame)
+    (arena origin : Word) (state : ReturnImage)
+    (capacity : size < 2 ^ 63)
+    (allocated : sourceIndex size (state.frame.registers.raw.gpr 4) + 8 ≤ size)
+    (stackOrigin : Refinement.EntryEnvironment.base env entry .stack = origin + BitVec.ofNat 64 size)
+    (coherent : Coherent size origin (state.frame.registers.raw.gpr 4).toInt state.stack
+      state.frame.registers.raw.memory) :
+    ownedRead size words (state.frame.registers.raw.gpr 4).toInt
+        (sourceIndex size (state.frame.registers.raw.gpr 4)) state.stack =
+      returnStackWord env entry arena state.frame.registers := by
+  let index := sourceIndex size (state.frame.registers.raw.gpr 4)
+  have coordinate : offset size index = (state.frame.registers.raw.gpr 4).toInt :=
+    source_coordinate size _ capacity (by omega)
+  have address (i : Nat) : origin + BitVec.ofNat 64 (index + i) =
+      registerValue env entry arena state.frame.registers 4 + BitVec.ofNat 64 i := by
+    simp only [registerValue, ↓reduceIte, stackOrigin]
+    exact source_byte_address size _ origin i
+  apply owned_read_native
+  · rw [← x86_mem_load_refines]
+    unfold returnStackWord
+    apply load64_congr
+    intro i inside
+    rw [coherent.1 (index + i) (by omega) (by unfold offset at *; omega), address]
+  · intro aligned live declared valid
+    have wordStart : index / 8 * 8 = index := by omega
+    rw [coherent.2 (index / 8) (by omega) (by simpa only [wordStart] using live) valid]
+    simp only [wordStart]
+    unfold returnStackWord
+    apply load64_congr
+    intro i _
+    rw [address]
+
+
+/-- An allocated eight-byte return read supplies the representation bound
+for the subsequent source index advance. -/
+theorem source_index_advance (size : Nat) (sp : Word)
+    (capacity : size < 2 ^ 63) (allocated : sourceIndex size sp + 8 ≤ size) :
+    sourceIndex size (sp + 8) = sourceIndex size sp + 8 := by
+  unfold sourceIndex
+  simp only [GeneratedX86StackIndex.index, ← BitVec.add_assoc, BitVec.toNat_add]
+  change (((BitVec.ofNat 64 size + sp).toNat + 8) % 18446744073709551616) = _
+  apply Nat.mod_eq_of_lt
+  change sourceIndex size sp + 8 < 18446744073709551616
+  omega
+
+/-- Signed C newSP-8 equals the captured previous SP throughout the allocated
+RET domain, so the release interval is exactly eight signed bytes. -/
+theorem source_sp_advance (size : Nat) (sp : Word)
+    (capacity : size < 2 ^ 63) (allocated : sourceIndex size sp + 8 ≤ size) :
+    (sp + 8).toInt = sp.toInt + 8 := by
+  have previous := source_coordinate size sp capacity (by omega)
+  have advance := source_index_advance size sp capacity allocated
+  have current := source_coordinate size (sp + 8) capacity (by omega)
+  rw [advance] at current
+  unfold offset at *
+  omega
+
+def sourceRead (size : Nat) (words : List Nat) (state : ReturnImage) : Word :=
+  ownedRead size words (state.frame.registers.raw.gpr 4).toInt
+    (sourceIndex size (state.frame.registers.raw.gpr 4)) state.stack
+
+def sourceSubReturn (size : Nat) (words : List Nat) (fresh : Nat → Reference.Byte)
+    (state : ReturnImage) : CapturedReturn :=
+  subReturn size words (sourceRead size words) fresh state
+
+theorem source_sub_return_projection (size : Nat) (words : List Nat)
+    (env : Refinement.EntryEnvironment.Environment) (entry : Refinement.EntryEnvironment.Frame)
+    (arena origin : Word) (fresh : Nat → Reference.Byte) (state : ReturnImage)
+    (capacity : size < 2 ^ 63)
+    (allocated : sourceIndex size (state.frame.registers.raw.gpr 4) + 8 ≤ size)
+    (stackOrigin : Refinement.EntryEnvironment.base env entry .stack = origin + BitVec.ofNat 64 size)
+    (coherent : Coherent size origin (state.frame.registers.raw.gpr 4).toInt state.stack
+      state.frame.registers.raw.memory) :
+    (sourceSubReturn size words fresh state).state.frame = subroutineFrame env entry arena state.frame := by
+  apply sub_return_frame_projection
+  exact source_read_native size words env entry arena origin state capacity allocated stackOrigin coherent
+
+/-- The same live-memory relation holds at the resulting raw SP. -/
+theorem source_sub_return_coherent (size : Nat) (words : List Nat) (origin : Word)
+    (fresh : Nat → Reference.Byte) (state : ReturnImage)
+    (capacity : size < 2 ^ 63)
+    (allocated : sourceIndex size (state.frame.registers.raw.gpr 4) + 8 ≤ size)
+    (coherent : Coherent size origin (state.frame.registers.raw.gpr 4).toInt state.stack
+      state.frame.registers.raw.memory) :
+    let result := (sourceSubReturn size words fresh state).state
+    Coherent size origin (result.frame.registers.raw.gpr 4).toInt result.stack result.frame.registers.raw.memory := by
+  have advance := source_sp_advance size (state.frame.registers.raw.gpr 4) capacity allocated
+  change Coherent size origin (state.frame.registers.raw.gpr 4 + 8).toInt
+    (body size words ((state.frame.registers.raw.gpr 4 + 8).toInt - 8)
+      (state.frame.registers.raw.gpr 4 + 8).toInt fresh state.stack) state.frame.registers.raw.memory
+  rw [advance]
+  have old : (state.frame.registers.raw.gpr 4).toInt + 8 - 8 =
+      (state.frame.registers.raw.gpr 4).toInt := by omega
+  rw [old]
+  apply release_coherent size words origin _ _ state.stack state.frame.registers.raw.memory fresh (by omega) coherent
+
+/-- Actual source read/index/forwarding and release compose into the native
+RET step under the existing read-permission and canonical-target ISA premises. -/
+theorem source_sub_return_step (size : Nat) (words : List Nat)
+    (env : Refinement.EntryEnvironment.Environment) (entry : Refinement.EntryEnvironment.Frame)
+    (arena origin : Word) (fresh : Nat → Reference.Byte) (state : ReturnImage) (nextPc : Word)
+    (capacity : size < 2 ^ 63)
+    (allocated : sourceIndex size (state.frame.registers.raw.gpr 4) + 8 ≤ size)
+    (stackOrigin : Refinement.EntryEnvironment.base env entry .stack = origin + BitVec.ofNat 64 size)
+    (coherent : Coherent size origin (state.frame.registers.raw.gpr 4).toInt state.stack
+      state.frame.registers.raw.memory)
+    (readable : Reference.permitted state.frame.registers.raw.memory.readable
+      (registerValue env entry arena state.frame.registers 4) 8 = true)
+    (canonical : Reference.X86.canonicalTarget state.frame.registers.raw.addressWidth
+      (returnStackWord env entry arena state.frame.registers) = true) :
+    Reference.Transition.mk
+      (nativeRegisters env entry arena (sourceSubReturn size words fresh state).state.frame.registers)
+      (returnStackReads env entry arena state.frame.registers) none =
+      Reference.X86.step (.returnNear 0 nextPc) (nativeRegisters env entry arena state.frame.registers) := by
+  rw [source_sub_return_projection size words env entry arena origin fresh state
+    capacity allocated stackOrigin coherent]
+  exact return_label_frame_refines env entry arena state.frame.registers nextPc readable canonical
+
+
+/-- Current source RET uses the captured owned word for the finite continuation
+choice and carries the released source image through both alternatives. -/
+def sourceReturnBody (size : Nat) (words : List Nat)
+    (env : Refinement.EntryEnvironment.Environment) (entry : Refinement.EntryEnvironment.Frame)
+    (arena : Word) (releaseFresh : Nat → Reference.Byte) (state : ReturnImage)
+    (targets : List Word) : ReturnOutcome × Image :=
+  let result := sourceSubReturn size words releaseFresh state
+  let effect : Reference.Transition Reference.X86.State :=
+    ⟨nativeRegisters env entry arena result.state.frame.registers,
+      returnStackReads env entry arena state.frame.registers, none⟩
+  (.subroutine result.state.frame
+    (if targets.contains result.target then .label effect else .unresolved effect), result.state.stack)
+
+/-- The existing specialized RET token executes the current source read,
+stack release and selected/default body under one live representation relation. -/
+theorem source_return_token (size : Nat) (words : List Nat)
+    (env : Refinement.EntryEnvironment.Environment) (entry : Refinement.EntryEnvironment.Frame)
+    (arena origin : Word) (releaseFresh : Nat → Reference.Byte) (state : ReturnImage)
+    (targets : List Word) (fresh : Nat → Bool) (current : Nat) (flags : Reference.Byte)
+    (aux : BitVec 32) (dst src : Reference.Byte) (value nextPc : Word)
+    (capacity : size < 2 ^ 63)
+    (allocated : sourceIndex size (state.frame.registers.raw.gpr 4) + 8 ≤ size)
+    (stackOrigin : Refinement.EntryEnvironment.base env entry .stack = origin + BitVec.ofNat 64 size)
+    (coherent : Coherent size origin (state.frame.registers.raw.gpr 4).toInt state.stack
+      state.frame.registers.raw.memory) :
+    tokenBody size words releaseFresh env entry arena fresh current state (.subroutine targets)
+        flags aux dst src value nextPc =
+      some (sourceReturnBody size words env entry arena releaseFresh state targets) := by
+  have frameProjection := source_sub_return_projection size words env entry arena origin releaseFresh
+    state capacity allocated stackOrigin coherent
+  have targetProjection : (sourceSubReturn size words releaseFresh state).target =
+      returnStackWord env entry arena state.frame.registers :=
+    source_read_native size words env entry arena origin state capacity allocated stackOrigin coherent
+  have stackProjection : (sourceSubReturn size words releaseFresh state).state.stack =
+      spec size words ((state.frame.registers.raw.gpr 4 + 8).toInt - 8)
+        (state.frame.registers.raw.gpr 4 + 8).toInt releaseFresh state.stack := by
+    simp only [sourceSubReturn, subReturn, body_matches]
+  rw [token_body_matches]
+  simp only [dispatch, returnDispatch, ↓reduceIte, attach, return_dispatch_body_matches,
+    specializedReturnDispatch, sourceReturnBody, frameProjection, targetProjection, stackProjection]
+  split <;> rfl
+
 end StackRelease
+
+
+
 
 
 

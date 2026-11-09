@@ -6272,3 +6272,21 @@ TV composition retains five inherited bridges. Source computed-index, union
 memory and signed-coordinate interpretation, producer mode, code-address mapping
 and C/B/compiler/physical transport remain the active universal interfaces.
 RET retains partial status and C-model71/75, compiled13/75 totals retain scope.
+
+### Internal RET actual source index and live-memory composition
+
+Twelve new `StackRelease` laws derive signed offsets from the actual wrapping
+`capacity + rawSP` source index and prove byte-address identity for arbitrary
+wrapping arena bases. Within the allocated eight-byte read interval, raw RSP+8
+has the exact signed value and source newSP-8 identifies the captured old SP.
+A live byte/scalar `Coherent` relation supplies the native saved-word equality,
+survives release and composes source SUB_RET into the canonical native return
+step and both specialized continuation alternatives. Every source image,
+stack size, finite table and fresh stream is quantified under the stated
+representation/allocated-domain premises. The [source receipt](ret-source-coherence.log.gz)
+retains macros, exact compiles and audits:12 component audits pass, sorryAx0;
+one audit inherits an executable-reduction bridge through the existing ISA
+return proof. Root/TV compiles and generic composition audits pass with their
+five inherited bridges. Actual C/union/compiler establishment of live coherence,
+producer return-mode, code-label/native-PC and physical transport remain active.
+RET retains partial status; current C-model71/75 and compiled13/75 retain scope.
