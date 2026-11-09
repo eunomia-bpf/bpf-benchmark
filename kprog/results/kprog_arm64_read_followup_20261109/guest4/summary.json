@@ -1,0 +1,52 @@
+{
+  "epoch": "guest4 captured pre-effective-address model",
+  "archive": "/var/tmp/kprog-tmp/S10/guest-result/trusted-arm64-service-result/run-20261109T065102301912Z.tar.gz",
+  "archive_bytes": 9398000,
+  "archive_sha256": "1a84048b6b38ae2598ce8a54a7fb198195eb6db340fbde4398b5ff342ddc29ce",
+  "form_count": 14,
+  "form_successes": 1,
+  "safety_count": 34,
+  "safety_stages": {
+    "valid_executed": 3,
+    "positive_infrastructure_error": 1,
+    "verifier_rejected": 20,
+    "accepted_finding": 8,
+    "specialization_rejected": 2
+  },
+  "accepted_findings": [
+    "uninitialized_stack",
+    "scalar_vector_load_clear_high",
+    "unpaired_stxr_failure",
+    "unpaired_stlxr_failure",
+    "paired_stxr_failure",
+    "paired_stlxr_failure",
+    "entry_return_address_flags",
+    "stack_base_flags"
+  ],
+  "positive_diagnostics": [
+    "valid_spill_restore"
+  ],
+  "atomic_stages": [
+    {
+      "stage": "load",
+      "exit": 0,
+      "stdout": ""
+    },
+    {
+      "stage": "narrow_add",
+      "exit": 0,
+      "stdout": "{\"retval\":2,\"duration\":217488}\n"
+    },
+    {
+      "stage": "narrow_set",
+      "exit": 0,
+      "stdout": "{\"retval\":2,\"duration\":132256}\n"
+    },
+    {
+      "stage": "narrow_clr",
+      "exit": 0,
+      "stdout": "{\"retval\":2,\"duration\":121664}\n"
+    }
+  ],
+  "unsafe_native_executions": 0
+}

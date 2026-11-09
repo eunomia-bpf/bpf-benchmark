@@ -1,0 +1,174 @@
+[
+  {
+    "symbol": "entry",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/probe",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/native.o",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/native_load_fault_module.ko",
+      "entry"
+    ],
+    "exit": 0,
+    "stdout": "{\"native_prog_id\":1,\"attach_btf_id\":69911,\"verified_insns\":112,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+    "stderr": ""
+  },
+  {
+    "symbol": "entry_byte",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/probe",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/arm64.o",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/native_load_fault_module.ko",
+      "entry_byte"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "native load guest fixture: trusted specializer refused native program: Input/output error\n"
+  },
+  {
+    "symbol": "entry_half",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/probe",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/arm64.o",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/native_load_fault_module.ko",
+      "entry_half"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "native load guest fixture: trusted specializer refused native program: Input/output error\n"
+  },
+  {
+    "symbol": "entry_word",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/probe",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/arm64.o",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/native_load_fault_module.ko",
+      "entry_word"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "native load guest fixture: trusted specializer refused native program: Input/output error\n"
+  },
+  {
+    "symbol": "entry_signed_byte",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/probe",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/arm64.o",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/native_load_fault_module.ko",
+      "entry_signed_byte"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "native load guest fixture: trusted specializer refused native program: Input/output error\n"
+  },
+  {
+    "symbol": "entry_signed_half",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/probe",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/arm64.o",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/native_load_fault_module.ko",
+      "entry_signed_half"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "native load guest fixture: trusted specializer refused native program: Input/output error\n"
+  },
+  {
+    "symbol": "entry_signed_word",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/probe",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/arm64.o",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/native_load_fault_module.ko",
+      "entry_signed_word"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "native load guest fixture: trusted specializer refused native program: Input/output error\n"
+  },
+  {
+    "symbol": "entry_pair",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/probe",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/arm64.o",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/native_load_fault_module.ko",
+      "entry_pair"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "native load guest fixture: trusted specializer refused native program: Input/output error\n"
+  },
+  {
+    "symbol": "entry_pre",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/probe",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/arm64.o",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/native_load_fault_module.ko",
+      "entry_pre"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "native load guest fixture: trusted specializer refused native program: Input/output error\n"
+  },
+  {
+    "symbol": "entry_post",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/probe",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/arm64.o",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/native_load_fault_module.ko",
+      "entry_post"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "native load guest fixture: trusted specializer refused native program: Input/output error\n"
+  },
+  {
+    "symbol": "entry_d0",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/probe",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/arm64.o",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/native_load_fault_module.ko",
+      "entry_d0",
+      "0xffffffff"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "native load guest fixture: trusted specializer refused native program: Input/output error\n"
+  },
+  {
+    "symbol": "entry_q0",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/probe",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/arm64.o",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/native_load_fault_module.ko",
+      "entry_q0",
+      "0xffffffff"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "native load guest fixture: trusted specializer refused native program: Input/output error\n"
+  },
+  {
+    "symbol": "entry_d0_post",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/probe",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/arm64.o",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/native_load_fault_module.ko",
+      "entry_d0_post",
+      "0xffffffff"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "native load guest fixture: trusted specializer refused native program: Input/output error\n"
+  },
+  {
+    "symbol": "entry_q0_post",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/probe",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/arm64.o",
+      "/workspaces/repository/kprog/arm64/build/native-load-recovery/null-fixture/native_load_fault_module.ko",
+      "entry_q0_post",
+      "0xffffffff"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "native load guest fixture: trusted specializer refused native program: Input/output error\n"
+  }
+]

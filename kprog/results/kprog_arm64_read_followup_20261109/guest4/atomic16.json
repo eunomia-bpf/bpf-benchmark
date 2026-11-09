@@ -1,0 +1,26 @@
+[
+  {
+    "stage": "load",
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "stage": "narrow_add",
+    "exit": 0,
+    "stdout": "{\"retval\":2,\"duration\":217488}\n",
+    "stderr": ""
+  },
+  {
+    "stage": "narrow_set",
+    "exit": 0,
+    "stdout": "{\"retval\":2,\"duration\":132256}\n",
+    "stderr": ""
+  },
+  {
+    "stage": "narrow_clr",
+    "exit": 0,
+    "stdout": "{\"retval\":2,\"duration\":121664}\n",
+    "stderr": ""
+  }
+]
