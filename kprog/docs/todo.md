@@ -22,7 +22,9 @@
 
 ## 2. 应用覆盖
 
-549 个常驻程序的静态普查（`corpus/results/kprog_app_coverage_20261109/resident-census/`）：安装 7。
+两条路径分开计数。直接 native（跳过 verifier）：六个应用都跑通过（05-29，11-07 复现）。verified 路径（verifier 检查 B）：BCC 25/25、Katran 1/1 跑通过，其余应用只有少量程序，历史最高约 50/549。
+
+549 个常驻程序的静态普查（`corpus/results/kprog_app_coverage_20261109/resident-census/`）第一轮：513 个停在进入生成器之前（选择缺口 275、资源准备 238），36 个进入生成，7 个通过 verifier。资源准备单独重跑后 164 成功、74 失败（3daeea9b2）。
 
 - [x] Tetragon 275 个选择缺口（271ddeee9、5dbd5d481、8922e4bde）。
 - [ ] **A** 这 275 个程序的静态结果，按失败类排序后修最大的一类。
