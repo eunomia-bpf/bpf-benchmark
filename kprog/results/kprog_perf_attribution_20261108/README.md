@@ -1034,5 +1034,41 @@ on 2026-11-08/09, and the change is in the host's service or generator, not
 in the workload. `5598b9321` ("Carry native load sites into stock x86
 exception-table emission") lands in that window and is the first to check.
 
-Under the task's division this is a trusted-service/generation failure for
-lane C, so the six-application timing on the restored workload waits on it.
+**Resolved.** The specializer was invoking two binaries from lane C's
+private workspace, both built on 2026-11-08 before the ABI change:
+
+| binary used by the recipe | built | has `load_site` |
+| --- | --- | ---: |
+| `C/design-only/native-context/loader/trusted-native-loader` | 11-08 11:09 | **no** |
+| `C/design-only/native-extent/corpus/native-link` | 11-08 14:43 | **no** |
+| `kprog/libnativeloader/build/trusted-native-loader` (rebuilt) | 11-09 02:23 | yes |
+| `kprog/x86/native_lab/native_link/target/release/native-link` | 11-08 23:44 | yes |
+
+`5598b9321` added `load_sites_user` and `load_site_count` to the trusted
+request struct at 23:49 on 11-08; a loader built before that sends no load
+sites, and the rebuilt kernel module rejects the short request with `EIO`,
+which surfaces as `specializer refused native program: Input/output error`.
+Rebuilding the loader and pointing the recipe at current builds clears it:
+`native-loader replaced prog=balancer_ingres`, zero failures.
+
+### Katran on the restored workload, both arms
+
+`status ok`, both arms complete, **1 of 1 program bound**:
+
+| arm | worker pps (threads 0-3) | total pps |
+| --- | --- | ---: |
+| JIT | 520,918 / 895,558 / 371,116 / 911,249 | 2,698,841 |
+| native | **1,057** / 919,407 / 865,474 / 900,407 | 2,685,288 |
+
+**native/JIT 0.995x** by summed throughput -- parity. All four workers carry
+`Flags: FLOW_RND`, so the restored random-flow shape is what ran. The
+native arm's worker 0 is a cold start at 1,057 pps, the same pattern the
+2026-05-29 reference shows with its 12,717 and 40,809 pps outliers. The
+like-for-like comparison is the warm workers only: native 895,096 mean over
+three, JIT 775,908 over its three highest. Summed over all four -- which is
+what the workload's total throughput is -- the cold workers roughly cancel,
+one in each arm, giving the 0.995x above.
+
+That is one 20 s sample, so it establishes binding and shape rather than a
+final ratio: the six-application timing at SAMPLES=3 WORKLOAD_DURATION=180
+is the measurement.
