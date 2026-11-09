@@ -34,7 +34,7 @@ from .setup_support import optional_repo_artifact_path
 
 _MINIMAL_CONFIG = """receivers:
   profiling:
-    samples_per_second: 1000
+    samples_per_second: 100000
     # `tracers: all` enables every interpreter tracer (python, php, ruby, v8,
     # perl, hotspot, dotnet, beam, labels). Without this, perf_unwind_<lang>
     # programs are loaded but never routed to: native_tracer_entry queries

@@ -60,66 +60,6 @@ ROUTER_CLIENT_IFACE = "rtcl0"
 CLIENT_IFACE = "client0"
 ROUTER_REAL_IFACE = "rtreal0"
 REAL_IFACE = "real0"
-KATRAN_RECEIVER_NAPI_CPU = 5
-KATRAN_ROUTER_NAPI_CPU = 6
-KATRAN_NAPI_RT_PRIORITY = 1
-KATRAN_NAPI_THREADED_MODE = "busy-poll"
-YNL_CLI = Path("/usr/local/lib/bpfrejit/linux/tools/net/ynl/pyynl/cli.py")
-
-
-def _pin_threaded_napi(pid: int, cpu: int) -> None:
-    os.sched_setaffinity(pid, {int(cpu)})
-    os.sched_setscheduler(
-        pid,
-        os.SCHED_FIFO,
-        os.sched_param(KATRAN_NAPI_RT_PRIORITY),
-    )
-
-
-def _enable_threaded_peer_napi(namespace: str, iface: str, cpu: int) -> int:
-    if not YNL_CLI.is_file():
-        raise RuntimeError(f"YNL CLI is required for threaded NAPI busy-poll: {YNL_CLI}")
-    ifindex = _namespace_ifindex(namespace, iface)
-
-    def napi_records() -> list[dict[str, object]]:
-        completed = ns_exec_command(namespace, [
-            remote_python_binary(), str(YNL_CLI), "--family", "netdev",
-            "--dump", "napi-get", "--json", json.dumps({"ifindex": ifindex}),
-            "--output-json",
-        ])
-        payload = json.loads(completed.stdout or "[]")
-        if not isinstance(payload, list):
-            raise RuntimeError(
-                f"netdev napi-get returned unexpected payload for {namespace}/{iface}"
-            )
-        return [dict(record) for record in payload if isinstance(record, Mapping)]
-
-    records = napi_records()
-    if len(records) != 1 or int(records[0].get("id", 0) or 0) <= 0:
-        raise RuntimeError(
-            f"expected one NAPI instance for {namespace}/{iface}, got {records!r}"
-        )
-    napi_id = int(records[0]["id"])
-    ns_exec_command(namespace, [
-        remote_python_binary(), str(YNL_CLI), "--family", "netdev",
-        "--do", "napi-set", "--json",
-        json.dumps({"id": napi_id, "threaded": KATRAN_NAPI_THREADED_MODE}),
-        "--output-json",
-    ])
-    configured = next(
-        (record for record in napi_records() if int(record.get("id", 0) or 0) == napi_id),
-        None,
-    )
-    if configured is None or configured.get("threaded") not in (KATRAN_NAPI_THREADED_MODE, 2):
-        raise RuntimeError(
-            f"NAPI busy-poll did not take effect for {namespace}/{iface}: {configured!r}"
-        )
-    pid = int(configured.get("pid", 0) or 0)
-    if pid <= 0:
-        raise RuntimeError(f"threaded NAPI worker for {namespace}/{iface} has no PID")
-    _pin_threaded_napi(pid, cpu)
-    return pid
-
 LB_IP = "192.0.2.2"
 ROUTER_LB_IP = "192.0.2.1"
 CLIENT_IP = "10.0.0.2"
@@ -364,8 +304,6 @@ class KatranDsrTopology:
         self.lb_ifindex = 0
         self.created_hc_ifaces: list[str] = []
         self.peer_xdp_path = ""
-        self.peer_napi_pid = 0
-        self.receiver_napi_pid = 0
         self.route_map_id = 0
 
     def __enter__(self) -> "KatranDsrTopology":
@@ -420,24 +358,11 @@ class KatranDsrTopology:
             ip_binary(), "link", "set", "dev", REAL_IFACE,
             "xdp", "obj", str(peer_xdp), "sec", "xdp/receiver_sink",
         ])
-        self.receiver_napi_pid = _enable_threaded_peer_napi(
-            REAL_NS,
-            REAL_IFACE,
-            KATRAN_RECEIVER_NAPI_CPU,
-        )
         ns_exec_command(ROUTER_NS, [
             ip_binary(), "link", "set", "dev", ROUTER_LB_IFACE,
             "xdp", "obj", str(peer_xdp), "sec", "xdp/router_redirect",
         ])
         self.peer_xdp_path = str(peer_xdp)
-        # Busy-poll on isolated CPUs so veth's fixed XDP rings are drained
-        # without cross-vCPU wakeup stalls, while retaining a parallel
-        # end-to-end pipeline whose bottleneck is Katran rather than transport.
-        self.peer_napi_pid = _enable_threaded_peer_napi(
-            ROUTER_NS,
-            ROUTER_LB_IFACE,
-            KATRAN_ROUTER_NAPI_CPU,
-        )
         self.route_map_id = _update_katran_route_map(
             ROUTER_NS, _namespace_ifindex(ROUTER_NS, ROUTER_REAL_IFACE)
         )
@@ -481,15 +406,7 @@ class KatranDsrTopology:
                 "healthcheck_ifaces": list(self.created_hc_ifaces),
                 "peer_xdp_path": self.peer_xdp_path,
                 "peer_xdp_iface": ROUTER_LB_IFACE,
-                "peer_napi_pid": self.peer_napi_pid,
-                "peer_napi_cpu": KATRAN_ROUTER_NAPI_CPU,
-                "peer_napi_rt_priority": KATRAN_NAPI_RT_PRIORITY,
-                "peer_napi_threaded_mode": KATRAN_NAPI_THREADED_MODE,
                 "receiver_xdp_iface": REAL_IFACE,
-                "receiver_napi_pid": self.receiver_napi_pid,
-                "receiver_napi_cpu": KATRAN_RECEIVER_NAPI_CPU,
-                "receiver_napi_rt_priority": KATRAN_NAPI_RT_PRIORITY,
-                "receiver_napi_threaded_mode": KATRAN_NAPI_THREADED_MODE,
                 "route_map_id": self.route_map_id}
 
     def close(self) -> None: self.cleanup()
@@ -751,35 +668,8 @@ DEFAULT_PKTGEN_PKT_SIZE = 64
 DEFAULT_PKTGEN_CLONE_SKB = 0
 DEFAULT_PKTGEN_SRC_PORT = 10000
 PKTGEN_CTRL = "/proc/net/pktgen/pgctrl"
-# A veth has one TX queue.  Multiple pktgen workers therefore race on queue 0,
-# producing NETDEV_TX_BUSY errors and, on AWS, no traffic at the XDP hook.
-# Keep the generator on the final vCPU of the paper-compatible 8-vCPU guest;
-# this also leaves CPUs 0--6 available to process the forwarding path.
-KATRAN_PKTGEN_THREAD_IDS = (7,)
+KATRAN_PKTGEN_THREAD_IDS = (0, 1, 2, 3)
 KATRAN_WORKLOADS = {"xdp_traffic", "xdp_pktgen"}
-
-
-def _available_katran_pktgen_thread_ids(namespace: str) -> tuple[int, ...]:
-    completed = ns_exec_command(
-        namespace,
-        [
-            "sh",
-            "-c",
-            'for path in /proc/net/pktgen/kpktgend_*; do [ -e "$path" ] && basename "$path"; done',
-        ],
-    )
-    available: set[int] = set()
-    for line in (completed.stdout or "").splitlines():
-        name = line.strip()
-        if not name.startswith("kpktgend_"):
-            continue
-        suffix = name.removeprefix("kpktgend_")
-        if suffix.isdigit():
-            available.add(int(suffix))
-    selected = tuple(thread_id for thread_id in KATRAN_PKTGEN_THREAD_IDS if thread_id in available)
-    if not selected:
-        raise RuntimeError(f"Katran pktgen found no usable pktgen threads in namespace {namespace}")
-    return selected
 
 
 def _resolve_katran_bpf_artifact(*relative_candidates: str) -> Path:
@@ -907,17 +797,17 @@ class KatranRunner(AppRunner):
         duration_s = max(1, int(float(seconds)))
         ensure_kernel_module_loaded("pktgen")
         self._pktgen_write(PKTGEN_CTRL, "reset")
-        pktgen_thread_ids = _available_katran_pktgen_thread_ids(ROUTER_NS)
-        aliases = tuple(f"{ROUTER_LB_IFACE}@{thread_id}" for thread_id in pktgen_thread_ids)
-        for thread_id, alias in zip(pktgen_thread_ids, aliases, strict=True):
+        # The 2026-05-29 workload: four pktgen workers on threads 0-3, each
+        # with its own device alias, driving the random-flow packet shape.
+        aliases = tuple(f"{ROUTER_LB_IFACE}@{thread_id}"
+                        for thread_id in KATRAN_PKTGEN_THREAD_IDS)
+        for thread_id, alias in zip(KATRAN_PKTGEN_THREAD_IDS, aliases,
+                                    strict=True):
             thread_path = f"/proc/net/pktgen/kpktgend_{thread_id}"
             self._pktgen_write(thread_path, "rem_device_all")
             self._pktgen_write(thread_path, f"add_device {alias}")
         pktgen_commands = (
-            # This is the packet shape used by the zero-loss paper workload.
-            # FLOW_RND/!SHARED looks successful in pktgen but does not traverse
-            # the veth peer's XDP hook on the kernels used by the AWS runner.
-            "flag SHARED",
+            "flag !SHARED",
             f"clone_skb {DEFAULT_PKTGEN_CLONE_SKB}",
             "burst 1",
             "count 0",
@@ -932,10 +822,10 @@ class KatranRunner(AppRunner):
             f"dst_mac {LB_MAC}",
             f"udp_dst_min {VIP_PORT}",
             f"udp_dst_max {VIP_PORT}",
-            f"udp_src_min {DEFAULT_PKTGEN_SRC_PORT}",
-            f"udp_src_max {DEFAULT_PKTGEN_SRC_PORT}",
-            "flows 0",
-            "flowlen 0",
+            "udp_src_min 1",
+            "udp_src_max 65535",
+            "flows 65535",
+            "flowlen 1",
             "clear_counters",
         )
         for alias in aliases:

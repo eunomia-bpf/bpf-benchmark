@@ -889,3 +889,76 @@ inlining change would move: 32 of 253 for katran (13%), 32 of 165 for
 (21%). Removing it entirely would take katran from 53.0 to 47.0 cycles per
 invocation (1.13x), `packet_vlan_tcpopt_parser` from 30.6 to 24.6 (1.24x)
 and `flow_5tuple_rss_hash` from 33.8 to 27.8 (1.22x).
+
+## The workload was not frozen: what changed since 2026-05-29
+
+The operator's finding is that the benchmark framework drifted after the
+2026-05-29 reference (commit `9f3855f6f`), so the two runs measured
+different workloads. Comparing each framework file against that tree
+(`/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree`)
+gives the list, and two of them change the workload shape:
+
+| file | diff lines | shape-affecting |
+| --- | ---: | --- |
+| `runner/libs/app_runners/katran.py` | 201 | **yes, two changes** |
+| `runner/libs/app_runners/otel_profiler.py` | 2 | **yes, one change** |
+| `runner/libs/app_runners/tracee.py` | 600 | no (implementation, same workload) |
+| `runner/libs/app_runners/cilium.py` | 28 | no (outcome tracking wrappers) |
+| `runner/libs/app_runners/tetragon.py` | 0 | no |
+| `runner/libs/app_runners/bcc_set.py` | 0 | no |
+| `runner/libs/workload.py` | 50 | no (added softirq counters) |
+| `corpus/driver.py` | 661 | no (plumbing, plus native-config evidence) |
+| `micro/driver.py`, `Makefile` knobs | 47 / 0 | no (`SAMPLES ?= 3` in both) |
+
+### Katran: one pktgen worker in place of four, and threaded NAPI busy-poll
+
+The reference drives **four pktgen workers on threads 0-3**, each with its
+own `rtlb0@N` device alias. The current code discovers available threads and
+uses a single one, `KATRAN_PKTGEN_THREAD_IDS = (7,)` on the last vCPU of an
+eight-vCPU guest, with a comment that a veth has one TX queue so multiple
+workers race on it.
+
+The reference packet shape is random-flow: `flag !SHARED`, `udp_src_min 1`,
+`udp_src_max 65535`, `flows 65535`, `flowlen 1`. The current shape is
+`flag SHARED` with one fixed source port (`udp_src_min` and `udp_src_max`
+both 10000) and `flows 0`, `flowlen 0`.
+
+The current code also enables **threaded NAPI busy-poll** on both the router
+and receiver peers (`KATRAN_NAPI_THREADED_MODE = "busy-poll"`, two workers
+pinned to CPUs 5 and 6 at `SCHED_FIFO` priority 1, configured through
+`ynl`'s `napi-set`). The reference has no NAPI setup at all.
+
+**How each moves the comparison.** Four workers with random flows spread the
+packet stream over the receive path and give the XDP program a working set
+that misses cache; one worker with a fixed flow and a busy-polled NAPI
+thread makes the same packet arrive on the same CPU with the ring already
+drained. The first measures the balancer's work; the second measures it with
+the transport removed. A native program that is 1.88x cheaper per call shows
+that gain only in the first case, which is why the current native arm gains
+1.78x where the reference gained 1.88x and, more importantly, why the
+invocation multiplier fell from 2.26x to 1.26x: with busy-poll there is no
+queue to fill, so the workload cannot push more packets through a faster
+program.
+
+### OTel: the sampling rate was cut a hundredfold
+
+`samples_per_second` is `1000` in the current code and `100000` in the
+reference. A hundredth of the samples means a hundredth of the BPF work per
+second, so the collector has almost nothing for the native path to speed up.
+That is why otelcol's ratio fell from 1.824x to 1.013x.
+
+### Restored
+
+Both are back at their 2026-05-29 values:
+
+- `runner/libs/app_runners/otel_profiler.py`: `samples_per_second: 100000`.
+- `runner/libs/app_runners/katran.py`: `KATRAN_PKTGEN_THREAD_IDS = (0, 1,
+  2, 3)`, `flag !SHARED`, `udp_src_min 1`, `udp_src_max 65535`, `flows
+  65535`, `flowlen 1`, and the threaded NAPI busy-poll setup removed,
+  keeping the XDP attachments the loader path needs to start the
+  application. The restored pktgen command strings match the reference's
+  exactly; only an explanatory comment was added.
+
+Nothing else in `runner/libs/workload.py`, `runner/libs/app_runners`,
+`corpus/driver.py`, `corpus/config`, `micro/driver.py`, `micro/config`,
+`micro/programs` or the Makefile recipes and knobs was touched.
