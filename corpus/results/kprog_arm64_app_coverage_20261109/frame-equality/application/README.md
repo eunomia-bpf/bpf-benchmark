@@ -1,0 +1,3 @@
+Complete ARM BCC scalar-stack forwarding replay
+
+Source729856581 and the paired5bbbf128a native compiler candidate run the complete eight-tool BCC application. Original native/JIT inputs and all32raw manifest rows remain captured. Current published frozen framework/workload source is captured by file hash and bound privately; the prior standalone BCC workload override is superseded by this captured framework file. Same-copy f1/e5 runtime and ordinary-copy three-descriptor module3e3f retain their captured bytes. One2GiB guest16-19 runs alongside the original2GiB catalog8-11. Functional QEMU counters and every generation/compiler/verifier/installed/work outcome are collected. Runtime admission additions:0.
