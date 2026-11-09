@@ -1,6 +1,8 @@
 #ifndef X86_SIM_LOCAL_BPF_H
 #define X86_SIM_LOCAL_BPF_H
 
+#define KPROG_X86_ENTRY_SAVES_CALLEE 1
+
 #ifndef __VMLINUX_H__
 #include <linux/bpf.h>
 #endif
@@ -420,12 +422,6 @@ struct x86_sim_state {
 	void *__x86_sim_helper_ctx = (void *)0;                            \
 	void *__x86_sim_helper_abi_base = (void *)0;                       \
 	X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_DECLARE_REG)                       \
-	const void *__x86_entry_rbx __attribute__((unused)) = __x86_rbx.ptr; \
-	const void *__x86_entry_rbp __attribute__((unused)) = __x86_rbp.ptr; \
-	const void *__x86_entry_r12 __attribute__((unused)) = __x86_r12.ptr; \
-	const void *__x86_entry_r13 __attribute__((unused)) = __x86_r13.ptr; \
-	const void *__x86_entry_r14 __attribute__((unused)) = __x86_r14.ptr; \
-	const void *__x86_entry_r15 __attribute__((unused)) = __x86_r15.ptr; \
 	__u64 __x86_native_stack_base = 0;                                 \
 	__u8 __x86_cf = X86_SIM_L_UNSPECIFIED() & 1;                                                  \
 	__u8 __x86_zf = X86_SIM_L_UNSPECIFIED() & 1;                                                  \
@@ -3598,21 +3594,9 @@ extern void __x86_sim_unsupported_helper(void)
 #define X86_SIM_BPF_CALL_REG(REG)                                           \
 	X86_SIM_BPF_CALL_ID(X86_SIM_L_READ_REG(REG))
 
-#ifdef KPROG_X86_ENTRY_SAVES_CALLEE
-#define X86_SIM_L_CALLEE_EXIT_FAULT 0
-#else
-#define X86_SIM_L_CALLEE_EXIT_FAULT \
-        (__x86_rbx_tag != X86_SIM_TAG_SCALAR || __x86_rbx.ptr != __x86_entry_rbx || \
-            __x86_rbp_tag != X86_SIM_TAG_SCALAR || __x86_rbp.ptr != __x86_entry_rbp || \
-            __x86_r12_tag != X86_SIM_TAG_SCALAR || __x86_r12.ptr != __x86_entry_r12 || \
-            __x86_r13_tag != X86_SIM_TAG_SCALAR || __x86_r13.ptr != __x86_entry_r13 || \
-            __x86_r14_tag != X86_SIM_TAG_SCALAR || __x86_r14.ptr != __x86_entry_r14 || \
-            __x86_r15_tag != X86_SIM_TAG_SCALAR || __x86_r15.ptr != __x86_entry_r15)
-#endif
-
 #define X86_SIM_X86_RET()                                                  \
 	do {                                                               \
-        if (X86_SIM_L_CALLEE_EXIT_FAULT || __x86_rsp.ptr != (void *)0) X86_SIM_L_ARCHITECTURAL_FAULT(); \
+        if (__x86_rsp.ptr != (void *)0) X86_SIM_L_ARCHITECTURAL_FAULT(); \
 		return (__u32)X86_SIM_L_READ_REG(X86_RAX);                 \
 	} while (0)
 
