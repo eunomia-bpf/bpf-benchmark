@@ -1,0 +1,601 @@
+{
+  "producer_cases": [
+    {
+      "label": "control",
+      "objects": [
+        {
+          "object": "native/bcc/biosnoop.native.o",
+          "sha256": "145e6db7f2b4c970ea3053405eb0fa11b42963969652706c0758acd54918798b",
+          "sections": [
+            {
+              "name": "kprobe/blk_account_io_merge_bio",
+              "bytes": 121,
+              "sha256": "d95dae8aac7d24ca6e37064391254d528432ac44a3f8f94aae217f3bbf183f95"
+            },
+            {
+              "name": "tp_btf/block_rq_insert",
+              "bytes": 328,
+              "sha256": "633fcad87cae23934606ef979aa8e9306e040c32ce62d9cf3b76f58a825d88b5"
+            },
+            {
+              "name": "tp_btf/block_rq_issue",
+              "bytes": 385,
+              "sha256": "6ba8c4ef05e07c6216040ff19e5f28c6005afab41d2dadd8fbdaa62e75d36dec"
+            },
+            {
+              "name": "tp_btf/block_rq_complete",
+              "bytes": 459,
+              "sha256": "6a54e1336836c987af2ddce2bbf630983ed23ce04f4f0a49914bd98052269a4e"
+            }
+          ],
+          "division_instructions": []
+        },
+        {
+          "object": "native/bcc/capable.native.o",
+          "sha256": "a925495eb895982fcb00f65dda6778bea6cfd4b77910397b1c95a3ba68fc4e1c",
+          "sections": [
+            {
+              "name": "kprobe/cap_capable",
+              "bytes": 131,
+              "sha256": "b01cb511f157a1c56c54c3398667de7f43de24fe7b930e6fb55c771830d92331"
+            },
+            {
+              "name": "kretprobe/cap_capable",
+              "bytes": 515,
+              "sha256": "fea9bb04878e8727aaadc17e9253928065bdbeab3fa2865db62066c441662287"
+            }
+          ],
+          "division_instructions": []
+        },
+        {
+          "object": "native/bcc/opensnoop.native.o",
+          "sha256": "a4d120ecada6c5a549845ffc0ad750f64de2e20a0b1e1cf714cb35768663f7cd",
+          "sections": [
+            {
+              "name": "tracepoint/syscalls/sys_enter_open",
+              "bytes": 148,
+              "sha256": "b4236fef0cca003a21ae840dc43bb8ca0a486d69c7d5df094e630629114ebd14"
+            },
+            {
+              "name": "tracepoint/syscalls/sys_enter_openat",
+              "bytes": 148,
+              "sha256": "a546a856b367e057c9f2d45913f97ec81ee70e1a668c0dbc53ace0f6e4d11ca1"
+            },
+            {
+              "name": "tracepoint/syscalls/sys_exit_open",
+              "bytes": 264,
+              "sha256": "4a27cb88aa771d8d8204129653c4c65112dccb292f205c9f603f4bf11046ebe9"
+            },
+            {
+              "name": "tracepoint/syscalls/sys_exit_openat",
+              "bytes": 264,
+              "sha256": "4a27cb88aa771d8d8204129653c4c65112dccb292f205c9f603f4bf11046ebe9"
+            }
+          ],
+          "division_instructions": []
+        },
+        {
+          "object": "native/bcc/runqlat.native.o",
+          "sha256": "208be4b298f4051185f31e7fce7c6397ef1c000433843b53cf0d32d7bcc77b9e",
+          "sections": [
+            {
+              "name": ".text",
+              "bytes": 869,
+              "sha256": "53b149da5f3c905ed23cf2eff82a82f87955f0baabfa6f6f7211bdfc94d65931"
+            },
+            {
+              "name": "tp_btf/sched_wakeup",
+              "bytes": 119,
+              "sha256": "79a2db3571f0b0d56a997d293ddb1d6c5ce59b25bad7ff9a9315213b52f0cfae"
+            },
+            {
+              "name": "tp_btf/sched_wakeup_new",
+              "bytes": 119,
+              "sha256": "79a2db3571f0b0d56a997d293ddb1d6c5ce59b25bad7ff9a9315213b52f0cfae"
+            },
+            {
+              "name": "tp_btf/sched_switch",
+              "bytes": 21,
+              "sha256": "0cd9fc969640fc9438005ffd6f12423b3e33bc24ab26bdeed9cd5a94d8740047"
+            },
+            {
+              "name": "raw_tp/sched_wakeup",
+              "bytes": 164,
+              "sha256": "ebf860fdde4aae3e7b73775656114f43e103f1975c9a9964e83b9a0f9442c1f8"
+            },
+            {
+              "name": "raw_tp/sched_wakeup_new",
+              "bytes": 164,
+              "sha256": "ebf860fdde4aae3e7b73775656114f43e103f1975c9a9964e83b9a0f9442c1f8"
+            },
+            {
+              "name": "raw_tp/sched_switch",
+              "bytes": 21,
+              "sha256": "0cd9fc969640fc9438005ffd6f12423b3e33bc24ab26bdeed9cd5a94d8740047"
+            }
+          ],
+          "division_instructions": [
+            "     17d:      \tidivq\t%rcx",
+            "     262:      \tidivq\t%rcx"
+          ]
+        },
+        {
+          "object": "native/bcc/syscount.native.o",
+          "sha256": "f75d9ddc53bdd5484d1760f9b16b058ae133aa2f8831b07a058be649ae01465d",
+          "sections": [
+            {
+              "name": "tracepoint/raw_syscalls/sys_enter",
+              "bytes": 112,
+              "sha256": "c9ef397b0f7b725adfbe1113c9f135d8b02a5ff69f1812e6a397bf7e7f9d6df1"
+            },
+            {
+              "name": "tracepoint/raw_syscalls/sys_exit",
+              "bytes": 428,
+              "sha256": "c47c8204f7fa16f99ebdc3ad16faff14e3917f8e0c198c92c25582395eab679b"
+            }
+          ],
+          "division_instructions": []
+        },
+        {
+          "object": "native/bcc/tcpconnect.native.o",
+          "sha256": "ab3bce3249e61631ff304014b14984b70a180b5a2cb83d39d357118ae47406f6",
+          "sections": [
+            {
+              "name": "kprobe/tcp_v4_connect",
+              "bytes": 100,
+              "sha256": "cd900c4984097d4f4a4b532297f72f43b0c8c19df47084dfe1d773c79cbafce5"
+            },
+            {
+              "name": "kretprobe/tcp_v4_connect",
+              "bytes": 649,
+              "sha256": "68d465e02987bf9c95153bdd814767f6abeea7463c49e53ede30c21a9a60155b"
+            },
+            {
+              "name": "kprobe/tcp_v6_connect",
+              "bytes": 100,
+              "sha256": "cd900c4984097d4f4a4b532297f72f43b0c8c19df47084dfe1d773c79cbafce5"
+            },
+            {
+              "name": "kretprobe/tcp_v6_connect",
+              "bytes": 691,
+              "sha256": "02f0adf950faa45981426c6b396d806db35edadca540ac62a0fe7b7df2e7e1a6"
+            }
+          ],
+          "division_instructions": [
+            "     1d4:      \tdivq\t%rcx",
+            "     1fa:      \tdivq\t%rcx"
+          ]
+        },
+        {
+          "object": "native/bcc/tcplife.native.o",
+          "sha256": "6f5771c2a0f7f449fefa72c7feb6502e7f16628bb3a6a815a66df1257e5ed8d2",
+          "sections": [
+            {
+              "name": "tracepoint/sock/inet_sock_set_state",
+              "bytes": 1494,
+              "sha256": "e23f303c44963c778837645afadf734af4ae9ab0e8dac5528f77629ec09310d3"
+            }
+          ],
+          "division_instructions": [
+            "     3d1:      \tdivq\t%rcx",
+            "     46e:      \tdivq\t%rsi"
+          ]
+        },
+        {
+          "object": "native/bcc/vfsstat.native.o",
+          "sha256": "7248b5ca184bf015e143d8cad8105848239579920167a0e46265db2d39196e3e",
+          "sections": [
+            {
+              "name": "kprobe/vfs_read",
+              "bytes": 14,
+              "sha256": "7a53f1fb6ccdd62d9b82c64f34066316b1f08cef47c47d9a25afa55e34ac375c"
+            },
+            {
+              "name": "kprobe/vfs_write",
+              "bytes": 15,
+              "sha256": "319a8cd133eb71738e8031f1e9a9ca78432db9da9eec253057f2d4dc67f3d536"
+            },
+            {
+              "name": "kprobe/vfs_fsync",
+              "bytes": 15,
+              "sha256": "1bbba3baa891f04a77910a2df1aac220552b2a4e5728683a264a56979d0ce84a"
+            },
+            {
+              "name": "kprobe/vfs_open",
+              "bytes": 15,
+              "sha256": "44fee006a3d8558bb944838bc6547cfe0ed8044dcc18ac7e62843fa60d2e582c"
+            },
+            {
+              "name": "kprobe/vfs_create",
+              "bytes": 15,
+              "sha256": "982c1f09911560e071962de2e79baadbfa3e63a00e492d9ba6928a40d3070cf2"
+            },
+            {
+              "name": "fentry/vfs_read",
+              "bytes": 14,
+              "sha256": "7a53f1fb6ccdd62d9b82c64f34066316b1f08cef47c47d9a25afa55e34ac375c"
+            },
+            {
+              "name": "fentry/vfs_write",
+              "bytes": 15,
+              "sha256": "319a8cd133eb71738e8031f1e9a9ca78432db9da9eec253057f2d4dc67f3d536"
+            },
+            {
+              "name": "fentry/vfs_fsync",
+              "bytes": 15,
+              "sha256": "1bbba3baa891f04a77910a2df1aac220552b2a4e5728683a264a56979d0ce84a"
+            },
+            {
+              "name": "fentry/vfs_open",
+              "bytes": 15,
+              "sha256": "44fee006a3d8558bb944838bc6547cfe0ed8044dcc18ac7e62843fa60d2e582c"
+            },
+            {
+              "name": "fentry/vfs_create",
+              "bytes": 15,
+              "sha256": "982c1f09911560e071962de2e79baadbfa3e63a00e492d9ba6928a40d3070cf2"
+            }
+          ],
+          "division_instructions": []
+        },
+        {
+          "object": "native/katran/balancer.native.o",
+          "sha256": "36f3daf9b98a3907d9a87307ab21133acf1225da88421035c4bb65f3dc95f751",
+          "sections": [
+            {
+              "name": ".text",
+              "bytes": 319,
+              "sha256": "eb44445532f409e96c54adcddbc6767c230e5475bb58116e86384ba7f1524e21"
+            },
+            {
+              "name": "xdp",
+              "bytes": 7931,
+              "sha256": "d9ae025424b0f4650107400fc21799964d293fe9ba1d6e5f2cf83f5bb47f7676"
+            }
+          ],
+          "division_instructions": [
+            "    122b:      \tdivl\t%ecx",
+            "    19d0:      \tdivl\t%ecx"
+          ]
+        },
+        {
+          "object": "native/katran/healthchecking.native.o",
+          "sha256": "5e71e9698730fadaad830a8144b7e84bd9de837ae6e1a09eda4b557b11e1f835",
+          "sections": [
+            {
+              "name": "tc",
+              "bytes": 1154,
+              "sha256": "7542f69dfefddc2c8c255267989867eaf827b21ab709756a2b558d5a9f2e8fcb"
+            }
+          ],
+          "division_instructions": []
+        },
+        {
+          "object": "native/katran/healthchecking_ipip.native.o",
+          "sha256": "fb3a1236c31a9deff63780da83e03071d4228d6c37d4cdead7e0b7f1bd3550a0",
+          "sections": [
+            {
+              "name": "tc",
+              "bytes": 381,
+              "sha256": "c6f0f76949e7efa320eafafc3be956e4701e950aa9f15602430fe83f3eeace35"
+            }
+          ],
+          "division_instructions": []
+        },
+        {
+          "object": "native/katran/xdp_root.native.o",
+          "sha256": "7ba2c59eb847412edd95d360c60a33acd5319d01573d9706c7e4005e1a04ff18",
+          "sections": [
+            {
+              "name": "xdp",
+              "bytes": 68,
+              "sha256": "0305bce867096b73a91f01ff61555c1e55bf93d84417ac8f3b03db30aa36ae0a"
+            }
+          ],
+          "division_instructions": []
+        }
+      ]
+    },
+    {
+      "label": "candidate",
+      "objects": [
+        {
+          "object": "native/bcc/biosnoop.native.o",
+          "sha256": "145e6db7f2b4c970ea3053405eb0fa11b42963969652706c0758acd54918798b",
+          "sections": [
+            {
+              "name": "kprobe/blk_account_io_merge_bio",
+              "bytes": 121,
+              "sha256": "d95dae8aac7d24ca6e37064391254d528432ac44a3f8f94aae217f3bbf183f95"
+            },
+            {
+              "name": "tp_btf/block_rq_insert",
+              "bytes": 328,
+              "sha256": "633fcad87cae23934606ef979aa8e9306e040c32ce62d9cf3b76f58a825d88b5"
+            },
+            {
+              "name": "tp_btf/block_rq_issue",
+              "bytes": 385,
+              "sha256": "6ba8c4ef05e07c6216040ff19e5f28c6005afab41d2dadd8fbdaa62e75d36dec"
+            },
+            {
+              "name": "tp_btf/block_rq_complete",
+              "bytes": 459,
+              "sha256": "6a54e1336836c987af2ddce2bbf630983ed23ce04f4f0a49914bd98052269a4e"
+            }
+          ],
+          "division_instructions": []
+        },
+        {
+          "object": "native/bcc/capable.native.o",
+          "sha256": "a925495eb895982fcb00f65dda6778bea6cfd4b77910397b1c95a3ba68fc4e1c",
+          "sections": [
+            {
+              "name": "kprobe/cap_capable",
+              "bytes": 131,
+              "sha256": "b01cb511f157a1c56c54c3398667de7f43de24fe7b930e6fb55c771830d92331"
+            },
+            {
+              "name": "kretprobe/cap_capable",
+              "bytes": 515,
+              "sha256": "fea9bb04878e8727aaadc17e9253928065bdbeab3fa2865db62066c441662287"
+            }
+          ],
+          "division_instructions": []
+        },
+        {
+          "object": "native/bcc/opensnoop.native.o",
+          "sha256": "a4d120ecada6c5a549845ffc0ad750f64de2e20a0b1e1cf714cb35768663f7cd",
+          "sections": [
+            {
+              "name": "tracepoint/syscalls/sys_enter_open",
+              "bytes": 148,
+              "sha256": "b4236fef0cca003a21ae840dc43bb8ca0a486d69c7d5df094e630629114ebd14"
+            },
+            {
+              "name": "tracepoint/syscalls/sys_enter_openat",
+              "bytes": 148,
+              "sha256": "a546a856b367e057c9f2d45913f97ec81ee70e1a668c0dbc53ace0f6e4d11ca1"
+            },
+            {
+              "name": "tracepoint/syscalls/sys_exit_open",
+              "bytes": 264,
+              "sha256": "4a27cb88aa771d8d8204129653c4c65112dccb292f205c9f603f4bf11046ebe9"
+            },
+            {
+              "name": "tracepoint/syscalls/sys_exit_openat",
+              "bytes": 264,
+              "sha256": "4a27cb88aa771d8d8204129653c4c65112dccb292f205c9f603f4bf11046ebe9"
+            }
+          ],
+          "division_instructions": []
+        },
+        {
+          "object": "native/bcc/runqlat.native.o",
+          "sha256": "66eb3dd54d9eefc34af36e0bc40268fb42273092e0414565720cab71066e865b",
+          "sections": [
+            {
+              "name": ".text",
+              "bytes": 856,
+              "sha256": "bcd89d2836a82f4c34d5ecf5f2b8fd223aa351774a6cd00a5e184bdfe123075a"
+            },
+            {
+              "name": "tp_btf/sched_wakeup",
+              "bytes": 119,
+              "sha256": "79a2db3571f0b0d56a997d293ddb1d6c5ce59b25bad7ff9a9315213b52f0cfae"
+            },
+            {
+              "name": "tp_btf/sched_wakeup_new",
+              "bytes": 119,
+              "sha256": "79a2db3571f0b0d56a997d293ddb1d6c5ce59b25bad7ff9a9315213b52f0cfae"
+            },
+            {
+              "name": "tp_btf/sched_switch",
+              "bytes": 21,
+              "sha256": "0cd9fc969640fc9438005ffd6f12423b3e33bc24ab26bdeed9cd5a94d8740047"
+            },
+            {
+              "name": "raw_tp/sched_wakeup",
+              "bytes": 164,
+              "sha256": "ebf860fdde4aae3e7b73775656114f43e103f1975c9a9964e83b9a0f9442c1f8"
+            },
+            {
+              "name": "raw_tp/sched_wakeup_new",
+              "bytes": 164,
+              "sha256": "ebf860fdde4aae3e7b73775656114f43e103f1975c9a9964e83b9a0f9442c1f8"
+            },
+            {
+              "name": "raw_tp/sched_switch",
+              "bytes": 21,
+              "sha256": "0cd9fc969640fc9438005ffd6f12423b3e33bc24ab26bdeed9cd5a94d8740047"
+            }
+          ],
+          "division_instructions": [
+            "     1a1:      \tdivq\t%rcx",
+            "     256:      \tdivl\t%ecx"
+          ]
+        },
+        {
+          "object": "native/bcc/syscount.native.o",
+          "sha256": "f75d9ddc53bdd5484d1760f9b16b058ae133aa2f8831b07a058be649ae01465d",
+          "sections": [
+            {
+              "name": "tracepoint/raw_syscalls/sys_enter",
+              "bytes": 112,
+              "sha256": "c9ef397b0f7b725adfbe1113c9f135d8b02a5ff69f1812e6a397bf7e7f9d6df1"
+            },
+            {
+              "name": "tracepoint/raw_syscalls/sys_exit",
+              "bytes": 428,
+              "sha256": "c47c8204f7fa16f99ebdc3ad16faff14e3917f8e0c198c92c25582395eab679b"
+            }
+          ],
+          "division_instructions": []
+        },
+        {
+          "object": "native/bcc/tcpconnect.native.o",
+          "sha256": "606eed00dae3949bab9d98c35142cdf47cbb750c901ddf9002dabbfb7cf68106",
+          "sections": [
+            {
+              "name": "kprobe/tcp_v4_connect",
+              "bytes": 100,
+              "sha256": "cd900c4984097d4f4a4b532297f72f43b0c8c19df47084dfe1d773c79cbafce5"
+            },
+            {
+              "name": "kretprobe/tcp_v4_connect",
+              "bytes": 665,
+              "sha256": "23fbd00a9dbf4709f93214ed6c41c7ca4c112c9df8791ff8f580f58e561f7ad2"
+            },
+            {
+              "name": "kprobe/tcp_v6_connect",
+              "bytes": 100,
+              "sha256": "cd900c4984097d4f4a4b532297f72f43b0c8c19df47084dfe1d773c79cbafce5"
+            },
+            {
+              "name": "kretprobe/tcp_v6_connect",
+              "bytes": 707,
+              "sha256": "8e3bd5c40c2862cbfd4f5cac4725a1902326634fceb82b56a9d27108fb7d25dd"
+            }
+          ],
+          "division_instructions": []
+        },
+        {
+          "object": "native/bcc/tcplife.native.o",
+          "sha256": "69419c0efbf991dfd43f9788da39c2c4d24093b3c561521648d5aa1698fb2aa0",
+          "sections": [
+            {
+              "name": "tracepoint/sock/inet_sock_set_state",
+              "bytes": 1514,
+              "sha256": "676ef96200828a18475b1fd33c44420207f74a3936babd46e6798bcde44769bf"
+            }
+          ],
+          "division_instructions": []
+        },
+        {
+          "object": "native/bcc/vfsstat.native.o",
+          "sha256": "7248b5ca184bf015e143d8cad8105848239579920167a0e46265db2d39196e3e",
+          "sections": [
+            {
+              "name": "kprobe/vfs_read",
+              "bytes": 14,
+              "sha256": "7a53f1fb6ccdd62d9b82c64f34066316b1f08cef47c47d9a25afa55e34ac375c"
+            },
+            {
+              "name": "kprobe/vfs_write",
+              "bytes": 15,
+              "sha256": "319a8cd133eb71738e8031f1e9a9ca78432db9da9eec253057f2d4dc67f3d536"
+            },
+            {
+              "name": "kprobe/vfs_fsync",
+              "bytes": 15,
+              "sha256": "1bbba3baa891f04a77910a2df1aac220552b2a4e5728683a264a56979d0ce84a"
+            },
+            {
+              "name": "kprobe/vfs_open",
+              "bytes": 15,
+              "sha256": "44fee006a3d8558bb944838bc6547cfe0ed8044dcc18ac7e62843fa60d2e582c"
+            },
+            {
+              "name": "kprobe/vfs_create",
+              "bytes": 15,
+              "sha256": "982c1f09911560e071962de2e79baadbfa3e63a00e492d9ba6928a40d3070cf2"
+            },
+            {
+              "name": "fentry/vfs_read",
+              "bytes": 14,
+              "sha256": "7a53f1fb6ccdd62d9b82c64f34066316b1f08cef47c47d9a25afa55e34ac375c"
+            },
+            {
+              "name": "fentry/vfs_write",
+              "bytes": 15,
+              "sha256": "319a8cd133eb71738e8031f1e9a9ca78432db9da9eec253057f2d4dc67f3d536"
+            },
+            {
+              "name": "fentry/vfs_fsync",
+              "bytes": 15,
+              "sha256": "1bbba3baa891f04a77910a2df1aac220552b2a4e5728683a264a56979d0ce84a"
+            },
+            {
+              "name": "fentry/vfs_open",
+              "bytes": 15,
+              "sha256": "44fee006a3d8558bb944838bc6547cfe0ed8044dcc18ac7e62843fa60d2e582c"
+            },
+            {
+              "name": "fentry/vfs_create",
+              "bytes": 15,
+              "sha256": "982c1f09911560e071962de2e79baadbfa3e63a00e492d9ba6928a40d3070cf2"
+            }
+          ],
+          "division_instructions": []
+        },
+        {
+          "object": "native/katran/balancer.native.o",
+          "sha256": "ba252e0372d100f34b60a0deb3f0a7ccc16b632c3c1a5eb40e9b13d31e558c20",
+          "sections": [
+            {
+              "name": ".text",
+              "bytes": 319,
+              "sha256": "eb44445532f409e96c54adcddbc6767c230e5475bb58116e86384ba7f1524e21"
+            },
+            {
+              "name": "xdp",
+              "bytes": 7965,
+              "sha256": "144d549c39144aab5d98425cb70ea2bc371529ce9906095653929a57a005c95f"
+            }
+          ],
+          "division_instructions": []
+        },
+        {
+          "object": "native/katran/healthchecking.native.o",
+          "sha256": "5e71e9698730fadaad830a8144b7e84bd9de837ae6e1a09eda4b557b11e1f835",
+          "sections": [
+            {
+              "name": "tc",
+              "bytes": 1154,
+              "sha256": "7542f69dfefddc2c8c255267989867eaf827b21ab709756a2b558d5a9f2e8fcb"
+            }
+          ],
+          "division_instructions": []
+        },
+        {
+          "object": "native/katran/healthchecking_ipip.native.o",
+          "sha256": "fb3a1236c31a9deff63780da83e03071d4228d6c37d4cdead7e0b7f1bd3550a0",
+          "sections": [
+            {
+              "name": "tc",
+              "bytes": 381,
+              "sha256": "c6f0f76949e7efa320eafafc3be956e4701e950aa9f15602430fe83f3eeace35"
+            }
+          ],
+          "division_instructions": []
+        },
+        {
+          "object": "native/katran/xdp_root.native.o",
+          "sha256": "7ba2c59eb847412edd95d360c60a33acd5319d01573d9706c7e4005e1a04ff18",
+          "sections": [
+            {
+              "name": "xdp",
+              "bytes": 68,
+              "sha256": "0305bce867096b73a91f01ff61555c1e55bf93d84417ac8f3b03db30aa36ae0a"
+            }
+          ],
+          "division_instructions": []
+        }
+      ]
+    }
+  ],
+  "constant_cases": {
+    "control": {
+      "functions": 192,
+      "results": 3936928,
+      "matched": 3936928
+    },
+    "candidate": {
+      "functions": 192,
+      "results": 3936928,
+      "matched": 3936928
+    }
+  },
+  "native_executions": 0,
+  "guest_executions": 0
+}
