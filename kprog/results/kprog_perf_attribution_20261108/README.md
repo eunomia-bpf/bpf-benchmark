@@ -243,6 +243,22 @@ The corpus manifest path differs (`/home/yunwei37/workspace/...` against
 not changed since 2026-05-20, before the reference, so the workload
 definition is identical.
 
+### Why the reference run matters, checked on katran
+
+Choosing the right archived run is not cosmetic. `kprog/docs/evaluation.md`
+records katran's reference as 1.102x; the median of the reference run's own
+four samples (`x86_kvm_corpus_20260529_061439_040837`) gives **1.1063x**,
+which is that number. The *pilot* run at 00:12 (`..._001204_890087`), which
+is where this report first took its archive from, gives 1.042x -- close
+enough to look plausible and 6% off the published figure.
+
+Both runs carry a cold-start sample far below the rest: the reference's
+baseline samples are 833,131 / 12,717 / 807,784 / 820,491 pps and its
+native samples 887,005 / 1,073 / 923,444 / 914,320. Summing the samples
+gives **1.1017x**, which is the published 1.102x; the median gives 1.1063x.
+The cold-start samples move the total by under 0.5% because one falls in
+each arm.
+
 ### The native objects of 2026-05-29, on the current kernel
 
 The second half of the separating experiment is to run the reference's own
