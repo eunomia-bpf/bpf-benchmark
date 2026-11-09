@@ -5,8 +5,9 @@ P. This directory proves generic simulator and token laws; native-link
 preservation lives in [tv/](../tv/). The current
 [coverage ledger](../results/kprog_verification_20261107/README.md) records every
 operation/token, its exact theorem domain, replay source epoch and remaining
-implementation interface. It currently records72 x86-64 C-model token-body equalities and74 of74
-AArch64 operation bodies, plus two returning-helper interface equalities. LDADD/STADD0x46, LDSET/STSET0x47 and LDCLR/STCLR0x48 share canonical atomic access, typed success laws and unified token bindings. Additional helper macro-routing and two-mode RET control laws retain their
+implementation interface. It currently records72 x86-64 C-model token-body equalities and73 of74
+AArch64 operation bodies, plus an explicit current RET exit-contract interface
+and two returning-helper interface equalities. LDADD/STADD0x46, LDSET/STSET0x47 and LDCLR/STCLR0x48 share canonical atomic access, typed success laws and unified token bindings. Additional helper macro-routing and two-mode RET control laws retain their
 parametric/source bindings and do not increase the72 complete x86 bodies.
 Full ISA and compiled-simulator closure remain active work.
 

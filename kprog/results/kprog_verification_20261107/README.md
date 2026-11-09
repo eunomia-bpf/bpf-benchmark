@@ -20,7 +20,7 @@ specialization token also has its own row.
 | Control handler model / composed step | 3/75 | 0/74 |
 | Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/74 |
 | Memory-call full-frame C body model | 4/75 | 0/74 |
-| O2 C-model token-body equality | 72/75 | 74/74 |
+| O2 C-model token-body equality | 72/75 | 73/74 |
 | Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8; SHIFTX6; POPCNT3; ANDN2; BZHI2; RORX2; MOV_IMM5) | 12/75 | 0/74 |
 | Actual clang returning helper bodies (partial CALL_HELPER) | 2 sparse IDs (1/5) | 0 |
 | Additional returning-helper interface equality | 2/75 | 0/74 |
@@ -5722,3 +5722,13 @@ the existing malformed/context/readonly/exact-width BPF assertions pass.
 Negative displacement remains in rdi-3; S7 lifetime suites exercise below-SP
 loss. [Original failed-full and targeted receipts](popcount-live-stack-fixture.log.gz)
 retain the exact full source manifest, log, CPU and exit.
+
+### Invocation-exit source contract
+
+Published48eb036f5/98013a7f6 requires the preserved native callee-save registers
+and SP at each invocation exit. The x86 RET row retains its partial category;
+ARM RET now carries `partial-current-exit-contract`, giving73/74 complete
+C-model token-body rows plus this explicit exit interface. Earlier return
+routing laws retain their source/model statements. S13 composes the current
+predicate with physical entry/unwind and compiler/frame premises; S7 supplies
+stack-lifetime and exit execution evidence.

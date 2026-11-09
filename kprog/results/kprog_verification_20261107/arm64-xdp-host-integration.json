@@ -21876,6 +21876,47 @@
     "source_drift": [],
     "stop_sha256": "6a9c1ee32919154cda9d68f2033856603cc029af2054ed577318cc5a14485d93"
   },
+  "invocation_exit_contract_update": {
+    "arm64_current_complete_token_models": 73,
+    "arm64_numeric_domain": 74,
+    "arm64_preserved": [
+      "X19",
+      "X20",
+      "X21",
+      "X22",
+      "X23",
+      "X24",
+      "X25",
+      "X26",
+      "X27",
+      "X28",
+      "X29",
+      "SP"
+    ],
+    "production_commits": [
+      "48eb036f5b30d6b8a89e6aa2623d3b00723d6d3f",
+      "98013a7f6b72a37d64f29ef3c18849e78f4758eb"
+    ],
+    "remaining_interface": "Current C predicate extraction and lossy-stack semantics, S7 execution evidence and S13 physical entry/unwind/compiler private-frame composition. Preceding return routing laws retain their pinned source/model domain.",
+    "rows_updated": 4,
+    "source_evidence": [
+      "kprog/x86/x86_sim_local_bpf.h:X86_SIM_X86_RET",
+      "kprog/arm64/arm64_sim_local_bpf.h:ARM64_SIM_RET_TO",
+      "kprog/formal/KProgFormal/Refinement/Arm64Dispatcher.lean:return_token_body_matches",
+      "kprog/formal/KProgFormal/X86RemainingTokenO2.lean:ret_body_matches"
+    ],
+    "x86_current_complete_token_models": 72,
+    "x86_numeric_domain": 75,
+    "x86_preserved": [
+      "RBX",
+      "RBP",
+      "R12",
+      "R13",
+      "R14",
+      "R15",
+      "SP"
+    ]
+  },
   "kernel_bpf_protected_load_platform": {
     "actual_existing_integration_exit": 0,
     "actual_private_proof_exit": 0,
