@@ -1,0 +1,5 @@
+# Approved SMAP full-word NULL BTF load recovery
+
+The authorized guest fixture loads one native LSM file_open program through source0 and the registered service. The original native body reads file.f_pos through the BTF pointer. An isolated guest module invokes that same loaded program first with a live struct file and then with its file argument0; results, program extable count, actual service/native/B/compiler/kernel records and guest survival are retained below. Program execution here is the explicitly requested recovery fixture, separate from the original kernel load-only catalog. Partial-register/ALU/implicit/vector fault-prefix correspondence remains the shared model/O4 work item.
+
+Approved SMAPaee6 source and paired producer. Actual outcome: {'probe_exit': 0, 'stdout': '{"native_prog_id":1,"attach_btf_id":71239,"extable_entries":2,"control":4294967295,"null_result":0}\n', 'stderr': '', 'guest_exit': 0, 'native_sha256': 'ba71c92bd9a8a876878dff5e6a27329f1b01f49f7a460016a4e2b39de59cb5fe', 'kernel_sha256': '1fc36bb214862ede6fe6d9c0f530e5a7199b7da7a8fef25c07890bd493b1b16c', 'module_sha256': '1b42ffa33fc95ef82fa7969e546760831f4827a4ff27f64ac34748086283cd3f'}.
