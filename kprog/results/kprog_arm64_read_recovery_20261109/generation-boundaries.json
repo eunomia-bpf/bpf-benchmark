@@ -1,0 +1,182 @@
+[
+  {
+    "form": "ldnp",
+    "assembly": "ldnp x0, x1, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldnp x0, x1, [x2]"
+  },
+  {
+    "form": "ldpsw",
+    "assembly": "ldpsw x0, x1, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldpsw x0, x1, [x2]"
+  },
+  {
+    "form": "ldxp",
+    "assembly": "ldxp x0, x1, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldxp x0, x1, [x2]"
+  },
+  {
+    "form": "ldaxp",
+    "assembly": "ldaxp x0, x1, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldaxp x0, x1, [x2]"
+  },
+  {
+    "form": "ldar",
+    "assembly": "ldar x0, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldar x0, [x2]"
+  },
+  {
+    "form": "ldarb",
+    "assembly": "ldarb w0, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldarb w0, [x2]"
+  },
+  {
+    "form": "ldarh",
+    "assembly": "ldarh w0, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldarh w0, [x2]"
+  },
+  {
+    "form": "ldapr",
+    "assembly": "ldapr x0, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldapr x0, [x2]"
+  },
+  {
+    "form": "ldaprb",
+    "assembly": "ldaprb w0, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldaprb w0, [x2]"
+  },
+  {
+    "form": "ldaprh",
+    "assembly": "ldaprh w0, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldaprh w0, [x2]"
+  },
+  {
+    "form": "ldxrb",
+    "assembly": "ldxrb w0, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldxrb w0, [x2]"
+  },
+  {
+    "form": "ldxrh",
+    "assembly": "ldxrh w0, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldxrh w0, [x2]"
+  },
+  {
+    "form": "ldaxrb",
+    "assembly": "ldaxrb w0, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldaxrb w0, [x2]"
+  },
+  {
+    "form": "ldaxrh",
+    "assembly": "ldaxrh w0, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldaxrh w0, [x2]"
+  },
+  {
+    "form": "ldursb",
+    "assembly": "ldursb x0, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldursb x0, [x2]"
+  },
+  {
+    "form": "ldursh",
+    "assembly": "ldursh x0, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldursh x0, [x2]"
+  },
+  {
+    "form": "ldursw",
+    "assembly": "ldursw x0, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldursw x0, [x2]"
+  },
+  {
+    "form": "ldtr",
+    "assembly": "ldtr x0, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldtr x0, [x2]"
+  },
+  {
+    "form": "ldtrb",
+    "assembly": "ldtrb w0, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldtrb w0, [x2]"
+  },
+  {
+    "form": "ldtrh",
+    "assembly": "ldtrh w0, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldtrh w0, [x2]"
+  },
+  {
+    "form": "ldtrsb",
+    "assembly": "ldtrsb x0, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldtrsb x0, [x2]"
+  },
+  {
+    "form": "ldtrsh",
+    "assembly": "ldtrsh x0, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldtrsh x0, [x2]"
+  },
+  {
+    "form": "ldtrsw",
+    "assembly": "ldtrsw x0, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldtrsw x0, [x2]"
+  },
+  {
+    "form": "cas",
+    "assembly": "cas x0, x1, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: cas x0, x1, [x2]"
+  },
+  {
+    "form": "casp",
+    "assembly": "casp x0, x1, x4, x5, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: casp x0, x1, x4, x5, [x2]"
+  },
+  {
+    "form": "swp",
+    "assembly": "swp x0, x1, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: swp x0, x1, [x2]"
+  },
+  {
+    "form": "ldeor",
+    "assembly": "ldeor x0, x1, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldeor x0, x1, [x2]"
+  },
+  {
+    "form": "ldsmax",
+    "assembly": "ldsmax x0, x1, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldsmax x0, x1, [x2]"
+  },
+  {
+    "form": "ldsmin",
+    "assembly": "ldsmin x0, x1, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldsmin x0, x1, [x2]"
+  },
+  {
+    "form": "ldumax",
+    "assembly": "ldumax x0, x1, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldumax x0, x1, [x2]"
+  },
+  {
+    "form": "ldumin",
+    "assembly": "ldumin x0, x1, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ldumin x0, x1, [x2]"
+  },
+  {
+    "form": "ldr_literal",
+    "assembly": "ldr x0, 0x1000",
+    "generation_diagnostic": "unsupported memory operand: 0x1000"
+  },
+  {
+    "form": "ldr_s0",
+    "assembly": "ldr s0, [x2]",
+    "generation_diagnostic": "unsupported register: s0"
+  },
+  {
+    "form": "ldr_d1",
+    "assembly": "ldr d1, [x2]",
+    "generation_diagnostic": "unsupported register: d1"
+  },
+  {
+    "form": "ldp_q",
+    "assembly": "ldp q0, q1, [x2]",
+    "generation_diagnostic": "unsupported register: q0"
+  },
+  {
+    "form": "ld1",
+    "assembly": "ld1 {v0.16b}, [x2]",
+    "generation_diagnostic": "unsupported arm64 instruction: ld1 {v0.16b}, [x2]"
+  }
+]

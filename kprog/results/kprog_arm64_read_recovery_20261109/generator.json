@@ -1,0 +1,905 @@
+{
+  "forms": 180,
+  "rows": [
+    {
+      "assembly": "ldr x0, [x2]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldr x0, [x2, #16]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldr x0, [x2, #16]!",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldr x0, [x2], #16",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldr x0, [x2, x3]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldr x0, [x2, w3, uxtw #2]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldr w0, [x2]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldr w0, [x2, #16]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldr w0, [x2, #16]!",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldr w0, [x2], #16",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldr w0, [x2, x3]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldr w0, [x2, w3, uxtw #2]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldr d0, [x2]",
+      "operation": "ARM64_OP_LOAD_D0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldr d0, [x2, #16]",
+      "operation": "ARM64_OP_LOAD_D0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldr d0, [x2, #16]!",
+      "operation": "ARM64_OP_LOAD_D0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldr d0, [x2], #16",
+      "operation": "ARM64_OP_LOAD_D0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldr d0, [x2, x3]",
+      "operation": "ARM64_OP_LOAD_D0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldr d0, [x2, w3, uxtw #2]",
+      "operation": "ARM64_OP_LOAD_D0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldr q0, [x2]",
+      "operation": "ARM64_OP_LOAD_Q0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldr q0, [x2, #16]",
+      "operation": "ARM64_OP_LOAD_Q0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldr q0, [x2, #16]!",
+      "operation": "ARM64_OP_LOAD_Q0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldr q0, [x2], #16",
+      "operation": "ARM64_OP_LOAD_Q0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldr q0, [x2, x3]",
+      "operation": "ARM64_OP_LOAD_Q0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldr q0, [x2, w3, uxtw #2]",
+      "operation": "ARM64_OP_LOAD_Q0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldur x0, [x2]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldur x0, [x2, #16]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldur x0, [x2, #16]!",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldur x0, [x2], #16",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldur x0, [x2, x3]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldur x0, [x2, w3, uxtw #2]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldur w0, [x2]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldur w0, [x2, #16]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldur w0, [x2, #16]!",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldur w0, [x2], #16",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldur w0, [x2, x3]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldur w0, [x2, w3, uxtw #2]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldur d0, [x2]",
+      "operation": "ARM64_OP_LOAD_D0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldur d0, [x2, #16]",
+      "operation": "ARM64_OP_LOAD_D0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldur d0, [x2, #16]!",
+      "operation": "ARM64_OP_LOAD_D0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldur d0, [x2], #16",
+      "operation": "ARM64_OP_LOAD_D0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldur d0, [x2, x3]",
+      "operation": "ARM64_OP_LOAD_D0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldur d0, [x2, w3, uxtw #2]",
+      "operation": "ARM64_OP_LOAD_D0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldur q0, [x2]",
+      "operation": "ARM64_OP_LOAD_Q0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldur q0, [x2, #16]",
+      "operation": "ARM64_OP_LOAD_Q0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldur q0, [x2, #16]!",
+      "operation": "ARM64_OP_LOAD_Q0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldur q0, [x2], #16",
+      "operation": "ARM64_OP_LOAD_Q0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldur q0, [x2, x3]",
+      "operation": "ARM64_OP_LOAD_Q0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldur q0, [x2, w3, uxtw #2]",
+      "operation": "ARM64_OP_LOAD_Q0",
+      "recovery": "SIMD runtime interface"
+    },
+    {
+      "assembly": "ldrb w0, [x2]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrb w0, [x2, #16]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrb w0, [x2, #16]!",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrb w0, [x2], #16",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrb w0, [x2, x3]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrb w0, [x2, w3, uxtw #2]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldurb w0, [x2]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldurb w0, [x2, #16]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldurb w0, [x2, #16]!",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldurb w0, [x2], #16",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldurb w0, [x2, x3]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldurb w0, [x2, w3, uxtw #2]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrh w0, [x2]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrh w0, [x2, #16]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrh w0, [x2, #16]!",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrh w0, [x2], #16",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrh w0, [x2, x3]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrh w0, [x2, w3, uxtw #2]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldurh w0, [x2]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldurh w0, [x2, #16]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldurh w0, [x2, #16]!",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldurh w0, [x2], #16",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldurh w0, [x2, x3]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldurh w0, [x2, w3, uxtw #2]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsb w0, [x2]",
+      "operation": "ARM64_OP_LDRSB",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsb w0, [x2, #16]",
+      "operation": "ARM64_OP_LDRSB",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsb w0, [x2, #16]!",
+      "operation": "ARM64_OP_LDRSB",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsb w0, [x2], #16",
+      "operation": "ARM64_OP_LDRSB",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsb w0, [x2, x3]",
+      "operation": "ARM64_OP_LDRSB",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsb w0, [x2, w3, uxtw #2]",
+      "operation": "ARM64_OP_LDRSB",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsb x0, [x2]",
+      "operation": "ARM64_OP_LDRSB",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsb x0, [x2, #16]",
+      "operation": "ARM64_OP_LDRSB",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsb x0, [x2, #16]!",
+      "operation": "ARM64_OP_LDRSB",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsb x0, [x2], #16",
+      "operation": "ARM64_OP_LDRSB",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsb x0, [x2, x3]",
+      "operation": "ARM64_OP_LDRSB",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsb x0, [x2, w3, uxtw #2]",
+      "operation": "ARM64_OP_LDRSB",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsh w0, [x2]",
+      "operation": "ARM64_OP_LDRSH",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsh w0, [x2, #16]",
+      "operation": "ARM64_OP_LDRSH",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsh w0, [x2, #16]!",
+      "operation": "ARM64_OP_LDRSH",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsh w0, [x2], #16",
+      "operation": "ARM64_OP_LDRSH",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsh w0, [x2, x3]",
+      "operation": "ARM64_OP_LDRSH",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsh w0, [x2, w3, uxtw #2]",
+      "operation": "ARM64_OP_LDRSH",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsh x0, [x2]",
+      "operation": "ARM64_OP_LDRSH",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsh x0, [x2, #16]",
+      "operation": "ARM64_OP_LDRSH",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsh x0, [x2, #16]!",
+      "operation": "ARM64_OP_LDRSH",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsh x0, [x2], #16",
+      "operation": "ARM64_OP_LDRSH",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsh x0, [x2, x3]",
+      "operation": "ARM64_OP_LDRSH",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsh x0, [x2, w3, uxtw #2]",
+      "operation": "ARM64_OP_LDRSH",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsw x0, [x2]",
+      "operation": "ARM64_OP_LDRSW",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsw x0, [x2, #16]",
+      "operation": "ARM64_OP_LDRSW",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsw x0, [x2, #16]!",
+      "operation": "ARM64_OP_LDRSW",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsw x0, [x2], #16",
+      "operation": "ARM64_OP_LDRSW",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsw x0, [x2, x3]",
+      "operation": "ARM64_OP_LDRSW",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldrsw x0, [x2, w3, uxtw #2]",
+      "operation": "ARM64_OP_LDRSW",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldxr x0, [x2]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldxr w0, [x2]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldaxr x0, [x2]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldaxr w0, [x2]",
+      "operation": "ARM64_OP_LOAD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldp x0, x1, [x2]",
+      "operation": "ARM64_OP_LDP",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldp x0, x1, [x2, #16]",
+      "operation": "ARM64_OP_LDP",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldp x0, x1, [x2, #16]!",
+      "operation": "ARM64_OP_LDP",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldp x0, x1, [x2], #16",
+      "operation": "ARM64_OP_LDP",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldp w0, w1, [x2]",
+      "operation": "ARM64_OP_LDP",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldp w0, w1, [x2, #16]",
+      "operation": "ARM64_OP_LDP",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldp w0, w1, [x2, #16]!",
+      "operation": "ARM64_OP_LDP",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldp w0, w1, [x2], #16",
+      "operation": "ARM64_OP_LDP",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldadd x0, x1, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldadd w0, w1, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldaddb w0, w1, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldaddh w0, w1, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldadda x0, x1, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldadda w0, w1, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldaddab w0, w1, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldaddah w0, w1, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldaddl x0, x1, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldaddl w0, w1, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldaddlb w0, w1, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldaddlh w0, w1, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldaddal x0, x1, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldaddal w0, w1, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldaddalb w0, w1, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldaddalh w0, w1, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "stadd w0, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "staddb w0, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "staddh w0, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "staddl w0, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "staddlb w0, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "staddlh w0, [x2]",
+      "operation": "ARM64_OP_LDADD",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldset x0, x1, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldset w0, w1, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldsetb w0, w1, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldseth w0, w1, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldseta x0, x1, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldseta w0, w1, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldsetab w0, w1, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldsetah w0, w1, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldsetl x0, x1, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldsetl w0, w1, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldsetlb w0, w1, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldsetlh w0, w1, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldsetal x0, x1, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldsetal w0, w1, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldsetalb w0, w1, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldsetalh w0, w1, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "stset w0, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "stsetb w0, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "stseth w0, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "stsetl w0, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "stsetlb w0, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "stsetlh w0, [x2]",
+      "operation": "ARM64_OP_LDSET",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldclr x0, x1, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldclr w0, w1, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldclrb w0, w1, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldclrh w0, w1, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldclra x0, x1, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldclra w0, w1, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldclrab w0, w1, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldclrah w0, w1, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldclrl x0, x1, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldclrl w0, w1, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldclrlb w0, w1, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldclrlh w0, w1, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldclral x0, x1, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldclral w0, w1, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldclralb w0, w1, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "ldclralh w0, w1, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "stclr w0, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "stclrb w0, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "stclrh w0, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "stclrl w0, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "stclrlb w0, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    },
+    {
+      "assembly": "stclrlh w0, [x2]",
+      "operation": "ARM64_OP_LDCLR",
+      "recovery": "whole-GPR clear before effects; PC+4"
+    }
+  ]
+}
