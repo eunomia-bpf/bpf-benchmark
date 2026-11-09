@@ -537,6 +537,25 @@ archive. What the archive called OTel's 1.824x is a *workload throughput*
 ratio that also needs the no-eBPF arm, which is not in the archived JSON;
 the program-level figure it rests on is reproduced here.
 
+### OTel, stats off: both arms complete, 13 programs native
+
+`x86_kvm_corpus_20261109_202713_178772`, status ok, 3 samples per arm, the
+same definition and settings as the stats-on run:
+
+| arm | samples | components | nonzero return codes | programs |
+| --- | ---: | ---: | ---: | ---: |
+| JIT | 3 | 33 | 0 | 13 |
+| native | 3 | 33 | 0 | 12 |
+
+13 programs were replaced natively. With stats off there are no runtime
+counters by construction, so this arm supplies the equal-work check instead:
+both arms ran 33 components with no failures, which is the same 11-workload
+mix per sample, and the program census differs only because the native arm
+retires the replaced programs.
+
+So both applications now have both modes: Katran at 1.087x on and 1.099x
+off, OTel at 14.53x per invocation on and a clean pair off.
+
 ### The May-29 runs: equal work, and what they can and cannot say
 
 The operator's condition for counting a restored number is that both arms did
