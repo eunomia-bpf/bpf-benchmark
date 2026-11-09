@@ -17,6 +17,8 @@
 #include <linux/xarray.h>
 #include <linux/unaligned.h>
 #include <asm/cpufeature.h>
+#include <asm/extable.h>
+#include <asm/asm-extable.h>
 #include "kinsn_common.h"
 #include "native_lab_binding.h"
 #define NATIVE_LAB_BINDING_ARCH NATIVE_LAB_ARCH_ARM64
@@ -47,6 +49,8 @@ struct native_blob {
     size_t len, reloc_count, proof_len;
     struct native_lab_reloc_record *relocs;
     struct bpf_insn *proof;
+    struct native_lab_load_site *load_sites;
+    u32 load_site_count;
     struct bpf_map **maps;
     u32 map_count;
     struct native_lab_trusted_capsule *capsule;
@@ -64,6 +68,7 @@ static void native_lab_free_blob(struct native_blob *blob)
     kvfree(blob->bytes);
     kvfree(blob->relocs);
     kvfree(blob->proof);
+    kvfree(blob->load_sites);
     kfree(blob);
 }
 static void native_lab_free_chunks(struct native_lab_trusted_capsule *capsule)
@@ -95,6 +100,14 @@ static int native_lab_store_chunk(void __user *argument)
     blob->proof_len = input.proof_insns;
     blob->reloc_count = input.reloc_count;
     blob->capsule = capsule;
+    blob->load_site_count = input.load_site_count;
+    if (blob->load_site_count) {
+        blob->load_sites = vmemdup_user(u64_to_user_ptr(input.load_sites_user),
+            array_size(blob->load_site_count, sizeof(*blob->load_sites)));
+        if (IS_ERR(blob->load_sites)) {
+            err = PTR_ERR(blob->load_sites); blob->load_sites = NULL; goto fail;
+        }
+    }
     blob->bytes = vmemdup_user(u64_to_user_ptr(input.native_user), blob->len);
     if (IS_ERR(blob->bytes)) { err = PTR_ERR(blob->bytes); blob->bytes = NULL; goto fail; }
     if (blob->reloc_count) {
@@ -512,10 +525,63 @@ out:
     mutex_unlock(&blobs_lock);
     return err;
 }
+static u32 native_lab_num_exentries(u64 payload)
+{
+    struct native_blob *blob;
+    u32 count = 0;
+    mutex_lock(&blobs_lock);
+    blob = xa_load(&blobs, kinsn_payload_decode(payload) >> 8);
+    if (blob) count = blob->load_site_count;
+    mutex_unlock(&blobs_lock);
+    return count;
+}
+
+static int native_lab_emit_exentries(u64 payload, void *rw_table,
+                                    const void *rx_table, const void *native_ip)
+{
+    struct exception_table_entry *rw = rw_table;
+    const struct exception_table_entry *rx = rx_table;
+    struct native_blob *blob;
+    u32 i;
+    int count;
+    mutex_lock(&blobs_lock);
+    blob = xa_load(&blobs, kinsn_payload_decode(payload) >> 8);
+    if (!blob) { mutex_unlock(&blobs_lock); return -ENOENT; }
+    count = blob->load_site_count;
+    for (i = 0; i < blob->load_site_count; i++) {
+        const struct native_lab_load_site *site = &blob->load_sites[i];
+        u32 word = get_unaligned_le32(blob->bytes + site->offset);
+        u32 reg = site->destination < 31 ? site->destination : 31;
+        u32 fixup = BPF_KINSN_ARM64_LOAD_NATIVE | (reg << 27);
+        u32 second = 31;
+        bool pair = false;
+
+        /* The same native instruction supplies the second architectural
+         * destination of GPR load-pair, exclusive-pair and compare-pair. */
+        if ((word & 0x3e400000U) == 0x28400000U ||
+            (word & 0x3fe00000U) == 0x08600000U) {
+            second = (word >> 10) & 31;
+            pair = true;
+        } else if ((word & 0x3fa07c00U) == 0x08207c00U) {
+            second = (reg + 1) & 31;
+            pair = true;
+        }
+        if (pair)
+            fixup |= BPF_KINSN_ARM64_LOAD_PAIR | (second << 16);
+        rw[i].insn = (const u8 *)native_ip + site->offset - (const u8 *)&rx[i].insn;
+        rw[i].fixup = fixup;
+        rw[i].type = EX_TYPE_BPF;
+    }
+    mutex_unlock(&blobs_lock);
+    return count;
+}
+
 const struct bpf_kinsn bpf_arm64_native_lab_desc = {
     .owner = THIS_MODULE, .max_insn_cnt = U32_MAX,
     .native_proof = true, .native_stack_depth = NATIVE_LAB_STACK_RESERVE_BYTES,
     .instantiate_insn = instantiate_native_lab, .emit_arm64 = emit_native_lab_arm64,
+    .num_exentries = native_lab_num_exentries,
+    .emit_exentries = native_lab_emit_exentries,
 };
 static const struct bpf_kinsn *bpf_arm64_native_lab_kinsn_descs[2];
 struct map_ptr_file_priv {

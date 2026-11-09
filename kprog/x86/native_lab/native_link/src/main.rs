@@ -1029,6 +1029,64 @@ fn arm64_accumulate_bpf_callee_saved_regs(insn: u32, mask: &mut u8) {
     }
 }
 
+// A64 load/store encoding groups follow arch/arm64/include/asm/insn.h.
+// Final native code is decoded before the appended literal/data pool.
+fn arm64_load_destination(word: u32) -> Option<u16> {
+    let rt = (word & 31) as u16;
+    let gpr = |reg: u16| if reg < 31 { reg } else { u16::MAX };
+    let vector = word & (1 << 26) != 0;
+
+    // CAS/CASP return the observed value through Rs, including acquire/release.
+    if word & 0x3fa0_7c00 == 0x08a0_7c00 ||
+       word & 0x3fa0_7c00 == 0x0820_7c00 {
+        return Some(gpr(((word >> 16) & 31) as u16));
+    }
+    // Literal LDR/LDRSW; PRFM literal is an architectural hint.
+    if word & 0x3b00_0000 == 0x1800_0000 {
+        if !vector && word >> 30 == 3 { return None; }
+        return Some(if vector { u16::MAX } else { gpr(rt) });
+    }
+    // LDP/LDNP/LDPSW, including offset and pre/post-index addressing.
+    if word & 0x3a40_0000 == 0x2840_0000 {
+        return Some(if vector { u16::MAX } else { gpr(rt) });
+    }
+    // Exclusive/acquire loads, including the two-result LDXP/LDAXP forms.
+    if word & 0x3f40_0000 == 0x0840_0000 {
+        return Some(gpr(rt));
+    }
+    // LSE atomic read/modify/write, including the XZR store aliases.
+    if word & 0x3b20_0c00 == 0x3820_0000 {
+        return Some(gpr(rt));
+    }
+    // Scalar/SIMD single loads: unsigned, signed, unscaled, register offset,
+    // unprivileged and writeback forms share the same load/store opc field.
+    if word & 0x3a00_0000 == 0x3800_0000 {
+        let opc = (word >> 22) & 3;
+        if vector {
+            return if opc & 1 != 0 { Some(u16::MAX) } else { None };
+        }
+        if opc == 0 || (opc == 2 && word >> 30 == 3) { return None; }
+        return Some(gpr(rt));
+    }
+    // Advanced SIMD load-structure groups use the saved-vector recovery scope.
+    if word & 0xbe40_0000 == 0x0c40_0000 {
+        return Some(u16::MAX);
+    }
+    None
+}
+
+fn arm64_decoded_load_sites(blob: &[u8], code_word_count: usize) -> Vec<LoadSite> {
+    blob[..code_word_count * 4].chunks_exact(4).enumerate()
+        .filter_map(|(index, bytes)| {
+            let word = u32::from_le_bytes(bytes.try_into().unwrap());
+            arm64_load_destination(word).map(|destination| LoadSite {
+                offset: (index * 4) as u32,
+                insn_len: 4,
+                destination,
+            })
+        }).collect()
+}
+
 fn arm64_mark_bpf_callee_saved_reg(mask: &mut u8, reg: u32) {
     if let Some(bit_index) = arm64_callee_saved_bit_index(reg) {
         *mask |= 1u8 << bit_index;
@@ -4554,6 +4612,10 @@ fn rewrite_arm64(
         validate_arm64_kernel_blob_control_flow(&blob, code_word_count, ret_trampoline_word, &finite_code_sites)?;
     }
 
+    let load_sites = if proof_mode { Vec::new() } else {
+        arm64_decoded_load_sites(&blob, code_word_count)
+    };
+
     if show {
         disasm_arm64_words(&blob);
     }
@@ -4576,7 +4638,7 @@ fn rewrite_arm64(
         proof_relocs,
         proof_symbols,
         readonly_objects,
-        load_sites: Vec::new(),
+        load_sites,
     })
 }
 
