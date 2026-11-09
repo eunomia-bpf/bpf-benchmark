@@ -16,7 +16,7 @@ PATCH = ROOT / 'kprog/stock-path/x86-entry-frame.patch'
 def main():
     command = sys.argv[1:]
     if Path(command[0]).name != 'cc1':
-        os.execv(command[0], command)
+        os.execvp(command[0], command)
     index = command.index(str(SOURCE))
     patched = subprocess.run(
         ['patch', '--silent', '--forward', '--no-backup-if-mismatch',
