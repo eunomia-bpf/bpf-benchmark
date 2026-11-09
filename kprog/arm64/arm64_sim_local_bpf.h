@@ -209,7 +209,9 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
       ARM64_SIM_L_REG_TAG(BASE) != ARM64_SIM_TAG_RELOC_ADDR && \
       !((__a64_sim_is_xdp || __a64_sim_abi_kind == KPROG_ABI_KIND_SKB) && \
         ARM64_SIM_L_REG_TAG(BASE) == ARM64_SIM_TAG_ABI)) && \
-     ARM64_SIM_L_UNSPECIFIED())
+     ((ARM64_SIM_L_REG_TAG(BASE) == ARM64_SIM_TAG_SCALAR && \
+       ARM64_SIM_L_READ_REG_RAW(BASE) == 0) || \
+      ARM64_SIM_L_UNSPECIFIED()))
 #endif
 #define ARM64_SIM_L_CLEAR_READ_DEST(DST) \
     ARM64_SIM_L_WRITE_REG_WIDTH((DST), 0ULL, ARM64_WIDTH_64)
@@ -1187,6 +1189,8 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			KPROG_ARM64_DQ_MEM_OP_STORE_Q0_ACCESS;          \
 		int __a64_dq_load =                                   \
 			__a64_dq_access == KPROG_ARM64_DQ_MEM_ACCESS_LOAD;\
+		if (__a64_dq_load && ARM64_SIM_L_READ_FAULT(BASE))        \
+			break;                                             \
 		unsigned __a64_dq_lanes = __a64_dq_idx ==             \
 				KPROG_ARM64_DQ_MEM_OP_LOAD_D0_INDEX ?   \
 			KPROG_ARM64_DQ_MEM_OP_LOAD_D0_LANES :           \
@@ -1422,14 +1426,19 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
  * Arm Instruction Set Reference 100076, section D3.6. */
 #if defined(__bpf__)
 extern __u64 bpf_arm64_native_lab_atomic8(__u8 *word, __u64 value, __u32 operation, __u32 order) __ksym;
+extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 operation, __u32 order) __ksym;
 #define ARM64_SIM_L_ATOMIC_KIND___atomic_fetch_add 0U
 #define ARM64_SIM_L_ATOMIC_KIND___atomic_fetch_or 1U
 #define ARM64_SIM_L_ATOMIC_KIND___atomic_fetch_and 2U
 #define ARM64_SIM_L_ATOMIC_BYTE(FETCH, ADDR, VALUE, ORDER) \
  ((__u8)bpf_arm64_native_lab_atomic8((__u8 *)(ADDR), (VALUE), ARM64_SIM_L_ATOMIC_KIND_##FETCH, (ORDER)))
+#define ARM64_SIM_L_ATOMIC_HALF(FETCH, ADDR, VALUE, ORDER) \
+ ((__u16)bpf_arm64_native_lab_atomic16((__u16 *)(ADDR), (VALUE), ARM64_SIM_L_ATOMIC_KIND_##FETCH, (ORDER)))
 #else
 #define ARM64_SIM_L_ATOMIC_BYTE(FETCH, ADDR, VALUE, ORDER) \
  FETCH((__u8 *)(ADDR), (__u8)(VALUE), (ORDER))
+#define ARM64_SIM_L_ATOMIC_HALF(FETCH, ADDR, VALUE, ORDER) \
+ FETCH((__u16 *)(ADDR), (__u16)(VALUE), (ORDER))
 #endif
 
 #define ARM64_SIM_L_ATOMIC_RMW(FETCH, COMPLEMENT, DST, SRC, BASE, WIDTH, AUX) \
@@ -1452,7 +1461,7 @@ extern __u64 bpf_arm64_native_lab_atomic8(__u8 *word, __u64 value, __u32 operati
     else if ((WIDTH) == ARM64_WIDTH_32) \
         __a64_la_old = FETCH((__u32 *)__a64_la_addr, (__u32)__a64_la_add, __a64_la_order); \
     else if ((WIDTH) == ARM64_WIDTH_16) \
-        __a64_la_old = FETCH((__u16 *)__a64_la_addr, (__u16)__a64_la_add, __a64_la_order); \
+        __a64_la_old = ARM64_SIM_L_ATOMIC_HALF(FETCH, __a64_la_addr, __a64_la_add, __a64_la_order); \
     else \
         __a64_la_old = ARM64_SIM_L_ATOMIC_BYTE(FETCH, __a64_la_addr, __a64_la_add, __a64_la_order); \
     __u64 __a64_la_payload = ARM64_SIM_L_MEM_PAYLOAD((BASE), ARM64_REG_NONE, __a64_la_mem_aux, 0, 0, __a64_la_old, __a64_la_tag); \
@@ -1793,6 +1802,8 @@ extern __u64 bpf_arm64_native_lab_atomic8(__u8 *word, __u64 value, __u32 operati
 
 #define ARM64_SIM_LIBC_MEMCPY()                                            \
 	do {                                                               \
+		if (ARM64_SIM_L_REG_TAG(ARM64_X1) == ARM64_SIM_TAG_SCALAR) \
+			ARM64_SIM_L_UNSUPPORTED_OPCODE();                       \
 		__u8 *__a64_lib_dst = ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0);  \
 		const __u8 *__a64_lib_src = ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1); \
 		__u64 __a64_lib_len = ARM64_SIM_L_READ_REG(ARM64_X2);       \

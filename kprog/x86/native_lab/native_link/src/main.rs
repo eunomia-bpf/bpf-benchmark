@@ -1038,7 +1038,7 @@ fn arm64_load_destination(word: u32) -> Option<u16> {
 
     // CAS/CASP return the observed value through Rs, including acquire/release.
     if word & 0x3fa0_7c00 == 0x08a0_7c00 ||
-       word & 0x3fa0_7c00 == 0x0820_7c00 {
+       word & 0xbfa0_7c00 == 0x0820_7c00 {
         return Some(gpr(((word >> 16) & 31) as u16));
     }
     // Literal LDR/LDRSW; PRFM literal is an architectural hint.

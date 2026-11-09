@@ -155,27 +155,35 @@ out:
 __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_arm64_native_lab_emit(u64 arg0) { (void)arg0; }
 
-/* Exact one-byte LSE memory effect. The stock kfunc ABI describes a one-byte
- * read/write argument; all byte addresses satisfy the ISA alignment. */
-#define ARM64_NATIVE_BYTE_RMW(FETCH, WORD, VALUE, ORDER) ({ \
- u8 __old; \
+/* Exact narrow LSE memory effects. Each typed kfunc argument gives the
+ * stock verifier the corresponding read/write memory extent. */
+#define ARM64_NATIVE_NARROW_RMW(FETCH, WORD, VALUE, ORDER) ({ \
+ typeof(*(WORD)) __old; \
  switch (ORDER) { \
- case __ATOMIC_RELAXED: __old=FETCH(WORD,(u8)(VALUE),__ATOMIC_RELAXED); break; \
- case __ATOMIC_ACQUIRE: __old=FETCH(WORD,(u8)(VALUE),__ATOMIC_ACQUIRE); break; \
- case __ATOMIC_RELEASE: __old=FETCH(WORD,(u8)(VALUE),__ATOMIC_RELEASE); break; \
- case __ATOMIC_ACQ_REL: __old=FETCH(WORD,(u8)(VALUE),__ATOMIC_ACQ_REL); break; \
- default: __old=FETCH(WORD,(u8)(VALUE),__ATOMIC_SEQ_CST); break; \
+ case __ATOMIC_RELAXED: __old=FETCH(WORD,(typeof(*(WORD)))(VALUE),__ATOMIC_RELAXED); break; \
+ case __ATOMIC_ACQUIRE: __old=FETCH(WORD,(typeof(*(WORD)))(VALUE),__ATOMIC_ACQUIRE); break; \
+ case __ATOMIC_RELEASE: __old=FETCH(WORD,(typeof(*(WORD)))(VALUE),__ATOMIC_RELEASE); break; \
+ case __ATOMIC_ACQ_REL: __old=FETCH(WORD,(typeof(*(WORD)))(VALUE),__ATOMIC_ACQ_REL); break; \
+ default: __old=FETCH(WORD,(typeof(*(WORD)))(VALUE),__ATOMIC_SEQ_CST); break; \
  } \
  __old; })
 __bpf_kfunc u64 bpf_arm64_native_lab_atomic8(u8 *word, u64 value, u32 operation, u32 order)
 {
  if (operation == 0)
-  return ARM64_NATIVE_BYTE_RMW(__atomic_fetch_add, word, value, order);
+  return ARM64_NATIVE_NARROW_RMW(__atomic_fetch_add, word, value, order);
  if (operation == 1)
-  return ARM64_NATIVE_BYTE_RMW(__atomic_fetch_or, word, value, order);
- return ARM64_NATIVE_BYTE_RMW(__atomic_fetch_and, word, value, order);
+  return ARM64_NATIVE_NARROW_RMW(__atomic_fetch_or, word, value, order);
+ return ARM64_NATIVE_NARROW_RMW(__atomic_fetch_and, word, value, order);
 }
-#undef ARM64_NATIVE_BYTE_RMW
+__bpf_kfunc u64 bpf_arm64_native_lab_atomic16(u16 *word, u64 value, u32 operation, u32 order)
+{
+ if (operation == 0)
+  return ARM64_NATIVE_NARROW_RMW(__atomic_fetch_add, word, value, order);
+ if (operation == 1)
+  return ARM64_NATIVE_NARROW_RMW(__atomic_fetch_or, word, value, order);
+ return ARM64_NATIVE_NARROW_RMW(__atomic_fetch_and, word, value, order);
+}
+#undef ARM64_NATIVE_NARROW_RMW
 
 __bpf_kfunc_end_defs();
 /* Typed u32 reads use scaled AArch64 relocations into this ELF section. */
@@ -183,6 +191,7 @@ asm(".pushsection .BTF_ids,\"a\"\n.balign 4\n.popsection\n");
 BTF_KFUNCS_START(bpf_arm64_native_lab_kfunc_ids)
 BTF_ID_FLAGS(func, bpf_arm64_native_lab_emit)
 BTF_ID_FLAGS(func, bpf_arm64_native_lab_atomic8)
+BTF_ID_FLAGS(func, bpf_arm64_native_lab_atomic16)
 BTF_KFUNCS_END(bpf_arm64_native_lab_kfunc_ids)
 BTF_ID_LIST_SINGLE(bpf_arm64_native_lab_emit_id, func, bpf_arm64_native_lab_emit)
 
@@ -562,7 +571,7 @@ static int native_lab_emit_exentries(u64 payload, void *rw_table,
             (word & 0x3fe00000U) == 0x08600000U) {
             second = (word >> 10) & 31;
             pair = true;
-        } else if ((word & 0x3fa07c00U) == 0x08207c00U) {
+        } else if ((word & 0xbfa07c00U) == 0x08207c00U) {
             second = (reg + 1) & 31;
             pair = true;
         }
