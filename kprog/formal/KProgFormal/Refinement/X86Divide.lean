@@ -194,3 +194,104 @@ theorem handler_refines (width : ScalarWidth) (source : Reference.X86.ScalarSour
   exact ⟨rfl, rfl, rfl⟩
 
 end KProgFormal.Refinement.X86Divide
+
+namespace KProgFormal.Refinement.X86Divide
+open Reference
+open Reference.X86 (ScalarWidth)
+open KProgFormal.X86SignedDivision
+
+/-- Unsigned magnitude division with restored operand signs equals integer
+truncation toward zero, including the complete double-width signed minimum. -/
+theorem signed_results (dividend divisor : Int) :
+    restoreSign (decide (dividend < 0) != decide (divisor < 0))
+        (dividend.natAbs / divisor.natAbs) = dividend.tdiv divisor ∧
+    restoreSign (decide (dividend < 0))
+        (dividend.natAbs % divisor.natAbs) = dividend.tmod divisor := by
+  have quotient := quotient_sign (decide (dividend < 0)) (decide (divisor < 0))
+    dividend.natAbs divisor.natAbs
+  have remainder := remainder_sign (decide (dividend < 0)) (decide (divisor < 0))
+    dividend.natAbs divisor.natAbs
+  rw [restore_signed, restore_signed] at quotient remainder
+  exact ⟨quotient.symm, remainder.symm⟩
+
+/-- Magnitude-level signed arithmetic composes with the existing generated
+operand read and width-aware writes. Captured-limb/source extraction, the C
+high-limb preliminary fault and restoring-loop realization, fresh flags and
+compiler/physical-memory transport remain the production interfaces. -/
+def signedMagnitudeStep (width : ScalarWidth) (source : Reference.X86.ScalarSource)
+    (nextPc : Reference.Word) (s : Reference.X86.State) : Transition Reference.X86.State :=
+  match X86Scalar.read s width source with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (operand, reads) =>
+      let dividend := (BitVec.ofNat (2 * width.bits) (Reference.X86.divideDividend width s)).toInt
+      let divisor := (operand.setWidth width.bits).toInt
+      let quotient := dividend.natAbs / divisor.natAbs
+      let negative := decide (dividend < 0) != decide (divisor < 0)
+      let limit := 2 ^ (width.bits - 1)
+      if divisor.natAbs = 0 ∨ ¬quotient ≤ limit - (if negative then 0 else 1) then
+        ⟨s, reads ++ [.fault .divide], some .divide⟩
+      else
+        let signedQuotient := restoreSign negative quotient
+        let signedRemainder := restoreSign (decide (dividend < 0)) (dividend.natAbs % divisor.natAbs)
+        if width = .w8 then
+          let packed := (BitVec.ofInt 8 signedQuotient).toNat +
+            256 * (BitVec.ofInt 8 signedRemainder).toNat
+          let registers := fun r => if r = 0 then
+            write .w16 (s.gpr r) (BitVec.ofNat 64 packed) else s.gpr r
+          ⟨{ s with gpr := registers, pc := nextPc }, reads, none⟩
+        else
+          let registers := fun r => if r = 0 then
+            write width (s.gpr r) (BitVec.ofInt 64 signedQuotient) else if r = 2 then
+              write width (s.gpr r) (BitVec.ofInt 64 signedRemainder) else s.gpr r
+          ⟨{ s with gpr := registers, pc := nextPc }, reads, none⟩
+
+theorem signed_magnitude_refines (width : ScalarWidth) (source : Reference.X86.ScalarSource)
+    (nextPc : Reference.Word) (s : Reference.X86.State) :
+    signedMagnitudeStep width source nextPc s =
+      Reference.X86.step (.signedDivide width source nextPc) s := by
+  change signedMagnitudeStep width source nextPc s = Reference.X86.signedDivideStep width source nextPc s
+  simp only [signedMagnitudeStep, Reference.X86.signedDivideStep, X86Scalar.read_refines]
+  cases read : Reference.X86.scalarRead s width source with
+  | error fault => simp only [read]
+  | ok pair =>
+      rcases pair with ⟨operand, reads⟩
+      simp only [read]
+      let dividend := (BitVec.ofNat (2 * width.bits) (Reference.X86.divideDividend width s)).toInt
+      let divisor := (operand.setWidth width.bits).toInt
+      let quotient := dividend.natAbs / divisor.natAbs
+      let negative := decide (dividend < 0) != decide (divisor < 0)
+      let limit := 2 ^ (width.bits - 1)
+      have values := signed_results dividend divisor
+      have positive : 0 < limit := by cases width <;> decide
+      have range := quotient_range negative quotient limit positive
+      rw [values.1] at range
+      have limitCast : (limit : Int) = (2 : Int) ^ (width.bits - 1) := by
+        cases width <;> decide
+      rw [limitCast] at range
+      have zero : divisor.natAbs = 0 ↔ divisor = 0 := by simp
+      have faults : (divisor.natAbs = 0 ∨ ¬quotient ≤ limit - (if negative then 0 else 1)) ↔
+          (divisor = 0 ∨ dividend.tdiv divisor < -((2 : Int) ^ (width.bits - 1)) ∨
+            (2 : Int) ^ (width.bits - 1) ≤ dividend.tdiv divisor) := by
+        rw [zero, range]
+        omega
+      by_cases failed : divisor.natAbs = 0 ∨ ¬quotient ≤ limit - (if negative then 0 else 1)
+      · have canonical := faults.mp failed
+        simp only [dividend, divisor, quotient, negative, limit] at failed canonical
+        simp only [failed, canonical, ↓reduceIte]
+      · have canonical := mt faults.mpr failed
+        simp only [dividend, divisor, quotient, negative, limit] at failed canonical values
+        simp only [failed, canonical, ↓reduceIte, values.1, values.2]
+        by_cases byte : width = .w8 <;>
+          simp only [byte, ↓reduceIte, write_refines] <;>
+          congr 2 <;> funext r <;>
+          by_cases accumulator : r = 0 <;> by_cases high : r = 2 <;>
+          simp_all [write_refines, Reference.X86.scalarWriteValue, Reference.X86.RegisterSlice.shift]
+
+theorem signed_magnitude_handler_refines (width : ScalarWidth) (source : Reference.X86.ScalarSource)
+    (nextPc : Reference.Word) (s : Reference.X86.State) :
+    Reference.X86.Step (.signedDivide width source nextPc) s
+      (signedMagnitudeStep width source nextPc s) := by
+  rw [signed_magnitude_refines]
+  exact ⟨rfl, rfl, rfl⟩
+
+end KProgFormal.Refinement.X86Divide
