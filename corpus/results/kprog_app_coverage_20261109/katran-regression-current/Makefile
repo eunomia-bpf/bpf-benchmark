@@ -30,3 +30,7 @@ generation:
 .PHONY: image
 image:
 	docker build -f /workspaces/repository/corpus/results/kprog_app_coverage_20261109/katran-regression-current/Dockerfile -t bpf-benchmark/kprog-katran-restored:c-20261109 /var/tmp/kprog-tmp/C/katran-regression-runtime/image
+
+.PHONY: producer
+producer:
+	PYTHONDONTWRITEBYTECODE=1 python3 -B $(ROOT)/corpus/results/kprog_app_coverage_20261109/katran-caller-registers/producer.py
