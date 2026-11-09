@@ -1,0 +1,3 @@
+Original ARM ISA fixtures on native-load recovery
+
+All34original fixtures retain original native bytes and annotations. Four named controls execute and compare their existing expected result2; negative cases retain load-only admission outcomes. A private runtime copy carries thef1/e5recovery Image/module/loader/linker and92helper simulator. The producer is incrementally relinked against the captured paired static loader. The existing check.py and original fixture source remain captured. QEMU2GiB12-15 follows the complete92helper dynptr family bypidfd, alongside the completecatalog2GiB8-11 and serialapps up to8GiB16-19. Every actual stage and raw request archive is collected. Runtime admission additions:0.

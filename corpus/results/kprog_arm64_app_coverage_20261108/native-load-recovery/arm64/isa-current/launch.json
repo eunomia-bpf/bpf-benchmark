@@ -1,0 +1,43 @@
+{
+  "utc": "2026-11-09T00:54:44.099722+00:00",
+  "runtime": "f1/e5/99b native load recovery",
+  "model_helpers": 92,
+  "cases": 34,
+  "guest_memory": "2GiB",
+  "cpus": "12-15",
+  "producer": {
+    "command": [
+      "taskset",
+      "-c",
+      "20-23",
+      "aarch64-linux-gnu-g++",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-O2",
+      "-D__EXPORTED_HEADERS__",
+      "-DNATIVE_LINK_PATH=\"/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link\"",
+      "-I/workspaces/repository/vendor/linux-framework/include/uapi",
+      "-I/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include",
+      "/workspaces/.agent-state/kprog-lanes/A/native-load-recovery/arm64/isa-current/source/kprog/fidelity/bound_probe.cpp",
+      "/workspaces/.agent-state/kprog-lanes/A/native-load-recovery/arm64/isa-current/libnative_loader.a",
+      "/workspaces/.agent-state/kprog-lanes/A/native-load-recovery/arm64/isa-current/libbpf.a",
+      "-static",
+      "-L/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu",
+      "-lelf",
+      "-lz",
+      "-lzstd",
+      "-ldl",
+      "-pthread",
+      "-o",
+      "/workspaces/.agent-state/kprog-lanes/A/native-load-recovery/arm64/isa-current/build/bound-probe"
+    ],
+    "build_exit": 0,
+    "source_sha256": "002abb7881af7084ead97a3fded4671143849b547e0f4178a8fc36ade00b4dab",
+    "static_loader_sha256": "6f7fb06e02768f65d6808c05553098e7f34e43d288a883e5867912d78c9751a3",
+    "producer_sha256": "935630751a57e5675fd16e5a9b541dc9653ae2be71e058afb804b9d0583b79f8"
+  },
+  "scope": "Original ISA fixtures, four named positives executed; negative cases load-only",
+  "runtime_admission_additions": 0
+}
