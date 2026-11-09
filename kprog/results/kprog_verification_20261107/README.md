@@ -11,8 +11,8 @@ corresponding specialization token row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 74 / 74 |
 | Reference step family defined | 67/75 | 74/74 |
-| Raw register handler refinement | 32/75 | 51/74 |
-| Raw register dispatcher arm composition | 32/75 | 51/74 |
+| Raw register handler refinement | 32/75 | 53/74 |
+| Raw register dispatcher arm composition | 32/75 | 53/74 |
 | Raw source-emitted branch families / composed step | 0 | 6/6 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/74 |
 | Addressed memory model / composed step | 29/75 | 0/74 |
@@ -6743,3 +6743,21 @@ interpretation, ghost stack release, native encoding/relocation identity and
 physical/compiler transport remain explicit generic interfaces. B forwarding
 and its RET components retain the coordinator pause. Complete make-check
 receipts carry their own frozen source epochs and actual outcomes.
+
+### ARM raw CNT/UADDLV refinement
+
+The two implemented vector reductions now execute their generated low/high
+64-bit primitives in the raw-state model. AUX16 selects sixteen byte lanes;
+the other AUX values select eight. CNT concatenates the byte counts, while
+UADDLV adds the widened half sums. A complete raw-state equality retains all
+GPR words/tags, SP, flags, memory, exclusive state and other vector banks.
+Production dispatch accepts arbitrary ignored operand bytes, FLAGS and IMM.
+The emission theorem composes53 numeric operations and six source families.
+
+Six new laws and the preceding164 audits compile with module/root exit0 and
+sorryAx0. The [reduction receipt](arm-raw-reduction.log.gz) records the source
+identities, theorem diagnostics and module/root outcomes. The current scalar
+native producer policy retains its domain; these laws cover implemented
+simulator bodies. Native decode/field extraction, C interpretation, entry
+origins and physical/compiler transport retain their existing interfaces.
+The sole complete-check queue retains its published source epochs.

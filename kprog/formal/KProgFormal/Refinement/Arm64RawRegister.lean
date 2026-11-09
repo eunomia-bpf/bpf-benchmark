@@ -2512,3 +2512,97 @@ end KProgFormal.Refinement.Arm64RawRegister.MoveAddress
 #print axioms KProgFormal.Refinement.Arm64RawRegister.MoveAddress.address_tag_frame
 #print axioms KProgFormal.Refinement.Arm64RawRegister.MoveAddress.address_production
 #print axioms KProgFormal.Refinement.Arm64RawRegister.MoveAddress.emission_step_refines
+
+
+namespace KProgFormal.Refinement.Arm64RawRegister.Reduction
+open Reference
+open Reference.AArch64 (ReductionOp)
+
+/-- DIRECT_BODY_37 captures the high-half result before overwriting the low
+half. AUX16 selects sixteen lanes; every other AUX selects eight lanes.
+CNT concatenates the byte counts; UADDLV adds the widened half sums. -/
+def body (op : ReductionOp) (aux : BitVec 32) (state : State) : Transition State :=
+  let high := if aux.toNat == 16 then GeneratedArm64Reduction.value
+    (Arm64Reduction.operation op) ((state.raw.vector0 >>> 64).setWidth 64) else 0
+  let low := GeneratedArm64Reduction.value (Arm64Reduction.operation op) (state.raw.vector0.setWidth 64)
+  let vector := match op with
+    | .count => low.setWidth 128 ||| (high.setWidth 128 <<< 64)
+    | .unsignedSum => (low + high).setWidth 128
+  ⟨advance { state with raw := { state.raw with vector0 := vector } }, [], none⟩
+
+theorem body_projects (op : ReductionOp) (aux : BitVec 32) (origins : Origins) (state : State) :
+    observe origins (body op aux state) =
+      Arm64Reduction.handlerStep op (aux.toNat == 16) (image origins state) := by
+  cases op <;> rfl
+
+theorem body_refines (op : ReductionOp) (aux : BitVec 32) (origins : Origins) (state : State) :
+    observe origins (body op aux state) =
+      Reference.AArch64.step (.reduction op (aux.toNat == 16)) (image origins state) := by
+  rw [body_projects, Arm64Reduction.step_refines]
+
+/-- The complete raw GPR/tag/SP/flags/memory/exclusive frame is retained;
+only V0 and the advancing PC change. Other vector banks retain their values. -/
+theorem body_frame (op : ReductionOp) (aux : BitVec 32) (state : State) :
+    (body op aux state).state.tags = state.tags ∧
+    (body op aux state).state.raw =
+      { state.raw with
+        vector0 := Arm64Reduction.handlerValue op (aux.toNat == 16) state.raw.vector0
+        pc := state.raw.pc + 4 } := by
+  cases op <;> exact ⟨rfl, rfl⟩
+
+def dispatch (code : Nat) (aux : BitVec 32) (state : State) : Option (Transition State) :=
+  (Arm64Reduction.decodeOperation code).map (fun op => body op aux state)
+
+theorem reached (op : ReductionOp) (aux : BitVec 32) (state : State) :
+    dispatch (GeneratedArm64Reduction.code (Arm64Reduction.operation op)) aux state =
+      some (body op aux state) := by
+  simp only [dispatch, Arm64Reduction.decode_operation_code]; rfl
+
+/-- All four byte-sized operand fields, FLAGS and IMM are arbitrary for the
+two reduction tokens. Full production dispatch reaches their vector body. -/
+theorem production (op : ReductionOp) (flags : Byte) (aux : BitVec 32)
+    (dst src src2 src3 : Byte) (value : Word)
+    (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (origins : Origins) (state : State) :
+    (dispatch (GeneratedArm64Reduction.code (Arm64Reduction.operation op)) aux state).map (observe origins) =
+      Arm64Dispatcher.dispatchExec (GeneratedArm64Reduction.code (Arm64Reduction.operation op))
+        flags aux dst src src2 src3 value sourceScalar sourceStack firstScalar secondScalar failure (image origins state) := by
+  rw [reached, Arm64Dispatcher.exec_reduction_refines]
+  exact congrArg some (body_refines op aux origins state)
+
+inductive Emission where
+  | leading (emission : MoveAddress.Emission)
+  | reduction (op : ReductionOp) (aux : BitVec 32)
+
+def dispatchEmission (nativeAddress : Word → Word) (emission : Emission) (origins : Origins) (state : State) :
+    Option (Transition State) :=
+  match emission with
+  | .leading emission => MoveAddress.dispatchEmission nativeAddress emission origins state
+  | .reduction op aux => dispatch (GeneratedArm64Reduction.code (Arm64Reduction.operation op)) aux state
+
+inductive Binding (nativeAddress : Word → Word) (pc : Word) : Emission → Reference.AArch64.Instruction → Prop where
+  | leading (emission : MoveAddress.Emission) (instruction : Reference.AArch64.Instruction)
+      (binding : MoveAddress.Binding nativeAddress pc emission instruction) :
+      Binding nativeAddress pc (.leading emission) instruction
+  | reduction (op : ReductionOp) (aux : BitVec 32) :
+      Binding nativeAddress pc (.reduction op aux) (.reduction op (aux.toNat == 16))
+
+theorem emission_step_refines (nativeAddress : Word → Word) (emission : Emission) (origins : Origins) (state : State)
+    (instruction : Reference.AArch64.Instruction) (binding : Binding nativeAddress state.raw.pc emission instruction) :
+    (dispatchEmission nativeAddress emission origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  cases binding with
+  | leading emission instruction bound =>
+      exact MoveAddress.emission_step_refines nativeAddress emission origins state instruction bound
+  | reduction op aux =>
+      change (dispatch _ aux state).map (observe origins) = _
+      rw [reached]
+      exact congrArg some (body_refines op aux origins state)
+
+end KProgFormal.Refinement.Arm64RawRegister.Reduction
+
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Reduction.body_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Reduction.body_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Reduction.body_frame
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Reduction.reached
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Reduction.production
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Reduction.emission_step_refines

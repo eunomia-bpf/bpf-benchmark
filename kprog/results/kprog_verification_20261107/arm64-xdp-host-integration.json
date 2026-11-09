@@ -78636,5 +78636,24 @@
       }
     ],
     "scope": "RawMOV_REG/alltags/capturedwordtag/SP32/ZR31/W64copy/W32scalarwrite, bitmaskMOVIMMSPalias, ADRPGOT7/RODATA8 withnativeIMM-PCidentity. Fullarchitecture, productionprefix andnormalized51numeric+6sourceemissionstep. Entry/C union/ghostrelease/nativeencoding/relocation/physical/compiler interfaces explicit; Bforwarding/layoutRETpause retained."
+  },
+  "arm64_raw_reduction_refinement": {
+    "operations": [
+      "ARM64_OP_CNT",
+      "ARM64_OP_UADDLV"
+    ],
+    "raw_operation_count": 53,
+    "source_branch_count": 6,
+    "new_audits": 6,
+    "total_audits": 170,
+    "module_exit": 0,
+    "root_exit": 0,
+    "sorryAx": 0,
+    "theorem": "KProgFormal.Refinement.Arm64RawRegister.Reduction.emission_step_refines",
+    "frame": "KProgFormal.Refinement.Arm64RawRegister.Reduction.body_frame",
+    "archive": "arm-raw-reduction.log.gz",
+    "archive_sha256": "18d246a4a5855e8338b0a6eac111355200c60da21ff02294018adf56055126c4",
+    "source_sha256": "564529b91cb82a1ffae57078773f3825369e6402ce50a38c064ea85cdad34f3a",
+    "scope": "CNT/UADDLV low/high halves, all AUX/ignored fields, full raw architectural/tag frame, production dispatch and unified53numeric+6source emission. Current scalar producer and C/native/entry/physical/compiler interfaces retain their domains."
   }
 }
