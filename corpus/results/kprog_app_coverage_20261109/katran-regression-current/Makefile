@@ -45,3 +45,7 @@ helper-stack-safety:
 
 helper-stack-application:
 	PYTHONDONTWRITEBYTECODE=1 python3 -B $(ROOT)/corpus/results/kprog_app_coverage_20261109/katran-regression-current/runtime.py $(SOURCE_COMMIT) /var/tmp/kprog-tmp/C/katran-regression-current/inline-producer/native/katran
+
+.PHONY: constant-offset-compile
+constant-offset-compile:
+	PYTHONDONTWRITEBYTECODE=1 python3 -B $(HERE)/constant-offset-compile.py $(PHASE)
