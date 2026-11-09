@@ -1,0 +1,3 @@
+# Whole paired Tracee existing-clamp source
+
+Published source20096 preserves each original size and offset bound through register-lifetime barriers. Paired native/JIT/embedded compile806ab supplies every original application artifact. The image-setup predecessor retained a missing-Dockerfile diagnostic; this successor packages its existing compiled artifacts through the established image recipe. Benchmark framework/workload definitions retain their frozen bytes. Actual Make exit 2. The command, each native request, generated C/B, compiler/verifier records and original work/error counters accompany this cohort. Runtime admission additions0.
