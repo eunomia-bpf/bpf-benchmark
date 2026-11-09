@@ -1,0 +1,37 @@
+{
+  "utc": "2026-11-09T07:48:01.623698+00:00",
+  "make_exit": 2,
+  "coverage": {
+    "utc": "2026-11-09T07:48:01.658665+00:00",
+    "host_ok": false,
+    "guest_exit": 1,
+    "hashes_unchanged": true,
+    "service_request_attempts": 0,
+    "distinct_source_prog_ids": 0,
+    "proof_generated": 0,
+    "stages": {},
+    "failure_causes": {},
+    "requests": [],
+    "applications": [
+      {
+        "archive_member": "run/corpus-results/arm64_qemu_corpus_19700101_000246_292444/details/apps/tracee__monitor.json",
+        "app": "tracee/monitor",
+        "status": "error",
+        "error": "failed to launch Tracee: /artifacts/tracee/bin/tracee --events '*' --events -net_packet_raw,-print_mem_dump,-net_packet_ipv4,-net_packet_ipv6,-net_packet_tcp,-net_packet_udp,-net_packet_icmp,-net_packet_icmpv6,-net_packet_dns,-net_packet_dns_request,-net_packet_dns_response,-net_packet_http,-net_packet_http_request,-net_packet_http_response,-anti_debugging,-aslr_inspection,-cgroup_notify_on_release,-cgroup_release_agent,-core_pattern_modification,-default_loader_mod,-disk_mount,-docker_abuse,-dropped_executable,-dynamic_code_loading,-file_modification,-fileless_execution,-hidden_file_created,-hooked_seq_ops_detector,-hooked_syscall_detector,-illegitimate_shell,-k8s_service_account_token,-kernel_module_loading,-k8s_api_connection,-k8s_cert_theft,-ld_preload,-lsm_test,-proc_fops_hooking,-proc_kcore_read,-proc_mem_access,-proc_mem_code_injection,-process_vm_write_inject,-ptrace_code_injection,-rcd_modification,-sched_debug_recon,-scheduled_task_mod,-stack_pivot,-bpf_attach,-security_bpf,-security_bpf_map,-security_bpf_prog,-stdio_over_socket,-sudoers_modification,-syscall_hooking,-system_request_key_mod --output none --server healthz --server http-address=:3366 --signatures-dir /var/tmp/bpfrejit-runtime/86ddf06c/tracee/signatures --capabilities bypass=true: command exited with code -9: {\"level\":\"warn\",\"ts\":306.472023136,\"msg\":\"Event canceled because of missing kernel symbol dependency\",\"missing symbols\":[\"non_existing_symbol\"],\"event\":\"multiple_fallbacks_test\"}\n{\"level\":\"warn\",\"ts\":306.684323648,\"msg\":\"Event canceled because of missing kernel symbol dependency\",\"missing symbols\":[\"non_existing_symbol\"],\"event\":\"missing_ksymbol\"}\n{\"level\":\"error\",\"ts\":307.581851904,\"msg\":\"Failed to register detector\",\"detector\":\"TRC-1013\",\"error\":\"detector TRC-1013 requires enrichment \\\"environment\\\" which is not enabled\"}\n{\"level\":\"error\",\"ts\":307.607977488,\"msg\":\"Failed to register detector\",\"detector\":\"TRC-107\",\"error\":\"detector TRC-107 requires enrichment \\\"environment\\\" which is not enabled\"}",
+        "phases": {
+          "baseline": {
+            "programs": [],
+            "workload": null,
+            "raw_measurement": {}
+          },
+          "post_rejit": {
+            "programs": [],
+            "workload": null,
+            "raw_measurement": {}
+          }
+        }
+      }
+    ],
+    "denominators": "Service requests retain retries. Distinct source IDs are recorded separately. Baseline resident programs and every raw phase measurement are retained without using manifest entries as loaded-program counts."
+  }
+}
