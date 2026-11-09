@@ -59,18 +59,19 @@
 | O1 参考语义定义 | 67/75 | 74/74 | V |
 | O1 raw 寄存器 handler 精化 | 32/75 | 条件式 74/74，raw 0/74 | V |
 | O1 地址内存组合步骤 | 29/75 | 0/74 | V |
-| O2 token 体等价 | 70/75 | 73/74 | V |
+| O2 C-model token 体等价 | 71/75 | 73/74 | V |
 | 编译字节级证明 | 13/75 个操作，141 单元组合对象（含 2 个部分 helper 单元） | 0/74 | V、C |
 | O4 链接步骤（22 行，两个 ISA 合计） | 7 条件式、14 部分、1 待证 | 同左 | V |
 
 - [ ] **V** 上表每一行做到满额。
 - [ ] **V** O1：官方模型对照补上 ANDN、BZHI 这 4 个 x86-64 形式（现为 63/67）。
-- [ ] **V** O1/O2：x86-64 的 helper 调用、寄存器调用、外层返回；有符号 DIV 从 partial 到完整；REP MOVS 全计数的 C 和编译证明。
+- [ ] **V** O1/O2：x86-64 的 helper 调用、寄存器调用、外层返回；REP MOVS 全计数的 C 和编译证明。
 - [x] **V** DIV：逐轮 64 位恢复除法、独立进位、余数与商不变式、bit63→bit0 顺序、零高位快路径与有符号故障结果组合（f243ef693，`X86Divide.RestoringLoop`）。
 - [x] **V** DIV：四种宽度的实际 word 算术、窄宽度打包、word 范围比较、符号恢复、完整状态/fresh flags 与 raw/tag frame 组合（ce913a9c7，`X86Divide.SourceWords`）。
-- [ ] **V** DIV word 模型两批的全量检查（f243ef693、ce913a9c7；当前 full 源 099a096fb，结束后沿用增量缓存继续）。
+- [ ] **V** DIV word/当前 raw handler 模型批次的全量检查（f243ef693、ce913a9c7 与本提交；当前 full 源 099a096fb，结束后沿用增量缓存继续）。
 - [x] **V** DIV：AUX bit0 的 signed/unsigned 分流、任意 fresh flags、寄存器/捕获操作数、token/dispatcher 与通用块组合（099a096fb）。
-- [ ] **V** DIV：实际 C 循环及 signed 分支源码提取对应 word 模型，继续编译 B、物理内存和 ABI 对应关系；当前 token 状态为 partial-signed-and-unsigned-C-model。
+- [x] **V** DIV：signed/unsigned 当前具体 C-model 全分支，word 算术直接执行于 raw/tag handler，并接入字段、dispatcher 和 O2 token 定理（本提交；71/75）。
+- [ ] **V** 全 simulator 的 C 源解释与 Lean C-model 对应关系（包括 DIV、ROR、ANDN/BZHI 等当前 C-model）；编译 B 与物理内存/入口/ABI 对应关系继续按各项收尾。
 - [ ] **V** O4：物理异常表一步、thunk 与物理栈有效性的组合、真实 JIT 对应关系、成功尾调用组合，并解除条件定理的 O1/O2 前提。
 - [ ] **V、C** 编译后的 B 与 C 模型的差距：按 token 单元验证，或走经过验证的编译路径。
 - [ ] **C/A** O3：两个 ISA 的有界间接跳转。

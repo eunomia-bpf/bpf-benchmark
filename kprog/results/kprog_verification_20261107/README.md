@@ -20,7 +20,7 @@ specialization token also has its own row.
 | Control handler model / composed step | 3/75 | 0/74 |
 | Pointer-load body model / composed step (all16 GPRs) | 2/75 | 0/74 |
 | Memory-call full-frame C body model | 4/75 | 0/74 |
-| O2 C-model token-body equality | 70/75 | 73/74 |
+| O2 C-model token-body equality | 71/75 | 73/74 |
 | Actual clang scalar token units (CMOV48; SETCC32; BSWAP2; MOV_REG7; MOVZX7; MOVSX8; SHIFTX6; POPCNT3; ANDN2; BZHI2; RORX2; MOV_IMM5; LEA12) | 13/75 | 0/74 |
 | Actual clang returning helper bodies (partial CALL_HELPER) | 2 sparse IDs (1/5) | 0 |
 | Additional returning-helper interface equality | 2/75 | 0/74 |
@@ -6200,3 +6200,18 @@ current raw/tag frame body. The [word-route receipt](div-word-routes.log.gz)
 records four compiled modules and11axiom audits (all0, sorryAx0, ten inherited executable-reduction dependencies). The unified TODO marks this layer
 complete and retains actual C-source extraction, compiled-B and physical/ABI
 transport. Current complete C-model70/75 and compiled scalar13/75 retain scope.
+
+### Current DIV concrete word body and C-model coverage
+
+The current `SignedDivision.wordStep` directly executes the proved native-word
+arithmetic, then generated raw/tag writes and six fresh flags. Its retained
+magnitude-frame equality composes all previous captured/full-register/high-byte,
+canonical-step, field, dispatcher and O2 laws. The [body receipt](div-word-frame.log.gz)
+records core, root, RET and generic TV compiles (all0),11core and7TV axiom audits (all0/sorryAx0, nine/five inherited executable-reduction dependencies) and a source-operation map.
+Both DIV rows now use the same concrete C-model category as ROR and ANDN:
+legal decoded fields and arbitrary common projected input under the stated
+primitive interpretation. Current complete x86 C-model coverage is71/75;
+compiled scalar coverage remains13/75. C-language source interpretation,
+actual BPF compilation and physical memory/entry/ABI transport retain their
+shared obligations in the [unified TODO](../../docs/todo.md). These numbers
+record model-level equality; the prior receipts retain their exact source epochs.

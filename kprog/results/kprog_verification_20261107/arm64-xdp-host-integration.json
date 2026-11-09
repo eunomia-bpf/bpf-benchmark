@@ -44368,6 +44368,246 @@
     "remaining": "other opcode families/wholeISA dispatch/compiledB/O2/O4",
     "scope": "current production CMP flags assignment exactly modeled: real zero-borrow SUB flags then SF xor signedLT using actual generated sign-extension helper; bridge derives equality of entire flag word"
   },
+  "x86_div_current_word_frame_binding": {
+    "archive": "kprog/results/kprog_verification_20261107/div-word-frame.log.gz",
+    "compiled_scalar_families": 13,
+    "composition": {
+      "audit_input": "import SimulatorComposition\n#print axioms KProgTV.SimulatorComposition.native_to_interpreted\n#print axioms KProgTV.SimulatorComposition.interpreted_to_specialized\n#print axioms KProgTV.SimulatorComposition.specialized_reflects\n#print axioms KProgTV.SimulatorComposition.program_block_validation\n#print axioms KProgTV.SimulatorComposition.program_effects_checked\n#print axioms KProgTV.SimulatorComposition.actual_program_block_validation\n#print axioms KProgTV.SimulatorComposition.actual_program_effects_checked\n",
+      "exit": 0,
+      "reduction_bridge": 5,
+      "sorryAx": 0
+    },
+    "coverage_standard": "Concrete body operations interpreted over legal decoded fields/arbitrary common projected input, same current C-model category as ROR and ANDN; actual C-source interpretation, compiled-B and physical/entry/ABI retain their separate shared obligations.",
+    "current_complete_C_model_families": 71,
+    "current_complete_C_model_families_before": 70,
+    "integration": [
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/div-word-frame/olean/KProgFormal/X86RemainingTokenO2.olean",
+          "/workspaces/repository/kprog/formal/KProgFormal/X86RemainingTokenO2.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/formal/KProgFormal/X86RemainingTokenO2.lean",
+        "source_sha256": "d7e093b36025d67e840ff87db9a3b6b47ba1ab9c2197092ee87b7bf3a4494d9f"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/div-word-frame/olean/KProgFormal.olean",
+          "/workspaces/repository/kprog/formal/KProgFormal.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/formal/KProgFormal.lean",
+        "source_sha256": "31bd595dd0e05a660cb3380e6a198b225df416894fe8451ddd46a9a8f6c6f107"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/div-word-frame/tv-olean/BPF.olean",
+          "/workspaces/repository/kprog/tv/BPF.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/tv/BPF.lean",
+        "source_sha256": "c7321c6be0ecaedaef5ec87ca70215cb780e250d241c062a308c88b08555c8f9"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/div-word-frame/tv-olean/Composition.olean",
+          "/workspaces/repository/kprog/tv/Composition.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/tv/Composition.lean",
+        "source_sha256": "696fa9b36c99fc8fce42be4ae37f04051b9338b35a8c8ac903dee32526828771"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/div-word-frame/tv-olean/BPFPath.olean",
+          "/workspaces/repository/kprog/tv/BPFPath.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/tv/BPFPath.lean",
+        "source_sha256": "55c5ceb95b9122ad7435ffbc1f653ac258f29d0ce9337f9424825245612b6d6d"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/div-word-frame/tv-olean/SimulatorComposition.olean",
+          "/workspaces/repository/kprog/tv/SimulatorComposition.lean"
+        ],
+        "exit": 0,
+        "source": "kprog/tv/SimulatorComposition.lean",
+        "source_sha256": "60e601baadb4891ce18172adedf3ec8f3f7237c5455299bf6aaf7f9e533681df"
+      }
+    ],
+    "runtime_admission_additions": 0,
+    "sole_full_source": "099a096fb81c9143663db0bf256eae35400be26a",
+    "source_operation_bindings": {
+      "bindings": [
+        [
+          "AUX & X86_DIV_AUX_SIGNED",
+          "X86Dispatcher.divide_aux_signed / signedField"
+        ],
+        [
+          "READ_REG SRC or immediate, RAX, RDX captured before writes",
+          "SignedDivision.register_frame_refines / captured_frame_refines"
+        ],
+        [
+          "masked high/low and low-negation/high-complement carry",
+          "X86SignedDivision.sourceMagnitudeLimbs / source_limbs_split"
+        ],
+        [
+          "sign, divisor magnitude and quotient sign XOR",
+          "X86Divide.Capture"
+        ],
+        [
+          "zero/high preliminary fault before quotient computation",
+          "SourceWords.guarded"
+        ],
+        [
+          "qword high0 direct unsigned64 divide or descending128/64 loop",
+          "SourceWords.quotRem / RestoringLoop.qword"
+        ],
+        [
+          "narrow (high << bits) | low and unsigned64 divide/modulo",
+          "SourceWords.packed_value / quot_rem_matches"
+        ],
+        [
+          "unsigned sign-bit minus positive-quotient bit threshold",
+          "SourceWords.limitWord / limit_value / guarded_matches"
+        ],
+        [
+          "0ULL - quotient/remainder restores original operand signs",
+          "SignedDivision.wordStep, SourceWords.arithmeticStep"
+        ],
+        [
+          "byte packed AH:AL write16, wider ordered RAX/RDX width writes",
+          "generated writeRegister / packedBytes / magnitudeFrameStep"
+        ],
+        [
+          "CF,ZF,SF,OF,PF,AF source-order arbitrary bits",
+          "SourceState.freshFlags slots0..5"
+        ],
+        [
+          "current whole raw-frame/token/dispatcher canonical Step",
+          "word_step_matches_magnitude / word_frame_matches / register_dispatch_step_refines / register_token_body_matches"
+        ]
+      ],
+      "interpretation_domain": "Legal decoded native widths and source-register/capture fields, arbitrary common projected numeric/raw-tag input, modeled scalar register primitives and arbitrary fresh bits; same complete-C-model category as ROR and ANDN. Actual C-to-Lean extraction, BPF compilation and physical/ABI correspondence remain shared proof interfaces.",
+      "model_status": "Complete concrete word C-model for current unsigned and signed DIV domains. C-language source correspondence and actual compiled/physical state transport remain distinct from this model-level claim.",
+      "runtime_admission_additions": 0,
+      "source": "kprog/x86/x86_sim_local_bpf.h",
+      "source_region": "KPROG_X86_DISP_DIV_HANDLED(OP), signed AUXbit0 branch"
+    },
+    "summary": {
+      "audit_exit": 0,
+      "audit_input": "import KProgFormal.Refinement.X86Dispatcher\n#print axioms KProgFormal.Refinement.X86NumericAddress.SignedDivision.word_step_matches_magnitude\n#print axioms KProgFormal.Refinement.X86NumericAddress.SignedDivision.word_frame_matches\n#print axioms KProgFormal.Refinement.X86NumericAddress.SignedDivision.word_frame_refines\n#print axioms KProgFormal.Refinement.X86NumericAddress.SignedDivision.handler_operand_narrow\n#print axioms KProgFormal.Refinement.X86NumericAddress.SignedDivision.captured_frame_refines\n#print axioms KProgFormal.Refinement.X86NumericAddress.SignedDivision.register_frame_refines\n#print axioms KProgFormal.Refinement.X86NumericAddress.SignedDivision.source_words_frame_matches\n#print axioms KProgFormal.Refinement.X86Dispatcher.register_dispatch_step_refines\n#print axioms KProgFormal.Refinement.X86Dispatcher.register_token_body_matches\n#print axioms KProgFormal.Refinement.X86Dispatcher.simulator_step_refines\n#print axioms KProgFormal.Refinement.X86Dispatcher.step_token_body_matches\n",
+      "compile": [
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/div-word-frame/olean/KProgFormal/X86DivHandler.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/X86DivHandler.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/X86DivHandler",
+          "source_sha256": "61b49c832251f4624a04b0fa2c2b96df04feec349a3d4dfaa10fefe6b6564c23"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/div-word-frame/olean/KProgFormal/Refinement/X86Divide.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86Divide.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Refinement/X86Divide",
+          "source_sha256": "0e6ac9d8b37135cf513a3d0b291190a6f0fbc5b566fb829935553c292bc7012e"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/div-word-frame/olean/KProgFormal/Refinement/X86NumericAddress.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86NumericAddress.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Refinement/X86NumericAddress",
+          "source_sha256": "046318642d07af25e07866248dde928f59f6ca240d0ce30eb709767c89891d1b"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/div-word-frame/olean/KProgFormal/Refinement/X86Dispatcher.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86Dispatcher.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Refinement/X86Dispatcher",
+          "source_sha256": "9a4a1428f4f3da1694e7db8d05676f042043228b9f193d82943949001d12448b"
+        }
+      ],
+      "laws": [
+        "word_step_matches_magnitude",
+        "word_frame_matches",
+        "word_frame_refines",
+        "handler_operand_narrow",
+        "captured_frame_refines",
+        "register_frame_refines",
+        "source_words_frame_matches"
+      ],
+      "reduction_bridge": 9,
+      "scope": "Current signed DIV raw/tag handler directly executes SourceWords.outcome and word sign restoration, then generated raw frame writes/fresh flags. Whole source-state/current dispatcher/O2 canonical Step remains generic for every program; C-model source interpretation and actual compiler/physical ABI remain the declared shared interfaces.",
+      "sorryAx": 0,
+      "source": {
+        "loop": "x86_sim_divmod128(__u64 high, __u64 low, __u64 divisor)\n{\n    struct x86_sim_divmod64 result = {0, high};\n#ifdef __clang__\n#pragma unroll\n#endif\n    for (int bit = 63; bit >= 0; --bit) {\n        __u64 carry = result.remainder >> 63;\n        result.remainder = (result.remainder << 1) | ((low >> bit) & 1ULL);\n        result.quotient <<= 1;\n        if (carry || result.remainder >= divisor) {\n            result.remainder -= divisor;\n            result.quotient |= 1ULL;\n        }\n    }\n    return result;\n}",
+        "loop_sha256": "a27006c98184d419c869bdec88280bf1fa85ef3416dbe88aeaa5ec6f6515c29c",
+        "path": "kprog/x86/x86_sim_local_bpf.h",
+        "sha256": "f9e729ec3fa99b1d3561ee9e030b9cf21ad72c12b8a2e17b69103287f4962891",
+        "source_correspondence": "C-to-Lean source extraction and compiler/physical ABI remain explicit interfaces"
+      }
+    },
+    "todo": "kprog/docs/todo.md"
+  },
   "x86_divide_raw_register_dispatch_token": {
     "all_t_o4_cells_retained": true,
     "archive_block_sha256": "b7c4899c30ecc19d0ff4abd595a2203fa7da03d1670e4165e67a7cc43969fffa",

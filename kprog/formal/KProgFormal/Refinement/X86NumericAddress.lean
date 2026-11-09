@@ -3374,10 +3374,9 @@ namespace KProgFormal.Refinement.X86NumericAddress.SignedDivision
 open Reference EntryEnvironment
 open X86Divide.SourceState
 
-/-- The C signed branch captures numeric operands before either implicit
-write, masks the divisor, then scalarizes generated RAX/RDX writes. The raw
-frame keeps unrelated pointer tags and normalizes only actual destinations. -/
-def wordStep (env : Environment) (frame : Frame) (arena : NativeWord)
+/-- Magnitude-result frame used to compose generated RAX/RDX writes and
+fresh flags with the canonical signed state proof. -/
+def magnitudeFrameStep (env : Environment) (frame : Frame) (arena : NativeWord)
     (state : RegisterState) (width : Reference.X86.ScalarWidth)
     (operand nextPc : NativeWord) (fresh : Nat → Bool) : Transition Reference.X86.State :=
   let native := nativeRegisters env frame arena state
@@ -3395,6 +3394,41 @@ def wordStep (env : Environment) (frame : Frame) (arena : NativeWord)
       let flagged := registerFlags written (freshFlags state.raw.rflags fresh)
       ⟨nativeRegisters env frame arena (registerPc flagged nextPc), [], none⟩
 
+/-- The current signed C-model branch executes the actual word arithmetic:
+source masks/signs, word division or restoring loop, word-range tests and
+unsigned sign restoration precede generated raw/tag writes and fresh flags. -/
+def wordStep (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (operand nextPc : NativeWord) (fresh : Nat → Bool) : Transition Reference.X86.State :=
+  let native := nativeRegisters env frame arena state
+  match X86Divide.SourceWords.outcome width native operand with
+  | none => ⟨native, [.fault .divide], some .divide⟩
+  | some (quotient, remainder) =>
+      let negative := X86Divide.Capture.sourceNegative width (X86Divide.Capture.highWord width native)
+      let qnegative := Bool.xor negative (X86Divide.Capture.sourceNegative width operand)
+      let qword := if qnegative then 0 - quotient else quotient
+      let rword := if negative then 0 - remainder else remainder
+      let written := if width = .w8 then
+        writeRegister env frame arena state .w16 (.low 0) (packedBytes qword rword)
+      else writeRegister env frame arena
+        (writeRegister env frame arena state width (.low 0) qword) width (.low 2) rword
+      let flagged := registerFlags written (freshFlags state.raw.rflags fresh)
+      ⟨nativeRegisters env frame arena (registerPc flagged nextPc), [], none⟩
+
+theorem word_step_matches_magnitude (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (operand nextPc : NativeWord) (fresh : Nat → Bool) :
+    wordStep env frame arena state width operand nextPc fresh =
+      magnitudeFrameStep env frame arena state width operand nextPc fresh := by
+  unfold wordStep magnitudeFrameStep
+  simp only []
+  rw [← X86Divide.SourceWords.outcome_matches]
+  cases result : X86Divide.SourceWords.outcome width (nativeRegisters env frame arena state) operand with
+  | none => rfl
+  | some pair =>
+      rcases pair with ⟨quotient, remainder⟩
+      simp [Option.map, restoredWord]
+
 theorem word_frame_matches (env : Environment) (frame : Frame) (arena : NativeWord)
     (state : RegisterState) (width : Reference.X86.ScalarWidth)
     (operand nextPc : NativeWord) (fresh : Nat → Bool) :
@@ -3407,7 +3441,8 @@ theorem word_frame_matches (env : Environment) (frame : Frame) (arena : NativeWo
           (registerValue env frame arena current reg) value access destination
         else registerValue env frame arena current reg :=
     congrArg (fun native => native.gpr reg) (native_register_write env frame arena current access destination value)
-  unfold wordStep handlerStep arithmeticStep
+  rw [word_step_matches_magnitude]
+  unfold magnitudeFrameStep handlerStep arithmeticStep
   simp only [X86Scalar.read_refines, Reference.X86.scalarRead]
   cases result : outcome width (nativeRegisters env frame arena state) operand with
   | none => simp only [result, refresh, Option.isSome_some, ↓reduceIte, List.nil_append]
