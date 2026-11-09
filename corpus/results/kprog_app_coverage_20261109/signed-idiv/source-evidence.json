@@ -1,0 +1,95 @@
+{
+  "approval": "COORDINATOR DECISION 2026-11-09 signed IDIV zero-divisor and quotient-overflow architectural faults for all widths",
+  "parent": "f360991d1306fe500dc9f954f608665a86167ea0",
+  "source_sha256": {
+    "kprog/x86/x86_sim.h": "003ce637260f97b720fcf22bd1d64e3a04f254b1d6dc8dcdd4002da609b5c4ca",
+    "kprog/x86/x86_sim_local_bpf.h": "fbd419b9fcb7a3ef8ac98e08d7c0fc2fd2f53c2854f28e590d52491494a42843",
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "7773063cadab38fda0e0d25454767372ee26fbcdacb6a9cb040f3f4ea2fcf77a"
+  },
+  "host": [
+    {
+      "compiler": "gcc",
+      "label": "idiv",
+      "command": [
+        "gcc",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/kprog/formal",
+        "/var/tmp/kprog-tmp/C/signed-idiv/host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/signed-idiv/gcc-idiv"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "gcc",
+      "label": "original-div",
+      "command": [
+        "gcc",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/kprog/formal",
+        "/workspaces/repository/kprog/formal/oracles/test_x86_div_route_host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/signed-idiv/gcc-original-div"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "clang-18",
+      "label": "idiv",
+      "command": [
+        "clang-18",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/kprog/formal",
+        "/var/tmp/kprog-tmp/C/signed-idiv/host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/signed-idiv/clang-18-idiv",
+        "-fno-sanitize-link-runtime",
+        "-lubsan"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "clang-18",
+      "label": "original-div",
+      "command": [
+        "clang-18",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-I/workspaces/repository/kprog/formal",
+        "/workspaces/repository/kprog/formal/oracles/test_x86_div_route_host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/signed-idiv/clang-18-original-div",
+        "-fno-sanitize-link-runtime",
+        "-lubsan"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    }
+  ],
+  "banners": {
+    "gcc-idiv": "signed IDIV hardware/model full-register-state PASS 18048 cases, 9380 architectural faults",
+    "clang-18-idiv": "signed IDIV hardware/model full-register-state PASS 18048 cases, 9380 architectural faults",
+    "gcc-original-div": "x86 div route host cross-check: OK (110885 cases)",
+    "clang-18-original-div": "x86 div route host cross-check: OK (110885 cases)"
+  },
+  "compiler_entries": 25,
+  "compiler_passed": 25
+}

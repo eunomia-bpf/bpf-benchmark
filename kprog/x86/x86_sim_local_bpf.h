@@ -2949,7 +2949,56 @@ x86_sim_divmod128(__u64 high, __u64 low, __u64 divisor)
             __u64 __x86_l_divisor = (SRC) == X86_REG_NONE ? (IMM) : X86_SIM_L_READ_REG(SRC); \
             __u64 __x86_l_rax = X86_SIM_L_READ_REG(X86_RAX); \
             __u64 __x86_l_rdx = X86_SIM_L_READ_REG(X86_RDX); \
-            if (KPROG_X86_DIV_ARM(__x86_l_width) == KPROG_X86_DIV_ARM_B8) { \
+            if ((AUX) & X86_DIV_AUX_SIGNED) { \
+                __u32 __x86_id_bits = (__u32)__x86_l_width * 8; \
+                __u64 __x86_id_mask = ~0ULL >> (64 - __x86_id_bits); \
+                __u64 __x86_id_sign = 1ULL << (__x86_id_bits - 1); \
+                __u64 __x86_id_hi = (__x86_l_width == X86_WIDTH_8 ? __x86_l_rax >> 8 : __x86_l_rdx) & __x86_id_mask; \
+                __u64 __x86_id_lo = __x86_l_rax & __x86_id_mask; \
+                __u64 __x86_id_div = __x86_l_divisor & __x86_id_mask; \
+                __u8 __x86_id_negative = (__x86_id_hi & __x86_id_sign) != 0; \
+                __u8 __x86_id_qnegative = __x86_id_negative ^ ((__x86_id_div & __x86_id_sign) != 0); \
+                if (__x86_id_negative) { \
+                    __x86_id_lo = (0ULL - __x86_id_lo) & __x86_id_mask; \
+                    __x86_id_hi = (~__x86_id_hi + (__x86_id_lo == 0)) & __x86_id_mask; \
+                } \
+                if (__x86_id_div & __x86_id_sign) \
+                    __x86_id_div = (0ULL - __x86_id_div) & __x86_id_mask; \
+                if (__x86_id_div == 0 || __x86_id_hi >= __x86_id_div) \
+                    X86_SIM_L_DIVIDE_FAULT(); \
+                struct x86_sim_divmod64 __x86_id_result; \
+                if (__x86_l_width == X86_WIDTH_64) { \
+                    if (__x86_id_hi == 0) { \
+                        __x86_id_result.quotient = __x86_id_lo / __x86_id_div; \
+                        __x86_id_result.remainder = __x86_id_lo % __x86_id_div; \
+                    } else { \
+                        __x86_id_result = x86_sim_divmod128(__x86_id_hi, __x86_id_lo, __x86_id_div); \
+                    } \
+                } else { \
+                    __u64 __x86_id_dividend = (__x86_id_hi << __x86_id_bits) | __x86_id_lo; \
+                    __x86_id_result.quotient = __x86_id_dividend / __x86_id_div; \
+                    __x86_id_result.remainder = __x86_id_dividend % __x86_id_div; \
+                } \
+                if (__x86_id_result.quotient > __x86_id_sign - (__x86_id_qnegative == 0)) \
+                    X86_SIM_L_DIVIDE_FAULT(); \
+                if (__x86_id_qnegative) \
+                    __x86_id_result.quotient = 0ULL - __x86_id_result.quotient; \
+                if (__x86_id_negative) \
+                    __x86_id_result.remainder = 0ULL - __x86_id_result.remainder; \
+                if (__x86_l_width == X86_WIDTH_8) { \
+                    X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, \
+                        ((__x86_id_result.remainder & 0xff) << 8) | (__x86_id_result.quotient & 0xff), X86_WIDTH_16); \
+                } else { \
+                    X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, __x86_id_result.quotient, __x86_l_width); \
+                    X86_SIM_L_WRITE_REG_WIDTH(X86_RDX, __x86_id_result.remainder, __x86_l_width); \
+                } \
+                __x86_cf = X86_SIM_L_UNSPECIFIED() & 1; \
+                __x86_zf = X86_SIM_L_UNSPECIFIED() & 1; \
+                __x86_sf = X86_SIM_L_UNSPECIFIED() & 1; \
+                __x86_of = X86_SIM_L_UNSPECIFIED() & 1; \
+                __x86_pf = X86_SIM_L_UNSPECIFIED() & 1; \
+                __x86_af = X86_SIM_L_UNSPECIFIED() & 1; \
+            } else if (KPROG_X86_DIV_ARM(__x86_l_width) == KPROG_X86_DIV_ARM_B8) { \
                 __u32 __x86_l_dividend = (__u16)__x86_l_rax; \
                 __u8 __x86_l_div = (__u8)__x86_l_divisor; \
                 if (__x86_l_div == 0 || (__x86_l_dividend >> 8) >= __x86_l_div) \

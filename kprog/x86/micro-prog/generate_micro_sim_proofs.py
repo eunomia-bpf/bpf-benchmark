@@ -511,7 +511,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                    aux="X86_MAP_PTR_AUX_VALUE" if is_value else "0",
                    imm=c_ptr_u64(expression))
     if insn.reloc_type=="R_X86_64_PC32" and op not in {
-        "mov","movabs","movzx","movsx","movsxd","lea","popcnt","div"
+        "mov","movabs","movzx","movsx","movsxd","lea","popcnt","div","idiv"
     }:
         raise ValueError(f"unresolved PC-relative data instruction: {insn.raw}")
     if insn.reloc_type and "GOTPCREL" in insn.reloc_type and insn.symbol_offset:
@@ -532,7 +532,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
          reg_info(ops[0]) is not None and
          (is_int(ops[1]) or reg_info(ops[1]) is not None)) or
         (op in {"rol", "ror"} and len(ops) == 2 and reg_info(ops[0]) is not None) or
-        (op == "div" and len(ops) == 1 and reg_info(ops[0]) is not None) or
+        (op in {"div", "idiv"} and len(ops) == 1 and reg_info(ops[0]) is not None) or
         (op in {"movzx", "movsx"} and len(ops) == 2 and
          reg_info(ops[0]) is not None and reg_info(ops[1]) is not None) or
         (op in {"dec", "inc", "neg", "not"} and len(ops) == 1 and
@@ -1043,15 +1043,16 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                        src=mem_base_reg(ops[1]), flags=WIDTH_CONST[dst[1]],
                        aux=mem_aux(ops[1], dst[1]), imm=c_u64(packed))
         raise ValueError(f"cannot encode {insn.raw}")
-    if op == "div":
+    if op in {"div", "idiv"}:
+        mode = "X86_DIV_AUX_SIGNED" if op == "idiv" else "0"
         if len(ops) != 1:
             raise ValueError(f"cannot encode {insn.raw}")
         src = reg_info(ops[0])
         if src is not None:
             if src[2]:
-                return enc("X86_OP_DIV", src="X86_REG_NONE", flags=WIDTH_CONST[src[1]],
+                return enc("X86_OP_DIV", src="X86_REG_NONE", flags=WIDTH_CONST[src[1]], aux=mode,
                     imm=f"X86_SIM_L_READ_REG_WIDTH_SHIFT({src[0]}, X86_WIDTH_8, 8)")
-            return enc("X86_OP_DIV", src=src[0], flags=WIDTH_CONST[src[1]])
+            return enc("X86_OP_DIV", src=src[0], flags=WIDTH_CONST[src[1]], aux=mode)
         if is_mem(ops[0]):
             width = operand_width(ops[0], 0)
             if width not in WIDTH_CONST:
@@ -1061,7 +1062,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                 raise ValueError(f"unresolved DIV data relocation: {insn.raw}")
             address = relocated_data_address(insn,rodata_idents) if insn.reloc_symbol else c_u64(mem_disp(ops[0]))
             value = f"X86_SIM_L_READ_MEM_VALUE({mem_base_reg(ops[0])}, {mem_aux(ops[0])}, {address}, {WIDTH_CONST[width]}, 0)"
-            return enc("X86_OP_DIV", src="X86_REG_NONE", flags=WIDTH_CONST[width], imm=value)
+            return enc("X86_OP_DIV", src="X86_REG_NONE", flags=WIDTH_CONST[width], aux=mode, imm=value)
         raise ValueError(f"cannot encode {insn.raw}")
     if op == "shld":
         if len(ops) != 3:
@@ -1378,7 +1379,7 @@ def append_step(lines: list[str], insn: NativeInsn, indent: str = "\t",
     if (insn.mnemonic in {"mov", "movabs"} and len(insn.operands) == 2 and
             dst is not None and dst[2] and is_mem(insn.operands[1])):
         memory, recovery_dst = insn.operands[1], dst[0]
-    elif insn.mnemonic == "div" and is_mem(insn.operands[0]):
+    elif insn.mnemonic in {"div", "idiv"} and is_mem(insn.operands[0]):
         memory, recovery_dst = insn.operands[0], "X86_RAX"
     if memory is not None:
         lines.append(f"{indent}if (!X86_SIM_L_READ_RECOVERY_MEM({mem_base_reg(memory)}, {recovery_dst}, {mem_aux(memory)}, x86_simm({c_u64(mem_disp(memory))}))) {{")

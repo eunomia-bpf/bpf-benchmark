@@ -28,6 +28,7 @@
 #define X86_OP_POPCNT 0x18U
 #define X86_OP_XCHG 0x19U
 #define X86_OP_DIV 0x1aU
+#define X86_DIV_AUX_SIGNED 1U
 #define X86_OP_SHLD_IMM 0x1bU
 #define X86_OP_SHRD_IMM 0x1cU
 #define X86_OP_CMP_MEM_IMM 0x1dU
