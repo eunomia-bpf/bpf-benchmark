@@ -1,0 +1,489 @@
+{
+  "utc": "2026-11-09T06:45:58.059195+00:00",
+  "scope": "Completed A lane private indexes; publication rebuilds each index from current HEAD",
+  "released": [
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-architectural-fault-safety.index",
+      "bytes": 25653561
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-closed-storage-release.index",
+      "bytes": 25912837
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-counted-v61-launch.index",
+      "bytes": 25807759
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-current-kfunc-catalog-launch.index",
+      "bytes": 25883233
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-current-kfunc-catalog-result.index",
+      "bytes": 25883601
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-current-kfunc-module-path-launch.index",
+      "bytes": 25888235
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-current-source-index.index",
+      "bytes": 25837762
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-data-event-inline-launch.index",
+      "bytes": 25829841
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-data-event-inline-mode-launch.index",
+      "bytes": 25836899
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-data-event-inline-mode-result.index",
+      "bytes": 25845735
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-data-event-inline-result.index",
+      "bytes": 25832840
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-dynptr-memory-qemu-launch.index",
+      "bytes": 25877838
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-dynptr-memory-qemu-result.index",
+      "bytes": 25878828
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-full-paired-resources-launch.index",
+      "bytes": 25793594
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-full-paired-resources-result.index",
+      "bytes": 25863448
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-full-resource-prepare-refresh.index",
+      "bytes": 25777371
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-full-whole-resources-launch.index",
+      "bytes": 25758377
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-full-whole-resources-result.index",
+      "bytes": 25791954
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-inline-actual-frontier.index",
+      "bytes": 25845920
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-inline-baseline-continuation.index",
+      "bytes": 25829311
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-katran-tracee-terminal.index",
+      "bytes": 25881958
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-kptr-address.index",
+      "bytes": 25760279
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-load-recovery-build.index",
+      "bytes": 25856889
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-load-recovery-docs.index",
+      "bytes": 25862299
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-lsm-stock-native-comparison.index",
+      "bytes": 25825867
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-mode-recovery-source-choice.index",
+      "bytes": 25837618
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-null-btf-matched-symbols.index",
+      "bytes": 25859848
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-null-btf-recovery.index",
+      "bytes": 25858737
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-nullable-lsm-context-launch.index",
+      "bytes": 25844162
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-nullable-lsm-context-result.index",
+      "bytes": 25847390
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-ordered-terminal-work.index",
+      "bytes": 25786286
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-paired-kfunc-resources.index",
+      "bytes": 25792988
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-paired-terminal-tables.index",
+      "bytes": 25835798
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-paired-tracee-lsm-index.index",
+      "bytes": 25822521
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-paired-v61-component-launch.index",
+      "bytes": 25798160
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-paired-v61-component-result.index",
+      "bytes": 25801491
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-plain-helper-launch.index",
+      "bytes": 25805952
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-plain-helper-result.index",
+      "bytes": 25810119
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-probe-read-LSE-index.index",
+      "bytes": 25909047
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-probe-read-LSE-queue-transition.index",
+      "bytes": 25905409
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-probe-read-S10-derived-header.index",
+      "bytes": 25908943
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-probe-read-S10-source-overlay.index",
+      "bytes": 25908151
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-probe-read-index.index",
+      "bytes": 25895943
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-probe-read-inventory.index",
+      "bytes": 25894350
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-probe-read-lowering-candidate.index",
+      "bytes": 25905409
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-probe-read-whole-app-launch.index",
+      "bytes": 25905409
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-probe-restoration-metadata.index",
+      "bytes": 25821381
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-producer-os-result.index",
+      "bytes": 25892618
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-raw-helper-context-launch.index",
+      "bytes": 25787470
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-raw-helper-context-result.index",
+      "bytes": 25788980
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-recovery-app-launch.index",
+      "bytes": 25861077
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-recovery-bcc-result.index",
+      "bytes": 25866793
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-recovery-control-index.index",
+      "bytes": 25862299
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-recovery-full-catalog-launch.index",
+      "bytes": 25863997
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-recovery-full-catalog-result.index",
+      "bytes": 25881190
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-recovery-isa-launch.index",
+      "bytes": 25870932
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-recovery-isa-result.index",
+      "bytes": 25879793
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-recovery-katran-result.index",
+      "bytes": 25873823
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-recovery-symbol-refresh.index",
+      "bytes": 25859632
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-resource-prepare-launch.index",
+      "bytes": 25775337
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-resource-prepare-result.index",
+      "bytes": 25779427
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-ringbuf-dynptr-qemu-launch.index",
+      "bytes": 25867869
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-ringbuf-dynptr-qemu-result.index",
+      "bytes": 25877297
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-same-copy-app-launch.index",
+      "bytes": 25842674
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-same-copy-bcc-result.index",
+      "bytes": 25849515
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-same-copy-helper-build.index",
+      "bytes": 25833334
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-same-copy-katran-result.index",
+      "bytes": 25850672
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-stock-lsm-launch.index",
+      "bytes": 25821293
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-stock-lsm-result.index",
+      "bytes": 25824685
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tag-app-launch.index",
+      "bytes": 25712335
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tag-ordered-app-launch.index",
+      "bytes": 25727431
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tag-ordered-otelcol-ebpf-profiler-result.index",
+      "bytes": 25763940
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tag-ordered-tetragon-result.index",
+      "bytes": 25751521
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tag-ordered-tracee-result.index",
+      "bytes": 25782034
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tag-otelcol-ebpf-profiler-result.index",
+      "bytes": 25726374
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tag-tetragon-result.index",
+      "bytes": 25724476
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tag-tracee-result.index",
+      "bytes": 25739987
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-counted-v61-app-launch.index",
+      "bytes": 25808299
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-counted-v61-app-tetragon-result.index",
+      "bytes": 25825547
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-data-inline-compile.index",
+      "bytes": 25827211
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-data-inline-source.index",
+      "bytes": 25828480
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-local-length-launch.index",
+      "bytes": 25783580
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-local-length-result.index",
+      "bytes": 25785870
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-source-app-launch.index",
+      "bytes": 25784929
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-source-app-tetragon-result.index",
+      "bytes": 25790900
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-source-component-launch.index",
+      "bytes": 25772016
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-source-component-result.index",
+      "bytes": 25772941
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-source-length.index",
+      "bytes": 25783218
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-source-loop.index",
+      "bytes": 25771662
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-v61-app-launch.index",
+      "bytes": 25798704
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tetragon-v61-app-tetragon-result.index",
+      "bytes": 25809169
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-ellipsis-local-compile.index",
+      "bytes": 25831874
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-paired-app-launch.index",
+      "bytes": 25819648
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-paired-app-result.index",
+      "bytes": 25826696
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-paired-clamp-compile.index",
+      "bytes": 25819124
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-shared-min-app-launch.index",
+      "bytes": 25836899
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-shared-min-app-result.index",
+      "bytes": 25852086
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-shared-min-compile.index",
+      "bytes": 25834590
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-string-register-app-launch.index",
+      "bytes": 25861601
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-string-register-app-result.index",
+      "bytes": 25874660
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-string-width-app-launch.index",
+      "bytes": 25884125
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-string-width-app-result.index",
+      "bytes": 25885758
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-string-width-compile.index",
+      "bytes": 25876299
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-string-width-source.index",
+      "bytes": 25875647
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-unix-length-app-launch.index",
+      "bytes": 25889674
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-unix-length-compile.index",
+      "bytes": 25889158
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-unix-length-source.index",
+      "bytes": 25888371
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-tracee-width-terminal.index",
+      "bytes": 25890050
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-typed-kptr-launch.index",
+      "bytes": 25763000
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-typed-kptr-result.index",
+      "bytes": 25764873
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-typed-kptr-triage.index",
+      "bytes": 25774013
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-upstream-kfunc-resources.index",
+      "bytes": 25788031
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-upstream-testmod.index",
+      "bytes": 25761637
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-v61-os-result.index",
+      "bytes": 25823423
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-v61-push-race-resume.index",
+      "bytes": 25799831
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-void-kfunc-qemu-launch.index",
+      "bytes": 25882627
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-void-kfunc-qemu-result.index",
+      "bytes": 25891024
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-void-kfunc-triage.index",
+      "bytes": 25893026
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/arm-whole-resources-result.index",
+      "bytes": 25759342
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/A/bpf34-full-result.index",
+      "bytes": 25780400
+    }
+  ],
+  "released_bytes": 3099570166,
+  "retained": "Repository shared index and every source, Git object, raw result, current guest input and incremental cache",
+  "runtime_admission_additions": 0
+}
