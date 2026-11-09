@@ -1,15 +1,15 @@
 {
-  "utc": "2026-11-09T06:11:07.165449+00:00",
+  "utc": "2026-11-09T06:24:53.246089+00:00",
   "scope": "Complete ARM BCC then paired Tracee; P compiler scalar probe-read lowering; current replays complete first",
-  "compiler_publication": "8a3dc898b781eb97786e8bbadb8ab7a8333f266c",
-  "model_source_head": "48eb036f5b30d6b8a89e6aa2623d3b00723d6d3f",
+  "compiler_publication": "5bbbf128a2c47bf102376fb28c90df6cd14191a2",
+  "model_source_head": "5bbbf128a2c47bf102376fb28c90df6cd14191a2",
   "applications": {
     "bcc": {
       "base_archive": "corpus/results/kprog_arm64_app_coverage_20261108/native-load-recovery/arm64/applications/launch-inputs.tar.gz",
       "base_archive_sha256": "c43eb44a7c85a0a10af358ab93efb2f7fcc0a9dc39c6f3802aa3da720d7a28f0",
       "delta_archive": "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/bcc-input-delta.tar.gz",
-      "delta_archive_sha256": "ca661e6edf930113414504026d05f5d64bdefece848299f45199de589c667f2f",
-      "model_source_head": "48eb036f5b30d6b8a89e6aa2623d3b00723d6d3f",
+      "delta_archive_sha256": "36382b5f2e2868a30d33659c5e0e5d22446f24ade966c2ed1981270d0534c365",
+      "model_source_head": "5bbbf128a2c47bf102376fb28c90df6cd14191a2",
       "files": {
         "mount.py": "cf322014deffd00065316b0d6ed686cff7862dd625a2bf32409b56d8cef70945",
         "input.py": "29cefe0080ea723db6c5351583205971ea9b9c74aa30a1463cf2a26e5d4d9d28",
@@ -25,7 +25,7 @@
         "source/kprog/trusted_loader.cpp": "90e840a9166189dfb042c2e991157f1a8104dcc6a1e2cee1bd110ad4a3d0a841",
         "source/kprog/helper_abi.py": "bd72775b1bc67da99e07d0ef1445af1d641971e07c77ea0abf7727f8052e168b",
         "source/kprog/trusted_compile.py": "c366a798ff4e791d93ad0dba091c721dea4782f1753149451c0ec825567d4d03",
-        "source/kprog/trusted_generation.py": "fef52ce748d46c970af60acf03a8f327c1a6b42584d2941e1718cc2c615cf87f",
+        "source/kprog/trusted_generation.py": "0dd183ae1950f17012fc48a1da0f0aa627b86e4f19457e668dd17a07498d1af5",
         "source/bpfopt/shim/shim_native_loader.h": "bda3e143497880cf400060c383e46c94541ddceeebd565e32fe90c842529c695",
         "source/kprog/test/check_trusted_service.py": "c7452eeebf9b9cf41043a99c5ef9ce2bc2be85d0e3361414423a0dc402722289",
         "source/kprog/tv/Makefile": "16e49a1158073ab0b9f6268a4c5bfb2c8172c130aa3926a9f6d380aea47760ee",
@@ -34,12 +34,12 @@
         "source/kprog/selftests/submit.py": "9a1d7a2d7177444aa7cfc30e1435bb71f591f5731ce1b21b2feed48569988186",
         "source/kprog/selftests/selftests.py": "53ff916a5a90a0300c5581b9084fa84f91f0d3256a5cbe450d37857cab070383",
         "source/kprog/fidelity/tcb.py": "f3420c7a27cbf5417f7f71b9fa23da503b88a6faad0f6f7fefce10dd1f3452bb",
-        "source/kprog/fidelity/negative.py": "ba7ba4b0f54fbef8cb25ac0abf7d9b59d8b7ed75f970d5809eedb6be4f38ee77",
+        "source/kprog/fidelity/negative.py": "507e8839542b8b665d8137ba98614d46f632c3d980b84ea1b0179098e8dba92e",
         "source/kprog/fidelity/bound_probe.cpp": "002abb7881af7084ead97a3fded4671143849b547e0f4178a8fc36ade00b4dab",
-        "source/kprog/x86/x86_sim_local_bpf.h": "fdbc77ec619332139009ea3e66d40152fab85aa05a3174d8c048020896123279",
-        "source/kprog/arm64/arm64_sim_local_bpf.h": "efdf501218d45cbd8f0779aeb3bbaa1ae4f4d1aa7747dd985bffca0cbf775092",
+        "source/kprog/x86/x86_sim_local_bpf.h": "f893baef3f342251992b385f489ca6c2edb4aaf27c670fd260ee5783fe2b3beb",
+        "source/kprog/arm64/arm64_sim_local_bpf.h": "8b03c750eb8aa391585ba13b31f05983de8939dc0f12b163fec9befd76f2cc10",
         "source/kprog/arm64/generate_sim_dispatch.py": "4c9e13303ac6bef3f174c1ae0b821737a14addbaafc982cd9d5a6ad9aeb0f821",
-        "source/kprog/arm64/trusted_specializer.py": "76f9d766bb23683c12c0e2ef61fd285f582baaa24f4eac5e606bc322876e7751",
+        "source/kprog/arm64/trusted_specializer.py": "51eddfaa7b8aaf7aad776c9bcf0e0996de65b5d0af1e72030f4d3e86838c99fe",
         "source/kprog/arm64/run_app_sim_smoke.py": "50a7cb04959cbb2781ebb1c6adc0f4532b7aad15b08c2028844ff8f82764541c",
         "source/kprog/arm64/arm64_sim_direct.h": "26c9c219db79fd3904ece77328cd4b417c40a563ffdf615bf0ea4338ea7b8f33",
         "source/kprog/arm64/arm64_sim.h": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd",
@@ -208,11 +208,11 @@
         "source/kprog/arm64/build/app-verified-stage/katran/xdp_root.native.o": "2edeaa3477e5f9d9579a480379458b1cdfd85daf32f1b0a8ecbf950380816341",
         "source/kprog/arm64/build/app-verified-stage/bcc/opensnoop.native.o": "cec5a1c8fc42439264df4206c28d491013d14eb2af90be53477ddff8b61fd3f7",
         "source/kprog/arm64/build/app-verified-stage/bcc/tcplife.native.o": "3e9db0023a62eb35cc503a40bf280b9528e4cbbee5908d8428545c6d22b34bb0",
-        "source/kprog/arm64/build/app-verified-stage/bcc/syscount.native.o": "f876ee07d979ba41d8174afe3783b24f93426011dc49960aa36f5cdf01f224a6",
-        "source/kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o": "7c1e5f13c08039e834270154c250d58a2667ae5a2443fc197dda4cdd74c2b7b6",
-        "source/kprog/arm64/build/app-verified-stage/bcc/runqlat.native.o": "bdf9dfcd37ff938934fc209ee33239dc2046ca8cecc654776a4db4cc79040ade",
+        "source/kprog/arm64/build/app-verified-stage/bcc/syscount.native.o": "e5ae3db3a9aaf7e41dd97362d34310efd0c4f0d658646cf06bc28fc5ef17f1c5",
+        "source/kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o": "2320782b38449f9f315bab55286ec9a9e2b26e3820c54c27b7351c1c7b99e1e2",
+        "source/kprog/arm64/build/app-verified-stage/bcc/runqlat.native.o": "aa982e292ab61aa983cd3551538d57af22ace9148de305a3f97bccb688115a2b",
         "source/kprog/arm64/build/app-verified-stage/bcc/capable.native.o": "e3c650c83a0ea4f8a43b62f258cda72ca3194d5a904e9be1c347848a6518d782",
-        "source/kprog/arm64/build/app-verified-stage/bcc/tcpconnect.native.o": "a98ad7f302a801ecadc7e3bee008837056b2f15063c137af269b2fd5e0f7d6c1",
+        "source/kprog/arm64/build/app-verified-stage/bcc/tcpconnect.native.o": "75fc646c63008cca698739b1b52a9b0068af12232a2a76aaf72fc7ed05823ad0",
         "source/kprog/arm64/build/app-verified-stage/bcc/biosnoop.native.o": "7c201879a714b95b7f13da569c0a8cc515c710a60ea561e0de8de022f09169d3",
         "source/kprog/arm64/build/app-verified-stage/katran/startup/startup_7.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
         "source/kprog/arm64/build/app-verified-stage/katran/startup/startup_4.native.o": "7bcdfab973009ecb3a1e24a696aa62f53510299b6370eaf7b4a4e577c1d415b5",
@@ -302,72 +302,72 @@
         },
         {
           "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/tcpconnect.native.o",
-          "sha256": "a98ad7f302a801ecadc7e3bee008837056b2f15063c137af269b2fd5e0f7d6c1",
+          "sha256": "75fc646c63008cca698739b1b52a9b0068af12232a2a76aaf72fc7ed05823ad0",
           "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/tcpconnect.native.o"
         },
         {
           "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/tcpconnect.native.o",
-          "sha256": "a98ad7f302a801ecadc7e3bee008837056b2f15063c137af269b2fd5e0f7d6c1",
+          "sha256": "75fc646c63008cca698739b1b52a9b0068af12232a2a76aaf72fc7ed05823ad0",
           "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/tcpconnect.native.o"
         },
         {
           "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/tcpconnect.native.o",
-          "sha256": "a98ad7f302a801ecadc7e3bee008837056b2f15063c137af269b2fd5e0f7d6c1",
+          "sha256": "75fc646c63008cca698739b1b52a9b0068af12232a2a76aaf72fc7ed05823ad0",
           "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/tcpconnect.native.o"
         },
         {
           "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/tcpconnect.native.o",
-          "sha256": "a98ad7f302a801ecadc7e3bee008837056b2f15063c137af269b2fd5e0f7d6c1",
+          "sha256": "75fc646c63008cca698739b1b52a9b0068af12232a2a76aaf72fc7ed05823ad0",
           "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/tcpconnect.native.o"
         },
         {
           "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o",
-          "sha256": "7c1e5f13c08039e834270154c250d58a2667ae5a2443fc197dda4cdd74c2b7b6",
+          "sha256": "2320782b38449f9f315bab55286ec9a9e2b26e3820c54c27b7351c1c7b99e1e2",
           "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/vfsstat.native.o"
         },
         {
           "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o",
-          "sha256": "7c1e5f13c08039e834270154c250d58a2667ae5a2443fc197dda4cdd74c2b7b6",
+          "sha256": "2320782b38449f9f315bab55286ec9a9e2b26e3820c54c27b7351c1c7b99e1e2",
           "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/vfsstat.native.o"
         },
         {
           "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o",
-          "sha256": "7c1e5f13c08039e834270154c250d58a2667ae5a2443fc197dda4cdd74c2b7b6",
+          "sha256": "2320782b38449f9f315bab55286ec9a9e2b26e3820c54c27b7351c1c7b99e1e2",
           "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/vfsstat.native.o"
         },
         {
           "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o",
-          "sha256": "7c1e5f13c08039e834270154c250d58a2667ae5a2443fc197dda4cdd74c2b7b6",
+          "sha256": "2320782b38449f9f315bab55286ec9a9e2b26e3820c54c27b7351c1c7b99e1e2",
           "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/vfsstat.native.o"
         },
         {
           "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/syscount.native.o",
-          "sha256": "f876ee07d979ba41d8174afe3783b24f93426011dc49960aa36f5cdf01f224a6",
+          "sha256": "e5ae3db3a9aaf7e41dd97362d34310efd0c4f0d658646cf06bc28fc5ef17f1c5",
           "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/syscount.native.o"
         },
         {
           "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/vfsstat.native.o",
-          "sha256": "7c1e5f13c08039e834270154c250d58a2667ae5a2443fc197dda4cdd74c2b7b6",
+          "sha256": "2320782b38449f9f315bab55286ec9a9e2b26e3820c54c27b7351c1c7b99e1e2",
           "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/vfsstat.native.o"
         },
         {
           "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/syscount.native.o",
-          "sha256": "f876ee07d979ba41d8174afe3783b24f93426011dc49960aa36f5cdf01f224a6",
+          "sha256": "e5ae3db3a9aaf7e41dd97362d34310efd0c4f0d658646cf06bc28fc5ef17f1c5",
           "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/syscount.native.o"
         },
         {
           "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/runqlat.native.o",
-          "sha256": "bdf9dfcd37ff938934fc209ee33239dc2046ca8cecc654776a4db4cc79040ade",
+          "sha256": "aa982e292ab61aa983cd3551538d57af22ace9148de305a3f97bccb688115a2b",
           "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/runqlat.native.o"
         },
         {
           "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/runqlat.native.o",
-          "sha256": "bdf9dfcd37ff938934fc209ee33239dc2046ca8cecc654776a4db4cc79040ade",
+          "sha256": "aa982e292ab61aa983cd3551538d57af22ace9148de305a3f97bccb688115a2b",
           "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/runqlat.native.o"
         },
         {
           "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/bcc/runqlat.native.o",
-          "sha256": "bdf9dfcd37ff938934fc209ee33239dc2046ca8cecc654776a4db4cc79040ade",
+          "sha256": "aa982e292ab61aa983cd3551538d57af22ace9148de305a3f97bccb688115a2b",
           "candidate": "/var/tmp/kprog-tmp/A/probe-read/lowering/native/bcc/runqlat.native.o"
         }
       ],
@@ -378,8 +378,8 @@
       "base_archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-unix-length/application/launch-inputs.tar.gz",
       "base_archive_sha256": "31d763972a55e21207fbc3d02fb3352b2ca37ee2eac63d37f0b8c4c3ad2ec2b9",
       "delta_archive": "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/tracee-input-delta.tar.gz",
-      "delta_archive_sha256": "525195ddbf8f0313b4b5f1b1e15418accbbfd21fa8778a382c7254d607a5525a",
-      "model_source_head": "48eb036f5b30d6b8a89e6aa2623d3b00723d6d3f",
+      "delta_archive_sha256": "9be2ce48117350943ad9ec01485f78769988710f95bd1d7d59324967feb48694",
+      "model_source_head": "5bbbf128a2c47bf102376fb28c90df6cd14191a2",
       "files": {
         "mount.py": "f3fa4d676f4e3fb56658195d40c58f5406f12e56b45693ef8aa487f36764eb60",
         "Makefile": "8b7bc7d62b05586f4009281f0c6fcd4bc0a8208713e715f730793c61cf82288a",
@@ -390,7 +390,7 @@
         "source/kprog/trusted_loader.cpp": "90e840a9166189dfb042c2e991157f1a8104dcc6a1e2cee1bd110ad4a3d0a841",
         "source/kprog/helper_abi.py": "bd72775b1bc67da99e07d0ef1445af1d641971e07c77ea0abf7727f8052e168b",
         "source/kprog/trusted_compile.py": "c366a798ff4e791d93ad0dba091c721dea4782f1753149451c0ec825567d4d03",
-        "source/kprog/trusted_generation.py": "fef52ce748d46c970af60acf03a8f327c1a6b42584d2941e1718cc2c615cf87f",
+        "source/kprog/trusted_generation.py": "0dd183ae1950f17012fc48a1da0f0aa627b86e4f19457e668dd17a07498d1af5",
         "source/bpfopt/shim/shim_native_loader.h": "bda3e143497880cf400060c383e46c94541ddceeebd565e32fe90c842529c695",
         "source/kprog/test/check_trusted_service.py": "c7452eeebf9b9cf41043a99c5ef9ce2bc2be85d0e3361414423a0dc402722289",
         "source/kprog/tv/Makefile": "16e49a1158073ab0b9f6268a4c5bfb2c8172c130aa3926a9f6d380aea47760ee",
@@ -399,12 +399,12 @@
         "source/kprog/selftests/submit.py": "9a1d7a2d7177444aa7cfc30e1435bb71f591f5731ce1b21b2feed48569988186",
         "source/kprog/selftests/selftests.py": "53ff916a5a90a0300c5581b9084fa84f91f0d3256a5cbe450d37857cab070383",
         "source/kprog/fidelity/tcb.py": "f3420c7a27cbf5417f7f71b9fa23da503b88a6faad0f6f7fefce10dd1f3452bb",
-        "source/kprog/fidelity/negative.py": "ba7ba4b0f54fbef8cb25ac0abf7d9b59d8b7ed75f970d5809eedb6be4f38ee77",
+        "source/kprog/fidelity/negative.py": "507e8839542b8b665d8137ba98614d46f632c3d980b84ea1b0179098e8dba92e",
         "source/kprog/fidelity/bound_probe.cpp": "002abb7881af7084ead97a3fded4671143849b547e0f4178a8fc36ade00b4dab",
-        "source/kprog/x86/x86_sim_local_bpf.h": "fdbc77ec619332139009ea3e66d40152fab85aa05a3174d8c048020896123279",
-        "source/kprog/arm64/arm64_sim_local_bpf.h": "efdf501218d45cbd8f0779aeb3bbaa1ae4f4d1aa7747dd985bffca0cbf775092",
+        "source/kprog/x86/x86_sim_local_bpf.h": "f893baef3f342251992b385f489ca6c2edb4aaf27c670fd260ee5783fe2b3beb",
+        "source/kprog/arm64/arm64_sim_local_bpf.h": "8b03c750eb8aa391585ba13b31f05983de8939dc0f12b163fec9befd76f2cc10",
         "source/kprog/arm64/generate_sim_dispatch.py": "4c9e13303ac6bef3f174c1ae0b821737a14addbaafc982cd9d5a6ad9aeb0f821",
-        "source/kprog/arm64/trusted_specializer.py": "76f9d766bb23683c12c0e2ef61fd285f582baaa24f4eac5e606bc322876e7751",
+        "source/kprog/arm64/trusted_specializer.py": "51eddfaa7b8aaf7aad776c9bcf0e0996de65b5d0af1e72030f4d3e86838c99fe",
         "source/kprog/arm64/run_app_sim_smoke.py": "50a7cb04959cbb2781ebb1c6adc0f4532b7aad15b08c2028844ff8f82764541c",
         "source/kprog/arm64/arm64_sim_direct.h": "26c9c219db79fd3904ece77328cd4b417c40a563ffdf615bf0ea4338ea7b8f33",
         "source/kprog/arm64/arm64_sim.h": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd",
