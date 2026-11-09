@@ -9,8 +9,14 @@ def publish(paths,message,receipt):
  env=dict(os.environ,GIT_INDEX_FILE=str(idx))
  def run(args,**kw):return subprocess.run(['git',*args],cwd=R,env=env,check=True,**kw)
  try:
-  run(['read-tree','HEAD']);run(['add','--',*paths])
-  done=run(['-c','core.abbrev=40','commit','-F',str(msg),'--',*paths],capture_output=True,text=True);print(done.stdout,flush=True)
+  while True:
+   run(['read-tree','HEAD']);run(['add','-f','--',*paths])
+   done=subprocess.run(['git','-c','core.abbrev=40','commit','-F',str(msg),'--',*paths],cwd=R,env=env,capture_output=True,text=True)
+   if done.returncode==0:break
+   print(done.stdout+done.stderr,flush=True)
+   if 'cannot lock ref' in done.stderr and 'expected' in done.stderr:continue
+   done.check_returncode()
+  print(done.stdout,flush=True)
   commit=re.search(r'^\[[^\]]+ ([0-9a-f]{40})\]',done.stdout,re.M)[1]
   show=run(['show','--stat','--oneline',commit],capture_output=True,text=True);print(show.stdout,flush=True)
   run(['push','origin','master'])
