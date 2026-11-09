@@ -1,0 +1,5 @@
+Paired ARM biosnoop creation-state replay
+
+The operator-authorized creation-state patch0185e288b records the existing lookup result as new_stage. JIT and native use the same edited biosnoop.bpf.c SHAb6eac277f947e2a86d8d21efb57a317f718b0439ce4ba7d11680881a917e9a1a and captured local headers. Native O3 and Os, JIT BPF, embedded upstream biosnoop binary, and both block_rq_insert B builds compile successfully. The initial static link records libelf ZSTD references; the paired incremental link supplies the existing zstd archive and succeeds. Exact commands, sources, objects, skeleton and logs accompany build.json/build-inputs.tar.gz.
+
+The complete eight-tool BCC QEMU two-start application uses the O3 native variant, current implicit-SP release55504ff90, the same-copy f1/e5/3e3f runtime, all32original manifest rows and the frozen May29 framework. Biosnoop bytecode-length selectors follow the newly embedded object; every original symbol selector remains. Functional work and request outcomes are collected by the existing runner. Timing measures QEMU functionality. Runtime admission additions:0.

@@ -1,0 +1,199 @@
+{
+  "utc": "2026-11-09T09:22:31.140213+00:00",
+  "source_publication": "0185e288bd959906a4b7058a39e5fa0edfe5f3b7",
+  "model_publication": "55504ff906ab268a5cab3ab083d6d448d152ed54",
+  "change": {
+    "utc": "2026-11-09T09:11:48.021902+00:00",
+    "app": "BCC/biosnoop",
+    "source": "libbpf-tools/biosnoop.bpf.c",
+    "before_sha256": "122b0835099ac0c299b1d003c6a8f046d547309347122a88cd674b241e6fc2d4",
+    "after_sha256": "b6eac277f947e2a86d8d21efb57a317f718b0439ce4ba7d11680881a917e9a1a",
+    "upstream_commit": "07ca7ba9df379bf063b3b2afca6983b8d91bc2a2",
+    "change": "Record new_stage from the existing map lookup NULL result; reuse it for the existing initialization and insertion branches.",
+    "behavior": "For start HASH map lookups, a live map value occupies map storage and local stage occupies the current native stack. Timestamp/device writes, map operations and program selectors retain their original behavior.",
+    "build": "Both JIT and native frontends consume the same edited file and captured headers.",
+    "reason": "Original block_rq_insert native address-equality branch between map value and local stack reaches an impossible-alias B path and fp-72 initialization diagnostic. Generic scalar/slot compression retains that cross-region relation frontier.",
+    "patch": "corpus/results/kprog_app_source_changes/bcc-biosnoop-creation-state.patch",
+    "runtime_admission_additions": 0
+  },
+  "commands": [
+    {
+      "label": "O3",
+      "cwd": "/workspaces/repository/vendor/bpf",
+      "command": [
+        "clang-18",
+        "--target=aarch64-linux-gnu",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fpass-plugin=/var/tmp/kprog-tmp/A/probe-read/lowering/native_division.so",
+        "-D__TARGET_ARCH_arm64",
+        "-fms-extensions",
+        "-fomit-frame-pointer",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x18",
+        "-ffixed-x26",
+        "-ffixed-x27",
+        "-ffixed-x28",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/var/tmp/kprog-tmp/A/biosnoop-creation-state/src",
+        "-I/var/tmp/kprog-tmp/A/biosnoop-creation-state/src/arm64",
+        "-I/workspaces/repository/vendor/bpf/bcc/src/cc/libbpf/include/uapi",
+        "-I/usr/aarch64-linux-gnu/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu",
+        "-o",
+        "/var/tmp/kprog-tmp/A/biosnoop-creation-state/biosnoop.O3.native.o",
+        "/var/tmp/kprog-tmp/A/biosnoop-creation-state/src/biosnoop.bpf.c",
+        "-MMD",
+        "-MF",
+        "/var/tmp/kprog-tmp/A/biosnoop-creation-state/biosnoop.O3.native.d",
+        "-c",
+        "-march=armv8.1-a+lse"
+      ]
+    },
+    {
+      "label": "Os",
+      "cwd": "/workspaces/repository/vendor/bpf",
+      "command": [
+        "clang-18",
+        "--target=aarch64-linux-gnu",
+        "-Os",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fpass-plugin=/var/tmp/kprog-tmp/A/probe-read/lowering/native_division.so",
+        "-D__TARGET_ARCH_arm64",
+        "-fms-extensions",
+        "-fomit-frame-pointer",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x18",
+        "-ffixed-x26",
+        "-ffixed-x27",
+        "-ffixed-x28",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/var/tmp/kprog-tmp/A/biosnoop-creation-state/src",
+        "-I/var/tmp/kprog-tmp/A/biosnoop-creation-state/src/arm64",
+        "-I/workspaces/repository/vendor/bpf/bcc/src/cc/libbpf/include/uapi",
+        "-I/usr/aarch64-linux-gnu/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include",
+        "-I/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu",
+        "-o",
+        "/var/tmp/kprog-tmp/A/biosnoop-creation-state/biosnoop.Os.native.o",
+        "/var/tmp/kprog-tmp/A/biosnoop-creation-state/src/biosnoop.bpf.c",
+        "-MMD",
+        "-MF",
+        "/var/tmp/kprog-tmp/A/biosnoop-creation-state/biosnoop.Os.native.d",
+        "-c",
+        "-march=armv8.1-a+lse"
+      ]
+    },
+    {
+      "label": "jit",
+      "cwd": "/var/tmp/kprog-tmp/A/biosnoop-creation-state/src",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "-f",
+        "/var/tmp/kprog-tmp/A/biosnoop-creation-state/upstream.Makefile",
+        "biosnoop",
+        "V=1",
+        "APPS=biosnoop",
+        "ARCH=arm64",
+        "USE_BLAZESYM=0",
+        "CC=aarch64-linux-gnu-gcc",
+        "CLANG=clang-18",
+        "LLVM_STRIP=llvm-strip-18",
+        "OUTPUT=/var/tmp/kprog-tmp/A/biosnoop-creation-state/jit",
+        "BPFTOOL=/workspaces/repository/vendor/build/x86/bpftool/bin/bpftool",
+        "LIBBPF_OBJ=/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a",
+        "INCLUDES=-I/var/tmp/kprog-tmp/A/biosnoop-creation-state/jit -I/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include -I/workspaces/repository/vendor/repos/bcc/src/cc/libbpf/include/uapi -I/workspaces/repository/.cache/aarch64-sysroot/usr/include -I/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu",
+        "CFLAGS=-g -O2 -Wall",
+        "BPFCFLAGS=-g -O2 -Wall",
+        "LDFLAGS=-static -L/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -Wl,--start-group -lelf -lz -lzstd -Wl,--end-group"
+      ]
+    }
+  ],
+  "initial_status": {
+    "utc": "2026-11-09T09:19:44.925166+00:00",
+    "phase": "finished",
+    "rows": [
+      {
+        "label": "O3",
+        "exit": 0
+      },
+      {
+        "label": "Os",
+        "exit": 0
+      },
+      {
+        "label": "jit",
+        "exit": 2
+      }
+    ]
+  },
+  "static_link_status": {
+    "utc": "2026-11-09T09:20:13.985821+00:00",
+    "exit": 0
+  },
+  "generation": [
+    {
+      "profile": "O3",
+      "phase": "compiled",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/A/biosnoop-creation-state/generated/O3/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/A/biosnoop-creation-state/generated/O3/trusted_arm64.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/A/biosnoop-creation-state/generated/O3/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "block_rq_insert",
+        "native_sha256": "e3d27444238ddfb404c1fdf8133b8586fc5013c86dfb836749da1f9689d6920e"
+      }
+    },
+    {
+      "profile": "Os",
+      "phase": "compiled",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/A/biosnoop-creation-state/generated/Os/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/A/biosnoop-creation-state/generated/Os/trusted_arm64.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/A/biosnoop-creation-state/generated/Os/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "block_rq_insert",
+        "native_sha256": "5c66372d1d77fa7b42a6dd32d04e0ffa1f6a15aa84752534d7c8d509bc553ab9"
+      }
+    }
+  ],
+  "artifacts": {
+    "src/biosnoop.bpf.c": "b6eac277f947e2a86d8d21efb57a317f718b0439ce4ba7d11680881a917e9a1a",
+    "src/biosnoop": "c8105d525b5c366d54ff8ffbf9ce89d0638beb37bcb1c5d48c5f91cd28ae73d8",
+    "jit/biosnoop.bpf.o": "ab3cac3a0db4c7c882a9e790c446ac6c08283e7d7f727003309ea673969d56f4",
+    "jit/biosnoop.skel.h": "397beb42531ec0b14852592795fbe17fa232407ce6c286299bc36b1a7fbd1801",
+    "biosnoop.O3.native.o": "e3d27444238ddfb404c1fdf8133b8586fc5013c86dfb836749da1f9689d6920e",
+    "biosnoop.Os.native.o": "5c66372d1d77fa7b42a6dd32d04e0ffa1f6a15aa84752534d7c8d509bc553ab9",
+    "generated/O3/trusted_arm64.bpf.o": "4c87548a801751316bbc51c4c6356b7a900cab10bfae7ec80ff53bdaf1754eae",
+    "generated/Os/trusted_arm64.bpf.o": "2584a158f10dc4401a62b435abb0365e7fbfe97180d00624dad1b98ccaf1e63d"
+  },
+  "runtime_admission_additions": 0
+}
