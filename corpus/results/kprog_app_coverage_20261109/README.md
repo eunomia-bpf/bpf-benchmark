@@ -6,10 +6,10 @@ This index preserves the latest completed whole-application cohort for each appl
 | --- | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 in completed startup | 25 | 25 | 25 | 25 | 0 | 0 | completed |
 | OTel | 13 resident in recorded startup | 3 | 3 | 3 | 2 | 0 | 1: proof stack write at -528, size 8 | native startup error |
-| Cilium | 72 resident in recorded startup | 16 | 15 | 15 | 14 | 1: source release before GET_CONTEXT | 1: scalar memory read, tail_ipv4_policy | native startup error |
+| Cilium | 72 resident in earlier recorded startup | 6 | 5 | 5 | 4 | 1: preparation/source outcome | 1: tail_ipv4_policy: R3 invalid mem access 'scalar' | native startup error |
 | Tetragon | 287 resident in earlier original startup; paired census continues | 0 | 0 | 0 | 0 | paired startup reaches baseline verifier | baseline helper4 R2 unbounded, generic_kprobe_filter_arg | startup error |
 | Katran | 1 in completed startup | 1 | 1 | 1 | 1 | 0 | 0 | completed |
-| Tracee | 151 resident in earlier original startup; paired census continues | 0 | 0 | 0 | 0 | paired startup reaches baseline verifier | baseline map access offset65672, size4096, value32536 | startup error |
+| Tracee | 151 resident in earlier original startup; paired census continues | 0 | 0 | 0 | 0 | paired startup reaches baseline verifier | baseline verifier log retained in current paired-source receipt | startup error |
 
 BCC and Katran share the [completed same-copy cohort](../../../kprog/results/kprog_design_only_20261108/same-copy-link/bcc-katran/README.md),26 generated/compiled/installed and application status ok. Its coverage, service/result/runtime archives and raw work counters retain the actual native/runtime epoch. The current exception-recovery kernel/module supplies a newer epoch, whose whole-application replay remains a separate observation.
 
@@ -37,3 +37,9 @@ The [SMAP dispatch case](../../../kprog/results/kprog_design_only_20261108/load-
 The latest [Tracee terminal recovery](tracee-clamp-macro/README.md),e076764e7, records its own interrupted guest and exact serial-launch correction. The earlier [Cilium setup receipt](cilium-map-caller-frame/README.md),e972fe227, records image kinsn-module insertion errno22 and application/native requests0. Current image recipes reuse all15 already-built current-kernel kinsn modules and the installed paired ordinary modules. Existing Cilium2643565 continues with its captured source; Tracee2652943 uses setsid --wait and queues behind the actual Cilium controller and guest closure. Private kernel/module/source caches retain their outputs.
 
 Coordinator disposition changes the performance baseline to the2026-05-29 workload definition9f3855f6f. R owns OTel sample-rate and Katran packet-work restoration and its timing. These current C compatibility cohorts retain their captured earlier framework epoch, while all performance claims use R's restored workload receipts. C's ensuing optimization remains in native P production, following completed load-fault recovery and R attribution; step(e) keeps same-copy native emission with resolved relocations.
+
+## Completed recovery-chain results
+
+The [MOV protected-read component](protected-mov-model/README.md),4839fa1f5, completes both gcc and clang UBSan runs with2,061,312full-state cases each across the same244native forms. Success and full-register recovery use actual emitted instructions; the preserved initial fixture/import/link diagnostics retain their own epochs. The canonical header and generator keep their current source, and remaining memory-token/compiler/platform premises stay explicit.
+
+The [paired-module Cilium cohort](cilium-map-caller-frame/README.md),bd3d7a68f, completes Make0 with6native requests,5generated/compiled,4installed and2terminal failures. Its actual app status is error. The [paired-source Tracee cohort](tracee-clamp-macro/README.md),b9d9804ca, completes Make0 and reaches a baseline verifier startup error with0native requests. Each receipt retains the complete native/source/kernel/image/service/compiler/verifier and original work/error records. These current compatibility attempts use their recorded earlier workload epoch; R owns restored05-29 workload timing.
