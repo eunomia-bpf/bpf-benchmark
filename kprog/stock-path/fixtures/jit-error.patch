@@ -1,0 +1,29 @@
+--- a/kprog/libnativeloader/src/native_loader.cpp
++++ b/kprog/libnativeloader/src/native_loader.cpp
+@@ -1,3 +1,4 @@
++#include <iostream>
+ #include "native_loader.hpp"
+ #include "../../../kinsn/module/include/native_lab_binding.h"
+ #include "../../../kinsn/module/include/native_lab_trusted_wire.h"
+@@ -979,7 +980,12 @@
+     std::vector<uint32_t> handles;
+     for (size_t i = 0; i < chunks.size(); i++) {
+         const auto &body = i + 1 == chunks.size() ? proof : continuation;
+-        const auto relocated = chunk_reloc_bytes(relocs, chunks[i]);
++        auto relocated = chunk_reloc_bytes(relocs, chunks[i]);
++        /* Fixture only: chunk_reloc_bytes drops a slot past the chunk end, so
++         * append after it. The kernel's relocation offset check rejects this. */
++        append_u32_le(relocated, static_cast<uint32_t>(chunks[i].len - 1));
++        append_u32_le(relocated, kNativeLabRelocHelperCallRel32);
++        append_u64_le(relocated, 1);
+         std::vector<native_lab_load_site> chunk_loads;
+         for (const auto &site : load_sites) {
+             if (site.offset >= chunks[i].offset &&
+@@ -1300,6 +1306,7 @@
+                                   sizeof(attr.keyring_id));
+     attr.log_size = static_cast<uint32_t>(verifier_log.size());
+     attr.log_buf = ptr_to_u64(verifier_log.data());
++    std::cerr << "stock-armed-load-attempt=1\n";
+     const long rc = syscall(SYS_bpf, BPF_PROG_LOAD, &attr, attr_size);
+     log_true_size = attr.log_true_size;
+     return rc >= 0 ? static_cast<int>(rc) : -errno;

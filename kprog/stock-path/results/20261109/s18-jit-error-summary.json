@@ -1,0 +1,71 @@
+{
+  "lane": "S18",
+  "fixture_exit": 0,
+  "kernel": "35ea2cde39fc88b01f2f49b2a357e7cf7102e4c8",
+  "injection": {
+    "where": "fixtures/jit-error.patch, upload_native_chunks, after chunk_reloc_bytes",
+    "offset": "chunk length minus 1 (5 of 6)",
+    "kind": 1,
+    "target": 1,
+    "kernel_check": "offset + X86_PATCH_SIZE > native->len in bpf_native_relocate"
+  },
+  "x86": {
+    "client_exit": 1,
+    "client_stdout_bytes": 0,
+    "client_error": "trusted service control: trusted specializer refused native program: Input/output error",
+    "service_status": -5,
+    "installed_prog_id": null,
+    "jited_dumps": 0,
+    "bpf_native_relocate_return": -34,
+    "armed_raw_load_return": -524,
+    "armed_raw_loads_kernel_trace": 1,
+    "armed_load_counter": 1,
+    "verifier_completed": true,
+    "loader_error": "stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Unknown error 524",
+    "native_test_run_kernel_trace": 0
+  },
+  "arm64_reference": {
+    "run": "S17/run/arm64-jit-error-kernel",
+    "client_exit": 1,
+    "service_status": -5,
+    "armed_load_counter": 1,
+    "verifier_completed": true,
+    "loader_error": "stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Unknown error 524"
+  },
+  "same_guest_control": {
+    "loader": "unmodified loader-once build",
+    "client": {
+      "ok": true,
+      "original_prog_id": 3,
+      "native_prog_id": 6,
+      "retval": 2,
+      "prebuilt_proof": false
+    },
+    "bpf_native_relocate_return": 0,
+    "armed_raw_loads_kernel_trace": 1,
+    "native_test_run_kernel_trace": 1
+  },
+  "other_loader_process_loads": {
+    "count_before_arm": 2,
+    "description": "Two libbpf capability probes, socket-filter type with 2 instructions, returning a descriptor before the image is armed; present identically in the control",
+    "entries": [
+      "trusted-native--1107    [000] .....     6.806594: s18_load_entry: (bpf_prog_load+0x0/0xb20) type=1 insns=2 log_size=0 name=\"\"",
+      "trusted-native--1107    [000] .....     6.806737: s18_load_entry: (bpf_prog_load+0x0/0xb20) type=1 insns=2 log_size=0 name=\"libbpf_nametest\""
+    ]
+  },
+  "earlier_attempts": {
+    "S17/run/x86-jit-error": "offset 0, kind 1, target 1: fits rel32 arithmetic, program installed, client TEST_RUN mismatch",
+    "S18/run/x86-jit-error-offset-end": "offset equal to blob length, added before chunk_reloc_bytes: status 0, retval 2",
+    "S18/run/x86-jit-error-offset-last": "offset blob length minus 1, added before chunk_reloc_bytes: status 0, retval 2",
+    "S18/run/x86-jit-error-probe-count-first": "final injection with a process-wide load count that included the libbpf probes; guest assertion stopped at the control, kernel trace retained"
+  },
+  "host_cpu_affinity": "8-15",
+  "guest_memory_mib": 2048,
+  "kprobe_trace": "run/x86-jit-error/kprobe-trace",
+  "proof_scope": "One injected relocation-offset failure on x86 in one guest; finite runtime receipt",
+  "archive": {
+    "file": "s18-jit-error-raw.tar.gz",
+    "bytes": 142147,
+    "members": 78
+  }
+}
