@@ -44,9 +44,14 @@ typedef signed long long __s64;
 #include <stdio.h>
 #include <string.h>
 
-static unsigned choice_bits, choice_cursor;
+static unsigned choice_bits, choice_cursor, read_success_choice;
 static unsigned long undefined_value(void)
 {
+	/* A valid memory operand consumes its successful read outcome first. */
+	if (read_success_choice) {
+		read_success_choice = 0;
+		return 0;
+	}
 	return (choice_bits >> (choice_cursor++ & 1U)) & 1U;
 }
 #undef X86_SIM_L_UNSPECIFIED
@@ -217,6 +222,7 @@ static void check_step(unsigned op_is_mem, unsigned flags, unsigned aux_width,
 	/* Each kind6 output ranges independently over both native bit values. */
 	choice_bits = (src1_reg ^ aux_reg ^ dst_reg ^ flags ^ via_dispatch) & 3U;
 	choice_cursor = 0U;
+	read_success_choice = op_is_mem;
 	mpf = choice_bits & 1U;
 	maf = (choice_bits >> 1) & 1U;
 	__x86_pf = mpf ^ 1U;
@@ -266,7 +272,7 @@ static void check_step(unsigned op_is_mem, unsigned flags, unsigned aux_width,
 
 	/* ---- compare the flags ---- */
 	cases++;
-	if (choice_cursor != 2U || __x86_cf != mcf || __x86_zf != mzf || __x86_sf != msf ||
+	if (read_success_choice || choice_cursor != 2U || __x86_cf != mcf || __x86_zf != mzf || __x86_sf != msf ||
 	    __x86_of != mof || __x86_pf != mpf || __x86_af != maf) {
 		printf("MISMATCH mem=%u flags=%u auxw=%u src1=%u dst=%u "
 		       "disp=%lld flags: got cf=%u zf=%u sf=%u of=%u pf=%u af=%u "
