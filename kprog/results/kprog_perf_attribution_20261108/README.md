@@ -179,29 +179,121 @@ is their ratio, which is the part the native path is answerable for.
 
 Two facts follow:
 
-1. **The JIT arm, the control, is heavier in four of five applications.**
-   It is 1.08x to 1.54x heavier per invocation than its reference on
-   tetragon, cilium, otelcol and bcc, and 0.99x on katran. The native arm
-   moves by a similar factor, so the reference's ratios came from a faster
-   machine state, not from faster native code.
-2. **The native-specific share is 0.87x to 1.23x.** After dividing out what
-   the JIT arm also lost: bcc **0.866x** (the native arm lost *less* than
-   the JIT arm), tetragon 1.061x, otelcol 1.114x, cilium 1.158x, katran
-   1.228x. Four of five are within 1.06x to 1.23x; bcc is below 1.
+The aggregate is the right basis: total `run_time_ns_delta` over total
+`run_cnt_delta` per arm, which is what a workload's packets actually paid.
+Per-program medians are in the next section, and they hid the pattern below.
 
-   **bcc's figure is the weakest of the five** and is reported as such: its
-   15 shared programs span 0.61x to 9.31x on the native arm and 0.68x to
-   4.29x on the JIT arm, because the eight tools it runs are unrelated
-   workloads and one median over all of them carries little. What it does
-   say is that bcc's native path is not the arm that got slower there, which
-   is consistent with its BPF time being 2.35 s against a minute-scale
-   workload: the ratio is insensitive to the native path by construction.
+| app | arm | 2026-05-29 ns/run | current ns/run | change |
+| --- | --- | ---: | ---: | ---: |
+| tetragon | JIT | 695 | 748 | 1.076 |
+| tetragon | native | **312** | **735** | **2.358** |
+| katran | JIT | 178 | 176 | 0.989 |
+| katran | native | **142** | **173** | **1.215** |
+| cilium | JIT | 489 | 685 | 1.403 |
+| cilium | native | 262 | 416 | 1.585 |
 
-That is why cilium's reference 2.358x is now 1.229x: its native arm lost
-1.292x, but its JIT arm lost 1.116x, so the ratio collapses by most of the
-native factor while the absolute slowdown is common to both arms. The same
-shape explains otelcol (1.824x to 1.013x), where the JIT arm lost 1.518x,
-and tetragon (1.323x to 1.008x), where both arms lost about the same 1.1x.
+Three facts follow, and two of them contradict what this report said before:
+
+1. **On tetragon and katran the JIT arm held steady and the native arm lost
+   its advantage.** Tetragon's JIT moved 1.076x while its native arm went
+   from 312 to 735 ns, a 2.358x loss that erased a 2.2x native advantage.
+   Katran's JIT moved 0.989x -- flat -- while its native arm went 142 to
+   173 ns. So the reading that "both arms moved alike" is wrong for those
+   two: the baseline held and the native arm moved.
+
+   Whether the *code* moved is a separate question with a different answer
+   per app. For katran it did not: the source is `cmp`-identical between
+   the trees and the 2026-05-29 linker and the current one emit a
+   byte-identical proof object from it. For tetragon the loss is in one
+   program, `generic_kprobe_`, which ran at 51.7 ns natively in the
+   reference and 900.4 ns now.
+2. **Cilium is the one where both arms moved**, its JIT 1.403x and native
+   1.585x, so its reference 2.358x collapses to 1.229x because the native
+   factor (262 to 416 ns) and the JIT factor (489 to 685 ns) are close.
+3. **The native-specific share is 1.23x to 2.19x on the two apps where the
+   baseline held** (katran 1.215/0.989 = 1.23, tetragon 2.358/1.076 =
+   2.19), which is a different and much larger figure than the 6-23% the
+   per-program medians gave.
+
+   The medians were the wrong statistic: they weight each program equally,
+   so a program with a handful of invocations counted as much as one with a
+   billion. The aggregate is what a packet paid.
+
+### Katran, established from its own sources
+
+Katran is the cleanest case -- one program, `balancer_ingress`, and the same
+source in both runs. Checked by rebuilding rather than assuming:
+
+| step | result |
+| --- | --- |
+| `balancer.c` and its headers, old tree vs current | `cmp`-identical (`vendor/bpf/katran` against `vendor/repos/katran`) |
+| compiler | clang 18.1.3 in both |
+| flags | the same `KATRAN_NATIVE_CFLAGS`, including `-march=native -mno-red-zone -mgeneral-regs-only -fno-optimize-sibling-calls -mllvm -switch-to-lookup=false` |
+| built from each tree, `balancer_ingress` disassembly | **md5-identical** (`61f38eea341bd96628815e960acfcefb`) |
+| linked by the 2026-05-29 linker and the current one | **byte-identical** 8,266-byte proof object, 65 relocations |
+
+**So the native code did not move, and the linker did not change its
+output.** What moved is the recorded native program size (jited 10,192 to
+10,261, +69 bytes) and the cost per invocation (142.4 to 173.1 ns, 1.215x).
+Both linkers emit the same bytes from the same object, so the +69 bytes come
+from the object the reference actually ran, which its image held and no
+archive kept.
+
+One per-invocation difference the current linker does expose is the entry
+ABI: `--preserve-entry-abi` keeps the compiler's prologue (five callee-saved
+pushes) where the default strips to two, a 14-byte and three-push
+difference. It is a real per-call term but far short of 31 ns.
+
+### Tetragon, which programs ran native
+
+Tetragon has one program that dwarfs the rest and it ran native in both
+runs, so the comparison is like for like at the program level:
+
+| program | 2026-05-29 native | current native | change |
+| --- | ---: | ---: | ---: |
+| `generic_tracepo` (the hot one) | 662.4 ns | 761.9 ns | 1.150 |
+| `generic_kprobe_` (was 51.7 ns) | **51.7 ns** | **900.4 ns** | **17.4x** |
+
+The JIT arm for the same two moved 722.7 to 765.4 (1.059) and 537.6 to
+601.1 (1.118). So the reference's 2.2x native advantage came from
+`generic_kprobe_` running at 51.7 ns against 537.6 ns under the JIT, and
+that advantage is gone: the current native arm runs it at 900.4 ns, worse
+than the JIT's 601.1.
+
+That is the mechanism behind tetragon's 312 to 735 ns aggregate. The hot
+program `generic_tracepo` itself only regressed 15%, and it is a large
+program that spends its time in the same place either way; the regression is
+in the small generic programs where the native path was previously doing
+something the JIT cannot.
+
+### Cilium, where the invocation count carries the answer
+
+Cilium is the app where the workload ratio follows the program speedup least
+closely, and the counters say why:
+
+| | reference | current |
+| --- | ---: | ---: |
+| JIT runs | 421,037,214 | 354,679,445 |
+| native runs | **951,601,656** | 448,505,003 |
+| JIT ns/run | 491.4 | 683.4 |
+| native ns/run | **261.1** | 384.1 |
+| native/JIT runs | **2.26x** | 1.26x |
+| total BPF time, JIT / native | 411.5 s / **497.3 s** | 486.1 s / **362.4 s** |
+
+In the reference the native arm ran **2.26 times as many program
+invocations** as the JIT arm, at 261.1 ns against 491.4, so it did more work
+in *more* total BPF time (497.3 s against 411.5 s) -- the program was faster
+and the workload therefore pushed more packets through it.
+
+Now the native arm runs 1.26x as many invocations at 384.1 ns against 683.4,
+and its total BPF time is *lower* than the JIT's (362.4 s against 486.1 s).
+
+The per-call speedup barely moved, 1.882x to 1.779x. What moved is the
+count multiplier, 2.26x to 1.26x: the reference's workload pushed 2.26
+times as many packets through a native program that was 1.88x cheaper, so a
+much larger share of wall time sat in BPF; now it pushes 1.26 times as many
+through one that is 1.78x cheaper. The invocation ratio is what the workload
+ratio follows, and it is nearly twice as large in the reference.
 
 ### The JIT arm, program by program
 
@@ -282,8 +374,15 @@ pure-bytecode set is exactly those 29 programs
 (`x86_kvm_micro_20260529_003919_048557`: 29 benchmarks; the helper/map set
 `..._004658_667642`: 13).  Native code compiled today from the reference's
 own source therefore reproduces the reference's ratios: 1.468x against
-1.478x and 1.403x against 1.429x.  The native code did not move; the
-context around the corpus apps did.
+1.478x and 1.403x against 1.429x.
+
+**That holds for the micros and only the micros.** For the corpus
+applications the native code did move: tetragon's native arm went from 312
+to 735 ns per run while its JIT arm moved 1.076x, and katran's from 142 to
+173 ns while its JIT arm held at 0.989x. The micros' sources are identical
+between the trees and their ratios reproduce; the applications' native
+objects came out of their images, and on the two apps where the baseline
+held, those objects are where the loss is.
 
 ### What this means for the candidates
 
