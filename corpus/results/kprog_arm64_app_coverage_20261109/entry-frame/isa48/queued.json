@@ -277,7 +277,7 @@
   "kernel_source": "canonical CK read-only source with master-owned ARM entry patch",
   "native_negative_execution_requests": 0,
   "arm_application_replays": 0,
-  "controller_pid": 228238,
+  "controller_pid": 231501,
   "kernel": "/var/tmp/kprog-tmp/A/entry-frame/Image",
   "module": "/var/tmp/kprog-tmp/A/entry-frame/module/kprog_stock.ko",
   "native_link": "/var/tmp/kprog-tmp/A/entry-frame/arm-native-link",
@@ -312,7 +312,7 @@
     "-append",
     "console=ttyAMA0 root=rootfs rootfstype=9p rootflags=trans=virtio,version=9p2000.L ro init=/bin/sh loglevel=7 panic=-1 oops=panic"
   ],
-  "stage": "existing ISA48 guest active; suite outcome pending",
+  "stage": "original ISA48 continuation running after zero-submission producer path correction",
   "output": "/var/tmp/kprog-tmp/A/entry-frame/isa48/results",
   "post_build_native_link_sources": {
     "kprog/x86/native_lab/native_link/Cargo.toml": {
@@ -327,5 +327,14 @@
       "working_sha256": "36df8a183c442228dbe799d60c1c024f2a742a436416364be70c76ac9a28b09e",
       "committed_sha256": "36df8a183c442228dbe799d60c1c024f2a742a436416364be70c76ac9a28b09e"
     }
+  },
+  "initial_controller_pid": 228238,
+  "collector_pid": 232755,
+  "setup_continuation": {
+    "first_attempt_native_submissions": 0,
+    "reason": "Published bound-probe resource discovery uses /mnt/cargo/aarch64-unknown-linux-gnu/release/native-link",
+    "correction": "Hardlink the already-built stock-entry-frame ARM binary at that original runtime path",
+    "same_native_link_binary": true,
+    "model_revision": "f3f1e6b9cbee07d70b22bed7fb61bd4669a0fe97"
   }
 }
