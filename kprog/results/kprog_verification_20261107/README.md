@@ -5922,3 +5922,20 @@ source-read fault and nextPC/length premises. Source recovery-choice coupling,
 primitive/tag/provenance/lifetime, physical fault/table/site/frame/ABI and
 compiled-B relations remain active. The O2 REP rows and O4 LOAD_FAULT_RECOVERY
 row stay partial; complete family counts remain71/75 C-model and13/75 compiled.
+
+### REP MOVS current source decisions
+
+The [16 source-control laws](rep-choice-loop.log.gz), published as
+`d4a3c6dd861799c5b346202d8fa287ff82e624d9`, connect the normalized current C recovery predicate
+and loop to the copied-prefix/O4 results. They prove scalar/typed routing,
+complete modular effective-address calculation, the low4KiB/fresh-bit decision,
+the first selected index, final pointer/RCX writeback and ordered events. Normal
+copy paths and scalar-source read-fault paths have explicit per-read choice
+witnesses for arbitrary states and full RCX counts.
+
+The native64/DF-clear, successful prefix, read-fault, exact continuation length
+and high-page premises are explicit. Global dynamic-word projection, actual
+primitive/tag/provenance/lifetime, physical exception/table/site/frame/ABI and
+C/compiler/embedding correspondence remain active interfaces. O2/O4 status
+and complete family counts retain their stated partial scope. Sole full
+`b2fd6f3b3f475f84a99566ce95efd8e4705d0e90` retains its earlier immutable source.

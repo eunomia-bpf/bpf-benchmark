@@ -28024,7 +28024,7 @@
       "sorryAx": 0
     },
     "current_complete_c_model_families": "71/75",
-    "current_goal": "Selected recovery-choice/index coupling, primitive/tag/provenance/ownership/lifetime, compiled B and physical exception/table/site/frame/native ABI/access once for all programs.",
+    "current_goal": "Actual dynamic global fresh-word projection, primitive/tag/provenance/ownership/lifetime, physical exception/table/site/frame/native ABI/access, C/compiler/embedding correspondence once for all programs.",
     "earlier_full_actual_exit": 2,
     "earlier_full_archive": "kprog/results/kprog_verification_20261107/stlxr-status-frame.log.gz",
     "earlier_full_source": "2d8fb3ac005b1c02c8af4d9c132d950aee109696",
@@ -28044,6 +28044,8 @@
     "recovery_prefix_publication": "b2fd6f3b3f475f84a99566ce95efd8e4705d0e90",
     "runtime_admission_additions": 0,
     "source": "bc0b5b1c51b76b2a4afda019e59618f1562be769",
+    "source_choice_archive": "kprog/results/kprog_verification_20261107/rep-choice-loop.log.gz",
+    "source_choice_publication": "d4a3c6dd861799c5b346202d8fa287ff82e624d9",
     "source_profile": "FullRCX native64 DFclear successful normal-access indexed loop; arbitrary legacy IMM/aux/dst/src; exact sequential overlap/fault prefixes and numeric/raw/tag frame.",
     "status": "partial-current-full-count-recovery-model",
     "success_model_archive": "kprog/results/kprog_verification_20261107/rep-full-count-success.log.gz",
@@ -28096,6 +28098,49 @@
       "kprog/tv/NativeLinkFinalImage.lean": "bf2eea0bc1d33812eb9b0445a9400ace15e4cfb1cd6a4b2b23c12b4056fece38"
     },
     "status": "partial-universal-component"
+  },
+  "rep_movs_source_choices": {
+    "actual_module_compiles": {
+      "NativeLinkFinalImage": 0,
+      "X86RepMovs": 0,
+      "X86RepStos": 0
+    },
+    "archive": "kprog/results/kprog_verification_20261107/rep-choice-loop.log.gz",
+    "axiom_audit_exit": 0,
+    "current_full_scope": "Earlier immutable epoch; eventual receipt separate.",
+    "current_full_source": "b2fd6f3b3f475f84a99566ce95efd8e4705d0e90",
+    "existing_module_prefixes_preserved": true,
+    "global_fresh_stream": "Per-read word view requires a projection from actual dynamic global input visits; retained interface.",
+    "law_count": 16,
+    "laws": [
+      "KProgFormal.Refinement.X86RepMovs.Indexed.recovery_decision_typed",
+      "KProgFormal.Refinement.X86RepMovs.Indexed.recovery_decision_low",
+      "KProgFormal.Refinement.X86RepMovs.Indexed.recovery_decision_high",
+      "KProgFormal.Refinement.X86RepMovs.Indexed.source_loop_selected",
+      "KProgFormal.Refinement.X86RepMovs.Indexed.source_handler_selected",
+      "KProgFormal.Refinement.X86RepMovs.Indexed.source_handler_success",
+      "KProgFormal.Refinement.X86RepMovs.Indexed.loop_next_pc",
+      "KProgFormal.Refinement.X86RepMovs.Indexed.source_handler_recovery_matches",
+      "KProgFormal.Refinement.X86RepMovs.Indexed.source_handler_step_refines",
+      "KProgFormal.Refinement.X86RepMovs.Indexed.recovery_fresh_bit",
+      "KProgFormal.Refinement.X86RepMovs.Indexed.recovery_effective_address",
+      "KProgFormal.Refinement.X86RepMovs.Indexed.ordinary_choices_exist",
+      "KProgFormal.Refinement.X86RepMovs.Indexed.first_recovery_choices_exist",
+      "KProgFormal.Refinement.X86RepMovs.Indexed.source_body_success_witness",
+      "KProgTV.NativeLinkFinalImage.x86_source_recovered_rep_movs",
+      "KProgTV.NativeLinkFinalImage.x86_source_recovery_choice_witness"
+    ],
+    "publication": "d4a3c6dd861799c5b346202d8fa287ff82e624d9",
+    "reduction_bridge": 5,
+    "runtime_predicate_additions": 0,
+    "scope": "Native64/DFclear fullRCX source loop with scalar/typed complete-EA low4KiB/fresh-bit recovery decisions. Any first selected index equals the copied prefix and final pointer/RCX state; ordinary and scalar-source read-fault paths have per-read choice witnesses. Successful prefix/read fault/nextPC-length and physical high-page premises explicit; global dynamic-input projection, primitive/tag/provenance/lifetime, physical exception/table/site/frame/ABI and compiledB/embedding remain interfaces.",
+    "sorryAx": 0,
+    "source_profile": "Existing scalar RSI condition, complete EA<4096 or fresh low-bit branch; any first-selected index and fullRCX range.",
+    "source_sha256": {
+      "kprog/formal/KProgFormal/Refinement/X86RepMovs.lean": "018a5dbc13ca3864441bd9d513cc4f217bbc7d42c94f7b57e5e3fe8cec45e59a",
+      "kprog/tv/NativeLinkFinalImage.lean": "9b9fd342b5b01df038f179fa80ab8dcf3abcd8290782200b01107aad670aef09"
+    },
+    "status": "partial-source-control-model"
   },
   "rep_stos_reference_progress": {
     "actual_compiled_B": "pending",
