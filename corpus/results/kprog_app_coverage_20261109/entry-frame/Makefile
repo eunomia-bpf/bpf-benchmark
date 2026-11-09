@@ -9,7 +9,7 @@ KERNEL_BUILD := $(STATE)/kernel-build
 kernel:
 	install -d $(KERNEL_BUILD)
 	@if test ! -e $(KERNEL_BUILD)/Makefile; then cp -a --reflink=auto /var/tmp/kprog-tmp/S17/x86-build/. $(KERNEL_BUILD)/; fi
-	TMPDIR=$(STATE) $(MAKE) -C $(KERNEL_SOURCE) O=$(KERNEL_BUILD) -j4 bzImage
+	TMPDIR=$(STATE) $(MAKE) -C $(KERNEL_SOURCE) O=$(KERNEL_BUILD) CFLAGS_bpf_jit_comp.o="-wrapper /usr/bin/python3,$(HERE)/kernel-compiler.py" -j4 bzImage
 module:
 	TMPDIR=$(STATE) $(MAKE) -C $(KERNEL_BUILD) M=$(ROOT)/kprog/stock-path/module MO=$(STATE)/module -j4 modules
 compile-before:
