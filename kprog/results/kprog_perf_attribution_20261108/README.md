@@ -922,9 +922,28 @@ from the source end: Katran's native code did not move.
 | step | what changed from 2026-05-29 | run | JIT ns | native ns | speedup |
 | --- | --- | --- | ---: | ---: | ---: |
 | 0 | nothing (the definition itself) | `..._153901_098451` | 176.5 | 144.8 | 1.219x |
-| 1 | the kernel | `..._181234_983977` | 168.7 | 136.4 | **1.236x** |
+| 1 | the kernel | `..._220354_774016` | 172.0 | 137.5 | **1.251x** |
 | 2 | + `native-link` | `..._190057_967714` | 170.1 | does not load | -- |
 | 3 | the native objects only | `..._192548_978152` | 174.7 | 146.8 | 1.190x |
+
+Step 1 is quoted from a re-run, `..._220354_774016`, because the first step-1
+figure came from a run whose saved archive could not be re-audited. The re-run
+passes `tools/audit_native_arm.py` as `native` -- arms differ in `bytes_jited`,
+13,641 against 10,196 -- and reads 1.251x per invocation and 1.114x
+throughput, against 1.236x and 1.071x first time. The conclusion is unchanged
+and slightly stronger: the kernel shifts both arms and leaves the ratio in
+roughly the same place it was on the 2026-05-29 kernel.
+
+**A defect in my own harness, worth recording because it corrupted several
+archives.** My guest archived whichever `corpus/results/x86_kvm_corpus_*`
+directory was newest on the shared filesystem, and with other lanes running
+concurrently that directory is often not the one the guest just produced.
+Eighteen saved archives turned out to contain far fewer distinct runs than
+that: several held the same counters because they were the same run copied
+twice, and the audit classified nine of them `same-code`. The guest now
+selects the newest directory created after its own start time. Live reads
+were always correct, so the tables are unaffected apart from the step-1 row
+above, which is re-measured.
 
 So, answering the operator's second question directly: **no single component
 of the 2026-05-29 setup moves Katran's cost per invocation in a way that
