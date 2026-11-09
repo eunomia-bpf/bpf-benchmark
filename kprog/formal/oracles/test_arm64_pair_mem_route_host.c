@@ -168,6 +168,7 @@ static void heap_write(__u64 addr, unsigned width, __u64 value)
  * slot as a word, every other access assembles bytes. */
 static __u64 stack_read(__u32 idx, unsigned width)
 {
+    if ((__s64)idx - ARM64_SIM_STACK_BIAS < msp) return 0;
 	if (width == ARM64_WIDTH_64 && (idx & 7U) == 0U)
 		return img_load(&stk_exp[idx], ARM64_WIDTH_64);
 	return img_load(&stk_exp[idx], width);
@@ -177,6 +178,7 @@ static __u64 stack_read(__u32 idx, unsigned width)
  * 64-bit access; every other access is scalar. */
 static __u8 stack_read_tag(__u32 idx, unsigned width)
 {
+    if ((__s64)idx - ARM64_SIM_STACK_BIAS < msp) return ARM64_SIM_TAG_SCALAR;
 	return KPROG_ARM64_STACK_TAG(width == ARM64_WIDTH_64,
 				     (idx & 7U) == 0U)
 		       ? stk_tag_exp[idx >> 3]
@@ -188,6 +190,13 @@ static void stack_write(__u32 idx, unsigned width, __u64 value, __u8 tag)
 {
 	img_store(&stk_exp[idx], width, value);
 	host_stack_store_tags(stk_tag_exp, idx, width, tag);
+    /* Below-SP native bytes belong to opaque callees: fresh host input0. */
+    for (unsigned i = 0; i < width; i++) {
+        if ((__s64)(idx + i) - ARM64_SIM_STACK_BIAS < msp) {
+            stk_exp[idx + i] = 0;
+            stk_tag_exp[(idx + i) >> 3] = ARM64_SIM_TAG_SCALAR;
+        }
+    }
 }
 
 /* The base register's value and provenance tag, as the memory macros read
@@ -276,9 +285,12 @@ static void model_mem_write(unsigned base, unsigned index, unsigned aux,
 /* `ARM64_SIM_L_MEM_PRE` / `ARM64_SIM_L_MEM_POST` writeback. */
 static void model_writeback(unsigned base, __s64 imm)
 {
-	if (base == ARM64_SP)
-		msp += imm;
-	else
+	if (base == ARM64_SP) {
+        __s64 prior_sp = msp;
+        msp += imm;
+        host_stack_release_zero(stk_exp, stk_tag_exp, STACK_BYTES,
+                                ARM64_SIM_STACK_BIAS, prior_sp, msp);
+    } else
 		mreg[base] = mreg[base] + (__u64)imm;
 }
 
@@ -288,7 +300,10 @@ static void model_write_reg_width(unsigned reg, __u64 value, unsigned width)
 	__u64 next = KPROG_ARM64_APPLY_WIDTH(value, width);
 
 	if (reg == ARM64_SP) {
-		msp = (__s64)next;
+        __s64 prior_sp = msp;
+        msp = (__s64)next;
+        host_stack_release_zero(stk_exp, stk_tag_exp, STACK_BYTES,
+                                ARM64_SIM_STACK_BIAS, prior_sp, msp);
 	} else if (reg != ARM64_XZR && reg != ARM64_REG_NONE) {
 		if (width == ARM64_WIDTH_32)
 			mreg[reg] = (__u32)next;

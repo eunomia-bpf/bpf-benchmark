@@ -48,6 +48,7 @@ typedef signed short __s16;
 #include "../arm64/arm64_sim_local_bpf.h"
 
 #include <stdio.h>
+#include "stack_store_model_host.h"
 #include <string.h>
 
 /* The simulator header expects this hook. Its call count is the observable
@@ -158,6 +159,7 @@ static __u64 heap_read(__u64 addr, unsigned width)
  * slot as a word, every other access assembles bytes. */
 static __u64 stack_read(__u32 idx, unsigned width)
 {
+    if ((__s64)idx - ARM64_SIM_STACK_BIAS < msp) return 0;
 	if (width == ARM64_WIDTH_64 && (idx & 7U) == 0U)
 		return img_load(&stk_exp[idx], ARM64_WIDTH_64);
 	return img_load(&stk_exp[idx], width);
@@ -211,9 +213,12 @@ static __u64 model_mem_read(unsigned base, unsigned index, unsigned aux,
 /* `ARM64_SIM_L_MEM_PRE` / `ARM64_SIM_L_MEM_POST` writeback. */
 static void model_writeback(unsigned base, __s64 imm)
 {
-	if (base == ARM64_SP)
-		msp += imm;
-	else
+	if (base == ARM64_SP) {
+        __s64 prior_sp = msp;
+        msp += imm;
+        host_stack_release_zero(stk_exp, stk_tag_exp, STACK_BYTES,
+                                ARM64_SIM_STACK_BIAS, prior_sp, msp);
+    } else
 		mreg[base] = mreg[base] + (__u64)imm;
 }
 
@@ -223,7 +228,10 @@ static void model_write_reg_width(unsigned reg, __u64 value, unsigned width)
 	__u64 next = KPROG_ARM64_APPLY_WIDTH(value, width);
 
 	if (reg == ARM64_SP) {
-		msp = (__s64)next;
+        __s64 prior_sp = msp;
+        msp = (__s64)next;
+        host_stack_release_zero(stk_exp, stk_tag_exp, STACK_BYTES,
+                                ARM64_SIM_STACK_BIAS, prior_sp, msp);
 	} else if (reg != ARM64_XZR && reg != ARM64_REG_NONE) {
 		if (width == ARM64_WIDTH_32)
 			mreg[reg] = (__u32)next;
