@@ -25,7 +25,8 @@
 - [x] **C** 原生替换失败后保留 eBPF，完整 Katran 两个工作阶段继续运行，recipe 位于冻结路径之外（7734afc52、725e45398；248ebacee、13c38586e，TODO 启用时补记）。
 - [ ] **C** 05-29 driver 缺少的运行需求放进 shim、loader 或冻结路径之外的 recipe，让 verified 一侧在恢复后的框架上跑通。
 - [ ] **R** AArch64 硬件性能（DGX Spark，单次测试后立刻恢复 deepseek41-flash 部署）。
-- [ ] **Claude subagent** 直接 native 的 blob 端点放回 R 专用测量模块（82f8e9e77 删除，R 的两次全长 run 因此是 eBPF 对 eBPF）。
+- [x] 直接 native 的 blob 端点放回 R 专用测量模块（`kprog/perf/direct-native/`，1734f582f、3bd83fb13），Katran 2 秒功能运行替换 1 个程序。
+- [ ] **C/R** 这条测量路径没有异常表项，带 probe read 内联的 Tetragon、Tracee 载荷要先补上恢复路径再计时。
 - [ ] **R** 统一 pps 口径：843,755 接近单 worker，四 worker 合计约 250 万。
 - [ ] **C** 优化顺序改为 Tetragon、Cilium、OTel、Tracee，Katran 放最后。
 - [ ] **协调者** 用重测结果更新论文 §6。
@@ -46,6 +47,7 @@
 - [x] **A** 普查按原始 commands.jsonl 保留失败编译器的命令、退出码和 stderr，并将 BPF stack-size 编译错误单列；现有两条编译失败均属此类，本提交纳入统一分类路径。 八行实际分类和原始档案见 resident-census/linked-progress-8。
 - [x] **A** 普查 B 的 forwarding cells 按现有整字读取布局收缩（本提交）：捕获的 8 行全部生成，6 行减少声明，其余生成行逐字相等；4 项布局用例保持旧 extent。结果见 resident-census/stack-forwarding-layout。
 - [x] **A** forwarding tag8 与 valid1 合并为16位状态（本提交），保留所有256tag值与两个valid状态；GCC/Clang18、array/named两种布局的完整512状态与原栈生命周期用例共8组构建/运行通过，host UBSan 启用。编译B的stack占用与stock verifier继续按下一行收尾。
+- [x] **A** Packing670b的5个distinct body完成B编译，5/5成功；直接R10最深值-120/-248/-248/-568/-1632，process_filter相对sparse的-2176收缩544字节。源/对象/命令/日志见 forwarding-state-pack/compile，本提交本地保存，stock verifier继续按下一行。
 - [ ] **A/C** 最大native storage类157（verifier124、compiler33）的通用修复及stock回放。Packing670b五体全部编译；process_filter直接R10从-2176降至-1632，仍需继续。宽constant-barrier1760/d3f的编译记录保留为撤回trial；C原38例中的entry_return_slot_overwrite要求保留原访问barrier，后续使用f202/05b等canonical source。
 - [ ] **A/C** native kernel link的PLT32编码11实例（3体）及bpf_loop callback参数1实例（1体），分别保留B已生成/已编译与实际verifier阶段，使用通用链接/回调下沉处理。
 - [ ] **A** 用已发布资源和名称修复回放其余 274 行的完整 native 生成、编译及 stock verifier 阶段；逐行记录模型/源码版本，harness 位于冻结路径之外。协调者 14:35 优先275行分组普查，旧等待队列已结束；源abf7ddc0b及274行输入保留于 repaired-static/launch 对应 scratch。
