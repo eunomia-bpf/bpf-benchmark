@@ -1,0 +1,79 @@
+{
+  "phase": "source ELF maps and BTF resource preparation",
+  "original_resource_failures": 238,
+  "resource_prepared": 238,
+  "groups": [
+    {
+      "application": "otelcol-ebpf-profiler/profiling",
+      "resident_instances": 13,
+      "result": "corpus/results/kprog_app_coverage_20261109/resident-census/resource-maps-only/result.json",
+      "commit": "3daeea9b23697dd0eed3ec256e0039e359d14088",
+      "source_stage": "resources_prepared"
+    },
+    {
+      "application": "tracee/monitor",
+      "resident_instances": 151,
+      "result": "corpus/results/kprog_app_coverage_20261109/resident-census/resource-maps-only/result.json",
+      "commit": "3daeea9b23697dd0eed3ec256e0039e359d14088",
+      "source_stage": "resources_prepared"
+    },
+    {
+      "application": "cilium/agent",
+      "resident_instances": 1,
+      "result": "corpus/results/kprog_app_coverage_20261109/resident-census/resource-pinning/result.json",
+      "commit": "aba3e9d46c8c484f043c633a90e212b26eef3756",
+      "source_stage": "resources_prepared"
+    },
+    {
+      "application": "cilium/agent",
+      "resident_instances": 35,
+      "result": "corpus/results/kprog_app_coverage_20261109/resident-census/resource-pinning/result.json",
+      "commit": "aba3e9d46c8c484f043c633a90e212b26eef3756",
+      "source_stage": "resources_prepared"
+    },
+    {
+      "application": "cilium/agent",
+      "resident_instances": 36,
+      "result": "corpus/results/kprog_app_coverage_20261109/resident-census/resource-pinning/result.json",
+      "commit": "aba3e9d46c8c484f043c633a90e212b26eef3756",
+      "source_stage": "resources_prepared"
+    },
+    {
+      "application": "bcc/set",
+      "resident_instances": 2,
+      "result": "corpus/results/kprog_app_coverage_20261109/resident-census/resource-runtime-config/result.json",
+      "commit": "7b4876f7a166dafbbabba3cbc4d65d17ffc1bf39",
+      "source_stage": "resources_prepared"
+    }
+  ],
+  "initial_native_pass": {
+    "instances": 549,
+    "generated": 12,
+    "compiled": 11,
+    "verifier_accepted": 7,
+    "verifier_rejected": 4,
+    "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795"
+  },
+  "numeric_name_metadata": {
+    "cases": 23,
+    "normalized": 23,
+    "map_declarations_compiled": 23,
+    "elf_identities_preserved": 23,
+    "existing_metadata_tests": 6,
+    "commit": "eeec0f52a66bc9bd08365675ff7988d30f0e2c89"
+  },
+  "manifest_unique": 549,
+  "native_execution_requests": 0,
+  "application_source_program_loads": 0,
+  "program_admission_predicates_added": 0,
+  "active_native_continuation": {
+    "scratch": "/var/tmp/kprog-tmp/A/resident-census-linked",
+    "attempted": 6,
+    "stages": {
+      "verifier_rejected": 5,
+      "compilation_failed": 1
+    },
+    "model_head": "4f5b7ae6db02414f6ad69648677fc22ec8bf6795",
+    "total_new_submissions": 275
+  }
+}
