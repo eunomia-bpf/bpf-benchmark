@@ -178,8 +178,6 @@ def safety(epoch, suite):
 
 def census(epoch):
     namespace(epoch)
-    bind(STATE / 'kernel-build/arch/x86/boot/bzImage',
-         Path('/var/tmp/kprog-tmp/S17/x86-build/arch/x86/boot/bzImage'))
     original = Path('/var/tmp/kprog-tmp/A/resident-census-linked')
     inputs = epoch / 'census-inputs'
     inputs.mkdir(exist_ok=True)
@@ -187,6 +185,7 @@ def census(epoch):
         data = json.loads((original / name).read_text())
         if name == 'run-inventory.json':
             data['source_head'] = epoch.name
+            data['kernel_image'] = str(STATE / 'kernel-build/arch/x86/boot/bzImage')
         write(inputs / name, data)
     link(epoch / 'source', inputs / 'source')
     shutil.copy2(NATIVE_LINK, inputs / 'native-link')
