@@ -1393,10 +1393,6 @@ pub(super) fn rewrite_x86(
     };
 
     let entry_bytes = read_symbol_bytes(elf, entry)?;
-    let entry_has_tail_call = x86_symbol_has_immediate_helper_id(&entry_bytes, entry.address, 12)?
-        || helper_call_sites.iter().any(|(key, name)| {
-            key.0 == entry.section_index && key.1 == entry.address && name == "bpf_tail_call"
-        });
     let proof_return_jmp_target = if !proof_mode && proof_input {
         proof_entry_end_target
     } else {
@@ -1406,13 +1402,24 @@ pub(super) fn rewrite_x86(
     // Submitted bytes and their relocation offsets retain their original form.
     let mut planning_entry_bytes = entry_bytes.clone();
     for (key,name) in &thunk_sites {
-        if key.0 == entry.section_index && key.1 == entry.address &&
-            x86_thunk_selector(name) == Some(16) {
+        if key.0 == entry.section_index && key.1 == entry.address {
             let offset = key.2 as usize;
-            planning_entry_bytes[offset] = 0xc3;
-            planning_entry_bytes[offset+1..offset+5].fill(0x90);
+            let selector = x86_thunk_selector(name).expect("scanned thunk") as u8;
+            let call = entry_bytes[offset] == 0xe8;
+            planning_entry_bytes[offset..offset+5].fill(0x90);
+            if selector == 16 { planning_entry_bytes[offset] = 0xc3; }
+            else {
+                let mut cursor = offset;
+                if selector >= 8 { planning_entry_bytes[cursor] = 0x41; cursor += 1; }
+                planning_entry_bytes[cursor] = 0xff;
+                planning_entry_bytes[cursor+1] = (if call { 0xd0 } else { 0xe0 }) | (selector & 7);
+            }
         }
     }
+    let entry_has_tail_call = x86_symbol_has_immediate_helper_id(&planning_entry_bytes, entry.address, 12)?
+        || helper_call_sites.iter().any(|(key, name)| {
+            key.0 == entry.section_index && key.1 == entry.address && name == "bpf_tail_call"
+        });
     let mut planned_entry_abi = plan_x86_entry_abi_strip(
         &planning_entry_bytes, entry.address, entry_has_tail_call, proof_return_jmp_target,
         (!proof_mode && proof_input) || (proof_mode && preserve_entry_abi),
@@ -1436,7 +1443,11 @@ pub(super) fn rewrite_x86(
         }
         required_mask |= x86_observed_callee_saved_writes(&instructions)?;
     }
-    let callee_saved_mask = x86_checked_callee_saved_mask(proof_callee_saved_mask, required_mask)?;
+    // The JIT also saves registers used by B. A tail transfer declares every
+    // ordinary BPF callee save through the existing sidecar ABI, giving its
+    // emitted pop sequence the same layout for every simulator allocation.
+    let callee_saved_mask = x86_checked_callee_saved_mask(proof_callee_saved_mask, required_mask)?
+        | if entry_has_tail_call { 15 } else { 0 };
 
     let mut sym_global_offset: HashMap<SymbolKey, usize> = HashMap::new();
     let mut blob: Vec<u8> = Vec::new();

@@ -78,6 +78,18 @@ for selector, reg in enumerate(registers):
         assert data[:4] == bytes.fromhex('f30f1efa')
         rows.append(dict(transfer=transfer, register=reg, thunks=thunk))
 
+# A thunked tail helper declares the complete JIT callee-save frame.
+tail_native, tail_proof = args.output / 'tail.native.o', args.output / 'tail.proof.o'
+run(['clang-18', '-c', ROOT / 'kprog/test/tail_call_frame/native.S', '-o', tail_native])
+run([args.linker, '--input', tail_native, '--symbol', 'entry', '--mode', 'proof',
+     '--preserve-entry-abi', '--output', tail_proof])
+with tail_proof.open('rb') as stream:
+    abi = ELFFile(stream).get_section_by_name('.native_link_abi').data().decode()
+assert 'callee_saved_mask\t15\n' in abi
+asm = run(['objdump', '-dr', '-Mintel', tail_native])
+assert re.search(r'\b(?:call|jmp)\s+(?:[er][a-z0-9]+|QWORD PTR)', asm) is None
+
+
 source = args.output / 'compiled.c'
 source.write_text('__attribute__((noinline)) static unsigned long target(void *x) '
                   '{ __asm__ volatile(""); return 2; }\n'
