@@ -1,0 +1,68 @@
+{
+  "source": "existing finite reaching-helper flow for entry tail detection",
+  "parent": {
+    "command": [
+      "/var/tmp/kprog-tmp/C/master-x86-runtime/runtime/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/C/tail-helper-reaching-frame/actual-input/2d8fea5d94304a41.tmp.8038.8038.proof.o",
+      "--symbol",
+      "tracepoint__raw_syscalls__sys_enter",
+      "--mode",
+      "kernel",
+      "--output",
+      "/var/tmp/kprog-tmp/C/tail-helper-reaching-frame/parent/native.blob",
+      "--output-relocs",
+      "/var/tmp/kprog-tmp/C/tail-helper-reaching-frame/parent/native.relocs",
+      "--output-map-patches",
+      "/var/tmp/kprog-tmp/C/tail-helper-reaching-frame/parent/maps.tsv",
+      "--output-abi",
+      "/var/tmp/kprog-tmp/C/tail-helper-reaching-frame/parent/abi.tsv",
+      "--output-data-layout",
+      "/var/tmp/kprog-tmp/C/tail-helper-reaching-frame/parent/data.json",
+      "--link-plan",
+      "/var/tmp/kprog-tmp/C/tail-helper-reaching-frame/actual-input/2d8fea5d94304a41.tmp.8038.8038.link-plan.json"
+    ],
+    "returncode": 1,
+    "stderr": "native-link: entry=tracepoint__raw_syscalls__sys_enter (142 bytes), 1 reachable symbol(s) total\n  - tracepoint__raw_syscalls__sys_enter (vaddr 0x0, 142 bytes) [entry]\nError: x86 bpf_tail_call lowering missing BPF rbp location\n",
+    "outputs": {
+      "result.json": "e3e8e9d061d80412aba7fe77e75650f235e9425c0cf59f72bc001758493f9899"
+    }
+  },
+  "candidate": {
+    "command": [
+      "/var/tmp/kprog-tmp/C/tail-helper-reaching-frame/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/C/tail-helper-reaching-frame/actual-input/2d8fea5d94304a41.tmp.8038.8038.proof.o",
+      "--symbol",
+      "tracepoint__raw_syscalls__sys_enter",
+      "--mode",
+      "kernel",
+      "--output",
+      "/var/tmp/kprog-tmp/C/tail-helper-reaching-frame/candidate/native.blob",
+      "--output-relocs",
+      "/var/tmp/kprog-tmp/C/tail-helper-reaching-frame/candidate/native.relocs",
+      "--output-map-patches",
+      "/var/tmp/kprog-tmp/C/tail-helper-reaching-frame/candidate/maps.tsv",
+      "--output-abi",
+      "/var/tmp/kprog-tmp/C/tail-helper-reaching-frame/candidate/abi.tsv",
+      "--output-data-layout",
+      "/var/tmp/kprog-tmp/C/tail-helper-reaching-frame/candidate/data.json",
+      "--link-plan",
+      "/var/tmp/kprog-tmp/C/tail-helper-reaching-frame/actual-input/2d8fea5d94304a41.tmp.8038.8038.link-plan.json"
+    ],
+    "returncode": 0,
+    "stderr": "native-link: entry=tracepoint__raw_syscalls__sys_enter (142 bytes), 1 reachable symbol(s) total\n  - tracepoint__raw_syscalls__sys_enter (vaddr 0x0, 142 bytes) [entry]\nnative-link: wrote 240 bytes -> /var/tmp/kprog-tmp/C/tail-helper-reaching-frame/candidate/native.blob (6 relocs)\nnative-link: wrote 6 relocs -> /var/tmp/kprog-tmp/C/tail-helper-reaching-frame/candidate/native.relocs\nnative-link: wrote 2 map patch site(s) -> /var/tmp/kprog-tmp/C/tail-helper-reaching-frame/candidate/maps.tsv\nnative-link: wrote ABI metadata -> /var/tmp/kprog-tmp/C/tail-helper-reaching-frame/candidate/abi.tsv\n",
+    "outputs": {
+      "native.blob": "d232f895344dbdb7c598da304accc96ca928606900ae509cde5c443120647323",
+      "native.relocs": "4865d747f4098b58392a0ea12f81c1a59e13aaecefa96cc0b8b467264bdb0e58",
+      "maps.tsv": "51a91f17689725a0b1bf39e22f6e4ce2ded60008d3f044195be615153e626461",
+      "data.json": "3ccbe11b60a4fa4f0d024f7c22cba06b70ca3ff7d9eead4c8a3a5aa4ca8d2b73",
+      "abi.tsv": "7386519ba549d79eeb92c763eeba8bccfd6787c2cdcab44412dfd6632fdd3850"
+    }
+  },
+  "rust_test_exit": 0,
+  "build_exit": 0,
+  "source_sha256": "5b3cb610e4113860789c8617ca523031c0f1b65f881534035ce27c4d9abd6211",
+  "native_link_sha256": "e5d034af6e2802b0e11cd25a39afc77ab4dd3dec4df788808754d8a637b07ccf",
+  "runtime_predicates_added": 0
+}

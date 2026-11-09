@@ -1,0 +1,5 @@
+# Tail-call frame planning from reaching helper targets
+
+The actual Tracee raw_syscalls entry in coherent109c86a05 copies helper12 from RAX to R11 after argument setup, then uses the compiler external thunk. Kernel lowering already resolves that call through the generic finite reaching-target analysis. Entry frame planning used a local immediate-register lookahead and missed the copied helper identity, leaving the existing RBP frame location empty.
+
+The private candidate reuses the existing reaching-target flow for helper-ID detection before frame planning. Existing cleanup/RBP/native ABI calculations, helper lowering, kernel emission and metadata formats retain their implementations. The regression exercises that compiler call shape and an overwritten-helper-ID case. Existing complete Rust tests/build exit0. Exact original Tracee proof object/link plan runs through parent and candidate; summary.json records their actual return values and complete output hashes. Runtime predicate additions0.
