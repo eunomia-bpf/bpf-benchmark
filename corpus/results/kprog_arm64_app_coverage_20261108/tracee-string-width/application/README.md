@@ -1,0 +1,3 @@
+Complete paired-source ARM Tracee
+
+The original Tracee recipe and workload run with the complete native manifest and paired 09f40af86 source artifacts. Both C frontends retain the recorded source edits and original size bounds; the new ARM binary embeds the paired JIT object. Native P uses canonical O3 flags, the88-helper ARM model8eac3b42a and same-copy native-load recovery f1caa1cd9/99b2f9561 with paired module symbolse5a3270f0. QEMU8GiB/eightvCPU16-19 follows the LSE BCC and paired-module Katran recovery serial apps through pidfd. Same-copy runtime source and all input hashes are captured. Runtime admission additions:0.
