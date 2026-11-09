@@ -786,6 +786,13 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
        } else { __a64_hap_ptr = ARM64_SIM_L_READ_REG_PTR(REG); } \
        __a64_hap_ptr; })
 
+/* Opaque callees own the bytes below the caller's current SP. */
+#define ARM64_SIM_L_HELPER_WRITE_ARG_PTR(REG) \
+    ({ if (ARM64_SIM_L_REG_TAG(REG) == ARM64_SIM_TAG_STACK && \
+           (__s64)(long)ARM64_SIM_L_READ_REG_PTR(REG) < ARM64_SIM_L_STACK_SP()) \
+           ARM64_SIM_L_UNSUPPORTED_OPCODE(); \
+       ARM64_SIM_L_HELPER_ARG_PTR(REG); })
+
 /* Only the proven expanded-context base denotes the original helper context.
  * Offset and arbitrary pointers retain their existing identity. */
 #define ARM64_SIM_L_HELPER_CTX_PTR(REG)                                  \
@@ -1807,7 +1814,7 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
 
 /* Native libc calls use their actual length; there is no simulator trip cap. */
 #define ARM64_SIM_LIBC_MEMSET()                                            \
-	do {                                                               \
+	do { (void)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X0);                                                               \
 		__u8 __a64_lib_byte = (__u8)ARM64_SIM_L_READ_REG(ARM64_X1);  \
 		__u64 __a64_lib_len = ARM64_SIM_L_READ_REG(ARM64_X2);       \
 		for (__u64 __a64_lib_i = 0; __a64_lib_i < __a64_lib_len; __a64_lib_i++) \
@@ -1817,7 +1824,7 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
 	} while (0)
 
 #define ARM64_SIM_LIBC_MEMCPY()                                            \
-	do {                                                               \
+	do { (void)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X0);                                                               \
 		if (ARM64_SIM_L_REG_TAG(ARM64_X1) == ARM64_SIM_TAG_SCALAR) \
 			ARM64_SIM_L_UNSUPPORTED_OPCODE();                       \
 		__u64 __a64_lib_len = ARM64_SIM_L_READ_REG(ARM64_X2);       \
@@ -1968,7 +1975,7 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_map_delete_elem((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1)))
 
 #define ARM64_SIM_BPF_CALL_bpf_probe_read() \
-	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X1); __s64 __a64_hw_src = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X2); __u8 __a64_hw_stag = ARM64_SIM_L_REG_TAG(ARM64_X2); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, __a64_hw_src, __a64_hw_stag, __a64_hw_len, (ARM64_SIM_L_READ_REG(ARM64_X0) == 0)); } while (0)
+	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X1); __s64 __a64_hw_src = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X2); __u8 __a64_hw_stag = ARM64_SIM_L_REG_TAG(ARM64_X2); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read((void *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, __a64_hw_src, __a64_hw_stag, __a64_hw_len, (ARM64_SIM_L_READ_REG(ARM64_X0) == 0)); } while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_ktime_get_ns() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_ktime_get_ns())
@@ -2004,10 +2011,10 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_uid_gid())
 
 #define ARM64_SIM_BPF_CALL_bpf_get_current_comm() \
-	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X1); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_comm((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
+	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X1); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_comm((void *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_skb_get_tunnel_key() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_get_tunnel_key((struct __sk_buff *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (struct bpf_tunnel_key *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_get_tunnel_key((struct __sk_buff *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (struct bpf_tunnel_key *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3)))
 
 #define ARM64_SIM_BPF_CALL_bpf_skb_set_tunnel_key() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_set_tunnel_key((struct __sk_buff *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (struct bpf_tunnel_key *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3)))
@@ -2019,7 +2026,7 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_perf_event_output((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4)))
 
 #define ARM64_SIM_BPF_CALL_bpf_skb_load_bytes() \
-	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X2); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X2); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X3); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_load_bytes((const void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2), (__u32)ARM64_SIM_L_READ_REG(ARM64_X3))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
+	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X2); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X2); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X3); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_load_bytes((const void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (void *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X2), (__u32)ARM64_SIM_L_READ_REG(ARM64_X3))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_get_stackid() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_stackid((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2)))
@@ -2040,7 +2047,7 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_task())
 
 #define ARM64_SIM_BPF_CALL_bpf_probe_write_user() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_write_user((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_write_user((void *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X0), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2)))
 
 #define ARM64_SIM_BPF_CALL_bpf_current_task_under_cgroup() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_current_task_under_cgroup((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1)))
@@ -2061,7 +2068,7 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
 	} while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_probe_read_str() \
-	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X1); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_str((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
+	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X1); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_str((void *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_get_socket_cookie() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_socket_cookie((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0)))
@@ -2085,13 +2092,13 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
 	} while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_get_stack() \
-	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X1); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X1); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X2); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_stack((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
+	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X1); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X1); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X2); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_stack((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_skb_load_bytes_relative() \
-	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X2); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X2); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X3); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_load_bytes_relative((const void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2), (__u32)ARM64_SIM_L_READ_REG(ARM64_X3), (__u32)ARM64_SIM_L_READ_REG(ARM64_X4))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
+	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X2); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X2); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X3); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_load_bytes_relative((const void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (void *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X2), (__u32)ARM64_SIM_L_READ_REG(ARM64_X3), (__u32)ARM64_SIM_L_READ_REG(ARM64_X4))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_fib_lookup() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_fib_lookup((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (struct bpf_fib_lookup *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (int)ARM64_SIM_L_READ_REG(ARM64_X2), (__u32)ARM64_SIM_L_READ_REG(ARM64_X3)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_fib_lookup((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (struct bpf_fib_lookup *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X1), (int)ARM64_SIM_L_READ_REG(ARM64_X2), (__u32)ARM64_SIM_L_READ_REG(ARM64_X3)))
 
 #define ARM64_SIM_BPF_CALL_bpf_get_current_cgroup_id() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_cgroup_id())
@@ -2106,7 +2113,7 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_map_push_elem((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2)))
 
 #define ARM64_SIM_BPF_CALL_bpf_map_pop_elem() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_map_pop_elem((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_map_pop_elem((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X1)))
 
 #define ARM64_SIM_BPF_CALL_bpf_sk_fullsock() \
 	ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_sk_fullsock((struct bpf_sock *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0)))
@@ -2115,22 +2122,22 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
 	ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_skc_lookup_tcp((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (struct bpf_sock_tuple *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4)))
 
 #define ARM64_SIM_BPF_CALL_bpf_strtol() \
-    do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X3); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X3); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_strtol((const char *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (unsigned long)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2), (long *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X3))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, sizeof(long), 0); } while (0)
+    do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X3); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X3); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_strtol((const char *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (unsigned long)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2), (long *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X3))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, sizeof(long), 0); } while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_send_signal() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_send_signal((__u32)ARM64_SIM_L_READ_REG(ARM64_X0)))
 
 #define ARM64_SIM_BPF_CALL_bpf_probe_read_user() \
-	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X1); __s64 __a64_hw_src = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X2); __u8 __a64_hw_stag = ARM64_SIM_L_REG_TAG(ARM64_X2); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_user((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, __a64_hw_src, __a64_hw_stag, __a64_hw_len, (ARM64_SIM_L_READ_REG(ARM64_X0) == 0)); } while (0)
+	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X1); __s64 __a64_hw_src = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X2); __u8 __a64_hw_stag = ARM64_SIM_L_REG_TAG(ARM64_X2); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_user((void *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, __a64_hw_src, __a64_hw_stag, __a64_hw_len, (ARM64_SIM_L_READ_REG(ARM64_X0) == 0)); } while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_probe_read_kernel() \
-	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X1); __s64 __a64_hw_src = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X2); __u8 __a64_hw_stag = ARM64_SIM_L_REG_TAG(ARM64_X2); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_kernel((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, __a64_hw_src, __a64_hw_stag, __a64_hw_len, (ARM64_SIM_L_READ_REG(ARM64_X0) == 0)); } while (0)
+	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X1); __s64 __a64_hw_src = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X2); __u8 __a64_hw_stag = ARM64_SIM_L_REG_TAG(ARM64_X2); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_kernel((void *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, __a64_hw_src, __a64_hw_stag, __a64_hw_len, (ARM64_SIM_L_READ_REG(ARM64_X0) == 0)); } while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_probe_read_user_str() \
-	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X1); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_user_str((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
+	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X1); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_user_str((void *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_probe_read_kernel_str() \
-	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X1); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_kernel_str((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
+	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X1); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_kernel_str((void *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_jiffies64() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_jiffies64())
@@ -2167,7 +2174,7 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_ringbuf_output((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3)))
 
 #define ARM64_SIM_BPF_CALL_bpf_copy_from_user() \
-	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X1); __s64 __a64_hw_src = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X2); __u8 __a64_hw_stag = ARM64_SIM_L_REG_TAG(ARM64_X2); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_copy_from_user((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, __a64_hw_src, __a64_hw_stag, __a64_hw_len, (ARM64_SIM_L_READ_REG(ARM64_X0) == 0)); } while (0)
+	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X1); __s64 __a64_hw_src = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X2); __u8 __a64_hw_stag = ARM64_SIM_L_REG_TAG(ARM64_X2); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_copy_from_user((void *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, __a64_hw_src, __a64_hw_stag, __a64_hw_len, (ARM64_SIM_L_READ_REG(ARM64_X0) == 0)); } while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_redirect_neigh() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_redirect_neigh((__u32)ARM64_SIM_L_READ_REG(ARM64_X0), (struct bpf_redir_neigh *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (int)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3)))
@@ -2182,10 +2189,10 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_ktime_get_coarse_ns())
 
 #define ARM64_SIM_BPF_CALL_bpf_ima_inode_hash() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_ima_inode_hash((struct inode *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_ima_inode_hash((struct inode *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2)))
 
 #define ARM64_SIM_BPF_CALL_bpf_check_mtu() \
-    do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X2); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X2); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_check_mtu((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (__u32 *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2), (__s32)ARM64_SIM_L_READ_REG(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4))); if ((__s64)ARM64_SIM_L_READ_REG(ARM64_X0) >= 0) ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, sizeof(__u32), 0); } while (0)
+    do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X2); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X2); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_check_mtu((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (__u32 *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X2), (__s32)ARM64_SIM_L_READ_REG(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4))); if ((__s64)ARM64_SIM_L_READ_REG(ARM64_X0) >= 0) ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, sizeof(__u32), 0); } while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_get_func_ip() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_ip((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0)))
@@ -2200,10 +2207,10 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_loop((__u32)ARM64_SIM_L_READ_REG(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3)))
 
 #define ARM64_SIM_BPF_CALL_bpf_get_func_arg() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_arg((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64 *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_arg((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64 *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X2)))
 
 #define ARM64_SIM_BPF_CALL_bpf_get_func_ret() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_ret((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u64 *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_ret((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u64 *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X1)))
 
 #define ARM64_SIM_BPF_CALL_bpf_get_func_arg_cnt() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_arg_cnt((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0)))
@@ -2219,7 +2226,7 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
 		__s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X2); \
 		__u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X2); \
 		__u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X3); \
-		ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_xdp_load_bytes((struct xdp_md *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2), __a64_hw_len)); \
+		ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_xdp_load_bytes((struct xdp_md *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (void *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X2), __a64_hw_len)); \
 		if (ARM64_SIM_L_READ_REG(ARM64_X0) == 0) \
 			ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); \
 	} while (0)
@@ -2228,13 +2235,13 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_xdp_store_bytes((struct xdp_md *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2), (__u32)ARM64_SIM_L_READ_REG(ARM64_X3)))
 
 #define ARM64_SIM_BPF_CALL_bpf_copy_from_user_task() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_copy_from_user_task((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2), (struct task_struct *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_copy_from_user_task((void *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2), (struct task_struct *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4)))
 
 #define ARM64_SIM_BPF_CALL_bpf_ima_file_hash() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_ima_file_hash((struct file *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_ima_file_hash((struct file *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2)))
 
 #define ARM64_SIM_BPF_CALL_bpf_kptr_xchg() \
-	ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_kptr_xchg((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1)))
+	ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_kptr_xchg((void *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1)))
 
 #define ARM64_SIM_BPF_CALL_bpf_map_lookup_percpu_elem() \
 	ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_map_lookup_percpu_elem((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2)))
@@ -2244,7 +2251,7 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
     do { \
         __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X3); \
         __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X3); \
-        ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_dynptr_from_mem((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u64)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2), (struct bpf_dynptr *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X3))); \
+        ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_dynptr_from_mem((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u64)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2), (struct bpf_dynptr *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X3))); \
         ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, sizeof(struct bpf_dynptr), 0); \
     } while (0)
 
@@ -2254,7 +2261,7 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
         __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); \
         __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); \
         __u64 __a64_hw_len = ARM64_SIM_L_READ_REG(ARM64_X1); \
-        ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_dynptr_read((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), __a64_hw_len, (const struct bpf_dynptr *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4))); \
+        ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_dynptr_read((void *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X0), __a64_hw_len, (const struct bpf_dynptr *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4))); \
         ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); \
     } while (0)
 
@@ -2269,7 +2276,7 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
     do { \
         __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X3); \
         __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X3); \
-        ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_ringbuf_reserve_dynptr((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2), (struct bpf_dynptr *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X3))); \
+        ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_ringbuf_reserve_dynptr((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2), (struct bpf_dynptr *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X3))); \
         ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, sizeof(struct bpf_dynptr), 0); \
     } while (0)
 
@@ -2277,7 +2284,7 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
     do { \
         __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); \
         __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); \
-        ARM64_SIM_L_HELPER_SCALAR_RESULT(({ bpf_ringbuf_submit_dynptr((struct bpf_dynptr *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u64)ARM64_SIM_L_READ_REG(ARM64_X1)); 0ULL; })); \
+        ARM64_SIM_L_HELPER_SCALAR_RESULT(({ bpf_ringbuf_submit_dynptr((struct bpf_dynptr *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X0), (__u64)ARM64_SIM_L_READ_REG(ARM64_X1)); 0ULL; })); \
         ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, sizeof(struct bpf_dynptr), 0); \
     } while (0)
 
@@ -2285,7 +2292,7 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
     do { \
         __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); \
         __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); \
-        ARM64_SIM_L_HELPER_SCALAR_RESULT(({ bpf_ringbuf_discard_dynptr((struct bpf_dynptr *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u64)ARM64_SIM_L_READ_REG(ARM64_X1)); 0ULL; })); \
+        ARM64_SIM_L_HELPER_SCALAR_RESULT(({ bpf_ringbuf_discard_dynptr((struct bpf_dynptr *)ARM64_SIM_L_HELPER_WRITE_ARG_PTR(ARM64_X0), (__u64)ARM64_SIM_L_READ_REG(ARM64_X1)); 0ULL; })); \
         ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, sizeof(struct bpf_dynptr), 0); \
     } while (0)
 
