@@ -65,7 +65,8 @@
 - [ ] **V** O1：官方模型对照补上 ANDN、BZHI 这 4 个 x86-64 形式（现为 63/67）。
 - [ ] **V** O1/O2：x86-64 的 helper 调用、寄存器调用、外层返回；有符号 DIV 从 partial 到完整；REP MOVS 全计数的 C 和编译证明。
 - [x] **V** DIV：逐轮 64 位恢复除法、独立进位、余数与商不变式、bit63→bit0 顺序、零高位快路径与有符号故障结果组合（f243ef693，`X86Divide.RestoringLoop`）。
-- [x] **V** DIV：四种宽度的实际 word 算术、窄宽度打包、word 范围比较、符号恢复、完整状态/fresh flags 与 raw/tag frame 组合（本提交，`X86Divide.SourceWords`）。
+- [x] **V** DIV：四种宽度的实际 word 算术、窄宽度打包、word 范围比较、符号恢复、完整状态/fresh flags 与 raw/tag frame 组合（ce913a9c7，`X86Divide.SourceWords`）。
+- [ ] **V** DIV word 模型两批的全量检查（f243ef693、ce913a9c7；当前 full 源 099a096fb，结束后沿用增量缓存继续）。
 - [x] **V** DIV：AUX bit0 的 signed/unsigned 分流、任意 fresh flags、寄存器/捕获操作数、token/dispatcher 与通用块组合（099a096fb）。
 - [ ] **V** DIV：实际 C 循环及 signed 分支源码提取对应 word 模型，继续编译 B、物理内存和 ABI 对应关系；当前 token 状态为 partial-signed-and-unsigned-C-model。
 - [ ] **V** O4：物理异常表一步、thunk 与物理栈有效性的组合、真实 JIT 对应关系、成功尾调用组合，并解除条件定理的 O1/O2 前提。
