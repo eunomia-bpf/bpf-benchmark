@@ -1,7 +1,8 @@
 # Scalar native programs on x86-64 and AArch64
 
-S14, 2026-11-09. Implementation and compile evidence are published; the paired
-safety replay remains active under `/var/tmp/kprog-tmp/S14/safety.sh`.
+S14, 2026-11-09. The scalar native scope, compile evidence and paired safety
+replay are complete and published. The lane retires its private outputs after
+Git archive and remote-ancestry readback.
 
 Native P uses scalar registers in both corpus producer routes. x86-64 combines
 `-mgeneral-regs-only` with the kernel-family `-mno-sse -mno-mmx -mno-sse2
@@ -52,12 +53,23 @@ hashes and controls are in `fp-state-audit.json`; the scanner joins the final
 safety command archive.
 
 The paired safety recipe captures common model/service/kernel/bridge inputs and
-uses one 2 GiB guest at a time on CPUs 20-23. The x86 control completes 45 cases:
-9 valid executions, 33 verifier rejections, one generation failure and two
-load-only findings, `immediate_push_branch` and `stack_base_flags`. ARM control
-and the scalar epochs continue through the detached serial recipe. Negative
-cases use the harness's existing load-only route. Final counts and paired
-stage differences follow completion.
+uses one 2 GiB guest at a time on CPUs 20-23. Complete observed stage counts:
+
+| Epoch/ISA | Observed stages |
+| --- | --- |
+| control/x86 | valid_executed=9, verifier_rejected=33, specialization_rejected=1, accepted_finding=2 |
+| control/arm64 | valid_executed=4, verifier_rejected=28, specialization_rejected=2, accepted_finding=7 |
+| scalar/x86 | valid_executed=9, verifier_rejected=33, specialization_rejected=1, accepted_finding=2 |
+| scalar/arm64 | valid_executed=4, verifier_rejected=28, specialization_rejected=3, accepted_finding=6 |
+
+Every positive control executes with its expected result. Negative native
+executions: 0. Integer-case stages remain paired. SIMD/FP generation-domain
+changes: [{"arch": "arm64", "control": "accepted_finding", "name": "scalar_vector_load_clear_high", "scalar": "specialization_rejected", "scalar_handler_domain": true}].
+
+Load-only accepted findings remain recorded by epoch/ISA: {"control/arm64": ["scalar_vector_load_clear_high", "unpaired_stxr_failure", "unpaired_stlxr_failure", "paired_stxr_failure", "paired_stlxr_failure", "entry_return_address_flags", "stack_base_flags"], "control/x86": ["immediate_push_branch", "stack_base_flags"], "scalar/arm64": ["unpaired_stxr_failure", "unpaired_stlxr_failure", "paired_stxr_failure", "paired_stlxr_failure", "entry_return_address_flags", "stack_base_flags"], "scalar/x86": ["immediate_push_branch", "stack_base_flags"]}. These preserved model findings retain their C/A/S7 owners.
+`safety-raw.tar.gz` retains all source-pinned inputs, requests, generated B,
+stock verifier logs and actual outcomes. V retains universal compiled-B and
+physical-composition ownership.
 
 The initial corpus invocation inherited the host BTF default and regenerated
 four shared generated headers. Recovery matched each S14-generated live hash,
