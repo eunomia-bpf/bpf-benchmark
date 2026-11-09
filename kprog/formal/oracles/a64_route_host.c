@@ -1286,6 +1286,9 @@ static __u64 scene_stack_lanes(void)
 	model_reset();
 	mlr = 0;
 	ARM64_SIM_ENTRY_XDP(&xdp_ctx);
+    /* The driven negative GPR/slot addresses are owned by this frame. */
+    __a64_sp = -64;
+    msp = -64;
 	(void)__a64_lr;
 	(void)__a64_v0;
 	(void)__a64_v0_hi;
@@ -1412,6 +1415,9 @@ arm64_l_done_stk:
 	X0_SET(0x5DULL);
 	KEEP_LBL(arm64_l_stk);
 	KEEP_LBL(arm64_l_done_stk);
+    /* The native entry frame is restored before the existing RET contract. */
+    ARM64_SIM_L_WRITE_REG_PTR_TAG(ARM64_SP, (void *)0, ARM64_SIM_TAG_STACK);
+    msp = 0;
 	ARM64_SIM_RET();
 }
 
@@ -1500,6 +1506,9 @@ static __u64 scene_mem_read_tag(void)
 	model_reset();
 	mlr = 0;
 	ARM64_SIM_ENTRY_XDP(&xdp_ctx);
+    /* The driven negative GPR/slot addresses are owned by this frame. */
+    __a64_sp = -64;
+    msp = -64;
 	(void)__a64_lr;
 	(void)__a64_v0;
 	(void)__a64_v0_hi;
@@ -1537,7 +1546,7 @@ static __u64 scene_mem_read_tag(void)
 	/* Paint the word the GPR-stack read resolves to under the correct
 	 * bsrc: base -32 + off 8 = -24 (arena idx 72, word 9, tag PACKET).
 	 * The `!=` repaint of the GPR base lane falls back to SP
-	 * (0 + 8 = arena idx 104, word 13, tag still SCALAR), so the
+	 * (-64 + 8 = arena idx40, word5, tag still SCALAR), so the
 	 * GPR-stack case below distinguishes the two. */
 	ARM64_SIM_L_STACK_WRITE_TAG(-24, ARM64_WIDTH_64, pattern_reg(28U),
 				    ARM64_SIM_TAG_PACKET);
@@ -1552,7 +1561,7 @@ arm64_l_mrt:
 
 		cases = cases + 1U;
 		if (got != model_read_tag(ARM64_SIM_TAG_STACK, ARM64_WIDTH_64, 1, 0U,
-					  12, 12)) {
+					  12, msp + 12)) {
 			printf("MISMATCH mrt sp w64 off 12: got %u\n", got);
 			return 0xDEAD0001ULL;
 		}
@@ -1563,7 +1572,7 @@ arm64_l_mrt:
 
 		cases = cases + 1U;
 		if (got != model_read_tag(ARM64_SIM_TAG_STACK, ARM64_WIDTH_64, 1, 0U,
-					  4, 4)) {
+					  4, msp + 4)) {
 			printf("MISMATCH mrt sp w64 off 4: got %u\n", got);
 			return 0xDEAD0001ULL;
 		}
@@ -1574,7 +1583,7 @@ arm64_l_mrt:
 
 		cases = cases + 1U;
 		if (got != model_read_tag(ARM64_SIM_TAG_STACK, ARM64_WIDTH_8, 1, 0U,
-					  8, 8)) {
+					  8, msp + 8)) {
 			printf("MISMATCH mrt sp w8 off 8: got %u\n", got);
 			return 0xDEAD0001ULL;
 		}
@@ -1672,6 +1681,9 @@ arm64_l_done_mrt:
 	X0_SET(0x5FULL);
 	KEEP_LBL(arm64_l_mrt);
 	KEEP_LBL(arm64_l_done_mrt);
+    /* The native entry frame is restored before the existing RET contract. */
+    ARM64_SIM_L_WRITE_REG_PTR_TAG(ARM64_SP, (void *)0, ARM64_SIM_TAG_STACK);
+    msp = 0;
 	ARM64_SIM_RET();
 }
 
@@ -1682,6 +1694,9 @@ static __u64 scene_mem_rw(void)
 	model_reset();
 	mlr = 0;
 	ARM64_SIM_ENTRY_XDP(&xdp_ctx);
+    /* The driven negative GPR/slot addresses are owned by this frame. */
+    __a64_sp = -64;
+    msp = -64;
 	(void)__a64_lr;
 	(void)__a64_v0;
 	(void)__a64_v0_hi;
@@ -1708,12 +1723,12 @@ static __u64 scene_mem_rw(void)
 		ARM64_SIM_L_MEM_WRITE(ARM64_SP, 0xffU, 0ULL, 8ULL, 0ULL,
 				      ARM64_WIDTH_64, pattern_reg(30U),
 				      ARM64_SIM_TAG_MAP_VALUE);
-		model_stack_write(8, ARM64_WIDTH_64, pattern_reg(30U),
+		model_stack_write(msp + 8, ARM64_WIDTH_64, pattern_reg(30U),
 				  ARM64_SIM_TAG_MAP_VALUE);
 		got = ARM64_SIM_L_MEM_READ(ARM64_SP, 0xffU, 0ULL, 8ULL, 0ULL,
 					   ARM64_WIDTH_64);
 		cases = cases + 1U;
-		if (got != model_stack_read(8, ARM64_WIDTH_64)) {
+		if (got != model_stack_read(msp + 8, ARM64_WIDTH_64)) {
 			printf("MISMATCH mrw sp read: got 0x%llx\n",
 			       (unsigned long long)got);
 			return 0xDEAD0001ULL;
@@ -1725,12 +1740,12 @@ static __u64 scene_mem_rw(void)
 		ARM64_SIM_L_MEM_WRITE(ARM64_SP, 0xffU, 0ULL, 4ULL, 0ULL,
 				      ARM64_WIDTH_16, 0x0102ULL,
 				      ARM64_SIM_TAG_SCALAR);
-		model_stack_write(4, ARM64_WIDTH_16, 0x0102ULL,
+		model_stack_write(msp + 4, ARM64_WIDTH_16, 0x0102ULL,
 				  ARM64_SIM_TAG_SCALAR);
 		got = ARM64_SIM_L_MEM_READ(ARM64_SP, 0xffU, 0ULL, 4ULL, 0ULL,
 					   ARM64_WIDTH_16);
 		cases = cases + 1U;
-		if (got != model_stack_read(4, ARM64_WIDTH_16)) {
+		if (got != model_stack_read(msp + 4, ARM64_WIDTH_16)) {
 			printf("MISMATCH mrw sp w16 read: got 0x%llx\n",
 			       (unsigned long long)got);
 			return 0xDEAD0001ULL;
@@ -1907,6 +1922,9 @@ arm64_l_done_mr:
 	X0_SET(0x60ULL);
 	KEEP_LBL(arm64_l_mr);
 	KEEP_LBL(arm64_l_done_mr);
+    /* The native entry frame is restored before the existing RET contract. */
+    ARM64_SIM_L_WRITE_REG_PTR_TAG(ARM64_SP, (void *)0, ARM64_SIM_TAG_STACK);
+    msp = 0;
 	ARM64_SIM_RET();
 }
 
