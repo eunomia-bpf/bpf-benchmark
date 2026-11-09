@@ -78,6 +78,22 @@ for selector, reg in enumerate(registers):
         assert data[:4] == bytes.fromhex('f30f1efa')
         rows.append(dict(transfer=transfer, register=reg, thunks=thunk))
 
+# RSP uses the existing external-symbol generation path and its distinct
+# kernel transient-stack semantics stays in the universal platform relation.
+rsp = args.output / 'rsp.S'
+rsp.write_text('.text\n.global entry\n.type entry,@function\nentry:\n'
+               'jmp __x86_indirect_thunk_rsp\n.size entry,.-entry\n')
+run(['clang-18', '-c', rsp, '-o', rsp.with_suffix('.o')])
+rsp_proof = args.output / 'rsp.proof.o'
+run([args.linker, '--input', rsp.with_suffix('.o'), '--symbol', 'entry',
+     '--mode', 'proof', '--preserve-entry-abi', '--output', rsp_proof])
+unsupported = subprocess.run([str(args.linker), '--input', str(rsp_proof),
+    '--symbol', 'entry', '--mode', 'kernel', '--output', str(rsp.with_suffix('.bin'))],
+    capture_output=True, text=True)
+(args.output / 'rsp-generation.txt').write_text(unsupported.stdout + unsupported.stderr)
+assert unsupported.returncode and '__x86_indirect_thunk_rsp' in unsupported.stderr
+
+
 # A thunked tail helper declares the complete JIT callee-save frame.
 tail_native, tail_proof = args.output / 'tail.native.o', args.output / 'tail.proof.o'
 run(['clang-18', '-c', ROOT / 'kprog/test/tail_call_frame/native.S', '-o', tail_native])

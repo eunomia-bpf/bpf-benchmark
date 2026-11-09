@@ -1071,9 +1071,13 @@ fn scan_helper_calls(
 fn x86_thunk_selector(name: &str) -> Option<u64> {
     if name == "__x86_return_thunk" { return Some(16); }
     let name = name.strip_prefix("__x86_indirect_thunk_")?;
-    ["rax","rcx","rdx","rbx","rsp","rbp","rsi","rdi",
-     "r8","r9","r10","r11","r12","r13","r14","r15"]
-        .iter().position(|reg| *reg == name).map(|n| n as u64)
+    match name {
+        "rax" => Some(0), "rcx" => Some(1), "rdx" => Some(2), "rbx" => Some(3),
+        "rbp" => Some(5), "rsi" => Some(6), "rdi" => Some(7),
+        "r8" => Some(8), "r9" => Some(9), "r10" => Some(10), "r11" => Some(11),
+        "r12" => Some(12), "r13" => Some(13), "r14" => Some(14), "r15" => Some(15),
+        _ => None,
+    }
 }
 
 fn x86_thunk_semantics(mut insn: Instruction, name: Option<&String>) -> Instruction {
