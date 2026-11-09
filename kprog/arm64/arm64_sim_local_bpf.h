@@ -382,7 +382,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 	     *__a64_tag_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)] : ARM64_SIM_TAG_SCALAR; })
 
 #define ARM64_SIM_L_WRITE_REG_WIDTH(REG, VALUE, WIDTH) \
-	do { __u64 __a64_l_reg = (REG); \
+	do { __s64 __a64_write_old_sp=__a64_sp;  __u64 __a64_l_reg = (REG); \
 	     __u64 __a64_l_next = KPROG_ARM64_APPLY_WIDTH((VALUE), (WIDTH)); \
 	     if (__a64_l_reg == ARM64_SP) { \
 	       __a64_sp = (__s64)(__a64_l_next - ARM64_SIM_L_STACK_BASE()); \
@@ -393,13 +393,14 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 	         __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->x = __a64_l_next; \
 	       *__a64_tag_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)] = ARM64_SIM_TAG_SCALAR; \
 	     } \
+	if ((REG)==ARM64_SP) ARM64_SIM_L_STACK_RELEASE(__a64_write_old_sp); \
 	} while (0)
 
 #define ARM64_SIM_L_WRITE_REG_PTR(REG, VALUE) \
 	ARM64_SIM_L_WRITE_REG_PTR_TAG((REG), (VALUE), ARM64_SIM_TAG_SCALAR)
 
 #define ARM64_SIM_L_WRITE_REG_PTR_TAG(REG, VALUE, TAG) \
-	do { __u64 __a64_l_reg = (REG); \
+	do { __s64 __a64_write_old_sp=__a64_sp;  __u64 __a64_l_reg = (REG); \
 	     void *__a64_l_next_ptr = (void *)(VALUE); \
 	     __u8 __a64_l_next_tag = (TAG); \
 	     if (__a64_l_reg == ARM64_SP) { \
@@ -410,6 +411,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 	       __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->ptr = __a64_l_next_ptr; \
 	       *__a64_tag_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)] = __a64_l_next_tag; \
 	     } \
+	if ((REG)==ARM64_SP) ARM64_SIM_L_STACK_RELEASE(__a64_write_old_sp); \
 	} while (0)
 
 #define ARM64_SIM_L_WRITE_REG_MAP_PTR(REG, VALUE)                            \
@@ -618,7 +620,34 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
             asm volatile("" : "+r"(INDEX));                              \
     } while (0)
 
-#define ARM64_SIM_L_STACK_READ(OFF, WIDTH)                                  \
+/* Bytes below the current native SP have an independent environment value.
+ * Releasing an allocated byte also releases its value and pointer provenance. */
+#ifndef ARM64_SIM_L_STACK_SP
+#define ARM64_SIM_L_STACK_SP() (__a64_sp)
+#endif
+#define ARM64_SIM_L_STACK_RELEASE(OLD) \
+    do { __s64 __a64_release_old=(OLD), __a64_release_new=ARM64_SIM_L_STACK_SP(); \
+      if (__a64_release_new>__a64_release_old) { \
+        _Pragma("unroll") \
+        for (__u32 __a64_release_i=0; __a64_release_i<ARM64_SIM_STACK_BYTES; ++__a64_release_i) { \
+          __s64 __a64_release_off=(__s64)__a64_release_i-(__s64)ARM64_SIM_STACK_BIAS; \
+          if (__a64_release_off>=__a64_release_old && __a64_release_off<__a64_release_new) \
+            __a64_stack.b[__a64_release_i]=(__u8)ARM64_SIM_L_UNSPECIFIED(); \
+        } \
+        _Pragma("unroll") \
+        for (__u32 __a64_release_w=0; __a64_release_w<KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES); ++__a64_release_w) \
+          if ((__s64)(__a64_release_w*8U)-(__s64)ARM64_SIM_STACK_BIAS<__a64_release_new && \
+              (__s64)(__a64_release_w*8U+8U)-(__s64)ARM64_SIM_STACK_BIAS>__a64_release_old) \
+            ARM64_SIM_L_TAG_SET(__a64_release_w,ARM64_SIM_TAG_SCALAR); \
+      } \
+    } while(0)
+
+#define ARM64_SIM_L_STACK_READ(OFF, WIDTH) \
+    ((__s64)(OFF)<ARM64_SIM_L_STACK_SP() ? \
+      KPROG_ARM64_APPLY_WIDTH(ARM64_SIM_L_UNSPECIFIED(),(WIDTH)) : \
+      ARM64_SIM_L_STACK_READ_OWNED((OFF),(WIDTH)))
+
+#define ARM64_SIM_L_STACK_READ_OWNED(OFF, WIDTH)                                  \
 	({                                                                 \
 		__u64 __a64_str_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
 		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_str_index, (WIDTH));     \
@@ -661,7 +690,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 				__a64_srt_width == ARM64_WIDTH_64,        \
 				KPROG_ARM64_STACK_WORD_ALIGNED(__a64_srt_index));\
 		__u8 __a64_srt_tag = ARM64_SIM_TAG_SCALAR;                \
-		if (__a64_srt_source ==                                   \
+		if ((__s64)(OFF)>=ARM64_SIM_L_STACK_SP() && __a64_srt_source ==                                   \
 		    KPROG_ARM64_STACK_READ_TAG_SOURCE_STACK_TAG_ARRAY) {  \
 			__a64_srt_tag = ARM64_SIM_L_TAG_GET(                    \
 				KPROG_ARM64_STACK_WORD_INDEX(__a64_srt_index));\
@@ -669,7 +698,18 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 		__a64_srt_tag;                                             \
 	})
 
-#define ARM64_SIM_L_STACK_WRITE_TAG(OFF, WIDTH, VALUE, TAG)                  \
+#define ARM64_SIM_L_STACK_WRITE_TAG(OFF, WIDTH, VALUE, TAG) \
+    do { __s64 __a64_loss_off=(OFF); __u8 __a64_loss_width=(WIDTH); __u64 __a64_loss_value=(VALUE); \
+      if (__a64_loss_off>=ARM64_SIM_L_STACK_SP()) \
+        ARM64_SIM_L_STACK_WRITE_OWNED(__a64_loss_off,__a64_loss_width,__a64_loss_value,(TAG)); \
+      else { _Pragma("unroll") \
+        for (__u32 __a64_loss_i=0; __a64_loss_i<8U; ++__a64_loss_i) \
+          if (__a64_loss_i<__a64_loss_width && __a64_loss_off+__a64_loss_i>=ARM64_SIM_L_STACK_SP()) \
+            ARM64_SIM_L_STACK_WRITE_OWNED(__a64_loss_off+__a64_loss_i,1U,__a64_loss_value>>(__a64_loss_i*8U),ARM64_SIM_TAG_SCALAR); \
+      } \
+    } while(0)
+
+#define ARM64_SIM_L_STACK_WRITE_OWNED(OFF, WIDTH, VALUE, TAG)                  \
 	do {                                                               \
 		__u64 __a64_stw_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
 		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_stw_index, (WIDTH));     \
