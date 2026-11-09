@@ -1,0 +1,85 @@
+{
+  "previous_rows": 237,
+  "current_rows": 225,
+  "producer_row_drop": 12,
+  "previous_only": [
+    {
+      "native_object": "bpf_execve_event_v61.native.o",
+      "program": "__do_str",
+      "symbol": "__do_str"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "cwd_read_v61",
+      "symbol": "cwd_read_v61"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "data_event_byte",
+      "symbol": "data_event_bytes"
+    },
+    {
+      "native_object": "bpf_execve_event_v61.native.o",
+      "program": "data_event_str",
+      "symbol": "data_event_str"
+    },
+    {
+      "native_object": "bpf_execve_event_v511.native.o",
+      "program": "execve_send",
+      "source_bytecode_len": 11216,
+      "source_lacks_helper": 174,
+      "symbol": "execve_send"
+    },
+    {
+      "native_object": "bpf_generic_fentry_v511.native.o",
+      "program": "generic_fentry_",
+      "source_bytecode_len": 23016,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fentry_process_filter"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v511.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 23016,
+      "source_lacks_helper": 174,
+      "symbol": "generic_kprobe_process_filter"
+    },
+    {
+      "native_object": "bpf_generic_lsm_core_v511.native.o",
+      "program": "generic_lsm_pro",
+      "source_bytecode_len": 23016,
+      "source_lacks_helper": 174,
+      "symbol": "generic_lsm_process_filter"
+    },
+    {
+      "native_object": "bpf_generic_rawtp_v511.native.o",
+      "program": "generic_rawtp_p",
+      "source_bytecode_len": 23016,
+      "source_lacks_helper": 174,
+      "symbol": "generic_rawtp_process_filter"
+    },
+    {
+      "native_object": "bpf_generic_tracepoint_v511.native.o",
+      "program": "generic_tracepo",
+      "source_bytecode_len": 23016,
+      "source_lacks_helper": 174,
+      "symbol": "generic_tracepoint_filter"
+    },
+    {
+      "native_object": "bpf_multi_uprobe_v511.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 23016,
+      "source_lacks_helper": 174,
+      "symbol": "generic_uprobe_process_filter"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v511.native.o",
+      "program": "generic_usdt_pr",
+      "source_bytecode_len": 23016,
+      "source_lacks_helper": 174,
+      "symbol": "generic_usdt_process_filter"
+    }
+  ],
+  "current_only": [],
+  "scope": "producer manifest records; whole-app startup supplies actual installation rows"
+}
