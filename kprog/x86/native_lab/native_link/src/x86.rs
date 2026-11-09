@@ -1134,7 +1134,10 @@ fn clear_x86_call_clobbered_registers<V>(registers: &mut HashMap<Register, V>) {
     }
 }
 
-fn x86_symbol_has_immediate_helper_id(bytes: &[u8], sym_addr: u64, helper_id: u64) -> Result<bool> {
+fn x86_symbol_has_immediate_helper_id(
+    bytes: &[u8], sym_addr: u64, helper_id: u64,
+    code_definitions: &HashMap<u64, X86Callee>, section: usize,
+) -> Result<bool> {
     let instructions: Vec<_> = Decoder::with_ip(64, bytes, sym_addr, DecoderOptions::NONE).into_iter().collect();
     for insn in &instructions {
         if insn.is_invalid() {
@@ -1142,7 +1145,7 @@ fn x86_symbol_has_immediate_helper_id(bytes: &[u8], sym_addr: u64, helper_id: u6
         }
     }
     if instructions.is_empty() { return Ok(false); }
-    let targets = x86_callee_flow(&instructions, &HashMap::new(), &HashSet::new(), 0)?;
+    let targets = x86_callee_flow(&instructions, code_definitions, &HashSet::new(), section)?;
     Ok(targets.values().any(|values| values.contains(&X86Callee::Id(helper_id))))
 }
 
@@ -1345,7 +1348,12 @@ pub(super) fn rewrite_x86(
             }
         }
     }
-    let entry_has_tail_call = x86_symbol_has_immediate_helper_id(&planning_entry_bytes, entry.address, 12)?
+    let planning_instructions: Vec<_> = Decoder::with_ip(
+        64, &planning_entry_bytes, entry.address, DecoderOptions::NONE).into_iter().collect();
+    let planning_code_definitions = x86_code_definitions(
+        elf, entry, &planning_instructions, included, &pc_relative_relocations)?;
+    let entry_has_tail_call = x86_symbol_has_immediate_helper_id(
+        &planning_entry_bytes, entry.address, 12, &planning_code_definitions, entry.section_index.0)?
         || helper_call_sites.iter().any(|(key, name)| {
             key.0 == entry.section_index && key.1 == entry.address && name == "bpf_tail_call"
         });
@@ -5223,13 +5231,23 @@ mod tests {
             0x41, 0xff, 0xd3, // call r11
             0x48, 0x83, 0xc4, 8, 0x5b, 0x5d, 0xc3,
         ];
-        assert!(x86_symbol_has_immediate_helper_id(&bytes, 0, 12)?);
+        assert!(x86_symbol_has_immediate_helper_id(&bytes, 0, 12, &HashMap::new(), 0)?);
         let frame = plan_x86_entry_abi_strip(&bytes, 0, true, None, true)?;
         assert_eq!(frame.tail_call_bpf_rbp_rsp_offset, Some(16));
         assert!(!frame.tail_call_bpf_rbp_is_live);
         assert_eq!(frame.tail_call_cleanup_bytes, [0x48, 0x83, 0xc4, 8, 0x5b, 0x5d]);
         let clobbered = [0xb8, 12, 0, 0, 0, 0x31, 0xc0, 0x49, 0x89, 0xc3, 0x41, 0xff, 0xd3, 0xc3];
-        assert!(!x86_symbol_has_immediate_helper_id(&clobbered, 0, 12)?);
+        assert!(!x86_symbol_has_immediate_helper_id(&clobbered, 0, 12, &HashMap::new(), 0)?);
+        // A bounded code jump reaches the tail helper through its real target.
+        let jumped = [
+            0x4c, 0x8d, 0x1d, 0x03, 0, 0, 0, // lea r11, [rip+3]
+            0x41, 0xff, 0xe3, // jmp r11
+            0x41, 0xbb, 12, 0, 0, 0, // mov r11d, 12
+            0x41, 0xff, 0xd3, // call r11
+            0xc3,
+        ];
+        let definitions = HashMap::from([(0, X86Callee::Code(0, 10))]);
+        assert!(x86_symbol_has_immediate_helper_id(&jumped, 0, 12, &definitions, 0)?);
         Ok(())
     }
 

@@ -27,9 +27,8 @@ profile matches the original-frame run; fixture-enabled coverage is a separate c
 
 Reproduce with the entry-frame Makefile targets kernel module linker prepare
 selftests315 and REVISION=96b561e22981f4a5a0b03ec5b7b0374998e546ed.
-The summary records each transition, input and runtime hash. Concatenate
-raw.tar.gz.part00, part01, and any successive numbered parts in lexical order
-to recover raw.tar.gz. The manifest records archive and part hashes.
+The summary records each transition, input and runtime hash. Concatenate the available
+raw.tar.gz.partNN files in lexical order to recover raw.tar.gz. The manifest records archive and part hashes.
 The archive includes table objects, catalogs, all load/service/compiler records,
 commands, guest script, dmesg and exits. The original comparison sits in
 ../before-selftests315/.
