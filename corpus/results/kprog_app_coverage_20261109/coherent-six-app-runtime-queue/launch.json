@@ -1,0 +1,31 @@
+{
+  "utc": "2026-11-09T10:03:23.653091+00:00",
+  "pid": 3571776,
+  "directory": "/var/tmp/kprog-tmp/C/coherent-six-app-runtime",
+  "state": {
+    "state": "running_complete_six_app_startup"
+  },
+  "tracee_paired_source": "626eae6152bd3aa71639b8f05c6acc24c7a44cd7",
+  "shim": "2312b25f55c403d22c300b3c2be20e216b56bacb",
+  "matched_modules": "c4cb716dc0953a9482bde98da639252fbf1d59e3",
+  "parent_actual_result": "53b44c83b6eaac4a15b1991ef4da88874517fd13",
+  "bcc_helper_utility_prior": "e929a65093b36852e5f139f5a5275a14e48fb345",
+  "original38": {
+    "make_exit": 0,
+    "cases": 38,
+    "stages": {
+      "accepted_finding": 2,
+      "specialization_rejected": 1,
+      "valid_executed": 9,
+      "verifier_rejected": 26
+    },
+    "negative_native_executions": 0
+  },
+  "serial_follower": {
+    "pid": 3573001,
+    "directory": "/var/tmp/kprog-tmp/C/helper-output-range-application",
+    "controller": "controller-current-shim.py"
+  },
+  "production_source_edits": 0,
+  "new_runtime_predicates": 0
+}
