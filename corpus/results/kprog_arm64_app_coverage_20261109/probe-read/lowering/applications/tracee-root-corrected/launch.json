@@ -1,0 +1,31 @@
+{
+  "utc": "2026-11-09T07:37:23.332082+00:00",
+  "scope": "Full paired-source Tracee probe-read P, existing artifact-root export after retained launcher settings",
+  "predecessor": "32c91def6e9c1c956f47e180330f8a2c769d41fd",
+  "compiler": "5bbbf128a",
+  "model": "5363b5ff6",
+  "runtime": "3e3f44f33",
+  "input_layers": [
+    {
+      "path": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-unix-length/application/launch-inputs.tar.gz",
+      "sha256": "31d763972a55e21207fbc3d02fb3352b2ca37ee2eac63d37f0b8c4c3ad2ec2b9"
+    },
+    {
+      "path": "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/tracee-input-delta.tar.gz",
+      "sha256": "9be2ce48117350943ad9ec01485f78769988710f95bd1d7d59324967feb48694"
+    },
+    {
+      "path": "corpus/results/kprog_arm64_app_coverage_20261109/probe-read/lowering/applications/tracee-model-delta.tar.gz",
+      "sha256": "0b6f86450b9e24b1685f3f33c38f01cd62f7bc4b7146eebfefbfb3d025f10a76"
+    }
+  ],
+  "transport_before_sha256": "3b604106f2624cce6658917973faeb14690fc628eb5868ea0d84b1e91f77a375",
+  "transport_after_sha256": "d88f7f2e6ff8386f3e253b3f5d6db8c39b421319fe539e0c7653019b8e0c806b",
+  "native_and_JIT": "Exact existing paired61C source, original123manifestrows, all candidateP/native/JIT bytes retained",
+  "framework": "Existing frozen runner/workload definitions retained; existing BPFREJIT_REPO_ARTIFACT_ROOT setting remains /artifacts",
+  "guest": {
+    "memory_MiB": 8192,
+    "cpus": "16-19"
+  },
+  "runtime_admission_additions": 0
+}
