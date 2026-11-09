@@ -1,0 +1,20 @@
+--- a/kprog/x86/x86_sim_local_bpf.h
++++ b/kprog/x86/x86_sim_local_bpf.h
+@@ -3192,7 +3192,7 @@
+ 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_adjust_room((struct __sk_buff *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (__s32)X86_SIM_L_READ_REG(X86_RSI), (__u32)X86_SIM_L_READ_REG(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX)))
+ 
+ #define X86_SIM_BPF_CALL_bpf_xdp_adjust_meta() \
+-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_xdp_adjust_meta((struct xdp_md *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (int)X86_SIM_L_READ_REG(X86_RSI)))
++	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_xdp_adjust_meta((struct xdp_md *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (int)X86_SIM_L_READ_REG(X86_RSI)))
+ 
+ #define X86_SIM_BPF_CALL_bpf_override_return() \
+ 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_override_return((struct pt_regs *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI)))
+@@ -3297,7 +3297,7 @@
+ 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_ret((void *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (__u64 *)X86_SIM_L_HELPER_WRITE_ARG_PTR(X86_RSI)))
+ 
+ #define X86_SIM_BPF_CALL_bpf_xdp_load_bytes() \
+-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_xdp_load_bytes((struct xdp_md *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (void *)X86_SIM_L_HELPER_WRITE_ARG_PTR(X86_RDX), (__u32)X86_SIM_L_READ_REG(X86_RCX)))
++	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_xdp_load_bytes((struct xdp_md *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (void *)X86_SIM_L_HELPER_WRITE_ARG_RANGE(X86_RDX, (__u32)X86_SIM_L_READ_REG(X86_RCX)), (__u32)X86_SIM_L_READ_REG(X86_RCX)))
+ 
+ #define X86_SIM_BPF_CALL_bpf_ima_file_hash() \
+ 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_ima_file_hash((struct file *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_WRITE_ARG_PTR(X86_RSI), (__u32)X86_SIM_L_READ_REG(X86_RDX)))

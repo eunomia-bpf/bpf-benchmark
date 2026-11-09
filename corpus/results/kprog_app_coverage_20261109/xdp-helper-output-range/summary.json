@@ -1,0 +1,110 @@
+{
+  "inputs": {
+    "utc": "2026-11-09T10:13:56.729250+00:00",
+    "base_candidate": "cbae8680827371581423ff644c1f219e598c4a73",
+    "changes": [
+      "xdp_load_bytes exact arg3/arg4 output extent invalidation plus existing caller-frame result",
+      "xdp_adjust_meta existing caller-frame result; actual packet/context helper call retained"
+    ],
+    "kernel_reference": "native runtime source net/core/filter.c4084/4280",
+    "actual_requests": [
+      6,
+      16,
+      17
+    ],
+    "runtime_predicates_added": 0
+  },
+  "host_results": [
+    {
+      "compiler": "gcc",
+      "command": [
+        "gcc",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "/var/tmp/kprog-tmp/C/xdp-helper-output-range/host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/xdp-helper-output-range/gcc"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    },
+    {
+      "compiler": "clang-18",
+      "command": [
+        "clang-18",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "/var/tmp/kprog-tmp/C/xdp-helper-output-range/host.c",
+        "-o",
+        "/var/tmp/kprog-tmp/C/xdp-helper-output-range/clang-18",
+        "-fno-sanitize-link-runtime",
+        "-lubsan"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0
+    }
+  ],
+  "host_banners": {
+    "gcc": "helper output range/caller fullword/partial/raw-memory PASS 3200 cases",
+    "clang-18": "helper output range/caller fullword/partial/raw-memory PASS 3200 cases"
+  },
+  "actual_compiler_rows": [
+    {
+      "request_id": 6,
+      "entry": "blk_account_io_merge_bio",
+      "path": "/var/tmp/kprog-tmp/C/xdp-helper-output-range/actual-inputs/6",
+      "archive": "/var/tmp/kprog-tmp/C/coherent-six-app-runtime/trusted-llmn6nxl/requests/6.failure.tar.gz",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/xdp-helper-output-range/generated/6/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/xdp-helper-output-range/generated/6/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/xdp-helper-output-range/generated/6/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "blk_account_io_merge_bio",
+        "native_sha256": "437b717312ad4946aa252ac783c24d1eefb13ebf3e3dc5882c172270e11324e9"
+      },
+      "status": "compiled",
+      "fault_stores": 2
+    },
+    {
+      "request_id": 16,
+      "entry": "read_task_struct",
+      "path": "/var/tmp/kprog-tmp/C/xdp-helper-output-range/actual-inputs/16",
+      "archive": "/var/tmp/kprog-tmp/C/coherent-six-app-runtime/trusted-llmn6nxl/requests/16.failure.tar.gz",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/xdp-helper-output-range/generated/16/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/xdp-helper-output-range/generated/16/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/xdp-helper-output-range/generated/16/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "read_task_struct",
+        "native_sha256": "3f7e9c5d33c42a2592d53088ed5fbbb1ed61fbc8430afae9ec628e74ebf4b008"
+      },
+      "status": "compiled",
+      "fault_stores": 1
+    },
+    {
+      "request_id": 17,
+      "entry": "cil_xdp_entry",
+      "path": "/var/tmp/kprog-tmp/C/xdp-helper-output-range/actual-inputs/17",
+      "archive": "/var/tmp/kprog-tmp/C/coherent-six-app-runtime/trusted-llmn6nxl/requests/17.failure.tar.gz",
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/C/xdp-helper-output-range/generated/17/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/C/xdp-helper-output-range/generated/17/trusted_x86.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/C/xdp-helper-output-range/generated/17/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "symbol": "cil_xdp_entry",
+        "native_sha256": "da6895a3671d7ff41b7ede47a44137de8d797997c13048858bcfe756f15a7491"
+      },
+      "status": "compiled",
+      "fault_stores": 10
+    }
+  ],
+  "parent_sha256": "cdd83fc626250c1a522aa2f3a0521087ca6e0f0236bfb6168bf53ddb659741bf",
+  "candidate_sha256": "d1514e0573111afbfca52ec2535b101c21a698c5f780b38f2b21b113e130a11d",
+  "native_executions": 0
+}

@@ -1,0 +1,5 @@
+# XDP output helper caller-frame representation
+
+Actual current coherent runtime first Cilium cil_xdp_entry fails the existing callee-save equality exit arm after xdp_load_bytes/xdp_adjust_meta. The private candidate composes the existing exact output-buffer ghost invalidation with xdp_load_bytes arg3/arg4 and the existing returning caller-frame operation. xdp_adjust_meta keeps that returning caller frame while its original helper performs packet/context effects. SysV clobbers, helper/kernel verifier behavior, native memory bytes and existing fault predicates retain their expressions. Production canonical source retains its parent.
+
+The host fixture extends the prior actual generic output-range grid to10wrappers, with scalar/stack-tag destination aliases, all128raw bytes, saved caller word and actual context-byte side effect. Actual compiler rows retain original BCC/OTel/Cilium native P and service metadata. summary.json distinguishes finite host/generation/compiled observations; whole-application verifier/work follows its runtime receipt. Runtime predicate additions0.
