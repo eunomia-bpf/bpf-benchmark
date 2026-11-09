@@ -10,8 +10,8 @@ specialization token also has its own row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 74 / 74 |
 | Reference step family defined | 67/75 | 74/74 |
-| Raw register handler refinement | 32/75 | 0/74 |
-| Raw register dispatcher arm composition | 32/75 | 0/74 |
+| Raw register handler refinement | 32/75 | 3/74 |
+| Raw register dispatcher arm composition | 32/75 | 3/74 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/74 |
 | Addressed memory model / composed step | 29/75 | 0/74 |
 | Additional partial-model handler families | 1/75 | 0 |
@@ -6380,3 +6380,26 @@ Git exports, expanded compiler inputs, binaries/commands and original diagnostic
 Existing access barriers, recovery, tags, stack handling and flag paths retain
 their definitions. Complete compiled-B, provenance and physical/O4 transport
 retain their stated interfaces; scalar compiled family totals keep their scope.
+
+### ARM raw register refinement
+
+`Arm64RawRegister` proves NOP, MOV_IMM and MOVK over raw64-bit register words,
+all256 byte tags and independent STACK4/RETURN10 numeric origins. The concrete
+GPR/ZR cell selectors, W/X write arms, scalar tag clear, finite MOVK column
+decoder and opcode gates compose into `step_refines`. Its binding constructors
+carry instruction/field identities and native column validity; the handler
+relations follow from13 audited laws. The whole projected architectural state,
+ordered empty events and fault result match the canonical AArch64 step.
+
+All32 native destination fields are covered, including XZR discard; the distinct
+SP32 simulator field stays separate by a proved range law. Memory, NZCV, SIMD,
+SP, monitor/environment and every other register retain their reference frame.
+The [raw proof receipt](arm-raw-register.log.gz) records module/root checks0,
+axioms, exact source snapshots and original proof/setup attempts. ARM raw
+handler and dispatcher totals advance0to3/74; existing conditional laws remain
+available for the full74 operation catalogue. C source extraction/union access,
+entry origin identity, physical state and compiler transport retain their
+explicit interfaces. These O1 register laws use architectural register words
+and byte tags; stack-forwarding layout and entry-stub callee comparisons stay
+separate. Compiled-B units and layout-specific RET work are paused under the
+coordinator's16:00 decision; retained compiled artifacts keep their exact epochs.

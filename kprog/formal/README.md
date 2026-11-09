@@ -62,6 +62,14 @@ stream and preserve memory/exclusive state with23 consumed inputs. Complete
 flags/tag/GPR-frame, operand mapping and physical/compiler transport remain
 explicit interfaces.
 
+ARM raw-register refinement covers NOP, MOV_IMM and MOVK across all32 native
+destination fields, raw64-bit register values and the full byte-tag domain.
+Thirteen laws derive concrete cell reads/writes, STACK/RETURN materialization,
+XZR discard and one opcode/field-bound dispatcher-step theorem. The complete
+projected architectural state matches the single AArch64 reference. Entry
+origin identity, C extraction/union access and physical/compiler transport
+remain explicit. These laws are independent of stack-forwarding storage.
+
 ## Specification and proof scope
 
 The reference ISA is defined once in

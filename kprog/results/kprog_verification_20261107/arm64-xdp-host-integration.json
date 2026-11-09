@@ -77953,5 +77953,30 @@
     },
     "archive": "ror-memory-address.log.gz",
     "scope": "One existing ROR memory writeback address expression uses KPROG_PTR_ADD64_BITS, whose modulo64 numeric operation matches the current address model. Original complete oracle/assertions run with both compilers and UBSan; prior null-base pointer arithmetic and initial readonly-support-header export diagnostics retained. Production runtime predicates0. Generic compiler/provenance/physical/O4 relations retain their interfaces."
+  },
+  "arm64_raw_register_refinement": {
+    "proof": {
+      "process_exit": 0,
+      "module_and_root_exit": 0,
+      "root_sha256": "c08dedfa21216380b9f8595e635c476de4bb7a155bfbe8f114f3fb1243fac057",
+      "source_sha256": "183d696a40f979ef161621b4f905c26f230c22f7a9bdbe7bf5c3fb54107185dc",
+      "sorryAx": 0,
+      "reduction_bridge": 8,
+      "scope": "RawGPR+allbyte tags/STACK4RETURN10 origins/NOP-MOVIMM-MOVK/fullarchitecturalstate; independent of B stack forwarding layout. Entry/C-union/source extraction/compiler/physical origin binding remain explicit."
+    },
+    "operations": [
+      "ARM64_OP_NOP",
+      "ARM64_OP_MOV_IMM",
+      "ARM64_OP_MOVK"
+    ],
+    "raw_operation_count": 3,
+    "archive": "arm-raw-register.log.gz",
+    "source_snapshots": {
+      "source-Arm64Register.lean.txt": "d822382129f2eb6a04ce7430c9553073bebebb3655bad1d9287c77bcd55919fc",
+      "source-Arm64Movk.lean.txt": "28b62b83d634dc7ab373764b778c292a3469b76a1590204e028b613dc7b2af1d",
+      "source-arm64_sim_local_bpf.h.txt": "9cb5d58f9595124300d5bfd8fdcfdecba53f763e4d9ee34567345dd12cba1c13",
+      "source-AArch64.lean.txt": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789"
+    },
+    "scope": "Raw64-bitGPR/fullbyte-tag materialization/32native destinations, concrete cell/width/tag arms and NOP/MOVIMM/MOVK opcode/field binding to one canonical-step theorem; whole projected state/events/fault. Independent of B forwarding and callee comparisons. Entry origin/C source extraction/union/physical/compiler transport remain interfaces. Existing conditional74 laws retained."
   }
 }
