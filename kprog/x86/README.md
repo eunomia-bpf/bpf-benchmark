@@ -80,12 +80,13 @@ fidelity. The removed `__x86_p_*` and `__x86_off_*` paths and the removed
 packet-plus-length to packet-end propagation must remain absent.
 
 The entry ABI is represented by `X86_SIM_ENTRY_XDP(ctx)` /
-`X86_SIM_ENTRY_SKB(ctx)`. XDP retains the actual verifier context in `RDI`:
-ordinary native stores and memory intrinsics therefore reach that context,
-instead of a writable private copy. Native 64-bit `data`/`data_end`/`data_meta` reads at
-offsets 0/8/16 use the corresponding live typed BPF fields, including offset
-aliases; unmapped reads fail specialization. XDP helpers need no cached-field
-refresh. For skb programs, `bpf_cast_to_kern_ctx` supplies the actual kernel skb object
+`X86_SIM_ENTRY_SKB(ctx)`. `bpf_cast_to_kern_ctx` supplies the native XDP
+context address in `RDI`; helper calls retain the original verifier context.
+Native 64-bit `data`/`data_end`/`data_meta` reads at offsets 0/8/16 use the
+corresponding live typed BPF fields, including offset aliases. Other native
+reads use the shared physical memory primitive at their original width.
+XDP helpers need no cached-field refresh. For skb programs,
+`bpf_cast_to_kern_ctx` supplies the actual kernel skb object
 for native memory accesses. Its len/data_len and other ordinary fields keep
 their real values and widths. Native packet fields at0xd0/0x50 select the live
 typed BPF data/data_end fields; qdisc cb storage at0x30 selects live cb bytes.

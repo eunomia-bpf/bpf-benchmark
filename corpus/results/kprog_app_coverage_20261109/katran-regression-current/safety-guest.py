@@ -4,7 +4,7 @@ G=Path(sys.argv[1]);R=Path('/workspaces/repository');OLD=Path('/workspaces/.agen
 spec=importlib.util.spec_from_file_location('existing_safety',OLD/'check.py');old=importlib.util.module_from_spec(spec);spec.loader.exec_module(old)
 rows=json.loads((OLD/'complete/cases.json').read_text());(OUT/'cases.json').write_text(json.dumps(rows,indent=2)+'\n')
 state=OUT/'requests';state.mkdir(mode=0o700,exist_ok=True)
-argv=[sys.executable,str(R/'kprog/trusted_service.py'),'--arch','1','--endpoint','/sys/kernel/debug/bpf_x86_native_lab/specializer','--state',str(state),'--native-link','/var/tmp/kprog-tmp/C/coherent-six-app-runtime/runtime/native-link','--loader','/var/tmp/kprog-tmp/C/coherent-six-app-runtime/runtime/trusted-native-loader']
+argv=[sys.executable,str(R/'kprog/trusted_service.py'),'--arch','1','--endpoint','/sys/kernel/debug/bpf_x86_native_lab/specializer','--state',str(state),'--native-link',str(G/'runtime/native-link'),'--loader',str(G/'runtime/trusted-native-loader')]
 service=subprocess.Popen(argv,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True);log=[];outcomes=[]
 env=dict(os.environ,CLANG='/usr/lib/llvm-18/bin/clang',BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF='1')
 try:

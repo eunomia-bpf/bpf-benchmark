@@ -2,11 +2,11 @@ from pathlib import Path
 import sys,subprocess,tarfile,json,os,select,shutil,resource,traceback
 from datetime import datetime,timezone
 resource.setrlimit(resource.RLIMIT_CORE,(0,0))
-R=Path('/workspaces/repository');O=R/'corpus/results/kprog_app_coverage_20261109/katran-regression-current';G=Path('/var/tmp/kprog-tmp/C/katran-regression-safety');C=Path('/workspaces/.agent-state/kprog-lanes/C');G.mkdir(exist_ok=True)
+R=Path('/workspaces/repository');O=R/'corpus/results/kprog_app_coverage_20261109/katran-regression-current';G=Path('/var/tmp/kprog-tmp/C/katran-regression-safety');C=Path('/workspaces/.agent-state/kprog-lanes/C');V=C/'design-only/remaining-apps/katran-regression-safety';G.mkdir(exist_ok=True)
 def state(**x):(G/'status.json').write_text(json.dumps(x,indent=2)+'\n')
 try:
  if len(sys.argv)>2 and sys.argv[2]=='mount':
-  E=Path(sys.argv[3])
+  E=Path(sys.argv[3]);V.mkdir(parents=True,exist_ok=True);subprocess.run(['mount','--bind',str(G),str(V)],check=True)
   for p in E.rglob('*'):
    if p.is_file() and (R/p.relative_to(E)).is_file():subprocess.run(['mount','--bind',str(p),str(R/p.relative_to(E))],check=True)
   os.execvp(sys.argv[4],sys.argv[4:])
@@ -17,12 +17,12 @@ try:
  for p in E.rglob('*'):
   if p.is_file():p.chmod(0o444)
  for p in sorted([p for p in E.rglob('*')if p.is_dir()],key=lambda p:len(p.parts),reverse=True):p.chmod(0o555)
- E.chmod(0o555);shutil.copy2('/var/tmp/kprog-tmp/C/signed-idiv/safety-control/canonical-probe',G/'canonical-probe')
- pid=int(Path('/var/tmp/kprog-tmp/C/katran-regression-current/corrected-application-controller.pid').read_text());state(state='queued_after_functional_application',pid=pid,source_commit=h)
+ E.chmod(0o555);shutil.copytree('/var/tmp/kprog-tmp/C/coherent-six-app-runtime/runtime',G/'runtime',dirs_exist_ok=True);shutil.copy2('/var/tmp/kprog-tmp/C/signed-idiv/safety-control/canonical-probe',G/'canonical-probe')
+ pid=int(sys.argv[2])if len(sys.argv)>2 else int(Path('/var/tmp/kprog-tmp/C/katran-regression-current/corrected-application-controller.pid').read_text());state(state='queued_after_functional_application',pid=pid,source_commit=h)
  try:fd=os.pidfd_open(pid);select.select([fd],[],[]);os.close(fd)
  except ProcessLookupError:pass
- guest='mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug; insmod /var/tmp/kprog-tmp/C/coherent-six-app-runtime/runtime/bpf_x86_native_lab.ko; CLANG=/usr/lib/llvm-18/bin/clang python3 '+str(O/'safety-guest.py')+' '+str(G)
- cmd=['unshare','--mount','--propagation','private','python3',str(O/'safety-replay.py'),h,'mount',str(E),'taskset','-c','20-23','vng','--run','/var/tmp/kprog-tmp/C/master-x86-runtime/kernel-build/arch/x86/boot/bzImage','--cwd',str(R),'--rwdir',str(R),'--rwdir',str(G),'--overlay-rwdir','/tmp','--overlay-rwdir','/run','--disable-monitor','--cpus','4','--memory','2G','--append','loglevel=4 panic=30 oops=panic','--exec',guest]
+ guest='mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug; insmod '+str(V/'runtime/bpf_x86_native_lab.ko')+'; CLANG=/usr/lib/llvm-18/bin/clang python3 '+str(O/'safety-guest.py')+' '+str(V)
+ cmd=['unshare','--mount','--propagation','private','python3',str(O/'safety-replay.py'),h,'mount',str(E),'taskset','-c','20-23','vng','--run','/var/tmp/kprog-tmp/C/master-x86-runtime/kernel-build/arch/x86/boot/bzImage','--cwd',str(R),'--rwdir',str(R),'--rwdir',str(V),'--overlay-rwdir','/tmp','--overlay-rwdir','/run','--disable-monitor','--cpus','4','--memory','2G','--append','loglevel=4 panic=30 oops=panic','--exec',guest]
  state(state='original38',source_commit=h);(G/'command.json').write_text(json.dumps(cmd,indent=2)+'\n')
  with(G/'run.log').open('w')as f:p=subprocess.run(cmd,stdout=f,stderr=subprocess.STDOUT)
  rows=json.loads((G/'safety/outcomes.json').read_text())if(G/'safety/outcomes.json').exists()else[]
