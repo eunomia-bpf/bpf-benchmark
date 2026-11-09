@@ -1,0 +1,5 @@
+# Current master x86 runtime incremental build
+
+The private build captures source46125883be and applies its current native proof/thunk patch series to the recorded Linux base. It reuses the warm kernel object cache, builds bzImage and all ordinary modules, compiles the matched x86 native module, and builds the matching native-link. Actual build exit0. The runtime directory is `/var/tmp/kprog-tmp/C/master-x86-runtime/runtime`, with842ordinary modules, x86 native module and linker. Private runtime module copies retain their loadable bytes after debug-section stripping; the original build artifacts remain in their build tree.
+
+summary.json records exact source, compiler commands, kernel/module/linker hashes and every packaged runtime file. build-inputs.tar.gz retains patch/source capture, actual build stream/config and symbol versions; runtime.tar.gz retains the loadable runtime. Existing shared images, S17 separate stock kernel, frozen framework and R timing inputs retain their captured bytes. Actual guest startup, original safety evidence and complete application work follow their own runtime receipts.
