@@ -9,3 +9,5 @@ The actual modified verifier.c/liveness.c and existing log.c also pass GCC synta
 The capacity adaptation gives old_must_write the complete slot-set type used by must_write; the original temporary is u32. The observation retains every selected slot during its set intersection. Production512B results retain their original source and counts; this experiment reports its capacity-adapted bookkeeping and source epoch explicitly.
 
 Every diagnostic, extracted fixture, compiler command, binary and exact patch/helper input is retained in raw.tar.gz. Native execution requests:0.
+
+Actual object stage: committed2ebbca711 sources compile successfully for verifier, liveness and log with the retained kernel GCC arguments. Diagnostics are empty. The largest reported per-function frame is1424B in liveness update_insn; verifier backtrack_insn reaches952B and log print_scalar_ranges256B. Actual object bytes, complete commands, generated stack-usage records and combined entry-frame/capacity patch applicability0 are retained in objects.tar.gz. Canonical CK source edits:0. The linked kernel and549-program guest pass follow the source-location disposition.

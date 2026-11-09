@@ -1,0 +1,1961 @@
+{
+  "kind": "kernel_translation_unit_object",
+  "kernel_base": "35ea2cde39fc",
+  "header_sha256": "dae039376ee56929831a53757c2091b7dad7372a06612fc92c78e0018d3d5a3c",
+  "patch_sha256": "a71071c7788d393fa214ce236c82fb8ffea46302b3c2b8446f868311b9d6c92e",
+  "canonical_kernel_source_edits": 0,
+  "rows": [
+    {
+      "translation_unit": "verifier",
+      "command": [
+        "gcc",
+        "-nostdinc",
+        "-I/var/tmp/kprog-tmp/CK/linux/arch/x86/include",
+        "-I./arch/x86/include/generated",
+        "-I/var/tmp/kprog-tmp/CK/linux/include",
+        "-I./include",
+        "-I/var/tmp/kprog-tmp/CK/linux/arch/x86/include/uapi",
+        "-I./arch/x86/include/generated/uapi",
+        "-I/var/tmp/kprog-tmp/CK/linux/include/uapi",
+        "-I./include/generated/uapi",
+        "-include",
+        "/var/tmp/kprog-tmp/CK/linux/include/linux/compiler-version.h",
+        "-include",
+        "/var/tmp/kprog-tmp/CK/linux/include/linux/kconfig.h",
+        "-include",
+        "/var/tmp/kprog-tmp/CK/linux/include/linux/compiler_types.h",
+        "-D__KERNEL__",
+        "-fmacro-prefix-map=/var/tmp/kprog-tmp/CK/linux/=",
+        "-std=gnu11",
+        "-fshort-wchar",
+        "-funsigned-char",
+        "-fno-common",
+        "-fno-PIE",
+        "-fno-strict-aliasing",
+        "-mno-sse",
+        "-mno-mmx",
+        "-mno-sse2",
+        "-mno-3dnow",
+        "-mno-avx",
+        "-mno-sse4a",
+        "-fcf-protection=none",
+        "-m64",
+        "-falign-jumps=1",
+        "-falign-loops=1",
+        "-mno-80387",
+        "-mno-fp-ret-in-387",
+        "-mpreferred-stack-boundary=3",
+        "-mskip-rax-setup",
+        "-march=x86-64",
+        "-mtune=generic",
+        "-mno-red-zone",
+        "-mcmodel=kernel",
+        "-mstack-protector-guard-reg=gs",
+        "-mstack-protector-guard-symbol=__ref_stack_chk_guard",
+        "-Wno-sign-compare",
+        "-fno-asynchronous-unwind-tables",
+        "-mindirect-branch=thunk-extern",
+        "-mindirect-branch-register",
+        "-mindirect-branch-cs-prefix",
+        "-mfunction-return=thunk-extern",
+        "-fno-jump-tables",
+        "-fpatchable-function-entry=16,16",
+        "-fno-delete-null-pointer-checks",
+        "-O2",
+        "-fno-allow-store-data-races",
+        "-fstack-protector-strong",
+        "-fno-stack-clash-protection",
+        "-pg",
+        "-mrecord-mcount",
+        "-mfentry",
+        "-DCC_USING_FENTRY",
+        "-fno-inline-functions-called-once",
+        "-falign-functions=16",
+        "-fstrict-flex-arrays=3",
+        "-fms-extensions",
+        "-fno-strict-overflow",
+        "-fno-stack-check",
+        "-fconserve-stack",
+        "-fno-builtin-wcslen",
+        "-Wall",
+        "-Wextra",
+        "-Wundef",
+        "-Werror=implicit-function-declaration",
+        "-Werror=implicit-int",
+        "-Werror=return-type",
+        "-Werror=strict-prototypes",
+        "-Wno-format-security",
+        "-Wno-trigraphs",
+        "-Wno-frame-address",
+        "-Wno-address-of-packed-member",
+        "-Wmissing-declarations",
+        "-Wmissing-prototypes",
+        "-Wframe-larger-than=2048",
+        "-Wno-main",
+        "-Wno-type-limits",
+        "-Wno-dangling-pointer",
+        "-Wvla-larger-than=1",
+        "-Wno-pointer-sign",
+        "-Wcast-function-type",
+        "-Wno-array-bounds",
+        "-Wno-stringop-overflow",
+        "-Wno-alloc-size-larger-than",
+        "-Wimplicit-fallthrough=5",
+        "-Werror=date-time",
+        "-Werror=incompatible-pointer-types",
+        "-Werror=designated-init",
+        "-Wenum-conversion",
+        "-Wunused",
+        "-Wno-unused-but-set-variable",
+        "-Wno-unused-const-variable",
+        "-Wno-packed-not-aligned",
+        "-Wno-format-overflow",
+        "-Wno-format-truncation",
+        "-Wno-stringop-truncation",
+        "-Wno-override-init",
+        "-Wno-missing-field-initializers",
+        "-Wno-shift-negative-value",
+        "-Wno-maybe-uninitialized",
+        "-Wno-sign-compare",
+        "-Wno-unused-parameter",
+        "-g",
+        "-I/var/tmp/kprog-tmp/CK/linux/kernel/bpf",
+        "-Ikernel/bpf",
+        "-DKBUILD_MODFILE=\"kernel/bpf/verifier\"",
+        "-DKBUILD_BASENAME=\"verifier\"",
+        "-DKBUILD_MODNAME=\"verifier\"",
+        "-D__KBUILD_MODNAME=verifier",
+        "-iquote",
+        "/var/tmp/kprog-tmp/CK/linux/kernel/bpf",
+        "-include",
+        "/proc/53374/fd/3",
+        "-c",
+        "-fstack-usage",
+        "-x",
+        "c",
+        "-",
+        "-o",
+        "/var/tmp/kprog-tmp/A/large-stack-observation/slot-storage/verifier.kernel.o"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "",
+      "source_sha256": "0ce5027b565ab26db01a0db2b96a475f7e446572eb261db7fa591dea622a5c3b",
+      "source_commit": "2ebbca7115f1662710f0d33ef91a6674576d7042",
+      "object_sha256": "365a503e3307faeae8aba4a07334b59518fc6c85eb051d87a87f00c61658cd84"
+    },
+    {
+      "translation_unit": "liveness",
+      "command": [
+        "gcc",
+        "-nostdinc",
+        "-I/var/tmp/kprog-tmp/CK/linux/arch/x86/include",
+        "-I./arch/x86/include/generated",
+        "-I/var/tmp/kprog-tmp/CK/linux/include",
+        "-I./include",
+        "-I/var/tmp/kprog-tmp/CK/linux/arch/x86/include/uapi",
+        "-I./arch/x86/include/generated/uapi",
+        "-I/var/tmp/kprog-tmp/CK/linux/include/uapi",
+        "-I./include/generated/uapi",
+        "-include",
+        "/var/tmp/kprog-tmp/CK/linux/include/linux/compiler-version.h",
+        "-include",
+        "/var/tmp/kprog-tmp/CK/linux/include/linux/kconfig.h",
+        "-include",
+        "/var/tmp/kprog-tmp/CK/linux/include/linux/compiler_types.h",
+        "-D__KERNEL__",
+        "-fmacro-prefix-map=/var/tmp/kprog-tmp/CK/linux/=",
+        "-std=gnu11",
+        "-fshort-wchar",
+        "-funsigned-char",
+        "-fno-common",
+        "-fno-PIE",
+        "-fno-strict-aliasing",
+        "-mno-sse",
+        "-mno-mmx",
+        "-mno-sse2",
+        "-mno-3dnow",
+        "-mno-avx",
+        "-mno-sse4a",
+        "-fcf-protection=none",
+        "-m64",
+        "-falign-jumps=1",
+        "-falign-loops=1",
+        "-mno-80387",
+        "-mno-fp-ret-in-387",
+        "-mpreferred-stack-boundary=3",
+        "-mskip-rax-setup",
+        "-march=x86-64",
+        "-mtune=generic",
+        "-mno-red-zone",
+        "-mcmodel=kernel",
+        "-mstack-protector-guard-reg=gs",
+        "-mstack-protector-guard-symbol=__ref_stack_chk_guard",
+        "-Wno-sign-compare",
+        "-fno-asynchronous-unwind-tables",
+        "-mindirect-branch=thunk-extern",
+        "-mindirect-branch-register",
+        "-mindirect-branch-cs-prefix",
+        "-mfunction-return=thunk-extern",
+        "-fno-jump-tables",
+        "-fpatchable-function-entry=16,16",
+        "-fno-delete-null-pointer-checks",
+        "-O2",
+        "-fno-allow-store-data-races",
+        "-fstack-protector-strong",
+        "-fno-stack-clash-protection",
+        "-pg",
+        "-mrecord-mcount",
+        "-mfentry",
+        "-DCC_USING_FENTRY",
+        "-fno-inline-functions-called-once",
+        "-falign-functions=16",
+        "-fstrict-flex-arrays=3",
+        "-fms-extensions",
+        "-fno-strict-overflow",
+        "-fno-stack-check",
+        "-fconserve-stack",
+        "-fno-builtin-wcslen",
+        "-Wall",
+        "-Wextra",
+        "-Wundef",
+        "-Werror=implicit-function-declaration",
+        "-Werror=implicit-int",
+        "-Werror=return-type",
+        "-Werror=strict-prototypes",
+        "-Wno-format-security",
+        "-Wno-trigraphs",
+        "-Wno-frame-address",
+        "-Wno-address-of-packed-member",
+        "-Wmissing-declarations",
+        "-Wmissing-prototypes",
+        "-Wframe-larger-than=2048",
+        "-Wno-main",
+        "-Wno-type-limits",
+        "-Wno-dangling-pointer",
+        "-Wvla-larger-than=1",
+        "-Wno-pointer-sign",
+        "-Wcast-function-type",
+        "-Wno-array-bounds",
+        "-Wno-stringop-overflow",
+        "-Wno-alloc-size-larger-than",
+        "-Wimplicit-fallthrough=5",
+        "-Werror=date-time",
+        "-Werror=incompatible-pointer-types",
+        "-Werror=designated-init",
+        "-Wenum-conversion",
+        "-Wunused",
+        "-Wno-unused-but-set-variable",
+        "-Wno-unused-const-variable",
+        "-Wno-packed-not-aligned",
+        "-Wno-format-overflow",
+        "-Wno-format-truncation",
+        "-Wno-stringop-truncation",
+        "-Wno-override-init",
+        "-Wno-missing-field-initializers",
+        "-Wno-shift-negative-value",
+        "-Wno-maybe-uninitialized",
+        "-Wno-sign-compare",
+        "-Wno-unused-parameter",
+        "-g",
+        "-I/var/tmp/kprog-tmp/CK/linux/kernel/bpf",
+        "-Ikernel/bpf",
+        "-DKBUILD_MODFILE=\"kernel/bpf/liveness\"",
+        "-DKBUILD_BASENAME=\"liveness\"",
+        "-DKBUILD_MODNAME=\"liveness\"",
+        "-D__KBUILD_MODNAME=liveness",
+        "-iquote",
+        "/var/tmp/kprog-tmp/CK/linux/kernel/bpf",
+        "-include",
+        "/proc/53374/fd/3",
+        "-c",
+        "-fstack-usage",
+        "-x",
+        "c",
+        "-",
+        "-o",
+        "/var/tmp/kprog-tmp/A/large-stack-observation/slot-storage/liveness.kernel.o"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "",
+      "source_sha256": "447ca604b8d2573b46f3aac546ee28c8dab9012265abc1eb93ee04aaa86f1d83",
+      "source_commit": "2ebbca7115f1662710f0d33ef91a6674576d7042",
+      "object_sha256": "175250c369d7e08e447732ff41bb8fef007606c9d76124b7761a7106f96ca14b"
+    },
+    {
+      "translation_unit": "log",
+      "command": [
+        "gcc",
+        "-nostdinc",
+        "-I/var/tmp/kprog-tmp/CK/linux/arch/x86/include",
+        "-I./arch/x86/include/generated",
+        "-I/var/tmp/kprog-tmp/CK/linux/include",
+        "-I./include",
+        "-I/var/tmp/kprog-tmp/CK/linux/arch/x86/include/uapi",
+        "-I./arch/x86/include/generated/uapi",
+        "-I/var/tmp/kprog-tmp/CK/linux/include/uapi",
+        "-I./include/generated/uapi",
+        "-include",
+        "/var/tmp/kprog-tmp/CK/linux/include/linux/compiler-version.h",
+        "-include",
+        "/var/tmp/kprog-tmp/CK/linux/include/linux/kconfig.h",
+        "-include",
+        "/var/tmp/kprog-tmp/CK/linux/include/linux/compiler_types.h",
+        "-D__KERNEL__",
+        "-fmacro-prefix-map=/var/tmp/kprog-tmp/CK/linux/=",
+        "-std=gnu11",
+        "-fshort-wchar",
+        "-funsigned-char",
+        "-fno-common",
+        "-fno-PIE",
+        "-fno-strict-aliasing",
+        "-mno-sse",
+        "-mno-mmx",
+        "-mno-sse2",
+        "-mno-3dnow",
+        "-mno-avx",
+        "-mno-sse4a",
+        "-fcf-protection=none",
+        "-m64",
+        "-falign-jumps=1",
+        "-falign-loops=1",
+        "-mno-80387",
+        "-mno-fp-ret-in-387",
+        "-mpreferred-stack-boundary=3",
+        "-mskip-rax-setup",
+        "-march=x86-64",
+        "-mtune=generic",
+        "-mno-red-zone",
+        "-mcmodel=kernel",
+        "-mstack-protector-guard-reg=gs",
+        "-mstack-protector-guard-symbol=__ref_stack_chk_guard",
+        "-Wno-sign-compare",
+        "-fno-asynchronous-unwind-tables",
+        "-mindirect-branch=thunk-extern",
+        "-mindirect-branch-register",
+        "-mindirect-branch-cs-prefix",
+        "-mfunction-return=thunk-extern",
+        "-fno-jump-tables",
+        "-fpatchable-function-entry=16,16",
+        "-fno-delete-null-pointer-checks",
+        "-O2",
+        "-fno-allow-store-data-races",
+        "-fstack-protector-strong",
+        "-fno-stack-clash-protection",
+        "-pg",
+        "-mrecord-mcount",
+        "-mfentry",
+        "-DCC_USING_FENTRY",
+        "-fno-inline-functions-called-once",
+        "-falign-functions=16",
+        "-fstrict-flex-arrays=3",
+        "-fms-extensions",
+        "-fno-strict-overflow",
+        "-fno-stack-check",
+        "-fconserve-stack",
+        "-fno-builtin-wcslen",
+        "-Wall",
+        "-Wextra",
+        "-Wundef",
+        "-Werror=implicit-function-declaration",
+        "-Werror=implicit-int",
+        "-Werror=return-type",
+        "-Werror=strict-prototypes",
+        "-Wno-format-security",
+        "-Wno-trigraphs",
+        "-Wno-frame-address",
+        "-Wno-address-of-packed-member",
+        "-Wmissing-declarations",
+        "-Wmissing-prototypes",
+        "-Wframe-larger-than=2048",
+        "-Wno-main",
+        "-Wno-type-limits",
+        "-Wno-dangling-pointer",
+        "-Wvla-larger-than=1",
+        "-Wno-pointer-sign",
+        "-Wcast-function-type",
+        "-Wno-array-bounds",
+        "-Wno-stringop-overflow",
+        "-Wno-alloc-size-larger-than",
+        "-Wimplicit-fallthrough=5",
+        "-Werror=date-time",
+        "-Werror=incompatible-pointer-types",
+        "-Werror=designated-init",
+        "-Wenum-conversion",
+        "-Wunused",
+        "-Wno-unused-but-set-variable",
+        "-Wno-unused-const-variable",
+        "-Wno-packed-not-aligned",
+        "-Wno-format-overflow",
+        "-Wno-format-truncation",
+        "-Wno-stringop-truncation",
+        "-Wno-override-init",
+        "-Wno-missing-field-initializers",
+        "-Wno-shift-negative-value",
+        "-Wno-maybe-uninitialized",
+        "-Wno-sign-compare",
+        "-Wno-unused-parameter",
+        "-g",
+        "-I/var/tmp/kprog-tmp/CK/linux/kernel/bpf",
+        "-Ikernel/bpf",
+        "-DKBUILD_MODFILE=\"kernel/bpf/log\"",
+        "-DKBUILD_BASENAME=\"log\"",
+        "-DKBUILD_MODNAME=\"log\"",
+        "-D__KBUILD_MODNAME=log",
+        "-iquote",
+        "/var/tmp/kprog-tmp/CK/linux/kernel/bpf",
+        "-include",
+        "/proc/53374/fd/3",
+        "-c",
+        "-fstack-usage",
+        "-x",
+        "c",
+        "-",
+        "-o",
+        "/var/tmp/kprog-tmp/A/large-stack-observation/slot-storage/log.kernel.o"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "",
+      "source_sha256": "2e9c11f8bb57e0a96ff0dadaa4ef2c10be6b70334c365303df27e566120a69f7",
+      "source_commit": "2ebbca7115f1662710f0d33ef91a6674576d7042",
+      "object_sha256": "c0e493ab2ff006f787995a8ad067c392d8e3f65945af8c19532901c3e9b14eb7"
+    }
+  ],
+  "stack_usage": {
+    "log.kernel.su": [
+      {
+        "function": "print_scalar_ranges",
+        "bytes": 256,
+        "kind": "static"
+      },
+      {
+        "function": "reg_type_str",
+        "bytes": 144,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "verbose_linfo",
+        "bytes": 120,
+        "kind": "static"
+      },
+      {
+        "function": "print_reg_state",
+        "bytes": 120,
+        "kind": "static"
+      },
+      {
+        "function": "print_verifier_state",
+        "bytes": 120,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "bpf_verifier_log_write",
+        "bytes": 96,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_log",
+        "bytes": 96,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_vlog_reverse_ubuf",
+        "bytes": 88,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_verifier_vlog",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_vlog_finalize",
+        "bytes": 40,
+        "kind": "static"
+      },
+      {
+        "function": "print_insn_state",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "tnum_strn",
+        "bytes": 16,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_vlog_reset",
+        "bytes": 16,
+        "kind": "static"
+      },
+      {
+        "function": "iter_type_str",
+        "bytes": 16,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_vlog_init",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "dynptr_type_str",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "iter_state_str",
+        "bytes": 8,
+        "kind": "static"
+      }
+    ],
+    "liveness.kernel.su": [
+      {
+        "function": "update_insn",
+        "bytes": 1424,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "log_mask_change",
+        "bytes": 1016,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "mark_stack_read.isra",
+        "bytes": 744,
+        "kind": "static"
+      },
+      {
+        "function": "commit_stack_write_marks",
+        "bytes": 664,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_mark_stack_write",
+        "bytes": 400,
+        "kind": "static"
+      },
+      {
+        "function": "update_instance",
+        "bytes": 288,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "bpf_mark_stack_read",
+        "bytes": 120,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_update_live_stack",
+        "bytes": 120,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_live_stack_query_init",
+        "bytes": 120,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_reset_stack_write_marks",
+        "bytes": 112,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_stack_slot_alive",
+        "bytes": 80,
+        "kind": "static"
+      },
+      {
+        "function": "fmt_callchain",
+        "bytes": 56,
+        "kind": "static"
+      },
+      {
+        "function": "__lookup_instance",
+        "bytes": 48,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_stack_liveness_free",
+        "bytes": 48,
+        "kind": "static"
+      },
+      {
+        "function": "alloc_frame_masks.isra",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_stack_liveness_init",
+        "bytes": 16,
+        "kind": "static"
+      },
+      {
+        "function": "reset_stack_write_marks",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "compute_callchain",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_reset_live_stack_callchain",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_commit_stack_write_marks",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_jmp_offset",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_insn_successors",
+        "bytes": 8,
+        "kind": "static"
+      }
+    ],
+    "verifier.kernel.su": [
+      {
+        "function": "backtrack_insn",
+        "bytes": 952,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "__mark_chain_precision",
+        "bytes": 808,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "bpf_check_attach_target",
+        "bytes": 792,
+        "kind": "static"
+      },
+      {
+        "function": "invalidate_dynptr",
+        "bytes": 776,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "destroy_if_dynptr_stack_slot",
+        "bytes": 776,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "mark_stack_slots_dynptr",
+        "bytes": 776,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "check_stack_range_initialized",
+        "bytes": 544,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "check_stack_write_fixed_off",
+        "bytes": 504,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "mark_stack_slots_iter",
+        "bytes": 480,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "check_stack_read_fixed_off",
+        "bytes": 480,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "mark_stack_slot_obj_read",
+        "bytes": 456,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "mark_stack_slot_irq_flag.isra",
+        "bytes": 456,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "unmark_stack_slots_iter",
+        "bytes": 456,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "unmark_stack_slot_irq_flag",
+        "bytes": 448,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "check_helper_call.isra",
+        "bytes": 312,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "adjust_reg_min_max_vals",
+        "bytes": 296,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "check_kfunc_mem_size_reg",
+        "bytes": 288,
+        "kind": "static"
+      },
+      {
+        "function": "check_kfunc_call.isra",
+        "bytes": 280,
+        "kind": "static"
+      },
+      {
+        "function": "adjust_ptr_min_max_vals",
+        "bytes": 272,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "sync_linked_regs",
+        "bytes": 216,
+        "kind": "static"
+      },
+      {
+        "function": "visit_insn",
+        "bytes": 216,
+        "kind": "static"
+      },
+      {
+        "function": "check_ptr_to_map_access",
+        "bytes": 208,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "btf_check_func_arg_match.isra",
+        "bytes": 208,
+        "kind": "static"
+      },
+      {
+        "function": "get_call_summary",
+        "bytes": 200,
+        "kind": "static"
+      },
+      {
+        "function": "check_cond_jmp_op",
+        "bytes": 200,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "do_misc_fixups",
+        "bytes": 184,
+        "kind": "static"
+      },
+      {
+        "function": "check_ptr_to_btf_access",
+        "bytes": 184,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "bpf_check",
+        "bytes": 176,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "check_max_stack_depth_subprog",
+        "bytes": 168,
+        "kind": "static"
+      },
+      {
+        "function": "check_alu_op",
+        "bytes": 168,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "check_kfunc_args",
+        "bytes": 160,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "check_core_relo",
+        "bytes": 152,
+        "kind": "static"
+      },
+      {
+        "function": "check_btf_line",
+        "bytes": 152,
+        "kind": "static"
+      },
+      {
+        "function": "check_btf_func_early.isra",
+        "bytes": 152,
+        "kind": "static"
+      },
+      {
+        "function": "convert_ctx_accesses",
+        "bytes": 152,
+        "kind": "static"
+      },
+      {
+        "function": "check_mem_access",
+        "bytes": 152,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "check_mem_reg",
+        "bytes": 152,
+        "kind": "static"
+      },
+      {
+        "function": "verifier_state_scratched",
+        "bytes": 144,
+        "kind": "static"
+      },
+      {
+        "function": "sanitize_ptr_alu",
+        "bytes": 144,
+        "kind": "static"
+      },
+      {
+        "function": "fixup_kfunc_call",
+        "bytes": 144,
+        "kind": "static"
+      },
+      {
+        "function": "add_kfunc_call",
+        "bytes": 144,
+        "kind": "static"
+      },
+      {
+        "function": "reg_bounds_sanity_check",
+        "bytes": 136,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "check_stack_access_within_bounds",
+        "bytes": 136,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "process_kf_arg_ptr_to_btf_id",
+        "bytes": 136,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "opt_subreg_zext_lo32_rnd_hi32.isra",
+        "bytes": 136,
+        "kind": "static"
+      },
+      {
+        "function": "check_stack_read",
+        "bytes": 136,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "check_return_code",
+        "bytes": 136,
+        "kind": "static"
+      },
+      {
+        "function": "is_state_visited",
+        "bytes": 136,
+        "kind": "static"
+      },
+      {
+        "function": "check_attach_btf_id",
+        "bytes": 136,
+        "kind": "static"
+      },
+      {
+        "function": "compute_scc",
+        "bytes": 128,
+        "kind": "static"
+      },
+      {
+        "function": "check_ptr_alignment",
+        "bytes": 128,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "is_scalar_branch_taken",
+        "bytes": 128,
+        "kind": "static"
+      },
+      {
+        "function": "do_check",
+        "bytes": 128,
+        "kind": "static"
+      },
+      {
+        "function": "compute_live_registers",
+        "bytes": 120,
+        "kind": "static"
+      },
+      {
+        "function": "adjust_scalar_min_max_vals",
+        "bytes": 120,
+        "kind": "static"
+      },
+      {
+        "function": "jit_subprogs",
+        "bytes": 120,
+        "kind": "static"
+      },
+      {
+        "function": "__check_ptr_off_reg",
+        "bytes": 104,
+        "kind": "static"
+      },
+      {
+        "function": "get_kfunc_ptr_arg_type",
+        "bytes": 104,
+        "kind": "static"
+      },
+      {
+        "function": "resolve_pseudo_ldimm64",
+        "bytes": 104,
+        "kind": "static"
+      },
+      {
+        "function": "states_equal",
+        "bytes": 104,
+        "kind": "static"
+      },
+      {
+        "function": "check_func_arg",
+        "bytes": 104,
+        "kind": "static"
+      },
+      {
+        "function": "verbose",
+        "bytes": 96,
+        "kind": "static"
+      },
+      {
+        "function": "__check_buffer_access",
+        "bytes": 96,
+        "kind": "static"
+      },
+      {
+        "function": "check_tp_buffer_access",
+        "bytes": 96,
+        "kind": "static"
+      },
+      {
+        "function": "check_buffer_access.isra",
+        "bytes": 96,
+        "kind": "static"
+      },
+      {
+        "function": "check_struct_ops_btf_id",
+        "bytes": 96,
+        "kind": "static"
+      },
+      {
+        "function": "clean_live_states",
+        "bytes": 96,
+        "kind": "static"
+      },
+      {
+        "function": "sanitize_check_bounds",
+        "bytes": 96,
+        "kind": "static"
+      },
+      {
+        "function": "__process_kf_arg_ptr_to_graph_node",
+        "bytes": 96,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "check_load_mem",
+        "bytes": 96,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "process_iter_arg",
+        "bytes": 96,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "adjust_subprog_starts_after_remove",
+        "bytes": 88,
+        "kind": "static"
+      },
+      {
+        "function": "widen_imprecise_scalars",
+        "bytes": 88,
+        "kind": "static"
+      },
+      {
+        "function": "optimize_bpf_loop",
+        "bytes": 88,
+        "kind": "static"
+      },
+      {
+        "function": "process_fd_array",
+        "bytes": 88,
+        "kind": "static"
+      },
+      {
+        "function": "process_spin_lock",
+        "bytes": 88,
+        "kind": "static"
+      },
+      {
+        "function": "process_dynptr_func",
+        "bytes": 88,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "do_check_insn",
+        "bytes": 88,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "do_check_common",
+        "bytes": 88,
+        "kind": "static"
+      },
+      {
+        "function": "bt_sync_linked_regs",
+        "bytes": 80,
+        "kind": "static"
+      },
+      {
+        "function": "__check_pseudo_btf_id",
+        "bytes": 80,
+        "kind": "static"
+      },
+      {
+        "function": "compute_postorder",
+        "bytes": 80,
+        "kind": "static"
+      },
+      {
+        "function": "push_jmp_history",
+        "bytes": 80,
+        "kind": "static"
+      },
+      {
+        "function": "adjust_insn_aux_data",
+        "bytes": 80,
+        "kind": "static"
+      },
+      {
+        "function": "stacksafe",
+        "bytes": 80,
+        "kind": "static"
+      },
+      {
+        "function": "jt_from_subprog",
+        "bytes": 80,
+        "kind": "static"
+      },
+      {
+        "function": "check_special_kfunc",
+        "bytes": 80,
+        "kind": "static"
+      },
+      {
+        "function": "__find_kfunc_desc_btf",
+        "bytes": 80,
+        "kind": "static"
+      },
+      {
+        "function": "fetch_kfunc_arg_meta",
+        "bytes": 80,
+        "kind": "static"
+      },
+      {
+        "function": "mark_fastcall_pattern_for_call",
+        "bytes": 80,
+        "kind": "static"
+      },
+      {
+        "function": "check_helper_mem_access",
+        "bytes": 80,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "check_func_call.isra",
+        "bytes": 80,
+        "kind": "static"
+      },
+      {
+        "function": "process_irq_flag.isra",
+        "bytes": 80,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "propagate_precision",
+        "bytes": 80,
+        "kind": "static"
+      },
+      {
+        "function": "update_branch_counts",
+        "bytes": 80,
+        "kind": "static"
+      },
+      {
+        "function": "check_resource_leak",
+        "bytes": 72,
+        "kind": "static"
+      },
+      {
+        "function": "check_subprogs",
+        "bytes": 72,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_adj_linfo_after_remove",
+        "bytes": 72,
+        "kind": "static"
+      },
+      {
+        "function": "opt_hard_wire_dead_code_branches",
+        "bytes": 72,
+        "kind": "static"
+      },
+      {
+        "function": "check_mem_region_access",
+        "bytes": 72,
+        "kind": "static"
+      },
+      {
+        "function": "map_kptr_match_type",
+        "bytes": 72,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "check_reg_type",
+        "bytes": 72,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "release_reference",
+        "bytes": 72,
+        "kind": "static"
+      },
+      {
+        "function": "check_map_kptr_access.isra",
+        "bytes": 72,
+        "kind": "static"
+      },
+      {
+        "function": "setup_func_entry",
+        "bytes": 72,
+        "kind": "static"
+      },
+      {
+        "function": "check_btf_func.isra",
+        "bytes": 72,
+        "kind": "static"
+      },
+      {
+        "function": "check_cfg",
+        "bytes": 72,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_get_kfunc_addr",
+        "bytes": 72,
+        "kind": "static"
+      },
+      {
+        "function": "check_stack_write_var_off",
+        "bytes": 72,
+        "kind": "static"
+      },
+      {
+        "function": "push_callback_call",
+        "bytes": 72,
+        "kind": "static"
+      },
+      {
+        "function": "clear_singular_ids",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "find_kfunc_desc",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "refsafe",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "mark_all_scalars_precise",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "__btf_type_is_scalar_struct",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "verifier_remove_insns",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "clear_all_pkt_pointers",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "free_states",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "mark_ptr_or_null_regs",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "check_indirect_jump",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "ref_convert_owning_non_owning",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "fetch_kfunc_meta",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "__process_kf_arg_ptr_to_graph_root.isra",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "reg_set_min_max",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "check_map_access",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "check_reg_const_str",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "visit_gotox_insn",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "check_ld_imm",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_jit_find_kfunc_model",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "check_store_reg",
+        "bytes": 64,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "prepare_func_exit",
+        "bytes": 64,
+        "kind": "static"
+      },
+      {
+        "function": "format_callchain",
+        "bytes": 56,
+        "kind": "static"
+      },
+      {
+        "function": "copy_insn_array",
+        "bytes": 56,
+        "kind": "static"
+      },
+      {
+        "function": "clear_insn_aux_data",
+        "bytes": 56,
+        "kind": "static"
+      },
+      {
+        "function": "scc_visit_alloc",
+        "bytes": 56,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_find_exception_callback_insn_off",
+        "bytes": 56,
+        "kind": "static"
+      },
+      {
+        "function": "realloc_array",
+        "bytes": 56,
+        "kind": "static"
+      },
+      {
+        "function": "check_packet_access",
+        "bytes": 56,
+        "kind": "static"
+      },
+      {
+        "function": "__check_reg_arg",
+        "bytes": 56,
+        "kind": "static"
+      },
+      {
+        "function": "clear_caller_saved_regs",
+        "bytes": 56,
+        "kind": "static"
+      },
+      {
+        "function": "mark_btf_ld_reg",
+        "bytes": 56,
+        "kind": "static"
+      },
+      {
+        "function": "process_iter_next_call",
+        "bytes": 56,
+        "kind": "static"
+      },
+      {
+        "function": "reg_bounds_sync",
+        "bytes": 56,
+        "kind": "static"
+      },
+      {
+        "function": "check_ld_abs",
+        "bytes": 56,
+        "kind": "static"
+      },
+      {
+        "function": "is_branch_taken",
+        "bytes": 56,
+        "kind": "static"
+      },
+      {
+        "function": "visit_func_call_insn",
+        "bytes": 56,
+        "kind": "static"
+      },
+      {
+        "function": "check_atomic_rmw",
+        "bytes": 56,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "do_check_subprogs",
+        "bytes": 56,
+        "kind": "static"
+      },
+      {
+        "function": "__reg32_deduce_bounds",
+        "bytes": 48,
+        "kind": "static"
+      },
+      {
+        "function": "fmt_reg_mask.constprop",
+        "bytes": 48,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_patch_insn_data",
+        "bytes": 48,
+        "kind": "static"
+      },
+      {
+        "function": "mark_reg_stack_read",
+        "bytes": 48,
+        "kind": "static"
+      },
+      {
+        "function": "regsafe",
+        "bytes": 48,
+        "kind": "static"
+      },
+      {
+        "function": "copy_verifier_state",
+        "bytes": 48,
+        "kind": "static"
+      },
+      {
+        "function": "push_stack",
+        "bytes": 48,
+        "kind": "static"
+      },
+      {
+        "function": "pop_stack",
+        "bytes": 48,
+        "kind": "static"
+      },
+      {
+        "function": "unmark_stack_slots_dynptr",
+        "bytes": 48,
+        "kind": "static"
+      },
+      {
+        "function": "regs_refine_cond_op",
+        "bytes": 48,
+        "kind": "static"
+      },
+      {
+        "function": "check_max_stack_depth",
+        "bytes": 48,
+        "kind": "static"
+      },
+      {
+        "function": "add_subprog_and_kfunc",
+        "bytes": 48,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_fmt_stack_mask",
+        "bytes": 48,
+        "kind": "static"
+      },
+      {
+        "function": "acquire_reference_state",
+        "bytes": 40,
+        "kind": "static"
+      },
+      {
+        "function": "is_kfunc_arg_scalar_with_name",
+        "bytes": 40,
+        "kind": "static"
+      },
+      {
+        "function": "copy_array.constprop",
+        "bytes": 40,
+        "kind": "static"
+      },
+      {
+        "function": "__is_kfunc_ptr_arg_type.isra",
+        "bytes": 40,
+        "kind": "static"
+      },
+      {
+        "function": "free_verifier_state",
+        "bytes": 40,
+        "kind": "static"
+      },
+      {
+        "function": "set_user_ringbuf_callback_state",
+        "bytes": 40,
+        "kind": "static"
+      },
+      {
+        "function": "check_func_proto",
+        "bytes": 40,
+        "kind": "static"
+      },
+      {
+        "function": "__update_reg64_bounds",
+        "bytes": 40,
+        "kind": "static"
+      },
+      {
+        "function": "init_reg_state",
+        "bytes": 40,
+        "kind": "static"
+      },
+      {
+        "function": "set_rbtree_add_callback_state",
+        "bytes": 40,
+        "kind": "static"
+      },
+      {
+        "function": "compute_insn_live_regs",
+        "bytes": 40,
+        "kind": "static"
+      },
+      {
+        "function": "find_good_pkt_pointers",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "__add_used_btf",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "verbose_invalid_scalar",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "regs_exact",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "push_insn",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "check_reg_sane_offset",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "mark_reg_not_init",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "mark_reg_unknown",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "is_kfunc_arg_const_mem_size",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "collect_linked_regs",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "maybe_free_verifier_state",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "__mark_reg_known",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "mark_reg_known_zero",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "set_task_work_schedule_callback_state",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "set_timer_callback_state",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "set_find_vma_callback_state",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "check_map_func_compatibility",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "check_map_prog_compatibility",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "__add_used_map",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "sanitize_speculative_path",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "maybe_fork_scalars",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "coerce_reg_to_size",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "try_match_pkt_pointers",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "process_bpf_exit_full",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "map_set_for_each_callback_args",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_prog_ctx_arg_info_init",
+        "bytes": 32,
+        "kind": "static"
+      },
+      {
+        "function": "sort_insn_array_uniq",
+        "bytes": 24,
+        "kind": "static"
+      },
+      {
+        "function": "sanitize_err",
+        "bytes": 24,
+        "kind": "static"
+      },
+      {
+        "function": "set_loop_callback_state",
+        "bytes": 24,
+        "kind": "static"
+      },
+      {
+        "function": "__update_reg32_bounds",
+        "bytes": 24,
+        "kind": "static"
+      },
+      {
+        "function": "coerce_reg_to_size_sx",
+        "bytes": 24,
+        "kind": "static"
+      },
+      {
+        "function": "__reg_deduce_bounds",
+        "bytes": 24,
+        "kind": "static"
+      },
+      {
+        "function": "release_reference_state",
+        "bytes": 24,
+        "kind": "static"
+      },
+      {
+        "function": "__check_mem_access",
+        "bytes": 24,
+        "kind": "dynamic,bounded"
+      },
+      {
+        "function": "maybe_widen_reg",
+        "bytes": 24,
+        "kind": "static"
+      },
+      {
+        "function": "copy_func_state",
+        "bytes": 24,
+        "kind": "static"
+      },
+      {
+        "function": "__mark_reg_s32_range",
+        "bytes": 24,
+        "kind": "static"
+      },
+      {
+        "function": "ref_set_non_owning.isra",
+        "bytes": 24,
+        "kind": "static"
+      },
+      {
+        "function": "check_map_field_pointer",
+        "bytes": 24,
+        "kind": "static"
+      },
+      {
+        "function": "disasm_kfunc_name",
+        "bytes": 24,
+        "kind": "static"
+      },
+      {
+        "function": "add_subprog",
+        "bytes": 24,
+        "kind": "static"
+      },
+      {
+        "function": "check_atomic",
+        "bytes": 24,
+        "kind": "static"
+      },
+      {
+        "function": "btf_check_subprog_call",
+        "bytes": 24,
+        "kind": "static"
+      },
+      {
+        "function": "check_mem_size_reg",
+        "bytes": 24,
+        "kind": "static"
+      },
+      {
+        "function": "btf_type_name",
+        "bytes": 16,
+        "kind": "static"
+      },
+      {
+        "function": "set_map_elem_callback_state",
+        "bytes": 16,
+        "kind": "static"
+      },
+      {
+        "function": "get_dynptr_arg_reg",
+        "bytes": 16,
+        "kind": "static"
+      },
+      {
+        "function": "__mark_reg_unknown_imprecise",
+        "bytes": 16,
+        "kind": "static"
+      },
+      {
+        "function": "bt_subprog_enter",
+        "bytes": 16,
+        "kind": "static"
+      },
+      {
+        "function": "copy_to_sockptr_offset.constprop",
+        "bytes": 16,
+        "kind": "static"
+      },
+      {
+        "function": "mark_ptr_or_null_reg.isra",
+        "bytes": 16,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_free_kfunc_btf_tab",
+        "bytes": 16,
+        "kind": "static"
+      },
+      {
+        "function": "btf_id_cmp_func",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "mark_verifier_state_scratched",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "is_acquire_function",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "is_ptr_cast_function",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "is_async_callback_calling_insn",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "cmp_subprogs",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "kfunc_desc_cmp_by_id_off",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "kfunc_btf_cmp_by_off",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "may_access_direct_pkt_data",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "set_callee_state",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "is_bpf_list_api_kfunc",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "is_bpf_rbtree_api_kfunc",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "cmp_ptr_to_u32",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "range_within",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "check_ids",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "idset_cnt_inc",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "adjust_jmp_off",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "check_map_access_type",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "stack_slot_obj_get_spi",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "may_update_sockmap",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "unbound_reg_init",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "compute_scc_callchain",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "scc_visit_lookup",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "scalars_exact_for_widen",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "check_func_arg_reg_off",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "atomic_ptr_type_ok",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "reg_btf_record",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "kfunc_desc_cmp_by_imm_off",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "insn_def_regno",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "mark_ptr_not_null_reg",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "check_fastcall_stack_contract.isra",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "save_register_state.isra",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "is_reg64.isra",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "is_sync_callback_calling_insn",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "save_aux_ptr_type",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "find_prev_entry",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_find_containing_subprog",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_prog_has_kfunc_call",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "loop_flag_is_zero",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "mark_chain_precision",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_calls_callback",
+        "bytes": 8,
+        "kind": "static"
+      },
+      {
+        "function": "bpf_get_btf_vmlinux",
+        "bytes": 8,
+        "kind": "static"
+      }
+    ]
+  },
+  "largest_reported_frame_bytes": 1424,
+  "native_execution_requests": 0
+}
