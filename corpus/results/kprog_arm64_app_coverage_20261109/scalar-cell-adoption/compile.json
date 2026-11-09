@@ -1,0 +1,15 @@
+{
+  "utc": "2026-11-09T10:25:30.958410+00:00",
+  "make_exit": 0,
+  "existing_host_receipts": [
+    "7c4636d3828af14f52d40c880ee1a21ada22045a",
+    "8b26b3b35ce07ed755f9381acf41cbf190b6978e"
+  ],
+  "source_base": "55504ff906ab268a5cab3ab083d6d448d152ed54",
+  "source_files": [
+    "kprog/arm64/arm64_sim_local_bpf.h",
+    "kprog/arm64/micro-prog/arm64_abi.py",
+    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py"
+  ],
+  "runtime_admission_additions": 0
+}
