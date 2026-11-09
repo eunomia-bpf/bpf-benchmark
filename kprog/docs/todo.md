@@ -77,7 +77,7 @@
 | 项 | x86-64 | AArch64 | 负责 |
 |---|---|---|---|
 | O1 参考语义定义 | 67/75 | 74/74 | V |
-| O1 raw 寄存器 handler 精化 | 32/75 | 条件式 74/74，raw 15/74 | V |
+| O1 raw 寄存器 handler 精化 | 32/75 | 条件式 74/74，raw 22/74 | V |
 | O1 地址内存组合步骤 | 29/75 | 0/74 | V |
 | O2 C-model token 体等价 | 71/75 | 73/74 | V |
 | 编译字节级证明 | 16/75 个操作，158 单元组合对象（含 2 个部分 helper 单元） | 0/74 | V、C |
@@ -87,6 +87,7 @@
 - [x] **V** ARM raw乘除法8操作：MADD/MSUB/MUL/UMULL/UDIV/UMULH/UMADDL/SMADDL，raw/tag数值还原、UDIV输入截断、width/tag写回、全部别名/XZR、unused SRC3任意字节含255，以及production multiply dispatcher与11操作统一step；新增10条及前13条审计/模块/root通过（本提交，raw11/74）。
 - [x] **V** ARM raw SHIFT_IMM/SHIFT_REG/MVN/NEG：整字AUX移位种类、byte1/byte2 unary修改和计数、任意raw值/256标签/别名/XZR、width/tag写回、unused字段含255，以及production dispatcher与15操作统一step；新增17条及前23条审计/模块/root通过（本提交，raw15/74）。
 - [x] **V** ARM数值SHIFT接口与实际C整字AUX统一：handler、dispatcher、specialized token和native binding使用整字0..3，原bad-kind定理覆盖全部AUX>3；11个受影响模块/root及50条公理审计通过，既有公开定理名和15操作raw step保留（本提交）。
+- [x] **V** ARM raw EXTR/REV/REV16/SXTB/SXTH/SXTW/CNEG：实际raw/tag来源、EXTR输入截断、输入NZCV条件、width/tag写回、别名/XZR、unused SRC2/SRC3/IMM含255，以及production dispatcher和22操作统一step；新增14条及前40条审计/模块/root通过（本提交，raw22/74），入口/C抽取/物理compiler接口保持显式。
 - [ ] **V** 上表每一行做到满额。
 - [ ] **V** O1：官方模型对照补上 ANDN、BZHI 这 4 个 x86-64 形式（现为 63/67）。
 - [ ] **V** O1/O2：x86-64 的 helper 调用、寄存器调用、外层返回；REP MOVS 全计数的 C 和编译证明。

@@ -601,3 +601,213 @@ end KProgFormal.Refinement.Arm64RawRegister.ShiftUnary
 #print axioms KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.unmodified_refines
 #print axioms KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.earlier_step
 #print axioms KProgFormal.Refinement.Arm64RawRegister.ShiftUnary.step_refines
+namespace KProgFormal.Refinement.Arm64RawRegister.ExtractReverse
+open Reference
+open Reference.AArch64 (Register Width ExtendBits)
+
+/-- EXTR narrows both incoming materialized operands at W/X width. REV/SXT
+consume full64-bit words and retain their generated scalar writeback. -/
+def body (op : GeneratedArm64Extrev.Extrev) (width : Width) (dst src src2 : Register)
+    (value : Word) (origins : Origins) (state : State) : Transition State :=
+  let inputWidth := if GeneratedArm64Extrev.code op = GeneratedArm64Extrev.code .extr
+    then Arm64Register.handlerWidth width else .w64
+  let lhs := GeneratedArm64Width.narrow (readRegister origins state src) inputWidth
+  let rhs := GeneratedArm64Width.narrow (readRegister origins state src2) inputWidth
+  let result := GeneratedArm64Extrev.value op lhs rhs value (Arm64Register.handlerWidth width)
+  ⟨advance (writeRegister state dst result width), [], none⟩
+
+theorem body_projects (op : GeneratedArm64Extrev.Extrev) (width : Width)
+    (dst src src2 : Register) (value : Word) (origins : Origins) (state : State) :
+    observe origins (body op width dst src src2 value origins state) =
+      Arm64Extrev.rawStep op width dst src src2 value (image origins state) := by
+  simp only [body, observe, advance_refines, write_refines, read_refines,
+    Arm64Extrev.rawStep, Arm64Register.read_refines, Arm64Register.write_refines]
+  rfl
+
+/-- CNEG evaluates the incoming NZCV condition and captures SRC before writeback. -/
+def conditionalBody (predicate : Arm64Cond) (width : Width) (dst src : Register)
+    (origins : Origins) (state : State) : Transition State :=
+  let result := GeneratedArm64Cneg.value .cneg
+    (generatedArm64Cond (Arm64Condition.flags state.raw.flags) predicate)
+    (readRegister origins state src) (Arm64Register.handlerWidth width)
+  ⟨advance (writeRegister state dst result width), [], none⟩
+
+theorem conditional_projects (predicate : Arm64Cond) (width : Width) (dst src : Register)
+    (origins : Origins) (state : State) :
+    observe origins (conditionalBody predicate width dst src origins state) =
+      Arm64Dispatcher.conditionalNegateBody predicate width (Arm64Register.registerCode dst)
+        (Arm64Register.registerCode src) (image origins state) := by
+  simp only [conditionalBody, observe, advance_refines, write_refines, read_refines,
+    Arm64Dispatcher.conditionalNegateBody, Arm64Move.Fields.register_read, Arm64Move.Fields.register_write,
+    Arm64Register.read_refines, Arm64Register.write_refines]
+  rfl
+
+/-- The CNEG and EXTR/REV/SXT production gates follow the preceding raw lift. -/
+def dispatch (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Register)
+    (value : Word) (origins : Origins) (state : State) : Option (Transition State) :=
+  match ShiftUnary.dispatch code aux width dst src src2 src3 value origins state with
+  | some result => some result
+  | none => if code = GeneratedArm64Cneg.code .cneg then
+      (Arm64Condition.decode aux.toNat).map (fun predicate => conditionalBody predicate width dst src origins state)
+    else (Arm64Extrev.decodeOpcode code).map (fun op => body op width dst src src2 value origins state)
+
+theorem before_extrev (op : GeneratedArm64Extrev.Extrev) (aux : BitVec 32) (width : Width)
+    (dst src src2 src3 : Register) (value : Word) (origins : Origins) (state : State) :
+    ShiftUnary.dispatch (GeneratedArm64Extrev.code op) aux width dst src src2 src3 value origins state = none := by
+  cases op <;> rfl
+
+theorem reached (op : GeneratedArm64Extrev.Extrev) (aux : BitVec 32) (width : Width)
+    (dst src src2 src3 : Register) (value : Word) (origins : Origins) (state : State) :
+    dispatch (GeneratedArm64Extrev.code op) aux width dst src src2 src3 value origins state =
+      some (body op width dst src src2 value origins state) := by
+  have separate : GeneratedArm64Extrev.code op ≠ GeneratedArm64Cneg.code .cneg := by cases op <;> decide
+  simp only [dispatch, before_extrev, if_neg separate, Arm64Extrev.decode_code]
+  rfl
+
+theorem conditional_reached (predicate : Arm64Cond) (width : Width) (dst src src2 src3 : Register)
+    (value : Word) (origins : Origins) (state : State) :
+    dispatch (GeneratedArm64Cneg.code .cneg) (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate))
+      width dst src src2 src3 value origins state = some (conditionalBody predicate width dst src origins state) := by
+  have leading : ShiftUnary.dispatch (GeneratedArm64Cneg.code .cneg)
+      (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)) width dst src src2 src3 value origins state = none := rfl
+  have known : Arm64Condition.decode (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)).toNat = some predicate := by
+    cases predicate <;> rfl
+  simp only [dispatch, leading, if_pos rfl, known]
+  rfl
+
+/-- Actual numerical production dispatcher equality derives preceding gates,
+concrete register codecs and full state projection. SRC3 retains every byte. -/
+theorem production_extrev (op : GeneratedArm64Extrev.Extrev) (aux : BitVec 32) (width : Width)
+    (dst src src2 src3 : Register) (unused3 : Byte) (value : Word) (sourceScalar sourceStack : Bool)
+    (origins : Origins) (state : State) :
+    (dispatch (GeneratedArm64Extrev.code op) aux width dst src src2 src3 value origins state).map (observe origins) =
+      Arm64Dispatcher.dispatchThroughExtrev (GeneratedArm64Extrev.code op) aux width
+        (Arm64Register.registerCode dst) (Arm64Register.registerCode src) (Arm64Register.registerCode src2)
+        unused3 value sourceScalar sourceStack (image origins state) := by
+  rw [reached, Arm64Dispatcher.extrev_reached, Arm64Dispatcher.extrev_body_typed]
+  exact congrArg some (body_projects op width dst src src2 value origins state)
+
+/-- REV/REV16/SXT ignore all SRC2/SRC3/IMM values, including NONE255. -/
+theorem production_unused_fields (op : GeneratedArm64Extrev.Extrev) (aux : BitVec 32) (width : Width)
+    (dst src src2 src3 : Register) (unused2 unused3 : Byte) (value otherValue : Word)
+    (sourceScalar sourceStack : Bool) (origins : Origins) (state : State) (unused : op ≠ .extr) :
+    (dispatch (GeneratedArm64Extrev.code op) aux width dst src src2 src3 value origins state).map (observe origins) =
+      Arm64Dispatcher.dispatchThroughExtrev (GeneratedArm64Extrev.code op) aux width
+        (Arm64Register.registerCode dst) (Arm64Register.registerCode src) unused2 unused3 otherValue
+        sourceScalar sourceStack (image origins state) := by
+  rw [reached, Arm64Dispatcher.extrev_reached,
+    Arm64Dispatcher.extrev_unused_fields op width _ _ unused2 (Arm64Register.registerCode src2) otherValue value _ unused,
+    Arm64Dispatcher.extrev_body_typed]
+  exact congrArg some (body_projects op width dst src src2 value origins state)
+
+theorem production_conditional (predicate : Arm64Cond) (width : Width) (dst src src2 src3 : Register)
+    (unused2 unused3 : Byte) (value : Word) (sourceScalar sourceStack : Bool) (origins : Origins) (state : State) :
+    (dispatch (GeneratedArm64Cneg.code .cneg) (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate))
+      width dst src src2 src3 value origins state).map (observe origins) =
+    Arm64Dispatcher.dispatchThroughExtrev (GeneratedArm64Cneg.code .cneg)
+      (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)) width (Arm64Register.registerCode dst)
+      (Arm64Register.registerCode src) unused2 unused3 value sourceScalar sourceStack (image origins state) := by
+  have known : Arm64Condition.decode (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)).toNat = some predicate := by
+    cases predicate <;> rfl
+  rw [conditional_reached, Arm64Dispatcher.conditional_negate_reached, known]
+  exact congrArg some (conditional_projects predicate width dst src origins state)
+
+theorem extract_refines (width : Width) (amount : Fin width.bits) (dst src src2 src3 : Register)
+    (aux : BitVec 32) (origins : Origins) (state : State) :
+    (dispatch (GeneratedArm64Extrev.code .extr) aux width dst src src2 src3 (BitVec.ofNat 64 amount.val)
+      origins state).map (observe origins) =
+      some (Reference.AArch64.step (.extrev (.extract width amount dst src src2)) (image origins state)) := by
+  rw [reached]
+  change some (observe origins (body .extr width dst src src2 (BitVec.ofNat 64 amount.val) origins state)) = _
+  rw [body_projects, Arm64Extrev.raw_extract_refines]
+
+theorem reverse_refines (width : Width) (halfwords : Bool) (dst src src2 src3 : Register)
+    (aux : BitVec 32) (value : Word) (origins : Origins) (state : State) :
+    (dispatch (GeneratedArm64Extrev.code (if halfwords then .rev16 else .rev)) aux width dst src src2 src3
+      value origins state).map (observe origins) =
+      some (Reference.AArch64.step (.extrev (.reverse width halfwords dst src)) (image origins state)) := by
+  rw [reached]
+  change some (observe origins (body (if halfwords then .rev16 else .rev) width dst src src2 value origins state)) = _
+  rw [body_projects, Arm64Extrev.raw_reverse_refines]
+
+theorem extend_refines (width : Width) (source : ExtendBits) (dst src src2 src3 : Register)
+    (aux : BitVec 32) (value : Word) (origins : Origins) (state : State) :
+    (dispatch (GeneratedArm64Extrev.code (Arm64Extrev.extendOpcode source)) aux width dst src src2 src3
+      value origins state).map (observe origins) =
+      some (Reference.AArch64.step (.extrev (.extend width source dst src)) (image origins state)) := by
+  rw [reached]
+  change some (observe origins (body (Arm64Extrev.extendOpcode source) width dst src src2 value origins state)) = _
+  rw [body_projects, Arm64Extrev.raw_extend_refines]
+
+theorem conditional_refines (predicate : Arm64Cond) (width : Width) (dst src src2 src3 : Register)
+    (value : Word) (origins : Origins) (state : State) (valid : predicate ≠ .al) :
+    (dispatch (GeneratedArm64Cneg.code .cneg) (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate))
+      width dst src src2 src3 value origins state).map (observe origins) =
+      some (Reference.AArch64.step (.select width .negate dst src src
+        (Arm64Condition.nativeCode (Arm64Select.inverse predicate))) (image origins state)) := by
+  rw [production_conditional predicate width dst src src2 src3 255 255 value false false origins state]
+  exact Arm64Dispatcher.conditional_negate_refines predicate width dst src 255 255 value false false _ valid
+
+theorem earlier_step (origins : Origins) (state : State) (code : Nat) (aux : BitVec 32)
+    (width : Width) (dst src src2 src3 : Register) (value : Word) (instruction : Reference.AArch64.Instruction)
+    (binding : ShiftUnary.Binding code aux width dst src src2 src3 value instruction) :
+    (dispatch code aux width dst src src2 src3 value origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  have result := ShiftUnary.step_refines origins state code aux width dst src src2 src3 value instruction binding
+  unfold dispatch
+  cases leading : ShiftUnary.dispatch code aux width dst src src2 src3 value origins state with
+  | none => simp [leading] at result
+  | some output => simpa only [leading] using result
+
+/-- Native field and condition identities extend the prior fifteen operations.
+EXTR uses its encoded immediate domain; CNEG keeps the native alias condition. -/
+inductive Binding : Nat → BitVec 32 → Width → Register → Register → Register → Register →
+    Word → Reference.AArch64.Instruction → Prop where
+  | leading (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Register)
+      (value : Word) (instruction : Reference.AArch64.Instruction)
+      (binding : ShiftUnary.Binding code aux width dst src src2 src3 value instruction) :
+      Binding code aux width dst src src2 src3 value instruction
+  | extract (width : Width) (amount : Fin width.bits) (dst src src2 src3 : Register) (aux : BitVec 32) :
+      Binding (GeneratedArm64Extrev.code .extr) aux width dst src src2 src3 (BitVec.ofNat 64 amount.val)
+        (.extrev (.extract width amount dst src src2))
+  | reverse (width : Width) (halfwords : Bool) (dst src src2 src3 : Register) (aux : BitVec 32) (value : Word) :
+      Binding (GeneratedArm64Extrev.code (if halfwords then .rev16 else .rev)) aux width dst src src2 src3 value
+        (.extrev (.reverse width halfwords dst src))
+  | extend (width : Width) (source : ExtendBits) (dst src src2 src3 : Register) (aux : BitVec 32) (value : Word) :
+      Binding (GeneratedArm64Extrev.code (Arm64Extrev.extendOpcode source)) aux width dst src src2 src3 value
+        (.extrev (.extend width source dst src))
+  | conditional (predicate : Arm64Cond) (width : Width) (dst src src2 src3 : Register) (value : Word)
+      (valid : predicate ≠ .al) :
+      Binding (GeneratedArm64Cneg.code .cneg) (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate))
+        width dst src src2 src3 value (.select width .negate dst src src
+          (Arm64Condition.nativeCode (Arm64Select.inverse predicate)))
+
+theorem step_refines (origins : Origins) (state : State) (code : Nat) (aux : BitVec 32)
+    (width : Width) (dst src src2 src3 : Register) (value : Word) (instruction : Reference.AArch64.Instruction)
+    (binding : Binding code aux width dst src src2 src3 value instruction) :
+    (dispatch code aux width dst src src2 src3 value origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  cases binding with
+  | leading code aux width dst src src2 src3 value instruction bound =>
+      exact earlier_step origins state code aux width dst src src2 src3 value instruction bound
+  | extract width amount dst src src2 src3 aux => exact extract_refines width amount dst src src2 src3 aux origins state
+  | reverse width halfwords dst src src2 src3 aux value => exact reverse_refines width halfwords dst src src2 src3 aux value origins state
+  | extend width source dst src src2 src3 aux value => exact extend_refines width source dst src src2 src3 aux value origins state
+  | conditional predicate width dst src src2 src3 value valid => exact conditional_refines predicate width dst src src2 src3 value origins state valid
+
+end KProgFormal.Refinement.Arm64RawRegister.ExtractReverse
+
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ExtractReverse.body_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ExtractReverse.conditional_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ExtractReverse.before_extrev
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ExtractReverse.reached
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ExtractReverse.conditional_reached
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ExtractReverse.production_extrev
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ExtractReverse.production_unused_fields
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ExtractReverse.production_conditional
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ExtractReverse.extract_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ExtractReverse.reverse_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ExtractReverse.extend_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ExtractReverse.conditional_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ExtractReverse.earlier_step
+#print axioms KProgFormal.Refinement.Arm64RawRegister.ExtractReverse.step_refines

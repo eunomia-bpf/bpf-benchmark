@@ -10,8 +10,8 @@ specialization token also has its own row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 74 / 74 |
 | Reference step family defined | 67/75 | 74/74 |
-| Raw register handler refinement | 32/75 | 15/74 |
-| Raw register dispatcher arm composition | 32/75 | 15/74 |
+| Raw register handler refinement | 32/75 | 22/74 |
+| Raw register dispatcher arm composition | 32/75 | 22/74 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/74 |
 | Addressed memory model / composed step | 29/75 | 0/74 |
 | Additional partial-model handler families | 1/75 | 0 |
@@ -6473,3 +6473,29 @@ sources, C/producer snapshots, exact module hashes/logs, the initial audit-name
 diagnostic and final corrected audits. The source C and single reference ISA
 retain their definitions. Runtime predicates added0. Raw ARM coverage stays15/74;
 entry/C extraction/union and physical/compiler transport remain interfaces.
+
+### ARM raw extract, reverse, extension and conditional negation
+
+EXTR, REV, REV16, SXTB, SXTH, SXTW and CNEG now compose raw64-bit GPR/tag
+materialization with concrete generated operands and scalarizing width/tag
+writeback. EXTR narrows both incoming words at W/X width; the other extract/
+reverse/extension rows use full incoming words. CNEG evaluates the input NZCV
+condition before writeback. All register aliases and XZR, complete architectural
+state, ordered empty events and fault result retain exact projection.
+
+`ExtractReverse.production_extrev`, `production_unused_fields` and
+`production_conditional` derive equality with the numerical production
+CNEG/EXTR dispatcher. REV/REV16/SXT retain arbitrary unused SRC2/SRC3/IMM,
+including NONE255 fields; CNEG retains unused SRC2/SRC3/IMM. EXTR's immediate
+uses its native field bound and CNEG's condition retains the existing native
+alias premise. `ExtractReverse.step_refines` composes all22 raw operations,
+including the preceding15. Entry origin identity, C extraction/union access
+and physical/compiler transport stay explicit and independent of B layout.
+
+Fourteen new and40 preceding laws audit with module/root checks0, sorryAx0
+and38 inherited Lean.ofReduceBool dependencies. The
+[raw EXTR/REV/SXT/CNEG receipt](arm-raw-extrev.log.gz) preserves canonical ISA,
+actual C/generated contracts, exact previous public source prefix, compiled
+module, all original proof logs and source identities. Raw ARM totals advance
+15to22/74; existing C-model/O2 and physical/compiler interfaces retain their
+separate categories.

@@ -78180,5 +78180,41 @@
       "source-arm64_sim.h.txt": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd"
     },
     "scope": "Complete32bit AUX decoded by numericalhandler/dispatcher/specializedtoken; nativeproducer kind0..3; existinginvalidkind law covers allabove3. All11affectedmodules/root/50audits0/sorryAx0; priorpublicnames and raw15 step retained. RuntimeC and canonicalISA retain definitions; C/physical/compiler interfaces explicit."
+  },
+  "arm64_raw_extrev_conditional_refinement": {
+    "proof": {
+      "process_exit": 0,
+      "module_and_root_exit": 0,
+      "root_sha256": "c08dedfa21216380b9f8595e635c476de4bb7a155bfbe8f114f3fb1243fac057",
+      "source_sha256": "0c95b453a3c60dbfae7ef0baafad878aa42e8b503067c1faa5cbae395b10e086",
+      "sorryAx": 0,
+      "reduction_bridge": 38,
+      "scope": "Raw EXTR/REV/REV16/SXTB/SXTH/SXTW/CNEG and prior15 raw gates; concrete tagged operands, input narrowing, whole condition, width/scalar-tag writeback and full architectural image; native immediate/condition domain, production dispatcher equality and arbitrary unused fields. Independent of B forwarding layout. Entry/C-union/source extraction/compiler/physical origin binding remain explicit."
+    },
+    "operations": [
+      "ARM64_OP_EXTR",
+      "ARM64_OP_REV",
+      "ARM64_OP_REV16",
+      "ARM64_OP_SXTB",
+      "ARM64_OP_SXTH",
+      "ARM64_OP_SXTW",
+      "ARM64_OP_CNEG"
+    ],
+    "raw_operation_count": 22,
+    "new_audits": 14,
+    "total_audits": 54,
+    "archive": "arm-raw-extrev.log.gz",
+    "source_snapshots": {
+      "source-Arm64Extrev.lean.txt": "1c7d14dfeb0d107e97fed285021c9b91e142b04c85b4ff24b9fd2b0a331e78be",
+      "source-Arm64Select.lean.txt": "876850c5f8b86dd4f99f28bb9e2d6e1f9de87280736cf1e514f5990ce4c91500",
+      "source-arm64_cneg.h.txt": "f0b641e9cbbbd985565f45d3a466aec3313b2a05f2d1fd0b82050789e64597df",
+      "source-arm64_extrev.h.txt": "cd5735e626fcf97f2c91cc13e2ccb4e2d2666b01277b1fc7a2ba75f187d3f32f",
+      "source-arm64_sim_local_bpf.h.txt": "9cb5d58f9595124300d5bfd8fdcfdecba53f763e4d9ee34567345dd12cba1c13",
+      "source-Arm64RawRegister.lean.txt": "404adbf2088192068a97ede2cac4c3811097e846fe3ba95fdacd58b8472f1b22",
+      "source-Arm64Dispatcher.lean.txt": "0388b0836263a0b05d0b3460344f83595b0bf0e9933b458675ecfe72d1362b20",
+      "source-AArch64.lean.txt": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789",
+      "source-arm64_sim.h.txt": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd"
+    },
+    "scope": "Raw EXTR/REV/REV16/SXTB/SXTH/SXTW/CNEG and preceding15 gates; actual operand materialization/input narrowing/NZCV condition/widthtagwriteback/completearchitecture. Production dispatcher equality and unused bytefields incl255/unusedIMM retained. Native amount/condition, entry/C extraction/union/physical/compiler interfaces explicit, independent of Bforwarding/calleecomparison."
   }
 }

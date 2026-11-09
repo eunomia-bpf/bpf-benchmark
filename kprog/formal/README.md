@@ -87,6 +87,15 @@ and preserves the native NEG/MVN modifier domains. Complete raw words/tags,
 register aliases/XZR and architectural image compose independently of B layout.
 Entry, C extraction/union and physical/compiler transport remain interfaces.
 
+ARM raw EXTR/REV/REV16/SXTB/SXTH/SXTW/CNEG extends the unified step to22/74.
+Fourteen new laws and40 prior laws audit with module/root0 and sorryAx0.
+Concrete operand/tag materialization, EXTR input narrowing, CNEG input NZCV
+and scalarizing width/tag writes preserve the complete architectural image.
+Production dispatcher equality covers arbitrary unused byte fields, including
+NONE255, and immediate values for the rows that ignore them. Native EXTR
+amount and CNEG alias-condition domains remain explicit. Entry/C extraction/
+union and physical/compiler transport remain interfaces independent of B layout.
+
 ## Specification and proof scope
 
 The reference ISA is defined once in
