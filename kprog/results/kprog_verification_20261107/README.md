@@ -5656,3 +5656,17 @@ and2 new function bytes match the combined124 object. Memory/exclusive remain
 equal, visit advances23 and fault/events are absent. [Original evidence](compiled-rorx.log.gz)
 retains preprocessing, ELF, arrays and proofs. Full defined/undefined flags,
 native register/tag frame, physical ABI and compiler embedding remain explicit.
+
+### x86 ALU read-fault recovery
+
+Five `NativeLinkFinalImage.x86_recovered_*` laws compose the unchanged
+canonical arithmetic, logical and unary steps with registered read recovery.
+Register-writing source faults clear the complete saved GPR; CMP/TEST and
+memory destinations resume with the complete input frame, except recorded PC
+advance. Flags, memory and SIMD stay unchanged; the raw fault event is retained.
+The existing `native-link-final-image-check` passes, using only `propext` and
+`Quot.sound` for these laws. [Original evidence](x86-alu-native-load-recovery.log.gz).
+An invalid BTF read is the explicit raw unreadable-memory premise, not a
+successful zero read. Physical exception/SMAP behavior, exact metadata target,
+C's early failure branch, O2/O3 projection and compiler embedding remain open;
+this does not assert that the physical x86 SMAP case is repaired.

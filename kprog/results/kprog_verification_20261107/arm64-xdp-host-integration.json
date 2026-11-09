@@ -25841,6 +25841,86 @@
       "stable_input_count": 224
     }
   },
+  "x86_alu_native_load_recovery": {
+    "actual_existing_target_exit": 0,
+    "archive_block_sha256": "6fab78c19dc7fb16e5b37c275d3fc7c0ee1f175d6a3931f109b551cc7ec0be28",
+    "archive_file": "kprog/results/kprog_verification_20261107/x86-alu-native-load-recovery.log.gz",
+    "archive_marker": "=== X86 ALU NATIVE READ FAULT RECOVERY V1 ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/x86-alu-recovery-check.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-alu-recovery-check.launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-alu-recovery-check.log": {
+        "bytes": 23386,
+        "sha256": "602304b96ff40210754a46959cf6c5adbc4953ad051a0c992b230481f30c994e"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-alu-recovery-check.py": {
+        "bytes": 395,
+        "sha256": "ad4c764b0658b125b0e0daad91ebba0012ff48e8070159a3a8a553f65060200e"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-alu-recovery.base.lean": {
+        "bytes": 34879,
+        "sha256": "15a4523353d78cd11fd8473a42758261fdfd50b6b4f4150b9af88d5ee06e768f"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/x86-alu-recovery.lean": {
+        "bytes": 4680,
+        "sha256": "7748f409eaec071fbea44e92c604fbd44743ab09716d2bed471bb4c8a69dc6ea"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/Memory.lean": {
+        "bytes": 3740,
+        "sha256": "da656b585c2f51d1cf93f1361a084f79da8e6954ee301a3afba1178fc33542d0"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/X86.lean": {
+        "bytes": 89883,
+        "sha256": "c43ea2e13d9cfd72c8cfdd57fe9e519b0d070a1e4bf24ed124543092dd082c9d"
+      },
+      "/workspaces/repository/kprog/formal/lean-toolchain": {
+        "bytes": 25,
+        "sha256": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea"
+      },
+      "/workspaces/repository/kprog/tv/BPFPlatform.lean": {
+        "bytes": 21703,
+        "sha256": "3f0fa34feb680209dd97e112e2fd15da06135e64d1797cb3c4a5b15701a483b1"
+      },
+      "/workspaces/repository/kprog/tv/Makefile": {
+        "bytes": 45135,
+        "sha256": "550f21effc4712b1b0c5b5e3b0100753b7be50641777f17af8856ddcfc30e146"
+      },
+      "/workspaces/repository/kprog/tv/NativeLinkFinalImage.lean": {
+        "bytes": 39559,
+        "sha256": "014476c22c82559f1c8e4dca5c1a26ab766acb4b2f2e05aa2b9487a23a5185d5"
+      }
+    },
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "existing_target": "make -C kprog/tv native-link-final-image-check",
+    "reference_invalid_btf_read": "Premise is canonical readMemory returning .error (.read address width.bytes), including an invalid BTF-pointer read represented as unreadable memory. Raw ISA is unchanged and still faults. Recovery is a separate registered platform profile; no successful zero-valued read event is invented.",
+    "reference_specification_unchanged": true,
+    "remaining_interfaces": [
+      "Physical exception class/page permissions/SMAP guard must actually invoke this handler; no claim that the open x86 SMAP case is repaired.",
+      "The producer must register the exact site/length and choose none for memory destinations/CMP/TEST, or the complete saved GPR for register-writing forms.",
+      "C production failure choice must exit before normal ALU/flag/writeback and agree with raw invalid read; successful normal path and actual compiled body embedding remain to be related.",
+      "O2/O3 native/B register, memory and diagnostic-event projection and verifier correspondence remain premises."
+    ],
+    "runtime_admission_additions": 0,
+    "scope": "Once-for-all canonical x86 arithmetic/logical/unary memory-read faults, arbitrary scalar width/kind/register slice/input state/address/actual recorded length. Register destination clears the whole GPR, while CMP/TEST select resume-only. Memory-destination faults retain every input component except PC, before second-operand access, memory write or flags update. Raw diagnostic fault event remains; terminal fault becomes none under existing recovery profile.",
+    "source_head": "61c85aa5febf1b6bd8acf8a37104469d90faa32a",
+    "theorems": [
+      "KProgTV.NativeLinkFinalImage.x86_recovered_arithmetic_source",
+      "KProgTV.NativeLinkFinalImage.x86_recovered_logical_source",
+      "KProgTV.NativeLinkFinalImage.x86_recovered_arithmetic_destination",
+      "KProgTV.NativeLinkFinalImage.x86_recovered_logical_destination",
+      "KProgTV.NativeLinkFinalImage.x86_recovered_unary_destination"
+    ],
+    "utc": "2026-11-09T05:25:20.883001+00:00"
+  },
   "x86_alu_source_token": {
     "c_domain": "Eight native payloads and39 legal payload/raw-width pairs, all16 GPR destinations, heap/RSP/STACK-alias bases, all64 six-flag seeds,19 operand boundaries and optional index/four scales with +/-16 displacements. RAX uses the full19x19 operand product; the other15 destinations use19x3 source-boundary combinations including aliased input representations. Actual direct/interpreter bodies retain the same complete512B heap/private stack and all GPR numeric/raw/tag cells; independent real CPU operations check the result, every defined flag and scalarizing write. All address inputs precede aliased destination writeback. IMUL uses its native16/32/64 domain and CF/OF defined mask; logical AF retains the reference definedness mask.",
     "diagnostics": "Three new numeric-frame laws passed first. Dispatcher elaboration reductions and constructor binder diagnostics are retained with the final default build and13 successful axiom audits. The final C source/dependencies stayed byte-exact through its successful run.",

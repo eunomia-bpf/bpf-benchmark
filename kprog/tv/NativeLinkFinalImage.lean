@@ -654,3 +654,78 @@ end KProgTV.NativeLinkFinalImage
 #print axioms KProgTV.NativeLinkFinalImage.arm64_pair_resume_first_zero
 #print axioms KProgTV.NativeLinkFinalImage.arm64_pair_resume_second_zero
 #print axioms KProgTV.NativeLinkFinalImage.arm64_pair_resume_frame
+
+namespace KProgTV.NativeLinkFinalImage
+open KProgFormal.Reference
+
+/-- A failed register-destination arithmetic read happens before flags or
+writeback. CMP has no GPR destination; other forms clear the whole saved GPR,
+including a byte/word destination. Physical metadata must select this target. -/
+theorem x86_recovered_arithmetic_source (state : X86.State) (width : X86.ScalarWidth)
+    (kind : X86.ArithmeticKind) (destination : X86.RegisterSlice)
+    (address next : Word) (length : Nat)
+    (fault : readMemory state.memory address width.bytes = .error (.read address width.bytes)) :
+    let target := if kind = .compare then none else some destination.reg
+    recoverRead (x86LoadResume target length)
+      (X86.arithmeticStep width kind (.register destination) (.memory address) next state) =
+      ⟨x86LoadResume target length state,[.fault (.read address width.bytes)],none⟩ := by
+  simp [recoverRead,X86.arithmeticStep,X86.scalarRead,X86.ScalarDestination.source,
+    X86.readSource,fault]
+
+/-- TEST, like CMP, resumes without clearing any GPR. Logical writes clear
+only their physical destination GPR; incoming flags survive the failed read. -/
+theorem x86_recovered_logical_source (state : X86.State) (width : X86.ScalarWidth)
+    (kind : X86.LogicKind) (destination : X86.RegisterSlice)
+    (address next : Word) (length : Nat)
+    (fault : readMemory state.memory address width.bytes = .error (.read address width.bytes)) :
+    let target := if kind = .test then none else some destination.reg
+    recoverRead (x86LoadResume target length)
+      (X86.logicalStep width kind (.register destination) (.memory address) next state) =
+      ⟨x86LoadResume target length state,[.fault (.read address width.bytes)],none⟩ := by
+  simp [recoverRead,X86.logicalStep,X86.scalarRead,X86.ScalarDestination.source,
+    X86.readSource,fault]
+
+/-- A memory-destination arithmetic read fault occurs before every write,
+flag update or second operand access. Resume-only retains the entire input
+state except the recorded PC increment, for both immediate and register RHS. -/
+theorem x86_recovered_arithmetic_destination (state : X86.State) (width : X86.ScalarWidth)
+    (kind : X86.ArithmeticKind) (source : X86.ScalarSource)
+    (address next : Word) (length : Nat)
+    (fault : readMemory state.memory address width.bytes = .error (.read address width.bytes)) :
+    recoverRead (x86LoadResume none length)
+      (X86.arithmeticStep width kind (.memory address) source next state) =
+      ⟨{state with pc := state.pc + BitVec.ofNat 64 length},
+        [.fault (.read address width.bytes)],none⟩ := by
+  simp [recoverRead,X86.arithmeticStep,X86.scalarRead,X86.ScalarDestination.source,
+    X86.readSource,fault,x86LoadResume]
+
+/-- Memory-destination logical and TEST reads share the same complete
+resume-only frame and preserve the raw diagnostic fault event. -/
+theorem x86_recovered_logical_destination (state : X86.State) (width : X86.ScalarWidth)
+    (kind : X86.LogicKind) (source : X86.ScalarSource)
+    (address next : Word) (length : Nat)
+    (fault : readMemory state.memory address width.bytes = .error (.read address width.bytes)) :
+    recoverRead (x86LoadResume none length)
+      (X86.logicalStep width kind (.memory address) source next state) =
+      ⟨{state with pc := state.pc + BitVec.ofNat 64 length},
+        [.fault (.read address width.bytes)],none⟩ := by
+  simp [recoverRead,X86.logicalStep,X86.scalarRead,X86.ScalarDestination.source,
+    X86.readSource,fault,x86LoadResume]
+
+/-- Unary memory ALU recovery commits neither the operand nor flags. This
+covers every canonical unary kind and arbitrary existing register/SIMD/memory. -/
+theorem x86_recovered_unary_destination (state : X86.State) (width : X86.ScalarWidth)
+    (kind : X86.UnaryKind) (address next : Word) (length : Nat)
+    (fault : readMemory state.memory address width.bytes = .error (.read address width.bytes)) :
+    recoverRead (x86LoadResume none length)
+      (X86.unaryStep width kind (.memory address) next state) =
+      ⟨{state with pc := state.pc + BitVec.ofNat 64 length},
+        [.fault (.read address width.bytes)],none⟩ := by
+  simp [recoverRead,X86.unaryStep,X86.scalarRead,X86.ScalarDestination.source,
+    X86.readSource,fault,x86LoadResume]
+end KProgTV.NativeLinkFinalImage
+#print axioms KProgTV.NativeLinkFinalImage.x86_recovered_arithmetic_source
+#print axioms KProgTV.NativeLinkFinalImage.x86_recovered_logical_source
+#print axioms KProgTV.NativeLinkFinalImage.x86_recovered_arithmetic_destination
+#print axioms KProgTV.NativeLinkFinalImage.x86_recovered_logical_destination
+#print axioms KProgTV.NativeLinkFinalImage.x86_recovered_unary_destination
