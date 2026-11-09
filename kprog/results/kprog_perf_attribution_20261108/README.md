@@ -804,6 +804,53 @@ That also reframes the current-ABI blocker: the blob-node and link-plan
 requirements are two halves of the same interface change, and a matching
 loader/transfer pair is what both need.
 
+### Component walk, step 3: the native objects. They are not what moved
+
+Step 3 keeps the 2026-05-29 kernel, loader and link path and takes only the
+current native objects. Run `x86_kvm_corpus_20261109_192548_978152`, status
+ok, 3 samples per arm:
+
+| arm | invocations | ns per invocation | pps | `jited` |
+| --- | ---: | ---: | ---: | ---: |
+| JIT | 1,313,542,109 | 174.7 | 806,184 | 13,641 |
+| native | 1,419,423,042 | **146.8** | 879,563 | **10,196** |
+
+1.190x per invocation, 1.091x throughput, native doing 1.08x the work.
+
+The decisive detail is the last column: the current objects produce a
+**10,196-byte** native program, the same size as the 2026-05-29 objects
+produced in step 1. The object files themselves differ (68,048 against
+67,928 bytes, different hashes), but the linked native body is the same
+code. That confirms from the object end what this report already recorded
+from the source end: Katran's native code did not move.
+
+#### The whole walk, one component at a time
+
+| step | what changed from 2026-05-29 | run | JIT ns | native ns | speedup |
+| --- | --- | --- | ---: | ---: | ---: |
+| 0 | nothing (the definition itself) | `..._153901_098451` | 176.5 | 144.8 | 1.219x |
+| 1 | the kernel | `..._181234_983977` | 168.7 | 136.4 | **1.236x** |
+| 2 | + `native-link` | `..._190057_967714` | 170.1 | does not load | -- |
+| 3 | the native objects only | `..._192548_978152` | 174.7 | 146.8 | 1.190x |
+
+So, answering the operator's second question directly: **no single component
+of the 2026-05-29 setup moves Katran's cost per invocation in a way that
+explains the loss.** The kernel shifts both arms about 4% and leaves the
+ratio; the objects are the same code; the link path is the only component
+whose interface changed, and it changes compatibility rather than cost.
+
+The measured spread across steps 0, 1 and 3 for the ratio is 1.190x to
+1.236x, against the archive's 1.102x and the current tree's earlier 0.86x to
+1.02x measurements. Two conclusions follow, and they are stated separately
+because only the first is settled by these runs:
+
+- **Settled:** on the 2026-05-29 definition, run correctly with the shim
+  attached, Katran reproduces. The 0.86x to 1.02x range came from runs whose
+  shim was off, not from the native code.
+- **Open:** why the *current* tree, measured the same way, gave 0.86x to
+  1.02x is still not attributed to a component, because the current tree's
+  native arm cannot load until the loader and module agree.
+
 ### What this means for the candidates
 
 The candidates act on the native path only, so they can recover at most the
