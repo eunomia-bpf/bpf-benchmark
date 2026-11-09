@@ -7,8 +7,8 @@
   "service_existing_cases": 9,
   "service_exit": 0,
   "worker_compile_exit": 0,
-  "kernel_state": "incremental build active",
-  "null_btf_fixture": "queued after actual kernel/module build",
+  "kernel_state": "ordinary modules and combined symbol versions refreshing incrementally",
+  "null_btf_fixture": "matched-module actual guest queued, original38 follows",
   "production_paths": [
     "kinsn/module/include/native_lab_trusted_wire.h",
     "kinsn/module/x86/bpf_x86_native_lab.c",
@@ -32,5 +32,14 @@
     "implicit and multiple accesses",
     "vector destination",
     "read-modify-write fault prefix"
-  ]
+  ],
+  "kernel_compile_exit": 0,
+  "external_module_compile_exit": 0,
+  "fixture_native_module_cpp_exit": 0,
+  "initial_guest": {
+    "commit": "a081be8885cb3da81703f85e97f6bfcf656c459f",
+    "guest_exit": 1,
+    "stage": "module symbol-version resolution",
+    "native_executions": 0
+  }
 }
