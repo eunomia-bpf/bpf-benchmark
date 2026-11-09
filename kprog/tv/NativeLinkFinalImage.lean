@@ -548,3 +548,109 @@ theorem x86_encoded_handler_refines (length : BitVec 16)
 
 end KProgTV.NativeLinkFinalImage
 #print axioms KProgTV.NativeLinkFinalImage.x86_encoded_handler_refines
+
+namespace KProgTV.NativeLinkFinalImage
+open KProgFormal.Reference
+
+/-- Native ARM exception metadata uses marker22, pair23, first31:27 and
+second20:16. The native branch precedes stock BPF arena/DONT_CLEAR logic. -/
+def arm64NativeFixup (first : BitVec 5) (second : Option (BitVec 5)) : BitVec 32 :=
+  (1 <<< 22) ||| (first.zeroExtend 32 <<< 27) |||
+    match second with
+    | none => 0
+    | some register => (1 <<< 23) ||| (register.zeroExtend 32 <<< 16)
+
+theorem arm64_fixup_native (first : BitVec 5) (second : Option (BitVec 5)) :
+    (arm64NativeFixup first second).getLsbD 22 = true := by
+  cases second <;> unfold arm64NativeFixup <;> bv_decide
+
+theorem arm64_fixup_first (first : BitVec 5) (second : Option (BitVec 5)) :
+    ((arm64NativeFixup first second >>> 27).setWidth 5) = first := by
+  cases second <;> unfold arm64NativeFixup <;> bv_decide
+
+theorem arm64_fixup_second (first second : BitVec 5) :
+    ((arm64NativeFixup first (some second) >>> 16).setWidth 5) = second := by
+  unfold arm64NativeFixup
+  bv_decide
+
+theorem arm64_fixup_pair (first : BitVec 5) (second : Option (BitVec 5)) :
+    (arm64NativeFixup first second).getLsbD 23 = second.isSome := by
+  cases second <;> simp only [arm64NativeFixup,Option.isSome] <;> bv_decide
+
+/-- Native metadata does not borrow the stock signed arena-offset field. -/
+theorem arm64_fixup_low_zero (first : BitVec 5) (second : Option (BitVec 5)) :
+    (arm64NativeFixup first second).setWidth 16 = 0 := by
+  cases second <;> unfold arm64NativeFixup <;> bv_decide
+
+def arm64RegisterField (register : BitVec 5) : AArch64.Register :=
+  ⟨register.toNat,register.isLt⟩
+
+/-- Complete raw fault-state recovery for one/two native GPR destinations.
+Register31 discards writes; both writes leave SP/memory/flags/vector/monitor
+and other input fields as they were in that actual fault prefix. -/
+def arm64PairResume (first : BitVec 5) (second : Option (BitVec 5))
+    (state : AArch64.State) : AArch64.State :=
+  let cleared := AArch64.writeReg state (arm64RegisterField first) 0
+  { (match second with
+      | none => cleared
+      | some register => AArch64.writeReg cleared (arm64RegisterField register) 0) with
+    pc := state.pc+4 }
+
+/-- The native marker dispatch is modeled separately from the stock branch.
+A physical saved-frame/layout/exception-table relation instantiates it. -/
+def arm64NativeHandler (fixup : BitVec 32) (state : AArch64.State) : Option AArch64.State :=
+  if fixup.getLsbD 22 then
+    let cleared := AArch64.writeReg state (arm64RegisterField ((fixup >>> 27).setWidth 5)) 0
+    let cleared := if fixup.getLsbD 23 then
+      AArch64.writeReg cleared (arm64RegisterField ((fixup >>> 16).setWidth 5)) 0
+      else cleared
+    some { cleared with pc := state.pc+4 }
+  else none
+
+theorem arm64_encoded_handler_refines (first : BitVec 5) (second : Option (BitVec 5))
+    (state : AArch64.State) :
+    arm64NativeHandler (arm64NativeFixup first second) state =
+      some (arm64PairResume first second state) := by
+  unfold arm64NativeHandler
+  simp only [arm64_fixup_native,Bool.true_eq,ite_true,arm64_fixup_first,arm64_fixup_pair]
+  cases second with
+  | none => rfl
+  | some second =>
+      simp only [arm64_fixup_second]
+      rfl
+
+/-- A single destination composes with the already proved scalar/X5/XZR
+recovery model, without stock BPF's DONT_CLEAR5 alias. -/
+theorem arm64_pair_resume_single (first : BitVec 5) (state : AArch64.State) :
+    arm64PairResume first none state =
+      arm64LoadResume (some (arm64RegisterField first)) state := rfl
+
+theorem arm64_pair_resume_first_zero (first : BitVec 5) (second : Option (BitVec 5))
+    (state : AArch64.State) (physical : first.toNat < 31) :
+    (arm64PairResume first second state).gpr ⟨first.toNat,physical⟩ = 0 := by
+  cases second <;> simp [arm64PairResume,AArch64.writeReg,arm64RegisterField]
+
+theorem arm64_pair_resume_second_zero (first second : BitVec 5)
+    (state : AArch64.State) (physical : second.toNat < 31) :
+    (arm64PairResume first (some second) state).gpr ⟨second.toNat,physical⟩ = 0 := by
+  simp [arm64PairResume,AArch64.writeReg,arm64RegisterField]
+
+theorem arm64_pair_resume_frame (first : BitVec 5) (second : Option (BitVec 5))
+    (state : AArch64.State) :
+    (arm64PairResume first second state).memory = state.memory ∧
+    (arm64PairResume first second state).sp = state.sp ∧
+    (arm64PairResume first second state).flags = state.flags ∧
+    (arm64PairResume first second state).pc = state.pc+4 := by
+  cases second <;> exact ⟨rfl,rfl,rfl,rfl⟩
+
+end KProgTV.NativeLinkFinalImage
+#print axioms KProgTV.NativeLinkFinalImage.arm64_fixup_native
+#print axioms KProgTV.NativeLinkFinalImage.arm64_fixup_first
+#print axioms KProgTV.NativeLinkFinalImage.arm64_fixup_second
+#print axioms KProgTV.NativeLinkFinalImage.arm64_fixup_pair
+#print axioms KProgTV.NativeLinkFinalImage.arm64_fixup_low_zero
+#print axioms KProgTV.NativeLinkFinalImage.arm64_encoded_handler_refines
+#print axioms KProgTV.NativeLinkFinalImage.arm64_pair_resume_single
+#print axioms KProgTV.NativeLinkFinalImage.arm64_pair_resume_first_zero
+#print axioms KProgTV.NativeLinkFinalImage.arm64_pair_resume_second_zero
+#print axioms KProgTV.NativeLinkFinalImage.arm64_pair_resume_frame

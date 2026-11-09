@@ -161,6 +161,10 @@ x86 exception-table encoding also composes saved-GPR offsets, fixup fields and
 relative final-PC entries with whole-register/PC recovery. Actual frame/site/table
 lifetime and B/physical fault correspondence remain explicit.
 
+ARM native-marker and paired-register fields likewise compose with whole-X/PC4
+recovery, X5/XZR semantics and the actual raw fault state. Production site/frame
+and B ordered-prefix correspondence remain explicit.
+
 ## Layout
 
 - [Reference/](KProgFormal/Reference/): canonical ISA and memory specifications.

@@ -873,6 +873,162 @@
       "root_git_blobs": 175
     }
   },
+  "arm64_native_exception_table_recovery": {
+    "actual_existing_integration_exit": 0,
+    "actual_private_proof_exit": 0,
+    "archive_block_sha256": "8cab3e76c79b2ff63d0a7570aea61a2d7e99a287f83e81ad30925df673ae77a6",
+    "archive_file": "kprog/results/kprog_verification_20261107/arm-native-exception-table-recovery.log.gz",
+    "archive_marker": "=== ARM NATIVE EXCEPTION TABLE RECOVERY V1 ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/armextable-integrated-launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/armextable-integrated.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/armextable-integrated.log": {
+        "bytes": 22250,
+        "sha256": "d21a766283b57d46fba38e767c23a4c23af2c654c7c604473c837b7236b52966"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/armextable-integrated.sh": {
+        "bytes": 262,
+        "sha256": "6970e18ecc91c29ccba00f1885ea167295b036bd5718945ff8cf60227976d6fa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/armextable-launch.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/armextable-proof.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/armextable-proof.exit.attempt1": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/armextable-proof.log": {
+        "bytes": 5243,
+        "sha256": "b70a951cbcbcd7f614eaf5099413b5e6a75edce9d9127951c1ed1f12783843b6"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/armextable-proof.log.attempt1": {
+        "bytes": 10840,
+        "sha256": "f7fd7188492bce49239c57eb78a23c78984c305c60941c68493b0f5242f5e4f6"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/armextable-proof.sh": {
+        "bytes": 423,
+        "sha256": "a17fac98a28a1c17956de96ad1f9e1a5a859909b6c7c3bbc949b97db7b111d8b"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/armextable-work/NativeLinkFinalImage.lean": {
+        "bytes": 34879,
+        "sha256": "15a4523353d78cd11fd8473a42758261fdfd50b6b4f4150b9af88d5ee06e768f"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/armextable-work/NativeLinkFinalImage.lean.attempt1": {
+        "bytes": 34785,
+        "sha256": "75d65af83a8865df9e4390d0195307bcf2b9d9889cd26f8b283966919071876f"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/armextable-work/bpf_arm64_native_lab.c.source-snapshot": {
+        "bytes": 24350,
+        "sha256": "3a0a35afea343ee625b3eac8b6c31105235ac8f8c565fe13c95baf20cfa5ebcb"
+      },
+      "/workspaces/.agent-state/kprog-lanes/V/armextable-work/native-proof-regions.patch.source-snapshot": {
+        "bytes": 16801,
+        "sha256": "5e8cd1628a9085a38fee75bf9e373316c5aac41fc6419ebcbce4e374828c7379"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/AArch64.lean": {
+        "bytes": 66804,
+        "sha256": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789"
+      },
+      "/workspaces/repository/kprog/formal/KProgFormal/Reference/Memory.lean": {
+        "bytes": 3740,
+        "sha256": "da656b585c2f51d1cf93f1361a084f79da8e6954ee301a3afba1178fc33542d0"
+      },
+      "/workspaces/repository/kprog/formal/lean-toolchain": {
+        "bytes": 25,
+        "sha256": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea"
+      },
+      "/workspaces/repository/kprog/tv/Makefile": {
+        "bytes": 45135,
+        "sha256": "550f21effc4712b1b0c5b5e3b0100753b7be50641777f17af8856ddcfc30e146"
+      },
+      "/workspaces/repository/kprog/tv/NativeLinkFinalImage.lean": {
+        "bytes": 34879,
+        "sha256": "15a4523353d78cd11fd8473a42758261fdfd50b6b4f4150b9af88d5ee06e768f"
+      },
+      "/workspaces/repository/vendor/linux-framework/arch/arm64/include/asm/ptrace.h": {
+        "bytes": 9532,
+        "sha256": "00607db99e25299e448cf467620778f6a3e1f4c0ca85f53ac6ad2f8c3e3de9f8"
+      }
+    },
+    "derived_regenerable_olean_caches": [
+      {
+        "bytes": 29512424,
+        "path": "/workspaces/.agent-state/kprog-lanes/V/armextable-work/NativeLinkFinalImage.olean",
+        "sha256": "68c475567254452c2e344ea6fd44c721a079093eda712a1e5301b17fafcc3a15"
+      }
+    ],
+    "encoding": {
+      "first_register_bits": "31:27",
+      "native_marker_bit": 22,
+      "pair_bit": 23,
+      "second_register_bits": "20:16",
+      "unused_arena_offset_low16": 0
+    },
+    "existing_integration_command": "make -C kprog/tv native-link-final-image-check",
+    "native_executions": 0,
+    "premises": [
+      "A production module and native kernel-handler branch must implement the pinned marker/field layout and precede stock arena/DONT_CLEAR handling. Working snapshots, if not yet published, are explicitly marked; their build/publication are A-owned and not inferred from proof exit0.",
+      "Physical ARM saved-frame X0..X30 representation is the native C regs array; destination31 means discard. NativeX5 is handled as an ordinary index, not stock BPF DONT_CLEAR5.",
+      "Actual transported first destination and optional paired second match the same copied instruction; producer scalar/literal/pair/exclusive/LSE/vector classification and complete final-site coverage remain source/canonical-field interfaces.",
+      "Actual final table relative address/lookup/registration/order and code/table lifetime remain implementation premises; the common signed32 relative-address law is reusable under representable placement.",
+      "This handler applies to the actual raw fault state, retaining any prior committed fault prefix. B protected-read outcome arms and event projection/O3 checked-event predicate, base writeback, vector resume-only, pair/REP/exclusive/atomic prefixes and physical exception-class behavior remain open."
+    ],
+    "prior_reference_component": "registered_load_recovery_reference",
+    "production_and_guest_scope": "No full kernel-build, installed native table, actual NULL guest execution or complete native/B fault-refinement claim is added by V here.",
+    "result": "The native marker is always set, pair marker exactly matches optional second destination, both5-bit register fields decode exactly and low16 stock arena offset bits remain zero. Marker dispatch before stock BPF implements complete paired full-GPR zero-and-PC4 recovery. Register31 discards; single destination composes with prior scalar/nativeX5/XZR model, and each physical first/second register is0 afterwards. Raw memory/SP/flags and every other fault-state field retain their actual value apart from selected GPRs/PC.",
+    "runtime_admission_additions": 0,
+    "scope": "Ten universal conditional ARM native-marker/pair fixup decoding and whole-GPR recovery components. No edits to A production files; physical/B correspondence remains explicit.",
+    "source_pins": {
+      "kprog/formal/KProgFormal/Reference/AArch64.lean": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789",
+      "kprog/formal/KProgFormal/Reference/Memory.lean": "da656b585c2f51d1cf93f1361a084f79da8e6954ee301a3afba1178fc33542d0",
+      "kprog/formal/lean-toolchain": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea",
+      "kprog/tv/Makefile": "550f21effc4712b1b0c5b5e3b0100753b7be50641777f17af8856ddcfc30e146",
+      "kprog/tv/NativeLinkFinalImage.lean": "15a4523353d78cd11fd8473a42758261fdfd50b6b4f4150b9af88d5ee06e768f",
+      "vendor/linux-framework/arch/arm64/include/asm/ptrace.h": "00607db99e25299e448cf467620778f6a3e1f4c0ca85f53ac6ad2f8c3e3de9f8"
+    },
+    "source_snapshots": {
+      "kinsn/module/arm64/bpf_arm64_native_lab.c": {
+        "bytes": 24350,
+        "published_commit": null,
+        "sha256": "3a0a35afea343ee625b3eac8b6c31105235ac8f8c565fe13c95baf20cfa5ebcb",
+        "snapshot_file": "/workspaces/.agent-state/kprog-lanes/V/armextable-work/bpf_arm64_native_lab.c.source-snapshot",
+        "status": "working-source-snapshot; actual production publication/build correspondence pending"
+      },
+      "kprog/tv/native-proof-regions.patch": {
+        "bytes": 16801,
+        "published_commit": null,
+        "sha256": "5e8cd1628a9085a38fee75bf9e373316c5aac41fc6419ebcbce4e374828c7379",
+        "snapshot_file": "/workspaces/.agent-state/kprog-lanes/V/armextable-work/native-proof-regions.patch.source-snapshot",
+        "status": "working-source-snapshot; actual production publication/build correspondence pending"
+      }
+    },
+    "status": "partial-universal-component",
+    "theorems": [
+      "KProgTV.NativeLinkFinalImage.arm64_fixup_native",
+      "KProgTV.NativeLinkFinalImage.arm64_fixup_first",
+      "KProgTV.NativeLinkFinalImage.arm64_fixup_second",
+      "KProgTV.NativeLinkFinalImage.arm64_fixup_pair",
+      "KProgTV.NativeLinkFinalImage.arm64_fixup_low_zero",
+      "KProgTV.NativeLinkFinalImage.arm64_encoded_handler_refines",
+      "KProgTV.NativeLinkFinalImage.arm64_pair_resume_single",
+      "KProgTV.NativeLinkFinalImage.arm64_pair_resume_first_zero",
+      "KProgTV.NativeLinkFinalImage.arm64_pair_resume_second_zero",
+      "KProgTV.NativeLinkFinalImage.arm64_pair_resume_frame"
+    ],
+    "trust": "Bitfield/encoded-handler laws use the stated BV reduction bridge (propext/Classical.choice/Quot.sound, and Lean.ofReduceBool where reported). Single/frame laws use propext and zeroing laws use propext/Quot.sound. No sorryAx or new axioms.",
+    "utc": "2026-11-09T00:12:03.973390+00:00"
+  },
   "arm64_return_token_body": {
     "c_domain": "All32 native Rn fields, all256 tag bytes,12 raw target boundaries, empty/one/four literal target tables, skb and ordinary exit profiles and all16 NZCV patterns. GCC scope cleanup observes actual production macros at return; the unsupported handler records the frame before the explicit refusal exit. Whole GPR/tag/vector/NZCV state, private LR scratch, whole context canaries, exactly two CB cells, materialized low32 X0 and entry-input call counts are checked. The emitter check covers32 explicit native operands and defaultX30 at four source PCs.",
     "diagnostics": "Initial oracle control used tag2; final oracle binds STACK tag4 and a separate setjmp invocation scope. Final accepted source/run is identified by its source pins, case totals and exit0.",
@@ -18956,6 +19112,7 @@
         "sha256": "c1d926986c02b5f8741251b5a45043c0202d6f119470f0a5aed950bbcdb909f7"
       }
     ],
+    "encoded_arm64_followup": "arm64_native_exception_table_recovery",
     "encoded_x86_followup": "x86_exception_table_recovery",
     "existing_integration_command": "make -C kprog/tv native-link-final-image-check",
     "make_change": "Existing native-link-final-image-check builds the newly imported canonical AArch64 dependency; no new target, runtime check or admission gate.",

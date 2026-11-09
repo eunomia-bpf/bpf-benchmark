@@ -5518,3 +5518,24 @@ installed outcomes and their annotation discrepancy stay attributed to their
 original kernel. Source-record hashes and all four outcomes are retained under
 `aligned_arm_nullable_lsm_qualification`. This is load-only qualification,
 not native exception recovery execution or complete physical entry/O3 proof.
+
+### ARM native marker and paired exception recovery
+
+Ten universal laws decode native marker22, pair23 and the first31:27/second20:16
+register fields, leaving the low16 stock arena-offset bits zero. The native
+handler branch implements complete one/two-register zeroing and PC4 advance
+from the actual fault state. Register31 discards; the single-register law
+composes with the prior nativeX5/XZR scalar model. Other fault-state memory,
+SP, flags, vector and monitor fields remain. Existing
+`native-link-final-image-check` passes. [Original evidence](arm-native-exception-table-recovery.log.gz)
+retains failed/passing proof attempts and exact A module/patch snapshots, marked
+by their actual working/published status. A owns production changes and builds;
+proof exit0 does not establish their physical adoption or guest execution.
+
+Actual decoded first/paired destinations and full site coverage, saved-frame
+mapping, native marker precedence, final table address/lookup/registration/
+lifetime, physical exception class and B fault-arm/ordered-prefix relations
+remain explicit. This handles the existing raw fault state; it does not discard
+earlier successful accesses or assume all pair/writeback/exclusive prefixes are
+identical to a scalar failure. The O4 row remains partial, with operation/token
+and replay totals unchanged. No runtime check or new build target is added.
