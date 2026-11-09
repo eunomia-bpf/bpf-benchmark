@@ -1,0 +1,49 @@
+{
+  "source_commit": "77c02c3083a3c527815acaca0453c34db53df081",
+  "change": "Clang native register allocation budget8, retaining original source and32dad inline/division flags; emitted register use is recorded",
+  "objects": [
+    {
+      "object": "balancer.native.o",
+      "sha256": "ce93bbecfbd5950ad7c76494d99bb50336a79daa795b96ffb31faa7b1d9d51d4",
+      "source_sha256": "4009c04a4cfa727545a2973d069cf3bed65691f4e9b6873869e561d9ce4128c9",
+      "text_symbols": [
+        "0000000000000000 00000000000025e5 T balancer_ingress"
+      ],
+      "executable_bytes": 9701
+    },
+    {
+      "object": "healthchecking.native.o",
+      "sha256": "e6b8b6b538e15b55d3bbc514a0f000ca62367ed25c1113736cc9fc15caa961f3",
+      "source_sha256": "4ee393ef94b1644685090400e248ccdfbfb67c99cea641cadd310c9c0af6a8bd",
+      "text_symbols": [
+        "0000000000000000 0000000000000554 T healthcheck_encap"
+      ],
+      "executable_bytes": 1364
+    },
+    {
+      "object": "healthchecking_ipip.native.o",
+      "sha256": "6da37384aafa243157c06586051c764bc0a39c4d38ce1206b3509331a47c4f05",
+      "source_sha256": "eec3c4e46f6df50194006b7dff8715af97b82ca7a9993b63d4f4e97ab9f9b10a",
+      "text_symbols": [
+        "0000000000000000 00000000000001d8 T healthcheck_encap"
+      ],
+      "executable_bytes": 472
+    },
+    {
+      "object": "xdp_root.native.o",
+      "sha256": "1ff98b28a12013d4e076079c71f016ad629ea938f4d625d3b2761c3bd59420e4",
+      "source_sha256": "02131e8cf7452aa4886bff20cd245d5f0dbc69fd22fe1193e93447b898ec51fe",
+      "text_symbols": [
+        "0000000000000000 000000000000005e T xdp_root"
+      ],
+      "executable_bytes": 94
+    }
+  ],
+  "plugin_sha256": "4fd7ff34ecca28c71bfa2febf5ac13a887638720cc943c583bc688368f22e301",
+  "callee_register_instruction_counts": {
+    "healthchecking.native.o": 0,
+    "balancer.native.o": 0,
+    "healthchecking_ipip.native.o": 0,
+    "xdp_root.native.o": 0
+  }
+}
