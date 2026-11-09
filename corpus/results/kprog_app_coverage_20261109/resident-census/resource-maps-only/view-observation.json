@@ -1,0 +1,2118 @@
+{
+  "objects": 18,
+  "resident_instances": 274,
+  "recovered_instances": 13,
+  "all_objects_opened": false,
+  "native_execution_requests": 0,
+  "bpf_program_load_calls": 0,
+  "programs": [
+    {
+      "source": "/var/tmp/kprog-tmp/A/resident-census/bpf-resources/34c994c52804c7d771f69c16aa16299d61210d85753e58e185ab00c7fcd0947e.bpf.o",
+      "source_sha256": "34c994c52804c7d771f69c16aa16299d61210d85753e58e185ab00c7fcd0947e",
+      "application": "bcc/set",
+      "resident_instances": 4,
+      "original_open_errno": 0,
+      "adapted_open_errno": 0,
+      "globalized_entries": [],
+      "resource_sha256": "f00722cbb121091f0dacf4351cecdc7002efe043c075e730b42658690507771a",
+      "preserved_sections": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracepoint/syscalls/sys_enter_open": "6e353c725f7e1e027b2e4c068e6cc155ce786fb5510dfb53cd7a52d022df5d63",
+        "tracepoint/syscalls/sys_enter_openat": "2932568912b60f700bdf3a1939e4fa5df6cc50b219fc4a8084ed99357b75655a",
+        "tracepoint/syscalls/sys_exit_open": "d38ffffbb6fa6edb365f90cc685c7bb26268085cf5012c8eccace2e5fecf6a57",
+        "tracepoint/syscalls/sys_exit_openat": "d38ffffbb6fa6edb365f90cc685c7bb26268085cf5012c8eccace2e5fecf6a57",
+        ".rodata": "dd46c3eebb1884ff3b5258c0a2fc9398e560a29e0780d4b53869b6254aa46a96",
+        ".maps": "d4817aa5497628e7c77e6b606107042bbba3130888c5f47a375e6179be789fbb",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a",
+        ".BTF": "08ba56f1fb17757f4fceb15a625427bf30aff8120a8891ac4531d32d80a64d47"
+      },
+      "program_relocation_table_present": false,
+      "programs": [
+        {
+          "name": "tracepoint__syscalls__sys_enter_open",
+          "section": "tracepoint/syscalls/sys_enter_open",
+          "prog_type": 5,
+          "autoload": false
+        },
+        {
+          "name": "tracepoint__syscalls__sys_enter_openat",
+          "section": "tracepoint/syscalls/sys_enter_openat",
+          "prog_type": 5,
+          "autoload": false
+        },
+        {
+          "name": "tracepoint__syscalls__sys_exit_open",
+          "section": "tracepoint/syscalls/sys_exit_open",
+          "prog_type": 5,
+          "autoload": false
+        },
+        {
+          "name": "tracepoint__syscalls__sys_exit_openat",
+          "section": "tracepoint/syscalls/sys_exit_openat",
+          "prog_type": 5,
+          "autoload": false
+        }
+      ]
+    },
+    {
+      "source": "/var/tmp/kprog-tmp/A/resident-census/bpf-resources/86e1380633ee337df9dec223491f1543f37b75105c65a936c8917ce0694e2462.bpf.o",
+      "source_sha256": "86e1380633ee337df9dec223491f1543f37b75105c65a936c8917ce0694e2462",
+      "application": "bcc/set",
+      "resident_instances": 4,
+      "original_open_errno": 0,
+      "adapted_open_errno": 0,
+      "globalized_entries": [],
+      "resource_sha256": "ed71ee89fb3fe237d7a484b33c66ea3a20a4223e6dec25b4e15ff3cff76d3db5",
+      "preserved_sections": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "kprobe/blk_account_io_merge_bio": "4ff28a8e774421ec93eea2bb77ca29cb7cbd09e8c34924c59ba023249505e34b",
+        "tp_btf/block_rq_insert": "46964423d042ac9f0d7a1d991a6b9f61f03f0eae17aea6da00431b84814446ab",
+        "tp_btf/block_rq_issue": "330b24fcf46575afb202d45fd4482aca77dd12b7f95771109650a4c20028777c",
+        "tp_btf/block_rq_complete": "03da21f6e26dd21974c8494adc8d0017656bdaacfd84e55178ef7a0426797268",
+        ".rodata": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a",
+        ".maps": "6edd9f6f9cc92cded36e6c4a580933f9c9f1b90562b46903b806f21902a1a54f",
+        ".BTF": "f7cf831ad443be2b010df57805021bc29b3a7c606ef1f9f510599fac25808a1d"
+      },
+      "program_relocation_table_present": false,
+      "programs": [
+        {
+          "name": "blk_account_io_merge_bio",
+          "section": "kprobe/blk_account_io_merge_bio",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "block_rq_insert",
+          "section": "tp_btf/block_rq_insert",
+          "prog_type": 26,
+          "autoload": false
+        },
+        {
+          "name": "block_rq_issue",
+          "section": "tp_btf/block_rq_issue",
+          "prog_type": 26,
+          "autoload": false
+        },
+        {
+          "name": "block_rq_complete",
+          "section": "tp_btf/block_rq_complete",
+          "prog_type": 26,
+          "autoload": false
+        }
+      ]
+    },
+    {
+      "source": "/var/tmp/kprog-tmp/A/resident-census/bpf-resources/5fe91415cc1425690609a1350233a4dbbeeb8430bf3d54f53eb4d15962c2c93a.bpf.o",
+      "source_sha256": "5fe91415cc1425690609a1350233a4dbbeeb8430bf3d54f53eb4d15962c2c93a",
+      "application": "bcc/set",
+      "resident_instances": 2,
+      "original_open_errno": 0,
+      "adapted_open_errno": 0,
+      "globalized_entries": [],
+      "resource_sha256": "35b35f153927a055f7a505276ad30864682c207f819c90e94d4d7c21c3a8dfb6",
+      "preserved_sections": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracepoint/raw_syscalls/sys_enter": "48cbb0215a2bbe6eb6fe6313958104a85ff79b553fc1c63ae5fc65a6428a15ff",
+        "tracepoint/raw_syscalls/sys_exit": "8857d083d2b3b0782b6c429cc3316fbdf95a091da1632b44923b9b128b246af3",
+        ".rodata": "17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+        ".maps": "2ea9ab9198d1638007400cd2c3bef1cc745b864b76011a0e1bc52180ac6452d4",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a",
+        ".BTF": "5bc3d7d79f029ec37b0fb1203f036fe1e3c0526669fc71bcd27b602b7b658804"
+      },
+      "program_relocation_table_present": false,
+      "programs": [
+        {
+          "name": "sys_enter",
+          "section": "tracepoint/raw_syscalls/sys_enter",
+          "prog_type": 5,
+          "autoload": false
+        },
+        {
+          "name": "sys_exit",
+          "section": "tracepoint/raw_syscalls/sys_exit",
+          "prog_type": 5,
+          "autoload": false
+        }
+      ]
+    },
+    {
+      "source": "/var/tmp/kprog-tmp/A/resident-census/bpf-resources/0fe7f59ef0492c7bc7cdaff1a64da55a97e9fed67a694045afa5eed9ab585f2c.bpf.o",
+      "source_sha256": "0fe7f59ef0492c7bc7cdaff1a64da55a97e9fed67a694045afa5eed9ab585f2c",
+      "application": "bcc/set",
+      "resident_instances": 2,
+      "original_open_errno": 0,
+      "adapted_open_errno": 0,
+      "globalized_entries": [],
+      "resource_sha256": "bd80816bc6b2bd779675db0262c20f9dfbb8528cb75fa547da63c827cf0652c6",
+      "preserved_sections": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "kprobe/cap_capable": "9c14199ce2230ec5dd0c83cbf42e7af6ddc6bd24bdb4f5aa36f8d39315aac4ed",
+        "kretprobe/cap_capable": "21a423007471a9ac22104b2b21b95746f5fa2c7d913f3fc52379eec1af5b550c",
+        ".rodata": "17d014410caf8ff36d2c9584a9908ef2a30936e7c5e1e9dcb8d07f5f4a409e99",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a",
+        ".maps": "e3c2af35d1dfc500e16f826a071cc311bf55003a3de77de7ea3376c6b6fa2857",
+        ".BTF": "49af55591fe77b0ed85418dd64b2027c1a6206cbeca678ebae9ff7ff0ab6c3ce"
+      },
+      "program_relocation_table_present": false,
+      "programs": [
+        {
+          "name": "kprobe__cap_capable_entry",
+          "section": "kprobe/cap_capable",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "kprobe__cap_capable_exit",
+          "section": "kretprobe/cap_capable",
+          "prog_type": 2,
+          "autoload": false
+        }
+      ]
+    },
+    {
+      "source": "/var/tmp/kprog-tmp/A/resident-census/bpf-resources/aa863c974df7873f3f3a2d35f7604860ce11e17e814b040a6e8c1aef088075e5.bpf.o",
+      "source_sha256": "aa863c974df7873f3f3a2d35f7604860ce11e17e814b040a6e8c1aef088075e5",
+      "application": "bcc/set",
+      "resident_instances": 4,
+      "original_open_errno": 0,
+      "adapted_open_errno": 0,
+      "globalized_entries": [],
+      "resource_sha256": "19b87b8746d9f5f3730e7f20bb4e764afa0f0498cccbc7895d182a7e9090add2",
+      "preserved_sections": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "kprobe/tcp_v4_connect": "bc299a82f1b76370dc9dc0ac851c271872728aa057ee65ca8d3f455438ad8526",
+        "kretprobe/tcp_v4_connect": "458ea05ada3fc3e86e9d2fe65e33b677157f5b6b58028384f35a2198a5a6a7ca",
+        "kprobe/tcp_v6_connect": "bc299a82f1b76370dc9dc0ac851c271872728aa057ee65ca8d3f455438ad8526",
+        "kretprobe/tcp_v6_connect": "1445d346a01e8ee2a2d7c897b6f2aeadfb1f47aca78812c94f91144552b40bcf",
+        ".rodata": "7d02d4db5e1aafd2428e9fc0e55926219bca236e98d68815ab7184124704d955",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a",
+        ".maps": "6edd9f6f9cc92cded36e6c4a580933f9c9f1b90562b46903b806f21902a1a54f",
+        ".bss": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+        ".BTF": "679219d79d26d1a7291a93dbd3a6a21bfad47ca9d6cdf0d455fd58c9a55c3760"
+      },
+      "program_relocation_table_present": false,
+      "programs": [
+        {
+          "name": "tcp_v4_connect",
+          "section": "kprobe/tcp_v4_connect",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "tcp_v4_connect_ret",
+          "section": "kretprobe/tcp_v4_connect",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "tcp_v6_connect",
+          "section": "kprobe/tcp_v6_connect",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "tcp_v6_connect_ret",
+          "section": "kretprobe/tcp_v6_connect",
+          "prog_type": 2,
+          "autoload": false
+        }
+      ]
+    },
+    {
+      "source": "/var/tmp/kprog-tmp/A/resident-census/bpf-resources/4d3a9b75641a4dd8d34ade4f275eccd99935e95511ba90b27a6aef3eed0440c8.bpf.o",
+      "source_sha256": "4d3a9b75641a4dd8d34ade4f275eccd99935e95511ba90b27a6aef3eed0440c8",
+      "application": "bcc/set",
+      "resident_instances": 1,
+      "original_open_errno": 0,
+      "adapted_open_errno": 0,
+      "globalized_entries": [],
+      "resource_sha256": "87ccdc47b5025fdfd4d3af61da0217c8a56985f2a9298e9349c361613dd4cff8",
+      "preserved_sections": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracepoint/sock/inet_sock_set_state": "818e59a8425e1b5d20d1d194c7fb010867d9e9566d81b7ff3c6468ad2f9d03c2",
+        ".rodata": "e7756c8aac741931bc2279ce5cc0d3e08b0bbc04adf0238f2f5682995538c425",
+        ".maps": "10eef285deef7a4b7c82b22aa53589b7833df29de3814649c772bbd5c832f365",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a",
+        ".BTF": "465b5069041c47e4727b8c17c63761df13deea38079f1a4926f918bed104e8f3"
+      },
+      "program_relocation_table_present": false,
+      "programs": [
+        {
+          "name": "inet_sock_set_state",
+          "section": "tracepoint/sock/inet_sock_set_state",
+          "prog_type": 5,
+          "autoload": false
+        }
+      ]
+    },
+    {
+      "source": "/var/tmp/kprog-tmp/A/resident-census/bpf-resources/e0dcb8b36e153a589eb4636c08c95bb5e6a124d6bbe6cf3f291be41a7f49119a.bpf.o",
+      "source_sha256": "e0dcb8b36e153a589eb4636c08c95bb5e6a124d6bbe6cf3f291be41a7f49119a",
+      "application": "bcc/set",
+      "resident_instances": 5,
+      "original_open_errno": 0,
+      "adapted_open_errno": 0,
+      "globalized_entries": [],
+      "resource_sha256": "4f4782d88cf04f9c2e6b0761416c6a9cdbca783f01786086acf07e965ba9597a",
+      "preserved_sections": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "kprobe/vfs_read": "a3b22f3b9d707b556dd942024606da262d5b8e8088653fb0b36fb925626a446d",
+        "kprobe/vfs_write": "cd17005a84ad4d8334ad938667b63baee6c4b660b8013a579aea2008d8df0d5a",
+        "kprobe/vfs_fsync": "fc752f4cf90f6d1d16dc2622167f00c4c46f9afb6b16986ec3d05c0b4b46e416",
+        "kprobe/vfs_open": "e299ad5252d163f7daf6a3ab521bd8c2ac3eb9b970484a97acaaf756a720746f",
+        "kprobe/vfs_create": "2745545bcb9abc7e0a11210cb084509037abeeb32fe472877c67922e9f24a283",
+        "fentry/vfs_read": "a3b22f3b9d707b556dd942024606da262d5b8e8088653fb0b36fb925626a446d",
+        "fentry/vfs_write": "cd17005a84ad4d8334ad938667b63baee6c4b660b8013a579aea2008d8df0d5a",
+        "fentry/vfs_fsync": "fc752f4cf90f6d1d16dc2622167f00c4c46f9afb6b16986ec3d05c0b4b46e416",
+        "fentry/vfs_open": "e299ad5252d163f7daf6a3ab521bd8c2ac3eb9b970484a97acaaf756a720746f",
+        "fentry/vfs_create": "2745545bcb9abc7e0a11210cb084509037abeeb32fe472877c67922e9f24a283",
+        ".bss": "2c34ce1df23b838c5abf2a7f6437cca3d3067ed509ff25f11df6b11b582b51eb",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a",
+        ".BTF": "f94b1359a62d5b22354526a6116a1275551d9444a3a4276e21371249aa643ec5"
+      },
+      "program_relocation_table_present": false,
+      "programs": [
+        {
+          "name": "kprobe_vfs_read",
+          "section": "kprobe/vfs_read",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "kprobe_vfs_write",
+          "section": "kprobe/vfs_write",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "kprobe_vfs_fsync",
+          "section": "kprobe/vfs_fsync",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "kprobe_vfs_open",
+          "section": "kprobe/vfs_open",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "kprobe_vfs_create",
+          "section": "kprobe/vfs_create",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "fentry_vfs_read",
+          "section": "fentry/vfs_read",
+          "prog_type": 26,
+          "autoload": false
+        },
+        {
+          "name": "fentry_vfs_write",
+          "section": "fentry/vfs_write",
+          "prog_type": 26,
+          "autoload": false
+        },
+        {
+          "name": "fentry_vfs_fsync",
+          "section": "fentry/vfs_fsync",
+          "prog_type": 26,
+          "autoload": false
+        },
+        {
+          "name": "fentry_vfs_open",
+          "section": "fentry/vfs_open",
+          "prog_type": 26,
+          "autoload": false
+        },
+        {
+          "name": "fentry_vfs_create",
+          "section": "fentry/vfs_create",
+          "prog_type": 26,
+          "autoload": false
+        }
+      ]
+    },
+    {
+      "source": "/var/tmp/kprog-tmp/A/resident-census/bpf-resources/34cefcb64d683d23508d3052daf5f059809ddaded59a5168892834d237f4bc6a.bpf.o",
+      "source_sha256": "34cefcb64d683d23508d3052daf5f059809ddaded59a5168892834d237f4bc6a",
+      "application": "bcc/set",
+      "resident_instances": 3,
+      "original_open_errno": 0,
+      "adapted_open_errno": 0,
+      "globalized_entries": [],
+      "resource_sha256": "b077012c704e824a318c0571bd717619a988b8d38cd33d70485caf9469b4c0ea",
+      "preserved_sections": {
+        ".text": "9b131c353b0f623a94786c3e2da6c2b03bd42580f73c3b6a89fc8486fbecb6b9",
+        "tp_btf/sched_wakeup": "950246bc189da4bf709218630bed505fe602a3e0b560ea0820d2b81fc954b536",
+        "tp_btf/sched_wakeup_new": "950246bc189da4bf709218630bed505fe602a3e0b560ea0820d2b81fc954b536",
+        "tp_btf/sched_switch": "7adc928d5497151187c78da9467d3add352190b432e8e99a20481f6c32619ba1",
+        "raw_tp/sched_wakeup": "02c46dd1a8c317c16b36d1f852d53b6ebf4a7d5e65bf7c1a6162ea8a97599a6f",
+        "raw_tp/sched_wakeup_new": "02c46dd1a8c317c16b36d1f852d53b6ebf4a7d5e65bf7c1a6162ea8a97599a6f",
+        "raw_tp/sched_switch": "7adc928d5497151187c78da9467d3add352190b432e8e99a20481f6c32619ba1",
+        ".rodata": "15ec7bf0b50732b49f8228e07d24365338f9e3ab994b00af08e5a3bffe55fd8b",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a",
+        ".maps": "2ea9ab9198d1638007400cd2c3bef1cc745b864b76011a0e1bc52180ac6452d4",
+        ".bss": "6edd9f6f9cc92cded36e6c4a580933f9c9f1b90562b46903b806f21902a1a54f",
+        ".BTF": "b08455b5436796e1deafa0fc3f1c6c81e7aac1d64c2ef528d3be90b09c78b070"
+      },
+      "program_relocation_table_present": false,
+      "programs": [
+        {
+          "name": "sched_wakeup",
+          "section": "tp_btf/sched_wakeup",
+          "prog_type": 26,
+          "autoload": false
+        },
+        {
+          "name": "sched_wakeup_new",
+          "section": "tp_btf/sched_wakeup_new",
+          "prog_type": 26,
+          "autoload": false
+        },
+        {
+          "name": "sched_switch",
+          "section": "tp_btf/sched_switch",
+          "prog_type": 26,
+          "autoload": false
+        },
+        {
+          "name": "handle_sched_wakeup",
+          "section": "raw_tp/sched_wakeup",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "handle_sched_wakeup_new",
+          "section": "raw_tp/sched_wakeup_new",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "handle_sched_switch",
+          "section": "raw_tp/sched_switch",
+          "prog_type": 17,
+          "autoload": false
+        }
+      ]
+    },
+    {
+      "source": "/var/tmp/kprog-tmp/A/resident-census/bpf-resources/2178f495720f0a81e44a8bc439978e259459fa0a6486f2c9c4a693f993cb2498.bpf.o",
+      "source_sha256": "2178f495720f0a81e44a8bc439978e259459fa0a6486f2c9c4a693f993cb2498",
+      "application": "katran",
+      "resident_instances": 1,
+      "original_open_errno": 0,
+      "adapted_open_errno": 0,
+      "globalized_entries": [],
+      "resource_sha256": "c658b7c067b07cd30d28065b68ac85b28d820741f5fcbc5080a644ca5e304858",
+      "preserved_sections": {
+        ".text": "3af08d6d8407edfe526320f660fc926935bcaef5e6b0730e4ac44e12aad3b87d",
+        "xdp": "67b39520dd3ad91f47dcea8f57cb0c0c90630cc5cd86d99e63a1fb4aabd07f2d",
+        ".maps": "3893c122a235d76ac34b7853ae88aae7b72c2785f12e0e5ba05506aa89f4cf6c",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a",
+        ".BTF": "c1cbcacacc9ea4d93db0f57031538ed39b179a08cb326a145af57baaf79708f8",
+        ".eh_frame": "4c0d9bd802c399fbe35290d30c777cf922bc55130711e57d3c0ab35c9cd65d0b"
+      },
+      "program_relocation_table_present": false,
+      "programs": [
+        {
+          "name": "balancer_ingress",
+          "section": "xdp",
+          "prog_type": 6,
+          "autoload": false
+        }
+      ]
+    },
+    {
+      "source": "/var/tmp/kprog-tmp/A/resident-census/bpf-resources/b00264d803fb0f1c6009973c9c929250411fa2e58a0f9b4a998baca76d190b5c.bpf.o",
+      "source_sha256": "b00264d803fb0f1c6009973c9c929250411fa2e58a0f9b4a998baca76d190b5c",
+      "application": "cilium/agent",
+      "resident_instances": 1,
+      "original_open_errno": -95,
+      "adapted_open_errno": -22,
+      "globalized_entries": [
+        "tail_nodeport_rev_dnat_ipv4",
+        "tail_nodeport_nat_ingress_ipv4",
+        "tail_nodeport_nat_egress_ipv4"
+      ],
+      "resource_sha256": "a642892d51c6389a0f2e6d673a93bfa5f7a11a71fb62a085e45235ca556355d9",
+      "preserved_sections": {
+        ".text": "336ab34a2b2c3a48921a28b73e05b92e5722b04c85e088d90b8736e4f42b390e",
+        "xdp/tail": "c53c3362736cd25e18f330d28f258e4ff8f5ef968ac2ad9f8a8c243ba96da197",
+        "xdp/entry": "7a28cfa93b451daf9db8bede6d0a99077cccf4dccd5ad21c8991c060cb19c265",
+        ".rodata.config": "92d9193e59979b2f6e345f56a9139b2bcd0e4c19ba66a6d8f95c3717bb5b8c40",
+        ".maps": "3fe07f46ac6e620fe8fd1e6a88260ceb498745a031b24eb918570b68db7ef7a3",
+        "license": "a711b6d9514fa9ca34a60c700d4cc7ba4576f8f3efac58014ed9eb2c78c922ba",
+        ".rodata.aux": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+        ".bss": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+        ".BTF": "6c3fd6cd4ade468d20579d297ec5f7c2d3d8340829ea00e41be99b9e465ce895"
+      },
+      "program_relocation_table_present": false,
+      "programs": []
+    },
+    {
+      "source": "/var/tmp/kprog-tmp/A/resident-census/bpf-resources/c2fefeb8e5b0a6651cbc3a06790280870609dbe14879901a8085b922448f55f8.bpf.o",
+      "source_sha256": "c2fefeb8e5b0a6651cbc3a06790280870609dbe14879901a8085b922448f55f8",
+      "application": "cilium/agent",
+      "resident_instances": 35,
+      "original_open_errno": -95,
+      "adapted_open_errno": -22,
+      "globalized_entries": [
+        "tail_nodeport_rev_dnat_ipv4",
+        "tail_nodeport_nat_ingress_ipv4",
+        "tail_nodeport_nat_egress_ipv4",
+        "tail_handle_nat_fwd_ipv4",
+        "tail_handle_ipv4_cont_from_host",
+        "tail_handle_ipv4_cont_from_netdev"
+      ],
+      "resource_sha256": "541959212ffcf20a022da1ed09095e4f29ae35471e17a55a0f43f9edf4eec95b",
+      "preserved_sections": {
+        ".text": "861e8fec5db91fb033fbe794106523b819e234a08e67f3d2831638501a12e6ab",
+        "tc/tail": "82b67ee8b1f54c8d241dd420d8799285e637d1702c23a491bc47d366111a1499",
+        "tc/entry": "0a678036027bd0f5329b3090a6656a8d2b0f1c64e52ddbad59216aaf3fa4e289",
+        ".rodata.config": "3599ae7637f07c34fc7dcab839fc589374d5d0b36a70ae7cd4d7ae6903caa59a",
+        ".maps": "26574bb8c82e7538c09b9ff1524706bd5088c740c6a080af83db4d8bf2e5255e",
+        "license": "a711b6d9514fa9ca34a60c700d4cc7ba4576f8f3efac58014ed9eb2c78c922ba",
+        ".rodata.aux": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+        ".BTF": "aea9c5d2b471fc57d3e6d6d181400a14cb435774b4ebb0d07b3f6537eefaca40"
+      },
+      "program_relocation_table_present": false,
+      "programs": []
+    },
+    {
+      "source": "/var/tmp/kprog-tmp/A/resident-census/bpf-resources/30b5fbe7e76ede150b2df03815eafbc8a0bb9fbcc079ff28b218105b1042ca28.bpf.o",
+      "source_sha256": "30b5fbe7e76ede150b2df03815eafbc8a0bb9fbcc079ff28b218105b1042ca28",
+      "application": "cilium/agent",
+      "resident_instances": 36,
+      "original_open_errno": -95,
+      "adapted_open_errno": -22,
+      "globalized_entries": [
+        "tail_nodeport_rev_dnat_ipv4",
+        "tail_nodeport_nat_ingress_ipv4",
+        "tail_nodeport_nat_egress_ipv4",
+        "tail_handle_ipv4_cont",
+        "tail_ipv4_ct_egress",
+        "tail_ipv4_policy",
+        "tail_ipv4_ct_ingress_policy_only",
+        "tail_ipv4_ct_ingress"
+      ],
+      "resource_sha256": "55598da6a61c689ee36885b69cd50270a337d19b363c11e1dee8b9623e9569fc",
+      "preserved_sections": {
+        ".text": "336ab34a2b2c3a48921a28b73e05b92e5722b04c85e088d90b8736e4f42b390e",
+        "tc/tail": "67b6247c5efbd27e2d7ae3960124ad0492030a5e6f31bb34f3a307b8d0fbb8dd",
+        "tc/entry": "9ca2b0124f3a276049af9a89836f26390c4e4b65f0401bb5b07baef8920c9357",
+        ".rodata.config": "3e47f3478248fdd286f8ed5ba6e2057864a553a192aefd84cd9e8196fe808db8",
+        ".maps": "863648b07f6bb668f8963d175e3594d49d502583517155c9ea8156b4bb5f0b00",
+        "license": "a711b6d9514fa9ca34a60c700d4cc7ba4576f8f3efac58014ed9eb2c78c922ba",
+        ".rodata.aux": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+        ".BTF": "1ff970f6d4d964c0bbc78d810e84eb5c7ab0265a8c3f83d4cb209e186d3ef491"
+      },
+      "program_relocation_table_present": false,
+      "programs": []
+    },
+    {
+      "source": "/var/tmp/kprog-tmp/A/resident-census/bpf-resources/c977ee7fc191812d39883816e6acb9bb15d929b606842f3a92a461469e30cac2.bpf.o",
+      "source_sha256": "c977ee7fc191812d39883816e6acb9bb15d929b606842f3a92a461469e30cac2",
+      "application": "otelcol-ebpf-profiler/profiling",
+      "resident_instances": 13,
+      "original_open_errno": -95,
+      "adapted_open_errno": 0,
+      "globalized_entries": [
+        "kprobe_unwind_dotnet",
+        "perf_unwind_dotnet",
+        "kprobe_go_labels",
+        "perf_go_labels",
+        "kprobe_unwind_hotspot",
+        "perf_unwind_hotspot",
+        "kprobe_unwind_stop",
+        "perf_unwind_stop",
+        "kprobe_unwind_native",
+        "perf_unwind_native",
+        "kprobe_unwind_perl",
+        "perf_unwind_perl",
+        "kprobe_unwind_php",
+        "perf_unwind_php",
+        "kprobe_unwind_python",
+        "perf_unwind_python",
+        "kprobe_unwind_ruby",
+        "perf_unwind_ruby",
+        "kprobe_unwind_v8",
+        "perf_unwind_v8"
+      ],
+      "resource_sha256": "b5a171be1ee4714bfccd9ceff4b075d19c4f99ba599d108f3152ff50368c2d1b",
+      "preserved_sections": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "uprobe/custom__generic": "d4e2de5051449755375f9a7ae7f7ce4f7fafabf93473edd23e8ffdfb9aa2cac2",
+        "kprobe/unwind_dotnet": "b25df695e6fd0c87bc29e70b7ecfdacd41e7f1e1a881df20d0cac6e0e740f2b8",
+        "perf_event/unwind_dotnet": "b25df695e6fd0c87bc29e70b7ecfdacd41e7f1e1a881df20d0cac6e0e740f2b8",
+        "kprobe/go_labels": "1863326586c395116e1cd36bd7e82b2d20a1c5d7595eb8b77818d7697c04276a",
+        "perf_event/go_labels": "1863326586c395116e1cd36bd7e82b2d20a1c5d7595eb8b77818d7697c04276a",
+        "kprobe/unwind_hotspot": "3e7071f2f770c7464849f67f9f58c497e439c943c089f216c6c78d03f7f22940",
+        "perf_event/unwind_hotspot": "3e7071f2f770c7464849f67f9f58c497e439c943c089f216c6c78d03f7f22940",
+        "tracepoint/integration/sched_switch": "c4ab9521a8f4373a6af5ac222ad80a6dc78813a0fce818808f8b36f0e90ee263",
+        "kprobe/unwind_stop": "e17de146ce52e305a646bfc8061290006adeeb8711352c815ebf40e062bda7a1",
+        "perf_event/unwind_stop": "e17de146ce52e305a646bfc8061290006adeeb8711352c815ebf40e062bda7a1",
+        "kprobe/unwind_native": "0c27b3f071ca50f88cab13f5936300817117bfe9898a6766bb5151bb16367ade",
+        "perf_event/native_tracer_entry": "40e4afe287629b969eafc611d71a660769f92803d85252612d44d52a39e84c93",
+        "perf_event/unwind_native": "0c27b3f071ca50f88cab13f5936300817117bfe9898a6766bb5151bb16367ade",
+        "kprobe/finish_task_switch": "701de6cbd4ae6b3fb368c101c48a2bdca1fbc03b64791ecca7e8ffa0e1d74b57",
+        "kprobe/dummy": "17a1b314402dd59c0487151b0e73e9bfcab499feee08f732823f9409f5208df8",
+        "tracepoint/sched/sched_switch": "7b9b2fce6ed4b94a91f3ef403833e67209fd706a81c1b1c90ea07a338227f3a3",
+        "kprobe/unwind_perl": "e94f624e7cd4903085c7d52272f3e1c8c7ed5acc2f63cddbf140b2b4d7555268",
+        "perf_event/unwind_perl": "e94f624e7cd4903085c7d52272f3e1c8c7ed5acc2f63cddbf140b2b4d7555268",
+        "kprobe/unwind_php": "fd3f527db1b40b424ff5c9352c05cdf028a188f095b48dfbce94b7ecee44aa8e",
+        "perf_event/unwind_php": "fd3f527db1b40b424ff5c9352c05cdf028a188f095b48dfbce94b7ecee44aa8e",
+        "kprobe/unwind_python": "e6930d06646d2cd572f2664424ef0471119ffaa1d749abb588c291bd5f21101c",
+        "perf_event/unwind_python": "e6930d06646d2cd572f2664424ef0471119ffaa1d749abb588c291bd5f21101c",
+        "kprobe/unwind_ruby": "1797e6c8c43aff006564b868531aa479515163df061a2be48a1b522ee31f4eb5",
+        "perf_event/unwind_ruby": "1797e6c8c43aff006564b868531aa479515163df061a2be48a1b522ee31f4eb5",
+        "tracepoint/sched/sched_process_free/v2": "13a97e5a1d5aa7589ab636eef930bf861933cad963d703e7fd83bd3de2d727cc",
+        "tracepoint/sched/sched_process_free/v1": "c809a3a8c7f304719058be4ee436c901ed155915414cedd1b3a05c25d203273a",
+        "tracepoint/syscalls/sys_enter_bpf": "fd347d8cdecb32b3a66f18f4e4a62aa76c8c0ec60d7d5df1b10883156cba3051",
+        "raw_tracepoint/sys_enter": "432a82f616747aec96e0f532dba6a05c62239f66ff1b3d40f28957087d6c8e9e",
+        "uprobe/generic": "c5e17f47a18092f61ddce1278756089bc05d446ed7c9c90a6626b91f9778a15e",
+        "kprobe/unwind_v8": "4cb1bd4ecb7fd29bf028ac58eda872de44af8012a6ba34b9a03b3f47f91d6702",
+        "perf_event/unwind_v8": "4cb1bd4ecb7fd29bf028ac58eda872de44af8012a6ba34b9a03b3f47f91d6702",
+        ".maps": "eb3db1453c0dac39bee30c72831d2c6b32faf64b3132fc519e1dc25fc1fea05a",
+        ".rodata.str1.16": "497bce390701081e62dfe531c5f61fe8a87e8c238df8ca3a0fa09ffbb18eff19",
+        ".rodata.str1.1": "a7897ce3dad98df642ef08b1ea56ce4439f03f979e31aad5faed8ac430d335fb",
+        ".rodata.var": "85759b3811ff7dc47b03792ac85317be51431a3f9e01dcafce317ed736a391b0",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a",
+        "version": "b4248c210a2905b94345e1a8414d0e12efcfb2f4f0f2397159a71283397a0ccd",
+        ".BTF": "b902f9a221efa5b22ece72da8f41193c2de56ef4735554a25af5a952e8c36dcd"
+      },
+      "program_relocation_table_present": false,
+      "programs": [
+        {
+          "name": "custom__generic",
+          "section": "uprobe/custom__generic",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "kprobe_unwind_dotnet",
+          "section": "kprobe/unwind_dotnet",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "perf_unwind_dotnet",
+          "section": "perf_event/unwind_dotnet",
+          "prog_type": 0,
+          "autoload": false
+        },
+        {
+          "name": "kprobe_go_labels",
+          "section": "kprobe/go_labels",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "perf_go_labels",
+          "section": "perf_event/go_labels",
+          "prog_type": 0,
+          "autoload": false
+        },
+        {
+          "name": "kprobe_unwind_hotspot",
+          "section": "kprobe/unwind_hotspot",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "perf_unwind_hotspot",
+          "section": "perf_event/unwind_hotspot",
+          "prog_type": 0,
+          "autoload": false
+        },
+        {
+          "name": "tracepoint_integration__sched_switch",
+          "section": "tracepoint/integration/sched_switch",
+          "prog_type": 5,
+          "autoload": false
+        },
+        {
+          "name": "kprobe_unwind_stop",
+          "section": "kprobe/unwind_stop",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "perf_unwind_stop",
+          "section": "perf_event/unwind_stop",
+          "prog_type": 0,
+          "autoload": false
+        },
+        {
+          "name": "kprobe_unwind_native",
+          "section": "kprobe/unwind_native",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "native_tracer_entry",
+          "section": "perf_event/native_tracer_entry",
+          "prog_type": 0,
+          "autoload": false
+        },
+        {
+          "name": "perf_unwind_native",
+          "section": "perf_event/unwind_native",
+          "prog_type": 0,
+          "autoload": false
+        },
+        {
+          "name": "finish_task_switch",
+          "section": "kprobe/finish_task_switch",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "kprobe__dummy",
+          "section": "kprobe/dummy",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "tracepoint__sched_switch",
+          "section": "tracepoint/sched/sched_switch",
+          "prog_type": 5,
+          "autoload": false
+        },
+        {
+          "name": "kprobe_unwind_perl",
+          "section": "kprobe/unwind_perl",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "perf_unwind_perl",
+          "section": "perf_event/unwind_perl",
+          "prog_type": 0,
+          "autoload": false
+        },
+        {
+          "name": "kprobe_unwind_php",
+          "section": "kprobe/unwind_php",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "perf_unwind_php",
+          "section": "perf_event/unwind_php",
+          "prog_type": 0,
+          "autoload": false
+        },
+        {
+          "name": "kprobe_unwind_python",
+          "section": "kprobe/unwind_python",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "perf_unwind_python",
+          "section": "perf_event/unwind_python",
+          "prog_type": 0,
+          "autoload": false
+        },
+        {
+          "name": "kprobe_unwind_ruby",
+          "section": "kprobe/unwind_ruby",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "perf_unwind_ruby",
+          "section": "perf_event/unwind_ruby",
+          "prog_type": 0,
+          "autoload": false
+        },
+        {
+          "name": "tracepoint__sched_process_free",
+          "section": "tracepoint/sched/sched_process_free/v2",
+          "prog_type": 5,
+          "autoload": false
+        },
+        {
+          "name": "tracepoint__sched_process_free_pre616",
+          "section": "tracepoint/sched/sched_process_free/v1",
+          "prog_type": 5,
+          "autoload": false
+        },
+        {
+          "name": "read_kernel_memory",
+          "section": "tracepoint/syscalls/sys_enter_bpf",
+          "prog_type": 5,
+          "autoload": false
+        },
+        {
+          "name": "read_task_struct",
+          "section": "raw_tracepoint/sys_enter",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "uprobe__generic",
+          "section": "uprobe/generic",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "kprobe_unwind_v8",
+          "section": "kprobe/unwind_v8",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "perf_unwind_v8",
+          "section": "perf_event/unwind_v8",
+          "prog_type": 0,
+          "autoload": false
+        }
+      ]
+    },
+    {
+      "source": "/var/tmp/kprog-tmp/A/resident-census/bpf-resources/f3628a47ca845927e0aa238d08132e1d29f30b740a602e0c419c77e39da1abca.bpf.o",
+      "source_sha256": "f3628a47ca845927e0aa238d08132e1d29f30b740a602e0c419c77e39da1abca",
+      "application": "tracee/monitor",
+      "resident_instances": 151,
+      "original_open_errno": 0,
+      "adapted_open_errno": 0,
+      "globalized_entries": [],
+      "resource_sha256": "84383f449937c6c8c2e1a9167f8ba0c9bdf1647c49cdf2d1a1d444ecbda53cef",
+      "preserved_sections": {
+        ".text": "592ac2490758a6738f8376a28d5fc55d480f59ecee9a80552465c47b98cdb5e7",
+        "raw_tracepoint/sys_enter": "c2d0ab719a96e507d858089b92d658ba2953820f95ab12e8b87404101ae76552",
+        "raw_tracepoint/sys_enter_init": "b31e2e0316504648ddcb78373763c761801d378b94642b559112acbdf235b498",
+        "raw_tracepoint/sys_enter_submit": "545e93f954a82ce1b98d2a6ce2d913a5ea02fbd907885b87605304772cbbfe99",
+        "raw_tracepoint/sys_exit": "ead6b3e5e20f636168ecd551544b599bd09a57a14cf568a7cb9f8e936d6c5cbb",
+        "raw_tracepoint/sys_exit_init": "4f6ceb800e397ddd64dc04aa515adb4e7df78011e35002abab5001c012adf7da",
+        "raw_tracepoint/sys_exit_submit": "417624eeb3026aa7aab49028bd6393ec796f00e9240bf2d2131be1868be9ee37",
+        "raw_tracepoint/trace_sys_enter": "e773b52e0f27c9f55703a1da4a40efb024e9d6b79dfcf377bd5da2d732462a83",
+        "raw_tracepoint/trace_sys_exit": "167d536f958bf79e91f0cfaf58b029ddd0a023388eab41fc1fc05720ace51dfe",
+        "kprobe/ptrace": "847d2a03fe2bfa812a5e1f39159f7a5f789c71e0a6e43350d2b820bb6951f4a6",
+        "kretprobe/ptrace": "6d608e7ed00b0950a1fad6e992905a0e35c599e107200f1383260509911d6034",
+        "kprobe/process_vm_writev": "0a267a5c3ec1312554ce095e7a46027b236d283c4e0e0b0d78b0468f65ee939d",
+        "kretprobe/process_vm_writev": "5576c31f6807e7c08bac9c2dddcecf4871bf925d86552543316c10746ab9c751",
+        "kprobe/arch_prctl": "674b94343058274f009bf158588763f478b227c82bc9b8b7bc47530549da7cd4",
+        "kretprobe/arch_prctl": "772e6064b4339f6e85197320b35940b9e6fea2c5a12c003a073110e7b928b057",
+        "kprobe/dup": "b5ed59c9e994e4922f8866f16da44bbb0029731566035e88082e0a3311a3669b",
+        "kretprobe/dup": "1a92c109d65ff5f4d83b368ec5804a963b90ba7a73b60a6cea463f647fe798de",
+        "kprobe/dup2": "8e3a5b673fa8e9c075d1dbe54b29f883de52829012f4d630c4dde32f294f6bce",
+        "kretprobe/dup2": "35da56f654c05785742d32eed068cb42b42dbd648db371a6004c5bb54c27b4ab",
+        "kprobe/dup3": "1a9d03a46768c687426688271de2dc1b688519a2d22d87aa4d019ea7243909d5",
+        "kretprobe/dup3": "b4bd2033eb8f58913d09127647772a1709180ff8d856108c9ee12f9c5b99af62",
+        "raw_tracepoint/sys_execve": "437dd0e0ef9409f59eb5f5d6414a3ca1180c671b149386ee332fd4d65d2633c0",
+        "raw_tracepoint/sys_execveat": "f5fb41d31b8edc29f0291a071ac6319835bca963fd5474682f2ac3a13ea30d3e",
+        "kprobe/sys_dup": "360373a2c69e02e409c5a6c89244ba804d2af13d0182aa7d182fdd40575cccd5",
+        "raw_tracepoint/sched_process_fork": "30f1638aed21e62722a00008fdd7f242d1ad299b4f5436fa60a6ace9ec1a4596",
+        "uprobe/lkm_seeker_modtree_loop_tail": "fc620e7d044b4d169ca19cd5fa86ef3253f7bc241005ca094bff5f1782877414",
+        "uprobe/capture_heartbeat": "026602742a886764042405adf5bc08ad11002d8843c3f6b02a4763c6ea8802f0",
+        "uprobe/lkm_seeker_submitter": "abd3d6665c06d515045874987c4f899f304c23685a55085d7f53c954dc4d5c63",
+        "uprobe/lkm_seeker": "fe57a66b908490e3a45719d7b8a3cfa06fa218ffd35c6dc79703e94b007d5da4",
+        "uprobe/lkm_seeker_kset_tail": "84ed87d7b2abb0424ca3b32cb5a6e9d2683e3aeed01dc12d1fb61e0fb98fdfed",
+        "uprobe/lkm_seeker_mod_tree_tail": "5bddd8e138e57d4c221e3641ffa07f15d67a15a10323b81a17b6baa5b06a7545",
+        "uprobe/lkm_seeker_proc_tail": "6afa08e7800e1bfb02ecbb7075eb5a8b5df6fb5aafb88515dabae63161d1f15b",
+        "uprobe/lkm_seeker_new_mod_only_tail": "5ec76b79a17a69a796dcc262fa1c72e34e5686d74fd02ee80348f07f2c6628dc",
+        "raw_tracepoint/sched_process_exec": "422c1fa5c10b160a0aba226ce0a3ca24de617041753169ac6fb8f055c386b72d",
+        "raw_tracepoint/sched_process_exec_event_submit_tail": "34489e656e715e90f90bd5d15243656087f6fb7e3e7d0b8fd11cb353a8f08886",
+        "raw_tracepoint/sched_process_exit": "18f0720dc0bc16e9801c8599740317cc58a178ce14c1f3b4107be23d07535222",
+        "raw_tracepoint/sched_process_free": "a5ccb11356bec220feaf73b6ad57082287e8abfa35c81ce9a7764c939e750794",
+        "raw_tracepoint/syscall__accept4": "54cf7ce199702cda4a96d0f799c6cf08087081a56e824d3a4060eaf73c296ba5",
+        "raw_tracepoint/sched_switch": "f8631dd0b7f7461fbaf4fd21e03705e8b10be2b95598d13d1897e1cf57da4227",
+        "kprobe/filldir64": "a4cc47e9285e7c63e5180fedd2794318ae994d5b84c01cfe94ac084be40d5394",
+        "kprobe/call_usermodehelper": "19543fc50568242f8a5b2c5a7e21186bf6d66016685b23b319cb63622e948e0b",
+        "kprobe/do_exit": "8492a44a73281c4ca6df5285be30e3926ef4d3750bb874d823c93886b152af7e",
+        "uprobe/syscall_table_check": "375622f7ad8eaf4071d24e4bd6be1d7392c6e84c0e631eaf49ccb7d6d1564a67",
+        "uprobe/trigger_seq_ops_event": "46a1c84958ee771f4f9c12c42f9852ded55f7f9a529e8f29d28566e19df55a71",
+        "uprobe/trigger_mem_dump_event": "00bdb428cb9228639a199c70fd789b680772ace21aa4f110fd336d6ee59368b3",
+        "kprobe/security_file_ioctl": "56c74e1c604236579cae9f7df2d4d6dcd1f8fc74627739a0ae56e8b435468f8f",
+        "kprobe/tracepoint_probe_register_prio_may_exist": "d5f255ec060169b77595e89a1ce91be4c7c0aaa4072b7ebec1cc4cd2f1e1b046",
+        "raw_tracepoint/cgroup_attach_task": "6cbf5f562175b6e7edb004efdd8ac378c9ad4f1f5b5570ce818554fcca6b3db0",
+        "raw_tracepoint/cgroup_mkdir": "84f987a04b48a7956d7bf5e229b7546302036ea096ed854982823565ee650ec6",
+        "raw_tracepoint/cgroup_rmdir": "fbcfa2009480abf19213fd610c3b6eac30af72e1a9b69c2ab2cb0f97b6e0fb9d",
+        "kprobe/security_bprm_check": "1b970d0c9d236b6c22e7ff5d769292e911d21f374b1e806320bca95ff02ac04f",
+        "kprobe/security_file_open": "eb1f3bec77d4be8635d690a3bdec30fbe1211db8485447058d75b215c0034941",
+        "kprobe/security_sb_mount": "2fe5084d155b08cdaf345357a99a235119234a1e3e5a210999f96fed032daf38",
+        "kprobe/security_inode_unlink": "0db91227a32abf282fdf854a0e5b72671fd1f1ed4155a22850b70cc3dc7cd88c",
+        "kprobe/commit_creds": "04731b602ffe039049332744d4b961f637b164922da047812ad0a50fd46c2534",
+        "kprobe/switch_task_namespaces": "d817e8bf6a10463e1c045972cd18bedd857197f072c9723b5b0d1dbfa6f0471c",
+        "kprobe/cap_capable": "d391928c312271e9b1d3b84c1a9765d529f02bad007eb92ab702f2b0f3698e26",
+        "kprobe/security_socket_create": "aa074b79d60037df52ca70fd5d13a5db63d601036392a3590ea052a8b5262c9c",
+        "kprobe/security_inode_symlink": "7cf4a6d0d8d619903dc4cf5231de5cc20c8b8bf7592db3eadfcd9eda2031025b",
+        "kprobe/proc_create": "794ad568ef7b532b68007eff83e257424bc570aeb3497fdff1e1ae3f4afcd2c3",
+        "kprobe/__debugfs_create_file": "ae7ff99ed1b908fe10ed730cc02dfe9c59ec9447948d34652523780fd7a7f6fb",
+        "kprobe/debugfs_create_dir": "b81765cf67a4a0befe26b4cf51d3d1b209d5b45a0d0b0d483203d6c7023d9b1c",
+        "kprobe/security_socket_listen": "f543502df0b765297365a69f9e2ed22d526d388df8f5942fd42abdf4de59f88e",
+        "kprobe/security_socket_connect": "9576d43b43a2fede4fdfc7c77f91c11467d3f0c50c91ff87070a9b1005eed4b0",
+        "kprobe/security_socket_accept": "dd559e696161d6cb9926461d588c7c021a8940b69b3812f2db6bb0668ccde824",
+        "kprobe/security_socket_bind": "4ca2e51957fe894e304f9f1ced9d7f6f308e625396926fd3dd3494354c7f218d",
+        "kprobe/security_socket_setsockopt": "59fc6d4023e866ef261c38e8496e5e3ebdd27b50b3d058d001c46fb5e9e1ec14",
+        "kprobe/send_bin": "6e62195b886d7eb2c634d7d2f5e4c991381908f6eb9ffc9ad5384db85a5b28bb",
+        "raw_tracepoint/send_bin_tp": "57b03b189e53c03e56948f76fd8778227d3bcf3e36f41254248f10b179c82755",
+        "kprobe/vfs_write": "4195bfff05ba9b278cd925046ef9684121ba54c8e02d832bafc6b7e3a6a19d5f",
+        "kretprobe/vfs_write": "5651c7f504a63c120eb9da99e7dd08a045ac70f197ae1097c81c35e8d62700ac",
+        "kretprobe/vfs_write_tail": "9a8749e2dc98e4a1c6829364a2abd0496c7af3cabf7a39d9b7607e85b16e3a72",
+        "kprobe/vfs_writev": "b5c6c2b6896bf0349687a615d70f5164d1185814852f28cff0a7d77b33fcd9d7",
+        "kretprobe/vfs_writev": "cd11802709be3e04f4d919a59b4567a23db40c3ca8fddf725ff9a6f5f09d280b",
+        "kretprobe/vfs_writev_tail": "a1154d1b92615669ba7a14356282f4a79bbe7830be8541eec1c7258fbd53b478",
+        "kprobe/__kernel_write": "30de1f52b9c98cd9fcaaccfc25a4759c984c74d6a59060e3af58dc32c9791fbe",
+        "kretprobe/__kernel_write": "8fa03f14d2253159ca271d9b3a03a903a812d972ee0fc89cb5908a09e58da60d",
+        "kretprobe/__kernel_write_tail": "754c4bd8b51de27374af99a3a756d640ec59f67e46770a8e0557d3782e504e34",
+        "kprobe/vfs_read": "f0e835e174983f1442d996369989a38a8f80529d011f978c43c14fa2406fef22",
+        "kretprobe/vfs_read": "3385a1d07f56f329930045a2c2fd43745b2fd1587ec55660ca6c609b85f7b556",
+        "kretprobe/vfs_read_tail": "669c3be1bff84f40b631fa86f4e5f6bb2b61650d1297d3baa83e7d87813667fa",
+        "kprobe/vfs_readv": "d68a29fe660a99921e5ab7d50b830e335ba2502d7a5e7d993bdd2cf9e20050b3",
+        "kretprobe/vfs_readv": "58e61637bd3bdb9edb7e805dde71e5990fb57a25564437deaf2fc85615a7db44",
+        "kretprobe/vfs_readv_tail": "75bdedbc3d68d3ce12e639d3e63e770cad7d8332d27e4ce082d98b45ad65452d",
+        "kprobe/security_mmap_addr": "cccde520e205d0336b988a9f251a129a55e900be031b7e1193c19e833a4e3c8d",
+        "kprobe/do_mmap": "2978725e2b1b268bb5d806399b1c4bde12d49078cfad8583604379c6cbc5cf08",
+        "kretprobe/do_mmap": "817fff6befb79fc02ed332c369d7a0f44e5c7f44efb43d5537082d8f08491ce6",
+        "kprobe/security_mmap_file": "9189ce8ac1a1d948aa6edf8f4ea0cbe697783269c2bbc70e203dda0fd2dff2af",
+        "kprobe/security_file_mprotect": "80afc952c46674026543cb4222a40d3256e43c5a2e3fd502ade7c43e10f68441",
+        "raw_tracepoint/sys_init_module": "d14e9f78f8474afe9660847bee2acddcbd092e6f3883a1ec83cb2052c7ed210d",
+        "kprobe/security_bpf": "73ce6828c099302a6ef5abc3c4e3f4e76c5fc1ed84340ed955b33fcb720d93fd",
+        "kprobe/register_kprobe": "963efca5766c6d3a82295a5ff94c0a48f71b5d292b4803229604c94900194d2c",
+        "kretprobe/register_kprobe": "af00392aac373a8a78d1e04359d38d37ae7e25becd5a58dc37b4a0856d72559e",
+        "kprobe/security_bpf_map": "ffa26c88fded53079071480379cb2411caff93db94b958b2d927bc49685231a2",
+        "kprobe/security_bpf_prog": "20c49ce2e1dec84c158c903d1f538cde1eddb70fa656d903d87802991ee5f7d5",
+        "kprobe/bpf_check": "5855e6009aeece77919be55c559ebfb9cb641c9ed764bd8cfc5ed73a24230fa3",
+        "kprobe/check_map_func_compatibility": "ab083984cae8b127ddd1867e9211b8428d490faad9152e70f374cfbc8d73cdb1",
+        "kprobe/check_helper_call": "b5fa4d705ace463e0b04529460e03e6c42b982c4fdc6c7267b0083651c3bdd47",
+        "kprobe/security_kernel_read_file": "a59aa52256e878349d877356adcf4605d79d7bed40ad6994ca85352d0f61d679",
+        "kprobe/security_kernel_post_read_file": "4e42843826e0e6a986091e2e31d01b1d0a96e4a3eba58542f4b27dd0d986521a",
+        "kprobe/security_inode_mknod": "7c78b47d0d5fcb9cf316556c78363b161df035466399e33a041be3c706e207dd",
+        "kprobe/device_add": "8f17363a5feace6a0bb54eda9c4671684e10bb044c8580d45039ce16508c9e64",
+        "kprobe/__register_chrdev": "4409f6660264402bbda5170428b72f88b8bb3b7df98e665690acb68d6867eca4",
+        "kretprobe/__register_chrdev": "8b94a20049e36bcd4acde41075d3a3a17fd34fff997e839279b582890357557b",
+        "kprobe/do_splice": "e4e9ecddff6c9aa953de624e98a30007f1061af65c3e7f1f4bc2b42de4128be7",
+        "kretprobe/do_splice": "00c51834edafa2598ef6112484e094373d6db40120995e79983fa70ac2da0a67",
+        "raw_tracepoint/module_load": "1c752af80a41cf245b008d24207d0f3c90dac0a7aa5a791e8320af8d3683a7c0",
+        "raw_tracepoint/module_free": "bc6cfbc380a9747070b2ef5becc94228408f7b519490589a999ed760a5aa8ec2",
+        "kprobe/do_init_module": "2206e6c752205091eada1aaaf907ec0f721eb3d426a74d203fba189ea8b003c8",
+        "kretprobe/do_init_module": "2c5f17da212c758658ecc6de77dfd42d15cfed065f723371ff6f356f3957bd4d",
+        "kprobe/load_elf_phdrs": "7c05e3edc0bad7a1de00ee8ab157db794bd56b294c5c97053f5231099f0618f5",
+        "kprobe/security_file_permission": "286e4f3e0ad19a60d1abab6f2a917573dde5b82380144a48982832bc12730d8f",
+        "raw_tracepoint/task_rename": "cb2c10441ba494d850c1eaf4d8b0cee1b4a6413b9d996347f5cb85c687b98854",
+        "kprobe/security_inode_rename": "96f1c87f211987d89828b20603f033b6f8e59a07aec4ae49129acfb5bfb7582c",
+        "kprobe/kallsyms_lookup_name": "078b0d2acb773523b9231ee6cbd2652bd1f940275e41aff2ccdfae32d3ace25c",
+        "kretprobe/kallsyms_lookup_name": "63243ea8c22995f0d37e6d6a79b0ad1c39a4351de6b71b1ac6a9199ee2b16f0c",
+        "kprobe/do_sigaction": "2667271ef12de9bc2a973d7d132c60f9fdbf526077d29cc58ab9ef069ec39333",
+        "kprobe/vfs_utimes": "46cecf292685ea436eb3e548627453987d1a2ab12d15ef42a49496c626fcf9e3",
+        "kprobe/utimes_common": "46cecf292685ea436eb3e548627453987d1a2ab12d15ef42a49496c626fcf9e3",
+        "kprobe/do_truncate": "144f432db1b5e8042a7fed22c4c0e1086655ea5a7f9d6e3b9652ad02083d78db",
+        "kprobe/fd_install": "221b04685e6c164d8522021a9e1afd0b8422a35957e4249b4bcda4bb0d87ff7c",
+        "kprobe/filp_close": "4a4a83c8ebe555582a98c2f8f45afc94f90b73cf45dc651d27b094b5458606ca",
+        "kprobe/file_update_time": "5f69f89cd1facfd3f284279b2b635dfa86234b75dc6f70b5748bdc12b2a1d4ae",
+        "kretprobe/file_update_time": "80acbf711137ec2940542b0ef81d3948ba7048a8070a4614ca69600032172062",
+        "kprobe/file_modified": "691636e9518322d70ac0b0b62bf4cff14aef346a08b37c1e437d12f641e2cc68",
+        "kretprobe/file_modified": "f006ec5d3a30eed43ae04ac5edff65ef9de0c13d17d0d27a53a8a05704c1355b",
+        "kprobe/inotify_find_inode": "8718f968bf9d0cb6068b1d2c9f6fc17a9f5f475c1ab460fe0d472d9747b9890e",
+        "kretprobe/inotify_find_inode": "2d6820be94f36a248eee658d618a2ef0ceb0b0693036a7ebd39a0a06331e9e9e",
+        "kprobe/process_execute_failed_tail": "c59bba2622481e2c6a706c69ff9ae7eaff09cbb118da2bedd875b7e7ad0569d1",
+        "kprobe/exec_binprm": "6311cdc61e02618b380cb920a00fa7cdc3f06bf878c16216f9069a5509545230",
+        "kprobe/security_bprm_creds_for_exec": "4fdfa40d5001e1a70a55ff266061796cbb2331a43db6af698f2097bda9a57915",
+        "kretprobe/execute_finished": "b510e55c273ded5a6a0badac761615f2e15a48c2c42e88698aa9be4b2f00b246",
+        "kprobe/security_path_notify": "f348a10777542bd4d27818df79db24786da5017fff7c287a1a1bb778cf6607aa",
+        "kprobe/set_fs_pwd": "71f14ed275aeb013ec8f332525111192ce4ee2955352f8789a70d586ec2044bd",
+        "kprobe/security_task_setrlimit": "8b55fe6574aabc063edd4ce159535dc0597ed224881a871a2e259ca98decb7d4",
+        "kprobe/security_settime64": "90f750e96cdf09b75ab1c68f16334df4433c7a68798c2d6ddcff26880ab71b68",
+        "kprobe/chmod_common": "d057bf13c1ac96857082f833089bd677b56ac540dccd40a7d8da68023ba0af89",
+        "kprobe/security_task_prctl": "be0ba8e25f85dc54d605c29cb0b2806288d6608fdce1abbf078402d4c4e371a9",
+        "kprobe/syscall_checker": "5f6b84a0dcbb7f490a270713d7f80d448cb697733013c6fff5db1ebd48f008b4",
+        "kprobe/security_sb_umount": "7453bcd50e8692146db0695eaff98fea8e375e0f195fedec5a94e88bbc2893b1",
+        "kprobe/sock_alloc_file": "cfb6838e0fe05a0360c095a91c843bad023a97b6c5ec2fbaa2fecb8ccc75fd93",
+        "kretprobe/sock_alloc_file": "0f4aee6285a3d1f70336f9ccc2407ec74ab2e68c70f36c9c7b4ab622a1d7ea1f",
+        "kprobe/security_sk_clone": "d1780ad35e47496976d49a600377ef9a0370a0bb63f012729a4836e9b30239e5",
+        "kprobe/security_socket_recvmsg": "5f536bc6b13d1ab2d25b3f73eb54210bf62f5780f3ea3a5b6c861235daed0677",
+        "kprobe/security_socket_sendmsg": "5f536bc6b13d1ab2d25b3f73eb54210bf62f5780f3ea3a5b6c861235daed0677",
+        "kprobe/__cgroup_bpf_run_filter_skb": "9e1738071eea1fa6a420b64d6da7827c9cd9eb6a93161ba9299775f754e1b625",
+        "cgroup_skb/ingress": "ffd6bf92181dfb930c11f5c7bd4465a8aba50df74b0644ea7c1414c4c27acb96",
+        "cgroup_skb/egress": "ffd6bf92181dfb930c11f5c7bd4465a8aba50df74b0644ea7c1414c4c27acb96",
+        "raw_tracepoint/cgroup_mkdir_signal": "79df1ab27c325f63f2f1563b1bfb3a20638415fd49117e1de85600468110eee3",
+        "raw_tracepoint/cgroup_rmdir_signal": "cb2eaa20d0a80a722af8089284f24d28062e874b30157db370e25b45512d451e",
+        "kprobe/empty_kprobe": "59f4a931744dcdc62944a018ed3990e666ec6444616418d3b09a82dc5c753d52",
+        "raw_tracepoint/exec_test": "e425d1a6734d3e0c28a6b99bc401a30fc17e5478bbd073de75f2d51db73074a6",
+        "lsm/file_open": "023bcdf6196f362d526ad1c51f72259b6428933901fb378e32f4eeccc0f5942b",
+        "uprobe/features_fallback_test": "3f84f4c3e6cbe99572b8dc5b9ea9943fea84af63b07b8cec4bbc90d8a6598205",
+        "uprobe/features_fallback_arena_tailcall": "5408e2c5bf6ac99864e4b44883732267c6f9870db631ce65fac2eae9b8be9924",
+        "uprobe/features_fallback_helper_tailcall": "3c3929418107a47468ac77947cdc7baeebecc2bd1af68d109aefbe32eb66ee4b",
+        "uprobe/features_fallback_minimal_tailcall": "4039cbcdc6c5005bb5de6354588b242a64736117ab9c2cb202681c9a23812e81",
+        ".rodata": "7d7b8d47043dc3388a665bf1274e895942d6bae8e5a2eee74752738329b23f42",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a",
+        ".maps": "94049167a48f2b58339027d4b615f28476f091940b88c70d007946de382463e9",
+        ".rodata.str1.1": "1074e441a1d0fc1bbc644a64c84d164449783ed72bbb21ed1d38ddc056073276",
+        ".bss": "d6fd62f5ce537d90ea3ea45841b17f34d727bcbc4128748cba14fb87c0ffd9d1",
+        ".BTF": "83e8c6c50870c02580e6263137ebeb6e636d32607f1b5ffe708e176901770fd3"
+      },
+      "program_relocation_table_present": false,
+      "programs": [
+        {
+          "name": "tracepoint__raw_syscalls__sys_enter",
+          "section": "raw_tracepoint/sys_enter",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "sys_enter_init",
+          "section": "raw_tracepoint/sys_enter_init",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "sys_enter_submit",
+          "section": "raw_tracepoint/sys_enter_submit",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "tracepoint__raw_syscalls__sys_exit",
+          "section": "raw_tracepoint/sys_exit",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "sys_exit_init",
+          "section": "raw_tracepoint/sys_exit_init",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "sys_exit_submit",
+          "section": "raw_tracepoint/sys_exit_submit",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "trace_sys_enter",
+          "section": "raw_tracepoint/trace_sys_enter",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "trace_sys_exit",
+          "section": "raw_tracepoint/trace_sys_exit",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "trace_ptrace",
+          "section": "kprobe/ptrace",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_ptrace",
+          "section": "kretprobe/ptrace",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_process_vm_writev",
+          "section": "kprobe/process_vm_writev",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_process_vm_writev",
+          "section": "kretprobe/process_vm_writev",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_arch_prctl",
+          "section": "kprobe/arch_prctl",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_arch_prctl",
+          "section": "kretprobe/arch_prctl",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_dup",
+          "section": "kprobe/dup",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_dup",
+          "section": "kretprobe/dup",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_dup2",
+          "section": "kprobe/dup2",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_dup2",
+          "section": "kretprobe/dup2",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_dup3",
+          "section": "kprobe/dup3",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_dup3",
+          "section": "kretprobe/dup3",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "syscall__execve_enter",
+          "section": "raw_tracepoint/sys_execve",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "syscall__execve_exit",
+          "section": "raw_tracepoint/sys_execve",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "syscall__execveat_enter",
+          "section": "raw_tracepoint/sys_execveat",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "syscall__execveat_exit",
+          "section": "raw_tracepoint/sys_execveat",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "sys_dup_exit_tail",
+          "section": "kprobe/sys_dup",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "tracepoint__sched__sched_process_fork",
+          "section": "raw_tracepoint/sched_process_fork",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "sched_process_fork_signal",
+          "section": "raw_tracepoint/sched_process_fork",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "lkm_seeker_modtree_loop",
+          "section": "uprobe/lkm_seeker_modtree_loop_tail",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "heartbeat_capture",
+          "section": "uprobe/capture_heartbeat",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "uprobe_lkm_seeker_submitter",
+          "section": "uprobe/lkm_seeker_submitter",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "uprobe_lkm_seeker",
+          "section": "uprobe/lkm_seeker",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "lkm_seeker_kset_tail",
+          "section": "uprobe/lkm_seeker_kset_tail",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "lkm_seeker_mod_tree_tail",
+          "section": "uprobe/lkm_seeker_mod_tree_tail",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "lkm_seeker_proc_tail",
+          "section": "uprobe/lkm_seeker_proc_tail",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "lkm_seeker_new_mod_only_tail",
+          "section": "uprobe/lkm_seeker_new_mod_only_tail",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "tracepoint__sched__sched_process_exec",
+          "section": "raw_tracepoint/sched_process_exec",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "sched_process_exec_signal",
+          "section": "raw_tracepoint/sched_process_exec",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "sched_process_exec_event_submit_tail",
+          "section": "raw_tracepoint/sched_process_exec_event_submit_tail",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "tracepoint__sched__sched_process_exit",
+          "section": "raw_tracepoint/sched_process_exit",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "sched_process_exit_signal",
+          "section": "raw_tracepoint/sched_process_exit",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "tracepoint__sched__sched_process_free",
+          "section": "raw_tracepoint/sched_process_free",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "syscall__accept4",
+          "section": "raw_tracepoint/syscall__accept4",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "tracepoint__sched__sched_switch",
+          "section": "raw_tracepoint/sched_switch",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "trace_filldir64",
+          "section": "kprobe/filldir64",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_call_usermodehelper",
+          "section": "kprobe/call_usermodehelper",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_do_exit",
+          "section": "kprobe/do_exit",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "uprobe_syscall_table_check",
+          "section": "uprobe/syscall_table_check",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "uprobe_seq_ops_trigger",
+          "section": "uprobe/trigger_seq_ops_event",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "uprobe_mem_dump_trigger",
+          "section": "uprobe/trigger_mem_dump_event",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_file_ioctl",
+          "section": "kprobe/security_file_ioctl",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_tracepoint_probe_register_prio_may_exist",
+          "section": "kprobe/tracepoint_probe_register_prio_may_exist",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "tracepoint__cgroup__cgroup_attach_task",
+          "section": "raw_tracepoint/cgroup_attach_task",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "tracepoint__cgroup__cgroup_mkdir",
+          "section": "raw_tracepoint/cgroup_mkdir",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "tracepoint__cgroup__cgroup_rmdir",
+          "section": "raw_tracepoint/cgroup_rmdir",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_bprm_check",
+          "section": "kprobe/security_bprm_check",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_file_open",
+          "section": "kprobe/security_file_open",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_sb_mount",
+          "section": "kprobe/security_sb_mount",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_inode_unlink",
+          "section": "kprobe/security_inode_unlink",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_commit_creds",
+          "section": "kprobe/commit_creds",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_switch_task_namespaces",
+          "section": "kprobe/switch_task_namespaces",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_cap_capable",
+          "section": "kprobe/cap_capable",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_socket_create",
+          "section": "kprobe/security_socket_create",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_inode_symlink",
+          "section": "kprobe/security_inode_symlink",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_proc_create",
+          "section": "kprobe/proc_create",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace___debugfs_create_file",
+          "section": "kprobe/__debugfs_create_file",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_debugfs_create_dir",
+          "section": "kprobe/debugfs_create_dir",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_socket_listen",
+          "section": "kprobe/security_socket_listen",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_socket_connect",
+          "section": "kprobe/security_socket_connect",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_socket_accept",
+          "section": "kprobe/security_socket_accept",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_socket_bind",
+          "section": "kprobe/security_socket_bind",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_socket_setsockopt",
+          "section": "kprobe/security_socket_setsockopt",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "send_bin",
+          "section": "kprobe/send_bin",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "send_bin_tp",
+          "section": "raw_tracepoint/send_bin_tp",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "trace_vfs_write",
+          "section": "kprobe/vfs_write",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "vfs_write_magic_enter",
+          "section": "kprobe/vfs_write",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_vfs_write",
+          "section": "kretprobe/vfs_write",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "vfs_write_magic_return",
+          "section": "kretprobe/vfs_write",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_vfs_write_tail",
+          "section": "kretprobe/vfs_write_tail",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_vfs_writev",
+          "section": "kprobe/vfs_writev",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "vfs_writev_magic_enter",
+          "section": "kprobe/vfs_writev",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_vfs_writev",
+          "section": "kretprobe/vfs_writev",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "vfs_writev_magic_return",
+          "section": "kretprobe/vfs_writev",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_vfs_writev_tail",
+          "section": "kretprobe/vfs_writev_tail",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_kernel_write",
+          "section": "kprobe/__kernel_write",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "kernel_write_magic_enter",
+          "section": "kprobe/__kernel_write",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_kernel_write",
+          "section": "kretprobe/__kernel_write",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "kernel_write_magic_return",
+          "section": "kretprobe/__kernel_write",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_kernel_write_tail",
+          "section": "kretprobe/__kernel_write_tail",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_vfs_read",
+          "section": "kprobe/vfs_read",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_vfs_read",
+          "section": "kretprobe/vfs_read",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_vfs_read_tail",
+          "section": "kretprobe/vfs_read_tail",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_vfs_readv",
+          "section": "kprobe/vfs_readv",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_vfs_readv",
+          "section": "kretprobe/vfs_readv",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_vfs_readv_tail",
+          "section": "kretprobe/vfs_readv_tail",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_mmap_alert",
+          "section": "kprobe/security_mmap_addr",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_do_mmap",
+          "section": "kprobe/do_mmap",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_do_mmap",
+          "section": "kretprobe/do_mmap",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_mmap_file",
+          "section": "kprobe/security_mmap_file",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_file_mprotect",
+          "section": "kprobe/security_file_mprotect",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "syscall__init_module",
+          "section": "raw_tracepoint/sys_init_module",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_bpf",
+          "section": "kprobe/security_bpf",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_register_kprobe",
+          "section": "kprobe/register_kprobe",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_register_kprobe",
+          "section": "kretprobe/register_kprobe",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_bpf_map",
+          "section": "kprobe/security_bpf_map",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_bpf_prog",
+          "section": "kprobe/security_bpf_prog",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_bpf_check",
+          "section": "kprobe/bpf_check",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_check_map_func_compatibility",
+          "section": "kprobe/check_map_func_compatibility",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_check_helper_call",
+          "section": "kprobe/check_helper_call",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_kernel_read_file",
+          "section": "kprobe/security_kernel_read_file",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_kernel_post_read_file",
+          "section": "kprobe/security_kernel_post_read_file",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_inode_mknod",
+          "section": "kprobe/security_inode_mknod",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_device_add",
+          "section": "kprobe/device_add",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace___register_chrdev",
+          "section": "kprobe/__register_chrdev",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret__register_chrdev",
+          "section": "kretprobe/__register_chrdev",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_do_splice",
+          "section": "kprobe/do_splice",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_do_splice",
+          "section": "kretprobe/do_splice",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "tracepoint__module__module_load",
+          "section": "raw_tracepoint/module_load",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "tracepoint__module__module_free",
+          "section": "raw_tracepoint/module_free",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "trace_do_init_module",
+          "section": "kprobe/do_init_module",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_do_init_module",
+          "section": "kretprobe/do_init_module",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_load_elf_phdrs",
+          "section": "kprobe/load_elf_phdrs",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_file_permission",
+          "section": "kprobe/security_file_permission",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "tracepoint__task__task_rename",
+          "section": "raw_tracepoint/task_rename",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_inode_rename",
+          "section": "kprobe/security_inode_rename",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_kallsyms_lookup_name",
+          "section": "kprobe/kallsyms_lookup_name",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_kallsyms_lookup_name",
+          "section": "kretprobe/kallsyms_lookup_name",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_do_sigaction",
+          "section": "kprobe/do_sigaction",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_vfs_utimes",
+          "section": "kprobe/vfs_utimes",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_utimes_common",
+          "section": "kprobe/utimes_common",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_do_truncate",
+          "section": "kprobe/do_truncate",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_fd_install",
+          "section": "kprobe/fd_install",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_filp_close",
+          "section": "kprobe/filp_close",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_file_update_time",
+          "section": "kprobe/file_update_time",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_file_update_time",
+          "section": "kretprobe/file_update_time",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_file_modified",
+          "section": "kprobe/file_modified",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_file_modified",
+          "section": "kretprobe/file_modified",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_inotify_find_inode",
+          "section": "kprobe/inotify_find_inode",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_inotify_find_inode",
+          "section": "kretprobe/inotify_find_inode",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "process_execute_failed_tail",
+          "section": "kprobe/process_execute_failed_tail",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_exec_binprm",
+          "section": "kprobe/exec_binprm",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_bprm_creds_for_exec",
+          "section": "kprobe/security_bprm_creds_for_exec",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_execute_finished",
+          "section": "kretprobe/execute_finished",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_path_notify",
+          "section": "kprobe/security_path_notify",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_set_fs_pwd",
+          "section": "kprobe/set_fs_pwd",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_task_setrlimit",
+          "section": "kprobe/security_task_setrlimit",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_settime64",
+          "section": "kprobe/security_settime64",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_chmod_common",
+          "section": "kprobe/chmod_common",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_task_prctl",
+          "section": "kprobe/security_task_prctl",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "syscall_checker",
+          "section": "kprobe/syscall_checker",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_sb_umount",
+          "section": "kprobe/security_sb_umount",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_sock_alloc_file",
+          "section": "kprobe/sock_alloc_file",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_ret_sock_alloc_file",
+          "section": "kretprobe/sock_alloc_file",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_sk_clone",
+          "section": "kprobe/security_sk_clone",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_socket_recvmsg",
+          "section": "kprobe/security_socket_recvmsg",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "trace_security_socket_sendmsg",
+          "section": "kprobe/security_socket_sendmsg",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "cgroup_bpf_run_filter_skb",
+          "section": "kprobe/__cgroup_bpf_run_filter_skb",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "cgroup_skb_ingress",
+          "section": "cgroup_skb/ingress",
+          "prog_type": 8,
+          "autoload": false
+        },
+        {
+          "name": "cgroup_skb_egress",
+          "section": "cgroup_skb/egress",
+          "prog_type": 8,
+          "autoload": false
+        },
+        {
+          "name": "cgroup_mkdir_signal",
+          "section": "raw_tracepoint/cgroup_mkdir_signal",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "cgroup_rmdir_signal",
+          "section": "raw_tracepoint/cgroup_rmdir_signal",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "empty_kprobe",
+          "section": "kprobe/empty_kprobe",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "tracepoint__exec_test",
+          "section": "raw_tracepoint/exec_test",
+          "prog_type": 17,
+          "autoload": false
+        },
+        {
+          "name": "lsm_file_open_test",
+          "section": "lsm/file_open",
+          "prog_type": 29,
+          "autoload": false
+        },
+        {
+          "name": "uprobe__features_fallback_arena",
+          "section": "uprobe/features_fallback_test",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "uprobe__features_fallback_helper",
+          "section": "uprobe/features_fallback_test",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "uprobe__features_fallback_minimal",
+          "section": "uprobe/features_fallback_test",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "uprobe__features_fallback_arena_tailcall",
+          "section": "uprobe/features_fallback_arena_tailcall",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "uprobe__features_fallback_helper_tailcall",
+          "section": "uprobe/features_fallback_helper_tailcall",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "uprobe__features_fallback_minimal_tailcall",
+          "section": "uprobe/features_fallback_minimal_tailcall",
+          "prog_type": 2,
+          "autoload": false
+        }
+      ]
+    },
+    {
+      "source": "/var/tmp/kprog-tmp/A/resident-census/bpf-resources/8242be00874c69b80e9978953c071fc69ebac0087c21ac41bb449afc85be50f3.bpf.o",
+      "source_sha256": "8242be00874c69b80e9978953c071fc69ebac0087c21ac41bb449afc85be50f3",
+      "application": "tetragon/observer",
+      "resident_instances": 9,
+      "original_open_errno": 0,
+      "adapted_open_errno": 0,
+      "globalized_entries": [],
+      "resource_sha256": "b5351da09938d6931aac7bebfeeb19f274109520bedc8763758d9b84d3ca47b6",
+      "preserved_sections": {
+        ".text": "d0c3952047b560971c3136460c584c9e37488b5110c1f0eed9cee3d7b68eb04c",
+        "kprobe.multi": "df715987bc3f5d51dac0373798566658d076c1537339f32ac4e2775af798320d",
+        "kprobe.multi/generic_retkprobe": "5a6b9801606a07412a57f4e482571cbe03b226ef422d0b9e627a908c7f0c8998",
+        "license": "a711b6d9514fa9ca34a60c700d4cc7ba4576f8f3efac58014ed9eb2c78c922ba",
+        ".maps": "46be13d2dc57d15a3505198ac0dcc7da2f1ec2f739e73f9789e9cb5bebfa34ab",
+        ".rodata": "96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b78630a09cfc7",
+        ".rodata.str1.1": "175dc64d82fd422d9690525d6141017991e7cfef76712196cd45e99ba5060699",
+        ".BTF": "26764effc63ac06eeca78fd5d8fb6067867cd088163a94050df66bc920b6a4ec"
+      },
+      "program_relocation_table_present": false,
+      "programs": [
+        {
+          "name": "generic_retkprobe_filter_arg",
+          "section": "kprobe.multi",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "generic_retkprobe_actions",
+          "section": "kprobe.multi",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "generic_retkprobe_output",
+          "section": "kprobe.multi",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "generic_retkprobe_event",
+          "section": "kprobe.multi/generic_retkprobe",
+          "prog_type": 2,
+          "autoload": false
+        }
+      ]
+    },
+    {
+      "source": "/var/tmp/kprog-tmp/A/resident-census/bpf-resources/d47a2f2c754ca2219c87271c1bc2dc4c9b40756ae92dbbfacd026ec25e5ea72f.bpf.o",
+      "source_sha256": "d47a2f2c754ca2219c87271c1bc2dc4c9b40756ae92dbbfacd026ec25e5ea72f",
+      "application": "tetragon/observer",
+      "resident_instances": 1,
+      "original_open_errno": 0,
+      "adapted_open_errno": 0,
+      "globalized_entries": [],
+      "resource_sha256": "3ce145b30b2310878c0bf75789ba0e07972d63ed3b512c45f0bde936cdc207b8",
+      "preserved_sections": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "kprobe/acct_process": "f65e763d8a741e677a8f360fc3d1015f03736ce98bfa7e385988853a2f7b0717",
+        "kprobe/disassociate_ctty": "3b0471eb17464587508b612a4f9001832b0e6a3f82dc0243a1bdfb85b628c8e7",
+        "license": "a711b6d9514fa9ca34a60c700d4cc7ba4576f8f3efac58014ed9eb2c78c922ba",
+        ".maps": "7081ba3d8887be22551f56b5f50da675bda7dd02f40e9fcb150ac84fccbe387f",
+        ".rodata": "96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b78630a09cfc7",
+        ".BTF": "3c44cdc49f8c69efdea4d1e8a0a415d4a37b27e07fae5fc7d79afe02b01c1478"
+      },
+      "program_relocation_table_present": false,
+      "programs": [
+        {
+          "name": "event_exit_acct_process",
+          "section": "kprobe/acct_process",
+          "prog_type": 2,
+          "autoload": false
+        },
+        {
+          "name": "event_exit_disassociate_ctty",
+          "section": "kprobe/disassociate_ctty",
+          "prog_type": 2,
+          "autoload": false
+        }
+      ]
+    },
+    {
+      "source": "/var/tmp/kprog-tmp/A/resident-census/bpf-resources/b373f3111d34b1dc3036aabfaff2f74433de1c350bfa6d029f49b58dc1ca2487.bpf.o",
+      "source_sha256": "b373f3111d34b1dc3036aabfaff2f74433de1c350bfa6d029f49b58dc1ca2487",
+      "application": "tetragon/observer",
+      "resident_instances": 1,
+      "original_open_errno": 0,
+      "adapted_open_errno": 0,
+      "globalized_entries": [],
+      "resource_sha256": "e86463f2eb9b1bf2a1890fc9c62acdfdbc5f8fb253bf50bfe2ea7b57d4e9b580",
+      "preserved_sections": {
+        ".text": "ba7d25b1104046e5aee01a583a46a70d0e8a27f43839f3685477da7d7c69d56c",
+        "tracepoint": "06a183dc22462d73b28266f9c56e019634e6fea04fccb9a902c0ff391e4763bb",
+        "tracepoint/sys_execve": "56ba41b509441b28ced121f89fde3fdc885302e605b9dd26400bb76335d3e518",
+        "license": "a711b6d9514fa9ca34a60c700d4cc7ba4576f8f3efac58014ed9eb2c78c922ba",
+        ".maps": "2ef0b8632395250da7a50aba9c73b8b97c27e1a5ff76d0ae2ffce238e3ce4f0c",
+        ".rodata": "709e80c88487a2411e1ee4dfb9f22a861492d20c4765150c0c794abd70f8147c",
+        ".rodata.str1.1": "175dc64d82fd422d9690525d6141017991e7cfef76712196cd45e99ba5060699",
+        ".BTF": "edbdd7e186ad65ce204fbb6a2bb2f839efe5d5b6dcc47029101827c2381f7c58"
+      },
+      "program_relocation_table_present": false,
+      "programs": [
+        {
+          "name": "execve_rate",
+          "section": "tracepoint",
+          "prog_type": 5,
+          "autoload": false
+        },
+        {
+          "name": "execve_send",
+          "section": "tracepoint",
+          "prog_type": 5,
+          "autoload": false
+        },
+        {
+          "name": "event_execve",
+          "section": "tracepoint/sys_execve",
+          "prog_type": 5,
+          "autoload": false
+        }
+      ]
+    },
+    {
+      "source": "/var/tmp/kprog-tmp/A/resident-census/bpf-resources/a9070b5d6291be84c9361c60f181be561bf498223f22a8738af50887b6440cd3.bpf.o",
+      "source_sha256": "a9070b5d6291be84c9361c60f181be561bf498223f22a8738af50887b6440cd3",
+      "application": "tetragon/observer",
+      "resident_instances": 1,
+      "original_open_errno": 0,
+      "adapted_open_errno": 0,
+      "globalized_entries": [],
+      "resource_sha256": "bdd2ceed93d25c31eaef08e7596af55278d93b80bf5afca28d17708a4442b887",
+      "preserved_sections": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "socket": "83c4d7f270bd9ece7240cc96be38bb911117cd694226ffe8bdce28045d3d5c4e",
+        "license": "a711b6d9514fa9ca34a60c700d4cc7ba4576f8f3efac58014ed9eb2c78c922ba",
+        ".maps": "3dc463a76fc170607c07b104c3cb531362ce7d6e10c1a34e0c0f370aeae08ce8",
+        ".rodata": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        ".BTF": "204b63fc8e901e9a0240a82466f6134f9647a09f652327878a793515bd7fccf0"
+      },
+      "program_relocation_table_present": false,
+      "programs": [
+        {
+          "name": "execve_map_update",
+          "section": "socket",
+          "prog_type": 1,
+          "autoload": false
+        }
+      ]
+    }
+  ]
+}

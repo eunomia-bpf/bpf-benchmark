@@ -96,11 +96,12 @@ def start_service(arch=1):
 
 @contextlib.contextmanager
 def libbpf_resource_object(path, directory):
-    """Present Go-loader local entry symbols to libbpf for maps/BTF setup."""
+    """Prepare source maps/BTF through a resource-only ELF metadata view."""
     from elftools.elf.elffile import ELFFile
     path = pathlib.Path(path)
     with path.open("rb") as source:
         elf = ELFFile(source)
+        program_relocations = elf.get_section_by_name(".BTF.ext") is not None
         local_entries = [
             symbol.name for symbol in elf.get_section_by_name(".symtab").iter_symbols()
             if symbol["st_info"]["type"] == "STT_FUNC"
@@ -109,10 +110,13 @@ def libbpf_resource_object(path, directory):
             and elf.get_section(symbol["st_shndx"])["sh_flags"] & 4
             and elf.get_section(symbol["st_shndx"]).name != ".text"
         ]
-    if local_entries:
+    if local_entries or program_relocations:
         with tempfile.TemporaryDirectory(prefix="resource-elf-", dir=directory) as temp:
             resource = pathlib.Path(temp) / path.name
-            subprocess.run(["llvm-objcopy-18",
+            # Source programs keep autoload=false. Their CO-RE/function/line
+            # relocation table belongs to source execution; maps and entry
+            # prototypes use the retained .BTF section.
+            subprocess.run(["llvm-objcopy-18", "--remove-section=.BTF.ext",
                             *("--globalize-symbol=" + name for name in local_entries),
                             str(path), str(resource)], check=True)
             yield resource, local_entries
@@ -280,7 +284,8 @@ class ObjectResources:
         return dict(version=1, load_context=context, maps=bindings), fds, dict(
             section=section, maps=pins, pin_root=str(self.pins),
             attach_target_resolution=target_error,
-            resource_globalized_entries=self.globalized_entries)
+            resource_globalized_entries=self.globalized_entries,
+            resource_view="maps-and-btf")
 
     def close(self):
         if self.obj:

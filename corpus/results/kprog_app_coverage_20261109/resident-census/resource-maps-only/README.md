@@ -1,0 +1,5 @@
+Maps and BTF resource view
+
+Direct native submission prepares source maps and entry BTF prototypes with every source program autoload=false. The temporary resource ELF keeps instruction/data and .BTF bytes, presents local entry symbols to libbpf, and omits the source-execution .BTF.ext relocation table. The original source ELF retains its bytes. This removes source-execution CO-RE work from the maps/BTF preparation path; source entry types remain available in .BTF.
+
+Offline observation covers all 18 initial resource ELF inputs and 274 selected instances. Allocatable sections and .BTF match; the resource view has a source-execution relocation-table count of zero. OTel 13 opens successfully; Cilium 72 reaches custom pinning metadata. The stock-kernel resource-only continuation covers the seven distinct source objects associated with all 238 initial resource failures. Its result.json/raw.tar.gz contain actual prepare outcomes after completion. Native execution requests: 0; application source-program loads: 0. Census generation/compile/verifier stages retain their separate actual outcomes.
