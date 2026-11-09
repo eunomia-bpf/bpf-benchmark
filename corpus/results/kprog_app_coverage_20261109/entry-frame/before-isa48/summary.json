@@ -1,0 +1,46 @@
+{
+  "model_head": "9cbac28ec5d31bd689b5875820e2bf639af4fd25",
+  "driver_head": "829ba669bf4d39981b3c03963c6b4cac7666e37a",
+  "kernel_base": "35ea2cde39fc88b01f2f49b2a357e7cf7102e4c8",
+  "entry_contract": "original CK four-register bitmap frame; original B six-callee exit comparisons",
+  "cases": 48,
+  "stages": {
+    "valid_executed": 10,
+    "verifier_rejected": 34,
+    "accepted_finding": 3,
+    "specialization_rejected": 1
+  },
+  "unsafe_native_executions": 0,
+  "suite_exit": 1,
+  "guest_exit": 1,
+  "make_exit": 2,
+  "comparison": {
+    "source": "/var/tmp/kprog-tmp/S17/run/x86-current/outcomes.json",
+    "stage_changes": []
+  },
+  "findings": [
+    {
+      "name": "uninitialized_stack",
+      "previous_stage": "accepted_finding",
+      "native_executed": false
+    },
+    {
+      "name": "immediate_push_branch",
+      "previous_stage": "accepted_finding",
+      "native_executed": false
+    },
+    {
+      "name": "stack_base_flags",
+      "previous_stage": "accepted_finding",
+      "native_executed": false
+    }
+  ],
+  "runtime": {
+    "/var/tmp/kprog-tmp/C/stock-entry/kernel-build/arch/x86/boot/bzImage": "fda0dd6ce634fa287d92e449ba81fc3ae5bd430a0c1ee896b8f281d13ccda31b",
+    "/var/tmp/kprog-tmp/C/stock-entry/module/kprog_stock.ko": "4ebb2d5edc1c5cf602cf7605920a01f321843d4a75c729635c2ee1b9061a2297",
+    "/var/tmp/kprog-tmp/C/stock-entry/native-link-before": "9aa6aacf54d0a272869dbe2a7b61606e641d6a657ac27d19b18fb4991d027afb",
+    "/var/tmp/kprog-tmp/C/stock-entry/loader/libnative_loader.so": "580852d479d5e13433d57cc3c5b822e2c119191564ebbd09fddf92111ae196f8",
+    "/var/tmp/kprog-tmp/C/stock-entry/loader/trusted-native-loader": "fd7820d758e9ba7a21dcdf378e0a691b047184660688c76bca7789ad13446170"
+  },
+  "input_catalog_sha256": "74a718eb19e77309ef85db97090a5dd765c622d7886e1d849f61faa684efda08"
+}
