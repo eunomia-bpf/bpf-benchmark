@@ -6326,3 +6326,12 @@ compiled coverage is14/75; complete flags/tag/frame, all-register/physical ABI
 and whole-program compiler embedding remain explicit interfaces. The existing
 full-check entry point compiles these same fixture functions and certificate.
 The final combined/full proof run follows the current sole full's publication.
+
+### Published source full check d39918760
+
+`make check` on immutable publishedd39918760 exits0. All1287 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_d39918760`. Every check retains its exact published source identity.
+
+Full raw archive: [full-make-check-d39918760.log.gz](full-make-check-d39918760.log.gz).
