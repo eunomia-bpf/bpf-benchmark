@@ -1099,3 +1099,22 @@ agree to within 0.18% and the receiver matches both.
 That is one 20 s sample, so it establishes binding, shape and equal work
 rather than a final ratio: the six-application timing at SAMPLES=3
 WORKLOAD_DURATION=180 is the measurement.
+
+### OTel, and what its image needs
+
+OTel ran its baseline arm on the restored workload (13 programs loaded, the
+20 s workload completed) and its native arm failed at startup with the same
+message Katran had before its loader was rebuilt: `native app exited before
+BPF programs were tracked by shim`.
+
+The difference from Katran is that the OTel image carries its own generated
+native objects under `/opt/bpf-benchmark/native-bpf/x86_64/otel*/`
+(`custom_trace.native.o`, `dotnet_tracer.native.o`, ...), produced before
+`5598b9321` added the load-site fields. Katran's image objects happen to
+work; OTel's do not. Regenerating them is generation work, which belongs to
+lane C with the app's own runtime.
+
+**So the both-arms check is complete for Katran and blocked for OTel.** The
+six-application timing needs OTel's native objects regenerated first, and
+that is the one outstanding item before `SAMPLES=3 WORKLOAD_DURATION=180`
+in both stats modes.
