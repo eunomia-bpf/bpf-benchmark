@@ -1,0 +1,3 @@
+Paired Tracee verified startup frontier
+
+Whole application860e77f17 completes its baseline and produces three service requests. tracepoint__raw_syscalls__sys_enter and sys_enter_init generate, compile and install. sys_enter_submit generates and compiles; the stock verifier diagnoses a write at R10-520 after6904 processed instructions. Its exact native P, generated B, metadata and verifier log remain in request3 inside the referenced complete raw archive. The prepared generic probe-read producer reduces this entry body11968→8224bytes and258→102calls. Its actual complete BCC→Tracee application queue b409 runs after the released original Tracee slot, alongside the private original catalog. Runtime admission additions:0.

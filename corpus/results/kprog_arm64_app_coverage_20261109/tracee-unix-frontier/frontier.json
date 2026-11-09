@@ -1,0 +1,25 @@
+{
+  "utc": "2026-11-09T07:13:16.413894+00:00",
+  "source_publication": "61c85aa5febf1b6bd8acf8a37104469d90faa32a",
+  "whole_application_publication": "860e77f17fdf0199126a79fd43f165b9aeaf258f",
+  "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261108/tracee-unix-length/application/trusted-arm64-tracee-result/run-20261109T052848053979Z.tar.gz",
+  "request_member": "run/requests/3.failure.tar.gz",
+  "entry": "sys_enter_submit",
+  "stage": "verifier_rejected",
+  "diagnostic": "invalid write to stack R10 off=-520 size=8",
+  "processed_instructions": 6904,
+  "generated": 3,
+  "installed_entries": [
+    "tracepoint__raw_syscalls__sys_enter",
+    "sys_enter_init"
+  ],
+  "application_make_exit": 2,
+  "next_producer": "Scalar probe-read lowering5bb; full BCC then Tracee actual application queue b409daa93",
+  "compiler_entry_measurement": {
+    "control_bytes": 11968,
+    "candidate_bytes": 8224,
+    "control_calls": 258,
+    "candidate_calls": 102
+  },
+  "runtime_admission_additions": 0
+}

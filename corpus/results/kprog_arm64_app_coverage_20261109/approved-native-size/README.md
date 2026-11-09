@@ -1,3 +1,5 @@
 Approved ARM native-copy extent module
 
 Coordinator decision2026-11-09 06:55 supplies the shared native_size >=1GiB E2BIG behavior at kernel copy time. Shared source c3d6523f8 contributes its exact two-line patch to the captured ARM include tree. Paired ARM module source b0e107ce6 carries the existing recovery and three kfunc descriptors. The existing prepared ARM kernel cache and module outputs supply the incremental build. The captured recovery Image, original catalog/Tracee guests and probe-read queue retain their runtime bytes. This receipt records module compilation; actual guest adoption has its own result. Additional runtime admission rules:0.
+
+The current shared successor is [3e3f ordinary-copy ARM](shared-successor/README.md), following coordinator direct instruction c2b96d6c3 that places the sole extent bound at actual x86 emitted chunk copy. Its [existing live/NULL replay](shared-successor/null-replay/result.json) succeeds at a95f777c8 with live4294967295, recovered0 and guest exit0. Historical c6df source and [c0e0 raw control](null-replay/README.md) retain their original captured rule. ARM successor admission rules added:0.
