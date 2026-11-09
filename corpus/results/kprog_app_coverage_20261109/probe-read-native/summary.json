@@ -1,0 +1,61 @@
+{
+  "inputs": {
+    "parent": "191f9dc1d60cfd2727efef3bbe9bf84b7ae1fab1",
+    "native_header_sha256": "049655c2df713e19731220de85668522f6569aeac2f42cb9c49e0b1bc04679d8",
+    "control_header_sha256": "d8f3497c11a5ceebb14ea389c9a4018caf22f065c53ba407e856a23cee717a3a",
+    "plugin_sha256": "4fd7ff34ecca28c71bfa2febf5ac13a887638720cc943c583bc688368f22e301",
+    "source_sha256": {
+      "vendor/bpf/tracee/pkg/ebpf/c/tracee.bpf.c": "4e0778b19b8584da9e1fdbe96d6e94a3bfdb1163abbf8d311de4b9aadd00c2c6",
+      "vendor/bpf/tracee/pkg/ebpf/c/lsmsupport/kprobe_check.bpf.c": "e1c9171afb3be4bc8a7f1d5fe316aed8e37e472bcc9b47affbf2af4a6b3395dc",
+      "vendor/bpf/tracee/pkg/ebpf/c/lsmsupport/lsm_check.bpf.c": "8c3fa39353ec82effed638a1cd3c12fa0c6638d9bb40e8b57c5bac0f65260fb2"
+    }
+  },
+  "control": {
+    "header_sha256": "d8f3497c11a5ceebb14ea389c9a4018caf22f065c53ba407e856a23cee717a3a",
+    "objects": [
+      {
+        "object": "kprobe_check.native.o",
+        "sha256": "fcb5e2932ebb5b08dd72a7e51c3d8c84c321a546428cf2879888e308c158e695",
+        "executable_bytes": 60,
+        "rep_movs_sites": 0
+      },
+      {
+        "object": "lsm_check.native.o",
+        "sha256": "8faf876a5dc2f344ac5352288983b2d94c3ec8c2725de301ad826f4931b73da3",
+        "executable_bytes": 60,
+        "rep_movs_sites": 0
+      },
+      {
+        "object": "tracee.native.o",
+        "sha256": "17336c1435701218af3cfb8db37cd2c6ce5427141d8e404888db265fd77dec9a",
+        "executable_bytes": 1822172,
+        "rep_movs_sites": 32
+      }
+    ],
+    "manifest_entries": 114
+  },
+  "candidate": {
+    "header_sha256": "049655c2df713e19731220de85668522f6569aeac2f42cb9c49e0b1bc04679d8",
+    "objects": [
+      {
+        "object": "kprobe_check.native.o",
+        "sha256": "f4958c6564b22e9d9fcbdccaa93a072d5c9d51c19ef20e8f7fef1a1144a6eb51",
+        "executable_bytes": 60,
+        "rep_movs_sites": 0
+      },
+      {
+        "object": "lsm_check.native.o",
+        "sha256": "bd9a5be00b9e689637afe0ce0fc91d9ef4b77095c4f3c21576e62909aedb2c82",
+        "executable_bytes": 60,
+        "rep_movs_sites": 0
+      },
+      {
+        "object": "tracee.native.o",
+        "sha256": "cf3f240bef94b59c892fdf5a704cf0fbb402941e75c7439648c247d004d60edb",
+        "executable_bytes": 2784446,
+        "rep_movs_sites": 16980
+      }
+    ],
+    "manifest_entries": 114
+  }
+}

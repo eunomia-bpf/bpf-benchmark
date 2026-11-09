@@ -656,11 +656,50 @@ static __always_inline unsigned long native_helper_id5(unsigned long id,
     native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
                        NATIVE_BPF_FUNC_probe_read, (dst), (size), (unsafe_ptr))( \
         (dst), (size), (unsafe_ptr))
+/* A single string element retains the helper's access width. On success
+ * RSI advances and RCX reaches zero; stock load recovery skips a faulting
+ * element and clears one destination register. The two outputs distinguish
+ * that fault from a legitimate zero value, including address wraparound.
+ * The address-domain arm preserves arch/x86/mm/maccess.c eligibility. */
+static __always_inline long __native_probe_read_kernel(
+    void *dst, unsigned int size, const void *source)
+{
+#if defined(__x86_64__)
+    unsigned long address = (unsigned long)source;
+    if (__builtin_constant_p(size) &&
+        (size == 1 || size == 2 || size == 4 || size == 8) &&
+        (long)address < 0 &&
+        (address & ~4095UL) != 0xffffffffff600000UL) {
+        const void *from = source;
+        void *to = dst;
+        unsigned long count = 1;
+        switch (size) {
+        case 1:
+            asm volatile("rep movsb" : "+S"(from), "+D"(to), "+c"(count) : : "memory");
+            break;
+        case 2:
+            asm volatile("rep movsw" : "+S"(from), "+D"(to), "+c"(count) : : "memory");
+            break;
+        case 4:
+            asm volatile("rep movsl" : "+S"(from), "+D"(to), "+c"(count) : : "memory");
+            break;
+        case 8:
+            asm volatile("rep movsq" : "+S"(from), "+D"(to), "+c"(count) : : "memory");
+            break;
+        }
+        if ((unsigned long)from == address + size && count == 0)
+            return 0;
+        __builtin_memset(dst, 0, size);
+        return -14;
+    }
+#endif
+    return native_bpf_helper3(long (*)(void *, unsigned int, const void *),
+                             NATIVE_BPF_FUNC_probe_read_kernel, dst, size, source)(
+        dst, size, source);
+}
 #undef bpf_probe_read_kernel
 #define bpf_probe_read_kernel(dst, size, unsafe_ptr) \
-    native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
-                       NATIVE_BPF_FUNC_probe_read_kernel, (dst), (size), (unsafe_ptr))( \
-        (dst), (size), (unsafe_ptr))
+    __native_probe_read_kernel((dst), (size), (unsafe_ptr))
 #undef bpf_probe_read_user
 #define bpf_probe_read_user(dst, size, unsafe_ptr) \
     native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
