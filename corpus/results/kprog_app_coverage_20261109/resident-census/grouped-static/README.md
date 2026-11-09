@@ -19,3 +19,5 @@ Model epoch: 4f5b7ae6db02414f6ad69648677fc22ec8bf6795. Retained completed reques
 The initial549-instance census and this275-instance grouped continuation retain separate epochs and counts. Runtime resources and BTF differences remain visible in membership.json; weighted body classes describe this census sampling rule.
 
 B generation:275/275; B compilation:242/275; actual representative verifier outcomes weighted to instances: accepted0/rejected231. The11native-kernel-link failures occur after B compilation, at PLT32 relocation encoding. One callback argument reaches the verifier as scalar where a function is required. These phases retain their separate counters.
+
+Closed-worker storage: all20 new representative guests exited0. Complete outcomes and27 raw request archives remain in this result; worker-controls.tar.gz retains host orchestration inputs/logs. Closed private worker exports and duplicate outputs released 651811852 logical bytes, with per-worker archive references in worker-cleanup.json.
