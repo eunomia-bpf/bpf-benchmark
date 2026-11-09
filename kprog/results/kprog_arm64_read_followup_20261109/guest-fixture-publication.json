@@ -1,0 +1,14 @@
+{
+  "commit": "35e5d9849c7f66f496ded27371ed400cedd736c3",
+  "sha256": {
+    "kprog/test/native_load_fault/arm64.c": "bc59155626c49e1cd5b6990896f3d9858205046100e3a2842f589eebfa5cd777",
+    "kprog/test/native_load_fault/arm64_atomic16.bpf.c": "b11190397be8c47131551518e346b9c1e8962dfd4aa9856c107061016aa0b1f6",
+    "kprog/test/native_load_fault/probe.cpp": "4fb17308236be85dee5048cfdafe326db4e6de55fd438ad380cdca2457a978f3"
+  },
+  "paths": [
+    "kprog/test/native_load_fault/arm64.c",
+    "kprog/test/native_load_fault/arm64_atomic16.bpf.c",
+    "kprog/test/native_load_fault/probe.cpp"
+  ],
+  "remote_ancestor_verified": true
+}

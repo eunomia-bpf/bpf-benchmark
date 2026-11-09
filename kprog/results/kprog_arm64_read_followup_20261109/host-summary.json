@@ -1,0 +1,96 @@
+{
+  "utc": "2026-11-09T06:43:44.529617+00:00",
+  "scope": "ARM64 H1/M1/M2/L1/L3 and 16-bit LSE follow-up",
+  "model_commit": "cd0a0c3affa16485ca053bbd4e5ac7e123638c29",
+  "module_commit": "b0e107ce6b44585442dcb6002d5e4fab42db32e0",
+  "read_host": {
+    "gcc_ubsan_checks": 1608,
+    "clang_O2_checks": 1608,
+    "baseline_discrepancies": 55
+  },
+  "decoder": {
+    "assembler_words": 10,
+    "pair_fields": 6,
+    "baseline_decoder_discrepancies": 4,
+    "baseline_pair_discrepancies": 2
+  },
+  "narrow_atomic_host": {
+    "checks": 4737024,
+    "discrepancies": 0,
+    "typed_descriptor_count": 3
+  },
+  "generator_shapes": 180,
+  "micro": {
+    "positive": 29,
+    "unchecked_read": 1,
+    "compile_exit": 0
+  },
+  "lse": {
+    "compiled_units": 12,
+    "initial_compiled_units": 9,
+    "initial_width16_diagnostics": 3
+  },
+  "inherited_hosts": {
+    "final": {
+      "banners": 114,
+      "passing": 105,
+      "failures": [
+        "arm64 alu operand select route host cross-check: FAIL (3)",
+        "arm64 dispatch singleton route host cross-check: FAIL (11)",
+        "arm64 ldrsx op route host cross-check: FAIL (96)",
+        "arm64 dq_mem_extra route host cross-check: FAIL (64)",
+        "arm64 vreg field route host cross-check: FAIL (64)",
+        "arm64 dq_mem route host cross-check: FAIL (64)",
+        "arm64 pair_mem route host cross-check: FAIL (128)",
+        "arm64 mem_prepost route host cross-check: FAIL (128)",
+        "arm64 vreg route host cross-check: FAIL (64)"
+      ],
+      "failed_targets": [
+        "s10-oracle-16",
+        "s10-oracle-24",
+        "s10-oracle-45",
+        "s10-oracle-53",
+        "s10-oracle-62",
+        "s10-oracle-91",
+        "s10-oracle-93",
+        "s10-oracle-97",
+        "s10-oracle-99",
+        "s10-oracle-103",
+        "s10-oracle-105",
+        "s10-oracle-107",
+        "s10-oracle-109"
+      ]
+    },
+    "baseline": {
+      "banners": 9,
+      "passing": 0,
+      "failures": [
+        "arm64 alu operand select route host cross-check: FAIL (3)",
+        "arm64 dispatch singleton route host cross-check: FAIL (11)",
+        "arm64 ldrsx op route host cross-check: FAIL (96)",
+        "arm64 dq_mem_extra route host cross-check: FAIL (64)",
+        "arm64 vreg field route host cross-check: FAIL (64)",
+        "arm64 dq_mem route host cross-check: FAIL (64)",
+        "arm64 pair_mem route host cross-check: FAIL (128)",
+        "arm64 mem_prepost route host cross-check: FAIL (128)",
+        "arm64 vreg route host cross-check: FAIL (64)"
+      ],
+      "failed_targets": [
+        "s10-oracle-16",
+        "s10-oracle-24",
+        "s10-oracle-45",
+        "s10-oracle-62",
+        "s10-oracle-91",
+        "s10-oracle-93",
+        "s10-oracle-97",
+        "s10-oracle-99",
+        "s10-oracle-103",
+        "s10-oracle-105",
+        "s10-oracle-107",
+        "s10-oracle-109"
+      ]
+    }
+  },
+  "runtime_admission_additions": 0,
+  "guest_status": "serial collection active"
+}

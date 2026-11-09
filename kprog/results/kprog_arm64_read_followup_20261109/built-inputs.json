@@ -1,0 +1,38 @@
+{
+  "module-output/bpf_arm64_native_lab.ko": {
+    "bytes": 1157248,
+    "sha256": "1a5d2a296e6f6d9a2893fc025d30ebe8c6fde6119248df667faa1f4b0cb5ca1a"
+  },
+  "cargo-build/aarch64-unknown-linux-gnu/release/native-link": {
+    "bytes": 2759384,
+    "sha256": "3b1f75c717981decf3efcfa87cb3899060e61e81b7dd5ffbd31430510977e47b"
+  },
+  "fixture4/native.o": {
+    "bytes": 896288,
+    "sha256": "256a7059b69c04315f24cd723e05057239bf2b4d8c964aeffe4887574a863746"
+  },
+  "fixture4/arm64.o": {
+    "bytes": 900512,
+    "sha256": "78cac229dfee843d5d24b775807e2b741256de0a81f60f4f26c2ecc41f6fa66b"
+  },
+  "fixture4/probe": {
+    "bytes": 813632,
+    "sha256": "60e5c38ba405135755de73dac826d38999447c7e1afea3f8f43d7df48b05027b"
+  },
+  "fixture4/native_load_fault_module.ko": {
+    "bytes": 607768,
+    "sha256": "f6c98a11ef0a197227ea08583ae9584bc0cf333551af5f259a7a2e3603e61c2b"
+  },
+  "fixture4/atomic16.bpf.o": {
+    "bytes": 7144,
+    "sha256": "61899ff2d5d0ed03a3f035e219129948c5ffb04d29246f5fe0e12f7348f85dff"
+  },
+  "kprog/arm64/build/native-load-recovery/recovery/Image": {
+    "bytes": 42674688,
+    "sha256": "8f38106e7aa3d7e2369aa5626bb852ad17cb39312ee28f4e4c0a2ea235b57be5"
+  },
+  "runner/build-arm64-llvmbpf/native_loader/libnative_loader.a": {
+    "bytes": 722710,
+    "sha256": "5a9147dafa3138d9924683e9a7eb58b9a04be6b32b13eca6a3bd2e84f1576dae"
+  }
+}

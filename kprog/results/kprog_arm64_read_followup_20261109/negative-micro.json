@@ -1,0 +1,25 @@
+[
+  {
+    "name": "unchecked_packet_read.bpf.c",
+    "command": [
+      "clang",
+      "-O2",
+      "-g",
+      "-target",
+      "bpf",
+      "-mcpu=v4",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_arm64",
+      "-I/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/S10/negative-src/unchecked_packet_read.bpf.c",
+      "-o",
+      "/var/tmp/kprog-tmp/S10/negative-build/unchecked_packet_read.bpf.o"
+    ],
+    "exit": 0,
+    "stderr": ""
+  }
+]

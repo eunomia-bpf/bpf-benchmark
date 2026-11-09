@@ -1,0 +1,20 @@
+{
+  "commit": "cd0a0c3affa16485ca053bbd4e5ac7e123638c29",
+  "paths": [
+    "kprog/arm64/arm64_sim_local_bpf.h",
+    "kinsn/module/arm64/bpf_arm64_native_lab.c",
+    "kprog/x86/native_lab/native_link/src/main.rs",
+    "kprog/formal/oracles/test_arm64_read_followup_host.c",
+    "kprog/formal/oracles/test_arm64_load_sites.py",
+    "kprog/formal/oracles/test_arm64_narrow_atomic_host.py"
+  ],
+  "sha256": {
+    "kprog/arm64/arm64_sim_local_bpf.h": "a5c3751a66034de7b0b635d0a441d2b2085474d8daf2095707dc3308573cb608",
+    "kinsn/module/arm64/bpf_arm64_native_lab.c": "e03c720564dd1ff13cbbf20f247d49a08b2814f49316d4e8966bff8dae473b5e",
+    "kprog/x86/native_lab/native_link/src/main.rs": "074e563b2a523fb69c7f4da59b30f005fc3fbfde522066ab24b9fe3e34377719",
+    "kprog/formal/oracles/test_arm64_read_followup_host.c": "392213a6b35adb09e2883b8873d82621aefcda7bb1560ce514494f123128cb02",
+    "kprog/formal/oracles/test_arm64_load_sites.py": "29b0da651affe4bc68ce62b32e79754d4423ba3a3de32770402c64b900f1624b",
+    "kprog/formal/oracles/test_arm64_narrow_atomic_host.py": "55f444022cae4b09793897957bf1593d7d54dc81deddba073ac1e31a2b90eba9"
+  },
+  "remote_ancestor_verified": true
+}
