@@ -1,0 +1,68 @@
+{
+  "model_head": "96b561e22981f4a5a0b03ec5b7b0374998e546ed",
+  "kernel_base": "35ea2cde39fc88b01f2f49b2a357e7cf7102e4c8",
+  "entry_contract": "physical six-register entry save and restore; B retains SP and return-target checks",
+  "cases": 48,
+  "stages": {
+    "valid_executed": 10,
+    "verifier_rejected": 32,
+    "accepted_finding": 5,
+    "specialization_rejected": 1
+  },
+  "unsafe_native_executions": 0,
+  "suite_exit": 1,
+  "guest_exit": 1,
+  "make_exit": 2,
+  "comparison": {
+    "source": "/var/tmp/kprog-tmp/C/stock-entry/replays/9cbac28ec5d31bd689b5875820e2bf639af4fd25/isa48/out/outcomes.json",
+    "stage_changes": [
+      {
+        "name": "exit_frame_pointer_map",
+        "before": "verifier_rejected",
+        "after": "accepted_finding",
+        "assembly": "mov rsi, QWORD PTR [rdi]; mov rax, QWORD PTR [rdi+8]; lea rdx, [rsi+4]; cmp rdx, rax; ja 1f; mov rdi, QWORD PTR [rip+neg_map@GOTPCREL]; call bpf_map_lookup_elem; test rax, rax; je 1f; mov rbp, rax; mov eax, 2; ret; 1: mov eax, 2; ret"
+      },
+      {
+        "name": "exit_r12",
+        "before": "verifier_rejected",
+        "after": "accepted_finding",
+        "assembly": "mov r12, 7; mov eax, 2; ret"
+      }
+    ]
+  },
+  "findings": [
+    {
+      "name": "uninitialized_stack",
+      "previous_stage": "accepted_finding",
+      "native_executed": false
+    },
+    {
+      "name": "immediate_push_branch",
+      "previous_stage": "accepted_finding",
+      "native_executed": false
+    },
+    {
+      "name": "exit_frame_pointer_map",
+      "previous_stage": "verifier_rejected",
+      "native_executed": false
+    },
+    {
+      "name": "exit_r12",
+      "previous_stage": "verifier_rejected",
+      "native_executed": false
+    },
+    {
+      "name": "stack_base_flags",
+      "previous_stage": "accepted_finding",
+      "native_executed": false
+    }
+  ],
+  "runtime": {
+    "/var/tmp/kprog-tmp/C/stock-entry/kernel-build/arch/x86/boot/bzImage": "f408b40e9b5fb6743d8ca1a49e27af5c33fc3dddc4c08b914c79af36bf6c0000",
+    "/var/tmp/kprog-tmp/C/stock-entry/module/kprog_stock.ko": "4ebb2d5edc1c5cf602cf7605920a01f321843d4a75c729635c2ee1b9061a2297",
+    "/var/tmp/kprog-tmp/C/stock-entry/native-link-target/release/native-link": "97226f64e37319a85e2defc63dfc2f6a52288db61436a12f7def0fbee0f6a5c5",
+    "/var/tmp/kprog-tmp/C/stock-entry/loader/libnative_loader.so": "580852d479d5e13433d57cc3c5b822e2c119191564ebbd09fddf92111ae196f8",
+    "/var/tmp/kprog-tmp/C/stock-entry/loader/trusted-native-loader": "fd7820d758e9ba7a21dcdf378e0a691b047184660688c76bca7789ad13446170"
+  },
+  "input_catalog_sha256": "74a718eb19e77309ef85db97090a5dd765c622d7886e1d849f61faa684efda08"
+}
