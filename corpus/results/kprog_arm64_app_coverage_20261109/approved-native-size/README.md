@@ -1,0 +1,3 @@
+Approved ARM native-copy extent module
+
+Coordinator decision2026-11-09 06:55 supplies the shared native_size >=1GiB E2BIG behavior at kernel copy time. Shared source c3d6523f8 contributes its exact two-line patch to the captured ARM include tree. Paired ARM module source b0e107ce6 carries the existing recovery and three kfunc descriptors. The existing prepared ARM kernel cache and module outputs supply the incremental build. The captured recovery Image, original catalog/Tracee guests and probe-read queue retain their runtime bytes. This receipt records module compilation; actual guest adoption has its own result. Additional runtime admission rules:0.
