@@ -1,7 +1,7 @@
 {
-  "source_commit": "8312bb664ced767a8f3c4e3c8bc1a5e127820bc7",
+  "source_commit": "2864dcce235d00a72e3bee04d883def8f2b5ce79",
   "entries": 43,
-  "compiled": 29,
+  "compiled": 43,
   "rows": [
     {
       "source": "kprog/x86/micro-prog/bcc_runqlat_log2_histogram_bucket.bpf.c",
@@ -24,7 +24,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/bcc_runqlat_log2_histogram_bucket.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "b4b3a3d1c72c68ac3a7eea702544bffa327d415b412895ded7450b8db90cf5d4"
+      "object_sha256": "b4b3a3d1c72c68ac3a7eea702544bffa327d415b412895ded7450b8db90cf5d4",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/bcc_tcpconnect_ipv4_tuple_filter.bpf.c",
@@ -47,7 +48,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/bcc_tcpconnect_ipv4_tuple_filter.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "ccc4d842efa6636340bc90d1d66c6780eb8cc2e395a7c8a68fdd642d39862a2f"
+      "object_sha256": "ccc4d842efa6636340bc90d1d66c6780eb8cc2e395a7c8a68fdd642d39862a2f",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/bitmap_popcount_scan.bpf.c",
@@ -70,7 +72,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/bitmap_popcount_scan.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "4db367154a5c372c9dda7e5be1c972331a7ec05bd35d5afa659bfcc78a41c5a1"
+      "object_sha256": "4db367154a5c372c9dda7e5be1c972331a7ec05bd35d5afa659bfcc78a41c5a1",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/bpf_local_call_fanout_dispatch.bpf.c",
@@ -93,7 +96,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/bpf_local_call_fanout_dispatch.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "7237942c2d05c10cbb7fce11cd086dcb5ad957b49809d29193a3fa4ff09d3e5e"
+      "object_sha256": "7237942c2d05c10cbb7fce11cd086dcb5ad957b49809d29193a3fa4ff09d3e5e",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/bpftrace_comm_key_fnv_hash.bpf.c",
@@ -116,7 +120,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/bpftrace_comm_key_fnv_hash.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "68907fff641ddfa69f4e5a5a94f2fd86fb387e315e5c8c6ad51c84b92f4bc2c8"
+      "object_sha256": "68907fff641ddfa69f4e5a5a94f2fd86fb387e315e5c8c6ad51c84b92f4bc2c8",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/bpftrace_string_search_prefix_scan.bpf.c",
@@ -139,7 +144,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/bpftrace_string_search_prefix_scan.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "a8b5c4707adf9fac53b2bc21bfffc0a3f368b14a1980c3f08a1074162d8e3d16"
+      "object_sha256": "a8b5c4707adf9fac53b2bc21bfffc0a3f368b14a1980c3f08a1074162d8e3d16",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/cgroup_skb_hash_chain.bpf.c",
@@ -162,7 +168,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/cgroup_skb_hash_chain.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "f8d7a41dd07bea99d5ed09a107cd977ae858cabd4c029229da8ef932be18977e"
+      "object_sha256": "f8d7a41dd07bea99d5ed09a107cd977ae858cabd4c029229da8ef932be18977e",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/cilium_ct_nat_tuple_rewrite.bpf.c",
@@ -185,7 +192,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/cilium_ct_nat_tuple_rewrite.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "25af5b832674637b4a3a80932460af2a2f19fedbe42ab57b215eb3e30b9aca1a"
+      "object_sha256": "25af5b832674637b4a3a80932460af2a2f19fedbe42ab57b215eb3e30b9aca1a",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/cilium_policy_guard_tree_filter.bpf.c",
@@ -208,7 +216,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/cilium_policy_guard_tree_filter.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "8ccde5f4b77bf8a9c3cdf20a06a231c055bd77284fcdab0b289adf858ae37400"
+      "object_sha256": "8ccde5f4b77bf8a9c3cdf20a06a231c055bd77284fcdab0b289adf858ae37400",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/cilium_socket_lb_service_select.bpf.c",
@@ -231,7 +240,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/cilium_socket_lb_service_select.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "6f7c85abade792739d3d1e37d77ab40af647dda2fff64cc6dcda07538a65ab54"
+      "object_sha256": "6f7c85abade792739d3d1e37d77ab40af647dda2fff64cc6dcda07538a65ab54",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/combined_helper_map.bpf.c",
@@ -249,11 +259,12 @@
         "-I/workspaces/repository/vendor/libbpf/src",
         "-I/usr/include/x86_64-linux-gnu",
         "-c",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/committed-source/kprog/x86/micro-prog/combined_helper_map.bpf.c",
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/committed-source/kprog/x86/micro-prog/combined_helper_map.bpf.c",
         "-o",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/combined_helper_map.bpf.o"
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/objects/combined_helper_map.bpf.o"
       ],
-      "exit": 1
+      "exit": 0,
+      "object_sha256": "c1330e053e1d9b9fd1b99770928188ed97180e2c7a2d0e648a089f0aacafe39b"
     },
     {
       "source": "kprog/x86/micro-prog/flow_5tuple_rss_hash.bpf.c",
@@ -276,7 +287,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/flow_5tuple_rss_hash.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "36ea8d336e10e303ad8b4f3668db54e9f480bbfe6786765caa2ed6d474687fbb"
+      "object_sha256": "36ea8d336e10e303ad8b4f3668db54e9f480bbfe6786765caa2ed6d474687fbb",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/flow_record_field_scan.bpf.c",
@@ -299,7 +311,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/flow_record_field_scan.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "f7c738d8ebcf0f80287999d987cae85dba46d3bb0dbffaf9ac3854d23ee72352"
+      "object_sha256": "f7c738d8ebcf0f80287999d987cae85dba46d3bb0dbffaf9ac3854d23ee72352",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/helper_chain_simple.bpf.c",
@@ -317,11 +330,12 @@
         "-I/workspaces/repository/vendor/libbpf/src",
         "-I/usr/include/x86_64-linux-gnu",
         "-c",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/committed-source/kprog/x86/micro-prog/helper_chain_simple.bpf.c",
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/committed-source/kprog/x86/micro-prog/helper_chain_simple.bpf.c",
         "-o",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/helper_chain_simple.bpf.o"
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/objects/helper_chain_simple.bpf.o"
       ],
-      "exit": 1
+      "exit": 0,
+      "object_sha256": "a6f34024a4894ede2a3bbad510ecac70029ef26fe3006ce1337ebf6124022d2f"
     },
     {
       "source": "kprog/x86/micro-prog/helper_only_uid_gid.bpf.c",
@@ -339,11 +353,12 @@
         "-I/workspaces/repository/vendor/libbpf/src",
         "-I/usr/include/x86_64-linux-gnu",
         "-c",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/committed-source/kprog/x86/micro-prog/helper_only_uid_gid.bpf.c",
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/committed-source/kprog/x86/micro-prog/helper_only_uid_gid.bpf.c",
         "-o",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/helper_only_uid_gid.bpf.o"
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/objects/helper_only_uid_gid.bpf.o"
       ],
-      "exit": 1
+      "exit": 0,
+      "object_sha256": "ce4a93f3bebc118346787b0348c7eaaba1863696636ad44d3e5e914dcc20de91"
     },
     {
       "source": "kprog/x86/micro-prog/katran_lb_consistent_hash_select.bpf.c",
@@ -366,7 +381,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/katran_lb_consistent_hash_select.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "aaee1fb44697e8c4d73bea21d63997bf12e977aeb1ef876870653a60a80b29b6"
+      "object_sha256": "aaee1fb44697e8c4d73bea21d63997bf12e977aeb1ef876870653a60a80b29b6",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/map_array_index_packet.bpf.c",
@@ -384,11 +400,12 @@
         "-I/workspaces/repository/vendor/libbpf/src",
         "-I/usr/include/x86_64-linux-gnu",
         "-c",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/committed-source/kprog/x86/micro-prog/map_array_index_packet.bpf.c",
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/committed-source/kprog/x86/micro-prog/map_array_index_packet.bpf.c",
         "-o",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/map_array_index_packet.bpf.o"
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/objects/map_array_index_packet.bpf.o"
       ],
-      "exit": 1
+      "exit": 0,
+      "object_sha256": "97ccc68678aff586efd7d032b518846e6934fbc7953a43c016dc953c91bc4e7f"
     },
     {
       "source": "kprog/x86/micro-prog/map_array_lookup.bpf.c",
@@ -406,11 +423,12 @@
         "-I/workspaces/repository/vendor/libbpf/src",
         "-I/usr/include/x86_64-linux-gnu",
         "-c",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/committed-source/kprog/x86/micro-prog/map_array_lookup.bpf.c",
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/committed-source/kprog/x86/micro-prog/map_array_lookup.bpf.c",
         "-o",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/map_array_lookup.bpf.o"
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/objects/map_array_lookup.bpf.o"
       ],
-      "exit": 1
+      "exit": 0,
+      "object_sha256": "cb22918b11b8106061e50cfc48fc6c13d7d8c96b8b77982157a736e6917597c9"
     },
     {
       "source": "kprog/x86/micro-prog/map_hash_lookup.bpf.c",
@@ -428,11 +446,12 @@
         "-I/workspaces/repository/vendor/libbpf/src",
         "-I/usr/include/x86_64-linux-gnu",
         "-c",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/committed-source/kprog/x86/micro-prog/map_hash_lookup.bpf.c",
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/committed-source/kprog/x86/micro-prog/map_hash_lookup.bpf.c",
         "-o",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/map_hash_lookup.bpf.o"
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/objects/map_hash_lookup.bpf.o"
       ],
-      "exit": 1
+      "exit": 0,
+      "object_sha256": "9ccd0a017db20c942e4d860220301869e7c2eff414f5ed64d0864c2948f0dcaa"
     },
     {
       "source": "kprog/x86/micro-prog/map_hash_str_key.bpf.c",
@@ -450,11 +469,12 @@
         "-I/workspaces/repository/vendor/libbpf/src",
         "-I/usr/include/x86_64-linux-gnu",
         "-c",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/committed-source/kprog/x86/micro-prog/map_hash_str_key.bpf.c",
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/committed-source/kprog/x86/micro-prog/map_hash_str_key.bpf.c",
         "-o",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/map_hash_str_key.bpf.o"
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/objects/map_hash_str_key.bpf.o"
       ],
-      "exit": 1
+      "exit": 0,
+      "object_sha256": "3c972bc1b97c62977f5efcfb469acaf64315dffd5082f95701e0954b015a53e2"
     },
     {
       "source": "kprog/x86/micro-prog/map_lru_hash_counter.bpf.c",
@@ -472,11 +492,12 @@
         "-I/workspaces/repository/vendor/libbpf/src",
         "-I/usr/include/x86_64-linux-gnu",
         "-c",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/committed-source/kprog/x86/micro-prog/map_lru_hash_counter.bpf.c",
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/committed-source/kprog/x86/micro-prog/map_lru_hash_counter.bpf.c",
         "-o",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/map_lru_hash_counter.bpf.o"
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/objects/map_lru_hash_counter.bpf.o"
       ],
-      "exit": 1
+      "exit": 0,
+      "object_sha256": "a7c80b0bce354ffbce67037f4da7eec26a7a4312aa7eacf9d370144b90363bf7"
     },
     {
       "source": "kprog/x86/micro-prog/map_percpu_array.bpf.c",
@@ -494,11 +515,12 @@
         "-I/workspaces/repository/vendor/libbpf/src",
         "-I/usr/include/x86_64-linux-gnu",
         "-c",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/committed-source/kprog/x86/micro-prog/map_percpu_array.bpf.c",
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/committed-source/kprog/x86/micro-prog/map_percpu_array.bpf.c",
         "-o",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/map_percpu_array.bpf.o"
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/objects/map_percpu_array.bpf.o"
       ],
-      "exit": 1
+      "exit": 0,
+      "object_sha256": "06fd05ee8a6333c4f6a3513b460785701ef6a0220b692703c2fd4ce2f2bb1717"
     },
     {
       "source": "kprog/x86/micro-prog/map_percpu_hash_counter.bpf.c",
@@ -516,11 +538,12 @@
         "-I/workspaces/repository/vendor/libbpf/src",
         "-I/usr/include/x86_64-linux-gnu",
         "-c",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/committed-source/kprog/x86/micro-prog/map_percpu_hash_counter.bpf.c",
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/committed-source/kprog/x86/micro-prog/map_percpu_hash_counter.bpf.c",
         "-o",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/map_percpu_hash_counter.bpf.o"
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/objects/map_percpu_hash_counter.bpf.o"
       ],
-      "exit": 1
+      "exit": 0,
+      "object_sha256": "6a7b8943582fc3b38f97cf4b6b8f0c85138b8ac27f9f64b48b32be95c4b27532"
     },
     {
       "source": "kprog/x86/micro-prog/multi_map_policy.bpf.c",
@@ -538,11 +561,12 @@
         "-I/workspaces/repository/vendor/libbpf/src",
         "-I/usr/include/x86_64-linux-gnu",
         "-c",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/committed-source/kprog/x86/micro-prog/multi_map_policy.bpf.c",
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/committed-source/kprog/x86/micro-prog/multi_map_policy.bpf.c",
         "-o",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/multi_map_policy.bpf.o"
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/objects/multi_map_policy.bpf.o"
       ],
-      "exit": 1
+      "exit": 0,
+      "object_sha256": "e0cf03715b090c62f4b74fb996603cc194196cabdca157efff9b5650effd65fa"
     },
     {
       "source": "kprog/x86/micro-prog/otel_stack_frame_unwind_scan.bpf.c",
@@ -565,7 +589,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/otel_stack_frame_unwind_scan.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "33d33832b1398e6706fb7a6597b9fbeb2b29eb4e94e95b2f9d1eb9ed1e171978"
+      "object_sha256": "33d33832b1398e6706fb7a6597b9fbeb2b29eb4e94e95b2f9d1eb9ed1e171978",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/packed_header_bitfield_decode.bpf.c",
@@ -588,7 +613,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/packed_header_bitfield_decode.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "50e5b8c1f5ce10586a8dd11962e9ba19f35e0628ae080ad0ae5e253a41add378"
+      "object_sha256": "50e5b8c1f5ce10586a8dd11962e9ba19f35e0628ae080ad0ae5e253a41add378",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/packet_5tuple_classify.bpf.c",
@@ -606,11 +632,12 @@
         "-I/workspaces/repository/vendor/libbpf/src",
         "-I/usr/include/x86_64-linux-gnu",
         "-c",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/committed-source/kprog/x86/micro-prog/packet_5tuple_classify.bpf.c",
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/committed-source/kprog/x86/micro-prog/packet_5tuple_classify.bpf.c",
         "-o",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/packet_5tuple_classify.bpf.o"
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/objects/packet_5tuple_classify.bpf.o"
       ],
-      "exit": 1
+      "exit": 0,
+      "object_sha256": "5d90c5136ce07c2498ce96e6ac1b14556260c6550f0cfbde5131eba92cb2e478"
     },
     {
       "source": "kprog/x86/micro-prog/packet_checksum_fold.bpf.c",
@@ -633,7 +660,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/packet_checksum_fold.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "4638cc878f8d103eb7da95295158b9ba91ca15f2897d5dd60429d11bcd5574bf"
+      "object_sha256": "4638cc878f8d103eb7da95295158b9ba91ca15f2897d5dd60429d11bcd5574bf",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/packet_record_bounds_window.bpf.c",
@@ -656,7 +684,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/packet_record_bounds_window.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "77007414c931bb4a4b13502c1bbaf614976cdf58d4b54f649727d95a43d4e193"
+      "object_sha256": "77007414c931bb4a4b13502c1bbaf614976cdf58d4b54f649727d95a43d4e193",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/packet_toeplitz_rss_hash.bpf.c",
@@ -679,7 +708,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/packet_toeplitz_rss_hash.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "3be43e34403ed32658526dbcb58554b09ee6df4c1c0309d4e0132eb7d969a7d5"
+      "object_sha256": "3be43e34403ed32658526dbcb58554b09ee6df4c1c0309d4e0132eb7d969a7d5",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/packet_vlan_tcpopt_parser.bpf.c",
@@ -702,7 +732,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/packet_vlan_tcpopt_parser.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "9931e6584ccacc0dbc0e51aa653cf64b22cb72092b98f9426dbd9b332a9c678c"
+      "object_sha256": "9931e6584ccacc0dbc0e51aa653cf64b22cb72092b98f9426dbd9b332a9c678c",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/payload_prefix_memcmp_scan.bpf.c",
@@ -725,7 +756,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/payload_prefix_memcmp_scan.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "35bae64164a71eaf26aa03ca89a2b82b4471c19c725b210adc8824399cb39548"
+      "object_sha256": "35bae64164a71eaf26aa03ca89a2b82b4471c19c725b210adc8824399cb39548",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/simple.bpf.c",
@@ -748,7 +780,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/simple.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "bd004bf9735594e0eb29421c8e8a5227270b7b71f333ce0790cb88c7805811b3"
+      "object_sha256": "bd004bf9735594e0eb29421c8e8a5227270b7b71f333ce0790cb88c7805811b3",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/simple_packet.bpf.c",
@@ -771,7 +804,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/simple_packet.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "24a1e5d1afe39bb944a1ba017abad3fe219c85b3b2eda889d03e26af7def9d4b"
+      "object_sha256": "24a1e5d1afe39bb944a1ba017abad3fe219c85b3b2eda889d03e26af7def9d4b",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/siphash_rotate64_mixer.bpf.c",
@@ -794,7 +828,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/siphash_rotate64_mixer.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "28b3f91dca02a2b4d92ac5678da3ac48e5dbb27af5391bae7ce052ae0b12181e"
+      "object_sha256": "28b3f91dca02a2b4d92ac5678da3ac48e5dbb27af5391bae7ce052ae0b12181e",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/sorted_rule_binary_search.bpf.c",
@@ -817,7 +852,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/sorted_rule_binary_search.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "684ff40fc49c2bbb73e3d7b953169c9e7b687ba727eb4570f9692448a7c5c096"
+      "object_sha256": "684ff40fc49c2bbb73e3d7b953169c9e7b687ba727eb4570f9692448a7c5c096",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/stats_mixed_helpers.bpf.c",
@@ -835,11 +871,12 @@
         "-I/workspaces/repository/vendor/libbpf/src",
         "-I/usr/include/x86_64-linux-gnu",
         "-c",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/committed-source/kprog/x86/micro-prog/stats_mixed_helpers.bpf.c",
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/committed-source/kprog/x86/micro-prog/stats_mixed_helpers.bpf.c",
         "-o",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/stats_mixed_helpers.bpf.o"
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/objects/stats_mixed_helpers.bpf.o"
       ],
-      "exit": 1
+      "exit": 0,
+      "object_sha256": "ff4d88c9535cf0b2b75d3c41bad54fafbff1417c34cddd94a9af0f6ea83c3cd9"
     },
     {
       "source": "kprog/x86/micro-prog/tc_packet_checksum_fold.bpf.c",
@@ -862,7 +899,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/tc_packet_checksum_fold.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "f4ebe487deba46c1a8b1e1e4befa360340a4b18076bc20b936e630c59eeb4d6e"
+      "object_sha256": "f4ebe487deba46c1a8b1e1e4befa360340a4b18076bc20b936e630c59eeb4d6e",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/tetragon_process_event_arg_filter.bpf.c",
@@ -885,7 +923,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/tetragon_process_event_arg_filter.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "ec299ceb382da66f2b0e0371f4c6a630f580d1a42c0d7e087e95284ab9c83149"
+      "object_sha256": "ec299ceb382da66f2b0e0371f4c6a630f580d1a42c0d7e087e95284ab9c83149",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/trace_event_type_switch_dispatch.bpf.c",
@@ -908,7 +947,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/trace_event_type_switch_dispatch.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "3106a3ee3712df335a4d1fe7886595a997175f8c7970fa506f6fbe835901ff2d"
+      "object_sha256": "3106a3ee3712df335a4d1fe7886595a997175f8c7970fa506f6fbe835901ff2d",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/tracee_http_method_prefix_detect.bpf.c",
@@ -931,7 +971,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/tracee_http_method_prefix_detect.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "c916ee321b64074a6d295659cb2d2d5494e9de04c2d6f89eab501e11fd1bd775"
+      "object_sha256": "c916ee321b64074a6d295659cb2d2d5494e9de04c2d6f89eab501e11fd1bd775",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/tracee_syscall_name_table_lookup.bpf.c",
@@ -954,7 +995,8 @@
         "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/tracee_syscall_name_table_lookup.bpf.o"
       ],
       "exit": 0,
-      "object_sha256": "0a88ba42136b09fc0a9de0ce74841b2e8066da35756f507d952e1bb242c643c4"
+      "object_sha256": "0a88ba42136b09fc0a9de0ce74841b2e8066da35756f507d952e1bb242c643c4",
+      "reused_from": "/var/tmp/kprog-tmp/C/generated-micro-source-refresh"
     },
     {
       "source": "kprog/x86/micro-prog/unchecked_packet_read.bpf.c",
@@ -972,11 +1014,12 @@
         "-I/workspaces/repository/vendor/libbpf/src",
         "-I/usr/include/x86_64-linux-gnu",
         "-c",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/committed-source/kprog/x86/micro-prog/unchecked_packet_read.bpf.c",
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/committed-source/kprog/x86/micro-prog/unchecked_packet_read.bpf.c",
         "-o",
-        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh/objects/unchecked_packet_read.bpf.o"
+        "/var/tmp/kprog-tmp/C/generated-micro-source-refresh-includes/objects/unchecked_packet_read.bpf.o"
       ],
-      "exit": 1
+      "exit": 0,
+      "object_sha256": "0dad33a947569efa4c0ce7803521d17b948aab2a927fa50bf6558181d49f3c37"
     }
   ]
 }
