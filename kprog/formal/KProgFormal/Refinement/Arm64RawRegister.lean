@@ -1038,3 +1038,125 @@ end KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect
 #print axioms KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect.normalized_nv_refines
 #print axioms KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect.earlier_step
 #print axioms KProgFormal.Refinement.Arm64RawRegister.ConditionalSelect.step_refines
+namespace KProgFormal.Refinement.Arm64RawRegister.Bitfield
+open Reference
+open Reference.AArch64 (Register Width BitfieldInstruction)
+
+/-- The C bitfield body captures SRC and old DST from incoming tagged words,
+then consumes kind byte0, LSB byte1 and count byte2 before scalar writeback. -/
+def body (kind : GeneratedArm64BitfieldDecode.Bitfield) (aux : BitVec 32) (width : Width)
+    (dst src : Register) (origins : Origins) (state : State) : Transition State :=
+  let result := GeneratedArm64Bitfield.value kind (readRegister origins state src)
+    (readRegister origins state dst) ((GeneratedArm64Aux.b1 aux).setWidth 8)
+    ((GeneratedArm64Aux.b2 aux).setWidth 8)
+  ⟨advance (writeRegister state dst result width), [], none⟩
+
+theorem body_projects (kind : GeneratedArm64BitfieldDecode.Bitfield) (aux : BitVec 32) (width : Width)
+    (dst src : Register) (origins : Origins) (state : State) :
+    observe origins (body kind aux width dst src origins state) =
+      Arm64Bitfield.rawStep kind width dst src aux (image origins state) := by
+  simp only [body, observe, advance_refines, write_refines, read_refines,
+    Arm64Bitfield.rawStep, Arm64Register.read_refines, Arm64Register.write_refines]
+  rfl
+
+theorem body_refines (kind : GeneratedArm64BitfieldDecode.Bitfield) (i : BitfieldInstruction)
+    (high : Byte) (origins : Origins) (state : State) (matching : Arm64Bitfield.canonicalKind kind = i.kind) :
+    observe origins (body kind (Arm64Bitfield.packedAux kind i.lsbByte i.countByte high)
+      i.width i.dst i.src origins state) = Reference.AArch64.step (.bitfield i) (image origins state) := by
+  rw [body_projects, Arm64Bitfield.raw_step_eq, Arm64Bitfield.step_refines kind i _ matching]
+
+/-- The covered bitfield opcode extends the preceding thirty disjoint gates. -/
+def dispatch (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Register)
+    (value : Word) (origins : Origins) (state : State) : Option (Transition State) :=
+  match ConditionalSelect.dispatch code aux width dst src src2 src3 value origins state with
+  | some result => some result
+  | none => if code = GeneratedArm64DispatchSingleton.code .bitfield then
+      (Arm64Bitfield.decodeKind (GeneratedArm64Aux.b0 aux).toNat).map
+        (fun kind => body kind aux width dst src origins state)
+    else none
+
+theorem leading_passes (aux : BitVec 32) (width : Width) (dst src src2 src3 : Register)
+    (value : Word) (origins : Origins) (state : State) :
+    ConditionalSelect.dispatch (GeneratedArm64DispatchSingleton.code .bitfield) aux width
+      dst src src2 src3 value origins state = none := rfl
+
+theorem reached (kind : GeneratedArm64BitfieldDecode.Bitfield) (i : BitfieldInstruction)
+    (high : Byte) (src2 src3 : Register) (value : Word) (origins : Origins) (state : State) :
+    dispatch (GeneratedArm64DispatchSingleton.code .bitfield)
+      (Arm64Bitfield.packedAux kind i.lsbByte i.countByte high) i.width i.dst i.src src2 src3 value origins state =
+      some (body kind (Arm64Bitfield.packedAux kind i.lsbByte i.countByte high) i.width i.dst i.src origins state) := by
+  simp only [dispatch, leading_passes, if_pos rfl,
+    (Arm64Bitfield.packed_fields kind i.lsbByte i.countByte high).1]
+  rfl
+
+/-- Actual production arm equality retains all unused SRC2/SRC3/IMM values
+and the high AUX byte. All operands refer to the incoming state, including aliases. -/
+theorem production (kind : GeneratedArm64BitfieldDecode.Bitfield) (i : BitfieldInstruction)
+    (high : Byte) (src2 src3 : Register) (unused2 unused3 : Byte) (value otherValue : Word)
+    (sourceScalar sourceStack : Bool) (origins : Origins) (state : State) :
+    (dispatch (GeneratedArm64DispatchSingleton.code .bitfield)
+      (Arm64Bitfield.packedAux kind i.lsbByte i.countByte high) i.width i.dst i.src src2 src3 value origins state).map
+      (observe origins) =
+    Arm64Dispatcher.dispatchThroughBitfield (GeneratedArm64DispatchSingleton.code .bitfield)
+      (Arm64Bitfield.packedAux kind i.lsbByte i.countByte high) i.width (Arm64Register.registerCode i.dst)
+      (Arm64Register.registerCode i.src) unused2 unused3 otherValue sourceScalar sourceStack (image origins state) := by
+  rw [reached, Arm64Dispatcher.bitfield_reached,
+    (Arm64Bitfield.packed_fields kind i.lsbByte i.countByte high).1]
+  simp only [Option.map]
+  rw [Arm64Dispatcher.bitfield_body_typed]
+  exact congrArg some (body_projects kind _ i.width i.dst i.src origins state)
+
+theorem dispatch_refines (kind : GeneratedArm64BitfieldDecode.Bitfield) (i : BitfieldInstruction)
+    (high : Byte) (src2 src3 : Register) (value : Word) (origins : Origins) (state : State)
+    (matching : Arm64Bitfield.canonicalKind kind = i.kind) :
+    (dispatch (GeneratedArm64DispatchSingleton.code .bitfield)
+      (Arm64Bitfield.packedAux kind i.lsbByte i.countByte high) i.width i.dst i.src src2 src3 value origins state).map
+      (observe origins) = some (Reference.AArch64.step (.bitfield i) (image origins state)) := by
+  rw [reached]
+  exact congrArg some (body_refines kind i high origins state matching)
+
+theorem earlier_step (origins : Origins) (state : State) (code : Nat) (aux : BitVec 32)
+    (width : Width) (dst src src2 src3 : Register) (value : Word) (instruction : Reference.AArch64.Instruction)
+    (binding : ConditionalSelect.Binding code aux width dst src src2 src3 value instruction) :
+    (dispatch code aux width dst src src2 src3 value origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  have result := ConditionalSelect.step_refines origins state code aux width dst src src2 src3 value instruction binding
+  unfold dispatch
+  cases leading : ConditionalSelect.dispatch code aux width dst src src2 src3 value origins state with
+  | none => simp [leading] at result
+  | some output => simpa only [leading] using result
+
+/-- Typed native LSB/count fields and kind identity bind all five bitfield
+forms. The field bounds are ISA premises supplied by the instruction type. -/
+inductive Binding : Nat → BitVec 32 → Width → Register → Register → Register → Register →
+    Word → Reference.AArch64.Instruction → Prop where
+  | leading (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Register)
+      (value : Word) (instruction : Reference.AArch64.Instruction)
+      (binding : ConditionalSelect.Binding code aux width dst src src2 src3 value instruction) :
+      Binding code aux width dst src src2 src3 value instruction
+  | bitfield (kind : GeneratedArm64BitfieldDecode.Bitfield) (i : BitfieldInstruction)
+      (high : Byte) (src2 src3 : Register) (value : Word) (matching : Arm64Bitfield.canonicalKind kind = i.kind) :
+      Binding (GeneratedArm64DispatchSingleton.code .bitfield)
+        (Arm64Bitfield.packedAux kind i.lsbByte i.countByte high) i.width i.dst i.src src2 src3 value (.bitfield i)
+
+theorem step_refines (origins : Origins) (state : State) (code : Nat) (aux : BitVec 32)
+    (width : Width) (dst src src2 src3 : Register) (value : Word) (instruction : Reference.AArch64.Instruction)
+    (binding : Binding code aux width dst src src2 src3 value instruction) :
+    (dispatch code aux width dst src src2 src3 value origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  cases binding with
+  | leading code aux width dst src src2 src3 value instruction bound =>
+      exact earlier_step origins state code aux width dst src src2 src3 value instruction bound
+  | bitfield kind i high src2 src3 value matching =>
+      exact dispatch_refines kind i high src2 src3 value origins state matching
+
+end KProgFormal.Refinement.Arm64RawRegister.Bitfield
+
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Bitfield.body_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Bitfield.body_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Bitfield.leading_passes
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Bitfield.reached
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Bitfield.production
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Bitfield.dispatch_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Bitfield.earlier_step
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Bitfield.step_refines

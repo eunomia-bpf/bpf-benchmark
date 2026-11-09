@@ -62,11 +62,12 @@ stream and preserve memory/exclusive state with23 consumed inputs. Complete
 flags/tag/GPR-frame, operand mapping and physical/compiler transport remain
 explicit interfaces.
 
-ARM raw handler/dispatcher refinement covers30/74 operations: immediate moves,
-multiply/divide, shift/unary, extract/reverse/extension and conditional select.
-Sixty-nine laws audit and compile with module/root0 and sorryAx0. All raw64-bit
+ARM raw handler/dispatcher refinement covers31/74 operations: immediate moves,
+multiply/divide, shift/unary, extract/reverse/extension, conditional select
+and bitfields.
+Seventy-seven laws audit and compile with module/root0 and sorryAx0. All raw64-bit
 words, byte tags, STACK4/RETURN10 materialization, register aliases/XZR and the
-complete architectural image compose through one30-operation step theorem.
+complete architectural image compose through one31-operation step theorem.
 CSEL/X retains its selected raw word/tag; scalar results use width/scalar-tag
 writes. SHIFT and conditions consume the actual whole AUX, while unary uses
 AUX byte1/byte2. Native widths, amount/alias domains and NV normalization stay

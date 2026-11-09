@@ -78254,5 +78254,40 @@
       "source-arm64_sim.h.txt": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd"
     },
     "scope": "Eight conditional-select operations and preceding22 raw gates. CSEL/X actual rawword/tag copy, scalarrows materializedoperand/widthtagwrite, inputNZCV/aliases/XZR/fullarchitecture. Productiondispatcher equality and arbitraryunusedfield bytes include255; nativealias and NVnormalization explicit. Entry/C extraction/union/physical/compiler interfaces explicit, independent of Bforwarding/calleecomparison."
+  },
+  "arm64_raw_bitfield_refinement": {
+    "proof": {
+      "process_exit": 0,
+      "module_and_root_exit": 0,
+      "root_sha256": "c08dedfa21216380b9f8595e635c476de4bb7a155bfbe8f114f3fb1243fac057",
+      "source_sha256": "6ba9b85e1235399bcd1a6a85d306bde2304cfdf4d5d2517eb6e8c4de953d0857",
+      "sorryAx": 0,
+      "reduction_bridge": 56,
+      "scope": "Raw BITFIELD five native forms and prior30 raw operations; incoming materialized SRC/oldDST, exact AUXbyte kind/LSB/count, generated merge and width/scalar-tag writeback. Typed native field bounds, complete architectural image, production dispatcher equality and arbitrary unused AUXhigh/SRC2/SRC3/IMM. Independent of B forwarding layout. Entry/C-union/source extraction/compiler/physical origin binding remain explicit."
+    },
+    "operations": [
+      "ARM64_OP_BITFIELD"
+    ],
+    "native_forms": [
+      "UBFX",
+      "SBFX",
+      "UBFIZ",
+      "BFXIL",
+      "BFI"
+    ],
+    "raw_operation_count": 31,
+    "new_audits": 8,
+    "total_audits": 77,
+    "archive": "arm-raw-bitfield.log.gz",
+    "source_snapshots": {
+      "source-Arm64Bitfield.lean.txt": "4f9c8de4925d1c9edec0f115388cdde59627b1ad9dbe3df12eff08e081e25ff3",
+      "source-arm64_sim_local_bpf.h.txt": "9cb5d58f9595124300d5bfd8fdcfdecba53f763e4d9ee34567345dd12cba1c13",
+      "source-Arm64RawRegister.lean.txt": "b2bf8ee689f4931dd1a4cf76f0d1b09612099d768328bb308b122366c9376d52",
+      "source-Arm64Dispatcher.lean.txt": "0388b0836263a0b05d0b3460344f83595b0bf0e9933b458675ecfe72d1362b20",
+      "source-AArch64.lean.txt": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789",
+      "source-arm64_sim.h.txt": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd",
+      "source-arm64_bitfield.h.txt": "4037f701cf89fac8ea15569456acd359080f9c32e027716f11b4568d28ed8210"
+    },
+    "scope": "RawBITFIELD five nativeforms and preceding30raw ops; incoming materializedSRC/oldDST, actualAUXbytes, generatedmerge andscalarizingwidth/tagwrite. Typed nativefieldbounds, allaliases/XZR/fullarchitecture, productiondispatcher/unusedhighbyte+SRC2/SRC3/IMM incl255 retained. Entry/C extraction/union/physical/compiler interfaces explicit, Bforwarding/calleecomparison independent."
   }
 }

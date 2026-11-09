@@ -10,8 +10,8 @@ specialization token also has its own row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 74 / 74 |
 | Reference step family defined | 67/75 | 74/74 |
-| Raw register handler refinement | 32/75 | 30/74 |
-| Raw register dispatcher arm composition | 32/75 | 30/74 |
+| Raw register handler refinement | 32/75 | 31/74 |
+| Raw register dispatcher arm composition | 32/75 | 31/74 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/74 |
 | Addressed memory model / composed step | 29/75 | 0/74 |
 | Additional partial-model handler families | 1/75 | 0 |
@@ -6527,3 +6527,22 @@ and49 inherited Lean.ofReduceBool dependencies. `step_refines` composes one
 and C/generated snapshots, the complete prior public source prefix, original
 proof drafts/diagnostics and final module/root outcomes. Raw ARM totals advance
 22to30/74; C-model/O2 and compiled/physical interfaces retain separate scope.
+
+### ARM raw bitfield refinement
+
+BITFIELD now captures materialized SRC and old DST from the incoming raw/tag
+state, decodes actual AUX byte0 kind, byte1 LSB and byte2 count, applies the
+generated value and commits scalarizing width/tag writeback. UBFX, SBFX, UBFIZ,
+BFXIL and BFI use the canonical typed instruction's native field bounds. All
+GPR aliases and XZR retain complete architectural projection, ordered empty
+events and fault result. AUX high byte and unused SRC2/SRC3/IMM keep arbitrary
+values, including NONE255 source fields, through `Bitfield.production`.
+
+`body_refines` derives the handler relation and `step_refines` composes all31
+raw operations. Eight new and69 preceding laws audit with module/root checks0,
+sorryAx0 and 56 inherited Lean.ofReduceBool dependencies. The
+[raw bitfield receipt](arm-raw-bitfield.log.gz) preserves canonical ISA and
+C/generated sources, exact previous public source prefix, compiled module and
+all original proof outcomes. Raw ARM totals advance30to31/74. Entry origin
+identity, C extraction/union and physical/compiler transport remain explicit;
+B forwarding and callee comparison storage stay independent.
