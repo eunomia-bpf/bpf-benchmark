@@ -1394,6 +1394,13 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			KPROG_ALU64_RESULT(__a64_alu_op, __a64_alu_lhs,   \
 				__a64_alu_rhs,                            \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE());        \
+        /* SP keeps its arena-relative coordinate through full-width ADD/SUB. */ \
+        if (__a64_alu_width==ARM64_WIDTH_64 && (DST)==ARM64_SP && \
+            __a64_alu_src_tag==ARM64_SIM_TAG_STACK && \
+            (__a64_alu_op==ARM64_ALU_ADD || __a64_alu_op==ARM64_ALU_SUB)) \
+            ARM64_SIM_L_WRITE_REG_PTR_TAG((DST),KPROG_PTR_ADD64_BITS(ARM64_SIM_L_READ_REG_PTR(SRC), \
+                __a64_alu_op==ARM64_ALU_ADD ? __a64_alu_rhs : -__a64_alu_rhs),ARM64_SIM_TAG_STACK); \
+        else \
 		/* Native SP is 16-byte aligned at this AAPCS64 boundary. */ \
 		if (__a64_alu_width == ARM64_WIDTH_64 && __a64_alu_op == ARM64_ALU_ORR && \
 		    __a64_alu_src_tag == ARM64_SIM_TAG_STACK && __a64_alu_rhs < 16U) \
