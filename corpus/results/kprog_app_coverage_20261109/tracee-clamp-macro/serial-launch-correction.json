@@ -1,0 +1,16 @@
+{
+  "utc": "2026-11-09T01:01:29.832273+00:00",
+  "actions": [
+    {
+      "pid": 2643565,
+      "scope": "preserved existing Cilium controller",
+      "action": "record actual child PID"
+    },
+    {
+      "pid": 2644859,
+      "scope": "own accidental Tracee successor guest",
+      "action": "SIGTERM"
+    }
+  ],
+  "root": "Popen start_new_session plus setsid forks a child, making the recorded launcher PID close early"
+}

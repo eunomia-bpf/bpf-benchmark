@@ -1,10 +1,22 @@
 {
   "make_exit": 2,
-  "image": "sha256:075f1c21a4055382a181356be05b79a9663ff052271410fabb4e94ba5e98814e",
-  "native_requests": 0,
-  "generated": 0,
-  "compiled": 0,
-  "installed": 0,
-  "failed": 0,
-  "work": []
+  "image": "sha256:9f62f0733f6f52a9acb2bc4d182ad13a2df04490dc627981539727368b7674ae",
+  "stage": "guest_startup",
+  "run_log": "PATH=/usr/lib/llvm-18/bin:$PATH python3 /workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tracee-clamp-macro/guest.py --samples 3 --duration 180 --apps tracee/monitor --state /workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tracee-clamp-macro\nqemu-system-x86_64: terminating on signal 15 from pid 2645285 (python3)\nmake: *** [/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/tracee-clamp-macro/Makefile:19: corpus] Error 255\n",
+  "runtime_recovery": {
+    "utc": "2026-11-09T01:01:29.832273+00:00",
+    "actions": [
+      {
+        "pid": 2643565,
+        "scope": "preserved existing Cilium controller",
+        "action": "record actual child PID"
+      },
+      {
+        "pid": 2644859,
+        "scope": "own accidental Tracee successor guest",
+        "action": "SIGTERM"
+      }
+    ],
+    "root": "Popen start_new_session plus setsid forks a child, making the recorded launcher PID close early"
+  }
 }
