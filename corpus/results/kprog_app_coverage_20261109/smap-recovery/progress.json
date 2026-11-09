@@ -1,0 +1,43 @@
+{
+  "utc": "2026-11-09T05:23:03.398863+00:00",
+  "source": "aee6b236d75286cf2a0291a47aae2592d72591f0",
+  "build": {
+    "state": "finished",
+    "commit": "be72d781f4eefce7faedf1f99a129f1ee75a053e",
+    "make_exit": 0
+  },
+  "live_null": {
+    "state": "finished",
+    "commit": "4ececd2cbb25cda5ba4880a3a81cb34fbe268f2e",
+    "result": {
+      "probe_exit": 0,
+      "stdout": "{\"native_prog_id\":1,\"attach_btf_id\":71239,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "stderr": "",
+      "guest_exit": 0,
+      "native_sha256": "ba71c92bd9a8a876878dff5e6a27329f1b01f49f7a460016a4e2b39de59cb5fe",
+      "kernel_sha256": "1fc36bb214862ede6fe6d9c0f530e5a7199b7da7a8fef25c07890bd493b1b16c",
+      "module_sha256": "1b42ffa33fc95ef82fa7969e546760831f4827a4ff27f64ac34748086283cd3f"
+    }
+  },
+  "original38": {
+    "state": "finished",
+    "commit": "b44ff4ff79b551f208055d1b39ec2c49543ccd76",
+    "make_exit": 0,
+    "cases": 38,
+    "stages": {
+      "specialization_rejected": 1,
+      "valid_executed": 9,
+      "verifier_rejected": 28
+    },
+    "native_risk_executions": 0
+  },
+  "bcc_katran": {
+    "state": "running",
+    "image": "sha256:714f4261db8f36c35a3aa5f4dfe3fdfc1327967d79e22da47f7006ec33d7b8a7"
+  },
+  "alu_component": {
+    "state": "finished",
+    "make_exit": 0,
+    "commit": "0b147b972789e3761eb1d0b21979b679ce98ce1e"
+  }
+}
