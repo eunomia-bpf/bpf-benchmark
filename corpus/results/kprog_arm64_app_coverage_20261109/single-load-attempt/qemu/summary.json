@@ -1,0 +1,18 @@
+{
+  "utc": "2026-11-09T09:33:21.043568+00:00",
+  "make_exit": 2,
+  "probe_build_exit": 0,
+  "runtime": {
+    "ok": false,
+    "guest_exit": 1,
+    "qemu_returncode": 0,
+    "compiler_exit": 0
+  },
+  "guest": {
+    "ok": false,
+    "scope": "Authorized ARM full-word NULL BTF load recovery",
+    "probe_exit": 1,
+    "stdout": "",
+    "stderr": "native load guest fixture: trusted specializer refused native program: Input/output error\n"
+  }
+}
