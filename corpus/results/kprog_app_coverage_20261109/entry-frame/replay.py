@@ -120,12 +120,12 @@ def safety(epoch, suite):
         ' check --out ' + str(output) + ' --inputs /mnt/x86-input --cases /mnt/x86-input/cases.json'
         if suite == 'isa48' else 'python3 ' + str(ROOT / 'kprog/selftests/submit.py') +
         ' --arch x86 --table ' + str(work / 'table') + ' --out ' + str(output))
-    guest.write_text('#!/bin/bash\nset -e\nmount --bind /mnt ' + str(work) + '\n' +
+    guest.write_text('#!/bin/bash\nset -e\ninstall -d ' + str(work) + '\nmount --bind /mnt ' + str(work) + '\n' +
         'mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf\n' +
-        'export KPROG_STOCK_MODULE=' + str(STATE / 'module/kprog_stock.ko') + '\n' +
+        'export KPROG_STOCK_MODULE=/mnt/kprog_stock.ko\n' +
         'export KPROG_STOCK_LOADER=' + str(ROOT / 'kprog/libnativeloader/build') + '\n' +
-        'export KPROG_STOCK_BOUND_PROBE=/var/tmp/kprog-tmp/S17/bp/bound-probe\n' +
-        'export KPROG_STOCK_NATIVE_LINK=' + str(NATIVE_LINK) + '\n' +
+        'export KPROG_STOCK_BOUND_PROBE=/mnt/bound-probe\n' +
+        'export KPROG_STOCK_NATIVE_LINK=/mnt/native-link\n' +
         'OUT=' + str(output) + '\n. ' + str(ROOT / 'kprog/stock-path/guest/common.sh') + '\n' +
         'export TMPDIR=' + str(work) + ' CLANG=' + str(work / 'stock-compile-proxy') + '\n' +
         'set +e\n' + command + ' > "$OUT/suite.log" 2>&1\nresult=$?\n' +
