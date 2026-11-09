@@ -1224,13 +1224,18 @@ native-loader source-context flags=0 token_fd=-1
 | generated source | 911,444 bytes, 21,822 lines |
 | compiler resident set | 9.3 GB, flat |
 | compiler CPU | 6,013 ticks per 60 s -- one full core, advancing |
-| wall time with no external timeout | past 11 minutes and still compiling |
+| wall time with no external timeout | **about 12 minutes**, then it finishes |
 | compiler peak resident set | 9.3 GB, falling to 2.3 GB in its codegen phase |
+| result | 2,919,744-byte object, zero errors, 906 warnings |
 | broker compiles that returned | 3 of 4 (`returncode: 0`) |
 
-So generation and the earlier compiles succeed; this one program's generated
-source is large enough that clang takes tens of minutes and the workload
-never starts. The baseline arm on the same restored workload completes in
+So generation and every compile succeed -- this one just takes about twelve
+minutes for one program, which is longer than the 20 s workload it precedes.
+Compiling it outside the run gives a 2,919,744-byte object with zero errors.
+
+That is the whole stall: the run waits twelve minutes on `perf_unwind_nat`'s
+compile before its measurement can start, and the shim polls `list_progs` in
+the meantime. The baseline arm on the same restored workload completes in
 225 s.
 
 That is a generation-size problem rather than a correctness one: the
