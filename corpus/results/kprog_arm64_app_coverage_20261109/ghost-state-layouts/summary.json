@@ -1,0 +1,407 @@
+{
+  "utc": "2026-11-09T10:09:23.243604+00:00",
+  "parent_source": "55504ff906ab268a5cab3ab083d6d448d152ed54",
+  "parent": [
+    {
+      "request": 5,
+      "phase": "compiled",
+      "frame_extent_bytes": 704,
+      "instructions": 3734,
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/parent/5/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/parent/5/trusted_arm64.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/parent/5/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "inet_sock_set_state",
+        "native_sha256": "3e9db0023a62eb35cc503a40bf280b9528e4cbbee5908d8428545c6d22b34bb0"
+      }
+    },
+    {
+      "request": 10,
+      "phase": "compiled",
+      "frame_extent_bytes": 648,
+      "instructions": 2627,
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/parent/10/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/parent/10/trusted_arm64.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/parent/10/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "tracepoint__syscalls__sys_exit_openat",
+        "native_sha256": "cec5a1c8fc42439264df4206c28d491013d14eb2af90be53477ddff8b61fd3f7"
+      }
+    },
+    {
+      "request": 11,
+      "phase": "compiled",
+      "frame_extent_bytes": 120,
+      "instructions": 1681,
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/parent/11/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/parent/11/trusted_arm64.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/parent/11/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "block_rq_insert",
+        "native_sha256": "7c201879a714b95b7f13da569c0a8cc515c710a60ea561e0de8de022f09169d3"
+      }
+    },
+    {
+      "request": 12,
+      "phase": "compiled",
+      "frame_extent_bytes": 184,
+      "instructions": 2547,
+      "result": {
+        "native_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/parent/12/request.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/parent/12/trusted_arm64.proof.o",
+        "simulator_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/parent/12/trusted_arm64.bpf.o",
+        "simulator_program": "trusted_arm64_arm64_sim_xdp",
+        "symbol": "kprobe__cap_capable_exit",
+        "native_sha256": "e3c650c83a0ea4f8a43b62f258cda72ca3194d5a904e9be1c347848a6518d782"
+      }
+    }
+  ],
+  "candidates": {
+    "ghost-tag-layout": [
+      {
+        "request": 5,
+        "phase": "compiled",
+        "frame_extent_bytes": 696,
+        "instructions": 3532,
+        "result": {
+          "native_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/candidate/5/request.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/candidate/5/trusted_arm64.proof.o",
+          "simulator_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/candidate/5/trusted_arm64.bpf.o",
+          "simulator_program": "trusted_arm64_arm64_sim_xdp",
+          "symbol": "inet_sock_set_state",
+          "native_sha256": "3e9db0023a62eb35cc503a40bf280b9528e4cbbee5908d8428545c6d22b34bb0"
+        }
+      },
+      {
+        "request": 10,
+        "phase": "compiled",
+        "frame_extent_bytes": 632,
+        "instructions": 2396,
+        "result": {
+          "native_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/candidate/10/request.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/candidate/10/trusted_arm64.proof.o",
+          "simulator_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/candidate/10/trusted_arm64.bpf.o",
+          "simulator_program": "trusted_arm64_arm64_sim_xdp",
+          "symbol": "tracepoint__syscalls__sys_exit_openat",
+          "native_sha256": "cec5a1c8fc42439264df4206c28d491013d14eb2af90be53477ddff8b61fd3f7"
+        }
+      },
+      {
+        "request": 11,
+        "phase": "compiled",
+        "frame_extent_bytes": 128,
+        "instructions": 1608,
+        "result": {
+          "native_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/candidate/11/request.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/candidate/11/trusted_arm64.proof.o",
+          "simulator_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/candidate/11/trusted_arm64.bpf.o",
+          "simulator_program": "trusted_arm64_arm64_sim_xdp",
+          "symbol": "block_rq_insert",
+          "native_sha256": "7c201879a714b95b7f13da569c0a8cc515c710a60ea561e0de8de022f09169d3"
+        }
+      },
+      {
+        "request": 12,
+        "phase": "compiled",
+        "frame_extent_bytes": 120,
+        "instructions": 2039,
+        "result": {
+          "native_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/candidate/12/request.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/candidate/12/trusted_arm64.proof.o",
+          "simulator_object": "/var/tmp/kprog-tmp/A/ghost-tag-layout/generated/candidate/12/trusted_arm64.bpf.o",
+          "simulator_program": "trusted_arm64_arm64_sim_xdp",
+          "symbol": "kprobe__cap_capable_exit",
+          "native_sha256": "e3c650c83a0ea4f8a43b62f258cda72ca3194d5a904e9be1c347848a6518d782"
+        }
+      }
+    ],
+    "compact-opaque-cache": [
+      {
+        "request": 5,
+        "phase": "compiled",
+        "frame_extent_bytes": 488,
+        "instructions": 3479,
+        "result": {
+          "native_object": "/var/tmp/kprog-tmp/A/compact-opaque-cache/generated/candidate/5/request.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/A/compact-opaque-cache/generated/candidate/5/trusted_arm64.proof.o",
+          "simulator_object": "/var/tmp/kprog-tmp/A/compact-opaque-cache/generated/candidate/5/trusted_arm64.bpf.o",
+          "simulator_program": "trusted_arm64_arm64_sim_xdp",
+          "symbol": "inet_sock_set_state",
+          "native_sha256": "3e9db0023a62eb35cc503a40bf280b9528e4cbbee5908d8428545c6d22b34bb0"
+        }
+      },
+      {
+        "request": 10,
+        "phase": "compiled",
+        "frame_extent_bytes": 576,
+        "instructions": 2357,
+        "result": {
+          "native_object": "/var/tmp/kprog-tmp/A/compact-opaque-cache/generated/candidate/10/request.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/A/compact-opaque-cache/generated/candidate/10/trusted_arm64.proof.o",
+          "simulator_object": "/var/tmp/kprog-tmp/A/compact-opaque-cache/generated/candidate/10/trusted_arm64.bpf.o",
+          "simulator_program": "trusted_arm64_arm64_sim_xdp",
+          "symbol": "tracepoint__syscalls__sys_exit_openat",
+          "native_sha256": "cec5a1c8fc42439264df4206c28d491013d14eb2af90be53477ddff8b61fd3f7"
+        }
+      },
+      {
+        "request": 11,
+        "phase": "compiled",
+        "frame_extent_bytes": 72,
+        "instructions": 1442,
+        "result": {
+          "native_object": "/var/tmp/kprog-tmp/A/compact-opaque-cache/generated/candidate/11/request.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/A/compact-opaque-cache/generated/candidate/11/trusted_arm64.proof.o",
+          "simulator_object": "/var/tmp/kprog-tmp/A/compact-opaque-cache/generated/candidate/11/trusted_arm64.bpf.o",
+          "simulator_program": "trusted_arm64_arm64_sim_xdp",
+          "symbol": "block_rq_insert",
+          "native_sha256": "7c201879a714b95b7f13da569c0a8cc515c710a60ea561e0de8de022f09169d3"
+        }
+      },
+      {
+        "request": 12,
+        "phase": "compiled",
+        "frame_extent_bytes": 136,
+        "instructions": 2068,
+        "result": {
+          "native_object": "/var/tmp/kprog-tmp/A/compact-opaque-cache/generated/candidate/12/request.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/A/compact-opaque-cache/generated/candidate/12/trusted_arm64.proof.o",
+          "simulator_object": "/var/tmp/kprog-tmp/A/compact-opaque-cache/generated/candidate/12/trusted_arm64.bpf.o",
+          "simulator_program": "trusted_arm64_arm64_sim_xdp",
+          "symbol": "kprobe__cap_capable_exit",
+          "native_sha256": "e3c650c83a0ea4f8a43b62f258cda72ca3194d5a904e9be1c347848a6518d782"
+        }
+      }
+    ],
+    "scalar-cell-layout": [
+      {
+        "request": 5,
+        "phase": "compiled",
+        "frame_extent_bytes": 432,
+        "instructions": 3692,
+        "result": {
+          "native_object": "/var/tmp/kprog-tmp/A/scalar-cell-layout/generated/candidate/5/request.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/A/scalar-cell-layout/generated/candidate/5/trusted_arm64.proof.o",
+          "simulator_object": "/var/tmp/kprog-tmp/A/scalar-cell-layout/generated/candidate/5/trusted_arm64.bpf.o",
+          "simulator_program": "trusted_arm64_arm64_sim_xdp",
+          "symbol": "inet_sock_set_state",
+          "native_sha256": "3e9db0023a62eb35cc503a40bf280b9528e4cbbee5908d8428545c6d22b34bb0"
+        }
+      },
+      {
+        "request": 10,
+        "phase": "compiled",
+        "frame_extent_bytes": 576,
+        "instructions": 2394,
+        "result": {
+          "native_object": "/var/tmp/kprog-tmp/A/scalar-cell-layout/generated/candidate/10/request.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/A/scalar-cell-layout/generated/candidate/10/trusted_arm64.proof.o",
+          "simulator_object": "/var/tmp/kprog-tmp/A/scalar-cell-layout/generated/candidate/10/trusted_arm64.bpf.o",
+          "simulator_program": "trusted_arm64_arm64_sim_xdp",
+          "symbol": "tracepoint__syscalls__sys_exit_openat",
+          "native_sha256": "cec5a1c8fc42439264df4206c28d491013d14eb2af90be53477ddff8b61fd3f7"
+        }
+      },
+      {
+        "request": 11,
+        "phase": "compiled",
+        "frame_extent_bytes": 72,
+        "instructions": 1442,
+        "result": {
+          "native_object": "/var/tmp/kprog-tmp/A/scalar-cell-layout/generated/candidate/11/request.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/A/scalar-cell-layout/generated/candidate/11/trusted_arm64.proof.o",
+          "simulator_object": "/var/tmp/kprog-tmp/A/scalar-cell-layout/generated/candidate/11/trusted_arm64.bpf.o",
+          "simulator_program": "trusted_arm64_arm64_sim_xdp",
+          "symbol": "block_rq_insert",
+          "native_sha256": "7c201879a714b95b7f13da569c0a8cc515c710a60ea561e0de8de022f09169d3"
+        }
+      },
+      {
+        "request": 12,
+        "phase": "compiled",
+        "frame_extent_bytes": 120,
+        "instructions": 2037,
+        "result": {
+          "native_object": "/var/tmp/kprog-tmp/A/scalar-cell-layout/generated/candidate/12/request.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/A/scalar-cell-layout/generated/candidate/12/trusted_arm64.proof.o",
+          "simulator_object": "/var/tmp/kprog-tmp/A/scalar-cell-layout/generated/candidate/12/trusted_arm64.bpf.o",
+          "simulator_program": "trusted_arm64_arm64_sim_xdp",
+          "symbol": "kprobe__cap_capable_exit",
+          "native_sha256": "e3c650c83a0ea4f8a43b62f258cda72ca3194d5a904e9be1c347848a6518d782"
+        }
+      }
+    ],
+    "ghost-payload-layout": [
+      {
+        "request": 5,
+        "phase": "compiled",
+        "frame_extent_bytes": 432,
+        "instructions": 3689,
+        "result": {
+          "native_object": "/var/tmp/kprog-tmp/A/ghost-payload-layout/generated/candidate/5/request.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/A/ghost-payload-layout/generated/candidate/5/trusted_arm64.proof.o",
+          "simulator_object": "/var/tmp/kprog-tmp/A/ghost-payload-layout/generated/candidate/5/trusted_arm64.bpf.o",
+          "simulator_program": "trusted_arm64_arm64_sim_xdp",
+          "symbol": "inet_sock_set_state",
+          "native_sha256": "3e9db0023a62eb35cc503a40bf280b9528e4cbbee5908d8428545c6d22b34bb0"
+        }
+      },
+      {
+        "request": 10,
+        "phase": "compiled",
+        "frame_extent_bytes": 576,
+        "instructions": 2414,
+        "result": {
+          "native_object": "/var/tmp/kprog-tmp/A/ghost-payload-layout/generated/candidate/10/request.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/A/ghost-payload-layout/generated/candidate/10/trusted_arm64.proof.o",
+          "simulator_object": "/var/tmp/kprog-tmp/A/ghost-payload-layout/generated/candidate/10/trusted_arm64.bpf.o",
+          "simulator_program": "trusted_arm64_arm64_sim_xdp",
+          "symbol": "tracepoint__syscalls__sys_exit_openat",
+          "native_sha256": "cec5a1c8fc42439264df4206c28d491013d14eb2af90be53477ddff8b61fd3f7"
+        }
+      },
+      {
+        "request": 11,
+        "phase": "compiled",
+        "frame_extent_bytes": 64,
+        "instructions": 1442,
+        "result": {
+          "native_object": "/var/tmp/kprog-tmp/A/ghost-payload-layout/generated/candidate/11/request.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/A/ghost-payload-layout/generated/candidate/11/trusted_arm64.proof.o",
+          "simulator_object": "/var/tmp/kprog-tmp/A/ghost-payload-layout/generated/candidate/11/trusted_arm64.bpf.o",
+          "simulator_program": "trusted_arm64_arm64_sim_xdp",
+          "symbol": "block_rq_insert",
+          "native_sha256": "7c201879a714b95b7f13da569c0a8cc515c710a60ea561e0de8de022f09169d3"
+        }
+      },
+      {
+        "request": 12,
+        "phase": "compiled",
+        "frame_extent_bytes": 112,
+        "instructions": 2029,
+        "result": {
+          "native_object": "/var/tmp/kprog-tmp/A/ghost-payload-layout/generated/candidate/12/request.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/A/ghost-payload-layout/generated/candidate/12/trusted_arm64.proof.o",
+          "simulator_object": "/var/tmp/kprog-tmp/A/ghost-payload-layout/generated/candidate/12/trusted_arm64.bpf.o",
+          "simulator_program": "trusted_arm64_arm64_sim_xdp",
+          "symbol": "kprobe__cap_capable_exit",
+          "native_sha256": "e3c650c83a0ea4f8a43b62f258cda72ca3194d5a904e9be1c347848a6518d782"
+        }
+      }
+    ]
+  },
+  "existing_host_controls": {
+    "utc": "2026-11-09T10:09:23.236511+00:00",
+    "rows": [
+      {
+        "label": "gcc-test_arm64_alu_operand_select_route_host",
+        "exit": 0
+      },
+      {
+        "label": "gcc-test_arm64_dispatch_singleton_route_host",
+        "exit": 0
+      },
+      {
+        "label": "gcc-test_arm64_return_token_host",
+        "exit": 0
+      },
+      {
+        "label": "gcc-test_arm64_ldrsx_op_route_host",
+        "exit": 0
+      },
+      {
+        "label": "gcc-test_arm64_helper_arg_ptr_route_host",
+        "exit": 0
+      },
+      {
+        "label": "gcc-test_arm64_mem_base_src_route_host",
+        "exit": 0
+      },
+      {
+        "label": "gcc-test_arm64_dq_mem_extra_route_host",
+        "exit": 0
+      },
+      {
+        "label": "gcc-test_arm64_vreg_field_route_host",
+        "exit": 0
+      },
+      {
+        "label": "gcc-test_arm64_helper_call_host",
+        "exit": 0
+      },
+      {
+        "label": "gcc-test_arm64_pair_mem_route_host",
+        "exit": 0
+      },
+      {
+        "label": "gcc-test_arm64_mem_prepost_route_host",
+        "exit": 0
+      },
+      {
+        "label": "gcc-test_arm64_dq_mem_route_host",
+        "exit": 0
+      },
+      {
+        "label": "gcc-test_arm64_vreg_route_host",
+        "exit": 0
+      },
+      {
+        "label": "clang-18-test_arm64_alu_operand_select_route_host",
+        "exit": 0
+      },
+      {
+        "label": "clang-18-test_arm64_dispatch_singleton_route_host",
+        "exit": 0
+      },
+      {
+        "label": "clang-18-test_arm64_return_token_host",
+        "exit": 2
+      },
+      {
+        "label": "clang-18-test_arm64_ldrsx_op_route_host",
+        "exit": 0
+      },
+      {
+        "label": "clang-18-test_arm64_helper_arg_ptr_route_host",
+        "exit": 0
+      },
+      {
+        "label": "clang-18-test_arm64_mem_base_src_route_host",
+        "exit": 0
+      },
+      {
+        "label": "clang-18-test_arm64_dq_mem_extra_route_host",
+        "exit": 0
+      },
+      {
+        "label": "clang-18-test_arm64_vreg_field_route_host",
+        "exit": 0
+      },
+      {
+        "label": "clang-18-test_arm64_helper_call_host",
+        "exit": 0
+      },
+      {
+        "label": "clang-18-test_arm64_pair_mem_route_host",
+        "exit": 0
+      },
+      {
+        "label": "clang-18-test_arm64_mem_prepost_route_host",
+        "exit": 0
+      },
+      {
+        "label": "clang-18-test_arm64_dq_mem_route_host",
+        "exit": 2
+      },
+      {
+        "label": "clang-18-test_arm64_vreg_route_host",
+        "exit": 2
+      }
+    ]
+  },
+  "scope": "Matched original P/metadata generation and compiled-B layout measurements; canonical source remains555 and active uniform-catalog/full-BCC cohorts retain captured inputs.",
+  "runtime_admission_additions": 0
+}
