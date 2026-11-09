@@ -1,0 +1,131 @@
+{
+  "utc": "2026-11-09T08:53:50.268389+00:00",
+  "source_publication": "55504ff906ab268a5cab3ab083d6d448d152ed54",
+  "make_exit": 2,
+  "cases": 48,
+  "stages": {
+    "valid_executed": 4,
+    "verifier_rejected": 34,
+    "specialization_rejected": 4,
+    "accepted_finding": 6
+  },
+  "negative_native_test_run": 0,
+  "positive_results": [
+    {
+      "name": "valid_control",
+      "stage": "valid_executed",
+      "returncode": 0
+    },
+    {
+      "name": "valid_copy_restore",
+      "stage": "valid_executed",
+      "returncode": 0
+    },
+    {
+      "name": "valid_alias_load",
+      "stage": "valid_executed",
+      "returncode": 0
+    },
+    {
+      "name": "valid_spill_restore",
+      "stage": "valid_executed",
+      "returncode": 0
+    }
+  ],
+  "accepted_load_only": [
+    {
+      "name": "unpaired_stxr_failure",
+      "stage": "accepted_finding",
+      "request": {
+        "request_id": 22,
+        "source_prog_id": 144,
+        "native_sha256": "cc18f710c67956078237759625d7fefc65727a4170c193f9ab6ae92109a607ef",
+        "started": "1970-01-01T00:06:58.151649+00:00",
+        "prog_id": 145,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-dm78a7mq/requests/22.success.tar.gz",
+        "finished": "1970-01-01T00:07:10.651892+00:00"
+      }
+    },
+    {
+      "name": "unpaired_stlxr_failure",
+      "stage": "accepted_finding",
+      "request": {
+        "request_id": 24,
+        "source_prog_id": 157,
+        "native_sha256": "eca5e9bb32b67d7cf02066072a3b14c07caf4c8897aae11b651497ce3906c360",
+        "started": "1970-01-01T00:07:32.336082+00:00",
+        "prog_id": 158,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-dm78a7mq/requests/24.success.tar.gz",
+        "finished": "1970-01-01T00:07:45.658408+00:00"
+      }
+    },
+    {
+      "name": "paired_stxr_failure",
+      "stage": "accepted_finding",
+      "request": {
+        "request_id": 26,
+        "source_prog_id": 170,
+        "native_sha256": "15115e53de99c5297833321a2a7d085a1d35e24b45284980af6d679c7a8d47b7",
+        "started": "1970-01-01T00:08:08.199855+00:00",
+        "prog_id": 171,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-dm78a7mq/requests/26.success.tar.gz",
+        "finished": "1970-01-01T00:08:20.903719+00:00"
+      }
+    },
+    {
+      "name": "paired_stlxr_failure",
+      "stage": "accepted_finding",
+      "request": {
+        "request_id": 28,
+        "source_prog_id": 183,
+        "native_sha256": "4d51789865c04e46dbdd0fdd1ebb5d07ab99d484e97c5549b7caa39fc4ba7dcd",
+        "started": "1970-01-01T00:08:44.030975+00:00",
+        "prog_id": 184,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-dm78a7mq/requests/28.success.tar.gz",
+        "finished": "1970-01-01T00:08:57.040963+00:00"
+      }
+    },
+    {
+      "name": "entry_return_address_flags",
+      "stage": "accepted_finding",
+      "request": {
+        "request_id": 34,
+        "source_prog_id": 220,
+        "native_sha256": "167f607b9c1cbf7bde3b23ba77502f1cae96830b267e1c54d9ca99738148b512",
+        "started": "1970-01-01T00:10:32.530642+00:00",
+        "prog_id": 221,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-dm78a7mq/requests/34.success.tar.gz",
+        "finished": "1970-01-01T00:10:45.255592+00:00"
+      }
+    },
+    {
+      "name": "stack_base_flags",
+      "stage": "accepted_finding",
+      "request": {
+        "request_id": 44,
+        "source_prog_id": 281,
+        "native_sha256": "14a25095df58aa9dbf3b28706df5a80dff621eab9b89a264f03063f49cd543b1",
+        "started": "1970-01-01T00:13:30.689641+00:00",
+        "prog_id": 282,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-dm78a7mq/requests/44.success.tar.gz",
+        "finished": "1970-01-01T00:13:42.791280+00:00"
+      }
+    }
+  ],
+  "host_controls": {
+    "compilers": [
+      "GCC",
+      "Clang18"
+    ],
+    "mem_prepost_cases_each": 135170,
+    "pair_cases_each": 122891,
+    "stack_lifetime": "PASS"
+  },
+  "runtime_admission_additions": 0
+}
