@@ -19,8 +19,10 @@
     },
     {
       "path": "/var/tmp/kprog-tmp/C/helper-output-range/source",
-      "archive": "corpus/results/kprog_app_coverage_20261109/helper-output-range/raw.tar.gz",
-      "state": "retained_with_member_reconciliation_pending"
+      "archive": "corpus/results/kprog_app_coverage_20261109/helper-output-range/source-inputs.tar.gz",
+      "state": "retired_archived_private_source_copy",
+      "files": 436,
+      "archive_sha256": "0f3458753f459415c0a59db29c1dc8a2cd9ed49550c604d602135b13b85809b4"
     },
     {
       "path": "/var/tmp/kprog-tmp/C/xdp-helper-output-range/source",
