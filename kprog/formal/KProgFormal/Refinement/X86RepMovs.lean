@@ -500,3 +500,104 @@ theorem Indexed.handler_step_refines (width : ScalarWidth) (nextPc : Reference.W
   exact ⟨rfl, rfl, rfl⟩
 
 end KProgFormal.Refinement.X86RepMovs
+
+namespace KProgFormal.Refinement.X86RepMovs
+open Reference
+open Reference.X86 (ScalarWidth State)
+
+theorem element_pc (width : ScalarWidth) (s : State) :
+    (element width s).state.pc = s.pc := by
+  unfold element
+  split
+  · rfl
+  · split <;> rfl
+
+/-- A successful doneCount keeps the original instruction PC before the remaining
+iterations, including when the following source access faults. -/
+theorem loop_prefix_split (width : ScalarWidth) (nextPc : Reference.Word)
+    (doneCount rest : Nat) (s : State)
+    (successful : (loop width s.pc doneCount s).fault = none) :
+    loop width nextPc (doneCount + rest) s =
+      let before := loop width s.pc doneCount s
+      let after := loop width nextPc rest before.state
+      ⟨after.state, before.events ++ after.events, after.fault⟩ := by
+  induction doneCount generalizing s with
+  | zero => simp [loop]
+  | succ n ih =>
+      by_cases stopped : (element width s).fault.isSome = true
+      · have bad : (element width s).fault = none := by simpa [loop, stopped] using successful
+        simp [bad] at stopped
+      · have nextOk : (loop width s.pc n (element width s).state).fault = none := by
+          simpa [loop, stopped] using successful
+        have nextPc : (element width s).state.pc = s.pc := element_pc width s
+        have stepSplit := ih (element width s).state (by simpa only [nextPc] using nextOk)
+        simp only [nextPc] at stepSplit
+        rw [Nat.succ_add, loop]
+        simp only [if_neg stopped]
+        rw [stepSplit]
+        simp only [loop, if_neg stopped, List.append_assoc]
+
+theorem loop_read_fault_after_prefix (width : ScalarWidth) (nextPc : Reference.Word)
+    (doneCount count : Nat) (s : State) (remaining : doneCount < count)
+    (successful : (loop width s.pc doneCount s).fault = none)
+    (failed : readMemory (loop width s.pc doneCount s).state.memory
+      ((loop width s.pc doneCount s).state.gpr 6) width.bytes =
+      .error (.read ((loop width s.pc doneCount s).state.gpr 6) width.bytes)) :
+    loop width nextPc count s =
+      ⟨(loop width s.pc doneCount s).state,
+        (loop width s.pc doneCount s).events ++
+          [.fault (.read ((loop width s.pc doneCount s).state.gpr 6) width.bytes)],
+        some (.read ((loop width s.pc doneCount s).state.gpr 6) width.bytes)⟩ := by
+  have counts : count = doneCount + (count - doneCount - 1 + 1) := by omega
+  rw [counts, loop_prefix_split width nextPc doneCount _ s successful]
+  simp only [loop, element, X86Scalar.read_refines, Reference.X86.scalarRead,
+    Reference.X86.readSource, failed, Option.isSome_some, ↓reduceIte]
+
+end KProgFormal.Refinement.X86RepMovs
+
+namespace KProgFormal.Refinement.X86RepMovs.Indexed
+open Reference
+open Reference.X86 (ScalarWidth State)
+
+theorem loop_events_match (width : ScalarWidth) (nextPc : Reference.Word) (count index : Nat) (s : State) :
+    (loop width nextPc index count s).events =
+      (X86RepMovs.loop width nextPc count (project width index s)).events := by
+  induction count generalizing index s with
+  | zero => rfl
+  | succ n ih =>
+      simp only [loop, X86RepMovs.loop, element_projects, projectElement]
+      by_cases stopped : (element width index s).fault.isSome = true
+      · simp only [stopped, ↓reduceIte]
+      · simp only [stopped, ↓reduceIte]
+        rw [ih (index + 1) (element width index s).state]
+        rfl
+
+/-- C selects a recovery before the next scalar read, sets its completed count
+to the current index, and uses the existing final pointer/RCX writeback. -/
+def recoveryFinish (width : ScalarWidth) (nextPc : Reference.Word) (completed : Nat)
+    (s : State) : Transition State :=
+  let copied := loop width s.pc 0 completed s
+  ⟨{ copied.state with gpr := emittedRegisters width completed s, pc := nextPc }, copied.events, none⟩
+
+theorem recovery_finish_matches_progress (width : ScalarWidth) (nextPc : Reference.Word)
+    (completed : Nat) (s : State)
+    (successful : (loop width s.pc 0 completed s).fault = none) :
+    (recoveryFinish width nextPc completed s).state =
+      { (X86RepMovs.loop width s.pc completed s).state with
+        gpr := fun r => if r = 1 then 0 else (X86RepMovs.loop width s.pc completed s).state.gpr r,
+        pc := nextPc } := by
+  have projection := loop_projects width s.pc completed 0 s successful
+  rw [project_zero] at projection
+  rw [projection]
+  simp only [recoveryFinish, project]
+  congr 1
+  funext r
+  by_cases counter : r = 1
+  · subst r
+    simp [emittedRegisters, progressed, generatedX86RepMovsRcx,
+      generatedX86RegWrite, GeneratedX86RegWrite.write, GeneratedX86RegWrite.writeAt,
+      GeneratedX86RegWrite.bitsAt, GeneratedX86RegWrite.bits]
+  · have captured := congrFun (loop_gpr width s.pc completed 0 s) r
+    simp only [emittedRegisters, progressed, if_neg counter, captured, Nat.zero_add]
+
+end KProgFormal.Refinement.X86RepMovs.Indexed

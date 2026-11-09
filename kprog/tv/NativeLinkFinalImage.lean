@@ -1,3 +1,4 @@
+import KProgFormal.Refinement.X86RepMovs
 import NativeLinkByteLayout
 import KProgFormal.Reference.AArch64
 
@@ -783,3 +784,72 @@ end KProgTV.NativeLinkFinalImage
 #print axioms KProgTV.NativeLinkFinalImage.arm64_recovered_pair_first
 #print axioms KProgTV.NativeLinkFinalImage.arm64_recovered_pair_second
 #print axioms KProgTV.NativeLinkFinalImage.arm64_recovered_pair_single_access
+
+namespace KProgTV.NativeLinkFinalImage
+open KProgFormal.Reference
+open KProgFormal.Refinement
+
+/-- Registered REP source-read recovery after any successful prefix. The C
+branch and the physical fault select the same completed index; the table selects
+RCX and records this instruction length. Physical access/table/exception-class,
+DF-clear ABI, primitive/provenance and compiler coupling remain premises.
+The raw diagnostic fault event is retained alongside the completed read/writes. -/
+theorem x86_recovered_rep_movs (width : X86.ScalarWidth) (completed : Nat)
+    (nextPc : Word) (length : Nat) (s : X86.State)
+    (direction : s.rflags.getLsbD 10 = false)
+    (remaining : completed < (s.gpr 1).toNat)
+    (successful : (X86RepMovs.Indexed.loop width s.pc 0 completed s).fault = none)
+    (failed : readMemory (X86RepMovs.loop width s.pc completed s).state.memory
+      ((X86RepMovs.loop width s.pc completed s).state.gpr 6) width.bytes =
+      .error (.read ((X86RepMovs.loop width s.pc completed s).state.gpr 6) width.bytes))
+    (continuation : nextPc = s.pc + BitVec.ofNat 64 length) :
+    recoverRead (x86LoadResume (some 1) length)
+      (X86.step (.repMovs width false 0 nextPc) s) =
+      ⟨(X86RepMovs.Indexed.recoveryFinish width nextPc completed s).state,
+        (X86RepMovs.Indexed.recoveryFinish width nextPc completed s).events ++
+          [.fault (.read ((X86RepMovs.loop width s.pc completed s).state.gpr 6) width.bytes)],
+        none⟩ := by
+  have faults := X86RepMovs.Indexed.loop_fault_matches width s.pc completed 0 s
+  rw [X86RepMovs.Indexed.project_zero] at faults
+  have progressOk : (X86RepMovs.loop width s.pc completed s).fault = none := by
+    rw [← faults]
+    exact successful
+  have resumed : x86LoadResume (some 1) length (X86RepMovs.loop width s.pc completed s).state =
+      (X86RepMovs.Indexed.recoveryFinish width nextPc completed s).state := by
+    rw [X86RepMovs.Indexed.recovery_finish_matches_progress width nextPc completed s successful]
+    unfold x86LoadResume
+    rw [X86RepMovs.loop_success_pc width s.pc completed s progressOk, ← continuation]
+    congr 1
+    funext register
+    simp [eq_comm]
+  rw [← X86RepMovs.step_refines width nextPc s direction]
+  unfold X86RepMovs.step
+  rw [X86RepMovs.loop_read_fault_after_prefix width nextPc completed (s.gpr 1).toNat s remaining progressOk failed]
+  change (⟨x86LoadResume (some 1) length (X86RepMovs.loop width s.pc completed s).state, _, none⟩ : Transition X86.State) = _
+  rw [resumed]
+  have events := X86RepMovs.Indexed.loop_events_match width s.pc completed 0 s
+  rw [X86RepMovs.Indexed.project_zero] at events
+  simp only [X86RepMovs.Indexed.recoveryFinish, events]
+
+/-- Recovery commits the completed prefix while preserving every other GPR,
+flags, vector state, segment bases and address profile. -/
+theorem x86_rep_recovery_frame (width : X86.ScalarWidth) (completed : Nat)
+    (nextPc : Word) (s : X86.State) :
+    let actual := (X86RepMovs.Indexed.recoveryFinish width nextPc completed s).state
+    actual.gpr 1 = 0 ∧
+    actual.gpr 6 = s.gpr 6 + BitVec.ofNat 64 (completed * width.bytes) ∧
+    actual.gpr 7 = s.gpr 7 + BitVec.ofNat 64 (completed * width.bytes) ∧
+    actual.pc = nextPc ∧
+    actual.memory = (X86RepMovs.Indexed.loop width s.pc 0 completed s).state.memory ∧
+    (∀ r, r ≠ 1 → r ≠ 6 → r ≠ 7 → actual.gpr r = s.gpr r) := by
+  simp only [X86RepMovs.Indexed.recoveryFinish, X86RepMovs.emittedRegisters]
+  refine ⟨?_, ?_, ?_, True.intro, True.intro, ?_⟩
+  · simp [KProgFormal.generatedX86RepMovsRcx, KProgFormal.generatedX86RegWrite,
+      KProgFormal.GeneratedX86RegWrite.write, KProgFormal.GeneratedX86RegWrite.writeAt,
+      KProgFormal.GeneratedX86RegWrite.bitsAt, KProgFormal.GeneratedX86RegWrite.bits]
+  · cases width <;> rfl
+  · cases width <;> rfl
+  · intro r counter source destination
+    simp [counter, source, destination]
+
+end KProgTV.NativeLinkFinalImage
