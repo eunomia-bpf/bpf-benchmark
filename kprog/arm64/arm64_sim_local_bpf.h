@@ -265,6 +265,17 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 	void *__a64_sim_helper_ctx __attribute__((unused)) = (void *)0;                            \
 	void *__a64_sim_helper_abi_base __attribute__((unused)) = (void *)0;                       \
 	ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_DECLARE_REG)                  \
+	const __u64 __a64_entry_x19 __attribute__((unused)) = __a64_x19.x; \
+	const __u64 __a64_entry_x20 __attribute__((unused)) = __a64_x20.x; \
+	const __u64 __a64_entry_x21 __attribute__((unused)) = __a64_x21.x; \
+	const __u64 __a64_entry_x22 __attribute__((unused)) = __a64_x22.x; \
+	const __u64 __a64_entry_x23 __attribute__((unused)) = __a64_x23.x; \
+	const __u64 __a64_entry_x24 __attribute__((unused)) = __a64_x24.x; \
+	const __u64 __a64_entry_x25 __attribute__((unused)) = __a64_x25.x; \
+	const __u64 __a64_entry_x26 __attribute__((unused)) = __a64_x26.x; \
+	const __u64 __a64_entry_x27 __attribute__((unused)) = __a64_x27.x; \
+	const __u64 __a64_entry_x28 __attribute__((unused)) = __a64_x28.x; \
+	const __u64 __a64_entry_x29 __attribute__((unused)) = __a64_x29.x; \
 	union arm64_sim_gpr *const __a64_cells[KPROG_ARM64_GPR_COUNT] = { \
 		ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_REG_CELL) };           \
 	__u8 *const __a64_tag_cells[KPROG_ARM64_GPR_COUNT] = {            \
@@ -2198,6 +2209,17 @@ extern __u64 bpf_arm64_native_lab_atomic8(__u8 *word, __u64 value, __u32 operati
 
 #define ARM64_SIM_RET()                                                     \
 	do {                                                               \
+        if (__a64_x19_tag != ARM64_SIM_TAG_SCALAR || __a64_x19.x != __a64_entry_x19 || \
+            __a64_x20_tag != ARM64_SIM_TAG_SCALAR || __a64_x20.x != __a64_entry_x20 || \
+            __a64_x21_tag != ARM64_SIM_TAG_SCALAR || __a64_x21.x != __a64_entry_x21 || \
+            __a64_x22_tag != ARM64_SIM_TAG_SCALAR || __a64_x22.x != __a64_entry_x22 || \
+            __a64_x23_tag != ARM64_SIM_TAG_SCALAR || __a64_x23.x != __a64_entry_x23 || \
+            __a64_x24_tag != ARM64_SIM_TAG_SCALAR || __a64_x24.x != __a64_entry_x24 || \
+            __a64_x25_tag != ARM64_SIM_TAG_SCALAR || __a64_x25.x != __a64_entry_x25 || \
+            __a64_x26_tag != ARM64_SIM_TAG_SCALAR || __a64_x26.x != __a64_entry_x26 || \
+            __a64_x27_tag != ARM64_SIM_TAG_SCALAR || __a64_x27.x != __a64_entry_x27 || \
+            __a64_x28_tag != ARM64_SIM_TAG_SCALAR || __a64_x28.x != __a64_entry_x28 || \
+            __a64_x29_tag != ARM64_SIM_TAG_SCALAR || __a64_x29.x != __a64_entry_x29 || __a64_sp != 0) ARM64_SIM_L_REJECT_PC(); \
 		return (__u32)ARM64_SIM_L_READ_REG(ARM64_X0);                                  \
 	} while (0)
 
