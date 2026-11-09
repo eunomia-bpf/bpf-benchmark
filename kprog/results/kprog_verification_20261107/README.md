@@ -10,8 +10,8 @@ specialization token also has its own row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 74 / 74 |
 | Reference step family defined | 67/75 | 74/74 |
-| Raw register handler refinement | 32/75 | 3/74 |
-| Raw register dispatcher arm composition | 32/75 | 3/74 |
+| Raw register handler refinement | 32/75 | 11/74 |
+| Raw register dispatcher arm composition | 32/75 | 11/74 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/74 |
 | Addressed memory model / composed step | 29/75 | 0/74 |
 | Additional partial-model handler families | 1/75 | 0 |
@@ -6403,3 +6403,25 @@ explicit interfaces. These O1 register laws use architectural register words
 and byte tags; stack-forwarding layout and entry-stub callee comparisons stay
 separate. Compiled-B units and layout-specific RET work are paused under the
 coordinator's16:00 decision; retained compiled artifacts keep their exact epochs.
+
+### ARM raw multiply and divide refinement
+
+MADD, MSUB, MUL, UMULL, UDIV, UMULH, UMADDL and SMADDL now compose raw64-bit
+register/tag reads, STACK4/RETURN10 materialization, operation-specific input
+width and actual scalarizing destination writeback. All operands are captured
+from the incoming state, so register aliases and XZR retain their exact effect.
+UDIV narrows both sources at W/X width; native long/high operations retain the
+X-width validity premise. MUL/UMULL/UDIV/UMULH also transport arbitrary unused
+SRC3 bytes, including NONE255, through the production dispatcher.
+
+`Multiply.production_dispatch` derives equality with the existing numerical
+production dispatcher through its multiply arm; `Multiply.step_refines`
+composes all eight operations with the preceding three raw register gates.
+Ten new laws and the preceding13 audit with module/root checks0 and sorryAx0.
+The [raw multiply receipt](arm-raw-multiply.log.gz) preserves the exact previous
+source prefix, canonical/source snapshots, compiled Lean module and all proof
+logs. ARM raw handler/dispatcher totals advance3to11/74. Complete architectural
+image, memory/flags/SP/SIMD/monitor/environment, ordered empty events and fault
+result retain equality. Entry origin identity, source extraction/union access
+and physical/compiler transport remain interfaces. This proof uses register
+words/tags and stays independent of B forwarding and callee comparisons.

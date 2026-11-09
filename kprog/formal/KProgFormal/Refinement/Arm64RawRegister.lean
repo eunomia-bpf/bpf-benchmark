@@ -193,3 +193,153 @@ end KProgFormal.Refinement.Arm64RawRegister
 
 #print axioms KProgFormal.Refinement.Arm64RawRegister.destination_separate_sp
 #print axioms KProgFormal.Refinement.Arm64RawRegister.step_refines
+
+namespace KProgFormal.Refinement.Arm64RawRegister.Multiply
+open Reference
+open Reference.AArch64 (Register Width)
+
+/-- The C multiply macro narrows UDIV sources at WIDTH and retains the full
+materialized word for every other operation. All operands precede writeback. -/
+def body (op : GeneratedArm64Mul.Mul) (width : Width) (dst lhs rhs addend : Register)
+    (origins : Origins) (state : State) : Transition State :=
+  let inputWidth := if GeneratedArm64Mul.code op = GeneratedArm64Mul.code .udiv
+    then Arm64Register.handlerWidth width else .w64
+  let lhsValue := GeneratedArm64Width.narrow (readRegister origins state lhs) inputWidth
+  let rhsValue := GeneratedArm64Width.narrow (readRegister origins state rhs) inputWidth
+  let result := GeneratedArm64Mul.value op lhsValue rhsValue (readRegister origins state addend)
+  ⟨advance (writeRegister state dst result width), [], none⟩
+
+theorem body_projects (op : GeneratedArm64Mul.Mul) (width : Width)
+    (dst lhs rhs addend : Register) (origins : Origins) (state : State) :
+    observe origins (body op width dst lhs rhs addend origins state) =
+      Arm64Mul.rawStep op width dst lhs rhs addend (image origins state) := by
+  simp only [body, observe, advance_refines, write_refines, read_refines,
+    Arm64Mul.rawStep, Arm64Register.read_refines, Arm64Register.write_refines]
+  rfl
+
+theorem body_refines (op : GeneratedArm64Mul.Mul) (width : Width)
+    (dst lhs rhs addend : Register) (origins : Origins) (state : State)
+    (valid : Arm64Mul.nativeWidth op width) :
+    observe origins (body op width dst lhs rhs addend origins state) =
+      Reference.AArch64.step (.mul (Arm64Mul.instruction op width dst lhs rhs addend))
+        (image origins state) := by
+  rw [body_projects, Arm64Mul.raw_step_refines op width dst lhs rhs addend _ valid]
+
+/-- The raw-register leading and multiply selector keep their production order.
+Additional ALU/shift gates retain the established numerical leading relation. -/
+def dispatch (code : Nat) (aux : BitVec 32) (width : Width)
+    (dst lhs rhs addend : Register) (value : Word) (origins : Origins) (state : State) :
+    Option (Transition State) :=
+  match Arm64RawRegister.dispatch code aux width dst value origins state with
+  | some result => some result
+  | none => (Arm64Mul.decodeOpcode code).map (fun op => body op width dst lhs rhs addend origins state)
+
+theorem prefix_passes (op : GeneratedArm64Mul.Mul) (aux : BitVec 32) (width : Width)
+    (dst : Register) (value : Word) (origins : Origins) (state : State) :
+    Arm64RawRegister.dispatch (GeneratedArm64Mul.code op) aux width dst value origins state = none := by
+  cases op <;> rfl
+
+theorem reached (op : GeneratedArm64Mul.Mul) (aux : BitVec 32) (width : Width)
+    (dst lhs rhs addend : Register) (value : Word) (origins : Origins) (state : State) :
+    dispatch (GeneratedArm64Mul.code op) aux width dst lhs rhs addend value origins state =
+      some (body op width dst lhs rhs addend origins state) := by
+  simp only [dispatch, prefix_passes, Arm64Mul.decode_code]
+  rfl
+
+/-- Equality with the existing complete numerical dispatcher through its
+multiply arm derives every earlier gate's fallthrough and every field codec. -/
+theorem production_dispatch (op : GeneratedArm64Mul.Mul) (aux : BitVec 32) (width : Width)
+    (dst lhs rhs addend : Register) (value : Word) (sourceScalar sourceStack : Bool)
+    (origins : Origins) (state : State) :
+    (dispatch (GeneratedArm64Mul.code op) aux width dst lhs rhs addend value origins state).map
+      (observe origins) =
+    Arm64Dispatcher.dispatchThroughMultiply (GeneratedArm64Mul.code op) aux width
+      (Arm64Register.registerCode dst) (Arm64Register.registerCode lhs)
+      (Arm64Register.registerCode rhs) (Arm64Register.registerCode addend)
+      value sourceScalar sourceStack (image origins state) := by
+  rw [reached, Arm64Dispatcher.multiply_reached, Arm64Dispatcher.multiply_body_typed]
+  exact congrArg some (body_projects op width dst lhs rhs addend origins state)
+
+theorem dispatch_refines (op : GeneratedArm64Mul.Mul) (aux : BitVec 32) (width : Width)
+    (dst lhs rhs addend : Register) (value : Word) (origins : Origins) (state : State)
+    (valid : Arm64Mul.nativeWidth op width) :
+    (dispatch (GeneratedArm64Mul.code op) aux width dst lhs rhs addend value origins state).map
+      (observe origins) = some (Reference.AArch64.step
+        (.mul (Arm64Mul.instruction op width dst lhs rhs addend)) (image origins state)) := by
+  rw [reached]
+  exact congrArg some (body_refines op width dst lhs rhs addend origins state valid)
+
+theorem earlier_step (origins : Origins) (state : State) (code : Nat) (aux : BitVec 32)
+    (width : Width) (dst lhs rhs addend : Register) (value : Word)
+    (instruction : Reference.AArch64.Instruction)
+    (binding : Arm64RawRegister.Binding code aux width dst value instruction) :
+    (dispatch code aux width dst lhs rhs addend value origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  have result := Arm64RawRegister.step_refines origins state code aux width dst value instruction binding
+  unfold dispatch
+  cases leading : Arm64RawRegister.dispatch code aux width dst value origins state with
+  | none => simp [leading] at result
+  | some output => simpa only [leading] using result
+
+/-- Width validity describes the native instruction domain, including X-only
+long/high products. The constructors carry operand/opcode identities. -/
+inductive Binding : Nat → BitVec 32 → Width → Register → Register → Register → Register →
+    Word → Reference.AArch64.Instruction → Prop where
+  | leading (code : Nat) (aux : BitVec 32) (width : Width) (dst lhs rhs addend : Register)
+      (value : Word) (instruction : Reference.AArch64.Instruction)
+      (binding : Arm64RawRegister.Binding code aux width dst value instruction) :
+      Binding code aux width dst lhs rhs addend value instruction
+  | multiply (op : GeneratedArm64Mul.Mul) (aux : BitVec 32) (width : Width)
+      (dst lhs rhs addend : Register) (value : Word) (valid : Arm64Mul.nativeWidth op width) :
+      Binding (GeneratedArm64Mul.code op) aux width dst lhs rhs addend value
+        (.mul (Arm64Mul.instruction op width dst lhs rhs addend))
+
+theorem step_refines (origins : Origins) (state : State) (code : Nat) (aux : BitVec 32)
+    (width : Width) (dst lhs rhs addend : Register) (value : Word)
+    (instruction : Reference.AArch64.Instruction)
+    (binding : Binding code aux width dst lhs rhs addend value instruction) :
+    (dispatch code aux width dst lhs rhs addend value origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  cases binding with
+  | leading code aux width dst lhs rhs addend value instruction bound =>
+      exact earlier_step origins state code aux width dst lhs rhs addend value instruction bound
+  | multiply op aux width dst lhs rhs addend value valid =>
+      exact dispatch_refines op aux width dst lhs rhs addend value origins state valid
+
+/-- MUL, UMULL, UDIV and UMULH retain freedom in the unused accumulator. -/
+theorem unused_accumulator (op : GeneratedArm64Mul.Mul) (width : Width)
+    (dst lhs rhs addend other : Register) (origins : Origins) (state : State)
+    (unused : op = .mul ∨ op = .umull ∨ op = .udiv ∨ op = .umulh) :
+    body op width dst lhs rhs addend origins state = body op width dst lhs rhs other origins state := by
+  rcases unused with rfl | rfl | rfl | rfl <;> rfl
+
+/-- The actual dispatcher accepts every unused SRC3 byte, including NONE255,
+while the native instruction retains its architectural zero accumulator. -/
+theorem production_unused_addend (op : GeneratedArm64Mul.Mul) (aux : BitVec 32) (width : Width)
+    (dst lhs rhs addend : Register) (source3 : Byte) (value : Word)
+    (sourceScalar sourceStack : Bool) (origins : Origins) (state : State)
+    (unused : op = .mul ∨ op = .umull ∨ op = .udiv ∨ op = .umulh) :
+    (dispatch (GeneratedArm64Mul.code op) aux width dst lhs rhs addend value origins state).map
+      (observe origins) =
+    Arm64Dispatcher.dispatchThroughMultiply (GeneratedArm64Mul.code op) aux width
+      (Arm64Register.registerCode dst) (Arm64Register.registerCode lhs)
+      (Arm64Register.registerCode rhs) source3 value sourceScalar sourceStack (image origins state) := by
+  rw [Arm64Dispatcher.multiply_reached]
+  rw [Arm64Dispatcher.multiply_ignores_accumulator op width
+    (Arm64Register.registerCode dst) (Arm64Register.registerCode lhs)
+    (Arm64Register.registerCode rhs) source3 (Arm64Register.registerCode addend) (image origins state) unused]
+  rw [Arm64Dispatcher.multiply_body_typed, reached]
+  exact congrArg some (body_projects op width dst lhs rhs addend origins state)
+
+end KProgFormal.Refinement.Arm64RawRegister.Multiply
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Multiply.body_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Multiply.body_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Multiply.prefix_passes
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Multiply.reached
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Multiply.production_dispatch
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Multiply.dispatch_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Multiply.earlier_step
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Multiply.step_refines
+
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Multiply.unused_accumulator
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Multiply.production_unused_addend

@@ -74,13 +74,14 @@
 | 项 | x86-64 | AArch64 | 负责 |
 |---|---|---|---|
 | O1 参考语义定义 | 67/75 | 74/74 | V |
-| O1 raw 寄存器 handler 精化 | 32/75 | 条件式 74/74，raw 3/74 | V |
+| O1 raw 寄存器 handler 精化 | 32/75 | 条件式 74/74，raw 11/74 | V |
 | O1 地址内存组合步骤 | 29/75 | 0/74 | V |
 | O2 C-model token 体等价 | 71/75 | 73/74 | V |
 | 编译字节级证明 | 16/75 个操作，158 单元组合对象（含 2 个部分 helper 单元） | 0/74 | V、C |
 | O4 链接步骤（22 行，两个 ISA 合计） | 7 条件式、14 部分、1 待证 | 同左 | V |
 
 - [x] **V** ARM raw NOP/MOV_IMM/MOVK：全部32目的字段、64位raw值/256标签、STACK4/RETURN10数值还原、实际cell/width/tag写回、XZR丢弃和opcode/field绑定的统一step定理；13条审计及模块/root编译通过（本提交，raw3/74），与B栈转发表示分离。
+- [x] **V** ARM raw乘除法8操作：MADD/MSUB/MUL/UMULL/UDIV/UMULH/UMADDL/SMADDL，raw/tag数值还原、UDIV输入截断、width/tag写回、全部别名/XZR、unused SRC3任意字节含255，以及production multiply dispatcher与11操作统一step；新增10条及前13条审计/模块/root通过（本提交，raw11/74）。
 - [ ] **V** 上表每一行做到满额。
 - [ ] **V** O1：官方模型对照补上 ANDN、BZHI 这 4 个 x86-64 形式（现为 63/67）。
 - [ ] **V** O1/O2：x86-64 的 helper 调用、寄存器调用、外层返回；REP MOVS 全计数的 C 和编译证明。

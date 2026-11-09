@@ -70,6 +70,14 @@ projected architectural state matches the single AArch64 reference. Entry
 origin identity, C extraction/union access and physical/compiler transport
 remain explicit. These laws are independent of stack-forwarding storage.
 
+ARM raw multiply/divide adds eight operations to the preceding three gates,
+bringing raw handler/dispatcher coverage to11/74. Concrete tagged operand reads,
+UDIV source narrowing and width/tag writeback compose through the production
+multiply arm and one eleven-operation step theorem. Native long/high products
+retain their X-width domain; unused SRC3 bytes keep their full byte domain.
+Ten new laws plus the13 preceding laws compile and audit together. Entry,
+C extraction/union and physical/compiler transport remain interfaces.
+
 ## Specification and proof scope
 
 The reference ISA is defined once in

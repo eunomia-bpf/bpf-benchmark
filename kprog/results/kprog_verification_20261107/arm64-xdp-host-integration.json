@@ -77978,5 +77978,37 @@
       "source-AArch64.lean.txt": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789"
     },
     "scope": "Raw64-bitGPR/fullbyte-tag materialization/32native destinations, concrete cell/width/tag arms and NOP/MOVIMM/MOVK opcode/field binding to one canonical-step theorem; whole projected state/events/fault. Independent of B forwarding and callee comparisons. Entry origin/C source extraction/union/physical/compiler transport remain interfaces. Existing conditional74 laws retained."
+  },
+  "arm64_raw_multiply_refinement": {
+    "proof": {
+      "process_exit": 0,
+      "module_and_root_exit": 0,
+      "root_sha256": "c08dedfa21216380b9f8595e635c476de4bb7a155bfbe8f114f3fb1243fac057",
+      "source_sha256": "5e3950c2e1d5471f9769329e1e840fdeeeb6ec2bdaea8b4a479a6b29c3f81cb2",
+      "sorryAx": 0,
+      "reduction_bridge": 15,
+      "scope": "Raw multiply/divide eight-operation family and prior three pure gates; full architectural image and actual numerical dispatcher through multiply; independent of B forwarding layout. Entry/C-union/source extraction/compiler/physical origin binding remain explicit."
+    },
+    "operations": [
+      "ARM64_OP_MADD",
+      "ARM64_OP_MSUB",
+      "ARM64_OP_MUL",
+      "ARM64_OP_UMULL",
+      "ARM64_OP_UDIV",
+      "ARM64_OP_UMULH",
+      "ARM64_OP_UMADDL",
+      "ARM64_OP_SMADDL"
+    ],
+    "raw_operation_count": 11,
+    "new_audits": 10,
+    "total_audits": 23,
+    "archive": "arm-raw-multiply.log.gz",
+    "source_snapshots": {
+      "source-arm64_sim_local_bpf.h.txt": "9cb5d58f9595124300d5bfd8fdcfdecba53f763e4d9ee34567345dd12cba1c13",
+      "source-Arm64Dispatcher.lean.txt": "944f7a21b4d9b2c5b0e41c00bb60f98df62a530143694c180698925f851daeef",
+      "source-AArch64.lean.txt": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789",
+      "source-Arm64Mul.lean.txt": "7507b5a8876587220ce1e2b92989c176cfda0ffb6a3e345b20f84106a55a1b46"
+    },
+    "scope": "Eight multiply/divide operations + preceding3raw gates; allGPR/tag/origin/width/result and complete architectural image. Concrete production dispatcher equality and arbitrary unusedSRC3 bytes included. Native long/high width domain, entry origin, C extraction/union/physical/compiler interfaces explicit; B forwarding and callee comparisons independent."
   }
 }
