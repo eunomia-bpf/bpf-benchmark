@@ -237,3 +237,77 @@ theorem x86_div_write_count_matches_effect (low high : X86RegValue)
   exact ⟨rfl, rfl, rfl, rfl⟩
 
 end KProgFormal
+
+namespace KProgFormal.X86SignedDivision
+
+/-- The signed body restores quotient sign from the XOR of the captured
+operand signs and remainder sign from the captured dividend sign. -/
+def restoreSign (negative : Bool) (magnitude : Nat) : Int :=
+  if negative then -(magnitude : Int) else (magnitude : Int)
+
+theorem restore_signed (value : Int) :
+    restoreSign (decide (value < 0)) value.natAbs = value := by
+  cases value <;> simp [restoreSign] <;> omega
+
+theorem quotient_sign (negativeDividend negativeDivisor : Bool) (dividend divisor : Nat) :
+    (restoreSign negativeDividend dividend).tdiv (restoreSign negativeDivisor divisor) =
+      restoreSign (negativeDividend != negativeDivisor) (dividend / divisor) := by
+  cases negativeDividend <;> cases negativeDivisor <;>
+    simp [restoreSign, Int.tdiv_neg, Int.neg_tdiv]
+  all_goals rfl
+
+theorem remainder_sign (negativeDividend negativeDivisor : Bool) (dividend divisor : Nat) :
+    (restoreSign negativeDividend dividend).tmod (restoreSign negativeDivisor divisor) =
+      restoreSign negativeDividend (dividend % divisor) := by
+  cases negativeDividend <;> cases negativeDivisor <;>
+    simp [restoreSign, Int.tmod_neg, Int.neg_tmod]
+  all_goals rfl
+
+/-- C accepts a negative magnitude through the signed minimum and a positive
+magnitude through the signed maximum. Integer bounds give the same range. -/
+theorem quotient_range (negative : Bool) (quotient limit : Nat) (positive : 0 < limit) :
+    quotient ≤ limit - (if negative then 0 else 1) ↔
+      -(limit : Int) ≤ restoreSign negative quotient ∧
+        restoreSign negative quotient < (limit : Int) := by
+  cases negative <;> simp only [restoreSign, Bool.false_eq_true, ↓reduceIte] <;> omega
+
+/-- Unsigned bitvector magnitude preserves the full signed minimum magnitude. -/
+theorem magnitude_to_nat {bits : Nat} (value : BitVec bits) :
+    value.abs.toNat = value.toInt.natAbs := by
+  cases sign : value.msb with
+  | false =>
+      simp only [BitVec.abs_eq, sign, Bool.false_eq_true, ↓reduceIte]
+      rw [BitVec.toInt_eq_toNat_of_msb sign]
+      rfl
+  | true =>
+      simp only [BitVec.abs_eq, sign, ↓reduceIte]
+      rw [BitVec.toInt_eq_neg_toNat_neg_of_msb_true sign, Int.natAbs_neg]
+      rfl
+
+def join (width : X86Width) (high low : BitVec 64) : BitVec (2 * x86WidthBitsSpec width) :=
+  ((high.setWidth (x86WidthBitsSpec width)).setWidth (2 * x86WidthBitsSpec width) <<<
+      x86WidthBitsSpec width) |||
+    (low.setWidth (x86WidthBitsSpec width)).setWidth (2 * x86WidthBitsSpec width)
+
+/-- C negates the low limb, then complements the high limb and adds the carry
+exactly when that negated low limb is zero. Captured limbs retain their width. -/
+def pairMagnitude (width : X86Width) (high low : BitVec 64) : BitVec (2 * x86WidthBitsSpec width) :=
+  let highLimb := high.setWidth (x86WidthBitsSpec width)
+  let lowLimb := low.setWidth (x86WidthBitsSpec width)
+  if highLimb.msb then
+    let lowMagnitude := -lowLimb
+    let highMagnitude := ~~~highLimb + (if lowMagnitude == 0 then 1 else 0)
+    (highMagnitude.setWidth (2 * x86WidthBitsSpec width) <<< x86WidthBitsSpec width) |||
+      lowMagnitude.setWidth (2 * x86WidthBitsSpec width)
+  else join width high low
+
+theorem pair_magnitude_correct (width : X86Width) (high low : BitVec 64) :
+    pairMagnitude width high low = (join width high low).abs := by
+  cases width <;> simp [pairMagnitude, join, x86WidthBitsSpec, BitVec.abs_eq] <;> bv_decide
+
+theorem pair_magnitude_to_nat (width : X86Width) (high low : BitVec 64) :
+    (pairMagnitude width high low).toNat = (join width high low).toInt.natAbs := by
+  rw [pair_magnitude_correct]
+  exact magnitude_to_nat _
+
+end KProgFormal.X86SignedDivision
