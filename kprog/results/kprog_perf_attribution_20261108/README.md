@@ -686,6 +686,43 @@ share, a faster body has real headroom -- 1.20x would need the native body
 about 14% cheaper, which is inside the range the body-level measurements
 report.
 
+### The component walk stops at the first step: the modules no longer build
+
+The walk the operator asks for replaces one component at a time, kernel first.
+The kernel step is the 2026-05-29 runner, loader, link path, native objects
+and modules, with the current kernel image, config and modules. It does not
+run, and the reason is a build break rather than a performance result:
+
+| step | result |
+| --- | --- |
+| May-29 module sources against the current kernel | builds, 15 modules, but see below |
+| current `kinsn/module/x86` against the current kernel | **fails**: `modpost: "bpf_x86_native_thunk" [bpf_x86_native_lab.ko] undefined!` |
+| the modules installed for the current kernel (06:33) | load in a standalone guest (`LAB-OK`, `ALU-OK`) and carry no `depends` |
+| the same modules through the corpus image | `insmod: ERROR: could not insert module .../bpf_x86_alu.ko: Invalid parameters` |
+| `bpf_x86_native_thunk` in any built module | **absent**; it is `extern` in `bpf_x86_native_lab.c:25` |
+| `native_thunk` in the kernel's `Module.symvers` | **0** |
+
+So the current module source needs a symbol that the current kernel does not
+export and no sibling module defines. The installed modules work because they
+predate that `extern`. Any rebuild of the module set against this kernel
+stops at modpost, which is why the kernel-swap step cannot be measured until
+that symbol is resolved.
+
+I verified the modules themselves are not at fault: loading
+`bpf_x86_alu`, `bpf_x86_bmi1`, `bpf_x86_cmov` and `bpf_x86_native_lab` in
+order in a plain guest on the current kernel succeeds every time, and the
+failure only appears through the corpus install path.
+
+Two smaller facts worth recording from the same attempt, both of which cost
+runs:
+
+- The May-29 image's modules (`6b936902...`) are built for the May-29
+  kernel. Dropping them into an image with the current kernel is a mismatch;
+  modules follow the kernel, so a kernel walk must rebuild them.
+- `/lib/modules` on this host does not exist, so the installer's
+  `cp -a ... /lib/modules/<release>` needs the image's tree, which every
+  recipe already provides through `/artifacts`.
+
 ### What this means for the candidates
 
 The candidates act on the native path only, so they can recover at most the
