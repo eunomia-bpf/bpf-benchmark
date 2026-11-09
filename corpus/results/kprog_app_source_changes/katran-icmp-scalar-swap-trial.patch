@@ -1,0 +1,27 @@
+--- a/vendor/bpf/katran/katran/lib/bpf/handle_icmp.h
++++ b/vendor/bpf/katran/katran/lib/bpf/handle_icmp.h
+@@ -44 +43,0 @@
+-  unsigned char tmp_mac[ETH_ALEN];
+@@ -46,3 +45,6 @@
+-  memcpy(tmp_mac, eth->h_source, ETH_ALEN);
+-  memcpy(eth->h_source, eth->h_dest, ETH_ALEN);
+-  memcpy(eth->h_dest, tmp_mac, ETH_ALEN);
++#pragma unroll
++  for (int i = 0; i < ETH_ALEN; i++) {
++    unsigned char tmp_mac = eth->h_source[i];
++    eth->h_source[i] = eth->h_dest[i];
++    eth->h_dest[i] = tmp_mac;
++  }
+@@ -99 +100,0 @@
+-  __be32 tmp_addr[4];
+@@ -115,3 +116,7 @@
+-  memcpy(tmp_addr, ip6h->saddr.s6_addr32, 16);
+-  memcpy(ip6h->saddr.s6_addr32, ip6h->daddr.s6_addr32, 16);
+-  memcpy(ip6h->daddr.s6_addr32, tmp_addr, 16);
++
++#pragma unroll
++  for (int i = 0; i < 4; i++) {
++    __be32 tmp_addr = ip6h->saddr.s6_addr32[i];
++    ip6h->saddr.s6_addr32[i] = ip6h->daddr.s6_addr32[i];
++    ip6h->daddr.s6_addr32[i] = tmp_addr;
++  }

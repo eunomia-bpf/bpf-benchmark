@@ -1,0 +1,3 @@
+# Unadopted Katran ICMP scalar-swap trial
+
+The authorized source trial replaced the existing6byte Ethernet and16byte IPv6 three-memcpy swaps with equivalent scalar swaps under the same packet bounds. Native balancer and all4JIT objects compile from the same edited handle_icmp.h (hash in compile.json). Native frame stays216bytes, so this trial is not adopted and the original source bytes are retained on master. No packet behavior or native acceptance claim is made from compilation. Patch and required source ledger row preserve the experiment; kernel, safety inputs and frozen workload retain bytes.

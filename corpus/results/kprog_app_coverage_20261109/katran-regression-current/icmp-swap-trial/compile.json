@@ -1,0 +1,18 @@
+{
+  "source_header_sha256": "ad92485eca3a429123a3a12f9899f3600c3e445d29c8c42c51b736fd971854d4",
+  "native_exit": 0,
+  "jit_exit": 0,
+  "native_stack_allocations": [
+    "1d: 48 81 ec d8 00 00 00         \tsubq\t$0xd8, %rsp"
+  ],
+  "jit_objects": [
+    "jit/katran/balancer.bpf.o",
+    "jit/katran/healthchecking.bpf.o",
+    "jit/katran/xdp_root.bpf.o",
+    "jit/katran/healthchecking_ipip.bpf.o"
+  ],
+  "base_commit": "abf7ddc0b2a481b43e42410aa998ea1f806b3edc",
+  "adopted": false,
+  "reason": "Paired source compiles but native frame remains216bytes; preserve original source.",
+  "restored_header_sha256": "ac39dd68e25f6fe7620280a10857da048b9f180aaaa0376f327b11fda7763e1c"
+}
