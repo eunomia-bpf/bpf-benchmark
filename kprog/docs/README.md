@@ -8,6 +8,7 @@ not establish fidelity for either complete ISA.
 | Need | Start here |
 | --- | --- |
 | Design and trust boundary | [design.md](design.md) |
+| Open work, owners and status | [todo.md](todo.md) |
 | Evaluation, results, and raw artifact manifest | [evaluation.md](evaluation.md) |
 | Simulator and native loader code | [`kprog/`](../README.md), including `x86/`, `arm64/`, `formal/`, `loader/`, and `libnativeloader/` |
 | Current paper | `docs/kprog-simulator-in-ebpf/` (submodule; initialize it to read the paper) |
