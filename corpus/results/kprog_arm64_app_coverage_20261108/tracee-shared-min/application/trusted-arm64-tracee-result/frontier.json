@@ -1,0 +1,18 @@
+{
+  "utc": "2026-11-09T00:12:42.064335+00:00",
+  "source_result": "2fe12fb014e1872968da722f743e8146cc846522",
+  "source": "20096bb3c",
+  "native_requests": 0,
+  "stage": "original JIT baseline verifier rejection",
+  "program": "syscall__execveat_enter",
+  "instruction": 2443,
+  "helper": "bpf_probe_read_str",
+  "map_value_size": 32536,
+  "max_offset": 32142,
+  "helper_size": 4096,
+  "processed_instructions": 2940,
+  "total_states": 199,
+  "registers": "R1 checked<=27899; helper pointer uses masked R7<=32000",
+  "successor_source": "218ccbc3403ce695161fcd1900645dfe06bc1a85",
+  "successor_compile": "e898194477b9c0d4c46753f56f35931475c7c19f"
+}
