@@ -1,0 +1,16 @@
+{
+  "utc": "2026-11-09T05:17:32.338611+00:00",
+  "source": "e46b05a25327a709577d295066e3d4ec559bdcbb",
+  "build_results": "ceeac738f",
+  "scope": "Existing single production ARM loader stage; active guests use private copied runtime directories",
+  "before": {
+    "libnative_loader.so": "4e7b20b2da3c267d2c36dba56fa69ce2444a2558f0196c60df72222c07585b22",
+    "trusted-native-loader": "8847668a99d646a06f30f4dda5466e9500ae1046dc78ba445a7579ccf41a9464",
+    "trusted-service-client": "534c87b635271eb796908a3f9e6c33b8444d259e170de875a58dfee4e7d22d82"
+  },
+  "after": {
+    "libnative_loader.so": "4fa65b5324d3aa70d01fe4c6a964db3d62e53c34c0e4456ba701afcafddeacba",
+    "trusted-native-loader": "812f71b2a75174bcecd4efc30ebcf314a861bd9d49569a0e3557143c0e41691d",
+    "trusted-service-client": "98bdd47613a9b86f0b69884c80e0b9a4299e0d14078ff03b0e1b1f96e5d6a9bb"
+  }
+}

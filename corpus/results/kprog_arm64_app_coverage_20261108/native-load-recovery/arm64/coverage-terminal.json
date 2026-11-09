@@ -1,0 +1,171 @@
+{
+  "utc": "2026-11-09T05:17:32.338611+00:00",
+  "full": {
+    "epoch": "native-load-recovery-full-catalog",
+    "publication": "b7f5d10c177e9605a2fdd1ad52fe55fbf9ed3ca0",
+    "summary": "corpus/results/kprog_arm64_app_coverage_20261108/native-load-recovery/arm64/full-catalog/summary.json",
+    "counts": {
+      "catalog_rows": 1917,
+      "attempted": 380,
+      "submitted": 376,
+      "installed": 55,
+      "verifier_rejected": 75,
+      "generation_failed": 246,
+      "compilation_failed": 0,
+      "resource_failed": 4,
+      "transport_failed": 0,
+      "load_failed": 0,
+      "skipped": 0,
+      "failure": 67,
+      "failure_agrees": 64,
+      "failure_installed": 3,
+      "success": 63,
+      "success_agrees": 52,
+      "success_installed": 52
+    },
+    "agreement": [
+      {
+        "annotation": "failure",
+        "reached_verifier": 67,
+        "installed": 3,
+        "verifier_rejected": 64,
+        "agrees": 64
+      },
+      {
+        "annotation": "success",
+        "reached_verifier": 63,
+        "installed": 52,
+        "verifier_rejected": 11,
+        "agrees": 52
+      }
+    ],
+    "installed_failure": [
+      {
+        "file": "dynptr_fail.c",
+        "program": "test_dynptr_reg_type",
+        "stage": "installed"
+      },
+      {
+        "file": "map_kptr_fail.c",
+        "program": "misaligned_access_read",
+        "stage": "installed"
+      },
+      {
+        "file": "test_global_func14.c",
+        "program": "global_func14",
+        "stage": "installed"
+      }
+    ]
+  },
+  "families": [
+    {
+      "epoch": "ringbuf-dynptr-original-family",
+      "publication": "8005cd1ca4a4c00e56a8ba40416f9e6fd1b2c2ac",
+      "summary": "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-helpers/ringbuf-dynptr/qemu/summary.json",
+      "counts": {
+        "catalog_rows": 86,
+        "attempted": 81,
+        "submitted": 81,
+        "installed": 1,
+        "verifier_rejected": 15,
+        "generation_failed": 65,
+        "compilation_failed": 0,
+        "resource_failed": 0,
+        "transport_failed": 0,
+        "load_failed": 0,
+        "skipped": 0,
+        "failure": 16,
+        "failure_agrees": 15,
+        "failure_installed": 1,
+        "success": 0,
+        "success_agrees": 0,
+        "success_installed": 0
+      },
+      "agreement": [
+        {
+          "annotation": "failure",
+          "reached_verifier": 16,
+          "installed": 1,
+          "verifier_rejected": 15,
+          "agrees": 15
+        },
+        {
+          "annotation": "success",
+          "reached_verifier": 0,
+          "installed": 0,
+          "verifier_rejected": 0,
+          "agrees": 0
+        }
+      ],
+      "installed_failure": [
+        {
+          "file": "dynptr_fail.c",
+          "program": "test_dynptr_reg_type",
+          "stage": "installed"
+        }
+      ]
+    },
+    {
+      "epoch": "dynptr-memory-original-family",
+      "publication": "8d909f9b47a513ad84409ccf1814edbc99c58ba5",
+      "summary": "corpus/results/kprog_arm64_app_coverage_20261108/kernel-selftest-helpers/dynptr-memory/qemu/summary.json",
+      "counts": {
+        "catalog_rows": 86,
+        "attempted": 81,
+        "submitted": 81,
+        "installed": 2,
+        "verifier_rejected": 18,
+        "generation_failed": 61,
+        "compilation_failed": 0,
+        "resource_failed": 0,
+        "transport_failed": 0,
+        "load_failed": 0,
+        "skipped": 0,
+        "failure": 19,
+        "failure_agrees": 18,
+        "failure_installed": 1,
+        "success": 1,
+        "success_agrees": 1,
+        "success_installed": 1
+      },
+      "agreement": [
+        {
+          "annotation": "failure",
+          "reached_verifier": 19,
+          "installed": 1,
+          "verifier_rejected": 18,
+          "agrees": 18
+        },
+        {
+          "annotation": "success",
+          "reached_verifier": 1,
+          "installed": 1,
+          "verifier_rejected": 0,
+          "agrees": 1
+        }
+      ],
+      "installed_failure": [
+        {
+          "file": "dynptr_fail.c",
+          "program": "test_dynptr_reg_type",
+          "stage": "installed"
+        }
+      ]
+    }
+  ],
+  "isa": {
+    "utc": "2026-11-09T05:17:32.338611+00:00",
+    "publication": "67c19577dc5e46b1b9b91a0096d2b946c6ea083e",
+    "cases": 34,
+    "stages": {
+      "valid_executed": 4,
+      "verifier_rejected": 28,
+      "specialization_rejected": 2
+    },
+    "actual_unsafe_native_executions": 0,
+    "runtime": "f1/e5 with captured92helper simulator",
+    "scope": "Original34 ISA fixtures; named positives expected2 execute, negative rows remain load-only",
+    "runtime_admission_additions": 0
+  },
+  "runtime_admission_additions": 0
+}
