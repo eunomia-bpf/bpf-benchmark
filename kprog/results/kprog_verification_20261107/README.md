@@ -33,6 +33,13 @@ specialization token also has its own row.
 | Additional direct UD2 reference/body terminal | 1/1 | 0 |
 | Actual shared architectural-fault BPF prefix | 1 | 0 |
 
+The numeric catalogue retains historical vector reference/C-model laws. Current
+native producers use the approved scalar policy and reach existing generation
+failure for two x86 and seven ARM SIMD/FP token families. The additional
+source-emitted REP STOS body has separate pending reference/refinement and
+compiled-B rows; it is outside the numeric catalogue and the13 compiled scalar
+families above.
+
 The [current Arm ASL comparison](reference-arm-asl.md) records5028 comparisons:
 5016 state observations agree across all74 labels, and12 STLXR inputs retain
 the explicit empty-monitor/fixed-success profile difference. The current82-form
@@ -5805,3 +5812,16 @@ ISA read/permission model and physical fault, site, saved frame, registered
 extable lifetime, ordered effects and current C/O2/compiler/O3 correspondence
 remain explicit interfaces. The shared row keeps its universal components and
 partial status.
+
+### Current invocation and emission scope
+
+[Final S7 evidence](exit-source-coverage.log.gz) updates four RET rows while
+preserving partial current-body status. All14 added exit/stack/output cases and
+original stack enforcement cases reach verifier rejection;13 positive controls
+execute. Original x8645/ARM41 stage labels and load-only negative handling stay
+in their captured epochs. Universal C/Lean/compiled-body and physical helper,
+entry/exit and successful-tail correspondence remain explicit.
+
+REP STOS now has two pending source-emission rows: four widths, native64
+addresses and full RCX count under the clear-DF ABI profile. Its finite host
+and native observations do not establish canonical ISA or compiled-B refinement.

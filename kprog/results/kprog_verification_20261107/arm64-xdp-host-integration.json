@@ -19695,6 +19695,69 @@
       "KProgTV.ShiftxCertificate.compiled_execution"
     ]
   },
+  "current_exit_and_source_emission_coverage": {
+    "active_vector_generation": "Existing missing-handler generation failure, per approved scalar producer policy. Historical C/reference laws retained.",
+    "archive_block_sha256": "d1a23c33ceb09c06d1c3346c90bb1dd1062d01c22a26ee208ccc222c51235328",
+    "archive_file": "kprog/results/kprog_verification_20261107/exit-source-coverage.log.gz",
+    "archive_marker": "=== CURRENT EXIT AND SOURCE EMISSION COVERAGE V1 ===",
+    "historical_vector_model_operations": [
+      "ARM64_OP_CNT",
+      "ARM64_OP_FMOV",
+      "ARM64_OP_LOAD_D0",
+      "ARM64_OP_LOAD_Q0",
+      "ARM64_OP_STORE_D0",
+      "ARM64_OP_STORE_Q0",
+      "ARM64_OP_UADDLV",
+      "X86_OP_LOAD_XMM0",
+      "X86_OP_STORE_XMM0"
+    ],
+    "negative_native_executions": 0,
+    "new_s7_cases_rejected": 14,
+    "positive_controls_executed": 13,
+    "raw_artifacts": {
+      "kprog/results/kprog_exit_stack_20261109/arm64-replay.tar.gz": {
+        "bytes": 618224,
+        "sha256": "e37c3cee090edfe0159c0e99c749d841ae64b1c169839c8683369803a3d0082a"
+      },
+      "kprog/results/kprog_exit_stack_20261109/summary.json": {
+        "bytes": 26003,
+        "sha256": "4181acea0cf114fb8a9348b738b04af896a00c487f1ed6e0ff9b678957a3ff1c"
+      },
+      "kprog/results/kprog_exit_stack_20261109/x86-replay.tar.gz": {
+        "bytes": 561850,
+        "sha256": "29df69ecef6a9325b3201bcb7aecb50ae5e9a66b1c5f1ec98bf91535f103abec"
+      }
+    },
+    "rep_stos_source": "df6f934d0c094196d69a1977d0de6b861a0b8822",
+    "rep_stos_status": "Two additional source-emission rows pending reference/refinement/compiled-B/physical composition; numeric catalogue remains75x86/74ARM.",
+    "ret_rows_preserved_partial": 4,
+    "s7_actual_stages": {
+      "arm64": {
+        "accepted_finding": 6,
+        "specialization_rejected": 3,
+        "valid_executed": 4,
+        "verifier_rejected": 28
+      },
+      "x86": {
+        "accepted_finding": 2,
+        "specialization_rejected": 1,
+        "valid_executed": 9,
+        "verifier_rejected": 33
+      }
+    },
+    "s7_publication": "cdeb9804d58acc5d0706e2ade91453221e2519d5",
+    "s7_source_commits": [
+      "48eb036f5b30d6b8a89e6aa2623d3b00723d6d3f",
+      "98013a7f6b72a37d64f29ef3c18849e78f4758eb",
+      "da42f496cce7aba11b90196aa01c23b0a76e9584",
+      "117eb020a313e8d734e79d18ac7661ee9393b49a",
+      "088a292b0374b728d86a6172b96ff7e4c7622c65",
+      "f7c517c0a95a8e7df2e38b6aaaf2bba0e0d9efe2",
+      "25a373adf2359e094910004481bf86af17fd437a",
+      "cc245743cfc34f873fe51c79864756873ccf4f27"
+    ],
+    "scalar_source_commit": "dba3416acc008857eee1907ed00deafd9e8d19a5"
+  },
   "current_read_recovery_receipts": {
     "archive_block_sha256": "c324071dd0140c26c67257d32c6209c083bcd0b77a457a1605ff617eb5651e3e",
     "archive_file": "kprog/results/kprog_verification_20261107/current-read-recovery-receipts.log.gz",
