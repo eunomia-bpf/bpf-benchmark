@@ -1,0 +1,82 @@
+{
+  "source_commit": "4e930174915e0842fd2a030af1a6496887d0ace8",
+  "change": "pre-submission per-CPU array index/bounds/mask/pptr lookup with existing this_cpu_ptr helper154; matched original source and default register allocation",
+  "profiles": {
+    "control": {
+      "objects": [
+        {
+          "object": "balancer.native.o",
+          "sha256": "dedd35bba6c4ac8d93e114c299cd79bc956a33855678130764b161d51e067ff0",
+          "source_sha256": "4009c04a4cfa727545a2973d069cf3bed65691f4e9b6873869e561d9ce4128c9",
+          "executable_bytes": 8701,
+          "lowered_sites": 14,
+          "percpu_sites": 0
+        },
+        {
+          "object": "healthchecking.native.o",
+          "sha256": "366b6936a6b895816d92f0030bc3c930444acfcf78313c21a47a72557dff0264",
+          "source_sha256": "4ee393ef94b1644685090400e248ccdfbfb67c99cea641cadd310c9c0af6a8bd",
+          "executable_bytes": 1243,
+          "lowered_sites": 5,
+          "percpu_sites": 0
+        },
+        {
+          "object": "healthchecking_ipip.native.o",
+          "sha256": "a66a6dba08ba2759d89252e2f33d8776b73e591986de37160416d732a1ea6533",
+          "source_sha256": "eec3c4e46f6df50194006b7dff8715af97b82ca7a9993b63d4f4e97ab9f9b10a",
+          "executable_bytes": 428,
+          "lowered_sites": 2,
+          "percpu_sites": 0
+        },
+        {
+          "object": "xdp_root.native.o",
+          "sha256": "d6679c14c8777b09c2dc24bf140fe4598cda2763e4880a101156a1fcf121584c",
+          "source_sha256": "02131e8cf7452aa4886bff20cd245d5f0dbc69fd22fe1193e93447b898ec51fe",
+          "executable_bytes": 95,
+          "lowered_sites": 0,
+          "percpu_sites": 0
+        }
+      ],
+      "plugin_sha256": "41d85e51e6c94c42a026359fee49085fe2046df9b2070aa45c64c5a029fca223",
+      "lowered_sites": 21
+    },
+    "candidate": {
+      "objects": [
+        {
+          "object": "balancer.native.o",
+          "sha256": "7b119a6269bedb7fec7a56ecf601211eec1c6ef6dff9655cade540686a054ea1",
+          "source_sha256": "4009c04a4cfa727545a2973d069cf3bed65691f4e9b6873869e561d9ce4128c9",
+          "executable_bytes": 10100,
+          "lowered_sites": 56,
+          "percpu_sites": 42
+        },
+        {
+          "object": "healthchecking.native.o",
+          "sha256": "044911683079a088c62977103d85c29fa5c80236bd448b762ed2aaa4fc5b3ab4",
+          "source_sha256": "4ee393ef94b1644685090400e248ccdfbfb67c99cea641cadd310c9c0af6a8bd",
+          "executable_bytes": 1282,
+          "lowered_sites": 7,
+          "percpu_sites": 2
+        },
+        {
+          "object": "healthchecking_ipip.native.o",
+          "sha256": "71c605adab95adfb61394b0493130f5d43f2fe01ff902254d47061ebe8849745",
+          "source_sha256": "eec3c4e46f6df50194006b7dff8715af97b82ca7a9993b63d4f4e97ab9f9b10a",
+          "executable_bytes": 446,
+          "lowered_sites": 3,
+          "percpu_sites": 1
+        },
+        {
+          "object": "xdp_root.native.o",
+          "sha256": "d6679c14c8777b09c2dc24bf140fe4598cda2763e4880a101156a1fcf121584c",
+          "source_sha256": "02131e8cf7452aa4886bff20cd245d5f0dbc69fd22fe1193e93447b898ec51fe",
+          "executable_bytes": 95,
+          "lowered_sites": 0,
+          "percpu_sites": 0
+        }
+      ],
+      "plugin_sha256": "9b0cc7d23caa47abf1996f29160da7724fe11f60e13034ec62cb643ad96a1f02",
+      "lowered_sites": 66
+    }
+  }
+}
