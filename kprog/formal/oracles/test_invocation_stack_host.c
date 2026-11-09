@@ -24,8 +24,21 @@ static unsigned long fresh(void) { ++draws; return 0x5a5a5a5a5a5a5a5aUL; }
 #define BYTE(I) __x86_stack_mem.b[X86_SIM_STACK_BYTES+(I)]
 #endif
 unsigned long native_lab_entry_input(unsigned int kind) { return 0; }
+#ifndef TEST_ARM64
+#undef X86_SIM_L_ARCHITECTURAL_FAULT
+#define X86_SIM_L_ARCHITECTURAL_FAULT() return 99
+static unsigned rsp_recovery(void) {
+    ENTRY();
+    __x86_rax.ptr=0;
+    X86_SIM_L_READ_RECOVERY(X86_RAX,X86_RSP);
+    return 0;
+}
+#endif
 #define REQUIRE(C) do { if (!(C)) { printf("stack contract failure line %d\n",__LINE__); return 1; } } while(0)
 int main(void) {
+#ifndef TEST_ARM64
+    REQUIRE(rsp_recovery()==99);
+#endif
     ENTRY();
     SET_SP(-32);
     WRITE(-24,8,0x1122334455667788ULL);
