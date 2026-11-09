@@ -38,6 +38,7 @@
 549 个常驻程序的静态普查（`corpus/results/kprog_app_coverage_20261109/resident-census/`）第一轮：选择缺口 275、资源准备 238、ELF 名称语法 23、context 下沉 1；实际生成 12、编译 11、verifier 接受 7、拒绝 4。后续 stock guest 资源回放完成 238/238（bc3104df7），资源阶段与 native 生成、编译和 verifier 结果分别计数。
 
 - [x] Tetragon 275 个选择缺口（271ddeee9、5dbd5d481、8922e4bde）。
+- [x] **A** body分组的实际resource preparation metadata（本提交）：36个重复body组/338resident涵盖58个不同profile输入，实际libbpf构造均成功、组内完整map定义/program context各自一致；其余211组各一resident。证据resource-profiles.json及gzip原始记录；maps创建0/program loads0/native executions0，549/247实际kernel阶段继续。
 - [x] **A** 匿名runtime map metadata处理（本提交）：OTel inventory的23条匿名map按optional name参与原有profile join；原始13对象均KeyError(name)，修复后13/13实际libbpf metadata打开成功，完整source-map定义与program/attach context均与named reference相同。全部原始metadata保留，maps创建0/program loads0/native executions0；完整native阶段走观察内核。
 - [x] **A** stage-end发布harness（本提交）：所有代表收集完成后一次发布；原始gzip流超过48MB时按顺序分片，每tracked文件小于50MB；相同字节结果沿用现有commit。三代表fixture仅触发一次stage publication，gzip JSON完整还原，48,000,001B分片完整还原。test-kernel image路径沿现有provenance传递，跨app资源按(application,id)匹配。
 - [x] **A** 按协调者16:00原始结果审计把active class verifier_scalar_memory_access命名为callee_saved_equality_arm（本提交），Tetragon106/十体、merged549共110。原始diagnostic与阶段计数保留，入口桩修复由C继续。

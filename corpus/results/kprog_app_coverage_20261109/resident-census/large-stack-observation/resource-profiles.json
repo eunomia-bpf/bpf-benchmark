@@ -1,0 +1,269 @@
+{
+  "kind": "actual_resource_metadata_preparation",
+  "model_head": "0617e22439585916734e079091b139772e981fd1",
+  "total_resident_instances": 549,
+  "native_body_groups": 247,
+  "repeated_groups": 36,
+  "repeated_instances": 338,
+  "actual_constructor_profiles": 58,
+  "groups_with_resource_variants": 0,
+  "metadata_errors": 0,
+  "maps_created": 0,
+  "program_loads": 0,
+  "native_executions": 0,
+  "groups": [
+    {
+      "body_sha256": "93484b8bc5df7736c9b8bb0205970ab63a4344da188585cdeb20439fc383acfa",
+      "symbol": "generic_kprobe_process_filter",
+      "member_count": 33,
+      "profiles": 2,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "c9948d5e4fdb04811315b2416818cec878c5967ef345a7b77afd09caaa41594e",
+      "symbol": "generic_kprobe_event",
+      "member_count": 33,
+      "profiles": 2,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "b4ca5042842530bec06aa483561507e29830f2db1ae941f92fdb0dd7ea069e3c",
+      "symbol": "generic_kprobe_process_event",
+      "member_count": 33,
+      "profiles": 3,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "3435df3e0423d2fe2439f292e852d713f03db5eb37aad8daea1d49d8d4891620",
+      "symbol": "generic_kprobe_setup_event",
+      "member_count": 33,
+      "profiles": 2,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "3969f989cfcfc2d7a95fcfbef34da98f1d6d36b9c918c347881d491558ab1108",
+      "symbol": "generic_kprobe_actions",
+      "member_count": 33,
+      "profiles": 3,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "364b1c9663605d8a984c34fdb8f3bea64c98b34d994de0abce9bb7d4391e2585",
+      "symbol": "generic_kprobe_output",
+      "member_count": 33,
+      "profiles": 2,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "7a648bb20e6d8fc9264a28b90183db34d971c779057f402a9d770a14fc90328e",
+      "symbol": "generic_kprobe_filter_arg",
+      "member_count": 33,
+      "profiles": 2,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "9381898e074c95645d489a840e30a9bdbf3afcf83b26ba7ec09f890b559f057c",
+      "symbol": "generic_retkprobe_filter_arg",
+      "member_count": 9,
+      "profiles": 2,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "0b52860af10c09b963fb8c5698bea800829bc12ce455242193e569465b72c457",
+      "symbol": "generic_retkprobe_event",
+      "member_count": 9,
+      "profiles": 2,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "f75564d83865027caa1dd8c4a9488e795d3f6d20ebee468065a1db5ad9c0bf02",
+      "symbol": "generic_retkprobe_actions",
+      "member_count": 9,
+      "profiles": 2,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "1798a85039b5c4f065a2178dcabf075ff4bb47857caeb90cd4080d0daac195c1",
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "member_count": 3,
+      "profiles": 2,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "c5861e189be09b9ca70a7ace0dcaaef3bade9cb231d77e2802e6b3661edab93f",
+      "symbol": "cil_from_host",
+      "member_count": 3,
+      "profiles": 2,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "c6247e55e365eed2bbbd632dfc6ac3c767a026aaf3318e682824b93443d68c2e",
+      "symbol": "tail_drop_notify",
+      "member_count": 3,
+      "profiles": 1,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "21fa2fe132f4a923defb938733287c8e4cae5974eb575b73cbec1c125d00d76d",
+      "symbol": "tail_handle_arp",
+      "member_count": 3,
+      "profiles": 1,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "cb35819bb741e58465509b81a56b5a0a7b37179fb2de8fa252793f4362d3a397",
+      "symbol": "tail_handle_ipv4_cont",
+      "member_count": 3,
+      "profiles": 1,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "0f666d0bbb7f2be86bf02a52f6b730da2aeec52285a70eeda0d5bebb56f855f3",
+      "symbol": "tail_handle_ipv4_from_netdev",
+      "member_count": 3,
+      "profiles": 2,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "5e33aa71d809a6aa9869f27c555b8c20b21793f286ee6d920b30ec5e1ad36815",
+      "symbol": "cil_from_container",
+      "member_count": 2,
+      "profiles": 1,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "dcccc3d545fa2fccc904faa5e9adb86bd9e5e4b6e5a1ef33471e4b534b328552",
+      "symbol": "tail_ipv4_to_endpoint",
+      "member_count": 3,
+      "profiles": 1,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "c3404017c2d353edcc51f8c9f6d801bc263fa3487c3630931d5a21c604b01c7c",
+      "symbol": "tail_drop_notify",
+      "member_count": 3,
+      "profiles": 1,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "3fb959e66bb73028485da4e0033a6f970ff139ee325f595d9509735d2b7751bf",
+      "symbol": "cil_lxc_policy",
+      "member_count": 2,
+      "profiles": 1,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "273bd0ebf0b9cd5a6f0a4a054be304d60107d0dad64054984fa1671ec1a2351b",
+      "symbol": "tail_nodeport_nat_ingress_ipv4",
+      "member_count": 3,
+      "profiles": 2,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "051c98ae6b9fdc635266fa10cd1bd7bf089421602db70b76bad2f53a55bae589",
+      "symbol": "cil_to_host",
+      "member_count": 3,
+      "profiles": 2,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "9bccf254478464af8ab20cceeb885b4b85c44b65380ce8de23858bb7713e7495",
+      "symbol": "tail_no_service_ipv4",
+      "member_count": 3,
+      "profiles": 1,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "f3630f487621fbca5f1e971fdcbe91d7f52943e9676be29aad449508cfba6a02",
+      "symbol": "tail_nodeport_nat_egress_ipv4",
+      "member_count": 3,
+      "profiles": 2,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "1e23a194b8ea144b1224849506b73c077fdd45d7e49c6539c64c3be0cc98a46a",
+      "symbol": "cil_lxc_policy_egress",
+      "member_count": 2,
+      "profiles": 1,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "f910703ca53ab7399f506b6d6439e158380d80471c9944596a83f030a369b2a2",
+      "symbol": "cil_to_netdev",
+      "member_count": 3,
+      "profiles": 2,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "55578b914a157402a1943bf8178976528054f4e360adcebd805e6067aa482b3c",
+      "symbol": "cil_host_policy",
+      "member_count": 3,
+      "profiles": 1,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "acf2b0629908c29058580a8995f9cd5b1b1e2d016b29581ef07c8763604c5e08",
+      "symbol": "tail_handle_ipv4",
+      "member_count": 3,
+      "profiles": 1,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "a762c2f495b6a8df826978bf306969e6f12ac8d5f5b92fe8086e91552b291f04",
+      "symbol": "tail_ipv4_ct_ingress",
+      "member_count": 3,
+      "profiles": 1,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "82d3c5eaac1e5bd5e167cbe458f464f7982af84aef810abdec6aef81de0f49ba",
+      "symbol": "cil_from_netdev",
+      "member_count": 3,
+      "profiles": 2,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "9848e3c82656e6bb6e76696b9629882e05d7772f300463f38e54e9865154df4a",
+      "symbol": "tail_handle_ipv4_from_host",
+      "member_count": 3,
+      "profiles": 2,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "cebc9f4dac6d079aa17e911b0482b1333e1bac106e32656947970cba5470bab5",
+      "symbol": "tail_ipv4_policy",
+      "member_count": 3,
+      "profiles": 1,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "f4d637a526b5cac6425d3a041d13e2fee9038d947a9b96c2cdcbb138badad33d",
+      "symbol": "tail_ipv4_ct_egress",
+      "member_count": 3,
+      "profiles": 1,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "b9cd08902dede727bd9eb89f925fd200107a455352d8e9632d10ccb926ef30bf",
+      "symbol": "tail_nodeport_rev_dnat_ipv4",
+      "member_count": 3,
+      "profiles": 1,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "dbb7cd0d92f937c466e7f5a1c69ce15737003b1ed8437358986cb266fdbd4ef6",
+      "symbol": "tail_no_service_ipv4",
+      "member_count": 2,
+      "profiles": 1,
+      "actual_shape_variants": 1
+    },
+    {
+      "body_sha256": "156132347ef95549c2457e77410d16113e9f65ec3c390eb45b249af5959e84be",
+      "symbol": "generic_retkprobe_output",
+      "member_count": 9,
+      "profiles": 2,
+      "actual_shape_variants": 1
+    }
+  ],
+  "raw_file": "resource-profiles.json.gz"
+}
