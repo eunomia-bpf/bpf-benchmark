@@ -713,3 +713,35 @@ for Katran, lowering map lookups reaches most of the program. For Tracee and
 BCC, the largest single helper is `bpf_probe_read_kernel`, which **no
 candidate in the list addresses**; those two need a probe-read candidate
 before map lowering can move their ratios much.
+
+#### One span instead of three
+
+The floor above comes from splitting into three spans. Marking the
+benchmark call alone halves the marks and gives a measurement that resolves:
+
+| quantity | cycles | note |
+| --- | ---: | --- |
+| plain published build, whole run | 439,463 | `--perf-counters`, 10,000 repeats |
+| body-only build, whole run | 825,183 | one `rdtsc` pair plus a volatile store per repeat |
+| body-only build, body span | 533,488 | **64.7%** (median of five; range 63.0-65.8%) |
+
+The overhead falls from 4.4x (three spans) to **1.88x** (one span), and the
+body is roughly two thirds of the run. That is the number to carry forward:
+it says where the cycles are for this program without needing the other two
+spans, which the floor made uninformative.
+
+The same mode on the other two programs, whose three-span split sat on the
+floor:
+
+| program | body cycles | instrumented run | body share |
+| --- | ---: | ---: | ---: |
+| `katran_lb_consistent_hash_select` | 533,488 | 825,183 | 64.7% |
+| `packet_vlan_tcpopt_parser` | 419,666 | 667,297 | 62.9% |
+| `flow_5tuple_rss_hash` | 349,804 | 655,485 | 53.4% |
+
+All three now resolve above the floor, so the entry's own work is between
+53% and 65% of what a run spends and the remaining 35% to 47% is the packet
+setup, the result write and the runner's loop. That is the split the
+three-span measurement could not give.
+
+`--spans body` selects this mode; `--spans three` keeps the original.

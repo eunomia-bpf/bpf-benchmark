@@ -61,10 +61,27 @@ FLAGS = [
 ]
 
 
-def instrument(source, out_dir):
+def instrument(source, out_dir, body_only=False):
     """A copy of one program whose entry is split by cycle counters."""
     out_dir.mkdir(parents=True, exist_ok=True)
     text = (PROGRAMS / source).read_text()
+    if body_only:
+        # One span, around the benchmark call alone: the rest of the entry
+        # is what the run does not spend inside the body.
+        text = text.replace(
+            "    if (bench_",
+            "    { unsigned long long __b0 = __builtin_ia32_rdtsc();\n"
+            "    if (bench_", 1)
+        text = text.replace(
+            "    micro_write_u64_le(data, result);",
+            "    site_cycles[SITE_BODY] += "
+            "__builtin_ia32_rdtsc() - __b0; }\n"
+            "    micro_write_u64_le(data, result);", 1)
+        if "SITE_BODY" not in text:
+            return None
+        unit = out_dir / source
+        unit.write_text(SITES + text)
+        return unit
     # The three spans are the entry's own phases; the body call is the
     # benchmark, and the write is the result store.
     text = text.replace(
@@ -121,10 +138,13 @@ def main(argv):
     ap.add_argument("--memory", default="",
                     help="generated input; defaults to the program's own")
     ap.add_argument("--repeat", default="10000")
+    ap.add_argument("--spans", default="three", choices=("three", "body"),
+                    help="three spans, or the body alone")
     ap.add_argument("--out-dir", default=str(ROOT / "kprog/perf/measure"))
     args = ap.parse_args(argv[1:])
     out_dir = pathlib.Path(args.out_dir)
-    unit = instrument(args.program, out_dir)
+    unit = instrument(args.program, out_dir,
+                      body_only=args.spans == "body")
     if unit is None:
         print("the entry did not carry the spans to instrument",
               file=sys.stderr)
