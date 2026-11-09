@@ -190,3 +190,11 @@ tracee, tetragon, bcc, katran, cilium, otelcol-ebpf-profiler
 ## One tree, one branch
 
 Operator, 2026-11-09: "以后禁止切换branch 和开不同的 tree". Every edit happens in this checkout on master. New git worktrees, clones, branches, branch switches and private edited source copies are banned. A read-only export of a committed revision may feed a guest or a full check. Commit and push every step at once ("做一步 commit push 一步").
+
+## Oversized files on GitHub
+
+Operator, 2026-11-09: "github 明确记录, 如果碰到这种大文件可以改写". A commit that has never been pushed and carries a file GitHub rejects for size may be rewritten to drop that file. This is the one exception to the history-rewriting ban above. Published history stays as it is. Tracked files stay under 50 MB.
+
+## Direct native path
+
+Operator, 2026-11-09: "直接 native 路径 要保留, 不允许删掉". The direct native (unbound) measurement path in `kprog/perf/direct-native/` stays.
