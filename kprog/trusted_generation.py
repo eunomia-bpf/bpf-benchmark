@@ -23,13 +23,13 @@ def context_kind(prog_type):
 
 
 def elf_symbol(name):
-    if not isinstance(name,str) or re.fullmatch(r"[A-Za-z_.$][A-Za-z0-9_.$]*",name) is None:
+    if not isinstance(name,str) or re.fullmatch(r"[A-Za-z0-9_.$]+",name) is None:
         raise ValueError("native symbol must be an explicit ELF identifier")
     return name
 
 
 def c_symbol_aliases(names,prefix):
-    """Keep ELF identities while giving dotted/static symbols legal C names."""
+    """Keep ELF identities while giving dotted/numeric symbols legal C names."""
     names=list(names)
     for name in names:elf_symbol(name)
     if len(set(names))!=len(names):raise ValueError("duplicate native symbol")
