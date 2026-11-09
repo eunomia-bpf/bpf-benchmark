@@ -1,0 +1,25 @@
+{
+  "compile_exit": 0,
+  "host_cases_per_compiler": 608256,
+  "original_helper_cases": 12,
+  "original_typed_route_cases": 19458,
+  "primary_failure_native_sha256": "9ad3c0e8959530dc323a435b2557ed6eda2502bad1bce0f37035bb1ffc04ac4f",
+  "prior_component": {
+    "native_object": "/var/tmp/kprog-tmp/C/checksum-caller-frame/generated/request.native.o",
+    "native_proof_object": "/var/tmp/kprog-tmp/C/checksum-caller-frame/generated/trusted_x86.proof.o",
+    "simulator_object": "/var/tmp/kprog-tmp/C/checksum-caller-frame/generated/trusted_x86.bpf.o",
+    "simulator_program": "trusted_x86_x86_sim_xdp",
+    "symbol": "tail_ipv4_policy",
+    "native_sha256": "8b8d4c8326c984668d392c9f68946642055acf9550b19a25669e36cb3b2bfa19"
+  },
+  "actual_component": {
+    "native_object": "/var/tmp/kprog-tmp/C/checksum-caller-frame/actual-generated/request.native.o",
+    "native_proof_object": "/var/tmp/kprog-tmp/C/checksum-caller-frame/actual-generated/trusted_x86.proof.o",
+    "simulator_object": "/var/tmp/kprog-tmp/C/checksum-caller-frame/actual-generated/trusted_x86.bpf.o",
+    "simulator_program": "trusted_x86_x86_sim_xdp",
+    "symbol": "tail_ipv4_policy",
+    "native_sha256": "9ad3c0e8959530dc323a435b2557ed6eda2502bad1bce0f37035bb1ffc04ac4f"
+  },
+  "source_header_sha256": "82aee8426e0112f618530d0d50ce1fcb6dee7258d4d4a9501556bebb38469b97",
+  "guest_replay": "queued after constant-division cohort in fc06240904baa1a398528c0a47a071723bca5fe8"
+}

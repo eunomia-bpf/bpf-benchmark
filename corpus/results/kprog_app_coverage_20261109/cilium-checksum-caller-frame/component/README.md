@@ -1,0 +1,7 @@
+# Checksum caller-frame component
+
+Actual generic frame checks pass608256states each on GCC and Clang UBSan, preserving caller stack bytes/tags above SP, callee register values, scalar return and original caller-register/flags/SIMD clobbers. Existing helper12 and typed-route19458cases pass. Original full-clear control reaches a tagged-slot mismatch. The initial fixture used a historical context-tag name; its diagnostic and the corrected ABI-tag input are retained.
+
+The retained earlier map-caller component uses native8b8d4c8326c984668d392c9f68946642055acf9550b19a25669e36cb3b2bfa19 and its captured metadata; that generation/compile completed. This receipt additionally replays the actual failing whole-application native ELF 9ad3c0e8959530dc323a435b2557ed6eda2502bad1bce0f37035bb1ffc04ac4f with its exact generation metadata and SKB context. Actual compile exit0. Native/C/B/compiler inputs and outputs, actual verifier trace and kernel helper-footprint source observations stay explicit. The four wrapper lines preserve caller-allocated stack across map update/delete and L3/L4 checksum calls; helper writes remain actual map or skb/packet effects. Valid object/lifetime and native call-frame/compiler correspondence remain universal premises.
+
+Whole application/original38 replay follows controller2876280 with its exact captured source/runtime; complete coverage and matching-work outcomes follow that terminal. Original C/P/safety fixtures retain their definitions. Runtime admission additions0.
