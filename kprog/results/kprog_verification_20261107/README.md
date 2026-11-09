@@ -5746,3 +5746,16 @@ The existing widening and CL/parity fixtures now preserve RBX via R8;19host/BPF
 widening cases,5invalid width/REX controls,3072CL cases and both packet parity
 programs pass. [Original proof/oracle/failed-full receipts](percpu-final-profile.log.gz)
 retain the exact full source manifest, log, CPU and exit.
+
+### Existing memory-frame oracle alignment
+
+Full source463612801 exits2 where the valid-memory frame fixture reads below
+its64B live SP. The seven existing CPU/full-state oracles now allocate their
+whole512B frame and keep RSP-base accesses inside it. Every width, operand,
+flag, destination, index, direct/interpreter and CPU case remains; heap/tagged
+stack retain signed displacements. Whole512B comparisons include exact fixed
+host-fresh0 release after SP writes. All seven existing suites pass; original
+counts and the2432live-XDP-RSP cases remain in the [raw receipts](live-memory-frame-oracles.log.gz).
+The archive retains exact preprocessed C as nested gzip with unpacked hashes,
+executables and the original full source manifest/log/CPU/exit. S7 lifetime
+cases cover below-SP forgetting.

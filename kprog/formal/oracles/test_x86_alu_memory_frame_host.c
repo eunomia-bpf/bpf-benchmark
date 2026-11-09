@@ -42,7 +42,8 @@ static __attribute__((noinline,noclone)) void simulate(struct observation *out,u
  __u32 __x86_sim_abi_kind=0;
  __x86_native_stack_base=(__u64)(long)&native_stack[512];
  for(unsigned reg=0;reg<16;reg++)X86_SIM_L_WRITE_REG_WIDTH(reg,seed(reg),X86_WIDTH_64);
- __x86_rsp.ptr=(void *)(long)-64;
+ /* This valid-access oracle owns the complete512-byte native frame. */
+ __x86_rsp.ptr=(void *)(long)-512;
  X86_SIM_L_WRITE_REG_PTR_TAG(X86_RDX,(void *)&__x86_stack_mem.b[160],X86_SIM_TAG_STACK);
  X86_SIM_L_WRITE_REG_WIDTH(X86_R8,2,X86_WIDTH_64);
  unsigned base=profile==1?X86_RSP:X86_RDI;
@@ -54,7 +55,7 @@ static __attribute__((noinline,noclone)) void simulate(struct observation *out,u
  if(op>=5&&op<=8){source=X86_RCX;X86_SIM_L_WRITE_REG_WIDTH(X86_RCX,right,X86_WIDTH_64);}
  else if(ri<VALUE_COUNT)X86_SIM_L_WRITE_REG_WIDTH(X86_RAX,right,X86_WIDTH_64);
  for(unsigned i=0;i<512;i++){heap[i]=(__u8)(i*7+0x85);native_stack[i]=(__u8)(i*7+0x85);__x86_stack_mem.b[i]=(__u8)(i*7+0x85);}
- unsigned offset=(profile==0?256:profile==1?448:160)+displacement+(index_mode?(2U<<scale):0);
+ unsigned offset=(profile==0?256:profile==1?0:160)+displacement+(index_mode?(2U<<scale):0);
  __u8 *target=profile?(__u8 *)(void *)__x86_stack_mem.b+offset:heap+offset;put(target,width,left);
  __u64 old=flags_word(flagseed);__x86_cf=!!(old&1);__x86_pf=!!(old&4);__x86_af=!!(old&16);__x86_zf=!!(old&64);__x86_sf=!!(old&128);__x86_of=!!(old&2048);
  __u64 before[16];__u8 tags[16];for(unsigned reg=0;reg<16;reg++){before[reg]=(__u64)(long)X86_SIM_L_REG_VALUE(reg);tags[reg]=X86_SIM_L_REG_TAG(reg);}
@@ -71,10 +72,10 @@ int main(void){const unsigned widths[]={0,1,2,4,8};unsigned long count=0;
  for(unsigned profile=0;profile<3;profile++)for(unsigned flagseed=0;flagseed<64;flagseed++)
  for(unsigned li=0;li<VALUE_COUNT;li++)for(unsigned ri=0;ri<(imm|| (operations[oi]>=5&&operations[oi]<=8)?VALUE_COUNT:VALUE_COUNT+3);ri++){
   unsigned op=operations[oi],width=widths[wi]?widths[wi]:8,index_mode=(li+ri+flagseed)%5,scale=index_mode?index_mode-1:0;
-  int displacement=(li+ri)&1?-16:16;unsigned offset=(profile==0?256:profile==1?448:160)+displacement+(index_mode?(2U<<scale):0);
+  int displacement=(li+ri)&1?-16:16;if(profile==1)displacement+=32;unsigned offset=(profile==0?256:profile==1?0:160)+displacement+(index_mode?(2U<<scale):0);
   struct observation a,b;simulate(&a,1,imm,op,widths[wi],profile,index_mode,displacement,values[li],ri,flagseed);simulate(&b,0,imm,op,widths[wi],profile,index_mode,displacement,values[li],ri,flagseed);
   if(memcmp(&a,&b,sizeof(a))||a.changed){fprintf(stderr,"direct/interpreter op=%u width=%u profile=%u li=%u ri=%u\n",op,width,profile,li,ri);return 1;}
-  __u64 right=ri<VALUE_COUNT?values[ri]:ri==VALUE_COUNT?(__u64)(long)&native_stack[448]:ri==VALUE_COUNT+1?(__u64)(long)&native_stack[160]:profile==0?(__u64)(long)&heap[256]:profile==1?seed(X86_RDI):(__u64)(long)&native_stack[160];
+  __u64 right=ri<VALUE_COUNT?values[ri]:ri==VALUE_COUNT?(__u64)(long)&native_stack[0]:ri==VALUE_COUNT+1?(__u64)(long)&native_stack[160]:profile==0?(__u64)(long)&heap[256]:profile==1?seed(X86_RDI):(__u64)(long)&native_stack[160];
   if(imm)right=immediate(right,width);
   for(unsigned i=0;i<512;i++){heap[i]=(__u8)(i*7+0x85);native_stack[i]=(__u8)(i*7+0x85);}
   __u8 *target=profile?native_stack+offset:heap+offset;put(target,width,values[li]);__u64 native=cpu(op,width,target,right,flags_word(flagseed)),mask=defined(op,width,right);

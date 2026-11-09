@@ -38,7 +38,7 @@ static __attribute__((noinline,noclone)) void simulate(struct observation *out,u
  X86_SIM_L_DECLARE_STATE();X86_SIM_L_DECLARE_STACK();__u8 __x86_sim_abi_kind=flagseed&1?KPROG_ABI_KIND_XDP:KPROG_ABI_KIND_SKB;
  __x86_native_stack_base=(__u64)(long)&native_stack[512];
  for(unsigned reg=0;reg<16;reg++)X86_SIM_L_WRITE_REG_WIDTH(reg,seed(reg),X86_WIDTH_64);
- __x86_rsp.ptr=(void *)(long)-64;
+ __x86_rsp.ptr=(void *)(long)-512;
  X86_SIM_L_WRITE_REG_PTR_TAG(X86_RDX,(void *)&__x86_stack_mem.b[160],X86_SIM_TAG_STACK);
  X86_SIM_L_WRITE_REG_WIDTH(X86_R8,2,X86_WIDTH_64);
  unsigned base=profile==1?X86_RSP:X86_RDI;
@@ -46,7 +46,7 @@ static __attribute__((noinline,noclone)) void simulate(struct observation *out,u
  if(profile==2)X86_SIM_L_WRITE_REG_PTR_TAG(X86_RDI,(void *)&__x86_stack_mem.b[160],X86_SIM_TAG_STACK);
  if(dst!=X86_RSP&&dst!=X86_RDX&&dst!=base&&dst!=X86_R8)X86_SIM_L_WRITE_REG_WIDTH(dst,left,X86_WIDTH_64);
  unsigned width=flags?flags:8,index=index_mode?X86_R8:X86_REG_NONE,scale=index_mode?index_mode-1:0;
- unsigned offset=((profile==0||profile==3)?256:profile==1?448:160)+displacement+(index_mode?(2U<<scale):0);
+ unsigned offset=((profile==0||profile==3)?256:profile==1?0:160)+displacement+(index_mode?(2U<<scale):0);
  for(unsigned i=0;i<512;i++){heap[i]=(__u8)(i*7+0x85);__x86_stack_mem.b[i]=(__u8)(i*7+0x85);}
  put(profile==1||profile==2?(__u8 *)(void *)__x86_stack_mem.b+offset:heap+offset,source_width,right);
  __u64 old=flagword(flagseed);__x86_cf=!!(old&1);__x86_pf=!!(old&4);__x86_af=!!(old&16);__x86_zf=!!(old&64);__x86_sf=!!(old&128);__x86_of=!!(old&2048);
@@ -74,14 +74,16 @@ int main(void){const unsigned widths[]={0,1,2,4,8},sources[]={1,2,4,8};unsigned 
   unsigned op=operations[oi],width=widths[wi]?widths[wi]:8,source=sources[si],sign=op==X86_OP_MOVSX_LOAD;
   if(source>width||(sign&&source==width)||(!memory_mode&&source!=width))continue;
   for(unsigned dst=0;dst<16;dst++)for(unsigned profile=0;profile<4;profile++)for(unsigned fs=0;fs<64;fs++)for(unsigned li=0;li<NVALUES;li++){
-   unsigned index_mode=(li+fs)%5,scale=index_mode?index_mode-1:0;int displacement=li&1?-16:16;
-   unsigned offset=((profile==0||profile==3)?256:profile==1?448:160)+displacement+(index_mode?(2U<<scale):0);unsigned stack=profile==1||profile==2;
+   unsigned index_mode=(li+fs)%5,scale=index_mode?index_mode-1:0;int displacement=li&1?-16:16;if(profile==1)displacement+=32;
+   unsigned offset=((profile==0||profile==3)?256:profile==1?0:160)+displacement+(index_mode?(2U<<scale):0);unsigned stack=profile==1||profile==2;
    struct observation a,b;__u64 left=values[(li+fs)%NVALUES];
    simulate(&a,1,op,widths[wi],dst,profile,source,memory_mode,index_mode,displacement,left,values[li],fs);simulate(&b,0,op,widths[wi],dst,profile,source,memory_mode,index_mode,displacement,left,values[li],fs);
    if(memcmp(&a,&b,sizeof(a))){fprintf(stderr,"direct/interpreter op=%u src=%u width=%u dst=%u profile=%u\n",op,source,width,dst,profile);return 1;}
    for(unsigned i=0;i<512;i++){heap[i]=(__u8)(i*7+0x85);native_stack[i]=(__u8)(i*7+0x85);}put(stack?native_stack+offset:heap+offset,source,values[li]);
    struct cpu_result expected=cpu(source,width,sign,stack?native_stack+offset:heap+offset,flagword(fs));
    __u64 mask=width==8?~0ULL:(1ULL<<(width*8))-1,write=expected.value&mask;if(width==1||width==2)write|=a.before[dst]&~mask;
+   /* Released stack bytes follow the fixed host fresh word0. */
+  if(dst==X86_RSP){__s64 released=(__s64)(write-(__u64)(long)&native_stack[512]);for(unsigned i=0;i<512;i++)if((__s64)i-512<released)native_stack[i]=0;}
    if(memcmp(a.heap,heap,512)||memcmp(a.stack,native_stack,512)||a.flags!=flagword(fs)||((expected.flags^flagword(fs))&0x8d5)){fprintf(stderr,"CPU flags/memory op=%u source=%u width=%u dst=%u profile=%u li=%u\n",op,source,width,dst,profile,li);return 1;}
    for(unsigned reg=0;reg<16;reg++){
     __u64 want=reg==dst?write:a.before[reg],raw=reg==dst?(reg==X86_RSP?write-(__u64)(long)&native_stack[512]:write):a.raw_before[reg];

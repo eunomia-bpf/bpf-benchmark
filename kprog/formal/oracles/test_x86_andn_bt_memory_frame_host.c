@@ -41,19 +41,19 @@ static __attribute__((noinline,noclone)) void simulate(struct observation *out,u
  X86_SIM_L_DECLARE_STATE();X86_SIM_L_DECLARE_STACK();__u8 __x86_sim_abi_kind=0;
  __x86_native_stack_base=(__u64)(long)&native_stack[512];
  for(unsigned reg=0;reg<16;reg++)X86_SIM_L_WRITE_REG_WIDTH(reg,seed(reg),X86_WIDTH_64);
- __x86_rsp.ptr=(void *)(long)-64;
+ __x86_rsp.ptr=(void *)(long)-512;
  X86_SIM_L_WRITE_REG_PTR_TAG(X86_RDX,(void *)&__x86_stack_mem.b[160],X86_SIM_TAG_STACK);
  unsigned count_reg=(flagseed+count_index)%16;
  X86_SIM_L_WRITE_REG_WIDTH(count_reg,left,X86_WIDTH_64);
  X86_SIM_L_WRITE_REG_WIDTH(X86_R8,2,X86_WIDTH_64);
- __x86_rsp.ptr=(void *)(long)-64;
+ __x86_rsp.ptr=(void *)(long)-512;
  X86_SIM_L_WRITE_REG_PTR_TAG(X86_RDX,(void *)&__x86_stack_mem.b[160],X86_SIM_TAG_STACK);
  unsigned base=profile==1?X86_RSP:X86_RDI;
  if(profile==0||profile==3)X86_SIM_L_WRITE_REG_PTR_TAG(X86_RDI,&heap[256],profile==3?X86_SIM_TAG_ABI:X86_SIM_TAG_SCALAR);
  if(profile==2)X86_SIM_L_WRITE_REG_PTR_TAG(X86_RDI,(void *)&__x86_stack_mem.b[160],X86_SIM_TAG_STACK);
  if(dst!=X86_RSP&&dst!=X86_RDX&&dst!=base&&dst!=X86_R8&&dst!=count_reg)X86_SIM_L_WRITE_REG_WIDTH(dst,left,X86_WIDTH_64);
  unsigned width=flags?flags:8,index=index_mode?X86_R8:X86_REG_NONE,scale=index_mode?index_mode-1:0;
- unsigned offset=((profile==0||profile==3)?256:profile==1?448:160)+displacement+(index_mode?(2U<<scale):0);
+ unsigned offset=((profile==0||profile==3)?256:profile==1?0:160)+displacement+(index_mode?(2U<<scale):0);
  for(unsigned i=0;i<512;i++){heap[i]=(__u8)(i*7+0x85);__x86_stack_mem.b[i]=(__u8)(i*7+0x85);}
  put(profile==1||profile==2?(__u8 *)(void *)__x86_stack_mem.b+offset:heap+offset,width,right);
  __u64 old=flagword(flagseed);__x86_cf=!!(old&1);__x86_pf=!!(old&4);__x86_af=!!(old&16);__x86_zf=!!(old&64);__x86_sf=!!(old&128);__x86_of=!!(old&2048);
@@ -75,7 +75,7 @@ int main(void){const unsigned widths[]={0,2,4,8};unsigned long cases=0;
  for(unsigned ci=0;ci<(form?sizeof(indices)/sizeof(indices[0]):2);ci++)for(unsigned dst=0;dst<16;dst++)for(unsigned profile=0;profile<4;profile++)
  for(unsigned fs=0;fs<64;fs++)for(unsigned li=0;li<NVALUES;li++){
   unsigned width=widths[wi]?widths[wi]:8,index_mode=(li+ci+fs)%5,scale=index_mode?index_mode-1:0;
-  int displacement=(li+ci)&1?-16:16;unsigned offset=((profile==0||profile==3)?256:profile==1?448:160)+displacement+(index_mode?(2U<<scale):0);
+  int displacement=(li+ci)&1?-16:16;if(profile==1)displacement+=32;unsigned offset=((profile==0||profile==3)?256:profile==1?0:160)+displacement+(index_mode?(2U<<scale):0);
   struct observation a,b;__u64 left=values[(li+fs)%NVALUES];
   simulate(&a,1,form,ci,widths[wi],dst,profile,index_mode,displacement,left,values[li],fs);
   simulate(&b,0,form,ci,widths[wi],dst,profile,index_mode,displacement,left,values[li],fs);
@@ -85,6 +85,8 @@ int main(void){const unsigned widths[]={0,2,4,8};unsigned long cases=0;
   __u64 write=width==4?(__u32)expected.value:expected.value;
   __u64 flagmask=form?1:0x8c1,flags=(flagword(fs)&~flagmask)|(expected.flags&flagmask);
   if(!form)flags &= ~(4ULL|16ULL);
+  /* Released stack bytes use the fixed host fresh word0; live bytes retain exact CPU comparison. */
+  if(dst==X86_RSP&&!form){__s64 released=(__s64)(write-(__u64)(long)&native_stack[512]);for(unsigned i=0;i<512;i++)if((__s64)i-512<released)native_stack[i]=0;}
   if(memcmp(a.heap,heap,512)||memcmp(a.stack,native_stack,512)||a.flags!=flags){
    fprintf(stderr,"CPU flags/memory width=%u form=%u dst=%u profile=%u fs=%u source=%u field=%u got=%llx expected=%llx\n",width,form,dst,profile,fs,li,ci,a.flags,flags);return 1;}
   for(unsigned reg=0;reg<16;reg++){
