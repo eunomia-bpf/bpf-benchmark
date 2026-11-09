@@ -58,7 +58,7 @@
 - [ ] **C** x86-64 六个应用全部走通 verified 路径。
 - [ ] **A** AArch64 QEMU 上六个应用全部走通（Tracee 启动窗口按 05-29 框架处理）。
 - [ ] **A** 放大 MAX_BPF_STACK 的测试内核，一次看清 549 个程序在 512 字节栈墙之后的失败类。 本提交准备8192B observation patch，现有history slot索引扩至10bit/flags16bit，保留原static_assert，verifier.c算法字节保持。对existingCK35ea的apply-check0；source one-tree位置由C/协调者处置，随后复用S17 warm build于A scratch。
-- [ ] **A** 按 `design.md` 的 region 切分做 spike：B 按基本块拆成 noinline 子函数，量 actions、process_filter、generic_kprobe_ 的栈深和 clang 时间。 本提交提供独立region_spike编译实验：actions为150基本块/214显式边/2原返回，完整状态跨block保留，Clang18 BPF syntax exit0；三体编译结果继续收集。
+- [x] **A** 按 `design.md` 的 region 切分做 spike：B 按基本块拆成 noinline 子函数，量 actions、process_filter、generic_kprobe_ 的栈深和 clang 时间。 本提交提供独立region_spike编译实验：actions为150基本块/214显式边/2原返回，完整状态跨block保留，Clang18 BPF syntax exit0；三体编译结果继续收集。 三体stage完成：actions150块/45.98s/state1264B、process_filter438块/179.42s/state1672B、process_event631块/436.82s/state2616B，全部compile0；原始输入/对象/log gzip归档，root state容量继续按storage157项处理。
 - [ ] **R/C** 应用级 B 生成时间（clang 单个 body 12–2,819 秒，最高 15.1 GB），论文的 54.52x 只来自 micro。
 - [ ] **C** 100–100K 规模扫描，verifier 时间和内存。
 

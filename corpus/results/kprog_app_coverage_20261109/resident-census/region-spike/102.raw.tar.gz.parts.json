@@ -1,0 +1,17 @@
+{
+  "format": "concatenate parts in order, then decompress gzip",
+  "bytes": 91921459,
+  "sha256": "7d52662f5e4f51c8e52d6dfab137ddeb27ae7f6527b577a162d07843e83269a8",
+  "parts": [
+    {
+      "file": "102.raw.tar.gz.part000",
+      "bytes": 48000000,
+      "sha256": "d4b1837d3d63bf455d87329b8924ff37e82d963d4d77167e0335f9b94d18c5b5"
+    },
+    {
+      "file": "102.raw.tar.gz.part001",
+      "bytes": 43921459,
+      "sha256": "bcf6e4f358afce7662d03cf3c7cf71ae31f9afa32be2556ec2b6227c0f7da1f7"
+    }
+  ]
+}

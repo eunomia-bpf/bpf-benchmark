@@ -1,0 +1,6714 @@
+{
+  "kind": "three_body_region_compiler_spike",
+  "harness_head": "25e013842e847508d264cbac5d9a2d9904740e60",
+  "header_head": "05b80424b198e5abf35ece943cbce95a00f53656",
+  "native_executions": 0,
+  "rows": [
+    {
+      "program": 104,
+      "compile_returncode": 0,
+      "clang_seconds": 45.97988705802709,
+      "basic_blocks": 150,
+      "state_struct_bytes": [
+        1264
+      ],
+      "entry_minimum_direct_r10": -1264,
+      "outlined_minimum_direct_r10": -128,
+      "emitted_functions": 146,
+      "archive": "104.raw.tar.gz",
+      "archive_sha256": "1bb4247e9f83846a1f78e2933f7f3597b4a6ff0efc4f7ae62f284c26e0883ec1",
+      "verified_raw_entries": 10
+    },
+    {
+      "program": 100,
+      "compile_returncode": 0,
+      "clang_seconds": 179.42484622029588,
+      "basic_blocks": 438,
+      "state_struct_bytes": [
+        1672
+      ],
+      "entry_minimum_direct_r10": -1672,
+      "outlined_minimum_direct_r10": -296,
+      "emitted_functions": 407,
+      "archive": "100.raw.tar.gz.parts.json",
+      "archive_sha256": "3019c0aeccca25b505eb8f0ac27d2102bdcf36b97cf5ef06c0b82d4ee085916d",
+      "verified_raw_entries": 12
+    },
+    {
+      "program": 102,
+      "compile_returncode": 0,
+      "clang_seconds": 436.81564819067717,
+      "basic_blocks": 631,
+      "state_struct_bytes": [
+        2616
+      ],
+      "entry_minimum_direct_r10": -2616,
+      "outlined_minimum_direct_r10": -536,
+      "emitted_functions": 621,
+      "archive": "102.raw.tar.gz.parts.json",
+      "archive_sha256": "7d52662f5e4f51c8e52d6dfab137ddeb27ae7f6527b577a162d07843e83269a8",
+      "verified_raw_entries": 12
+    }
+  ],
+  "full_compiler_records": [
+    {
+      "program": 104,
+      "header_head": "05b80424b198e5abf35ece943cbce95a00f53656",
+      "harness_head": "25e013842e847508d264cbac5d9a2d9904740e60",
+      "native_executions": 0,
+      "input_sha256": "407d52cb29fe737773916ee4c5c7d73e619d6a5bb336e8e0f4f6a5b68e530c12",
+      "preprocess_returncode": 0,
+      "outline_returncode": 0,
+      "layout": {
+        "kind": "compiler_region_spike",
+        "entry": "trusted_x86_x86_sim_xdp",
+        "state_fields": [
+          "__x86_sim_abi",
+          "__x86_sim_skb_ctx",
+          "__x86_sim_abi_kind",
+          "__x86_stack_value_state_2",
+          "__x86_stack_value_ptr_2",
+          "__x86_stack_scalar_value_2",
+          "__x86_stack_value_state_6",
+          "__x86_stack_value_ptr_6",
+          "__x86_stack_scalar_value_6",
+          "__x86_stack_value_state_9",
+          "__x86_stack_value_ptr_9",
+          "__x86_stack_scalar_value_9",
+          "__x86_stack_value_state_10",
+          "__x86_stack_value_ptr_10",
+          "__x86_stack_scalar_value_10",
+          "__x86_stack_value_state_11",
+          "__x86_stack_value_ptr_11",
+          "__x86_stack_scalar_value_11",
+          "__x86_stack_value_state_14",
+          "__x86_stack_value_ptr_14",
+          "__x86_stack_scalar_value_14",
+          "__x86_stack_value_state_15",
+          "__x86_stack_value_ptr_15",
+          "__x86_stack_scalar_value_15",
+          "__x86_stack_value_state_16",
+          "__x86_stack_value_ptr_16",
+          "__x86_stack_scalar_value_16",
+          "__x86_stack_value_state_17",
+          "__x86_stack_value_ptr_17",
+          "__x86_stack_scalar_value_17",
+          "__x86_stack_value_state_18",
+          "__x86_stack_value_ptr_18",
+          "__x86_stack_scalar_value_18",
+          "__x86_stack_value_state_19",
+          "__x86_stack_value_ptr_19",
+          "__x86_stack_scalar_value_19",
+          "__x86_stack_value_state_20",
+          "__x86_stack_value_ptr_20",
+          "__x86_stack_scalar_value_20",
+          "__x86_stack_value_state_21",
+          "__x86_stack_value_ptr_21",
+          "__x86_stack_scalar_value_21",
+          "__x86_stack_value_state_22",
+          "__x86_stack_value_ptr_22",
+          "__x86_stack_scalar_value_22",
+          "__x86_stack_value_state_23",
+          "__x86_stack_value_ptr_23",
+          "__x86_stack_scalar_value_23",
+          "__x86_stack_value_state_26",
+          "__x86_stack_value_ptr_26",
+          "__x86_stack_scalar_value_26",
+          "__x86_stack_value_state_27",
+          "__x86_stack_value_ptr_27",
+          "__x86_stack_scalar_value_27",
+          "__x86_stack_value_state_28",
+          "__x86_stack_value_ptr_28",
+          "__x86_stack_scalar_value_28",
+          "__x86_sim_is_xdp",
+          "__x86_sim_helper_ctx",
+          "__x86_sim_helper_abi_base",
+          "__x86_rax",
+          "__x86_rax_tag",
+          "__x86_rcx",
+          "__x86_rcx_tag",
+          "__x86_rdx",
+          "__x86_rdx_tag",
+          "__x86_rbx",
+          "__x86_rbx_tag",
+          "__x86_rsp",
+          "__x86_rsp_tag",
+          "__x86_rbp",
+          "__x86_rbp_tag",
+          "__x86_rsi",
+          "__x86_rsi_tag",
+          "__x86_rdi",
+          "__x86_rdi_tag",
+          "__x86_r8",
+          "__x86_r8_tag",
+          "__x86_r9",
+          "__x86_r9_tag",
+          "__x86_r10",
+          "__x86_r10_tag",
+          "__x86_r11",
+          "__x86_r11_tag",
+          "__x86_r12",
+          "__x86_r12_tag",
+          "__x86_r13",
+          "__x86_r13_tag",
+          "__x86_r14",
+          "__x86_r14_tag",
+          "__x86_r15",
+          "__x86_r15_tag",
+          "__x86_entry_rbx",
+          "__x86_entry_rbp",
+          "__x86_entry_r12",
+          "__x86_entry_r13",
+          "__x86_entry_r14",
+          "__x86_entry_r15",
+          "__x86_native_stack_base",
+          "__x86_cf",
+          "__x86_zf",
+          "__x86_sf",
+          "__x86_of",
+          "__x86_pf",
+          "__x86_af",
+          "__x86_xmm0_lo",
+          "__x86_xmm0_hi",
+          "__x86_sim_ret_addr",
+          "__x86_stack_mem"
+        ],
+        "basic_blocks": 150,
+        "explicit_edges": 214,
+        "value_returns": 2,
+        "original_instruction_labels": 846,
+        "native_executions": 0,
+        "input_sha256": "24e5de5b0d397ec19d0022b5971f675585e72fc992b85264f7b0284f43a05545",
+        "output_sha256": "4611d07b63ccaadef33ed112f931a0196b1404c185c284e22d4b0d082e9452e6"
+      },
+      "compile_returncode": 0,
+      "compile_seconds": 45.97988705802709,
+      "object_sha256": "8f3fe3320bb5b283b60becdebef21870bd2dbd132f111704d98fe1bf177a4eaa",
+      "functions": [
+        {
+          "name": "__region_99",
+          "instructions": 1534,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_1",
+          "instructions": 150,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_76",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_38",
+          "instructions": 47,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_113",
+          "instructions": 113,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_19",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_94",
+          "instructions": 1309,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_57",
+          "instructions": 4228,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_132",
+          "instructions": 3039,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_28",
+          "instructions": 49,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_103",
+          "instructions": 584,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_47",
+          "instructions": 169,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_122",
+          "instructions": 1382,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_66",
+          "instructions": 9390,
+          "minimum_direct_r10_offset": -120
+        },
+        {
+          "name": "__region_141",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_10",
+          "instructions": 151,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_85",
+          "instructions": 348,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_23",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_80",
+          "instructions": 2771,
+          "minimum_direct_r10_offset": -128
+        },
+        {
+          "name": "__region_14",
+          "instructions": 6308,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_89",
+          "instructions": 131,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_33",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_108",
+          "instructions": 1343,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_42",
+          "instructions": 131,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_117",
+          "instructions": 1382,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_61",
+          "instructions": 3519,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_136",
+          "instructions": 3584,
+          "minimum_direct_r10_offset": -128
+        },
+        {
+          "name": "__region_52",
+          "instructions": 3649,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_127",
+          "instructions": 42,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_71",
+          "instructions": 57,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_146",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_26",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_101",
+          "instructions": 15,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_8",
+          "instructions": 151,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_83",
+          "instructions": 1358,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_17",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_92",
+          "instructions": 3025,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_31",
+          "instructions": 221,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_106",
+          "instructions": 1701,
+          "minimum_direct_r10_offset": -128
+        },
+        {
+          "name": "__region_36",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_111",
+          "instructions": 3027,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_45",
+          "instructions": 133,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_120",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_64",
+          "instructions": 6769,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_139",
+          "instructions": 1230,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_50",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_125",
+          "instructions": 686,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_69",
+          "instructions": 113,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_144",
+          "instructions": 1534,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_55",
+          "instructions": 1283,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_130",
+          "instructions": 1054,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_74",
+          "instructions": 478,
+          "minimum_direct_r10_offset": -16
+        },
+        {
+          "name": "__region_149",
+          "instructions": 11,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_21",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_96",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_3",
+          "instructions": 3232,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_78",
+          "instructions": 3508,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_12",
+          "instructions": 103,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_87",
+          "instructions": 5248,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_40",
+          "instructions": 1826,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_115",
+          "instructions": 47,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_59",
+          "instructions": 348,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_134",
+          "instructions": 3586,
+          "minimum_direct_r10_offset": -128
+        },
+        {
+          "name": "__region_24",
+          "instructions": 49,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_97",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_18",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_93",
+          "instructions": 348,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_20",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_95",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_25",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_100",
+          "instructions": 578,
+          "minimum_direct_r10_offset": -128
+        },
+        {
+          "name": "__region_6",
+          "instructions": 154,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_81",
+          "instructions": 3,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_15",
+          "instructions": 47,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_90",
+          "instructions": 5087,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_4",
+          "instructions": 270,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_79",
+          "instructions": 348,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_13",
+          "instructions": 1293,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_88",
+          "instructions": 41,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_29",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_104",
+          "instructions": 455,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_34",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_27",
+          "instructions": 1397,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_102",
+          "instructions": 1549,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_32",
+          "instructions": 131,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_107",
+          "instructions": 12649,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_0",
+          "instructions": 5031,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_75",
+          "instructions": 131,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_9",
+          "instructions": 680,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_84",
+          "instructions": 3027,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_2",
+          "instructions": 1380,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_77",
+          "instructions": 5656,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_11",
+          "instructions": 680,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_86",
+          "instructions": 1329,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_43",
+          "instructions": 3815,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_118",
+          "instructions": 148,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_62",
+          "instructions": 348,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_137",
+          "instructions": 162,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_41",
+          "instructions": 1290,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_116",
+          "instructions": 2813,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_60",
+          "instructions": 3886,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_135",
+          "instructions": 130,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_7",
+          "instructions": 685,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_82",
+          "instructions": 17,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_16",
+          "instructions": 8409,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_91",
+          "instructions": 1364,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_30",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_105",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_35",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_110",
+          "instructions": 1358,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_37",
+          "instructions": 1340,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_112",
+          "instructions": 348,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_56",
+          "instructions": 1332,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_131",
+          "instructions": 1283,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_39",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_114",
+          "instructions": 7620,
+          "minimum_direct_r10_offset": -128
+        },
+        {
+          "name": "__region_58",
+          "instructions": 2259,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_133",
+          "instructions": 572,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_44",
+          "instructions": 41,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_119",
+          "instructions": 849,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_63",
+          "instructions": 1308,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_138",
+          "instructions": 615,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_48",
+          "instructions": 131,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_123",
+          "instructions": 833,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_67",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_142",
+          "instructions": 1347,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_128",
+          "instructions": 5016,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_72",
+          "instructions": 1288,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_147",
+          "instructions": 1347,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_46",
+          "instructions": 5150,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_121",
+          "instructions": 2813,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_65",
+          "instructions": 1347,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_140",
+          "instructions": 1534,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_51",
+          "instructions": 2888,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_126",
+          "instructions": 161,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_70",
+          "instructions": 1253,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_145",
+          "instructions": 1518,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_49",
+          "instructions": 2599,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_124",
+          "instructions": 171,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_68",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_143",
+          "instructions": 463,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_54",
+          "instructions": 717,
+          "minimum_direct_r10_offset": -128
+        },
+        {
+          "name": "__region_129",
+          "instructions": 3042,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_73",
+          "instructions": 1309,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_148",
+          "instructions": 463,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "trusted_x86_x86_sim_xdp",
+          "instructions": 1091,
+          "minimum_direct_r10_offset": -1264
+        }
+      ],
+      "minimum_direct_r10_offset": -1264,
+      "state_struct_bytes": [
+        1264
+      ],
+      "commands": [
+        {
+          "command": [
+            "/var/tmp/kprog-tmp/A/forwarding-scoped-coordinates/source/kprog/stock-path/bin/clang",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-E",
+            "-P",
+            "/var/tmp/kprog-tmp/A/region-spike/104/original.bpf.c"
+          ],
+          "returncode": 0,
+          "elapsed_seconds": 5.598007451277226
+        },
+        {
+          "command": [
+            "python3",
+            "/var/tmp/kprog-tmp/A/region-spike/harness.py",
+            "/var/tmp/kprog-tmp/A/region-spike/104/expanded.c",
+            "/var/tmp/kprog-tmp/A/region-spike/104/regions.c",
+            "--report",
+            "/var/tmp/kprog-tmp/A/region-spike/104/layout.json"
+          ],
+          "returncode": 0,
+          "elapsed_seconds": 8.406167468987405
+        },
+        {
+          "command": [
+            "/var/tmp/kprog-tmp/A/forwarding-scoped-coordinates/source/kprog/stock-path/bin/clang",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-c",
+            "/var/tmp/kprog-tmp/A/region-spike/104/regions.c",
+            "-o",
+            "/var/tmp/kprog-tmp/A/region-spike/104/regions.o"
+          ],
+          "returncode": 0,
+          "elapsed_seconds": 45.97988705802709
+        }
+      ]
+    },
+    {
+      "program": 100,
+      "header_head": "05b80424b198e5abf35ece943cbce95a00f53656",
+      "harness_head": "25e013842e847508d264cbac5d9a2d9904740e60",
+      "native_executions": 0,
+      "input_sha256": "63d56f66198f94b44dea80b7410113c469bb30360051b179b87ed122ed07c4ed",
+      "preprocess_returncode": 0,
+      "outline_returncode": 0,
+      "layout": {
+        "kind": "compiler_region_spike",
+        "entry": "trusted_x86_x86_sim_xdp",
+        "state_fields": [
+          "__x86_sim_abi",
+          "__x86_sim_skb_ctx",
+          "__x86_sim_abi_kind",
+          "__x86_stack_value_state_1",
+          "__x86_stack_value_ptr_1",
+          "__x86_stack_scalar_value_1",
+          "__x86_stack_value_state_2",
+          "__x86_stack_value_ptr_2",
+          "__x86_stack_scalar_value_2",
+          "__x86_stack_value_state_3",
+          "__x86_stack_value_ptr_3",
+          "__x86_stack_scalar_value_3",
+          "__x86_stack_value_state_4",
+          "__x86_stack_value_ptr_4",
+          "__x86_stack_scalar_value_4",
+          "__x86_stack_value_state_5",
+          "__x86_stack_value_ptr_5",
+          "__x86_stack_scalar_value_5",
+          "__x86_stack_value_state_6",
+          "__x86_stack_value_ptr_6",
+          "__x86_stack_scalar_value_6",
+          "__x86_stack_value_state_7",
+          "__x86_stack_value_ptr_7",
+          "__x86_stack_scalar_value_7",
+          "__x86_stack_value_state_8",
+          "__x86_stack_value_ptr_8",
+          "__x86_stack_scalar_value_8",
+          "__x86_stack_value_state_9",
+          "__x86_stack_value_ptr_9",
+          "__x86_stack_scalar_value_9",
+          "__x86_stack_value_state_10",
+          "__x86_stack_value_ptr_10",
+          "__x86_stack_scalar_value_10",
+          "__x86_stack_value_state_11",
+          "__x86_stack_value_ptr_11",
+          "__x86_stack_scalar_value_11",
+          "__x86_stack_value_state_12",
+          "__x86_stack_value_ptr_12",
+          "__x86_stack_scalar_value_12",
+          "__x86_stack_value_state_13",
+          "__x86_stack_value_ptr_13",
+          "__x86_stack_scalar_value_13",
+          "__x86_stack_value_state_14",
+          "__x86_stack_value_ptr_14",
+          "__x86_stack_scalar_value_14",
+          "__x86_stack_value_state_15",
+          "__x86_stack_value_ptr_15",
+          "__x86_stack_scalar_value_15",
+          "__x86_stack_value_state_16",
+          "__x86_stack_value_ptr_16",
+          "__x86_stack_scalar_value_16",
+          "__x86_stack_value_state_17",
+          "__x86_stack_value_ptr_17",
+          "__x86_stack_scalar_value_17",
+          "__x86_stack_value_state_18",
+          "__x86_stack_value_ptr_18",
+          "__x86_stack_scalar_value_18",
+          "__x86_stack_value_state_19",
+          "__x86_stack_value_ptr_19",
+          "__x86_stack_scalar_value_19",
+          "__x86_stack_value_state_20",
+          "__x86_stack_value_ptr_20",
+          "__x86_stack_scalar_value_20",
+          "__x86_stack_value_state_21",
+          "__x86_stack_value_ptr_21",
+          "__x86_stack_scalar_value_21",
+          "__x86_stack_value_state_22",
+          "__x86_stack_value_ptr_22",
+          "__x86_stack_scalar_value_22",
+          "__x86_stack_value_state_23",
+          "__x86_stack_value_ptr_23",
+          "__x86_stack_scalar_value_23",
+          "__x86_stack_value_state_24",
+          "__x86_stack_value_ptr_24",
+          "__x86_stack_scalar_value_24",
+          "__x86_stack_value_state_26",
+          "__x86_stack_value_ptr_26",
+          "__x86_stack_scalar_value_26",
+          "__x86_stack_value_state_27",
+          "__x86_stack_value_ptr_27",
+          "__x86_stack_scalar_value_27",
+          "__x86_stack_value_state_28",
+          "__x86_stack_value_ptr_28",
+          "__x86_stack_scalar_value_28",
+          "__x86_stack_value_state_29",
+          "__x86_stack_value_ptr_29",
+          "__x86_stack_scalar_value_29",
+          "__x86_stack_value_state_30",
+          "__x86_stack_value_ptr_30",
+          "__x86_stack_scalar_value_30",
+          "__x86_stack_value_state_31",
+          "__x86_stack_value_ptr_31",
+          "__x86_stack_scalar_value_31",
+          "__x86_stack_value_state_32",
+          "__x86_stack_value_ptr_32",
+          "__x86_stack_scalar_value_32",
+          "__x86_stack_value_state_33",
+          "__x86_stack_value_ptr_33",
+          "__x86_stack_scalar_value_33",
+          "__x86_stack_value_state_34",
+          "__x86_stack_value_ptr_34",
+          "__x86_stack_scalar_value_34",
+          "__x86_sim_is_xdp",
+          "__x86_sim_helper_ctx",
+          "__x86_sim_helper_abi_base",
+          "__x86_rax",
+          "__x86_rax_tag",
+          "__x86_rcx",
+          "__x86_rcx_tag",
+          "__x86_rdx",
+          "__x86_rdx_tag",
+          "__x86_rbx",
+          "__x86_rbx_tag",
+          "__x86_rsp",
+          "__x86_rsp_tag",
+          "__x86_rbp",
+          "__x86_rbp_tag",
+          "__x86_rsi",
+          "__x86_rsi_tag",
+          "__x86_rdi",
+          "__x86_rdi_tag",
+          "__x86_r8",
+          "__x86_r8_tag",
+          "__x86_r9",
+          "__x86_r9_tag",
+          "__x86_r10",
+          "__x86_r10_tag",
+          "__x86_r11",
+          "__x86_r11_tag",
+          "__x86_r12",
+          "__x86_r12_tag",
+          "__x86_r13",
+          "__x86_r13_tag",
+          "__x86_r14",
+          "__x86_r14_tag",
+          "__x86_r15",
+          "__x86_r15_tag",
+          "__x86_entry_rbx",
+          "__x86_entry_rbp",
+          "__x86_entry_r12",
+          "__x86_entry_r13",
+          "__x86_entry_r14",
+          "__x86_entry_r15",
+          "__x86_native_stack_base",
+          "__x86_cf",
+          "__x86_zf",
+          "__x86_sf",
+          "__x86_of",
+          "__x86_pf",
+          "__x86_af",
+          "__x86_xmm0_lo",
+          "__x86_xmm0_hi",
+          "__x86_sim_ret_addr",
+          "__x86_stack_mem"
+        ],
+        "basic_blocks": 438,
+        "explicit_edges": 654,
+        "value_returns": 2,
+        "original_instruction_labels": 2418,
+        "native_executions": 0,
+        "input_sha256": "dcc7299d430ca937ab5cddb50a96f0c5684fde1d352232a4ea04d520e513c5e5",
+        "output_sha256": "e94499847119c105785ab0fa3bbaea3c669a02d4cac2a067c9df4cbc0d33c3c1"
+      },
+      "compile_returncode": 0,
+      "compile_seconds": 179.42484622029588,
+      "object_sha256": "46b79004ea3a82e3aab3bbf23332fbe7330ef24cd75af120baddc338a30ac69c",
+      "functions": [
+        {
+          "name": "__region_394",
+          "instructions": 138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_2",
+          "instructions": 386,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_221",
+          "instructions": 1681,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_111",
+          "instructions": 519,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_330",
+          "instructions": 153,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_166",
+          "instructions": 848,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_385",
+          "instructions": 149,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_56",
+          "instructions": 3949,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_275",
+          "instructions": 824,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_138",
+          "instructions": 155,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_357",
+          "instructions": 1778,
+          "minimum_direct_r10_offset": -232
+        },
+        {
+          "name": "__region_193",
+          "instructions": 105,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_412",
+          "instructions": 20,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_83",
+          "instructions": 2499,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_302",
+          "instructions": 1778,
+          "minimum_direct_r10_offset": -232
+        },
+        {
+          "name": "__region_29",
+          "instructions": 1976,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_248",
+          "instructions": 799,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_124",
+          "instructions": 3195,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_343",
+          "instructions": 25,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_179",
+          "instructions": 1680,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_398",
+          "instructions": 6166,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_69",
+          "instructions": 1926,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_288",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_152",
+          "instructions": 1680,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_207",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_426",
+          "instructions": 3609,
+          "minimum_direct_r10_offset": -280
+        },
+        {
+          "name": "__region_97",
+          "instructions": 7050,
+          "minimum_direct_r10_offset": -264
+        },
+        {
+          "name": "__region_15",
+          "instructions": 4850,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_234",
+          "instructions": 118,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_42",
+          "instructions": 731,
+          "minimum_direct_r10_offset": -248
+        },
+        {
+          "name": "__region_261",
+          "instructions": 1942,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_117",
+          "instructions": 722,
+          "minimum_direct_r10_offset": -248
+        },
+        {
+          "name": "__region_336",
+          "instructions": 843,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_172",
+          "instructions": 157,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_62",
+          "instructions": 3205,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_281",
+          "instructions": 804,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_131",
+          "instructions": 423,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_350",
+          "instructions": 149,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_186",
+          "instructions": 3162,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_405",
+          "instructions": 2979,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_76",
+          "instructions": 136,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_295",
+          "instructions": 149,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_8",
+          "instructions": 386,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_227",
+          "instructions": 1186,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_35",
+          "instructions": 3562,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_254",
+          "instructions": 149,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_145",
+          "instructions": 164,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_364",
+          "instructions": 138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_200",
+          "instructions": 5599,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_419",
+          "instructions": 13960,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_159",
+          "instructions": 155,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_378",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_214",
+          "instructions": 741,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_433",
+          "instructions": 7701,
+          "minimum_direct_r10_offset": -272
+        },
+        {
+          "name": "__region_90",
+          "instructions": 2950,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_309",
+          "instructions": 138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_104",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_323",
+          "instructions": 4340,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_22",
+          "instructions": 11646,
+          "minimum_direct_r10_offset": -248
+        },
+        {
+          "name": "__region_241",
+          "instructions": 54,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_49",
+          "instructions": 1730,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_268",
+          "instructions": 783,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_119",
+          "instructions": 1716,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_338",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_174",
+          "instructions": 157,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_393",
+          "instructions": 20,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_64",
+          "instructions": 453,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_283",
+          "instructions": 1647,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_126",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_345",
+          "instructions": 149,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_181",
+          "instructions": 1680,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_400",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_133",
+          "instructions": 27,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_352",
+          "instructions": 1778,
+          "minimum_direct_r10_offset": -232
+        },
+        {
+          "name": "__region_71",
+          "instructions": 1644,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_290",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_78",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_297",
+          "instructions": 1778,
+          "minimum_direct_r10_offset": -232
+        },
+        {
+          "name": "__region_10",
+          "instructions": 5604,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_229",
+          "instructions": 11,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_37",
+          "instructions": 2709,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_256",
+          "instructions": 1681,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_140",
+          "instructions": 1680,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_359",
+          "instructions": 138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_195",
+          "instructions": 175,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_414",
+          "instructions": 1778,
+          "minimum_direct_r10_offset": -232
+        },
+        {
+          "name": "__region_154",
+          "instructions": 164,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_373",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_209",
+          "instructions": 60,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_428",
+          "instructions": 58,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_147",
+          "instructions": 155,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_202",
+          "instructions": 129,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_421",
+          "instructions": 47,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_161",
+          "instructions": 48,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_380",
+          "instructions": 149,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_216",
+          "instructions": 182,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_435",
+          "instructions": 1812,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_85",
+          "instructions": 1233,
+          "minimum_direct_r10_offset": -16
+        },
+        {
+          "name": "__region_304",
+          "instructions": 138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_99",
+          "instructions": 111,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_318",
+          "instructions": 23,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_92",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_106",
+          "instructions": 19,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_325",
+          "instructions": 824,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_17",
+          "instructions": 13224,
+          "minimum_direct_r10_offset": -24
+        },
+        {
+          "name": "__region_44",
+          "instructions": 1450,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_263",
+          "instructions": 2889,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_24",
+          "instructions": 31413,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_243",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_51",
+          "instructions": 700,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_270",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_114",
+          "instructions": 2826,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_333",
+          "instructions": 1647,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_169",
+          "instructions": 3899,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_388",
+          "instructions": 20,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_59",
+          "instructions": 163,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_278",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_5",
+          "instructions": 386,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_224",
+          "instructions": 7,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_32",
+          "instructions": 58,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_121",
+          "instructions": 4228,
+          "minimum_direct_r10_offset": -248
+        },
+        {
+          "name": "__region_340",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_176",
+          "instructions": 157,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_395",
+          "instructions": 854,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_66",
+          "instructions": 3368,
+          "minimum_direct_r10_offset": -272
+        },
+        {
+          "name": "__region_285",
+          "instructions": 3158,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_128",
+          "instructions": 3496,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_347",
+          "instructions": 1778,
+          "minimum_direct_r10_offset": -232
+        },
+        {
+          "name": "__region_183",
+          "instructions": 1680,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_402",
+          "instructions": 852,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_135",
+          "instructions": 880,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_354",
+          "instructions": 138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_190",
+          "instructions": 3,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_409",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_73",
+          "instructions": 132,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_292",
+          "instructions": 1778,
+          "minimum_direct_r10_offset": -232
+        },
+        {
+          "name": "__region_80",
+          "instructions": 19,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_299",
+          "instructions": 138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_12",
+          "instructions": 4318,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_231",
+          "instructions": 1648,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_258",
+          "instructions": 6957,
+          "minimum_direct_r10_offset": -296
+        },
+        {
+          "name": "__region_142",
+          "instructions": 164,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_197",
+          "instructions": 49,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_416",
+          "instructions": 6762,
+          "minimum_direct_r10_offset": -256
+        },
+        {
+          "name": "__region_156",
+          "instructions": 155,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_375",
+          "instructions": 149,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_211",
+          "instructions": 437,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_430",
+          "instructions": 3705,
+          "minimum_direct_r10_offset": -272
+        },
+        {
+          "name": "__region_149",
+          "instructions": 1680,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_368",
+          "instructions": 25,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_204",
+          "instructions": 397,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_423",
+          "instructions": 408,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_163",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_382",
+          "instructions": 1778,
+          "minimum_direct_r10_offset": -232
+        },
+        {
+          "name": "__region_218",
+          "instructions": 49,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_437",
+          "instructions": 2,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_87",
+          "instructions": 2811,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_101",
+          "instructions": 2269,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_320",
+          "instructions": 149,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_94",
+          "instructions": 7,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_313",
+          "instructions": 23,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_108",
+          "instructions": 1681,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_327",
+          "instructions": 118,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_19",
+          "instructions": 48639,
+          "minimum_direct_r10_offset": -24
+        },
+        {
+          "name": "__region_238",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_46",
+          "instructions": 973,
+          "minimum_direct_r10_offset": -272
+        },
+        {
+          "name": "__region_265",
+          "instructions": 4340,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_26",
+          "instructions": 2481,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_245",
+          "instructions": 4535,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_53",
+          "instructions": 5038,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_272",
+          "instructions": 11,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_118",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_337",
+          "instructions": 20,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_173",
+          "instructions": 1680,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_392",
+          "instructions": 1778,
+          "minimum_direct_r10_offset": -232
+        },
+        {
+          "name": "__region_120",
+          "instructions": 7,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_175",
+          "instructions": 1680,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_63",
+          "instructions": 5038,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_282",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_65",
+          "instructions": 1926,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_284",
+          "instructions": 712,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_125",
+          "instructions": 5599,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_344",
+          "instructions": 138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_180",
+          "instructions": 157,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_399",
+          "instructions": 5039,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_132",
+          "instructions": 165,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_187",
+          "instructions": 3545,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_406",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_127",
+          "instructions": 17533,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_182",
+          "instructions": 157,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_401",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_134",
+          "instructions": 22,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_353",
+          "instructions": 25,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_189",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_408",
+          "instructions": 51,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_70",
+          "instructions": 1116,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_77",
+          "instructions": 120,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_72",
+          "instructions": 822,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_79",
+          "instructions": 19,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_298",
+          "instructions": 23,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_9",
+          "instructions": 5049,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_228",
+          "instructions": 2889,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_11",
+          "instructions": 386,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_230",
+          "instructions": 4340,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_38",
+          "instructions": 9545,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_257",
+          "instructions": 1651,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_139",
+          "instructions": 164,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_358",
+          "instructions": 25,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_194",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_413",
+          "instructions": 138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_153",
+          "instructions": 155,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_372",
+          "instructions": 1778,
+          "minimum_direct_r10_offset": -232
+        },
+        {
+          "name": "__region_208",
+          "instructions": 1589,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_427",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_146",
+          "instructions": 1680,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_365",
+          "instructions": 149,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_201",
+          "instructions": 88,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_420",
+          "instructions": 710,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_160",
+          "instructions": 3656,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_379",
+          "instructions": 138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_215",
+          "instructions": 1071,
+          "minimum_direct_r10_offset": -16
+        },
+        {
+          "name": "__region_434",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_141",
+          "instructions": 155,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_360",
+          "instructions": 149,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_196",
+          "instructions": 924,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_415",
+          "instructions": 5275,
+          "minimum_direct_r10_offset": -272
+        },
+        {
+          "name": "__region_155",
+          "instructions": 1680,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_374",
+          "instructions": 138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_210",
+          "instructions": 2282,
+          "minimum_direct_r10_offset": -296
+        },
+        {
+          "name": "__region_429",
+          "instructions": 1817,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_148",
+          "instructions": 164,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_367",
+          "instructions": 1778,
+          "minimum_direct_r10_offset": -232
+        },
+        {
+          "name": "__region_203",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_422",
+          "instructions": 12357,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_162",
+          "instructions": 1554,
+          "minimum_direct_r10_offset": -280
+        },
+        {
+          "name": "__region_217",
+          "instructions": 1498,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_436",
+          "instructions": 15937,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_84",
+          "instructions": 1751,
+          "minimum_direct_r10_offset": -272
+        },
+        {
+          "name": "__region_303",
+          "instructions": 23,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_98",
+          "instructions": 700,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_317",
+          "instructions": 1778,
+          "minimum_direct_r10_offset": -232
+        },
+        {
+          "name": "__region_91",
+          "instructions": 722,
+          "minimum_direct_r10_offset": -248
+        },
+        {
+          "name": "__region_310",
+          "instructions": 149,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_105",
+          "instructions": 19,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_324",
+          "instructions": 1648,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_86",
+          "instructions": 2822,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_305",
+          "instructions": 149,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_100",
+          "instructions": 4598,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_319",
+          "instructions": 138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_93",
+          "instructions": 2379,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_312",
+          "instructions": 1778,
+          "minimum_direct_r10_offset": -232
+        },
+        {
+          "name": "__region_107",
+          "instructions": 19,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_326",
+          "instructions": 783,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_16",
+          "instructions": 45004,
+          "minimum_direct_r10_offset": -24
+        },
+        {
+          "name": "__region_235",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_43",
+          "instructions": 1585,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_262",
+          "instructions": 1186,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_23",
+          "instructions": 700,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_242",
+          "instructions": 71,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_50",
+          "instructions": 2192,
+          "minimum_direct_r10_offset": -272
+        },
+        {
+          "name": "__region_269",
+          "instructions": 118,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_18",
+          "instructions": 716,
+          "minimum_direct_r10_offset": -248
+        },
+        {
+          "name": "__region_237",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_45",
+          "instructions": 3538,
+          "minimum_direct_r10_offset": -272
+        },
+        {
+          "name": "__region_264",
+          "instructions": 7,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_25",
+          "instructions": 13,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_244",
+          "instructions": 182,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_52",
+          "instructions": 2715,
+          "minimum_direct_r10_offset": -264
+        },
+        {
+          "name": "__region_110",
+          "instructions": 1048,
+          "minimum_direct_r10_offset": -272
+        },
+        {
+          "name": "__region_329",
+          "instructions": 4962,
+          "minimum_direct_r10_offset": -272
+        },
+        {
+          "name": "__region_165",
+          "instructions": 134,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_384",
+          "instructions": 138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_113",
+          "instructions": 2811,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_332",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_168",
+          "instructions": 51,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_387",
+          "instructions": 1778,
+          "minimum_direct_r10_offset": -232
+        },
+        {
+          "name": "__region_109",
+          "instructions": 1797,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_328",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_164",
+          "instructions": 51,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_383",
+          "instructions": 20,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_112",
+          "instructions": 2822,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_331",
+          "instructions": 804,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_167",
+          "instructions": 60,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_55",
+          "instructions": 1926,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_274",
+          "instructions": 1648,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_58",
+          "instructions": 453,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_277",
+          "instructions": 118,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_54",
+          "instructions": 453,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_273",
+          "instructions": 4340,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_57",
+          "instructions": 5038,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_276",
+          "instructions": 1488,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_1",
+          "instructions": 12753,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_28",
+          "instructions": 3518,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_247",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_4",
+          "instructions": 5604,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_223",
+          "instructions": 7626,
+          "minimum_direct_r10_offset": -296
+        },
+        {
+          "name": "__region_31",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_250",
+          "instructions": 149,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_0",
+          "instructions": 11563,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_219",
+          "instructions": 150,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_27",
+          "instructions": 384,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_246",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_3",
+          "instructions": 5049,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_222",
+          "instructions": 1651,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_30",
+          "instructions": 8978,
+          "minimum_direct_r10_offset": -24
+        },
+        {
+          "name": "__region_249",
+          "instructions": 138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_116",
+          "instructions": 2950,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_335",
+          "instructions": 3158,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_171",
+          "instructions": 1680,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_390",
+          "instructions": 149,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_115",
+          "instructions": 42,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_334",
+          "instructions": 49,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_170",
+          "instructions": 157,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_389",
+          "instructions": 138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_61",
+          "instructions": 2090,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_280",
+          "instructions": 153,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_60",
+          "instructions": 2121,
+          "minimum_direct_r10_offset": -248
+        },
+        {
+          "name": "__region_279",
+          "instructions": 5644,
+          "minimum_direct_r10_offset": -256
+        },
+        {
+          "name": "__region_123",
+          "instructions": 364,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_342",
+          "instructions": 1778,
+          "minimum_direct_r10_offset": -232
+        },
+        {
+          "name": "__region_178",
+          "instructions": 157,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_397",
+          "instructions": 866,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_130",
+          "instructions": 54,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_349",
+          "instructions": 138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_185",
+          "instructions": 48,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_404",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_122",
+          "instructions": 700,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_177",
+          "instructions": 1680,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_396",
+          "instructions": 1837,
+          "minimum_direct_r10_offset": -232
+        },
+        {
+          "name": "__region_129",
+          "instructions": 111,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_348",
+          "instructions": 25,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_184",
+          "instructions": 3656,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_68",
+          "instructions": 453,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_287",
+          "instructions": 20,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_75",
+          "instructions": 13370,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_294",
+          "instructions": 138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_7",
+          "instructions": 5604,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_226",
+          "instructions": 2639,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_34",
+          "instructions": 4653,
+          "minimum_direct_r10_offset": -32
+        },
+        {
+          "name": "__region_253",
+          "instructions": 138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_137",
+          "instructions": 3899,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_192",
+          "instructions": 99,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_411",
+          "instructions": 1778,
+          "minimum_direct_r10_offset": -232
+        },
+        {
+          "name": "__region_151",
+          "instructions": 164,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_370",
+          "instructions": 149,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_206",
+          "instructions": 1442,
+          "minimum_direct_r10_offset": -288
+        },
+        {
+          "name": "__region_425",
+          "instructions": 414,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_144",
+          "instructions": 155,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_363",
+          "instructions": 25,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_199",
+          "instructions": 3216,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_418",
+          "instructions": 3114,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_158",
+          "instructions": 1680,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_377",
+          "instructions": 1778,
+          "minimum_direct_r10_offset": -232
+        },
+        {
+          "name": "__region_213",
+          "instructions": 105,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_432",
+          "instructions": 1188,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_67",
+          "instructions": 5038,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_286",
+          "instructions": 843,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_74",
+          "instructions": 51,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_293",
+          "instructions": 23,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_6",
+          "instructions": 5049,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_225",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_33",
+          "instructions": 1817,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_252",
+          "instructions": 799,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_136",
+          "instructions": 164,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_355",
+          "instructions": 149,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_191",
+          "instructions": 437,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_410",
+          "instructions": 2526,
+          "minimum_direct_r10_offset": -240
+        },
+        {
+          "name": "__region_150",
+          "instructions": 155,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_369",
+          "instructions": 138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_205",
+          "instructions": 56,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_424",
+          "instructions": 408,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_143",
+          "instructions": 1680,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_362",
+          "instructions": 1778,
+          "minimum_direct_r10_offset": -232
+        },
+        {
+          "name": "__region_198",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_417",
+          "instructions": 17,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_157",
+          "instructions": 164,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_212",
+          "instructions": 99,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_431",
+          "instructions": 4174,
+          "minimum_direct_r10_offset": -264
+        },
+        {
+          "name": "__region_82",
+          "instructions": 1681,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_315",
+          "instructions": 149,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_89",
+          "instructions": 42,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_308",
+          "instructions": 23,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_103",
+          "instructions": 119,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_322",
+          "instructions": 7,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_81",
+          "instructions": 19,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_300",
+          "instructions": 149,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_95",
+          "instructions": 5367,
+          "minimum_direct_r10_offset": -264
+        },
+        {
+          "name": "__region_314",
+          "instructions": 138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_88",
+          "instructions": 2826,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_307",
+          "instructions": 1778,
+          "minimum_direct_r10_offset": -232
+        },
+        {
+          "name": "__region_102",
+          "instructions": 136,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_14",
+          "instructions": 3949,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_233",
+          "instructions": 1488,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_41",
+          "instructions": 1788,
+          "minimum_direct_r10_offset": -272
+        },
+        {
+          "name": "__region_260",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_21",
+          "instructions": 13867,
+          "minimum_direct_r10_offset": -48
+        },
+        {
+          "name": "__region_240",
+          "instructions": 59,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_267",
+          "instructions": 824,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_13",
+          "instructions": 18418,
+          "minimum_direct_r10_offset": -280
+        },
+        {
+          "name": "__region_232",
+          "instructions": 824,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_40",
+          "instructions": 1981,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_259",
+          "instructions": 7,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_20",
+          "instructions": 1111,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_239",
+          "instructions": 457,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_47",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_266",
+          "instructions": 1648,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "trusted_x86_x86_sim_xdp",
+          "instructions": 2811,
+          "minimum_direct_r10_offset": -1672
+        }
+      ],
+      "minimum_direct_r10_offset": -1672,
+      "state_struct_bytes": [
+        1672
+      ],
+      "commands": [
+        {
+          "command": [
+            "/var/tmp/kprog-tmp/A/forwarding-scoped-coordinates/source/kprog/stock-path/bin/clang",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-E",
+            "-P",
+            "/var/tmp/kprog-tmp/A/region-spike/100/original.bpf.c"
+          ],
+          "returncode": 0,
+          "elapsed_seconds": 19.8988558226265
+        },
+        {
+          "command": [
+            "python3",
+            "/var/tmp/kprog-tmp/A/region-spike/harness.py",
+            "/var/tmp/kprog-tmp/A/region-spike/100/expanded.c",
+            "/var/tmp/kprog-tmp/A/region-spike/100/regions.c",
+            "--report",
+            "/var/tmp/kprog-tmp/A/region-spike/100/layout.json"
+          ],
+          "returncode": 0,
+          "elapsed_seconds": 31.329185049049556
+        },
+        {
+          "command": [
+            "/var/tmp/kprog-tmp/A/forwarding-scoped-coordinates/source/kprog/stock-path/bin/clang",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-c",
+            "/var/tmp/kprog-tmp/A/region-spike/100/regions.c",
+            "-o",
+            "/var/tmp/kprog-tmp/A/region-spike/100/regions.o"
+          ],
+          "returncode": 0,
+          "elapsed_seconds": 179.42484622029588
+        }
+      ]
+    },
+    {
+      "program": 102,
+      "header_head": "05b80424b198e5abf35ece943cbce95a00f53656",
+      "harness_head": "25e013842e847508d264cbac5d9a2d9904740e60",
+      "native_executions": 0,
+      "input_sha256": "368893350383f94223f2366a52e467ad59ca002f4e65351f6702cc786e18890d",
+      "preprocess_returncode": 0,
+      "outline_returncode": 0,
+      "layout": {
+        "kind": "compiler_region_spike",
+        "entry": "trusted_x86_x86_sim_xdp",
+        "state_fields": [
+          "__x86_sim_abi",
+          "__x86_sim_skb_ctx",
+          "__x86_sim_abi_kind",
+          "__x86_stack_value_state_0",
+          "__x86_stack_value_ptr_0",
+          "__x86_stack_scalar_value_0",
+          "__x86_stack_value_state_1",
+          "__x86_stack_value_ptr_1",
+          "__x86_stack_scalar_value_1",
+          "__x86_stack_value_state_2",
+          "__x86_stack_value_ptr_2",
+          "__x86_stack_scalar_value_2",
+          "__x86_stack_value_state_3",
+          "__x86_stack_value_ptr_3",
+          "__x86_stack_scalar_value_3",
+          "__x86_stack_value_state_4",
+          "__x86_stack_value_ptr_4",
+          "__x86_stack_scalar_value_4",
+          "__x86_stack_value_state_5",
+          "__x86_stack_value_ptr_5",
+          "__x86_stack_scalar_value_5",
+          "__x86_stack_value_state_6",
+          "__x86_stack_value_ptr_6",
+          "__x86_stack_scalar_value_6",
+          "__x86_stack_value_state_7",
+          "__x86_stack_value_ptr_7",
+          "__x86_stack_scalar_value_7",
+          "__x86_stack_value_state_8",
+          "__x86_stack_value_ptr_8",
+          "__x86_stack_scalar_value_8",
+          "__x86_stack_value_state_9",
+          "__x86_stack_value_ptr_9",
+          "__x86_stack_scalar_value_9",
+          "__x86_stack_value_state_10",
+          "__x86_stack_value_ptr_10",
+          "__x86_stack_scalar_value_10",
+          "__x86_stack_value_state_11",
+          "__x86_stack_value_ptr_11",
+          "__x86_stack_scalar_value_11",
+          "__x86_stack_value_state_12",
+          "__x86_stack_value_ptr_12",
+          "__x86_stack_scalar_value_12",
+          "__x86_stack_value_state_13",
+          "__x86_stack_value_ptr_13",
+          "__x86_stack_scalar_value_13",
+          "__x86_stack_value_state_14",
+          "__x86_stack_value_ptr_14",
+          "__x86_stack_scalar_value_14",
+          "__x86_stack_value_state_15",
+          "__x86_stack_value_ptr_15",
+          "__x86_stack_scalar_value_15",
+          "__x86_stack_value_state_16",
+          "__x86_stack_value_ptr_16",
+          "__x86_stack_scalar_value_16",
+          "__x86_stack_value_state_17",
+          "__x86_stack_value_ptr_17",
+          "__x86_stack_scalar_value_17",
+          "__x86_stack_value_state_18",
+          "__x86_stack_value_ptr_18",
+          "__x86_stack_scalar_value_18",
+          "__x86_stack_value_state_19",
+          "__x86_stack_value_ptr_19",
+          "__x86_stack_scalar_value_19",
+          "__x86_stack_value_state_20",
+          "__x86_stack_value_ptr_20",
+          "__x86_stack_scalar_value_20",
+          "__x86_stack_value_state_21",
+          "__x86_stack_value_ptr_21",
+          "__x86_stack_scalar_value_21",
+          "__x86_stack_value_state_22",
+          "__x86_stack_value_ptr_22",
+          "__x86_stack_scalar_value_22",
+          "__x86_stack_value_state_23",
+          "__x86_stack_value_ptr_23",
+          "__x86_stack_scalar_value_23",
+          "__x86_stack_value_state_24",
+          "__x86_stack_value_ptr_24",
+          "__x86_stack_scalar_value_24",
+          "__x86_stack_value_state_25",
+          "__x86_stack_value_ptr_25",
+          "__x86_stack_scalar_value_25",
+          "__x86_stack_value_state_26",
+          "__x86_stack_value_ptr_26",
+          "__x86_stack_scalar_value_26",
+          "__x86_stack_value_state_27",
+          "__x86_stack_value_ptr_27",
+          "__x86_stack_scalar_value_27",
+          "__x86_stack_value_state_28",
+          "__x86_stack_value_ptr_28",
+          "__x86_stack_scalar_value_28",
+          "__x86_stack_value_state_29",
+          "__x86_stack_value_ptr_29",
+          "__x86_stack_scalar_value_29",
+          "__x86_stack_value_state_30",
+          "__x86_stack_value_ptr_30",
+          "__x86_stack_scalar_value_30",
+          "__x86_stack_value_state_31",
+          "__x86_stack_value_ptr_31",
+          "__x86_stack_scalar_value_31",
+          "__x86_stack_value_state_32",
+          "__x86_stack_value_ptr_32",
+          "__x86_stack_scalar_value_32",
+          "__x86_stack_value_state_33",
+          "__x86_stack_value_ptr_33",
+          "__x86_stack_scalar_value_33",
+          "__x86_stack_value_state_34",
+          "__x86_stack_value_ptr_34",
+          "__x86_stack_scalar_value_34",
+          "__x86_stack_value_state_35",
+          "__x86_stack_value_ptr_35",
+          "__x86_stack_scalar_value_35",
+          "__x86_stack_value_state_36",
+          "__x86_stack_value_ptr_36",
+          "__x86_stack_scalar_value_36",
+          "__x86_stack_value_state_37",
+          "__x86_stack_value_ptr_37",
+          "__x86_stack_scalar_value_37",
+          "__x86_stack_value_state_38",
+          "__x86_stack_value_ptr_38",
+          "__x86_stack_scalar_value_38",
+          "__x86_stack_value_state_39",
+          "__x86_stack_value_ptr_39",
+          "__x86_stack_scalar_value_39",
+          "__x86_stack_value_state_40",
+          "__x86_stack_value_ptr_40",
+          "__x86_stack_scalar_value_40",
+          "__x86_stack_value_state_41",
+          "__x86_stack_value_ptr_41",
+          "__x86_stack_scalar_value_41",
+          "__x86_stack_value_state_42",
+          "__x86_stack_value_ptr_42",
+          "__x86_stack_scalar_value_42",
+          "__x86_stack_value_state_43",
+          "__x86_stack_value_ptr_43",
+          "__x86_stack_scalar_value_43",
+          "__x86_stack_value_state_44",
+          "__x86_stack_value_ptr_44",
+          "__x86_stack_scalar_value_44",
+          "__x86_stack_value_state_45",
+          "__x86_stack_value_ptr_45",
+          "__x86_stack_scalar_value_45",
+          "__x86_stack_value_state_46",
+          "__x86_stack_value_ptr_46",
+          "__x86_stack_scalar_value_46",
+          "__x86_stack_value_state_47",
+          "__x86_stack_value_ptr_47",
+          "__x86_stack_scalar_value_47",
+          "__x86_stack_value_state_48",
+          "__x86_stack_value_ptr_48",
+          "__x86_stack_scalar_value_48",
+          "__x86_stack_value_state_49",
+          "__x86_stack_value_ptr_49",
+          "__x86_stack_scalar_value_49",
+          "__x86_stack_value_state_50",
+          "__x86_stack_value_ptr_50",
+          "__x86_stack_scalar_value_50",
+          "__x86_stack_value_state_51",
+          "__x86_stack_value_ptr_51",
+          "__x86_stack_scalar_value_51",
+          "__x86_stack_value_state_52",
+          "__x86_stack_value_ptr_52",
+          "__x86_stack_scalar_value_52",
+          "__x86_stack_value_state_53",
+          "__x86_stack_value_ptr_53",
+          "__x86_stack_scalar_value_53",
+          "__x86_stack_value_state_54",
+          "__x86_stack_value_ptr_54",
+          "__x86_stack_scalar_value_54",
+          "__x86_stack_value_state_55",
+          "__x86_stack_value_ptr_55",
+          "__x86_stack_scalar_value_55",
+          "__x86_stack_value_state_56",
+          "__x86_stack_value_ptr_56",
+          "__x86_stack_scalar_value_56",
+          "__x86_stack_value_state_57",
+          "__x86_stack_value_ptr_57",
+          "__x86_stack_scalar_value_57",
+          "__x86_stack_value_state_58",
+          "__x86_stack_value_ptr_58",
+          "__x86_stack_scalar_value_58",
+          "__x86_stack_value_state_59",
+          "__x86_stack_value_ptr_59",
+          "__x86_stack_scalar_value_59",
+          "__x86_stack_value_state_60",
+          "__x86_stack_value_ptr_60",
+          "__x86_stack_scalar_value_60",
+          "__x86_stack_value_state_61",
+          "__x86_stack_value_ptr_61",
+          "__x86_stack_scalar_value_61",
+          "__x86_stack_value_state_62",
+          "__x86_stack_value_ptr_62",
+          "__x86_stack_scalar_value_62",
+          "__x86_sim_is_xdp",
+          "__x86_sim_helper_ctx",
+          "__x86_sim_helper_abi_base",
+          "__x86_rax",
+          "__x86_rax_tag",
+          "__x86_rcx",
+          "__x86_rcx_tag",
+          "__x86_rdx",
+          "__x86_rdx_tag",
+          "__x86_rbx",
+          "__x86_rbx_tag",
+          "__x86_rsp",
+          "__x86_rsp_tag",
+          "__x86_rbp",
+          "__x86_rbp_tag",
+          "__x86_rsi",
+          "__x86_rsi_tag",
+          "__x86_rdi",
+          "__x86_rdi_tag",
+          "__x86_r8",
+          "__x86_r8_tag",
+          "__x86_r9",
+          "__x86_r9_tag",
+          "__x86_r10",
+          "__x86_r10_tag",
+          "__x86_r11",
+          "__x86_r11_tag",
+          "__x86_r12",
+          "__x86_r12_tag",
+          "__x86_r13",
+          "__x86_r13_tag",
+          "__x86_r14",
+          "__x86_r14_tag",
+          "__x86_r15",
+          "__x86_r15_tag",
+          "__x86_entry_rbx",
+          "__x86_entry_rbp",
+          "__x86_entry_r12",
+          "__x86_entry_r13",
+          "__x86_entry_r14",
+          "__x86_entry_r15",
+          "__x86_native_stack_base",
+          "__x86_cf",
+          "__x86_zf",
+          "__x86_sf",
+          "__x86_of",
+          "__x86_pf",
+          "__x86_af",
+          "__x86_xmm0_lo",
+          "__x86_xmm0_hi",
+          "__x86_sim_ret_addr",
+          "__x86_stack_mem"
+        ],
+        "basic_blocks": 631,
+        "explicit_edges": 915,
+        "value_returns": 2,
+        "original_instruction_labels": 3681,
+        "native_executions": 0,
+        "input_sha256": "2b4ac87c839fae0e047f268f9046bab098a8fd81688942f2a4bc5b5b7cc79356",
+        "output_sha256": "6ee451a598abf79aa64e5e8c34c1fbd765c274d1c852a009fde66bafb624eb40"
+      },
+      "compile_returncode": 0,
+      "compile_seconds": 436.81564819067717,
+      "object_sha256": "0eaa90ee0562103b5621ef8c9df6d609f3895955ae256a9d5246fd4b60c5a9d7",
+      "functions": [
+        {
+          "name": "__region_238",
+          "instructions": 4126,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_1",
+          "instructions": 250,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_316",
+          "instructions": 1103,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_158",
+          "instructions": 1208,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_474",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_237",
+          "instructions": 12625,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_79",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_395",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_553",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_197",
+          "instructions": 1251,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_276",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_118",
+          "instructions": 3970,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_355",
+          "instructions": 6800,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_513",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_434",
+          "instructions": 121,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_592",
+          "instructions": 39,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_40",
+          "instructions": 1252,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_177",
+          "instructions": 2805,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_256",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_98",
+          "instructions": 14861,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_217",
+          "instructions": 9154,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_296",
+          "instructions": 3,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_335",
+          "instructions": 4609,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_493",
+          "instructions": 3,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_414",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_572",
+          "instructions": 29118,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_138",
+          "instructions": 14919,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_375",
+          "instructions": 7,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_533",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_454",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_612",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_20",
+          "instructions": 160,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_59",
+          "instructions": 3,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_187",
+          "instructions": 49,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_266",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_108",
+          "instructions": 9154,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_207",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_286",
+          "instructions": 5216,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_227",
+          "instructions": 4993,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_306",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_345",
+          "instructions": 1327,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_503",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_424",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_582",
+          "instructions": 2733,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_167",
+          "instructions": 4372,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_246",
+          "instructions": 1799,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_128",
+          "instructions": 16126,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_148",
+          "instructions": 38350,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_88",
+          "instructions": 86,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_365",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_523",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_444",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_602",
+          "instructions": 70,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_385",
+          "instructions": 3228,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_543",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_464",
+          "instructions": 121,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_622",
+          "instructions": 4897,
+          "minimum_direct_r10_offset": -536
+        },
+        {
+          "name": "__region_30",
+          "instructions": 2791,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_69",
+          "instructions": 49,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_325",
+          "instructions": 8159,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_483",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_404",
+          "instructions": 121,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_562",
+          "instructions": 29117,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_10",
+          "instructions": 7310,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_162",
+          "instructions": 58,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_241",
+          "instructions": 38,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_83",
+          "instructions": 3,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_320",
+          "instructions": 6801,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_478",
+          "instructions": 1663,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_399",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_557",
+          "instructions": 9055,
+          "minimum_direct_r10_offset": -520
+        },
+        {
+          "name": "__region_5",
+          "instructions": 30131,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_44",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_182",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_261",
+          "instructions": 21070,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_192",
+          "instructions": 53,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_271",
+          "instructions": 2712,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_103",
+          "instructions": 3293,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_113",
+          "instructions": 6138,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_202",
+          "instructions": 55,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_281",
+          "instructions": 5540,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_222",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_301",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_212",
+          "instructions": 6742,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_291",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_232",
+          "instructions": 4873,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_311",
+          "instructions": 7381,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_340",
+          "instructions": 4053,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_498",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_419",
+          "instructions": 121,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_577",
+          "instructions": 39,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_350",
+          "instructions": 2870,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_508",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_429",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_587",
+          "instructions": 126,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_172",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_251",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_123",
+          "instructions": 20602,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_143",
+          "instructions": 461,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_133",
+          "instructions": 4873,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_153",
+          "instructions": 2415,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_93",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_360",
+          "instructions": 1276,
+          "minimum_direct_r10_offset": -496
+        },
+        {
+          "name": "__region_518",
+          "instructions": 44,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_439",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_597",
+          "instructions": 2733,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_380",
+          "instructions": 38,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_538",
+          "instructions": 47,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_459",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_617",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_370",
+          "instructions": 1276,
+          "minimum_direct_r10_offset": -496
+        },
+        {
+          "name": "__region_528",
+          "instructions": 37,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_449",
+          "instructions": 121,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_607",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_390",
+          "instructions": 20,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_548",
+          "instructions": 24184,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_469",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_627",
+          "instructions": 2902,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_25",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_35",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_74",
+          "instructions": 3,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_330",
+          "instructions": 17956,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_488",
+          "instructions": 5380,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_409",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_567",
+          "instructions": 39,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_15",
+          "instructions": 9248,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_165",
+          "instructions": 2918,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_244",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_86",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_323",
+          "instructions": 42,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_481",
+          "instructions": 20,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_402",
+          "instructions": 121,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_560",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_8",
+          "instructions": 1965,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_47",
+          "instructions": 49,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_180",
+          "instructions": 1208,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_259",
+          "instructions": 77149,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_190",
+          "instructions": 2427,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_269",
+          "instructions": 38,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_264",
+          "instructions": 26096,
+          "minimum_direct_r10_offset": -536
+        },
+        {
+          "name": "__region_195",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_274",
+          "instructions": 21933,
+          "minimum_direct_r10_offset": -520
+        },
+        {
+          "name": "__region_101",
+          "instructions": 6633,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_111",
+          "instructions": 4213,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_106",
+          "instructions": 1212,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_116",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_200",
+          "instructions": 3278,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_279",
+          "instructions": 1278,
+          "minimum_direct_r10_offset": -504
+        },
+        {
+          "name": "__region_220",
+          "instructions": 4097,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_299",
+          "instructions": 16352,
+          "minimum_direct_r10_offset": -32
+        },
+        {
+          "name": "__region_210",
+          "instructions": 1103,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_289",
+          "instructions": 662,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_230",
+          "instructions": 9066,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_309",
+          "instructions": 6770,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_205",
+          "instructions": 10494,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_284",
+          "instructions": 4830,
+          "minimum_direct_r10_offset": -504
+        },
+        {
+          "name": "__region_225",
+          "instructions": 2459,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_304",
+          "instructions": 7051,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_215",
+          "instructions": 1223,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_294",
+          "instructions": 5546,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_235",
+          "instructions": 2609,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_314",
+          "instructions": 11,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_338",
+          "instructions": 17956,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_496",
+          "instructions": 53,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_417",
+          "instructions": 1663,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_575",
+          "instructions": 82,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_348",
+          "instructions": 2802,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_506",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_427",
+          "instructions": 1278,
+          "minimum_direct_r10_offset": -504
+        },
+        {
+          "name": "__region_585",
+          "instructions": 2733,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_343",
+          "instructions": 4609,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_501",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_422",
+          "instructions": 14056,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_580",
+          "instructions": 39,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_353",
+          "instructions": 10676,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_511",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_432",
+          "instructions": 1663,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_590",
+          "instructions": 126,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_170",
+          "instructions": 3668,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_249",
+          "instructions": 15982,
+          "minimum_direct_r10_offset": -520
+        },
+        {
+          "name": "__region_175",
+          "instructions": 45961,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_254",
+          "instructions": 1337,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_141",
+          "instructions": 49,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_131",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_151",
+          "instructions": 1206,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_126",
+          "instructions": 10947,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_146",
+          "instructions": 67,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_136",
+          "instructions": 25,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_156",
+          "instructions": 1208,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_91",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_96",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_358",
+          "instructions": 5660,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_516",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_437",
+          "instructions": 14056,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_595",
+          "instructions": 39,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_378",
+          "instructions": 1330,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_536",
+          "instructions": 691,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_457",
+          "instructions": 1278,
+          "minimum_direct_r10_offset": -504
+        },
+        {
+          "name": "__region_615",
+          "instructions": 37,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_368",
+          "instructions": 1278,
+          "minimum_direct_r10_offset": -504
+        },
+        {
+          "name": "__region_526",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_447",
+          "instructions": 1663,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_605",
+          "instructions": 42,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_388",
+          "instructions": 1544,
+          "minimum_direct_r10_offset": -520
+        },
+        {
+          "name": "__region_546",
+          "instructions": 10459,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_467",
+          "instructions": 14056,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_363",
+          "instructions": 4434,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_521",
+          "instructions": 44,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_442",
+          "instructions": 1278,
+          "minimum_direct_r10_offset": -504
+        },
+        {
+          "name": "__region_600",
+          "instructions": 2772,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_383",
+          "instructions": 2582,
+          "minimum_direct_r10_offset": -496
+        },
+        {
+          "name": "__region_541",
+          "instructions": 139,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_462",
+          "instructions": 1663,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_620",
+          "instructions": 13702,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_373",
+          "instructions": 1216,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_531",
+          "instructions": 37,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_452",
+          "instructions": 14056,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_610",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_393",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_551",
+          "instructions": 622,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_472",
+          "instructions": 1278,
+          "minimum_direct_r10_offset": -504
+        },
+        {
+          "name": "__region_630",
+          "instructions": 55,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_23",
+          "instructions": 3,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_62",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_33",
+          "instructions": 49,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_72",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_28",
+          "instructions": 103,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_67",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_38",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_328",
+          "instructions": 4053,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_486",
+          "instructions": 48,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_407",
+          "instructions": 14056,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_565",
+          "instructions": 11830,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_333",
+          "instructions": 8159,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_491",
+          "instructions": 6372,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_412",
+          "instructions": 1278,
+          "minimum_direct_r10_offset": -504
+        },
+        {
+          "name": "__region_570",
+          "instructions": 2857,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_13",
+          "instructions": 12082,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_52",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_18",
+          "instructions": 6830,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_57",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_160",
+          "instructions": 35,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_239",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_81",
+          "instructions": 3,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_318",
+          "instructions": 1414,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_476",
+          "instructions": 1278,
+          "minimum_direct_r10_offset": -504
+        },
+        {
+          "name": "__region_397",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_555",
+          "instructions": 3970,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_3",
+          "instructions": 2888,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_42",
+          "instructions": 49,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_157",
+          "instructions": 1206,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_236",
+          "instructions": 18784,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_159",
+          "instructions": 39,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_78",
+          "instructions": 3,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_80",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_315",
+          "instructions": 1097,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_473",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_394",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_552",
+          "instructions": 5698,
+          "minimum_direct_r10_offset": -536
+        },
+        {
+          "name": "__region_317",
+          "instructions": 1103,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_475",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_396",
+          "instructions": 1278,
+          "minimum_direct_r10_offset": -504
+        },
+        {
+          "name": "__region_554",
+          "instructions": 58,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_0",
+          "instructions": 22885,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_2",
+          "instructions": 3358,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_41",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_161",
+          "instructions": 2566,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_240",
+          "instructions": 14507,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_163",
+          "instructions": 1634,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_242",
+          "instructions": 2526,
+          "minimum_direct_r10_offset": -496
+        },
+        {
+          "name": "__region_82",
+          "instructions": 3,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_164",
+          "instructions": 3358,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_243",
+          "instructions": 31259,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_84",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_319",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_477",
+          "instructions": 1663,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_398",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_556",
+          "instructions": 8025,
+          "minimum_direct_r10_offset": -520
+        },
+        {
+          "name": "__region_85",
+          "instructions": 3,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_321",
+          "instructions": 8154,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_479",
+          "instructions": 121,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_400",
+          "instructions": 1278,
+          "minimum_direct_r10_offset": -504
+        },
+        {
+          "name": "__region_558",
+          "instructions": 1930,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_322",
+          "instructions": 17309,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_480",
+          "instructions": 1847,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_401",
+          "instructions": 1663,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_559",
+          "instructions": 16880,
+          "minimum_direct_r10_offset": -520
+        },
+        {
+          "name": "__region_4",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_43",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_6",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_7",
+          "instructions": 25,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_46",
+          "instructions": 47,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_176",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_255",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_186",
+          "instructions": 49,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_265",
+          "instructions": 39643,
+          "minimum_direct_r10_offset": -520
+        },
+        {
+          "name": "__region_181",
+          "instructions": 47,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_260",
+          "instructions": 16761,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_191",
+          "instructions": 2459,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_270",
+          "instructions": 2526,
+          "minimum_direct_r10_offset": -496
+        },
+        {
+          "name": "__region_178",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_257",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_188",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_267",
+          "instructions": 3,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_183",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_262",
+          "instructions": 13640,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_193",
+          "instructions": 6759,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_272",
+          "instructions": 1250,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_97",
+          "instructions": 9,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_107",
+          "instructions": 3399,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_102",
+          "instructions": 6830,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_112",
+          "instructions": 592,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_179",
+          "instructions": 2415,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_258",
+          "instructions": 7,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_189",
+          "instructions": 10767,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_268",
+          "instructions": 16207,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_184",
+          "instructions": 2459,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_263",
+          "instructions": 2415,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_194",
+          "instructions": 1208,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_273",
+          "instructions": 14299,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_99",
+          "instructions": 20,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_109",
+          "instructions": 75921,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_104",
+          "instructions": 38709,
+          "minimum_direct_r10_offset": -16
+        },
+        {
+          "name": "__region_114",
+          "instructions": 6150,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_196",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_275",
+          "instructions": 155,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_216",
+          "instructions": 1223,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_295",
+          "instructions": 4167,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_206",
+          "instructions": 2324,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_285",
+          "instructions": 2870,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_226",
+          "instructions": 39658,
+          "minimum_direct_r10_offset": -520
+        },
+        {
+          "name": "__region_305",
+          "instructions": 2417,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_201",
+          "instructions": 4043,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_280",
+          "instructions": 2815,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_221",
+          "instructions": 44750,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_300",
+          "instructions": 2927,
+          "minimum_direct_r10_offset": -520
+        },
+        {
+          "name": "__region_211",
+          "instructions": 1223,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_290",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_231",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_310",
+          "instructions": 5540,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_334",
+          "instructions": 17956,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_492",
+          "instructions": 16207,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_413",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_571",
+          "instructions": 3179,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_344",
+          "instructions": 3936,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_502",
+          "instructions": 44,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_423",
+          "instructions": 155,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_581",
+          "instructions": 126,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_339",
+          "instructions": 4609,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_497",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_418",
+          "instructions": 1663,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_576",
+          "instructions": 2733,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_349",
+          "instructions": 6897,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_507",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_428",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_586",
+          "instructions": 39,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_100",
+          "instructions": 8082,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_110",
+          "instructions": 7,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_105",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_115",
+          "instructions": 15208,
+          "minimum_direct_r10_offset": -24
+        },
+        {
+          "name": "__region_166",
+          "instructions": 167,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_245",
+          "instructions": 35461,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_171",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_250",
+          "instructions": 155,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_198",
+          "instructions": 56145,
+          "minimum_direct_r10_offset": -520
+        },
+        {
+          "name": "__region_277",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_218",
+          "instructions": 6874,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_297",
+          "instructions": 1208,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_208",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_287",
+          "instructions": 37399,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_228",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_307",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_203",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_282",
+          "instructions": 17092,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_223",
+          "instructions": 6768,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_302",
+          "instructions": 13,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_213",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_292",
+          "instructions": 1104,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_233",
+          "instructions": 32419,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_312",
+          "instructions": 12266,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_336",
+          "instructions": 4053,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_494",
+          "instructions": 480,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_415",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_573",
+          "instructions": 21852,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_346",
+          "instructions": 9903,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_504",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_425",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_583",
+          "instructions": 39,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_341",
+          "instructions": 8159,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_499",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_420",
+          "instructions": 1847,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_578",
+          "instructions": 126,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_351",
+          "instructions": 4009,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_509",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_430",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_588",
+          "instructions": 2733,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_168",
+          "instructions": 4046,
+          "minimum_direct_r10_offset": -496
+        },
+        {
+          "name": "__region_247",
+          "instructions": 5578,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_173",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_252",
+          "instructions": 11917,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_117",
+          "instructions": 58,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_137",
+          "instructions": 10187,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_127",
+          "instructions": 3358,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_147",
+          "instructions": 1212,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_122",
+          "instructions": 7419,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_142",
+          "instructions": 1223,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_132",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_152",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_199",
+          "instructions": 2847,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_278",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_219",
+          "instructions": 2458,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_298",
+          "instructions": 9209,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_209",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_288",
+          "instructions": 10676,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_229",
+          "instructions": 4873,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_308",
+          "instructions": 7,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_204",
+          "instructions": 49,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_283",
+          "instructions": 13716,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_224",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_303",
+          "instructions": 4099,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_214",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_293",
+          "instructions": 4060,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_234",
+          "instructions": 1251,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_313",
+          "instructions": 13714,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_337",
+          "instructions": 8159,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_495",
+          "instructions": 47,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_416",
+          "instructions": 1278,
+          "minimum_direct_r10_offset": -504
+        },
+        {
+          "name": "__region_574",
+          "instructions": 39,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_347",
+          "instructions": 3359,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_505",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_426",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_584",
+          "instructions": 126,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_342",
+          "instructions": 17956,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_500",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_421",
+          "instructions": 20,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_579",
+          "instructions": 2733,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_352",
+          "instructions": 42521,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_510",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_431",
+          "instructions": 1278,
+          "minimum_direct_r10_offset": -504
+        },
+        {
+          "name": "__region_589",
+          "instructions": 39,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_87",
+          "instructions": 10122,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_92",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_169",
+          "instructions": 25388,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_248",
+          "instructions": 2852,
+          "minimum_direct_r10_offset": -536
+        },
+        {
+          "name": "__region_174",
+          "instructions": 9287,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_253",
+          "instructions": 4272,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_119",
+          "instructions": 9872,
+          "minimum_direct_r10_offset": -24
+        },
+        {
+          "name": "__region_139",
+          "instructions": 2464,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_129",
+          "instructions": 47,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_149",
+          "instructions": 1208,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_144",
+          "instructions": 2470,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_134",
+          "instructions": 4147,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_154",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_89",
+          "instructions": 10742,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_94",
+          "instructions": 9684,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_354",
+          "instructions": 662,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_512",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_433",
+          "instructions": 1663,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_591",
+          "instructions": 2733,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_374",
+          "instructions": 123,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_532",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_453",
+          "instructions": 155,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_611",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_364",
+          "instructions": 1274,
+          "minimum_direct_r10_offset": -496
+        },
+        {
+          "name": "__region_522",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_443",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_601",
+          "instructions": 39,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_384",
+          "instructions": 6855,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_542",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_463",
+          "instructions": 1663,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_621",
+          "instructions": 5655,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_359",
+          "instructions": 3228,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_517",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_438",
+          "instructions": 155,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_596",
+          "instructions": 126,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_379",
+          "instructions": 10870,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_537",
+          "instructions": 3635,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_458",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_616",
+          "instructions": 37,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_369",
+          "instructions": 3342,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_527",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_448",
+          "instructions": 1663,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_606",
+          "instructions": 42,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_389",
+          "instructions": 1847,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_547",
+          "instructions": 3635,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_468",
+          "instructions": 155,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_626",
+          "instructions": 3,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_19",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_58",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_29",
+          "instructions": 3,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_24",
+          "instructions": 13577,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_63",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_34",
+          "instructions": 1256,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_73",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_120",
+          "instructions": 8153,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_140",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_130",
+          "instructions": 47,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_150",
+          "instructions": 1208,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_125",
+          "instructions": 2791,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_145",
+          "instructions": 1501,
+          "minimum_direct_r10_offset": -8
+        },
+        {
+          "name": "__region_135",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_155",
+          "instructions": 2415,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_324",
+          "instructions": 4053,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_482",
+          "instructions": 14015,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_403",
+          "instructions": 1663,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_561",
+          "instructions": 3965,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_329",
+          "instructions": 8159,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_487",
+          "instructions": 5380,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_408",
+          "instructions": 155,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_566",
+          "instructions": 32023,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_356",
+          "instructions": 5708,
+          "minimum_direct_r10_offset": -520
+        },
+        {
+          "name": "__region_514",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_435",
+          "instructions": 1847,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_593",
+          "instructions": 126,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_376",
+          "instructions": 7,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_534",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_455",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_613",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_366",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_524",
+          "instructions": 44,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_445",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_603",
+          "instructions": 3304,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_386",
+          "instructions": 1276,
+          "minimum_direct_r10_offset": -496
+        },
+        {
+          "name": "__region_544",
+          "instructions": 2703,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_465",
+          "instructions": 1847,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_623",
+          "instructions": 127,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_361",
+          "instructions": 9377,
+          "minimum_direct_r10_offset": -496
+        },
+        {
+          "name": "__region_519",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_440",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_598",
+          "instructions": 39,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_381",
+          "instructions": 6443,
+          "minimum_direct_r10_offset": -496
+        },
+        {
+          "name": "__region_539",
+          "instructions": 9650,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_460",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_618",
+          "instructions": 1236,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_371",
+          "instructions": 3342,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_529",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_450",
+          "instructions": 1847,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_608",
+          "instructions": 44,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_391",
+          "instructions": 14056,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_549",
+          "instructions": 651,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_470",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_628",
+          "instructions": 12,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_90",
+          "instructions": 31610,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_95",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_21",
+          "instructions": 21009,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_60",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_31",
+          "instructions": 2835,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_70",
+          "instructions": 3,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_26",
+          "instructions": 1347,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_65",
+          "instructions": 47,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_36",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_75",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_326",
+          "instructions": 17956,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_484",
+          "instructions": 10125,
+          "minimum_direct_r10_offset": -520
+        },
+        {
+          "name": "__region_405",
+          "instructions": 1847,
+          "minimum_direct_r10_offset": -528
+        },
+        {
+          "name": "__region_563",
+          "instructions": 22892,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_331",
+          "instructions": 4609,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_489",
+          "instructions": 5542,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_410",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_568",
+          "instructions": 3649,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_357",
+          "instructions": 2582,
+          "minimum_direct_r10_offset": -496
+        },
+        {
+          "name": "__region_515",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_436",
+          "instructions": 20,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_594",
+          "instructions": 2733,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_377",
+          "instructions": 7,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_535",
+          "instructions": 37,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_456",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_614",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_367",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_525",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_446",
+          "instructions": 1278,
+          "minimum_direct_r10_offset": -504
+        },
+        {
+          "name": "__region_604",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_387",
+          "instructions": 123,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_545",
+          "instructions": 2950,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_466",
+          "instructions": 20,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_624",
+          "instructions": 2902,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_362",
+          "instructions": 5662,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_520",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_441",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_599",
+          "instructions": 126,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_382",
+          "instructions": 1250,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_540",
+          "instructions": 9981,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_461",
+          "instructions": 1278,
+          "minimum_direct_r10_offset": -504
+        },
+        {
+          "name": "__region_619",
+          "instructions": 29121,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_372",
+          "instructions": 2561,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_530",
+          "instructions": 37,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_451",
+          "instructions": 20,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_609",
+          "instructions": 43,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_392",
+          "instructions": 155,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_550",
+          "instructions": 616,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_471",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_629",
+          "instructions": 21563,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_22",
+          "instructions": 7,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_61",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_32",
+          "instructions": 1208,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_71",
+          "instructions": 3,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_27",
+          "instructions": 9864,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_66",
+          "instructions": 1253,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_37",
+          "instructions": 49,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_76",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_327",
+          "instructions": 4609,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_485",
+          "instructions": 50,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_406",
+          "instructions": 20,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_564",
+          "instructions": 11940,
+          "minimum_direct_r10_offset": -512
+        },
+        {
+          "name": "__region_332",
+          "instructions": 4053,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_490",
+          "instructions": 2480,
+          "minimum_direct_r10_offset": -504
+        },
+        {
+          "name": "__region_411",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_569",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_9",
+          "instructions": 2851,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_48",
+          "instructions": 49,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_14",
+          "instructions": 2759,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_53",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_11",
+          "instructions": 40,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_50",
+          "instructions": 47,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_16",
+          "instructions": 5,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_55",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_12",
+          "instructions": 11480,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_51",
+          "instructions": 46,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_17",
+          "instructions": 2413,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "__region_56",
+          "instructions": 45,
+          "minimum_direct_r10_offset": 0
+        },
+        {
+          "name": "trusted_x86_x86_sim_xdp",
+          "instructions": 4191,
+          "minimum_direct_r10_offset": -2616
+        }
+      ],
+      "minimum_direct_r10_offset": -2616,
+      "state_struct_bytes": [
+        2616
+      ],
+      "commands": [
+        {
+          "command": [
+            "/var/tmp/kprog-tmp/A/forwarding-scoped-coordinates/source/kprog/stock-path/bin/clang",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-E",
+            "-P",
+            "/var/tmp/kprog-tmp/A/region-spike/102/original.bpf.c"
+          ],
+          "returncode": 0,
+          "elapsed_seconds": 32.89872732618824
+        },
+        {
+          "command": [
+            "python3",
+            "/var/tmp/kprog-tmp/A/region-spike/harness.py",
+            "/var/tmp/kprog-tmp/A/region-spike/102/expanded.c",
+            "/var/tmp/kprog-tmp/A/region-spike/102/regions.c",
+            "--report",
+            "/var/tmp/kprog-tmp/A/region-spike/102/layout.json"
+          ],
+          "returncode": 0,
+          "elapsed_seconds": 57.988302959594876
+        },
+        {
+          "command": [
+            "/var/tmp/kprog-tmp/A/forwarding-scoped-coordinates/source/kprog/stock-path/bin/clang",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-c",
+            "/var/tmp/kprog-tmp/A/region-spike/102/regions.c",
+            "-o",
+            "/var/tmp/kprog-tmp/A/region-spike/102/regions.o"
+          ],
+          "returncode": 0,
+          "elapsed_seconds": 436.81564819067717
+        }
+      ]
+    }
+  ]
+}
