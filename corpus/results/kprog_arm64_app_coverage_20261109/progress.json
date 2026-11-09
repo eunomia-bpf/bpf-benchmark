@@ -1,27 +1,27 @@
 {
-  "utc": "2026-11-09T06:47:38.974851+00:00",
-  "scope": "Live partial original catalog and paired-source Tracee, followed by the existing complete probe-read queue",
+  "utc": "2026-11-09T08:01:20.214312+00:00",
+  "scope": "Live original catalog/dynptr family and published complete application attempts",
   "catalog": {
     "expected_native_entries": 380,
     "original_annotation_rows": 1917,
     "counts": {
       "catalog_rows": 1917,
-      "attempted": 188,
-      "submitted": 188,
-      "installed": 8,
-      "verifier_rejected": 42,
-      "generation_failed": 138,
+      "attempted": 336,
+      "submitted": 336,
+      "installed": 43,
+      "verifier_rejected": 89,
+      "generation_failed": 204,
       "compilation_failed": 0,
       "resource_failed": 0,
       "transport_failed": 0,
       "load_failed": 0,
       "skipped": 0,
-      "failure": 44,
-      "failure_agrees": 42,
-      "failure_installed": 2,
-      "success": 6,
-      "success_agrees": 6,
-      "success_installed": 6
+      "failure": 83,
+      "failure_agrees": 80,
+      "failure_installed": 3,
+      "success": 49,
+      "success_agrees": 40,
+      "success_installed": 40
     },
     "load_only_native_executions": 0,
     "launch_publication": "907403f3e9ea7ca8740cc6dcd1229f4c287d0843",
@@ -40,12 +40,19 @@
         "expect": "failure",
         "stage": "installed",
         "request_id": 152
+      },
+      {
+        "file": "test_global_func14.c",
+        "program": "global_func14",
+        "expect": "failure",
+        "stage": "installed",
+        "request_id": 217
       }
     ]
   },
   "Tracee": {
     "launch_publication": "3f6a6b5e43c9f8d5e6cb4f49d810bc7bd1ef1fd1",
-    "phase": "baseline_start completed; existing BPF evidence collection active",
+    "phase": "original paired source terminal860e77f17; candidate terminal9d656adc1 baseline startup; source epochs retained",
     "evidence": {
       "files": 413,
       "bytes": 26066801,
@@ -141,5 +148,35 @@
     "b09aa12d5a4259408ed02f890cfae5f8f150113f"
   ],
   "workspace_released_bytes": 3840856214,
-  "runtime_admission_additions": 0
+  "runtime_admission_additions": 0,
+  "probe_read_applications": {
+    "bcc": "241f19a59:4generated4compiled1installed2verifier1loader",
+    "tracee": "9d656adc1:baseline startup SIGKILL,0service requests",
+    "frontier": "probe-read/lowering/applications/frontier/summary.json"
+  },
+  "dynptr": {
+    "source": "673776614",
+    "launch": "7f1f43eab",
+    "counts": {
+      "catalog_rows": 86,
+      "attempted": 58,
+      "submitted": 58,
+      "installed": 0,
+      "verifier_rejected": 36,
+      "generation_failed": 22,
+      "compilation_failed": 0,
+      "resource_failed": 0,
+      "transport_failed": 0,
+      "load_failed": 0,
+      "skipped": 0,
+      "failure": 34,
+      "failure_agrees": 34,
+      "failure_installed": 0,
+      "success": 2,
+      "success_agrees": 0,
+      "success_installed": 0
+    },
+    "raw_snapshot": "dynptr-access/qemu/progress.json.gz",
+    "load_only_native_executions": 0
+  }
 }
