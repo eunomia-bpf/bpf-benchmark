@@ -495,15 +495,15 @@ open Reference
 open Reference.X86 (ScalarWidth)
 open KProgFormal.X86SignedDivision
 
-/-- The captured source magnitude is split at the resolved native width.
-The concrete word-limb projection and C loop transport remain source interfaces. -/
+/-- The actual masked/negated high and low 64-bit source words feed the two
+fault tests and native-width quotient routes. C loop/source/compiler and AUX
+transport remain separate interfaces. -/
 def outcome (width : ScalarWidth) (s : Reference.X86.State) (operand : Reference.Word) : Option (Nat × Nat) :=
-  let magnitude := (sourcePairMagnitude (X86Scalar.handlerWidth width)
-    (Capture.highWord width s) (s.gpr 0)).toNat
+  let limbs := sourceMagnitudeLimbs (X86Scalar.handlerWidth width)
+    (Capture.highWord width s) (s.gpr 0)
   SignedArithmetic.guarded width
     (Bool.xor (Capture.sourceNegative width (Capture.highWord width s))
-      (Capture.sourceNegative width operand))
-    (magnitude / base width) (magnitude % base width)
+      (Capture.sourceNegative width operand)) limbs.1.toNat limbs.2.toNat
     (Capture.divisorMagnitude width operand).toNat
 
 theorem outcome_matches (width : ScalarWidth) (s : Reference.X86.State) (operand : Reference.Word) :
@@ -515,6 +515,13 @@ theorem outcome_matches (width : ScalarWidth) (s : Reference.X86.State) (operand
       if divisor.natAbs = 0 ∨ SignedArithmetic.limit width negative < quotient then none
       else some (quotient, dividend.natAbs % divisor.natAbs) := by
   unfold outcome
+  dsimp only
+  have projection := source_limbs_split (X86Scalar.handlerWidth width)
+    (Capture.highWord width s) (s.gpr 0)
+  have radix : 2 ^ x86WidthBitsSpec (X86Scalar.handlerWidth width) = base width := by
+    cases width <;> rfl
+  rw [radix] at projection
+  rw [projection.1, projection.2]
   have positive : 0 < base width := by cases width <;> decide
   rw [SignedArithmetic.guarded_matches _ _ _ _ _ (Nat.mod_lt _ positive)]
   unfold SignedArithmetic.flatResult

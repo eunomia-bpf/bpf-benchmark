@@ -325,19 +325,28 @@ theorem masked_limb_refines (width : X86Width) (value : BitVec 64) :
 /-- Normalized source sequence: mask both captured 64-bit limbs, test the
 captured high sign bit, negate the low limb in 64 bits, mask it, then add its
 zero carry to the complemented high limb and mask the result. -/
-def sourcePairMagnitude (width : X86Width) (high low : BitVec 64) : BitVec (2 * x86WidthBitsSpec width) :=
+def sourceMagnitudeLimbs (width : X86Width) (high low : BitVec 64) : BitVec 64 × BitVec 64 :=
   let highWord := maskedLimb width high
   let lowWord := maskedLimb width low
   if highWord &&& (1 <<< (x86WidthBitsSpec width - 1)) != 0 then
     let lowMagnitude := maskedLimb width (0 - lowWord)
     let highMagnitude := maskedLimb width ((~~~highWord) + (if lowMagnitude == 0 then 1 else 0))
-    join width highMagnitude lowMagnitude
-  else join width highWord lowWord
+    (highMagnitude, lowMagnitude)
+  else (highWord, lowWord)
+
+
+/-- Join the emitted magnitude limbs without changing their captured values. -/
+def sourcePairMagnitude (width : X86Width) (high low : BitVec 64) : BitVec (2 * x86WidthBitsSpec width) :=
+  let limbs := sourceMagnitudeLimbs width high low
+  join width limbs.1 limbs.2
 
 theorem source_pair_magnitude_matches (width : X86Width) (high low : BitVec 64) :
     sourcePairMagnitude width high low = pairMagnitude width high low := by
-  cases width <;> simp [sourcePairMagnitude, maskedLimb, pairMagnitude, join,
-    x86WidthBitsSpec] <;> bv_decide
+  by_cases negative : (maskedLimb width high &&& (1 <<< (x86WidthBitsSpec width - 1)) != 0) = true
+  · simp only [sourcePairMagnitude, sourceMagnitudeLimbs, negative, ↓reduceIte]
+    cases width <;> simp [maskedLimb, pairMagnitude, join, x86WidthBitsSpec] at * <;> bv_decide
+  · simp only [sourcePairMagnitude, sourceMagnitudeLimbs, negative, ↓reduceIte]
+    cases width <;> simp [maskedLimb, pairMagnitude, join, x86WidthBitsSpec] at * <;> bv_decide
 
 theorem join_eq_add (width : X86Width) (high low : BitVec 64) :
     join width high low =
@@ -359,5 +368,37 @@ including the most-negative dividend at every width. -/
 theorem source_pair_magnitude_to_nat (width : X86Width) (high low : BitVec 64) :
     (sourcePairMagnitude width high low).toNat = (join width high low).toInt.natAbs := by
   rw [source_pair_magnitude_matches, pair_magnitude_to_nat]
+
+/-- Every emitted mask confines its unsigned limb to the native width. -/
+theorem masked_limb_bound (width : X86Width) (value : BitVec 64) :
+    (maskedLimb width value).toNat < 2 ^ x86WidthBitsSpec width := by
+  rw [masked_limb_refines, BitVec.toNat_setWidth]
+  exact Nat.lt_of_le_of_lt (Nat.mod_le _ _) (value.setWidth (x86WidthBitsSpec width)).isLt
+
+theorem source_limbs_bounds (width : X86Width) (high low : BitVec 64) :
+    (sourceMagnitudeLimbs width high low).1.toNat < 2 ^ x86WidthBitsSpec width ∧
+      (sourceMagnitudeLimbs width high low).2.toNat < 2 ^ x86WidthBitsSpec width := by
+  dsimp only [sourceMagnitudeLimbs]
+  split <;> constructor <;> exact masked_limb_bound _ _
+
+/-- The emitted high and low words reconstruct the entire unsigned magnitude. -/
+theorem source_limbs_value (width : X86Width) (high low : BitVec 64) :
+    (sourcePairMagnitude width high low).toNat =
+      (sourceMagnitudeLimbs width high low).1.toNat * 2 ^ x86WidthBitsSpec width +
+        (sourceMagnitudeLimbs width high low).2.toNat := by
+  have bounds := source_limbs_bounds width high low
+  unfold sourcePairMagnitude
+  rw [join_to_nat, Nat.mod_eq_of_lt bounds.1, Nat.mod_eq_of_lt bounds.2]
+
+/-- Projection of the complete magnitude gives precisely the C words entering
+its preliminary high-limb comparison and division routes. -/
+theorem source_limbs_split (width : X86Width) (high low : BitVec 64) :
+    (sourceMagnitudeLimbs width high low).1.toNat =
+        (sourcePairMagnitude width high low).toNat / 2 ^ x86WidthBitsSpec width ∧
+      (sourceMagnitudeLimbs width high low).2.toNat =
+        (sourcePairMagnitude width high low).toNat % 2 ^ x86WidthBitsSpec width := by
+  have bounds := source_limbs_bounds width high low
+  rw [source_limbs_value]
+  cases width <;> simp only [x86WidthBitsSpec] at * <;> omega
 
 end KProgFormal.X86SignedDivision
