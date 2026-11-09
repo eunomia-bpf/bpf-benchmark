@@ -1,0 +1,3 @@
+#!/bin/sh
+# BPF compiler for B on the stock path: forces the ordinary-input header.
+exec "${KPROG_REAL_CLANG:-/usr/lib/llvm-18/bin/clang}" -include "$(dirname "$0")/../include/stock_native_input.h" "$@"
