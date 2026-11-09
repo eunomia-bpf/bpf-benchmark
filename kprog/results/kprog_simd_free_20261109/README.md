@@ -41,7 +41,7 @@ generation failures: three x86 forms and four ARM forms. Native executions of
 these cases: 0. Executable bytes, disassemblies, generated B, commands, source
 snapshots and hashes are retained in `compile-raw.tar.gz`. The corpus export
 contains 198 debug-stripped native objects and their disassemblies, with original
-object hashes, executable-section hashes and DWARF source checksums.
+object hashes, executable-section hashes and DWARF source-file tables.
 
 The paired safety recipe captures common model/service/kernel/bridge inputs and
 uses one 2 GiB guest at a time on CPUs 20-23. The x86 control completes 45 cases:
