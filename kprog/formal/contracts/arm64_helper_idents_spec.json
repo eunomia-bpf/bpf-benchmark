@@ -93,6 +93,9 @@
     {"id": 197, "name": "bpf_dynptr_from_mem"},
     {"id": 198, "name": "bpf_ringbuf_reserve_dynptr"},
     {"id": 199, "name": "bpf_ringbuf_submit_dynptr"},
-    {"id": 200, "name": "bpf_ringbuf_discard_dynptr"}
+    {"id": 200, "name": "bpf_ringbuf_discard_dynptr"},
+    {"id": 201, "name": "bpf_dynptr_read"},
+    {"id": 202, "name": "bpf_dynptr_write"},
+    {"id": 203, "name": "bpf_dynptr_data"}
   ]
 }

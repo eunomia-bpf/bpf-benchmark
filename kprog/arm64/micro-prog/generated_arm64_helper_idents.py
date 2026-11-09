@@ -92,4 +92,7 @@ HELPER_IDENTS = {
     198: "bpf_ringbuf_reserve_dynptr",
     199: "bpf_ringbuf_submit_dynptr",
     200: "bpf_ringbuf_discard_dynptr",
+    201: "bpf_dynptr_read",
+    202: "bpf_dynptr_write",
+    203: "bpf_dynptr_data",
 }

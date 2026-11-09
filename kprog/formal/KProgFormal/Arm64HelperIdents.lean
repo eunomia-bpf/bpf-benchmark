@@ -2,7 +2,7 @@ import KProgFormal.Generated.GeneratedArm64HelperIdents
 
 namespace KProgFormal
 
-/-- Independent enumeration of the encoder's 92 BPF helper ids with the
+/-- Independent enumeration of the encoder's 95 BPF helper ids with the
 helper name each one denotes, in id-sorted order. Written out by hand so it
 shares no structure with the generated table. -/
 def helperIdentsSpec : List (Nat × String) := [
@@ -64,6 +64,9 @@ def helperIdentsSpec : List (Nat × String) := [
   (198, "bpf_ringbuf_reserve_dynptr"),
   (199, "bpf_ringbuf_submit_dynptr"),
   (200, "bpf_ringbuf_discard_dynptr"),
+  (201, "bpf_dynptr_read"),
+  (202, "bpf_dynptr_write"),
+  (203, "bpf_dynptr_data"),
 
 ]
 
@@ -126,6 +129,7 @@ def allHelperIdents : List GeneratedArm64HelperIdents.Helper := [
   .bpf_ringbuf_reserve_dynptr,
   .bpf_ringbuf_submit_dynptr,
   .bpf_ringbuf_discard_dynptr,
+  .bpf_dynptr_read, .bpf_dynptr_write, .bpf_dynptr_data,
 
 ]
 

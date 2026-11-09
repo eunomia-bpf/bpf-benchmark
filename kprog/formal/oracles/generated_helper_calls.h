@@ -844,6 +844,37 @@ static inline void bpf_ringbuf_discard_dynptr(struct bpf_dynptr *ptr, __u64 flag
   ora_arguments[1] = (__u64)(uintptr_t)flags;
   return;
 }
+static inline long bpf_dynptr_read(void *dst, __u64 len, const struct bpf_dynptr *src, __u64 offset, __u64 flags)
+{
+  ora_called = 201U;
+  ora_argc = 5U;
+  ora_arguments[0] = (__u64)(uintptr_t)dst;
+  ora_arguments[1] = (__u64)(uintptr_t)len;
+  ora_arguments[2] = (__u64)(uintptr_t)src;
+  ora_arguments[3] = (__u64)(uintptr_t)offset;
+  ora_arguments[4] = (__u64)(uintptr_t)flags;
+  return (long)(uintptr_t)ora_raw_result(201U);
+}
+static inline long bpf_dynptr_write(const struct bpf_dynptr *dst, __u64 offset, void *src, __u64 len, __u64 flags)
+{
+  ora_called = 202U;
+  ora_argc = 5U;
+  ora_arguments[0] = (__u64)(uintptr_t)dst;
+  ora_arguments[1] = (__u64)(uintptr_t)offset;
+  ora_arguments[2] = (__u64)(uintptr_t)src;
+  ora_arguments[3] = (__u64)(uintptr_t)len;
+  ora_arguments[4] = (__u64)(uintptr_t)flags;
+  return (long)(uintptr_t)ora_raw_result(202U);
+}
+static inline void * bpf_dynptr_data(const struct bpf_dynptr *ptr, __u64 offset, __u64 len)
+{
+  ora_called = 203U;
+  ora_argc = 3U;
+  ora_arguments[0] = (__u64)(uintptr_t)ptr;
+  ora_arguments[1] = (__u64)(uintptr_t)offset;
+  ora_arguments[2] = (__u64)(uintptr_t)len;
+  return (void *)(uintptr_t)ora_raw_result(203U);
+}
 static inline unsigned ora_expected_arguments(__u64 id, const __u64 raw[5], __u64 out[5])
 {
   switch (id) {
@@ -1279,6 +1310,25 @@ static inline unsigned ora_expected_arguments(__u64 id, const __u64 raw[5], __u6
     out[0] = (__u64)(uintptr_t)((struct bpf_dynptr *)(uintptr_t)raw[0]);
     out[1] = (__u64)(uintptr_t)((__u64)(uintptr_t)raw[1]);
     return 2U;
+  case 201ULL:
+    out[0] = (__u64)(uintptr_t)((void *)(uintptr_t)raw[0]);
+    out[1] = (__u64)(uintptr_t)((__u64)(uintptr_t)raw[1]);
+    out[2] = (__u64)(uintptr_t)((const struct bpf_dynptr *)(uintptr_t)raw[2]);
+    out[3] = (__u64)(uintptr_t)((__u64)(uintptr_t)raw[3]);
+    out[4] = (__u64)(uintptr_t)((__u64)(uintptr_t)raw[4]);
+    return 5U;
+  case 202ULL:
+    out[0] = (__u64)(uintptr_t)((const struct bpf_dynptr *)(uintptr_t)raw[0]);
+    out[1] = (__u64)(uintptr_t)((__u64)(uintptr_t)raw[1]);
+    out[2] = (__u64)(uintptr_t)((void *)(uintptr_t)raw[2]);
+    out[3] = (__u64)(uintptr_t)((__u64)(uintptr_t)raw[3]);
+    out[4] = (__u64)(uintptr_t)((__u64)(uintptr_t)raw[4]);
+    return 5U;
+  case 203ULL:
+    out[0] = (__u64)(uintptr_t)((const struct bpf_dynptr *)(uintptr_t)raw[0]);
+    out[1] = (__u64)(uintptr_t)((__u64)(uintptr_t)raw[1]);
+    out[2] = (__u64)(uintptr_t)((__u64)(uintptr_t)raw[2]);
+    return 3U;
   default: return 0;
   }
 }
@@ -1377,12 +1427,15 @@ static inline __u64 ora_expected_result(__u64 id)
   case 198ULL: return (__u64)(uintptr_t)((long)(uintptr_t)ora_raw_result(198U));
   case 199ULL: return 0;
   case 200ULL: return 0;
+  case 201ULL: return (__u64)(uintptr_t)((long)(uintptr_t)ora_raw_result(201U));
+  case 202ULL: return (__u64)(uintptr_t)((long)(uintptr_t)ora_raw_result(202U));
+  case 203ULL: return (__u64)(uintptr_t)((void *)(uintptr_t)ora_raw_result(203U));
   default: return 0;
   }
 }
 static inline unsigned ora_pointer_result(__u64 id)
 {
-  return id == 1ULL || id == 85ULL || id == 95ULL || id == 99ULL || id == 131ULL || id == 154ULL || id == 158ULL || id == 194ULL || id == 195ULL;
+  return id == 1ULL || id == 85ULL || id == 95ULL || id == 99ULL || id == 131ULL || id == 154ULL || id == 158ULL || id == 194ULL || id == 195ULL || id == 203ULL;
 }
 static inline unsigned ora_pointer_arguments(__u64 id)
 {
@@ -1479,6 +1532,9 @@ static inline unsigned ora_pointer_arguments(__u64 id)
   case 198ULL: return 9U;
   case 199ULL: return 1U;
   case 200ULL: return 1U;
+  case 201ULL: return 5U;
+  case 202ULL: return 5U;
+  case 203ULL: return 1U;
   default: return 0;
   }
 }

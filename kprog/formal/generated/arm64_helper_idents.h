@@ -2,12 +2,12 @@
 #ifndef KPROG_FORMAL_GENERATED_ARM64_HELPER_IDENTS_H
 #define KPROG_FORMAL_GENERATED_ARM64_HELPER_IDENTS_H
 /*
- * The AArch64 artifact encoder's BPF helper-ident table: the 92 kernel
+ * The AArch64 artifact encoder's BPF helper-ident table: the 95 kernel
  * ids the AArch64 simulator recognizes, in id-sorted order.
  * KPROG_ARM64_HELPER_ROW maps a kernel id to its 1-based position in that
  * order, 0 outside. Each name invokes its actual Linux helper ID.
  */
-#define KPROG_ARM64_HELPER_IDENTS_COUNT 92U
+#define KPROG_ARM64_HELPER_IDENTS_COUNT 95U
 /*
  * The 1-based position of a kernel id in the id-sorted table. The input is
  * evaluated once; an id outside the table reaches the 0 default.
@@ -105,8 +105,11 @@
 	 (KERNEL_ID) == 198 ? 90U : \
 	 (KERNEL_ID) == 199 ? 91U : \
 	 (KERNEL_ID) == 200 ? 92U : \
+	 (KERNEL_ID) == 201 ? 93U : \
+	 (KERNEL_ID) == 202 ? 94U : \
+	 (KERNEL_ID) == 203 ? 95U : \
 	 0)
-_Static_assert(KPROG_ARM64_HELPER_IDENTS_COUNT == 92U,
+_Static_assert(KPROG_ARM64_HELPER_IDENTS_COUNT == 95U,
 	       "AArch64 helper idents count drift");
 _Static_assert(KPROG_ARM64_HELPER_ROW(1) == 1U, "AArch64 helper idents row selection drift");
 _Static_assert(KPROG_ARM64_HELPER_ROW(2) == 2U, "AArch64 helper idents row selection drift");
@@ -200,6 +203,9 @@ _Static_assert(KPROG_ARM64_HELPER_ROW(197) == 89U, "AArch64 helper idents row se
 _Static_assert(KPROG_ARM64_HELPER_ROW(198) == 90U, "AArch64 helper idents row selection drift");
 _Static_assert(KPROG_ARM64_HELPER_ROW(199) == 91U, "AArch64 helper idents row selection drift");
 _Static_assert(KPROG_ARM64_HELPER_ROW(200) == 92U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(201) == 93U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(202) == 94U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(203) == 95U, "AArch64 helper idents row selection drift");
 /* The selector is total: a kernel id past the table reaches the default. */
 _Static_assert(KPROG_ARM64_HELPER_ROW(0x100) == 0U,
 	       "AArch64 helper idents out-of-range id must reach the default arm");

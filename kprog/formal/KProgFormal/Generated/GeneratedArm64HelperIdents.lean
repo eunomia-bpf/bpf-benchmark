@@ -94,6 +94,9 @@ inductive Helper
   | bpf_ringbuf_reserve_dynptr
   | bpf_ringbuf_submit_dynptr
   | bpf_ringbuf_discard_dynptr
+  | bpf_dynptr_read
+  | bpf_dynptr_write
+  | bpf_dynptr_data
   deriving DecidableEq, Repr
 def id : Helper -> Nat
   | .bpf_map_lookup_elem => 1
@@ -188,6 +191,9 @@ def id : Helper -> Nat
   | .bpf_ringbuf_reserve_dynptr => 198
   | .bpf_ringbuf_submit_dynptr => 199
   | .bpf_ringbuf_discard_dynptr => 200
+  | .bpf_dynptr_read => 201
+  | .bpf_dynptr_write => 202
+  | .bpf_dynptr_data => 203
 def name : Helper -> String
   | .bpf_map_lookup_elem => "bpf_map_lookup_elem"
   | .bpf_map_update_elem => "bpf_map_update_elem"
@@ -281,4 +287,7 @@ def name : Helper -> String
   | .bpf_ringbuf_reserve_dynptr => "bpf_ringbuf_reserve_dynptr"
   | .bpf_ringbuf_submit_dynptr => "bpf_ringbuf_submit_dynptr"
   | .bpf_ringbuf_discard_dynptr => "bpf_ringbuf_discard_dynptr"
+  | .bpf_dynptr_read => "bpf_dynptr_read"
+  | .bpf_dynptr_write => "bpf_dynptr_write"
+  | .bpf_dynptr_data => "bpf_dynptr_data"
 end KProgFormal.GeneratedArm64HelperIdents

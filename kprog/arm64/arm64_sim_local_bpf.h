@@ -2248,6 +2248,22 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
         ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, sizeof(struct bpf_dynptr), 0); \
     } while (0)
 
+/* Stock dynptr helper calls retain their native five-argument ABI and pointer result. */
+#define ARM64_SIM_BPF_CALL_bpf_dynptr_read() \
+    do { \
+        __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); \
+        __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); \
+        __u64 __a64_hw_len = ARM64_SIM_L_READ_REG(ARM64_X1); \
+        ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_dynptr_read((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), __a64_hw_len, (const struct bpf_dynptr *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4))); \
+        ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); \
+    } while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_dynptr_write() \
+    ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_dynptr_write((const struct bpf_dynptr *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u64)ARM64_SIM_L_READ_REG(ARM64_X1), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4)))
+
+#define ARM64_SIM_BPF_CALL_bpf_dynptr_data() \
+    ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_dynptr_data((const struct bpf_dynptr *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u64)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2)))
+
 /* The paired ringbuf helpers write the complete opaque dynptr on all returns. */
 #define ARM64_SIM_BPF_CALL_bpf_ringbuf_reserve_dynptr() \
     do { \
