@@ -245,49 +245,47 @@ _Static_assert(KPROG_X86_GPR_CELL(X86_R15) == 15U,
  * layout lets the compiler scalarize each ghost cell before lowering loops. */
 struct x86_sim_stack_value { void *pointer; __u8 tag; };
 #ifdef X86_SIM_STACK_VALUE_WORDS
-#define X86_SIM_L_SV_TAG_NAME_(I) __x86_stack_value_tag_##I
+#define X86_SIM_L_SV_STATE_NAME_(I) __x86_stack_value_state_##I
 #define X86_SIM_L_SV_PTR_NAME_(I) __x86_stack_value_ptr_##I
 #define X86_SIM_L_SC_VALUE_NAME_(I) __x86_stack_scalar_value_##I
-#define X86_SIM_L_SC_VALID_NAME_(I) __x86_stack_scalar_valid_##I
 #define X86_SIM_L_SC_VALUE(I) X86_SIM_L_SC_VALUE_NAME_(I)
-#define X86_SIM_L_SC_VALID(I) X86_SIM_L_SC_VALID_NAME_(I)
-#define X86_SIM_L_SV_TAG(I) X86_SIM_L_SV_TAG_NAME_(I)
+#define X86_SIM_L_SV_STATE(I) X86_SIM_L_SV_STATE_NAME_(I)
 #define X86_SIM_L_SV_PTR(I) X86_SIM_L_SV_PTR_NAME_(I)
-#define X86_SIM_L_SV_DECLARE(I) __u8 X86_SIM_L_SV_TAG(I)=0; void *X86_SIM_L_SV_PTR(I)=0; __u64 X86_SIM_L_SC_VALUE(I)=0; __u8 X86_SIM_L_SC_VALID(I)=0;
+#define X86_SIM_L_SV_DECLARE(I) __u16 X86_SIM_L_SV_STATE(I)=0; void *X86_SIM_L_SV_PTR(I)=0; __u64 X86_SIM_L_SC_VALUE(I)=0;
 #define X86_SIM_L_DECLARE_STACK_VALUES() X86_SIM_STACK_VALUE_WORDS(X86_SIM_L_SV_DECLARE)
 #define X86_SIM_L_SV_EACH(OP) X86_SIM_STACK_VALUE_WORDS(OP)
 #else
-#define X86_SIM_L_SV_TAG(I) __x86_stack_value_tags[(I)]
+#define X86_SIM_L_SV_STATE(I) __x86_stack_value_states[(I)]
 #define X86_SIM_L_SV_PTR(I) __x86_stack_value_ptrs[(I)]
 #define X86_SIM_L_SC_VALUE(I) __x86_stack_scalar_values[(I)]
-#define X86_SIM_L_SC_VALID(I) __x86_stack_scalar_valid[(I)]
 #define X86_SIM_L_DECLARE_STACK_VALUES() \
-    __u8 __x86_stack_value_tags[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]={}; \
+    __u16 __x86_stack_value_states[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]={}; \
     void *__x86_stack_value_ptrs[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]={}; \
-    __u64 __x86_stack_scalar_values[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]={}; \
-    __u8 __x86_stack_scalar_valid[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]={}
+    __u64 __x86_stack_scalar_values[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]={}
 #define X86_SIM_L_SV_EACH(OP) \
     _Pragma("unroll") \
     for (__u32 __x86_sv_i=0; __x86_sv_i<KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES); ++__x86_sv_i) { OP(__x86_sv_i) }
 #endif
-#define X86_SIM_L_SV_CLEAR_ONE(I) X86_SIM_L_SV_TAG(I)=X86_SIM_TAG_SCALAR; X86_SIM_L_SC_VALID(I)=0;
+#define X86_SIM_L_SV_TAG(I) ((__u8)(X86_SIM_L_SV_STATE(I)&255U))
+#define X86_SIM_L_SC_VALID(I) ((X86_SIM_L_SV_STATE(I)>>8U)&1U)
+#define X86_SIM_L_SV_CLEAR_ONE(I) X86_SIM_L_SV_STATE(I)=0;
 #define X86_SIM_L_STACK_VALUES_CLEAR() do { X86_SIM_L_SV_EACH(X86_SIM_L_SV_CLEAR_ONE) } while(0)
 #define X86_SIM_L_SV_ERASE_ONE(I) \
     do { __u64 __x86_sv_start=(__u64)(I)*8U; \
          if (__x86_sv_index-__x86_sv_start<8U || __x86_sv_start-__x86_sv_index<__x86_sv_width) \
-             { X86_SIM_L_SV_TAG(I)=X86_SIM_TAG_SCALAR; X86_SIM_L_SC_VALID(I)=0; } } while(0);
+             { X86_SIM_L_SV_STATE(I)=0; } } while(0);
 #define X86_SIM_L_STACK_VALUES_ERASE(INDEX, WIDTH) \
     do { __u64 __x86_sv_index=(INDEX),__x86_sv_width=X86_SIM_L_EFFECTIVE_WIDTH(WIDTH); \
          X86_SIM_L_SV_EACH(X86_SIM_L_SV_ERASE_ONE) } while(0)
 #define X86_SIM_L_SV_SAVE_ONE(I) \
     do { if (__x86_sv_at==(__u64)(I)*8U) { \
         if (__x86_sv_tag==X86_SIM_TAG_STACK) X86_SIM_L_SV_PTR(I)=__x86_sv_pointer; \
-        X86_SIM_L_SV_TAG(I)=__x86_sv_tag; } } while(0);
+        X86_SIM_L_SV_STATE(I)=(X86_SIM_L_SV_STATE(I)&256U)|__x86_sv_tag; } } while(0);
 /* Full-word forwarding retains the raw access and its original scalar identity.
  * Every existing pointer-ghost invalidation also releases this value fact. */
 #define X86_SIM_L_SC_SAVE_ONE(I) \
     do { if (__x86_sc_at==(__u64)(I)*8U) { \
-        X86_SIM_L_SC_VALUE(I)=__x86_sc_value; X86_SIM_L_SC_VALID(I)=1; } } while(0);
+        X86_SIM_L_SC_VALUE(I)=__x86_sc_value; X86_SIM_L_SV_STATE(I)|=256U; } } while(0);
 #define X86_SIM_L_STACK_SCALAR_SAVE(INDEX, VALUE) \
     do { __u64 __x86_sc_at=(INDEX), __x86_sc_value=(VALUE); \
          if ((__s64)__x86_sc_at-(__s64)X86_SIM_STACK_BYTES>=X86_SIM_L_STACK_SP()) { \
@@ -317,7 +315,7 @@ struct x86_sim_stack_value { void *pointer; __u8 tag; };
  * deallocated slots disappear while their architectural bytes stay raw. */
 #define X86_SIM_L_SV_BELOW_SP_ONE(I) \
     do { if ((__s64)((__u64)(I)*8U)-(__s64)X86_SIM_STACK_BYTES<__x86_sv_sp) \
-             { X86_SIM_L_SV_TAG(I)=X86_SIM_TAG_SCALAR; X86_SIM_L_SC_VALID(I)=0; } } while(0);
+             { X86_SIM_L_SV_STATE(I)=0; } } while(0);
 #define X86_SIM_L_STACK_VALUES_CALL_FRAME() \
     do { __s64 __x86_sv_sp=(__s64)(long)__x86_rsp.ptr; \
          X86_SIM_L_SV_EACH(X86_SIM_L_SV_BELOW_SP_ONE) } while(0)
