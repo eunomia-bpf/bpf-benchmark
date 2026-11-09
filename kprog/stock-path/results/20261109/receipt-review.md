@@ -1,8 +1,7 @@
 # Stock-path receipt review, 2026-11-09
 
-This continuation reviewed existing source identities and saved guest receipts.
-The measured results below come from the preceding S17 guest runs.
-The publication covers static per-case tables and this report.
+The 48-case tables below come from the S17 guest runs. The S18 closure section
+records the later integration runs and the complete raw collection.
 
 | ISA | Cases | Executed controls | Verifier rejection | Generation rejection | Accepted load-only |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -56,20 +55,58 @@ with one raw load. Saved ARM injected-relocation-error service output records
 load failure after verifier processing, as described in the S17 10:01 notice.
 
 The saved x86 tail control records stock/native retval 2, 34 invocations and
-33 transfers on each route, with JIT stack depth 0 and pop 0. The separate
-physical R12/RSP/RBP observation exits 1 with the diagnostic
-`tail frame: physical R12/RSP/RBP observation`. Physical frame preservation
-therefore remains an open result. Successful-transfer frame-predicate
-composition remains the S11 O4 obligation.
+33 transfers on each route, with JIT stack depth 0 and pop 0. Successful-transfer
+frame-predicate composition remains the S11 O4 obligation.
 
-The saved x86 JIT-error fixture exits 1 after its service records status 0
-and a program ID; its client reports a TEST_RUN return mismatch. This receipt
-establishes a fixture discrepancy. The x86 kernel-error result remains open.
+## S18 closure
 
-The preceding final collector stopped on its expected-one-failure-archive
-assertion. Existing raw artifacts, source/build outputs and shared-index state
-are retained for review. End-to-end stock-path acceptance remains open for the
-physical tail observation, x86 kernel-error receipt, complete raw collection
-and universal proof composition. This continuation ends after defensive
-receipt publication; native-image JIT implementation and execution remain
-outside its safety scope.
+`integration-cases.tsv` holds one row per integration case and
+`final-summary.json` holds the full collection summary.
+
+| Case | Fixture exit | Client exit | Service status | Armed raw loads | Verifier completed | Native TEST_RUN |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| x86-physical-tail-frame | 0 | 0 | 0 | 1 | 1 | 1 |
+| x86-multi-once | 0 | 1 | -5 | 1 | 0 | 0 |
+| x86-jit-error | 0 | 1 | -5 | 1 | 1 | 0 |
+| arm64-multi-once | 0 | 1 | -5 | 1 | 0 | 0 |
+| arm64-jit-error | 0 | 1 | -5 | 1 | 1 | 0 |
+
+Physical tail frame (`f360991d1`, x86): the guest records retval 2, R12=1, RSP=1
+and RBP=1 across 34 invocations and 33 transfers. The earlier exit 1 came from
+the probe compiler assigning retval to EBP between the call and the after
+snapshot; the focused fixture keeps RBP as the frame pointer.
+
+x86 JIT error (`970e4b205`): `fixtures/jit-error.patch` appends one relocation
+record with offset chunk length minus 1 (5 of 6), kind 1, target 1, after the
+loader's chunk filter. In the guest, kernel return probes record
+`bpf_native_relocate` returning -34 (ERANGE) and the armed `BPF_PROG_LOAD`
+returning -524 after the verifier completes. The client exits 1 with empty
+stdout, the service records status -5 with `prog_id` absent, and
+`bpf_prog_test_run_xdp` fires 0 times. The unmodified loader in the same guest
+records relocate 0, retval 2 and one TEST_RUN, which shows the probes observe
+the success path. ARM's `arm64-jit-error-kernel` run returns the same 524 with
+one armed load; its raw output is in `s18-load-error-raw.tar.gz`.
+
+Load count: the loader process issues three `BPF_PROG_LOAD` calls in both the
+control and the injected run. Two are libbpf capability probes (socket-filter
+type, 2 instructions, names empty and `libbpf_nametest`) that return descriptors
+before the single arm event. Exactly one load follows the arm event; it carries
+the 16 MiB log buffer and is the armed load. The `stock-armed-load-attempt=1`
+counter used on both ISAs counts that armed load.
+
+Earlier injections are retained in `s18-jit-error-raw.tar.gz`. Offset 0 fits
+the rel32 arithmetic and installs a changed P. Offsets at and one below the blob
+length were added ahead of `chunk_reloc_bytes`, which keeps only slots inside
+the chunk, and both runs installed the program with retval 2.
+
+Collector (`fc443b4d4`): each receipt reads its single request record and the
+archive that record names. The earlier glob expected a failure archive where the
+x86 fixture had written a success archive. From `loader-once/kinsn`, a link to
+the live shared tree, the archive takes the headers the loader includes. The
+final run exits 0 with 2278 members reread from the 11.4 MB archive at
+`/var/tmp/kprog-tmp/S18/collected/current-raw.tar.gz`. Its 48-case rows and
+outcome files match the earlier publication.
+
+End-to-end stock-path acceptance now rests on the universal proof composition:
+successful-tail, compiler and O1/O2/O4, held by V and the S11 ledger. The rows
+above are finite runtime receipts for the listed runs.
