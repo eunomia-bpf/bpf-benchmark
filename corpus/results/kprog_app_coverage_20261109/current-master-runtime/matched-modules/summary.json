@@ -1,0 +1,99 @@
+{
+  "kernel_release": "7.0.0-rc2",
+  "command": [
+    "make",
+    "-C",
+    "/workspaces/repository/vendor/linux-framework",
+    "O=/var/tmp/kprog-tmp/C/master-x86-runtime/kernel-build",
+    "M=/var/tmp/kprog-tmp/C/master-x86-runtime/project/kinsn/module/x86",
+    "MO=/var/tmp/kprog-tmp/C/current-master-matched-application/custom-module-build",
+    "ARCH=x86",
+    "-j4",
+    "modules"
+  ],
+  "make_exit": 0,
+  "modules": {
+    "bpf_x86_imul.ko": {
+      "bytes": 596752,
+      "sha256": "18310acdb7bb342c3c2293ce7a95d4ad39b2520b795221f6cd968a44e0282253",
+      "vermagic": "7.0.0-rc2 SMP preempt mod_unload modversions"
+    },
+    "bpf_x86_bmi1.ko": {
+      "bytes": 644000,
+      "sha256": "69bf1f8658b6b983f41c145eb4975fcda702d5533956924578155708b802f112",
+      "vermagic": "7.0.0-rc2 SMP preempt mod_unload modversions"
+    },
+    "bpf_x86_prefetch.ko": {
+      "bytes": 593696,
+      "sha256": "e1754db54bbba4a3ea650ced9211154c94a1f30457c971ef6b9472e8687801fd",
+      "vermagic": "7.0.0-rc2 SMP preempt mod_unload modversions"
+    },
+    "bpf_x86_rotate.ko": {
+      "bytes": 642648,
+      "sha256": "03061d1f7faddf7224a26c6f1d5b6ea55edc00e7f22b236d77096085ec20a18b",
+      "vermagic": "7.0.0-rc2 SMP preempt mod_unload modversions"
+    },
+    "bpf_x86_shd.ko": {
+      "bytes": 615384,
+      "sha256": "0a3d8a938f401137f063c6458b1dca37f44aa1d33c835eb4a6b3a3e565963ed9",
+      "vermagic": "7.0.0-rc2 SMP preempt mod_unload modversions"
+    },
+    "bpf_x86_alu.ko": {
+      "bytes": 915160,
+      "sha256": "2cebed849d01c842f574c48db696f96a3695bcd85083d42a821495e34b256033",
+      "vermagic": "7.0.0-rc2 SMP preempt mod_unload modversions"
+    },
+    "bpf_x86_mov.ko": {
+      "bytes": 885848,
+      "sha256": "3f16aa4d76486f0a62517ffd9a3fb1584fff6e416995d09d57bf008b88777355",
+      "vermagic": "7.0.0-rc2 SMP preempt mod_unload modversions"
+    },
+    "bpf_x86_popcnt.ko": {
+      "bytes": 605968,
+      "sha256": "d906131a8898a3d794266dc9883dc16840e8522dc32e552b39d53dca3ed7d629",
+      "vermagic": "7.0.0-rc2 SMP preempt mod_unload modversions"
+    },
+    "bpf_x86_native_lab.ko": {
+      "bytes": 872008,
+      "sha256": "5256dee2d07acba00a138b3300e3b3a5e6a381d5a3aa32fec3f174a206b5f812",
+      "vermagic": "7.0.0-rc2 SMP preempt mod_unload modversions"
+    },
+    "bpf_x86_not.ko": {
+      "bytes": 616416,
+      "sha256": "19b22bbdfedb424faa8bedb12c2b97cce848c0b4b7adcffe7d8eaa720cec562b",
+      "vermagic": "7.0.0-rc2 SMP preempt mod_unload modversions"
+    },
+    "bpf_x86_movbe.ko": {
+      "bytes": 634920,
+      "sha256": "8ebb48df77ab8a5ec7c684b30666dcd42c8683a552567d9c72ad55cdf0c19fd0",
+      "vermagic": "7.0.0-rc2 SMP preempt mod_unload modversions"
+    },
+    "bpf_x86_byteorder.ko": {
+      "bytes": 622264,
+      "sha256": "4e7a86cdbcf7a4a068dd82b8058728ce9736c6cf9ff6c32f8b6da451f891af0c",
+      "vermagic": "7.0.0-rc2 SMP preempt mod_unload modversions"
+    },
+    "bpf_x86_cmov.ko": {
+      "bytes": 621464,
+      "sha256": "76338fe227817f5acb77a1303f34a0d5cc052d34203042847c45f3dd55fed53c",
+      "vermagic": "7.0.0-rc2 SMP preempt mod_unload modversions"
+    },
+    "bpf_x86_bmi2_shift.ko": {
+      "bytes": 665840,
+      "sha256": "02f28ece4aec8a228be9c7e5bab08f9b311b0989d683c1c7296f54e9fd9ddf2c",
+      "vermagic": "7.0.0-rc2 SMP preempt mod_unload modversions"
+    },
+    "bpf_x86_lea.ko": {
+      "bytes": 639880,
+      "sha256": "16b7d8339683020dc627f857d446c4bc28623f7d1e85ce04dda08be54a85fe89",
+      "vermagic": "7.0.0-rc2 SMP preempt mod_unload modversions"
+    }
+  },
+  "prior_application_receipt": "fc50455dc034711bb21f79b0dca8403857984864",
+  "prior_error": "image7.0.0-rc2+ versus running7.0.0-rc2",
+  "image_manifest": {
+    "kernel_release": "7.0.0-rc2",
+    "target_arch": "x86_64",
+    "kernel_image": "bzImage"
+  }
+}
