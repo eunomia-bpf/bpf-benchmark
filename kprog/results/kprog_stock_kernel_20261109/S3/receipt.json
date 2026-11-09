@@ -1,0 +1,63 @@
+{
+  "utc": "2026-11-09T05:35:48.849498+00:00",
+  "deliverable": "stock-base branch with approved SMAP BPF exception recovery",
+  "status": "partial",
+  "kernel_repository": "https://github.com/eunomia-bpf/linux",
+  "kernel_branch": "kprog-no-kinsn",
+  "kernel_commit": "e25108bc9d73dfff2d27211792d7588768d47979",
+  "base_commit": "c23719abc3308df7ed3ad35650ad211fb2d2003d",
+  "kernel_commits_above_base": 1,
+  "kernel_changed_paths": [
+    "arch/x86/mm/fault.c"
+  ],
+  "kernel_diffstat": "arch/x86/mm/fault.c | 6 ++++++\n 1 file changed, 6 insertions(+)",
+  "kernel_numstat": "6\t0\tarch/x86/mm/fault.c",
+  "verifier_sha256": "2bbb780a06e76719c97b8458f3560e3ab0bc37cfc2a773a3e0267ccf3cd7dd50",
+  "base_verifier_sha256": "2bbb780a06e76719c97b8458f3560e3ab0bc37cfc2a773a3e0267ccf3cd7dd50",
+  "verifier_git_blob": "159b25f8269ddfd6f66edabbca06e3822e56a330",
+  "base_verifier_git_blob": "159b25f8269ddfd6f66edabbca06e3822e56a330",
+  "verifier_byte_equal": true,
+  "initial_running_tree_delta": {
+    "head": "9c50491de2a5",
+    "files": 15,
+    "insertions": 1238,
+    "deletions": 120,
+    "verifier_insertions": 527,
+    "verifier_deletions": 72,
+    "source": "initial S3 read of shared working tree including its existing changes"
+  },
+  "approved_patch_sha256": "1105bd57453eac3ed6d494eb3a5732823a479e44c228f510a02c2a4c3271495c",
+  "build": {
+    "commands": [
+      "taskset -c 8-23 make O=/var/tmp/kprog-tmp/S3/build ARCH=x86_64 olddefconfig",
+      "taskset -c 8-23 make O=/var/tmp/kprog-tmp/S3/build ARCH=x86_64 -j4 arch/x86/mm/fault.o"
+    ],
+    "exit": 0,
+    "config_source": "kprog/tv/build-kernel-x86/.config",
+    "config_source_sha256": "98c9d7927c024d3a70ed45d365dd4b1582d755d892158edfe3e9e1f4e01cb864",
+    "resolved_config_sha256": "0b75fe318542db6698950f2b2ce5163e867118317fe61c538c4e7de7a1357163",
+    "fault_object_sha256": "87bec64bd8dc8febe84231ee09937880422aaed36f06710c001efeb909adbe5a",
+    "log_sha256": "90123e7c263858c354b6146dc8d2cb2de924701dfcce36c3700425c309f4df70",
+    "compressed_log_sha256": "d68020441863400d694a795a67e57dd4db9a2daac80a497b359a810c506900a8",
+    "scope": "fault object and its build prerequisites"
+  },
+  "acceptance": {
+    "guest_boots": 0,
+    "small_native_five_step_cases": 0,
+    "null_btf_five_step_cases": 0,
+    "safety_cases_attempted": 0,
+    "safety_suite_total": 38,
+    "remaining": "five-step native execution and guest acceptance"
+  },
+  "active_runtime": "existing kernel, module, guest owners and parent submodule pointer retained",
+  "coverage_tsv_rows": 0,
+  "source_anchors": [
+    "kprog/x86/x86_sim_local_bpf.h:10,388,447,1050",
+    "kinsn/module/include/native_lab_input.h:9-17,27-44",
+    "kinsn/module/include/native_lab_trusted.h:374-393,408-430",
+    "kinsn/module/x86/bpf_x86_native_lab.c:86-104,108-122",
+    "kernel/bpf/verifier.c at base:21756,22778",
+    "kernel/bpf/core.c at base:783,2519",
+    "kinsn/module/include/native_lab_binding.h:13-23"
+  ]
+}
