@@ -74,13 +74,11 @@
 - [ ] **C、V** 工作树积压的约 100 条路径（S19 交接）。
 - [ ] **协调者** lane 状态目录搬出 %TEMP%。
 
-## 6. 开源发布（计划：`oss-release-plan`，决策已定）
+## 6. 开源整理（仓库名、许可证、结果位置保持现状）
 
-- [ ] 修正许可证声明：框架 MIT，`kinsn/module`、内核补丁和 BPF 程序 GPL-2.0，Lean 和工具 MIT。
+- [ ] `THIRD_PARTY_NOTICES.md` 对 `kinsn/module` 的说明和文件自身的 GPL-2.0 标注保持一致。
 - [ ] 确认 `kprog/formal` 中 ASL、Sail 生成物的许可。
 - [ ] 代码里的 `/workspaces` 硬编码路径改成相对路径。
 - [ ] 逐路径的发布清单：进超级仓库、进 kinsn、进 kprog、进存档。
 - [ ] 公开文档（README、CONTRIBUTING、SECURITY，英文）和新 CI。
-- [ ] 原始结果存档到 Zenodo，公开仓库只留 ATC 的 17.5 MiB。
-- [ ] 安静窗口：内核合并、导出 kinsn 和 kprog 两个 submodule、全新历史的超级仓库、全新环境构建验证。
-- [ ] 正式发布：旧仓库改名存档，新仓库接管公开地址。
+- [ ] 安静窗口：内核合并，kinsn 和 kprog 拆成两个 submodule，全新环境构建验证。
