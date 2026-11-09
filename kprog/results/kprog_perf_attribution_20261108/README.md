@@ -523,6 +523,43 @@ for the same candidate reads `native_requests: 1, compiled: 1,
 installed: 0, failed: 1` (`809c71b76`), which is the same gap seen from
 their side.
 
+### Every candidate on the current ABI stops at the same missing blob
+
+Both published producers were timed on the unbound path after overlaying
+their payloads into the restored current-ABI image. Neither replaced a single
+program, and both failed for the same reason:
+
+| run | app | payload | replaced | failed | error |
+| --- | --- | --- | ---: | ---: | --- |
+| `..._20261109_142708_149898` | katran | `97a8dbaaa` regalloc9 | 0 | 1 | `open /sys/kernel/debug/bpf_x86_native_lab/blob0: No such file or directory` |
+| `..._20261109_150304_777612` | bcc/set | `constant-profile/candidate` | 0 | 25 | the same |
+
+Both runs are complete and equal-work, and both are **eBPF against eBPF**:
+
+| run | arm | programs | invocations | BPF ns | ns per run |
+| --- | --- | ---: | ---: | ---: | ---: |
+| BCC candidate | JIT | 25 | 7,413,391,039 | 777,494,356,027 | 104.9 |
+| BCC candidate | native-requested | 25 | 7,488,446,383 | 784,302,772,533 | 104.7 |
+| Katran regalloc9 | JIT | 1 | 993,872,521 | | 175.2 |
+| Katran regalloc9 | native-requested | 1 | 996,633,825 | | 176.0 |
+
+BCC's two arms agree to 1% in both work and cost, which is what equal arms
+running the same code should do; that agreement is the evidence that the
+native arm never diverged, not a speedup. The rule that a timing row names
+its run, duration, samples and status applies, and so does the corollary:
+these rows are full-length and complete, but their ratio is not a native/JIT
+ratio and they are labelled as such.
+
+The payloads themselves are intact -- all four regalloc9 objects match the
+request's `summary.json` sha256, and the image's `balancer.native.o` is the
+candidate's `509cb2cc...`, not the baseline `ba252e03...`.
+
+One earlier BCC control run (`..._20261109_102148_078721`) is a different
+failure worth keeping distinct: it replaced 8 programs and had 3 refused with
+`trusted specializer refused native program: Input/output error`, the older
+pre-load-site-ABI signature. That run is baseline-only (1 sample) and is not
+in a full-length table.
+
 ### What this means for the candidates
 
 The candidates act on the native path only, so they can recover at most the
