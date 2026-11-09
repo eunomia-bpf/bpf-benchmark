@@ -1,0 +1,5 @@
+# Caller-frame preservation for checksum and map helpers
+
+Four helper wrappers use the existing caller-frame-preserving scalar result: map update/delete and L3/L4 checksum replacement. They keep the allocated caller stack provenance and invoke the existing call-frame treatment for released slots, alongside the original SysV register/flag/SIMD clobbers and actual helper effects. Packet-pointer invalidation stays with the actual BPF helper/verifier behavior.
+
+The generic host component passes608256states each at its captured source. This source update additionally checks the exact committed header plus its four-line patch:67584allocated-frame states each on GCC/Clang UBSan and19458existing typed route cases. S7 owns released-slot/return lifetime semantics; allocated-frame checks retain that ownership boundary. Actual failing SKB native9ad3 and metadata compile successfully in744bdd4f1. Original38 and complete Cilium application receipts follow the captured serial queue fc0624090. Original C/native P/workload and every safety input retain their definitions. Runtime admission additions0.
