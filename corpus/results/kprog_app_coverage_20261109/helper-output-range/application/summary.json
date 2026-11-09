@@ -1,0 +1,40 @@
+{
+  "inputs": {
+    "utc": "2026-11-09T09:49:39.504379+00:00",
+    "parent_model": "c4fe77f34e6d43746b9aa1f266a606fcc8d8b2ea579560774f35fa43eae10255",
+    "candidate_model": "cdd83fc626250c1a522aa2f3a0521087ca6e0f0236bfb6168bf53ddb659741bf",
+    "native_p": "/var/tmp/kprog-tmp/C/bcc-frozen-config-set/control/bcc",
+    "native_profile": "complete8tool canonicalO3 producer retained",
+    "parent_runtime": "/var/tmp/kprog-tmp/C/current-master-matched-application",
+    "queued_after_pid": 3561588,
+    "native_fixture_set": "original38 unchanged, risky inputs load-only",
+    "framework_freeze": "9f3855f6f",
+    "virtual_directory": "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/helper-output-range-application",
+    "source_change": "8 helper wrappers; exact output-byte ghost invalidation; existing caller-frame operation",
+    "admission_additions": 0
+  },
+  "original38": {
+    "make_exit": 0,
+    "cases": 38,
+    "stages": {
+      "accepted_finding": 2,
+      "specialization_rejected": 1,
+      "valid_executed": 9,
+      "verifier_rejected": 26
+    },
+    "negative_native_executions": 0
+  },
+  "make_exit": 0,
+  "native_requests": 0,
+  "generated": 0,
+  "compiled": 0,
+  "installed": 0,
+  "failed": 0,
+  "app_outcomes": [
+    {
+      "application": "bcc/set",
+      "status": "error",
+      "error": "BCC tool capable exited before BPF programs were tracked by shim"
+    }
+  ]
+}
