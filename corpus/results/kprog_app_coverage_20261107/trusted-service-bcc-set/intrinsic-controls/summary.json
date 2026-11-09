@@ -1,0 +1,24 @@
+{
+  "ok": false,
+  "started": "2026-11-07T11:55:35.561567+00:00",
+  "unsafe_execution_permitted": false,
+  "helper_sha256": "d75926c1e9bbb0d9931b39ab67874a8d5c017751c701eb5fc6a795f9863e84fa",
+  "outcomes": [
+    {
+      "name": "valid_stack_fill",
+      "negative": false,
+      "stage": "valid_executed",
+      "returncode": 0,
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "invalid_context_fill",
+      "negative": true,
+      "stage": "accepted_finding",
+      "returncode": 0,
+      "unsafe_native_executed": false
+    }
+  ],
+  "finished": "2026-11-07T11:55:39.842174+00:00",
+  "archive": "controls-20261107T115539842188Z.tar.gz"
+}

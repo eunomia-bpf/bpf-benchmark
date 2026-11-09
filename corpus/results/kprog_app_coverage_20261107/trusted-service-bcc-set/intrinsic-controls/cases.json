@@ -1,0 +1,23 @@
+[
+  {
+    "name": "valid_stack_fill",
+    "negative": false,
+    "assembly": "sub rsp,40; mov rdi,rsp; mov esi,122; mov edx,24; call memset; cmp BYTE PTR [rsp+23],122; sete al; movzx eax,al; add eax,1; add rsp,40; ret",
+    "native_sha256": "d0ded3c1d2e3a1c8bd2c5bd7696b3127504089e7d8542b11cae5816d8c997773",
+    "manifest": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/intrinsic-controls/valid_stack_fill.manifest.json"
+  },
+  {
+    "name": "invalid_context_fill",
+    "negative": true,
+    "assembly": "sub rsp,8; xor esi,esi; mov edx,24; call memset; add rsp,8; mov eax,2; ret",
+    "native_sha256": "91d9a04318763d8b1931699f96f40023f0520a019c55c477afe4ac78b03f1a0e",
+    "manifest": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/intrinsic-controls/invalid_context_fill.manifest.json"
+  },
+  {
+    "name": "invalid_stack_fill",
+    "negative": true,
+    "assembly": "sub rsp,40; mov rdi,rsp; xor esi,esi; mov edx,80; call memset; add rsp,40; mov eax,2; ret",
+    "native_sha256": "cab5afbe95ab9e443bf8d90595521e3f92790f3beb23ef73966d8ae5fb1d7843",
+    "manifest": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/intrinsic-controls/invalid_stack_fill.manifest.json"
+  }
+]
