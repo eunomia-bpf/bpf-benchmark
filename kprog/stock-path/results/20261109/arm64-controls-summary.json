@@ -1,0 +1,52 @@
+{
+  "kernel_commit": "35ea2cde39fc88b01f2f49b2a357e7cf7102e4c8",
+  "stock_loader_patch": "d140d92ab",
+  "small": {
+    "ok": true,
+    "original_prog_id": 37,
+    "native_prog_id": 40,
+    "retval": 2,
+    "prebuilt_proof": false
+  },
+  "null_btf": {
+    "native_prog_id": 43,
+    "attach_btf_id": 62524,
+    "verified_insns": 111,
+    "extable_entries": 2,
+    "control": 4294967295,
+    "null_result": 0
+  },
+  "unarmed_subprogram": {
+    "exit": 0,
+    "log": "unarmed_subprogram fd=3 errno=0\nprocessed 4 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n"
+  },
+  "armed_subprogram": {
+    "exit": 1,
+    "raw_load_attempts": 1,
+    "error": "EOPNOTSUPP",
+    "verifier_entered": false,
+    "native_test_run": 0
+  },
+  "source_audit": {
+    "kprog/arm64/arm64_sim_local_bpf.h": {
+      "snapshot_sha256": "d6bfab27d2b3a50edd1a909877d23f00a2f940baffd7a61e1a8d898f7f9db59d",
+      "published_source_matches": [
+        "55504ff906ab268a5cab3ab083d6d448d152ed54"
+      ]
+    },
+    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": {
+      "snapshot_sha256": "ac4f78382db53902600994fb24c71e625c1306ed50fcf7e4dcfc361c9252775e",
+      "published_source_matches": [
+        "731a91ee6b87cbad5340976de90f146afa912a25"
+      ]
+    },
+    "kprog/trusted_service.py": {
+      "snapshot_sha256": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
+      "published_source_matches": [
+        "dd144b1537e3f1ca581dceb30ff1f4dfc049b16d"
+      ]
+    }
+  },
+  "fixture_context": "The inherited direct-invocation fixture emits its migration-context debug trace and completes control/null observations; the full console is retained in the raw archive.",
+  "full_suite": "The48-case current replay continues in the same2GiBguest."
+}
