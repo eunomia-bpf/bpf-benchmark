@@ -1,0 +1,21 @@
+{
+  "utc": "2026-11-09T10:52:44.899253+00:00",
+  "jobs": [
+    {
+      "name": "uniform-catalog",
+      "original_collector": 3559437,
+      "driver": 3559814,
+      "driver_command": "make -f /var/tmp/kprog-tmp/A/uniform-catalog/Makefile catalog ",
+      "collector": 3781213
+    },
+    {
+      "name": "biosnoop-creation-state/dynamic-scalar-application",
+      "original_collector": 3606049,
+      "driver": 3759351,
+      "driver_command": "make -f /var/tmp/kprog-tmp/A/biosnoop-creation-state/dynamic-scalar-application/Makefile application APP=bcc ",
+      "collector": 3781214
+    }
+  ],
+  "publication": "git commit -F <msg> -- <paths>",
+  "guest_preserved": true
+}
