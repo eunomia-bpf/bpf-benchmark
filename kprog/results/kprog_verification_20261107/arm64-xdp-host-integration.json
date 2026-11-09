@@ -30054,6 +30054,98 @@
     },
     "utc": "2026-11-09T00:56:45.013685+00:00"
   },
+  "signed_div_actual_word_limb_composition": {
+    "archive": "kprog/results/kprog_verification_20261107/signed-div-word-limbs.log.gz",
+    "compiled_scalar_families": 13,
+    "complete_C_model_families": 70,
+    "integration": [
+      {
+        "exit": 0,
+        "input": "import KProgFormal.Refinement.X86Divide\nimport KProgFormal.Refinement.X86Exchange\n#print axioms KProgFormal.Refinement.X86Divide.Capture.high_sign_matches\n#print axioms KProgFormal.Refinement.X86Divide.Capture.dividend_negative\n",
+        "stage": "combined-import"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/signed-div-word-limbs/olean/KProgFormal/Refinement/X86NumericAddress.olean",
+          "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86NumericAddress.lean"
+        ],
+        "exit": 0,
+        "source_sha256": "9a2e6d87da40923d3460d04b18682c45d3238a5e0d76a55feef5e41a62625f00",
+        "stage": "KProgFormal/Refinement/X86NumericAddress"
+      },
+      {
+        "command": [
+          "taskset",
+          "-c",
+          "12-15",
+          "lean",
+          "-o",
+          "/var/tmp/kprog-tmp/V/signed-div-word-limbs/olean/KProgFormal/Refinement/X86Dispatcher.olean",
+          "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86Dispatcher.lean"
+        ],
+        "exit": 0,
+        "source_sha256": "ba981ea00c0bd3404bdc241b94e8ea805a88210fbdc60f22661b79b8acb4b69e",
+        "stage": "KProgFormal/Refinement/X86Dispatcher"
+      }
+    ],
+    "publication": "66995f1514c126cf85158ae29d6cbb0785c6b0a6",
+    "remaining_interfaces": [
+      "Concrete restoring-loop/source extraction",
+      "AUX0/AUX1 numeric/token/dispatcher binding",
+      "Compiler and physical memory/entry/tag/ABI transport"
+    ],
+    "scope": "Actual captured64-bit masked/sign-negated high/low word pair is bounded at native width, reconstructs complete magnitude and has exact div/mod projections. SourceState outcome and canonical handler Step now consume these exact words directly.",
+    "sole_full_source": "fbe6cd1f865fee9c4b48208c9e88de933c0d081e",
+    "summary": {
+      "audit_exit": 0,
+      "audit_input": "import KProgFormal.Refinement.X86Divide\n#print axioms KProgFormal.X86SignedDivision.masked_limb_bound\n#print axioms KProgFormal.X86SignedDivision.source_limbs_bounds\n#print axioms KProgFormal.X86SignedDivision.source_limbs_value\n#print axioms KProgFormal.X86SignedDivision.source_limbs_split\n#print axioms KProgFormal.Refinement.X86Divide.SourceState.outcome_matches\n#print axioms KProgFormal.Refinement.X86Divide.SourceState.handler_refines\n",
+      "compile": [
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/signed-div-word-limbs/olean/KProgFormal/X86DivHandler.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/X86DivHandler.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/X86DivHandler",
+          "reused": true,
+          "source_sha256": "61b49c832251f4624a04b0fa2c2b96df04feec349a3d4dfaa10fefe6b6564c23"
+        },
+        {
+          "command": [
+            "taskset",
+            "-c",
+            "12-15",
+            "lean",
+            "-o",
+            "/var/tmp/kprog-tmp/V/signed-div-word-limbs/olean/KProgFormal/Refinement/X86Divide.olean",
+            "/workspaces/repository/kprog/formal/KProgFormal/Refinement/X86Divide.lean"
+          ],
+          "exit": 0,
+          "module": "KProgFormal/Refinement/X86Divide",
+          "source_sha256": "ad7419b4a39c32774be87f6c7eeb62875d8d4eed012e9fb2687e7e377884ecc8"
+        }
+      ],
+      "laws": [
+        "masked_limb_bound",
+        "source_limbs_bounds",
+        "source_limbs_value",
+        "source_limbs_split"
+      ],
+      "reduction_bridge": 6,
+      "scope": "Actual masked64-bit high/low source magnitude words bound, join and project to complete magnitude; source-state handler Step now consumes those words directly. Concrete restoring-loop/source extraction, AUX binding and compiler/physical/ABI remain interfaces.",
+      "sorryAx": 0
+    }
+  },
   "signed_div_magnitude_refinement": {
     "actual_C_interfaces": "Captured limbs/first high-magnitude fault/restoring division realization, six fresh flag assignments, AUX specialization and source extraction, physical memory/ABI/compiler transport.",
     "compiled_scalar_families": "13/75",

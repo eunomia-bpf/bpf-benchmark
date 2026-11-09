@@ -6089,3 +6089,19 @@ uses a word-only bitvector lemma, avoiding State-wide enum normalization. The
 combined X86Divide/X86Exchange import and actual X86NumericAddress/X86Dispatcher
 compilations finish exit0. The next sole full source is `fbe6cd1f865fee9c4b48208c9e88de933c0d081e`; its
 actual terminal receives a separate receipt.
+
+### Actual signed magnitude words
+
+The [four word-limb laws](signed-div-word-limbs.log.gz), published as
+`66995f1514c126cf85158ae29d6cbb0785c6b0a6`, factor the C mask/sign/low-negation/high-complement carry sequence
+once into its actual two64-bit words. Each word is native-width bounded; their
+join reconstructs the complete unsigned magnitude, and its division/remainder
+projections give exactly those emitted high/low words. The source-state model
+now consumes the actual words directly and retains its canonical signedDivide
+Step with complete state, ordered faults, width writes and six fresh flags.
+
+Both modules, their combined import and current NumericAddress/Dispatcher
+compile exit0; all six audited statements have no sorryAx and disclose inherited
+BV reduction. Concrete loop/source extraction, AUX0/AUX1 token/dispatcher and
+compiler/physical/ABI transport remain explicit. Complete C-model/compiled-family
+totals stay70/75 and13/75. Sole fullfbe6 keeps its earlier immutable source.
