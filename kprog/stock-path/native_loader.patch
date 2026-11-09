@@ -1,6 +1,16 @@
 --- a/kprog/libnativeloader/src/native_loader.cpp
 +++ b/kprog/libnativeloader/src/native_loader.cpp
-@@ -971,7 +971,7 @@
+@@ -500,9 +500,7 @@
+ constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v67";
+ constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
+ constexpr const char *kNativeStubBtfCacheVersion = "native-stub-btf-cache-v1";
+-constexpr size_t kInitialVerifierLogSize = 256 * 1024;
+ constexpr size_t kMaxVerifierLogSize = 16 * 1024 * 1024;
+-constexpr size_t kVerifierLogGrowthSlop = 4096;
+ constexpr const char *kHtabLookupElemSymbol = "__htab_map_lookup_elem";
+ constexpr const char *kArrayOfMapLookupElemSymbol = "array_of_map_lookup_elem";
+ constexpr const char *kHtabLruPercpuMapLookupElemSymbol =
+@@ -971,7 +969,7 @@
      int service_fd, uint64_t request_id, const std::vector<bpf_insn> &proof_program,
      const std::vector<NativeBlobChunk> &chunks, const std::vector<uint8_t> &blob,
      const std::vector<NativeLabReloc> &relocs,
@@ -9,7 +19,7 @@
  {
      const auto proof = bound_proof_sequence(proof_program);
      const std::vector<bpf_insn> continuation{{
-@@ -994,6 +994,7 @@
+@@ -994,6 +992,7 @@
          native_lab_trusted_chunk input{};
          input.load_sites_user = ptr_to_u64(chunk_loads.data());
          input.load_site_count = chunk_loads.size();
@@ -17,7 +27,87 @@
          input.request_id = request_id;
          input.native_user = ptr_to_u64(blob.data() + chunks[i].offset);
          input.native_size = chunks[i].len;
-@@ -1369,7 +1370,8 @@
+@@ -1248,36 +1247,6 @@
+     return fd;
+ }
+
+-bool verifier_log_was_truncated(const std::vector<char> &verifier_log,
+-                                uint32_t log_true_size)
+-{
+-    return log_true_size > verifier_log.size() ||
+-           (!verifier_log.empty() && verifier_log.back() != '\0');
+-}
+-
+-size_t next_verifier_log_size(size_t current_size, uint32_t log_true_size)
+-{
+-    if (current_size >= kMaxVerifierLogSize) {
+-        return 0;
+-    }
+-
+-    size_t requested = log_true_size != 0
+-        ? static_cast<size_t>(log_true_size)
+-        : current_size;
+-    if (requested > kMaxVerifierLogSize - kVerifierLogGrowthSlop) {
+-        requested = kMaxVerifierLogSize;
+-    } else {
+-        requested += kVerifierLogGrowthSlop;
+-    }
+-
+-    const size_t doubled = current_size > kMaxVerifierLogSize / 2
+-        ? kMaxVerifierLogSize
+-        : current_size * 2;
+-    const size_t next_size = std::min(kMaxVerifierLogSize,
+-                                      std::max(requested, doubled));
+-    return next_size > current_size ? next_size : 0;
+-}
+-
+ int bpf_prog_load_native_stub_raw(uint32_t prog_type_value,
+                                   const StubLoadAttrs &attrs,
+                                   int attach_prog_fd,
+@@ -1329,37 +1298,11 @@
+     const unsigned int attr_size =
+         static_cast<unsigned int>(offsetof(union bpf_attr, keyring_id) +
+                                   sizeof(attr.keyring_id));
+-    int saved_errno = 0;
+-    for (int attempt = 0; attempt < 8; attempt++) {
+-        if (collect_log) {
+-            std::fill(verifier_log.begin(), verifier_log.end(), '\0');
+-            attr.log_size = static_cast<uint32_t>(verifier_log.size());
+-            attr.log_buf = ptr_to_u64(verifier_log.data());
+-        }
+-        attr.log_true_size = 0;
+-
+-        const long rc = syscall(SYS_bpf, BPF_PROG_LOAD, &attr, attr_size);
+-        if (rc >= 0) {
+-            log_true_size = attr.log_true_size;
+-            return static_cast<int>(rc);
+-        }
+-        saved_errno = errno;
+-        log_true_size = attr.log_true_size;
+-        if (saved_errno == EAGAIN) {
+-            continue;
+-        }
+-        if (collect_log && saved_errno == ENOSPC &&
+-            verifier_log_was_truncated(verifier_log, log_true_size)) {
+-            const size_t next_size =
+-                next_verifier_log_size(verifier_log.size(), log_true_size);
+-            if (next_size != 0) {
+-                verifier_log.assign(next_size, '\0');
+-                continue;
+-            }
+-        }
+-        return -saved_errno;
+-    }
+-    return -(saved_errno != 0 ? saved_errno : EAGAIN);
++    attr.log_size = static_cast<uint32_t>(verifier_log.size());
++    attr.log_buf = ptr_to_u64(verifier_log.data());
++    const long rc = syscall(SYS_bpf, BPF_PROG_LOAD, &attr, attr_size);
++    log_true_size = attr.log_true_size;
++    return rc >= 0 ? static_cast<int>(rc) : -errno;
+ }
+
+ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
+@@ -1369,7 +1312,8 @@
                     const StubLoadAttrs &attrs,
                     bool tail_call_reachable,
                     const std::string &prog_name,
@@ -27,7 +117,7 @@
  {
      ScopedFd source_btf_fd;
      if (attrs.source_btf_id) {
-@@ -1377,111 +1379,9 @@
+@@ -1377,111 +1321,9 @@
          if (source_btf_fd.fd < 0)
              fail("open original entry BTF: " + std::string(std::strerror(errno)));
      }
@@ -142,7 +232,44 @@
      if (fd_array.size() > std::numeric_limits<uint32_t>::max()) {
          fail("native_kernel fd_array too large");
      }
-@@ -4416,7 +4316,7 @@
+@@ -1490,7 +1332,7 @@
+     ScopedFd attach_prog_fd(open_prog_fd_by_id_required(
+         attrs.attach_prog_id, "attach_prog_id"));
+
+-    std::vector<char> verifier_log;
++    std::vector<char> verifier_log(kMaxVerifierLogSize);
+     uint32_t log_true_size = 0;
+     {
+         std::ostringstream msg;
+@@ -1516,27 +1358,17 @@
+         prog_name, insns, fd_array, verifier_log, log_true_size);
+     if (fd < 0) {
+         const int primary_error = fd;
+-        verifier_log.assign(kInitialVerifierLogSize, '\0');
+-        const int diagnostic_error = bpf_prog_load_native_stub_raw(
+-            prog_type_value, attrs, attach_prog_fd.get(), attach_btf_obj_fd.get(), source_btf_fd.get(),
+-            prog_name, insns, fd_array, verifier_log, log_true_size);
+-        if (diagnostic_error >= 0) {
+-            return diagnostic_error;
+-        }
+         {
+             std::ostringstream msg;
+             msg << "stub-load-syscall-failed"
+                 << " name=" << (prog_name.empty() ? "native_lab_stub" : prog_name)
+                 << " err=" << primary_error
+-                << " diagnostic_err=" << diagnostic_error
+                 << " log_true_size=" << log_true_size
+                 << " log_buf_size=" << verifier_log.size();
+             native_loader_kmsg_line(msg.str());
+         }
+         std::string message = std::string("BPF_PROG_LOAD native_lab stub: ")
+             + libbpf_error_string(primary_error);
+-        message += "\ndiagnostic BPF_PROG_LOAD: "
+-            + libbpf_error_string(diagnostic_error);
+         message += "\nstub verifier_log_size=" + std::to_string(verifier_log.size())
+             + " log_true_size=" + std::to_string(log_true_size);
+         message += "\nstub fd_array_cnt=" + std::to_string(fd_array.size())
+@@ -4416,7 +4248,7 @@
      {
          ensure_debugfs_mounted();
          relocs = parse_native_lab_relocs(linked.relocs, linked.blob.size());
@@ -151,7 +278,7 @@
          out.native_blob_fnv64 = native_blob_fnv64(linked.blob);
          out.native_reloc_count = static_cast<uint32_t>(relocs.size());
          out.native_chunk_count = static_cast<uint32_t>(chunks.size());
-@@ -4466,7 +4366,7 @@
+@@ -4466,7 +4298,7 @@
              native_loader_kmsg_line(msg.str());
          }
          handles = upload_native_chunks(service_fd, request_id, proof_insns,
@@ -160,8 +287,8 @@
          upload_end = std::chrono::steady_clock::now();
          {
              std::ostringstream msg;
-@@ -4482,8 +4382,8 @@
- 
+@@ -4482,8 +4314,8 @@
+
          const auto prog_load_start = std::chrono::steady_clock::now();
          native_loader_kmsg_line("stub-btf-lookup-begin name=" + prog_name);
 -        NativeStubBtfIds stub_btf = find_native_stub_btf_ids();
@@ -171,7 +298,7 @@
          {
              std::ostringstream msg;
              msg << "stub-btf-lookup-done"
-@@ -4504,7 +4404,8 @@
+@@ -4504,7 +4336,8 @@
                  attrs,
                  tail_call_reachable,
                  prog_name,
@@ -181,7 +308,7 @@
          } catch (const std::exception &e) {
              const std::string load_error = e.what();
              const size_t first_line_end = load_error.find('\n');
-@@ -5387,7 +5288,22 @@
+@@ -5387,7 +5220,22 @@
      companion.prog_type = prog_info.type;
      companion.expected_attach_type = options.expected_attach_type;
      bind_source_map_symbols(companion, source_map_bindings, source_insns);
@@ -205,7 +332,7 @@
          const auto selected = std::find_if(companion.maps.begin(), companion.maps.end(),
              [&](const auto &map) { return map.kernel_id == binding.map_id; });
          MapMeta map{};
-@@ -5441,7 +5357,7 @@
+@@ -5441,7 +5289,7 @@
              simulator_program, prog_info, companion, proof_insns);
          if (trusted_externs)
              relocate_source_map_proof(simulator_object.get(), simulator_object_path, simulator_program,
