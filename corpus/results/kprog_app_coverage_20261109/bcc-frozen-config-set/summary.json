@@ -1,0 +1,1271 @@
+{
+  "inputs": {
+    "source_head": "860e77f17fdf0199126a79fd43f165b9aeaf258f",
+    "frozen_workload": "9f3855f6f",
+    "syscount_arguments": [
+      "-L",
+      "-i",
+      "1"
+    ],
+    "other_tool_arguments": [],
+    "dynamic_configuration_retained": [
+      "capable.my_pid set by getpid at startup"
+    ],
+    "bindings": {
+      "capable": {
+        "unique_type": 0,
+        "kernel_stack": 0,
+        "user_stack": 0,
+        "filter_cg": 0,
+        "targ_pid": -1
+      },
+      "biosnoop": {
+        "filter_cg": 0,
+        "targ_queued": 0,
+        "filter_dev": 0,
+        "targ_dev": 0
+      },
+      "vfsstat": {},
+      "opensnoop": {
+        "targ_pid": 0,
+        "targ_tgid": 0,
+        "targ_uid": -1,
+        "targ_failed": 0
+      },
+      "syscount": {
+        "filter_cg": 0,
+        "count_by_process": 0,
+        "measure_latency": 1,
+        "filter_failed": 0,
+        "filter_errno": 0,
+        "filter_pid": 0
+      },
+      "tcpconnect": {
+        "filter_ports_len": 0,
+        "filter_uid": -1,
+        "filter_pid": 0,
+        "do_count": 0,
+        "source_port": 0
+      },
+      "tcplife": {
+        "filter_sport": 0,
+        "filter_dport": 0,
+        "target_pid": 0,
+        "target_family": 0
+      },
+      "runqlat": {
+        "filter_cg": 0,
+        "targ_per_process": 0,
+        "targ_per_thread": 0,
+        "targ_per_pidns": 0,
+        "targ_ms": 0,
+        "targ_tgid": 0
+      }
+    },
+    "target_vmlinux": "/workspaces/repository/kprog/tv/build-kernel-x86/vmlinux",
+    "target_vmlinux_sha256": "a28ac7e4238e6577ed50c5f0b9649df1ed4a2248fa639298f22f14f35d31e089",
+    "target_vmlinux_h_sha256": "1488e701f5dad3ab295a9712c508045f5656a781e68935896ad9dd5d62b1ab4d",
+    "compiler": "clang18 O3 original flags/division pass; target BTF from retained SMAP kernel; paired IR pipeline",
+    "files": {
+      "vendor/bpf/native_division.cpp": "3c65eeb586523a6a03e8192e6e0b51e3a534692328b40e85020a92128252ef87",
+      "vendor/bpf/Makefile": "3d2529d3ccd41b39a81b0bb509050d83db31b5aad5ff999399f4aaf695085a50",
+      "vendor/bpf/native_compat.h": "d8f3497c11a5ceebb14ea389c9a4018caf22f065c53ba407e856a23cee717a3a",
+      "vendor/bpf/write_native_manifest.py": "7db97e4613c4c6e2a69811ed1f7db170ea0f7b90c261322748d95f3f676fdca7",
+      "vendor/repos/bcc/libbpf-tools/runqlat.c": "21d035de67bfed6887df0d588c9529cdf962c3234b52d7b88e1d28f5674bec96",
+      "vendor/repos/bcc/libbpf-tools/tcplife.c": "dbfaab92186d5bed21c1a85a89f823f487515a2f42aa50718ffc9176bbabf1fc",
+      "vendor/repos/bcc/libbpf-tools/tcpconnect.c": "41f19bddf96960016a148b7223a01d79f1069fad03c6c1771dbffa8080b378df",
+      "vendor/repos/bcc/libbpf-tools/capable.c": "293a0f7fd77ffc6e4dde0ddf7f79b28871d7580ba8d1e258872cf087d017f03c",
+      "vendor/repos/bcc/libbpf-tools/biosnoop.c": "7b9862a3356a4d5612dc811bc8bc02eaa79681d31d70e09a3b17d2b5bbf9e0b9",
+      "vendor/repos/bcc/libbpf-tools/vfsstat.c": "e35fee4e9fde042ef7d1816e2dfef15b086fac1e417f2411eba09aafb2783b0c",
+      "vendor/repos/bcc/libbpf-tools/syscount.c": "c65c0b9f852017d6848dfc24a49e9b3a26f07ae18bf8d044e09977d6434e1bcd",
+      "vendor/repos/bcc/libbpf-tools/opensnoop.c": "685d09119cb07311a0d77b89632dae27c23487e62948117342ccd25045b3479b",
+      "vendor/bpf/bcc/libbpf-tools/tcplife.bpf.c": "51b8cad1b03fa262df3751e3304053a9523d98577b7ecfcf8a41463714b611b0",
+      "vendor/bpf/bcc/libbpf-tools/opensnoop.bpf.c": "8c322242892208993e5df9cf221049d481447e8d7436c7cdba202c3c25c6b3f3",
+      "vendor/bpf/bcc/libbpf-tools/vfsstat.bpf.c": "906a49977073624ce798f8a8195baec36845c0e4707dc2b253ec6c7177b04d3d",
+      "vendor/bpf/bcc/libbpf-tools/runqlat.bpf.c": "3001976a0ad976e1a4416dc13286ec2d554abbfcd68442fe17630755c867a753",
+      "vendor/bpf/bcc/libbpf-tools/tcpconnect.bpf.c": "376221e5307c8d2a2f1228efd68409e4e5b5ed762d569a3b3aa20dd46c5ff96f",
+      "vendor/bpf/bcc/libbpf-tools/syscount.bpf.c": "64c7af7ac28b2732f1710b1c52b664c6f170b29631a0e04d6b4066da9f43f4c2",
+      "vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c": "122b0835099ac0c299b1d003c6a8f046d547309347122a88cd674b241e6fc2d4",
+      "vendor/bpf/bcc/libbpf-tools/capable.bpf.c": "2146c2f3b30f3f70268b806a728e49be109dd8ed4430713aa88cb28070c64529"
+    }
+  },
+  "objects": [
+    {
+      "tool": "capable",
+      "label": "control",
+      "elf_sha256": "6f54568325e3eadb23095ff68ccd39685272dd3093e3a9810d74af4ad778aef5",
+      "sections": [
+        {
+          "name": "kprobe/cap_capable",
+          "bytes": 131,
+          "sha256": "b01cb511f157a1c56c54c3398667de7f43de24fe7b930e6fb55c771830d92331"
+        },
+        {
+          "name": "kretprobe/cap_capable",
+          "bytes": 515,
+          "sha256": "fea9bb04878e8727aaadc17e9253928065bdbeab3fa2865db62066c441662287"
+        }
+      ],
+      "executable_bytes": 646,
+      "instructions": 188,
+      "conditional_branches": 14,
+      "calls": 15,
+      "rip_memory_ops": 18
+    },
+    {
+      "tool": "capable",
+      "label": "candidate",
+      "elf_sha256": "af9f1d5de8b2c703dd51059de1e9c66c3d53ce69b5ddad794e2dfa33ae162d7c",
+      "sections": [
+        {
+          "name": "kprobe/cap_capable",
+          "bytes": 85,
+          "sha256": "be12877f58fdde2fdec78cd2608afd1f04d0b7cbad4342f25c8e616c97bf5780"
+        },
+        {
+          "name": "kretprobe/cap_capable",
+          "bytes": 243,
+          "sha256": "00a67c56bc0bed0909a60b884096838f3ccce2188e1a93910f37d7806fa9eb07"
+        }
+      ],
+      "executable_bytes": 328,
+      "instructions": 96,
+      "conditional_branches": 3,
+      "calls": 8,
+      "rip_memory_ops": 6
+    },
+    {
+      "tool": "biosnoop",
+      "label": "control",
+      "elf_sha256": "437b717312ad4946aa252ac783c24d1eefb13ebf3e3dc5882c172270e11324e9",
+      "sections": [
+        {
+          "name": "kprobe/blk_account_io_merge_bio",
+          "bytes": 121,
+          "sha256": "d95dae8aac7d24ca6e37064391254d528432ac44a3f8f94aae217f3bbf183f95"
+        },
+        {
+          "name": "tp_btf/block_rq_insert",
+          "bytes": 328,
+          "sha256": "633fcad87cae23934606ef979aa8e9306e040c32ce62d9cf3b76f58a825d88b5"
+        },
+        {
+          "name": "tp_btf/block_rq_issue",
+          "bytes": 385,
+          "sha256": "6ba8c4ef05e07c6216040ff19e5f28c6005afab41d2dadd8fbdaa62e75d36dec"
+        },
+        {
+          "name": "tp_btf/block_rq_complete",
+          "bytes": 459,
+          "sha256": "6a54e1336836c987af2ddce2bbf630983ed23ce04f4f0a49914bd98052269a4e"
+        }
+      ],
+      "executable_bytes": 1293,
+      "instructions": 363,
+      "conditional_branches": 27,
+      "calls": 30,
+      "rip_memory_ops": 28
+    },
+    {
+      "tool": "biosnoop",
+      "label": "candidate",
+      "elf_sha256": "2f3460b9a7b38b6a0b2a06165b3782c008ca51c8c8825a5caa80f1f9b54f0ea1",
+      "sections": [
+        {
+          "name": "kprobe/blk_account_io_merge_bio",
+          "bytes": 90,
+          "sha256": "82f6ebe78271b8f71693a266b7943bfd974deb92bc711dc9188fc050d76921c9"
+        },
+        {
+          "name": "tp_btf/block_rq_insert",
+          "bytes": 242,
+          "sha256": "2fd38ad730480664f8a4d9292e197af2cbed5ab9bc5910f6e35f1fbe9e8b2dc7"
+        },
+        {
+          "name": "tp_btf/block_rq_issue",
+          "bytes": 317,
+          "sha256": "c37dc6c3d750b5fa66509567500643597fd22480c30dc0ba7a08ad59462ce1fe"
+        },
+        {
+          "name": "tp_btf/block_rq_complete",
+          "bytes": 311,
+          "sha256": "35e43a84c3a762ec1cc142817e7a3df53069bb50a95d030a00ba2a29a828f3ec"
+        }
+      ],
+      "executable_bytes": 960,
+      "instructions": 264,
+      "conditional_branches": 10,
+      "calls": 24,
+      "rip_memory_ops": 13
+    },
+    {
+      "tool": "vfsstat",
+      "label": "control",
+      "elf_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
+      "sections": [
+        {
+          "name": "kprobe/vfs_read",
+          "bytes": 14,
+          "sha256": "7a53f1fb6ccdd62d9b82c64f34066316b1f08cef47c47d9a25afa55e34ac375c"
+        },
+        {
+          "name": "kprobe/vfs_write",
+          "bytes": 15,
+          "sha256": "319a8cd133eb71738e8031f1e9a9ca78432db9da9eec253057f2d4dc67f3d536"
+        },
+        {
+          "name": "kprobe/vfs_fsync",
+          "bytes": 15,
+          "sha256": "1bbba3baa891f04a77910a2df1aac220552b2a4e5728683a264a56979d0ce84a"
+        },
+        {
+          "name": "kprobe/vfs_open",
+          "bytes": 15,
+          "sha256": "44fee006a3d8558bb944838bc6547cfe0ed8044dcc18ac7e62843fa60d2e582c"
+        },
+        {
+          "name": "kprobe/vfs_create",
+          "bytes": 15,
+          "sha256": "982c1f09911560e071962de2e79baadbfa3e63a00e492d9ba6928a40d3070cf2"
+        },
+        {
+          "name": "fentry/vfs_read",
+          "bytes": 14,
+          "sha256": "7a53f1fb6ccdd62d9b82c64f34066316b1f08cef47c47d9a25afa55e34ac375c"
+        },
+        {
+          "name": "fentry/vfs_write",
+          "bytes": 15,
+          "sha256": "319a8cd133eb71738e8031f1e9a9ca78432db9da9eec253057f2d4dc67f3d536"
+        },
+        {
+          "name": "fentry/vfs_fsync",
+          "bytes": 15,
+          "sha256": "1bbba3baa891f04a77910a2df1aac220552b2a4e5728683a264a56979d0ce84a"
+        },
+        {
+          "name": "fentry/vfs_open",
+          "bytes": 15,
+          "sha256": "44fee006a3d8558bb944838bc6547cfe0ed8044dcc18ac7e62843fa60d2e582c"
+        },
+        {
+          "name": "fentry/vfs_create",
+          "bytes": 15,
+          "sha256": "982c1f09911560e071962de2e79baadbfa3e63a00e492d9ba6928a40d3070cf2"
+        }
+      ],
+      "executable_bytes": 148,
+      "instructions": 60,
+      "conditional_branches": 0,
+      "calls": 0,
+      "rip_memory_ops": 10
+    },
+    {
+      "tool": "vfsstat",
+      "label": "candidate",
+      "elf_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
+      "sections": [
+        {
+          "name": "kprobe/vfs_read",
+          "bytes": 14,
+          "sha256": "7a53f1fb6ccdd62d9b82c64f34066316b1f08cef47c47d9a25afa55e34ac375c"
+        },
+        {
+          "name": "kprobe/vfs_write",
+          "bytes": 15,
+          "sha256": "319a8cd133eb71738e8031f1e9a9ca78432db9da9eec253057f2d4dc67f3d536"
+        },
+        {
+          "name": "kprobe/vfs_fsync",
+          "bytes": 15,
+          "sha256": "1bbba3baa891f04a77910a2df1aac220552b2a4e5728683a264a56979d0ce84a"
+        },
+        {
+          "name": "kprobe/vfs_open",
+          "bytes": 15,
+          "sha256": "44fee006a3d8558bb944838bc6547cfe0ed8044dcc18ac7e62843fa60d2e582c"
+        },
+        {
+          "name": "kprobe/vfs_create",
+          "bytes": 15,
+          "sha256": "982c1f09911560e071962de2e79baadbfa3e63a00e492d9ba6928a40d3070cf2"
+        },
+        {
+          "name": "fentry/vfs_read",
+          "bytes": 14,
+          "sha256": "7a53f1fb6ccdd62d9b82c64f34066316b1f08cef47c47d9a25afa55e34ac375c"
+        },
+        {
+          "name": "fentry/vfs_write",
+          "bytes": 15,
+          "sha256": "319a8cd133eb71738e8031f1e9a9ca78432db9da9eec253057f2d4dc67f3d536"
+        },
+        {
+          "name": "fentry/vfs_fsync",
+          "bytes": 15,
+          "sha256": "1bbba3baa891f04a77910a2df1aac220552b2a4e5728683a264a56979d0ce84a"
+        },
+        {
+          "name": "fentry/vfs_open",
+          "bytes": 15,
+          "sha256": "44fee006a3d8558bb944838bc6547cfe0ed8044dcc18ac7e62843fa60d2e582c"
+        },
+        {
+          "name": "fentry/vfs_create",
+          "bytes": 15,
+          "sha256": "982c1f09911560e071962de2e79baadbfa3e63a00e492d9ba6928a40d3070cf2"
+        }
+      ],
+      "executable_bytes": 148,
+      "instructions": 60,
+      "conditional_branches": 0,
+      "calls": 0,
+      "rip_memory_ops": 10
+    },
+    {
+      "tool": "opensnoop",
+      "label": "control",
+      "elf_sha256": "a75fa794049d47e444f59a7f966104ba44e7bc6cb0c12925b997afdc2458f5c8",
+      "sections": [
+        {
+          "name": "tracepoint/syscalls/sys_enter_open",
+          "bytes": 148,
+          "sha256": "b4236fef0cca003a21ae840dc43bb8ca0a486d69c7d5df094e630629114ebd14"
+        },
+        {
+          "name": "tracepoint/syscalls/sys_enter_openat",
+          "bytes": 148,
+          "sha256": "a546a856b367e057c9f2d45913f97ec81ee70e1a668c0dbc53ace0f6e4d11ca1"
+        },
+        {
+          "name": "tracepoint/syscalls/sys_exit_open",
+          "bytes": 264,
+          "sha256": "4a27cb88aa771d8d8204129653c4c65112dccb292f205c9f603f4bf11046ebe9"
+        },
+        {
+          "name": "tracepoint/syscalls/sys_exit_openat",
+          "bytes": 264,
+          "sha256": "4a27cb88aa771d8d8204129653c4c65112dccb292f205c9f603f4bf11046ebe9"
+        }
+      ],
+      "executable_bytes": 824,
+      "instructions": 252,
+      "conditional_branches": 18,
+      "calls": 26,
+      "rip_memory_ops": 16
+    },
+    {
+      "tool": "opensnoop",
+      "label": "candidate",
+      "elf_sha256": "1fe73bb6874c4f8fbfb39b9d68e216e9ba297c1fe3d69af5620bb705b713f5d4",
+      "sections": [
+        {
+          "name": "tracepoint/syscalls/sys_enter_open",
+          "bytes": 74,
+          "sha256": "fac074448767bcfe9eeb49f7b369f55d067f5194d5200719844ec621a8250461"
+        },
+        {
+          "name": "tracepoint/syscalls/sys_enter_openat",
+          "bytes": 74,
+          "sha256": "5e2ef87a021778190a19a5283a1eba7703fcfacb3ed67a7935d983a0f11fb677"
+        },
+        {
+          "name": "tracepoint/syscalls/sys_exit_open",
+          "bytes": 244,
+          "sha256": "5d20cd402d947976c8ec8f7212859fe4a87b0f41678925b8398e4dc80a85db48"
+        },
+        {
+          "name": "tracepoint/syscalls/sys_exit_openat",
+          "bytes": 244,
+          "sha256": "5d20cd402d947976c8ec8f7212859fe4a87b0f41678925b8398e4dc80a85db48"
+        }
+      ],
+      "executable_bytes": 636,
+      "instructions": 184,
+      "conditional_branches": 2,
+      "calls": 24,
+      "rip_memory_ops": 8
+    },
+    {
+      "tool": "syscount",
+      "label": "control",
+      "elf_sha256": "72606e15d326a3b5f76000db22c5aa77bbb111acdf04dd900b468ab504c11741",
+      "sections": [
+        {
+          "name": "tracepoint/raw_syscalls/sys_enter",
+          "bytes": 112,
+          "sha256": "c9ef397b0f7b725adfbe1113c9f135d8b02a5ff69f1812e6a397bf7e7f9d6df1"
+        },
+        {
+          "name": "tracepoint/raw_syscalls/sys_exit",
+          "bytes": 428,
+          "sha256": "d787190d16ac99576bd37f80837a116bc987128669dbfe77a8e304481cf706b5"
+        }
+      ],
+      "executable_bytes": 540,
+      "instructions": 173,
+      "conditional_branches": 23,
+      "calls": 14,
+      "rip_memory_ops": 17
+    },
+    {
+      "tool": "syscount",
+      "label": "candidate",
+      "elf_sha256": "bff53460e37271dca3d81ec792b52da240ae8c5cc19542642f206f9c9298d44b",
+      "sections": [
+        {
+          "name": "tracepoint/raw_syscalls/sys_enter",
+          "bytes": 54,
+          "sha256": "e23d521dedccc2e66985205afb3e3fd49ecafbe42be228e14d5338d51d46b4db"
+        },
+        {
+          "name": "tracepoint/raw_syscalls/sys_exit",
+          "bytes": 179,
+          "sha256": "162d980d40c07d7646f6e1a2c5862272f9eea8618fc802d7082b8cb4b990d2c0"
+        }
+      ],
+      "executable_bytes": 233,
+      "instructions": 78,
+      "conditional_branches": 6,
+      "calls": 9,
+      "rip_memory_ops": 6
+    },
+    {
+      "tool": "tcpconnect",
+      "label": "control",
+      "elf_sha256": "3b5ea3cc68724165d2d61e4cc843abf20e790a08f7f9c81fd7c2656b7916a6b0",
+      "sections": [
+        {
+          "name": "kprobe/tcp_v4_connect",
+          "bytes": 100,
+          "sha256": "cd900c4984097d4f4a4b532297f72f43b0c8c19df47084dfe1d773c79cbafce5"
+        },
+        {
+          "name": "kretprobe/tcp_v4_connect",
+          "bytes": 649,
+          "sha256": "68d465e02987bf9c95153bdd814767f6abeea7463c49e53ede30c21a9a60155b"
+        },
+        {
+          "name": "kprobe/tcp_v6_connect",
+          "bytes": 100,
+          "sha256": "cd900c4984097d4f4a4b532297f72f43b0c8c19df47084dfe1d773c79cbafce5"
+        },
+        {
+          "name": "kretprobe/tcp_v6_connect",
+          "bytes": 691,
+          "sha256": "02f0adf950faa45981426c6b396d806db35edadca540ac62a0fe7b7df2e7e1a6"
+        }
+      ],
+      "executable_bytes": 1540,
+      "instructions": 418,
+      "conditional_branches": 34,
+      "calls": 38,
+      "rip_memory_ops": 28
+    },
+    {
+      "tool": "tcpconnect",
+      "label": "candidate",
+      "elf_sha256": "6544cbf567abcabbf92985ea7fee2b679237f1f4fe3656153e5dc17008d13a3b",
+      "sections": [
+        {
+          "name": "kprobe/tcp_v4_connect",
+          "bytes": 58,
+          "sha256": "9445b4a69a074e2f8e0de22951a397f9eae30be8c1b5e9a32eec77ea900d89ee"
+        },
+        {
+          "name": "kretprobe/tcp_v4_connect",
+          "bytes": 359,
+          "sha256": "58827f57dde1e7a8fe533683d4147deb423e825a4b62d24ce9dd9585c1621ce6"
+        },
+        {
+          "name": "kprobe/tcp_v6_connect",
+          "bytes": 58,
+          "sha256": "9445b4a69a074e2f8e0de22951a397f9eae30be8c1b5e9a32eec77ea900d89ee"
+        },
+        {
+          "name": "kretprobe/tcp_v6_connect",
+          "bytes": 363,
+          "sha256": "21f56ef4590b8feb5f2e47ce5810dd5604d2633e89f1f7e9d346c807e38cd0b6"
+        }
+      ],
+      "executable_bytes": 838,
+      "instructions": 219,
+      "conditional_branches": 4,
+      "calls": 26,
+      "rip_memory_ops": 8
+    },
+    {
+      "tool": "tcplife",
+      "label": "control",
+      "elf_sha256": "f5c4ead55a230bdc32b28fee562bc3d693b08536d0ed7688512d1c03ca0ec095",
+      "sections": [
+        {
+          "name": "tracepoint/sock/inet_sock_set_state",
+          "bytes": 1494,
+          "sha256": "9e7926d9e9041e5faceff66737955fc96a546766afe341fd4d46f6710eac7793"
+        }
+      ],
+      "executable_bytes": 1494,
+      "instructions": 357,
+      "conditional_branches": 51,
+      "calls": 32,
+      "rip_memory_ops": 14
+    },
+    {
+      "tool": "tcplife",
+      "label": "candidate",
+      "elf_sha256": "02569e84e1ad0efdc195b640df87631e372568dc01050a245d918b864a739af0",
+      "sections": [
+        {
+          "name": "tracepoint/sock/inet_sock_set_state",
+          "bytes": 1010,
+          "sha256": "75c11ab27d1c3c82fd2ac8f7f90321a4ba9079e20c8abc02faa99ad437ab3b23"
+        }
+      ],
+      "executable_bytes": 1010,
+      "instructions": 255,
+      "conditional_branches": 10,
+      "calls": 32,
+      "rip_memory_ops": 7
+    },
+    {
+      "tool": "runqlat",
+      "label": "control",
+      "elf_sha256": "861b58d9676a36496c2a26ed7dc4ce27e3a1eaffa5b6bcc89beaad3bc93ea8c0",
+      "sections": [
+        {
+          "name": ".text",
+          "bytes": 869,
+          "sha256": "4dbdd013b17ca4d6b5f57c03ad18cbf2d2a41a7f1a80044ae5f0040951e85a14"
+        },
+        {
+          "name": "tp_btf/sched_wakeup",
+          "bytes": 119,
+          "sha256": "9bf3415c4f640587c18cbab5acc1258c039a49428468b63fc23c5e888cefd8ad"
+        },
+        {
+          "name": "tp_btf/sched_wakeup_new",
+          "bytes": 119,
+          "sha256": "9bf3415c4f640587c18cbab5acc1258c039a49428468b63fc23c5e888cefd8ad"
+        },
+        {
+          "name": "tp_btf/sched_switch",
+          "bytes": 21,
+          "sha256": "0cd9fc969640fc9438005ffd6f12423b3e33bc24ab26bdeed9cd5a94d8740047"
+        },
+        {
+          "name": "raw_tp/sched_wakeup",
+          "bytes": 164,
+          "sha256": "142926c3dc058473e4fa73c59f8353aca8c5e46db4a3586f8a2c62d5b0eb2645"
+        },
+        {
+          "name": "raw_tp/sched_wakeup_new",
+          "bytes": 164,
+          "sha256": "142926c3dc058473e4fa73c59f8353aca8c5e46db4a3586f8a2c62d5b0eb2645"
+        },
+        {
+          "name": "raw_tp/sched_switch",
+          "bytes": 21,
+          "sha256": "0cd9fc969640fc9438005ffd6f12423b3e33bc24ab26bdeed9cd5a94d8740047"
+        }
+      ],
+      "executable_bytes": 1477,
+      "instructions": 452,
+      "conditional_branches": 40,
+      "calls": 36,
+      "rip_memory_ops": 31
+    },
+    {
+      "tool": "runqlat",
+      "label": "candidate",
+      "elf_sha256": "e712b17337dde49c3940ba705e43b35e643ae4737fac0e2e0e4c85e42ae5c89a",
+      "sections": [
+        {
+          "name": ".text",
+          "bytes": 575,
+          "sha256": "8a61f81f9e97f523115475886b04109fa0a7981b110334f878d9db1b361485ad"
+        },
+        {
+          "name": "tp_btf/sched_wakeup",
+          "bytes": 62,
+          "sha256": "3279f45068805182f2be864f36d210cac1546ae5230d3e64ab9ca5f55478752b"
+        },
+        {
+          "name": "tp_btf/sched_wakeup_new",
+          "bytes": 62,
+          "sha256": "3279f45068805182f2be864f36d210cac1546ae5230d3e64ab9ca5f55478752b"
+        },
+        {
+          "name": "tp_btf/sched_switch",
+          "bytes": 21,
+          "sha256": "0cd9fc969640fc9438005ffd6f12423b3e33bc24ab26bdeed9cd5a94d8740047"
+        },
+        {
+          "name": "raw_tp/sched_wakeup",
+          "bytes": 101,
+          "sha256": "4dd96048492518d23e1baa1d8341a0e2a7d2d030533aa170bf6abc1291d14275"
+        },
+        {
+          "name": "raw_tp/sched_wakeup_new",
+          "bytes": 101,
+          "sha256": "4dd96048492518d23e1baa1d8341a0e2a7d2d030533aa170bf6abc1291d14275"
+        },
+        {
+          "name": "raw_tp/sched_switch",
+          "bytes": 21,
+          "sha256": "0cd9fc969640fc9438005ffd6f12423b3e33bc24ab26bdeed9cd5a94d8740047"
+        }
+      ],
+      "executable_bytes": 943,
+      "instructions": 288,
+      "conditional_branches": 14,
+      "calls": 27,
+      "rip_memory_ops": 11
+    }
+  ],
+  "observations": {
+    "capable_dynamic_my_pid_reads": [
+      "%19 = load volatile i32, ptr @my_pid, align 4, !dbg !30861, !tbaa !30863"
+    ],
+    "syscount_control_task_fields": [
+      "11f:      \tleaq\t0xb30(%rax), %rdx",
+      "139:      \tmovl\t$0xd10, %edx            # imm = 0xD10"
+    ]
+  },
+  "replaced_loads": {
+    "capable": {
+      "bindings": {
+        "unique_type": 0,
+        "kernel_stack": 0,
+        "user_stack": 0,
+        "filter_cg": 0,
+        "targ_pid": -1
+      },
+      "replaced_loads": [
+        {
+          "global_name": "filter_cg",
+          "width": 8,
+          "value": 0,
+          "original": "  %10 = load volatile i8, ptr @filter_cg, align 1, !dbg !30846, !tbaa !30848, !range !30850, !noundef !1721"
+        },
+        {
+          "global_name": "targ_pid",
+          "width": 32,
+          "value": -1,
+          "original": "  %22 = load volatile i32, ptr @targ_pid, align 4, !dbg !30867, !tbaa !30863"
+        },
+        {
+          "global_name": "targ_pid",
+          "width": 32,
+          "value": -1,
+          "original": "  %25 = load volatile i32, ptr @targ_pid, align 4, !dbg !30871, !tbaa !30863"
+        },
+        {
+          "global_name": "unique_type",
+          "width": 32,
+          "value": 0,
+          "original": "  %44 = load volatile i32, ptr @unique_type, align 4, !dbg !30963, !tbaa !30863"
+        },
+        {
+          "global_name": "unique_type",
+          "width": 32,
+          "value": 0,
+          "original": "  %50 = load volatile i32, ptr @unique_type, align 4, !dbg !30975, !tbaa !30863"
+        },
+        {
+          "global_name": "kernel_stack",
+          "width": 8,
+          "value": 0,
+          "original": "  %63 = load volatile i8, ptr @kernel_stack, align 1, !dbg !30995, !tbaa !30848, !range !30850, !noundef !1721"
+        },
+        {
+          "global_name": "user_stack",
+          "width": 8,
+          "value": 0,
+          "original": "  %66 = load volatile i8, ptr @user_stack, align 1, !dbg !30998, !tbaa !30848, !range !30850, !noundef !1721"
+        },
+        {
+          "global_name": "user_stack",
+          "width": 8,
+          "value": 0,
+          "original": "  %76 = load volatile i8, ptr @user_stack, align 1, !dbg !31020, !tbaa !30848, !range !30850, !noundef !1721"
+        },
+        {
+          "global_name": "kernel_stack",
+          "width": 8,
+          "value": 0,
+          "original": "  %82 = load volatile i8, ptr @kernel_stack, align 1, !dbg !31027, !tbaa !30848, !range !30850, !noundef !1721"
+        }
+      ]
+    },
+    "biosnoop": {
+      "bindings": {
+        "filter_cg": 0,
+        "targ_queued": 0,
+        "filter_dev": 0,
+        "targ_dev": 0
+      },
+      "replaced_loads": [
+        {
+          "global_name": "filter_cg",
+          "width": 8,
+          "value": 0,
+          "original": "  %7 = load volatile i8, ptr @filter_cg, align 1, !dbg !30781, !tbaa !30783, !range !30785, !noundef !1705"
+        },
+        {
+          "global_name": "filter_cg",
+          "width": 8,
+          "value": 0,
+          "original": "  %12 = load volatile i8, ptr @filter_cg, align 1, !dbg !30838, !tbaa !30783, !range !30785, !noundef !1705"
+        },
+        {
+          "global_name": "filter_dev",
+          "width": 8,
+          "value": 0,
+          "original": "  %43 = load volatile i8, ptr @filter_dev, align 1, !dbg !30915, !tbaa !30783, !range !30785, !noundef !1705"
+        },
+        {
+          "global_name": "targ_dev",
+          "width": 32,
+          "value": 0,
+          "original": "  %46 = load volatile i32, ptr @targ_dev, align 4, !dbg !30918, !tbaa !30845"
+        },
+        {
+          "global_name": "filter_dev",
+          "width": 8,
+          "value": 0,
+          "original": "  %78 = load volatile i8, ptr @filter_dev, align 1, !dbg !30958, !tbaa !30783, !range !30785, !noundef !1705"
+        },
+        {
+          "global_name": "targ_dev",
+          "width": 32,
+          "value": 0,
+          "original": "  %81 = load volatile i32, ptr @targ_dev, align 4, !dbg !30960, !tbaa !30845"
+        },
+        {
+          "global_name": "filter_cg",
+          "width": 8,
+          "value": 0,
+          "original": "  %9 = load volatile i8, ptr @filter_cg, align 1, !dbg !30987, !tbaa !30783, !range !30785, !noundef !1705"
+        },
+        {
+          "global_name": "filter_dev",
+          "width": 8,
+          "value": 0,
+          "original": "  %47 = load volatile i8, ptr @filter_dev, align 1, !dbg !31040, !tbaa !30783, !range !30785, !noundef !1705"
+        },
+        {
+          "global_name": "targ_dev",
+          "width": 32,
+          "value": 0,
+          "original": "  %50 = load volatile i32, ptr @targ_dev, align 4, !dbg !31042, !tbaa !30845"
+        },
+        {
+          "global_name": "filter_cg",
+          "width": 8,
+          "value": 0,
+          "original": "  %8 = load volatile i8, ptr @filter_cg, align 1, !dbg !31099, !tbaa !30783, !range !30785, !noundef !1705"
+        },
+        {
+          "global_name": "targ_queued",
+          "width": 8,
+          "value": 0,
+          "original": "  %32 = load volatile i8, ptr @targ_queued, align 1, !dbg !31139, !tbaa !30783, !range !30785, !noundef !1705"
+        }
+      ]
+    },
+    "vfsstat": {
+      "bindings": {},
+      "replaced_loads": []
+    },
+    "opensnoop": {
+      "bindings": {
+        "targ_pid": 0,
+        "targ_tgid": 0,
+        "targ_uid": -1,
+        "targ_failed": 0
+      },
+      "replaced_loads": [
+        {
+          "global_name": "targ_tgid",
+          "width": 32,
+          "value": 0,
+          "original": "  %6 = load volatile i32, ptr @targ_tgid, align 4, !dbg !151, !tbaa !137"
+        },
+        {
+          "global_name": "targ_tgid",
+          "width": 32,
+          "value": 0,
+          "original": "  %11 = load volatile i32, ptr @targ_tgid, align 4, !dbg !156, !tbaa !137"
+        },
+        {
+          "global_name": "targ_pid",
+          "width": 32,
+          "value": 0,
+          "original": "  %14 = load volatile i32, ptr @targ_pid, align 4, !dbg !159, !tbaa !137"
+        },
+        {
+          "global_name": "targ_pid",
+          "width": 32,
+          "value": 0,
+          "original": "  %17 = load volatile i32, ptr @targ_pid, align 4, !dbg !162, !tbaa !137"
+        },
+        {
+          "global_name": "targ_uid",
+          "width": 32,
+          "value": -1,
+          "original": "  %20 = load volatile i32, ptr @targ_uid, align 4, !dbg !165, !tbaa !137"
+        },
+        {
+          "global_name": "targ_uid",
+          "width": 32,
+          "value": -1,
+          "original": "  %25 = load volatile i32, ptr @targ_uid, align 4, !dbg !179, !tbaa !137"
+        },
+        {
+          "global_name": "targ_tgid",
+          "width": 32,
+          "value": 0,
+          "original": "  %6 = load volatile i32, ptr @targ_tgid, align 4, !dbg !238, !tbaa !137"
+        },
+        {
+          "global_name": "targ_tgid",
+          "width": 32,
+          "value": 0,
+          "original": "  %11 = load volatile i32, ptr @targ_tgid, align 4, !dbg !242, !tbaa !137"
+        },
+        {
+          "global_name": "targ_pid",
+          "width": 32,
+          "value": 0,
+          "original": "  %14 = load volatile i32, ptr @targ_pid, align 4, !dbg !245, !tbaa !137"
+        },
+        {
+          "global_name": "targ_pid",
+          "width": 32,
+          "value": 0,
+          "original": "  %17 = load volatile i32, ptr @targ_pid, align 4, !dbg !247, !tbaa !137"
+        },
+        {
+          "global_name": "targ_uid",
+          "width": 32,
+          "value": -1,
+          "original": "  %20 = load volatile i32, ptr @targ_uid, align 4, !dbg !250, !tbaa !137"
+        },
+        {
+          "global_name": "targ_uid",
+          "width": 32,
+          "value": -1,
+          "original": "  %25 = load volatile i32, ptr @targ_uid, align 4, !dbg !257, !tbaa !137"
+        },
+        {
+          "global_name": "targ_failed",
+          "width": 8,
+          "value": 0,
+          "original": "  %13 = load volatile i8, ptr @targ_failed, align 1, !dbg !346, !tbaa !348, !range !350, !noundef !351"
+        },
+        {
+          "global_name": "targ_failed",
+          "width": 8,
+          "value": 0,
+          "original": "  %13 = load volatile i8, ptr @targ_failed, align 1, !dbg !418, !tbaa !348, !range !350, !noundef !351"
+        }
+      ]
+    },
+    "syscount": {
+      "bindings": {
+        "filter_cg": 0,
+        "count_by_process": 0,
+        "measure_latency": 1,
+        "filter_failed": 0,
+        "filter_errno": 0,
+        "filter_pid": 0
+      },
+      "replaced_loads": [
+        {
+          "global_name": "filter_cg",
+          "width": 8,
+          "value": 0,
+          "original": "  %8 = load volatile i8, ptr @filter_cg, align 1, !dbg !30804, !tbaa !30806, !range !30808, !noundef !1664"
+        },
+        {
+          "global_name": "filter_pid",
+          "width": 32,
+          "value": 0,
+          "original": "  %14 = load volatile i32, ptr @filter_pid, align 4, !dbg !30812, !tbaa !30798"
+        },
+        {
+          "global_name": "filter_pid",
+          "width": 32,
+          "value": 0,
+          "original": "  %17 = load volatile i32, ptr @filter_pid, align 4, !dbg !30815, !tbaa !30798"
+        },
+        {
+          "global_name": "filter_cg",
+          "width": 8,
+          "value": 0,
+          "original": "  %5 = load volatile i8, ptr @filter_cg, align 1, !dbg !30841, !tbaa !30806, !range !30808, !noundef !1664"
+        },
+        {
+          "global_name": "filter_pid",
+          "width": 32,
+          "value": 0,
+          "original": "  %19 = load volatile i32, ptr @filter_pid, align 4, !dbg !30863, !tbaa !30798"
+        },
+        {
+          "global_name": "filter_pid",
+          "width": 32,
+          "value": 0,
+          "original": "  %22 = load volatile i32, ptr @filter_pid, align 4, !dbg !30866, !tbaa !30798"
+        },
+        {
+          "global_name": "filter_failed",
+          "width": 8,
+          "value": 0,
+          "original": "  %25 = load volatile i8, ptr @filter_failed, align 1, !dbg !30869, !tbaa !30806, !range !30808, !noundef !1664"
+        },
+        {
+          "global_name": "filter_errno",
+          "width": 32,
+          "value": 0,
+          "original": "  %32 = load volatile i32, ptr @filter_errno, align 4, !dbg !30876, !tbaa !30798"
+        },
+        {
+          "global_name": "filter_errno",
+          "width": 32,
+          "value": 0,
+          "original": "  %37 = load volatile i32, ptr @filter_errno, align 4, !dbg !30880, !tbaa !30798"
+        },
+        {
+          "global_name": "measure_latency",
+          "width": 8,
+          "value": 1,
+          "original": "  %42 = load volatile i8, ptr @measure_latency, align 1, !dbg !30884, !tbaa !30806, !range !30808, !noundef !1664"
+        },
+        {
+          "global_name": "count_by_process",
+          "width": 8,
+          "value": 0,
+          "original": "  %53 = load volatile i8, ptr @count_by_process, align 1, !dbg !30896, !tbaa !30806, !range !30808, !noundef !1664"
+        },
+        {
+          "global_name": "count_by_process",
+          "width": 8,
+          "value": 0,
+          "original": "  %72 = load volatile i8, ptr @count_by_process, align 1, !dbg !30927, !tbaa !30806, !range !30808, !noundef !1664"
+        },
+        {
+          "global_name": "measure_latency",
+          "width": 8,
+          "value": 1,
+          "original": "  %84 = load volatile i8, ptr @measure_latency, align 1, !dbg !30948, !tbaa !30806, !range !30808, !noundef !1664"
+        }
+      ]
+    },
+    "tcpconnect": {
+      "bindings": {
+        "filter_ports_len": 0,
+        "filter_uid": -1,
+        "filter_pid": 0,
+        "do_count": 0,
+        "source_port": 0
+      },
+      "replaced_loads": [
+        {
+          "global_name": "filter_pid",
+          "width": 32,
+          "value": 0,
+          "original": "  %9 = load volatile i32, ptr @filter_pid, align 4, !dbg !30843, !tbaa !30840"
+        },
+        {
+          "global_name": "filter_pid",
+          "width": 32,
+          "value": 0,
+          "original": "  %14 = load volatile i32, ptr @filter_pid, align 4, !dbg !30848, !tbaa !30840"
+        },
+        {
+          "global_name": "filter_uid",
+          "width": 32,
+          "value": -1,
+          "original": "  %18 = load volatile i32, ptr @filter_uid, align 4, !dbg !30852, !tbaa !30840"
+        },
+        {
+          "global_name": "filter_uid",
+          "width": 32,
+          "value": -1,
+          "original": "  %22 = load volatile i32, ptr @filter_uid, align 4, !dbg !30856, !tbaa !30840"
+        },
+        {
+          "global_name": "source_port",
+          "width": 8,
+          "value": 0,
+          "original": "  %20 = load volatile i8, ptr @source_port, align 1, !dbg !30919, !tbaa !30921, !range !30923, !noundef !1622"
+        },
+        {
+          "global_name": "filter_ports_len",
+          "width": 32,
+          "value": 0,
+          "original": "  %29 = load volatile i32, ptr @filter_ports_len, align 4, !dbg !30937, !tbaa !30840"
+        },
+        {
+          "global_name": "filter_ports_len",
+          "width": 32,
+          "value": 0,
+          "original": "  %32 = load volatile i32, ptr @filter_ports_len, align 4, !dbg !30941, !tbaa !30840"
+        },
+        {
+          "global_name": "filter_ports_len",
+          "width": 32,
+          "value": 0,
+          "original": "  %38 = load volatile i32, ptr @filter_ports_len, align 4, !dbg !30941, !tbaa !30840"
+        },
+        {
+          "global_name": "do_count",
+          "width": 8,
+          "value": 0,
+          "original": "  %49 = load volatile i8, ptr @do_count, align 1, !dbg !30956, !tbaa !30921, !range !30923, !noundef !1622"
+        },
+        {
+          "global_name": "filter_pid",
+          "width": 32,
+          "value": 0,
+          "original": "  %9 = load volatile i32, ptr @filter_pid, align 4, !dbg !31100, !tbaa !30840"
+        },
+        {
+          "global_name": "filter_pid",
+          "width": 32,
+          "value": 0,
+          "original": "  %14 = load volatile i32, ptr @filter_pid, align 4, !dbg !31104, !tbaa !30840"
+        },
+        {
+          "global_name": "filter_uid",
+          "width": 32,
+          "value": -1,
+          "original": "  %18 = load volatile i32, ptr @filter_uid, align 4, !dbg !31108, !tbaa !30840"
+        },
+        {
+          "global_name": "filter_uid",
+          "width": 32,
+          "value": -1,
+          "original": "  %22 = load volatile i32, ptr @filter_uid, align 4, !dbg !31111, !tbaa !30840"
+        },
+        {
+          "global_name": "source_port",
+          "width": 8,
+          "value": 0,
+          "original": "  %20 = load volatile i8, ptr @source_port, align 1, !dbg !31152, !tbaa !30921, !range !30923, !noundef !1622"
+        },
+        {
+          "global_name": "filter_ports_len",
+          "width": 32,
+          "value": 0,
+          "original": "  %29 = load volatile i32, ptr @filter_ports_len, align 4, !dbg !31159, !tbaa !30840"
+        },
+        {
+          "global_name": "filter_ports_len",
+          "width": 32,
+          "value": 0,
+          "original": "  %32 = load volatile i32, ptr @filter_ports_len, align 4, !dbg !31162, !tbaa !30840"
+        },
+        {
+          "global_name": "filter_ports_len",
+          "width": 32,
+          "value": 0,
+          "original": "  %38 = load volatile i32, ptr @filter_ports_len, align 4, !dbg !31162, !tbaa !30840"
+        },
+        {
+          "global_name": "do_count",
+          "width": 8,
+          "value": 0,
+          "original": "  %49 = load volatile i8, ptr @do_count, align 1, !dbg !31172, !tbaa !30921, !range !30923, !noundef !1622"
+        }
+      ]
+    },
+    "tcplife": {
+      "bindings": {
+        "filter_sport": 0,
+        "filter_dport": 0,
+        "target_pid": 0,
+        "target_family": 0
+      },
+      "replaced_loads": [
+        {
+          "global_name": "target_family",
+          "width": 16,
+          "value": 0,
+          "original": "  %28 = load volatile i16, ptr @target_family, align 2, !dbg !31627, !tbaa !31618"
+        },
+        {
+          "global_name": "target_family",
+          "width": 16,
+          "value": 0,
+          "original": "  %31 = load volatile i16, ptr @target_family, align 2, !dbg !31630, !tbaa !31618"
+        },
+        {
+          "global_name": "filter_sport",
+          "width": 8,
+          "value": 0,
+          "original": "  %37 = load volatile i8, ptr @filter_sport, align 1, !dbg !31635, !tbaa !31637, !range !31639, !noundef !1622"
+        },
+        {
+          "global_name": "filter_dport",
+          "width": 8,
+          "value": 0,
+          "original": "  %110 = load volatile i8, ptr @filter_dport, align 1, !dbg !31660, !tbaa !31637, !range !31639, !noundef !1622"
+        },
+        {
+          "global_name": "target_pid",
+          "width": 32,
+          "value": 0,
+          "original": "  %201 = load volatile i32, ptr @target_pid, align 4, !dbg !31706, !tbaa !31682"
+        },
+        {
+          "global_name": "target_pid",
+          "width": 32,
+          "value": 0,
+          "original": "  %204 = load volatile i32, ptr @target_pid, align 4, !dbg !31709, !tbaa !31682"
+        },
+        {
+          "global_name": "target_pid",
+          "width": 32,
+          "value": 0,
+          "original": "  %233 = load volatile i32, ptr @target_pid, align 4, !dbg !31738, !tbaa !31682"
+        },
+        {
+          "global_name": "target_pid",
+          "width": 32,
+          "value": 0,
+          "original": "  %236 = load volatile i32, ptr @target_pid, align 4, !dbg !31741, !tbaa !31682"
+        }
+      ]
+    },
+    "runqlat": {
+      "bindings": {
+        "filter_cg": 0,
+        "targ_per_process": 0,
+        "targ_per_thread": 0,
+        "targ_per_pidns": 0,
+        "targ_ms": 0,
+        "targ_tgid": 0
+      },
+      "replaced_loads": [
+        {
+          "global_name": "filter_cg",
+          "width": 8,
+          "value": 0,
+          "original": "  %6 = load volatile i8, ptr @filter_cg, align 1, !dbg !30774, !tbaa !30776, !range !30778, !noundef !1656"
+        },
+        {
+          "global_name": "targ_tgid",
+          "width": 32,
+          "value": 0,
+          "original": "  %18 = load volatile i32, ptr @targ_tgid, align 4, !dbg !30865, !tbaa !30859"
+        },
+        {
+          "global_name": "targ_tgid",
+          "width": 32,
+          "value": 0,
+          "original": "  %21 = load volatile i32, ptr @targ_tgid, align 4, !dbg !30868, !tbaa !30859"
+        },
+        {
+          "global_name": "filter_cg",
+          "width": 8,
+          "value": 0,
+          "original": "  %6 = load volatile i8, ptr @filter_cg, align 1, !dbg !30891, !tbaa !30776, !range !30778, !noundef !1656"
+        },
+        {
+          "global_name": "targ_tgid",
+          "width": 32,
+          "value": 0,
+          "original": "  %18 = load volatile i32, ptr @targ_tgid, align 4, !dbg !30904, !tbaa !30859"
+        },
+        {
+          "global_name": "targ_tgid",
+          "width": 32,
+          "value": 0,
+          "original": "  %21 = load volatile i32, ptr @targ_tgid, align 4, !dbg !30906, !tbaa !30859"
+        },
+        {
+          "global_name": "filter_cg",
+          "width": 8,
+          "value": 0,
+          "original": "  %8 = load volatile i8, ptr @filter_cg, align 1, !dbg !30953, !tbaa !30776, !range !30778, !noundef !1656"
+        },
+        {
+          "global_name": "targ_tgid",
+          "width": 32,
+          "value": 0,
+          "original": "  %22 = load volatile i32, ptr @targ_tgid, align 4, !dbg !30968, !tbaa !30859"
+        },
+        {
+          "global_name": "targ_tgid",
+          "width": 32,
+          "value": 0,
+          "original": "  %25 = load volatile i32, ptr @targ_tgid, align 4, !dbg !30970, !tbaa !30859"
+        },
+        {
+          "global_name": "filter_cg",
+          "width": 8,
+          "value": 0,
+          "original": "  %8 = load volatile i8, ptr @filter_cg, align 1, !dbg !31001, !tbaa !30776, !range !30778, !noundef !1656"
+        },
+        {
+          "global_name": "targ_tgid",
+          "width": 32,
+          "value": 0,
+          "original": "  %22 = load volatile i32, ptr @targ_tgid, align 4, !dbg !31016, !tbaa !30859"
+        },
+        {
+          "global_name": "targ_tgid",
+          "width": 32,
+          "value": 0,
+          "original": "  %25 = load volatile i32, ptr @targ_tgid, align 4, !dbg !31018, !tbaa !30859"
+        },
+        {
+          "global_name": "filter_cg",
+          "width": 8,
+          "value": 0,
+          "original": "  %13 = load volatile i8, ptr @filter_cg, align 1, !dbg !31094, !tbaa !30776, !range !30778, !noundef !1656"
+        },
+        {
+          "global_name": "targ_tgid",
+          "width": 32,
+          "value": 0,
+          "original": "  %31 = load volatile i32, ptr @targ_tgid, align 4, !dbg !31130, !tbaa !30859"
+        },
+        {
+          "global_name": "targ_tgid",
+          "width": 32,
+          "value": 0,
+          "original": "  %34 = load volatile i32, ptr @targ_tgid, align 4, !dbg !31132, !tbaa !30859"
+        },
+        {
+          "global_name": "targ_per_process",
+          "width": 8,
+          "value": 0,
+          "original": "  %51 = load volatile i8, ptr @targ_per_process, align 1, !dbg !31154, !tbaa !30776, !range !30778, !noundef !1656"
+        },
+        {
+          "global_name": "targ_per_thread",
+          "width": 8,
+          "value": 0,
+          "original": "  %57 = load volatile i8, ptr @targ_per_thread, align 1, !dbg !31159, !tbaa !30776, !range !30778, !noundef !1656"
+        },
+        {
+          "global_name": "targ_per_pidns",
+          "width": 8,
+          "value": 0,
+          "original": "  %62 = load volatile i8, ptr @targ_per_pidns, align 1, !dbg !31166, !tbaa !30776, !range !30778, !noundef !1656"
+        },
+        {
+          "global_name": "targ_ms",
+          "width": 8,
+          "value": 0,
+          "original": "  %96 = load volatile i8, ptr @targ_ms, align 1, !dbg !31235, !tbaa !30776, !range !30778, !noundef !1656"
+        }
+      ]
+    }
+  },
+  "native_executions": 0,
+  "guest_executions": 0
+}
