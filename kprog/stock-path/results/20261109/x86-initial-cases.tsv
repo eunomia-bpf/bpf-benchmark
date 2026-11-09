@@ -1,0 +1,39 @@
+case	expected_fixture	stage	returncode	native_execution
+valid_control	retval2	valid_executed	0	true
+valid_copy_restore	retval2	valid_executed	0	true
+valid_alias_load	retval2	valid_executed	0	true
+valid_cmov_alias	retval2	valid_executed	0	true
+valid_cmov_from_sp	retval2	valid_executed	0	true
+valid_cmov_to_sp	retval2	valid_executed	0	true
+valid_cmov_self_sp	retval2	valid_executed	0	true
+valid_xchg_alias	retval2	valid_executed	0	true
+valid_spill_restore	retval2	valid_executed	0	true
+past_data_end_read	load-only safety	verifier_rejected	1	false
+past_data_end_write	load-only safety	verifier_rejected	1	false
+missing_data_end_check	load-only safety	verifier_rejected	1	false
+map_value_oob	load-only safety	verifier_rejected	1	false
+nullable_map_dereference	load-only safety	verifier_rejected	1	false
+invalid_helper_argument	load-only safety	verifier_rejected	1	false
+stack_oob	load-only safety	verifier_rejected	1	false
+uninitialized_stack	load-only safety	accepted_finding	0	false
+unbounded_loop	load-only safety	verifier_rejected	1	false
+unbounded_indirect_jump	load-only safety	specialization_rejected	1	false
+unsupported_instruction	load-only safety	verifier_rejected	1	false
+immediate_push_branch	load-only safety	accepted_finding	0	false
+entry_return_slot_overwrite	load-only safety	verifier_rejected	1	false
+stack_base_flags	load-only safety	accepted_finding	0	false
+undefined_entry_register	load-only safety	verifier_rejected	1	false
+undefined_entry_flags	load-only safety	verifier_rejected	1	false
+div8_zero	load-only safety	verifier_rejected	1	false
+div8_overflow	load-only safety	verifier_rejected	1	false
+div16_zero	load-only safety	verifier_rejected	1	false
+div16_overflow	load-only safety	verifier_rejected	1	false
+div32_zero	load-only safety	verifier_rejected	1	false
+div32_overflow	load-only safety	verifier_rejected	1	false
+div64_zero	load-only safety	verifier_rejected	1	false
+div64_overflow	load-only safety	verifier_rejected	1	false
+helper_clobbered_register	load-only safety	verifier_rejected	1	false
+high32_positive_byte	load-only safety	verifier_rejected	1	false
+high32_positive_qword	load-only safety	verifier_rejected	1	false
+high32_negative_byte	load-only safety	verifier_rejected	1	false
+high32_negative_qword	load-only safety	verifier_rejected	1	false

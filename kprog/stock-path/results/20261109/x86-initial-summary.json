@@ -1,0 +1,16 @@
+{
+  "lane": "S17",
+  "suite": "current-generator stock x86 initial38",
+  "repository_commit": "23e4a7e269f80874836376d01debbc0da1fe67ff",
+  "kernel_commit": "6b572b667e0ac83f7a9b725bb02d7490abaf3e59",
+  "cases": 38,
+  "stages": {
+    "valid_executed": 9,
+    "verifier_rejected": 25,
+    "accepted_finding": 3,
+    "specialization_rejected": 1
+  },
+  "native_risk_executions": 0,
+  "uninitialized_stack": "accepted load-only with original root credentials; credential comparison follows",
+  "kinsn_receipt": "kprog/results/kprog_exit_stack_20261109/summary.json"
+}
