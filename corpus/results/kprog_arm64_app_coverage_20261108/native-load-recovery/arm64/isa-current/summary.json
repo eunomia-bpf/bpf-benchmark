@@ -1,0 +1,21 @@
+{
+  "utc": "2026-11-09T01:54:16.421201+00:00",
+  "make_exit": 0,
+  "runtime": {
+    "ok": true,
+    "guest_exit": 0,
+    "qemu_returncode": 0,
+    "compiler_exit": 0,
+    "guest": {
+      "ok": true,
+      "cases": 34,
+      "accepted_unsafe": 0
+    },
+    "archive_sha256": "2b06f451fa7f72c92a7644c85cbbd98d5b0a54bdc3107109cfcc162bf472f7dd"
+  },
+  "stages": {
+    "valid_executed": 4,
+    "verifier_rejected": 28,
+    "specialization_rejected": 2
+  }
+}
