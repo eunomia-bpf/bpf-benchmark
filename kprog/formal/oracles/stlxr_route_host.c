@@ -184,6 +184,9 @@ static void model_mem_write(unsigned base, unsigned width, __u64 value,
 static void model_write_status(unsigned dst)
 {
 	if (dst == ARM64_SP) {
+        /* A status write to the SP coordinate releases its private frame. */
+        host_stack_release_zero(stk_exp, stk_tag_exp, STACK_BYTES,
+                                ARM64_SIM_STACK_BIAS, msp, failure);
 		msp = failure;
 	} else if (dst != ARM64_XZR && dst != ARM64_REG_NONE) {
 		mreg[dst] = failure;
