@@ -1,0 +1,17 @@
+{
+  "utc": "2026-11-09T05:37:11.469694+00:00",
+  "phase": "queued_after_canonical_BCC_Katran",
+  "controller_pid": 2805722,
+  "control_controller_pid": 2776127,
+  "control_state": {
+    "state": "running",
+    "image": "sha256:714f4261db8f36c35a3aa5f4dfe3fdfc1327967d79e22da47f7006ec33d7b8a7"
+  },
+  "prior_native_compile": "f828386bdb07c64422e8c2e837c97e226a8af4ae",
+  "source_delta": "O3 to Os in NATIVE_CFLAGS and KATRAN_NATIVE_CFLAGS",
+  "change_boundary": "Native P production before submission",
+  "safety": "b44ff4ff79b551f208055d1b39ec2c49543ccd76",
+  "smap_live_null": "4ececd2cbb25cda5ba4880a3a81cb34fbe268f2e",
+  "native_flags_sha256": "299e5dad4094f317757f8f2710360bd8ca549a79e13fbec4b93a598750e7ae96",
+  "timing_owner": "R with restored 9f3855f6f workload"
+}

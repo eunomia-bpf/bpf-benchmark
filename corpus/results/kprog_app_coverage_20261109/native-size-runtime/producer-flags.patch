@@ -1,0 +1,20 @@
+--- producer-O3.mk
++++ producer-Os.mk
+@@ -52,7 +52,7 @@
+ 	$(if $(filter arm64 aarch64,$(ARCH)),-mtune=neoverse-n1 -mgeneral-regs-only -mno-outline-atomics \
+ 		-ffixed-x18 -ffixed-x26 -ffixed-x27 \
+ 		-ffixed-x28)
+-NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE \
++NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -Os -g -fPIC -c -DMICRO_NATIVE \
+ 	-fpass-plugin=$(NATIVE_DIVISION_PLUGIN) \
+ 	-D$(TARGET_ARCH_DEFINE) \
+ 	-fms-extensions \
+@@ -60,7 +60,7 @@
+ 	-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
+ 	-fno-optimize-sibling-calls \
+ 	-Wno-unknown-attributes -mllvm -switch-to-lookup=false
+-KATRAN_NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE \
++KATRAN_NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -Os -g -fPIC -c -DMICRO_NATIVE \
+ 	-fpass-plugin=$(NATIVE_DIVISION_PLUGIN) \
+ 	-D$(TARGET_ARCH_DEFINE) \
+ 	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
