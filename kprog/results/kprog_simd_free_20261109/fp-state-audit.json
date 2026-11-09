@@ -1,0 +1,1640 @@
+{
+  "native_objects": 318,
+  "fp_state_instruction_hits": 0,
+  "positive_detection_controls": [
+    {
+      "path": "rejection/arm64/cnt/input.o",
+      "detected": [
+        "       0:      \tcnt\tv0.16b, v0.16b"
+      ]
+    },
+    {
+      "path": "rejection/arm64/d_store/input.o",
+      "detected": [
+        "       0:      \tstr\td0, [x0]"
+      ]
+    },
+    {
+      "path": "rejection/arm64/fmov/input.o",
+      "detected": [
+        "       0:      \tfmov\td0, x0"
+      ]
+    },
+    {
+      "path": "rejection/arm64/q_load/input.o",
+      "detected": [
+        "       0:      \tldr\tq0, [x0]"
+      ]
+    },
+    {
+      "path": "rejection/x86/movaps_load/input.o",
+      "detected": [
+        "       0:      \tmovaps\t(%rdi), %xmm0"
+      ]
+    },
+    {
+      "path": "rejection/x86/movups_store/input.o",
+      "detected": [
+        "       0:      \tmovups\t%xmm0, (%rdi)"
+      ]
+    },
+    {
+      "path": "rejection/x86/x87/input.o",
+      "detected": [
+        "       0:      \tfldz"
+      ]
+    }
+  ],
+  "objects": [
+    {
+      "path": "micro-final/arm64/control/micro/bcc_runqlat_log2_histogram_bucket.native.asm",
+      "sha256": "9526b53dd227575fce0d175b14bc2aa3a4d619b7050a97d83897a17aa24378d8",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/bcc_tcpconnect_ipv4_tuple_filter.native.asm",
+      "sha256": "b172d361c33e1f7d966108b844d532af21484e679ec2e79a42cb682c86a53dd9",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/bitmap_popcount_scan.native.asm",
+      "sha256": "d07b1fe3b69cd607ed51a9fd8c4db09fd083a78e5fc36092feeef5f1b198eaf4",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/bpf_local_call_fanout_dispatch.native.asm",
+      "sha256": "4527121f4742d9e84524a7958072c49755253a7bab1c0fcd905333ab7b36a3f9",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/bpftrace_comm_key_fnv_hash.native.asm",
+      "sha256": "a32b8d98414922250243fab914c1a3e26088efccca5e6ce120ec055ebe6f1425",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/bpftrace_string_search_prefix_scan.native.asm",
+      "sha256": "312271c0d95381ae96d4d797e8c9d1bfd147e6d503c489b76cd56ab0165ac14c",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/cgroup_skb_hash_chain.native.asm",
+      "sha256": "43e05925867d1ff11b998f128168ea66bd0df1af3c5efaa225a08dba20041a34",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/cilium_ct_nat_tuple_rewrite.native.asm",
+      "sha256": "505447398406ac6a68146b61b854dbf68ce0893ada8f90d57a7e541ea6cf254a",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/cilium_policy_guard_tree_filter.native.asm",
+      "sha256": "56cf22e207e90264f420ee3c6bf9725ced377a02ba9aa4ebd8d95c9ba52fe67b",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/cilium_socket_lb_service_select.native.asm",
+      "sha256": "1ecae14622225ec8852a0501081dc8b51e7ec143dfd21d3eae2afadba13b3d3f",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/flow_5tuple_rss_hash.native.asm",
+      "sha256": "ea7851070ed0ed9b6942700ada8663bef15c88029ce30d484c2303347fb65a07",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/flow_record_field_scan.native.asm",
+      "sha256": "12b30812ae5548b8a7d8b223d5f4c9cced78e6e5c1868d6b5245c4314d5d9737",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/katran_lb_consistent_hash_select.native.asm",
+      "sha256": "c4e14eb96a105752e1cdbbb896f0260e741173abe018d06bfee1971d0d7b8db2",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/otel_stack_frame_unwind_scan.native.asm",
+      "sha256": "f9bc7aa51d0fc9355cae0a22b980689718215f84a2807f12d65d5b7e5cf628ab",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/packed_header_bitfield_decode.native.asm",
+      "sha256": "854ea672a08441ee6d167d9415c937daa06bccf852ed8ec3d088b32fd361bb07",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/packet_checksum_fold.native.asm",
+      "sha256": "a2644b7c2917fcb224301d79fef86996a9362a41756365122c99f871de47c14e",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/packet_record_bounds_window.native.asm",
+      "sha256": "cfb7e734b2478bc745425a96793f41511cf2c4707cae5c2f9a6350da3097cae8",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/packet_toeplitz_rss_hash.native.asm",
+      "sha256": "a275ba8e5ab216627fbe61c56d8bf0e20ca08fa49077a236d07bc4b4535ccfc1",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/packet_vlan_tcpopt_parser.native.asm",
+      "sha256": "e2482a93a1fa78570f65e7872c90ec4a84680f5f1fcf190b8b426b45a908c3ff",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/payload_prefix_memcmp_scan.native.asm",
+      "sha256": "e82d6685f607b2a9bd09cf74e088d6105f36f63936b685b609f3165f6886a1f3",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/simple.native.asm",
+      "sha256": "d341fc5d96c5c01e118e7a7f383bb91b7efb83e8b6a6e9ec99d9c44a6f36f024",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/simple_packet.native.asm",
+      "sha256": "a0b699e0621b11549e8bcf1958aca4ecf440dc212a50fcac5c707cf7f3332698",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/siphash_rotate64_mixer.native.asm",
+      "sha256": "3e4795c20ae1ab43c9c042ac5995a5683d8080e81846587e8b5fafe4f3183cf2",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/sorted_rule_binary_search.native.asm",
+      "sha256": "0f6826acb8e51825184da5cc3c2a84957b1551eaf08379141c8fc5b03535023b",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/tc_packet_checksum_fold.native.asm",
+      "sha256": "c7111cc36c52501ce47c3a7831c2ea40eb5e083a9f2f584aa371301a33facbf2",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/tetragon_process_event_arg_filter.native.asm",
+      "sha256": "02be8115b4d7b306594953aaa43158fac73003b336ad75b660af9931ebedd390",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/trace_event_type_switch_dispatch.native.asm",
+      "sha256": "e0c09675438cec8c5e8bf869f1d0693de73943691fc999985f9b215292227b9a",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/tracee_http_method_prefix_detect.native.asm",
+      "sha256": "535ca4463e07b39a962a8021cfcc4e41d878706d9a224a8cefaf5df046144b89",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/micro/tracee_syscall_name_table_lookup.native.asm",
+      "sha256": "35eafb0e0ffbc1341bc246066951013af5e2a5f42607d81cfa7a5a61cac2f8d7",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/control/stage2/unchecked_packet_read.native.asm",
+      "sha256": "bd03f6e0a9ff8ef91e1080c16b25eea8234aa4bbeac3be495c5b877c54a41600",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/bcc_runqlat_log2_histogram_bucket.native.asm",
+      "sha256": "140259d1a8dce678d0be47dc1dcd4c7e76dd2e8fd935f23cdc758c61bd6a8195",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/bcc_tcpconnect_ipv4_tuple_filter.native.asm",
+      "sha256": "fa8e4546efa9c3145b583459f80e0677a345ac990d52f8c217c630289b21d0d0",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/bitmap_popcount_scan.native.asm",
+      "sha256": "d2f66e2963291b0f1ee4914bd0e9e243214333bffcad39315a3e86fd814f2f04",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/bpf_local_call_fanout_dispatch.native.asm",
+      "sha256": "57e5658efe8cdd4c064b1894e413f00fe0c119c69a54214e8c932996a90f6eaa",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/bpftrace_comm_key_fnv_hash.native.asm",
+      "sha256": "b35f92cb8d92a6b5cc42e3fd0327f5b18a95f94f23460dfc99b7ebc886734d2b",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/bpftrace_string_search_prefix_scan.native.asm",
+      "sha256": "24ab2ebfb3b11f49d3d515495745f7216e16eedd61fc4e61dcffee331a729e80",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/cgroup_skb_hash_chain.native.asm",
+      "sha256": "b3176512e89f61ddd1a0d5ce64394c9752c88c4245c88da27d0aad5e40e86861",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/cilium_ct_nat_tuple_rewrite.native.asm",
+      "sha256": "e6a47b53dfe51cdee7fdac263d5d9bec83ebdca64c87fd650321bbee105ac6eb",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/cilium_policy_guard_tree_filter.native.asm",
+      "sha256": "d4ac17ddd2456f3d9febbfdbef9c7f086822b103462c8891db66ad3f888019f6",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/cilium_socket_lb_service_select.native.asm",
+      "sha256": "c27d81b9fa5b763daff69315e3acd5eddfa951c1b0a40de7f41c4f37f0035719",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/flow_5tuple_rss_hash.native.asm",
+      "sha256": "903bb2db9b87bfaa12254d3132d8d82c4b9643abd852ddc0bebe0cc16fe4aac7",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/flow_record_field_scan.native.asm",
+      "sha256": "e763ec7d71920b67969d6edc90ff521cc4cfc63fde6290d251f6dff2db8cc921",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/katran_lb_consistent_hash_select.native.asm",
+      "sha256": "28f9f825cadecdc277d34fae6422e355e749cfe8231860d69fa0b431b83c3b62",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/otel_stack_frame_unwind_scan.native.asm",
+      "sha256": "e6d5d176a43a4f3f1d8286832cd9b371862ef5bd1cdc8bc70291e086e1b96b99",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/packed_header_bitfield_decode.native.asm",
+      "sha256": "af33287f0a631711111bdd12e7fcfd98b899315517ae03e81207b3b66ea8420c",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/packet_checksum_fold.native.asm",
+      "sha256": "de7d337b74a67463dccc470450729f9f9b88ed03b245985e0a0fe856cb936466",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/packet_record_bounds_window.native.asm",
+      "sha256": "9d2c79cbcfdaff75224f14c9dd24b449c3081a35e82f9026b8b63e412a003825",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/packet_toeplitz_rss_hash.native.asm",
+      "sha256": "0426465231f5f741e297bf2ba37ef0f1e616d9fb272bc6a185cedd6151e952b9",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/packet_vlan_tcpopt_parser.native.asm",
+      "sha256": "f4daf1ac2ba66f0971fa3834d06d2dea49dbd4ed25b7cd737f6685c7393ed9b5",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/payload_prefix_memcmp_scan.native.asm",
+      "sha256": "8b529b251bef8e023eda96ede226967cec5b4ed59b075322e4e0fb806d430000",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/simple.native.asm",
+      "sha256": "c606b74c50019752ff4c5072913b9e488b70800cd1712fa5706deb0d5d13d95f",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/simple_packet.native.asm",
+      "sha256": "d9dfe08734cb720cadd9c77a0226b9f11ff0b0419705c07118838f045caa2efc",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/siphash_rotate64_mixer.native.asm",
+      "sha256": "a547cdee7743100d4f2edc39c9e3bcc822597e27efe2f87362eaa8d5371cd250",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/sorted_rule_binary_search.native.asm",
+      "sha256": "ab0767060774e8c42f7cb2b57e28911d518d7ff8ac15a9238be0e789a0248ef4",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/tc_packet_checksum_fold.native.asm",
+      "sha256": "eaa280d843bd6cbec510817c94202d8aa4fa754d272297a1b6bdeb3182b805b5",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/tetragon_process_event_arg_filter.native.asm",
+      "sha256": "912d60a28c97c48391eb27ccf9f5081c2f41352b74175dcc43bac0638d25c525",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/trace_event_type_switch_dispatch.native.asm",
+      "sha256": "a2059120acc2c84d3c9e641f6b4f8fae2b5ad54a9c028b4cce16e827ab5049ea",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/tracee_http_method_prefix_detect.native.asm",
+      "sha256": "981d20a8bcf6d8c620b67bbbd6fe82578a371fb8b9e595e81ed1aa53023b8add",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/micro/tracee_syscall_name_table_lookup.native.asm",
+      "sha256": "f23c8c4a8550acce1eb36fbeb697a6b76eafee83ea13633494225b8582f0363c",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/arm64/scalar/stage2/unchecked_packet_read.native.asm",
+      "sha256": "a9d0ad839cc5369c63005d880c23363f2eee35d7ffbfffa7b71751e952120d70",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/bcc_runqlat_log2_histogram_bucket.native.asm",
+      "sha256": "cf7b93a1cede09b4f9dd337e381d86c33ec3d20ba4cdc843fd0efd1134b4f35c",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/bcc_tcpconnect_ipv4_tuple_filter.native.asm",
+      "sha256": "2853fe2bb49c36d4e7ad59d94b197723d09f0732db84b9e5945d67fc7b16f015",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/bitmap_popcount_scan.native.asm",
+      "sha256": "bb95380a28d473add3c5342feb9a21d249ee900b3a31f79ff48d737190c9d0d8",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/bpf_local_call_fanout_dispatch.native.asm",
+      "sha256": "94fe1dfae5d8bb5b8db1786cbda9ab68e6814493c94f426735dac2c765565df7",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/bpftrace_comm_key_fnv_hash.native.asm",
+      "sha256": "db633166ea42b58787d03b3614aed55f70052bddef167ce8a6e379a9d8d82805",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/bpftrace_string_search_prefix_scan.native.asm",
+      "sha256": "64d5d4cef486de7c1cfd45fa0c8ca30d1cb83b4d028b39a9bb19a607452c0418",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/cgroup_skb_hash_chain.native.asm",
+      "sha256": "223da438a445292c48c3c660c03bb36e0ba4ac9ab08c53b44c062a6905fe64d7",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/cilium_ct_nat_tuple_rewrite.native.asm",
+      "sha256": "8d5629fa40146afe1ee11d45e7c8448ab111c9727dee89b85e5e96bae3897e31",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/cilium_policy_guard_tree_filter.native.asm",
+      "sha256": "f0c44bdef30e60ebe69c13a4da4e4dfb7b4e4cda477c37dbe33f95b22b1fdd57",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/cilium_socket_lb_service_select.native.asm",
+      "sha256": "40da001e5e5b8c1d2deb13babca21575e9b0fa8178faf3e1015eb6fdaea79ade",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/flow_5tuple_rss_hash.native.asm",
+      "sha256": "5cab568b70ae3c7c5b2b4ea7af7994c5c100542c1c7f2f79209e731a0934cb19",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/flow_record_field_scan.native.asm",
+      "sha256": "bc286eedcbcbf30c011b2652e7d7d43cde71bdb5fb15743170fd9c998b3c5666",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/katran_lb_consistent_hash_select.native.asm",
+      "sha256": "b4ab7a0c015ad7a80712a65297f03cad3cef9272e3163543ca37c6d33321ba85",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/otel_stack_frame_unwind_scan.native.asm",
+      "sha256": "cd9abade4e20b2ec658cb0d80ae6e45364ef1fe5769776ae01dec2cc59fc7356",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/packed_header_bitfield_decode.native.asm",
+      "sha256": "8da6667c9b4ca39a3825dd4b93c93c2903516891eace25938af4cfb1b69739be",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/packet_checksum_fold.native.asm",
+      "sha256": "e3ed4905172f3db55f8f52b43cb916d4c5a889253f389e06feb31635a96a08f9",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/packet_record_bounds_window.native.asm",
+      "sha256": "ab542cdb64eacea0e847ce024d15cec07c6e32e1b102a0cc5ceae9ee450c5d36",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/packet_toeplitz_rss_hash.native.asm",
+      "sha256": "879c2b014d29dacd0e88d6d75a5c62a1250e3a412e132e8374509e2e7763dd21",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/packet_vlan_tcpopt_parser.native.asm",
+      "sha256": "d936ea79b830d5c0e7f4b0a2dd35765446ed8c60e86e438bf6b4e9d5f60f88d8",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/payload_prefix_memcmp_scan.native.asm",
+      "sha256": "1486081500457565880f5ed1d0be466943bc38cabc541f461fe61b8f11769618",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/simple.native.asm",
+      "sha256": "4df8f2a69449de66053da8005b80d994707d37e45f8f9a747ba161e87745b102",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/simple_packet.native.asm",
+      "sha256": "96bdeee50562808bdafe7c3cf0116ce44251a3f664af7d3c04ea5014ba55b330",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/siphash_rotate64_mixer.native.asm",
+      "sha256": "b4be1332f885d9c9840779cad9bbc9cad97781e1ad0490e555b9f884c3de984a",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/sorted_rule_binary_search.native.asm",
+      "sha256": "48f15a0d4e4647a19f8385afea2dcb9497a9395ca7c9a43d9cf327cd4321194b",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/tc_packet_checksum_fold.native.asm",
+      "sha256": "7e47be75ccf05edc431451e3f436b7cbf8c9a2dac8a555d377cee1e59a1fd63b",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/tetragon_process_event_arg_filter.native.asm",
+      "sha256": "62d44693639ad07cb992f4cab0ac10325585fcfaa61ed91ce406ef1d8049b0ab",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/trace_event_type_switch_dispatch.native.asm",
+      "sha256": "b61b670255891a3419c40efcdb9faf7eb71f1c19defbb51ebe5302718bb26404",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/tracee_http_method_prefix_detect.native.asm",
+      "sha256": "c4dd2d1ce6d8ba475513c418e79a412b316451c04044f538e020687572128236",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/micro/tracee_syscall_name_table_lookup.native.asm",
+      "sha256": "d9e30a6fb75531e4675f006e473f5abb754dd7b37dde5228576a626ff49f6c17",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/control/stage2/unchecked_packet_read.native.asm",
+      "sha256": "1c5587d32cb04956d195acc7e543ffa1b1829a4396846ccd8226aef37b5cafa5",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/bcc_runqlat_log2_histogram_bucket.native.asm",
+      "sha256": "5c7373a97c24cf652b9549c7965a81d1b70b019b922d55ce8c1743fcdcb36b63",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/bcc_tcpconnect_ipv4_tuple_filter.native.asm",
+      "sha256": "ecb29e86df0b55997fd0acf085ee3517a27eb0cc57bc1f25bfb92956ec65b4a0",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/bitmap_popcount_scan.native.asm",
+      "sha256": "3a0bfa41731532e91d48d515e4cf245b2a91736f4d963b79ad9aff9d23285b48",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/bpf_local_call_fanout_dispatch.native.asm",
+      "sha256": "b5b7b42ac5b706868a4ed3749e49bb71c038f5491d10559a9f824d6d736b4f5d",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/bpftrace_comm_key_fnv_hash.native.asm",
+      "sha256": "e81b00caa3bba4a281a5b35109f6cf11dda5b21df716b74cb19cefd9acf57922",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/bpftrace_string_search_prefix_scan.native.asm",
+      "sha256": "a2852abfc1cb087fc7f3096cbcbc2e8ed4a6dc02e1eeacc8f16d3b148f341b73",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/cgroup_skb_hash_chain.native.asm",
+      "sha256": "82a30a4791a25552a3927969489a63d164daba48996df94d4a0ef92cde84c9c9",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/cilium_ct_nat_tuple_rewrite.native.asm",
+      "sha256": "6308c4ca13375541de5d0a4f60b02f61f21c4255c6f9809eff6c38383cda2033",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/cilium_policy_guard_tree_filter.native.asm",
+      "sha256": "a260202d6471c5a7f49b602b0c8a500124d44146543df41d4986d27323ba077c",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/cilium_socket_lb_service_select.native.asm",
+      "sha256": "a988c8b461fb830225b30266eb9e1bd23f3f3bf6fad1c66b19ec6fdbcf5df499",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/flow_5tuple_rss_hash.native.asm",
+      "sha256": "23050e3b10812d3073b4ec580bac405ea02578c3bee004bf450fd5cb262749a9",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/flow_record_field_scan.native.asm",
+      "sha256": "6ec837498587553ffb0f3c603f3a5ebe112d643a991317ba6c25d3c60b19ee94",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/katran_lb_consistent_hash_select.native.asm",
+      "sha256": "bd21a73715223cbff45a6baab7d899cca5ad68dc3e0f32998add0648d9e31849",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/otel_stack_frame_unwind_scan.native.asm",
+      "sha256": "9f3728c347e1ee1ddc68518bfba51bf3e3b6451eddf3051c8705a762ac4da433",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/packed_header_bitfield_decode.native.asm",
+      "sha256": "f6f179607e2a8d0971c65177794c7f1dbe3986cba9aba6bbd7482ae058b1798b",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/packet_checksum_fold.native.asm",
+      "sha256": "feb520eb5ce41717f7a78c6766307ef3e42bf6b811c3e29226b14efdaa24f450",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/packet_record_bounds_window.native.asm",
+      "sha256": "a5a005e4337135891e2345c847212bfb838ba204c0772def2acdfa2b64854d9d",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/packet_toeplitz_rss_hash.native.asm",
+      "sha256": "984938105f063b9bafb504d8868c0dd7a23e8ae47793fc93626480a59a8e4217",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/packet_vlan_tcpopt_parser.native.asm",
+      "sha256": "52b82bbc68bfdb5c3b0e16931c1fcc51dc763c7814589e99204dfb56466e6624",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/payload_prefix_memcmp_scan.native.asm",
+      "sha256": "c231fa458ef205ca0f09daa67ccfe080abf6d7c3037cf1d193ef6ed9111b48cd",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/simple.native.asm",
+      "sha256": "e7db0e7962dbd8310034f71f1141e9f95a1083ae4000c691c64a127b6bd5898b",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/simple_packet.native.asm",
+      "sha256": "0f9958561659af115c9a9a0177ced78e4403451f4db12cc1d382ce180e5ac100",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/siphash_rotate64_mixer.native.asm",
+      "sha256": "0f66919032c6ea19c104809bd0358cf0a6a8c9acd300dc4a88c573db8eff3423",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/sorted_rule_binary_search.native.asm",
+      "sha256": "d87e589b84e13008b1412b30011bfb813b0fa2ae9450c98657b27ee86e7e8db9",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/tc_packet_checksum_fold.native.asm",
+      "sha256": "dded8a1248115cd1a4cc7d6ad76615892fffda6dc22de76a85e4746c655e7152",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/tetragon_process_event_arg_filter.native.asm",
+      "sha256": "55e5dac87abf798019f08342cf846b0bb98ba4aec254d514d0ce9ef20b239fa9",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/trace_event_type_switch_dispatch.native.asm",
+      "sha256": "592f53f3d70f6a66df1cb66201a6f7a4fb0e0ecdf77ffadab9141e4cb521e8da",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/tracee_http_method_prefix_detect.native.asm",
+      "sha256": "ac0c76245a5a472d7a00f522686ca1e55f7b0ea5c18bb85062600aad4b108c19",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/micro/tracee_syscall_name_table_lookup.native.asm",
+      "sha256": "f02726a20f3cdb8214397fc09fe97f91a5bd6f3f9c80818034e472751fe07749",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "micro-final/x86/scalar/stage2/unchecked_packet_read.native.asm",
+      "sha256": "4531aeecd6f402ae5d0980cd8886affdccaa1a46cece6b59942130902a60f311",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/bcc/biosnoop.native.asm",
+      "sha256": "0c877d0160ba954d850fd4be4769a6f75eeaccce2d000a85c29573dae8baf46f",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/bcc/capable.native.asm",
+      "sha256": "b4403b5114cb3b158f71bf979d089e2bf4bf44193a54e1e86814ae7232a1e60c",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/bcc/opensnoop.native.asm",
+      "sha256": "a18662a8bf6014603df3d093b529ec63da69a28ec29ca7290ff3acb4af5a423b",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/bcc/runqlat.native.asm",
+      "sha256": "23b032d8975bf985ac9584d9caa531d29939c0db2903565dc5d422effe1c1935",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/bcc/syscount.native.asm",
+      "sha256": "ddb1222630f9337f54a3830671475fd2bca5194220e53b2155fd5eef3dcafe4d",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/bcc/tcpconnect.native.asm",
+      "sha256": "3ca9c8e020c9642cce82174da2dd777f8923f9ad6fb0fbbcee7a58faf6160a6e",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/bcc/tcplife.native.asm",
+      "sha256": "f58df277378b11f6cd026cfd2b99b26fc8b31d93d1a3c14c104144d81d1c3b64",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/bcc/vfsstat.native.asm",
+      "sha256": "96c91d0ffa9d99108b43227019aaf3c719e4d490274ac42e77acb52c39fd8005",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/cilium/bpf_alignchecker.native.asm",
+      "sha256": "6db84d54a32ec10120ac677fc5d8f08bb38e75f644d1e0a9479f187584a01bc4",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/cilium/bpf_host.native.asm",
+      "sha256": "e00749edaa15548e7a90ed80131aafacdb4ea50e21d78897e5b03c87e8f1683d",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/cilium/bpf_lxc.native.asm",
+      "sha256": "daa53969dad79a975cc5f9ba857d290bf68caa248f2c3abc68abb6b6c87adfb1",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/cilium/bpf_overlay.native.asm",
+      "sha256": "3fe2af8ee1a4c6353535d207a01f45019973bdd98c7223b1bd6e975ce128f878",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/cilium/bpf_sock.native.asm",
+      "sha256": "eb2ee37c29cfa0cf8e7e72a515748695e1297e85459550f08af08749fd29d77b",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/cilium/bpf_wireguard.native.asm",
+      "sha256": "5e9a59bbd3a3af19567ee987a69aac6fe9e0f1aac8b415c9f1c8bdb42b9f689e",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/cilium/bpf_xdp.native.asm",
+      "sha256": "af5e692d0ad2fb7a7446fb6c7a3ccf40348c6d24f6dd77b2640b4216e7d8e102",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/katran/balancer.native.asm",
+      "sha256": "0b424dbed629734503354823c833d6d3aabef476666a6f848558c679e932fd0c",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/katran/healthchecking.native.asm",
+      "sha256": "44c2d1aaedf03f305170a734da445b6345b9df7d3109e1ee116236662a2f5516",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/katran/healthchecking_ipip.native.asm",
+      "sha256": "53c20bc251d0fef4014e1b9273655f5a5276f5ede58e9323085d7164575c565d",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/katran/xdp_root.native.asm",
+      "sha256": "6e67dbe2199664a21b8e4cd436344cd6ef52ab972c2a09920a3500e654e9a170",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/otel/custom_trace.native.asm",
+      "sha256": "aa4ca30a475c8659c5088fdcc49750450436853fbc5952b5f75135f6ce11e746",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/otel/dotnet_tracer.native.asm",
+      "sha256": "d01043aeb25f6d198399cda630ab5ce472dd3eb6ed9c19f62ee355be8deabe64",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/otel/go_labels.native.asm",
+      "sha256": "c1917680b0f13f9f23916ef2e8a08fbd715adca36d9d9a4239cce4e07dbe2c00",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/otel/hotspot_tracer.native.asm",
+      "sha256": "6ae0bb34ba96ff59ffa8e8dde8aa7f31c0b88ccf054df6a4f4d01424d84c436a",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/otel/interpreter_dispatcher.native.asm",
+      "sha256": "9ca59b962c5690104138ecd6207a9fd5605b5e123c012bdd65b401e253f81735",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/otel/native_stack_trace.native.asm",
+      "sha256": "4662cce3c2dd086a6ba71fcf47c7e74332ab5a1da10de46690284c23b1740343",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/otel/off_cpu.native.asm",
+      "sha256": "6a8bd9349d114b260267b498810e8e7ed9543d16c39caa29f536f69d1d24e677",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/otel/perl_tracer.native.asm",
+      "sha256": "a396d9b82bd66d82cd4edd9303dcc20b01c9b6df184cc813307af4a09363de42",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/otel/php_tracer.native.asm",
+      "sha256": "1151746a1cc1b3361c792baeb8075dd8730750678496e89ec99c9f5e00808f0b",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/otel/python_tracer.native.asm",
+      "sha256": "110bb1b52d190b8040f8d34d17e51224248d6a3e560d37b1d975ee92716ceb9e",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/otel/ruby_tracer.native.asm",
+      "sha256": "7ba328d7b873ca02bfa459895a2b52b444cb5de1fd1c4f4cbbefcb38f65c96f7",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/otel/sched_monitor.native.asm",
+      "sha256": "2a9d4674cf02235a08b792b9c9ffd5d172193606c8034be3a1f817e76be15850",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/otel/system_config.native.asm",
+      "sha256": "7c495f933b9808e69904d11f2555195d95c31e4ae7809b5b417b167bed594dbf",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/otel/uprobe.native.asm",
+      "sha256": "453d7acf0bfdbf75ac26c00568332c65df4fc2161c6ba6251a7ae4a4cc95a101",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/otel/v8_tracer.native.asm",
+      "sha256": "343c0ac6a02cfb8369752d8f616b4c2e2f5ffe3dfcd93e7db371a113f8490dc5",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_cgroup_mkdir_v511.native.asm",
+      "sha256": "218a6a75da23ad1879b1f248dc8decca8bad7b10134cd0c511df7e07efc1620c",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_cgroup_release_v511.native.asm",
+      "sha256": "db854f0feb0248fc473a89a6c294511adbcf4b55b2d97766984c823ea449b177",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_cgroup_rmdir_v511.native.asm",
+      "sha256": "baddfa9597abbb8cbf030ff1998c95097bf350cc1875f99eea9e4d2edba59500",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_execve_event_v310.native.asm",
+      "sha256": "eade5415d46dc43f9dcdcd1bbbeed593a3560b705834ce3de86d0206bcd0ef11",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_execve_event_v511.native.asm",
+      "sha256": "668b3777ba3b333f09e1d132e790eb9a221d16a1cda2c5e89c050ae4922a9cda",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_execve_event_v53.native.asm",
+      "sha256": "c8b9b36b53927561adbdfc1d03c345f6ae2ebbd533f29e42dd7b69041281958e",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_execve_event_v61.native.asm",
+      "sha256": "d270b004b6eb70a36bdfb08a1ee80b21c7d1d54b746ecd2d06536c425985242f",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_execve_map_update_v511.native.asm",
+      "sha256": "78b18b150387de8a84d589623a280b6e62dffdc33fee9027d3230a6d73616d51",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_execve_map_update_v53.native.asm",
+      "sha256": "83964aaa53b26ed3cb6b8e8805fc7eaf1ed5830381ecfab6ab2533832c0f960f",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_execve_map_update_v61.native.asm",
+      "sha256": "d558398f8d0e75414f57b49e6e8030098bc672ad7f9e2f79fd55ec9e1b3d4d98",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_exit_v310.native.asm",
+      "sha256": "2893fa3f39c4d383f1c47d98663cb9f8e7f28a18c208ab4cfad652185544e934",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_exit_v511.native.asm",
+      "sha256": "2978bc4cfe636d27c4d6ab1d950a0fc0330f6296bc6344de4cab2da230a4d4a6",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_fork_v310.native.asm",
+      "sha256": "3e28cd710bab7e45e6a3eb4e0bd6343d6f5b104016368b145b9a0e48a5704a00",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_fork_v511.native.asm",
+      "sha256": "f6ace28cbc0a8f2c3a50f8c70f073860ea4f8c74664171f8f120d1fa7b8dc899",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_fentry_v511.native.asm",
+      "sha256": "6ea43905747c4dc1a91a8bfea64bdf051a198a174f048b954c399143c9258ddf",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_fentry_v53.native.asm",
+      "sha256": "48d132b454bb37e8570b5c22dd4c5fbcc24c0c8ed6b9187d3abc35a719a2e6b5",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_fentry_v61.native.asm",
+      "sha256": "605c8c34064b53b31a0b3c3b140c5f95386254a3f25b720f0f4d50408b43254e",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_fexit_v511.native.asm",
+      "sha256": "6bf66f558ee367ad66664f56104adbfc85fa9b87782699f7b0e073038bb95cb6",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_fexit_v53.native.asm",
+      "sha256": "e8fffda228d7f079e7d83ea12599896a9fca27bb4378f901b8a5da1cd33e7d35",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_fexit_v61.native.asm",
+      "sha256": "0727de9b0dd3bc94fd00c568b0c242bc13862d566977d724dcf7777aefc87a9c",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_kprobe_v511.native.asm",
+      "sha256": "6f64bcc49d1afe66aed000efb9404fea4a2d3fda7bdac2da1647927c7346c4a7",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_kprobe_v53.native.asm",
+      "sha256": "2de73b2d335293588b3e79d6560983a3b88df17d76d375f2b9f41618f901883d",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_kprobe_v61.native.asm",
+      "sha256": "30b39f7a028e1f70a41fc44549c43597939e647978bc29faa71ffd36b54b98ff",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_core_v511.native.asm",
+      "sha256": "4161f47a4b9ace7a5e854ec194c907ba9854d8286f3d89ffc8ce49861cba2e32",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_core_v61.native.asm",
+      "sha256": "1b1e35a4c2cb79230bfec8a464a8510341e34e80321eb34d5886253e97c0da16",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_ima_bprm_v511.native.asm",
+      "sha256": "91ae6783a45086865ce6c231ffa33ef839f5e704d464976c1878678f019c1471",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_ima_bprm_v61.native.asm",
+      "sha256": "033dcb8e5411e1e7476dcd83cdbeb9de39a1685f17221a2212b2315523c6b6be",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_ima_file_v511.native.asm",
+      "sha256": "2489dab16e33e61ea750ce25f07a09636ad96f9d0d7eff9edc10329c96955b8b",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_ima_file_v61.native.asm",
+      "sha256": "0cb105cfad335c3a08fa74746bd483641339f320e55560e931b33af3bee953dc",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_output_v511.native.asm",
+      "sha256": "ce8df65ad9463b8d06b64c228b821e26fcb7c3c4227c86c99cd1c92549c9e27d",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_output_v61.native.asm",
+      "sha256": "138cbfe09b01b6eca475c7f17ffe41a28cc2be3120be8882cebccaac1c11d48c",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_rawtp_v511.native.asm",
+      "sha256": "7cc38b6d8ab2111716cff3c3dcc6c34a106a63f26a1382de602b9b2c91059d76",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_rawtp_v53.native.asm",
+      "sha256": "060580de6f79d05c5b13c3303cd41cb8ebe7ab52a31644365359efe5a0469433",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_rawtp_v61.native.asm",
+      "sha256": "d3168bf5cab52737cad288b719998a467a595496d3b64c9c60f1e89fbb7e1813",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_retkprobe_v511.native.asm",
+      "sha256": "9a3983f72fc473bc2cd3701640d7d80b07900a3de6c523db4b32f57562a48893",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_retkprobe_v53.native.asm",
+      "sha256": "d7234746a7994033f14146a3d207b7b9fc4c91811fd7e1eab15385fa4fe163c8",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_retkprobe_v61.native.asm",
+      "sha256": "96149cbd26c4d593141080c20d7e7924526c27fec752680cb75fae71608f2c85",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_retuprobe_v511.native.asm",
+      "sha256": "748f121bf817b312509d9671445fac7ba8e0bd0bd302415246581c9b24262d4e",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_retuprobe_v53.native.asm",
+      "sha256": "a24c98357931ed742737db6689e163d655956aab4bc72500b3c92cdb914c60cb",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_retuprobe_v61.native.asm",
+      "sha256": "a1b8cde277a02ca886fe390c506e0721f42a40c9d0c333789dec2ca56ba8712f",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_tracepoint_v511.native.asm",
+      "sha256": "e23fda136fc799d8e3ab65dd20aee163d5eb3127bd2c553e857d16f1c7bd89f5",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_tracepoint_v53.native.asm",
+      "sha256": "bdf36e13719e264813ebc208ebf34b64e1697f1434152e29b5b924de638a0276",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_tracepoint_v61.native.asm",
+      "sha256": "fd10a80fb70785c657d0772f366545d8c3a483c39915557c7f9768da167b0253",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_uprobe_v511.native.asm",
+      "sha256": "a86bd40c72a4109a57368fa4669f596da6a03cfc0d74a488bc745b0e3f78fbde",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_uprobe_v53.native.asm",
+      "sha256": "e9b212fd4e2fb8365e9da39528161ca58b041cdf2348412509146a9851eea0c3",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_uprobe_v61.native.asm",
+      "sha256": "1064e5c29f5eb3e8db90c3543211f58d72a905a12f0aa8a80047d079234911e8",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_usdt_v511.native.asm",
+      "sha256": "36319f36d38f2150df2090f7ad94ee40008e7e9cfeef1e05a8e9347dd1e0adb4",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_usdt_v53.native.asm",
+      "sha256": "b230791bd4c64a79ea14fab083eb0f8b615eb7726b73a7dacc0d8f803afc2141",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_generic_usdt_v61.native.asm",
+      "sha256": "7a677bc9c73e19f023ab459b1553aedebb0b8aae9670f0ed5a1b8440831c9237",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_loader_v511.native.asm",
+      "sha256": "3b85dd549965fe7e14b67bc6ca75fde9fb7297a07a2a3870b824f6dedd52245b",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_kprobe_v511.native.asm",
+      "sha256": "b5a8738f366585097af0ef1a025d574f5475cbc0af4c7f1cb0aa4b2524e08466",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_kprobe_v53.native.asm",
+      "sha256": "9aabada2f8742b4bb5b7f1102cad7743d3311c816796e2769b9e5b7eb29cea8f",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_kprobe_v61.native.asm",
+      "sha256": "38f7814fdbb796f5c44d71cdabdabca6fa2bbaef822c8477e00a02c8f60fb181",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_retkprobe_v511.native.asm",
+      "sha256": "0b0b2289c457f3d597e3fa76b9aaf52830c9c0d7833b053ff80571d2c00032c2",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_retkprobe_v53.native.asm",
+      "sha256": "0e9ec8499bc8d25c17e285304793bf66682bfb48b090d6fccddf56271f61ed31",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_retkprobe_v61.native.asm",
+      "sha256": "ff3271f8342ecd30e44932ba4844db2553c4729fa4907dc38548d8444ee7c018",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_retuprobe_v511.native.asm",
+      "sha256": "d61f8271499da875d14bce39ba49a8626d3036861e4b5ba91b1a85602f856746",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_retuprobe_v61.native.asm",
+      "sha256": "d397442f6fac7fa96e0db6b59a003b6e6814c65f2ca20402a5a9aa3ac4560718",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_uprobe_v511.native.asm",
+      "sha256": "8c696df73099689d6133a302d96a49be484af707b1d9c659b55e85a1d73c8c5a",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_uprobe_v61.native.asm",
+      "sha256": "4d86d9224f94996c8848f7a03825c364a474cc8e0a314a0b13d021907e32bea8",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_usdt_v511.native.asm",
+      "sha256": "dfa0199116643964487dd3990c00ba7b56de8c247e346ef3d1b574d3cb71a7f8",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tetragon/bpf_multi_usdt_v61.native.asm",
+      "sha256": "585960a9d3b6986459829423c6fa54785d078009d416c49a9497e0f882ca5ef4",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tracee/lsm_support/kprobe_check.native.asm",
+      "sha256": "232e58eb001481752ee8f48f074e3e7c779e5e737803418b887952c190f11873",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tracee/lsm_support/lsm_check.native.asm",
+      "sha256": "ad109645b89c7df777a53eb5fa0fa50091f7259f405ab016b56a3929c2b9f0b0",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/arm64/7.0.0-30-generic/native/tracee/tracee.native.asm",
+      "sha256": "b93f083f66ec50e2ead80d30916ebdae9c704dc43a5305766de099700ae2b93c",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/bcc/biosnoop.native.asm",
+      "sha256": "07c3ae962bbdd83e977babe3f5d5972168f17ece1789b25f95a7887563f1f5a3",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/bcc/capable.native.asm",
+      "sha256": "e40ea134d71f3adb3428778f077c6e50e87fe89444f3c0fe6ed5dafc7ffefae2",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/bcc/opensnoop.native.asm",
+      "sha256": "89883a9d018b978748ef074a914ab1c61eae0df9cc9ecb0d41615d33ff0d50d0",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/bcc/runqlat.native.asm",
+      "sha256": "e5fa1af8427da1e3f6391a381e4c8c23cebac71c3a5418c7bce86c4322fcbb6c",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/bcc/syscount.native.asm",
+      "sha256": "629e869f05d23e0767c2b975865ef9837c7c127afd107791968531e4ddc45c5b",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/bcc/tcpconnect.native.asm",
+      "sha256": "26b8f023147f6fdaacf21ef7ecccfae7908f0b4a54a8fb5269b989fa94647f6a",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/bcc/tcplife.native.asm",
+      "sha256": "14191c99b3047667b6e236732b0694d0a7e9b271aecb5aaacb7e0d4d5f1e563e",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/bcc/vfsstat.native.asm",
+      "sha256": "ff5c5249843f21aefe369a34502b60dc3d21cb4969358b1673ea911645def202",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/cilium/bpf_alignchecker.native.asm",
+      "sha256": "558f637c4f7ec012e3174826859b60e0ced2b0fc82a9accfdc85d6454cabbd24",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/cilium/bpf_host.native.asm",
+      "sha256": "952834996af9b57ad16ddb6265190aea0bca945451e2869acc2bfe5283a679b5",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/cilium/bpf_lxc.native.asm",
+      "sha256": "87bd0a1740bb980ea15e1daadbb6be84597db93066df021a24f059150ba80563",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/cilium/bpf_overlay.native.asm",
+      "sha256": "0689820d41620cffeafaa15bd5cbb0d172e2bb5d95f1565d0ebc4ffe03460119",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/cilium/bpf_sock.native.asm",
+      "sha256": "fb985b2c88c4a74fa06a8773055d6a4acf4017e5a431eb785673f96ff3f48ba9",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/cilium/bpf_wireguard.native.asm",
+      "sha256": "cfec1319c1a8a8b088f7ffe7b94075c17274df9ae99edf7f6b5dc4c53a3e0c2e",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/cilium/bpf_xdp.native.asm",
+      "sha256": "e040239f7fad4951027c436c30fcfe5c5e95c79f0558937b7dd1c649a5624ed2",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/katran/balancer.native.asm",
+      "sha256": "a18d7f0c6027fa4173908af9d7c2b956361ebbde70e6f3a3db7b3f7de5ddd3a2",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/katran/healthchecking.native.asm",
+      "sha256": "83a6493016740cc498fc135e7aca2323b12fe572c11c21b3754bfec610dd853e",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/katran/healthchecking_ipip.native.asm",
+      "sha256": "0f685b9aa29b7ead38e67d4d1929625493a928c17a8f95d11b5b8ec6c4014f64",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/katran/xdp_root.native.asm",
+      "sha256": "032010adc8c3fd5a37cc744a25d5d7b6327c84a3f719dabda9953cfff5abb4ad",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/otel/custom_trace.native.asm",
+      "sha256": "7ee224e2d3523150ee3671b9ea92624c429c8398d56a6df0349d615282eeddad",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/otel/dotnet_tracer.native.asm",
+      "sha256": "d5fb3401334ca4458df57188e46f511130536118b917319f5b90643458a19cbc",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/otel/go_labels.native.asm",
+      "sha256": "1c45d199efb1b157843c0c0796d309e8ed540ab98b85c607a2585669a7b6206f",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/otel/hotspot_tracer.native.asm",
+      "sha256": "23214092e3e456b3d326747988fd5225bd6d17a189ed25ee59cdcf048fc17d66",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/otel/interpreter_dispatcher.native.asm",
+      "sha256": "38227279a200e7e3b0305bc6cf4b3925919d79f7b37bc9c5b2a1b8d7ea4d2023",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/otel/native_stack_trace.native.asm",
+      "sha256": "76057bb8be3525703e96c4f871d64a81ce422d769fb0d964d39558c4462b1cdb",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/otel/off_cpu.native.asm",
+      "sha256": "1f49229fcbe951b1d10496219c7f160a468c60e49690a1217b4a7172f130a88a",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/otel/perl_tracer.native.asm",
+      "sha256": "23604647228d8c955b6feb6d1aed5f9d598983b8c577b848f489e5fc4a63839f",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/otel/php_tracer.native.asm",
+      "sha256": "8ec3e5407231f6834586cc080cd6911aeeef8beff13902b1d813968c1a0eaf5e",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/otel/python_tracer.native.asm",
+      "sha256": "746a94164ca6cbb35938087df8518783d7695c341144043d0c1b77851cd2302e",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/otel/ruby_tracer.native.asm",
+      "sha256": "5f1513ea86c30b62620b523e77171c7a8ed3d9ed419b234d19d1fd8e8f5cc5d7",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/otel/sched_monitor.native.asm",
+      "sha256": "86d810f2da37aa1291ebe5059804ad0ae98628b4a9cbfe82308dcd879265c1be",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/otel/system_config.native.asm",
+      "sha256": "c5750c70fadd2f2f24b287a5ea1713a5702509215674a0a8cbf9c2efaf70951c",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/otel/uprobe.native.asm",
+      "sha256": "aeaeb48938aa51658ca2d3b4cefa64858266835fd4ff61f2886b8571348620d9",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/otel/v8_tracer.native.asm",
+      "sha256": "ee031ddbc2fd7b8793b59813e4816c15ae42c2e3a33c4f3ef5c39bf6c645ee17",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_cgroup_mkdir_v511.native.asm",
+      "sha256": "bf0aec710522dbff6c306802554c4692bbc1bb3c21cfdfab1d153734cde0ff33",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_cgroup_release_v511.native.asm",
+      "sha256": "b5f1f3fb393bd5f8f723effc3a3972ec562b98996b27c962ba51793c954f8901",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_cgroup_rmdir_v511.native.asm",
+      "sha256": "a9ba91778d1e30de25b35c450a8cb1da77288377648d5932a9dde7250d786c11",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_execve_event_v310.native.asm",
+      "sha256": "4d058d88997aa1c9cde17dfe0dde55f982fba44a7b1953394089f53fae60d255",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_execve_event_v511.native.asm",
+      "sha256": "83ccf37870f1d6b3abb1999fcded129f492b5d01a1765ce4f1943c718eefcc29",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_execve_event_v53.native.asm",
+      "sha256": "fc7bf36d07f4771624a14d659ea61375e9b7a99ef124d9df427e8430993d4bb8",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_execve_event_v61.native.asm",
+      "sha256": "6ef196e287f900e72673cd4fd8b0eaac8183b106db456e3d91e92c5670c0b74f",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_execve_map_update_v511.native.asm",
+      "sha256": "a6e1e7f7d1ccf025614dc96fe95aeabc83c88608938c43eca03e1c7b8b78c4e6",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_execve_map_update_v53.native.asm",
+      "sha256": "d8267e9ed2aa543d75eee61e82cf3c38f3e31fdbd6adb2587973b49e7516956b",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_execve_map_update_v61.native.asm",
+      "sha256": "ed23b3b33cff0b38fbd3b34ef8cc6d53dc0094897d5de3a8f8fb77795f3fb090",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_exit_v310.native.asm",
+      "sha256": "d260f2cd35a858f7bae28f1126eb5385aef272589a7fc9c51f3db910a9fed8aa",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_exit_v511.native.asm",
+      "sha256": "ebf5cf138e04b988741a6f8b89d79617ce0dba2503134d986fb12fdd73ee2590",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_fork_v310.native.asm",
+      "sha256": "b3e7f066a96f4377a6b1e55068422642e7f0641a61ca03a3097fd7cf9a33021b",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_fork_v511.native.asm",
+      "sha256": "69064ab1c86321d2697723dc5d66a17dfb387c6947e603485971a5b2b412e4f1",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_fentry_v511.native.asm",
+      "sha256": "50c6bf1b3a63b159ef4447deab40918c261ed4d53dd051b0b9144110fdf8adfc",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_fentry_v53.native.asm",
+      "sha256": "b4e9a052fdb359cab2a16988c676e036b4d1221ba7cad72e63f19391149ea535",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_fentry_v61.native.asm",
+      "sha256": "91086a1b384a9dabe73388884789506212eedde3ab42f11e8904b4360e74dce1",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_fexit_v511.native.asm",
+      "sha256": "3ec5370e3e4f73b4d8493f9609dfbe9e4b88b8e82a8eb2b55dc79f296c61f2be",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_fexit_v53.native.asm",
+      "sha256": "0614e103dfb7f04064960591b6ef805bffe321fcd3d6c48fa78b608f39bc6842",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_fexit_v61.native.asm",
+      "sha256": "9294d9a7084988e54932186db323327e02d67df6df8e56ed66b182fea05feac9",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_kprobe_v511.native.asm",
+      "sha256": "18435e0133e4208143ed73c41d915275c4682b4f68275991f1507cbdb99d5053",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_kprobe_v53.native.asm",
+      "sha256": "0ed9a334bbd64dc204557348baa119b029d72f39d1bd54cb397067fd4103c5c4",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_kprobe_v61.native.asm",
+      "sha256": "d424a4280c63493caede1c7706d7bec947d829b9f13bf2695ece704f510c7d94",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_core_v511.native.asm",
+      "sha256": "2378e81efb117f6c1efa4a1fbfbc8a5f81a9270e145f008981497c67b2bd39da",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_core_v61.native.asm",
+      "sha256": "19acf6e708450f8378af96862c1e1fed770065a70e4a2a3904202ddfd0e5f42a",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_ima_bprm_v511.native.asm",
+      "sha256": "eb7414d49aa63af3772c5d3bf24f3ca4c1440b84354bf7bfa435aa74c7295e67",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_ima_bprm_v61.native.asm",
+      "sha256": "6defbcb7d16e59434f374fb28d002715f2e61fb2ae8b7d32e8f9d5c7a2c85854",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_ima_file_v511.native.asm",
+      "sha256": "0c2ccbea41a45425c10314c092e10d78926ed43e3ab9d507f42c7cd580196ae0",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_ima_file_v61.native.asm",
+      "sha256": "133f86e04b810a85322042c8ae6c16aa45c62b18f6b98a1f1e1d48a4043a5dff",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_output_v511.native.asm",
+      "sha256": "89b80c08e7449df2a1be686aa4e491b092f7427e01fd4fd1f33e8cf24cfad1db",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_lsm_output_v61.native.asm",
+      "sha256": "7d0bd749f65ff9583e21fee51e29b4897b406eb49ca3811e6ffaceab36ceb84a",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_rawtp_v511.native.asm",
+      "sha256": "ae726f5e593177ba5a8cd095df4c395852670e9c6fe37b4c9793f6d1c8a77dc2",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_rawtp_v53.native.asm",
+      "sha256": "e637a10c9401b4b177f442291e0c207e6f3b3e88de29cb9c680c6f103866ab2b",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_rawtp_v61.native.asm",
+      "sha256": "db89332b44cecbf0f5ab33f403a1b2f597f0211f5e25a8f6f75248c3e3cc15c3",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_retkprobe_v511.native.asm",
+      "sha256": "c4f5b20e9013235f58290488ff7e526e589a8c7452b1990c497190dde9ad30e2",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_retkprobe_v53.native.asm",
+      "sha256": "15905f3f647ff6f8e92953884d32d5c527dfe380805946b0f992785cf2dcf473",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_retkprobe_v61.native.asm",
+      "sha256": "ded423d9e6ec091119b5906baceb3ae1e7526068a492b901c2946db43f087f43",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_retuprobe_v511.native.asm",
+      "sha256": "86c4507dfda164da98efb5c7fdb5b183fa76588da220a1f9f37a7aabc56971c9",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_retuprobe_v53.native.asm",
+      "sha256": "542afce1aba7c1deae6026802cddcc5b2e3c658e327e58a71be78150c469b1a7",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_retuprobe_v61.native.asm",
+      "sha256": "c4526b7053ae205af66c5041ec9e197b29d95eb0de3286b3641f232f6146f9f1",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_tracepoint_v511.native.asm",
+      "sha256": "26bf5ed920b95dcd3bc8b1965acc8b7ea7b335291650003d8d902e78660c60d4",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_tracepoint_v53.native.asm",
+      "sha256": "1dba04a32cb25380cc415f3e7c71145895dc4dce30a363ea788f70546a827d43",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_tracepoint_v61.native.asm",
+      "sha256": "a7db3e534dad880f7499f9aedf55ac55f8c674c9f3580b3b51ce38afb2a6b6fa",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_uprobe_v511.native.asm",
+      "sha256": "905da9a462837cf3b5b73c7160cf85d93353c68d8f07d75cb27638fb354455b6",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_uprobe_v53.native.asm",
+      "sha256": "8e771d52c3c254108d1ab86b71e80271cff6d2db94756440ffca1f652f3c3485",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_uprobe_v61.native.asm",
+      "sha256": "724769bc6caa2cb6a3b07608c62f4352da51aee5b7288c7f21f7eead131abd3f",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_usdt_v511.native.asm",
+      "sha256": "ef0cb05760cb15344580182755246604738c3ce97f10b6a0cbd8f4aed56f22bc",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_usdt_v53.native.asm",
+      "sha256": "ce2ee964b4a5f0b6f831a340c903b9a47fe3a11ac165e3eb532bc5d5ce1e3103",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_generic_usdt_v61.native.asm",
+      "sha256": "ee28d8158d834710959c97d4ec2477763edf442c3f5ef13a12d5336cd39edca4",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_loader_v511.native.asm",
+      "sha256": "bce48eb857d471fb1b17ecb742b3dc356646f7395578fb720e0e8f008c619717",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_multi_kprobe_v511.native.asm",
+      "sha256": "9587ab169e158618b162f1811d5e76330aba7a29bd47c4b5beae2e5962edcafe",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_multi_kprobe_v53.native.asm",
+      "sha256": "f4e3e9eba3f844c4387e221ed0a2808efa00497791068549af2a651854754ab9",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_multi_kprobe_v61.native.asm",
+      "sha256": "ee7da112402c527bc6ce0862eff17665b35b9df851f3083b2ce88468f39e7467",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_multi_retkprobe_v511.native.asm",
+      "sha256": "0eef570599d58dfa7b66bb025b206a655ec02a2def6cf752853e158cb5c68118",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_multi_retkprobe_v53.native.asm",
+      "sha256": "29bb55dbde0830c5660b9d1ed5a63bddf290c42c6c2effc5fcf043bfba5d929e",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_multi_retkprobe_v61.native.asm",
+      "sha256": "f111901a6420b44c59cdd2f55736ac7be06053ff937ad9af643767d8f73b7768",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_multi_retuprobe_v511.native.asm",
+      "sha256": "d25daf482818927e541d106eafed4ad837138cbd7947940d31430d1eb341db9d",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_multi_retuprobe_v61.native.asm",
+      "sha256": "2dc02948aa2e22ba01df265cb208fb7a34a5c58e2a78f23fd4f282b6dae68b09",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_multi_uprobe_v511.native.asm",
+      "sha256": "7777baff7ccda2e84a2cdecfd68b22f0d8b1082a445cf20717b77b58c08c65d0",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_multi_uprobe_v61.native.asm",
+      "sha256": "6317cdf3efdf231b821a4ba62a28f31498456d411d04a8846a1295e2f71a6226",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_multi_usdt_v511.native.asm",
+      "sha256": "a2a462c01c28dc2f52869543c0b0cd019fb414cac8d8fb563e9597fb12068a8b",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tetragon/bpf_multi_usdt_v61.native.asm",
+      "sha256": "a0fe8a4ed7395818ec902aac23020bf6ff53a72ba94e8fa27e4674c20fa11101",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tracee/lsm_support/kprobe_check.native.asm",
+      "sha256": "de9ab4fda3a42c9526630d18b698aa30199f6b50091c8ff3200dcf98c8e9569d",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tracee/lsm_support/lsm_check.native.asm",
+      "sha256": "f98c9165c03967edf5daf7fdc1ca7bca35b3eb4050fd1184837db6b106cf59fd",
+      "fp_instruction_hits": []
+    },
+    {
+      "path": "export/corpus/x86/7.0.0-30-generic/native/tracee/tracee.native.asm",
+      "sha256": "8cda598242a9970a92712076bf6db53c19cd52661bcc7c546179ef22a7eb84ec",
+      "fp_instruction_hits": []
+    }
+  ]
+}

@@ -43,6 +43,14 @@ snapshots and hashes are retained in `compile-raw.tar.gz`. The corpus export
 contains 198 debug-stripped native objects and their disassemblies, with original
 object hashes, executable-section hashes and DWARF source-file tables.
 
+The FP-state instruction audit covers all 318 micro/corpus native objects,
+including implicit x87, MXCSR, XSAVE/XRSTOR, MMX/AVX state operations and ARM
+FP control registers alongside explicit SIMD operands. Observed FP-state
+instruction hits: 0. All seven actual rejection ELF inputs provide positive
+detection controls, including the implicit x87 FLDZ form. Exact disassembly
+hashes and controls are in `fp-state-audit.json`; the scanner joins the final
+safety command archive.
+
 The paired safety recipe captures common model/service/kernel/bridge inputs and
 uses one 2 GiB guest at a time on CPUs 20-23. The x86 control completes 45 cases:
 9 valid executions, 33 verifier rejections, one generation failure and two
