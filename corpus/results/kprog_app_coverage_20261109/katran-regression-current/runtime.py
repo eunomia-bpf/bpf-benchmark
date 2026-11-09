@@ -2,7 +2,7 @@ from pathlib import Path
 import subprocess,json,sys,tarfile,os,shutil,select,hashlib,traceback,resource
 from datetime import datetime,timezone
 resource.setrlimit(resource.RLIMIT_CORE,(0,0))
-R=Path('/workspaces/repository');D=R/'corpus/results/kprog_app_coverage_20261109/katran-regression-current';G=Path('/var/tmp/kprog-tmp/C/katran-regression-runtime');C=Path('/workspaces/.agent-state/kprog-lanes/C');V=C/'design-only/remaining-apps/katran-regression-runtime';h=sys.argv[1];OUT=D/'application'
+R=Path('/workspaces/repository');D=R/'corpus/results/kprog_app_coverage_20261109/katran-regression-current';G=Path('/var/tmp/kprog-tmp/C/katran-regression-runtime');C=Path('/workspaces/.agent-state/kprog-lanes/C');V=C/'design-only/remaining-apps/katran-regression-runtime';h=sys.argv[1];OUT=D/'restored-framework-application'
 producer=Path(sys.argv[2])if len(sys.argv)>2 else Path('/var/tmp/kprog-tmp/C/katran-regression-current/producer/native/katran')
 if len(sys.argv)>3:
  try:fd=os.pidfd_open(int(sys.argv[3]));select.select([fd],[],[]);os.close(fd)
@@ -19,6 +19,8 @@ try:
  p=subprocess.Popen(['git','archive',h,'--',*paths],cwd=R,stdout=subprocess.PIPE)
  with tarfile.open(fileobj=p.stdout,mode='r|')as t:t.extractall(E,filter='data')
  p.stdout.close();p.wait()
+ # The frozen driver imports snapshot_app_maps; use its matching committed support module.
+ (E/'runner/libs/rejit.py').write_bytes(subprocess.check_output(['git','show','9f3855f6f:runner/libs/rejit.py'],cwd=R))
  for p in E.rglob('*'):
   if p.is_file():p.chmod(0o444)
  for p in sorted([p for p in E.rglob('*')if p.is_dir()],key=lambda p:len(p.parts),reverse=True):p.chmod(0o555)
