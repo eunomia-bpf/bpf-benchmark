@@ -5506,3 +5506,15 @@ canonical length, representable final text/table distance, lookup/site completen
 registration/order/lifetime, B protected-load/trace and remaining fault-prefix
 correspondence stay explicit. No NULL guest execution or complete O4 law is
 claimed; operation/token totals and the partial recovery-row status stay unchanged.
+
+### Matched ARM nullable hook qualification
+
+The [new paired ARM comparison](../../../corpus/results/kprog_arm64_app_coverage_20261108/native-load-recovery/lsm-comparison/comparison.json)
+uses kernel61656250e, target70002/file__nullable, and the recorded Image/module/
+runtimeBTF and original/native object identities. Both original stock BPF and
+native paths reject `no_null_check` and install `null_check`; all executions
+remain0. The new paired stage qualification now agrees, while older70008/file
+installed outcomes and their annotation discrepancy stay attributed to their
+original kernel. Source-record hashes and all four outcomes are retained under
+`aligned_arm_nullable_lsm_qualification`. This is load-only qualification,
+not native exception recovery execution or complete physical entry/O3 proof.

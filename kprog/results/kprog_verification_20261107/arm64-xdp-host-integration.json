@@ -115,6 +115,91 @@
     ],
     "universal_domain": "Every BPF program byte array and decoded instruction position, saved r0-r9, every16-bit signed frame offset, arbitrary complete BPF state/environment."
   },
+  "aligned_arm_nullable_lsm_qualification": {
+    "comparison_commit": "9573a49683b1b144e64bdb8b01a19e125ec006f6",
+    "kernel_Image_sha256": "e53b7212f2c300dd0c436a6afe6c0f4ac0eda8aa5a3ec6eab75bf9a7c3e863d1",
+    "kernel_commit": "61656250e90663eb1cf32c09eb2c8a6191cfd47d",
+    "module_sha256": "5489c7798f82d50867dba46d662f860cf0bb78c7d3ac77948ac82c4183a9f8ec",
+    "native_counts": {
+      "attempted": 2,
+      "catalog_rows": 2,
+      "compilation_failed": 0,
+      "failure": 1,
+      "failure_agrees": 1,
+      "failure_installed": 0,
+      "generation_failed": 0,
+      "installed": 1,
+      "load_failed": 0,
+      "resource_failed": 0,
+      "skipped": 0,
+      "submitted": 2,
+      "success": 1,
+      "success_agrees": 1,
+      "success_installed": 1,
+      "transport_failed": 0,
+      "verifier_rejected": 1
+    },
+    "native_executions": 0,
+    "observations": [
+      {
+        "annotation": "failure",
+        "native_executions": 0,
+        "native_sha256": "4d55ebe6e20a82e8ed68da8656c15370e9f7abaabf821da5a8a7c3ea93a36124",
+        "native_stage": "verifier_rejected",
+        "original_object_sha256": "62eb52c9bff188a91955dc6749bff25f781c9f4d29f1cab64861c764b745fb6a",
+        "program": "no_null_check",
+        "stock_executions": 0,
+        "stock_stage": "load_rejected",
+        "target_btf_id": 70002
+      },
+      {
+        "annotation": "success",
+        "native_executions": 0,
+        "native_sha256": "19dd519dd9375034c4af9f021d8a230218b882d65dfc1f5e345749e5b4bf1529",
+        "native_stage": "installed",
+        "original_object_sha256": "62eb52c9bff188a91955dc6749bff25f781c9f4d29f1cab64861c764b745fb6a",
+        "program": "null_check",
+        "stock_executions": 0,
+        "stock_stage": "installed",
+        "target_btf_id": 70002
+      }
+    ],
+    "remaining_premise": "The physical entry relation uses actual hook nullability and every legal invocation. Load acceptance/rejection alone does not establish generic native fault recovery, protected-B/raw ISA trace agreement, exception-site completeness or O3 soundness; their separate O4 obligations remain partial.",
+    "result": "On the same ARM nullable metadata epoch, both original stock BPF and native paths reject no_null_check and install null_check. This closes the observed stage qualification difference for the new paired run; older target70008/file outcomes and original annotation discrepancies remain historical observations under their recorded kernels.",
+    "runtime_admission_additions": 0,
+    "runtime_btf_sha256": "9c14f5903b62b800946d071e767e417b06984bda8ca1d42360bf8967e6b0fa88",
+    "scope": "Matched original stock/native LSM load-only observations on the ARM upstream file__nullable kernel. Four outcomes across two programs, not fault recovery execution.",
+    "source_pins": {
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-load-recovery/lsm-comparison/comparison.json": {
+        "bytes": 1261,
+        "commit": "9573a49683b1b144e64bdb8b01a19e125ec006f6",
+        "sha256": "5db3ca6f135929f471d51de7e40630188374857625b22d54ca4695a1280cb99d"
+      },
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-load-recovery/lsm-comparison/kernel-btf-sha256.txt": {
+        "bytes": 65,
+        "commit": "a018586545b6c2553c55c44ea1bb6ce4b35ce8e3",
+        "sha256": "d9aad49f4c8f3142766672c4a5e5e551f3542a81ee07703a3c9faf8058d55522"
+      },
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-load-recovery/lsm-comparison/original-stock-lsm.json": {
+        "bytes": 1460,
+        "commit": "a018586545b6c2553c55c44ea1bb6ce4b35ce8e3",
+        "sha256": "1fa846112f846d80e41f740cbc6c5001b5e9376f6f4cc9e7856025f802e436c2"
+      },
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-load-recovery/lsm-comparison/summary.json": {
+        "bytes": 1821,
+        "commit": "a018586545b6c2553c55c44ea1bb6ce4b35ce8e3",
+        "sha256": "2cafe17cfa7808057ab08be2b82cca95f0ade078a6364db9a9008e25c5b8a721"
+      },
+      "corpus/results/kprog_arm64_app_coverage_20261108/native-load-recovery/metadata-build.json": {
+        "bytes": 513,
+        "commit": "61656250e90663eb1cf32c09eb2c8a6191cfd47d",
+        "sha256": "c5375c7900d1f8aef6b06b2d8c1a038f5900ced0c196f8154a5781df66267a79"
+      }
+    },
+    "stock_executions": 0,
+    "target": "bpf_lsm_mmap_file/70002/file__nullable",
+    "utc": "2026-11-09T00:04:45.359433+00:00"
+  },
   "andn_bzhi_fresh_aux_transport": {
     "archive_block_sha256": "4304af1ab54396e373359c7cc73fbdc2be8a9a98a118ef2a2321945bb43e2d99",
     "archive_entries": 23,
@@ -16827,6 +16912,7 @@
     "utc": "2026-11-08T23:33:32.945179+00:00"
   },
   "lsm_context_nullability_entry_premise": {
+    "aligned_arm_nullable_followup": "aligned_arm_nullable_lsm_qualification",
     "current_workspace_source_excerpts": [
       {
         "excerpt": "/**\n * security_mmap_file() - Check if mmap'ing a file is allowed\n * @file: file\n * @prot: protection applied by the kernel\n * @flags: flags\n *\n * Check permissions for a mmap operation.  The @file may be NULL, e.g. if\n * mapping anonymous memory.\n *\n * Return: Returns 0 if permission is granted.\n */\nint security_mmap_file(struct file *file, unsigned long prot,\n\t\t       unsigned long flags)\n{\n\treturn call_int_hook(mmap_file, file, prot, mmap_prot(file, prot),\n\t\t\t     flags);\n}",
@@ -16917,6 +17003,7 @@
     "utc": "2026-11-08T22:14:42.594326+00:00"
   },
   "matched_stock_lsm_qualification": {
+    "aligned_arm_nullable_followup": "aligned_arm_nullable_lsm_qualification",
     "arm_runtime_btf_sha256": "5ecb19368498893d000bf482a2ff3f09493c62b065b2e7bf4a8089efb30b1b8b",
     "finding": "Within each captured kernel, original stock and native routes have the same installed/rejected outcome for this pair. x86 target71327/file__nullable rejects no_null_check and installs null_check; ARM target70008/file installs both. The observed architecture stage difference follows the paired metadata qualification.",
     "formal_consequence": "The physical entry relation must retain the real paired kernel BTF nullability and all legal invocations. This fixture does not instantiate a universal verifierSound or the generic protected-BTF-load/native-fault correspondence. ARM original __failure annotation disagreement is retained; stock and native execution counts remain zero.",
