@@ -1,0 +1,5 @@
+# XDP head adjustment caller-frame representation
+
+Actual current coherent Katran balancer_ingress reports11Clang x86_sim_unmapped_xdp_read diagnostics after its xdp_adjust_head helper. The private candidate extends the existing returning caller-frame operation to xdp_adjust_head. Its actual helper retains packet/context effects. The preceding exact-output-range and xdp_load_bytes/xdp_adjust_meta representation remains captured. SysV clobbers, helper/kernel verifier behavior, native memory bytes and existing fault predicates retain their expressions. Production canonical source retains its parent.
+
+The host fixture extends the prior actual generic output-range grid to11wrappers, with scalar/stack-tag destination aliases, all128raw bytes, saved caller word and actual context-byte side effect. Actual compiler rows retain original BCC/OTel/Cilium/Katran native P and service metadata. summary.json distinguishes finite host/generation/compiled observations; whole-application verifier/work follows its runtime receipt. Runtime predicate additions0.
