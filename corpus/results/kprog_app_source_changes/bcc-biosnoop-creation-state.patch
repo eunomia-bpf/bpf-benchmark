@@ -1,0 +1,11 @@
+--- a/libbpf-tools/biosnoop.bpf.c
++++ b/libbpf-tools/biosnoop.bpf.c
+@@ -81,0 +82 @@
++	bool new_stage;
+@@ -85 +86,2 @@
+-	if (!stagep) {
++	new_stage = !stagep;
++	if (new_stage) {
+@@ -98 +100 @@
+-	if (stagep == &stage)
++	if (new_stage)
