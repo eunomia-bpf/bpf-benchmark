@@ -6230,3 +6230,12 @@ identities, dependency compiles and axiom audits. RET and INVOCATION_ENTRY_ABI
 retain partial status; internal stack-release/valid-tag lifetime, ARM mode/LR
 binding and actual C/B/compiler/physical correspondence remain active in the
 unified TODO. C-model71/75 and compiled scalar13/75 totals retain their scope.
+
+### Published source full check 099a096fb
+
+`make check` on immutable published099a096fb exits0. All1287 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_099a096fb`. Every check retains its exact published source identity.
+
+Full raw archive: [full-make-check-099a096fb.log.gz](full-make-check-099a096fb.log.gz).
