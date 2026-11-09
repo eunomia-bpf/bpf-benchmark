@@ -1,0 +1,5 @@
+Tracee checked-offset paired source terminal
+
+Whole original Tracee747723132 retains source218ccbc34 in both native/JIT compiler inputs and its embedded binary. The stock JIT baseline reaches sys_exit_submit B1367 bpf_probe_read_str, with map32536/maxoff65677/size4096 after1284instructions84states. Existing checks narrow a zero-extendedR1 to27899 while the actual helper pointer uses originalR2 up to65535. Native service requests/generated/compiled/installed counts are0 because startup ends at that baseline stage. Original app/work/service/raw diagnostics remain archived.
+
+Source09f40af86 changes the one local offset width fromu32 tou64, retaining both empty +r operands and every original numeric bound/helper/field update. Required source patch and ledger record the exact change. Its complete paired native/JIT/embedded binary rebuild is active in tracee-string-width; actual verifier and whole-app outcomes follow there. Benchmark framework restoration belongs to R; this record retains its captured source/workload. Runtime admission additions:0.
