@@ -760,15 +760,15 @@ runs:
 
 The task requires every timing run in both `BPFREJIT_CORPUS_BPF_STATS`
 modes. Katran on the 2026-05-29 definition, stats off
-(`x86_kvm_corpus_20261109_195850_891648`, status ok, 3 samples per arm,
+(`x86_kvm_corpus_20261109_210035_874649`, status ok, 3 samples per arm,
 180 s each):
 
 | arm | pps | `jited` |
 | --- | ---: | ---: |
-| JIT | 993,968 | 13,641 |
-| native | **1,092,131** | **10,196** |
+| JIT | 982,516 | 13,641 |
+| native | **1,085,020** | **10,196** |
 
-**native/JIT = 1.099x**, against the archive's 1.102x. The native arm
+**native/JIT = 1.104x**, against the archive's 1.102x. The native arm
 replaced `balancer_ingres`, the kernel holds a 10,196-byte native program,
 and the two arms' packet totals are within 0.1% of each other (1.0987x of
 work in the native arm), so the ratio is on equal work.
@@ -777,12 +777,22 @@ Put beside the stats-on run:
 
 | stats | run | JIT pps | native pps | native/JIT |
 | --- | --- | ---: | ---: | ---: |
-| off | `..._195850_891648` | 993,968 | 1,092,131 | **1.099** |
+| off | `..._210035_874649` | 982,516 | 1,085,020 | **1.104** |
 | on | `..._153901_098451` | 818,636 | 889,572 | **1.087** |
 
-The archive records 1.102x, and both modes land within 1.5% of it. Stats off
+The archive records 1.102x, and both modes land within 0.2% of it. Stats off
 is faster in both arms, as expected when the counters are not updated, and
 the ratio is essentially unchanged.
+
+The first attempt at the off mode (`..._195850_891648`) is worth recording
+because it read 1.099x and looked fine: both arms held `jited 13641`, no
+program was replaced, and the shim's log said
+`open .../blob0: No such file or directory`. The image's module had been
+rebuilt without the `blob%ld` nodes the loader needs, so that run was eBPF
+against eBPF. **A ratio of about 1.0x from two identical programs looks
+exactly like a real result**, and only the `jited` column distinguishes them.
+Both arms of the corrected run differ there -- 13,641 against 10,196 -- and
+that is the check to make on every row.
 
 ### Component walk, step 1: the kernel. It costs nothing, and it changes the ratio
 
