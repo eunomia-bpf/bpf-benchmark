@@ -1,0 +1,3 @@
+Captured ARM live and NULL recovery control
+
+The c6df historical module cohort executes the existing authorized full-word BTF read under model5363. Actual stock verification, native execution and guest exit succeed: live returns u32 0xffffffff, NULL recovery returns0, extable count2. The initial wrapper selected the prior November8 result directory; the captured raw summary/archive now reside here and that earlier report retains its exact published bytes. Continuation inputs retain the diagnostic and corrected output selector. The ordinary-copy shared successor3e3f44f33 has its own subsequent adoption cohort. Approved historical shared rule adopted:1. Additional runtime admission rules:0.

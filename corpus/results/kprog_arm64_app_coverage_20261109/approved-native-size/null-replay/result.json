@@ -2,5 +2,21 @@
   "utc": "2026-11-09T07:06:17.283520+00:00",
   "make_exit": 0,
   "approved_shared_rules_adopted": 1,
-  "additional_runtime_admission_rules": 0
+  "additional_runtime_admission_rules": 0,
+  "runtime": {
+    "ok": true,
+    "guest_exit": 0,
+    "qemu_returncode": 0,
+    "compiler_exit": 0
+  },
+  "guest": {
+    "ok": true,
+    "scope": "Authorized ARM full-word NULL BTF load recovery",
+    "probe_exit": 0,
+    "stdout": "{\"native_prog_id\":1,\"attach_btf_id\":69911,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+    "stderr": ""
+  },
+  "archive_sha256": "dc76f3ad6a6c5d270b91a899c720536d87bfa71617ccd5628009b59f537badfd",
+  "actual_original_output": "corpus/results/kprog_arm64_app_coverage_20261108/native-load-recovery/arm64/null-btf/trusted-arm64-service-result",
+  "historical_summary_sha256": "e424d8fc6e9ab3921cc6414f3a185e56ca0df44c4c6edef0faa375176a41840b"
 }
