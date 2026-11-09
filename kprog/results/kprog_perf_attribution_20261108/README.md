@@ -751,10 +751,11 @@ three-span measurement could not give.
 The candidates list the entry and return bridge as "fixed per invocation"
 but gave no cost. It is measurable: `simple` writes one constant, so its
 per-invocation cost is the bridge plus the runner's loop and nothing else.
-At one million inner repeats, that floor is **6.04 cycles and 26
-instructions per invocation** (it converges as the repeat count grows:
-6.68 at 10,000, 6.08 at 100,000, 6.04 at 1,000,000, so the one-shot call
-setup is amortized).
+At one million inner repeats, that floor is **6.01 cycles and 32
+instructions per invocation**, a median of five runs. The instruction count
+converges as the repeat count grows (27.5 per invocation at 10,000, 32.0 at
+1,000,000), so the one-shot call setup amortizes; the cycle count does not
+converge as cleanly, ranging 6.0 to 7.5 across the five runs.
 
 Measured the same way, with each program's own generated input:
 
