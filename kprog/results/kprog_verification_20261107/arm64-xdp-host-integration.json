@@ -78289,5 +78289,40 @@
       "source-arm64_bitfield.h.txt": "4037f701cf89fac8ea15569456acd359080f9c32e027716f11b4568d28ed8210"
     },
     "scope": "RawBITFIELD five nativeforms and preceding30raw ops; incoming materializedSRC/oldDST, actualAUXbytes, generatedmerge andscalarizingwidth/tagwrite. Typed nativefieldbounds, allaliases/XZR/fullarchitecture, productiondispatcher/unusedhighbyte+SRC2/SRC3/IMM incl255 retained. Entry/C extraction/union/physical/compiler interfaces explicit, Bforwarding/calleecomparison independent."
+  },
+  "arm64_raw_source_branch_refinement": {
+    "proof": {
+      "process_exit": 0,
+      "module_and_root_exit": 0,
+      "root_sha256": "c08dedfa21216380b9f8595e635c476de4bb7a155bfbe8f114f3fb1243fac057",
+      "source_sha256": "62e1fcdb91fb28c31ded2f264c935fd9eb5f2359aa19d6df137c3120a5886b8e",
+      "sorryAx": 0,
+      "reduction_bridge": 58,
+      "scope": "Raw B/Bcond/WXCBZCBNZ/TBZ TBNZ and prior31 raw operations; incoming tagged data/flags, actual source branch shapes and native label map. Whole architecture/tag frame, arbitrary bit upperbits, native current/next/target identities and normalized NV; production emission equalities. Independent of B forwarding layout. Entry/C-union/source extraction/compiler/physical origin binding remain explicit."
+    },
+    "source_families": [
+      "B",
+      "B_COND",
+      "CBZ",
+      "CBNZ",
+      "TBZ",
+      "TBNZ"
+    ],
+    "raw_source_family_count": 6,
+    "numeric_raw_operation_count": 31,
+    "new_audits": 14,
+    "total_audits": 91,
+    "archive": "arm-raw-branch.log.gz",
+    "source_snapshots": {
+      "source-arm64_branch.h.txt": "597f1c706da47bb61fee586c8db342de0e046338510fe7b781ea23503b509b57",
+      "source-arm64_sim_local_bpf.h.txt": "9cb5d58f9595124300d5bfd8fdcfdecba53f763e4d9ee34567345dd12cba1c13",
+      "source-Arm64RawRegister.lean.txt": "6ba9b85e1235399bcd1a6a85d306bde2304cfdf4d5d2517eb6e8c4de953d0857",
+      "source-Arm64Dispatcher.lean.txt": "0388b0836263a0b05d0b3460344f83595b0bf0e9933b458675ecfe72d1362b20",
+      "source-arm64_branch_emit.h.txt": "f0102c2c142207f8d52df1ef1368ce861acf1cd8474af493ffd906a73da84404",
+      "source-generate_micro_sim_proofs.py.txt": "d186c9596aeddea227ec0bae0a29e70ba7d7877607eb3ab0b3906ea45cd2114c",
+      "source-AArch64.lean.txt": "d312bb3e2981e4a7f8992a2ebc8c85a9454fc20797c27378750add54793ca789",
+      "source-Arm64Branch.lean.txt": "bef3cf78cfcf68219f2aa2c7a5e55cec6159692a2d7963e3fc6c990b5fb69df8"
+    },
+    "scope": "Sixsourceemission families+prior31numericraw; actualrawtag/NZCV/predicates/sourcebranchshape/nativeLabelmap derive outcomes/fullarchitecture. Complete current/next/target source-native identities, NVnormalization and upperbitdomain; production emission equalities. Entry/data/codeaddress/Csource/union/physical/compiler interfaces and selectedcontrolreplay explicit. Bforwarding/calleecomparison independent."
   }
 }

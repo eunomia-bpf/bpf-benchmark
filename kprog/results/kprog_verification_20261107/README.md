@@ -2,8 +2,9 @@
 
 <!-- COVERAGE START -->
 [Per-operation and per-token coverage](coverage.tsv) records the current partial
-formalization. Totals below count distinct numeric operations; each corresponding
-specialization token also has its own row.
+formalization. Numeric totals count distinct numeric operations. Source-emission
+families have additional rows and their own totals. Each operation has its
+corresponding specialization token row.
 
 | Coverage obligation | x86-64 | AArch64 |
 | --- | ---: | ---: |
@@ -12,6 +13,7 @@ specialization token also has its own row.
 | Reference step family defined | 67/75 | 74/74 |
 | Raw register handler refinement | 32/75 | 31/74 |
 | Raw register dispatcher arm composition | 32/75 | 31/74 |
+| Raw source-emitted branch families / composed step | 0 | 6/6 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/74 |
 | Addressed memory model / composed step | 29/75 | 0/74 |
 | Additional partial-model handler families | 1/75 | 0 |
@@ -6546,3 +6548,32 @@ C/generated sources, exact previous public source prefix, compiled module and
 all original proof outcomes. Raw ARM totals advance30to31/74. Entry origin
 identity, C extraction/union and physical/compiler transport remain explicit;
 B forwarding and callee comparison storage stay independent.
+
+### ARM raw source-emitted branches
+
+B, B.cond, CBZ/CBNZ and TBZ/TBNZ are emitted outside L_EXEC's numeric catalogue.
+The ledger now gives each source family and source token its own row. Numeric
+raw coverage remains31/74; six source branch families have separate6/6 raw-model
+coverage. `Branch.dispatch` composes the prior31 numeric raw operations with
+these producer forms through one source-emission step theorem.
+
+The C-generated forward/backward shape consumes source coordinates, while the
+selected label is observed at its native address. The binding retains current,
+lexical successor and target address identities, plus source-next=current+4.
+NZCV, materialized W/X zero tests and low6-bit tests derive every branch result;
+Every outcome follows from the incoming state. Upper bit-argument bits are arbitrary.
+NV15 uses the producer's existing AL14 normalization. Whole GPR/tag/SP/NZCV/
+memory/vector/monitor/environment frames and empty ordered events/fault remain
+unchanged through the PC update. `production_jump`, `production_condition`,
+`production_zero` and `production_bit` prove equality to the numerical production
+emission model for arbitrary auxiliary dispatcher flags.
+
+Fourteen new and77 preceding laws audit with module/root checks0, sorryAx0 and58
+inherited Lean.ofReduceBool dependencies. The
+[raw branch receipt](arm-raw-branch.log.gz) retains C/producer/generated sources,
+canonical ISA, prior public source prefix, final compiled module and all logs.
+Native label extraction/identity, entry/data/code-address provenance, C union/
+source correspondence and physical/compiler transport remain explicit generic
+interfaces. Selected source-control hardware/official-model replay stays on the
+shared TODO. These are once-per-simulator theorems for every program; B forwarding
+and callee comparison storage stay independent.

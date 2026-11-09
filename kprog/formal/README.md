@@ -65,7 +65,7 @@ explicit interfaces.
 ARM raw handler/dispatcher refinement covers31/74 operations: immediate moves,
 multiply/divide, shift/unary, extract/reverse/extension, conditional select
 and bitfields.
-Seventy-seven laws audit and compile with module/root0 and sorryAx0. All raw64-bit
+Ninety-one laws audit and compile with module/root0 and sorryAx0. All raw64-bit
 words, byte tags, STACK4/RETURN10 materialization, register aliases/XZR and the
 complete architectural image compose through one31-operation step theorem.
 CSEL/X retains its selected raw word/tag; scalar results use width/scalar-tag
@@ -73,7 +73,13 @@ writes. SHIFT and conditions consume the actual whole AUX, while unary uses
 AUX byte1/byte2. Native widths, amount/alias domains and NV normalization stay
 explicit. The ledger retains production dispatcher equalities and arbitrary
 unused-field domains. Entry origin identity, C extraction/union and physical/
-compiler transport remain interfaces independent of B forwarding storage.
+compiler transport remain interfaces independent of B forwarding storage. Six
+additional source-emitted branch families (B/B.cond/CBZ/CBNZ/TBZ/TBNZ) compose
+with these31 numeric operations through one source-emission step theorem.
+Source/current/next/target label-to-native-address identities stay explicit;
+NZCV/value/bit tests derive the outcome and preserve the entire data/tag frame.
+Their source-operation/token rows retain a separate6/6 raw count.
+
 
 ## Specification and proof scope
 

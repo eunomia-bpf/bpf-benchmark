@@ -1160,3 +1160,212 @@ end KProgFormal.Refinement.Arm64RawRegister.Bitfield
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Bitfield.dispatch_refines
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Bitfield.earlier_step
 #print axioms KProgFormal.Refinement.Arm64RawRegister.Bitfield.step_refines
+namespace KProgFormal.Refinement.Arm64RawRegister.Branch
+open Reference
+open Reference.AArch64 (Register Width)
+
+def setPc (state : State) (pc : Word) : State :=
+  { state with raw := { state.raw with pc := pc } }
+
+theorem set_pc_projects (origins : Origins) (state : State) (pc : Word) :
+    image origins (setPc state pc) = { image origins state with pc := pc } := rfl
+
+theorem set_pc_tag_frame (state : State) (pc : Word) :
+    (setPc state pc).tags = state.tags := rfl
+
+/-- Raw operands select the actual source-level forward/backward branch shape;
+the selected label's native address supplies the architectural PC. -/
+def mappedBody (nativeAddress : Word → Word) (current fallthrough target : Word) (taken : Bool)
+    (state : State) : Transition State :=
+  ⟨setPc state (Arm64Branch.choosePc (GeneratedArm64BranchEmit.shape current.toNat target.toNat)
+    taken (nativeAddress fallthrough) (nativeAddress target)), [], none⟩
+
+theorem mapped_projects (nativeAddress : Word → Word) (current fallthrough target : Word) (taken : Bool)
+    (origins : Origins) (state : State) :
+    observe origins (mappedBody nativeAddress current fallthrough target taken state) =
+      Arm64Dispatcher.mappedBranchStep nativeAddress current fallthrough target taken (image origins state) := rfl
+
+theorem mapped_refines (nativeAddress : Word → Word) (current fallthrough target : Word) (taken : Bool)
+    (displacement : Word) (origins : Origins) (state : State)
+    (fallAddress : nativeAddress fallthrough = state.raw.pc + 4)
+    (targetAddress : nativeAddress target = state.raw.pc + displacement) :
+    observe origins (mappedBody nativeAddress current fallthrough target taken state) =
+      Reference.AArch64.branchStep taken displacement (image origins state) := by
+  rw [mapped_projects]
+  exact Arm64Dispatcher.mapped_branch_refines nativeAddress current fallthrough target taken displacement
+    (image origins state) fallAddress targetAddress
+
+/-- Source emission alternatives extend the raw register dispatcher. They are
+producer forms outside L_EXEC and retain source labels separately from native PC. -/
+inductive Emission where
+  | execute (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Register) (value : Word)
+  | jump (current target : Word)
+  | condition (code : Nat) (current fallthrough target : Word)
+  | zero (width : Width) (nonzero : Bool) (src : Register) (current fallthrough target : Word)
+  | bit (nonzero : Bool) (src : Register) (bit : Word) (current fallthrough target : Word)
+
+def dispatch (nativeAddress : Word → Word) (emission : Emission) (origins : Origins) (state : State) :
+    Option (Transition State) :=
+  match emission with
+  | .execute code aux width dst src src2 src3 value => Bitfield.dispatch code aux width dst src src2 src3 value origins state
+  | .jump _ target => some ⟨setPc state (nativeAddress target), [], none⟩
+  | .condition code current fallthrough target => (Arm64Condition.decode code).map (fun predicate =>
+      mappedBody nativeAddress current fallthrough target
+        (generatedArm64Cond (Arm64Condition.flags state.raw.flags) predicate) state)
+  | .zero width nonzero src current fallthrough target => some (mappedBody nativeAddress current fallthrough target
+      (GeneratedArm64Branch.value (if nonzero then .cbnz else .cbz)
+        (Arm64Branch.zeroSource width (readRegister origins state src)) 0) state)
+  | .bit nonzero src bit current fallthrough target => some (mappedBody nativeAddress current fallthrough target
+      (GeneratedArm64Branch.value (if nonzero then .tbnz else .tbz) (readRegister origins state src) bit) state)
+
+theorem production_jump (nativeAddress : Word → Word) (current target : Word) (origins : Origins) (state : State)
+    (sourceScalar sourceStack firstScalar secondScalar release failure : Bool) :
+    (dispatch nativeAddress (.jump current target) origins state).map (observe origins) =
+    Arm64Dispatcher.dispatchEmission nativeAddress (.jump current target) sourceScalar sourceStack
+      firstScalar secondScalar release failure (image origins state) := rfl
+
+theorem production_condition (nativeAddress : Word → Word) (code : Nat) (current fallthrough target : Word)
+    (origins : Origins) (state : State) (sourceScalar sourceStack firstScalar secondScalar release failure : Bool) :
+    (dispatch nativeAddress (.condition code current fallthrough target) origins state).map (observe origins) =
+    Arm64Dispatcher.dispatchEmission nativeAddress (.condition code current fallthrough target) sourceScalar sourceStack
+      firstScalar secondScalar release failure (image origins state) := by
+  simp only [dispatch, Arm64Dispatcher.dispatchEmission, Option.map_map]
+  rfl
+
+theorem production_zero (nativeAddress : Word → Word) (width : Width) (nonzero : Bool) (src : Register)
+    (current fallthrough target : Word) (origins : Origins) (state : State)
+    (sourceScalar sourceStack firstScalar secondScalar release failure : Bool) :
+    (dispatch nativeAddress (.zero width nonzero src current fallthrough target) origins state).map (observe origins) =
+    Arm64Dispatcher.dispatchEmission nativeAddress
+      (.zero width nonzero (Arm64Register.registerCode src) current fallthrough target)
+      sourceScalar sourceStack firstScalar secondScalar release failure (image origins state) := by
+  simp only [dispatch, Arm64Dispatcher.dispatchEmission, Arm64Move.Fields.register_read,
+    Arm64Register.read_refines, ← read_refines]
+  rfl
+
+theorem production_bit (nativeAddress : Word → Word) (nonzero : Bool) (src : Register) (bit : Word)
+    (current fallthrough target : Word) (origins : Origins) (state : State)
+    (sourceScalar sourceStack firstScalar secondScalar release failure : Bool) :
+    (dispatch nativeAddress (.bit nonzero src bit current fallthrough target) origins state).map (observe origins) =
+    Arm64Dispatcher.dispatchEmission nativeAddress
+      (.bit nonzero (Arm64Register.registerCode src) bit current fallthrough target)
+      sourceScalar sourceStack firstScalar secondScalar release failure (image origins state) := by
+  simp only [dispatch, Arm64Dispatcher.dispatchEmission, Arm64Move.Fields.register_read,
+    Arm64Register.read_refines, ← read_refines]
+  rfl
+
+theorem jump_refines (nativeAddress : Word → Word) (current target displacement : Word)
+    (origins : Origins) (state : State) (targetAddress : nativeAddress target = state.raw.pc + displacement) :
+    (dispatch nativeAddress (.jump current target) origins state).map (observe origins) =
+      some (Reference.AArch64.step (.branch displacement) (image origins state)) := by
+  change some (observe origins ⟨setPc state (nativeAddress target), [], none⟩) = _
+  simp only [observe, set_pc_projects, targetAddress, Reference.AArch64.step]
+  rfl
+
+theorem condition_refines (nativeAddress : Word → Word) (predicate : Arm64Cond)
+    (current fallthrough target displacement : Word) (origins : Origins) (state : State)
+    (fallAddress : nativeAddress fallthrough = state.raw.pc + 4)
+    (targetAddress : nativeAddress target = state.raw.pc + displacement) :
+    (dispatch nativeAddress (.condition (GeneratedArm64Cond.code predicate) current fallthrough target) origins state).map
+      (observe origins) = some (Reference.AArch64.step
+        (.branchConditional (Arm64Condition.nativeCode predicate) displacement) (image origins state)) := by
+  simp only [dispatch, Arm64Condition.decode_code]
+  change some (observe origins (mappedBody nativeAddress current fallthrough target _ state)) = _
+  rw [mapped_refines nativeAddress current fallthrough target _ displacement origins state fallAddress targetAddress,
+    Arm64Condition.condition_refines]
+  rfl
+
+theorem normalized_nv_refines (nativeAddress : Word → Word) (current fallthrough target displacement : Word)
+    (origins : Origins) (state : State) (fallAddress : nativeAddress fallthrough = state.raw.pc + 4)
+    (targetAddress : nativeAddress target = state.raw.pc + displacement) :
+    (dispatch nativeAddress (.condition (GeneratedArm64CcDecode.code .nv) current fallthrough target) origins state).map
+      (observe origins) = some (Reference.AArch64.step (.branchConditional 15 displacement) (image origins state)) :=
+  condition_refines nativeAddress .al current fallthrough target displacement origins state fallAddress targetAddress
+
+theorem zero_refines (nativeAddress : Word → Word) (width : Width) (nonzero : Bool) (src : Register)
+    (current fallthrough target displacement : Word) (origins : Origins) (state : State)
+    (fallAddress : nativeAddress fallthrough = state.raw.pc + 4)
+    (targetAddress : nativeAddress target = state.raw.pc + displacement) :
+    (dispatch nativeAddress (.zero width nonzero src current fallthrough target) origins state).map (observe origins) =
+      some (Reference.AArch64.step (.branchZero width nonzero src displacement) (image origins state)) := by
+  change some (observe origins (mappedBody nativeAddress current fallthrough target _ state)) = _
+  rw [mapped_refines nativeAddress current fallthrough target _ displacement origins state fallAddress targetAddress,
+    read_refines, Arm64Branch.zero_predicate_refines]
+  rfl
+
+theorem bit_refines (nativeAddress : Word → Word) (nonzero : Bool) (src : Register) (bit : Word)
+    (current fallthrough target displacement : Word) (origins : Origins) (state : State)
+    (fallAddress : nativeAddress fallthrough = state.raw.pc + 4)
+    (targetAddress : nativeAddress target = state.raw.pc + displacement) :
+    (dispatch nativeAddress (.bit nonzero src bit current fallthrough target) origins state).map (observe origins) =
+      some (Reference.AArch64.step (.branchBit nonzero src (bit.setWidth 6) displacement) (image origins state)) := by
+  change some (observe origins (mappedBody nativeAddress current fallthrough target _ state)) = _
+  rw [mapped_refines nativeAddress current fallthrough target _ displacement origins state fallAddress targetAddress,
+    read_refines, Arm64Dispatcher.branch_bit_argument, Arm64Branch.bit_predicate_refines]
+  rfl
+
+/-- Every program uses the same source-label/native-address field identities.
+Bounds and branch outcomes are derived by the handlers; only layout identities
+bind the current, lexical successor and target to the architectural PC. -/
+inductive Binding (nativeAddress : Word → Word) (pc : Word) : Emission → Reference.AArch64.Instruction → Prop where
+  | execute (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Register) (value : Word)
+      (instruction : Reference.AArch64.Instruction)
+      (binding : Bitfield.Binding code aux width dst src src2 src3 value instruction) :
+      Binding nativeAddress pc (.execute code aux width dst src src2 src3 value) instruction
+  | jump (current target displacement : Word) (currentAddress : nativeAddress current = pc)
+      (targetAddress : nativeAddress target = pc + displacement) :
+      Binding nativeAddress pc (.jump current target) (.branch displacement)
+  | condition (predicate : Arm64Cond) (current fallthrough target displacement : Word)
+      (currentAddress : nativeAddress current = pc) (nextLabel : fallthrough = current + 4)
+      (fallAddress : nativeAddress fallthrough = pc + 4) (targetAddress : nativeAddress target = pc + displacement) :
+      Binding nativeAddress pc (.condition (GeneratedArm64Cond.code predicate) current fallthrough target)
+        (.branchConditional (Arm64Condition.nativeCode predicate) displacement)
+  | normalizedNv (current fallthrough target displacement : Word)
+      (currentAddress : nativeAddress current = pc) (nextLabel : fallthrough = current + 4)
+      (fallAddress : nativeAddress fallthrough = pc + 4) (targetAddress : nativeAddress target = pc + displacement) :
+      Binding nativeAddress pc (.condition (GeneratedArm64CcDecode.code .nv) current fallthrough target)
+        (.branchConditional 15 displacement)
+  | zero (width : Width) (nonzero : Bool) (src : Register) (current fallthrough target displacement : Word)
+      (currentAddress : nativeAddress current = pc) (nextLabel : fallthrough = current + 4)
+      (fallAddress : nativeAddress fallthrough = pc + 4) (targetAddress : nativeAddress target = pc + displacement) :
+      Binding nativeAddress pc (.zero width nonzero src current fallthrough target) (.branchZero width nonzero src displacement)
+  | bit (nonzero : Bool) (src : Register) (bit : Word) (current fallthrough target displacement : Word)
+      (currentAddress : nativeAddress current = pc) (nextLabel : fallthrough = current + 4)
+      (fallAddress : nativeAddress fallthrough = pc + 4) (targetAddress : nativeAddress target = pc + displacement) :
+      Binding nativeAddress pc (.bit nonzero src bit current fallthrough target)
+        (.branchBit nonzero src (bit.setWidth 6) displacement)
+
+theorem step_refines (nativeAddress : Word → Word) (emission : Emission) (origins : Origins) (state : State)
+    (instruction : Reference.AArch64.Instruction) (binding : Binding nativeAddress state.raw.pc emission instruction) :
+    (dispatch nativeAddress emission origins state).map (observe origins) =
+      some (Reference.AArch64.step instruction (image origins state)) := by
+  cases binding with
+  | execute code aux width dst src src2 src3 value instruction bound =>
+      exact Bitfield.step_refines origins state code aux width dst src src2 src3 value instruction bound
+  | jump current target displacement currentAddress targetAddress =>
+      exact jump_refines nativeAddress current target displacement origins state targetAddress
+  | condition predicate current fallthrough target displacement currentAddress nextLabel fallAddress targetAddress =>
+      exact condition_refines nativeAddress predicate current fallthrough target displacement origins state fallAddress targetAddress
+  | normalizedNv current fallthrough target displacement currentAddress nextLabel fallAddress targetAddress =>
+      exact normalized_nv_refines nativeAddress current fallthrough target displacement origins state fallAddress targetAddress
+  | zero width nonzero src current fallthrough target displacement currentAddress nextLabel fallAddress targetAddress =>
+      exact zero_refines nativeAddress width nonzero src current fallthrough target displacement origins state fallAddress targetAddress
+  | bit nonzero src bit current fallthrough target displacement currentAddress nextLabel fallAddress targetAddress =>
+      exact bit_refines nativeAddress nonzero src bit current fallthrough target displacement origins state fallAddress targetAddress
+
+end KProgFormal.Refinement.Arm64RawRegister.Branch
+
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Branch.set_pc_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Branch.set_pc_tag_frame
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Branch.mapped_projects
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Branch.mapped_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Branch.production_jump
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Branch.production_condition
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Branch.production_zero
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Branch.production_bit
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Branch.jump_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Branch.condition_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Branch.normalized_nv_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Branch.zero_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Branch.bit_refines
+#print axioms KProgFormal.Refinement.Arm64RawRegister.Branch.step_refines

@@ -92,6 +92,8 @@
 - [x] **V** ARM raw EXTR/REV/REV16/SXTB/SXTH/SXTW/CNEG：实际raw/tag来源、EXTR输入截断、输入NZCV条件、width/tag写回、别名/XZR、unused SRC2/SRC3/IMM含255，以及production dispatcher和22操作统一step；新增14条及前40条审计/模块/root通过（本提交，raw22/74），入口/C抽取/物理compiler接口保持显式。
 - [x] **V** ARM raw CSEL/CSINC/CSINV/CSNEG/CINC/CINV/CSET/CSETM：CSEL/X复制选中的raw值与完整标签，scalar分支按width写回；输入NZCV/别名/XZR、alias条件反转和ZR、NV归一化、unused字段含255，以及production dispatcher和30操作统一step；新增15条及前54条审计/模块/root通过（本提交，raw30/74）。
 - [x] **V** ARM raw BITFIELD：UBFX/SBFX/UBFIZ/BFXIL/BFI五种native形式；输入SRC/旧DST的raw/tag还原、实际AUX字段、width/tag写回、全部别名/XZR、任意unused高字节/SRC2/SRC3/IMM，以及production dispatcher和31操作统一step；新增8条及前69条审计/模块/root通过（本提交，raw31/74），native字段边界与C/物理compiler接口显式。
+- [x] **V** ARM raw源分支B/B.cond/CBZ/CBNZ/TBZ/TBNZ六族：原始tag/GPR/NZCV、W/X zero和low6 bit测试、前/后向源标签选择、current/next/target native地址绑定、NV归一化和完整data/tag frame，production emission等式与前31数值raw操作统一step；新增14条及前77条审计/模块/root通过（本提交），数值31/74与源分支6/6分列。
+- [ ] **V** ARM六族source-control的selected硬件/official-model回放与native标签提取/数据和代码地址对应接口；通用label-map定理已在raw源分支批次给出，数值catalogue保持独立。
 - [ ] **V** 上表每一行做到满额。
 - [ ] **V** O1：官方模型对照补上 ANDN、BZHI 这 4 个 x86-64 形式（现为 63/67）。
 - [ ] **V** O1/O2：x86-64 的 helper 调用、寄存器调用、外层返回；REP MOVS 全计数的 C 和编译证明。
