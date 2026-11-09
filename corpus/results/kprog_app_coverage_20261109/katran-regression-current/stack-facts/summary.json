@@ -1,0 +1,24 @@
+{
+  "change": "Preserve pre-barrier stack metadata coordinates for the three memory ALU writers; actual accesses retain the original barrier",
+  "header_sha256": "c1ff7495bc668db8caac7521f572a905e14a51280fef0d51bad7175e513c365a",
+  "host_outcomes": [
+    "x86 lea route host cross-check: OK (48553 cases)",
+    "x86 stack arm route host cross-check: OK (117782 cases)",
+    "x86 stack write lanes route host cross-check: OK (1401654 cases)",
+    "x86 alu mem result route host cross-check: OK (26547217 cases)",
+    "x86 memory ALU frame host/CPU cross-check: OK (8007360 cases)",
+    "x86 lea route host cross-check: OK (48553 cases)",
+    "x86 stack arm route host cross-check: OK (117782 cases)",
+    "x86 stack write lanes route host cross-check: OK (1401654 cases)"
+  ],
+  "clang_frame": [
+    "x86 memory ALU frame host/CPU cross-check: OK (8007360 cases)"
+  ],
+  "host_cohort_exit": 2,
+  "clang_frame_exit": 0,
+  "parent_clang_route_exit": 2,
+  "clang_route_diagnostic": "pointer arithmetic sanitizer at original oracle line892 reproduces on readonly committed parent f20203824",
+  "whole_B_compile": "active",
+  "original38": "queued from the committed model",
+  "runtime_predicates_added": 0
+}
