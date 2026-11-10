@@ -18,5 +18,7 @@
     "application": "cilium/agent",
     "status": "installed"
   },
-  "disposition": "coordinator review for serializing measurement RPC with existing synchronous load scope; code added0"
+  "disposition": "coordinator review for serializing measurement RPC with existing synchronous load scope; code added0",
+  "first_request_stage": "kernel_native_chunk_load_failed",
+  "first_request_load_stderr": "trusted-native-loader: create kernel native chunk: No such file or directory"
 }

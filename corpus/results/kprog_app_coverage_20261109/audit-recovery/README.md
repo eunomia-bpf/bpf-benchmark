@@ -123,3 +123,18 @@ The independent full eight-tool BCC startup uses adapter b7440a7be, the complete
 The original driver reaches measure_start on the first tool socket at guest206.583986 while its capability program remains in synchronous native loading. Other tool sockets already contain the four installed programs. The resulting native-phase error is the original empty tracked-program error; post-phase work counters remain pending a completed startup. The baseline workload returns0 and its25 program counters and original stdout remain archived. Outer guest/make0 accompanies corpus metadata status=error. The21-program installation drop combines one native-chunk error with20 programs whose startup stops before a completed service result; their verifier outcomes remain open. These counters describe this run's startup frontier.
 
 bcc-startup-retry.json publishes each actual request entry, source/native identity, stage and compile timing, plus the baseline program rows and exact reproduction command. bcc-startup-retry-raw.tar.gz includes all five request archives, source/runtime identities, the complete original corpus output, compiler records and image metadata. The measurement serialization case posted for OTel now includes this BCC evidence; coordinator disposition remains pending and waiting-code additions remain0. The ongoing six-app writer continues with its original service/compiler state.
+
+## Cilium completed-request frontier
+
+The ongoing six-app startup has21 completed Cilium native requests in service rows2-22:21 B programs generated and compiled,17 installed and4 verifier rejected. The old best installed count is14; this frontier records an aggregate gain of3. Actual complete program membership, per-prior-program gains/drops and post-phase work counters follow the whole-app terminal. The writer continues with its original fixed af422c391 model/runtime.
+
+| Entry | Service row | Stage/error class | Raw verifier signal |
+| --- | ---: | --- | --- |
+| cil_from_container |6|BTF write permission|only read is supported; store u16 to trusted sk_buff+124|
+| tail_handle_ipv4_cont |12|packet bounds|invalid access to packet, off=0 size=4|
+| tail_ipv4_to_endpoint |18|pointer bitwise operation|R0 bitwise operator &= on pointer prohibited|
+| cil_from_netdev |19|pointer bitwise operation|R2 bitwise operator &= on pointer prohibited|
+
+cilium-startup-frontier22.json records every completed request, full entry, source ID, load context, compile timing and native/simulator object identity. The raw archive retains all22 complete success/failure archives, including the OTel first request and its exact load-stage error. The17 Cilium installations include two separate tail_drop_notify source-program instances; each retains its own source ID. Submitted native object hashes identify the full uploaded ELF, with the selected entry recorded alongside each hash.
+
+OTel read_task_struct reaches a native-chunk ioctl ENOENT, before B verifier submission. The generic phrase used in the earlier preliminary Notice is corrected to kernel native-chunk load failure. In the fixed module source this ioctl first resolves the active request capsule; native_lab_active_capsule returns ENOENT for an inactive/abandoned request. This source behavior and the measured startup/teardown ordering support the existing lifecycle-overlap case. Its exact raw record remains distinct from the four actual Cilium verifier rejections. The proposed measurement waiting behavior still awaits coordinator disposition; production code additions0.
