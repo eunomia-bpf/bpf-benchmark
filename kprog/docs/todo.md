@@ -83,7 +83,7 @@
 - [x] context 布局、尾调用帧、verifier 派生标志（S11，901194c0c）。
 - [x] 部分宽度读的异常表恢复（S1、S2、S9、S10）；SMAP 分发（4ececd2cb）。
 - [x] SIMD-free 原生代码（S14，0ead331cd）。
-- [x] 间接分支加固 retpoline/ITS 和 BTI（S15，165ac4100）。
+- [x] 间接分支加固 retpoline/ITS 和 BTI（S15，165ac4100）在 2026-11-09 按变更必要性审计撤回，native 代码回到原来的间接分支形式。
 - [x] 安全用例 x86 47、ARM 48，接受的 8 例为良性恢复读，配对的写入变体被 verifier 拒绝（S16，ec468f0f7）。
 - [x] 每个 armed 镜像只加载一次（fb23a234d、d140d92ab）。
 - [x] **C** 入口桩保存恢复六个 callee-saved 寄存器，B的外层RET保持RSP判定（96c6946cf、kernel390ef9011c7d、canonical pin47579c053）；同模型ISA48/315与六应用回放属于上方统一回放项。

@@ -189,7 +189,7 @@ tracee, tetragon, bcc, katran, cilium, otelcol-ebpf-profiler
 
 ## One tree, one branch
 
-Operator, 2026-11-09: "以后禁止切换branch 和开不同的 tree". Every edit happens in this checkout on master. New git worktrees, clones, branches, branch switches and private edited source copies are banned. A read-only export of a committed revision may feed a guest or a full check. Commit and push every step at once ("做一步 commit push 一步").
+Operator, 2026-11-09: "以后禁止切换branch 和开不同的 tree". Every edit happens in this checkout on master. New git worktrees, clones, branches, branch switches and private edited source copies are banned. Builds, replays and guests also run from this checkout, with their recipes and scripts committed here, so exported source copies, copied benchmark trees (such as the former /paper-tree) and private harness directories go away as well (operator 2026-11-10: "/paper-tree 是什么???? 又违规开了 worktree 了?"). Commit and push every step at once ("做一步 commit push 一步").
 
 ## Oversized files on GitHub
 
