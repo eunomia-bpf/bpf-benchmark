@@ -372,8 +372,11 @@ def verifier_message(text):
 
 
 def normalize(text):
+    # Hex addresses and decimal values become N; register names other than the
+    # frame pointer R10 become Rn.
     text = re.sub(r'0x[0-9a-fA-F]+', '0xN', text)
-    return re.sub(r'\bR\d+\b', 'Rn', re.sub(r'(?<![A-Za-z])-?\d+', 'N', text)).strip()
+    text = re.sub(r'\bR(?!10\b)\d+\b', 'Rn', text)
+    return re.sub(r'(?<![A-Za-z0-9])-?\d+', 'N', text).strip()
 
 
 def message_class(message):
@@ -403,8 +406,9 @@ def stage_class(outcome, label):
     trace = (service.get('traceback') or '').strip().splitlines()
     if outcome['stage'] == 'generation_failed' and trace:
         code = [l.strip() for l in trace if l.startswith('    ') and set(l.strip()) - set('^~ ')]
-        return ('generation_failed: ' + normalize(trace[-1])[:100] +
-                (' at ' + code[-1][:100] if code else ''))
+        message = re.sub(r'0x[0-9a-fA-F]+', '0xN', trace[-1]).strip()[:100]
+        site = code[-1] if code and not code[-1].startswith('raise ') else ''
+        return 'generation_failed: ' + message + (' at ' + site[:100] if site else '')
     if outcome['stage'] == 'compilation_failed':
         text = '\n'.join(c.get('stderr', '') for c in outcome.get('compiler_failures') or [])
         for line in text.splitlines():
@@ -431,13 +435,24 @@ def store(base, name, payload):
     return paths + [base / (name + '.parts.json')]
 
 
-def publish():
+def publish(interim=False):
     census = load('census_classes', ROOT / 'kprog/corpus_resident_verifier.py')
     data = json.loads((S / 'groups.json').read_text())
     provenance = json.loads((S / 'provenance.json').read_text())
     RESULTS.mkdir(parents=True, exist_ok=True)
     instances, bodies, outcomes = [], [], {}
+    pending_bodies = 0
     for entry in data['groups']:
+        if 'outcome' not in entry:
+            pending_bodies += 1
+            for member in entry['members']:
+                instances.append(dict(application=member['application'],
+                    source_prog_id=member['source_prog_id'], name=member['name'],
+                    selection_kind=member['selection_kind'], body_sha256=entry['body_sha256'],
+                    representative_id=entry['representative']['source_prog_id'],
+                    stage='pending', generated=False, compiled=False, driver_class='pending',
+                    failure_class='pending', verifier_message=None))
+            continue
         outcome = entry['outcome']
         message, context = verifier_message(outcome.get('diagnostic', ''))
         label = outcome.get('failure_class') or census.failure_class(outcome)
@@ -504,7 +519,7 @@ def publish():
     classes = collections.Counter(r['failure_class'] for r in instances)
     class_bodies = collections.Counter(b['failure_class'] for b in bodies)
     total = phases(instances)
-    largest = next(label for label, _ in classes.most_common() if label != 'installed')
+    largest = next(label for label, _ in classes.most_common() if label not in ('installed', 'pending'))
     examples = [b for b in bodies if b['failure_class'] == largest]
     examples.sort(key=lambda b: -b['instances'])
     summary = dict(model_head=provenance['model_head'], runtime_model=RUNTIME_MODEL,
@@ -521,11 +536,20 @@ def publish():
                                   verifier_message=b['verifier_message'],
                                   error_context=b['error_context']) for b in examples[:3]]),
         native_execution_requests=0, guest_memory=GUEST_MEMORY, workers=WORKERS,
+        completed_bodies=len(bodies), pending_bodies=pending_bodies,
+        pending_instances=sum(r['stage'] == 'pending' for r in instances),
         body_identity=data['body_identity'], bodies=bodies)
     write(RESULTS / 'result.json', summary)
     write(RESULTS / 'instances.json', dict(model_head=provenance['model_head'], programs=instances))
     write(RESULTS / 'provenance.json', provenance)
     paths = [RESULTS / n for n in ['result.json', 'instances.json', 'provenance.json']]
+    if interim:
+        readme(summary, provenance)
+        paths.append(RESULTS / 'README.md')
+        write(S / 'publication-paths.json', [os.path.relpath(p, ROOT) for p in paths])
+        print(json.dumps({k: summary[k] for k in ['instances', 'completed_bodies', 'pending_bodies',
+              'pending_instances', 'generated', 'compiled', 'verifier_accepted', 'verifier_rejected']}))
+        return
     paths += store(RESULTS, 'outcomes.json.gz', gzip.compress(
         (json.dumps(outcomes, indent=2) + '\n').encode(), mtime=0))
     # Request archives without their byte copies of the submitted native input;
@@ -538,15 +562,15 @@ def publish():
             prefix = str(path.relative_to(S))
             with tarfile.open(path) as source_archive:
                 for member in source_archive.getmembers():
-                    data = source_archive.extractfile(member).read() if member.isfile() else None
-                    if data is not None and member.name.endswith('.native.o'):
-                        digest = hashlib.sha256(data).hexdigest()
+                    content = source_archive.extractfile(member).read() if member.isfile() else None
+                    if content is not None and member.name.endswith('.native.o'):
+                        digest = hashlib.sha256(content).hexdigest()
                         if digest in known:
                             omitted.append(dict(archive=prefix, member=member.name, sha256=digest,
-                                                bytes=len(data), input=known[digest]))
+                                                bytes=len(content), input=known[digest]))
                             continue
                     member.name = prefix + '/' + member.name
-                    archive.addfile(member, io.BytesIO(data) if data is not None else None)
+                    archive.addfile(member, io.BytesIO(content) if content is not None else None)
         listing = (json.dumps(dict(omitted_native_input_copies=omitted), indent=2) + '\n').encode()
         info = tarfile.TarInfo('omitted-native-copies.json')
         info.size = len(listing)
@@ -588,7 +612,13 @@ def readme(summary, provenance):
         'All 549 resident x86-64 instances, model ' + summary['model_head'][:9] +
         ' (model sources identical to the matched runtime model ' + RUNTIME_MODEL[:9] +
         '). Load-only: B is generated, compiled and submitted to the stock verifier; '
-        'native execution requests: 0.', '',
+        'native execution requests: 0.', '']
+    if summary['pending_bodies']:
+        lines += ['**Interim table:** ' + str(summary['completed_bodies']) + ' of ' +
+                  str(summary['completed_bodies'] + summary['pending_bodies']) +
+                  ' native bodies have outcomes; ' + str(summary['pending_instances']) +
+                  ' instances are still running and appear as `pending`.', '']
+    lines += [
         '| Application | Instances | Generated | Compiled | Verifier accepted | Verifier rejected | '
         'Failure classes (instances) | Best verified-path row | 4f5 census accepted |',
         '| --- | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: |']
@@ -671,9 +701,10 @@ def readme(summary, provenance):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=['prepare', 'run', 'publish'])
+    parser.add_argument('mode', choices=['prepare', 'run', 'publish', 'interim'])
     args = parser.parse_args()
-    {'prepare': prepare, 'run': run, 'publish': publish}[args.mode]()
+    {'prepare': prepare, 'run': run, 'publish': publish,
+     'interim': lambda: publish(interim=True)}[args.mode]()
 
 
 if __name__ == '__main__':

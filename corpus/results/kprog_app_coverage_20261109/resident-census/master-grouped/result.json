@@ -1,0 +1,4472 @@
+{
+  "model_head": "46659115e7a1643c3c09ea905372b4488d4c95c6",
+  "runtime_model": "af422c39195084ee3137627df943c055491358c7",
+  "native_body_groups": 123,
+  "instances": 549,
+  "generated": 341,
+  "compiled": 321,
+  "verifier_accepted": 108,
+  "verifier_rejected": 213,
+  "applications": [
+    {
+      "application": "bcc/set",
+      "instances": 25,
+      "generated": 25,
+      "compiled": 25,
+      "verifier_accepted": 25,
+      "verifier_rejected": 0,
+      "failure_classes": {},
+      "bodies": 25,
+      "by_selection": {
+        "current manifest": {
+          "instances": 25,
+          "generated": 25,
+          "compiled": 25,
+          "verifier_accepted": 25,
+          "verifier_rejected": 0
+        }
+      },
+      "best_verified_path_row": 25,
+      "census_4f5": {
+        "instances": 25,
+        "generated": 9,
+        "compiled": 9,
+        "verifier_accepted": 7,
+        "verifier_rejected": 2
+      }
+    },
+    {
+      "application": "katran",
+      "instances": 1,
+      "generated": 1,
+      "compiled": 1,
+      "verifier_accepted": 0,
+      "verifier_rejected": 1,
+      "failure_classes": {
+        "verifier: value N makes fp pointer be out of bounds": 1
+      },
+      "bodies": 1,
+      "by_selection": {
+        "current manifest": {
+          "instances": 1,
+          "generated": 1,
+          "compiled": 1,
+          "verifier_accepted": 0,
+          "verifier_rejected": 1
+        }
+      },
+      "best_verified_path_row": 1,
+      "census_4f5": {
+        "instances": 1,
+        "generated": 1,
+        "compiled": 0,
+        "verifier_accepted": 0,
+        "verifier_rejected": 0
+      }
+    },
+    {
+      "application": "cilium/agent",
+      "instances": 72,
+      "generated": 0,
+      "compiled": 0,
+      "verifier_accepted": 0,
+      "verifier_rejected": 0,
+      "failure_classes": {
+        "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]": 72
+      },
+      "bodies": 26,
+      "by_selection": {
+        "current manifest": {
+          "instances": 72,
+          "generated": 0,
+          "compiled": 0,
+          "verifier_accepted": 0,
+          "verifier_rejected": 0
+        }
+      },
+      "best_verified_path_row": 14,
+      "census_4f5": {
+        "instances": 72,
+        "generated": 0,
+        "compiled": 0,
+        "verifier_accepted": 0,
+        "verifier_rejected": 0
+      }
+    },
+    {
+      "application": "otelcol-ebpf-profiler/profiling",
+      "instances": 13,
+      "generated": 2,
+      "compiled": 2,
+      "verifier_accepted": 2,
+      "verifier_rejected": 0,
+      "failure_classes": {
+        "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]": 11
+      },
+      "bodies": 13,
+      "by_selection": {
+        "current manifest": {
+          "instances": 13,
+          "generated": 2,
+          "compiled": 2,
+          "verifier_accepted": 2,
+          "verifier_rejected": 0
+        }
+      },
+      "best_verified_path_row": 2,
+      "census_4f5": {
+        "instances": 13,
+        "generated": 0,
+        "compiled": 0,
+        "verifier_accepted": 0,
+        "verifier_rejected": 0
+      }
+    },
+    {
+      "application": "tracee/monitor",
+      "instances": 151,
+      "generated": 29,
+      "compiled": 9,
+      "verifier_accepted": 0,
+      "verifier_rejected": 9,
+      "failure_classes": {
+        "pending": 121,
+        "compiler: translation unit is too large for Clang to process: ran out of source locations": 20,
+        "verifier: Rn invalid mem access 'scalar'": 9,
+        "generation_failed: ValueError: unresolved finite indirect target at 0xN: call   QWORD PTR [rsp+0xN]": 1
+      },
+      "bodies": 30,
+      "by_selection": {
+        "current manifest": {
+          "instances": 151,
+          "generated": 29,
+          "compiled": 9,
+          "verifier_accepted": 0,
+          "verifier_rejected": 9
+        }
+      },
+      "best_verified_path_row": 5,
+      "census_4f5": {
+        "instances": 151,
+        "generated": 0,
+        "compiled": 0,
+        "verifier_accepted": 0,
+        "verifier_rejected": 0
+      }
+    },
+    {
+      "application": "tetragon/observer",
+      "instances": 287,
+      "generated": 284,
+      "compiled": 284,
+      "verifier_accepted": 81,
+      "verifier_rejected": 203,
+      "failure_classes": {
+        "verifier: Rn invalid mem access 'scalar'": 123,
+        "verifier: invalid write to stack R10 off=N size=N": 77,
+        "pending": 2,
+        "verifier: The sequence of N jumps is too complex.": 1,
+        "native_manifest_selection_gap": 1,
+        "verifier: math between fp pointer and register with unbounded min value is not allowed": 1,
+        "verifier: Rn type=scalar expected=func": 1
+      },
+      "bodies": 28,
+      "by_selection": {
+        "current manifest": {
+          "instances": 134,
+          "generated": 134,
+          "compiled": 134,
+          "verifier_accepted": 46,
+          "verifier_rejected": 88
+        },
+        "current manifest gap; previous identity absent from payload": {
+          "instances": 1,
+          "generated": 0,
+          "compiled": 0,
+          "verifier_accepted": 0,
+          "verifier_rejected": 0
+        },
+        "previous census identity on current payload": {
+          "instances": 152,
+          "generated": 150,
+          "compiled": 150,
+          "verifier_accepted": 35,
+          "verifier_rejected": 115
+        }
+      },
+      "best_verified_path_row": 4,
+      "census_4f5": {
+        "instances": 287,
+        "generated": 277,
+        "compiled": 244,
+        "verifier_accepted": 0,
+        "verifier_rejected": 233
+      }
+    }
+  ],
+  "classes": [
+    {
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "instances": 132,
+      "bodies": 20,
+      "per_application": {
+        "BCC": 0,
+        "Katran": 0,
+        "Cilium": 0,
+        "OTel": 0,
+        "Tracee": 9,
+        "Tetragon": 123
+      }
+    },
+    {
+      "failure_class": "pending",
+      "instances": 123,
+      "bodies": 0,
+      "per_application": {
+        "BCC": 0,
+        "Katran": 0,
+        "Cilium": 0,
+        "OTel": 0,
+        "Tracee": 121,
+        "Tetragon": 2
+      }
+    },
+    {
+      "failure_class": "installed",
+      "instances": 108,
+      "bodies": 36,
+      "per_application": {
+        "BCC": 25,
+        "Katran": 0,
+        "Cilium": 0,
+        "OTel": 2,
+        "Tracee": 0,
+        "Tetragon": 81
+      }
+    },
+    {
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "instances": 83,
+      "bodies": 37,
+      "per_application": {
+        "BCC": 0,
+        "Katran": 0,
+        "Cilium": 72,
+        "OTel": 11,
+        "Tracee": 0,
+        "Tetragon": 0
+      }
+    },
+    {
+      "failure_class": "verifier: invalid write to stack R10 off=N size=N",
+      "instances": 77,
+      "bodies": 5,
+      "per_application": {
+        "BCC": 0,
+        "Katran": 0,
+        "Cilium": 0,
+        "OTel": 0,
+        "Tracee": 0,
+        "Tetragon": 77
+      }
+    },
+    {
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "instances": 20,
+      "bodies": 20,
+      "per_application": {
+        "BCC": 0,
+        "Katran": 0,
+        "Cilium": 0,
+        "OTel": 0,
+        "Tracee": 20,
+        "Tetragon": 0
+      }
+    },
+    {
+      "failure_class": "verifier: value N makes fp pointer be out of bounds",
+      "instances": 1,
+      "bodies": 1,
+      "per_application": {
+        "BCC": 0,
+        "Katran": 1,
+        "Cilium": 0,
+        "OTel": 0,
+        "Tracee": 0,
+        "Tetragon": 0
+      }
+    },
+    {
+      "failure_class": "generation_failed: ValueError: unresolved finite indirect target at 0xN: call   QWORD PTR [rsp+0xN]",
+      "instances": 1,
+      "bodies": 1,
+      "per_application": {
+        "BCC": 0,
+        "Katran": 0,
+        "Cilium": 0,
+        "OTel": 0,
+        "Tracee": 1,
+        "Tetragon": 0
+      }
+    },
+    {
+      "failure_class": "verifier: The sequence of N jumps is too complex.",
+      "instances": 1,
+      "bodies": 1,
+      "per_application": {
+        "BCC": 0,
+        "Katran": 0,
+        "Cilium": 0,
+        "OTel": 0,
+        "Tracee": 0,
+        "Tetragon": 1
+      }
+    },
+    {
+      "failure_class": "native_manifest_selection_gap",
+      "instances": 1,
+      "bodies": 0,
+      "per_application": {
+        "BCC": 0,
+        "Katran": 0,
+        "Cilium": 0,
+        "OTel": 0,
+        "Tracee": 0,
+        "Tetragon": 1
+      }
+    },
+    {
+      "failure_class": "verifier: math between fp pointer and register with unbounded min value is not allowed",
+      "instances": 1,
+      "bodies": 1,
+      "per_application": {
+        "BCC": 0,
+        "Katran": 0,
+        "Cilium": 0,
+        "OTel": 0,
+        "Tracee": 0,
+        "Tetragon": 1
+      }
+    },
+    {
+      "failure_class": "verifier: Rn type=scalar expected=func",
+      "instances": 1,
+      "bodies": 1,
+      "per_application": {
+        "BCC": 0,
+        "Katran": 0,
+        "Cilium": 0,
+        "OTel": 0,
+        "Tracee": 0,
+        "Tetragon": 1
+      }
+    }
+  ],
+  "largest_failure_class": {
+    "failure_class": "verifier: Rn invalid mem access 'scalar'",
+    "instances": 132,
+    "bodies": 20,
+    "representatives": [
+      {
+        "application": "tetragon/observer",
+        "representative_id": 100,
+        "symbol": "generic_kprobe_process_filter",
+        "instances": 33,
+        "verifier_message": "R0 invalid mem access 'scalar'",
+        "error_context": [
+          "144: (bf) r1 = r3                     ; R1=32 R3=32",
+          "145: (07) r1 += -296                  ; R1=-264",
+          "146: (61) r2 = *(u32 *)(r0 +0)",
+          "R0 invalid mem access 'scalar'"
+        ]
+      },
+      {
+        "application": "tetragon/observer",
+        "representative_id": 104,
+        "symbol": "generic_kprobe_actions",
+        "instances": 33,
+        "verifier_message": "R1 invalid mem access 'scalar'",
+        "error_context": [
+          "8193: (0f) r1 += r2                   ; R1=scalar() R2=scalar(id=105)",
+          "8194: (b7) r2 = 0                     ; R2=0",
+          "8195: (73) *(u8 *)(r1 +0) = r2",
+          "R1 invalid mem access 'scalar'"
+        ]
+      },
+      {
+        "application": "tetragon/observer",
+        "representative_id": 101,
+        "symbol": "generic_kprobe_event",
+        "instances": 33,
+        "verifier_message": "R0 invalid mem access 'scalar'",
+        "error_context": [
+          "349: (bf) r1 = r3                     ; R1=40 R3=40",
+          "350: (07) r1 += -184                  ; R1=-144",
+          "351: (79) r2 = *(u64 *)(r0 +0)",
+          "R0 invalid mem access 'scalar'"
+        ]
+      }
+    ]
+  },
+  "native_execution_requests": 0,
+  "guest_memory": "4G",
+  "workers": [
+    "8-19",
+    "8-19",
+    "8-19",
+    "8-19",
+    "8-19",
+    "8-19",
+    "8-19",
+    "8-19",
+    "8-19",
+    "8-19",
+    "8-19",
+    "8-19",
+    "8-19",
+    "8-19"
+  ],
+  "completed_bodies": 123,
+  "pending_bodies": 123,
+  "pending_instances": 123,
+  "body_identity": "SHA256 of complete native-link proof ELF (--mode proof --preserve-entry-abi)",
+  "bodies": [
+    {
+      "body_sha256": "9054f1ddf1ce7e62862ddd542cafbce4655548fec0c8fa8fe2dd9915ec7b2a80",
+      "application": "tracee/monitor",
+      "representative_id": 611,
+      "symbol": "tracepoint__exec_test",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        611
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "compilation_failed",
+      "driver_class": "compilation_failed",
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "fatal error: translation unit is too large for Clang to process: ran out of source locations",
+        "clang: error: clang frontend command failed with exit code 70 (use -v to see invocation)"
+      ],
+      "generated": true,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/9054f1ddf1ce7e62",
+      "cpu": "8-9",
+      "started": "2026-11-10T01:23:41.858984+00:00",
+      "finished": "2026-11-10T01:31:14.534353+00:00"
+    },
+    {
+      "body_sha256": "21e3c94cb8b46a490acd5447725702c9b1014709e622f67a448c1f0778054856",
+      "application": "tracee/monitor",
+      "representative_id": 491,
+      "symbol": "lkm_seeker_modtree_loop",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        491
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "compilation_failed",
+      "driver_class": "compilation_failed",
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "fatal error: translation unit is too large for Clang to process: ran out of source locations",
+        "clang: error: clang frontend command failed with exit code 70 (use -v to see invocation)"
+      ],
+      "generated": true,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/21e3c94cb8b46a49",
+      "cpu": "10-11",
+      "started": "2026-11-10T01:23:41.859411+00:00",
+      "finished": "2026-11-10T01:31:12.186874+00:00"
+    },
+    {
+      "body_sha256": "8bde845c0e8010f4c54b9b400209f529660eea03987951e8a0d1262810b38cbc",
+      "application": "tracee/monitor",
+      "representative_id": 497,
+      "symbol": "lkm_seeker_proc_tail",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        497
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "compilation_failed",
+      "driver_class": "compilation_failed",
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "fatal error: translation unit is too large for Clang to process: ran out of source locations",
+        "clang: error: clang frontend command failed with exit code 70 (use -v to see invocation)"
+      ],
+      "generated": true,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/8bde845c0e8010f4",
+      "cpu": "12-13",
+      "started": "2026-11-10T01:23:41.859549+00:00",
+      "finished": "2026-11-10T01:31:23.910311+00:00"
+    },
+    {
+      "body_sha256": "fcab20da3a87b34d56258cb8ae48635c1d848b1c5cef02151c0de81d8b4fb978",
+      "application": "tracee/monitor",
+      "representative_id": 495,
+      "symbol": "lkm_seeker_kset_tail",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        495
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "compilation_failed",
+      "driver_class": "compilation_failed",
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "fatal error: translation unit is too large for Clang to process: ran out of source locations",
+        "clang: error: clang frontend command failed with exit code 70 (use -v to see invocation)"
+      ],
+      "generated": true,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/fcab20da3a87b34d",
+      "cpu": "14-15",
+      "started": "2026-11-10T01:23:41.859791+00:00",
+      "finished": "2026-11-10T01:30:55.149977+00:00"
+    },
+    {
+      "body_sha256": "44509bb9872eb2d0a1a7cf1311271e623a482c0d460c7962ddda43ecc9e75ff1",
+      "application": "tracee/monitor",
+      "representative_id": 596,
+      "symbol": "trace_security_task_prctl",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        596
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "compilation_failed",
+      "driver_class": "compilation_failed",
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "fatal error: translation unit is too large for Clang to process: ran out of source locations",
+        "clang: error: clang frontend command failed with exit code 70 (use -v to see invocation)"
+      ],
+      "generated": true,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/44509bb9872eb2d0",
+      "cpu": "16-17",
+      "started": "2026-11-10T01:23:41.860432+00:00",
+      "finished": "2026-11-10T01:30:44.613362+00:00"
+    },
+    {
+      "body_sha256": "d5db967bdc82d5a2d9f012dc842b0ededdab73e72b1c71756d21a2cb14a4e4ca",
+      "application": "tracee/monitor",
+      "representative_id": 559,
+      "symbol": "trace_security_file_mprotect",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        559
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "compilation_failed",
+      "driver_class": "compilation_failed",
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "fatal error: translation unit is too large for Clang to process: ran out of source locations",
+        "clang: error: clang frontend command failed with exit code 70 (use -v to see invocation)"
+      ],
+      "generated": true,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/d5db967bdc82d5a2",
+      "cpu": "18-19",
+      "started": "2026-11-10T01:23:41.861265+00:00",
+      "finished": "2026-11-10T01:31:05.182627+00:00"
+    },
+    {
+      "body_sha256": "15e8b9047ce30143c7d580d20a832280aad33f895d7c593238faadba0f0be582",
+      "application": "otelcol-ebpf-profiler/profiling",
+      "representative_id": 151,
+      "symbol": "perf_unwind_hotspot",
+      "native_object": "otelcol-ebpf-profiler.native.o",
+      "instances": 1,
+      "member_ids": [
+        151
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/15e8b9047ce30143",
+      "cpu": "16-17",
+      "started": "2026-11-10T01:30:44.712357+00:00",
+      "finished": "2026-11-10T01:31:37.973476+00:00"
+    },
+    {
+      "body_sha256": "3efe4222a802d9fc2b3dd5218cbeea3b67a17a1253c6ae1602ea3075c60367d9",
+      "application": "tracee/monitor",
+      "representative_id": 558,
+      "symbol": "trace_security_mmap_file",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        558
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "compilation_failed",
+      "driver_class": "compilation_failed",
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "fatal error: translation unit is too large for Clang to process: ran out of source locations",
+        "clang: error: clang frontend command failed with exit code 70 (use -v to see invocation)"
+      ],
+      "generated": true,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/3efe4222a802d9fc",
+      "cpu": "14-15",
+      "started": "2026-11-10T01:30:55.245909+00:00",
+      "finished": "2026-11-10T01:37:29.866141+00:00"
+    },
+    {
+      "body_sha256": "6261912286ce465971e460547e8ed1a221135470fc8894e7bc7baeb9a03e8ad9",
+      "application": "tracee/monitor",
+      "representative_id": 515,
+      "symbol": "trace_security_bprm_check",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        515
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "compilation_failed",
+      "driver_class": "compilation_failed",
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "fatal error: translation unit is too large for Clang to process: ran out of source locations",
+        "clang: error: clang frontend command failed with exit code 70 (use -v to see invocation)"
+      ],
+      "generated": true,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/6261912286ce4659",
+      "cpu": "18-19",
+      "started": "2026-11-10T01:31:05.273396+00:00",
+      "finished": "2026-11-10T01:37:36.779585+00:00"
+    },
+    {
+      "body_sha256": "ec41a8d778dd115bbbc050f7feebf9a03e8ab61f6cdf15207b3f7a92b8f71913",
+      "application": "otelcol-ebpf-profiler/profiling",
+      "representative_id": 152,
+      "symbol": "perf_unwind_perl",
+      "native_object": "otelcol-ebpf-profiler.native.o",
+      "instances": 1,
+      "member_ids": [
+        152
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/ec41a8d778dd115b",
+      "cpu": "10-11",
+      "started": "2026-11-10T01:31:12.289798+00:00",
+      "finished": "2026-11-10T01:32:04.231184+00:00"
+    },
+    {
+      "body_sha256": "17def92c06ca37c8249aa492f080c4ec120dac152c27004950227e05a5e857ec",
+      "application": "tracee/monitor",
+      "representative_id": 538,
+      "symbol": "trace_ret_vfs_write_tail",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        538
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "compilation_failed",
+      "driver_class": "compilation_failed",
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "fatal error: translation unit is too large for Clang to process: ran out of source locations",
+        "clang: error: clang frontend command failed with exit code 70 (use -v to see invocation)"
+      ],
+      "generated": true,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/17def92c06ca37c8",
+      "cpu": "8-9",
+      "started": "2026-11-10T01:31:14.638818+00:00",
+      "finished": "2026-11-10T01:37:57.463366+00:00"
+    },
+    {
+      "body_sha256": "2d86871536585bac20a1614ed8d1edb6fdc74eb9e481272e0f80c52ea69be7fb",
+      "application": "tracee/monitor",
+      "representative_id": 548,
+      "symbol": "trace_ret_kernel_write_tail",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        548
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "compilation_failed",
+      "driver_class": "compilation_failed",
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "fatal error: translation unit is too large for Clang to process: ran out of source locations"
+      ],
+      "generated": true,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/2d86871536585bac",
+      "cpu": "12-13",
+      "started": "2026-11-10T01:31:24.016386+00:00",
+      "finished": "2026-11-10T01:37:55.949371+00:00"
+    },
+    {
+      "body_sha256": "4ef63875e54ceadd90b50649660b06100f69e3a94b9d24e7f4deb105a0396644",
+      "application": "otelcol-ebpf-profiler/profiling",
+      "representative_id": 156,
+      "symbol": "perf_unwind_v8",
+      "native_object": "otelcol-ebpf-profiler.native.o",
+      "instances": 1,
+      "member_ids": [
+        156
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/4ef63875e54ceadd",
+      "cpu": "16-17",
+      "started": "2026-11-10T01:31:38.057118+00:00",
+      "finished": "2026-11-10T01:32:36.626931+00:00"
+    },
+    {
+      "body_sha256": "efb628e48694d735d4d2ba1b59db2b87a42f1c295cac7d9215c685738e758aa2",
+      "application": "tracee/monitor",
+      "representative_id": 543,
+      "symbol": "trace_ret_vfs_writev_tail",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        543
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "compilation_failed",
+      "driver_class": "compilation_failed",
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "fatal error: translation unit is too large for Clang to process: ran out of source locations",
+        "clang: error: clang frontend command failed with exit code 70 (use -v to see invocation)"
+      ],
+      "generated": true,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/efb628e48694d735",
+      "cpu": "10-11",
+      "started": "2026-11-10T01:38:17.783313+00:00",
+      "finished": "2026-11-10T01:38:37.060825+00:00"
+    },
+    {
+      "body_sha256": "1f2744b77dc269f6a0e2fa4043bb5cdc68ba3344fe5557a97cc558e51823123f",
+      "application": "otelcol-ebpf-profiler/profiling",
+      "representative_id": 157,
+      "symbol": "perf_unwind_dotnet",
+      "native_object": "otelcol-ebpf-profiler.native.o",
+      "instances": 1,
+      "member_ids": [
+        157
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/1f2744b77dc269f6",
+      "cpu": "16-17",
+      "started": "2026-11-10T01:32:36.710878+00:00",
+      "finished": "2026-11-10T01:33:31.458674+00:00"
+    },
+    {
+      "body_sha256": "0763a60a80f5a0c3c451b219cf816825b452b61a535a05ca2003f20a9edddfa0",
+      "application": "tracee/monitor",
+      "representative_id": 510,
+      "symbol": "uprobe_syscall_table_check",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        510
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "compilation_failed",
+      "driver_class": "compilation_failed",
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "fatal error: translation unit is too large for Clang to process: ran out of source locations",
+        "clang: error: clang frontend command failed with exit code 70 (use -v to see invocation)"
+      ],
+      "generated": true,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/0763a60a80f5a0c3",
+      "cpu": "16-17",
+      "started": "2026-11-10T01:38:17.783524+00:00",
+      "finished": "2026-11-10T01:40:20.504719+00:00"
+    },
+    {
+      "body_sha256": "8adbadacbb4deab93439daa539a30792190f89428371e29b0b3e3564997aa85d",
+      "application": "otelcol-ebpf-profiler/profiling",
+      "representative_id": 153,
+      "symbol": "perf_unwind_php",
+      "native_object": "otelcol-ebpf-profiler.native.o",
+      "instances": 1,
+      "member_ids": [
+        153
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/8adbadacbb4deab9",
+      "cpu": "14-15",
+      "started": "2026-11-10T01:38:17.783785+00:00",
+      "finished": "2026-11-10T01:38:24.815351+00:00"
+    },
+    {
+      "body_sha256": "ff125e71d1101c290154402cd2d81739a9e2cf8da3ea70c979916603cb0052cd",
+      "application": "tracee/monitor",
+      "representative_id": 590,
+      "symbol": "trace_execute_finished",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        590
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "compilation_failed",
+      "driver_class": "compilation_failed",
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "fatal error: translation unit is too large for Clang to process: ran out of source locations",
+        "clang: error: clang frontend command failed with exit code 70 (use -v to see invocation)"
+      ],
+      "generated": true,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/ff125e71d1101c29",
+      "cpu": "18-19",
+      "started": "2026-11-10T01:38:17.783967+00:00",
+      "finished": "2026-11-10T01:44:38.360796+00:00"
+    },
+    {
+      "body_sha256": "13e3a1fbd4d215c60f30042bf921556335e9b4854f78acdbb91d68369638d4ac",
+      "application": "tracee/monitor",
+      "representative_id": 500,
+      "symbol": "sched_process_exec_signal",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        500
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "compilation_failed",
+      "driver_class": "compilation_failed",
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "fatal error: translation unit is too large for Clang to process: ran out of source locations",
+        "clang: error: clang frontend command failed with exit code 70 (use -v to see invocation)"
+      ],
+      "generated": true,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/13e3a1fbd4d215c6",
+      "cpu": "12-13",
+      "started": "2026-11-10T01:38:24.922081+00:00",
+      "finished": "2026-11-10T01:45:45.223777+00:00"
+    },
+    {
+      "body_sha256": "bd9570cb9bca817591b0cc47fb974d16e1d07eef505a0de7bf17dda49f9c13e7",
+      "application": "tracee/monitor",
+      "representative_id": 501,
+      "symbol": "sched_process_exec_event_submit_tail",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        501
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "compilation_failed",
+      "driver_class": "compilation_failed",
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "fatal error: translation unit is too large for Clang to process: ran out of source locations",
+        "clang: error: clang frontend command failed with exit code 70 (use -v to see invocation)"
+      ],
+      "generated": true,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/bd9570cb9bca8175",
+      "cpu": "8-9",
+      "started": "2026-11-10T01:38:37.181375+00:00",
+      "finished": "2026-11-10T01:44:55.450013+00:00"
+    },
+    {
+      "body_sha256": "12824526e1312b5b7085cf95ce760eba5818b009496e31d751100a7d78d8ffc6",
+      "application": "tracee/monitor",
+      "representative_id": 597,
+      "symbol": "syscall_checker",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        597
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: ValueError: unresolved finite indirect target at 0xN: call   QWORD PTR [rsp+0xN]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1295, in indirect_targets",
+        "    raise ValueError(f\"unresolved finite indirect target at 0x{insn.addr:x}: {insn.raw}\")",
+        "ValueError: unresolved finite indirect target at 0x6de9: call   QWORD PTR [rsp+0xa8]"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/12824526e1312b5b",
+      "cpu": "11-13",
+      "started": "2026-11-10T01:40:20.606105+00:00",
+      "finished": "2026-11-10T01:44:55.594383+00:00"
+    },
+    {
+      "body_sha256": "318e8a18af456ff6971fac6e7be9cc1a48bc27a096ccc2e665a9a5cb70fdf791",
+      "application": "otelcol-ebpf-profiler/profiling",
+      "representative_id": 155,
+      "symbol": "perf_unwind_ruby",
+      "native_object": "otelcol-ebpf-profiler.native.o",
+      "instances": 1,
+      "member_ids": [
+        155
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/318e8a18af456ff6",
+      "cpu": "17-19",
+      "started": "2026-11-10T01:44:38.492560+00:00",
+      "finished": "2026-11-10T01:46:28.771910+00:00"
+    },
+    {
+      "body_sha256": "320e959b5d9172a8665ec5759bd6a73023f30644f34b777ba8d3138f32b753f5",
+      "application": "tracee/monitor",
+      "representative_id": 508,
+      "symbol": "trace_call_usermodehelper",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        508
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "compilation_failed",
+      "driver_class": "compilation_failed",
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "fatal error: translation unit is too large for Clang to process: ran out of source locations"
+      ],
+      "generated": true,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/320e959b5d9172a8",
+      "cpu": "8-10",
+      "started": "2026-11-10T01:44:55.564189+00:00",
+      "finished": "2026-11-10T01:54:24.880136+00:00"
+    },
+    {
+      "body_sha256": "1c788071f76ab16069422a23c1d06037211ae28daf09d90b5ef9e4b078cbf220",
+      "application": "tracee/monitor",
+      "representative_id": 542,
+      "symbol": "vfs_writev_magic_return",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        542
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "compilation_failed",
+      "driver_class": "compilation_failed",
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "fatal error: translation unit is too large for Clang to process: ran out of source locations",
+        "clang: error: clang frontend command failed with exit code 70 (use -v to see invocation)"
+      ],
+      "generated": true,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/1c788071f76ab160",
+      "cpu": "11-13",
+      "started": "2026-11-10T01:44:55.715734+00:00",
+      "finished": "2026-11-10T01:54:19.214351+00:00"
+    },
+    {
+      "body_sha256": "8df9a37c7b847a5cb18c0b11cc9d6273b60179c45db500ccb03b8e68128c723a",
+      "application": "tracee/monitor",
+      "representative_id": 547,
+      "symbol": "kernel_write_magic_return",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        547
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "compilation_failed",
+      "driver_class": "compilation_failed",
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "fatal error: translation unit is too large for Clang to process: ran out of source locations",
+        "clang: error: clang frontend command failed with exit code 70 (use -v to see invocation)"
+      ],
+      "generated": true,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/8df9a37c7b847a5c",
+      "cpu": "14-16",
+      "started": "2026-11-10T01:45:45.349999+00:00",
+      "finished": "2026-11-10T01:54:42.042160+00:00"
+    },
+    {
+      "body_sha256": "8d4810b895664dabd16e99e13283b219a66ceee05f3cad7aac0fe75ccb7ee488",
+      "application": "tracee/monitor",
+      "representative_id": 537,
+      "symbol": "vfs_write_magic_return",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        537
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "compilation_failed",
+      "driver_class": "compilation_failed",
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "fatal error: translation unit is too large for Clang to process: ran out of source locations",
+        "clang: error: clang frontend command failed with exit code 70 (use -v to see invocation)"
+      ],
+      "generated": true,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/8d4810b895664dab",
+      "cpu": "17-19",
+      "started": "2026-11-10T01:46:28.867346+00:00",
+      "finished": "2026-11-10T01:55:28.628115+00:00"
+    },
+    {
+      "body_sha256": "a8ff0344218c22ab17685c3e6bb062daa587d64c1b89de1f2695e7827363be91",
+      "application": "tracee/monitor",
+      "representative_id": 555,
+      "symbol": "trace_mmap_alert",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        555
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "compilation_failed",
+      "driver_class": "compilation_failed",
+      "failure_class": "compiler: translation unit is too large for Clang to process: ran out of source locations",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "fatal error: translation unit is too large for Clang to process: ran out of source locations"
+      ],
+      "generated": true,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/a8ff0344218c22ab",
+      "cpu": "11-13",
+      "started": "2026-11-10T02:00:33.411899+00:00",
+      "finished": "2026-11-10T02:02:47.100253+00:00"
+    },
+    {
+      "body_sha256": "ecf445dab33e369bd8e122cb19e2f97bab9f25f93c50baa71830747e6a525e45",
+      "application": "tracee/monitor",
+      "representative_id": 499,
+      "symbol": "tracepoint__sched__sched_process_exec",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        499
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "callee_saved_equality_arm",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "100: (bf) r1 = r4                     ; R1=48 R4=48",
+        "101: (07) r1 += -264                  ; R1=-216",
+        "102: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "100: (bf) r1 = r4                     ; R1=48 R4=48",
+        "101: (07) r1 += -264                  ; R1=-216",
+        "102: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/ecf445dab33e369b",
+      "cpu": "8-9",
+      "started": "2026-11-10T03:58:27.120089+00:00",
+      "finished": "2026-11-10T04:16:12.062671+00:00"
+    },
+    {
+      "body_sha256": "1e7265fbc6dd10662e125871acad1bcb3417f0ca97c6c1579f2d428ec4331430",
+      "application": "tracee/monitor",
+      "representative_id": 557,
+      "symbol": "trace_ret_do_mmap",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        557
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "callee_saved_equality_arm",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "208: (bf) r1 = r4                     ; R1=48 R4=48",
+        "209: (07) r1 += -328                  ; R1=-280",
+        "210: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "208: (bf) r1 = r4                     ; R1=48 R4=48",
+        "209: (07) r1 += -328                  ; R1=-280",
+        "210: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/1e7265fbc6dd1066",
+      "cpu": "10-11",
+      "started": "2026-11-10T03:11:58.235032+00:00",
+      "finished": "2026-11-10T03:27:23.355725+00:00"
+    },
+    {
+      "body_sha256": "3e59125c077abd594a8b9cf9ad2af04e7f3a4541bbd6eaa38690acf8783f1003",
+      "application": "tracee/monitor",
+      "representative_id": 571,
+      "symbol": "tracepoint__module__module_load",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        571
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "callee_saved_equality_arm",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "89: (bf) r1 = r4                      ; R1=32 R4=32",
+        "90: (07) r1 += -248                   ; R1=-216",
+        "91: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "89: (bf) r1 = r4                      ; R1=32 R4=32",
+        "90: (07) r1 += -248                   ; R1=-216",
+        "91: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/3e59125c077abd59",
+      "cpu": "12-13",
+      "started": "2026-11-10T03:11:58.235205+00:00",
+      "finished": "2026-11-10T03:17:44.366805+00:00"
+    },
+    {
+      "body_sha256": "69bc78c621027d4b8c7117fb70ec6c3a8acc3021abdef93680671ff57aad6643",
+      "application": "tracee/monitor",
+      "representative_id": 554,
+      "symbol": "trace_ret_vfs_readv_tail",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        554
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "callee_saved_equality_arm",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "260: (bf) r1 = r8                     ; R1=80 R8=80",
+        "261: (07) r1 += -296                  ; R1=-216",
+        "262: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "260: (bf) r1 = r8                     ; R1=80 R8=80",
+        "261: (07) r1 += -296                  ; R1=-216",
+        "262: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/69bc78c621027d4b",
+      "cpu": "14-15",
+      "started": "2026-11-10T02:39:20.938256+00:00",
+      "finished": "2026-11-10T02:47:23.653923+00:00"
+    },
+    {
+      "body_sha256": "d282ea6846a35421d34cf3f5c9fe2833a8f42a79a92daadf087de1e72423f2df",
+      "application": "tracee/monitor",
+      "representative_id": 563,
+      "symbol": "trace_security_kernel_read_file",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        563
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "callee_saved_equality_arm",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "89: (bf) r1 = r4                      ; R1=48 R4=48",
+        "90: (07) r1 += -264                   ; R1=-216",
+        "91: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "89: (bf) r1 = r4                      ; R1=48 R4=48",
+        "90: (07) r1 += -264                   ; R1=-216",
+        "91: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/d282ea6846a35421",
+      "cpu": "16-17",
+      "started": "2026-11-10T02:39:20.938420+00:00",
+      "finished": "2026-11-10T02:47:41.976956+00:00"
+    },
+    {
+      "body_sha256": "eb5bfaec4a7a9dd20c90a7be82a16a5f4d1e0692e2556c3c90a6831939c3ae57",
+      "application": "tracee/monitor",
+      "representative_id": 551,
+      "symbol": "trace_ret_vfs_read_tail",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        551
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "callee_saved_equality_arm",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "247: (bf) r1 = r8                     ; R1=64 R8=64",
+        "248: (07) r1 += -280                  ; R1=-216",
+        "249: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "247: (bf) r1 = r8                     ; R1=64 R8=64",
+        "248: (07) r1 += -280                  ; R1=-216",
+        "249: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/eb5bfaec4a7a9dd2",
+      "cpu": "18-19",
+      "started": "2026-11-10T02:39:20.938991+00:00",
+      "finished": "2026-11-10T02:46:12.840912+00:00"
+    },
+    {
+      "body_sha256": "787580743c6c78cf2b3bd8d8f91a4643b126d55d229bab4d87a4e8799b516a53",
+      "application": "tracee/monitor",
+      "representative_id": 583,
+      "symbol": "trace_utimes_common",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        583
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "callee_saved_equality_arm",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "90: (bf) r1 = r0                      ; R0=48 R1=48",
+        "91: (07) r1 += -248                   ; R1=-200",
+        "92: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "90: (bf) r1 = r0                      ; R0=48 R1=48",
+        "91: (07) r1 += -248                   ; R1=-200",
+        "92: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/787580743c6c78cf",
+      "cpu": "8-19",
+      "started": "2026-11-10T03:45:10.793719+00:00",
+      "finished": "2026-11-10T03:45:10.885076+00:00"
+    },
+    {
+      "body_sha256": "86e6a711d4c3d78f8da91baf7716593224d3b209f1dee5c81367cbb31ee70f47",
+      "application": "tracee/monitor",
+      "representative_id": 582,
+      "symbol": "trace_vfs_utimes",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        582
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "callee_saved_equality_arm",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "90: (bf) r1 = r0                      ; R0=48 R1=48",
+        "91: (07) r1 += -248                   ; R1=-200",
+        "92: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "90: (bf) r1 = r0                      ; R0=48 R1=48",
+        "91: (07) r1 += -248                   ; R1=-200",
+        "92: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/86e6a711d4c3d78f",
+      "cpu": "8-19",
+      "started": "2026-11-10T03:11:58.235525+00:00",
+      "finished": "2026-11-10T03:15:53.834374+00:00"
+    },
+    {
+      "body_sha256": "4981db61ec0a355321519afcbb5fe5d75ee1905f7e9b10966c08494f5d2351f5",
+      "application": "tracee/monitor",
+      "representative_id": 487,
+      "symbol": "syscall__execveat_exit",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        487
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "callee_saved_equality_arm",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "3125: (56) if w7 != 0x0 goto pc+1     ; R7=0",
+        "3126: (63) *(u32 *)(r10 -272) = r2    ; R2=0 R10=fp0 fp-272=????0",
+        "3127: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "3125: (56) if w7 != 0x0 goto pc+1     ; R7=0",
+        "3126: (63) *(u32 *)(r10 -272) = r2    ; R2=0 R10=fp0 fp-272=????0",
+        "3127: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/4981db61ec0a3553",
+      "cpu": "8-19",
+      "started": "2026-11-10T03:58:27.119660+00:00",
+      "finished": "2026-11-10T04:06:52.525619+00:00"
+    },
+    {
+      "body_sha256": "2d94f88d5c1fb9f42b77cdd6635b4989538ef9ed62a231e273d95fe270872fa2",
+      "application": "otelcol-ebpf-profiler/profiling",
+      "representative_id": 154,
+      "symbol": "perf_unwind_python",
+      "native_object": "otelcol-ebpf-profiler.native.o",
+      "instances": 1,
+      "member_ids": [
+        154
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/2d94f88d5c1fb9f4",
+      "cpu": "8-19",
+      "started": "2026-11-10T03:58:27.120241+00:00",
+      "finished": "2026-11-10T03:59:46.958593+00:00"
+    },
+    {
+      "body_sha256": "5b554a12103d930b4290de2e7634e8560f439fc430a34f84b0e44612bc2dcc28",
+      "application": "tetragon/observer",
+      "representative_id": 213,
+      "symbol": "generic_tracepoint_event",
+      "native_object": "bpf_generic_tracepoint_v61.native.o",
+      "instances": 1,
+      "member_ids": [
+        213
+      ],
+      "selection_kinds": {
+        "previous census identity on current payload": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "callee_saved_equality_arm",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R0 invalid mem access 'scalar'",
+      "verifier_context": [
+        "347: (bf) r1 = r3                     ; R1=16 R3=16",
+        "348: (07) r1 += -184                  ; R1=-168",
+        "349: (79) r2 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "347: (bf) r1 = r3                     ; R1=16 R3=16",
+        "348: (07) r1 += -184                  ; R1=-168",
+        "349: (79) r2 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/5b554a12103d930b",
+      "cpu": "8-19",
+      "started": "2026-11-10T03:58:27.120407+00:00",
+      "finished": "2026-11-10T04:31:35.603590+00:00"
+    },
+    {
+      "body_sha256": "8c08076044533e5be2502dc1505cf83a5da94e2bc74cdf18e7ebb2a499d09786",
+      "application": "tetragon/observer",
+      "representative_id": 102,
+      "symbol": "generic_kprobe_process_event",
+      "native_object": "bpf_multi_kprobe_v61.native.o",
+      "instances": 33,
+      "member_ids": [
+        102,
+        106,
+        113,
+        126,
+        127,
+        137,
+        146,
+        161,
+        170,
+        182,
+        190,
+        198,
+        205,
+        224,
+        230,
+        240,
+        250,
+        255,
+        263,
+        270,
+        278,
+        287,
+        300,
+        304,
+        310,
+        38,
+        45,
+        55,
+        61,
+        72,
+        79,
+        85,
+        98
+      ],
+      "selection_kinds": {
+        "previous census identity on current payload": 33
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_stack_access",
+      "failure_class": "verifier: invalid write to stack R10 off=N size=N",
+      "verifier_message": "invalid write to stack R10 off=-848 size=8",
+      "verifier_context": [
+        "987: (bf) r4 = r10                    ; R4=fp0 R10=fp0",
+        "988: (07) r4 += 0                     ; R4=fp0",
+        "989: (7b) *(u64 *)(r10 -848) = r4",
+        "invalid write to stack R10 off=-848 size=8"
+      ],
+      "error_context": [
+        "987: (bf) r4 = r10                    ; R4=fp0 R10=fp0",
+        "988: (07) r4 += 0                     ; R4=fp0",
+        "989: (7b) *(u64 *)(r10 -848) = r4",
+        "invalid write to stack R10 off=-848 size=8"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/8c08076044533e5b",
+      "cpu": "8-19",
+      "started": "2026-11-10T03:58:27.121348+00:00",
+      "finished": "2026-11-10T04:38:53.787086+00:00"
+    },
+    {
+      "body_sha256": "abcc4bccbb6284bbaf313c5e18ae508469d3bb4a12382922e75a6ac00861986a",
+      "application": "cilium/agent",
+      "representative_id": 287,
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "native_object": "eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c.native.o",
+      "instances": 3,
+      "member_ids": [
+        287,
+        330,
+        361
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/abcc4bccbb6284bb",
+      "cpu": "8-19",
+      "started": "2026-11-10T03:58:27.122081+00:00",
+      "finished": "2026-11-10T03:58:38.267930+00:00"
+    },
+    {
+      "body_sha256": "afaf7c37fc74959c6d58f809f0178f1aa503be35a1a180d12c8803d32724a9b5",
+      "application": "tetragon/observer",
+      "representative_id": 142,
+      "symbol": "generic_retkprobe_event",
+      "native_object": "bpf_generic_retkprobe_v61.native.o",
+      "instances": 9,
+      "member_ids": [
+        142,
+        153,
+        163,
+        175,
+        187,
+        251,
+        284,
+        65,
+        91
+      ],
+      "selection_kinds": {
+        "previous census identity on current payload": 9
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "callee_saved_equality_arm",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R0 invalid mem access 'scalar'",
+      "verifier_context": [
+        "19400: (bf) r1 = r3                   ; R1=144 R3=144",
+        "19401: (07) r1 += -296                ; R1=-152",
+        "19402: (61) r2 = *(u32 *)(r0 +0)",
+        "R0 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "19400: (bf) r1 = r3                   ; R1=144 R3=144",
+        "19401: (07) r1 += -296                ; R1=-152",
+        "19402: (61) r2 = *(u32 *)(r0 +0)",
+        "R0 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/afaf7c37fc74959c",
+      "cpu": "8-19",
+      "started": "2026-11-10T03:58:38.607671+00:00",
+      "finished": "2026-11-10T04:27:23.293759+00:00"
+    },
+    {
+      "body_sha256": "e5980f3edafe00f5206321dd001a15dea1322b821b791bd7fc43ad2b8ebb35fc",
+      "application": "tetragon/observer",
+      "representative_id": 214,
+      "symbol": "generic_tracepoint_process_event",
+      "native_object": "bpf_generic_tracepoint_v61.native.o",
+      "instances": 1,
+      "member_ids": [
+        214
+      ],
+      "selection_kinds": {
+        "previous census identity on current payload": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_callback_argument",
+      "failure_class": "verifier: Rn type=scalar expected=func",
+      "verifier_message": "R2 type=scalar expected=func",
+      "verifier_context": [
+        "1603: (b7) r2 = 13259                 ; R2=13259",
+        "1604: (b7) r4 = 0                     ; R4=0",
+        "1605: (85) call bpf_loop#181",
+        "R2 type=scalar expected=func"
+      ],
+      "error_context": [
+        "1603: (b7) r2 = 13259                 ; R2=13259",
+        "1604: (b7) r4 = 0                     ; R4=0",
+        "1605: (85) call bpf_loop#181",
+        "R2 type=scalar expected=func"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/e5980f3edafe00f5",
+      "cpu": "8-19",
+      "started": "2026-11-10T03:59:47.317472+00:00",
+      "finished": "2026-11-10T04:50:06.128596+00:00"
+    },
+    {
+      "body_sha256": "d5d811e228e40b6af62c52bb75557ea6a2e0257b84052c4a62b3cd2410e0e769",
+      "application": "tetragon/observer",
+      "representative_id": 100,
+      "symbol": "generic_kprobe_process_filter",
+      "native_object": "bpf_multi_kprobe_v61.native.o",
+      "instances": 33,
+      "member_ids": [
+        100,
+        107,
+        114,
+        123,
+        128,
+        135,
+        148,
+        159,
+        168,
+        180,
+        189,
+        201,
+        206,
+        227,
+        233,
+        238,
+        248,
+        257,
+        264,
+        271,
+        276,
+        288,
+        297,
+        303,
+        312,
+        35,
+        46,
+        50,
+        60,
+        70,
+        75,
+        82,
+        95
+      ],
+      "selection_kinds": {
+        "previous census identity on current payload": 33
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "callee_saved_equality_arm",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R0 invalid mem access 'scalar'",
+      "verifier_context": [
+        "144: (bf) r1 = r3                     ; R1=32 R3=32",
+        "145: (07) r1 += -296                  ; R1=-264",
+        "146: (61) r2 = *(u32 *)(r0 +0)",
+        "R0 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "144: (bf) r1 = r3                     ; R1=32 R3=32",
+        "145: (07) r1 += -296                  ; R1=-264",
+        "146: (61) r2 = *(u32 *)(r0 +0)",
+        "R0 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/d5d811e228e40b6a",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:06:52.871809+00:00",
+      "finished": "2026-11-10T04:14:52.767291+00:00"
+    },
+    {
+      "body_sha256": "dfbf2bd066ef2f8fba57107426c226aeb6dbc47487cbcf2f420de2eedc4e08ba",
+      "application": "tetragon/observer",
+      "representative_id": 219,
+      "symbol": "generic_rawtp_process_filter",
+      "native_object": "bpf_generic_rawtp_v61.native.o",
+      "instances": 1,
+      "member_ids": [
+        219
+      ],
+      "selection_kinds": {
+        "previous census identity on current payload": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "callee_saved_equality_arm",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R0 invalid mem access 'scalar'",
+      "verifier_context": [
+        "144: (bf) r1 = r3                     ; R1=32 R3=32",
+        "145: (07) r1 += -296                  ; R1=-264",
+        "146: (61) r2 = *(u32 *)(r0 +0)",
+        "R0 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "144: (bf) r1 = r3                     ; R1=32 R3=32",
+        "145: (07) r1 += -296                  ; R1=-264",
+        "146: (61) r2 = *(u32 *)(r0 +0)",
+        "R0 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/dfbf2bd066ef2f8f",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:14:53.173608+00:00",
+      "finished": "2026-11-10T04:22:57.757408+00:00"
+    },
+    {
+      "body_sha256": "1afd423a7b4b03aefa925e360647b88dd85f0de57e008f94cc6dcec257f7591d",
+      "application": "tetragon/observer",
+      "representative_id": 212,
+      "symbol": "generic_tracepoint_filter",
+      "native_object": "bpf_generic_tracepoint_v61.native.o",
+      "instances": 1,
+      "member_ids": [
+        212
+      ],
+      "selection_kinds": {
+        "previous census identity on current payload": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "callee_saved_equality_arm",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R0 invalid mem access 'scalar'",
+      "verifier_context": [
+        "144: (bf) r1 = r3                     ; R1=32 R3=32",
+        "145: (07) r1 += -296                  ; R1=-264",
+        "146: (61) r2 = *(u32 *)(r0 +0)",
+        "R0 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "144: (bf) r1 = r3                     ; R1=32 R3=32",
+        "145: (07) r1 += -296                  ; R1=-264",
+        "146: (61) r2 = *(u32 *)(r0 +0)",
+        "R0 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/1afd423a7b4b03ae",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:16:12.499632+00:00",
+      "finished": "2026-11-10T04:24:25.286183+00:00"
+    },
+    {
+      "body_sha256": "483d9ebd57e91236b13f4a4da3fa5cd4415fe8e5bab3155dd940e2ee137c05e6",
+      "application": "tetragon/observer",
+      "representative_id": 108,
+      "symbol": "generic_kprobe_filter_arg",
+      "native_object": "bpf_multi_kprobe_v61.native.o",
+      "instances": 33,
+      "member_ids": [
+        108,
+        115,
+        124,
+        133,
+        136,
+        151,
+        157,
+        171,
+        183,
+        195,
+        202,
+        208,
+        229,
+        232,
+        237,
+        249,
+        258,
+        268,
+        274,
+        277,
+        289,
+        298,
+        305,
+        308,
+        39,
+        42,
+        52,
+        59,
+        68,
+        76,
+        87,
+        96,
+        99
+      ],
+      "selection_kinds": {
+        "current manifest": 33
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_stack_access",
+      "failure_class": "verifier: invalid write to stack R10 off=N size=N",
+      "verifier_message": "invalid write to stack R10 off=-656 size=8",
+      "verifier_context": [
+        "arg#0 reference type('UNKNOWN ') size cannot be determined: -22",
+        "0: R1=ctx() R10=fp0",
+        "0: (7b) *(u64 *)(r10 -656) = r1",
+        "invalid write to stack R10 off=-656 size=8"
+      ],
+      "error_context": [
+        "arg#0 reference type('UNKNOWN ') size cannot be determined: -22",
+        "0: R1=ctx() R10=fp0",
+        "0: (7b) *(u64 *)(r10 -656) = r1",
+        "invalid write to stack R10 off=-656 size=8"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/483d9ebd57e91236",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:22:58.215933+00:00",
+      "finished": "2026-11-10T04:35:08.957555+00:00"
+    },
+    {
+      "body_sha256": "e9fed6fa73734479df7359a9bff56cefd9b072f42111dea707349e6cca7f8408",
+      "application": "tetragon/observer",
+      "representative_id": 218,
+      "symbol": "generic_rawtp_filter_arg",
+      "native_object": "bpf_generic_rawtp_v61.native.o",
+      "instances": 1,
+      "member_ids": [
+        218
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_stack_access",
+      "failure_class": "verifier: invalid write to stack R10 off=N size=N",
+      "verifier_message": "invalid write to stack R10 off=-656 size=8",
+      "verifier_context": [
+        "arg#0 reference type('UNKNOWN ') size cannot be determined: -22",
+        "0: R1=ctx() R10=fp0",
+        "0: (7b) *(u64 *)(r10 -656) = r1",
+        "invalid write to stack R10 off=-656 size=8"
+      ],
+      "error_context": [
+        "arg#0 reference type('UNKNOWN ') size cannot be determined: -22",
+        "0: R1=ctx() R10=fp0",
+        "0: (7b) *(u64 *)(r10 -656) = r1",
+        "invalid write to stack R10 off=-656 size=8"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/e9fed6fa73734479",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:24:25.768475+00:00",
+      "finished": "2026-11-10T04:36:20.909787+00:00"
+    },
+    {
+      "body_sha256": "aa32aed0fdc6d11727d880456ca326711725bd3d6f02512d12c633b1365a9c7f",
+      "application": "tetragon/observer",
+      "representative_id": 215,
+      "symbol": "generic_tracepoint_arg",
+      "native_object": "bpf_generic_tracepoint_v61.native.o",
+      "instances": 1,
+      "member_ids": [
+        215
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_stack_access",
+      "failure_class": "verifier: invalid write to stack R10 off=N size=N",
+      "verifier_message": "invalid write to stack R10 off=-656 size=8",
+      "verifier_context": [
+        "arg#0 reference type('UNKNOWN ') size cannot be determined: -22",
+        "0: R1=ctx() R10=fp0",
+        "0: (7b) *(u64 *)(r10 -656) = r1",
+        "invalid write to stack R10 off=-656 size=8"
+      ],
+      "error_context": [
+        "arg#0 reference type('UNKNOWN ') size cannot be determined: -22",
+        "0: R1=ctx() R10=fp0",
+        "0: (7b) *(u64 *)(r10 -656) = r1",
+        "invalid write to stack R10 off=-656 size=8"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/aa32aed0fdc6d117",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:27:23.769066+00:00",
+      "finished": "2026-11-10T04:39:23.520907+00:00"
+    },
+    {
+      "body_sha256": "ec2bb3bdc8ece2b2cda669fe92b40742fee0cc8f5bc0de543d7742e57ec12861",
+      "application": "tetragon/observer",
+      "representative_id": 141,
+      "symbol": "generic_retkprobe_filter_arg",
+      "native_object": "bpf_multi_retkprobe_v61.native.o",
+      "instances": 9,
+      "member_ids": [
+        141,
+        152,
+        165,
+        176,
+        185,
+        253,
+        285,
+        64,
+        89
+      ],
+      "selection_kinds": {
+        "current manifest": 9
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_stack_access",
+      "failure_class": "verifier: invalid write to stack R10 off=N size=N",
+      "verifier_message": "invalid write to stack R10 off=-656 size=8",
+      "verifier_context": [
+        "verifier log:",
+        "0: R1=ctx() R10=fp0",
+        "0: (7b) *(u64 *)(r10 -656) = r1",
+        "invalid write to stack R10 off=-656 size=8"
+      ],
+      "error_context": [
+        "verifier log:",
+        "0: R1=ctx() R10=fp0",
+        "0: (7b) *(u64 *)(r10 -656) = r1",
+        "invalid write to stack R10 off=-656 size=8"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/ec2bb3bdc8ece2b2",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:31:36.127074+00:00",
+      "finished": "2026-11-10T04:50:15.502910+00:00"
+    },
+    {
+      "body_sha256": "fa75fd93aee6c87e2be1941bdf80a5a1788e026d121ce5b039705e315afebd11",
+      "application": "cilium/agent",
+      "representative_id": 293,
+      "symbol": "tail_handle_ipv4_cont",
+      "native_object": "220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315.native.o",
+      "instances": 3,
+      "member_ids": [
+        293,
+        324,
+        351
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/fa75fd93aee6c87e",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:35:09.566923+00:00",
+      "finished": "2026-11-10T04:35:16.762003+00:00"
+    },
+    {
+      "body_sha256": "330c8579b9b8d08a1059ac30d196a9f8ea92578c7c638a79790c83ed76a3cb95",
+      "application": "otelcol-ebpf-profiler/profiling",
+      "representative_id": 150,
+      "symbol": "perf_unwind_native",
+      "native_object": "otelcol-ebpf-profiler.native.o",
+      "instances": 1,
+      "member_ids": [
+        150
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/330c8579b9b8d08a",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:35:17.367812+00:00",
+      "finished": "2026-11-10T04:36:31.126659+00:00"
+    },
+    {
+      "body_sha256": "4eb98fa3e90b98f6e12b5e093e65d4a4cef6011bc49b59b3a343fc898bc9fd95",
+      "application": "katran",
+      "representative_id": 440,
+      "symbol": "balancer_ingress",
+      "native_object": "balancer.native.o",
+      "instances": 1,
+      "member_ids": [
+        440
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_rejected",
+      "failure_class": "verifier: value N makes fp pointer be out of bounds",
+      "verifier_message": "value -9223372036854775568 makes fp pointer be out of bounds",
+      "verifier_context": [
+        "7123: (bf) r3 = r10                   ; R3=fp0 R10=fp0",
+        "7124: (07) r3 += -240                 ; R3=fp-240",
+        "7125: (0f) r3 += r7",
+        "value -9223372036854775568 makes fp pointer be out of bounds"
+      ],
+      "error_context": [
+        "7123: (bf) r3 = r10                   ; R3=fp0 R10=fp0",
+        "7124: (07) r3 += -240                 ; R3=fp-240",
+        "7125: (0f) r3 += r7",
+        "value -9223372036854775568 makes fp pointer be out of bounds"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/4eb98fa3e90b98f6",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:36:21.608102+00:00",
+      "finished": "2026-11-10T04:44:01.946441+00:00"
+    },
+    {
+      "body_sha256": "95a673e164a865973266a678e9c8f7c5fd39eef1c0a03ee62cc58bef4881c5f6",
+      "application": "cilium/agent",
+      "representative_id": 294,
+      "symbol": "tail_handle_ipv4_from_netdev",
+      "native_object": "eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c.native.o",
+      "instances": 3,
+      "member_ids": [
+        294,
+        334,
+        350
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/95a673e164a86597",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:36:31.848536+00:00",
+      "finished": "2026-11-10T04:36:39.027842+00:00"
+    },
+    {
+      "body_sha256": "afe8200e3f7c87789bb4cb8959efc4d7b07a67fa7ac5cf20bc8420fac009b4cf",
+      "application": "cilium/agent",
+      "representative_id": 300,
+      "symbol": "tail_nodeport_nat_ingress_ipv4",
+      "native_object": "eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c.native.o",
+      "instances": 3,
+      "member_ids": [
+        300,
+        327,
+        347
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/afe8200e3f7c8778",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:36:39.752150+00:00",
+      "finished": "2026-11-10T04:36:45.632089+00:00"
+    },
+    {
+      "body_sha256": "1a5005f5118dc2e4f8d7e1e43310c498f1251fb4e8332db78adb25bf4c223220",
+      "application": "cilium/agent",
+      "representative_id": 296,
+      "symbol": "tail_ipv4_to_endpoint",
+      "native_object": "220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315.native.o",
+      "instances": 3,
+      "member_ids": [
+        296,
+        302,
+        341
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/1a5005f5118dc2e4",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:36:46.342027+00:00",
+      "finished": "2026-11-10T04:36:52.217503+00:00"
+    },
+    {
+      "body_sha256": "58905642a2860b0d5d94fd38ab2f17895ef673a40a1f03485a98187b37506ae1",
+      "application": "cilium/agent",
+      "representative_id": 314,
+      "symbol": "tail_ipv4_policy",
+      "native_object": "220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315.native.o",
+      "instances": 3,
+      "member_ids": [
+        314,
+        322,
+        356
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/58905642a2860b0d",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:36:52.933475+00:00",
+      "finished": "2026-11-10T04:36:58.917519+00:00"
+    },
+    {
+      "body_sha256": "ba0a5d685d5bccaf2b2c223ae182a6a2f539d83881d7c2a6df6239d6bf73936f",
+      "application": "otelcol-ebpf-profiler/profiling",
+      "representative_id": 160,
+      "symbol": "native_tracer_entry",
+      "native_object": "otelcol-ebpf-profiler.native.o",
+      "instances": 1,
+      "member_ids": [
+        160
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/ba0a5d685d5bccaf",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:36:59.642286+00:00",
+      "finished": "2026-11-10T04:38:11.390986+00:00"
+    },
+    {
+      "body_sha256": "94b2ae4ee9258eca1d3a1581f23ec664f11a48cc72f998362472c77cdc787b4e",
+      "application": "otelcol-ebpf-profiler/profiling",
+      "representative_id": 149,
+      "symbol": "perf_unwind_stop",
+      "native_object": "otelcol-ebpf-profiler.native.o",
+      "instances": 1,
+      "member_ids": [
+        149
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/94b2ae4ee9258eca",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:38:12.108232+00:00",
+      "finished": "2026-11-10T04:39:26.066837+00:00"
+    },
+    {
+      "body_sha256": "599b9310be0979ce50db5fa39f9ed9e6e99ae718a277004361f1f3473bdf3457",
+      "application": "cilium/agent",
+      "representative_id": 288,
+      "symbol": "cil_from_host",
+      "native_object": "eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c.native.o",
+      "instances": 3,
+      "member_ids": [
+        288,
+        333,
+        352
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/599b9310be0979ce",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:38:54.748391+00:00",
+      "finished": "2026-11-10T04:38:59.325208+00:00"
+    },
+    {
+      "body_sha256": "670a85056e8473714528e1620ea4c730932d941ce603bb772df4568dc1fda8b9",
+      "application": "cilium/agent",
+      "representative_id": 307,
+      "symbol": "cil_to_netdev",
+      "native_object": "eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c.native.o",
+      "instances": 3,
+      "member_ids": [
+        307,
+        328,
+        363
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/670a85056e847371",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:39:00.170383+00:00",
+      "finished": "2026-11-10T04:39:04.746520+00:00"
+    },
+    {
+      "body_sha256": "410465454b2f5f6a814dfa6bf928b1df9a34fdfbc00c9d59d1af15969448c56e",
+      "application": "cilium/agent",
+      "representative_id": 312,
+      "symbol": "cil_from_netdev",
+      "native_object": "eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c.native.o",
+      "instances": 3,
+      "member_ids": [
+        312,
+        336,
+        353
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/410465454b2f5f6a",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:39:05.582004+00:00",
+      "finished": "2026-11-10T04:39:10.562003+00:00"
+    },
+    {
+      "body_sha256": "3836a48a1ba6af6af3398c1f244296719de0f646c1749e52fc9e318b96bf00bc",
+      "application": "cilium/agent",
+      "representative_id": 309,
+      "symbol": "tail_handle_ipv4",
+      "native_object": "220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315.native.o",
+      "instances": 3,
+      "member_ids": [
+        309,
+        318,
+        349
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/3836a48a1ba6af6a",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:39:11.398704+00:00",
+      "finished": "2026-11-10T04:39:16.172443+00:00"
+    },
+    {
+      "body_sha256": "d04bd14ae439e4eca59d15b04337ffecf752d14f7c9ce0f92e33a2bc9a75b94c",
+      "application": "cilium/agent",
+      "representative_id": 317,
+      "symbol": "tail_ipv4_ct_egress",
+      "native_object": "220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315.native.o",
+      "instances": 3,
+      "member_ids": [
+        317,
+        325,
+        358
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/d04bd14ae439e4ec",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:39:17.003437+00:00",
+      "finished": "2026-11-10T04:39:21.887549+00:00"
+    },
+    {
+      "body_sha256": "c8043c3abe85c81b9ae4403d32bdf2516d2e859fe1083202dd0df1530220c392",
+      "application": "cilium/agent",
+      "representative_id": 304,
+      "symbol": "tail_nodeport_nat_egress_ipv4",
+      "native_object": "eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c.native.o",
+      "instances": 3,
+      "member_ids": [
+        304,
+        319,
+        362
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/c8043c3abe85c81b",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:39:22.725754+00:00",
+      "finished": "2026-11-10T04:39:27.613344+00:00"
+    },
+    {
+      "body_sha256": "b5211a5603a49aed20537a3f549fe3668fdb8a54247c752135151fa6fba1c032",
+      "application": "otelcol-ebpf-profiler/profiling",
+      "representative_id": 161,
+      "symbol": "custom__generic",
+      "native_object": "otelcol-ebpf-profiler.native.o",
+      "instances": 1,
+      "member_ids": [
+        161
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/b5211a5603a49aed",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:39:24.478808+00:00",
+      "finished": "2026-11-10T04:48:05.804541+00:00"
+    },
+    {
+      "body_sha256": "5498c62690944ce9bcf3decf11725ae917024f380985f7b1f57c88f3af55a874",
+      "application": "cilium/agent",
+      "representative_id": 298,
+      "symbol": "cil_lxc_policy",
+      "native_object": "220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315.native.o",
+      "instances": 2,
+      "member_ids": [
+        298,
+        343
+      ],
+      "selection_kinds": {
+        "current manifest": 2
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/5498c62690944ce9",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:39:27.058704+00:00",
+      "finished": "2026-11-10T04:39:32.153932+00:00"
+    },
+    {
+      "body_sha256": "a1401281046c0b27f224bac952da393b45a813d47980360cc670df028e5696ec",
+      "application": "tetragon/observer",
+      "representative_id": 29,
+      "symbol": "execve_send",
+      "native_object": "bpf_execve_event_v61.native.o",
+      "instances": 1,
+      "member_ids": [
+        29
+      ],
+      "selection_kinds": {
+        "previous census identity on current payload": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_rejected",
+      "failure_class": "verifier: The sequence of N jumps is too complex.",
+      "verifier_message": "The sequence of 8193 jumps is too complex.",
+      "verifier_context": [
+        "4778: (b7) r0 = 88                    ; R0=88",
+        "4779: (bf) r2 = r9                    ; R2=scalar(id=6851,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R9=scalar(id=6851,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))",
+        "4780: (ad) if r9 < r5 goto pc+1",
+        "The sequence of 8193 jumps is too complex."
+      ],
+      "error_context": [
+        "4778: (b7) r0 = 88                    ; R0=88",
+        "4779: (bf) r2 = r9                    ; R2=scalar(id=6851,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R9=scalar(id=6851,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))",
+        "4780: (ad) if r9 < r5 goto pc+1",
+        "The sequence of 8193 jumps is too complex."
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/a1401281046c0b27",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:39:28.547142+00:00",
+      "finished": "2026-11-10T04:41:25.716137+00:00"
+    },
+    {
+      "body_sha256": "467ed16146e89dc522b70d01974727a300e49a9155f2fd9de1393a8a283a76cc",
+      "application": "cilium/agent",
+      "representative_id": 310,
+      "symbol": "tail_ipv4_ct_ingress",
+      "native_object": "220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315.native.o",
+      "instances": 3,
+      "member_ids": [
+        310,
+        316,
+        344
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/467ed16146e89dc5",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:39:33.112051+00:00",
+      "finished": "2026-11-10T04:39:38.410568+00:00"
+    },
+    {
+      "body_sha256": "9be752ee91026d2ab632deef95f4e3b726455650b19346bcb7a5befaf7f90f77",
+      "application": "tetragon/observer",
+      "representative_id": 27,
+      "symbol": "event_wake_up_new_task",
+      "native_object": "bpf_fork_v511.native.o",
+      "instances": 1,
+      "member_ids": [
+        27
+      ],
+      "selection_kinds": {
+        "previous census identity on current payload": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "callee_saved_equality_arm",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "109: (79) r1 = *(u64 *)(r10 -368)     ; R1=144 R10=fp0 fp-368=144",
+        "110: (07) r1 += -344                  ; R1=-200",
+        "111: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "109: (79) r1 = *(u64 *)(r10 -368)     ; R1=144 R10=fp0 fp-368=144",
+        "110: (07) r1 += -344                  ; R1=-200",
+        "111: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/9be752ee91026d2a",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:39:39.394596+00:00",
+      "finished": "2026-11-10T04:43:07.242712+00:00"
+    },
+    {
+      "body_sha256": "9f3e7b1ceb9d30715d1f36f69cbb89ba8cf919d1145da4e00d793e37fccc20e5",
+      "application": "tetragon/observer",
+      "representative_id": 104,
+      "symbol": "generic_kprobe_actions",
+      "native_object": "bpf_multi_kprobe_v61.native.o",
+      "instances": 33,
+      "member_ids": [
+        104,
+        111,
+        116,
+        125,
+        129,
+        139,
+        147,
+        160,
+        172,
+        179,
+        191,
+        196,
+        209,
+        225,
+        234,
+        241,
+        244,
+        261,
+        266,
+        275,
+        279,
+        290,
+        294,
+        306,
+        309,
+        37,
+        47,
+        53,
+        56,
+        67,
+        78,
+        86,
+        93
+      ],
+      "selection_kinds": {
+        "current manifest": 33
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "callee_saved_equality_arm",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R1 invalid mem access 'scalar'",
+      "verifier_context": [
+        "8193: (0f) r1 += r2                   ; R1=scalar() R2=scalar(id=105)",
+        "8194: (b7) r2 = 0                     ; R2=0",
+        "8195: (73) *(u8 *)(r1 +0) = r2",
+        "R1 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "8193: (0f) r1 += r2                   ; R1=scalar() R2=scalar(id=105)",
+        "8194: (b7) r2 = 0                     ; R2=0",
+        "8195: (73) *(u8 *)(r1 +0) = r2",
+        "R1 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/9f3e7b1ceb9d3071",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:41:26.956328+00:00",
+      "finished": "2026-11-10T04:45:47.024889+00:00"
+    },
+    {
+      "body_sha256": "31042a031e0496add922a5fe435e6270e5464fd0839dea6c91133e280e12933a",
+      "application": "tetragon/observer",
+      "representative_id": 210,
+      "symbol": "generic_tracepoint_actions",
+      "native_object": "bpf_generic_tracepoint_v61.native.o",
+      "instances": 1,
+      "member_ids": [
+        210
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_rejected",
+      "failure_class": "verifier: math between fp pointer and register with unbounded min value is not allowed",
+      "verifier_message": "math between fp pointer and register with unbounded min value is not allowed",
+      "verifier_context": [
+        "7961: (07) r3 += -232                 ; R3=fp-232",
+        "7962: (bf) r2 = r1                    ; R1=scalar(id=100,smax=-233,umin=0x8000000000000000,umax=0xffffffffffffff17,var_off=(0x8000000000000000; 0x7fffffffffffffff)) R2=scalar(id=100,smax=-233,umin=0x8000000000000000,umax=0xffffffffffffff17,var_off=(0x8000000000000000; 0x7fffffffffffffff))",
+        "7963: (0f) r2 += r3",
+        "math between fp pointer and register with unbounded min value is not allowed"
+      ],
+      "error_context": [
+        "7961: (07) r3 += -232                 ; R3=fp-232",
+        "7962: (bf) r2 = r1                    ; R1=scalar(id=100,smax=-233,umin=0x8000000000000000,umax=0xffffffffffffff17,var_off=(0x8000000000000000; 0x7fffffffffffffff)) R2=scalar(id=100,smax=-233,umin=0x8000000000000000,umax=0xffffffffffffff17,var_off=(0x8000000000000000; 0x7fffffffffffffff))",
+        "7963: (0f) r2 += r3",
+        "math between fp pointer and register with unbounded min value is not allowed"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/31042a031e0496ad",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:43:08.484053+00:00",
+      "finished": "2026-11-10T04:45:44.336559+00:00"
+    },
+    {
+      "body_sha256": "8c84ac256a9d0cc1a8a5365096df8afd630b15a031f819ca5aa25233b03d231d",
+      "application": "cilium/agent",
+      "representative_id": 301,
+      "symbol": "cil_to_host",
+      "native_object": "eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c.native.o",
+      "instances": 3,
+      "member_ids": [
+        301,
+        337,
+        355
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/8c84ac256a9d0cc1",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:44:03.071200+00:00",
+      "finished": "2026-11-10T04:44:08.370116+00:00"
+    },
+    {
+      "body_sha256": "120d7892bc0acc0d793b6f987b887f568bd73561605cf9dd666882cb9b60dd2c",
+      "application": "cilium/agent",
+      "representative_id": 320,
+      "symbol": "tail_nodeport_rev_dnat_ipv4",
+      "native_object": "220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315.native.o",
+      "instances": 3,
+      "member_ids": [
+        320,
+        323,
+        360
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/120d7892bc0acc0d",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:44:09.414208+00:00",
+      "finished": "2026-11-10T04:44:14.426215+00:00"
+    },
+    {
+      "body_sha256": "848cd3043fd61051056f7a5021e59b0f2dd85a6b25213f18ea6c8faa93c1fea6",
+      "application": "tetragon/observer",
+      "representative_id": 144,
+      "symbol": "generic_retkprobe_actions",
+      "native_object": "bpf_multi_retkprobe_v61.native.o",
+      "instances": 9,
+      "member_ids": [
+        144,
+        154,
+        164,
+        174,
+        188,
+        252,
+        283,
+        63,
+        88
+      ],
+      "selection_kinds": {
+        "current manifest": 9
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "callee_saved_equality_arm",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R1 invalid mem access 'scalar'",
+      "verifier_context": [
+        "6809: (0f) r1 += r2                   ; R1=scalar() R2=scalar(id=81)",
+        "6810: (b7) r2 = 0                     ; R2=0",
+        "6811: (73) *(u8 *)(r1 +0) = r2",
+        "R1 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "6809: (0f) r1 += r2                   ; R1=scalar() R2=scalar(id=81)",
+        "6810: (b7) r2 = 0                     ; R2=0",
+        "6811: (73) *(u8 *)(r1 +0) = r2",
+        "R1 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/848cd3043fd61051",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:44:15.590609+00:00",
+      "finished": "2026-11-10T04:46:57.216912+00:00"
+    },
+    {
+      "body_sha256": "18ad4e37c22f95ea929c13cdff1e4bf3c8cb3d2732157af8bb369ad18319197f",
+      "application": "tetragon/observer",
+      "representative_id": 222,
+      "symbol": "generic_rawtp_actions",
+      "native_object": "bpf_generic_rawtp_v61.native.o",
+      "instances": 1,
+      "member_ids": [
+        222
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "callee_saved_equality_arm",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R1 invalid mem access 'scalar'",
+      "verifier_context": [
+        "6809: (0f) r1 += r2                   ; R1=scalar() R2=scalar(id=81)",
+        "6810: (b7) r2 = 0                     ; R2=0",
+        "6811: (73) *(u8 *)(r1 +0) = r2",
+        "R1 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "6809: (0f) r1 += r2                   ; R1=scalar() R2=scalar(id=81)",
+        "6810: (b7) r2 = 0                     ; R2=0",
+        "6811: (73) *(u8 *)(r1 +0) = r2",
+        "R1 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/18ad4e37c22f95ea",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:45:45.520916+00:00",
+      "finished": "2026-11-10T04:49:18.364728+00:00"
+    },
+    {
+      "body_sha256": "e60c4ff5c34adff43e78e6d0fd753e2d19813c9b122e7d00122110790877989e",
+      "application": "otelcol-ebpf-profiler/profiling",
+      "representative_id": 158,
+      "symbol": "perf_go_labels",
+      "native_object": "otelcol-ebpf-profiler.native.o",
+      "instances": 1,
+      "member_ids": [
+        158
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/e60c4ff5c34adff4",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:45:48.247131+00:00",
+      "finished": "2026-11-10T04:47:00.725916+00:00"
+    },
+    {
+      "body_sha256": "cc8aefb2aecd854eaf62f6fa2fdc7b33556ac1e9920ff2c62ea4db20e7045aac",
+      "application": "bcc/set",
+      "representative_id": 63,
+      "symbol": "inet_sock_set_state",
+      "native_object": "tcplife.native.o",
+      "instances": 1,
+      "member_ids": [
+        63
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/cc8aefb2aecd854e",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:46:58.499652+00:00",
+      "finished": "2026-11-10T04:48:55.983489+00:00"
+    },
+    {
+      "body_sha256": "7c3401953f7de0fd8b238cb595191af30487e8a2e1a55003ba4d909863aeb678",
+      "application": "cilium/agent",
+      "representative_id": 295,
+      "symbol": "cil_from_container",
+      "native_object": "220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315.native.o",
+      "instances": 2,
+      "member_ids": [
+        295,
+        345
+      ],
+      "selection_kinds": {
+        "current manifest": 2
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/7c3401953f7de0fd",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:47:01.954024+00:00",
+      "finished": "2026-11-10T04:47:09.862265+00:00"
+    },
+    {
+      "body_sha256": "4d3a36a7d5712759857734ca9ccfc660f91babe6b24c674f130a64a7dfa9689a",
+      "application": "bcc/set",
+      "representative_id": 78,
+      "symbol": "sched_switch",
+      "native_object": "runqlat.native.o",
+      "instances": 1,
+      "member_ids": [
+        78
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/4d3a36a7d5712759",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:47:11.053656+00:00",
+      "finished": "2026-11-10T04:50:45.776193+00:00"
+    },
+    {
+      "body_sha256": "31e6f62a798e414a00471d9846dd494374d7997534186ecef89d04268e99a350",
+      "application": "bcc/set",
+      "representative_id": 70,
+      "symbol": "tcp_v6_connect_ret",
+      "native_object": "tcpconnect.native.o",
+      "instances": 1,
+      "member_ids": [
+        70
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/31e6f62a798e414a",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:48:07.013664+00:00",
+      "finished": "2026-11-10T04:49:21.588312+00:00"
+    },
+    {
+      "body_sha256": "93c33fe17b4eb631297c9473c884d1ac5c7a0fc31f60ab5a96f4b887c0dc1559",
+      "application": "tetragon/observer",
+      "representative_id": 101,
+      "symbol": "generic_kprobe_event",
+      "native_object": "bpf_generic_kprobe_v61.native.o",
+      "instances": 33,
+      "member_ids": [
+        101,
+        110,
+        117,
+        121,
+        132,
+        140,
+        150,
+        158,
+        169,
+        184,
+        194,
+        200,
+        204,
+        228,
+        235,
+        239,
+        246,
+        260,
+        265,
+        273,
+        280,
+        293,
+        295,
+        307,
+        314,
+        41,
+        48,
+        49,
+        57,
+        71,
+        77,
+        83,
+        94
+      ],
+      "selection_kinds": {
+        "previous census identity on current payload": 33
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "callee_saved_equality_arm",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R0 invalid mem access 'scalar'",
+      "verifier_context": [
+        "349: (bf) r1 = r3                     ; R1=40 R3=40",
+        "350: (07) r1 += -184                  ; R1=-144",
+        "351: (79) r2 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "349: (bf) r1 = r3                     ; R1=40 R3=40",
+        "350: (07) r1 += -184                  ; R1=-144",
+        "351: (79) r2 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/93c33fe17b4eb631",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:48:57.267386+00:00",
+      "finished": "2026-11-10T04:49:56.669255+00:00"
+    },
+    {
+      "body_sha256": "c80d945fb89bb1ee98fcde9c1585630c84be3cd44889d204124d42d1f4a15d7e",
+      "application": "tetragon/observer",
+      "representative_id": 220,
+      "symbol": "generic_rawtp_event",
+      "native_object": "bpf_generic_rawtp_v61.native.o",
+      "instances": 1,
+      "member_ids": [
+        220
+      ],
+      "selection_kinds": {
+        "previous census identity on current payload": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "callee_saved_equality_arm",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R0 invalid mem access 'scalar'",
+      "verifier_context": [
+        "349: (bf) r1 = r3                     ; R1=40 R3=40",
+        "350: (07) r1 += -184                  ; R1=-144",
+        "351: (79) r2 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "349: (bf) r1 = r3                     ; R1=40 R3=40",
+        "350: (07) r1 += -184                  ; R1=-144",
+        "351: (79) r2 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/c80d945fb89bb1ee",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:49:19.542419+00:00",
+      "finished": "2026-11-10T04:49:55.251306+00:00"
+    },
+    {
+      "body_sha256": "ee0e9fb36b4ca9b80fb25fc1e06594cd96ef668e9dc76ae994aca7369616becd",
+      "application": "tetragon/observer",
+      "representative_id": 105,
+      "symbol": "generic_kprobe_output",
+      "native_object": "bpf_multi_kprobe_v61.native.o",
+      "instances": 33,
+      "member_ids": [
+        105,
+        109,
+        119,
+        120,
+        131,
+        138,
+        149,
+        162,
+        173,
+        181,
+        192,
+        199,
+        207,
+        226,
+        236,
+        242,
+        247,
+        259,
+        262,
+        272,
+        282,
+        291,
+        299,
+        302,
+        313,
+        40,
+        43,
+        51,
+        62,
+        73,
+        74,
+        84,
+        97
+      ],
+      "selection_kinds": {
+        "previous census identity on current payload": 33
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/ee0e9fb36b4ca9b8",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:49:22.762093+00:00",
+      "finished": "2026-11-10T04:50:18.571980+00:00"
+    },
+    {
+      "body_sha256": "f1da7b14c4b6c276802afc77232749c0cf4dc077953ccd4a27f72072d34aad41",
+      "application": "tetragon/observer",
+      "representative_id": 211,
+      "symbol": "generic_tracepoint_output",
+      "native_object": "bpf_generic_tracepoint_v61.native.o",
+      "instances": 1,
+      "member_ids": [
+        211
+      ],
+      "selection_kinds": {
+        "previous census identity on current payload": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/f1da7b14c4b6c276",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:49:56.520474+00:00",
+      "finished": "2026-11-10T04:50:26.436463+00:00"
+    },
+    {
+      "body_sha256": "53d9e66646ac287a33ec177151a2519d7fe295a9e56fc0e1bf191ca6aecfd275",
+      "application": "tetragon/observer",
+      "representative_id": 221,
+      "symbol": "generic_rawtp_output",
+      "native_object": "bpf_generic_rawtp_v61.native.o",
+      "instances": 1,
+      "member_ids": [
+        221
+      ],
+      "selection_kinds": {
+        "previous census identity on current payload": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/53d9e66646ac287a",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:49:57.853687+00:00",
+      "finished": "2026-11-10T04:50:48.687508+00:00"
+    },
+    {
+      "body_sha256": "40e4ee91cf4707b711d2ef9174cce0dced95eaf3835004e5f75889b95f12dbb6",
+      "application": "bcc/set",
+      "representative_id": 62,
+      "symbol": "tcp_v4_connect_ret",
+      "native_object": "tcpconnect.native.o",
+      "instances": 1,
+      "member_ids": [
+        62
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/40e4ee91cf4707b7",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:50:07.423875+00:00",
+      "finished": "2026-11-10T04:50:40.722536+00:00"
+    },
+    {
+      "body_sha256": "bd743f00fbfabe44704dc2a891a68f3933f1d04dba6b703e1006579cbd6bab95",
+      "application": "cilium/agent",
+      "representative_id": 332,
+      "symbol": "tail_no_service_ipv4",
+      "native_object": "eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c.native.o",
+      "instances": 2,
+      "member_ids": [
+        332,
+        348
+      ],
+      "selection_kinds": {
+        "current manifest": 2
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/bd743f00fbfabe44",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:50:16.810029+00:00",
+      "finished": "2026-11-10T04:50:21.988227+00:00"
+    },
+    {
+      "body_sha256": "14cbd11ad43c19b8faf20b1f7bff1d632bd13ecbbbfac409c620b5c01c781581",
+      "application": "cilium/agent",
+      "representative_id": 303,
+      "symbol": "tail_no_service_ipv4",
+      "native_object": "220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315.native.o",
+      "instances": 3,
+      "member_ids": [
+        303,
+        326,
+        338
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/14cbd11ad43c19b8",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:50:19.881731+00:00",
+      "finished": "2026-11-10T04:50:24.768319+00:00"
+    },
+    {
+      "body_sha256": "e8ef6303456883f5651005de23e874450f875f42d3102c81b653c0b12258dd22",
+      "application": "otelcol-ebpf-profiler/profiling",
+      "representative_id": 159,
+      "symbol": "tracepoint__sched_process_free",
+      "native_object": "otelcol-ebpf-profiler.native.o",
+      "instances": 1,
+      "member_ids": [
+        159
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/e8ef6303456883f5",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:50:23.372688+00:00",
+      "finished": "2026-11-10T04:51:53.296421+00:00"
+    },
+    {
+      "body_sha256": "14a9fd94649cc1e48bef6f17b4ed8bec83e96bf0604518bf01845b4b69aad20d",
+      "application": "bcc/set",
+      "representative_id": 58,
+      "symbol": "kprobe__cap_capable_exit",
+      "native_object": "capable.native.o",
+      "instances": 1,
+      "member_ids": [
+        58
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/14a9fd94649cc1e4",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:50:26.103132+00:00",
+      "finished": "2026-11-10T04:50:57.741179+00:00"
+    },
+    {
+      "body_sha256": "2965b31f9c12203718f91d99957154fc748e6323b0bc1f2156d414e8a06f1d80",
+      "application": "bcc/set",
+      "representative_id": 51,
+      "symbol": "sys_exit",
+      "native_object": "syscount.native.o",
+      "instances": 1,
+      "member_ids": [
+        51
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/2965b31f9c122037",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:50:27.736659+00:00",
+      "finished": "2026-11-10T04:51:01.804316+00:00"
+    },
+    {
+      "body_sha256": "3e2ac9f82deeee27d12f861b0a9abcec0c7d37ed92cd051ee1edba0d6f84a5db",
+      "application": "cilium/agent",
+      "representative_id": 313,
+      "symbol": "tail_handle_ipv4_from_host",
+      "native_object": "eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c.native.o",
+      "instances": 3,
+      "member_ids": [
+        313,
+        331,
+        354
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/3e2ac9f82deeee27",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:50:42.073382+00:00",
+      "finished": "2026-11-10T04:50:47.361145+00:00"
+    },
+    {
+      "body_sha256": "5a0650866792aa3818140a63910d1f5f0580edeb5c3d1d85a0369c951dd3457b",
+      "application": "cilium/agent",
+      "representative_id": 286,
+      "symbol": "cil_xdp_entry",
+      "native_object": "45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd.native.o",
+      "instances": 1,
+      "member_ids": [
+        286
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/5a0650866792aa38",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:50:47.329535+00:00",
+      "finished": "2026-11-10T04:50:59.092277+00:00"
+    },
+    {
+      "body_sha256": "6cb440c5240ec9775c88d797d4cefe4c50c3c446de2fc3037bd0cea1cb6acb41",
+      "application": "tetragon/observer",
+      "representative_id": 28,
+      "symbol": "execve_rate",
+      "native_object": "bpf_execve_event_v61.native.o",
+      "instances": 1,
+      "member_ids": [
+        28
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/6cb440c5240ec977",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:50:48.687407+00:00",
+      "finished": "2026-11-10T04:51:16.106228+00:00"
+    },
+    {
+      "body_sha256": "c378e135e86e732f5fe1ea6d8471b6e4e51e43954061956038e97f355778cdd8",
+      "application": "cilium/agent",
+      "representative_id": 289,
+      "symbol": "tail_drop_notify",
+      "native_object": "eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c.native.o",
+      "instances": 3,
+      "member_ids": [
+        289,
+        329,
+        339
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/c378e135e86e732f",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:50:49.991787+00:00",
+      "finished": "2026-11-10T04:51:00.441257+00:00"
+    },
+    {
+      "body_sha256": "339962b4ecf3616028fda7b71ec270f2ddd5a83a61bc57db6f6b4e7382d56d62",
+      "application": "cilium/agent",
+      "representative_id": 297,
+      "symbol": "tail_drop_notify",
+      "native_object": "220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315.native.o",
+      "instances": 3,
+      "member_ids": [
+        297,
+        321,
+        346
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/339962b4ecf36160",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:50:59.092165+00:00",
+      "finished": "2026-11-10T04:51:06.027414+00:00"
+    },
+    {
+      "body_sha256": "40271cb5174d328ce0e7534a446c8ac8d1d46963946ec8bb7390c1f03112a3cd",
+      "application": "bcc/set",
+      "representative_id": 43,
+      "symbol": "block_rq_issue",
+      "native_object": "biosnoop.native.o",
+      "instances": 1,
+      "member_ids": [
+        43
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/40271cb5174d328c",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:51:00.441182+00:00",
+      "finished": "2026-11-10T04:51:20.645447+00:00"
+    },
+    {
+      "body_sha256": "db4c41d94f94d17df68dbb465f7a5489f48039251955dc109914f42c41a3c122",
+      "application": "bcc/set",
+      "representative_id": 44,
+      "symbol": "block_rq_complete",
+      "native_object": "biosnoop.native.o",
+      "instances": 1,
+      "member_ids": [
+        44
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/db4c41d94f94d17d",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:51:01.804242+00:00",
+      "finished": "2026-11-10T04:51:23.678494+00:00"
+    },
+    {
+      "body_sha256": "631ca45048c0efd6644607b43153461e2f8cf981cb3ae67c99d066c0b089cada",
+      "application": "tetragon/observer",
+      "representative_id": 103,
+      "symbol": "generic_kprobe_setup_event",
+      "native_object": "bpf_multi_kprobe_v61.native.o",
+      "instances": 33,
+      "member_ids": [
+        103,
+        112,
+        118,
+        122,
+        130,
+        134,
+        145,
+        156,
+        167,
+        178,
+        193,
+        197,
+        203,
+        223,
+        231,
+        243,
+        245,
+        256,
+        267,
+        269,
+        281,
+        292,
+        296,
+        301,
+        311,
+        36,
+        44,
+        54,
+        58,
+        69,
+        80,
+        81,
+        92
+      ],
+      "selection_kinds": {
+        "current manifest": 33
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/631ca45048c0efd6",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:51:03.119715+00:00",
+      "finished": "2026-11-10T04:51:30.089913+00:00"
+    },
+    {
+      "body_sha256": "06037ae94d09502215d55fe9de77bf3e7e0a484aff04d92a3d2864ddd0f05abe",
+      "application": "tetragon/observer",
+      "representative_id": 25,
+      "symbol": "event_exit_acct_process",
+      "native_object": "bpf_exit_v511.native.o",
+      "instances": 1,
+      "member_ids": [
+        25
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/06037ae94d095022",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:51:07.278731+00:00",
+      "finished": "2026-11-10T04:51:25.038230+00:00"
+    },
+    {
+      "body_sha256": "655e6c99b22a878c4b880f5b1ee0f3282fec055ad1b2544cc34f9aeb28e60b14",
+      "application": "bcc/set",
+      "representative_id": 38,
+      "symbol": "block_rq_insert",
+      "native_object": "biosnoop.native.o",
+      "instances": 1,
+      "member_ids": [
+        38
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/655e6c99b22a878c",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:51:17.412908+00:00",
+      "finished": "2026-11-10T04:51:32.936494+00:00"
+    },
+    {
+      "body_sha256": "75a5d17b8cb04d51e4d18783ae27e754f08927a6ae0a4ec39be2a7bc2e202e1d",
+      "application": "bcc/set",
+      "representative_id": 32,
+      "symbol": "tracepoint__syscalls__sys_exit_openat",
+      "native_object": "opensnoop.native.o",
+      "instances": 1,
+      "member_ids": [
+        32
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/75a5d17b8cb04d51",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:51:21.882948+00:00",
+      "finished": "2026-11-10T04:51:41.973524+00:00"
+    },
+    {
+      "body_sha256": "fc86f1dda617c1325f83069e2ddb453e0b4b74419cbbd16fb6403156d9284995",
+      "application": "bcc/set",
+      "representative_id": 30,
+      "symbol": "tracepoint__syscalls__sys_exit_open",
+      "native_object": "opensnoop.native.o",
+      "instances": 1,
+      "member_ids": [
+        30
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/fc86f1dda617c132",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:51:25.038127+00:00",
+      "finished": "2026-11-10T04:51:46.493337+00:00"
+    },
+    {
+      "body_sha256": "4c01dbdf2966e940a0bee631ba7c00582fd7d05c02c9e5e0238b1da6d633b9b6",
+      "application": "tetragon/observer",
+      "representative_id": 143,
+      "symbol": "generic_retkprobe_output",
+      "native_object": "bpf_multi_retkprobe_v61.native.o",
+      "instances": 9,
+      "member_ids": [
+        143,
+        155,
+        166,
+        177,
+        186,
+        254,
+        286,
+        66,
+        90
+      ],
+      "selection_kinds": {
+        "current manifest": 9
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/4c01dbdf2966e940",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:51:26.304869+00:00",
+      "finished": "2026-11-10T04:51:49.179285+00:00"
+    },
+    {
+      "body_sha256": "8e92df0b3d8be65fe4686f2e1522c10a1d3428f6e891260bca6074125dac4909",
+      "application": "cilium/agent",
+      "representative_id": 291,
+      "symbol": "tail_handle_arp",
+      "native_object": "220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315.native.o",
+      "instances": 3,
+      "member_ids": [
+        291,
+        299,
+        359
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/8e92df0b3d8be65f",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:51:31.325640+00:00",
+      "finished": "2026-11-10T04:51:38.438397+00:00"
+    },
+    {
+      "body_sha256": "661a9511bdeb32beecd2669a3f84566edaddc2343c77cfd46a91858928758416",
+      "application": "tetragon/observer",
+      "representative_id": 216,
+      "symbol": "generic_rawtp_setup_event",
+      "native_object": "bpf_generic_rawtp_v61.native.o",
+      "instances": 1,
+      "member_ids": [
+        216
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/661a9511bdeb32be",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:51:34.168219+00:00",
+      "finished": "2026-11-10T04:51:50.828876+00:00"
+    },
+    {
+      "body_sha256": "5fc03da330c06e3be2ba52a93adb6c60c94dd0f77e914bbbfa016f471f290b39",
+      "application": "bcc/set",
+      "representative_id": 52,
+      "symbol": "kprobe__cap_capable_entry",
+      "native_object": "capable.native.o",
+      "instances": 1,
+      "member_ids": [
+        52
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/5fc03da330c06e3b",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:51:39.691367+00:00",
+      "finished": "2026-11-10T04:51:55.820575+00:00"
+    },
+    {
+      "body_sha256": "7c3672c98469472bc367c2ef46cd10ebcf4701fede985a1ee3a58fcc3b89defb",
+      "application": "bcc/set",
+      "representative_id": 46,
+      "symbol": "sys_enter",
+      "native_object": "syscount.native.o",
+      "instances": 1,
+      "member_ids": [
+        46
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/7c3672c98469472b",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:51:43.289103+00:00",
+      "finished": "2026-11-10T04:51:54.544922+00:00"
+    },
+    {
+      "body_sha256": "00b9da510197339bbd6454765805e9720ebcb3b01e90a78a44bdc38048ac0b57",
+      "application": "bcc/set",
+      "representative_id": 27,
+      "symbol": "tracepoint__syscalls__sys_enter_open",
+      "native_object": "opensnoop.native.o",
+      "instances": 1,
+      "member_ids": [
+        27
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/00b9da510197339b",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:51:47.758890+00:00",
+      "finished": "2026-11-10T04:51:57.620164+00:00"
+    },
+    {
+      "body_sha256": "e13a6a05a53d5ca69c100d5bb088cfdef6fadf3855016843cba73eeddde9cdff",
+      "application": "bcc/set",
+      "representative_id": 29,
+      "symbol": "tracepoint__syscalls__sys_enter_openat",
+      "native_object": "opensnoop.native.o",
+      "instances": 1,
+      "member_ids": [
+        29
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/e13a6a05a53d5ca6",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:51:50.366558+00:00",
+      "finished": "2026-11-10T04:52:00.405071+00:00"
+    },
+    {
+      "body_sha256": "1dc01e626b00a6928b658d034f403c9fdd671a39a62d90905e68778e3e0c5662",
+      "application": "bcc/set",
+      "representative_id": 35,
+      "symbol": "blk_account_io_merge_bio",
+      "native_object": "biosnoop.native.o",
+      "instances": 1,
+      "member_ids": [
+        35
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/1dc01e626b00a692",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:51:52.134843+00:00",
+      "finished": "2026-11-10T04:52:02.912010+00:00"
+    },
+    {
+      "body_sha256": "1c062c1b6e75d0ebb7300a6fe9ff664e587ab226a03e31f805afbb920a1978f6",
+      "application": "bcc/set",
+      "representative_id": 77,
+      "symbol": "sched_wakeup_new",
+      "native_object": "runqlat.native.o",
+      "instances": 1,
+      "member_ids": [
+        77
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/1c062c1b6e75d0eb",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:51:54.544843+00:00",
+      "finished": "2026-11-10T04:52:06.315371+00:00"
+    },
+    {
+      "body_sha256": "300979416f4184ed36cf26995e8640850881fbdc3c5cd951d53c71b050389478",
+      "application": "bcc/set",
+      "representative_id": 71,
+      "symbol": "sched_wakeup",
+      "native_object": "runqlat.native.o",
+      "instances": 1,
+      "member_ids": [
+        71
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/300979416f4184ed",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:51:55.820493+00:00",
+      "finished": "2026-11-10T04:52:07.627848+00:00"
+    },
+    {
+      "body_sha256": "6f9adf74e1f9f02aa59485379c0006dbb89ff718420829e472f9de14ae1828e6",
+      "application": "bcc/set",
+      "representative_id": 53,
+      "symbol": "tcp_v4_connect",
+      "native_object": "tcpconnect.native.o",
+      "instances": 1,
+      "member_ids": [
+        53
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/6f9adf74e1f9f02a",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:51:57.077449+00:00",
+      "finished": "2026-11-10T04:52:08.842101+00:00"
+    },
+    {
+      "body_sha256": "c61755433a328acc3de5690d3a9f681dfd9100cbf2870a6e3f6dcd49015ffed9",
+      "application": "bcc/set",
+      "representative_id": 67,
+      "symbol": "tcp_v6_connect",
+      "native_object": "tcpconnect.native.o",
+      "instances": 1,
+      "member_ids": [
+        67
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/c61755433a328acc",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:51:58.817634+00:00",
+      "finished": "2026-11-10T04:52:13.733147+00:00"
+    },
+    {
+      "body_sha256": "fbce9a304e3059483949686aac0158799fec38819132cbb4bd1ff29854ad93fc",
+      "application": "tetragon/observer",
+      "representative_id": 32,
+      "symbol": "execve_map_update",
+      "native_object": "bpf_execve_map_update_v61.native.o",
+      "instances": 1,
+      "member_ids": [
+        32
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/fbce9a304e305948",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:52:01.573935+00:00",
+      "finished": "2026-11-10T04:52:11.598140+00:00"
+    },
+    {
+      "body_sha256": "4395af4321e1ffca7dad6c856c425cfe49a98e13053a8f24430a55fc8196e3ca",
+      "application": "bcc/set",
+      "representative_id": 72,
+      "symbol": "fentry_vfs_create",
+      "native_object": "vfsstat.native.o",
+      "instances": 1,
+      "member_ids": [
+        72
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/4395af4321e1ffca",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:52:04.247210+00:00",
+      "finished": "2026-11-10T04:52:10.333758+00:00"
+    },
+    {
+      "body_sha256": "7fefae45ad8f1ce1ea4992d1c20f5321b35ec8d9c04aadb4624dbc05fcb83e18",
+      "application": "bcc/set",
+      "representative_id": 64,
+      "symbol": "fentry_vfs_read",
+      "native_object": "vfsstat.native.o",
+      "instances": 1,
+      "member_ids": [
+        64
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/7fefae45ad8f1ce1",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:52:07.627558+00:00",
+      "finished": "2026-11-10T04:52:15.456541+00:00"
+    },
+    {
+      "body_sha256": "5dba784eb94bf1861379462228d71c15158682ad9866111357cfda8088009a3d",
+      "application": "bcc/set",
+      "representative_id": 65,
+      "symbol": "fentry_vfs_write",
+      "native_object": "vfsstat.native.o",
+      "instances": 1,
+      "member_ids": [
+        65
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/5dba784eb94bf186",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:52:08.842033+00:00",
+      "finished": "2026-11-10T04:52:16.921876+00:00"
+    },
+    {
+      "body_sha256": "7cd8882552ab51ded67ccd0a935efb03de18afd990b3344757086107067a5b3a",
+      "application": "bcc/set",
+      "representative_id": 66,
+      "symbol": "fentry_vfs_fsync",
+      "native_object": "vfsstat.native.o",
+      "instances": 1,
+      "member_ids": [
+        66
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/7cd8882552ab51de",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:52:10.152465+00:00",
+      "finished": "2026-11-10T04:52:18.346460+00:00"
+    },
+    {
+      "body_sha256": "5efb9d7eba296dfef2f4af08697c3301dac0363c4fa8de6c46ee55b23e894029",
+      "application": "bcc/set",
+      "representative_id": 68,
+      "symbol": "fentry_vfs_open",
+      "native_object": "vfsstat.native.o",
+      "instances": 1,
+      "member_ids": [
+        68
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/5efb9d7eba296dfe",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:52:11.597995+00:00",
+      "finished": "2026-11-10T04:52:19.859526+00:00"
+    },
+    {
+      "body_sha256": "dfa5f0c7b2398a8871ca6f608cb1d12ed68790de54bf34893a038262443c47dc",
+      "application": "cilium/agent",
+      "representative_id": 306,
+      "symbol": "cil_lxc_policy_egress",
+      "native_object": "220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315.native.o",
+      "instances": 2,
+      "member_ids": [
+        306,
+        357
+      ],
+      "selection_kinds": {
+        "current manifest": 2
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/dfa5f0c7b2398a88",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:52:12.840912+00:00",
+      "finished": "2026-11-10T04:52:21.139863+00:00"
+    },
+    {
+      "body_sha256": "d7d46a95dd1d406eb77915656e3ab85f87c5e22a6e2ff54c69ffe21ab8b46c9b",
+      "application": "cilium/agent",
+      "representative_id": 308,
+      "symbol": "cil_host_policy",
+      "native_object": "eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c.native.o",
+      "instances": 3,
+      "member_ids": [
+        308,
+        335,
+        340
+      ],
+      "selection_kinds": {
+        "current manifest": 3
+      },
+      "stage": "generation_failed",
+      "driver_class": "generation_failed",
+      "failure_class": "generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [
+        "  File \"/workspaces/repository/kprog/trusted_service.py\", line 139, in normalize",
+        "    section = SECTIONS[context['prog_type']]",
+        "              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^",
+        "KeyError: 0"
+      ],
+      "generated": false,
+      "compiled": false,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/d7d46a95dd1d406e",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:52:15.011072+00:00",
+      "finished": "2026-11-10T04:52:22.411558+00:00"
+    }
+  ]
+}
