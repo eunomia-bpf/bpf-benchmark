@@ -41,10 +41,13 @@ tetragon-manifest:
 # here, 221014 on the October host). Both cilium_snat_v4_* maps truncate to the
 # same 15-char BPF name, so the stale pin makes the loader report "matches
 # multiple loaded maps" and the linker "unknown symbol
-# cilium_snat_v4_external". The ten arguments are the frozen recipe's six plus
-# the four per-program selectors runner/libs/cilium_native_build.py uses, which
-# pin each tail_drop_notif/__policy/__lxc_policy_egress variant to one object;
-# the current generator carries both the map-rule fix and those selectors.
+# cilium_snat_v4_external". ART keeps all seven objects in one directory, so a
+# program that exists in several of them resolves to several paths unless the
+# entry also carries a selector. The four tail_drop_notify/__policy entries
+# below pin each variant to one object with the same source_xlated_len and
+# source_map_prefix values runner/libs/cilium_native_build.py uses; with them
+# every live variant (696 and 752 xlated, with a cilium_calls_ho/ov/wi
+# prefix) resolves to exactly one object.
 CILIUM_NATIVE := $(ART)/native-bpf/x86_64/cilium
 cilium-manifest:
 	cd $(CILIUM_NATIVE) && python3 $(ROOT)/vendor/bpf/write_native_manifest.py \
@@ -54,8 +57,8 @@ cilium-manifest:
 	  --object "bpf_overlay.native.o,source_map_prefix=cilium_calls_ov" \
 	  --object "bpf_sock.native.o" \
 	  --object "bpf_host.native.o,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne" \
-	  --object "bpf_host.native.o,symbol=tail_drop_notify,source_xlated_len=752" \
-	  --object "bpf_lxc.native.o,symbol=tail_drop_notify,source_xlated_len=696" \
+	  --object "bpf_host.native.o,symbol=tail_drop_notify,source_xlated_len=752,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne" \
+	  --object "bpf_lxc.native.o,symbol=tail_drop_notify,source_xlated_len=696,source_map_prefix=cilium_calls_0" \
 	  --object "bpf_host.native.o,symbol=cil_host_policy,source_xlated_len=16,source_lacks_map_prefix=cilium_calls_ho,source_lacks_map_prefix=cilium_calls_ne" \
 	  --object "bpf_lxc.native.o,symbol=cil_lxc_policy_egress,source_xlated_len=16,source_lacks_map_prefix=cilium_calls_0" \
 	  --object "bpf_wireguard.native.o,source_map_prefix=cilium_calls_wi" \
