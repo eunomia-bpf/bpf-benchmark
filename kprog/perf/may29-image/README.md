@@ -22,7 +22,12 @@ tree (operator 2026-11-09, "以后禁止切换branch 和开不同的 tree"; 2026
   `libnative_loader.so`, `native-link`, and the native objects under
   `native-bpf/x86_64/<app>/`. BCC, Cilium and Tracee objects come from the
   2026-05-29 build; Tetragon's come from the current tree's build, because the
-  2026-05-29 Tetragon source targets an older `struct filename`.
+  2026-05-29 Tetragon source targets an older `struct filename`. `make
+  tetragon-manifest` writes Tetragon's manifest with the frozen
+  `write_native_manifest.py` and the 2026-05-29 flags (`--dedupe-program last
+  --helper-disambiguate 174`), so each kernel-version variant resolves to one
+  object; the earlier manifest listed 32 program names more than once and the
+  2026-05-29 loader stopped Tetragon with "manifest has ambiguous entries".
 - **Guest**: the native lab module, `kernel.bpf_stats_enabled` per
   `BPFREJIT_CORPUS_BPF_STATS`, and the unbound shim path
   (`BPFREJIT_SHIM_NATIVE_LOADER=post`, the app's manifest,

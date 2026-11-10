@@ -23,7 +23,17 @@ SAMPLES ?= 3
 WORKLOAD_DURATION ?= 180
 RUNS ?= otelcol-ebpf-profiler/profiling:0 bcc/set:1 bcc/set:0 cilium/agent:1 cilium/agent:0 tetragon/observer:1 tetragon/observer:0 tracee/monitor:1 tracee/monitor:0 katran:1 katran:0 otelcol-ebpf-profiler/profiling:1
 
-.PHONY: image corpus guest six
+.PHONY: image corpus guest six tetragon-manifest
+
+# The 2026-05-29 build wrote Tetragon's manifest with these flags (9f3855f6f vendor/bpf/Makefile,
+# native-tetragon); the frozen generator rewrites ART's Tetragon manifest the same way, so each
+# kernel-version variant resolves to one object.
+TETRAGON_NATIVE := $(ART)/native-bpf/x86_64/tetragon
+tetragon-manifest:
+	cd $(ROOT) && git show $(FROZEN):vendor/bpf/write_native_manifest.py | python3 - --app tetragon \
+	  --llvm-nm /usr/lib/llvm-18/bin/llvm-nm --dedupe-program last \
+	  --source-object-root $(ROOT)/vendor/build/x86/tetragon --helper-disambiguate 174 \
+	  --output $(TETRAGON_NATIVE)/manifest.json $(addprefix --object ,$(sort $(wildcard $(TETRAGON_NATIVE)/*.native.o)))
 
 # The framework files come from this repository's frozen commit through git archive,
 # joined with the build outputs into one build context that is removed after the build.
