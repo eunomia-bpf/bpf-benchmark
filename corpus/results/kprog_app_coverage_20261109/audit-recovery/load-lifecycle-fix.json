@@ -1,0 +1,32 @@
+{
+  "change": "bound-load and list/measurement RPC lifetime synchronization",
+  "parent_head": "ede82db91e69c9f8248d8887e177d331ce02000d",
+  "production_diff": {
+    "added": 13,
+    "removed": 1
+  },
+  "new_checks": 0,
+  "new_admission_conditions": 0,
+  "frozen_verifier_model": "af422c39195084ee3137627df943c055491358c7",
+  "source_sha256": {
+    "bpfopt/shim/libbpfrejit_shim.c": "4ddb664968a21fc0df8e80c1038fe18bb64dc30ed1a9f8370f5ef08f5e149147",
+    "bpfopt/shim/shim_measure.h": "e721a64de7e0a0ce261d669956e6ec9cb0fdcfd8b262a3fc258897fc321332e1",
+    "bpfopt/shim/shim_native_loader.h": "6c4c950c66cd3723eb92f13b0ce38302fc63985bc950d383d95f39159516a3d8"
+  },
+  "shim_so_sha256": "8be47399923ac261eca77a66c0c0b5b345dca11516d55feebb7fc08e6a1f5115",
+  "build_exit": 0,
+  "existing_host_selftest": {
+    "exit": 1,
+    "passed": 7,
+    "failed": 1,
+    "failed_case": "t8_report_scoped_reload_unchanged",
+    "diagnostic": "failed to spawn kinsnprober rc=2"
+  },
+  "lock_order": "native-load rwlock before state_mutex; bound load owns read scope through insertion and all existing returns; list/measure-start/measure-finish own write scope for state snapshots",
+  "real_application_replay": "BCC full eight-tool set and OTel original profiling startup next, each using fixed af verifier/runtime with this shim adapter",
+  "raw": {
+    "file": "load-lifecycle-build-raw.tar.gz",
+    "bytes": 4161,
+    "sha256": "c81500a00f90eebee3a54cd071d2808927190f0a740bb23a7374f891b95a1a7a"
+  }
+}

@@ -400,14 +400,17 @@ static void shim_native_loader_log_jit_dump(const char *label, int fd) {
 
 /* Verified startup must not confuse a synchronous proof wait with an idle
  * program set. The outer syscall scope includes capture and state insertion. */
+static pthread_rwlock_t shim_native_load_lock = PTHREAD_RWLOCK_INITIALIZER;
 static unsigned shim_native_loads_inflight;
 /* The legacy wire field native_bound_completed counts completed bound
  * attempts, including an eBPF fallback. Replacement outcomes stay in the log. */
 static unsigned shim_native_loads_completed;
 struct shim_native_load_scope { int active; };
 static void shim_native_load_scope_end(struct shim_native_load_scope *scope) {
-    if (scope->active)
+    if (scope->active) {
         __atomic_sub_fetch(&shim_native_loads_inflight, 1, __ATOMIC_SEQ_CST);
+        pthread_rwlock_unlock(&shim_native_load_lock);
+    }
 }
 
 static long shim_maybe_replace_with_native_fd(long original_fd,

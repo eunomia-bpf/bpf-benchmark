@@ -893,6 +893,7 @@ long syscall(long number, ...) {
         __attribute__((cleanup(shim_native_load_scope_end))) = {0};
     if (cmd == BPF_PROG_LOAD && attr && !in_shim &&
         shim_native_loader_enabled() && shim_native_loader_requires_bound_proof()) {
+        pthread_rwlock_rdlock(&shim_native_load_lock);
         native_scope.active = 1;
         __atomic_add_fetch(&shim_native_loads_inflight, 1, __ATOMIC_SEQ_CST);
     }
@@ -1663,6 +1664,7 @@ static int unix_socket_listen(const char *path) {
 }
 
 static void emit_list_progs(int cli) {
+    pthread_rwlock_wrlock(&shim_native_load_lock);
     discover_bpf_programs();
     pthread_mutex_lock(&state_mutex);
     size_t prog_count = 0;
@@ -1686,6 +1688,7 @@ static void emit_list_progs(int cli) {
     char *buf = (char *)malloc(cap);
     if (!buf) {
         pthread_mutex_unlock(&state_mutex);
+        pthread_rwlock_unlock(&shim_native_load_lock);
         return;
     }
     size_t len = 0;
@@ -1733,6 +1736,7 @@ static void emit_list_progs(int cli) {
     }
     len += snprintf(buf + len, cap - len, "]}\n");
     pthread_mutex_unlock(&state_mutex);
+    pthread_rwlock_unlock(&shim_native_load_lock);
     if (write(cli, buf, len) < 0) { /* best effort */ }
     free(buf);
 }
