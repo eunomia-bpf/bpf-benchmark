@@ -65,7 +65,7 @@ GUEST_MEMORY = '4G'
 CLANG_SLOTS = 3
 CLANG_LARGE_SLOTS = 4
 CLANG_LARGE_SOURCE_BYTES = 400_000
-CLANG_MIN_AVAILABLE_GIB = 28
+CLANG_MIN_AVAILABLE_GIB = 40
 VNG = '/opt/virtme-ng/bin/vng'
 
 
@@ -638,9 +638,12 @@ def readme(summary, provenance):
         'discarded and their bodies resubmitted. From then on the existing KPROG_REAL_CLANG hook '
         'routes the same clang binary and argv through a bounded number of concurrent compiles: '
         'first three in total at MemAvailable >= 24 GiB, then three for B sources above ' +
-        str(CLANG_LARGE_SOURCE_BYTES) + ' bytes plus three for smaller sources, then ' +
-        str(CLANG_LARGE_SLOTS) + ' large plus ' + str(CLANG_SLOTS) + ' small at MemAvailable >= ' +
-        str(CLANG_MIN_AVAILABLE_GIB) + ' GiB. Worker counts over the run: six two-CPU, four '
+        str(CLANG_LARGE_SOURCE_BYTES) + ' bytes plus three for smaller sources, then four large '
+        'plus three small at MemAvailable >= 28 GiB. At 03:43 UTC, on the coordinator request for '
+        'the 64G timing guest on CPUs 0-7, the two youngest of four large compiles were stopped and '
+        'their bodies resubmitted; bin/slot-holder holds two of the four large slots (at most two '
+        'large compiles) and new compiles start at MemAvailable >= ' + str(CLANG_MIN_AVAILABLE_GIB) +
+        ' GiB. Worker counts over the run: six two-CPU, four '
         'three-CPU, six two-CPU, then eight sharing CPUs 8-19. Scheduling changes affect run '
         'time only; each compile uses the same compiler and argv.',
         '* Files: result.json (summary, per-body records), instances.json (549 rows), '
