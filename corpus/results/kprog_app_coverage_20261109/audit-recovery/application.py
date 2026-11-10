@@ -92,6 +92,9 @@ def replay(epoch):
         if source.is_file():
             subprocess.run(['mount', '--bind', str(source),
                             str(ROOT / source.relative_to(epoch / 'source'))], check=True)
+    results = G / 'corpus-results'
+    results.mkdir(exist_ok=True)
+    subprocess.run(['mount', '--bind', str(results), str(ROOT / 'corpus/results')], check=True)
     runtime = G / 'runtime'
     runtime.mkdir(exist_ok=True)
     for name in ['native-link', 'trusted-native-loader']:
