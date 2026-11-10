@@ -1283,6 +1283,32 @@ remaining question is not how to make the code faster; it is why the
 2026-05-29 measurement uses objects that are slower than the ones lane C has
 already produced.
 
+### OTel with its current-ABI payload: 1.832x, so the gap is Tracee's alone
+
+Tracee's 44-62% gap between the archive's objects and lane C's raised the
+question of whether the other applications have one too. OTel was the next
+cheapest to check, since its payload has 16 objects:
+
+| OTel | native/eBPF | objects |
+| --- | ---: | --- |
+| archive | 1.824x | the archive's |
+| 2026-05-29 image, rebuilt | 1.849x | the archive's |
+| 2026-05-29 image, lane C's current-ABI payload | **1.832x** | 16 |
+
+Run `..._20261110_173026_542451`, status ok, 3 samples of 180 s, audited
+native with 13 programs in both arms, stats off.
+
+**So OTel has no objects gap**: the current payload lands between the archive
+figure and the rebuilt-archive-objects figure, all three within 1.5%. Tracee
+is the application where the objects moved, and it moved them a long way --
+0.964x to 1.384x-1.551x.
+
+That is the useful shape of the result: of the two applications checked
+against both object sets, one is insensitive to the change (OTel, 1.849x to
+1.832x) and one is transformed by it (Tracee, 0.964x to 1.551x). So the
+current-ABI producers are not uniformly faster; their value is
+application-specific, and Tracee is where it is largest.
+
 ### The counter check on the direct-native path, which settles OTel independently
 
 The operator asked for one short run on the direct-native image reading each
