@@ -6,26 +6,36 @@ the BPF statistics the corpus run already collects (`bpf_stats` on,
 `run_cnt_delta`, `run_time_ns_delta`), with the JIT arm and the native arm
 of the same run. Nothing here is a new instrument.
 
-## Contents
+## Contents, in the order the questions were asked
 
-1. **Per-app totals, both arms** and **Where the time sits, by program** —
-   where BPF run time goes, per application.
-2. **What the numbers say about the candidates** — the share each
-   optimization covers.
-3. **Why the 2026-05-29 numbers were faster** — the question the operator
-   asked. Both arms moved; the native-specific remainder is 0.87x to 1.23x.
-4. **Call sites per program** — what each candidate acts on, from the link
-   plans.
-5. **Katran on the verified arm, 2026-11-08** — both stats modes.
-6. **Per-program time shares** paired with the site counts, **the code
-   itself**, and the two per-site measurements that exist: the runner's PMU
-   counters and a per-site instrumented build.
-7. **Cilium's call sites by the task's four categories**, and **the
-   candidates ranked** by the share of cilium's BPF time each covers.
+1. **The six-application geomean** — the operator's target figure, and where
+   the shortfall is. Start here.
+2. **The six apps on the rebuilt 2026-05-29 image**, each beside its archive
+   figure, with equal-work evidence.
+3. **The objects comparison** — every application measured on the archive's
+   native objects and on lane C's current-ABI payloads, which is where the
+   geomean gain is.
+4. **The component walk** — kernel, then link path, then objects, one
+   component at a time, to name what moves the cost per invocation.
+5. **The Katran candidates** on the direct-native path, both modes, all four
+   landing at 1.03x.
+6. **The counter checks** for OTel, Cilium, Tetragon and Tracee, which settle
+   whether a per-invocation gain comes with equal work.
+7. **The BPF share** each application spends, against the CPU capacity it
+   uses, which bounds what a faster body can deliver.
+8. **Why the 2026-05-29 numbers were faster** — the original question, and
+   the call-site and per-site measurements behind it.
 
-Apps: katran, cilium, tetragon, tracee and bcc. The bcc figures come from
-`corpus/results/x86_kvm_corpus_20261108_232046_843736`, the latest run with
-a `bcc__set` result (`verified_native_loader`, `status ok`).
+Everything is measured on `/workspaces/repository` master with the committed
+recipes, and every run directory cited here is committed under
+`corpus/results/`.
+
+Of the 28 cited runs, **23 pass `tools/audit_native_arm.py` as `native`**. The
+other five are named and expected: four are the deliberate 30-second counter
+runs (`short-run`, 1 sample) and one is the failed Katran stats-off attempt
+`..._20261110_103556_402501` (`bad-status`), which is cited only to say why
+the row it belonged to was replaced. **No timing row rests on a run that is
+not `native`.**
 
 ## Per-app totals, both arms
 
