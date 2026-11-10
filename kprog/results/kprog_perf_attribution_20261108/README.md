@@ -1071,6 +1071,49 @@ The two Tetragon rows are not yet in the table: its first pair failed with
 recipe now writes the manifest with `--dedupe-program last` and
 `--helper-disambiguate 174`. Its retry is in the queue.
 
+### The BPF share, against the CPU capacity each application actually uses
+
+The operator asks for BPF seconds over duration times the CPU that bounds
+throughput, not all eight guest CPUs. Dividing BPF CPU-seconds by wall
+seconds gives the number of CPUs the programs need, which is the bounded
+figure: an application needing 4.5 CPUs is CPU-bound on the BPF side, and one
+needing 0.2 has almost all its time outside the programs.
+
+From the stats-on runs of the rebuilt 2026-05-29 image, three 180-second
+samples each:
+
+| app | arm | BPF seconds | duration | CPUs needed | of 8 |
+| --- | --- | ---: | ---: | ---: | ---: |
+| tracee | JIT | 2,448.9 | 540.1 s | **4.53** | 56.7% |
+| tracee | native | 2,399.6 | 540.1 s | 4.44 | 55.5% |
+| otel | JIT | 1,373.0 | 542.9 s | **2.53** | 31.6% |
+| otel | native | 97.0 | 540.6 s | 0.18 | 2.2% |
+| bcc | JIT | 781.3 | 543.1 s | **1.44** | 18.0% |
+| bcc | native | 783.3 | 543.1 s | 1.44 | 18.0% |
+| cilium | JIT | 524.9 | 540.2 s | **0.97** | 12.1% |
+| cilium | native | 358.2 | 540.3 s | 0.66 | 8.3% |
+| katran | JIT | 228.7 | 540.2 s | **0.42** | 5.3% |
+| katran | native | (no counters in this run) | 540.2 s | -- | -- |
+
+Read as headroom, this orders the applications by what a faster body can
+deliver:
+
+- **Tracee at 4.5 CPUs is the most BPF-bound** and therefore the one where a
+  faster native body should move throughput most. Its measured per-invocation
+  speedup is 0.988x, however, so its body is not faster at all, and its
+  throughput ratio stays at 0.948x-0.964x. Tracee is where a body improvement
+  would pay, and it is the only application measured with no body gain.
+- **OTel drops from 2.53 CPUs to 0.18**, a 14x reduction in BPF CPU demand,
+  which is exactly the 14.636x per-invocation speedup and why its throughput
+  ratio is the highest of the six.
+- **BCC's 1.44 CPUs do not move**, matching its 0.991x per-invocation
+  figure: the body is not faster there either.
+- **Cilium falls from 0.97 to 0.66 CPUs**, a 1.47x reduction, while its
+  throughput gains 1.715x — the extra comes from the invocation count, not
+  from the body alone.
+- **Katran's 0.42 CPUs** is the smallest share, which is why its 1.104x is
+  near the ceiling a 0.42-CPU workload can deliver.
+
 ### What this means for the candidates
 
 The candidates act on the native path only, so they can recover at most the
