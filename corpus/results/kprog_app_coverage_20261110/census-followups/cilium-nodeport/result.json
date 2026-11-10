@@ -1,0 +1,156 @@
+{
+  "label": "cilium-nodeport",
+  "model_head": "3676dab5f938b5a56d30abae0f5d17d8c2824675",
+  "runtime": "/var/tmp/kprog-tmp/replay-claude/runtime-fix1",
+  "native_execution_requests": 0,
+  "bodies": [
+    {
+      "body_sha256": "3836a48a1ba6af6af3398c1f244296719de0f646c1749e52fc9e318b96bf00bc",
+      "application": "cilium/agent",
+      "symbol": "tail_handle_ipv4",
+      "instances": 3,
+      "member_ids": [
+        309,
+        318,
+        349
+      ],
+      "stage": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "started": "2026-11-10T14:35:01.586366+00:00",
+      "finished": "2026-11-10T14:37:42.969536+00:00"
+    },
+    {
+      "body_sha256": "fa75fd93aee6c87e2be1941bdf80a5a1788e026d121ce5b039705e315afebd11",
+      "application": "cilium/agent",
+      "symbol": "tail_handle_ipv4_cont",
+      "instances": 3,
+      "member_ids": [
+        293,
+        324,
+        351
+      ],
+      "stage": "verifier_rejected",
+      "failure_class": "verifier: Rn offset is outside of the packet",
+      "verifier_message": "R2 offset is outside of the packet",
+      "error_context": [
+        "16016: (0f) r2 += r1                  ; R1=pkt(r=34) R2=pkt(id=76,r=0,smin=umin=smin32=umin32=26,smax=umax=smax32=umax32=1046,var_off=(0x2; 0x7fc))",
+        "16017: (61) r1 = *(u32 *)(r2 +0)",
+        "invalid access to packet, off=0 size=4, R2(id=76,off=0,r=0)",
+        "R2 offset is outside of the packet"
+      ],
+      "generated": true,
+      "compiled": true,
+      "started": "2026-11-10T14:35:01.586795+00:00",
+      "finished": "2026-11-10T14:42:06.646987+00:00"
+    }
+  ],
+  "instances": [
+    {
+      "application": "cilium/agent",
+      "source_prog_id": 309,
+      "name": "tail_handle_ipv4",
+      "body_sha256": "3836a48a1ba6af6af3398c1f244296719de0f646c1749e52fc9e318b96bf00bc",
+      "census": {
+        "stage": "load_failed",
+        "failure_class": "load_failed: raw proof map name has ambiguous original identities: cilium_nodeport"
+      },
+      "recheck": {
+        "stage": "installed",
+        "failure_class": "installed",
+        "generated": true,
+        "compiled": true
+      }
+    },
+    {
+      "application": "cilium/agent",
+      "source_prog_id": 318,
+      "name": "tail_handle_ipv4",
+      "body_sha256": "3836a48a1ba6af6af3398c1f244296719de0f646c1749e52fc9e318b96bf00bc",
+      "census": {
+        "stage": "load_failed",
+        "failure_class": "load_failed: raw proof map name has ambiguous original identities: cilium_nodeport"
+      },
+      "recheck": {
+        "stage": "installed",
+        "failure_class": "installed",
+        "generated": true,
+        "compiled": true
+      }
+    },
+    {
+      "application": "cilium/agent",
+      "source_prog_id": 349,
+      "name": "tail_handle_ipv4",
+      "body_sha256": "3836a48a1ba6af6af3398c1f244296719de0f646c1749e52fc9e318b96bf00bc",
+      "census": {
+        "stage": "load_failed",
+        "failure_class": "load_failed: raw proof map name has ambiguous original identities: cilium_nodeport"
+      },
+      "recheck": {
+        "stage": "installed",
+        "failure_class": "installed",
+        "generated": true,
+        "compiled": true
+      }
+    },
+    {
+      "application": "cilium/agent",
+      "source_prog_id": 293,
+      "name": "tail_handle_ipv4_cont",
+      "body_sha256": "fa75fd93aee6c87e2be1941bdf80a5a1788e026d121ce5b039705e315afebd11",
+      "census": {
+        "stage": "load_failed",
+        "failure_class": "load_failed: raw proof map name has ambiguous original identities: cilium_nodeport"
+      },
+      "recheck": {
+        "stage": "verifier_rejected",
+        "failure_class": "verifier: Rn offset is outside of the packet",
+        "generated": true,
+        "compiled": true
+      }
+    },
+    {
+      "application": "cilium/agent",
+      "source_prog_id": 324,
+      "name": "tail_handle_ipv4_cont",
+      "body_sha256": "fa75fd93aee6c87e2be1941bdf80a5a1788e026d121ce5b039705e315afebd11",
+      "census": {
+        "stage": "load_failed",
+        "failure_class": "load_failed: raw proof map name has ambiguous original identities: cilium_nodeport"
+      },
+      "recheck": {
+        "stage": "verifier_rejected",
+        "failure_class": "verifier: Rn offset is outside of the packet",
+        "generated": true,
+        "compiled": true
+      }
+    },
+    {
+      "application": "cilium/agent",
+      "source_prog_id": 351,
+      "name": "tail_handle_ipv4_cont",
+      "body_sha256": "fa75fd93aee6c87e2be1941bdf80a5a1788e026d121ce5b039705e315afebd11",
+      "census": {
+        "stage": "load_failed",
+        "failure_class": "load_failed: raw proof map name has ambiguous original identities: cilium_nodeport"
+      },
+      "recheck": {
+        "stage": "verifier_rejected",
+        "failure_class": "verifier: Rn offset is outside of the packet",
+        "generated": true,
+        "compiled": true
+      }
+    }
+  ],
+  "census_classes": {
+    "load_failed: raw proof map name has ambiguous original identities: cilium_nodeport": 6
+  },
+  "recheck_classes": {
+    "installed": 3,
+    "verifier: Rn offset is outside of the packet": 3
+  }
+}
