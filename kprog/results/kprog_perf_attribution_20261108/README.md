@@ -978,9 +978,21 @@ in `bytes_jited`, so the native arm really ran.
 | --- | --- | --- | ---: | ---: | ---: | --- |
 | inline calls `1ab8e6d10` | on | `..._231256_993018` | 173.8 ns | 168.9 ns | **1.029x** body / 0.995x thr | 13,641 / 10,161 |
 | inline calls `1ab8e6d10` | off | `..._234153_062138` | 864,237 pps | 903,888 pps | **1.046x** thr | 13,641 / 10,161 |
+| inline, hardening flags removed `87a028418` | on | `..._20261110_113058_977591` | 173.5 ns | 168.6 ns | **1.029x** body | 13,641 / 10,161 |
 
 The inline-threshold candidate is worth 1.029x on the body and nothing on
-throughput. Against the 2026-05-29 definition's 1.225x body, that is a large
+throughput.
+
+Removing the hardening flags (`-fcf-protection=branch`,
+`-mfunction-return=thunk-extern`, `-mretpoline-external-thunk`) was expected to help,
+because those flags put an indirect-return thunk in the prologue of every
+function. It does not: the candidate measures **1.029x**, identical to the
+inline-threshold candidate's 1.029x, at the same 10,161-byte `jited` size.
+The hardening flags therefore contribute nothing measurable on this path.
+
+That is a useful negative result and it points the same way as the share
+table: Katran's body has at most about 4% to give because only 0.42 of one
+CPU is inside the program. A 1.03x body is close to all of it. Against the 2026-05-29 definition's 1.225x body, that is a large
 loss, and it is measurable only because the direct path works.
 
 Two harness facts this needed, both of which cost runs:
