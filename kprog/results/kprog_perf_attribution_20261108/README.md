@@ -1173,6 +1173,31 @@ This is a 30-second sample, so its 1.077x is not comparable to the 180-second
 1.319x of the timing rows; it is the counter evidence the task asks for, taken
 on the same image and payload.
 
+### Tetragon's event counts, from the program counters
+
+Tetragon records no `outcomes` map even on the direct-native image, so its
+event count is the invocations the tracing programs actually served. Run
+`..._20261110_155343_731448`, 1 sample of 30 s, 287 programs registered in
+both arms, 32 live in each:
+
+| measure | JIT arm | native arm | native/JIT |
+| --- | ---: | ---: | ---: |
+| total tracing invocations | 56,773,300 | 70,281,907 | **1.238x** |
+| `generic_tracepo` invocations | 26,156,981 | 32,457,014 | 1.241x |
+| `generic_tracepo` ns per invocation | 5,192.7 | 3,906.4 | 0.752x |
+
+So the native arm served **1.238x more events** in the same 30 seconds, and
+its hottest program is 1.329x cheaper per event. Both effects are real and
+they act in the same direction, which is why Tetragon's body speedup is
+genuine (1.289x on three 180-second samples) -- and it is also why its
+throughput ratio cannot be read as the body ratio: the workload delivers more
+events to the cheaper program, and how many more depends on the generator.
+
+This is the third application showing the same shape, Cilium and OTel being
+the other two: **a cheaper native program produces more work in the same wall
+time**, so a per-invocation speedup and a throughput ratio are different
+quantities.
+
 ### The counter check on the direct-native path, which settles OTel independently
 
 The operator asked for one short run on the direct-native image reading each
