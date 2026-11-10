@@ -700,7 +700,9 @@ static __always_inline long __native_probe_read_kernel(
 }
 #undef bpf_probe_read_kernel
 #define bpf_probe_read_kernel(dst, size, unsafe_ptr) \
-    __native_probe_read_kernel((dst), (size), (unsafe_ptr))
+    native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
+                       NATIVE_BPF_FUNC_probe_read_kernel, (dst), (size), (unsafe_ptr))( \
+        (dst), (size), (unsafe_ptr))
 #undef bpf_probe_read_user
 #define bpf_probe_read_user(dst, size, unsafe_ptr) \
     native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
