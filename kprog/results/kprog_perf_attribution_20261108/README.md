@@ -1071,15 +1071,18 @@ Every row below passes `tools/audit_native_arm.py` as `native`.
 | --- | ---: | ---: |
 | 2026-05-29 archive | **1.349x** | 6 |
 | rebuilt image, stats off, complete | **1.169x** | 6 |
-| rebuilt image, stats on | 1.179x | 5 (Cilium's stats-on is not like-for-like) |
-| rebuilt image, best measured ratio per app | **1.202x** | 6 |
+| rebuilt image, stats on, complete | **1.202x** | 6 |
+| rebuilt image, best ratio per app | **1.204x** | 6 |
 
-The only complete set is the stats-off one, because Cilium's stats-on figures
-compare different program paths; it reads **1.169x** against the archive's
-1.349x. Taking each application's better mode gives **1.202x**, which is
-inside the operator's band at its bottom edge. Both numbers are worth
-stating: the definition reproduces at 1.169x on one mode and 1.202x on the
-best per-application mode, against 1.349x archived.
+Both modes are now complete. The stats-on set takes Cilium's comparable
+1.319x, because its per-invocation figures measure different work.
+
+**The measured geomean is 1.169x on stats-off and 1.202x on stats-on,
+against the archive's 1.349x.** The stats-on figure sits just inside the
+operator's 1.20x-1.40x band at its bottom edge; stats-off sits 3% below it.
+Both are reported because the mode changes the answer, and the honest
+statement is that the definition reproduces at 1.169x-1.204x depending on
+the mode.
 
 The arithmetic of the shortfall is simple: four applications reproduce their
 archive figures to within 4%, so the geomean falls only because the two
@@ -1087,8 +1090,12 @@ largest archive contributors do not -- Cilium at 2.358x reproduces as 1.319x
 and Tetragon at 1.323x as 1.009x-1.140x. Setting those two to 2.0x and 1.3x
 and keeping the other four as measured gives **1.357x**, matching the
 archive's 1.349x. So closing the two short applications restores the archive
-geomean exactly; closing either one alone gives 1.231x (Tetragon) or 1.324x
-(Cilium), so Cilium carries more of the geodesic weight.
+geomean exactly.
+
+Closing one alone is not enough. From the best-per-application set,
+Tetragon at 1.32x gives 1.235x and Cilium at 2.36x gives 1.328x -- Cilium
+carries more of the geodesic weight because 2.358x multiplies further, but
+either alone lands in the band and together they restore the archive.
 
 **Four of the six return; two do not.** All six now have both modes.
 
