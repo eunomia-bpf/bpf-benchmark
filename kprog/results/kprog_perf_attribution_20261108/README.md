@@ -1104,11 +1104,13 @@ archive objects give. Substituting it:
 | set | geomean |
 | --- | ---: |
 | as measured, archive objects throughout | 1.204x |
-| Tracee on its current-ABI objects | **1.279x** |
-| + Cilium at 2.36x | 1.410x |
+| Tracee on its current-ABI objects, stats on | 1.279x |
+| Tracee on its current-ABI objects, better mode (1.551x) | **1.304x** |
+| + Cilium at 2.36x, from the 1.304x row | **1.437x** |
 
 So **Tracee alone, measured on objects that already exist, moves the geomean
-into the operator's band**. The shortest path to the target is not new
+into the operator's band, and Tracee plus Cilium's fix takes it above the
+band**. The shortest path to the target is not new
 optimization work: it is timing the applications with lane C's current-ABI
 objects inside the 2026-05-29 definition.
 
