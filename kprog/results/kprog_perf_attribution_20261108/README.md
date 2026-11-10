@@ -1366,9 +1366,27 @@ first candidate for the 24% loss. Both runs replaced the full program set
 clean.
 
 This is a concrete question for lane C: **why does Cilium's current producer
-emit 30% larger native bodies than the archive's objects do?** Tracee's
-producer went the other way -- it is the one that improved 61% -- so the two
-producers differ in exactly the dimension that matters.
+emit 30% larger native bodies than the archive's objects do?**
+
+Tracee is the useful cross-check, because it is the application that
+improved. Its body sizes:
+
+| Tracee objects | JIT total | native total | native/JIT | speedup |
+| --- | ---: | ---: | ---: | ---: |
+| archive | 2,068,774 | 1,654,694 | 0.800x | 0.988x |
+| current-ABI payload | 1,907,577 | 1,659,116 | 0.870x | **1.609x** |
+
+So the relationship is **not** monotone in size: Tracee's current payload has
+*slightly larger* native bodies than the archive objects (1,659,116 against
+1,654,694, +0.3%) and is 63% faster. Body size therefore explains Cilium's
+direction but is not by itself the mechanism -- what matters is what the body
+does per invocation, not how many bytes it occupies.
+
+Both applications do agree on one thing: their native/JIT size ratio moved in
+the same direction as their speed. Cilium's grew from 1.049x to 1.299x and it
+got slower; Tracee's grew from 0.800x to 0.870x and it got faster, so size
+relative to the JIT is at best a weak signal and the real question for both
+producers is what the emitted code does.
 
 That settles the question for all five applications with more than one
 object:
