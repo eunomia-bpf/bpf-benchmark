@@ -23,7 +23,7 @@ SAMPLES ?= 3
 WORKLOAD_DURATION ?= 180
 RUNS ?= otelcol-ebpf-profiler/profiling:0 bcc/set:1 bcc/set:0 cilium/agent:1 cilium/agent:0 tetragon/observer:1 tetragon/observer:0 tracee/monitor:1 tracee/monitor:0 katran:1 katran:0 otelcol-ebpf-profiler/profiling:1
 
-.PHONY: image corpus guest six tetragon-manifest cilium-manifest
+.PHONY: image corpus guest six tetragon-manifest
 
 # The 2026-05-29 build wrote Tetragon's manifest with these flags (9f3855f6f vendor/bpf/Makefile,
 # native-tetragon); the frozen generator rewrites ART's Tetragon manifest the same way, so each
@@ -34,35 +34,6 @@ tetragon-manifest:
 	  --llvm-nm /usr/lib/llvm-18/bin/llvm-nm --dedupe-program last \
 	  --source-object-root $(ROOT)/vendor/build/x86/tetragon --helper-disambiguate 174 \
 	  --output $(TETRAGON_NATIVE)/manifest.json $(addprefix --object ,$(sort $(wildcard $(TETRAGON_NATIVE)/*.native.o)))
-
-# Cilium's manifest must be regenerated with the current generator: the frozen
-# 2026-05-29 02:22 rules still pin max_entries=591428 for
-# cilium_snat_v4_external, and the live map is sized from host memory (591427
-# here, 221014 on the October host). Both cilium_snat_v4_* maps truncate to the
-# same 15-char BPF name, so the stale pin makes the loader report "matches
-# multiple loaded maps" and the linker "unknown symbol
-# cilium_snat_v4_external". ART keeps all seven objects in one directory, so a
-# program that exists in several of them resolves to several paths unless the
-# entry also carries a selector. The four tail_drop_notify/__policy entries
-# below pin each variant to one object with the same source_xlated_len and
-# source_map_prefix values runner/libs/cilium_native_build.py uses; with them
-# every live variant (696 and 752 xlated, with a cilium_calls_ho/ov/wi
-# prefix) resolves to exactly one object.
-CILIUM_NATIVE := $(ART)/native-bpf/x86_64/cilium
-cilium-manifest:
-	cd $(CILIUM_NATIVE) && python3 $(ROOT)/vendor/bpf/write_native_manifest.py \
-	  --app cilium --llvm-nm /usr/lib/llvm-18/bin/llvm-nm \
-	  --output $(CILIUM_NATIVE)/manifest.json \
-	  --object "bpf_lxc.native.o,source_map_prefix=cilium_calls_0" \
-	  --object "bpf_overlay.native.o,source_map_prefix=cilium_calls_ov" \
-	  --object "bpf_sock.native.o" \
-	  --object "bpf_host.native.o,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne" \
-	  --object "bpf_host.native.o,symbol=tail_drop_notify,source_xlated_len=752,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne" \
-	  --object "bpf_lxc.native.o,symbol=tail_drop_notify,source_xlated_len=696,source_map_prefix=cilium_calls_0" \
-	  --object "bpf_host.native.o,symbol=cil_host_policy,source_xlated_len=16,source_lacks_map_prefix=cilium_calls_ho,source_lacks_map_prefix=cilium_calls_ne" \
-	  --object "bpf_lxc.native.o,symbol=cil_lxc_policy_egress,source_xlated_len=16,source_lacks_map_prefix=cilium_calls_0" \
-	  --object "bpf_wireguard.native.o,source_map_prefix=cilium_calls_wi" \
-	  --object "bpf_xdp.native.o,prog_type=6"
 
 # The framework files come from this repository's frozen commit through git archive,
 # joined with the build outputs into one build context that is removed after the build.
@@ -102,6 +73,7 @@ six:
 	for r in $(RUNS); do \
 	  [ -e $(STATE)/STOP ] && break; \
 	  echo "$$(date -u +%FT%TZ) start $$r" >> $(STATE)/progress.log; \
-	  $(MAKE) -f $(HERE)/Makefile corpus APPS=$${r%:*} BPFREJIT_CORPUS_BPF_STATS=$${r##*:} > $(STATE)/$$(echo $$r | tr /: __).log 2>&1 && rc=0 || rc=$$?; \
-	  echo "$$(date -u +%FT%TZ) end $$r rc=$$rc run=$$(ls -dt $(ROOT)/corpus/results/x86_kvm_corpus_* | head -1)" >> $(STATE)/progress.log; \
+	  log=$(STATE)/$$(echo $$r | tr /: __).log; \
+	  $(MAKE) -f $(HERE)/Makefile corpus APPS=$${r%:*} BPFREJIT_CORPUS_BPF_STATS=$${r##*:} > $$log 2>&1 && rc=0 || rc=$$?; \
+	  echo "$$(date -u +%FT%TZ) end $$r rc=$$rc run=$$(grep -o '"artifact_run_dir": "[^"]*"' $$log | tail -1 | cut -d'"' -f4)" >> $(STATE)/progress.log; \
 	done
