@@ -1198,6 +1198,35 @@ the other two: **a cheaper native program produces more work in the same wall
 time**, so a per-invocation speedup and a throughput ratio are different
 quantities.
 
+### Tracee's event counts, and a body gain the 2026-05-29 image did not show
+
+Run `..._20261110_160218_440340`, 1 sample of 30 s on the direct-native image
+with Tracee's current-ABI payload, 151 programs in both arms:
+
+| measure | JIT arm | native arm | native/JIT |
+| --- | ---: | ---: | ---: |
+| invocations | 368,118,367 | 512,965,309 | **1.394x** |
+| ns per invocation | 359.5 | **218.2** | **1.648x faster** |
+| live programs | 55 | 54 | -- |
+
+**This is the most important counter result in the section, and it contradicts
+a conclusion drawn from the 2026-05-29 image.** There, Tracee measured 0.988x
+per invocation -- no body gain at all, which is why it was named the
+application that needs a body improvement. On the current-ABI payload it
+measures **1.648x**, with the native arm also serving 1.394x more events.
+
+The two runs differ in the native objects: the 2026-05-29 image carries the
+archive's Tracee objects, this one lane C's current-ABI producer. Both arms
+are complete in both runs -- 64 live programs each on the 2026-05-29 image,
+55 and 54 here -- so the program sets are comparable and the difference is
+the objects, not the coverage. The body gain Tracee needs **already exists in
+the current producer** and is not visible from the 2026-05-29 definition.
+
+That moves Tracee from "needs a body, has none" to "has a 1.648x body on the
+current ABI, and its 2026-05-29 throughput row does not show it". Its 4.53-CPU
+share is unchanged, so a 1.648x body at that share is the single largest
+available gain of the six.
+
 ### The counter check on the direct-native path, which settles OTel independently
 
 The operator asked for one short run on the direct-native image reading each
@@ -1363,11 +1392,12 @@ deliver:
   second at 4.53. Tetragon is where a faster body should move throughput
   most, and its measured body is 1.289x while its throughput is only
   1.009x-1.140x -- so for Tetragon the gap is conversion.
-- **Tracee at 4.5 CPUs is second** and, unlike Tetragon, has no body gain at
-  all. Its measured per-invocation
-  speedup is 0.988x, however, so its body is not faster at all, and its
-  throughput ratio stays at 0.948x-0.964x. Tracee is where a body improvement
-  would pay, and it is the only application measured with no body gain.
+- **Tracee at 4.5 CPUs is second**, and its two objects disagree. On the
+  2026-05-29 objects its per-invocation speedup is **0.988x** -- no gain, with
+  throughput at 0.948x-0.964x. On lane C's current-ABI payload it is
+  **1.648x**, and the native arm serves 1.394x more events. So a body gain for
+  Tracee already exists; what is missing is that it reach the 2026-05-29
+  measurement, which uses the archive's objects.
 
   The arithmetic of that is worth stating, because it decides where the
   target can come from. With Tracee's BPF share of 0.566 of the wall time,
@@ -1375,9 +1405,9 @@ deliver:
 
   | body factor | predicted throughput |
   | ---: | ---: |
-  | 0.988 (measured) | 0.993x |
-  | 1.5 | 1.233x |
-  | 2.0 | **1.395x** |
+  | 0.988 (2026-05-29 objects) | 0.993x |
+  | 1.648 (current-ABI payload) | **1.286x** |
+  | 2.0 | 1.395x |
 
   For Tetragon at 5.33 of 8 CPUs the same arithmetic gives **1.50x** at a 2x
   body and 3.00x at a free one, and 1.176x at the 1.289x body it already has.
@@ -1385,8 +1415,10 @@ deliver:
   deliver, which puts Tetragon's gap firmly in conversion rather than in the
   body.
 
-  So Tracee alone reaches the top of the operator's 1.20x-1.40x band at a 2x
-  body, by this model.
+  So on the current-ABI payload Tracee's measured 1.648x body predicts
+  **1.286x** throughput, inside the operator's band -- which is the single
+  largest available gain of the six, and it needs only that the newer objects
+  reach the measurement.
 
   **The model has a known error, and Katran exposes it.** At a 0.42-CPU share
   it predicts a free-body ceiling of 1.0554x, yet Katran measures 1.104x. So
