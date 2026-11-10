@@ -1139,6 +1139,22 @@ deliver:
   speedup is 0.988x, however, so its body is not faster at all, and its
   throughput ratio stays at 0.948x-0.964x. Tracee is where a body improvement
   would pay, and it is the only application measured with no body gain.
+
+  The arithmetic of that is worth stating, because it decides where the
+  target can come from. With Tracee's BPF share of 0.566 of the wall time,
+  throughput goes as $1/((1-s)+s/b)$ for a body factor $b$:
+
+  | body factor | predicted throughput |
+  | ---: | ---: |
+  | 0.988 (measured) | 0.993x |
+  | 1.5 | 1.233x |
+  | 2.0 | **1.395x** |
+
+  So Tracee alone reaches the top of the operator's 1.20x-1.40x band at a 2x
+  body. No other application can: Katran at a 0.42-CPU share caps out near
+  1.42x even with a free body, and BCC, Cilium and OTel are already at or
+  near the ratio their shares allow. **Tracee is the one application where
+  the target is reachable from a body change alone.**
 - **OTel drops from 2.53 CPUs to 0.18**, a 14x reduction in BPF CPU demand,
   which is exactly the 14.636x per-invocation speedup and why its throughput
   ratio is the highest of the six.
