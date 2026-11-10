@@ -1,11 +1,13 @@
 """Run the frozen six-app startup through the fixed stock-path model."""
 from pathlib import Path
 import argparse
+import hashlib
 import json
 import os
 import shutil
 import subprocess
 import sys
+import tarfile
 
 ROOT = Path('/workspaces/repository')
 HERE = Path(__file__).resolve().parent
@@ -52,6 +54,13 @@ def image(epoch):
         shutil.copy2(source, context / name)
     shutil.copytree(INPUTS / 'native-inputs/payloads', context / 'native-bpf',
                     dirs_exist_ok=True)
+    bcc_archive = ROOT / 'corpus/results/kprog_app_coverage_20261109/bcc-frozen-config-set/raw.tar.gz'
+    with tarfile.open(bcc_archive) as archive:
+        for member in archive:
+            if member.isfile() and member.name.startswith('control/bcc/'):
+                target = context / 'native-bpf' / Path(member.name).relative_to('control')
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(archive.extractfile(member).read())
     shutil.copytree(INPUTS / 'paired-source/tetragon', context / 'tetragon-bpf',
                     dirs_exist_ok=True)
     run(['make', '-C', '/var/tmp/kprog-tmp/CK/linux',
@@ -85,6 +94,10 @@ def image(epoch):
         image_id=subprocess.check_output(
             ['docker', 'image', 'inspect', IMAGE, '--format', '{{.Id}}'], text=True).strip(),
         upstream_tracee_support_and_binary=True,
+        native_payload_root='/opt/bpf-benchmark/native-bpf/x86_64',
+        bcc_control_archive_sha256=hashlib.sha256(bcc_archive.read_bytes()).hexdigest(),
+        bcc_files={p.name: hashlib.sha256(p.read_bytes()).hexdigest()
+                   for p in (context / 'native-bpf/bcc').iterdir() if p.is_file()},
         workload='9f3855f6f', native_inputs=json.loads(
             (INPUTS / 'native-inputs/complete.json').read_text())))
 
