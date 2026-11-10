@@ -1118,6 +1118,31 @@ twice, so the 2026-05-29 loader refused the manifest. The recipe now writes
 it with `--dedupe-program last --helper-disambiguate 174`, and both modes
 then ran with 287 programs registered in each arm.
 
+### The counter check on the direct-native path, which settles OTel independently
+
+The operator asked for one short run on the direct-native image reading each
+application's counters, to settle whether OTel's per-invocation figure comes
+with equal work. Run `x86_kvm_corpus_20261110_142002_749800`, 1 sample of
+30 s, `APPS=otelcol-ebpf-profiler/profiling`, audit verdict `short-run` (as
+intended), status ok:
+
+| arm | live programs | invocations | `native_tracer_e` ns/run | `jited` |
+| --- | ---: | ---: | ---: | ---: |
+| eBPF | 2 | 20,502,613 | 3,538.9 | 3,815 |
+| native | 2 | **24,004,123** | **162.6** | 7,801 |
+
+**21.8x per invocation, with the native arm running 1.17x the invocations.**
+This is a second, independent measurement of the same conclusion the
+2026-05-29 image gave (14.636x on 1.034x the work): the native
+`native_tracer_e` is far cheaper per call and is called *more* often in the
+same wall time, because a cheaper program lets the profiler deliver more
+samples. The gain is not bought by doing less work.
+
+The direct-native figure is higher than the 2026-05-29 one (21.8x against
+14.6x) because this is a 30-second sample rather than three 180-second ones,
+and short samples favour the native arm here. It is quoted as the counter
+check's result, not as a replacement for the full-length 1.887x.
+
 **OTel's 14.636x comes with equal work, which was the open question.** Its
 stats-on run records both arms' counters, and they settle it:
 
