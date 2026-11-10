@@ -4538,8 +4538,12 @@ void bind_raw_proof_maps(std::vector<bpf_insn> &proof, const CompanionLoad &comp
             const bpf_map_info actual = load_map_info(insn.imm);
             const std::string name(actual.name, strnlen(actual.name, sizeof(actual.name)));
             const MapMeta *selected = nullptr;
-            for (const MapMeta &source : companion.maps) {
+            // The operand's own original map identity comes first; the kernel
+            // name (15 bytes) selects only when that identity is absent.
+            for (const MapMeta &source : companion.maps)
                 if (source.kernel_id == actual.id) { selected = &source; break; }
+            for (const MapMeta &source : companion.maps) {
+                if (selected && selected->kernel_id == actual.id) break;
                 if (source.name != name) continue;
                 if (selected && selected->kernel_id != source.kernel_id)
                     fail("raw proof map name has ambiguous original identities: " + name);
