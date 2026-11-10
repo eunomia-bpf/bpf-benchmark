@@ -58,9 +58,10 @@ SHORT = {'bcc/set': 'BCC', 'katran': 'Katran', 'cilium/agent': 'Cilium',
          'tetragon/observer': 'Tetragon'}
 BEST = {'bcc/set': 25, 'katran': 1, 'cilium/agent': 14,
         'otelcol-ebpf-profiler/profiling': 2, 'tracee/monitor': 5, 'tetragon/observer': 4}
-# Host Clang for the largest B sources reaches about 10 GiB; four concurrent
-# workers keep the host memory available to the C and R lanes.
-WORKERS = ['8-10', '11-13', '14-16', '17-19']
+# Host Clang for the largest B sources reached about 10 GiB. The first 26
+# representatives (largest proof ELFs) ran with four three-CPU workers; the
+# remaining smaller bodies use six two-CPU workers.
+WORKERS = ['8-9', '10-11', '12-13', '14-15', '16-17', '18-19']
 GUEST_MEMORY = '4G'
 VNG = '/opt/virtme-ng/bin/vng'
 
@@ -602,9 +603,10 @@ def readme(summary, provenance):
         'grouped-static. One representative per body through corpus_resident_groups.shard; the '
         'outcome is weighted by body membership.',
         '* Runtime: af422c391 replay kernel, bpf_kprog_stock module, loader and native-link copies. '
-        'Workers on host CPUs 8-19 (six two-CPU workers for the first representatives, then four '
-        'three-CPU workers after host Clang reached about 10 GiB per large B source), one guest '
-        'vCPU, ' + GUEST_MEMORY + ' guest memory.',
+        'Workers on host CPUs 8-19: six two-CPU workers for the first 14 representatives, four '
+        'three-CPU workers while the largest Tracee B sources compiled (host Clang about 10 GiB '
+        'each), then six two-CPU workers for the smaller bodies. One guest vCPU, ' +
+        GUEST_MEMORY + ' guest memory.',
         '* Files: result.json (summary, per-body records), instances.json (549 rows), '
         'outcomes.json.gz (complete representative outcomes with every diagnostic byte), '
         'requests.tar.gz (raw request archives), run-raw.tar.gz (inputs, logs, commands), '
