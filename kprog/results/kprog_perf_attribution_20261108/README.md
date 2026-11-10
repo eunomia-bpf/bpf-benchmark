@@ -979,6 +979,7 @@ in `bytes_jited`, so the native arm really ran.
 | inline calls `1ab8e6d10` | on | `..._231256_993018` | 173.8 ns | 168.9 ns | **1.029x** body / 0.995x thr | 13,641 / 10,161 |
 | inline calls `1ab8e6d10` | off | `..._234153_062138` | 864,237 pps | 903,888 pps | **1.046x** thr | 13,641 / 10,161 |
 | inline, hardening flags removed `87a028418` | on | `..._20261110_113058_977591` | 173.5 ns | 168.6 ns | **1.029x** body | 13,641 / 10,161 |
+| inline, hardening flags removed `87a028418` | off | `..._20261110_120334_373092` | 2,718,482 pps | 2,701,686 pps | **0.993x** thr | 13,641 / 10,161 |
 
 The inline-threshold candidate is worth 1.029x on the body and nothing on
 throughput.
