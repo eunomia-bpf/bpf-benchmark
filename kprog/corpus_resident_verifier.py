@@ -170,7 +170,7 @@ def failure_class(row):
         ("bpf_object__open_file", "source_elf_open"),
         ("maps/BTF object prepare", "source_maps_btf_prepare"),
         ("native symbol must be an explicit ELF identifier", "elf_symbol_name_grammar"),
-        ("invalid mem access 'scalar'", "callee_saved_equality_arm"),
+        ("invalid mem access 'scalar'", "verifier_scalar_memory_access"),
         ("context layout handler required", "context_lowering"),
         ("invalid write to stack", "verifier_stack_access"),
         ("invalid read from stack", "verifier_stack_access"),
