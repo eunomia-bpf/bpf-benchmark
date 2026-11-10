@@ -212,3 +212,16 @@ The fixed-model native_compat.h SHA is fcbef510c4fae1ca7621958788d87c01527ed0271
 The shared native compiler bpf_probe_read_kernel macro returns to the exact helper-call definition preceding9738f6a5a. The switch changes3lines/adds2net lines in vendor/bpf/native_compat.h. The fixed-width optimized implementation and complete optimized producer/payload at88e623a6a retain their identities for direct-native measurement. Application C sources, paired JIT objects, current replay images and the frozen framework keep their captured bytes.
 
 The existing complete four-app native-input producer runs at /var/tmp/kprog-tmp/C/audit-recovery/native-inputs-helper-call, with its existing STATE output path redirected through the Python module variable. Controller413442 uses CPUs20-23. Initial native Tetragon output bpf_fork_v511.native.o has SHAb7df2bf771f1891401a137895f230080537e07ee2478177978f85e497bd3b2ea; llvm-objdump-18 shows helper113 loaded at0x64 and called at0x7b in event_wake_up_new_task. Its next four-byte field read also calls helper113. The exact original/current macro comparison and git diff --check pass. Full payload counts and verifier outcomes follow their actual completion; runtime admission/check/flag additions0.
+
+## Complete helper-call native payload build
+
+The65c73b03c compiler default completes all existing four-application build and manifest targets with exit0. helper-call-native-inputs.json records every target command/exit and payload file identity. The complete producer, native compiler header/plugin, manifests, actual native objects, original commands and raw build logs are in helper-call-native-inputs-raw.tar.gz (34,499,758bytes, SHAbe69124490f5071c73db4d6f28be6e5931403d85c89770dfe3af5f18c524320f).
+
+| Application | Native ELF units | Manifest records | Build result |
+| --- | ---: | ---: | --- |
+| Tetragon | 62 | 225 | 0 |
+| Tracee | 3 | 114 | 0 |
+| OTel | 16 | 26 | 0 |
+| Cilium | 4 | 68 | 0 |
+
+All85 native ELF archive members match the recorded file hashes. The433 manifest records retain their source-unit/alias/data scopes; whole-application installed-program counts follow actual loading. OTel's16 native ELF files are byte-identical to the preceding payloads. Other ELF hashes include build-path/debug metadata alongside instruction changes, with every earlier/current hash retained for comparison. In particular the OTel large-translation-unit compiler frontier remains a separate item. Application C and paired JIT inputs retain the existing source cohort. The current captured images continue their original whole-app phases; a prepared helper-call image will retain the same AF verifier/kernel/loader/linker epoch. This receipt records complete payload production; native verifier/work outcomes remain the next replay observation. Runtime code/check additions0.
