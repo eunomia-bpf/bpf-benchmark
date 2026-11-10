@@ -23,7 +23,7 @@
 - [ ] **C** 继续在 P 中下沉 per-CPU array、hash、LRU 查找，保留现有重定位和验证后的同一副本发射。
 - [ ] **C** 完成 Tracee probe-read 有效值/零值/故障重放与 R 计时：9738f6a5a 初版已撤回，保留原 helper ERANGE/EFAULT 的完整替代 payload 已发布（88e623a6a）; actual bfa5ae6de:4generated/4compiled/4verifier rejections/0native executions, from trusted-pointer masking before the load. R unbound timing and verified fault semantics remain open.
 - [x] **C** 原生替换失败后保留 eBPF，完整 Katran 两个工作阶段继续运行，recipe 位于冻结路径之外（7734afc52、725e45398；248ebacee、13c38586e，TODO 启用时补记）。
-- [ ] **C** 05-29 driver 缺少的运行需求放进 shim、loader 或冻结路径之外的 recipe，让 verified 一侧在恢复后的框架上跑通。
+- [ ] **C** 在冻结路径之外接通05-29 verified native阶段：原snapshot RPC9220b9b44、原norejit模式e9b15dbfb、完整成功/失败请求档案759f31d85已发布；六应用baseline共384个观测程序，af422c391 native阶段回放继续。
 - [ ] **R** AArch64 硬件性能（DGX Spark，单次测试后立刻恢复 deepseek41-flash 部署）。
 - [x] 直接 native 的 blob 端点放回 R 专用测量模块（`kprog/perf/direct-native/`，1734f582f、3bd83fb13），Katran 2 秒功能运行替换 1 个程序。
 - [ ] **C/R** 这条测量路径没有异常表项，带 probe read 内联的 Tetragon、Tracee 载荷要先补上恢复路径再计时。
@@ -66,6 +66,7 @@
 
 - [x] **A** 按协调者21:50决策恢复ARM原始volatile栈表示（本提交）：撤回729/e2e scalar forwarding及六个host fixture中的cache声明/reset，保留全部原有语义assertions、隐式SP release与异常恢复；Python语法通过，direct dispatcher逐字相同。现有host回放单独收据。 host stage完成：GCC8/8 UBSan通过；Clang5/8 UBSan通过，三个child-fault boundary oracle按原Makefile flags全部通过，完整instrumentation诊断保留。11-08参考目录36覆盖文件/203原始观察/36entry名及native身份齐全。
 - [ ] **A/C** 共享reverts完成后，用统一kinsn-free路径进行一次verified回放，与11-08最佳行逐行比较；A负责ARM，C负责x86。
+- [x] **C** 相同af422c391运行文件完成原始ISA48和upstream315逐行回放/归档（114749e2b）：ISA10执行/29拒绝/1生成拒绝/8仅加载接受，315为58安装/91拒绝/137生成/29资源；315阶段与5afa逐行相同，风险native执行0；原注释与两条失败注释接受记录保留，安全发现按协调待办继续。
 - [x] **C** x86审计回退和单内核切换：aee6栈布局39c529032、普通helper/copy参数1c85d1097、context/extent421c97bb8、原生branch指令a2a3c62ab、原上游BPF前端配对范围51711ed07、kernel pin47579c053、canonical stock loader70a4af5a8。统一回放模型5afa9bf29。
 - [ ] **C/协调者/V** 原始ISA48回放的below-SP helper/memset/memcpy输出三例load-only接受结果进入协调决策；原字节与注释保留，风险native执行0，新增生产判定按批准规则处理。
 
