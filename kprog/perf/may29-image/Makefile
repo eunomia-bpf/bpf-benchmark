@@ -52,14 +52,14 @@ cilium-manifest:
 	cd $(CILIUM_NATIVE) && python3 $(ROOT)/vendor/bpf/write_native_manifest.py \
 	  --app cilium --llvm-nm /usr/lib/llvm-18/bin/llvm-nm \
 	  --output $(CILIUM_NATIVE)/manifest.json \
-	  --object "bpf_lxc.native.o,source_map_prefix=cilium_calls_0,source_lacks_map_prefix=cilium_calls_ho,source_lacks_map_prefix=cilium_calls_ne,source_lacks_map_prefix=cilium_calls_ov,source_lacks_map_prefix=cilium_calls_wi" \
-	  --object "bpf_overlay.native.o,source_map_prefix=cilium_calls_ov,source_lacks_map_prefix=cilium_calls_ho,source_lacks_map_prefix=cilium_calls_ne,source_lacks_map_prefix=cilium_calls_0,source_lacks_map_prefix=cilium_calls_wi" \
+	  --object "bpf_lxc.native.o,source_map_prefix=cilium_calls_0" \
+	  --object "bpf_overlay.native.o,source_map_prefix=cilium_calls_ov" \
 	  --object "bpf_sock.native.o" \
-	  --object "bpf_host.native.o,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne,source_lacks_map_prefix=cilium_calls_0,source_lacks_map_prefix=cilium_calls_ov,source_lacks_map_prefix=cilium_calls_wi" \
-	  --object "bpf_wireguard.native.o,source_map_prefix=cilium_calls_wi,source_lacks_map_prefix=cilium_calls_ho,source_lacks_map_prefix=cilium_calls_ne,source_lacks_map_prefix=cilium_calls_0,source_lacks_map_prefix=cilium_calls_ov" \
+	  --object "bpf_host.native.o,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne" \
+	  --object "bpf_wireguard.native.o,source_map_prefix=cilium_calls_wi" \
 	  --object "bpf_xdp.native.o,prog_type=6" \
-	  --object "bpf_host.native.o,symbol=tail_drop_notify,source_xlated_len=752,source_lacks_map_prefix=cilium_calls_ov,source_lacks_map_prefix=cilium_calls_wi,source_lacks_map_prefix=cilium_calls_0" \
-	  --object "bpf_lxc.native.o,symbol=tail_drop_notify,source_xlated_len=696,source_lacks_map_prefix=cilium_calls_ov,source_lacks_map_prefix=cilium_calls_wi,source_lacks_map_prefix=cilium_calls_ho,source_lacks_map_prefix=cilium_calls_ne" \
+	  --object "bpf_host.native.o,symbol=tail_drop_notify,source_xlated_len=752,source_lacks_map_prefix=cilium_calls_0,source_lacks_map_prefix=cilium_calls_ov,source_lacks_map_prefix=cilium_calls_wi" \
+	  --object "bpf_lxc.native.o,symbol=tail_drop_notify,source_xlated_len=696,source_lacks_map_prefix=cilium_calls_ho,source_lacks_map_prefix=cilium_calls_ne,source_lacks_map_prefix=cilium_calls_ov,source_lacks_map_prefix=cilium_calls_wi" \
 	  --object "bpf_host.native.o,symbol=cil_host_policy,source_xlated_len=16,source_lacks_map_prefix=cilium_calls_ho,source_lacks_map_prefix=cilium_calls_ne" \
 	  --object "bpf_lxc.native.o,symbol=cil_lxc_policy_egress,source_xlated_len=16,source_lacks_map_prefix=cilium_calls_0"
 
