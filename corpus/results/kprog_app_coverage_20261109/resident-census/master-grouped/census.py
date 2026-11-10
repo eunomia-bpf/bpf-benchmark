@@ -432,7 +432,7 @@ def store(base, name, payload):
 
 
 def publish():
-    census = load('census_classes', I / 'source/kprog/corpus_resident_verifier.py')
+    census = load('census_classes', ROOT / 'kprog/corpus_resident_verifier.py')
     data = json.loads((S / 'groups.json').read_text())
     provenance = json.loads((S / 'provenance.json').read_text())
     RESULTS.mkdir(parents=True, exist_ok=True)
@@ -641,6 +641,11 @@ def readme(summary, provenance):
         '* Grouping: SHA256 of the native-link proof ELF (--mode proof --preserve-entry-abi), as in '
         'grouped-static. One representative per body through corpus_resident_groups.shard; the '
         'outcome is weighted by body membership.',
+        '* Model source: this batch used a read-only export of the committed model files at ' +
+        summary['model_head'][:9] + ', bound over the repository paths by the committed driver '
+        '(inputs/source). Under the operator rule of 2026-11-10 an exported source copy counts as a '
+        'separate tree: the batch kept it until it finished, the copy was then removed, and '
+        'publication reads /workspaces/repository directly.',
         '* Runtime: af422c391 replay kernel, bpf_kprog_stock module, loader and native-link copies. '
         'Workers on host CPUs 8-19, one guest vCPU, ' + GUEST_MEMORY + ' guest memory. Host Clang '
         'for one large Tracee B source reaches 10-14 GiB; after six concurrent compiles brought host '
