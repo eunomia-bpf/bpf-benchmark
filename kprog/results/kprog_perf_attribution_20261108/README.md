@@ -983,7 +983,7 @@ in `bytes_jited`, so the native arm really ran.
 | per-CPU array `469a94426` | on | `..._20261110_123519_873545` | 176.5 ns | 171.7 ns | **1.028x** body | 13,641 / 10,161 |
 | array lookups `4b9805362` | on | `..._20261110_001401_453215` | 174.3 ns | 170.4 ns | **1.023x** body | 13,641 / 10,161 |
 | array lookups `4b9805362` | off | `..._20261110_131352_423791` | 2,678,158 pps | 2,642,452 pps | **0.991x** thr | 13,641 / 10,161 |
-| per-CPU array `469a94426` | off | pending | -- | -- | -- | -- |
+| per-CPU array `469a94426` | off | `..._20261110_134606_617208` | 2,668,611 pps | 2,681,493 pps | **1.010x** thr | 13,641 / 10,161 |
 
 The inline-threshold candidate is worth 1.029x on the body and nothing on
 throughput.
@@ -1002,18 +1002,25 @@ CPU is inside the program. A 1.03x body is close to all of it.
 **All three published Katran candidates land in the same place**, which is
 the clearest result in this section:
 
-| candidate | what it changes | body | verdict |
-| --- | --- | ---: | --- |
-| `1ab8e6d10` | inline thresholds for hash calls | 1.029x | no change |
-| `4b9805362` | array map lookup in P | 1.023x | no change |
-| `469a94426` | per-CPU array lookup in P | 1.028x | no change |
-| `87a028418` | hardening flags removed | 1.029x | no change |
+| candidate | what it changes | body (stats on) | throughput (stats off) |
+| --- | --- | ---: | ---: |
+| `1ab8e6d10` | inline thresholds for hash calls | 1.029x | 1.046x |
+| `4b9805362` | array map lookup in P | 1.023x | 0.991x |
+| `469a94426` | per-CPU array lookup in P | 1.028x | 1.010x |
+| `87a028418` | hardening flags removed | 1.029x | 0.993x |
 
 Four different changes, including ones that remove whole instructions from
 the body, all measure 1.023x-1.029x with the same 10,161-byte `jited`
 output. That is what a 0.42-CPU share predicts: the body is under 4% of the
 workload's time, so a 1.03x body is the most any of them can show, and the
 differences between them are inside the noise of a 3-sample measurement.
+
+Every candidate now has both modes, and the throughput column shows the same
+thing from the other side: 1.046x, 0.991x, 1.010x, 0.993x. Those spread
+either side of one with no dependence on which candidate ran, which is the
+run-to-run spread of this workload rather than a difference between
+candidates. **No Katran candidate is distinguishable from any other on
+throughput.**
 
 The measured exception is the 2026-05-29 definition's own Katran body, which
 reaches 1.258x per invocation. That body is not one of these candidates, and
