@@ -1076,6 +1076,48 @@ fn x86_mov_imm_to_gpr64(insn: &Instruction) -> Option<(Register, u64)> {
     Some((reg, imm))
 }
 
+/// A helper-id materialization feeding an indirect call.
+///
+/// The native object loads the BPF helper id into a register and calls through
+/// it (`mov eax, 2; call *%rax`). The kernel-mode pass rewrites that call to a
+/// direct `call rel32`, after which the id register is dead: the helper ABI
+/// takes its arguments in rdi/rsi/rdx/rcx/r8/r9 and returns in rax. Dropping
+/// the load removes one executed instruction per helper call. Proof mode keeps
+/// it, because the verifier-visible proof sequence names the id.
+fn x86_dropped_helper_id_load(
+    bytes: &[u8],
+    sym_addr: u64,
+    local_ip: u64,
+    insn: &Instruction,
+) -> Option<Register> {
+    let (reg, helper_id) = x86_mov_imm_to_gpr64(insn)?;
+    if helper_id > 255 || bpf_helper_name_from_id(helper_id).is_none() {
+        return None;
+    }
+    let next_ip = sym_addr.checked_add(local_ip)?.checked_add(u64::try_from(insn.len()).ok()?)?;
+    let start = usize::try_from(next_ip.checked_sub(sym_addr)?).ok()?;
+    if start >= bytes.len() {
+        return None;
+    }
+    for next in Decoder::with_ip(64, &bytes[start..], next_ip, DecoderOptions::NONE) {
+        if next.is_invalid() {
+            return None;
+        }
+        if is_alignment_nop(&next) {
+            continue;
+        }
+        if x86_indirect_call_register(&next) == Some(reg) {
+            return Some(reg);
+        }
+        if next.flow_control() != FlowControl::Next ||
+            x86_written_gpr_family(&next) == Some(reg)
+        {
+            return None;
+        }
+    }
+    None
+}
+
 fn x86_mov_gpr64_to_gpr64(insn: &Instruction) -> Option<(Register, Register)> {
     if insn.mnemonic() != Mnemonic::Mov
         || insn.op_count() < 2
@@ -1409,6 +1451,16 @@ pub(super) fn rewrite_x86(
             }
             let local_ip = insn.ip() - sym.address;
             let site_key = local_site_key(sym, local_ip);
+
+            // The object materializes a helper id and calls through that
+            // register. Kernel mode rewrites the call to a direct call, so
+            // the id load is dead and is dropped, as the 2026-05-29 linker
+            // did; proof mode keeps it for the verifier-visible sequence.
+            if !proof_mode
+                && x86_dropped_helper_id_load(&bytes, sym.address, local_ip, &insn).is_some()
+            {
+                continue;
+            }
 
             if is_entry && entry_abi_strip.drop_local_ips.contains(&local_ip) {
                 continue;
@@ -4965,6 +5017,22 @@ mod tests {
         let mut used = vec![false];
         assert_eq!(select_update_site(&sites, &HashMap::new(), &mut used, 0, Some("fallback_cache"))?, None);
         assert_eq!(used, vec![false]);
+        Ok(())
+    }
+
+    #[test]
+    fn helper_id_load_before_indirect_call_is_dropped() -> Result<()> {
+        // mov eax, 2; call *rax  -- the object's materialization of a helper id.
+        let bytes = [0xb8, 0x02, 0x00, 0x00, 0x00, 0xff, 0xd0];
+        let insns = decode_x86(&bytes)?;
+
+        assert_eq!(x86_dropped_helper_id_load(&bytes, 0, 0, &insns[0]), Some(Register::RAX));
+        // A load that feeds nothing is an ordinary mov and stays.
+        let alone = decode_x86(&[0xb8, 0x02, 0x00, 0x00, 0x00, 0x90])?;
+        assert_eq!(x86_dropped_helper_id_load(&[0xb8,0x02,0,0,0,0x90], 0, 0, &alone[0]), None);
+        // An unknown id is not a helper materialization.
+        let unknown = decode_x86(&[0xb8, 0xf0, 0x00, 0x00, 0x00, 0xff, 0xd0])?;
+        assert_eq!(x86_dropped_helper_id_load(&[0xb8,0xf0,0,0,0,0xff,0xd0], 0, 0, &unknown[0]), None);
         Ok(())
     }
 
