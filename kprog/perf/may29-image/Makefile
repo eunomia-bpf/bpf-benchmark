@@ -23,7 +23,7 @@ SAMPLES ?= 3
 WORKLOAD_DURATION ?= 180
 RUNS ?= otelcol-ebpf-profiler/profiling:0 bcc/set:1 bcc/set:0 cilium/agent:1 cilium/agent:0 tetragon/observer:1 tetragon/observer:0 tracee/monitor:1 tracee/monitor:0 katran:1 katran:0 otelcol-ebpf-profiler/profiling:1
 
-.PHONY: image corpus guest six tetragon-manifest
+.PHONY: image corpus guest six tetragon-manifest cilium-manifest
 
 # The 2026-05-29 build wrote Tetragon's manifest with these flags (9f3855f6f vendor/bpf/Makefile,
 # native-tetragon); the frozen generator rewrites ART's Tetragon manifest the same way, so each
@@ -34,6 +34,34 @@ tetragon-manifest:
 	  --llvm-nm /usr/lib/llvm-18/bin/llvm-nm --dedupe-program last \
 	  --source-object-root $(ROOT)/vendor/build/x86/tetragon --helper-disambiguate 174 \
 	  --output $(TETRAGON_NATIVE)/manifest.json $(addprefix --object ,$(sort $(wildcard $(TETRAGON_NATIVE)/*.native.o)))
+
+
+# Cilium's manifest must be regenerated with the current generator: the frozen
+# 2026-05-29 02:22 rules still pin max_entries=591428 for
+# cilium_snat_v4_external, and the live map is sized from host memory (591427
+# here, 221014 on the October host). Both cilium_snat_v4_* maps truncate to the
+# same 15-char BPF name, so the stale pin makes the loader report "matches
+# multiple loaded maps" and the linker "unknown symbol
+# cilium_snat_v4_external". ART also keeps all seven objects in one directory,
+# so tail_drop_notify, which exists in all of them, resolves to several paths
+# and is refused as ambiguous. The size-pinned entries below carry the live
+# xlated length and forbid the overlay/wireguard prefixes, which have their own
+# entries; every live variant then resolves to exactly one object.
+CILIUM_NATIVE := $(ART)/native-bpf/x86_64/cilium
+cilium-manifest:
+	cd $(CILIUM_NATIVE) && python3 $(ROOT)/vendor/bpf/write_native_manifest.py \
+	  --app cilium --llvm-nm /usr/lib/llvm-18/bin/llvm-nm \
+	  --output $(CILIUM_NATIVE)/manifest.json \
+	  --object "bpf_lxc.native.o,source_map_prefix=cilium_calls_0" \
+	  --object "bpf_overlay.native.o,source_map_prefix=cilium_calls_ov" \
+	  --object "bpf_sock.native.o" \
+	  --object "bpf_host.native.o,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne" \
+	  --object "bpf_wireguard.native.o,source_map_prefix=cilium_calls_wi" \
+	  --object "bpf_xdp.native.o,prog_type=6" \
+	  --object "bpf_host.native.o,symbol=tail_drop_notify,source_xlated_len=752,source_lacks_map_prefix=cilium_calls_ov,source_lacks_map_prefix=cilium_calls_wi,source_lacks_map_prefix=cilium_calls_0" \
+	  --object "bpf_lxc.native.o,symbol=tail_drop_notify,source_xlated_len=696,source_lacks_map_prefix=cilium_calls_ov,source_lacks_map_prefix=cilium_calls_wi,source_lacks_map_prefix=cilium_calls_ho,source_lacks_map_prefix=cilium_calls_ne" \
+	  --object "bpf_host.native.o,symbol=cil_host_policy,source_xlated_len=16,source_lacks_map_prefix=cilium_calls_ho,source_lacks_map_prefix=cilium_calls_ne" \
+	  --object "bpf_lxc.native.o,symbol=cil_lxc_policy_egress,source_xlated_len=16,source_lacks_map_prefix=cilium_calls_0"
 
 # The framework files come from this repository's frozen commit through git archive,
 # joined with the build outputs into one build context that is removed after the build.
