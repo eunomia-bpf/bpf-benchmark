@@ -1309,6 +1309,36 @@ against both object sets, one is insensitive to the change (OTel, 1.849x to
 current-ABI producers are not uniformly faster; their value is
 application-specific, and Tracee is where it is largest.
 
+### Tetragon with its current-ABI payload: 1.015x, so it has no objects gap
+
+Tetragon's payload is the largest at 62 objects, and Tetragon is the
+application furthest from its archive figure, so it was the next check. Run
+`..._20261110_180334_671437`, status ok, 3 samples of 180 s, audited native
+with 287 programs in both arms, stats off:
+
+| Tetragon | native/eBPF | objects |
+| --- | ---: | --- |
+| archive | 1.323x | the archive's |
+| 2026-05-29 image, rebuilt | 1.009x | the archive's |
+| 2026-05-29 image, lane C's current-ABI payload | **1.015x** | 62 |
+
+**No objects gap.** The current payload lands within 0.6% of the archive
+objects, and both are far from the archive's 1.323x.
+
+That settles the question for three applications:
+
+| app | archive objects | current-ABI objects | gap |
+| --- | ---: | ---: | --- |
+| otel | 1.849x | 1.832x | none, -0.9% |
+| tetragon | 1.009x | 1.015x | none, +0.6% |
+| tracee | 0.964x | **1.551x** | **yes, +61%** |
+
+So Tracee is the only application of the three where the objects matter, and
+it matters enormously. The other two are insensitive to the swap. Tetragon's
+shortfall against 1.323x is therefore not about which objects are used;
+measured on both sets it is 1.009x-1.140x, which is the conversion question
+already recorded.
+
 ### The counter check on the direct-native path, which settles OTel independently
 
 The operator asked for one short run on the direct-native image reading each
