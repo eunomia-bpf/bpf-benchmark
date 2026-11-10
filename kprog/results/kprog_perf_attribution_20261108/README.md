@@ -1150,6 +1150,29 @@ twice, so the 2026-05-29 loader refused the manifest. The recipe now writes
 it with `--dedupe-program last --helper-disambiguate 174`, and both modes
 then ran with 287 programs registered in each arm.
 
+### Cilium's verdict and drop counters, from the direct-native image
+
+The operator asked for Cilium's verdicts and drops as part of the counter
+check. Run `..._20261110_154430_231175`, 1 sample of 30 s on the
+direct-native image with Cilium's current-ABI payload:
+
+| counter | JIT arm | native arm | native/JIT |
+| --- | ---: | ---: | ---: |
+| forwarded, `reason=0,direction=1` | 34,541,991 | 37,211,690 | **1.077x** |
+| forwarded, `reason=0,direction=2` | 34,541,994 | 37,211,690 | 1.077x |
+| bytes forwarded | 2,210,689,216 | 2,381,549,952 | 1.077x |
+| drops, `reason=139` and `reason=3` | 4 | 1 | -- |
+
+Both directions carry the same volume, so the datapath is symmetric, and the
+native arm drops **one** packet against the JIT arm's four. The forwarded
+count rises 7.7%, which is the Cilium pattern these measurements keep
+showing: the native arm is not cheaper per packet, it completes more of the
+packet path in the same wall time.
+
+This is a 30-second sample, so its 1.077x is not comparable to the 180-second
+1.319x of the timing rows; it is the counter evidence the task asks for, taken
+on the same image and payload.
+
 ### The counter check on the direct-native path, which settles OTel independently
 
 The operator asked for one short run on the direct-native image reading each
