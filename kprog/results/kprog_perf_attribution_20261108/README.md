@@ -1325,19 +1325,48 @@ with 287 programs in both arms, stats off:
 **No objects gap.** The current payload lands within 0.6% of the archive
 objects, and both are far from the archive's 1.323x.
 
-That settles the question for three applications:
+Cilium completes the set. Run `..._20261110_183638_035475`, status ok, 3
+samples of 180 s, 177 native replacements, all 20 program names present in
+both arms and every component returning 0, so the arms are comparable:
 
-| app | archive objects | current-ABI objects | gap |
+| Cilium | native/eBPF | objects |
+| --- | ---: | --- |
+| archive | 2.358x | the archive's |
+| 2026-05-29 image, `cilfix8` | 1.319x | the archive's, with the fixed manifest |
+| 2026-05-29 image, lane C's current-ABI payload | **1.006x** | 7 objects |
+
+**Cilium's current-ABI payload is much *slower* than its archive objects** --
+1.006x against 1.319x, a 24% loss. So its objects gap runs the opposite way
+from Tracee's.
+
+That settles the question for all four applications with more than one
+object:
+
+| app | archive objects | current-ABI objects | change |
 | --- | ---: | ---: | --- |
 | otel | 1.849x | 1.832x | none, -0.9% |
 | tetragon | 1.009x | 1.015x | none, +0.6% |
-| tracee | 0.964x | **1.551x** | **yes, +61%** |
+| cilium | 1.319x | **1.006x** | **worse, -24%** |
+| tracee | 0.964x | **1.551x** | **better, +61%** |
 
-So Tracee is the only application of the three where the objects matter, and
-it matters enormously. The other two are insensitive to the swap. Tetragon's
-shortfall against 1.323x is therefore not about which objects are used;
-measured on both sets it is 1.009x-1.140x, which is the conversion question
-already recorded.
+So the objects are not uniformly better or worse: **Tracee's current payload
+is far better and Cilium's is materially worse.** The other two are
+insensitive. That matters for how the payloads are used -- swapping an
+application to its current-ABI objects without measuring both ways would have
+improved one application and hurt another.
+
+**It also changes the geomean projection.** With the other four as measured:
+
+| set | geomean |
+| --- | ---: |
+| all applications on 2026-05-29 objects | 1.204x |
+| Tracee and Cilium both on current-ABI objects | 1.246x |
+| Tracee current (1.551x), Cilium on archive objects (1.319x) | **1.306x** |
+
+So the best combination is Tracee's current payload with Cilium's archive
+objects, not both swapped: choosing per application gives 1.306x, swapping
+both gives 1.246x. The rule is to measure each application's objects both
+ways, which this table now does for four of the six.
 
 ### The counter check on the direct-native path, which settles OTel independently
 
