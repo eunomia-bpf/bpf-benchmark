@@ -18,7 +18,7 @@ NATIVE_LINK = STATE / 'native-link-target/release/native-link'
 LOADER = STATE / 'loader'
 SELFTESTS = ROOT / 'kprog/selftests/build'
 KERNEL = STATE / 'kernel-build/arch/x86/boot/bzImage'
-MODULE = STATE / 'module/kprog_stock.ko'
+MODULE = STATE / 'module/bpf_kprog_stock.ko'
 
 
 def write(path, value):

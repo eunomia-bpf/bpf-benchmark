@@ -36,7 +36,7 @@ def image(epoch):
     context.mkdir(exist_ok=True)
     runtime = epoch / 'runtime'
     for source, name in [
-        (runtime / 'kprog_stock.ko', 'bpf_x86_native_lab.ko'),
+        (runtime / 'kprog_stock.ko', 'bpf_kprog_stock.ko'),
         (runtime / 'native-link', 'native-link'),
         (runtime / 'libnative_loader.so', 'libnative_loader.so'),
         (ROOT / 'bpfopt/shim/build-x86/libbpfrejit_shim.so', 'libbpfrejit_shim.so'),
@@ -56,15 +56,16 @@ def image(epoch):
          'INSTALL_MOD_STRIP=1', 'DEPMOD=true'], 'modules-install')
     lines = [
         'FROM ' + BASE,
+        'RUN cp -a /paper-tree/. /workspaces/repository/ && rm -f /artifacts/kinsn/*.ko',
         'COPY native-bpf/ /artifacts/user/native-bpf/x86_64/',
         'COPY tetragon-bpf/ /artifacts/user/repo-artifacts/x86_64/tetragon/',
         'COPY tracee.bpf.o /artifacts/tracee/tracee.bpf.o',
         'COPY libnative_loader.so libbpfrejit_shim.so /usr/local/lib/bpfrejit/',
         'COPY native-link /usr/local/bin/native-link',
         'COPY native_compat.h native_division.so /usr/local/lib/bpfrejit/native/',
-        'COPY cilium_native_build.py /paper-tree/runner/libs/cilium_native_build.py',
+        'COPY cilium_native_build.py /workspaces/repository/runner/libs/cilium_native_build.py',
         'COPY kernel_offsets.h /artifacts/kernel/kernel_offsets.h',
-        'COPY bpf_x86_native_lab.ko /artifacts/kinsn/bpf_x86_native_lab.ko',
+        'COPY bpf_kprog_stock.ko /artifacts/kinsn/bpf_kprog_stock.ko',
         'COPY modules/ /artifacts/',
         'ENV BPFREJIT_SHIM_NATIVE_LOADER=post BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1',
         'ENV BPFREJIT_CORPUS_APP_TIMEOUT=0 BPFREJIT_CORPUS_REJIT_TIMEOUT=0',
