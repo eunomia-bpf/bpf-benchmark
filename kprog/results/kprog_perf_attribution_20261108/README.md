@@ -1339,7 +1339,7 @@ both arms and every component returning 0, so the arms are comparable:
 1.006x against 1.319x, a 24% loss. So its objects gap runs the opposite way
 from Tracee's.
 
-That settles the question for all four applications with more than one
+That settles the question for all five applications with more than one
 object:
 
 | app | archive objects | current-ABI objects | change |
@@ -1347,13 +1347,21 @@ object:
 | otel | 1.849x | 1.832x | none, -0.9% |
 | tetragon | 1.009x | 1.015x | none, +0.6% |
 | cilium | 1.319x | **1.006x** | **worse, -24%** |
+| bcc | 0.985x | 0.994x | none, +0.9% |
 | tracee | 0.964x | **1.551x** | **better, +61%** |
 
+BCC completes the set (`..._20261110_191600_768031`, status ok, 3 samples of
+180 s, 25 programs in both arms, stats off, **0.994x**). Its current-ABI
+payload lands within 0.9% of the archive objects.
+
+Katran is the sixth and is not in the table because its 2026-05-29 native
+bytes are byte-identical between the trees, so it has no objects gap to find.
+
 So the objects are not uniformly better or worse: **Tracee's current payload
-is far better and Cilium's is materially worse.** The other two are
-insensitive. That matters for how the payloads are used -- swapping an
-application to its current-ABI objects without measuring both ways would have
-improved one application and hurt another.
+is far better and Cilium's is materially worse.** The other three are
+insensitive within 1%. That matters for how the payloads are used -- swapping
+an application to its current-ABI objects without measuring both ways would
+have improved one application and hurt another.
 
 **It also changes the geomean projection.** With the other four as measured:
 
