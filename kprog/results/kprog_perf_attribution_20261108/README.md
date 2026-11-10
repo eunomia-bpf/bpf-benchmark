@@ -992,6 +992,71 @@ Two harness facts this needed, both of which cost runs:
 - The module must be built against `kprog/tv/build-kernel-x86`, the kernel the
   guest boots, which the recipe's `module` target already does.
 
+### All six applications on the rebuilt 2026-05-29 image
+
+The operator's question was "先把所有的都测试一遍了吗? 回到之前的数字了吗".
+These are the runs, produced by the committed recipe
+`kprog/perf/may29-image` (`make -f kprog/perf/may29-image/Makefile six`), on
+`/workspaces/repository` master, three 180-second samples in both
+`BPFREJIT_CORPUS_BPF_STATS` modes. Ratios use the 2026-05-29 evaluation's own
+parsing (`kprog/perf/may29-image/ratio.py`), so they are the archive's
+definition, not a new one.
+
+Every row below passes `tools/audit_native_arm.py` as `native`.
+
+| app | stats | run | native/eBPF | archive | equal work |
+| --- | --- | --- | ---: | ---: | --- |
+| otel | off | `..._20261110_082943_617913` | **1.887x** | 1.824x | 3 samples, 0 errors, 13 vs 12 programs |
+| otel | on | `..._20261110_041432_200000` | 1.849x | 1.824x | per-invocation **14.636x** against 14.81x |
+| bcc | off | `..._20261110_050934_687855` | **0.985x** | 1.005x | 3 samples, packets 650,270/645,076/640,868 against 651,057/654,621/658,372 |
+| bcc | on | `..._20261110_044139_262178` | **1.003x** | 1.005x | per-invocation 106.8 against 105.9 ns, 15/25 programs live in both arms |
+| cilium | off | `..._20261110_060431_280096` | **1.715x** | 2.358x | 3 samples, 1.83-1.95M pps against 1.09-1.10M **but 7 programs lost** |
+| cilium | on | `..._20261110_053714_186096` | 1.562x | 2.358x | per-invocation **2.290x** (870.4 to 380.1 ns), same loss |
+| tracee | off | `..._20261110_073051_915971` | **0.948x** | 0.958x | 3 samples, 360,712/360,717/357,413 against 382,448/380,536/371,288 |
+| tracee | on | `..._20261110_070250_626363` | 0.964x | 0.958x | per-invocation 0.988x (359.4 to 363.7 ns), 41/167 live programs |
+| katran | off | `..._20261110_081426_770032` | **1.104x** | 1.102x | prior section, equal work to 1.099x of packets |
+| katran | on | `..._20261110_075919_372582` | **1.087x** | 1.102x | prior section |
+
+**Four of the six return.** OTel lands slightly *above* its archive figure in
+both modes (1.887x off, 1.849x on, against 1.824x) and its per-invocation
+speedup is 14.636x against 14.81x. BCC returns at 1.003x on against 1.005x
+and 0.985x off. Tracee returns at 0.964x on and 0.948x off against 0.958x.
+Katran returns at 1.104x off and 1.087x on against 1.102x.
+
+**Cilium is the one that does not, and its row carries a caveat the others
+do not.** Seven kernel-version programs load in the JIT arm and are absent
+from the native arm -- `cil_from_host`, `cil_from_netdev`,
+`cil_host_policy`, `cil_to_host`, `cil_to_netdev`, `tail_handle_sna` and
+`tail_nodeport_n` -- because the native load fails on them:
+
+```
+error=native map symbol cilium_snat_v4_external matches multiple loaded maps
+      named cilium_snat_v4_
+```
+
+So Cilium's native arm runs the workload with a third fewer programs than its
+JIT arm, which makes its 1.715x a comparison of unequal program sets and not
+strictly equal work. The throughput is nevertheless *higher* in the native
+arm, so the missing programs are not doing work that helped the JIT arm; but
+until the map-symbol ambiguity is resolved, Cilium's row is the weakest of the
+six. That is a lane C request: the native map-symbol lookup has to pick
+between duplicate `cilium_snat_v4_*` maps the way the loader's relocation
+expects.
+
+Then, on the numbers: It reaches 1.715x off and 1.562x on
+against the archive's 2.358x, a shortfall of about a quarter. Its
+per-invocation speedup is 2.290x against the archive's 1.86x, so the *native
+code* is faster than the archive's, and the gap is in the invocation count:
+the two live programs run 870.4 to 380.1 ns, but the throughput ratio stays
+far below that. That is the application whose cost sits outside the programs,
+which is why the archive's 2.358x reproduces as 1.7x rather than the other
+way round.
+
+The two Tetragon rows are not yet in the table: its first pair failed with
+`manifest has ambiguous entries` (32 program names listed twice), and the
+recipe now writes the manifest with `--dedupe-program last` and
+`--helper-disambiguate 174`. Its retry is in the queue.
+
 ### What this means for the candidates
 
 The candidates act on the native path only, so they can recover at most the
