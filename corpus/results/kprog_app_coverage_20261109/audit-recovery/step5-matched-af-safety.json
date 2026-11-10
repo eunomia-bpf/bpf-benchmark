@@ -1,0 +1,71 @@
+{
+  "model": "af422c39195084ee3137627df943c055491358c7",
+  "isa48": {
+    "cases": 48,
+    "stages": {
+      "valid_executed": 10,
+      "verifier_rejected": 29,
+      "accepted_finding": 8,
+      "specialization_rejected": 1
+    },
+    "unsafe_native_executions": 0,
+    "guest_exit": 1
+  },
+  "selftests315": {
+    "counts": {
+      "catalog_rows": 1917,
+      "attempted": 315,
+      "submitted": 286,
+      "installed": 58,
+      "verifier_rejected": 91,
+      "generation_failed": 137,
+      "compilation_failed": 0,
+      "resource_failed": 29,
+      "transport_failed": 0,
+      "load_failed": 0,
+      "skipped": 0,
+      "failure": 86,
+      "failure_agrees": 84,
+      "failure_installed": 2,
+      "success": 63,
+      "success_agrees": 56,
+      "success_installed": 56
+    },
+    "native_execution_requests": 0,
+    "accepted_failure_annotations": [
+      {
+        "file": "dynptr_fail.c",
+        "program": "test_dynptr_reg_type"
+      },
+      {
+        "file": "verifier_lsm.c",
+        "program": "no_null_check"
+      }
+    ]
+  },
+  "changed_stages_from_5afa": [],
+  "runtime": {
+    "/var/tmp/kprog-tmp/C/stock-entry/replays/af422c39195084ee3137627df943c055491358c7/runtime/bzImage": "3f7aa7457066953bb44ab946051d23e9f2655964af8f2181e336cbb7e86a3fed",
+    "/var/tmp/kprog-tmp/C/stock-entry/replays/af422c39195084ee3137627df943c055491358c7/runtime/kprog_stock.ko": "64b17224ef8b924d3fa36c1c24bd0e40365f74d5fd2491f9bce4b84cfe0ea166",
+    "/var/tmp/kprog-tmp/C/stock-entry/replays/af422c39195084ee3137627df943c055491358c7/runtime/native-link": "4dd1c99417cca9e8ef1f833d8724057352c7e4d17547a67e223d716bca0250b7",
+    "/var/tmp/kprog-tmp/C/stock-entry/replays/af422c39195084ee3137627df943c055491358c7/runtime/libnative_loader.so": "ce384277a644914facf0885edc2d0c2cf5775107f7368f1418f779a95968ca59",
+    "/var/tmp/kprog-tmp/C/stock-entry/replays/af422c39195084ee3137627df943c055491358c7/runtime/trusted-native-loader": "3027e74952b8d97f89e19bb35d86eb551cfec59edfd36d424ed1420db1240b04"
+  },
+  "archive": {
+    "format": "concatenate ordered parts then extract gzip tar",
+    "bytes": 58590142,
+    "sha256": "a683e5b821afc54459b31dc21fbf4f0438930d6ebdf40e0b1260dda062bb50be",
+    "parts": [
+      {
+        "file": "step5-matched-af-safety-raw.tar.gz.part00",
+        "bytes": 48000000,
+        "sha256": "4dab2706e8572f2db784475959adf7360bd090b44fcf8a813cb99e339cf00130"
+      },
+      {
+        "file": "step5-matched-af-safety-raw.tar.gz.part01",
+        "bytes": 10590142,
+        "sha256": "794706312af8cdecd80ef7b62d3d856686e396dacb67852140d5d4359857c920"
+      }
+    ]
+  }
+}
