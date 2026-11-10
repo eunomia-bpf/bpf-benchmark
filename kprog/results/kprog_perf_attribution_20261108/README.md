@@ -1015,7 +1015,7 @@ Every row below passes `tools/audit_native_arm.py` as `native`.
 | tracee | off | `..._20261110_073051_915971` | **0.948x** | 0.958x | 3 samples, 360,712/360,717/357,413 against 382,448/380,536/371,288 |
 | tracee | on | `..._20261110_070250_626363` | 0.964x | 0.958x | per-invocation 0.988x (359.4 to 363.7 ns), 41/167 live programs |
 | katran | off | `..._20261110_081426_770032` | **1.104x** | 1.102x | prior section, equal work to 1.099x of packets |
-| katran | on | `..._20261110_075919_372582` | **1.087x** | 1.102x | prior section |
+| katran | on | `..._20261110_095208_171497` | **1.097x** | 1.102x | per-invocation **1.258x** (170.0 to 135.1 ns) |
 | tetragon | off | `..._20261110_092457_736627` | **1.009x** | 1.323x | 3 samples; native arm replaced programs, 287 registered |
 | tetragon | on | `..._20261110_085735_082662` | **1.140x** | 1.323x | per-invocation **1.289x** (1773.2 to 1375.3 ns), 21/287 and 23/287 live |
 
@@ -1029,6 +1029,12 @@ Every row below passes `tools/audit_native_arm.py` as `native`.
 | katran | 1.102x | 1.104x | 1.087x | returns |
 | tetragon | 1.323x | **1.009x** | **1.140x** | away, -14% to -24% |
 | cilium | 2.358x | **1.715x** | 1.562x | away, -27% to -34% |
+
+Katran's stats-on pair from the queue's final retry reads 1.097x throughput
+with a 1.258x per-invocation speedup, the strongest Katran body figure
+measured. Its stats-off run, `..._20261110_103556_402501`, produced no
+per-app result before the queue ended, so the off mode is quoted from the
+earlier full-length run above.
 
 OTel lands slightly *above* its archive figure in both modes and its
 per-invocation speedup is 14.636x against 14.81x. BCC returns at 1.003x on
