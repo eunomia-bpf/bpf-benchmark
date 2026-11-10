@@ -1097,16 +1097,15 @@ Tetragon at 1.32x gives 1.235x and Cilium at 2.36x gives 1.328x -- Cilium
 carries more of the geodesic weight because 2.358x multiplies further, but
 either alone lands in the band and together they restore the archive.
 
-**One measurement already taken changes this.** Tracee's current-ABI payload
-measures a 1.648x body, which at its 4.53-CPU share predicts 1.286x -- a
-floor, per the model's known error. Putting that in place of its 0.964x:
+**One measurement already taken changes this.** Tracee on the current-ABI
+objects measures **1.384x throughput** at full length, not the 0.964x the
+archive objects give. Substituting it:
 
 | set | geomean |
 | --- | ---: |
 | as measured, archive objects throughout | 1.204x |
-| Tracee on its current-ABI objects (1.286x floor) | **1.264x** |
-| + Cilium at 2.36x | 1.392x |
-| + Tetragon at 1.32x | 1.427x |
+| Tracee on its current-ABI objects | **1.279x** |
+| + Cilium at 2.36x | 1.410x |
 
 So **Tracee alone, measured on objects that already exist, moves the geomean
 into the operator's band**. The shortest path to the target is not new
@@ -1242,6 +1241,45 @@ That moves Tracee from "needs a body, has none" to "has a 1.648x body on the
 current ABI, and its 2026-05-29 throughput row does not show it". Its 4.53-CPU
 share is unchanged, so a 1.648x body at that share is the single largest
 available gain of the six.
+
+### Tracee at full length on the current ABI: 1.384x, against 0.964x archived
+
+The 30-second counter run showed 1.648x for Tracee on the current-ABI
+payload, so it was repeated at the operator's knobs. Run
+`..._20261110_161708_204872`, status ok, **3 samples of 180 s per arm**,
+audit verdict `native` with 151 programs in both arms:
+
+| measure | JIT arm | native arm | native/JIT |
+| --- | ---: | ---: | ---: |
+| invocations | 6,744,591,873 | 9,081,910,868 | **1.347x more work** |
+| ns per invocation | 358.5 | 222.8 | **1.609x faster** |
+| throughput | -- | -- | **1.384x** |
+
+This is the strongest result in the report and it changes the target
+arithmetic:
+
+| app | archive | 2026-05-29 objects | current-ABI objects |
+| --- | ---: | ---: | ---: |
+| tracee | 0.958x | 0.964x | **1.384x** |
+
+**Tracee does not merely return to its archive figure; on the objects lane C
+has already published it exceeds it by 44%.** The body is 1.609x at full
+length (1.648x on the short sample, so the two agree), it runs 1.347x more
+work rather than less, and the throughput ratio follows.
+
+Putting 1.384x in place of 0.964x in the six-application geomean:
+
+| set | geomean |
+| --- | ---: |
+| archive objects throughout, as measured | 1.169x (off) / 1.204x (best per app) |
+| Tracee on current-ABI objects | **1.279x** (best per app) |
+| + Cilium at 2.36x | 1.410x |
+
+So one application, measured on objects that already exist, lifts the
+geomean from 1.204x to **1.279x**, inside the operator's band. The
+remaining question is not how to make the code faster; it is why the
+2026-05-29 measurement uses objects that are slower than the ones lane C has
+already produced.
 
 ### The counter check on the direct-native path, which settles OTel independently
 
