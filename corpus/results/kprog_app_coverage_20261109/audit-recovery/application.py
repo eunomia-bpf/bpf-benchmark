@@ -108,7 +108,8 @@ def replay(epoch):
     shutil.copy2(epoch / 'runtime/kprog_stock.ko', runtime / 'bpf_x86_native_lab.ko')
     guest_source = 'corpus/results/kprog_app_coverage_20261109/coherent-six-app-runtime-queue/guest.py'
     guest = G / 'guest.py'
-    guest.write_bytes(subprocess.check_output(['git', 'show', epoch.name + ':' + guest_source],
+    adapter = json.loads((G / 'image.json').read_text())['runtime_adapter_head']
+    guest.write_bytes(subprocess.check_output(['git', 'show', adapter + ':' + guest_source],
                                               cwd=ROOT))
     guest.chmod(0o444)
     proxy = G / 'stock-compile-proxy'
