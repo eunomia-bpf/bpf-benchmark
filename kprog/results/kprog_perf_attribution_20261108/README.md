@@ -1051,7 +1051,7 @@ Every row below passes `tools/audit_native_arm.py` as `native`.
 | cilium | on | `..._20261110_053714_186096` | 1.562x | 2.358x | per-invocation **2.290x** (870.4 to 380.1 ns), same loss |
 | tracee | off | `..._20261110_073051_915971` | **0.948x** | 0.958x | 3 samples, 360,712/360,717/357,413 against 382,448/380,536/371,288 |
 | tracee | on | `..._20261110_070250_626363` | 0.964x | 0.958x | per-invocation 0.988x (359.4 to 363.7 ns), 41/167 live programs |
-| katran | off | `..._20261110_081426_770032` | **1.104x** | 1.102x | prior section, equal work to 1.099x of packets |
+| katran | off | `..._20261110_101903_560647` | **1.113x** | 1.102x | 3 samples, 540.2 s per arm, 2.81-2.88M against 3.19-3.23M pps |
 | katran | on | `..._20261110_095208_171497` | **1.097x** | 1.102x | per-invocation **1.258x** (170.0 to 135.1 ns) |
 | tetragon | off | `..._20261110_092457_736627` | **1.009x** | 1.323x | 3 samples; native arm replaced programs, 287 registered |
 | tetragon | on | `..._20261110_085735_082662` | **1.140x** | 1.323x | per-invocation **1.289x** (1773.2 to 1375.3 ns), 21/287 and 23/287 live |
@@ -1063,9 +1063,16 @@ Every row below passes `tools/audit_native_arm.py` as `native`.
 | otel | 1.824x | 1.849x | 1.887x | returns, slightly above |
 | bcc | 1.005x | 0.985x | 1.003x | returns |
 | tracee | 0.958x | 0.948x | 0.964x | returns |
-| katran | 1.102x | 1.104x | 1.087x | returns |
+| katran | 1.102x | 1.113x | 1.097x | returns |
 | tetragon | 1.323x | **1.009x** | **1.140x** | away, -14% to -24% |
 | cilium | 2.358x | **1.715x** | 1.562x | away, -27% to -34% |
+
+Katran's stats-off row is `..._20261110_101903_560647`, not the
+`..._081426_770032` this table first carried. That earlier run failed with
+`katran native-loader manifest not found`, so its native arm never loaded and
+its 1.104x was not a native measurement; the run above passes the audit with
+arms differing in `bytes_jited` and reads 1.113x. This is the same class of
+error the audit tool exists to catch, and it caught it.
 
 Katran's stats-on pair from the queue's final retry reads 1.097x throughput
 with a 1.258x per-invocation speedup, the strongest Katran body figure
