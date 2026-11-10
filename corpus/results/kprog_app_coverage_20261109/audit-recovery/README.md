@@ -138,3 +138,20 @@ The ongoing six-app startup has21 completed Cilium native requests in service ro
 cilium-startup-frontier22.json records every completed request, full entry, source ID, load context, compile timing and native/simulator object identity. The raw archive retains all22 complete success/failure archives, including the OTel first request and its exact load-stage error. The17 Cilium installations include two separate tail_drop_notify source-program instances; each retains its own source ID. Submitted native object hashes identify the full uploaded ELF, with the selected entry recorded alongside each hash.
 
 OTel read_task_struct reaches a native-chunk ioctl ENOENT, before B verifier submission. The generic phrase used in the earlier preliminary Notice is corrected to kernel native-chunk load failure. In the fixed module source this ioctl first resolves the active request capsule; native_lab_active_capsule returns ENOENT for an inactive/abandoned request. This source behavior and the measured startup/teardown ordering support the existing lifecycle-overlap case. Its exact raw record remains distinct from the four actual Cilium verifier rejections. The proposed measurement waiting behavior still awaits coordinator disposition; production code additions0.
+
+## Historical best installed rows and individual comparison
+
+best-installed-reference.json reconstructs all51 accepted historical requests directly from their committed raw archives. Actual counts equal the requested reference: BCC25, Katran1, Cilium14, OTel2, Tracee5 and Tetragon4. Each row retains the full entry, original source/native program IDs, load context, map metadata, native/B/proof object hashes, source identities and nested archive locator/hash. This is an observation ledger for the existing outcomes. The original accepted native bytes and compiler/source epochs remain qualified by their own records.
+
+| Application | Historical best installed | Current snapshot installed | Historical entry roles observed installed | Current comparison state |
+| --- | ---: | ---: | ---: | --- |
+| BCC |25|4|4|21 installation drops:1 native-chunk load error and20 interrupted startup rows|
+| Katran |1|pending|pending|application phase queued|
+| Cilium |14|17|11|3 old entry roles remain loading at service row22|
+| OTel |2|0|0|2 installation drops:read_task_struct chunk ENOENT and perf_unwind_stop startup interrupted|
+| Tracee |5|pending|pending|application phase queued|
+| Tetragon |4|pending|pending|application phase queued|
+
+The BCC comparison uses its completed independent full eight-tool retry; OTel and Cilium use the fixed first22-request snapshot of the ongoing six-app run. All share the af422c391 verifier/runtime, with adapter/image identities recorded separately. Each historical row lists current candidates and its actual state. The three Cilium pending roles are cil_to_container, cil_to_netdev and tail_ipv4_ct_ingress. Its aggregate17 installations include new entry roles and a second tail_drop_notify instance; the old14 roles receive their own individual comparison. Multiple current source instances remain separate records. Entry-role presence and the full native/source/context identity observations express distinct comparison scopes. Final instance-level drops follow the complete whole-app outcome.
+
+Historical input locators are undefined-flags/bcc-katran (26), cilium-prepared-end/whole-current (14), ghost-adoption/tracee (5), and whole-five-step-0700/applications.tar.gz with tetragon-current-assets (4) and otel-final-modules (2). Every selected historical request carries status0 and its complete native/B/proof objects. The exact archive SHA and nested member chain make each of the51 original records directly recoverable. Current snapshot input SHA values identify the already published result files; runtime code additions0.
