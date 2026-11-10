@@ -963,6 +963,35 @@ because only the first is settled by these runs:
   1.02x is still not attributed to a component, because the current tree's
   native arm cannot load until the loader and module agree.
 
+### The direct-native path, and the three Katran candidates on it
+
+`kprog/perf/direct-native` installs native bytes without verification (the
+verifier sees an `r0 = 0` stub), which is what lets a candidate be timed
+before lane C's verifier work catches up. Its module serves the `blob<N>`
+endpoints the restored image's loader needs, which is exactly the gap this
+report recorded against the trusted module.
+
+All rows below pass `tools/audit_native_arm.py` as `native`: the arms differ
+in `bytes_jited`, so the native arm really ran.
+
+| candidate | stats | run | JIT | native | ratio | `jited` JIT / native |
+| --- | --- | --- | ---: | ---: | ---: | --- |
+| inline calls `1ab8e6d10` | on | `..._231256_993018` | 173.8 ns | 168.9 ns | **1.029x** body / 0.995x thr | 13,641 / 10,161 |
+| inline calls `1ab8e6d10` | off | `..._234153_062138` | 864,237 pps | 903,888 pps | **1.046x** thr | 13,641 / 10,161 |
+
+The inline-threshold candidate is worth 1.029x on the body and nothing on
+throughput. Against the 2026-05-29 definition's 1.225x body, that is a large
+loss, and it is measurable only because the direct path works.
+
+Two harness facts this needed, both of which cost runs:
+
+- The base image's `/artifacts/lib/modules` had to be rebuilt. The restored
+  image predated the kernel rebuilt with `native-branch-thunks.patch`, so
+  `modprobe tunnel4` failed with `Invalid parameters` before the workload
+  started.
+- The module must be built against `kprog/tv/build-kernel-x86`, the kernel the
+  guest boots, which the recipe's `module` target already does.
+
 ### What this means for the candidates
 
 The candidates act on the native path only, so they can recover at most the
