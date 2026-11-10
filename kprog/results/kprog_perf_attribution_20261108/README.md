@@ -1235,22 +1235,31 @@ samples each:
 
 | app | arm | BPF seconds | duration | CPUs needed | of 8 |
 | --- | --- | ---: | ---: | ---: | ---: |
+| tetragon | JIT | 2,879.1 | 540.2 s | **5.33** | 66.6% |
+| tetragon | native | 2,873.0 | 540.2 s | 5.32 | 66.4% |
 | tracee | JIT | 2,448.9 | 540.1 s | **4.53** | 56.7% |
 | tracee | native | 2,399.6 | 540.1 s | 4.44 | 55.5% |
 | otel | JIT | 1,373.0 | 542.9 s | **2.53** | 31.6% |
 | otel | native | 97.0 | 540.6 s | 0.18 | 2.2% |
 | bcc | JIT | 781.3 | 543.1 s | **1.44** | 18.0% |
 | bcc | native | 783.3 | 543.1 s | 1.44 | 18.0% |
-| cilium | JIT | 524.9 | 540.2 s | **0.97** | 12.1% |
-| cilium | native | 358.2 | 540.3 s | 0.66 | 8.3% |
-| katran | JIT | 228.7 | 540.2 s | **0.42** | 5.3% |
-| katran | native | (no counters in this run) | 540.2 s | -- | -- |
+| cilium | JIT | 393.4 | 540.2 s | **0.73** | 9.1% |
+| cilium | native | 376.2 | 540.3 s | 0.70 | 8.8% |
+| katran | JIT | 227.7 | 540.3 s | **0.42** | 5.3% |
+| katran | native | 196.8 | 540.3 s | 0.36 | 4.5% |
+
+Cilium's figures are from the `cilfix8` stats-on run, so they cover the full
+program set; its pre-fix 0.97 was measured with seven programs missing.
 
 Read as headroom, this orders the applications by what a faster body can
 deliver:
 
-- **Tracee at 4.5 CPUs is the most BPF-bound** and therefore the one where a
-  faster native body should move throughput most. Its measured per-invocation
+- **Tetragon at 5.33 CPUs is the most BPF-bound of the six**, and Tracee
+  second at 4.53. Tetragon is where a faster body should move throughput
+  most, and its measured body is 1.289x while its throughput is only
+  1.009x-1.140x -- so for Tetragon the gap is conversion.
+- **Tracee at 4.5 CPUs is second** and, unlike Tetragon, has no body gain at
+  all. Its measured per-invocation
   speedup is 0.988x, however, so its body is not faster at all, and its
   throughput ratio stays at 0.948x-0.964x. Tracee is where a body improvement
   would pay, and it is the only application measured with no body gain.
@@ -1265,6 +1274,12 @@ deliver:
   | 1.5 | 1.233x |
   | 2.0 | **1.395x** |
 
+  For Tetragon at 5.33 of 8 CPUs the same arithmetic gives **1.50x** at a 2x
+  body and 3.00x at a free one, and 1.176x at the 1.289x body it already has.
+  So its measured 1.009x-1.140x is well short of what its own body should
+  deliver, which puts Tetragon's gap firmly in conversion rather than in the
+  body.
+
   So Tracee alone reaches the top of the operator's 1.20x-1.40x band at a 2x
   body, by this model.
 
@@ -1278,11 +1293,12 @@ deliver:
   part, but the specific 1.395x should be read as a floor rather than a
   target.
 
-  What survives the correction is the comparison between applications: Tracee
-  carries 4.53 CPUs of measured BPF time, ten times Katran's 0.42, so it is
-  where a body change has an order of magnitude more room. **Tracee is the
-  one application where the target is plausibly reachable from a body change
-  alone.**
+  What survives the correction is the comparison between applications:
+  Tetragon (5.33 CPUs) and Tracee (4.53) carry more than ten times Katran's
+  0.42, so a body change has an order of magnitude more room there. **Those
+  two are the applications where the target is plausibly reachable from a
+  body change**, and their needs differ: Tetragon already has a 1.289x body
+  and needs conversion, Tracee has no body gain and needs one.
 - **OTel drops from 2.53 CPUs to 0.18**, a 14x reduction in BPF CPU demand,
   which is exactly the 14.636x per-invocation speedup and why its throughput
   ratio is the highest of the six.
