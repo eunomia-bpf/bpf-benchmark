@@ -1,9 +1,9 @@
 {
-  "started": "2026-11-07T15:30:05.935020+00:00",
+  "started": "2026-11-09T14:59:00.792242+00:00",
   "apps": "bcc/set",
-  "samples": 1,
-  "duration": 2,
-  "service_state_directory": "/workspaces/.agent-state/kprog-lanes/C/native-only-runtime/trusted-chbxujgy/requests",
+  "samples": 3,
+  "duration": 180,
+  "service_state_directory": "/workspaces/.agent-state/kprog-lanes/R/native-only-runtime/trusted-9lphl6jv/requests",
   "service_state_mode": "0o700",
   "command": [
     "make",
@@ -13,19 +13,23 @@
     "PLATFORM=kvm",
     "ARCH=x86",
     "RUNTIME_CONTAINER_IMAGE=bpf-benchmark/kprog-native-only:x86-current",
-    "RUNTIME_IMAGE_TAR=/workspaces/.agent-state/kprog-lanes/C/native-only-runtime/runtime.image.tar",
-    "SAMPLES=1",
-    "WORKLOAD_DURATION=2"
+    "RUNTIME_IMAGE_TAR=/workspaces/.agent-state/kprog-lanes/R/native-only-runtime/runtime.image.tar",
+    "SAMPLES=3",
+    "WORKLOAD_DURATION=180"
   ],
   "returncode": 0,
-  "finished": "2026-11-07T15:36:29.025645+00:00",
+  "retained_service_state": "/workspaces/repository/corpus/results/trusted-state-20261109T145900",
+  "retained_service_files": [
+    "service.log"
+  ],
+  "finished": "2026-11-09T15:28:02.302503+00:00",
   "corpus_metadata": [
     {
-      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_153239_875135/metadata.json",
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261109_150304_777612/metadata.json",
       "status": "completed",
       "error_message": null
     }
   ],
-  "archive": "corpus-20261107T153640028572Z.tar.gz",
-  "archive_sha256": "b8e5e4b824b7b06f60c7f5eff7f9b11b1b9615f95438ddff8dab7c8558fefad3"
+  "archive": "corpus-20261109T152814292017Z.tar.gz",
+  "archive_sha256": "ae4a1c720a6e629cc6aaccabe5985c19b4d37d8e1e398b22268c36a962161695"
 }
