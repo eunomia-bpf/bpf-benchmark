@@ -1,0 +1,49 @@
+{
+  "label": "tetragon-credential",
+  "model_head": "16f6caeec0df74d21c35916544b51ba30def080d",
+  "runtime": "/var/tmp/kprog-tmp/replay-claude/runtime-fix1",
+  "native_execution_requests": 0,
+  "bodies": [
+    {
+      "body_sha256": "row-tetragon-31",
+      "application": "tetragon/observer",
+      "symbol": "tg_kp_bprm_committing_creds",
+      "instances": 1,
+      "member_ids": [
+        31
+      ],
+      "stage": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "started": "2026-11-10T14:48:46.372635+00:00",
+      "finished": "2026-11-10T14:49:17.696338+00:00"
+    }
+  ],
+  "instances": [
+    {
+      "application": "tetragon/observer",
+      "source_prog_id": 31,
+      "name": "tg_kp_bprm_committing_creds",
+      "body_sha256": "row-tetragon-31",
+      "census": {
+        "stage": "native_selection_failed",
+        "failure_class": "native_manifest_selection_gap"
+      },
+      "recheck": {
+        "stage": "installed",
+        "failure_class": "installed",
+        "generated": true,
+        "compiled": true
+      }
+    }
+  ],
+  "census_classes": {
+    "native_manifest_selection_gap": 1
+  },
+  "recheck_classes": {
+    "installed": 1
+  }
+}

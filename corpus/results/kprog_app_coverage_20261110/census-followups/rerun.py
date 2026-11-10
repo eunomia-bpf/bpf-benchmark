@@ -9,7 +9,12 @@ Load-only; native execution requests: 0. Outcomes are classified with the
 census functions and reported for every member instance next to its census row.
 
   rerun.py run <label> --runtime <dir> --bodies <body-prefix>...
+  rerun.py rows <label> --application <app> --producer <dir> --rows <resident id>...
   rerun.py publish <label>
+
+rows mode selects native P for the named resident rows with
+corpus_resident_census.collect on the given producer directory (census selection
+spec otherwise unchanged) and runs each row as its own entry.
 """
 from pathlib import Path
 import argparse
@@ -87,15 +92,52 @@ def tools():
     os.environ['TMPDIR'] = str(OUT / 'tmp')
 
 
-def run(label, runtime, prefixes, workers):
-    tools()
-    head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
-    driver = ROOT / 'kprog/corpus_resident_verifier.py'
-    census = load('census_classes', driver)
+def census_bodies(prefixes):
     groups = json.loads((CENSUS / 'groups.json').read_text())['groups']
     selected = [g for g in groups if any(g['body_sha256'].startswith(p) for p in prefixes)]
     if len(selected) != len(prefixes):
         raise SystemExit('bodies found %d of %d' % (len(selected), len(prefixes)))
+    return selected
+
+
+def selected_rows(label, application, producer, identifiers):
+    """Census rows selected afresh by corpus_resident_census.collect on a producer.
+
+    The census selection spec (coverage, archive, shim) stays as it is; only the
+    application's producer directory changes. Each row becomes its own entry."""
+    spec = json.loads((CENSUS / 'selection-spec.json').read_text())
+    apps = [dict(a, producer=str(producer)) for a in spec['applications']
+            if a['application'] == application]
+    collector = load('census_collect', ROOT / 'kprog/corpus_resident_census.py')
+    fresh = {r['source_prog_id']: r for r in
+             collector.collect(dict(spec, applications=apps))['programs']}
+    inventory = {r['source_prog_id']: r for r in
+                 json.loads((I / 'run-inventory.json').read_text())['programs']
+                 if r['application'] == application}
+    entries, selection = [], []
+    for identifier in identifiers:
+        row = json.loads(json.dumps(inventory[identifier]))
+        candidates = fresh[identifier]['native_candidates']
+        selection.append(dict(source_prog_id=identifier, name=row['name'], producer=str(producer),
+                              candidates=candidates))
+        row['native_candidates'] = [dict(c, source_native_object=c['native_object'])
+                                    for c in candidates]
+        row['selection_kind'] = 'current manifest of ' + str(producer)
+        entries.append(dict(body_sha256='row-%s-%d' % (application.split('/')[0], identifier),
+                            representative=row, members=[row], proof_bytes=0))
+    (OUT / label).mkdir(parents=True, exist_ok=True)
+    write(OUT / label / 'selection.json', selection)
+    unselected = [s for s in selection if len(s['candidates']) != 1]
+    if unselected:
+        raise SystemExit('rows without exactly one candidate: %s' % unselected)
+    return entries
+
+
+def run(label, runtime, selected, workers):
+    tools()
+    head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
+    driver = ROOT / 'kprog/corpus_resident_verifier.py'
+    census = load('census_classes', driver)
     base = OUT / label
     base.mkdir(parents=True, exist_ok=True)
     path = base / 'bodies.json'
@@ -108,7 +150,8 @@ def run(label, runtime, prefixes, workers):
     lock = threading.Lock()
 
     def one(entry):
-        work = base / entry['body_sha256'][:16]
+        key = entry['body_sha256']
+        work = base / (key if key.startswith('row-') else key[:16])
         if not (work / 'stock-results.json').exists():
             work.mkdir(parents=True, exist_ok=True)
             inventory = json.loads((I / 'run-inventory.json').read_text())
@@ -233,6 +276,8 @@ def publish(label):
     raw = io.BytesIO()
     with tarfile.open(fileobj=raw, mode='w:gz') as archive:
         archive.add(base / 'bodies.json', arcname='bodies.json')
+        if (base / 'selection.json').exists():
+            archive.add(base / 'selection.json', arcname='selection.json')
         for work in sorted(p for p in base.iterdir() if p.is_dir() and (p / 'provenance.json').exists()):
             for name in ['controller.log', 'stock-console.log', 'stock-service.log',
                          'stock-compiler.log', 'stock-host.log', 'effective-vng-command.json',
@@ -250,14 +295,20 @@ def publish(label):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=['run', 'publish'])
+    parser.add_argument('mode', choices=['run', 'rows', 'publish'])
     parser.add_argument('label')
     parser.add_argument('--runtime', type=Path, default=I / 'stock-runtime')
     parser.add_argument('--bodies', nargs='*', default=[])
+    parser.add_argument('--application')
+    parser.add_argument('--producer', type=Path)
+    parser.add_argument('--rows', nargs='*', type=int, default=[])
     parser.add_argument('--workers', type=int, default=2)
     args = parser.parse_args()
     if args.mode == 'run':
-        run(args.label, args.runtime, args.bodies, args.workers)
+        run(args.label, args.runtime, census_bodies(args.bodies), args.workers)
+    elif args.mode == 'rows':
+        run(args.label, args.runtime,
+            selected_rows(args.label, args.application, args.producer, args.rows), args.workers)
     else:
         publish(args.label)
 
