@@ -110,6 +110,14 @@ struct Args {
     #[arg(long)]
     output_abi: Option<PathBuf>,
 
+    /// Include `load_site` rows in the ABI sideband. The trusted loader reads
+    /// them for the exception table; the pre-exception-table (2026-05-29)
+    /// loader rejects any key beyond version and callee_saved_mask. Default
+    /// off so every loader can read the file; a consumer that builds the
+    /// exception table passes 1.
+    #[arg(long, default_value_t = false, action = clap::ArgAction::Set)]
+    abi_load_sites: bool,
+
     /// Exact canonical readonly objects and their final kernel blob offsets.
     #[arg(long)]
     output_data_layout: Option<PathBuf>,
@@ -748,9 +756,11 @@ fn main() -> Result<()> {
             "version\tnative-link-abi-v2\ncallee_saved_mask\t{}\n",
             output_callee_saved_mask
         );
-        for site in &load_sites {
-            text.push_str(&format!("load_site\t{},{},{}\n",
-                site.offset, site.insn_len, site.destination));
+        if args.abi_load_sites {
+            for site in &load_sites {
+                text.push_str(&format!("load_site\t{},{},{}\n",
+                    site.offset, site.insn_len, site.destination));
+            }
         }
         fs::write(path, text).with_context(|| format!("write {}", path.display()))?;
         eprintln!("native-link: wrote ABI metadata -> {}", path.display());

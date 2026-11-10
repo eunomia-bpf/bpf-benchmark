@@ -4060,6 +4060,9 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     argv.push_back(out.map_patches.string());
     argv.push_back("--output-abi");
     argv.push_back(out.abi.string());
+    // The trusted path builds the exception table from these rows.
+    argv.push_back("--abi-load-sites");
+    argv.push_back("true");
     argv.push_back("--output-data-layout");
     argv.push_back(out.data_layout.string());
     const std::filesystem::path link_plan =
