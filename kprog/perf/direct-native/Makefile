@@ -12,6 +12,9 @@ BASE_IMAGE ?= bpf-benchmark/kprog-five-step-tracee:r-restored
 IMAGE ?= bpf-benchmark/kprog-direct-native:r-restored
 APP ?= katran
 PAYLOAD ?= $(ROOT)/corpus/results/kprog_app_coverage_20261109/katran-regression-current/inline-producer/payload.tar.gz
+# Linker to install in the image. Empty keeps the base image's own.
+LINKER ?=
+LINKER_DEFAULT := $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link
 APPS ?= $(APP)
 CPUS ?= 8-15
 VM_CPUS ?= 8
@@ -36,6 +39,8 @@ image: module
 	tar -xzf $(PAYLOAD) -C $(OUT)/image/payload
 	cp $(OUT)/module/bpf_x86_native_lab.ko $(OUT)/image/
 	cp -r $(OUT)/image/payload/native/$(APP) $(OUT)/image/native-app
+	install -d $(OUT)/image/native-link-selected
+	cp $(if $(LINKER),$(LINKER),$(LINKER_DEFAULT)) $(OUT)/image/native-link-selected/native-link
 	cp $(HERE)/Dockerfile $(OUT)/image/Dockerfile
 	docker build --build-arg BASE_IMAGE=$(BASE_IMAGE) --build-arg APP=$(APP) -t $(IMAGE) $(OUT)/image
 	rm -f $(IMAGE_TAR)
