@@ -1097,6 +1097,22 @@ Tetragon at 1.32x gives 1.235x and Cilium at 2.36x gives 1.328x -- Cilium
 carries more of the geodesic weight because 2.358x multiplies further, but
 either alone lands in the band and together they restore the archive.
 
+**One measurement already taken changes this.** Tracee's current-ABI payload
+measures a 1.648x body, which at its 4.53-CPU share predicts 1.286x -- a
+floor, per the model's known error. Putting that in place of its 0.964x:
+
+| set | geomean |
+| --- | ---: |
+| as measured, archive objects throughout | 1.204x |
+| Tracee on its current-ABI objects (1.286x floor) | **1.264x** |
+| + Cilium at 2.36x | 1.392x |
+| + Tetragon at 1.32x | 1.427x |
+
+So **Tracee alone, measured on objects that already exist, moves the geomean
+into the operator's band**. The shortest path to the target is not new
+optimization work: it is timing the applications with lane C's current-ABI
+objects inside the 2026-05-29 definition.
+
 **Four of the six return; two do not.** All six now have both modes.
 
 | app | archive | off | on | verdict |
