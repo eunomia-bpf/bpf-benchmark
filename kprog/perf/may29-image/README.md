@@ -7,11 +7,14 @@ tree (operator 2026-11-09, "以后禁止切换branch 和开不同的 tree"; 2026
 
 ## What runs
 
-- **Framework**: this tree's frozen benchmark files (`Makefile`, `runner/`,
-  `corpus/driver.py`, `corpus/config`, `corpus/inputs`, `micro/config`), equal to
-  `9f3855f6f` apart from the `native-sim`/`kprog` and `module`/`kinsn/module`
-  renames. `make image` streams the tracked files into the image build, and
-  the guest runs this tree's `__runtime-vm-corpus`, so results land in
+- **Framework**: the benchmark framework of the frozen commit `9f3855f6f`
+  (`Makefile`, `runner/`, `corpus/driver.py`, `corpus/config`, `corpus/inputs`,
+  `micro/config`, `vendor/bpfrejit_x86_defconfig`), read from this repository with
+  `git archive` into the image build context. The whole `runner/` comes from that
+  commit because the frozen `corpus/driver.py` imports `snapshot_app_maps` from
+  `runner/libs/rejit.py`, and master's `rejit.py` has moved on since. The guest
+  runs this tree's `__runtime-vm-corpus` (equal to the frozen one apart from the
+  `native-sim`/`kprog` and `module`/`kinsn/module` renames), so results land in
   `corpus/results/x86_kvm_corpus_*`.
 - **Build outputs** in `ART` (`/var/tmp/kprog-tmp/R/six`): the kernel built from
   `vendor/linux-framework` `8e116c79d` (`bzImage`, `modules/`, `kernel.config`,

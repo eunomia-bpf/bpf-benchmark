@@ -12,6 +12,7 @@ IMAGE_TAR := $(STATE)/var-tmp/runtime.image.tar
 GUEST_IMAGE_TAR := /var/tmp/runtime.image.tar
 ARTIFACTS := modules bzImage kernel.config kernel_offsets.h kinsn native-bpf libnative_loader.so libbpfrejit_shim.so native-link
 FRAMEWORK := Makefile runner corpus/driver.py corpus/config corpus/inputs micro/config vendor/bpfrejit_x86_defconfig
+FROZEN := 9f3855f6f
 APPS ?= katran
 APP_DIR = $(firstword $(subst /, ,$(APPS)))
 CPUS ?= 0-7
@@ -24,12 +25,14 @@ RUNS ?= otelcol-ebpf-profiler/profiling:0 bcc/set:1 bcc/set:0 cilium/agent:1 cil
 
 .PHONY: image corpus guest six
 
-# The framework files stream from this tree straight into the image build.
+# The framework files come from this repository's frozen commit through git archive,
+# joined with the build outputs into one build context that is removed after the build.
 image:
 	install -d $(STATE)/var-tmp
-	git -C $(ROOT) ls-files -- $(FRAMEWORK) > $(STATE)/framework.list
-	tar -c -C $(ART) $(ARTIFACTS) -C $(HERE) Dockerfile -C $(ROOT) -T $(STATE)/framework.list | docker build -f Dockerfile -t $(IMAGE) -
-	rm -f $(IMAGE_TAR)
+	git -C $(ROOT) archive --format=tar -o $(STATE)/context.tar $(FROZEN) -- $(FRAMEWORK)
+	tar -r -f $(STATE)/context.tar -C $(ART) $(ARTIFACTS) -C $(HERE) Dockerfile
+	docker build -f Dockerfile -t $(IMAGE) - < $(STATE)/context.tar
+	rm -f $(STATE)/context.tar $(IMAGE_TAR)
 	docker save -o $(IMAGE_TAR) $(IMAGE)
 
 corpus:
