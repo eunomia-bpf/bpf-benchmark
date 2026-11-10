@@ -45,3 +45,12 @@ APPS=bcc/set BPFREJIT_CORPUS_BPF_STATS=0`.
 Each run directory goes through
 `kprog/results/kprog_perf_attribution_20261108/tools/audit_native_arm.py`
 before its numbers enter a table.
+
+## Ratios
+
+`ratio.py` computes each row with the parsing functions of
+`kprog/docs/archive/native_eval_20260529.py`, the script behind the 2026-05-29
+table in `kprog/docs/evaluation.md`: `off=<run>` gives workload throughput
+native/eBPF from a stats-off run, `on=<run>` gives BPF ns per invocation from a
+stats-on run. On the archived runs it returns BCC 1.005x and OTel 1.824x, the
+published figures.
