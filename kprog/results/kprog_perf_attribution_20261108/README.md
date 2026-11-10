@@ -1422,8 +1422,22 @@ have improved one application and hurt another.
 
 So the best combination is Tracee's current payload with Cilium's archive
 objects, not both swapped: choosing per application gives 1.306x, swapping
-both gives 1.246x. The rule is to measure each application's objects both
-ways, which this table now does for four of the six.
+both gives 1.246x.
+
+**One caveat on that 1.306x, found while trying to measure it as a single
+run.** The Tracee 1.551x was measured on the direct-native image, which ships
+a *different* `native-link` (`bd40a288`) and a different kernel from the
+2026-05-29 image (`79bd3829`). Putting Tracee's current-ABI objects into the
+2026-05-29 image does **not** reproduce it: the run fails with
+`native-link kernel failed (rc=1)`, the same link-plan boundary the component
+walk found, and Tracee aborts on the failed load. Two attempts, both
+`status error` after 15 minutes.
+
+So 1.306x is a projection across two runtimes, not a measurement from one.
+Measuring it properly needs either Tracee's payload regenerated for the
+2026-05-29 link boundary, or the other five applications timed on the
+direct-native runtime. Both are lane C's to enable, and the distinction
+matters because the two runtimes differ in the kernel as well as the link.
 
 ### The counter check on the direct-native path, which settles OTel independently
 
