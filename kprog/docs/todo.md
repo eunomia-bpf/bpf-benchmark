@@ -17,7 +17,7 @@
 - [ ] **R** 实测每个应用的 BPF 占比（BPF 秒数 /（时长 × 忙 CPU 数）），得出算术上限。**协调者**据此确定目标按哪些应用计算。
 - [ ] **R** 在 unbound 路径计时 C 已发布的候选：BCC control 和 candidate、Katran 内联（32dadc6b6）、Katran array 查找（99d79e4c9）。
 - [ ] **R** 可信模块基线、时延、CPU 利用率。
-- [ ] **C** 在原生编译阶段下沉 map 查找、改写 probe-read，先做 Katran 和 Tracee，再做 Tetragon、Cilium、OTel。
+- [ ] **C** 在原生编译阶段下沉 map 查找、改写 probe-read；按协调者22:20顺序处理 Katran、Tetragon、Tracee、Cilium、OTel。完整 direct Katran 三候选已交给R（87a028418）。
 - [ ] **C** 当前 master 的 Katran 恢复原生安装：XDP 编译已修（044d32e09）；内联 P 的返回寄存器一致性拒绝见 13c38586e；分配候选 98650c853 的恢复框架回放为 0 次原生请求（247af4cc8），须先在冻结路径外补齐启动传递。
 - [x] **C** 完整 Katran P 在提交前下沉 array 查找，21 个调用点、4 个对象、manifest/plugin/原始日志齐全，R unbound 请求已发（99d79e4c9，TODO 启用时补记）。
 - [ ] **C** 继续在 P 中下沉 per-CPU array、hash、LRU 查找，保留现有重定位和验证后的同一副本发射。
@@ -28,7 +28,7 @@
 - [x] 直接 native 的 blob 端点放回 R 专用测量模块（`kprog/perf/direct-native/`，1734f582f、3bd83fb13），Katran 2 秒功能运行替换 1 个程序。
 - [ ] **C/R** 这条测量路径没有异常表项，带 probe read 内联的 Tetragon、Tracee 载荷要先补上恢复路径再计时。
 - [ ] **R** 统一 pps 口径：843,755 接近单 worker，四 worker 合计约 250 万。
-- [ ] **C** 优化顺序改为 Tetragon、Cilium、OTel、Tracee，Katran 放最后。
+- [x] **C** 按协调者22:20更新优化顺序：Katran、Tetragon、Tracee、Cilium、OTel；Katran完整direct payload87a028418交给R，verified审计回退按主线继续。
 - [ ] **协调者** 用重测结果更新论文 §6。
 
 ## 2. 应用覆盖
@@ -66,6 +66,8 @@
 
 - [x] **A** 按协调者21:50决策恢复ARM原始volatile栈表示（本提交）：撤回729/e2e scalar forwarding及六个host fixture中的cache声明/reset，保留全部原有语义assertions、隐式SP release与异常恢复；Python语法通过，direct dispatcher逐字相同。现有host回放单独收据。 host stage完成：GCC8/8 UBSan通过；Clang5/8 UBSan通过，三个child-fault boundary oracle按原Makefile flags全部通过，完整instrumentation诊断保留。11-08参考目录36覆盖文件/203原始观察/36entry名及native身份齐全。
 - [ ] **A/C** 共享reverts完成后，用统一kinsn-free路径进行一次verified回放，与11-08最佳行逐行比较；A负责ARM，C负责x86。
+- [x] **C** x86审计回退和单内核切换：aee6栈布局39c529032、普通helper/copy参数1c85d1097、context/extent421c97bb8、原生branch指令a2a3c62ab、原上游BPF前端配对范围51711ed07、kernel pin47579c053、canonical stock loader70a4af5a8。统一回放模型5afa9bf29。
+- [ ] **C/协调者/V** 原始ISA48回放的below-SP helper/memset/memcpy输出三例load-only接受结果进入协调决策；原字节与注释保留，风险native执行0，新增生产判定按批准规则处理。
 
 - [x] **A** 协调者21:50要求的ARM helper检查撤回（本提交）：31个output-wrapper使用恢复原helper参数投影，移除below-SP output fault、libc额外prefetch及memcpy scalar-source fault；原有invocation-stack host在GCC/Clang18+UBSan均通过。实际guest回放沿共享revert项继续。
 
@@ -83,7 +85,7 @@
 - [x] 间接分支加固 retpoline/ITS 和 BTI（S15，165ac4100）。
 - [x] 安全用例 x86 47、ARM 48，接受的 8 例为良性恢复读，配对的写入变体被 verifier 拒绝（S16，ec468f0f7）。
 - [x] 每个 armed 镜像只加载一次（fb23a234d、d140d92ab）。
-- [ ] **C** 入口桩保存恢复六个 callee-saved 寄存器，B 删掉对应比较；这个相等分支是最大的单一拒绝原因（105 个 Tetragon 实例及 Katran、OTel、Cilium、BCC）。
+- [x] **C** 入口桩保存恢复六个 callee-saved 寄存器，B的外层RET保持RSP判定（96c6946cf、kernel390ef9011c7d、canonical pin47579c053）；同模型ISA48/315与六应用回放属于上方统一回放项。
 - [ ] **C** RSP 位移候选：clang inbounds GEP 对区域外访问的影响（compiled-B 义务）。
 
 ## 4. 安全：证明（对所有程序，一次证完；禁止逐程序）
