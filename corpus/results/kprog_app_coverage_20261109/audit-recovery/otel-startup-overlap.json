@@ -1,0 +1,22 @@
+{
+  "model": "af422c39195084ee3137627df943c055491358c7",
+  "runtime_adapter": "759f31d85",
+  "application": "otelcol-ebpf-profiler/profiling",
+  "native_load_begin_guest_monotonic": 186.913249,
+  "measure_start_guest_monotonic": 191.367608,
+  "elapsed_seconds": 4.454358999999982,
+  "first_request_entry": "read_task_struct",
+  "first_request_prog_type": 17,
+  "first_request_maps": [
+    "system_analysis",
+    "with_debug_output"
+  ],
+  "measurement_error": "no tracked BPF programs",
+  "second_request": {
+    "entry": "cil_xdp_entry",
+    "prog_type": 6,
+    "application": "cilium/agent",
+    "status": "installed"
+  },
+  "disposition": "coordinator review for serializing measurement RPC with existing synchronous load scope; code added0"
+}
