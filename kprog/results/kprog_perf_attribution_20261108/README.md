@@ -1349,6 +1349,27 @@ both arms and every component returning 0, so the arms are comparable:
 1.006x against 1.319x, a 24% loss. So its objects gap runs the opposite way
 from Tracee's.
 
+**Its cause is the size of the native bodies, which the run records.** Summing
+`bytes_jited` over each arm:
+
+| Cilium objects | JIT total | native total | native/JIT |
+| --- | ---: | ---: | ---: |
+| archive (`cilfix8`) | 259,933 | 272,734 | 1.049x |
+| current-ABI payload | 233,900 | **303,892** | **1.299x** |
+
+The archive objects produce native code about the size of the JIT's, and the
+current payload produces native code **30% larger than its JIT**. Larger
+straight-line native bodies mean more instruction bytes per invocation, and
+Cilium invokes its programs at packet rate, so the size difference is the
+first candidate for the 24% loss. Both runs replaced the full program set
+(177 replacements here, all 20 names, no failures), so the comparison is
+clean.
+
+This is a concrete question for lane C: **why does Cilium's current producer
+emit 30% larger native bodies than the archive's objects do?** Tracee's
+producer went the other way -- it is the one that improved 61% -- so the two
+producers differ in exactly the dimension that matters.
+
 That settles the question for all five applications with more than one
 object:
 
