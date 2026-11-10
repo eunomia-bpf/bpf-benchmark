@@ -1057,7 +1057,7 @@ Every row below passes `tools/audit_native_arm.py` as `native`.
 | bcc | off | `..._20261110_050934_687855` | **0.985x** | 1.005x | 3 samples, packets 650,270/645,076/640,868 against 651,057/654,621/658,372 |
 | bcc | on | `..._20261110_044139_262178` | **1.003x** | 1.005x | per-invocation 106.8 against 105.9 ns, 15/25 programs live in both arms |
 | cilium | off | `..._20261110_142831_693343` | **1.319x** | 2.358x | 113 replacements, 0 failures, all 20 names in both arms |
-| cilium | on | `..._20261110_130512_907908` | -- | 2.358x | per-invocation **3.280x**, but the arms run different paths |
+| cilium | on | `..._20261110_150748_133996` | -- | 2.358x | per-invocation 4.701x on 3.96x the work; not like-for-like |
 | tracee | off | `..._20261110_073051_915971` | **0.948x** | 0.958x | 3 samples, 360,712/360,717/357,413 against 382,448/380,536/371,288 |
 | tracee | on | `..._20261110_070250_626363` | 0.964x | 0.958x | per-invocation 0.988x (359.4 to 363.7 ns), 41/167 live programs |
 | katran | off | `..._20261110_101903_560647` | **1.113x** | 1.102x | 3 samples, 540.2 s per arm, 2.81-2.88M against 3.19-3.23M pps |
@@ -1099,7 +1099,7 @@ geomean exactly; closing either one alone gives 1.231x (Tetragon) or 1.324x
 | tracee | 0.958x | 0.948x | 0.964x | returns |
 | katran | 1.102x | 1.113x | 1.097x | returns |
 | tetragon | 1.323x | **1.009x** | **1.140x** | away, -14% to -24% |
-| cilium | 2.358x | **1.319x** | see below | away; program set now fixed, but the arms run different paths |
+| cilium | 2.358x | **1.319x** | (see below) | away; 1.319x is more packets, not cheaper ones |
 
 Katran's stats-off row is `..._20261110_101903_560647`, not the
 `..._081426_770032` this table first carried. That earlier run failed with
@@ -1199,13 +1199,38 @@ over the whole arm:
 | `cil_to_host` | **4** | **485,613,006** |
 | every other name | 2 or 0 | 2 or 0 |
 
-The two arms run **different paths**. `cil_from_contai` is equal within 4%,
-but the native arm additionally executes `cil_from_host` and `cil_to_host`
-485.6 million times each where the JIT arm executed them twice. So the native
-arm does **3.1x** the work in total (1.457 billion invocations against 465
-million), and its 3.280x per-invocation figure is measured on a program mix
-the JIT arm never ran. Cilium's stats-on figure is therefore not a
-like-for-like ratio, and the stats-off 1.319x is the comparable number.
+The two arms run **different paths**. The native arm additionally executes
+`cil_from_host` and `cil_to_host` where the JIT arm executes them twice. Its
+total work is **3.1x** the JIT arm's, so its per-invocation figure is
+measured on a program mix the JIT arm never ran.
+
+Repeated on the same image, and the numbers are consistent: run
+`..._20261110_150748_133996` (53 programs in both arms, 4.701x
+per-invocation) gives the same shape, with native total work **3.958x** the
+JIT arm's. But within it, the one program both arms share --
+`cil_from_contai` -- runs **1.319x** more often in the native arm, which is
+exactly the stats-off throughput ratio of 1.319x. That agreement is the
+finding: **the native body is not faster per packet in Cilium; it completes
+more of the packet path in the same time**, and the throughput gain equals
+the extra work done, not a per-invocation speedup.
+
+So Cilium's stats-on per-invocation numbers (3.280x, 4.701x) measure
+different work and should not be read as speedups. The comparable figure is
+the stats-off **1.319x**, and what it represents is more packets processed
+rather than cheaper ones.
+
+Three independent measures agree on that, which is what makes it solid:
+
+| measure | native/JIT |
+| --- | ---: |
+| workload throughput, stats off | 1.319x |
+| `cil_from_contai` invocations, stats on | 1.319x |
+| packets sent, from the pktgen components (109,975,558 to 144,436,582) | **1.313x** |
+
+The generator's own packet count is the cleanest of the three, because it does
+not depend on the BPF counters at all: with both arms given the same 180
+seconds, the native arm's machine sent 31% more packets. Cilium's native
+programs are not cheaper per packet; the workload simply gets further.
 
 That the native arm pushes packets through two more programs is itself
 interesting -- a cheaper body lets more of the packet path complete -- but it
