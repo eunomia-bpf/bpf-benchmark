@@ -1,0 +1,835 @@
+{
+  "application": "otelcol-ebpf-profiler/profiling",
+  "model": "af422c39195084ee3137627df943c055491358c7",
+  "runtime_adapter": "ea4625f42399de899c437b5136df7c84ac29bb7f",
+  "scope": "immutable completed-request frontier during ongoing whole-application startup",
+  "observed_at": "2026-11-10T02:11:06.811494+00:00",
+  "completed_native_requests": 4,
+  "proof_generated": 4,
+  "compiled": 3,
+  "installed": 2,
+  "verifier_rejected": 1,
+  "specialization_failed": 1,
+  "requests": [
+    {
+      "request_id": 26,
+      "entry": "read_task_struct",
+      "source_prog_id": 250,
+      "native_prog_id": 253,
+      "stage": "installed",
+      "cause": "accepted",
+      "started": "2026-11-10T01:42:38.089992+00:00",
+      "finished": "2026-11-10T01:42:42.722750+00:00",
+      "native_object_sha256": "c6459bf9b9be89c78be833124acac1a7d5b4c81fa78da26eebd8d84268051cad",
+      "simulator_object_sha256": "662469d2fa30dae1bee930ed0ff5ec43a8cb0a3f2523df2b8c691fe5f5faf4ec",
+      "proof_object_sha256": "4ad3da84f4886233b83e19bd80731bcbd4e1e5f233713986a7c05296ba79bf85",
+      "compiler": {
+        "returncode": 0,
+        "command": [
+          "/var/tmp/kprog-tmp/C/stock-entry/replays/af422c39195084ee3137627df943c055491358c7/source/kprog/stock-path/bin/clang",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I",
+          "/workspaces/repository/kprog/x86",
+          "-I",
+          "/workspaces/repository/kprog/formal/generated",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/src",
+          "-I",
+          "/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-67hpytjk/requests/request-ycxqeqs0/generated/trusted_x86.bpf.c",
+          "-o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-67hpytjk/requests/request-ycxqeqs0/generated/trusted_x86.bpf.o"
+        ],
+        "source_sha256": "b591da0e1a4f7f6a71f113912d623f5f4f62d7c928d0865e7aeb174a9be215e3",
+        "compiler_sha256": "a33c492fe50fe646bdcc4b263d1ada44e6d6eb8f46236c47ca0f8158b440b8ed",
+        "wall_seconds": 2.227744058240205,
+        "max_rss_kib": 233404,
+        "user_seconds": 2.118233,
+        "system_seconds": 0.10878299999999999,
+        "object_sha256": "662469d2fa30dae1bee930ed0ff5ec43a8cb0a3f2523df2b8c691fe5f5faf4ec"
+      },
+      "load_metadata": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 17,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "prog_ifindex": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 239,
+          "source_func_type_id": 0,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "system_analysis",
+            "map_id": 217,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 144,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "with_debug_output",
+            "map_id": 218,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 44,
+            "max_entries": 1,
+            "map_flags": 128,
+            "value_offset": 40
+          }
+        ]
+      },
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
+        "/workspaces/repository/kprog/trusted_generation.py": "8904adbab468569c0a8eddaf00084434bc92310c4db61f80476ecde7fc92404b",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "657b60f9e7534bb044891a95f0755e7d17b62bfccd642954e7d460564e3060f6",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "2f46d29d64590fad1a1af2d6dc07d76dd9b35463da2fe584d8c431387022a130",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "ec6751ddba7498c9c72923d7c7895942475043439382bdf36321f8a5d9b96f6d",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "cdd797ca851420bff642fcd5214b595eb4fe58191911b553a1edf1981c68e737",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "a1809ba647581c61648eaea752338268bbb769aa50706216eb37b8ef4a4cc6ab",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/native-link": "4dd1c99417cca9e8ef1f833d8724057352c7e4d17547a67e223d716bca0250b7",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/trusted-native-loader": "3027e74952b8d97f89e19bb35d86eb551cfec59edfd36d424ed1420db1240b04"
+      },
+      "diagnostic_excerpt": "",
+      "archive": "26.success.tar.gz",
+      "archive_sha256": "5bf2e28fb7ee9c3c2613b28e765be38d430dd37ea395df5ae3554a20915fd5f3"
+    },
+    {
+      "request_id": 27,
+      "entry": "perf_unwind_stop",
+      "source_prog_id": 254,
+      "native_prog_id": 257,
+      "stage": "installed",
+      "cause": "accepted",
+      "started": "2026-11-10T01:42:42.739550+00:00",
+      "finished": "2026-11-10T01:44:52.072608+00:00",
+      "native_object_sha256": "c6459bf9b9be89c78be833124acac1a7d5b4c81fa78da26eebd8d84268051cad",
+      "simulator_object_sha256": "a39eee2eb1d41c8621cdec730901e63b773eb1a3a18641d38c563969001fb2ee",
+      "proof_object_sha256": "94b2ae4ee9258eca1d3a1581f23ec664f11a48cc72f998362472c77cdc787b4e",
+      "compiler": {
+        "returncode": 0,
+        "command": [
+          "/var/tmp/kprog-tmp/C/stock-entry/replays/af422c39195084ee3137627df943c055491358c7/source/kprog/stock-path/bin/clang",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I",
+          "/workspaces/repository/kprog/x86",
+          "-I",
+          "/workspaces/repository/kprog/formal/generated",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/src",
+          "-I",
+          "/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-67hpytjk/requests/request-9nflar9w/generated/trusted_x86.bpf.c",
+          "-o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-67hpytjk/requests/request-9nflar9w/generated/trusted_x86.bpf.o"
+        ],
+        "source_sha256": "4a05f6cb160f24d8a90ce94b1aad2b93f5147168bc0cf9cedbdf9674e27c38e8",
+        "compiler_sha256": "a33c492fe50fe646bdcc4b263d1ada44e6d6eb8f46236c47ca0f8158b440b8ed",
+        "wall_seconds": 126.32034183200449,
+        "max_rss_kib": 2982612,
+        "user_seconds": 124.315044,
+        "system_seconds": 1.725225,
+        "object_sha256": "a39eee2eb1d41c8621cdec730901e63b773eb1a3a18641d38c563969001fb2ee"
+      },
+      "load_metadata": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 7,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "prog_ifindex": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 298,
+          "source_func_type_id": 0,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "apm_int_procs",
+            "map_id": 260,
+            "map_type": 1,
+            "key_size": 4,
+            "value_size": 8,
+            "max_entries": 128,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "filter_error_frames",
+            "map_id": 268,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 44,
+            "max_entries": 1,
+            "map_flags": 128,
+            "value_offset": 0
+          },
+          {
+            "name": "go_labels_procs",
+            "map_id": 273,
+            "map_type": 1,
+            "key_size": 4,
+            "value_size": 28,
+            "max_entries": 128,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "inhibit_events",
+            "map_id": 265,
+            "map_type": 1,
+            "key_size": 4,
+            "value_size": 1,
+            "max_entries": 2,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "metrics",
+            "map_id": 243,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 8,
+            "max_entries": 99,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "per_cpu_records",
+            "map_id": 267,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 5000,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "perf_progs",
+            "map_id": 256,
+            "map_type": 3,
+            "key_size": 4,
+            "value_size": 4,
+            "max_entries": 10,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "pid_events",
+            "map_id": 251,
+            "map_type": 1,
+            "key_size": 8,
+            "value_size": 1,
+            "max_entries": 65536,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "report_events",
+            "map_id": 231,
+            "map_type": 4,
+            "key_size": 4,
+            "value_size": 4,
+            "max_entries": 4,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "reported_pids",
+            "map_id": 232,
+            "map_type": 9,
+            "key_size": 4,
+            "value_size": 8,
+            "max_entries": 65536,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tpbase_offset",
+            "map_id": 268,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 44,
+            "max_entries": 1,
+            "map_flags": 128,
+            "value_offset": 24
+          },
+          {
+            "name": "trace_events",
+            "map_id": 239,
+            "map_type": 4,
+            "key_size": 4,
+            "value_size": 4,
+            "max_entries": 4,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "with_debug_output",
+            "map_id": 268,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 44,
+            "max_entries": 1,
+            "map_flags": 128,
+            "value_offset": 40
+          }
+        ]
+      },
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
+        "/workspaces/repository/kprog/trusted_generation.py": "8904adbab468569c0a8eddaf00084434bc92310c4db61f80476ecde7fc92404b",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "657b60f9e7534bb044891a95f0755e7d17b62bfccd642954e7d460564e3060f6",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "2f46d29d64590fad1a1af2d6dc07d76dd9b35463da2fe584d8c431387022a130",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "ec6751ddba7498c9c72923d7c7895942475043439382bdf36321f8a5d9b96f6d",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "cdd797ca851420bff642fcd5214b595eb4fe58191911b553a1edf1981c68e737",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "a1809ba647581c61648eaea752338268bbb769aa50706216eb37b8ef4a4cc6ab",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/native-link": "4dd1c99417cca9e8ef1f833d8724057352c7e4d17547a67e223d716bca0250b7",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/trusted-native-loader": "3027e74952b8d97f89e19bb35d86eb551cfec59edfd36d424ed1420db1240b04"
+      },
+      "diagnostic_excerpt": "",
+      "archive": "27.success.tar.gz",
+      "archive_sha256": "c0e281e5755d747a2807b98d06e3aa0216aaffdfab801411194dc28cc4e17127"
+    },
+    {
+      "request_id": 28,
+      "entry": "perf_unwind_native",
+      "source_prog_id": 258,
+      "native_prog_id": null,
+      "stage": "verifier_rejected",
+      "cause": "stack_write",
+      "started": "2026-11-10T01:44:52.099576+00:00",
+      "finished": "2026-11-10T01:55:22.699788+00:00",
+      "native_object_sha256": "c6459bf9b9be89c78be833124acac1a7d5b4c81fa78da26eebd8d84268051cad",
+      "simulator_object_sha256": "3e4157f126012a61e15bf5a91de93551f6242c787bc039549c775af5375d6a10",
+      "proof_object_sha256": "330c8579b9b8d08a1059ac30d196a9f8ea92578c7c638a79790c83ed76a3cb95",
+      "compiler": {
+        "returncode": 0,
+        "command": [
+          "/var/tmp/kprog-tmp/C/stock-entry/replays/af422c39195084ee3137627df943c055491358c7/source/kprog/stock-path/bin/clang",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I",
+          "/workspaces/repository/kprog/x86",
+          "-I",
+          "/workspaces/repository/kprog/formal/generated",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/src",
+          "-I",
+          "/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-67hpytjk/requests/request-ubcv6mln/generated/trusted_x86.bpf.c",
+          "-o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-67hpytjk/requests/request-ubcv6mln/generated/trusted_x86.bpf.o"
+        ],
+        "source_sha256": "2205810a702aa550c59a7c20205b9e7fd4b059a37023b81f9d60c8b864b40da0",
+        "compiler_sha256": "a33c492fe50fe646bdcc4b263d1ada44e6d6eb8f46236c47ca0f8158b440b8ed",
+        "wall_seconds": 626.3640696415678,
+        "max_rss_kib": 4959904,
+        "user_seconds": 622.575662,
+        "system_seconds": 2.988245,
+        "object_sha256": "3e4157f126012a61e15bf5a91de93551f6242c787bc039549c775af5375d6a10"
+      },
+      "load_metadata": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 7,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "prog_ifindex": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 299,
+          "source_func_type_id": 0,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "exe_id_to_10_stack_deltas",
+            "map_id": 229,
+            "map_type": 13,
+            "key_size": 8,
+            "value_size": 4,
+            "max_entries": 65536,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_11_stack_deltas",
+            "map_id": 222,
+            "map_type": 13,
+            "key_size": 8,
+            "value_size": 4,
+            "max_entries": 65536,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_12_stack_deltas",
+            "map_id": 248,
+            "map_type": 13,
+            "key_size": 8,
+            "value_size": 4,
+            "max_entries": 65536,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_13_stack_deltas",
+            "map_id": 224,
+            "map_type": 13,
+            "key_size": 8,
+            "value_size": 4,
+            "max_entries": 65536,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_14_stack_deltas",
+            "map_id": 236,
+            "map_type": 13,
+            "key_size": 8,
+            "value_size": 4,
+            "max_entries": 65536,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_15_stack_deltas",
+            "map_id": 277,
+            "map_type": 13,
+            "key_size": 8,
+            "value_size": 4,
+            "max_entries": 65536,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_16_stack_deltas",
+            "map_id": 250,
+            "map_type": 13,
+            "key_size": 8,
+            "value_size": 4,
+            "max_entries": 65536,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_17_stack_deltas",
+            "map_id": 258,
+            "map_type": 13,
+            "key_size": 8,
+            "value_size": 4,
+            "max_entries": 65536,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_18_stack_deltas",
+            "map_id": 227,
+            "map_type": 13,
+            "key_size": 8,
+            "value_size": 4,
+            "max_entries": 65536,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_19_stack_deltas",
+            "map_id": 264,
+            "map_type": 13,
+            "key_size": 8,
+            "value_size": 4,
+            "max_entries": 65536,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_20_stack_deltas",
+            "map_id": 272,
+            "map_type": 13,
+            "key_size": 8,
+            "value_size": 4,
+            "max_entries": 65536,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_21_stack_deltas",
+            "map_id": 241,
+            "map_type": 13,
+            "key_size": 8,
+            "value_size": 4,
+            "max_entries": 65536,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_22_stack_deltas",
+            "map_id": 246,
+            "map_type": 13,
+            "key_size": 8,
+            "value_size": 4,
+            "max_entries": 65536,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_23_stack_deltas",
+            "map_id": 253,
+            "map_type": 13,
+            "key_size": 8,
+            "value_size": 4,
+            "max_entries": 65536,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_8_stack_deltas",
+            "map_id": 238,
+            "map_type": 13,
+            "key_size": 8,
+            "value_size": 4,
+            "max_entries": 65536,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_9_stack_deltas",
+            "map_id": 262,
+            "map_type": 13,
+            "key_size": 8,
+            "value_size": 4,
+            "max_entries": 65536,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "interpreter_offsets",
+            "map_id": 255,
+            "map_type": 1,
+            "key_size": 8,
+            "value_size": 40,
+            "max_entries": 32,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "metrics",
+            "map_id": 243,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 8,
+            "max_entries": 99,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "per_cpu_records",
+            "map_id": 267,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 5000,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "perf_progs",
+            "map_id": 256,
+            "map_type": 3,
+            "key_size": 4,
+            "value_size": 4,
+            "max_entries": 10,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "pid_page_to_mapping_info",
+            "map_id": 270,
+            "map_type": 11,
+            "key_size": 16,
+            "value_size": 16,
+            "max_entries": 1048576,
+            "map_flags": 1,
+            "value_offset": null
+          },
+          {
+            "name": "stack_delta_page_to_info",
+            "map_id": 254,
+            "map_type": 1,
+            "key_size": 16,
+            "value_size": 8,
+            "max_entries": 65536,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "unwind_info_array",
+            "map_id": 259,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 12,
+            "max_entries": 16384,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "with_debug_output",
+            "map_id": 268,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 44,
+            "max_entries": 1,
+            "map_flags": 128,
+            "value_offset": 40
+          }
+        ]
+      },
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
+        "/workspaces/repository/kprog/trusted_generation.py": "8904adbab468569c0a8eddaf00084434bc92310c4db61f80476ecde7fc92404b",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "657b60f9e7534bb044891a95f0755e7d17b62bfccd642954e7d460564e3060f6",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "2f46d29d64590fad1a1af2d6dc07d76dd9b35463da2fe584d8c431387022a130",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "ec6751ddba7498c9c72923d7c7895942475043439382bdf36321f8a5d9b96f6d",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "cdd797ca851420bff642fcd5214b595eb4fe58191911b553a1edf1981c68e737",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "a1809ba647581c61648eaea752338268bbb769aa50706216eb37b8ef4a4cc6ab",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/native-link": "4dd1c99417cca9e8ef1f833d8724057352c7e4d17547a67e223d716bca0250b7",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/trusted-native-loader": "3027e74952b8d97f89e19bb35d86eb551cfec59edfd36d424ed1420db1240b04"
+      },
+      "diagnostic_excerpt": "26: (79) r8 = *(u64 *)(r7 +0)         ; R7=map_value(map=kprog_unspec,ks=4,vs=8) R8=scalar()\n27: (7b) *(u64 *)(r10 -520) = r8\ninvalid write to stack R10 off=-520 size=8\nprocessed 27 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n27: (7b) *(u64 *)(r10 -520) = r8\ninvalid write to stack R10 off=-520 size=8\nprocessed 27 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n",
+      "archive": "28.failure.tar.gz",
+      "archive_sha256": "9d2e9fd2afe67cfc63ef64bf296caacfdf8f62977839dc33ed8939e2f1bccbde"
+    },
+    {
+      "request_id": 29,
+      "entry": "perf_unwind_hotspot",
+      "source_prog_id": 261,
+      "native_prog_id": null,
+      "stage": "specialization_failed",
+      "cause": "clang_source_locations_exhausted",
+      "started": "2026-11-10T01:55:22.740712+00:00",
+      "finished": "2026-11-10T01:58:08.266577+00:00",
+      "native_object_sha256": "c6459bf9b9be89c78be833124acac1a7d5b4c81fa78da26eebd8d84268051cad",
+      "simulator_object_sha256": null,
+      "proof_object_sha256": "15e8b9047ce30143c7d580d20a832280aad33f895d7c593238faadba0f0be582",
+      "compiler": {
+        "returncode": 1,
+        "command": [
+          "/var/tmp/kprog-tmp/C/stock-entry/replays/af422c39195084ee3137627df943c055491358c7/source/kprog/stock-path/bin/clang",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I",
+          "/workspaces/repository/kprog/x86",
+          "-I",
+          "/workspaces/repository/kprog/formal/generated",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/src",
+          "-I",
+          "/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-67hpytjk/requests/request-wmmlzw9i/generated/trusted_x86.bpf.c",
+          "-o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-67hpytjk/requests/request-wmmlzw9i/generated/trusted_x86.bpf.o"
+        ],
+        "source_sha256": "ee836fda871826948e41e1e40bafdaec3c2dd5a5b871841a87bf3db421cdbe45",
+        "compiler_sha256": "a33c492fe50fe646bdcc4b263d1ada44e6d6eb8f46236c47ca0f8158b440b8ed",
+        "wall_seconds": 160.96694437367842,
+        "max_rss_kib": 11340788,
+        "user_seconds": 154.281048,
+        "system_seconds": 6.613703
+      },
+      "load_metadata": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 7,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "prog_ifindex": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 300,
+          "source_func_type_id": 0,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "hotspot_procs",
+            "map_id": 275,
+            "map_type": 1,
+            "key_size": 4,
+            "value_size": 40,
+            "max_entries": 256,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "interpreter_offsets",
+            "map_id": 255,
+            "map_type": 1,
+            "key_size": 8,
+            "value_size": 40,
+            "max_entries": 32,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "metrics",
+            "map_id": 243,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 8,
+            "max_entries": 99,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "per_cpu_records",
+            "map_id": 267,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 5000,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "perf_progs",
+            "map_id": 256,
+            "map_type": 3,
+            "key_size": 4,
+            "value_size": 4,
+            "max_entries": 10,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "pid_page_to_mapping_info",
+            "map_id": 270,
+            "map_type": 11,
+            "key_size": 16,
+            "value_size": 16,
+            "max_entries": 1048576,
+            "map_flags": 1,
+            "value_offset": null
+          },
+          {
+            "name": "with_debug_output",
+            "map_id": 268,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 44,
+            "max_entries": 1,
+            "map_flags": 128,
+            "value_offset": 40
+          }
+        ]
+      },
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
+        "/workspaces/repository/kprog/trusted_generation.py": "8904adbab468569c0a8eddaf00084434bc92310c4db61f80476ecde7fc92404b",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "657b60f9e7534bb044891a95f0755e7d17b62bfccd642954e7d460564e3060f6",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "2f46d29d64590fad1a1af2d6dc07d76dd9b35463da2fe584d8c431387022a130",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "ec6751ddba7498c9c72923d7c7895942475043439382bdf36321f8a5d9b96f6d",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "cdd797ca851420bff642fcd5214b595eb4fe58191911b553a1edf1981c68e737",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "a1809ba647581c61648eaea752338268bbb769aa50706216eb37b8ef4a4cc6ab",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/native-link": "4dd1c99417cca9e8ef1f833d8724057352c7e4d17547a67e223d716bca0250b7",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/trusted-native-loader": "3027e74952b8d97f89e19bb35d86eb551cfec59edfd36d424ed1420db1240b04"
+      },
+      "diagnostic_excerpt": " 1452 |                         void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \\\n      |                         ^\nfatal error: translation unit is too large for Clang to process: ran out of source locations\nPLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace, preprocessed source, and associated run script.\n      |                         ^\nfatal error: translation unit is too large for Clang to process: ran out of source locations\nPLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace, preprocessed source, and associated run script.\nStack dump:\n#82 0x00007e26fe1ed28b __libc_start_main ./csu/../csu/libc-start.c:347:5\n#83 0x00005b01f75f0255 _start (/usr/lib/llvm-18/bin/clang+0xe255)\nclang: error: clang frontend command failed with exit code 70 (use -v to see invocation)\nUbuntu clang version 18.1.3 (1ubuntu1)\n\nPLEASE ATTACH THE FOLLOWING FILES TO THE BUG REPORT:\nPreprocessed source(s) and associated run script(s) are located at:\nclang: note: diagnostic msg: /tmp/trusted_x86-8914d8.c",
+      "archive": "29.failure.tar.gz",
+      "archive_sha256": "0fb2671abb09fc0f4cf8f6b3f76018725bdbaf0a2026980012cf0c828045f6dc"
+    }
+  ],
+  "reference_entry_comparison": [
+    {
+      "entry": "read_task_struct",
+      "prior_source_prog_id": 21,
+      "current_source_prog_ids": [
+        250
+      ],
+      "current_native_prog_ids": [
+        253
+      ],
+      "state": "entry_installed",
+      "causes": [
+        "accepted"
+      ]
+    },
+    {
+      "entry": "perf_unwind_stop",
+      "prior_source_prog_id": 23,
+      "current_source_prog_ids": [
+        254
+      ],
+      "current_native_prog_ids": [
+        257
+      ],
+      "state": "entry_installed",
+      "causes": [
+        "accepted"
+      ]
+    }
+  ],
+  "historical_entry_role_drops": 0,
+  "whole_application_status": "loading",
+  "programs_total": "pending completed application cohort",
+  "native_work_counters": "pending whole-application phase",
+  "new_checks": 0,
+  "raw": {
+    "file": "tetragon-otel-completed-frontiers-raw.tar.gz",
+    "bytes": 10944378,
+    "sha256": "279af739ecbf5c22a3b4daea067010b475a9b10db71fc46cd370a6a709619321"
+  },
+  "earlier_raw": "load-lifecycle-otel-recovery-raw.tar.gz supplies requests26-27"
+}

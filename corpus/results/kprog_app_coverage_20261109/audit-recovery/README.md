@@ -185,3 +185,18 @@ The five verifier rejections are cil_from_container/BTF write permission, tail_h
 Cilium reports HTTP500 from PUT /v1/endpoint/0: timeout while waiting for initial endpoint generation, context deadline exceeded. Its native workload phase stays pending. The full app JSON preserves baseline work, startup logs and the original error. cilium-startup-complete.json joins every old entry with current source/native IDs and separates actual verifier classes from the lifecycle load error. Requests2-22 reuse the already committed frontier22 raw archive; cilium-startup-complete-delta-raw.tar.gz adds requests23-31 and the complete phase logs. The other app owners continue with their captured source/runtime.
 
 The lifecycle fix ea4625f42 already recovers BCC25 and OTel2 on the same model. The independent Cilium endpoint-generation API deadline still intersects long synchronous proof compilation. Changing that frozen setting is posted for coordinator disposition; setting/check changes0. The serialized Katran/Tetragon/Tracee continuation uses the same lifecycle-fixed image after the BCC/OTel owner completes.
+
+## Tetragon and OTel completed frontiers on the same model
+
+These immutable snapshots retain completed requests while both whole-application owners continue compiling their next program. The verifier/kernel/loader/linker/P epoch stays af422c391. Tetragon uses the original captured measurement adapter; OTel uses lifecycle adapter ea4625f42. Each image identity and original launch command accompanies its raw records.
+
+| Application snapshot | Completed requests | Proof generated | Compiled | Installed | Verifier rejected | Specialization failed |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Tetragon requests32-39 | 8 | 8 | 8 | 4 | 4 | 0 |
+| OTel requests26-29 | 4 | 4 | 3 | 2 | 1 | 1 |
+
+Tetragon recovers event_exit_acct_process, event_exit_disassociate_ctty and execve_rate among its four historical installed entry roles. event_wake_up_new_task drops from installed to a verifier rejection at an R3 scalar u64 load, after101 instructions and3 states. The current fourth installation is generic_kprobe_output, so aggregate4 versus prior4 still includes one historical entry-role drop. The other rejections are execve_send and execve_map_update at8193 jumps, and event_execve at a stack write to R10-1352. tetragon-completed-frontier8.json preserves every source/native ID, load context, map layout, native/B/proof identity and raw diagnostic. The prior/current source and map cohorts remain explicit.
+
+OTel retains its two historical installed entry roles, read_task_struct and perf_unwind_stop. perf_unwind_native compiles and reaches a verifier stack-write rejection at R10-520. perf_unwind_hotspot generates its proof object, then Clang reports translation-unit source-location exhaustion and frontend exit70; the compiler wrapper records return1,160.967seconds and11,340,788KiB maximum RSS. This is a specialization compiler failure. otel-completed-frontier4.json records both failure stages separately and historical entry-role drops0.
+
+tetragon-otel-completed-frontiers-raw.tar.gz contains all8 Tetragon request archives, OTel requests28-29, the matching image/launch metadata and bounded completed-event snapshots. OTel requests26-27 retain their existing load-lifecycle-otel-recovery-raw.tar.gz locator. Every recorded request archive hash was checked against these raw members. Whole-app totals, final load counts and native work remain pending their actual application phases. Existing background compilers and the serial Katran/Tetragon/Tracee successor retain their owners. Runtime code/check additions0.

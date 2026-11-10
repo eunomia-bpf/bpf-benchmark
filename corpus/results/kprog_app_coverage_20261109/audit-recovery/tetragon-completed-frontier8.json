@@ -1,0 +1,1631 @@
+{
+  "application": "tetragon/observer",
+  "model": "af422c39195084ee3137627df943c055491358c7",
+  "runtime_adapter": "759f31d855e99e232c6b71a6877968ade6af308c",
+  "scope": "immutable completed-request frontier during ongoing whole-application startup",
+  "observed_at": "2026-11-10T02:11:06.467087+00:00",
+  "completed_native_requests": 8,
+  "proof_generated": 8,
+  "compiled": 8,
+  "installed": 4,
+  "verifier_rejected": 4,
+  "specialization_failed": 0,
+  "requests": [
+    {
+      "request_id": 32,
+      "entry": "event_exit_disassociate_ctty",
+      "source_prog_id": 771,
+      "native_prog_id": 776,
+      "stage": "installed",
+      "cause": "accepted",
+      "started": "2026-11-10T01:40:21.455473+00:00",
+      "finished": "2026-11-10T01:40:28.037621+00:00",
+      "native_object_sha256": "9955250a415e29a195c7ca51cd0b06b133bbf72361766d414dd73cfb4a2aa8ec",
+      "simulator_object_sha256": "4da534a8b23414e14267544da5065fd075bd884644bcc37398a462abf290c6b7",
+      "proof_object_sha256": "2ba8766455b9b2bc891255f1912e436788d667cae5ebd177b96b4eb982bf05d3",
+      "compiler": {
+        "returncode": 0,
+        "command": [
+          "/var/tmp/kprog-tmp/C/stock-entry/replays/af422c39195084ee3137627df943c055491358c7/source/kprog/stock-path/bin/clang",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I",
+          "/workspaces/repository/kprog/x86",
+          "-I",
+          "/workspaces/repository/kprog/formal/generated",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/src",
+          "-I",
+          "/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-fi6h3gg6/requests/request-rsz29y0u/generated/trusted_x86.bpf.c",
+          "-o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-fi6h3gg6/requests/request-rsz29y0u/generated/trusted_x86.bpf.o"
+        ],
+        "source_sha256": "9ae339a79ef71be6df55c6561806407248e6f7c32957c38ecf4327fde1d4e8d0",
+        "compiler_sha256": "a33c492fe50fe646bdcc4b263d1ada44e6d6eb8f46236c47ca0f8158b440b8ed",
+        "wall_seconds": 4.836585402023047,
+        "max_rss_kib": 398256,
+        "user_seconds": 4.560482,
+        "system_seconds": 0.23906899999999998,
+        "object_sha256": "4da534a8b23414e14267544da5065fd075bd884644bcc37398a462abf290c6b7"
+      },
+      "load_metadata": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "prog_ifindex": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 4332,
+          "source_func_type_id": 0,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "execve_map",
+            "map_id": 3878,
+            "map_type": 1,
+            "key_size": 4,
+            "value_size": 896,
+            "max_entries": 32768,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "execve_map_stats",
+            "map_id": 3880,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 8,
+            "max_entries": 3,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "exit_heap_map",
+            "map_id": 3911,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 40,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tcpmon_map",
+            "map_id": 3884,
+            "map_type": 4,
+            "key_size": 4,
+            "value_size": 4,
+            "max_entries": 4,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_conf_map",
+            "map_id": 3877,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 48,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_parents_bin",
+            "map_id": 3898,
+            "map_type": 9,
+            "key_size": 4,
+            "value_size": 792,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_rb_events",
+            "map_id": 3889,
+            "map_type": 27,
+            "key_size": 0,
+            "value_size": 0,
+            "max_entries": 262144,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_stats_map",
+            "map_id": 3885,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 14336,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          }
+        ]
+      },
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
+        "/workspaces/repository/kprog/trusted_generation.py": "8904adbab468569c0a8eddaf00084434bc92310c4db61f80476ecde7fc92404b",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "657b60f9e7534bb044891a95f0755e7d17b62bfccd642954e7d460564e3060f6",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "2f46d29d64590fad1a1af2d6dc07d76dd9b35463da2fe584d8c431387022a130",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "ec6751ddba7498c9c72923d7c7895942475043439382bdf36321f8a5d9b96f6d",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "cdd797ca851420bff642fcd5214b595eb4fe58191911b553a1edf1981c68e737",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "a1809ba647581c61648eaea752338268bbb769aa50706216eb37b8ef4a4cc6ab",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/native-link": "4dd1c99417cca9e8ef1f833d8724057352c7e4d17547a67e223d716bca0250b7",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/trusted-native-loader": "3027e74952b8d97f89e19bb35d86eb551cfec59edfd36d424ed1420db1240b04"
+      },
+      "diagnostic_excerpt": "",
+      "archive": "32.success.tar.gz",
+      "archive_sha256": "b92165e891362b67afb8bae2f0613b37b69656228fe3bcabfa98428d890e32cc"
+    },
+    {
+      "request_id": 33,
+      "entry": "event_exit_acct_process",
+      "source_prog_id": 777,
+      "native_prog_id": 780,
+      "stage": "installed",
+      "cause": "accepted",
+      "started": "2026-11-10T01:40:28.052507+00:00",
+      "finished": "2026-11-10T01:40:34.645664+00:00",
+      "native_object_sha256": "9955250a415e29a195c7ca51cd0b06b133bbf72361766d414dd73cfb4a2aa8ec",
+      "simulator_object_sha256": "77e92bdfa4374245c7f49dfc8589378125f2adc3c433a2e568628d15c89e49fc",
+      "proof_object_sha256": "06037ae94d09502215d55fe9de77bf3e7e0a484aff04d92a3d2864ddd0f05abe",
+      "compiler": {
+        "returncode": 0,
+        "command": [
+          "/var/tmp/kprog-tmp/C/stock-entry/replays/af422c39195084ee3137627df943c055491358c7/source/kprog/stock-path/bin/clang",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I",
+          "/workspaces/repository/kprog/x86",
+          "-I",
+          "/workspaces/repository/kprog/formal/generated",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/src",
+          "-I",
+          "/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-fi6h3gg6/requests/request-8a2ot2ib/generated/trusted_x86.bpf.c",
+          "-o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-fi6h3gg6/requests/request-8a2ot2ib/generated/trusted_x86.bpf.o"
+        ],
+        "source_sha256": "a987ed7d94cde7f5bd2997da25fd2c88aaf24e014f7c6ed678ee3d276573a7f8",
+        "compiler_sha256": "a33c492fe50fe646bdcc4b263d1ada44e6d6eb8f46236c47ca0f8158b440b8ed",
+        "wall_seconds": 4.781426895875484,
+        "max_rss_kib": 383140,
+        "user_seconds": 4.455607,
+        "system_seconds": 0.268634,
+        "object_sha256": "77e92bdfa4374245c7f49dfc8589378125f2adc3c433a2e568628d15c89e49fc"
+      },
+      "load_metadata": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "prog_ifindex": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 4333,
+          "source_func_type_id": 0,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "execve_map",
+            "map_id": 3878,
+            "map_type": 1,
+            "key_size": 4,
+            "value_size": 896,
+            "max_entries": 32768,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "execve_map_stats",
+            "map_id": 3880,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 8,
+            "max_entries": 3,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "exit_heap_map",
+            "map_id": 3911,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 40,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tcpmon_map",
+            "map_id": 3884,
+            "map_type": 4,
+            "key_size": 4,
+            "value_size": 4,
+            "max_entries": 4,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_conf_map",
+            "map_id": 3877,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 48,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_parents_bin",
+            "map_id": 3898,
+            "map_type": 9,
+            "key_size": 4,
+            "value_size": 792,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_rb_events",
+            "map_id": 3889,
+            "map_type": 27,
+            "key_size": 0,
+            "value_size": 0,
+            "max_entries": 262144,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_stats_map",
+            "map_id": 3885,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 14336,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          }
+        ]
+      },
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
+        "/workspaces/repository/kprog/trusted_generation.py": "8904adbab468569c0a8eddaf00084434bc92310c4db61f80476ecde7fc92404b",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "657b60f9e7534bb044891a95f0755e7d17b62bfccd642954e7d460564e3060f6",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "2f46d29d64590fad1a1af2d6dc07d76dd9b35463da2fe584d8c431387022a130",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "ec6751ddba7498c9c72923d7c7895942475043439382bdf36321f8a5d9b96f6d",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "cdd797ca851420bff642fcd5214b595eb4fe58191911b553a1edf1981c68e737",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "a1809ba647581c61648eaea752338268bbb769aa50706216eb37b8ef4a4cc6ab",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/native-link": "4dd1c99417cca9e8ef1f833d8724057352c7e4d17547a67e223d716bca0250b7",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/trusted-native-loader": "3027e74952b8d97f89e19bb35d86eb551cfec59edfd36d424ed1420db1240b04"
+      },
+      "diagnostic_excerpt": "",
+      "archive": "33.success.tar.gz",
+      "archive_sha256": "a3dd98d8f7b1fdbccddc6f076ad6e516c6c708436ee3e863d7455023a76fc6f6"
+    },
+    {
+      "request_id": 34,
+      "entry": "event_wake_up_new_task",
+      "source_prog_id": 781,
+      "native_prog_id": null,
+      "stage": "verifier_rejected",
+      "cause": "scalar_memory_access",
+      "started": "2026-11-10T01:40:34.662186+00:00",
+      "finished": "2026-11-10T01:42:15.583907+00:00",
+      "native_object_sha256": "29d4543ffd5bf0c3e446729379ffc074efb955aa1c6a4c8881b06f1940e2fa56",
+      "simulator_object_sha256": "0fbe927ce26e0cc9ad4e7845398252c80c28657120614637ced5113866915e8e",
+      "proof_object_sha256": "9be752ee91026d2ab632deef95f4e3b726455650b19346bcb7a5befaf7f90f77",
+      "compiler": {
+        "returncode": 0,
+        "command": [
+          "/var/tmp/kprog-tmp/C/stock-entry/replays/af422c39195084ee3137627df943c055491358c7/source/kprog/stock-path/bin/clang",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I",
+          "/workspaces/repository/kprog/x86",
+          "-I",
+          "/workspaces/repository/kprog/formal/generated",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/src",
+          "-I",
+          "/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-fi6h3gg6/requests/request-4w1z9xqa/generated/trusted_x86.bpf.c",
+          "-o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-fi6h3gg6/requests/request-4w1z9xqa/generated/trusted_x86.bpf.o"
+        ],
+        "source_sha256": "1836d7e5444d4d6e6929d945891e0d6f7d2f46d5c013f34fdf8e0a2a83c9ee56",
+        "compiler_sha256": "a33c492fe50fe646bdcc4b263d1ada44e6d6eb8f46236c47ca0f8158b440b8ed",
+        "wall_seconds": 98.45484215626493,
+        "max_rss_kib": 3736432,
+        "user_seconds": 96.200961,
+        "system_seconds": 2.1466250000000002,
+        "object_sha256": "0fbe927ce26e0cc9ad4e7845398252c80c28657120614637ced5113866915e8e"
+      },
+      "load_metadata": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "prog_ifindex": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 4382,
+          "source_func_type_id": 0,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "cgroup_rate_map",
+            "map_id": 3948,
+            "map_type": 5,
+            "key_size": 8,
+            "value_size": 40,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_rate_options_map",
+            "map_id": 3978,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 16,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "execve_map",
+            "map_id": 3878,
+            "map_type": 1,
+            "key_size": 4,
+            "value_size": 896,
+            "max_entries": 32768,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "execve_map_stats",
+            "map_id": 3880,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 8,
+            "max_entries": 3,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "execve_val",
+            "map_id": 3990,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 896,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tcpmon_map",
+            "map_id": 3884,
+            "map_type": 4,
+            "key_size": 4,
+            "value_size": 4,
+            "max_entries": 4,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_cgtracker_map",
+            "map_id": 3947,
+            "map_type": 1,
+            "key_size": 8,
+            "value_size": 8,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_conf_map",
+            "map_id": 3877,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 48,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_rb_events",
+            "map_id": 3889,
+            "map_type": 27,
+            "key_size": 0,
+            "value_size": 0,
+            "max_entries": 262144,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_stats_map",
+            "map_id": 3885,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 14336,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "throttle_heap_map",
+            "map_id": 3943,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 160,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          }
+        ]
+      },
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
+        "/workspaces/repository/kprog/trusted_generation.py": "8904adbab468569c0a8eddaf00084434bc92310c4db61f80476ecde7fc92404b",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "657b60f9e7534bb044891a95f0755e7d17b62bfccd642954e7d460564e3060f6",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "2f46d29d64590fad1a1af2d6dc07d76dd9b35463da2fe584d8c431387022a130",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "ec6751ddba7498c9c72923d7c7895942475043439382bdf36321f8a5d9b96f6d",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "cdd797ca851420bff642fcd5214b595eb4fe58191911b553a1edf1981c68e737",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "a1809ba647581c61648eaea752338268bbb769aa50706216eb37b8ef4a4cc6ab",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/native-link": "4dd1c99417cca9e8ef1f833d8724057352c7e4d17547a67e223d716bca0250b7",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/trusted-native-loader": "3027e74952b8d97f89e19bb35d86eb551cfec59edfd36d424ed1420db1240b04"
+      },
+      "diagnostic_excerpt": "110: (07) r1 += -344                  ; R1=-200\n111: (79) r2 = *(u64 *)(r3 +0)\nR3 invalid mem access 'scalar'\nprocessed 101 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0\n111: (79) r2 = *(u64 *)(r3 +0)\nR3 invalid mem access 'scalar'\nprocessed 101 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0\n",
+      "archive": "34.failure.tar.gz",
+      "archive_sha256": "2d8c18db8552a2b7e81f1eb3e1d028d26c0a884d08f387e81d3638d394fb6f13"
+    },
+    {
+      "request_id": 35,
+      "entry": "execve_send",
+      "source_prog_id": 784,
+      "native_prog_id": null,
+      "stage": "verifier_rejected",
+      "cause": "jump_complexity",
+      "started": "2026-11-10T01:42:15.707647+00:00",
+      "finished": "2026-11-10T01:43:58.792935+00:00",
+      "native_object_sha256": "239fc3539b9896e4be9850b35871e29774918159bc7c7da9b8f72e6d74ac1d39",
+      "simulator_object_sha256": "eff1f8a58cf878510c23e2c5c5e4241efbc16de58dd7af6372895f2515accb65",
+      "proof_object_sha256": "a1401281046c0b27f224bac952da393b45a813d47980360cc670df028e5696ec",
+      "compiler": {
+        "returncode": 0,
+        "command": [
+          "/var/tmp/kprog-tmp/C/stock-entry/replays/af422c39195084ee3137627df943c055491358c7/source/kprog/stock-path/bin/clang",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I",
+          "/workspaces/repository/kprog/x86",
+          "-I",
+          "/workspaces/repository/kprog/formal/generated",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/src",
+          "-I",
+          "/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-fi6h3gg6/requests/request-k4mqach4/generated/trusted_x86.bpf.c",
+          "-o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-fi6h3gg6/requests/request-k4mqach4/generated/trusted_x86.bpf.o"
+        ],
+        "source_sha256": "d3f0e4d372de184dd425cce6a9a37cecd7be0b241daecb2119353692b83e4bf0",
+        "compiler_sha256": "a33c492fe50fe646bdcc4b263d1ada44e6d6eb8f46236c47ca0f8158b440b8ed",
+        "wall_seconds": 98.20427811285481,
+        "max_rss_kib": 3120376,
+        "user_seconds": 94.443784,
+        "system_seconds": 1.741121,
+        "object_sha256": "eff1f8a58cf878510c23e2c5c5e4241efbc16de58dd7af6372895f2515accb65"
+      },
+      "load_metadata": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 5,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "prog_ifindex": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 4430,
+          "source_func_type_id": 0,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "CONFIG_ITER_NUM",
+            "map_id": 4010,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 3,
+            "max_entries": 1,
+            "map_flags": 1152,
+            "value_offset": 0
+          },
+          {
+            "name": "PARENTS_MAP_ENABLED",
+            "map_id": 4010,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 3,
+            "max_entries": 1,
+            "map_flags": 1152,
+            "value_offset": 1
+          },
+          {
+            "name": "buffer_heap_map",
+            "map_id": 4027,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 4352,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "execve_map",
+            "map_id": 3878,
+            "map_type": 1,
+            "key_size": 4,
+            "value_size": 896,
+            "max_entries": 32768,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "execve_msg_heap_map",
+            "map_id": 4020,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 6224,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tcpmon_map",
+            "map_id": 3884,
+            "map_type": 4,
+            "key_size": 4,
+            "value_size": 4,
+            "max_entries": 4,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_binary_heap",
+            "map_id": 4029,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 792,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_conf_map",
+            "map_id": 3877,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 48,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_errmetrics_map",
+            "map_id": 3888,
+            "map_type": 10,
+            "key_size": 12,
+            "value_size": 4,
+            "max_entries": 1024,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_mbset_map",
+            "map_id": 3886,
+            "map_type": 1,
+            "key_size": 256,
+            "value_size": 8,
+            "max_entries": 1024,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_parents_bin",
+            "map_id": 4009,
+            "map_type": 9,
+            "key_size": 4,
+            "value_size": 792,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_rb_events",
+            "map_id": 3889,
+            "map_type": 27,
+            "key_size": 0,
+            "value_size": 0,
+            "max_entries": 262144,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_stats_map",
+            "map_id": 3885,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 14336,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          }
+        ]
+      },
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
+        "/workspaces/repository/kprog/trusted_generation.py": "8904adbab468569c0a8eddaf00084434bc92310c4db61f80476ecde7fc92404b",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "657b60f9e7534bb044891a95f0755e7d17b62bfccd642954e7d460564e3060f6",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "2f46d29d64590fad1a1af2d6dc07d76dd9b35463da2fe584d8c431387022a130",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "ec6751ddba7498c9c72923d7c7895942475043439382bdf36321f8a5d9b96f6d",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "cdd797ca851420bff642fcd5214b595eb4fe58191911b553a1edf1981c68e737",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "a1809ba647581c61648eaea752338268bbb769aa50706216eb37b8ef4a4cc6ab",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/native-link": "4dd1c99417cca9e8ef1f833d8724057352c7e4d17547a67e223d716bca0250b7",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/trusted-native-loader": "3027e74952b8d97f89e19bb35d86eb551cfec59edfd36d424ed1420db1240b04"
+      },
+      "diagnostic_excerpt": "3121: (bf) r2 = r9                    ; R2=scalar(id=6851,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R9=scalar(id=6851,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n3122: (ad) if r9 < r5 goto pc+1\nThe sequence of 8193 jumps is too complex.\nprocessed 249156 insns (limit 1000000) max_states_per_insn 4 total_states 2597 peak_states 2597 mark_read 0\n3122: (ad) if r9 < r5 goto pc+1\nThe sequence of 8193 jumps is too complex.\nprocessed 249156 insns (limit 1000000) max_states_per_insn 4 total_states 2597 peak_states 2597 mark_read 0\n",
+      "archive": "35.failure.tar.gz",
+      "archive_sha256": "23024e543961aa2db2f8e8524927a9b2a3394b3772085b8830f1f2653144c2b8"
+    },
+    {
+      "request_id": 36,
+      "entry": "event_execve",
+      "source_prog_id": 787,
+      "native_prog_id": null,
+      "stage": "verifier_rejected",
+      "cause": "stack_write",
+      "started": "2026-11-10T01:43:58.843398+00:00",
+      "finished": "2026-11-10T01:58:06.348239+00:00",
+      "native_object_sha256": "239fc3539b9896e4be9850b35871e29774918159bc7c7da9b8f72e6d74ac1d39",
+      "simulator_object_sha256": "84b5619dc4d14d02fa93812ceff122f942ac77e9a8271be743d6add25853f704",
+      "proof_object_sha256": "5bb072ffc048531f3d576020af6b844cc437101a844f93c398748249bc74deee",
+      "compiler": {
+        "returncode": 0,
+        "command": [
+          "/var/tmp/kprog-tmp/C/stock-entry/replays/af422c39195084ee3137627df943c055491358c7/source/kprog/stock-path/bin/clang",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I",
+          "/workspaces/repository/kprog/x86",
+          "-I",
+          "/workspaces/repository/kprog/formal/generated",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/src",
+          "-I",
+          "/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-fi6h3gg6/requests/request-npsl_q9u/generated/trusted_x86.bpf.c",
+          "-o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-fi6h3gg6/requests/request-npsl_q9u/generated/trusted_x86.bpf.o"
+        ],
+        "source_sha256": "1bc15db9b5e159cc70148abc16d7e2944f89efe35d49219e031819cc5b32df50",
+        "compiler_sha256": "a33c492fe50fe646bdcc4b263d1ada44e6d6eb8f46236c47ca0f8158b440b8ed",
+        "wall_seconds": 837.6894136709161,
+        "max_rss_kib": 9316696,
+        "user_seconds": 830.560486,
+        "system_seconds": 5.444825,
+        "object_sha256": "84b5619dc4d14d02fa93812ceff122f942ac77e9a8271be743d6add25853f704"
+      },
+      "load_metadata": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 5,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "prog_ifindex": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 4431,
+          "source_func_type_id": 0,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "CONFIG_ITER_NUM",
+            "map_id": 4010,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 3,
+            "max_entries": 1,
+            "map_flags": 1152,
+            "value_offset": 0
+          },
+          {
+            "name": "ENV_VARS_ENABLED",
+            "map_id": 4010,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 3,
+            "max_entries": 1,
+            "map_flags": 1152,
+            "value_offset": 2
+          },
+          {
+            "name": "PARENTS_MAP_ENABLED",
+            "map_id": 4010,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 3,
+            "max_entries": 1,
+            "map_flags": 1152,
+            "value_offset": 1
+          },
+          {
+            "name": "buffer_heap_map",
+            "map_id": 4027,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 4352,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_rate_map",
+            "map_id": 4021,
+            "map_type": 5,
+            "key_size": 8,
+            "value_size": 40,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_rate_options_map",
+            "map_id": 4019,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 16,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "data_heap",
+            "map_id": 4028,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 32768,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "execve_calls",
+            "map_id": 3882,
+            "map_type": 3,
+            "key_size": 4,
+            "value_size": 4,
+            "max_entries": 2,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "execve_heap",
+            "map_id": 4035,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 4112,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "execve_map",
+            "map_id": 3878,
+            "map_type": 1,
+            "key_size": 4,
+            "value_size": 896,
+            "max_entries": 32768,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "execve_msg_heap_map",
+            "map_id": 4020,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 6224,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tcpmon_map",
+            "map_id": 3884,
+            "map_type": 4,
+            "key_size": 4,
+            "value_size": 4,
+            "max_entries": 4,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_binary_heap",
+            "map_id": 4029,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 792,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_cgtracker_map",
+            "map_id": 4026,
+            "map_type": 1,
+            "key_size": 8,
+            "value_size": 8,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_conf_map",
+            "map_id": 3877,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 48,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_errmetrics_map",
+            "map_id": 3888,
+            "map_type": 10,
+            "key_size": 12,
+            "value_size": 4,
+            "max_entries": 1024,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_execve_joined_info_map",
+            "map_id": 3879,
+            "map_type": 9,
+            "key_size": 8,
+            "value_size": 16,
+            "max_entries": 8192,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_execve_joined_info_map_stats",
+            "map_id": 3881,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 8,
+            "max_entries": 3,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_mbset_gen",
+            "map_id": 3887,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 8,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_mbset_map",
+            "map_id": 3886,
+            "map_type": 1,
+            "key_size": 256,
+            "value_size": 8,
+            "max_entries": 1024,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_parents_bin",
+            "map_id": 4009,
+            "map_type": 9,
+            "key_size": 4,
+            "value_size": 792,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_rb_events",
+            "map_id": 3889,
+            "map_type": 27,
+            "key_size": 0,
+            "value_size": 0,
+            "max_entries": 262144,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_stats_map",
+            "map_id": 3885,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 14336,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "throttle_heap_map",
+            "map_id": 4025,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 160,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          }
+        ]
+      },
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
+        "/workspaces/repository/kprog/trusted_generation.py": "8904adbab468569c0a8eddaf00084434bc92310c4db61f80476ecde7fc92404b",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "657b60f9e7534bb044891a95f0755e7d17b62bfccd642954e7d460564e3060f6",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "2f46d29d64590fad1a1af2d6dc07d76dd9b35463da2fe584d8c431387022a130",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "ec6751ddba7498c9c72923d7c7895942475043439382bdf36321f8a5d9b96f6d",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "cdd797ca851420bff642fcd5214b595eb4fe58191911b553a1edf1981c68e737",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "a1809ba647581c61648eaea752338268bbb769aa50706216eb37b8ef4a4cc6ab",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/native-link": "4dd1c99417cca9e8ef1f833d8724057352c7e4d17547a67e223d716bca0250b7",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/trusted-native-loader": "3027e74952b8d97f89e19bb35d86eb551cfec59edfd36d424ed1420db1240b04"
+      },
+      "diagnostic_excerpt": "26: (79) r7 = *(u64 *)(r6 +0)         ; R6=map_value(map=kprog_unspec,ks=4,vs=8) R7=scalar()\n27: (7b) *(u64 *)(r10 -1352) = r7\ninvalid write to stack R10 off=-1352 size=8\nprocessed 27 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n27: (7b) *(u64 *)(r10 -1352) = r7\ninvalid write to stack R10 off=-1352 size=8\nprocessed 27 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n",
+      "archive": "36.failure.tar.gz",
+      "archive_sha256": "b881065fa7c6a2ee0a688e0f2bdeaaf565e0a67d0ff23c99291b8d0c1a4a8c0f"
+    },
+    {
+      "request_id": 37,
+      "entry": "execve_rate",
+      "source_prog_id": 790,
+      "native_prog_id": 793,
+      "stage": "installed",
+      "cause": "accepted",
+      "started": "2026-11-10T01:58:06.380712+00:00",
+      "finished": "2026-11-10T01:58:22.943131+00:00",
+      "native_object_sha256": "239fc3539b9896e4be9850b35871e29774918159bc7c7da9b8f72e6d74ac1d39",
+      "simulator_object_sha256": "fe2171971938eea4725426cbe7e7bdece434e5e1b4d6cbf0da24cec0db1d260a",
+      "proof_object_sha256": "6cb440c5240ec9775c88d797d4cefe4c50c3c446de2fc3037bd0cea1cb6acb41",
+      "compiler": {
+        "returncode": 0,
+        "command": [
+          "/var/tmp/kprog-tmp/C/stock-entry/replays/af422c39195084ee3137627df943c055491358c7/source/kprog/stock-path/bin/clang",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I",
+          "/workspaces/repository/kprog/x86",
+          "-I",
+          "/workspaces/repository/kprog/formal/generated",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/src",
+          "-I",
+          "/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-fi6h3gg6/requests/request-5s3s2lfn/generated/trusted_x86.bpf.c",
+          "-o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-fi6h3gg6/requests/request-5s3s2lfn/generated/trusted_x86.bpf.o"
+        ],
+        "source_sha256": "fcab9a390ec774a2daba2f1ca3884dbe91f2f42d014544ced32b50569cc1bbb4",
+        "compiler_sha256": "a33c492fe50fe646bdcc4b263d1ada44e6d6eb8f46236c47ca0f8158b440b8ed",
+        "wall_seconds": 14.695921214763075,
+        "max_rss_kib": 1205308,
+        "user_seconds": 14.043867,
+        "system_seconds": 0.637824,
+        "object_sha256": "fe2171971938eea4725426cbe7e7bdece434e5e1b4d6cbf0da24cec0db1d260a"
+      },
+      "load_metadata": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 5,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "prog_ifindex": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 4432,
+          "source_func_type_id": 0,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "CONFIG_ITER_NUM",
+            "map_id": 4010,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 3,
+            "max_entries": 1,
+            "map_flags": 1152,
+            "value_offset": 0
+          },
+          {
+            "name": "PARENTS_MAP_ENABLED",
+            "map_id": 4010,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 3,
+            "max_entries": 1,
+            "map_flags": 1152,
+            "value_offset": 1
+          },
+          {
+            "name": "buffer_heap_map",
+            "map_id": 4027,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 4352,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_rate_map",
+            "map_id": 4021,
+            "map_type": 5,
+            "key_size": 8,
+            "value_size": 40,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_rate_options_map",
+            "map_id": 4019,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 16,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "execve_calls",
+            "map_id": 3882,
+            "map_type": 3,
+            "key_size": 4,
+            "value_size": 4,
+            "max_entries": 2,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "execve_map",
+            "map_id": 3878,
+            "map_type": 1,
+            "key_size": 4,
+            "value_size": 896,
+            "max_entries": 32768,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "execve_msg_heap_map",
+            "map_id": 4020,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 6224,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tcpmon_map",
+            "map_id": 3884,
+            "map_type": 4,
+            "key_size": 4,
+            "value_size": 4,
+            "max_entries": 4,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_binary_heap",
+            "map_id": 4029,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 792,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_conf_map",
+            "map_id": 3877,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 48,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_errmetrics_map",
+            "map_id": 3888,
+            "map_type": 10,
+            "key_size": 12,
+            "value_size": 4,
+            "max_entries": 1024,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_mbset_map",
+            "map_id": 3886,
+            "map_type": 1,
+            "key_size": 256,
+            "value_size": 8,
+            "max_entries": 1024,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_parents_bin",
+            "map_id": 4009,
+            "map_type": 9,
+            "key_size": 4,
+            "value_size": 792,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_rb_events",
+            "map_id": 3889,
+            "map_type": 27,
+            "key_size": 0,
+            "value_size": 0,
+            "max_entries": 262144,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_stats_map",
+            "map_id": 3885,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 14336,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "throttle_heap_map",
+            "map_id": 4025,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 160,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          }
+        ]
+      },
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
+        "/workspaces/repository/kprog/trusted_generation.py": "8904adbab468569c0a8eddaf00084434bc92310c4db61f80476ecde7fc92404b",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "657b60f9e7534bb044891a95f0755e7d17b62bfccd642954e7d460564e3060f6",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "2f46d29d64590fad1a1af2d6dc07d76dd9b35463da2fe584d8c431387022a130",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "ec6751ddba7498c9c72923d7c7895942475043439382bdf36321f8a5d9b96f6d",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "cdd797ca851420bff642fcd5214b595eb4fe58191911b553a1edf1981c68e737",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "a1809ba647581c61648eaea752338268bbb769aa50706216eb37b8ef4a4cc6ab",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/native-link": "4dd1c99417cca9e8ef1f833d8724057352c7e4d17547a67e223d716bca0250b7",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/trusted-native-loader": "3027e74952b8d97f89e19bb35d86eb551cfec59edfd36d424ed1420db1240b04"
+      },
+      "diagnostic_excerpt": "",
+      "archive": "37.success.tar.gz",
+      "archive_sha256": "1ef27d73f74945fe256eb81d1b8f41dbb69ce3ba3a916e395aeb2b2d6626b1c4"
+    },
+    {
+      "request_id": 38,
+      "entry": "execve_map_update",
+      "source_prog_id": 795,
+      "native_prog_id": null,
+      "stage": "verifier_rejected",
+      "cause": "jump_complexity",
+      "started": "2026-11-10T01:58:22.957644+00:00",
+      "finished": "2026-11-10T01:58:29.183375+00:00",
+      "native_object_sha256": "9e1561dfe2e67f1296065448c32851c743f0708a5023b6ec6f3933e9c8a1de3b",
+      "simulator_object_sha256": "31dd73a56dadfb3cec7090f9488c2a9b26a7597487625145dd6b3061a579ec75",
+      "proof_object_sha256": "fbce9a304e3059483949686aac0158799fec38819132cbb4bd1ff29854ad93fc",
+      "compiler": {
+        "returncode": 0,
+        "command": [
+          "/var/tmp/kprog-tmp/C/stock-entry/replays/af422c39195084ee3137627df943c055491358c7/source/kprog/stock-path/bin/clang",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I",
+          "/workspaces/repository/kprog/x86",
+          "-I",
+          "/workspaces/repository/kprog/formal/generated",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/src",
+          "-I",
+          "/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-fi6h3gg6/requests/request-jjnsfp45/generated/trusted_x86.bpf.c",
+          "-o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-fi6h3gg6/requests/request-jjnsfp45/generated/trusted_x86.bpf.o"
+        ],
+        "source_sha256": "1df7726d786cf1e7aa07579a6bda439dbef6c7807b49f358d7b4e985256aa1c0",
+        "compiler_sha256": "a33c492fe50fe646bdcc4b263d1ada44e6d6eb8f46236c47ca0f8158b440b8ed",
+        "wall_seconds": 2.9725738638080657,
+        "max_rss_kib": 279140,
+        "user_seconds": 2.83528,
+        "system_seconds": 0.12372899999999999,
+        "object_sha256": "31dd73a56dadfb3cec7090f9488c2a9b26a7597487625145dd6b3061a579ec75"
+      },
+      "load_metadata": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 1,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "prog_ifindex": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 4515,
+          "source_func_type_id": 0,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "CONFIG_ITER_NUM",
+            "map_id": 4085,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 1,
+            "max_entries": 1,
+            "map_flags": 1152,
+            "value_offset": 0
+          },
+          {
+            "name": "execve_map",
+            "map_id": 3878,
+            "map_type": 1,
+            "key_size": 4,
+            "value_size": 896,
+            "max_entries": 32768,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "execve_map_update_data",
+            "map_id": 3883,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 131080,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          }
+        ]
+      },
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
+        "/workspaces/repository/kprog/trusted_generation.py": "8904adbab468569c0a8eddaf00084434bc92310c4db61f80476ecde7fc92404b",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "657b60f9e7534bb044891a95f0755e7d17b62bfccd642954e7d460564e3060f6",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "2f46d29d64590fad1a1af2d6dc07d76dd9b35463da2fe584d8c431387022a130",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "ec6751ddba7498c9c72923d7c7895942475043439382bdf36321f8a5d9b96f6d",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "cdd797ca851420bff642fcd5214b595eb4fe58191911b553a1edf1981c68e737",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "a1809ba647581c61648eaea752338268bbb769aa50706216eb37b8ef4a4cc6ab",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/native-link": "4dd1c99417cca9e8ef1f833d8724057352c7e4d17547a67e223d716bca0250b7",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/trusted-native-loader": "3027e74952b8d97f89e19bb35d86eb551cfec59edfd36d424ed1420db1240b04"
+      },
+      "diagnostic_excerpt": "192: (57) r2 &= 31                    ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=31,var_off=(0x0; 0x1f))\n193: (15) if r2 == 0x0 goto pc+12\nThe sequence of 8193 jumps is too complex.\nprocessed 191231 insns (limit 1000000) max_states_per_insn 4 total_states 1829 peak_states 1829 mark_read 0\n193: (15) if r2 == 0x0 goto pc+12\nThe sequence of 8193 jumps is too complex.\nprocessed 191231 insns (limit 1000000) max_states_per_insn 4 total_states 1829 peak_states 1829 mark_read 0\n",
+      "archive": "38.failure.tar.gz",
+      "archive_sha256": "bd476ae04a52d5f322169f74df3a04149efb71bb32f53a84734005047880d319"
+    },
+    {
+      "request_id": 39,
+      "entry": "generic_kprobe_output",
+      "source_prog_id": 800,
+      "native_prog_id": 803,
+      "stage": "installed",
+      "cause": "accepted",
+      "started": "2026-11-10T01:58:29.576827+00:00",
+      "finished": "2026-11-10T01:58:50.439904+00:00",
+      "native_object_sha256": "c5196544446f44c1d991ce27dac6c84b9d2696f7c1eec228b84c92298d6f1ede",
+      "simulator_object_sha256": "e2a4b085a31df8148fe8f54313d06e4790b2f175d4cb6b8a011999c6d33923ca",
+      "proof_object_sha256": "ee0e9fb36b4ca9b80fb25fc1e06594cd96ef668e9dc76ae994aca7369616becd",
+      "compiler": {
+        "returncode": 0,
+        "command": [
+          "/var/tmp/kprog-tmp/C/stock-entry/replays/af422c39195084ee3137627df943c055491358c7/source/kprog/stock-path/bin/clang",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I",
+          "/workspaces/repository/kprog/x86",
+          "-I",
+          "/workspaces/repository/kprog/formal/generated",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/src",
+          "-I",
+          "/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-fi6h3gg6/requests/request-lnkbj_20/generated/trusted_x86.bpf.c",
+          "-o",
+          "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/trusted-fi6h3gg6/requests/request-lnkbj_20/generated/trusted_x86.bpf.o"
+        ],
+        "source_sha256": "f255d183680d5aa4f8002601ed80c16f1e8546c50794fca9a8fdbe9bc86c3fe9",
+        "compiler_sha256": "a33c492fe50fe646bdcc4b263d1ada44e6d6eb8f46236c47ca0f8158b440b8ed",
+        "wall_seconds": 18.378663226030767,
+        "max_rss_kib": 1015480,
+        "user_seconds": 17.799392,
+        "system_seconds": 0.570858,
+        "object_sha256": "e2a4b085a31df8148fe8f54313d06e4790b2f175d4cb6b8a011999c6d33923ca"
+      },
+      "load_metadata": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "prog_ifindex": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 4599,
+          "source_func_type_id": 0,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "execve_map",
+            "map_id": 3878,
+            "map_type": 1,
+            "key_size": 4,
+            "value_size": 896,
+            "max_entries": 32768,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "policy_stats",
+            "map_id": 4132,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 80,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "process_call_heap",
+            "map_id": 4128,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 25632,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tcpmon_map",
+            "map_id": 3884,
+            "map_type": 4,
+            "key_size": 4,
+            "value_size": 4,
+            "max_entries": 4,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_conf_map",
+            "map_id": 3877,
+            "map_type": 2,
+            "key_size": 4,
+            "value_size": 48,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_rb_events",
+            "map_id": 3889,
+            "map_type": 27,
+            "key_size": 0,
+            "value_size": 0,
+            "max_entries": 262144,
+            "map_flags": 0,
+            "value_offset": null
+          },
+          {
+            "name": "tg_stats_map",
+            "map_id": 3885,
+            "map_type": 6,
+            "key_size": 4,
+            "value_size": 14336,
+            "max_entries": 1,
+            "map_flags": 0,
+            "value_offset": null
+          }
+        ]
+      },
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "f8c09b39b8a6d2917fcb6622413efcadf99f5cf409b4ee5e4f5344a24e6b1818",
+        "/workspaces/repository/kprog/trusted_generation.py": "8904adbab468569c0a8eddaf00084434bc92310c4db61f80476ecde7fc92404b",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "657b60f9e7534bb044891a95f0755e7d17b62bfccd642954e7d460564e3060f6",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "2f46d29d64590fad1a1af2d6dc07d76dd9b35463da2fe584d8c431387022a130",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "ec6751ddba7498c9c72923d7c7895942475043439382bdf36321f8a5d9b96f6d",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "cdd797ca851420bff642fcd5214b595eb4fe58191911b553a1edf1981c68e737",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "a1809ba647581c61648eaea752338268bbb769aa50706216eb37b8ef4a4cc6ab",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/native-link": "4dd1c99417cca9e8ef1f833d8724057352c7e4d17547a67e223d716bca0250b7",
+        "/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime/runtime/trusted-native-loader": "3027e74952b8d97f89e19bb35d86eb551cfec59edfd36d424ed1420db1240b04"
+      },
+      "diagnostic_excerpt": "",
+      "archive": "39.success.tar.gz",
+      "archive_sha256": "0f6d21416f0152c06cf1f4db6d9add1d0a4c6d10c3ccbd8d7804eecde05141dc"
+    }
+  ],
+  "reference_entry_comparison": [
+    {
+      "entry": "event_exit_acct_process",
+      "prior_source_prog_id": 333,
+      "current_source_prog_ids": [
+        777
+      ],
+      "current_native_prog_ids": [
+        780
+      ],
+      "state": "entry_installed",
+      "causes": [
+        "accepted"
+      ]
+    },
+    {
+      "entry": "event_exit_disassociate_ctty",
+      "prior_source_prog_id": 335,
+      "current_source_prog_ids": [
+        771
+      ],
+      "current_native_prog_ids": [
+        776
+      ],
+      "state": "entry_installed",
+      "causes": [
+        "accepted"
+      ]
+    },
+    {
+      "entry": "event_wake_up_new_task",
+      "prior_source_prog_id": 337,
+      "current_source_prog_ids": [
+        781
+      ],
+      "current_native_prog_ids": [],
+      "state": "installation_drop",
+      "causes": [
+        "scalar_memory_access"
+      ]
+    },
+    {
+      "entry": "execve_rate",
+      "prior_source_prog_id": 339,
+      "current_source_prog_ids": [
+        790
+      ],
+      "current_native_prog_ids": [
+        793
+      ],
+      "state": "entry_installed",
+      "causes": [
+        "accepted"
+      ]
+    }
+  ],
+  "historical_entry_role_drops": 1,
+  "whole_application_status": "loading",
+  "programs_total": "pending completed application cohort",
+  "native_work_counters": "pending whole-application phase",
+  "new_checks": 0,
+  "raw": {
+    "file": "tetragon-otel-completed-frontiers-raw.tar.gz",
+    "bytes": 10944378,
+    "sha256": "279af739ecbf5c22a3b4daea067010b475a9b10db71fc46cd370a6a709619321"
+  }
+}
