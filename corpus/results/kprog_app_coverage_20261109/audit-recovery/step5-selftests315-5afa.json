@@ -1,0 +1,1661 @@
+{
+  "model": "5afa9bf29c5eebd3db96593c8e49e135540e6c17",
+  "counts": {
+    "catalog_rows": 1917,
+    "attempted": 315,
+    "submitted": 286,
+    "installed": 58,
+    "verifier_rejected": 91,
+    "generation_failed": 137,
+    "compilation_failed": 0,
+    "resource_failed": 29,
+    "transport_failed": 0,
+    "load_failed": 0,
+    "skipped": 0,
+    "failure": 86,
+    "failure_agrees": 84,
+    "failure_installed": 2,
+    "success": 63,
+    "success_agrees": 56,
+    "success_installed": 56
+  },
+  "annotation_failure_installed": [
+    {
+      "file": "dynptr_fail.c",
+      "program": "test_dynptr_reg_type"
+    },
+    {
+      "file": "verifier_lsm.c",
+      "program": "no_null_check"
+    }
+  ],
+  "native_execution_requests": 0,
+  "comparisons": [
+    {
+      "model": "9cbac28ec5d31bd689b5875820e2bf639af4fd25",
+      "counts": {
+        "catalog_rows": 1917,
+        "attempted": 315,
+        "submitted": 285,
+        "installed": 15,
+        "verifier_rejected": 68,
+        "generation_failed": 202,
+        "compilation_failed": 0,
+        "resource_failed": 30,
+        "transport_failed": 0,
+        "load_failed": 0,
+        "skipped": 0,
+        "failure": 63,
+        "failure_agrees": 61,
+        "failure_installed": 2,
+        "success": 20,
+        "success_agrees": 13,
+        "success_installed": 13
+      },
+      "changed_rows": [
+        {
+          "file": "dynptr_fail.c",
+          "program": "dynptr_overwrite_unref",
+          "expect": "success",
+          "before": "verifier_rejected",
+          "after": "installed"
+        },
+        {
+          "file": "dynptr_fail.c",
+          "program": "dynptr_invalidate_slice_success",
+          "expect": "success",
+          "before": "verifier_rejected",
+          "after": "installed"
+        },
+        {
+          "file": "kfunc_implicit_args.c",
+          "program": "test_kfunc_implicit_arg_impl_illegal",
+          "expect": "failure",
+          "before": "resource_failed",
+          "after": "generation_failed"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "an_array_with_a_constant_no_nullness",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "multiple_array_with_a_constant_no_nullness",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "an_array_with_a_32bit_constant_0_no_nullness",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "a_pcpu_array_with_a_constant_no_nullness",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "an_array_with_a_constant_no_nullness_out_of_bounds",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "an_array_with_a_constant_too_small",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "an_array_with_a_constant_too_big",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "non_stack_key_lookup",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "doesnt_reject_irrelevant_maps",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_linked_scalars.c",
+          "program": "alu32_negative_offset",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_load_acquire.c",
+          "program": "dummy_test",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "recvmsg4_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "recvmsg4_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "recvmsg6_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "recvmsg6_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "recvmsg_unix_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "recvmsg_unix_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg4_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg4_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg4_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg6_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg6_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg6_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg_unix_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg_unix_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg_unix_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getpeername4_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getpeername4_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getpeername6_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getpeername6_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getpeername_unix_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getpeername_unix_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getsockname4_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getsockname4_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getsockname6_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getsockname6_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getsockname_unix_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getsockname_unix_unix_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind4_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind4_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind4_good_return_code_2",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind4_good_return_code_3",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind4_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind6_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind6_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind6_good_return_code_2",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind6_good_return_code_3",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind6_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect4_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect4_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect4_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect6_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect6_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect6_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect_unix_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect_unix_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect_unix_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_sched_act",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_flow_dissector_delete",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_flow_dissector_update",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_sk_lookup",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_sk_reuseport",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_socket_filter",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_sockops_delete",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_sockops_update",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_xdp",
+          "expect": "success",
+          "before": "verifier_rejected",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_store_release.c",
+          "program": "dummy_test",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        }
+      ],
+      "installed_gains": [
+        {
+          "file": "dynptr_fail.c",
+          "program": "dynptr_overwrite_unref",
+          "expect": "success",
+          "before": "verifier_rejected",
+          "after": "installed"
+        },
+        {
+          "file": "dynptr_fail.c",
+          "program": "dynptr_invalidate_slice_success",
+          "expect": "success",
+          "before": "verifier_rejected",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "an_array_with_a_32bit_constant_0_no_nullness",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "doesnt_reject_irrelevant_maps",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_linked_scalars.c",
+          "program": "alu32_negative_offset",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_load_acquire.c",
+          "program": "dummy_test",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "recvmsg4_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "recvmsg6_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "recvmsg_unix_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg4_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg4_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg6_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg6_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg_unix_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg_unix_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getpeername4_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getpeername6_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getpeername_unix_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getsockname4_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getsockname6_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getsockname_unix_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind4_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind4_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind4_good_return_code_2",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind4_good_return_code_3",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind6_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind6_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind6_good_return_code_2",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind6_good_return_code_3",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect4_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect4_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect6_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect6_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect_unix_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect_unix_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_sched_act",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_flow_dissector_delete",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_sk_lookup",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_sk_reuseport",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_socket_filter",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_sockops_delete",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_xdp",
+          "expect": "success",
+          "before": "verifier_rejected",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_store_release.c",
+          "program": "dummy_test",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        }
+      ],
+      "installed_drops": []
+    },
+    {
+      "model": "96b561e22981f4a5a0b03ec5b7b0374998e546ed",
+      "counts": {
+        "catalog_rows": 1917,
+        "attempted": 315,
+        "submitted": 285,
+        "installed": 17,
+        "verifier_rejected": 66,
+        "generation_failed": 202,
+        "compilation_failed": 0,
+        "resource_failed": 30,
+        "transport_failed": 0,
+        "load_failed": 0,
+        "skipped": 0,
+        "failure": 63,
+        "failure_agrees": 62,
+        "failure_installed": 1,
+        "success": 20,
+        "success_agrees": 16,
+        "success_installed": 16
+      },
+      "changed_rows": [
+        {
+          "file": "kfunc_implicit_args.c",
+          "program": "test_kfunc_implicit_arg_impl_illegal",
+          "expect": "failure",
+          "before": "resource_failed",
+          "after": "generation_failed"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "an_array_with_a_constant_no_nullness",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "multiple_array_with_a_constant_no_nullness",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "an_array_with_a_32bit_constant_0_no_nullness",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "a_pcpu_array_with_a_constant_no_nullness",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "an_array_with_a_constant_no_nullness_out_of_bounds",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "an_array_with_a_constant_too_small",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "an_array_with_a_constant_too_big",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "non_stack_key_lookup",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "doesnt_reject_irrelevant_maps",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_linked_scalars.c",
+          "program": "alu32_negative_offset",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_load_acquire.c",
+          "program": "dummy_test",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_lsm.c",
+          "program": "no_null_check",
+          "expect": "failure",
+          "before": "verifier_rejected",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "recvmsg4_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "recvmsg4_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "recvmsg6_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "recvmsg6_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "recvmsg_unix_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "recvmsg_unix_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg4_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg4_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg4_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg6_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg6_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg6_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg_unix_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg_unix_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg_unix_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getpeername4_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getpeername4_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getpeername6_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getpeername6_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getpeername_unix_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getpeername_unix_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getsockname4_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getsockname4_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getsockname6_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getsockname6_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getsockname_unix_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getsockname_unix_unix_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind4_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind4_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind4_good_return_code_2",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind4_good_return_code_3",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind4_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind6_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind6_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind6_good_return_code_2",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind6_good_return_code_3",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind6_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect4_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect4_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect4_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect6_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect6_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect6_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect_unix_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect_unix_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect_unix_bad_return_code",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_sched_act",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_flow_dissector_delete",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_flow_dissector_update",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_sk_lookup",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_sk_reuseport",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_socket_filter",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_sockops_delete",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_sockops_update",
+          "expect": "failure",
+          "before": "generation_failed",
+          "after": "verifier_rejected"
+        },
+        {
+          "file": "verifier_store_release.c",
+          "program": "dummy_test",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        }
+      ],
+      "installed_gains": [
+        {
+          "file": "verifier_array_access.c",
+          "program": "an_array_with_a_32bit_constant_0_no_nullness",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_array_access.c",
+          "program": "doesnt_reject_irrelevant_maps",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_linked_scalars.c",
+          "program": "alu32_negative_offset",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_load_acquire.c",
+          "program": "dummy_test",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_lsm.c",
+          "program": "no_null_check",
+          "expect": "failure",
+          "before": "verifier_rejected",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "recvmsg4_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "recvmsg6_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "recvmsg_unix_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg4_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg4_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg6_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg6_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg_unix_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "sendmsg_unix_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getpeername4_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getpeername6_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getpeername_unix_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getsockname4_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getsockname6_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "getsockname_unix_good_return_code",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind4_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind4_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind4_good_return_code_2",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind4_good_return_code_3",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind6_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind6_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind6_good_return_code_2",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "bind6_good_return_code_3",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect4_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect4_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect6_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect6_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect_unix_good_return_code_0",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sock_addr.c",
+          "program": "connect_unix_good_return_code_1",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_sched_act",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_flow_dissector_delete",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_sk_lookup",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_sk_reuseport",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_socket_filter",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_sockmap_mutate.c",
+          "program": "test_sockops_delete",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        },
+        {
+          "file": "verifier_store_release.c",
+          "program": "dummy_test",
+          "expect": "success",
+          "before": "generation_failed",
+          "after": "installed"
+        }
+      ],
+      "installed_drops": []
+    }
+  ],
+  "archive": {
+    "file": "step5-selftests315-5afa-raw.tar.gz",
+    "bytes": 57926892,
+    "sha256": "baf5bac8092e602ae8dfbcb4e3a1d92107776d91529bf8cefaccab1d669c8ab5",
+    "format": "concatenate ordered parts then extract gzip tar",
+    "parts": [
+      {
+        "file": "step5-selftests315-5afa-raw.tar.gz.part00",
+        "bytes": 48000000,
+        "sha256": "b357baea7b2192baf751931ff13a9c59da749a0bd47c7ddae929a9564d8cffe5"
+      },
+      {
+        "file": "step5-selftests315-5afa-raw.tar.gz.part01",
+        "bytes": 9926892,
+        "sha256": "fad5ae211f614102dc7167ce05f5df7cdb5f1c8257f4c4085dccb8d993c90a14"
+      }
+    ]
+  }
+}
