@@ -35,11 +35,15 @@ def image(epoch):
     context = G / 'image'
     context.mkdir(exist_ok=True)
     runtime = epoch / 'runtime'
+    (STOCK / 'shim-build').mkdir(exist_ok=True)
+    run(['make', '-C', ROOT / 'bpfopt/shim',
+         'SHIM_SO=' + str(STOCK / 'shim-build/libbpfrejit_shim.so'),
+         STOCK / 'shim-build/libbpfrejit_shim.so'], 'shim-build')
     for source, name in [
         (runtime / 'kprog_stock.ko', 'bpf_kprog_stock.ko'),
         (runtime / 'native-link', 'native-link'),
         (runtime / 'libnative_loader.so', 'libnative_loader.so'),
-        (ROOT / 'bpfopt/shim/build-x86/libbpfrejit_shim.so', 'libbpfrejit_shim.so'),
+        (STOCK / 'shim-build/libbpfrejit_shim.so', 'libbpfrejit_shim.so'),
         (INPUTS / 'native-inputs/native_compat.h', 'native_compat.h'),
         (INPUTS / 'native-inputs/native_division.so', 'native_division.so'),
         (ROOT / 'runner/libs/cilium_native_build.py', 'cilium_native_build.py'),
@@ -69,7 +73,7 @@ def image(epoch):
         'COPY modules/ /artifacts/',
         'ENV BPFREJIT_SHIM_NATIVE_LOADER=post BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1',
         'ENV BPFREJIT_CORPUS_APP_TIMEOUT=0 BPFREJIT_CORPUS_REJIT_TIMEOUT=0',
-        'ENV CLANG=/usr/lib/llvm-18/bin/clang',
+        'ENV CLANG=/usr/lib/llvm-18/bin/clang SKIP_REJIT=norejit',
         '',
     ]
     (context / 'Dockerfile').write_text('\n'.join(lines))
@@ -77,6 +81,7 @@ def image(epoch):
     run(['docker', 'save', '-o', G / 'runtime.image.tar', IMAGE], 'image-save')
     write(G / 'image.json', dict(
         model=epoch.name, base=BASE, image=IMAGE,
+        runtime_adapter_head=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
         image_id=subprocess.check_output(
             ['docker', 'image', 'inspect', IMAGE, '--format', '{{.Id}}'], text=True).strip(),
         upstream_tracee_support_and_binary=True,

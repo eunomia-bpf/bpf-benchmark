@@ -1,0 +1,85 @@
+{
+  "model": "af422c39195084ee3137627df943c055491358c7",
+  "stage": "frozen measurement RPC setup",
+  "rows": [
+    {
+      "application": "bcc/set",
+      "status": "error",
+      "stage": "baseline map snapshot",
+      "baseline_programs": 25,
+      "baseline_status": null,
+      "error": "unknown cmd: snapshot_maps",
+      "native_requests": 0,
+      "installed": 0,
+      "best_installed": 25,
+      "installation_drop": 25,
+      "native_phase": null
+    },
+    {
+      "application": "katran",
+      "status": "error",
+      "stage": "baseline map snapshot",
+      "baseline_programs": 1,
+      "baseline_status": null,
+      "error": "unknown cmd: snapshot_maps",
+      "native_requests": 0,
+      "installed": 0,
+      "best_installed": 1,
+      "installation_drop": 1,
+      "native_phase": null
+    },
+    {
+      "application": "tracee/monitor",
+      "status": "error",
+      "stage": "baseline map snapshot",
+      "baseline_programs": 167,
+      "baseline_status": null,
+      "error": "unknown cmd: snapshot_maps",
+      "native_requests": 0,
+      "installed": 0,
+      "best_installed": 5,
+      "installation_drop": 5,
+      "native_phase": null
+    },
+    {
+      "application": "tetragon/observer",
+      "status": "error",
+      "stage": "baseline map snapshot",
+      "baseline_programs": 106,
+      "baseline_status": null,
+      "error": "unknown cmd: snapshot_maps",
+      "native_requests": 0,
+      "installed": 0,
+      "best_installed": 4,
+      "installation_drop": 4,
+      "native_phase": null
+    },
+    {
+      "application": "otelcol-ebpf-profiler/profiling",
+      "status": "error",
+      "stage": "baseline map snapshot",
+      "baseline_programs": 13,
+      "baseline_status": null,
+      "error": "unknown cmd: snapshot_maps",
+      "native_requests": 0,
+      "installed": 0,
+      "best_installed": 2,
+      "installation_drop": 2,
+      "native_phase": null
+    },
+    {
+      "application": "cilium/agent",
+      "status": "error",
+      "stage": "baseline map snapshot",
+      "baseline_programs": 72,
+      "baseline_status": null,
+      "error": "unknown cmd: snapshot_maps",
+      "native_requests": 0,
+      "installed": 0,
+      "best_installed": 14,
+      "installation_drop": 14,
+      "native_phase": null
+    }
+  ],
+  "native_execution_requests": 0
+}
