@@ -1,0 +1,2786 @@
+{
+  "application": "bcc/set",
+  "model": "af422c39195084ee3137627df943c055491358c7",
+  "shim_adapter": "ea4625f42399de899c437b5136df7c84ac29bb7f",
+  "image": "sha256:4aa7cac529054e47e5c8a355f8f727eb80fa55f9b615d035fd1f8848505a7161",
+  "status": "ok",
+  "baseline_programs": 25,
+  "generated": 25,
+  "compiled": 25,
+  "installed": 25,
+  "specialization_failed": 0,
+  "verifier_rejected": 0,
+  "kernel_native_chunk_ENOENT": 0,
+  "best_installed": 25,
+  "installation_drop": 0,
+  "recovered_installations_from_prior_retry": 21,
+  "previous_retry_installed": 4,
+  "requests": [
+    {
+      "entry": "fentry_vfs_read",
+      "request_id": 1,
+      "source_prog_id": 109,
+      "native_prog_id": 130,
+      "status": 0,
+      "started": "2026-11-10T01:38:10.228453+00:00",
+      "finished": "2026-11-10T01:38:11.706692+00:00",
+      "native_object_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
+      "simulator_object_sha256": "779477a8bf87813a2644ad2c025bb3e4b259ce7299af7ab5d6648b80704c47c6",
+      "compiler_seconds": 0.1665930999442935,
+      "load_context": {
+        "prog_type": 26,
+        "expected_attach_type": 24,
+        "prog_flags": 0,
+        "attach_btf_id": 123744,
+        "attach_btf_obj_id": 1,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 101,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "stats",
+          "map_id": 78,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 40,
+          "max_entries": 1,
+          "map_flags": 1024,
+          "value_offset": 0
+        }
+      ],
+      "archive": "1.success.tar.gz",
+      "archive_sha256": "b63e48bbc43678c8fbc210c3a89bf0e240018440b94113157a93c3877dca2129"
+    },
+    {
+      "entry": "blk_account_io_merge_bio",
+      "request_id": 2,
+      "source_prog_id": 117,
+      "native_prog_id": 134,
+      "status": 0,
+      "started": "2026-11-10T01:38:11.720740+00:00",
+      "finished": "2026-11-10T01:38:15.886693+00:00",
+      "native_object_sha256": "437b717312ad4946aa252ac783c24d1eefb13ebf3e3dc5882c172270e11324e9",
+      "simulator_object_sha256": "4c15b265500db4c8d1ebd7f5c7efbe6f14212405dccc94860b55da5677cffa6c",
+      "compiler_seconds": 2.382043448276818,
+      "load_context": {
+        "prog_type": 2,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 119,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "cgroup_map",
+          "map_id": 77,
+          "map_type": 8,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "filter_cg",
+          "map_id": 102,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "infobyreq",
+          "map_id": 81,
+          "map_type": 1,
+          "key_size": 8,
+          "value_size": 20,
+          "max_entries": 10240,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "2.success.tar.gz",
+      "archive_sha256": "33d80b1888255e4486d8983e054efde79b59867130c94b6b797f7c33d80c26e8"
+    },
+    {
+      "entry": "sched_wakeup",
+      "request_id": 3,
+      "source_prog_id": 123,
+      "native_prog_id": 139,
+      "status": 0,
+      "started": "2026-11-10T01:38:15.903522+00:00",
+      "finished": "2026-11-10T01:38:20.021558+00:00",
+      "native_object_sha256": "861b58d9676a36496c2a26ed7dc4ce27e3a1eaffa5b6bcc89beaad3bc93ea8c0",
+      "simulator_object_sha256": "13cddfe9ad2aedaa6da25a754897184170a335519f59a7ed4596d26a6520b2ca",
+      "compiler_seconds": 2.4670112836174667,
+      "load_context": {
+        "prog_type": 26,
+        "expected_attach_type": 23,
+        "prog_flags": 0,
+        "attach_btf_id": 74174,
+        "attach_btf_obj_id": 1,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 128,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "cgroup_map",
+          "map_id": 80,
+          "map_type": 8,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "filter_cg",
+          "map_id": 89,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 12,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "start",
+          "map_id": 85,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 10240,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "targ_tgid",
+          "map_id": 89,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 12,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        }
+      ],
+      "archive": "3.success.tar.gz",
+      "archive_sha256": "3cf6be3c59657af45aeab087d23b14720d1ac60c144b8e8f278a79b676cf7f84"
+    },
+    {
+      "entry": "tcp_v4_connect",
+      "request_id": 4,
+      "source_prog_id": 119,
+      "native_prog_id": 144,
+      "status": 0,
+      "started": "2026-11-10T01:38:20.036383+00:00",
+      "finished": "2026-11-10T01:38:23.786013+00:00",
+      "native_object_sha256": "3b5ea3cc68724165d2d61e4cc843abf20e790a08f7f9c81fd7c2656b7916a6b0",
+      "simulator_object_sha256": "2fa3e2233c27ed13401f3a01c228a4cf98869d9a3fd7fdb71a4e162594a05d3d",
+      "compiler_seconds": 2.1438816860318184,
+      "load_context": {
+        "prog_type": 2,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 110,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "filter_pid",
+          "map_id": 105,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 280,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "filter_uid",
+          "map_id": 105,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 280,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "sockets",
+          "map_id": 83,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "4.success.tar.gz",
+      "archive_sha256": "0b8aba8d0ddc3f54a1101d66e48c88592c6889c578fdabdf31573c24edecd047"
+    },
+    {
+      "entry": "inet_sock_set_state",
+      "request_id": 5,
+      "source_prog_id": 124,
+      "native_prog_id": 149,
+      "status": 0,
+      "started": "2026-11-10T01:38:23.801638+00:00",
+      "finished": "2026-11-10T01:38:56.490626+00:00",
+      "native_object_sha256": "f5c4ead55a230bdc32b28fee562bc3d693b08536d0ed7688512d1c03ca0ec095",
+      "simulator_object_sha256": "ad6740a74456d732ea94bfc59a181b4efeb11d0195361711a2d3a13060737042",
+      "compiler_seconds": 30.92742826603353,
+      "load_context": {
+        "prog_type": 5,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 137,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "birth",
+          "map_id": 95,
+          "map_type": 1,
+          "key_size": 8,
+          "value_size": 8,
+          "max_entries": 10240,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "events",
+          "map_id": 101,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "filter_dport",
+          "map_id": 108,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 4106,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 1
+        },
+        {
+          "name": "filter_sport",
+          "map_id": 108,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 4106,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "idents",
+          "map_id": 99,
+          "map_type": 1,
+          "key_size": 8,
+          "value_size": 20,
+          "max_entries": 10240,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "target_dports",
+          "map_id": 108,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 4106,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 2050
+        },
+        {
+          "name": "target_family",
+          "map_id": 108,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 4106,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4104
+        },
+        {
+          "name": "target_pid",
+          "map_id": 108,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 4106,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4100
+        },
+        {
+          "name": "target_sports",
+          "map_id": 108,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 4106,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 2
+        }
+      ],
+      "archive": "5.success.tar.gz",
+      "archive_sha256": "167eda4e2075f71ccc0d528565b8fa6ae82d8e5dad121bcb3178dbaf612c84e4"
+    },
+    {
+      "entry": "tracepoint__syscalls__sys_enter_open",
+      "request_id": 6,
+      "source_prog_id": 121,
+      "native_prog_id": 154,
+      "status": 0,
+      "started": "2026-11-10T01:38:56.524040+00:00",
+      "finished": "2026-11-10T01:39:00.513565+00:00",
+      "native_object_sha256": "a75fa794049d47e444f59a7f966104ba44e7bc6cb0c12925b997afdc2458f5c8",
+      "simulator_object_sha256": "7971ca07e2720865fb211334520d4d0f0a8d10763a21cb3f79ad99474182c366",
+      "compiler_seconds": 2.4800591017119586,
+      "load_context": {
+        "prog_type": 5,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 92,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "start",
+          "map_id": 79,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 16,
+          "max_entries": 10240,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "targ_pid",
+          "map_id": 107,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 13,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "targ_tgid",
+          "map_id": 107,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 13,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "targ_uid",
+          "map_id": 107,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 13,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        }
+      ],
+      "archive": "6.success.tar.gz",
+      "archive_sha256": "14177eb3d2e29bb190c55d9652d097c1cac0e1a2ebd9fdb9ff552803025a0151"
+    },
+    {
+      "entry": "kprobe__cap_capable_entry",
+      "request_id": 7,
+      "source_prog_id": 107,
+      "native_prog_id": 159,
+      "status": 0,
+      "started": "2026-11-10T01:39:00.529451+00:00",
+      "finished": "2026-11-10T01:39:04.898580+00:00",
+      "native_object_sha256": "6f54568325e3eadb23095ff68ccd39685272dd3093e3a9810d74af4ad778aef5",
+      "simulator_object_sha256": "63a0565b30cc848144df8cfcb7f22e924d9a18d6a26e883957b938f6564221de",
+      "compiler_seconds": 2.2966154352761805,
+      "load_context": {
+        "prog_type": 2,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 83,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "cgroup_map",
+          "map_id": 64,
+          "map_type": 8,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "filter_cg",
+          "map_id": 76,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 16,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 10
+        },
+        {
+          "name": "my_pid",
+          "map_id": 76,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 16,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "start",
+          "map_id": 63,
+          "map_type": 1,
+          "key_size": 8,
+          "value_size": 8,
+          "max_entries": 10240,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "targ_pid",
+          "map_id": 76,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 16,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 12
+        }
+      ],
+      "archive": "7.success.tar.gz",
+      "archive_sha256": "e3c836c194b51a2cc18c8fcd087e7f12f29b0e5f6a37329eab3c56771e2e1811"
+    },
+    {
+      "entry": "sys_enter",
+      "request_id": 8,
+      "source_prog_id": 127,
+      "native_prog_id": 164,
+      "status": 0,
+      "started": "2026-11-10T01:39:04.918809+00:00",
+      "finished": "2026-11-10T01:39:10.731382+00:00",
+      "native_object_sha256": "72606e15d326a3b5f76000db22c5aa77bbb111acdf04dd900b468ab504c11741",
+      "simulator_object_sha256": "970731506801d2de24d030978bdbe14972d4ac1f189cb397c2e6a96fa6f89620",
+      "compiler_seconds": 2.392365489155054,
+      "load_context": {
+        "prog_type": 5,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 146,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "cgroup_map",
+          "map_id": 110,
+          "map_type": 8,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "filter_cg",
+          "map_id": 114,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 48,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "filter_pid",
+          "map_id": 114,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 48,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "start",
+          "map_id": 111,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "8.success.tar.gz",
+      "archive_sha256": "26ae8bed10deded1d9f323cb372e8bbe6e21ba954995b2f1d352cd982a800152"
+    },
+    {
+      "entry": "fentry_vfs_write",
+      "request_id": 9,
+      "source_prog_id": 131,
+      "native_prog_id": 169,
+      "status": 0,
+      "started": "2026-11-10T01:39:10.746173+00:00",
+      "finished": "2026-11-10T01:39:12.060544+00:00",
+      "native_object_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
+      "simulator_object_sha256": "4c8dc73dda78b70953e21772f076f9972ab5a27228c678a4874395c70436b58a",
+      "compiler_seconds": 0.11213970789685845,
+      "load_context": {
+        "prog_type": 26,
+        "expected_attach_type": 24,
+        "prog_flags": 0,
+        "attach_btf_id": 123764,
+        "attach_btf_obj_id": 1,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 101,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "stats",
+          "map_id": 78,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 40,
+          "max_entries": 1,
+          "map_flags": 1024,
+          "value_offset": 0
+        }
+      ],
+      "archive": "9.success.tar.gz",
+      "archive_sha256": "c2e7b1c4a862419775d22aecdc2e9d77696f32bea773b196122227bf82671976"
+    },
+    {
+      "entry": "block_rq_insert",
+      "request_id": 10,
+      "source_prog_id": 136,
+      "native_prog_id": 173,
+      "status": 0,
+      "started": "2026-11-10T01:39:12.082092+00:00",
+      "finished": "2026-11-10T01:39:19.490957+00:00",
+      "native_object_sha256": "437b717312ad4946aa252ac783c24d1eefb13ebf3e3dc5882c172270e11324e9",
+      "simulator_object_sha256": "1f2b97214a31bbeafa7131a6796f680b29ac94364351d6961401ff633abab54c",
+      "compiler_seconds": 5.084372716024518,
+      "load_context": {
+        "prog_type": 26,
+        "expected_attach_type": 23,
+        "prog_flags": 0,
+        "attach_btf_id": 73506,
+        "attach_btf_obj_id": 1,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 119,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "LINUX_KERNEL_VERSION",
+          "map_id": 104,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "cgroup_map",
+          "map_id": 77,
+          "map_type": 8,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "filter_cg",
+          "map_id": 102,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "filter_dev",
+          "map_id": 102,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 2
+        },
+        {
+          "name": "start",
+          "map_id": 86,
+          "map_type": 1,
+          "key_size": 8,
+          "value_size": 24,
+          "max_entries": 10240,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "targ_dev",
+          "map_id": 102,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        }
+      ],
+      "archive": "10.success.tar.gz",
+      "archive_sha256": "c4ecae639e6c94afffe0c545e46e8b0df0448b4b3b069ca0447b02a353dd8a39"
+    },
+    {
+      "entry": "sched_wakeup_new",
+      "request_id": 11,
+      "source_prog_id": 141,
+      "native_prog_id": 177,
+      "status": 0,
+      "started": "2026-11-10T01:39:19.512663+00:00",
+      "finished": "2026-11-10T01:39:23.919784+00:00",
+      "native_object_sha256": "861b58d9676a36496c2a26ed7dc4ce27e3a1eaffa5b6bcc89beaad3bc93ea8c0",
+      "simulator_object_sha256": "f41f6f441ed73547f48191f5d09724a68ad4019e1b0c205d1cc1fa15fe5fb8f6",
+      "compiler_seconds": 2.2705420558340847,
+      "load_context": {
+        "prog_type": 26,
+        "expected_attach_type": 23,
+        "prog_flags": 0,
+        "attach_btf_id": 74175,
+        "attach_btf_obj_id": 1,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 128,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "cgroup_map",
+          "map_id": 80,
+          "map_type": 8,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "filter_cg",
+          "map_id": 89,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 12,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "start",
+          "map_id": 85,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 10240,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "targ_tgid",
+          "map_id": 89,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 12,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        }
+      ],
+      "archive": "11.success.tar.gz",
+      "archive_sha256": "b32b496462b82ea98ffc1f7d3249def5dd2432512e55a7be346a236d6a6e8c50"
+    },
+    {
+      "entry": "tcp_v4_connect_ret",
+      "request_id": 12,
+      "source_prog_id": 146,
+      "native_prog_id": 181,
+      "status": 0,
+      "started": "2026-11-10T01:39:23.947421+00:00",
+      "finished": "2026-11-10T01:39:39.115000+00:00",
+      "native_object_sha256": "3b5ea3cc68724165d2d61e4cc843abf20e790a08f7f9c81fd7c2656b7916a6b0",
+      "simulator_object_sha256": "a8a506a5412e51d22ccdb3b4c6672d3b8ea6ea7e0c7bf77893787d8d62bdd64f",
+      "compiler_seconds": 13.10816554678604,
+      "load_context": {
+        "prog_type": 2,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 110,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "count_v4.zero",
+          "map_id": 106,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": 0
+        },
+        {
+          "name": "do_count",
+          "map_id": 105,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 280,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 12
+        },
+        {
+          "name": "events",
+          "map_id": 98,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "filter_ports",
+          "map_id": 105,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 280,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 16
+        },
+        {
+          "name": "filter_ports_len",
+          "map_id": 105,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 280,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "ipv4_count",
+          "map_id": 92,
+          "map_type": 1,
+          "key_size": 12,
+          "value_size": 8,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "sockets",
+          "map_id": 83,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "source_port",
+          "map_id": 105,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 280,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 13
+        }
+      ],
+      "archive": "12.success.tar.gz",
+      "archive_sha256": "7fedeb0044836517562525fefe188856e340ee314fb771f58ca7d55f6e444385"
+    },
+    {
+      "entry": "tracepoint__syscalls__sys_enter_openat",
+      "request_id": 13,
+      "source_prog_id": 156,
+      "native_prog_id": 185,
+      "status": 0,
+      "started": "2026-11-10T01:39:39.150739+00:00",
+      "finished": "2026-11-10T01:39:42.948102+00:00",
+      "native_object_sha256": "a75fa794049d47e444f59a7f966104ba44e7bc6cb0c12925b997afdc2458f5c8",
+      "simulator_object_sha256": "bd02345c43bfb76b5d6100199aa8a6655f9d1bc4b18e1e50f876cf490df23b83",
+      "compiler_seconds": 2.6644977987743914,
+      "load_context": {
+        "prog_type": 5,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 92,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "start",
+          "map_id": 79,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 16,
+          "max_entries": 10240,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "targ_pid",
+          "map_id": 107,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 13,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "targ_tgid",
+          "map_id": 107,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 13,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "targ_uid",
+          "map_id": 107,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 13,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        }
+      ],
+      "archive": "13.success.tar.gz",
+      "archive_sha256": "bf35df54da8e137667d794ff2faf8dea51271457b87c9356933413c78ecff7cc"
+    },
+    {
+      "entry": "kprobe__cap_capable_exit",
+      "request_id": 14,
+      "source_prog_id": 161,
+      "native_prog_id": 189,
+      "status": 0,
+      "started": "2026-11-10T01:39:42.962251+00:00",
+      "finished": "2026-11-10T01:39:53.569449+00:00",
+      "native_object_sha256": "6f54568325e3eadb23095ff68ccd39685272dd3093e3a9810d74af4ad778aef5",
+      "simulator_object_sha256": "29adf89cf326cbb50d9f61141edb8683543a076aacb9aff3cdae5065ec940044",
+      "compiler_seconds": 8.977109651081264,
+      "load_context": {
+        "prog_type": 2,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 83,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "LINUX_KERNEL_VERSION",
+          "map_id": 82,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "events",
+          "map_id": 65,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "info",
+          "map_id": 67,
+          "map_type": 1,
+          "key_size": 16,
+          "value_size": 44,
+          "max_entries": 10240,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "kernel_stack",
+          "map_id": 76,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 16,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "seen",
+          "map_id": 68,
+          "map_type": 1,
+          "key_size": 16,
+          "value_size": 8,
+          "max_entries": 10240,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "stackmap",
+          "map_id": 66,
+          "map_type": 7,
+          "key_size": 4,
+          "value_size": 1016,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "start",
+          "map_id": 63,
+          "map_type": 1,
+          "key_size": 8,
+          "value_size": 8,
+          "max_entries": 10240,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "unique_type",
+          "map_id": 76,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 16,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "user_stack",
+          "map_id": 76,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 16,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 9
+        }
+      ],
+      "archive": "14.success.tar.gz",
+      "archive_sha256": "7d23f9a3dd18f7ebcecdd3992bd6441b71a91eccca0319451076066f5f827ada"
+    },
+    {
+      "entry": "sys_exit",
+      "request_id": 15,
+      "source_prog_id": 166,
+      "native_prog_id": 193,
+      "status": 0,
+      "started": "2026-11-10T01:39:53.586405+00:00",
+      "finished": "2026-11-10T01:40:02.007416+00:00",
+      "native_object_sha256": "72606e15d326a3b5f76000db22c5aa77bbb111acdf04dd900b468ab504c11741",
+      "simulator_object_sha256": "49839298cd11aa1355a29ea27c2c73dfc89fa9fbd3ad0e9c302c3c3da9a79554",
+      "compiler_seconds": 6.749600054230541,
+      "load_context": {
+        "prog_type": 5,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 146,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "cgroup_map",
+          "map_id": 110,
+          "map_type": 8,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "count_by_process",
+          "map_id": 114,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 48,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 1
+        },
+        {
+          "name": "data",
+          "map_id": 112,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 32,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "filter_cg",
+          "map_id": 114,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 48,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "filter_errno",
+          "map_id": 114,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 48,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "filter_failed",
+          "map_id": 114,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 48,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 3
+        },
+        {
+          "name": "filter_pid",
+          "map_id": 114,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 48,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "measure_latency",
+          "map_id": 114,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 48,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 2
+        },
+        {
+          "name": "start",
+          "map_id": 111,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "sys_exit.zero",
+          "map_id": 114,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 48,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 16
+        }
+      ],
+      "archive": "15.success.tar.gz",
+      "archive_sha256": "f587224db71f9b21af20e9688cb2e26ba839969b25de3cb6ed9a7fce58f2d68c"
+    },
+    {
+      "entry": "fentry_vfs_fsync",
+      "request_id": 16,
+      "source_prog_id": 170,
+      "native_prog_id": 197,
+      "status": 0,
+      "started": "2026-11-10T01:40:02.022879+00:00",
+      "finished": "2026-11-10T01:40:03.194182+00:00",
+      "native_object_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
+      "simulator_object_sha256": "23fcc669024a2e409850938243075e29a78d9289ed0ae88f4e636603c52d1068",
+      "compiler_seconds": 0.16652102302759886,
+      "load_context": {
+        "prog_type": 26,
+        "expected_attach_type": 24,
+        "prog_flags": 0,
+        "attach_btf_id": 123710,
+        "attach_btf_obj_id": 1,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 101,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "stats",
+          "map_id": 78,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 40,
+          "max_entries": 1,
+          "map_flags": 1024,
+          "value_offset": 0
+        }
+      ],
+      "archive": "16.success.tar.gz",
+      "archive_sha256": "2e28deffaf13bbf3bc59952977a233c2fdad3f9ce38a43bcbc5845e97e25e3f9"
+    },
+    {
+      "entry": "block_rq_issue",
+      "request_id": 17,
+      "source_prog_id": 174,
+      "native_prog_id": 201,
+      "status": 0,
+      "started": "2026-11-10T01:40:03.209313+00:00",
+      "finished": "2026-11-10T01:40:12.156005+00:00",
+      "native_object_sha256": "437b717312ad4946aa252ac783c24d1eefb13ebf3e3dc5882c172270e11324e9",
+      "simulator_object_sha256": "fb9b47158f048f279992337a6f9afe171e931e4feb52dd49442085e129f052ec",
+      "compiler_seconds": 7.3130762106738985,
+      "load_context": {
+        "prog_type": 26,
+        "expected_attach_type": 23,
+        "prog_flags": 0,
+        "attach_btf_id": 73507,
+        "attach_btf_obj_id": 1,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 119,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "LINUX_KERNEL_VERSION",
+          "map_id": 104,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "cgroup_map",
+          "map_id": 77,
+          "map_type": 8,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "filter_cg",
+          "map_id": 102,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "filter_dev",
+          "map_id": 102,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 2
+        },
+        {
+          "name": "infobyreq",
+          "map_id": 81,
+          "map_type": 1,
+          "key_size": 8,
+          "value_size": 20,
+          "max_entries": 10240,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "start",
+          "map_id": 86,
+          "map_type": 1,
+          "key_size": 8,
+          "value_size": 24,
+          "max_entries": 10240,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "targ_dev",
+          "map_id": 102,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        }
+      ],
+      "archive": "17.success.tar.gz",
+      "archive_sha256": "5a1d820236f41f19319a74b2eed8cc890a7766e3f5d7dc646858f3eed3c74434"
+    },
+    {
+      "entry": "sched_switch",
+      "request_id": 18,
+      "source_prog_id": 178,
+      "native_prog_id": 205,
+      "status": 0,
+      "started": "2026-11-10T01:40:12.173467+00:00",
+      "finished": "2026-11-10T01:40:50.531468+00:00",
+      "native_object_sha256": "861b58d9676a36496c2a26ed7dc4ce27e3a1eaffa5b6bcc89beaad3bc93ea8c0",
+      "simulator_object_sha256": "2bd9d6ba11461312f433e7dc036a205ee01e38afedcde4efb3ee7853225ea327",
+      "compiler_seconds": 36.47513713501394,
+      "load_context": {
+        "prog_type": 26,
+        "expected_attach_type": 23,
+        "prog_flags": 0,
+        "attach_btf_id": 74168,
+        "attach_btf_obj_id": 1,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 128,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "cgroup_map",
+          "map_id": 80,
+          "map_type": 8,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "filter_cg",
+          "map_id": 89,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 12,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "hists",
+          "map_id": 87,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 120,
+          "max_entries": 10240,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "start",
+          "map_id": 85,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 10240,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "targ_ms",
+          "map_id": 89,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 12,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "targ_per_pidns",
+          "map_id": 89,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 12,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 3
+        },
+        {
+          "name": "targ_per_process",
+          "map_id": 89,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 12,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 1
+        },
+        {
+          "name": "targ_per_thread",
+          "map_id": 89,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 12,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 2
+        },
+        {
+          "name": "targ_tgid",
+          "map_id": 89,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 12,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "zero",
+          "map_id": 90,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 120,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": 0
+        }
+      ],
+      "archive": "18.success.tar.gz",
+      "archive_sha256": "45cddbaae3ca62562496cf848e4dee2224ca7aef86f353afc7b774c0f83d53ab"
+    },
+    {
+      "entry": "tcp_v6_connect",
+      "request_id": 19,
+      "source_prog_id": 182,
+      "native_prog_id": 208,
+      "status": 0,
+      "started": "2026-11-10T01:40:50.549009+00:00",
+      "finished": "2026-11-10T01:40:55.552665+00:00",
+      "native_object_sha256": "3b5ea3cc68724165d2d61e4cc843abf20e790a08f7f9c81fd7c2656b7916a6b0",
+      "simulator_object_sha256": "645b4155d549a1ba40a94bfe8bb21195aeebcb67d553702210be60dd7fcf289d",
+      "compiler_seconds": 3.1590036652050912,
+      "load_context": {
+        "prog_type": 2,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 110,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "filter_pid",
+          "map_id": 105,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 280,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "filter_uid",
+          "map_id": 105,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 280,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "sockets",
+          "map_id": 83,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "19.success.tar.gz",
+      "archive_sha256": "cdb1e85cab0a7a868150b874cd23b18f6b8b23b6a49138b69b51bc57256900af"
+    },
+    {
+      "entry": "tracepoint__syscalls__sys_exit_open",
+      "request_id": 20,
+      "source_prog_id": 186,
+      "native_prog_id": 212,
+      "status": 0,
+      "started": "2026-11-10T01:40:55.567806+00:00",
+      "finished": "2026-11-10T01:41:08.809972+00:00",
+      "native_object_sha256": "a75fa794049d47e444f59a7f966104ba44e7bc6cb0c12925b997afdc2458f5c8",
+      "simulator_object_sha256": "9406489dc8e18a300b8436c516fe6fde68715b529d3cb04fdd4fc2f1929d2c59",
+      "compiler_seconds": 11.986786277964711,
+      "load_context": {
+        "prog_type": 5,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 92,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "events",
+          "map_id": 84,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "start",
+          "map_id": 79,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 16,
+          "max_entries": 10240,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "targ_failed",
+          "map_id": 107,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 13,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 12
+        }
+      ],
+      "archive": "20.success.tar.gz",
+      "archive_sha256": "92f16e24ff1f02d581b701fc222dfc7a4e04706af53a2700c27840dbb036a30b"
+    },
+    {
+      "entry": "fentry_vfs_open",
+      "request_id": 21,
+      "source_prog_id": 198,
+      "native_prog_id": 216,
+      "status": 0,
+      "started": "2026-11-10T01:41:08.831719+00:00",
+      "finished": "2026-11-10T01:41:10.272625+00:00",
+      "native_object_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
+      "simulator_object_sha256": "10cc84267269612be1e7e257cfc268ec3c3e42a1a47db6a7e97a484ea1299d5a",
+      "compiler_seconds": 0.16479049669578671,
+      "load_context": {
+        "prog_type": 26,
+        "expected_attach_type": 24,
+        "prog_flags": 0,
+        "attach_btf_id": 123734,
+        "attach_btf_obj_id": 1,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 101,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "stats",
+          "map_id": 78,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 40,
+          "max_entries": 1,
+          "map_flags": 1024,
+          "value_offset": 0
+        }
+      ],
+      "archive": "21.success.tar.gz",
+      "archive_sha256": "57a439c4f52263411b4be4812fe7f53412f0e7ac0963972d32c8c0ecbd11d8f3"
+    },
+    {
+      "entry": "block_rq_complete",
+      "request_id": 22,
+      "source_prog_id": 202,
+      "native_prog_id": 220,
+      "status": 0,
+      "started": "2026-11-10T01:41:10.290533+00:00",
+      "finished": "2026-11-10T01:41:24.274530+00:00",
+      "native_object_sha256": "437b717312ad4946aa252ac783c24d1eefb13ebf3e3dc5882c172270e11324e9",
+      "simulator_object_sha256": "67b42dc85a1d590171e05f7a4a25834fa0d32d45fa2866c537ac9785afe34361",
+      "compiler_seconds": 12.037498696241528,
+      "load_context": {
+        "prog_type": 26,
+        "expected_attach_type": 23,
+        "prog_flags": 0,
+        "attach_btf_id": 73504,
+        "attach_btf_obj_id": 1,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 119,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "cgroup_map",
+          "map_id": 77,
+          "map_type": 8,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "events",
+          "map_id": 94,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "filter_cg",
+          "map_id": 102,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "infobyreq",
+          "map_id": 81,
+          "map_type": 1,
+          "key_size": 8,
+          "value_size": 20,
+          "max_entries": 10240,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "start",
+          "map_id": 86,
+          "map_type": 1,
+          "key_size": 8,
+          "value_size": 24,
+          "max_entries": 10240,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "targ_queued",
+          "map_id": 102,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 1
+        }
+      ],
+      "archive": "22.success.tar.gz",
+      "archive_sha256": "49c8ae71c92e0bdcd0f78950f92365e6390a5846b82a2cd7f9ae39a4b2b0a932"
+    },
+    {
+      "entry": "tcp_v6_connect_ret",
+      "request_id": 23,
+      "source_prog_id": 209,
+      "native_prog_id": 224,
+      "status": 0,
+      "started": "2026-11-10T01:41:24.307371+00:00",
+      "finished": "2026-11-10T01:41:47.519442+00:00",
+      "native_object_sha256": "3b5ea3cc68724165d2d61e4cc843abf20e790a08f7f9c81fd7c2656b7916a6b0",
+      "simulator_object_sha256": "e23aa064fecb18f6f4143d6a0f9d4638644282cd9dc0af07a4ec8e10d69521a0",
+      "compiler_seconds": 21.284077093936503,
+      "load_context": {
+        "prog_type": 2,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 110,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "count_v6.zero",
+          "map_id": 105,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 280,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 272
+        },
+        {
+          "name": "do_count",
+          "map_id": 105,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 280,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 12
+        },
+        {
+          "name": "events",
+          "map_id": 98,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "filter_pid",
+          "map_id": 105,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 280,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "filter_ports",
+          "map_id": 105,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 280,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 16
+        },
+        {
+          "name": "filter_ports_len",
+          "map_id": 105,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 280,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "filter_uid",
+          "map_id": 105,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 280,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "ipv6_count",
+          "map_id": 97,
+          "map_type": 1,
+          "key_size": 36,
+          "value_size": 8,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "sockets",
+          "map_id": 83,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "source_port",
+          "map_id": 105,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 280,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 13
+        }
+      ],
+      "archive": "23.success.tar.gz",
+      "archive_sha256": "62b7c444775f6f227a969250a72844f9e33ca6cc0f85b5e27691162877e5dda7"
+    },
+    {
+      "entry": "tracepoint__syscalls__sys_exit_openat",
+      "request_id": 24,
+      "source_prog_id": 213,
+      "native_prog_id": 228,
+      "status": 0,
+      "started": "2026-11-10T01:41:47.543940+00:00",
+      "finished": "2026-11-10T01:42:00.900891+00:00",
+      "native_object_sha256": "a75fa794049d47e444f59a7f966104ba44e7bc6cb0c12925b997afdc2458f5c8",
+      "simulator_object_sha256": "3c22b3bd56c15662be29e69817e958efdf8d18a2c8c663eeca39ab79f0dbb521",
+      "compiler_seconds": 12.206620302051306,
+      "load_context": {
+        "prog_type": 5,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 92,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "events",
+          "map_id": 84,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "start",
+          "map_id": 79,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 16,
+          "max_entries": 10240,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "targ_failed",
+          "map_id": 107,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 13,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 12
+        }
+      ],
+      "archive": "24.success.tar.gz",
+      "archive_sha256": "bea1dd0760bd7dc8daa8a7135c73876b7ebc714127dcf0150176addaad2df59f"
+    },
+    {
+      "entry": "fentry_vfs_create",
+      "request_id": 25,
+      "source_prog_id": 217,
+      "native_prog_id": 232,
+      "status": 0,
+      "started": "2026-11-10T01:42:00.917261+00:00",
+      "finished": "2026-11-10T01:42:01.938389+00:00",
+      "native_object_sha256": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
+      "simulator_object_sha256": "4cacbaebd31b162fb73f12e0b38ec27aa756aa87a3473088a2071c4ab8f82273",
+      "compiler_seconds": 0.17142384685575962,
+      "load_context": {
+        "prog_type": 26,
+        "expected_attach_type": 24,
+        "prog_flags": 0,
+        "attach_btf_id": 123695,
+        "attach_btf_obj_id": 1,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 101,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "stats",
+          "map_id": 78,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 40,
+          "max_entries": 1,
+          "map_flags": 1024,
+          "value_offset": 0
+        }
+      ],
+      "archive": "25.success.tar.gz",
+      "archive_sha256": "ed4e40ac616c97a5f1f0ed8015e30c6d64e871e321b67e1212f24a97458f834f"
+    }
+  ],
+  "reference_entry_comparison": [
+    {
+      "entry": "fentry_vfs_read",
+      "prior_source_prog_id": 120,
+      "current_source_prog_id": 109,
+      "current_native_prog_id": 130,
+      "status": 0
+    },
+    {
+      "entry": "kprobe__cap_capable_entry",
+      "prior_source_prog_id": 114,
+      "current_source_prog_id": 107,
+      "current_native_prog_id": 159,
+      "status": 0
+    },
+    {
+      "entry": "sched_wakeup",
+      "prior_source_prog_id": 127,
+      "current_source_prog_id": 123,
+      "current_native_prog_id": 139,
+      "status": 0
+    },
+    {
+      "entry": "tcp_v4_connect",
+      "prior_source_prog_id": 116,
+      "current_source_prog_id": 119,
+      "current_native_prog_id": 144,
+      "status": 0
+    },
+    {
+      "entry": "blk_account_io_merge_bio",
+      "prior_source_prog_id": 118,
+      "current_source_prog_id": 117,
+      "current_native_prog_id": 134,
+      "status": 0
+    },
+    {
+      "entry": "sys_enter",
+      "prior_source_prog_id": 123,
+      "current_source_prog_id": 127,
+      "current_native_prog_id": 164,
+      "status": 0
+    },
+    {
+      "entry": "tracepoint__syscalls__sys_enter_open",
+      "prior_source_prog_id": 115,
+      "current_source_prog_id": 121,
+      "current_native_prog_id": 154,
+      "status": 0
+    },
+    {
+      "entry": "inet_sock_set_state",
+      "prior_source_prog_id": 126,
+      "current_source_prog_id": 124,
+      "current_native_prog_id": 149,
+      "status": 0
+    },
+    {
+      "entry": "fentry_vfs_write",
+      "prior_source_prog_id": 129,
+      "current_source_prog_id": 131,
+      "current_native_prog_id": 169,
+      "status": 0
+    },
+    {
+      "entry": "kprobe__cap_capable_exit",
+      "prior_source_prog_id": 132,
+      "current_source_prog_id": 161,
+      "current_native_prog_id": 189,
+      "status": 0
+    },
+    {
+      "entry": "sched_wakeup_new",
+      "prior_source_prog_id": 135,
+      "current_source_prog_id": 141,
+      "current_native_prog_id": 177,
+      "status": 0
+    },
+    {
+      "entry": "tcp_v4_connect_ret",
+      "prior_source_prog_id": 138,
+      "current_source_prog_id": 146,
+      "current_native_prog_id": 181,
+      "status": 0
+    },
+    {
+      "entry": "block_rq_insert",
+      "prior_source_prog_id": 141,
+      "current_source_prog_id": 136,
+      "current_native_prog_id": 173,
+      "status": 0
+    },
+    {
+      "entry": "sys_exit",
+      "prior_source_prog_id": 144,
+      "current_source_prog_id": 166,
+      "current_native_prog_id": 193,
+      "status": 0
+    },
+    {
+      "entry": "tracepoint__syscalls__sys_enter_openat",
+      "prior_source_prog_id": 147,
+      "current_source_prog_id": 156,
+      "current_native_prog_id": 185,
+      "status": 0
+    },
+    {
+      "entry": "fentry_vfs_fsync",
+      "prior_source_prog_id": 152,
+      "current_source_prog_id": 170,
+      "current_native_prog_id": 197,
+      "status": 0
+    },
+    {
+      "entry": "sched_switch",
+      "prior_source_prog_id": 156,
+      "current_source_prog_id": 178,
+      "current_native_prog_id": 205,
+      "status": 0
+    },
+    {
+      "entry": "tcp_v6_connect",
+      "prior_source_prog_id": 160,
+      "current_source_prog_id": 182,
+      "current_native_prog_id": 208,
+      "status": 0
+    },
+    {
+      "entry": "block_rq_issue",
+      "prior_source_prog_id": 162,
+      "current_source_prog_id": 174,
+      "current_native_prog_id": 201,
+      "status": 0
+    },
+    {
+      "entry": "tracepoint__syscalls__sys_exit_open",
+      "prior_source_prog_id": 168,
+      "current_source_prog_id": 186,
+      "current_native_prog_id": 212,
+      "status": 0
+    },
+    {
+      "entry": "fentry_vfs_open",
+      "prior_source_prog_id": 170,
+      "current_source_prog_id": 198,
+      "current_native_prog_id": 216,
+      "status": 0
+    },
+    {
+      "entry": "tcp_v6_connect_ret",
+      "prior_source_prog_id": 175,
+      "current_source_prog_id": 209,
+      "current_native_prog_id": 224,
+      "status": 0
+    },
+    {
+      "entry": "block_rq_complete",
+      "prior_source_prog_id": 177,
+      "current_source_prog_id": 202,
+      "current_native_prog_id": 220,
+      "status": 0
+    },
+    {
+      "entry": "tracepoint__syscalls__sys_exit_openat",
+      "prior_source_prog_id": 179,
+      "current_source_prog_id": 213,
+      "current_native_prog_id": 228,
+      "status": 0
+    },
+    {
+      "entry": "fentry_vfs_create",
+      "prior_source_prog_id": 181,
+      "current_source_prog_id": 217,
+      "current_native_prog_id": 232,
+      "status": 0
+    }
+  ],
+  "raw_work_summary": {
+    "baseline": {
+      "programs": 25,
+      "run_cnt_delta": 11701124,
+      "workload_name": "stress_ng_bcc_hook_hot",
+      "config": {
+        "stressors": [
+          "syscall",
+          "cap",
+          "set",
+          "sockfd"
+        ],
+        "tool": "stress-ng"
+      },
+      "returncode": 0,
+      "duration_s": 2.021643689000001
+    },
+    "post_rejit": {
+      "programs": 25,
+      "run_cnt_delta": 12173316,
+      "workload_name": "stress_ng_bcc_hook_hot",
+      "config": {
+        "stressors": [
+          "syscall",
+          "cap",
+          "set",
+          "sockfd"
+        ],
+        "tool": "stress-ng"
+      },
+      "returncode": 0,
+      "duration_s": 2.0264105460000224
+    }
+  },
+  "raw_application": {
+    "app": "bcc/set",
+    "baseline": {
+      "bpf": {
+        "32": {
+          "bytes_jited": 1501,
+          "bytes_xlated": 2240,
+          "id": 32,
+          "name": "inet_sock_set_s",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "tracepoint"
+        },
+        "35": {
+          "bytes_jited": 40,
+          "bytes_xlated": 48,
+          "id": 35,
+          "name": "fentry_vfs_read",
+          "run_cnt_delta": 4041,
+          "run_time_ns_delta": 208880,
+          "type": "tracing"
+        },
+        "38": {
+          "bytes_jited": 121,
+          "bytes_xlated": 184,
+          "id": 38,
+          "name": "sched_wakeup",
+          "run_cnt_delta": 120627,
+          "run_time_ns_delta": 27804353,
+          "type": "tracing"
+        },
+        "41": {
+          "bytes_jited": 40,
+          "bytes_xlated": 48,
+          "id": 41,
+          "name": "fentry_vfs_writ",
+          "run_cnt_delta": 3956,
+          "run_time_ns_delta": 190101,
+          "type": "tracing"
+        },
+        "42": {
+          "bytes_jited": 143,
+          "bytes_xlated": 232,
+          "id": 42,
+          "name": "kprobe__cap_cap",
+          "run_cnt_delta": 258472,
+          "run_time_ns_delta": 31921412,
+          "type": "kprobe"
+        },
+        "48": {
+          "bytes_jited": 121,
+          "bytes_xlated": 184,
+          "id": 48,
+          "name": "sched_wakeup_ne",
+          "run_cnt_delta": 40,
+          "run_time_ns_delta": 14537,
+          "type": "tracing"
+        },
+        "49": {
+          "bytes_jited": 383,
+          "bytes_xlated": 616,
+          "id": 49,
+          "name": "kprobe__cap_cap",
+          "run_cnt_delta": 258468,
+          "run_time_ns_delta": 170177496,
+          "type": "kprobe"
+        },
+        "50": {
+          "bytes_jited": 40,
+          "bytes_xlated": 48,
+          "id": 50,
+          "name": "fentry_vfs_fsyn",
+          "run_cnt_delta": 12,
+          "run_time_ns_delta": 785,
+          "type": "tracing"
+        },
+        "51": {
+          "bytes_jited": 935,
+          "bytes_xlated": 1632,
+          "id": 51,
+          "name": "sched_switch",
+          "run_cnt_delta": 239465,
+          "run_time_ns_delta": 79964032,
+          "type": "tracing"
+        },
+        "52": {
+          "bytes_jited": 141,
+          "bytes_xlated": 240,
+          "id": 52,
+          "name": "tracepoint__sys",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "tracepoint"
+        },
+        "55": {
+          "bytes_jited": 141,
+          "bytes_xlated": 240,
+          "id": 55,
+          "name": "tracepoint__sys",
+          "run_cnt_delta": 134199,
+          "run_time_ns_delta": 23032024,
+          "type": "tracepoint"
+        },
+        "56": {
+          "bytes_jited": 602,
+          "bytes_xlated": 792,
+          "id": 56,
+          "name": "tracepoint__sys",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "tracepoint"
+        },
+        "57": {
+          "bytes_jited": 602,
+          "bytes_xlated": 792,
+          "id": 57,
+          "name": "tracepoint__sys",
+          "run_cnt_delta": 134199,
+          "run_time_ns_delta": 317986362,
+          "type": "tracepoint"
+        },
+        "58": {
+          "bytes_jited": 40,
+          "bytes_xlated": 48,
+          "id": 58,
+          "name": "fentry_vfs_open",
+          "run_cnt_delta": 134774,
+          "run_time_ns_delta": 5217882,
+          "type": "tracing"
+        },
+        "63": {
+          "bytes_jited": 110,
+          "bytes_xlated": 184,
+          "id": 63,
+          "name": "tcp_v4_connect",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "kprobe"
+        },
+        "64": {
+          "bytes_jited": 108,
+          "bytes_xlated": 168,
+          "id": 64,
+          "name": "sys_enter",
+          "run_cnt_delta": 5206264,
+          "run_time_ns_delta": 793816940,
+          "type": "tracepoint"
+        },
+        "65": {
+          "bytes_jited": 121,
+          "bytes_xlated": 200,
+          "id": 65,
+          "name": "blk_account_io_",
+          "run_cnt_delta": 39,
+          "run_time_ns_delta": 9794,
+          "type": "kprobe"
+        },
+        "66": {
+          "bytes_jited": 40,
+          "bytes_xlated": 48,
+          "id": 66,
+          "name": "fentry_vfs_crea",
+          "run_cnt_delta": 184,
+          "run_time_ns_delta": 9937,
+          "type": "tracing"
+        },
+        "70": {
+          "bytes_jited": 493,
+          "bytes_xlated": 752,
+          "id": 70,
+          "name": "tcp_v4_connect_",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "kprobe"
+        },
+        "71": {
+          "bytes_jited": 354,
+          "bytes_xlated": 648,
+          "id": 71,
+          "name": "block_rq_insert",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "tracing"
+        },
+        "72": {
+          "bytes_jited": 406,
+          "bytes_xlated": 656,
+          "id": 72,
+          "name": "sys_exit",
+          "run_cnt_delta": 5206271,
+          "run_time_ns_delta": 532345036,
+          "type": "tracepoint"
+        },
+        "73": {
+          "bytes_jited": 440,
+          "bytes_xlated": 824,
+          "id": 73,
+          "name": "block_rq_issue",
+          "run_cnt_delta": 53,
+          "run_time_ns_delta": 47131,
+          "type": "tracing"
+        },
+        "74": {
+          "bytes_jited": 437,
+          "bytes_xlated": 712,
+          "id": 74,
+          "name": "block_rq_comple",
+          "run_cnt_delta": 60,
+          "run_time_ns_delta": 327770,
+          "type": "tracing"
+        },
+        "76": {
+          "bytes_jited": 110,
+          "bytes_xlated": 184,
+          "id": 76,
+          "name": "tcp_v6_connect",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "kprobe"
+        },
+        "77": {
+          "bytes_jited": 496,
+          "bytes_xlated": 752,
+          "id": 77,
+          "name": "tcp_v6_connect_",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "kprobe"
+        }
+      },
+      "workloads": [
+        {
+          "command": [
+            "/usr/bin/stress-ng",
+            "--syscall",
+            "1",
+            "--syscall-method",
+            "fast75",
+            "--cap",
+            "1",
+            "--set",
+            "1",
+            "--sockfd",
+            "1",
+            "--sockfd-port",
+            "14452",
+            "--timeout",
+            "2s",
+            "--metrics-brief",
+            "--temp-path",
+            "/var/tmp/bpfrejit-runtime/b1900bda"
+          ],
+          "config": {
+            "stressors": [
+              "syscall",
+              "cap",
+              "set",
+              "sockfd"
+            ],
+            "tool": "stress-ng"
+          },
+          "duration_s": 2.021643689000001,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "stress-ng: info:  [1650] setting to a 2 secs run per stressor\nstress-ng: info:  [1650] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [1650] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [1651] syscall: using method 'fast75'\nstress-ng: info:  [1651] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [1651] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [1651] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [1651] syscall:                      time       73.9         37\nstress-ng: info:  [1651] syscall:                  pkey_get       78.1         39\nstress-ng: info:  [1651] syscall:                  pkey_set       97.6         76\nstress-ng: info:  [1651] syscall:              gettimeofday      110.8         57\nstress-ng: info:  [1651] syscall:                    getcpu      232.7        118\nstress-ng: info:  [1651] syscall:                   prlimit      665.1        572\nstress-ng: info:  [1651] syscall:                    getgid      665.3        525\nstress-ng: info:  [1651] syscall:                   getppid      692.7        605\nstress-ng: info:  [1651] syscall:                 setrlimit      694.1        592\nstress-ng: info:  [1651] syscall:                 getresuid      698.4        578\nstress-ng: metrc: [1650] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1650]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1650] syscall            7994      2.00      0.03      0.04      3993.31      102048.89\nstress-ng: metrc: [1650] cap              239893      2.00      0.15      1.06    119782.16      198569.83\nstress-ng: metrc: [1650] set               22845      2.00      0.19      1.31     11422.31       15251.81\nstress-ng: metrc: [1650] sockfd           131476      2.00      0.09      1.25     65659.30       98555.06\nstress-ng: info:  [1650] skipped: 0\nstress-ng: info:  [1650] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [1650] failed: 0\nstress-ng: info:  [1650] metrics untrustworthy: 0\nstress-ng: info:  [1650] successful run completed in 2.01 secs",
+          "workload_name": "stress_ng_bcc_hook_hot"
+        }
+      ]
+    },
+    "error": "",
+    "post_rejit": {
+      "bpf": {
+        "130": {
+          "bytes_jited": 54,
+          "bytes_xlated": 296,
+          "id": 130,
+          "name": "fentry_vfs_read",
+          "run_cnt_delta": 4053,
+          "run_time_ns_delta": 211267,
+          "type": "tracing"
+        },
+        "134": {
+          "bytes_jited": 167,
+          "bytes_xlated": 1784,
+          "id": 134,
+          "name": "blk_account_io_",
+          "run_cnt_delta": 38,
+          "run_time_ns_delta": 8657,
+          "type": "kprobe"
+        },
+        "139": {
+          "bytes_jited": 168,
+          "bytes_xlated": 1552,
+          "id": 139,
+          "name": "sched_wakeup",
+          "run_cnt_delta": 141885,
+          "run_time_ns_delta": 20065102,
+          "type": "tracing"
+        },
+        "144": {
+          "bytes_jited": 146,
+          "bytes_xlated": 1392,
+          "id": 144,
+          "name": "tcp_v4_connect",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "kprobe"
+        },
+        "149": {
+          "bytes_jited": 1573,
+          "bytes_xlated": 13304,
+          "id": 149,
+          "name": "inet_sock_set_s",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "tracepoint"
+        },
+        "154": {
+          "bytes_jited": 197,
+          "bytes_xlated": 1784,
+          "id": 154,
+          "name": "tracepoint__sys",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "tracepoint"
+        },
+        "159": {
+          "bytes_jited": 183,
+          "bytes_xlated": 1744,
+          "id": 159,
+          "name": "kprobe__cap_cap",
+          "run_cnt_delta": 237951,
+          "run_time_ns_delta": 28357410,
+          "type": "kprobe"
+        },
+        "164": {
+          "bytes_jited": 161,
+          "bytes_xlated": 1448,
+          "id": 164,
+          "name": "sys_enter",
+          "run_cnt_delta": 5423871,
+          "run_time_ns_delta": 816109355,
+          "type": "tracepoint"
+        },
+        "169": {
+          "bytes_jited": 55,
+          "bytes_xlated": 296,
+          "id": 169,
+          "name": "fentry_vfs_writ",
+          "run_cnt_delta": 3854,
+          "run_time_ns_delta": 174979,
+          "type": "tracing"
+        },
+        "173": {
+          "bytes_jited": 389,
+          "bytes_xlated": 3792,
+          "id": 173,
+          "name": "block_rq_insert",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "tracing"
+        },
+        "177": {
+          "bytes_jited": 168,
+          "bytes_xlated": 1552,
+          "id": 177,
+          "name": "sched_wakeup_ne",
+          "run_cnt_delta": 39,
+          "run_time_ns_delta": 17808,
+          "type": "tracing"
+        },
+        "181": {
+          "bytes_jited": 726,
+          "bytes_xlated": 5856,
+          "id": 181,
+          "name": "tcp_v4_connect_",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "kprobe"
+        },
+        "185": {
+          "bytes_jited": 197,
+          "bytes_xlated": 1784,
+          "id": 185,
+          "name": "tracepoint__sys",
+          "run_cnt_delta": 139038,
+          "run_time_ns_delta": 17803739,
+          "type": "tracepoint"
+        },
+        "189": {
+          "bytes_jited": 595,
+          "bytes_xlated": 4696,
+          "id": 189,
+          "name": "kprobe__cap_cap",
+          "run_cnt_delta": 237953,
+          "run_time_ns_delta": 146695798,
+          "type": "kprobe"
+        },
+        "193": {
+          "bytes_jited": 554,
+          "bytes_xlated": 3176,
+          "id": 193,
+          "name": "sys_exit",
+          "run_cnt_delta": 5423873,
+          "run_time_ns_delta": 577377428,
+          "type": "tracepoint"
+        },
+        "197": {
+          "bytes_jited": 55,
+          "bytes_xlated": 296,
+          "id": 197,
+          "name": "fentry_vfs_fsyn",
+          "run_cnt_delta": 12,
+          "run_time_ns_delta": 692,
+          "type": "tracing"
+        },
+        "201": {
+          "bytes_jited": 449,
+          "bytes_xlated": 4552,
+          "id": 201,
+          "name": "block_rq_issue",
+          "run_cnt_delta": 46,
+          "run_time_ns_delta": 38912,
+          "type": "tracing"
+        },
+        "205": {
+          "bytes_jited": 1094,
+          "bytes_xlated": 5776,
+          "id": 205,
+          "name": "sched_switch",
+          "run_cnt_delta": 282359,
+          "run_time_ns_delta": 98342693,
+          "type": "tracing"
+        },
+        "208": {
+          "bytes_jited": 146,
+          "bytes_xlated": 1392,
+          "id": 208,
+          "name": "tcp_v6_connect",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "kprobe"
+        },
+        "212": {
+          "bytes_jited": 313,
+          "bytes_xlated": 9168,
+          "id": 212,
+          "name": "tracepoint__sys",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "tracepoint"
+        },
+        "216": {
+          "bytes_jited": 55,
+          "bytes_xlated": 296,
+          "id": 216,
+          "name": "fentry_vfs_open",
+          "run_cnt_delta": 139239,
+          "run_time_ns_delta": 5393486,
+          "type": "tracing"
+        },
+        "220": {
+          "bytes_jited": 523,
+          "bytes_xlated": 5392,
+          "id": 220,
+          "name": "block_rq_comple",
+          "run_cnt_delta": 53,
+          "run_time_ns_delta": 392341,
+          "type": "tracing"
+        },
+        "224": {
+          "bytes_jited": 1040,
+          "bytes_xlated": 5888,
+          "id": 224,
+          "name": "tcp_v6_connect_",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "kprobe"
+        },
+        "228": {
+          "bytes_jited": 313,
+          "bytes_xlated": 9168,
+          "id": 228,
+          "name": "tracepoint__sys",
+          "run_cnt_delta": 139038,
+          "run_time_ns_delta": 348248491,
+          "type": "tracepoint"
+        },
+        "232": {
+          "bytes_jited": 55,
+          "bytes_xlated": 296,
+          "id": 232,
+          "name": "fentry_vfs_crea",
+          "run_cnt_delta": 14,
+          "run_time_ns_delta": 1191,
+          "type": "tracing"
+        }
+      },
+      "workloads": [
+        {
+          "command": [
+            "/usr/bin/stress-ng",
+            "--syscall",
+            "1",
+            "--syscall-method",
+            "fast75",
+            "--cap",
+            "1",
+            "--set",
+            "1",
+            "--sockfd",
+            "1",
+            "--sockfd-port",
+            "15476",
+            "--timeout",
+            "2s",
+            "--metrics-brief",
+            "--temp-path",
+            "/var/tmp/bpfrejit-runtime/b1900bda"
+          ],
+          "config": {
+            "stressors": [
+              "syscall",
+              "cap",
+              "set",
+              "sockfd"
+            ],
+            "tool": "stress-ng"
+          },
+          "duration_s": 2.0264105460000224,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "stress-ng: info:  [2012] setting to a 2 secs run per stressor\nstress-ng: info:  [2012] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [2012] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [2013] syscall: using method 'fast75'\nstress-ng: info:  [2013] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [2013] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [2013] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [2013] syscall:                  pkey_set      110.0         92\nstress-ng: info:  [2013] syscall:              gettimeofday      117.0         95\nstress-ng: info:  [2013] syscall:                  pkey_get      134.5         57\nstress-ng: info:  [2013] syscall:                      time      154.0        109\nstress-ng: info:  [2013] syscall:                    getcpu      322.5        261\nstress-ng: info:  [2013] syscall:                 pkey_free      528.5        526\nstress-ng: info:  [2013] syscall:                   getppid      667.5        641\nstress-ng: info:  [2013] syscall:                 getresuid      687.5        680\nstress-ng: info:  [2013] syscall:                    getuid      697.0        688\nstress-ng: info:  [2013] syscall:                 setresuid      699.5        671\nstress-ng: metrc: [2012] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2012]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2012] syscall             514      2.00      0.02      0.02       256.87       16153.87\nstress-ng: metrc: [2012] cap              282279      2.00      0.22      1.19    141056.67      199970.81\nstress-ng: metrc: [2012] set               21121      2.00      0.16      1.21     10554.74       15385.31\nstress-ng: metrc: [2012] sockfd           136059      2.00      0.15      1.32     67976.55       92930.13\nstress-ng: info:  [2012] skipped: 0\nstress-ng: info:  [2012] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [2012] failed: 0\nstress-ng: info:  [2012] metrics untrustworthy: 0\nstress-ng: info:  [2012] successful run completed in 2.01 secs",
+          "workload_name": "stress_ng_bcc_hook_hot"
+        }
+      ]
+    },
+    "rejit_result": {
+      "mode": "loadtime",
+      "status": "skipped"
+    },
+    "runner": "bcc_set",
+    "selected_workload": "stress_ng_bcc_hook_hot",
+    "status": "ok"
+  },
+  "workload_scope": "same frozen four-stressor/time-limited fast75 definition; actual operation counts and dynamic calibration outputs retained for each phase; R owns performance interpretation",
+  "runtime_comparison": {
+    "model": "af422c39195084ee3137627df943c055491358c7",
+    "adapter_after": "ea4625f42399de899c437b5136df7c84ac29bb7f",
+    "comparison": {
+      "runtime/native-link": {
+        "before": "4dd1c99417cca9e8ef1f833d8724057352c7e4d17547a67e223d716bca0250b7",
+        "after": "4dd1c99417cca9e8ef1f833d8724057352c7e4d17547a67e223d716bca0250b7",
+        "equal": true
+      },
+      "runtime/trusted-native-loader": {
+        "before": "3027e74952b8d97f89e19bb35d86eb551cfec59edfd36d424ed1420db1240b04",
+        "after": "3027e74952b8d97f89e19bb35d86eb551cfec59edfd36d424ed1420db1240b04",
+        "equal": true
+      },
+      "runtime/bpf_x86_native_lab.ko": {
+        "before": "64b17224ef8b924d3fa36c1c24bd0e40365f74d5fd2491f9bce4b84cfe0ea166",
+        "after": "64b17224ef8b924d3fa36c1c24bd0e40365f74d5fd2491f9bce4b84cfe0ea166",
+        "equal": true
+      },
+      "image/libnative_loader.so": {
+        "before": "ce384277a644914facf0885edc2d0c2cf5775107f7368f1418f779a95968ca59",
+        "after": "ce384277a644914facf0885edc2d0c2cf5775107f7368f1418f779a95968ca59",
+        "equal": true
+      },
+      "image/libbpfrejit_shim.so": {
+        "before": "3c56b9936cd644cf85180bcbfbe3305ba52169ea4db528593d0ffdda52c97687",
+        "after": "8be47399923ac261eca77a66c0c0b5b345dca11516d55feebb7fc08e6a1f5115",
+        "equal": false
+      }
+    },
+    "bcc_payload": {
+      "biosnoop.native.o": {
+        "before": "437b717312ad4946aa252ac783c24d1eefb13ebf3e3dc5882c172270e11324e9",
+        "after": "437b717312ad4946aa252ac783c24d1eefb13ebf3e3dc5882c172270e11324e9",
+        "equal": true
+      },
+      "capable.native.o": {
+        "before": "6f54568325e3eadb23095ff68ccd39685272dd3093e3a9810d74af4ad778aef5",
+        "after": "6f54568325e3eadb23095ff68ccd39685272dd3093e3a9810d74af4ad778aef5",
+        "equal": true
+      },
+      "manifest.json": {
+        "before": "e2ed376e4c431edb74859ef35a3b626f226d1f54b1332d514da8df2dc7d0cd6f",
+        "after": "e2ed376e4c431edb74859ef35a3b626f226d1f54b1332d514da8df2dc7d0cd6f",
+        "equal": true
+      },
+      "opensnoop.native.o": {
+        "before": "a75fa794049d47e444f59a7f966104ba44e7bc6cb0c12925b997afdc2458f5c8",
+        "after": "a75fa794049d47e444f59a7f966104ba44e7bc6cb0c12925b997afdc2458f5c8",
+        "equal": true
+      },
+      "runqlat.native.o": {
+        "before": "861b58d9676a36496c2a26ed7dc4ce27e3a1eaffa5b6bcc89beaad3bc93ea8c0",
+        "after": "861b58d9676a36496c2a26ed7dc4ce27e3a1eaffa5b6bcc89beaad3bc93ea8c0",
+        "equal": true
+      },
+      "syscount.native.o": {
+        "before": "72606e15d326a3b5f76000db22c5aa77bbb111acdf04dd900b468ab504c11741",
+        "after": "72606e15d326a3b5f76000db22c5aa77bbb111acdf04dd900b468ab504c11741",
+        "equal": true
+      },
+      "tcpconnect.native.o": {
+        "before": "3b5ea3cc68724165d2d61e4cc843abf20e790a08f7f9c81fd7c2656b7916a6b0",
+        "after": "3b5ea3cc68724165d2d61e4cc843abf20e790a08f7f9c81fd7c2656b7916a6b0",
+        "equal": true
+      },
+      "tcplife.native.o": {
+        "before": "f5c4ead55a230bdc32b28fee562bc3d693b08536d0ed7688512d1c03ca0ec095",
+        "after": "f5c4ead55a230bdc32b28fee562bc3d693b08536d0ed7688512d1c03ca0ec095",
+        "equal": true
+      },
+      "vfsstat.native.o": {
+        "before": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
+        "after": "956618361adbfa6edf176c0af4c81a3da9d42df4b761028ed64e4af30fec9ccd",
+        "equal": true
+      }
+    }
+  },
+  "raw": {
+    "file": "load-lifecycle-bcc-complete-raw.tar.gz",
+    "bytes": 10416367,
+    "sha256": "f7af157e7bc6f1d564bbbf6a707ca884d2eab1c7745e8ab0ae81acc459c260b0"
+  },
+  "new_checks": 0
+}
