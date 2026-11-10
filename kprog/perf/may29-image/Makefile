@@ -58,6 +58,7 @@ cilium-manifest:
 	  --object "bpf_wireguard.native.o,source_map_prefix=cilium_calls_wi" \
 	  --object "bpf_xdp.native.o,prog_type=6"
 
+
 # The framework files come from this repository's frozen commit through git archive,
 # joined with the build outputs into one build context that is removed after the build.
 image:
