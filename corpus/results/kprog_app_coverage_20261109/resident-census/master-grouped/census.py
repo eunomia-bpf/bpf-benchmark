@@ -58,7 +58,7 @@ SHORT = {'bcc/set': 'BCC', 'katran': 'Katran', 'cilium/agent': 'Cilium',
          'tetragon/observer': 'Tetragon'}
 BEST = {'bcc/set': 25, 'katran': 1, 'cilium/agent': 14,
         'otelcol-ebpf-profiler/profiling': 2, 'tracee/monitor': 5, 'tetragon/observer': 4}
-WORKERS = ['8-19'] * 8
+WORKERS = ['8-19'] * 14
 GUEST_MEMORY = '4G'
 # Host Clang for one large Tracee B source (about 1 MB of C) reaches 10-14 GiB
 # and can run for about an hour. Large and small sources use separate pools.
@@ -325,10 +325,17 @@ def run():
     gate.chmod(0o755)
     os.environ['KPROG_REAL_CLANG'] = str(gate)
     os.environ.setdefault('CENSUS_GUEST_MEMORY', GUEST_MEMORY)
+    def order(entry):
+        # In-flight representatives first (adopted), then the other applications
+        # (largest bodies first), then Tracee from its smallest body up: large
+        # Tracee B compiles take about an hour each under the compile cap.
+        started = (S / 'workers' / entry['body_sha256'][:16]).exists()
+        tracee = entry['representative']['application'] == 'tracee/monitor'
+        return (not started, tracee, entry['proof_bytes'] if tracee else -entry['proof_bytes'])
+
     pending = queue.Queue()
-    for entry in data['groups']:
-        if 'outcome' not in entry:
-            pending.put(entry)
+    for entry in sorted((g for g in data['groups'] if 'outcome' not in g), key=order):
+        pending.put(entry)
     lock = threading.Lock()
 
     def worker(cpu):
@@ -548,7 +555,10 @@ def publish():
     raw = io.BytesIO()
     with tarfile.open(fileobj=raw, mode='w:gz') as archive:
         for name in ['census.py', 'provenance.json', 'selection-spec.json', 'groups.json',
-                     'prepare.log', 'run.log', 'complete.json', 'bin/vng',
+                     'prepare.log', 'run.log', 'run2.log', 'run3.log', 'run4.log', 'run5.log',
+                     'run6.log', 'run7.log', 'run8.log', 'complete.json', 'bin',
+                     'killed-clang.txt', 'killed-clang-2.txt', 'discarded-workers/README.json',
+                     'slot-holder.held', 'slot-holder.log',
                      'inputs/run-inventory.json', 'inputs/resource-index.json', 'inputs/manifests',
                      'katran-image-payload']:
             if (S / name).exists():
@@ -644,7 +654,7 @@ def readme(summary, provenance):
         'their bodies resubmitted; bin/slot-holder holds two of the four large slots (at most two '
         'large compiles) and new compiles start at MemAvailable >= ' + str(CLANG_MIN_AVAILABLE_GIB) +
         ' GiB. Worker counts over the run: six two-CPU, four '
-        'three-CPU, six two-CPU, then eight sharing CPUs 8-19. Scheduling changes affect run '
+        'three-CPU, six two-CPU, eight sharing CPUs 8-19, then fourteen sharing CPUs 8-19 with the other applications and the smallest Tracee bodies queued ahead of the large Tracee bodies. Scheduling changes affect run '
         'time only; each compile uses the same compiler and argv.',
         '* Files: result.json (summary, per-body records), instances.json (549 rows), '
         'outcomes.json.gz (complete representative outcomes with every diagnostic byte), '
