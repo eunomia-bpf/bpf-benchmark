@@ -1,0 +1,78 @@
+{
+  "application": "otelcol-ebpf-profiler/profiling",
+  "model": "af422c39195084ee3137627df943c055491358c7",
+  "shim_adapter": "ea4625f42399de899c437b5136df7c84ac29bb7f",
+  "scope": "first two completed OTel requests in the ongoing whole-application startup",
+  "installed": 2,
+  "entries": [
+    {
+      "entry": "read_task_struct",
+      "source_prog_id": 250,
+      "native_prog_id": 253,
+      "request_id": 26,
+      "status": 0,
+      "started": "2026-11-10T01:42:38.089992+00:00",
+      "finished": "2026-11-10T01:42:42.722750+00:00",
+      "native_object_sha256": "c6459bf9b9be89c78be833124acac1a7d5b4c81fa78da26eebd8d84268051cad",
+      "simulator_object_sha256": "662469d2fa30dae1bee930ed0ff5ec43a8cb0a3f2523df2b8c691fe5f5faf4ec",
+      "compiler_returncode": 0,
+      "load_context": {
+        "prog_type": 17,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 239,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "archive": "26.success.tar.gz",
+      "archive_sha256": "5bf2e28fb7ee9c3c2613b28e765be38d430dd37ea395df5ae3554a20915fd5f3"
+    },
+    {
+      "entry": "perf_unwind_stop",
+      "source_prog_id": 254,
+      "native_prog_id": 257,
+      "request_id": 27,
+      "status": 0,
+      "started": "2026-11-10T01:42:42.739550+00:00",
+      "finished": "2026-11-10T01:44:52.072608+00:00",
+      "native_object_sha256": "c6459bf9b9be89c78be833124acac1a7d5b4c81fa78da26eebd8d84268051cad",
+      "simulator_object_sha256": "a39eee2eb1d41c8621cdec730901e63b773eb1a3a18641d38c563969001fb2ee",
+      "compiler_returncode": 0,
+      "load_context": {
+        "prog_type": 7,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 298,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "archive": "27.success.tar.gz",
+      "archive_sha256": "c0e281e5755d747a2807b98d06e3aa0216aaffdfab801411194dc28cc4e17127"
+    }
+  ],
+  "prior_best_installed": 2,
+  "prior_retry_installed": 0,
+  "historical_entry_roles_recovered": [
+    "read_task_struct",
+    "perf_unwind_stop"
+  ],
+  "native_chunk_ENOENT_in_completed_prefix": 0,
+  "whole_application_status": "loading",
+  "work_counters_status": "pending whole-application phase",
+  "raw": {
+    "file": "load-lifecycle-otel-recovery-raw.tar.gz",
+    "bytes": 2292974,
+    "sha256": "66fd59a0b20e471251d3553048c7f25bac5336f4adf767a7c25e01e87de38d59"
+  },
+  "new_checks": 0
+}
