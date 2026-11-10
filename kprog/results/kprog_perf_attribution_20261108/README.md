@@ -1056,8 +1056,8 @@ Every row below passes `tools/audit_native_arm.py` as `native`.
 | otel | on | `..._20261110_082943_617913` | 1.887x | 1.824x | per-invocation **14.636x**; work native/JIT **1.034** |
 | bcc | off | `..._20261110_050934_687855` | **0.985x** | 1.005x | 3 samples, packets 650,270/645,076/640,868 against 651,057/654,621/658,372 |
 | bcc | on | `..._20261110_044139_262178` | **1.003x** | 1.005x | per-invocation 106.8 against 105.9 ns, 15/25 programs live in both arms |
-| cilium | off | `..._20261110_060431_280096` | **1.715x** | 2.358x | 3 samples, 1.83-1.95M pps against 1.09-1.10M **but 7 programs lost** |
-| cilium | on | `..._20261110_053714_186096` | 1.562x | 2.358x | per-invocation **2.290x** (870.4 to 380.1 ns), same loss |
+| cilium | off | `..._20261110_142831_693343` | **1.319x** | 2.358x | 113 replacements, 0 failures, all 20 names in both arms |
+| cilium | on | `..._20261110_130512_907908` | -- | 2.358x | per-invocation **3.280x**, but the arms run different paths |
 | tracee | off | `..._20261110_073051_915971` | **0.948x** | 0.958x | 3 samples, 360,712/360,717/357,413 against 382,448/380,536/371,288 |
 | tracee | on | `..._20261110_070250_626363` | 0.964x | 0.958x | per-invocation 0.988x (359.4 to 363.7 ns), 41/167 live programs |
 | katran | off | `..._20261110_101903_560647` | **1.113x** | 1.102x | 3 samples, 540.2 s per arm, 2.81-2.88M against 3.19-3.23M pps |
@@ -1074,7 +1074,7 @@ Every row below passes `tools/audit_native_arm.py` as `native`.
 | tracee | 0.958x | 0.948x | 0.964x | returns |
 | katran | 1.102x | 1.113x | 1.097x | returns |
 | tetragon | 1.323x | **1.009x** | **1.140x** | away, -14% to -24% |
-| cilium | 2.358x | **1.715x** | 1.562x | away, -27% to -34% |
+| cilium | 2.358x | **1.319x** | see below | away; program set now fixed, but the arms run different paths |
 
 Katran's stats-off row is `..._20261110_101903_560647`, not the
 `..._081426_770032` this table first carried. That earlier run failed with
@@ -1157,8 +1157,38 @@ seven percent of the time. The two live programs are the same pair in both
 arms (`native_tracer_e` and `tracepoint__sched`), so the comparison is
 program for program.
 
-**Cilium is the one that does not, and its row carries a caveat the others
-do not.** Seven kernel-version programs load in the JIT arm and are absent
+**Cilium's program-set gap is now fixed, and the fix reveals a different
+gap.** Lane C's `cilfix8` image replaces 113 programs with 0 failures and both
+arms carry all 20 Cilium program names, so the seven programs that used to be
+absent now load. Its stats-off row on that image reads **1.319x**, down from
+the 1.715x of the broken run: with the full program set present, the honest
+ratio is lower.
+
+Its stats-on row shows why, and it is the same lesson as Tetragon. Per name,
+over the whole arm:
+
+| program | JIT invocations | native invocations |
+| --- | ---: | ---: |
+| `cil_from_contai` | 464,558,914 | 485,613,008 |
+| `cil_from_host` | **2** | **485,613,005** |
+| `cil_to_host` | **4** | **485,613,006** |
+| every other name | 2 or 0 | 2 or 0 |
+
+The two arms run **different paths**. `cil_from_contai` is equal within 4%,
+but the native arm additionally executes `cil_from_host` and `cil_to_host`
+485.6 million times each where the JIT arm executed them twice. So the native
+arm does **3.1x** the work in total (1.457 billion invocations against 465
+million), and its 3.280x per-invocation figure is measured on a program mix
+the JIT arm never ran. Cilium's stats-on figure is therefore not a
+like-for-like ratio, and the stats-off 1.319x is the comparable number.
+
+That the native arm pushes packets through two more programs is itself
+interesting -- a cheaper body lets more of the packet path complete -- but it
+means Cilium's archive 2.358x cannot be compared to either figure without
+fixing which path each arm takes.
+
+**The earlier Cilium rows, for the record.** Before `cilfix8`, seven
+kernel-version programs loaded in the JIT arm and were absent
 from the native arm -- `cil_from_host`, `cil_from_netdev`,
 `cil_host_policy`, `cil_to_host`, `cil_to_netdev`, `tail_handle_sna` and
 `tail_nodeport_n` -- because the native load fails on them:
@@ -1168,9 +1198,10 @@ error=native map symbol cilium_snat_v4_external matches multiple loaded maps
       named cilium_snat_v4_
 ```
 
-So Cilium's native arm runs the workload with a third fewer programs than its
-JIT arm, which makes its 1.715x a comparison of unequal program sets and not
-strictly equal work. The throughput is nevertheless *higher* in the native
+So the earlier native arm ran the workload with a third fewer programs than
+its JIT arm, which made those runs a comparison of unequal program sets. They
+are kept here because the fix's effect is only readable against them: the
+ratio moved from 1.715x to 1.319x when the missing programs began to load. The throughput is nevertheless *higher* in the native
 arm, so the missing programs are not doing work that helped the JIT arm; but
 until the map-symbol ambiguity is resolved, Cilium's row is the weakest of the
 six. That is a lane C request: the native map-symbol lookup has to pick
