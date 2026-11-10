@@ -61,11 +61,11 @@ BEST = {'bcc/set': 25, 'katran': 1, 'cilium/agent': 14,
 WORKERS = ['8-19'] * 8
 GUEST_MEMORY = '4G'
 # Host Clang for one large Tracee B source (about 1 MB of C) reaches 10-14 GiB
-# and can run for tens of minutes. Large and small sources use separate pools of
-# CLANG_SLOTS concurrent compiles each.
+# and can run for about an hour. Large and small sources use separate pools.
 CLANG_SLOTS = 3
+CLANG_LARGE_SLOTS = 4
 CLANG_LARGE_SOURCE_BYTES = 400_000
-CLANG_MIN_AVAILABLE_GIB = 24
+CLANG_MIN_AVAILABLE_GIB = 28
 VNG = '/opt/virtme-ng/bin/vng'
 
 
@@ -300,19 +300,21 @@ def run():
     os.environ['TMPDIR'] = str(S / 'tmp')
     # Host B compilation scheduling through the existing KPROG_REAL_CLANG hook of
     # kprog/stock-path/bin/clang: the same clang binary and argv, at most
-    # CLANG_SLOTS at once, each starting while MemAvailable >= CLANG_MIN_AVAILABLE_GIB.
-    gate = S / 'bin/clang-gate'
+    # CLANG_LARGE_SLOTS / CLANG_SLOTS at once, each starting while
+    # MemAvailable >= CLANG_MIN_AVAILABLE_GIB.
+    gate = S / 'bin/clang-gate2'
     gate.write_text('\n'.join([
         '#!/bin/bash',
         'source=; previous=',
         'for argument in "$@"; do [ "$previous" = -c ] && source=$argument; previous=$argument; done',
         'size=$(stat -c %s "$source" 2>/dev/null || echo 0)',
-        'pool=small',
-        '[ "$size" -gt ' + str(CLANG_LARGE_SOURCE_BYTES) + ' ] && pool=slot',
+        'pool=small; slots=' + str(CLANG_SLOTS),
+        '[ "$size" -gt ' + str(CLANG_LARGE_SOURCE_BYTES) + ' ] && pool=slot && slots=' +
+        str(CLANG_LARGE_SLOTS),
         'while true; do',
         "  avail=$(awk '/MemAvailable/{print int($2/1048576)}' /proc/meminfo)",
         '  if [ "$avail" -ge ' + str(CLANG_MIN_AVAILABLE_GIB) + ' ]; then',
-        '    for i in $(seq 0 ' + str(CLANG_SLOTS - 1) + '); do',
+        '    for i in $(seq 0 $((slots - 1))); do',
         '      exec 9>' + str(S) + '/clang-$pool-$i',
         '      if flock -n 9; then exec /usr/lib/llvm-18/bin/clang "$@"; fi',
         '      exec 9>&-',
@@ -634,11 +636,13 @@ def readme(summary, provenance):
         'for one large Tracee B source reaches 10-14 GiB; after six concurrent compiles brought host '
         'MemAvailable to 4 GiB, the six in-flight compiles were stopped, their worker records '
         'discarded and their bodies resubmitted. From then on the existing KPROG_REAL_CLANG hook '
-        'routes the same clang binary and argv through at most ' + str(CLANG_SLOTS) +
-        ' concurrent compiles of B sources above ' + str(CLANG_LARGE_SOURCE_BYTES) + ' bytes and '
-        + str(CLANG_SLOTS) + ' of smaller sources, each starting at MemAvailable >= ' +
+        'routes the same clang binary and argv through a bounded number of concurrent compiles: '
+        'first three in total at MemAvailable >= 24 GiB, then three for B sources above ' +
+        str(CLANG_LARGE_SOURCE_BYTES) + ' bytes plus three for smaller sources, then ' +
+        str(CLANG_LARGE_SLOTS) + ' large plus ' + str(CLANG_SLOTS) + ' small at MemAvailable >= ' +
         str(CLANG_MIN_AVAILABLE_GIB) + ' GiB. Worker counts over the run: six two-CPU, four '
-        'three-CPU, six two-CPU, then eight sharing CPUs 8-19.',
+        'three-CPU, six two-CPU, then eight sharing CPUs 8-19. Scheduling changes affect run '
+        'time only; each compile uses the same compiler and argv.',
         '* Files: result.json (summary, per-body records), instances.json (549 rows), '
         'outcomes.json.gz (complete representative outcomes with every diagnostic byte), '
         'requests.tar.gz (raw request archives), run-raw.tar.gz (inputs, logs, commands), '
