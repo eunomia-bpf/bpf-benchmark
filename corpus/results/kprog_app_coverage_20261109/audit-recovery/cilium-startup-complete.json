@@ -1,0 +1,5878 @@
+{
+  "application": "cilium/agent",
+  "model": "af422c39195084ee3137627df943c055491358c7",
+  "runtime_adapter": "759f31d855e99e232c6b71a6877968ade6af308c",
+  "application_status": "error",
+  "error": "Cilium API PUT /v1/endpoint/0 returned HTTP 500: \"timeout while waiting for initial endpoint generation to complete: context deadline exceeded\"; cilium-agent output tail:\ntime=2026-11-10T00:32:13.342406143Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c075:e3ff:feff:e89e (primary)\" device=*\ntime=2026-11-10T00:32:13.342422778Z level=info msg=\"Initializing node addressing\" module=agent.controlplane.ipam\ntime=2026-11-10T00:32:13.342446132Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary, nodeport), fe80::c075:e3ff:feff:e89e\" device=bpfbench0\ntime=2026-11-10T00:32:13.342441161Z level=info msg=\"Initializing IPAM\" module=agent.controlplane.ipam mode=cluster-pool v4Prefix=10.244.0.0/24 v6Prefix=<nil>\ntime=2026-11-10T00:32:13.342455749Z level=info msg=\"Restoring endpoints...\" module=agent.controlplane.endpoint-restore\ntime=2026-11-10T00:32:13.342478784Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c075:e3ff:feff:e89e (primary)\" device=*\ntime=2026-11-10T00:32:13.342545689Z level=info msg=\"Endpoints restored\" module=agent.controlplane.endpoint-restore restored=0 failed=0\ntime=2026-11-10T00:32:13.342762183Z level=info msg=\"More than one stale router IP was found on the cilium_host device after restoration, cleaning up old router IPs.\" module=agent.controlplane.agent-infra-endpoints\ntime=2026-11-10T00:32:13.342868367Z level=info msg=\"Node updated\" module=agent.controlplane.node-manager clusterName=default nodeName=virtme-ng spi=0\ntime=2026-11-10T00:32:13.342900382Z level=info msg=\"Adding local node to cluster\" module=agent.controlplane.nodediscovery node=virtme-ng\ntime=2026-11-10T00:32:13.342955399Z level=info msg=\"Initializing identity allocator\" module=agent.controlplane.identity.identity\ntime=2026-11-10T00:32:13.342961463Z level=info msg=\"Allocating identities between range\" module=agent.controlplane.identity.identity min=256 max=65535 clusterID=0\ntime=2026-11-10T00:32:13.342975499Z level=info msg=\"Starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:43825] config=\"\" prefix=cilium/state/nodes/v1\ntime=2026-11-10T00:32:13.343216074Z level=info msg=\"Validating configured node address ranges\" module=agent.controlplane.daemon\ntime=2026-11-10T00:32:13.343226424Z level=info msg=\"Daemon initialization completed\" module=agent.controlplane.daemon\ntime=2026-11-10T00:32:13.343444776Z level=info msg=\"Hubble server is disabled\" module=agent.controlplane.hubble\ntime=2026-11-10T00:32:13.343770535Z level=info msg=\"Successfully listed keys before starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:43825] config=\"\" prefix=cilium/state/nodes/v1 count=0 revision=3\ntime=2026-11-10T00:32:13.343787482Z level=info msg=\"Starting to watch prefix\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:43825] config=\"\" prefix=cilium/state/nodes/v1 revision=4\ntime=2026-11-10T00:32:13.348560931Z level=info msg=\"Starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:43825] config=\"\" prefix=cilium/state/identities/v1/id\ntime=2026-11-10T00:32:13.350193927Z level=info msg=\"New lease successfully acquired\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:43825] config=\"\" leaseID=910467933012909838 ttl=15m0s\ntime=2026-11-10T00:32:13.350212122Z level=info msg=\"Successfully listed keys before starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:43825] config=\"\" prefix=cilium/state/identities/v1/id count=0 revision=3\ntime=2026-11-10T00:32:13.350234197Z level=info msg=\"Starting to watch prefix\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:43825] config=\"\" prefix=cilium/state/identities/v1/id revision=4\ntime=2026-11-10T00:32:13.382213946Z level=info msg=\"Serving cilium API at unix:///var/tmp/ciliumrunner_sip2up8j/state/cilium.sock\" module=agent.infra.cilium-api-server\ntime=2026-11-10T00:32:13.382673261Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"nat-stats (stats.(*Stats).countNat)\" duration=425ns\ntime=2026-11-10T00:32:13.383257852Z level=info msg=\"Starting healthz status API server\" module=agent.infra.agent-healthz address=127.0.0.1:9879\ntime=2026-11-10T00:32:13.383830462Z level=info msg=\"Regenerating restored endpoints\" module=agent.controlplane.endpoint-restore restored=0\ntime=2026-11-10T00:32:13.383929844Z level=info msg=\"Processing queued deletion requests\" module=agent.controlplane.endpoint-api lenEndpoints=0\ntime=2026-11-10T00:32:13.384018764Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"reconcile (reconciler.Register[...].func2 (.../statedb/reconciler/builder.go:84))\" duration=2.006\u00b5s\ntime=2026-11-10T00:32:13.384034655Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"refresh (reconciler.Register[...].func3 (.../statedb/reconciler/builder.go:86))\" duration=531ns\ntime=2026-11-10T00:32:13.384112649Z level=info msg=\"Fence waiting\" module=agent.controlplane.endpoint-api name=cni-deletion-queue remaining=1\ntime=2026-11-10T00:32:13.384122964Z level=info msg=\"Fence done\" module=agent.controlplane.endpoint-api name=cni-deletion-queue remaining=1 duration=12.172\u00b5s\ntime=2026-11-10T00:32:13.384127332Z level=info msg=\"Finished regenerating restored endpoints\" module=agent.controlplane.endpoint-restore regenerated=0 failed=0 total=0\ntime=2026-11-10T00:32:13.384224845Z level=info msg=\"Creating host endpoint\" module=agent.controlplane.agent-infra-endpoints\ntime=2026-11-10T00:32:13.384440016Z level=info msg=\"New endpoint\" containerID=\"\" ipv6=\"\" ciliumEndpointName=/ containerInterface=\"\" ipv4=\"\" endpointID=2356 k8sPodName=/ subsys=endpoint\ntime=2026-11-10T00:32:13.384575245Z level=info msg=\"Shell listening\" module=agent.infra.shell socket=/var/run/cilium/shell.sock\ntime=2026-11-10T00:32:13.385137893Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"dns-garbage-collector-job (namemanager.(*manager).doGC)\" duration=1.351\u00b5s\ntime=2026-11-10T00:32:13.385232865Z level=info msg=\"Resolving identity labels (blocking)\" containerID=\"\" ipv6=\"\" ciliumEndpointName=/ containerInterface=\"\" ipv4=\"\" endpointID=2356 k8sPodName=/ subsys=endpoint identityLabels=reserved:host\ntime=2026-11-10T00:32:13.385277437Z level=info msg=\"Identity of endpoint changed\" containerID=\"\" ipv6=\"\" ciliumEndpointName=/ containerInterface=\"\" ipv4=\"\" endpointID=2356 k8sPodName=/ subsys=endpoint new-identity=1 old-identity=\"no identity\" identityLabels=\"map[host:{Key:host Value: Source:reserved cidr:<nil>}]\"\ntime=2026-11-10T00:32:13.385439332Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=true\ntime=2026-11-10T00:32:13.385756897Z level=info msg=\"Removed stale bpf map\" module=agent.datapath.map-sweeper file-path=/var/tmp/ciliumrunner_sip2up8j/bpffs/tc/globals/cilium_cidr_v6_dyn\ntime=2026-11-10T00:32:13.38577057Z level=info msg=\"Removed stale bpf map\" module=agent.datapath.map-sweeper file-path=/var/tmp/ciliumrunner_sip2up8j/bpffs/tc/globals/cilium_cidr_v6_fix\ntime=2026-11-10T00:32:13.385778878Z level=info msg=\"Removed stale bpf map\" module=agent.datapath.map-sweeper file-path=/var/tmp/ciliumrunner_sip2up8j/bpffs/tc/globals/cilium_lb4_maglev\ntime=2026-11-10T00:32:13.386794719Z level=info msg=\"initial gc of ct and nat maps completed\" module=agent.datapath.maps.ct-nat-map-gc duration=1.355903ms\ntime=2026-11-10T00:32:13.386818193Z level=info msg=\"Initial scan of connection tracking completed, starting ctmap pressure metrics controller\" module=agent.datapath.maps.ct-nat-map-gc\ntime=2026-11-10T00:32:13.399469567Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c075:e3ff:feff:e89e (primary)\" device=*\ntime=2026-11-10T00:32:13.399580558Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=fe80::4c53:2aff:fe8e:21f2 device=cilium_host\ntime=2026-11-10T00:32:13.420939606Z level=info msg=\"Started hive\" duration=423.938855ms\ntime=2026-11-10T00:32:13.700886147Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c075:e3ff:feff:e89e (primary)\" device=*\ntime=2026-11-10T00:32:13.700972385Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"10.244.0.140 (primary), fe80::4c53:2aff:fe8e:21f2\" device=cilium_host\ntime=2026-11-10T00:32:15.776019332Z level=info msg=\"Create endpoint request\" module=agent.controlplane.endpoint-api addressing=\"&{IPv4:10.244.0.51 IPv4ExpirationUUID: IPv4PoolName:default IPv6: IPv6ExpirationUUID: IPv6PoolName:}\" containerID=bpfbench-cepa containerInterface=eth0 datapathConfiguration=\"&{DisableSipVerification:false ExternalIpam:false InstallEndpointRoute:false RequireArpPassthrough:false RequireEgressProg:false RequireRouting:<nil>}\" interface=lxcbench0 k8sPodName=/ k8sUID=\"\" labels=\"[container:app=bpfbench-cilium container:instance=a]\" sync-build=true\ntime=2026-11-10T00:32:15.776217826Z level=info msg=\"New endpoint\" ipv6=\"\" ciliumEndpointName=/ containerInterface=\"\" ipv4=10.244.0.51 containerID=bpfbench-c endpointID=3737 k8sPodName=/ subsys=endpoint\ntime=2026-11-10T00:32:15.77627963Z level=info msg=\"Resolving identity labels (blocking)\" ipv6=\"\" ciliumEndpointName=/ containerInterface=\"\" ipv4=10.244.0.51 containerID=bpfbench-c endpointID=3737 k8sPodName=/ subsys=endpoint identityLabels=\"container:app=bpfbench-cilium,container:instance=a\"\ntime=2026-11-10T00:32:15.801165062Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c075:e3ff:feff:e89e (primary)\" device=*\ntime=2026-11-10T00:32:15.805938899Z level=info msg=\"Identity of endpoint changed\" ipv6=\"\" ciliumEndpointName=/ containerInterface=\"\" ipv4=10.244.0.51 containerID=bpfbench-c endpointID=3737 k8sPodName=/ subsys=endpoint new-identity=438 old-identity=\"no identity\" identityLabels=\"map[app:{Key:app Value:bpfbench-cilium Source:container cidr:<nil>} instance:{Key:instance Value:a Source:container cidr:<nil>}]\"\ntime=2026-11-10T00:32:15.806275279Z level=info msg=\"Waiting for endpoint to be generated\" identity=438 ipv6=\"\" ciliumEndpointName=/ containerInterface=\"\" ipv4=10.244.0.51 containerID=bpfbench-c endpointID=3737 k8sPodName=/ subsys=endpoint\ntime=2026-11-10T00:32:17.099892849Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c075:e3ff:feff:e89e (primary)\" device=*\ntime=2026-11-10T00:32:29.889545382Z level=info msg=\"No existing link found for program\" module=agent.datapath.loader link=/var/tmp/ciliumrunner_sip2up8j/bpffs/cilium/devices/bpfbench0/links/cil_xdp_entry progName=cil_xdp_entry\ntime=2026-11-10T00:32:29.922235777Z level=info msg=\"Program attached using bpf_link\" module=agent.datapath.loader progName=cil_xdp_entry\ntime=2026-11-10T00:32:32.497322967Z level=info msg=\"Compiled new BPF template\" module=agent.datapath.loader file-path=/var/tmp/ciliumrunner_sip2up8j/state/state/templates/1462966b0204e8263598f139ba36ebbeaa6f17cb623a3de51681b75886df33e3/bpf_host.o BPFCompilationTime=2.172868692s\ntime=2026-11-10T00:32:32.541696608Z level=info msg=\"Compiled new BPF template\" module=agent.datapath.loader file-path=/var/tmp/ciliumrunner_sip2up8j/state/state/templates/3dee598d1871c1ae890bb71d18a31dd13664df166d164d39409f4f8ef869edf1/bpf_lxc.o BPFCompilationTime=2.211755749s\ntime=2026-11-10T00:37:13.387581698Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=false\ntime=2026-11-10T00:42:13.38871433Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=false\ntime=2026-11-10T00:47:13.389519108Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=false\ntime=2026-11-10T00:52:13.390350842Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=false\ntime=2026-11-10T00:57:13.391777052Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=false\ntime=2026-11-10T01:02:13.392479297Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=false\ntime=2026-11-10T01:07:13.394243056Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=false\ntime=2026-11-10T01:12:13.395107002Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=false\ntime=2026-11-10T01:17:13.396411764Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=false\ntime=2026-11-10T01:17:34.572275366Z level=info msg=\"Program attached to device using tcx\" module=agent.datapath.loader progName=cil_to_host device=cilium_host\ntime=2026-11-10T01:17:34.612230935Z level=info msg=\"Program attached to device using tcx\" module=agent.datapath.loader progName=cil_from_host device=cilium_host\ntime=2026-11-10T01:22:13.397385242Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=false\ntime=2026-11-10T01:27:13.398444857Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=false\ntime=2026-11-10T01:32:13.399661198Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=false\ntime=2026-11-10T01:37:13.400984106Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=false\ntime=2026-11-10T01:37:55.492286697Z level=info msg=\"Program attached to device using tcx\" module=agent.datapath.loader progName=cil_from_container device=lxcbench0\ntime=2026-11-10T01:37:55.49276716Z level=info msg=\"Reloaded endpoint BPF program\" identity=438 ipv6=\"\" ciliumEndpointName=/ containerInterface=\"\" ipv4=10.244.0.51 containerID=bpfbench-c endpointID=3737 k8sPodName=/ subsys=endpoint\ntime=2026-11-10T01:37:55.493810811Z level=info msg=\"Released last local use of key, invoking global release\" module=agent.controlplane.identity.identity subsys=kvstorebackend key=\"[container:app=bpfbench-cilium container:instance=a]\"\ntime=2026-11-10T01:37:55.498199594Z level=info msg=\"Removed endpoint\" identity=438 ipv6=\"\" ciliumEndpointName=/ containerInterface=\"\" ipv4=10.244.0.51 containerID=bpfbench-c endpointID=3737 k8sPodName=/ subsys=endpoint\ntime=2026-11-10T01:37:55.498239194Z level=warn msg=\"Creation of endpoint failed\" identity=438 ipv6=\"\" ciliumEndpointName=/ containerInterface=\"\" ipv4=10.244.0.51 containerID=bpfbench-c endpointID=3737 k8sPodName=/ subsys=endpoint-api error=\"timeout while waiting for initial endpoint generation to complete: context deadline exceeded\"",
+  "baseline_resident_programs": 82,
+  "earlier_reference_resident_programs": 72,
+  "completed_native_requests": 30,
+  "generated_and_compiled": 30,
+  "installed": 24,
+  "verifier_rejected": 5,
+  "kernel_native_chunk_load_failed": 1,
+  "specialization_failed": 0,
+  "classes": {
+    "verifier_btf_write_permission": 1,
+    "verifier_packet_bounds": 1,
+    "verifier_pointer_bitwise_operation": 2,
+    "verifier_scalar_memory_access": 1,
+    "kernel_native_chunk_load_failed": 1
+  },
+  "best_prior_installed": 14,
+  "aggregate_installation_gain": 10,
+  "historical_entry_roles_reinstalled": 14,
+  "historical_entry_role_drops": 0,
+  "post_work": "application startup interrupted at endpoint-generation API; post work pending",
+  "scope": "current closed application phase; baseline resident snapshot82 and completed native requests30 are separate observed cohorts; all-program startup remains open",
+  "requests": [
+    {
+      "entry": "cil_xdp_entry",
+      "request_id": 2,
+      "source_prog_id": 333,
+      "native_prog_id": 336,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T00:32:14.565145+00:00",
+      "finished": "2026-11-10T00:32:30.154480+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 14.288974470924586,
+      "native_object_sha256": "5be01306231b0fd777ec7c3a44ef2afcea9ea92f63d3afb13f435e9fb42067fe",
+      "simulator_object_sha256": "9d5f4510905b0cf0d3ce4a37c9d2aca783a0af41d04f3c600e72263ed9615e74",
+      "load_context": {
+        "prog_type": 6,
+        "expected_attach_type": 37,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 419,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_enable_xdp_prefilter",
+          "map_id": 278,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 186,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 150
+        },
+        {
+          "name": "__config_tracing_ip_option_type",
+          "map_id": 278,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 186,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 107
+        },
+        {
+          "name": "cilium_cidr_v4_dyn",
+          "map_id": 242,
+          "map_type": 11,
+          "key_size": 8,
+          "value_size": 1,
+          "max_entries": 65536,
+          "map_flags": 129,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_cidr_v4_fix",
+          "map_id": 243,
+          "map_type": 1,
+          "key_size": 8,
+          "value_size": 1,
+          "max_entries": 20971520,
+          "map_flags": 129,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_percpu_trace_id",
+          "map_id": 250,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_xdp_scratch",
+          "map_id": 275,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 28,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "2.success.tar.gz",
+      "archive_sha256": "2030f2678dbb4892e6915f8578c2f7fe3b5fc91f0bffec97d1fa4dd80edee5cb"
+    },
+    {
+      "entry": "tail_handle_ipv4_from_netdev",
+      "request_id": 3,
+      "source_prog_id": 337,
+      "native_prog_id": 341,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T00:32:32.559454+00:00",
+      "finished": "2026-11-10T00:36:26.787102+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 232.09545591194183,
+      "native_object_sha256": "0d847f06718cc196b24d0f75fabe2f1df96fb1218d33ba2829344b4fa2d8b35f",
+      "simulator_object_sha256": "d3067f235b60d4e2be51fd50f730a490019d4111294a6c8d4af73896811803a7",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 425,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_debug_lb",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 109
+        },
+        {
+          "name": "__config_enable_conntrack_accounting",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 108
+        },
+        {
+          "name": "__config_enable_ipv4_fragments",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 163
+        },
+        {
+          "name": "__config_enable_jiffies",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "__config_enable_no_service_endpoints_routable",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 197
+        },
+        {
+          "name": "__config_eth_header_length",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "__config_kernel_hz",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 12
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 286,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct4_global",
+          "map_id": 266,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 131072,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct_any4_global",
+          "map_id": 267,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipv4_frag_datagrams",
+          "map_id": 268,
+          "map_type": 9,
+          "key_size": 12,
+          "value_size": 4,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_lb4_affinity",
+          "map_id": 260,
+          "map_type": 9,
+          "key_size": 16,
+          "value_size": 16,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_lb4_backends_v3",
+          "map_id": 255,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 12,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_lb4_services_v2",
+          "map_id": 254,
+          "map_type": 1,
+          "key_size": 12,
+          "value_size": 12,
+          "max_entries": 65536,
+          "map_flags": 128,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_lb4_source_range",
+          "map_id": 253,
+          "map_type": 11,
+          "key_size": 12,
+          "value_size": 1,
+          "max_entries": 65536,
+          "map_flags": 129,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_lb_affinity_match",
+          "map_id": 252,
+          "map_type": 1,
+          "key_size": 8,
+          "value_size": 1,
+          "max_entries": 65536,
+          "map_flags": 128,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_lxc",
+          "map_id": 241,
+          "map_type": 1,
+          "key_size": 20,
+          "value_size": 48,
+          "max_entries": 65535,
+          "map_flags": 128,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_nodeport_neigh4",
+          "map_id": 283,
+          "map_type": 9,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 131072,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "3.success.tar.gz",
+      "archive_sha256": "a9f7d30fb1d4c318e5c0a5d7acec315ac3f04a0d5b40cd0f27b3142714f72722"
+    },
+    {
+      "entry": "tail_handle_arp",
+      "request_id": 4,
+      "source_prog_id": 338,
+      "native_prog_id": 345,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T00:36:26.801600+00:00",
+      "finished": "2026-11-10T00:36:33.963404+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 5.857762744184583,
+      "native_object_sha256": "e0a5a0edca7925ffda88d4303ff75bb7ef234537b0e0fb2b215d59c246a4e27e",
+      "simulator_object_sha256": "103045a7e68621f86688dd2dae195d841957cbb4c738d31e99507f1f5fb17956",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 434,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_endpoint_ipv4",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 164
+        },
+        {
+          "name": "__config_interface_mac",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 144
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 293,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "4.success.tar.gz",
+      "archive_sha256": "775f193684057cbe9828fbd184670cdaeea176677428b3a1e58f659c7fe73e8f"
+    },
+    {
+      "entry": "tail_handle_ipv4_from_host",
+      "request_id": 5,
+      "source_prog_id": 342,
+      "native_prog_id": 349,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T00:36:33.976399+00:00",
+      "finished": "2026-11-10T00:36:45.712339+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 10.401446548756212,
+      "native_object_sha256": "0d847f06718cc196b24d0f75fabe2f1df96fb1218d33ba2829344b4fa2d8b35f",
+      "simulator_object_sha256": "25c5eb4841677643362f6ed56f8f35995a211c0ec9a0ca8f5077476af941796b",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 435,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_cilium_net_mac",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 24
+        },
+        {
+          "name": "__config_enable_ipv4_fragments",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 163
+        },
+        {
+          "name": "__config_eth_header_length",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "cilium_call_policy",
+          "map_id": 247,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 65535,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 286,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipcache_v2",
+          "map_id": 238,
+          "map_type": 11,
+          "key_size": 24,
+          "value_size": 24,
+          "max_entries": 512000,
+          "map_flags": 129,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_lxc",
+          "map_id": 241,
+          "map_type": 1,
+          "key_size": 20,
+          "value_size": 48,
+          "max_entries": 65535,
+          "map_flags": 128,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "5.success.tar.gz",
+      "archive_sha256": "2fd8d769c6880ed00c1b29a7907e70d4f24c153af07e4a4386cc07594935767b"
+    },
+    {
+      "entry": "cil_from_container",
+      "request_id": 6,
+      "source_prog_id": 346,
+      "native_prog_id": null,
+      "stage": "verifier_btf_write_permission",
+      "status": -5,
+      "started": "2026-11-10T00:36:45.726702+00:00",
+      "finished": "2026-11-10T00:37:25.208725+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 37.977918894961476,
+      "native_object_sha256": "e0a5a0edca7925ffda88d4303ff75bb7ef234537b0e0fb2b215d59c246a4e27e",
+      "simulator_object_sha256": "ccd77a8dc9ead8f8420f20fc92dd8e436024eb1598524e5d8eb6a1b275a744d1",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 436,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_enable_arp_responder",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 158
+        },
+        {
+          "name": "__config_endpoint_id",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 160
+        },
+        {
+          "name": "__config_events_map_burst_limit",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 136
+        },
+        {
+          "name": "__config_events_map_rate_limit",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 132
+        },
+        {
+          "name": "__config_security_label",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 152
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "__config_tracing_ip_option_type",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 99
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 293,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_events",
+          "map_id": 237,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_percpu_trace_id",
+          "map_id": 250,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit_metrics",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "6.failure.tar.gz",
+      "archive_sha256": "2d78d24728f50b12c03154b80d7191737fc6c036f45a11e25d1cf51a085e576b",
+      "diagnostic_excerpt": "184: (71) r1 = *(u8 *)(r1 +0)         ; R1=0\n185: (57) r1 &= 255                   ; R1=0\n186: (15) if r1 == 0x0 goto pc+76     ; R1=0\n263: (bf) r1 = r7                     ; R1=trusted_ptr_sk_buff() R7=trusted_ptr_sk_buff()\n264: (07) r1 += 124                   ; R1=trusted_ptr_sk_buff(off=124)\n265: (6b) *(u16 *)(r1 +0) = r5\nonly read is supported\nprocessed 112 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0"
+    },
+    {
+      "entry": "tail_drop_notify",
+      "request_id": 7,
+      "source_prog_id": 350,
+      "native_prog_id": 356,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T00:37:25.225170+00:00",
+      "finished": "2026-11-10T00:37:41.522122+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 14.920533690135926,
+      "native_object_sha256": "0d847f06718cc196b24d0f75fabe2f1df96fb1218d33ba2829344b4fa2d8b35f",
+      "simulator_object_sha256": "ca51cbed984aedcd285416e0c82e7def3fed00efc13017848ac5bf7735c8b0aa",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 437,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_eth_header_length",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "__config_events_map_burst_limit",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 136
+        },
+        {
+          "name": "__config_events_map_rate_limit",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 132
+        },
+        {
+          "name": "__config_host_ep_id",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 156
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "__config_tracing_ip_option_type",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 99
+        },
+        {
+          "name": "cilium_events",
+          "map_id": 237,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_percpu_trace_id",
+          "map_id": 250,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit_metrics",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "7.success.tar.gz",
+      "archive_sha256": "80eede17788ec740f6a7a52642b32a513f81f356b42df68cafa9a432b2187c41"
+    },
+    {
+      "entry": "tail_drop_notify",
+      "request_id": 8,
+      "source_prog_id": 353,
+      "native_prog_id": 360,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T00:37:41.536519+00:00",
+      "finished": "2026-11-10T00:37:57.597145+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 14.64097619894892,
+      "native_object_sha256": "e0a5a0edca7925ffda88d4303ff75bb7ef234537b0e0fb2b215d59c246a4e27e",
+      "simulator_object_sha256": "a9c4bfa5e63f97644fec5769ece12624edd7dbd3b3ff7d551373878b937e08d3",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 438,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_endpoint_id",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 160
+        },
+        {
+          "name": "__config_events_map_burst_limit",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 136
+        },
+        {
+          "name": "__config_events_map_rate_limit",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 132
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "__config_tracing_ip_option_type",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 99
+        },
+        {
+          "name": "cilium_events",
+          "map_id": 237,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_percpu_trace_id",
+          "map_id": 250,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit_metrics",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "8.success.tar.gz",
+      "archive_sha256": "b9addb1c0573415934035e47a5d9e73eff056ce9d4d4362e956f4e1f96cde3d8"
+    },
+    {
+      "entry": "cil_host_policy",
+      "request_id": 9,
+      "source_prog_id": 357,
+      "native_prog_id": 364,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T00:37:57.611096+00:00",
+      "finished": "2026-11-10T00:37:58.970012+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 0.11081799399107695,
+      "native_object_sha256": "0d847f06718cc196b24d0f75fabe2f1df96fb1218d33ba2829344b4fa2d8b35f",
+      "simulator_object_sha256": "2e5427a9f127831ae31c02b2cea8decfccb936698bc67ae765429c99badb2e7d",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 439,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [],
+      "archive": "9.success.tar.gz",
+      "archive_sha256": "e62dad7be003d9e88d0233ffc26a7e7b5f7757ab7d4c08c6f820bd58c4423368"
+    },
+    {
+      "entry": "tail_no_service_ipv4",
+      "request_id": 10,
+      "source_prog_id": 361,
+      "native_prog_id": 368,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T00:37:58.982994+00:00",
+      "finished": "2026-11-10T00:38:24.860438+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 24.538599066901952,
+      "native_object_sha256": "e0a5a0edca7925ffda88d4303ff75bb7ef234537b0e0fb2b215d59c246a4e27e",
+      "simulator_object_sha256": "275f2bfc54a003338d33a74835a864277fd6fb869e42af0e1c5a85834ff0ac20",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 440,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "cilium_calls",
+          "map_id": 293,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "10.success.tar.gz",
+      "archive_sha256": "1e730010053fa6b0704237a644d0f708e2bf977e3196997c8d60a5907939925a"
+    },
+    {
+      "entry": "tail_nodeport_nat_egress_ipv4",
+      "request_id": 11,
+      "source_prog_id": 365,
+      "native_prog_id": 372,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T00:38:24.873882+00:00",
+      "finished": "2026-11-10T00:40:33.864264+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 127.20088842185214,
+      "native_object_sha256": "0d847f06718cc196b24d0f75fabe2f1df96fb1218d33ba2829344b4fa2d8b35f",
+      "simulator_object_sha256": "829f796566ab8c218f5e3e396acbaa91b0bfe0291742e14e85cc279a0b094ec7",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 441,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_enable_ipv4_fragments",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 163
+        },
+        {
+          "name": "__config_enable_jiffies",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "__config_enable_nodeport_source_lookup",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 98
+        },
+        {
+          "name": "__config_eth_header_length",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "__config_nodeport_port_max",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 112
+        },
+        {
+          "name": "__config_supports_fib_lookup_skip_neigh",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 96
+        },
+        {
+          "name": "__config_supports_fib_lookup_src",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 97
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 286,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_devices",
+          "map_id": 287,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 16,
+          "max_entries": 512,
+          "map_flags": 1,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipv4_frag_datagrams",
+          "map_id": 268,
+          "map_type": 9,
+          "key_size": 12,
+          "value_size": 4,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_signals",
+          "map_id": 269,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_snat_v4_alloc_retries",
+          "map_id": 270,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 33,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_snat_v4_external",
+          "map_id": 265,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 40,
+          "max_entries": 131072,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "11.success.tar.gz",
+      "archive_sha256": "d332bac77c23544860fe9f4cc5dd6acadad8d14e8b3bcd9e9f60554dcf47e51d"
+    },
+    {
+      "entry": "tail_handle_ipv4_cont",
+      "request_id": 12,
+      "source_prog_id": 369,
+      "native_prog_id": null,
+      "stage": "verifier_packet_bounds",
+      "status": -5,
+      "started": "2026-11-10T00:40:33.877546+00:00",
+      "finished": "2026-11-10T00:47:20.392911+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 404.1083450689912,
+      "native_object_sha256": "e0a5a0edca7925ffda88d4303ff75bb7ef234537b0e0fb2b215d59c246a4e27e",
+      "simulator_object_sha256": "d58c53f1905d9b527add2ab439d18ac27ce1e9c6bcd23e4731a26f494ca8acd2",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 442,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_allow_icmp_frag_needed",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 206
+        },
+        {
+          "name": "__config_cluster_id_bits",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "__config_enable_conntrack_accounting",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 108
+        },
+        {
+          "name": "__config_enable_icmp_rule",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 207
+        },
+        {
+          "name": "__config_enable_identity_mark",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 141
+        },
+        {
+          "name": "__config_enable_jiffies",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 6
+        },
+        {
+          "name": "__config_enable_policy_accounting",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 208
+        },
+        {
+          "name": "__config_enable_tproxy",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 128
+        },
+        {
+          "name": "__config_endpoint_id",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 160
+        },
+        {
+          "name": "__config_events_map_burst_limit",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 136
+        },
+        {
+          "name": "__config_events_map_rate_limit",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 132
+        },
+        {
+          "name": "__config_interface_mac",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 144
+        },
+        {
+          "name": "__config_kernel_hz",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "__config_policy_verdict_log_filter",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 240
+        },
+        {
+          "name": "__config_security_label",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 152
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "__config_tracing_ip_option_type",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 99
+        },
+        {
+          "name": "cilium_call_policy",
+          "map_id": 247,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 65535,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 293,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct4_global",
+          "map_id": 266,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 131072,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct_any4_global",
+          "map_id": 267,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_events",
+          "map_id": 237,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipcache_v2",
+          "map_id": 238,
+          "map_type": 11,
+          "key_size": 24,
+          "value_size": 24,
+          "max_entries": 512000,
+          "map_flags": 129,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_lxc",
+          "map_id": 241,
+          "map_type": 1,
+          "key_size": 20,
+          "value_size": 48,
+          "max_entries": 65535,
+          "map_flags": 128,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_nodeport_nat_buffer",
+          "map_id": 294,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 18,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_percpu_trace_id",
+          "map_id": 250,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_policy_v2",
+          "map_id": 281,
+          "map_type": 11,
+          "key_size": 12,
+          "value_size": 12,
+          "max_entries": 16384,
+          "map_flags": 129,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_policystats",
+          "map_id": 249,
+          "map_type": 10,
+          "key_size": 12,
+          "value_size": 16,
+          "max_entries": 65536,
+          "map_flags": 2,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit_metrics",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_tail_call_buffer4",
+          "map_id": 295,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 60,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "12.failure.tar.gz",
+      "archive_sha256": "78916d1b9f980194c6698f081c3f225f9351a4b12182ffe5640186d7fbd5b903",
+      "diagnostic_excerpt": "16013: (67) r2 <<= 2                  ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=4,var_off=(0x0; 0x4))\n16014: (07) r2 += 26                  ; R2=scalar(smin=umin=smin32=umin32=26,smax=umax=smax32=umax32=30,var_off=(0x1a; 0x4))\n16015: (79) r1 = *(u64 *)(r10 -352)   ; R1=pkt(r=34) R10=fp0 fp-352=pkt(r=34)\n16016: (0f) r2 += r1                  ; R1=pkt(r=34) R2=pkt(id=88,r=0,smin=umin=smin32=umin32=26,smax=umax=smax32=umax32=30,var_off=(0x1a; 0x4))\n16017: (61) r1 = *(u32 *)(r2 +0)\ninvalid access to packet, off=0 size=4, R2(id=88,off=0,r=0)\nR2 offset is outside of the packet\nprocessed 4017 insns (limit 1000000) max_states_per_insn 1 total_states 145 peak_states 145 mark_read 0"
+    },
+    {
+      "entry": "tail_handle_snat_fwd_ipv4",
+      "request_id": 13,
+      "source_prog_id": 373,
+      "native_prog_id": 379,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T00:47:20.410970+00:00",
+      "finished": "2026-11-10T00:54:39.226129+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 435.8417174988426,
+      "native_object_sha256": "0d847f06718cc196b24d0f75fabe2f1df96fb1218d33ba2829344b4fa2d8b35f",
+      "simulator_object_sha256": "2ce7d7248a507964b5478bfa9502ff651adb1d8b19605234d3190ed4979ad8c1",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 443,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_enable_conntrack_accounting",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 108
+        },
+        {
+          "name": "__config_enable_extended_ip_protocols",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 164
+        },
+        {
+          "name": "__config_enable_ipv4_fragments",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 163
+        },
+        {
+          "name": "__config_enable_jiffies",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "__config_enable_remote_node_masquerade",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 192
+        },
+        {
+          "name": "__config_eth_header_length",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "__config_events_map_burst_limit",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 136
+        },
+        {
+          "name": "__config_events_map_rate_limit",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 132
+        },
+        {
+          "name": "__config_host_ep_id",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 156
+        },
+        {
+          "name": "__config_interface_ifindex",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 16
+        },
+        {
+          "name": "__config_kernel_hz",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 12
+        },
+        {
+          "name": "__config_nat_ipv4_masquerade",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 172
+        },
+        {
+          "name": "__config_nodeport_port_max",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 112
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "__config_tracing_ip_option_type",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 99
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 286,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct4_global",
+          "map_id": 266,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 131072,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct_any4_global",
+          "map_id": 267,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_events",
+          "map_id": 237,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipcache_v2",
+          "map_id": 238,
+          "map_type": 11,
+          "key_size": 24,
+          "value_size": 24,
+          "max_entries": 512000,
+          "map_flags": 129,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipv4_frag_datagrams",
+          "map_id": 268,
+          "map_type": 9,
+          "key_size": 12,
+          "value_size": 4,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_lxc",
+          "map_id": 241,
+          "map_type": 1,
+          "key_size": 20,
+          "value_size": 48,
+          "max_entries": 65535,
+          "map_flags": 128,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_percpu_trace_id",
+          "map_id": 250,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit_metrics",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_signals",
+          "map_id": 269,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_snat_v4_alloc_retries",
+          "map_id": 270,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 33,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_snat_v4_external",
+          "map_id": 265,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 40,
+          "max_entries": 131072,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "13.success.tar.gz",
+      "archive_sha256": "f9871028b46fbd47b50edc6b3e24f7b7844e5f2a70fb20b398834e5138c7a317"
+    },
+    {
+      "entry": "tail_handle_ipv4",
+      "request_id": 14,
+      "source_prog_id": 376,
+      "native_prog_id": 383,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T00:54:39.243689+00:00",
+      "finished": "2026-11-10T00:57:12.503230+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 150.8411617418751,
+      "native_object_sha256": "e0a5a0edca7925ffda88d4303ff75bb7ef234537b0e0fb2b215d59c246a4e27e",
+      "simulator_object_sha256": "428c2d636952e0dd2a180a5c7b737ffa18558737c7611ed4161c62b2eaecdad4",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 444,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_debug_lb",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 109
+        },
+        {
+          "name": "__config_enable_conntrack_accounting",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 108
+        },
+        {
+          "name": "__config_enable_ipv4_fragments",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 201
+        },
+        {
+          "name": "__config_enable_jiffies",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 6
+        },
+        {
+          "name": "__config_enable_lrp",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 205
+        },
+        {
+          "name": "__config_enable_no_service_endpoints_routable",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 236
+        },
+        {
+          "name": "__config_endpoint_netns_cookie",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 184
+        },
+        {
+          "name": "__config_kernel_hz",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "__config_nodeport_port_max",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 112
+        },
+        {
+          "name": "__config_nodeport_port_min",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 110
+        },
+        {
+          "name": "__config_security_label",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 152
+        },
+        {
+          "name": "__config_service_loopback_ipv4",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 48
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 293,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct4_global",
+          "map_id": 266,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 131072,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct_any4_global",
+          "map_id": 267,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipcache_v2",
+          "map_id": 238,
+          "map_type": 11,
+          "key_size": 24,
+          "value_size": 24,
+          "max_entries": 512000,
+          "map_flags": 129,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipv4_frag_datagrams",
+          "map_id": 268,
+          "map_type": 9,
+          "key_size": 12,
+          "value_size": 4,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_lb4_affinity",
+          "map_id": 260,
+          "map_type": 9,
+          "key_size": 16,
+          "value_size": 16,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_lb4_backends_v3",
+          "map_id": 255,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 12,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_lb4_services_v2",
+          "map_id": 254,
+          "map_type": 1,
+          "key_size": 12,
+          "value_size": 12,
+          "max_entries": 65536,
+          "map_flags": 128,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_lb_affinity_match",
+          "map_id": 252,
+          "map_type": 1,
+          "key_size": 8,
+          "value_size": 1,
+          "max_entries": 65536,
+          "map_flags": 128,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_nodeport_nat_buffer",
+          "map_id": 294,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 18,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_skip_lb4",
+          "map_id": 261,
+          "map_type": 1,
+          "key_size": 16,
+          "value_size": 1,
+          "max_entries": 100,
+          "map_flags": 129,
+          "value_offset": null
+        }
+      ],
+      "archive": "14.success.tar.gz",
+      "archive_sha256": "05fd993fc27aa6854927882c334e0b5ad9914538abe999712c10c2af1c15033f"
+    },
+    {
+      "entry": "cil_from_host",
+      "request_id": 15,
+      "source_prog_id": 380,
+      "native_prog_id": 387,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T00:57:12.518516+00:00",
+      "finished": "2026-11-10T01:00:23.477052+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 189.0550381927751,
+      "native_object_sha256": "0d847f06718cc196b24d0f75fabe2f1df96fb1218d33ba2829344b4fa2d8b35f",
+      "simulator_object_sha256": "05adb4a1f0a12c32615497fbf766137d06563b2c97b7d7a601d71c4c619dcaca",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 445,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_cluster_id_bits",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "__config_enable_l2_announcements",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 206
+        },
+        {
+          "name": "__config_eth_header_length",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "__config_events_map_burst_limit",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 136
+        },
+        {
+          "name": "__config_events_map_rate_limit",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 132
+        },
+        {
+          "name": "__config_host_ep_id",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 156
+        },
+        {
+          "name": "__config_interface_mac",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 144
+        },
+        {
+          "name": "__config_l2_announcements_max_liveness",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 208
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "__config_tracing_ip_option_type",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 99
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 286,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_events",
+          "map_id": 237,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipcache_v2",
+          "map_id": 238,
+          "map_type": 11,
+          "key_size": 24,
+          "value_size": 24,
+          "max_entries": 512000,
+          "map_flags": 129,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_l2_responder_v4",
+          "map_id": 273,
+          "map_type": 1,
+          "key_size": 8,
+          "value_size": 8,
+          "max_entries": 4096,
+          "map_flags": 1,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_percpu_trace_id",
+          "map_id": 250,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit_metrics",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_runtime_config",
+          "map_id": 263,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 256,
+          "map_flags": 128,
+          "value_offset": null
+        }
+      ],
+      "archive": "15.success.tar.gz",
+      "archive_sha256": "b25b0f979e78ae08c666026a23ed0e3e4c5a39c6af491b4bfea30ec4768533e8"
+    },
+    {
+      "entry": "tail_nodeport_rev_dnat_ipv4",
+      "request_id": 16,
+      "source_prog_id": 384,
+      "native_prog_id": 391,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T01:00:23.490297+00:00",
+      "finished": "2026-11-10T01:01:18.617530+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 53.494811681099236,
+      "native_object_sha256": "e0a5a0edca7925ffda88d4303ff75bb7ef234537b0e0fb2b215d59c246a4e27e",
+      "simulator_object_sha256": "abbec515aa12a7e05c7de92d20ae8480add0ff8ff4bf8a967765732a9ceb991e",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 446,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_debug_lb",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 109
+        },
+        {
+          "name": "__config_enable_conntrack_accounting",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 108
+        },
+        {
+          "name": "__config_enable_ipv4_fragments",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 201
+        },
+        {
+          "name": "__config_enable_jiffies",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 6
+        },
+        {
+          "name": "__config_kernel_hz",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "__config_security_label",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 152
+        },
+        {
+          "name": "__config_supports_fib_lookup_skip_neigh",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 96
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 293,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct4_global",
+          "map_id": 266,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 131072,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct_any4_global",
+          "map_id": 267,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_devices",
+          "map_id": 297,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 16,
+          "max_entries": 512,
+          "map_flags": 1,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipv4_frag_datagrams",
+          "map_id": 268,
+          "map_type": 9,
+          "key_size": 12,
+          "value_size": 4,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_lb4_reverse_nat",
+          "map_id": 256,
+          "map_type": 1,
+          "key_size": 2,
+          "value_size": 6,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "16.success.tar.gz",
+      "archive_sha256": "dc27530232588cbf32661bea19500994ee6453a9b67cba4d94d42924620b7ccf"
+    },
+    {
+      "entry": "tail_nodeport_nat_ingress_ipv4",
+      "request_id": 17,
+      "source_prog_id": 388,
+      "native_prog_id": 395,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T01:01:18.632139+00:00",
+      "finished": "2026-11-10T01:05:00.271405+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 219.36230132216588,
+      "native_object_sha256": "0d847f06718cc196b24d0f75fabe2f1df96fb1218d33ba2829344b4fa2d8b35f",
+      "simulator_object_sha256": "d543683cf75c11e1e5a018e4eed96e93053bce3a2576b15d68a82043dc91239c",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 447,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_debug_lb",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 109
+        },
+        {
+          "name": "__config_enable_conntrack_accounting",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 108
+        },
+        {
+          "name": "__config_enable_ipv4_fragments",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 163
+        },
+        {
+          "name": "__config_enable_jiffies",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "__config_eth_header_length",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "__config_kernel_hz",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 12
+        },
+        {
+          "name": "__config_nodeport_port_max",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 112
+        },
+        {
+          "name": "__config_security_label",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 152
+        },
+        {
+          "name": "__config_supports_fib_lookup_skip_neigh",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 96
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 286,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct4_global",
+          "map_id": 266,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 131072,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct_any4_global",
+          "map_id": 267,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_devices",
+          "map_id": 287,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 16,
+          "max_entries": 512,
+          "map_flags": 1,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipv4_frag_datagrams",
+          "map_id": 268,
+          "map_type": 9,
+          "key_size": 12,
+          "value_size": 4,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_lb4_reverse_nat",
+          "map_id": 256,
+          "map_type": 1,
+          "key_size": 2,
+          "value_size": 6,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_snat_v4_external",
+          "map_id": 265,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 40,
+          "max_entries": 131072,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "17.success.tar.gz",
+      "archive_sha256": "b390f58bbb00e15275845a6290e6e6679e7a04d89c948fc530093f5020767f35"
+    },
+    {
+      "entry": "tail_ipv4_to_endpoint",
+      "request_id": 18,
+      "source_prog_id": 392,
+      "native_prog_id": null,
+      "stage": "verifier_pointer_bitwise_operation",
+      "status": -5,
+      "started": "2026-11-10T01:05:00.293553+00:00",
+      "finished": "2026-11-10T01:09:09.829747+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 246.9130215132609,
+      "native_object_sha256": "e0a5a0edca7925ffda88d4303ff75bb7ef234537b0e0fb2b215d59c246a4e27e",
+      "simulator_object_sha256": "ed56dcf390bebcad337437a08be4efa0223815ebe3ff00feb8807a47fd34e2eb",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 448,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_allow_icmp_frag_needed",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 206
+        },
+        {
+          "name": "__config_cilium_host_mac",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 40
+        },
+        {
+          "name": "__config_cilium_net_ifindex",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 16
+        },
+        {
+          "name": "__config_debug_lb",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 109
+        },
+        {
+          "name": "__config_enable_conntrack_accounting",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 108
+        },
+        {
+          "name": "__config_enable_icmp_rule",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 207
+        },
+        {
+          "name": "__config_enable_ipv4_fragments",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 201
+        },
+        {
+          "name": "__config_enable_jiffies",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 6
+        },
+        {
+          "name": "__config_enable_policy_accounting",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 208
+        },
+        {
+          "name": "__config_endpoint_id",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 160
+        },
+        {
+          "name": "__config_events_map_burst_limit",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 136
+        },
+        {
+          "name": "__config_events_map_rate_limit",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 132
+        },
+        {
+          "name": "__config_interface_ifindex",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 12
+        },
+        {
+          "name": "__config_interface_mac",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 144
+        },
+        {
+          "name": "__config_kernel_hz",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "__config_policy_verdict_log_filter",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 240
+        },
+        {
+          "name": "__config_security_label",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 152
+        },
+        {
+          "name": "__config_service_loopback_ipv4",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 48
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "__config_tracing_ip_option_type",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 99
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 293,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct4_global",
+          "map_id": 266,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 131072,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct_any4_global",
+          "map_id": 267,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_events",
+          "map_id": 237,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipcache_v2",
+          "map_id": 238,
+          "map_type": 11,
+          "key_size": 24,
+          "value_size": 24,
+          "max_entries": 512000,
+          "map_flags": 129,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_lb4_reverse_nat",
+          "map_id": 256,
+          "map_type": 1,
+          "key_size": 2,
+          "value_size": 6,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_percpu_trace_id",
+          "map_id": 250,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_policy_v2",
+          "map_id": 281,
+          "map_type": 11,
+          "key_size": 12,
+          "value_size": 12,
+          "max_entries": 16384,
+          "map_flags": 129,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_policystats",
+          "map_id": 249,
+          "map_type": 10,
+          "key_size": 12,
+          "value_size": 16,
+          "max_entries": 65536,
+          "map_flags": 2,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit_metrics",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_tail_call_buffer4",
+          "map_id": 295,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 60,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "18.failure.tar.gz",
+      "archive_sha256": "d59d84c84488a595a3667b5cea5f6ff15b82e3c5b609c10bf94e475d6d3f94a3",
+      "diagnostic_excerpt": "12740: (57) r9 &= 127                 ; R9=scalar(smin=smin32=0,smax=umax=smax32=umax32=127,var_off=(0x0; 0x7f))\n12741: (55) if r9 != 0x0 goto pc+192          ; R9=0\n12742: (61) r9 = *(u32 *)(r10 -288)   ; R9=0 R10=fp0 fp-288=mmmm0\n12743: (16) if w5 == 0x0 goto pc+359          ; R5=0\n13103: (b7) r8 = 0                    ; R8=0\n13104: (57) r0 &= -256\nR0 bitwise operator &= on pointer prohibited\nprocessed 32553 insns (limit 1000000) max_states_per_insn 11 total_states 1854 peak_states 1083 mark_read 0"
+    },
+    {
+      "entry": "cil_from_netdev",
+      "request_id": 19,
+      "source_prog_id": 396,
+      "native_prog_id": null,
+      "stage": "verifier_pointer_bitwise_operation",
+      "status": -5,
+      "started": "2026-11-10T01:09:09.846195+00:00",
+      "finished": "2026-11-10T01:11:28.419922+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 136.7074367343448,
+      "native_object_sha256": "0d847f06718cc196b24d0f75fabe2f1df96fb1218d33ba2829344b4fa2d8b35f",
+      "simulator_object_sha256": "cbaceb8420b75493aeb50dc40f107d19e40918c3fd98bad3e702f2ce98aa8e9a",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 449,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_enable_l2_announcements",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 206
+        },
+        {
+          "name": "__config_eth_header_length",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "__config_events_map_burst_limit",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 136
+        },
+        {
+          "name": "__config_events_map_rate_limit",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 132
+        },
+        {
+          "name": "__config_host_ep_id",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 156
+        },
+        {
+          "name": "__config_interface_mac",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 144
+        },
+        {
+          "name": "__config_l2_announcements_max_liveness",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 208
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "__config_tracing_ip_option_type",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 99
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 286,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_events",
+          "map_id": 237,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipcache_v2",
+          "map_id": 238,
+          "map_type": 11,
+          "key_size": 24,
+          "value_size": 24,
+          "max_entries": 512000,
+          "map_flags": 129,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_l2_responder_v4",
+          "map_id": 273,
+          "map_type": 1,
+          "key_size": 8,
+          "value_size": 8,
+          "max_entries": 4096,
+          "map_flags": 1,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_percpu_trace_id",
+          "map_id": 250,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit_metrics",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_runtime_config",
+          "map_id": 263,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 256,
+          "map_flags": 128,
+          "value_offset": null
+        }
+      ],
+      "archive": "19.failure.tar.gz",
+      "archive_sha256": "857d3e1b0c8e1e18cd38a03c81b94304c807ddd09c3e940e9a4995682040f8ad",
+      "diagnostic_excerpt": "1262: (bf) r2 = r1                    ; R1=pkt(r=0) R2=pkt(r=0)\n1263: (0f) r2 += r3                   ; R2=pkt(off=14,r=0) R3=14\n1264: (07) r2 += 20                   ; R2=pkt(off=34,r=0)\n1265: (2d) if r2 > r4 goto pc+1164 2430: R0=scalar() R1=pkt(r=0) R2=pkt(off=34,r=0xfffffffffffffffe) R3=14 R4=pkt_end() R6=ctx() R7=14 R8=128 R9=128 R10=fp0 fp-8=scalar(id=2) fp-16=scalar() fp-24=scalar() fp-32=scalar() fp-40=scalar(id=3) fp-48=scalar(id=1) fp-216=trusted_ptr_sk_buff() fp-224=scalar(id=1) fp-232=scalar(id=2) fp-240=scalar(id=3)\n2430: (18) r8 = 0xffffff7a            ; R8=0xffffff7a\n2432: (57) r2 &= -256\nR2 bitwise operator &= on pointer prohibited\nprocessed 2165 insns (limit 1000000) max_states_per_insn 1 total_states 91 peak_states 91 mark_read 0"
+    },
+    {
+      "entry": "cil_lxc_policy",
+      "request_id": 20,
+      "source_prog_id": 399,
+      "native_prog_id": 405,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T01:11:28.435994+00:00",
+      "finished": "2026-11-10T01:13:21.518047+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 111.31888888776302,
+      "native_object_sha256": "e0a5a0edca7925ffda88d4303ff75bb7ef234537b0e0fb2b215d59c246a4e27e",
+      "simulator_object_sha256": "8b82ae77c8a2e123293d979138ecdb6d78958b6a8dd64a1fe88b7642520237bf",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 450,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_enable_conntrack_accounting",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 108
+        },
+        {
+          "name": "__config_enable_extended_ip_protocols",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 203
+        },
+        {
+          "name": "__config_enable_ipv4_fragments",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 201
+        },
+        {
+          "name": "__config_enable_jiffies",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 6
+        },
+        {
+          "name": "__config_endpoint_id",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 160
+        },
+        {
+          "name": "__config_kernel_hz",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "__config_security_label",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 152
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 293,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct4_global",
+          "map_id": 266,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 131072,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct_any4_global",
+          "map_id": 267,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipv4_frag_datagrams",
+          "map_id": 268,
+          "map_type": 9,
+          "key_size": 12,
+          "value_size": 4,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_tail_call_buffer4",
+          "map_id": 295,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 60,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "20.success.tar.gz",
+      "archive_sha256": "65e236d12dd97b702852ab882d4478ffe65c3833ae02c9ad4124a40b7e8926b6"
+    },
+    {
+      "entry": "cil_to_host",
+      "request_id": 21,
+      "source_prog_id": 402,
+      "native_prog_id": 409,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T01:13:21.531706+00:00",
+      "finished": "2026-11-10T01:14:39.780988+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 76.72851869789883,
+      "native_object_sha256": "0d847f06718cc196b24d0f75fabe2f1df96fb1218d33ba2829344b4fa2d8b35f",
+      "simulator_object_sha256": "74b9e7da9dff3d3f5d82ea78949daea9ddc8d5490c5d041c5e777ee1922d6610",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 451,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_cilium_host_ifindex",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 32
+        },
+        {
+          "name": "__config_cluster_id_bits",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "__config_enable_identity_mark",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 141
+        },
+        {
+          "name": "__config_enable_ipv4_fragments",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 163
+        },
+        {
+          "name": "__config_enable_tproxy",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 128
+        },
+        {
+          "name": "__config_eth_header_length",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "__config_events_map_burst_limit",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 136
+        },
+        {
+          "name": "__config_events_map_rate_limit",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 132
+        },
+        {
+          "name": "__config_host_ep_id",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 156
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "__config_tracing_ip_option_type",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 99
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 286,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_events",
+          "map_id": 237,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipv4_frag_datagrams",
+          "map_id": 268,
+          "map_type": 9,
+          "key_size": 12,
+          "value_size": 4,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_percpu_trace_id",
+          "map_id": 250,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit_metrics",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "21.success.tar.gz",
+      "archive_sha256": "ee023989b719192de263a90eb1d34f305052f1218d4d5e0a950ca6b256f32366"
+    },
+    {
+      "entry": "cil_lxc_policy_egress",
+      "request_id": 22,
+      "source_prog_id": 406,
+      "native_prog_id": 413,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T01:14:39.794741+00:00",
+      "finished": "2026-11-10T01:14:41.274318+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 0.1149529367685318,
+      "native_object_sha256": "e0a5a0edca7925ffda88d4303ff75bb7ef234537b0e0fb2b215d59c246a4e27e",
+      "simulator_object_sha256": "bfaa0f6721941964fe6e2b187a6f3d38380fb920a4f4a3cb11eb8f1d8017b474",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 452,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [],
+      "archive": "22.success.tar.gz",
+      "archive_sha256": "6f0a8f7db8e7f1608cce239139b19d524a9d596cb518533d694c38067f4f5f9f"
+    },
+    {
+      "entry": "cil_to_netdev",
+      "request_id": 23,
+      "source_prog_id": 410,
+      "native_prog_id": 417,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T01:14:41.288401+00:00",
+      "finished": "2026-11-10T01:17:35.155587+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 172.07377744698897,
+      "native_object_sha256": "0d847f06718cc196b24d0f75fabe2f1df96fb1218d33ba2829344b4fa2d8b35f",
+      "simulator_object_sha256": "463f9bd1bb42208ed748880e928443b718d52511ce051759cffd0e9629088c7d",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 453,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_cluster_id_bits",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "__config_debug_lb",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 109
+        },
+        {
+          "name": "__config_enable_conntrack_accounting",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 108
+        },
+        {
+          "name": "__config_enable_identity_mark",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 141
+        },
+        {
+          "name": "__config_enable_ipv4_fragments",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 163
+        },
+        {
+          "name": "__config_enable_jiffies",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "__config_eth_header_length",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "__config_events_map_burst_limit",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 136
+        },
+        {
+          "name": "__config_events_map_rate_limit",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 132
+        },
+        {
+          "name": "__config_host_ep_id",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 156
+        },
+        {
+          "name": "__config_interface_ifindex",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 16
+        },
+        {
+          "name": "__config_kernel_hz",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 12
+        },
+        {
+          "name": "__config_supports_fib_lookup_skip_neigh",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 96
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "__config_tracing_ip_option_type",
+          "map_id": 285,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 99
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 286,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct4_global",
+          "map_id": 266,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 131072,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct_any4_global",
+          "map_id": 267,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_devices",
+          "map_id": 287,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 16,
+          "max_entries": 512,
+          "map_flags": 1,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_events",
+          "map_id": 237,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipv4_frag_datagrams",
+          "map_id": 268,
+          "map_type": 9,
+          "key_size": 12,
+          "value_size": 4,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_lb4_reverse_nat",
+          "map_id": 256,
+          "map_type": 1,
+          "key_size": 2,
+          "value_size": 6,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_percpu_trace_id",
+          "map_id": 250,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit_metrics",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "23.success.tar.gz",
+      "archive_sha256": "cad3213791882d275d0d9dfcc48aaf05bd0e28ba71382ce42a03ae335303a5b5"
+    },
+    {
+      "entry": "cil_to_container",
+      "request_id": 24,
+      "source_prog_id": 414,
+      "native_prog_id": 421,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T01:17:35.169941+00:00",
+      "finished": "2026-11-10T01:19:06.921189+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 90.28648547967896,
+      "native_object_sha256": "e0a5a0edca7925ffda88d4303ff75bb7ef234537b0e0fb2b215d59c246a4e27e",
+      "simulator_object_sha256": "6ae56f06bc2b8967f5d378715b37d07a917ff0fd7f9c0b612135c5371e3ab7ed",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 454,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_cluster_id_bits",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "__config_endpoint_id",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 160
+        },
+        {
+          "name": "__config_events_map_burst_limit",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 136
+        },
+        {
+          "name": "__config_events_map_rate_limit",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 132
+        },
+        {
+          "name": "__config_security_label",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 152
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "__config_tracing_ip_option_type",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 99
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 293,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_events",
+          "map_id": 237,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_percpu_trace_id",
+          "map_id": 250,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit_metrics",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "24.success.tar.gz",
+      "archive_sha256": "b1a3e9614ba403886e2f7676ebe1422c6e4135641593b52e055cb70172116ad4"
+    },
+    {
+      "entry": "tail_no_service_ipv4",
+      "request_id": 25,
+      "source_prog_id": 418,
+      "native_prog_id": 425,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T01:19:06.935573+00:00",
+      "finished": "2026-11-10T01:19:33.891348+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 25.66287885978818,
+      "native_object_sha256": "0d847f06718cc196b24d0f75fabe2f1df96fb1218d33ba2829344b4fa2d8b35f",
+      "simulator_object_sha256": "107a1346fa2a328a10e38a53f22aa5ed39e7431953139f5dd4213db339e7fb81",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 457,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_eth_header_length",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 321,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "25.success.tar.gz",
+      "archive_sha256": "264257caa94ebebd989611c8e86f18010d8c7ee80688e1c31a790354ad53bc43"
+    },
+    {
+      "entry": "tail_ipv4_ct_ingress",
+      "request_id": 26,
+      "source_prog_id": 422,
+      "native_prog_id": 429,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T01:19:33.905567+00:00",
+      "finished": "2026-11-10T01:20:46.860881+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 71.32118057599291,
+      "native_object_sha256": "e0a5a0edca7925ffda88d4303ff75bb7ef234537b0e0fb2b215d59c246a4e27e",
+      "simulator_object_sha256": "d381f53a172801694272fa97a36df78e978b707105f09c145605daab83777ffc",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 458,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_enable_conntrack_accounting",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 108
+        },
+        {
+          "name": "__config_enable_extended_ip_protocols",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 203
+        },
+        {
+          "name": "__config_enable_ipv4_fragments",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 201
+        },
+        {
+          "name": "__config_enable_jiffies",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 6
+        },
+        {
+          "name": "__config_endpoint_id",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 160
+        },
+        {
+          "name": "__config_kernel_hz",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "__config_security_label",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 152
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 293,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct4_global",
+          "map_id": 266,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 131072,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct_any4_global",
+          "map_id": 267,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipv4_frag_datagrams",
+          "map_id": 268,
+          "map_type": 9,
+          "key_size": 12,
+          "value_size": 4,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_tail_call_buffer4",
+          "map_id": 295,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 60,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "26.success.tar.gz",
+      "archive_sha256": "92bc02dfbbd6ca933a1fa402326d5f2966b9c358a0de82d43d57af40efe12553"
+    },
+    {
+      "entry": "tail_handle_snat_fwd_ipv4",
+      "request_id": 27,
+      "source_prog_id": 426,
+      "native_prog_id": 433,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T01:20:46.873888+00:00",
+      "finished": "2026-11-10T01:28:26.224277+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 456.44538767961785,
+      "native_object_sha256": "0d847f06718cc196b24d0f75fabe2f1df96fb1218d33ba2829344b4fa2d8b35f",
+      "simulator_object_sha256": "94a0744c512c3d20aead05fd76dfe0789ad048b592c818f6ee1d19df49684b4d",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 459,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_enable_conntrack_accounting",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 108
+        },
+        {
+          "name": "__config_enable_extended_ip_protocols",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 164
+        },
+        {
+          "name": "__config_enable_ipv4_fragments",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 163
+        },
+        {
+          "name": "__config_enable_jiffies",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "__config_enable_remote_node_masquerade",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 192
+        },
+        {
+          "name": "__config_eth_header_length",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "__config_events_map_burst_limit",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 136
+        },
+        {
+          "name": "__config_events_map_rate_limit",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 132
+        },
+        {
+          "name": "__config_host_ep_id",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 156
+        },
+        {
+          "name": "__config_interface_ifindex",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 16
+        },
+        {
+          "name": "__config_kernel_hz",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 12
+        },
+        {
+          "name": "__config_nat_ipv4_masquerade",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 172
+        },
+        {
+          "name": "__config_nodeport_port_max",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 112
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "__config_tracing_ip_option_type",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 99
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 321,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct4_global",
+          "map_id": 266,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 131072,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct_any4_global",
+          "map_id": 267,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_events",
+          "map_id": 237,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipcache_v2",
+          "map_id": 238,
+          "map_type": 11,
+          "key_size": 24,
+          "value_size": 24,
+          "max_entries": 512000,
+          "map_flags": 129,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipv4_frag_datagrams",
+          "map_id": 268,
+          "map_type": 9,
+          "key_size": 12,
+          "value_size": 4,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_lxc",
+          "map_id": 241,
+          "map_type": 1,
+          "key_size": 20,
+          "value_size": 48,
+          "max_entries": 65535,
+          "map_flags": 128,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_percpu_trace_id",
+          "map_id": 250,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit_metrics",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_signals",
+          "map_id": 269,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_snat_v4_alloc_retries",
+          "map_id": 270,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 33,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_snat_v4_external",
+          "map_id": 265,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 40,
+          "max_entries": 131072,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "27.success.tar.gz",
+      "archive_sha256": "3e6b34d89b9a124e31c3e52f65429cbde5deb5b29576584f494a88f32dc7e9f0"
+    },
+    {
+      "entry": "tail_ipv4_policy",
+      "request_id": 28,
+      "source_prog_id": 430,
+      "native_prog_id": null,
+      "stage": "verifier_scalar_memory_access",
+      "status": -5,
+      "started": "2026-11-10T01:28:26.238003+00:00",
+      "finished": "2026-11-10T01:32:46.937294+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 258.5703282710165,
+      "native_object_sha256": "e0a5a0edca7925ffda88d4303ff75bb7ef234537b0e0fb2b215d59c246a4e27e",
+      "simulator_object_sha256": "f36055c9a7e0eeb5708a3e2daaa230c890a54a660a8904621c752349a4848d30",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 460,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_allow_icmp_frag_needed",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 206
+        },
+        {
+          "name": "__config_debug_lb",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 109
+        },
+        {
+          "name": "__config_enable_conntrack_accounting",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 108
+        },
+        {
+          "name": "__config_enable_icmp_rule",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 207
+        },
+        {
+          "name": "__config_enable_ipv4_fragments",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 201
+        },
+        {
+          "name": "__config_enable_jiffies",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 6
+        },
+        {
+          "name": "__config_enable_policy_accounting",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 208
+        },
+        {
+          "name": "__config_enable_tproxy",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 128
+        },
+        {
+          "name": "__config_endpoint_id",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 160
+        },
+        {
+          "name": "__config_events_map_burst_limit",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 136
+        },
+        {
+          "name": "__config_events_map_rate_limit",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 132
+        },
+        {
+          "name": "__config_interface_ifindex",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 12
+        },
+        {
+          "name": "__config_kernel_hz",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "__config_policy_verdict_log_filter",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 240
+        },
+        {
+          "name": "__config_security_label",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 152
+        },
+        {
+          "name": "__config_service_loopback_ipv4",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 48
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "__config_tracing_ip_option_type",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 99
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 293,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct4_global",
+          "map_id": 266,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 131072,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct_any4_global",
+          "map_id": 267,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_events",
+          "map_id": 237,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_lb4_reverse_nat",
+          "map_id": 256,
+          "map_type": 1,
+          "key_size": 2,
+          "value_size": 6,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_percpu_trace_id",
+          "map_id": 250,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_policy_v2",
+          "map_id": 281,
+          "map_type": 11,
+          "key_size": 12,
+          "value_size": 12,
+          "max_entries": 16384,
+          "map_flags": 129,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_policystats",
+          "map_id": 249,
+          "map_type": 10,
+          "key_size": 12,
+          "value_size": 16,
+          "max_entries": 65536,
+          "map_flags": 2,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit_metrics",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_tail_call_buffer4",
+          "map_id": 295,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 60,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "28.failure.tar.gz",
+      "archive_sha256": "030cf630684dbcb9a035c88f050eda77f63745d207453f69d44280be92dbcf34",
+      "diagnostic_excerpt": "18154: (79) r4 = *(u64 *)(r4 +0)      ; R4=scalar()\n18155: (57) r4 &= 1                   ; R4=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))\n18156: (55) if r4 != 0x0 goto pc+178          ; R4=0\n18157: (b7) r4 = 0                    ; R4=0\n18158: (0f) r4 += r3                  ; R3=scalar(id=130,umin=4096) R4=scalar(umin=4096)\n18159: (69) r4 = *(u16 *)(r4 +0)\nR4 invalid mem access 'scalar'\nprocessed 5454 insns (limit 1000000) max_states_per_insn 2 total_states 149 peak_states 149 mark_read 0"
+    },
+    {
+      "entry": "cil_from_host",
+      "request_id": 29,
+      "source_prog_id": 434,
+      "native_prog_id": 440,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T01:32:46.957366+00:00",
+      "finished": "2026-11-10T01:36:05.556452+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 196.51465390902013,
+      "native_object_sha256": "0d847f06718cc196b24d0f75fabe2f1df96fb1218d33ba2829344b4fa2d8b35f",
+      "simulator_object_sha256": "f4fc52af023c868095d6da1092317358ae599cc0b04e3489173cafe38eb4712c",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 461,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_cluster_id_bits",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 0
+        },
+        {
+          "name": "__config_enable_l2_announcements",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 206
+        },
+        {
+          "name": "__config_eth_header_length",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "__config_events_map_burst_limit",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 136
+        },
+        {
+          "name": "__config_events_map_rate_limit",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 132
+        },
+        {
+          "name": "__config_host_ep_id",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 156
+        },
+        {
+          "name": "__config_interface_mac",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 144
+        },
+        {
+          "name": "__config_l2_announcements_max_liveness",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 208
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "__config_tracing_ip_option_type",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 99
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 321,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_events",
+          "map_id": 237,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipcache_v2",
+          "map_id": 238,
+          "map_type": 11,
+          "key_size": 24,
+          "value_size": 24,
+          "max_entries": 512000,
+          "map_flags": 129,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_l2_responder_v4",
+          "map_id": 273,
+          "map_type": 1,
+          "key_size": 8,
+          "value_size": 8,
+          "max_entries": 4096,
+          "map_flags": 1,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_percpu_trace_id",
+          "map_id": 250,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit_metrics",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_runtime_config",
+          "map_id": 263,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 256,
+          "map_flags": 128,
+          "value_offset": null
+        }
+      ],
+      "archive": "29.success.tar.gz",
+      "archive_sha256": "7b7b6686ab4177ab0a8fb9eab4f411c5558e8a6a3e7cfbd875f8453b2f6363cd"
+    },
+    {
+      "entry": "tail_ipv4_ct_egress",
+      "request_id": 30,
+      "source_prog_id": 437,
+      "native_prog_id": 444,
+      "stage": "installed",
+      "status": 0,
+      "started": "2026-11-10T01:36:05.586609+00:00",
+      "finished": "2026-11-10T01:37:56.094683+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 108.28873897716403,
+      "native_object_sha256": "e0a5a0edca7925ffda88d4303ff75bb7ef234537b0e0fb2b215d59c246a4e27e",
+      "simulator_object_sha256": "3a80a3f2974acb3e32fe8ca9968300b854a1359deeaa92296faab033b4385e58",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 462,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_enable_conntrack_accounting",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 108
+        },
+        {
+          "name": "__config_enable_extended_ip_protocols",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 203
+        },
+        {
+          "name": "__config_enable_ipv4_fragments",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 201
+        },
+        {
+          "name": "__config_enable_jiffies",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 6
+        },
+        {
+          "name": "__config_kernel_hz",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 8
+        },
+        {
+          "name": "__config_security_label",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 152
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 296,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 249,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 293,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct4_global",
+          "map_id": 266,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 131072,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ct_any4_global",
+          "map_id": 267,
+          "map_type": 9,
+          "key_size": 14,
+          "value_size": 56,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipv4_frag_datagrams",
+          "map_id": 268,
+          "map_type": 9,
+          "key_size": 12,
+          "value_size": 4,
+          "max_entries": 8192,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_tail_call_buffer4",
+          "map_id": 295,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 60,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "archive": "30.success.tar.gz",
+      "archive_sha256": "0b7bb76bf1ac4a6043c53696a9de7f2dafa877838f078714ab6db740c059b96d"
+    },
+    {
+      "entry": "cil_from_netdev",
+      "request_id": 31,
+      "source_prog_id": 441,
+      "native_prog_id": null,
+      "stage": "kernel_native_chunk_load_failed",
+      "status": -5,
+      "started": "2026-11-10T01:37:56.111910+00:00",
+      "finished": "2026-11-10T01:40:21.439206+00:00",
+      "compiler_returncode": 0,
+      "compiler_seconds": 143.56316542997956,
+      "native_object_sha256": "0d847f06718cc196b24d0f75fabe2f1df96fb1218d33ba2829344b4fa2d8b35f",
+      "simulator_object_sha256": "37611c27e02211ca7681aac56ccd6c9a8cec6d39524d2b0bae3114eaa8b1374a",
+      "load_context": {
+        "prog_type": 3,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 463,
+        "source_func_type_id": 0,
+        "token_present": 0
+      },
+      "maps": [
+        {
+          "name": "__config_enable_l2_announcements",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 206
+        },
+        {
+          "name": "__config_eth_header_length",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 4
+        },
+        {
+          "name": "__config_events_map_burst_limit",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 136
+        },
+        {
+          "name": "__config_events_map_rate_limit",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 132
+        },
+        {
+          "name": "__config_host_ep_id",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 156
+        },
+        {
+          "name": "__config_interface_mac",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 144
+        },
+        {
+          "name": "__config_l2_announcements_max_liveness",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 208
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 84
+        },
+        {
+          "name": "__config_tracing_ip_option_type",
+          "map_id": 322,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 221,
+          "max_entries": 1,
+          "map_flags": 1152,
+          "value_offset": 99
+        },
+        {
+          "name": "cilium_calls",
+          "map_id": 321,
+          "map_type": 3,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 50,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_events",
+          "map_id": 237,
+          "map_type": 4,
+          "key_size": 4,
+          "value_size": 4,
+          "max_entries": 4,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ipcache_v2",
+          "map_id": 238,
+          "map_type": 11,
+          "key_size": 24,
+          "value_size": 24,
+          "max_entries": 512000,
+          "map_flags": 129,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_l2_responder_v4",
+          "map_id": 273,
+          "map_type": 1,
+          "key_size": 8,
+          "value_size": 8,
+          "max_entries": 4096,
+          "map_flags": 1,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_metrics",
+          "map_id": 239,
+          "map_type": 5,
+          "key_size": 8,
+          "value_size": 16,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_percpu_trace_id",
+          "map_id": 250,
+          "map_type": 6,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_ratelimit_metrics",
+          "map_id": 240,
+          "map_type": 1,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        },
+        {
+          "name": "cilium_runtime_config",
+          "map_id": 263,
+          "map_type": 2,
+          "key_size": 4,
+          "value_size": 8,
+          "max_entries": 256,
+          "map_flags": 128,
+          "value_offset": null
+        }
+      ],
+      "archive": "31.failure.tar.gz",
+      "archive_sha256": "2bc082461e0c815f4ded1207c5c3775c8547d3ea5a29748ac0bf9554b350a9ba",
+      "diagnostic_excerpt": "trusted-native-loader: create kernel native chunk: No such file or directory"
+    }
+  ],
+  "reference_entry_comparison": [
+    {
+      "entry": "cil_xdp_entry",
+      "prior_source_prog_id": 236,
+      "current_source_prog_ids": [
+        333
+      ],
+      "current_native_prog_ids": [
+        336
+      ],
+      "state": "entry_installed"
+    },
+    {
+      "entry": "tail_handle_snat_fwd_ipv4",
+      "prior_source_prog_id": 238,
+      "current_source_prog_ids": [
+        373,
+        426
+      ],
+      "current_native_prog_ids": [
+        379,
+        433
+      ],
+      "state": "entry_installed"
+    },
+    {
+      "entry": "cil_to_container",
+      "prior_source_prog_id": 239,
+      "current_source_prog_ids": [
+        414
+      ],
+      "current_native_prog_ids": [
+        421
+      ],
+      "state": "entry_installed"
+    },
+    {
+      "entry": "tail_drop_notify",
+      "prior_source_prog_id": 241,
+      "current_source_prog_ids": [
+        350,
+        353
+      ],
+      "current_native_prog_ids": [
+        356,
+        360
+      ],
+      "state": "entry_installed"
+    },
+    {
+      "entry": "cil_lxc_policy",
+      "prior_source_prog_id": 243,
+      "current_source_prog_ids": [
+        399
+      ],
+      "current_native_prog_ids": [
+        405
+      ],
+      "state": "entry_installed"
+    },
+    {
+      "entry": "cil_to_netdev",
+      "prior_source_prog_id": 245,
+      "current_source_prog_ids": [
+        410
+      ],
+      "current_native_prog_ids": [
+        417
+      ],
+      "state": "entry_installed"
+    },
+    {
+      "entry": "tail_ipv4_ct_ingress",
+      "prior_source_prog_id": 247,
+      "current_source_prog_ids": [
+        422
+      ],
+      "current_native_prog_ids": [
+        429
+      ],
+      "state": "entry_installed"
+    },
+    {
+      "entry": "tail_nodeport_nat_egress_ipv4",
+      "prior_source_prog_id": 249,
+      "current_source_prog_ids": [
+        365
+      ],
+      "current_native_prog_ids": [
+        372
+      ],
+      "state": "entry_installed"
+    },
+    {
+      "entry": "tail_handle_arp",
+      "prior_source_prog_id": 251,
+      "current_source_prog_ids": [
+        338
+      ],
+      "current_native_prog_ids": [
+        345
+      ],
+      "state": "entry_installed"
+    },
+    {
+      "entry": "cil_to_host",
+      "prior_source_prog_id": 253,
+      "current_source_prog_ids": [
+        402
+      ],
+      "current_native_prog_ids": [
+        409
+      ],
+      "state": "entry_installed"
+    },
+    {
+      "entry": "cil_lxc_policy_egress",
+      "prior_source_prog_id": 255,
+      "current_source_prog_ids": [
+        406
+      ],
+      "current_native_prog_ids": [
+        413
+      ],
+      "state": "entry_installed"
+    },
+    {
+      "entry": "tail_handle_ipv4_from_host",
+      "prior_source_prog_id": 257,
+      "current_source_prog_ids": [
+        342
+      ],
+      "current_native_prog_ids": [
+        349
+      ],
+      "state": "entry_installed"
+    },
+    {
+      "entry": "tail_handle_ipv4",
+      "prior_source_prog_id": 259,
+      "current_source_prog_ids": [
+        376
+      ],
+      "current_native_prog_ids": [
+        383
+      ],
+      "state": "entry_installed"
+    },
+    {
+      "entry": "tail_nodeport_nat_ingress_ipv4",
+      "prior_source_prog_id": 261,
+      "current_source_prog_ids": [
+        388
+      ],
+      "current_native_prog_ids": [
+        395
+      ],
+      "state": "entry_installed"
+    }
+  ],
+  "raw": [
+    {
+      "file": "cilium-startup-frontier22-raw.tar.gz",
+      "sha256": "9de66bb531b43600800127636efcdac57cdec8f39c4c5655da4e63e9406c8679",
+      "members": "requests2-22; earlier OTel request1 retained in its original scope"
+    },
+    {
+      "file": "cilium-startup-complete-delta-raw.tar.gz",
+      "sha256": "d6ceacb978ffa706ba596b1049d620189c2f5e5a9e895fbd73645403bcabcce6",
+      "bytes": 5997034,
+      "members": "requests23-31 and complete Cilium application/shim/image records"
+    }
+  ],
+  "new_checks": 0
+}
