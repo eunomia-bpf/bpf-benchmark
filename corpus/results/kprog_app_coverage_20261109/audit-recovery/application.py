@@ -12,6 +12,7 @@ import tarfile
 ROOT = Path('/workspaces/repository')
 HERE = Path(__file__).resolve().parent
 G = Path('/var/tmp/kprog-tmp/C/audit-recovery/application')
+APPS = 'bcc/set,katran,cilium/agent,otelcol-ebpf-profiler/profiling,tracee/monitor,tetragon/observer'
 V = Path('/workspaces/.agent-state/kprog-lanes/C/design-only/remaining-apps/coherent-six-app-runtime')
 BASE = 'bpf-benchmark/kprog-paper-may29:r'
 IMAGE = 'bpf-benchmark/kprog-coherent-six:c-20261109'
@@ -136,7 +137,7 @@ def replay(epoch):
         'export CLANG=' + str(alias / 'stock-compile-proxy'),
         'export PYTHONDONTWRITEBYTECODE=1 BPFREJIT_CORPUS_BPF_STATS=1 BPFREJIT_INSTALL_SKIP_KINSN=1',
         'python3 /mnt/guest.py --samples 1 --duration 2 --apps ' +
-        'bcc/set,katran,cilium/agent,otelcol-ebpf-profiler/profiling,tracee/monitor,tetragon/observer' +
+        APPS +
         ' --state ' + str(V), '',
     ]
     (G / 'bootstrap.sh').write_text('\n'.join(lines))
@@ -162,10 +163,14 @@ def replay(epoch):
 
 
 def main():
+    global G, APPS
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mode', choices=['image', 'run'])
     parser.add_argument('--revision', required=True)
+    parser.add_argument('--out', type=Path, default=G)
+    parser.add_argument('--apps', default=APPS)
     args = parser.parse_args()
+    G, APPS = args.out, args.apps
     revision = subprocess.check_output(['git', 'rev-parse', args.revision],
                                        cwd=ROOT, text=True).strip()
     epoch = STOCK / 'replays' / revision
