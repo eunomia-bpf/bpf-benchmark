@@ -321,11 +321,297 @@ def run():
           completed=sum('outcome' in g for g in data['groups'])))
 
 
+def verifier_message(text):
+    """The verifier's own error line precedes its 'processed N insns' summary."""
+    lines = (text or '').splitlines()
+    for index, line in enumerate(lines):
+        if index and re.match(r'processed \d+ insns', line):
+            return lines[index - 1].strip(), lines[max(0, index - 4):index]
+    return None, []
+
+
+def normalize(text):
+    text = re.sub(r'0x[0-9a-fA-F]+', '0xN', text)
+    return re.sub(r'\bR\d+\b', 'Rn', re.sub(r'(?<![A-Za-z])-?\d+', 'N', text)).strip()
+
+
+def message_class(message):
+    return 'verifier: ' + normalize(message)
+
+
+def error_context(outcome, verifier_context):
+    """A few lines of the stage's own error output for representative examples."""
+    if verifier_context:
+        return verifier_context
+    compiler = '\n'.join(c.get('stderr', '') for c in outcome.get('compiler_failures') or [])
+    lines = [l for l in compiler.splitlines() if 'error:' in l][:3]
+    if lines:
+        return lines
+    service = (outcome.get('submission') or {}).get('service') or {}
+    trace = (service.get('traceback') or '').strip().splitlines()
+    if trace:
+        return trace[-4:]
+    return (outcome.get('diagnostic') or '').strip().splitlines()[-4:]
+
+
+def stage_class(outcome, label):
+    """Name a non-verifier stage by its own first error line when no committed label matches."""
+    if label != outcome['stage']:
+        return label
+    service = (outcome.get('submission') or {}).get('service') or {}
+    trace = (service.get('traceback') or '').strip().splitlines()
+    if outcome['stage'] == 'generation_failed' and trace:
+        code = [l.strip() for l in trace if l.startswith('    ') and set(l.strip()) - set('^~ ')]
+        return ('generation_failed: ' + normalize(trace[-1])[:100] +
+                (' at ' + code[-1][:100] if code else ''))
+    if outcome['stage'] == 'compilation_failed':
+        text = '\n'.join(c.get('stderr', '') for c in outcome.get('compiler_failures') or [])
+        for line in text.splitlines():
+            if 'error:' in line:
+                return 'compiler: ' + normalize(line.split('error:', 1)[1])[:120]
+    text = (outcome.get('diagnostic') or '').strip()
+    return outcome['stage'] + (': ' + normalize(text.splitlines()[0])[:120] if text else '')
+
+
+def store(base, name, payload):
+    """Write one byte stream, split in ordered 48,000,000-byte parts when larger."""
+    size = 48_000_000
+    if len(payload) <= size:
+        (base / name).write_bytes(payload)
+        return [base / name]
+    paths, parts = [], []
+    for number, start in enumerate(range(0, len(payload), size)):
+        path = base / (name + '.part' + str(number).zfill(3))
+        path.write_bytes(payload[start:start + size])
+        paths.append(path)
+        parts.append(dict(file=path.name, bytes=path.stat().st_size, sha256=sha(path)))
+    write(base / (name + '.parts.json'), dict(format='concatenate parts in order',
+          bytes=len(payload), sha256=hashlib.sha256(payload).hexdigest(), parts=parts))
+    return paths + [base / (name + '.parts.json')]
+
+
+def publish():
+    census = load('census_classes', I / 'source/kprog/corpus_resident_verifier.py')
+    data = json.loads((S / 'groups.json').read_text())
+    provenance = json.loads((S / 'provenance.json').read_text())
+    RESULTS.mkdir(parents=True, exist_ok=True)
+    instances, bodies, outcomes = [], [], {}
+    for entry in data['groups']:
+        outcome = entry['outcome']
+        message, context = verifier_message(outcome.get('diagnostic', ''))
+        label = outcome.get('failure_class') or census.failure_class(outcome)
+        if outcome['stage'] == 'installed':
+            primary = 'installed'
+        elif outcome['stage'] == 'verifier_rejected' and message:
+            primary = message_class(message)
+        else:
+            primary = stage_class(outcome, label)
+        outcomes[entry['body_sha256']] = outcome
+        bodies.append(dict(body_sha256=entry['body_sha256'],
+            application=entry['representative']['application'],
+            representative_id=entry['representative']['source_prog_id'],
+            symbol=entry['representative']['native_candidates'][0]['symbol'],
+            native_object=Path(entry['representative']['native_candidates'][0]
+                               ['source_native_object']).name,
+            instances=len(entry['members']), member_ids=[m['source_prog_id'] for m in entry['members']],
+            selection_kinds=dict(collections.Counter(m['selection_kind'] for m in entry['members'])),
+            stage=outcome['stage'], driver_class=label, failure_class=primary,
+            verifier_message=message, verifier_context=context,
+            error_context=error_context(outcome, context),
+            generated=outcome.get('generated'), compiled=outcome.get('compiled'),
+            worker=entry.get('worker'), cpu=entry.get('cpu'),
+            started=entry.get('started'), finished=entry.get('finished')))
+        for member in entry['members']:
+            instances.append(dict(application=member['application'],
+                source_prog_id=member['source_prog_id'], name=member['name'],
+                selection_kind=member['selection_kind'], body_sha256=entry['body_sha256'],
+                representative_id=entry['representative']['source_prog_id'],
+                stage=outcome['stage'], generated=bool(outcome.get('generated')),
+                compiled=bool(outcome.get('compiled')), driver_class=label,
+                failure_class=primary, verifier_message=message))
+    for outcome in data['selection_outcomes']:
+        instances.append(dict(application=outcome['application'],
+            source_prog_id=outcome['source_prog_id'], name=outcome['name'],
+            selection_kind=outcome['selection_kind'], body_sha256=None, representative_id=None,
+            stage=outcome['stage'], generated=False, compiled=False,
+            driver_class='native_manifest_selection_gap',
+            failure_class='native_manifest_selection_gap', verifier_message=None,
+            diagnostic=outcome['diagnostic']))
+    instances.sort(key=lambda r: (APPS.index(r['application']), r['source_prog_id']))
+    previous = json.loads((ROOT / 'corpus/results/kprog_app_coverage_20261109/resident-census/'
+                           'grouped-static/all-instances.json').read_text())['programs']
+
+    def phases(rows):
+        return dict(instances=len(rows), generated=sum(r['generated'] for r in rows),
+                    compiled=sum(r['compiled'] for r in rows),
+                    verifier_accepted=sum(r['stage'] == 'installed' for r in rows),
+                    verifier_rejected=sum(r['stage'] == 'verifier_rejected' for r in rows))
+
+    applications = []
+    for app in APPS:
+        rows = [r for r in instances if r['application'] == app]
+        old = [r for r in previous if r['application'] == app]
+        applications.append(dict(application=app, **phases(rows),
+            failure_classes=dict(collections.Counter(
+                r['failure_class'] for r in rows if r['stage'] != 'installed').most_common()),
+            bodies=sum(b['application'] == app for b in bodies),
+            by_selection={kind: phases([r for r in rows if r['selection_kind'] == kind])
+                          for kind in sorted({r['selection_kind'] for r in rows})},
+            best_verified_path_row=BEST[app],
+            census_4f5={k: v for k, v in phases([dict(r, generated=bool(r.get('generated')),
+                        compiled=bool(r.get('compiled'))) for r in old]).items()}))
+    classes = collections.Counter(r['failure_class'] for r in instances)
+    class_bodies = collections.Counter(b['failure_class'] for b in bodies)
+    total = phases(instances)
+    largest = next(label for label, _ in classes.most_common() if label != 'installed')
+    examples = [b for b in bodies if b['failure_class'] == largest]
+    examples.sort(key=lambda b: -b['instances'])
+    summary = dict(model_head=provenance['model_head'], runtime_model=RUNTIME_MODEL,
+        native_body_groups=len(bodies), **total,
+        applications=applications,
+        classes=[dict(failure_class=k, instances=v, bodies=class_bodies.get(k, 0),
+                      per_application={SHORT[a]: sum(r['failure_class'] == k and r['application'] == a
+                                                    for r in instances) for a in APPS})
+                 for k, v in classes.most_common()],
+        largest_failure_class=dict(failure_class=largest, instances=classes[largest],
+            bodies=class_bodies[largest],
+            representatives=[dict(application=b['application'], representative_id=b['representative_id'],
+                                  symbol=b['symbol'], instances=b['instances'],
+                                  verifier_message=b['verifier_message'],
+                                  error_context=b['error_context']) for b in examples[:3]]),
+        native_execution_requests=0, guest_memory=GUEST_MEMORY, workers=WORKERS,
+        body_identity=data['body_identity'], bodies=bodies)
+    write(RESULTS / 'result.json', summary)
+    write(RESULTS / 'instances.json', dict(model_head=provenance['model_head'], programs=instances))
+    write(RESULTS / 'provenance.json', provenance)
+    paths = [RESULTS / n for n in ['result.json', 'instances.json', 'provenance.json']]
+    paths += store(RESULTS, 'outcomes.json.gz', gzip.compress(
+        (json.dumps(outcomes, indent=2) + '\n').encode(), mtime=0))
+    # Request archives without their byte copies of the submitted native input;
+    # each omitted copy is listed with its SHA256 and the identical input object.
+    known = {sha(p): os.path.relpath(p, I) for p in (I / 'native').rglob('*.native.o')}
+    omitted = []
+    raw = io.BytesIO()
+    with tarfile.open(fileobj=raw, mode='w:gz') as archive:
+        for path in sorted((S / 'workers').glob('*/stock-state/*.tar.gz')):
+            prefix = str(path.relative_to(S))
+            with tarfile.open(path) as source_archive:
+                for member in source_archive.getmembers():
+                    data = source_archive.extractfile(member).read() if member.isfile() else None
+                    if data is not None and member.name.endswith('.native.o'):
+                        digest = hashlib.sha256(data).hexdigest()
+                        if digest in known:
+                            omitted.append(dict(archive=prefix, member=member.name, sha256=digest,
+                                                bytes=len(data), input=known[digest]))
+                            continue
+                    member.name = prefix + '/' + member.name
+                    archive.addfile(member, io.BytesIO(data) if data is not None else None)
+        listing = (json.dumps(dict(omitted_native_input_copies=omitted), indent=2) + '\n').encode()
+        info = tarfile.TarInfo('omitted-native-copies.json')
+        info.size = len(listing)
+        archive.addfile(info, io.BytesIO(listing))
+    paths += store(RESULTS, 'requests.tar.gz', raw.getvalue())
+    raw = io.BytesIO()
+    with tarfile.open(fileobj=raw, mode='w:gz') as archive:
+        for name in ['census.py', 'provenance.json', 'selection-spec.json', 'groups.json',
+                     'prepare.log', 'run.log', 'complete.json', 'bin/vng',
+                     'inputs/run-inventory.json', 'inputs/resource-index.json', 'inputs/manifests',
+                     'katran-image-payload']:
+            if (S / name).exists():
+                archive.add(S / name, arcname=name)
+        for path in sorted((S / 'proofs').glob('*.command.json')):
+            archive.add(path, arcname=str(path.relative_to(S)))
+        for worker in sorted((S / 'workers').iterdir()):
+            for name in ['controller.log', 'stock-console.log', 'stock-service.log',
+                         'stock-compiler.log', 'stock-host.log', 'effective-vng-command.json',
+                         'stock-command.json', 'stock-guest.exit', 'stock-guest.sh', 'provenance.json',
+                         'run-inventory.json', 'resource-index.json', 'stock-state/requests.jsonl',
+                         'stock-compiler/jobs.jsonl']:
+                if (worker / name).exists():
+                    archive.add(worker / name, arcname=str((worker / name).relative_to(S)))
+    paths += store(RESULTS, 'run-raw.tar.gz', raw.getvalue())
+    shutil.copy2(Path(__file__).resolve(), RESULTS / 'census.py')
+    paths.append(RESULTS / 'census.py')
+    readme(summary, provenance)
+    paths.append(RESULTS / 'README.md')
+    write(S / 'publication-paths.json', [os.path.relpath(p, ROOT) for p in paths])
+    print(json.dumps({k: summary[k] for k in ['instances', 'native_body_groups', 'generated',
+          'compiled', 'verifier_accepted', 'verifier_rejected']}))
+
+
+def readme(summary, provenance):
+    lines = ['# Resident census at the current model', '',
+        'All 549 resident x86-64 instances, model ' + summary['model_head'][:9] +
+        ' (model sources identical to the matched runtime model ' + RUNTIME_MODEL[:9] +
+        '). Load-only: B is generated, compiled and submitted to the stock verifier; '
+        'native execution requests: 0.', '',
+        '| Application | Instances | Generated | Compiled | Verifier accepted | Verifier rejected | '
+        'Failure classes (instances) | Best verified-path row | 4f5 census accepted |',
+        '| --- | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: |']
+    for app in summary['applications']:
+        classes = '; '.join('`' + k + '` ' + str(v) for k, v in app['failure_classes'].items()) or '-'
+        lines.append('| ' + ' | '.join([SHORT[app['application']], str(app['instances']),
+            str(app['generated']), str(app['compiled']), str(app['verifier_accepted']),
+            str(app['verifier_rejected']), classes, str(app['best_verified_path_row']),
+            str(app['census_4f5']['verifier_accepted'])]) + ' |')
+    lines.append('| Total | ' + ' | '.join(str(summary[k]) for k in
+        ['instances', 'generated', 'compiled', 'verifier_accepted', 'verifier_rejected']) +
+        ' | | ' + str(sum(BEST.values())) + ' | ' +
+        str(sum(a['census_4f5']['verifier_accepted'] for a in summary['applications'])) + ' |')
+    lines += ['', 'Best verified-path rows are the 2026-11-08 and 2026-11-09 05:18 application '
+        'installations. The 4f5 column is the 2026-11-09 census at model 4f5b7ae6d '
+        '(grouped-static/all-instances.json): generated 287, compiled 253, accepted 7, rejected 235.', '',
+        '## Failure classes', '',
+        'Verifier rejections are named by the verifier\'s own final error line, with numbers and '
+        'register indices normalized. Other stages keep the committed corpus_resident_verifier label; '
+        'where that label is only the stage name, the stage\'s first error line names the class. '
+        'instances.json keeps both the committed label (driver_class) and this class.',
+        '', '| Class | Instances | Bodies | ' + ' | '.join(SHORT[a] for a in APPS) + ' |',
+        '| --- | ---: | ---: | ' + ' | '.join('---:' for _ in APPS) + ' |']
+    for row in summary['classes']:
+        lines.append('| `' + row['failure_class'] + '` | ' + str(row['instances']) + ' | ' +
+                     str(row['bodies']) + ' | ' +
+                     ' | '.join(str(row['per_application'][SHORT[a]]) for a in APPS) + ' |')
+    largest = summary['largest_failure_class']
+    lines += ['', '## Largest remaining class', '',
+        '`' + largest['failure_class'] + '`: ' + str(largest['instances']) + ' instances in ' +
+        str(largest['bodies']) + ' native bodies. Representative output:', '']
+    for rep in largest['representatives']:
+        lines.append('* ' + SHORT[rep['application']] + ' ' + rep['symbol'] + ' (resident ' +
+                     str(rep['representative_id']) + ', ' + str(rep['instances']) + ' instances):')
+        lines.append('')
+        lines.append('  ```')
+        lines += ['  ' + l[:300] for l in rep['error_context']]
+        lines.append('  ```')
+    lines += ['', '## Inputs and method', '',
+        '* Resident rows and source resources: A\'s prepared 549-instance set (' +
+        provenance['resident_rows'] + '); fresh collection over the same coverage archives '
+        'reproduces every row field.',
+        '* Native P: the payloads of the current-model six-app replay, built with the restored '
+        'compiler flags (no external thunks). Selection uses corpus_resident_census.collect on '
+        'their manifests. Every manifest selection equals the previous census object+symbol. The '
+        'Tetragon manifest selects nothing for 153 residents (bytecode-length mismatch against the '
+        'paired source); 152 of them use the previous census object+symbol in the current payload, '
+        'and one (credential-commit) has no object in the payload. by_selection in result.json '
+        'separates these rows.',
+        '* Grouping: SHA256 of the native-link proof ELF (--mode proof --preserve-entry-abi), as in '
+        'grouped-static. One representative per body through corpus_resident_groups.shard; the '
+        'outcome is weighted by body membership.',
+        '* Runtime: af422c391 replay kernel, bpf_kprog_stock module, loader and native-link copies. '
+        'Six workers on host CPU pairs 8-9 ... 18-19, one guest vCPU, ' + GUEST_MEMORY + ' guest memory.',
+        '* Files: result.json (summary, per-body records), instances.json (549 rows), '
+        'outcomes.json.gz (complete representative outcomes with every diagnostic byte), '
+        'requests.tar.gz (raw request archives), run-raw.tar.gz (inputs, logs, commands), '
+        'provenance.json (hashes and model identity), census.py (controller). Ordered .partNNN files '
+        'concatenate to the named stream.', '']
+    (RESULTS / 'README.md').write_text('\n'.join(lines))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=['prepare', 'run'])
+    parser.add_argument('mode', choices=['prepare', 'run', 'publish'])
     args = parser.parse_args()
-    prepare() if args.mode == 'prepare' else run()
+    {'prepare': prepare, 'run': run, 'publish': publish}[args.mode]()
 
 
 if __name__ == '__main__':
