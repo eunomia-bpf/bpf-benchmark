@@ -980,6 +980,8 @@ in `bytes_jited`, so the native arm really ran.
 | inline calls `1ab8e6d10` | off | `..._234153_062138` | 864,237 pps | 903,888 pps | **1.046x** thr | 13,641 / 10,161 |
 | inline, hardening flags removed `87a028418` | on | `..._20261110_113058_977591` | 173.5 ns | 168.6 ns | **1.029x** body | 13,641 / 10,161 |
 | inline, hardening flags removed `87a028418` | off | `..._20261110_120334_373092` | 2,718,482 pps | 2,701,686 pps | **0.993x** thr | 13,641 / 10,161 |
+| per-CPU array `469a94426` | on | `..._20261110_123519_873545` | 176.5 ns | 171.7 ns | **1.028x** body | 13,641 / 10,161 |
+| array lookups `4b9805362` | on | `..._20261110_001401_453215` | 174.3 ns | 170.4 ns | **1.023x** body | 13,641 / 10,161 |
 
 The inline-threshold candidate is worth 1.029x on the body and nothing on
 throughput.
@@ -993,7 +995,29 @@ The hardening flags therefore contribute nothing measurable on this path.
 
 That is a useful negative result and it points the same way as the share
 table: Katran's body has at most about 4% to give because only 0.42 of one
-CPU is inside the program. A 1.03x body is close to all of it. Against the 2026-05-29 definition's 1.225x body, that is a large
+CPU is inside the program. A 1.03x body is close to all of it.
+
+**All three published Katran candidates land in the same place**, which is
+the clearest result in this section:
+
+| candidate | what it changes | body | verdict |
+| --- | --- | ---: | --- |
+| `1ab8e6d10` | inline thresholds for hash calls | 1.029x | no change |
+| `4b9805362` | array map lookup in P | 1.023x | no change |
+| `469a94426` | per-CPU array lookup in P | 1.028x | no change |
+| `87a028418` | hardening flags removed | 1.029x | no change |
+
+Four different changes, including ones that remove whole instructions from
+the body, all measure 1.023x-1.029x with the same 10,161-byte `jited`
+output. That is what a 0.42-CPU share predicts: the body is under 4% of the
+workload's time, so a 1.03x body is the most any of them can show, and the
+differences between them are inside the noise of a 3-sample measurement.
+
+The measured exception is the 2026-05-29 definition's own Katran body, which
+reaches 1.258x per invocation. That body is not one of these candidates, and
+the difference is worth lane C's attention: the archive's object is 10,196
+bytes and these are 10,161, a 35-byte gap that carries a 22% body-speed
+difference. Against the 2026-05-29 definition's 1.225x body, that is a large
 loss, and it is measurable only because the direct path works.
 
 Two harness facts this needed, both of which cost runs:
