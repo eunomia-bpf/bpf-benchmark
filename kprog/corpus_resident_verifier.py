@@ -17,6 +17,14 @@ import select
 import datetime
 
 ROOT = Path("/workspaces/repository")
+# libbpf program type names (bpftool/bpf_prog_info spelling) in enum bpf_prog_type order.
+PROG_TYPES = {name: number for number, name in enumerate([
+    "unspec", "socket_filter", "kprobe", "sched_cls", "sched_act", "tracepoint", "xdp",
+    "perf_event", "cgroup_skb", "cgroup_sock", "lwt_in", "lwt_out", "lwt_xmit", "sock_ops",
+    "sk_skb", "cgroup_device", "sk_msg", "raw_tracepoint", "cgroup_sock_addr",
+    "lwt_seg6local", "lirc_mode2", "sk_reuseport", "flow_dissector", "cgroup_sysctl",
+    "raw_tracepoint_writable", "cgroup_sockopt", "tracing", "struct_ops", "ext", "lsm",
+    "sk_lookup", "syscall", "netfilter"])}
 
 
 def guest(scratch):
@@ -62,7 +70,8 @@ def guest(scratch):
                 map_info.extend(item for item in application_maps[row["application"]]
                                 if item.get("name") not in selected_names)
                 record = dict(program=selected[0]["symbol"], bpf_object=resource["bpf_object"],
-                              map_info=map_info)
+                              map_info=map_info,
+                              prog_type=PROG_TYPES.get(row.get("program_info", {}).get("type"), 0))
                 with contextlib.redirect_stdout(io.StringIO()) as captured:
                     submit.direct("x86", state, Path(selected[0]["native_object"]), record)
                 output = captured.getvalue()

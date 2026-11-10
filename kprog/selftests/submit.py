@@ -443,6 +443,11 @@ def direct(arch, state, native, row):
         resources.__init__(arch, row["bpf_object"], row["program"], state,
                            row.get("map_info", ()))
         metadata, fds, details = resources.load(row["bpf_object"])
+        if not metadata["load_context"]["prog_type"] and row.get("prog_type"):
+            # The source section names no libbpf program type; the resident
+            # program's bpf_prog_info type supplies it.
+            metadata["load_context"]["prog_type"] = row["prog_type"]
+            details["prog_type_source"] = "resident bpf_prog_info"
         entry_bytes = row["program"].encode()
         meta_bytes = json.dumps(metadata, separators=(",", ":")).encode()
         buffers = [c.create_string_buffer(value) for value in
