@@ -23,7 +23,7 @@
 - [ ] **C** 继续在 P 中下沉 per-CPU array、hash、LRU 查找，保留现有重定位和验证后的同一副本发射。
 - [ ] **C** 完成 Tracee probe-read 有效值/零值/故障重放与 R 计时：9738f6a5a 初版已撤回，保留原 helper ERANGE/EFAULT 的完整替代 payload 已发布（88e623a6a）; actual bfa5ae6de:4generated/4compiled/4verifier rejections/0native executions, from trusted-pointer masking before the load. R unbound timing and verified fault semantics remain open.
 - [x] **C** 原生替换失败后保留 eBPF，完整 Katran 两个工作阶段继续运行，recipe 位于冻结路径之外（7734afc52、725e45398；248ebacee、13c38586e，TODO 启用时补记）。
-- [ ] **C** 在冻结路径之外接通05-29 verified native阶段：原snapshot RPC9220b9b44、原norejit模式e9b15dbfb、完整成功/失败请求档案759f31d85已发布；六应用baseline共384个观测程序，af422c391 native阶段回放继续。
+- [ ] **C** 在冻结路径之外接通05-29 verified native阶段：原snapshot RPC9220b9b44、原norejit模式e9b15dbfb、完整成功/失败请求档案759f31d85已发布；六应用baseline共384个观测程序，同af422c391模型的生命周期锁ea4625f42后，BCC25/25完整运行710fdaa60，OTel两条旧安装入口恢复42ba10978；其余native阶段回放继续。
 - [ ] **R** AArch64 硬件性能（DGX Spark，单次测试后立刻恢复 deepseek41-flash 部署）。
 - [x] 直接 native 的 blob 端点放回 R 专用测量模块（`kprog/perf/direct-native/`，1734f582f、3bd83fb13），Katran 2 秒功能运行替换 1 个程序。
 - [ ] **C/R** 这条测量路径没有异常表项，带 probe read 内联的 Tetragon、Tracee 载荷要先补上恢复路径再计时。
