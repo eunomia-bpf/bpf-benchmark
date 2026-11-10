@@ -20,8 +20,10 @@ tree (operator 2026-11-09, "以后禁止切换branch 和开不同的 tree"; 2026
   `vendor/linux-framework` `8e116c79d` (`bzImage`, `modules/`, `kernel.config`,
   `kernel_offsets.h`), the 2026-05-29 kinsn modules, `libbpfrejit_shim.so`,
   `libnative_loader.so`, `native-link`, and the native objects under
-  `native-bpf/x86_64/<app>/`. BCC, Cilium and Tracee objects come from the
-  2026-05-29 build; Tetragon's come from the current tree's build, because the
+  `native-bpf/x86_64/<app>/`. BCC, Cilium, Tracee and Katran objects come from
+  the 2026-05-29 build (Katran's from the build stage of the 9f3855f6f
+  `cilium-lab-20261009/paper-tree`, the objects behind the 1.104x and 1.087x
+  Katran rows); Tetragon's come from the current tree's build, because the
   2026-05-29 Tetragon source targets an older `struct filename`. `make
   tetragon-manifest` writes Tetragon's manifest with the frozen
   `write_native_manifest.py` and the 2026-05-29 flags (`--dedupe-program last
