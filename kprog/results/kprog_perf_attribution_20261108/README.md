@@ -1006,8 +1006,8 @@ Every row below passes `tools/audit_native_arm.py` as `native`.
 
 | app | stats | run | native/eBPF | archive | equal work |
 | --- | --- | --- | ---: | ---: | --- |
-| otel | off | `..._20261110_082943_617913` | **1.887x** | 1.824x | 3 samples, 0 errors, 13 vs 12 programs |
-| otel | on | `..._20261110_041432_200000` | 1.849x | 1.824x | per-invocation **14.636x** against 14.81x |
+| otel | off | `..._20261110_041432_200000` | **1.849x** | 1.824x | 3 samples, 0 errors, 13 vs 12 programs |
+| otel | on | `..._20261110_082943_617913` | 1.887x | 1.824x | per-invocation **14.636x**; work native/JIT **1.034** |
 | bcc | off | `..._20261110_050934_687855` | **0.985x** | 1.005x | 3 samples, packets 650,270/645,076/640,868 against 651,057/654,621/658,372 |
 | bcc | on | `..._20261110_044139_262178` | **1.003x** | 1.005x | per-invocation 106.8 against 105.9 ns, 15/25 programs live in both arms |
 | cilium | off | `..._20261110_060431_280096` | **1.715x** | 2.358x | 3 samples, 1.83-1.95M pps against 1.09-1.10M **but 7 programs lost** |
@@ -1018,10 +1018,24 @@ Every row below passes `tools/audit_native_arm.py` as `native`.
 | katran | on | `..._20261110_075919_372582` | **1.087x** | 1.102x | prior section |
 
 **Four of the six return.** OTel lands slightly *above* its archive figure in
-both modes (1.887x off, 1.849x on, against 1.824x) and its per-invocation
+both modes (1.849x off, 1.887x on, against 1.824x) and its per-invocation
 speedup is 14.636x against 14.81x. BCC returns at 1.003x on against 1.005x
 and 0.985x off. Tracee returns at 0.964x on and 0.948x off against 0.958x.
 Katran returns at 1.104x off and 1.087x on against 1.102x.
+
+**OTel's 14.636x comes with equal work, which was the open question.** Its
+stats-on run records both arms' counters, and they settle it:
+
+| arm | live programs | invocations | `native_tracer_e` ns/run |
+| --- | ---: | ---: | ---: |
+| JIT | 2 | 416,169,823 | 3,299.1 |
+| native | 2 | 430,302,410 | **225.4** |
+
+The native arm ran **1.034x the invocations** of the JIT arm, so its 14.636x
+per invocation is not bought by doing less: it did three percent more in
+seven percent of the time. The two live programs are the same pair in both
+arms (`native_tracer_e` and `tracepoint__sched`), so the comparison is
+program for program.
 
 **Cilium is the one that does not, and its row carries a caveat the others
 do not.** Seven kernel-version programs load in the JIT arm and are absent
