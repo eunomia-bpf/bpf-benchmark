@@ -1,12 +1,12 @@
 {
   "model_head": "46659115e7a1643c3c09ea905372b4488d4c95c6",
   "runtime_model": "af422c39195084ee3137627df943c055491358c7",
-  "native_body_groups": 123,
+  "native_body_groups": 191,
   "instances": 549,
-  "generated": 341,
-  "compiled": 321,
-  "verifier_accepted": 108,
-  "verifier_rejected": 213,
+  "generated": 409,
+  "compiled": 389,
+  "verifier_accepted": 123,
+  "verifier_rejected": 266,
   "applications": [
     {
       "application": "bcc/set",
@@ -125,24 +125,29 @@
     {
       "application": "tracee/monitor",
       "instances": 151,
-      "generated": 29,
-      "compiled": 9,
-      "verifier_accepted": 0,
-      "verifier_rejected": 9,
+      "generated": 96,
+      "compiled": 76,
+      "verifier_accepted": 15,
+      "verifier_rejected": 61,
       "failure_classes": {
-        "pending": 121,
+        "pending": 54,
+        "verifier: Rn invalid mem access 'scalar'": 50,
         "compiler: translation unit is too large for Clang to process: ran out of source locations": 20,
-        "verifier: Rn invalid mem access 'scalar'": 9,
+        "verifier: Rn max value is outside of the allowed memory range": 4,
+        "verifier: invalid write to stack R10 off=N size=N": 2,
+        "verifier: math between map_value pointer and N is not allowed": 2,
+        "verifier: access beyond struct (anon) at off N size N": 2,
+        "verifier: misaligned stack access off N+N+N size N": 1,
         "generation_failed: ValueError: unresolved finite indirect target at 0xN: call   QWORD PTR [rsp+0xN]": 1
       },
-      "bodies": 30,
+      "bodies": 97,
       "by_selection": {
         "current manifest": {
           "instances": 151,
-          "generated": 29,
-          "compiled": 9,
-          "verifier_accepted": 0,
-          "verifier_rejected": 9
+          "generated": 96,
+          "compiled": 76,
+          "verifier_accepted": 15,
+          "verifier_rejected": 61
         }
       },
       "best_verified_path_row": 5,
@@ -157,20 +162,20 @@
     {
       "application": "tetragon/observer",
       "instances": 287,
-      "generated": 284,
-      "compiled": 284,
+      "generated": 285,
+      "compiled": 285,
       "verifier_accepted": 81,
-      "verifier_rejected": 203,
+      "verifier_rejected": 204,
       "failure_classes": {
         "verifier: Rn invalid mem access 'scalar'": 123,
-        "verifier: invalid write to stack R10 off=N size=N": 77,
-        "pending": 2,
+        "verifier: invalid write to stack R10 off=N size=N": 78,
         "verifier: The sequence of N jumps is too complex.": 1,
         "native_manifest_selection_gap": 1,
         "verifier: math between fp pointer and register with unbounded min value is not allowed": 1,
-        "verifier: Rn type=scalar expected=func": 1
+        "verifier: Rn type=scalar expected=func": 1,
+        "pending": 1
       },
-      "bodies": 28,
+      "bodies": 29,
       "by_selection": {
         "current manifest": {
           "instances": 134,
@@ -188,10 +193,10 @@
         },
         "previous census identity on current payload": {
           "instances": 152,
-          "generated": 150,
-          "compiled": 150,
+          "generated": 151,
+          "compiled": 151,
           "verifier_accepted": 35,
-          "verifier_rejected": 115
+          "verifier_rejected": 116
         }
       },
       "best_verified_path_row": 4,
@@ -207,40 +212,27 @@
   "classes": [
     {
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
-      "instances": 132,
-      "bodies": 20,
+      "instances": 173,
+      "bodies": 61,
       "per_application": {
         "BCC": 0,
         "Katran": 0,
         "Cilium": 0,
         "OTel": 0,
-        "Tracee": 9,
+        "Tracee": 50,
         "Tetragon": 123
       }
     },
     {
-      "failure_class": "pending",
-      "instances": 123,
-      "bodies": 0,
-      "per_application": {
-        "BCC": 0,
-        "Katran": 0,
-        "Cilium": 0,
-        "OTel": 0,
-        "Tracee": 121,
-        "Tetragon": 2
-      }
-    },
-    {
       "failure_class": "installed",
-      "instances": 108,
-      "bodies": 36,
+      "instances": 123,
+      "bodies": 51,
       "per_application": {
         "BCC": 25,
         "Katran": 0,
         "Cilium": 0,
         "OTel": 2,
-        "Tracee": 0,
+        "Tracee": 15,
         "Tetragon": 81
       }
     },
@@ -259,15 +251,28 @@
     },
     {
       "failure_class": "verifier: invalid write to stack R10 off=N size=N",
-      "instances": 77,
-      "bodies": 5,
+      "instances": 80,
+      "bodies": 8,
       "per_application": {
         "BCC": 0,
         "Katran": 0,
         "Cilium": 0,
         "OTel": 0,
-        "Tracee": 0,
-        "Tetragon": 77
+        "Tracee": 2,
+        "Tetragon": 78
+      }
+    },
+    {
+      "failure_class": "pending",
+      "instances": 55,
+      "bodies": 0,
+      "per_application": {
+        "BCC": 0,
+        "Katran": 0,
+        "Cilium": 0,
+        "OTel": 0,
+        "Tracee": 54,
+        "Tetragon": 1
       }
     },
     {
@@ -284,6 +289,45 @@
       }
     },
     {
+      "failure_class": "verifier: Rn max value is outside of the allowed memory range",
+      "instances": 4,
+      "bodies": 4,
+      "per_application": {
+        "BCC": 0,
+        "Katran": 0,
+        "Cilium": 0,
+        "OTel": 0,
+        "Tracee": 4,
+        "Tetragon": 0
+      }
+    },
+    {
+      "failure_class": "verifier: math between map_value pointer and N is not allowed",
+      "instances": 2,
+      "bodies": 2,
+      "per_application": {
+        "BCC": 0,
+        "Katran": 0,
+        "Cilium": 0,
+        "OTel": 0,
+        "Tracee": 2,
+        "Tetragon": 0
+      }
+    },
+    {
+      "failure_class": "verifier: access beyond struct (anon) at off N size N",
+      "instances": 2,
+      "bodies": 2,
+      "per_application": {
+        "BCC": 0,
+        "Katran": 0,
+        "Cilium": 0,
+        "OTel": 0,
+        "Tracee": 2,
+        "Tetragon": 0
+      }
+    },
+    {
       "failure_class": "verifier: value N makes fp pointer be out of bounds",
       "instances": 1,
       "bodies": 1,
@@ -293,6 +337,19 @@
         "Cilium": 0,
         "OTel": 0,
         "Tracee": 0,
+        "Tetragon": 0
+      }
+    },
+    {
+      "failure_class": "verifier: misaligned stack access off N+N+N size N",
+      "instances": 1,
+      "bodies": 1,
+      "per_application": {
+        "BCC": 0,
+        "Katran": 0,
+        "Cilium": 0,
+        "OTel": 0,
+        "Tracee": 1,
         "Tetragon": 0
       }
     },
@@ -364,8 +421,8 @@
   ],
   "largest_failure_class": {
     "failure_class": "verifier: Rn invalid mem access 'scalar'",
-    "instances": 132,
-    "bodies": 20,
+    "instances": 173,
+    "bodies": 61,
     "representatives": [
       {
         "application": "tetragon/observer",
@@ -426,9 +483,9 @@
     "8-19",
     "8-19"
   ],
-  "completed_bodies": 123,
-  "pending_bodies": 123,
-  "pending_instances": 123,
+  "completed_bodies": 191,
+  "pending_bodies": 55,
+  "pending_instances": 55,
   "body_identity": "SHA256 of complete native-link proof ELF (--mode proof --preserve-entry-abi)",
   "bodies": [
     {
@@ -1239,7 +1296,7 @@
         "current manifest": 1
       },
       "stage": "verifier_rejected",
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R3 invalid mem access 'scalar'",
       "verifier_context": [
@@ -1275,7 +1332,7 @@
         "current manifest": 1
       },
       "stage": "verifier_rejected",
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R3 invalid mem access 'scalar'",
       "verifier_context": [
@@ -1311,7 +1368,7 @@
         "current manifest": 1
       },
       "stage": "verifier_rejected",
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R3 invalid mem access 'scalar'",
       "verifier_context": [
@@ -1347,7 +1404,7 @@
         "current manifest": 1
       },
       "stage": "verifier_rejected",
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R3 invalid mem access 'scalar'",
       "verifier_context": [
@@ -1383,7 +1440,7 @@
         "current manifest": 1
       },
       "stage": "verifier_rejected",
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R3 invalid mem access 'scalar'",
       "verifier_context": [
@@ -1419,7 +1476,7 @@
         "current manifest": 1
       },
       "stage": "verifier_rejected",
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R3 invalid mem access 'scalar'",
       "verifier_context": [
@@ -1455,7 +1512,7 @@
         "current manifest": 1
       },
       "stage": "verifier_rejected",
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R3 invalid mem access 'scalar'",
       "verifier_context": [
@@ -1491,7 +1548,7 @@
         "current manifest": 1
       },
       "stage": "verifier_rejected",
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R3 invalid mem access 'scalar'",
       "verifier_context": [
@@ -1527,7 +1584,7 @@
         "current manifest": 1
       },
       "stage": "verifier_rejected",
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R3 invalid mem access 'scalar'",
       "verifier_context": [
@@ -1548,6 +1605,186 @@
       "cpu": "8-19",
       "started": "2026-11-10T03:58:27.119660+00:00",
       "finished": "2026-11-10T04:06:52.525619+00:00"
+    },
+    {
+      "body_sha256": "3a1c3ca4686e388ff4c1ca0ec674fb0606097fe0b11248a7fc018f8531d46321",
+      "application": "tracee/monitor",
+      "representative_id": 486,
+      "symbol": "syscall__execveat_enter",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        486
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "3126: (56) if w7 != 0x0 goto pc+1     ; R7=0",
+        "3127: (63) *(u32 *)(r10 -304) = r2    ; R2=0 R10=fp0 fp-304=????0",
+        "3128: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "3126: (56) if w7 != 0x0 goto pc+1     ; R7=0",
+        "3127: (63) *(u32 *)(r10 -304) = r2    ; R2=0 R10=fp0 fp-304=????0",
+        "3128: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/3a1c3ca4686e388f",
+      "cpu": "8-19",
+      "started": "2026-11-10T03:58:27.119211+00:00",
+      "finished": "2026-11-10T05:39:57.417321+00:00"
+    },
+    {
+      "body_sha256": "bd8a8080813a7575adc3b0338bc489561fa7c5108b49c3a7ed0c001f0d38398a",
+      "application": "tracee/monitor",
+      "representative_id": 484,
+      "symbol": "syscall__execve_enter",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        484
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "4167: (15) if r7 == 0x10 goto pc+1    ; R7=scalar(smax=0x7ffffffffffffff8,umax=0xfffffffffffffff8,smax32=0x7ffffff8,umax32=0xfffffff8,var_off=(0x0; 0xfffffffffffffff8))",
+        "4168: (63) *(u32 *)(r10 -256) = r5    ; R5=6 R10=fp0 fp-256=mmmm6",
+        "4169: (79) r5 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "4167: (15) if r7 == 0x10 goto pc+1    ; R7=scalar(smax=0x7ffffffffffffff8,umax=0xfffffffffffffff8,smax32=0x7ffffff8,umax32=0xfffffff8,var_off=(0x0; 0xfffffffffffffff8))",
+        "4168: (63) *(u32 *)(r10 -256) = r5    ; R5=6 R10=fp0 fp-256=mmmm6",
+        "4169: (79) r5 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/bd8a8080813a7575",
+      "cpu": "8-19",
+      "started": "2026-11-10T03:58:27.117897+00:00",
+      "finished": "2026-11-10T05:56:55.914283+00:00"
+    },
+    {
+      "body_sha256": "1de2bb7b9ee78df4c8e415221ab2abe85f1e9b36ee40bf205e66c910e6e99ce3",
+      "application": "tracee/monitor",
+      "representative_id": 516,
+      "symbol": "trace_security_file_open",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        516
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "100: (bf) r1 = r4                     ; R1=48 R4=48",
+        "101: (07) r1 += -232                  ; R1=-184",
+        "102: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "100: (bf) r1 = r4                     ; R1=48 R4=48",
+        "101: (07) r1 += -232                  ; R1=-184",
+        "102: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/1de2bb7b9ee78df4",
+      "cpu": "8-19",
+      "started": "2026-11-10T03:58:27.118422+00:00",
+      "finished": "2026-11-10T06:08:36.524419+00:00"
+    },
+    {
+      "body_sha256": "698e23a5255537cef6632c3013b4585d78c5aba1abd47758411dbcb53c194327",
+      "application": "tracee/monitor",
+      "representative_id": 591,
+      "symbol": "trace_security_path_notify",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        591
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "89: (bf) r1 = r4                      ; R1=48 R4=48",
+        "90: (07) r1 += -232                   ; R1=-184",
+        "91: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "89: (bf) r1 = r4                      ; R1=48 R4=48",
+        "90: (07) r1 += -232                   ; R1=-184",
+        "91: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/698e23a5255537ce",
+      "cpu": "8-19",
+      "started": "2026-11-10T03:58:27.117243+00:00",
+      "finished": "2026-11-10T04:58:34.562080+00:00"
+    },
+    {
+      "body_sha256": "5215f8f2514043f7a8143e0f4fe6f7347c2786d4531b812f95250d752f58c960",
+      "application": "tracee/monitor",
+      "representative_id": 564,
+      "symbol": "trace_security_kernel_post_read_file",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        564
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "89: (bf) r1 = r4                      ; R1=32 R4=32",
+        "90: (07) r1 += -248                   ; R1=-216",
+        "91: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "89: (bf) r1 = r4                      ; R1=32 R4=32",
+        "90: (07) r1 += -248                   ; R1=-216",
+        "91: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/5215f8f2514043f7",
+      "cpu": "8-19",
+      "started": "2026-11-10T03:58:27.116535+00:00",
+      "finished": "2026-11-10T05:15:26.237882+00:00"
     },
     {
       "body_sha256": "2d94f88d5c1fb9f42b77cdd6635b4989538ef9ed62a231e273d95fe270872fa2",
@@ -1594,7 +1831,7 @@
         "previous census identity on current payload": 1
       },
       "stage": "verifier_rejected",
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'",
       "verifier_context": [
@@ -1718,6 +1955,42 @@
       "finished": "2026-11-10T03:58:38.267930+00:00"
     },
     {
+      "body_sha256": "5bb072ffc048531f3d576020af6b844cc437101a844f93c398748249bc74deee",
+      "application": "tetragon/observer",
+      "representative_id": 30,
+      "symbol": "event_execve",
+      "native_object": "bpf_execve_event_v61.native.o",
+      "instances": 1,
+      "member_ids": [
+        30
+      ],
+      "selection_kinds": {
+        "previous census identity on current payload": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_stack_access",
+      "failure_class": "verifier: invalid write to stack R10 off=N size=N",
+      "verifier_message": "invalid write to stack R10 off=-1352 size=8",
+      "verifier_context": [
+        "25: (79) r7 = *(u64 *)(r6 +0)         ; R6=map_value(map=kprog_unspec,ks=4,vs=8) R7=scalar()",
+        "26: (79) r7 = *(u64 *)(r6 +0)         ; R6=map_value(map=kprog_unspec,ks=4,vs=8) R7=scalar()",
+        "27: (7b) *(u64 *)(r10 -1352) = r7",
+        "invalid write to stack R10 off=-1352 size=8"
+      ],
+      "error_context": [
+        "25: (79) r7 = *(u64 *)(r6 +0)         ; R6=map_value(map=kprog_unspec,ks=4,vs=8) R7=scalar()",
+        "26: (79) r7 = *(u64 *)(r6 +0)         ; R6=map_value(map=kprog_unspec,ks=4,vs=8) R7=scalar()",
+        "27: (7b) *(u64 *)(r10 -1352) = r7",
+        "invalid write to stack R10 off=-1352 size=8"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/5bb072ffc048531f",
+      "cpu": "8-19",
+      "started": "2026-11-10T03:58:27.122275+00:00",
+      "finished": "2026-11-10T06:12:14.977794+00:00"
+    },
+    {
       "body_sha256": "afaf7c37fc74959c6d58f809f0178f1aa503be35a1a180d12c8803d32724a9b5",
       "application": "tetragon/observer",
       "representative_id": 142,
@@ -1739,7 +2012,7 @@
         "previous census identity on current payload": 9
       },
       "stage": "verifier_rejected",
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'",
       "verifier_context": [
@@ -1843,7 +2116,7 @@
         "previous census identity on current payload": 33
       },
       "stage": "verifier_rejected",
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'",
       "verifier_context": [
@@ -1879,7 +2152,7 @@
         "previous census identity on current payload": 1
       },
       "stage": "verifier_rejected",
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'",
       "verifier_context": [
@@ -1915,7 +2188,7 @@
         "previous census identity on current payload": 1
       },
       "stage": "verifier_rejected",
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'",
       "verifier_context": [
@@ -2155,6 +2428,258 @@
       "finished": "2026-11-10T04:35:16.762003+00:00"
     },
     {
+      "body_sha256": "b5a5090318dee206259081a1d82b306a50f973653215e231222462d04884955c",
+      "application": "tracee/monitor",
+      "representative_id": 580,
+      "symbol": "trace_ret_kallsyms_lookup_name",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        580
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "214: (57) r1 &= 1                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "215: (55) if r1 != 0x0 goto pc+298    ; R1=0",
+        "216: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "214: (57) r1 &= 1                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "215: (55) if r1 != 0x0 goto pc+298    ; R1=0",
+        "216: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/b5a5090318dee206",
+      "cpu": "8-19",
+      "started": "2026-11-10T06:09:00.826961+00:00",
+      "finished": "2026-11-10T06:27:01.290054+00:00"
+    },
+    {
+      "body_sha256": "2239feb50f8a301a89248f8956d610c5f93bbf36816b99437c7171a6bac654b5",
+      "application": "tracee/monitor",
+      "representative_id": 600,
+      "symbol": "trace_ret_sock_alloc_file",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        600
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "99: (bf) r1 = r4                      ; R1=16 R4=16",
+        "100: (07) r1 += -264                  ; R1=-248",
+        "101: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "99: (bf) r1 = r4                      ; R1=16 R4=16",
+        "100: (07) r1 += -264                  ; R1=-248",
+        "101: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/2239feb50f8a301a",
+      "cpu": "8-19",
+      "started": "2026-11-10T06:05:02.559677+00:00",
+      "finished": "2026-11-10T06:20:06.429917+00:00"
+    },
+    {
+      "body_sha256": "012a25fcff4975b3125219cba0d64075354086090ff09a2f1595b58764b43b5b",
+      "application": "tracee/monitor",
+      "representative_id": 566,
+      "symbol": "trace_device_add",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        566
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "95: (57) r1 &= 1                      ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "96: (55) if r1 != 0x0 goto pc+140     ; R1=0",
+        "97: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "95: (57) r1 &= 1                      ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "96: (55) if r1 != 0x0 goto pc+140     ; R1=0",
+        "97: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/012a25fcff4975b3",
+      "cpu": "8-19",
+      "started": "2026-11-10T06:04:27.350245+00:00",
+      "finished": "2026-11-10T06:22:33.227417+00:00"
+    },
+    {
+      "body_sha256": "a09375350722345a9b98946174efcee523dfe465997369d8a43ff68fa45b5870",
+      "application": "tracee/monitor",
+      "representative_id": 577,
+      "symbol": "tracepoint__task__task_rename",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        577
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "95: (57) r1 &= 1                      ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "96: (55) if r1 != 0x0 goto pc+140     ; R1=0",
+        "97: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "95: (57) r1 &= 1                      ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "96: (55) if r1 != 0x0 goto pc+140     ; R1=0",
+        "97: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/a09375350722345a",
+      "cpu": "8-19",
+      "started": "2026-11-10T06:01:53.836993+00:00",
+      "finished": "2026-11-10T06:20:35.738305+00:00"
+    },
+    {
+      "body_sha256": "2419a44f47fbb134997502563863995c2f6a8304826981a56a0cebc91d5164f4",
+      "application": "tracee/monitor",
+      "representative_id": 524,
+      "symbol": "trace_proc_create",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        524
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "95: (57) r1 &= 1                      ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "96: (55) if r1 != 0x0 goto pc+140     ; R1=0",
+        "97: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "95: (57) r1 &= 1                      ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "96: (55) if r1 != 0x0 goto pc+140     ; R1=0",
+        "97: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/2419a44f47fbb134",
+      "cpu": "8-19",
+      "started": "2026-11-10T06:00:13.820351+00:00",
+      "finished": "2026-11-10T06:15:19.172364+00:00"
+    },
+    {
+      "body_sha256": "0f410fafb16d92f0763ae3d3ecd4009da9a16a86125f38ce684c7749fb8f100b",
+      "application": "tracee/monitor",
+      "representative_id": 509,
+      "symbol": "trace_do_exit",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        509
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "95: (57) r1 &= 1                      ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "96: (55) if r1 != 0x0 goto pc+140     ; R1=0",
+        "97: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "95: (57) r1 &= 1                      ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "96: (55) if r1 != 0x0 goto pc+140     ; R1=0",
+        "97: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/0f410fafb16d92f0",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:59:49.290189+00:00",
+      "finished": "2026-11-10T06:22:18.019108+00:00"
+    },
+    {
+      "body_sha256": "eac6b3e6428a9dbcff82413bfe82d3a3d4f7adf713de2a3c4f658419ac3e0917",
+      "application": "tracee/monitor",
+      "representative_id": 507,
+      "symbol": "trace_filldir64",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        507
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "98: (57) r1 &= 1                      ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "99: (55) if r1 != 0x0 goto pc+140     ; R1=0",
+        "100: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "98: (57) r1 &= 1                      ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "99: (55) if r1 != 0x0 goto pc+140     ; R1=0",
+        "100: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/eac6b3e6428a9dbc",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:58:18.195081+00:00",
+      "finished": "2026-11-10T06:16:10.235286+00:00"
+    },
+    {
       "body_sha256": "330c8579b9b8d08a1059ac30d196a9f8ea92578c7c638a79790c83ed76a3cb95",
       "application": "otelcol-ebpf-profiler/profiling",
       "representative_id": 150,
@@ -2184,6 +2709,42 @@
       "cpu": "8-19",
       "started": "2026-11-10T04:35:17.367812+00:00",
       "finished": "2026-11-10T04:36:31.126659+00:00"
+    },
+    {
+      "body_sha256": "e11faca43f183a9b90bec7d7b3b5e2b850d9c67e16d967c33d786a3589c41b52",
+      "application": "tracee/monitor",
+      "representative_id": 505,
+      "symbol": "syscall__accept4",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        505
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "3354: (56) if w7 != 0x0 goto pc+1     ; R7=0",
+        "3355: (61) r1 = *(u32 *)(r10 -344)    ; R1=0 R10=fp0 fp-344=mmmm0",
+        "3356: (79) r0 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "3354: (56) if w7 != 0x0 goto pc+1     ; R7=0",
+        "3355: (61) r1 = *(u32 *)(r10 -344)    ; R1=0 R10=fp0 fp-344=mmmm0",
+        "3356: (79) r0 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/e11faca43f183a9b",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:56:57.331869+00:00",
+      "finished": "2026-11-10T06:10:16.778651+00:00"
     },
     {
       "body_sha256": "4eb98fa3e90b98f6e12b5e093e65d4a4cef6011bc49b59b3a343fc898bc9fd95",
@@ -2253,6 +2814,78 @@
       "cpu": "8-19",
       "started": "2026-11-10T04:36:31.848536+00:00",
       "finished": "2026-11-10T04:36:39.027842+00:00"
+    },
+    {
+      "body_sha256": "e17dcb0c8443cb1dfa1ddd26b238345c3ab2745d211e46565c7c5745bd43ef5d",
+      "application": "tracee/monitor",
+      "representative_id": 511,
+      "symbol": "uprobe_seq_ops_trigger",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        511
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "118: (57) r1 &= 1                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "119: (55) if r1 != 0x0 goto pc+301    ; R1=0",
+        "120: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "118: (57) r1 &= 1                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "119: (55) if r1 != 0x0 goto pc+301    ; R1=0",
+        "120: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/e17dcb0c8443cb1d",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:52:16.503507+00:00",
+      "finished": "2026-11-10T06:05:01.129456+00:00"
+    },
+    {
+      "body_sha256": "fa744a1742937335eb4ac15210a8895beca91d948869fc838710dc10174742de",
+      "application": "tracee/monitor",
+      "representative_id": 593,
+      "symbol": "trace_security_task_setrlimit",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        593
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "100: (bf) r1 = r4                     ; R1=16 R4=16",
+        "101: (07) r1 += -232                  ; R1=-216",
+        "102: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "100: (bf) r1 = r4                     ; R1=16 R4=16",
+        "101: (07) r1 += -232                  ; R1=-216",
+        "102: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/fa744a1742937335",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:47:55.817819+00:00",
+      "finished": "2026-11-10T06:10:03.722017+00:00"
     },
     {
       "body_sha256": "afe8200e3f7c87789bb4cb8959efc4d7b07a67fa7ac5cf20bc8420fac009b4cf",
@@ -2352,6 +2985,222 @@
       "cpu": "8-19",
       "started": "2026-11-10T04:36:52.933475+00:00",
       "finished": "2026-11-10T04:36:58.917519+00:00"
+    },
+    {
+      "body_sha256": "876edbc31cac71a6a298dd1ac13f5b4955ca6fe27de4864c02b632ab7df45421",
+      "application": "tracee/monitor",
+      "representative_id": 493,
+      "symbol": "uprobe_lkm_seeker_submitter",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        493
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "875: (1f) r1 -= r4                    ; R1=scalar() R4=fp-440",
+        "876: (07) r1 += -440                  ; R1=scalar()",
+        "877: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "875: (1f) r1 -= r4                    ; R1=scalar() R4=fp-440",
+        "876: (07) r1 += -440                  ; R1=scalar()",
+        "877: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/876edbc31cac71a6",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:47:31.824231+00:00",
+      "finished": "2026-11-10T06:08:59.286709+00:00"
+    },
+    {
+      "body_sha256": "ed40b27831629b54c829685e3a6ad2dc09b81709a8eaaa87c69bc4c12fcc3a73",
+      "application": "tracee/monitor",
+      "representative_id": 606,
+      "symbol": "cgroup_skb_ingress",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        606
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_rejected",
+      "failure_class": "verifier: access beyond struct (anon) at off N size N",
+      "verifier_message": "access beyond struct (anon) at off 0 size 8",
+      "verifier_context": [
+        "44: (b4) w9 = 1                       ; R9=1",
+        "45: (55) if r1 != 0x2 goto pc+159     ; R1=2",
+        "46: (79) r1 = *(u64 *)(r0 +168)",
+        "access beyond struct (anon) at off 0 size 8"
+      ],
+      "error_context": [
+        "44: (b4) w9 = 1                       ; R9=1",
+        "45: (55) if r1 != 0x2 goto pc+159     ; R1=2",
+        "46: (79) r1 = *(u64 *)(r0 +168)",
+        "access beyond struct (anon) at off 0 size 8"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/ed40b27831629b54",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:45:45.357266+00:00",
+      "finished": "2026-11-10T06:01:52.332345+00:00"
+    },
+    {
+      "body_sha256": "5e86cada182a1fadbc8b896f13e59d5d0f4c4151eae930996297f222c183d472",
+      "application": "tracee/monitor",
+      "representative_id": 607,
+      "symbol": "cgroup_skb_egress",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        607
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_rejected",
+      "failure_class": "verifier: access beyond struct (anon) at off N size N",
+      "verifier_message": "access beyond struct (anon) at off 0 size 8",
+      "verifier_context": [
+        "44: (b4) w9 = 1                       ; R9=1",
+        "45: (55) if r1 != 0x2 goto pc+159     ; R1=2",
+        "46: (79) r1 = *(u64 *)(r0 +168)",
+        "access beyond struct (anon) at off 0 size 8"
+      ],
+      "error_context": [
+        "44: (b4) w9 = 1                       ; R9=1",
+        "45: (55) if r1 != 0x2 goto pc+159     ; R1=2",
+        "46: (79) r1 = *(u64 *)(r0 +168)",
+        "access beyond struct (anon) at off 0 size 8"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/5e86cada182a1fad",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:47:26.161094+00:00",
+      "finished": "2026-11-10T06:14:02.151119+00:00"
+    },
+    {
+      "body_sha256": "66cb11bf7e16086c49d5f52f7ee0a5337e78a386fd236d9a5dd7b1339b01a651",
+      "application": "tracee/monitor",
+      "representative_id": 521,
+      "symbol": "trace_cap_capable",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        521
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "89: (bf) r1 = r4                      ; R1=16 R4=16",
+        "90: (07) r1 += -232                   ; R1=-216",
+        "91: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "89: (bf) r1 = r4                      ; R1=16 R4=16",
+        "90: (07) r1 += -232                   ; R1=-216",
+        "91: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/66cb11bf7e16086c",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:45:22.728842+00:00",
+      "finished": "2026-11-10T06:00:12.282358+00:00"
+    },
+    {
+      "body_sha256": "91c71beeefa4231d457cf18fed42e51af7367386c37d9349166b91db803f6c3e",
+      "application": "tracee/monitor",
+      "representative_id": 471,
+      "symbol": "trace_sys_exit",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        471
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "53: (bf) r1 = r4                      ; R1=16 R4=16",
+        "54: (07) r1 += -232                   ; R1=-216",
+        "55: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "53: (bf) r1 = r4                      ; R1=16 R4=16",
+        "54: (07) r1 += -232                   ; R1=-216",
+        "55: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/91c71beeefa4231d",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:45:14.808919+00:00",
+      "finished": "2026-11-10T06:04:25.743339+00:00"
+    },
+    {
+      "body_sha256": "36f43ce768ac24901aa2fec47217563fcbc17d454d4ffa7ecdcfd023d8a99cec",
+      "application": "tracee/monitor",
+      "representative_id": 470,
+      "symbol": "trace_sys_enter",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        470
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R8 invalid mem access 'scalar'",
+      "verifier_context": [
+        "105: (bf) r1 = r3                     ; R1=16 R3=16",
+        "106: (07) r1 += -232                  ; R1=-216",
+        "107: (61) r2 = *(u32 *)(r8 +0)",
+        "R8 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "105: (bf) r1 = r3                     ; R1=16 R3=16",
+        "106: (07) r1 += -232                  ; R1=-216",
+        "107: (61) r2 = *(u32 *)(r8 +0)",
+        "R8 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/36f43ce768ac2490",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:44:35.644520+00:00",
+      "finished": "2026-11-10T05:59:47.808955+00:00"
     },
     {
       "body_sha256": "ba0a5d685d5bccaf2b2c223ae182a6a2f539d83881d7c2a6df6239d6bf73936f",
@@ -2581,6 +3430,42 @@
       "finished": "2026-11-10T04:39:21.887549+00:00"
     },
     {
+      "body_sha256": "e5def456ee4d70c810499cc9bc14191c585df66f2d9b7fbe13d7448d3115f1b3",
+      "application": "tracee/monitor",
+      "representative_id": 604,
+      "symbol": "cgroup_bpf_run_filter_skb",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        604
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_stack_access",
+      "failure_class": "verifier: invalid write to stack R10 off=N size=N",
+      "verifier_message": "invalid write to stack R10 off=-536 size=8",
+      "verifier_context": [
+        "257: (65) if r1 s> 0xffffffff goto pc+1       ; R1=432",
+        "259: (85) call bpf_get_current_task#35        ; R0=scalar()",
+        "260: (7b) *(u64 *)(r10 -536) = r0",
+        "invalid write to stack R10 off=-536 size=8"
+      ],
+      "error_context": [
+        "257: (65) if r1 s> 0xffffffff goto pc+1       ; R1=432",
+        "259: (85) call bpf_get_current_task#35        ; R0=scalar()",
+        "260: (7b) *(u64 *)(r10 -536) = r0",
+        "invalid write to stack R10 off=-536 size=8"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/e5def456ee4d70c8",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:43:50.934736+00:00",
+      "finished": "2026-11-10T05:58:16.698217+00:00"
+    },
+    {
       "body_sha256": "c8043c3abe85c81b9ae4403d32bdf2516d2e859fe1083202dd0df1530220c392",
       "application": "cilium/agent",
       "representative_id": 304,
@@ -2612,6 +3497,42 @@
       "cpu": "8-19",
       "started": "2026-11-10T04:39:22.725754+00:00",
       "finished": "2026-11-10T04:39:27.613344+00:00"
+    },
+    {
+      "body_sha256": "e24ba6f64785b0fc44c22bc57647ff1d7ac024ffd2551704f9fb2bb083466114",
+      "application": "tracee/monitor",
+      "representative_id": 494,
+      "symbol": "uprobe_lkm_seeker",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        494
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "88: (bf) r1 = r4                      ; R1=16 R4=16",
+        "89: (07) r1 += -200                   ; R1=-184",
+        "90: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "88: (bf) r1 = r4                      ; R1=16 R4=16",
+        "89: (07) r1 += -200                   ; R1=-184",
+        "90: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/e24ba6f64785b0fc",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:39:58.873043+00:00",
+      "finished": "2026-11-10T05:52:15.085846+00:00"
     },
     {
       "body_sha256": "b5211a5603a49aed20537a3f549fe3668fdb8a54247c752135151fa6fba1c032",
@@ -2741,6 +3662,42 @@
       "finished": "2026-11-10T04:39:38.410568+00:00"
     },
     {
+      "body_sha256": "1313020364bd1a94a322d49b38f1065daf24b44a1430a63c8ab0dd43ebbfb535",
+      "application": "tracee/monitor",
+      "representative_id": 612,
+      "symbol": "uprobe__features_fallback_arena",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        612
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "88: (bf) r1 = r4                      ; R1=32 R4=32",
+        "89: (07) r1 += -216                   ; R1=-184",
+        "90: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "88: (bf) r1 = r4                      ; R1=32 R4=32",
+        "89: (07) r1 += -216                   ; R1=-184",
+        "90: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/1313020364bd1a94",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:35:51.637502+00:00",
+      "finished": "2026-11-10T05:47:24.739965+00:00"
+    },
+    {
       "body_sha256": "9be752ee91026d2ab632deef95f4e3b726455650b19346bcb7a5befaf7f90f77",
       "application": "tetragon/observer",
       "representative_id": 27,
@@ -2754,7 +3711,7 @@
         "previous census identity on current payload": 1
       },
       "stage": "verifier_rejected",
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R3 invalid mem access 'scalar'",
       "verifier_context": [
@@ -2775,6 +3732,78 @@
       "cpu": "8-19",
       "started": "2026-11-10T04:39:39.394596+00:00",
       "finished": "2026-11-10T04:43:07.242712+00:00"
+    },
+    {
+      "body_sha256": "b49525aaba0aec63546ed19ed462f35655c071c47cbad637faa456e83dfbd991",
+      "application": "tracee/monitor",
+      "representative_id": 490,
+      "symbol": "sched_process_fork_signal",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        490
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "221: (bf) r7 = r5                     ; R5=8 R7=8",
+        "222: (07) r7 += -184                  ; R7=-176",
+        "223: (79) r4 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "221: (bf) r7 = r5                     ; R5=8 R7=8",
+        "222: (07) r7 += -184                  ; R7=-176",
+        "223: (79) r4 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/b49525aaba0aec63",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:35:43.327084+00:00",
+      "finished": "2026-11-10T05:47:30.120516+00:00"
+    },
+    {
+      "body_sha256": "155eead3419659776ada95b0b1090b2435cdc9a1038d1a32c859d2888e93d989",
+      "application": "tracee/monitor",
+      "representative_id": 498,
+      "symbol": "lkm_seeker_new_mod_only_tail",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        498
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_stack_access",
+      "failure_class": "verifier: invalid write to stack R10 off=N size=N",
+      "verifier_message": "invalid write to stack R10 off=-528 size=8",
+      "verifier_context": [
+        "2928: (bf) r3 = r1                    ; R1=104 R3=104",
+        "2929: (57) r3 &= 7                    ; R3=0",
+        "2930: (7b) *(u64 *)(r10 -528) = r6",
+        "invalid write to stack R10 off=-528 size=8"
+      ],
+      "error_context": [
+        "2928: (bf) r3 = r1                    ; R1=104 R3=104",
+        "2929: (57) r3 &= 7                    ; R3=0",
+        "2930: (7b) *(u64 *)(r10 -528) = r6",
+        "invalid write to stack R10 off=-528 size=8"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/155eead341965977",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:35:40.682557+00:00",
+      "finished": "2026-11-10T05:47:54.416333+00:00"
     },
     {
       "body_sha256": "9f3e7b1ceb9d30715d1f36f69cbb89ba8cf919d1145da4e00d793e37fccc20e5",
@@ -2822,7 +3851,7 @@
         "current manifest": 33
       },
       "stage": "verifier_rejected",
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'",
       "verifier_context": [
@@ -2914,6 +3943,258 @@
       "finished": "2026-11-10T04:44:08.370116+00:00"
     },
     {
+      "body_sha256": "c758b1df37487c006ea34dcc1e046d4dbe37c6ac339a34f3ce00ff32c54e434c",
+      "application": "tracee/monitor",
+      "representative_id": 465,
+      "symbol": "sys_enter_init",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        465
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "881: (57) r1 &= 1                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "882: (55) if r1 != 0x0 goto pc+48     ; R1=0",
+        "883: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "881: (57) r1 &= 1                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "882: (55) if r1 != 0x0 goto pc+48     ; R1=0",
+        "883: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/c758b1df37487c00",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:34:39.787015+00:00",
+      "finished": "2026-11-10T05:45:13.355830+00:00"
+    },
+    {
+      "body_sha256": "ed4b29a8610f0aa7be472613d9c6f2a3d61118d4444acddfea9e39bf40403147",
+      "application": "tracee/monitor",
+      "representative_id": 474,
+      "symbol": "trace_process_vm_writev",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        474
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "287: (79) r1 = *(u64 *)(r10 -200)     ; R1=16 R10=fp0 fp-200=16",
+        "288: (07) r1 += -168                  ; R1=-152",
+        "289: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "287: (79) r1 = *(u64 *)(r10 -200)     ; R1=16 R10=fp0 fp-200=16",
+        "288: (07) r1 += -168                  ; R1=-152",
+        "289: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/ed4b29a8610f0aa7",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:34:52.782042+00:00",
+      "finished": "2026-11-10T05:45:21.304353+00:00"
+    },
+    {
+      "body_sha256": "88a9cf0b3bf41bb449fd4bf5beed5322c523a97f3c53204119309ee971b76b9a",
+      "application": "tracee/monitor",
+      "representative_id": 472,
+      "symbol": "trace_ptrace",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        472
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "287: (79) r1 = *(u64 *)(r10 -200)     ; R1=16 R10=fp0 fp-200=16",
+        "288: (07) r1 += -168                  ; R1=-152",
+        "289: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "287: (79) r1 = *(u64 *)(r10 -200)     ; R1=16 R10=fp0 fp-200=16",
+        "288: (07) r1 += -168                  ; R1=-152",
+        "289: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/88a9cf0b3bf41bb4",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:24:57.311536+00:00",
+      "finished": "2026-11-10T05:35:41.960369+00:00"
+    },
+    {
+      "body_sha256": "5b161cbf7534c5108126e0d8b4c825a0939c3c7cecfe1268241dfbde0377fdaa",
+      "application": "tracee/monitor",
+      "representative_id": 476,
+      "symbol": "trace_arch_prctl",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        476
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "287: (79) r1 = *(u64 *)(r10 -200)     ; R1=16 R10=fp0 fp-200=16",
+        "288: (07) r1 += -168                  ; R1=-152",
+        "289: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "287: (79) r1 = *(u64 *)(r10 -200)     ; R1=16 R10=fp0 fp-200=16",
+        "288: (07) r1 += -168                  ; R1=-152",
+        "289: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/5b161cbf7534c510",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:25:29.641639+00:00",
+      "finished": "2026-11-10T05:35:50.318137+00:00"
+    },
+    {
+      "body_sha256": "9333fdd630101db7908cc5c9249bc55bfaeb3354bf40a71618e0cd529787eae4",
+      "application": "tracee/monitor",
+      "representative_id": 478,
+      "symbol": "trace_dup",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        478
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "287: (79) r1 = *(u64 *)(r10 -200)     ; R1=16 R10=fp0 fp-200=16",
+        "288: (07) r1 += -168                  ; R1=-152",
+        "289: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "287: (79) r1 = *(u64 *)(r10 -200)     ; R1=16 R10=fp0 fp-200=16",
+        "288: (07) r1 += -168                  ; R1=-152",
+        "289: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/9333fdd630101db7",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:33:48.914535+00:00",
+      "finished": "2026-11-10T05:43:49.543781+00:00"
+    },
+    {
+      "body_sha256": "f2d68348932a9ae5b71530b984ba0fab4e69ccfdb6b3f9f8be57e87c3c0c2a3d",
+      "application": "tracee/monitor",
+      "representative_id": 480,
+      "symbol": "trace_dup2",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        480
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "287: (79) r1 = *(u64 *)(r10 -200)     ; R1=16 R10=fp0 fp-200=16",
+        "288: (07) r1 += -168                  ; R1=-152",
+        "289: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "287: (79) r1 = *(u64 *)(r10 -200)     ; R1=16 R10=fp0 fp-200=16",
+        "288: (07) r1 += -168                  ; R1=-152",
+        "289: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/f2d68348932a9ae5",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:33:51.385597+00:00",
+      "finished": "2026-11-10T05:44:34.252967+00:00"
+    },
+    {
+      "body_sha256": "20c8b3cfe3e635ccf52f4c8d37e96b4f7157ab6dff3a7d772984977d25d39064",
+      "application": "tracee/monitor",
+      "representative_id": 482,
+      "symbol": "trace_dup3",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        482
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "287: (79) r1 = *(u64 *)(r10 -200)     ; R1=16 R10=fp0 fp-200=16",
+        "288: (07) r1 += -168                  ; R1=-152",
+        "289: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "287: (79) r1 = *(u64 *)(r10 -200)     ; R1=16 R10=fp0 fp-200=16",
+        "288: (07) r1 += -168                  ; R1=-152",
+        "289: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/20c8b3cfe3e635cc",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:34:20.757529+00:00",
+      "finished": "2026-11-10T05:45:44.018879+00:00"
+    },
+    {
       "body_sha256": "120d7892bc0acc0d793b6f987b887f568bd73561605cf9dd666882cb9b60dd2c",
       "application": "cilium/agent",
       "representative_id": 320,
@@ -2968,7 +4249,7 @@
         "current manifest": 9
       },
       "stage": "verifier_rejected",
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'",
       "verifier_context": [
@@ -3004,7 +4285,7 @@
         "current manifest": 1
       },
       "stage": "verifier_rejected",
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'",
       "verifier_context": [
@@ -3025,6 +4306,42 @@
       "cpu": "8-19",
       "started": "2026-11-10T04:45:45.520916+00:00",
       "finished": "2026-11-10T04:49:18.364728+00:00"
+    },
+    {
+      "body_sha256": "cb921201888069a455411bc84ab3c5c95b5eb137924458c94faebf3ab6b24bc4",
+      "application": "tracee/monitor",
+      "representative_id": 468,
+      "symbol": "sys_exit_init",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        468
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "163: (bf) r1 = r4                     ; R1=16 R4=16",
+        "164: (07) r1 += -168                  ; R1=-152",
+        "165: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "163: (bf) r1 = r4                     ; R1=16 R4=16",
+        "164: (07) r1 += -168                  ; R1=-152",
+        "165: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/cb921201888069a4",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:24:54.977042+00:00",
+      "finished": "2026-11-10T05:34:51.468626+00:00"
     },
     {
       "body_sha256": "e60c4ff5c34adff43e78e6d0fd753e2d19813c9b122e7d00122110790877989e",
@@ -3056,6 +4373,114 @@
       "cpu": "8-19",
       "started": "2026-11-10T04:45:48.247131+00:00",
       "finished": "2026-11-10T04:47:00.725916+00:00"
+    },
+    {
+      "body_sha256": "43eff7b997715402bd801a11a00a54d5449ef5d0471e0cd8a96c213b723a8dc4",
+      "application": "tracee/monitor",
+      "representative_id": 615,
+      "symbol": "uprobe__features_fallback_minimal_tailcall",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        615
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_map_bounds",
+      "failure_class": "verifier: Rn max value is outside of the allowed memory range",
+      "verifier_message": "R2 max value is outside of the allowed memory range",
+      "verifier_context": [
+        "232: (b7) r3 = 0                      ; R3=0",
+        "233: (73) *(u8 *)(r2 +0) = r3",
+        "invalid access to map value, value_size=32536 off=65672 size=1",
+        "R2 max value is outside of the allowed memory range"
+      ],
+      "error_context": [
+        "232: (b7) r3 = 0                      ; R3=0",
+        "233: (73) *(u8 *)(r2 +0) = r3",
+        "invalid access to map value, value_size=32536 off=65672 size=1",
+        "R2 max value is outside of the allowed memory range"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/43eff7b997715402",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:24:40.516725+00:00",
+      "finished": "2026-11-10T05:34:38.297461+00:00"
+    },
+    {
+      "body_sha256": "7fa894a0a17d95689b8f87cd6661f09cfbe7b7e0acd4846b96ee72c4a1a8c7cd",
+      "application": "tracee/monitor",
+      "representative_id": 613,
+      "symbol": "uprobe__features_fallback_arena_tailcall",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        613
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_map_bounds",
+      "failure_class": "verifier: Rn max value is outside of the allowed memory range",
+      "verifier_message": "R2 max value is outside of the allowed memory range",
+      "verifier_context": [
+        "232: (b7) r3 = 0                      ; R3=0",
+        "233: (73) *(u8 *)(r2 +0) = r3",
+        "invalid access to map value, value_size=32536 off=65672 size=1",
+        "R2 max value is outside of the allowed memory range"
+      ],
+      "error_context": [
+        "232: (b7) r3 = 0                      ; R3=0",
+        "233: (73) *(u8 *)(r2 +0) = r3",
+        "invalid access to map value, value_size=32536 off=65672 size=1",
+        "R2 max value is outside of the allowed memory range"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/7fa894a0a17d9568",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:24:26.334572+00:00",
+      "finished": "2026-11-10T05:34:19.325592+00:00"
+    },
+    {
+      "body_sha256": "8d779571f68725636f0d794934dec462c63e5c0d3b3e50f52033ee5c6098c691",
+      "application": "tracee/monitor",
+      "representative_id": 614,
+      "symbol": "uprobe__features_fallback_helper_tailcall",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        614
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_map_bounds",
+      "failure_class": "verifier: Rn max value is outside of the allowed memory range",
+      "verifier_message": "R2 max value is outside of the allowed memory range",
+      "verifier_context": [
+        "232: (b7) r3 = 0                      ; R3=0",
+        "233: (73) *(u8 *)(r2 +0) = r3",
+        "invalid access to map value, value_size=32536 off=65672 size=1",
+        "R2 max value is outside of the allowed memory range"
+      ],
+      "error_context": [
+        "232: (b7) r3 = 0                      ; R3=0",
+        "233: (73) *(u8 *)(r2 +0) = r3",
+        "invalid access to map value, value_size=32536 off=65672 size=1",
+        "R2 max value is outside of the allowed memory range"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/8d779571f6872563",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:24:38.615010+00:00",
+      "finished": "2026-11-10T05:35:39.349631+00:00"
     },
     {
       "body_sha256": "cc8aefb2aecd854eaf62f6fa2fdc7b33556ac1e9920ff2c62ea4db20e7045aac",
@@ -3213,7 +4638,7 @@
         "previous census identity on current payload": 33
       },
       "stage": "verifier_rejected",
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'",
       "verifier_context": [
@@ -3249,7 +4674,7 @@
         "previous census identity on current payload": 1
       },
       "stage": "verifier_rejected",
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'",
       "verifier_context": [
@@ -3525,6 +4950,78 @@
       "finished": "2026-11-10T04:50:57.741179+00:00"
     },
     {
+      "body_sha256": "528729cc6dc5ace15b9f0681b4efce96e33670ba2c410b831d40d9950d6ec95c",
+      "application": "tracee/monitor",
+      "representative_id": 533,
+      "symbol": "send_bin_tp",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        533
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_rejected",
+      "failure_class": "verifier: math between map_value pointer and N is not allowed",
+      "verifier_message": "math between map_value pointer and 9223372036854771712 is not allowed",
+      "verifier_context": [
+        "171: (18) r2 = 0x7ffffffffffff000     ; R2=0x7ffffffffffff000",
+        "173: (bf) r3 = r7                     ; R3=map_value(map=event_data_map,ks=4,vs=32536,off=137,smin=smin32=0,smax=umax=smax32=umax32=31936,var_off=(0x0; 0x7fff)) R7=map_value(map=event_data_map,ks=4,vs=32536,off=137,smin=smin32=0,smax=umax=smax32=umax32=31936,var_off=(0x0; 0x7fff))",
+        "174: (5f) r3 &= r2",
+        "math between map_value pointer and 9223372036854771712 is not allowed"
+      ],
+      "error_context": [
+        "171: (18) r2 = 0x7ffffffffffff000     ; R2=0x7ffffffffffff000",
+        "173: (bf) r3 = r7                     ; R3=map_value(map=event_data_map,ks=4,vs=32536,off=137,smin=smin32=0,smax=umax=smax32=umax32=31936,var_off=(0x0; 0x7fff)) R7=map_value(map=event_data_map,ks=4,vs=32536,off=137,smin=smin32=0,smax=umax=smax32=umax32=31936,var_off=(0x0; 0x7fff))",
+        "174: (5f) r3 &= r2",
+        "math between map_value pointer and 9223372036854771712 is not allowed"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/528729cc6dc5ace1",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:24:21.652482+00:00",
+      "finished": "2026-11-10T05:33:47.503417+00:00"
+    },
+    {
+      "body_sha256": "7589d8aea88c9f93d86a894a3f4adb62e74971808fc0f7ad4f0690fe0c6252f7",
+      "application": "tracee/monitor",
+      "representative_id": 532,
+      "symbol": "send_bin",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        532
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_rejected",
+      "failure_class": "verifier: math between map_value pointer and N is not allowed",
+      "verifier_message": "math between map_value pointer and 9223372036854771712 is not allowed",
+      "verifier_context": [
+        "171: (18) r2 = 0x7ffffffffffff000     ; R2=0x7ffffffffffff000",
+        "173: (bf) r3 = r7                     ; R3=map_value(map=event_data_map,ks=4,vs=32536,off=137,smin=smin32=0,smax=umax=smax32=umax32=31936,var_off=(0x0; 0x7fff)) R7=map_value(map=event_data_map,ks=4,vs=32536,off=137,smin=smin32=0,smax=umax=smax32=umax32=31936,var_off=(0x0; 0x7fff))",
+        "174: (5f) r3 &= r2",
+        "math between map_value pointer and 9223372036854771712 is not allowed"
+      ],
+      "error_context": [
+        "171: (18) r2 = 0x7ffffffffffff000     ; R2=0x7ffffffffffff000",
+        "173: (bf) r3 = r7                     ; R3=map_value(map=event_data_map,ks=4,vs=32536,off=137,smin=smin32=0,smax=umax=smax32=umax32=31936,var_off=(0x0; 0x7fff)) R7=map_value(map=event_data_map,ks=4,vs=32536,off=137,smin=smin32=0,smax=umax=smax32=umax32=31936,var_off=(0x0; 0x7fff))",
+        "174: (5f) r3 &= r2",
+        "math between map_value pointer and 9223372036854771712 is not allowed"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/7589d8aea88c9f93",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:24:19.810968+00:00",
+      "finished": "2026-11-10T05:33:49.971033+00:00"
+    },
+    {
       "body_sha256": "2965b31f9c12203718f91d99957154fc748e6323b0bc1f2156d414e8a06f1d80",
       "application": "bcc/set",
       "representative_id": 51,
@@ -3672,6 +5169,42 @@
       "cpu": "8-19",
       "started": "2026-11-10T04:50:49.991787+00:00",
       "finished": "2026-11-10T04:51:00.441257+00:00"
+    },
+    {
+      "body_sha256": "c8e2c534b72c5fac2d7bd4272dcaed5ff25421ac788c3c32d05bada7c79381cc",
+      "application": "tracee/monitor",
+      "representative_id": 503,
+      "symbol": "sched_process_exit_signal",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        503
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_map_bounds",
+      "failure_class": "verifier: Rn max value is outside of the allowed memory range",
+      "verifier_message": "R3 max value is outside of the allowed memory range",
+      "verifier_context": [
+        "165: (b7) r4 = 0                      ; R4=0",
+        "166: (73) *(u8 *)(r3 +0) = r4",
+        "invalid access to map value, value_size=32072 off=65540 size=1",
+        "R3 max value is outside of the allowed memory range"
+      ],
+      "error_context": [
+        "165: (b7) r4 = 0                      ; R4=0",
+        "166: (73) *(u8 *)(r3 +0) = r4",
+        "invalid access to map value, value_size=32072 off=65540 size=1",
+        "R3 max value is outside of the allowed memory range"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/c8e2c534b72c5fac",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:16:28.026913+00:00",
+      "finished": "2026-11-10T05:25:28.365843+00:00"
     },
     {
       "body_sha256": "339962b4ecf3616028fda7b71ec270f2ddd5a83a61bc57db6f6b4e7382d56d62",
@@ -3843,6 +5376,78 @@
       "finished": "2026-11-10T04:51:25.038230+00:00"
     },
     {
+      "body_sha256": "4b7980239f8c2f356487ca1ee5094fabf28a1b4c9a865be1bebb02c46a8ca9f1",
+      "application": "tracee/monitor",
+      "representative_id": 608,
+      "symbol": "cgroup_mkdir_signal",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        608
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "197: (bf) r1 = r9                     ; R1=16 R9=16",
+        "198: (07) r1 += -104                  ; R1=-88",
+        "199: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "197: (bf) r1 = r9                     ; R1=16 R9=16",
+        "198: (07) r1 += -104                  ; R1=-88",
+        "199: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/4b7980239f8c2f35",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:15:55.320236+00:00",
+      "finished": "2026-11-10T05:24:56.047372+00:00"
+    },
+    {
+      "body_sha256": "7adde86159ec29d5eba0bbcfc868ff4d1fbeb6edae870d312c86aa9263a55f47",
+      "application": "tracee/monitor",
+      "representative_id": 609,
+      "symbol": "cgroup_rmdir_signal",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        609
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "197: (55) if r2 != 0x0 goto pc+103    ; R2=0",
+        "198: (07) r8 += -88                   ; R8=-80",
+        "199: (79) r1 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "197: (55) if r2 != 0x0 goto pc+103    ; R2=0",
+        "198: (07) r8 += -88                   ; R8=-80",
+        "199: (79) r1 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/7adde86159ec29d5",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:15:46.915618+00:00",
+      "finished": "2026-11-10T05:24:53.617982+00:00"
+    },
+    {
       "body_sha256": "655e6c99b22a878c4b880f5b1ee0f3282fec055ad1b2544cc34f9aeb28e60b14",
       "application": "bcc/set",
       "representative_id": 38,
@@ -3919,6 +5524,78 @@
       "cpu": "8-19",
       "started": "2026-11-10T04:51:25.038127+00:00",
       "finished": "2026-11-10T04:51:46.493337+00:00"
+    },
+    {
+      "body_sha256": "a52c9c6a340f3bece7b97d22011f3eaf2298367d3e9d7d9ad24b4f5f04bf5258",
+      "application": "tracee/monitor",
+      "representative_id": 560,
+      "symbol": "syscall__init_module",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        560
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_rejected",
+      "failure_class": "verifier: misaligned stack access off N+N+N size N",
+      "verifier_message": "misaligned stack access off 0+-99+0 size 4",
+      "verifier_context": [
+        "1437: (67) r5 <<= 32                  ; R5=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))",
+        "1438: (77) r5 >>= 32                  ; R5=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))",
+        "1439: (63) *(u32 *)(r1 +0) = r5",
+        "misaligned stack access off 0+-99+0 size 4"
+      ],
+      "error_context": [
+        "1437: (67) r5 <<= 32                  ; R5=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))",
+        "1438: (77) r5 >>= 32                  ; R5=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))",
+        "1439: (63) *(u32 *)(r1 +0) = r5",
+        "misaligned stack access off 0+-99+0 size 4"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/a52c9c6a340f3bec",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:15:33.752179+00:00",
+      "finished": "2026-11-10T05:24:37.381392+00:00"
+    },
+    {
+      "body_sha256": "e739ec2534d50651fe3d14deea81c43ecbb11141c19f3407b059a5abc634511f",
+      "application": "tracee/monitor",
+      "representative_id": 496,
+      "symbol": "lkm_seeker_mod_tree_tail",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        496
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R7 invalid mem access 'scalar'",
+      "verifier_context": [
+        "377: (79) r4 = *(u64 *)(r10 -152)     ; R4=32 R10=fp0 fp-152=32",
+        "378: (07) r4 += -136                  ; R4=-104",
+        "379: (79) r1 = *(u64 *)(r7 +0)",
+        "R7 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "377: (79) r4 = *(u64 *)(r10 -152)     ; R4=32 R10=fp0 fp-152=32",
+        "378: (07) r4 += -136                  ; R4=-104",
+        "379: (79) r1 = *(u64 *)(r7 +0)",
+        "R7 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/e739ec2534d50651",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:15:27.681646+00:00",
+      "finished": "2026-11-10T05:24:24.979900+00:00"
     },
     {
       "body_sha256": "4c01dbdf2966e940a0bee631ba7c00582fd7d05c02c9e5e0238b1da6d633b9b6",
@@ -4012,6 +5689,42 @@
       "cpu": "8-19",
       "started": "2026-11-10T04:51:34.168219+00:00",
       "finished": "2026-11-10T04:51:50.828876+00:00"
+    },
+    {
+      "body_sha256": "5fe405c6073a62132ab903e9996b7fe131e4a4bcf815b61a1608842a0a6509c9",
+      "application": "tracee/monitor",
+      "representative_id": 601,
+      "symbol": "trace_security_sk_clone",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        601
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "43: (57) r1 &= 1                      ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "44: (55) if r1 != 0x0 goto pc+18      ; R1=0",
+        "45: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "43: (57) r1 &= 1                      ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "44: (55) if r1 != 0x0 goto pc+18      ; R1=0",
+        "45: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/5fe405c6073a6213",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:15:21.445561+00:00",
+      "finished": "2026-11-10T05:24:20.305451+00:00"
     },
     {
       "body_sha256": "5fc03da330c06e3be2ba52a93adb6c60c94dd0f77e914bbbfa016f471f290b39",
@@ -4196,6 +5909,78 @@
       "finished": "2026-11-10T04:52:07.627848+00:00"
     },
     {
+      "body_sha256": "0c99cbaf18b93760b6c155ef77d7395efb58680d9b91afb6ec69c5d34106f55b",
+      "application": "tracee/monitor",
+      "representative_id": 599,
+      "symbol": "trace_sock_alloc_file",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        599
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "157: (bf) r1 = r4                     ; R1=16 R4=16",
+        "158: (07) r1 += -88                   ; R1=-72",
+        "159: (69) r2 = *(u16 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "157: (bf) r1 = r4                     ; R1=16 R4=16",
+        "158: (07) r1 += -88                   ; R1=-72",
+        "159: (69) r2 = *(u16 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/0c99cbaf18b93760",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:15:12.768445+00:00",
+      "finished": "2026-11-10T05:24:18.522308+00:00"
+    },
+    {
+      "body_sha256": "97ecce4a5c9dd32e81a964d473daf2d133498d040d9281e1fddf65dc1d7315be",
+      "application": "tracee/monitor",
+      "representative_id": 504,
+      "symbol": "tracepoint__sched__sched_process_free",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        504
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "48: (bf) r1 = r4                      ; R1=12 R4=12",
+        "49: (07) r1 += -40                    ; R1=-28",
+        "50: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "48: (bf) r1 = r4                      ; R1=12 R4=12",
+        "49: (07) r1 += -40                    ; R1=-28",
+        "50: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/97ecce4a5c9dd32e",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:15:08.276244+00:00",
+      "finished": "2026-11-10T05:24:39.271795+00:00"
+    },
+    {
       "body_sha256": "6f9adf74e1f9f02aa59485379c0006dbb89ff718420829e472f9de14ae1828e6",
       "application": "bcc/set",
       "representative_id": 53,
@@ -4272,6 +6057,550 @@
       "cpu": "8-19",
       "started": "2026-11-10T04:52:01.573935+00:00",
       "finished": "2026-11-10T04:52:11.598140+00:00"
+    },
+    {
+      "body_sha256": "a10db6a8030ed603b9a12abbe891dfa39854e08007b5001365d9808532330845",
+      "application": "tracee/monitor",
+      "representative_id": 540,
+      "symbol": "vfs_writev_magic_enter",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        540
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "44: (bf) r2 = r5                      ; R2=8 R5=8",
+        "45: (07) r2 += -72                    ; R2=-64",
+        "46: (79) r4 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "44: (bf) r2 = r5                      ; R2=8 R5=8",
+        "45: (07) r2 += -72                    ; R2=-64",
+        "46: (79) r4 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/a10db6a8030ed603",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:07:39.682748+00:00",
+      "finished": "2026-11-10T05:15:45.599978+00:00"
+    },
+    {
+      "body_sha256": "7d282856b3980a22064b73c9db99718b110ab47d5a8ed8e5127969ff20faead2",
+      "application": "tracee/monitor",
+      "representative_id": 545,
+      "symbol": "kernel_write_magic_enter",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        545
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "44: (bf) r2 = r5                      ; R2=8 R5=8",
+        "45: (07) r2 += -72                    ; R2=-64",
+        "46: (79) r4 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "44: (bf) r2 = r5                      ; R2=8 R5=8",
+        "45: (07) r2 += -72                    ; R2=-64",
+        "46: (79) r4 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/7d282856b3980a22",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:07:41.793084+00:00",
+      "finished": "2026-11-10T05:16:26.738828+00:00"
+    },
+    {
+      "body_sha256": "40afbccbc7fd48ee0bf5393f0d9ff01f4a2111e8338c5f47578f24c6cf4d5716",
+      "application": "tracee/monitor",
+      "representative_id": 535,
+      "symbol": "vfs_write_magic_enter",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        535
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "44: (bf) r2 = r5                      ; R2=8 R5=8",
+        "45: (07) r2 += -72                    ; R2=-64",
+        "46: (79) r4 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "44: (bf) r2 = r5                      ; R2=8 R5=8",
+        "45: (07) r2 += -72                    ; R2=-64",
+        "46: (79) r4 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/40afbccbc7fd48ee",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:07:38.362859+00:00",
+      "finished": "2026-11-10T05:15:53.906737+00:00"
+    },
+    {
+      "body_sha256": "d97b4df896d26cae31208c6c57d319768537fde42fa72346c53f7cf531948ae3",
+      "application": "tracee/monitor",
+      "representative_id": 467,
+      "symbol": "tracepoint__raw_syscalls__sys_exit",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        467
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "48: (bf) r1 = r4                      ; R1=16 R4=16",
+        "49: (07) r1 += -40                    ; R1=-24",
+        "50: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "48: (bf) r1 = r4                      ; R1=16 R4=16",
+        "49: (07) r1 += -40                    ; R1=-24",
+        "50: (79) r2 = *(u64 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/d97b4df896d26cae",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:07:31.897908+00:00",
+      "finished": "2026-11-10T05:15:32.454545+00:00"
+    },
+    {
+      "body_sha256": "1e362c0fc46f0b332079d78de325171e430d85f8f1a161cdf3812b1c6041c7e2",
+      "application": "tracee/monitor",
+      "representative_id": 463,
+      "symbol": "tracepoint__raw_syscalls__sys_enter",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        463
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "101: (bf) r1 = r4                     ; R1=4 R4=4",
+        "102: (07) r1 += -24                   ; R1=-20",
+        "103: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "101: (bf) r1 = r4                     ; R1=4 R4=4",
+        "102: (07) r1 += -24                   ; R1=-20",
+        "103: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/1e362c0fc46f0b33",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:07:13.557910+00:00",
+      "finished": "2026-11-10T05:15:20.225874+00:00"
+    },
+    {
+      "body_sha256": "cb9af7bc874b87d3e70e7b49d5534859d911f628c28332ecad19b595030c7044",
+      "application": "tracee/monitor",
+      "representative_id": 492,
+      "symbol": "heartbeat_capture",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        492
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/cb9af7bc874b87d3",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:07:08.221694+00:00",
+      "finished": "2026-11-10T05:15:07.084332+00:00"
+    },
+    {
+      "body_sha256": "20186c02dc9bf8584fb1173cea4f588061717c10c73c68a827a26b86666fec57",
+      "application": "tracee/monitor",
+      "representative_id": 567,
+      "symbol": "trace___register_chrdev",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        567
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/20186c02dc9bf858",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:59:43.313731+00:00",
+      "finished": "2026-11-10T05:07:38.362937+00:00"
+    },
+    {
+      "body_sha256": "6e55e03dfb24b2065c39b07ae680d54a58ae7f2174cdb12593474533f6fe924c",
+      "application": "tracee/monitor",
+      "representative_id": 579,
+      "symbol": "trace_kallsyms_lookup_name",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        579
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/6e55e03dfb24b206",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:59:46.215914+00:00",
+      "finished": "2026-11-10T05:07:37.074573+00:00"
+    },
+    {
+      "body_sha256": "e6d0f37e725fd5e47102d4cd99acee4a4a5d9a4ff30decdac403f8d06b94321c",
+      "application": "tracee/monitor",
+      "representative_id": 585,
+      "symbol": "trace_inotify_find_inode",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        585
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/e6d0f37e725fd5e4",
+      "cpu": "8-19",
+      "started": "2026-11-10T05:06:27.756017+00:00",
+      "finished": "2026-11-10T05:15:11.538602+00:00"
+    },
+    {
+      "body_sha256": "01553f2c78fc9672a5e5ce1421966f6a4cf77a3bc04a95a195cfea0acc80e120",
+      "application": "tracee/monitor",
+      "representative_id": 534,
+      "symbol": "trace_vfs_write",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        534
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/01553f2c78fc9672",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:52:21.139783+00:00",
+      "finished": "2026-11-10T04:59:44.936295+00:00"
+    },
+    {
+      "body_sha256": "9056d6c0161fb8045fafa06fb55a28a2b782aaf9bc261a8b2bb2e919d69d3ca1",
+      "application": "tracee/monitor",
+      "representative_id": 539,
+      "symbol": "trace_vfs_writev",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        539
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/9056d6c0161fb804",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:52:22.411480+00:00",
+      "finished": "2026-11-10T04:59:22.734252+00:00"
+    },
+    {
+      "body_sha256": "527f2e7c9d1c49d6b49b5efb03164c683432736c81f10d70523fd30236c7f51c",
+      "application": "tracee/monitor",
+      "representative_id": 544,
+      "symbol": "trace_kernel_write",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        544
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/527f2e7c9d1c49d6",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:52:23.666580+00:00",
+      "finished": "2026-11-10T04:59:19.207381+00:00"
+    },
+    {
+      "body_sha256": "deb96ca3e8cd293c33fc784ebbd3acd68865e887fe3256b84780882c4658e9f5",
+      "application": "tracee/monitor",
+      "representative_id": 549,
+      "symbol": "trace_vfs_read",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        549
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/deb96ca3e8cd293c",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:58:35.891174+00:00",
+      "finished": "2026-11-10T05:06:26.404308+00:00"
+    },
+    {
+      "body_sha256": "874b3b046ca4316bd7e48839371344502a82809f05dd5be6324734b01613fab1",
+      "application": "tracee/monitor",
+      "representative_id": 552,
+      "symbol": "trace_vfs_readv",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        552
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/874b3b046ca4316b",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:59:20.530331+00:00",
+      "finished": "2026-11-10T05:07:06.901483+00:00"
+    },
+    {
+      "body_sha256": "5f408193166a729973634fb29b9e3db4f5f6b9c7ad4d370ab95eb5b326a8fc81",
+      "application": "tracee/monitor",
+      "representative_id": 561,
+      "symbol": "trace_register_kprobe",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        561
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/5f408193166a7299",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:59:24.025665+00:00",
+      "finished": "2026-11-10T05:07:12.295765+00:00"
+    },
+    {
+      "body_sha256": "fe16329420077232a5a42078d0826d37373ae01343fdaa964ab450a94b3651fe",
+      "application": "tracee/monitor",
+      "representative_id": 569,
+      "symbol": "trace_do_splice",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        569
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/fe16329420077232",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:59:32.211155+00:00",
+      "finished": "2026-11-10T05:07:30.666535+00:00"
+    },
+    {
+      "body_sha256": "b8197139b3366c567a710d3952c4233cbd80a1a6842ea16ff469d2dba9e7a4d5",
+      "application": "tracee/monitor",
+      "representative_id": 573,
+      "symbol": "trace_do_init_module",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        573
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/b8197139b3366c56",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:59:42.056426+00:00",
+      "finished": "2026-11-10T05:07:40.461360+00:00"
+    },
+    {
+      "body_sha256": "ddc8fcad4a61cab81e884ffc54ed7674349129ecbdddd8b5c42d3e2a7bba5fed",
+      "application": "tracee/monitor",
+      "representative_id": 556,
+      "symbol": "trace_do_mmap",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        556
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/ddc8fcad4a61cab8",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:52:19.859423+00:00",
+      "finished": "2026-11-10T04:59:40.788111+00:00"
+    },
+    {
+      "body_sha256": "2e70b12034b90d265dd185929bff9d048b0d1ee992b173abc220c378164656b7",
+      "application": "tracee/monitor",
+      "representative_id": 570,
+      "symbol": "trace_ret_do_splice",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        570
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/2e70b12034b90d26",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:52:18.346383+00:00",
+      "finished": "2026-11-10T04:59:30.910432+00:00"
     },
     {
       "body_sha256": "4395af4321e1ffca7dad6c856c425cfe49a98e13053a8f24430a55fc8196e3ca",
@@ -4467,6 +6796,32 @@
       "cpu": "8-19",
       "started": "2026-11-10T04:52:15.011072+00:00",
       "finished": "2026-11-10T04:52:22.411558+00:00"
+    },
+    {
+      "body_sha256": "ab5b566aeeb50d862c1ca5b1c9c7b7c86cdc80766fd096c6f46bd0b78a58982c",
+      "application": "tracee/monitor",
+      "representative_id": 610,
+      "symbol": "empty_kprobe",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        610
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "installed",
+      "driver_class": "installed",
+      "failure_class": "installed",
+      "verifier_message": null,
+      "verifier_context": [],
+      "error_context": [],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/ab5b566aeeb50d86",
+      "cpu": "8-19",
+      "started": "2026-11-10T04:52:16.921792+00:00",
+      "finished": "2026-11-10T04:59:42.056522+00:00"
     }
   ]
 }

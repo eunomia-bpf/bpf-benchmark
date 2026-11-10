@@ -1562,12 +1562,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "1e362c0fc46f0b332079d78de325171e430d85f8f1a161cdf3812b1c6041c7e2",
       "representative_id": 463,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -1576,12 +1576,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "c758b1df37487c006ea34dcc1e046d4dbe37c6ac339a34f3ce00ff32c54e434c",
       "representative_id": 465,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -1604,12 +1604,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "d97b4df896d26cae31208c6c57d319768537fde42fa72346c53f7cf531948ae3",
       "representative_id": 467,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -1618,12 +1618,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "cb921201888069a455411bc84ab3c5c95b5eb137924458c94faebf3ab6b24bc4",
       "representative_id": 468,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -1646,12 +1646,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "36f43ce768ac24901aa2fec47217563fcbc17d454d4ffa7ecdcfd023d8a99cec",
       "representative_id": 470,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R8 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -1660,12 +1660,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "91c71beeefa4231d457cf18fed42e51af7367386c37d9349166b91db803f6c3e",
       "representative_id": 471,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -1674,12 +1674,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "88a9cf0b3bf41bb449fd4bf5beed5322c523a97f3c53204119309ee971b76b9a",
       "representative_id": 472,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -1702,12 +1702,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "ed4b29a8610f0aa7be472613d9c6f2a3d61118d4444acddfea9e39bf40403147",
       "representative_id": 474,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -1730,12 +1730,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "5b161cbf7534c5108126e0d8b4c825a0939c3c7cecfe1268241dfbde0377fdaa",
       "representative_id": 476,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -1758,12 +1758,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "9333fdd630101db7908cc5c9249bc55bfaeb3354bf40a71618e0cd529787eae4",
       "representative_id": 478,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -1786,12 +1786,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "f2d68348932a9ae5b71530b984ba0fab4e69ccfdb6b3f9f8be57e87c3c0c2a3d",
       "representative_id": 480,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -1814,12 +1814,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "20c8b3cfe3e635ccf52f4c8d37e96b4f7157ab6dff3a7d772984977d25d39064",
       "representative_id": 482,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -1842,12 +1842,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "bd8a8080813a7575adc3b0338bc489561fa7c5108b49c3a7ed0c001f0d38398a",
       "representative_id": 484,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -1870,12 +1870,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "3a1c3ca4686e388ff4c1ca0ec674fb0606097fe0b11248a7fc018f8531d46321",
       "representative_id": 486,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -1887,7 +1887,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R3 invalid mem access 'scalar'"
     },
@@ -1926,12 +1926,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "b49525aaba0aec63546ed19ed462f35655c071c47cbad637faa456e83dfbd991",
       "representative_id": 490,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -1954,11 +1954,11 @@
       "selection_kind": "current manifest",
       "body_sha256": "cb9af7bc874b87d3e70e7b49d5534859d911f628c28332ecad19b595030c7044",
       "representative_id": 492,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
+      "stage": "installed",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "installed",
+      "failure_class": "installed",
       "verifier_message": null
     },
     {
@@ -1968,12 +1968,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "876edbc31cac71a6a298dd1ac13f5b4955ca6fe27de4864c02b632ab7df45421",
       "representative_id": 493,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -1982,12 +1982,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "e24ba6f64785b0fc44c22bc57647ff1d7ac024ffd2551704f9fb2bb083466114",
       "representative_id": 494,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -2010,12 +2010,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "e739ec2534d50651fe3d14deea81c43ecbb11141c19f3407b059a5abc634511f",
       "representative_id": 496,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R7 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -2038,12 +2038,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "155eead3419659776ada95b0b1090b2435cdc9a1038d1a32c859d2888e93d989",
       "representative_id": 498,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_stack_access",
+      "failure_class": "verifier: invalid write to stack R10 off=N size=N",
+      "verifier_message": "invalid write to stack R10 off=-528 size=8"
     },
     {
       "application": "tracee/monitor",
@@ -2055,7 +2055,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R3 invalid mem access 'scalar'"
     },
@@ -2108,12 +2108,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "c8e2c534b72c5fac2d7bd4272dcaed5ff25421ac788c3c32d05bada7c79381cc",
       "representative_id": 503,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_map_bounds",
+      "failure_class": "verifier: Rn max value is outside of the allowed memory range",
+      "verifier_message": "R3 max value is outside of the allowed memory range"
     },
     {
       "application": "tracee/monitor",
@@ -2122,12 +2122,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "97ecce4a5c9dd32e81a964d473daf2d133498d040d9281e1fddf65dc1d7315be",
       "representative_id": 504,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -2136,12 +2136,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "e11faca43f183a9b90bec7d7b3b5e2b850d9c67e16d967c33d786a3589c41b52",
       "representative_id": 505,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -2164,12 +2164,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "eac6b3e6428a9dbcff82413bfe82d3a3d4f7adf713de2a3c4f658419ac3e0917",
       "representative_id": 507,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -2192,12 +2192,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "0f410fafb16d92f0763ae3d3ecd4009da9a16a86125f38ce684c7749fb8f100b",
       "representative_id": 509,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -2220,12 +2220,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "e17dcb0c8443cb1dfa1ddd26b238345c3ab2745d211e46565c7c5745bd43ef5d",
       "representative_id": 511,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -2290,12 +2290,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "1de2bb7b9ee78df4c8e415221ab2abe85f1e9b36ee40bf205e66c910e6e99ce3",
       "representative_id": 516,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -2360,12 +2360,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "66cb11bf7e16086c49d5f52f7ee0a5337e78a386fd236d9a5dd7b1339b01a651",
       "representative_id": 521,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -2402,12 +2402,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "2419a44f47fbb134997502563863995c2f6a8304826981a56a0cebc91d5164f4",
       "representative_id": 524,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -2514,12 +2514,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "7589d8aea88c9f93d86a894a3f4adb62e74971808fc0f7ad4f0690fe0c6252f7",
       "representative_id": 532,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_rejected",
+      "failure_class": "verifier: math between map_value pointer and N is not allowed",
+      "verifier_message": "math between map_value pointer and 9223372036854771712 is not allowed"
     },
     {
       "application": "tracee/monitor",
@@ -2528,12 +2528,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "528729cc6dc5ace15b9f0681b4efce96e33670ba2c410b831d40d9950d6ec95c",
       "representative_id": 533,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_rejected",
+      "failure_class": "verifier: math between map_value pointer and N is not allowed",
+      "verifier_message": "math between map_value pointer and 9223372036854771712 is not allowed"
     },
     {
       "application": "tracee/monitor",
@@ -2542,11 +2542,11 @@
       "selection_kind": "current manifest",
       "body_sha256": "01553f2c78fc9672a5e5ce1421966f6a4cf77a3bc04a95a195cfea0acc80e120",
       "representative_id": 534,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
+      "stage": "installed",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "installed",
+      "failure_class": "installed",
       "verifier_message": null
     },
     {
@@ -2556,12 +2556,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "40afbccbc7fd48ee0bf5393f0d9ff01f4a2111e8338c5f47578f24c6cf4d5716",
       "representative_id": 535,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -2612,11 +2612,11 @@
       "selection_kind": "current manifest",
       "body_sha256": "9056d6c0161fb8045fafa06fb55a28a2b782aaf9bc261a8b2bb2e919d69d3ca1",
       "representative_id": 539,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
+      "stage": "installed",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "installed",
+      "failure_class": "installed",
       "verifier_message": null
     },
     {
@@ -2626,12 +2626,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "a10db6a8030ed603b9a12abbe891dfa39854e08007b5001365d9808532330845",
       "representative_id": 540,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -2682,11 +2682,11 @@
       "selection_kind": "current manifest",
       "body_sha256": "527f2e7c9d1c49d6b49b5efb03164c683432736c81f10d70523fd30236c7f51c",
       "representative_id": 544,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
+      "stage": "installed",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "installed",
+      "failure_class": "installed",
       "verifier_message": null
     },
     {
@@ -2696,12 +2696,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "7d282856b3980a22064b73c9db99718b110ab47d5a8ed8e5127969ff20faead2",
       "representative_id": 545,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -2752,11 +2752,11 @@
       "selection_kind": "current manifest",
       "body_sha256": "deb96ca3e8cd293c33fc784ebbd3acd68865e887fe3256b84780882c4658e9f5",
       "representative_id": 549,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
+      "stage": "installed",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "installed",
+      "failure_class": "installed",
       "verifier_message": null
     },
     {
@@ -2783,7 +2783,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R3 invalid mem access 'scalar'"
     },
@@ -2794,11 +2794,11 @@
       "selection_kind": "current manifest",
       "body_sha256": "874b3b046ca4316bd7e48839371344502a82809f05dd5be6324734b01613fab1",
       "representative_id": 552,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
+      "stage": "installed",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "installed",
+      "failure_class": "installed",
       "verifier_message": null
     },
     {
@@ -2825,7 +2825,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R3 invalid mem access 'scalar'"
     },
@@ -2850,11 +2850,11 @@
       "selection_kind": "current manifest",
       "body_sha256": "ddc8fcad4a61cab81e884ffc54ed7674349129ecbdddd8b5c42d3e2a7bba5fed",
       "representative_id": 556,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
+      "stage": "installed",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "installed",
+      "failure_class": "installed",
       "verifier_message": null
     },
     {
@@ -2867,7 +2867,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R3 invalid mem access 'scalar'"
     },
@@ -2906,12 +2906,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "a52c9c6a340f3bece7b97d22011f3eaf2298367d3e9d7d9ad24b4f5f04bf5258",
       "representative_id": 560,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_rejected",
+      "failure_class": "verifier: misaligned stack access off N+N+N size N",
+      "verifier_message": "misaligned stack access off 0+-99+0 size 4"
     },
     {
       "application": "tracee/monitor",
@@ -2920,11 +2920,11 @@
       "selection_kind": "current manifest",
       "body_sha256": "5f408193166a729973634fb29b9e3db4f5f6b9c7ad4d370ab95eb5b326a8fc81",
       "representative_id": 561,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
+      "stage": "installed",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "installed",
+      "failure_class": "installed",
       "verifier_message": null
     },
     {
@@ -2951,7 +2951,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R3 invalid mem access 'scalar'"
     },
@@ -2962,12 +2962,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "5215f8f2514043f7a8143e0f4fe6f7347c2786d4531b812f95250d752f58c960",
       "representative_id": 564,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -2990,12 +2990,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "012a25fcff4975b3125219cba0d64075354086090ff09a2f1595b58764b43b5b",
       "representative_id": 566,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -3004,11 +3004,11 @@
       "selection_kind": "current manifest",
       "body_sha256": "20186c02dc9bf8584fb1173cea4f588061717c10c73c68a827a26b86666fec57",
       "representative_id": 567,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
+      "stage": "installed",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "installed",
+      "failure_class": "installed",
       "verifier_message": null
     },
     {
@@ -3032,11 +3032,11 @@
       "selection_kind": "current manifest",
       "body_sha256": "fe16329420077232a5a42078d0826d37373ae01343fdaa964ab450a94b3651fe",
       "representative_id": 569,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
+      "stage": "installed",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "installed",
+      "failure_class": "installed",
       "verifier_message": null
     },
     {
@@ -3046,11 +3046,11 @@
       "selection_kind": "current manifest",
       "body_sha256": "2e70b12034b90d265dd185929bff9d048b0d1ee992b173abc220c378164656b7",
       "representative_id": 570,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
+      "stage": "installed",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "installed",
+      "failure_class": "installed",
       "verifier_message": null
     },
     {
@@ -3063,7 +3063,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R3 invalid mem access 'scalar'"
     },
@@ -3088,11 +3088,11 @@
       "selection_kind": "current manifest",
       "body_sha256": "b8197139b3366c567a710d3952c4233cbd80a1a6842ea16ff469d2dba9e7a4d5",
       "representative_id": 573,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
+      "stage": "installed",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "installed",
+      "failure_class": "installed",
       "verifier_message": null
     },
     {
@@ -3144,12 +3144,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "a09375350722345a9b98946174efcee523dfe465997369d8a43ff68fa45b5870",
       "representative_id": 577,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -3172,11 +3172,11 @@
       "selection_kind": "current manifest",
       "body_sha256": "6e55e03dfb24b2065c39b07ae680d54a58ae7f2174cdb12593474533f6fe924c",
       "representative_id": 579,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
+      "stage": "installed",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "installed",
+      "failure_class": "installed",
       "verifier_message": null
     },
     {
@@ -3186,12 +3186,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "b5a5090318dee206259081a1d82b306a50f973653215e231222462d04884955c",
       "representative_id": 580,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -3217,7 +3217,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R3 invalid mem access 'scalar'"
     },
@@ -3231,7 +3231,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R3 invalid mem access 'scalar'"
     },
@@ -3256,11 +3256,11 @@
       "selection_kind": "current manifest",
       "body_sha256": "e6d0f37e725fd5e47102d4cd99acee4a4a5d9a4ff30decdac403f8d06b94321c",
       "representative_id": 585,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
+      "stage": "installed",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "installed",
+      "failure_class": "installed",
       "verifier_message": null
     },
     {
@@ -3340,12 +3340,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "698e23a5255537cef6632c3013b4585d78c5aba1abd47758411dbcb53c194327",
       "representative_id": 591,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -3368,12 +3368,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "fa744a1742937335eb4ac15210a8895beca91d948869fc838710dc10174742de",
       "representative_id": 593,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -3452,12 +3452,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "0c99cbaf18b93760b6c155ef77d7395efb58680d9b91afb6ec69c5d34106f55b",
       "representative_id": 599,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -3466,12 +3466,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "2239feb50f8a301a89248f8956d610c5f93bbf36816b99437c7171a6bac654b5",
       "representative_id": 600,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -3480,12 +3480,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "5fe405c6073a62132ab903e9996b7fe131e4a4bcf815b61a1608842a0a6509c9",
       "representative_id": 601,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -3522,12 +3522,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "e5def456ee4d70c810499cc9bc14191c585df66f2d9b7fbe13d7448d3115f1b3",
       "representative_id": 604,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_stack_access",
+      "failure_class": "verifier: invalid write to stack R10 off=N size=N",
+      "verifier_message": "invalid write to stack R10 off=-536 size=8"
     },
     {
       "application": "tracee/monitor",
@@ -3536,12 +3536,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "ed40b27831629b54c829685e3a6ad2dc09b81709a8eaaa87c69bc4c12fcc3a73",
       "representative_id": 606,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_rejected",
+      "failure_class": "verifier: access beyond struct (anon) at off N size N",
+      "verifier_message": "access beyond struct (anon) at off 0 size 8"
     },
     {
       "application": "tracee/monitor",
@@ -3550,12 +3550,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "5e86cada182a1fadbc8b896f13e59d5d0f4c4151eae930996297f222c183d472",
       "representative_id": 607,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_rejected",
+      "failure_class": "verifier: access beyond struct (anon) at off N size N",
+      "verifier_message": "access beyond struct (anon) at off 0 size 8"
     },
     {
       "application": "tracee/monitor",
@@ -3564,12 +3564,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "4b7980239f8c2f356487ca1ee5094fabf28a1b4c9a865be1bebb02c46a8ca9f1",
       "representative_id": 608,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -3578,12 +3578,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "7adde86159ec29d5eba0bbcfc868ff4d1fbeb6edae870d312c86aa9263a55f47",
       "representative_id": 609,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -3592,11 +3592,11 @@
       "selection_kind": "current manifest",
       "body_sha256": "ab5b566aeeb50d862c1ca5b1c9c7b7c86cdc80766fd096c6f46bd0b78a58982c",
       "representative_id": 610,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
+      "stage": "installed",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "installed",
+      "failure_class": "installed",
       "verifier_message": null
     },
     {
@@ -3620,12 +3620,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "1313020364bd1a94a322d49b38f1065daf24b44a1430a63c8ab0dd43ebbfb535",
       "representative_id": 612,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",
@@ -3634,12 +3634,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "7fa894a0a17d95689b8f87cd6661f09cfbe7b7e0acd4846b96ee72c4a1a8c7cd",
       "representative_id": 613,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_map_bounds",
+      "failure_class": "verifier: Rn max value is outside of the allowed memory range",
+      "verifier_message": "R2 max value is outside of the allowed memory range"
     },
     {
       "application": "tracee/monitor",
@@ -3648,12 +3648,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "8d779571f68725636f0d794934dec462c63e5c0d3b3e50f52033ee5c6098c691",
       "representative_id": 614,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_map_bounds",
+      "failure_class": "verifier: Rn max value is outside of the allowed memory range",
+      "verifier_message": "R2 max value is outside of the allowed memory range"
     },
     {
       "application": "tracee/monitor",
@@ -3662,12 +3662,12 @@
       "selection_kind": "current manifest",
       "body_sha256": "43eff7b997715402bd801a11a00a54d5449ef5d0471e0cd8a96c213b723a8dc4",
       "representative_id": 615,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_map_bounds",
+      "failure_class": "verifier: Rn max value is outside of the allowed memory range",
+      "verifier_message": "R2 max value is outside of the allowed memory range"
     },
     {
       "application": "tetragon/observer",
@@ -3693,7 +3693,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R3 invalid mem access 'scalar'"
     },
@@ -3732,12 +3732,12 @@
       "selection_kind": "previous census identity on current payload",
       "body_sha256": "5bb072ffc048531f3d576020af6b844cc437101a844f93c398748249bc74deee",
       "representative_id": 30,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_stack_access",
+      "failure_class": "verifier: invalid write to stack R10 off=N size=N",
+      "verifier_message": "invalid write to stack R10 off=-1352 size=8"
     },
     {
       "application": "tetragon/observer",
@@ -3778,7 +3778,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -3806,7 +3806,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -3862,7 +3862,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -3932,7 +3932,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -3946,7 +3946,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -3960,7 +3960,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -3974,7 +3974,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -3988,7 +3988,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -4030,7 +4030,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -4072,7 +4072,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -4086,7 +4086,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -4128,7 +4128,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -4170,7 +4170,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -4198,7 +4198,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -4226,7 +4226,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -4268,7 +4268,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -4282,7 +4282,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -4338,7 +4338,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -4366,7 +4366,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -4380,7 +4380,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -4436,7 +4436,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -4450,7 +4450,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -4492,7 +4492,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -4520,7 +4520,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -4562,7 +4562,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -4590,7 +4590,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -4604,7 +4604,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -4618,7 +4618,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -4688,7 +4688,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -4702,7 +4702,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -4744,7 +4744,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -4786,7 +4786,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -4828,7 +4828,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -4842,7 +4842,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -4884,7 +4884,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -4912,7 +4912,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -4926,7 +4926,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -4982,7 +4982,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -5010,7 +5010,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -5038,7 +5038,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -5080,7 +5080,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -5094,7 +5094,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -5136,7 +5136,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -5178,7 +5178,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -5234,7 +5234,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -5248,7 +5248,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -5276,7 +5276,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -5304,7 +5304,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -5346,7 +5346,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -5360,7 +5360,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -5388,7 +5388,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -5430,7 +5430,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -5444,7 +5444,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -5500,7 +5500,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -5514,7 +5514,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -5528,7 +5528,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -5570,7 +5570,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -5584,7 +5584,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -5640,7 +5640,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -5654,7 +5654,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -5696,7 +5696,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -5724,7 +5724,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -5738,7 +5738,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -5794,7 +5794,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -5808,7 +5808,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -5864,7 +5864,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -5906,7 +5906,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -5920,7 +5920,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -5934,7 +5934,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -5962,7 +5962,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -6004,7 +6004,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6032,7 +6032,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -6088,7 +6088,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6102,7 +6102,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6144,7 +6144,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6172,7 +6172,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6214,7 +6214,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -6256,7 +6256,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6270,7 +6270,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6354,7 +6354,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6368,7 +6368,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6396,7 +6396,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -6438,7 +6438,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -6466,7 +6466,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6480,7 +6480,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6550,7 +6550,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6564,7 +6564,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -6578,7 +6578,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6620,7 +6620,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6634,7 +6634,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6662,7 +6662,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -6704,7 +6704,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -6732,7 +6732,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6760,7 +6760,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6802,7 +6802,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6816,7 +6816,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -6886,7 +6886,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6928,7 +6928,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6942,7 +6942,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -6984,7 +6984,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -6998,7 +6998,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -7012,7 +7012,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -7082,7 +7082,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -7110,7 +7110,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -7138,7 +7138,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -7152,7 +7152,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -7194,7 +7194,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -7208,7 +7208,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -7250,7 +7250,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -7264,7 +7264,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -7320,7 +7320,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -7348,7 +7348,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -7390,7 +7390,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -7404,7 +7404,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -7418,7 +7418,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -7446,7 +7446,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -7530,7 +7530,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -7572,7 +7572,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -7586,7 +7586,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -7614,7 +7614,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R1 invalid mem access 'scalar'"
     },
@@ -7656,7 +7656,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     },
@@ -7684,7 +7684,7 @@
       "stage": "verifier_rejected",
       "generated": true,
       "compiled": true,
-      "driver_class": "callee_saved_equality_arm",
+      "driver_class": "verifier_scalar_memory_access",
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
       "verifier_message": "R0 invalid mem access 'scalar'"
     }

@@ -455,7 +455,10 @@ def publish(interim=False):
             continue
         outcome = entry['outcome']
         message, context = verifier_message(outcome.get('diagnostic', ''))
-        label = outcome.get('failure_class') or census.failure_class(outcome)
+        # Classify with the repository classifier; worker records carry the label of
+        # the exported batch source.
+        label = census.failure_class(outcome)
+        outcome['failure_class'] = label
         if outcome['stage'] == 'installed':
             primary = 'installed'
         elif outcome['stage'] == 'verifier_rejected' and message:
@@ -582,7 +585,7 @@ def publish(interim=False):
                      'prepare.log', 'run.log', 'run2.log', 'run3.log', 'run4.log', 'run5.log',
                      'run6.log', 'run7.log', 'run8.log', 'complete.json', 'bin',
                      'killed-clang.txt', 'killed-clang-2.txt', 'discarded-workers/README.json',
-                     'slot-holder.held', 'slot-holder.log',
+                     'slot-holder.held', 'slot-holder.log', 'small-holder.held', 'small-holder.log',
                      'inputs/run-inventory.json', 'inputs/resource-index.json', 'inputs/manifests',
                      'katran-image-payload']:
             if (S / name).exists():
@@ -688,7 +691,8 @@ def readme(summary, provenance):
         'the 64G timing guest on CPUs 0-7, the two youngest of four large compiles were stopped and '
         'their bodies resubmitted; bin/slot-holder holds two of the four large slots (at most two '
         'large compiles) and new compiles start at MemAvailable >= ' + str(CLANG_MIN_AVAILABLE_GIB) +
-        ' GiB. Worker counts over the run: six two-CPU, four '
+        ' GiB; from 06:18 UTC bin/small-holder also kept smaller compiles to one at a time while '
+        'host MemAvailable stayed near 30 GiB. Worker counts over the run: six two-CPU, four '
         'three-CPU, six two-CPU, eight sharing CPUs 8-19, then fourteen sharing CPUs 8-19 with the other applications and the smallest Tracee bodies queued ahead of the large Tracee bodies. Scheduling changes affect run '
         'time only; each compile uses the same compiler and argv.',
         '* Files: result.json (summary, per-body records), instances.json (549 rows), '
