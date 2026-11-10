@@ -58,11 +58,11 @@ SHORT = {'bcc/set': 'BCC', 'katran': 'Katran', 'cilium/agent': 'Cilium',
          'tetragon/observer': 'Tetragon'}
 BEST = {'bcc/set': 25, 'katran': 1, 'cilium/agent': 14,
         'otelcol-ebpf-profiler/profiling': 2, 'tracee/monitor': 5, 'tetragon/observer': 4}
-# Host Clang for the largest B sources reached about 10 GiB. The first 26
-# representatives (largest proof ELFs) ran with four three-CPU workers; the
-# remaining smaller bodies use six two-CPU workers.
 WORKERS = ['8-9', '10-11', '12-13', '14-15', '16-17', '18-19']
 GUEST_MEMORY = '4G'
+# Host Clang for one large Tracee B source reaches 10-14 GiB.
+CLANG_SLOTS = 3
+CLANG_MIN_AVAILABLE_GIB = 24
 VNG = '/opt/virtme-ng/bin/vng'
 
 
@@ -295,6 +295,25 @@ def run():
     os.environ['PATH'] = str(wrapper.parent) + ':' + os.environ['PATH']
     (S / 'tmp').mkdir(exist_ok=True)
     os.environ['TMPDIR'] = str(S / 'tmp')
+    # Host B compilation scheduling through the existing KPROG_REAL_CLANG hook of
+    # kprog/stock-path/bin/clang: the same clang binary and argv, at most
+    # CLANG_SLOTS at once, each starting while MemAvailable >= CLANG_MIN_AVAILABLE_GIB.
+    gate = S / 'bin/clang-slot'
+    gate.write_text('\n'.join([
+        '#!/bin/bash',
+        'while true; do',
+        "  avail=$(awk '/MemAvailable/{print int($2/1048576)}' /proc/meminfo)",
+        '  if [ "$avail" -ge ' + str(CLANG_MIN_AVAILABLE_GIB) + ' ]; then',
+        '    for i in $(seq 0 ' + str(CLANG_SLOTS - 1) + '); do',
+        '      exec 9>' + str(S) + '/clang-slot-$i',
+        '      if flock -n 9; then exec /usr/lib/llvm-18/bin/clang "$@"; fi',
+        '      exec 9>&-',
+        '    done',
+        '  fi',
+        '  sleep 5',
+        'done', '']))
+    gate.chmod(0o755)
+    os.environ['KPROG_REAL_CLANG'] = str(gate)
     os.environ.setdefault('CENSUS_GUEST_MEMORY', GUEST_MEMORY)
     pending = queue.Queue()
     for entry in data['groups']:
@@ -603,10 +622,13 @@ def readme(summary, provenance):
         'grouped-static. One representative per body through corpus_resident_groups.shard; the '
         'outcome is weighted by body membership.',
         '* Runtime: af422c391 replay kernel, bpf_kprog_stock module, loader and native-link copies. '
-        'Workers on host CPUs 8-19: six two-CPU workers for the first 14 representatives, four '
-        'three-CPU workers while the largest Tracee B sources compiled (host Clang about 10 GiB '
-        'each), then six two-CPU workers for the smaller bodies. One guest vCPU, ' +
-        GUEST_MEMORY + ' guest memory.',
+        'Workers on host CPUs 8-19, one guest vCPU, ' + GUEST_MEMORY + ' guest memory. Host Clang '
+        'for one large Tracee B source reaches 10-14 GiB; after six concurrent compiles brought host '
+        'MemAvailable to 4 GiB, the six in-flight compiles were stopped, their worker records '
+        'discarded and their bodies resubmitted. From then on the existing KPROG_REAL_CLANG hook '
+        'routes the same clang binary and argv through at most ' + str(CLANG_SLOTS) +
+        ' concurrent compiles, each starting at MemAvailable >= ' + str(CLANG_MIN_AVAILABLE_GIB) +
+        ' GiB. Worker counts over the run: six, four, six.',
         '* Files: result.json (summary, per-body records), instances.json (549 rows), '
         'outcomes.json.gz (complete representative outcomes with every diagnostic byte), '
         'requests.tar.gz (raw request archives), run-raw.tar.gz (inputs, logs, commands), '
