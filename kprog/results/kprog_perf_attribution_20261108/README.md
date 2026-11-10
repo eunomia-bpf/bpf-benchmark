@@ -1016,12 +1016,48 @@ Every row below passes `tools/audit_native_arm.py` as `native`.
 | tracee | on | `..._20261110_070250_626363` | 0.964x | 0.958x | per-invocation 0.988x (359.4 to 363.7 ns), 41/167 live programs |
 | katran | off | `..._20261110_081426_770032` | **1.104x** | 1.102x | prior section, equal work to 1.099x of packets |
 | katran | on | `..._20261110_075919_372582` | **1.087x** | 1.102x | prior section |
+| tetragon | off | `..._20261110_092457_736627` | **1.009x** | 1.323x | 3 samples; native arm replaced programs, 287 registered |
+| tetragon | on | `..._20261110_085735_082662` | **1.140x** | 1.323x | per-invocation **1.289x** (1773.2 to 1375.3 ns), 21/287 and 23/287 live |
 
-**Four of the six return.** OTel lands slightly *above* its archive figure in
-both modes (1.849x off, 1.887x on, against 1.824x) and its per-invocation
-speedup is 14.636x against 14.81x. BCC returns at 1.003x on against 1.005x
-and 0.985x off. Tracee returns at 0.964x on and 0.948x off against 0.958x.
-Katran returns at 1.104x off and 1.087x on against 1.102x.
+**Four of the six return; two do not.** All six now have both modes.
+
+| app | archive | off | on | verdict |
+| --- | ---: | ---: | ---: | --- |
+| otel | 1.824x | 1.849x | 1.887x | returns, slightly above |
+| bcc | 1.005x | 0.985x | 1.003x | returns |
+| tracee | 0.958x | 0.948x | 0.964x | returns |
+| katran | 1.102x | 1.104x | 1.087x | returns |
+| tetragon | 1.323x | **1.009x** | **1.140x** | away, -14% to -24% |
+| cilium | 2.358x | **1.715x** | 1.562x | away, -27% to -34% |
+
+OTel lands slightly *above* its archive figure in both modes and its
+per-invocation speedup is 14.636x against 14.81x. BCC returns at 1.003x on
+against 1.005x and 0.985x off. Tracee returns at 0.964x on and 0.948x off
+against 0.958x. Katran returns at 1.104x off and 1.087x on against 1.102x.
+
+**The two that do not return are the two biggest archive wins**, Cilium at
+2.358x and Tetragon at 1.323x. That is the pattern worth naming: the
+applications the archive recorded as gaining most are the ones whose gain
+does not reproduce, and the applications it recorded as flat (BCC 1.005x,
+Tracee 0.958x) reproduce to within one or two percent.
+
+Tetragon's shortfall has a measurable cause and it is not the body: its
+per-invocation speedup is **1.289x**, close to the archive's 1.323x, while
+its throughput is 1.009x-1.140x. So the native code is doing what the archive
+says it should; the workload is not converting that into throughput. Its
+stats-off arm reads 1.009x against 1.140x on, and the 2026-05-29 runner
+records no event counters for it (the workload's ``config`` carries no
+``outcomes``), so the equal-work evidence for Tetragon is the registered
+program count -- 287 in both arms -- rather than a count of events handled.
+That is weaker evidence than Cilium's verdicts or OTel's invocations, and it
+is worth stating: Tetragon's row is audited `native` on program bytes and
+program count, but its work is not independently counted.
+
+Tetragon's first attempt in the queue failed before any of this with
+`manifest has ambiguous entries` -- 32 of its 287 program names were listed
+twice, so the 2026-05-29 loader refused the manifest. The recipe now writes
+it with `--dedupe-program last --helper-disambiguate 174`, and both modes
+then ran with 287 programs registered in each arm.
 
 **OTel's 14.636x comes with equal work, which was the open question.** Its
 stats-on run records both arms' counters, and they settle it:
