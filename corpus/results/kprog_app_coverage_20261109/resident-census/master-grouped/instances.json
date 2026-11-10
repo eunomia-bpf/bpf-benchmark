@@ -3638,12 +3638,13 @@
       "selection_kind": "current manifest",
       "body_sha256": "5788849186cad0cb3fbfa75f14dbd37b92d45a367351d2a6909cf877c06dc851",
       "representative_id": 595,
-      "stage": "pending",
-      "generated": false,
-      "compiled": false,
-      "driver_class": "pending",
-      "failure_class": "pending",
-      "verifier_message": null
+      "stage": "verifier_rejected",
+      "generated": true,
+      "compiled": true,
+      "driver_class": "verifier_scalar_memory_access",
+      "resubmitted_with_resident_program_type": false,
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'"
     },
     {
       "application": "tracee/monitor",

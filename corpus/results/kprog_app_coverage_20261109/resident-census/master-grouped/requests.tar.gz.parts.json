@@ -1,0 +1,22 @@
+{
+  "format": "concatenate parts in order",
+  "bytes": 123863876,
+  "sha256": "a9100f405723f4da6fea81c2159ef5c2c5cbfa4c1ef4282ad9d72d8f1f194c15",
+  "parts": [
+    {
+      "file": "requests.tar.gz.part000",
+      "bytes": 48000000,
+      "sha256": "8574715de4e41172c891623895f41b528c8d9017be8d4cb24a92e6745b43e9cc"
+    },
+    {
+      "file": "requests.tar.gz.part001",
+      "bytes": 48000000,
+      "sha256": "c130ad55f027bab7c02626b9a4174d587a36096f1e492aceb86978374d91b37d"
+    },
+    {
+      "file": "requests.tar.gz.part002",
+      "bytes": 27863876,
+      "sha256": "c4685a01c8e73c0b7005540d7aefe59ff9c15846b890ace6455549848c78235b"
+    }
+  ]
+}

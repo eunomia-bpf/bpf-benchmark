@@ -2,17 +2,15 @@
 
 All 549 resident x86-64 instances, model 46659115e (model sources identical to the matched runtime model af422c391). Load-only: B is generated, compiled and submitted to the stock verifier; native execution requests: 0.
 
-**Interim table:** 245 of 246 native bodies have outcomes; 1 instances are still running and appear as `pending`.
-
 | Application | Instances | Generated | Compiled | Verifier accepted | Verifier rejected | Failure classes (instances) | Best verified-path row | 4f5 census accepted |
 | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: |
 | BCC | 25 | 25 | 25 | 25 | 0 | - | 25 | 7 |
 | Katran | 1 | 1 | 1 | 0 | 1 | `verifier: value N makes fp pointer be out of bounds` 1 | 1 | 0 |
 | Cilium | 72 | 72 | 72 | 58 | 8 | `load_failed: raw proof map name has ambiguous original identities: cilium_nodeport` 6; `verifier: Rn bitwise operator &= on pointer prohibited` 3; `verifier: Rn invalid mem access 'scalar'` 3; `verifier: only read is supported` 2 | 14 | 0 |
 | OTel | 13 | 13 | 10 | 8 | 2 | `compiler: translation unit is too large for Clang to process: ran out of source locations` 3; `verifier: invalid write to stack R10 off=N size=N` 1; `verifier: Rn unbounded memory access, make sure to bounds check any such access` 1 | 2 | 0 |
-| Tracee | 151 | 149 | 129 | 15 | 114 | `verifier: Rn invalid mem access 'scalar'` 103; `compiler: translation unit is too large for Clang to process: ran out of source locations` 20; `verifier: Rn max value is outside of the allowed memory range` 4; `verifier: invalid write to stack R10 off=N size=N` 2; `verifier: math between map_value pointer and N is not allowed` 2; `verifier: access beyond struct (anon) at off N size N` 2; `verifier: misaligned stack access off N+N+N size N` 1; `pending` 1; `generation_failed: ValueError: unresolved finite indirect target at 0xN: call   QWORD PTR [rsp+0xN]` 1 | 5 | 0 |
+| Tracee | 151 | 150 | 130 | 15 | 115 | `verifier: Rn invalid mem access 'scalar'` 104; `compiler: translation unit is too large for Clang to process: ran out of source locations` 20; `verifier: Rn max value is outside of the allowed memory range` 4; `verifier: invalid write to stack R10 off=N size=N` 2; `verifier: math between map_value pointer and N is not allowed` 2; `verifier: access beyond struct (anon) at off N size N` 2; `verifier: misaligned stack access off N+N+N size N` 1; `generation_failed: ValueError: unresolved finite indirect target at 0xN: call   QWORD PTR [rsp+0xN]` 1 | 5 | 0 |
 | Tetragon | 287 | 286 | 286 | 81 | 205 | `verifier: Rn invalid mem access 'scalar'` 123; `verifier: invalid write to stack R10 off=N size=N` 78; `verifier: Rn type=scalar expected=func` 2; `verifier: The sequence of N jumps is too complex.` 1; `native_manifest_selection_gap` 1; `verifier: math between fp pointer and register with unbounded min value is not allowed` 1 | 4 | 0 |
-| Total | 549 | 546 | 523 | 187 | 330 | | 51 | 7 |
+| Total | 549 | 547 | 524 | 187 | 331 | | 51 | 7 |
 
 Best verified-path rows are the 2026-11-08 and 2026-11-09 05:18 application installations. The 4f5 column is the 2026-11-09 census at model 4f5b7ae6d (grouped-static/all-instances.json): generated 287, compiled 253, accepted 7, rejected 235.
 
@@ -22,7 +20,7 @@ Verifier rejections are named by the verifier's own final error line, with numbe
 
 | Class | Instances | Bodies | BCC | Katran | Cilium | OTel | Tracee | Tetragon |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `verifier: Rn invalid mem access 'scalar'` | 229 | 115 | 0 | 0 | 3 | 0 | 103 | 123 |
+| `verifier: Rn invalid mem access 'scalar'` | 230 | 116 | 0 | 0 | 3 | 0 | 104 | 123 |
 | `installed` | 187 | 78 | 25 | 0 | 58 | 8 | 15 | 81 |
 | `verifier: invalid write to stack R10 off=N size=N` | 81 | 9 | 0 | 0 | 0 | 1 | 2 | 78 |
 | `compiler: translation unit is too large for Clang to process: ran out of source locations` | 23 | 23 | 0 | 0 | 0 | 3 | 20 | 0 |
@@ -36,7 +34,6 @@ Verifier rejections are named by the verifier's own final error line, with numbe
 | `verifier: value N makes fp pointer be out of bounds` | 1 | 1 | 0 | 1 | 0 | 0 | 0 | 0 |
 | `verifier: Rn unbounded memory access, make sure to bounds check any such access` | 1 | 1 | 0 | 0 | 0 | 1 | 0 | 0 |
 | `verifier: misaligned stack access off N+N+N size N` | 1 | 1 | 0 | 0 | 0 | 0 | 1 | 0 |
-| `pending` | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
 | `generation_failed: ValueError: unresolved finite indirect target at 0xN: call   QWORD PTR [rsp+0xN]` | 1 | 1 | 0 | 0 | 0 | 0 | 1 | 0 |
 | `verifier: The sequence of N jumps is too complex.` | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 1 |
 | `native_manifest_selection_gap` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
@@ -53,7 +50,7 @@ These rows first stopped at service metadata with KeyError: 0. Outcomes after 8a
 
 ## Largest remaining class
 
-`verifier: Rn invalid mem access 'scalar'`: 229 instances in 115 native bodies. Representative output:
+`verifier: Rn invalid mem access 'scalar'`: 230 instances in 116 native bodies. Representative output:
 
 * Tetragon generic_kprobe_process_filter (resident 100, 33 instances):
 

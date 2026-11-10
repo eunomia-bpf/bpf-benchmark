@@ -1,12 +1,12 @@
 {
   "model_head": "46659115e7a1643c3c09ea905372b4488d4c95c6",
   "runtime_model": "af422c39195084ee3137627df943c055491358c7",
-  "native_body_groups": 245,
+  "native_body_groups": 246,
   "instances": 549,
-  "generated": 546,
-  "compiled": 523,
+  "generated": 547,
+  "compiled": 524,
   "verifier_accepted": 187,
-  "verifier_rejected": 330,
+  "verifier_rejected": 331,
   "applications": [
     {
       "application": "bcc/set",
@@ -130,29 +130,28 @@
     {
       "application": "tracee/monitor",
       "instances": 151,
-      "generated": 149,
-      "compiled": 129,
+      "generated": 150,
+      "compiled": 130,
       "verifier_accepted": 15,
-      "verifier_rejected": 114,
+      "verifier_rejected": 115,
       "failure_classes": {
-        "verifier: Rn invalid mem access 'scalar'": 103,
+        "verifier: Rn invalid mem access 'scalar'": 104,
         "compiler: translation unit is too large for Clang to process: ran out of source locations": 20,
         "verifier: Rn max value is outside of the allowed memory range": 4,
         "verifier: invalid write to stack R10 off=N size=N": 2,
         "verifier: math between map_value pointer and N is not allowed": 2,
         "verifier: access beyond struct (anon) at off N size N": 2,
         "verifier: misaligned stack access off N+N+N size N": 1,
-        "pending": 1,
         "generation_failed: ValueError: unresolved finite indirect target at 0xN: call   QWORD PTR [rsp+0xN]": 1
       },
-      "bodies": 150,
+      "bodies": 151,
       "by_selection": {
         "current manifest": {
           "instances": 151,
-          "generated": 149,
-          "compiled": 129,
+          "generated": 150,
+          "compiled": 130,
           "verifier_accepted": 15,
-          "verifier_rejected": 114
+          "verifier_rejected": 115
         }
       },
       "best_verified_path_row": 5,
@@ -216,14 +215,14 @@
   "classes": [
     {
       "failure_class": "verifier: Rn invalid mem access 'scalar'",
-      "instances": 229,
-      "bodies": 115,
+      "instances": 230,
+      "bodies": 116,
       "per_application": {
         "BCC": 0,
         "Katran": 0,
         "Cilium": 3,
         "OTel": 0,
-        "Tracee": 103,
+        "Tracee": 104,
         "Tetragon": 123
       }
     },
@@ -397,19 +396,6 @@
       }
     },
     {
-      "failure_class": "pending",
-      "instances": 1,
-      "bodies": 0,
-      "per_application": {
-        "BCC": 0,
-        "Katran": 0,
-        "Cilium": 0,
-        "OTel": 0,
-        "Tracee": 1,
-        "Tetragon": 0
-      }
-    },
-    {
       "failure_class": "generation_failed: ValueError: unresolved finite indirect target at 0xN: call   QWORD PTR [rsp+0xN]",
       "instances": 1,
       "bodies": 1,
@@ -464,8 +450,8 @@
   ],
   "largest_failure_class": {
     "failure_class": "verifier: Rn invalid mem access 'scalar'",
-    "instances": 229,
-    "bodies": 115,
+    "instances": 230,
+    "bodies": 116,
     "representatives": [
       {
         "application": "tetragon/observer",
@@ -526,8 +512,8 @@
     "8-19",
     "8-19"
   ],
-  "completed_bodies": 245,
-  "pending_bodies": 1,
+  "completed_bodies": 246,
+  "pending_bodies": 0,
   "resident_program_type_resubmission": {
     "BCC": {},
     "Katran": {},
@@ -547,7 +533,7 @@
     "Tracee": {},
     "Tetragon": {}
   },
-  "pending_instances": 1,
+  "pending_instances": 0,
   "body_identity": "SHA256 of complete native-link proof ELF (--mode proof --preserve-entry-abi)",
   "bodies": [
     {
@@ -2125,6 +2111,43 @@
       "resubmission": null,
       "started": "2026-11-10T09:32:32.748008+00:00",
       "finished": "2026-11-10T10:07:43.096677+00:00"
+    },
+    {
+      "body_sha256": "5788849186cad0cb3fbfa75f14dbd37b92d45a367351d2a6909cf877c06dc851",
+      "application": "tracee/monitor",
+      "representative_id": 595,
+      "symbol": "trace_chmod_common",
+      "native_object": "tracee.native.o",
+      "instances": 1,
+      "member_ids": [
+        595
+      ],
+      "selection_kinds": {
+        "current manifest": 1
+      },
+      "stage": "verifier_rejected",
+      "driver_class": "verifier_scalar_memory_access",
+      "failure_class": "verifier: Rn invalid mem access 'scalar'",
+      "verifier_message": "R3 invalid mem access 'scalar'",
+      "verifier_context": [
+        "100: (bf) r1 = r4                     ; R1=48 R4=48",
+        "101: (07) r1 += -232                  ; R1=-184",
+        "102: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "error_context": [
+        "100: (bf) r1 = r4                     ; R1=48 R4=48",
+        "101: (07) r1 += -232                  ; R1=-184",
+        "102: (61) r2 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'"
+      ],
+      "generated": true,
+      "compiled": true,
+      "worker": "/var/tmp/kprog-tmp/census-claude/workers/5788849186cad0cb",
+      "cpu": "8-19",
+      "resubmission": null,
+      "started": "2026-11-10T09:26:02.222689+00:00",
+      "finished": "2026-11-10T14:05:41.301774+00:00"
     },
     {
       "body_sha256": "82c769d6316821d632804abe653a53e345a02e5ea1b4ee754518c6978d8d3a8b",

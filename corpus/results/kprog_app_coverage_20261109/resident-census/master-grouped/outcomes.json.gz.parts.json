@@ -1,0 +1,17 @@
+{
+  "format": "concatenate parts in order",
+  "bytes": 75850759,
+  "sha256": "5330c85af298ab1c228f4463aad1b03d9eef24e160154c12e037f2a2aff90466",
+  "parts": [
+    {
+      "file": "outcomes.json.gz.part000",
+      "bytes": 48000000,
+      "sha256": "35a5c0d614d26e25190727a0241704c4c19d708750301c7248088f99f060f12f"
+    },
+    {
+      "file": "outcomes.json.gz.part001",
+      "bytes": 27850759,
+      "sha256": "022f893afa06061b584a967b559912a6033a2d88ae219c214a44d021b8403c16"
+    }
+  ]
+}

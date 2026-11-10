@@ -698,7 +698,7 @@ def publish(interim=False):
     omitted = []
     raw = io.BytesIO()
     with tarfile.open(fileobj=raw, mode='w:gz') as archive:
-        for path in sorted((S / 'workers').glob('*/stock-state/*.tar.gz')):
+        for path in sorted(p for d in ('workers', 'workers-type0') for p in (S / d).glob('*/stock-state/*.tar.gz')):
             prefix = str(path.relative_to(S))
             with tarfile.open(path) as source_archive:
                 for member in source_archive.getmembers():
@@ -716,9 +716,19 @@ def publish(interim=False):
         info.size = len(listing)
         archive.addfile(info, io.BytesIO(listing))
     paths += store(RESULTS, 'requests.tar.gz', raw.getvalue())
+    # Group membership without outcomes; outcomes.json.gz carries every outcome.
+    groups_state = json.loads((S / 'groups.json').read_text())
+    for entry in groups_state['groups']:
+        entry.pop('outcome', None)
+    write(S / 'membership.json', groups_state)
+    type0_state = json.loads((S / 'type0.json').read_text()) if (S / 'type0.json').exists() else {}
+    for record in type0_state.get('bodies', {}).values():
+        record.pop('outcome', None)
+    write(S / 'type0-membership.json', type0_state)
     raw = io.BytesIO()
     with tarfile.open(fileobj=raw, mode='w:gz') as archive:
-        for name in ['census.py', 'provenance.json', 'selection-spec.json', 'groups.json',
+        for name in ['census.py', 'provenance.json', 'selection-spec.json', 'membership.json',
+                     'type0-membership.json', 'type0.log', 'type0-complete.json',
                      'prepare.log', 'run.log', 'run2.log', 'run3.log', 'run4.log', 'run5.log',
                      'run6.log', 'run7.log', 'run8.log', 'complete.json', 'bin',
                      'killed-clang.txt', 'killed-clang-2.txt', 'discarded-workers/README.json',
@@ -729,7 +739,7 @@ def publish(interim=False):
                 archive.add(S / name, arcname=name)
         for path in sorted((S / 'proofs').glob('*.command.json')):
             archive.add(path, arcname=str(path.relative_to(S)))
-        for worker in sorted((S / 'workers').iterdir()):
+        for worker in sorted(w for d in ('workers', 'workers-type0') if (S / d).exists() for w in (S / d).iterdir()):
             for name in ['controller.log', 'stock-console.log', 'stock-service.log',
                          'stock-compiler.log', 'stock-host.log', 'effective-vng-command.json',
                          'stock-command.json', 'stock-guest.exit', 'stock-guest.sh', 'provenance.json',
