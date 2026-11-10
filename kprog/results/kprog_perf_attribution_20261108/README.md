@@ -1194,10 +1194,23 @@ deliver:
   | 2.0 | **1.395x** |
 
   So Tracee alone reaches the top of the operator's 1.20x-1.40x band at a 2x
-  body. No other application can: Katran at a 0.42-CPU share caps out near
-  1.42x even with a free body, and BCC, Cilium and OTel are already at or
-  near the ratio their shares allow. **Tracee is the one application where
-  the target is reachable from a body change alone.**
+  body, by this model.
+
+  **The model has a known error, and Katran exposes it.** At a 0.42-CPU share
+  it predicts a free-body ceiling of 1.0554x, yet Katran measures 1.104x. So
+  the BPF-time share *understates* the serialized cost of the program: part
+  of Katran's throughput depends on the program's latency per packet, which
+  the BPF `run_time_ns` total does not capture when the program sits in front
+  of a queue. The predictions above are therefore lower bounds, and the
+  ordering they give -- Tracee first, by a wide margin -- is still the useful
+  part, but the specific 1.395x should be read as a floor rather than a
+  target.
+
+  What survives the correction is the comparison between applications: Tracee
+  carries 4.53 CPUs of measured BPF time, ten times Katran's 0.42, so it is
+  where a body change has an order of magnitude more room. **Tracee is the
+  one application where the target is plausibly reachable from a body change
+  alone.**
 - **OTel drops from 2.53 CPUs to 0.18**, a 14x reduction in BPF CPU demand,
   which is exactly the 14.636x per-invocation speedup and why its throughput
   ratio is the highest of the six.
