@@ -2,17 +2,17 @@
 
 All 549 resident x86-64 instances, model 46659115e (model sources identical to the matched runtime model af422c391). Load-only: B is generated, compiled and submitted to the stock verifier; native execution requests: 0.
 
-**Interim table:** 191 of 246 native bodies have outcomes; 55 instances are still running and appear as `pending`.
+**Interim table:** 245 of 246 native bodies have outcomes; 1 instances are still running and appear as `pending`.
 
 | Application | Instances | Generated | Compiled | Verifier accepted | Verifier rejected | Failure classes (instances) | Best verified-path row | 4f5 census accepted |
 | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: |
 | BCC | 25 | 25 | 25 | 25 | 0 | - | 25 | 7 |
 | Katran | 1 | 1 | 1 | 0 | 1 | `verifier: value N makes fp pointer be out of bounds` 1 | 1 | 0 |
-| Cilium | 72 | 0 | 0 | 0 | 0 | `generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]` 72 | 14 | 0 |
-| OTel | 13 | 2 | 2 | 2 | 0 | `generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]` 11 | 2 | 0 |
-| Tracee | 151 | 96 | 76 | 15 | 61 | `pending` 54; `verifier: Rn invalid mem access 'scalar'` 50; `compiler: translation unit is too large for Clang to process: ran out of source locations` 20; `verifier: Rn max value is outside of the allowed memory range` 4; `verifier: invalid write to stack R10 off=N size=N` 2; `verifier: math between map_value pointer and N is not allowed` 2; `verifier: access beyond struct (anon) at off N size N` 2; `verifier: misaligned stack access off N+N+N size N` 1; `generation_failed: ValueError: unresolved finite indirect target at 0xN: call   QWORD PTR [rsp+0xN]` 1 | 5 | 0 |
-| Tetragon | 287 | 285 | 285 | 81 | 204 | `verifier: Rn invalid mem access 'scalar'` 123; `verifier: invalid write to stack R10 off=N size=N` 78; `verifier: The sequence of N jumps is too complex.` 1; `native_manifest_selection_gap` 1; `verifier: math between fp pointer and register with unbounded min value is not allowed` 1; `verifier: Rn type=scalar expected=func` 1; `pending` 1 | 4 | 0 |
-| Total | 549 | 409 | 389 | 123 | 266 | | 51 | 7 |
+| Cilium | 72 | 72 | 72 | 58 | 8 | `load_failed: raw proof map name has ambiguous original identities: cilium_nodeport` 6; `verifier: Rn bitwise operator &= on pointer prohibited` 3; `verifier: Rn invalid mem access 'scalar'` 3; `verifier: only read is supported` 2 | 14 | 0 |
+| OTel | 13 | 13 | 10 | 8 | 2 | `compiler: translation unit is too large for Clang to process: ran out of source locations` 3; `verifier: invalid write to stack R10 off=N size=N` 1; `verifier: Rn unbounded memory access, make sure to bounds check any such access` 1 | 2 | 0 |
+| Tracee | 151 | 149 | 129 | 15 | 114 | `verifier: Rn invalid mem access 'scalar'` 103; `compiler: translation unit is too large for Clang to process: ran out of source locations` 20; `verifier: Rn max value is outside of the allowed memory range` 4; `verifier: invalid write to stack R10 off=N size=N` 2; `verifier: math between map_value pointer and N is not allowed` 2; `verifier: access beyond struct (anon) at off N size N` 2; `verifier: misaligned stack access off N+N+N size N` 1; `pending` 1; `generation_failed: ValueError: unresolved finite indirect target at 0xN: call   QWORD PTR [rsp+0xN]` 1 | 5 | 0 |
+| Tetragon | 287 | 286 | 286 | 81 | 205 | `verifier: Rn invalid mem access 'scalar'` 123; `verifier: invalid write to stack R10 off=N size=N` 78; `verifier: Rn type=scalar expected=func` 2; `verifier: The sequence of N jumps is too complex.` 1; `native_manifest_selection_gap` 1; `verifier: math between fp pointer and register with unbounded min value is not allowed` 1 | 4 | 0 |
+| Total | 549 | 546 | 523 | 187 | 330 | | 51 | 7 |
 
 Best verified-path rows are the 2026-11-08 and 2026-11-09 05:18 application installations. The 4f5 column is the 2026-11-09 census at model 4f5b7ae6d (grouped-static/all-instances.json): generated 287, compiled 253, accepted 7, rejected 235.
 
@@ -22,26 +22,38 @@ Verifier rejections are named by the verifier's own final error line, with numbe
 
 | Class | Instances | Bodies | BCC | Katran | Cilium | OTel | Tracee | Tetragon |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `verifier: Rn invalid mem access 'scalar'` | 173 | 61 | 0 | 0 | 0 | 0 | 50 | 123 |
-| `installed` | 123 | 51 | 25 | 0 | 0 | 2 | 15 | 81 |
-| `generation_failed: KeyError: 0 at section = SECTIONS[context['prog_type']]` | 83 | 37 | 0 | 0 | 72 | 11 | 0 | 0 |
-| `verifier: invalid write to stack R10 off=N size=N` | 80 | 8 | 0 | 0 | 0 | 0 | 2 | 78 |
-| `pending` | 55 | 0 | 0 | 0 | 0 | 0 | 54 | 1 |
-| `compiler: translation unit is too large for Clang to process: ran out of source locations` | 20 | 20 | 0 | 0 | 0 | 0 | 20 | 0 |
+| `verifier: Rn invalid mem access 'scalar'` | 229 | 115 | 0 | 0 | 3 | 0 | 103 | 123 |
+| `installed` | 187 | 78 | 25 | 0 | 58 | 8 | 15 | 81 |
+| `verifier: invalid write to stack R10 off=N size=N` | 81 | 9 | 0 | 0 | 0 | 1 | 2 | 78 |
+| `compiler: translation unit is too large for Clang to process: ran out of source locations` | 23 | 23 | 0 | 0 | 0 | 3 | 20 | 0 |
+| `load_failed: raw proof map name has ambiguous original identities: cilium_nodeport` | 6 | 2 | 0 | 0 | 6 | 0 | 0 | 0 |
 | `verifier: Rn max value is outside of the allowed memory range` | 4 | 4 | 0 | 0 | 0 | 0 | 4 | 0 |
+| `verifier: Rn bitwise operator &= on pointer prohibited` | 3 | 1 | 0 | 0 | 3 | 0 | 0 | 0 |
+| `verifier: only read is supported` | 2 | 1 | 0 | 0 | 2 | 0 | 0 | 0 |
 | `verifier: math between map_value pointer and N is not allowed` | 2 | 2 | 0 | 0 | 0 | 0 | 2 | 0 |
 | `verifier: access beyond struct (anon) at off N size N` | 2 | 2 | 0 | 0 | 0 | 0 | 2 | 0 |
+| `verifier: Rn type=scalar expected=func` | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 2 |
 | `verifier: value N makes fp pointer be out of bounds` | 1 | 1 | 0 | 1 | 0 | 0 | 0 | 0 |
+| `verifier: Rn unbounded memory access, make sure to bounds check any such access` | 1 | 1 | 0 | 0 | 0 | 1 | 0 | 0 |
 | `verifier: misaligned stack access off N+N+N size N` | 1 | 1 | 0 | 0 | 0 | 0 | 1 | 0 |
+| `pending` | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
 | `generation_failed: ValueError: unresolved finite indirect target at 0xN: call   QWORD PTR [rsp+0xN]` | 1 | 1 | 0 | 0 | 0 | 0 | 1 | 0 |
 | `verifier: The sequence of N jumps is too complex.` | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 1 |
 | `native_manifest_selection_gap` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 | `verifier: math between fp pointer and register with unbounded min value is not allowed` | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 1 |
-| `verifier: Rn type=scalar expected=func` | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 1 |
+
+## Program type 0 rows resubmitted with the resident type
+
+These rows first stopped at service metadata with KeyError: 0. Outcomes after 8a2d0135e (resident bpf_prog_info type when the source section yields 0):
+
+| Application | Instances | Outcome classes |
+| --- | ---: | --- |
+| Cilium | 72 | `installed` 58; `load_failed: raw proof map name has ambiguous original identities: cilium_nodeport` 6; `verifier: Rn bitwise operator &= on pointer prohibited` 3; `verifier: Rn invalid mem access 'scalar'` 3; `verifier: only read is supported` 2 |
+| OTel | 11 | `installed` 6; `compiler: translation unit is too large for Clang to process: ran out of source locations` 3; `verifier: invalid write to stack R10 off=N size=N` 1; `verifier: Rn unbounded memory access, make sure to bounds check any such access` 1 |
 
 ## Largest remaining class
 
-`verifier: Rn invalid mem access 'scalar'`: 173 instances in 61 native bodies. Representative output:
+`verifier: Rn invalid mem access 'scalar'`: 229 instances in 115 native bodies. Representative output:
 
 * Tetragon generic_kprobe_process_filter (resident 100, 33 instances):
 
@@ -73,6 +85,7 @@ Verifier rejections are named by the verifier's own final error line, with numbe
 * Resident rows and source resources: A's prepared 549-instance set (/var/tmp/kprog-tmp/A/large-stack-observation/inputs/run-inventory.json); fresh collection over the same coverage archives reproduces every row field.
 * Native P: the payloads of the current-model six-app replay, built with the restored compiler flags (no external thunks). Selection uses corpus_resident_census.collect on their manifests. Every manifest selection equals the previous census object+symbol. The Tetragon manifest selects nothing for 153 residents (bytecode-length mismatch against the paired source); 152 of them use the previous census object+symbol in the current payload, and one (credential-commit) has no object in the payload. by_selection in result.json separates these rows.
 * Grouping: SHA256 of the native-link proof ELF (--mode proof --preserve-entry-abi), as in grouped-static. One representative per body through corpus_resident_groups.shard; the outcome is weighted by body membership.
+* Program type 0: libbpf maps the Cilium (tc/tail and similar) and OTel (perf_event/<name>) source sections to program type 0, so service metadata first stopped at KeyError: 0 for 72 Cilium and 11 OTel instances. At the coordinator request these bodies were resubmitted from /workspaces/repository with 8a2d0135e, which takes the resident program's bpf_prog_info type when the source section yields 0; the tables show the resubmitted outcomes, result.json resident_program_type_resubmission lists their classes and outcomes.json.gz keeps the earlier outcomes.
 * Model source: this batch used a read-only export of the committed model files at 46659115e, bound over the repository paths by the committed driver (inputs/source). Under the operator rule of 2026-11-10 an exported source copy counts as a separate tree: the batch kept it until it finished, the copy was then removed, and publication reads /workspaces/repository directly.
 * Runtime: af422c391 replay kernel, bpf_kprog_stock module, loader and native-link copies. Workers on host CPUs 8-19, one guest vCPU, 4G guest memory. Host Clang for one large Tracee B source reaches 10-14 GiB; after six concurrent compiles brought host MemAvailable to 4 GiB, the six in-flight compiles were stopped, their worker records discarded and their bodies resubmitted. From then on the existing KPROG_REAL_CLANG hook routes the same clang binary and argv through a bounded number of concurrent compiles: first three in total at MemAvailable >= 24 GiB, then three for B sources above 400000 bytes plus three for smaller sources, then four large plus three small at MemAvailable >= 28 GiB. At 03:43 UTC, on the coordinator request for the 64G timing guest on CPUs 0-7, the two youngest of four large compiles were stopped and their bodies resubmitted; bin/slot-holder holds two of the four large slots (at most two large compiles) and new compiles start at MemAvailable >= 40 GiB; from 06:18 UTC bin/small-holder also kept smaller compiles to one at a time while host MemAvailable stayed near 30 GiB. Worker counts over the run: six two-CPU, four three-CPU, six two-CPU, eight sharing CPUs 8-19, then fourteen sharing CPUs 8-19 with the other applications and the smallest Tracee bodies queued ahead of the large Tracee bodies. Scheduling changes affect run time only; each compile uses the same compiler and argv.
 * Files: result.json (summary, per-body records), instances.json (549 rows), outcomes.json.gz (complete representative outcomes with every diagnostic byte), requests.tar.gz (raw request archives), run-raw.tar.gz (inputs, logs, commands), provenance.json (hashes and model identity), census.py (controller). Ordered .partNNN files concatenate to the named stream.

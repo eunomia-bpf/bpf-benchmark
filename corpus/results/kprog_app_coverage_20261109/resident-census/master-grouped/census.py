@@ -362,6 +362,124 @@ def run():
           completed=sum('outcome' in g for g in data['groups'])))
 
 
+def type0_groups(data):
+    """Bodies whose service metadata stopped at program type 0 (KeyError: 0)."""
+    selected = []
+    for entry in data['groups']:
+        outcome = entry.get('outcome') or {}
+        service = (outcome.get('submission') or {}).get('service') or {}
+        if (outcome.get('stage') == 'generation_failed' and
+                (service.get('traceback') or '').strip().endswith('KeyError: 0')):
+            selected.append(entry)
+    return selected
+
+
+def rerun_type0():
+    """Resubmit the type-0 bodies from /workspaces/repository with the resident
+    program type fallback (8a2d0135e). The driver, model sources and clang
+    wrapper are read from the repository tree; runtime files and inputs stay
+    the batch copies."""
+    data = json.loads((S / 'groups.json').read_text())
+    groups = type0_groups(data)
+    head = git('rev-parse', 'HEAD').strip()
+    census = load('census_type0', ROOT / 'kprog/corpus_resident_verifier.py')
+    driver = ROOT / 'kprog/corpus_resident_verifier.py'
+    path = S / 'type0.json'
+    results = json.loads(path.read_text()) if path.exists() else dict(
+        model_head=head, driver=str(driver), bodies={})
+    os.environ['PATH'] = str(S / 'bin') + ':' + os.environ['PATH']
+    os.environ['TMPDIR'] = str(S / 'tmp')
+    os.environ['KPROG_REAL_CLANG'] = str(S / 'bin/clang-gate2')
+    os.environ.setdefault('CENSUS_GUEST_MEMORY', GUEST_MEMORY)
+    pending = queue.Queue()
+    for entry in sorted(groups, key=lambda g: -g['proof_bytes']):
+        if entry['body_sha256'] not in results['bodies']:
+            pending.put(entry)
+    lock = threading.Lock()
+
+    def one(entry, cpu):
+        work = S / 'workers-type0' / entry['body_sha256'][:16]
+        if not (work / 'stock-results.json').exists():
+            work.mkdir(parents=True, exist_ok=True)
+            inventory = json.loads((I / 'run-inventory.json').read_text())
+            resources = json.loads((I / 'resource-index.json').read_text())
+            row = json.loads(json.dumps(entry['representative']))
+            resource = dict(next(r for r in resources['programs'] if
+                                 (r['application'], r['source_prog_id']) ==
+                                 (row['application'], row['source_prog_id'])))
+            for candidate in row['native_candidates']:
+                source = Path(candidate['native_object'])
+                if not (work / source.name).exists():
+                    os.link(source, work / source.name)
+                candidate['native_object'] = str(work / source.name)
+            source = Path(resource['bpf_object'])
+            if not (work / source.name).exists():
+                os.link(source, work / source.name)
+            resource['bpf_object'] = str(work / source.name)
+            inventory.update(programs=[row], instances=1, source_head=head)
+            resources['programs'] = [resource]
+            write(work / 'run-inventory.json', inventory)
+            write(work / 'resource-index.json', resources)
+            write(work / 'provenance.json', dict(model_head=head,
+                body_sha256=entry['body_sha256'], weighted_instances=len(entry['members']),
+                host_cpu=cpu, guest_cpus=1, kernel_image=str(I / 'bzImage'),
+                model_source='/workspaces/repository', resubmission='resident program type'))
+            if not (work / 'source').exists():
+                (work / 'source').symlink_to(ROOT, target_is_directory=True)
+            (work / 'stock-runtime').mkdir(exist_ok=True)
+            for item in (I / 'stock-runtime').iterdir():
+                if not (work / 'stock-runtime' / item.name).exists():
+                    os.link(item, work / 'stock-runtime' / item.name)
+            if not (work / 'native-link').exists():
+                os.link(I / 'native-link', work / 'native-link')
+            (work / 'stock-compile-proxy').write_text('#!/bin/sh\nexec python3 ' + str(driver) +
+                ' compile --scratch ' + str(work) + ' "$@"\n')
+            (work / 'stock-compile-proxy').chmod(0o755)
+            (work / 'stock-guest.sh').write_text('#!/bin/bash\nset -e\nD=' + str(work) +
+                '\nmountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug\n'
+                'mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf\n'
+                'insmod "$D/stock-runtime/kprog_stock.ko"\n'
+                'export CLANG="$D/stock-compile-proxy" PYTHONDONTWRITEBYTECODE=1\n'
+                'python3 ' + str(driver) + ' guest --scratch "$D"\n')
+            with (work / 'controller.log').open('w') as log:
+                subprocess.run(['taskset', '-c', cpu, sys.executable, '-B', str(driver),
+                                'namespace', '--scratch', str(work)],
+                               stdout=log, stderr=subprocess.STDOUT)
+        if (work / 'stock-results.json').exists():
+            outcome = json.loads((work / 'stock-results.json').read_text())['programs'][0]
+            outcome['compiler_failures'] = census.compiler_failures(outcome)
+            outcome['failure_class'] = census.failure_class(outcome)
+        else:
+            outcome = dict(source_prog_id=entry['representative']['source_prog_id'],
+                           name=entry['representative']['name'], stage='transport_failed',
+                           diagnostic=(work / 'controller.log').read_text())
+        return dict(outcome=outcome, worker=str(work), model_head=head)
+
+    def worker(cpu):
+        while True:
+            try:
+                entry = pending.get_nowait()
+            except queue.Empty:
+                return
+            started = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            record = one(entry, cpu)
+            with lock:
+                record.update(started=started,
+                              finished=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                              previous_stage=entry['outcome']['stage'],
+                              instances=len(entry['members']),
+                              application=entry['representative']['application'])
+                results['bodies'][entry['body_sha256']] = record
+                write(path, results)
+                print(len(results['bodies']), len(groups), record['application'],
+                      record['outcome']['stage'], record['outcome'].get('failure_class'), flush=True)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
+        for job in [pool.submit(worker, '8-19') for _ in range(6)]:
+            job.result()
+    write(S / 'type0-complete.json', dict(bodies=len(results['bodies']), selected=len(groups)))
+
+
 def verifier_message(text):
     """The verifier's own error line precedes its 'processed N insns' summary."""
     lines = (text or '').splitlines()
@@ -409,6 +527,10 @@ def stage_class(outcome, label):
         message = re.sub(r'0x[0-9a-fA-F]+', '0xN', trace[-1]).strip()[:100]
         site = code[-1] if code and not code[-1].startswith('raise ') else ''
         return 'generation_failed: ' + message + (' at ' + site[:100] if site else '')
+    if outcome['stage'] == 'load_failed':
+        match = re.search(r'trusted-native-loader: ([^\n|]*)', outcome.get('diagnostic') or '')
+        if match:
+            return 'load_failed: ' + normalize(match.group(1))[:120]
     if outcome['stage'] == 'compilation_failed':
         text = '\n'.join(c.get('stderr', '') for c in outcome.get('compiler_failures') or [])
         for line in text.splitlines():
@@ -442,6 +564,17 @@ def publish(interim=False):
     RESULTS.mkdir(parents=True, exist_ok=True)
     instances, bodies, outcomes = [], [], {}
     pending_bodies = 0
+    # Bodies resubmitted with the resident program type (8a2d0135e) replace their
+    # program-type-0 outcome; the earlier outcome stays in outcomes.json.gz.
+    type0 = json.loads((S / 'type0.json').read_text()) if (S / 'type0.json').exists() else {}
+    for entry in data['groups']:
+        record = type0.get('bodies', {}).get(entry['body_sha256'])
+        if record:
+            outcomes[entry['body_sha256'] + '/before-resident-program-type'] = entry['outcome']
+            entry['outcome'] = record['outcome']
+            entry['resubmission'] = dict(reason='resident program type', commit='8a2d0135e',
+                                         model_head=record['model_head'], worker=record['worker'],
+                                         previous_stage=record['previous_stage'])
     for entry in data['groups']:
         if 'outcome' not in entry:
             pending_bodies += 1
@@ -478,7 +611,7 @@ def publish(interim=False):
             verifier_message=message, verifier_context=context,
             error_context=error_context(outcome, context),
             generated=outcome.get('generated'), compiled=outcome.get('compiled'),
-            worker=entry.get('worker'), cpu=entry.get('cpu'),
+            worker=entry.get('worker'), cpu=entry.get('cpu'), resubmission=entry.get('resubmission'),
             started=entry.get('started'), finished=entry.get('finished')))
         for member in entry['members']:
             instances.append(dict(application=member['application'],
@@ -487,6 +620,7 @@ def publish(interim=False):
                 representative_id=entry['representative']['source_prog_id'],
                 stage=outcome['stage'], generated=bool(outcome.get('generated')),
                 compiled=bool(outcome.get('compiled')), driver_class=label,
+                resubmitted_with_resident_program_type=bool(entry.get('resubmission')),
                 failure_class=primary, verifier_message=message))
     for outcome in data['selection_outcomes']:
         instances.append(dict(application=outcome['application'],
@@ -540,6 +674,9 @@ def publish(interim=False):
                                   error_context=b['error_context']) for b in examples[:3]]),
         native_execution_requests=0, guest_memory=GUEST_MEMORY, workers=WORKERS,
         completed_bodies=len(bodies), pending_bodies=pending_bodies,
+        resident_program_type_resubmission={SHORT[a]: dict(collections.Counter(
+            r['failure_class'] for r in instances if r['application'] == a and
+            r.get('resubmitted_with_resident_program_type'))) for a in APPS},
         pending_instances=sum(r['stage'] == 'pending' for r in instances),
         body_identity=data['body_identity'], bodies=bodies)
     write(RESULTS / 'result.json', summary)
@@ -649,6 +786,17 @@ def readme(summary, provenance):
         lines.append('| `' + row['failure_class'] + '` | ' + str(row['instances']) + ' | ' +
                      str(row['bodies']) + ' | ' +
                      ' | '.join(str(row['per_application'][SHORT[a]]) for a in APPS) + ' |')
+    resubmitted = {app: classes for app, classes in
+                   summary['resident_program_type_resubmission'].items() if classes}
+    if resubmitted:
+        lines += ['', '## Program type 0 rows resubmitted with the resident type', '',
+            'These rows first stopped at service metadata with KeyError: 0. Outcomes after '
+            '8a2d0135e (resident bpf_prog_info type when the source section yields 0):', '',
+            '| Application | Instances | Outcome classes |', '| --- | ---: | --- |']
+        for app, classes in resubmitted.items():
+            lines.append('| ' + app + ' | ' + str(sum(classes.values())) + ' | ' +
+                         '; '.join('`' + k + '` ' + str(v) for k, v in
+                                   sorted(classes.items(), key=lambda x: -x[1])) + ' |')
     largest = summary['largest_failure_class']
     lines += ['', '## Largest remaining class', '',
         '`' + largest['failure_class'] + '`: ' + str(largest['instances']) + ' instances in ' +
@@ -674,6 +822,13 @@ def readme(summary, provenance):
         '* Grouping: SHA256 of the native-link proof ELF (--mode proof --preserve-entry-abi), as in '
         'grouped-static. One representative per body through corpus_resident_groups.shard; the '
         'outcome is weighted by body membership.',
+        '* Program type 0: libbpf maps the Cilium (tc/tail and similar) and OTel '
+        '(perf_event/<name>) source sections to program type 0, so service metadata first stopped '
+        'at KeyError: 0 for 72 Cilium and 11 OTel instances. At the coordinator request these '
+        'bodies were resubmitted from /workspaces/repository with 8a2d0135e, which takes the '
+        'resident program\'s bpf_prog_info type when the source section yields 0; the tables show '
+        'the resubmitted outcomes, result.json resident_program_type_resubmission lists their '
+        'classes and outcomes.json.gz keeps the earlier outcomes.',
         '* Model source: this batch used a read-only export of the committed model files at ' +
         summary['model_head'][:9] + ', bound over the repository paths by the committed driver '
         '(inputs/source). Under the operator rule of 2026-11-10 an exported source copy counts as a '
@@ -705,10 +860,10 @@ def readme(summary, provenance):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=['prepare', 'run', 'publish', 'interim'])
+    parser.add_argument('mode', choices=['prepare', 'run', 'publish', 'interim', 'type0'])
     args = parser.parse_args()
     {'prepare': prepare, 'run': run, 'publish': publish,
-     'interim': lambda: publish(interim=True)}[args.mode]()
+     'interim': lambda: publish(interim=True), 'type0': rerun_type0}[args.mode]()
 
 
 if __name__ == '__main__':
