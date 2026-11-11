@@ -20,4 +20,13 @@ cp $K/arch/x86/boot/bzImage $I/bzImage
 cp $R/kprog/x86/native_lab/native_link/target/release/native-link $I/native-link
 cp $O/mod/bpf_kprog_stock.ko $I/stock-runtime/kprog_stock.ko
 cp $O/loader/libnative_loader.so $O/loader/trusted-native-loader $I/stock-runtime/
+# Tetragon objects reference cel_expr_N externs that its loader resolves at load time;
+# link the default CEL bodies in so libbpf can open them as source resources.
+L=$R/runner/build-llvmbpf/vendor/libbpf
+cc -O2 -I$L/prefix/include $R/corpus/results/kprog_app_coverage_20261110/census-followups/bpf-link.c $L/pic-obj/libbpf.a -lelf -lz -o $O/bpf-link
+make -C $R/vendor/bpf $O/cel-defaults.bpf.o TETRAGON_CEL_SOURCE_LIBRARY=$O/cel-defaults.bpf.o
+mkdir -p $O/tetragon-linked
+for n in bpf_multi_kprobe_v61 bpf_generic_kprobe_v61; do
+  $O/bpf-link $O/tetragon-linked/$n.o $R/vendor/build/x86/tetragon/$n.o $O/cel-defaults.bpf.o
+done
 echo RUNTIME_DONE
