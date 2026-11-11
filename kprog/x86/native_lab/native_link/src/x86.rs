@@ -1376,7 +1376,8 @@ pub(super) fn rewrite_x86(
                         }
                         for ib in build_x86_tail_call_inline(
                             helper_addrs,
-                            callee_saved_mask,
+                            // The one kernel's frame saves rbx, r13, r14 and r15 around P.
+                            0xf,
                             &entry_abi_strip.tail_call_cleanup_bytes,
                             entry_abi_strip.tail_call_bpf_rbp_rsp_offset,
                             entry_abi_strip.tail_call_bpf_rbp_is_live,
