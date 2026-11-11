@@ -19,7 +19,6 @@
 
 #include <algorithm>
 #include <chrono>
-#include <cstdlib>
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
@@ -65,9 +64,6 @@ using bpf_object_ptr = std::unique_ptr<bpf_object, object_deleter>;
 struct LoadedCompanion {
     bpf_object_ptr object;
     int program_fd = -1;
-    uint32_t prog_type = 0;
-    uint32_t expected_attach_type = 0;
-    uint32_t prog_flags = 0;
     std::vector<bpf_insn> source_insns;
     uint64_t open_ns = 0;
     uint64_t object_load_ns = 0;
@@ -115,9 +111,6 @@ LoadedCompanion load_native_companion_object(const std::filesystem::path &path)
         fail("native_kernel companion entry program has no fd after load: " +
              path.string());
     }
-    out.prog_type = static_cast<uint32_t>(bpf_program__type(entry_prog));
-    out.expected_attach_type = bpf_program__expected_attach_type(entry_prog);
-    out.prog_flags = bpf_program__flags(entry_prog);
     const bpf_insn *insns = bpf_program__insns(entry_prog);
     const size_t insn_count = bpf_program__insn_cnt(entry_prog);
     if (insns == nullptr || insn_count == 0) {
@@ -164,10 +157,6 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
 
     const auto companion_load_start = std::chrono::steady_clock::now();
     LoadedCompanion companion = load_native_companion_object(options.program);
-    if (companion.prog_type != prog_type_value) {
-        fail("native_kernel companion program type does not match the requested stub type: " +
-             options.program.string());
-    }
     const auto companion_load_end = std::chrono::steady_clock::now();
 
     native_loader::FdLoadOptions load_options{
@@ -179,17 +168,7 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
         .source_insns = companion.source_insns,
         .source_fd_array = {},
         .native_link_path = options.native_kernel_linker_path,
-        .prog_flags = companion.prog_flags,
-        .expected_attach_type = companion.expected_attach_type,
     };
-    // Like an application, this runner submits only P. The separately
-    // registered common service generates B from the kernel-owned copy.
-    // native_kernel has always required binding; never silently use an
-    // unbound stub when its old prebuilt-proof path is removed.
-    if (setenv("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF", "1", 1) != 0) {
-        fail("native_kernel: cannot require bound native-only submission: " +
-             std::string(std::strerror(errno)));
-    }
     native_loader::LoadedProgram native_loaded =
         native_loader::load_from_fd(load_options);
     const auto native_load_end = std::chrono::steady_clock::now();
