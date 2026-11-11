@@ -46,7 +46,7 @@ HOST_CPUS = '8-19'
 # small compiles at once, each starting while host MemAvailable >= the pool's
 # figure, so host available memory stays above about 30 GiB.
 LARGE_SOURCE_BYTES = 400_000
-POOLS = dict(large=(2, 48), small=(2, 34))
+POOLS = {k: tuple(v) for k, v in json.loads(os.environ.get('KPROG_CENSUS_POOLS', '{"large": [2, 48], "small": [2, 34]}')).items()}
 
 
 def write(path, value):
