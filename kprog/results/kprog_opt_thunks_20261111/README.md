@@ -50,3 +50,17 @@ Regenerate the Cilium and Tracee payloads with the canonical producers, as
 `87a028418` did for Katran. That gives bodies near the archive size and
 objects both linkers accept, so one image can carry all six best object
 sets. Runtime checks added: 0.
+
+## Tracee: recovering the size with the canonical producer
+
+Summing the text bytes of all 173 programs in `tracee.native.o`:
+
+| object | text bytes |
+| --- | ---: |
+| current-ABI payload | 1,823,858 |
+| rebuilt with `vendor/bpf/Makefile` | **1,625,441** |
+
+An 11% reduction from removing the thunk indirection alone, before any
+linker-side inlining. `sys_enter_submit` then emits a 13,759-byte blob
+through the current linker and 13,756 through the 2026-05-29 linker; the
+thunked object emits nothing on either without a thunk stub.
