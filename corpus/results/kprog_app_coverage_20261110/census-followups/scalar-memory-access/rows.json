@@ -1,0 +1,930 @@
+[
+ {
+  "body": "ecf445dab33e369bd8e122cb19e2f97bab9f25f93c50baa71830747e6a525e45",
+  "app": "tracee/monitor",
+  "name": "tracepoint__sched__sched_process_exec",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "1e7265fbc6dd10662e125871acad1bcb3417f0ca97c6c1579f2d428ec4331430",
+  "app": "tracee/monitor",
+  "name": "trace_ret_do_mmap",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "3e59125c077abd594a8b9cf9ad2af04e7f3a4541bbd6eaa38690acf8783f1003",
+  "app": "tracee/monitor",
+  "name": "tracepoint__module__module_load",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "69bc78c621027d4b8c7117fb70ec6c3a8acc3021abdef93680671ff57aad6643",
+  "app": "tracee/monitor",
+  "name": "trace_ret_vfs_readv_tail",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "d282ea6846a35421d34cf3f5c9fe2833a8f42a79a92daadf087de1e72423f2df",
+  "app": "tracee/monitor",
+  "name": "trace_security_kernel_read_file",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "eb5bfaec4a7a9dd20c90a7be82a16a5f4d1e0692e2556c3c90a6831939c3ae57",
+  "app": "tracee/monitor",
+  "name": "trace_ret_vfs_read_tail",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "787580743c6c78cf2b3bd8d8f91a4643b126d55d229bab4d87a4e8799b516a53",
+  "app": "tracee/monitor",
+  "name": "trace_utimes_common",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "86e6a711d4c3d78f8da91baf7716593224d3b209f1dee5c81367cbb31ee70f47",
+  "app": "tracee/monitor",
+  "name": "trace_vfs_utimes",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "4981db61ec0a355321519afcbb5fe5d75ee1905f7e9b10966c08494f5d2351f5",
+  "app": "tracee/monitor",
+  "name": "syscall__execveat_exit",
+  "instances": 1,
+  "insn": "r2 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from map_value"
+ },
+ {
+  "body": "3a1c3ca4686e388ff4c1ca0ec674fb0606097fe0b11248a7fc018f8531d46321",
+  "app": "tracee/monitor",
+  "name": "syscall__execveat_enter",
+  "instances": 1,
+  "insn": "r2 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from map_value"
+ },
+ {
+  "body": "bd8a8080813a7575adc3b0338bc489561fa7c5108b49c3a7ed0c001f0d38398a",
+  "app": "tracee/monitor",
+  "name": "syscall__execve_enter",
+  "instances": 1,
+  "insn": "r5 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from map_value"
+ },
+ {
+  "body": "1de2bb7b9ee78df4c8e415221ab2abe85f1e9b36ee40bf205e66c910e6e99ce3",
+  "app": "tracee/monitor",
+  "name": "trace_security_file_open",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "698e23a5255537cef6632c3013b4585d78c5aba1abd47758411dbcb53c194327",
+  "app": "tracee/monitor",
+  "name": "trace_security_path_notify",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "c02eda83c2adee4feb38a23c5d0c82e7ae7bece9f9bdf121f4c340f9f77504b3",
+  "app": "tracee/monitor",
+  "name": "syscall__execve_exit",
+  "instances": 1,
+  "insn": "r2 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from map_value"
+ },
+ {
+  "body": "5215f8f2514043f7a8143e0f4fe6f7347c2786d4531b812f95250d752f58c960",
+  "app": "tracee/monitor",
+  "name": "trace_security_kernel_post_read_file",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "a923937e3e368d30caa0b2d96c73e4a52dbf501e1b3375c31cc353b84b373421",
+  "app": "tracee/monitor",
+  "name": "trace_load_elf_phdrs",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "0a67da96463d5b7f7590500e4da0aa1f98160ccfdf30be81e0807420e1f60309",
+  "app": "tracee/monitor",
+  "name": "trace_security_sb_mount",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "81c317ea0ad4e52bee6d0d663033c3bf137d81c6a13f363af3b07814f9e9d718",
+  "app": "tracee/monitor",
+  "name": "trace_set_fs_pwd",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "5039dc5159d39bdd32adb8128d26d820c3764e373653ca46b4475a3931c9148c",
+  "app": "tracee/monitor",
+  "name": "trace_ret_inotify_find_inode",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "2c6a6f4ece6b0fc57062e590144fe1b6f22a68dc829b355a318241f5da7a2f3d",
+  "app": "tracee/monitor",
+  "name": "tracepoint__sched__sched_process_fork",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "5788849186cad0cb3fbfa75f14dbd37b92d45a367351d2a6909cf877c06dc851",
+  "app": "tracee/monitor",
+  "name": "trace_chmod_common",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "82c769d6316821d632804abe653a53e345a02e5ea1b4ee754518c6978d8d3a8b",
+  "app": "tracee/monitor",
+  "name": "trace_ret_kernel_write",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "690a142d03f75ae4f1838f0f9353ded4c3b7e127aad61723371b0548d0e42e0e",
+  "app": "tracee/monitor",
+  "name": "trace_ret_vfs_writev",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "e33f2a0b4814434315a5ba67356868ac8cd371a9112cefda9f4893e9c1905191",
+  "app": "tracee/monitor",
+  "name": "trace_ret_vfs_read",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "56c416443fe0ac4d6048c2275c788dcc339c25f5d024293afc1b5ccaaee366d8",
+  "app": "tracee/monitor",
+  "name": "trace_ret_vfs_readv",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "415f0bf14406926040a7b1543c3fa88bcaef262afcd77ce38ff024663eb3ef10",
+  "app": "tracee/monitor",
+  "name": "trace_ret_vfs_write",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "6ec5e5fc2207b4737d8c0862cb90cc349c2d9fece3a30ccf081f8b5a9b846c21",
+  "app": "tracee/monitor",
+  "name": "trace_security_bprm_creds_for_exec",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "4aa62773a2a934db739887186b39c5fcd92e72f73d2a7e6e76d03a825d2b5f85",
+  "app": "tracee/monitor",
+  "name": "trace_exec_binprm",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "017967b3fc7a725d3801bc57a410949f9b2feba015552cb9ab53291632cf07a2",
+  "app": "tracee/monitor",
+  "name": "sys_enter_submit",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "d2557ccc26b4266f050be59b9cf51487416a0734115e776a8b89d1d99f8b7360",
+  "app": "tracee/monitor",
+  "name": "trace_ret_do_init_module",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "6903eab8716c7a88c4bc85318cea21aecb56a32ec016ddfc63cf4f4d1ba59547",
+  "app": "tracee/monitor",
+  "name": "process_execute_failed_tail",
+  "instances": 1,
+  "insn": "r2 = *(u64 *)(r0 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "5b554a12103d930b4290de2e7634e8560f439fc430a34f84b0e44612bc2dcc28",
+  "app": "tetragon/observer",
+  "name": "generic_tracepo",
+  "instances": 1,
+  "insn": "r2 = *(u64 *)(r0 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "a479fda67500e9dc43b51cd5e7cb9c3551c0a800c729a1185a1fd33b5d840035",
+  "app": "tracee/monitor",
+  "name": "sys_dup_exit_tail",
+  "instances": 1,
+  "insn": "r2 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from map_value"
+ },
+ {
+  "body": "02306ae20b9a9654f6c517b66d62b02d2a74567261f86f270d10c5edbbf865ae",
+  "app": "tracee/monitor",
+  "name": "trace_security_socket_accept",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "0fc1ed5b63097abe5015f0926d9fe2d0d1d3524583cc010ecd0fb2781b8fe393",
+  "app": "tracee/monitor",
+  "name": "trace_switch_task_namespaces",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "82d340a6c24557e55c9c7c8ab5a2c490514d0f44e9895158edf8b5ba80bf89d7",
+  "app": "tracee/monitor",
+  "name": "trace_ret_process_vm_writev",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "9f488104eee2af83d4dd82070e483f38214976434f13ffd8ad2194d48ad93a23",
+  "app": "tracee/monitor",
+  "name": "trace_ret_ptrace",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "81e91a01727070d7380b643af10c5feeb6a6bd8a3d4a5f0d1217aa1f8b649f3c",
+  "app": "tracee/monitor",
+  "name": "trace_ret_arch_prctl",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "0e5d42876fa279b798447929a459ca0a59a546ec15493aee2f326a1e53242365",
+  "app": "tracee/monitor",
+  "name": "trace_ret_dup2",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "52dd667a552d866003146d6489c6cde4e23fa096e92cc51ffa35ce05e5f95357",
+  "app": "tracee/monitor",
+  "name": "trace_ret_dup3",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "e84919aadd4481b7a17f8adcf9ad8779da15f6736a282ea0d2e77396fa6bd800",
+  "app": "tracee/monitor",
+  "name": "trace_ret_dup",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "437e93f09fc1daf296316e24880289e663d12c2f092a932f7fa143ada73ba394",
+  "app": "tracee/monitor",
+  "name": "trace_security_socket_setsockopt",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "ed4f612016ddd3942e7df071ff6c9d35ebcb11f2afdfd77d643a30462e04f0ad",
+  "app": "tracee/monitor",
+  "name": "trace_security_socket_bind",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "6741fd64129a7d725182ca2dc649f9290bfad3bbc2b674a1488da5bc09d28bdf",
+  "app": "tracee/monitor",
+  "name": "trace_security_socket_listen",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "afaf7c37fc74959c6d58f809f0178f1aa503be35a1a180d12c8803d32724a9b5",
+  "app": "tetragon/observer",
+  "name": "generic_retkpro",
+  "instances": 9,
+  "insn": "r2 = *(u32 *)(r0 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "65d444dceecfcb72cc97af8a473a2117604ef582d3ca53050bb7bb4a6ae0784e",
+  "app": "tracee/monitor",
+  "name": "trace_do_sigaction",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "b89bbc4c2907a8d7e2606dc98a1ed695a4a29f77e4ef1d29f2ad3e4dc2623c30",
+  "app": "tracee/monitor",
+  "name": "trace_security_inode_unlink",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "3c7d10f278828f735c125529c995bc6cbc66c1630b47fdb5824eca29e5c5ebc6",
+  "app": "tracee/monitor",
+  "name": "trace_security_socket_connect",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "94bce9b7b3f2faf6e6c083d725c3e9684a4a2c1f9f3e2de21776fd44110e23c9",
+  "app": "tracee/monitor",
+  "name": "trace_security_inode_rename",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "6b66567d82222a74dfb21f1f89cb0cacdf329e57983800daafc7e24e28e9c3c9",
+  "app": "tracee/monitor",
+  "name": "trace_do_truncate",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "393e19c8e8ce9e989d06f173080646ffad45c3f279372c3b25fd3526804ecbb2",
+  "app": "tracee/monitor",
+  "name": "trace_security_sb_umount",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "f2afdb9a1a0278957b0b80815ce5fe6dacaf131e693d52525455566adfb5e0d1",
+  "app": "tracee/monitor",
+  "name": "trace___debugfs_create_file",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "d5d811e228e40b6af62c52bb75557ea6a2e0257b84052c4a62b3cd2410e0e769",
+  "app": "tetragon/observer",
+  "name": "generic_kprobe_process_filter",
+  "instances": 33,
+  "insn": "r2 = *(u32 *)(r0 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "dfbf2bd066ef2f8fba57107426c226aeb6dbc47487cbcf2f420de2eedc4e08ba",
+  "app": "tetragon/observer",
+  "name": "generic_rawtp_p",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r0 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "1afd423a7b4b03aefa925e360647b88dd85f0de57e008f94cc6dcec257f7591d",
+  "app": "tetragon/observer",
+  "name": "generic_tracepo",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r0 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "b992d1a82f46e63055c82329c00403aaa55fa5938de547956bc1636b68d78eec",
+  "app": "tracee/monitor",
+  "name": "trace_security_file_permission",
+  "instances": 1,
+  "insn": "r4 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from ctx"
+ },
+ {
+  "body": "65f57d166049e962e7ed6e4b5d7da068854f41cb9ce39cc58210eadf15a35b13",
+  "app": "tracee/monitor",
+  "name": "trace_commit_creds",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "8f725bd78ae9f68af30c8018edee8a8d8fccf25b92ec464f46a8152a4c23cea1",
+  "app": "tracee/monitor",
+  "name": "trace_security_inode_mknod",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "06833aca0818200456ab21832bfc2e72162c7d52e1f88673a665762896cf2bd0",
+  "app": "tracee/monitor",
+  "name": "sys_exit_submit",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "749d01d7ee989842f4f45165a0da61bb2732a37213b6ab113d889589cf4a9a38",
+  "app": "tracee/monitor",
+  "name": "trace_security_inode_symlink",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "af5e5fe336b64c9333ee102ce2669aa130425e96e7b1d00646b4615d5f6b06a6",
+  "app": "tracee/monitor",
+  "name": "trace_debugfs_create_dir",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "50e61497c255753ba251aa55223c2eed815704a7662d8b5ccbef23633ea6d39e",
+  "app": "tracee/monitor",
+  "name": "tracepoint__module__module_free",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "4fafb68340041fdc11d90fd04aef3f9db5987548f302a6e4178b43e18ec6634c",
+  "app": "tracee/monitor",
+  "name": "trace_ret_register_kprobe",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "2b8a485239367e1da54b38812e7ef9752d3962bf9f7738691c9d7d9ec604030f",
+  "app": "tracee/monitor",
+  "name": "trace_security_settime64",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "b124ab83fcbaa197257b82bd23f570d726bc1a7f47092f7bd2b326e214c588aa",
+  "app": "tracee/monitor",
+  "name": "tracepoint__sched__sched_process_exit",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "56850d53dbd4a7ddbf75a230d446a2b89a36f8cd5a40eb55686185ece6a1b76f",
+  "app": "tracee/monitor",
+  "name": "tracepoint__sched__sched_switch",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "3dc76d59f8eab695f7b314b80a8f77cc9fb010cc0aa9a848edc7fe2ec1e045e6",
+  "app": "tracee/monitor",
+  "name": "trace_ret__register_chrdev",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "98fe6083b5282cbec5e5bf5fed158b89cdf45bfb06e3653efb9fa2c3c934d0e0",
+  "app": "tracee/monitor",
+  "name": "trace_security_socket_recvmsg",
+  "instances": 1,
+  "insn": "r2 = *(u16 *)(r3 +0)",
+  "origin": "load u64 from fp"
+ },
+ {
+  "body": "b59ec734172f223e258bc8c7ffbd67b2e24d12c8e2d1ab5e059615665ef5b4dc",
+  "app": "tracee/monitor",
+  "name": "trace_security_socket_sendmsg",
+  "instances": 1,
+  "insn": "r2 = *(u16 *)(r3 +0)",
+  "origin": "load u64 from fp"
+ },
+ {
+  "body": "41f62fe5fbdd48c2de8f12d843a7f47b8fcf7e7fefb791577dd73a6e396f9022",
+  "app": "tracee/monitor",
+  "name": "tracepoint__cgroup__cgroup_mkdir",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "69b22e91a1d8244f20d96db34b5275feff4194afa5f8ed2674df792f5efe59a4",
+  "app": "tracee/monitor",
+  "name": "tracepoint__cgroup__cgroup_rmdir",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "83938fefeb43c5bda7c677ac9e73518a49ed20f3ab9f6382d0e0c452804f87fd",
+  "app": "tracee/monitor",
+  "name": "trace_security_socket_create",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "4dd84a9ff39f8d0373aa416f4dc07fed22beebd3a60f5bf14a148c61ec7b617c",
+  "app": "tracee/monitor",
+  "name": "tracepoint__cgroup__cgroup_attach_task",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "b5a5090318dee206259081a1d82b306a50f973653215e231222462d04884955c",
+  "app": "tracee/monitor",
+  "name": "trace_ret_kallsyms_lookup_name",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "2239feb50f8a301a89248f8956d610c5f93bbf36816b99437c7171a6bac654b5",
+  "app": "tracee/monitor",
+  "name": "trace_ret_sock_alloc_file",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "012a25fcff4975b3125219cba0d64075354086090ff09a2f1595b58764b43b5b",
+  "app": "tracee/monitor",
+  "name": "trace_device_add",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "a09375350722345a9b98946174efcee523dfe465997369d8a43ff68fa45b5870",
+  "app": "tracee/monitor",
+  "name": "tracepoint__task__task_rename",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "2419a44f47fbb134997502563863995c2f6a8304826981a56a0cebc91d5164f4",
+  "app": "tracee/monitor",
+  "name": "trace_proc_create",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "0f410fafb16d92f0763ae3d3ecd4009da9a16a86125f38ce684c7749fb8f100b",
+  "app": "tracee/monitor",
+  "name": "trace_do_exit",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "eac6b3e6428a9dbcff82413bfe82d3a3d4f7adf713de2a3c4f658419ac3e0917",
+  "app": "tracee/monitor",
+  "name": "trace_filldir64",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "e11faca43f183a9b90bec7d7b3b5e2b850d9c67e16d967c33d786a3589c41b52",
+  "app": "tracee/monitor",
+  "name": "syscall__accept4",
+  "instances": 1,
+  "insn": "r0 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from map_value"
+ },
+ {
+  "body": "e17dcb0c8443cb1dfa1ddd26b238345c3ab2745d211e46565c7c5745bd43ef5d",
+  "app": "tracee/monitor",
+  "name": "uprobe_seq_ops_trigger",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "fa744a1742937335eb4ac15210a8895beca91d948869fc838710dc10174742de",
+  "app": "tracee/monitor",
+  "name": "trace_security_task_setrlimit",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "58905642a2860b0d5d94fd38ab2f17895ef673a40a1f03485a98187b37506ae1",
+  "app": "cilium/agent",
+  "name": "tail_ipv4_policy",
+  "instances": 3,
+  "insn": "r4 = *(u16 *)(r4 +0)",
+  "origin": "(set 0) + (load u64 via scalar <- (entry) + (set 8))"
+ },
+ {
+  "body": "876edbc31cac71a6a298dd1ac13f5b4955ca6fe27de4864c02b632ab7df45421",
+  "app": "tracee/monitor",
+  "name": "uprobe_lkm_seeker_submitter",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "66cb11bf7e16086c49d5f52f7ee0a5337e78a386fd236d9a5dd7b1339b01a651",
+  "app": "tracee/monitor",
+  "name": "trace_cap_capable",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "91c71beeefa4231d457cf18fed42e51af7367386c37d9349166b91db803f6c3e",
+  "app": "tracee/monitor",
+  "name": "trace_sys_exit",
+  "instances": 1,
+  "insn": "r2 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from ctx"
+ },
+ {
+  "body": "36f43ce768ac24901aa2fec47217563fcbc17d454d4ffa7ecdcfd023d8a99cec",
+  "app": "tracee/monitor",
+  "name": "trace_sys_enter",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r8 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "e24ba6f64785b0fc44c22bc57647ff1d7ac024ffd2551704f9fb2bb083466114",
+  "app": "tracee/monitor",
+  "name": "uprobe_lkm_seeker",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "1313020364bd1a94a322d49b38f1065daf24b44a1430a63c8ab0dd43ebbfb535",
+  "app": "tracee/monitor",
+  "name": "uprobe__features_fallback_arena",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "9be752ee91026d2ab632deef95f4e3b726455650b19346bcb7a5befaf7f90f77",
+  "app": "tetragon/observer",
+  "name": "event_wake_up_new_task",
+  "instances": 1,
+  "insn": "r2 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from fp"
+ },
+ {
+  "body": "b49525aaba0aec63546ed19ed462f35655c071c47cbad637faa456e83dfbd991",
+  "app": "tracee/monitor",
+  "name": "sched_process_fork_signal",
+  "instances": 1,
+  "insn": "r4 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from fp"
+ },
+ {
+  "body": "9f3e7b1ceb9d30715d1f36f69cbb89ba8cf919d1145da4e00d793e37fccc20e5",
+  "app": "tetragon/observer",
+  "name": "generic_kprobe_actions",
+  "instances": 33,
+  "insn": "*(u8 *)(r1 +0) = r2",
+  "origin": "(set 0) + (load u64 via scalar <- (entry) + (set 72))"
+ },
+ {
+  "body": "c758b1df37487c006ea34dcc1e046d4dbe37c6ac339a34f3ce00ff32c54e434c",
+  "app": "tracee/monitor",
+  "name": "sys_enter_init",
+  "instances": 1,
+  "insn": "r2 = *(u64 *)(r3 +0)",
+  "origin": "load u64 via scalar <- entry"
+ },
+ {
+  "body": "ed4b29a8610f0aa7be472613d9c6f2a3d61118d4444acddfea9e39bf40403147",
+  "app": "tracee/monitor",
+  "name": "trace_process_vm_writev",
+  "instances": 1,
+  "insn": "r2 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from ctx"
+ },
+ {
+  "body": "88a9cf0b3bf41bb449fd4bf5beed5322c523a97f3c53204119309ee971b76b9a",
+  "app": "tracee/monitor",
+  "name": "trace_ptrace",
+  "instances": 1,
+  "insn": "r2 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from ctx"
+ },
+ {
+  "body": "5b161cbf7534c5108126e0d8b4c825a0939c3c7cecfe1268241dfbde0377fdaa",
+  "app": "tracee/monitor",
+  "name": "trace_arch_prctl",
+  "instances": 1,
+  "insn": "r2 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from ctx"
+ },
+ {
+  "body": "9333fdd630101db7908cc5c9249bc55bfaeb3354bf40a71618e0cd529787eae4",
+  "app": "tracee/monitor",
+  "name": "trace_dup",
+  "instances": 1,
+  "insn": "r2 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from ctx"
+ },
+ {
+  "body": "f2d68348932a9ae5b71530b984ba0fab4e69ccfdb6b3f9f8be57e87c3c0c2a3d",
+  "app": "tracee/monitor",
+  "name": "trace_dup2",
+  "instances": 1,
+  "insn": "r2 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from ctx"
+ },
+ {
+  "body": "20c8b3cfe3e635ccf52f4c8d37e96b4f7157ab6dff3a7d772984977d25d39064",
+  "app": "tracee/monitor",
+  "name": "trace_dup3",
+  "instances": 1,
+  "insn": "r2 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from ctx"
+ },
+ {
+  "body": "848cd3043fd61051056f7a5021e59b0f2dd85a6b25213f18ea6c8faa93c1fea6",
+  "app": "tetragon/observer",
+  "name": "generic_retkpro",
+  "instances": 9,
+  "insn": "*(u8 *)(r1 +0) = r2",
+  "origin": "(set 0) + (load u64 via scalar <- (entry) + (set 56))"
+ },
+ {
+  "body": "18ad4e37c22f95ea929c13cdff1e4bf3c8cb3d2732157af8bb369ad18319197f",
+  "app": "tetragon/observer",
+  "name": "generic_rawtp_a",
+  "instances": 1,
+  "insn": "*(u8 *)(r1 +0) = r2",
+  "origin": "(set 0) + (load u64 via scalar <- (entry) + (set 56))"
+ },
+ {
+  "body": "cb921201888069a455411bc84ab3c5c95b5eb137924458c94faebf3ab6b24bc4",
+  "app": "tracee/monitor",
+  "name": "sys_exit_init",
+  "instances": 1,
+  "insn": "r2 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from ctx"
+ },
+ {
+  "body": "93c33fe17b4eb631297c9473c884d1ac5c7a0fc31f60ab5a96f4b887c0dc1559",
+  "app": "tetragon/observer",
+  "name": "generic_kprobe_event",
+  "instances": 33,
+  "insn": "r2 = *(u64 *)(r0 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "c80d945fb89bb1ee98fcde9c1585630c84be3cd44889d204124d42d1f4a15d7e",
+  "app": "tetragon/observer",
+  "name": "generic_rawtp_e",
+  "instances": 1,
+  "insn": "r2 = *(u64 *)(r0 +0)",
+  "origin": "helper bpf_get_current_task"
+ },
+ {
+  "body": "4b7980239f8c2f356487ca1ee5094fabf28a1b4c9a865be1bebb02c46a8ca9f1",
+  "app": "tracee/monitor",
+  "name": "cgroup_mkdir_signal",
+  "instances": 1,
+  "insn": "r2 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from ctx"
+ },
+ {
+  "body": "7adde86159ec29d5eba0bbcfc868ff4d1fbeb6edae870d312c86aa9263a55f47",
+  "app": "tracee/monitor",
+  "name": "cgroup_rmdir_signal",
+  "instances": 1,
+  "insn": "r1 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from ctx"
+ },
+ {
+  "body": "e739ec2534d50651fe3d14deea81c43ecbb11141c19f3407b059a5abc634511f",
+  "app": "tracee/monitor",
+  "name": "lkm_seeker_mod_tree_tail",
+  "instances": 1,
+  "insn": "r1 = *(u64 *)(r7 +0)",
+  "origin": "(load u64 from map_value) + (load u8 from fp)"
+ },
+ {
+  "body": "5fe405c6073a62132ab903e9996b7fe131e4a4bcf815b61a1608842a0a6509c9",
+  "app": "tracee/monitor",
+  "name": "trace_security_sk_clone",
+  "instances": 1,
+  "insn": "r2 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from ctx"
+ },
+ {
+  "body": "0c99cbaf18b93760b6c155ef77d7395efb58680d9b91afb6ec69c5d34106f55b",
+  "app": "tracee/monitor",
+  "name": "trace_sock_alloc_file",
+  "instances": 1,
+  "insn": "r2 = *(u16 *)(r3 +0)",
+  "origin": "load u64 from fp"
+ },
+ {
+  "body": "97ecce4a5c9dd32e81a964d473daf2d133498d040d9281e1fddf65dc1d7315be",
+  "app": "tracee/monitor",
+  "name": "tracepoint__sched__sched_process_free",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "load u64 from ctx"
+ },
+ {
+  "body": "a10db6a8030ed603b9a12abbe891dfa39854e08007b5001365d9808532330845",
+  "app": "tracee/monitor",
+  "name": "vfs_writev_magic_enter",
+  "instances": 1,
+  "insn": "r4 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from ctx"
+ },
+ {
+  "body": "7d282856b3980a22064b73c9db99718b110ab47d5a8ed8e5127969ff20faead2",
+  "app": "tracee/monitor",
+  "name": "kernel_write_magic_enter",
+  "instances": 1,
+  "insn": "r4 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from ctx"
+ },
+ {
+  "body": "40afbccbc7fd48ee0bf5393f0d9ff01f4a2111e8338c5f47578f24c6cf4d5716",
+  "app": "tracee/monitor",
+  "name": "vfs_write_magic_enter",
+  "instances": 1,
+  "insn": "r4 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from ctx"
+ },
+ {
+  "body": "d97b4df896d26cae31208c6c57d319768537fde42fa72346c53f7cf531948ae3",
+  "app": "tracee/monitor",
+  "name": "tracepoint__raw_syscalls__sys_exit",
+  "instances": 1,
+  "insn": "r2 = *(u64 *)(r3 +0)",
+  "origin": "load u64 from ctx"
+ },
+ {
+  "body": "1e362c0fc46f0b332079d78de325171e430d85f8f1a161cdf3812b1c6041c7e2",
+  "app": "tracee/monitor",
+  "name": "tracepoint__raw_syscalls__sys_enter",
+  "instances": 1,
+  "insn": "r2 = *(u32 *)(r3 +0)",
+  "origin": "helper bpf_get_current_task"
+ }
+]
