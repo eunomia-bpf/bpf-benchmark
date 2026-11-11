@@ -322,44 +322,56 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 #endif
 #if __has_include(<linux/bpf_native.h>)
 /*
- * Stock native line: the JIT takes a whole image armed for this task
- * (bpf_native_image_arm / bpf_native_image_take) and emits it directly, so
- * the module arms one image per uploaded blob instead of describing a kinsn.
- * relocs_write() is the last write before BPF_PROG_LOAD, which is where the
- * arming has to happen for bpf_native_image_take() to see this task.
+ * Stock native line: the JIT takes one whole image armed for this task
+ * (bpf_native_image_arm / bpf_native_image_take) and emits it directly. The
+ * loader uploads a program's blob as chunks blob0..blobN-1 in order, so every
+ * write re-arms the concatenation of the chunks uploaded so far, each chunk's
+ * relocation offsets moved by the chunk's start; the last write before
+ * BPF_PROG_LOAD leaves the whole image armed.
  */
-static int native_lab_arm_blob(struct native_blob *blob)
+static int native_lab_arm_chunks(void)
 {
 	struct bpf_native_image *image;
 	struct bpf_native_reloc *relocs = NULL;
-	void *bytes;
-	u32 i;
+	size_t len = 0, nr = 0, off = 0, k = 0;
+	u8 *bytes;
+	u32 i, j;
 
-	bytes = kmemdup(blob->bytes, blob->len, GFP_KERNEL);
+	for (i = 0; i < NATIVE_LAB_MAX_BLOBS && blobs[i].bytes; i++) {
+		len += blobs[i].len;
+		nr += blobs[i].reloc_count;
+	}
+	if (!len)
+		return 0;
+	bytes = kvmalloc(len, GFP_KERNEL);
 	if (!bytes)
 		return -ENOMEM;
-	if (blob->reloc_count) {
-		relocs = kcalloc(blob->reloc_count, sizeof(*relocs), GFP_KERNEL);
+	if (nr) {
+		relocs = kvcalloc(nr, sizeof(*relocs), GFP_KERNEL);
 		if (!relocs) {
-			kfree(bytes);
+			kvfree(bytes);
 			return -ENOMEM;
 		}
-		for (i = 0; i < blob->reloc_count; i++) {
-			relocs[i].offset = blob->relocs[i].offset;
-			relocs[i].kind = blob->relocs[i].kind;
-			relocs[i].target = blob->relocs[i].target;
+	}
+	for (i = 0; i < NATIVE_LAB_MAX_BLOBS && blobs[i].bytes; i++) {
+		memcpy(bytes + off, blobs[i].bytes, blobs[i].len);
+		for (j = 0; j < blobs[i].reloc_count; j++, k++) {
+			relocs[k].offset = off + blobs[i].relocs[j].offset;
+			relocs[k].kind = blobs[i].relocs[j].kind;
+			relocs[k].target = blobs[i].relocs[j].target;
 		}
+		off += blobs[i].len;
 	}
 	image = kzalloc(sizeof(*image), GFP_KERNEL);
 	if (!image) {
-		kfree(bytes);
-		kfree(relocs);
+		kvfree(bytes);
+		kvfree(relocs);
 		return -ENOMEM;
 	}
 	image->bytes = bytes;
-	image->len = blob->len;
+	image->len = len;
 	image->relocs = relocs;
-	image->nr_relocs = blob->reloc_count;
+	image->nr_relocs = nr;
 	bpf_native_image_arm(image);
 	return 0;
 }
@@ -412,6 +424,18 @@ static ssize_t blob_write(struct file *file, const char __user *ubuf,
 	}
 
 	mutex_lock(&blobs_lock);
+#if __has_include(<linux/bpf_native.h>)
+	/* Chunk 0 starts a new program: drop the chunks a longer one left. */
+	if (priv->id == 0) {
+		int k;
+
+		for (k = 1; k < NATIVE_LAB_MAX_BLOBS; k++) {
+			kfree(blobs[k].bytes);
+			kfree(blobs[k].relocs);
+			memset(&blobs[k], 0, sizeof(blobs[k]));
+		}
+	}
+#endif
 	kfree(blobs[priv->id].bytes);
 	/* Reuploading the blob invalidates any previously uploaded relocs. */
 	kfree(blobs[priv->id].relocs);
@@ -419,6 +443,16 @@ static ssize_t blob_write(struct file *file, const char __user *ubuf,
 	blobs[priv->id].reloc_count = 0;
 	blobs[priv->id].bytes = kbuf;
 	blobs[priv->id].len = len;
+#if __has_include(<linux/bpf_native.h>)
+	{
+		int err = native_lab_arm_chunks();
+
+		if (err) {
+			mutex_unlock(&blobs_lock);
+			return err;
+		}
+	}
+#endif
 	mutex_unlock(&blobs_lock);
 
 	*ppos = len;
@@ -457,7 +491,7 @@ static ssize_t relocs_write(struct file *file, const char __user *ubuf,
 	blobs[priv->id].reloc_count = count;
 #if __has_include(<linux/bpf_native.h>)
 	{
-		int err = native_lab_arm_blob(&blobs[priv->id]);
+		int err = native_lab_arm_chunks();
 
 		if (err) {
 			mutex_unlock(&blobs_lock);
