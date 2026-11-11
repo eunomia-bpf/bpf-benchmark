@@ -33,10 +33,10 @@ import tarfile
 import threading
 
 ROOT = Path('/workspaces/repository')
-CENSUS = Path('/var/tmp/kprog-tmp/census-claude')
+CENSUS = Path(os.environ.get('KPROG_CENSUS_INPUTS', '/var/tmp/kprog-tmp/census-claude'))
 I = CENSUS / 'inputs'
 PUBLISHED = ROOT / 'corpus/results/kprog_app_coverage_20261109/resident-census/master-grouped'
-OUT = Path('/var/tmp/kprog-tmp/replay-claude/census')
+OUT = Path(os.environ.get('KPROG_CENSUS_RERUN', '/var/tmp/kprog-tmp/replay-claude/census'))
 RESULTS = Path(__file__).resolve().parent
 VNG = '/opt/virtme-ng/bin/vng'
 GUEST_MEMORY = '4G'
@@ -100,7 +100,18 @@ def census_bodies(prefixes):
     return selected
 
 
-def selected_rows(label, application, producer, identifiers):
+def census_symbol_rows(application, producer, identifiers):
+    """Each row's census native object name and symbol, taken from another producer."""
+    inventory = {r['source_prog_id']: r for r in
+                 json.loads((I / 'run-inventory.json').read_text())['programs']
+                 if r['application'] == application}
+    return {identifier: [dict(native_object=str(Path(producer) / Path(c['native_object']).name),
+                              symbol=c['symbol'], selector='census object and symbol')
+                         for c in inventory[identifier]['native_candidates']]
+            for identifier in identifiers}
+
+
+def selected_rows(label, application, producer, identifiers, census_symbols=False):
     """Census rows selected afresh by corpus_resident_census.collect on a producer.
 
     The census selection spec (coverage, archive, shim) stays as it is; only the
@@ -108,9 +119,13 @@ def selected_rows(label, application, producer, identifiers):
     spec = json.loads((CENSUS / 'selection-spec.json').read_text())
     apps = [dict(a, producer=str(producer)) for a in spec['applications']
             if a['application'] == application]
-    collector = load('census_collect', ROOT / 'kprog/corpus_resident_census.py')
-    fresh = {r['source_prog_id']: r for r in
-             collector.collect(dict(spec, applications=apps))['programs']}
+    if census_symbols:
+        fresh = {i: dict(native_candidates=c) for i, c in
+                 census_symbol_rows(application, producer, identifiers).items()}
+    else:
+        collector = load('census_collect', ROOT / 'kprog/corpus_resident_census.py')
+        fresh = {r['source_prog_id']: r for r in
+                 collector.collect(dict(spec, applications=apps))['programs']}
     inventory = {r['source_prog_id']: r for r in
                  json.loads((I / 'run-inventory.json').read_text())['programs']
                  if r['application'] == application}
@@ -302,13 +317,16 @@ def main():
     parser.add_argument('--application')
     parser.add_argument('--producer', type=Path)
     parser.add_argument('--rows', nargs='*', type=int, default=[])
+    parser.add_argument('--census-symbols', action='store_true',
+                        help="select each row's census native object name and symbol in --producer")
     parser.add_argument('--workers', type=int, default=2)
     args = parser.parse_args()
     if args.mode == 'run':
         run(args.label, args.runtime, census_bodies(args.bodies), args.workers)
     elif args.mode == 'rows':
         run(args.label, args.runtime,
-            selected_rows(args.label, args.application, args.producer, args.rows), args.workers)
+            selected_rows(args.label, args.application, args.producer, args.rows,
+                          args.census_symbols), args.workers)
     else:
         publish(args.label)
 

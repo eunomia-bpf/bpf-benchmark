@@ -314,6 +314,10 @@ def main():
     parser.add_argument("--previous-results", type=Path)
     args, rest = parser.parse_known_args()
     if args.mode == "compile":
+        if "-E" in rest:
+            # Preprocessing one piece of B stays in the guest; whole-B compiles go to the host.
+            clang = ROOT / "kprog/stock-path/bin/clang"
+            os.execv(clang, [str(clang), *rest])
         sys.path.insert(0, str(ROOT / "kprog"))
         from trusted_compile import submit
         return submit(args.scratch / "stock-compiler",
