@@ -1743,6 +1743,43 @@ recording because they are silent:
 | `bpfrejit-install` exits 2 silently | it reports on stderr, which a PTY-less `vng --exec` drops; the message is only visible by running the install by hand in the guest |
 | volume at 82% | a 68 GB `bpf-benchmark-docker.img` left behind by an aborted run; it must be removed between runs |
 
+### The counter reads on the current kernel, 2026-11-11
+
+The operator's case decision BPF-47 asks for counters where a measured gain
+exceeds what the BPF share predicts, which is exactly OTel and Tracee. Both
+read once in both arms on the current kernel, one 30-second sample each.
+
+**Tracee works, with a partial native arm.**
+
+| measure | JIT arm | native arm | native/JIT |
+| --- | ---: | ---: | ---: |
+| invocations | 393,620,417 | 492,175,517 | **1.250x more work** |
+| ns per invocation | 343.0 | **257.2** | **1.333x faster** |
+| native body bytes (`bytes_jited` total) | 1,907,577 | 1,643,492 | 0.862x |
+
+So Tracee's native body is 14% smaller and 1.333x cheaper per invocation while
+the workload delivers 25% more events. Run `..._20261111_065229_404422`,
+status ok.
+
+**It is a partial native arm**: 109 programs replaced and **42 refused** with
+`native_lab reloc kind 10 is not supported by module bpf_x86_native_lab`. So
+the 1.333x is measured over a mixed set, and the true all-native figure is if
+anything better, since the refused programs kept their eBPF bodies inside the
+native arm.
+
+**OTel still cannot load its hot program.** Run
+`..._20261111_064433_835603`, status ok, 3 programs replaced, and
+`native_tracer_e` fails with the same reloc kind 10: it reads 3,271.8 ns in
+the native arm against the JIT's 3,225.5, because both are the eBPF body.
+Lane C's thunk-free object set does not help, because the relocation is
+`X86_TAIL_COUNT`, not a thunk.
+
+The measurement-only module
+(`kprog/perf/direct-native/bpf_x86_native_lab.c`) implements **five** reloc
+kinds against the trusted module's **seven**; the two missing are
+`X86_TAIL_COUNT` (10) and `X86_TAIL_STACK` (11). That is a one-file request
+for lane C and it unblocks both counter reads.
+
 ### What this means for the candidates
 
 The candidates act on the native path only, so they can recover at most the
