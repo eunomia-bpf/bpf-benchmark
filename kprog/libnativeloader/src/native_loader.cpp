@@ -1013,7 +1013,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
     insns.reserve(static_cast<size_t>(2) * chunks +
                   (tail_call_reachable ? 8 : 1));
     if (tail_call_reachable) {
-        const size_t probe_off = 1 + static_cast<size_t>(2) * chunks;
+        const size_t probe_off = 2; /* skip the body's r0 = 0 and its exit */
         if (probe_off > static_cast<size_t>(std::numeric_limits<int16_t>::max())) {
             fail("native_kernel tail-call probe jump offset exceeds int16");
         }
@@ -1032,24 +1032,15 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
             .imm = 0,
         });
     }
-    for (uint32_t i = 0; i < chunks; i++) {
-        bpf_insn sidecar = {
-            .code = BPF_ALU64 | BPF_MOV | BPF_K,
-            .dst_reg = 0,
-            .src_reg = BPF_PSEUDO_KINSN_SIDECAR,
-            .off = static_cast<int16_t>(callee_saved_mask),
-            .imm = static_cast<int32_t>(i),
-        };
-        insns.push_back(sidecar);
-        bpf_insn call = {
-            .code = BPF_JMP | BPF_CALL,
-            .dst_reg = 0,
-            .src_reg = BPF_PSEUDO_KINSN_CALL,
-            .off = 1, // fd_array slot for module BTF
-            .imm = kfunc_btf_id,
-        };
-        insns.push_back(call);
-    }
+    /* The one kernel line emits the image armed for the whole program
+     * (bpf_native_jit), so the stub carries no kinsn sidecar/call pairs. */
+    insns.push_back(bpf_insn{
+        .code = BPF_ALU64 | BPF_MOV | BPF_K,
+        .dst_reg = BPF_REG_0,
+        .src_reg = 0,
+        .off = 0,
+        .imm = 0,
+    });
     insns.push_back(bpf_insn{
         .code = BPF_JMP | BPF_EXIT, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0,
     });
