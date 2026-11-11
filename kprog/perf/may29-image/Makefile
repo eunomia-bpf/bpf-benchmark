@@ -72,19 +72,32 @@ image:
 corpus:
 	install -d $(STATE)/var-tmp
 	cp $(ART)/kinsn/bpf_x86_native_lab.ko $(STATE)/var-tmp/bpf_x86_native_lab.ko
+	cp $(ART)/native-link $(STATE)/var-tmp/native-link
 	taskset -c $(CPUS) vng --run $(ART)/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir /var/tmp=$(STATE)/var-tmp --overlay-rwdir /tmp --overlay-rwdir /run --overlay-rwdir /usr/local --disable-monitor --cpus $(VM_CPUS) --memory $(VM_MEM) --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile guest IMAGE=$(IMAGE) APPS=$(APPS) SAMPLES=$(SAMPLES) WORKLOAD_DURATION=$(WORKLOAD_DURATION) BPFREJIT_CORPUS_BPF_STATS=$(BPFREJIT_CORPUS_BPF_STATS)'
 	rm -f $(STATE)/var-tmp/bpf-benchmark-docker.img
 
-# The 2026-05-29 shim loads the native programs itself, so the guest starts no
-# trusted service: the native lab module, the stats sysctl, and the unbound environment.
+# The current loader submits P through the kernel's trusted specializer, so the
+# guest starts kprog/trusted_service.py on the debugfs endpoint and waits for
+# its ready line before any application runs. The module, the stats sysctl and
+# the unbound environment follow.
 guest:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod /var/tmp/bpf_x86_native_lab.ko
+	rm -rf /var/tmp/service /var/tmp/service.log && install -d /var/tmp/service
+	python3 $(ROOT)/kprog/trusted_service.py --arch 1 \
+	  --endpoint /sys/kernel/debug/bpf_x86_native_lab/specializer \
+	  --state /var/tmp/service --native-link /var/tmp/native-link \
+	  --loader $(ROOT)/runner/build-llvmbpf/native_loader/trusted-native-loader \
+	  > /var/tmp/service.log 2>&1 & \
+	for i in $$(seq 1 240); do grep -q '"ready"' /var/tmp/service.log 2>/dev/null && break; sleep 0.5; done
+	grep -q '"ready"' /var/tmp/service.log
 	echo $(if $(filter 0,$(BPFREJIT_CORPUS_BPF_STATS)),0,1) > /proc/sys/kernel/bpf_stats_enabled
-	env -u BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF PATH=/usr/lib/llvm-18/bin:$$PATH \
+	env PATH=/usr/lib/llvm-18/bin:$$PATH \
 	  BPFREJIT_CORPUS_APPS=$(APPS) BPFREJIT_CORPUS_BPF_STATS=$(BPFREJIT_CORPUS_BPF_STATS) \
-	  BPFREJIT_SHIM_NATIVE_LOADER=post \
+	  BPFREJIT_SHIM_NATIVE_LOADER=1 BPFREJIT_CORPUS_NATIVE_LOADER_POST_ONLY=1 \
+	  BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1 \
 	  BPFREJIT_SHIM_NATIVE_MANIFEST=/opt/bpf-benchmark/native-bpf/x86_64/$(APP_DIR)/manifest.json \
+	  BPFREJIT_NATIVE_LINK_BINARY=/usr/local/bin/native-link \
 	  BPFREJIT_NATIVE_LOADER_SO=/usr/local/lib/bpfrejit/libnative_loader.so \
 	  KEEP_WORKDIRS=all BPFREJIT_KEEP_ALL_WORKDIRS=1 SKIP_REJIT=norejit \
 	  $(MAKE) -C $(ROOT) __runtime-vm-corpus PLATFORM=kvm ARCH=x86 \

@@ -24,3 +24,4 @@ RUN printf '{"kernel_release":"7.0.0-rc2+","target_arch":"x86_64","kernel_image"
  && install -d /workspaces/repository/corpus/results && rm -rf /workspaces/repository/corpus/results/*
 WORKDIR /workspaces/repository
 ENV BPFREJIT_IMAGE_WORKSPACE=/workspaces/repository PYTHONPATH=/workspaces/repository
+ENV BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1 BPFREJIT_CORPUS_NATIVE_LOADER_POST_ONLY=1
