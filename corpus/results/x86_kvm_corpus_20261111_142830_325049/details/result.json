@@ -1,0 +1,64 @@
+{
+  "bpf_stats": true,
+  "generated_at": "2026-11-11T14:29:22.863898+00:00",
+  "kinsn_modules": {
+    "captured_at": "2026-11-11T14:28:30.342184+00:00",
+    "expected_modules": [
+      "bpf_x86_native_lab"
+    ],
+    "module_load": {
+      "expected_modules": [
+        "bpf_x86_native_lab"
+      ],
+      "failed_modules": [],
+      "invoked_at": "2026-11-11T14:28:30.342089+00:00",
+      "loaded_count": 1,
+      "loaded_modules": [
+        "bpf_x86_native_lab"
+      ],
+      "loader": "runner.libs.kinsn.load_kinsn_modules",
+      "module_dir": "/artifacts/kinsn",
+      "newly_loaded_modules": [],
+      "snapshot_after": {
+        "captured_at": "2026-11-11T14:28:30.342081+00:00",
+        "expected_modules": [
+          "bpf_x86_native_lab"
+        ],
+        "loaded_bpf_modules": [
+          "bpf_x86_native_lab"
+        ],
+        "missing_expected_modules": [],
+        "raw_output": "bpf_x86_native_lab     32768  0",
+        "resident_expected_modules": [
+          "bpf_x86_native_lab"
+        ],
+        "source": "lsmod"
+      },
+      "status": "ok",
+      "total_count": 1
+    },
+    "module_snapshot_before_rejit": {
+      "captured_at": "2026-11-11T14:28:30.338263+00:00",
+      "expected_modules": [
+        "bpf_x86_native_lab"
+      ],
+      "loaded_bpf_modules": [
+        "bpf_x86_native_lab"
+      ],
+      "missing_expected_modules": [],
+      "raw_output": "bpf_x86_native_lab     32768  0",
+      "resident_expected_modules": [
+        "bpf_x86_native_lab"
+      ],
+      "source": "lsmod"
+    }
+  },
+  "manifest": "/workspaces/repository/corpus/config/macro_apps.yaml",
+  "samples": 1,
+  "skip_rejit": true,
+  "status": "ok",
+  "suite_name": "macro_apps",
+  "warmups": 1,
+  "workload_only": false,
+  "workload_seconds": 10.0
+}
