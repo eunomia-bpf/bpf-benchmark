@@ -1,9 +1,7 @@
 #pragma once
 
 #include <linux/bpf.h>
-#include "native_source_map_binding.hpp"
 
-#include <algorithm>
 #include <cctype>
 #include <cstdint>
 #include <cstring>
@@ -11,7 +9,6 @@
 #include <fstream>
 #include <limits>
 #include <optional>
-#include <set>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -40,25 +37,10 @@ struct NativeMapRule {
     bool object_scoped = false;
 };
 
-struct NativeSourceMapBinding {
-    std::string native_symbol;
-    uint32_t source_insn;
-    bool operator==(const NativeSourceMapBinding &) const = default;
-};
-
-struct ProofSourceMapBinding {
-    NativeSourceMapBinding source;
-    std::string proof_symbol;
-};
-
 struct ManifestResolution {
     std::filesystem::path native_object_path;
     std::string symbol_name;
-    std::filesystem::path simulator_object_path;
-    std::string simulator_program;
-    std::vector<std::filesystem::path> native_data_object_paths;
     std::vector<NativeMapRule> map_rules;
-    std::vector<NativeSourceMapBinding> source_map_bindings;
 };
 
 [[noreturn]] inline void manifest_fail(const std::string &message)
@@ -158,20 +140,6 @@ inline size_t json_skip_ws(const std::string &text, size_t pos)
     manifest_fail("native_loader manifest JSON: " + message);
 }
 
-inline void json_append_scalar(std::string &out, uint32_t scalar)
-{
-    if (!scalar || scalar > 0x10ffff || (scalar >= 0xd800 && scalar <= 0xdfff))
-        json_fail("invalid Unicode scalar in metadata identity");
-    if (scalar < 0x80) out.push_back(static_cast<char>(scalar));
-    else {
-        const unsigned tails = scalar < 0x800 ? 1 : scalar < 0x10000 ? 2 : 3;
-        out.push_back(static_cast<char>((tails == 1 ? 0xc0 : tails == 2 ? 0xe0 : 0xf0) |
-            (scalar >> (6 * tails))));
-        for (unsigned left = tails; left > 0; left--)
-            out.push_back(static_cast<char>(0x80 | ((scalar >> (6 * (left - 1))) & 0x3f)));
-    }
-}
-
 inline std::string json_parse_string_value(const std::string &text, size_t &pos)
 {
     pos = json_skip_ws(text, pos);
@@ -211,54 +179,18 @@ inline std::string json_parse_string_value(const std::string &text, size_t &pos)
             case 't':
                 out.push_back('\t');
                 break;
-            case 'u': {
-                const auto unit = [&]() {
-                    uint32_t value = 0;
-                    for (unsigned i = 0; i < 4; i++) {
-                        if (pos == text.size()) json_fail("short unicode escape");
-                        const unsigned char digit = text[pos++];
-                        unsigned nibble;
-                        if (digit >= '0' && digit <= '9') nibble = digit - '0';
-                        else if (digit >= 'a' && digit <= 'f') nibble = digit - 'a' + 10;
-                        else if (digit >= 'A' && digit <= 'F') nibble = digit - 'A' + 10;
-                        else json_fail("nonhexadecimal unicode escape");
-                        value = value * 16 + nibble;
-                    }
-                    return value;
-                };
-                uint32_t scalar = unit();
-                if (scalar >= 0xd800 && scalar <= 0xdbff) {
-                    if (text.size() - pos < 2 || text[pos] != '\\' || text[pos + 1] != 'u')
-                        json_fail("Unicode high surrogate lacks a low surrogate");
-                    pos += 2;
-                    const uint32_t low = unit();
-                    if (low < 0xdc00 || low > 0xdfff) json_fail("invalid Unicode low surrogate");
-                    scalar = 0x10000 + ((scalar - 0xd800) << 10) + low - 0xdc00;
+            case 'u':
+                if (pos + 4 > text.size()) {
+                    json_fail("short unicode escape");
                 }
-                json_append_scalar(out, scalar);
+                out.push_back('?');
+                pos += 4;
                 break;
-            }
             default:
                 json_fail("invalid string escape");
             }
         } else {
-            const unsigned char lead = static_cast<unsigned char>(ch);
-            if (lead < 0x20) json_fail("unescaped control byte in string");
-            if (lead < 0x80) out.push_back(ch);
-            else {
-                const unsigned tails = lead >= 0xc2 && lead <= 0xdf ? 1 :
-                    lead >= 0xe0 && lead <= 0xef ? 2 : lead >= 0xf0 && lead <= 0xf4 ? 3 : 0;
-                if (!tails || text.size() - pos < tails) json_fail("invalid UTF-8 metadata string");
-                uint32_t scalar = lead & (tails == 1 ? 0x1f : tails == 2 ? 0x0f : 7);
-                for (unsigned i = 0; i < tails; i++) {
-                    const unsigned char byte = text[pos++];
-                    if ((byte & 0xc0) != 0x80) json_fail("invalid UTF-8 continuation");
-                    scalar = (scalar << 6) | (byte & 0x3f);
-                }
-                if ((tails == 2 && scalar < 0x800) || (tails == 3 && scalar < 0x10000))
-                    json_fail("overlong UTF-8 metadata string");
-                json_append_scalar(out, scalar);
-            }
+            out.push_back(ch);
         }
     }
     json_fail("unterminated string");
@@ -371,14 +303,13 @@ inline std::optional<size_t> json_find_key_value(const std::string &object,
         json_fail("root is not an object");
     }
     pos++;
-    std::optional<size_t> found;
     for (;;) {
         pos = json_skip_ws(object, pos);
         if (pos >= object.size()) {
             json_fail("unterminated object while finding key " + key);
         }
         if (object[pos] == '}') {
-            return found;
+            return std::nullopt;
         }
         std::string parsed_key = json_parse_string_value(object, pos);
         pos = json_skip_ws(object, pos);
@@ -387,8 +318,7 @@ inline std::optional<size_t> json_find_key_value(const std::string &object,
         }
         pos = json_skip_ws(object, pos + 1);
         if (parsed_key == key) {
-            if (found) json_fail("duplicate key " + key);
-            found = pos;
+            return pos;
         }
         pos = json_skip_value(object, pos);
         pos = json_skip_ws(object, pos);
@@ -397,7 +327,7 @@ inline std::optional<size_t> json_find_key_value(const std::string &object,
             continue;
         }
         if (pos < object.size() && object[pos] == '}') {
-            return found;
+            return std::nullopt;
         }
         json_fail("expected separator after key " + parsed_key);
     }
@@ -413,44 +343,6 @@ inline std::optional<std::string> json_object_string(
     }
     size_t value_pos = *pos;
     return json_parse_string_value(object, value_pos);
-}
-
-inline std::vector<std::string> json_object_string_list(
-    const std::string &object,
-    const std::string &key)
-{
-    std::optional<size_t> found = json_find_key_value(object, key);
-    if (!found) {
-        return {};
-    }
-    size_t pos = json_skip_ws(object, *found);
-    if (pos < object.size() && object[pos] == '"') {
-        return {json_parse_string_value(object, pos)};
-    }
-    if (pos >= object.size() || object[pos] != '[') {
-        json_fail("key " + key + " must be a string or string array");
-    }
-    pos++;
-    std::vector<std::string> out;
-    for (;;) {
-        pos = json_skip_ws(object, pos);
-        if (pos >= object.size()) {
-            json_fail("unterminated string array " + key);
-        }
-        if (object[pos] == ']') {
-            return out;
-        }
-        out.push_back(json_parse_string_value(object, pos));
-        pos = json_skip_ws(object, pos);
-        if (pos < object.size() && object[pos] == ',') {
-            pos++;
-            continue;
-        }
-        if (pos < object.size() && object[pos] == ']') {
-            return out;
-        }
-        json_fail("expected separator in string array " + key);
-    }
 }
 
 inline std::string json_required_string(const std::string &object,
@@ -484,10 +376,6 @@ inline std::optional<uint64_t> json_object_u64(const std::string &object,
         value = value * 10 + digit;
         pos++;
     }
-    const size_t next = json_skip_ws(object, pos);
-    if ((pos - json_skip_ws(object, *found) > 1 && object[json_skip_ws(object, *found)] == '0') ||
-        next == object.size() || (object[next] != ',' && object[next] != '}' && object[next] != ']'))
-        json_fail("invalid integer token for key " + key);
     return value;
 }
 
@@ -548,98 +436,13 @@ inline std::vector<std::string> json_array_objects(
         out.push_back(manifest.substr(start, pos - start));
         pos = json_skip_ws(manifest, pos);
         if (pos < manifest.size() && manifest[pos] == ',') {
-            pos = json_skip_ws(manifest, pos + 1);
-            if (pos == manifest.size() || manifest[pos] == ']') json_fail("trailing array comma " + key);
+            pos++;
             continue;
         }
         if (pos < manifest.size() && manifest[pos] == ']') {
             return out;
         }
         json_fail("expected separator in array " + key);
-    }
-}
-
-inline void json_require_object_fields(const std::string &text, std::set<std::string> required,
-                                       const std::string &context)
-{
-    size_t pos = json_skip_ws(text, 0);
-    if (pos == text.size() || text[pos++] != '{') json_fail(context + ": record is not an object");
-    for (;;) {
-        pos = json_skip_ws(text, pos);
-        if (pos == text.size()) json_fail(context + ": unterminated object");
-        if (text[pos] == '}') {
-            if (!required.empty()) json_fail(context + ": missing metadata field: " + *required.begin());
-            if (json_skip_ws(text, pos + 1) != text.size()) json_fail(context + ": trailing metadata");
-            return;
-        }
-        const std::string key = json_parse_string_value(text, pos);
-        required.erase(key);
-        pos = json_skip_ws(text, pos);
-        if (pos == text.size() || text[pos++] != ':') json_fail(context + ": missing metadata colon");
-        pos = json_skip_ws(text, json_skip_value(text, pos));
-        if (pos < text.size() && text[pos] == '}') continue;
-        if (pos == text.size() || text[pos++] != ',') json_fail(context + ": missing metadata separator");
-        pos = json_skip_ws(text, pos);
-        if (pos == text.size() || text[pos] == '}') json_fail(context + ": trailing metadata comma");
-    }
-}
-
-
-inline std::vector<NativeSourceMapBinding> parse_source_map_bindings(const std::string &entry)
-{
-    std::vector<NativeSourceMapBinding> result;
-    std::set<std::string> symbols;
-    for (const std::string &record : json_array_objects(entry, "source_map_bindings")) {
-        json_require_object_fields(record, {"native_symbol", "source_insn"}, "source map binding");
-        NativeSourceMapBinding binding{json_required_string(record, "native_symbol"),
-            json_required_u32(record, "source_insn")};
-        if (!symbols.insert(binding.native_symbol).second)
-            json_fail("duplicate source map binding symbol " + binding.native_symbol);
-        result.push_back(std::move(binding));
-    }
-    return result;
-}
-
-inline std::vector<ProofSourceMapBinding> parse_proof_source_maps(std::string text)
-{
-    if (!text.empty() && text.back() == '\0') text.pop_back();
-    json_require_object_fields(text, {"version", "objects"}, "proof source maps");
-    std::vector<ProofSourceMapBinding> result;
-    std::set<std::string> symbols;
-    for (const auto &record : json_array_objects(text, "objects")) {
-        json_require_object_fields(record, {"native_symbol", "source_insn", "proof_symbol"}, "proof source maps");
-        ProofSourceMapBinding binding{{json_required_string(record, "native_symbol"),
-            json_required_u32(record, "source_insn")}, json_required_string(record, "proof_symbol")};
-        if (!symbols.insert(binding.proof_symbol).second) json_fail("duplicate proof source map symbol");
-        result.push_back(std::move(binding));
-    }
-    return result;
-}
-
-inline std::vector<uint32_t> parse_source_map_fd_sites(const std::string &entry)
-{
-    const auto found = json_find_key_value(entry, "source_map_fd_sites");
-    if (!found) return {};
-    size_t pos = json_skip_ws(entry, *found);
-    if (pos == entry.size() || entry[pos++] != '[') json_fail("source_map_fd_sites must be an array");
-    std::vector<uint32_t> sites;
-    std::set<uint32_t> unique;
-    pos = json_skip_ws(entry, pos);
-    if (pos < entry.size() && entry[pos] == ']') return sites;
-    for (;;) {
-        const size_t begin = pos;
-        uint64_t value = 0;
-        while (pos < entry.size() && std::isdigit(static_cast<unsigned char>(entry[pos]))) {
-            value = value * 10 + static_cast<unsigned>(entry[pos++] - '0');
-            if (value > UINT32_MAX) json_fail("source map FD site exceeds u32");
-        }
-        if (pos == begin || (pos - begin > 1 && entry[begin] == '0')) json_fail("invalid source map FD site");
-        if (!unique.insert(static_cast<uint32_t>(value)).second) json_fail("duplicate source map FD site");
-        sites.push_back(static_cast<uint32_t>(value));
-        pos = json_skip_ws(entry, pos);
-        if (pos < entry.size() && entry[pos] == ']') return sites;
-        if (pos == entry.size() || entry[pos++] != ',') json_fail("invalid source map FD site separator");
-        pos = json_skip_ws(entry, pos);
     }
 }
 
@@ -701,45 +504,6 @@ inline bool source_has_helper(const std::vector<bpf_insn> &source_insns,
     }
     return false;
 }
-
-inline bool manifest_source_bytecode_matches(
-    const std::string &hex, const std::vector<bpf_insn> &source)
-{
-    if (hex.empty() || hex.size() % (2 * sizeof(bpf_insn))) {
-        json_fail("source_bytecode_hex must encode complete BPF instructions");
-    }
-    const auto digit = [](char ch) -> unsigned {
-        if (ch >= '0' && ch <= '9') return static_cast<unsigned>(ch - '0');
-        if (ch >= 'a' && ch <= 'f') return static_cast<unsigned>(ch - 'a' + 10);
-        if (ch >= 'A' && ch <= 'F') return static_cast<unsigned>(ch - 'A' + 10);
-        json_fail("source_bytecode_hex contains a non-hexadecimal digit");
-    };
-    const auto *bytes = reinterpret_cast<const unsigned char *>(source.data());
-    bool equal = hex.size() / 2 == source.size() * sizeof(bpf_insn);
-    for (size_t index = 0; index < hex.size() / 2; ++index) {
-        const unsigned value = (digit(hex[2 * index]) << 4) | digit(hex[2 * index + 1]);
-        equal = equal && bytes[index] == value;
-    }
-    return equal;
-}
-
-inline bool manifest_bound_source_matches(const std::string &encoded,
-    const std::vector<bpf_insn> &source, const std::vector<uint32_t> &sites,
-    const std::vector<NativeSourceMapBinding> &bindings)
-{
-    auto normalized = source;
-    for (uint32_t site : sites) {
-        if (std::none_of(bindings.begin(), bindings.end(),
-                [&](const auto &binding) { return binding.source_insn == site; }))
-            json_fail("source map FD site lacks an explicit source_map_bindings entry");
-        if (site >= normalized.size()) return false;
-        normalized[site].imm = 0;
-    }
-    if (!manifest_source_bytecode_matches(encoded, normalized)) return false;
-    for (uint32_t site : sites) source_map_reference(source, site);
-    return true;
-}
-
 
 template <typename LoadMapInfo>
 bool source_has_map_prefix(const std::vector<bpf_insn> &source_insns,
@@ -827,29 +591,12 @@ inline std::vector<NativeMapRule> parse_manifest_map_rules(
     return rules;
 }
 
-inline std::vector<std::filesystem::path> parse_manifest_data_objects(
-    const std::filesystem::path &manifest_path,
-    const std::string &manifest)
-{
-    std::vector<std::filesystem::path> paths;
-    for (const std::string &entry : json_array_objects(manifest, "data_objects")) {
-        std::filesystem::path path =
-            manifest_relative_path(manifest_path,
-                                   json_required_string(entry, "native_object"));
-        if (std::find(paths.begin(), paths.end(), path) == paths.end()) {
-            paths.push_back(std::move(path));
-        }
-    }
-    return paths;
-}
-
 template <typename LoadMapInfo>
 std::optional<ManifestResolution> resolve_native_manifest(
     const std::filesystem::path &manifest_path,
     const bpf_prog_info &prog_info,
     const std::vector<bpf_insn> &source_insns,
-    LoadMapInfo load_map_info,
-    const std::string &source_btf_symbol = {})
+    LoadMapInfo load_map_info)
 {
     const std::string manifest = read_text_file_required(manifest_path);
     std::vector<std::string> objects = json_array_objects(manifest, "objects");
@@ -863,78 +610,18 @@ std::optional<ManifestResolution> resolve_native_manifest(
 
     std::optional<ManifestResolution> selected;
     for (const std::string &entry : objects) {
-        const auto entry_program = json_object_string(entry, "program");
-        if (!entry_program) json_fail("object missing required string key program");
-        if (*entry_program != prog_name) {
-            continue;
-        }
-        const auto source_hex = json_object_string(entry, "source_bytecode_hex");
-        const auto source_bindings = parse_source_map_bindings(entry);
-        const auto source_fd_sites = parse_source_map_fd_sites(entry);
-        if (!source_fd_sites.empty() && !source_hex)
-            json_fail("source map FD normalization requires source_bytecode_hex");
-        if (entry_program->empty() && !source_hex) {
-            manifest_fail("native_loader: anonymous program entry requires source_bytecode_hex");
-        }
-        if (source_hex && !manifest_bound_source_matches(*source_hex, source_insns, source_fd_sites, source_bindings)) {
+        const std::string entry_program = json_required_string(entry, "program");
+        if (entry_program != prog_name) {
             continue;
         }
         std::optional<uint64_t> prog_type = json_object_u64(entry, "prog_type");
         if (prog_type && *prog_type != prog_info.type) {
             continue;
         }
-        std::optional<uint64_t> source_xlated_len =
-            json_object_u64(entry, "source_xlated_len");
-        if (source_xlated_len && *source_xlated_len != prog_info.xlated_prog_len) {
-            continue;
-        }
-        std::optional<uint64_t> source_bytecode_len =
-            json_object_u64(entry, "source_bytecode_len");
-        if (source_bytecode_len &&
-            *source_bytecode_len != source_insns.size() * sizeof(bpf_insn)) {
-            continue;
-        }
-        /* An entry that names only `symbol` (no `source_btf_symbol`) still
-         * identifies one program. Without this the remaining conditions are
-         * all optional, so such an entry matches the first program with the
-         * same bytecode length and helpers — which is how tracee's
-         * `trace_sys_enter` fragment ran as
-         * `tracepoint__raw_syscalls__sys_enter` and dereferenced a null
-         * pt_regs. */
-        if (!json_object_string(entry, "source_btf_symbol")) {
-            const auto only_symbol = json_object_string(entry, "symbol");
-            if (only_symbol && !only_symbol->empty() &&
-                *only_symbol != source_btf_symbol) {
-                continue;
-            }
-        }
-        if (const auto selector = json_object_string(entry, "source_btf_symbol")) {
-            if (selector->empty()) {
-                manifest_fail("native_loader: empty source_btf_symbol selector");
-            }
-            if (source_btf_symbol.empty()) {
-                manifest_fail("native_loader: source_btf_symbol requires source entry BTF");
-            }
-            if (*selector != source_btf_symbol) {
-                continue;
-            }
-        }
         std::optional<std::string> map_prefix =
             json_object_string(entry, "source_map_prefix");
         if (map_prefix && !map_prefix->empty() &&
             !source_has_map_prefix(source_insns, *map_prefix, load_map_info)) {
-            continue;
-        }
-        bool has_forbidden_map_prefix = false;
-        for (const std::string &forbidden_prefix :
-             json_object_string_list(entry, "source_lacks_map_prefix")) {
-            if (!forbidden_prefix.empty() &&
-                source_has_map_prefix(source_insns, forbidden_prefix, load_map_info)) {
-                has_forbidden_map_prefix = true;
-                break;
-            }
-        }
-        if (has_forbidden_map_prefix) {
             continue;
         }
         std::optional<uint64_t> required_helper =
@@ -951,27 +638,13 @@ std::optional<ManifestResolution> resolve_native_manifest(
         }
 
         ManifestResolution candidate{};
-        candidate.source_map_bindings = source_bindings;
         candidate.native_object_path =
             manifest_relative_path(manifest_path,
                                    json_required_string(entry, "native_object"));
         candidate.symbol_name = json_object_string(entry, "symbol").value_or("");
-        const auto simulator_object = json_object_string(entry, "simulator_object");
-        const auto simulator_program = json_object_string(entry, "simulator_program");
-        if (simulator_object.has_value() != simulator_program.has_value() ||
-            (simulator_object && (simulator_object->empty() || simulator_program->empty()))) {
-            manifest_fail("native_loader: simulator_object and simulator_program must be specified together");
-        }
-        if (simulator_object) {
-            candidate.simulator_object_path = manifest_relative_path(manifest_path, *simulator_object);
-            candidate.simulator_program = *simulator_program;
-        }
         if (selected &&
             (selected->native_object_path != candidate.native_object_path ||
-             selected->symbol_name != candidate.symbol_name ||
-             selected->simulator_object_path != candidate.simulator_object_path ||
-             selected->simulator_program != candidate.simulator_program ||
-             selected->source_map_bindings != candidate.source_map_bindings)) {
+             selected->symbol_name != candidate.symbol_name)) {
             manifest_fail("native_loader: manifest has ambiguous entries for prog=" +
                           prog_name);
         }
@@ -985,18 +658,6 @@ std::optional<ManifestResolution> resolve_native_manifest(
     if (!std::filesystem::exists(selected->native_object_path, ec) || ec) {
         manifest_fail("native_loader: manifest native object is unreadable: " +
                       selected->native_object_path.string());
-    }
-    selected->native_data_object_paths =
-        parse_manifest_data_objects(manifest_path, manifest);
-    if (selected->native_data_object_paths.empty()) {
-        selected->native_data_object_paths.push_back(selected->native_object_path);
-    }
-    for (const std::filesystem::path &path : selected->native_data_object_paths) {
-        ec.clear();
-        if (!std::filesystem::exists(path, ec) || ec) {
-            manifest_fail("native_loader: manifest native data object is unreadable: " +
-                          path.string());
-        }
     }
     selected->map_rules = parse_manifest_map_rules(manifest);
     return *selected;

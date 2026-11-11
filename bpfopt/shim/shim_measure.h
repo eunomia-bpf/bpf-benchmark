@@ -3,35 +3,27 @@
 
 static uint32_t current_measure_generation;
 
-static int query_prog_info_fd(int fd, struct bpf_prog_info *info) {
-    if (fd < 0)
-        return -1;
+static int query_prog_info(struct prog_entry *p, struct bpf_prog_info *info) {
     memset(info, 0, sizeof(*info));
+    int fd = p->fd;
+    int close_fd = 0;
+    if (p->kernel_prog_id) {
+        union bpf_attr ga = {0};
+        ga.prog_id = p->kernel_prog_id;
+        fd = (int)real_syscall(SYS_bpf, BPF_PROG_GET_FD_BY_ID, &ga,
+                               sizeof(ga));
+        if (fd < 0)
+            return -1;
+        close_fd = 1;
+    }
     union bpf_attr ia = {0};
     ia.info.bpf_fd = (uint32_t)fd;
     ia.info.info_len = sizeof(*info);
     ia.info.info = (uintptr_t)info;
     long rc = real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia));
+    if (close_fd)
+        real_close(fd);
     return rc < 0 ? -1 : 0;
-}
-
-static int query_prog_info(struct prog_entry *p, struct bpf_prog_info *info) {
-    if (query_prog_info_fd(p->fd, info) == 0 &&
-        (!p->kernel_prog_id || info->id == p->kernel_prog_id))
-        return 0;
-
-    if (!p->kernel_prog_id)
-        return -1;
-
-    union bpf_attr ga = {0};
-    ga.prog_id = p->kernel_prog_id;
-    int fd = (int)real_syscall(SYS_bpf, BPF_PROG_GET_FD_BY_ID, &ga,
-                               sizeof(ga));
-    if (fd < 0)
-        return -1;
-    int rc = query_prog_info_fd(fd, info);
-    real_close(fd);
-    return rc;
 }
 
 static void emit_has_programs(int cli) {
@@ -55,7 +47,6 @@ static void emit_has_programs(int cli) {
 
 static void emit_measure_start(int cli) {
     uint32_t count = 0;
-    pthread_rwlock_wrlock(&shim_native_load_lock);
     discover_bpf_programs();
     pthread_mutex_lock(&state_mutex);
     current_measure_generation++;
@@ -79,7 +70,6 @@ static void emit_measure_start(int cli) {
         }
     }
     pthread_mutex_unlock(&state_mutex);
-    pthread_rwlock_unlock(&shim_native_load_lock);
     if (count == 0) {
         dprintf(cli, "{\"status\":\"error\",\"error\":\"no tracked BPF programs\"}\n");
         return;
@@ -99,7 +89,6 @@ static void emit_measure_finish(int cli) {
 
     int first = 1;
     uint32_t emitted = 0;
-    pthread_rwlock_wrlock(&shim_native_load_lock);
     pthread_mutex_lock(&state_mutex);
     uint32_t generation = current_measure_generation;
     for (int b = 0; b < BPF_STATE_BUCKETS; b++) {
@@ -139,7 +128,6 @@ static void emit_measure_finish(int cli) {
                     (unsigned long long)run_time_delta, info.jited_prog_len,
                     info.xlated_prog_len) != 0) {
                 pthread_mutex_unlock(&state_mutex);
-                pthread_rwlock_unlock(&shim_native_load_lock);
                 goto oom;
             }
             first = 0;
@@ -147,7 +135,6 @@ static void emit_measure_finish(int cli) {
         }
     }
     pthread_mutex_unlock(&state_mutex);
-    pthread_rwlock_unlock(&shim_native_load_lock);
     if (emitted == 0) {
         free(buf);
         dprintf(cli, "{\"status\":\"error\",\"error\":\"no BPF program stats\"}\n");

@@ -74,20 +74,15 @@ NativeLinkArgs::UpdateSite make_link_update_site(
         site.value_size,
         site.value_offset,
         site.percpu_base_addr,
-        site.map_name,
-        site.map_addr,
-        {},
     };
 }
 
 NativeLinkArgs build_native_link_args(
     const std::filesystem::path &native_link_path,
     const std::unordered_map<std::string, uint64_t> &map_addrs,
-    const CompanionLoad &companion,
-    const std::filesystem::path &trusted_native_proof)
+    const CompanionLoad &companion)
 {
     NativeLinkArgs out{};
-    const bool optimize_helpers = trusted_native_proof.empty();
     out.linker = native_link_binary(native_link_path);
     BpfArrayOffsets array_offsets{
         K_BPF_ARRAY_VALUE_OFFSET,
@@ -100,13 +95,11 @@ NativeLinkArgs build_native_link_args(
     uint64_t this_cpu_off_addr = 0;
 #if defined(__x86_64__)
     {
-        if (optimize_helpers && companion.needs_kernel_symbols) {
-            uint64_t cpu_number_addr = kallsyms_lookup("cpu_number");
-            this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
-            if (cpu_number_addr != 0 && this_cpu_off_addr != 0) {
-                add_name_addr(out.helpers, kX86CpuNumberHelperKey, cpu_number_addr);
-                add_name_addr(out.helpers, kX86ThisCpuOffHelperKey, this_cpu_off_addr);
-            }
+        uint64_t cpu_number_addr = kallsyms_lookup("cpu_number");
+        this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
+        if (cpu_number_addr != 0 && this_cpu_off_addr != 0) {
+            add_name_addr(out.helpers, kX86CpuNumberHelperKey, cpu_number_addr);
+            add_name_addr(out.helpers, kX86ThisCpuOffHelperKey, this_cpu_off_addr);
         }
         add_name_addr(out.helpers, kX86BpfMapMaxEntriesOffsetKey,
                       K_BPF_MAP_MAX_ENTRIES_OFFSET);
@@ -114,58 +107,40 @@ NativeLinkArgs build_native_link_args(
                       K_BPF_ARRAY_PTRS_OFFSET);
         add_name_addr(out.helpers, kX86BpfProgBpfFuncOffsetKey,
                       K_BPF_PROG_BPF_FUNC_OFFSET);
-        add_name_addr(out.helpers, kX86TailCallOffsetKey,
-                      K_X86_BPF_TAIL_CALL_OFFSET);
+        add_name_addr(out.helpers, kX86TailCallOffsetKey, 12);
     }
 #elif defined(__aarch64__)
     {
-        if (optimize_helpers) {
-            uint32_t cpu_offset = K_THREAD_INFO_CPU_OFFSET;
-            add_name_addr(out.helpers, kArm64ThreadInfoCpuOffsetHelperKey, cpu_offset);
-        }
-        add_name_addr(out.helpers, kArm64BpfMapMaxEntriesOffsetKey,
-                      K_BPF_MAP_MAX_ENTRIES_OFFSET);
-        add_name_addr(out.helpers, kArm64BpfArrayPtrsOffsetKey,
-                      K_BPF_ARRAY_PTRS_OFFSET);
-        add_name_addr(out.helpers, kArm64BpfProgBpfFuncOffsetKey,
-                      K_BPF_PROG_BPF_FUNC_OFFSET);
-        add_name_addr(out.helpers, kArm64TailCallOffsetKey,
-                      K_ARM64_BPF_TAIL_CALL_OFFSET);
+        uint32_t cpu_offset = K_THREAD_INFO_CPU_OFFSET;
+        add_name_addr(out.helpers, kArm64ThreadInfoCpuOffsetHelperKey, cpu_offset);
     }
 #endif
 
-    if (companion.needs_kernel_symbols) {
-        for (const auto &helper : kSupportedHelpers) {
-            uint64_t addr = kallsyms_lookup(helper.symbol);
-            if (addr != 0) {
-                add_name_addr(out.helpers, helper.symbol, addr);
-            }
+    for (const auto &helper : kSupportedHelpers) {
+        uint64_t addr = kallsyms_lookup(helper.symbol);
+        if (addr != 0) {
+            add_name_addr(out.helpers, helper.symbol, addr);
         }
-        static constexpr int kContextualHelperIds[] = {
-            BPF_FUNC_perf_event_output,
-            BPF_FUNC_get_stackid,
-            BPF_FUNC_get_stack,
-            BPF_FUNC_get_prandom_u32,
-            BPF_FUNC_fib_lookup,
-            BPF_FUNC_check_mtu,
-            BPF_FUNC_redirect_map,
-            BPF_FUNC_skc_lookup_tcp,
-            BPF_FUNC_sk_lookup_udp,
-            BPF_FUNC_get_func_ip,
-        };
-        for (int helper_id : kContextualHelperIds) {
-            std::optional<std::pair<std::string, uint64_t>> alias =
-                contextual_helper_alias_if_available(helper_id, companion.prog_type, companion.expected_attach_type);
-            if (!alias) {
-                continue;
-            }
-            add_name_addr(out.helpers, alias->first, alias->second);
+    }
+    static constexpr int kContextualHelperIds[] = {
+        BPF_FUNC_get_prandom_u32,
+        BPF_FUNC_fib_lookup,
+        BPF_FUNC_redirect_map,
+        BPF_FUNC_skc_lookup_tcp,
+        BPF_FUNC_sk_lookup_udp,
+    };
+    for (int helper_id : kContextualHelperIds) {
+        std::optional<std::pair<std::string, uint64_t>> alias =
+            contextual_helper_alias_if_available(helper_id, companion.prog_type);
+        if (!alias) {
+            continue;
         }
-        for (const char *symbol : kRuntimeCallSymbols) {
-            uint64_t addr = kallsyms_lookup(symbol);
-            if (addr != 0) {
-                add_name_addr(out.helpers, symbol, addr);
-            }
+        add_name_addr(out.helpers, alias->first, alias->second);
+    }
+    for (const char *symbol : kRuntimeCallSymbols) {
+        uint64_t addr = kallsyms_lookup(symbol);
+        if (addr != 0) {
+            add_name_addr(out.helpers, symbol, addr);
         }
     }
 
@@ -177,72 +152,29 @@ NativeLinkArgs build_native_link_args(
         add_name_addr(out.maps, kv.first, 0);
     }
 
-    std::unordered_set<uint32_t> source_tail_call_map_ids;
-    for (const MapMeta &meta : companion.source_tail_call_maps) {
-        source_tail_call_map_ids.insert(meta.kernel_id);
+    for (size_t i = 0; i < companion.lookup_sites.size(); i++) {
+        out.lookup_sites.push_back(make_link_lookup_site(companion.lookup_sites[i]));
     }
-    for (const auto &kv : companion.map_addr_ids) {
-        if (source_tail_call_map_ids.count(kv.second)) {
-            out.tail_call_maps.push_back(kv.first);
+    std::vector<std::pair<std::string, std::string>> native_map_symbols(
+        companion.native_map_symbols.begin(), companion.native_map_symbols.end());
+    std::sort(native_map_symbols.begin(), native_map_symbols.end(),
+              [](const auto &a, const auto &b) { return a.first < b.first; });
+    for (const auto &kv : native_map_symbols) {
+        const MapMeta *meta = find_map_meta_by_loaded_name(companion, kv.second);
+        if (!meta) {
+            fail("native map symbol " + kv.first +
+                 " references unknown loaded map " + kv.second);
         }
+        CompanionLoad::LookupSite site =
+            lookup_site_for_map_meta(*meta, array_offsets, htab_offsets, this_cpu_off_addr);
+        site.map_name = kv.first;
+        out.lookup_maps.push_back(NativeLinkArgs::LookupMap{
+            kv.first,
+            make_link_lookup_site(site),
+        });
     }
-    std::sort(out.tail_call_maps.begin(), out.tail_call_maps.end());
-    out.tail_call_maps.erase(
-        std::unique(out.tail_call_maps.begin(), out.tail_call_maps.end()),
-        out.tail_call_maps.end());
-
-    // A trusted worker resolves the submitted helper calls through their ABI.
-    // Optimized helper bodies enter P during native compilation before submit.
-    if (optimize_helpers) {
-        for (size_t i = 0; i < companion.lookup_sites.size(); i++) {
-            out.lookup_sites.push_back(make_link_lookup_site(companion.lookup_sites[i]));
-        }
-        std::vector<std::pair<std::string, std::string>> native_map_symbols(
-            companion.native_map_symbols.begin(), companion.native_map_symbols.end());
-        std::sort(native_map_symbols.begin(), native_map_symbols.end(),
-                  [](const auto &a, const auto &b) { return a.first < b.first; });
-        for (const auto &kv : native_map_symbols) {
-            const MapMeta *meta = find_map_meta_by_loaded_name(companion, kv.second);
-            if (!meta) {
-                fail("native map symbol " + kv.first +
-                     " references unknown loaded map " + kv.second);
-            }
-            CompanionLoad::LookupSite site =
-                lookup_site_for_map_meta(*meta, array_offsets, htab_offsets, this_cpu_off_addr);
-            site.map_name = kv.first;
-            out.lookup_maps.push_back(NativeLinkArgs::LookupMap{
-                kv.first,
-                make_link_lookup_site(site),
-            });
-        }
-        for (size_t i = 0; i < companion.update_sites.size(); i++) {
-            auto site = make_link_update_site(companion.update_sites[i]);
-            // Native templates carry zero map pointers. Bind full aliases while
-            // the source FD identity and real native map addresses are available.
-            for (const auto &map : maps) {
-                if (site.map_addr && map.second == site.map_addr &&
-                    companion.native_map_symbols.count(map.first))
-                    site.map_names.push_back(map.first);
-            }
-            // LLVM can merge proof calls from different maps. The verifier then
-            // poisons map_ptr_state, so bind the public helper identity rather than
-            // a map-specific ops function on the required-bound path.
-            if (site.kind == "call" &&
-                native_loader_env_truthy("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF")) {
-                site.target_addr = helper_kernel_addr(BPF_FUNC_map_update_elem);
-            }
-            out.update_sites.push_back(site);
-        }
+    for (size_t i = 0; i < companion.update_sites.size(); i++) {
+        out.update_sites.push_back(make_link_update_site(companion.update_sites[i]));
     }
-#if defined(__aarch64__)
-    /*
-     * The final JIT address for a native_lab blob is only known during the
-     * kernel emit callback. Emit fixed-width helper-call slots and let the
-     * module patch each slot after the final RX address is known. In-range
-     * helper targets become direct BL26 calls; out-of-range targets use the
-     * same fixed-length far-call sequence as the arm64 BPF JIT.
-     */
-    out.arm64_helper_call_slot = "direct_or_far";
-#endif
     return out;
 }

@@ -1,21 +1,12 @@
 #include "native_loader.hpp"
-#include "../../../kinsn/module/include/native_lab_binding.h"
-#include "../../../kinsn/module/include/native_lab_trusted_wire.h"
 
 #include "kernel_offsets.h"
 
 #include "native_loader_manifest.hpp"
-#include "native_source_map_binding.hpp"
-#include "native_data_layout.hpp"
-#include "native_loader_cache.hpp"
-#include "native_loader_fd_scan.hpp"
 
 #include <bpf/bpf.h>
 #include <bpf/btf.h>
 #include <bpf/libbpf.h>
-extern "C" {
-#include "../../../vendor/libbpf/src/relo_core.h"
-}
 #include <dirent.h>
 #include <gelf.h>
 #include <libelf.h>
@@ -23,7 +14,6 @@ extern "C" {
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/file.h>
-#include <sys/ioctl.h>
 #include <sys/mount.h>
 #include <sys/syscall.h>
 #include <sys/stat.h>
@@ -32,7 +22,6 @@ extern "C" {
 
 #include <algorithm>
 #include <chrono>
-#include <charconv>
 #include <cctype>
 #include <cstddef>
 #include <cstdint>
@@ -41,14 +30,11 @@ extern "C" {
 #include <cstring>
 #include <filesystem>
 #include <fstream>
-#include <iterator>
 #include <limits>
-#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <sstream>
 #include <string>
-#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -78,112 +64,11 @@ inline uint64_t elapsed_ns(
         std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count());
 }
 
-bool native_loader_env_truthy(const char *name)
-{
-    const char *value = std::getenv(name);
-    return value && value[0] && std::strcmp(value, "0") != 0 &&
-        std::strcmp(value, "false") != 0 &&
-        std::strcmp(value, "False") != 0 &&
-        std::strcmp(value, "FALSE") != 0;
-}
-
-void native_loader_kmsg_line(const std::string &message)
-{
-    if (!native_loader_env_truthy("BPFREJIT_SHIM_NATIVE_KMSG_PROGRESS")) {
-        return;
-    }
-
-    const int saved_errno = errno;
-    std::string line = "bpfrejit-native-loader[" + std::to_string(getpid())
-        + "]: " + message;
-    if (line.empty() || line.back() != '\n') {
-        line.push_back('\n');
-    }
-
-    long fd = syscall(SYS_openat, AT_FDCWD, "/dev/kmsg",
-                      O_WRONLY | O_CLOEXEC, 0);
-    if (fd >= 0) {
-        (void)syscall(SYS_write, fd, line.data(), line.size());
-        (void)syscall(SYS_close, fd);
-    }
-    errno = saved_errno;
-}
-
 std::string libbpf_error_string(int error_code)
 {
     char buffer[256] = {};
     libbpf_strerror(error_code, buffer, sizeof(buffer));
     return std::string(buffer);
-}
-
-std::string native_lab_kernel_log_tail()
-{
-    int fd = open("/dev/kmsg", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
-    if (fd < 0) {
-        return "\nkernel log unavailable: open /dev/kmsg: "
-            + std::string(std::strerror(errno));
-    }
-    if (lseek(fd, 0, SEEK_SET) < 0) {
-        int saved = errno;
-        close(fd);
-        return "\nkernel log unavailable: seek /dev/kmsg: "
-            + std::string(std::strerror(saved));
-    }
-
-    std::string raw;
-    char buf[4096];
-    for (;;) {
-        ssize_t n = read(fd, buf, sizeof(buf));
-        if (n > 0) {
-            raw.append(buf, static_cast<size_t>(n));
-            constexpr size_t kMaxRawLog = 128 * 1024;
-            if (raw.size() > kMaxRawLog) {
-                raw.erase(0, raw.size() - kMaxRawLog);
-            }
-            continue;
-        }
-        if (n == 0) {
-            break;
-        }
-        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            break;
-        }
-        if (errno == EPIPE) {
-            raw.clear();
-            continue;
-        }
-        const int saved = errno;
-        close(fd);
-        return "\nkernel log unavailable: read /dev/kmsg: "
-            + std::string(std::strerror(saved));
-    }
-    close(fd);
-
-    std::string filtered;
-    size_t line_start = 0;
-    while (line_start < raw.size()) {
-        size_t line_end = raw.find('\n', line_start);
-        if (line_end == std::string::npos) {
-            line_end = raw.size();
-        }
-        std::string line = raw.substr(line_start, line_end - line_start);
-        if (line.find("bpf_x86_native_lab") != std::string::npos ||
-            line.find("bpf_arm64_native_lab") != std::string::npos ||
-            line.find("bpf_jit:") != std::string::npos ||
-            line.find("Target call") != std::string::npos) {
-            filtered += line;
-            filtered += '\n';
-            constexpr size_t kMaxFilteredLog = 8192;
-            if (filtered.size() > kMaxFilteredLog) {
-                filtered.erase(0, filtered.size() - kMaxFilteredLog);
-            }
-        }
-        line_start = line_end + 1;
-    }
-    if (filtered.empty()) {
-        return "";
-    }
-    return "\nkernel log tail:\n" + filtered;
 }
 
 bpf_prog_info load_prog_info(int program_fd)
@@ -280,7 +165,6 @@ void write_binary_file(const std::filesystem::path &path, const uint8_t *data, s
     if (size != 0) {
         output.write(reinterpret_cast<const char *>(data), static_cast<std::streamsize>(size));
     }
-    output.close();
     if (!output) {
         fail("unable to write file: " + path.string());
     }
@@ -291,9 +175,10 @@ struct NativeLabTarget {
     const char *kfunc_name;
     const char *module_btf_path;
     const char *debugfs_dir;
+    const char *blob_path_fmt;
+    const char *relocs_path_fmt;
     const char *map_ptr_path;
     const char *map_value_ptr_path;
-    const char *map_update_elem_path;
     uint32_t chunk_bytes;
 };
 
@@ -303,10 +188,11 @@ constexpr NativeLabTarget kNativeLabTarget = {
     .kfunc_name = "bpf_arm64_native_lab_emit",
     .module_btf_path = "/sys/kernel/btf/bpf_arm64_native_lab",
     .debugfs_dir = "/sys/kernel/debug/bpf_arm64_native_lab",
+    .blob_path_fmt = "/sys/kernel/debug/bpf_arm64_native_lab/blob%u",
+    .relocs_path_fmt = nullptr,
     .map_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_ptr",
     .map_value_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_value_ptr",
-    .map_update_elem_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_update_elem",
-    .chunk_bytes = 16 * 1024,
+    .chunk_bytes = 256,
 };
 #else
 constexpr NativeLabTarget kNativeLabTarget = {
@@ -314,20 +200,52 @@ constexpr NativeLabTarget kNativeLabTarget = {
     .kfunc_name = "bpf_x86_native_lab_emit",
     .module_btf_path = "/sys/kernel/btf/bpf_x86_native_lab",
     .debugfs_dir = "/sys/kernel/debug/bpf_x86_native_lab",
+    .blob_path_fmt = "/sys/kernel/debug/bpf_x86_native_lab/blob%u",
+    .relocs_path_fmt = "/sys/kernel/debug/bpf_x86_native_lab/blob%u.relocs",
     .map_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_ptr",
     .map_value_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_value_ptr",
-    .map_update_elem_path = "/sys/kernel/debug/bpf_x86_native_lab/map_update_elem",
     .chunk_bytes = 128,
 };
 #endif
 
 constexpr const char *kVmlinuxBtfPath = "/sys/kernel/btf/vmlinux";
 constexpr const char *kDebugfsDir = "/sys/kernel/debug";
+constexpr uint32_t kMaxBlobs = 512;
 
-bool native_lab_needs_tail_call_probe()
-{
-    return true;
-}
+class NativeLabUploadLock {
+public:
+    NativeLabUploadLock()
+    {
+        fd_ = open("/tmp/bpfrejit-native-loader-upload.lock",
+                   O_RDWR | O_CREAT | O_CLOEXEC, 0600);
+        if (fd_ < 0) {
+            fail("open native_lab upload lock: " + std::string(std::strerror(errno)));
+        }
+        while (flock(fd_, LOCK_EX) != 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+            const int saved_errno = errno;
+            close(fd_);
+            fd_ = -1;
+            fail("lock native_lab upload lock: " + std::string(std::strerror(saved_errno)));
+        }
+    }
+
+    NativeLabUploadLock(const NativeLabUploadLock &) = delete;
+    NativeLabUploadLock &operator=(const NativeLabUploadLock &) = delete;
+
+    ~NativeLabUploadLock()
+    {
+        if (fd_ >= 0) {
+            flock(fd_, LOCK_UN);
+            close(fd_);
+        }
+    }
+
+private:
+    int fd_ = -1;
+};
 
 /* Stage 2 helpers that native-link can lower. The loader passes explicit
  * helper/map targets into native-link; unsupported or missing symbols fail
@@ -408,13 +326,10 @@ constexpr SupportedHelper kSupportedHelpers[] = {
     {BPF_FUNC_map_pop_elem, "bpf_map_pop_elem"},
     {BPF_FUNC_sk_fullsock, "bpf_sk_fullsock"},
     {BPF_FUNC_override_return, "bpf_override_return"},
-    {BPF_FUNC_strtol, "bpf_strtol"},
-    {BPF_FUNC_check_mtu, "bpf_check_mtu"},
     {BPF_FUNC_send_signal, "bpf_send_signal"},
     {BPF_FUNC_seq_write, "bpf_seq_write"},
     {BPF_FUNC_copy_from_user, "bpf_copy_from_user"},
     {BPF_FUNC_jiffies64, "bpf_jiffies64"},
-    {BPF_FUNC_ktime_get_coarse_ns, "bpf_ktime_get_coarse_ns"},
     {BPF_FUNC_sk_assign, "bpf_sk_assign"},
     {BPF_FUNC_get_current_task_btf, "bpf_get_current_task_btf"},
     {BPF_FUNC_ima_inode_hash, "bpf_ima_inode_hash"},
@@ -426,26 +341,12 @@ constexpr SupportedHelper kSupportedHelpers[] = {
     {BPF_FUNC_get_func_ret, "bpf_get_func_ret"},
     {BPF_FUNC_get_func_arg_cnt, "bpf_get_func_arg_cnt"},
     {BPF_FUNC_ima_file_hash, "bpf_ima_file_hash"},
-    {BPF_FUNC_kptr_xchg, "bpf_kptr_xchg"},
-    {BPF_FUNC_this_cpu_ptr, "bpf_this_cpu_ptr"},
-    {BPF_FUNC_dynptr_from_mem, "bpf_dynptr_from_mem"},
-    {BPF_FUNC_ringbuf_reserve_dynptr, "bpf_ringbuf_reserve_dynptr"},
-    {BPF_FUNC_dynptr_write, "bpf_dynptr_write"},
-    {BPF_FUNC_strncmp, "bpf_strncmp"},
-    {BPF_FUNC_ringbuf_submit_dynptr, "bpf_ringbuf_submit_dynptr"},
-    {BPF_FUNC_ringbuf_discard_dynptr, "bpf_ringbuf_discard_dynptr"},
-    {BPF_FUNC_dynptr_read, "bpf_dynptr_read"},
-    {BPF_FUNC_dynptr_data, "bpf_dynptr_data"},
     {BPF_FUNC_set_hash, "bpf_set_hash"},
     {BPF_FUNC_redirect_neigh, "bpf_redirect_neigh"},
     {BPF_FUNC_redirect_peer, "bpf_redirect_peer"},
 };
 
 constexpr const char *kRuntimeCallSymbols[] = {
-    "bpf_preempt_disable",
-    "bpf_preempt_enable",
-    "bpf_rcu_read_lock",
-    "bpf_rcu_read_unlock",
     "memset",
     "memcpy",
     "memmove",
@@ -453,18 +354,8 @@ constexpr const char *kRuntimeCallSymbols[] = {
 
 constexpr const char *kTypedHelperSymbols[] = {
     "bpf_user_rnd_u32",
-    "bpf_perf_event_output_tp",
-    "bpf_perf_event_output_raw_tp",
-    "bpf_get_stackid_tp",
-    "bpf_get_stackid_pe",
-    "bpf_get_stackid_raw_tp",
-    "bpf_get_stack_tp",
-    "bpf_get_stack_pe",
-    "bpf_get_stack_raw_tp",
     "bpf_xdp_fib_lookup",
     "bpf_skb_fib_lookup",
-    "bpf_skb_check_mtu",
-    "bpf_xdp_check_mtu",
     "bpf_xdp_redirect_map",
     "bpf_tc_skc_lookup_tcp",
     "bpf_xdp_skc_lookup_tcp",
@@ -473,10 +364,6 @@ constexpr const char *kTypedHelperSymbols[] = {
     "bpf_xdp_sk_lookup_udp",
     "bpf_sock_addr_sk_lookup_udp",
     "bpf_sk_lookup_udp",
-    "bpf_get_func_ip_tracing",
-    "bpf_get_func_ip_kprobe",
-    "bpf_get_func_ip_kprobe_multi",
-    "bpf_get_func_ip_uprobe_multi",
 };
 
 constexpr const char *kX86CpuNumberHelperKey = "__native_x86_cpu_number";
@@ -489,18 +376,10 @@ constexpr const char *kX86BpfProgBpfFuncOffsetKey =
 constexpr const char *kX86TailCallOffsetKey = "__native_x86_tail_call_offset";
 constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
-constexpr const char *kArm64BpfMapMaxEntriesOffsetKey =
-    "__native_arm64_bpf_map_max_entries_offset";
-constexpr const char *kArm64BpfArrayPtrsOffsetKey =
-    "__native_arm64_bpf_array_ptrs_offset";
-constexpr const char *kArm64BpfProgBpfFuncOffsetKey =
-    "__native_arm64_bpf_prog_bpf_func_offset";
-constexpr const char *kArm64TailCallOffsetKey = "__native_arm64_tail_call_offset";
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v67";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v40";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
 constexpr const char *kNativeStubBtfCacheVersion = "native-stub-btf-cache-v1";
-constexpr size_t kMaxVerifierLogSize = 16 * 1024 * 1024;
 constexpr const char *kHtabLookupElemSymbol = "__htab_map_lookup_elem";
 constexpr const char *kArrayOfMapLookupElemSymbol = "array_of_map_lookup_elem";
 constexpr const char *kHtabLruPercpuMapLookupElemSymbol =
@@ -513,39 +392,14 @@ constexpr int kLibbpfCoreBadRelocPoison = 195896080; // 0xbad2310
 #ifndef BPF_PSEUDO_KINSN_CALL
 #define BPF_PSEUDO_KINSN_CALL 4
 #endif
-#ifndef K_BPF_ARRAY_VALUE_OFFSET
-#error "kernel_offsets.h must define K_BPF_ARRAY_VALUE_OFFSET"
+#ifndef K_BPF_MAP_MAX_ENTRIES_OFFSET
+#define K_BPF_MAP_MAX_ENTRIES_OFFSET 68u
 #endif
 #ifndef K_BPF_ARRAY_PTRS_OFFSET
-#error "kernel_offsets.h must define K_BPF_ARRAY_PTRS_OFFSET"
-#endif
-#ifndef K_BPF_ARRAY_PPTRS_OFFSET
-#error "kernel_offsets.h must define K_BPF_ARRAY_PPTRS_OFFSET"
-#endif
-#ifndef K_BPF_MAP_MAX_ENTRIES_OFFSET
-#error "kernel_offsets.h must define K_BPF_MAP_MAX_ENTRIES_OFFSET"
+#define K_BPF_ARRAY_PTRS_OFFSET K_BPF_ARRAY_VALUE_OFFSET
 #endif
 #ifndef K_BPF_PROG_BPF_FUNC_OFFSET
-#error "kernel_offsets.h must define K_BPF_PROG_BPF_FUNC_OFFSET"
-#endif
-#if defined(__x86_64__)
-#ifndef K_X86_BPF_TAIL_CALL_OFFSET
-#error "kernel_offsets.h must define K_X86_BPF_TAIL_CALL_OFFSET"
-#endif
-#endif
-#ifndef K_HTAB_ELEM_KEY_OFFSET
-#error "kernel_offsets.h must define K_HTAB_ELEM_KEY_OFFSET"
-#endif
-#ifndef K_HTAB_ELEM_LRU_REF_OFFSET
-#error "kernel_offsets.h must define K_HTAB_ELEM_LRU_REF_OFFSET"
-#endif
-#if defined(__aarch64__)
-#ifndef K_THREAD_INFO_CPU_OFFSET
-#error "kernel_offsets.h must define K_THREAD_INFO_CPU_OFFSET"
-#endif
-#ifndef K_ARM64_BPF_TAIL_CALL_OFFSET
-#error "kernel_offsets.h must define K_ARM64_BPF_TAIL_CALL_OFFSET"
-#endif
+#define K_BPF_PROG_BPF_FUNC_OFFSET 72u
 #endif
 
 std::string read_first_line_required(const char *path);
@@ -562,8 +416,7 @@ void ensure_debugfs_mounted()
 
 uint64_t lookup_native_lab_ptr_by_fd(int map_fd,
                                      const char *path,
-                                     const char *label,
-                                     bool allow_unavailable = false)
+                                     const char *label)
 {
     ensure_debugfs_mounted();
     int fd = open(path, O_RDWR | O_CLOEXEC);
@@ -582,10 +435,6 @@ uint64_t lookup_native_lab_ptr_by_fd(int map_fd,
     int saved = errno;
     if (written != request_len) {
         close(fd);
-        if (allow_unavailable && written < 0 &&
-            (saved == EOPNOTSUPP || saved == EINVAL)) {
-            return 0;
-        }
         fail(std::string("write ") + path + ": " + std::strerror(saved));
     }
 
@@ -625,31 +474,12 @@ uint64_t lookup_kernel_map_value_ptr_by_fd(int map_fd)
         map_fd, kNativeLabTarget.map_value_ptr_path, "map_value_ptr");
 }
 
-uint64_t lookup_kernel_map_update_elem_by_fd(int map_fd)
-{
-    return lookup_native_lab_ptr_by_fd(
-        map_fd, kNativeLabTarget.map_update_elem_path, "map_update_elem");
-}
-
-uint64_t lookup_kernel_map_value_ptr_by_fd_if_available(int map_fd)
-{
-    return lookup_native_lab_ptr_by_fd(
-        map_fd, kNativeLabTarget.map_value_ptr_path, "map_value_ptr", true);
-}
-
 constexpr size_t kRelocRecordBytes = 16;
-constexpr size_t kNativeLabRelocHelperCallRel32Bytes = 5;
-constexpr size_t kNativeLabRelocHelperCallArm64Bytes = 16;
-constexpr size_t kNativeLabRelocHelperCallArm64Bl26Bytes = 4;
-constexpr size_t kNativeLabRelocArm64PercpuMrsBytes = 4;
+constexpr size_t kNativeLabRelocBytes = 5;
 constexpr uint32_t kNativeLabRelocHelperCallRel32 = 1;
-constexpr uint32_t kNativeLabRelocHelperCallArm64 = 2;
-constexpr uint32_t kNativeLabRelocHelperCallArm64Bl26 = 3;
-constexpr uint32_t kNativeLabRelocArm64PercpuMrs = 4;
 
 struct NativeLabReloc {
     uint32_t global_offset;
-    uint32_t kind;
     uint64_t target;
 };
 
@@ -690,165 +520,6 @@ void append_u64_le(std::vector<uint8_t> &out, uint64_t v)
     }
 }
 
-bool native_lab_reloc_kind_supported(uint32_t kind)
-{
-    if (kind == NATIVE_LAB_RELOC_MAP_POINTER || kind == NATIVE_LAB_RELOC_MAP_VALUE ||
-        kind == NATIVE_LAB_RELOC_HELPER_POINTER || kind == NATIVE_LAB_RELOC_READONLY_DATA) return true;
-#if defined(__aarch64__)
-    return kind == kNativeLabRelocHelperCallArm64 ||
-           kind == NATIVE_LAB_RELOC_EXCLUSIVE_FAILURE ||
-           kind == kNativeLabRelocHelperCallArm64Bl26 ||
-           kind == kNativeLabRelocArm64PercpuMrs;
-#else
-    return kind == kNativeLabRelocHelperCallRel32 ||
-           kind == NATIVE_LAB_RELOC_X86_TAIL_COUNT || kind == NATIVE_LAB_RELOC_X86_TAIL_STACK;
-#endif
-}
-
-size_t native_lab_reloc_slot_bytes(uint32_t kind)
-{
-    switch (kind) {
-    case NATIVE_LAB_RELOC_X86_TAIL_COUNT:
-    case NATIVE_LAB_RELOC_X86_TAIL_STACK:
-        return sizeof(int32_t);
-    case NATIVE_LAB_RELOC_EXCLUSIVE_FAILURE:
-        return 4; // Exact ARM instruction anchor, with no byte patch.
-    case NATIVE_LAB_RELOC_READONLY_DATA:
-        return 1; // Placement anchor in chunk zero; metadata does not patch it.
-    case NATIVE_LAB_RELOC_MAP_POINTER:
-    case NATIVE_LAB_RELOC_MAP_VALUE:
-    case NATIVE_LAB_RELOC_HELPER_POINTER:
-        return sizeof(uint64_t);
-    case kNativeLabRelocHelperCallRel32:
-        return kNativeLabRelocHelperCallRel32Bytes;
-    case kNativeLabRelocHelperCallArm64:
-        return kNativeLabRelocHelperCallArm64Bytes;
-    case kNativeLabRelocHelperCallArm64Bl26:
-        return kNativeLabRelocHelperCallArm64Bl26Bytes;
-    case kNativeLabRelocArm64PercpuMrs:
-        return kNativeLabRelocArm64PercpuMrsBytes;
-    default:
-        fail("native_lab reloc has unknown kind " + std::to_string(kind));
-    }
-}
-
-std::string hex_u64(uint64_t value)
-{
-    char buf[17];
-    std::snprintf(buf, sizeof(buf), "%016llx",
-                  static_cast<unsigned long long>(value));
-    return std::string(buf);
-}
-
-std::string offset_or_none(size_t offset)
-{
-    if (offset == std::numeric_limits<size_t>::max()) {
-        return "none";
-    }
-    return std::to_string(offset);
-}
-
-uint64_t native_blob_fnv64(const std::vector<uint8_t> &blob)
-{
-    uint64_t hash = 1469598103934665603ULL;
-    for (uint8_t byte : blob) {
-        hash ^= byte;
-        hash *= 1099511628211ULL;
-    }
-    return hash;
-}
-
-std::string native_blob_diagnostics(const std::vector<uint8_t> &blob,
-                                    const std::vector<NativeBlobChunk> &chunks)
-{
-    constexpr uint32_t kArm64BreakFault = 0xd4200000;
-    uint64_t hash = native_blob_fnv64(blob);
-
-    size_t break_fault_words = 0;
-    size_t first_break_fault_offset = std::numeric_limits<size_t>::max();
-    size_t zero_words = 0;
-    size_t first_zero_offset = std::numeric_limits<size_t>::max();
-    const size_t word_bytes = blob.size() - (blob.size() % sizeof(uint32_t));
-    for (size_t offset = 0; offset < word_bytes; offset += sizeof(uint32_t)) {
-        const uint32_t word = read_u32_le(blob.data() + offset);
-        if (word == kArm64BreakFault) {
-            if (first_break_fault_offset == std::numeric_limits<size_t>::max()) {
-                first_break_fault_offset = offset;
-            }
-            break_fault_words++;
-        }
-        if (word == 0) {
-            if (first_zero_offset == std::numeric_limits<size_t>::max()) {
-                first_zero_offset = offset;
-            }
-            zero_words++;
-        }
-    }
-
-    size_t chunk_range_bad = 0;
-    size_t first_bad_chunk = std::numeric_limits<size_t>::max();
-    size_t chunk_alignment_bad = 0;
-    size_t first_unaligned_chunk = std::numeric_limits<size_t>::max();
-    size_t chunk_length_bad = 0;
-    size_t first_bad_length_chunk = std::numeric_limits<size_t>::max();
-    size_t chunk_contiguous_bad = 0;
-    size_t first_noncontiguous_chunk = std::numeric_limits<size_t>::max();
-    size_t expected_offset = 0;
-    for (size_t i = 0; i < chunks.size(); i++) {
-        const NativeBlobChunk &chunk = chunks[i];
-        if (chunk.offset > blob.size() || chunk.len > blob.size() - chunk.offset) {
-            if (first_bad_chunk == std::numeric_limits<size_t>::max()) {
-                first_bad_chunk = i;
-            }
-            chunk_range_bad++;
-        }
-#if defined(__aarch64__)
-        if ((chunk.offset % sizeof(uint32_t)) != 0 ||
-            (chunk.len % sizeof(uint32_t)) != 0) {
-            if (first_unaligned_chunk == std::numeric_limits<size_t>::max()) {
-                first_unaligned_chunk = i;
-            }
-            chunk_alignment_bad++;
-        }
-#endif
-        if (chunk.len == 0 || chunk.len > kNativeLabTarget.chunk_bytes) {
-            if (first_bad_length_chunk == std::numeric_limits<size_t>::max()) {
-                first_bad_length_chunk = i;
-            }
-            chunk_length_bad++;
-        }
-        if (chunk.offset != expected_offset) {
-            if (first_noncontiguous_chunk == std::numeric_limits<size_t>::max()) {
-                first_noncontiguous_chunk = i;
-            }
-            chunk_contiguous_bad++;
-        }
-        expected_offset = chunk.offset + chunk.len;
-    }
-    const bool final_size_matches = expected_offset == blob.size();
-
-    std::ostringstream out;
-    out << "native_blob_diag:"
-        << " fnv64=" << hex_u64(hash)
-        << " word_count=" << (blob.size() / sizeof(uint32_t))
-        << " tail_bytes=" << (blob.size() % sizeof(uint32_t))
-        << " break_fault_words=" << break_fault_words
-        << " first_break_fault_offset=" << offset_or_none(first_break_fault_offset)
-        << " zero_words=" << zero_words
-        << " first_zero_offset=" << offset_or_none(first_zero_offset)
-        << " chunk_range_bad=" << chunk_range_bad
-        << " first_bad_chunk=" << offset_or_none(first_bad_chunk)
-        << " chunk_alignment_bad=" << chunk_alignment_bad
-        << " first_unaligned_chunk=" << offset_or_none(first_unaligned_chunk)
-        << " chunk_length_bad=" << chunk_length_bad
-        << " first_bad_length_chunk=" << offset_or_none(first_bad_length_chunk)
-        << " chunk_contiguous_bad=" << chunk_contiguous_bad
-        << " first_noncontiguous_chunk=" << offset_or_none(first_noncontiguous_chunk)
-        << " final_chunk_end=" << expected_offset
-        << " final_size_matches=" << (final_size_matches ? 1 : 0);
-    return out.str();
-}
-
 std::vector<NativeLabReloc> parse_native_lab_relocs(const std::vector<uint8_t> &relocs,
                                                     size_t blob_size)
 {
@@ -865,16 +536,14 @@ std::vector<NativeLabReloc> parse_native_lab_relocs(const std::vector<uint8_t> &
         const uint32_t global_offset = read_u32_le(relocs.data() + off);
         const uint32_t kind = read_u32_le(relocs.data() + off + 4);
         const uint64_t target = read_u64_le(relocs.data() + off + 8);
-        if (!native_lab_reloc_kind_supported(kind)) {
-            fail("native_lab reloc kind " + std::to_string(kind) +
-                 " is not supported by module " + kNativeLabTarget.module_name);
+        if (kind != kNativeLabRelocHelperCallRel32) {
+            fail("native_lab reloc has unknown kind " + std::to_string(kind));
         }
-        if (static_cast<size_t>(global_offset) + native_lab_reloc_slot_bytes(kind) > blob_size) {
+        if (static_cast<size_t>(global_offset) + kNativeLabRelocBytes > blob_size) {
             fail("native_lab reloc call offset exceeds blob bounds");
         }
         out.push_back(NativeLabReloc{
             global_offset,
-            kind,
             target,
         });
     }
@@ -895,7 +564,7 @@ std::vector<NativeBlobChunk> plan_blob_chunks(size_t blob_size,
         /* A helper-call reloc slot must fit inside one kinsn emit chunk. */
         for (const NativeLabReloc &reloc : relocs) {
             const size_t reloc_start = reloc.global_offset;
-            const size_t reloc_end = reloc_start + native_lab_reloc_slot_bytes(reloc.kind);
+            const size_t reloc_end = reloc_start + kNativeLabRelocBytes;
             if (offset < reloc_start && reloc_start < end && end < reloc_end) {
                 end = reloc_start;
             }
@@ -907,103 +576,105 @@ std::vector<NativeBlobChunk> plan_blob_chunks(size_t blob_size,
         chunks.push_back(NativeBlobChunk{offset, end - offset});
         offset = end;
     }
+    if (chunks.size() > kMaxBlobs) {
+        fail("native blob requires " + std::to_string(chunks.size()) +
+             " chunks but module only supports " + std::to_string(kMaxBlobs));
+    }
     return chunks;
 }
 
-std::vector<uint8_t> chunk_reloc_bytes(
-    const std::vector<NativeLabReloc> &relocs, const NativeBlobChunk &chunk)
+void upload_reloc_chunk(const std::vector<uint8_t> &relocs, uint32_t chunk_id)
 {
-    std::vector<uint8_t> bytes;
+#if defined(__aarch64__)
+    (void)relocs;
+    (void)chunk_id;
+    fail(std::string("native_lab relocs are not supported by module ")
+         + kNativeLabTarget.module_name);
+#else
+    char path[160];
+    snprintf(path, sizeof(path), kNativeLabTarget.relocs_path_fmt, chunk_id);
+    int fd = open(path, O_WRONLY | O_TRUNC);
+    if (fd < 0) {
+        fail(std::string("open ") + path + ": " + std::strerror(errno));
+    }
+    ssize_t n = write(fd, relocs.data(), relocs.size());
+    int saved = errno;
+    close(fd);
+    if (n != static_cast<ssize_t>(relocs.size())) {
+        fail(std::string("write ") + path + ": " + std::strerror(saved));
+    }
+#endif
+}
+
+void upload_relocs(const std::vector<NativeLabReloc> &relocs,
+                   const std::vector<NativeBlobChunk> &chunks)
+{
+    if (relocs.empty()) {
+        return;
+    }
+    if (!kNativeLabTarget.relocs_path_fmt) {
+        fail(std::string("native_lab relocs are not supported by module ")
+             + kNativeLabTarget.module_name);
+    }
+
+    std::vector<std::vector<uint8_t>> by_chunk(chunks.size());
     for (const NativeLabReloc &reloc : relocs) {
-        const size_t start = reloc.global_offset;
-        const size_t end = start + native_lab_reloc_slot_bytes(reloc.kind);
-        if (start >= chunk.offset && end <= chunk.offset + chunk.len) {
-            append_u32_le(bytes, static_cast<uint32_t>(start - chunk.offset));
-            append_u32_le(bytes, reloc.kind);
-            append_u64_le(bytes, reloc.target);
+        bool assigned = false;
+        for (size_t chunk_id = 0; chunk_id < chunks.size(); chunk_id++) {
+            const NativeBlobChunk &chunk = chunks[chunk_id];
+            const size_t chunk_end = chunk.offset + chunk.len;
+            const size_t reloc_start = reloc.global_offset;
+            const size_t reloc_end = reloc_start + kNativeLabRelocBytes;
+            if (reloc_start < chunk.offset || reloc_end > chunk_end) {
+                continue;
+            }
+            const uint32_t local_offset =
+                static_cast<uint32_t>(reloc_start - chunk.offset);
+            append_u32_le(by_chunk[chunk_id], local_offset);
+            append_u32_le(by_chunk[chunk_id], kNativeLabRelocHelperCallRel32);
+            append_u64_le(by_chunk[chunk_id], reloc.target);
+            assigned = true;
+            break;
+        }
+        if (!assigned) {
+            fail("native_lab reloc at offset " +
+                 std::to_string(reloc.global_offset) +
+                 " crosses planned blob chunks");
         }
     }
-    return bytes;
+
+    for (uint32_t i = 0; i < chunks.size(); i++) {
+        if (!by_chunk[i].empty()) {
+            upload_reloc_chunk(by_chunk[i], i);
+        }
+    }
 }
 
-std::vector<bpf_insn> bound_proof_sequence(const std::vector<bpf_insn> &program)
+void upload_blob(const std::vector<uint8_t> &blob,
+                 const std::vector<NativeBlobChunk> &chunks)
 {
-    std::vector<bpf_insn> proof = program;
-    for (size_t i = 0; i < proof.size(); i++) {
-        bpf_insn &insn = proof[i];
-        const uint8_t cls = BPF_CLASS(insn.code);
-        if (cls == BPF_JMP && BPF_OP(insn.code) == BPF_EXIT) {
-            insn.code = BPF_JMP | BPF_JA;
-            insn.dst_reg = 0;
-            insn.src_reg = 0;
-            const size_t distance = proof.size() - i - 1;
-            if (distance <= static_cast<size_t>(std::numeric_limits<int16_t>::max())) {
-                insn.off = static_cast<int16_t>(distance);
-                insn.imm = 0;
-            } else {
-                insn.code = BPF_JMP32 | BPF_JA;
-                insn.off = 0;
-                insn.imm = static_cast<int32_t>(distance);
-            }
+    if (blob.empty()) {
+        fail("native blob is empty");
+    }
+    for (uint32_t i = 0; i < chunks.size(); i++) {
+        const NativeBlobChunk &chunk = chunks[i];
+        if (chunk.len == 0 || chunk.len > kNativeLabTarget.chunk_bytes ||
+            chunk.offset + chunk.len > blob.size()) {
+            fail("native blob chunk has invalid bounds");
+        }
+        char path[128];
+        snprintf(path, sizeof(path), kNativeLabTarget.blob_path_fmt, i);
+        int fd = open(path, O_WRONLY | O_TRUNC);
+        if (fd < 0) {
+            fail(std::string("open ") + path + ": " + std::strerror(errno));
+        }
+        ssize_t n = write(fd, blob.data() + chunk.offset, chunk.len);
+        int saved = errno;
+        close(fd);
+        if (n != static_cast<ssize_t>(chunk.len)) {
+            fail(std::string("write ") + path + ": " + std::strerror(saved));
         }
     }
-    return proof;
-}
-
-struct StubLoadAttrs {
-    uint32_t expected_attach_type = 0;
-    uint32_t attach_btf_id = 0;
-    uint32_t attach_btf_obj_id = 0;
-    uint32_t attach_prog_id = 0;
-    uint32_t prog_flags = 0;
-    int prog_token_fd = -1;
-    uint32_t prog_ifindex = 0;
-    uint32_t source_prog_id = 0;
-    bool gpl_compatible = true;
-    uint32_t source_btf_id = 0;
-    bpf_func_info entry_func{};
-};
-
-std::vector<uint32_t> upload_native_chunks(
-    int service_fd, uint64_t request_id, const std::vector<bpf_insn> &proof_program,
-    const std::vector<NativeBlobChunk> &chunks, const std::vector<uint8_t> &blob,
-    const std::vector<NativeLabReloc> &relocs,
-    const std::vector<native_lab_load_site> &load_sites, uint32_t callee_saved_mask)
-{
-    const auto proof = bound_proof_sequence(proof_program);
-    const std::vector<bpf_insn> continuation{{
-        .code = BPF_ALU64 | BPF_MOV | BPF_K, .dst_reg = BPF_REG_0,
-        .src_reg = 0, .off = 0, .imm = 0,
-    }};
-    std::vector<uint32_t> handles;
-    for (size_t i = 0; i < chunks.size(); i++) {
-        const auto &body = i + 1 == chunks.size() ? proof : continuation;
-        const auto relocated = chunk_reloc_bytes(relocs, chunks[i]);
-        std::vector<native_lab_load_site> chunk_loads;
-        for (const auto &site : load_sites) {
-            if (site.offset >= chunks[i].offset &&
-                site.offset < chunks[i].offset + chunks[i].len) {
-                auto local = site;
-                local.offset -= chunks[i].offset;
-                chunk_loads.push_back(local);
-            }
-        }
-        native_lab_trusted_chunk input{};
-        input.load_sites_user = ptr_to_u64(chunk_loads.data());
-        input.load_site_count = chunk_loads.size();
-        input.reserved = callee_saved_mask;
-        input.request_id = request_id;
-        input.native_user = ptr_to_u64(blob.data() + chunks[i].offset);
-        input.native_size = chunks[i].len;
-        input.relocs_user = ptr_to_u64(relocated.data());
-        input.reloc_count = relocated.size() / kRelocRecordBytes;
-        input.proof_user = ptr_to_u64(body.data());
-        input.proof_insns = body.size();
-        if (ioctl(service_fd, NATIVE_LAB_TRUSTED_CHUNK, &input))
-            fail("create kernel native chunk: " + std::string(std::strerror(errno)));
-        handles.push_back(input.chunk_id);
-    }
-    return handles;
 }
 
 bool btf_fd_name_is(int fd, const char *expected_name)
@@ -1098,6 +769,13 @@ int find_kfunc_btf_id()
 struct NativeStubBtfIds {
     uint32_t module_btf_id = 0;
     int kfunc_btf_id = 0;
+};
+
+struct StubLoadAttrs {
+    uint32_t expected_attach_type = 0;
+    uint32_t attach_btf_id = 0;
+    uint32_t attach_btf_obj_id = 0;
+    uint32_t attach_prog_id = 0;
 };
 
 struct ScopedFd {
@@ -1250,7 +928,6 @@ int bpf_prog_load_native_stub_raw(uint32_t prog_type_value,
                                   const StubLoadAttrs &attrs,
                                   int attach_prog_fd,
                                   int attach_btf_obj_fd,
-                                  int source_btf_fd,
                                   const std::string &prog_name,
                                   const std::vector<bpf_insn> &insns,
                                   const std::vector<int> &fd_array,
@@ -1259,17 +936,13 @@ int bpf_prog_load_native_stub_raw(uint32_t prog_type_value,
 {
     union bpf_attr attr = {};
     constexpr const char kDefaultName[] = "native_lab_stub";
-    const char *license = attrs.gpl_compatible ? "GPL" : "BSD";
+    constexpr const char kLicense[] = "GPL";
     const char *name_data = prog_name.empty() ? kDefaultName : prog_name.data();
     const size_t name_size = prog_name.empty()
         ? strlen(kDefaultName)
         : prog_name.size();
 
     attr.prog_type = prog_type_value;
-    attr.prog_flags = attrs.prog_flags;
-    attr.prog_ifindex = attrs.prog_ifindex;
-    if (attrs.prog_flags & BPF_F_TOKEN_FD)
-        attr.prog_token_fd = static_cast<uint32_t>(attrs.prog_token_fd);
     attr.expected_attach_type = attrs.expected_attach_type;
     attr.attach_btf_id = attrs.attach_btf_id;
     if (attach_prog_fd >= 0) {
@@ -1280,53 +953,149 @@ int bpf_prog_load_native_stub_raw(uint32_t prog_type_value,
     std::memcpy(attr.prog_name,
                 name_data,
                 std::min(name_size, sizeof(attr.prog_name) - 1));
-    attr.license = ptr_to_u64(license);
-    if (source_btf_fd >= 0) {
-        attr.prog_btf_fd = static_cast<uint32_t>(source_btf_fd);
-        attr.func_info = ptr_to_u64(&attrs.entry_func);
-        attr.func_info_cnt = 1;
-        attr.func_info_rec_size = sizeof(attrs.entry_func);
-    }
+    attr.license = ptr_to_u64(kLicense);
     attr.insns = ptr_to_u64(insns.data());
     attr.insn_cnt = static_cast<uint32_t>(insns.size());
     attr.fd_array = ptr_to_u64(fd_array.data());
     attr.fd_array_cnt = static_cast<uint32_t>(fd_array.size());
-    const bool collect_log = !verifier_log.empty();
-    attr.log_level = collect_log ? 1 : 0;
+    attr.log_level = 2;
+    attr.log_size = static_cast<uint32_t>(verifier_log.size());
+    attr.log_buf = ptr_to_u64(verifier_log.data());
 
     const unsigned int attr_size =
         static_cast<unsigned int>(offsetof(union bpf_attr, keyring_id) +
                                   sizeof(attr.keyring_id));
-    if (collect_log) {
-        attr.log_size = static_cast<uint32_t>(verifier_log.size());
-        attr.log_buf = ptr_to_u64(verifier_log.data());
+    for (int attempt = 0; attempt < 5; attempt++) {
+        const long rc = syscall(SYS_bpf, BPF_PROG_LOAD, &attr, attr_size);
+        if (rc >= 0) {
+            log_true_size = attr.log_true_size;
+            return static_cast<int>(rc);
+        }
+        if (errno != EAGAIN) {
+            break;
+        }
     }
-    attr.log_true_size = 0;
-    const long rc = syscall(SYS_bpf, BPF_PROG_LOAD, &attr, attr_size);
-    const int saved_errno = errno;
     log_true_size = attr.log_true_size;
-    return rc >= 0 ? static_cast<int>(rc) : -saved_errno;
+    return -errno;
 }
 
 int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
                    uint32_t callee_saved_mask,
-                   const std::vector<uint32_t> &handles,
                    uint32_t prog_type_value,
                    const StubLoadAttrs &attrs,
                    bool tail_call_reachable,
                    const std::string &prog_name,
-                   const std::vector<int> &map_ref_fds,
-                   const std::vector<bpf_insn> &b_program)
+                   const std::vector<int> &map_ref_fds)
 {
-    ScopedFd source_btf_fd;
-    if (attrs.source_btf_id) {
-        source_btf_fd.fd = bpf_btf_get_fd_by_id(attrs.source_btf_id);
-        if (source_btf_fd.fd < 0)
-            fail("open original entry BTF: " + std::string(std::strerror(errno)));
+    if (chunks == 0) {
+        fail("chunks must be > 0");
     }
-    // B is the whole program; map references P needs stay pinned in used_maps.
-    std::vector<bpf_insn> insns = b_program;
-    std::vector<int> fd_array = map_ref_fds;
+    if (callee_saved_mask > 0xf) {
+        fail("native_kernel callee-saved mask exceeds 4 bits");
+    }
+    ScopedFd tail_call_map_fd;
+    if (tail_call_reachable) {
+        LIBBPF_OPTS(bpf_map_create_opts, map_opts);
+        int fd = bpf_map_create(BPF_MAP_TYPE_PROG_ARRAY,
+                                "native_tail_call_probe",
+                                sizeof(uint32_t),
+                                sizeof(uint32_t),
+                                1,
+                                &map_opts);
+        if (fd < 0) {
+            fail("bpf_map_create native tail-call probe map: "
+                 + std::string(std::strerror(errno)));
+        }
+        tail_call_map_fd.fd = fd;
+    }
+
+    std::vector<bpf_insn> insns;
+    insns.reserve(static_cast<size_t>(2) * chunks +
+                  (tail_call_reachable ? 8 : 1));
+    if (tail_call_reachable) {
+        const size_t probe_off = 1 + static_cast<size_t>(2) * chunks;
+        if (probe_off > static_cast<size_t>(std::numeric_limits<int16_t>::max())) {
+            fail("native_kernel tail-call probe jump offset exceeds int16");
+        }
+        insns.push_back(bpf_insn{
+            .code = BPF_ALU64 | BPF_MOV | BPF_K,
+            .dst_reg = BPF_REG_0,
+            .src_reg = 0,
+            .off = 0,
+            .imm = 0,
+        });
+        insns.push_back(bpf_insn{
+            .code = BPF_JMP | BPF_JNE | BPF_K,
+            .dst_reg = BPF_REG_0,
+            .src_reg = 0,
+            .off = static_cast<int16_t>(probe_off),
+            .imm = 0,
+        });
+    }
+    for (uint32_t i = 0; i < chunks; i++) {
+        bpf_insn sidecar = {
+            .code = BPF_ALU64 | BPF_MOV | BPF_K,
+            .dst_reg = 0,
+            .src_reg = BPF_PSEUDO_KINSN_SIDECAR,
+            .off = static_cast<int16_t>(callee_saved_mask),
+            .imm = static_cast<int32_t>(i),
+        };
+        insns.push_back(sidecar);
+        bpf_insn call = {
+            .code = BPF_JMP | BPF_CALL,
+            .dst_reg = 0,
+            .src_reg = BPF_PSEUDO_KINSN_CALL,
+            .off = 1, // fd_array slot for module BTF
+            .imm = kfunc_btf_id,
+        };
+        insns.push_back(call);
+    }
+    insns.push_back(bpf_insn{
+        .code = BPF_JMP | BPF_EXIT, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0,
+    });
+    if (tail_call_reachable) {
+        insns.push_back(bpf_insn{
+            .code = BPF_LD | BPF_DW | BPF_IMM,
+            .dst_reg = BPF_REG_2,
+            .src_reg = BPF_PSEUDO_MAP_FD,
+            .off = 0,
+            .imm = tail_call_map_fd.get(),
+        });
+        insns.push_back(bpf_insn{
+            .code = 0, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0,
+        });
+        insns.push_back(bpf_insn{
+            .code = BPF_ALU64 | BPF_MOV | BPF_K,
+            .dst_reg = BPF_REG_3,
+            .src_reg = 0,
+            .off = 0,
+            .imm = 0,
+        });
+        insns.push_back(bpf_insn{
+            .code = BPF_JMP | BPF_CALL,
+            .dst_reg = 0,
+            .src_reg = 0,
+            .off = 0,
+            .imm = BPF_FUNC_tail_call,
+        });
+        insns.push_back(bpf_insn{
+            .code = BPF_JMP | BPF_EXIT, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0,
+        });
+    }
+
+    // fd_array[0] is the verifier pre-scan slot; fd_array[1] is what `off=1`
+    // in the kinsn call resolves to. Retained map fds follow and are bound via
+    // fd_array_cnt, so map retention has no runtime BPF instruction cost.
+    std::vector<int> fd_array;
+    fd_array.reserve(2 + map_ref_fds.size());
+    fd_array.push_back(mod_btf_fd);
+    fd_array.push_back(mod_btf_fd);
+    for (int fd : map_ref_fds) {
+        if (fd < 0) {
+            fail("native_kernel retained map ref has invalid fd");
+        }
+        fd_array.push_back(fd);
+    }
     if (fd_array.size() > std::numeric_limits<uint32_t>::max()) {
         fail("native_kernel fd_array too large");
     }
@@ -1335,45 +1104,14 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
     ScopedFd attach_prog_fd(open_prog_fd_by_id_required(
         attrs.attach_prog_id, "attach_prog_id"));
 
-    std::vector<char> verifier_log(kMaxVerifierLogSize, '\0');
+    std::vector<char> verifier_log(256 * 1024, '\0');
     uint32_t log_true_size = 0;
-    {
-        std::ostringstream msg;
-        msg << "stub-load-syscall-begin"
-            << " name=" << (prog_name.empty() ? "native_lab_stub" : prog_name)
-            << " type=" << prog_type_value
-            << " chunks=" << chunks
-            << " proof_bound=" << (!handles.empty() ? 1 : 0)
-            << " callee_saved_mask=" << callee_saved_mask
-            << " tail_call_reachable=" << (tail_call_reachable ? 1 : 0)
-            << " insns=" << insns.size()
-            << " fd_array_cnt=" << fd_array.size()
-            << " attach_prog_fd=" << attach_prog_fd.get()
-            << " attach_btf_obj_fd=" << attach_btf_obj_fd.get()
-            << " expected_attach_type=" << attrs.expected_attach_type
-            << " attach_btf_id=" << attrs.attach_btf_id
-            << " attach_btf_obj_id=" << attrs.attach_btf_obj_id
-            << " attach_prog_id=" << attrs.attach_prog_id;
-        native_loader_kmsg_line(msg.str());
-    }
     int fd = bpf_prog_load_native_stub_raw(
-        prog_type_value, attrs, attach_prog_fd.get(), attach_btf_obj_fd.get(), source_btf_fd.get(),
+        prog_type_value, attrs, attach_prog_fd.get(), attach_btf_obj_fd.get(),
         prog_name, insns, fd_array, verifier_log, log_true_size);
     if (fd < 0) {
-        const int primary_error = fd;
-        {
-            std::ostringstream msg;
-            msg << "stub-load-syscall-failed"
-                << " name=" << (prog_name.empty() ? "native_lab_stub" : prog_name)
-                << " err=" << primary_error
-                << " log_true_size=" << log_true_size
-                << " log_buf_size=" << verifier_log.size();
-            native_loader_kmsg_line(msg.str());
-        }
         std::string message = std::string("BPF_PROG_LOAD native_lab stub: ")
-            + libbpf_error_string(primary_error);
-        message += "\nstub verifier_log_size=" + std::to_string(verifier_log.size())
-            + " log_true_size=" + std::to_string(log_true_size);
+            + libbpf_error_string(fd);
         message += "\nstub fd_array_cnt=" + std::to_string(fd_array.size())
             + " fd_array=";
         for (size_t i = 0; i < fd_array.size(); i++) {
@@ -1402,23 +1140,14 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
             log_size--;
         }
         if (log_size != 0) {
-            message += "\nverifier log:\n";
-            // Preserve every log segment through exception.what() consumers:
-            // embedded NULs would otherwise hide all following diagnostics.
-            for (size_t i = 0; i < log_size; ++i) {
-                message += verifier_log[i] ? verifier_log[i] : char(10);
-            }
+            constexpr size_t kMaxVerifierLogTail = 8192;
+            const size_t start = log_size > kMaxVerifierLogTail
+                ? log_size - kMaxVerifierLogTail
+                : 0;
+            message += "\nverifier log tail:\n";
+            message.append(verifier_log.data() + start, log_size - start);
         }
-        message += native_lab_kernel_log_tail();
         fail(message);
-    }
-    {
-        std::ostringstream msg;
-        msg << "stub-load-syscall-done"
-            << " name=" << (prog_name.empty() ? "native_lab_stub" : prog_name)
-            << " fd=" << fd
-            << " log_true_size=" << log_true_size;
-        native_loader_kmsg_line(msg.str());
     }
     return fd;
 }
@@ -1544,13 +1273,13 @@ std::vector<MapPatchSite> read_map_patch_file(const std::filesystem::path &path)
     return patches;
 }
 
-uint32_t read_link_abi_file(const std::filesystem::path &path,
-                            std::vector<native_lab_load_site> *load_sites = nullptr)
+uint32_t read_link_abi_file(const std::filesystem::path &path)
 {
     std::ifstream f(path);
     if (!f) {
         fail("read native-link ABI file: " + path.string());
     }
+    bool seen_version = false;
     bool seen_mask = false;
     uint64_t mask = 0;
     std::string line;
@@ -1567,30 +1296,46 @@ uint32_t read_link_abi_file(const std::filesystem::path &path,
         }
         const std::string key = line.substr(0, tab);
         const std::string value = line.substr(tab + 1);
-        if (key == "load_site" && load_sites) {
-            std::string fields = value;
-            std::replace(fields.begin(), fields.end(), ',', ' ');
-            std::istringstream row(fields);
-            uint32_t offset, length, destination;
-            if (!(row >> offset >> length >> destination))
-                fail("read native load site: " + path.string());
-            load_sites->push_back(native_lab_load_site{
-                offset, static_cast<uint16_t>(length), static_cast<uint16_t>(destination)});
-        }
-        if (key == "callee_saved_mask") {
+        if (key == "version") {
+            if (value != "native-link-abi-v2") {
+                fail("unsupported native-link ABI version in " + path.string()
+                     + ": " + value);
+            }
+            seen_version = true;
+        } else if (key == "callee_saved_mask") {
             mask = parse_decimal_u64(value, "native-link callee-saved mask");
             if (mask > 0xf) {
                 fail("native-link callee-saved mask exceeds 4 bits");
             }
             seen_mask = true;
+        } else {
+            fail("unknown native-link ABI key in " + path.string() + ": " + key);
         }
     }
-    if (!seen_mask) {
+    if (!seen_version || !seen_mask) {
         fail("native-link ABI file missing required keys: " + path.string());
     }
     return static_cast<uint32_t>(mask);
 }
 
+void patch_map_literals(std::vector<uint8_t> &blob,
+                        const std::vector<MapPatchSite> &patches,
+                        const std::unordered_map<std::string, uint64_t> &map_addrs)
+{
+    for (const auto &patch : patches) {
+        if (patch.offset + sizeof(uint64_t) > blob.size()) {
+            fail("native map patch offset exceeds blob bounds for " + patch.name);
+        }
+        auto it = map_addrs.find(patch.name);
+        if (it == map_addrs.end()) {
+            fail("native map patch references unknown map " + patch.name);
+        }
+        uint64_t value = it->second;
+        for (unsigned i = 0; i < 8; i++) {
+            blob[patch.offset + i] = static_cast<uint8_t>((value >> (i * 8)) & 0xff);
+        }
+    }
+}
 
 std::vector<uint32_t> collect_relocated_map_ids(
     const std::vector<MapPatchSite> &patches,
@@ -1645,57 +1390,53 @@ const std::unordered_map<std::string, uint64_t> &kallsyms_table()
         return table;
     }
 
-    std::unordered_set<std::string_view> wanted;
+    std::vector<const char *> wanted;
 #if defined(__x86_64__)
-    wanted.insert("cpu_number");
-    wanted.insert("this_cpu_off");
+    wanted.push_back("cpu_number");
+    wanted.push_back("this_cpu_off");
 #endif
     for (const auto &helper : kSupportedHelpers) {
-        wanted.insert(helper.symbol);
+        wanted.push_back(helper.symbol);
     }
     for (const char *symbol : kTypedHelperSymbols) {
-        wanted.insert(symbol);
+        wanted.push_back(symbol);
     }
     for (const char *symbol : kRuntimeCallSymbols) {
-        wanted.insert(symbol);
+        wanted.push_back(symbol);
     }
-    wanted.insert(kHtabLookupElemSymbol);
-    wanted.insert(kArrayOfMapLookupElemSymbol);
-    wanted.insert(kHtabLruPercpuMapLookupElemSymbol);
+    wanted.push_back(kHtabLookupElemSymbol);
+    wanted.push_back(kArrayOfMapLookupElemSymbol);
+    wanted.push_back(kHtabLruPercpuMapLookupElemSymbol);
+    const size_t wanted_count = wanted.size();
 
-    std::ifstream input("/proc/kallsyms");
-    if (!input) {
+    FILE *f = std::fopen("/proc/kallsyms", "re");
+    if (!f) {
         fail("open /proc/kallsyms: " + std::string(std::strerror(errno)));
     }
-    std::string line;
-    while (std::getline(input, line)) {
-        const size_t address_end = line.find(' ');
-        const size_t type = line.find_first_not_of(" \t", address_end);
-        const size_t name_start = line.find_first_not_of(" \t", type + 1);
-        if (address_end == std::string::npos || type == std::string::npos ||
-            name_start == std::string::npos) {
-            fail("malformed /proc/kallsyms record");
-        }
-        const size_t name_end = line.find_first_of(" \t", name_start);
-        const std::string_view name(line.data() + name_start,
-            (name_end == std::string::npos ? line.size() : name_end) - name_start);
-        if (!wanted.erase(name)) {
+    char line[512];
+    size_t found = 0;
+    while (std::fgets(line, sizeof(line), f)) {
+        char addr_text[32] = {};
+        char type = '\0';
+        char name[256] = {};
+        if (std::sscanf(line, "%31s %c %255s", addr_text, &type, name) != 3) {
             continue;
         }
-        uint64_t address = 0;
-        const auto parsed = std::from_chars(line.data(), line.data() + address_end,
-                                            address, 16);
-        if (parsed.ec != std::errc{} || parsed.ptr != line.data() + address_end) {
-            fail("invalid address in /proc/kallsyms for " + std::string(name));
+        (void)type;
+        for (size_t i = 0; i < wanted_count; i++) {
+            if (std::strcmp(name, wanted[i]) != 0 || table.count(wanted[i])) {
+                continue;
+            }
+            uint64_t addr = std::strtoull(addr_text, nullptr, 16);
+            table.emplace(wanted[i], addr);
+            found++;
+            break;
         }
-        table.emplace(name, address);
-        if (wanted.empty()) {
+        if (found == wanted_count) {
             break;
         }
     }
-    if (input.bad()) {
-        fail("read /proc/kallsyms failed");
-    }
+    std::fclose(f);
     return table;
 }
 
@@ -1720,29 +1461,34 @@ uint64_t helper_kernel_addr(int helper_id)
     return kallsyms_lookup(symbol);
 }
 
-uint64_t required_kernel_symbol_addr(const char *symbol)
+uint64_t htab_lookup_elem_kernel_addr()
 {
-    uint64_t addr = kallsyms_lookup(symbol);
+    uint64_t addr = kallsyms_lookup(kHtabLookupElemSymbol);
     if (addr == 0) {
-        fail(std::string("native_kernel: ") + symbol +
+        fail(std::string("native_kernel: ") + kHtabLookupElemSymbol +
              " is missing from /proc/kallsyms");
     }
     return addr;
 }
 
-uint64_t htab_lookup_elem_kernel_addr()
-{
-    return required_kernel_symbol_addr(kHtabLookupElemSymbol);
-}
-
 uint64_t array_of_map_lookup_elem_kernel_addr()
 {
-    return required_kernel_symbol_addr(kArrayOfMapLookupElemSymbol);
+    uint64_t addr = kallsyms_lookup(kArrayOfMapLookupElemSymbol);
+    if (addr == 0) {
+        fail(std::string("native_kernel: ") + kArrayOfMapLookupElemSymbol +
+             " is missing from /proc/kallsyms");
+    }
+    return addr;
 }
 
 uint64_t htab_lru_percpu_map_lookup_elem_kernel_addr()
 {
-    return required_kernel_symbol_addr(kHtabLruPercpuMapLookupElemSymbol);
+    uint64_t addr = kallsyms_lookup(kHtabLruPercpuMapLookupElemSymbol);
+    if (addr == 0) {
+        fail(std::string("native_kernel: ") + kHtabLruPercpuMapLookupElemSymbol +
+             " is missing from /proc/kallsyms");
+    }
+    return addr;
 }
 
 struct BpfArrayOffsets {
@@ -1765,8 +1511,6 @@ struct MapMeta {
     uint32_t max_entries;
     uint64_t kernel_addr;
     uint64_t value_addr;
-    uint32_t btf_id;
-    uint32_t btf_value_type_id;
 };
 
 struct HelperAlias {
@@ -1787,6 +1531,23 @@ bool map_matches_shape(const MapMeta &meta, const NativeMapShape &shape)
         return false;
     }
     if (shape.max_entries != 0 && meta.max_entries != shape.max_entries) {
+        return false;
+    }
+    return true;
+}
+
+bool map_info_matches_shape(const bpf_map_info &info, const NativeMapShape &shape)
+{
+    if (shape.type >= 0 && static_cast<int>(info.type) != shape.type) {
+        return false;
+    }
+    if (shape.key_size != 0 && info.key_size != shape.key_size) {
+        return false;
+    }
+    if (shape.value_size != 0 && info.value_size != shape.value_size) {
+        return false;
+    }
+    if (shape.max_entries != 0 && info.max_entries != shape.max_entries) {
         return false;
     }
     return true;
@@ -1829,68 +1590,8 @@ const char *helper_symbol_for_id(int helper_id)
     return nullptr;
 }
 
-HelperAlias helper_alias_for_call(int helper_id, uint32_t prog_type, uint32_t expected_attach_type)
+HelperAlias helper_alias_for_call(int helper_id, uint32_t prog_type)
 {
-    if (helper_id == BPF_FUNC_get_func_ip) {
-        const char *symbol = "bpf_get_func_ip_tracing";
-        if (prog_type == BPF_PROG_TYPE_KPROBE) {
-            if (expected_attach_type == BPF_TRACE_KPROBE_MULTI ||
-                expected_attach_type == BPF_TRACE_KPROBE_SESSION)
-                symbol = "bpf_get_func_ip_kprobe_multi";
-            else if (expected_attach_type == BPF_TRACE_UPROBE_MULTI ||
-                expected_attach_type == BPF_TRACE_UPROBE_SESSION)
-                symbol = "bpf_get_func_ip_uprobe_multi";
-            else symbol = "bpf_get_func_ip_kprobe";
-        }
-        return HelperAlias{helper_id, "bpf_get_func_ip", symbol};
-    }
-    if (helper_id == BPF_FUNC_perf_event_output) {
-        if (prog_type == BPF_PROG_TYPE_TRACEPOINT ||
-            prog_type == BPF_PROG_TYPE_PERF_EVENT) {
-            return HelperAlias{helper_id, "bpf_perf_event_output",
-                               "bpf_perf_event_output_tp"};
-        }
-        if (prog_type == BPF_PROG_TYPE_RAW_TRACEPOINT ||
-            prog_type == BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE ||
-            prog_type == BPF_PROG_TYPE_TRACING) {
-            return HelperAlias{helper_id, "bpf_perf_event_output",
-                               "bpf_perf_event_output_raw_tp"};
-        }
-        return HelperAlias{helper_id, "bpf_perf_event_output",
-                           "bpf_perf_event_output"};
-    }
-    if (helper_id == BPF_FUNC_get_stackid) {
-        if (prog_type == BPF_PROG_TYPE_TRACEPOINT) {
-            return HelperAlias{helper_id, "bpf_get_stackid",
-                               "bpf_get_stackid_tp"};
-        }
-        if (prog_type == BPF_PROG_TYPE_PERF_EVENT) {
-            return HelperAlias{helper_id, "bpf_get_stackid",
-                               "bpf_get_stackid_pe"};
-        }
-        if (prog_type == BPF_PROG_TYPE_RAW_TRACEPOINT ||
-            prog_type == BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE ||
-            prog_type == BPF_PROG_TYPE_TRACING) {
-            return HelperAlias{helper_id, "bpf_get_stackid",
-                               "bpf_get_stackid_raw_tp"};
-        }
-        return HelperAlias{helper_id, "bpf_get_stackid", "bpf_get_stackid"};
-    }
-    if (helper_id == BPF_FUNC_get_stack) {
-        if (prog_type == BPF_PROG_TYPE_TRACEPOINT) {
-            return HelperAlias{helper_id, "bpf_get_stack", "bpf_get_stack_tp"};
-        }
-        if (prog_type == BPF_PROG_TYPE_PERF_EVENT) {
-            return HelperAlias{helper_id, "bpf_get_stack", "bpf_get_stack_pe"};
-        }
-        if (prog_type == BPF_PROG_TYPE_RAW_TRACEPOINT ||
-            prog_type == BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE ||
-            prog_type == BPF_PROG_TYPE_TRACING) {
-            return HelperAlias{helper_id, "bpf_get_stack",
-                               "bpf_get_stack_raw_tp"};
-        }
-        return HelperAlias{helper_id, "bpf_get_stack", "bpf_get_stack"};
-    }
     if (helper_id == BPF_FUNC_get_prandom_u32) {
         return HelperAlias{helper_id, "bpf_get_prandom_u32", "bpf_user_rnd_u32"};
     }
@@ -1903,11 +1604,6 @@ HelperAlias helper_alias_for_call(int helper_id, uint32_t prog_type, uint32_t ex
             return HelperAlias{helper_id, "bpf_fib_lookup", "bpf_skb_fib_lookup"};
         }
         return HelperAlias{helper_id, "bpf_fib_lookup", nullptr};
-    }
-    if (helper_id == BPF_FUNC_check_mtu) {
-        return HelperAlias{helper_id, "bpf_check_mtu",
-                           prog_type == BPF_PROG_TYPE_XDP
-                               ? "bpf_xdp_check_mtu" : "bpf_skb_check_mtu"};
     }
     if (helper_id == BPF_FUNC_redirect_map) {
         if (prog_type == BPF_PROG_TYPE_XDP) {
@@ -1943,9 +1639,9 @@ HelperAlias helper_alias_for_call(int helper_id, uint32_t prog_type, uint32_t ex
 }
 
 std::optional<std::pair<std::string, uint64_t>>
-contextual_helper_alias_if_available(int helper_id, uint32_t prog_type, uint32_t expected_attach_type)
+contextual_helper_alias_if_available(int helper_id, uint32_t prog_type)
 {
-    const HelperAlias alias = helper_alias_for_call(helper_id, prog_type, expected_attach_type);
+    const HelperAlias alias = helper_alias_for_call(helper_id, prog_type);
     if (!alias.link_name || !alias.kernel_symbol) {
         return std::nullopt;
     }
@@ -1956,111 +1652,14 @@ contextual_helper_alias_if_available(int helper_id, uint32_t prog_type, uint32_t
     return std::make_pair(std::string(alias.link_name), addr);
 }
 
-std::string btf_symbol_name_from_func_info(uint32_t btf_id,
-                                           const uint8_t *func_info_data,
-                                           uint32_t nr_func_info,
-                                           uint32_t func_info_rec_size,
-                                           const char *inferred_name,
-                                           bool exact_entry = false)
-{
-    const size_t inferred_len =
-        inferred_name ? strnlen(inferred_name, BPF_OBJ_NAME_LEN) : 0;
-    const std::string inferred(
-        inferred_name ? std::string(inferred_name, inferred_len) : std::string{});
-
-    if (btf_id == 0 || nr_func_info == 0 ||
-        func_info_rec_size < sizeof(bpf_func_info)) {
-        if (exact_entry) return {};
-        if (inferred.empty()) {
-            fail("loaded BPF program has no name and no BTF func_info");
-        }
-        return inferred;
-    }
-    if (!func_info_data) {
-        fail("loaded BPF program func_info pointer is null");
-    }
-
-    btf *btf_obj = btf__load_from_kernel_by_id(btf_id);
-    const long btf_err = libbpf_get_error(btf_obj);
-    if (btf_err) {
-        fail("btf__load_from_kernel_by_id(" + std::to_string(btf_id) +
-             "): " + std::strerror(static_cast<int>(-btf_err)));
-    }
-
-    std::string matched_symbol;
-    std::string first_symbol;
-    for (uint32_t i = 0; i < nr_func_info; ++i) {
-        bpf_func_info rec = {};
-        const uint8_t *record = func_info_data +
-            static_cast<size_t>(i) * func_info_rec_size;
-        std::memcpy(&rec, record, sizeof(rec));
-        if (exact_entry && rec.insn_off != 0) continue;
-        if (rec.type_id == 0) {
-            continue;
-        }
-
-        const btf_type *type = btf__type_by_id(btf_obj, rec.type_id);
-        if (!type || btf_kind(type) != BTF_KIND_FUNC) {
-            continue;
-        }
-        const char *name = btf__name_by_offset(btf_obj, type->name_off);
-        if (!name || !name[0]) {
-            continue;
-        }
-
-        if (first_symbol.empty()) {
-            first_symbol = name;
-        }
-        if (rec.insn_off == 0) {
-            std::string entry_symbol = name;
-            btf__free(btf_obj);
-            return entry_symbol;
-        }
-        if (inferred_len > 0 &&
-            std::strncmp(name, inferred.c_str(), inferred_len) == 0) {
-            if (!matched_symbol.empty() && matched_symbol != name) {
-                btf__free(btf_obj);
-                fail("loaded BPF program truncated name '" + inferred +
-                     "' matches multiple BTF functions");
-            }
-            matched_symbol = name;
-        }
-    }
-
-    if (exact_entry) {
-        btf__free(btf_obj);
-        fail("loaded BPF func_info has no named entry at instruction zero");
-    }
-    if (!matched_symbol.empty()) {
-        btf__free(btf_obj);
-        return matched_symbol;
-    }
-    if (inferred_len > 0 && nr_func_info > 1) {
-        btf__free(btf_obj);
-        fail("loaded BPF program name '" + inferred +
-             "' does not match any BTF function");
-    }
-    if (first_symbol.empty()) {
-        btf__free(btf_obj);
-        if (inferred.empty()) {
-            fail("loaded BPF program func_info does not contain a named BTF_KIND_FUNC");
-        }
-        return inferred;
-    }
-    btf__free(btf_obj);
-    return first_symbol;
-}
-
 std::string load_prog_btf_symbol_name(int program_fd,
-                                      const bpf_prog_info &base_info,
-                                      bool exact_entry = false)
+                                      const bpf_prog_info &base_info)
 {
     char inferred_name[sizeof(base_info.name) + 1] = {};
     std::memcpy(inferred_name, base_info.name, sizeof(base_info.name));
 
     if (base_info.btf_id == 0 || base_info.nr_func_info == 0 ||
         base_info.func_info_rec_size < sizeof(bpf_func_info)) {
-        if (exact_entry) return {};
         if (inferred_name[0] == '\0') {
             fail("loaded BPF program has no name and no BTF func_info");
         }
@@ -2085,17 +1684,76 @@ std::string load_prog_btf_symbol_name(int program_fd,
         fail("bpf_obj_get_info_by_fd (func_info) failed: " + libbpf_error_string(err));
     }
     if (info.nr_func_info == 0) {
-        if (exact_entry) return {};
         if (inferred_name[0] == '\0') {
             fail("loaded BPF program has empty func_info and no name");
         }
         return inferred_name;
     }
-    return btf_symbol_name_from_func_info(base_info.btf_id,
-                                          func_info.data(),
-                                          info.nr_func_info,
-                                          info.func_info_rec_size,
-                                          inferred_name, exact_entry);
+
+    btf *btf_obj = btf__load_from_kernel_by_id(base_info.btf_id);
+    const long btf_err = libbpf_get_error(btf_obj);
+    if (btf_err) {
+        fail("btf__load_from_kernel_by_id(" + std::to_string(base_info.btf_id) +
+             "): " + std::strerror(static_cast<int>(-btf_err)));
+    }
+
+    const size_t inferred_len = strnlen(inferred_name, sizeof(base_info.name));
+    std::string matched_symbol;
+    std::string first_symbol;
+    for (uint32_t i = 0; i < info.nr_func_info; ++i) {
+        bpf_func_info rec = {};
+        const uint8_t *record = func_info.data() +
+            static_cast<size_t>(i) * info.func_info_rec_size;
+        std::memcpy(&rec, record, sizeof(rec));
+        if (rec.type_id == 0) {
+            continue;
+        }
+
+        const btf_type *type = btf__type_by_id(btf_obj, rec.type_id);
+        if (!type || btf_kind(type) != BTF_KIND_FUNC) {
+            continue;
+        }
+        const char *name = btf__name_by_offset(btf_obj, type->name_off);
+        if (!name || !name[0]) {
+            continue;
+        }
+
+        if (first_symbol.empty()) {
+            first_symbol = name;
+        }
+        if (rec.insn_off == 0) {
+            std::string entry_symbol = name;
+            btf__free(btf_obj);
+            return entry_symbol;
+        }
+        if (inferred_len > 0 && std::strncmp(name, inferred_name, inferred_len) == 0) {
+            if (!matched_symbol.empty() && matched_symbol != name) {
+                btf__free(btf_obj);
+                fail("loaded BPF program truncated name '" + std::string(inferred_name) +
+                     "' matches multiple BTF functions");
+            }
+            matched_symbol = name;
+        }
+    }
+
+    if (!matched_symbol.empty()) {
+        btf__free(btf_obj);
+        return matched_symbol;
+    }
+    if (inferred_len > 0 && info.nr_func_info > 1) {
+        btf__free(btf_obj);
+        fail("loaded BPF program name '" + std::string(inferred_name) +
+             "' does not match any BTF function");
+    }
+    if (first_symbol.empty()) {
+        btf__free(btf_obj);
+        if (inferred_name[0] == '\0') {
+            fail("loaded BPF program func_info does not contain a named BTF_KIND_FUNC");
+        }
+        return inferred_name;
+    }
+    btf__free(btf_obj);
+    return first_symbol;
 }
 
 std::vector<uint32_t> load_prog_map_ids(int program_fd, uint32_t count)
@@ -2175,7 +1833,7 @@ uint64_t lookup_array_value_addr_if_direct(const bpf_map_info &info, int map_fd)
     if (info.type != BPF_MAP_TYPE_ARRAY || info.max_entries != 1) {
         return 0;
     }
-    return lookup_kernel_map_value_ptr_by_fd_if_available(map_fd);
+    return lookup_kernel_map_value_ptr_by_fd(map_fd);
 }
 
 MapMeta load_map_meta_from_fd(int map_fd)
@@ -2183,6 +1841,9 @@ MapMeta load_map_meta_from_fd(int map_fd)
     bpf_map_info info = load_map_info(map_fd);
     char name[sizeof(info.name) + 1] = {};
     std::memcpy(name, info.name, sizeof(info.name));
+    if (name[0] == '\0') {
+        fail("loaded BPF program references unnamed map fd " + std::to_string(map_fd));
+    }
     return MapMeta{
         std::string(name),
         map_fd,
@@ -2193,8 +1854,6 @@ MapMeta load_map_meta_from_fd(int map_fd)
         info.max_entries,
         lookup_kernel_map_ptr_by_fd(map_fd),
         lookup_array_value_addr_if_direct(info, map_fd),
-        info.btf_id,
-        info.btf_value_type_id,
     };
 }
 
@@ -2213,30 +1872,13 @@ std::vector<MapMeta> collect_open_process_maps(Predicate predicate)
             continue;
         }
         int fd = std::atoi(de->d_name);
-        if (fd < 0) {
-            continue;
-        }
-        ScopedFd pinned_fd(pin_open_process_fd_for_scan(fd));
-        if (pinned_fd.get() < 0) {
-            const int saved = errno;
-            if (open_process_fd_went_stale(saved)) {
-                continue;
-            }
-            closedir(fd_dir);
-            fail("duplicate /proc/self/fd/" + std::to_string(fd) +
-                 " for map scan: " + std::strerror(saved));
-        }
-        if (!fd_is_bpf_map(pinned_fd.get())) {
+        if (fd < 0 || !fd_is_bpf_map(fd)) {
             continue;
         }
         bpf_map_info info = {};
         __u32 info_len = sizeof(info);
-        const int info_err = bpf_obj_get_info_by_fd(
-            pinned_fd.get(), &info, &info_len);
-        if (info_err != 0) {
-            closedir(fd_dir);
-            fail("bpf_obj_get_info_by_fd (pinned process map) failed: " +
-                 libbpf_error_string(info_err));
+        if (bpf_obj_get_info_by_fd(fd, &info, &info_len) != 0) {
+            continue;
         }
         char map_name_buf[sizeof(info.name) + 1] = {};
         std::memcpy(map_name_buf, info.name, sizeof(info.name));
@@ -2252,10 +1894,8 @@ std::vector<MapMeta> collect_open_process_maps(Predicate predicate)
             info.key_size,
             info.value_size,
             info.max_entries,
-            lookup_kernel_map_ptr_by_fd(pinned_fd.get()),
-            lookup_array_value_addr_if_direct(info, pinned_fd.get()),
-            info.btf_id,
-            info.btf_value_type_id,
+            lookup_kernel_map_ptr_by_fd(fd),
+            lookup_array_value_addr_if_direct(info, fd),
         });
     }
     closedir(fd_dir);
@@ -2264,73 +1904,15 @@ std::vector<MapMeta> collect_open_process_maps(Predicate predicate)
 
 std::string bpf_obj_name_truncation(const std::string &name);
 
-struct OpenProcessMapsCache {
-    bool loaded = false;
-    std::vector<MapMeta> maps;
-};
-
-thread_local OpenProcessMapsCache *active_open_process_maps_cache = nullptr;
-
-class OpenProcessMapsCacheScope {
-public:
-    explicit OpenProcessMapsCacheScope(OpenProcessMapsCache &cache)
-        : previous_(active_open_process_maps_cache)
-    {
-        active_open_process_maps_cache = &cache;
-    }
-
-    OpenProcessMapsCacheScope(const OpenProcessMapsCacheScope &) = delete;
-    OpenProcessMapsCacheScope &operator=(const OpenProcessMapsCacheScope &) = delete;
-
-    ~OpenProcessMapsCacheScope()
-    {
-        active_open_process_maps_cache = previous_;
-    }
-
-private:
-    OpenProcessMapsCache *previous_;
-};
-
-template <typename Predicate>
-std::vector<MapMeta> collect_open_process_maps_cached(Predicate predicate)
-{
-    OpenProcessMapsCache *cache = active_open_process_maps_cache;
-    if (!cache) {
-        return collect_open_process_maps(predicate);
-    }
-    if (!cache->loaded) {
-        cache->maps = collect_open_process_maps(
-            [](const bpf_map_info &, const std::string &) {
-                return true;
-            });
-        cache->loaded = true;
-    }
-
-    std::vector<MapMeta> matches;
-    for (const MapMeta &meta : cache->maps) {
-        bpf_map_info info = {};
-        info.id = meta.kernel_id;
-        info.type = static_cast<__u32>(meta.type);
-        info.key_size = meta.key_size;
-        info.value_size = meta.value_size;
-        info.max_entries = meta.max_entries;
-        if (predicate(info, meta.name)) {
-            matches.push_back(meta);
-        }
-    }
-    return matches;
-}
-
 bool find_open_process_map_by_name(const std::string &name,
                                    const std::vector<NativeMapRule> &map_rules,
                                    MapMeta &out)
 {
     const std::string truncated = bpf_obj_name_truncation(name);
     std::vector<MapMeta> matches =
-        collect_open_process_maps_cached(
-            [&](const bpf_map_info &, const std::string &map_name) {
-                return map_name == truncated || map_name == name;
-            });
+        collect_open_process_maps([&](const bpf_map_info &, const std::string &map_name) {
+            return map_name == truncated || map_name == name;
+        });
 
     if (matches.empty()) {
         return false;
@@ -2373,14 +1955,14 @@ bool find_open_process_array_data_map_by_name(const std::string &name,
 {
     const std::string truncated = bpf_obj_name_truncation(name);
     std::vector<MapMeta> matches =
-        collect_open_process_maps_cached(
-            [&](const bpf_map_info &info, const std::string &map_name) {
-                return (map_name == truncated || map_name == name) &&
-                       info.type == BPF_MAP_TYPE_ARRAY &&
-                       info.key_size == 4 &&
-                       info.max_entries == 1 &&
-                       info.value_size >= min_value_size;
-            });
+        collect_open_process_maps([&](const bpf_map_info &info,
+                                      const std::string &map_name) {
+            return (map_name == truncated || map_name == name) &&
+                   info.type == BPF_MAP_TYPE_ARRAY &&
+                   info.key_size == 4 &&
+                   info.max_entries == 1 &&
+                   info.value_size >= min_value_size;
+        });
 
     if (matches.empty()) {
         return false;
@@ -2502,13 +2084,10 @@ struct LinkerOutput {
     std::filesystem::path relocs;
     std::filesystem::path map_patches;
     std::filesystem::path abi;
-    std::filesystem::path data_layout;
-    bool prebuilt_proof = false;
 };
 
 struct NativeLinkArgs {
     std::filesystem::path linker;
-    std::filesystem::path trusted_native_proof;
     struct NameAddr {
         std::string name;
         uint64_t addr = 0;
@@ -2536,17 +2115,12 @@ struct NativeLinkArgs {
         uint32_t value_size = 0;
         uint32_t value_offset = 0;
         uint64_t percpu_base_addr = 0;
-        std::string map_name;
-        uint64_t map_addr = 0;
-        std::vector<std::string> map_names;
     };
     std::vector<NameAddr> helpers;
     std::vector<NameAddr> maps;
-    std::vector<std::string> tail_call_maps;
     std::vector<LookupSite> lookup_sites;
     std::vector<LookupMap> lookup_maps;
     std::vector<UpdateSite> update_sites;
-    std::string arm64_helper_call_slot = "far_safe";
 };
 
 struct LinkedBlob {
@@ -2556,42 +2130,23 @@ struct LinkedBlob {
     uint64_t native_link_exec_ns = 0;
     uint64_t native_link_read_ns = 0;
     uint64_t map_patch_ns = 0;
-    bool cache_hit = false;
-    bool prebuilt_proof = false;
     uint32_t callee_saved_mask = 0;
-    std::vector<native_lab_load_site> load_sites;
     std::vector<uint32_t> relocated_map_ids;
-    std::string native_link_summary;
 };
-
-bool proof_needs_kernel_symbols(const std::vector<bpf_insn> &proof)
-{
-    return proof.empty() || std::any_of(proof.begin(), proof.end(),
-        [](const bpf_insn &insn) {
-            return insn.code == (BPF_JMP | BPF_CALL) &&
-                insn.src_reg != BPF_PSEUDO_CALL;
-        });
-}
 
 struct CompanionLoad {
     uint64_t map_ptr_extract_ns = 0;
     uint64_t lookup_spec_ns = 0;
     uint64_t source_bytecode_bytes = 0;
     bool has_tail_call = false;
-    bool needs_kernel_symbols = false;
     std::unordered_map<std::string, uint64_t> map_addrs;
     std::unordered_map<std::string, uint32_t> map_addr_ids;
-    std::unordered_set<uint32_t> original_map_ids;
-    std::unordered_set<std::string> source_map_symbols;
-    std::unordered_set<std::string> native_data_symbols;
     std::unordered_map<std::string, std::string> native_map_symbols;
     std::unordered_map<std::string, MapMeta> exact_map_addrs;
     std::unordered_set<std::string> ambiguous_exact_maps;
     uint32_t prog_type = 0;
-    uint32_t expected_attach_type = 0;
     std::vector<MapMeta> maps;
     std::vector<NativeMapRule> map_rules;
-    std::vector<MapMeta> source_tail_call_maps;
     /* Per-call-site spec for every `bpf_map_lookup_elem` invocation in
      * the entry program, listed in BPF-source order. Each entry is a
      * (target_kernel_address, key_offset) pair. native-link routes the
@@ -2636,24 +2191,9 @@ struct CompanionLoad {
         uint32_t value_size;
         uint32_t value_offset;
         uint64_t percpu_base_addr;
-        std::string map_name;
-        uint64_t map_addr = 0;
     };
     std::vector<UpdateSite> update_sites;
 };
-
-void add_source_tail_call_map(CompanionLoad &load, const MapMeta &meta)
-{
-    if (meta.type != BPF_MAP_TYPE_PROG_ARRAY) {
-        return;
-    }
-    for (const MapMeta &existing : load.source_tail_call_maps) {
-        if (existing.kernel_id == meta.kernel_id) {
-            return;
-        }
-    }
-    load.source_tail_call_maps.push_back(meta);
-}
 
 void add_exact_map_meta(CompanionLoad &load, const MapMeta &meta)
 {
@@ -2710,8 +2250,6 @@ void add_map_meta(CompanionLoad &load, const MapMeta &meta)
     if (!duplicate) {
         load.maps.push_back(meta);
     }
-    // Unnamed maps retain their original ID/layout, without a fabricated name.
-    if (meta.name.empty()) return;
 
     bool have = false;
     bool ambiguous = false;
@@ -2766,51 +2304,6 @@ void add_map_symbol_alias_meta(CompanionLoad &load,
     load.native_map_symbols[alias] = alias;
 }
 
-void bind_source_map_symbols(CompanionLoad &load,
-    const std::vector<NativeSourceMapBinding> &bindings, const std::vector<bpf_insn> &source)
-{
-    for (const auto &binding : bindings) {
-        const auto reference = source_map_reference(source, binding.source_insn);
-        const MapMeta meta = load_map_meta_from_fd(reference.fd);
-        if (!load.original_map_ids.contains(meta.kernel_id))
-            fail("source map binding FD is not retained by the original program: " + binding.native_symbol);
-        if (reference.value && (!meta.value_addr || reference.offset >= meta.value_size))
-            fail("source map binding exceeds the original direct map value: " + binding.native_symbol);
-        add_map_symbol_alias_meta(load, binding.native_symbol, meta);
-        if (reference.value) {
-            load.map_addrs[binding.native_symbol] = meta.value_addr + reference.offset;
-            load.native_map_symbols.erase(binding.native_symbol);
-        }
-        load.source_map_symbols.insert(binding.native_symbol);
-    }
-}
-
-const MapMeta *source_tail_call_map_for_native_symbol(const CompanionLoad &load,
-                                                      const MapMeta &candidate)
-{
-    if (candidate.type != BPF_MAP_TYPE_PROG_ARRAY ||
-        load.source_tail_call_maps.size() != 1) {
-        return nullptr;
-    }
-    const MapMeta &source = load.source_tail_call_maps.front();
-    if (source.type != BPF_MAP_TYPE_PROG_ARRAY) {
-        return nullptr;
-    }
-    return &source;
-}
-
-void add_native_map_symbol_alias_meta(CompanionLoad &load,
-                                      const std::string &alias,
-                                      const MapMeta &candidate)
-{
-    if (const MapMeta *source_tail_call =
-            source_tail_call_map_for_native_symbol(load, candidate)) {
-        add_map_symbol_alias_meta(load, alias, *source_tail_call);
-        return;
-    }
-    add_map_symbol_alias_meta(load, alias, candidate);
-}
-
 bool map_matches_native_symbol_rule(const NativeMapRule &rule,
                                     const std::string &symbol,
                                     const MapMeta &meta)
@@ -2825,18 +2318,9 @@ bool map_info_matches_native_symbol_rule(const NativeMapRule &rule,
                                          const bpf_map_info &info,
                                          const std::string &map_name)
 {
-    MapMeta meta{
-        map_name,
-        -1,
-        info.id,
-        static_cast<int>(info.type),
-        info.key_size,
-        info.value_size,
-        info.max_entries,
-        0,
-        0,
-    };
-    return map_matches_native_symbol_rule(rule, symbol, meta);
+    return rule.native_symbol == symbol &&
+           native_map_rule_matches(rule, map_name) &&
+           map_info_matches_shape(info, rule.shape);
 }
 
 bool find_loaded_manifest_native_symbol_map(const CompanionLoad &load,
@@ -2869,18 +2353,18 @@ bool find_open_process_manifest_native_symbol_map(const CompanionLoad &load,
 {
     bool object_scoped = false;
     std::vector<MapMeta> matches =
-        collect_open_process_maps_cached(
-            [&](const bpf_map_info &info, const std::string &map_name) {
-                for (const NativeMapRule &rule : load.map_rules) {
-                    if (!map_info_matches_native_symbol_rule(rule, symbol,
-                                                             info, map_name)) {
-                        continue;
-                    }
-                    object_scoped = object_scoped || rule.object_scoped;
-                    return true;
+        collect_open_process_maps([&](const bpf_map_info &info,
+                                      const std::string &map_name) {
+            for (const NativeMapRule &rule : load.map_rules) {
+                if (!map_info_matches_native_symbol_rule(rule, symbol,
+                                                         info, map_name)) {
+                    continue;
                 }
-                return false;
-            });
+                object_scoped = object_scoped || rule.object_scoped;
+                return true;
+            }
+            return false;
+        });
 
     if (matches.empty()) {
         return false;
@@ -2925,29 +2409,16 @@ const MapMeta *find_singleton_array_data_map(const CompanionLoad &load,
         return nullptr;
     }
     const MapMeta *match = matches[0];
-    bool same_object = true;
     for (const MapMeta *candidate : matches) {
         if (candidate->kernel_addr != match->kernel_addr) {
-            same_object = false;
-            continue;
+            fail("multiple ARRAY maps match native data section " + section_name +
+                 ": " + match->name + " and " + candidate->name);
         }
         if (candidate->value_addr != match->value_addr) {
             fail("multiple ARRAY maps match native data section " + section_name +
                  " with different value addresses: " + match->name +
                  " and " + candidate->name);
         }
-    }
-    if (!same_object) {
-        /* libbpf can keep earlier per-object data maps with the same section
-         * name open while loading the next object. Bind data symbols to the
-         * newest matching map, which is the object currently being loaded. */
-        match = *std::max_element(matches.begin(), matches.end(),
-                                  [](const MapMeta *a, const MapMeta *b) {
-                                      if (a->kernel_id != b->kernel_id) {
-                                          return a->kernel_id < b->kernel_id;
-                                      }
-                                      return a->fd < b->fd;
-                                  });
     }
     return match;
 }
@@ -3018,52 +2489,6 @@ bool native_data_section_supported(const std::string &section_name)
            section_name.rfind(".rodata", 0) == 0;
 }
 
-std::optional<uint64_t> source_data_symbol_offset(
-    const MapMeta &map,
-    const std::string &section_name,
-    const std::string &symbol_name,
-    uint64_t native_size,
-    uint64_t native_offset,
-    bool local_readonly)
-{
-    if (map.btf_id == 0 || map.btf_value_type_id == 0) {
-        if (local_readonly) return std::nullopt;
-        return native_offset;
-    }
-
-    btf *btf_obj = btf__load_from_kernel_by_id(map.btf_id);
-    const long btf_err = libbpf_get_error(btf_obj);
-    if (btf_err) {
-        fail("btf__load_from_kernel_by_id(" + std::to_string(map.btf_id) +
-             ") for data map " + map.name + ": " +
-             std::strerror(static_cast<int>(-btf_err)));
-    }
-
-    const NativeDataSymbolLayout layout = find_source_data_symbol_layout(
-        btf_obj, map.btf_value_type_id, section_name, symbol_name);
-    btf__free(btf_obj);
-    const NativeDataSymbolOffsetResolution resolution =
-        resolve_source_data_symbol_offset(
-            layout, native_size, native_offset, map.value_size, local_readonly);
-    if (resolution.kind == NativeDataSymbolOffsetKind::SectionMismatch) {
-        fail("native data section " + section_name +
-             " does not match the source BTF datasec for map " + map.name);
-    }
-    if (resolution.kind == NativeDataSymbolOffsetKind::Absent) {
-        return std::nullopt;
-    }
-    if (resolution.kind == NativeDataSymbolOffsetKind::SizeMismatch) {
-        fail("native data symbol " + symbol_name + " size " +
-             std::to_string(native_size) + " differs from source BTF size " +
-             std::to_string(layout.size));
-    }
-    if (resolution.kind == NativeDataSymbolOffsetKind::OutOfBounds) {
-        fail("source BTF data symbol " + symbol_name + " exceeds map " +
-             map.name + " value_size");
-    }
-    return resolution.offset;
-}
-
 std::string bpf_obj_name_truncation(const std::string &name)
 {
     constexpr size_t kMaxBpfObjNameLen = BPF_OBJ_NAME_LEN - 1;
@@ -3075,23 +2500,24 @@ std::string bpf_obj_name_truncation(const std::string &name)
 
 void add_native_map_symbol_alias(CompanionLoad &load, const std::string &name)
 {
-    if (load.source_map_symbols.contains(name)) return;
+    if (load.map_addrs.count(name)) {
+        return;
+    }
+
     if (const MapMeta *exact = find_exact_map_meta(load, name)) {
-        add_native_map_symbol_alias_meta(load, name, *exact);
+        add_map_symbol_alias_meta(load, name, *exact);
         return;
     }
 
     MapMeta manifest_symbol_map{};
     if (find_loaded_manifest_native_symbol_map(load, name, manifest_symbol_map)) {
-        add_native_map_symbol_alias_meta(load, name, manifest_symbol_map);
+        add_map_symbol_alias_meta(load, name, manifest_symbol_map);
         return;
     }
     if (find_open_process_manifest_native_symbol_map(load, name,
                                                      manifest_symbol_map)) {
-        if (!source_tail_call_map_for_native_symbol(load, manifest_symbol_map)) {
-            add_map_meta(load, manifest_symbol_map);
-        }
-        add_native_map_symbol_alias_meta(load, name, manifest_symbol_map);
+        add_map_meta(load, manifest_symbol_map);
+        add_map_symbol_alias_meta(load, name, manifest_symbol_map);
         return;
     }
 
@@ -3127,16 +2553,14 @@ void add_native_map_symbol_alias(CompanionLoad &load, const std::string &name)
                      " matches multiple loaded maps named " + truncated);
             }
         }
-        add_native_map_symbol_alias_meta(load, name, *match);
+        add_map_symbol_alias_meta(load, name, *match);
         return;
     }
 
     MapMeta process_map{};
     if (find_open_process_map_by_name(name, load.map_rules, process_map)) {
-        if (!source_tail_call_map_for_native_symbol(load, process_map)) {
-            add_map_meta(load, process_map);
-        }
-        add_native_map_symbol_alias_meta(load, name, process_map);
+        add_map_meta(load, process_map);
+        add_map_symbol_alias_meta(load, name, process_map);
     }
 }
 
@@ -3161,18 +2585,6 @@ bool has_native_map_shape(const NativeMapShape &shape)
     return shape.type >= 0;
 }
 
-bool native_map_lowering_disabled()
-{
-    const char *raw = std::getenv("BPFREJIT_NATIVE_DISABLE_MAP_LOWERING");
-    if (!raw || !raw[0]) {
-        return false;
-    }
-    return std::strcmp(raw, "1") == 0
-        || std::strcmp(raw, "true") == 0
-        || std::strcmp(raw, "yes") == 0
-        || std::strcmp(raw, "on") == 0;
-}
-
 NativeMapShape map_shape_from_meta(const MapMeta &meta)
 {
     return NativeMapShape{
@@ -3181,35 +2593,6 @@ NativeMapShape map_shape_from_meta(const MapMeta &meta)
         meta.value_size,
         meta.max_entries,
     };
-}
-
-std::string source_map_name_from_manifest(const CompanionLoad &load,
-                                          const MapMeta &meta)
-{
-    std::string resolved;
-    for (const NativeMapRule &rule : load.map_rules) {
-        bool name_match = native_map_rule_matches(rule, meta.name);
-        if (!name_match &&
-            rule.match == NativeMapRuleMatch::Exact &&
-            starts_with(rule.pattern, meta.name)) {
-            name_match = true;
-        }
-        if (!name_match || !map_matches_shape(meta, rule.shape)) {
-            continue;
-        }
-
-        const std::string &candidate =
-            rule.native_symbol.empty() ? rule.pattern : rule.native_symbol;
-        if (candidate.empty()) {
-            continue;
-        }
-        if (!resolved.empty() && resolved != candidate) {
-            // Same truncated kernel name and shape: keep the runtime name instead of guessing.
-            return meta.name;
-        }
-        resolved = candidate;
-    }
-    return resolved.empty() ? meta.name : resolved;
 }
 
 NativeMapShape inner_map_shape_for_outer_map(
@@ -3251,9 +2634,6 @@ bool configure_lookup_site_for_shape(CompanionLoad::LookupSite &site,
                                      const BpfHtabOffsets &htab_offsets,
                                      uint64_t this_cpu_off_addr)
 {
-    if (native_map_lowering_disabled()) {
-        return false;
-    }
     if (!has_native_map_shape(shape)) {
         return false;
     }
@@ -3315,14 +2695,10 @@ bool configure_lookup_site_for_shape(CompanionLoad::LookupSite &site,
         return true;
     }
     if (t == BPF_MAP_TYPE_HASH_OF_MAPS) {
-        /*
-         * map-in-map lookups must preserve helper-level semantics. The
-         * internal htab lookup returns the raw outer value, while
-         * bpf_map_lookup_elem() returns the live inner map pointer that BPF
-         * programs pass to the next lookup.
-         */
-        site.kind = CompanionLoad::LookupSite::Kind::Call;
-        site.target_addr = helper_kernel_addr(BPF_FUNC_map_lookup_elem);
+        uint32_t rounded = (shape.key_size + 7) & ~7u;
+        site.kind = CompanionLoad::LookupSite::Kind::HashOfMaps;
+        site.target_addr = htab_lookup_elem_kernel_addr();
+        site.key_offset = htab_offsets.key + rounded;
         return true;
     }
     if (t == BPF_MAP_TYPE_ARRAY_OF_MAPS) {
@@ -3331,59 +2707,6 @@ bool configure_lookup_site_for_shape(CompanionLoad::LookupSite &site,
         return true;
     }
 
-    return false;
-}
-
-bool configure_update_site_for_shape(CompanionLoad::UpdateSite &site,
-                                     const NativeMapShape &shape,
-                                     int map_fd,
-                                     const BpfArrayOffsets &array_offsets,
-                                     uint64_t this_cpu_off_addr)
-{
-    if (native_map_lowering_disabled()) {
-        return false;
-    }
-    if (!has_native_map_shape(shape)) {
-        return false;
-    }
-
-    const uint32_t value_size = shape.value_size;
-    const bool simple_value =
-        value_size == 1 || value_size == 2 ||
-        value_size == 4 || value_size == 8;
-    int t = shape.type;
-    if (simple_value && t == BPF_MAP_TYPE_ARRAY) {
-        site.kind = CompanionLoad::UpdateSite::Kind::Array;
-        site.max_entries = shape.max_entries;
-        site.elem_size = (value_size + 7u) & ~7u;
-        site.value_size = value_size;
-        site.value_offset = array_offsets.value;
-        return true;
-    }
-    if (simple_value && t == BPF_MAP_TYPE_PERCPU_ARRAY) {
-#if defined(__x86_64__)
-        if (this_cpu_off_addr == 0) {
-            fail("this_cpu_off not in /proc/kallsyms");
-        }
-#endif
-        site.kind = CompanionLoad::UpdateSite::Kind::PerCpuArray;
-        site.max_entries = shape.max_entries;
-        site.elem_size = sizeof(void *);
-        site.value_size = value_size;
-        site.value_offset = array_offsets.pptrs;
-        site.percpu_base_addr = this_cpu_off_addr;
-        return true;
-    }
-    if (t == BPF_MAP_TYPE_HASH) {
-        site.target_addr = lookup_kernel_map_update_elem_by_fd(map_fd);
-        return true;
-    }
-    if (t == BPF_MAP_TYPE_LRU_HASH ||
-        t == BPF_MAP_TYPE_PERCPU_HASH ||
-        t == BPF_MAP_TYPE_LRU_PERCPU_HASH) {
-        site.target_addr = lookup_kernel_map_update_elem_by_fd(map_fd);
-        return true;
-    }
     return false;
 }
 
@@ -3456,21 +2779,14 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
                 close(fd);
                 fail("gelf_getsym " + native_object.string() + ": " + elf_errmsg(-1));
             }
-            const char *name = elf_strptr(elf, shdr.sh_link, sym.st_name);
-            if (!name || !name[0]) {
-                continue;
-            }
-            if (GELF_ST_TYPE(sym.st_info) != STT_FUNC &&
-                (sym.st_shndx == SHN_UNDEF || GELF_ST_TYPE(sym.st_info) == STT_OBJECT))
-                load.native_data_symbols.insert(name);
-            if (sym.st_shndx == SHN_UNDEF) {
-                load.needs_kernel_symbols = true;
-                add_native_map_symbol_alias(load, name);
-                continue;
-            }
             if (GELF_ST_TYPE(sym.st_info) != STT_OBJECT ||
                 sym.st_size == 0 ||
+                sym.st_shndx == SHN_UNDEF ||
                 sym.st_shndx >= SHN_LORESERVE) {
+                continue;
+            }
+            const char *name = elf_strptr(elf, shdr.sh_link, sym.st_name);
+            if (!name || !name[0]) {
                 continue;
             }
             Elf_Scn *target_scn = elf_getscn(elf, sym.st_shndx);
@@ -3499,24 +2815,19 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
                 close(fd);
                 fail("native data symbol " + std::string(name) + " is below section base");
             }
-            const uint64_t native_off = sym.st_value - target_shdr.sh_addr;
-            const MapMeta *map = find_array_data_map(load, section, 1);
+            const uint64_t off = sym.st_value - target_shdr.sh_addr;
+            const uint64_t symbol_end = off + sym.st_size;
+            const uint64_t section_end =
+                std::max<uint64_t>(target_shdr.sh_size, symbol_end);
+            const MapMeta *map = find_array_data_map(load, section, section_end);
             if (!map) {
                 continue;
             }
-            const std::optional<uint64_t> off = source_data_symbol_offset(
-                *map, section, name, sym.st_size, native_off,
-                ELF64_ST_BIND(sym.st_info) == STB_LOCAL &&
-                    std::string_view(section).rfind(".rodata", 0) == 0);
-            if (!off) {
-                continue;
-            }
-            /* Private readonly constants use the native linker's own immutable
-             * object storage. Only symbols resolved against source data belong
-             * to the app map; compiler string-pool offsets are not source offsets. */
-            if (*off >= map->value_size ||
-                sym.st_size > map->value_size - *off) {
-                continue;
+            if (off + sym.st_size > map->value_size) {
+                elf_end(elf);
+                close(fd);
+                fail("native data symbol " + std::string(name) +
+                     " exceeds BPF data map value_size for " + map->name);
             }
             if (map->value_addr == 0) {
                 elf_end(elf);
@@ -3524,14 +2835,9 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
                 fail("native data map " + map->name +
                      " has no direct value address for symbol " + std::string(name));
             }
-            const std::string symbol_name(name);
-            /* A BPF map object can share its ELF name with a data-map symbol;
-             * helper calls need the existing struct bpf_map * address. */
-            if (load.map_addrs.count(symbol_name)) {
-                continue;
-            }
-            load.map_addrs[symbol_name] = map->value_addr + *off;
-            load.map_addr_ids[symbol_name] = map->kernel_id;
+            load.map_addrs[std::string(name)] =
+                map->value_addr + off;
+            load.map_addr_ids[std::string(name)] = map->kernel_id;
         }
     }
     elf_end(elf);
@@ -3562,7 +2868,6 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
                  std::strerror(errno));
         }
         MapMeta meta = load_map_meta_from_fd(map_fd);
-        out.original_map_ids.insert(meta.kernel_id);
         add_map_meta(out, meta);
         add_exact_map_meta(out, meta);
         close(map_fd);
@@ -3599,7 +2904,6 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
     std::vector<SourceHelperCall> source_calls =
         collect_source_helper_calls(insns, insn_cnt, &meta_by_source_fd,
                                     &out.map_rules);
-    out.needs_kernel_symbols = !source_calls.empty();
 
     BpfArrayOffsets array_offsets{
         K_BPF_ARRAY_VALUE_OFFSET,
@@ -3610,28 +2914,17 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
         K_HTAB_ELEM_LRU_REF_OFFSET,
     };
 #if defined(__x86_64__)
-    const bool has_percpu_map = std::any_of(out.maps.begin(), out.maps.end(),
-        [](const MapMeta &map) {
-            return map.type == BPF_MAP_TYPE_PERCPU_ARRAY ||
-                   map.type == BPF_MAP_TYPE_PERCPU_HASH ||
-                   map.type == BPF_MAP_TYPE_LRU_PERCPU_HASH;
-        });
-    out.needs_kernel_symbols |= has_percpu_map;
-    uint64_t this_cpu_off_addr = has_percpu_map
-        ? kallsyms_lookup("this_cpu_off") : 0;
+    uint64_t this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
 #else
     uint64_t this_cpu_off_addr = 0;
 #endif
 
     for (const SourceHelperCall &call : source_calls) {
-        auto map_it = (call.map_fd >= 0) ? meta_by_source_fd.find(call.map_fd) : meta_by_source_fd.end();
         if (call.helper_id == BPF_FUNC_tail_call) {
             out.has_tail_call = true;
-            if (map_it != meta_by_source_fd.end()) {
-                add_source_tail_call_map(out, map_it->second);
-            }
             continue;
         }
+        auto map_it = (call.map_fd >= 0) ? meta_by_source_fd.find(call.map_fd) : meta_by_source_fd.end();
         if (call.helper_id == BPF_FUNC_map_lookup_elem) {
             CompanionLoad::LookupSite site{
                 CompanionLoad::LookupSite::Kind::Call,
@@ -3644,7 +2937,7 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
                 0,
             };
             if (map_it != meta_by_source_fd.end()) {
-                site.map_name = source_map_name_from_manifest(out, map_it->second);
+                site.map_name = map_it->second.name;
                 configure_lookup_site_for_shape(site,
                                                 map_shape_from_meta(map_it->second),
                                                 array_offsets,
@@ -3669,13 +2962,30 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
                 0,
             };
             if (map_it != meta_by_source_fd.end()) {
-                site.map_name = source_map_name_from_manifest(out, map_it->second);
-                site.map_addr = map_it->second.kernel_addr;
-                configure_update_site_for_shape(site,
-                                                map_shape_from_meta(map_it->second),
-                                                map_it->second.fd,
-                                                array_offsets,
-                                                this_cpu_off_addr);
+                const uint32_t value_size = map_it->second.value_size;
+                const bool simple_value =
+                    value_size == 1 || value_size == 2 ||
+                    value_size == 4 || value_size == 8;
+                int t = map_it->second.type;
+                if (simple_value && t == BPF_MAP_TYPE_ARRAY) {
+                    site.kind = CompanionLoad::UpdateSite::Kind::Array;
+                    site.max_entries = map_it->second.max_entries;
+                    site.elem_size = (value_size + 7u) & ~7u;
+                    site.value_size = value_size;
+                    site.value_offset = array_offsets.value;
+                } else if (simple_value && t == BPF_MAP_TYPE_PERCPU_ARRAY) {
+#if defined(__x86_64__)
+                    if (this_cpu_off_addr == 0) {
+                        fail("this_cpu_off not in /proc/kallsyms");
+                    }
+#endif
+                    site.kind = CompanionLoad::UpdateSite::Kind::PerCpuArray;
+                    site.max_entries = map_it->second.max_entries;
+                    site.elem_size = sizeof(void *);
+                    site.value_size = value_size;
+                    site.value_offset = array_offsets.pptrs;
+                    site.percpu_base_addr = this_cpu_off_addr;
+                }
             }
             out.update_sites.push_back(site);
         }
@@ -3704,8 +3014,6 @@ std::string native_link_cache_key(const std::filesystem::path &native_elf,
     hash.add_string("loaded_prog");
     hash_file_identity(hash, link_args.linker, "native_linker");
     hash.add_string(symbol_name);
-    hash.add_string("arm64_helper_call_slot");
-    hash.add_string(link_args.arm64_helper_call_slot);
     for (const auto &arg : link_args.helpers) {
         hash.add_string("helper");
         hash.add_string(arg.name);
@@ -3715,10 +3023,6 @@ std::string native_link_cache_key(const std::filesystem::path &native_elf,
         hash.add_string("map");
         hash.add_string(arg.name);
         hash.add_u64(arg.addr);
-    }
-    for (const std::string &arg : link_args.tail_call_maps) {
-        hash.add_string("tail_call_map");
-        hash.add_string(arg);
     }
     for (const NativeLinkArgs::LookupSite &arg : link_args.lookup_sites) {
         hash.add_string("lookup");
@@ -3753,158 +3057,8 @@ std::string native_link_cache_key(const std::filesystem::path &native_elf,
         hash.add_u64(arg.value_size);
         hash.add_u64(arg.value_offset);
         hash.add_u64(arg.percpu_base_addr);
-        hash.add_string(arg.map_name);
-        hash.add_u64(arg.map_addr);
-        for (const auto &name : arg.map_names) hash.add_string(name);
     }
     return hash.hex();
-}
-
-uint64_t native_link_name_addr(
-    const std::vector<NativeLinkArgs::NameAddr> &items,
-    const char *name)
-{
-    for (const NativeLinkArgs::NameAddr &item : items) {
-        if (item.name == name) {
-            return item.addr;
-        }
-    }
-    return 0;
-}
-
-std::string native_link_plan_summary(const NativeLinkArgs &link_args,
-                                     const LinkedBlob &linked)
-{
-    size_t lookup_call = 0;
-    size_t lookup_hash = 0;
-    size_t lookup_lru_hash = 0;
-    size_t lookup_percpu_hash = 0;
-    size_t lookup_hash_of_maps = 0;
-    size_t lookup_array = 0;
-    size_t lookup_percpu_array = 0;
-    for (const NativeLinkArgs::LookupSite &site : link_args.lookup_sites) {
-        if (site.kind == "call") {
-            lookup_call++;
-        } else if (site.kind == "hash") {
-            lookup_hash++;
-        } else if (site.kind == "lru_hash") {
-            lookup_lru_hash++;
-        } else if (site.kind == "percpu_hash") {
-            lookup_percpu_hash++;
-        } else if (site.kind == "hash_of_maps") {
-            lookup_hash_of_maps++;
-        } else if (site.kind == "array") {
-            lookup_array++;
-        } else if (site.kind == "percpu_array") {
-            lookup_percpu_array++;
-        }
-    }
-
-    size_t update_call = 0;
-    size_t update_array = 0;
-    size_t update_percpu_array = 0;
-    for (const NativeLinkArgs::UpdateSite &site : link_args.update_sites) {
-        if (site.kind == "call") {
-            update_call++;
-        } else if (site.kind == "array") {
-            update_array++;
-        } else if (site.kind == "percpu_array") {
-            update_percpu_array++;
-        }
-    }
-
-    std::vector<NativeLabReloc> parsed_relocs =
-        parse_native_lab_relocs(linked.relocs, linked.blob.size());
-    size_t reloc_helper = 0;
-    size_t reloc_arm64_slot = 0;
-    size_t reloc_arm64_bl26 = 0;
-    size_t reloc_x86_rel32 = 0;
-    size_t reloc_percpu_mrs = 0;
-    std::unordered_map<uint64_t, size_t> reloc_target_counts;
-    for (const NativeLabReloc &reloc : parsed_relocs) {
-        if (reloc.kind == kNativeLabRelocHelperCallRel32 ||
-            reloc.kind == kNativeLabRelocHelperCallArm64 ||
-            reloc.kind == kNativeLabRelocHelperCallArm64Bl26) {
-            reloc_helper++;
-            reloc_target_counts[reloc.target]++;
-        }
-        if (reloc.kind == kNativeLabRelocHelperCallArm64) {
-            reloc_arm64_slot++;
-        } else if (reloc.kind == kNativeLabRelocHelperCallArm64Bl26) {
-            reloc_arm64_bl26++;
-        } else if (reloc.kind == kNativeLabRelocHelperCallRel32) {
-            reloc_x86_rel32++;
-        } else if (reloc.kind == kNativeLabRelocArm64PercpuMrs) {
-            reloc_percpu_mrs++;
-        }
-    }
-    auto helper_reloc_count = [&](const char *name) -> size_t {
-        const uint64_t addr = native_link_name_addr(link_args.helpers, name);
-        if (addr == 0) {
-            return 0;
-        }
-        auto it = reloc_target_counts.find(addr);
-        return it == reloc_target_counts.end() ? 0 : it->second;
-    };
-
-    const uint64_t perf_addr =
-        native_link_name_addr(link_args.helpers, "bpf_perf_event_output");
-    const uint64_t perf_raw_tp_addr =
-        perf_addr ? kallsyms_lookup("bpf_perf_event_output_raw_tp") : 0;
-    const uint64_t perf_generic_addr =
-        perf_addr ? kallsyms_lookup("bpf_perf_event_output") : 0;
-    const char *perf_alias = "missing";
-    if (perf_addr != 0 && perf_addr == perf_raw_tp_addr) {
-        perf_alias = "raw_tp";
-    } else if (perf_addr != 0 && perf_addr == perf_generic_addr) {
-        perf_alias = "generic";
-    } else if (perf_addr != 0) {
-        perf_alias = "other";
-    }
-
-    std::ostringstream out;
-    out << "helper_slot=" << link_args.arm64_helper_call_slot
-        << " helpers=" << link_args.helpers.size()
-        << " maps=" << link_args.maps.size()
-        << " tail_call_maps=" << link_args.tail_call_maps.size()
-        << " lookup_sites=" << link_args.lookup_sites.size()
-        << " lookup_call=" << lookup_call
-        << " lookup_hash=" << lookup_hash
-        << " lookup_lru_hash=" << lookup_lru_hash
-        << " lookup_percpu_hash=" << lookup_percpu_hash
-        << " lookup_hash_of_maps=" << lookup_hash_of_maps
-        << " lookup_array=" << lookup_array
-        << " lookup_percpu_array=" << lookup_percpu_array
-        << " lookup_maps=" << link_args.lookup_maps.size()
-        << " update_sites=" << link_args.update_sites.size()
-        << " update_call=" << update_call
-        << " update_array=" << update_array
-        << " update_percpu_array=" << update_percpu_array
-        << " relocs=" << parsed_relocs.size()
-        << " helper_relocs=" << reloc_helper
-        << " arm64_slot_relocs=" << reloc_arm64_slot
-        << " arm64_bl26_relocs=" << reloc_arm64_bl26
-        << " x86_rel32_relocs=" << reloc_x86_rel32
-        << " percpu_mrs_relocs=" << reloc_percpu_mrs
-        << " reloc_map_lookup_elem=" << helper_reloc_count("bpf_map_lookup_elem")
-        << " reloc_map_update_elem=" << helper_reloc_count("bpf_map_update_elem")
-        << " reloc_probe_read_kernel=" << helper_reloc_count("bpf_probe_read_kernel")
-        << " reloc_probe_read_kernel_str="
-        << helper_reloc_count("bpf_probe_read_kernel_str")
-        << " reloc_probe_read_compat="
-        << helper_reloc_count("bpf_probe_read_compat")
-        << " reloc_get_current_task="
-        << helper_reloc_count("bpf_get_current_task")
-        << " reloc_get_current_task_btf="
-        << helper_reloc_count("bpf_get_current_task_btf")
-        << " reloc_get_stackid=" << helper_reloc_count("bpf_get_stackid")
-        << " reloc_perf_event_output="
-        << helper_reloc_count("bpf_perf_event_output")
-        << " perf_event_output_addr=0x" << hex_u64(perf_addr)
-        << " perf_raw_tp_addr=0x" << hex_u64(perf_raw_tp_addr)
-        << " perf_generic_addr=0x" << hex_u64(perf_generic_addr)
-        << " perf_alias=" << perf_alias;
-    return out.str();
 }
 
 bool linker_output_exists(const LinkerOutput &out)
@@ -3914,53 +3068,7 @@ bool linker_output_exists(const LinkerOutput &out)
            && std::filesystem::exists(out.blob, ec)
            && std::filesystem::exists(out.relocs, ec)
            && std::filesystem::exists(out.map_patches, ec)
-           && std::filesystem::exists(out.abi, ec)
-           && std::filesystem::exists(out.data_layout, ec);
-}
-
-bool env_bool_enabled(const char *name)
-{
-    const char *raw = std::getenv(name);
-    if (!raw || !raw[0]) {
-        return false;
-    }
-    return std::strcmp(raw, "1") == 0
-        || std::strcmp(raw, "true") == 0
-        || std::strcmp(raw, "yes") == 0
-        || std::strcmp(raw, "on") == 0;
-}
-
-std::string native_object_proof_stem(const std::filesystem::path &elf_path)
-{
-    std::string name = elf_path.filename().string();
-    static constexpr const char *kSuffix = ".native.o";
-    static constexpr size_t kSuffixLen = std::char_traits<char>::length(kSuffix);
-    if (name.size() > kSuffixLen &&
-        name.compare(name.size() - kSuffixLen, kSuffixLen, kSuffix) == 0) {
-        name.resize(name.size() - kSuffixLen);
-        return name;
-    }
-    return elf_path.stem().string();
-}
-
-std::optional<std::filesystem::path> find_prebuilt_proof(
-    const std::filesystem::path &elf_path,
-    const std::string &symbol_name)
-{
-    std::error_code ec;
-    const std::filesystem::path dir = elf_path.parent_path();
-    const std::string object_stem = native_object_proof_stem(elf_path);
-    std::vector<std::filesystem::path> candidates{
-        dir / (object_stem + "." + symbol_name + ".proof.o"),
-        dir / (symbol_name + ".proof.o"),
-    };
-    for (const auto &candidate : candidates) {
-        if (std::filesystem::is_regular_file(candidate, ec)) {
-            return candidate;
-        }
-        ec.clear();
-    }
-    return std::nullopt;
+           && std::filesystem::exists(out.abi, ec);
 }
 
 void publish_cache_file(const std::filesystem::path &tmp,
@@ -3991,58 +3099,32 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     out.relocs = base.string() + ".relocs.bin";
     out.map_patches = base.string() + ".map-patches.tsv";
     out.abi = base.string() + ".abi.tsv";
-    out.data_layout = base.string() + ".data-layout.json";
 
-    // The registered service names its fresh output explicitly. It never
-    // discovers a sibling supplied by the application or obeys REQUIRE_PREBUILT.
-    std::optional<std::filesystem::path> prebuilt_proof = link_args.trusted_native_proof.empty()
-        ? find_prebuilt_proof(elf_path, symbol_name)
-        : std::optional<std::filesystem::path>(link_args.trusted_native_proof);
-    if (prebuilt_proof) {
-        out.prebuilt_proof = link_args.trusted_native_proof.empty();
-        std::error_code copy_ec;
-        std::filesystem::copy_file(
-            *prebuilt_proof,
-            out.proof,
-            std::filesystem::copy_options::overwrite_existing,
-            copy_ec);
-        if (copy_ec) {
-            fail("copy prebuilt native-link proof " + prebuilt_proof->string() +
-                 " to " + out.proof.string() + ": " + copy_ec.message());
-        }
-    } else {
-        if (env_bool_enabled("BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF")) {
-            fail("missing prebuilt native-link proof for " + elf_path.string() +
-                 " symbol " + symbol_name);
-        }
+    std::vector<std::string> proof_argv;
+    proof_argv.push_back(link_args.linker.string());
+    proof_argv.push_back("--input");
+    proof_argv.push_back(elf_path.string());
+    proof_argv.push_back("--symbol");
+    proof_argv.push_back(symbol_name);
+    proof_argv.push_back("--output");
+    proof_argv.push_back(out.proof.string());
+    proof_argv.push_back("--mode");
+    proof_argv.push_back("proof");
 
-        std::vector<std::string> proof_argv;
-        proof_argv.push_back(link_args.linker.string());
-        proof_argv.push_back("--input");
-        proof_argv.push_back(elf_path.string());
-        proof_argv.push_back("--symbol");
-        proof_argv.push_back(symbol_name);
-        proof_argv.push_back("--output");
-        proof_argv.push_back(out.proof.string());
-        proof_argv.push_back("--mode");
-        proof_argv.push_back("proof");
-        proof_argv.push_back("--preserve-entry-abi");
-
-        const std::filesystem::path proof_stderr = base.string() + ".proof.stderr.txt";
-        int proof_rc = run_subprocess(proof_argv, proof_stderr);
-        if (proof_rc != 0) {
-            std::ostringstream msg;
-            const std::string stderr_text = read_text_file_limited(proof_stderr, 2048);
-            msg << "native-link proof failed (rc=" << proof_rc << ")";
-            if (!stderr_text.empty()) {
-                msg << "\nstderr:\n" << stderr_text;
-            }
-            msg << "\ncommand: " << format_command_limited(proof_argv, 4096);
-            fail(msg.str());
+    const std::filesystem::path proof_stderr = base.string() + ".proof.stderr.txt";
+    int proof_rc = run_subprocess(proof_argv, proof_stderr);
+    if (proof_rc != 0) {
+        std::ostringstream msg;
+        const std::string stderr_text = read_text_file_limited(proof_stderr, 2048);
+        msg << "native-link proof failed (rc=" << proof_rc << ")";
+        if (!stderr_text.empty()) {
+            msg << "\nstderr:\n" << stderr_text;
         }
-        std::error_code proof_ec;
-        std::filesystem::remove(proof_stderr, proof_ec);
+        msg << "\ncommand: " << format_command_limited(proof_argv, 4096);
+        fail(msg.str());
     }
+    std::error_code proof_ec;
+    std::filesystem::remove(proof_stderr, proof_ec);
 
     std::vector<std::string> argv;
     argv.push_back(link_args.linker.string());
@@ -4060,11 +3142,6 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     argv.push_back(out.map_patches.string());
     argv.push_back("--output-abi");
     argv.push_back(out.abi.string());
-    // The trusted path builds the exception table from these rows.
-    argv.push_back("--abi-load-sites");
-    argv.push_back("true");
-    argv.push_back("--output-data-layout");
-    argv.push_back(out.data_layout.string());
     const std::filesystem::path link_plan =
         write_native_link_plan(link_args, base);
     argv.push_back("--link-plan");
@@ -4087,54 +3164,15 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     return out;
 }
 
-void bind_native_map_relocations(LinkedBlob &linked,
-    const std::vector<MapPatchSite> &patches, const CompanionLoad &companion)
-{
-    for (const auto &site : patches) {
-        const auto identity = companion.map_addr_ids.find(site.name);
-        const auto address = companion.map_addrs.find(site.name);
-        if (identity == companion.map_addr_ids.end() || address == companion.map_addrs.end())
-            fail("native map relocation lacks original map identity: " + site.name);
-        const auto map = std::find_if(companion.maps.begin(), companion.maps.end(),
-            [&](const MapMeta &m) { return m.kernel_id == identity->second; });
-        if (map == companion.maps.end())
-            fail("native map relocation has no original map layout: " + site.name);
-        uint32_t kind = NATIVE_LAB_RELOC_MAP_POINTER;
-        uint64_t offset = 0;
-        if (address->second != map->kernel_addr) {
-            kind = NATIVE_LAB_RELOC_MAP_VALUE;
-            if (!map->value_addr || address->second < map->value_addr ||
-                address->second - map->value_addr >= map->value_size)
-                fail("native map relocation exceeds original value: " + site.name);
-            offset = address->second - map->value_addr;
-        }
-        if (site.offset > std::numeric_limits<uint32_t>::max())
-            fail("native map relocation offset exceeds wire format");
-        if (site.offset > linked.blob.size() || sizeof(uint64_t) > linked.blob.size() - site.offset)
-            fail("native map literal exceeds linked bytes: " + site.name);
-        std::fill_n(linked.blob.begin() + site.offset, sizeof(uint64_t), 0);
-        append_u32_le(linked.relocs, static_cast<uint32_t>(site.offset));
-        append_u32_le(linked.relocs, kind);
-        append_u64_le(linked.relocs, identity->second | (offset << 32));
-    }
-}
-
 LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_path,
                                     const std::filesystem::path &elf_path,
                                     const std::string &symbol_name,
-                                    const CompanionLoad &companion,
-                                    const std::filesystem::path &trusted_native_proof = {})
+                                    const CompanionLoad &companion)
 {
     const auto cache_lookup_start = std::chrono::steady_clock::now();
     NativeLinkArgs link_args =
-        build_native_link_args(native_link_path, companion.map_addrs, companion,
-                               trusted_native_proof);
-    link_args.trusted_native_proof = trusted_native_proof;
-    // Fresh service outputs live in the broker's private per-request directory.
-    // They cannot reuse the application's old shared template/prebuilt cache.
-    const std::filesystem::path cache_dir = trusted_native_proof.empty()
-        ? std::filesystem::path(kNativeLinkCacheDir)
-        : trusted_native_proof.parent_path() / "kernel-link";
+        build_native_link_args(native_link_path, companion.map_addrs, companion);
+    const std::filesystem::path cache_dir = kNativeLinkCacheDir;
     std::error_code ec;
     std::filesystem::create_directories(cache_dir, ec);
     if (ec) {
@@ -4149,14 +3187,13 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
     cache.relocs = cache_dir / (key + ".relocs.bin");
     cache.map_patches = cache_dir / (key + ".map-patches.tsv");
     cache.abi = cache_dir / (key + ".abi.tsv");
-    cache.data_layout = cache_dir / (key + ".data-layout.json");
     const bool cache_hit = linker_output_exists(cache);
     const auto cache_lookup_end = std::chrono::steady_clock::now();
 
     LinkerOutput source = cache;
     if (!cache_hit) {
-        const std::filesystem::path tmp_base = native_link_temporary_base(
-            cache_dir, key, getpid(), syscall(SYS_gettid));
+        const std::filesystem::path tmp_base =
+            cache_dir / (key + ".tmp." + std::to_string(getpid()));
         const auto link_start = std::chrono::steady_clock::now();
         LinkerOutput tmp = invoke_native_link(elf_path, symbol_name, link_args, tmp_base);
         const auto link_end = std::chrono::steady_clock::now();
@@ -4175,20 +3212,15 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
         auto map_patches = read_map_patch_file(source.map_patches);
         linked.relocated_map_ids =
             collect_relocated_map_ids(map_patches, companion.map_addr_ids);
-        linked.callee_saved_mask = read_link_abi_file(source.abi, &linked.load_sites);
-
-        linked.prebuilt_proof = source.prebuilt_proof;
-        linked.native_link_summary = "cache_key=" + key + " " +
-            native_link_plan_summary(link_args, linked);
+        linked.callee_saved_mask = read_link_abi_file(source.abi);
         const auto read_end = std::chrono::steady_clock::now();
         publish_cache_file(tmp.proof, cache.proof);
         publish_cache_file(tmp.blob, cache.blob);
         publish_cache_file(tmp.relocs, cache.relocs);
         publish_cache_file(tmp.map_patches, cache.map_patches);
         publish_cache_file(tmp.abi, cache.abi);
-        publish_cache_file(tmp.data_layout, cache.data_layout);
         const auto patch_start = std::chrono::steady_clock::now();
-        bind_native_map_relocations(linked, map_patches, companion);
+        patch_map_literals(linked.blob, map_patches, companion.map_addrs);
         const auto patch_end = std::chrono::steady_clock::now();
         linked.native_link_read_ns = elapsed_ns(read_start, read_end);
         linked.map_patch_ns = elapsed_ns(patch_start, patch_end);
@@ -4205,157 +3237,67 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
     auto map_patches = read_map_patch_file(source.map_patches);
     linked.relocated_map_ids =
         collect_relocated_map_ids(map_patches, companion.map_addr_ids);
-    linked.callee_saved_mask = read_link_abi_file(source.abi, &linked.load_sites);
-
-    linked.cache_hit = true;
-    linked.native_link_summary = "cache_key=" + key + " " +
-            native_link_plan_summary(link_args, linked);
+    linked.callee_saved_mask = read_link_abi_file(source.abi);
     const auto read_end = std::chrono::steady_clock::now();
     const auto patch_start = std::chrono::steady_clock::now();
-    bind_native_map_relocations(linked, map_patches, companion);
+    patch_map_literals(linked.blob, map_patches, companion.map_addrs);
     const auto patch_end = std::chrono::steady_clock::now();
     linked.native_link_read_ns = elapsed_ns(read_start, read_end);
     linked.map_patch_ns = elapsed_ns(patch_start, patch_end);
     return linked;
 }
 
-
 struct LoadedStub {
     int prog_fd = -1;
     uint64_t upload_ns = 0;
     uint64_t prog_load_ns = 0;
-    uint64_t native_blob_fnv64 = 0;
-    uint64_t native_first_reloc_target = 0;
-    uint64_t native_last_reloc_target = 0;
-    uint32_t native_reloc_count = 0;
-    uint32_t native_chunk_count = 0;
-    uint32_t native_callee_saved_mask = 0;
-    uint32_t native_first_reloc_offset = 0;
-    uint32_t native_first_reloc_kind = 0;
-    uint32_t native_last_reloc_offset = 0;
-    uint32_t native_last_reloc_kind = 0;
 };
 
 LoadedStub upload_and_load_stub(const LinkedBlob &linked,
-                                const std::vector<bpf_insn> &proof_insns,
                                 uint32_t prog_type,
                                 const StubLoadAttrs &attrs,
                                 bool tail_call_reachable,
                                 const std::string &prog_name,
-                                const std::vector<int> &map_ref_fds, int service_fd, uint64_t request_id)
+                                const std::vector<int> &map_ref_fds)
 {
     LoadedStub out{};
     std::vector<NativeLabReloc> relocs;
     std::vector<NativeBlobChunk> chunks;
-    std::vector<uint32_t> handles;
 
     const auto upload_start = std::chrono::steady_clock::now();
     auto upload_end = upload_start;
     {
+        NativeLabUploadLock upload_lock;
         ensure_debugfs_mounted();
         relocs = parse_native_lab_relocs(linked.relocs, linked.blob.size());
-        chunks = {NativeBlobChunk{0, linked.blob.size()}};
-        out.native_blob_fnv64 = native_blob_fnv64(linked.blob);
-        out.native_reloc_count = static_cast<uint32_t>(relocs.size());
-        out.native_chunk_count = static_cast<uint32_t>(chunks.size());
-        out.native_callee_saved_mask = linked.callee_saved_mask;
-        if (!relocs.empty()) {
-            const NativeLabReloc &first = relocs.front();
-            const NativeLabReloc &last = relocs.back();
-            out.native_first_reloc_offset = first.global_offset;
-            out.native_first_reloc_kind = first.kind;
-            out.native_first_reloc_target = first.target;
-            out.native_last_reloc_offset = last.global_offset;
-            out.native_last_reloc_kind = last.kind;
-            out.native_last_reloc_target = last.target;
-        }
-        {
-            std::ostringstream msg;
-            msg << "upload-begin"
-                << " name=" << prog_name
-                << " type=" << prog_type
-                << " blob_bytes=" << linked.blob.size()
-                << " blob_fnv=" << hex_u64(out.native_blob_fnv64)
-                << " reloc_records=" << relocs.size()
-                << " reloc_bytes=" << linked.relocs.size()
-                << " chunks=" << chunks.size()
-                << " callee_saved_mask=" << linked.callee_saved_mask
-                << " tail_call_reachable=" << (tail_call_reachable ? 1 : 0)
-                << " retained_map_fds=" << map_ref_fds.size()
-                << " relocated_map_ids=" << linked.relocated_map_ids.size()
-                << " expected_attach_type=" << attrs.expected_attach_type
-                << " attach_btf_id=" << attrs.attach_btf_id
-                << " attach_btf_obj_id=" << attrs.attach_btf_obj_id
-                << " attach_prog_id=" << attrs.attach_prog_id;
-            if (!chunks.empty()) {
-                msg << " first_chunk=" << chunks.front().offset << "+"
-                    << chunks.front().len
-                    << " last_chunk=" << chunks.back().offset << "+"
-                    << chunks.back().len;
-            }
-            if (!relocs.empty()) {
-                msg << " first_reloc=" << out.native_first_reloc_offset
-                    << ":" << out.native_first_reloc_kind
-                    << ":0x" << hex_u64(out.native_first_reloc_target)
-                    << " last_reloc=" << out.native_last_reloc_offset
-                    << ":" << out.native_last_reloc_kind
-                    << ":0x" << hex_u64(out.native_last_reloc_target);
-            }
-            native_loader_kmsg_line(msg.str());
-        }
-        handles = upload_native_chunks(service_fd, request_id, proof_insns,
-            chunks, linked.blob, relocs, linked.load_sites, linked.callee_saved_mask);
+        chunks = plan_blob_chunks(linked.blob.size(), relocs);
+        upload_blob(linked.blob, chunks);
+        upload_relocs(relocs, chunks);
         upload_end = std::chrono::steady_clock::now();
-        {
-            std::ostringstream msg;
-            msg << "upload-done"
-                << " name=" << prog_name
-                << " blob_bytes=" << linked.blob.size()
-                << " reloc_records=" << relocs.size()
-                << " chunks=" << chunks.size()
-                << " proof_bound=" << (!handles.empty() ? 1 : 0)
-                << " upload_ns=" << elapsed_ns(upload_start, upload_end);
-            native_loader_kmsg_line(msg.str());
-        }
 
         const auto prog_load_start = std::chrono::steady_clock::now();
-        native_loader_kmsg_line("stub-btf-lookup-begin name=" + prog_name);
-        NativeStubBtfIds stub_btf{};
-        ScopedFd mod_btf_fd;
-        {
-            std::ostringstream msg;
-            msg << "stub-btf-lookup-done"
-                << " name=" << prog_name
-                << " module_btf_id=" << stub_btf.module_btf_id
-                << " kfunc_btf_id=" << stub_btf.kfunc_btf_id
-                << " mod_btf_fd=" << mod_btf_fd.get();
-            native_loader_kmsg_line(msg.str());
-        }
+        NativeStubBtfIds stub_btf = find_native_stub_btf_ids();
+        ScopedFd mod_btf_fd(open_module_btf_fd_by_id(stub_btf.module_btf_id));
         try {
             out.prog_fd = load_stub_prog(
                 stub_btf.kfunc_btf_id,
                 mod_btf_fd.get(),
                 static_cast<uint32_t>(chunks.size()),
                 linked.callee_saved_mask,
-                handles,
                 prog_type,
                 attrs,
                 tail_call_reachable,
                 prog_name,
-                map_ref_fds,
-                proof_insns);
+                map_ref_fds);
         } catch (const std::exception &e) {
-            const std::string load_error = e.what();
-            const size_t first_line_end = load_error.find('\n');
             std::ostringstream msg;
-            msg << load_error
+            msg << e.what()
                 << "\nnative_lab stub context:"
                 << " prog_type=" << prog_type
                 << " blob_bytes=" << linked.blob.size()
                 << " reloc_records=" << relocs.size()
                 << " reloc_bytes=" << linked.relocs.size()
                 << " chunks=" << chunks.size()
-                << " proof_bound=" << (!handles.empty() ? 1 : 0)
                 << " callee_saved_mask=" << linked.callee_saved_mask
                 << " tail_call_reachable=" << (tail_call_reachable ? 1 : 0)
                 << " retained_map_fds=" << map_ref_fds.size()
@@ -4386,7 +3328,6 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
                     }
                 }
             }
-            msg << "\n" << native_blob_diagnostics(linked.blob, chunks);
             if (!chunks.empty()) {
                 msg << "\nchunk_bytes=";
                 for (size_t i = 0; i < chunks.size(); i++) {
@@ -4406,11 +3347,10 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
                         << std::hex << relocs[i].target << std::dec;
                 }
             }
-            msg << "\nstub_load_error_summary="
-                << load_error.substr(0, first_line_end);
             fail(msg.str());
         }
         try {
+            verify_loaded_prog_uses_maps(out.prog_fd, linked.relocated_map_ids);
         } catch (...) {
             close(out.prog_fd);
             out.prog_fd = -1;
@@ -4445,527 +3385,6 @@ std::vector<int> reopen_relocated_map_fds(const std::vector<uint32_t> &map_ids)
     return fds;
 }
 
-using SimulatorObject = std::unique_ptr<bpf_object, decltype(&bpf_object__close)>;
-using MapBtf = std::unique_ptr<btf, decltype(&btf__free)>;
-
-MapBtf open_map_btf(uint32_t id, const std::string &name)
-{
-    if (!id) return {nullptr, btf__free};
-    btf *raw = btf__load_from_kernel_by_id(id);
-    const long error = libbpf_get_error(raw);
-    if (error || !raw)
-        fail("load proof map BTF " + name + ": " + libbpf_error_string(error ? error : -errno));
-    return {raw, btf__free};
-}
-
-void validate_data_map_layout(const btf *proof_btf, uint32_t proof_id,
-    uint32_t source_btf_id, uint32_t source_id, const std::string &name, bool internal)
-{
-    const auto source_btf = open_map_btf(source_btf_id, name);
-    const auto *proof_type = proof_btf ? btf__type_by_id(proof_btf, proof_id) : nullptr;
-    const auto *source_type = source_btf ? btf__type_by_id(source_btf.get(), source_id) : nullptr;
-    if (internal || (proof_type && btf_kind(proof_type) == BTF_KIND_DATASEC) ||
-        (source_type && btf_kind(source_type) == BTF_KIND_DATASEC)) {
-        if (!same_data_layout(proof_btf, proof_id, source_btf.get(), source_id))
-            fail("simulator internal map BTF layout differs from original program: " + name);
-    }
-}
-
-const MapMeta *find_original_data_map(const btf *proof_btf, uint32_t proof_id,
-    const CompanionLoad &companion, const std::string &name)
-{
-    const auto *type = proof_btf ? btf__type_by_id(proof_btf, proof_id) : nullptr;
-    if (!type || btf_kind(type) != BTF_KIND_DATASEC) return nullptr;
-    const char *section = btf__name_by_offset(proof_btf, type->name_off);
-    if (!section || !*section) fail("simulator internal map has no BTF section: " + name);
-    const MapMeta *selected = nullptr;
-    bool section_found = false;
-    for (const MapMeta &source : companion.maps) {
-        const auto source_btf = open_map_btf(source.btf_id, source.name);
-        const auto *source_type = source_btf ?
-            btf__type_by_id(source_btf.get(), source.btf_value_type_id) : nullptr;
-        if (!source_type || btf_kind(source_type) != BTF_KIND_DATASEC) continue;
-        const char *source_section = btf__name_by_offset(source_btf.get(), source_type->name_off);
-        if (!source_section || std::string_view(section) != source_section) continue;
-        section_found = true;
-        if (!same_data_layout(proof_btf, proof_id, source_btf.get(), source.btf_value_type_id)) continue;
-        if (selected && selected->kernel_id != source.kernel_id)
-            fail("simulator internal map has ambiguous source identities: " + name);
-        selected = &source;
-    }
-    if (section_found && !selected)
-        fail("simulator internal map BTF layout differs from original program: " + name);
-    return selected;
-}
-
-/* Raw proof callers may have loaded the compiler object separately. Its maps
- * are not the application's maps, even when names and shapes are identical.
- * Relink those FD operands to the original program before sealing the proof.
- */
-std::optional<std::string> read_proof_metadata(const std::filesystem::path &path, const char *metadata_section)
-{
-    if (path.empty()) return {};
-    auto bytes = read_binary_file(path);
-    if (elf_version(EV_CURRENT) == EV_NONE) fail("libelf initialization failed");
-    std::unique_ptr<Elf, decltype(&elf_end)> elf(
-        elf_memory(reinterpret_cast<char *>(bytes.data()), bytes.size()), elf_end);
-    if (!elf) fail("read proof metadata ELF " + path.string() + ": " + elf_errmsg(-1));
-    size_t strings;
-    if (elf_getshdrstrndx(elf.get(), &strings)) fail("read proof metadata section names");
-    std::optional<std::string> metadata;
-    Elf_Scn *section = nullptr;
-    while ((section = elf_nextscn(elf.get(), section))) {
-        GElf_Shdr header{};
-        if (!gelf_getshdr(section, &header)) fail("read proof metadata section header");
-        const char *name = elf_strptr(elf.get(), strings, header.sh_name);
-        if (!name) fail("read proof metadata section name");
-        if (std::strcmp(name, metadata_section)) continue;
-        if (metadata || header.sh_type != SHT_PROGBITS) fail("duplicate/invalid proof readonly metadata section");
-        Elf_Data *data = elf_getdata(section, nullptr);
-        if (!data || data->d_off || data->d_size != header.sh_size ||
-            elf_getdata(section, data)) fail("invalid proof readonly metadata extent");
-        metadata.emplace(static_cast<const char *>(data->d_buf), data->d_size);
-    }
-    return metadata;
-}
-
-void bind_raw_proof_maps(std::vector<bpf_insn> &proof, const CompanionLoad &companion,
-    std::vector<std::unique_ptr<ScopedFd>> &pins, LinkedBlob &linked)
-{
-    std::unordered_map<uint32_t, int> replacements;
-    for (size_t index = 0; index < proof.size(); index++) {
-        bpf_insn &insn = proof[index];
-        if (insn.code != (BPF_LD | BPF_DW | BPF_IMM)) continue;
-        if (index + 1 >= proof.size()) fail("raw proof has a truncated wide immediate");
-        if (insn.src_reg == BPF_PSEUDO_MAP_FD || insn.src_reg == BPF_PSEUDO_MAP_VALUE) {
-            const bpf_map_info actual = load_map_info(insn.imm);
-            const std::string name(actual.name, strnlen(actual.name, sizeof(actual.name)));
-            const MapMeta *selected = nullptr;
-            // The operand's own original map identity comes first; the kernel
-            // name (15 bytes) selects only when that identity is absent.
-            for (const MapMeta &source : companion.maps)
-                if (source.kernel_id == actual.id) { selected = &source; break; }
-            for (const MapMeta &source : companion.maps) {
-                if (selected && selected->kernel_id == actual.id) break;
-                if (source.name != name) continue;
-                if (selected && selected->kernel_id != source.kernel_id)
-                    fail("raw proof map name has ambiguous original identities: " + name);
-                selected = &source;
-            }
-            const auto proof_btf = open_map_btf(actual.btf_id, name);
-            if (const auto *data = find_original_data_map(proof_btf.get(),
-                    actual.btf_value_type_id, companion, name)) {
-                if (selected && selected->kernel_id != data->kernel_id)
-                    fail("raw proof map has conflicting original identities: " + name);
-                selected = data;
-            }
-            if (!selected) {
-                if (insn.src_reg != BPF_PSEUDO_MAP_VALUE)
-                    fail("raw proof map has no original-program identity: " + name);
-                const auto existing = replacements.find(actual.id);
-                if (existing != replacements.end()) {
-                    insn.imm = existing->second;
-                } else {
-                    auto fd = std::make_unique<ScopedFd>(bpf_map_get_fd_by_id(actual.id));
-                    if (fd->get() < 0) fail("pin readonly proof map: " + std::string(std::strerror(errno)));
-                    insn.imm = fd->get();
-                    replacements.emplace(actual.id, fd->get());
-                    pins.push_back(std::move(fd));
-                }
-                index++;
-                continue;
-            }
-            if (actual.id != selected->kernel_id) {
-                const auto existing = replacements.find(selected->kernel_id);
-                if (existing != replacements.end()) {
-                    insn.imm = existing->second;
-                    index++;
-                    continue;
-                }
-                auto fd = std::make_unique<ScopedFd>(bpf_map_get_fd_by_id(selected->kernel_id));
-                if (fd->get() < 0) fail("open original proof map " + name + ": " + std::strerror(errno));
-                insn.imm = fd->get();
-                replacements.emplace(selected->kernel_id, fd->get());
-                pins.push_back(std::move(fd));
-            }
-        }
-        index++;
-    }
-}
-
-SimulatorObject open_simulator_proof(
-    const std::filesystem::path &path, const std::string &entry,
-    const bpf_prog_info &original, const CompanionLoad &companion,
-    std::vector<bpf_insn> &proof)
-{
-    bpf_object *raw = bpf_object__open_file(path.c_str(), nullptr);
-    const long open_error = libbpf_get_error(raw);
-    if (open_error || !raw) {
-        fail("open simulator proof " + path.string() + ": " +
-             libbpf_error_string(open_error ? open_error : -errno));
-    }
-    SimulatorObject object(raw, bpf_object__close);
-    bpf_program *selected = bpf_object__find_program_by_name(raw, entry.c_str());
-    if (!selected) {
-        fail("simulator proof entry not found: " + entry + " in " + path.string());
-    }
-    if (static_cast<uint32_t>(bpf_program__type(selected)) != original.type) {
-        fail("simulator proof program type does not match original program: " + entry);
-    }
-    bpf_program *program;
-    bpf_object__for_each_program(program, raw) {
-        const int err = bpf_program__set_autoload(program, program == selected);
-        if (err) {
-            fail("set simulator proof entry: " + libbpf_error_string(err));
-        }
-    }
-    bpf_map *map;
-    bpf_object__for_each_map(map, raw) {
-        const std::string name = bpf_map__name(map);
-        std::optional<uint32_t> identity;
-        if (const auto exact = companion.map_addr_ids.find(name); exact != companion.map_addr_ids.end()) {
-            identity = exact->second;
-        }
-        if (bpf_map__is_internal(map)) {
-            if (const auto *source = find_original_data_map(bpf_object__btf(raw),
-                    bpf_map__btf_value_type_id(map), companion, name)) {
-                if (identity && *identity != source->kernel_id)
-                    fail("simulator internal map has conflicting source identities: " + name);
-                identity = source->kernel_id;
-            }
-        }
-        if (!identity) {
-            if (bpf_map__is_internal(map) && (bpf_map__map_flags(map) & BPF_F_RDONLY_PROG))
-                continue; // Native byte/address and frozen-map binding follows native linking.
-            /* Objects can declare maps unused by the selected entry. Never
-             * create a replacement app map; a referenced missing map makes
-             * prepare fail instead of supplying invented specialization data.
-             */
-            const int err = bpf_map__set_autocreate(map, false);
-            if (err) {
-                fail("disable unmatched simulator map " + name + ": " + libbpf_error_string(err));
-            }
-            continue;
-        }
-        ScopedFd fd(bpf_map_get_fd_by_id(*identity));
-        if (fd.get() < 0) {
-            fail("open simulator proof map " + name + ": " + std::strerror(errno));
-        }
-        const auto shape = load_map_info(fd.get());
-        /* Zero is an application-configured declaration, not a zero-capacity
-         * replacement map. Adopt the exact original FD's runtime capacity.
-         */
-        if (!bpf_map__is_internal(map) && !bpf_map__max_entries(map)) {
-            const int err = bpf_map__set_max_entries(map, shape.max_entries);
-            if (err) fail("configure simulator map capacity " + name + ": " + libbpf_error_string(err));
-        }
-        if (!bpf_map__is_internal(map) && !bpf_map__value_size(map)) {
-            const int err = bpf_map__set_value_size(map, shape.value_size);
-            if (err) fail("configure simulator map value size " + name + ": " + libbpf_error_string(err));
-        }
-        const int err = bpf_map__reuse_fd(map, fd.get());
-        if (err) {
-            fail("reuse simulator proof map " + name + ": " + libbpf_error_string(err));
-        }
-    }
-    const auto *instructions = bpf_program__insns(selected);
-    const auto count = bpf_program__insn_cnt(selected);
-    if (!instructions || !count) fail("simulator proof is empty: " + entry);
-    proof.assign(instructions, instructions + count);
-    return object;
-}
-
-// libbpf normalizes .ksyms extern linkage while opening the object. Read
-// the declaration from the same original ELF snapshot as its relocations.
-std::unique_ptr<btf, decltype(&btf__free)> source_proof_btf(Elf *elf)
-{
-    size_t names = 0;
-    if (elf_getshdrstrndx(elf, &names)) fail("read source proof BTF section names");
-    std::unique_ptr<btf, decltype(&btf__free)> result(nullptr, btf__free);
-    Elf_Scn *section = nullptr;
-    while ((section = elf_nextscn(elf, section))) {
-        GElf_Shdr header{};
-        if (!gelf_getshdr(section, &header)) fail("read source proof BTF section");
-        const char *name = elf_strptr(elf, names, header.sh_name);
-        if (!name || std::strcmp(name, ".BTF")) continue;
-        Elf_Data *data = elf_getdata(section, nullptr);
-        if (result || header.sh_type != SHT_PROGBITS || !data || data->d_off ||
-            !data->d_buf || data->d_size != header.sh_size || data->d_size > UINT32_MAX)
-            fail("invalid source proof BTF extent");
-        btf *raw = btf__new(data->d_buf, static_cast<uint32_t>(data->d_size));
-        if (libbpf_get_error(raw) || !raw) fail("parse original source proof BTF");
-        result.reset(raw);
-    }
-    if (!result) fail("source proof BTF section absent");
-    return result;
-}
-
-// Use the pinned libbpf prototype matcher for proof-side vmlinux kfuncs.
-// Module calls retain their FD-array binding through the ordinary object path.
-void relocate_vmlinux_proof_call(const btf *local, const btf *kernel,
-    const char *name, const GElf_Sym &symbol, int64_t addend, bpf_insn &insn)
-{
-    if (!name || symbol.st_shndx != SHN_UNDEF ||
-        GELF_ST_BIND(symbol.st_info) != STB_GLOBAL || addend ||
-        insn.code != (BPF_JMP | BPF_CALL) || insn.dst_reg ||
-        insn.src_reg != BPF_PSEUDO_CALL || insn.off || insn.imm != -1)
-        fail("invalid source proof kfunc call relocation");
-    const int local_id = local ? btf__find_by_name_kind(local, name, BTF_KIND_FUNC) : -1;
-    const int kernel_id = kernel ? btf__find_by_name_kind(kernel, name, BTF_KIND_FUNC) : -1;
-    if (local_id <= 0 || kernel_id <= 0)
-        fail("source proof kfunc requires matching vmlinux BTF: " + std::string(name));
-    const auto *declaration = btf__type_by_id(local, local_id);
-    const auto *target = btf__type_by_id(kernel, kernel_id);
-    if (btf_vlen(declaration) != BTF_FUNC_EXTERN ||
-        bpf_core_types_are_compat(local, declaration->type, kernel, target->type) <= 0)
-        fail("source proof kfunc prototype differs from vmlinux: " + std::string(name));
-    insn.src_reg = BPF_PSEUDO_KFUNC_CALL;
-    insn.imm = kernel_id;
-}
-
-void relocate_source_map_proof(bpf_object *object, const std::filesystem::path &path, const std::string &entry,
-    const std::vector<ProofSourceMapBinding> &bindings,
-    const std::vector<NativeSourceMapBinding> &manifest_bindings,
-    const std::vector<bpf_insn> &source, const CompanionLoad &companion,
-    std::vector<bpf_insn> &proof, std::vector<std::unique_ptr<ScopedFd>> &pins,
-    const std::vector<native_loader::TrustedMapBinding> *trusted = nullptr)
-{
-    for (const auto &binding : bindings)
-        if (std::find(manifest_bindings.begin(), manifest_bindings.end(), binding.source) == manifest_bindings.end())
-            fail("proof source map metadata differs from manifest source binding: " + binding.proof_symbol);
-    auto bytes = read_binary_file(path);
-    std::unique_ptr<Elf, decltype(&elf_end)> elf(
-        elf_memory(reinterpret_cast<char *>(bytes.data()), bytes.size()), elf_end);
-    GElf_Ehdr header{};
-    if (!elf || !gelf_getehdr(elf.get(), &header) || header.e_machine != EM_BPF ||
-        header.e_type != ET_REL || header.e_ident[EI_DATA] != ELFDATA2LSB)
-        fail("proof source maps require a little-endian relocatable BPF ELF");
-    std::optional<GElf_Sym> selected;
-    Elf_Scn *section = nullptr;
-    while ((section = elf_nextscn(elf.get(), section))) {
-        GElf_Shdr table{};
-        if (!gelf_getshdr(section, &table)) fail("read source proof symbol table");
-        if (table.sh_type != SHT_SYMTAB) continue;
-        Elf_Data *data = elf_getdata(section, nullptr);
-        if (!data || !table.sh_entsize) fail("empty source proof symbol table");
-        for (size_t i = 0; i < table.sh_size / table.sh_entsize; i++) {
-            GElf_Sym symbol{};
-            if (!gelf_getsym(data, i, &symbol)) fail("read source proof symbol");
-            const char *name = elf_strptr(elf.get(), table.sh_link, symbol.st_name);
-            if (!name) fail("read source proof symbol name");
-            if (entry != name) continue;
-            if (selected || GELF_ST_TYPE(symbol.st_info) != STT_FUNC || !symbol.st_size ||
-                symbol.st_shndx == SHN_UNDEF || symbol.st_shndx >= SHN_LORESERVE)
-                fail("ambiguous/invalid source proof entry: " + entry);
-            selected = symbol;
-        }
-    }
-    if (!selected) fail("source proof entry absent: " + entry);
-    GElf_Shdr code{};
-    Elf_Scn *code_section = elf_getscn(elf.get(), selected->st_shndx);
-    if (!code_section || !gelf_getshdr(code_section, &code) || !(code.sh_flags & SHF_EXECINSTR) ||
-        selected->st_value < code.sh_addr || selected->st_size != proof.size() * sizeof(bpf_insn))
-        fail("source proof entry extent differs from selected BPF program");
-    const uint64_t begin = selected->st_value - code.sh_addr;
-    Elf_Data *code_data = elf_getdata(code_section, nullptr);
-    if (!code_data || code_data->d_off || begin > code_data->d_size ||
-        selected->st_size > code_data->d_size - begin ||
-        std::memcmp(proof.data(), static_cast<const char *>(code_data->d_buf) + begin, selected->st_size))
-        fail("source proof entry bytes differ from selected BPF program");
-    std::set<uint64_t> patched;
-    std::unique_ptr<btf, decltype(&btf__free)> kernel_btf(nullptr, btf__free);
-    std::unique_ptr<btf, decltype(&btf__free)> declaration_btf(nullptr, btf__free);
-    std::unordered_map<uint32_t, int> map_fds, readonly_fds;
-    section = nullptr;
-    while ((section = elf_nextscn(elf.get(), section))) {
-        GElf_Shdr relocations{};
-        if (!gelf_getshdr(section, &relocations)) fail("read source proof relocations");
-        if ((relocations.sh_type != SHT_REL && relocations.sh_type != SHT_RELA) ||
-            relocations.sh_info != selected->st_shndx) continue;
-        Elf_Data *data = elf_getdata(section, nullptr);
-        Elf_Scn *symbols = elf_getscn(elf.get(), relocations.sh_link);
-        GElf_Shdr symbol_table{};
-        if (!data || !relocations.sh_entsize || !symbols || !gelf_getshdr(symbols, &symbol_table))
-            fail("invalid source proof relocation table");
-        Elf_Data *symbol_data = elf_getdata(symbols, nullptr);
-        if (!symbol_data) fail("source proof relocation symbols absent");
-        for (size_t i = 0; i < relocations.sh_size / relocations.sh_entsize; i++) {
-            GElf_Rela relocation{};
-            if (relocations.sh_type == SHT_RELA) {
-                if (!gelf_getrela(data, i, &relocation)) fail("read source proof RELA");
-            } else {
-                GElf_Rel rel{};
-                if (!gelf_getrel(data, i, &rel)) fail("read source proof REL");
-                relocation.r_offset = rel.r_offset; relocation.r_info = rel.r_info;
-            }
-            if (relocation.r_offset < begin || relocation.r_offset - begin >= selected->st_size) continue;
-            const uint64_t offset = relocation.r_offset - begin;
-            if (offset % sizeof(bpf_insn) || !patched.insert(offset).second)
-                fail("invalid source proof relocation site");
-            GElf_Sym symbol{};
-            if (!gelf_getsym(symbol_data, GELF_R_SYM(relocation.r_info), &symbol)) fail("read source proof relocation symbol");
-            const char *name = elf_strptr(elf.get(), symbol_table.sh_link, symbol.st_name);
-            if (GELF_R_TYPE(relocation.r_info) == R_BPF_64_32) {
-                if (!kernel_btf) {
-                    btf *loaded = btf__load_vmlinux_btf();
-                    const long err = libbpf_get_error(loaded);
-                    if (err || !loaded) fail("load proof kfunc vmlinux BTF");
-                    kernel_btf.reset(loaded);
-                }
-                if (!declaration_btf) declaration_btf = source_proof_btf(elf.get());
-                relocate_vmlinux_proof_call(declaration_btf.get(), kernel_btf.get(), name,
-                    symbol, relocation.r_addend, proof[offset / sizeof(bpf_insn)]);
-                continue;
-            }
-            if (GELF_R_TYPE(relocation.r_info) != R_BPF_64_64 ||
-                offset / sizeof(bpf_insn) + 1 >= proof.size())
-                fail("invalid source proof map relocation site/type");
-            if (symbol.st_shndx != SHN_UNDEF) {
-                GElf_Shdr data_section{};
-                Elf_Scn *data_scn = elf_getscn(elf.get(), symbol.st_shndx);
-                if (!data_scn || !gelf_getshdr(data_scn, &data_section) ||
-                    data_section.sh_type != SHT_PROGBITS ||
-                    (data_section.sh_flags & (SHF_ALLOC | SHF_WRITE | SHF_EXECINSTR)) != SHF_ALLOC)
-                    fail("defined source proof relocation is not readonly data");
-                size_t names = 0;
-                if (elf_getshdrstrndx(elf.get(), &names)) fail("read proof section names");
-                const char *data_name = elf_strptr(elf.get(), names, data_section.sh_name);
-                bpf_map *data_map = nullptr, *candidate;
-                btf *types = bpf_object__btf(object);
-                if (!types) fail("readonly source proof lacks BTF");
-                bpf_object__for_each_map(candidate, object) {
-                    const auto *type = btf__type_by_id(types, bpf_map__btf_value_type_id(candidate));
-                    if (!type || btf_kind(type) != BTF_KIND_DATASEC) continue;
-                    const char *map_section = btf__name_by_offset(types, type->name_off);
-                    if (!data_name || !map_section || std::strcmp(data_name, map_section)) continue;
-                    if (data_map) fail("ambiguous readonly proof section");
-                    data_map = candidate;
-                }
-                if (!data_map || !bpf_map__is_internal(data_map) ||
-                    !(bpf_map__map_flags(data_map) & BPF_F_RDONLY_PROG) ||
-                    bpf_map__type(data_map) != BPF_MAP_TYPE_ARRAY ||
-                    bpf_map__key_size(data_map) != sizeof(uint32_t) || bpf_map__max_entries(data_map) != 1)
-                    fail("defined proof relocation lacks a readonly single-value map");
-                if (!readonly_fds.contains(symbol.st_shndx)) {
-                    size_t length = 0;
-                    const void *initial = bpf_map__initial_value(data_map, &length);
-                    if (!initial || length != data_section.sh_size || length != bpf_map__value_size(data_map))
-                        fail("readonly proof map extent differs from ELF section");
-                    if (btf__fd(types) < 0) {
-                        const int err = btf__load_into_kernel(types);
-                        if (err) fail("load readonly proof BTF: " + libbpf_error_string(err));
-                    }
-                    bpf_map_create_opts opts{}; opts.sz = sizeof(opts);
-                    opts.map_flags = bpf_map__map_flags(data_map); opts.btf_fd = btf__fd(types);
-                    opts.btf_key_type_id = bpf_map__btf_key_type_id(data_map);
-                    opts.btf_value_type_id = bpf_map__btf_value_type_id(data_map);
-                    auto fd = std::make_unique<ScopedFd>(bpf_map_create(BPF_MAP_TYPE_ARRAY,
-                        bpf_map__name(data_map), sizeof(uint32_t), length, 1, &opts));
-                    if (fd->get() < 0) fail("create readonly source proof map: " + std::string(std::strerror(errno)));
-                    const uint32_t key = 0;
-                    if (bpf_map_update_elem(fd->get(), &key, initial, BPF_ANY) || bpf_map_freeze(fd->get()))
-                        fail("initialize readonly source proof map: " + std::string(std::strerror(errno)));
-                    readonly_fds.emplace(symbol.st_shndx, fd->get()); pins.push_back(std::move(fd));
-                }
-                bpf_insn &low = proof[offset / sizeof(bpf_insn)], &high = proof[offset / sizeof(bpf_insn) + 1];
-                if (low.code != (BPF_LD | BPF_DW | BPF_IMM) || low.src_reg || low.off ||
-                    high.code || high.dst_reg || high.src_reg || high.off || relocation.r_addend < 0 ||
-                    symbol.st_value < data_section.sh_addr)
-                    fail("invalid readonly source proof load");
-                const uint64_t immediate = static_cast<uint32_t>(low.imm) |
-                    (static_cast<uint64_t>(static_cast<uint32_t>(high.imm)) << 32);
-                const uint64_t symbol_offset = symbol.st_value - data_section.sh_addr;
-                if (symbol_offset >= data_section.sh_size ||
-                    static_cast<uint64_t>(relocation.r_addend) >= data_section.sh_size - symbol_offset ||
-                    immediate >= data_section.sh_size - symbol_offset - relocation.r_addend)
-                    fail("readonly source proof load exceeds ELF object");
-                low.src_reg = BPF_PSEUDO_MAP_VALUE;
-                low.imm = readonly_fds.at(symbol.st_shndx);
-                high.imm = static_cast<int32_t>(symbol_offset + relocation.r_addend + immediate);
-                continue;
-            }
-            if (!name || GELF_ST_BIND(symbol.st_info) != STB_GLOBAL)
-                fail("source map relocation is not a strong explicit extern");
-            uint32_t id;
-            bool value;
-            std::optional<uint32_t> base;
-            std::string native_symbol;
-            if (trusted) {
-                const auto binding = std::find_if(trusted->begin(), trusted->end(),
-                    [&](const auto &item) { return item.native_symbol == name; });
-                if (binding == trusted->end()) fail("unbound trusted proof extern: " + std::string(name));
-                id = binding->map_id;
-                base = binding->value_offset;
-                value = base.has_value();
-                native_symbol = binding->native_symbol;
-            } else {
-                const auto binding = std::find_if(bindings.begin(), bindings.end(),
-                    [&](const auto &item) { return item.proof_symbol == name; });
-                if (binding == bindings.end()) fail("unbound proof extern: " + std::string(name));
-                const auto reference = source_map_reference(source, binding->source.source_insn);
-                const auto identity = companion.map_addr_ids.find(binding->source.native_symbol);
-                if (identity == companion.map_addr_ids.end()) fail("source proof map lacks bound original identity");
-                id = identity->second;
-                value = reference.value;
-            }
-            const auto map = std::find_if(companion.maps.begin(), companion.maps.end(),
-                [&](const MapMeta &meta) { return meta.kernel_id == id; });
-            if (map == companion.maps.end()) fail("source proof map identity has no original layout");
-            bpf_insn &low = proof[offset / sizeof(bpf_insn)], &high = proof[offset / sizeof(bpf_insn) + 1];
-            if (low.code != (BPF_LD | BPF_DW | BPF_IMM) || low.src_reg || low.off ||
-                high.code || high.dst_reg || high.src_reg || high.off)
-                fail("source proof map relocation does not target a plain LDDW");
-            const uint64_t immediate = static_cast<uint32_t>(low.imm) |
-                (static_cast<uint64_t>(static_cast<uint32_t>(high.imm)) << 32);
-            uint64_t addend;
-            if (trusted) {
-                addend = trusted_map_relocation_offset(base, immediate, relocation.r_addend,
-                    relocations.sh_type == SHT_RELA, map->value_size);
-            } else {
-                if (relocation.r_addend < 0 || static_cast<uint64_t>(relocation.r_addend) > UINT32_MAX ||
-                    immediate > UINT32_MAX - static_cast<uint64_t>(relocation.r_addend))
-                    fail("source proof map addend exceeds wire format");
-                addend = immediate + relocation.r_addend;
-                if ((!value && addend) || (value && addend >= map->value_size))
-                    fail("source proof map addend exceeds original object/value");
-            }
-            if (!map_fds.contains(id)) {
-                auto fd = std::make_unique<ScopedFd>(bpf_map_get_fd_by_id(id));
-                if (fd->get() < 0) fail("pin original source proof map: " + std::string(std::strerror(errno)));
-                map_fds.emplace(id, fd->get()); pins.push_back(std::move(fd));
-            }
-            low.src_reg = value ? BPF_PSEUDO_MAP_VALUE : BPF_PSEUDO_MAP_FD;
-            low.imm = map_fds.at(id);
-            high.imm = static_cast<int32_t>(addend);
-        }
-    }
-}
-
-void finish_simulator_proof(bpf_object *raw, const std::string &entry,
-    std::vector<bpf_insn> &proof, LinkedBlob &linked)
-{
-    const int err = bpf_object__prepare(raw);
-    if (err) {
-        fail("relocate simulator proof " + entry + ": " + libbpf_error_string(err));
-    }
-    bpf_program *selected = bpf_object__find_program_by_name(raw, entry.c_str());
-    const auto *instructions = bpf_program__insns(selected);
-    const size_t count = bpf_program__insn_cnt(selected);
-    if (!instructions || !count) {
-        fail("relocated simulator proof is empty: " + entry);
-    }
-    proof.assign(instructions, instructions + count);
-    for (size_t index = 0; index < proof.size(); index++) {
-        const bpf_insn &insn = proof[index];
-        // libbpf poisons missing map/kfunc relocations rather than failing prepare.
-        if (insn.code == (BPF_JMP | BPF_CALL) && insn.imm >= 2001000000)
-            fail("simulator proof contains an unresolved map/kfunc relocation: " + entry);
-        if (insn.code != (BPF_LD | BPF_DW | BPF_IMM)) continue;
-        if (index + 1 >= proof.size()) fail("truncated simulator wide immediate: " + entry);
-        index++;
-    }
-}
-
 void close_fd_vector(std::vector<int> &fds)
 {
     for (int fd : fds) {
@@ -4977,153 +3396,21 @@ void close_fd_vector(std::vector<int> &fds)
 }
 
 
-native_loader::LoadedProgram submit_trusted_native(
-    const native_loader::FdLoadOptions &options, const bpf_prog_info &info,
-    const std::filesystem::path &native_path, const std::string &entry,
-    const CompanionLoad &companion)
-{
-    auto native = read_binary_file(native_path);
-    if (native.size() > UINT32_MAX || entry.empty() || entry.size() > UINT32_MAX)
-        fail("trusted native submission extent exceeds request ABI");
-    std::ostringstream metadata;
-    metadata << "{\"version\":1,\"load_context\":{\"prog_type\":" << info.type
-        << ",\"expected_attach_type\":" << options.expected_attach_type
-        << ",\"prog_flags\":" << options.prog_flags
-        << ",\"attach_btf_id\":" << (options.attach_btf_id ? options.attach_btf_id : info.attach_btf_id)
-        << ",\"attach_btf_obj_id\":" << (options.attach_btf_obj_id ? options.attach_btf_obj_id : info.attach_btf_obj_id)
-        << ",\"attach_prog_id\":" << options.attach_prog_id
-        << ",\"prog_ifindex\":" << info.ifindex
-        << ",\"gpl_compatible\":" << info.gpl_compatible
-        << ",\"source_btf_id\":" << options.source_btf_id
-        << ",\"source_func_type_id\":" << (options.native_entry_function ? options.native_entry_function->type_id : 0)
-        << ",\"token_present\":0},\"maps\":[";
-    bool first = true;
-    std::vector<std::unique_ptr<ScopedFd>> native_resource_fds;
-    std::vector<int32_t> native_resource_numbers;
-    std::unordered_set<uint32_t> native_resource_ids;
-    // Reuse native-link's instruction and data-reference closure for this entry.
-    ScopedFd resource_output(static_cast<int>(syscall(SYS_memfd_create, "native-resources", 0)));
-    if (resource_output.get() < 0)
-        fail("create native resource query output: " + std::string(std::strerror(errno)));
-    const std::string resource_path = "/proc/self/fd/" + std::to_string(resource_output.get());
-    const auto linker = native_link_binary(options.native_link_path);
-    if (run_subprocess({linker.string(), "--input", native_path.string(),
-                        "--symbol", entry, "--mode", "resources", "--output", resource_path}, {}) != 0)
-        fail("native entry resource discovery failed: " + entry);
-    const auto resources = read_text_file_required(resource_path);
-    auto symbols = json_object_string_list(resources, "symbols");
-    std::sort(symbols.begin(), symbols.end());
-    symbols.erase(std::unique(symbols.begin(), symbols.end()), symbols.end());
-    for (const auto &name : symbols) {
-        if (!companion.native_data_symbols.contains(name)) continue;
-        const auto identity = companion.map_addr_ids.find(name);
-        if (identity == companion.map_addr_ids.end()) continue;
-        const auto selected = std::find_if(companion.maps.begin(), companion.maps.end(),
-            [&](const auto &map) { return map.kernel_id == identity->second; });
-        if (selected == companion.maps.end()) fail("native symbol lacks its source map object: " + name);
-        const auto &map = *selected;
-        const auto address = companion.map_addrs.find(name);
-        if (address == companion.map_addrs.end()) fail("native symbol has no bound address: " + name);
-        // MapMeta.fd may be a borrowed descriptor already closed by parsing.
-        auto retained = std::make_unique<ScopedFd>(bpf_map_get_fd_by_id(map.kernel_id));
-        if (retained->get() < 0)
-            fail("reopen native submission map identity: " + std::string(std::strerror(errno)));
-        const auto actual = load_map_info(retained->get());
-        if (!companion.original_map_ids.contains(actual.id) && native_resource_ids.insert(actual.id).second) {
-            native_resource_numbers.push_back(retained->get());
-            native_resource_fds.push_back(std::move(retained));
-        }
-        if (!first) metadata << ',';
-        first = false;
-        metadata << "{\"name\":"; write_json_string(metadata, name);
-        metadata << ",\"map_id\":" << actual.id << ",\"map_type\":" << actual.type
-            << ",\"key_size\":" << actual.key_size << ",\"value_size\":" << actual.value_size
-            << ",\"max_entries\":" << actual.max_entries << ",\"map_flags\":" << actual.map_flags
-            << ",\"value_offset\":";
-        if (address->second == map.kernel_addr) metadata << "null";
-        else {
-            if (!map.value_addr || address->second < map.value_addr ||
-                address->second - map.value_addr >= map.value_size)
-                fail("trusted native direct map value exceeds its object: " + map.name);
-            metadata << address->second - map.value_addr;
-        }
-        metadata << '}';
-    }
-    metadata << "]}";
-    const std::string serialized = metadata.str();
-    if (serialized.size() > UINT32_MAX) fail("trusted native metadata exceeds request ABI");
-    const std::string endpoint = std::string(kNativeLabTarget.debugfs_dir) + "/native_submit";
-    ScopedFd submit(open(endpoint.c_str(), O_RDWR | O_CLOEXEC));
-    if (submit.get() < 0) fail("open kernel native submission: " + std::string(std::strerror(errno)));
-    native_lab_trusted_request request{};
-    request.version = NATIVE_LAB_TRUSTED_VERSION;
-#if defined(__aarch64__)
-    request.arch = NATIVE_LAB_ARCH_ARM64;
-#else
-    request.arch = NATIVE_LAB_ARCH_X86;
-#endif
-    request.source_prog_id = info.id;
-    request.native_size = static_cast<uint32_t>(native.size());
-    request.entry_size = static_cast<uint32_t>(entry.size());
-    request.metadata_size = static_cast<uint32_t>(serialized.size());
-    request.native_user = ptr_to_u64(native.data());
-    request.entry_user = ptr_to_u64(entry.data());
-    request.metadata_user = ptr_to_u64(serialized.data());
-    if (native_resource_numbers.empty()) {
-        if (ioctl(submit.get(), NATIVE_LAB_TRUSTED_SUBMIT, &request))
-            fail("kernel native submission refused: " + std::string(std::strerror(errno)));
-    } else {
-        if (native_resource_numbers.size() > UINT32_MAX)
-            fail("native resource descriptor count exceeds request ABI");
-        native_lab_trusted_submission submission{};
-        submission.request = request;
-        submission.map_count = static_cast<uint32_t>(native_resource_numbers.size());
-        submission.map_fds_user = ptr_to_u64(native_resource_numbers.data());
-        if (ioctl(submit.get(), NATIVE_LAB_TRUSTED_SUBMIT_RESOURCES, &submission))
-            fail("kernel native resource submission refused: " + std::string(std::strerror(errno)));
-        request = submission.request;
-    }
-    native_lab_trusted_result result{};
-    int status;
-    do { status = ioctl(submit.get(), NATIVE_LAB_TRUSTED_WAIT, &result); }
-    while (status < 0 && errno == EINTR);
-    if (status < 0) fail("wait for trusted specializer: " + std::string(std::strerror(errno)));
-    if (result.request_id != request.request_id)
-        fail("kernel trusted specializer returned an invalid completion");
-    if (result.status)
-        fail("trusted specializer refused native program: " + std::string(std::strerror(-result.status)));
-    native_loader::LoadedProgram out{};
-    out.prog_fd = bpf_prog_get_fd_by_id(result.prog_id);
-    if (out.prog_fd < 0) fail("open kernel-owned trusted native result: " + std::string(std::strerror(errno)));
-    out.replaced = true;
-    out.original_prog_id = info.id;
-    out.native_prog_id = result.prog_id;
-    out.selected_native_object = native_path.string();
-    out.selected_symbol = entry;
-    out.native_link_summary = "trusted_request=" + std::to_string(request.request_id);
-    return out;
-}
-
-
 } // namespace
 
 namespace native_loader {
 
 LoadedProgram load_from_fd(const FdLoadOptions &options)
 {
-    const auto total_start = std::chrono::steady_clock::now();
-    const bool trusted_worker = options.trusted_service_fd >= 0;
-    if (trusted_worker) {
-        native_lab_trusted_activate activate{options.trusted_request_id};
-        if (ioctl(options.trusted_service_fd, NATIVE_LAB_TRUSTED_ACTIVATE, &activate))
-            fail("activate service request: " + std::string(std::strerror(errno)));
+    if (options.original_prog_fd < 0) {
+        fail("native_loader: missing original_prog_fd");
     }
     if (options.native_object_path.empty() && options.manifest_path.empty()) {
         fail("native_loader: missing native_object_path or manifest_path");
     }
     LoadedProgram out{};
-    const bpf_prog_info prog_info = options.original_prog_fd >= 0
-        ? load_prog_info(options.original_prog_fd) : options.native_context.value();
+    const auto companion_load_start = std::chrono::steady_clock::now();
+    const bpf_prog_info prog_info = load_prog_info(options.original_prog_fd);
     std::vector<bpf_insn> source_insns;
     if (!options.source_bpf_path.empty() && !options.source_insns.empty()) {
         fail("native_loader: source_bpf_path and source_insns are mutually exclusive");
@@ -5138,211 +3425,43 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     }
     std::filesystem::path native_object_path = options.native_object_path;
     std::string symbol_name = options.symbol_name;
-    std::string source_btf_symbol_name;
-    if (options.source_btf_id != 0 && !options.source_func_info.empty()) {
-        if (options.source_func_info_rec_size < sizeof(bpf_func_info) ||
-            options.source_func_info.size() %
-                options.source_func_info_rec_size != 0) {
-            fail("native_loader: invalid source func_info record layout");
-        }
-        char inferred_name[sizeof(prog_info.name) + 1] = {};
-        std::memcpy(inferred_name, prog_info.name, sizeof(prog_info.name));
-        source_btf_symbol_name = btf_symbol_name_from_func_info(
-            options.source_btf_id,
-            options.source_func_info.data(),
-            static_cast<uint32_t>(
-                options.source_func_info.size() /
-                options.source_func_info_rec_size),
-            options.source_func_info_rec_size,
-            inferred_name, true);
-    }
-    std::vector<std::filesystem::path> native_data_object_paths;
     std::vector<NativeMapRule> map_rules;
-    std::vector<NativeSourceMapBinding> source_map_bindings;
-    std::filesystem::path simulator_object_path;
-    std::string simulator_program;
-    std::vector<bpf_insn> proof_insns = trusted_worker ? options.proof_insns : std::vector<bpf_insn>{};
-    uint64_t manifest_resolve_ns = 0;
     if (native_object_path.empty()) {
         if (source_insns.empty()) {
             fail("native_loader: manifest resolution requires source BPF bytecode");
         }
-        const auto manifest_start = std::chrono::steady_clock::now();
-        const std::string loaded_entry = load_prog_btf_symbol_name(
-            options.original_prog_fd, prog_info, true);
-        if (source_btf_symbol_name.empty()) source_btf_symbol_name = loaded_entry;
         std::optional<ManifestResolution> resolution =
             resolve_native_manifest(options.manifest_path,
                                     prog_info,
                                     source_insns,
-                                    load_map_info,
-                                    source_btf_symbol_name);
-        const auto manifest_end = std::chrono::steady_clock::now();
-        manifest_resolve_ns = elapsed_ns(manifest_start, manifest_end);
+                                    load_map_info);
         if (!resolution) {
-            out.timings.manifest_resolve_ns = manifest_resolve_ns;
-            out.timings.total_ns =
-                elapsed_ns(total_start, std::chrono::steady_clock::now());
             return out;
         }
         native_object_path = resolution->native_object_path;
-        if (!resolution->symbol_name.empty()) {
-            symbol_name = resolution->symbol_name;
-        } else if (symbol_name.empty() && !source_btf_symbol_name.empty()) {
-            symbol_name = source_btf_symbol_name;
-        }
-        native_data_object_paths = std::move(resolution->native_data_object_paths);
+        symbol_name = resolution->symbol_name;
         map_rules = std::move(resolution->map_rules);
-        source_map_bindings = std::move(resolution->source_map_bindings);
-        simulator_object_path = std::move(resolution->simulator_object_path);
-        simulator_program = std::move(resolution->simulator_program);
-    }
-    if (trusted_worker) {
-        if (options.proof_insns.empty()) {
-            simulator_object_path = options.proof_object_path;
-            simulator_program = options.trusted_simulator_program;
-            if (simulator_object_path.empty() || simulator_program.empty())
-                fail("native_loader: trusted worker has no fresh simulator object/entry");
-        }
-    } else {
-        // Manifest proof siblings and REQUIRE_PREBUILT are never app proof inputs.
-        simulator_object_path.clear();
-        simulator_program.clear();
-    }
-    if (native_data_object_paths.empty()) {
-        native_data_object_paths.push_back(native_object_path);
     }
     if (symbol_name.empty()) {
-        if (!source_btf_symbol_name.empty()) {
-            symbol_name = source_btf_symbol_name;
-        } else {
-            symbol_name = load_prog_btf_symbol_name(options.original_prog_fd, prog_info);
-        }
+        symbol_name = load_prog_btf_symbol_name(options.original_prog_fd, prog_info);
     }
-    CompanionLoad companion{};
-    if (options.original_prog_fd >= 0)
-        companion = load_from_loaded_program_fd(
+    CompanionLoad companion =
+        load_from_loaded_program_fd(
             options.original_prog_fd,
             prog_info,
             source_insns.empty() ? nullptr : source_insns.data(),
             source_insns.size(),
             std::move(map_rules));
-    companion.prog_type = prog_info.type;
-    companion.expected_attach_type = options.expected_attach_type;
-    bind_source_map_symbols(companion, source_map_bindings, source_insns);
-    std::vector<native_loader::TrustedMapBinding> trusted_maps = options.trusted_maps;
-    ScopedFd unspecified_map_fd;
-    if (trusted_worker) {
-        // Ordinary mutable array: each read is an unknown scalar for the verifier.
-        LIBBPF_OPTS(bpf_map_create_opts, unspecified_opts);
-        unspecified_map_fd.fd = bpf_map_create(BPF_MAP_TYPE_ARRAY, "kprog_unspec",
-                                               sizeof(uint32_t), sizeof(uint64_t), 1, &unspecified_opts);
-        if (unspecified_map_fd.get() < 0)
-            fail("create unspecified input map: " + std::string(std::strerror(errno)));
-        native_loader::TrustedMapBinding binding;
-        binding.native_symbol = "kprog_unspecified_input";
-        binding.map_id = load_map_info(unspecified_map_fd.get()).id;
-        binding.value_offset = 0;
-        trusted_maps.push_back(binding);
-    }
-    for (const auto &binding : trusted_maps) {
-        const auto selected = std::find_if(companion.maps.begin(), companion.maps.end(),
-            [&](const auto &map) { return map.kernel_id == binding.map_id; });
-        MapMeta map{};
-        if (selected == companion.maps.end()) {
-            ScopedFd retained(bpf_map_get_fd_by_id(binding.map_id));
-            if (retained.get() < 0)
-                fail("reopen kernel-pinned native map: " + std::string(std::strerror(errno)));
-            map = load_map_meta_from_fd(retained.get());
-            add_map_meta(companion, map);
-        } else {
-            map = *selected;
-        }
-        add_source_tail_call_map(companion, map);
-        add_map_symbol_alias_meta(companion, binding.native_symbol, map);
-        if (binding.value_offset) {
-            if (!map.value_addr || *binding.value_offset >= map.value_size)
-                fail("trusted direct map value exceeds the original map");
-            companion.map_addrs[binding.native_symbol] = map.value_addr + *binding.value_offset;
-            companion.native_map_symbols.erase(binding.native_symbol);
-        }
-        // Preserve the explicit capsule alias while scanning the remaining ELF.
-        companion.source_map_symbols.insert(binding.native_symbol);
-    }
-    SimulatorObject simulator_object(nullptr, bpf_object__close);
-    std::vector<std::unique_ptr<ScopedFd>> proof_map_fds;
-    const auto native_data_symbols_start = std::chrono::steady_clock::now();
-    {
-        OpenProcessMapsCache open_maps_cache;
-        OpenProcessMapsCacheScope open_maps_scope(open_maps_cache);
-        for (const std::filesystem::path &path : native_data_object_paths) {
-            add_native_data_symbol_addrs(path, companion);
-        }
-    }
-    const auto native_data_symbols_end = std::chrono::steady_clock::now();
-    if (!trusted_worker && env_bool_enabled("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF")) {
-        auto submitted = submit_trusted_native(options, prog_info, native_object_path, symbol_name, companion);
-        submitted.timings.manifest_resolve_ns = manifest_resolve_ns;
-        submitted.timings.total_ns = elapsed_ns(total_start, std::chrono::steady_clock::now());
-        return submitted;
-    }
-    const auto source_proof_metadata = read_proof_metadata(simulator_object_path, ".native_lab.source_maps");
-    const bool trusted_externs = trusted_worker;
+    add_native_data_symbol_addrs(native_object_path, companion);
+    const auto companion_load_end = std::chrono::steady_clock::now();
 
-    // Native data resolution supplies full ELF map names for truncated kernel
-    // names. Resolve those identities before deciding which proof maps to reuse.
-    if (!simulator_object_path.empty()) {
-        if (!proof_insns.empty()) {
-            fail("simulator proof supplied both as raw instructions and manifest object");
-        }
-        simulator_object = open_simulator_proof(simulator_object_path,
-            simulator_program, prog_info, companion, proof_insns);
-        if (trusted_externs)
-            relocate_source_map_proof(simulator_object.get(), simulator_object_path, simulator_program,
-                {}, {}, {}, companion, proof_insns, proof_map_fds, &trusted_maps);
-        else if (source_proof_metadata)
-            relocate_source_map_proof(simulator_object.get(), simulator_object_path, simulator_program,
-                parse_proof_source_maps(*source_proof_metadata), source_map_bindings,
-                source_insns, companion, proof_insns, proof_map_fds);
-    }
-    companion.needs_kernel_symbols |= proof_needs_kernel_symbols(proof_insns);
     LinkedBlob linked = load_or_link_native_blob(
         options.native_link_path,
         native_object_path,
         symbol_name,
-        companion,
-        options.trusted_native_proof_path);
-    if (simulator_object && !source_proof_metadata && !trusted_externs)
-        finish_simulator_proof(simulator_object.get(), simulator_program, proof_insns, linked);
-    else
-        bind_raw_proof_maps(proof_insns, companion, proof_map_fds, linked);
-    out.selected_native_object = native_object_path.string();
-    out.selected_symbol = symbol_name;
+        companion);
 
-    if ((options.prog_flags & BPF_F_TOKEN_FD) && options.prog_token_fd < 0)
-        fail("native_loader: source token flag requires its captured token FD");
     StubLoadAttrs stub_attrs{};
-    stub_attrs.prog_flags = options.prog_flags;
-    stub_attrs.prog_token_fd = options.prog_token_fd;
-    stub_attrs.prog_ifindex = prog_info.ifindex;
-    stub_attrs.source_prog_id = prog_info.id;
-    stub_attrs.gpl_compatible = prog_info.gpl_compatible;
-    if (options.original_prog_fd < 0 && options.native_entry_function) {
-        stub_attrs.entry_func = *options.native_entry_function;
-        stub_attrs.source_btf_id = options.source_btf_id;
-    } else if (options.original_prog_fd >= 0 && prog_info.nr_func_info) {
-        bpf_prog_info detail{};
-        detail.nr_func_info = 1;
-        detail.func_info_rec_size = sizeof(stub_attrs.entry_func);
-        detail.func_info = ptr_to_u64(&stub_attrs.entry_func);
-        uint32_t size = sizeof(detail);
-        const int error = bpf_obj_get_info_by_fd(options.original_prog_fd, &detail, &size);
-        if (error) fail("query original entry ABI: " + libbpf_error_string(error));
-        if (!detail.nr_func_info || !detail.btf_id || stub_attrs.entry_func.insn_off ||
-            !stub_attrs.entry_func.type_id || detail.func_info_rec_size != sizeof(stub_attrs.entry_func))
-            fail("native_loader: original program has no exact entry BTF prototype");
-        stub_attrs.source_btf_id = detail.btf_id;
-    }
     stub_attrs.expected_attach_type = options.expected_attach_type;
     stub_attrs.attach_btf_id = options.attach_btf_id
         ? options.attach_btf_id
@@ -5357,14 +3476,13 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     const std::string stub_prog_name = prog_info_name_or_stub(prog_info);
     LoadedStub loaded_stub{};
     try {
-            loaded_stub = upload_and_load_stub(
-                linked,
-                proof_insns,
-                prog_info.type,
-                stub_attrs,
-                companion.has_tail_call && native_lab_needs_tail_call_probe(),
-                stub_prog_name,
-                map_ref_fds, options.trusted_service_fd, options.trusted_request_id);
+        loaded_stub = upload_and_load_stub(
+            linked,
+            prog_info.type,
+            stub_attrs,
+            companion.has_tail_call,
+            stub_prog_name,
+            map_ref_fds);
         close_fd_vector(map_ref_fds);
     } catch (...) {
         close_fd_vector(map_ref_fds);
@@ -5373,28 +3491,8 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
 
     out.prog_fd = loaded_stub.prog_fd;
     out.replaced = true;
-    out.original_prog_id = prog_info.id;
-    out.native_prog_id = load_prog_info(loaded_stub.prog_fd).id;
-    out.cache_hit = linked.cache_hit;
-    out.prebuilt_proof = linked.prebuilt_proof;
     out.bpf_bytecode_bytes = companion.source_bytecode_bytes;
     out.native_code_bytes = linked.blob.size();
-    out.native_blob_fnv64 = loaded_stub.native_blob_fnv64;
-    out.native_first_reloc_target = loaded_stub.native_first_reloc_target;
-    out.native_last_reloc_target = loaded_stub.native_last_reloc_target;
-    out.native_reloc_count = loaded_stub.native_reloc_count;
-    out.native_chunk_count = loaded_stub.native_chunk_count;
-    out.native_callee_saved_mask = loaded_stub.native_callee_saved_mask;
-    out.native_first_reloc_offset = loaded_stub.native_first_reloc_offset;
-    out.native_first_reloc_kind = loaded_stub.native_first_reloc_kind;
-    out.native_last_reloc_offset = loaded_stub.native_last_reloc_offset;
-    out.native_last_reloc_kind = loaded_stub.native_last_reloc_kind;
-    out.native_link_summary = linked.native_link_summary;
-    out.timings.total_ns =
-        elapsed_ns(total_start, std::chrono::steady_clock::now());
-    out.timings.manifest_resolve_ns = manifest_resolve_ns;
-    out.timings.native_data_symbols_ns =
-        elapsed_ns(native_data_symbols_start, native_data_symbols_end);
     out.timings.companion_map_ptr_extract_ns = companion.map_ptr_extract_ns;
     out.timings.companion_lookup_spec_ns = companion.lookup_spec_ns;
     out.timings.cache_lookup_ns = linked.cache_lookup_ns;
@@ -5403,18 +3501,6 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     out.timings.map_patch_ns = linked.map_patch_ns;
     out.timings.upload_ns = loaded_stub.upload_ns;
     out.timings.prog_load_ns = loaded_stub.prog_load_ns;
-    if (trusted_worker) {
-        native_lab_trusted_result completed{};
-        completed.request_id = options.trusted_request_id;
-        completed.prog_id = out.native_prog_id;
-        // Pin the verified program in the kernel request before a helper can
-        // exit and drop its FD. The broker does not complete success twice.
-        if (ioctl(options.trusted_service_fd, NATIVE_LAB_TRUSTED_COMPLETE, &completed)) {
-            const int error = errno;
-            close_loaded_program(&out);
-            fail("kernel trusted native completion refused: " + std::string(std::strerror(error)));
-        }
-    }
     return out;
 }
 
@@ -5443,46 +3529,6 @@ void transfer_loaded_program_to_c_result(native_loader::LoadedProgram &loaded,
 
     out->prog_fd = loaded.prog_fd;
     out->replaced = loaded.replaced ? 1 : 0;
-    out->cache_hit = loaded.cache_hit ? 1 : 0;
-    out->prebuilt_proof = loaded.prebuilt_proof ? 1 : 0;
-    out->bpf_bytecode_bytes = loaded.bpf_bytecode_bytes;
-    out->native_code_bytes = loaded.native_code_bytes;
-    out->native_blob_fnv64 = loaded.native_blob_fnv64;
-    out->native_first_reloc_target = loaded.native_first_reloc_target;
-    out->native_last_reloc_target = loaded.native_last_reloc_target;
-    out->native_reloc_count = loaded.native_reloc_count;
-    out->native_chunk_count = loaded.native_chunk_count;
-    out->native_callee_saved_mask = loaded.native_callee_saved_mask;
-    out->native_first_reloc_offset = loaded.native_first_reloc_offset;
-    out->native_first_reloc_kind = loaded.native_first_reloc_kind;
-    out->native_last_reloc_offset = loaded.native_last_reloc_offset;
-    out->native_last_reloc_kind = loaded.native_last_reloc_kind;
-    out->original_prog_id = loaded.original_prog_id;
-    out->native_prog_id = loaded.native_prog_id;
-    std::snprintf(out->selected_native_object,
-                  sizeof(out->selected_native_object),
-                  "%s",
-                  loaded.selected_native_object.c_str());
-    std::snprintf(out->selected_symbol,
-                  sizeof(out->selected_symbol),
-                  "%s",
-                  loaded.selected_symbol.c_str());
-    std::snprintf(out->native_link_summary,
-                  sizeof(out->native_link_summary),
-                  "%s",
-                  loaded.native_link_summary.c_str());
-    out->total_ns = loaded.timings.total_ns;
-    out->manifest_resolve_ns = loaded.timings.manifest_resolve_ns;
-    out->native_data_symbols_ns = loaded.timings.native_data_symbols_ns;
-    out->companion_map_ptr_extract_ns =
-        loaded.timings.companion_map_ptr_extract_ns;
-    out->companion_lookup_spec_ns = loaded.timings.companion_lookup_spec_ns;
-    out->cache_lookup_ns = loaded.timings.cache_lookup_ns;
-    out->native_link_exec_ns = loaded.timings.native_link_exec_ns;
-    out->native_link_read_ns = loaded.timings.native_link_read_ns;
-    out->map_patch_ns = loaded.timings.map_patch_ns;
-    out->upload_ns = loaded.timings.upload_ns;
-    out->prog_load_ns = loaded.timings.prog_load_ns;
     loaded.prog_fd = -1;
 }
 
@@ -5498,64 +3544,6 @@ extern "C" int native_loader_load_from_fd_with_manifest_path_and_attach(
     uint32_t attach_btf_id,
     uint32_t attach_btf_obj_id,
     uint32_t attach_prog_id,
-    struct native_loader_c_result *out)
-{
-    return native_loader_load_from_fd_with_manifest_path_btf_and_attach(
-        original_prog_fd,
-        manifest_path,
-        source_bpf_path,
-        source_fd_array,
-        source_fd_array_count,
-        0,
-        nullptr,
-        0,
-        0,
-        expected_attach_type,
-        attach_btf_id,
-        attach_btf_obj_id,
-        attach_prog_id,
-        out);
-}
-
-extern "C" int native_loader_load_from_fd_with_manifest_path_btf_and_attach(
-    int original_prog_fd,
-    const char *manifest_path,
-    const char *source_bpf_path,
-    const int *source_fd_array,
-    uint32_t source_fd_array_count,
-    uint32_t source_btf_id,
-    const void *source_func_info,
-    uint32_t source_func_info_count,
-    uint32_t source_func_info_rec_size,
-    uint32_t expected_attach_type,
-    uint32_t attach_btf_id,
-    uint32_t attach_btf_obj_id,
-    uint32_t attach_prog_id,
-    struct native_loader_c_result *out)
-{
-    return native_loader_load_from_fd_with_manifest_path_btf_and_context(
-        original_prog_fd, manifest_path, source_bpf_path,
-        source_fd_array, source_fd_array_count, source_btf_id,
-        source_func_info, source_func_info_count, source_func_info_rec_size,
-        expected_attach_type, attach_btf_id, attach_btf_obj_id, attach_prog_id,
-        nullptr, out);
-}
-
-extern "C" int native_loader_load_from_fd_with_manifest_path_btf_and_context(
-    int original_prog_fd,
-    const char *manifest_path,
-    const char *source_bpf_path,
-    const int *source_fd_array,
-    uint32_t source_fd_array_count,
-    uint32_t source_btf_id,
-    const void *source_func_info,
-    uint32_t source_func_info_count,
-    uint32_t source_func_info_rec_size,
-    uint32_t expected_attach_type,
-    uint32_t attach_btf_id,
-    uint32_t attach_btf_obj_id,
-    uint32_t attach_prog_id,
-    const struct native_loader_source_load_context *context,
     struct native_loader_c_result *out)
 {
     if (out) {
@@ -5576,10 +3564,6 @@ extern "C" int native_loader_load_from_fd_with_manifest_path_btf_and_context(
     try {
         native_loader::FdLoadOptions options{};
         options.original_prog_fd = original_prog_fd;
-        if (context) {
-            options.prog_flags = context->prog_flags;
-            options.prog_token_fd = context->prog_token_fd;
-        }
         options.manifest_path = manifest_path;
         options.source_bpf_path = source_bpf_path;
         if (source_fd_array_count > 0) {
@@ -5588,27 +3572,6 @@ extern "C" int native_loader_load_from_fd_with_manifest_path_btf_and_context(
             }
             options.source_fd_array.assign(
                 source_fd_array, source_fd_array + source_fd_array_count);
-        }
-        if (source_func_info_count > 0 || source_func_info_rec_size > 0 ||
-            source_func_info) {
-            if (source_btf_id == 0 || !source_func_info ||
-                source_func_info_count == 0 ||
-                source_func_info_rec_size < sizeof(bpf_func_info)) {
-                fail("native_loader: invalid source BTF func_info arguments");
-            }
-            const uint64_t bytes =
-                static_cast<uint64_t>(source_func_info_count) *
-                static_cast<uint64_t>(source_func_info_rec_size);
-            if (bytes > static_cast<uint64_t>(
-                    std::numeric_limits<size_t>::max())) {
-                fail("native_loader: source func_info is too large");
-            }
-            const uint8_t *begin =
-                static_cast<const uint8_t *>(source_func_info);
-            options.source_btf_id = source_btf_id;
-            options.source_func_info_rec_size = source_func_info_rec_size;
-            options.source_func_info.assign(
-                begin, begin + static_cast<size_t>(bytes));
         }
         options.expected_attach_type = expected_attach_type;
         options.attach_btf_id = attach_btf_id;

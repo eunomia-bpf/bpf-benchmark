@@ -103,18 +103,7 @@ inline void write_json_update_site(std::ostream &out,
         << ",\"value_size\":" << site.value_size
         << ",\"value_offset\":" << site.value_offset
         << ",\"percpu_base_addr\":" << site.percpu_base_addr
-        << ",\"map_addr\":" << site.map_addr;
-    out << ",\"map_names\":[";
-    for (size_t i = 0; i < site.map_names.size(); i++) {
-        if (i) out << ",";
-        write_json_string(out, site.map_names[i]);
-    }
-    out << "]";
-    if (!site.map_name.empty()) {
-        out << ",\"map_name\":";
-        write_json_string(out, site.map_name);
-    }
-    out << "}";
+        << "}";
 }
 
 template <typename T, typename Writer>
@@ -142,14 +131,10 @@ inline std::filesystem::path write_native_link_plan(
         fail("open native-link plan " + path.string());
     }
     out << "{\"version\":1";
-    out << ",\"arm64_helper_call_slot\":";
-    write_json_string(out, link_args.arm64_helper_call_slot);
     out << ",\"helpers\":";
     write_json_array(out, link_args.helpers, write_json_name_addr);
     out << ",\"maps\":";
     write_json_array(out, link_args.maps, write_json_name_addr);
-    out << ",\"tail_call_maps\":";
-    write_json_array(out, link_args.tail_call_maps, write_json_string);
     out << ",\"lookup_sites\":";
     write_json_array(out, link_args.lookup_sites, write_json_lookup_site);
     out << ",\"lookup_maps\":";

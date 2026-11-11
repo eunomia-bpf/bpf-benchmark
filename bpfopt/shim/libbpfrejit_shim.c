@@ -26,7 +26,6 @@
 #include <fcntl.h>
 #include <linux/bpf.h>
 #include <linux/perf_event.h>
-#include <limits.h>
 #include <pthread.h>
 #include <sys/prctl.h>
 #include <signal.h>
@@ -142,70 +141,6 @@ static __thread int in_shim;
 #include "shim_loadtime.h"
 #include "shim_native_loader.h"
 
-static int capture_prog_load_exact_map_refs(struct prog_entry *prog,
-                                            const union bpf_attr *attr) {
-    if (!prog || !attr || !attr->insns || attr->insn_cnt == 0)
-        return 0;
-
-    struct shim_map_ref *refs = NULL;
-    uint32_t ref_n = 0;
-    const struct bpf_insn *insns =
-        (const struct bpf_insn *)(uintptr_t)attr->insns;
-    if (collect_current_map_refs(insns, attr->insn_cnt, &refs, &ref_n) != 0)
-        return -1;
-    if (ref_n == 0) {
-        free(refs);
-        return 0;
-    }
-
-    uint32_t *fds = (uint32_t *)calloc(ref_n, sizeof(uint32_t));
-    uint32_t *kids = (uint32_t *)calloc(ref_n, sizeof(uint32_t));
-    uint32_t *types = (uint32_t *)calloc(ref_n, sizeof(uint32_t));
-    if (!fds || !kids || !types) {
-        free(fds);
-        free(kids);
-        free(types);
-        free(refs);
-        return -1;
-    }
-
-    uint32_t n = 0;
-    for (uint32_t r = 0; r < ref_n; r++) {
-        if (refs[r].loader_fd < 0 || refs[r].kernel_id == 0)
-            continue;
-        int dup = 0;
-        for (uint32_t i = 0; i < n; i++) {
-            if (fds[i] == (uint32_t)refs[r].loader_fd) {
-                dup = 1;
-                break;
-            }
-        }
-        if (dup)
-            continue;
-        fds[n] = (uint32_t)refs[r].loader_fd;
-        kids[n] = refs[r].kernel_id;
-        types[n] = refs[r].map_type;
-        n++;
-    }
-    free(refs);
-
-    if (n == 0) {
-        free(fds);
-        free(kids);
-        free(types);
-        return 0;
-    }
-
-    free(prog->snap_fds);
-    free(prog->snap_kids);
-    free(prog->snap_types);
-    prog->snap_fds = fds;
-    prog->snap_kids = kids;
-    prog->snap_types = types;
-    prog->snap_n = n;
-    return 0;
-}
-
 static void *worker_thread(void *arg);  /* forward decl */
 static void *socket_thread(void *arg);  /* forward decl */
 
@@ -252,27 +187,6 @@ static void format_perf_event_extra(const struct perf_event_attr *pa,
     }
 }
 
-static void copy_perf_probe_target(const struct perf_event_attr *pa,
-                                   char *out, size_t out_sz) {
-    if (!out || out_sz == 0)
-        return;
-    out[0] = '\0';
-    if (!pa)
-        return;
-
-    static int kprobe_type = -2;
-    static int uprobe_type = -2;
-    int kt = read_perf_pmu_type("kprobe", &kprobe_type);
-    int ut = read_perf_pmu_type("uprobe", &uprobe_type);
-    const char *source = NULL;
-    if ((int)pa->type == kt && pa->kprobe_func)
-        source = (const char *)(uintptr_t)pa->kprobe_func;
-    else if ((int)pa->type == ut && pa->uprobe_path)
-        source = (const char *)(uintptr_t)pa->uprobe_path;
-    if (source)
-        snprintf(out, out_sz, "%s", source);
-}
-
 static void log_task_fd_query(uint32_t target_fd, uint32_t attach_type) {
     if (target_fd == 0)
         return;
@@ -310,60 +224,16 @@ static int fd_is_bpf_prog(int fd) {
     return strcmp(link_target, "anon_inode:bpf-prog") == 0;
 }
 
-static int shim_pgo_hold_prog_fds_enabled(void) {
-    return shim_env_truthy("BPFREJIT_SHIM_PGO_HOLD_PROG_FDS");
-}
-
-static int prog_profile_hold_fd_is_locked(int fd) {
-    if (fd < 0)
-        return 0;
-    for (int b = 0; b < BPF_STATE_BUCKETS; b++)
-        for (struct prog_entry *p = prog_table[b]; p; p = p->next)
-            if (p->profile_hold_fd == fd)
-                return 1;
-    return 0;
-}
-
-static int prog_profile_hold_fd_is(int fd) {
-    int ret;
-    pthread_mutex_lock(&state_mutex);
-    ret = prog_profile_hold_fd_is_locked(fd);
-    pthread_mutex_unlock(&state_mutex);
-    return ret;
-}
-
-/* Retire every piece of state associated with an fd before either closing it
- * or recording a newly returned kernel object at the same number.  Native
- * runtimes such as Go issue close(2) without crossing the libc/LD_PRELOAD
- * boundary, so fd reuse is sometimes the first observable proof that the old
- * attachment disappeared.  Caller holds state_mutex. */
-static void shim_forget_fd_state_locked(int fd) {
-    if (fd < 0)
-        return;
-    prog_forget_loader_fd(fd);
-    map_remove(fd);
-    link_remove(fd);
-    raw_tp_remove(fd);
-    perf_remove(fd);
-    prog_table_drop_attach_fd(fd);
-}
-
 static int shim_close_observed_fd(int fd) {
     ensure_syms_resolved();
-    if (shim_pgo_hold_prog_fds_enabled() && prog_profile_hold_fd_is(fd)) {
-        log_line("PGO hold fd close skipped fd=%d", fd);
-        return 0;
-    }
-    pthread_mutex_lock(&state_mutex);
-    int retained_link_fd = link_owned_fd_is_locked(fd);
-    pthread_mutex_unlock(&state_mutex);
-    if (retained_link_fd) {
-        log_line("retained BPF link fd close skipped fd=%d", fd);
-        return 0;
-    }
     if (fd >= 0) {
         pthread_mutex_lock(&state_mutex);
-        shim_forget_fd_state_locked(fd);
+        prog_forget_loader_fd(fd);
+        map_remove(fd);
+        link_remove(fd);
+        raw_tp_remove(fd);
+        perf_remove(fd);
+        prog_table_drop_attach_fd(fd);
         pthread_mutex_unlock(&state_mutex);
     }
     in_shim = 1;
@@ -372,171 +242,6 @@ static int shim_close_observed_fd(int fd) {
     in_shim = 0;
     errno = saved_errno;
     return ret;
-}
-
-/* A loader may reopen a pinned BPF link and update it to a newly loaded
- * program. The link fd then has no creation-time table entry, and the old
- * program's attachment record is stale. Retain a private duplicate of the
- * live link and transfer ownership to the new program so a later
- * execute_plan uses BPF_LINK_UPDATE rather than misclassifying the attachment
- * as legacy netlink XDP. */
-static int track_successful_link_update(const union bpf_attr *attr) {
-    if (!attr)
-        return -1;
-    int app_link_fd = (int)attr->link_update.link_fd;
-    int new_prog_fd = (int)attr->link_update.new_prog_fd;
-    uint32_t link_id = resolve_kernel_id(app_link_fd);
-    uint32_t new_prog_id = resolve_kernel_id(new_prog_fd);
-    if (!link_id || !new_prog_id) {
-        log_line("BPF_LINK_UPDATE tracking could not resolve link/prog ids "
-                 "link_fd=%d link_id=%u new_prog_fd=%d prog_id=%u",
-                 app_link_fd, link_id, new_prog_fd, new_prog_id);
-        return -1;
-    }
-
-    int retained_fd = -1;
-    int previous_tracked_fd = -1;
-    pthread_mutex_lock(&state_mutex);
-    struct link_entry *link = link_find_by_kernel_id(link_id);
-    if (link)
-        previous_tracked_fd = link->fd;
-    if (!link || !link->fd_owned_by_shim) {
-        long duplicate = real_syscall(SYS_fcntl, app_link_fd,
-                                      F_DUPFD_CLOEXEC, 3);
-        if (duplicate < 0) {
-            int duplicate_errno = errno;
-            pthread_mutex_unlock(&state_mutex);
-            log_line("BPF_LINK_UPDATE tracking could not retain link_id=%u "
-                     "fd=%d errno=%d",
-                     link_id, app_link_fd, duplicate_errno);
-            return -1;
-        }
-        retained_fd = (int)duplicate;
-        if (link) {
-            int old_fd = link->fd;
-            link->fd = retained_fd;
-            link->fd_owned_by_shim = 1;
-            link_rebucket_locked(link, old_fd);
-        } else {
-            link = (struct link_entry *)calloc(1, sizeof(*link));
-            if (!link) {
-                pthread_mutex_unlock(&state_mutex);
-                real_close(retained_fd);
-                log_line("BPF_LINK_UPDATE tracking allocation failed "
-                         "link_id=%u", link_id);
-                return -1;
-            }
-            link->fd = retained_fd;
-            link->fd_owned_by_shim = 1;
-            link->prog_fd = (uint32_t)new_prog_fd;
-            link->attach_type = BPF_XDP;
-            link->kernel_link_id = link_id;
-            link->target_hold_fd = -1;
-            link_insert(link);
-        }
-    } else {
-        retained_fd = link->fd;
-    }
-
-    struct prog_entry *new_prog =
-        prog_find_attachment_target(new_prog_fd, new_prog_id);
-    if (!new_prog) {
-        pthread_mutex_unlock(&state_mutex);
-        log_line("BPF_LINK_UPDATE tracking found no new prog entry "
-                 "link_id=%u new_prog_id=%u", link_id, new_prog_id);
-        return -1;
-    }
-    for (int b = 0; b < BPF_STATE_BUCKETS; b++) {
-        for (struct prog_entry *prog = prog_table[b]; prog; prog = prog->next) {
-            prog_attach_drop(prog->attached_link_fds, &prog->n_links,
-                             app_link_fd);
-            if (previous_tracked_fd != app_link_fd)
-                prog_attach_drop(prog->attached_link_fds, &prog->n_links,
-                                 previous_tracked_fd);
-            if (retained_fd != app_link_fd)
-                prog_attach_drop(prog->attached_link_fds, &prog->n_links,
-                                 retained_fd);
-        }
-    }
-    if (prog_attach_append(&new_prog->attached_link_fds, &new_prog->n_links,
-                           retained_fd) != 0) {
-        pthread_mutex_unlock(&state_mutex);
-        log_line("BPF_LINK_UPDATE tracking could not attach retained fd=%d "
-                 "to new_prog_id=%u", retained_fd, new_prog_id);
-        return -1;
-    }
-    link->prog_fd = (uint32_t)new_prog_fd;
-    if (link->create_attr_size >= sizeof(uint32_t))
-        memcpy(link->create_attr_blob, &link->prog_fd, sizeof(link->prog_fd));
-    pthread_mutex_unlock(&state_mutex);
-    log_line("BPF_LINK_UPDATE tracking retargeted link_id=%u retained_fd=%d "
-             "new_prog_id=%u", link_id, retained_fd, new_prog_id);
-    return 0;
-}
-
-static long shim_close_range_observed(unsigned int first,
-                                      unsigned int last,
-                                      unsigned int flags) {
-    if (flags & CLOSE_RANGE_UNSHARE) {
-        long ur = real_syscall(SYS_unshare, CLONE_FILES);
-        if (ur < 0)
-            return -1;
-    }
-
-    DIR *fd_dir = opendir("/proc/self/fd");
-    if (!fd_dir)
-        return -1;
-    int dir_fd = dirfd(fd_dir);
-    int *fds = NULL;
-    size_t n = 0, cap = 0;
-    struct dirent *de;
-    while ((de = readdir(fd_dir)) != NULL) {
-        if (de->d_name[0] < '0' || de->d_name[0] > '9')
-            continue;
-        char *end = NULL;
-        errno = 0;
-        unsigned long raw = strtoul(de->d_name, &end, 10);
-        if (errno || !end || *end)
-            continue;
-        if (raw > INT_MAX)
-            continue;
-        int fd = (int)raw;
-        if (fd == dir_fd)
-            continue;
-        if ((unsigned int)fd < first || (unsigned int)fd > last)
-            continue;
-        if (prog_profile_hold_fd_is(fd))
-            continue;
-        if (n == cap) {
-            size_t next = cap ? cap * 2 : 64;
-            int *grown = (int *)realloc(fds, next * sizeof(*grown));
-            if (!grown) {
-                int saved = errno ? errno : ENOMEM;
-                free(fds);
-                closedir(fd_dir);
-                errno = saved;
-                return -1;
-            }
-            fds = grown;
-            cap = next;
-        }
-        fds[n++] = fd;
-    }
-    closedir(fd_dir);
-
-    for (size_t i = 0; i < n; i++) {
-        if (shim_close_observed_fd(fds[i]) != 0) {
-            int saved = errno;
-            free(fds);
-            errno = saved;
-            return -1;
-        }
-    }
-    free(fds);
-    log_line("close_range observed fds and preserved profile holds "
-             "first=%u last=%u flags=0x%x",
-             first, last, flags);
-    return 0;
 }
 
 static long shim_close_range(unsigned int first, unsigned int last,
@@ -560,13 +265,12 @@ static long shim_close_range(unsigned int first, unsigned int last,
         return ret;
     }
 
-    /* Every real close must retire the fd from the shim's typed tables and
-     * from each program's attachment lists.  A direct close_range syscall
-     * leaves stale raw-tracepoint/link/perf attachment fds behind; after the
-     * kernel reuses one of those fd numbers, live replacement tries to replay
-     * a detached attachment using unrelated state.  Enumerating the open
-     * range also lets the profiling path preserve its private hold fds. */
-    return shim_close_range_observed(first, last, flags);
+    in_shim = 1;
+    long ret = real_syscall(SYS_close_range, first, last, flags);
+    int saved_errno = errno;
+    in_shim = 0;
+    errno = saved_errno;
+    return ret;
 }
 
 static void log_prog_array_update(const union bpf_attr *attr, long ret,
@@ -578,30 +282,15 @@ static void log_prog_array_update(const union bpf_attr *attr, long ret,
     uint32_t map_type = 0;
     uint32_t key_size = 0;
     uint32_t value_size = 0;
-    uint32_t map_id = 0;
-    ensure_syms_resolved();
-    if (!real_syscall)
-        return;
-
-    /* A loader can close a map fd and later reuse the same integer for a
-     * BPF_OBJ_GET of another map. The creation-time fd table is therefore
-     * only a capture aid, never authoritative for an update syscall. */
-    struct bpf_map_info info;
-    memset(&info, 0, sizeof(info));
-    union bpf_attr info_attr = {0};
-    info_attr.info.bpf_fd = attr->map_fd;
-    info_attr.info.info_len = sizeof(info);
-    info_attr.info.info = (uintptr_t)&info;
-    long info_ret = real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD,
-                                 &info_attr, sizeof(info_attr));
-    if (info_ret < 0)
-        return;
-
-    map_type = info.type;
-    key_size = info.key_size;
-    value_size = info.value_size;
-    map_id = info.id;
-    memcpy(map_name, info.name, sizeof(map_name) - 1);
+    pthread_mutex_lock(&state_mutex);
+    struct map_entry *map = map_find((int)attr->map_fd);
+    if (map) {
+        map_type = map->map_type;
+        key_size = map->key_size;
+        value_size = map->value_size;
+        memcpy(map_name, map->name, sizeof(map_name) - 1);
+    }
+    pthread_mutex_unlock(&state_mutex);
 
     if (map_type != BPF_MAP_TYPE_PROG_ARRAY || key_size != sizeof(uint32_t) ||
         value_size != sizeof(uint32_t) || attr->key == 0 || attr->value == 0) {
@@ -619,68 +308,14 @@ static void log_prog_array_update(const union bpf_attr *attr, long ret,
     if (prog)
         prog_id = prog->kernel_prog_id;
     pthread_mutex_unlock(&state_mutex);
-    if (prog_id == 0)
-        prog_id = resolve_kernel_id((int)prog_fd);
 
-    log_line("BPF_MAP_UPDATE_ELEM prog_array name=%s map_fd=%u map_id=%u key=%u "
+    log_line("BPF_MAP_UPDATE_ELEM prog_array name=%s map_fd=%u key=%u "
              "prog_fd=%u prog_id=%u flags=%llu ret=%ld errno=%d",
-             map_name, attr->map_fd, map_id, key, prog_fd, prog_id,
+             map_name, attr->map_fd, key, prog_fd, prog_id,
              (unsigned long long)attr->flags, ret,
              ret < 0 ? saved_errno : 0);
-    kmsg_line("BPF_MAP_UPDATE_ELEM prog_array name=%s map_fd=%u map_id=%u key=%u "
-              "prog_fd=%u prog_id=%u flags=%llu ret=%ld errno=%d",
-              map_name, attr->map_fd, map_id, key, prog_fd, prog_id,
-              (unsigned long long)attr->flags, ret,
-              ret < 0 ? saved_errno : 0);
     if (ret >= 0)
         shim_native_loader_log_jit_info("prog_array-target", (int)prog_fd);
-    if (ret >= 0 && map_id != 0 && prog_id != 0) {
-        pthread_mutex_lock(&state_mutex);
-        int track_rc = prog_array_slot_upsert(map_id, key, prog_id);
-        pthread_mutex_unlock(&state_mutex);
-        if (track_rc != 0)
-            log_line("failed to track prog_array map_id=%u key=%u prog_id=%u",
-                     map_id, key, prog_id);
-    }
-}
-
-static int is_u32_prog_array_fd(uint32_t map_fd) {
-    struct bpf_map_info info;
-    memset(&info, 0, sizeof(info));
-    union bpf_attr info_attr = {0};
-    info_attr.info.bpf_fd = map_fd;
-    info_attr.info.info_len = sizeof(info);
-    info_attr.info.info = (uintptr_t)&info;
-    if (real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &info_attr,
-                     sizeof(info_attr)) < 0) {
-        return 0;
-    }
-
-    return info.type == BPF_MAP_TYPE_PROG_ARRAY &&
-           info.key_size == sizeof(uint32_t) &&
-           info.value_size == sizeof(uint32_t);
-}
-
-static void track_prog_array_delete(const union bpf_attr *attr, long ret) {
-    if (!attr || ret < 0 || attr->key == 0)
-        return;
-    struct bpf_map_info info;
-    memset(&info, 0, sizeof(info));
-    union bpf_attr info_attr = {0};
-    info_attr.info.bpf_fd = attr->map_fd;
-    info_attr.info.info_len = sizeof(info);
-    info_attr.info.info = (uintptr_t)&info;
-    if (real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &info_attr,
-                     sizeof(info_attr)) < 0)
-        return;
-    if (info.type != BPF_MAP_TYPE_PROG_ARRAY ||
-        info.key_size != sizeof(uint32_t))
-        return;
-    uint32_t key = 0;
-    memcpy(&key, (const void *)(uintptr_t)attr->key, sizeof(key));
-    pthread_mutex_lock(&state_mutex);
-    prog_array_slot_remove(info.id, key);
-    pthread_mutex_unlock(&state_mutex);
 }
 
 __attribute__((constructor)) static void shim_init(void) {
@@ -703,7 +338,40 @@ __attribute__((constructor)) static void shim_init(void) {
         ssize_t n = readlink("/proc/self/exe", exe, sizeof(exe) - 1);
         if (n > 0) exe[n] = 0;
         log_line("shim_init pid=%d exe=%s", getpid(), exe);
-        kmsg_line("shim-init exe=%s", exe);
+    }
+
+    /* Probe the kernel BTF for all available kinsn kfunc targets and write
+     * target.json once. Subsequent execute_plan RPCs reuse this file for the
+     * `--target` arg to every bpfopt pass. Daemon-equivalent of the
+     * `probe_target_json` step. */
+    char target_json_path[320];
+    snprintf(target_json_path, sizeof(target_json_path), "%s/target.json", dir);
+    if (access(target_json_path, F_OK) != 0) {
+        char *const argv[] = {"kinsnprober", "--out", target_json_path, NULL};
+        posix_spawn_file_actions_t fa;
+        int fa_inited = (posix_spawn_file_actions_init(&fa) == 0);
+        if (fa_inited) {
+            posix_spawn_file_actions_addopen(&fa, STDOUT_FILENO, "/dev/null", O_WRONLY, 0);
+            posix_spawn_file_actions_addopen(&fa, STDERR_FILENO, "/dev/null", O_WRONLY, 0);
+        }
+        /* Strip LD_PRELOAD so kinsnprober doesn't re-attach the shim. */
+        size_t n_env = 0; while (environ[n_env]) n_env++;
+        char **clean_env = (char **)calloc(n_env + 1, sizeof(char *));
+        size_t j = 0;
+        for (size_t i = 0; clean_env && i < n_env; i++)
+            if (strncmp(environ[i], "LD_PRELOAD=", 11) != 0)
+                clean_env[j++] = environ[i];
+        if (clean_env) clean_env[j] = NULL;
+        pid_t ppid;
+        int rc = posix_spawnp(&ppid, "kinsnprober", fa_inited ? &fa : NULL,
+                              NULL, argv, clean_env ? clean_env : environ);
+        free(clean_env);
+        if (fa_inited) posix_spawn_file_actions_destroy(&fa);
+        if (rc == 0) {
+            int st = 0; waitpid(ppid, &st, 0);
+            log_line("kinsnprober exit=%d target=%s",
+                     WIFEXITED(st) ? WEXITSTATUS(st) : -1, target_json_path);
+        }
     }
 
     /* Periodic dump worker, if enabled by env. */
@@ -775,10 +443,11 @@ long syscall(long number, ...) {
                         asize = sizeof(struct perf_event_attr);
                     memcpy(e->attr_blob, pa, asize);
                     e->attr_size = asize;
-                    copy_perf_probe_target(pa, e->probe_target,
-                                           sizeof(e->probe_target));
                     pthread_mutex_lock(&state_mutex);
-                    shim_forget_fd_state_locked(e->fd);
+                    prog_forget_loader_fd(e->fd);
+                    map_remove(e->fd);
+                    link_remove(e->fd);
+                    raw_tp_remove(e->fd);
                     perf_insert(e);
                     pthread_mutex_unlock(&state_mutex);
                 }
@@ -795,15 +464,6 @@ long syscall(long number, ...) {
                      pa ? (unsigned long long)pa->config2 : 0, pid, cpu,
                      group_fd, flags, perf_extra, ret,
                      ret < 0 ? saved_errno : 0);
-            kmsg_line("perf-open type=%u config=%llu config1=%llu "
-                      "config2=%llu pid=%d cpu=%d group_fd=%d flags=%lu%s "
-                      "ret=%ld errno=%d",
-                      pa ? pa->type : 0,
-                      pa ? (unsigned long long)pa->config : 0,
-                      pa ? (unsigned long long)pa->config1 : 0,
-                      pa ? (unsigned long long)pa->config2 : 0, pid, cpu,
-                      group_fd, flags, perf_extra, ret,
-                      ret < 0 ? saved_errno : 0);
             errno = saved_errno;
             return ret;
         }
@@ -813,42 +473,6 @@ long syscall(long number, ...) {
     int cmd = (int)a0;
     union bpf_attr *attr = (union bpf_attr *)a1;
     unsigned int size = (unsigned int)a2;
-
-    /* libbpf callers may reuse a bpf_attr and its key/value storage from
-     * another thread as soon as the real syscall returns. Prog-array state
-     * must therefore not dereference caller-owned memory after that point:
-     * use one pre-call snapshot for both the kernel operation and the shim's
-     * post-call attachment bookkeeping. */
-    union bpf_attr stable_prog_array_attr;
-    uint32_t stable_prog_array_key = 0;
-    uint32_t stable_prog_array_value = 0;
-    if (!in_shim && attr &&
-        (cmd == BPF_MAP_UPDATE_ELEM || cmd == BPF_MAP_DELETE_ELEM)) {
-        memset(&stable_prog_array_attr, 0, sizeof(stable_prog_array_attr));
-        size_t attr_copy_size = size;
-        if (attr_copy_size > sizeof(stable_prog_array_attr))
-            attr_copy_size = sizeof(stable_prog_array_attr);
-        memcpy(&stable_prog_array_attr, attr, attr_copy_size);
-        if (stable_prog_array_attr.key != 0 &&
-            (cmd != BPF_MAP_UPDATE_ELEM ||
-             stable_prog_array_attr.value != 0) &&
-            is_u32_prog_array_fd(stable_prog_array_attr.map_fd)) {
-            memcpy(&stable_prog_array_key,
-                   (const void *)(uintptr_t)stable_prog_array_attr.key,
-                   sizeof(stable_prog_array_key));
-            stable_prog_array_attr.key =
-                (uintptr_t)&stable_prog_array_key;
-            if (cmd == BPF_MAP_UPDATE_ELEM) {
-                memcpy(&stable_prog_array_value,
-                       (const void *)(uintptr_t)stable_prog_array_attr.value,
-                       sizeof(stable_prog_array_value));
-                stable_prog_array_attr.value =
-                    (uintptr_t)&stable_prog_array_value;
-            }
-            attr = &stable_prog_array_attr;
-            a1 = (long)(uintptr_t)attr;
-        }
-    }
 
     if (!in_shim && cmd == BPF_OBJ_GET_INFO_BY_FD && attr) {
         int query_fd = (int)attr->info.bpf_fd;
@@ -889,15 +513,6 @@ long syscall(long number, ...) {
         }
     }
 
-    struct shim_native_load_scope native_scope
-        __attribute__((cleanup(shim_native_load_scope_end))) = {0};
-    if (cmd == BPF_PROG_LOAD && attr && !in_shim &&
-        shim_native_loader_enabled() && shim_native_loader_requires_bound_proof()) {
-        pthread_rwlock_rdlock(&shim_native_load_lock);
-        native_scope.active = 1;
-        __atomic_add_fetch(&shim_native_loads_inflight, 1, __ATOMIC_SEQ_CST);
-    }
-
     /* Pre-call captures: one pending pointer per kind. Each capture_*
      * allocates a heap entry we insert into the corresponding table iff
      * the syscall succeeds. */
@@ -917,16 +532,11 @@ long syscall(long number, ...) {
             pending_map = capture_map_create(attr);
             break;
         case BPF_LINK_CREATE:
-            pending_link = capture_link_create(attr, size);
+            pending_link = capture_link_create(attr);
             log_line("BPF_LINK_CREATE prog_fd=%u target_fd=%u attach_type=%u "
                      "flags=%u",
                      attr->link_create.prog_fd, attr->link_create.target_fd,
                      attr->link_create.attach_type, attr->link_create.flags);
-            kmsg_line("attach link-create begin prog_fd=%u target_fd=%u "
-                      "attach_type=%u flags=%u",
-                      attr->link_create.prog_fd, attr->link_create.target_fd,
-                      attr->link_create.attach_type,
-                      attr->link_create.flags);
             break;
         case BPF_LINK_UPDATE:
             on_link_update(attr);
@@ -936,25 +546,14 @@ long syscall(long number, ...) {
             break;
         case BPF_RAW_TRACEPOINT_OPEN:
             pending_raw_tp = capture_raw_tp_open(attr);
-            if (pending_raw_tp)
-                kmsg_line("attach raw-tp begin name=%s prog_fd=%u",
-                          pending_raw_tp->name, pending_raw_tp->prog_fd);
             break;
         default:
             break;
         }
         if (cmd == BPF_PROG_LOAD && pending_prog) {
-            if (capture_prog_load_exact_map_refs(pending_prog, attr) != 0) {
-                in_shim = 0;
-                log_line("failed to capture BPF_PROG_LOAD map refs");
-                prog_free(pending_prog);
-                errno = EINVAL;
-                return -1;
-            }
             char opt_err[512];
-            int opt_rc = loadtime_optimize_prog_load(
-                attr, size, pending_prog->policy_hash, &loadtime, opt_err,
-                sizeof(opt_err));
+            int opt_rc = loadtime_optimize_prog_load(attr, size, &loadtime,
+                                                     opt_err, sizeof(opt_err));
             if (opt_rc < 0) {
                 in_shim = 0;
                 log_line("loadtime optimization failed: %s", opt_err);
@@ -993,22 +592,6 @@ long syscall(long number, ...) {
             pending_prog->fd = (int)ret;
             resolved_id = resolve_kernel_id((int)ret);
             pending_prog->kernel_prog_id = resolved_id;
-            if (shim_pgo_hold_prog_fds_enabled()) {
-                int hold_fd = fcntl((int)ret, F_DUPFD_CLOEXEC, 3);
-                if (hold_fd < 0) {
-                    int hold_errno = errno;
-                    real_close((int)ret);
-                    prog_free(pending_prog);
-                    if (loadtime_active)
-                        loadtime_result_free(&loadtime);
-                    in_shim = 0;
-                    errno = hold_errno;
-                    return -1;
-                }
-                pending_prog->profile_hold_fd = hold_fd;
-                log_line("PGO hold fd retained app_fd=%ld hold_fd=%d kid=%u",
-                         ret, hold_fd, resolved_id);
-            }
             /* Capture only the maps THIS prog actually references. Earlier we
              * enumerated all of /proc/self/fd, but for a long-lived loader
              * (e.g. tracee with 158 progs) that snapshot accumulates every
@@ -1038,67 +621,67 @@ long syscall(long number, ...) {
                     if (pmap_n > 64) pmap_n = 64;
                 }
             }
-            if (pending_prog->snap_n == 0) {
-                uint32_t cap = pmap_n ? pmap_n : 1, n = 0;
-                uint32_t *fds = (uint32_t *)calloc(cap, sizeof(uint32_t));
-                uint32_t *kids = (uint32_t *)calloc(cap, sizeof(uint32_t));
-                uint32_t *types = (uint32_t *)calloc(cap, sizeof(uint32_t));
-                DIR *fd_dir = pmap_n > 0 ? opendir("/proc/self/fd") : NULL;
-                if (fd_dir && fds && kids && types) {
-                    struct dirent *de;
-                    while ((de = readdir(fd_dir)) != NULL && n < pmap_n) {
-                        if (de->d_name[0] < '0' || de->d_name[0] > '9') continue;
-                        int probe_fd = atoi(de->d_name);
-                        if (probe_fd < 0) continue;
-                        char fdpath[64], link_target[64];
-                        snprintf(fdpath, sizeof(fdpath), "/proc/self/fd/%d", probe_fd);
-                        ssize_t lr = readlink(fdpath, link_target, sizeof(link_target) - 1);
-                        if (lr <= 0) continue;
-                        link_target[lr] = 0;
-                        if (strcmp(link_target, "anon_inode:bpf-map") != 0) continue;
-                        struct bpf_map_info mi;
-                        memset(&mi, 0, sizeof(mi));
-                        union bpf_attr ia = {0};
-                        ia.info.bpf_fd = (uint32_t)probe_fd;
-                        ia.info.info_len = sizeof(mi);
-                        ia.info.info = (uintptr_t)&mi;
-                        long r = real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD,
-                                              &ia, sizeof(ia));
-                        if (r < 0 || mi.id == 0) continue;
-                        /* Only keep fds whose kernel map id is in this prog's
-                         * used_maps list. */
-                        int wanted = 0;
-                        for (uint32_t i = 0; i < pmap_n; i++)
-                            if (pmap_ids[i] == mi.id) { wanted = 1; break; }
-                        if (!wanted) continue;
-                        /* Skip duplicates — multiple loader fds may alias the
-                         * same kernel id; one representative is enough for
-                         * non-fd-immediate discovery. */
-                        int dup = 0;
-                        for (uint32_t i = 0; i < n; i++)
-                            if (kids[i] == mi.id) { dup = 1; break; }
-                        if (dup) continue;
-                        fds[n] = (uint32_t)probe_fd;
-                        kids[n] = mi.id;
-                        types[n] = mi.type;
-                        n++;
-                    }
-                    pending_prog->snap_fds = fds;
-                    pending_prog->snap_kids = kids;
-                    pending_prog->snap_types = types;
-                    pending_prog->snap_n = n;
-                } else {
-                    free(fds); free(kids); free(types);
+            uint32_t cap = pmap_n ? pmap_n : 1, n = 0;
+            uint32_t *fds = (uint32_t *)calloc(cap, sizeof(uint32_t));
+            uint32_t *kids = (uint32_t *)calloc(cap, sizeof(uint32_t));
+            uint32_t *types = (uint32_t *)calloc(cap, sizeof(uint32_t));
+            DIR *fd_dir = pmap_n > 0 ? opendir("/proc/self/fd") : NULL;
+            if (fd_dir && fds && kids && types) {
+                struct dirent *de;
+                while ((de = readdir(fd_dir)) != NULL && n < pmap_n) {
+                    if (de->d_name[0] < '0' || de->d_name[0] > '9') continue;
+                    int probe_fd = atoi(de->d_name);
+                    if (probe_fd < 0) continue;
+                    char fdpath[64], link_target[64];
+                    snprintf(fdpath, sizeof(fdpath), "/proc/self/fd/%d", probe_fd);
+                    ssize_t lr = readlink(fdpath, link_target, sizeof(link_target) - 1);
+                    if (lr <= 0) continue;
+                    link_target[lr] = 0;
+                    if (strcmp(link_target, "anon_inode:bpf-map") != 0) continue;
+                    struct bpf_map_info mi;
+                    memset(&mi, 0, sizeof(mi));
+                    union bpf_attr ia = {0};
+                    ia.info.bpf_fd = (uint32_t)probe_fd;
+                    ia.info.info_len = sizeof(mi);
+                    ia.info.info = (uintptr_t)&mi;
+                    long r = real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD,
+                                          &ia, sizeof(ia));
+                    if (r < 0 || mi.id == 0) continue;
+                    /* Only keep fds whose kernel map id is in this prog's
+                     * used_maps list. */
+                    int wanted = 0;
+                    for (uint32_t i = 0; i < pmap_n; i++)
+                        if (pmap_ids[i] == mi.id) { wanted = 1; break; }
+                    if (!wanted) continue;
+                    /* Skip duplicates — multiple loader fds may alias the
+                     * same kernel id; one representative is enough. */
+                    int dup = 0;
+                    for (uint32_t i = 0; i < n; i++)
+                        if (kids[i] == mi.id) { dup = 1; break; }
+                    if (dup) continue;
+                    fds[n] = (uint32_t)probe_fd;
+                    kids[n] = mi.id;
+                    types[n] = mi.type;
+                    n++;
                 }
-                if (fd_dir) closedir(fd_dir);
+                pending_prog->snap_fds = fds;
+                pending_prog->snap_kids = kids;
+                pending_prog->snap_types = types;
+                pending_prog->snap_n = n;
+            } else {
+                free(fds); free(kids); free(types);
             }
+            if (fd_dir) closedir(fd_dir);
             pthread_mutex_lock(&state_mutex);
-            shim_forget_fd_state_locked(pending_prog->fd);
+            prog_forget_loader_fd(pending_prog->fd);
+            map_remove(pending_prog->fd);
+            link_remove(pending_prog->fd);
+            raw_tp_remove(pending_prog->fd);
+            perf_remove(pending_prog->fd);
             prog_insert(pending_prog);
             pthread_mutex_unlock(&state_mutex);
         } else {
             free(pending_prog);
-            pending_prog = NULL;
         }
     }
     if (pending_map) {
@@ -1107,7 +690,10 @@ long syscall(long number, ...) {
             resolved_id = resolve_kernel_id((int)ret);
             pending_map->kernel_map_id = resolved_id;
             pthread_mutex_lock(&state_mutex);
-            shim_forget_fd_state_locked(pending_map->fd);
+            prog_forget_loader_fd(pending_map->fd);
+            link_remove(pending_map->fd);
+            raw_tp_remove(pending_map->fd);
+            perf_remove(pending_map->fd);
             map_insert(pending_map);
             pthread_mutex_unlock(&state_mutex);
         } else {
@@ -1116,70 +702,32 @@ long syscall(long number, ...) {
     }
     if (pending_link) {
         if (ret >= 0) {
-            uint32_t attached_prog_id =
-                resolve_kernel_id((int)pending_link->prog_fd);
             pending_link->fd = (int)ret;
             resolved_id = resolve_kernel_id((int)ret);
             pending_link->kernel_link_id = resolved_id;
-            if (pending_link->attach_type == BPF_PERF_EVENT) {
-                long hold_fd = real_syscall(
-                    SYS_fcntl, (int)pending_link->target_fd,
-                    F_DUPFD_CLOEXEC, 3);
-                if (hold_fd >= 0) {
-                    pending_link->target_hold_fd = (int)hold_fd;
-                    log_line("BPF_PERF_EVENT target retained target_fd=%u "
-                             "hold_fd=%ld link_fd=%ld",
-                             pending_link->target_fd, hold_fd, ret);
-                } else {
-                    log_line("BPF_PERF_EVENT target retain failed "
-                             "target_fd=%u link_fd=%ld errno=%d",
-                             pending_link->target_fd, ret, errno);
-                }
-            }
             pthread_mutex_lock(&state_mutex);
-            shim_forget_fd_state_locked(pending_link->fd);
+            prog_forget_loader_fd(pending_link->fd);
+            map_remove(pending_link->fd);
+            raw_tp_remove(pending_link->fd);
+            perf_remove(pending_link->fd);
             link_insert(pending_link);
             /* Record this attach on the prog so reload_and_reattach can
              * BPF_LINK_UPDATE us to the optimized prog later. */
-            struct prog_entry *pe = prog_find_attachment_target(
-                (int)pending_link->prog_fd, attached_prog_id);
+            struct prog_entry *pe = prog_find((int)pending_link->prog_fd);
             if (pe)
                 (void)prog_attach_append(&pe->attached_link_fds,
                                          &pe->n_links, (int)ret);
-            else
-                log_line("BPF_LINK_CREATE attachment prog_fd=%u kid=%u "
-                         "has no tracked prog_entry",
-                         pending_link->prog_fd, attached_prog_id);
-            if (pending_link->attach_type == BPF_PERF_EVENT) {
-                struct perf_entry *target =
-                    perf_find((int)pending_link->target_fd);
-                if (target && target->attr_size > 0) {
-                    memcpy(pending_link->target_perf_attr_blob,
-                           target->attr_blob, target->attr_size);
-                    pending_link->target_perf_attr_size = target->attr_size;
-                    pending_link->target_perf_pid = target->pid;
-                    pending_link->target_perf_cpu = target->cpu;
-                    pending_link->target_perf_group_fd = target->group_fd;
-                    pending_link->target_perf_open_flags = target->open_flags;
-                    snprintf(pending_link->target_perf_probe_target,
-                             sizeof(pending_link->target_perf_probe_target),
-                             "%s", target->probe_target);
-                }
-            }
             pthread_mutex_unlock(&state_mutex);
             if (pending_link->attach_type == BPF_PERF_EVENT)
                 log_task_fd_query(pending_link->target_fd,
                                   pending_link->attach_type);
         } else {
-            link_entry_free(pending_link);
+            free(pending_link);
         }
     }
     if (cmd == BPF_PROG_ATTACH && ret >= 0 && attr) {
-        uint32_t attached_prog_id =
-            resolve_kernel_id((int)attr->attach_bpf_fd);
         pthread_mutex_lock(&state_mutex);
-        struct prog_entry *pe = prog_find_attachment_target(
-            (int)attr->attach_bpf_fd, attached_prog_id);
+        struct prog_entry *pe = prog_find((int)attr->attach_bpf_fd);
         if (pe) {
             struct prog_attach_point point = {
                 .target_fd = (int)attr->target_fd,
@@ -1193,15 +741,14 @@ long syscall(long number, ...) {
     }
     if (pending_raw_tp) {
         if (ret >= 0) {
-            uint32_t attached_prog_id =
-                resolve_kernel_id((int)pending_raw_tp->prog_fd);
             pending_raw_tp->fd = (int)ret;
-            pending_raw_tp->prog_id = attached_prog_id;
             pthread_mutex_lock(&state_mutex);
-            shim_forget_fd_state_locked(pending_raw_tp->fd);
+            prog_forget_loader_fd(pending_raw_tp->fd);
+            map_remove(pending_raw_tp->fd);
+            link_remove(pending_raw_tp->fd);
+            perf_remove(pending_raw_tp->fd);
             raw_tp_insert(pending_raw_tp);
-            struct prog_entry *pe = prog_find_attachment_target(
-                (int)pending_raw_tp->prog_fd, attached_prog_id);
+            struct prog_entry *pe = prog_find((int)pending_raw_tp->prog_fd);
             if (pe)
                 (void)prog_attach_append(&pe->attached_raw_tp_fds,
                                          &pe->n_raw_tps, (int)ret);
@@ -1212,56 +759,28 @@ long syscall(long number, ...) {
     }
     if (cmd == BPF_MAP_UPDATE_ELEM && attr)
         log_prog_array_update(attr, ret, saved_errno);
-    if (cmd == BPF_MAP_DELETE_ELEM && attr)
-        track_prog_array_delete(attr, ret);
-    if (cmd == BPF_LINK_UPDATE && ret >= 0 && attr)
-        (void)track_successful_link_update(attr);
     in_shim = 0;
     if (loadtime_active)
         loadtime_result_free(&loadtime);
 
-    if (cmd == BPF_PROG_LOAD) {
+    if (cmd == BPF_PROG_LOAD)
         log_line("  PROG_LOAD -> fd=%ld errno=%d kernel_prog_id=%u", ret,
                  ret < 0 ? saved_errno : 0, resolved_id);
-        if (pending_prog)
-            kmsg_line("prog-load done name=%s ret=%ld errno=%d kid=%u",
-                      pending_prog->name, ret, ret < 0 ? saved_errno : 0,
-                      resolved_id);
-    } else if (cmd == BPF_LINK_CREATE) {
+    else if (cmd == BPF_LINK_CREATE)
         log_line("  LINK_CREATE -> fd=%ld errno=%d kernel_link_id=%u", ret,
                  ret < 0 ? saved_errno : 0, resolved_id);
-        if (attr)
-            kmsg_line("attach link-create done prog_fd=%u target_fd=%u "
-                      "attach_type=%u ret=%ld errno=%d kid=%u",
-                      attr->link_create.prog_fd, attr->link_create.target_fd,
-                      attr->link_create.attach_type, ret,
-                      ret < 0 ? saved_errno : 0, resolved_id);
-    } else if (cmd == BPF_LINK_UPDATE) {
+    else if (cmd == BPF_LINK_UPDATE)
         log_line("  LINK_UPDATE -> ret=%ld errno=%d", ret,
                  ret < 0 ? saved_errno : 0);
-    } else if (cmd == BPF_MAP_CREATE) {
+    else if (cmd == BPF_MAP_CREATE)
         log_line("  MAP_CREATE -> fd=%ld errno=%d kernel_map_id=%u", ret,
                  ret < 0 ? saved_errno : 0, resolved_id);
-    } else if (cmd == BPF_PROG_ATTACH) {
+    else if (cmd == BPF_PROG_ATTACH)
         log_line("  PROG_ATTACH -> ret=%ld errno=%d", ret,
                  ret < 0 ? saved_errno : 0);
-        if (attr)
-            kmsg_line("attach prog-attach done target_fd=%u prog_fd=%u "
-                      "attach_type=%u ret=%ld errno=%d",
-                      attr->target_fd, attr->attach_bpf_fd,
-                      attr->attach_type, ret, ret < 0 ? saved_errno : 0);
-    } else if (cmd == BPF_RAW_TRACEPOINT_OPEN) {
+    else if (cmd == BPF_RAW_TRACEPOINT_OPEN)
         log_line("  RAW_TRACEPOINT_OPEN -> fd=%ld errno=%d", ret,
                  ret < 0 ? saved_errno : 0);
-        if (attr) {
-            const char *name = attr->raw_tracepoint.name
-                                   ? (const char *)(uintptr_t)attr->raw_tracepoint.name
-                                   : "";
-            kmsg_line("attach raw-tp done name=%.*s prog_fd=%u ret=%ld errno=%d",
-                      80, name, attr->raw_tracepoint.prog_fd, ret,
-                      ret < 0 ? saved_errno : 0);
-        }
-    }
 
     errno = saved_errno;
     return ret;
@@ -1281,8 +800,6 @@ int ioctl(int fd, unsigned long request, ...) {
             int prog_fd = (int)(intptr_t)arg;
             log_line("PERF_EVENT_IOC_SET_BPF event_fd=%d prog_fd=%d", fd,
                      prog_fd);
-            kmsg_line("attach perf-set-bpf begin event_fd=%d prog_fd=%d",
-                      fd, prog_fd);
         } else if (request == PERF_EVENT_IOC_ENABLE) {
             log_line("PERF_EVENT_IOC_ENABLE event_fd=%d", fd);
         } else if (request == PERF_EVENT_IOC_DISABLE) {
@@ -1298,7 +815,6 @@ int ioctl(int fd, unsigned long request, ...) {
     if (request == PERF_EVENT_IOC_SET_BPF) {
         if (ret == 0) {
             int prog_fd = (int)(intptr_t)arg;
-            uint32_t attached_prog_id = resolve_kernel_id(prog_fd);
             pthread_mutex_lock(&state_mutex);
             struct perf_entry *e = perf_find(fd);
             if (!e) {
@@ -1353,8 +869,7 @@ int ioctl(int fd, unsigned long request, ...) {
             if (e) e->attached_prog_fd = prog_fd;
             /* Record this attach on the prog so reload_and_reattach can
              * re-issue SET_BPF with the optimized prog fd later. */
-            struct prog_entry *pe = prog_find_attachment_target(
-                prog_fd, attached_prog_id);
+            struct prog_entry *pe = prog_find(prog_fd);
             if (pe)
                 (void)prog_attach_append(&pe->attached_perf_fds,
                                          &pe->n_perfs, fd);
@@ -1362,9 +877,6 @@ int ioctl(int fd, unsigned long request, ...) {
         }
         log_line("  PERF_EVENT_IOC_SET_BPF -> ret=%d errno=%d", ret,
                  ret < 0 ? saved_errno : 0);
-        kmsg_line("attach perf-set-bpf done event_fd=%d prog_fd=%d ret=%d "
-                  "errno=%d",
-                  fd, (int)(intptr_t)arg, ret, ret < 0 ? saved_errno : 0);
     }
 
     errno = saved_errno;
@@ -1543,9 +1055,7 @@ static void dump_state_json(void) {
     if (!dir) dir = "/tmp";
     char path[512];
     snprintf(path, sizeof(path), "%s/state_%d.json", dir, getpid());
-    char tmp_path[544];
-    snprintf(tmp_path, sizeof(tmp_path), "%s.tmp", path);
-    int fd = open(tmp_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (fd < 0) return;
     FILE *f = fdopen(fd, "w");
     if (!f) {
@@ -1558,14 +1068,11 @@ static void dump_state_json(void) {
     for (int b = 0; b < BPF_STATE_BUCKETS; b++) {
         for (struct prog_entry *e = prog_table[b]; e; e = e->next) {
             fprintf(f, "%s\n    {\"fd\":%d,\"prog_type\":%u,\"name\":\"%s\","
-                       "\"insn_cnt\":%u,\"hash\":\"%016lx\",\"policy_hash\":\"%016lx\","
-                       "\"branch_profile_hash\":\"%016lx\","
+                       "\"insn_cnt\":%u,\"hash\":\"%016lx\","
                        "\"kernel_prog_id\":%u,\"bytecode_path\":\"%s\","
                        "\"expected_attach\":%u,\"attach_btf_id\":%u}",
                     first ? "" : ",", e->fd, e->prog_type, e->name,
-                    e->insn_cnt, e->hash, e->policy_hash,
-                    e->branch_profile_hash,
-                    e->kernel_prog_id, e->bytecode_path,
+                    e->insn_cnt, e->hash, e->kernel_prog_id, e->bytecode_path,
                     e->expected_attach_type, e->attach_btf_id);
             first = 0;
         }
@@ -1608,14 +1115,7 @@ static void dump_state_json(void) {
     }
     pthread_mutex_unlock(&state_mutex);
     fprintf(f, "\n  ]\n}\n");
-    if (fclose(f) != 0) {
-        unlink(tmp_path);
-        return;
-    }
-    if (rename(tmp_path, path) != 0) {
-        unlink(tmp_path);
-        return;
-    }
+    fclose(f);
     log_line("state dumped to %s", path);
 }
 
@@ -1664,79 +1164,38 @@ static int unix_socket_listen(const char *path) {
 }
 
 static void emit_list_progs(int cli) {
-    pthread_rwlock_wrlock(&shim_native_load_lock);
     discover_bpf_programs();
     pthread_mutex_lock(&state_mutex);
-    size_t prog_count = 0;
-    size_t slot_count = 0;
-    size_t raw_tp_count = 0;
-    for (int b = 0; b < BPF_STATE_BUCKETS; b++) {
-        for (struct prog_entry *e = prog_table[b]; e; e = e->next)
-            prog_count++;
-    }
-    for (struct prog_array_slot *slot = prog_array_slots; slot;
-         slot = slot->next)
-        slot_count++;
-    for (int b = 0; b < BPF_STATE_BUCKETS; b++)
-        for (struct raw_tp_entry *raw = raw_tp_table[b]; raw;
-             raw = raw->next)
-            raw_tp_count++;
-    /* Names and paths are bounded in prog_entry; allocate once so an OOM
-     * cannot leave a partially reallocated JSON buffer. */
-    size_t cap = 160 + prog_count * 768 + slot_count * 192 +
-                 raw_tp_count * 256;
+    /* Estimate buffer size: ~256 bytes per prog. */
+    size_t cap = 4096;
     char *buf = (char *)malloc(cap);
     if (!buf) {
         pthread_mutex_unlock(&state_mutex);
-        pthread_rwlock_unlock(&shim_native_load_lock);
         return;
     }
     size_t len = 0;
-    len += snprintf(buf + len, cap - len,
-                    "{\"ok\":true,\"native_loads_inflight\":%u,\"native_bound_completed\":%u,\"progs\":[",
-                    __atomic_load_n(&shim_native_loads_inflight, __ATOMIC_SEQ_CST),
-                    __atomic_load_n(&shim_native_loads_completed, __ATOMIC_SEQ_CST));
+    len += snprintf(buf + len, cap - len, "{\"ok\":true,\"progs\":[");
     int first = 1;
     for (int b = 0; b < BPF_STATE_BUCKETS; b++) {
         for (struct prog_entry *e = prog_table[b]; e; e = e->next) {
+            if (cap - len < 512) {
+                cap *= 2;
+                char *nb = (char *)realloc(buf, cap);
+                if (!nb)
+                    break;
+                buf = nb;
+            }
             len += snprintf(
                 buf + len, cap - len,
                 "%s{\"id\":%u,\"name\":\"%s\",\"type\":%u,\"insn_cnt\":%u,"
-                "\"hash\":\"%016lx\",\"policy_hash\":\"%016lx\","
-                "\"branch_profile_hash\":\"%016lx\","
-                "\"bytecode_path\":\"%s\"}",
+                "\"hash\":\"%016lx\",\"bytecode_path\":\"%s\"}",
                 first ? "" : ",", e->kernel_prog_id, e->name,
-                e->prog_type, e->insn_cnt, e->hash, e->policy_hash,
-                e->branch_profile_hash,
-                e->bytecode_path);
+                e->prog_type, e->insn_cnt, e->hash, e->bytecode_path);
             first = 0;
         }
     }
-    len += snprintf(buf + len, cap - len, "],\"prog_array_slots\":[");
-    first = 1;
-    for (struct prog_array_slot *slot = prog_array_slots; slot;
-         slot = slot->next) {
-        len += snprintf(buf + len, cap - len,
-                        "%s{\"map_id\":%u,\"key\":%u,\"prog_id\":%u}",
-                        first ? "" : ",", slot->map_id, slot->key,
-                        slot->prog_id);
-        first = 0;
-    }
-    len += snprintf(buf + len, cap - len, "],\"raw_tracepoints\":[");
-    first = 1;
-    for (int b = 0; b < BPF_STATE_BUCKETS; b++) {
-        for (struct raw_tp_entry *raw = raw_tp_table[b]; raw;
-             raw = raw->next) {
-            len += snprintf(
-                buf + len, cap - len,
-                "%s{\"name\":\"%s\",\"prog_id\":%u}",
-                first ? "" : ",", raw->name, raw->prog_id);
-            first = 0;
-        }
-    }
-    len += snprintf(buf + len, cap - len, "]}\n");
     pthread_mutex_unlock(&state_mutex);
-    pthread_rwlock_unlock(&shim_native_load_lock);
+    len += snprintf(buf + len, cap - len, "]}\n");
     if (write(cli, buf, len) < 0) { /* best effort */ }
     free(buf);
 }

@@ -8,10 +8,6 @@ publish = false
 name = "native-link"
 path = "src/main.rs"
 
-[features]
-default = ["stock-entry-frame"]
-stock-entry-frame = []
-
 [dependencies]
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
