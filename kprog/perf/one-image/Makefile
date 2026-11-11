@@ -15,7 +15,13 @@ JOBS ?= 20
 # micro/programs/build-x86/kernel_offsets.h is frozen (chattr +i). The one kernel gives the same
 # offsets (pahole body identical, 2026-11-11), so the frozen header serves as the input as it is.
 OFFSETS := $(ROOT)/micro/programs/build-x86/kernel_offsets.h
-OVERRIDES := HOST_KERNEL_BUILD_DIR_X86=$(KDIR) X86_RUNNER_RUNTIME_IMAGE=$(IMAGE) JOBS=$(JOBS) KERNEL_OFFSETS_INPUT=$(OFFSETS)
+# vendor/bpf compiles BCC and Tetragon native objects against VMLINUX_BTF, by default the BTF of
+# the machine running the build (the Workspace host, 7.3.0). Native x86 code keeps the struct
+# offsets it was compiled with, so the objects take the one kernel's BTF and release name, as the
+# 2026-05-29 objects (built under 7.0.0-rc2+) did.
+KRELEASE = $(shell cat $(KDIR)/include/config/kernel.release)
+OVERRIDES := HOST_KERNEL_BUILD_DIR_X86=$(KDIR) X86_RUNNER_RUNTIME_IMAGE=$(IMAGE) JOBS=$(JOBS) KERNEL_OFFSETS_INPUT=$(OFFSETS) \
+	VMLINUX_BTF=$(KDIR)/vmlinux KERNEL_RELEASE=$(KRELEASE)
 
 .PHONY: kernel module negative image
 
