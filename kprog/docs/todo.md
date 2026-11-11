@@ -12,7 +12,8 @@
 - [ ] **C** 内核合并：9c50491de2a5 和 a3cb8790e 里当前路径需要的功能，以提交的形式合进 7d6b7d663680 这条线（在子模块检出里原地提交，推送 eunomia-bpf/linux kprog-no-kinsn，同步 master 指针），在 `/workspaces/.agent-state/kprog-ck/build-x86` 原地重建；之后删掉其他内核版本和构建，删除清单写进 `kprog/docs/cleanup-log.md`。
 - [x] **协调者** 唯一镜像 `bpf-benchmark/kprog:current`：05-29 的 build.mk 与 Dockerfile（d0b902050），内核在唯一底座按 05-29 defconfig 构建，配方 `kprog/perf/one-image`（0373ac0eb、7d31c972b、2fa61eee7）。
 - [x] **协调者** 原生用户态链路与框架回到 05-29：shim、loader、链接器（e6808c073，链接器与 05-29 二进制逐字节相同）、`vendor/bpf`（5a47ae87b）、`runner/`（c9b58a26f、24a2d15aa）。之后的改动按六应用在唯一内核上的需要逐个加回。
-- [ ] **协调者** 六应用在唯一系统上装入原生代码（Katran 功能检查进行中），然后广度优先计时。
+- [ ] **协调者** 六应用在唯一系统上装入原生代码：Katran、BCC 已装上（16a1391d8、ee1ba70fc）；OTel、Cilium、Tetragon、Tracee 在 tail call 上让 guest 崩溃，修复 5f6e694bfd4d、6a3152eb7 待验证。
+- [ ] **协调者** 广度优先计时（每个应用 3×180 秒）：BCC stats 关 1.005x（101011_549780）、Katran stats 关 1.128x（103657_155576），均达到或超过 05-29；其余四个应用待装上后计时。
 - [ ] **C** Katran：链接器去掉多余的 helper id 加载（cd8996e64，blob 与 05-29 字节相同）后计时；jited_len 剩下的差（10,102 对 10,196）查内核一侧的包装。
 - [ ] **C** Cilium：用去掉 thunk 的配方对象（`cil_from_host` 734 条指令）计时，对照 05-29 的 1.319x。
 - [ ] **C** OTel、Tracee：唯一内核线支持 tail call 计数重定位（第 10、11 种），`native_tracer_e` 走 native。
