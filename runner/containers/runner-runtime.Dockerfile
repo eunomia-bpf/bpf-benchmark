@@ -9,7 +9,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        auditd \
         bash \
         binutils \
         bzip2 \
@@ -58,7 +57,6 @@ RUN apt-get update \
         libssl3t64 \
         libunwind8 \
         libyaml-cpp0.8 \
-        llvm-18 \
         libzstd1 \
         lz4 \
         nftables \
@@ -68,7 +66,6 @@ RUN apt-get update \
         php-cli \
         procps \
         python3 \
-        python3-pyelftools \
         python3-yaml \
         ruby \
         stress-ng \
@@ -89,18 +86,20 @@ ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
 ARG VENDOR_BUILD_ARCH=x86
 ARG RUNNER_BUILD_DIR_NAME=build-llvmbpf
+ARG TEST_BUILD_DIR=build
 # Narrow build-contexts pointing at subdirs of the host kbuild O= dir to avoid
 # shipping the full kbuild output (~6 GB) as Docker context. Set by the image rule:
 #   x86_64 -> image-context = $(O)/arch/x86/boot   KERNEL_IMAGE_NAME=bzImage
 #   arm64  -> image-context = $(O)/arch/arm64/boot KERNEL_IMAGE_NAME=vmlinuz.efi
+# Manifest JSON is tiny (<200B) so we inline it as a build-arg instead of a context.
 ARG KERNEL_IMAGE_NAME
+ARG KERNEL_MANIFEST_JSON
 
 COPY --link --chmod=0755 vendor/build/${VENDOR_BUILD_ARCH}/tracee/bin/tracee /artifacts/tracee/bin/tracee
 COPY --link vendor/build/${VENDOR_BUILD_ARCH}/tetragon/ /artifacts/tetragon/
 
 COPY --link --chmod=0755 vendor/binary/katran/${RUN_TARGET_ARCH}/bin/katran_server_grpc /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bin/katran_server_grpc
 COPY --link vendor/build/${VENDOR_BUILD_ARCH}/katran/bpf/*.bpf.o /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bpf/
-COPY --link --from=runner-runtime-host-runner-build /katran_transport.bpf.o /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bpf/katran_transport.bpf.o
 
 COPY --link vendor/repos/cilium/bpf/ /var/lib/cilium/bpf/
 COPY --link --chmod=0755 \
@@ -131,20 +130,17 @@ RUN set -eux; \
     ln -sfn /usr/local/bin/otelcol-ebpf-profiler "${repo_artifact_root}/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler"
 
 COPY --link --from=runner-runtime-host-kernel-image /${KERNEL_IMAGE_NAME} /artifacts/kernel/${KERNEL_IMAGE_NAME}
-COPY --link --from=runner-runtime-host-kernel-config /config /artifacts/kernel/config
-COPY --link --from=runner-runtime-host-kernel-config /manifest.json /artifacts/manifest.json
 COPY --link --from=runner-runtime-host-kernel-offsets /kernel_offsets.h /artifacts/kernel/kernel_offsets.h
 COPY --link --from=runner-runtime-host-kernel-modules / /artifacts/lib/modules
+RUN mkdir -p /artifacts && printf '%s\n' "${KERNEL_MANIFEST_JSON}" > /artifacts/manifest.json
 RUN set -eux; \
     kernel_release="$(python3 -c 'import json; print(json.load(open("/artifacts/manifest.json"))["kernel_release"])')"; \
-    mkdir -p /artifacts/boot /boot; \
-    cp /artifacts/kernel/config "/artifacts/boot/config-${kernel_release}"; \
-    cp /artifacts/kernel/config "/boot/config-${kernel_release}"; \
     depmod -b /artifacts "$kernel_release"
 
 COPY --link --from=runner-runtime-host-runner-build /micro_exec ${IMAGE_WORKSPACE}/runner/${RUNNER_BUILD_DIR_NAME}/micro_exec
 COPY --link --from=runner-runtime-host-micro-programs / /artifacts/user/micro-programs/${RUN_TARGET_ARCH}/
 COPY --link --from=runner-runtime-host-stage2-programs / /artifacts/user/stage2-programs/${RUN_TARGET_ARCH}/
+COPY --link --from=runner-runtime-host-negative /adversarial_rejit /fuzz_rejit ${IMAGE_WORKSPACE}/tests/negative/${TEST_BUILD_DIR}/
 
 FROM runner-runtime-runtime-base AS runner-runtime
 
@@ -152,7 +148,6 @@ ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
 ARG BPFOPT_HOST_BIN=bpfopt/llvm/build-kinsn/bpfopt
 ARG KINSNPROBER_HOST_BIN=bpfopt/target/release/kinsnprober
-ARG BPFPROF_HOST_BIN=bpfperf/target/release/bpfprof
 ARG NATIVE_LINK_HOST_BIN=kprog/x86/native_lab/native_link/target/release/native-link
 
 COPY --link --from=runner-runtime-artifacts /artifacts/tracee /artifacts/tracee
@@ -161,32 +156,22 @@ COPY --link --from=runner-runtime-artifacts /artifacts/user/repo-artifacts /arti
 COPY --link --from=runner-runtime-artifacts /usr/local/bin/ /usr/local/bin/
 COPY --link --from=runner-runtime-artifacts /var/lib/cilium /var/lib/cilium
 COPY --link --from=runner-runtime-artifacts /artifacts/kernel /artifacts/kernel
-COPY --link --from=runner-runtime-artifacts /artifacts/boot /artifacts/boot
-COPY --link --from=runner-runtime-artifacts /boot /boot
 COPY --link --from=runner-runtime-artifacts /artifacts/lib/modules /artifacts/lib/modules
 COPY --link --from=runner-runtime-artifacts /artifacts/manifest.json /artifacts/manifest.json
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/runner ${IMAGE_WORKSPACE}/runner
 COPY --link --from=runner-runtime-artifacts /artifacts/user/micro-programs /artifacts/user/micro-programs
 COPY --link --from=runner-runtime-artifacts /artifacts/user/stage2-programs /artifacts/user/stage2-programs
 COPY --link --from=runner-runtime-host-native-bpf / /artifacts/user/native-bpf/${RUN_TARGET_ARCH}/
-COPY --link vendor/linux-framework/tools/net/ynl/pyynl /usr/local/lib/bpfrejit/linux/tools/net/ynl/pyynl
-COPY --link vendor/linux-framework/Documentation/netlink /usr/share/ynl
-COPY --link tests ${IMAGE_WORKSPACE}/tests
+COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/tests ${IMAGE_WORKSPACE}/tests
 COPY --link --chmod=0755 ${BPFOPT_HOST_BIN} /usr/local/bin/bpfopt
 COPY --link --chmod=0755 \
     ${KINSNPROBER_HOST_BIN} \
-    ${BPFPROF_HOST_BIN} \
     ${NATIVE_LINK_HOST_BIN} \
     /usr/local/bin/
-COPY --link vendor/merlin_bpf_clang.py /usr/local/lib/bpfrejit/merlin/merlin_bpf_clang.py
-COPY --link --from=runner-runtime-host-merlin / /usr/local/lib/bpfrejit/merlin/
-COPY --chmod=0755 runner/scripts/merlin-bpf-clang /usr/local/bin/merlin-bpf-clang
 
 RUN set -eux; \
     mkdir -p /opt; \
     ln -sfn /artifacts/user /opt/bpf-benchmark; \
-    ln -sfn /usr/local/bin/merlin-bpf-clang /usr/local/bin/clang; \
-    ln -sfn /usr/local/bin/merlin-bpf-clang /usr/local/bin/clang-18; \
     ldconfig
 
 COPY --link --from=runner-runtime-host-kinsn-artifacts / /artifacts/kinsn
@@ -195,11 +180,6 @@ COPY --link --from=runner-runtime-host-kinsn-artifacts / /artifacts/kinsn
 COPY --link --from=runner-runtime-host-shim /libbpfrejit_shim.so /usr/local/lib/bpfrejit/libbpfrejit_shim.so
 COPY --link --from=runner-runtime-host-runner-build /native_loader/libnative_loader.so /usr/local/lib/bpfrejit/libnative_loader.so
 COPY --chmod=0755 runner/scripts/bpfrejit-install /usr/local/bin/bpfrejit-install
-COPY --chmod=0644 vendor/bpf/native_compat.h /usr/local/lib/bpfrejit/native/native_compat.h
-COPY --link --from=runner-runtime-host-native-bpf /native_division.so /usr/local/lib/bpfrejit/native/native_division.so
-COPY --chmod=0755 vendor/bpf/write_native_manifest.py /usr/local/lib/bpfrejit/native/write_native_manifest.py
-COPY vendor/bpf/cilium/bpf /usr/local/lib/bpfrejit/native/cilium-bpf
-COPY vendor/repos/cilium/bpf /usr/local/lib/bpfrejit/native/cilium-bpf-original
 COPY runner/__init__.py ./runner/
 COPY runner/config ./runner/config
 COPY runner/libs ./runner/libs
@@ -216,7 +196,6 @@ RUN mkdir -p micro/results corpus/results tests/results /var/tmp/bpfrejit-runtim
 ENV BPFREJIT_IMAGE_WORKSPACE=${IMAGE_WORKSPACE} \
     BPFREJIT_REPO_ARTIFACT_ROOT=/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH} \
     BPFREJIT_NATIVE_LOADER_SO=/usr/local/lib/bpfrejit/libnative_loader.so \
-    BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF=1 \
     PYTHONPATH=${IMAGE_WORKSPACE} \
     RUN_TARGET_ARCH=${RUN_TARGET_ARCH} \
     PATH=${IMAGE_WORKSPACE}/runner/build-llvmbpf:${IMAGE_WORKSPACE}/runner/build-arm64-llvmbpf:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
