@@ -35,6 +35,9 @@
 #include <linux/slab.h>
 #include <linux/string.h>
 #include <linux/uaccess.h>
+#if __has_include(<linux/bpf_native.h>)
+#include <linux/bpf_native.h>
+#endif
 
 #include "kinsn_common.h"
 
@@ -48,6 +51,9 @@
 #define NATIVE_LAB_RELOC_MAP_VALUE		6U
 #define NATIVE_LAB_RELOC_HELPER_POINTER		7U
 #define NATIVE_LAB_RELOC_READONLY_DATA		8U
+/* x86 JIT frame immediates, resolved from the final physical stack depth. */
+#define NATIVE_LAB_RELOC_X86_TAIL_COUNT	10U
+#define NATIVE_LAB_RELOC_X86_TAIL_STACK	11U
 
 #define NATIVE_LAB_ABI_RBX		(1U << 0)
 #define NATIVE_LAB_ABI_R13		(1U << 1)
@@ -90,6 +96,7 @@ BTF_KFUNCS_START(bpf_x86_native_lab_kfunc_ids)
 BTF_ID_FLAGS(func, bpf_x86_native_lab_emit)
 BTF_KFUNCS_END(bpf_x86_native_lab_kfunc_ids)
 
+#if !__has_include(<linux/bpf_native.h>)
 static int decode_native_lab_payload(u64 payload, u32 *blob_id, u32 *abi_mask)
 {
 	payload = kinsn_payload_decode(payload);
@@ -218,6 +225,21 @@ static int native_lab_apply_reloc(const struct native_lab_reloc_record *r,
 	case NATIVE_LAB_RELOC_HELPER_POINTER:
 		return native_lab_emit_literal(r, blob->bytes, blob->len,
 					       emit_at, prog);
+	case NATIVE_LAB_RELOC_X86_TAIL_COUNT:
+	case NATIVE_LAB_RELOC_X86_TAIL_STACK:
+		/* The wrapper's physical BPF stack depth is zero, matching the
+		 * stock JIT: a 4-byte slot holds -16 for the tail-call counter
+		 * and 0 for the saved frame depth.
+		 */
+		if ((size_t)r->offset + sizeof(disp) > blob->len) {
+			native_lab_emit_error("reloc_slot", -ERANGE, payload,
+					      blob_id, blob->len, blob->reloc_count,
+					      index, r->offset, r->kind, r->target);
+			return -ERANGE;
+		}
+		disp = r->kind == NATIVE_LAB_RELOC_X86_TAIL_COUNT ? -16 : 0;
+		memcpy(emit_at + r->offset, &disp, sizeof(disp));
+		return 0;
 	case NATIVE_LAB_RELOC_HELPER_CALL_REL32:
 		err = 0;
 		if ((size_t)r->offset + sizeof(rel32_slot) > blob->len)
@@ -297,6 +319,51 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	return snapshot_len;
 }
 
+#endif
+#if __has_include(<linux/bpf_native.h>)
+/*
+ * Stock native line: the JIT takes a whole image armed for this task
+ * (bpf_native_image_arm / bpf_native_image_take) and emits it directly, so
+ * the module arms one image per uploaded blob instead of describing a kinsn.
+ * relocs_write() is the last write before BPF_PROG_LOAD, which is where the
+ * arming has to happen for bpf_native_image_take() to see this task.
+ */
+static int native_lab_arm_blob(struct native_blob *blob)
+{
+	struct bpf_native_image *image;
+	struct bpf_native_reloc *relocs = NULL;
+	void *bytes;
+	u32 i;
+
+	bytes = kmemdup(blob->bytes, blob->len, GFP_KERNEL);
+	if (!bytes)
+		return -ENOMEM;
+	if (blob->reloc_count) {
+		relocs = kcalloc(blob->reloc_count, sizeof(*relocs), GFP_KERNEL);
+		if (!relocs) {
+			kfree(bytes);
+			return -ENOMEM;
+		}
+		for (i = 0; i < blob->reloc_count; i++) {
+			relocs[i].offset = blob->relocs[i].offset;
+			relocs[i].kind = blob->relocs[i].kind;
+			relocs[i].target = blob->relocs[i].target;
+		}
+	}
+	image = kzalloc(sizeof(*image), GFP_KERNEL);
+	if (!image) {
+		kfree(bytes);
+		kfree(relocs);
+		return -ENOMEM;
+	}
+	image->bytes = bytes;
+	image->len = blob->len;
+	image->relocs = relocs;
+	image->nr_relocs = blob->reloc_count;
+	bpf_native_image_arm(image);
+	return 0;
+}
+#else
 const struct bpf_kinsn bpf_x86_native_lab_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 5,
@@ -309,6 +376,7 @@ const struct bpf_kinsn bpf_x86_native_lab_desc = {
 static const struct bpf_kinsn * const bpf_x86_native_lab_kinsn_descs[] = {
 	&bpf_x86_native_lab_desc,
 };
+#endif
 
 /* ---- debugfs: bpf_x86_native_lab/blob<N> and blob<N>.relocs ---- */
 
@@ -387,6 +455,16 @@ static ssize_t relocs_write(struct file *file, const char __user *ubuf,
 	kfree(blobs[priv->id].relocs);
 	blobs[priv->id].relocs = kbuf;
 	blobs[priv->id].reloc_count = count;
+#if __has_include(<linux/bpf_native.h>)
+	{
+		int err = native_lab_arm_blob(&blobs[priv->id]);
+
+		if (err) {
+			mutex_unlock(&blobs_lock);
+			return err;
+		}
+	}
+#endif
 	mutex_unlock(&blobs_lock);
 
 	*ppos = len;
@@ -598,7 +676,9 @@ static void native_lab_free_blobs(void)
 static const struct btf_kfunc_id_set bpf_x86_native_lab_kfunc_set = {
 	.owner = THIS_MODULE,
 	.set = &bpf_x86_native_lab_kfunc_ids,
+#if !__has_include(<linux/bpf_native.h>)
 	.kinsn_descs = bpf_x86_native_lab_kinsn_descs,
+#endif
 };
 
 static int __init bpf_x86_native_lab_init(void)
