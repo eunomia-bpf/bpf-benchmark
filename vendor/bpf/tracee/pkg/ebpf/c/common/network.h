@@ -391,7 +391,7 @@ statfunc struct ipv6_pinfo *get_inet_pinet6(struct inet_sock *inet)
 statfunc struct sockaddr_un get_unix_sock_addr(struct unix_sock *sock)
 {
     struct unix_address *addr = BPF_CORE_READ(sock, addr);
-    u32 len = BPF_CORE_READ(addr, len);
+    int len = BPF_CORE_READ(addr, len);
 
     // name is a flexible array member (struct sockaddr_un[])
     struct sockaddr_un *sockaddr_src = (struct sockaddr_un *) addr->name;

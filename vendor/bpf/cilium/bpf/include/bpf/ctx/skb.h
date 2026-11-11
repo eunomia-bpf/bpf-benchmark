@@ -79,8 +79,7 @@ ctx_data(const struct __sk_buff *ctx)
 static __always_inline void *
 ctx_data_end(const struct __sk_buff *ctx)
 {
-	/* The kernel prepares this BPF data_end pointer in skb->cb. */
-	return *(void *const *)&ctx->cb[8];
+	return ctx->data + (ctx->len - ctx->data_len);
 }
 
 static __always_inline void *
@@ -193,20 +192,4 @@ static __always_inline __maybe_unused __u32
 ctx_get_ingress_ifindex(const struct __sk_buff *ctx)
 {
 	return ctx->ingress_ifindex;
-}
-
-static __always_inline __maybe_unused bool
-ctx_has_vlan(const struct __sk_buff *ctx)
-{
-#ifdef MICRO_NATIVE
-	return ctx->vlan_all != 0;
-#else
-	return ctx->vlan_present != 0;
-#endif
-}
-
-static __always_inline __maybe_unused __u32
-ctx_get_vlan_tci(const struct __sk_buff *ctx)
-{
-	return ctx->vlan_tci;
 }

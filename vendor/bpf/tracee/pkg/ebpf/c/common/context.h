@@ -16,13 +16,7 @@ statfunc proc_info_t *init_proc_info(u32, u32);
 statfunc void init_task_info_scratch(u32, scratch_t *);
 statfunc task_info_t *init_task_info(u32, u32);
 statfunc event_config_t *get_event_config(u32, u16);
-statfunc int init_program_data_common(program_data_t *, void *, u32, struct task_struct *, int);
 statfunc int init_program_data(program_data_t *, void *, u32);
-statfunc int init_program_data_with_task_syscall(program_data_t *,
-                                                 void *,
-                                                 u32,
-                                                 struct task_struct *,
-                                                 int);
 statfunc int init_tailcall_program_data(program_data_t *, void *);
 statfunc bool reset_event(event_data_t *, u32);
 statfunc void reset_event_args_buf(event_data_t *);
@@ -64,7 +58,7 @@ statfunc int init_task_context(task_context_t *tsk_ctx, struct task_struct *task
     // the destination buffer is not padded with zeroes (see
     // https://github.com/torvalds/linux/commit/03b9c7fa3f15f51bcd07f3828c2a01311e7746c4 and
     // https://github.com/torvalds/linux/commit/f3f21349779776135349a8e6f114a1485b2476b7)
-    __builtin_memset_inline(&tsk_ctx->comm, 0, sizeof(tsk_ctx->comm));
+    __builtin_memset(&tsk_ctx->comm, 0, sizeof(tsk_ctx->comm));
     bpf_get_current_comm(&tsk_ctx->comm, sizeof(tsk_ctx->comm));
 
     // UTS Name
@@ -77,7 +71,7 @@ statfunc int init_task_context(task_context_t *tsk_ctx, struct task_struct *task
 
 statfunc void init_proc_info_scratch(u32 pid, scratch_t *scratch)
 {
-    __builtin_memset_inline(&scratch->proc_info, 0, sizeof(proc_info_t));
+    __builtin_memset(&scratch->proc_info, 0, sizeof(proc_info_t));
     bpf_map_update_elem(&proc_info_map, &pid, &scratch->proc_info, BPF_NOEXIST);
 }
 
@@ -94,7 +88,7 @@ statfunc proc_info_t *init_proc_info(u32 pid, u32 scratch_idx)
 
 statfunc void init_task_info_scratch(u32 tid, scratch_t *scratch)
 {
-    __builtin_memset_inline(&scratch->task_info, 0, sizeof(task_info_t));
+    __builtin_memset(&scratch->task_info, 0, sizeof(task_info_t));
     bpf_map_update_elem(&task_info_map, &tid, &scratch->task_info, BPF_NOEXIST);
 }
 
@@ -120,11 +114,7 @@ statfunc event_config_t *get_event_config(u32 event_id, u16 policies_version)
 }
 
 // clang-format off
-statfunc int init_program_data_common(program_data_t *p,
-                                      void *ctx,
-                                      u32 event_id,
-                                      struct task_struct *task,
-                                      int syscall_id)
+statfunc int init_program_data(program_data_t *p, void *ctx, u32 event_id)
 {
     int zero = 0;
 
@@ -143,9 +133,9 @@ statfunc int init_program_data_common(program_data_t *p,
 
     reset_event_args_buf(p->event);
 
-    p->event->task = task;
+    p->event->task = (struct task_struct *) bpf_get_current_task();
 
-    __builtin_memset_inline(&p->event->context.task, 0, sizeof(p->event->context.task));
+    __builtin_memset(&p->event->context.task, 0, sizeof(p->event->context.task));
 
     // get the minimal context required at this stage
     // any other context will be initialized only if event is submitted
@@ -155,7 +145,7 @@ statfunc int init_program_data_common(program_data_t *p,
     p->event->context.eventid = event_id;
     p->event->context.ts = get_current_time_in_ns();
     p->event->context.processor_id = (u16) bpf_get_smp_processor_id();
-    p->event->context.syscall = syscall_id;
+    p->event->context.syscall = get_current_task_syscall_id();
 
     u32 host_pid = p->event->context.task.host_pid;
     p->proc_info = bpf_map_lookup_elem(&proc_info_map, &host_pid);
@@ -220,21 +210,6 @@ statfunc int init_program_data_common(program_data_t *p,
 
     return 1;
 }
-
-statfunc int init_program_data(program_data_t *p, void *ctx, u32 event_id)
-{
-    struct task_struct *task = (struct task_struct *) bpf_get_current_task();
-    return init_program_data_common(p, ctx, event_id, task, get_current_task_syscall_id());
-}
-
-statfunc int init_program_data_with_task_syscall(program_data_t *p,
-                                                 void *ctx,
-                                                 u32 event_id,
-                                                 struct task_struct *task,
-                                                 int syscall_id)
-{
-    return init_program_data_common(p, ctx, event_id, task, syscall_id);
-}
 // clang-format on
 
 statfunc int init_tailcall_program_data(program_data_t *p, void *ctx)
@@ -271,8 +246,7 @@ statfunc void reset_event_args_buf(event_data_t *event)
     event->args_buf.argnum = 0;
 
     // Mark all entries in args_offset as invalid (0xFF)
-    __builtin_memset_inline(
-        event->args_buf.args_offset, 0xFF, sizeof(event->args_buf.args_offset));
+    __builtin_memset(event->args_buf.args_offset, 0xFF, sizeof(event->args_buf.args_offset));
 }
 
 // use this function in programs that send more than one event

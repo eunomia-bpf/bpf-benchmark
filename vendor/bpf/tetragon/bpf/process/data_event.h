@@ -14,10 +14,28 @@ __do_bytes(void *ctx, struct msg_data *msg, unsigned long uptr, size_t bytes)
 	int err;
 
 	/* Code movement from clang forces us to inline bounds checks here */
-	tetragon_clamp_nonnegative_max_or_goto(bytes, MSG_DATA_ARG_LEN, b);
+#ifdef MICRO_NATIVE
+	if (bytes > MSG_DATA_ARG_LEN)
+		bytes = MSG_DATA_ARG_LEN;
+#else
+	asm volatile goto(
+		"if %[bytes] < 0 goto %l[b]\n;"
+		"if %[bytes] < " XSTR(MSG_DATA_ARG_LEN) " goto %l[a]\n;"
+		:
+		: [bytes] "+r"(bytes)::a, b);
+	bytes = MSG_DATA_ARG_LEN;
+a:
+#endif
 	// < 5.3 verifier still requires value masking like 'val &= xxx'
 #ifndef __LARGE_BPF_PROG
-	tetragon_mask(bytes, 0x3fff);
+#ifdef MICRO_NATIVE
+	bytes &= 0x3fff;
+#else
+	asm volatile("%[bytes] &= 0x3fff;\n"
+		     :
+		     : [bytes] "+r"(bytes)
+		     :);
+#endif
 #endif
 	err = probe_read(&msg->arg[0], bytes, (char *)uptr);
 	if (err < 0)
@@ -72,15 +90,23 @@ error:
 	return err;
 }
 
-FUNC_INLINE long
+FUNC_LOCAL long
 __do_str(void *ctx, struct msg_data *msg, unsigned long arg, bool *done)
 {
 	size_t size, max = sizeof(msg->arg) - 1;
 	long ret;
 
 	/* Code movement from clang forces us to inline bounds checks here */
-	tetragon_mask(max, 0x7fff);
-	tetragon_clamp_max(max, 32736);
+#ifdef MICRO_NATIVE
+	max &= 0x7fff;
+	if (max >= 32736)
+		max = 32736;
+#else
+	asm volatile("%[max] &= 0x7fff;\n"
+		     "if %[max] < 32736 goto +1\n;"
+		     "%[max] = 32736;\n"
+		     : [max] "+r"(max));
+#endif
 
 	ret = probe_read_str(&msg->arg[0], max, (char *)arg);
 	if (ret < 0)
@@ -94,7 +120,12 @@ __do_str(void *ctx, struct msg_data *msg, unsigned long arg, bool *done)
 
 	size = ret + offsetof(struct msg_data, arg);
 	/* Code movement from clang forces us to inline bounds checks here */
-	tetragon_mask(size, 0x7fff);
+#ifdef MICRO_NATIVE
+	size &= 0x7fff;
+#else
+	asm volatile("%[size] &= 0x7fff;\n"
+		     : [size] "+r"(size));
+#endif
 	msg->common.size = size;
 	event_output_metric(ctx, MSG_OP_DATA, msg, size);
 	return ret;
@@ -183,7 +214,7 @@ FUNC_INLINE size_t data_event(
  *
  * Returns size of struct @desc object or 0 in case of error.
  */
-FUNC_INLINE size_t
+FUNC_LOCAL size_t
 data_event_bytes(void *ctx, struct data_event_desc *desc, unsigned long uptr,
 		 size_t size, struct bpf_map_def *heap)
 {
@@ -200,7 +231,7 @@ data_event_bytes(void *ctx, struct data_event_desc *desc, unsigned long uptr,
  *
  * Returns size of struct @desc object or 0 in case of error.
  */
-FUNC_INLINE size_t
+FUNC_LOCAL size_t
 data_event_str(void *ctx, struct data_event_desc *desc, unsigned long uptr,
 	       struct bpf_map_def *heap)
 {

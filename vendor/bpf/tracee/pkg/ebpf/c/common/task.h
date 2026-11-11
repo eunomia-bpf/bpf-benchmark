@@ -11,7 +11,6 @@
 
 statfunc int get_task_flags(struct task_struct *task);
 statfunc int get_current_task_syscall_id(void);
-statfunc int translate_syscall_id_for_task(struct task_struct *task, int id);
 statfunc u32 get_task_mnt_ns_id(struct task_struct *task);
 statfunc u32 get_task_pid_ns_for_children_id(struct task_struct *task);
 statfunc struct pid_namespace *get_task_pid_ns(struct task_struct *task);
@@ -41,18 +40,6 @@ statfunc int get_task_flags(struct task_struct *task)
     return BPF_CORE_READ(task, flags);
 }
 
-statfunc int translate_syscall_id_for_task(struct task_struct *task, int id)
-{
-    if (!is_compat(task))
-        return id;
-
-    u32 *id_64 = bpf_map_lookup_elem(&sys_32_to_64_map, &id);
-    if (id_64 == NULL)
-        return NO_SYSCALL;
-
-    return *id_64;
-}
-
 statfunc int get_current_task_syscall_id(void)
 {
     // There is no originated syscall in kernel thread context
@@ -63,7 +50,16 @@ statfunc int get_current_task_syscall_id(void)
 
     struct pt_regs *regs = get_current_task_pt_regs();
     int id = get_syscall_id_from_regs(regs);
-    return translate_syscall_id_for_task(curr, id);
+    if (is_compat(curr)) {
+        // Translate 32bit syscalls to 64bit syscalls, so we can send to the correct handler
+        u32 *id_64 = bpf_map_lookup_elem(&sys_32_to_64_map, &id);
+        if (id_64 == NULL)
+            // outdated syscall list?
+            return NO_SYSCALL;
+
+        id = *id_64;
+    }
+    return id;
 }
 
 statfunc u32 get_task_mnt_ns_id(struct task_struct *task)

@@ -7,12 +7,6 @@
 #define __BPF_TRACING_H__
 #define __BPF_CORE_READ_H__
 #define BPF_NO_PRESERVE_ACCESS_INDEX
-/* Native helper/kfunc shims below own the callable declarations.  Suppress
- * generated vmlinux kfunc prototypes so a same-named function-like shim does
- * not rewrite a later prototype while this header is force-included. */
-#ifndef BPF_NO_KFUNC_PROTOTYPES
-#define BPF_NO_KFUNC_PROTOTYPES
-#endif
 
 #ifndef SEC
 #define SEC(NAME) __attribute__((section(NAME), used))
@@ -76,6 +70,18 @@
 #define _(P) (__builtin_preserve_access_index(P))
 #endif
 
+#define __PT_PARM1_REG di
+#define __PT_PARM2_REG si
+#define __PT_PARM3_REG dx
+#define __PT_PARM4_REG cx
+#define __PT_PARM5_REG r8
+#define __PT_PARM6_REG r9
+#define __PT_RET_REG sp
+#define __PT_FP_REG bp
+#define __PT_RC_REG ax
+#define __PT_SP_REG sp
+#define __PT_IP_REG ip
+
 #if defined(__TARGET_ARCH_x86) && !defined(bpf_target_x86)
 #define bpf_target_x86
 #endif
@@ -84,103 +90,36 @@
 #endif
 
 #define __PT_REGS_CAST(x) ((struct pt_regs *)(x))
-
-#if defined(__TARGET_ARCH_arm64)
-#define __PT_PARM1(x) (__PT_REGS_CAST(x)->regs[0])
-#define __PT_PARM2(x) (__PT_REGS_CAST(x)->regs[1])
-#define __PT_PARM3(x) (__PT_REGS_CAST(x)->regs[2])
-#define __PT_PARM4(x) (__PT_REGS_CAST(x)->regs[3])
-#define __PT_PARM5(x) (__PT_REGS_CAST(x)->regs[4])
-#define __PT_PARM6(x) (__PT_REGS_CAST(x)->regs[5])
-#define __PT_RET(x) (__PT_REGS_CAST(x)->regs[30])
-#define __PT_FP(x) (__PT_REGS_CAST(x)->regs[29])
-#define __PT_RC(x) (__PT_REGS_CAST(x)->regs[0])
-#define __PT_SP(x) (__PT_REGS_CAST(x)->sp)
-#define __PT_IP(x) (__PT_REGS_CAST(x)->pc)
-#else
-#define __PT_PARM1(x) (__PT_REGS_CAST(x)->di)
-#define __PT_PARM2(x) (__PT_REGS_CAST(x)->si)
-#define __PT_PARM3(x) (__PT_REGS_CAST(x)->dx)
-#define __PT_PARM4(x) (__PT_REGS_CAST(x)->cx)
-#define __PT_PARM5(x) (__PT_REGS_CAST(x)->r8)
-#define __PT_PARM6(x) (__PT_REGS_CAST(x)->r9)
-#define __PT_RET(x) (__PT_REGS_CAST(x)->sp)
-#define __PT_FP(x) (__PT_REGS_CAST(x)->bp)
-#define __PT_RC(x) (__PT_REGS_CAST(x)->ax)
-#define __PT_SP(x) (__PT_REGS_CAST(x)->sp)
-#define __PT_IP(x) (__PT_REGS_CAST(x)->ip)
-#endif
-
-#define PT_REGS_PARM1(x) __PT_PARM1(x)
-#define PT_REGS_PARM2(x) __PT_PARM2(x)
-#define PT_REGS_PARM3(x) __PT_PARM3(x)
-#define PT_REGS_PARM4(x) __PT_PARM4(x)
-#define PT_REGS_PARM5(x) __PT_PARM5(x)
-#define PT_REGS_PARM6(x) __PT_PARM6(x)
-#define PT_REGS_RET(x) __PT_RET(x)
-#define PT_REGS_FP(x) __PT_FP(x)
-#define PT_REGS_RC(x) __PT_RC(x)
-#define PT_REGS_SP(x) __PT_SP(x)
-#define PT_REGS_IP(x) __PT_IP(x)
-
-#if defined(__TARGET_ARCH_arm64)
-#define __PT_PARM1_REG regs[0]
-#define __PT_PARM2_REG regs[1]
-#define __PT_PARM3_REG regs[2]
-#define __PT_PARM4_REG regs[3]
-#define __PT_PARM5_REG regs[4]
-#define __PT_PARM6_REG regs[5]
-#define __PT_PARM1_SYSCALL_REG orig_x0
-#define __PT_PARM2_SYSCALL_REG __PT_PARM2_REG
-#define __PT_PARM3_SYSCALL_REG __PT_PARM3_REG
-#define __PT_PARM4_SYSCALL_REG __PT_PARM4_REG
-#define __PT_PARM5_SYSCALL_REG __PT_PARM5_REG
-#define __PT_PARM6_SYSCALL_REG __PT_PARM6_REG
-#define __PT_RET_REG regs[30]
-#define __PT_FP_REG regs[29]
-#define __PT_RC_REG regs[0]
-#define __PT_SP_REG sp
-#define __PT_IP_REG pc
-#else
-#define __PT_PARM1_REG di
-#define __PT_PARM2_REG si
-#define __PT_PARM3_REG dx
-#define __PT_PARM4_REG cx
-#define __PT_PARM5_REG r8
-#define __PT_PARM6_REG r9
-#define __PT_PARM1_SYSCALL_REG __PT_PARM1_REG
-#define __PT_PARM2_SYSCALL_REG __PT_PARM2_REG
-#define __PT_PARM3_SYSCALL_REG __PT_PARM3_REG
-#define __PT_PARM4_SYSCALL_REG r10
-#define __PT_PARM5_SYSCALL_REG __PT_PARM5_REG
-#define __PT_PARM6_SYSCALL_REG __PT_PARM6_REG
-#define __PT_RET_REG sp
-#define __PT_FP_REG bp
-#define __PT_RC_REG ax
-#define __PT_SP_REG sp
-#define __PT_IP_REG ip
-#endif
-
-#define __PT_CORE_READ(x, reg) BPF_CORE_READ(__PT_REGS_CAST(x), reg)
-#define PT_REGS_RET_CORE(x) __PT_CORE_READ(x, __PT_RET_REG)
-#define PT_REGS_FP_CORE(x) __PT_CORE_READ(x, __PT_FP_REG)
-#define PT_REGS_RC_CORE(x) __PT_CORE_READ(x, __PT_RC_REG)
-#define PT_REGS_SP_CORE(x) __PT_CORE_READ(x, __PT_SP_REG)
-#define PT_REGS_IP_CORE(x) __PT_CORE_READ(x, __PT_IP_REG)
-#define PT_REGS_PARM1_CORE(x) __PT_CORE_READ(x, __PT_PARM1_REG)
-#define PT_REGS_PARM2_CORE(x) __PT_CORE_READ(x, __PT_PARM2_REG)
-#define PT_REGS_PARM3_CORE(x) __PT_CORE_READ(x, __PT_PARM3_REG)
-#define PT_REGS_PARM4_CORE(x) __PT_CORE_READ(x, __PT_PARM4_REG)
-#define PT_REGS_PARM5_CORE(x) __PT_CORE_READ(x, __PT_PARM5_REG)
-#define PT_REGS_PARM6_CORE(x) __PT_CORE_READ(x, __PT_PARM6_REG)
+#define PT_REGS_PARM1(x) (__PT_REGS_CAST(x)->__PT_PARM1_REG)
+#define PT_REGS_PARM2(x) (__PT_REGS_CAST(x)->__PT_PARM2_REG)
+#define PT_REGS_PARM3(x) (__PT_REGS_CAST(x)->__PT_PARM3_REG)
+#define PT_REGS_PARM4(x) (__PT_REGS_CAST(x)->__PT_PARM4_REG)
+#define PT_REGS_PARM5(x) (__PT_REGS_CAST(x)->__PT_PARM5_REG)
+#define PT_REGS_PARM6(x) (__PT_REGS_CAST(x)->__PT_PARM6_REG)
+#define PT_REGS_RET(x) (__PT_REGS_CAST(x)->__PT_RET_REG)
+#define PT_REGS_FP(x) (__PT_REGS_CAST(x)->__PT_FP_REG)
+#define PT_REGS_RC(x) (__PT_REGS_CAST(x)->__PT_RC_REG)
+#define PT_REGS_SP(x) (__PT_REGS_CAST(x)->__PT_SP_REG)
+#define PT_REGS_IP(x) (__PT_REGS_CAST(x)->__PT_IP_REG)
+#define PT_REGS_RET_CORE(x) PT_REGS_RET(x)
+#define PT_REGS_FP_CORE(x) PT_REGS_FP(x)
+#define PT_REGS_RC_CORE(x) PT_REGS_RC(x)
+#define PT_REGS_SP_CORE(x) PT_REGS_SP(x)
+#define PT_REGS_IP_CORE(x) PT_REGS_IP(x)
+#define PT_REGS_PARM1_CORE(x) PT_REGS_PARM1(x)
+#define PT_REGS_PARM2_CORE(x) PT_REGS_PARM2(x)
+#define PT_REGS_PARM3_CORE(x) PT_REGS_PARM3(x)
+#define PT_REGS_PARM4_CORE(x) PT_REGS_PARM4(x)
+#define PT_REGS_PARM5_CORE(x) PT_REGS_PARM5(x)
+#define PT_REGS_PARM6_CORE(x) PT_REGS_PARM6(x)
 #define PT_REGS_PARM7_CORE(x) 0
 #define PT_REGS_PARM8_CORE(x) 0
-#define PT_REGS_PARM1_CORE_SYSCALL(x) __PT_CORE_READ(x, __PT_PARM1_SYSCALL_REG)
-#define PT_REGS_PARM2_CORE_SYSCALL(x) __PT_CORE_READ(x, __PT_PARM2_SYSCALL_REG)
-#define PT_REGS_PARM3_CORE_SYSCALL(x) __PT_CORE_READ(x, __PT_PARM3_SYSCALL_REG)
-#define PT_REGS_PARM4_CORE_SYSCALL(x) __PT_CORE_READ(x, __PT_PARM4_SYSCALL_REG)
-#define PT_REGS_PARM5_CORE_SYSCALL(x) __PT_CORE_READ(x, __PT_PARM5_SYSCALL_REG)
-#define PT_REGS_PARM6_CORE_SYSCALL(x) __PT_CORE_READ(x, __PT_PARM6_SYSCALL_REG)
+#define PT_REGS_PARM1_CORE_SYSCALL(x) PT_REGS_PARM1(x)
+#define PT_REGS_PARM2_CORE_SYSCALL(x) PT_REGS_PARM2(x)
+#define PT_REGS_PARM3_CORE_SYSCALL(x) PT_REGS_PARM3(x)
+#define PT_REGS_PARM4_CORE_SYSCALL(x) PT_REGS_PARM4(x)
+#define PT_REGS_PARM5_CORE_SYSCALL(x) PT_REGS_PARM5(x)
+#define PT_REGS_PARM6_CORE_SYSCALL(x) PT_REGS_PARM6(x)
 #define PT_REGS_PARM7_CORE_SYSCALL(x) 0
 #define PT_REGS_SYSCALL_REGS(x) (x)
 
@@ -297,23 +236,23 @@ ____##name(struct pt_regs *ctx, ##args)
     fn((dst), sizeof(*(dst)), &((src)->a))
 #define __native_core_read_into_2(fn, dst, src, a, b) ({ \
     typeof((src)->a) __t1; \
-    fn(&__t1, sizeof(__t1), &((src)->a)); \
+    bpf_probe_read_kernel(&__t1, sizeof(__t1), &((src)->a)); \
     fn((dst), sizeof(*(dst)), &(__t1->b)); \
 })
 #define __native_core_read_into_3(fn, dst, src, a, b, c) ({ \
     typeof((src)->a) __t1; \
     typeof(__t1->b) __t2; \
-    fn(&__t1, sizeof(__t1), &((src)->a)); \
-    fn(&__t2, sizeof(__t2), &(__t1->b)); \
+    bpf_probe_read_kernel(&__t1, sizeof(__t1), &((src)->a)); \
+    bpf_probe_read_kernel(&__t2, sizeof(__t2), &(__t1->b)); \
     fn((dst), sizeof(*(dst)), &(__t2->c)); \
 })
 #define __native_core_read_into_4(fn, dst, src, a, b, c, d) ({ \
     typeof((src)->a) __t1; \
     typeof(__t1->b) __t2; \
     typeof(__t2->c) __t3; \
-    fn(&__t1, sizeof(__t1), &((src)->a)); \
-    fn(&__t2, sizeof(__t2), &(__t1->b)); \
-    fn(&__t3, sizeof(__t3), &(__t2->c)); \
+    bpf_probe_read_kernel(&__t1, sizeof(__t1), &((src)->a)); \
+    bpf_probe_read_kernel(&__t2, sizeof(__t2), &(__t1->b)); \
+    bpf_probe_read_kernel(&__t3, sizeof(__t3), &(__t2->c)); \
     fn((dst), sizeof(*(dst)), &(__t3->d)); \
 })
 #define __native_core_read_into_5(fn, dst, src, a, b, c, d, e) ({ \
@@ -321,10 +260,10 @@ ____##name(struct pt_regs *ctx, ##args)
     typeof(__t1->b) __t2; \
     typeof(__t2->c) __t3; \
     typeof(__t3->d) __t4; \
-    fn(&__t1, sizeof(__t1), &((src)->a)); \
-    fn(&__t2, sizeof(__t2), &(__t1->b)); \
-    fn(&__t3, sizeof(__t3), &(__t2->c)); \
-    fn(&__t4, sizeof(__t4), &(__t3->d)); \
+    bpf_probe_read_kernel(&__t1, sizeof(__t1), &((src)->a)); \
+    bpf_probe_read_kernel(&__t2, sizeof(__t2), &(__t1->b)); \
+    bpf_probe_read_kernel(&__t3, sizeof(__t3), &(__t2->c)); \
+    bpf_probe_read_kernel(&__t4, sizeof(__t4), &(__t3->d)); \
     fn((dst), sizeof(*(dst)), &(__t4->e)); \
 })
 #define __native_core_read_into_6(fn, dst, src, a, b, c, d, e, f) ({ \
@@ -333,11 +272,11 @@ ____##name(struct pt_regs *ctx, ##args)
     typeof(__t2->c) __t3; \
     typeof(__t3->d) __t4; \
     typeof(__t4->e) __t5; \
-    fn(&__t1, sizeof(__t1), &((src)->a)); \
-    fn(&__t2, sizeof(__t2), &(__t1->b)); \
-    fn(&__t3, sizeof(__t3), &(__t2->c)); \
-    fn(&__t4, sizeof(__t4), &(__t3->d)); \
-    fn(&__t5, sizeof(__t5), &(__t4->e)); \
+    bpf_probe_read_kernel(&__t1, sizeof(__t1), &((src)->a)); \
+    bpf_probe_read_kernel(&__t2, sizeof(__t2), &(__t1->b)); \
+    bpf_probe_read_kernel(&__t3, sizeof(__t3), &(__t2->c)); \
+    bpf_probe_read_kernel(&__t4, sizeof(__t4), &(__t3->d)); \
+    bpf_probe_read_kernel(&__t5, sizeof(__t5), &(__t4->e)); \
     fn((dst), sizeof(*(dst)), &(__t5->f)); \
 })
 #define __native_core_read_into(fn, dst, src, args...) \
@@ -349,41 +288,6 @@ ____##name(struct pt_regs *ctx, ##args)
                        __native_core_read_into_2, \
                        __native_core_read_into_1)(fn, dst, src, args)
 
-#define __native_core_read_value_1(fn, dst, src, a) \
-    fn((void *)(dst), sizeof(*(dst)), &((src)->a))
-#define __native_core_read_value_2(fn, dst, src, a, b) \
-    __native_core_read_into_2(fn, dst, src, a, b)
-#define __native_core_read_value_3(fn, dst, src, a, b, c) \
-    __native_core_read_into_3(fn, dst, src, a, b, c)
-#define __native_core_read_value_4(fn, dst, src, a, b, c, d) \
-    __native_core_read_into_4(fn, dst, src, a, b, c, d)
-#define __native_core_read_value_5(fn, dst, src, a, b, c, d, e) \
-    __native_core_read_into_5(fn, dst, src, a, b, c, d, e)
-#define __native_core_read_value_6(fn, dst, src, a, b, c, d, e, f) \
-    __native_core_read_into_6(fn, dst, src, a, b, c, d, e, f)
-#define __native_core_read_value(fn, dst, src, args...) \
-    __native_core_pick(args, \
-                       __native_core_read_value_6, \
-                       __native_core_read_value_5, \
-                       __native_core_read_value_4, \
-                       __native_core_read_value_3, \
-                       __native_core_read_value_2, \
-                       __native_core_read_value_1)(fn, dst, src, args)
-
-#define __native_core_read_expr_1(src, a) ((src)->a)
-#define __native_core_read_expr_2(src, a, b) (__native_core_read_expr_1(src, a)->b)
-#define __native_core_read_expr_3(src, a, b, c) (__native_core_read_expr_2(src, a, b)->c)
-#define __native_core_read_expr_4(src, a, b, c, d) (__native_core_read_expr_3(src, a, b, c)->d)
-#define __native_core_read_expr_5(src, a, b, c, d, e) (__native_core_read_expr_4(src, a, b, c, d)->e)
-#define __native_core_read_expr_6(src, a, b, c, d, e, f) (__native_core_read_expr_5(src, a, b, c, d, e)->f)
-#define __native_core_read_expr(src, args...) \
-    __native_core_pick(args, \
-                       __native_core_read_expr_6, \
-                       __native_core_read_expr_5, \
-                       __native_core_read_expr_4, \
-                       __native_core_read_expr_3, \
-                       __native_core_read_expr_2, \
-                       __native_core_read_expr_1)(src, args)
 #ifndef bpf_core_field_exists
 #ifdef MICRO_NATIVE_TETRAGON
 /*
@@ -419,30 +323,23 @@ ____##name(struct pt_regs *ctx, ##args)
 #ifndef bpf_core_enum_value
 #define bpf_core_enum_value(type, value) (value)
 #endif
-#ifdef MICRO_NATIVE_TETRAGON
-#define __native_core_probe_read bpf_probe_read
-#define __native_core_probe_read_str bpf_probe_read_str
-#else
-#define __native_core_probe_read bpf_probe_read_kernel
-#define __native_core_probe_read_str bpf_probe_read_kernel_str
-#endif
 #ifndef bpf_core_read
-#define bpf_core_read(dst, sz, src) __native_core_probe_read((dst), (sz), (src))
+#define bpf_core_read(dst, sz, src) bpf_probe_read_kernel((dst), (sz), (src))
 #endif
 #ifndef BPF_CORE_READ
 #define BPF_CORE_READ(src, args...) ({ \
     __native_core_type(src, args) __r; \
-    __native_core_read_value(__native_core_probe_read, &__r, (src), args); \
+    BPF_CORE_READ_INTO(&__r, (src), args); \
     __r; \
 })
 #endif
 #ifndef BPF_CORE_READ_INTO
 #define BPF_CORE_READ_INTO(dst, src, args...) \
-    __native_core_read_into(__native_core_probe_read, (dst), (src), args)
+    __native_core_read_into(bpf_probe_read_kernel, (dst), (src), args)
 #endif
 #ifndef BPF_CORE_READ_STR_INTO
 #define BPF_CORE_READ_STR_INTO(dst, src, args...) \
-    __native_core_read_into(__native_core_probe_read_str, (dst), (src), args)
+    __native_core_read_into(bpf_probe_read_kernel_str, (dst), (src), args)
 #endif
 #ifndef bpf_core_read_user
 #define bpf_core_read_user(dst, sz, src) bpf_probe_read_user((dst), (sz), (src))
@@ -501,25 +398,16 @@ extern long bpf_skb_load_bytes_relative(void *skb, unsigned int offset,
                                         unsigned int start_header);
 
 #ifdef MICRO_NATIVE_HELPER_MACROS
-#if defined(__aarch64__)
-/* Keep the helper number in a general register until the indirect branch.
- * native-link recognizes the resulting MOV-immediate plus BR/BLR pair on
- * AArch64; the x86 path deliberately keeps its existing RAX convention. */
-#define NATIVE_HELPER_ID_CONSTRAINT "+r"
-#else
-#define NATIVE_HELPER_ID_CONSTRAINT "+a"
-#endif
-
 static __always_inline unsigned long native_helper_id0(unsigned long id)
 {
-    asm volatile("" : NATIVE_HELPER_ID_CONSTRAINT(id) : : "memory");
+    asm volatile("" : "+r"(id) : : "memory");
     return id;
 }
 
 static __always_inline unsigned long native_helper_id1(unsigned long id,
                                                        unsigned long a0)
 {
-    asm volatile("" : NATIVE_HELPER_ID_CONSTRAINT(id) : "r"(a0) : "memory");
+    asm volatile("" : "+r"(id) : "r"(a0) : "memory");
     return id;
 }
 
@@ -527,7 +415,7 @@ static __always_inline unsigned long native_helper_id2(unsigned long id,
                                                        unsigned long a0,
                                                        unsigned long a1)
 {
-    asm volatile("" : NATIVE_HELPER_ID_CONSTRAINT(id) : "r"(a0), "r"(a1) : "memory");
+    asm volatile("" : "+r"(id) : "r"(a0), "r"(a1) : "memory");
     return id;
 }
 
@@ -536,7 +424,7 @@ static __always_inline unsigned long native_helper_id3(unsigned long id,
                                                        unsigned long a1,
                                                        unsigned long a2)
 {
-    asm volatile("" : NATIVE_HELPER_ID_CONSTRAINT(id) : "r"(a0), "r"(a1), "r"(a2) : "memory");
+    asm volatile("" : "+r"(id) : "r"(a0), "r"(a1), "r"(a2) : "memory");
     return id;
 }
 
@@ -546,7 +434,8 @@ static __always_inline unsigned long native_helper_id4(unsigned long id,
                                                        unsigned long a2,
                                                        unsigned long a3)
 {
-    asm volatile("" : NATIVE_HELPER_ID_CONSTRAINT(id) : "r"(a0), "r"(a1), "r"(a2), "r"(a3) : "memory");
+    asm volatile("" : "+r"(id) : "r"(a0), "r"(a1), "r"(a2), "r"(a3)
+                 : "memory");
     return id;
 }
 
@@ -557,11 +446,11 @@ static __always_inline unsigned long native_helper_id5(unsigned long id,
                                                        unsigned long a3,
                                                        unsigned long a4)
 {
-    asm volatile("" : NATIVE_HELPER_ID_CONSTRAINT(id) : "r"(a0), "r"(a1), "r"(a2), "r"(a3), "r"(a4) : "memory");
+    asm volatile("" : "+r"(id)
+                 : "r"(a0), "r"(a1), "r"(a2), "r"(a3), "r"(a4)
+                 : "memory");
     return id;
 }
-
-#undef NATIVE_HELPER_ID_CONSTRAINT
 
 #define native_bpf_helper0(type, id) ((type)native_helper_id0((unsigned long)(id)))
 #define native_bpf_helper1(type, id, a0) \
@@ -656,48 +545,6 @@ static __always_inline unsigned long native_helper_id5(unsigned long id,
     native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
                        NATIVE_BPF_FUNC_probe_read, (dst), (size), (unsafe_ptr))( \
         (dst), (size), (unsafe_ptr))
-/* A single string element retains the helper's access width. On success
- * RSI advances and RCX reaches zero; stock load recovery skips a faulting
- * element and clears one destination register. The two outputs distinguish
- * that fault from a legitimate zero value, including address wraparound.
- * The address-domain arm preserves arch/x86/mm/maccess.c eligibility. */
-static __always_inline long __native_probe_read_kernel(
-    void *dst, unsigned int size, const void *source)
-{
-#if defined(__x86_64__)
-    unsigned long address = (unsigned long)source;
-    if (__builtin_constant_p(size) &&
-        (size == 1 || size == 2 || size == 4 || size == 8) &&
-        (long)address < 0 &&
-        (address & ~4095UL) != 0xffffffffff600000UL) {
-        const void *from = source;
-        void *to = dst;
-        unsigned long count = 1;
-        switch (size) {
-        case 1:
-            asm volatile("rep movsb" : "+S"(from), "+D"(to), "+c"(count) : : "memory");
-            break;
-        case 2:
-            asm volatile("rep movsw" : "+S"(from), "+D"(to), "+c"(count) : : "memory");
-            break;
-        case 4:
-            asm volatile("rep movsl" : "+S"(from), "+D"(to), "+c"(count) : : "memory");
-            break;
-        case 8:
-            asm volatile("rep movsq" : "+S"(from), "+D"(to), "+c"(count) : : "memory");
-            break;
-        }
-        if ((unsigned long)from == address + size && count == 0)
-            return 0;
-        /* Preserve the helper's original error class and zeroing behavior.
-         * A rejected address domain returns -ERANGE; a failed valid-domain
-         * access returns -EFAULT. The existing helper supplies both. */
-    }
-#endif
-    return native_bpf_helper3(long (*)(void *, unsigned int, const void *),
-                             NATIVE_BPF_FUNC_probe_read_kernel, dst, size, source)(
-        dst, size, source);
-}
 #undef bpf_probe_read_kernel
 #define bpf_probe_read_kernel(dst, size, unsafe_ptr) \
     native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
@@ -728,18 +575,6 @@ static __always_inline long __native_probe_read_kernel(
     native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
                        NATIVE_BPF_FUNC_probe_read_user_str, (dst), (size), (unsafe_ptr))( \
         (dst), (size), (unsafe_ptr))
-/* Tetragon uses the sleepable bpf_copy_from_user_str kfunc with flags=0.
- * That mode has the same string-copy contract as probe_read_user_str, whose
- * helper trampoline is available to the native proof path.  Reject every
- * other mode at compile time instead of silently approximating it. */
-#undef bpf_copy_from_user_str
-#define bpf_copy_from_user_str(dst, size, unsafe_ptr, flags) ({ \
-    _Static_assert(__builtin_constant_p(flags) && (flags) == 0, \
-                   "native bpf_copy_from_user_str requires constant flags=0"); \
-    native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
-                       NATIVE_BPF_FUNC_probe_read_user_str, (dst), (size), (unsafe_ptr))( \
-        (dst), (size), (unsafe_ptr)); \
-})
 #undef bpf_probe_read_str
 #define bpf_probe_read_str(dst, size, unsafe_ptr) \
     native_bpf_helper3(long (*)(void *, unsigned int, const void *), \

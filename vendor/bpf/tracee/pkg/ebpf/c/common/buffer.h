@@ -25,8 +25,6 @@ statfunc int save_args_str_arr_to_buf(args_buffer_t *, const char *, const char 
 statfunc int save_sockaddr_to_buf(args_buffer_t *, struct socket *, bool, u8);
 statfunc int save_args_to_submit_buf(event_data_t *, args_t *);
 statfunc int events_perf_submit(program_data_t *);
-statfunc int events_perf_submit_cached_task_context(program_data_t *);
-#define events_perf_submit_hot_path(p) events_perf_submit_cached_task_context(p)
 statfunc int signal_perf_submit(void *, controlplane_signal_t *);
 
 // FUNCTIONS
@@ -98,7 +96,16 @@ statfunc int save_to_submit_buf(args_buffer_t *buf, void *ptr, u32 size, u8 inde
     // Save argument index (add 1 to offset later)
     buf->args[buf->offset] = index;
 
-    update_min(size, MAX_ELEMENT_SIZE);
+#ifdef MICRO_NATIVE
+    if (size > MAX_ELEMENT_SIZE)
+        size = MAX_ELEMENT_SIZE;
+#else
+    // Force verifier to compare size register with a bound maximum
+    asm volatile("if %[size] < %[max_size] goto +1;\n"
+                 "%[size] = %[max_size];\n"
+                 :
+                 : [size] "r"(size), [max_size] "i"(MAX_ELEMENT_SIZE));
+#endif
 
     u32 buffer_arg_offset = buffer_index_offset + size; // buffer offset after writing the ptr
 
@@ -278,33 +285,29 @@ statfunc int save_str_to_buf(args_buffer_t *buf, void *ptr, u8 index)
 {
     // Data saved to submit buf: [index][size][ ... string ... ]
 
-    u64 offset = buf->offset;
-    asm volatile("" : "+r"(offset));
-    if (offset > ARGS_BUF_SIZE - 1)
+    if (buf->offset > ARGS_BUF_SIZE - 1)
         return 0;
 
     // Save argument index
-    buf->args[offset] = index;
+    buf->args[buf->offset] = index;
 
     // Save offset at the specified index
-    buf->args_offset[index] = offset;
+    buf->args_offset[index] = buf->offset;
 
     // Satisfy verifier for probe read
-    if (offset > ARGS_BUF_SIZE - (MAX_STRING_SIZE + 1 + sizeof(int)))
+    if (buf->offset > ARGS_BUF_SIZE - (MAX_STRING_SIZE + 1 + sizeof(int)))
         return 0;
 
     // Read into buffer
-    int sz = bpf_probe_read_str(&(buf->args[offset + 1 + sizeof(int)]), MAX_STRING_SIZE, ptr);
+    int sz = bpf_probe_read_str(&(buf->args[buf->offset + 1 + sizeof(int)]), MAX_STRING_SIZE, ptr);
     if (sz > 0) {
         barrier();
-        offset = buf->offset;
-        asm volatile("" : "+r"(offset));
         // Satisfy verifier for probe read
-        if (offset > ARGS_BUF_SIZE - (MAX_STRING_SIZE + 1 + sizeof(int)))
+        if (buf->offset > ARGS_BUF_SIZE - (MAX_STRING_SIZE + 1 + sizeof(int)))
             return 0;
 
-        __builtin_memcpy(&(buf->args[offset + 1]), &sz, sizeof(int));
-        buf->offset = offset + sz + sizeof(int) + 1;
+        __builtin_memcpy(&(buf->args[buf->offset + 1]), &sz, sizeof(int));
+        buf->offset += sz + sizeof(int) + 1;
         buf->argnum++;
         return 1;
     }
@@ -720,44 +723,16 @@ statfunc int events_perf_submit(program_data_t *p)
     // context + argnum + arg buffer size
     u32 size = sizeof(event_context_t) + sizeof(u8) + p->event->args_buf.offset;
 
-    update_min(size, MAX_EVENT_SIZE);
-
-    long perf_ret = bpf_perf_event_output(p->ctx, &events, BPF_F_CURRENT_CPU, p->event, size);
-
-    update_event_stats(p->event->context.eventid, perf_ret);
-
-    return perf_ret;
-}
-
-// Preserve Tracee's task_info cache while avoiding a second full task-context
-// read on hot-path event submission.
-statfunc int events_perf_submit_cached_task_context(program_data_t *p)
-{
-    u32 host_pid = p->event->context.task.host_pid;
-    u32 host_tid = p->event->context.task.host_tid;
-    u64 cgroup_id = p->event->context.task.cgroup_id;
-    u32 flags = p->event->context.task.flags;
-
-    __builtin_memcpy_inline(
-        &p->event->context.task, &p->task_info->context, sizeof(task_context_t));
-    p->event->context.task.host_pid = host_pid;
-    p->event->context.task.host_tid = host_tid;
-    p->event->context.task.cgroup_id = cgroup_id;
-    p->event->context.task.flags |= flags & CONTAINER_STARTED_FLAG;
-    __builtin_memcpy_inline(
-        &p->task_info->context, &p->event->context.task, sizeof(task_context_t));
-
-    // Get Stack trace
-    if (p->config->options & OPT_CAPTURE_STACK_TRACES) {
-        int stack_id = bpf_get_stackid(p->ctx, &stack_addresses, BPF_F_USER_STACK);
-        if (stack_id >= 0) {
-            p->event->context.stack_id = stack_id;
-        }
-    }
-
-    // context + argnum + arg buffer size
-    u32 size = sizeof(event_context_t) + sizeof(u8) + p->event->args_buf.offset;
-    update_min(size, MAX_EVENT_SIZE);
+#ifdef MICRO_NATIVE
+    if (size > MAX_EVENT_SIZE)
+        size = MAX_EVENT_SIZE;
+#else
+    // inline bounds check to force compiler to use the register of size
+    asm volatile("if %[size] < %[max_size] goto +1;\n"
+                 "%[size] = %[max_size];\n"
+                 :
+                 : [size] "r"(size), [max_size] "i"(MAX_EVENT_SIZE));
+#endif
 
     long perf_ret = bpf_perf_event_output(p->ctx, &events, BPF_F_CURRENT_CPU, p->event, size);
 
@@ -771,7 +746,16 @@ statfunc int signal_perf_submit(void *ctx, controlplane_signal_t *sig)
     // signal id + argnum + arg buffer size
     u32 size = sizeof(u32) + sizeof(u8) + sig->args_buf.offset;
 
-    update_min(size, MAX_SIGNAL_SIZE);
+#ifdef MICRO_NATIVE
+    if (size > MAX_SIGNAL_SIZE)
+        size = MAX_SIGNAL_SIZE;
+#else
+    // inline bounds check to force compiler to use the register of size
+    asm volatile("if %[size] < %[max_size] goto +1;\n"
+                 "%[size] = %[max_size];\n"
+                 :
+                 : [size] "r"(size), [max_size] "i"(MAX_SIGNAL_SIZE));
+#endif
 
     long perf_ret = bpf_perf_event_output(ctx, &signals, BPF_F_CURRENT_CPU, sig, size);
 

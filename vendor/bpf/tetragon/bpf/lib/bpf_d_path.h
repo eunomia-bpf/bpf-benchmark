@@ -201,6 +201,13 @@ FUNC_INLINE long cwd_read(struct cwd_read_data *data)
 	return 0;
 }
 
+#ifdef __V61_BPF_PROG
+static long cwd_read_v61(__u32 index, void *data)
+{
+	return cwd_read(data);
+}
+#endif
+
 FUNC_INLINE int
 prepend_path(const struct path *path, const struct path *root, char *bf,
 	     char **buffer, int *buflen)
@@ -226,15 +233,15 @@ prepend_path(const struct path *path, const struct path *root, char *bf,
 				break;
 		}
 	} else {
-#ifdef __LARGE_BPF_PROG
-#pragma clang loop unroll(disable)
-#else
+#ifndef __V61_BPF_PROG
 #pragma unroll
-#endif
 		for (int i = 0; i < PROBE_CWD_READ_ITERATIONS; ++i) {
 			if (cwd_read(&data))
 				break;
 		}
+#else
+		loop(PROBE_CWD_READ_ITERATIONS, cwd_read_v61, (void *)&data, 0);
+#endif /* __V61_BPF_PROG */
 	}
 
 	if (data.bptr == *buffer) {

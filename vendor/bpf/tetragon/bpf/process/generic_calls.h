@@ -26,12 +26,6 @@
 
 #define MAX_TOTAL 9000
 
-FUNC_INLINE const char *const *filename_name_slot(struct filename *file)
-{
-	/* filename starts with the name pointer in the paired kernel ABI. */
-	return (const char *const *)file;
-}
-
 FUNC_INLINE int
 generic_start_process_filter(void *ctx, struct bpf_map_def *calls)
 {
@@ -291,7 +285,7 @@ __read_arg_1(void *ctx, int type, long orig_off, unsigned long arg, int argm, ch
 		struct filename *file;
 
 		probe_read(&file, sizeof(file), &arg);
-		probe_read(&arg, sizeof(arg), filename_name_slot(file));
+		probe_read(&arg, sizeof(arg), &file->name);
 	}
 		fallthrough;
 	case string_type:
@@ -1265,7 +1259,12 @@ FUNC_INLINE int generic_retprobe(void *ctx, struct bpf_map_def *calls, unsigned 
 	 * 0x1000 should be maximum argument length, so masking
 	 * with 0x1fff is safe and verifier will be happy.
 	 */
-	tetragon_mask(size, 0x1fff);
+#ifdef MICRO_NATIVE
+	size &= 0x1fff;
+#else
+	asm volatile("%[size] &= 0x1fff;\n"
+		     : [size] "+r"(size));
+#endif
 
 	switch (do_copy) {
 	case char_buf:

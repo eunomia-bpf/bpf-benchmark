@@ -4,10 +4,9 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
-import tempfile
 from collections import defaultdict
 from pathlib import Path
-from typing import Iterable, NamedTuple
+from typing import Iterable
 
 
 BPF_LD_IMM64 = 0x18
@@ -74,13 +73,12 @@ CILIUM_MAP_RULES = [
     map_rule("exact", "cilium_ratelimit", BPF_MAP_TYPE_LRU_HASH, 8, 16, 1024),
     map_rule("exact", "cilium_lb4_reverse_nat", BPF_MAP_TYPE_HASH, 2, 6, 65536),
     map_rule("exact", "cilium_lb6_reverse_nat", BPF_MAP_TYPE_HASH, 2, 18, 65536),
-    map_rule("exact", "cilium_snat_v4_external", BPF_MAP_TYPE_LRU_HASH, 14, 40),
+    map_rule("exact", "cilium_snat_v4_external", BPF_MAP_TYPE_LRU_HASH, 14, 40, 591428),
     map_rule("exact", "cilium_snat_v4_alloc_retries", BPF_MAP_TYPE_PERCPU_ARRAY, 4, 4, 33),
     map_rule("exact", "cilium_l2_responder_v4", BPF_MAP_TYPE_HASH, 8, 8, 4096),
     map_rule("exact", "cilium_l2_responder_v6", BPF_MAP_TYPE_HASH, 24, 8, 4096),
     map_rule("exact", "cilium_devices", BPF_MAP_TYPE_HASH, 4, 16, 512, True),
     map_rule("exact", "cilium_policy_v2", BPF_MAP_TYPE_LPM_TRIE, 12, 12, 16384, True),
-    map_rule("exact", "cilium_subnet_map", BPF_MAP_TYPE_LPM_TRIE, 24, 4, 1024),
     map_rule("exact", "cilium_nodeport_nat_buffer", BPF_MAP_TYPE_PERCPU_ARRAY, 4, 18, 1, True),
     map_rule("exact", "cilium_nodeport_neigh4", BPF_MAP_TYPE_LRU_HASH, 4, 8, object_scoped=True),
     map_rule("exact", "cilium_nodeport_neigh6", BPF_MAP_TYPE_LRU_HASH, 16, 8, object_scoped=True),
@@ -88,42 +86,6 @@ CILIUM_MAP_RULES = [
     map_rule("exact", "cilium_tail_call_buffer4", BPF_MAP_TYPE_PERCPU_ARRAY, 4, 60, 1, True),
     map_rule("prefix", "cilium_calls", BPF_MAP_TYPE_PROG_ARRAY, 4, 4,
              object_scoped=True, native_symbol="cilium_calls"),
-]
-
-MAX_FILTER_VERSION = 64
-MAX_EVENT_ID = 794
-
-TRACEE_VERSIONED_FILTER_MAP_RULES = [
-    map_rule("exact", "events_map_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
-             MAX_FILTER_VERSION, True,
-             inner=(BPF_MAP_TYPE_HASH, 4, 64, MAX_EVENT_ID)),
-    map_rule("exact", "uid_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
-             MAX_FILTER_VERSION, True,
-             inner=(BPF_MAP_TYPE_HASH, 4, 16, 256)),
-    map_rule("exact", "pid_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
-             MAX_FILTER_VERSION, True,
-             inner=(BPF_MAP_TYPE_HASH, 4, 16, 256)),
-    map_rule("exact", "mnt_ns_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
-             MAX_FILTER_VERSION, True,
-             inner=(BPF_MAP_TYPE_HASH, 4, 16, 256)),
-    map_rule("exact", "pid_ns_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
-             MAX_FILTER_VERSION, True,
-             inner=(BPF_MAP_TYPE_HASH, 4, 16, 256)),
-    map_rule("exact", "uts_ns_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
-             MAX_FILTER_VERSION, True,
-             inner=(BPF_MAP_TYPE_HASH, 16, 16, 256)),
-    map_rule("exact", "comm_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
-             MAX_FILTER_VERSION, True,
-             inner=(BPF_MAP_TYPE_HASH, 16, 16, 256)),
-    map_rule("exact", "cgroup_id_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2,
-             4, MAX_FILTER_VERSION, True,
-             inner=(BPF_MAP_TYPE_HASH, 4, 16, 256)),
-    map_rule("exact", "process_tree_map_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2,
-             4, MAX_FILTER_VERSION, True,
-             inner=(BPF_MAP_TYPE_HASH, 4, 16, 10240)),
-    map_rule("exact", "binary_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
-             MAX_FILTER_VERSION, True,
-             inner=(BPF_MAP_TYPE_HASH, 260, 16, 256)),
 ]
 
 TRACEE_TETRAGON_MAP_RULES = [
@@ -171,7 +133,6 @@ TRACEE_TETRAGON_MAP_RULES = [
     map_rule("exact", "ratelimit_map", BPF_MAP_TYPE_LRU_HASH, 224, 8, object_scoped=True),
     map_rule("exact", "ratelimit_heap", BPF_MAP_TYPE_PERCPU_ARRAY, 4, 352, 1, True),
     map_rule("exact", "retprobe_map", BPF_MAP_TYPE_HASH, 16, 24, 1024, True),
-    map_rule("exact", "socktrack_map", BPF_MAP_TYPE_LRU_HASH, 8, 16, 1, True),
     map_rule("exact", "fdinstall_map", BPF_MAP_TYPE_LRU_HASH, 16, 4104, object_scoped=True),
     map_rule("exact", "stack_trace_map", BPF_MAP_TYPE_STACK_TRACE, 4, 1016, object_scoped=True),
     map_rule("exact", "sleepable_preload", BPF_MAP_TYPE_HASH, 8, 4100, object_scoped=True),
@@ -185,7 +146,6 @@ TRACEE_TETRAGON_MAP_RULES = [
     map_rule("exact", "config_map", BPF_MAP_TYPE_ARRAY, 4, 736, 1, True),
     map_rule("exact", "write_offload", BPF_MAP_TYPE_HASH, 8, 16, 1, True),
     map_rule("exact", "argfilter_maps", BPF_MAP_TYPE_ARRAY_OF_MAPS, 4, 4, 8, True),
-    *TRACEE_VERSIONED_FILTER_MAP_RULES,
     map_rule("exact", "policy_filter_maps", BPF_MAP_TYPE_HASH_OF_MAPS, 4, 4, 128, True,
              inner=(BPF_MAP_TYPE_HASH, 8, 1, 1)),
     map_rule("exact", "policy_filter_cgroup_maps", BPF_MAP_TYPE_HASH_OF_MAPS, 8, 4, 1024, True,
@@ -193,19 +153,10 @@ TRACEE_TETRAGON_MAP_RULES = [
     map_rule("exact", "exit_heap_map", BPF_MAP_TYPE_PERCPU_ARRAY, 4, 40, 1, True),
 ]
 
-OTEL_MAP_RULES = [
-    map_rule("exact", "pid_page_to_map", BPF_MAP_TYPE_LPM_TRIE, 16, 16,
-             native_symbol="pid_page_to_mapping_info"),
-    map_rule("exact", "interpreter_off", BPF_MAP_TYPE_HASH, 8, 40, 32,
-             native_symbol="interpreter_offsets"),
-]
-
 
 def map_rules_for_app(app: str) -> list[dict[str, object]]:
     if app == "cilium":
         return CILIUM_MAP_RULES
-    if app == "otelcol-ebpf-profiler":
-        return OTEL_MAP_RULES
     if app in {"tracee", "tetragon"}:
         return TRACEE_TETRAGON_MAP_RULES
     return []
@@ -218,109 +169,45 @@ def source_object_for_native(root: Path, native_obj: Path) -> Path:
     return root / f"{name[:-len('.native.o')]}.o"
 
 
-class SourceProgramMeta(NamedTuple):
-    bytecode_len: int
-    helpers: set[int]
-
-
-def source_symbol_binding_allowed(binding: str, *, include_local: bool) -> bool:
-    allowed = {"STB_GLOBAL", "STB_WEAK"}
-    if include_local:
-        allowed.add("STB_LOCAL")
-    return binding in allowed
-
-
-def scan_bpf_source_programs(
-    source_obj: Path, *, include_local: bool = False
-) -> dict[str, SourceProgramMeta]:
+def scan_bpf_source_helpers(source_obj: Path) -> dict[str, set[int]]:
     try:
         from elftools.elf.elffile import ELFFile
     except ImportError as exc:
         raise SystemExit("pyelftools is required for --source-object-root") from exc
 
-    from elftools.elf.relocation import RelocationSection
-
-    by_symbol: dict[str, SourceProgramMeta] = {}
+    by_program: dict[str, set[int]] = defaultdict(set)
     with source_obj.open("rb") as f:
         elf = ELFFile(f)
         symtab = elf.get_section_by_name(".symtab")
         if symtab is None:
             raise SystemExit(f"source BPF object has no .symtab: {source_obj}")
-        functions = {}
-        entries = []
         for sym in symtab.iter_symbols():
             info = sym["st_info"]
-            if info["type"] != "STT_FUNC" or not isinstance(sym["st_shndx"], int):
+            if info["type"] != "STT_FUNC" or info["bind"] not in {"STB_GLOBAL", "STB_WEAK"}:
                 continue
-            section_index = int(sym["st_shndx"])
-            section = elf.get_section(section_index)
+            if not isinstance(sym["st_shndx"], int):
+                continue
+            section = elf.get_section(sym["st_shndx"])
             if section is None or not (section["sh_flags"] & 0x4):
                 continue
-            start, size = int(sym["st_value"]), int(sym["st_size"])
+            data = section.data()
+            start = int(sym["st_value"])
+            size = int(sym["st_size"])
             if size <= 0:
                 continue
-            if start < 0 or start + size > section["sh_size"] or start % 8 or size % 8:
+            end = start + size
+            if start < 0 or end > len(data) or size % 8 != 0:
                 raise SystemExit(f"invalid BPF function bounds for {sym.name} in {source_obj}")
-            key = (section_index, start)
-            if key in functions and functions[key][1] != size:
-                raise SystemExit(f"conflicting BPF function extents at {key} in {source_obj}")
-            functions[key] = (section, size, sym.name)
-            if source_symbol_binding_allowed(info["bind"], include_local=include_local):
-                entries.append((sym.name, key))
-
-        relocations = {}
-        for section in elf.iter_sections():
-            if isinstance(section, RelocationSection):
-                symbols = elf.get_section(section["sh_link"])
-                for reloc in section.iter_relocations():
-                    relocations[(int(section["sh_info"]), int(reloc["r_offset"]))] = (
-                        int(reloc["r_info_type"]), symbols.get_symbol(reloc["r_info_sym"]))
-
-        edges, helpers = {}, {}
-        for key, (section, size, name) in functions.items():
-            section_index, start = key
-            body = section.data()[start:start + size]
-            edges[key], helpers[key] = set(), set()
-            offset = 0
-            while offset < size:
-                insn = body[offset:offset + 8]
-                opcode, source = insn[0], insn[1] >> 4
-                immediate = int.from_bytes(insn[4:8], "little", signed=True)
-                if opcode == BPF_CALL and source == 0:
-                    helpers[key].add(immediate)
-                reloc = relocations.get((section_index, start + offset))
-                target = None
-                if reloc is not None:
-                    kind, symbol = reloc
-                    target_section = symbol["st_shndx"]
-                    if (isinstance(target_section, int)
-                            and elf.get_section(target_section).name == ".text"):
-                        # Match libbpf bpf_object__reloc_code: direct calls use
-                        # S/8+imm+1; function-address ldimm64 uses (S+imm)/8.
-                        if opcode == BPF_CALL and source == 1 and kind == 10:
-                            target = (target_section, int(symbol["st_value"]) + (immediate + 1) * 8)
-                        elif opcode == BPF_LD_IMM64 and kind == 1:
-                            target = (target_section, int(symbol["st_value"]) + immediate)
-                elif opcode == BPF_CALL and source == 1:
-                    target = (section_index, start + offset + (immediate + 1) * 8)
-                if target is not None:
-                    if target not in functions:
-                        raise SystemExit(f"BPF subprogram target {target} from {name} lacks a function extent in {source_obj}")
-                    edges[key].add(target)
-                offset += 16 if opcode == BPF_LD_IMM64 else 8
-
-        for name, root in entries:
-            reachable, pending = set(), [root]
-            while pending:
-                key = pending.pop()
-                if key in reachable:
+            helpers = by_program[sym.name[:15]]
+            body = data[start:end]
+            for off in range(0, len(body), 8):
+                insn = body[off:off + 8]
+                if insn[0] == BPF_CALL and insn[1] == 0:
+                    helpers.add(int.from_bytes(insn[4:8], "little", signed=True))
+                elif insn[0] == BPF_LD_IMM64:
+                    # Skip the second half of an ldimm64 pair.
                     continue
-                reachable.add(key)
-                pending.extend(edges[key] - reachable)
-            by_symbol[name] = SourceProgramMeta(
-                bytecode_len=sum(functions[key][1] for key in reachable),
-                helpers=set().union(*(helpers[key] for key in reachable)))
-    return by_symbol
+    return by_program
 
 
 def helper_signature(helpers: set[int] | None, ids: Iterable[int]) -> tuple[tuple[int, ...], tuple[int, ...]]:
@@ -343,16 +230,8 @@ def parse_object_spec(raw: str) -> tuple[Path, dict[str, object]]:
             raise SystemExit(f"invalid --object attribute: {part!r}")
         if key == "prog_type":
             attrs["prog_type"] = int(value, 0)
-        elif key == "source_xlated_len":
-            attrs["source_xlated_len"] = int(value, 0)
-        elif key == "source_bytecode_len":
-            attrs["source_bytecode_len"] = int(value, 0)
-        elif key == "symbol":
-            attrs["symbol"] = value
         elif key == "source_map_prefix":
             attrs.setdefault("source_map_prefixes", []).append(value)
-        elif key == "source_lacks_map_prefix":
-            attrs.setdefault("source_lacks_map_prefixes", []).append(value)
         else:
             raise SystemExit(f"unsupported --object attribute: {key}")
     return path, attrs
@@ -379,10 +258,6 @@ def text_symbols(llvm_nm: str, obj: Path, skip_prefixes: tuple[str, ...]) -> lis
     return out
 
 
-def manifest_sort_key(key: tuple[object, ...]) -> tuple[str, ...]:
-    return tuple("" if value is None else str(value) for value in key)
-
-
 def rel_object(output: Path, obj: Path) -> str:
     try:
         return str(obj.resolve().relative_to(output.parent.resolve()))
@@ -396,81 +271,45 @@ def main() -> None:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--llvm-nm", required=True)
     parser.add_argument("--object", action="append", required=True)
-    parser.add_argument("--data-object", action="append", default=[])
     parser.add_argument("--skip-prefix", action="append", default=["LBB", "__check_"])
     parser.add_argument("--dedupe-program", choices=("none", "last"), default="none")
     parser.add_argument("--source-object-root", type=Path)
-    parser.add_argument("--source-library", action="append", type=Path, default=[],
-                        help="BPF subprogram library linked into source metadata")
-    parser.add_argument("--bpftool", default="bpftool")
-    parser.add_argument("--include-local-source-programs", action="store_true")
     parser.add_argument("--helper-disambiguate", action="append", type=lambda v: int(v, 0), default=[])
     args = parser.parse_args()
 
     output: Path = args.output
-    output.parent.mkdir(parents=True, exist_ok=True)
     entries_by_key: dict[tuple[object, ...], set[str]] = defaultdict(set)
     native_object_by_key: dict[tuple[object, ...], str] = {}
     helper_require_by_key: dict[tuple[object, ...], tuple[int, ...]] = {}
     helper_forbid_by_key: dict[tuple[object, ...], tuple[int, ...]] = {}
     selected_by_program: dict[tuple[object, ...], tuple[str, set[str]]] = {}
     selected_helpers_by_program: dict[tuple[object, ...], tuple[tuple[int, ...], tuple[int, ...]]] = {}
-    source_meta_cache: dict[Path, dict[str, SourceProgramMeta]] = {}
+    source_helpers_cache: dict[Path, dict[str, set[int]]] = {}
     for raw in args.object:
         obj, attrs = parse_object_spec(raw)
         rel = rel_object(output, obj)
-        source_meta: dict[str, SourceProgramMeta] | None = None
+        source_helpers: dict[str, set[int]] | None = None
         if args.source_object_root:
             source_obj = source_object_for_native(args.source_object_root, obj)
             if not source_obj.is_file():
                 raise SystemExit(f"source BPF object not found for {obj}: {source_obj}")
-            if source_obj not in source_meta_cache:
-                if args.source_library:
-                    # Use the application linker's BPF relocation semantics for
-                    # generated subprograms before computing reachable code.
-                    with tempfile.TemporaryDirectory(
-                            prefix="manifest-source-", dir=output.parent) as temp:
-                        linked = Path(temp) / source_obj.name
-                        subprocess.run(
-                            [args.bpftool, "gen", "object", str(linked),
-                             str(source_obj), *map(str, args.source_library)],
-                            check=True,
-                        )
-                        metadata = scan_bpf_source_programs(
-                            linked, include_local=args.include_local_source_programs)
-                else:
-                    metadata = scan_bpf_source_programs(
-                        source_obj, include_local=args.include_local_source_programs)
-                source_meta_cache[source_obj] = metadata
-            source_meta = source_meta_cache[source_obj]
+            source_helpers = source_helpers_cache.setdefault(
+                source_obj, scan_bpf_source_helpers(source_obj))
         prefixes = attrs.get("source_map_prefixes") or [None]
         for symbol in text_symbols(args.llvm_nm, obj, tuple(args.skip_prefix)):
-            if attrs.get("symbol") and symbol != attrs["symbol"]:
-                continue
             program = symbol[:15]
-            meta = None if source_meta is None else source_meta.get(symbol)
-            source_xlated_len = attrs.get("source_xlated_len")
-            source_bytecode_len = attrs.get("source_bytecode_len")
-            if source_bytecode_len is None and meta is not None:
-                source_bytecode_len = meta.bytecode_len
             required, forbidden = helper_signature(
-                None if meta is None else meta.helpers,
+                None if source_helpers is None else source_helpers.get(program),
                 args.helper_disambiguate)
             for prefix in prefixes:
                 if args.dedupe_program == "last":
-                    key = (program, attrs.get("prog_type"), prefix,
-                           source_xlated_len, source_bytecode_len,
-                           tuple(attrs.get("source_lacks_map_prefixes", ())),
-                           required, forbidden)
+                    key = (program, attrs.get("prog_type"), prefix, required, forbidden)
                     if key not in selected_by_program or selected_by_program[key][0] != rel:
                         selected_by_program[key] = (rel, set())
                         selected_helpers_by_program[key] = (required, forbidden)
                     selected_by_program[key][1].add(symbol)
                 else:
-                    key = (program, rel, attrs.get("prog_type"), prefix,
-                           source_xlated_len, source_bytecode_len,
-                           tuple(attrs.get("source_lacks_map_prefixes", ())),
-                           required, forbidden)
+                    key = (program, rel, attrs.get("prog_type"), prefix, required, forbidden)
                     native_object_by_key[key] = rel
                     helper_require_by_key[key] = required
                     helper_forbid_by_key[key] = forbidden
@@ -478,19 +317,16 @@ def main() -> None:
 
     if args.dedupe_program == "last":
         for key, (rel, symbols) in selected_by_program.items():
-            (program, prog_type, prefix, source_xlated_len, source_bytecode_len,
-             lacks_prefixes, required, forbidden) = key
-            out_key = (program, rel, prog_type, prefix, source_xlated_len,
-                       source_bytecode_len, lacks_prefixes, required, forbidden)
+            program, prog_type, prefix, required, forbidden = key
+            out_key = (program, rel, prog_type, prefix, required, forbidden)
             native_object_by_key[out_key] = rel
             helper_require_by_key[out_key] = selected_helpers_by_program[key][0]
             helper_forbid_by_key[out_key] = selected_helpers_by_program[key][1]
             entries_by_key[out_key].update(symbols)
 
     objects: list[dict[str, object]] = []
-    for key in sorted(entries_by_key, key=manifest_sort_key):
-        (program, rel, prog_type, prefix, source_xlated_len,
-         source_bytecode_len, lacks_prefixes, _required, _forbidden) = key
+    for key in sorted(entries_by_key):
+        program, rel, prog_type, prefix, _required, _forbidden = key
         symbols = sorted(entries_by_key[key])
         entry: dict[str, object] = {
             "program": program,
@@ -500,14 +336,8 @@ def main() -> None:
             entry["symbol"] = symbols[0]
         if prog_type is not None:
             entry["prog_type"] = prog_type
-        if source_xlated_len is not None:
-            entry["source_xlated_len"] = source_xlated_len
-        if source_bytecode_len is not None:
-            entry["source_bytecode_len"] = source_bytecode_len
         if prefix is not None:
             entry["source_map_prefix"] = prefix
-        if lacks_prefixes:
-            entry["source_lacks_map_prefix"] = list(lacks_prefixes)
         required = helper_require_by_key.get(key, ())
         forbidden = helper_forbid_by_key.get(key, ())
         if required:
@@ -526,16 +356,6 @@ def main() -> None:
         "status": "native-objects-proof-linked",
         "objects": objects,
     }
-    if args.data_object:
-        data_objects = []
-        seen_data_objects: set[str] = set()
-        for raw in args.data_object:
-            rel = rel_object(output, Path(raw))
-            if rel in seen_data_objects:
-                continue
-            seen_data_objects.add(rel)
-            data_objects.append({"native_object": rel})
-        manifest["data_objects"] = data_objects
     map_rules = map_rules_for_app(args.app)
     if map_rules:
         manifest["map_rules"] = map_rules

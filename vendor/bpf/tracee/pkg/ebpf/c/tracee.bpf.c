@@ -169,7 +169,7 @@ int sys_enter_submit(struct bpf_raw_tracepoint_args *ctx)
 
     if (sys->id != SYSCALL_RT_SIGRETURN && !p.task_info->syscall_traced) {
         save_to_submit_buf(&p.event->args_buf, (void *) &(sys->args.args[0]), sizeof(int), 0);
-        events_perf_submit_hot_path(&p);
+        events_perf_submit(&p);
     }
 
 out:
@@ -289,7 +289,7 @@ int sys_exit_submit(struct bpf_raw_tracepoint_args *ctx)
 
     u8 ret_index = get_num_fields(p.event->config.field_types);
     save_to_submit_buf(&p.event->args_buf, (void *) &ret, sizeof(long), ret_index);
-    events_perf_submit_hot_path(&p);
+    events_perf_submit(&p);
 
 out:
     bpf_tail_call(ctx, &sys_exit_tails, sys->id);
@@ -306,21 +306,25 @@ SEC("raw_tracepoint/trace_sys_enter")
 int trace_sys_enter(struct bpf_raw_tracepoint_args *ctx)
 {
     program_data_t p = {};
-    int id = ctx->args[1];
-    struct task_struct *task = (struct task_struct *) bpf_get_current_task();
-    id = translate_syscall_id_for_task(task, id);
-    if (id == NO_SYSCALL)
-        return 0;
-
-    if (!init_program_data_with_task_syscall(&p, ctx, RAW_SYS_ENTER, task, id))
+    if (!init_program_data(&p, ctx, RAW_SYS_ENTER))
         return 0;
 
     if (!evaluate_scope_filters(&p))
         return 0;
 
     // always submit since this won't be attached otherwise
+    int id = ctx->args[1];
+    struct task_struct *task = (struct task_struct *) bpf_get_current_task();
+    if (is_compat(task)) {
+        // Translate 32bit syscalls to 64bit syscalls, so we can send to the correct handler
+        u32 *id_64 = bpf_map_lookup_elem(&sys_32_to_64_map, &id);
+        if (id_64 == 0)
+            return 0;
+
+        id = *id_64;
+    }
     save_to_submit_buf(&p.event->args_buf, (void *) &id, sizeof(int), 0);
-    events_perf_submit_hot_path(&p);
+    events_perf_submit(&p);
     return 0;
 }
 
@@ -329,22 +333,26 @@ SEC("raw_tracepoint/trace_sys_exit")
 int trace_sys_exit(struct bpf_raw_tracepoint_args *ctx)
 {
     program_data_t p = {};
-    struct pt_regs *regs = (struct pt_regs *) ctx->args[0];
-    int id = get_syscall_id_from_regs(regs);
-    struct task_struct *task = (struct task_struct *) bpf_get_current_task();
-    id = translate_syscall_id_for_task(task, id);
-    if (id == NO_SYSCALL)
-        return 0;
-
-    if (!init_program_data_with_task_syscall(&p, ctx, RAW_SYS_EXIT, task, id))
+    if (!init_program_data(&p, ctx, RAW_SYS_EXIT))
         return 0;
 
     if (!evaluate_scope_filters(&p))
         return 0;
 
     // always submit since this won't be attached otherwise
+    struct pt_regs *regs = (struct pt_regs *) ctx->args[0];
+    int id = get_syscall_id_from_regs(regs);
+    struct task_struct *task = (struct task_struct *) bpf_get_current_task();
+    if (is_compat(task)) {
+        // Translate 32bit syscalls to 64bit syscalls, so we can send to the correct handler
+        u32 *id_64 = bpf_map_lookup_elem(&sys_32_to_64_map, &id);
+        if (id_64 == 0)
+            return 0;
+
+        id = *id_64;
+    }
     save_to_submit_buf(&p.event->args_buf, (void *) &id, sizeof(int), 0);
-    events_perf_submit_hot_path(&p);
+    events_perf_submit(&p);
     return 0;
 }
 
@@ -847,7 +855,7 @@ bool hidden_old_mod_scan_done = false;
 #define MOD_HIDDEN                     1
 #define MOD_NOT_HIDDEN                 0
 
-sharedfunc void lkm_seeker_send_to_userspace(struct module *mod, u32 *flags, program_data_t *p)
+void __always_inline lkm_seeker_send_to_userspace(struct module *mod, u32 *flags, program_data_t *p)
 {
     // since this function can be called in a loop, we need to reset the buffer.
     // it is the responsibility of the caller, however, to set program_data to
@@ -2349,7 +2357,7 @@ int BPF_KPROBE(trace_security_file_open)
     save_str_to_buf(&p.event->args_buf, syscall_pathname, 5);
 
     if (evaluate_data_filters(&p, 0))
-        events_perf_submit_hot_path(&p);
+        events_perf_submit(&p);
 
 out:
 #ifdef EXTENDED_BUILD
@@ -2494,7 +2502,7 @@ int BPF_KPROBE(trace_commit_creds)
         (old_slim.cap_bset != new_slim.cap_bset)                ||
         (old_slim.cap_ambient != new_slim.cap_ambient)
     ) {
-        events_perf_submit_hot_path(&p);
+        events_perf_submit(&p);
     }
     // clang-format on
 
@@ -2569,7 +2577,7 @@ int BPF_KPROBE(trace_cap_capable)
 
     save_to_submit_buf(&p.event->args_buf, (void *) &cap, sizeof(int), 0);
 
-    return events_perf_submit_hot_path(&p);
+    return events_perf_submit(&p);
 }
 
 SEC("kprobe/security_socket_create")
@@ -3203,7 +3211,7 @@ do_file_io_operation(struct pt_regs *ctx, u32 event_id, u32 tail_call_id, bool i
     // Submit io event
     long ret = PT_REGS_RC(ctx);
     save_to_submit_buf(&p.event->args_buf, (void *) &ret, sizeof(long), 5);
-    events_perf_submit_hot_path(&p);
+    events_perf_submit(&p);
 
 tail:
     bpf_tail_call(ctx, &prog_array, tail_call_id);
@@ -5294,7 +5302,7 @@ int BPF_KPROBE(trace_security_task_setrlimit)
     save_to_submit_buf(&p.event->args_buf, &new_rlim_cur, sizeof(u64), 2);
     save_to_submit_buf(&p.event->args_buf, &new_rlim_max, sizeof(u64), 3);
 
-    return events_perf_submit_hot_path(&p);
+    return events_perf_submit(&p);
 }
 
 SEC("kprobe/security_settime64")
@@ -5590,7 +5598,7 @@ int BPF_KPROBE(trace_security_task_prctl)
         save_to_submit_buf(&p.event->args_buf, &old_securebits, sizeof(old_securebits), 40);
     }
 
-    return events_perf_submit_hot_path(&p);
+    return events_perf_submit(&p);
 }
 
 //

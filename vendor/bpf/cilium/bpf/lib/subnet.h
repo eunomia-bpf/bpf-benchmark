@@ -10,12 +10,6 @@
 
 DECLARE_CONFIG(bool, hybrid_routing_enabled, "Enable hybrid mode routing based on subnet IDs")
 
-#ifdef BPFBENCH_CILIUM_HYBRID_ROUTING_ENABLED
-#define CILIUM_HYBRID_ROUTING_ENABLED BPFBENCH_CILIUM_HYBRID_ROUTING_ENABLED
-#else
-#define CILIUM_HYBRID_ROUTING_ENABLED CONFIG(hybrid_routing_enabled)
-#endif
-
 #define SUBNET_MAP_SIZE 1024
 
 struct subnet_key {
