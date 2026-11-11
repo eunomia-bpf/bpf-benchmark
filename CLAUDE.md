@@ -1,5 +1,18 @@
 # BPF Benchmark Framework
 
+## HIGHEST PRIORITY: one kernel, one worktree, one image, one base; raw data kept; benchmark settings fixed
+
+This section overrides every other rule in this file, in lane prompts and in duty prompts.
+
+Operator, 2026-11-11: "确保需要的功能 merge 到一起之后, 删掉所有别的内核版本. 任何时候只允许一个镜像和一个底座. 所有原始数据不允许删掉, 不允许建立任何新的 worktree. 明确记录." "一个 workspace 里面只能一个我顺便问一句, 内核版本只有一个吧? 也只有一个 worktree? ... 这个规则要记录在好几个地方, 最高优先级" "我们要确保在当前系统也达到这样的性能. benchmark 设置也不能改, 除非得到我同意" "得确保当前对象也是 05-29 系统的性能数据, 当前对象为啥会差? 是不是有回归? 代码为啥不是直接和 05-29 一致?"
+
+- One worktree in this Workspace: /workspaces/repository on master, with the kernel submodule vendor/linux-framework checked out inside it. No other worktree, clone, export, copied tree or branch checkout of this repository or of a kernel exists here, and none is created.
+- One kernel version: the vendor/linux-framework submodule at the commit master records. Functions a path needs are merged into that line as commits on top of it, made inside the submodule checkout (pushed to eunomia-bpf/linux kprog-no-kinsn, master's pointer updated in the same step). After the merge every other kernel version, kernel tree and kernel build is removed.
+- One image (bpf-benchmark/kprog:current) and one base (/workspaces/.agent-state/kprog-ck: the kernel build build-x86, its modules, the loader, shim, native-link and the object sets) serve every lane at any time. A lane that changes the base rebuilds it in place and announces it in COORDINATION.md.
+- Raw data is kept: run directories, logs, archives, census and replay outputs stay on persistent storage under /workspaces, committed when they back a number. /var/tmp is cleared when the container restarts, so raw data written there moves to /workspaces. Removal applies to rebuildable build outputs (kernels, images, object builds) only, and every removal is listed in kprog/docs/cleanup-log.md.
+- Benchmark settings stay at the 2026-05-29 definition (9f3855f6f): the workload, its configuration and the runtime image definition. Any change needs the operator's explicit consent.
+- Performance floor: the current system reaches, application by application, at least the 2026-05-29 system: OTel 1.849x, BCC 0.985x, Tracee 0.948x, Katran 1.113x, Tetragon 1.009x, Cilium 1.319x (stats off, reproduced 2026-11-10 on the frozen workload). The 2026-05-29 code is the reference. For each application the current chain's native code is compared byte by byte with the 2026-05-29 code first; each difference is a measured improvement or goes back to the 2026-05-29 form.
+
 ## Working Agreement
 
 Inside this project's already-authorized goals, continue and deliver
@@ -190,15 +203,6 @@ tracee, tetragon, bcc, katran, cilium, otelcol-ebpf-profiler
 ## One tree, one branch
 
 Operator, 2026-11-09: "以后禁止切换branch 和开不同的 tree". Every edit happens in this checkout on master. New git worktrees, clones, branches, branch switches and private edited source copies are banned. Builds, replays and guests also run from this checkout, with their recipes and scripts committed here, so exported source copies, copied benchmark trees (such as the former /paper-tree) and private harness directories go away as well (operator 2026-11-10: "/paper-tree 是什么???? 又违规开了 worktree 了?"). Commit and push every step at once ("做一步 commit push 一步").
-
-## One kernel, one image, one base; raw data kept
-
-Operator, 2026-11-11: "确保需要的功能 merge 到一起之后, 删掉所有别的内核版本. 任何时候只允许一个镜像和一个底座. 所有原始数据不允许删掉, 不允许建立任何新的 worktree. 明确记录."
-
-- One kernel line: the vendor/linux-framework submodule at the commit master records. Functions a path needs are merged into that line as commits on top of it (pushed to eunomia-bpf/linux kprog-no-kinsn, with master's pointer updated in the same step). After the merge, every other kernel version and kernel build is removed.
-- One runtime image (bpf-benchmark/kprog:current) and one base (/workspaces/.agent-state/kprog-ck: the kernel build, its modules, the loader, shim, native-link and the object sets) serve every lane at any time. A lane that changes the base rebuilds it in place and announces it in COORDINATION.md.
-- Raw data stays: run directories, logs, archives, census and replay outputs live on persistent storage (/workspaces, committed when they back a number), and removal applies only to rebuildable build outputs.
-- No new git worktree, clone or branch checkout, kernel trees included.
 
 ## Oversized files on GitHub
 

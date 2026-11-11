@@ -7,6 +7,13 @@
 状态基于 2026-11-09 13:05 UTC。
 
 ## 1. 性能（目标：六应用几何平均 native/JIT 1.20x–1.40x，来自原生代码）
+- [ ] **最高优先级（运营者 2026-11-11）**：每个应用在当前系统上至少达到 05-29 系统的数字（11-10 复现，stats 关：OTel 1.849x、BCC 0.985x、Tracee 0.948x、Katran 1.113x、Tetragon 1.009x、Cilium 1.319x）。以 05-29 代码为参照，逐个应用比对原生代码字节，差异要么是实测的改进，要么改回 05-29 的形式。
+- [ ] **C** 内核合并：9c50491de2a5 和 a3cb8790e 里当前路径需要的功能，以提交的形式合进 7d6b7d663680 这条线（在子模块检出里原地提交，推送 eunomia-bpf/linux kprog-no-kinsn，同步 master 指针），在 `/workspaces/.agent-state/kprog-ck/build-x86` 原地重建；之后删掉其他内核版本和构建，删除清单写进 `kprog/docs/cleanup-log.md`。
+- [ ] **C** 唯一镜像 `bpf-benchmark/kprog:current`：`runner/containers/runner-runtime.Dockerfile` 的非原生部分改回 9f3855f6f（运营者 11-09“当前仓库的所有 benchmark设置立刻马上改回 05-29, 确保不要留下”），保留的原生组件逐行写明理由；其余镜像删除。
+- [ ] **C** Katran：链接器去掉多余的 helper id 加载（cd8996e64，blob 与 05-29 字节相同）后计时；jited_len 剩下的差（10,102 对 10,196）查内核一侧的包装。
+- [ ] **C** Cilium：用去掉 thunk 的配方对象（`cil_from_host` 734 条指令）计时，对照 05-29 的 1.319x。
+- [ ] **C** OTel、Tracee：唯一内核线支持 tail call 计数重定位（第 10、11 种），`native_tracer_e` 走 native。
+- [ ] **全部 lane** 原始数据从 /var/tmp 移到 /workspaces 的持久存储，一律保留。
 
 - [x] 框架恢复为 05-29 定义，只保留 `native-sim`→`kprog` 和 `module/`→`kinsn/module/` 两处目录改名（191f9dc1d、96d09c17b）。
 - [ ] **R** 用 05-29 完整版本（内核、loader、原生对象）跑 Katran 和 OTel，两边工作量相等时才算数字回来（参考值 1.102x、1.824x）。
