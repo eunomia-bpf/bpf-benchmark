@@ -1659,6 +1659,54 @@ deliver:
 - **Katran's 0.42 CPUs** is the smallest share, which is why its 1.104x is
   near the ceiling a 0.42-CPU workload can deliver.
 
+### The rebuilt 2026-05-29 ART cannot load Katran, and the loader reports no reason
+
+The container restart of 2026-11-10 23:53 cleared `/var/tmp` and every docker
+image, so the ART was rebuilt from the tree into
+`/workspaces/.agent-state/kprog-r-art/art`. Seven attempts to re-run the
+Katran walk's step 0 on it all fail identically:
+
+| attempt | objects | loader | native-link | kinsn module | result |
+| --- | --- | --- | --- | --- | --- |
+| `024606_747311` | paper stage | `1a4d6c9d` | `79bd3829` | paper build | error |
+| `030503_381394` | paper stage | `1a4d6c9d` | `79bd3829` | paper Oct-9 stage | error |
+| `032445_773282` | + regenerated 4-entry manifest | same | same | same | error |
+| `034336_005282` | same | `aa1715d2` (runner build) | `79bd3829` | same | error |
+| `040030_925389` | working-payload object `e04e3d20` | `aa1715d2` | `79bd3829` | same | error |
+| `041721_726681` | same | `aa1715d2` | `c66be48f` (direct-native) | same | error |
+| `043836_102861` | same | `1a4d6c9d` | `79bd3829` | same | error |
+
+Every attempt: the baseline arm records 170.9-175.2 ns per invocation, and the
+native arm logs
+
+```
+native-loader failed prog=balancer_ingres manifest=... error=
+```
+
+with **`error=` empty**. The shim writes `result.error` verbatim
+(`bpfopt/shim/shim_native_loader.h:505`), so the loader returned non-zero
+without setting a message. That is the concrete defect: a silent failure.
+
+What was checked and ruled out:
+
+| component | evidence |
+| --- | --- |
+| kernel and module | the paper module loads in a guest on the paper kernel (`LAB-OK`), and its module creates `blob98`/`blob99` nodes |
+| objects | the working run's own `balancer.native.o` (`e04e3d20`, 67,088 bytes) was tried verbatim |
+| manifest | regenerated with the frozen `write_native_manifest.py` and verified to match the working payload's program/symbol pairs exactly |
+| loader and shim | all three images ship the same loader (`1a4d6c9d`) and the same shim (`62d7d16b`) |
+| native-link | both the 2026-05-29 (`79bd3829`) and direct-native (`c66be48f`) binaries fail the same way |
+
+The one component never reproduced is the **image that produced the working
+run** (`101903_560647`, `jited` 10196). Its `details/result.json` records the
+same manifest path and the same source hash as my attempts, so the difference
+is inside an image whose build inputs were lost with `/var/tmp`.
+
+That makes this a lane C question rather than a timing one: the unbound
+2026-05-29 chain loads Katran in the image that produced `101903_560647` and
+does not load it in an ART rebuilt from the tree, and the loader's silent
+failure gives nothing to work from.
+
 ### What this means for the candidates
 
 The candidates act on the native path only, so they can recover at most the
