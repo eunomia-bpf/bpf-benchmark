@@ -1707,6 +1707,42 @@ That makes this a lane C question rather than a timing one: the unbound
 does not load it in an ART rebuilt from the tree, and the loader's silent
 failure gives nothing to work from.
 
+### After the restart: the direct-native path works, the verified path refuses
+
+The 2026-11-10 23:53 restart cleared `/var/tmp` and every image. Timing was
+restored in two stages.
+
+**The direct-native path works on the current kernel.** Katran measured on it
+(`054053_114209`, status ok, 3 samples of 180 s, audited `native` with
+`jited` 13,641 against 10,102 and one replacement): **1.035x**. The image is
+the current `bzImage` (`8401550e`) with the measurement module.
+
+**The verified path refuses the program.** The committed
+`kprog/perf/may29-image` recipe now runs the *trusted* mode --
+`BPFREJIT_SHIM_NATIVE_LOADER=1`, `BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1`
+and a `trusted_service.py` on the `specializer` endpoint -- and on the same
+artefacts Katran fails with
+
+```
+native-loader failed prog=balancer_ingres ... error=trusted specializer
+refused native program
+```
+
+run `063150_486008`. So the two paths now diverge: the direct-native module
+accepts the object and the verified specializer does not. That is lane C's
+generation/binding frontier, and it is a request rather than a timing result.
+
+**Five build traps cost runs before either number existed**, each worth
+recording because they are silent:
+
+| symptom | cause |
+| --- | --- |
+| `insmod: Invalid parameters` on `bpf_x86_stack.ko` | the ART mixed C's kinsn set (04:16) with the repo kernel (06:10); module and kernel must be one build |
+| `disagrees about version of symbol register_btf_kfunc_id_set` | C's `art-now` kernel and its own module were inconsistent with each other |
+| service never becomes ready | the recipe starts `trusted_service.py` on `specializer`, which the paper-tree module does not create; the repo module (`56979a11`) creates all five nodes |
+| `bpfrejit-install` exits 2 silently | it reports on stderr, which a PTY-less `vng --exec` drops; the message is only visible by running the install by hand in the guest |
+| volume at 82% | a 68 GB `bpf-benchmark-docker.img` left behind by an aborted run; it must be removed between runs |
+
 ### What this means for the candidates
 
 The candidates act on the native path only, so they can recover at most the
