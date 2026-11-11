@@ -62,7 +62,7 @@ WORKLOAD_DURATION ?= 180
 ORDER ?= otelcol-ebpf-profiler/profiling bcc/set cilium/agent tetragon/observer tracee/monitor katran
 STATS ?= 0 1
 
-.PHONY: corpus guest rotate
+.PHONY: corpus guest rotate check
 
 corpus:
 	install -d $(STATE)/var-tmp $(LOGS)
@@ -96,3 +96,9 @@ rotate:
 	  $(MAKE) -f $(HERE)/Makefile corpus APPS=$$a BPFREJIT_CORPUS_BPF_STATS=$$s > $$log 2>&1 && rc=0 || rc=$$?; \
 	  echo "$$(date -u +%FT%TZ) end $$a stats=$$s rc=$$rc run=$$(grep -o '"artifact_run_dir": "[^"]*"' $$log | tail -1 | cut -d'"' -f4)" >> $(LOGS)/progress.log; \
 	done; done
+
+# Functional pass before timing: one 10-second sample per application with stats on, so a
+# native load that needs a change shows up before a 3x180 s baseline is spent on it.
+check:
+	install -d $(LOGS)
+	for a in $(ORDER); do 	  log=$(LOGS)/$$(date -u +%Y%m%dT%H%M%SZ)-check-$$(echo $$a | tr / _).log; 	  $(MAKE) -f $(HERE)/Makefile corpus APPS=$$a SAMPLES=1 WORKLOAD_DURATION=10 BPFREJIT_CORPUS_BPF_STATS=1 > $$log 2>&1 && rc=0 || rc=$$?; 	  echo "$$(date -u +%FT%TZ) check $$a rc=$$rc run=$$(grep -o '\"artifact_run_dir\": \"[^\"]*' $$log | tail -1 | cut -d'\"' -f4)" >> $(LOGS)/check.log; 	done
