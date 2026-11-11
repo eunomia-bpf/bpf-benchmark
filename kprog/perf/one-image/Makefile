@@ -12,7 +12,10 @@ HERE := $(ROOT)/kprog/perf/one-image
 KINSN_OUT := $(ROOT)/kinsn/module/x86/build
 IMAGE := bpf-benchmark/kprog:current
 JOBS ?= 20
-OVERRIDES := HOST_KERNEL_BUILD_DIR_X86=$(KDIR) X86_RUNNER_RUNTIME_IMAGE=$(IMAGE) JOBS=$(JOBS)
+# micro/programs/build-x86/kernel_offsets.h is frozen (chattr +i). The one kernel gives the same
+# offsets (pahole body identical, 2026-11-11), so the frozen header serves as the input as it is.
+OFFSETS := $(ROOT)/micro/programs/build-x86/kernel_offsets.h
+OVERRIDES := HOST_KERNEL_BUILD_DIR_X86=$(KDIR) X86_RUNNER_RUNTIME_IMAGE=$(IMAGE) JOBS=$(JOBS) KERNEL_OFFSETS_INPUT=$(OFFSETS)
 
 .PHONY: kernel module image
 
@@ -32,7 +35,7 @@ image: module
 # tar link and the guest's docker disk; results land in corpus/results, logs in LOGS.
 STATE ?= /var/tmp/kprog-tmp/one-image
 LOGS ?= /workspaces/kprog-raw/one-image-runs
-IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/x86_64-runner-runtime.image.tar
+IMAGE_TAR := $(ROOT)/.cache/container-images/x86_64-runner-runtime.image.tar
 GUEST_IMAGE_TAR := /var/tmp/runtime.image.tar
 APPS ?= katran
 APP_DIR = $(firstword $(subst /, ,$(APPS)))
