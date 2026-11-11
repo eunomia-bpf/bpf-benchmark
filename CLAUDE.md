@@ -191,6 +191,15 @@ tracee, tetragon, bcc, katran, cilium, otelcol-ebpf-profiler
 
 Operator, 2026-11-09: "以后禁止切换branch 和开不同的 tree". Every edit happens in this checkout on master. New git worktrees, clones, branches, branch switches and private edited source copies are banned. Builds, replays and guests also run from this checkout, with their recipes and scripts committed here, so exported source copies, copied benchmark trees (such as the former /paper-tree) and private harness directories go away as well (operator 2026-11-10: "/paper-tree 是什么???? 又违规开了 worktree 了?"). Commit and push every step at once ("做一步 commit push 一步").
 
+## One kernel, one image, one base; raw data kept
+
+Operator, 2026-11-11: "确保需要的功能 merge 到一起之后, 删掉所有别的内核版本. 任何时候只允许一个镜像和一个底座. 所有原始数据不允许删掉, 不允许建立任何新的 worktree. 明确记录."
+
+- One kernel line: the vendor/linux-framework submodule at the commit master records. Functions a path needs are merged into that line as commits on top of it (pushed to eunomia-bpf/linux kprog-no-kinsn, with master's pointer updated in the same step). After the merge, every other kernel version and kernel build is removed.
+- One runtime image (bpf-benchmark/kprog:current) and one base (/workspaces/.agent-state/kprog-ck: the kernel build, its modules, the loader, shim, native-link and the object sets) serve every lane at any time. A lane that changes the base rebuilds it in place and announces it in COORDINATION.md.
+- Raw data stays: run directories, logs, archives, census and replay outputs live on persistent storage (/workspaces, committed when they back a number), and removal applies only to rebuildable build outputs.
+- No new git worktree, clone or branch checkout, kernel trees included.
+
 ## Oversized files on GitHub
 
 Operator, 2026-11-09: "github 明确记录, 如果碰到这种大文件可以改写". A commit that has never been pushed and carries a file GitHub rejects for size may be rewritten to drop that file. This is the one exception to the history-rewriting ban above. Published history stays as it is. Tracked files stay under 50 MB.
