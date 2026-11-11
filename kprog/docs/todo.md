@@ -13,6 +13,7 @@
 - [x] **协调者** 唯一镜像 `bpf-benchmark/kprog:current`：05-29 的 build.mk 与 Dockerfile（d0b902050），内核在唯一底座按 05-29 defconfig 构建，配方 `kprog/perf/one-image`（0373ac0eb、7d31c972b、2fa61eee7）。
 - [x] **协调者** 原生用户态链路与框架回到 05-29：shim、loader、链接器（e6808c073，链接器与 05-29 二进制逐字节相同）、`vendor/bpf`（5a47ae87b）、`runner/`（c9b58a26f、24a2d15aa）。之后的改动按六应用在唯一内核上的需要逐个加回。
 - [ ] **协调者** 六应用在唯一系统上装入原生代码：Katran、BCC 已装上（16a1391d8、ee1ba70fc）；OTel、Cilium、Tetragon、Tracee 在 tail call 上让 guest 崩溃，修复 5f6e694bfd4d、6a3152eb7 待验证。
+- [x] **协调者** Tetragon 的比较基准（运营者 11-11 "请你定? 解释一下? 不是说你自己决定吗, 干嘛找我" "记住"）：按等量工作比较，即唯一系统第 c 轮（原生对象按唯一内核结构体布局编译）对照 AGENTS.md 里的下限表（11-10 复现：stats 关 1.009x、开 1.140x）。存档 1.323x 与复现中 generic_kprobe 每次调用 5.8x 来自按另一内核 task_struct 布局编译的原生对象，记为工作量不同的数字，附证据，不作目标。
 - [ ] **协调者** 广度优先计时（每个应用 3×180 秒）：BCC stats 关 1.005x（101011_549780）、Katran stats 关 1.128x（103657_155576），均达到或超过 05-29；其余四个应用待装上后计时。
 - [ ] **C** Katran：链接器去掉多余的 helper id 加载（cd8996e64，blob 与 05-29 字节相同）后计时；jited_len 剩下的差（10,102 对 10,196）查内核一侧的包装。
 - [ ] **C** Cilium：用去掉 thunk 的配方对象（`cil_from_host` 734 条指令）计时，对照 05-29 的 1.319x。
