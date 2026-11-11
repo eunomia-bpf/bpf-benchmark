@@ -17,7 +17,7 @@ JOBS ?= 20
 OFFSETS := $(ROOT)/micro/programs/build-x86/kernel_offsets.h
 OVERRIDES := HOST_KERNEL_BUILD_DIR_X86=$(KDIR) X86_RUNNER_RUNTIME_IMAGE=$(IMAGE) JOBS=$(JOBS) KERNEL_OFFSETS_INPUT=$(OFFSETS)
 
-.PHONY: kernel module image
+.PHONY: kernel module negative image
 
 kernel:
 	$(MAKE) -C $(ROOT) host-kernel-x86 $(OVERRIDES)
@@ -26,7 +26,19 @@ module: kernel
 	rm -rf $(KINSN_OUT) && install -d $(KINSN_OUT)
 	$(MAKE) -C $(KDIR) M=$(ROOT)/kprog/perf/direct-native MO=$(KINSN_OUT) ARCH=x86 modules
 
-image: module
+# The 2026-05-29 Dockerfile copies tests/negative/build/{adversarial_rejit,fuzz_rejit}. Their sources
+# left the tree on 2026-05-17 (8a118e205), so the 2026-05-29 build used binaries left in that
+# directory. They are built here from their last source against the ReJIT uapi they were written
+# for (4d46ee60994b); the corpus never runs them.
+NEG := $(ROOT)/tests/negative/build
+negative:
+	rm -rf /tmp/one-image-negative && install -d /tmp/one-image-negative/linux $(NEG)
+	for f in adversarial_rejit.c fuzz_rejit.c common.h; do git -C $(ROOT) show 8a118e205^:tests/negative/$$f > /tmp/one-image-negative/$$f; done
+	git -C $(ROOT)/vendor/linux-framework show 4d46ee60994b:include/uapi/linux/bpf.h > /tmp/one-image-negative/linux/bpf.h
+	for t in adversarial_rejit fuzz_rejit; do cc -O2 -g -Wall -Wno-cpp -I/tmp/one-image-negative -I$(ROOT)/vendor/linux-framework/include/uapi -o $(NEG)/$$t /tmp/one-image-negative/$$t.c -lpthread; done
+	rm -rf /tmp/one-image-negative
+
+image: module negative
 	$(MAKE) -C $(ROOT) x86-runner-runtime-image-tar $(OVERRIDES) -o host-kinsn-x86
 
 # Timing on the one image and the one kernel, with the guest settings of the 2026-11-10
