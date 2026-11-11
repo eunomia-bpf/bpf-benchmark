@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import sys
 import json
 import subprocess
 from collections import defaultdict
@@ -292,7 +293,9 @@ def main() -> None:
         if args.source_object_root:
             source_obj = source_object_for_native(args.source_object_root, obj)
             if not source_obj.is_file():
-                raise SystemExit(f"source BPF object not found for {obj}: {source_obj}")
+                # The application ships no such object, so nothing loads this native one.
+                print(f"skipping {obj}: no application object {source_obj}", file=sys.stderr)
+                continue
             source_helpers = source_helpers_cache.setdefault(
                 source_obj, scan_bpf_source_helpers(source_obj))
         prefixes = attrs.get("source_map_prefixes") or [None]
