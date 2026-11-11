@@ -64,3 +64,27 @@ An 11% reduction from removing the thunk indirection alone, before any
 linker-side inlining. `sys_enter_submit` then emits a 13,759-byte blob
 through the current linker and 13,756 through the 2026-05-29 linker; the
 thunked object emits nothing on either without a thunk stub.
+
+## Regenerating with the in-tree producer: verified
+
+Both applications were rebuilt from the tree's own recipes and then linked
+through a **2026-05-29 native-link built from
+`git show 9f3855f6f:native-sim/x86/native_lab/native_link`**:
+
+| app | producer | objects | undefined symbols | programs linking on 05-29 |
+| --- | --- | ---: | --- | ---: |
+| Cilium | `make -C vendor/bpf cilium native-cilium` | 7 | **0, 0 thunks** | **95 / 95** |
+| Tracee | `make -C vendor/bpf native-tracee` | 3 | **0, 0 thunks** | **175 / 175** |
+
+Cilium's `cil_from_host` returns to **734 instructions** — the archive
+object's count — against 1,407 in the thunked payload, and emits 3,437
+bytes through the 05-29 linker and 3,467 through the current one. Tracee's
+`tracee.native.o` text drops from 1,823,858 to 1,625,441 bytes.
+
+Before the rebuild, the thunked objects emitted nothing on the 05-29
+linker at all. So one image can now carry all six best object sets, which
+is what item 1 asked for, and the body size recovers, which is item 2.
+
+The 4 remaining Tracee names in the loop are proof-mode aliases
+(`syscall_checker`, `trace_security_bpf`, `trace_security_file_ioctl`,
+`trace_tracepoint_probe_register_prio_may_exist`), not link failures.
