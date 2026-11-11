@@ -17,7 +17,7 @@ JOBS ?= 20
 OFFSETS := $(ROOT)/micro/programs/build-x86/kernel_offsets.h
 OVERRIDES := HOST_KERNEL_BUILD_DIR_X86=$(KDIR) X86_RUNNER_RUNTIME_IMAGE=$(IMAGE) JOBS=$(JOBS) KERNEL_OFFSETS_INPUT=$(OFFSETS)
 
-.PHONY: kernel module negative image
+.PHONY: kernel module negative tetragon-base image
 
 kernel:
 	$(MAKE) -C $(ROOT) host-kernel-x86 $(OVERRIDES)
@@ -38,7 +38,19 @@ negative:
 	for t in adversarial_rejit fuzz_rejit; do cc -O2 -g -Wall -Wno-cpp -I/tmp/one-image-negative -I$(ROOT)/vendor/linux-framework/include/uapi -o $(NEG)/$$t /tmp/one-image-negative/$$t.c -lpthread; done
 	rm -rf /tmp/one-image-negative
 
-image: module negative
+# Tetragon's bpf/Makefile has a rule for its base (unversioned) objects only under the literal
+# objs/ directory, so the application recipe's OBJSDIR override builds just the kernel-version
+# variants. The agent's startup needs base objects such as bpf_alignchecker.o; the 2026-05-29 image
+# carried them from earlier builds. They are built here from the same 2026-05-29 source and compiler
+# in the submodule's own objs/, copied next to the variants, and objs/ is removed again.
+TETRAGON_BPF := $(ROOT)/vendor/repos/tetragon/bpf
+tetragon-base:
+	$(MAKE) -C $(ROOT) host-source-apps-x86 $(OVERRIDES)
+	$(MAKE) -C $(TETRAGON_BPF) CLANG=clang-18 LLC=llc-18 BPF_TARGET_ARCH=x86 -j$(JOBS)
+	for o in $(TETRAGON_BPF)/objs/*.o; do case $$(basename $$o) in *_v[0-9]*) ;; *) cp $$o $(ROOT)/vendor/build/x86/tetragon/;; esac; done
+	rm -rf $(TETRAGON_BPF)/objs $(TETRAGON_BPF)/deps
+
+image: module negative tetragon-base
 	$(MAKE) -C $(ROOT) x86-runner-runtime-image-tar $(OVERRIDES) -o host-kinsn-x86
 
 # Timing on the one image and the one kernel, with the guest settings of the 2026-11-10
