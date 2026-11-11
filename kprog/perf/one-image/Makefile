@@ -70,7 +70,7 @@ corpus:
 	install -d $(STATE)/var-tmp $(LOGS)
 	ln -f $(IMAGE_TAR) $(STATE)/var-tmp/runtime.image.tar 2>/dev/null || cp $(IMAGE_TAR) $(STATE)/var-tmp/runtime.image.tar
 	cp $(KINSN_OUT)/bpf_x86_native_lab.ko $(STATE)/var-tmp/bpf_x86_native_lab.ko
-	taskset -c $(CPUS) vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir /var/tmp=$(STATE)/var-tmp --overlay-rwdir /tmp --overlay-rwdir /run --overlay-rwdir /usr/local --disable-monitor  --cpus $(VM_CPUS) --memory $(VM_MEM) --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile guest APPS=$(APPS) SAMPLES=$(SAMPLES) WORKLOAD_DURATION=$(WORKLOAD_DURATION) BPFREJIT_CORPUS_BPF_STATS=$(BPFREJIT_CORPUS_BPF_STATS)'
+	taskset -c $(CPUS) vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir /var/tmp=$(STATE)/var-tmp --overlay-rwdir /tmp --overlay-rwdir /run --overlay-rwdir /usr/local --disable-monitor $(VNG_FLAGS) --cpus $(VM_CPUS) --memory $(VM_MEM) --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile guest APPS=$(APPS) SAMPLES=$(SAMPLES) WORKLOAD_DURATION=$(WORKLOAD_DURATION) BPFREJIT_CORPUS_BPF_STATS=$(BPFREJIT_CORPUS_BPF_STATS)'
 	rm -f $(STATE)/var-tmp/bpf-benchmark-docker.img
 
 guest:
