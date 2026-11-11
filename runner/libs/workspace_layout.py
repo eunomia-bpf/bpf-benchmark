@@ -13,6 +13,7 @@ RUNTIME_KINSN_MODULE_DIR = Path("/artifacts/kinsn")
 # (arm64_parts, x86_parts)
 _ARCH_PATHS: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
     "runner_binary_path":      (("runner", "build-arm64-llvmbpf", "micro_exec"), ("runner", "build-llvmbpf", "micro_exec")),
+    "test_negative_build_dir": (("tests", "negative", "build-arm64"), ("tests", "negative", "build")),
 }
 
 
@@ -28,6 +29,7 @@ def _vendor_arch(target_arch: str) -> str:
 
 def repo_artifact_root(workspace: Path, target_arch: str) -> Path:       return workspace / "vendor" / "build" / _vendor_arch(target_arch)
 def workload_tools_root(workspace: Path, target_arch: str) -> Path:      return workspace / "vendor" / "build" / _vendor_arch(target_arch) / "workload-tools"
+def test_negative_build_dir(workspace: Path, target_arch: str) -> Path:  return _p(workspace, target_arch, "test_negative_build_dir")
 
 def image_artifact_root(target_arch: str, subdir: str) -> Path:
     return RUNTIME_IMAGE_ARTIFACT_ROOT / subdir / str(target_arch).strip()
@@ -54,7 +56,7 @@ def stage2_program_root(workspace: Path, target_arch: str) -> Path:
     relocations."""
     if inside_runtime_image():
         return image_artifact_root(target_arch, "stage2-programs")
-    return runtime_workspace(workspace) / "kprog" / "test" / f"build-{_vendor_arch(target_arch)}"
+    return runtime_workspace(workspace) / "native-sim" / "test" / f"build-{_vendor_arch(target_arch)}"
 
 def sim_proof_root(workspace: Path, target_arch: str) -> Path:
     return stage2_program_root(workspace, target_arch) / f"{_vendor_arch(target_arch)}_sim_proofs"
@@ -78,12 +80,10 @@ def runtime_container_image_tar_path(workspace: Path, target_arch: str) -> Path:
 def kinsn_module_dir(workspace: Path, target_arch: str) -> Path:
     if inside_runtime_image():
         return RUNTIME_KINSN_MODULE_DIR
-    return workspace / "kinsn" / "module" / ("arm64" if _is_arm64(target_arch) else "x86")
+    return workspace / "module" / ("arm64" if _is_arm64(target_arch) else "x86")
 
 def kernel_modules_root(workspace: Path, target_arch: str, executor: str) -> Path:
     if inside_runtime_image():
-        if str(executor).strip() == "local-docker":
-            return Path("/")
         return Path("/artifacts")
     arch = str(target_arch).strip()
     if str(executor).strip() == "kvm":

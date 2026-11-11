@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import shlex
 import shutil
 import subprocess
@@ -477,18 +476,7 @@ def _sync_remote_roots(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     aws_common._ssh_exec(ctx, ip, "mkdir", "-p", ctx.remote_stage_dir)
     remote_path = f"{ctx.remote_stage_dir}/{relative_image_tar}"
     aws_common._ssh_exec(ctx, ip, "mkdir", "-p", str(Path(remote_path).parent))
-    remote_size = aws_common._ssh_exec(
-        ctx,
-        ip,
-        "stat",
-        "-c",
-        "%s",
-        remote_path,
-        check=False,
-        capture_output=True,
-    )
-    if remote_size.returncode != 0 or remote_size.stdout.strip() != str(image_tar.stat().st_size):
-        aws_common._scp_to(ctx, ip, image_tar, remote_path)
+    aws_common._scp_to(ctx, ip, image_tar, remote_path)
 
 
 def _sync_remote_results(
@@ -534,29 +522,6 @@ def _capture_remote_failure_diagnostics(
     local_diag_dir: Path,
 ) -> None:
     local_diag_dir.mkdir(parents=True, exist_ok=True)
-    state = aws_common._load_instance_state(ctx)
-    instance_id = state.get("STATE_INSTANCE_ID", "").strip()
-    if instance_id:
-        console = aws_common._aws_cmd(
-            ctx,
-            "ec2",
-            "get-console-output",
-            "--instance-id",
-            instance_id,
-            "--latest",
-            "--output",
-            "json",
-            capture_output=True,
-        )
-        (local_diag_dir / "console-output.json").write_text(
-            f"rc={console.returncode}\n{console.stdout}",
-            encoding="utf-8",
-        )
-        if console.stderr:
-            (local_diag_dir / "console-output.stderr.log").write_text(
-                console.stderr,
-                encoding="utf-8",
-            )
     quoted_run_dir = shlex.quote(remote_run_dir)
     script = f"""
 set +e
@@ -768,15 +733,6 @@ def _run_aws(ctx: aws_common.AwsExecutorContext) -> None:
         if cleanup_error and hasattr(exc, "add_note"):
             exc.add_note(cleanup_error)
         raise
-    if os.environ.get("BPFREJIT_AWS_KEEP_INSTANCE", "").strip().lower() in {
-        "1", "true", "yes", "on"
-    }:
-        print(
-            f"[aws-executor] Preserved instance {state.get('STATE_INSTANCE_ID', '').strip()} "
-            f"for run token {ctx.run_token}",
-            file=sys.stderr,
-        )
-        return
     aws_common._terminate_instance(ctx, state.get("STATE_INSTANCE_ID", "").strip())
     shutil.rmtree(ctx.run_state_dir, ignore_errors=True)
 

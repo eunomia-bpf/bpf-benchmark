@@ -19,7 +19,6 @@ from . import ROOT_DIR
 
 
 _BENCH_PASSES_ENV = "BPFREJIT_BENCH_PASSES"
-_NATIVE_LOADER_POST_ONLY_ENV = "BPFREJIT_CORPUS_NATIVE_LOADER_POST_ONLY"
 _SKIP_REJIT_ENV = "SKIP_REJIT"
 _BENCHMARK_CONFIG_PATH = ROOT_DIR / "corpus" / "config" / "benchmark_config.yaml"
 _DEFAULT_BENCHMARK_REPEAT = 200
@@ -202,19 +201,12 @@ def benchmark_rejit_enabled_passes() -> list[str]:
             return list(_cached_benchmark_config_enabled_passes())
         tokens = [token.strip() for token in text.split(",") if token.strip()]
         return _expand_groups(tokens, load_benchmark_config().get("policy") or {})
-    native_post_only = os.environ.get(_NATIVE_LOADER_POST_ONLY_ENV, "").strip().lower()
-    if native_post_only in {"1", "true", "yes", "on"}:
-        return []
     return list(_cached_benchmark_config_enabled_passes())
 
 
-def benchmark_run_provenance(
-    *,
-    enabled_passes: Sequence[str] | None = None,
-) -> dict[str, object]:
-    passes = list(benchmark_rejit_enabled_passes() if enabled_passes is None else enabled_passes)
+def benchmark_run_provenance() -> dict[str, object]:
     return {
-        "config": {"enabled_passes": passes},
+        "config": {"enabled_passes": benchmark_rejit_enabled_passes()},
     }
 
 _SHIM_SOCK_DIR = Path("/var/run/bpfrejit")
@@ -323,13 +315,6 @@ def _list_app_shim_program_ids(app_pid: int) -> tuple[int, ...]:
     resp = _shim_request(_shim_socket_for_pid(int(app_pid)), {"cmd": "list_progs"})
     if not bool(resp.get("ok")):
         raise RuntimeError(str(resp.get("error") or "list_progs failed"))
-    if os.environ.get("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF", "").strip().lower() in {"1", "true", "yes", "on"}:
-        pending = resp.get("native_loads_inflight")
-        completed = resp.get("native_bound_completed")
-        if type(pending) is not int or type(completed) is not int or pending < 0 or completed < 0:
-            raise ValueError("verified native startup requires shim load-progress fields; update the shim")
-        if pending or not completed:
-            return ()
     programs = resp.get("progs")
     if not isinstance(programs, Sequence) or isinstance(programs, (str, bytes, bytearray)):
         raise RuntimeError("list_progs returned invalid progs payload")
@@ -426,6 +411,30 @@ def apply_app_rejit(
         _persist_failure_artifacts(resp, failure_artifacts_dir)
         responses.append({"pid": pid, "response": dict(resp)})
     return dict(responses[0]["response"]) if len(responses) == 1 else {"status": "ok", "shim_responses": responses}
+
+
+def snapshot_app_maps(
+    *,
+    app_pid: int | None = None,
+    app_pids: Sequence[int] | None = None,
+    output_dir: Path,
+) -> dict[str, object]:
+    pids = _normalize_app_pids(app_pid=app_pid, app_pids=app_pids)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    responses: list[dict[str, object]] = []
+    for pid in pids:
+        resp = _shim_request(
+            _shim_socket_for_pid(pid),
+            {"cmd": "snapshot_maps", "output_dir": str(output_dir)},
+        )
+        if not bool(resp.get("ok")):
+            raise RuntimeError(str(resp.get("error") or "map snapshot failed"))
+        responses.append({"pid": pid, "response": dict(resp), "output_dir": str(output_dir)})
+    return (
+        dict(responses[0]["response"])
+        if len(responses) == 1
+        else {"ok": True, "shim_responses": responses}
+    )
 
 
 def measure_app_phase(

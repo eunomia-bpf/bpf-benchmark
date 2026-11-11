@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Mapping, Sequence
 
 from . import ROOT_DIR, run_command
-from .workspace_layout import RUNTIME_KINSN_MODULE_DIR, inside_runtime_image, kinsn_module_dir
+from .workspace_layout import RUNTIME_KINSN_MODULE_DIR, inside_runtime_image
 
 
 _KINSN_MODULE_ARCH_DIRS = {
@@ -49,7 +49,7 @@ def resolve_kinsn_module_dir(module_dir: Path | None = None) -> Path:
     arch_dir = _KINSN_MODULE_ARCH_DIRS.get(platform.machine())
     if arch_dir is None:
         raise RuntimeError(f"unsupported architecture for kinsn modules: {platform.machine()}")
-    return kinsn_module_dir(ROOT_DIR, arch_dir)
+    return ROOT_DIR / "module" / arch_dir
 
 
 def _loaded_bpf_modules_from_lsmod() -> tuple[list[str], str] | None:

@@ -1,4 +1,0 @@
-# Single-pass kinsn ablation with every bytecode family except prefetch forced.
-log_level: 1
-command: |
-  bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode all=force,prefetch=disable
