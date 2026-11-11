@@ -718,4 +718,16 @@ static __always_inline unsigned long native_helper_id5(unsigned long id,
 
 #endif
 
+#ifdef MICRO_NATIVE_TETRAGON
+/* kfuncs Tetragon calls. The one kernel's BTF dump carries no kfunc prototypes, so the
+ * native compile declares them here, as the earlier generated header did. */
+struct cgroup;
+struct bpf_iter_num;
+extern void bpf_cgroup_release(struct cgroup *cgrp) __attribute__((weak)) __attribute__((section(".ksyms")));
+extern int bpf_copy_from_user_str(void *dst, unsigned int dst__sz, const void *unsafe_ptr__ign, unsigned long long flags) __attribute__((weak)) __attribute__((section(".ksyms")));
+extern int bpf_iter_num_new(struct bpf_iter_num *it, int start, int end) __attribute__((weak)) __attribute__((section(".ksyms")));
+extern int *bpf_iter_num_next(struct bpf_iter_num *it) __attribute__((weak)) __attribute__((section(".ksyms")));
+extern void bpf_iter_num_destroy(struct bpf_iter_num *it) __attribute__((weak)) __attribute__((section(".ksyms")));
+#endif
+
 #endif
