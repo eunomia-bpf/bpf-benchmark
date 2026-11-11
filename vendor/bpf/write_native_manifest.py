@@ -74,7 +74,9 @@ CILIUM_MAP_RULES = [
     map_rule("exact", "cilium_ratelimit", BPF_MAP_TYPE_LRU_HASH, 8, 16, 1024),
     map_rule("exact", "cilium_lb4_reverse_nat", BPF_MAP_TYPE_HASH, 2, 6, 65536),
     map_rule("exact", "cilium_lb6_reverse_nat", BPF_MAP_TYPE_HASH, 2, 18, 65536),
-    map_rule("exact", "cilium_snat_v4_external", BPF_MAP_TYPE_LRU_HASH, 14, 40, 591428),
+    # Cilium sizes this NAT map from host memory (591427 in the 64G guest); type, key and value
+    # sizes separate it from cilium_snat_v4_alloc_retries under the shared 15-character name.
+    map_rule("exact", "cilium_snat_v4_external", BPF_MAP_TYPE_LRU_HASH, 14, 40),
     map_rule("exact", "cilium_snat_v4_alloc_retries", BPF_MAP_TYPE_PERCPU_ARRAY, 4, 4, 33),
     map_rule("exact", "cilium_l2_responder_v4", BPF_MAP_TYPE_HASH, 8, 8, 4096),
     map_rule("exact", "cilium_l2_responder_v6", BPF_MAP_TYPE_HASH, 24, 8, 4096),
