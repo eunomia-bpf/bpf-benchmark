@@ -545,40 +545,6 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		__x86_l_tag;                                             \
 	})
 
-#define X86_SIM_L_WRITE_REG64_VALUE_CASE(REG, NAME)                         \
-	case REG:                                                          \
-		KPROG_X86_WRITE_REG64(__x86_##NAME, __x86_##NAME##_tag,   \
-			__x86_wr_next, X86_SIM_TAG_SCALAR);                 \
-		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr - __x86_native_stack_base); \
-		break;
-
-#define X86_SIM_L_WRITE_REG8_VALUE_CASE(REG, NAME)                          \
-	case REG:                                                          \
-		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr + __x86_native_stack_base); \
-		else if (__x86_##NAME##_tag == X86_SIM_TAG_STACK)          \
-			__x86_##NAME.ptr = (void *)(long)X86_SIM_L_STACK_NUMERIC_BITS(__x86_##NAME.ptr); \
-		KPROG_X86_WRITE_REG8(__x86_##NAME, __x86_##NAME##_tag,    \
-			__x86_wr_next, __x86_wr_shift, X86_SIM_TAG_SCALAR); \
-		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr - __x86_native_stack_base); \
-		break;
-
-#define X86_SIM_L_WRITE_REG16_VALUE_CASE(REG, NAME)                         \
-	case REG:                                                          \
-		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr + __x86_native_stack_base); \
-		else if (__x86_##NAME##_tag == X86_SIM_TAG_STACK)          \
-			__x86_##NAME.ptr = (void *)(long)X86_SIM_L_STACK_NUMERIC_BITS(__x86_##NAME.ptr); \
-		KPROG_X86_WRITE_REG16(__x86_##NAME, __x86_##NAME##_tag,   \
-			__x86_wr_next, X86_SIM_TAG_SCALAR);                 \
-		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr - __x86_native_stack_base); \
-		break;
-
-#define X86_SIM_L_WRITE_REG32_VALUE_CASE(REG, NAME)                         \
-	case REG:                                                          \
-		KPROG_X86_WRITE_REG32(__x86_##NAME, __x86_##NAME##_tag,   \
-			__x86_wr_next, X86_SIM_TAG_SCALAR);                 \
-		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr - __x86_native_stack_base); \
-		break;
-
 #define X86_SIM_L_WRITE_REG_PTR_VALUE_CASE(REG, NAME)                       \
 	case REG:                                                          \
 		__x86_##NAME.ptr = __x86_wr_next_ptr;                    \
@@ -600,6 +566,8 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 #define X86_SIM_L_WRITE_REG_PTR(REG, VALUE)                                 \
 	X86_SIM_L_WRITE_REG_PTR_TAG((REG), (VALUE), X86_SIM_TAG_SCALAR)
 
+/* One register read, one width update of that value and one register store:
+ * the width ladder is spelled once rather than once per register. */
 #define X86_SIM_L_WRITE_REG_WIDTH_SHIFT(REG, VALUE, WIDTH, DST_SHIFT)       \
 	do { __s64 __x86_write_old_sp=(__s64)(long)__x86_rsp.ptr;                                                                \
 		__u8 __x86_wr_raw_width = (WIDTH);                         \
@@ -607,33 +575,37 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 			X86_SIM_L_EFFECTIVE_WIDTH(__x86_wr_raw_width);             \
 		__u8 __x86_wr_shift = (DST_SHIFT);                          \
 		__u64 __x86_wr_next = (VALUE);                            \
+		union x86_sim_gpr __x86_wr_cell = { .ptr = X86_SIM_L_REG_VALUE(REG) }; \
+		__u8 __x86_wr_cell_tag = X86_SIM_L_REG_TAG(REG);           \
 		if (KPROG_X86_WRITE_WIDTH_ARM(__x86_wr_width) ==            \
 		    KPROG_X86_WRITE_WIDTH_ARM_B8) {                        \
-			switch (REG) {                                    \
-			X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_REG8_VALUE_CASE)\
-			default:                                          \
-				break;                                    \
-			}                                                 \
+			if ((REG) == X86_RSP) __x86_wr_cell.ptr = (void *)(long)((__u64)(long)__x86_wr_cell.ptr + __x86_native_stack_base); \
+			else if (__x86_wr_cell_tag == X86_SIM_TAG_STACK)    \
+				__x86_wr_cell.ptr = (void *)(long)X86_SIM_L_STACK_NUMERIC_BITS(__x86_wr_cell.ptr); \
+			KPROG_X86_WRITE_REG8(__x86_wr_cell, __x86_wr_cell_tag, \
+				__x86_wr_next, __x86_wr_shift, X86_SIM_TAG_SCALAR); \
 		} else if (KPROG_X86_WRITE_WIDTH_ARM(__x86_wr_width) ==    \
 			   KPROG_X86_WRITE_WIDTH_ARM_B16) {                \
-			switch (REG) {                                    \
-			X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_REG16_VALUE_CASE)\
-			default:                                          \
-				break;                                    \
-			}                                                 \
+			if ((REG) == X86_RSP) __x86_wr_cell.ptr = (void *)(long)((__u64)(long)__x86_wr_cell.ptr + __x86_native_stack_base); \
+			else if (__x86_wr_cell_tag == X86_SIM_TAG_STACK)    \
+				__x86_wr_cell.ptr = (void *)(long)X86_SIM_L_STACK_NUMERIC_BITS(__x86_wr_cell.ptr); \
+			KPROG_X86_WRITE_REG16(__x86_wr_cell, __x86_wr_cell_tag, \
+				__x86_wr_next, X86_SIM_TAG_SCALAR);         \
 		} else if (KPROG_X86_WRITE_WIDTH_ARM(__x86_wr_width) ==    \
 			   KPROG_X86_WRITE_WIDTH_ARM_B32) {                \
-			switch (REG) {                                    \
-			X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_REG32_VALUE_CASE)\
-			default:                                          \
-				break;                                    \
-			}                                                 \
+			KPROG_X86_WRITE_REG32(__x86_wr_cell, __x86_wr_cell_tag, \
+				__x86_wr_next, X86_SIM_TAG_SCALAR);         \
 		} else {                                                  \
-			switch (REG) {                                    \
-			X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_REG64_VALUE_CASE)\
-			default:                                          \
-				break;                                    \
-			}                                                 \
+			KPROG_X86_WRITE_REG64(__x86_wr_cell, __x86_wr_cell_tag, \
+				__x86_wr_next, X86_SIM_TAG_SCALAR);         \
+		}                                                         \
+		if ((REG) == X86_RSP) __x86_wr_cell.ptr = (void *)(long)((__u64)(long)__x86_wr_cell.ptr - __x86_native_stack_base); \
+		void *__x86_wr_next_ptr = __x86_wr_cell.ptr;              \
+		__u8 __x86_wr_next_tag = __x86_wr_cell_tag;               \
+		switch (REG) {                                            \
+		X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_REG_PTR_VALUE_CASE)\
+		default:                                                  \
+			break;                                            \
 		}                                                         \
 	if ((REG)==X86_RSP) X86_SIM_L_STACK_RELEASE(__x86_write_old_sp); \
 	} while (0)

@@ -4,6 +4,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import re
 import shutil
 from pathlib import Path
 import subprocess
@@ -19,6 +20,47 @@ _SPEC = importlib.util.spec_from_file_location("kprog_x86_trusted_generator",
 gen = importlib.util.module_from_spec(_SPEC)
 sys.modules[_SPEC.name] = gen
 _SPEC.loader.exec_module(gen)
+
+
+COMPILE_FLAGS = ["-g", "-O3", "-mcpu=v4", "-target", "bpf",
+                 "-mllvm", "-bpf-stack-size=4096", "-D__TARGET_ARCH_x86",
+                 "-I", ROOT / "vendor/libbpf/include/uapi", "-I", ROOT / "vendor/libbpf/src",
+                 "-I", "/usr/include/x86_64-linux-gnu"]
+# Clang gives a translation unit 2^31 bytes of source-location space and each
+# macro expansion takes a share of it, so the instruction statements of a large
+# B exhaust it while their expanded text stays far smaller. B is therefore
+# preprocessed in pieces of whole instructions, each behind the same preamble
+# (every directive of B sits in the preamble), and the joined token stream is
+# compiled as one translation unit with the same compiler and flags.
+INSTRUCTION_LABEL = re.compile(r"x86_l_[0-9a-f]+:")
+PIECE_SOURCE_BYTES = 1 << 18
+PIECE_MARK = "#pragma kprog_preprocessed_piece"
+
+
+def compile_simulator(clang, source: Path, obj: Path, run) -> None:
+    lines = source.read_text().split("\n")
+    first = next(i for i, line in enumerate(lines) if INSTRUCTION_LABEL.fullmatch(line))
+    bounds, start, size = [], first, 0
+    for index in range(first, len(lines)):
+        if index > start and size >= PIECE_SOURCE_BYTES and INSTRUCTION_LABEL.fullmatch(lines[index]):
+            bounds.append((start, index))
+            start, size = index, 0
+        size += len(lines[index]) + 1
+    bounds.append((start, len(lines)))
+    location = json.dumps(str(source))
+    preamble = "#line 1 " + location + "\n" + "\n".join(lines[:first]) + "\n"
+    joined = []
+    for number, (start, end) in enumerate(bounds):
+        piece = source.with_name(f"{source.stem}.piece{number}.c")
+        piece.write_text(preamble + PIECE_MARK + "\n" + f"#line {start + 1} {location}\n"
+                         + "\n".join(lines[start:end]) + "\n")
+        expanded = piece.with_suffix(".i")
+        run([clang, *COMPILE_FLAGS, "-E", piece, "-o", expanded])
+        head, body = expanded.read_text().split(PIECE_MARK + "\n")
+        joined.append((head if number == 0 else "") + body)
+    preprocessed = source.with_suffix(".i")
+    preprocessed.write_text("".join(joined))
+    run([clang, *COMPILE_FLAGS, "-c", preprocessed, "-o", obj])
 
 
 def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
@@ -61,10 +103,7 @@ def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
     if not clang:
         candidates = sorted(Path("/usr/lib").glob("llvm-*/bin/clang"))
         clang = str(candidates[-1]) if candidates else "clang"
-    run([clang, "-g", "-O3", "-mcpu=v4", "-target", "bpf",
-         "-mllvm", "-bpf-stack-size=4096", "-D__TARGET_ARCH_x86",
-         "-I", ROOT / "vendor/libbpf/include/uapi", "-I", ROOT / "vendor/libbpf/src",
-         "-I", "/usr/include/x86_64-linux-gnu", "-c", source, "-o", obj])
+    compile_simulator(clang, source, obj, run)
     result = dict(native_object=str(native), native_proof_object=str(proof),
         simulator_object=str(obj), simulator_program=name + "_x86_sim_xdp",
         symbol=entry_symbol, native_sha256=hashlib.sha256(native_bytes).hexdigest())
