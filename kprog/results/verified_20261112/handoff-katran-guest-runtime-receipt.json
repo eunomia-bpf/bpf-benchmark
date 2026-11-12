@@ -1,0 +1,13 @@
+{
+  "recorded_at": "2026-11-12T13:59:55.775103+00:00",
+  "method": "Read-only noload mount after completed Katran guest; retain remaining daemon/container/runtime logs before existing guest cache reuse",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-handoff-katran",
+  "paths": [
+    "dockerd.log",
+    "data/containers",
+    "data/containerd/daemon/io.containerd.snapshotter.v1.overlayfs/snapshots/35/fs/var/tmp/bpfrejit-runtime"
+  ],
+  "archive": "handoff-katran-guest-runtime.tar.gz",
+  "archive_bytes": 3451,
+  "scope": "Full P/B service and corpus counters plus persistent original bytecode captures already retained in97128065a; this archive adds remaining guest runtime logs."
+}
