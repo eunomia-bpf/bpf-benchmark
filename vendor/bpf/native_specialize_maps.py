@@ -38,6 +38,7 @@ import sys
 from pathlib import Path
 
 # The kernel's own layout constants, as the loader and the linker use them.
+PERCPU_BASE_ADDR = 0  # gs:[this_cpu_off], supplied when --percpu is used
 ARRAY_VALUE_OFFSET = 304
 PERCPU_ARRAY_PPTRS_OFFSET = 304
 HTAB_KEY_OFFSET = 48
@@ -80,11 +81,23 @@ ARRAY_BODY = """    __u32 __k;
         return (void *)0;
     return (void *)((char *)map + {value_offset}u + (unsigned long)__k * {elem_size}u);"""
 
+# A percpu array's value lives in the per-CPU area: the array slot holds a
+# pointer and the loader adds gs:[&this_cpu_off] to it. That address is a
+# run-time kallsyms value, so a C body built at build time cannot carry it and
+# the loader keeps percpu arrays; this body serves --percpu, where the address
+# is supplied as PERCPU_BASE_ADDR.
 PERCPU_ARRAY_BODY = """    __u32 __k;
     __builtin_memcpy(&__k, key, sizeof(__k));
     if (__k >= {entries}u)
         return (void *)0;
-    return (void *)((char *)map + {value_offset}u + (unsigned long)__k * {elem_size}u);"""
+    void *__pp = *(void **)((char *)map + {value_offset}u +
+                            (unsigned long)__k * {elem_size}u);
+    if ((unsigned long)__pp == 0)
+        return (void *)0;
+    unsigned long __cpu_off;
+    __asm__ __volatile__("movq %%gs:%c1, %0" : "=r"(__cpu_off)
+                         : "i"(PERCPU_BASE_ADDR));
+    return (void *)((char *)__pp + __cpu_off);"""
 
 # The loader's own hash post-processing: the map's lookup function runs, then
 # the element's key offset is added, so the program's NULL check sees the same
@@ -135,9 +148,12 @@ def lookup_key_size(key_sizes: dict[str, int], name: str) -> int | None:
     return None
 
 
-def body_for(map_decl: dict, value_size: int, include_hash: bool = False) -> str | None:
+def body_for(map_decl: dict, value_size: int, include_hash: bool = False,
+             include_percpu: bool = False) -> str | None:
     """The inline body for one map, or None when it keeps the helper call."""
     kind = ARRAY_TYPES.get(str(map_decl["type"]))
+    if kind == "percpu_array" and not include_percpu:
+        return None
     if kind is None:
         if include_hash and str(map_decl["type"]) in HASH_TYPES:
             return HASH_BODY.format(key_offset=HTAB_KEY_OFFSET +
@@ -185,6 +201,8 @@ def main() -> None:
                         help="JSON: map name -> key size, from the loaded maps")
     parser.add_argument("--hash", action="store_true",
                         help="also give the hash family a body (a call plus the key offset)")
+    parser.add_argument("--percpu", action="store_true",
+                        help="also inline percpu arrays (needs --percpu-base)")
     args = parser.parse_args()
 
     unit = Path(args.unit)
@@ -210,7 +228,7 @@ def main() -> None:
                 continue
             key_size = decl["key_size"] or lookup_key_size(key_sizes, name) or 0
             decl["key_size"] = key_size
-            body = body_for(decl, int(value_size), args.hash)
+            body = body_for(decl, int(value_size), args.hash, args.percpu)
             if body is None:
                 continue
             bodies.append(BODY.format(name=name, body=body))
