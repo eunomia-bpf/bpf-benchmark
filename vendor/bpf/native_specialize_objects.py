@@ -50,6 +50,51 @@ def bcc_tools() -> list[str]:
             "tcpconnect", "tcplife", "runqlat"]
 
 
+def tetragon_variants() -> list[tuple[str, str, str, list[str]]]:
+    """The objects the image ships, with the flags the Makefile gives each.
+
+    The Makefile builds every kernel variant; the manifest names 35 of them, and
+    the ones that carry configuration are the _v511/_v61 variants.
+    """
+    process = "process"
+    large = ["-D__LARGE_BPF_PROG"]
+    v511 = large + ["-D__V511_BPF_PROG"]
+    v61 = v511 + ["-D__V61_BPF_PROG"]
+    out: list[tuple[str, str, str, list[str]]] = []
+    for name in ("bpf_loader", "bpf_cgroup", "bpf_prog_iter", "bpf_execve_event",
+                 "bpf_fork", "bpf_exit", "bpf_execve_bprm_commit_creds",
+                 "bpf_generic_kprobe", "bpf_generic_retkprobe",
+                 "bpf_generic_tracepoint", "bpf_generic_uprobe",
+                 "bpf_generic_retuprobe", "bpf_generic_rawtp", "bpf_generic_usdt",
+                 "bpf_generic_fentry", "bpf_generic_fexit", "bpf_execve_map_update"):
+        out.append((name, process, name, []))
+    for name in ("bpf_execve_event", "bpf_execve_map_update", "bpf_generic_kprobe",
+                 "bpf_generic_retkprobe", "bpf_generic_tracepoint",
+                 "bpf_generic_uprobe", "bpf_generic_retuprobe", "bpf_generic_rawtp",
+                 "bpf_generic_usdt", "bpf_generic_fentry", "bpf_generic_fexit",
+                 "bpf_generic_lsm_core", "bpf_generic_lsm_output",
+                 "bpf_generic_lsm_ima_file", "bpf_generic_lsm_ima_bprm"):
+        out.append((f"{name}_v511", process, name, v511))
+    for name in ("bpf_execve_event", "bpf_execve_map_update", "bpf_generic_kprobe",
+                 "bpf_generic_retkprobe", "bpf_generic_tracepoint",
+                 "bpf_generic_uprobe", "bpf_generic_retuprobe", "bpf_generic_rawtp",
+                 "bpf_generic_usdt", "bpf_generic_fentry", "bpf_generic_fexit",
+                 "bpf_generic_lsm_core", "bpf_generic_lsm_output",
+                 "bpf_generic_lsm_ima_file", "bpf_generic_lsm_ima_bprm"):
+        out.append((f"{name}_v61", process, name, v61))
+    for pair, extra in ((("bpf_multi_kprobe_v61", "bpf_generic_kprobe"), v61),
+                         (("bpf_multi_retkprobe_v61", "bpf_generic_retkprobe"), v61),
+                         (("bpf_multi_uprobe_v61", "bpf_generic_uprobe"), v61),
+                         (("bpf_multi_retuprobe_v61", "bpf_generic_retuprobe"), v61),
+                         (("bpf_multi_usdt_v61", "bpf_generic_usdt"), v61)):
+        out.append((pair[0], process, pair[1], extra + ["-D__MULTI_KPROBE"]))
+    for name in ("bpf_cgroup_mkdir", "bpf_cgroup_rmdir", "bpf_cgroup_release"):
+        out.append((name, "cgroup", name, []))
+        out.append((f"{name}_v511", "cgroup", name, v511))
+    out.append(("bpf_cgtracker", "cgroup", "bpf_cgtracker", []))
+    return out
+
+
 def units_for_app(app: str) -> list[tuple[str, Path, list[str]]]:
     """(stem, source, flags) for each native object the image carries."""
     bpf = ROOT / "vendor" / "bpf"
@@ -78,6 +123,17 @@ def units_for_app(app: str) -> list[tuple[str, Path, list[str]]]:
         return [(name, bpf / f"cilium/bpf/{name}.c", base + include)
                 for name in ("bpf_lxc", "bpf_overlay", "bpf_sock", "bpf_host",
                              "bpf_wireguard", "bpf_xdp", "bpf_alignchecker")]
+    if app == "tetragon":
+        # The Makefile's tetragon common_flags, in its own order.
+        common = ["-fms-extensions", "-DMICRO_NATIVE_HELPER_MACROS",
+                  "-DMICRO_NATIVE_TETRAGON", "-D__TARGET_ARCH_x86",
+                  "-include", str(bpf / "native_compat.h"),
+                  f"-I{bpf}/tetragon/bpf", f"-I{bpf}/tetragon/bpf/include",
+                  f"-I{bpf}/tetragon/bpf/lib", f"-I{bpf}/tetragon/bpf/libbpf",
+                  f"-I{bpf}/tetragon/bpf/process", f"-I{bpf}/tetragon/bpf/errmetrics",
+                  "-I/usr/include", "-I/usr/include/x86_64-linux-gnu"]
+        return [(name, bpf / f"tetragon/bpf/{subdir}/{src}.c", common + extra)
+                for name, subdir, src, extra in tetragon_variants()]
     if app == "tracee":
         flags = [f"-include", str(bpf / "native_compat.h"),
                  "-DMICRO_NATIVE_HELPER_MACROS", "-D__TARGET_ARCH_x86",
@@ -135,7 +191,7 @@ def loaded_rodata(capture: Path) -> dict[str, bytes]:
         if not dump.exists():
             continue
         entries = json.loads(dump.read_text())
-        if not entries:
+        if not entries or "value" not in entries[0]:
             continue
         image = bytes(int(byte, 16) for byte in entries[0]["value"])
         # ".rodata" and ".rodata.<variant>" (cilium's .rodata.config) both name
@@ -281,7 +337,11 @@ def main() -> None:
              "--unit", str(produced_unit), "--decls", str(produced_index),
              "--rodata", str(rodata_file), "--output", str(specialized)])
         spec_object = base.with_suffix(".rodata.o")
-        run(["clang-18", *NATIVE_CFLAGS, str(specialized), "-o", str(spec_object)])
+        # The unit is preprocessed, so only the language flags the compile
+        # needs (-fms-extensions for tetragon's struct filename) apply.
+        language = [arg for arg in flags if arg.startswith("-fms-extensions")]
+        run(["clang-18", *NATIVE_CFLAGS, *language, str(specialized),
+             "-o", str(spec_object)])
 
         before, after = program_sizes(plain), program_sizes(spec_object)
         changed = [(name, before[name], after.get(name, 0)) for name in before

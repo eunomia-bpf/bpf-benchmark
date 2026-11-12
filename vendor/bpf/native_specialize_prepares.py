@@ -140,7 +140,12 @@ def declarations(unit: Path, clang_argv: list[str]) -> dict[str, dict[str, objec
     # A pragma keeps its macro unexpanded through preprocessing
     # (#pragma unroll(MAX_IPV4_OPTS) in cilium), so those names are defined
     # again for the dump from the values the preprocessed unit still shows.
-    defines = [arg for arg in clang_argv if arg.startswith("-D")]
+    # The dump needs the compile's language and -D flags: -fms-extensions
+    # decides whether struct filename has an anonymous union member, and a
+    # pragma keeps its macro through preprocessing (#pragma
+    # unroll(MAX_IPV4_OPTS) in cilium), so those names are given their values.
+    keep = ("-D", "-fms-extensions", "-DMICRO_NATIVE")
+    defines = [arg for arg in clang_argv if arg.startswith(keep)]
     pragma_macros = set(re.findall(r"#pragma \w+\((\w+)\)",
                                    unit.read_text()))
     for name in pragma_macros:
