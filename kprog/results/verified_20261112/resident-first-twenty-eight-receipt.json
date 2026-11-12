@@ -1,0 +1,122 @@
+{
+  "recorded_at": "2026-11-12T17:55:32.135750+00:00",
+  "scope": "First28 completed requests of ongoing549-instance load-only census",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-resident-census/ready",
+  "kernel_commit": "74d1097af561",
+  "model_commit": "d0890b14f",
+  "submitted": 28,
+  "stock_verifier_submissions": 27,
+  "verified": 22,
+  "verifier_rejected": 5,
+  "compilation_failed": 1,
+  "native_execution_requests": 0,
+  "applications": {
+    "bcc/set": {
+      "submitted": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "katran": {
+      "submitted": 1,
+      "verified": 0,
+      "verifier_rejected": 1,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "cilium/agent": {
+      "submitted": 2,
+      "verified": 0,
+      "verifier_rejected": 2,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "otelcol-ebpf-profiler/profiling": {
+      "submitted": 1,
+      "verified": 1,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "tetragon/observer": {
+      "submitted": 24,
+      "verified": 21,
+      "verifier_rejected": 2,
+      "compilation_failed": 1,
+      "workload_run": null
+    },
+    "tracee/monitor": {
+      "submitted": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    }
+  },
+  "classes": {
+    "verifier_instruction_complexity": 1,
+    "verifier_readonly_kernel_write": 2,
+    "installed": 22,
+    "verifier_callback_argument": 1,
+    "verifier_scalar_memory_access": 1,
+    "compiler_stack_storage": 1
+  },
+  "new_request": {
+    "request_id": 28,
+    "retained_source_prog_id": 38,
+    "entry": "generic_kprobe_process_event",
+    "stage": "compilation_failed",
+    "classified_class": "compiler_stack_storage",
+    "started": "2026-11-12T17:05:16.013705+00:00",
+    "finished": "2026-11-12T17:46:07.795209+00:00",
+    "request_elapsed_seconds": 2451.781504,
+    "generation_returncodes": [
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "generated_C_bytes": 527395,
+    "preprocessed_bytes": 235178669,
+    "native_stack_arena_bytes": 504,
+    "named_stack_value_words": 63,
+    "configured_bpf_stack_size": 4096,
+    "error_lines": [
+      "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-zb09takv/generated/trusted_x86.bpf.c:32:5: error: Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.",
+      "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-zb09takv/generated/trusted_x86.bpf.c:32:5: error: Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.",
+      "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-zb09takv/generated/trusted_x86.bpf.c:32:5: error: Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.",
+      "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-zb09takv/generated/trusted_x86.bpf.c:32:5: error: Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.",
+      "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-zb09takv/generated/trusted_x86.bpf.c:32:5: error: Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.",
+      "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-zb09takv/generated/trusted_x86.bpf.c:32:5: error: Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.",
+      "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-zb09takv/generated/trusted_x86.bpf.c:32:5: error: Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.",
+      "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-zb09takv/generated/trusted_x86.bpf.c:32:5: error: Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.",
+      "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-zb09takv/generated/trusted_x86.bpf.c:32:5: error: Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.",
+      "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-zb09takv/generated/trusted_x86.bpf.c:32:5: error: Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.",
+      "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-zb09takv/generated/trusted_x86.bpf.c:32:5: error: Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.",
+      "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-zb09takv/generated/trusted_x86.bpf.c:32:5: error: Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.",
+      "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-zb09takv/generated/trusted_x86.bpf.c:32:5: error: Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.",
+      "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-zb09takv/generated/trusted_x86.bpf.c:32:5: error: Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.",
+      "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-zb09takv/generated/trusted_x86.bpf.c:32:5: error: Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.",
+      "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-zb09takv/generated/trusted_x86.bpf.c:32:5: error: Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.",
+      "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-zb09takv/generated/trusted_x86.bpf.c:32:5: error: Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.",
+      "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-zb09takv/generated/trusted_x86.bpf.c:32:5: error: Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.",
+      "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-zb09takv/generated/trusted_x86.bpf.c:32:5: error: Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.",
+      "fatal error: too many errors emitted, stopping now [-ferror-limit=]"
+    ],
+    "compiler_summary": "973 warnings and 20 errors generated.",
+    "stock_verifier_submission": false
+  },
+  "archive": "resident-process-event-storage.tar.gz",
+  "archive_request_range": [
+    28,
+    28
+  ],
+  "previous_archives": [
+    "resident-first-five.tar.gz",
+    "resident-next-nineteen.tar.gz",
+    "resident-tetragon-new-classes.tar.gz"
+  ],
+  "next": "Serial census continues with generic_kprobe_filter_arg; general B storage/representation work follows class collection."
+}
