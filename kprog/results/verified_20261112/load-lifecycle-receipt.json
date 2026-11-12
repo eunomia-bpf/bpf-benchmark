@@ -1,0 +1,27 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-load-lifecycle",
+  "fix_commit": "1af32bdae",
+  "kernel_commit": "5f6e694bfd4d",
+  "kernel_build": "/workspaces/.agent-state/kprog-ck/build-x86",
+  "shim_artifact": "/workspaces/repository/bpfopt/shim/build-x86/libbpfrejit_shim.so",
+  "command": "taskset -c 8-19 make -C kprog/libnativeloader trusted-lifecycle-check BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader OUTPUT=<raw_directory>/<before|after> -j1",
+  "rebuild_command": "taskset -c 8-19 make -C bpfopt/shim SHIM_SO=build-x86/libbpfrejit_shim.so build-x86/libbpfrejit_shim.so",
+  "before_exit_code": 2,
+  "after_exit_code": 0,
+  "before": {
+    "source_prog_id": 5,
+    "snapshot_before_load_completed": true,
+    "snapshot_response": "{\"ok\":true,\"progs\":[{\"id\":4,\"name\":\"\",\"type\":1,\"insn_cnt\":5,\"hash\":\"06ffeef05d7e610c\",\"bytecode_path\":\"/workspaces/kprog-raw/verified/20261112-load-lifecycle/before/shim/bpfrejit_1199_06ffeef05d7e610c.bpf\"},{\"id\":2,\"name\":\"\",\"type\":1,\"insn_cnt\":2,\"hash\":\"58255400910d7827\",\"bytecode_path\":\"/workspaces/kprog-raw/verified/20261112-load-lifecycle/before/shim/bpfrejit_1199_58255400910d7827.bpf\"},{\"id\":1,\"name\":\"\",\"type\":1,\"insn_cnt\":2,\"hash\":\"39f82ae52884c235\",\"bytecode_path\":\"/workspaces/kprog-raw/verified/20261112-load-lifecycle/before/shim/bpfrejit_1199_39f82ae52884c235.bpf\"},{\"id\":3,\"name\":\"libbpf_nametest\",\"type\":1,\"insn_cnt\":2,\"hash\":\"58255400910d7827\",\"bytecode_path\":\"/workspaces/kprog-raw/verified/20261112-load-lifecycle/before/shim/bpfrejit_1199_58255400910d7827.bpf\"}]}\n",
+    "app_returncode": 1,
+    "service_status": -13
+  },
+  "after": {
+    "source_prog_id": 5,
+    "snapshot_before_load_completed": false,
+    "snapshot_response": "",
+    "app_returncode": 1,
+    "service_status": -13
+  },
+  "scope": "Real upstream vfsstat BPF_PROG_LOAD held by a registered kernel service, with list_progs requested during that load. Service deliberately completes with -EACCES; the regression measures snapshot publication lifetime. Native compilation and application coverage are separate runs.",
+  "archive": "load-lifecycle.tar.gz"
+}
