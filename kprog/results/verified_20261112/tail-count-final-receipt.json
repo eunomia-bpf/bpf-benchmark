@@ -1,0 +1,66 @@
+{
+  "recorded_at": "2026-11-12T22:36:13Z",
+  "linker_source_commit": "a941c36c0",
+  "option_commit": "60031f1f1",
+  "recipe_commit": "29028248a",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-tail-count-final",
+  "make_exit_code": 0,
+  "finished": "2026-11-12T22:34:08Z",
+  "rust_tests": {
+    "passed": 9,
+    "failed": 0
+  },
+  "compiler_warnings": [],
+  "proof_comparison": {
+    "entries": 349,
+    "differences": []
+  },
+  "successful_proof_outputs": 302,
+  "retained_failed_commands": 47,
+  "kernel_comparison": {
+    "reference": "/workspaces/kprog-raw/verified/20261112-tail-count-option/kernel-retry-bytes",
+    "all_identical": [
+      "input.proof.o",
+      "default.bin",
+      "default.relocs",
+      "default.maps",
+      "default.abi",
+      "enabled.bin",
+      "enabled.relocs",
+      "enabled.maps",
+      "enabled.abi"
+    ],
+    "method": "cmp byte-for-byte, all exit0; kernel-comparison.txt retained"
+  },
+  "kernel_default": {
+    "blob_bytes": 6726,
+    "relocation_kinds": {
+      "1": 66
+    }
+  },
+  "kernel_enabled": {
+    "option": "--tail-count-relocs",
+    "blob_bytes": 6732,
+    "relocation_kinds": {
+      "1": 66,
+      "10": 2
+    },
+    "tail_count_offsets": [
+      1948,
+      3178
+    ]
+  },
+  "shared_binary": {
+    "bytes": 2522784,
+    "mtime": "2026-11-12T22:34:05.774729085Z"
+  },
+  "original_reference_context": "Early original reference has two Tetragon aux field offsets changed by authorized kernel/header c9b531e45; retained in30eb2f746, not filtered or marked equal.",
+  "readiness": "Default-off linker component ready for coordinator image scheduling; no image rebuilt by this run.",
+  "limits": [
+    "349 comparison is proof-stage text/ABI/status, not final linked bytes of all six apps",
+    "Kernel off/on capture uses C synthetic OTel plan, not actual app startup",
+    "No enabled guest tail-count execution or acceptance measured",
+    "CLI option alone does not pass the option through the loader"
+  ],
+  "archive": "tail-count-final-check.tar.gz"
+}
