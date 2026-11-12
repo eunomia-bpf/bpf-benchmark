@@ -1,0 +1,47 @@
+{
+  "recorded_at": "2026-11-12T09:24:16.375170+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-image-katran",
+  "corpus_run_directory": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261112_091130_181587",
+  "kernel_commit": "5f6e694bfd4d",
+  "model_commit": "8f1a1a8b4",
+  "loader_linker_commit": "fba19ea94",
+  "shim_commit": "1af32bdae",
+  "module_build_commit": "0ecc10f51",
+  "image": "bpf-benchmark/kprog:current",
+  "image_built_from": "d70d2e03e",
+  "samples": 1,
+  "workload_seconds": 10,
+  "bpf_stats": true,
+  "host_cpus": "8-19",
+  "guest_cpus": 8,
+  "guest_memory": "64G",
+  "exit_code": 0,
+  "application_status": "ok",
+  "loaded": 1,
+  "verified": 1,
+  "run": 1,
+  "source_prog_id": 15,
+  "native_prog_id": 18,
+  "generation_returncodes": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "stock_load": {
+    "request_id": 1,
+    "prog_id": 18,
+    "status": 0
+  },
+  "counters": {
+    "bytes_jited": 10126,
+    "bytes_xlated": 88360,
+    "id": 18,
+    "name": "balancer_ingres",
+    "run_cnt_delta": 19865512,
+    "run_time_ns_delta": 3932891086,
+    "type": "xdp"
+  },
+  "archive": "image-katran.tar.gz",
+  "scope": "Frozen two-start corpus on the sole kernel/current image. One short sample records functional coverage and raw workload counters."
+}
