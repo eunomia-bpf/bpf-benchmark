@@ -62,5 +62,43 @@
     }
   ],
   "archive": "safety-replay.tar.gz",
-  "scope": "Original 38-case suite replayed in place on the sole kernel. Its three accepted findings match the existing original-ABI item in todo.md section 3 (historical receipt 7cc7c2106). Full generated B and diagnostics remain available for general model investigation. All negative cases use the existing load-only invocation."
+  "scope": "Original 38-case suite replayed in place on the sole kernel. Its three accepted findings match the existing original-ABI item in todo.md section 3 (historical receipt 7cc7c2106). Full generated B and diagnostics remain available for general model investigation. All negative cases use the existing load-only invocation.",
+  "inspection": {
+    "recorded_at": "2026-11-12T09:30:08.503653+00:00",
+    "archive": "safety-inspection.tar.gz",
+    "raw_directory": "/workspaces/kprog-raw/verified/20261112-safety-replay/inspection",
+    "disassembler": "llvm-objdump-18 -d",
+    "observations": [
+      {
+        "request_id": 17,
+        "name": "uninitialized_stack",
+        "observation": "The emitted B retains the stack read before replacing below-SP observations with environment input. Disassembly instructions 33 and 41-48 show the aligned and byte memory-read arms. The sole kernel sets allow_uninit_stack through bpf_allow_uninit_stack, which uses CAP_PERFMON; check_stack_slot_within_bounds permits reads across MAX_BPF_STACK under that policy.",
+        "source_references": [
+          "vendor/linux-framework/include/linux/bpf.h:2735",
+          "vendor/linux-framework/kernel/bpf/verifier.c:7583",
+          "vendor/linux-framework/kernel/bpf/verifier.c:25948",
+          "kprog/x86/x86_sim_local_bpf.h:730"
+        ]
+      },
+      {
+        "request_ids": [
+          21,
+          23
+        ],
+        "names": [
+          "immediate_push_branch",
+          "stack_base_flags"
+        ],
+        "observation": "The emitted B returns zero on the candidate scalar-NULL read arms, following existing X86_SIM_L_READ_RECOVERY_AT. Historical exit-stack and branch-hardening receipts describe these original recovered-NULL labels. The current stock module carries load-site recovery offsets and stock register fixups.",
+        "source_references": [
+          "kprog/x86/x86_sim_local_bpf.h:1261",
+          "kprog/stock-path/module/kprog_stock.c:39",
+          "kprog/stock-path/module/kprog_stock.c:116",
+          "kprog/results/kprog_exit_stack_20261109/README.md",
+          "kprog/results/kprog_branch_hardening_20261109/README.md"
+        ]
+      }
+    ],
+    "scope": "Read-only inspection of the completed artifacts and current kernel/model sources. Original suite labels and measurements remain in the replay receipt. Universal and physical correspondence remain tracked in todo.md section 3."
+  }
 }
