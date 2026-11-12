@@ -1,0 +1,352 @@
+{
+  "recorded_at": "2026-11-12T17:04:55.931567+00:00",
+  "scope": "First24 completed requests of ongoing549-instance load-only census",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-resident-census/ready",
+  "kernel_commit": "74d1097af561",
+  "model_commit": "d0890b14f",
+  "completed_prefix": 24,
+  "submitted": 24,
+  "verified": 21,
+  "native_execution_requests": 0,
+  "applications": {
+    "bcc/set": {
+      "submitted": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "workload_run": null
+    },
+    "katran": {
+      "submitted": 1,
+      "verified": 0,
+      "verifier_rejected": 1,
+      "workload_run": null
+    },
+    "cilium/agent": {
+      "submitted": 2,
+      "verified": 0,
+      "verifier_rejected": 2,
+      "workload_run": null
+    },
+    "otelcol-ebpf-profiler/profiling": {
+      "submitted": 1,
+      "verified": 1,
+      "verifier_rejected": 0,
+      "workload_run": null
+    },
+    "tetragon/observer": {
+      "submitted": 20,
+      "verified": 20,
+      "verifier_rejected": 0,
+      "workload_run": null
+    },
+    "tracee/monitor": {
+      "submitted": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "workload_run": null
+    }
+  },
+  "classes": {
+    "verifier_instruction_complexity": 1,
+    "verifier_readonly_kernel_write": 2,
+    "installed": 21
+  },
+  "requests": [
+    {
+      "application": "katran",
+      "retained_source_prog_id": 440,
+      "name": "balancer_ingress",
+      "request_id": 1,
+      "native_prog_id": 0,
+      "stage": "verifier_rejected",
+      "classified_class": "verifier_instruction_complexity"
+    },
+    {
+      "application": "cilium/agent",
+      "retained_source_prog_id": 345,
+      "name": "cil_from_container",
+      "request_id": 2,
+      "native_prog_id": 0,
+      "stage": "verifier_rejected",
+      "classified_class": "verifier_readonly_kernel_write"
+    },
+    {
+      "application": "cilium/agent",
+      "retained_source_prog_id": 295,
+      "name": "cil_from_container",
+      "request_id": 3,
+      "native_prog_id": 0,
+      "stage": "verifier_rejected",
+      "classified_class": "verifier_readonly_kernel_write"
+    },
+    {
+      "application": "otelcol-ebpf-profiler/profiling",
+      "retained_source_prog_id": 160,
+      "name": "native_tracer_entry",
+      "request_id": 4,
+      "native_prog_id": 20,
+      "stage": "installed",
+      "classified_class": "installed"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 307,
+      "name": "generic_kprobe_",
+      "request_id": 5,
+      "native_prog_id": 24,
+      "stage": "installed",
+      "classified_class": "installed"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 101,
+      "name": "generic_kprobe_event",
+      "request_id": 6,
+      "native_prog_id": 28,
+      "stage": "installed",
+      "classified_class": "installed"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 110,
+      "name": "generic_kprobe_",
+      "request_id": 7,
+      "native_prog_id": 32,
+      "stage": "installed",
+      "classified_class": "installed"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 71,
+      "name": "generic_kprobe_event",
+      "request_id": 8,
+      "native_prog_id": 36,
+      "stage": "installed",
+      "classified_class": "installed"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 260,
+      "name": "generic_kprobe_",
+      "request_id": 9,
+      "native_prog_id": 40,
+      "stage": "installed",
+      "classified_class": "installed"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 94,
+      "name": "generic_kprobe_event",
+      "request_id": 10,
+      "native_prog_id": 44,
+      "stage": "installed",
+      "classified_class": "installed"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 150,
+      "name": "generic_kprobe_",
+      "request_id": 11,
+      "native_prog_id": 48,
+      "stage": "installed",
+      "classified_class": "installed"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 140,
+      "name": "generic_kprobe_",
+      "request_id": 12,
+      "native_prog_id": 52,
+      "stage": "installed",
+      "classified_class": "installed"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 246,
+      "name": "generic_kprobe_",
+      "request_id": 13,
+      "native_prog_id": 56,
+      "stage": "installed",
+      "classified_class": "installed"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 132,
+      "name": "generic_kprobe_",
+      "request_id": 14,
+      "native_prog_id": 60,
+      "stage": "installed",
+      "classified_class": "installed"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 83,
+      "name": "generic_kprobe_event",
+      "request_id": 15,
+      "native_prog_id": 64,
+      "stage": "installed",
+      "classified_class": "installed"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 57,
+      "name": "generic_kprobe_event",
+      "request_id": 16,
+      "native_prog_id": 68,
+      "stage": "installed",
+      "classified_class": "installed"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 235,
+      "name": "generic_kprobe_",
+      "request_id": 17,
+      "native_prog_id": 72,
+      "stage": "installed",
+      "classified_class": "installed"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 273,
+      "name": "generic_kprobe_",
+      "request_id": 18,
+      "native_prog_id": 76,
+      "stage": "installed",
+      "classified_class": "installed"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 295,
+      "name": "generic_kprobe_",
+      "request_id": 19,
+      "native_prog_id": 80,
+      "stage": "installed",
+      "classified_class": "installed"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 228,
+      "name": "generic_kprobe_",
+      "request_id": 20,
+      "native_prog_id": 84,
+      "stage": "installed",
+      "classified_class": "installed"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 265,
+      "name": "generic_kprobe_",
+      "request_id": 21,
+      "native_prog_id": 88,
+      "stage": "installed",
+      "classified_class": "installed"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 293,
+      "name": "generic_kprobe_",
+      "request_id": 22,
+      "native_prog_id": 92,
+      "stage": "installed",
+      "classified_class": "installed"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 204,
+      "name": "generic_kprobe_",
+      "request_id": 23,
+      "native_prog_id": 96,
+      "stage": "installed",
+      "classified_class": "installed"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 280,
+      "name": "generic_kprobe_",
+      "request_id": 24,
+      "native_prog_id": 100,
+      "stage": "installed",
+      "classified_class": "installed"
+    }
+  ],
+  "previous_request_archive": "resident-first-five.tar.gz",
+  "request_archive_range": [
+    6,
+    24
+  ],
+  "archive": "resident-next-nineteen.tar.gz",
+  "katran_input_comparison": {
+    "native_body_bytes": 7965,
+    "native_body_equal": true,
+    "proof_body_bytes": 7969,
+    "proof_body_equal": true,
+    "generated_C_bytes": 301529,
+    "generated_C_equal": true,
+    "compile_flags_equal": true,
+    "compile_flags": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "<preprocessed-input>",
+      "-o",
+      "<compiled-B>"
+    ],
+    "compiled_B_instructions": {
+      "application": 20988,
+      "census": 22986
+    },
+    "application_model": "8f1a1a8b4",
+    "census_model": "d0890b14f",
+    "map_layout_differences": [
+      {
+        "name": "lru_mapping",
+        "application": {
+          "name": "lru_mapping",
+          "value_offset": null,
+          "map_type": 12,
+          "max_entries": 128,
+          "value_size": 4,
+          "key_size": 4,
+          "map_flags": 0,
+          "inner_map": {
+            "map_type": 9,
+            "max_entries": 1024,
+            "value_size": 16,
+            "key_size": 40,
+            "map_flags": 0
+          }
+        },
+        "census": {
+          "name": "lru_mapping",
+          "value_offset": null,
+          "value_size": 4,
+          "map_type": 12,
+          "map_flags": 0,
+          "key_size": 4,
+          "max_entries": 128,
+          "inner_map": {
+            "value_size": 16,
+            "map_type": 9,
+            "map_flags": 0,
+            "key_size": 40,
+            "max_entries": 1000
+          }
+        }
+      }
+    ],
+    "scope": "Same sole kernel and entry P/C/flags; B-model-era code and inner-map template capacity differ. Source BTF context IDs/type identifiers remain in the captured facts. Causal replay follows the census."
+  }
+}
