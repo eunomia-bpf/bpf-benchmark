@@ -88,6 +88,17 @@ def tetragon_variants() -> list[tuple[str, str, str, list[str]]]:
                          (("bpf_multi_retuprobe_v61", "bpf_generic_retuprobe"), v61),
                          (("bpf_multi_usdt_v61", "bpf_generic_usdt"), v61)):
         out.append((pair[0], process, pair[1], extra + ["-D__MULTI_KPROBE"]))
+    # One source, several programs: the enforcer is compiled three ways and the
+    # _v511/_v61 objects reuse a plain source with a kernel-version define.
+    for name, extra in (("bpf_enforcer", ["-D__BPF_OVERRIDE_RETURN"]),
+                        ("bpf_fmodret_enforcer", []),
+                        ("bpf_multi_enforcer", ["-D__BPF_OVERRIDE_RETURN",
+                                                 "-D__MULTI_KPROBE"])):
+        out.append((name, process, "bpf_enforcer", extra))
+    for name in ("bpf_exit", "bpf_fork", "bpf_loader"):
+        out.append((f"{name}_v511", process, name, v511))
+    out.append(("bpf_multi_usdt_v511", process, "bpf_generic_usdt",
+                v511 + ["-D__MULTI_KPROBE"]))
     for name in ("bpf_cgroup_mkdir", "bpf_cgroup_rmdir", "bpf_cgroup_release"):
         out.append((name, "cgroup", name, []))
         out.append((f"{name}_v511", "cgroup", name, v511))
@@ -293,6 +304,12 @@ def publish_manifest(app: str, output: Path, published: dict[str, str],
     if not image_manifest.is_file():
         sys.exit(f"--manifest: {image_manifest} is not a file")
     manifest = json.loads(image_manifest.read_text())
+    shipped = {Path(entry["native_object"]).name.replace(".native.o", "")
+               for entry in manifest["objects"]}
+    missing = sorted(shipped - set(published))
+    if missing:
+        sys.exit(f"{app}: {len(missing)} objects the manifest ships were not "
+                 f"specialized: {missing}")
     for stem, path in published.items():
         target = output / f"{stem}.native.o"
         if Path(path).resolve() != target.resolve():
