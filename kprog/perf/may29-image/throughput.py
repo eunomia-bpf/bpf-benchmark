@@ -66,7 +66,10 @@ def main() -> None:
 
     plain, treatment = group(args.plain), group(args.treatment)
     print(f"{'stressor':12} {'plain n':>7} {'mean':>10} {'sd':>9} "
-          f"{'treat n':>7} {'mean':>10} {'delta':>8} {'z':>6}")
+          f"{'treat n':>7} {'mean':>10} {'delta':>8} {'z':>6}   ranges")
+    # A z below 2 with overlapping arms is not an effect, and with a handful of
+    # samples one outlier moves the mean as much as a real change: the ranges are
+    # printed next to z so a reader can see which claim the data supports.
     for name in sorted(treatment):
         a, b = plain.get(name, []), treatment[name]
         if not a or not b:
@@ -75,8 +78,11 @@ def main() -> None:
         treat = statistics.mean(b)
         change = treat - mean
         z = change / spread if spread else float("nan")
+        lo, hi = min(a), max(a)
+        tlo, thi = min(b), max(b)
         print(f"{name:12} {len(a):7} {mean:10.0f} {spread:9.0f} "
-              f"{len(b):7} {treat:10.0f} {100 * change / mean:+7.1f}% {z:+6.1f}")
+              f"{len(b):7} {treat:10.0f} {100 * change / mean:+7.1f}% {z:+6.1f}"
+              f"   ranges {lo:.0f}-{hi:.0f} / {tlo:.0f}-{thi:.0f}")
 
 
 if __name__ == "__main__":
