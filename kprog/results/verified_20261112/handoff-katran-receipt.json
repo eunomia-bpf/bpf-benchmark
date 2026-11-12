@@ -1,0 +1,74 @@
+{
+  "recorded_at": "2026-11-12T13:57:17.691095+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-handoff-katran",
+  "corpus_run_directory": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261112_134431_322796",
+  "kernel_commit": "74d1097af561",
+  "image": "bpf-benchmark/kprog:current",
+  "image_platform_id": "sha256:d756bf5919e9eb35cc8628a38af95ca2cec2751e86f4c23f7c6e3f7bd07494a1",
+  "loader_selector_commit": "da665bbf3",
+  "shim_commit": "1af32bdae",
+  "capture_forward_commit": "44cb30c70",
+  "samples": 1,
+  "workload_seconds": 10,
+  "bpf_stats": true,
+  "host_cpus": "8-19",
+  "guest_cpus": 8,
+  "guest_memory": "64G",
+  "exit_code": 0,
+  "application_status": "ok",
+  "application_error": "",
+  "service_summary": {
+    "started": "2026-11-12T13:43:00.483936+00:00",
+    "command": [
+      "python3",
+      "/workspaces/repository/kprog/test/verified_corpus.py",
+      "katran",
+      "1",
+      "10",
+      "1"
+    ],
+    "service": {
+      "ready": true,
+      "arch": 1,
+      "endpoint": "/sys/kernel/debug/bpf_x86_native_lab/specializer"
+    },
+    "returncode": 0,
+    "service_returncode": -15,
+    "finished": "2026-11-12T13:51:06.635603+00:00"
+  },
+  "loaded": 1,
+  "verified": 1,
+  "run": 1,
+  "programs": [
+    {
+      "request_id": 1,
+      "source_prog_id": 15,
+      "native_prog_id": 18,
+      "stock_load": {
+        "request_id": 1,
+        "prog_id": 18,
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 10126,
+        "bytes_xlated": 88360,
+        "id": 18,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 20015708,
+        "run_time_ns_delta": 4125298587,
+        "type": "xdp"
+      }
+    }
+  ],
+  "capture_directory": "/workspaces/repository/corpus/results/verified-captures-d1yds3g0",
+  "capture_regular_files": 9,
+  "capture_bytes": 40837,
+  "archive": "handoff-katran.tar.gz",
+  "scope": "Frozen corpus two-start workload on rebuilt sole kernel/image through registered service. Positive workload run_cnt_delta defines exercised count; persistent bytecode captures survive container cleanup."
+}
