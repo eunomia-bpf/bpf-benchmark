@@ -46,7 +46,7 @@
 
 ## 2. 应用覆盖
 
-- [ ] **VERIFIED（2026-11-12）** 唯一内核 5f6e694bfd4d 上重新跑 BCC、Katran，再按最大失败类推进其余四应用。第一步：现有 stock-path module 在唯一底座 `build-x86` 编译成功，产物 `/workspaces/.agent-state/kprog-ck/verified-module/bpf_kprog_stock.ko`，构建收据 `/workspaces/kprog-raw/verified/20261112-module-build/receipt.json`。当前镜像仅带 timing-only module，没有 specializer；May reset e6808c073 删除了 trusted-service loader API，待在原检出中恢复所需部分，并协调唯一镜像重建。六应用在当前内核的 loaded/verified/run 数量均未测量，不能沿用下方历史计数。 生产者提交端已恢复（2a32f739a、ee9d3117d）：要求 verified 时通过 kernel queue 提交 P 和 map capabilities，service 拒绝直接返回；实际 kernel-queue regression 已启动，收据目录 `/workspaces/kprog-raw/verified/20261112-producer-queue/`，结果待后续 turn 读取；service-worker load API 与镜像集成仍待完成。
+- [ ] **VERIFIED（2026-11-12）** 唯一内核 5f6e694bfd4d 上重新跑 BCC、Katran，再按最大失败类推进其余四应用。第一步：现有 stock-path module 在唯一底座 `build-x86` 编译成功，产物 `/workspaces/.agent-state/kprog-ck/verified-module/bpf_kprog_stock.ko`，构建收据 `/workspaces/kprog-raw/verified/20261112-module-build/receipt.json`。当前镜像仅带 timing-only module，没有 specializer；May reset e6808c073 删除了 trusted-service loader API，待在原检出中恢复所需部分，并协调唯一镜像重建。六应用在当前内核的 loaded/verified/run 数量均未测量，不能沿用下方历史计数。 生产者提交端已恢复（2a32f739a、ee9d3117d）：要求 verified 时通过 kernel queue 提交 P 和 map capabilities，service 拒绝直接返回；首轮 kernel-queue regression rc2（`/workspaces/kprog-raw/verified/20261112-producer-queue/`）：P/entry/source snapshot 收到，但测试 map 名称缺少 `.bss` 后缀，metadata 断言失败；修正 fixture 后重跑，目录 `/workspaces/kprog-raw/verified/20261112-producer-queue-2/`；service-worker load API 与镜像集成仍待完成。
 
 两条路径分开计数。直接 native（跳过 verifier）：六个应用都跑通过（05-29，11-07 复现）。verified 路径（verifier 检查 B）：BCC 25/25、Katran 1/1 跑通过，其余应用只有少量程序，历史最高约 50/549。
 

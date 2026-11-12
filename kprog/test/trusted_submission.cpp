@@ -27,7 +27,7 @@ int main(int argc, char **argv)
         std::vector<unsigned char> native{std::istreambuf_iterator<char>(input), {}};
         require(!input.bad() && !native.empty(), "read native ELF");
         bpf_map_create_opts map_opts{}; map_opts.sz = sizeof(map_opts);
-        int map = bpf_map_create(BPF_MAP_TYPE_ARRAY, "source_data", 4, 40, 1, &map_opts);
+        int map = bpf_map_create(BPF_MAP_TYPE_ARRAY, "vfsstat.bss", 4, 40, 1, &map_opts);
         require(map >= 0, "create actual source map");
         bpf_map_info map_info{}; uint32_t size = sizeof(map_info);
         require(!bpf_obj_get_info_by_fd(map, &map_info, &size), "query map identity");
@@ -60,6 +60,7 @@ int main(int argc, char **argv)
             require(bytes == native && std::string(entry.begin(), entry.end()) == "kprobe_vfs_read" &&
                     request.source_prog_id == info.id, "exact P, entry and source identity");
             std::string json(metadata.begin(), metadata.end());
+            std::cout << "kernel submission metadata: " << json << std::endl;
             require(json.find("\"name\":\"stats\"") != std::string::npos &&
                     json.find("\"map_id\":" + std::to_string(map_info.id)) != std::string::npos &&
                     json.find("\"value_offset\":0") != std::string::npos,
