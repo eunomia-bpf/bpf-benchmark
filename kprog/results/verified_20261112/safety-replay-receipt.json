@@ -1,0 +1,66 @@
+{
+  "recorded_at": "2026-11-12T09:24:57.493828+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-safety-replay",
+  "kernel_commit": "5f6e694bfd4d",
+  "model_commit": "8f1a1a8b4",
+  "module_build_commit": "0ecc10f51",
+  "entry_commit": "e4cd5a862",
+  "input_commit": "a9a0b8b5c",
+  "exit_code": 2,
+  "cases": 38,
+  "stages": {
+    "valid_executed": 9,
+    "verifier_rejected": 25,
+    "accepted_finding": 3,
+    "specialization_rejected": 1
+  },
+  "positive_cases": 9,
+  "negative_cases": 29,
+  "negative_command_argument_counts": [
+    3
+  ],
+  "negative_native_executed": 0,
+  "accepted_findings": [
+    {
+      "name": "uninitialized_stack",
+      "assembly": "mov rax, QWORD PTR [rsp-8]; ret",
+      "stage": "accepted_finding",
+      "returncode": 0,
+      "command": [
+        "/workspaces/.agent-state/kprog-ck/verified-safety/bound-probe",
+        "/workspaces/.agent-state/kprog-ck/verified-safety/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-ck/verified-safety/uninitialized_stack.manifest.json"
+      ],
+      "request_id": 17,
+      "native_prog_id": 164
+    },
+    {
+      "name": "immediate_push_branch",
+      "assembly": "mov eax, 2; push 1; pop rcx; test rcx, rcx; jz 1f; xor edx, edx; mov eax, DWORD PTR [rdx]; 1: ret",
+      "stage": "accepted_finding",
+      "returncode": 0,
+      "command": [
+        "/workspaces/.agent-state/kprog-ck/verified-safety/bound-probe",
+        "/workspaces/.agent-state/kprog-ck/verified-safety/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-ck/verified-safety/immediate_push_branch.manifest.json"
+      ],
+      "request_id": 21,
+      "native_prog_id": 195
+    },
+    {
+      "name": "stack_base_flags",
+      "assembly": "mov eax, 2; sub rsp, 8; add rsp, 8; jz 1f; xor ecx, ecx; mov eax, DWORD PTR [rcx]; 1: ret",
+      "stage": "accepted_finding",
+      "returncode": 0,
+      "command": [
+        "/workspaces/.agent-state/kprog-ck/verified-safety/bound-probe",
+        "/workspaces/.agent-state/kprog-ck/verified-safety/context_hash.bpf.o",
+        "/workspaces/.agent-state/kprog-ck/verified-safety/stack_base_flags.manifest.json"
+      ],
+      "request_id": 23,
+      "native_prog_id": 212
+    }
+  ],
+  "archive": "safety-replay.tar.gz",
+  "scope": "Original 38-case suite replayed in place on the sole kernel. Its three accepted findings match the existing original-ABI item in todo.md section 3 (historical receipt 7cc7c2106). Full generated B and diagnostics remain available for general model investigation. All negative cases use the existing load-only invocation."
+}
