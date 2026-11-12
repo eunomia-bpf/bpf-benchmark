@@ -8,11 +8,12 @@ rebuilt with those values as plain constants, so clang folds the reads and the
 branches the configuration values decide -- the same folds the verifier does on
 the eBPF side.
 
-The value of a global is taken by name from the loaded .rodata image, at the
-offset the compiled BPF object gives that name. The loaded map's layout is the
-BPF object's, which differs from the native object's (the two compilers align
-the same globals differently), and the loader resolves each native .rodata
-symbol to the loaded map by name, so the name is the join key.
+The value of a global is the bytes the loaded .rodata image holds at that
+global's offset in the native object: the loader patches each native .rodata
+symbol to map_value_addr + native offset, so the native object's own layout is
+what the loaded image is indexed by. When the object's .rodata is larger than
+the map value the loader keeps the object's own copy, and then the constant is
+the object's initializer as it stands.
 
 Every object is built twice: once with the Makefile's own source and flags
 (<stem>.plain.o, the switch-off path) and once from the specialized unit
@@ -127,6 +128,31 @@ def loaded_rodata(capture: Path) -> dict[str, bytes]:
     return values
 
 
+def plain_rodata_bytes(object_path: Path) -> bytes:
+    """The object's .rodata contents, what the loader patches against."""
+    sections = subprocess.run(["readelf", "-SW", str(object_path)],
+                              capture_output=True, text=True).stdout
+    for m in re.finditer(
+            r"^\s*\[\s*\d+\]\s+\.rodata\s+PROGBITS\s+[0-9a-f]+\s+([0-9a-f]+)\s+([0-9a-f]+)",
+            sections, re.M):
+        offset, size = int(m.group(1), 16), int(m.group(2), 16)
+        with open(object_path, "rb") as handle:
+            handle.seek(offset)
+            return handle.read(size)
+    return b""
+
+
+def plain_rodata_size(object_path: Path) -> int:
+    """Bytes of the object's .rodata section, the loader's fit test."""
+    sections = subprocess.run(["readelf", "-SW", str(object_path)],
+                              capture_output=True, text=True).stdout
+    for m in re.finditer(
+            r"^\s*\[\s*\d+\]\s+\.rodata\s+\S+\s+[0-9a-f]+\s+[0-9a-f]+\s+([0-9a-f]+)",
+            sections, re.M):
+        return int(m.group(1), 16)
+    return 0
+
+
 def program_sizes(object_path: Path) -> dict[str, int]:
     """Executable section name -> bytes, one entry per BPF program."""
     sections = subprocess.run(["readelf", "-SW", str(object_path)],
@@ -182,17 +208,15 @@ def main() -> None:
             print(f"{stem:22} no captured .rodata map", file=sys.stderr)
             continue
         reference = loaded[tool]
-        bpf_object = bpf_objects / f"{tool}.bpf.o"
-        globals_ = section_symbols(bpf_object, ".rodata")
-        for name, (section, offset, size) in globals_.items():
-            if offset + size > len(reference):
-                raise SystemExit(f"{stem}: {name} at {offset}+{size} past the "
-                                 f"{len(reference)}-byte {tool}.rodata image")
         directory = output / Path(stem).parent
         directory.mkdir(parents=True, exist_ok=True)
         base = directory / Path(stem).name
         plain = base.with_suffix(".plain.o")
         run(["clang-18", *NATIVE_CFLAGS, *flags, "-o", str(plain), str(source)])
+        section = plain_rodata_size(plain)
+        if section > len(reference):
+            print(f"{stem:22} .rodata {section} > map value {len(reference)}; "
+                  f"the object keeps its own copy", file=sys.stderr)
 
         unit = base.with_suffix(".unit.i")
         index = base.with_suffix(".decls.json")
@@ -203,8 +227,10 @@ def main() -> None:
         produced_unit = directory / f"{Path(stem).name}.i"
         produced_index = produced_unit.with_suffix(".decls.json")
 
+        # The loader indexes the loaded image by the plain object's .rodata
+        # offsets, so the constants come from the plain object's own section.
         rodata_file = directory / f"{base.name}.rodata.bin"
-        rodata_file.write_bytes(reference)
+        rodata_file.write_bytes(plain_rodata_bytes(plain))
         specialized = base.with_suffix(".rodata.i")
         run([sys.executable, str(HERE / "native_specialize.py"),
              "--unit", str(produced_unit), "--decls", str(produced_index),

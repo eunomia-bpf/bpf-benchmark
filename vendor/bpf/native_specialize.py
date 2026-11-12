@@ -7,15 +7,17 @@ native_specialize_prepares.py wrote at build time, and the bytes the program's
 global is a plain constant carrying those bytes, so clang folds every read of
 it and every branch it decides.
 
-The rewrite keeps the original declaration (so the type spelling the program
-wrote stays as it is) and inserts, after it, a byte-image constant plus a
-#define that routes the name to it:
+The rewrite keeps the original declaration and inserts, after it, a byte-image
+constant plus a #define that routes the name to it. Keeping the declaration is
+what preserves the object's .rodata layout: the loader patches every native
+.rodata symbol to map_value_addr + its own offset, so a reordered section would
+read another global's bytes.
 
     const volatile int targ_pid = 0;
-    ->
-    const union { unsigned char b[4]; const int v; } targ_pid
-        __attribute__((unused)) = { .b = { 0xe8,0x00,0x00,0x00 } };
-    #define targ_pid (targ_pid.v)
+    static const union { unsigned char b[4]; const int v; }
+        __sp_targ_pid __attribute__((unused)) = { .b = { 0xe8,0x00,0x00,0x00 } };
+    #undef targ_pid
+    #define targ_pid (__sp_targ_pid.v)
 
 The declaration is replaced in place, so the object keeps its name, its offset
 in .rodata and its size; the loader resolves the .rodata symbol addresses from
@@ -48,8 +50,9 @@ def strip_volatile(type_text: str) -> str:
 
 
 def specialization(name: str, entry: dict, data: bytes) -> str:
-    """The declaration that replaces the original, plus the macro that routes
-    the name to the constant member."""
+    """The constant that carries the loaded bytes, plus the macro that routes
+    the name to it. The original declaration stays in place, which keeps the
+    object's .rodata layout."""
     # An array type's brackets belong after the member name: the recorded
     # "const volatile int[64]" becomes "const int v[64]". A scalar or struct
     # type is used as written.
@@ -58,9 +61,10 @@ def specialization(name: str, entry: dict, data: bytes) -> str:
     if entry.get("array_type"):
         base, brackets = member.split("[", 1)
         declarator = f"{base} v[{brackets}"
-    return (f"const union {{ unsigned char b[{len(data)}]; const {declarator}; }} "
-            f"{name} __attribute__((unused)) = {{ .b = {{ {byte_image(data)} }} }};\n"
-            f"#undef {name}\n#define {name} ({name}.v)")
+    constant = f"__sp_{name}"
+    return (f"static const union {{ unsigned char b[{len(data)}]; const {declarator}; }}\n"
+            f"    {constant} __attribute__((unused)) = {{ .b = {{ {byte_image(data)} }} }};\n"
+            f"#undef {name}\n#define {name} ({constant}.v)")
 
 
 def main() -> None:
@@ -88,7 +92,8 @@ def main() -> None:
             sys.exit(f"{entry['name']}: {size}-byte initializer exceeds "
                      f"{MAX_INITIALIZER_BYTES}")
         at = entry["line"] - 1
-        lines[at] = specialization(entry["name"], entry, rodata[offset:offset + size])
+        lines[at] = (lines[at] + "\n" +
+                     specialization(entry["name"], entry, rodata[offset:offset + size]))
         applied += 1
 
     Path(args.output).write_text("\n".join(lines))
