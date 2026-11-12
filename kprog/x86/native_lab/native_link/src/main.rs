@@ -115,6 +115,10 @@ struct Args {
     #[arg(long)]
     preserve_entry_abi: bool,
 
+    /// Emit x86 kernel tail-count relocations using a patchable imm32 entry offset.
+    #[arg(long)]
+    tail_count_relocs: bool,
+
     /// Link mode. `proof` applies canonical ABI/link edits but leaves
     /// verifier-after helper/map lowering symbolic and emits a relocatable
     /// proof object for the eBPF simulator generator.
@@ -486,6 +490,7 @@ fn main() -> Result<()> {
                 &update_sites,
                 proof_mode,
                 args.preserve_entry_abi,
+                args.tail_count_relocs,
                 args.show,
             )?
         }
@@ -2548,6 +2553,14 @@ fn disasm_arm64_words(blob: &[u8]) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn tail_count_relocations_require_cli_opt_in() {
+        let argv = ["native-link", "--input", "p.o", "--symbol", "entry", "--output", "p.bin"];
+        assert!(!Args::try_parse_from(argv).unwrap().tail_count_relocs);
+        assert!(Args::try_parse_from(argv.into_iter().chain(["--tail-count-relocs"]))
+            .unwrap().tail_count_relocs);
+    }
 
     #[test]
     fn arm64_entry_abi_strip_allows_multiple_epilogues() {
