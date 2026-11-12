@@ -1,0 +1,170 @@
+{
+  "recorded_at": "2026-11-12T16:54:08.315919+00:00",
+  "scope": "First five completed requests of the ongoing 549-instance load-only census; actual app startup/workload counts stay separate.",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-resident-census/ready",
+  "kernel_commit": "74d1097af561",
+  "model_commit": "d0890b14f",
+  "controller_commit": "1486139b4",
+  "completed_prefix": 5,
+  "submitted": 5,
+  "verified": 2,
+  "verifier_rejected": 3,
+  "native_execution_requests": 0,
+  "applications": {
+    "bcc/set": {
+      "submitted": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "workload_run": null
+    },
+    "katran": {
+      "submitted": 1,
+      "verified": 0,
+      "verifier_rejected": 1,
+      "workload_run": null
+    },
+    "cilium/agent": {
+      "submitted": 2,
+      "verified": 0,
+      "verifier_rejected": 2,
+      "workload_run": null
+    },
+    "otelcol-ebpf-profiler/profiling": {
+      "submitted": 1,
+      "verified": 1,
+      "verifier_rejected": 0,
+      "workload_run": null
+    },
+    "tetragon/observer": {
+      "submitted": 1,
+      "verified": 1,
+      "verifier_rejected": 0,
+      "workload_run": null
+    },
+    "tracee/monitor": {
+      "submitted": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "workload_run": null
+    }
+  },
+  "requests": [
+    {
+      "application": "katran",
+      "retained_source_prog_id": 440,
+      "name": "balancer_ingress",
+      "stock_request_id": 1,
+      "kernel_source_prog_id": 0,
+      "native_prog_id": 0,
+      "stage": "verifier_rejected",
+      "original_class": "verifier_rejected",
+      "classified_class": "verifier_instruction_complexity",
+      "priority": {
+        "measured_name": "balancer_ingres",
+        "baseline_time_ns": 231713723754,
+        "application_time_ns": 231713723754,
+        "application_time_share": 1.0,
+        "matching_census_instances": 1,
+        "retained_instance_time_ns": 769120639,
+        "scope": "Measured name family; matching instances share priority"
+      },
+      "verifier_tail": "m fp-256=fp-232 fp-264=pkt(r=82) fp-272=0 fp-280=scalar() fp-288=ctx() fp-296=mmmm0 fp-304=mmmm6\n15493: (b7) r1 = 8                    ; R1=8\n15494: (bf) r2 = r1                   ; R1=8 R2=8\n15495: (07) r2 += 8                   ; R2=16\n15496: (bf) r3 = r1                   ; R1=8 R3=8\n15497: (57) r3 &= 7                   ; R3=0\n15498: (55) if r3 != 0x0 goto pc+299          ; R3=0\n15499: (bf) r3 = r10                  ; R3=fp0 R10=fp0\n15500: (07) r3 += -240                ; R3=fp-240\n15501: (0f) r3 += r2                  ; R2=16 R3=fp-224\n15502: (7a) *(u64 *)(r3 +0) = 0       ; R3=fp-224 fp-224=0\n15503: (65) if r1 s> 0xffffffff goto pc+1     ; R1=8\n15505: (b7) r1 = 0                    ; R1=0\n15506: (bf) r2 = r1                   ; R1=0 R2=0\n15507: (07) r2 += 8                   ; R2=8\n15508: (bf) r3 = r1                   ; R1=0 R3=0\n15509: (57) r3 &= 7                   ; R3=0\n15510: (55) if r3 != 0x0 goto pc+361          ; R3=0\n15511: (bf) r3 = r10                  ; R3=fp0 R10=fp0\n15512: (07) r3 += -240                ; R3=fp-240\n15513: (0f) r3 += r2                  ; R2=8 R3=fp-232\n15514: (7a) *(u64 *)(r3 +0) = 0       ; R3=fp-232 fp-232=0\n15515: (65) if r1 s> 0xffffffff goto pc+1     ; R1=0\n15517: (b7) r1 = 28\nBPF program is too large. Processed 1000001 insn\nprocessed 1000001 insns (limit 1000000) max_states_per_insn 19 total_states 50038 peak_states 1598 mark_read 0\n\n"
+    },
+    {
+      "application": "cilium/agent",
+      "retained_source_prog_id": 345,
+      "name": "cil_from_container",
+      "stock_request_id": 2,
+      "kernel_source_prog_id": 0,
+      "native_prog_id": 0,
+      "stage": "verifier_rejected",
+      "original_class": "verifier_rejected",
+      "classified_class": "verifier_readonly_kernel_write",
+      "priority": {
+        "measured_name": "cil_from_contai",
+        "baseline_time_ns": 442737794504,
+        "application_time_ns": 442737807414,
+        "application_time_share": 0.9999999708405296,
+        "matching_census_instances": 2,
+        "retained_instance_time_ns": 1140882101,
+        "scope": "Measured name family; matching instances share priority"
+      },
+      "verifier_tail": "smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=trusted_ptr_sk_buff()\n45: (61) r2 = *(u32 *)(r7 +116)       ; R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=trusted_ptr_sk_buff()\n46: (1c) w1 -= w2                     ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n47: (18) r2 = 0xfffffffe              ; R2=0xfffffffe\n49: (5f) r1 &= r2                     ; R1=scalar(smin=0,smax=umax=umax32=0xfffffffe,smax32=0x7ffffffe,var_off=(0x0; 0xfffffffe)) R2=0xfffffffe\n50: (25) if r1 > 0xd goto pc+5        ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=13,var_off=(0x0; 0xe))\n51: (b7) r1 = 0                       ; R1=0\n52: (7b) *(u64 *)(r10 -112) = r1      ; R1=0 R10=fp0 fp-112=0\n53: (7b) *(u64 *)(r10 -120) = r1      ; R1=0 R10=fp0 fp-120=0\n54: (79) r6 = *(u64 *)(r10 -104)      ; R6=ctx() R10=fp0 fp-104=ctx()\n55: (05) goto pc+13\n69: (7b) *(u64 *)(r10 -96) = r7       ; R7=trusted_ptr_sk_buff() R10=fp0 fp-96=trusted_ptr_sk_buff()\n70: (bf) r1 = r7                      ; R1=trusted_ptr_sk_buff() R7=trusted_ptr_sk_buff()\n71: (07) r1 += 40                     ; R1=trusted_ptr_sk_buff(off=40)\n72: (b7) r8 = 0                       ; R8=0\n73: (63) *(u32 *)(r1 +0) = r8\nonly read is supported\nprocessed 58 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n\n"
+    },
+    {
+      "application": "cilium/agent",
+      "retained_source_prog_id": 295,
+      "name": "cil_from_container",
+      "stock_request_id": 3,
+      "kernel_source_prog_id": 0,
+      "native_prog_id": 0,
+      "stage": "verifier_rejected",
+      "original_class": "verifier_rejected",
+      "classified_class": "verifier_readonly_kernel_write",
+      "priority": {
+        "measured_name": "cil_from_contai",
+        "baseline_time_ns": 442737794504,
+        "application_time_ns": 442737807414,
+        "application_time_share": 0.9999999708405296,
+        "matching_census_instances": 2,
+        "retained_instance_time_ns": 1138109271,
+        "scope": "Measured name family; matching instances share priority"
+      },
+      "verifier_tail": "smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=trusted_ptr_sk_buff()\n45: (61) r2 = *(u32 *)(r7 +116)       ; R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=trusted_ptr_sk_buff()\n46: (1c) w1 -= w2                     ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n47: (18) r2 = 0xfffffffe              ; R2=0xfffffffe\n49: (5f) r1 &= r2                     ; R1=scalar(smin=0,smax=umax=umax32=0xfffffffe,smax32=0x7ffffffe,var_off=(0x0; 0xfffffffe)) R2=0xfffffffe\n50: (25) if r1 > 0xd goto pc+5        ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=13,var_off=(0x0; 0xe))\n51: (b7) r1 = 0                       ; R1=0\n52: (7b) *(u64 *)(r10 -112) = r1      ; R1=0 R10=fp0 fp-112=0\n53: (7b) *(u64 *)(r10 -120) = r1      ; R1=0 R10=fp0 fp-120=0\n54: (79) r6 = *(u64 *)(r10 -104)      ; R6=ctx() R10=fp0 fp-104=ctx()\n55: (05) goto pc+13\n69: (7b) *(u64 *)(r10 -96) = r7       ; R7=trusted_ptr_sk_buff() R10=fp0 fp-96=trusted_ptr_sk_buff()\n70: (bf) r1 = r7                      ; R1=trusted_ptr_sk_buff() R7=trusted_ptr_sk_buff()\n71: (07) r1 += 40                     ; R1=trusted_ptr_sk_buff(off=40)\n72: (b7) r8 = 0                       ; R8=0\n73: (63) *(u32 *)(r1 +0) = r8\nonly read is supported\nprocessed 58 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n\n"
+    },
+    {
+      "application": "otelcol-ebpf-profiler/profiling",
+      "retained_source_prog_id": 160,
+      "name": "native_tracer_entry",
+      "stock_request_id": 4,
+      "kernel_source_prog_id": 0,
+      "native_prog_id": 20,
+      "stage": "installed",
+      "original_class": "installed",
+      "classified_class": "installed",
+      "priority": {
+        "measured_name": "native_tracer_e",
+        "baseline_time_ns": 1344585696818,
+        "application_time_ns": 1344585911932,
+        "application_time_share": 0.9999998400146854,
+        "matching_census_instances": 1,
+        "retained_instance_time_ns": 11583159377,
+        "scope": "Measured name family; matching instances share priority"
+      },
+      "verifier_tail": ""
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 307,
+      "name": "generic_kprobe_",
+      "stock_request_id": 5,
+      "kernel_source_prog_id": 0,
+      "native_prog_id": 24,
+      "stage": "installed",
+      "original_class": "installed",
+      "classified_class": "installed",
+      "priority": {
+        "measured_name": "generic_kprobe_",
+        "baseline_time_ns": 1086683629793,
+        "application_time_ns": 2129006675345,
+        "application_time_share": 0.5104181411816878,
+        "matching_census_instances": 231,
+        "retained_instance_time_ns": 646233147,
+        "scope": "Measured name family; matching instances share priority"
+      },
+      "verifier_tail": ""
+    }
+  ],
+  "cilium_origin": {
+    "native_cb_offset": 40,
+    "kernel_skb_cb_offset": 40,
+    "qdisc_data_offset": 8,
+    "stock_uapi_cb_target_offset": 48,
+    "model_cb_offset": 48,
+    "native_pc": "0x42",
+    "bpf_pc": 73,
+    "processed_insns": 58,
+    "owner_request": "COORDINATION notice to lane C for shared MICRO_NATIVE Cilium context layout repair; sole-image replacement scheduled by coordinator."
+  },
+  "archive": "resident-first-five.tar.gz"
+}

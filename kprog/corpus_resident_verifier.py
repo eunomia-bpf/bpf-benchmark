@@ -186,6 +186,8 @@ def failure_class(row):
         ("invalid func unknown#-1", "simulator_fault_arm"),
         ("invalid bpf_context access", "verifier_context_access"),
         ("modified ctx ptr", "verifier_context_access"),
+        ("only read is supported", "verifier_readonly_kernel_write"),
+        ("BPF program is too large. Processed", "verifier_instruction_complexity"),
         ("invalid access to map value", "verifier_map_bounds"),
         ("unsupported instruction", "instruction_lowering"),
         ("unsupported mnemonic", "instruction_lowering"),
