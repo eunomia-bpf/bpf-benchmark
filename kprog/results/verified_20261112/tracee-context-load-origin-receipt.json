@@ -1,0 +1,33 @@
+{
+  "recorded_at": "2026-11-12T16:46:01.559617+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-tracee-core-reg-replay/context-load-origin",
+  "scope": "Failure origin and measured priority for the existing Tracee context-access class",
+  "kernel_commit": "74d1097af561",
+  "model_commit": "d0890b14f",
+  "source_request_id": 8,
+  "source_prog_id": 226,
+  "program_type": 17,
+  "entry": "sys_exit_submit",
+  "native_entry_pc": "0x11: mov r15,rdi",
+  "native_access_pc": "0xa89: mov rax,[r15+8]",
+  "generated_c_line": 4759,
+  "bpf_access_pc": 5043,
+  "bpf_byte_address": "0x9d98",
+  "stock_diagnostic": "dereference of modified ctx ptr R2 off=8 disallowed",
+  "stock_processed_insns": 788,
+  "representation": "64-bit ABI pointer-load arm computes the effective address before its volatile load; scalar ABI loads already use the fixed-displacement primitive.",
+  "general_followup": "Route index-free ABI pointer loads in MOV_LOAD and shared READ_MEM_VALUE through the existing fixed-displacement primitive, preserving width and tag refinement.",
+  "priority_evidence": {
+    "source": "corpus/results/x86_kvm_corpus_20261111_202934_974828/details/apps/tracee__monitor.json",
+    "phase": "baseline",
+    "name": "sys_exit_submit",
+    "run_cnt_delta": 0,
+    "run_time_ns_delta": 0,
+    "application_bpf_time_ns": 2500427708222,
+    "application_time_share": 0.0
+  },
+  "scheduling": "Current Bmodel stays fixed for the running census; hot-class ordering follows census outcomes.",
+  "full_request_archive_commit": "9f86d2619",
+  "full_request_archive": "tracee-core-reg-final.tar.gz",
+  "archive": "tracee-context-load-origin.tar.gz"
+}
