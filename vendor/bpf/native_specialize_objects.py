@@ -388,6 +388,9 @@ def main() -> None:
     parser.add_argument("--maps-type-sizes", action="store_true",
                         help="with --maps, size a map's value type from the unit "
                              "when the capture did not record that map")
+    parser.add_argument("--probe-reads", action="store_true",
+                        help="give bpf_probe_read_kernel a C body over the typed "
+                             "operand (native_specialize_probe_reads.py)")
     parser.add_argument("--link", nargs="*", default=[], metavar="STEM",
                         help="combine these specialized objects with clang -r into "
                              "<first stem>.native.o, the way the Makefile links the "
@@ -486,6 +489,11 @@ def main() -> None:
                 maps_argv.append("--type-sizes")
             run(maps_argv)
             specialized = mapped
+        if args.probe_reads:
+            read_unit = base.with_suffix(".reads.i")
+            run([sys.executable, str(HERE / "native_specialize_probe_reads.py"),
+                 "--unit", str(specialized), "--output", str(read_unit)])
+            specialized = read_unit
         spec_object = base.with_suffix(".rodata.o")
         # The unit is preprocessed, so only the language flags the compile
         # needs (-fms-extensions for tetragon's struct filename) apply.
