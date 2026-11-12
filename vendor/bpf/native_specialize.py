@@ -12,15 +12,17 @@ wrote stays as it is) and inserts, after it, a byte-image constant plus a
 #define that routes the name to it:
 
     const volatile int targ_pid = 0;
-    static const union { unsigned char b[4]; __typeof__((0, targ_pid)) v; }
-        __sp_targ_pid __attribute__((unused)) = { .b = { 0xe8,0x00,0x00,0x00 } };
-    #define targ_pid (__sp_targ_pid.v)
+    ->
+    const union { unsigned char b[4]; const int v; } targ_pid
+        __attribute__((unused)) = { .b = { 0xe8,0x00,0x00,0x00 } };
+    #define targ_pid (targ_pid.v)
 
-`__typeof__((0, name))` is the declared type with the qualifiers dropped (the
-comma operator's result is an rvalue), and a union between the byte image and
-that type is a compile-time constant for scalar, struct and array declarations
-alike. An array declaration uses its element type and its element count, so
-`sizeof (name)` keeps the declared extent.
+The declaration is replaced in place, so the object keeps its name, its offset
+in .rodata and its size; the loader resolves the .rodata symbol addresses from
+exactly that layout. A union between the byte image and the constant type is a
+compile-time constant for scalar, struct and array declarations alike, and an
+array declaration uses its element type and element count so `sizeof (name)`
+keeps the declared extent.
 
 Usage: native_specialize.py --unit <unit.i> --decls <unit.decls.json>
                             --rodata <bytes.bin> --output <unit.specialized.i>
@@ -40,17 +42,20 @@ def byte_image(data: bytes) -> str:
     return ", ".join(f"0x{byte:02x}" for byte in data)
 
 
-def specialization(name: str, entry: dict, data: bytes) -> tuple[str, str]:
-    """The constant's declaration and the macro that routes `name` to it."""
-    member = f"__typeof__((0, {name}))"
+def strip_volatile(type_text: str) -> str:
+    return " ".join(word for word in type_text.split()
+                    if word not in ("volatile", "const"))
+
+
+def specialization(name: str, entry: dict, data: bytes) -> str:
+    """The declaration that replaces the original, plus the macro that routes
+    the name to the constant member."""
+    member = strip_volatile(entry["type"])
     if entry.get("array_length"):
         member = f"{member}[{entry['array_length']}]"
-    constant = f"__sp_{name}"
-    declaration = (
-        f"static const union {{ unsigned char b[{len(data)}]; {member} v; }}\n"
-        f"    {constant} __attribute__((unused)) = {{ .b = {{ {byte_image(data)} }} }};"
-    )
-    return declaration, f"#undef {name}\n#define {name} ({constant}.v)"
+    return (f"const union {{ unsigned char b[{len(data)}]; const {member} v; }} "
+            f"{name} __attribute__((unused)) = {{ .b = {{ {byte_image(data)} }} }};\n"
+            f"#undef {name}\n#define {name} ({name}.v)")
 
 
 def main() -> None:
@@ -77,10 +82,8 @@ def main() -> None:
         if size > MAX_INITIALIZER_BYTES:
             sys.exit(f"{entry['name']}: {size}-byte initializer exceeds "
                      f"{MAX_INITIALIZER_BYTES}")
-        declaration, define = specialization(entry["name"], entry,
-                                            rodata[offset:offset + size])
         at = entry["line"] - 1
-        lines[at] = lines[at] + "\n" + declaration + "\n" + define
+        lines[at] = specialization(entry["name"], entry, rodata[offset:offset + size])
         applied += 1
 
     Path(args.output).write_text("\n".join(lines))
