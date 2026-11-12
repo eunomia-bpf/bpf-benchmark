@@ -1,0 +1,24 @@
+{
+  "recorded_at": "2026-11-12T08:47:11.461957+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-module-regressions",
+  "module_build_commit": "0ecc10f51",
+  "model_commit": "8f1a1a8b4",
+  "controls_exit_code": 0,
+  "queue_observation": "PASS: exact kernel P snapshot, map capability and service rejection; no native execution",
+  "lifetime": {
+    "source_prog_id": 5,
+    "snapshot_before_load_completed": false,
+    "snapshot_response": "",
+    "app_returncode": 1,
+    "service_status": -13
+  },
+  "native_control": {
+    "ok": true,
+    "original_prog_id": 3,
+    "native_prog_id": 6,
+    "retval": 2,
+    "prebuilt_proof": false
+  },
+  "scope": "Existing controls repeated on the renamed module with the sole kernel. Actual Katran and frozen-image corpus coverage use their own receipts.",
+  "archive": "module-controls.tar.gz"
+}
