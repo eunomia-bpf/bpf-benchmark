@@ -1,0 +1,146 @@
+{
+  "recorded_at": "2026-11-12T14:55:23.635374+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-tetragon-narrow-stack",
+  "corpus_run_directory": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261112_143720_901527",
+  "kernel_commit": "74d1097af561",
+  "image_platform_id": "sha256:d756bf5919e9eb35cc8628a38af95ca2cec2751e86f4c23f7c6e3f7bd07494a1",
+  "selector_commit": "c20253b7d",
+  "model_commit": "d0890b14f",
+  "object_build_receipt_commit": "fddcd4048",
+  "samples": 1,
+  "workload_seconds": 10,
+  "bpf_stats": true,
+  "host_cpus": "8-19",
+  "guest_cpus": 8,
+  "guest_memory": "64G",
+  "make_exit_code": 0,
+  "application_status": "error",
+  "application_error": "Tetragon exited before BPF programs were tracked by shim\nstdout tail:\nlevel=info msg=\"Starting tetragon\" version=v1.8.0-pre.0-79-g8ca052908\nlevel=info msg=\"config settings\" config=\"map[bpf-dir:tetragon bpf-lib:/opt/bpf-benchmark/repo-artifacts/x86_64/tetragon btf: cgroup-rate: cluster-name: config-dir: cpuprofile: cri-endpoint: data-cache-size:1024 debug:false disable-kprobe-multi:false enable-ancestors:[] enable-cgidmap:false enable-cgidmap-debug:false enable-cgtrackerid:true enable-cri:false enable-deprecated-tracingpolicy-grpc:false enable-event-metrics:true enable-export-aggregation:false enable-k8s-api:false enable-msg-handling-latency:false enable-pid-set-filter:false enable-pod-annotations:false enable-pod-info:false enable-policy-filter:false enable-policy-filter-cgroup-map:false enable-policy-filter-debug:false enable-process-cred:false enable-process-environment-variables:false enable-process-ns:false enable-tracing-policy-crd:true event-cache-retries:15 event-cache-retry-delay:2 event-queue-size:10000 execve-map-entries:0 execve-map-size: export-aggregation-buffer-size:10000 export-aggregation-window-size:15s export-allowlist: export-denylist: export-file-compress:false export-file-max-backups:5 export-file-max-size-mb:10 export-file-perm:600 export-file-rotation-interval:0s export-filename: export-rate-limit:-1 expose-stack-addresses:false field-filters: filter-environment-variables:[] force-large-progs:false force-small-progs:false generate-docs:false gops-address: health-server-address:127.0.0.1:45923 health-server-interval:10 k8s-controlplane-retry:1 k8s-kubeconfig-path: keep-sensors-on-exit:false kernel: log-file: log-format:text log-level:info memprofile: metrics-label-filter:namespace,workload,pod,binary metrics-server: netns-dir:/var/run/docker/netns/ parents-map-enabled:false parents-map-entries:0 parents-map-size: pprof-address: process-cache-gc-interval:30s process-cache-size:65536 procfs:/proc/ rb-queue-size:65535 rb-size:0 rb-size-total:0 redaction-filters: release-pinned-bpf:true retprobes-cache-size:4096 server-address:127.0.0.1:55137 tracing-policy: tracing-policy-dir:/workspaces/repository/runner/assets/tetragon_policies use-perf-ring-buffer:false username-metadata:disabled verbose:0]\"\nlevel=info msg=\"Tetragon current security context\" SELinux=\"kernel\\x00\" AppArmor=\"\" Smack=\"\" Lockdown=none\nlevel=info msg=\"Tetragon pid file creation succeeded\" pid=2003 pidfile=/var/run/tetragon/tetragon.pid\nlevel=warn msg=\"BPF filesystem is going to be mounted automatically in /run/cilium/bpffs. However, it probably means that Cilium is running inside container and BPFFS is not mounted on the host. for more information, see: https://cilium.link/err-bpf-mount\"\nlevel=info msg=\"BPF: successfully released pinned BPF programs and maps\" bpf-dir=/run/cilium/bpffs/tetragon\nlevel=info msg=\"BTF discovery: default kernel btf file found\" btf-file=/sys/kernel/btf/vmlinux\nlevel=info msg=\"BPF detected features: override_return: true, buildid: true, kprobe_multi: false, uprobe_multi: true, fmodret: true, fmodret_syscall: true, signal: true, large: true, link_pin: true, lsm: true, missed_stats_kprobe_multi: true, missed_stats_kprobe: true, batch_update: true, uprobe_refctroff: true, audit_loginuid: true, probe_write_user: true, uprobe_regs_change: true, mix_bpf_and_tail_calls: true, fentry: true, get_func_ret: true\"\nlevel=info msg=\"Cgroup mode detection succeeded\" cgroup.fs=/sys/fs/cgroup cgroup.mode=\"Unified mode (Cgroupv2)\"\nlevel=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/proc/1/root/sys/fs/cgroup cgroup.controllers=\"[cpuset cpu io memory hugetlb pids misc]\" cgroup.hierarchyID=0\nlevel=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/sys/fs/cgroup/docker/8b04394dcdbb0109a0fe27f43d74f2c60b6fed5780db50d4c4519378d301f78c cgroup.controllers=\"[cpuset cpu io memory hugetlb pids misc]\" cgroup.hierarchyID=0\nlevel=info msg=\"Cgroupv2 hierarchy validated successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/sys/fs/cgroup/docker/8b04394dcdbb0109a0fe27f43d74f2c60b6fed5780db50d4c4519378d301f78c\nlevel=info msg=\"Deployment mode detection succeeded\" cgroup.fs=/sys/fs/cgroup deployment.mode=Container\nlevel=info msg=\"Updated TetragonConf map successfully\" confmap-update=tg_conf_map deployment.mode=Container log.level=0 cgroup.fs.magic=Cgroupv2 cgroup.hierarchyID=0 NSPID=2003\nlevel=info msg=\"Disabling Kubernetes API\"\nlevel=info msg=\"Configured redaction filters\" redactionFilters=\"\"\nlevel=info msg=\"Exit probe on acct_process\"\nlevel=info msg=\"Set execve_map entries 32768\" size=28M\nlevel=info msg=\"BPF ring buffer size (bytes)\" total=512K\nlevel=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux\nlevel=info msg=\"Loading sensor\" name=__base__\nlevel=info msg=\"Loading kernel version 7.0.0\"\nlevel=info msg=\"BPF events statistics: 0 received, 0% events loss\"\nlevel=info msg=\"Observer events statistics\" received=0 lost=0 errors=0 filterPass=0 filterDrop=0\nlevel=error msg=\"Failed to execute tetragon\" error=\"sensor __base__ from collection __base__ failed to load: failed prog /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_execve_event_v61.o kern_version 458752 loadInstance: opening collection '/opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_execve_event_v61.o' failed: program execve_send: load program: invalid argument\"",
+  "baseline_programs": 287,
+  "loaded": 6,
+  "verified": 4,
+  "run": null,
+  "run_scope": "Candidate startup stopped before workload; positive workload counters remain unmeasured.",
+  "service_summary": {
+    "started": "2026-11-12T14:36:01.284762+00:00",
+    "command": [
+      "env",
+      "BPFREJIT_SHIM_NATIVE_MANIFEST=/workspaces/repository/corpus/results/verified-tetragon-probe/tetragon/manifest.json",
+      "python3",
+      "/workspaces/repository/kprog/test/verified_corpus.py",
+      "tetragon/observer",
+      "1",
+      "10",
+      "1"
+    ],
+    "service": {
+      "ready": true,
+      "arch": 1,
+      "endpoint": "/sys/kernel/debug/bpf_x86_native_lab/specializer"
+    },
+    "returncode": 0,
+    "service_returncode": -15,
+    "finished": "2026-11-12T14:43:19.414149+00:00"
+  },
+  "programs": [
+    {
+      "request_id": 1,
+      "source_prog_id": 333,
+      "entry": "event_exit_acct_process",
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "accepted": true,
+      "stock_load": {
+        "request_id": 1,
+        "prog_id": 336,
+        "status": 0
+      }
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 337,
+      "entry": "event_exit_disassociate_ctty",
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "accepted": true,
+      "stock_load": {
+        "request_id": 2,
+        "prog_id": 340,
+        "status": 0
+      }
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 341,
+      "entry": "event_wake_up_new_task",
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "accepted": true,
+      "stock_load": {
+        "request_id": 3,
+        "prog_id": 344,
+        "status": 0
+      }
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 345,
+      "entry": "execve_rate",
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "accepted": true,
+      "stock_load": {
+        "request_id": 4,
+        "prog_id": 348,
+        "status": 0
+      }
+    },
+    {
+      "request_id": 5,
+      "source_prog_id": 349,
+      "entry": "execve_send",
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "accepted": false,
+      "verifier_tail": "=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R5=scalar(id=5714,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n3224: (0f) r5 += r4                   ; R4=0 R5=scalar(id=5714+0,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n3225: (bf) r9 = r8                    ; R8=scalar(id=5716,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R9=scalar(id=5716,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n3226: (1f) r9 -= r5                   ; R5=scalar(id=5714+0,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R9=scalar(smin=0xffffffff00000001,smax=0xffffffff)\n3227: (bf) r1 = r0                    ; R0=88 R1=88\n3228: (57) r1 &= 3                    ; R1=0\n3229: (55) if r1 != 0x0 goto pc+66    ; R1=0\n3230: (bf) r1 = r10                   ; R1=fp0 R10=fp0\n3231: (07) r1 += -216                 ; R1=fp-216\n3232: (0f) r1 += r0                   ; R0=88 R1=fp-128\n3233: (63) *(u32 *)(r1 +0) = r9       ; R1=fp-128 R9=scalar(smin=0xffffffff00000001,smax=0xffffffff) fp-128=???0scalar(smin=0xffffffff00000001,smax=0xffffffff)\n3234: (65) if r0 s> 0xffffffff goto pc+1      ; R0=88\n3236: (79) r0 = *(u64 *)(r10 -280)    ; R0=map_value(map=buffer_heap_map,ks=4,vs=4352) R10=fp0 fp-280=map_value(map=buffer_heap_map,ks=4,vs=4352)\n3237: (1f) r7 -= r0                   ; R0=map_value(map=buffer_heap_map,ks=4,vs=4352) R7=scalar()\n3238: (67) r5 <<= 32                  ; R5=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n3239: (77) r5 >>= 32                  ; R5=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n3240: (ad) if r7 < r5 goto pc+979\nThe sequence of 8193 jumps is too complex.\nprocessed 219825 insns (limit 1000000) max_states_per_insn 4 total_states 2370 peak_states 2370 mark_read 0\n\n",
+      "verifier_class": "stock pending-branch stack8193",
+      "processed_instructions": 219825
+    },
+    {
+      "request_id": 6,
+      "source_prog_id": 352,
+      "entry": "execve_send",
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "accepted": false,
+      "verifier_tail": "=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R5=scalar(id=5714,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n3224: (0f) r5 += r4                   ; R4=0 R5=scalar(id=5714+0,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n3225: (bf) r9 = r8                    ; R8=scalar(id=5716,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R9=scalar(id=5716,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n3226: (1f) r9 -= r5                   ; R5=scalar(id=5714+0,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R9=scalar(smin=0xffffffff00000001,smax=0xffffffff)\n3227: (bf) r1 = r0                    ; R0=88 R1=88\n3228: (57) r1 &= 3                    ; R1=0\n3229: (55) if r1 != 0x0 goto pc+66    ; R1=0\n3230: (bf) r1 = r10                   ; R1=fp0 R10=fp0\n3231: (07) r1 += -216                 ; R1=fp-216\n3232: (0f) r1 += r0                   ; R0=88 R1=fp-128\n3233: (63) *(u32 *)(r1 +0) = r9       ; R1=fp-128 R9=scalar(smin=0xffffffff00000001,smax=0xffffffff) fp-128=???0scalar(smin=0xffffffff00000001,smax=0xffffffff)\n3234: (65) if r0 s> 0xffffffff goto pc+1      ; R0=88\n3236: (79) r0 = *(u64 *)(r10 -280)    ; R0=map_value(map=buffer_heap_map,ks=4,vs=4352) R10=fp0 fp-280=map_value(map=buffer_heap_map,ks=4,vs=4352)\n3237: (1f) r7 -= r0                   ; R0=map_value(map=buffer_heap_map,ks=4,vs=4352) R7=scalar()\n3238: (67) r5 <<= 32                  ; R5=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n3239: (77) r5 >>= 32                  ; R5=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n3240: (ad) if r7 < r5 goto pc+979\nThe sequence of 8193 jumps is too complex.\nprocessed 219825 insns (limit 1000000) max_states_per_insn 4 total_states 2370 peak_states 2370 mark_read 0\n\n",
+      "verifier_class": "stock pending-branch stack8193",
+      "processed_instructions": 219825
+    }
+  ],
+  "capture_directory": "/workspaces/repository/corpus/results/verified-captures-l3zt4_ey",
+  "capture_files": 316,
+  "capture_bytes": 4310549,
+  "archive": "tetragon-narrow-stack-replay.tar.gz",
+  "diagnosis": "Typed narrow arena accesses retain width and pass overlap/lifetime host tests. This run accepts both exit probes, the fork probe and execve_rate. execve_send still reaches8193 pending branches after219825 processed instructions. Native loop initializes r12d=2048 and decrements at0x38f/0x3eb before backedges0x392/0x3ee->0x266. Complexity of this bounded loop remains the next lowering investigation; scalar-read class work for the other applications continues.",
+  "scope": "Actual application status error and Make0 retained independently. Earlier5/3 and current6/4 reflect actual startup submissions; program order differs between runs.",
+  "native_loop_initializer": "/* 0x255: mov    r12d,0x800 */"
+}
