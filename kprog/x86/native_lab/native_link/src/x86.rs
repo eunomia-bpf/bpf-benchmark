@@ -16,6 +16,7 @@ const X86_BPF_PROG_BPF_FUNC_OFFSET_KEY: &str = "__native_x86_bpf_prog_bpf_func_o
 const X86_TAIL_CALL_OFFSET_KEY: &str = "__native_x86_tail_call_offset";
 const X86_JMP_END_PLACEHOLDER_TARGET: u64 = 0x4000_0000;
 const NATIVE_LAB_RELOC_HELPER_CALL_REL32: u32 = 1;
+const NATIVE_LAB_RELOC_X86_TAIL_COUNT: u32 = 10;
 const X86_HELPER_CALL_REL32_SLOT: [u8; 5] = [0xE8, 0, 0, 0, 0];
 type SymbolKey = (object::SectionIndex, u64);
 type LocalSiteKey = (object::SectionIndex, u64, u64);
@@ -540,6 +541,11 @@ enum PatchKind {
     /// Rewritten `mov reg, [rip+GOT]` against a map symbol. The runner
     /// patches the immediate field with the live kernel map pointer.
     MapImmediate { name: String, imm_offset: usize },
+    /// The tail-call stub's `add rcx, imm32` that forms the callee's entry
+    /// address. The module rewrites the field with `-16 - depth`, which steps
+    /// over the prologue that increments `bpf_prog->stats.cnt`; without it a
+    /// tail-called program reports no runs at all.
+    TailCount { field_delta: u32 },
 }
 
 struct PatchInfo {
@@ -1408,14 +1414,27 @@ pub(super) fn rewrite_x86(
                                 local_ip
                             );
                         }
-                        for ib in build_x86_tail_call_inline(
+                        let (tail_stub, tail_count_field) = build_x86_tail_call_inline(
                             helper_addrs,
                             // The one kernel's frame saves rbx, r13, r14 and r15 around P.
                             0xf,
                             &entry_abi_strip.tail_call_cleanup_bytes,
                             entry_abi_strip.tail_call_bpf_rbp_rsp_offset,
                             entry_abi_strip.tail_call_bpf_rbp_is_live,
-                        )? {
+                        )?;
+                        // The stub is emitted as chunks of up to 16 bytes, and the
+                        // tail-count field sits inside one of them. The patch records
+                        // the chunk's local IP; the kind is attached to the
+                        // instruction that starts at or before the field, which is
+                        // what PatchInfo's global_offset is derived from.
+                        let mut stub_base = u64::MAX;
+                        for ib in tail_stub {
+                            let starts = u64::try_from(ib.len())
+                                .map_err(|_| anyhow!("tail-call stub length overflow"))?;
+                            let at = next_synthetic_ip;
+                            if stub_base == u64::MAX {
+                                stub_base = at;
+                            }
                             push_x86_synthetic(
                                 &mut local,
                                 &mut kinds,
@@ -1423,6 +1442,16 @@ pub(super) fn rewrite_x86(
                                 &mut next_synthetic_ip,
                                 ib,
                             )?;
+                            // The field offset is a byte offset into the stub; the
+                            // chunk that contains it gets the kind.
+                            let field_ip = stub_base + tail_count_field as u64;
+                            if field_ip >= at && field_ip < at + starts {
+                                if let Some(last) = kinds.last_mut() {
+                                    *last = Some(PatchKind::TailCount {
+                                        field_delta: (field_ip - at) as u32,
+                                    });
+                                }
+                            }
                         }
                         resolved_helper_call_sites.insert(site_key);
                         clear_x86_call_clobbered_registers(&mut map_symbol_registers);
@@ -1653,8 +1682,15 @@ pub(super) fn rewrite_x86(
                 .copied()
                 .ok_or_else(|| anyhow!("missing offset for instruction {i} in {}", sym.name))?
                 as usize;
+            // A kind may name a field inside its instruction rather than the
+            // instruction's first byte; the tail-count field follows a
+            // three-byte opcode.
+            let field_delta = match kind {
+                PatchKind::TailCount { field_delta } => *field_delta as usize,
+                _ => 0,
+            };
             patches.push(PatchInfo {
-                global_offset: sym_base + off_in_sym,
+                global_offset: sym_base + off_in_sym + field_delta,
                 kind: kind.clone(),
             });
         }
@@ -1720,6 +1756,17 @@ pub(super) fn rewrite_x86(
                     offset,
                     kind: NATIVE_LAB_RELOC_HELPER_CALL_REL32,
                     target: *target_addr,
+                });
+            }
+            PatchKind::TailCount { .. } => {
+                // Four-byte field the module rewrites with -16 - depth. The
+                // linker's own value is the plain entry offset; the module's
+                // patch is what makes a tail-called program count its runs.
+                relocs.push(RelocRecord {
+                    offset: u32::try_from(p.global_offset)
+                        .map_err(|_| anyhow!("tail-count reloc offset exceeds u32"))?,
+                    kind: NATIVE_LAB_RELOC_X86_TAIL_COUNT,
+                    target: 0,
                 });
             }
             PatchKind::JmpEnd | PatchKind::Call { .. } => {}
@@ -3581,13 +3628,15 @@ fn append_x86_stub_callee_pop(bytes: &mut Vec<u8>, callee_saved_mask: u8) {
     }
 }
 
-fn append_x86_add_rcx_imm(bytes: &mut Vec<u8>, imm: u32) {
-    if imm <= 0x7f {
-        bytes.extend_from_slice(&[0x48, 0x83, 0xC1, imm as u8]);
-    } else {
-        bytes.extend_from_slice(&[0x48, 0x81, 0xC1]);
-        bytes.extend_from_slice(&imm.to_le_bytes());
-    }
+/// Append `add rcx, imm` and return the offset of its immediate field.
+///
+/// Always the imm32 form: the module rewrites that four-byte field with
+/// `NATIVE_LAB_RELOC_X86_TAIL_COUNT`, and the imm8 form has no such field.
+fn append_x86_add_rcx_imm(bytes: &mut Vec<u8>, imm: u32) -> usize {
+    bytes.extend_from_slice(&[0x48, 0x81, 0xC1]);
+    let at = bytes.len();
+    bytes.extend_from_slice(&imm.to_le_bytes());
+    at
 }
 
 fn build_x86_tail_call_inline(
@@ -3596,7 +3645,7 @@ fn build_x86_tail_call_inline(
     native_cleanup: &[u8],
     saved_bpf_rbp_rsp_offset: Option<i32>,
     bpf_rbp_is_live: bool,
-) -> Result<Vec<Instruction>> {
+) -> Result<(Vec<Instruction>, usize)> {
     const MAX_TAIL_CALL_CNT: u8 = 33;
     let map_max_entries = x86_required_u32_helper_arg(
         helper_addrs,
@@ -3652,14 +3701,16 @@ fn build_x86_tail_call_inline(
     bytes.extend_from_slice(&[0x58, 0x58]); // pop tail_call_cnt_ptr; pop tail_call_cnt
     bytes.extend_from_slice(&[0x48, 0x8B, 0x89]); // mov rcx, [rcx + disp32]
     bytes.extend_from_slice(&prog_bpf_func.to_le_bytes());
-    append_x86_add_rcx_imm(&mut bytes, tail_call_offset);
+    let tail_count_field = append_x86_add_rcx_imm(&mut bytes, tail_call_offset);
     bytes.extend_from_slice(&[0xFF, 0xE1]); // jmp rcx
 
     let out = bytes.len();
     patch_x86_rel32(&mut bytes, jbe_out, out)?;
     patch_x86_rel32(&mut bytes, jae_out, out)?;
     patch_x86_rel32(&mut bytes, je_out, out)?;
-    declared_byte_chunks(&bytes)
+    // The module rewrites the tail-count field, so the caller has to know where it
+    // is: reported as an offset into the stub the chunks below are built from.
+    Ok((declared_byte_chunks(&bytes)?, tail_count_field))
 }
 
 fn x86_gpr64_encoding(reg: Register) -> Result<(u8, bool)> {
@@ -3999,6 +4050,21 @@ fn build_x86_array_update(spec: &UpdateSiteSpec) -> Result<Vec<Instruction>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// The module rewrites the tail-count field with `-16 - depth`, so that field
+    /// has to be four bytes wide whatever the entry offset is: the imm8 form has
+    /// no field to rewrite and would leave the callee's stats prologue in place.
+    #[test]
+    fn tail_count_field_is_always_four_bytes() {
+        for imm in [0u32, 16, 0x7f, 0x80, 0x1000] {
+            let mut bytes = Vec::new();
+            let at = append_x86_add_rcx_imm(&mut bytes, imm);
+            assert_eq!(at, 3, "imm32 opcode is three bytes");
+            assert_eq!(bytes.len(), 7, "opcode plus a four-byte field");
+            assert_eq!(&bytes[..3], &[0x48, 0x81, 0xC1]);
+            assert_eq!(&bytes[3..7], &imm.to_le_bytes());
+        }
+    }
 
     #[test]
     fn load_sites_exclude_stores_and_literal_pool_bytes() {
