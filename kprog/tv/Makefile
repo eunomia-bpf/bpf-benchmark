@@ -95,6 +95,21 @@ build/cmov-block.bpf.o: cmov_block.bpf.c $(wildcard ../x86/*.h ../formal/generat
 linker-build:
 	cargo build --release --manifest-path ../x86/native_lab/native_link/Cargo.toml
 
+STACK_ALIAS_BUILD ?= /var/tmp/kprog-tmp/verified/stack-alias
+.PHONY: stack-alias-host-check
+stack-alias-host-check:
+	install -d "$(STACK_ALIAS_BUILD)"
+	$(CC) -O2 -Wall -Wextra -fsanitize=undefined -fno-sanitize-recover=all \
+		-I../.. -I../../vendor/libbpf/src \
+		-c ../formal/oracles/test_invocation_stack_host.c -o "$(STACK_ALIAS_BUILD)/invocation-stack.o"
+	gcc -fsanitize=undefined "$(STACK_ALIAS_BUILD)/invocation-stack.o" -o "$(STACK_ALIAS_BUILD)/invocation-stack"
+	"$(STACK_ALIAS_BUILD)/invocation-stack"
+
+.PHONY: service-request-compile
+service-request-compile:
+	CLANG="$(abspath ../stock-path/bin/clang)" python3 ../test/recompile_service_request.py \
+		"$(REQUEST_ARCHIVE)" "$(REQUEST_MEMBER)" "$(OUTPUT)"
+
 .PHONY: linker-default-bytes
 linker-default-bytes:
 	python3 ../test/native_link_default_bytes.py "$(OUTPUT)" $(if $(REFERENCE),--reference "$(REFERENCE)")

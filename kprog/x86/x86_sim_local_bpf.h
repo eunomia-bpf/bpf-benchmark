@@ -834,9 +834,16 @@ typedef void *x86_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
         if (__x86_st_tag==X86_SIM_TAG_STACK) \
             X86_SIM_L_STACK_VALUES_ERASE((__u64)(long)__x86_st_addr-(__u64)(long)&__x86_stack_mem.b[0],__x86_st_width); \
         else if (__x86_st_tag==X86_SIM_TAG_SCALAR) X86_SIM_L_STACK_VALUES_CLEAR(); \
-        if (__x86_st_tag==X86_SIM_TAG_STACK && X86_SIM_L_STACK_ALIAS_OFFSET(__x86_st_addr)<X86_SIM_L_STACK_SP()) \
-            X86_SIM_L_STACK_WRITE_RAW(X86_SIM_L_STACK_ALIAS_OFFSET(__x86_st_addr),__x86_st_width,__x86_st_value); \
-        else KPROG_X86_MEM_STORE(__x86_st_addr,__x86_st_width,__x86_st_value); \
+        KPROG_X86_MEM_STORE(__x86_st_addr,__x86_st_width,__x86_st_value); \
+        if (__x86_st_tag==X86_SIM_TAG_STACK) { \
+            __s64 __x86_st_off=X86_SIM_L_STACK_ALIAS_OFFSET(__x86_st_addr); \
+            if (__x86_st_off<X86_SIM_L_STACK_SP()) { _Pragma("unroll") \
+                for (__u32 __x86_st_i=0; __x86_st_i<8U; ++__x86_st_i) \
+                    if (__x86_st_i<X86_SIM_L_EFFECTIVE_WIDTH(__x86_st_width) && \
+                        __x86_st_off+__x86_st_i<X86_SIM_L_STACK_SP()) \
+                        ((volatile __u8 *)__x86_st_addr)[__x86_st_i]=(__u8)X86_SIM_L_UNSPECIFIED(); \
+            } \
+        } \
     } while (0)
 
 #define X86_SIM_L_SET_LOGIC_FLAGS(RESULT, WIDTH)                            \

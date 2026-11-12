@@ -73,6 +73,27 @@ int main(void) {
     REQUIRE(X86_SIM_L_LOAD_ADDR_TAGGED(X86_SIM_L_STACK_PTR(-24),8,X86_SIM_TAG_STACK)==0x5a5a5a5a5a5a5a5aULL && draws==before+1);
     X86_SIM_L_STORE_ADDR_TAGGED(X86_SIM_L_STACK_PTR(-24),8,9,X86_SIM_TAG_STACK);
     REQUIRE(BYTE(-24)==0x5a);
+    /* Alias writes preserve live bytes across SP for every width/alignment. */
+    const unsigned widths[]={1,2,4,8};
+    for(unsigned wi=0;wi<4;++wi) for(long off=-32;off+(long)widths[wi]<=0;++off)
+      for(long sp=-32;sp<=0;++sp) {
+        __x86_rsp.ptr=(void *)sp;
+        for(long byte=-64;byte<0;++byte) BYTE(byte)=0xc3;
+        before=draws;
+        X86_SIM_L_STORE_ADDR_TAGGED(X86_SIM_L_STACK_PTR(off),widths[wi],
+            0x8877665544332211ULL,X86_SIM_TAG_STACK);
+        unsigned lost=0;
+        for(long byte=-64;byte<0;++byte) {
+          unsigned expected=0xc3;
+          if(byte>=off && byte<off+(long)widths[wi]) {
+            if(byte<sp) { expected=0x5a; ++lost; }
+            else expected=(0x8877665544332211ULL>>((byte-off)*8))&0xff;
+          }
+          REQUIRE(BYTE(byte)==expected);
+        }
+        REQUIRE(draws==before+lost);
+      }
+    __x86_rsp.ptr=(void *)-16;
 #endif
     /* A helper output below SP loses its bytes before later allocation. */
     BYTE(-24)=0x12;

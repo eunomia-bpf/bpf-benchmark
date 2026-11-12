@@ -1,0 +1,11 @@
+{
+  "recorded_at": "2026-11-12T07:53:57.700857+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-stack-alias-host",
+  "cases": 3861,
+  "results": {
+    "gcc": 0,
+    "clang-18": 0
+  },
+  "initial_clang_link_issue": "Clang18 standalone UBSan runtime archive is absent; the target now uses Clang for instrumented object compilation and the installed GCC UBSan runtime for linking, as existing host oracles do.",
+  "scope": "Existing stack-lifetime oracle extended across alias width, alignment and SP crossings; bytes above SP retain the store value and below-SP bytes draw environment input. This is host semantics evidence; actual Katran stock-verifier rerun remains pending."
+}
