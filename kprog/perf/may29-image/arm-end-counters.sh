@@ -30,7 +30,7 @@ while [ "$(date +%s)" -lt "$deadline" ]; do
             ls "$d"/shim-*.sock 2>/dev/null | head -1 && break; done' 2>/dev/null | head -1)
         if [ -n "${sock:-}" ]; then
             echo "arm-end: container $cid socket $sock"
-            docker exec "$cid" python3 - "$sock" "$OUT" <<'PYEOF'
+            docker exec -i "$cid" python3 - "$sock" "$OUT" <<'PYEOF'
 import json, os, socket, sys
 
 path, out = sys.argv[1], sys.argv[2]
