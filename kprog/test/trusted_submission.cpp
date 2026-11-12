@@ -44,9 +44,11 @@ int main(int argc, char **argv)
         int ready[2]; require(!pipe(ready), "service readiness pipe");
         pid_t child = fork(); require(child >= 0, "fork registered service");
         if (!child) {
+            require(!close(ready[0]), "close service read end");
             int service = open("/sys/kernel/debug/bpf_x86_native_lab/specializer", O_RDWR);
             require(service >= 0, "register service");
             require(write(ready[1], "x", 1) == 1, "announce service");
+            require(!close(ready[1]), "close service write end");
             native_lab_trusted_request request{}; request.version = NATIVE_LAB_TRUSTED_VERSION;
             require(ioctl(service, NATIVE_LAB_TRUSTED_NEXT, &request) == -1 && errno == EMSGSIZE,
                     "probe kernel snapshot sizes");
@@ -71,6 +73,7 @@ int main(int argc, char **argv)
             require(!close(service), "close service");
             _exit(0);
         }
+        require(!close(ready[1]), "close producer write end");
         char marker; require(read(ready[0], &marker, 1) == 1, "await service");
         require(!setenv("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF", "1", 1), "select verified route");
         native_loader::FdLoadOptions options;
@@ -86,7 +89,7 @@ int main(int argc, char **argv)
         require(rejected, "propagate service rejection without a direct upload");
         int status;
         require(waitpid(child, &status, 0) == child && WIFEXITED(status) && !WEXITSTATUS(status), "service result");
-        require(!close(source) && !close(map) && !close(ready[0]) && !close(ready[1]), "close source resources");
+        require(!close(source) && !close(map) && !close(ready[0]), "close source resources");
         std::cout << "PASS: exact kernel P snapshot, map capability and service rejection; no native execution\n";
         return 0;
     } catch (const std::exception &error) {
