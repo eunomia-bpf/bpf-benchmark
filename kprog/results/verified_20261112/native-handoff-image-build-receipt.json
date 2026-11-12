@@ -1,0 +1,30 @@
+{
+  "recorded_at": "2026-11-12T13:14:40.859191+00:00",
+  "kernel_commit": "74d1097af561",
+  "kernel_build_receipt_commit": "07fcffae8",
+  "native_header_commit": "c9b531e45",
+  "loader_selector_commit": "da665bbf3",
+  "loader_map_dependency_commit": "812aee2ec",
+  "image_platform": {
+    "Id": "sha256:d756bf5919e9eb35cc8628a38af95ca2cec2751e86f4c23f7c6e3f7bd07494a1",
+    "Created": "2026-11-12T13:04:20.077571753Z",
+    "RepoTags": [
+      "bpf-benchmark/kprog:current"
+    ],
+    "Architecture": "amd64",
+    "Os": "linux",
+    "Size": 2778520313
+  },
+  "make_exit_code": 0,
+  "started": "2026-11-12T12:59:00Z",
+  "finished": "2026-11-12T13:04:50Z",
+  "command": "taskset -c 0-19 make -f /workspaces/repository/kprog/perf/one-image/Makefile image JOBS=12 -o negative",
+  "saved_image_tar": "/workspaces/repository/.cache/container-images/x86_64-runner-runtime.image.tar",
+  "saved_image_tar_bytes": 687938048,
+  "previous_image_removal_exit_code": 0,
+  "negative_inputs": "Existing frozen negative-test binaries retained through -o negative; the existing source-export recipe stays outside this incremental rebuild. Runtime definition retained.",
+  "direct_module_bytes": 664520,
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-handoff-rebuild",
+  "archive": "native-handoff-image-build.tar.gz",
+  "scope": "Shared kernel/header/module/native object/loader/image build completed. Verified worker and stock module controls plus live handoff and six-application functional checks follow before IMAGE REBUILT release."
+}
