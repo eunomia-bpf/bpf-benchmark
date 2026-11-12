@@ -1,0 +1,376 @@
+{
+  "recorded_at": "2026-11-12T14:11:43.971133+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-tetragon-probe-build",
+  "kernel_commit": "74d1097af561",
+  "kernel_release": "7.0.0-rc2+",
+  "header_commit": "c9b531e45",
+  "selector_commit": "c20253b7d",
+  "syntax_receipt_commit": "35f1e8848",
+  "host_cpus": "8-19",
+  "jobs": 1,
+  "command": "taskset -c 8-19 make -C /workspaces/repository/vendor/bpf native-tetragon ARCH=x86 KERNEL_RELEASE=7.0.0-rc2+ VMLINUX_BTF=/workspaces/.agent-state/kprog-ck/build-x86/vmlinux NATIVE_ARCH_CFLAGS=-march=native\\ -mno-red-zone\\ -mgeneral-regs-only\\ -DMICRO_NATIVE_TETRAGON_PROBE_READS NATIVE_OUT=/var/tmp/kprog-tmp/verified/tetragon-probe/native NATIVE_STAGE_ROOT=/workspaces/repository/corpus/results/verified-tetragon-probe -j1",
+  "make_exit_code": 0,
+  "started": "2026-11-12T13:58:01Z",
+  "finished": "2026-11-12T14:00:26Z",
+  "native_stage": "/workspaces/repository/corpus/results/verified-tetragon-probe/tetragon",
+  "native_objects": [
+    {
+      "name": "bpf_cgroup.native.o",
+      "bytes": 920608
+    },
+    {
+      "name": "bpf_cgroup_mkdir.native.o",
+      "bytes": 932792
+    },
+    {
+      "name": "bpf_cgroup_mkdir_v511.native.o",
+      "bytes": 935608
+    },
+    {
+      "name": "bpf_cgroup_release.native.o",
+      "bytes": 931128
+    },
+    {
+      "name": "bpf_cgroup_release_v511.native.o",
+      "bytes": 933624
+    },
+    {
+      "name": "bpf_cgroup_rmdir.native.o",
+      "bytes": 931112
+    },
+    {
+      "name": "bpf_cgroup_rmdir_v511.native.o",
+      "bytes": 933600
+    },
+    {
+      "name": "bpf_cgtracker.native.o",
+      "bytes": 925312
+    },
+    {
+      "name": "bpf_enforcer.native.o",
+      "bytes": 7888
+    },
+    {
+      "name": "bpf_execve_bprm_commit_creds.native.o",
+      "bytes": 926848
+    },
+    {
+      "name": "bpf_execve_event.native.o",
+      "bytes": 1017184
+    },
+    {
+      "name": "bpf_execve_event_v310.native.o",
+      "bytes": 1009728
+    },
+    {
+      "name": "bpf_execve_event_v511.native.o",
+      "bytes": 1439472
+    },
+    {
+      "name": "bpf_execve_event_v53.native.o",
+      "bytes": 1429616
+    },
+    {
+      "name": "bpf_execve_event_v61.native.o",
+      "bytes": 1027968
+    },
+    {
+      "name": "bpf_execve_map_update.native.o",
+      "bytes": 18976
+    },
+    {
+      "name": "bpf_execve_map_update_v511.native.o",
+      "bytes": 22192
+    },
+    {
+      "name": "bpf_execve_map_update_v53.native.o",
+      "bytes": 20184
+    },
+    {
+      "name": "bpf_execve_map_update_v61.native.o",
+      "bytes": 22192
+    },
+    {
+      "name": "bpf_exit.native.o",
+      "bytes": 931128
+    },
+    {
+      "name": "bpf_exit_v310.native.o",
+      "bytes": 931128
+    },
+    {
+      "name": "bpf_exit_v511.native.o",
+      "bytes": 935600
+    },
+    {
+      "name": "bpf_fmodret_enforcer.native.o",
+      "bytes": 7600
+    },
+    {
+      "name": "bpf_fork.native.o",
+      "bytes": 945808
+    },
+    {
+      "name": "bpf_fork_v310.native.o",
+      "bytes": 936992
+    },
+    {
+      "name": "bpf_fork_v511.native.o",
+      "bytes": 950056
+    },
+    {
+      "name": "bpf_generic_fentry.native.o",
+      "bytes": 1269328
+    },
+    {
+      "name": "bpf_generic_fentry_v511.native.o",
+      "bytes": 1899368
+    },
+    {
+      "name": "bpf_generic_fentry_v53.native.o",
+      "bytes": 1875632
+    },
+    {
+      "name": "bpf_generic_fentry_v61.native.o",
+      "bytes": 1204488
+    },
+    {
+      "name": "bpf_generic_fexit.native.o",
+      "bytes": 1123080
+    },
+    {
+      "name": "bpf_generic_fexit_v511.native.o",
+      "bytes": 1339896
+    },
+    {
+      "name": "bpf_generic_fexit_v53.native.o",
+      "bytes": 1322208
+    },
+    {
+      "name": "bpf_generic_fexit_v61.native.o",
+      "bytes": 1110200
+    },
+    {
+      "name": "bpf_generic_kprobe.native.o",
+      "bytes": 1338000
+    },
+    {
+      "name": "bpf_generic_kprobe_v511.native.o",
+      "bytes": 1910680
+    },
+    {
+      "name": "bpf_generic_kprobe_v53.native.o",
+      "bytes": 1886024
+    },
+    {
+      "name": "bpf_generic_kprobe_v61.native.o",
+      "bytes": 1216072
+    },
+    {
+      "name": "bpf_generic_lsm_core.native.o",
+      "bytes": 1867136
+    },
+    {
+      "name": "bpf_generic_lsm_core_v511.native.o",
+      "bytes": 1890296
+    },
+    {
+      "name": "bpf_generic_lsm_core_v61.native.o",
+      "bytes": 1196000
+    },
+    {
+      "name": "bpf_generic_lsm_ima_bprm_v511.native.o",
+      "bytes": 932424
+    },
+    {
+      "name": "bpf_generic_lsm_ima_bprm_v61.native.o",
+      "bytes": 932120
+    },
+    {
+      "name": "bpf_generic_lsm_ima_file_v511.native.o",
+      "bytes": 932400
+    },
+    {
+      "name": "bpf_generic_lsm_ima_file_v61.native.o",
+      "bytes": 932096
+    },
+    {
+      "name": "bpf_generic_lsm_output.native.o",
+      "bytes": 942720
+    },
+    {
+      "name": "bpf_generic_lsm_output_v511.native.o",
+      "bytes": 947240
+    },
+    {
+      "name": "bpf_generic_lsm_output_v61.native.o",
+      "bytes": 946936
+    },
+    {
+      "name": "bpf_generic_rawtp.native.o",
+      "bytes": 1270040
+    },
+    {
+      "name": "bpf_generic_rawtp_v511.native.o",
+      "bytes": 1897328
+    },
+    {
+      "name": "bpf_generic_rawtp_v53.native.o",
+      "bytes": 1873496
+    },
+    {
+      "name": "bpf_generic_rawtp_v61.native.o",
+      "bytes": 1202520
+    },
+    {
+      "name": "bpf_generic_retkprobe.native.o",
+      "bytes": 1127768
+    },
+    {
+      "name": "bpf_generic_retkprobe_v511.native.o",
+      "bytes": 1341160
+    },
+    {
+      "name": "bpf_generic_retkprobe_v53.native.o",
+      "bytes": 1324232
+    },
+    {
+      "name": "bpf_generic_retkprobe_v61.native.o",
+      "bytes": 1111168
+    },
+    {
+      "name": "bpf_generic_retuprobe.native.o",
+      "bytes": 1127768
+    },
+    {
+      "name": "bpf_generic_retuprobe_v511.native.o",
+      "bytes": 1340416
+    },
+    {
+      "name": "bpf_generic_retuprobe_v53.native.o",
+      "bytes": 1325280
+    },
+    {
+      "name": "bpf_generic_retuprobe_v61.native.o",
+      "bytes": 1111456
+    },
+    {
+      "name": "bpf_generic_tracepoint.native.o",
+      "bytes": 1326384
+    },
+    {
+      "name": "bpf_generic_tracepoint_v511.native.o",
+      "bytes": 1730504
+    },
+    {
+      "name": "bpf_generic_tracepoint_v53.native.o",
+      "bytes": 1706232
+    },
+    {
+      "name": "bpf_generic_tracepoint_v61.native.o",
+      "bytes": 1278456
+    },
+    {
+      "name": "bpf_generic_uprobe.native.o",
+      "bytes": 1359448
+    },
+    {
+      "name": "bpf_generic_uprobe_v511.native.o",
+      "bytes": 2007184
+    },
+    {
+      "name": "bpf_generic_uprobe_v53.native.o",
+      "bytes": 1942272
+    },
+    {
+      "name": "bpf_generic_uprobe_v61.native.o",
+      "bytes": 1220344
+    },
+    {
+      "name": "bpf_generic_usdt.native.o",
+      "bytes": 1308712
+    },
+    {
+      "name": "bpf_generic_usdt_v511.native.o",
+      "bytes": 2010368
+    },
+    {
+      "name": "bpf_generic_usdt_v53.native.o",
+      "bytes": 1935560
+    },
+    {
+      "name": "bpf_generic_usdt_v61.native.o",
+      "bytes": 1233592
+    },
+    {
+      "name": "bpf_loader.native.o",
+      "bytes": 924944
+    },
+    {
+      "name": "bpf_loader_v511.native.o",
+      "bytes": 927800
+    },
+    {
+      "name": "bpf_multi_enforcer.native.o",
+      "bytes": 7896
+    },
+    {
+      "name": "bpf_multi_kprobe_v511.native.o",
+      "bytes": 1910936
+    },
+    {
+      "name": "bpf_multi_kprobe_v53.native.o",
+      "bytes": 1886280
+    },
+    {
+      "name": "bpf_multi_kprobe_v61.native.o",
+      "bytes": 1216344
+    },
+    {
+      "name": "bpf_multi_retkprobe_v511.native.o",
+      "bytes": 1341424
+    },
+    {
+      "name": "bpf_multi_retkprobe_v53.native.o",
+      "bytes": 1324496
+    },
+    {
+      "name": "bpf_multi_retkprobe_v61.native.o",
+      "bytes": 1111424
+    },
+    {
+      "name": "bpf_multi_retuprobe_v511.native.o",
+      "bytes": 1340672
+    },
+    {
+      "name": "bpf_multi_retuprobe_v61.native.o",
+      "bytes": 1111720
+    },
+    {
+      "name": "bpf_multi_uprobe_v511.native.o",
+      "bytes": 2007664
+    },
+    {
+      "name": "bpf_multi_uprobe_v61.native.o",
+      "bytes": 1220816
+    },
+    {
+      "name": "bpf_multi_usdt_v511.native.o",
+      "bytes": 2010832
+    },
+    {
+      "name": "bpf_multi_usdt_v61.native.o",
+      "bytes": 1234056
+    },
+    {
+      "name": "bpf_prog_iter.native.o",
+      "bytes": 905648
+    }
+  ],
+  "native_object_count": 88,
+  "native_object_bytes": 104633328,
+  "manifest_status": "native-objects-proof-linked",
+  "manifest_entries": 93,
+  "archive": "tetragon-probe-build.tar.gz",
+  "scope": "Existing native-tetragon target compiled the complete probe-read object set and generated its manifest on the current kernel headers. Registered-service application replay follows; loaded/verified/run counts come from that replay."
+}
