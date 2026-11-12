@@ -23,7 +23,7 @@ while [ "$(date +%s)" -lt "$deadline" ]; do
         if docker exec "$cid" python3 -c "import sys; sys.exit(0)" 2>/dev/null; then
             got=$(docker exec "$cid" sh -c "
                 bt=\$(command -v bpftool || true)
-                [ -n \"\$bt\" ] || bt=/usr/local/sbin/bpftool
+                [ -n \"\$bt\" ] || bt=/usr/local/bin/bpftool
                 [ -x \"\$bt\" ] || bt=/usr/sbin/bpftool
                 [ -x \"\$bt\" ] || exit 2
                 for m in \$(\$bt -j map show 2>/dev/null | python3 -c '
