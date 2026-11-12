@@ -1414,7 +1414,6 @@ pub(super) fn rewrite_x86(
                                 local_ip
                             );
                         }
-                        eprintln!("TRACE tail-call stub built in {}", sym.name);
                         let (tail_stub, tail_count_field, tail_count_field_stub_len) = build_x86_tail_call_inline(
                             helper_addrs,
                             // The one kernel's frame saves rbx, r13, r14 and r15 around P.
