@@ -1,0 +1,38 @@
+{
+  "recorded_at": "2026-11-12T17:28:55.887380+00:00",
+  "scope": "Read-only origin analysis of the general saved-stack-pointer/helper-memory-effects class",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-resident-census/ready/tetragon-actions-provenance",
+  "model_commit": "d0890b14f",
+  "kernel_commit": "74d1097af561",
+  "request_id": 27,
+  "retained_source_prog_id": 37,
+  "entry": "generic_kprobe_actions",
+  "source_argument": "do_action(..., bool *post, ...)",
+  "caller_native_pc": "0xb5: lea rcx,[rsp+7]",
+  "callee_spill_pc": "0x151: mov [rsp+80],rcx",
+  "callee_reload_pc": "0xbde: mov rax,[rsp+80]",
+  "callee_store_pc": "0xbe3: mov byte ptr[rax],0",
+  "frame_coordinates": {
+    "caller_rsp": -40,
+    "post_bool": -33,
+    "deepest_callee_rsp": -232,
+    "spill_slot": -152,
+    "arena_bytes": 232,
+    "spill_arena_index": 80,
+    "spill_word_index": 10
+  },
+  "model_boundary": "X86_SIM_L_HELPER_SCALAR_RESULT -> X86_SIM_L_HELPER_CLOBBERS -> X86_SIM_L_STACK_VALUES_CLEAR",
+  "readonly_boundary_example": "bpf_ktime_get_boot_ns has zero arguments and reads the kernel boottime clock; current wrapper uses the generic clearing boundary.",
+  "captured_write_boundary": {
+    "helper": "bpf_probe_read",
+    "bpf_pc": 7249,
+    "destination": "ratelimit_heap map_value+184",
+    "size": 40,
+    "source": "process_call_heap map_value+144+bounded_offset"
+  },
+  "observation": "Caller-owned post pointer is spilled across helpers whose observed output region is outside the native stack arena. The model clears its ghost pointer fact and later reassembles scalar bytes for the write.",
+  "general_followup": "Classify memory effects for every supported helper boundary: preserve allocated stack facts for read-only helpers and writes to disjoint map regions; invalidate overlapping native stack output ranges. Preserve existing register clobbers, stack lifetime and byte writes.",
+  "census": "Same PID935546/Bmodeld089 pass continues; latest collected prefix27/22verified/5rejected remains separate from real app runs.",
+  "full_request_evidence": "3167f8b17 resident-tetragon-new-classes.tar.gz",
+  "archive": "tetragon-actions-provenance.tar.gz"
+}
