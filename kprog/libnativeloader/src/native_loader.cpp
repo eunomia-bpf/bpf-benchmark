@@ -1,4 +1,6 @@
 #include "native_loader.hpp"
+#include "../../../kinsn/module/include/native_lab_binding.h"
+#include "../../../kinsn/module/include/native_lab_trusted_wire.h"
 
 #include "kernel_offsets.h"
 
@@ -14,6 +16,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/file.h>
+#include <sys/ioctl.h>
 #include <sys/mount.h>
 #include <sys/syscall.h>
 #include <sys/stat.h>
@@ -31,6 +34,7 @@
 #include <filesystem>
 #include <fstream>
 #include <limits>
+#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <sstream>
@@ -2132,6 +2136,7 @@ struct CompanionLoad {
     bool has_tail_call = false;
     std::unordered_map<std::string, uint64_t> map_addrs;
     std::unordered_map<std::string, uint32_t> map_addr_ids;
+    std::unordered_set<std::string> native_data_symbols;
     std::unordered_map<std::string, std::string> native_map_symbols;
     std::unordered_map<std::string, MapMeta> exact_map_addrs;
     std::unordered_set<std::string> ambiguous_exact_maps;
@@ -2770,6 +2775,10 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
                 close(fd);
                 fail("gelf_getsym " + native_object.string() + ": " + elf_errmsg(-1));
             }
+            if (sym.st_shndx == SHN_UNDEF && GELF_ST_TYPE(sym.st_info) != STT_FUNC) {
+                const char *name = elf_strptr(elf, shdr.sh_link, sym.st_name);
+                if (name && name[0]) load.native_data_symbols.insert(name);
+            }
             if (GELF_ST_TYPE(sym.st_info) != STT_OBJECT ||
                 sym.st_size == 0 ||
                 sym.st_shndx == SHN_UNDEF ||
@@ -2796,6 +2805,7 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
             }
             if (std::strcmp(section, ".maps") == 0) {
                 add_native_map_symbol_alias(load, name);
+                load.native_data_symbols.insert(name);
                 continue;
             }
             if (!native_data_section_supported(section)) {
@@ -2829,6 +2839,7 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
             load.map_addrs[std::string(name)] =
                 map->value_addr + off;
             load.map_addr_ids[std::string(name)] = map->kernel_id;
+            load.native_data_symbols.insert(name);
         }
     }
     elf_end(elf);
@@ -3386,6 +3397,101 @@ void close_fd_vector(std::vector<int> &fds)
     fds.clear();
 }
 
+native_loader::LoadedProgram submit_trusted_native(
+    const native_loader::FdLoadOptions &options, const bpf_prog_info &info,
+    const std::filesystem::path &native_path, const std::string &entry,
+    const CompanionLoad &companion)
+{
+    auto native = read_binary_file(native_path);
+    if (native.size() > UINT32_MAX || entry.empty() || entry.size() > UINT32_MAX)
+        fail("trusted native submission extent exceeds request ABI");
+    std::ostringstream metadata;
+    metadata << "{\"version\":1,\"load_context\":{\"prog_type\":" << info.type
+        << ",\"expected_attach_type\":" << options.expected_attach_type
+        << ",\"prog_flags\":0,\"attach_btf_id\":" << (options.attach_btf_id ? options.attach_btf_id : info.attach_btf_id)
+        << ",\"attach_btf_obj_id\":" << (options.attach_btf_obj_id ? options.attach_btf_obj_id : info.attach_btf_obj_id)
+        << ",\"attach_prog_id\":" << options.attach_prog_id
+        << ",\"prog_ifindex\":" << info.ifindex
+        << ",\"gpl_compatible\":" << info.gpl_compatible
+        << ",\"source_btf_id\":" << info.btf_id
+        << ",\"token_present\":0},\"maps\":[";
+    std::vector<std::unique_ptr<ScopedFd>> retained_maps;
+    std::vector<int32_t> map_fds;
+    std::unordered_set<uint32_t> retained_ids;
+    bool first = true;
+    for (const auto &name : companion.native_data_symbols) {
+        const auto identity = companion.map_addr_ids.find(name);
+        if (identity == companion.map_addr_ids.end()) continue;
+        const auto selected = std::find_if(companion.maps.begin(), companion.maps.end(),
+            [&](const MapMeta &map) { return map.kernel_id == identity->second; });
+        if (selected == companion.maps.end()) fail("native symbol lacks its source map object: " + name);
+        const auto &map = *selected;
+        auto retained = std::make_unique<ScopedFd>(bpf_map_get_fd_by_id(map.kernel_id));
+        if (retained->get() < 0)
+            fail("reopen native submission map identity: " + std::string(std::strerror(errno)));
+        const auto actual = load_map_info(retained->get());
+        if (retained_ids.insert(actual.id).second) {
+            map_fds.push_back(retained->get());
+            retained_maps.push_back(std::move(retained));
+        }
+        if (!first) metadata << ',';
+        first = false;
+        metadata << "{\"name\":"; write_json_string(metadata, name);
+        metadata << ",\"map_id\":" << actual.id << ",\"map_type\":" << actual.type
+            << ",\"key_size\":" << actual.key_size << ",\"value_size\":" << actual.value_size
+            << ",\"max_entries\":" << actual.max_entries << ",\"map_flags\":" << actual.map_flags
+            << ",\"value_offset\":";
+        const auto address = companion.map_addrs.at(name);
+        if (address == map.kernel_addr) metadata << "null";
+        else {
+            if (!map.value_addr || address < map.value_addr || address - map.value_addr >= map.value_size)
+                fail("trusted native direct map value exceeds its object: " + name);
+            metadata << address - map.value_addr;
+        }
+        metadata << '}';
+    }
+    metadata << "]}";
+    const std::string serialized = metadata.str();
+    if (serialized.size() > UINT32_MAX || map_fds.size() > UINT32_MAX)
+        fail("trusted native metadata exceeds request ABI");
+    const std::string endpoint = std::string(kNativeLabTarget.debugfs_dir) + "/native_submit";
+    ScopedFd submit(open(endpoint.c_str(), O_RDWR | O_CLOEXEC));
+    if (submit.get() < 0) fail("open kernel native submission: " + std::string(std::strerror(errno)));
+    native_lab_trusted_submission submission{};
+    auto &request = submission.request;
+    request.version = NATIVE_LAB_TRUSTED_VERSION;
+#if defined(__aarch64__)
+    request.arch = NATIVE_LAB_ARCH_ARM64;
+#else
+    request.arch = NATIVE_LAB_ARCH_X86;
+#endif
+    request.source_prog_id = info.id;
+    request.native_size = native.size();
+    request.entry_size = entry.size();
+    request.metadata_size = serialized.size();
+    request.native_user = ptr_to_u64(native.data());
+    request.entry_user = ptr_to_u64(entry.data());
+    request.metadata_user = ptr_to_u64(serialized.data());
+    submission.map_count = map_fds.size();
+    submission.map_fds_user = ptr_to_u64(map_fds.data());
+    if (ioctl(submit.get(), NATIVE_LAB_TRUSTED_SUBMIT_RESOURCES, &submission))
+        fail("kernel native submission refused: " + std::string(std::strerror(errno)));
+    native_lab_trusted_result result{};
+    int status;
+    do { status = ioctl(submit.get(), NATIVE_LAB_TRUSTED_WAIT, &result); }
+    while (status < 0 && errno == EINTR);
+    if (status < 0) fail("wait for trusted specializer: " + std::string(std::strerror(errno)));
+    if (result.request_id != request.request_id)
+        fail("kernel trusted specializer returned an invalid completion");
+    if (result.status)
+        fail("trusted specializer refused native program: " + std::string(std::strerror(-result.status)));
+    native_loader::LoadedProgram out{};
+    out.prog_fd = bpf_prog_get_fd_by_id(result.prog_id);
+    if (out.prog_fd < 0) fail("open kernel-owned trusted native result: " + std::string(std::strerror(errno)));
+    out.replaced = true;
+    out.bpf_bytecode_bytes = companion.source_bytecode_bytes;
+    return out;
+}
 
 } // namespace
 
@@ -3445,6 +3551,14 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             std::move(map_rules));
     add_native_data_symbol_addrs(native_object_path, companion);
     const auto companion_load_end = std::chrono::steady_clock::now();
+
+    const char *bound = std::getenv("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF");
+    if (bound && (std::strcmp(bound, "1") == 0 || std::strcmp(bound, "true") == 0 ||
+                  std::strcmp(bound, "yes") == 0 || std::strcmp(bound, "on") == 0)) {
+        for (const auto &name : companion.native_data_symbols)
+            if (!companion.map_addr_ids.contains(name)) add_native_map_symbol_alias(companion, name);
+        return submit_trusted_native(options, prog_info, native_object_path, symbol_name, companion);
+    }
 
     LinkedBlob linked = load_or_link_native_blob(
         options.native_link_path,
