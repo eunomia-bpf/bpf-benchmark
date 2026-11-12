@@ -1,0 +1,124 @@
+{
+  "recorded_at": "2026-11-12T17:14:20.869709+00:00",
+  "scope": "First27 completed requests of ongoing549-instance load-only census",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-resident-census/ready",
+  "kernel_commit": "74d1097af561",
+  "model_commit": "d0890b14f",
+  "submitted": 27,
+  "verified": 22,
+  "verifier_rejected": 5,
+  "native_execution_requests": 0,
+  "applications": {
+    "bcc/set": {
+      "submitted": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "workload_run": null
+    },
+    "katran": {
+      "submitted": 1,
+      "verified": 0,
+      "verifier_rejected": 1,
+      "workload_run": null
+    },
+    "cilium/agent": {
+      "submitted": 2,
+      "verified": 0,
+      "verifier_rejected": 2,
+      "workload_run": null
+    },
+    "otelcol-ebpf-profiler/profiling": {
+      "submitted": 1,
+      "verified": 1,
+      "verifier_rejected": 0,
+      "workload_run": null
+    },
+    "tetragon/observer": {
+      "submitted": 23,
+      "verified": 21,
+      "verifier_rejected": 2,
+      "workload_run": null
+    },
+    "tracee/monitor": {
+      "submitted": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "workload_run": null
+    }
+  },
+  "classes": {
+    "verifier_instruction_complexity": 1,
+    "verifier_readonly_kernel_write": 2,
+    "installed": 22,
+    "verifier_callback_argument": 1,
+    "verifier_scalar_memory_access": 1
+  },
+  "new_requests": [
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 35,
+      "request_id": 25,
+      "name": "generic_kprobe_process_filter",
+      "native_prog_id": 0,
+      "stage": "verifier_rejected",
+      "classified_class": "verifier_callback_argument",
+      "diagnostic": " r1 += -296                 ; R1=fp-296\n5637: (0f) r1 += r6                   ; R1=fp-152 R6=144\n5638: (79) r2 = *(u64 *)(r1 +0)       ; R1=fp-152 R2=scalar() fp-152=mmmmmmmm\n5639: (05) goto pc+68\n5708: (18) r1 = 0x8000000000000128    ; R1=0x8000000000000128\n5710: (ad) if r6 < r1 goto pc+3       ; R1=0x8000000000000128 R6=144\n5714: (b7) r1 = 152                   ; R1=152\n5715: (07) r2 += -32                  ; R2=scalar()\n5716: (bf) r3 = r1                    ; R1=152 R3=152\n5717: (57) r3 &= 7                    ; R3=0\n5718: (55) if r3 != 0x0 goto pc+1602          ; R3=0\n5719: (bf) r3 = r10                   ; R3=fp0 R10=fp0\n5720: (07) r3 += -296                 ; R3=fp-296\n5721: (0f) r3 += r1                   ; R1=152 R3=fp-144\n5722: (7b) *(u64 *)(r3 +0) = r2       ; R2=scalar(id=34) R3=fp-144 fp-144=scalar(id=34)\n5723: (65) if r1 s> 0xffffffff goto pc+1      ; R1=152\n5725: (b7) r1 = 0                     ; R1=0\n5726: (18) r2 = 0xffffd3b1403da000    ; R2=map_value(map=bpf_mult.rodata,ks=4,vs=2)\n5728: (0f) r1 += r2                   ; R1=map_value(map=bpf_mult.rodata,ks=4,vs=2) R2=map_value(map=bpf_mult.rodata,ks=4,vs=2)\n5729: (71) r1 = *(u8 *)(r1 +0)        ; R1=0\n5730: (57) r1 &= 255                  ; R1=0\n5731: (15) if r1 == 0x0 goto pc+1676          ; R1=0\n7408: (b7) r3 = 112                   ; R3=112\n7409: (bf) r1 = r10                   ; R1=fp0 R10=fp0\n7410: (07) r1 += -296                 ; R1=fp-296\n7411: (0f) r3 += r1                   ; R1=fp-296 R3=fp-184\n7412: (b4) w1 = 2048                  ; R1=2048\n7413: (b7) r2 = 9740                  ; R2=9740\n7414: (b7) r4 = 0                     ; R4=0\n7415: (85) call bpf_loop#181\nR2 type=scalar expected=func\nprocessed 6229 insns (limit 1000000) max_states_per_insn 4 total_states 177 peak_states 177 mark_read 0\n\n"
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 36,
+      "request_id": 26,
+      "name": "generic_kprobe_setup_event",
+      "native_prog_id": 107,
+      "stage": "installed",
+      "classified_class": "installed",
+      "diagnostic": ""
+    },
+    {
+      "application": "tetragon/observer",
+      "retained_source_prog_id": 37,
+      "request_id": 27,
+      "name": "generic_kprobe_actions",
+      "native_prog_id": 0,
+      "stage": "verifier_rejected",
+      "classified_class": "verifier_scalar_memory_access",
+      "diagnostic": "dc0,umin=0xfff0bdc0000f4240,umax=0xfffffffffff0bdc0,smax32=0x7fffffc0,umax32=0xffffffc0,var_off=(0xfff0000000000000; 0xfffffffffffc0)) R2=scalar()\n7826: (b7) r1 = 0                     ; R1=0\n7827: (0f) r1 += r5                   ; R1=map_value(map=ratelimit_map,ks=224,vs=8) R5=map_value(map=ratelimit_map,ks=224,vs=8)\n7828: (79) r1 = *(u64 *)(r1 +0)       ; R1=scalar()\n7829: (b4) w3 = 1                     ; R3=1\n7830: (1d) if r1 == r2 goto pc+1      ; R1=scalar() R2=scalar()\n7831: (b4) w3 = 0                     ; R3=0\n7832: (bd) if r1 <= r2 goto pc+10     ; R1=scalar(umin=1) R2=scalar(umax=0xfffffffffffffffe)\n7833: (7b) *(u64 *)(r10 -256) = r3    ; R3=0 R10=fp0 fp-256=0\n7834: (b7) r1 = 80                    ; R1=80\n7835: (bf) r2 = r1                    ; R1=80 R2=80\n7836: (57) r2 &= 7                    ; R2=0\n7837: (55) if r2 != 0x0 goto pc+604   ; R2=0\n7838: (bf) r2 = r10                   ; R2=fp0 R10=fp0\n7839: (07) r2 += -232                 ; R2=fp-232\n7840: (0f) r2 += r1                   ; R1=80 R2=fp-152\n7841: (79) r2 = *(u64 *)(r2 +0)       ; R2=scalar(id=101) fp-152=scalar(id=101)\n7842: (05) goto pc+640\n8483: (79) r5 = *(u64 *)(r10 -296)    ; R5=map_value(map=process_call_he,ks=4,vs=25632) R10=fp0 fp-296=map_value(map=process_call_he,ks=4,vs=25632)\n8484: (79) r7 = *(u64 *)(r10 -264)    ; R7=2 R10=fp0 fp-264=2\n8485: (18) r3 = 0x80000000000000e8    ; R3=0x80000000000000e8\n8487: (ad) if r1 < r3 goto pc+1       ; R1=80 R3=0x80000000000000e8\n8489: (b7) r1 = 0                     ; R1=0\n8490: (0f) r1 += r2                   ; R1=scalar() R2=scalar(id=101)\n8491: (b7) r2 = 0                     ; R2=0\n8492: (73) *(u8 *)(r1 +0) = r2\nR1 invalid mem access 'scalar'\nprocessed 6412 insns (limit 1000000) max_states_per_insn 1 total_states 124 peak_states 124 mark_read 0\n\n"
+    }
+  ],
+  "archive": "resident-tetragon-new-classes.tar.gz",
+  "archive_request_range": [
+    25,
+    27
+  ],
+  "previous_archives": [
+    "resident-first-five.tar.gz",
+    "resident-next-nineteen.tar.gz"
+  ],
+  "callback_origin": {
+    "entry": "generic_kprobe_process_filter",
+    "retained_source_prog_id": 35,
+    "native_callback": "cwd_read_v61",
+    "native_callback_pc": "0x260c",
+    "native_call_pc": "0xc6c",
+    "loop_count": 2048,
+    "flags": 0,
+    "bpf_call_pc": 7415,
+    "stock_processed_insns": 6229,
+    "stock_diagnostic": "R2 type=scalar expected=func",
+    "followup": "General callback/code-address helper lowering requires a verifier-visible callback representation."
+  },
+  "scalar_store_origin": {
+    "entry": "generic_kprobe_actions",
+    "retained_source_prog_id": 37,
+    "native_pointer_reload_pc": "0xbde: mov rax,[rsp+0x50]",
+    "native_store_pc": "0xbe3: mov byte ptr[rax],0",
+    "generated_c_lines": [
+      2960,
+      2963
+    ],
+    "bpf_store_pc": 8492,
+    "stock_processed_insns": 6412,
+    "stock_diagnostic": "R1 invalid mem access 'scalar'",
+    "observation": "The pointer reload reaches B through byte assembly before the store; stack provenance remains the general investigation."
+  }
+}
