@@ -83,6 +83,9 @@
 
 - **VERIFIED module runtime controls（2026-11-12）** 0ecc10f51 的同名 stock module 在唯一内核上通过现有三项 control，group rc0：原始 P/map capability capture 与 service EACCES；pending native load 的 snapshot 等待完成（false）；registered service 生成 B 经 stock verifier/JIT，原 source3 → native6 TEST_RUN retval2。raw `/workspaces/kprog-raw/verified/20261112-module-regressions/controls/`，完整 archive/receipt `kprog/results/verified_20261112/module-controls*`。actual Katran 同轮继续运行。协调者 08:39 已公布 IMAGE REBUILT，冻结镜像 corpus 可接续运行。
 
+
+- **VERIFIED safety VM entry（2026-11-12）** 已有 38-case inputs 接入 `make -C kprog/libnativeloader trusted-safety-kvm BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader OUTPUT=<fresh raw dir>`：同一 kernel/base/module，fixture build 与 worker 复用已有 recipe；guest 仅载入 stock module，由原 check() 自己注册 service 并保持 negative load-only 协议。与 app supervisor 的 service 生命周期独立，kernel replay 将在当前 Katran compiler 完成后串行执行；guest recipe dry-run 通过，实际结果按 run 单列。
+
 两条路径分开计数。直接 native（跳过 verifier）：六个应用都跑通过（05-29，11-07 复现）。verified 路径（verifier 检查 B）：BCC 25/25、Katran 1/1 跑通过，其余应用只有少量程序，历史最高约 50/549。
 
 549 个常驻程序的静态普查（`corpus/results/kprog_app_coverage_20261109/resident-census/`）第一轮：选择缺口 275、资源准备 238、ELF 名称语法 23、context 下沉 1；实际生成 12、编译 11、verifier 接受 7、拒绝 4。后续 stock guest 资源回放完成 238/238（bc3104df7），资源阶段与 native 生成、编译和 verifier 结果分别计数。

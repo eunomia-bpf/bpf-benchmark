@@ -51,6 +51,21 @@ trusted-safety-inputs: all
 	KPROG_STOCK_LOADER="$(abspath $(BUILD_DIR))" python3 ../stock-path/run_safety.py build \
 		--out "$(SAFETY_INPUTS)" --inputs "$(SAFETY_INPUTS)"
 
+.PHONY: trusted-safety-kvm guest-trusted-safety
+trusted-safety-kvm: trusted-service trusted-safety-inputs
+	$(MAKE) -C ../stock-path/module
+	install -d "$(OUTPUT)"
+	taskset -c 8-19 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(OUTPUT)" --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory $(VM_MEM) --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/libnativeloader guest-trusted-safety BUILD_DIR=$(abspath $(BUILD_DIR)) OUTPUT=$(OUTPUT) SAFETY_INPUTS=$(SAFETY_INPUTS)'
+
+guest-trusted-safety:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
+	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" KPROG_STOCK_LOADER="$(abspath $(BUILD_DIR))" \
+		python3 ../stock-path/run_safety.py check --out "$(OUTPUT)" --inputs "$(SAFETY_INPUTS)"
+
 trusted-service-kvm: trusted-service
 	$(MAKE) -C ../stock-path/module
 	install -d "$(OUTPUT)"
