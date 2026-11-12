@@ -1,0 +1,37 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-final-linker-bytes",
+  "linker_source_revision": "fba19ea942460f534d51e5b920dfee75de51dc34 Recover registered service loading through the stock verifier and JIT",
+  "exit_code": 0,
+  "comparison": {
+    "entries": 349,
+    "differences": []
+  },
+  "apps": {
+    "bcc": {
+      "successful": 26,
+      "retained_failure_status": 3
+    },
+    "cilium": {
+      "successful": 75,
+      "retained_failure_status": 10
+    },
+    "katran": {
+      "successful": 3,
+      "retained_failure_status": 0
+    },
+    "otelcol-ebpf-profiler": {
+      "successful": 24,
+      "retained_failure_status": 2
+    },
+    "tetragon": {
+      "successful": 77,
+      "retained_failure_status": 16
+    },
+    "tracee": {
+      "successful": 97,
+      "retained_failure_status": 16
+    }
+  },
+  "scope": "Default proof-stage .text and .native_link_abi compared byte for byte against original pre-rebuild outputs; final kernel-linked runtime bytes and application coverage use separate runs.",
+  "archive": "final-linker-bytes.tar.gz"
+}
