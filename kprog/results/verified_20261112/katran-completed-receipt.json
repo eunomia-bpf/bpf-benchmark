@@ -1,0 +1,143 @@
+{
+  "recorded_at": "2026-11-12T08:54:19.330475+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-module-regressions/katran",
+  "kernel_commit": "5f6e694bfd4d",
+  "model_commit": "8f1a1a8b4",
+  "module_build_commit": "0ecc10f51",
+  "loader_linker_commit": "fba19ea94",
+  "shim_fix_commit": "1af32bdae",
+  "exit_code": 0,
+  "loaded": 1,
+  "verified": 1,
+  "run": 1,
+  "source_prog_id": 6,
+  "native_prog_id": 9,
+  "native_attached": {
+    "xdp": [
+      {
+        "devname": "tvkatran0",
+        "ifindex": 3,
+        "mode": "driver",
+        "id": 9
+      }
+    ],
+    "tc": [],
+    "flow_dissector": [],
+    "netfilter": []
+  },
+  "program_counters": [
+    {
+      "id": 6,
+      "type": "xdp",
+      "name": "balancer_ingress",
+      "tag": "90e1a12c30a4bce5",
+      "gpl_compatible": true,
+      "run_time_ns": 9508,
+      "run_cnt": 1,
+      "loaded_at": 1794472785,
+      "uid": 0,
+      "orphaned": false,
+      "bytes_xlated": 23840,
+      "jited": true,
+      "bytes_jited": 13641,
+      "bytes_memlock": 24576,
+      "map_ids": [
+        2,
+        4,
+        6,
+        5,
+        12,
+        17,
+        8,
+        19,
+        3,
+        9,
+        7,
+        11,
+        10,
+        15
+      ],
+      "btf_id": 38
+    },
+    {
+      "id": 9,
+      "type": "xdp",
+      "name": "balancer_ingress",
+      "tag": "e639819a6e7dbc2c",
+      "gpl_compatible": true,
+      "run_time_ns": 2595,
+      "run_cnt": 1,
+      "loaded_at": 1794473087,
+      "uid": 0,
+      "orphaned": false,
+      "bytes_xlated": 88360,
+      "jited": true,
+      "bytes_jited": 10126,
+      "bytes_memlock": 172032,
+      "map_ids": [
+        14,
+        13,
+        2,
+        4,
+        16,
+        17,
+        3,
+        6,
+        5,
+        12,
+        19,
+        9,
+        7,
+        15,
+        11,
+        8,
+        10,
+        20
+      ],
+      "btf_id": 38
+    }
+  ],
+  "packet_runs": {
+    "6": {
+      "command": [
+        "/workspaces/repository/vendor/build/x86/bpftool/bin/bpftool",
+        "-j",
+        "prog",
+        "run",
+        "id",
+        "6",
+        "data_in",
+        "/workspaces/repository/corpus/inputs/katran_vip_packet_64.bin",
+        "data_out",
+        "/workspaces/kprog-raw/verified/20261112-module-regressions/katran/control/application/6.packet",
+        "repeat",
+        "1"
+      ],
+      "returncode": 0,
+      "stdout": "{\"retval\":2,\"duration\":9894}\n",
+      "stderr": ""
+    },
+    "9": {
+      "command": [
+        "/workspaces/repository/vendor/build/x86/bpftool/bin/bpftool",
+        "-j",
+        "prog",
+        "run",
+        "id",
+        "9",
+        "data_in",
+        "/workspaces/repository/corpus/inputs/katran_vip_packet_64.bin",
+        "data_out",
+        "/workspaces/kprog-raw/verified/20261112-module-regressions/katran/control/application/9.packet",
+        "repeat",
+        "1"
+      ],
+      "returncode": 0,
+      "stdout": "{\"retval\":2,\"duration\":3057}\n",
+      "stderr": ""
+    }
+  },
+  "packet_original_native_equal": true,
+  "archive": "katran-completed.tar.gz",
+  "scope": "Actual upstream Katran startup and packet TEST_RUN on the sole kernel and renamed stock module. Frozen-image workload corpus follows separately."
+}
