@@ -4,9 +4,9 @@ ifneq ($(KERNELRELEASE),)
 obj-m += bpf_kprog_stock.o
 bpf_kprog_stock-y := kprog_stock.o
 else
-KDIR ?= /var/tmp/kprog-tmp/CK/build
-MO ?= /var/tmp/kprog-tmp/CK/mod
+KDIR ?= /workspaces/.agent-state/kprog-ck/build-x86
+MO ?= /workspaces/.agent-state/kprog-ck/verified-module
 all:
-	mkdir -p $(MO)
+	install -d $(MO)
 	$(MAKE) -C $(KDIR) M=$(CURDIR) MO=$(MO) modules
 endif
