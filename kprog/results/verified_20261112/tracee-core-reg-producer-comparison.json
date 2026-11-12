@@ -1,0 +1,126 @@
+{
+  "before_receipt_commit": "f125e00fc",
+  "selector_commit": "b94e7d0ee",
+  "build_receipt_commit": "0f0b2815f",
+  "scope": "Read-only comparison of every defined function body in all three staged objects against captured pre-fix native ELF requests; ordinary byte comparison, application verification follows separately.",
+  "objects": [
+    {
+      "object": "kprobe_check.native.o",
+      "previous_defined_functions": 1,
+      "selector_defined_functions": 1,
+      "shared_functions": 1,
+      "changed_functions": [],
+      "previous_only": [],
+      "selector_only": []
+    },
+    {
+      "object": "lsm_check.native.o",
+      "previous_defined_functions": 1,
+      "selector_defined_functions": 1,
+      "shared_functions": 1,
+      "changed_functions": [],
+      "previous_only": [],
+      "selector_only": []
+    },
+    {
+      "object": "tracee.native.o",
+      "previous_defined_functions": 172,
+      "selector_defined_functions": 172,
+      "shared_functions": 172,
+      "changed_functions": [
+        {
+          "symbol": "sys_enter_init",
+          "previous_bytes": 1800,
+          "selector_bytes": 1936
+        },
+        {
+          "symbol": "syscall_checker",
+          "previous_bytes": 15804,
+          "selector_bytes": 15915
+        },
+        {
+          "symbol": "trace_arch_prctl",
+          "previous_bytes": 1730,
+          "selector_bytes": 1866
+        },
+        {
+          "symbol": "trace_dup",
+          "previous_bytes": 1730,
+          "selector_bytes": 1866
+        },
+        {
+          "symbol": "trace_dup2",
+          "previous_bytes": 1730,
+          "selector_bytes": 1866
+        },
+        {
+          "symbol": "trace_dup3",
+          "previous_bytes": 1730,
+          "selector_bytes": 1866
+        },
+        {
+          "symbol": "trace_execute_finished",
+          "previous_bytes": 25523,
+          "selector_bytes": 25945
+        },
+        {
+          "symbol": "trace_mmap_alert",
+          "previous_bytes": 15376,
+          "selector_bytes": 15416
+        },
+        {
+          "symbol": "trace_process_vm_writev",
+          "previous_bytes": 1730,
+          "selector_bytes": 1866
+        },
+        {
+          "symbol": "trace_ptrace",
+          "previous_bytes": 1730,
+          "selector_bytes": 1866
+        },
+        {
+          "symbol": "trace_security_file_mprotect",
+          "previous_bytes": 27391,
+          "selector_bytes": 27436
+        },
+        {
+          "symbol": "trace_security_file_open",
+          "previous_bytes": 15686,
+          "selector_bytes": 15716
+        },
+        {
+          "symbol": "trace_security_socket_accept",
+          "previous_bytes": 7918,
+          "selector_bytes": 8078
+        },
+        {
+          "symbol": "trace_security_socket_bind",
+          "previous_bytes": 7365,
+          "selector_bytes": 7372
+        },
+        {
+          "symbol": "trace_security_socket_connect",
+          "previous_bytes": 7182,
+          "selector_bytes": 7215
+        },
+        {
+          "symbol": "trace_security_socket_setsockopt",
+          "previous_bytes": 7804,
+          "selector_bytes": 7813
+        },
+        {
+          "symbol": "trace_set_fs_pwd",
+          "previous_bytes": 14119,
+          "selector_bytes": 14134
+        },
+        {
+          "symbol": "tracepoint__module__module_load",
+          "previous_bytes": 14997,
+          "selector_bytes": 15012
+        }
+      ],
+      "previous_only": [],
+      "selector_only": []
+    }
+  ]
+}
