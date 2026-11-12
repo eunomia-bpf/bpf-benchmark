@@ -1,0 +1,131 @@
+{
+  "recorded_at": "2026-11-12T16:05:57.708952+00:00",
+  "scope": "In-progress observation: first seven registered-service requests accepted; subsequent requests and final application workload counters follow separately.",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-tracee-core-reg-replay",
+  "selector_commit": "b94e7d0ee",
+  "producer_build_commit": "0f0b2815f",
+  "model_commit": "d0890b14f",
+  "kernel_commit": "74d1097af561",
+  "image_platform_id": "sha256:d756bf5919e9eb35cc8628a38af95ca2cec2751e86f4c23f7c6e3f7bd07494a1",
+  "completed_verified": 7,
+  "workload_run": null,
+  "completed_requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 191,
+      "entry": "security_bpf_kprobe",
+      "stock_load": {
+        "request_id": 1,
+        "prog_id": 194,
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 198,
+      "entry": "lsm_bpf_check",
+      "stock_load": {
+        "request_id": 2,
+        "prog_id": 201,
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 206,
+      "entry": "tracepoint__raw_syscalls__sys_enter",
+      "stock_load": {
+        "request_id": 3,
+        "prog_id": 209,
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 210,
+      "entry": "sys_enter_init",
+      "stock_load": {
+        "request_id": 4,
+        "prog_id": 213,
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "request_id": 5,
+      "source_prog_id": 214,
+      "entry": "sys_enter_submit",
+      "stock_load": {
+        "request_id": 5,
+        "prog_id": 217,
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "request_id": 6,
+      "source_prog_id": 218,
+      "entry": "tracepoint__raw_syscalls__sys_exit",
+      "stock_load": {
+        "request_id": 6,
+        "prog_id": 221,
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "request_id": 7,
+      "source_prog_id": 222,
+      "entry": "sys_exit_init",
+      "stock_load": {
+        "request_id": 7,
+        "prog_id": 225,
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "active_observation": [
+    {
+      "source_prog_id": 226,
+      "entry": "sys_exit_submit",
+      "directory": "/workspaces/kprog-raw/verified/20261112-tracee-core-reg-replay/control/state/session-4l9ownmh/requests/request-5rj793_g"
+    }
+  ],
+  "expansion_observation": "tracee-core-reg-expansion-observation.json",
+  "archive": "tracee-core-reg-first-cohort.tar.gz",
+  "next": "Keep the existing application run and single compiler running; collect final app status and counts after completion."
+}

@@ -1,0 +1,115 @@
+{
+  "recorded_at": "2026-11-12T15:59:29.247720+00:00",
+  "scope": "Read-only compiler-input expansion observation during the active application run; generated data and compiler flags retained.",
+  "request_directory": "/workspaces/kprog-raw/verified/20261112-tracee-core-reg-replay/control/state/session-4l9ownmh/requests/request-0dz8uorh",
+  "entry": "sys_enter_submit",
+  "source_prog_id": 214,
+  "source_bytes": 547683,
+  "preprocessed_bytes": 171407055,
+  "native_instruction_labels": 3200,
+  "bytes_by_macro": {
+    "X86_SIM_L_EXEC_MOV_LOAD": 81354622,
+    "X86_SIM_L_EXEC_LEA": 14159703,
+    "X86_SIM_L_EXEC_STORE": 13957052,
+    "X86_SIM_L_EXEC_ALU_IMM": 12768104,
+    "dispatch_or_exit": 12399705,
+    "X86_SIM_L_EXEC_MOV_REG": 9342047,
+    "X86_SIM_L_EXEC_MOV_IMM": 7621240,
+    "X86_SIM_L_EXEC_ALU_REG": 6487402,
+    "X86_SIM_L_EXEC_CMP_REG_OP": 5614530,
+    "X86_SIM_L_EXEC_CMP_IMM_OP": 2000505,
+    "X86_SIM_L_EXEC_CMP_REG_MEM": 1025380,
+    "X86_SIM_L_EXEC_CMP_MEM": 831069,
+    "X86_SIM_L_EXEC_ALU_MEM": 761298,
+    "X86_SIM_L_EXEC_PUSH_OP": 566760,
+    "X86_SIM_L_EXEC_POP_OP": 528276,
+    "X86_SIM_X86_JCC": 402290,
+    "X86_SIM_L_EXEC_PTR_LOAD": 394580,
+    "preamble": 371188,
+    "X86_SIM_L_EXEC_BT": 261594,
+    "X86_SIM_L_EXEC_ALU_MEM_IMM": 252517,
+    "X86_SIM_L_EXEC_CMOV": 101581,
+    "X86_SIM_L_EXEC_ALU_MEM_UNARY": 82059,
+    "X86_SIM_L_EXEC_CALL_MEMSET": 58162,
+    "X86_SIM_L_EXEC_SETCC": 42510,
+    "X86_SIM_L_EXEC_MOVX_REG": 12777,
+    "X86_SIM_X86_RET": 5950,
+    "X86_SIM_X86_JMP": 4154
+  },
+  "largest_blocks": [
+    {
+      "native_pc": "preamble",
+      "macro": "preamble",
+      "preprocessed_bytes": 371188,
+      "source_instruction": ""
+    },
+    {
+      "native_pc": "31ea",
+      "macro": "X86_SIM_L_EXEC_MOV_LOAD",
+      "preprocessed_bytes": 156130,
+      "source_instruction": "/* 0x31ea: mov    r15,QWORD PTR [r14+0x7dd0] */"
+    },
+    {
+      "native_pc": "b67",
+      "macro": "X86_SIM_L_EXEC_MOV_LOAD",
+      "preprocessed_bytes": 156117,
+      "source_instruction": "/* 0xb67: movzx  r13d,WORD PTR [r14+0x7e] */"
+    },
+    {
+      "native_pc": "104b",
+      "macro": "X86_SIM_L_EXEC_MOV_LOAD",
+      "preprocessed_bytes": 156104,
+      "source_instruction": "/* 0x104b: mov    r12,QWORD PTR [r14+0x7e38] */"
+    },
+    {
+      "native_pc": "1055",
+      "macro": "X86_SIM_L_EXEC_MOV_LOAD",
+      "preprocessed_bytes": 156104,
+      "source_instruction": "/* 0x1055: mov    r13,QWORD PTR [r14+0x7ea8] */"
+    },
+    {
+      "native_pc": "10e6",
+      "macro": "X86_SIM_L_EXEC_MOV_LOAD",
+      "preprocessed_bytes": 156104,
+      "source_instruction": "/* 0x10e6: mov    r12,QWORD PTR [r14+0x7e40] */"
+    },
+    {
+      "native_pc": "10f0",
+      "macro": "X86_SIM_L_EXEC_MOV_LOAD",
+      "preprocessed_bytes": 156104,
+      "source_instruction": "/* 0x10f0: mov    r13,QWORD PTR [r14+0x7eb0] */"
+    },
+    {
+      "native_pc": "116f",
+      "macro": "X86_SIM_L_EXEC_MOV_LOAD",
+      "preprocessed_bytes": 156104,
+      "source_instruction": "/* 0x116f: mov    r12,QWORD PTR [r14+0x7eb8] */"
+    },
+    {
+      "native_pc": "11e1",
+      "macro": "X86_SIM_L_EXEC_MOV_LOAD",
+      "preprocessed_bytes": 156104,
+      "source_instruction": "/* 0x11e1: mov    r12,QWORD PTR [r14+0x7ee0] */"
+    },
+    {
+      "native_pc": "1246",
+      "macro": "X86_SIM_L_EXEC_MOV_LOAD",
+      "preprocessed_bytes": 156104,
+      "source_instruction": "/* 0x1246: mov    r12,QWORD PTR [r14+0x7e78] */"
+    },
+    {
+      "native_pc": "1259",
+      "macro": "X86_SIM_L_EXEC_MOV_LOAD",
+      "preprocessed_bytes": 156104,
+      "source_instruction": "/* 0x1259: mov    r13,QWORD PTR [r14+0x7ee8] */"
+    },
+    {
+      "native_pc": "d28",
+      "macro": "X86_SIM_L_EXEC_MOV_LOAD",
+      "preprocessed_bytes": 156103,
+      "source_instruction": "/* 0xd28: mov    r13,QWORD PTR [r14+0x7f00] */"
+    }
+  ],
+  "compiler_policy": "Current trusted_specializer.py COMPILE_FLAGS retained; one large compiler running on CPUs8-19.",
+  "macro_labeled_instruction_count": 2907
+}
