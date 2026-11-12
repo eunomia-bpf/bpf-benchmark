@@ -1,0 +1,125 @@
+{
+  "recorded_at": "2026-11-12T15:25:25.512218+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-handoff-tracee",
+  "corpus_run_directory": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261112_145806_995634",
+  "kernel_commit": "74d1097af561",
+  "image_platform_id": "sha256:d756bf5919e9eb35cc8628a38af95ca2cec2751e86f4c23f7c6e3f7bd07494a1",
+  "model_commit": "d0890b14f",
+  "map_dependency_commit": "812aee2ec",
+  "samples": 1,
+  "workload_seconds": 10,
+  "bpf_stats": true,
+  "host_cpus": "8-19",
+  "guest_cpus": 8,
+  "guest_memory": "64G",
+  "make_exit_code": 0,
+  "application_status": "error",
+  "application_error": "shim socket /var/run/bpfrejit/shim-7300.sock request failed: [Errno 111] Connection refused",
+  "baseline_programs": 167,
+  "loaded": 5,
+  "verified": 3,
+  "run": null,
+  "run_scope": "Candidate application stopped before workload counters were available; refused shim connection retained.",
+  "service_summary": {
+    "started": "2026-11-12T14:56:53.036863+00:00",
+    "command": [
+      "python3",
+      "/workspaces/repository/kprog/test/verified_corpus.py",
+      "tracee/monitor",
+      "1",
+      "10",
+      "1"
+    ],
+    "service": {
+      "ready": true,
+      "arch": 1,
+      "endpoint": "/sys/kernel/debug/bpf_x86_native_lab/specializer"
+    },
+    "returncode": 0,
+    "service_returncode": -15,
+    "finished": "2026-11-12T15:00:33.320818+00:00"
+  },
+  "programs": [
+    {
+      "request_id": 1,
+      "source_prog_id": 191,
+      "entry": "security_bpf_kprobe",
+      "accepted": true,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 1,
+        "prog_id": 194,
+        "status": 0
+      }
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 198,
+      "entry": "lsm_bpf_check",
+      "accepted": true,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 2,
+        "prog_id": 201,
+        "status": 0
+      }
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 206,
+      "entry": "tracepoint__raw_syscalls__sys_enter",
+      "accepted": true,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 3,
+        "prog_id": 209,
+        "status": 0
+      }
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 210,
+      "entry": "sys_enter_init",
+      "accepted": false,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "verifier_class": "scalar memory access",
+      "verifier_tail": "; R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar()\n136: (79) r2 = *(u64 *)(r1 +0)        ; R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar()\n137: (79) r2 = *(u64 *)(r1 +0)        ; R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar()\n138: (b7) r3 = 0                      ; R3=0\n139: (0f) r6 += r3                    ; R3=0 R6=fp-152\n140: (71) r2 = *(u8 *)(r6 +0)         ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=fp-152 fp-152=????mmmm\n141: (18) r4 = 0x8000000000000098     ; R4=0x8000000000000098\n143: (ad) if r3 < r4 goto pc+2        ; R3=0 R4=0x8000000000000098\n146: (57) r2 &= 2                     ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=2,var_off=(0x0; 0x2))\n147: (55) if r2 != 0x0 goto pc+142    ; R2=0\n148: (b7) r1 = 0                      ; R1=0\n149: (bf) r3 = r9                     ; R3=scalar(id=10) R9=scalar(id=10)\n150: (07) r3 += 112                   ; R3=scalar(id=10+112)\n151: (b7) r2 = 0                      ; R2=0\n152: (a5) if r3 < 0x1000 goto pc+9    ; R3=scalar(id=10+112,umin=4096) R9=scalar(id=10,umin=3984,umax=0xffffffffffffff8f)\n153: (18) r2 = 0xffff8a5688639930     ; R2=map_value(map=kprog_unspec,ks=4,vs=8)\n155: (79) r3 = *(u64 *)(r2 +0)        ; R2=map_value(map=kprog_unspec,ks=4,vs=8) R3=scalar()\n156: (57) r3 &= 1                     ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))\n157: (b7) r2 = 0                      ; R2=0\n158: (55) if r3 != 0x0 goto pc+3      ; R3=0\n159: (b7) r2 = 112                    ; R2=112\n160: (0f) r2 += r9                    ; R2=scalar(umin=4096) R9=scalar(umin=3984,umax=0xffffffffffffff8f)\n161: (79) r2 = *(u64 *)(r2 +0)\nR2 invalid mem access 'scalar'\nprocessed 153 insns (limit 1000000) max_states_per_insn 0 total_states 5 peak_states 5 mark_read 0\n\n",
+      "processed_instructions": 153
+    },
+    {
+      "request_id": 5,
+      "source_prog_id": 213,
+      "entry": "sys_enter_init",
+      "accepted": false,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "verifier_class": "scalar memory access",
+      "verifier_tail": "; R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar()\n136: (79) r2 = *(u64 *)(r1 +0)        ; R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar()\n137: (79) r2 = *(u64 *)(r1 +0)        ; R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar()\n138: (b7) r3 = 0                      ; R3=0\n139: (0f) r6 += r3                    ; R3=0 R6=fp-152\n140: (71) r2 = *(u8 *)(r6 +0)         ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=fp-152 fp-152=????mmmm\n141: (18) r4 = 0x8000000000000098     ; R4=0x8000000000000098\n143: (ad) if r3 < r4 goto pc+2        ; R3=0 R4=0x8000000000000098\n146: (57) r2 &= 2                     ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=2,var_off=(0x0; 0x2))\n147: (55) if r2 != 0x0 goto pc+142    ; R2=0\n148: (b7) r1 = 0                      ; R1=0\n149: (bf) r3 = r9                     ; R3=scalar(id=10) R9=scalar(id=10)\n150: (07) r3 += 112                   ; R3=scalar(id=10+112)\n151: (b7) r2 = 0                      ; R2=0\n152: (a5) if r3 < 0x1000 goto pc+9    ; R3=scalar(id=10+112,umin=4096) R9=scalar(id=10,umin=3984,umax=0xffffffffffffff8f)\n153: (18) r2 = 0xffff8a5688639930     ; R2=map_value(map=kprog_unspec,ks=4,vs=8)\n155: (79) r3 = *(u64 *)(r2 +0)        ; R2=map_value(map=kprog_unspec,ks=4,vs=8) R3=scalar()\n156: (57) r3 &= 1                     ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))\n157: (b7) r2 = 0                      ; R2=0\n158: (55) if r3 != 0x0 goto pc+3      ; R3=0\n159: (b7) r2 = 112                    ; R2=112\n160: (0f) r2 += r9                    ; R2=scalar(umin=4096) R9=scalar(umin=3984,umax=0xffffffffffffff8f)\n161: (79) r2 = *(u64 *)(r2 +0)\nR2 invalid mem access 'scalar'\nprocessed 153 insns (limit 1000000) max_states_per_insn 0 total_states 5 peak_states 5 mark_read 0\n\n",
+      "processed_instructions": 153
+    }
+  ],
+  "capture_directory": "/workspaces/repository/corpus/results/verified-captures-7634q2hl",
+  "capture_files": 180,
+  "capture_bytes": 3393509,
+  "archive": "handoff-tracee.tar.gz",
+  "diagnosis": "The raw-syscalls entry now passes stock verification with the dependency-scoped fd array. sys_enter_init retries210/213 fail atBPF161 scalar memory access after153 instructions. NativePC0x6c loads[pt_regs+112]; shared native_compat CORE register macros alias direct pt_regs reads, while upstream CORE register macros use probe reads. Whole-family opt-in producer lowering follows."
+}
