@@ -1,0 +1,36 @@
+{
+  "recorded_at": "2026-11-12T22:23:45Z",
+  "source_commit": "60031f1f1",
+  "scope": "Default-off tail-count option: completed build, Rust tests and six-manifest proof-stage comparison",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-tail-count-option",
+  "command": "make -C kprog/tv linker-entry-abi-check OUTPUT=/workspaces/kprog-raw/verified/20261112-tail-count-option/bytes",
+  "exit_code": 0,
+  "finished": "2026-11-12T22:19:24Z",
+  "rust_tests": {
+    "passed": 9,
+    "failed": 0
+  },
+  "proof_commands": 349,
+  "successful_commands": 302,
+  "retained_failed_commands": 47,
+  "comparison": {
+    "entries": 349,
+    "differences": []
+  },
+  "comparison_reference": "bytes/before captured with C replacement linker before60031 rebuild",
+  "current_binary_observed": {
+    "bytes": 2522800,
+    "mtime": "2026-11-12T22:19:20.489861673Z"
+  },
+  "behavior": {
+    "default": "Legacy compact entry offset; no kind-10 relocation",
+    "opt_in": "--tail-count-relocs selects imm32 entry offset and kind10"
+  },
+  "pending": [
+    "Original default record comparison launched PID1040026; collect in later turn",
+    "Real kernel-mode off/on capture launched PID1041720; collect in later turn",
+    "Guest tail-called program execution and counts remain unverified"
+  ],
+  "limits": "Proof .text/.native_link_abi equality and command statuses do not establish final kernel-linked byte parity or application acceptance.",
+  "archive": "tail-count-option-proof-check.tar.gz"
+}
