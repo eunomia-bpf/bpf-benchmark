@@ -1,0 +1,13 @@
+{
+  "recorded_at": "2026-11-12T08:37:39.285052+00:00",
+  "module_source_commit": "0264f021c",
+  "kernel_commit": "5f6e694bfd4d",
+  "kernel_build": "/workspaces/.agent-state/kprog-ck/build-x86",
+  "module_path": "/workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko",
+  "module_bytes": 669472,
+  "module_name": "bpf_x86_native_lab",
+  "vermagic": "7.0.0-rc2+ SMP preempt mod_unload modversions",
+  "build_exit_code": 0,
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-module-identity",
+  "scope": "External verified module rebuilt incrementally in its existing output directory. Architecture endpoint name aligns with the frozen loader resident identity; module C/header behavior and sole kernel version retain their definitions. Kernel runtime controls follow separately."
+}

@@ -154,3 +154,17 @@ MOVED /workspaces/.agent-state/kprog-ck/verified-safety/stack_base_flags_scalar_
 MOVED /workspaces/.agent-state/kprog-ck/verified-safety/stack_base_flags_scalar_store.manifest.json -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/stack_base_flags_scalar_store.manifest.json
 KEPT full expanded47 generated fixture build -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-47-inputs.tar.gz
 ```
+
+```
+# verified module identity replacement 2026-11-12T08:35:29Z
+REMOVED 251B /workspaces/.agent-state/kprog-ck/verified-module/.bpf_kprog_stock.ko.cmd
+REMOVED 121B /workspaces/.agent-state/kprog-ck/verified-module/.bpf_kprog_stock.mod.cmd
+REMOVED 73535B /workspaces/.agent-state/kprog-ck/verified-module/.bpf_kprog_stock.mod.o.cmd
+REMOVED 450B /workspaces/.agent-state/kprog-ck/verified-module/.bpf_kprog_stock.o.cmd
+REMOVED 669464B /workspaces/.agent-state/kprog-ck/verified-module/bpf_kprog_stock.ko
+REMOVED 16B /workspaces/.agent-state/kprog-ck/verified-module/bpf_kprog_stock.mod
+REMOVED 2161B /workspaces/.agent-state/kprog-ck/verified-module/bpf_kprog_stock.mod.c
+REMOVED 156448B /workspaces/.agent-state/kprog-ck/verified-module/bpf_kprog_stock.mod.o
+REMOVED 499976B /workspaces/.agent-state/kprog-ck/verified-module/bpf_kprog_stock.o
+KEPT incremental kprog_stock.o and source; raw run archives and logs retained.
+```

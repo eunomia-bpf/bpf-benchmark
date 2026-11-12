@@ -1,0 +1,15 @@
+make: Entering directory '/workspaces/repository/kprog/stock-path/module'
+install -d /workspaces/.agent-state/kprog-ck/verified-module
+make -C /workspaces/.agent-state/kprog-ck/build-x86 M=/workspaces/repository/kprog/stock-path/module MO=/workspaces/.agent-state/kprog-ck/verified-module modules
+make[1]: Entering directory '/workspaces/.agent-state/kprog-ck/build-x86'
+make[2]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-module'
+  GEN     Makefile
+  CC [M]  kprog_stock.o
+  LD [M]  bpf_x86_native_lab.o
+  MODPOST Module.symvers
+  CC [M]  bpf_x86_native_lab.mod.o
+  LD [M]  bpf_x86_native_lab.ko
+  BTF [M] bpf_x86_native_lab.ko
+make[2]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-module'
+make[1]: Leaving directory '/workspaces/.agent-state/kprog-ck/build-x86'
+make: Leaving directory '/workspaces/repository/kprog/stock-path/module'
