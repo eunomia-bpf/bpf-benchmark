@@ -80,6 +80,15 @@ def rodata_globals(object_path: Path) -> dict[str, tuple[str, int, int]]:
     return symbols
 
 
+def unit_name(object_path: Path) -> str:
+    """The unit's file name: the object's, with a .i suffix."""
+    name = object_path.name
+    for suffix in (".native.o", ".plain.o", ".rodata.o", ".o"):
+        if name.endswith(suffix):
+            return name[: -len(suffix)] + ".i"
+    return name + ".i"
+
+
 def preprocess(object_path: Path, output: Path, clang_argv: list[str]) -> None:
     argv = list(clang_argv) + ["-E", "-P", "-o", str(output)]
     result = run(argv)
@@ -133,8 +142,7 @@ def main() -> None:
         raise SystemExit("missing clang command after --")
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    stem = object_path.name[: -len(".native.o")]
-    unit = output_dir / f"{stem}.i"
+    unit = output_dir / unit_name(object_path)
     preprocess(object_path, unit, clang_argv)
 
     rodata = rodata_globals(object_path)
@@ -156,7 +164,7 @@ def main() -> None:
             "has_initializer": decl["has_initializer"],
         })
 
-    index = output_dir / f"{stem}.decls.json"
+    index = unit.with_suffix(".decls.json")
     index.write_text(json.dumps({
         "object": object_path.name,
         "unit": unit.name,
