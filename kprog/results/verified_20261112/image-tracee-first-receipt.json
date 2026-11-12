@@ -1,0 +1,98 @@
+{
+  "recorded_at": "2026-11-12T09:47:56.256917+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-image-tracee",
+  "corpus_run_directory": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261112_093955_323073",
+  "kernel_commit": "5f6e694bfd4d",
+  "model_commit": "8f1a1a8b4",
+  "image": "bpf-benchmark/kprog:current",
+  "image_built_from": "d70d2e03e",
+  "samples": 1,
+  "workload_seconds": 10,
+  "bpf_stats": true,
+  "host_cpus": "8-19",
+  "guest_cpus": 8,
+  "guest_memory": "64G",
+  "make_exit_code": 0,
+  "application_status": "error",
+  "baseline_loaded": 167,
+  "candidate_loaded_source_submissions": 4,
+  "verified": 2,
+  "run": null,
+  "run_observation": "The candidate exits during startup and its measurement reports a refused shim socket. Candidate counters remain unmeasured.",
+  "requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 191,
+      "native_prog_id": 194,
+      "service_status": 0,
+      "entry": "security_bpf_kprobe",
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "map_bindings": 3,
+      "binding_map_ids": 2,
+      "verifier_tail": []
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 198,
+      "native_prog_id": 201,
+      "service_status": 0,
+      "entry": "lsm_bpf_check",
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "map_bindings": 3,
+      "binding_map_ids": 2,
+      "verifier_tail": []
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 206,
+      "native_prog_id": null,
+      "service_status": -5,
+      "entry": "tracepoint__raw_syscalls__sys_enter",
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "map_bindings": 78,
+      "binding_map_ids": 75,
+      "verifier_tail": [
+        "trusted-native-loader: service simulator verification failed: Argument list too long",
+        "The total number of maps per program has reached the limit of 64",
+        "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 209,
+      "native_prog_id": null,
+      "service_status": -5,
+      "entry": "tracepoint__raw_syscalls__sys_enter",
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "map_bindings": 78,
+      "binding_map_ids": 75,
+      "verifier_tail": [
+        "trusted-native-loader: service simulator verification failed: Argument list too long",
+        "The total number of maps per program has reached the limit of 64",
+        "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+        ""
+      ]
+    }
+  ],
+  "failure_class": "stock verifier maximum used maps",
+  "diagnosis": "The failed syscall entry has 78 binding symbols for 75 kernel map IDs. Native proof relocations use two of those maps; generated B uses the same two plus the unspecified-input map. The worker currently places every pinned binding FD into fd_array, attaching object-wide dependencies to the selected entry and reaching the existing 64-map limit before instruction analysis.",
+  "scope": "Frozen-image two-start application startup: baseline completes, two candidate native programs install, main entry fails twice. All original map bindings, source submissions and raw diagnostics remain recorded.",
+  "archive": "image-tracee-first.tar.gz"
+}
