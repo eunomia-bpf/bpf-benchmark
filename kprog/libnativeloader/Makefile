@@ -34,3 +34,26 @@ guest-trusted-submission-check:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_kprog_stock.ko
 	"$(BUILD_DIR)/trusted-submission" "$(REPO_ROOT)/vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o"
+
+.PHONY: trusted-service trusted-service-kvm guest-trusted-service
+trusted-service: all
+	cmake --build "$(BUILD_DIR)" --target trusted-native-loader trusted-service-client
+	$(CC) -O2 -fPIC -mno-red-zone -mgeneral-regs-only -fno-stack-protector \
+		-fno-asynchronous-unwind-tables -c ../test/trusted_native.c -o "$(BUILD_DIR)/trusted-native.o"
+
+trusted-service-kvm: trusted-service
+	$(MAKE) -C ../stock-path/module
+	install -d "$(OUTPUT)"
+	taskset -c 8-19 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(OUTPUT)" --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/libnativeloader guest-trusted-service BUILD_DIR=$(abspath $(BUILD_DIR)) OUTPUT=$(OUTPUT)'
+
+guest-trusted-service:
+	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" python3 ../trusted_service.py --arch 1 \
+		--endpoint /sys/kernel/debug/bpf_x86_native_lab/specializer \
+		--module /workspaces/.agent-state/kprog-ck/verified-module/bpf_kprog_stock.ko \
+		--state "$(OUTPUT)/state" --results "$(OUTPUT)/service.tar.gz" \
+		--native-link "$(REPO_ROOT)/kprog/x86/native_lab/native_link/target/release/native-link" \
+		--loader "$(BUILD_DIR)/trusted-native-loader" \
+		--run "$(BUILD_DIR)/trusted-service-client" "$(BUILD_DIR)/trusted-native.o"

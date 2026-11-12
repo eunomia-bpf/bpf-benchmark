@@ -98,6 +98,10 @@ struct Args {
     #[arg(long)]
     output_abi: Option<PathBuf>,
 
+    /// Include exception-recovery load sites for the registered service.
+    #[arg(long, action = clap::ArgAction::Set, default_value_t = false)]
+    abi_load_sites: bool,
+
     /// Versioned structured link plan containing helper/map/callsite facts.
     /// This is the stable loader/native-link boundary for kernel mode.
     #[arg(long)]
@@ -445,6 +449,7 @@ fn main() -> Result<()> {
         callee_saved_mask,
         proof_relocs,
         proof_symbols,
+        load_sites,
     } = match elf.architecture() {
         object::Architecture::X86_64 => {
             let entry = find_symbol_by_name(&elf, &args.symbol)?;
@@ -594,10 +599,15 @@ fn main() -> Result<()> {
         );
     }
     if let Some(path) = &args.output_abi {
-        let text = format!(
+        let mut text = format!(
             "version\tnative-link-abi-v2\ncallee_saved_mask\t{}\n",
             output_callee_saved_mask
         );
+        if args.abi_load_sites {
+            for site in &load_sites {
+                text.push_str(&format!("load_site\t{},{},{}\n", site.offset, site.insn_len, site.destination));
+            }
+        }
         fs::write(path, text).with_context(|| format!("write {}", path.display()))?;
         eprintln!("native-link: wrote ABI metadata -> {}", path.display());
     }
@@ -865,6 +875,14 @@ struct RewriteResult {
     callee_saved_mask: u8,
     proof_relocs: Vec<ProofReloc>,
     proof_symbols: Vec<ProofSymbol>,
+    load_sites: Vec<LoadSite>,
+}
+
+#[derive(Debug, Clone)]
+struct LoadSite {
+    offset: u32,
+    insn_len: u16,
+    destination: u16,
 }
 
 #[derive(Clone, Debug)]
@@ -2461,6 +2479,7 @@ fn rewrite_arm64(
         callee_saved_mask,
         proof_relocs,
         proof_symbols,
+        load_sites: Vec::new(),
     })
 }
 

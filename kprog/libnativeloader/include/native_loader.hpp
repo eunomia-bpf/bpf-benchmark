@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <linux/bpf.h>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -23,13 +24,32 @@ struct LoadTimings {
 struct LoadedProgram {
     int prog_fd = -1;
     bool replaced = false;
+    bool prebuilt_proof = false;
+    uint32_t original_prog_id = 0;
+    uint32_t native_prog_id = 0;
     uint64_t bpf_bytecode_bytes = 0;
     uint64_t native_code_bytes = 0;
     LoadTimings timings;
 };
 
+struct TrustedMapBinding {
+    std::string native_symbol;
+    uint32_t map_id = 0;
+    std::optional<uint32_t> value_offset;
+};
+
 struct FdLoadOptions {
     int original_prog_fd = -1;
+    int trusted_service_fd = -1;
+    uint64_t trusted_request_id = 0;
+    std::filesystem::path trusted_native_proof_path;
+    std::filesystem::path proof_object_path;
+    std::string trusted_simulator_program;
+    std::vector<TrustedMapBinding> trusted_maps;
+    std::optional<bpf_prog_info> native_context;
+    std::optional<bpf_func_info> native_entry_function;
+    uint32_t source_btf_id = 0;
+    uint32_t prog_flags = 0;
     std::filesystem::path manifest_path;
     std::filesystem::path native_object_path;
     std::string symbol_name;

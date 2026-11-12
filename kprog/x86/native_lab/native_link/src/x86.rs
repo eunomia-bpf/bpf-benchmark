@@ -1,7 +1,7 @@
 use anyhow::{anyhow, bail, Result};
 use iced_x86::{
     BlockEncoder, BlockEncoderOptions, BlockEncoderResult, Code, Decoder, DecoderOptions,
-    FlowControl, Instruction, InstructionBlock, Mnemonic, OpKind, Register,
+    FlowControl, Instruction, InstructionBlock, InstructionInfoFactory, Mnemonic, OpAccess, OpKind, Register,
 };
 use object::{Object, ObjectSection, ObjectSymbol, RelocationFlags, RelocationTarget};
 use std::collections::{HashMap, HashSet};
@@ -1028,6 +1028,38 @@ fn scan_x86_pc_relative_relocations(
     Ok(out)
 }
 
+fn x86_decoded_load_sites(blob: &[u8], ranges: &[(usize, usize)]) -> Vec<LoadSite> {
+    let mut result = Vec::new();
+    let mut factory = InstructionInfoFactory::new();
+    for &(start, end) in ranges {
+        for insn in Decoder::with_ip(64, &blob[start..end.min(blob.len())],
+                                    start as u64, DecoderOptions::NONE) {
+            let info = factory.info(&insn);
+            if !info.used_memory().iter().any(|m| matches!(m.access(),
+                OpAccess::Read | OpAccess::CondRead | OpAccess::ReadWrite |
+                OpAccess::ReadCondWrite)) { continue; }
+            // An explicit written GPR is the stock fixup destination.
+            // Implicit stack movement remains owned by the instruction.
+            let destination = (0..insn.op_count()).find_map(|i| {
+                if insn.op_kind(i) != OpKind::Register ||
+                    !matches!(info.op_access(i), OpAccess::Write | OpAccess::CondWrite |
+                              OpAccess::ReadWrite | OpAccess::ReadCondWrite) { return None; }
+                x86_gpr64_family(insn.op_register(i))
+            }).or_else(|| {
+                info.used_registers().iter().find_map(|r| {
+                    if !matches!(r.access(), OpAccess::Write | OpAccess::CondWrite |
+                                 OpAccess::ReadWrite | OpAccess::ReadCondWrite) { return None; }
+                    x86_gpr64_family(r.register()).filter(|&r| r != Register::RSP)
+                })
+            }).map(|r| (r as u32 - Register::RAX as u32) as u16).unwrap_or(u16::MAX);
+            result.push(LoadSite { offset: insn.ip() as u32,
+                insn_len: insn.len() as u16, destination });
+        }
+    }
+    result.sort_by_key(|s| s.offset);
+    result
+}
+
 pub(super) fn rewrite_x86(
     elf: &object::File,
     entry: &SymInfo,
@@ -1065,6 +1097,7 @@ pub(super) fn rewrite_x86(
     let mut blob: Vec<u8> = Vec::new();
     let mut patches: Vec<PatchInfo> = Vec::new();
     let mut layouts: Vec<SymbolLayout> = Vec::new();
+    let mut code_ranges = Vec::new();
     let mut callee_saved_mask: u8 = proof_callee_saved_mask.unwrap_or(0);
     // For each `bpf_map_lookup_elem` call site encountered in
     // reachable-symbol byte order, record (symbol_addr, local_call_offset)
@@ -1631,6 +1664,7 @@ pub(super) fn rewrite_x86(
             insn_local_ip,
             new_offset_in_sym: encoded.new_instruction_offsets.clone(),
         });
+        code_ranges.push((sym_base, sym_base + encoded.code_buffer.len()));
         blob.extend_from_slice(&encoded.code_buffer);
     }
 
@@ -1762,6 +1796,7 @@ pub(super) fn rewrite_x86(
     } else {
         Vec::new()
     };
+    let load_sites = x86_decoded_load_sites(&blob, &code_ranges);
     Ok(RewriteResult {
         blob,
         relocs,
@@ -1769,6 +1804,7 @@ pub(super) fn rewrite_x86(
         callee_saved_mask,
         proof_relocs,
         proof_symbols,
+        load_sites,
     })
 }
 fn x86_layout_insn_global_offset(layout: &SymbolLayout, local_patch_off: u64) -> Result<usize> {
@@ -3963,6 +3999,14 @@ fn build_x86_array_update(spec: &UpdateSiteSpec) -> Result<Vec<Instruction>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn load_sites_exclude_stores_and_literal_pool_bytes() {
+        let bytes = [0x48, 0x8b, 0x07, 0x48, 0x89, 0x07, 0xc3, 0x48, 0x8b, 0x1f];
+        let sites = x86_decoded_load_sites(&bytes, &[(0, 7)]);
+        let rows: Vec<_> = sites.iter().map(|s| (s.offset, s.insn_len, s.destination)).collect();
+        assert_eq!(rows, vec![(0, 3, 0), (6, 1, u16::MAX)]);
+    }
 
     #[test]
     fn proof_entry_abi_preserves_native_saves_only_when_requested() -> Result<()> {

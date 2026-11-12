@@ -34,6 +34,11 @@ add_library(native_loader_shared SHARED
 )
 set_target_properties(native_loader_shared PROPERTIES OUTPUT_NAME native_loader)
 
+add_executable(trusted-native-loader ../trusted_loader.cpp)
+target_link_libraries(trusted-native-loader PRIVATE native_loader)
+add_executable(trusted-service-client ../test/trusted_service_client.cpp)
+target_link_libraries(trusted-service-client PRIVATE native_loader)
+
 add_library(native_loader_libbpf STATIC IMPORTED GLOBAL)
 set_target_properties(native_loader_libbpf PROPERTIES
     IMPORTED_LOCATION "${NATIVE_LOADER_LIBBPF_LIBRARY}"
