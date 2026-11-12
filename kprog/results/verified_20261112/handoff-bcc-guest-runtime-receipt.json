@@ -1,0 +1,11 @@
+{
+  "recorded_at": "2026-11-12T13:41:40.266872+00:00",
+  "method": "Read-only noload mount after completed guest; preserve guest daemon/container/runtime logs and remaining shim captures before existing cache reuse",
+  "paths": [
+    "dockerd.log",
+    "data/containers",
+    "data/containerd/daemon/io.containerd.snapshotter.v1.overlayfs/snapshots/35/fs/var/tmp/bpfrejit-runtime"
+  ],
+  "archive": "handoff-bcc-guest-runtime.tar.gz",
+  "scope": "Registered-service P/B requests and corpus result already retained separately. Docker --rm completed before this collection; raw captures in future verified runs will use the persistent corpus result mount."
+}

@@ -7,6 +7,7 @@ import argparse
 import os
 from pathlib import Path
 import subprocess
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
 parser = argparse.ArgumentParser(description=__doc__)
@@ -15,7 +16,10 @@ parser.add_argument('samples', type=int)
 parser.add_argument('duration', type=int)
 parser.add_argument('stats', choices=('0', '1'))
 args = parser.parse_args()
+capture_dir = tempfile.mkdtemp(prefix='verified-captures-', dir=ROOT/'corpus/results')
+print(f'Verified raw capture directory: {capture_dir}', flush=True)
 environment = dict(os.environ,
+    BPFREJIT_SHIM_DIR=capture_dir,
     BPFREJIT_CORPUS_APPS=args.app,
     BPFREJIT_CORPUS_BPF_STATS=args.stats,
     BPFREJIT_SHIM_NATIVE_LOADER='post',
@@ -26,10 +30,10 @@ environment = dict(os.environ,
     BPFREJIT_NATIVE_LOADER_SO='/usr/local/lib/bpfrejit/libnative_loader.so',
     KEEP_WORKDIRS='all', BPFREJIT_KEEP_ALL_WORKDIRS='1', SKIP_REJIT='norejit')
 # Preserve the frozen Makefile's nine base names and forward the existing
-# verified-path selector and raw-artifact retention flag through that API.
+# verified-path selector and raw capture settings through that API.
 names = ('TARGET RUN_TARGET_NAME RUN_TOKEN RUN_TARGET_ARCH RUN_EXECUTOR '
     'RUN_REMOTE_PYTHON_BIN RUN_RUNTIME_PYTHON_BIN RUN_BPFTOOL_BIN RUN_NATIVE_REPOS_CSV '
-    'BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF BPFREJIT_KEEP_ALL_WORKDIRS')
+    'BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF BPFREJIT_KEEP_ALL_WORKDIRS BPFREJIT_SHIM_DIR')
 raise SystemExit(subprocess.run(['make', '-C', str(ROOT), '__runtime-vm-corpus',
     'PLATFORM=kvm', 'ARCH=x86', 'X86_RUNNER_RUNTIME_IMAGE=bpf-benchmark/kprog:current',
     'X86_RUNNER_RUNTIME_IMAGE_TAR=' + str(ROOT/'.cache/container-images/x86_64-runner-runtime.image.tar'),
