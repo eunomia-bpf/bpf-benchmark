@@ -56,6 +56,9 @@
 - **VERIFIED BCC completed diagnostic（2026-11-12，唯一内核）** load/snapshot 修复 1af32bdae 后，原八工具启动 rc0，25 个实际 source submissions 全部经 service 生成 B、stock verifier 接受、native 安装完成（25 loaded / 25 verified）；结束时 14 个 native program 的 run_cnt 为正，其中 12 个在原 10K 次 open/write/close 功能操作阶段增加。其余程序继续保留原始计数。目录 `/workspaces/kprog-raw/verified/20261112-load-lifecycle/bcc/control/`；每个 source/native ID、run_cnt 前后值和完整 service/app/shim 档案见 `kprog/results/verified_20261112/bcc-set-completed*`。opensnoop 报 CPU0 丢失 3295 个事件，原始 stderr 已保存。此项为镜像外 diagnostic；冻结 workload 的唯一镜像 BCC、Katran 重跑仍交协调者集成。
 - **VERIFIED final linker regression（2026-11-12）** 在最终 linker source fba19ea94 重跑六 manifest 默认 proof-stage bytes 对照，rc0，349 个 command identity/status 一致，302 份成功 `.text`/ABI 逐字相同，47 条历史失败状态保留；原始目录 `/workspaces/kprog-raw/verified/20261112-final-linker-bytes/`，原 baseline 和本轮输出一起归档 `kprog/results/verified_20261112/final-linker-bytes*`。最终 runtime bytes 与应用运行数据按各自 run 记录。
 
+
+- **VERIFIED image integration（2026-11-12）** READY FOR IMAGE 已于 07:26 交协调者（loader/linker fba19ea94、shim 1af32bdae，证据 bfe589764/2a01f79e6）。冻结 root Makefile 的 `SUITE_ENV_NAMES` 和 `runner/libs/suite_commands.py` 环境列表保持 05-29 版本；verified invocation 需要通过现有 Make 变量 `RUNTIME_ENV_BASE_NAMES` 显式包含 `BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF`，才能将 service supervisor 的值传入 app container。module selection 由协调者在同一镜像的每个 guest 单独安排。原 Katran artifact preparation helper 改为读取唯一镜像 `bpf-benchmark/kprog:current`，用已有 `unbound-katran-inputs` target 将上游可执行文件与依赖放入唯一底座的 `verified-katran-inputs`；之后真实服务诊断复用该二进制，冻结 workload/image 重跑继续按协调安排。
+
 两条路径分开计数。直接 native（跳过 verifier）：六个应用都跑通过（05-29，11-07 复现）。verified 路径（verifier 检查 B）：BCC 25/25、Katran 1/1 跑通过，其余应用只有少量程序，历史最高约 50/549。
 
 549 个常驻程序的静态普查（`corpus/results/kprog_app_coverage_20261109/resident-census/`）第一轮：选择缺口 275、资源准备 238、ELF 名称语法 23、context 下沉 1；实际生成 12、编译 11、verifier 接受 7、拒绝 4。后续 stock guest 资源回放完成 238/238（bc3104df7），资源阶段与 native 生成、编译和 verifier 结果分别计数。

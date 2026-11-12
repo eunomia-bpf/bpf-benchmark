@@ -27,7 +27,7 @@ if sys.argv[1]=='--check-stub':
 if sys.argv[1]=='--prepare':
     inputs=Path(sys.argv[2]);inputs.mkdir(parents=True,exist_ok=True)
     libs=inputs/'lib';libs.mkdir(exist_ok=True)
-    image='bpf-benchmark/runner-runtime:x86_64'
+    image='bpf-benchmark/kprog:current'
     name='kprog-tv-unbound-inputs-'+str(os.getpid())
     subprocess.run(['docker','create','--name',name,image,'true'],check=True,stdout=subprocess.DEVNULL)
     try:
