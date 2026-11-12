@@ -123,6 +123,7 @@ def declarations(unit: Path) -> dict[str, dict[str, object]]:
             "name": name,
             "type": type_text,
             "array_length": array_length(type_text),
+            "array_type": type_text.endswith("]"),
             "has_initializer": " cinit" in rest,
         }
     return found
@@ -161,6 +162,7 @@ def main() -> None:
             "name_column": decl["name_column"],
             "type": decl["type"],
             "array_length": decl["array_length"],
+            "array_type": decl["array_type"],
             "has_initializer": decl["has_initializer"],
         })
 

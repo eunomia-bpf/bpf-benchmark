@@ -100,11 +100,17 @@ def section_symbols(object_path: Path, section_prefix: str) -> dict[str, tuple[s
 
 
 def loaded_rodata(capture: Path) -> dict[str, bytes]:
-    """Read the captured .rodata image of every program that reads one."""
+    """Tool name -> the .rodata image of the programs that read it.
+
+    Each BCC tool names its .rodata map "<tool>.rodata"; the tracee object
+    names it ".rodata". The map name is the join key between a captured
+    program and the object built from the same source.
+    """
     values: dict[str, bytes] = {}
     for ref in sorted(capture.glob("*/ref.json")):
         meta = json.loads(ref.read_text())
-        if meta.get("map_name", "") != ".rodata":
+        map_name = meta.get("map_name", "")
+        if map_name != ".rodata" and not map_name.endswith(".rodata"):
             continue
         dump = ref.parent / "map-values" / f"map-{meta['map_id']}.dump.json"
         if not dump.exists():
@@ -113,7 +119,9 @@ def loaded_rodata(capture: Path) -> dict[str, bytes]:
         if not entries:
             continue
         image = bytes(int(byte, 16) for byte in entries[0]["value"])
-        previous = values.setdefault(meta["prog_name"], image)
+        tool = map_name[: -len(".rodata")] if map_name.endswith(".rodata") \
+            and map_name != ".rodata" else ""
+        previous = values.setdefault(tool, image)
         if previous != image:
             sys.exit(f"{meta['prog_name']}: .rodata differs between references")
     return values
@@ -139,7 +147,8 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--app", required=True)
     parser.add_argument("--capture", required=True)
-    parser.add_argument("--bpf-object", required=True)
+    parser.add_argument("--bpf-objects", default="",
+                        help="directory of <stem>.bpf.o inputs")
     parser.add_argument("--output", required=True)
     parser.add_argument("--only", nargs="*", default=[])
     args = parser.parse_args()
@@ -147,29 +156,38 @@ def main() -> None:
     capture = Path(args.capture)
     output = Path(args.output).resolve()
     output.mkdir(parents=True, exist_ok=True)
-    bpf_object = Path(args.bpf_object)
+    bpf_objects = Path(args.bpf_objects)
     loaded = loaded_rodata(capture)
-    globals_ = section_symbols(bpf_object, ".rodata")
-    print(f"{args.app}: {len(loaded)} programs with a .rodata image, "
-          f"{len(globals_)} named globals in {bpf_object.name}", file=sys.stderr)
+    print(f"{args.app}: {len(loaded)} captured .rodata maps under {capture.name}",
+          file=sys.stderr)
 
     # Every program of one BPF object reads the same .rodata globals, so the
     # values are identical across the captured programs; verify that, then use
     # the single image the object's own offsets index.
-    images = {name: image for name, image in loaded.items()}
-    if not images:
+    if not loaded:
         raise SystemExit(f"no captured .rodata image under {capture}")
-    reference = next(iter(images.values()))
-    for name, image in images.items():
-        if image != reference:
-            raise SystemExit(f"{name}: captured .rodata differs from {next(iter(images))}")
-    for name, (section, offset, size) in globals_.items():
-        if offset + size > len(reference):
-            raise SystemExit(f"{name}: {offset}+{size} past the {len(reference)}-byte image")
 
     for stem, source, flags in units_for_app(args.app):
         if args.only and stem not in args.only:
             continue
+        tool = Path(stem).name
+        if tool not in loaded:
+            # BPF object names are truncated to 15 characters, so the map is
+            # "<first 7 characters>.rodata"; match on that as well.
+            short = tool[:7]
+            match = [name for name in loaded if name and name[:7] == short]
+            if len(match) == 1:
+                tool = match[0]
+        if tool not in loaded:
+            print(f"{stem:22} no captured .rodata map", file=sys.stderr)
+            continue
+        reference = loaded[tool]
+        bpf_object = bpf_objects / f"{tool}.bpf.o"
+        globals_ = section_symbols(bpf_object, ".rodata")
+        for name, (section, offset, size) in globals_.items():
+            if offset + size > len(reference):
+                raise SystemExit(f"{stem}: {name} at {offset}+{size} past the "
+                                 f"{len(reference)}-byte {tool}.rodata image")
         directory = output / Path(stem).parent
         directory.mkdir(parents=True, exist_ok=True)
         base = directory / Path(stem).name

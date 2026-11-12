@@ -50,10 +50,15 @@ def strip_volatile(type_text: str) -> str:
 def specialization(name: str, entry: dict, data: bytes) -> str:
     """The declaration that replaces the original, plus the macro that routes
     the name to the constant member."""
+    # An array type's brackets belong after the member name: the recorded
+    # "const volatile int[64]" becomes "const int v[64]". A scalar or struct
+    # type is used as written.
     member = strip_volatile(entry["type"])
-    if entry.get("array_length"):
-        member = f"{member}[{entry['array_length']}]"
-    return (f"const union {{ unsigned char b[{len(data)}]; const {member} v; }} "
+    declarator = f"{member} v"
+    if entry.get("array_type"):
+        base, brackets = member.split("[", 1)
+        declarator = f"{base} v[{brackets}"
+    return (f"const union {{ unsigned char b[{len(data)}]; const {declarator}; }} "
             f"{name} __attribute__((unused)) = {{ .b = {{ {byte_image(data)} }} }};\n"
             f"#undef {name}\n#define {name} ({name}.v)")
 
