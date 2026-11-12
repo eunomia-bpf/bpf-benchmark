@@ -88,6 +88,8 @@
 
 - **VERIFIED safety VM entry（2026-11-12）** 已有 38-case inputs 接入 `make -C kprog/libnativeloader trusted-safety-kvm BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader OUTPUT=<fresh raw dir>`：同一 kernel/base/module，fixture build 与 worker 复用已有 recipe；guest 仅载入 stock module，由原 check() 自己注册 service 并保持 negative load-only 协议。与 app supervisor 的 service 生命周期独立，kernel replay 将在当前 Katran compiler 完成后串行执行；guest recipe dry-run 通过，实际结果按 run 单列。
 
+- **VERIFIED follow-on order（2026-11-12）** BCC、Katran 的唯一镜像 corpus 完成后，以最新历史 `resident-census/master-grouped/README.md` / `result.json` 的分类作为下一轮定位起点：scalar memory access 230 instances / 116 bodies（Tetragon 123、Tracee 104、Cilium 3），随后 stack write 81 / 9 bodies、Clang source locations 23 / 23 bodies。该表的模型为 46659115e，记录的是 load-only stock verifier 阶段；当前 sole-kernel/model 8f1a1a8b4 的实际 app startup 继续分别收集并按实际诊断更新分类。下方 157 storage 排序保留为早期 grouped-static 记录。通用修复优先覆盖整个失败类别。
+
 两条路径分开计数。直接 native（跳过 verifier）：六个应用都跑通过（05-29，11-07 复现）。verified 路径（verifier 检查 B）：BCC 25/25、Katran 1/1 跑通过，其余应用只有少量程序，历史最高约 50/549。
 
 549 个常驻程序的静态普查（`corpus/results/kprog_app_coverage_20261109/resident-census/`）第一轮：选择缺口 275、资源准备 238、ELF 名称语法 23、context 下沉 1；实际生成 12、编译 11、verifier 接受 7、拒绝 4。后续 stock guest 资源回放完成 238/238（bc3104df7），资源阶段与 native 生成、编译和 verifier 结果分别计数。
