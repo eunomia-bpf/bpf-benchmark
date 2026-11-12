@@ -242,14 +242,40 @@ LOOKUP_TYPED = re.compile(
     r"\(&(?P<map>\w+), &(?P<key>\w+)\)")
 
 # The preprocessed unit spells a lookup as the compat header's helper macro
+# expansion, with the helper id and both arguments inline. How many parentheses
+# group each operand differs by program -- BCC and Tracee write ((&map)),
+# tetragon (((&map))) -- so each group is matched as an optional parenthesis
+# run and only the two identifiers are captured; the call that follows repeats
+# them.
+LOOKUP_CALL = re.compile(
+    r"\(\(void \*\(\*\)\(void \*, const void \*\)\)native_helper_id2"
+    r"\(\(unsigned long\)\(1\), \(unsigned long\)\(\(*(?P<map>&?\w+)\)+"
+    r", \(unsigned long\)\(\(*(?P<key>&?\w+)\)+"
+    r"\)+\)\(\(*(?P=map)\)+, \(\(*(?P=key)\)+\)")
+
+
+
+
+# The preprocessed unit spells a lookup as the compat header's helper macro
+# expansion, with the helper id and both arguments inline. How many parentheses
+# group each operand differs by program -- BCC and Tracee write ((&map)),
+# tetragon (((&map))) -- so the groups are matched as runs and only the two
+# identifiers are captured; the call that follows repeats them.
+_OPERAND = r"\(+(?P<{}>&?\w+)\)+"
+
+
+
+
+
+
+# The preprocessed unit spells a lookup as the compat header's helper macro
 # expansion, with the helper id and both arguments inline:
 #   ((void *(*)(void *, const void *))native_helper_id2((unsigned long)(1),
 #     (unsigned long)((&map)), (unsigned long)(&key)))((&map), (&key))
-LOOKUP_CALL = re.compile(
-    r"\(\(void \*\(\*\)\(void \*, const void \*\)\)native_helper_id2"
-    r"\(\(unsigned long\)\(1\), \(unsigned long\)\(\(&(?P<map>\w+)\)\), "
-    r"\(unsigned long\)\(\(?&(?P<key>\w+)\)?\)\)\)"
-    r"\(\(&(?P=map)\), \(&(?P=key)\)\)")
+# The parentheses around the operands differ by program: BCC and Tracee spell
+# ((&map)), tetragon (((&map))), so the grouping is matched loosely and only the
+# identifiers are captured.
+_GROUP = r"\(+\s*(?P<{}>&?\s*\w+)\s*\)+"
 
 
 def main() -> None:
@@ -287,7 +313,7 @@ def main() -> None:
     # the rule working if a program mixes them.
     calls = list(LOOKUP_CALL.finditer(text_in)) + list(LOOKUP_TYPED.finditer(text_in))
     for match in calls:
-        name = match.group("map")
+        name = match.group("map").lstrip("&")
         if name not in by_name:
             continue
         if name not in inlined:
@@ -318,10 +344,10 @@ def main() -> None:
     text = unit.read_text()
 
     def rewrite(match: "re.Match[str]") -> str:
-        name = match.group("map")
+        name = match.group("map").lstrip("&")
         if name not in inlined:
             return match.group(0)
-        return f"__sp_lookup_{name}((&{name}), (&{match.group('key')}))"
+        return f"__sp_lookup_{name}((&{name}), (&{match.group('key').lstrip('&')}))"
 
     first_call = min(m.start() for m in calls)
     text = LOOKUP_TYPED.sub(rewrite, LOOKUP_CALL.sub(rewrite, text))
