@@ -1,0 +1,79 @@
+{
+  "recorded_at": "2026-11-12T22:28:10Z",
+  "source_commit": "60031f1f1",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-tail-count-option",
+  "original_reference": "/workspaces/kprog-raw/verified/20261112-entry-abi-2/before",
+  "make_exit_code": 2,
+  "comparison": {
+    "entries": 349,
+    "differences": [
+      {
+        "app": "tetragon",
+        "symbol": "generic_fexit_event",
+        "changed": ".text"
+      },
+      {
+        "app": "tetragon",
+        "symbol": "iter",
+        "changed": ".text"
+      }
+    ]
+  },
+  "scope": "All 349 command identities/statuses retained; 300 of302 successful .text outputs equal; all successful ABI sections equal; two .text differences retained without filtering.",
+  "diagnosis": {
+    "header_commit": "c9b531e45",
+    "kernel_commit": "74d1097af561",
+    "field_added": "bpf_prog_aux.native_image follows refcnt; shifts later id/name fields by8",
+    "differences": [
+      {
+        "symbol": "generic_fexit_event",
+        "field": "bpf_prog_aux.name",
+        "reference_offset": 1016,
+        "current_offset": 1024,
+        "proof_instruction_offset": 7281,
+        "current_native_instruction_offset": 7288,
+        "changed_bytes": [
+          {
+            "offset_zero_based": 7282,
+            "old": 248,
+            "new": 0
+          },
+          {
+            "offset_zero_based": 7283,
+            "old": 3,
+            "new": 4
+          }
+        ],
+        "source": "copy_bpf_prog in process/types/basic.h:1282, via native input DWARF"
+      },
+      {
+        "symbol": "iter",
+        "field": "bpf_prog_aux.id",
+        "reference_offset": 32,
+        "current_offset": 40,
+        "proof_instruction_offset": 14,
+        "current_native_instruction_offset": 14,
+        "changed_bytes": [
+          {
+            "offset_zero_based": 16,
+            "old": 32,
+            "new": 40
+          }
+        ],
+        "source": "process/bpf_prog_iter.c prog->aux->id"
+      }
+    ],
+    "input_evidence": "Current native objects already contain these immediate/displacement values; object mtimes13:03 after header regeneration. Original reference predates the kernel/header rebuild.",
+    "interpretation": "Differences are consistent with authorized producer/header layout changes, not tail-count flag lowering; the original comparison is not byte-identical."
+  },
+  "kernel_capture": {
+    "initial_make_exit_code": 2,
+    "error": "Kernel mode requires .proof.o; recipe incorrectly passed the native input directly",
+    "fix_commit": "29028248a",
+    "retry_launcher": 1043714,
+    "retry_log": "kernel-retry-job/make.log",
+    "status": "Launched; collect next turn",
+    "plan_provenance": "C synthetic OTel plan; output inspection only, not real application startup/load/run evidence"
+  },
+  "archive": "tail-count-option-reference-diagnosis.tar.gz"
+}
