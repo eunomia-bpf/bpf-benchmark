@@ -98,6 +98,8 @@
 
 - **VERIFIED Tetragon current-image first result（2026-11-12）** baseline workload 完成，280 个原程序有 raw counters；candidate 实际 source submissions 4 / stock verified + native installed 2 / run counters 待测（startup 先退出）。make rc0、app status error 分别保留；event_wake_up_new_task 两次重试均 B generated/compiled 后在 BPF2676 以 `R2 invalid mem access scalar` 拒绝。native R14 在 PC0x11 来自 pt_regs+112（DI 槽），BPF33 的 context read 为 scalar；PC0x3c7 的 R14+3328 load 在 recovery 的成功分支继续 ordinary scalar read。属于历史最大 scalar class。raw `/workspaces/kprog-raw/verified/20261112-image-tetragon/`，corpus `corpus/results/x86_kvm_corpus_20261112_092733_716003/`，四份完整 service/generated/compiler/verifier 与 native/B disassembly 归档 `kprog/results/verified_20261112/image-tetragon-first*`。通用 producer/helper-read 表达需求交 lane C，当前 canonical verifier-visible read 保持。
 
+- **VERIFIED producer candidate integration（2026-11-12）** 已有 verified corpus wrapper 现在保留调用者的 `BPFREJIT_SHIM_NATIVE_MANIFEST`，默认继续 image 内 app manifest；整类 producer candidate 可放入 runtime 已可见的结果目录，再通过同一个 frozen corpus/service 路径提交。选择接口复用既有环境变量；kernel/image/框架文件继续沿用当前定义。Python syntax check 通过，actual candidate app 结果按运行单列。
+
 - **VERIFIED follow-on order（2026-11-12）** BCC、Katran 的唯一镜像 corpus 完成后，以最新历史 `resident-census/master-grouped/README.md` / `result.json` 的分类作为下一轮定位起点：scalar memory access 230 instances / 116 bodies（Tetragon 123、Tracee 104、Cilium 3），随后 stack write 81 / 9 bodies、Clang source locations 23 / 23 bodies。该表的模型为 46659115e，记录的是 load-only stock verifier 阶段；当前 sole-kernel/model 8f1a1a8b4 的实际 app startup 继续分别收集并按实际诊断更新分类。下方 157 storage 排序保留为早期 grouped-static 记录。通用修复优先覆盖整个失败类别。
 
 两条路径分开计数。直接 native（跳过 verifier）：六个应用都跑通过（05-29，11-07 复现）。verified 路径（verifier 检查 B）：BCC 25/25、Katran 1/1 跑通过，其余应用只有少量程序，历史最高约 50/549。

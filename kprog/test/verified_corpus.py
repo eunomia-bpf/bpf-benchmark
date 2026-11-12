@@ -20,8 +20,8 @@ environment = dict(os.environ,
     BPFREJIT_CORPUS_BPF_STATS=args.stats,
     BPFREJIT_SHIM_NATIVE_LOADER='post',
     BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF='1',
-    BPFREJIT_SHIM_NATIVE_MANIFEST='/opt/bpf-benchmark/native-bpf/x86_64/' +
-        args.app.split('/')[0] + '/manifest.json',
+    BPFREJIT_SHIM_NATIVE_MANIFEST=os.environ.get('BPFREJIT_SHIM_NATIVE_MANIFEST',
+        '/opt/bpf-benchmark/native-bpf/x86_64/' + args.app.split('/')[0] + '/manifest.json'),
     BPFREJIT_NATIVE_LINK_BINARY='/usr/local/bin/native-link',
     BPFREJIT_NATIVE_LOADER_SO='/usr/local/lib/bpfrejit/libnative_loader.so',
     KEEP_WORKDIRS='all', BPFREJIT_KEEP_ALL_WORKDIRS='1', SKIP_REJIT='norejit')
