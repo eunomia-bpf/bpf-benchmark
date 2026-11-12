@@ -5,13 +5,13 @@
 # vendor/bpf/native_specialize_objects.py (corpus/results is mounted into the
 # runtime container, so the directory lives there).
 #
-# Usage: specialized-timing.sh <app> <manifest-dir> <state-dir> <samples> <seconds> <cpus>
+# Usage: specialized-timing.sh <app> <manifest-dir|image> <state-dir> <samples> <seconds> <cpus>
 # Example (functional check, CPUs 20-23):
 #   specialized-timing.sh tracee/monitor corpus/results/spec-test/tracee \
 #     /var/tmp/kprog-tmp/C/state 1 10 20-23
 set -eu
 APP=${1:?app}
-MANIFEST=${2:?manifest directory holding manifest.json}
+MANIFEST=${2:?manifest directory, or the word image for the image manifest}
 STATE=${3:?state directory of this lane}
 SAMPLES_N=${4:-3}
 SECONDS_N=${5:-180}
@@ -22,10 +22,15 @@ install -d "$LOGS"
 TAG=$(date -u +%Y%m%dT%H%M%SZ)
 LOG=$LOGS/$TAG-specialized-$(echo "$APP" | tr / _)-s$SAMPLES_N.log
 cd "$ROOT"
+if [ "$MANIFEST" = image ]; then
+  NATIVE=/opt/bpf-benchmark/native-bpf/x86_64/$(echo "$APP" | cut -d/ -f1)/manifest.json
+else
+  NATIVE=$ROOT/$MANIFEST/manifest.json
+fi
 taskset -c "$CPUS_N" make -f kprog/perf/one-image/Makefile corpus \
   APPS="$APP" SAMPLES="$SAMPLES_N" WORKLOAD_DURATION="$SECONDS_N" \
   BPFREJIT_CORPUS_BPF_STATS=1 CPUS="$CPUS_N" STATE="$STATE" \
-  NATIVE_MANIFEST="$ROOT/$MANIFEST/manifest.json" > "$LOG" 2>&1 || rc=$?
+  NATIVE_MANIFEST="$NATIVE" > "$LOG" 2>&1 || rc=$?
 rc=${rc:-0}
 run=$(grep -o '"artifact_run_dir": "[^"]*"' "$LOG" | tail -1 | cut -d'"' -f4)
 echo "$(date -u +%FT%TZ) specialized app=$APP rc=$rc samples=$SAMPLES_N run=$run" >> "$LOGS/specialized.log"
