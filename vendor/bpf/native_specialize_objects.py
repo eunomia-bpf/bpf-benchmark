@@ -197,6 +197,10 @@ def main() -> None:
         if args.only and stem not in args.only:
             continue
         tool = Path(stem).name
+        if tool not in loaded and "" in loaded:
+            # An object whose programs name their map ".rodata" (tracee) has a
+            # single image, selected by the empty tool name.
+            tool = ""
         if tool not in loaded:
             # BPF object names are truncated to 15 characters, so the map is
             # "<first 7 characters>.rodata"; match on that as well.
