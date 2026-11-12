@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-2.0
 # make KDIR=<O= build dir> MO=<object dir>
 ifneq ($(KERNELRELEASE),)
-obj-m += bpf_kprog_stock.o
-bpf_kprog_stock-y := kprog_stock.o
+obj-m += bpf_$(SRCARCH)_native_lab.o
+bpf_$(SRCARCH)_native_lab-y := kprog_stock.o
 else
 KDIR ?= /workspaces/.agent-state/kprog-ck/build-x86
 MO ?= /workspaces/.agent-state/kprog-ck/verified-module

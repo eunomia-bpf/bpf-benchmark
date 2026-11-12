@@ -34,7 +34,7 @@ trusted-submission-check: all
 
 guest-trusted-submission-check:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
-	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_kprog_stock.ko
+	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
 	"$(BUILD_DIR)/trusted-submission" "$(REPO_ROOT)/vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o"
 
 .PHONY: trusted-service trusted-service-kvm guest-trusted-service
@@ -54,7 +54,7 @@ trusted-service-kvm: trusted-service
 guest-trusted-service:
 	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" python3 ../trusted_service.py --arch 1 \
 		--endpoint /sys/kernel/debug/bpf_x86_native_lab/specializer \
-		--module /workspaces/.agent-state/kprog-ck/verified-module/bpf_kprog_stock.ko \
+		--module /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
 		--state "$(OUTPUT)/state" --results "$(OUTPUT)/service.tar.gz" \
 		--native-link "$(REPO_ROOT)/kprog/x86/native_lab/native_link/target/release/native-link" \
 		--loader "$(BUILD_DIR)/trusted-native-loader" \
@@ -71,6 +71,6 @@ trusted-lifecycle-check: all
 
 guest-trusted-lifecycle:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
-	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_kprog_stock.ko
+	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
 	python3 ../test/pending_native_snapshot.py "$(OUTPUT)" \
 		"$(REPO_ROOT)/bpfopt/shim/build-x86/libbpfrejit_shim.so" "$(BUILD_DIR)/libnative_loader.so"

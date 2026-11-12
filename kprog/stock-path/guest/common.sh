@@ -4,7 +4,7 @@ CK=${KPROG_STOCK_ROOT:-/mnt}
 ARCH=${KPROG_STOCK_ARCH:-1}
 ENDPOINT=${KPROG_STOCK_ENDPOINT:-bpf_x86_native_lab}
 LOADER=${KPROG_STOCK_LOADER:-$CK/loader/build}
-MODULE=${KPROG_STOCK_MODULE:-$CK/mod/bpf_kprog_stock.ko}
+MODULE=${KPROG_STOCK_MODULE:-$CK/mod/$ENDPOINT.ko}
 mkdir -p "$OUT"
 mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 insmod "$MODULE" || exit 1
