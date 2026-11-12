@@ -1,0 +1,51 @@
+{
+  "recorded_at": "2026-11-12T22:32:38Z",
+  "linker_source_commit": "60031f1f1",
+  "recipe_commit": "29028248a",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-tail-count-option",
+  "scope": "Actual two-stage OTel native_tracer_entry linker capture using C synthetic link plan",
+  "make_exit_code": 0,
+  "finished": "2026-11-12T22:26:47Z",
+  "native_entry_bytes": 6793,
+  "proof_entry_bytes": 6783,
+  "default": {
+    "blob_bytes": 6726,
+    "relocation_bytes": 1056,
+    "relocation_kinds": {
+      "1": 66
+    },
+    "map_patches": 26,
+    "abi_bytes": 48
+  },
+  "enabled": {
+    "option": "--tail-count-relocs",
+    "blob_bytes": 6732,
+    "relocation_bytes": 1088,
+    "relocation_kinds": {
+      "1": 66,
+      "10": 2
+    },
+    "tail_count_fields": [
+      {
+        "offset": 1948,
+        "target": 0,
+        "initial_value": 12
+      },
+      {
+        "offset": 3178,
+        "target": 0,
+        "initial_value": 12
+      }
+    ],
+    "map_patches": 26,
+    "abi_bytes": 48
+  },
+  "record_format": "RelocRecord: little-endian u32 offset,u32 kind,u64 target; kind histogram read with od -tu4 -w16",
+  "limits": [
+    "Synthetic plan inspection is not an application startup capture or stock verifier acceptance",
+    "No guest tail-count execution/run_cnt measured",
+    "Six-manifest proof comparison is separately archived; original early reference has two authorized header-layout differences",
+    "No claim of six-application final kernel-linked byte parity"
+  ],
+  "archive": "tail-count-option-kernel-capture.tar.gz"
+}
