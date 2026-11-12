@@ -409,16 +409,21 @@ struct x86_sim_state {
 	__u64 __x86_xmm0_hi = X86_SIM_L_UNSPECIFIED();                                            \
 	__u64 __x86_sim_ret_addr = 0
 
+/* Width views share bytes; typed scalar spills retain verifier ranges. */
 #ifdef X86_SIM_ENABLE_STACK
 #define X86_SIM_L_DECLARE_STACK()                                           \
 	volatile union {                                                            \
 		__u8 b[X86_SIM_STACK_BYTES];                              \
+		__u16 w[(X86_SIM_STACK_BYTES + 1U) / 2U];                 \
+		__u32 d[(X86_SIM_STACK_BYTES + 3U) / 4U];                 \
 		__u64 q[(X86_SIM_STACK_BYTES + 7U) / 8U];                 \
 	} __x86_stack_mem
 #else
 #define X86_SIM_L_DECLARE_STACK()                                           \
 	volatile union {                                                            \
 		__u8 b[1];                                                \
+		__u16 w[1];                                               \
+		__u32 d[1];                                               \
 		__u64 q[1];                                               \
 	} __x86_stack_mem
 #endif
@@ -698,6 +703,12 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 			__x86_stack_mem.q                               \
 				[KPROG_X86_STACK_WORD_INDEX(             \
 					__x86_stw_index)] = (VALUE);     \
+		} else if (X86_SIM_L_EFFECTIVE_WIDTH(WIDTH) == X86_WIDTH_32 && \
+			   (__x86_stw_index & 3U) == 0) {                    \
+			__x86_stack_mem.d[__x86_stw_index / 4U] = (VALUE);    \
+		} else if (X86_SIM_L_EFFECTIVE_WIDTH(WIDTH) == X86_WIDTH_16 && \
+			   (__x86_stw_index & 1U) == 0) {                    \
+			__x86_stack_mem.w[__x86_stw_index / 2U] = (VALUE);    \
 		} else {                                                  \
 			X86_SIM_L_PRIVATE_BYTE_STORE(                    \
 				&__x86_stack_mem.b[__x86_stw_index],       \
@@ -744,6 +755,12 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 			__x86_str_value = __x86_stack_mem.q               \
 				[KPROG_X86_STACK_WORD_INDEX(             \
 					__x86_str_index)];               \
+		} else if (X86_SIM_L_EFFECTIVE_WIDTH(WIDTH) == X86_WIDTH_32 && \
+			   (__x86_str_index & 3U) == 0) {                    \
+			__x86_str_value = __x86_stack_mem.d[__x86_str_index / 4U]; \
+		} else if (X86_SIM_L_EFFECTIVE_WIDTH(WIDTH) == X86_WIDTH_16 && \
+			   (__x86_str_index & 1U) == 0) {                    \
+			__x86_str_value = __x86_stack_mem.w[__x86_str_index / 2U]; \
 		} else {                                                  \
 			volatile __u8 *__x86_str_bytes = __x86_stack_mem.b; \
 			__u8 __x86_str_width =                            \

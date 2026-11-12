@@ -93,6 +93,22 @@ int main(void) {
         }
         REQUIRE(draws==before+lost);
       }
+    /* Typed stores and overlapping reads share the same little-endian bytes. */
+    __x86_rsp.ptr=(void *)-32;
+    for(unsigned wi=0;wi<4;++wi) for(long off=-32;off+(long)widths[wi]<=0;++off) {
+      unsigned char expected[32];
+      for(unsigned byte=0;byte<32;++byte) expected[byte]=BYTE((long)byte-32)=0xc3;
+      WRITE(off,widths[wi],0x8877665544332211ULL);
+      for(unsigned byte=0;byte<widths[wi];++byte)
+        expected[off+32+byte]=(0x8877665544332211ULL>>(byte*8))&0xff;
+      for(unsigned byte=0;byte<32;++byte) REQUIRE(BYTE((long)byte-32)==expected[byte]);
+      for(unsigned ri=0;ri<4;++ri) for(long at=-32;at+(long)widths[ri]<=0;++at) {
+        unsigned long long reference=0;
+        for(unsigned byte=0;byte<widths[ri];++byte)
+          reference|=(unsigned long long)expected[at+32+byte]<<(byte*8);
+        REQUIRE(READ(at,widths[ri])==reference);
+      }
+    }
     __x86_rsp.ptr=(void *)-16;
 #endif
     /* A helper output below SP loses its bytes before later allocation. */

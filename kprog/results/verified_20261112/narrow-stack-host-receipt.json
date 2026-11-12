@@ -1,0 +1,23 @@
+{
+  "recorded_at": "2026-11-12T14:34:42.231256+00:00",
+  "before_receipt_commit": "7d4817c81",
+  "scope": "Aligned16/32-bit arena accesses use overlapping typed union views; the byte representation, unaligned accesses and stack lifetime routing retain their semantics.",
+  "host_checks": [
+    {
+      "compiler": "gcc",
+      "command": "taskset -c 8-19 make -C kprog/tv stack-alias-host-check CC=gcc STACK_ALIAS_BUILD=/var/tmp/kprog-tmp/verified/narrow-stack-gcc",
+      "returncode": 0,
+      "log": "gcc.log"
+    },
+    {
+      "compiler": "clang-18",
+      "command": "taskset -c 8-19 make -C kprog/tv stack-alias-host-check CC=clang-18 STACK_ALIAS_BUILD=/var/tmp/kprog-tmp/verified/narrow-stack-clang",
+      "returncode": 0,
+      "log": "clang.log"
+    }
+  ],
+  "coverage": "Existing3861 alias/lifetime cases plus117 aligned/unaligned stores checked through13689 overlapping reads against independent little-endian byte reconstruction; GCC and Clang UBSan.",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-narrow-stack",
+  "archive": "narrow-stack-host.tar.gz",
+  "next": "Whole-application registered-service Tetragon replay on the same kernel/image; stock branch limits retained."
+}
