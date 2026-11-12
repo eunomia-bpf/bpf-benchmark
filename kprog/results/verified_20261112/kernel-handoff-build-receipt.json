@@ -1,0 +1,20 @@
+{
+  "recorded_at": "2026-11-12T12:51:12.594531+00:00",
+  "kernel_commit": "74d1097af561",
+  "base": "/workspaces/.agent-state/kprog-ck/build-x86",
+  "kernel_release": "7.0.0-rc2+",
+  "command": "taskset -c 0-19 make -f /workspaces/repository/kprog/perf/one-image/Makefile kernel JOBS=12",
+  "started": "2026-11-12T12:41:39Z",
+  "finished": "2026-11-12T12:49:03Z",
+  "make_exit_code": 0,
+  "host_cpus": "0-19",
+  "build_jobs": 12,
+  "artifact_bytes": {
+    "arch/x86/boot/bzImage": 15233536,
+    "vmlinux": 408902160,
+    "Module.symvers": 1077836
+  },
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-handoff-rebuild/kernel",
+  "archive": "kernel-handoff-build.tar.gz",
+  "scope": "The sole base kernel and modules rebuilt in place. Native header regeneration, runtime image/components and live handoff/application validation follow the coordinator sequence."
+}
