@@ -16,7 +16,7 @@
 - [x] **协调者** Tetragon 的比较基准（运营者 11-11 "请你定? 解释一下? 不是说你自己决定吗, 干嘛找我" "记住"）：按等量工作比较，即唯一系统第 c 轮（原生对象按唯一内核结构体布局编译）对照 AGENTS.md 里的下限表（11-10 复现：stats 关 1.009x、开 1.140x）。存档 1.323x 与复现中 generic_kprobe 每次调用 5.8x 来自按另一内核 task_struct 布局编译的原生对象，记为工作量不同的数字，附证据，不作目标。
 - [ ] **协调者** 广度优先计时（每个应用 3×180 秒）：BCC stats 关 1.005x（101011_549780）、Katran stats 关 1.128x（103657_155576），均达到或超过 05-29；其余四个应用待装上后计时。
 - [ ] **C** Katran：链接器去掉多余的 helper id 加载（cd8996e64，blob 与 05-29 字节相同）后计时；jited_len 剩下的差（10,102 对 10,196）查内核一侧的包装。
-- [ ] **C** Cilium：用去掉 thunk 的配方对象（`cil_from_host` 734 条指令）计时，对照 05-29 的 1.319x。
+- [x] **C** Cilium：用去掉 thunk 的配方对象（`cil_from_host` 734 条指令）计时，对照 05-29 的 1.319x。**结果：远超下限，且是每单位量而非吞吐。** 镜像对象已是无 thunk 版（bpf_host.native.o 的 thunk 符号 0、thunk 重定位 0，cil_from_host 3048 字节）。round-f stats 开 run 174649_389445：cil_from_container 780.7 → 278.0 ns/次（每次调用 2.808x）；等量核对——报文 108,156,920 → 142,060,840（1.314x，0 错误），每条目报文 0.3325 → 0.3388（1.019x，工作量相同），每报文成本 2348.0 → 820.5 ns（**2.861x**）。注意 run_cnt 总量两臂不可比：eBPF 臂只有 cil_from_container 计数（6.5 亿），native 臂另有两个尾调用目标各 8.386 亿，须只比两臂都计数的 cil_from_container。
 - [ ] **C** OTel、Tracee：唯一内核线支持 tail call 计数重定位（第 10、11 种），`native_tracer_e` 走 native。
 - [ ] **全部 lane** 原始数据从 /var/tmp 移到 /workspaces 的持久存储，一律保留。
 
