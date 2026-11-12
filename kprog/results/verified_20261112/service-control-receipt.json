@@ -1,0 +1,35 @@
+{
+  "recorded_at": "2026-11-12T06:45:44Z",
+  "source_commit": "fba19ea94",
+  "kernel_commit": "5f6e694bfd4d42a593f1715c1c458dc0f979db10",
+  "kernel_build": "/workspaces/.agent-state/kprog-ck/build-x86",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-service-recovery",
+  "sequence_exit_code": 0,
+  "default_proof_byte_comparison": {
+    "entries": 349,
+    "differences": []
+  },
+  "service_summary": {
+    "started": "2026-11-12T06:37:53.806107+00:00",
+    "command": [
+      "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-service-client",
+      "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native.o"
+    ],
+    "service": {
+      "ready": true,
+      "arch": 1,
+      "endpoint": "/sys/kernel/debug/bpf_x86_native_lab/specializer"
+    },
+    "returncode": 0,
+    "service_returncode": -15,
+    "finished": "2026-11-12T06:37:58.574121+00:00"
+  },
+  "control_stdout": {
+    "ok": true,
+    "original_prog_id": 3,
+    "native_prog_id": 6,
+    "retval": 2,
+    "prebuilt_proof": false
+  },
+  "scope": "Existing native return-2 control via registered service, ordinary BPF verifier and native JIT. No application coverage or performance measurement. Default comparison is proof-stage .text/ABI, not final relocated runtime bytes."
+}
