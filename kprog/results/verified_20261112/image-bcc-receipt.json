@@ -1,0 +1,652 @@
+{
+  "recorded_at": "2026-11-12T09:08:53.319041+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-image-bcc",
+  "corpus_run_directory": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261112_085658_299095",
+  "kernel_commit": "5f6e694bfd4d",
+  "model_commit": "8f1a1a8b4",
+  "loader_linker_commit": "fba19ea94",
+  "shim_commit": "1af32bdae",
+  "module_build_commit": "0ecc10f51",
+  "image": "bpf-benchmark/kprog:current",
+  "image_built_from": "d70d2e03e",
+  "samples": 1,
+  "workload_seconds": 10,
+  "bpf_stats": true,
+  "host_cpus": "8-19",
+  "guest_cpus": 8,
+  "guest_memory": "64G",
+  "exit_code": 0,
+  "application_status": "ok",
+  "loaded": 25,
+  "verified": 25,
+  "run": 17,
+  "programs": [
+    {
+      "request_id": 1,
+      "source_prog_id": 111,
+      "native_prog_id": 130,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 1,
+        "prog_id": 130,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 1605,
+        "bytes_xlated": 13664,
+        "id": 130,
+        "name": "inet_sock_set_s",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      }
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 109,
+      "native_prog_id": 135,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 2,
+        "prog_id": 135,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 191,
+        "bytes_xlated": 1784,
+        "id": 135,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      }
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 113,
+      "native_prog_id": 140,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 3,
+        "prog_id": 140,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 140,
+        "bytes_xlated": 1392,
+        "id": 140,
+        "name": "tcp_v4_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 118,
+      "native_prog_id": 145,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 4,
+        "prog_id": 145,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 48,
+        "bytes_xlated": 296,
+        "id": 145,
+        "name": "fentry_vfs_read",
+        "run_cnt_delta": 32839,
+        "run_time_ns_delta": 2966995,
+        "type": "tracing"
+      }
+    },
+    {
+      "request_id": 5,
+      "source_prog_id": 121,
+      "native_prog_id": 149,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 5,
+        "prog_id": 149,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 161,
+        "bytes_xlated": 1784,
+        "id": 149,
+        "name": "blk_account_io_",
+        "run_cnt_delta": 55,
+        "run_time_ns_delta": 17497,
+        "type": "kprobe"
+      }
+    },
+    {
+      "request_id": 6,
+      "source_prog_id": 117,
+      "native_prog_id": 154,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 6,
+        "prog_id": 154,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 177,
+        "bytes_xlated": 1744,
+        "id": 154,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 1735001,
+        "run_time_ns_delta": 189463270,
+        "type": "kprobe"
+      }
+    },
+    {
+      "request_id": 7,
+      "source_prog_id": 125,
+      "native_prog_id": 159,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 7,
+        "prog_id": 159,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 155,
+        "bytes_xlated": 1448,
+        "id": 159,
+        "name": "sys_enter",
+        "run_cnt_delta": 46338332,
+        "run_time_ns_delta": 5400972900,
+        "type": "tracepoint"
+      }
+    },
+    {
+      "request_id": 8,
+      "source_prog_id": 127,
+      "native_prog_id": 164,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 8,
+        "prog_id": 164,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 162,
+        "bytes_xlated": 1552,
+        "id": 164,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 1542372,
+        "run_time_ns_delta": 206625528,
+        "type": "tracing"
+      }
+    },
+    {
+      "request_id": 9,
+      "source_prog_id": 137,
+      "native_prog_id": 169,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 9,
+        "prog_id": 169,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 191,
+        "bytes_xlated": 1784,
+        "id": 169,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 1667370,
+        "run_time_ns_delta": 190409513,
+        "type": "tracepoint"
+      }
+    },
+    {
+      "request_id": 10,
+      "source_prog_id": 142,
+      "native_prog_id": 173,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 10,
+        "prog_id": 173,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 763,
+        "bytes_xlated": 6088,
+        "id": 173,
+        "name": "tcp_v4_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    {
+      "request_id": 11,
+      "source_prog_id": 146,
+      "native_prog_id": 177,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 11,
+        "prog_id": 177,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 49,
+        "bytes_xlated": 296,
+        "id": 177,
+        "name": "fentry_vfs_writ",
+        "run_cnt_delta": 34686,
+        "run_time_ns_delta": 2557075,
+        "type": "tracing"
+      }
+    },
+    {
+      "request_id": 12,
+      "source_prog_id": 151,
+      "native_prog_id": 181,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 12,
+        "prog_id": 181,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 392,
+        "bytes_xlated": 3792,
+        "id": 181,
+        "name": "block_rq_insert",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      }
+    },
+    {
+      "request_id": 13,
+      "source_prog_id": 156,
+      "native_prog_id": 185,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 13,
+        "prog_id": 185,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 611,
+        "bytes_xlated": 4696,
+        "id": 185,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 1735000,
+        "run_time_ns_delta": 831925579,
+        "type": "kprobe"
+      }
+    },
+    {
+      "request_id": 14,
+      "source_prog_id": 161,
+      "native_prog_id": 189,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 14,
+        "prog_id": 189,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 575,
+        "bytes_xlated": 3176,
+        "id": 189,
+        "name": "sys_exit",
+        "run_cnt_delta": 46338332,
+        "run_time_ns_delta": 3917593192,
+        "type": "tracepoint"
+      }
+    },
+    {
+      "request_id": 15,
+      "source_prog_id": 166,
+      "native_prog_id": 193,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 15,
+        "prog_id": 193,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 162,
+        "bytes_xlated": 1552,
+        "id": 193,
+        "name": "sched_wakeup_ne",
+        "run_cnt_delta": 76,
+        "run_time_ns_delta": 35097,
+        "type": "tracing"
+      }
+    },
+    {
+      "request_id": 16,
+      "source_prog_id": 170,
+      "native_prog_id": 197,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 16,
+        "prog_id": 197,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 316,
+        "bytes_xlated": 9160,
+        "id": 197,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      }
+    },
+    {
+      "request_id": 17,
+      "source_prog_id": 174,
+      "native_prog_id": 201,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 17,
+        "prog_id": 201,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 140,
+        "bytes_xlated": 1392,
+        "id": 201,
+        "name": "tcp_v6_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    {
+      "request_id": 18,
+      "source_prog_id": 178,
+      "native_prog_id": 205,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 18,
+        "prog_id": 205,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 49,
+        "bytes_xlated": 296,
+        "id": 205,
+        "name": "fentry_vfs_fsyn",
+        "run_cnt_delta": 14,
+        "run_time_ns_delta": 2627,
+        "type": "tracing"
+      }
+    },
+    {
+      "request_id": 19,
+      "source_prog_id": 182,
+      "native_prog_id": 209,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 19,
+        "prog_id": 209,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 452,
+        "bytes_xlated": 4552,
+        "id": 209,
+        "name": "block_rq_issue",
+        "run_cnt_delta": 53,
+        "run_time_ns_delta": 57659,
+        "type": "tracing"
+      }
+    },
+    {
+      "request_id": 20,
+      "source_prog_id": 194,
+      "native_prog_id": 213,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 20,
+        "prog_id": 213,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 1099,
+        "bytes_xlated": 5712,
+        "id": 213,
+        "name": "sched_switch",
+        "run_cnt_delta": 3081295,
+        "run_time_ns_delta": 604181377,
+        "type": "tracing"
+      }
+    },
+    {
+      "request_id": 21,
+      "source_prog_id": 198,
+      "native_prog_id": 216,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 21,
+        "prog_id": 216,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 316,
+        "bytes_xlated": 9160,
+        "id": 216,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 1667370,
+        "run_time_ns_delta": 2269613728,
+        "type": "tracepoint"
+      }
+    },
+    {
+      "request_id": 22,
+      "source_prog_id": 202,
+      "native_prog_id": 220,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 22,
+        "prog_id": 220,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 1077,
+        "bytes_xlated": 6120,
+        "id": 220,
+        "name": "tcp_v6_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    {
+      "request_id": 23,
+      "source_prog_id": 206,
+      "native_prog_id": 224,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 23,
+        "prog_id": 224,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 49,
+        "bytes_xlated": 296,
+        "id": 224,
+        "name": "fentry_vfs_open",
+        "run_cnt_delta": 1667906,
+        "run_time_ns_delta": 66569362,
+        "type": "tracing"
+      }
+    },
+    {
+      "request_id": 24,
+      "source_prog_id": 210,
+      "native_prog_id": 228,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 24,
+        "prog_id": 228,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 535,
+        "bytes_xlated": 5392,
+        "id": 228,
+        "name": "block_rq_comple",
+        "run_cnt_delta": 61,
+        "run_time_ns_delta": 264879,
+        "type": "tracing"
+      }
+    },
+    {
+      "request_id": 25,
+      "source_prog_id": 225,
+      "native_prog_id": 232,
+      "service_status": 0,
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "stock_load": {
+        "request_id": 25,
+        "prog_id": 232,
+        "status": 0
+      },
+      "counters": {
+        "bytes_jited": 49,
+        "bytes_xlated": 296,
+        "id": 232,
+        "name": "fentry_vfs_crea",
+        "run_cnt_delta": 191,
+        "run_time_ns_delta": 16985,
+        "type": "tracing"
+      }
+    }
+  ],
+  "archive": "image-bcc.tar.gz",
+  "scope": "Frozen corpus two-start workload on the sole kernel and current image, with the registered stock-verifier service. One short sample records functional coverage and raw workload counters."
+}

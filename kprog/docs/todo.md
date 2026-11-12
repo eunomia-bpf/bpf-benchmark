@@ -88,6 +88,8 @@
 
 - **VERIFIED safety VM entry（2026-11-12）** 已有 38-case inputs 接入 `make -C kprog/libnativeloader trusted-safety-kvm BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader OUTPUT=<fresh raw dir>`：同一 kernel/base/module，fixture build 与 worker 复用已有 recipe；guest 仅载入 stock module，由原 check() 自己注册 service 并保持 negative load-only 协议。与 app supervisor 的 service 生命周期独立，kernel replay 将在当前 Katran compiler 完成后串行执行；guest recipe dry-run 通过，实际结果按 run 单列。
 
+- **VERIFIED BCC current-image corpus（2026-11-12）** 唯一 kernel 5f6e694bfd4d / stock module 0ecc10f51 / current image（协调者 08:39 rebuilt）上的冻结两次启动 workload，1 sample × 10s、stats on、CPU8–19，make/app rc0。实际 source loaded 25 / stock verified + native installed 25 / workload run 17；25 份 worker archive 的生成/编译 returncode 全部为 0，stock load status 全部为 0，原始 native counters 的 ID 集与 service 安装 ID 集相同。逐 ID run_cnt_delta（包括 0）与完整 app stdout/stderr 保留。corpus `corpus/results/x86_kvm_corpus_20261112_085658_299095/`，service/raw `/workspaces/kprog-raw/verified/20261112-image-bcc/`；完整 archive/receipt `kprog/results/verified_20261112/image-bcc*`。本项为短样本功能覆盖，image Katran 和 original38 replay 接续。
+
 - **VERIFIED follow-on order（2026-11-12）** BCC、Katran 的唯一镜像 corpus 完成后，以最新历史 `resident-census/master-grouped/README.md` / `result.json` 的分类作为下一轮定位起点：scalar memory access 230 instances / 116 bodies（Tetragon 123、Tracee 104、Cilium 3），随后 stack write 81 / 9 bodies、Clang source locations 23 / 23 bodies。该表的模型为 46659115e，记录的是 load-only stock verifier 阶段；当前 sole-kernel/model 8f1a1a8b4 的实际 app startup 继续分别收集并按实际诊断更新分类。下方 157 storage 排序保留为早期 grouped-static 记录。通用修复优先覆盖整个失败类别。
 
 两条路径分开计数。直接 native（跳过 verifier）：六个应用都跑通过（05-29，11-07 复现）。verified 路径（verifier 检查 B）：BCC 25/25、Katran 1/1 跑通过，其余应用只有少量程序，历史最高约 50/549。
