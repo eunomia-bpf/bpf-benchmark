@@ -22,9 +22,18 @@ while [ "$(date +%s)" -lt "$deadline" ]; do
         # The application's maps exist only while it is running.
         if docker exec "$cid" python3 -c "import sys; sys.exit(0)" 2>/dev/null; then
             got=$(docker exec "$cid" sh -c "
-                bpftool=$(command -v bpftool || echo /usr/sbin/bpftool)
-                for m in \$(\$bpftool map show 2>/dev/null | grep -oE '^[0-9]+:.* name $MAP_NAME ' | awk -F: '{print \$1}'); do
-                    \$bpftool map dump id \$m --json && exit 0
+                bt=\$(command -v bpftool || true)
+                [ -n \"\$bt\" ] || bt=/usr/local/sbin/bpftool
+                [ -x \"\$bt\" ] || bt=/usr/sbin/bpftool
+                [ -x \"\$bt\" ] || exit 2
+                for m in \$(\$bt -j map show 2>/dev/null | python3 -c '
+import json,sys
+try: maps=json.load(sys.stdin)
+except Exception: sys.exit(0)
+for m in maps:
+    if m.get(\"name\")==\"$MAP_NAME\": print(m.get(\"id\"))
+'); do
+                    \$bt map dump id \$m --json && exit 0
                 done
                 exit 1" 2>/dev/null) || true
             if [ -n "${got:-}" ]; then
