@@ -1,0 +1,24 @@
+{
+  "recorded_at": "2026-11-12T15:28:45.283244+00:00",
+  "before_tracee_receipt_commit": "f125e00fc",
+  "selector": "MICRO_NATIVE_CORE_REG_PROBE_READS",
+  "scope": "Opt-in native producer lowering of all supported PT_REGS_*_CORE and CORE_SYSCALL reads through existing BPF_CORE_READ/probe_read_kernel. CORE_SYSCALL arg4 uses upstreamx86 r10; default aliases retain their current field selection.",
+  "affected_source": "vendor/bpf/native_compat.h",
+  "syntax_checks": [
+    {
+      "mode": "default",
+      "returncode": 0,
+      "log": "default-syntax.log"
+    },
+    {
+      "mode": "selector",
+      "returncode": 0,
+      "log": "selector-syntax.log"
+    }
+  ],
+  "validation": "Existing vendor/bpf Make native Tracee object recipe compiles the actual complete tracee.bpf.c translation unit with -fsyntax-only in both modes. Full native build and registered-service application replay follow.",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-core-reg-probe-selector",
+  "archive": "core-reg-probe-selector.tar.gz",
+  "kernel_commit": "74d1097af561",
+  "image_platform_id": "sha256:d756bf5919e9eb35cc8628a38af95ca2cec2751e86f4c23f7c6e3f7bd07494a1"
+}
