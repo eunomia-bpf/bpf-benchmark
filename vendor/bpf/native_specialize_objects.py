@@ -120,9 +120,12 @@ def units_for_app(app: str) -> list[tuple[str, Path, list[str]]]:
                    f"-I{bpf}/cilium/bpf/include/linux",
                    f"-I{bpf}/cilium/bpf/lib",
                    "-I/usr/include", "-I/usr/include/x86_64-linux-gnu"]
+        # bpf_alignchecker.c guards itself with "policy_log.h only supports
+        # inclusion from bpf_host or bpf_lxc", so it only compiles inside those
+        # programs; it carries no configuration of its own.
         return [(name, bpf / f"cilium/bpf/{name}.c", base + include)
                 for name in ("bpf_lxc", "bpf_overlay", "bpf_sock", "bpf_host",
-                             "bpf_wireguard", "bpf_xdp", "bpf_alignchecker")]
+                             "bpf_wireguard", "bpf_xdp")]
     if app == "tetragon":
         # The Makefile's tetragon common_flags, in its own order.
         common = ["-fms-extensions", "-DMICRO_NATIVE_HELPER_MACROS",
@@ -265,6 +268,36 @@ def run(argv: list[str]) -> None:
         raise SystemExit(f"failed: {' '.join(argv[:4])} ...")
 
 
+def publish_manifest(app: str, output: Path, published: dict[str, str],
+                     image_manifest: Path) -> None:
+    """Name the specialized objects as the loader expects and write the manifest.
+
+    The image's manifest lists one entry per program, each naming the object the
+    loader maps it from; replacing that file with the specialized one and
+    pointing every entry at the new name is all a run needs.
+    """
+    if not image_manifest.is_file():
+        sys.exit(f"--manifest: {image_manifest} is not a file")
+    manifest = json.loads(image_manifest.read_text())
+    for stem, path in published.items():
+        target = output / f"{stem}.native.o"
+        if Path(path).resolve() != target.resolve():
+            target.write_bytes(Path(path).read_bytes())
+    kept, dropped = [], set()
+    for entry in manifest["objects"]:
+        stem = Path(entry["native_object"]).name.replace(".native.o", "")
+        if stem in published:
+            kept.append(entry)
+        else:
+            dropped.add(entry["native_object"])
+    manifest["objects"] = kept
+    manifest["status"] = "specialized"
+    (output / "manifest.json").write_text(json.dumps(manifest, indent=1) + "\n")
+    print(f"{app}: manifest {len(kept)} entries over {len(published)} objects"
+          + (f", {len(dropped)} objects left out: {sorted(dropped)}" if dropped else ""),
+          file=sys.stderr)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--app", required=True)
@@ -273,6 +306,11 @@ def main() -> None:
                         help="directory of <stem>.bpf.o inputs")
     parser.add_argument("--output", required=True)
     parser.add_argument("--only", nargs="*", default=[])
+    parser.add_argument("--publish", action="store_true",
+                        help="name each specialized object <stem>.native.o and "
+                             "write the manifest a run loads it through")
+    parser.add_argument("--manifest", default="",
+                        help="the image's own manifest, copied when publishing")
     args = parser.parse_args()
 
     capture = Path(args.capture)
@@ -289,6 +327,7 @@ def main() -> None:
     if not loaded:
         raise SystemExit(f"no captured .rodata image under {capture}")
 
+    published: dict[str, str] = {}
     for stem, source, flags in units_for_app(args.app):
         if args.only and stem not in args.only:
             continue
@@ -349,6 +388,13 @@ def main() -> None:
         total = sum(before.values()), sum(after.values())
         print(f"{stem:22} code {total[0]:>7} -> {total[1]:>7}  "
               f"({len(changed)} of {len(before)} programs changed)", file=sys.stderr)
+        if args.publish:
+            # A run loads the file its manifest names "native_object", so the
+            # specialized object takes that name.
+            published[Path(stem).name] = str(spec_object)
+
+    if args.publish:
+        publish_manifest(args.app, output, published, Path(args.manifest))
 
 
 if __name__ == "__main__":
