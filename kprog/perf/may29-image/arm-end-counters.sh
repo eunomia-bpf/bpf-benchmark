@@ -52,6 +52,9 @@ print(text if text else "(empty reply)")
 PYEOF
             rc=$?
             if [ "$rc" -ne 0 ]; then echo "arm-end: snapshot command failed rc=$rc" >&2; fi
+            # Count what landed, so an empty reply is distinguishable from a
+            # successful one that found no program to describe.
+            echo "arm-end: $(find "$OUT" -name 'ref.json' 2>/dev/null | wc -l) program refs, $(find "$OUT" -name '*.dump.json' 2>/dev/null | wc -l) map dumps"
             echo "arm-end: snapshot under $OUT"
             exit 0
         fi
