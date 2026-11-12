@@ -12,6 +12,11 @@
 # Example (functional check, CPUs 20-23):
 #   specialized-timing.sh tracee/monitor corpus/results/spec-test/tracee \
 #     /var/tmp/kprog-tmp/C/state 1 10 20-23
+#
+# ONE GUEST AT A TIME per state directory. Two invocations that share <state-dir>
+# collide in it and the second fails with make Error 1/2 from __runtime-vm-docker
+# while the first may still finish -- so a pair or a series is run sequentially,
+# never with two invocations launched together.
 set -eu
 APP=${1:?app}
 MANIFEST=${2:?manifest directory, or the word image for the image manifest}
