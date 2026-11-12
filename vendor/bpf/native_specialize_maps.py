@@ -32,6 +32,7 @@ Usage: native_specialize_maps.py --unit <unit.i|unit.specialized.i>
 from __future__ import annotations
 
 import argparse
+import subprocess
 import json
 import re
 import sys
@@ -44,13 +45,22 @@ PERCPU_ARRAY_PPTRS_OFFSET = 304
 HTAB_KEY_OFFSET = 48
 
 MAP_DECL = re.compile(
-    r"^struct (\w+) \{\n"
-    r"(?:\s+int \(\*type\)\[(\w+)\];\n)?"
-    r"(?:\s+int \(\*max_entries\)\[(\d+)\];\n)?"
-    r"(?:\s+typeof\((.+?)\) \*key;\n)?"
-    r"(?:\s+typeof\((.+?)\) \*value;\n)?"
+    r"^(?:struct (\w+) |struct )\{\n"
+    r"(?P<body>(?:\s+\S.*\n)*?)"
     r"\} (\w+) __attribute__\(\(section\(\"\.maps\"\), used\)\);",
     re.M)
+
+# One field of a map declaration: `int(*(type))[...]`, `typeof(T) *(key);` and
+# so on. Cilium writes the fields in its own order, so each is looked up by name
+# rather than by position.
+# One field of a map declaration. Cilium writes `int(*(type))[X]` and
+# `typeof(T) *(key)` -- the parentheses are part of the declarator -- while the
+# older form writes `int (*type)[X]`, so both shapes are accepted and a field is
+# looked up by its name rather than by position.
+MAP_FIELD = re.compile(
+    r"\(\s*\*\s*\(\s*(\w+)\s*\)\s*\)\s*\[([^\]]*)\]"
+    r"|\bint\s*\(\s*\*\s*(\w+)\s*\)\s*\[([^\]]*)\]"
+    r"|\btypeof\((.+?)\)\s*\*\s*\(?\s*(\w+)\s*\)?\s*;")
 
 # BPF map types, from uapi/linux/bpf.h, that the inline body handles.
 ARRAY_TYPES = {"BPF_MAP_TYPE_ARRAY": "array",
@@ -113,17 +123,30 @@ def declarations(unit: Path) -> list[dict[str, object]]:
     text = unit.read_text()
     found: list[dict[str, object]] = []
     for match in MAP_DECL.finditer(text):
-        struct, type_text, entries, key_type, value_type, name = match.groups()
-        if not type_text or not entries:
+        named, body, name = match.groups()
+        fields: dict[str, str] = {}
+        for field in MAP_FIELD.finditer(body):
+            cil_square, cil_type, old_square, old_type, typeof_text, typeof_name = \
+                field.groups()
+            if cil_square is not None:
+                fields[cil_square] = cil_type
+            elif old_square is not None:
+                fields[old_square] = old_type
+            elif typeof_name is not None:
+                fields[typeof_name] = typeof_text
+        type_text = fields.get("type", "").strip()
+        entries = fields.get("max_entries", "").strip()
+        if not type_text or not entries.isdigit():
             continue
+        key_type = (fields.get("key") or "").strip()
         found.append({
             "name": name,
-            "struct": struct,
+            "struct": named or name,
             "type": type_text,
             "entries": int(entries),
-            "key_type": (key_type or "").strip(),
-            "key_size": KEY_SIZES.get((key_type or "").strip(), 0),
-            "value_type": (value_type or "").strip(),
+            "key_type": key_type,
+            "key_size": KEY_SIZES.get(key_type, 0),
+            "value_type": (fields.get("value") or "").strip(),
             "offset": match.start(),
         })
     return found
@@ -145,6 +168,35 @@ def lookup_key_size(key_sizes: dict[str, int], name: str) -> int | None:
     for loaded, size in key_sizes.items():
         if len(loaded) == 15 and name.startswith(loaded):
             return size
+    return None
+
+
+def size_of(unit: Path, type_text: str, flags: list[str]) -> int | None:
+    """The size clang gives a declared value type, or None if it will not compile.
+
+    The capture gives the sizes of the maps a program loaded, which is the only
+    source when the value type is opaque; but the declaration names the type, so
+    when the unit defines that type its size is one compile away and the map need
+    not have been captured.
+
+    The size is emitted as an array extent, so it arrives as the symbol's size
+    column rather than as data to be located and read.
+    """
+    probe = unit.with_suffix(".size.c")
+    out = unit.with_suffix(".size.o")
+    probe.write_text(
+        f'#include "{unit.resolve()}"\n'
+        f"char __sp_size_value[sizeof({type_text})];\n")
+    result = subprocess.run(["clang-18", *flags, "-w", "-c", str(probe), "-o", str(out)],
+                            capture_output=True, text=True)
+    if result.returncode != 0:
+        return None
+    symbols = subprocess.run(["llvm-nm-18", "--defined-only", "--print-size",
+                              str(out)], capture_output=True, text=True).stdout
+    for line in symbols.splitlines():
+        parts = line.split()
+        if len(parts) >= 4 and parts[3] == "__sp_size_value":
+            return int(parts[1], 16)
     return None
 
 
@@ -179,6 +231,16 @@ static inline __attribute__((always_inline)) void *__sp_map_lookup_default(void 
 DISPATCH = """
 @ARMS@"""
 
+# Cilium's programs reach the same helper through a typed function pointer and
+# the helper-id call, so the unit spells the lookup with the map and key as
+# plain arguments:
+#   ((__typeof__(map_lookup_elem))__native_helper_id(
+#      (unsigned long)(BPF_FUNC_map_lookup_elem)))(&map, &key)
+LOOKUP_TYPED = re.compile(
+    r"\(\s*\(__typeof__\(map_lookup_elem\)\)__native_helper_id"
+    r"\(\(unsigned long\)\(BPF_FUNC_map_lookup_elem\)\)\)"
+    r"\(&(?P<map>\w+), &(?P<key>\w+)\)")
+
 # The preprocessed unit spells a lookup as the compat header's helper macro
 # expansion, with the helper id and both arguments inline:
 #   ((void *(*)(void *, const void *))native_helper_id2((unsigned long)(1),
@@ -201,6 +263,9 @@ def main() -> None:
                         help="JSON: map name -> key size, from the loaded maps")
     parser.add_argument("--hash", action="store_true",
                         help="also give the hash family a body (a call plus the key offset)")
+    parser.add_argument("--type-sizes", action="store_true",
+                        help="size a map's value type from the unit when the "
+                             "capture did not record the map")
     parser.add_argument("--percpu", action="store_true",
                         help="also inline percpu arrays (needs --percpu-base)")
     args = parser.parse_args()
@@ -217,13 +282,19 @@ def main() -> None:
     counts: dict[str, int] = {}
 
     have_call = False
-    for match in LOOKUP_CALL.finditer(unit.read_text()):
+    text_in = unit.read_text()
+    # One unit uses one convention, but matching both costs nothing and keeps
+    # the rule working if a program mixes them.
+    calls = list(LOOKUP_CALL.finditer(text_in)) + list(LOOKUP_TYPED.finditer(text_in))
+    for match in calls:
         name = match.group("map")
         if name not in by_name:
             continue
         if name not in inlined:
             decl = by_name[name]
             value_size = lookup_value_size(value_sizes, name)
+            if not value_size and args.type_sizes and decl["value_type"]:
+                value_size = size_of(unit, str(decl["value_type"]), [])
             if not value_size:
                 continue
             key_size = decl["key_size"] or lookup_key_size(key_sizes, name) or 0
@@ -252,8 +323,8 @@ def main() -> None:
             return match.group(0)
         return f"__sp_lookup_{name}((&{name}), (&{match.group('key')}))"
 
-    first_call = min(m.start() for m in LOOKUP_CALL.finditer(text))
-    text = LOOKUP_CALL.sub(rewrite, text)
+    first_call = min(m.start() for m in calls)
+    text = LOOKUP_TYPED.sub(rewrite, LOOKUP_CALL.sub(rewrite, text))
     # The bodies are plain C over the key and the returned pointer: they need
     # the extern declarations at the head of the unit and nothing of the map
     # types, so they go at the first blank line after those declarations,

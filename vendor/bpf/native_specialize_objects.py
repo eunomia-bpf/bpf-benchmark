@@ -368,6 +368,9 @@ def main() -> None:
                              "the load-time map layout (native_specialize_maps.py)")
     parser.add_argument("--maps-hash", action="store_true",
                         help="with --maps, lower hash lookups too")
+    parser.add_argument("--maps-type-sizes", action="store_true",
+                        help="with --maps, size a map's value type from the unit "
+                             "when the capture did not record that map")
     args = parser.parse_args()
 
     capture = Path(args.capture)
@@ -448,6 +451,8 @@ def main() -> None:
                          "--key-sizes", str(keys_file)]
             if args.maps_hash:
                 maps_argv.append("--hash")
+            if args.maps_type_sizes:
+                maps_argv.append("--type-sizes")
             run(maps_argv)
             specialized = mapped
         spec_object = base.with_suffix(".rodata.o")
