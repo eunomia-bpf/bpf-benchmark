@@ -1,0 +1,91 @@
+{
+  "recorded_at": "2026-11-12T19:32:00.283449+00:00",
+  "scope": "Completed prefix of ongoing 549-instance load-only census",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-resident-census/ready/first-forty-two",
+  "journal": "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/outcomes.jsonl",
+  "kernel_commit": "74d1097af561",
+  "model_commit": "d0890b14f",
+  "submitted": 42,
+  "stock_verifier_submissions": 40,
+  "verified": 29,
+  "verifier_rejected": 11,
+  "compilation_failed": 2,
+  "native_execution_requests": 0,
+  "applications": {
+    "bcc/set": {
+      "submitted": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "katran": {
+      "submitted": 1,
+      "verified": 0,
+      "verifier_rejected": 1,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "cilium/agent": {
+      "submitted": 2,
+      "verified": 0,
+      "verifier_rejected": 2,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "otelcol-ebpf-profiler/profiling": {
+      "submitted": 1,
+      "verified": 1,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "tetragon/observer": {
+      "submitted": 38,
+      "verified": 28,
+      "verifier_rejected": 8,
+      "compilation_failed": 2,
+      "workload_run": null
+    },
+    "tracee/monitor": {
+      "submitted": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    }
+  },
+  "classes": {
+    "verifier_instruction_complexity": 1,
+    "verifier_readonly_kernel_write": 2,
+    "installed": 29,
+    "verifier_callback_argument": 3,
+    "verifier_scalar_memory_access": 2,
+    "compiler_stack_storage": 2,
+    "verifier_stack_access": 3
+  },
+  "new_requests": [
+    {
+      "application": "tetragon/observer",
+      "name": "generic_kprobe_filter_arg",
+      "retained_source_prog_id": 52,
+      "stage": "verifier_rejected",
+      "classified_class": "verifier_stack_access",
+      "diagnostic": "trusted-native-loader: service simulator verification failed: Permission denied\narg#0 reference type('UNKNOWN ') size cannot be determined: -22\n0: R1=ctx() R10=fp0\n0: (7b) *(u64 *)(r10 -656) = r1\ninvalid write to stack R10 off=-656 size=8\nprocessed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\n",
+      "service": {
+        "request_id": 42,
+        "started": "2026-11-12T19:16:01.818788+00:00",
+        "status": -5,
+        "failure_archive": "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/42.failure.tar.gz",
+        "finished": "2026-11-12T19:30:53.240096+00:00"
+      }
+    }
+  ],
+  "archive": "resident-stack-access-third.tar.gz",
+  "archive_bytes": 12089284,
+  "previous_receipt": "kprog/results/verified_20261112/resident-first-forty-one-receipt.json",
+  "previous_submitted": 41,
+  "archived_requests": [
+    "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/42.failure.tar.gz"
+  ]
+}
