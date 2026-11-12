@@ -30,12 +30,12 @@ if [ "$MANIFEST" = image ]; then
 else
   NATIVE=$ROOT/$MANIFEST/manifest.json
 fi
-EXTRA=
-[ "${CMD:-time}" = maps ] && EXTRA="BPFREJIT_BENCH_PASSES=map-only"
+PASSES=
+[ "${CMD:-time}" = maps ] && PASSES=map-only
 taskset -c "$CPUS_N" make -f kprog/perf/one-image/Makefile corpus \
   APPS="$APP" SAMPLES="$SAMPLES_N" WORKLOAD_DURATION="$SECONDS_N" \
   BPFREJIT_CORPUS_BPF_STATS=1 CPUS="$CPUS_N" STATE="$STATE" \
-  NATIVE_MANIFEST="$NATIVE" $EXTRA > "$LOG" 2>&1 || rc=$?
+  NATIVE_MANIFEST="$NATIVE" BENCH_PASSES="$PASSES" > "$LOG" 2>&1 || rc=$?
 rc=${rc:-0}
 run=$(grep -o '"artifact_run_dir": "[^"]*"' "$LOG" | tail -1 | cut -d'"' -f4)
 echo "$(date -u +%FT%TZ) specialized app=$APP rc=$rc samples=$SAMPLES_N run=$run" >> "$LOGS/specialized.log"
