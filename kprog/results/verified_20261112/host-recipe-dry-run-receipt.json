@@ -1,0 +1,15 @@
+{
+  "recorded_at": "2026-11-12T10:16:03.750967+00:00",
+  "recipe_commit": "77c517dad",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-host-recipe-dry-run",
+  "make_command": "taskset -c 8-19 make -C /workspaces/repository/kprog/libnativeloader -n -o trusted-service trusted-service-kvm BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader OUTPUT=/workspaces/kprog-raw/verified/20261112-host-recipe-dry-run/control VM_CPUS=8 VM_MEM=64G VNG_FLAGS=--overlay-rwdir\\ /run\\ --overlay-rwdir\\ /usr/local\\ --rwdir\\ /var/tmp=/var/tmp/kprog-tmp/verified/corpus-state SERVICE_RUN=python3\\ /workspaces/repository/kprog/test/verified_corpus.py\\ tracee/monitor\\ 1\\ 10\\ 1 -j1",
+  "make_exit_code": 0,
+  "observations": {
+    "installed_worker_prerequisite_selected": true,
+    "worker_cmake_recipe_present": false,
+    "expected_guest_arguments_present": true,
+    "expected_service_command_present": true
+  },
+  "archive": "host-recipe-dry-run.tar.gz",
+  "scope": "GNU Make dry run of the committed host recipe. Commands are printed; this receipt covers invocation forwarding and the installed-worker selection. Actual application verification and execution use separate corpus receipts."
+}
