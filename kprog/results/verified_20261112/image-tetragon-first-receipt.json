@@ -97,5 +97,20 @@
   "failure_instruction": 2676,
   "diagnosis": "Native R14 is loaded from the kprobe pt_regs DI slot at native PC 0x11, generating a scalar-valued BPF context read at BPF instruction 33. The native read at PC 0x3c7 dereferences R14+3328; BPF instruction 2676 retains an ordinary scalar read on the successful recovery arm and the stock verifier rejects it. Both application retries preserve this outcome.",
   "scope": "Actual frozen-image two-start startup. Baseline workload completes; candidate startup installs two native programs and then exits. The framework make exit code is retained alongside the application error. Generated B and native/B disassembly support class-level investigation.",
-  "archive": "image-tetragon-first.tar.gz"
+  "archive": "image-tetragon-first.tar.gz",
+  "native_source_origin": {
+    "recorded_at": "2026-11-12T09:43:04.745536+00:00",
+    "source": "vendor/bpf/tetragon/bpf/process/bpf_process_event.h:159",
+    "expression": "cred = task ? task->cred : 0;",
+    "selector": "MICRO_NATIVE_TETRAGON",
+    "related_direct_read_sections": [
+      "__get_caps at line 103",
+      "get_current_subj_caps at line 158",
+      "get_namespaces at line 191"
+    ],
+    "observation": "Original native object DWARF maps PC0x3c7 to the native-only credential read. The upstream else branches already use probe_read helpers for credential values and namespaces. This refines the earlier producer investigation from CORE_READ generally to explicit native-only metadata-read lowering.",
+    "producer_owner": "lane C",
+    "archive": "tetragon-native-origin.tar.gz",
+    "scope": "Read-only source and native-object inspection. Candidate producer changes and kernel acceptance use their separate run receipts."
+  }
 }

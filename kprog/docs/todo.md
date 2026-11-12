@@ -100,6 +100,8 @@
 
 - **VERIFIED producer candidate integration（2026-11-12）** 已有 verified corpus wrapper 现在保留调用者的 `BPFREJIT_SHIM_NATIVE_MANIFEST`，默认继续 image 内 app manifest；整类 producer candidate 可放入 runtime 已可见的结果目录，再通过同一个 frozen corpus/service 路径提交。选择接口复用既有环境变量；kernel/image/框架文件继续沿用当前定义。Python syntax check 通过，actual candidate app 结果按运行单列。
 
+- **VERIFIED Tetragon producer origin（2026-11-12）** native 原对象 DWARF 将 PC0x3c7 对应到 `vendor/bpf/tetragon/bpf/process/bpf_process_event.h:159` 的 `cred = task ? task->cred : 0`：MICRO_NATIVE_TETRAGON 的 direct metadata-read 分支。`__get_caps`、`get_current_subj_caps`、`get_namespaces` 三段 native guard 的 upstream else 已使用 probe-read helpers。该定位将此前 CORE_READ 调查收窄到 native-only credentials/namespaces lowering；producer 全类 selector 需求交 lane C，timing default bytes 保持当前参考。原对象 disassembly 为 `kprog/results/verified_20261112/tetragon-native-origin.tar.gz`，细节补入 image-tetragon-first receipt。
+
 - **VERIFIED follow-on order（2026-11-12）** BCC、Katran 的唯一镜像 corpus 完成后，以最新历史 `resident-census/master-grouped/README.md` / `result.json` 的分类作为下一轮定位起点：scalar memory access 230 instances / 116 bodies（Tetragon 123、Tracee 104、Cilium 3），随后 stack write 81 / 9 bodies、Clang source locations 23 / 23 bodies。该表的模型为 46659115e，记录的是 load-only stock verifier 阶段；当前 sole-kernel/model 8f1a1a8b4 的实际 app startup 继续分别收集并按实际诊断更新分类。下方 157 storage 排序保留为早期 grouped-static 记录。通用修复优先覆盖整个失败类别。
 
 两条路径分开计数。直接 native（跳过 verifier）：六个应用都跑通过（05-29，11-07 复现）。verified 路径（verifier 检查 B）：BCC 25/25、Katran 1/1 跑通过，其余应用只有少量程序，历史最高约 50/549。
