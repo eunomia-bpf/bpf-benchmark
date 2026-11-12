@@ -1,0 +1,337 @@
+{
+  "instances": 549,
+  "applications": {
+    "katran": 1,
+    "cilium/agent": 72,
+    "otelcol-ebpf-profiler/profiling": 13,
+    "tetragon/observer": 287,
+    "tracee/monitor": 151,
+    "bcc/set": 25
+  },
+  "native_candidate_counts": {
+    "1": 548,
+    "0": 1
+  },
+  "resource_files_present": 549,
+  "native_files_present": 548,
+  "stats_evidence": [
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261111_184428_882758/details/apps/otelcol-ebpf-profiler__profiling.json",
+      "application": "otelcol-ebpf-profiler/profiling",
+      "baseline_programs": 13
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261111_191024_348289/details/apps/bcc__set.json",
+      "application": "bcc/set",
+      "baseline_programs": 25
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261111_193648_926655/details/apps/cilium__agent.json",
+      "application": "cilium/agent",
+      "baseline_programs": 73
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261111_200309_471678/details/apps/tetragon__observer.json",
+      "application": "tetragon/observer",
+      "baseline_programs": 287
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261111_202934_974828/details/apps/tracee__monitor.json",
+      "application": "tracee/monitor",
+      "baseline_programs": 167
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261111_205641_469520/details/apps/katran.json",
+      "application": "katran",
+      "baseline_programs": 1
+    }
+  ],
+  "first_twenty": [
+    {
+      "application": "katran",
+      "source_prog_id": 440,
+      "name": "balancer_ingress",
+      "priority": {
+        "measured_name": "balancer_ingres",
+        "baseline_time_ns": 231713723754,
+        "application_time_ns": 231713723754,
+        "application_time_share": 1.0,
+        "matching_census_instances": 1,
+        "retained_instance_time_ns": 769120639,
+        "scope": "Measured name family; matching instances share priority"
+      }
+    },
+    {
+      "application": "cilium/agent",
+      "source_prog_id": 345,
+      "name": "cil_from_container",
+      "priority": {
+        "measured_name": "cil_from_contai",
+        "baseline_time_ns": 442737794504,
+        "application_time_ns": 442737807414,
+        "application_time_share": 0.9999999708405296,
+        "matching_census_instances": 2,
+        "retained_instance_time_ns": 1140882101,
+        "scope": "Measured name family; matching instances share priority"
+      }
+    },
+    {
+      "application": "cilium/agent",
+      "source_prog_id": 295,
+      "name": "cil_from_container",
+      "priority": {
+        "measured_name": "cil_from_contai",
+        "baseline_time_ns": 442737794504,
+        "application_time_ns": 442737807414,
+        "application_time_share": 0.9999999708405296,
+        "matching_census_instances": 2,
+        "retained_instance_time_ns": 1138109271,
+        "scope": "Measured name family; matching instances share priority"
+      }
+    },
+    {
+      "application": "otelcol-ebpf-profiler/profiling",
+      "source_prog_id": 160,
+      "name": "native_tracer_entry",
+      "priority": {
+        "measured_name": "native_tracer_e",
+        "baseline_time_ns": 1344585696818,
+        "application_time_ns": 1344585911932,
+        "application_time_share": 0.9999998400146854,
+        "matching_census_instances": 1,
+        "retained_instance_time_ns": 11583159377,
+        "scope": "Measured name family; matching instances share priority"
+      }
+    },
+    {
+      "application": "tetragon/observer",
+      "source_prog_id": 307,
+      "name": "generic_kprobe_",
+      "priority": {
+        "measured_name": "generic_kprobe_",
+        "baseline_time_ns": 1086683629793,
+        "application_time_ns": 2129006675345,
+        "application_time_share": 0.5104181411816878,
+        "matching_census_instances": 231,
+        "retained_instance_time_ns": 646233147,
+        "scope": "Measured name family; matching instances share priority"
+      }
+    },
+    {
+      "application": "tetragon/observer",
+      "source_prog_id": 101,
+      "name": "generic_kprobe_event",
+      "priority": {
+        "measured_name": "generic_kprobe_",
+        "baseline_time_ns": 1086683629793,
+        "application_time_ns": 2129006675345,
+        "application_time_share": 0.5104181411816878,
+        "matching_census_instances": 231,
+        "retained_instance_time_ns": 479313618,
+        "scope": "Measured name family; matching instances share priority"
+      }
+    },
+    {
+      "application": "tetragon/observer",
+      "source_prog_id": 110,
+      "name": "generic_kprobe_",
+      "priority": {
+        "measured_name": "generic_kprobe_",
+        "baseline_time_ns": 1086683629793,
+        "application_time_ns": 2129006675345,
+        "application_time_share": 0.5104181411816878,
+        "matching_census_instances": 231,
+        "retained_instance_time_ns": 477378852,
+        "scope": "Measured name family; matching instances share priority"
+      }
+    },
+    {
+      "application": "tetragon/observer",
+      "source_prog_id": 71,
+      "name": "generic_kprobe_event",
+      "priority": {
+        "measured_name": "generic_kprobe_",
+        "baseline_time_ns": 1086683629793,
+        "application_time_ns": 2129006675345,
+        "application_time_share": 0.5104181411816878,
+        "matching_census_instances": 231,
+        "retained_instance_time_ns": 310816431,
+        "scope": "Measured name family; matching instances share priority"
+      }
+    },
+    {
+      "application": "tetragon/observer",
+      "source_prog_id": 260,
+      "name": "generic_kprobe_",
+      "priority": {
+        "measured_name": "generic_kprobe_",
+        "baseline_time_ns": 1086683629793,
+        "application_time_ns": 2129006675345,
+        "application_time_share": 0.5104181411816878,
+        "matching_census_instances": 231,
+        "retained_instance_time_ns": 310773929,
+        "scope": "Measured name family; matching instances share priority"
+      }
+    },
+    {
+      "application": "tetragon/observer",
+      "source_prog_id": 94,
+      "name": "generic_kprobe_event",
+      "priority": {
+        "measured_name": "generic_kprobe_",
+        "baseline_time_ns": 1086683629793,
+        "application_time_ns": 2129006675345,
+        "application_time_share": 0.5104181411816878,
+        "matching_census_instances": 231,
+        "retained_instance_time_ns": 301425513,
+        "scope": "Measured name family; matching instances share priority"
+      }
+    },
+    {
+      "application": "tetragon/observer",
+      "source_prog_id": 150,
+      "name": "generic_kprobe_",
+      "priority": {
+        "measured_name": "generic_kprobe_",
+        "baseline_time_ns": 1086683629793,
+        "application_time_ns": 2129006675345,
+        "application_time_share": 0.5104181411816878,
+        "matching_census_instances": 231,
+        "retained_instance_time_ns": 246611205,
+        "scope": "Measured name family; matching instances share priority"
+      }
+    },
+    {
+      "application": "tetragon/observer",
+      "source_prog_id": 140,
+      "name": "generic_kprobe_",
+      "priority": {
+        "measured_name": "generic_kprobe_",
+        "baseline_time_ns": 1086683629793,
+        "application_time_ns": 2129006675345,
+        "application_time_share": 0.5104181411816878,
+        "matching_census_instances": 231,
+        "retained_instance_time_ns": 45937880,
+        "scope": "Measured name family; matching instances share priority"
+      }
+    },
+    {
+      "application": "tetragon/observer",
+      "source_prog_id": 246,
+      "name": "generic_kprobe_",
+      "priority": {
+        "measured_name": "generic_kprobe_",
+        "baseline_time_ns": 1086683629793,
+        "application_time_ns": 2129006675345,
+        "application_time_share": 0.5104181411816878,
+        "matching_census_instances": 231,
+        "retained_instance_time_ns": 15693049,
+        "scope": "Measured name family; matching instances share priority"
+      }
+    },
+    {
+      "application": "tetragon/observer",
+      "source_prog_id": 132,
+      "name": "generic_kprobe_",
+      "priority": {
+        "measured_name": "generic_kprobe_",
+        "baseline_time_ns": 1086683629793,
+        "application_time_ns": 2129006675345,
+        "application_time_share": 0.5104181411816878,
+        "matching_census_instances": 231,
+        "retained_instance_time_ns": 14336975,
+        "scope": "Measured name family; matching instances share priority"
+      }
+    },
+    {
+      "application": "tetragon/observer",
+      "source_prog_id": 83,
+      "name": "generic_kprobe_event",
+      "priority": {
+        "measured_name": "generic_kprobe_",
+        "baseline_time_ns": 1086683629793,
+        "application_time_ns": 2129006675345,
+        "application_time_share": 0.5104181411816878,
+        "matching_census_instances": 231,
+        "retained_instance_time_ns": 10031092,
+        "scope": "Measured name family; matching instances share priority"
+      }
+    },
+    {
+      "application": "tetragon/observer",
+      "source_prog_id": 57,
+      "name": "generic_kprobe_event",
+      "priority": {
+        "measured_name": "generic_kprobe_",
+        "baseline_time_ns": 1086683629793,
+        "application_time_ns": 2129006675345,
+        "application_time_share": 0.5104181411816878,
+        "matching_census_instances": 231,
+        "retained_instance_time_ns": 9721059,
+        "scope": "Measured name family; matching instances share priority"
+      }
+    },
+    {
+      "application": "tetragon/observer",
+      "source_prog_id": 235,
+      "name": "generic_kprobe_",
+      "priority": {
+        "measured_name": "generic_kprobe_",
+        "baseline_time_ns": 1086683629793,
+        "application_time_ns": 2129006675345,
+        "application_time_share": 0.5104181411816878,
+        "matching_census_instances": 231,
+        "retained_instance_time_ns": 537650,
+        "scope": "Measured name family; matching instances share priority"
+      }
+    },
+    {
+      "application": "tetragon/observer",
+      "source_prog_id": 273,
+      "name": "generic_kprobe_",
+      "priority": {
+        "measured_name": "generic_kprobe_",
+        "baseline_time_ns": 1086683629793,
+        "application_time_ns": 2129006675345,
+        "application_time_share": 0.5104181411816878,
+        "matching_census_instances": 231,
+        "retained_instance_time_ns": 163162,
+        "scope": "Measured name family; matching instances share priority"
+      }
+    },
+    {
+      "application": "tetragon/observer",
+      "source_prog_id": 295,
+      "name": "generic_kprobe_",
+      "priority": {
+        "measured_name": "generic_kprobe_",
+        "baseline_time_ns": 1086683629793,
+        "application_time_ns": 2129006675345,
+        "application_time_share": 0.5104181411816878,
+        "matching_census_instances": 231,
+        "retained_instance_time_ns": 122988,
+        "scope": "Measured name family; matching instances share priority"
+      }
+    },
+    {
+      "application": "tetragon/observer",
+      "source_prog_id": 228,
+      "name": "generic_kprobe_",
+      "priority": {
+        "measured_name": "generic_kprobe_",
+        "baseline_time_ns": 1086683629793,
+        "application_time_ns": 2129006675345,
+        "application_time_share": 0.5104181411816878,
+        "matching_census_instances": 231,
+        "retained_instance_time_ns": 40138,
+        "scope": "Measured name family; matching instances share priority"
+      }
+    }
+  ],
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-resident-census/ready",
+  "kernel_commit": "74d1097af561",
+  "model_commit": "d0890b14f",
+  "queue_scope": "Load-only resident census; application startup counts remain separate",
+  "ranking": "Round-c baseline BPF time by measured name family; retained per-instance time breaks ties. Round-f stats-on inputs follow when available.",
+  "archive": "resident-ranked-inputs.tar.gz"
+}
