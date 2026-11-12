@@ -1,0 +1,565 @@
+{
+  "recorded_at": "2026-11-12T12:45:45.381967+00:00",
+  "kernel_commit": "5f6e694bfd4d",
+  "model_commit": "8f1a1a8b4",
+  "installed_worker_commit": "fba19ea94",
+  "image": "bpf-benchmark/kprog:current",
+  "image_built_from": "d70d2e03e",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-image-otel-initial",
+  "corpus_run_directory": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261112_095533_293337",
+  "application_status": "interrupted for coordinator kernel/base/image rebuild",
+  "make_exit_code": 2,
+  "source_submissions_observed": 4,
+  "source_prog_ids": [
+    21,
+    25,
+    29,
+    32
+  ],
+  "verified_installed_observed": 2,
+  "native_prog_ids": [
+    24,
+    28
+  ],
+  "workload_run": null,
+  "request4": {
+    "source_prog_id": 32,
+    "entry": "perf_unwind_native",
+    "stage": "compiler interrupted",
+    "kernel_facts": {
+      "prog_type": 7,
+      "expected_attach_type": 0,
+      "prog_flags": 0,
+      "prog_ifindex": 0,
+      "attach_btf_id": 0,
+      "attach_btf_obj_id": 0,
+      "attach_prog_id": 0,
+      "gpl_compatible": 1,
+      "source_btf_id": 186,
+      "token_present": 0,
+      "id": 32,
+      "maps": [
+        {
+          "key_size": 8,
+          "map_type": 13,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_size": 4,
+          "inner_map": {
+            "key_size": 4,
+            "map_type": 2,
+            "max_entries": 2097152,
+            "map_flags": 0,
+            "value_size": 4
+          },
+          "id": 127
+        },
+        {
+          "key_size": 4,
+          "map_type": 2,
+          "max_entries": 1,
+          "map_flags": 128,
+          "value_size": 44,
+          "id": 78
+        },
+        {
+          "key_size": 8,
+          "map_type": 13,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_size": 4,
+          "inner_map": {
+            "key_size": 4,
+            "map_type": 2,
+            "max_entries": 8192,
+            "map_flags": 0,
+            "value_size": 4
+          },
+          "id": 101
+        },
+        {
+          "key_size": 4,
+          "map_type": 1,
+          "max_entries": 128,
+          "map_flags": 0,
+          "value_size": 8,
+          "id": 123
+        },
+        {
+          "key_size": 4,
+          "map_type": 3,
+          "max_entries": 10,
+          "map_flags": 0,
+          "value_size": 4,
+          "id": 108
+        },
+        {
+          "key_size": 16,
+          "map_type": 1,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_size": 8,
+          "id": 122
+        },
+        {
+          "key_size": 4,
+          "map_type": 1,
+          "max_entries": 2,
+          "map_flags": 0,
+          "value_size": 1,
+          "id": 80
+        },
+        {
+          "key_size": 4,
+          "map_type": 1,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_size": 28,
+          "id": 107
+        },
+        {
+          "key_size": 8,
+          "map_type": 13,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_size": 4,
+          "inner_map": {
+            "key_size": 4,
+            "map_type": 2,
+            "max_entries": 8388608,
+            "map_flags": 0,
+            "value_size": 4
+          },
+          "id": 112
+        },
+        {
+          "key_size": 4,
+          "map_type": 1,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_size": 40,
+          "id": 77
+        },
+        {
+          "key_size": 8,
+          "map_type": 13,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_size": 4,
+          "inner_map": {
+            "key_size": 4,
+            "map_type": 2,
+            "max_entries": 32768,
+            "map_flags": 0,
+            "value_size": 4
+          },
+          "id": 98
+        },
+        {
+          "key_size": 4,
+          "map_type": 2,
+          "max_entries": 1,
+          "map_flags": 128,
+          "value_size": 44,
+          "id": 78
+        },
+        {
+          "key_size": 4,
+          "map_type": 1,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_size": 40,
+          "id": 118
+        },
+        {
+          "key_size": 8,
+          "map_type": 1,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_size": 1,
+          "id": 71
+        },
+        {
+          "key_size": 8,
+          "map_type": 13,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_size": 4,
+          "inner_map": {
+            "key_size": 4,
+            "map_type": 2,
+            "max_entries": 256,
+            "map_flags": 0,
+            "value_size": 4
+          },
+          "id": 95
+        },
+        {
+          "key_size": 4,
+          "map_type": 2,
+          "max_entries": 1,
+          "map_flags": 128,
+          "value_size": 44,
+          "id": 78
+        },
+        {
+          "key_size": 4,
+          "map_type": 2,
+          "max_entries": 1,
+          "map_flags": 128,
+          "value_size": 44,
+          "id": 78
+        },
+        {
+          "key_size": 4,
+          "map_type": 7,
+          "max_entries": 16384,
+          "map_flags": 0,
+          "value_size": 1016,
+          "id": 109
+        },
+        {
+          "key_size": 4,
+          "map_type": 1,
+          "max_entries": 256,
+          "map_flags": 0,
+          "value_size": 40,
+          "id": 121
+        },
+        {
+          "key_size": 4,
+          "map_type": 4,
+          "max_entries": 8,
+          "map_flags": 0,
+          "value_size": 4,
+          "id": 128
+        },
+        {
+          "key_size": 4,
+          "map_type": 6,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_size": 8,
+          "id": 119
+        },
+        {
+          "key_size": 8,
+          "map_type": 13,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_size": 4,
+          "inner_map": {
+            "key_size": 4,
+            "map_type": 2,
+            "max_entries": 512,
+            "map_flags": 0,
+            "value_size": 4
+          },
+          "id": 83
+        },
+        {
+          "key_size": 8,
+          "map_type": 1,
+          "max_entries": 32,
+          "map_flags": 0,
+          "value_size": 40,
+          "id": 84
+        },
+        {
+          "key_size": 8,
+          "map_type": 13,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_size": 4,
+          "inner_map": {
+            "key_size": 4,
+            "map_type": 2,
+            "max_entries": 1024,
+            "map_flags": 0,
+            "value_size": 4
+          },
+          "id": 104
+        },
+        {
+          "key_size": 8,
+          "map_type": 13,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_size": 4,
+          "inner_map": {
+            "key_size": 4,
+            "map_type": 2,
+            "max_entries": 4096,
+            "map_flags": 0,
+            "value_size": 4
+          },
+          "id": 91
+        },
+        {
+          "key_size": 8,
+          "map_type": 13,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_size": 4,
+          "inner_map": {
+            "key_size": 4,
+            "map_type": 2,
+            "max_entries": 16384,
+            "map_flags": 0,
+            "value_size": 4
+          },
+          "id": 125
+        },
+        {
+          "key_size": 4,
+          "map_type": 1,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_size": 4,
+          "id": 110
+        },
+        {
+          "key_size": 8,
+          "map_type": 13,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_size": 4,
+          "inner_map": {
+            "key_size": 4,
+            "map_type": 2,
+            "max_entries": 2048,
+            "map_flags": 0,
+            "value_size": 4
+          },
+          "id": 73
+        },
+        {
+          "key_size": 4,
+          "map_type": 2,
+          "max_entries": 1,
+          "map_flags": 128,
+          "value_size": 44,
+          "id": 78
+        },
+        {
+          "key_size": 8,
+          "map_type": 13,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_size": 4,
+          "inner_map": {
+            "key_size": 4,
+            "map_type": 2,
+            "max_entries": 65536,
+            "map_flags": 0,
+            "value_size": 4
+          },
+          "id": 106
+        },
+        {
+          "key_size": 4,
+          "map_type": 2,
+          "max_entries": 1,
+          "map_flags": 128,
+          "value_size": 44,
+          "id": 78
+        },
+        {
+          "key_size": 8,
+          "map_type": 13,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_size": 4,
+          "inner_map": {
+            "key_size": 4,
+            "map_type": 2,
+            "max_entries": 262144,
+            "map_flags": 0,
+            "value_size": 4
+          },
+          "id": 93
+        },
+        {
+          "key_size": 4,
+          "map_type": 2,
+          "max_entries": 16384,
+          "map_flags": 0,
+          "value_size": 12,
+          "id": 117
+        },
+        {
+          "key_size": 4,
+          "map_type": 6,
+          "max_entries": 99,
+          "map_flags": 0,
+          "value_size": 8,
+          "id": 81
+        },
+        {
+          "key_size": 4,
+          "map_type": 3,
+          "max_entries": 10,
+          "map_flags": 0,
+          "value_size": 4,
+          "id": 120
+        },
+        {
+          "key_size": 16,
+          "map_type": 11,
+          "max_entries": 1048576,
+          "map_flags": 1,
+          "value_size": 16,
+          "id": 113
+        },
+        {
+          "key_size": 4,
+          "map_type": 4,
+          "max_entries": 8,
+          "map_flags": 0,
+          "value_size": 4,
+          "id": 96
+        },
+        {
+          "key_size": 4,
+          "map_type": 9,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_size": 8,
+          "id": 102
+        },
+        {
+          "key_size": 8,
+          "map_type": 13,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_size": 4,
+          "inner_map": {
+            "key_size": 4,
+            "map_type": 2,
+            "max_entries": 4194304,
+            "map_flags": 0,
+            "value_size": 4
+          },
+          "id": 116
+        },
+        {
+          "key_size": 4,
+          "map_type": 1,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_size": 40,
+          "id": 79
+        },
+        {
+          "key_size": 8,
+          "map_type": 13,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_size": 4,
+          "inner_map": {
+            "key_size": 4,
+            "map_type": 2,
+            "max_entries": 524288,
+            "map_flags": 0,
+            "value_size": 4
+          },
+          "id": 87
+        },
+        {
+          "key_size": 4,
+          "map_type": 1,
+          "max_entries": 128,
+          "map_flags": 0,
+          "value_size": 28,
+          "id": 99
+        },
+        {
+          "key_size": 4,
+          "map_type": 2,
+          "max_entries": 1,
+          "map_flags": 128,
+          "value_size": 44,
+          "id": 78
+        },
+        {
+          "key_size": 4,
+          "map_type": 1,
+          "max_entries": 1024,
+          "map_flags": 0,
+          "value_size": 24,
+          "id": 74
+        },
+        {
+          "key_size": 4,
+          "map_type": 6,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_size": 5000,
+          "id": 85
+        },
+        {
+          "key_size": 4,
+          "map_type": 2,
+          "max_entries": 1,
+          "map_flags": 0,
+          "value_size": 144,
+          "id": 114
+        },
+        {
+          "key_size": 4,
+          "map_type": 2,
+          "max_entries": 1,
+          "map_flags": 128,
+          "value_size": 44,
+          "id": 78
+        },
+        {
+          "key_size": 8,
+          "map_type": 13,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_size": 4,
+          "inner_map": {
+            "key_size": 4,
+            "map_type": 2,
+            "max_entries": 1048576,
+            "map_flags": 0,
+            "value_size": 4
+          },
+          "id": 89
+        },
+        {
+          "key_size": 8,
+          "map_type": 13,
+          "max_entries": 65536,
+          "map_flags": 0,
+          "value_size": 4,
+          "inner_map": {
+            "key_size": 4,
+            "map_type": 2,
+            "max_entries": 131072,
+            "map_flags": 0,
+            "value_size": 4
+          },
+          "id": 76
+        }
+      ]
+    }
+  },
+  "completed_request3": "Six generation/compile commands succeeded; stock verifier rejected BPF8813 stack write R10-528,size8, processed3107. Completed requests1-3 retained in image-otel-first-closed.tar.gz, commitab0b8fbe0.",
+  "interruption": {
+    "recorded_at": "2026-11-12T12:40:08.775034+00:00",
+    "action": "terminated own QEMU671808 for coordinator12:33 rebuild slot",
+    "launcher_pid": 671605,
+    "guest_pid": 671808,
+    "phase": "candidate request4/source32 compilation after request3 stock stack-write rejection",
+    "observed_source_submissions": 4,
+    "accepted_native_installations": 2,
+    "workload_run": null,
+    "application_status": "interrupted for coordinated kernel rebuild",
+    "scope": "Completed request1-3 evidence retained in ab0b8fbe0; partial retry4 and all persistent service state retained. Existing guest Docker data file remains for raw workdir/log recovery before cache replacement."
+  },
+  "archive": "image-otel-interrupted-request4.tar.gz",
+  "archive_bytes": 36241777,
+  "scope": "Historical old-kernel coverage observation. The candidate workload remains unmeasured after interruption. Live handoff and all-six verified rechecks follow kernel74d1097af561 coordinated replacement."
+}
