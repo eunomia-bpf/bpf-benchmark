@@ -45,6 +45,12 @@ trusted-service: all
 	$(CC) -O2 -fPIC -mno-red-zone -mgeneral-regs-only -fno-stack-protector \
 		-fno-asynchronous-unwind-tables -c ../test/trusted_native.c -o "$(BUILD_DIR)/trusted-native.o"
 
+SAFETY_INPUTS ?= /workspaces/.agent-state/kprog-ck/verified-safety
+.PHONY: trusted-safety-inputs
+trusted-safety-inputs: all
+	KPROG_STOCK_LOADER="$(abspath $(BUILD_DIR))" python3 ../stock-path/run_safety.py build \
+		--out "$(SAFETY_INPUTS)" --inputs "$(SAFETY_INPUTS)"
+
 trusted-service-kvm: trusted-service
 	$(MAKE) -C ../stock-path/module
 	install -d "$(OUTPUT)"

@@ -1,0 +1,18 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-safety-inputs",
+  "inputs_directory": "/workspaces/.agent-state/kprog-ck/verified-safety",
+  "build_exit_codes": {
+    "exit-code": 2,
+    "exit-code-2": 0,
+    "exit-code-3": 0
+  },
+  "first_error": "Obsolete diagnostic native_chunk_count field removed from bound_probe logging to match current LoadedProgram API.",
+  "intermediate_build": "Current fixture generator produced47 inputs. Complete intermediate build archived;9 expanded-only generated fixture sets moved to persistent raw storage and recorded in cleanup-log.",
+  "cases": 38,
+  "positives": 9,
+  "negatives": 29,
+  "original_names_assembly_negative_equal": true,
+  "current_worker_classification": "verifier_rejected",
+  "scope": "Original38 fixture/context/probe build and classifier test over captured actual worker rejection. Kernel safety replay and actual Katran acceptance remain pending.",
+  "archive": "safety-inputs.tar.gz"
+}

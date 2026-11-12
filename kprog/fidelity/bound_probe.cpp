@@ -68,7 +68,7 @@ int main(int argc,char **argv)
         if (loaded.prog_fd<0 || !loaded.replaced) throw std::runtime_error("manifest did not produce a native program");
         bpf_prog_info info{};uint32_t size=sizeof(info);
         if (bpf_obj_get_info_by_fd(loaded.prog_fd,&info,&size)) throw std::runtime_error("bound program info failed");
-        std::printf("native program id=%u chunks=%u\n",info.id,loaded.native_chunk_count);
+        std::printf("native program id=%u\n",info.id);
         if (argc==5) check_result(loaded.prog_fd,expected,expected_retval,"native_bound");
         native_loader::close_loaded_program(&loaded);
         if (std::fflush(stdout)) throw std::runtime_error("flush probe output failed");

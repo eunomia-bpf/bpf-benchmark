@@ -122,3 +122,35 @@ REMOVED 14888K /workspaces/.agent-state/kprog-lanes/C/cilium-update-identity/bzI
 REMOVED 121540K /workspaces/.agent-state/kprog-lanes/C/cilium-update-identity/modules
 REMOVED 14888K /workspaces/.agent-state/kprog-lanes/C/native-only-runtime/package/kernel/bzImage
 ```
+
+```
+# verified safety fixture alignment 2026-11-12T08:15:32Z
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/below_sp_call.S -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/below_sp_call.S
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/below_sp_call.native.o -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/below_sp_call.native.o
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/below_sp_call.manifest.json -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/below_sp_call.manifest.json
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/below_sp_helper_output.S -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/below_sp_helper_output.S
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/below_sp_helper_output.native.o -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/below_sp_helper_output.native.o
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/below_sp_helper_output.manifest.json -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/below_sp_helper_output.manifest.json
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/below_sp_memcpy_output.S -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/below_sp_memcpy_output.S
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/below_sp_memcpy_output.native.o -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/below_sp_memcpy_output.native.o
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/below_sp_memcpy_output.manifest.json -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/below_sp_memcpy_output.manifest.json
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/below_sp_memset_output.S -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/below_sp_memset_output.S
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/below_sp_memset_output.native.o -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/below_sp_memset_output.native.o
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/below_sp_memset_output.manifest.json -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/below_sp_memset_output.manifest.json
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/exit_frame_pointer_map.S -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/exit_frame_pointer_map.S
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/exit_frame_pointer_map.native.o -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/exit_frame_pointer_map.native.o
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/exit_frame_pointer_map.manifest.json -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/exit_frame_pointer_map.manifest.json
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/exit_r12.S -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/exit_r12.S
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/exit_r12.native.o -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/exit_r12.native.o
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/exit_r12.manifest.json -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/exit_r12.manifest.json
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/exit_stack_pointer.S -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/exit_stack_pointer.S
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/exit_stack_pointer.native.o -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/exit_stack_pointer.native.o
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/exit_stack_pointer.manifest.json -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/exit_stack_pointer.manifest.json
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/immediate_push_branch_scalar_store.S -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/immediate_push_branch_scalar_store.S
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/immediate_push_branch_scalar_store.native.o -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/immediate_push_branch_scalar_store.native.o
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/immediate_push_branch_scalar_store.manifest.json -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/immediate_push_branch_scalar_store.manifest.json
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/stack_base_flags_scalar_store.S -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/stack_base_flags_scalar_store.S
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/stack_base_flags_scalar_store.native.o -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/stack_base_flags_scalar_store.native.o
+MOVED /workspaces/.agent-state/kprog-ck/verified-safety/stack_base_flags_scalar_store.manifest.json -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-only-inputs/stack_base_flags_scalar_store.manifest.json
+KEPT full expanded47 generated fixture build -> /workspaces/kprog-raw/verified/20261112-safety-inputs/expanded-47-inputs.tar.gz
+```

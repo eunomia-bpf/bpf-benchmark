@@ -56,7 +56,7 @@ def classify(record):
  texts='\n'.join(data.values());error=record.get('error','')
  trace=record.get('traceback','')
  if 'ValueError:' in trace and any('/kprog/'+isa+'/micro-prog/' in trace for isa in ['x86','arm64']):return 'specialization_rejected',error+'\n'+texts
- if ('processed ' in texts and ('BPF_PROG_LOAD' in texts or 'bpf_object__load failed' in texts)):return 'verifier_rejected',texts
+ if ('processed ' in texts and ('BPF_PROG_LOAD' in texts or 'bpf_object__load failed' in texts or 'service simulator verification failed' in texts)):return 'verifier_rejected',texts
  if 'contains no BPF exit' in texts:return 'loader_rejected',texts
  if any(s in error for s in ['unsupported x86','unsupported arm64 instruction','unsupported mnemonic','native ABI','native entry','native return','uninitialized','unsupported instruction','indirect']):return 'specialization_rejected',error+'\n'+texts
  if 'clang' in error and 'returned non-zero' in error:return 'compiler_rejected',error+'\n'+texts

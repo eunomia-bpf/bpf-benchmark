@@ -77,6 +77,9 @@
 
 - **VERIFIED captured Katran compile（2026-11-12）** 8f1a1a8b4 的原 P/entry/generation metadata 再生成和编译全部 rc0（proof link、两段预处理、完整 B 编译），B ELF 为 1485544 bytes。目录 `/workspaces/kprog-raw/verified/20261112-stack-alias-compile/`，完整输出（含预处理 source）归档 `kprog/results/verified_20261112/stack-alias-compile*`。本项记录编译阶段，实际 stock verifier/native execution 继续按重跑 receipt 记录。
 
+
+- **VERIFIED safety replay preparation（2026-11-12）** 既有 stock-path `run_safety.py` 增加对原 suite `build()` 的原地入口，默认工具/fixture 目录统一为唯一底座的 `verified-loader`、`verified-safety` 与 canonical linker。历史 cases/assembly/build/check 逻辑继续由原脚本执行，生成的 fixture/native/context/probe 位于该底座；raw replay `--out` 单独保留。`make -C kprog/libnativeloader trusted-safety-inputs BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader` 准备现有 38-case suite，后续在唯一 kernel/module 上 replay；历史 source-export/kernel-copy launcher 留作原始记录。第一轮 probe 构建因旧 native_chunk_count 日志字段失败；修正后发现 current fixture generator 为 47 cases，完整中间 build 已归档、9 份额外 fixture 的移动逐条记录 cleanup-log。build 改用原始 recorded cases 后 rc0，38 个 name/assembly/negative 标记与原记录完全一致（positive9/negative29）；原始 build/probe/contexts 见 `kprog/results/verified_20261112/safety-inputs*`。现有 classifier 同时识别 stock worker 的 verifier failure prefix，真实 Katran 拒绝档案分类为 verifier_rejected。
+
 两条路径分开计数。直接 native（跳过 verifier）：六个应用都跑通过（05-29，11-07 复现）。verified 路径（verifier 检查 B）：BCC 25/25、Katran 1/1 跑通过，其余应用只有少量程序，历史最高约 50/549。
 
 549 个常驻程序的静态普查（`corpus/results/kprog_app_coverage_20261109/resident-census/`）第一轮：选择缺口 275、资源准备 238、ELF 名称语法 23、context 下沉 1；实际生成 12、编译 11、verifier 接受 7、拒绝 4。后续 stock guest 资源回放完成 238/238（bc3104df7），资源阶段与 native 生成、编译和 verifier 结果分别计数。
