@@ -71,6 +71,9 @@
 
 - **VERIFIED typed stack alias store（2026-11-12）** 通用 tagged store 保留原 typed address 完成原宽度写入，随后沿该地址对现有 below-SP 字节逐个写入 environment input；原 alias offset barrier、metadata erase、SP predicate 保持。扩展原 invocation-stack host oracle，覆盖 3861 个 width/alignment/SP 组合，GCC 与 Clang18 的 UBSan 均 rc0（Clang 编译 object，使用已安装的 GCC UBSan runtime 链接）。原始 `/workspaces/kprog-raw/verified/20261112-stack-alias-host/` 和 `kprog/results/verified_20261112/stack-alias-host*`。当前 Katran 首轮 verifier 拒绝原样保留；对原 P/entry/generation metadata 的再编译和实际 kernel regression 继续分阶段记录，module identity 替换走协调 rebuild slot。
 
+
+- **VERIFIED corpus invocation prepared（2026-11-12）** `kprog/test/verified_corpus.py <app> <samples> <duration> <stats>` 从已有 service supervisor 的 guest 调用冻结 `make __runtime-vm-corpus`，通过原有 `RUNTIME_ENV_BASE_NAMES` 接口显式转发 bound flag 和原始 artifact 保留开关。固定选择唯一镜像 current 和当前唯一 image tar，`post`/`norejit` 沿用原两次启动比较；app/workload/框架文件保持冻结定义。已有 `trusted-service-kvm` 的 guest CPU 与额外 vng 参数现可按调用设置（默认仍为 2 CPU、原 flag 集合），corpus 调用使用 8 CPU、64G 和原 `/run`、`/usr/local` overlays，加可写 `/var/tmp` 映射供冻结 Docker target 写临时 disk。此入口已准备交协调者用于 module/image rebuild 后的 BCC、Katran；实际 corpus 结果继续按 raw run 记录。
+
 两条路径分开计数。直接 native（跳过 verifier）：六个应用都跑通过（05-29，11-07 复现）。verified 路径（verifier 检查 B）：BCC 25/25、Katran 1/1 跑通过，其余应用只有少量程序，历史最高约 50/549。
 
 549 个常驻程序的静态普查（`corpus/results/kprog_app_coverage_20261109/resident-census/`）第一轮：选择缺口 275、资源准备 238、ELF 名称语法 23、context 下沉 1；实际生成 12、编译 11、verifier 接受 7、拒绝 4。后续 stock guest 资源回放完成 238/238（bc3104df7），资源阶段与 native 生成、编译和 verifier 结果分别计数。
