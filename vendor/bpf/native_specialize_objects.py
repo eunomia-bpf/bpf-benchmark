@@ -388,6 +388,12 @@ def main() -> None:
     parser.add_argument("--maps-type-sizes", action="store_true",
                         help="with --maps, size a map's value type from the unit "
                              "when the capture did not record that map")
+    parser.add_argument("--link", nargs="*", default=[], metavar="STEM",
+                        help="combine these specialized objects with clang -r into "
+                             "<first stem>.native.o, the way the Makefile links the "
+                             "otel units")
+    parser.add_argument("--link-name", default="",
+                        help="the linked object's name, without .native.o")
     args = parser.parse_args()
 
     capture = Path(args.capture)
@@ -497,6 +503,21 @@ def main() -> None:
             # A run loads the file its manifest names "native_object", so the
             # specialized object takes that name.
             published[Path(stem).name] = str(spec_object)
+
+    if args.link:
+        # The Makefile combines otel's 15 unit objects into one relocatable
+        # object with `clang -r`, and the manifest names only that one, so the
+        # units are recombined the same way after specialization.
+        absent = [stem for stem in args.link if stem not in published]
+        if absent:
+            sys.exit(f"--link: {absent} were not specialized")
+        name = args.link_name or args.link[0]
+        linked = output / f"{name}.native.o"
+        run(["clang-18", "-r", "-o", str(linked),
+             *[published[stem] for stem in args.link]])
+        for stem in args.link:
+            published[stem] = str(linked)
+        published = {name: str(linked)}
 
     if args.publish:
         publish_manifest(args.app, output, published, Path(args.manifest))
