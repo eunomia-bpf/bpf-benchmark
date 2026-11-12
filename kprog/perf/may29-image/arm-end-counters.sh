@@ -35,20 +35,34 @@ import json, os, socket, sys
 
 path, out = sys.argv[1], sys.argv[2]
 os.makedirs(out, exist_ok=True)
-sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-sock.connect(path)
-sock.sendall((json.dumps({"cmd": "snapshot_maps", "output_dir": out}) + "\n").encode())
-reply = b""
-while True:
-    chunk = sock.recv(4096)
-    if not chunk:
-        break
-    reply += chunk
-    if b"\n" in reply:
-        break
-sock.close()
-text = reply.decode(errors="replace").strip()
-print(text if text else "(empty reply)")
+
+
+def ask(sock_path, payload, limit=1 << 22):
+    """One command over the shim socket, with the reply it sends back."""
+    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    s.connect(sock_path)
+    s.sendall((json.dumps(payload) + "\n").encode())
+    buf = b""
+    while True:
+        chunk = s.recv(65536)
+        if not chunk:
+            break
+        buf += chunk
+        if b"\n" in buf or len(buf) > limit:
+            break
+    s.close()
+    return buf.decode(errors="replace").strip()
+
+
+# What does the shim hold right now? `dump_state` lists the program table, which
+# is what snapshot_maps filters; asking first turns "nothing was written" into a
+# countable answer.
+state = ask(path, {"cmd": "dump_state"})
+open(os.path.join(out, "dump_state.json"), "w").write(state + "\n")
+print("state:", (state[:200] if state else "(empty)"))
+
+reply = ask(path, {"cmd": "snapshot_maps", "output_dir": out})
+print("snapshot:", (reply if reply else "(empty reply)"))
 PYEOF
             rc=$?
             if [ "$rc" -ne 0 ]; then echo "arm-end: snapshot command failed rc=$rc" >&2; fi
