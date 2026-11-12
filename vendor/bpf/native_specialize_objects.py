@@ -151,6 +151,13 @@ def units_for_app(app: str) -> list[tuple[str, Path, list[str]]]:
         # programs; it carries no configuration of its own.
         return [(name, bpf / f"cilium/bpf/{name}.c", options + include)
                 for name, options in per_object.items()]
+    if app == "katran":
+        # The Makefile's KATRAN_NATIVE_CFLAGS, and one source per object.
+        include = [f"-I{bpf}/katran", f"-I{bpf}/katran/katran/lib/linux_includes",
+                   "-I/usr/include", "-I/usr/include/x86_64-linux-gnu"]
+        return [(name, bpf / f"katran/katran/lib/bpf/{name}.c", include)
+                for name in ("balancer", "healthchecking", "healthchecking_ipip",
+                             "xdp_root", "xdp_pktcntr")]
     if app == "tetragon":
         # The Makefile's tetragon common_flags, in its own order.
         common = ["-fms-extensions", "-DMICRO_NATIVE_HELPER_MACROS",
@@ -384,7 +391,11 @@ def main() -> None:
     # Every program of one BPF object reads the same .rodata globals, so the
     # values are identical across the captured programs; verify that, then use
     # the single image the object's own offsets index.
-    if not loaded:
+    if not loaded and not args.maps:
+        # Without a .rodata image there is nothing for the constant rule, but the
+        # map rule takes its sizes from the capture's map records or, with
+        # --maps-type-sizes, from the types the program declares -- katran keeps
+        # all its configuration in a regular map and has no .rodata at all.
         raise SystemExit(f"no captured .rodata image under {capture}")
 
     published: dict[str, str] = {}
@@ -404,9 +415,13 @@ def main() -> None:
             if len(match) == 1:
                 tool = match[0]
         if tool not in loaded:
-            print(f"{stem:22} no captured .rodata map", file=sys.stderr)
-            continue
-        reference = loaded[tool]
+            if not args.maps:
+                print(f"{stem:22} no captured .rodata map", file=sys.stderr)
+                continue
+        # An object with no captured .rodata (katran keeps its configuration in
+        # a regular map) still goes through the map rule, with no image to
+        # compare its own .rodata against.
+        reference = loaded.get(tool, b"")
         directory = output / Path(stem).parent
         directory.mkdir(parents=True, exist_ok=True)
         base = directory / Path(stem).name

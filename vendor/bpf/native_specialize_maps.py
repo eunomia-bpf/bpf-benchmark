@@ -231,6 +231,12 @@ static inline __attribute__((always_inline)) void *__sp_map_lookup_default(void 
 DISPATCH = """
 @ARMS@"""
 
+# Katran calls the helper by name with no indirection at all, so the unit has
+# plain calls: bpf_map_lookup_elem(&map, &key).
+LOOKUP_PLAIN = re.compile(
+    r"\bbpf_map_lookup_elem\(&(?P<map>\w+), &(?P<key>\w+)\)")
+
+
 # Cilium's programs reach the same helper through a typed function pointer and
 # the helper-id call, so the unit spells the lookup with the map and key as
 # plain arguments:
@@ -311,7 +317,9 @@ def main() -> None:
     text_in = unit.read_text()
     # One unit uses one convention, but matching both costs nothing and keeps
     # the rule working if a program mixes them.
-    calls = list(LOOKUP_CALL.finditer(text_in)) + list(LOOKUP_TYPED.finditer(text_in))
+    calls = (list(LOOKUP_CALL.finditer(text_in))
+             + list(LOOKUP_TYPED.finditer(text_in))
+             + list(LOOKUP_PLAIN.finditer(text_in)))
     for match in calls:
         name = match.group("map").lstrip("&")
         if name not in by_name:
@@ -350,7 +358,7 @@ def main() -> None:
         return f"__sp_lookup_{name}((&{name}), (&{match.group('key').lstrip('&')}))"
 
     first_call = min(m.start() for m in calls)
-    text = LOOKUP_TYPED.sub(rewrite, LOOKUP_CALL.sub(rewrite, text))
+    text = LOOKUP_PLAIN.sub(rewrite, LOOKUP_TYPED.sub(rewrite, LOOKUP_CALL.sub(rewrite, text)))
     # The bodies are plain C over the key and the returned pointer: they need
     # the extern declarations at the head of the unit and nothing of the map
     # types, so they go at the first blank line after those declarations,
