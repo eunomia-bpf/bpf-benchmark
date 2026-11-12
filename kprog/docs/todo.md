@@ -65,6 +65,9 @@
 
 - **VERIFIED module selection integration（2026-11-12）** stock module 的内部名和文件名按已有架构 endpoint 对齐为 `bpf_$(SRCARCH)_native_lab`，仍由同一 `kprog_stock.o` 组成；x86 service/queue/lifecycle Make callers 与 stock guest 默认文件名同步。verified guest 先载入对应 variant 后，冻结 installer 的递归扫描和 corpus 的顶层扫描均能按既有 resident 判定复用该模块。源代码已准备，唯一底座 module 替换、旧 `bpf_kprog_stock` wrapper build 输出清理和 kernel regression 交协调者安排共享 rebuild slot；当前 Katran guest 使用其启动时已载入的模块继续运行。
 
+
+- **VERIFIED Katran first result（2026-11-12）** upstream 实际 source loaded/submitted 1（ID6），B generated 1/compiled 1，stock verifier 拒绝，verified native 0、native run 0，make rc2。末端 BPF 指令 7127 在 stack alias lifetime 路径重建 frame pointer 时得到过宽负数范围：`value -9223372036854775568 makes fp pointer be out of bounds`。原始目录 `/workspaces/kprog-raw/verified/20261112-katran-startup/`，完整 worker/generated-C/compiler/verifier/app/shim 档案 `kprog/results/verified_20261112/katran-stack-alias-failure*`。继续处理通用 tagged stack alias store 的 typed address 保持；此前 broad constant-barrier 方案的安全 replay 有变化，当前保留 canonical barrier。
+
 两条路径分开计数。直接 native（跳过 verifier）：六个应用都跑通过（05-29，11-07 复现）。verified 路径（verifier 检查 B）：BCC 25/25、Katran 1/1 跑通过，其余应用只有少量程序，历史最高约 50/549。
 
 549 个常驻程序的静态普查（`corpus/results/kprog_app_coverage_20261109/resident-census/`）第一轮：选择缺口 275、资源准备 238、ELF 名称语法 23、context 下沉 1；实际生成 12、编译 11、verifier 接受 7、拒绝 4。后续 stock guest 资源回放完成 238/238（bc3104df7），资源阶段与 native 生成、编译和 verifier 结果分别计数。
