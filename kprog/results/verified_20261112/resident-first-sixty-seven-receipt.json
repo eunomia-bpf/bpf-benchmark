@@ -118,7 +118,7 @@
       }
     }
   ],
-  "archive": "resident-callback-output-next.tar.gz",
+  "archive": "resident-callback-seventh-output.tar.gz",
   "archive_bytes": 13837325,
   "previous_receipt": "kprog/results/verified_20261112/resident-first-sixty-five-receipt.json",
   "previous_submitted": 65,
@@ -132,5 +132,6 @@
     "epoch_record": "resident-linker-epoch-change.json",
     "final_publication": "tail-count-final-receipt.json",
     "requests_66_67": "Both start after the last recorded a941c36c0 shared release-linker publication at22:34:05. Full native inputs and service commands retained; cumulative census spans earlier tool epochs."
-  }
+  },
+  "publication_correction": "Initial20f14fc45 reused a tracked older chunk archive filename. This receipt uses a unique name; the earlier chunk archive was restored from persistent raw data in a forward commit. No raw outcome/artifact discarded."
 }
