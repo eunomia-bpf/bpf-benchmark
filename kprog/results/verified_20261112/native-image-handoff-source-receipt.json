@@ -31,5 +31,14 @@
   "regression_build_command": "taskset -c 8-19 make -C kprog/libnativeloader native-image-handoff BUILD_DIR=/var/tmp/kprog-tmp/verified/native-image-handoff",
   "scheduled_runtime_command": "make -C kprog/libnativeloader native-image-handoff-kvm BUILD_DIR=/var/tmp/kprog-tmp/verified/native-image-handoff NATIVE_MODULE=<coordinator-built direct-native module>",
   "scope": "Source repair plus host regression build, loader syntax and static kernel patch checks. Kernel compilation, guest regression, six-application verified rechecks and direct timing follow coordinator-scheduled base/module/image rebuilds. Existing application receipts retain their historical running kernel.",
-  "queue": "Own queue690824 and tail690826 stopped while awaiting OTel; queue-cancellation.json annotates its exit-code file. OTel671605 retains its already-loaded guest and raw outputs."
+  "queue": "Own queue690824 and tail690826 stopped while awaiting OTel; queue-cancellation.json annotates its exit-code file. OTel671605 retains its already-loaded guest and raw outputs.",
+  "regression_native_body": {
+    "recorded_at": "2026-11-12T12:08:55.523523+00:00",
+    "instructions": "MOV EAX, imm32; fall through to the kernel native JIT epilogue",
+    "abi": "bpf_native_jit pushes callee-save registers before P and restores them after P. The fixture uses that shared epilogue for its return.",
+    "correction": "Source inspection caught the original fixture RET before runtime execution. The forward fixture correction retains the full test cases and production kernel/loader definitions.",
+    "build_exit_code": 0,
+    "build_log": "test-build-epilogue.log",
+    "runtime_status": "pending coordinator-scheduled rebuild"
+  }
 }

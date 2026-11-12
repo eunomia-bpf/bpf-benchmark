@@ -23,7 +23,8 @@ static void require(int condition, const char *message)
 
 static void arm(uint32_t value)
 {
-	unsigned char bytes[] = {0xb8, value, value >> 8, value >> 16, value >> 24, 0xc3};
+	/* MOV EAX, imm32; fall through to the JIT's callee-save epilogue. */
+	unsigned char bytes[] = {0xb8, value, value >> 8, value >> 16, value >> 24};
 	int fd = open("/sys/kernel/debug/bpf_x86_native_lab/blob0", O_WRONLY);
 
 	require(fd >= 0, "open blob0");
