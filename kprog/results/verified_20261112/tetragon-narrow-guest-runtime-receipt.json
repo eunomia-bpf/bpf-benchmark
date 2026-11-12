@@ -1,0 +1,12 @@
+{
+  "recorded_at": "2026-11-12T14:56:09.836929+00:00",
+  "method": "Read-only noload mount after completed typed-stack Tetragon replay",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-tetragon-narrow-stack",
+  "paths": [
+    "dockerd.log",
+    "data/containers",
+    "data/containerd/daemon/io.containerd.snapshotter.v1.overlayfs/snapshots/35/fs/var/tmp/bpfrejit-runtime"
+  ],
+  "archive": "tetragon-narrow-guest-runtime.tar.gz",
+  "scope": "Supplement remaining guest daemon/runtime logs to full service/corpus/capture receipt01f0c16de before existing cache reuse."
+}
