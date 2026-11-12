@@ -14,7 +14,17 @@
   "selector_make_dry_run_exit_code": 0,
   "raw_directory": "/workspaces/kprog-raw/verified/20261112-tetragon-probe-selector",
   "archive": "tetragon-probe-selector.tar.gz",
-  "validation_scope": "Three source guards and existing Make invocation. Both dry runs print the existing complete native-tetragon build, and the selector reaches common_flags for every object. Native compilation and actual application replay follow the active OTel guest.",
+  "validation_scope": "Three source guards, existing default/selector Make invocation dry runs and Clang18 frontend syntax compile of the actual bpf_fork.c translation unit. The selected metadata helper-read sections parse with generated target layout and native helper macros. Whole-class native code generation and actual application replay follow the active guest and serial worker regression.",
   "runtime_counts": "Application counts retain their prior run receipts.",
-  "coordinator_authorization": "COORDINATION.md 2026-11-12T10:32:15Z; exact source file claimed before editing."
+  "coordinator_authorization": "COORDINATION.md 2026-11-12T10:32:15Z; exact source file claimed before editing.",
+  "helper_branch_syntax": {
+    "recorded_at": "2026-11-12T10:54:43.657555+00:00",
+    "make_target": "make -C vendor/bpf tetragon/bpf/process/bpf_fork.o CC=clang-18 CFLAGS=<recorded native selector flags, -fsyntax-only>",
+    "source": "vendor/bpf/tetragon/bpf/process/bpf_fork.c",
+    "source_commit": "c20253b7d",
+    "exit_code": 0,
+    "warnings": 10,
+    "log": "helper-syntax.log",
+    "scope": "Existing GNU Make C-object rule invokes the Clang frontend with -fsyntax-only and the native selector, generated target header, native helper macros and include paths. All three selected metadata helper-read sections parse successfully. Full warnings and command are retained. Native code generation and stock verifier/application behavior follow their actual run receipts."
+  }
 }
