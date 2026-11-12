@@ -1414,7 +1414,8 @@ pub(super) fn rewrite_x86(
                                 local_ip
                             );
                         }
-                        let (tail_stub, tail_count_field) = build_x86_tail_call_inline(
+                        eprintln!("TRACE tail-call stub built in {}", sym.name);
+                        let (tail_stub, tail_count_field, tail_count_field_stub_len) = build_x86_tail_call_inline(
                             helper_addrs,
                             // The one kernel's frame saves rbx, r13, r14 and r15 around P.
                             0xf,
@@ -1422,19 +1423,13 @@ pub(super) fn rewrite_x86(
                             entry_abi_strip.tail_call_bpf_rbp_rsp_offset,
                             entry_abi_strip.tail_call_bpf_rbp_is_live,
                         )?;
-                        // The stub is emitted as chunks of up to 16 bytes, and the
-                        // tail-count field sits inside one of them. The patch records
-                        // the chunk's local IP; the kind is attached to the
-                        // instruction that starts at or before the field, which is
-                        // what PatchInfo's global_offset is derived from.
-                        let mut stub_base = u64::MAX;
-                        for ib in tail_stub {
-                            let starts = u64::try_from(ib.len())
-                                .map_err(|_| anyhow!("tail-call stub length overflow"))?;
-                            let at = next_synthetic_ip;
-                            if stub_base == u64::MAX {
-                                stub_base = at;
-                            }
+                        // The stub is emitted as 16-byte chunks. A synthetic
+                        // advances next_synthetic_ip by one whatever its width, so
+                        // the chunk holding the field is field/16 and the field sits
+                        // field%16 bytes into that chunk.
+                        let field_chunk = tail_count_field / 16;
+                        let field_delta = (tail_count_field % 16) as u32;
+                        for (chunk_index, ib) in tail_stub.into_iter().enumerate() {
                             push_x86_synthetic(
                                 &mut local,
                                 &mut kinds,
@@ -1442,14 +1437,9 @@ pub(super) fn rewrite_x86(
                                 &mut next_synthetic_ip,
                                 ib,
                             )?;
-                            // The field offset is a byte offset into the stub; the
-                            // chunk that contains it gets the kind.
-                            let field_ip = stub_base + tail_count_field as u64;
-                            if field_ip >= at && field_ip < at + starts {
+                            if chunk_index == field_chunk {
                                 if let Some(last) = kinds.last_mut() {
-                                    *last = Some(PatchKind::TailCount {
-                                        field_delta: (field_ip - at) as u32,
-                                    });
+                                    *last = Some(PatchKind::TailCount { field_delta });
                                 }
                             }
                         }
@@ -3645,7 +3635,7 @@ fn build_x86_tail_call_inline(
     native_cleanup: &[u8],
     saved_bpf_rbp_rsp_offset: Option<i32>,
     bpf_rbp_is_live: bool,
-) -> Result<(Vec<Instruction>, usize)> {
+) -> Result<(Vec<Instruction>, usize, usize)> {
     const MAX_TAIL_CALL_CNT: u8 = 33;
     let map_max_entries = x86_required_u32_helper_arg(
         helper_addrs,
@@ -3710,7 +3700,8 @@ fn build_x86_tail_call_inline(
     patch_x86_rel32(&mut bytes, je_out, out)?;
     // The module rewrites the tail-count field, so the caller has to know where it
     // is: reported as an offset into the stub the chunks below are built from.
-    Ok((declared_byte_chunks(&bytes)?, tail_count_field))
+    let stub_len = bytes.len();
+    Ok((declared_byte_chunks(&bytes)?, tail_count_field, stub_len))
 }
 
 fn x86_gpr64_encoding(reg: Register) -> Result<(u8, bool)> {
@@ -4063,6 +4054,27 @@ mod tests {
             assert_eq!(bytes.len(), 7, "opcode plus a four-byte field");
             assert_eq!(&bytes[..3], &[0x48, 0x81, 0xC1]);
             assert_eq!(&bytes[3..7], &imm.to_le_bytes());
+        }
+    }
+
+    /// The tail-count field has to be found inside the chunked stub, and the
+    /// chunk a synthetic reports cannot be used for that: a synthetic advances
+    /// its IP by one whatever its width. This pins the arithmetic the emission
+    /// relies on, against the stub's own layout.
+    #[test]
+    fn tail_count_field_maps_to_its_chunk_in_the_stub() {
+        let bytes: Vec<u8> = (0..40u8).collect();
+        let chunks = declared_byte_chunks(&bytes).expect("chunk");
+        assert_eq!(chunks.len(), 3, "40 bytes is three 16-byte chunks");
+        for field in [0usize, 3, 15, 16, 17, 31, 32, 39] {
+            let chunk = field / 16;
+            let delta = field % 16;
+            assert!(chunk < chunks.len(), "field {field} must have a chunk");
+            // The byte the module would write is the field's own byte.
+            assert_eq!(chunk * 16 + delta, field);
+            // And that byte is inside the chunk it names.
+            let width = bytes.len().saturating_sub(chunk * 16).min(16);
+            assert!(delta < width, "field {field} delta {delta} outside {width}");
         }
     }
 
