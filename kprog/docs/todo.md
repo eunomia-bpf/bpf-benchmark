@@ -29,11 +29,11 @@
 - [ ] **R** 实测每个应用的 BPF 占比（BPF 秒数 /（时长 × 忙 CPU 数）），得出算术上限。**协调者**据此确定目标按哪些应用计算。
 - [ ] **R** 在 unbound 路径计时 C 已发布的候选：BCC control 和 candidate、Katran 内联（32dadc6b6）、Katran array 查找（99d79e4c9）。
 - [ ] **R** 可信模块基线、时延、CPU 利用率。
-- [ ] **C** 在原生编译阶段下沉 map 查找、改写 probe-read；按协调者22:20顺序处理 Katran、Tetragon、Tracee、Cilium、OTel。完整 direct Katran 三候选已交给R（87a028418）。
+- [x] **C** 在原生编译阶段下沉 map 查找、改写 probe-read；按协调者22:20顺序处理 Katran、Tetragon、Tracee、Cilium、OTel。结论（22:20 顺序逐应用实测，均为对象级 + 访客验证）：**map 查找层**——Katran −2.8%…−23.4%/对象（访客 balancer_ingress 10196→9792，−4.0%）、Tetragon −9313 构建 / 访客 −3235（execve_map_update 331→158）、Tracee −506（改写到的两个程序在 stress_ng 工作负载里执行 0 次）、Cilium −158（访客 −143，可忽略）、OTel −2899（访客 −1477，落在 0 次执行的 perf_unwind_native 上）。**hash 下沉关闭**（22401700b：多省 132 却回吐 362）。**probe-read 内联体关闭于契约不符**（见下一行）。.rodata 层仍是有效结果：BCC 每次调用 1.221x。
 - [ ] **C** 当前 master 的 Katran 恢复原生安装：XDP 编译已修（044d32e09）；内联 P 的返回寄存器一致性拒绝见 13c38586e；分配候选 98650c853 的恢复框架回放为 0 次原生请求（247af4cc8），须先在冻结路径外补齐启动传递。
 - [x] **C** 完整 Katran P 在提交前下沉 array 查找，21 个调用点、4 个对象、manifest/plugin/原始日志齐全，R unbound 请求已发（99d79e4c9，TODO 启用时补记）。
 - [ ] **C** 继续在 P 中下沉 per-CPU array、hash、LRU 查找，保留现有重定位和验证后的同一副本发射。
-- [ ] **C** 完成 Tracee probe-read 有效值/零值/故障重放与 R 计时：9738f6a5a 初版已撤回，保留原 helper ERANGE/EFAULT 的完整替代 payload 已发布（88e623a6a）; actual bfa5ae6de:4generated/4compiled/4verifier rejections/0native executions, from trusted-pointer masking before the load. R unbound timing and verified fault semantics remain open.
+- [x] **C** 完成 Tracee probe-read：**本项关闭于契约不符，不再推进内联体**。9738f6a5a 初版已撤回；88e623a6a 保留原 helper ERANGE/EFAULT 的替代 payload；bfa5ae6de 为 4 generated/4 compiled/4 verifier rejections/0 native executions（trusted-pointer masking before the load）。本 lane 另写了内联规则 vendor/bpf/native_specialize_probe_reads.py（7da474e04，--probe-reads 接入 5149a9f98）：tetragon bpf_generic_kprobe_v511 下沉 40 处、对象 196208→143174（−27%），clang 通过，但完整 66 对象 manifest 在访客里停在 tg_kp_bprm_comm（该程序带 4 处新 body）。lane verified 的契约审核 f08bb2cb9（kprog/results/verified_20261112/probe-read-rule-contract.md）判定与内核 helper 不符：故障时不清零 dst、无故障处理。R 侧 unbound 计时与 fault 语义随之关闭。
 - [x] **C** 原生替换失败后保留 eBPF，完整 Katran 两个工作阶段继续运行，recipe 位于冻结路径之外（7734afc52、725e45398；248ebacee、13c38586e，TODO 启用时补记）。
 - [ ] **C** 在冻结路径之外接通05-29 verified native阶段：原snapshot RPC9220b9b44、原norejit模式e9b15dbfb、完整成功/失败请求档案759f31d85已发布；六应用baseline共384个观测程序，同af422c391模型的生命周期锁ea4625f42后，BCC25/25完整运行710fdaa60，OTel两条旧安装入口恢复42ba10978；其余native阶段回放继续。
 - [ ] **R** AArch64 硬件性能（DGX Spark，单次测试后立刻恢复 deepseek41-flash 部署）。
