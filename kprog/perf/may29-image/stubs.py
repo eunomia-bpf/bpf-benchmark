@@ -20,8 +20,13 @@ import json
 import pathlib
 import sys
 
-# The fallback body the x86 JIT emits for a program with no instructions.
+# The fallback body the x86 JIT emits for a program with no instructions. A
+# program that is genuinely tiny has a small original too (tracee's empty_kprobe
+# loads 16 bytes of original and is called that), so the stub is identified by
+# both: a small jited body OVER a small original. BCC's fentry_vfs_* are 40 bytes
+# jited from 48 bytes of original, six real instructions, and are not stubs.
 FALLBACK_BYTES = 40
+FALLBACK_XLATED = 24
 
 
 def phases(app: dict) -> dict[str, dict]:
@@ -39,6 +44,8 @@ def main() -> None:
     parser.add_argument("runs", nargs="+", type=pathlib.Path)
     parser.add_argument("--max-bytes", type=int, default=FALLBACK_BYTES,
                         help="a program at or below this jited size is a stub")
+    parser.add_argument("--max-xlated", type=int, default=FALLBACK_XLATED,
+                        help="and at or below this many original bytes")
     args = parser.parse_args()
 
     stubbed = 0
@@ -52,7 +59,8 @@ def main() -> None:
             name = path.stem
             for phase, programs in phases(app).items():
                 stubs = [v for v in programs.values()
-                         if v.get("bytes_jited", 0) <= args.max_bytes]
+                         if v.get("bytes_jited", 0) <= args.max_bytes
+                         and v.get("bytes_xlated", 0) <= args.max_xlated]
                 if not stubs:
                     continue
                 runs = sum(v.get("run_cnt_delta", 0) for v in stubs)
