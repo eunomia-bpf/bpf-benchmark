@@ -151,6 +151,16 @@ def units_for_app(app: str) -> list[tuple[str, Path, list[str]]]:
         # programs; it carries no configuration of its own.
         return [(name, bpf / f"cilium/bpf/{name}.c", options + include)
                 for name, options in per_object.items()]
+    if app == "otel":
+        # The Makefile compiles one object per *.ebpf.c unit with NATIVE_CFLAGS
+        # plus -I<otel support dir>, and links them into
+        # otelcol-ebpf-profiler.native.o.
+        units = sorted(p.name[: -len(".ebpf.c")]
+                       for p in (bpf / "otel/support/ebpf").glob("*.ebpf.c"))
+        include = [f"-I{bpf}/otel/support/ebpf",
+                   "-Wno-unused-function", "-Wno-unused-variable"]
+        return [(name, bpf / f"otel/support/ebpf/{name}.ebpf.c", include)
+                for name in units]
     if app == "katran":
         # The Makefile's KATRAN_NATIVE_CFLAGS, and one source per object.
         include = [f"-I{bpf}/katran", f"-I{bpf}/katran/katran/lib/linux_includes",

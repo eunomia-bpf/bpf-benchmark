@@ -46,8 +46,13 @@ HTAB_KEY_OFFSET = 48
 
 MAP_DECL = re.compile(
     r"^(?:struct (\w+) |struct )\{\n"
-    r"(?P<body>(?:\s+\S.*\n)*?)"
-    r"\} (\w+) __attribute__\(\(section\(\"\.maps\"\), used\)\);",
+    r"(?P<body>(?:[^\n]*\n)*?)"
+    r"\} (\w+)"
+    # OTel puts diagnostics pragmas between the declarator and its attribute, so
+    # the attribute is looked for on the lines that follow.
+    r"(?:\s*\n#pragma[^\n]*)*\s*"
+    r"__attribute__\(\(section\(\"\.maps\"\), used\)\)"
+    r"(?:\s*\n#pragma[^\n]*)*\s*;",
     re.M)
 
 # One field of a map declaration: `int(*(type))[...]`, `typeof(T) *(key);` and
@@ -85,7 +90,7 @@ static inline __attribute__((always_inline)) void *__sp_lookup_{name}(void *map,
 }}
 """
 
-ARRAY_BODY = """    __u32 __k;
+ARRAY_BODY = """    unsigned int __k;
     __builtin_memcpy(&__k, key, sizeof(__k));
     if (__k >= {entries}u)
         return (void *)0;
@@ -96,7 +101,7 @@ ARRAY_BODY = """    __u32 __k;
 # run-time kallsyms value, so a C body built at build time cannot carry it and
 # the loader keeps percpu arrays; this body serves --percpu, where the address
 # is supplied as PERCPU_BASE_ADDR.
-PERCPU_ARRAY_BODY = """    __u32 __k;
+PERCPU_ARRAY_BODY = """    unsigned int __k;
     __builtin_memcpy(&__k, key, sizeof(__k));
     if (__k >= {entries}u)
         return (void *)0;
@@ -253,11 +258,20 @@ LOOKUP_TYPED = re.compile(
 # tetragon (((&map))) -- so each group is matched as an optional parenthesis
 # run and only the two identifiers are captured; the call that follows repeats
 # them.
+# The preprocessed unit spells a lookup as the compat header's helper macro
+# expansion. Three programs write the surrounding expression differently -- BCC
+# and Tracee with a (void *, const void *) cast and one paren level, tetragon
+# with one more level, OTel with (void *, void *) and a space after the open
+# paren -- so the grouping, the cast and the spacing are all matched loosely and
+# only the two identifiers are captured. The pattern deliberately does not try to
+# balance the parentheses itself: it finds the helper call, the two arguments
+# that name the map and the key, and then the trailing call that repeats them.
 LOOKUP_CALL = re.compile(
-    r"\(\(void \*\(\*\)\(void \*, const void \*\)\)native_helper_id2"
-    r"\(\(unsigned long\)\(1\), \(unsigned long\)\(\(*(?P<map>&?\w+)\)+"
-    r", \(unsigned long\)\(\(*(?P<key>&?\w+)\)+"
-    r"\)+\)\(\(*(?P=map)\)+, \(\(*(?P=key)\)+\)")
+    r"\(\s*\(\s*void\s*\*\s*\(\s*\*\s*\)\s*\(\s*void\s*\*\s*,\s*(?:const\s+)?void\s*\*\s*\)\s*\)"
+    r"\s*(?:__)?native_helper_id2\s*\(\s*\(\s*unsigned\s+long\s*\)\s*\(\s*1\s*\)\s*,"
+    r"\s*\(\s*unsigned\s+long\s*\)\s*\(*\s*&(?P<map>\w+)\s*\)*\s*,"
+    r"\s*\(\s*unsigned\s+long\s*\)\s*\(*\s*&(?P<key>[\w>.\-\[\]]+)\s*\)*"
+    r"[\s\S]{0,200}?\)\s*\(*\s*&(?P=map)\s*\)*\s*,\s*\(*\s*&(?P=key)\s*\)*")
 
 
 
@@ -363,8 +377,24 @@ def main() -> None:
     # the extern declarations at the head of the unit and nothing of the map
     # types, so they go at the first blank line after those declarations,
     # ahead of every program body.
-    decls_end = text.index("\n\n") + 1
-    cut = decls_end
+    # A unit with no blank line before its first lookup (otel's system_config is
+    # one long sequence) has nowhere to put the bodies at the head, so they go
+    # immediately before the first call instead.
+    # At file scope: a line that ends a definition (`}` or `;`) and leaves the
+    # brace depth at zero, taken from the first call backwards.
+    blank = text.find("\n\n")
+    if 0 <= blank < first_call and text.count("{", 0, blank) == text.count("}", 0, blank):
+        cut = blank + 1
+    else:
+        cut = 0
+        depth = 0
+        for index, line in enumerate(text.splitlines(keepends=True)):
+            depth += line.count("{") - line.count("}")
+            end = sum(len(l) for l in text.splitlines(keepends=True)[:index + 1])
+            if end > first_call:
+                break
+            if depth == 0 and line.rstrip().endswith(("}", ";")):
+                cut = end
     assert cut <= first_call, (cut, first_call)
     prelude = (
         "\n/* --- load-time map lookup bodies (native_specialize_maps.py) --- */\n"
