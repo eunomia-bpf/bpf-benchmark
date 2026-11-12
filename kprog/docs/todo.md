@@ -46,6 +46,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED probe-read candidate contract source comparison（2026-11-12）** lane C build-only rule emits memcpy/success for nonnull sources and returns -14 without clearing destination for null; sole-kernel read helpers use nofault copies and clear destination on negative return. Its 112/113 names are reversed, parsed base/offset are unused, and cited write_user_arg example is a write-family integer address. Evidence: `kprog/results/verified_20261112/probe-read-rule-contract.md`; shared repair requested from lane C in COORDINATION.md at 18:03:50Z. Census continues with retained helpers/modeld089; actual application counts remain in their run receipts.
+
 - **VERIFIED Katran rebuilt-kernel recheck（2026-11-12）** kernel `74d1097af561` / image `d756bf5919e9` 上冻结 workload 完成：1 loaded / 1 stock verified+native installed / 1 positive workload run counters，source15→native18，run_cnt_delta `20015708`、run_time_ns_delta `4125298587`；SAMPLES1、10s、stats1，app ok、make0。完整 P/B、load IDs、corpus raw 与持久化 bytecode captures（9 files、40837 bytes）归档 `kprog/results/verified_20261112/handoff-katran*`；raw `/workspaces/kprog-raw/verified/20261112-handoff-katran/`，corpus `x86_kvm_corpus_20261112_134431_322796`，captures `verified-captures-d1yds3g0`。
 
 - **VERIFIED BCC rebuilt-kernel recheck（2026-11-12）** kernel `74d1097af561` / image `d756bf5919e9` 上冻结 workload 的真实 BCC set 完成：25 loaded / 25 stock verified+native installed / 17 positive workload run counters；SAMPLES1、10s、stats1，app ok、make0。完整 request P/B、generation commands、stock load IDs、per-program counters 与 corpus 原始数据归档 `kprog/results/verified_20261112/handoff-bcc*`；raw `/workspaces/kprog-raw/verified/20261112-handoff-bcc/`，corpus `x86_kvm_corpus_20261112_132657_505791`。旧 kernel BCC 数据继续保留各自 receipt。
