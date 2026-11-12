@@ -1,0 +1,99 @@
+{
+  "model_commit": "8f1a1a8b4",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-stack-alias-compile",
+  "input_archive": "/workspaces/kprog-raw/verified/20261112-katran-startup/control/service.tar.gz",
+  "input_member": "service/requests/1.failure.tar.gz",
+  "exit_code": 0,
+  "commands": [
+    {
+      "command": [
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--input",
+        "/workspaces/kprog-raw/verified/20261112-stack-alias-compile/generated/request.native.o",
+        "--symbol",
+        "balancer_ingress",
+        "--mode",
+        "proof",
+        "--preserve-entry-abi",
+        "--output",
+        "/workspaces/kprog-raw/verified/20261112-stack-alias-compile/generated/trusted_x86.proof.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-g",
+        "-O3",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-E",
+        "/workspaces/kprog-raw/verified/20261112-stack-alias-compile/generated/trusted_x86.bpf.piece0.c",
+        "-o",
+        "/workspaces/kprog-raw/verified/20261112-stack-alias-compile/generated/trusted_x86.bpf.piece0.i"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-g",
+        "-O3",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-E",
+        "/workspaces/kprog-raw/verified/20261112-stack-alias-compile/generated/trusted_x86.bpf.piece1.c",
+        "-o",
+        "/workspaces/kprog-raw/verified/20261112-stack-alias-compile/generated/trusted_x86.bpf.piece1.i"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-g",
+        "-O3",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-c",
+        "/workspaces/kprog-raw/verified/20261112-stack-alias-compile/generated/trusted_x86.bpf.i",
+        "-o",
+        "/workspaces/kprog-raw/verified/20261112-stack-alias-compile/generated/trusted_x86.bpf.o"
+      ],
+      "returncode": 0
+    }
+  ],
+  "object_bytes": 1485544,
+  "scope": "Existing registered x86 adapter regenerated and compiled B from the captured kernel P, entry and generation metadata. Compile-only evidence; stock verification and native execution follow a separate actual service run.",
+  "archive": "stack-alias-compile.tar.gz"
+}
