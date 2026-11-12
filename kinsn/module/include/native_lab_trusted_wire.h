@@ -6,6 +6,9 @@
 
 #define NATIVE_LAB_TRUSTED_VERSION 1U
 
+/* BPF_PROG_LOAD selector, matching the kernel's BPF_F_NATIVE_IMAGE. */
+#define NATIVE_LAB_PROG_F_NATIVE_IMAGE (1U << 8)
+
 /* SUBMIT accepts native ELF, an entry symbol (without a terminating NUL),
  * and specialization metadata. B is generated through the service.
  * All three spans are copied into kernel-owned storage before submission

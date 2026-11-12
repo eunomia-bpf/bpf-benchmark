@@ -1,0 +1,35 @@
+{
+  "recorded_at": "2026-11-12T11:55:15.699942+00:00",
+  "kernel_source_commit": "74d1097af561",
+  "running_kernel_commit": "5f6e694bfd4d",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-native-image-handoff",
+  "archive": "native-image-handoff-source.tar.gz",
+  "root_cause": "The native image was assigned to the next JIT in the uploading task. libbpf cold memcg/name feature probes can issue BPF_PROG_LOAD between module arm and the intended stub load, consuming the image. The later stub then followed ordinary JIT emission of its return-zero bytecode. The global pending slot also allowed another task to replace the image.",
+  "source_trace": [
+    "kprog/libnativeloader/src/native_loader.cpp:3321 upload_and_load_stub arms before load_stub_prog creates its tail-call probe map",
+    "vendor/libbpf/src/bpf.c:220 and228 map creation calls memlock and program-name feature probes",
+    "vendor/libbpf/src/bpf.c:329 program load probes program-name support",
+    "vendor/linux-framework/kernel/bpf/core.c prior bpf_native_image_take consumed the global pending image on owner == current"
+  ],
+  "fix": "BPF_F_NATIVE_IMAGE selects the intended load. Its task-owned pending image transfers to prog->aux before stock verification, and the architecture JIT takes that program image. Fork initializes a fresh pending slot; task/program teardown releases images. Bound native loads retain B verification and emit P directly, including when B has subprograms. Missing images or failed native emission return errors.",
+  "userspace": "Both raw direct stub attr.prog_flags and trusted-worker opts.prog_flags select the native image through the shared wire constant.",
+  "checks": {
+    "loader_cpp20_syntax_exit_code": 0,
+    "regression_build_before_UAPI_export_define_exit_code": 2,
+    "regression_build_with_UAPI_export_define_exit_code": 0,
+    "kernel_checkpatch_exit_code": 0
+  },
+  "regression_cases": [
+    "cold libbpf feature probes and intervening ordinary load",
+    "missing image returns ENOENT",
+    "replacement of the same task image",
+    "BPF-to-BPF subprogram B emits the bound native P",
+    "failed verifier load releases its image",
+    "fork isolates pending state and child teardown releases its image",
+    "parallel tasks retain their distinct native images"
+  ],
+  "regression_build_command": "taskset -c 8-19 make -C kprog/libnativeloader native-image-handoff BUILD_DIR=/var/tmp/kprog-tmp/verified/native-image-handoff",
+  "scheduled_runtime_command": "make -C kprog/libnativeloader native-image-handoff-kvm BUILD_DIR=/var/tmp/kprog-tmp/verified/native-image-handoff NATIVE_MODULE=<coordinator-built direct-native module>",
+  "scope": "Source repair plus host regression build, loader syntax and static kernel patch checks. Kernel compilation, guest regression, six-application verified rechecks and direct timing follow coordinator-scheduled base/module/image rebuilds. Existing application receipts retain their historical running kernel.",
+  "queue": "Own queue690824 and tail690826 stopped while awaiting OTel; queue-cancellation.json annotates its exit-code file. OTel671605 retains its already-loaded guest and raw outputs."
+}

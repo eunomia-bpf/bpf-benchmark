@@ -46,6 +46,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED native image handoff（2026-11-12 11:33 审核最高优先级）** coordinator4589b0079 将四应用 timing 交修复后重测；既有 verified 计数保留各自原始 kernel/run receipt，并在新内核上复核六应用。内核源码提交 `74d1097af561` 把 pending image 归上传 task，`BPF_F_NATIVE_IMAGE` 将它转交明确的 program，再由 JIT 获取该 program 的 P；普通 libbpf feature probes 保持各自 B。fork 独立 pending slot，task/program teardown 释放 image；stock verifier 检查 B 后由 architecture JIT 发射 P，missing/JIT emission failure 通过 error 返回。loader 的 direct stub 与 trusted worker 同时携带 selector。新增 regression 覆盖 cold probes、rearm、missing、B subprogram、failed verification、fork、并发任务；host build（含 selector ABI static assertion）、C++20 syntax、kernel checkpatch 均 rc0。初次直接使用 UAPI header 的 export define 编译错误和后续成功日志均保留。source/receipt/archive `kprog/results/verified_20261112/native-image-handoff-source*`，raw `/workspaces/kprog-raw/verified/20261112-native-image-handoff/`。kernel/base/module/image rebuild 及实际 guest regression 由 coordinator 排期；旧 worker queue690824/690826 已在等待阶段停止，OTel671605 保留原 guest 和原始数据。
+
 **当前唯一镜像 verified 覆盖快照（2026-11-12 09:55 UTC）**：kernel `5f6e694bfd4d`、model `8f1a1a8b4`、current image（built from `d70d2e03e`）、installed worker `fba19ea94`。样本为 1×10s 功能覆盖。source submissions 计实际装入后提交 service 的候选原程序（保留应用重试）；verified 计 stock verifier 接受并安装的 native programs；run 计 workload 内 `run_cnt_delta > 0` 的 native programs。启动阶段退出的 run counters 标为待测。原始目录统一位于 `/workspaces/kprog-raw/verified/`；完整 corpus run IDs、逐 ID counters 与 stdout/stderr 见各 receipt/archive。worker map-dependency fix `812aee2ec` 的运行结果在协调 rebuild 后单列。
 
 | 应用 | Source loaded/submitted | Verified installed | Workload run | App status | Raw run directory / receipt |

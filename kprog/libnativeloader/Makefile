@@ -10,6 +10,27 @@ VNG_FLAGS ?=
 
 .PHONY: all clean
 
+.PHONY: native-image-handoff native-image-handoff-kvm guest-native-image-handoff
+native-image-handoff:
+	install -d "$(BUILD_DIR)"
+	$(CC) -O2 -Wall -Wextra -Werror -D__EXPORTED_HEADERS__ \
+		-I"$(REPO_ROOT)/vendor/linux-framework/include/uapi" \
+		-I"$(LIBBPF_PREFIX)/include" \
+		../test/native_image_handoff.c "$(LIBBPF_LIBRARY)" -lelf -lz -pthread \
+		-o "$(BUILD_DIR)/native-image-handoff"
+
+# NATIVE_MODULE selects the coordinator-built direct-native module.
+native-image-handoff-kvm: native-image-handoff
+	taskset -c 8-19 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/libnativeloader guest-native-image-handoff BUILD_DIR=$(abspath $(BUILD_DIR)) NATIVE_MODULE=$(NATIVE_MODULE)'
+
+guest-native-image-handoff:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod "$(NATIVE_MODULE)"
+	"$(BUILD_DIR)/native-image-handoff"
+
 all:
 	cmake -S . -B "$(BUILD_DIR)" \
 		-DNATIVE_LOADER_REPO_ROOT="$(REPO_ROOT)" \

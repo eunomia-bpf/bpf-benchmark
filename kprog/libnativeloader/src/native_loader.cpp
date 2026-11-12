@@ -953,6 +953,7 @@ int bpf_prog_load_native_stub_raw(uint32_t prog_type_value,
         : prog_name.size();
 
     attr.prog_type = prog_type_value;
+    attr.prog_flags = NATIVE_LAB_PROG_F_NATIVE_IMAGE;
     attr.expected_attach_type = attrs.expected_attach_type;
     attr.attach_btf_id = attrs.attach_btf_id;
     if (attach_prog_fd >= 0) {
@@ -3883,6 +3884,7 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
         opts.func_info = &entry; opts.func_info_cnt = 1; opts.func_info_rec_size = sizeof(entry);
     }
     opts.fd_array = fd_array.data(); opts.fd_array_cnt = fd_array.size();
+    opts.prog_flags |= NATIVE_LAB_PROG_F_NATIVE_IMAGE;
     std::vector<char> log(16 * 1024 * 1024, '\0');
     opts.log_buf = log.data(); opts.log_size = log.size(); opts.log_level = 1;
     native_lab_trusted_chunk image{};
