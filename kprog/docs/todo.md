@@ -50,7 +50,7 @@
 
 - **VERIFIED diagnostic（2026-11-12，非镜像 corpus）** 上游 BCC `vfsstat -v 1 1` 在唯一内核启动 rc0：实际应用 loaded 5、verified/native attached 5，native IDs 8/12/16/20/24；read/write/open 的 app counters 非零，执行至少 3 个程序，未采集全部程序 run_cnt，fsync/create 是否执行未确认。目录 `/workspaces/kprog-raw/verified/20261112-bcc-startup/`；完整 service/shim/startup 日志与 receipt 已归档 `kprog/results/verified_20261112/bcc-vfsstat-*`。source-current producer regression 同轮 rc0。完整 BCC set 与唯一镜像 corpus 仍待跑。
 
-- **VERIFIED BCC set diagnostic（2026-11-12）** 首轮 harness rc0，但只观测到 8 个仍在 native load 中的原始程序，verified native 0、native run 0；首个实际 service request 的 B 已生成/编译，caller 在完成前被 harness SIGINT，worker arm 返回 ENOENT，不能记作 verifier rejection。原始目录 `/workspaces/kprog-raw/verified/20261112-bcc-set/`，归档 `kprog/results/verified_20261112/bcc-set-interrupted*`。通用原因是 snapshot 可发布正在替换的 original FD；恢复历史 ea4625f42 的 load/snapshot lifetime 同步，不改 frozen runner、不新增 readiness 条件。
+- **VERIFIED BCC set diagnostic（2026-11-12）** 首轮 harness rc0，但只观测到 8 个仍在 native load 中的原始程序，verified native 0、native run 0；首个实际 service request 的 B 已生成/编译，caller 在完成前被 harness SIGINT，worker arm 返回 ENOENT，不能记作 verifier rejection。原始目录 `/workspaces/kprog-raw/verified/20261112-bcc-set/`，归档 `kprog/results/verified_20261112/bcc-set-interrupted*`。通用原因是 snapshot 可发布正在替换的 original FD；恢复历史 ea4625f42 的 load/snapshot lifetime 同步，不改 frozen runner、不新增 readiness 条件。 同步修复与真实 kernel queue/snapshot regression 已恢复到当前 shim；将先用旧 artifact 复现，再原地重建同一 shim 并重跑 regression/BCC set，目录 `/workspaces/kprog-raw/verified/20261112-load-lifecycle/`，结果待读取。
 
 两条路径分开计数。直接 native（跳过 verifier）：六个应用都跑通过（05-29，11-07 复现）。verified 路径（verifier 检查 B）：BCC 25/25、Katran 1/1 跑通过，其余应用只有少量程序，历史最高约 50/549。
 

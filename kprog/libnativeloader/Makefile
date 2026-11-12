@@ -59,3 +59,18 @@ guest-trusted-service:
 		--native-link "$(REPO_ROOT)/kprog/x86/native_lab/native_link/target/release/native-link" \
 		--loader "$(BUILD_DIR)/trusted-native-loader" \
 		--run $(SERVICE_RUN)
+
+.PHONY: trusted-lifecycle-check guest-trusted-lifecycle
+trusted-lifecycle-check: all
+	$(MAKE) -C ../stock-path/module
+	install -d "$(OUTPUT)"
+	taskset -c 8-19 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(OUTPUT)" --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/libnativeloader guest-trusted-lifecycle BUILD_DIR=$(abspath $(BUILD_DIR)) OUTPUT=$(OUTPUT)'
+
+guest-trusted-lifecycle:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_kprog_stock.ko
+	python3 ../test/pending_native_snapshot.py "$(OUTPUT)" \
+		"$(REPO_ROOT)/bpfopt/shim/build-x86/libbpfrejit_shim.so" "$(BUILD_DIR)/libnative_loader.so"
