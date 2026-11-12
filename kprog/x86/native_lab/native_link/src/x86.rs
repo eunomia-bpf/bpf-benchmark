@@ -3981,7 +3981,9 @@ mod tests {
         for preserve in [false, true] {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(),
                 &HashMap::new(), &[], &HashMap::new(), &[], true, preserve, false)?;
-            assert_eq!(output.blob, if preserve { vec![0x53, 0x31, 0xc0, 0x5b] } else { vec![0x31, 0xc0] });
+            let mut expected = if preserve { vec![0x53, 0x31, 0xc0, 0x5b] } else { vec![0x31, 0xc0] };
+            expected.extend_from_slice(&[0xe9, 0, 0, 0, 0]); // Canonical entry exit in proof mode.
+            assert_eq!(output.blob, expected);
             assert_eq!(output.callee_saved_mask, if preserve { 0 } else { 1 });
         }
         Ok(())
