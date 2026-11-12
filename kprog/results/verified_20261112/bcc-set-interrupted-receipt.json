@@ -1,0 +1,172 @@
+{
+  "source_commit": "c6fc51337",
+  "recorded_at": "2026-11-12T07:12:45Z",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-bcc-set",
+  "harness_exit_code": 0,
+  "source_programs_observed": [
+    {
+      "id": 10,
+      "type": "tracing",
+      "name": "fentry_vfs_read",
+      "tag": "8aac7fd4c2e97bf7",
+      "gpl_compatible": true,
+      "loaded_at": 1794466871,
+      "uid": 0,
+      "orphaned": false,
+      "bytes_xlated": 48,
+      "jited": true,
+      "bytes_jited": 40,
+      "bytes_memlock": 4096,
+      "map_ids": [
+        3
+      ],
+      "btf_id": 36
+    },
+    {
+      "id": 19,
+      "type": "kprobe",
+      "name": "kprobe__cap_capable_entry",
+      "tag": "b5856c95ecd0282a",
+      "gpl_compatible": true,
+      "loaded_at": 1794466871,
+      "uid": 0,
+      "orphaned": false,
+      "bytes_xlated": 232,
+      "jited": true,
+      "bytes_jited": 143,
+      "bytes_memlock": 4096,
+      "map_ids": [
+        20,
+        7,
+        5
+      ],
+      "btf_id": 45
+    },
+    {
+      "id": 25,
+      "type": "kprobe",
+      "name": "blk_account_io_merge_bio",
+      "tag": "9793ccc672393419",
+      "gpl_compatible": true,
+      "loaded_at": 1794466871,
+      "uid": 0,
+      "orphaned": false,
+      "bytes_xlated": 200,
+      "jited": true,
+      "bytes_jited": 121,
+      "bytes_memlock": 4096,
+      "map_ids": [
+        18,
+        8,
+        9
+      ],
+      "btf_id": 54
+    },
+    {
+      "id": 38,
+      "type": "kprobe",
+      "name": "tcp_v4_connect",
+      "tag": "120cbe8ad1ac7784",
+      "gpl_compatible": true,
+      "loaded_at": 1794466871,
+      "uid": 0,
+      "orphaned": false,
+      "bytes_xlated": 184,
+      "jited": true,
+      "bytes_jited": 110,
+      "bytes_memlock": 4096,
+      "map_ids": [
+        39,
+        27
+      ],
+      "btf_id": 72
+    },
+    {
+      "id": 39,
+      "type": "tracepoint",
+      "name": "tracepoint__syscalls__sys_enter_open",
+      "tag": "bcec44e26ffb6bdd",
+      "gpl_compatible": true,
+      "loaded_at": 1794466871,
+      "uid": 0,
+      "orphaned": false,
+      "bytes_xlated": 240,
+      "jited": true,
+      "bytes_jited": 141,
+      "bytes_memlock": 4096,
+      "map_ids": [
+        37,
+        23
+      ],
+      "btf_id": 63
+    },
+    {
+      "id": 40,
+      "type": "tracepoint",
+      "name": "sys_enter",
+      "tag": "b384d88950b7bbb9",
+      "gpl_compatible": true,
+      "loaded_at": 1794466871,
+      "uid": 0,
+      "orphaned": false,
+      "bytes_xlated": 168,
+      "jited": true,
+      "bytes_jited": 108,
+      "bytes_memlock": 4096,
+      "map_ids": [
+        38,
+        31,
+        32
+      ],
+      "btf_id": 81
+    },
+    {
+      "id": 44,
+      "type": "tracepoint",
+      "name": "inet_sock_set_state",
+      "tag": "7cdf701b320f8e4e",
+      "gpl_compatible": true,
+      "loaded_at": 1794466871,
+      "uid": 0,
+      "orphaned": false,
+      "bytes_xlated": 2240,
+      "jited": true,
+      "bytes_jited": 1501,
+      "bytes_memlock": 4096,
+      "map_ids": [
+        46,
+        42,
+        43,
+        44
+      ],
+      "btf_id": 90
+    },
+    {
+      "id": 47,
+      "type": "tracing",
+      "name": "sched_wakeup",
+      "tag": "07887b23a665c882",
+      "gpl_compatible": true,
+      "loaded_at": 1794466871,
+      "uid": 0,
+      "orphaned": false,
+      "bytes_xlated": 184,
+      "jited": true,
+      "bytes_jited": 121,
+      "bytes_memlock": 4096,
+      "map_ids": [
+        52,
+        48,
+        49
+      ],
+      "btf_id": 99
+    }
+  ],
+  "verified_native_programs": 0,
+  "native_programs_run": 0,
+  "service_requests_completed": 1,
+  "worker_stderr": "trusted-native-loader: arm kernel native image: No such file or directory\n",
+  "finding": "Diagnostic treated tracked original programs as ready during synchronous native replacement, completed its work, then stopped all eight tools with SIGINT while the first compilation was still active. Kernel native-arm ENOENT is consistent with that caller cancellation; it is not a verifier rejection.",
+  "next_fix": "Recover generic snapshot/load lifetime synchronization from ea4625f42 in non-frozen shim code. No readiness threshold or frozen runner change.",
+  "scope": "Interrupted startup diagnostic outside runtime image. Harness exit zero does not establish verified coverage."
+}
