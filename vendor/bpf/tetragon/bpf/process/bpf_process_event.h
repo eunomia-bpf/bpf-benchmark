@@ -100,7 +100,7 @@ FUNC_INLINE void event_set_clone(struct msg_process *pid)
 FUNC_INLINE void
 __get_caps(struct msg_capabilities *msg, const struct cred *cred)
 {
-#ifdef MICRO_NATIVE_TETRAGON
+#if defined(MICRO_NATIVE_TETRAGON) && !defined(MICRO_NATIVE_TETRAGON_PROBE_READS)
 	if (!cred) {
 		msg->effective = 0;
 		msg->inheritable = 0;
@@ -155,7 +155,7 @@ get_current_subj_caps(struct msg_capabilities *msg, struct task_struct *task)
 	const struct cred *cred;
 
 	/* Get the task's subjective creds */
-#ifdef MICRO_NATIVE_TETRAGON
+#if defined(MICRO_NATIVE_TETRAGON) && !defined(MICRO_NATIVE_TETRAGON_PROBE_READS)
 	cred = task ? task->cred : 0;
 #else
 	probe_read(&cred, sizeof(cred), _(&task->cred));
@@ -188,7 +188,7 @@ get_current_subj_creds(struct msg_cred *info, struct task_struct *task)
 FUNC_INLINE void
 get_namespaces(struct msg_ns *msg, struct task_struct *task)
 {
-#ifdef MICRO_NATIVE_TETRAGON
+#if defined(MICRO_NATIVE_TETRAGON) && !defined(MICRO_NATIVE_TETRAGON_PROBE_READS)
 	struct nsproxy *nsp = task ? task->nsproxy : 0;
 	struct pid *p = task ? task->thread_pid : 0;
 	struct mm_struct *mm = task ? task->mm : 0;

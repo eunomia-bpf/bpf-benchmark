@@ -1,0 +1,20 @@
+{
+  "recorded_at": "2026-11-12T10:36:03.487157+00:00",
+  "source": "vendor/bpf/tetragon/bpf/process/bpf_process_event.h",
+  "selector": "MICRO_NATIVE_TETRAGON_PROBE_READS",
+  "affected_functions": [
+    "__get_caps",
+    "get_current_subj_caps",
+    "get_namespaces"
+  ],
+  "behavior": "Defining the selector routes all three native metadata-read sections through their existing upstream probe_read branches. MICRO_NATIVE_TETRAGON retains target-layout and field-existence support in native_compat.h. Default builds retain their existing direct-read branches.",
+  "build_override": "NATIVE_ARCH_CFLAGS=-march=native -mno-red-zone -mgeneral-regs-only -DMICRO_NATIVE_TETRAGON_PROBE_READS",
+  "existing_make_target": "make -C vendor/bpf native-tetragon",
+  "default_make_dry_run_exit_code": 0,
+  "selector_make_dry_run_exit_code": 0,
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-tetragon-probe-selector",
+  "archive": "tetragon-probe-selector.tar.gz",
+  "validation_scope": "Three source guards and existing Make invocation. Both dry runs print the existing complete native-tetragon build, and the selector reaches common_flags for every object. Native compilation and actual application replay follow the active OTel guest.",
+  "runtime_counts": "Application counts retain their prior run receipts.",
+  "coordinator_authorization": "COORDINATION.md 2026-11-12T10:32:15Z; exact source file claimed before editing."
+}
