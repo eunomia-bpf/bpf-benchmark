@@ -29,5 +29,7 @@
   "scheduling": "Current Bmodel stays fixed for the running census; hot-class ordering follows census outcomes.",
   "full_request_archive_commit": "9f86d2619",
   "full_request_archive": "tracee-core-reg-final.tar.gz",
-  "archive": "tracee-context-load-origin.tar.gz"
+  "archive": "tracee-context-load-origin.tar.gz",
+  "disassembly_window_correction": "Original window starts inside an instruction at0xa70; corrected exact0xa89 boundary window is retained in native-context-load-aligned.txt.",
+  "correction_archive": "tracee-context-load-aligned.tar.gz"
 }
