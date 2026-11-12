@@ -202,6 +202,27 @@ def section_symbols(object_path: Path, section_prefix: str) -> dict[str, tuple[s
     return found
 
 
+def captured_map_shapes(capture: Path) -> tuple[dict[str, int], dict[str, int]]:
+    """Map name -> value size and key size, from the load-time capture.
+
+    The capture records each program's maps with the sizes the loader saw, which
+    is the layout a lookup body needs; the map declarations in the program give
+    the kind and entry count but not the sizes of the value types they alias.
+    """
+    values: dict[str, int] = {}
+    keys: dict[str, int] = {}
+    for ref in sorted(capture.glob("*/ref.json")):
+        meta = json.loads(ref.read_text())
+        name = meta.get("map_name", "")
+        if not name:
+            continue
+        if meta.get("value_size"):
+            values[name] = int(meta["value_size"])
+        if meta.get("key_size"):
+            keys[name] = int(meta["key_size"])
+    return values, keys
+
+
 def loaded_rodata(capture: Path) -> dict[str, bytes]:
     """Tool name -> the .rodata image of the programs that read it.
 
@@ -342,6 +363,11 @@ def main() -> None:
                              "write the manifest a run loads it through")
     parser.add_argument("--manifest", default="",
                         help="the image's own manifest, copied when publishing")
+    parser.add_argument("--maps", action="store_true",
+                        help="also give bpf_map_lookup_elem a C body built from "
+                             "the load-time map layout (native_specialize_maps.py)")
+    parser.add_argument("--maps-hash", action="store_true",
+                        help="with --maps, lower hash lookups too")
     args = parser.parse_args()
 
     capture = Path(args.capture)
@@ -406,6 +432,24 @@ def main() -> None:
         run([sys.executable, str(HERE / "native_specialize.py"),
              "--unit", str(produced_unit), "--decls", str(produced_index),
              "--rodata", str(rodata_file), "--output", str(specialized)])
+        if args.maps:
+            # The map layout is known here, so the lookup becomes address
+            # arithmetic before clang compiles the caller and the NULL check,
+            # field offsets and branches fold through it.
+            mapped = base.with_suffix(".maps.i")
+            value_sizes, key_sizes = captured_map_shapes(capture)
+            shapes = directory / f"{Path(stem).name}.map-shapes.json"
+            keys_file = directory / f"{Path(stem).name}.map-keys.json"
+            shapes.write_text(json.dumps(value_sizes))
+            keys_file.write_text(json.dumps(key_sizes))
+            maps_argv = [sys.executable, str(HERE / "native_specialize_maps.py"),
+                         "--unit", str(specialized), "--output", str(mapped),
+                         "--value-sizes", str(shapes),
+                         "--key-sizes", str(keys_file)]
+            if args.maps_hash:
+                maps_argv.append("--hash")
+            run(maps_argv)
+            specialized = mapped
         spec_object = base.with_suffix(".rodata.o")
         # The unit is preprocessed, so only the language flags the compile
         # needs (-fms-extensions for tetragon's struct filename) apply.
