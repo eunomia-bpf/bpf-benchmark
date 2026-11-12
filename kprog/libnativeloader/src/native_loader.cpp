@@ -3853,10 +3853,10 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
                            companion, proof, pins, bindings);
     LinkedBlob linked = load_or_link_native_blob(options.native_link_path, options.native_object_path,
         options.symbol_name, companion, options.trusted_native_proof_path);
-    for (int fd : reopen_relocated_map_fds(linked.relocated_map_ids))
+    // P retains its relocated maps; B's LDDW references retain B's maps.
+    std::vector<int> fd_array = reopen_relocated_map_fds(linked.relocated_map_ids);
+    for (int fd : fd_array)
         pins.push_back(std::make_unique<ScopedFd>(fd));
-    std::vector<int> fd_array;
-    for (const auto &pin : pins) fd_array.push_back(pin->get());
 
     bpf_prog_load_opts opts{}; opts.sz = sizeof(opts);
     opts.expected_attach_type = static_cast<bpf_attach_type>(options.expected_attach_type);
