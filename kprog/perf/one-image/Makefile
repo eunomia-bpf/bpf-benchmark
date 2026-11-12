@@ -84,6 +84,10 @@ NATIVE_MANIFEST ?= /opt/bpf-benchmark/native-bpf/x86_64/$(APP_DIR)/manifest.json
 # The pass list for the load-time plan; empty keeps the frozen default. A capture
 # run uses map-only so the driver writes each program's map snapshots.
 BENCH_PASSES ?=
+# The load-time rejit mode the guest runs in. norejit is the timing setting (the
+# native objects are installed at load); a capture run leaves it empty so the
+# frozen driver takes its map-snapshot phase for the map_inline pass.
+SKIP_REJIT_MODE ?= norejit
 # Extra vng flags, for example --verbose to keep the guest kernel console in the log.
 VNG_FLAGS ?=
 # Breadth first (operator 2026-11-11: "每个应用跑3次之后换下一个应用这样, 广度优先"):
@@ -97,7 +101,7 @@ corpus:
 	install -d $(STATE)/var-tmp $(LOGS)
 	ln -f $(IMAGE_TAR) $(STATE)/var-tmp/runtime.image.tar 2>/dev/null || cp $(IMAGE_TAR) $(STATE)/var-tmp/runtime.image.tar
 	cp $(KINSN_OUT)/bpf_x86_native_lab.ko $(STATE)/var-tmp/bpf_x86_native_lab.ko
-	taskset -c $(CPUS) vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir /var/tmp=$(STATE)/var-tmp --overlay-rwdir /tmp --overlay-rwdir /run --overlay-rwdir /usr/local --disable-monitor $(VNG_FLAGS) --cpus $(VM_CPUS) --memory $(VM_MEM) --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile guest APPS=$(APPS) SAMPLES=$(SAMPLES) WORKLOAD_DURATION=$(WORKLOAD_DURATION) BPFREJIT_CORPUS_BPF_STATS=$(BPFREJIT_CORPUS_BPF_STATS) NATIVE_MANIFEST=$(NATIVE_MANIFEST) BENCH_PASSES=$(BENCH_PASSES)'
+	taskset -c $(CPUS) vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir /var/tmp=$(STATE)/var-tmp --overlay-rwdir /tmp --overlay-rwdir /run --overlay-rwdir /usr/local --disable-monitor $(VNG_FLAGS) --cpus $(VM_CPUS) --memory $(VM_MEM) --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile guest APPS=$(APPS) SAMPLES=$(SAMPLES) WORKLOAD_DURATION=$(WORKLOAD_DURATION) BPFREJIT_CORPUS_BPF_STATS=$(BPFREJIT_CORPUS_BPF_STATS) NATIVE_MANIFEST=$(NATIVE_MANIFEST) BENCH_PASSES=$(BENCH_PASSES) SKIP_REJIT_MODE=$(SKIP_REJIT_MODE)'
 	rm -f $(STATE)/var-tmp/bpf-benchmark-docker.img
 
 guest:
@@ -110,7 +114,7 @@ guest:
 	  BPFREJIT_SHIM_NATIVE_MANIFEST=$(NATIVE_MANIFEST) \
 	  BPFREJIT_BENCH_PASSES=$(BENCH_PASSES) \
 	  BPFREJIT_NATIVE_LOADER_SO=/usr/local/lib/bpfrejit/libnative_loader.so \
-	  KEEP_WORKDIRS=all BPFREJIT_KEEP_ALL_WORKDIRS=1 SKIP_REJIT=norejit \
+	  KEEP_WORKDIRS=all BPFREJIT_KEEP_ALL_WORKDIRS=1 SKIP_REJIT=$(SKIP_REJIT_MODE) \
 	  $(MAKE) -C $(ROOT) __runtime-vm-corpus PLATFORM=kvm ARCH=x86 \
 	  X86_RUNNER_RUNTIME_IMAGE=$(IMAGE) X86_RUNNER_RUNTIME_IMAGE_TAR=$(GUEST_IMAGE_TAR) \
 	  SAMPLES=$(SAMPLES) WORKLOAD_DURATION=$(WORKLOAD_DURATION)
