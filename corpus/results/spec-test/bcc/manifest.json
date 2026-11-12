@@ -1,0 +1,149 @@
+{
+ "app": "bcc",
+ "objects": [
+  {
+   "native_object": "biosnoop.native.o",
+   "program": "blk_account_io_",
+   "symbol": "blk_account_io_merge_bio"
+  },
+  {
+   "native_object": "biosnoop.native.o",
+   "program": "block_rq_comple",
+   "symbol": "block_rq_complete"
+  },
+  {
+   "native_object": "biosnoop.native.o",
+   "program": "block_rq_insert",
+   "symbol": "block_rq_insert"
+  },
+  {
+   "native_object": "biosnoop.native.o",
+   "program": "block_rq_issue",
+   "symbol": "block_rq_issue"
+  },
+  {
+   "native_object": "vfsstat.native.o",
+   "program": "fentry_vfs_crea",
+   "symbol": "fentry_vfs_create"
+  },
+  {
+   "native_object": "vfsstat.native.o",
+   "program": "fentry_vfs_fsyn",
+   "symbol": "fentry_vfs_fsync"
+  },
+  {
+   "native_object": "vfsstat.native.o",
+   "program": "fentry_vfs_open",
+   "symbol": "fentry_vfs_open"
+  },
+  {
+   "native_object": "vfsstat.native.o",
+   "program": "fentry_vfs_read",
+   "symbol": "fentry_vfs_read"
+  },
+  {
+   "native_object": "vfsstat.native.o",
+   "program": "fentry_vfs_writ",
+   "symbol": "fentry_vfs_write"
+  },
+  {
+   "native_object": "runqlat.native.o",
+   "program": "handle_sched_sw",
+   "symbol": "handle_sched_switch"
+  },
+  {
+   "native_object": "runqlat.native.o",
+   "program": "handle_sched_wa"
+  },
+  {
+   "native_object": "runqlat.native.o",
+   "program": "handle_switch",
+   "symbol": "handle_switch"
+  },
+  {
+   "native_object": "tcplife.native.o",
+   "program": "inet_sock_set_s",
+   "symbol": "inet_sock_set_state"
+  },
+  {
+   "native_object": "capable.native.o",
+   "program": "kprobe__cap_cap"
+  },
+  {
+   "native_object": "vfsstat.native.o",
+   "program": "kprobe_vfs_crea",
+   "symbol": "kprobe_vfs_create"
+  },
+  {
+   "native_object": "vfsstat.native.o",
+   "program": "kprobe_vfs_fsyn",
+   "symbol": "kprobe_vfs_fsync"
+  },
+  {
+   "native_object": "vfsstat.native.o",
+   "program": "kprobe_vfs_open",
+   "symbol": "kprobe_vfs_open"
+  },
+  {
+   "native_object": "vfsstat.native.o",
+   "program": "kprobe_vfs_read",
+   "symbol": "kprobe_vfs_read"
+  },
+  {
+   "native_object": "vfsstat.native.o",
+   "program": "kprobe_vfs_writ",
+   "symbol": "kprobe_vfs_write"
+  },
+  {
+   "native_object": "runqlat.native.o",
+   "program": "sched_switch",
+   "symbol": "sched_switch"
+  },
+  {
+   "native_object": "runqlat.native.o",
+   "program": "sched_wakeup",
+   "symbol": "sched_wakeup"
+  },
+  {
+   "native_object": "runqlat.native.o",
+   "program": "sched_wakeup_ne",
+   "symbol": "sched_wakeup_new"
+  },
+  {
+   "native_object": "syscount.native.o",
+   "program": "sys_enter",
+   "symbol": "sys_enter"
+  },
+  {
+   "native_object": "syscount.native.o",
+   "program": "sys_exit",
+   "symbol": "sys_exit"
+  },
+  {
+   "native_object": "tcpconnect.native.o",
+   "program": "tcp_v4_connect",
+   "symbol": "tcp_v4_connect"
+  },
+  {
+   "native_object": "tcpconnect.native.o",
+   "program": "tcp_v4_connect_",
+   "symbol": "tcp_v4_connect_ret"
+  },
+  {
+   "native_object": "tcpconnect.native.o",
+   "program": "tcp_v6_connect",
+   "symbol": "tcp_v6_connect"
+  },
+  {
+   "native_object": "tcpconnect.native.o",
+   "program": "tcp_v6_connect_",
+   "symbol": "tcp_v6_connect_ret"
+  },
+  {
+   "native_object": "opensnoop.native.o",
+   "program": "tracepoint__sys"
+  }
+ ],
+ "status": "native-objects-proof-linked",
+ "version": 1
+}
