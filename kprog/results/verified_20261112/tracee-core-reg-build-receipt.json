@@ -1,0 +1,34 @@
+{
+  "recorded_at": "2026-11-12T15:33:44.211751+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-tracee-core-reg-build",
+  "selector_commit": "b94e7d0ee",
+  "kernel_commit": "74d1097af561",
+  "kernel_release": "7.0.0-rc2+",
+  "host_cpus": "8-19",
+  "jobs": 1,
+  "command": "taskset -c 8-19 make -C /workspaces/repository/vendor/bpf native-tracee ARCH=x86 KERNEL_RELEASE=7.0.0-rc2+ VMLINUX_BTF=/workspaces/.agent-state/kprog-ck/build-x86/vmlinux NATIVE_ARCH_CFLAGS=-march=native\\ -mno-red-zone\\ -mgeneral-regs-only\\ -DMICRO_NATIVE_CORE_REG_PROBE_READS NATIVE_OUT=/var/tmp/kprog-tmp/verified/tracee-core-reg/native NATIVE_STAGE_ROOT=/workspaces/repository/corpus/results/verified-tracee-core-reg -j1",
+  "make_exit_code": 0,
+  "started": "2026-11-12T15:30:00Z",
+  "finished": "2026-11-12T15:30:26Z",
+  "native_stage": "/workspaces/repository/corpus/results/verified-tracee-core-reg/tracee",
+  "native_objects": [
+    {
+      "name": "kprobe_check.native.o",
+      "bytes": 7936
+    },
+    {
+      "name": "lsm_check.native.o",
+      "bytes": 6056
+    },
+    {
+      "name": "tracee.native.o",
+      "bytes": 10077512
+    }
+  ],
+  "native_object_count": 3,
+  "native_object_bytes": 10091504,
+  "manifest_entries": 113,
+  "manifest_status": "native-objects-proof-linked",
+  "archive": "tracee-core-reg-build.tar.gz",
+  "scope": "Existing full native-tracee target with CORE register probe reads completed; application coverage follows in the registered-service replay. Existing timing objects/kernel/image retained."
+}
