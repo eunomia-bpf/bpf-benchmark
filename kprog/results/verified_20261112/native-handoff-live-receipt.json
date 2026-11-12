@@ -1,0 +1,27 @@
+{
+  "recorded_at": "2026-11-12T13:24:43.709251+00:00",
+  "kernel_commit": "74d1097af561",
+  "loader_selector_commit": "da665bbf3",
+  "image_build_receipt_commit": "f69c938e7",
+  "test_fixture_commit": "9d8094606",
+  "guest_mount_commit": "7b0a5c05c",
+  "log_stream_commit": "04b567de3",
+  "make_exit_code": 0,
+  "started": "2026-11-12T13:21:38Z",
+  "finished": "2026-11-12T13:21:42Z",
+  "command": "taskset -c 8-19 make -C /workspaces/repository/kprog/libnativeloader native-image-handoff-kvm BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader NATIVE_MODULE=/workspaces/repository/kinsn/module/x86/build/bpf_x86_native_lab.ko",
+  "observed_stdout": "PASS: cold probes, explicit load, rearm, verifier failure, fork and parallel upload",
+  "cases": [
+    "ordinary load and cold libbpf probes retain pending P",
+    "explicit load executes its native P return value",
+    "consumed image returns ENOENT on next explicit load",
+    "rearm replaces pending image; B subprogram load emits P",
+    "stock verifier rejection releases attached image",
+    "fork child starts with independent pending state and exits with its own image",
+    "parent pending image survives child",
+    "parallel uploader threads each execute their own image"
+  ],
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-handoff-rebuild/handoff-rerun2",
+  "archive": "native-handoff-live.tar.gz",
+  "scope": "Live kernel handoff regression completed; application coverage and image functional sweep follow."
+}
