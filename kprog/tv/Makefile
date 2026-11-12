@@ -114,6 +114,14 @@ service-request-compile:
 linker-default-bytes:
 	python3 ../test/native_link_default_bytes.py "$(OUTPUT)" $(if $(REFERENCE),--reference "$(REFERENCE)")
 
+.PHONY: linker-tail-count-bytes
+linker-tail-count-bytes:
+	install -d "$(OUTPUT)"
+	../x86/native_lab/native_link/target/release/native-link --input "$(INPUT)" --symbol "$(SYMBOL)" --mode kernel --link-plan "$(LINK_PLAN)" \
+		--output "$(OUTPUT)/default.bin" --output-relocs "$(OUTPUT)/default.relocs" --output-map-patches "$(OUTPUT)/default.maps" --output-abi "$(OUTPUT)/default.abi"
+	../x86/native_lab/native_link/target/release/native-link --input "$(INPUT)" --symbol "$(SYMBOL)" --mode kernel --link-plan "$(LINK_PLAN)" --tail-count-relocs \
+		--output "$(OUTPUT)/enabled.bin" --output-relocs "$(OUTPUT)/enabled.relocs" --output-map-patches "$(OUTPUT)/enabled.maps" --output-abi "$(OUTPUT)/enabled.abi"
+
 .PHONY: linker-entry-abi-check
 linker-entry-abi-check:
 	$(MAKE) linker-default-bytes OUTPUT="$(OUTPUT)/before"
