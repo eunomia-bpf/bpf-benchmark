@@ -1,0 +1,19 @@
+{
+  "recorded_at": "2026-11-12T12:54:14.680454+00:00",
+  "kernel_commit": "74d1097af561",
+  "btf": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+  "make_exit_code": 0,
+  "command": "taskset -c 0-19 make -C /workspaces/repository/vendor/bpf vmlinux VMLINUX_BTF=/workspaces/.agent-state/kprog-ck/build-x86/vmlinux KERNEL_RELEASE=7.0.0-rc2+ -j1",
+  "bcc_equals_new_btf_header": true,
+  "tetragon_equals_new_btf_with_own_guard": true,
+  "changed_headers": [
+    "vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h",
+    "vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h"
+  ],
+  "layout_changes": [
+    "bpf_prog_aux gains native_image",
+    "task_struct gains bpf_native_image after bpf_ctx",
+    "bpf_native_image owner field removed"
+  ],
+  "scope": "Native source headers regenerated from the sole rebuilt kernel BTF; the runtime image and live tests follow. Cleanup log records stale generated target header removal."
+}

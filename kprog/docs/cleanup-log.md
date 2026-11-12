@@ -168,3 +168,5 @@ REMOVED 156448B /workspaces/.agent-state/kprog-ck/verified-module/bpf_kprog_stoc
 REMOVED 499976B /workspaces/.agent-state/kprog-ck/verified-module/bpf_kprog_stock.o
 KEPT incremental kprog_stock.o and source; raw run archives and logs retained.
 ```
+
+- VERIFIED 2026-11-12T12:51:40Z: removed rebuildable stale native target header `/workspaces/repository/vendor/bpf/targets/x86/7.0.0-rc2+/vmlinux.h` (2885599 bytes) under coordinator12:33 instruction; regenerated in place from sole kernel74d1097af561 BTF. Raw build/run data retained.

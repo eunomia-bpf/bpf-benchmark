@@ -6729,7 +6729,7 @@ enum {
 	PT_MAX_TOP_LEVEL___2 = 4ULL,
 	PT_GRANULE_LG2SZ___2 = 12ULL,
 	PT_TABLEMEM_LG2SZ___2 = 12ULL,
-	PT_TOP_PHYS_MASK___2 = 4503599627366400ULL,
+	PT_TOP_PHYS_MASK___2 = 18446744073709547520ULL,
 };
 
 enum {
@@ -6739,7 +6739,7 @@ enum {
 	PT_MAX_TOP_LEVEL___3 = 4ULL,
 	PT_GRANULE_LG2SZ___3 = 12ULL,
 	PT_TABLEMEM_LG2SZ___3 = 12ULL,
-	PT_TOP_PHYS_MASK___3 = 18446744073709547520ULL,
+	PT_TOP_PHYS_MASK___3 = 4503599627366400ULL,
 };
 
 enum {
@@ -42344,7 +42344,6 @@ struct bpf_native_image {
 	u32 nr_relocs;
 	u32 nr_sites;
 	u32 callee_saved_mask;
-	struct task_struct *owner;
 };
 
 struct bpf_native_reloc {
@@ -42553,6 +42552,7 @@ struct exception_table_entry;
 
 struct bpf_prog_aux {
 	atomic64_t refcnt;
+	struct bpf_native_image *native_image;
 	u32 used_map_cnt;
 	u32 used_btf_cnt;
 	u32 max_ctx_offset;
@@ -73029,14 +73029,14 @@ struct insn_live_regs {
 
 struct instance_attribute {
 	struct attribute attr;
-	ssize_t (*show)(struct edac_pci_ctl_info *, char *);
-	ssize_t (*store)(struct edac_pci_ctl_info *, const char *, size_t);
+	ssize_t (*show)(struct edac_device_instance *, char *);
+	ssize_t (*store)(struct edac_device_instance *, const char *, size_t);
 };
 
 struct instance_attribute___2 {
 	struct attribute attr;
-	ssize_t (*show)(struct edac_device_instance *, char *);
-	ssize_t (*store)(struct edac_device_instance *, const char *, size_t);
+	ssize_t (*show)(struct edac_pci_ctl_info *, char *);
+	ssize_t (*store)(struct edac_pci_ctl_info *, const char *, size_t);
 };
 
 union intcapxt {
@@ -109615,6 +109615,7 @@ struct task_struct {
 	void *security;
 	struct bpf_local_storage *bpf_storage;
 	struct bpf_run_ctx *bpf_ctx;
+	struct bpf_native_image *bpf_native_image;
 	struct bpf_net_context *bpf_net_context;
 	void *mce_vaddr;
 	__u64 mce_kflags;
@@ -109629,7 +109630,6 @@ struct task_struct {
 	struct callback_head l1d_flush_kill;
 	struct unwind_task_info unwind_info;
 	struct thread_struct thread;
-	long: 64;
 	long: 64;
 	long: 64;
 };
