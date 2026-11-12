@@ -1,39 +1,40 @@
 #!/bin/bash
-# Read an application's own map counters at the END of a measurement arm.
+# Read an application's own map counters while an arm is still running.
 #
 # The shim snapshots maps when a program loads, so the per-CPU counters an
-# equal-work check wants are all zero in those snapshots -- and the bigger ones
-# are dropped anyway, because the shim refuses a dump over 64 KiB
-# (bpfopt/shim/shim_snapshot.h:583) and a per-CPU map multiplies by the CPU count.
+# equal-work check wants read zero in those snapshots; and a per-CPU map
+# multiplies its JSON by the guest's CPU count, so a large one can also exceed
+# the 64 KiB dump limit. The shim has an on-demand command the framework never
+# calls at arm end: `snapshot_maps` with an output_dir, over the app's own socket
+# at $BPFREJIT_SHIM_SOCK_DIR/shim-<pid>.sock (bpfopt/shim/libbpfrejit_shim.c:1466,
+# default /var/run/bpfrejit).
 #
-# The shim already has an on-demand command for this, so nothing in the framework
-# changes: send `snapshot_maps` to the app's shim socket, which is
-# /tmp/bpfrejit-shim-<pid>.sock inside the guest.
+# The app runs inside the runtime container, so its socket is inside that
+# container's filesystem and a path in the guest will not see it. This enters the
+# container with docker exec, finds the socket, and sends the command. /workspaces
+# is mounted on both sides, so the snapshot lands where the host can read it.
 #
-# Usage (inside the guest): arm-end-counters.sh <app-pid> <output-dir>
+# Usage (inside the guest): arm-end-counters.sh <app-name-substring> <output-dir> [timeout]
 set -eu
 
-PID=${1:?application pid}
-OUT=${2:?output directory}
-SOCK=/tmp/bpfrejit-shim-$PID.sock
+NAME=${1:?application name substring, e.g. otelcol}
+OUT=${2:?output directory, a path the host can read}
+TIMEOUT=${3:-600}
 
-if [ ! -S "$SOCK" ]; then
-    # The shim falls back to a directory of its own when it cannot use /tmp; find
-    # the socket for this pid anywhere it could have landed.
-    SOCK=$(ls /tmp/bpfrejit-shim-$PID.sock /run/*/shim-$PID.sock 2>/dev/null | head -1 || true)
-fi
-if [ ! -S "${SOCK:-}" ]; then
-    echo "arm-end: no shim socket for pid $PID" >&2
-    exit 1
-fi
-
-install -d "$OUT"
-printf '{"cmd":"snapshot_maps","output_dir":"%s"}\n' "$OUT" | \
-    socat - "UNIX-CONNECT:$SOCK" 2>/dev/null || \
-    python3 - "$SOCK" "$OUT" <<'PY'
-import json, socket, sys
+deadline=$(( $(date +%s) + TIMEOUT ))
+killed=0
+while [ "$(date +%s)" -lt "$deadline" ]; do
+    for cid in $(docker ps -q 2>/dev/null); do
+        # The socket belongs to the app process inside this container.
+        sock=$(docker exec "$cid" sh -c 'for d in "${BPFREJIT_SHIM_SOCK_DIR:-/var/run/bpfrejit}" /tmp; do
+            ls "$d"/shim-*.sock 2>/dev/null | head -1 && break; done' 2>/dev/null | head -1)
+        if [ -n "${sock:-}" ]; then
+            echo "arm-end: container $cid socket $sock"
+            docker exec "$cid" python3 - "$sock" "$OUT" <<'PYEOF'
+import json, os, socket, sys
 
 path, out = sys.argv[1], sys.argv[2]
+os.makedirs(out, exist_ok=True)
 sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 sock.connect(path)
 sock.sendall((json.dumps({"cmd": "snapshot_maps", "output_dir": out}) + "\n").encode())
@@ -46,7 +47,16 @@ while True:
     if b"\n" in reply:
         break
 sock.close()
-print(reply.decode(errors="replace").strip())
-PY
-
-echo "arm-end: snapshot written under $OUT"
+text = reply.decode(errors="replace").strip()
+print(text if text else "(empty reply)")
+PYEOF
+            rc=$?
+            if [ "$rc" -ne 0 ]; then echo "arm-end: snapshot command failed rc=$rc" >&2; fi
+            echo "arm-end: snapshot under $OUT"
+            exit 0
+        fi
+    done
+    sleep 1
+done
+echo "arm-end: no shim socket within ${TIMEOUT}s" >&2
+exit 1
