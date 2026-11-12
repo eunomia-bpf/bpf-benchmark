@@ -8,12 +8,17 @@
 # limit, and the app's maps are in the guest's own BPF namespace, so this finds the
 # map by name inside the container and dumps it directly.
 #
-# Usage (inside the guest): map-dump.sh <map-name> <out-dir> [timeout-seconds]
+# The map exists as soon as the program loads, which is before the workload has
+# produced anything, so a dump taken on first sight is empty of the counters the
+# check wants. SETTLE_SECONDS waits after the map appears before dumping.
+#
+# Usage (inside the guest): map-dump.sh <map-name> <out-dir> [timeout-seconds] [settle-seconds]
 set -eu
 
 MAP_NAME=${1:?map name, e.g. metrics}
 OUT=${2:?output directory the host can read}
 TIMEOUT=${3:-900}
+SETTLE=${4:-0}
 
 install -d "$OUT"
 deadline=$(( $(date +%s) + TIMEOUT ))
@@ -37,6 +42,20 @@ for m in maps:
                 done
                 exit 1" 2>/dev/null) || true
             if [ -n "${got:-}" ]; then
+                [ "$SETTLE" -gt 0 ] && sleep "$SETTLE"
+                got=$(docker exec "$cid" sh -c "
+                    bt=\$(command -v bpftool || true)
+                    [ -n \"\$bt\" ] || bt=/usr/local/bin/bpftool
+                    for m in \$(\$bt -j map show 2>/dev/null | python3 -c '
+import json,sys
+try: maps=json.load(sys.stdin)
+except Exception: sys.exit(0)
+for m in maps:
+    if m.get(\"name\")==\"$MAP_NAME\": print(m.get(\"id\"))
+'); do
+                        \$bt map dump id \$m --json && exit 0
+                    done
+                    exit 1" 2>/dev/null) || true
                 printf '%s\n' "$got" > "$OUT/$MAP_NAME.json"
                 echo "map-dump: wrote $OUT/$MAP_NAME.json ($(printf '%s' "$got" | wc -c) bytes)"
                 exit 0
