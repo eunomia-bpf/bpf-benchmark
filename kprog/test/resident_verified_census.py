@@ -104,7 +104,7 @@ def guest(args):
     source = json.loads((args.output / "inventory.json").read_text())
     state, = args.service_state.glob("session-*/requests")
     app_maps = {a["application"]: a["map_inventory"] for a in source["applications"]}
-    with (args.output / "outcomes.jsonl").open("w") as journal:
+    with (args.service_state.parent / "outcomes.jsonl").open("w") as journal:
         for row in source["programs"]:
             result = {k: row[k] for k in ("application", "source_prog_id", "name", "priority")}
             selected = row["native_candidates"]

@@ -2,6 +2,7 @@ SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 ROOT := /workspaces/repository
 OUTPUT ?= /workspaces/kprog-raw/verified/20261112-resident-census
+RUN_OUTPUT ?= $(OUTPUT)/control
 INPUTS := /workspaces/kprog-raw/var-tmp/CL/census-inputs/inputs/run-inventory.json
 RESOURCES := /workspaces/kprog-raw/var-tmp/CL/census-inputs/inputs/resource-index.json
 STAGE := $(ROOT)/vendor/build/native-bpf/x86/stage
@@ -22,5 +23,5 @@ prepare:
 
 run:
 	$(MAKE) -C $(ROOT)/kprog/libnativeloader -o trusted-service trusted-service-kvm \
-		BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader OUTPUT=$(OUTPUT)/control VM_CPUS=8 VM_MEM=64G \
-		SERVICE_RUN='python3 $(ROOT)/kprog/test/resident_verified_census.py guest --output $(OUTPUT) --service-state $(OUTPUT)/control/state --loader-directory /workspaces/.agent-state/kprog-ck/verified-loader'
+		BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader OUTPUT=$(RUN_OUTPUT) VM_CPUS=8 VM_MEM=64G \
+		SERVICE_RUN='python3 $(ROOT)/kprog/test/resident_verified_census.py guest --output $(OUTPUT) --service-state $(RUN_OUTPUT)/state --loader-directory /workspaces/.agent-state/kprog-ck/verified-loader'

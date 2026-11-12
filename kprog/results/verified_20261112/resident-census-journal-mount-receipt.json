@@ -1,0 +1,17 @@
+{
+  "recorded_at": "2026-11-12T16:32:38.241364+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-resident-census/ready",
+  "launcher_pid": 931495,
+  "make_exit_code": 2,
+  "completed_stock_submissions": 0,
+  "diagnostic": "OSError [Errno30] Read-only file system while creating ready/outcomes.jsonl",
+  "cause": "The VM exposes RUN_OUTPUT as writable; the prepared inventory parent is read-only.",
+  "change": "Place the journal in service_state.parent, inside RUN_OUTPUT. RUN_OUTPUT permits a distinct retry directory while retaining each earlier service archive.",
+  "validation": {
+    "python_ast": "pass",
+    "retry_make_dry_run": 0,
+    "canonical_loader_resource_symbols": "bpf_object__prepare, bpf_map__set_pin_path, btf__new present",
+    "runtime_retry": "pending"
+  },
+  "archive": "resident-census-journal-mount.tar.gz"
+}
