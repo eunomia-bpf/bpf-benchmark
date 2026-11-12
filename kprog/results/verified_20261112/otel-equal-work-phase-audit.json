@@ -1,0 +1,70 @@
+{
+  "recorded_at": "2026-11-12T23:24:01Z",
+  "scope": "Read-only audit of C reported baseline metrics versus actual native phase",
+  "run_directory": "corpus/results/x86_kvm_corpus_20261112_230405_667339",
+  "claim_source": "COORDINATION.md C19:15 and19:18 notices: all five usable metric samples are BASELINE;13 replacements are from post_rejit shim log",
+  "sample_phase_source": "C phase annotations; this audit does not independently repeat the raw dump timestamp/lifecycle join",
+  "source_evidence": [
+    {
+      "path": "kprog/perf/one-image/Makefile:113",
+      "fact": "Guest sets BPFREJIT_SHIM_NATIVE_LOADER=post"
+    },
+    {
+      "path": "corpus/driver.py:143",
+      "fact": "post means native_loader_post_only enabled"
+    },
+    {
+      "path": "corpus/driver.py:633",
+      "fact": "baseline measured before runner.stop/restart"
+    },
+    {
+      "path": "corpus/driver.py:697",
+      "fact": "Post-restart loadtime_env sets native loader to1"
+    }
+  ],
+  "actual_program_records": {
+    "baseline": [
+      {
+        "bytes_jited": 3815,
+        "bytes_xlated": 5904,
+        "id": 17,
+        "name": "native_tracer_e",
+        "run_cnt_delta": 91790055,
+        "run_time_ns_delta": 302474496998,
+        "type": "perf_event"
+      },
+      {
+        "bytes_jited": 21868,
+        "bytes_xlated": 37024,
+        "id": 7,
+        "name": "perf_unwind_nat",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      }
+    ],
+    "post_rejit": [
+      {
+        "bytes_jited": 31327,
+        "bytes_xlated": 24,
+        "id": 28,
+        "name": "perf_unwind_nat",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      {
+        "bytes_jited": 7510,
+        "bytes_xlated": 24,
+        "id": 48,
+        "name": "native_tracer_e",
+        "run_cnt_delta": 81229701,
+        "run_time_ns_delta": 24429408913,
+        "type": "perf_event"
+      }
+    ]
+  },
+  "finding": "The reported baseline series are from the eBPF side of each two-start run. The later13 post_rejit replacements do not identify the implementation of an earlier baseline metric sample. Thus the stated phase labels do not support the claim that these series compare native versus eBPF work.",
+  "requested_correction": "C should capture the requested metrics from the actual post_rejit native app instance and pair with baseline eBPF data, preserving phase/map/program provenance. Owner handles capture tooling; no framework changes requested.",
+  "limits": "Retain all completed runs and counters; this does not invalidate throughput or add a validity gate. No native equal-work verdict is inferred from these baseline-only samples."
+}
