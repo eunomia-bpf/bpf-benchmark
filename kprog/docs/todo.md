@@ -59,6 +59,9 @@
 
 - **VERIFIED image integration（2026-11-12）** READY FOR IMAGE 已于 07:26 交协调者（loader/linker fba19ea94、shim 1af32bdae，证据 bfe589764/2a01f79e6）。冻结 root Makefile 的 `SUITE_ENV_NAMES` 和 `runner/libs/suite_commands.py` 环境列表保持 05-29 版本；verified invocation 需要通过现有 Make 变量 `RUNTIME_ENV_BASE_NAMES` 显式包含 `BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF`，才能将 service supervisor 的值传入 app container。module selection 由协调者在同一镜像的每个 guest 单独安排。原 Katran artifact preparation helper 改为读取唯一镜像 `bpf-benchmark/kprog:current`，用已有 `unbound-katran-inputs` target 将上游可执行文件与依赖放入唯一底座的 `verified-katran-inputs`；之后真实服务诊断复用该二进制，冻结 workload/image 重跑继续按协调安排。
 
+
+- **VERIFIED Katran diagnostic（2026-11-12）** 原 `unbound-katran-inputs` preparation 在唯一镜像 current 上 rc0；上游 server 与运行库位于唯一底座 `verified-katran-inputs`，原始日志 `/workspaces/kprog-raw/verified/20261112-katran-inputs/`。下一步在当前 registered service 下复用 `KatranServerSession` 启动上游应用，保存完整 program snapshots，对实际加载的程序使用既有 `katran_vip_packet_64.bin` 执行 TEST_RUN，原始 stdout/stderr/packet 保留；新脚本 `kprog/test/katran_startup.py` 仅组织该 diagnostic。应用 loaded/verified/run 计数由运行后 service receipts 与 raw counters 交叉记录。
+
 两条路径分开计数。直接 native（跳过 verifier）：六个应用都跑通过（05-29，11-07 复现）。verified 路径（verifier 检查 B）：BCC 25/25、Katran 1/1 跑通过，其余应用只有少量程序，历史最高约 50/549。
 
 549 个常驻程序的静态普查（`corpus/results/kprog_app_coverage_20261109/resident-census/`）第一轮：选择缺口 275、资源准备 238、ELF 名称语法 23、context 下沉 1；实际生成 12、编译 11、verifier 接受 7、拒绝 4。后续 stock guest 资源回放完成 238/238（bc3104df7），资源阶段与 native 生成、编译和 verifier 结果分别计数。
