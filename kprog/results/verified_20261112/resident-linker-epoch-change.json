@@ -14,6 +14,19 @@
     "source_head": "f2ac4f94e",
     "lane_c_change": "Emit the tail-count relocation"
   },
+  "subsequent_observations": [
+    {
+      "observed_at": "2026-11-12T22:12:22Z",
+      "mtime": "2026-11-12T22:12:01.133933207Z",
+      "bytes": 2519568,
+      "source_head_at_collection": "59a3f8a3f",
+      "modified_source_path": "kprog/x86/native_lab/native_link/src/x86.rs",
+      "source_attribution": "The source path was uncommitted at collection; the exact binary source is not assigned to a commit.",
+      "completed_requests": 55,
+      "in_flight_request_directory": "retry2-control/state/session-e0ue5kr8/requests/request-1hcm7naq",
+      "boundary": "The same request remains in flight. Completed generation predates both replacements; subsequent linker calls may use this later binary."
+    }
+  ],
   "completed_requests_at_observation": 55,
   "last_published_receipt": "resident-first-fifty-five-receipt.json",
   "in_flight_request": {
