@@ -1,0 +1,31 @@
+{
+  "observed_at": "2026-11-12T22:08:31Z",
+  "scope": "Shared linker replacement during the ongoing load-only resident census",
+  "raw_root": "/workspaces/kprog-raw/verified/20261112-resident-census/ready",
+  "linker_path": "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+  "previous_observation": {
+    "observed_at": "2026-11-12T21:57:16Z",
+    "mtime": "2026-11-12T06:37:34.837723750Z",
+    "bytes": 2517592
+  },
+  "current_observation": {
+    "mtime": "2026-11-12T22:02:38.940090484Z",
+    "bytes": 2518768,
+    "source_head": "f2ac4f94e",
+    "lane_c_change": "Emit the tail-count relocation"
+  },
+  "completed_requests_at_observation": 55,
+  "last_published_receipt": "resident-first-fifty-five-receipt.json",
+  "in_flight_request": {
+    "directory": "retry2-control/state/session-e0ue5kr8/requests/request-1hcm7naq",
+    "entry": "generic_kprobe_process_event",
+    "observed_completed_commands": "native-link and three preprocessing commands returned 0 before the replacement was observed",
+    "pending_stage": "Final B compilation",
+    "linker_provenance": "The completed generation commands predate the replacement. Any subsequent linker invocation must be attributed to the replacement binary. No final request outcome is claimed."
+  },
+  "request_boundary": "The replacement occurred after the first 55 completed requests, while the next request was in flight; later commands in that request may also use the replacement.",
+  "kernel_commit": "74d1097af561",
+  "model_commit": "d0890b14f",
+  "native_execution_requests": 0,
+  "action": "Continue the serial census, retain every outcome and full P/B artifact, and record the tool change. No runtime gate, new job, rollback, or image/kernel rebuild was introduced by this record."
+}
