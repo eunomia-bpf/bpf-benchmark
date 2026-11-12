@@ -1415,7 +1415,7 @@ pub(super) fn rewrite_x86(
                                 local_ip
                             );
                         }
-                        let (tail_stub, tail_count_field, tail_count_field_stub_len) = build_x86_tail_call_inline(
+                        let (tail_stub, tail_count_field) = build_x86_tail_call_inline(
                             helper_addrs,
                             // The one kernel's frame saves rbx, r13, r14 and r15 around P.
                             0xf,
@@ -3641,7 +3641,7 @@ fn build_x86_tail_call_inline(
     saved_bpf_rbp_rsp_offset: Option<i32>,
     bpf_rbp_is_live: bool,
     tail_count_relocs: bool,
-) -> Result<(Vec<Instruction>, usize, usize)> {
+) -> Result<(Vec<Instruction>, usize)> {
     const MAX_TAIL_CALL_CNT: u8 = 33;
     let map_max_entries = x86_required_u32_helper_arg(
         helper_addrs,
@@ -3706,8 +3706,7 @@ fn build_x86_tail_call_inline(
     patch_x86_rel32(&mut bytes, je_out, out)?;
     // The module rewrites the tail-count field, so the caller has to know where it
     // is: reported as an offset into the stub the chunks below are built from.
-    let stub_len = bytes.len();
-    Ok((declared_byte_chunks(&bytes)?, tail_count_field, stub_len))
+    Ok((declared_byte_chunks(&bytes)?, tail_count_field))
 }
 
 fn x86_gpr64_encoding(reg: Register) -> Result<(u8, bool)> {
