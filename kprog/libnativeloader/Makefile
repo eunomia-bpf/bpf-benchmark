@@ -3,6 +3,7 @@ REPO_ROOT := $(abspath ../..)
 LIBBPF_PREFIX ?= $(REPO_ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix
 LIBBPF_LIBRARY ?= $(REPO_ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a
 KERNEL_OFFSETS_INCLUDE ?= $(REPO_ROOT)/micro/programs/build-x86
+SERVICE_RUN ?= $(abspath $(BUILD_DIR))/trusted-service-client $(abspath $(BUILD_DIR))/trusted-native.o
 
 .PHONY: all clean
 
@@ -47,7 +48,7 @@ trusted-service-kvm: trusted-service
 	taskset -c 8-19 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
 		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(OUTPUT)" --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -C kprog/libnativeloader guest-trusted-service BUILD_DIR=$(abspath $(BUILD_DIR)) OUTPUT=$(OUTPUT)'
+		--exec 'make -C kprog/libnativeloader guest-trusted-service BUILD_DIR=$(abspath $(BUILD_DIR)) OUTPUT=$(OUTPUT) SERVICE_RUN="$(SERVICE_RUN)"'
 
 guest-trusted-service:
 	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" python3 ../trusted_service.py --arch 1 \
@@ -56,4 +57,4 @@ guest-trusted-service:
 		--state "$(OUTPUT)/state" --results "$(OUTPUT)/service.tar.gz" \
 		--native-link "$(REPO_ROOT)/kprog/x86/native_lab/native_link/target/release/native-link" \
 		--loader "$(BUILD_DIR)/trusted-native-loader" \
-		--run "$(BUILD_DIR)/trusted-service-client" "$(BUILD_DIR)/trusted-native.o"
+		--run $(SERVICE_RUN)
