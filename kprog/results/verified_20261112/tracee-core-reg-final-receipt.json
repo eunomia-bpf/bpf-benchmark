@@ -1,0 +1,46 @@
+{
+  "recorded_at": "2026-11-12T16:17:51.911973+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-tracee-core-reg-replay",
+  "corpus_directory": "corpus/results/x86_kvm_corpus_20261112_153610_965482",
+  "kernel_commit": "74d1097af561",
+  "model_commit": "d0890b14f",
+  "selector_commit": "b94e7d0ee",
+  "image_platform_id": "sha256:d756bf5919e9eb35cc8628a38af95ca2cec2751e86f4c23f7c6e3f7bd07494a1",
+  "make_exit_code": 0,
+  "app_status": "error",
+  "baseline_programs": 167,
+  "submitted": 9,
+  "verified": 7,
+  "workload_run": null,
+  "failures": [
+    {
+      "request_id": 8,
+      "source_prog_id": 226,
+      "entry": "sys_exit_submit",
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "verifier_tail": " 48                    ; R2=48\n5016: (0f) r2 += r0                   ; R0=map_value(ks=4,vs=64) R2=map_value(ks=4,vs=64,off=48)\n5017: (79) r2 = *(u64 *)(r2 +0)       ; R2=scalar()\n5018: (b7) r3 = 32264                 ; R3=32264\n5019: (0f) r3 += r9                   ; R3=map_value(map=event_data_map,ks=4,vs=32536,off=32264) R9=map_value(map=event_data_map,ks=4,vs=32536)\n5020: (7b) *(u64 *)(r3 +0) = r2       ; R2=scalar() R3=map_value(map=event_data_map,ks=4,vs=32536,off=32264)\n5021: (b7) r2 = 56                    ; R2=56\n5022: (0f) r2 += r0                   ; R0=map_value(ks=4,vs=64) R2=map_value(ks=4,vs=64,off=56)\n5023: (79) r2 = *(u64 *)(r2 +0)       ; R2=scalar()\n5024: (b7) r3 = 32272                 ; R3=32272\n5025: (0f) r3 += r9                   ; R3=map_value(map=event_data_map,ks=4,vs=32536,off=32272) R9=map_value(map=event_data_map,ks=4,vs=32536)\n5026: (7b) *(u64 *)(r3 +0) = r2       ; R2=scalar() R3=map_value(map=event_data_map,ks=4,vs=32536,off=32272)\n5027: (79) r2 = *(u64 *)(r10 -256)    ; R2=ctx() R10=fp0 fp-256=ctx()\n5028: (07) r2 += 8                    ; R2=ctx(off=8)\n5029: (61) r3 = *(u32 *)(r10 -296)    ; R3=1 R10=fp0 fp-296=????1\n5030: (56) if w3 != 0x0 goto pc+12    ; R3=1\n5043: (79) r1 = *(u64 *)(r2 +0)\ndereference of modified ctx ptr R2 off=8 disallowed\nprocessed 788 insns (limit 1000000) max_states_per_insn 0 total_states 25 peak_states 25 mark_read 0\n\n"
+    },
+    {
+      "request_id": 9,
+      "source_prog_id": 229,
+      "entry": "sys_exit_submit",
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "verifier_tail": " 48                    ; R2=48\n5016: (0f) r2 += r0                   ; R0=map_value(ks=4,vs=64) R2=map_value(ks=4,vs=64,off=48)\n5017: (79) r2 = *(u64 *)(r2 +0)       ; R2=scalar()\n5018: (b7) r3 = 32264                 ; R3=32264\n5019: (0f) r3 += r9                   ; R3=map_value(map=event_data_map,ks=4,vs=32536,off=32264) R9=map_value(map=event_data_map,ks=4,vs=32536)\n5020: (7b) *(u64 *)(r3 +0) = r2       ; R2=scalar() R3=map_value(map=event_data_map,ks=4,vs=32536,off=32264)\n5021: (b7) r2 = 56                    ; R2=56\n5022: (0f) r2 += r0                   ; R0=map_value(ks=4,vs=64) R2=map_value(ks=4,vs=64,off=56)\n5023: (79) r2 = *(u64 *)(r2 +0)       ; R2=scalar()\n5024: (b7) r3 = 32272                 ; R3=32272\n5025: (0f) r3 += r9                   ; R3=map_value(map=event_data_map,ks=4,vs=32536,off=32272) R9=map_value(map=event_data_map,ks=4,vs=32536)\n5026: (7b) *(u64 *)(r3 +0) = r2       ; R2=scalar() R3=map_value(map=event_data_map,ks=4,vs=32536,off=32272)\n5027: (79) r2 = *(u64 *)(r10 -256)    ; R2=ctx() R10=fp0 fp-256=ctx()\n5028: (07) r2 += 8                    ; R2=ctx(off=8)\n5029: (61) r3 = *(u32 *)(r10 -296)    ; R3=1 R10=fp0 fp-296=????1\n5030: (56) if w3 != 0x0 goto pc+12    ; R3=1\n5043: (79) r1 = *(u64 *)(r2 +0)\ndereference of modified ctx ptr R2 off=8 disallowed\nprocessed 788 insns (limit 1000000) max_states_per_insn 0 total_states 25 peak_states 25 mark_read 0\n\n"
+    }
+  ],
+  "archive": "tracee-core-reg-final.tar.gz",
+  "archive_bytes": 29130196,
+  "accepted_request_archive": "tracee-core-reg-first-cohort.tar.gz",
+  "capture_directory": "corpus/results/verified-captures-m89k0gbf",
+  "diagnosis": "Both sys_exit_submit attempts reach stock BPF5043 after788 instructions. The ABI pointer-load arm materializes ctx+8 then loads offset0; the existing fixed-displacement memory primitive retains the base for scalar context loads. Extend that primitive routing to the shared64-bit ABI read and MOV pointer-load arms."
+}
