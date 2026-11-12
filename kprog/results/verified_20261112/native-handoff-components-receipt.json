@@ -1,0 +1,31 @@
+{
+  "recorded_at": "2026-11-12T13:20:40.501399+00:00",
+  "kernel_commit": "74d1097af561",
+  "image_id": "sha256:d756bf5919e9eb35cc8628a38af95ca2cec2751e86f4c23f7c6e3f7bd07494a1",
+  "components_command": "taskset -c 8-19 make -C /workspaces/repository/kprog/libnativeloader trusted-service trusted-submission-check trusted-lifecycle-check trusted-service-kvm BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader OUTPUT=/workspaces/kprog-raw/verified/20261112-handoff-rebuild/verified-components/controls -j1",
+  "components_make_exit_code": 0,
+  "started": "2026-11-12T13:11:46Z",
+  "finished": "2026-11-12T13:12:17Z",
+  "service_observation": {
+    "original_prog_id": 3,
+    "native_prog_id": 6,
+    "retval": 2,
+    "prebuilt_proof": false
+  },
+  "lifecycle_observation": {
+    "source_prog_id": 5,
+    "snapshot_before_load_completed": false,
+    "snapshot_response": "",
+    "app_returncode": 1,
+    "service_status": -13
+  },
+  "log_scope": "Final service guest text retained; sequential guests reopened the inherited regular output file. Launcher04b567de3 streams future guest output through tee and preserves Make status with pipefail. Existing raw files archived as retained.",
+  "handoff_rerun1": {
+    "make_exit_code": 2,
+    "guest_exit_code": 127,
+    "scope": "Module load completed; binary path under /var/tmp remained inaccessible before test execution. Next run selects the existing shared-base loader build directory."
+  },
+  "archive": "native-handoff-components.tar.gz",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-handoff-rebuild",
+  "next": "Live handoff from the sole base, then six-app functional checks and image release."
+}
