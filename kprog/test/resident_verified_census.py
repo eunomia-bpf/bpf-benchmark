@@ -24,6 +24,12 @@ def write(path, value):
     path.write_text(json.dumps(value, indent=2) + "\n")
 
 
+def map_profiles(selected, application):
+    """Keep selected map profiles first, including anonymous inventory records."""
+    names = {item.get("name") for item in selected}
+    return list(selected) + [item for item in application if item.get("name") not in names]
+
+
 def prepare(args):
     source = json.loads(args.inputs.read_text())
     producers = dict(item.split("=", 1) for item in args.producer)
@@ -96,6 +102,8 @@ def prepare(args):
 
 
 def guest(args):
+    subprocess.run(["bash", "-eu", "-c",
+                    "mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf"], check=True)
     spec = importlib.util.spec_from_file_location("resident_submit", ROOT / "kprog/selftests/submit.py")
     submit = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(submit)
@@ -114,9 +122,7 @@ def guest(args):
             elif resource["resource_stage"] != "source_object_captured":
                 result.update(stage="resource_failed", diagnostic=resource["resource_stage"])
             else:
-                maps = list(row["map_info"])
-                names = {m["name"] for m in maps}
-                maps.extend(m for m in app_maps[row["application"]] if m["name"] not in names)
+                maps = map_profiles(row["map_info"], app_maps[row["application"]])
                 record = dict(program=selected[0]["symbol"], bpf_object=resource["bpf_object"],
                               map_info=maps, prog_type=PROG_TYPES[row["program_info"]["type"]])
                 with contextlib.redirect_stdout(io.StringIO()) as captured:

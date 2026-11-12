@@ -1,0 +1,36 @@
+{
+  "recorded_at": "2026-11-12T16:37:33.347570+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-resident-census/ready",
+  "launcher_pid": 933122,
+  "make_exit_code": 2,
+  "completed_resource_rows": 3,
+  "stock_submissions": 0,
+  "resource_error": "bpffs unmounted: tempfile creation under /sys/fs/bpf returns ENOENT",
+  "controller_error": "KeyError name while merging OTel application map inventory with23 anonymous records",
+  "change": "Use the existing corpus_resident_groups bpffs mount setup and merge optional map names while preserving selected profiles first.",
+  "host_regression": {
+    "recorded_at": "2026-11-12T16:36:51.154155+00:00",
+    "processed": 549,
+    "applications": {
+      "katran": 1,
+      "cilium/agent": 72,
+      "otelcol-ebpf-profiler/profiling": 13,
+      "tetragon/observer": 287,
+      "tracee/monitor": 151,
+      "bcc/set": 25
+    },
+    "anonymous_profiles_retained": {
+      "katran": 0,
+      "cilium/agent": 0,
+      "otelcol-ebpf-profiler/profiling": 299,
+      "tetragon/observer": 0,
+      "tracee/monitor": 0,
+      "bcc/set": 0
+    },
+    "selected_profile_prefixes_preserved": 4220,
+    "scope": "Host execution of production map merge across the entire retained inventory; guest bpffs setup follows the existing corpus_resident_groups recipe."
+  },
+  "retry_make_dry_run": 0,
+  "runtime_retry": "pending",
+  "archive": "resident-census-bpffs-maps.tar.gz"
+}
