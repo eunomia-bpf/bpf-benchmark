@@ -23,6 +23,9 @@ def main():
     parser.add_argument("--archive", type=Path, required=True)
     args = parser.parse_args()
     previous = json.loads(args.previous.read_text())
+    # Old receipts predate selection/resource failures and counted every row
+    # as submitted. Keep their completed offset when extending that format.
+    previous_completed = previous.get("completed", previous["submitted"])
     lines = args.journal.read_text().splitlines(keepends=True)[:args.count]
     rows = [json.loads(line) for line in lines]
     args.output.mkdir(parents=True, exist_ok=True)
@@ -34,10 +37,12 @@ def main():
         selected = [row for row in rows if row["application"] == application]
         counts = Counter(row["stage"] for row in selected)
         applications[application] = dict(
-            submitted=len(selected), verified=counts["installed"],
+            completed=len(selected), submitted=sum("submission" in row for row in selected),
+            native_selection_failed=counts["native_selection_failed"],
+            resource_failed=counts["resource_failed"], verified=counts["installed"],
             verifier_rejected=counts["verifier_rejected"],
             compilation_failed=counts["compilation_failed"], workload_run=None)
-    added = rows[previous["submitted"]:]
+    added = rows[previous_completed:]
     services = [row["submission"]["service"] for row in added
                 if "service" in row.get("submission", {})]
     artifacts = [Path(service["artifact_archive"] if "artifact_archive" in service
@@ -53,7 +58,10 @@ def main():
         scope="Completed prefix of ongoing 549-instance load-only census",
         raw_directory=str(args.output), journal=str(args.journal),
         kernel_commit=previous["kernel_commit"], model_commit=previous["model_commit"],
-        submitted=len(rows), stock_verifier_submissions=stages["installed"] + stages["verifier_rejected"],
+        completed=len(rows), submitted=sum("submission" in row for row in rows),
+        native_selection_failed=stages["native_selection_failed"],
+        resource_failed=stages["resource_failed"],
+        stock_verifier_submissions=stages["installed"] + stages["verifier_rejected"],
         verified=stages["installed"], verifier_rejected=stages["verifier_rejected"],
         compilation_failed=stages["compilation_failed"], native_execution_requests=0,
         applications=applications, classes=dict(Counter(failure_class(row) for row in rows)),
@@ -67,11 +75,12 @@ def main():
                       for row in added],
         archive=args.archive.name, archive_bytes=args.archive.stat().st_size,
         previous_receipt=str(args.previous), previous_submitted=previous["submitted"],
+        previous_completed=previous_completed,
         archived_requests=[str(path) for path in artifacts])
     content = json.dumps(receipt, indent=2) + "\n"
     (args.output / "receipt.json").write_text(content)
     args.receipt.write_text(content)
-    print(json.dumps(dict(submitted=len(rows), stages=dict(stages),
+    print(json.dumps(dict(completed=len(rows), submitted=receipt["submitted"], stages=dict(stages),
                           archive=str(args.archive), archive_bytes=receipt["archive_bytes"])))
 
 
