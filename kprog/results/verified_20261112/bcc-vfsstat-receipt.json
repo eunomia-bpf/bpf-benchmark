@@ -1,0 +1,38 @@
+{
+  "recorded_at": "2026-11-12T06:56:48Z",
+  "implementation_commit": "fba19ea94",
+  "run_command_commit": "63ff0ca9f",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-bcc-startup",
+  "queue_exit_code": 0,
+  "startup_exit_code": 0,
+  "scope": "Sole-kernel actual upstream vfsstat startup outside runtime image, not full BCC set or benchmark coverage.",
+  "source_program_ids": [
+    5,
+    9,
+    13,
+    17,
+    21
+  ],
+  "verified_native_program_ids": [
+    8,
+    12,
+    16,
+    20,
+    24
+  ],
+  "service_statuses": [
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "native_link_create_count": 5,
+  "observed_native_execution": [
+    "fentry_vfs_read",
+    "fentry_vfs_write",
+    "fentry_vfs_open"
+  ],
+  "execution_evidence": "Application native-shared stats show READ/s77 WRITE/s11 OPEN/s132; no per-program run counter snapshot captured. FSYNC/CREATE execution not established.",
+  "runtime_image_coverage": false
+}

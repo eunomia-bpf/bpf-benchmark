@@ -1,0 +1,157 @@
+make: Entering directory '/workspaces/repository/kprog/libnativeloader'
+cmake -S . -B "/workspaces/.agent-state/kprog-ck/verified-loader" \
+	-DNATIVE_LOADER_REPO_ROOT="/workspaces/repository" \
+	-DNATIVE_LOADER_LIBBPF_PREFIX="/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix" \
+	-DNATIVE_LOADER_LIBBPF_LIBRARY="/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a" \
+	-DNATIVE_LOADER_KERNEL_OFFSETS_INCLUDE="/workspaces/repository/micro/programs/build-x86"
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /workspaces/.agent-state/kprog-ck/verified-loader
+cmake --build "/workspaces/.agent-state/kprog-ck/verified-loader" --target native_loader native_loader_shared
+gmake[1]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[2]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[3]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[4]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[4]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+[100%] Built target native_loader
+gmake[3]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[2]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[2]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[3]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[4]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[4]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+[100%] Built target native_loader_shared
+gmake[3]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[2]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[1]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+cmake --build "/workspaces/.agent-state/kprog-ck/verified-loader" --target trusted-native-loader trusted-service-client
+gmake[1]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[2]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[3]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[4]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[4]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+[ 50%] Built target native_loader
+gmake[4]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[4]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+[100%] Built target trusted-native-loader
+gmake[3]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[2]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[2]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[3]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[4]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[4]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+[ 50%] Built target native_loader
+gmake[4]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[4]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+[100%] Built target trusted-service-client
+gmake[3]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[2]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[1]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+cc -O2 -fPIC -mno-red-zone -mgeneral-regs-only -fno-stack-protector \
+	-fno-asynchronous-unwind-tables -c ../test/trusted_native.c -o "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native.o"
+make -C ../stock-path/module
+make[1]: Entering directory '/workspaces/repository/kprog/stock-path/module'
+install -d /workspaces/.agent-state/kprog-ck/verified-module
+make -C /workspaces/.agent-state/kprog-ck/build-x86 M=/workspaces/repository/kprog/stock-path/module MO=/workspaces/.agent-state/kprog-ck/verified-module modules
+make[2]: Entering directory '/workspaces/.agent-state/kprog-ck/build-x86'
+make[3]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-module'
+  GEN     Makefile
+make[3]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-module'
+make[2]: Leaving directory '/workspaces/.agent-state/kprog-ck/build-x86'
+make[1]: Leaving directory '/workspaces/repository/kprog/stock-path/module'
+install -d "/workspaces/kprog-raw/verified/20261112-bcc-startup/bcc"
+taskset -c 8-19 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+	--cwd "/workspaces/repository" --rwdir "/workspaces/repository" --rwdir "/workspaces/kprog-raw/verified/20261112-bcc-startup/bcc" --overlay-rwdir /tmp \
+	--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+	--exec 'make -C kprog/libnativeloader guest-trusted-service BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader OUTPUT=/workspaces/kprog-raw/verified/20261112-bcc-startup/bcc SERVICE_RUN="env LD_PRELOAD=/workspaces/repository/bpfopt/shim/build-x86/libbpfrejit_shim.so BPFREJIT_SHIM_NATIVE_LOADER=1 BPFREJIT_NATIVE_LOADER_SO=/workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.so BPFREJIT_SHIM_NATIVE_MANIFEST=/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/manifest.json BPFREJIT_SHIM_DIR=/workspaces/kprog-raw/verified/20261112-bcc-startup/bcc/shim BPFREJIT_SHIM_LOG=/workspaces/kprog-raw/verified/20261112-bcc-startup/bcc/shim.log /workspaces/repository/vendor/build/x86/bcc/bin/vfsstat -v 1 1"'
+make: Entering directory '/workspaces/repository/kprog/libnativeloader'
+CLANG="/workspaces/repository/kprog/stock-path/bin/clang" python3 ../trusted_service.py --arch 1 \
+	--endpoint /sys/kernel/debug/bpf_x86_native_lab/specializer \
+	--module /workspaces/.agent-state/kprog-ck/verified-module/bpf_kprog_stock.ko \
+	--state "/workspaces/kprog-raw/verified/20261112-bcc-startup/bcc/state" --results "/workspaces/kprog-raw/verified/20261112-bcc-startup/bcc/service.tar.gz" \
+	--native-link "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link" \
+	--loader "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader" \
+	--run env LD_PRELOAD=/workspaces/repository/bpfopt/shim/build-x86/libbpfrejit_shim.so BPFREJIT_SHIM_NATIVE_LOADER=1 BPFREJIT_NATIVE_LOADER_SO=/workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.so BPFREJIT_SHIM_NATIVE_MANIFEST=/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/manifest.json BPFREJIT_SHIM_DIR=/workspaces/kprog-raw/verified/20261112-bcc-startup/bcc/shim BPFREJIT_SHIM_LOG=/workspaces/kprog-raw/verified/20261112-bcc-startup/bcc/shim.log /workspaces/repository/vendor/build/x86/bcc/bin/vfsstat -v 1 1
+libbpf: loading object 'vfsstat_bpf' from buffer
+libbpf: elf: section(3) kprobe/vfs_read, size 48, link 0, flags 6, type=1
+libbpf: sec 'kprobe/vfs_read': found program 'kprobe_vfs_read' at insn offset 0 (0 bytes), code size 6 insns (48 bytes)
+libbpf: elf: section(4) .relkprobe/vfs_read, size 16, link 30, flags 40, type=9
+libbpf: elf: section(5) kprobe/vfs_write, size 48, link 0, flags 6, type=1
+libbpf: sec 'kprobe/vfs_write': found program 'kprobe_vfs_write' at insn offset 0 (0 bytes), code size 6 insns (48 bytes)
+libbpf: elf: section(6) .relkprobe/vfs_write, size 16, link 30, flags 40, type=9
+libbpf: elf: section(7) kprobe/vfs_fsync, size 48, link 0, flags 6, type=1
+libbpf: sec 'kprobe/vfs_fsync': found program 'kprobe_vfs_fsync' at insn offset 0 (0 bytes), code size 6 insns (48 bytes)
+libbpf: elf: section(8) .relkprobe/vfs_fsync, size 16, link 30, flags 40, type=9
+libbpf: elf: section(9) kprobe/vfs_open, size 48, link 0, flags 6, type=1
+libbpf: sec 'kprobe/vfs_open': found program 'kprobe_vfs_open' at insn offset 0 (0 bytes), code size 6 insns (48 bytes)
+libbpf: elf: section(10) .relkprobe/vfs_open, size 16, link 30, flags 40, type=9
+libbpf: elf: section(11) kprobe/vfs_create, size 48, link 0, flags 6, type=1
+libbpf: sec 'kprobe/vfs_create': found program 'kprobe_vfs_create' at insn offset 0 (0 bytes), code size 6 insns (48 bytes)
+libbpf: elf: section(12) .relkprobe/vfs_create, size 16, link 30, flags 40, type=9
+libbpf: elf: section(13) fentry/vfs_read, size 48, link 0, flags 6, type=1
+libbpf: sec 'fentry/vfs_read': found program 'fentry_vfs_read' at insn offset 0 (0 bytes), code size 6 insns (48 bytes)
+libbpf: elf: section(14) .relfentry/vfs_read, size 16, link 30, flags 40, type=9
+libbpf: elf: section(15) fentry/vfs_write, size 48, link 0, flags 6, type=1
+libbpf: sec 'fentry/vfs_write': found program 'fentry_vfs_write' at insn offset 0 (0 bytes), code size 6 insns (48 bytes)
+libbpf: elf: section(16) .relfentry/vfs_write, size 16, link 30, flags 40, type=9
+libbpf: elf: section(17) fentry/vfs_fsync, size 48, link 0, flags 6, type=1
+libbpf: sec 'fentry/vfs_fsync': found program 'fentry_vfs_fsync' at insn offset 0 (0 bytes), code size 6 insns (48 bytes)
+libbpf: elf: section(18) .relfentry/vfs_fsync, size 16, link 30, flags 40, type=9
+libbpf: elf: section(19) fentry/vfs_open, size 48, link 0, flags 6, type=1
+libbpf: sec 'fentry/vfs_open': found program 'fentry_vfs_open' at insn offset 0 (0 bytes), code size 6 insns (48 bytes)
+libbpf: elf: section(20) .relfentry/vfs_open, size 16, link 30, flags 40, type=9
+libbpf: elf: section(21) fentry/vfs_create, size 48, link 0, flags 6, type=1
+libbpf: sec 'fentry/vfs_create': found program 'fentry_vfs_create' at insn offset 0 (0 bytes), code size 6 insns (48 bytes)
+libbpf: elf: section(22) .relfentry/vfs_create, size 16, link 30, flags 40, type=9
+libbpf: elf: section(23) .bss, size 40, link 0, flags 3, type=8
+libbpf: elf: section(24) license, size 4, link 0, flags 3, type=1
+libbpf: license of vfsstat_bpf is GPL
+libbpf: elf: section(25) .BTF, size 1813, link 0, flags 0, type=1
+libbpf: elf: section(27) .BTF.ext, size 760, link 0, flags 0, type=1
+libbpf: elf: section(30) .symtab, size 552, link 1, flags 0, type=2
+libbpf: looking for externs among 23 symbols...
+libbpf: collected 0 externs total
+libbpf: map 'vfsstat_.bss' (global data): at sec_idx 23, offset 0, flags 400.
+libbpf: map 0 is "vfsstat_.bss"
+libbpf: sec '.relkprobe/vfs_read': collecting relocation for section(3) 'kprobe/vfs_read'
+libbpf: sec '.relkprobe/vfs_read': relo #0: insn #1 against 'stats'
+libbpf: prog 'kprobe_vfs_read': found data map 0 (vfsstat_.bss, sec 23, off 0) for insn 1
+libbpf: sec '.relkprobe/vfs_write': collecting relocation for section(5) 'kprobe/vfs_write'
+libbpf: sec '.relkprobe/vfs_write': relo #0: insn #1 against 'stats'
+libbpf: prog 'kprobe_vfs_write': found data map 0 (vfsstat_.bss, sec 23, off 0) for insn 1
+libbpf: sec '.relkprobe/vfs_fsync': collecting relocation for section(7) 'kprobe/vfs_fsync'
+libbpf: sec '.relkprobe/vfs_fsync': relo #0: insn #1 against 'stats'
+libbpf: prog 'kprobe_vfs_fsync': found data map 0 (vfsstat_.bss, sec 23, off 0) for insn 1
+libbpf: sec '.relkprobe/vfs_open': collecting relocation for section(9) 'kprobe/vfs_open'
+libbpf: sec '.relkprobe/vfs_open': relo #0: insn #1 against 'stats'
+libbpf: prog 'kprobe_vfs_open': found data map 0 (vfsstat_.bss, sec 23, off 0) for insn 1
+libbpf: sec '.relkprobe/vfs_create': collecting relocation for section(11) 'kprobe/vfs_create'
+libbpf: sec '.relkprobe/vfs_create': relo #0: insn #1 against 'stats'
+libbpf: prog 'kprobe_vfs_create': found data map 0 (vfsstat_.bss, sec 23, off 0) for insn 1
+libbpf: sec '.relfentry/vfs_read': collecting relocation for section(13) 'fentry/vfs_read'
+libbpf: sec '.relfentry/vfs_read': relo #0: insn #1 against 'stats'
+libbpf: prog 'fentry_vfs_read': found data map 0 (vfsstat_.bss, sec 23, off 0) for insn 1
+libbpf: sec '.relfentry/vfs_write': collecting relocation for section(15) 'fentry/vfs_write'
+libbpf: sec '.relfentry/vfs_write': relo #0: insn #1 against 'stats'
+libbpf: prog 'fentry_vfs_write': found data map 0 (vfsstat_.bss, sec 23, off 0) for insn 1
+libbpf: sec '.relfentry/vfs_fsync': collecting relocation for section(17) 'fentry/vfs_fsync'
+libbpf: sec '.relfentry/vfs_fsync': relo #0: insn #1 against 'stats'
+libbpf: prog 'fentry_vfs_fsync': found data map 0 (vfsstat_.bss, sec 23, off 0) for insn 1
+libbpf: sec '.relfentry/vfs_open': collecting relocation for section(19) 'fentry/vfs_open'
+libbpf: sec '.relfentry/vfs_open': relo #0: insn #1 against 'stats'
+libbpf: prog 'fentry_vfs_open': found data map 0 (vfsstat_.bss, sec 23, off 0) for insn 1
+libbpf: sec '.relfentry/vfs_create': collecting relocation for section(21) 'fentry/vfs_create'
+libbpf: sec '.relfentry/vfs_create': relo #0: insn #1 against 'stats'
+libbpf: prog 'fentry_vfs_create': found data map 0 (vfsstat_.bss, sec 23, off 0) for insn 1
+libbpf: loading kernel BTF '/sys/kernel/btf/vmlinux': 0
+libbpf: map 'vfsstat_.bss': created successfully, fd=7
+libbpf: prog 'kprobe_vfs_read': skipped loading
+libbpf: prog 'kprobe_vfs_write': skipped loading
+libbpf: prog 'kprobe_vfs_fsync': skipped loading
+libbpf: prog 'kprobe_vfs_open': skipped loading
+libbpf: prog 'kprobe_vfs_create': skipped loading
+TIME         READ/s  WRITE/s  FSYNC/s   OPEN/s CREATE/s
+06:50:48:        77       11        0      132        0
+{"trusted_service_archive": "/workspaces/kprog-raw/verified/20261112-bcc-startup/bcc/service.tar.gz"}
+make: Leaving directory '/workspaces/repository/kprog/libnativeloader'
+make: Leaving directory '/workspaces/repository/kprog/libnativeloader'

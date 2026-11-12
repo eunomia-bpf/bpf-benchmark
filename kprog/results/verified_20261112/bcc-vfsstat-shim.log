@@ -1,0 +1,55 @@
+[4.211460 pid=1199 tid=1199] shim_init pid=1199 exe=/workspaces/repository/vendor/build/x86/bcc/bin/vfsstat
+[4.215017 pid=1199 tid=1202] socket: listening on /var/run/bpfrejit/shim-1199.sock
+[4.228153 pid=1199 tid=1199] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[4.228744 pid=1199 tid=1199] native-loader skipped feature probe program name= insn_cnt=2
+[4.228855 pid=1199 tid=1199]   PROG_LOAD -> fd=6 errno=0 kernel_prog_id=1
+[4.230269 pid=1199 tid=1199] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[4.230396 pid=1199 tid=1199] native-loader skipped feature probe program name= insn_cnt=2
+[4.230497 pid=1199 tid=1199]   PROG_LOAD -> fd=6 errno=0 kernel_prog_id=2
+[4.237016 pid=1199 tid=1199] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=1813 attach_prog_fd=1813
+[4.237163 pid=1199 tid=1199] native-loader skipped feature probe program name=libbpf_nametest insn_cnt=2
+[4.237268 pid=1199 tid=1199]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=3
+[4.237366 pid=1199 tid=1199] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[4.237473 pid=1199 tid=1199]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=1
+[4.237670 pid=1199 tid=1199] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[4.237771 pid=1199 tid=1199]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=2
+[4.239108 pid=1199 tid=1199] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=06ffeef05d7e610c license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[4.239241 pid=1199 tid=1199] native-loader skipped feature probe program name= insn_cnt=5
+[4.239398 pid=1199 tid=1199]   PROG_LOAD -> fd=8 errno=0 kernel_prog_id=4
+[4.239501 pid=1199 tid=1199] BPF_MAP_CREATE type=2 key_size=4 value_size=40 max_entries=1 name=vfsstat_.bss
+[4.239604 pid=1199 tid=1199]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=3
+[4.242228 pid=1199 tid=1199] BPF_PROG_LOAD type=26 (tracing) name=fentry_vfs_read insn_cnt=6 hash=ca9822ef332acdf2 license=GPL expected_attach=24 attach_btf_id=123753 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[6.668192 pid=1199 tid=1199] native-loader jit-info original fd=8 id=5 type=26 name=fentry_vfs_read tag=8aac7fd4c2e97bf7 jited_len=40 xlated_len=48 nr_jited_ksyms=1 ksym0=0xffffffffc0401654 ksym1=0x0
+[6.668453 pid=1199 tid=1199] native-loader jit-info native fd=11 id=8 type=26 name=fentry_vfs_read tag=19ba1511ebec9ff2 jited_len=48 xlated_len=296 nr_jited_ksyms=1 ksym0=0xffffffffc040168c ksym1=0x0
+[6.668588 pid=1199 tid=1199] native-loader replaced prog=fentry_vfs_read original_fd=8 native_fd=11 manifest=/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/manifest.json source=/workspaces/kprog-raw/verified/20261112-bcc-startup/bcc/shim/bpfrejit_1199_ca9822ef332acdf2.bpf
+[6.668749 pid=1199 tid=1199]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=8
+[6.670903 pid=1199 tid=1199] BPF_PROG_LOAD type=26 (tracing) name=fentry_vfs_writ insn_cnt=6 hash=d0c2d468d90e10ba license=GPL expected_attach=24 attach_btf_id=123773 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[7.914081 pid=1199 tid=1199] native-loader jit-info original fd=8 id=9 type=26 name=fentry_vfs_writ tag=ce6b1d10515738d0 jited_len=40 xlated_len=48 nr_jited_ksyms=1 ksym0=0xffffffffc04017d4 ksym1=0x0
+[7.914354 pid=1199 tid=1199] native-loader jit-info native fd=13 id=12 type=26 name=fentry_vfs_writ tag=1d58ba25bd061a21 jited_len=49 xlated_len=296 nr_jited_ksyms=1 ksym0=0xffffffffc0401814 ksym1=0x0
+[7.914508 pid=1199 tid=1199] native-loader replaced prog=fentry_vfs_writ original_fd=8 native_fd=13 manifest=/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/manifest.json source=/workspaces/kprog-raw/verified/20261112-bcc-startup/bcc/shim/bpfrejit_1199_d0c2d468d90e10ba.bpf
+[7.914627 pid=1199 tid=1199]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=12
+[7.916615 pid=1199 tid=1199] BPF_PROG_LOAD type=26 (tracing) name=fentry_vfs_fsyn insn_cnt=6 hash=cc6d44cf3357ea62 license=GPL expected_attach=24 attach_btf_id=123719 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[9.142359 pid=1199 tid=1199] native-loader jit-info original fd=8 id=13 type=26 name=fentry_vfs_fsyn tag=4153521805e1f9e0 jited_len=40 xlated_len=48 nr_jited_ksyms=1 ksym0=0xffffffffc0401948 ksym1=0x0
+[9.142752 pid=1199 tid=1199] native-loader jit-info native fd=15 id=16 type=26 name=fentry_vfs_fsyn tag=363bd3821c962a5b jited_len=49 xlated_len=296 nr_jited_ksyms=1 ksym0=0xffffffffc0401990 ksym1=0x0
+[9.143089 pid=1199 tid=1199] native-loader replaced prog=fentry_vfs_fsyn original_fd=8 native_fd=15 manifest=/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/manifest.json source=/workspaces/kprog-raw/verified/20261112-bcc-startup/bcc/shim/bpfrejit_1199_cc6d44cf3357ea62.bpf
+[9.143384 pid=1199 tid=1199]   PROG_LOAD -> fd=15 errno=0 kernel_prog_id=16
+[9.145799 pid=1199 tid=1199] BPF_PROG_LOAD type=26 (tracing) name=fentry_vfs_open insn_cnt=6 hash=c826085eb7cf6f2a license=GPL expected_attach=24 attach_btf_id=123743 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[10.364143 pid=1199 tid=1199] native-loader jit-info original fd=8 id=17 type=26 name=fentry_vfs_open tag=88848b4f70304f6c jited_len=40 xlated_len=48 nr_jited_ksyms=1 ksym0=0xffffffffc0401ac8 ksym1=0x0
+[10.364239 pid=1199 tid=1199] native-loader jit-info native fd=17 id=20 type=26 name=fentry_vfs_open tag=c275aaac3644c203 jited_len=49 xlated_len=296 nr_jited_ksyms=1 ksym0=0xffffffffc0401b18 ksym1=0x0
+[10.364307 pid=1199 tid=1199] native-loader replaced prog=fentry_vfs_open original_fd=8 native_fd=17 manifest=/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/manifest.json source=/workspaces/kprog-raw/verified/20261112-bcc-startup/bcc/shim/bpfrejit_1199_c826085eb7cf6f2a.bpf
+[10.364424 pid=1199 tid=1199]   PROG_LOAD -> fd=17 errno=0 kernel_prog_id=20
+[10.366210 pid=1199 tid=1199] BPF_PROG_LOAD type=26 (tracing) name=fentry_vfs_crea insn_cnt=6 hash=8656aae1a3bb4f12 license=GPL expected_attach=24 attach_btf_id=123704 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[11.608197 pid=1199 tid=1199] native-loader jit-info original fd=8 id=21 type=26 name=fentry_vfs_crea tag=31fa7fcc5d9b6166 jited_len=40 xlated_len=48 nr_jited_ksyms=1 ksym0=0xffffffffc0401c4c ksym1=0x0
+[11.608366 pid=1199 tid=1199] native-loader jit-info native fd=19 id=24 type=26 name=fentry_vfs_crea tag=06d0a5feedd4189d jited_len=49 xlated_len=296 nr_jited_ksyms=1 ksym0=0xffffffffc0401c98 ksym1=0x0
+[11.608464 pid=1199 tid=1199] native-loader replaced prog=fentry_vfs_crea original_fd=8 native_fd=19 manifest=/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/manifest.json source=/workspaces/kprog-raw/verified/20261112-bcc-startup/bcc/shim/bpfrejit_1199_8656aae1a3bb4f12.bpf
+[11.608627 pid=1199 tid=1199]   PROG_LOAD -> fd=19 errno=0 kernel_prog_id=24
+[11.609401 pid=1199 tid=1199] BPF_LINK_CREATE prog_fd=11 target_fd=0 attach_type=24 flags=0
+[11.610866 pid=1199 tid=1199]   LINK_CREATE -> fd=8 errno=0 kernel_link_id=1
+[11.611028 pid=1199 tid=1199] BPF_LINK_CREATE prog_fd=13 target_fd=0 attach_type=24 flags=0
+[11.612618 pid=1199 tid=1199]   LINK_CREATE -> fd=18 errno=0 kernel_link_id=2
+[11.612693 pid=1199 tid=1199] BPF_LINK_CREATE prog_fd=15 target_fd=0 attach_type=24 flags=0
+[11.614355 pid=1199 tid=1199]   LINK_CREATE -> fd=20 errno=0 kernel_link_id=3
+[11.614423 pid=1199 tid=1199] BPF_LINK_CREATE prog_fd=17 target_fd=0 attach_type=24 flags=0
+[11.616083 pid=1199 tid=1199]   LINK_CREATE -> fd=21 errno=0 kernel_link_id=4
+[11.616155 pid=1199 tid=1199] BPF_LINK_CREATE prog_fd=19 target_fd=0 attach_type=24 flags=0
+[11.617998 pid=1199 tid=1199]   LINK_CREATE -> fd=22 errno=0 kernel_link_id=5
