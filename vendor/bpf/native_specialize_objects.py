@@ -106,14 +106,29 @@ def units_for_app(app: str) -> list[tuple[str, Path, list[str]]]:
         return [(tool, bpf / f"bcc/libbpf-tools/{tool}.bpf.c", flags)
                 for tool in bcc_tools()]
     if app == "cilium":
+        # The Makefile gives each object its own options (XDP drops
+        # ENABLE_NODEPORT_ACCELERATION, host drops ENABLE_HOST_FIREWALL, ...),
+        # and a run loads the object compiled with the options the image used.
         base = ["-DSKIP_DEBUG=1", "-DENABLE_IPV4=1", "-DENABLE_ROUTING=1",
                 "-DPOLICY_VERDICT_NOTIFY=1", "-DMONITOR_AGGREGATION=3",
                 "-DCT_REPORT_FLAGS=0x0002", "-DENABLE_HOST_FIREWALL=1",
                 "-DENABLE_MASQUERADE_IPV4=1", "-DENABLE_NODEPORT=1",
                 "-DENABLE_NODEPORT_ACCELERATION=1", "-DENABLE_DSR_ICMP_ERRORS=1",
                 "-DENABLE_DSR=1", "-DENABLE_DSR_BYUSER=1",
-                "-DENABLE_HOST_ROUTING=1", "-DSERVICE_NO_BACKEND_RESPONSE=1",
-                "-DENCAP_IFINDEX=1"]
+                "-DENABLE_HOST_ROUTING=1", "-DSERVICE_NO_BACKEND_RESPONSE=1"]
+        def without(*drop):
+            return [flag for flag in base if flag not in drop]
+        lb = ["-DLB_SELECTION_PER_SERVICE=1", "-DLB_SELECTION_MAGLEV=2",
+              "-DLB_SELECTION_RANDOM=1"]
+        per_object = {
+            "bpf_lxc": base + ["-DENCAP_IFINDEX=1"],
+            "bpf_overlay": base + ["-DENCAP_IFINDEX=1", "-DTUNNEL_MODE=1"] + lb,
+            "bpf_sock": base + ["-DENCAP_IFINDEX=1", "-DTUNNEL_MODE=1"] + lb,
+            "bpf_host": without("-DENABLE_HOST_FIREWALL=1") + ["-DENCAP_IFINDEX=1"],
+            "bpf_wireguard": base + ["-DENCAP_IFINDEX=1", "-DTUNNEL_MODE=1",
+                                     "-DENABLE_WIREGUARD=1"],
+            "bpf_xdp": without("-DENABLE_NODEPORT_ACCELERATION=1") + lb,
+        }
         include = [f"-include", str(bpf / "native_compat.h"),
                    f"-I{bpf}/cilium/bpf", f"-I{bpf}/cilium/bpf/include",
                    f"-I{bpf}/cilium/bpf/include/bpf",
@@ -123,9 +138,8 @@ def units_for_app(app: str) -> list[tuple[str, Path, list[str]]]:
         # bpf_alignchecker.c guards itself with "policy_log.h only supports
         # inclusion from bpf_host or bpf_lxc", so it only compiles inside those
         # programs; it carries no configuration of its own.
-        return [(name, bpf / f"cilium/bpf/{name}.c", base + include)
-                for name in ("bpf_lxc", "bpf_overlay", "bpf_sock", "bpf_host",
-                             "bpf_wireguard", "bpf_xdp")]
+        return [(name, bpf / f"cilium/bpf/{name}.c", options + include)
+                for name, options in per_object.items()]
     if app == "tetragon":
         # The Makefile's tetragon common_flags, in its own order.
         common = ["-fms-extensions", "-DMICRO_NATIVE_HELPER_MACROS",

@@ -47,7 +47,38 @@ def byte_image(data: bytes) -> str:
     return ", ".join(f"0x{byte:02x}" for byte in data)
 
 
-def constants_block_line(lines: list[str], names: list[str]) -> int:
+def constants_block_line(lines: list[str], entries: list[dict]) -> int:
+    """Where the constant block goes.
+
+    Three constraints: after every declaration of every name it rewrites
+    (cilium's ASSIGN_CONFIG declares a global and then defines it), at file
+    scope (a static const inside a function body is an error, and the first read
+    of a name is usually inside a function), and before the first read of any
+    of them, or that read keeps the map load.
+
+    The scan walks from the last declaration and stops at the first line where
+    the brace depth is back to zero -- the end of the statement that declares
+    the globals -- then extends past any type definition the constants name.
+    """
+    last_declaration = max(e.get("end_line", e["line"]) for e in entries)
+    depth = 0
+    boundary = last_declaration
+    for at in range(last_declaration - 1, len(lines)):
+        depth += lines[at].count("{") - lines[at].count("}")
+        boundary = at + 1
+        if depth <= 0:
+            break
+    names = [e["name"] for e in entries]
+    first_read = len(lines)
+    for name in names:
+        for at in range(boundary, len(lines)):
+            if name in lines[at]:
+                first_read = min(first_read, at)
+                break
+    return min(boundary, first_read) if first_read > boundary else boundary
+
+
+def _unused_block_line(lines: list[str], names: list[str]) -> int:
     """Where the constant block goes: after the last line a name or its type needs.
 
     A constant's member type may be a union the unit defines further down, and
@@ -193,7 +224,7 @@ def main() -> None:
         # The constants and their #defines go just before the first function
         # body: every type the declarations name is complete by then, and every
         # read of a global follows, so the #define reaches all of them.
-        boundary = constants_block_line(lines, [e["name"] for e in index["declarations"]])
+        boundary = constants_block_line(lines, index["declarations"])
         block = ("\n/* --- frozen .rodata as constants (native_specialize.py) --- */\n"
                  + "\n".join(tail) + "\n")
         lines.insert(boundary, block)
