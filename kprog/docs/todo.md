@@ -4,7 +4,7 @@
 
 规则：每完成一项，负责的 lane 在同一个提交里把这一行改成 `[x]` 并写上提交号，然后 push。新发现的事项直接加到这里。证明数字以 `kprog/results/kprog_verification_20261107/coverage.tsv` 为准。
 
-状态基于 2026-11-12 04:30 UTC。六应用几何平均（stats 关）：第 c 轮 1.217x；用第 d 轮的 Cilium 1.401x、Katran 1.112x 为 1.240x；05-29 下限表 1.169x；运营者 11-09 目标"平均之后 20%-40% 进步"。
+状态基于 2026-11-12 11:40 UTC。审核 detour-20261112T09Z（已核实）：重启后 OTel、Cilium、Tetragon、Tracee 每次运行都有一个程序装成 36 字节空壳（内核单一 pending 槽 + x86 JIT 拿不到镜像时回落编译 r0=0 桩，违反 AGENTS.md:105），这四个应用的下限对照和 1.240x 几何平均作废，待修复后重测；BCC 1.007x、Katran 1.092x–1.113x 有效。修复由 lane verified 做（每次桩装载要么拿到自己程序的镜像，要么失败）；OTel 的每 arm metrics map 导出在修复后由 lane C 做。
 
 ## 1. 性能（目标：六应用几何平均 native/JIT 1.20x–1.40x，来自原生代码）
 - [ ] **重新开始（运营者 2026-11-11 “停掉所有的, 然后确保重新开始”，“你能自己来的整理可以自己来, omp 辅助 review; 先不用 claude subagent 了”）**：所有 lane 停止，协调者自己做，omp 逐步 review。顺序：① 内核从 stock 基点 c23719abc330 开始，按需要逐个加入提交，每步构建并检查；② 链接器从 05-29 的源码（9f3855f6f）开始，按需要逐个加入改动，每步比对六个应用的原生字节；③ 唯一镜像、唯一底座；④ 一轮六应用计时，每个应用达到或超过 05-29。之后才做其他事。运营者 2026-11-11 22:55 UTC "6 小时审核 可以是 claude. 开发让 omp 做" "每一个 workspace 一个 omp 在里面跑, 持续推进. local large"：lane C 以新会话重启，作为 Workspace 里唯一的 omp 开发 lane（fleet/local-large），按本节的加载时特化条目开发；6 小时审核在 Workspace 里由全新的 claude -p 进程自己跑（AUDIT 循环）。2026-11-12 运营者（经 ModelOS 会话转达）"每一个 workspace 里面都可以加一个 codex lane 一直干, 用 gpt 6.1 sol"：加 Codex lane "verified"（gpt-6.1-sol）做 verified 线：先在唯一内核和镜像上跑通 BCC、Katran，再按失败类别从大到小做其余四个应用；CPU 0-7 归 lane C 计时，8-19 归 verified，20-23 归 lane C 构建。运营者 "每小时监控提醒不能停" "自己推进, 直到性能这部分全部做完, 优化也搞定为止. 每个应用跑3次之后换下一个应用这样, 广度优先"：计时和优化按应用广度优先，每个应用跑 3 次再换下一个。
