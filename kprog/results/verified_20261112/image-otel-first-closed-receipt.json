@@ -1,0 +1,97 @@
+{
+  "recorded_at": "2026-11-12T12:03:33.161687+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-image-otel-initial",
+  "closed_observation_directory": "/workspaces/kprog-raw/verified/20261112-image-otel-first-closed",
+  "corpus_run_directory": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261112_095533_293337",
+  "kernel_commit": "5f6e694bfd4d",
+  "model_commit": "8f1a1a8b4",
+  "installed_worker_commit": "fba19ea94",
+  "image": "bpf-benchmark/kprog:current",
+  "image_built_from": "d70d2e03e",
+  "samples": 1,
+  "workload_seconds": 10,
+  "bpf_stats": true,
+  "host_cpus": "8-19",
+  "guest_cpus": 8,
+  "guest_memory": "64G",
+  "application_status": "running",
+  "make_exit_code": null,
+  "candidate_source_submissions_observed": 4,
+  "observed_source_prog_ids": [
+    21,
+    25,
+    29,
+    32
+  ],
+  "verified_installed_observed": 2,
+  "verified_native_prog_ids": [
+    24,
+    28
+  ],
+  "run": null,
+  "observation_scope": "Three completed service requests plus a fourth captured retry. Baseline workload completed; candidate remains in startup and its final program/run counts remain pending.",
+  "requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 21,
+      "prog_id": 24,
+      "status": 0,
+      "started": "2026-11-12T09:56:02.808717+00:00",
+      "finished": "2026-11-12T09:56:09.977700+00:00",
+      "entry": "read_task_struct",
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 25,
+      "prog_id": 28,
+      "status": 0,
+      "started": "2026-11-12T09:56:10.003917+00:00",
+      "finished": "2026-11-12T09:58:40.557597+00:00",
+      "entry": "perf_unwind_stop",
+      "generation_returncodes": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 29,
+      "prog_id": null,
+      "status": -5,
+      "started": "2026-11-12T09:58:40.597666+00:00",
+      "finished": "2026-11-12T11:48:31.461362+00:00",
+      "entry": "perf_unwind_native",
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "verifier_tail": [
+        "8812: (bf) r1 = r8                    ; R1=0 R8=0",
+        "8813: (7b) *(u64 *)(r10 -528) = r1",
+        "invalid write to stack R10 off=-528 size=8",
+        "processed 3107 insns (limit 1000000) max_states_per_insn 0 total_states 130 peak_states 130 mark_read 0",
+        ""
+      ],
+      "failure_class": "verifier: invalid write to stack R10 off=-528 size=8"
+    }
+  ],
+  "active_request": {
+    "request_id": 4,
+    "source_prog_id": 32,
+    "entry": "perf_unwind_native",
+    "stage": "compiler running"
+  },
+  "failure": "The large perf_unwind_native simulator compiled successfully through six generation commands, then the stock verifier rejected instruction8813 writing stack offset-528. It processed3107instructions. This instantiates the existing stack-write family, following the Tetragon/Tracee scalar-read class.",
+  "kernel_handoff_scope": "These are running-kernel5f6e694bfd4d observations. The kernel74d1097af561/rootda665bbf3 handoff repair awaits coordinated rebuild and all-six-application recheck.",
+  "archive": "image-otel-first-closed.tar.gz"
+}
