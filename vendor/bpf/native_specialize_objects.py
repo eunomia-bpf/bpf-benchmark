@@ -60,6 +60,24 @@ def units_for_app(app: str) -> list[tuple[str, Path, list[str]]]:
                  "-I/usr/include", "-I/usr/include/x86_64-linux-gnu"]
         return [(tool, bpf / f"bcc/libbpf-tools/{tool}.bpf.c", flags)
                 for tool in bcc_tools()]
+    if app == "cilium":
+        base = ["-DSKIP_DEBUG=1", "-DENABLE_IPV4=1", "-DENABLE_ROUTING=1",
+                "-DPOLICY_VERDICT_NOTIFY=1", "-DMONITOR_AGGREGATION=3",
+                "-DCT_REPORT_FLAGS=0x0002", "-DENABLE_HOST_FIREWALL=1",
+                "-DENABLE_MASQUERADE_IPV4=1", "-DENABLE_NODEPORT=1",
+                "-DENABLE_NODEPORT_ACCELERATION=1", "-DENABLE_DSR_ICMP_ERRORS=1",
+                "-DENABLE_DSR=1", "-DENABLE_DSR_BYUSER=1",
+                "-DENABLE_HOST_ROUTING=1", "-DSERVICE_NO_BACKEND_RESPONSE=1",
+                "-DENCAP_IFINDEX=1"]
+        include = [f"-include", str(bpf / "native_compat.h"),
+                   f"-I{bpf}/cilium/bpf", f"-I{bpf}/cilium/bpf/include",
+                   f"-I{bpf}/cilium/bpf/include/bpf",
+                   f"-I{bpf}/cilium/bpf/include/linux",
+                   f"-I{bpf}/cilium/bpf/lib",
+                   "-I/usr/include", "-I/usr/include/x86_64-linux-gnu"]
+        return [(name, bpf / f"cilium/bpf/{name}.c", base + include)
+                for name in ("bpf_lxc", "bpf_overlay", "bpf_sock", "bpf_host",
+                             "bpf_wireguard", "bpf_xdp", "bpf_alignchecker")]
     if app == "tracee":
         flags = [f"-include", str(bpf / "native_compat.h"),
                  "-DMICRO_NATIVE_HELPER_MACROS", "-D__TARGET_ARCH_x86",

@@ -6,6 +6,9 @@
 # runtime container, so the directory lives there).
 #
 # Usage: specialized-timing.sh <app> <manifest-dir|image> <state-dir> <samples> <seconds> <cpus>
+#   CMD=maps captures each program's .rodata map contents instead of timing: the
+#   run then carries details/map-snapshots/<app>, the input
+#   vendor/bpf/native_specialize_objects.py needs for that application.
 # Example (functional check, CPUs 20-23):
 #   specialized-timing.sh tracee/monitor corpus/results/spec-test/tracee \
 #     /var/tmp/kprog-tmp/C/state 1 10 20-23
@@ -27,10 +30,12 @@ if [ "$MANIFEST" = image ]; then
 else
   NATIVE=$ROOT/$MANIFEST/manifest.json
 fi
+EXTRA=
+[ "${CMD:-time}" = maps ] && EXTRA="BPFREJIT_BENCH_PASSES=map-only"
 taskset -c "$CPUS_N" make -f kprog/perf/one-image/Makefile corpus \
   APPS="$APP" SAMPLES="$SAMPLES_N" WORKLOAD_DURATION="$SECONDS_N" \
   BPFREJIT_CORPUS_BPF_STATS=1 CPUS="$CPUS_N" STATE="$STATE" \
-  NATIVE_MANIFEST="$NATIVE" > "$LOG" 2>&1 || rc=$?
+  NATIVE_MANIFEST="$NATIVE" $EXTRA > "$LOG" 2>&1 || rc=$?
 rc=${rc:-0}
 run=$(grep -o '"artifact_run_dir": "[^"]*"' "$LOG" | tail -1 | cut -d'"' -f4)
 echo "$(date -u +%FT%TZ) specialized app=$APP rc=$rc samples=$SAMPLES_N run=$run" >> "$LOGS/specialized.log"
