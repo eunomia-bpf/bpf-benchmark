@@ -32,8 +32,11 @@ RODATA_PREFIX = ".rodata"
 # The .rodata section a declaration lives in, in order of specificity: a
 # declaration in .rodata.str1.1 is a string, one in .rodata.config is a Cilium
 # configuration variable, one in .rodata is a plain global.
+# Pragmas that name a macro: the value the program's headers give it.
+PRAGMA_MACRO_VALUES = {"MAX_IPV4_OPTS": 3}
+
 AST_VAR_DECL = re.compile(
-    r"^[|`]?-VarDecl 0x[0-9a-f]+ <line:(\d+):(\d+), col:(\d+)> col:(\d+) "
+    r"^[|`]?-VarDecl 0x[0-9a-f]+ <(line:)?(\d+):(\d+), (?:line:(\d+):(\d+)|col:(\d+))> col:(\d+) "
     r"(?:used |referenced )?(\w+) '([^']*)'(.*)$"
 )
 
@@ -103,9 +106,48 @@ def array_length(type_text: str) -> int:
     return int(m.group(1)) if m else 0
 
 
-def declarations(unit: Path) -> dict[str, dict[str, object]]:
-    """Top-level volatile declarations of the preprocessed unit, by name."""
-    result = run(["clang-18", "-fsyntax-only", "-Xclang", "-ast-dump", "-x", "c", str(unit)])
+def define_line(unit: Path, name: str) -> int:
+    """The last line that declares `name` at file scope.
+
+    A program may declare a global twice (cilium's ASSIGN_CONFIG writes a bare
+    declaration and then the defining one), and the #define has to follow both.
+    """
+    last = 0
+    for number, line in enumerate(unit.read_text().split("\n"), start=1):
+        if name not in line:
+            continue
+        before = line[:line.index(name)]
+        after = line[line.index(name) + len(name):]
+        # A definition or declaration, not a read: the statement before the
+        # name ends a declaration (or the line starts one) and what follows the
+        # name is the end of the statement.
+        declares = (after.lstrip().startswith(("=", ";", "["))
+                    and (";" in after or "{" in after))
+        if declares and (before.strip() == "" or before.rstrip().endswith((";", "}", ")"))):
+            last = number
+        elif declares:
+            last = number
+    return last
+
+
+def declarations(unit: Path, clang_argv: list[str]) -> dict[str, dict[str, object]]:
+    """Top-level volatile declarations of the preprocessed unit, by name.
+
+    The dump needs the compile's own -D and include flags: a preprocessed unit
+    still carries the conditional expressions the macros left behind, and
+    cilium's MAX_IPV4_OPTS is one of them.
+    """
+    # A pragma keeps its macro unexpanded through preprocessing
+    # (#pragma unroll(MAX_IPV4_OPTS) in cilium), so those names are defined
+    # again for the dump from the values the preprocessed unit still shows.
+    defines = [arg for arg in clang_argv if arg.startswith("-D")]
+    pragma_macros = set(re.findall(r"#pragma \w+\((\w+)\)",
+                                   unit.read_text()))
+    for name in pragma_macros:
+        if name in PRAGMA_MACRO_VALUES:
+            defines.append(f"-D{name}={PRAGMA_MACRO_VALUES[name]}")
+    result = run(["clang-18", *defines, "-fsyntax-only", "-Xclang", "-ast-dump",
+                  "-x", "c", str(unit)])
     if result.returncode != 0:
         sys.stderr.write(result.stderr)
         raise SystemExit(f"ast dump failed for {unit}")
@@ -114,11 +156,13 @@ def declarations(unit: Path) -> dict[str, dict[str, object]]:
         m = AST_VAR_DECL.match(line)
         if not m:
             continue
-        line_no, col, _end_col, name_col, name, type_text, rest = m.groups()
+        _prefix, line_no, _c, end_line, _ec, _end_col, name_col, name, type_text, rest = m.groups()
         if "volatile" not in type_text:
             continue
-        found[name] = {
+        previous = found.get(name)
+        entry = {
             "line": int(line_no),
+            "end_line": int(end_line or line_no),
             "name_column": int(name_col),
             "name": name,
             "type": type_text,
@@ -126,6 +170,10 @@ def declarations(unit: Path) -> dict[str, dict[str, object]]:
             "array_type": type_text.endswith("]"),
             "has_initializer": " cinit" in rest,
         }
+        if previous:
+            entry["end_line"] = max(entry["end_line"], previous["end_line"])
+            entry["line"] = min(entry["line"], previous["line"])
+        found[name] = entry
     return found
 
 
@@ -147,7 +195,7 @@ def main() -> None:
     preprocess(object_path, unit, clang_argv)
 
     rodata = rodata_globals(object_path)
-    decls = declarations(unit)
+    decls = declarations(unit, clang_argv)
     entries = []
     for name, (section, offset, size) in sorted(rodata.items()):
         decl = decls.get(name)
@@ -159,6 +207,10 @@ def main() -> None:
             "offset": offset,
             "size": size,
             "line": decl["line"],
+            "end_line": decl["end_line"],
+            # Where the #define goes: after every declaration of the name in
+            # the unit, since ASSIGN_CONFIG writes a second one.
+            "define_line": define_line(unit, name),
             "name_column": decl["name_column"],
             "type": decl["type"],
             "array_length": decl["array_length"],

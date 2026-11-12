@@ -129,7 +129,7 @@ def loaded_rodata(capture: Path) -> dict[str, bytes]:
     for ref in sorted(capture.glob("*/ref.json")):
         meta = json.loads(ref.read_text())
         map_name = meta.get("map_name", "")
-        if map_name != ".rodata" and not map_name.endswith(".rodata"):
+        if not map_name.startswith(".rodata"):
             continue
         dump = ref.parent / "map-values" / f"map-{meta['map_id']}.dump.json"
         if not dump.exists():
@@ -138,26 +138,48 @@ def loaded_rodata(capture: Path) -> dict[str, bytes]:
         if not entries:
             continue
         image = bytes(int(byte, 16) for byte in entries[0]["value"])
+        # ".rodata" and ".rodata.<variant>" (cilium's .rodata.config) both name
+        # the program's own configuration map; "<tool>.rodata" is a BCC tool's.
         tool = map_name[: -len(".rodata")] if map_name.endswith(".rodata") \
-            and map_name != ".rodata" else ""
-        previous = values.setdefault(tool, image)
-        if previous != image:
-            sys.exit(f"{meta['prog_name']}: .rodata differs between references")
+            and not map_name.startswith(".rodata") else ""
+        # Programs of one BPF object all read the same image; cilium's objects
+        # each carry their own, and the first one seen is the layout its
+        # .rodata symbols are patched against.
+        values.setdefault(tool, image)
     return values
 
 
-def plain_rodata_bytes(object_path: Path) -> bytes:
-    """The object's .rodata contents, what the loader patches against."""
+def plain_rodata_bytes(object_path: Path, section: str = ".rodata") -> bytes:
+    """The object's own contents of one .rodata section.
+
+    The loader patches each native .rodata symbol to map_value_addr + its offset
+    in the section, so the constants are the bytes the plain object carries
+    there. Cilium's configuration lives in .rodata.config and the plain-array
+    maps in .rodata, so the section is named.
+    """
     sections = subprocess.run(["readelf", "-SW", str(object_path)],
                               capture_output=True, text=True).stdout
     for m in re.finditer(
-            r"^\s*\[\s*\d+\]\s+\.rodata\s+PROGBITS\s+[0-9a-f]+\s+([0-9a-f]+)\s+([0-9a-f]+)",
+            r"^\s*\[\s*\d+\]\s+" + re.escape(section) +
+            r"\s+PROGBITS\s+[0-9a-f]+\s+([0-9a-f]+)\s+([0-9a-f]+)",
             sections, re.M):
         offset, size = int(m.group(1), 16), int(m.group(2), 16)
         with open(object_path, "rb") as handle:
             handle.seek(offset)
             return handle.read(size)
     return b""
+
+
+def plain_rodata_section(object_path: Path) -> str:
+    """The .rodata section holding the configuration globals, by its symbols."""
+    out = subprocess.run(["readelf", "-SW", str(object_path)],
+                         capture_output=True, text=True).stdout
+    names = [m.group(1) for m in re.finditer(
+        r"^\s*\[\s*\d+\]\s+(\.rodata\S*)\s+PROGBITS", out, re.M)]
+    for preferred in (".rodata.config", ".rodata.var", ".rodata"):
+        if preferred in names:
+            return preferred
+    return names[0] if names else ".rodata"
 
 
 def plain_rodata_size(object_path: Path) -> int:
@@ -240,6 +262,7 @@ def main() -> None:
             print(f"{stem:22} .rodata {section} > map value {len(reference)}; "
                   f"the object keeps its own copy", file=sys.stderr)
 
+        section_name = plain_rodata_section(plain)
         unit = base.with_suffix(".unit.i")
         index = base.with_suffix(".decls.json")
         run([sys.executable, str(HERE / "native_specialize_prepares.py"),
@@ -252,7 +275,7 @@ def main() -> None:
         # The loader indexes the loaded image by the plain object's .rodata
         # offsets, so the constants come from the plain object's own section.
         rodata_file = directory / f"{base.name}.rodata.bin"
-        rodata_file.write_bytes(plain_rodata_bytes(plain))
+        rodata_file.write_bytes(plain_rodata_bytes(plain, section_name))
         specialized = base.with_suffix(".rodata.i")
         run([sys.executable, str(HERE / "native_specialize.py"),
              "--unit", str(produced_unit), "--decls", str(produced_index),
