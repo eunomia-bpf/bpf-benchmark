@@ -2,7 +2,7 @@
 # Invoke with setsid nohup and a fresh persistent result directory:
 # run_verified_corpus.sh OUTPUT APP [extra make arguments...]
 # Existing SAMPLES/WORKLOAD_DURATION/BPFREJIT_CORPUS_BPF_STATS select the sample.
-set -eu
+set -euo pipefail
 run_dir=$1
 app=$2
 shift 2
@@ -20,6 +20,6 @@ make_args=(
 printf '%q ' taskset -c 8-19 make "${make_args[@]}" > "$run_dir/make-command.txt"
 printf '\n' >> "$run_dir/make-command.txt"
 status=0
-taskset -c 8-19 make "${make_args[@]}" > "$run_dir/corpus.log" 2>&1 || status=$?
+taskset -c 8-19 make "${make_args[@]}" 2>&1 | tee "$run_dir/corpus.log" >/dev/null || status=$?
 printf '%s\n' "$status" > "$run_dir/exit-code"
 exit "$status"
