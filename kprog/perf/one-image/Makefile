@@ -75,6 +75,12 @@ VM_MEM ?= 64G
 BPFREJIT_CORPUS_BPF_STATS ?= 0
 SAMPLES ?= 3
 WORKLOAD_DURATION ?= 180
+# The native configuration switch. The default is the image's own manifest, the
+# 2026-05-29 path with no load-time specialization. Pointing it at a directory
+# built by vendor/bpf/native_specialize_objects.py selects the specialized
+# objects (.rodata values as constants, array lookups as address arithmetic);
+# the path must be one the runtime container sees (corpus/results is mounted).
+NATIVE_MANIFEST ?= /opt/bpf-benchmark/native-bpf/x86_64/$(APP_DIR)/manifest.json
 # Extra vng flags, for example --verbose to keep the guest kernel console in the log.
 VNG_FLAGS ?=
 # Breadth first (operator 2026-11-11: "每个应用跑3次之后换下一个应用这样, 广度优先"):
@@ -88,7 +94,7 @@ corpus:
 	install -d $(STATE)/var-tmp $(LOGS)
 	ln -f $(IMAGE_TAR) $(STATE)/var-tmp/runtime.image.tar 2>/dev/null || cp $(IMAGE_TAR) $(STATE)/var-tmp/runtime.image.tar
 	cp $(KINSN_OUT)/bpf_x86_native_lab.ko $(STATE)/var-tmp/bpf_x86_native_lab.ko
-	taskset -c $(CPUS) vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir /var/tmp=$(STATE)/var-tmp --overlay-rwdir /tmp --overlay-rwdir /run --overlay-rwdir /usr/local --disable-monitor $(VNG_FLAGS) --cpus $(VM_CPUS) --memory $(VM_MEM) --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile guest APPS=$(APPS) SAMPLES=$(SAMPLES) WORKLOAD_DURATION=$(WORKLOAD_DURATION) BPFREJIT_CORPUS_BPF_STATS=$(BPFREJIT_CORPUS_BPF_STATS)'
+	taskset -c $(CPUS) vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir /var/tmp=$(STATE)/var-tmp --overlay-rwdir /tmp --overlay-rwdir /run --overlay-rwdir /usr/local --disable-monitor $(VNG_FLAGS) --cpus $(VM_CPUS) --memory $(VM_MEM) --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile guest APPS=$(APPS) SAMPLES=$(SAMPLES) WORKLOAD_DURATION=$(WORKLOAD_DURATION) BPFREJIT_CORPUS_BPF_STATS=$(BPFREJIT_CORPUS_BPF_STATS) NATIVE_MANIFEST=$(NATIVE_MANIFEST)'
 	rm -f $(STATE)/var-tmp/bpf-benchmark-docker.img
 
 guest:
@@ -98,7 +104,7 @@ guest:
 	env -u BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF PATH=/usr/lib/llvm-18/bin:$$PATH \
 	  BPFREJIT_CORPUS_APPS=$(APPS) BPFREJIT_CORPUS_BPF_STATS=$(BPFREJIT_CORPUS_BPF_STATS) \
 	  BPFREJIT_SHIM_NATIVE_LOADER=post \
-	  BPFREJIT_SHIM_NATIVE_MANIFEST=/opt/bpf-benchmark/native-bpf/x86_64/$(APP_DIR)/manifest.json \
+	  BPFREJIT_SHIM_NATIVE_MANIFEST=$(NATIVE_MANIFEST) \
 	  BPFREJIT_NATIVE_LOADER_SO=/usr/local/lib/bpfrejit/libnative_loader.so \
 	  KEEP_WORKDIRS=all BPFREJIT_KEEP_ALL_WORKDIRS=1 SKIP_REJIT=norejit \
 	  $(MAKE) -C $(ROOT) __runtime-vm-corpus PLATFORM=kvm ARCH=x86 \
