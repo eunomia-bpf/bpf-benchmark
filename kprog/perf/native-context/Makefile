@@ -209,3 +209,9 @@ socket-context-errors: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/publ
 .PHONY: upstream-socket-proof
 upstream-socket-proof: upstream-socket-native
 	python3 $(HERE)/socket-proof.py --input $(SOCKET_BUILD)/upstream-sock.native.o --linker $(LINK_MEMORY_PAYLOAD)/native-link.real --output $(SOCKET_BUILD)/proofs
+
+SOCKET_RAW ?= /workspaces/kprog-raw/perf/20261113-socket-context
+SOCKET_RECEIPT ?= $(ROOT)/kprog/results/perf_20261113/socket-context-host.json
+.PHONY: socket-retain
+socket-retain:
+	python3 $(HERE)/socket-retain.py --build $(SOCKET_BUILD) --raw $(SOCKET_RAW) --output $(SOCKET_RECEIPT) --features='$(UPSTREAM_SOCKET_FEATURES)' --log $(SOCKET_RAW)/complete.log

@@ -1,0 +1,148 @@
+{
+  "recorded_at": "2026-11-13T07:26:40.079472+00:00",
+  "compiler_commit": "d46c8a632",
+  "raw": "/workspaces/kprog-raw/perf/20261113-socket-context",
+  "upstream_revision": "1b721c2964e7799cab3e18c38066905ea240fa34",
+  "upstream_source": "vendor/repos/cilium/bpf/bpf_sock.c",
+  "source_sha256": "4a1435ea4343e51dbb6c09a709375bf455204f7cb20446b7e93dc31367a515f5",
+  "kernel_revision": "74d1097af56132da2b325699c5a560b29a790ff2",
+  "target_btf_header": "vendor/bpf/targets/x86/7.0.0-rc2+/vmlinux.h",
+  "target_btf_sha256": "39c424a6324887315c21d64924722762f757d85270e8a3c735630ea9fb8ca153",
+  "features": "-DENABLE_IPV4=1",
+  "frontend_target": "bpf",
+  "native_target": "x86_64",
+  "lowered_access_counts_from_log": [
+    29,
+    55
+  ],
+  "build_log": "/workspaces/kprog-raw/perf/20261113-socket-context/complete.log",
+  "expected_error_cases": [
+    "dynamic offset",
+    "unmapped field",
+    "field-address escape"
+  ],
+  "offline_link_results": [
+    {
+      "symbol": "cil_sock4_connect",
+      "command": [
+        "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+        "--mode",
+        "proof",
+        "--input",
+        "/var/tmp/kprog-tmp/perf/socket-context/upstream-sock.native.o",
+        "--symbol",
+        "cil_sock4_connect",
+        "--output",
+        "/var/tmp/kprog-tmp/perf/socket-context/proofs/cil_sock4_connect.proof.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "symbol": "cil_sock4_recvmsg",
+      "command": [
+        "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+        "--mode",
+        "proof",
+        "--input",
+        "/var/tmp/kprog-tmp/perf/socket-context/upstream-sock.native.o",
+        "--symbol",
+        "cil_sock4_recvmsg",
+        "--output",
+        "/var/tmp/kprog-tmp/perf/socket-context/proofs/cil_sock4_recvmsg.proof.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "symbol": "cil_sock4_sendmsg",
+      "command": [
+        "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+        "--mode",
+        "proof",
+        "--input",
+        "/var/tmp/kprog-tmp/perf/socket-context/upstream-sock.native.o",
+        "--symbol",
+        "cil_sock4_sendmsg",
+        "--output",
+        "/var/tmp/kprog-tmp/perf/socket-context/proofs/cil_sock4_sendmsg.proof.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "symbol": "cil_sock6_connect",
+      "command": [
+        "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+        "--mode",
+        "proof",
+        "--input",
+        "/var/tmp/kprog-tmp/perf/socket-context/upstream-sock.native.o",
+        "--symbol",
+        "cil_sock6_connect",
+        "--output",
+        "/var/tmp/kprog-tmp/perf/socket-context/proofs/cil_sock6_connect.proof.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "symbol": "cil_sock6_recvmsg",
+      "command": [
+        "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+        "--mode",
+        "proof",
+        "--input",
+        "/var/tmp/kprog-tmp/perf/socket-context/upstream-sock.native.o",
+        "--symbol",
+        "cil_sock6_recvmsg",
+        "--output",
+        "/var/tmp/kprog-tmp/perf/socket-context/proofs/cil_sock6_recvmsg.proof.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "symbol": "cil_sock6_sendmsg",
+      "command": [
+        "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+        "--mode",
+        "proof",
+        "--input",
+        "/var/tmp/kprog-tmp/perf/socket-context/upstream-sock.native.o",
+        "--symbol",
+        "cil_sock6_sendmsg",
+        "--output",
+        "/var/tmp/kprog-tmp/perf/socket-context/proofs/cil_sock6_sendmsg.proof.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "symbol": "cil_sock_release",
+      "command": [
+        "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+        "--mode",
+        "proof",
+        "--input",
+        "/var/tmp/kprog-tmp/perf/socket-context/upstream-sock.native.o",
+        "--symbol",
+        "cil_sock_release",
+        "--output",
+        "/var/tmp/kprog-tmp/perf/socket-context/proofs/cil_sock_release.proof.o"
+      ],
+      "returncode": 0
+    }
+  ],
+  "verifier_submissions": 0,
+  "native_installs": 0,
+  "application_execution": false,
+  "default_path_changed": false,
+  "limits": [
+    "Compiler/host subset only; actual frozen runtime config remains to match.",
+    "No application-decision or throughput equivalence certified.",
+    "Known unsupported context kinds and general CO-RE still need implementation.",
+    "Original-program helper deployment remains with lane verified."
+  ],
+  "archive": {
+    "path": "kprog/results/perf_20261113/socket-context-host.tar.gz",
+    "bytes": 476193,
+    "sha256": "ea0ec2168c576e2b7adf1636eec591ebbfd298a6d0a1053123f1f6e57d728613",
+    "files_byte_compared": 65
+  },
+  "tree_head": "2d05e634238b0ab0b158fd8769784a32c83489b6"
+}
