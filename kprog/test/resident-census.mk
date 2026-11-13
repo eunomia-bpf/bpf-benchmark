@@ -5,13 +5,14 @@ OUTPUT ?= /workspaces/kprog-raw/verified/20261112-resident-census
 RUN_OUTPUT ?= $(OUTPUT)/control
 VM_CPUS ?= 8
 VM_MEM ?= 64G
+VM_QUEUES ?= 3
 HOST_CPUS ?= 8-15
 INPUTS := /workspaces/kprog-raw/var-tmp/CL/census-inputs/inputs/run-inventory.json
 RESOURCES := /workspaces/kprog-raw/var-tmp/CL/census-inputs/inputs/resource-index.json
 STAGE := $(ROOT)/vendor/build/native-bpf/x86/stage
 STATS_RUNS ?= x86_kvm_corpus_20261111_184428_882758 x86_kvm_corpus_20261111_191024_348289 x86_kvm_corpus_20261111_193648_926655 x86_kvm_corpus_20261111_200309_471678 x86_kvm_corpus_20261111_202934_974828 x86_kvm_corpus_20261111_205641_469520
 
-.PHONY: prepare group replay run collect collector-check group-check
+.PHONY: prepare group replay resume run collect collector-check group-check
 prepare:
 	install -d $(OUTPUT)/source-resources
 	tar --skip-old-files -xzf $(ROOT)/corpus/results/kprog_app_coverage_20261109/resident-census/stock-resource-inputs.tar.gz -C $(OUTPUT)/source-resources
@@ -33,6 +34,12 @@ replay:
 		--inputs $(INVENTORY) --completed-journal $(COMPLETED_JOURNAL) \
 		$(foreach journal,$(OBSERVED_JOURNALS),--additional-journal $(journal)) \
 		$(foreach class,$(FAILURE_CLASSES),--failure-class $(class))
+
+resume:
+	taskset -c $(HOST_CPUS) python3 $(ROOT)/kprog/test/resident_verified_census.py resume --output $(OUTPUT) \
+		--inputs $(INVENTORY) --completed-journal $(COMPLETED_JOURNAL) \
+		$(foreach journal,$(OBSERVED_JOURNALS),--additional-journal $(journal)) \
+		$(foreach inventory,$(PRIORITY_INVENTORIES),--priority-inventory $(inventory)) --guest-count $(VM_QUEUES)
 
 run:
 	$(MAKE) -C $(ROOT)/kprog/libnativeloader -o trusted-service trusted-service-kvm \

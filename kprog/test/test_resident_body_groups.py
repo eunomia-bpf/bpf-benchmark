@@ -5,10 +5,57 @@ from pathlib import Path
 import tempfile
 from types import SimpleNamespace
 
-from resident_verified_census import group_bodies, replay, replay_programs, retain_request_artifacts, write_replay_guests
+from resident_verified_census import group_bodies, replay, replay_programs, resume, resume_programs, retain_request_artifacts, write_replay_guests
 
 
 class BodyGrouping(unittest.TestCase):
+    def test_resume_does_not_repeat_completed_bodies_or_drop_unfinished_requests(self):
+        rows = [dict(body_group=n, resource=dict(maps=[n])) for n in range(7)]
+        outcomes = [dict(body_group=0, stage="verifier_rejected"),
+                    dict(body_group=2, stage="installed"),
+                    dict(body_group=2, stage="installed")]
+        priority = [rows[2], rows[4], rows[2]]
+        selected, pending = resume_programs(rows, outcomes, priority)
+        self.assertEqual(pending, 5)
+        self.assertEqual([r["body_group"] for r in selected], [2, 4, 1, 3, 5, 6])
+        self.assertEqual(selected[-1], rows[-1])
+        self.assertEqual(resume_programs(rows, outcomes, [])[0],
+                         [rows[n] for n in (1, 3, 4, 5, 6)])
+
+    def test_resume_partitions_all_pending_and_class_bodies_with_complete_resources(self):
+        with tempfile.TemporaryDirectory() as work:
+            root = Path(work)
+            inputs, main, extra, priority = (root / name for name in
+                                             ("inputs.json", "main.jsonl", "extra.jsonl", "priority.json"))
+            rows = [dict(body_group=n, source_prog_id=n+100, resource=dict(map_inventory=[n]))
+                    for n in range(7)]
+            source = dict(programs=rows, body_groups=[dict(body_group=n, members=[n, n+20])
+                                                      for n in range(7)],
+                          applications=[dict(application="app", map_inventory=[7, 8])])
+            original = json.dumps(source)
+            inputs.write_text(original)
+            main.write_text(json.dumps(dict(body_group=0, stage="installed")) + "\n")
+            extra.write_text(json.dumps(dict(body_group=1, stage="verifier_rejected")) + "\n")
+            priority.write_text(json.dumps(dict(programs=[rows[1], rows[2], rows[1]])))
+            output = root / "resume"
+            resume(SimpleNamespace(inputs=inputs, completed_journal=main, additional_journal=[extra],
+                                   priority_inventory=[priority], guest_count=3, output=output))
+            result = json.loads((output / "inventory.json").read_text())
+            guests = [json.loads(Path(path).read_text())
+                      for path in result["resume"]["guest_inventories"]]
+            self.assertEqual([[r["body_group"] for r in g["programs"]] for g in guests],
+                             [[1, 4], [2, 5], [3, 6]])
+            self.assertEqual(result["resume"]["pending_bodies"], 5)
+            self.assertEqual(result["resume"]["additional_replay_bodies"], 1)
+            self.assertEqual(sorted(r["body_group"] for g in guests for r in g["programs"]),
+                             [1, 2, 3, 4, 5, 6])
+            for guest in guests:
+                self.assertEqual(guest["applications"], source["applications"])
+                self.assertEqual(guest["body_groups"], source["body_groups"])
+                for row in guest["programs"]:
+                    self.assertEqual(row, rows[row["body_group"]])
+            self.assertEqual(inputs.read_text(), original)
+
     def test_class_replay_includes_independent_guest_observations(self):
         with tempfile.TemporaryDirectory() as work:
             root = Path(work)

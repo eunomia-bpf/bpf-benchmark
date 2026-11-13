@@ -231,6 +231,49 @@ def replay(args):
     print(json.dumps(source["replay"]), flush=True)
 
 
+def resume_programs(rows, outcomes, priority_rows):
+    """Prioritize explicit class replays, then keep every unfinished body once."""
+    completed = {row["body_group"] for row in outcomes}
+    pending = [row for row in rows if row["body_group"] not in completed]
+    selected = {}
+    for row in [*priority_rows, *pending]:
+        selected.setdefault(row["body_group"], row)
+    return list(selected.values()), len(pending)
+
+
+def resume(args):
+    source = json.loads(args.inputs.read_text())
+    outcomes = [json.loads(line)
+                for journal in [args.completed_journal, *args.additional_journal]
+                for line in journal.read_text().splitlines()]
+    priority_rows = [row for inventory in args.priority_inventory
+                     for row in json.loads(inventory.read_text())["programs"]]
+    source["programs"], pending = resume_programs(source["programs"], outcomes, priority_rows)
+    source["resume"] = dict(input_inventory=str(args.inputs),
+                            completed_journals=[str(path) for path in
+                                               [args.completed_journal, *args.additional_journal]],
+                            priority_inventories=[str(path) for path in args.priority_inventory],
+                            pending_bodies=pending, queued_bodies=len(source["programs"]),
+                            additional_replay_bodies=len(source["programs"]) - pending,
+                            controller_commit=subprocess.check_output(
+                                ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip())
+    args.output.mkdir(parents=True, exist_ok=True)
+    inventories = []
+    for index in range(args.guest_count):
+        directory = args.output / "queues" / str(index)
+        directory.mkdir(parents=True, exist_ok=True)
+        partition = dict(source, programs=source["programs"][index::args.guest_count],
+                         execution_queue=dict(index=index, count=args.guest_count,
+                                              source_inventory=str(args.output / "inventory.json")))
+        path = directory / "inventory.json"
+        write(path, partition)
+        inventories.append(str(path))
+    source["resume"]["guest_inventories"] = inventories
+    write(args.output / "inventory.json", source)
+    write(args.output / "preparation.json", source["resume"])
+    print(json.dumps(source["resume"]), flush=True)
+
+
 def retain_request_artifacts(result, directory):
     """Keep journal targets outside the service's temporary session directory."""
     service = result.get("submission", {}).get("service", {})
@@ -284,7 +327,7 @@ def guest(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("prepare", "group", "replay", "guest"))
+    parser.add_argument("mode", choices=("prepare", "group", "replay", "resume", "guest"))
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--inputs", type=Path)
     parser.add_argument("--resources", type=Path)
@@ -297,8 +340,10 @@ def main():
     parser.add_argument("--completed-journal", type=Path)
     parser.add_argument("--additional-journal", type=Path, action="append", default=[])
     parser.add_argument("--failure-class", action="append", default=[])
+    parser.add_argument("--priority-inventory", type=Path, action="append", default=[])
+    parser.add_argument("--guest-count", type=int, default=3)
     args = parser.parse_args()
-    {"prepare": prepare, "group": group, "replay": replay, "guest": guest}[args.mode](args)
+    {"prepare": prepare, "group": group, "replay": replay, "resume": resume, "guest": guest}[args.mode](args)
 
 
 if __name__ == "__main__":
