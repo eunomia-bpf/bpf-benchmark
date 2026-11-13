@@ -90,3 +90,10 @@ linker-profile:
 	install -d $(LINK_PROFILE_OUTPUT)
 	install -m 755 $(HERE)/link-cost.py $(LINK_PROFILE_OUTPUT)/native-link
 	python3 -c 'import json, pathlib, sys; (pathlib.Path(sys.argv[1]) / "config.json").write_text(json.dumps({"linker": sys.argv[2]}, indent=2) + "\n")' '$(LINK_PROFILE_OUTPUT)' '$(LINK_PROFILE_PAYLOAD)'
+
+LOADER_PERF_SOURCE ?= /var/tmp/kprog-tmp/C/perf-build/perf
+LOADER_PERF_OUTPUT ?= /var/tmp/kprog-tmp/perf/var-tmp/perf
+.PHONY: loader-perf-tool
+loader-perf-tool:
+	install -D -m 755 $(LOADER_PERF_SOURCE) $(LOADER_PERF_OUTPUT)
+	$(LOADER_PERF_OUTPUT) version --build-options

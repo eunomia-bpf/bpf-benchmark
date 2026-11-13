@@ -43,6 +43,7 @@ class GuestControl(unittest.TestCase):
             command = shlex.join(['python3', '-c', 'print("exact output")', 'x' * 5000])
             argv = ['vng', '--run', '/kernel', '--exec', command]
             environment = {'EQCODEX_OUT': directory, 'EQCODEX_TETRA': '/a client/tetra',
+                           'EQCODEX_LOADER_PERF': '/a perf tool/perf',
                            'EQCODEX_NATIVE_LINK_BINARY': '/a linker/native-link'}
             with patch.object(sys, 'argv', argv), patch.dict(os.environ, environment, clear=True), patch.object(CAPTURE.os, 'execv') as execute:
                 CAPTURE.main()
@@ -53,7 +54,8 @@ class GuestControl(unittest.TestCase):
             self.assertEqual(shlex.split(plan['command']),
                              ['env', 'BPFREJIT_NATIVE_LINK_BINARY=/a linker/native-link',
                               'python3', '-c', 'print("exact output")', 'x' * 5000])
-            self.assertEqual(plan['observer'][-2:], ['--tetra', '/a client/tetra'])
+            self.assertEqual(plan['observer'][-4:], ['--tetra', '/a client/tetra',
+                                                   '--loader-perf', '/a perf tool/perf'])
             self.assertEqual(actual[:4], ['vng', '--run', '/kernel', '--exec'])
 
     def test_guest_returns_workload_failure_and_reaps_its_observer(self):

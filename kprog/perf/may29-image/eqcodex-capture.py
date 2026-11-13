@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 import time
@@ -30,6 +31,32 @@ def save(command, path):
     path.with_suffix(path.suffix + '.stderr').write_bytes(result.stderr)
     path.with_suffix(path.suffix + '.rc').write_text(str(result.returncode) + '\n')
     return result
+
+
+def profile_loader(perf, prefix, dest):
+    agent = save(prefix + ['pgrep', '-x', 'tetragon'], dest / 'loader-perf-pid.txt')
+    if agent.returncode:
+        return
+    pid = str(int(agent.stdout.decode().strip()))
+    save(['cat', f'/proc/{pid}/maps'], dest / 'loader-perf-maps.txt')
+    symbols = dest / 'loader-perf-symbols'
+    library = Path('usr/local/lib/bpfrejit/libnative_loader.so')
+    (symbols / library).parent.mkdir(parents=True)
+    shutil.copy2(Path(f'/proc/{pid}/root') / library, symbols / library)
+    save(['cat', '/proc/kallsyms'], dest / 'loader-perf-kallsyms.txt')
+    # perf data mmap needs a local filesystem, rather than the shared 9p mount.
+    data = Path('/dev/shm') / f'eqcodex-loader-{pid}.data'
+    recording = save([perf, 'record', '--namespaces', '-e', 'cpu-clock', '-F', '99',
+                      '--call-graph', 'dwarf,8192', '-p', pid, '-o', str(data),
+                      '--', 'sleep', '10'], dest / 'loader-perf-record.txt')
+    if recording.returncode:
+        return
+    shutil.copy2(data, dest / 'loader-perf.data')
+    arguments = ['-i', str(data), '--symfs', str(symbols),
+                 '--kallsyms', str(dest / 'loader-perf-kallsyms.txt')]
+    save([perf, 'report', *arguments, '--stdio', '--no-children', '--percent-limit', '0'],
+         dest / 'loader-perf-report.txt')
+    save([perf, 'script', *arguments], dest / 'loader-perf-script.txt')
 
 
 def observe(out):
@@ -71,6 +98,8 @@ def observe(out):
         for port in (8888, 2112):
             save(prefix + ['curl', '-sS', '--max-time', '3', f'http://localhost:{port}/metrics'],
                  dest / f'collector-{port}.txt')
+        if '--loader-perf' in sys.argv and phase == 'post_rejit' and phase not in seen:
+            profile_loader(sys.argv[sys.argv.index('--loader-perf') + 1], prefix, dest)
         if '--tetra' in sys.argv:
             client = sys.argv[sys.argv.index('--tetra') + 1]
             agent = save(prefix + ['pgrep', '-x', 'tetragon'], dest / 'tetragon-pid.txt')
@@ -163,6 +192,8 @@ def main():
             observer.append('--trace')
         if client := os.environ.get('EQCODEX_TETRA'):
             observer += ['--tetra', client]
+        if perf := os.environ.get('EQCODEX_LOADER_PERF'):
+            observer += ['--loader-perf', perf]
         (out / 'guest-plan.json').write_text(json.dumps({'command': original, 'observer': observer}, indent=2) + '\n')
         arguments[index] = shlex.join(['python3', str(Path(__file__).resolve()), '--guest', str(out)])
         (out / 'vng-command.json').write_text(json.dumps(arguments, indent=2) + '\n')
