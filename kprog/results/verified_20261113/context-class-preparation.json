@@ -1,0 +1,56 @@
+{
+  "recorded_at": "2026-11-13T06:05:06.320266+00:00",
+  "scope": "Parallel affected-class replay preparation, all selected bodies covered as guest data partitions",
+  "model_commit": "17c69dfec",
+  "controller_base": "a860ca65cb3a6c69af9ba2039be89b139e1ec7b5",
+  "class_replay": {
+    "classes": [
+      "verifier_context_access"
+    ],
+    "input_inventory": "/workspaces/kprog-raw/verified/20261113-body-census/ready/inventory.json",
+    "completed_journal": "/workspaces/kprog-raw/verified/20261113-body-census/control/outcomes.jsonl",
+    "bodies": 3,
+    "represented_instances": 3,
+    "controller_commit": "a860ca65cb3a6c69af9ba2039be89b139e1ec7b5",
+    "guest_inventories": [
+      "/workspaces/kprog-raw/verified/20261113-context-class/ready/bodies/20/inventory.json",
+      "/workspaces/kprog-raw/verified/20261113-context-class/ready/bodies/28/inventory.json",
+      "/workspaces/kprog-raw/verified/20261113-context-class/ready/bodies/29/inventory.json"
+    ]
+  },
+  "programs": [
+    {
+      "body_group": 20,
+      "name": "trace_sys_enter",
+      "application": "tracee/monitor",
+      "source_prog_id": 470
+    },
+    {
+      "body_group": 28,
+      "name": "trace_ret_vfs_read",
+      "application": "tracee/monitor",
+      "source_prog_id": 550
+    },
+    {
+      "body_group": 29,
+      "name": "trace_ret_vfs_read_tail",
+      "application": "tracee/monitor",
+      "source_prog_id": 551
+    }
+  ],
+  "per_guest": {
+    "vm_cpus": 2,
+    "vm_mem": "8G",
+    "address_space_bytes": 17179869184
+  },
+  "host_cpu_sets": [
+    "12",
+    "13",
+    "14-15"
+  ],
+  "actual_new_submissions": 0,
+  "tests": "4 existing grouping/replay retention tests pass, including complete/disjoint guest partition and resource preservation",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-context-class",
+  "archive": "context-class-preparation.tar.gz",
+  "archive_bytes": 1678148
+}

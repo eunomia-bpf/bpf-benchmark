@@ -109,6 +109,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED context class并行复测准备（2026-11-13）** 所有已观察context失败body20/28/29（trace_sys_enter、trace_ret_vfs_read、trace_ret_vfs_read_tail，各1成员）分成三个guest数据inventory；根inventory保留完整class，源P和资源引用保持，通用service相同。新增完整/互斥分区与map资源保留回归，同组4tests通过；归档 `context-class-preparation*`，raw `/workspaces/kprog-raw/verified/20261113-context-class/ready/`。计划3×2vCPU/8G/AS16GiB，host12、13、14–15，model17c69；实际提交数后续收集。
+
 - **VERIFIED ISA stock实际结果（2026-11-13）** unit1225193完成12个object-load调用/12份stock verifier log；6个candidate接受（partial low/high/word3、signed1、flat ctx2），6个baseline拒绝。Make2来自signed脚本限定diagnostic字串；实际baseline报R2负size bound、candidate接受，脚本保留接受/拒绝判定及全部日志。完整输入BPF/输出/service/job归档 `isa-stock-results*`，raw `/workspaces/kprog-raw/verified/20261113-raw-context/guest/`。native execution0，独立于应用body。
 
 - **VERIFIED partial-register实际body结果（2026-11-13，1123c5755）** outer1216112 make0，generic_kprobe_actions实际1submitted/0installed/1stock rejected，代表33成员。首拒绝从policy_stats越界推进到verifier处理上限：processed1000001、max_states_per_insn29、total_states38381、peak2610，终止BPF10646。完整P/B/service/job归档 `helper-partial-reg-replay*`，raw `/workspaces/kprog-raw/verified/20261113-helper-class-replay/partial-*`；native execution0/workload待测，复杂度通用压缩接续。

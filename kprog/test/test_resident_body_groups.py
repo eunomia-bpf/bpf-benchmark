@@ -1,12 +1,27 @@
 """Different relocation/data bytes must not inherit another body's outcome."""
 import unittest
+import json
 from pathlib import Path
 import tempfile
 
-from resident_verified_census import group_bodies, replay_programs, retain_request_artifacts
+from resident_verified_census import group_bodies, replay_programs, retain_request_artifacts, write_replay_guests
 
 
 class BodyGrouping(unittest.TestCase):
+    def test_parallel_guest_inputs_preserve_the_entire_class_and_resources(self):
+        source = dict(programs=[dict(body_group=n, source_prog_id=n+20,
+                                    resource=dict(map_inventory=[n])) for n in [3,7,11]],
+                      applications=[dict(application="app", map_inventory=[4,5])])
+        with tempfile.TemporaryDirectory() as work:
+            paths = write_replay_guests(source, Path(work))
+            guests = [json.loads(Path(path).read_text()) for path in paths]
+        self.assertEqual([g["programs"][0] for g in guests], source["programs"])
+        self.assertEqual([len(g["programs"]) for g in guests], [1,1,1])
+        for guest in guests:
+            self.assertEqual(guest["applications"], source["applications"])
+            self.assertEqual(guest["execution_partition"]["body_group"],
+                             guest["programs"][0]["body_group"])
+
     def test_journal_archive_survives_service_session_cleanup(self):
         with tempfile.TemporaryDirectory() as work:
             retained = Path(work) / "retained"

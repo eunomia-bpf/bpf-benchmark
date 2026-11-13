@@ -194,6 +194,20 @@ def replay_programs(groups, outcomes, classes):
             for g in groups if g["body_group"] in selected]
 
 
+def write_replay_guests(source, output):
+    """Partition all selected bodies into guest inputs for parallel isolation."""
+    inventories = []
+    for row in source["programs"]:
+        directory = output / "bodies" / str(row["body_group"])
+        directory.mkdir(parents=True, exist_ok=True)
+        partition = dict(source, programs=[row], execution_partition=dict(
+            body_group=row["body_group"], class_inventory=str(output / "inventory.json")))
+        path = directory / "inventory.json"
+        write(path, partition)
+        inventories.append(str(path))
+    return inventories
+
+
 def replay(args):
     source = json.loads(args.inputs.read_text())
     outcomes = [json.loads(line) for line in args.completed_journal.read_text().splitlines()]
@@ -208,6 +222,7 @@ def replay(args):
                             controller_commit=subprocess.check_output(
                                 ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip())
     args.output.mkdir(parents=True, exist_ok=True)
+    source["replay"]["guest_inventories"] = write_replay_guests(source, args.output)
     write(args.output / "inventory.json", source)
     write(args.output / "preparation.json", source["replay"])
     print(json.dumps(source["replay"]), flush=True)
