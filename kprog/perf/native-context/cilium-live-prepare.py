@@ -28,6 +28,7 @@ def main():
                 source.extractall(state,filter='data')
         snapshots.append(dict(path=str(path),bytes=path.stat().st_size,sha256=digest(path),index=index))
     app=json.loads((args.run/'details/apps/cilium__agent.json').read_text())
+    metadata=json.loads((args.run/'metadata.json').read_text())
     shim=args.run/'details/shim-logs/cilium__agent.post_rejit.log'
     archive=args.output.with_suffix('.tar.gz')
     roots=[args.raw,args.capture,args.run]
@@ -44,12 +45,14 @@ def main():
             files+=1
     result=dict(recorded_at=datetime.now(timezone.utc).isoformat(),run=str(args.run),raw=str(args.raw),
                 make_exit=int((args.raw/'job/exit-code').read_text()),app_status=app['status'],app_error=app['error'],
-                programs={phase:len(app[phase]['bpf']) for phase in ['baseline','post_rejit']},
+                programs={phase:len(app[phase]['bpf']) if app[phase] is not None else None for phase in ['baseline','post_rejit']},
+                samples=metadata['samples'],workload_seconds=metadata['workload_seconds'],
                 native_replacements=shim.read_text().count('native-loader replaced prog='),
                 observer_exit=int((args.capture/'observer-exit-code').read_text()),snapshots=snapshots,
                 extracted_baseline_snapshot=args.baseline_snapshot,
-                limits=['One-sample1s diagnostic; default manifest and objects, not the new upstream compiler candidate.',
+                limits=['Diagnostic outcome only; actual manifest/linker selection is recorded in launch receipt and shim logs.',
                         'Snapshots may catch objects mid-build; each captured length and raw partial bytes are retained.',
+                        'Progress labels can span app restarts before the next measurement marker; actual generation IDs and clocks remain necessary.',
                         'No app-decision or throughput equivalence certified.'],
                 archive=dict(path=str(archive),bytes=archive.stat().st_size,sha256=digest(archive),files_byte_compared=files))
     with args.output.open('x') as output: json.dump(result,output,indent=2);output.write('\n')

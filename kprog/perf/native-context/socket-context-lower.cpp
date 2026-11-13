@@ -214,6 +214,9 @@ int main(int argc,char **argv) {
     for (auto &F:*M) {
       F.removeFnAttr("target-cpu"); F.removeFnAttr("target-features"); F.removeFnAttr("target-abi");
       F.addFnAttr("disable-tail-calls","true");
+      // Driver frontend flags do not set attributes on an existing IR module.
+      // Preserve the native linker's direct-branch contract when retargeting.
+      F.addFnAttr("no-jump-tables","true");
       SmallVector<CallInst *,16> Calls;
       for (auto &I:instructions(F)) if (auto *Call=dyn_cast<CallInst>(&I)) Calls.push_back(Call);
       for (auto *Call:Calls) {

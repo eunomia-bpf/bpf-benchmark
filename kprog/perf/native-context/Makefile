@@ -267,6 +267,10 @@ upstream-cilium-native: upstream-cilium-ir $(SOCKET_BUILD)/socket-context-lower 
 upstream-cilium-link: upstream-cilium-native
 	python3 $(HERE)/socket-proof.py --input $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).native.o --linker $(LINK_MEMORY_PAYLOAD)/native-link.real --output $(CILIUM_IR_BUILD)/$(CILIUM_UNIT)-links --section-prefix tc/ --section-prefix xdp
 
+.PHONY: cilium-kernel-roundtrip
+cilium-kernel-roundtrip:
+	python3 $(HERE)/socket-proof.py --input $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).native.o --linker $(LINK_MEMORY_PAYLOAD)/native-link-off --output $(CILIUM_IR_BUILD)/$(CILIUM_UNIT)-roundtrip --section-prefix tc/ --section-prefix xdp --kernel-roundtrip
+
 .PHONY: cilium-object-compare
 cilium-object-compare:
 	python3 $(HERE)/cilium-object-compare.py --record $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).json --output $(CILIUM_IR_BUILD)/$(CILIUM_UNIT)-comparison.json
@@ -301,3 +305,14 @@ cilium-candidate:
 		--object $(CILIUM_PAYLOAD)/bpf_lxc.native.o,source_map_prefix=cilium_calls_0 \
 		--object $(CILIUM_PAYLOAD)/bpf_host.native.o,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne \
 		--object $(CILIUM_PAYLOAD)/bpf_xdp.native.o,prog_type=6
+
+SWITCH_BUILD ?= /var/tmp/kprog-tmp/perf/native-switch
+.PHONY: native-switch-check
+native-switch-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
+	install -d $(SWITCH_BUILD)
+	$(CC) -target bpf -O2 -emit-llvm -c $(HERE)/test-native-switch.c -o $(SWITCH_BUILD)/input.bc
+	python3 $(HERE)/socket-helper-names.py > $(SWITCH_BUILD)/helper-names.json
+	$(SOCKET_BUILD)/socket-context-lower $(SWITCH_BUILD)/input.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(SWITCH_BUILD)/helper-names.json -o $(SWITCH_BUILD)/native.bc
+	$(CC) -target x86_64-linux-gnu -O3 -fPIC -fno-optimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-jump-tables -c $(SWITCH_BUILD)/native.bc -o $(SWITCH_BUILD)/native.o
+	$(LINK_MEMORY_PAYLOAD)/native-link.real --mode proof --input $(SWITCH_BUILD)/native.o --symbol native_switch --output $(SWITCH_BUILD)/proof.o
+	$(LINK_MEMORY_PAYLOAD)/native-link.real --mode kernel --input $(SWITCH_BUILD)/proof.o --symbol native_switch --output $(SWITCH_BUILD)/blob.bin
