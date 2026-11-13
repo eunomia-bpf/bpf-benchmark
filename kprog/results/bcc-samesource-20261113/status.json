@@ -1,13 +1,19 @@
 {
- "state": "switch in and functional; code identical for 5 of 8 tools; the other 3 differ only by unresolved CO-RE",
+ "state": "switch wired with core-ir-resolve; CO-RE now resolves to the shipped offsets, but routing every tool through the BPF frontend changes code shape slightly",
  "measured": {
   "executable code": "capable, biosnoop, vfsstat, opensnoop, tcpconnect are byte-identical to the shipped objects from untouched source; syscount, tcplife, runqlat differ",
   "the difference": "runqlat's sched_wakeup reads `mov 0xaf0(%rbx)` shipped vs `mov 0xb78(%rbx)` untouched-source; 0xaf0=2800 is the kernel's task_struct.pid, 0xb78=2936 is the BTF the eBPF arm was compiled against. These come from BPF_CORE_READ (runqlat.bpf.c:69-72).",
   "core resolution": "lane perf's core-ir-resolve on runqlat's frontend IR resolves 11 CO-RE globals, 5 of them to a different offset; task_struct:0:2936 -> 2800, :0:2804 -> 2800, :0:3472 -> 3344, :0:3040 -> 2904 \u2014 i.e. exactly the shipped object's numbers (task_struct.pid 2800, thread_pid 2904, comm 3344 per pahole).",
   "rodata": "only tcplife's layout differs (4118 untouched vs 4106 shipped); lane verified's loader kernel_data_layout option resolves it per symbol by name",
-  "no flag needed": "no compiler flag reproduces tcplife's packed layout; the offset is the section's 16-byte alignment"
+  "no flag needed": "no compiler flag reproduces tcplife's packed layout; the offset is the section's 16-byte alignment",
+  "with_core_ir": "runqlat's sched_wakeup now reads `mov 0xaf0(%rbx)` \u2014 the same offset as the shipped object and the kernel's task_struct.pid \u2014 so CO-RE is correct. But every tool's program body now differs from the shipped object by a few bytes and a few instructions (capable 131 -> 136 bytes, biosnoop 121 -> 128, runqlat 119 -> 124): the BPF frontend + CO-RE route gives clang a different program to optimize, notably helper calls as named calls rather than the adjacent `mov $imm` the direct C route produces. This is the same helper-call-shape difference measured on Tracee, not a CO-RE error."
  },
  "pipeline_needed": "untouched source -> BPF frontend (-emit-llvm) -> core-ir-resolve -> x86 codegen, then the loader's kernel_data_layout for tcplife",
  "switch": "BCC_SAME_SOURCE=1 in vendor/bpf/Makefile; default path verified byte-identical (per-program AX section bytes) on all 8 tools",
- "not_done": "the switch does not yet run core-ir-resolve; wiring it in is the next step, and it needs the BPF object for the same source/config, which the BCC recipe already builds"
+ "not_done": "the switch does not yet run core-ir-resolve; wiring it in is the next step, and it needs the BPF object for the same source/config, which the BCC recipe already builds",
+ "two_routes": {
+  "direct C (BCC_SAME_SOURCE=1 alone)": "byte-identical code for 5 of 8 tools; the other 3 read wrong task_struct offsets because CO-RE is unresolved (runqlat task+0xb78 instead of task+0xaf0)",
+  "BPF frontend + core-ir-resolve": "CO-RE correct on all 8, but helper call shape differs from the shipped objects, so no tool is byte-identical; it is the correct route on semantics and the wrong one on bytes until the helper-shape difference is closed"
+ },
+ "conclusion": "BCC's same-source question is the same one as Tracee's: the source is fine (the tree's only change is tcplife's alignment attribute), and both remaining differences \u2014 CO-RE and the helper call shape \u2014 are compiler/toolchain, not application source."
 }

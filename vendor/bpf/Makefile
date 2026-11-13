@@ -231,16 +231,35 @@ $(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c
 # symbol by name against the loaded map's BTF instead, which fits. With the switch off this
 # rule is unchanged and the default objects stay byte-identical.
 BCC_SAME_SOURCE ?= 0
+# lane perf's CO-RE resolver: resolves the frontend IR's CO-RE queries against the
+# sole kernel's BTF before codegen, so a native object reads the real offsets
+# (without it runqlat reads task+0xb78 where the kernel has task+0xaf0).
+CORE_IR_LOWER ?= /var/tmp/kprog-tmp/perf/core-ir/core-ir-lower
+KATRAN_TARGET_BTF ?= /workspaces/.agent-state/kprog-ck/build-x86/vmlinux
 
 $(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/x86/vmlinux.h native_compat.h
 	install -d "$(dir $@)"
 	if [ "$(BCC_SAME_SOURCE)" = 1 ]; then \
-		"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/native_compat.h" \
-			-I"$(CURDIR)/../repos/bcc/libbpf-tools" \
-			-I"$(CURDIR)/bcc/libbpf-tools/x86" \
-			-I"$(CURDIR)/../repos/bcc/src/cc/libbpf/include/uapi" \
-			-I/usr/include -I/usr/include/x86_64-linux-gnu \
-			-o "$@" "$(CURDIR)/../repos/bcc/libbpf-tools/$*.bpf.c"; \
+		set -e; \
+		stem="$*"; \
+		src="$(CURDIR)/../repos/bcc/libbpf-tools/$${stem}.bpf.c"; \
+		inc="-I$(CURDIR)/../repos/bcc/libbpf-tools -I$(CURDIR)/bcc/libbpf-tools/x86 \
+			-I$(CURDIR)/../repos/bcc/src/cc/libbpf/include/uapi \
+			-I/usr/include -I/usr/include/x86_64-linux-gnu"; \
+		"$(CLANG)" -target bpf -O2 -g -mcpu=v2 -D__TARGET_ARCH_x86 $$inc \
+			-emit-llvm -c "$${src}" -o "$(dir $@)$${stem}.bc"; \
+		"$(CLANG)" -target bpf -O2 -g -mcpu=v2 -D__TARGET_ARCH_x86 $$inc \
+			-c "$(dir $@)$${stem}.bc" -o "$(dir $@)$${stem}.bpf.o"; \
+		"$(CORE_IR_LOWER)" "$(dir $@)$${stem}.bc" \
+			--local-bpf "$(dir $@)$${stem}.bpf.o" \
+			--target-btf "$(KATRAN_TARGET_BTF)" \
+			--report "$(dir $@)$${stem}.core.json" \
+			-o "$(dir $@)$${stem}.resolved.bc"; \
+		"$(LLVM_DIS)" "$(dir $@)$${stem}.resolved.bc" -o "$(dir $@)$${stem}.resolved.ll"; \
+		sed -E 's/"target-features"="[^"]*"//; s/"target-cpu"="[^"]*"//' \
+			"$(dir $@)$${stem}.resolved.ll" > "$(dir $@)$${stem}.notf.ll"; \
+		"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/native_compat.h" $$inc \
+			-o "$@" "$(dir $@)$${stem}.notf.ll"; \
 	else \
 		"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/native_compat.h" \
 			-I"$(CURDIR)/bcc/libbpf-tools" -I"$(CURDIR)/bcc/libbpf-tools/x86" \
