@@ -1,0 +1,119 @@
+{
+  "recorded_at": "2026-11-13T01:31:31.073652+00:00",
+  "scope": "Completed prefix of ongoing 549-instance load-only census",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-resident-census/ready/first-seventy-six",
+  "journal": "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/outcomes.jsonl",
+  "kernel_commit": "74d1097af561",
+  "model_commit": "d0890b14f",
+  "completed": 76,
+  "submitted": 76,
+  "native_selection_failed": 0,
+  "resource_failed": 0,
+  "stock_verifier_submissions": 68,
+  "verified": 41,
+  "verifier_rejected": 27,
+  "compilation_failed": 8,
+  "native_execution_requests": 0,
+  "applications": {
+    "bcc/set": {
+      "completed": 0,
+      "submitted": 0,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "katran": {
+      "completed": 1,
+      "submitted": 1,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 0,
+      "verifier_rejected": 1,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "cilium/agent": {
+      "completed": 2,
+      "submitted": 2,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 0,
+      "verifier_rejected": 2,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "otelcol-ebpf-profiler/profiling": {
+      "completed": 1,
+      "submitted": 1,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 1,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "tetragon/observer": {
+      "completed": 72,
+      "submitted": 72,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 40,
+      "verifier_rejected": 24,
+      "compilation_failed": 8,
+      "workload_run": null
+    },
+    "tracee/monitor": {
+      "completed": 0,
+      "submitted": 0,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    }
+  },
+  "classes": {
+    "verifier_instruction_complexity": 1,
+    "verifier_readonly_kernel_write": 2,
+    "installed": 41,
+    "verifier_callback_argument": 8,
+    "verifier_scalar_memory_access": 8,
+    "compiler_stack_storage": 8,
+    "verifier_stack_access": 8
+  },
+  "new_requests": [
+    {
+      "application": "tetragon/observer",
+      "name": "generic_kprobe_process_event",
+      "retained_source_prog_id": 98,
+      "stage": "compilation_failed",
+      "classified_class": "compiler_stack_storage",
+      "diagnostic": "Command '['/workspaces/repository/kprog/stock-path/bin/clang', '-g', '-O3', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_x86', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '-I', '/usr/include/x86_64-linux-gnu', '-c', '/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-kbcqe_cn/generated/trusted_x86.bpf.i', '-o', '/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/request-kbcqe_cn/generated/trusted_x86.bpf.o']' returned non-zero exit status 1.",
+      "service": {
+        "request_id": 76,
+        "started": "2026-11-13T00:50:46.574961+00:00",
+        "status": -5,
+        "failure_archive": "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/76.failure.tar.gz",
+        "finished": "2026-11-13T01:29:57.311310+00:00"
+      }
+    }
+  ],
+  "archive": "resident-outcomes-76.tar.gz",
+  "archive_bytes": 17739411,
+  "previous_receipt": "kprog/results/verified_20261112/resident-first-seventy-five-receipt.json",
+  "previous_submitted": 75,
+  "previous_completed": 75,
+  "archived_requests": [
+    "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/76.failure.tar.gz"
+  ],
+  "collector_commit": "c445b02e2",
+  "linker_provenance": {
+    "epoch_record": "resident-linker-epoch-change.json",
+    "final_publication": "tail-count-final-receipt.json",
+    "request_76": "Begins after the last recorded a941c36c0 shared release-linker publication on2026-11-12 at22:34:05. Full native inputs/service commands retained; cumulative census spans earlier tool epochs."
+  }
+}
