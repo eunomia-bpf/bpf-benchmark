@@ -142,6 +142,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED restart jobs launched（2026-11-13）** code e718a0505、host/recovery evidence9ae744e3b已push；全新attempt保持旧raw不覆盖。3个census outer45406/45407/45408，各24G/AS32GiB、CPU8-11/12-13/14-15、72/72/71体；raw `20261113-census-after-loader-refresh/restart1/queue-{0,1,2}/`。另启动generic kfunc实际kernel地址单元outer45409，2G/AS8GiB/CPU13，raw `20261113-kfunc/restart1/kernel-launch/`、输出 `.../kernel/`；使用保留的真实原BPF/native ELF及已测试二进制，不重新构建shared compiler/base。全部shared image锁，restore writer已释放；启动前MemAvailable117GiB，各Make dry-run已完成。Receipt `restart-census-kfunc-launch.json`，下turn收集，不把排队/启动算应用通过或执行；canonical kfunc flag仍未部署，checked x86 kfunc模型仍在worklist。
+
 - **VERIFIED generic weak kfunc binding（2026-11-13 22:58 UTC）** e718a0505新增默认关闭的kernel_kfunc_context：原程序BTF FUNC_EXTERN与target BTF按现有libbpf兼容规则匹配，真实present地址查kallsyms，weak缺失保留null，strong缺失报错；无伪造函数/强制availability。通用弱/强引用、真实prototype不兼容、target ID、default-off及Tetra五个真实声明host功能测试通过，原错误整数宽度测试及修正记录均保留。Raw `20261113-kfunc/restart1/`，receipt/archive `kfunc-host*`。当前仅source/scratch，未部署canonical loader；live-kernel地址和通用x86 checked kfunc模型、真实应用运行仍待完成，不能计入应用通过数。
 
 - **VERIFIED restart recovery（2026-11-13）** clock jump后3个census guest均消失，新journal各0完成；所有未完成state完整checkpoint保留在 `20261113-census-after-loader-refresh/restart-checkpoint/`，3个archive分别42749307/50135739/43127586 bytes，index/SHA见kfunc-host receipt，215体待新attempt恢复，无新增接受/拒绝。C10:48从unstripped恢复的ELF与实际boot在.text/.rodata/.BTF/.BTF_ids不相同；已exclusive lock下从未改的boot2667103e0fbb恢复sole ELF f3743c05960f，并对匹配BTF重跑host子集通过；不新建内核/版本/镜像。唯一image tar仍Config0761421c7fcf；Docker本地inventory在restart后清空，不冒充新IMAGE REBUILT。
