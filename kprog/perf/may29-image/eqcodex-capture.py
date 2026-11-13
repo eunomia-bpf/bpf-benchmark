@@ -72,7 +72,7 @@ def observe(out):
                 if command.returncode == 0:
                     argv = command.stdout.decode().split('\0')
                     address = argv[argv.index('--server-address') + 1]
-                    cli = [client, '--server-address', address, '--timeout', '2s', '--retries', '0']
+                    cli = [client, '--server-address', address, '--timeout', '2s']
                     save(prefix + cli + ['tracingpolicy', 'list', '-o', 'json'], dest / 'tracingpolicies.json')
                     if sequence % 3 == 0:
                         save(prefix + ['timeout', '--signal=INT', '--kill-after=2', '1s', *cli,
