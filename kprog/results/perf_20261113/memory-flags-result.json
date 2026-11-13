@@ -1,0 +1,20 @@
+{
+  "recorded_at": "2026-11-13T06:13:15.343536+00:00",
+  "source": "9854bd220",
+  "make_exit": 0,
+  "code_sections_equal": true,
+  "plain_undefined": [
+    "memcpy",
+    "memset"
+  ],
+  "threshold_undefined": [
+    "memcpy",
+    "memset"
+  ],
+  "result": "Both tested expansion thresholds leave memset/memcpy calls and identical executable sections; proceed with linker-owned routines.",
+  "limits": [
+    "The staged vendor object comparison was false: stage belongs to withdrawn C inline-header candidate; do not treat that stage as frozen image identity.",
+    "This compares original-source compiler flags only; no runtime throughput claimed."
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261113-memory-flags"
+}
