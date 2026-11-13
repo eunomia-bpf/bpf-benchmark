@@ -118,9 +118,26 @@ match its own invocation count in both arms. That is a correctness check, not a 
 claim: the two phases ran different packet counts because the arms differ in speed, and one
 30 s sample on four CPUs does not measure a ratio. C4 timing on CPUs 0-7 comes next.
 
+## Restaging, 2026-11-13T23:00Z
+
+The staged object set predated the per-app helper-naming fix (e0a0c5c16) and was therefore
+built with a step that is wrong for Katran. Naming helpers is right for Tracee and BCC,
+whose frontend leaves the helper as an `inttoptr (i64 N to ptr)` constant clang may hoist
+away from the call. Katran's frontend already emits the adjacent `mov $imm; call *reg` that
+`native-link` inlines, so naming there only converts an inlinable call into a `PLT32`
+relocation the linker cannot inline, and every object grows: healthcheck 1360 -> 1608,
+xdp_root 888 -> 1008, balancer 11000 -> 13168. With naming off Katran returns to the table
+above (1360 and 888 byte-identical, balancer 11000). The step is now per application in
+`vendor/bpf/Makefile`, and the restaged objects are committed beside this file.
+
+The context tools and layout tables are pinned in this lane's own scratch
+(`/var/tmp/kprog-tmp/C/ctx/...`) after a reboot cleared `/var/tmp`; they reproduce with
+`make -f kprog/perf/native-context/Makefile` plus running the two layout binaries.
+
 ## Not yet done
 
-- C4 timing (3x180 s, CPUs 0-7, both arms) for the switch-on objects.
+- C4 timing for the switch-on objects: running since 2026-11-13T23:08Z, 3x180 s on CPUs
+  0-7, timing lock held, state /var/tmp/kprog-tmp/C/state/c4.
 - Whether removing the MICRO_NATIVE blocks from katran/lib/linux_includes/bpf.h is a
   no-op for every other consumer of that header (healthchecking.c is built but not
   shipped; xdp_pktcntr.c likewise).
