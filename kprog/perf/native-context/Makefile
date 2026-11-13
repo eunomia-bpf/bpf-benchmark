@@ -98,10 +98,11 @@ LOADER_PERF_OUTPUT ?= /var/tmp/kprog-tmp/perf/var-tmp/perf
 loader-perf-deps:
 	apt-get install -y --no-install-recommends libdw-dev
 
-# Tool build only, from the sole kernel source; no kernel/base/image rebuild.
+# Software cpu-clock sampler only: PMU event tables and Python bindings unused.
+# Tool build from the sole kernel source; no kernel/base/image rebuild.
 loader-perf-build:
 	install -d $(LOADER_PERF_BUILD)
-	$(MAKE) -C $(ROOT)/vendor/linux-framework/tools/perf O=$(LOADER_PERF_BUILD)/ -j4 PYTHON=/usr/bin/python3 NO_LIBBPF=1 NO_LIBPYTHON=1 NO_LIBPERL=1 NO_LIBTRACEEVENT=1 NO_SLANG=1 NO_LIBUNWIND=1 NO_LIBNUMA=1 NO_AUXTRACE=1 NO_LIBCAP=1 NO_LIBLLVM=1
+	$(MAKE) -C $(ROOT)/vendor/linux-framework/tools/perf O=$(LOADER_PERF_BUILD)/ -j4 NO_JEVENTS=1 NO_LIBBPF=1 NO_LIBPYTHON=1 NO_LIBPERL=1 NO_LIBTRACEEVENT=1 NO_SLANG=1 NO_LIBUNWIND=1 NO_LIBNUMA=1 NO_AUXTRACE=1 NO_LIBCAP=1 NO_LIBLLVM=1
 	$(LOADER_PERF_SOURCE) version --build-options
 
 loader-perf-tool:
