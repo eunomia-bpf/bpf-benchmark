@@ -1,0 +1,121 @@
+{
+  "recorded_at": "2026-11-13T23:51:13Z",
+  "compiler_commit": "dbb62ef37",
+  "capture_and_data_selector_commit": "b6a810518",
+  "candidate_commit": "052c4b44c",
+  "outer_pid": 67271,
+  "raw": "/workspaces/kprog-raw/perf/20261113-cilium-public-data-runtime",
+  "state": "/var/tmp/kprog-tmp/perf/cilium-public-data-runtime",
+  "capture": "/workspaces/repository/corpus/results/perf-cilium-public-data-capture-20261113",
+  "job": "/workspaces/kprog-raw/perf/20261113-cilium-public-data-runtime/job",
+  "prelaunch_image_manifest": [
+    {
+      "Config": "blobs/sha256/0761421c7fcf07dbb4cab6a8154dfcce12b5bb9882bb4a17806ed1555b40c176",
+      "RepoTags": [
+        "bpf-benchmark/kprog:current"
+      ],
+      "Layers": [
+        "blobs/sha256/7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+        "blobs/sha256/da94521aa2edb5320294ffd5a275ba249fd25cc7c36d315c09001be870516a6c",
+        "blobs/sha256/d7e5c4bcb413324a0587b08590497b13caf6babed909ec1de07db39172a4256f",
+        "blobs/sha256/4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+        "blobs/sha256/48a1dbf3ca7189d9bbde8552e8f8379e8e93acd55fd79a91f26e87dac42438cc",
+        "blobs/sha256/082fd1debfcf8c4d600cc438b9f1fffa4cd77cdcc452a66b75776deb4118a325",
+        "blobs/sha256/65a1690e2c42799c926b3c465a89a500601f43901589afa31663eb54f1cf11a4",
+        "blobs/sha256/6e3e5bcef4c08c63af76e3699a97a403649cea23bd8876a2f7cf1b64c8f897ae",
+        "blobs/sha256/544279ce7ce12036657d246d25f28b78f3f24ca532f7a7efecc2433c300ef841",
+        "blobs/sha256/d50cbbffd535ce88b1f149cd2567712c90ffff0fd07fcec575544ee51151a7e2",
+        "blobs/sha256/45ad7c1fe29d787f3bddaa8e7110e06db83bb384703d0907daf4cd3c8257b755",
+        "blobs/sha256/6fb42c663001468e0e4d12964f24208b5946af5875e24ce76cb8b2e14b0ce550",
+        "blobs/sha256/68080ae6a8407d43c6f06431d65c9452cd1fe3eadc5f3a71912b22963b7616ae",
+        "blobs/sha256/9b3e32bf007d91cf8917cf3e1c241454e1de6ef07dfd6946bc22738fbb5a8ddc",
+        "blobs/sha256/26fc66cf4b1ce5e62a7f987caed2079d2b1c4204eeba3cf4fa731dfadc820da7",
+        "blobs/sha256/9cd4084707bdbfcd85061113c961ce1a08a03a8ba6d721c28bcb5cf02ded355d",
+        "blobs/sha256/c29ea8bf8eb004eaee1f10f84d199fe8271cd3b1a41e42069c68a6bd9beec453",
+        "blobs/sha256/0a46b251d5f49ae4d8665065d3c713e0a3b7d472f240f464c99f693a99e7c377",
+        "blobs/sha256/f654ce6d048fa0bc1a0eded0a8c9ea6ecd84356c98bd20d4a0bdb895ddaa199e",
+        "blobs/sha256/eed09fc0e3e39af2ef3d752a81d1630dcb048117939fb45edf6c543f5e69992b",
+        "blobs/sha256/542cf1920378ce6172fd16ec40e264127b96ebec80e8c09aa7f1f2f392c3a517",
+        "blobs/sha256/94081ab9d664b26480766d79876178f43c7637f377693119b78de6742913cfad",
+        "blobs/sha256/8b4b58b35809294eac87fc94c82b8ea062c3f50ffe331545a1443a262ce1280d",
+        "blobs/sha256/c6a253e8bfd1560c879755460e36bd897411d5adfa26acb4153e17741174cae3",
+        "blobs/sha256/870b5dffac19af37d3d0d46ba822604ab72a9ae6f192cc0c468a729671646363",
+        "blobs/sha256/3e09016a48d737439fb01fe1ebdce52220d67854fbc4ae0c4d17641adb324039",
+        "blobs/sha256/af19f88edc12369646db6f6d732a95312d33a0f813a357c7d4c082b6172ef2ff",
+        "blobs/sha256/689698dfb4ba03e1e77164920bf04e399bc091af3d32c1bea6cad5c401640530",
+        "blobs/sha256/04ce3590b6bd07bb90053e61985f5879891a60b122229afbc41eb78116f0f3ec",
+        "blobs/sha256/bdf7cf17a587af521c5d69f4297ac6c2798aebbff46b9788b62e048e3cd7dbb3",
+        "blobs/sha256/8bd8d80fae7b5cdbe3f4099bc37e98faa68b06d918828de21e4c06cbdb6407eb",
+        "blobs/sha256/504c2c36478a7b778a93259e56633bb720c964003e8b4cb0eb43928171100e25",
+        "blobs/sha256/119fab2c54d858fc1174ac2643c6b98a8074358ef2c0f3748a3fbe138ef7ee29",
+        "blobs/sha256/adbe67feff107a24012b0109667e66bbefb0fe919fa09c11809e26bc11af7afd",
+        "blobs/sha256/a671c07af02e4725c003556cedabe61e9a8c789c1dfd8930445174133ffe87b5"
+      ]
+    }
+  ],
+  "payload": [
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-public-data-20261113/bpf_host.native.o",
+      "bytes": 553776,
+      "sha256": "78516371e7bfb3c490e635ba47c335b3693510e51c5c421f6c66cb62f767c7e5"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-public-data-20261113/bpf_lxc.native.o",
+      "bytes": 585560,
+      "sha256": "0cfd637a2e58c11081a620835d704bc5b0143a8d85f090745967aedca453fba6"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-public-data-20261113/bpf_xdp.native.o",
+      "bytes": 226384,
+      "sha256": "57b2ae5631a9de8f15ffd5c2e9ec7553fc1bc718f8090da2bb1882c9ce6d4352"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-public-data-20261113/manifest-context.json",
+      "bytes": 15156,
+      "sha256": "fb142163f5735ba86576f61cbc75e93ab3280863f09714ccfb776e8f3951439f"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-public-data-20261113/manifest.json",
+      "bytes": 11606,
+      "sha256": "9f4e7191c5a53af0d25abd9231b2fc1d1d45b17ad17425458616e45aee28de08"
+    }
+  ],
+  "selected_linker": {
+    "path": "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+    "wrapper_sha256": "f7644e69df0606ac64e1af9631ffec0227c5c46282aaf2c5622758626de9f58a",
+    "binary_sha256": "65eebf5e64ed5e4c0adfda52dd4587c9c626c232aeffb2ac3ab76e90a01d5b72",
+    "runtime_map_lookups": true,
+    "local_memory_routines": false
+  },
+  "capture_sources": [
+    {
+      "path": "kprog/perf/may29-image/eqcodex-capture.py",
+      "sha256": "3f0442fc2f90768e8d22914695adf8edace9b9cc49c67e665ab502eb57babcaf"
+    },
+    {
+      "path": "kprog/perf/may29-image/cilium-config.py",
+      "sha256": "2e6b44a8eae740a4ab8f4ae96bd90c15a1e389a96930a2e1536e39fe2654a8ed"
+    }
+  ],
+  "resources": {
+    "cpu": "16-19",
+    "vcpus": 4,
+    "guest_memory": "8G",
+    "process_as_bytes": 17179869184,
+    "image_lock": "shared via run_verified_make.sh",
+    "timing_lock": false
+  },
+  "protocol": {
+    "makefile": "kprog/perf/one-image/Makefile",
+    "target": "corpus",
+    "APPS": "cilium/agent",
+    "SAMPLES": 1,
+    "WORKLOAD_DURATION": 45,
+    "BPFREJIT_CORPUS_BPF_STATS": 1,
+    "NATIVE_MANIFEST": "/workspaces/repository/corpus/results/perf-cilium-public-data-20261113/manifest-context.json",
+    "warmup": "Frozen unchanged 180 seconds.",
+    "loader_selection": "Current deployed helper-context and kernel-data-layout; no new kfunc flag."
+  },
+  "scope": "Affected-app diagnostic for actual constant JSON and named data binding/load outcomes; not a floor/timing result. No postlaunch polling; actual image/library identity is collected by observer; prior missing subnet-map linkage is not declared fixed.",
+  "outcome": null
+}
