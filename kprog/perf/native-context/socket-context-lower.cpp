@@ -204,10 +204,12 @@ int main(int argc,char **argv) {
     if (HelperNames.empty()) fail("native codegen requires canonical helper names");
     auto HelperTable=readJSON(HelperNames); auto *Helpers=HelperTable.getAsObject();
     if (!Helpers) fail("invalid canonical helper-name object");
-    // Map addresses are supplied by the intercepted loader, so keep their
-    // symbol identity in PIC relocations rather than folding to section+offset.
+    // Public maps and data are runtime linker inputs. Preserve their symbol
+    // identity: section+offset references would embed native initializers
+    // instead of the original BPF data binding. Private constants and LLVM's
+    // appending metadata stay local.
     for (auto &Global:M->globals())
-      if (Global.getSection()==".maps") Global.setDSOLocal(false);
+      if (!Global.hasLocalLinkage() && !Global.hasAppendingLinkage()) Global.setDSOLocal(false);
     // The BPF frontend marks extern weak function addresses dso_local. Native
     // PIC must keep a nullable GOT slot so the loader's target-BTF binding can
     // supply either the genuine address or zero without folding the guard.

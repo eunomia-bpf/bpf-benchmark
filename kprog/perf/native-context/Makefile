@@ -482,3 +482,26 @@ weak-ksym-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-lay
 	$(WEAK_BUILD)/absent
 	$(CC) -O2 -fPIE -pie -DTEST_DRIVER -DSYMBOL_PRESENT $(HERE)/test-weak-ksym.c $(WEAK_BUILD)/native.o -o $(WEAK_BUILD)/present
 	$(WEAK_BUILD)/present
+
+CONFIG_GLOBALS_BUILD ?= /var/tmp/kprog-tmp/perf/config-globals
+.PHONY: config-globals-check
+config-globals-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
+	install -d $(CONFIG_GLOBALS_BUILD)
+	$(CC) -target bpf -O2 -g -emit-llvm -c $(HERE)/test-config-globals.c -o $(CONFIG_GLOBALS_BUILD)/input.bc
+	python3 $(HERE)/socket-helper-names.py > $(CONFIG_GLOBALS_BUILD)/helper-names.json
+	$(SOCKET_BUILD)/socket-context-lower $(CONFIG_GLOBALS_BUILD)/input.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(CONFIG_GLOBALS_BUILD)/helper-names.json -o $(CONFIG_GLOBALS_BUILD)/native.bc
+	$(CC) -target x86_64-linux-gnu -O2 -fPIC -c $(CONFIG_GLOBALS_BUILD)/native.bc -o $(CONFIG_GLOBALS_BUILD)/native.o
+	llvm-readelf-18 -r $(CONFIG_GLOBALS_BUILD)/native.o > $(CONFIG_GLOBALS_BUILD)/relocations.txt
+	$(CC) -shared $(CONFIG_GLOBALS_BUILD)/native.o -o $(CONFIG_GLOBALS_BUILD)/libconfig-fixture.so
+	$(CC) -O2 -DTEST_DRIVER $(HERE)/test-config-globals.c -L$(CONFIG_GLOBALS_BUILD) -lconfig-fixture -Wl,--export-dynamic -Wl,-rpath,$(CONFIG_GLOBALS_BUILD) -o $(CONFIG_GLOBALS_BUILD)/check
+	$(CONFIG_GLOBALS_BUILD)/check
+
+.PHONY: config-globals-roundtrip config-globals-default-check
+config-globals-roundtrip:
+	python3 $(HERE)/socket-proof.py --input $(CONFIG_GLOBALS_BUILD)/native.o --linker $(LINK_MEMORY_PAYLOAD)/native-link-off --output $(CONFIG_GLOBALS_BUILD)/links --section-prefix test/ --kernel-roundtrip
+
+config-globals-default-check:
+	install -m755 $(CONFIG_GLOBALS_REFERENCE_TOOL) $(CONFIG_GLOBALS_BUILD)/reference-socket-context-lower
+	$(CONFIG_GLOBALS_BUILD)/reference-socket-context-lower $(CONFIG_GLOBALS_BUILD)/input.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json -o $(CONFIG_GLOBALS_BUILD)/default-before.bc
+	$(SOCKET_BUILD)/socket-context-lower $(CONFIG_GLOBALS_BUILD)/input.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json -o $(CONFIG_GLOBALS_BUILD)/default-after.bc
+	cmp $(CONFIG_GLOBALS_BUILD)/default-before.bc $(CONFIG_GLOBALS_BUILD)/default-after.bc
