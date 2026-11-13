@@ -1,0 +1,274 @@
+{
+  "recorded_at": "2026-11-13T06:35:44.746104+00:00",
+  "scope": "P0 local-memory host implementation and offline real-object byte parity",
+  "source_commits": [
+    "04ea4d810",
+    "11dfe339d",
+    "e12e627e9"
+  ],
+  "flag": "--local-memory-routines",
+  "default": false,
+  "algorithm": {
+    "specialization": "Must-constant control-flow analysis of RDX and low-byte RSI; merge equal paths, invalidate writes/calls, decline unknown indirect control flow.",
+    "constant_up_to_bytes": 512,
+    "constant_body": "Shared per-length fully unrolled eight-byte operations and exact 4/2/1-byte tail; proven-zero fill uses xor-zeroed GPR.",
+    "general_body": "32-byte iterations then exact8/4/2/1-byte tail; no size admission limit.",
+    "proof": "Local routines and calls included in canonical proof ELF; kernel relinking discovers same bodies.",
+    "rep_selected": false,
+    "simd_selected": false
+  },
+  "tests": {
+    "component_passed": 18,
+    "new_memory_tests": 5,
+    "semantics": "All lengths0..65 plus127/128/129/367/368/369/511/512/513/4096/17111, eight unaligned offsets, general/zero fills, copy/source preservation, return pointer, zero null pointers, protected-page boundaries.",
+    "relocations": "10 real ELF combinations: memset/memcpy times PLT32, GOT9/41/42, register-loaded GOT; duplicate lengths share body; proof-to-kernel roundtrip executes successfully.",
+    "analysis": "Different branch constants, partial register writes, call clobbers, loops, and indirect/local calls cannot produce stale specializations."
+  },
+  "real_inputs": {
+    "cases": [
+      {
+        "label": "bcc",
+        "input": "/workspaces/kprog-raw/perf/20261113-local-memory/objects/inputs/e4a81820c57c5ba44c6c1cefac6f4b1ff367672c38c2d193990709a60a74cab7.native.o",
+        "original_input": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/syscount.native.o",
+        "symbol": "sys_enter",
+        "input_sha256": "e4a81820c57c5ba44c6c1cefac6f4b1ff367672c38c2d193990709a60a74cab7",
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 114,
+        "proof_bytes_after": 114,
+        "local_routines": []
+      },
+      {
+        "label": "cilium",
+        "input": "/workspaces/kprog-raw/perf/20261113-local-memory/objects/inputs/e9b7159e096ddc7cb4933ea67b9a0a910d6dad39183ab30fcbf67cfa9d2218e5.native.o",
+        "original_input": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+        "symbol": "cil_from_container",
+        "input_sha256": "e9b7159e096ddc7cb4933ea67b9a0a910d6dad39183ab30fcbf67cfa9d2218e5",
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 1258,
+        "proof_bytes_after": 1258,
+        "local_routines": []
+      },
+      {
+        "label": "katran",
+        "input": "/workspaces/kprog-raw/perf/20261113-local-memory/objects/inputs/ba252e0372d100f34b60a0deb3f0a7ccc16b632c3c1a5eb40e9b13d31e558c20.native.o",
+        "original_input": "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/balancer.native.o",
+        "symbol": "balancer_ingress",
+        "input_sha256": "ba252e0372d100f34b60a0deb3f0a7ccc16b632c3c1a5eb40e9b13d31e558c20",
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 8266,
+        "proof_bytes_after": 8266,
+        "local_routines": []
+      },
+      {
+        "label": "otel",
+        "input": "/workspaces/kprog-raw/perf/20261113-local-memory/objects/inputs/590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915.native.o",
+        "original_input": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "symbol": "native_tracer_entry",
+        "input_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915",
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 6783,
+        "proof_bytes_after": 6909,
+        "local_routines": [
+          {
+            "name": "__native_link_local_memset_zero_dynamic",
+            "size": 126,
+            "offset": 6783,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          }
+        ]
+      },
+      {
+        "label": "tetragon",
+        "input": "/workspaces/kprog-raw/perf/20261113-local-memory/objects/inputs/14d51fe1b02bb885c71f0127a8b37d7d1a95fb64abbbd0cc955842e681ab3ed2.native.o",
+        "original_input": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_kprobe_v61.native.o",
+        "symbol": "generic_kprobe_event",
+        "input_sha256": "14d51fe1b02bb885c71f0127a8b37d7d1a95fb64abbbd0cc955842e681ab3ed2",
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 1203,
+        "proof_bytes_after": 1203,
+        "local_routines": []
+      },
+      {
+        "label": "tetragon-execve",
+        "input": "/workspaces/kprog-raw/perf/20261113-local-memory/objects/inputs/6f7d7b306ebc2ad6e133277ea94e90a970004459e651e806c67cc5fd9cf25490.native.o",
+        "original_input": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_execve_event_v61.native.o",
+        "symbol": "event_execve",
+        "input_sha256": "6f7d7b306ebc2ad6e133277ea94e90a970004459e651e806c67cc5fd9cf25490",
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 9997,
+        "proof_bytes_after": 10081,
+        "local_routines": [
+          {
+            "name": "__native_link_local_memset_zero_144",
+            "size": 84,
+            "offset": 9997,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          }
+        ]
+      },
+      {
+        "label": "bcc-biosnoop",
+        "input": "/workspaces/kprog-raw/perf/20261113-local-memory/objects/inputs/4ae54e353e6eff7c9f12f11e26f25546e0781ec66335f2ee9bfb350b5928d3b4.native.o",
+        "original_input": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/biosnoop.native.o",
+        "symbol": "block_rq_insert",
+        "input_sha256": "4ae54e353e6eff7c9f12f11e26f25546e0781ec66335f2ee9bfb350b5928d3b4",
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 331,
+        "proof_bytes_after": 331,
+        "local_routines": []
+      },
+      {
+        "label": "tracee-trace_sys_enter",
+        "input": "/workspaces/kprog-raw/perf/20261113-local-memory/objects/inputs/ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1.native.o",
+        "original_input": "/var/tmp/kprog-tmp/perf/memory-flags/tracee.plain.o",
+        "symbol": "trace_sys_enter",
+        "input_sha256": "ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1",
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 5884,
+        "proof_bytes_after": 6297,
+        "local_routines": [
+          {
+            "name": "__native_link_local_memset_zero_368",
+            "size": 280,
+            "offset": 5884,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          },
+          {
+            "name": "__native_link_local_memset_zero_200",
+            "size": 133,
+            "offset": 6164,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          }
+        ]
+      },
+      {
+        "label": "tracee-trace_sys_exit",
+        "input": "/workspaces/kprog-raw/perf/20261113-local-memory/objects/inputs/ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1.native.o",
+        "original_input": "/var/tmp/kprog-tmp/perf/memory-flags/tracee.plain.o",
+        "symbol": "trace_sys_exit",
+        "input_sha256": "ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1",
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 5910,
+        "proof_bytes_after": 6323,
+        "local_routines": [
+          {
+            "name": "__native_link_local_memset_zero_368",
+            "size": 280,
+            "offset": 5910,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          },
+          {
+            "name": "__native_link_local_memset_zero_200",
+            "size": 133,
+            "offset": 6190,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          }
+        ]
+      },
+      {
+        "label": "tracee-sys_enter_submit",
+        "input": "/workspaces/kprog-raw/perf/20261113-local-memory/objects/inputs/ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1.native.o",
+        "original_input": "/var/tmp/kprog-tmp/perf/memory-flags/tracee.plain.o",
+        "symbol": "sys_enter_submit",
+        "input_sha256": "ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1",
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 14267,
+        "proof_bytes_after": 14680,
+        "local_routines": [
+          {
+            "name": "__native_link_local_memset_zero_368",
+            "size": 280,
+            "offset": 14267,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          },
+          {
+            "name": "__native_link_local_memset_zero_200",
+            "size": 133,
+            "offset": 14547,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          }
+        ]
+      },
+      {
+        "label": "tracee-trace_ret_vfs_read_tail",
+        "input": "/workspaces/kprog-raw/perf/20261113-local-memory/objects/inputs/ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1.native.o",
+        "original_input": "/var/tmp/kprog-tmp/perf/memory-flags/tracee.plain.o",
+        "symbol": "trace_ret_vfs_read_tail",
+        "input_sha256": "ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1",
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 14813,
+        "proof_bytes_after": 15319,
+        "local_routines": [
+          {
+            "name": "__native_link_local_memset_zero_368",
+            "size": 280,
+            "offset": 14813,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          },
+          {
+            "name": "__native_link_local_memset_zero_200",
+            "size": 133,
+            "offset": 15093,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          },
+          {
+            "name": "__native_link_local_memcpy_any_71",
+            "size": 93,
+            "offset": 15226,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          }
+        ]
+      }
+    ],
+    "reference": "/workspaces/repository/corpus/results/verified-linker-runtime-maps-20261113/native-link.real",
+    "candidate": "/var/tmp/kprog-tmp/perf/native-link-memory/debug/native-link",
+    "limits": [
+      "Synthetic address plans are offline parity inputs, never kernel execution.",
+      "Vendor stage is current build data; Tracee uses the original-source plain flag experiment object.",
+      "Host executable/guard-page fixtures cover runtime memory semantics separately."
+    ]
+  },
+  "hashes": {
+    "corpus/results/perf-local-memory-20261113/native-link.real": "65eebf5e64ed5e4c0adfda52dd4587c9c626c232aeffb2ac3ab76e90a01d5b72",
+    "corpus/results/perf-local-memory-20261113/native-link-on": "f7644e69df0606ac64e1af9631ffec0227c5c46282aaf2c5622758626de9f58a",
+    "corpus/results/perf-local-memory-20261113/native-link-off": "f7644e69df0606ac64e1af9631ffec0227c5c46282aaf2c5622758626de9f58a",
+    "corpus/results/verified-linker-runtime-maps-20261113/native-link.real": "10a4b7dadc0f4f4c89d04c60f9f448b079dcdb38568e065f959705ac5eda6322"
+  },
+  "archive": {
+    "path": "kprog/results/perf_20261113/local-memory-host.tar.gz",
+    "bytes": 6136103,
+    "sha256": "7dec2091fbec1df052570a51d78736ddec83344572be39bc16ddd2b3ddc3fd41",
+    "files_byte_compared": 271
+  },
+  "raw": "/workspaces/kprog-raw/perf/20261113-local-memory",
+  "limits": [
+    "Host executions and offline synthetic address plans are not a guest or workload result.",
+    "All11default proof-code and kernel bytes/relocs/maps/ABI comparisons passed; original ELF inputs are retained in archive.",
+    "REP hardware selection has not been benchmarked; no REP implementation is selected.",
+    "Tracee CO-RE/source ABI issues remain independently open; P0 throughput/profile claims pending.",
+    "Both selected on/off wrappers enable the existing runtime-map option; they differ only in local-memory flag.",
+    "Default image, base, frozen runners and application sources/headers unchanged."
+  ]
+}
