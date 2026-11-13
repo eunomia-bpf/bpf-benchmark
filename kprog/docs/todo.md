@@ -123,6 +123,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED u32 stock子集排队（2026-11-13）** outer1270473等待自己的body28 retry outer1251409退出后，通过已提交Make目标启动2vCPU2G/AS8GiB、CPU13/shared image reader guest，实际加载copy before/after、signed-after及partial0/8/16共6份BPF回归；不编译/替换base module或loader，不新增application loader路径。raw `/workspaces/kprog-raw/verified/20261113-word32-copy/{guest-job,control}/`，启动receipt `word32-copy-stock-launch.json`；本turn结束，不轮询排队/运行结果，下一turn收集。
+
 - **VERIFIED u32 copy bounds通用候选（2026-11-13）** TRUNC32由empty GPR64 asm后shift32 pair改为GPR32 constraint `w`上的显式mov32；LLVM backend确有此constraint，无需猜测operand modifier。小型相同reg-write/copy/branch/map-store回归真实BPF反汇编从r1 copy+shiftpair变为w2/w1 moves，保留stock scalar ID传播条件。UBSan host逐项通过65536个u16 source offsets（前后各一次）、16 signed边界/high-word、3 partial lanes各189 bit/tag+2 boolean案例；对应6份BPF输入编译成功。完整输入/disassembly/log归档 `word32-copy-host*`，raw `/workspaces/kprog-raw/verified/20261113-word32-copy*`。实际stock拒绝/接受和应用body复测仍待下一guest，不能算class通过；P、kernel和image未改，无应用特例/新proof/gate。
 
 - **VERIFIED module自动重建纠正（2026-11-13）** body29 retry日志显示trusted-service-kvm在shared reader lock内于07:13:06自动编译了唯一base的module（source6df2a07f6，sha256 df2e3627b15227aa39b850fee23f29399633c0a9c05fd8eea4fc447cce9c6ee9），此前handoff的“base未变”不准确；kernel/image/loader binary未变，D23真实查询仍未验证。现移除service guest启动里的隐式module build，module只在独立writer-lock构建步骤更新；实际nested census Make dry-run已确认直接启动guest，不再调用module build。receipt `module-launch-fix.json`，原日志body29-retry1-job/make.log及dry-run全部保留；未删除或丢弃任何运行结果。

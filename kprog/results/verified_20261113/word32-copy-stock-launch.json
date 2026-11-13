@@ -1,0 +1,22 @@
+{
+  "queued_at": "2026-11-13T07:26:04Z",
+  "scope": "Six stock-verifier regression loads, queued behind an owned census guest",
+  "outer_pid": 1270473,
+  "wait_for_owned_pid": 1251409,
+  "model_and_test_commit": "2d05e6342",
+  "launcher_commit": "13778fc64",
+  "kernel_commit": "74d1097af561",
+  "host_cpu": 13,
+  "vm_cpus": 2,
+  "vm_mem": "2G",
+  "address_space_bytes": 8589934592,
+  "resource_lock": "shared /workspaces/.agent-state/kprog-lanes/locks/image",
+  "command": "make -C /workspaces/repository/kprog/tv word32-copy-kvm",
+  "job_directory": "/workspaces/kprog-raw/verified/20261113-word32-copy/guest-job",
+  "verifier_logs": "/workspaces/kprog-raw/verified/20261113-word32-copy/control",
+  "dry_run": "/workspaces/kprog-raw/verified/20261113-word32-copy-kvm-dry-run.log",
+  "cases": ["copy-before", "copy-after", "signed-after", "partial-0", "partial-8", "partial-16"],
+  "module_or_loader_build": false,
+  "native_execution_requests": 0,
+  "result": "Collect later turn; no result polling after queue submission"
+}
