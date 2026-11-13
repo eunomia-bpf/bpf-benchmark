@@ -1,0 +1,82 @@
+{
+  "recorded_utc": "2026-11-13T10:35:54.260852+00:00",
+  "controller_step": "e48deb5cc loader-only recipe +6dfe76e49 immutable checkpoint/prepared inputs",
+  "writer": {
+    "outer_pid": 1393340,
+    "operation": "shared-base-refresh REFRESH_OPERATION=--loader-only",
+    "job_directory": "/workspaces/kprog-raw/verified/20261113-loader-refresh/job",
+    "run_directory": "/workspaces/kprog-raw/verified/20261113-loader-refresh/run",
+    "host_cpus": "8-15",
+    "jobs": 1,
+    "host_address_space_limit_bytes": 17179869184,
+    "image_lock": "exclusive /workspaces/.agent-state/kprog-lanes/locks/image"
+  },
+  "deploys": [
+    "2980d8af6 optional loaded-map BTF data layout",
+    "ec3432bd6 complete UAPI helper identities for optional original-program prototype query"
+  ],
+  "validation": "Data layout live-kernel test PASS; both unchanged module frontends ten-context helper suites PASS (963 targets/29 address checks each)",
+  "queues": [
+    {
+      "queue": 0,
+      "outer_pid": 1393351,
+      "job_directory": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/queue-0/job",
+      "control_directory": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/queue-0/control",
+      "inventory": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/ready/queues/0/inventory.json",
+      "bodies": 72,
+      "host_cpus": "8-11",
+      "vm_cpus": 4,
+      "vm_memory": "24G",
+      "host_address_space_limit_bytes": 34359738368,
+      "wait_pid": 1393340,
+      "dependency_job": "/workspaces/kprog-raw/verified/20261113-loader-refresh/job",
+      "image_lock": "shared after writer exits and Make0"
+    },
+    {
+      "queue": 1,
+      "outer_pid": 1393370,
+      "job_directory": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/queue-1/job",
+      "control_directory": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/queue-1/control",
+      "inventory": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/ready/queues/1/inventory.json",
+      "bodies": 72,
+      "host_cpus": "12-13",
+      "vm_cpus": 2,
+      "vm_memory": "24G",
+      "host_address_space_limit_bytes": 34359738368,
+      "wait_pid": 1393340,
+      "dependency_job": "/workspaces/kprog-raw/verified/20261113-loader-refresh/job",
+      "image_lock": "shared after writer exits and Make0"
+    },
+    {
+      "queue": 2,
+      "outer_pid": 1393382,
+      "job_directory": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/queue-2/job",
+      "control_directory": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/queue-2/control",
+      "inventory": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/ready/queues/2/inventory.json",
+      "bodies": 71,
+      "host_cpus": "14-15",
+      "vm_cpus": 2,
+      "vm_memory": "24G",
+      "host_address_space_limit_bytes": 34359738368,
+      "wait_pid": 1393340,
+      "dependency_job": "/workspaces/kprog-raw/verified/20261113-loader-refresh/job",
+      "image_lock": "shared after writer exits and Make0"
+    }
+  ],
+  "remaining_bodies": 215,
+  "pending_main_bodies": 211,
+  "class_replays": [
+    29,
+    30,
+    31,
+    32
+  ],
+  "completed_replay20_not_repeated": true,
+  "checkpoint": "loader-refresh-checkpoint.json and persistent full state archives",
+  "collection": "Next turn; no postlaunch polling or image completion claim",
+  "launch_host_available_gib": 112,
+  "kernel_or_module_rebuild": false,
+  "application_objects_rebuilt": false,
+  "benchmark_settings_changed": false,
+  "raw_data_removed": false
+}
