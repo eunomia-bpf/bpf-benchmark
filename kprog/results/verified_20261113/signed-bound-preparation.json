@@ -1,0 +1,26 @@
+{
+  "recorded_at": "2026-11-13T04:55:10.649805+00:00",
+  "model_commit": "a1d1fb198",
+  "previous_model": "f169281a4",
+  "kernel_commit": "74d1097af561",
+  "scope": "Preparation and host/compiled-B evidence for generic signed32 range regression; stock guest result pending",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-signed-bound",
+  "host_semantic_cases": 16,
+  "host_semantic_result": "PASS",
+  "helper_effects": "UBSan PASS",
+  "invocation_stack_lifetime": "UBSan PASS",
+  "compiler_transform": "u32 compiler barrier at every native32 register write, followed by existing reg_write contract; native P unchanged",
+  "before_evidence": "BPF signed low32 compare precedes helper call using original full R2",
+  "after_evidence": "BPF zero-extends the input, compares signed/unsigned on the narrowed value, passes that value to helper",
+  "guest": {
+    "launcher_pid": 1186389,
+    "vcpus": 2,
+    "memory": "2G",
+    "host_address_space_limit_bytes": 8589934592,
+    "host_cpus": "12-15",
+    "log": "/workspaces/kprog-raw/verified/20261113-signed-bound/job/make.log",
+    "outcome": "pending",
+    "source_native_execution_requests": 0
+  },
+  "transient_compiler_diagnostic": "Initial %w operand modifier rejected by BPF inline assembler; full diagnostic retained, final implementation uses empty u32 compiler barrier"
+}
