@@ -6,9 +6,12 @@ the same; it does not say where either arm spends the time.  This profiles both 
 ONE run (baseline = eBPF/JIT, post_rejit = native, installed only after the baseline
 phase), so the two profiles share the guest, the workload and the machine.
 
-`perf record -a -e cpu-clock` runs in the guest, bracketed by the driver's own
+`perf record -a -g -e cpu-clock` runs in the guest, bracketed by the driver's own
 `measurement_start`/`measurement_done` progress lines, so each sample belongs to a known
-phase.  With kptr_restrict=0 and bpf_jit_kallsyms=1 every JIT'd program appears in
+phase.  Callchains are recorded so a sample can be attributed to the code that called it
+(an out-of-line helper entry such as memset is reached from a caller, and the caller
+is what the arm's change is about).  With kptr_restrict=0 and bpf_jit_kallsyms=1 every
+JIT'd program appears in
 /proc/kallsyms as `bpf_prog_<tag>_<name>`, and perf records the guest kallsyms into the
 data file, so the report symbolizes afterwards.  A sample's symbol is the code that was
 running on the CPU: for these programs, samples under `bpf_prog_*` are BPF time.
@@ -73,7 +76,7 @@ for ph in baseline post_rejit; do
     sleep 2
   done
   echo "phase-profile: perf start $ph $(date -u +%FT%TZ)" >> "$O/phase-profile.log"
-  /var/tmp/perf record -a -e cpu-clock -F "$FREQ" -o "/dev/shm/$ph.data" \
+  /var/tmp/perf record -a -g -e cpu-clock -F "$FREQ" -o "/dev/shm/$ph.data" \
     >> "$O/phase-profile.log" 2>&1 &
   P=$!
   for _ in $(seq 1 300); do
