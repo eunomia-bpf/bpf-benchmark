@@ -36,5 +36,20 @@
   },
   "relocations": "match entry for entry (GOTPCRELX for maps/rodata globals by name, PLT32 for helpers by name)",
   "default path": "switch off reproduces the image's objects (instruction counts identical)"
+ },
+ "correction_sole_kernel_btf": {
+  "what": "My earlier convergence numbers were measured against objects built with the HOST kernel's BTF (make -B in vendor/bpf defaults VMLINUX_BTF to /sys/kernel/btf/vmlinux, kernel release $(uname -r) = 7.3.0). The image's objects are built from the sole kernel (7.0.0-rc2+). Re-measured against the shipped objects with the sole-kernel header, the picture is:",
+  "instruction counts": {
+   "vfsstat": 40,
+   "opensnoop": 210,
+   "syscount": 140,
+   "tcpconnect": 354,
+   "tcplife": 311,
+   "runqlat": 384,
+   "capable": "155 shipped vs 154 switch-on",
+   "biosnoop": "305 shipped vs 311 switch-on"
+  },
+  "relocations": "match the shipped objects entry for entry (GOTPCRELX for data globals by name, PLT32 for helpers by name)",
+  "conclusion": "six of eight tools match the image's instruction counts exactly; capable is one instruction fewer and biosnoop six more. Both are codegen-order differences on the same source with the same relocations, not a semantic difference."
  }
 }
