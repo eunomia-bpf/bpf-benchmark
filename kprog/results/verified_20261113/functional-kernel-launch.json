@@ -1,0 +1,43 @@
+{
+  "launched_at": "2026-11-13T07:43:15Z",
+  "scope": "Sequenced small functional guests alongside at most three census guests",
+  "cancelled_prior_wait": {
+    "outer_pid": 1270473,
+    "launcher_pid": 1270474,
+    "stopped_exact_owned_pid": 1270477,
+    "process": "tail --pid=1251409 -f /dev/null",
+    "had_started_make": false,
+    "raw_marker": "/workspaces/kprog-raw/verified/20261113-word32-copy/guest-job/cancelled-wait",
+    "reason": "The advisor limits census guests to three; a small functional guest on idle CPU13 fits the available memory without waiting for a large census compiler"
+  },
+  "host_mem_available_kb_at_resource_check": 77396740,
+  "host_cpu": 13,
+  "vm_cpus": 2,
+  "vm_mem_each": "2G",
+  "address_space_bytes_each": 8589934592,
+  "resource_lock": "shared /workspaces/.agent-state/kprog-lanes/locks/image",
+  "stock_width_unit": {
+    "outer_pid": 1276775,
+    "test_commit": "2d05e6342",
+    "command": "make -C /workspaces/repository/kprog/tv word32-copy-kvm WORD32_COPY_OUTPUT=/workspaces/kprog-raw/verified/20261113-word32-copy/immediate-control",
+    "job_directory": "/workspaces/kprog-raw/verified/20261113-word32-copy/immediate-job",
+    "results": "/workspaces/kprog-raw/verified/20261113-word32-copy/immediate-control",
+    "dry_run": "/workspaces/kprog-raw/verified/20261113-word32-copy/immediate-dry-run.log",
+    "planned_loads": 6
+  },
+  "helper_query_unit": {
+    "outer_pid": 1276776,
+    "wait_for_owned_pid": 1276775,
+    "test_commit": "221e719e0",
+    "command": "make -C /workspaces/repository/kprog/libnativeloader helper-context-kernel-kvm",
+    "job_directory": "/workspaces/kprog-raw/verified/20261113-helper-context/kernel-job",
+    "results": "/workspaces/kprog-raw/verified/20261113-helper-context/kernel",
+    "dry_run": "/workspaces/kprog-raw/verified/20261113-helper-kernel-dry-run.log",
+    "planned_contexts": 9,
+    "selected_binary": "/var/tmp/kprog-tmp/verified/helper-context/helper-kernel"
+  },
+  "canonical_module_or_loader_build": false,
+  "kernel_or_image_changed": false,
+  "native_execution_requests": 0,
+  "result": "Collect both in later turn; no post-launch polling"
+}
