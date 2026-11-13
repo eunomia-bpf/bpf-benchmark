@@ -35,12 +35,13 @@ finalize_refresh() {
     date -u +%FT%TZ > "$refresh_output/finished"
 }
 
-if [[ ${2:-} == --finalize ]]; then
+refresh_operation=${2:-full}
+if [[ $refresh_operation == --finalize ]]; then
     refresh_old_image=$(cat "$refresh_output/old-image")
     refresh_new_image=$(docker image inspect --format '{{.Id}}' "$refresh_image")
     finalize_refresh
     exit 0
-elif [[ -n ${2:-} ]]; then
+elif [[ $refresh_operation != full && $refresh_operation != --modules-only ]]; then
     printf 'Unknown refresh operation: %s\n' "$2" >&2
     exit 1
 fi
@@ -49,6 +50,7 @@ date -u +%FT%TZ > "$refresh_output/started"
 refresh_old_image=$(docker image inspect --format '{{.Id}}' "$refresh_image")
 printf '%s\n' "$refresh_old_image" > "$refresh_output/old-image"
 
+if [[ $refresh_operation == full ]]; then
 # Interrupted recursive preflight removed vmlinux. Recover the matching ELF/BTF
 # directly from the sole unchanged boot image; do not build another kernel.
 "$refresh_root/vendor/linux-framework/scripts/extract-vmlinux" \
@@ -72,6 +74,21 @@ for refresh_module in verified direct; do
 done
 make -C "$refresh_root/kprog/libnativeloader" native-image-handoff-kvm \
     BUILD_DIR="$refresh_loader" NATIVE_MODULE="$refresh_direct/bpf_x86_native_lab.ko" SERVICE_HOST_CPUS=13
+fi
+
+# Kbuild's modules_install parser removes the installed kernel directory even
+# with make -n. Restore the sole installed set from the already built modules;
+# no kernel compilation or source/version change is involved.
+find "$refresh_kernel/modules-install" -type f -print > "$refresh_output/modules-before.txt"
+make -C "$refresh_root/vendor/linux-framework" O="$refresh_kernel" ARCH=x86_64 \
+    INSTALL_MOD_PATH="$refresh_kernel/modules-install" INSTALL_MOD_STRIP=1 \
+    DEPMOD=true modules_install -j1
+find "$refresh_kernel/modules-install" -type f -print > "$refresh_output/modules-after.txt"
+sha256sum "$refresh_kernel/net/netfilter/nfnetlink.ko" \
+    "$refresh_kernel/modules-install/lib/modules/$(cat "$refresh_kernel/include/config/kernel.release")/kernel/net/netfilter/nfnetlink.ko" \
+    > "$refresh_output/nfnetlink-sha256"
+printf -- '- %s VERIFIED module packaging repair: replaced incomplete modules-install in the sole build using its existing .ko files (INSTALL_MOD_STRIP=1); no kernel compilation; file inventories and raw logs retained in %s.\n' \
+    "$(date -u +%FT%TZ)" "$refresh_output" >> "$refresh_root/kprog/docs/cleanup-log.md"
 
 # Use the frozen image recipe and existing stable kernel/application artifacts.
 # Rebuild its loader/shim; avoid unrelated source exports and object rebuilds.

@@ -1,0 +1,17 @@
+{
+  "scope": "Repair sole installed kernel-module set and incrementally replace current image",
+  "reason": "PERF Cilium 093122_937885 failed before baseline or native phase: netlink protocol not supported; canonical modules-install has three metadata files and no .ko",
+  "cause": "scripts/Makefile.modinst removes MODLIB/kernel and MODLIB/build with a parse-time shell expression, including during make -n; previous preflight entered this rule",
+  "source_commit": "74d1097af561 unchanged",
+  "kernel_build": "/workspaces/.agent-state/kprog-ck/build-x86",
+  "existing_built_modules": 1683,
+  "image_before": "sha256:3c30779bd71612cf616821229c4af9ab673d34f0ded3a2ee3591064b8c41ece2",
+  "repair": "Use existing modules_install with INSTALL_MOD_STRIP=1 DEPMOD=true; frozen image recipe skips kernel and application rebuilds",
+  "preflight": "bash -n and make -n shared-base-modules-repair; does not enter Kbuild during dry-run",
+  "shared_resource": "Exclusive /workspaces/.agent-state/kprog-lanes/locks/image, CPUs8-15/jobs1",
+  "module_functional_tests": "Previous refresh passed nine contexts on each helper frontend plus existing direct handoff; unchanged here",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-modules-repair",
+  "application_test": "Pending repaired-image Cilium rerun; no success claimed",
+  "benchmark_definition_changed": false,
+  "raw_data_removed": false
+}

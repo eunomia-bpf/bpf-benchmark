@@ -14,12 +14,15 @@ HELPER_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-helper-context/k
 HELPER_KERNEL_MODULE ?= /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
 REFRESH_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-shared-refresh
 
-.PHONY: shared-base-refresh shared-base-finalize shared-module-syntax
+.PHONY: shared-base-refresh shared-base-finalize shared-base-modules-repair shared-module-syntax
 shared-base-refresh:
 	bash ../test/refresh_verified_base.sh "$(REFRESH_OUTPUT)"
 
 shared-base-finalize:
 	bash ../test/refresh_verified_base.sh "$(REFRESH_OUTPUT)" --finalize
+
+shared-base-modules-repair:
+	bash ../test/refresh_verified_base.sh "$(REFRESH_OUTPUT)" --modules-only
 
 shared-module-syntax:
 	$(MAKE) -C ../stock-path/module syntax-check
