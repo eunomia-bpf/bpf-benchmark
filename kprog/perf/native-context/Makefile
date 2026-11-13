@@ -215,3 +215,53 @@ SOCKET_RECEIPT ?= $(ROOT)/kprog/results/perf_20261113/socket-context-host.json
 .PHONY: socket-retain
 socket-retain:
 	python3 $(HERE)/socket-retain.py --build $(SOCKET_BUILD) --raw $(SOCKET_RAW) --output $(SOCKET_RECEIPT) --features='$(UPSTREAM_SOCKET_FEATURES)' --log $(SOCKET_RAW)/complete.log
+
+CILIUM_CAPTURE ?=
+CILIUM_IR_BUILD ?= /var/tmp/kprog-tmp/perf/cilium-context
+CILIUM_UNIT ?= bpf_lxc
+.PHONY: upstream-cilium-ir
+upstream-cilium-ir:
+	prlimit --as=8589934592 -- python3 $(HERE)/cilium-upstream.py --capture $(CILIUM_CAPTURE) --output $(CILIUM_IR_BUILD)/$(CILIUM_UNIT)
+	llvm-dis-18 $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).bc -o $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).ll
+	prlimit --as=8589934592 -- $(CC) -target bpf -mcpu=v3 -O2 -c $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).bc -o $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).bpf.o
+
+PACKET_BUILD ?= /var/tmp/kprog-tmp/perf/packet-context
+$(PACKET_BUILD)/public-layout: $(HERE)/packet-public-layout.c $(CILIUM_UPSTREAM)/include/linux/bpf.h
+	install -d $(PACKET_BUILD)
+	$(CC) -O2 -I$(CILIUM_UPSTREAM)/include -I/usr/include/x86_64-linux-gnu $< -o $@
+$(PACKET_BUILD)/physical-layout: $(HERE)/packet-physical-layout.c $(VMLINUX_DIR)/vmlinux.h
+	install -d $(PACKET_BUILD)
+	$(CC) -O2 -Wno-unknown-attributes -I$(VMLINUX_DIR) $< -o $@
+$(PACKET_BUILD)/driver.o: $(HERE)/test-packet-driver.c $(VMLINUX_DIR)/vmlinux.h
+	install -d $(PACKET_BUILD)
+	$(CC) -O2 -Wno-unknown-attributes -I$(VMLINUX_DIR) -c $< -o $@
+$(PACKET_BUILD)/driver.asm.o: $(HERE)/test-packet-driver.c $(VMLINUX_DIR)/vmlinux.h
+	install -d $(PACKET_BUILD)
+	$(CC) -O2 -DBPF_POINTER_ASM -Wno-unknown-attributes -I$(VMLINUX_DIR) -c $< -o $@
+.PHONY: packet-context-check
+packet-context-check: $(SOCKET_BUILD)/socket-context-lower $(PACKET_BUILD)/public-layout $(PACKET_BUILD)/physical-layout $(PACKET_BUILD)/driver.o $(PACKET_BUILD)/driver.asm.o
+	$(PACKET_BUILD)/public-layout > $(PACKET_BUILD)/public-layout.json
+	$(PACKET_BUILD)/physical-layout > $(PACKET_BUILD)/physical-layout.json
+	$(CC) -O2 -I$(CILIUM_UPSTREAM)/include -emit-llvm -c $(HERE)/test-packet-context.c -o $(PACKET_BUILD)/fixture.bc
+	$(CC) -O2 $(PACKET_BUILD)/fixture.bc $(PACKET_BUILD)/driver.o -o $(PACKET_BUILD)/plain
+	$(PACKET_BUILD)/plain && result=0 || result=$$?; test $$result = 1
+	$(SOCKET_BUILD)/socket-context-lower $(PACKET_BUILD)/fixture.bc --public-layout $(PACKET_BUILD)/public-layout.json --physical-layout $(PACKET_BUILD)/physical-layout.json -o $(PACKET_BUILD)/fixture.physical.bc
+	$(CC) -O2 $(PACKET_BUILD)/fixture.physical.bc $(PACKET_BUILD)/driver.o -o $(PACKET_BUILD)/fixed
+	$(PACKET_BUILD)/fixed
+	$(CC) -target bpf -O2 -DBPF_POINTER_ASM -I$(CILIUM_UPSTREAM)/include -emit-llvm -c $(HERE)/test-packet-context.c -o $(PACKET_BUILD)/fixture.asm.bc
+	python3 $(HERE)/socket-helper-names.py > $(PACKET_BUILD)/helper-names.json
+	$(SOCKET_BUILD)/socket-context-lower $(PACKET_BUILD)/fixture.asm.bc --public-layout $(PACKET_BUILD)/public-layout.json --physical-layout $(PACKET_BUILD)/physical-layout.json --native-codegen --helper-names $(PACKET_BUILD)/helper-names.json -o $(PACKET_BUILD)/fixture.asm.physical.bc
+	$(CC) -O2 $(PACKET_BUILD)/fixture.asm.physical.bc $(PACKET_BUILD)/driver.asm.o -o $(PACKET_BUILD)/fixed.asm
+	$(PACKET_BUILD)/fixed.asm
+
+.PHONY: upstream-cilium-native
+upstream-cilium-native: upstream-cilium-ir $(SOCKET_BUILD)/socket-context-lower $(PACKET_BUILD)/public-layout $(PACKET_BUILD)/physical-layout
+	$(PACKET_BUILD)/public-layout > $(PACKET_BUILD)/public-layout.json
+	$(PACKET_BUILD)/physical-layout > $(PACKET_BUILD)/physical-layout.json
+	python3 $(HERE)/socket-helper-names.py > $(PACKET_BUILD)/helper-names.json
+	$(SOCKET_BUILD)/socket-context-lower $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).bc --public-layout $(PACKET_BUILD)/public-layout.json --physical-layout $(PACKET_BUILD)/physical-layout.json --native-codegen --helper-names $(PACKET_BUILD)/helper-names.json -o $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).physical.bc
+	prlimit --as=8589934592 -- $(CC) -target x86_64-linux-gnu -O3 -g -fPIC -fno-optimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-jump-tables -c $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).physical.bc -o $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).native.o
+
+.PHONY: upstream-cilium-link
+upstream-cilium-link: upstream-cilium-native
+	python3 $(HERE)/socket-proof.py --input $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).native.o --linker $(LINK_MEMORY_PAYLOAD)/native-link.real --output $(CILIUM_IR_BUILD)/$(CILIUM_UNIT)-links --section-prefix tc/ --section-prefix xdp

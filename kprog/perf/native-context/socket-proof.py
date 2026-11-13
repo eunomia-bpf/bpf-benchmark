@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build canonical proofs for every cgroup entry of the upstream socket object.
+"""Build canonical linker artifacts for every selected entry section.
 
 Offline linker execution only: no verifier submission or native installation.
 """
@@ -15,15 +15,17 @@ def main():
     parser.add_argument('--input', type=Path, required=True)
     parser.add_argument('--linker', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--section-prefix', action='append')
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     with args.input.open('rb') as stream:
         elf = ELFFile(stream)
+        prefixes = args.section_prefix or ['cgroup/']
         entries = [symbol.name for symbol in elf.get_section_by_name('.symtab').iter_symbols()
                    if symbol['st_info']['type'] == 'STT_FUNC' and isinstance(symbol['st_shndx'], int)
-                   and elf.get_section(symbol['st_shndx']).name.startswith('cgroup/')]
+                   and any(elf.get_section(symbol['st_shndx']).name.startswith(prefix) for prefix in prefixes)]
     if not entries:
-        raise ValueError('socket object has no cgroup entries')
+        raise ValueError('object has no entries in requested sections')
     rows = []
     for name in sorted(entries):
         command = [str(args.linker), '--mode', 'proof', '--input', str(args.input),
@@ -33,7 +35,8 @@ def main():
         (args.output/(name+'.stderr')).write_text(result.stderr)
         rows.append(dict(symbol=name, command=command, returncode=result.returncode))
         (args.output/'report.json').write_text(json.dumps(rows, indent=2)+'\n')
-        result.check_returncode()
+    if any(row['returncode'] for row in rows):
+        raise SystemExit(1)
 
 
 if __name__ == '__main__':
