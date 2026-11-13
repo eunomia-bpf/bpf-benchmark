@@ -91,8 +91,36 @@ Katran the only real source-level difference is the context struct, and the othe
 the source audit lists (`healthchecking.c`, `healthchecking_helpers.h`) are not in the
 shipped manifest at all.
 
+## The build switch, and the functional check
+
+`vendor/bpf/Makefile` now carries the chain behind `KATRAN_SAME_SOURCE` (default 0):
+
+    KATRAN_SAME_SOURCE=1 make -C vendor/bpf native-katran
+
+With the switch off the rule is the previous command unchanged: all four Katran objects were
+deleted and rebuilt, and every one is byte-identical to the object the image ships. With it
+on, all four build SIMD-free (0 `xmm`) and link as the table above says.
+
+Functional check, CPUs 20-23, stats on, 30 s per phase, switch-on manifest
+(`corpus/results/x86_kvm_corpus_20261113_083503_438970`, manifest
+`corpus/results/katran-samesource-20261113/objects/manifest.json`):
+
+| | eBPF arm | native arm (switch on) |
+|---|---|---|
+| phases | baseline `ok` | post_rejit `ok`, app_done `ok` |
+| native replacements | — | 1 `replaced prog=` for the loaded object's manifest |
+| `balancer_ingress` runs | 75,192,822 | 84,022,753 |
+| `balancer_ingress` ns/run | 202.4 | 158.0 |
+| pktgen packets | 75,192,821 | 84,022,752 |
+
+So the untouched-source object installs and runs under load, and the packets it processes
+match its own invocation count in both arms. That is a correctness check, not a timing
+claim: the two phases ran different packet counts because the arms differ in speed, and one
+30 s sample on four CPUs does not measure a ratio. C4 timing on CPUs 0-7 comes next.
+
 ## Not yet done
 
-- A `vendor/bpf/Makefile` rule with the switch (default build byte-identical) — waits on the
-  rule-table question in COORDINATION with lane perf, whose tool this is.
-- A functional guest run comparing both arms' packet counts and drops.
+- C4 timing (3x180 s, CPUs 0-7, both arms) for the switch-on objects.
+- Whether removing the MICRO_NATIVE blocks from katran/lib/linux_includes/bpf.h is a
+  no-op for every other consumer of that header (healthchecking.c is built but not
+  shipped; xdp_pktcntr.c likewise).
