@@ -1,0 +1,372 @@
+{
+  "recorded_at": "2026-11-13T10:03:07.868681+00:00",
+  "reason": "Retire superseded image cache hardlinks from completed PERF guests under the one-image rule; raw run evidence is retained.",
+  "files": [
+    {
+      "path": "/var/tmp/kprog-tmp/perf/cilium-same-source-runtime/var-tmp/runtime.image.tar",
+      "bytes": 687938048,
+      "inode": 14170226,
+      "device": 75,
+      "links": 1,
+      "manifest": [
+        {
+          "Config": "blobs/sha256/cdd06a49fd0ed181ccd9b35a9ce58148322e555d578a112e285c5b85e74e6851",
+          "RepoTags": [
+            "bpf-benchmark/kprog:current"
+          ],
+          "Layers": [
+            "blobs/sha256/7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+            "blobs/sha256/da94521aa2edb5320294ffd5a275ba249fd25cc7c36d315c09001be870516a6c",
+            "blobs/sha256/d7e5c4bcb413324a0587b08590497b13caf6babed909ec1de07db39172a4256f",
+            "blobs/sha256/4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+            "blobs/sha256/48a1dbf3ca7189d9bbde8552e8f8379e8e93acd55fd79a91f26e87dac42438cc",
+            "blobs/sha256/082fd1debfcf8c4d600cc438b9f1fffa4cd77cdcc452a66b75776deb4118a325",
+            "blobs/sha256/65a1690e2c42799c926b3c465a89a500601f43901589afa31663eb54f1cf11a4",
+            "blobs/sha256/6e3e5bcef4c08c63af76e3699a97a403649cea23bd8876a2f7cf1b64c8f897ae",
+            "blobs/sha256/544279ce7ce12036657d246d25f28b78f3f24ca532f7a7efecc2433c300ef841",
+            "blobs/sha256/d50cbbffd535ce88b1f149cd2567712c90ffff0fd07fcec575544ee51151a7e2",
+            "blobs/sha256/cc0ff1d772a2758fd586e19d0832c076df74b860ac84df64526ec3c9bfde8d3c",
+            "blobs/sha256/6fb42c663001468e0e4d12964f24208b5946af5875e24ce76cb8b2e14b0ce550",
+            "blobs/sha256/e01e76c4d9a9b23a8833991e9e60b2bfd092f0bb4a948361b9fc1918696d133e",
+            "blobs/sha256/9b3e32bf007d91cf8917cf3e1c241454e1de6ef07dfd6946bc22738fbb5a8ddc",
+            "blobs/sha256/26fc66cf4b1ce5e62a7f987caed2079d2b1c4204eeba3cf4fa731dfadc820da7",
+            "blobs/sha256/eb31ccb060db90eb641a339d5049f2c9b2e2ca31b499d008236e0c7225a16b61",
+            "blobs/sha256/c29ea8bf8eb004eaee1f10f84d199fe8271cd3b1a41e42069c68a6bd9beec453",
+            "blobs/sha256/a4b4164a6e47ab24a8347e3bb62e3624eb439d96a2e00d7f8943042c92eb6148",
+            "blobs/sha256/c062ce0ae3a6c5164b885fba014fec4d0838bb5c1ce9abae0ea8ec28432c54aa",
+            "blobs/sha256/b6971dd594b304ab7b71b13f234fccd5dc0208106eaf38f396a7efb58b71eaf4",
+            "blobs/sha256/d2d736672ebd3cb78573c97b8e20d327e6dca8bc061ae7e37ad09e7a3f6aa48d",
+            "blobs/sha256/94081ab9d664b26480766d79876178f43c7637f377693119b78de6742913cfad",
+            "blobs/sha256/8feb2a02b516a02fe833c71eaf7d736bebe50c1b057ab1e71978f14f3e0e46d4",
+            "blobs/sha256/cc4f57e5345ee782a1b4a30bf49e60fd60799351ed2b9f16d214a4dc13ff76be",
+            "blobs/sha256/286510d1faa79f1ff1bf2790749fe63432a398c12381d316c0df4d0fb95f3994",
+            "blobs/sha256/076d68031bf9a548e6cd78f5d88387601ad185e32fb2df778669ff66ec53fe8f",
+            "blobs/sha256/1d068874e44650463a4dcf36a21a6efec66306cc24baacdf77d98d5eebf34afb",
+            "blobs/sha256/2e91e2876204d9762e0ce717d441209437d679e4f36977204c3fd8ad1c466b76",
+            "blobs/sha256/088440934760f6caf3b0bcc25f528933ad336bebcffae9d6ca7e3211c5253784",
+            "blobs/sha256/42c4bc1125053883e33a2a4992ca6459ccfad88727cea11c6bd482336d780b25",
+            "blobs/sha256/03b45075e0997f4021126b0b3eb94cf0face343e6f05f9213b6215b5eb1d4bae",
+            "blobs/sha256/00b925c84b920d877dc8f4396db9ce35d06833d106fb950c6df04326cab6a427",
+            "blobs/sha256/0685d696394c445069fa603c8bcf7696bb53274b5b4310c7e8e6fc5e3f7412fa",
+            "blobs/sha256/adbe67feff107a24012b0109667e66bbefb0fe919fa09c11809e26bc11af7afd",
+            "blobs/sha256/d1e9535aa7ee74f4b7721b81e093a7e55ec073cf0dc75f891489490e15d4fa68"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/cilium-live-config/var-tmp/runtime.image.tar",
+      "bytes": 687938048,
+      "inode": 14169599,
+      "device": 75,
+      "links": 1,
+      "manifest": [
+        {
+          "Config": "blobs/sha256/cdd06a49fd0ed181ccd9b35a9ce58148322e555d578a112e285c5b85e74e6851",
+          "RepoTags": [
+            "bpf-benchmark/kprog:current"
+          ],
+          "Layers": [
+            "blobs/sha256/7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+            "blobs/sha256/da94521aa2edb5320294ffd5a275ba249fd25cc7c36d315c09001be870516a6c",
+            "blobs/sha256/d7e5c4bcb413324a0587b08590497b13caf6babed909ec1de07db39172a4256f",
+            "blobs/sha256/4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+            "blobs/sha256/48a1dbf3ca7189d9bbde8552e8f8379e8e93acd55fd79a91f26e87dac42438cc",
+            "blobs/sha256/082fd1debfcf8c4d600cc438b9f1fffa4cd77cdcc452a66b75776deb4118a325",
+            "blobs/sha256/65a1690e2c42799c926b3c465a89a500601f43901589afa31663eb54f1cf11a4",
+            "blobs/sha256/6e3e5bcef4c08c63af76e3699a97a403649cea23bd8876a2f7cf1b64c8f897ae",
+            "blobs/sha256/544279ce7ce12036657d246d25f28b78f3f24ca532f7a7efecc2433c300ef841",
+            "blobs/sha256/d50cbbffd535ce88b1f149cd2567712c90ffff0fd07fcec575544ee51151a7e2",
+            "blobs/sha256/cc0ff1d772a2758fd586e19d0832c076df74b860ac84df64526ec3c9bfde8d3c",
+            "blobs/sha256/6fb42c663001468e0e4d12964f24208b5946af5875e24ce76cb8b2e14b0ce550",
+            "blobs/sha256/e01e76c4d9a9b23a8833991e9e60b2bfd092f0bb4a948361b9fc1918696d133e",
+            "blobs/sha256/9b3e32bf007d91cf8917cf3e1c241454e1de6ef07dfd6946bc22738fbb5a8ddc",
+            "blobs/sha256/26fc66cf4b1ce5e62a7f987caed2079d2b1c4204eeba3cf4fa731dfadc820da7",
+            "blobs/sha256/eb31ccb060db90eb641a339d5049f2c9b2e2ca31b499d008236e0c7225a16b61",
+            "blobs/sha256/c29ea8bf8eb004eaee1f10f84d199fe8271cd3b1a41e42069c68a6bd9beec453",
+            "blobs/sha256/a4b4164a6e47ab24a8347e3bb62e3624eb439d96a2e00d7f8943042c92eb6148",
+            "blobs/sha256/c062ce0ae3a6c5164b885fba014fec4d0838bb5c1ce9abae0ea8ec28432c54aa",
+            "blobs/sha256/b6971dd594b304ab7b71b13f234fccd5dc0208106eaf38f396a7efb58b71eaf4",
+            "blobs/sha256/d2d736672ebd3cb78573c97b8e20d327e6dca8bc061ae7e37ad09e7a3f6aa48d",
+            "blobs/sha256/94081ab9d664b26480766d79876178f43c7637f377693119b78de6742913cfad",
+            "blobs/sha256/8feb2a02b516a02fe833c71eaf7d736bebe50c1b057ab1e71978f14f3e0e46d4",
+            "blobs/sha256/cc4f57e5345ee782a1b4a30bf49e60fd60799351ed2b9f16d214a4dc13ff76be",
+            "blobs/sha256/286510d1faa79f1ff1bf2790749fe63432a398c12381d316c0df4d0fb95f3994",
+            "blobs/sha256/076d68031bf9a548e6cd78f5d88387601ad185e32fb2df778669ff66ec53fe8f",
+            "blobs/sha256/1d068874e44650463a4dcf36a21a6efec66306cc24baacdf77d98d5eebf34afb",
+            "blobs/sha256/2e91e2876204d9762e0ce717d441209437d679e4f36977204c3fd8ad1c466b76",
+            "blobs/sha256/088440934760f6caf3b0bcc25f528933ad336bebcffae9d6ca7e3211c5253784",
+            "blobs/sha256/42c4bc1125053883e33a2a4992ca6459ccfad88727cea11c6bd482336d780b25",
+            "blobs/sha256/03b45075e0997f4021126b0b3eb94cf0face343e6f05f9213b6215b5eb1d4bae",
+            "blobs/sha256/00b925c84b920d877dc8f4396db9ce35d06833d106fb950c6df04326cab6a427",
+            "blobs/sha256/0685d696394c445069fa603c8bcf7696bb53274b5b4310c7e8e6fc5e3f7412fa",
+            "blobs/sha256/adbe67feff107a24012b0109667e66bbefb0fe919fa09c11809e26bc11af7afd",
+            "blobs/sha256/d1e9535aa7ee74f4b7721b81e093a7e55ec073cf0dc75f891489490e15d4fa68"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/cpu/var-tmp/runtime.image.tar",
+      "bytes": 687938048,
+      "inode": 13789600,
+      "device": 75,
+      "links": 1,
+      "manifest": [
+        {
+          "Config": "blobs/sha256/cdd06a49fd0ed181ccd9b35a9ce58148322e555d578a112e285c5b85e74e6851",
+          "RepoTags": [
+            "bpf-benchmark/kprog:current"
+          ],
+          "Layers": [
+            "blobs/sha256/7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+            "blobs/sha256/da94521aa2edb5320294ffd5a275ba249fd25cc7c36d315c09001be870516a6c",
+            "blobs/sha256/d7e5c4bcb413324a0587b08590497b13caf6babed909ec1de07db39172a4256f",
+            "blobs/sha256/4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+            "blobs/sha256/48a1dbf3ca7189d9bbde8552e8f8379e8e93acd55fd79a91f26e87dac42438cc",
+            "blobs/sha256/082fd1debfcf8c4d600cc438b9f1fffa4cd77cdcc452a66b75776deb4118a325",
+            "blobs/sha256/65a1690e2c42799c926b3c465a89a500601f43901589afa31663eb54f1cf11a4",
+            "blobs/sha256/6e3e5bcef4c08c63af76e3699a97a403649cea23bd8876a2f7cf1b64c8f897ae",
+            "blobs/sha256/544279ce7ce12036657d246d25f28b78f3f24ca532f7a7efecc2433c300ef841",
+            "blobs/sha256/d50cbbffd535ce88b1f149cd2567712c90ffff0fd07fcec575544ee51151a7e2",
+            "blobs/sha256/cc0ff1d772a2758fd586e19d0832c076df74b860ac84df64526ec3c9bfde8d3c",
+            "blobs/sha256/6fb42c663001468e0e4d12964f24208b5946af5875e24ce76cb8b2e14b0ce550",
+            "blobs/sha256/e01e76c4d9a9b23a8833991e9e60b2bfd092f0bb4a948361b9fc1918696d133e",
+            "blobs/sha256/9b3e32bf007d91cf8917cf3e1c241454e1de6ef07dfd6946bc22738fbb5a8ddc",
+            "blobs/sha256/26fc66cf4b1ce5e62a7f987caed2079d2b1c4204eeba3cf4fa731dfadc820da7",
+            "blobs/sha256/eb31ccb060db90eb641a339d5049f2c9b2e2ca31b499d008236e0c7225a16b61",
+            "blobs/sha256/c29ea8bf8eb004eaee1f10f84d199fe8271cd3b1a41e42069c68a6bd9beec453",
+            "blobs/sha256/a4b4164a6e47ab24a8347e3bb62e3624eb439d96a2e00d7f8943042c92eb6148",
+            "blobs/sha256/c062ce0ae3a6c5164b885fba014fec4d0838bb5c1ce9abae0ea8ec28432c54aa",
+            "blobs/sha256/b6971dd594b304ab7b71b13f234fccd5dc0208106eaf38f396a7efb58b71eaf4",
+            "blobs/sha256/d2d736672ebd3cb78573c97b8e20d327e6dca8bc061ae7e37ad09e7a3f6aa48d",
+            "blobs/sha256/94081ab9d664b26480766d79876178f43c7637f377693119b78de6742913cfad",
+            "blobs/sha256/8feb2a02b516a02fe833c71eaf7d736bebe50c1b057ab1e71978f14f3e0e46d4",
+            "blobs/sha256/cc4f57e5345ee782a1b4a30bf49e60fd60799351ed2b9f16d214a4dc13ff76be",
+            "blobs/sha256/286510d1faa79f1ff1bf2790749fe63432a398c12381d316c0df4d0fb95f3994",
+            "blobs/sha256/076d68031bf9a548e6cd78f5d88387601ad185e32fb2df778669ff66ec53fe8f",
+            "blobs/sha256/1d068874e44650463a4dcf36a21a6efec66306cc24baacdf77d98d5eebf34afb",
+            "blobs/sha256/2e91e2876204d9762e0ce717d441209437d679e4f36977204c3fd8ad1c466b76",
+            "blobs/sha256/088440934760f6caf3b0bcc25f528933ad336bebcffae9d6ca7e3211c5253784",
+            "blobs/sha256/42c4bc1125053883e33a2a4992ca6459ccfad88727cea11c6bd482336d780b25",
+            "blobs/sha256/03b45075e0997f4021126b0b3eb94cf0face343e6f05f9213b6215b5eb1d4bae",
+            "blobs/sha256/00b925c84b920d877dc8f4396db9ce35d06833d106fb950c6df04326cab6a427",
+            "blobs/sha256/0685d696394c445069fa603c8bcf7696bb53274b5b4310c7e8e6fc5e3f7412fa",
+            "blobs/sha256/adbe67feff107a24012b0109667e66bbefb0fe919fa09c11809e26bc11af7afd",
+            "blobs/sha256/d1e9535aa7ee74f4b7721b81e093a7e55ec073cf0dc75f891489490e15d4fa68"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/cilium-probe-config/var-tmp/runtime.image.tar",
+      "bytes": 687938048,
+      "inode": 14170025,
+      "device": 75,
+      "links": 1,
+      "manifest": [
+        {
+          "Config": "blobs/sha256/cdd06a49fd0ed181ccd9b35a9ce58148322e555d578a112e285c5b85e74e6851",
+          "RepoTags": [
+            "bpf-benchmark/kprog:current"
+          ],
+          "Layers": [
+            "blobs/sha256/7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+            "blobs/sha256/da94521aa2edb5320294ffd5a275ba249fd25cc7c36d315c09001be870516a6c",
+            "blobs/sha256/d7e5c4bcb413324a0587b08590497b13caf6babed909ec1de07db39172a4256f",
+            "blobs/sha256/4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+            "blobs/sha256/48a1dbf3ca7189d9bbde8552e8f8379e8e93acd55fd79a91f26e87dac42438cc",
+            "blobs/sha256/082fd1debfcf8c4d600cc438b9f1fffa4cd77cdcc452a66b75776deb4118a325",
+            "blobs/sha256/65a1690e2c42799c926b3c465a89a500601f43901589afa31663eb54f1cf11a4",
+            "blobs/sha256/6e3e5bcef4c08c63af76e3699a97a403649cea23bd8876a2f7cf1b64c8f897ae",
+            "blobs/sha256/544279ce7ce12036657d246d25f28b78f3f24ca532f7a7efecc2433c300ef841",
+            "blobs/sha256/d50cbbffd535ce88b1f149cd2567712c90ffff0fd07fcec575544ee51151a7e2",
+            "blobs/sha256/cc0ff1d772a2758fd586e19d0832c076df74b860ac84df64526ec3c9bfde8d3c",
+            "blobs/sha256/6fb42c663001468e0e4d12964f24208b5946af5875e24ce76cb8b2e14b0ce550",
+            "blobs/sha256/e01e76c4d9a9b23a8833991e9e60b2bfd092f0bb4a948361b9fc1918696d133e",
+            "blobs/sha256/9b3e32bf007d91cf8917cf3e1c241454e1de6ef07dfd6946bc22738fbb5a8ddc",
+            "blobs/sha256/26fc66cf4b1ce5e62a7f987caed2079d2b1c4204eeba3cf4fa731dfadc820da7",
+            "blobs/sha256/eb31ccb060db90eb641a339d5049f2c9b2e2ca31b499d008236e0c7225a16b61",
+            "blobs/sha256/c29ea8bf8eb004eaee1f10f84d199fe8271cd3b1a41e42069c68a6bd9beec453",
+            "blobs/sha256/a4b4164a6e47ab24a8347e3bb62e3624eb439d96a2e00d7f8943042c92eb6148",
+            "blobs/sha256/c062ce0ae3a6c5164b885fba014fec4d0838bb5c1ce9abae0ea8ec28432c54aa",
+            "blobs/sha256/b6971dd594b304ab7b71b13f234fccd5dc0208106eaf38f396a7efb58b71eaf4",
+            "blobs/sha256/d2d736672ebd3cb78573c97b8e20d327e6dca8bc061ae7e37ad09e7a3f6aa48d",
+            "blobs/sha256/94081ab9d664b26480766d79876178f43c7637f377693119b78de6742913cfad",
+            "blobs/sha256/8feb2a02b516a02fe833c71eaf7d736bebe50c1b057ab1e71978f14f3e0e46d4",
+            "blobs/sha256/cc4f57e5345ee782a1b4a30bf49e60fd60799351ed2b9f16d214a4dc13ff76be",
+            "blobs/sha256/286510d1faa79f1ff1bf2790749fe63432a398c12381d316c0df4d0fb95f3994",
+            "blobs/sha256/076d68031bf9a548e6cd78f5d88387601ad185e32fb2df778669ff66ec53fe8f",
+            "blobs/sha256/1d068874e44650463a4dcf36a21a6efec66306cc24baacdf77d98d5eebf34afb",
+            "blobs/sha256/2e91e2876204d9762e0ce717d441209437d679e4f36977204c3fd8ad1c466b76",
+            "blobs/sha256/088440934760f6caf3b0bcc25f528933ad336bebcffae9d6ca7e3211c5253784",
+            "blobs/sha256/42c4bc1125053883e33a2a4992ca6459ccfad88727cea11c6bd482336d780b25",
+            "blobs/sha256/03b45075e0997f4021126b0b3eb94cf0face343e6f05f9213b6215b5eb1d4bae",
+            "blobs/sha256/00b925c84b920d877dc8f4396db9ce35d06833d106fb950c6df04326cab6a427",
+            "blobs/sha256/0685d696394c445069fa603c8bcf7696bb53274b5b4310c7e8e6fc5e3f7412fa",
+            "blobs/sha256/adbe67feff107a24012b0109667e66bbefb0fe919fa09c11809e26bc11af7afd",
+            "blobs/sha256/d1e9535aa7ee74f4b7721b81e093a7e55ec073cf0dc75f891489490e15d4fa68"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/cilium-context-runtime/var-tmp/runtime.image.tar",
+      "bytes": 655158272,
+      "inode": 14286851,
+      "device": 75,
+      "links": 1,
+      "manifest": [
+        {
+          "Config": "blobs/sha256/952e7cfe8dd660f59afe4b629d436f8f2d522d5e7339096b086a2a939651177a",
+          "RepoTags": [
+            "bpf-benchmark/kprog:current"
+          ],
+          "Layers": [
+            "blobs/sha256/7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+            "blobs/sha256/da94521aa2edb5320294ffd5a275ba249fd25cc7c36d315c09001be870516a6c",
+            "blobs/sha256/d7e5c4bcb413324a0587b08590497b13caf6babed909ec1de07db39172a4256f",
+            "blobs/sha256/4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+            "blobs/sha256/48a1dbf3ca7189d9bbde8552e8f8379e8e93acd55fd79a91f26e87dac42438cc",
+            "blobs/sha256/082fd1debfcf8c4d600cc438b9f1fffa4cd77cdcc452a66b75776deb4118a325",
+            "blobs/sha256/65a1690e2c42799c926b3c465a89a500601f43901589afa31663eb54f1cf11a4",
+            "blobs/sha256/6e3e5bcef4c08c63af76e3699a97a403649cea23bd8876a2f7cf1b64c8f897ae",
+            "blobs/sha256/544279ce7ce12036657d246d25f28b78f3f24ca532f7a7efecc2433c300ef841",
+            "blobs/sha256/d50cbbffd535ce88b1f149cd2567712c90ffff0fd07fcec575544ee51151a7e2",
+            "blobs/sha256/cc9d26f512bfaf3c513bcadaa8d6470981e537b56736299a6a25c7297f04d2b7",
+            "blobs/sha256/6fb42c663001468e0e4d12964f24208b5946af5875e24ce76cb8b2e14b0ce550",
+            "blobs/sha256/4682f4d33e60b070c98d1aaad5256b7c73d91fd74aa31db504259800a2bf011f",
+            "blobs/sha256/9b3e32bf007d91cf8917cf3e1c241454e1de6ef07dfd6946bc22738fbb5a8ddc",
+            "blobs/sha256/26fc66cf4b1ce5e62a7f987caed2079d2b1c4204eeba3cf4fa731dfadc820da7",
+            "blobs/sha256/f7c164095f359acd0d868f2537b935b54f7fff35e9cca0965bda1e226ca250bc",
+            "blobs/sha256/c29ea8bf8eb004eaee1f10f84d199fe8271cd3b1a41e42069c68a6bd9beec453",
+            "blobs/sha256/3848e53cd07d8a9659f2bdedf778e3a2632bf9cc72a6021c970de0286b4c8b13",
+            "blobs/sha256/4c79c8f3dae7dddd06dff5c226e5eff600fbf94d7358ce2d8929bcd7625b23fa",
+            "blobs/sha256/5d7c0c01b2971825792e601fb479f6d4ed95e13d01caf0bde3e4388ff9aed608",
+            "blobs/sha256/542cf1920378ce6172fd16ec40e264127b96ebec80e8c09aa7f1f2f392c3a517",
+            "blobs/sha256/94081ab9d664b26480766d79876178f43c7637f377693119b78de6742913cfad",
+            "blobs/sha256/ca877e7a2fbd9c198be287532f55c1fc5f6b8b9e1e8cd595888801afeb0f14b0",
+            "blobs/sha256/bea413fbcc184e4c3ddc786645eeee19ed05cfd3f54e67e06d93f96f8c201dd0",
+            "blobs/sha256/ac25030633869ae22e8de28ffc55fb1571ce126a25fccf1d4bec748bedfae2f8",
+            "blobs/sha256/749622d5b8ac6ba623684bf8cee366ef09e234cdd8afe025d5d1270eacebcac7",
+            "blobs/sha256/350b4ff192c4bd83a50c694ade599b3affd3003429dc574be364a99f94fdf599",
+            "blobs/sha256/7473d8cd85a24054544a2d959dfb156c2dbdd6f7bb7f78cb9109bc19ffe1085b",
+            "blobs/sha256/4e242c46f503a7f308305a0c12c62c2c2ea07063d306bace4ff7208cd3f2fc2c",
+            "blobs/sha256/909a6ad693ae715b06186ce10675b6073b18730b0cf1a3275e2f25ce978e5685",
+            "blobs/sha256/0ea3eac5333261ee539c627c1662e9020c6c41842ea8615b1a32d817a22d9959",
+            "blobs/sha256/8dc42b8222608a768c8deef431bbfe7605af8e4c0d51e0b4a52b33b9995e8da9",
+            "blobs/sha256/809aecba825afd56f77505660b93b0585c2339b014bd6aa36d14d7fedb0184df",
+            "blobs/sha256/adbe67feff107a24012b0109667e66bbefb0fe919fa09c11809e26bc11af7afd",
+            "blobs/sha256/1223ca0413c312b85bb7022194b65a1c55f7cf84a441210ec1f57135c2b1f823"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/var-tmp/runtime.image.tar",
+      "bytes": 687938048,
+      "inode": 12728149,
+      "device": 75,
+      "links": 1,
+      "manifest": [
+        {
+          "Config": "blobs/sha256/cdd06a49fd0ed181ccd9b35a9ce58148322e555d578a112e285c5b85e74e6851",
+          "RepoTags": [
+            "bpf-benchmark/kprog:current"
+          ],
+          "Layers": [
+            "blobs/sha256/7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+            "blobs/sha256/da94521aa2edb5320294ffd5a275ba249fd25cc7c36d315c09001be870516a6c",
+            "blobs/sha256/d7e5c4bcb413324a0587b08590497b13caf6babed909ec1de07db39172a4256f",
+            "blobs/sha256/4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+            "blobs/sha256/48a1dbf3ca7189d9bbde8552e8f8379e8e93acd55fd79a91f26e87dac42438cc",
+            "blobs/sha256/082fd1debfcf8c4d600cc438b9f1fffa4cd77cdcc452a66b75776deb4118a325",
+            "blobs/sha256/65a1690e2c42799c926b3c465a89a500601f43901589afa31663eb54f1cf11a4",
+            "blobs/sha256/6e3e5bcef4c08c63af76e3699a97a403649cea23bd8876a2f7cf1b64c8f897ae",
+            "blobs/sha256/544279ce7ce12036657d246d25f28b78f3f24ca532f7a7efecc2433c300ef841",
+            "blobs/sha256/d50cbbffd535ce88b1f149cd2567712c90ffff0fd07fcec575544ee51151a7e2",
+            "blobs/sha256/cc0ff1d772a2758fd586e19d0832c076df74b860ac84df64526ec3c9bfde8d3c",
+            "blobs/sha256/6fb42c663001468e0e4d12964f24208b5946af5875e24ce76cb8b2e14b0ce550",
+            "blobs/sha256/e01e76c4d9a9b23a8833991e9e60b2bfd092f0bb4a948361b9fc1918696d133e",
+            "blobs/sha256/9b3e32bf007d91cf8917cf3e1c241454e1de6ef07dfd6946bc22738fbb5a8ddc",
+            "blobs/sha256/26fc66cf4b1ce5e62a7f987caed2079d2b1c4204eeba3cf4fa731dfadc820da7",
+            "blobs/sha256/eb31ccb060db90eb641a339d5049f2c9b2e2ca31b499d008236e0c7225a16b61",
+            "blobs/sha256/c29ea8bf8eb004eaee1f10f84d199fe8271cd3b1a41e42069c68a6bd9beec453",
+            "blobs/sha256/a4b4164a6e47ab24a8347e3bb62e3624eb439d96a2e00d7f8943042c92eb6148",
+            "blobs/sha256/c062ce0ae3a6c5164b885fba014fec4d0838bb5c1ce9abae0ea8ec28432c54aa",
+            "blobs/sha256/b6971dd594b304ab7b71b13f234fccd5dc0208106eaf38f396a7efb58b71eaf4",
+            "blobs/sha256/d2d736672ebd3cb78573c97b8e20d327e6dca8bc061ae7e37ad09e7a3f6aa48d",
+            "blobs/sha256/94081ab9d664b26480766d79876178f43c7637f377693119b78de6742913cfad",
+            "blobs/sha256/8feb2a02b516a02fe833c71eaf7d736bebe50c1b057ab1e71978f14f3e0e46d4",
+            "blobs/sha256/cc4f57e5345ee782a1b4a30bf49e60fd60799351ed2b9f16d214a4dc13ff76be",
+            "blobs/sha256/286510d1faa79f1ff1bf2790749fe63432a398c12381d316c0df4d0fb95f3994",
+            "blobs/sha256/076d68031bf9a548e6cd78f5d88387601ad185e32fb2df778669ff66ec53fe8f",
+            "blobs/sha256/1d068874e44650463a4dcf36a21a6efec66306cc24baacdf77d98d5eebf34afb",
+            "blobs/sha256/2e91e2876204d9762e0ce717d441209437d679e4f36977204c3fd8ad1c466b76",
+            "blobs/sha256/088440934760f6caf3b0bcc25f528933ad336bebcffae9d6ca7e3211c5253784",
+            "blobs/sha256/42c4bc1125053883e33a2a4992ca6459ccfad88727cea11c6bd482336d780b25",
+            "blobs/sha256/03b45075e0997f4021126b0b3eb94cf0face343e6f05f9213b6215b5eb1d4bae",
+            "blobs/sha256/00b925c84b920d877dc8f4396db9ce35d06833d106fb950c6df04326cab6a427",
+            "blobs/sha256/0685d696394c445069fa603c8bcf7696bb53274b5b4310c7e8e6fc5e3f7412fa",
+            "blobs/sha256/adbe67feff107a24012b0109667e66bbefb0fe919fa09c11809e26bc11af7afd",
+            "blobs/sha256/d1e9535aa7ee74f4b7721b81e093a7e55ec073cf0dc75f891489490e15d4fa68"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/timing/var-tmp/runtime.image.tar",
+      "bytes": 687938048,
+      "inode": 12866295,
+      "device": 75,
+      "links": 1,
+      "manifest": [
+        {
+          "Config": "blobs/sha256/cdd06a49fd0ed181ccd9b35a9ce58148322e555d578a112e285c5b85e74e6851",
+          "RepoTags": [
+            "bpf-benchmark/kprog:current"
+          ],
+          "Layers": [
+            "blobs/sha256/7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+            "blobs/sha256/da94521aa2edb5320294ffd5a275ba249fd25cc7c36d315c09001be870516a6c",
+            "blobs/sha256/d7e5c4bcb413324a0587b08590497b13caf6babed909ec1de07db39172a4256f",
+            "blobs/sha256/4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+            "blobs/sha256/48a1dbf3ca7189d9bbde8552e8f8379e8e93acd55fd79a91f26e87dac42438cc",
+            "blobs/sha256/082fd1debfcf8c4d600cc438b9f1fffa4cd77cdcc452a66b75776deb4118a325",
+            "blobs/sha256/65a1690e2c42799c926b3c465a89a500601f43901589afa31663eb54f1cf11a4",
+            "blobs/sha256/6e3e5bcef4c08c63af76e3699a97a403649cea23bd8876a2f7cf1b64c8f897ae",
+            "blobs/sha256/544279ce7ce12036657d246d25f28b78f3f24ca532f7a7efecc2433c300ef841",
+            "blobs/sha256/d50cbbffd535ce88b1f149cd2567712c90ffff0fd07fcec575544ee51151a7e2",
+            "blobs/sha256/cc0ff1d772a2758fd586e19d0832c076df74b860ac84df64526ec3c9bfde8d3c",
+            "blobs/sha256/6fb42c663001468e0e4d12964f24208b5946af5875e24ce76cb8b2e14b0ce550",
+            "blobs/sha256/e01e76c4d9a9b23a8833991e9e60b2bfd092f0bb4a948361b9fc1918696d133e",
+            "blobs/sha256/9b3e32bf007d91cf8917cf3e1c241454e1de6ef07dfd6946bc22738fbb5a8ddc",
+            "blobs/sha256/26fc66cf4b1ce5e62a7f987caed2079d2b1c4204eeba3cf4fa731dfadc820da7",
+            "blobs/sha256/eb31ccb060db90eb641a339d5049f2c9b2e2ca31b499d008236e0c7225a16b61",
+            "blobs/sha256/c29ea8bf8eb004eaee1f10f84d199fe8271cd3b1a41e42069c68a6bd9beec453",
+            "blobs/sha256/a4b4164a6e47ab24a8347e3bb62e3624eb439d96a2e00d7f8943042c92eb6148",
+            "blobs/sha256/c062ce0ae3a6c5164b885fba014fec4d0838bb5c1ce9abae0ea8ec28432c54aa",
+            "blobs/sha256/b6971dd594b304ab7b71b13f234fccd5dc0208106eaf38f396a7efb58b71eaf4",
+            "blobs/sha256/d2d736672ebd3cb78573c97b8e20d327e6dca8bc061ae7e37ad09e7a3f6aa48d",
+            "blobs/sha256/94081ab9d664b26480766d79876178f43c7637f377693119b78de6742913cfad",
+            "blobs/sha256/8feb2a02b516a02fe833c71eaf7d736bebe50c1b057ab1e71978f14f3e0e46d4",
+            "blobs/sha256/cc4f57e5345ee782a1b4a30bf49e60fd60799351ed2b9f16d214a4dc13ff76be",
+            "blobs/sha256/286510d1faa79f1ff1bf2790749fe63432a398c12381d316c0df4d0fb95f3994",
+            "blobs/sha256/076d68031bf9a548e6cd78f5d88387601ad185e32fb2df778669ff66ec53fe8f",
+            "blobs/sha256/1d068874e44650463a4dcf36a21a6efec66306cc24baacdf77d98d5eebf34afb",
+            "blobs/sha256/2e91e2876204d9762e0ce717d441209437d679e4f36977204c3fd8ad1c466b76",
+            "blobs/sha256/088440934760f6caf3b0bcc25f528933ad336bebcffae9d6ca7e3211c5253784",
+            "blobs/sha256/42c4bc1125053883e33a2a4992ca6459ccfad88727cea11c6bd482336d780b25",
+            "blobs/sha256/03b45075e0997f4021126b0b3eb94cf0face343e6f05f9213b6215b5eb1d4bae",
+            "blobs/sha256/00b925c84b920d877dc8f4396db9ce35d06833d106fb950c6df04326cab6a427",
+            "blobs/sha256/0685d696394c445069fa603c8bcf7696bb53274b5b4310c7e8e6fc5e3f7412fa",
+            "blobs/sha256/adbe67feff107a24012b0109667e66bbefb0fe919fa09c11809e26bc11af7afd",
+            "blobs/sha256/d1e9535aa7ee74f4b7721b81e093a7e55ec073cf0dc75f891489490e15d4fa68"
+          ]
+        }
+      ]
+    }
+  ],
+  "active_cache": "/var/tmp/kprog-tmp/perf/cilium-context-runtime-retry1/var-tmp/runtime.image.tar",
+  "canonical": "/workspaces/repository/.cache/container-images/x86_64-runner-runtime.image.tar"
+}

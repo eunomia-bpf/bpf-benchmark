@@ -1,0 +1,147 @@
+{
+  "launched_at": "2026-11-13T10:00:59Z",
+  "outer_pid": 1380227,
+  "candidate_commit": "28f37871d",
+  "capture_source_commit": "28f37871d",
+  "raw": "/workspaces/kprog-raw/perf/20261113-cilium-context-runtime-retry1",
+  "capture": "/workspaces/repository/corpus/results/perf-cilium-context-capture-retry1-20261113",
+  "cpus": "16-19",
+  "vm_cpus": 4,
+  "vm_memory_gib": 8,
+  "host_address_space_limit_bytes": 17179869184,
+  "shared_image_lock": "/workspaces/.agent-state/kprog-lanes/locks/image",
+  "image": "bpf-benchmark/kprog:current",
+  "kernel": "74d1097af561",
+  "argv": [
+    "make",
+    "-f",
+    "kprog/perf/one-image/Makefile",
+    "corpus",
+    "APPS=cilium/agent",
+    "CPUS=16-19",
+    "VM_CPUS=4",
+    "VM_MEM=8G",
+    "STATE=/var/tmp/kprog-tmp/perf/cilium-context-runtime-retry1",
+    "LOGS=/workspaces/kprog-raw/perf/20261113-cilium-context-runtime-retry1",
+    "SAMPLES=1",
+    "WORKLOAD_DURATION=45",
+    "BPFREJIT_CORPUS_BPF_STATS=1",
+    "NATIVE_MANIFEST=/workspaces/repository/corpus/results/perf-cilium-no-jump-20261113/manifest-context.json"
+  ],
+  "environment": {
+    "PATH_prefix": "/workspaces/repository/kprog/perf/may29-image/eqcodex-bin",
+    "EQCODEX_OUT": "/workspaces/repository/corpus/results/perf-cilium-context-capture-retry1-20261113",
+    "EQCODEX_CILIUM_CONFIG": "1",
+    "EQCODEX_NATIVE_LINK_BINARY": "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+    "VERIFIED_BUILD_CPUS": "16-19",
+    "VERIFIED_WAIT_PID": "",
+    "VERIFIED_IMAGE_LOCK": "",
+    "VERIFIED_WAIT_JOB": ""
+  },
+  "linker_selection": "runtime-map-lookups on; local memory routines off; same P0 binary",
+  "payload": [
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-no-jump-20261113/manifest-context.json",
+      "bytes": 13456,
+      "sha256": "31cf859d1a4fba07b2fe49741553e0a38cd2fd3d1f48b4c3062a8bc31b40fd71"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-no-jump-20261113/manifest.json",
+      "bytes": 11606,
+      "sha256": "9f4e7191c5a53af0d25abd9231b2fc1d1d45b17ad17425458616e45aee28de08"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-no-jump-20261113/bpf_host.native.o",
+      "bytes": 553800,
+      "sha256": "59ff3e87d00d6514e9d2a101d765cdc6bc88e60b6b2bc3b474943095af8e8a7c"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-no-jump-20261113/bpf_lxc.native.o",
+      "bytes": 585584,
+      "sha256": "ccec6315c26e07c783d57b96515edc243658a9ef49b07e64c33622108f6895d9"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-no-jump-20261113/bpf_xdp.native.o",
+      "bytes": 226408,
+      "sha256": "c152f471ec594990a3f060193eefbad3897f04d58a9e73f6d5d991680edb9b31"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+      "bytes": 445,
+      "sha256": "f7644e69df0606ac64e1af9631ffec0227c5c46282aaf2c5622758626de9f58a"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+      "bytes": 4407560,
+      "sha256": "65eebf5e64ed5e4c0adfda52dd4587c9c626c232aeffb2ac3ab76e90a01d5b72"
+    }
+  ],
+  "dry_run_log": "/workspaces/kprog-raw/perf/20261113-cilium-context-runtime-retry1/dry-run.log",
+  "make_log": "/workspaces/kprog-raw/perf/20261113-cilium-context-runtime-retry1/job/make.log",
+  "exit_file": "/workspaces/kprog-raw/perf/20261113-cilium-context-runtime-retry1/job/exit-code",
+  "collect": "NEXT turn; no post-launch polling",
+  "scope": "Retry unchanged corrected Cilium+D23 candidate after restoring sole-kernel module packaging; diagnostic only, no official throughput floor.",
+  "limits": [
+    "D23 requested through all 50 manifest rows; actual runtime deployment/behavior to be collected, not inferred from kernel unit tests.",
+    "Unmatched runtime-generated cil_host_policy/cil_lxc_policy retained as original BPF and listed for generic owner handling.",
+    "44 offline proof/kernel roundtrips use synthetic ABI/addresses, no actual kernel execution.",
+    "Exact source BPF reconstruction is not a native-runtime semantic certificate.",
+    "Installed payload files, selected linker and observer scripts frozen until actual exit.",
+    "Observer labels can cross app generations; compare map/config identity and clocks, not labels alone."
+  ],
+  "image_tar_manifest": [
+    {
+      "Config": "blobs/sha256/83f01ed24eb007bf722268e6881fb8c3b29339d252949181d07e9d97f89d0567",
+      "RepoTags": [
+        "bpf-benchmark/kprog:current"
+      ],
+      "Layers": [
+        "blobs/sha256/7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+        "blobs/sha256/da94521aa2edb5320294ffd5a275ba249fd25cc7c36d315c09001be870516a6c",
+        "blobs/sha256/d7e5c4bcb413324a0587b08590497b13caf6babed909ec1de07db39172a4256f",
+        "blobs/sha256/4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+        "blobs/sha256/48a1dbf3ca7189d9bbde8552e8f8379e8e93acd55fd79a91f26e87dac42438cc",
+        "blobs/sha256/082fd1debfcf8c4d600cc438b9f1fffa4cd77cdcc452a66b75776deb4118a325",
+        "blobs/sha256/65a1690e2c42799c926b3c465a89a500601f43901589afa31663eb54f1cf11a4",
+        "blobs/sha256/6e3e5bcef4c08c63af76e3699a97a403649cea23bd8876a2f7cf1b64c8f897ae",
+        "blobs/sha256/544279ce7ce12036657d246d25f28b78f3f24ca532f7a7efecc2433c300ef841",
+        "blobs/sha256/d50cbbffd535ce88b1f149cd2567712c90ffff0fd07fcec575544ee51151a7e2",
+        "blobs/sha256/45ad7c1fe29d787f3bddaa8e7110e06db83bb384703d0907daf4cd3c8257b755",
+        "blobs/sha256/6fb42c663001468e0e4d12964f24208b5946af5875e24ce76cb8b2e14b0ce550",
+        "blobs/sha256/4682f4d33e60b070c98d1aaad5256b7c73d91fd74aa31db504259800a2bf011f",
+        "blobs/sha256/9b3e32bf007d91cf8917cf3e1c241454e1de6ef07dfd6946bc22738fbb5a8ddc",
+        "blobs/sha256/26fc66cf4b1ce5e62a7f987caed2079d2b1c4204eeba3cf4fa731dfadc820da7",
+        "blobs/sha256/f7c164095f359acd0d868f2537b935b54f7fff35e9cca0965bda1e226ca250bc",
+        "blobs/sha256/c29ea8bf8eb004eaee1f10f84d199fe8271cd3b1a41e42069c68a6bd9beec453",
+        "blobs/sha256/0e3e63a01a250445c13b89b59284df07e113954e2f0ca0fafd4403fa48d4ebeb",
+        "blobs/sha256/ce029cc0106bba21b3f3b1cba9ec96532ee14cd02d98deab85bc7728210daf35",
+        "blobs/sha256/f0cf06e41f8820e4a1b2da65ef68bd5de451bd13c5d9f958a1ade896d1b81476",
+        "blobs/sha256/542cf1920378ce6172fd16ec40e264127b96ebec80e8c09aa7f1f2f392c3a517",
+        "blobs/sha256/94081ab9d664b26480766d79876178f43c7637f377693119b78de6742913cfad",
+        "blobs/sha256/ca877e7a2fbd9c198be287532f55c1fc5f6b8b9e1e8cd595888801afeb0f14b0",
+        "blobs/sha256/5e502bc7504d79dcd9bb215ed5693683451397d5d3c33eff28c5ec5dee5bc0d2",
+        "blobs/sha256/747c366a4b85c2e4fd7d47ab2c4aa195b17d653443d6f2bc92772b5749765f09",
+        "blobs/sha256/aa2d8cd40ea081a5ea8dfd4d51e036bda0c65054f8628802b94e0ee0847badda",
+        "blobs/sha256/8ab342d62aa6fdc16ce7338714fbe0702ebdc6a62f77091f6dbf870ca2265ea0",
+        "blobs/sha256/6ee82b717d181968bd1dea50b102ca041a7fbeb3df2e2325e115a71ad358c47a",
+        "blobs/sha256/f9fa469cb105439b9e0f8ffd1a9f46993bb6e4ed31859078979bba18b6f6954b",
+        "blobs/sha256/ada9594e56d2af8880b71ba8e3fd812be0ec9284436348cb612eed46b6692397",
+        "blobs/sha256/ff1371b5fa53f53d2f328205f362f20066865d99bc07d15bb17e43df3011d64b",
+        "blobs/sha256/013c29cbf675a160ae6daf096fa407af31eb937be46ab0e386ce6888544f236b",
+        "blobs/sha256/6a950aa1da3c5e9981e6fa4fb48dd362177913530f88377cdeea0dd7e0359818",
+        "blobs/sha256/adbe67feff107a24012b0109667e66bbefb0fe919fa09c11809e26bc11af7afd",
+        "blobs/sha256/1342083dd2aaca0b147bc67d330a64e8ff27eb53d9ece399282de8020585dfdb"
+      ]
+    }
+  ],
+  "shared_refresh": {
+    "raw": "/workspaces/kprog-raw/verified/20261113-modules-repair-retry2",
+    "make_exit": 0,
+    "owner_image_reference": "sha256:7f915aea1f2276fb9509027cb7e4fc2dd6e4182740312e002ebcc14dbc81c923",
+    "base_sha256": "36a70dd972053f46d7dadb5450c5f7538afa0835343c912cadf7509217fde0cc  /workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.so\n14bc8074d101e8382cafcb5d99bf232885634cb1a6ab293c16a26a484bca7f77  /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader\n5a9f0b3b0a6a1f633a9f4227dd7bbfa0580bdfdc557a788712079e9c14a27fa7  /workspaces/repository/kinsn/module/x86/build/bpf_x86_native_lab.ko\nc1338358c52b8962dbb2383a66b47755eb7f75920288c43fea13e86743b65db3  /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko\n",
+    "kernel_before": "2667103e0fbb3fc54467f59bb15ef0cdc128e54ca7c30d7718e66d0199c4e1ec  /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage\nf3743c05960fc700e29f31e0035a23cdd4b2500d5e6e7542984d5f6fba75babe  /workspaces/.agent-state/kprog-ck/build-x86/vmlinux\n0b75fe318542db6698950f2b2ce5163e867118317fe61c538c4e7de7a1357163  /workspaces/.agent-state/kprog-ck/build-x86/.config\n",
+    "kernel_after": "2667103e0fbb3fc54467f59bb15ef0cdc128e54ca7c30d7718e66d0199c4e1ec  /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage\nf3743c05960fc700e29f31e0035a23cdd4b2500d5e6e7542984d5f6fba75babe  /workspaces/.agent-state/kprog-ck/build-x86/vmlinux\n0b75fe318542db6698950f2b2ce5163e867118317fe61c538c4e7de7a1357163  /workspaces/.agent-state/kprog-ck/build-x86/.config\n",
+    "stock_modules_installed": 842
+  },
+  "launch_source_commit": "19de922e0"
+}
