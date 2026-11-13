@@ -1,0 +1,44 @@
+{
+  "recorded_at": "2026-11-13T01:33:09Z",
+  "scope": "Read-only staged native OTel metric-increment inspection",
+  "claim_source": "COORDINATION C01:25: replacing the metric-owning program makes the map blind by construction",
+  "source": [
+    {
+      "path": "vendor/bpf/otel/support/ebpf/tracemgmt.h:45",
+      "fact": "increment_metric looks up metrics[key] and increments the returned u64"
+    },
+    {
+      "path": "vendor/bpf/otel/support/ebpf/native_stack_trace.ebpf.c:608",
+      "fact": "unwind_native gets per_cpu_records[0], returns on NULL, then increments Attempts inside frame loop"
+    },
+    {
+      "path": "vendor/bpf/otel/support/ebpf/bpfdefs.h:184",
+      "fact": "MICRO_NATIVE map lookup calls the native helper ID wrapper; no metric no-op here"
+    }
+  ],
+  "compiled_input": {
+    "path": "vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/native_stack_trace.native.o",
+    "function": "perf_unwind_native",
+    "attempts_metric": {
+      "key": 5,
+      "key_store_pc": "0xc5",
+      "map_relocation_pc": "0xd4",
+      "helper_call_pc": "0xdb",
+      "increment_pc": "0xe6"
+    },
+    "frames_metric": {
+      "key": 6,
+      "key_store_pc": "0x128f",
+      "map_relocation_pc": "0x129f",
+      "helper_call_pc": "0x12a8"
+    }
+  },
+  "finding": "The inspected native object retains metric lookup/increment code. Replacement by itself does not inherently remove these counters. Native-phase zeros should be investigated as an execution, state/map-binding or lowering issue, not assumed to be unavoidable telemetry loss.",
+  "limits": [
+    "Actual failing-run image/manifest object identity not independently established by this inspection",
+    "No claim that this block executed or that a specific root cause is proven",
+    "No new counter, runtime validation gate, native code or benchmark setting added"
+  ],
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-native-metric-audit",
+  "archive": "otel-native-metric-presence.tar.gz"
+}

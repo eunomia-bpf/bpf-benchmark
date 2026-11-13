@@ -8,6 +8,8 @@
 
 ## 1. 性能（目标：六应用几何平均 native/JIT 1.20x–1.40x，来自原生代码）
 
+- **VERIFIED OTel native metrics代码存在（2026-11-13）** C01:25将native-phase Attempts/Frames为0解释为replacement使map必然不可观测，但当前staged `native_stack_trace.native.o`的`perf_unwind_native`仍含metric5 key store0xc5、metrics relocation0xd4、lookup call0xdb与incq0xe6，metric6代码亦存在。共享`tracemgmt.h:45`没有将increment_metric置空；`unwind_native`先lookup per_cpu_records[0]，NULL时在计数前返回。ELF、完整function disassembly与receipt为 `kprog/results/verified_20261112/otel-native-metric-presence*`，raw `/workspaces/kprog-raw/verified/20261113-native-metric-audit/`。该证据否定“替换本身必然移除counter”的推断；实际失败run的object/manifest对应及execution/map-binding/lowering根因仍待C查明，未声明block实际执行或具体根因，未新增counter/gate/修改runtime。
+
 - **VERIFIED phase审计后续（2026-11-13）** C00:52纠正先前结论：两组目录运行相同配置，usable samples均来自baseline eBPF，native只在post_rejit安装；撤回先前frames/attempt的native equal-work解释与1.366x profile-rate native解释。c935286fe的phase finding得到C确认；`otel-equal-work-phase-audit.json`追加该确认，原始audit/archive保留。C报告已启动单run两phase的metrics capture，并将重查Tetragon；实际native-vs-eBPF equal-work仍待该数据，本lane未独立重复新dump时间关联或计算新ratio。
 
 - **VERIFIED OTel equal-work phase审计（2026-11-12）** C19:18称五个usable metrics samples均为baseline，但native替换证据来自`x86_kvm_corpus_20261112_230405_667339`的post_rejit。现有one-image设置`NATIVE_LOADER=post`、driver在post restart才启用native；该run的baseline entry id17/xlated5904/jited3815，post entry id48/xlated24/jited7510，两个阶段的实现不同。按C自己的phase标注，这些baseline样本不能支持native-vs-eBPF equal-work结论；需由C在实际post_rejit native实例收集原请求的计数。完整app raw result与source/record证据为 `kprog/results/verified_20261112/otel-equal-work-phase-audit*`，raw `/workspaces/kprog-raw/verified/20261112-otel-phase-audit/`；未独立重复dump timestamp/lifecycle join，未丢弃任何run或吞吐数据，也不新增gate/修改framework。
