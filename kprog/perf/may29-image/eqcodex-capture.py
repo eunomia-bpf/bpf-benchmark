@@ -63,6 +63,26 @@ def profile_loader(perf, prefix, dest):
         raise RuntimeError(f'loader perf script failed ({script.returncode}); see {dest}/loader-perf-script.txt.stderr')
 
 
+def capture_cilium_configuration(prefix, dest):
+    agent = save(prefix + ['pgrep', '-x', 'cilium-agent'], dest / 'cilium-pid.txt')
+    agent.check_returncode()
+    pid = str(int(agent.stdout.decode().strip()))
+    command = save(prefix + ['cat', f'/proc/{pid}/cmdline'], dest / 'cilium-command.bin')
+    command.check_returncode()
+    argv = command.stdout.decode().rstrip('\0').split('\0')
+    state = None
+    for index, argument in enumerate(argv):
+        if argument.startswith('--state-dir='):
+            state = argument.split('=', 1)[1]
+        elif argument == '--state-dir':
+            state = argv[index + 1]
+    if not state:
+        raise RuntimeError('running Cilium command has no state directory')
+    source = Path(__file__).with_name('cilium-config.py').read_text()
+    archive = save(prefix + ['python3', '-c', source, state], dest / 'cilium-config.tar.gz')
+    archive.check_returncode()
+
+
 def observe(out):
     out = Path(out)
     log = out / 'guest.log'
@@ -87,6 +107,8 @@ def observe(out):
             continue
         cid = ids[0]
         prefix = ['docker', 'exec', cid]
+        if '--cilium-config' in sys.argv and phase not in seen:
+            capture_cilium_configuration(prefix, dest)
         programs = save(prefix + ['bpftool', '-j', 'prog', 'show'], dest / 'programs.json')
         maps = save(prefix + ['bpftool', '-j', 'map', 'show'], dest / 'maps.json')
         if programs.returncode or maps.returncode:
@@ -201,6 +223,8 @@ def main():
             observer += ['--tetra-policy', client]
         if perf := os.environ.get('EQCODEX_LOADER_PERF'):
             observer += ['--loader-perf', perf]
+        if os.environ.get('EQCODEX_CILIUM_CONFIG') == '1':
+            observer.append('--cilium-config')
         (out / 'guest-plan.json').write_text(json.dumps({'command': original, 'observer': observer}, indent=2) + '\n')
         arguments[index] = shlex.join(['python3', str(Path(__file__).resolve()), '--guest', str(out)])
         (out / 'vng-command.json').write_text(json.dumps(arguments, indent=2) + '\n')

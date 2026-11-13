@@ -43,3 +43,11 @@ even when an earlier entry fails; the final exit reports any failure. This is
 ELF integration evidence, with no verifier submission or native execution.
 Original-program helper deployment, actual application decisions, remaining
 context/CO-RE mechanisms and throughput comparison still require completion.
+
+For a fresh read-only capture, the existing opt-in `eqcodex-bin` observer accepts
+`EQCODEX_CILIUM_CONFIG=1` alongside `EQCODEX_OUT`. Once per arm it reads the
+running agent's command line, then archives generated headers and compiled
+objects from its actual state directory. Endpoint-relative paths remain intact,
+so distinct endpoint configs cannot overwrite one another. Each archive includes
+the original paths and hashes. The normal Make target still owns the workload;
+the observer neither changes configuration nor selects native candidates.
