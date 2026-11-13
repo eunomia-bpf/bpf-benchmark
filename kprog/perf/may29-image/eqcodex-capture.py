@@ -123,9 +123,23 @@ cat /sys/kernel/tracing/kprobe_profile
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == '--guest':
+        out = Path(sys.argv[2])
+        plan = json.loads((out / 'guest-plan.json').read_text())
+        with (out / 'observer.log').open('wb') as observer_log, (out / 'guest.log').open('wb') as guest_log:
+            observer = subprocess.Popen(plan['observer'], stdout=observer_log, stderr=subprocess.STDOUT)
+            try:
+                result = subprocess.run(['/bin/bash', '-c', plan['command']], stdout=guest_log, stderr=subprocess.STDOUT)
+            finally:
+                if observer.poll() is None:
+                    observer.terminate()
+                observer_status = observer.wait()
+                (out / 'observer-exit-code').write_text(str(observer_status) + '\n')
+        sys.stdout.buffer.write((out / 'guest.log').read_bytes())
+        return result.returncode
     if len(sys.argv) > 1 and sys.argv[1] == '--observe':
         observe(sys.argv[2])
-        return
+        return 0
     arguments = sys.argv[1:]
     output = os.environ.get('EQCODEX_OUT')
     if output:
@@ -136,20 +150,16 @@ def main():
         selected_linker = os.environ.get('EQCODEX_NATIVE_LINK_BINARY')
         if selected_linker:
             original = shlex.join(['env', f'BPFREJIT_NATIVE_LINK_BINARY={selected_linker}']) + ' ' + original
-        observer = shlex.join(['python3', str(Path(__file__).resolve()), '--observe', str(out)])
+        observer = ['python3', str(Path(__file__).resolve()), '--observe', str(out)]
         if os.environ.get('EQCODEX_TRACE') == '1':
-            observer += ' --trace'
+            observer.append('--trace')
         if client := os.environ.get('EQCODEX_TETRA'):
-            observer += ' --tetra ' + shlex.quote(client)
-        log = shlex.quote(str(out / 'guest.log'))
-        obslog = shlex.quote(str(out / 'observer.log'))
-        arguments[index] = (f'{observer} >{obslog} 2>&1 & observer_pid=$!; '
-                            f'{original} >{log} 2>&1; result=$?; '
-                            'kill "$observer_pid"; wait "$observer_pid"; '
-                            f'cat {log}; exit "$result"')
+            observer += ['--tetra', client]
+        (out / 'guest-plan.json').write_text(json.dumps({'command': original, 'observer': observer}, indent=2) + '\n')
+        arguments[index] = shlex.join(['python3', str(Path(__file__).resolve()), '--guest', str(out)])
         (out / 'vng-command.json').write_text(json.dumps(arguments, indent=2) + '\n')
     os.execv('/opt/virtme-ng/bin/vng', ['vng', *arguments])
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
