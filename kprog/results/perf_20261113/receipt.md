@@ -324,3 +324,21 @@ corrected and the first failed log is retained. Actual data have no unmatched
 child invocations. All raw clocks, commands, shim logs, child reports and observer
 files are archived. The guest and its image read-lock have exited; no process
 was stopped by perf in this turn.
+
+## Loader CPU sampler preflight
+
+`loader-cpu-preflight.json` and its archive retain the next P1e diagnostic's
+preparation. An explicitly selected observer can sample the Tetragon process
+for10 seconds with cpu-clock99Hz and DWARF stacks. It saves the actual loader
+library, process mappings, guest kallsyms, both clock domains and raw perf data.
+Sampler failures surface in the observer's status and logs; the original
+workload's exit code stays authoritative. Four observer regressions pass.
+
+Preflight found that C's existing perf executable has ELF, libdw and DWARF
+unwinding disabled. No CPU-profile guest was launched with that executable.
+A Make-backed tool build from the sole kernel source is launched on CPUs16–19,
+four compiler jobs and16GiB host address-space limit. The recipe installs the
+host libdw development package and builds under `/var/tmp/kprog-tmp/perf`.
+This builds a userspace tool only; kernel, base, image, native objects, frozen
+launcher and C's existing tool stay unchanged. Actual build outcome and enabled
+capabilities will be collected next turn before a sampling run. P1e is open.

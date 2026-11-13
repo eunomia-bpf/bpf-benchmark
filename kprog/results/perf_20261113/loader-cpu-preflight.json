@@ -1,0 +1,39 @@
+{
+  "recorded_at": "2026-11-13T04:59:23Z",
+  "scope": "P1e optional loader CPU sampler preflight, no guest run yet",
+  "observer_commits": [
+    "e6c1fa1cd",
+    "f9457ce50"
+  ],
+  "tool_build_recipe": "460371bee",
+  "observer_tests_passed": 4,
+  "initial_tool": "/var/tmp/kprog-tmp/C/perf-build/perf",
+  "initial_tool_version": "7.0.rc2.g74d1097af561",
+  "initial_tool_missing_features": [
+    "libelf",
+    "libdw",
+    "dwarf-unwind"
+  ],
+  "finding": "Existing sampler lacks required ELF/DWARF support; capability output retained. No CPU-profile guest launched with that tool.",
+  "build": {
+    "outer_pid": 1188441,
+    "status": "launched; collect next turn",
+    "cpus": "16-19",
+    "compiler_jobs": 4,
+    "host_address_space_limit_gib": 16,
+    "source": "/workspaces/repository/vendor/linux-framework/tools/perf",
+    "output": "/var/tmp/kprog-tmp/perf/perf-build",
+    "command": "make -f kprog/perf/native-context/Makefile loader-perf-deps loader-perf-build loader-perf-tool",
+    "host_dependency": "libdw-dev",
+    "log": "/workspaces/kprog-raw/perf/20261113-loader-cpu-profile/build/make.log"
+  },
+  "selection": "EQCODEX_LOADER_PERF=/var/tmp/perf enables only this own-guest observer; default observer path unchanged.",
+  "planned_observation": "10s cpu-clock99Hz DWARF stacks for the actual Tetragon PID, after native phase starts; same guest clocks, native loader library and guest kallsyms retained.",
+  "failure_handling": "Sampler PID/record/report/script failures propagate to the observer with raw command logs; workload exit code remains authoritative and unchanged.",
+  "limits": [
+    "No loader cost or performance number measured by this preparation.",
+    "No kernel build, base/image replacement, source copy or change to C sampler build.",
+    "P1e remains open; direct existing loader stage timings remain requested from verified."
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261113-loader-cpu-profile"
+}
