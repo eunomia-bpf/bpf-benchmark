@@ -115,7 +115,7 @@ struct Args {
     #[arg(long)]
     preserve_entry_abi: bool,
 
-    /// Emit x86 kernel tail-count relocations using a patchable imm32 entry offset.
+    /// Emit x86 kernel relocations for the tail counter-frame displacement.
     #[arg(long)]
     tail_count_relocs: bool,
 
