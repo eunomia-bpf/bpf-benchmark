@@ -1,10 +1,24 @@
 """Different relocation/data bytes must not inherit another body's outcome."""
 import unittest
+from pathlib import Path
+import tempfile
 
-from resident_verified_census import group_bodies, replay_programs
+from resident_verified_census import group_bodies, replay_programs, retain_request_artifacts
 
 
 class BodyGrouping(unittest.TestCase):
+    def test_journal_archive_survives_service_session_cleanup(self):
+        with tempfile.TemporaryDirectory() as work:
+            retained = Path(work) / "retained"
+            with tempfile.TemporaryDirectory(dir=work) as session:
+                original = Path(session) / "1.failure.tar.gz"
+                original.write_bytes(b"complete request evidence")
+                row = dict(submission=dict(service=dict(failure_archive=str(original))))
+                retain_request_artifacts(row, retained)
+            target = Path(row["submission"]["service"]["failure_archive"])
+            self.assertEqual(target, retained / original.name)
+            self.assertEqual(target.read_bytes(), b"complete request evidence")
+
     def test_class_replay_keeps_every_body_once_after_later_success(self):
         failure = dict(stage="verifier_rejected", diagnostic="invalid mem access 'scalar'")
         groups = [dict(body_group=n, representative=dict(source_prog_id=n, resource={"maps": n}),

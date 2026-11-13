@@ -92,6 +92,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED request档案持久保留（2026-11-13）** census guest在写journal前将service request success/failure archive复制到RUN_OUTPUT/retained-requests/session目录，并把journal目标指向该持久位置。回归覆盖service临时session清理后archive仍可读取，group-check三项通过；既有已结束helper replay的完整request仍在control/service.tar.gz内保留，实际结果继续单列。
+
 - **VERIFIED helper失败类重放已准备（2026-11-13）** 通用class选择器取到全部已知scalar-memory类1body/33membership；准备结果/完整inventory归档 `kprog/results/verified_20261113/helper-class-replay-preparation*`，raw `/workspaces/kprog-raw/verified/20261113-helper-class-replay/`。模型b177、kernel74；第二guest4vCPU/8G、hostAS16GiB、CPU12–15，原census改CPU8–11并加40GiB AS上限，kernel/image/base代码未改。test和实际run均先Make dry-run，下一步后台启动后收集真实verifier差分；当前不算新增提交或接受。
 - **VERIFIED 失败类重放控制（2026-11-13）** 已有body census增加通用replay模式：从完整membership的旧观察和新journal取目标failure class的所有body，每body仅一次且保持原priority/resource/context；后续成功不会抹去先前失败的回归覆盖。完整census inventory/journal不改，重放是独立subset观察。host回归覆盖old/new观察合并、去重、后续成功、非目标类和resource保持，group-check2/2PASS。诊断Make增加HOST_CPUS传递到实际service VNG，默认8–15；可按两guest 8–11/12–15分配。下一步重放全部已知scalar-memory类，第二guest8G物理/16GiB host AS硬上限，符合operator bounded parallel/batch策略；不新增validity gate或提高BPF限制。
 

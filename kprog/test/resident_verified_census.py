@@ -12,6 +12,7 @@ import importlib.util
 import io
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -212,6 +213,18 @@ def replay(args):
     print(json.dumps(source["replay"]), flush=True)
 
 
+def retain_request_artifacts(result, directory):
+    """Keep journal targets outside the service's temporary session directory."""
+    service = result.get("submission", {}).get("service", {})
+    for field in ("artifact_archive", "failure_archive"):
+        if path := service.get(field):
+            source = Path(path)
+            directory.mkdir(parents=True, exist_ok=True)
+            target = directory / source.name
+            shutil.copyfile(source, target)
+            service[field] = str(target)
+
+
 def guest(args):
     subprocess.run(["bash", "-eu", "-c",
                     "mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf"], check=True)
@@ -243,6 +256,7 @@ def guest(args):
                 result["submission"] = json.loads(captured.getvalue())
                 result["stage"] = result["submission"]["stage"]
                 result["diagnostic"] = result["submission"].get("diagnostic", result["submission"].get("error", ""))
+                retain_request_artifacts(result, args.service_state.parent / "retained-requests" / state.parent.name)
                 result["compiler_failures"] = compiler_failures(result)
             result["class"] = failure_class(result)
             journal.write(json.dumps(result) + "\n")
