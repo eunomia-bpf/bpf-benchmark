@@ -114,3 +114,16 @@ MEMORY_FLAGS_LOGS ?= /workspaces/kprog-raw/perf/20261113-memory-flags
 .PHONY: memory-flags
 memory-flags:
 	python3 $(HERE)/memory-flags.py --app tracee --only tracee --output $(MEMORY_FLAGS_OUTPUT) --logs $(MEMORY_FLAGS_LOGS)
+
+LINK_MEMORY_TARGET ?= /var/tmp/kprog-tmp/perf/native-link-memory
+.PHONY: memory-link-check memory-link-build
+memory-link-check:
+	CARGO_TARGET_DIR=$(LINK_MEMORY_TARGET) CARGO_PROFILE_DEV_OPT_LEVEL=3 CARGO_PROFILE_DEV_DEBUG=0 cargo test --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
+
+memory-link-build:
+	CARGO_TARGET_DIR=$(LINK_MEMORY_TARGET) CARGO_PROFILE_DEV_OPT_LEVEL=3 CARGO_PROFILE_DEV_DEBUG=0 cargo build --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
+
+LINK_MEMORY_EVIDENCE ?= /workspaces/kprog-raw/perf/20261113-local-memory/objects
+.PHONY: memory-link-evidence
+memory-link-evidence:
+	python3 $(HERE)/memory-link-evidence.py --candidate $(LINK_MEMORY_TARGET)/debug/native-link --reference $(ROOT)/corpus/results/verified-linker-runtime-maps-20261113/native-link.real --output $(LINK_MEMORY_EVIDENCE)

@@ -123,6 +123,10 @@ struct Args {
     #[arg(long)]
     runtime_map_lookups: bool,
 
+    /// Bind x86 memset/memcpy to linker-owned GPR routines in the proof image.
+    #[arg(long)]
+    local_memory_routines: bool,
+
     /// Link mode. `proof` applies canonical ABI/link edits but leaves
     /// verifier-after helper/map lowering symbolic and emits a relocatable
     /// proof object for the eBPF simulator generator.
@@ -439,6 +443,9 @@ fn main() -> Result<()> {
     let bytes = fs::read(&args.input).with_context(|| format!("read {}", args.input.display()))?;
     let elf = object::File::parse(&*bytes)
         .with_context(|| format!("parse ELF {}", args.input.display()))?;
+    if args.local_memory_routines && elf.architecture() != object::Architecture::X86_64 {
+        bail!("--local-memory-routines requires x86-64 input");
+    }
     let proof_input = elf.section_by_name(".native_link_abi").is_some();
     if !proof_mode && !proof_input {
         bail!("--mode kernel requires a .proof.o produced by --mode proof");
@@ -496,6 +503,7 @@ fn main() -> Result<()> {
                 args.preserve_entry_abi,
                 args.tail_count_relocs,
                 args.runtime_map_lookups && !proof_mode,
+                args.local_memory_routines,
                 args.show,
             )?
         }
@@ -2558,6 +2566,14 @@ fn disasm_arm64_words(blob: &[u8]) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn local_memory_routines_require_cli_opt_in() {
+        let argv = ["native-link", "--input", "p.o", "--symbol", "entry", "--output", "p.bin"];
+        assert!(!Args::try_parse_from(argv).unwrap().local_memory_routines);
+        assert!(Args::try_parse_from(argv.into_iter().chain(["--local-memory-routines"]))
+            .unwrap().local_memory_routines);
+    }
 
     #[test]
     fn runtime_map_lookups_require_cli_opt_in() {

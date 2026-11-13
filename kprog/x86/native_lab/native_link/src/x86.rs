@@ -8,6 +8,9 @@ use std::collections::{HashMap, HashSet};
 
 use crate::*;
 
+#[path = "x86_memory.rs"]
+mod memory;
+
 const X86_CPU_NUMBER_HELPER_KEY: &str = "__native_x86_cpu_number";
 const X86_THIS_CPU_OFF_HELPER_KEY: &str = "__native_x86_this_cpu_off";
 const X86_BPF_MAP_MAX_ENTRIES_OFFSET_KEY: &str = "__native_x86_bpf_map_max_entries_offset";
@@ -548,6 +551,7 @@ enum PatchKind {
     /// must patch the rel32 displacement after the blob lands in executable
     /// memory.
     HelperCallRel32 { target_addr: u64 },
+    LocalMemory { routine: memory::Routine },
     /// Rewritten `mov reg, [rip+GOT]` against a map symbol. The runner
     /// patches the immediate field with the live kernel map pointer.
     MapImmediate { name: String, imm_offset: usize },
@@ -1089,6 +1093,7 @@ pub(super) fn rewrite_x86(
     preserve_entry_abi: bool,
     tail_count_relocs: bool,
     runtime_map_lookups: bool,
+    local_memory_routines: bool,
     show: bool,
 ) -> Result<RewriteResult> {
     let included_ranges: Vec<(u64, u64)> = included
@@ -1132,10 +1137,14 @@ pub(super) fn rewrite_x86(
     let mut update_call_counter: usize = 0;
     let mut resolved_helper_call_sites: HashSet<LocalSiteKey> = HashSet::new();
     let mut resolved_got_relocations: HashSet<LocalSiteKey> = HashSet::new();
+    let mut memory_relocations: HashSet<LocalSiteKey> = HashSet::new();
 
     for sym in included {
         let is_entry = symbol_key(sym) == symbol_key(entry);
         let bytes = read_symbol_bytes(elf, sym)?;
+        let memory_constants = if local_memory_routines {
+            memory::constants(&bytes, sym.address)?
+        } else { HashMap::new() };
         let entry_abi_strip = if is_entry {
             let entry_has_tail_call = x86_symbol_has_immediate_helper_id(&bytes, sym.address, 12)?
                 || helper_call_sites.iter().any(|(key, name)| {
@@ -1251,7 +1260,9 @@ pub(super) fn rewrite_x86(
                             resolved_got_relocations.insert(patch_key);
                             continue;
                         }
-                        if target_name.starts_with("bpf_") || helper_addrs.contains_key(target_name)
+                        let local_memory = local_memory_routines
+                            && matches!(target_name.as_str(), "memset" | "memcpy");
+                        if target_name.starts_with("bpf_") || helper_addrs.contains_key(target_name) || local_memory
                         {
                             let dst_family = x86_gpr64_family(dst).ok_or_else(|| {
                                 anyhow!(
@@ -1263,8 +1274,9 @@ pub(super) fn rewrite_x86(
                             helper_got_registers.insert(dst_family, target_name.clone());
                             helper_got_load_reg = Some(dst_family);
                             map_symbol_registers.remove(&dst_family);
-                            if !proof_mode {
+                            if !proof_mode || local_memory {
                                 resolved_got_relocations.insert(patch_key);
+                                if local_memory { memory_relocations.insert(patch_key); }
                                 continue;
                             }
                         }
@@ -1411,6 +1423,19 @@ pub(super) fn rewrite_x86(
                 if let Some(name) = helper_call_name {
                     clear_x86_call_clobbered_registers(&mut helper_imm_registers);
                     clear_x86_call_clobbered_registers(&mut helper_got_registers);
+                    if let Some(routine) = local_memory_routines.then(||
+                        memory::Routine::at_call(&name, memory_constants.get(&local_ip))).flatten()
+                    {
+                        push_x86_replacement(&mut local, &mut kinds, &mut insn_local_ip,
+                            local_ip, build_x86_helper_call_rel32_slot()?,
+                            Some(PatchKind::LocalMemory { routine }));
+                        resolved_helper_call_sites.insert(site_key);
+                        if helper_call_sites.contains_key(&site_key) {
+                            memory_relocations.insert(local_site_key(sym, local_ip + insn.len() as u64 - 4));
+                        }
+                        clear_x86_call_clobbered_registers(&mut map_symbol_registers);
+                        continue;
+                    }
                     if proof_mode {
                         local.push(insn);
                         kinds.push(None);
@@ -1708,6 +1733,29 @@ pub(super) fn rewrite_x86(
         blob.extend_from_slice(&encoded.code_buffer);
     }
 
+    // Add each selected routine once, in call-site order, before all data pools.
+    // Proof symbols make the same bodies reachable during kernel relinking.
+    let original_code_end = blob.len();
+    let mut memory_offsets = HashMap::new();
+    let mut memory_symbols = Vec::new();
+    for patch in &patches {
+        if let PatchKind::LocalMemory { routine } = patch.kind {
+            if memory_offsets.contains_key(&routine) { continue; }
+            let bytes = routine.bytes()?;
+            let start = blob.len();
+            let name = routine.name();
+            for symbol in elf.symbols() {
+                if symbol.name()? == name {
+                    bail!("input symbol conflicts with linker memory routine {name}");
+                }
+            }
+            memory_offsets.insert(routine, start);
+            memory_symbols.push(ProofSymbol { name, offset: start as u64, size: bytes.len() as u64 });
+            code_ranges.push((start, start + bytes.len()));
+            blob.extend_from_slice(&bytes);
+        }
+    }
+
     // Apply intra-blob Call patches first (cross-symbol direct calls);
     // those need only `sym_global_offset` which is already known.
     for p in &patches {
@@ -1722,6 +1770,12 @@ pub(super) fn rewrite_x86(
             let disp = target_global as i64 - (off + 5) as i64;
             let d = i32::try_from(disp).map_err(|_| anyhow!("call disp {disp} exceeds i32"))?;
             blob[off + 1..off + 5].copy_from_slice(&d.to_le_bytes());
+        }
+        if let PatchKind::LocalMemory { routine } = &p.kind {
+            let off = p.global_offset;
+            let target = memory_offsets[routine];
+            let disp = i32::try_from(target as i64 - (off + 5) as i64)?;
+            blob[off + 1..off + 5].copy_from_slice(&disp.to_le_bytes());
         }
     }
 
@@ -1772,7 +1826,7 @@ pub(super) fn rewrite_x86(
                     target: 0,
                 });
             }
-            PatchKind::JmpEnd | PatchKind::Call { .. } => {}
+            PatchKind::JmpEnd | PatchKind::Call { .. } | PatchKind::LocalMemory { .. } => {}
         }
     }
 
@@ -1780,7 +1834,7 @@ pub(super) fn rewrite_x86(
     // RIP-relative indirect-call form and point at in-blob literal-pool entries;
     // PLT32 helper calls use in-blob absolute trampolines.
     let proof_relocs = if proof_mode {
-        collect_x86_proof_relocs(elf, &layouts)?
+        collect_x86_proof_relocs(elf, &layouts, &memory_relocations)?
     } else {
         relocs.extend(apply_elf_relocations(
             elf,
@@ -1842,7 +1896,9 @@ pub(super) fn rewrite_x86(
         disasm(&blob);
     }
     let proof_symbols = if proof_mode {
-        proof_symbols_from_x86_layouts(&layouts, blob.len())?
+        let mut symbols = proof_symbols_from_x86_layouts(&layouts, original_code_end)?;
+        symbols.extend(memory_symbols);
+        symbols
     } else {
         Vec::new()
     };
@@ -1905,6 +1961,7 @@ fn proof_symbols_from_x86_layouts(
 fn collect_x86_proof_relocs(
     elf: &object::File,
     layouts: &[SymbolLayout],
+    resolved_memory_relocations: &HashSet<LocalSiteKey>,
 ) -> Result<Vec<ProofReloc>> {
     let mut relocs = Vec::new();
     let mut sections: HashMap<object::SectionIndex, Vec<&SymbolLayout>> = HashMap::new();
@@ -1941,6 +1998,9 @@ fn collect_x86_proof_relocs(
                 _ => continue,
             };
             let local_patch_off = reloc_offset - layout.sym.address;
+            if resolved_memory_relocations.contains(&local_site_key(&layout.sym, local_patch_off)) {
+                continue;
+            }
             match r_type {
                 4 => {
                     let opcode_local_off = local_patch_off
@@ -4060,6 +4120,80 @@ mod tests {
     use super::*;
 
     #[test]
+    fn memory_relocations_roundtrip_proof_kernel_and_deduplicate_lengths() -> Result<()> {
+        for name in ["memset", "memcpy"] {
+            // Direct PLT, GOT call (all supported relaxation tags), and a
+            // function pointer loaded from the GOT into r11.
+            for form in [4, 9, 41, 42, 100] {
+                let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::X86_64, Endianness::Little);
+                let text = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
+                let mut bytes = vec![0xba, 5, 0, 0, 0];
+                let (call, delta, rtype) = match form {
+                    4 => (vec![0xe8,0,0,0,0], 1, 4),
+                    100 => (vec![0x4c,0x8b,0x1d,0,0,0,0, 0x41,0xff,0xd3], 3, 9),
+                    r => (vec![0xff,0x15,0,0,0,0], 2, r),
+                };
+                let first = bytes.len();
+                bytes.extend_from_slice(&call);
+                bytes.extend_from_slice(&[0xba,5,0,0,0]);
+                let second = bytes.len();
+                bytes.extend_from_slice(&call);
+                bytes.push(0xc3);
+                object.append_section_data(text, &bytes, 1);
+                object.add_symbol(WriteSymbol { name: b"entry".to_vec(), value: 0, size: bytes.len() as u64,
+                    kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
+                    section: WriteSymbolSection::Section(text), flags: SymbolFlags::None });
+                let symbol = object.add_symbol(WriteSymbol { name: name.as_bytes().to_vec(), value: 0, size: 0,
+                    kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
+                    section: WriteSymbolSection::Undefined, flags: SymbolFlags::None });
+                for start in [first, second] {
+                    object.add_relocation(text, WriteRelocation { offset: (start + delta) as u64,
+                        symbol, addend: -4, flags: RelocationFlags::Elf { r_type: rtype } })?;
+                }
+                let data = object.write()?;
+                let elf = object::File::parse(data.as_slice())?;
+                let entry = find_symbol_by_name(&elf, "entry")?;
+                let empty = HashMap::new();
+                let helpers = HashMap::from([(name.to_owned(), 0x1234)]);
+                let plain = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &empty, &[],
+                    &HashMap::new(), &[], true, true, false, false, false, false)?;
+                assert_eq!(plain.proof_relocs.len(), 2, "default remains symbolic");
+                let proof = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &empty, &[],
+                    &HashMap::new(), &[], true, true, false, false, true, false)?;
+                assert!(proof.proof_relocs.is_empty(), "{name}, form={form}");
+                assert_eq!(proof.proof_symbols.len(), 2, "same length shares one routine");
+                assert!(proof.proof_symbols[1].name.starts_with("__native_link_local_"));
+                let path = std::env::temp_dir().join(format!("native-link-memory-{}-{name}-{form}.proof.o", std::process::id()));
+                write_proof_object(&path, object::Architecture::X86_64, "entry", &proof.blob,
+                    &proof.proof_symbols, &proof.proof_relocs, proof.callee_saved_mask)?;
+                let roundtrip = fs::read(&path)?;
+                fs::remove_file(&path)?;
+                let elf = object::File::parse(roundtrip.as_slice())?;
+                let entry = find_symbol_by_name(&elf, "entry")?;
+                let included = discover_reachable(&elf, &entry)?;
+                assert_eq!(included.len(), 2);
+                let result = rewrite_x86(&elf, &entry, &included, &empty, &empty, &[],
+                    &HashMap::new(), &[], false, true, false, false, true, false)?;
+                assert!(result.relocs.is_empty());
+                #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+                {
+                    let mut code = result.blob;
+                    code.push(0xc3); // The kernel normally supplies this epilogue.
+                    let mut dest = [0xa5; 13];
+                    let source = [1u8,2,3,4,5,6,7,8,9];
+                    let arg = if name == "memcpy" { source.as_ptr() as usize } else { 0x1234 };
+                    let ptr = unsafe { dest.as_mut_ptr().add(4) };
+                    assert_eq!(memory::call_blob(&code, ptr, arg, 99), ptr);
+                    assert_eq!(&dest[..4], &[0xa5;4]);
+                    assert_eq!(&dest[9..], &[0xa5;4]);
+                    assert_eq!(&dest[4..9], if name == "memcpy" { &source[..5] } else { &[0x34;5] });
+                }
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
     fn runtime_map_lookup_rewrites_immediate_and_got_calls() -> Result<()> {
         for got in [false, true] {
             let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::X86_64, Endianness::Little);
@@ -4091,7 +4225,7 @@ mod tests {
             for enabled in [false, true] {
                 let result = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers,
                     &HashMap::new(), &[site.clone()], &HashMap::new(), &[],
-                    false, false, false, enabled, false)?;
+                    false, false, false, enabled, false, false)?;
                 let expected = if enabled { 0x1234 } else { 0x5678 };
                 assert!(result.relocs.iter().any(|r| r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32
                     && r.target == expected), "got={got}, enabled={enabled}: actual helper target");
@@ -4238,7 +4372,7 @@ mod tests {
         let entry = find_symbol_by_name(&elf, "entry")?;
         for preserve in [false, true] {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(),
-                &HashMap::new(), &[], &HashMap::new(), &[], true, preserve, false, false, false)?;
+                &HashMap::new(), &[], &HashMap::new(), &[], true, preserve, false, false, false, false)?;
             let mut expected = if preserve { vec![0x53, 0x31, 0xc0, 0x5b] } else { vec![0x31, 0xc0] };
             expected.extend_from_slice(&[0xe9, 0, 0, 0, 0]); // Canonical entry exit in proof mode.
             assert_eq!(output.blob, expected);
