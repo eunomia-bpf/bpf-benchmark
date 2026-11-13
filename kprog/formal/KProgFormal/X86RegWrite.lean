@@ -90,6 +90,17 @@ theorem x86_reg_write_low_compatible (old : X86RegValue)
   cases old
   cases width <;> rfl
 
+/-- Re-exposing the written scalar lane after pointer scalarization preserves
+the architectural register value for every width and byte lane. -/
+theorem x86_reg_write_at_idempotent (old : X86RegValue)
+    (value : BitVec 64) (width : X86Width) (lane : X86ByteLane) :
+    generatedX86RegWriteAt (generatedX86RegWriteAt old value width lane)
+      value width lane = generatedX86RegWriteAt old value width lane := by
+  cases old
+  cases width <;> cases lane <;>
+    simp [generatedX86RegWriteAt, GeneratedX86RegWrite.writeAt,
+      GeneratedX86RegWrite.bitsAt, GeneratedX86RegWrite.byteShift] <;> bv_decide
+
 theorem x86_reg_write_refines (old : X86RegValue) (value : BitVec 64)
     (width : X86Width) :
     generatedX86RegWrite old value width = x86RegWriteSpec old value width := by

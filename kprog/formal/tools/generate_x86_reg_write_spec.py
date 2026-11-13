@@ -77,27 +77,37 @@ def render_c() -> str:
 #define KPROG_FORMAL_GENERATED_X86_REG_WRITE_H
 #define KPROG_X86_WRITE_REG8(STORAGE, TAG, VALUE, BYTE_SHIFT, SCALAR_TAG) \
 	do { \
+		__u8 __kprog_x86_lane = (VALUE); \
 		if ((TAG) == (SCALAR_TAG)) { \
-			if ((BYTE_SHIFT) == 8U) (STORAGE).b[1] = (__u8)(VALUE); \
-			else (STORAGE).b[0] = (__u8)(VALUE); \
+			if ((BYTE_SHIFT) == 8U) (STORAGE).b[1] = __kprog_x86_lane; \
+			else (STORAGE).b[0] = __kprog_x86_lane; \
 		} else { \
 			volatile union { void *ptr; __u16 w; __u8 b[8]; } \
 				__kprog_x86_partial = { .ptr = (STORAGE).ptr }; \
-			if ((BYTE_SHIFT) == 8U) __kprog_x86_partial.b[1] = (__u8)(VALUE); \
-			else __kprog_x86_partial.b[0] = (__u8)(VALUE); \
-			(STORAGE).ptr = __kprog_x86_partial.ptr; \
+			if ((BYTE_SHIFT) == 8U) __kprog_x86_partial.b[1] = __kprog_x86_lane; \
+			else __kprog_x86_partial.b[0] = __kprog_x86_lane; \
+			__u64 __kprog_x86_bits = (__u64)(long)__kprog_x86_partial.ptr; \
+			/* Scalarize first, then expose the written lane's bounds. */ \
+			__asm__ volatile("" : "+r"(__kprog_x86_bits)); \
+			if ((BYTE_SHIFT) == 8U) \
+				__kprog_x86_bits = (__kprog_x86_bits & ~0xff00ULL) | ((__u64)__kprog_x86_lane << 8); \
+			else __kprog_x86_bits = (__kprog_x86_bits & ~0xffULL) | __kprog_x86_lane; \
+			(STORAGE).ptr = (void *)(long)__kprog_x86_bits; \
 		} \
 		(TAG) = (SCALAR_TAG); \
 	} while (0)
 #define KPROG_X86_WRITE_REG16(STORAGE, TAG, VALUE, SCALAR_TAG) \
 	do { \
+		__u16 __kprog_x86_lane = (VALUE); \
 		if ((TAG) == (SCALAR_TAG)) { \
-			(STORAGE).w = (__u16)(VALUE); \
+			(STORAGE).w = __kprog_x86_lane; \
 		} else { \
 			volatile union { void *ptr; __u16 w; __u8 b[8]; } \
 				__kprog_x86_partial = { .ptr = (STORAGE).ptr }; \
-			__kprog_x86_partial.w = (__u16)(VALUE); \
-			(STORAGE).ptr = __kprog_x86_partial.ptr; \
+			__kprog_x86_partial.w = __kprog_x86_lane; \
+			__u64 __kprog_x86_bits = (__u64)(long)__kprog_x86_partial.ptr; \
+			__asm__ volatile("" : "+r"(__kprog_x86_bits)); \
+			(STORAGE).ptr = (void *)(long)((__kprog_x86_bits & ~0xffffULL) | __kprog_x86_lane); \
 		} \
 		(TAG) = (SCALAR_TAG); \
 	} while (0)

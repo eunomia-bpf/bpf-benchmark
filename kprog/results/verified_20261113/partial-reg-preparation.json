@@ -1,0 +1,24 @@
+{
+  "recorded_at": "2026-11-13T05:38:35.369919+00:00",
+  "scope": "General partial-register lowering repair; host/Lean evidence and before/after BPF fixtures",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-partial-reg",
+  "cause": "Actual body BPF1494 spills policy_conf map pointer,1495 writes boolean byte,1496 reloads unknown scalar;2049 masks to byte range0..255 before later map index",
+  "change": "After partial pointer scalarization, reinsert the same scalar lane. Architectural bits and scalar tag retained across all widths and lanes.",
+  "host": {
+    "lanes": [
+      0,
+      8,
+      16
+    ],
+    "cases_per_lane": 189,
+    "boolean_cases_per_lane": 2,
+    "ubsan_exit": 0
+  },
+  "existing_helper_and_stack_regressions_exit": 0,
+  "lean": "x86_reg_write_at_idempotent, universal old/value/width/lane; lake env lean KProgFormal/X86RegWrite.lean exit0",
+  "generator_check_exit": 0,
+  "stock_verifier_submissions": 0,
+  "application_replay": "next detached job",
+  "archive": "partial-reg-preparation.tar.gz",
+  "archive_bytes": 73591
+}

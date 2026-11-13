@@ -99,6 +99,22 @@ STACK_ALIAS_BUILD ?= /var/tmp/kprog-tmp/verified/stack-alias
 SIGNED_BOUND_BUILD ?= /var/tmp/kprog-tmp/verified/signed-bound
 SIGNED_BOUND_RAW ?= /workspaces/kprog-raw/verified/20261113-signed-bound
 SIGNED_BOUND_OUTPUT ?= $(SIGNED_BOUND_RAW)/control
+PARTIAL_REG_BUILD ?= /var/tmp/kprog-tmp/verified/partial-reg
+PARTIAL_REG_RAW ?= /workspaces/kprog-raw/verified/20261113-partial-reg
+PARTIAL_REG_OUTPUT ?= $(PARTIAL_REG_RAW)/control
+.PHONY: partial-reg-inputs partial-reg-guest
+partial-reg-inputs: $(addprefix $(PARTIAL_REG_BUILD)/lane,0.bpf.o 8.bpf.o 16.bpf.o)
+
+$(PARTIAL_REG_BUILD)/lane%.bpf.o: ../test/partial_reg_range.c ../formal/generated/x86_reg_write.h
+	install -d "$(PARTIAL_REG_BUILD)"
+	$(CC) -O2 -fsanitize=undefined -fno-sanitize-recover=all -DPARTIAL_LANE=$* -I../.. -I../../vendor/libbpf/src $< -o "$(PARTIAL_REG_BUILD)/lane$*-host"
+	"$(PARTIAL_REG_BUILD)/lane$*-host"
+	../stock-path/bin/clang -O3 -g -mcpu=v4 -target bpf -D__TARGET_ARCH_x86 -DPARTIAL_LANE=$* -I../.. -I../../vendor/libbpf/src -I../../vendor/libbpf/include/uapi -I/usr/include/x86_64-linux-gnu -c $< -o "$@"
+
+partial-reg-guest:
+	mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf
+	python3 ../test/check_partial_reg.py "$(PARTIAL_REG_RAW)" "$(PARTIAL_REG_OUTPUT)"
+
 .PHONY: signed-bound-inputs signed-bound-guest
 signed-bound-inputs:
 	install -d "$(SIGNED_BOUND_BUILD)"
