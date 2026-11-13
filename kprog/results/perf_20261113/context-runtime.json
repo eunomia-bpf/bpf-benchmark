@@ -1,0 +1,51 @@
+{
+  "recorded_at": "2026-11-13T03:09:36.632696+00:00",
+  "kernel": "74d1097af561",
+  "image": "bpf-benchmark/kprog:current",
+  "image_id": "d756bf5919e9",
+  "candidate": "corpus/results/perf-context-20261113/manifest.json",
+  "runs": [
+    {
+      "launcher": 1126468,
+      "make_exit": 2,
+      "vng_exit": 255,
+      "corpus": "corpus/results/x86_kvm_corpus_20261113_030145_497961",
+      "capture": "corpus/results/perf-context-capture-20261113",
+      "command": "taskset -c 16-19 make -f /workspaces/repository/kprog/perf/one-image/Makefile corpus APPS=otelcol-ebpf-profiler/profiling SAMPLES=1 WORKLOAD_DURATION=30 CPUS=16-19 VM_CPUS=4 VM_MEM=32G STATE=/var/tmp/kprog-tmp/perf LOGS=/workspaces/kprog-raw/perf/20261113-context/run BPFREJIT_CORPUS_BPF_STATS=1 NATIVE_MANIFEST=/workspaces/repository/corpus/results/perf-context-20261113/manifest.json",
+      "log": "/workspaces/kprog-raw/perf/20261113-context/run/make.log",
+      "observed": "baseline completed; native measurement did not report start"
+    },
+    {
+      "launcher": 1128899,
+      "make_exit": 2,
+      "vng_exit": 255,
+      "corpus": "corpus/results/x86_kvm_corpus_20261113_030557_243818",
+      "capture": "corpus/results/perf-context-capture2-20261113",
+      "command": "taskset -c 16-19 make -f /workspaces/repository/kprog/perf/one-image/Makefile corpus APPS=otelcol-ebpf-profiler/profiling SAMPLES=1 WORKLOAD_DURATION=10 CPUS=16-19 VM_CPUS=4 VM_MEM=32G STATE=/var/tmp/kprog-tmp/perf LOGS=/workspaces/kprog-raw/perf/20261113-context/run2 BPFREJIT_CORPUS_BPF_STATS=1 NATIVE_MANIFEST=/workspaces/repository/corpus/results/perf-context-20261113/manifest.json VNG_FLAGS=--verbose",
+      "log": "/workspaces/kprog-raw/perf/20261113-context/run2/make.log",
+      "observed": "baseline completed; native measurement started; kernel page fault in perf_unwind_native"
+    }
+  ],
+  "fault": {
+    "rip": "bpf_prog_26449268576adffc_perf_unwind_nat+0x5f5/0x7aef",
+    "instruction": "cmpw [rax],dx",
+    "address": "ffff8a613eb18837",
+    "rdi_map": "ffff8a59c82bd000",
+    "pivot_key": 2,
+    "unlinked_native_comparison": "Repeated bsearch_step comparisons in perf_unwind_native; exact producer PC needs link-plan/JIT correspondence",
+    "emitted_lookup_sequence": "map max_entries bounds; load map+304+key*8; add GS:this_cpu_off; test result; compare addrLow",
+    "source_inner_map": "BPF_MAP_TYPE_ARRAY of StackDelta values",
+    "source_location": "vendor/bpf/otel/support/ebpf/native_stack_trace.ebpf.c:123",
+    "linker_lead": "native_link/src/x86.rs select_lookup_site assigns first unused BPF lookup spec when native map identity is unknown; this can assign a per-CPU array layout to a dynamic ordinary array"
+  },
+  "verdict": "Context trial reaches the previously skipped native unwinder. Its dynamic map lookup uses an incompatible inlined per-CPU layout and faults. End-to-end equal work remains open.",
+  "limits": [
+    "The full emitted failing JIT image was lost with the guest; kernel console bytes and producer ELF are retained.",
+    "The selected BPF link-plan index and exact map object identity require linker-owner confirmation.",
+    "Native Attempts/Frames deltas after correction are unmeasured because the guest faults before the observer records a mature native snapshot.",
+    "These diagnostic runs provide ABI/fault evidence; floor throughput follows the assembled fixes."
+  ],
+  "owner": "lane verified; request in COORDINATION 2026-11-13T03:07:33Z",
+  "crash_filesystem": "/workspaces/kprog-raw/perf/20261113-context/run2-crash-filesystem.img",
+  "raw": "/workspaces/kprog-raw/perf/20261113-context"
+}

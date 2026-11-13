@@ -14,7 +14,7 @@
 
 **lane perf（Codex，gpt-6.1-sol）。目标：每个性能数字都是等量工作、可复现的；六应用几何平均 native/eBPF 达到 1.20x 以上，每个应用不低于 05-29 下限。**
 - [ ] P1 OTel、Tetragon 等量工作：读一次性 Codex 的报告 kprog/results/equal-work-20261113/report.md（以及 COORDINATION 里 FOR TEMP CODEX 的线索：内联 tail call 用到的内核偏移和计数槽）；查清哪一边偏了，按所属组件修（链接器、加载器、shim 属 lane verified，直接和它商量），新行为放在默认关闭的开关后。
-- [x] P1a PERF_EVENT physical-context host子集与候选构建（e0939263e、ce863428d、00c863247）：regs/sample_period/addr按唯一kernel BTF转换，helper/tailcall保留physical ctx；plain fixture=1、corrected=0，OTel 15 units合并构建rc0、10处context loads完成转换。receipt `kprog/results/perf_20261113/context-host.json`；实际配对guest运行中，P1继续。
+- [x] P1a PERF_EVENT physical-context host子集与候选构建（e0939263e、ce863428d、00c863247）：regs/sample_period/addr按唯一kernel BTF转换，helper/tailcall保留physical ctx；plain fixture=1、corrected=0，OTel 15 units合并构建rc0、10处context loads完成转换。receipt `kprog/results/perf_20261113/context-host.json`；实际配对guest已进入native unwinder，暴露动态inner-map lookup被编为percpu array后的panic；runtime receipt `context-runtime.json`，链接器修复交verified，P1继续。
 - [ ] P2 修好后只重测受这处修复影响的应用（stats 关和开，每个应用 3×180 秒），每次运行用 stubs.py 和程序自身计数核对，增量写进第 1 节；六应用全量计时只在冻结前跑一次，正式下限表和几何平均以那次为准。
 - [ ] P3 等量工作成立的应用里，按每次调用的差距找原生一侧的通用优化（OTel、Tetragon、Cilium）。
 

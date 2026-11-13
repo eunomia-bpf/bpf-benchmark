@@ -1,7 +1,7 @@
 # Lane perf P1 subset, 2026-11-13
 
 The host context regression passes and the complete OTel candidate builds.
-Runtime equal-work confirmation is in progress. The official six-application
+Runtime equal-work confirmation continues after the guest fault below. The official six-application
 throughput table remains provisional while P1 proceeds.
 
 `context-host.json` records the exact commands, layout, revisions and runtime
@@ -25,9 +25,9 @@ The default image and its object files remain in place. This compiler-stage
 trial lives entirely under `kprog/perf/native-context/` and operates on generated
 LLVM build outputs from the existing producer sources and flags.
 
-The paired diagnostic uses the existing Make corpus target, CPUs 16–19, four
-vCPUs, 32 GiB, one 30-second sample and stats enabled. Launcher 1126468 holds a
-shared image lock; logs are under
+The first paired diagnostic used the existing Make corpus target, CPUs 16–19,
+four vCPUs, 32 GiB, one 30-second sample and stats enabled. Launcher 1126468 used
+a shared image lock; logs are under
 `/workspaces/kprog-raw/perf/20261113-context/run/`, with captures under
 `corpus/results/perf-context-capture-20261113/`. Its purpose is ABI behavior and
 application-counter confirmation. Floor timing follows the corrected subset.
@@ -47,6 +47,35 @@ that relocation in b433c23be, with a regression covering both saved-frame
 locations. The default captured images use their original +12 immediate.
 The shared release linker integrates with the assembled batch.
 
-P1 continues with the paired OTel result and general Tetragon CO-RE flavor
+## Runtime follow-up, 03:09 UTC
+
+Both selected-candidate guests completed the eBPF baseline and exited with
+Make status 2 / vng status 255 during the native restart or measurement. The
+second run used one 10-second sample and verbose guest-console capture. It
+reached native measurement and faulted inside `perf_unwind_native+0x5f5`, proving
+the corrected entry reaches that previously skipped native path.
+
+The console records a word comparison through RAX after a per-CPU-array lookup
+expansion: array slot load followed by GS:this_cpu_off addition. RAX is
+`ffff8a613eb18837`, while the per-CPU base is `ffff8a613eae8000`. The producer's
+corresponding repeated search uses `bsearch_step(inner_map, &pivot)` over an
+ordinary ARRAY of StackDelta values. Treating its value bytes as a per-CPU
+pointer explains this fault pattern. The linker owner's causal check must
+identify the selected link-plan index and the actual dynamic map.
+
+The source lead is `select_lookup_site`: when native RDI's map identity is
+unknown, it chooses the first remaining BPF lookup-site specification. The two
+compilers' helper orders can differ. Lane verified received the full fault
+request in COORDINATION at 03:07:33 UTC and owns the general linker correction.
+The native register/unwinder counter deltas remain unmeasured at this point;
+the fault arrived before a mature native snapshot was retained.
+
+`context-runtime.json` records both commands, directories, statuses and limits.
+`context-runtime.tar.gz` publishes both observer captures, progress outputs,
+console, launch logs and producer disassembly. The second guest's captured
+filesystem stays on persistent storage at
+`/workspaces/kprog-raw/perf/20261113-context/run2-crash-filesystem.img`.
+
+P1 continues with generic dynamic-map lookup repair and general Tetragon CO-RE flavor
 resolution. The one-off report's concrete task.thread_pid/loginuid offset
 defects and remaining hot-kprobe causal question are tracked together.
