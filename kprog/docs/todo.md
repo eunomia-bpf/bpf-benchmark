@@ -16,6 +16,7 @@
 - [ ] P1 OTel、Tetragon 等量工作：读一次性 Codex 的报告 kprog/results/equal-work-20261113/report.md（以及 COORDINATION 里 FOR TEMP CODEX 的线索：内联 tail call 用到的内核偏移和计数槽）；查清哪一边偏了，按所属组件修（链接器、加载器、shim 属 lane verified，直接和它商量），新行为放在默认关闭的开关后。
 - [x] P1a PERF_EVENT physical-context host子集与候选构建（e0939263e、ce863428d、00c863247）：regs/sample_period/addr按唯一kernel BTF转换，helper/tailcall保留physical ctx；plain fixture=1、corrected=0，OTel 15 units合并构建rc0、10处context loads完成转换。receipt `kprog/results/perf_20261113/context-host.json`；实际配对guest已进入native unwinder，暴露动态inner-map lookup被编为percpu array后的panic；runtime receipt `context-runtime.json`，链接器修复交verified，P1继续。
 - [ ] P1b OTel动态inner-map lookup：与verified修复native_link未知map identity时按BPF调用序号分配map规格的通用问题，默认关闭的运行时选择；`context-runtime.json`/a2367ceae记录native unwinder在percpu lookup展开后panic。用现有`BPFREJIT_NATIVE_LINK_BINARY`选择修复候选，短配对复测后核对Attempts/Frames与collector计数。
+- [ ] P1c 查 05-29 存档运行（x86_kvm_corpus_20260529_*）的 OTel、Tetragon 原生对象是否带着同样的缺陷（OTel 按公开寄存器结构读 PERF_EVENT 上下文、不做用户栈展开；Tetragon CO-RE flavor 结构用声明偏移）。论文和 evaluation.md 的 OTel、Tetragon 数字依赖这一点；结论写进第 1 节，论文怎么改由运营者决定。
 - [ ] P2 修好后只重测受这处修复影响的应用（stats 关和开，每个应用 3×180 秒），每次运行用 stubs.py 和程序自身计数核对，增量写进第 1 节；六应用全量计时只在冻结前跑一次，正式下限表和几何平均以那次为准。
 - [ ] P3 等量工作成立的应用里，按每次调用的差距找原生一侧的通用优化（OTel、Tetragon、Cilium）。
 
