@@ -122,6 +122,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED body29较大内存重试启动（2026-11-13）** dry-run后setsid/nohup outer1266108，2vCPU24G/AS32GiB、CPU14–15、shared image read lock；与main QEMU1110393及body28 retry QEMU1251615共三台census guest，启动前MemAvailable约85GiB。保留原8G失败，独立输出 `/workspaces/kprog-raw/verified/20261113-context-class/body29-retry1-{control,job}/`，精确调用/启动参数见 `context-body29-retry1-launch.json`；本turn不轮询，后续收集实际模型epoch与结果。
+
 - **VERIFIED context20/29完成结果（2026-11-13）** Tracee两个独立回放共2submitted/1stock verifier submission/0verified/0native execution：body20 trace_sys_enter(source470)从modified-ctx前进到event_data_map bounds拒绝，processed3302、total/peak230，u16 offset复制后只收紧r1、r6仍65535，再+137到65672（vs32536）；body29 trace_ret_vfs_read_tail(source551)在8G guest编译SIGKILL，0stock submission，原因未独立证实为OOM。完整P/B、诊断与各应用计数归档 `context-body20-first-attempt*`、`context-body29-first-attempt*`；raw `/workspaces/kprog-raw/verified/20261113-context-class/body{20,29}-control/`，日志body{20,29}-job；两次Make均0但service -5，不能算verified成功。main census21/13/8不变，两个回放不计入新body累计；body28 24G retry继续运行。
 
 - **VERIFIED D23 helper context通用实现（2026-11-13）** 默认关闭的`objects[].kernel_helper_context=true`让loader通过原始program FD向可信module批量查询唯一kernel的`bpf_verifier_ops.get_func_proto`；保留实际attach/aux元数据，EXT沿用target ops，helper122也按canonical key返回。候选模式不再用generic kallsyms/五项type别名替代，available=false只省略target，实际使用缺失target仍由原linker报错；默认路径及C ABI保持。FD/type/ID wire offsets、返回次序/zero/短reply、manifest关闭/开启回归（ASan/UBSan）通过，完整loader和module按canonical build flags语法检查通过；日志/receipt `helper-context-host*`，raw `/workspaces/kprog-raw/verified/20261113-helper-context*`。源代码已准备，唯一base/image未重建，真实guest context targets及应用行为尚待验证；与PERF06:48 D23交接一致，不改应用源码/内核源码/冻结framework。
