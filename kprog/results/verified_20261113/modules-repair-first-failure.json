@@ -1,0 +1,11 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-modules-repair",
+  "outer_pid": 1323899,
+  "make_exit": 2,
+  "failure": "Top-level modules.order missing; image assembly never began",
+  "image_unchanged": "sha256:3c30779bd71612cf616821229c4af9ab673d34f0ded3a2ee3591064b8c41ece2",
+  "retained_installed_index_entries": 842,
+  "recovery": "Invert the existing installed modules.order using Kbuild exact .o -> kernel/*.ko transformation, preserve both indices in retry raw directory",
+  "preflight": "842-entry roundtrip byte-identical; bash -n and local make -n passed without entering Kbuild",
+  "raw_data_removed": false
+}

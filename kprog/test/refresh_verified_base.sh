@@ -80,12 +80,22 @@ fi
 # with make -n. Restore the sole installed set from the already built modules;
 # no kernel compilation or source/version change is involved.
 find "$refresh_kernel/modules-install" -type f -print > "$refresh_output/modules-before.txt"
+refresh_release=$(cat "$refresh_kernel/include/config/kernel.release")
+if [[ ! -e $refresh_kernel/modules.order ]]; then
+    # Kbuild installs this exact list by replacing .o with kernel/*.ko.
+    # Preserve that existing metadata before modules_install replaces it.
+    cp "$refresh_kernel/modules-install/lib/modules/$refresh_release/modules.order" \
+        "$refresh_output/installed-modules.order"
+    sed -e 's:^kernel/::' -e 's:\.ko$:.o:' "$refresh_output/installed-modules.order" \
+        > "$refresh_kernel/modules.order"
+    cp "$refresh_kernel/modules.order" "$refresh_output/recovered-modules.order"
+fi
 make -C "$refresh_root/vendor/linux-framework" O="$refresh_kernel" ARCH=x86_64 \
     INSTALL_MOD_PATH="$refresh_kernel/modules-install" INSTALL_MOD_STRIP=1 \
     DEPMOD=true modules_install -j1
 find "$refresh_kernel/modules-install" -type f -print > "$refresh_output/modules-after.txt"
 sha256sum "$refresh_kernel/net/netfilter/nfnetlink.ko" \
-    "$refresh_kernel/modules-install/lib/modules/$(cat "$refresh_kernel/include/config/kernel.release")/kernel/net/netfilter/nfnetlink.ko" \
+    "$refresh_kernel/modules-install/lib/modules/$refresh_release/kernel/net/netfilter/nfnetlink.ko" \
     > "$refresh_output/nfnetlink-sha256"
 printf -- '- %s VERIFIED module packaging repair: replaced incomplete modules-install in the sole build using its existing .ko files (INSTALL_MOD_STRIP=1); no kernel compilation; file inventories and raw logs retained in %s.\n' \
     "$(date -u +%FT%TZ)" "$refresh_output" >> "$refresh_root/kprog/docs/cleanup-log.md"
