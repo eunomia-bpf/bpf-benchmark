@@ -7,6 +7,7 @@
 #include "native_loader_manifest.hpp"
 #include "native_loader_subprocess.hpp"
 #include "native_loader_timings.hpp"
+#include "native_loader_helper_query.hpp"
 
 #include <bpf/bpf.h>
 #include <bpf/btf.h>
@@ -1421,6 +1422,7 @@ const std::unordered_map<std::string, uint64_t> &kallsyms_table()
     wanted.push_back(kHtabLookupElemSymbol);
     wanted.push_back(kArrayOfMapLookupElemSymbol);
     wanted.push_back(kHtabLruPercpuMapLookupElemSymbol);
+    wanted.push_back("bpf_verifier_ops");
     const size_t wanted_count = wanted.size();
 
     FILE *f = std::fopen("/proc/kallsyms", "re");
@@ -1464,6 +1466,53 @@ uint64_t kallsyms_lookup(const std::string &name)
         return it->second;
     }
     return 0;
+}
+
+std::vector<std::pair<std::string, uint64_t>> query_program_helper_targets(
+    int program_fd, uint32_t program_type)
+{
+    const uint64_t ops = kallsyms_lookup("bpf_verifier_ops");
+    if (!ops)
+        fail("native_loader: bpf_verifier_ops missing from /proc/kallsyms");
+    std::vector<uint32_t> ids;
+    std::vector<std::string> names;
+    for (const auto &helper : kSupportedHelpers) {
+        ids.push_back(helper.id);
+        names.emplace_back(helper.symbol);
+    }
+    // This helper has context-specific implementations and no generic symbol.
+    ids.push_back(BPF_FUNC_get_netns_cookie);
+    names.emplace_back("bpf_get_netns_cookie");
+    const auto request = encode_helper_query(ops, program_fd, program_type, ids);
+    const std::string path = std::string(kNativeLabTarget.debugfs_dir) + "/helper_targets";
+    ScopedFd fd(open(path.c_str(), O_RDWR | O_CLOEXEC));
+    if (fd.get() < 0)
+        fail("open " + path + ": " + std::strerror(errno));
+    ssize_t written;
+    do { written = write(fd.get(), request.data(), request.size()); }
+    while (written < 0 && errno == EINTR);
+    if (written < 0)
+        fail("write " + path + ": " + std::strerror(errno));
+    if (static_cast<size_t>(written) != request.size())
+        fail("short write " + path);
+    if (lseek(fd.get(), 0, SEEK_SET) < 0)
+        fail("seek " + path + ": " + std::strerror(errno));
+    std::vector<uint8_t> response(ids.size() * sizeof(uint64_t));
+    size_t offset = 0;
+    while (offset < response.size()) {
+        ssize_t n = read(fd.get(), response.data() + offset, response.size() - offset);
+        if (n < 0 && errno == EINTR) continue;
+        if (n < 0)
+            fail("read " + path + ": " + std::strerror(errno));
+        if (!n) break;
+        offset += static_cast<size_t>(n);
+    }
+    response.resize(offset);
+    const auto targets = decode_helper_targets(response, ids.size());
+    std::vector<std::pair<std::string, uint64_t>> result;
+    for (size_t i = 0; i < targets.size(); ++i)
+        if (targets[i]) result.emplace_back(names[i], targets[i]);
+    return result;
 }
 
 uint64_t helper_kernel_addr(int helper_id)
@@ -2112,6 +2161,7 @@ struct CompanionLoad {
     std::unordered_map<std::string, MapMeta> exact_map_addrs;
     std::unordered_set<std::string> ambiguous_exact_maps;
     uint32_t prog_type = 0;
+    std::optional<std::vector<std::pair<std::string, uint64_t>>> context_helpers;
     std::vector<MapMeta> maps;
     std::vector<NativeMapRule> map_rules;
     /* Per-call-site spec for every `bpf_map_lookup_elem` invocation in
@@ -3908,6 +3958,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     std::filesystem::path native_object_path = options.native_object_path;
     std::string symbol_name = options.symbol_name;
     std::vector<NativeMapRule> map_rules;
+    bool kernel_helper_context = false;
     if (native_object_path.empty()) {
         if (source_insns.empty()) {
             fail("native_loader: manifest resolution requires source BPF bytecode");
@@ -3928,6 +3979,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             options.diagnostics->log_path = resolution->loader_timing_log;
         native_object_path = resolution->native_object_path;
         symbol_name = resolution->symbol_name;
+        kernel_helper_context = resolution->kernel_helper_context;
         map_rules = std::move(resolution->map_rules);
     }
     if (symbol_name.empty()) {
@@ -3941,6 +3993,8 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             source_insns.empty() ? nullptr : source_insns.data(),
             source_insns.size(),
             std::move(map_rules));
+    if (kernel_helper_context)
+        companion.context_helpers = query_program_helper_targets(options.original_prog_fd, prog_info.type);
     const auto data_symbols_start = diagnostic_now();
     add_native_data_symbol_addrs(native_object_path, companion);
     const auto data_symbols_end = diagnostic_now();

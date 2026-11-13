@@ -8,6 +8,16 @@ LIBBPF_PREFIX ?= $(REPO_ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix
 LIBBPF_LIBRARY ?= $(REPO_ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a
 KERNEL_OFFSETS_INCLUDE ?= $(REPO_ROOT)/micro/programs/build-x86
 SERVICE_RUN ?= $(abspath $(BUILD_DIR))/trusted-service-client $(abspath $(BUILD_DIR))/trusted-native.o
+HELPER_BUILD ?= /var/tmp/kprog-tmp/verified/helper-context
+HELPER_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-helper-context/functional
+
+.PHONY: helper-context-check
+helper-context-check:
+	install -d "$(HELPER_BUILD)" "$(HELPER_OUTPUT)"
+	$(CXX) -std=c++20 -O2 -Wall -Wextra -Werror -fsanitize=address,undefined ../test/native_loader_helper_query.cpp -o "$(HELPER_BUILD)/helper-query"
+	"$(HELPER_BUILD)/helper-query" "$(HELPER_OUTPUT)"
+	$(CXX) -std=gnu++20 -fsyntax-only -Iinclude -I"$(KERNEL_OFFSETS_INCLUDE)" -I"$(LIBBPF_PREFIX)/include" -I"$(REPO_ROOT)/vendor/libbpf/include" -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" src/native_loader.cpp
+	$(MAKE) -C ../stock-path/module syntax-check
 
 .PHONY: subprocess-check
 subprocess-check:

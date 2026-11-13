@@ -116,26 +116,31 @@ NativeLinkArgs build_native_link_args(
     }
 #endif
 
-    for (const auto &helper : kSupportedHelpers) {
-        uint64_t addr = kallsyms_lookup(helper.symbol);
-        if (addr != 0) {
-            add_name_addr(out.helpers, helper.symbol, addr);
+    if (companion.context_helpers) {
+        for (const auto &[name, address] : *companion.context_helpers)
+            add_name_addr(out.helpers, name, address);
+    } else {
+        for (const auto &helper : kSupportedHelpers) {
+            uint64_t addr = kallsyms_lookup(helper.symbol);
+            if (addr != 0) {
+                add_name_addr(out.helpers, helper.symbol, addr);
+            }
         }
-    }
-    static constexpr int kContextualHelperIds[] = {
-        BPF_FUNC_get_prandom_u32,
-        BPF_FUNC_fib_lookup,
-        BPF_FUNC_redirect_map,
-        BPF_FUNC_skc_lookup_tcp,
-        BPF_FUNC_sk_lookup_udp,
-    };
-    for (int helper_id : kContextualHelperIds) {
-        std::optional<std::pair<std::string, uint64_t>> alias =
-            contextual_helper_alias_if_available(helper_id, companion.prog_type);
-        if (!alias) {
-            continue;
+        static constexpr int kContextualHelperIds[] = {
+            BPF_FUNC_get_prandom_u32,
+            BPF_FUNC_fib_lookup,
+            BPF_FUNC_redirect_map,
+            BPF_FUNC_skc_lookup_tcp,
+            BPF_FUNC_sk_lookup_udp,
+        };
+        for (int helper_id : kContextualHelperIds) {
+            std::optional<std::pair<std::string, uint64_t>> alias =
+                contextual_helper_alias_if_available(helper_id, companion.prog_type);
+            if (!alias) {
+                continue;
+            }
+            add_name_addr(out.helpers, alias->first, alias->second);
         }
-        add_name_addr(out.helpers, alias->first, alias->second);
     }
     for (const char *symbol : kRuntimeCallSymbols) {
         uint64_t addr = kallsyms_lookup(symbol);

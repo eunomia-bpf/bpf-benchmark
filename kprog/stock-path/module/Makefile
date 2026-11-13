@@ -9,4 +9,7 @@ MO ?= /workspaces/.agent-state/kprog-ck/verified-module
 all:
 	install -d $(MO)
 	$(MAKE) -C $(KDIR) M=$(CURDIR) MO=$(MO) modules
+.PHONY: syntax-check
+syntax-check:
+	python3 ../../test/module_syntax_check.py "$(MO)"
 endif

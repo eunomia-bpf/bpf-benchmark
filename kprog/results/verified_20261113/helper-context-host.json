@@ -1,0 +1,30 @@
+{
+  "scope": "D23 default-off program-context helper target resolver, host checks only",
+  "manifest_option": "objects[].kernel_helper_context",
+  "default": false,
+  "kernel_commit": "74d1097af561",
+  "mechanism": "Trusted module calls the running kernel verifier ops with the retained original bpf_prog, including attach/aux metadata; EXT inherits target ops",
+  "helper_keys": "Existing canonical supported-helper keys plus bpf_get_netns_cookie (122)",
+  "unavailable": "Zero address; no generic-symbol substitution in candidate mode; existing linker fails if the target is used",
+  "checks": [
+    "ASan/UBSan: request offsets 0/8/12/16 and batched helper IDs",
+    "ASan/UBSan: exact target order, zero availability and truncated reply",
+    "Manifest omitted/false/true activation",
+    "Complete native_loader.cpp syntax check",
+    "Complete kprog_stock.c syntax check using the sole canonical module build's saved flags, without writing build outputs"
+  ],
+  "first_check": "Failed: missing entry.o fixture; fixed in test setup",
+  "second_check": "Make exit 0",
+  "command": "taskset -c 14-15 make -C kprog/libnativeloader helper-context-check",
+  "raw_logs": [
+    "/workspaces/kprog-raw/verified/20261113-helper-context-check.log",
+    "/workspaces/kprog-raw/verified/20261113-helper-context-check-attempt2.log"
+  ],
+  "archive": "helper-context-host.tar.gz",
+  "shared_base_changed": false,
+  "shared_image_changed": false,
+  "kernel_source_changed": false,
+  "application_source_changed": false,
+  "guest_queries": 0,
+  "runtime_claim": "Pending canonical module/loader build and affected application checks"
+}
