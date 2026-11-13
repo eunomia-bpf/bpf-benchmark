@@ -1,0 +1,35 @@
+{
+  "recorded_at": "2026-11-13T06:27:22.763282+00:00",
+  "scope": "Actual body28 first context replay; compilation termination before stock verification",
+  "application": "tracee/monitor",
+  "name": "trace_ret_vfs_read",
+  "body_group": 28,
+  "retained_source_prog_id": 550,
+  "actual_submissions": 1,
+  "stock_verifier_submissions": 0,
+  "verified": 0,
+  "compilation_failed": 1,
+  "compiler_termination": "SIGKILL9",
+  "guest_memory": "8G",
+  "host_address_space_bytes": 17179869184,
+  "make_exit": 0,
+  "native_execution_requests": 0,
+  "workload_run": null,
+  "diagnostic": "Command '['/workspaces/repository/kprog/stock-path/bin/clang', '-g', '-O3', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_x86', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '-I', '/usr/include/x86_64-linux-gnu', '-c', '/workspaces/kprog-raw/verified/20261113-context-class/body28-control/state/session-9qnhxjnd/requests/request-p_26_qsy/generated/trusted_x86.bpf.i', '-o', '/workspaces/kprog-raw/verified/20261113-context-class/body28-control/state/session-9qnhxjnd/requests/request-p_26_qsy/generated/trusted_x86.bpf.o']' died with <Signals.SIGKILL: 9>.",
+  "service": {
+    "request_id": 1,
+    "started": "2026-11-13T06:14:21.094848+00:00",
+    "status": -5,
+    "failure_archive": "/workspaces/kprog-raw/verified/20261113-context-class/body28-control/retained-requests/session-9qnhxjnd/1.failure.tar.gz",
+    "finished": "2026-11-13T06:20:57.858305+00:00"
+  },
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-context-class",
+  "archive": "context-body28-first-attempt.tar.gz",
+  "archive_bytes": 22623809,
+  "model_evidence": {
+    "preprocessed_mtime_unix": 1794550513.5438235,
+    "partial_lane_reinsertion": true,
+    "readonly_stackid_marker": true,
+    "source_bytes": 262743194
+  }
+}
