@@ -152,3 +152,26 @@ dated May29 run's exact object identity still requires a matching archived
 payload or provenance receipt. Source and native disassembly establish the
 mechanisms; historical per-arm unwinding/emission totals remain unmeasured.
 P1c stays open for that identity link. Paper decisions remain with the operator.
+
+## Tetragon first runtime, startup overlap
+
+`x86_kvm_corpus_20261113_033825_557252` completes with Make/application status
+0/ok, zero workload errors and zero stub records. It selects all35 CORE-corrected
+objects and runtime map dispatch. Raw measured throughput is1.796x native/eBPF;
+aggregate BPF cost is700.2→215.2ns/invocation. These numbers remain an unequal-work
+startup observation.
+
+The result records287 eBPF programs versus245 native programs. Missing native
+entries concentrate in generic kprobe/return-probe policy chains (231→193 and
+36→32). Native live inventory continues growing from183 at03:43:12 to571 at
+03:47:59; total live inventory includes retained originals and other programs.
+The selected debug linker is a concrete load-time cost lead. Its optimization
+and a repeat of the affected startup are coordinated with lane verified; the
+frozen runner stays in place.
+
+The observer's first-stage program/map/counter timeline, original app/result
+files and all captures are retained in `tetragon-first-runtime.json` and its
+archive. A default-off observer extension now builds upstream `tetra` and can
+query loaded-policy state and sample successful gRPC event payloads. The
+legacy send-failure analysis note now accurately describes native counter
+writers; its existing raw fixture still decodes successfully.
