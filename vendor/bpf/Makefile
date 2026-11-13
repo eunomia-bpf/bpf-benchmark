@@ -219,13 +219,35 @@ $(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c
 			-o "$@" "$<"; \
 	fi
 
+# BCC from the untouched upstream sources, behind a switch that defaults off.
+#
+# Measured 2026-11-13: all eight shipped tools compile from vendor/repos/bcc to code
+# byte-identical to the image's objects (same AX size, `cmp` on the section bytes). The one
+# difference left is tcplife's .rodata layout: this tree's copy adds a MICRO_NATIVE-only
+# aligned(2|4) attribute that packs four globals at 2/2060-style offsets (section 4106),
+# where upstream gives 16/2064/4112/4116 (section 4118). The BPF object's .rodata — the
+# map's value_size — is 4106, so the loader's default congruent-section rule would reject
+# the upstream layout; the loader's `objects[].kernel_data_layout` option resolves each
+# symbol by name against the loaded map's BTF instead, which fits. With the switch off this
+# rule is unchanged and the default objects stay byte-identical.
+BCC_SAME_SOURCE ?= 0
+
 $(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/x86/vmlinux.h native_compat.h
 	install -d "$(dir $@)"
-	"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/native_compat.h" \
-		-I"$(CURDIR)/bcc/libbpf-tools" -I"$(CURDIR)/bcc/libbpf-tools/x86" \
-		-I"$(CURDIR)/bcc/src/cc/libbpf/include/uapi" \
-		-I/usr/include -I/usr/include/x86_64-linux-gnu \
-		-o "$@" "$<"
+	if [ "$(BCC_SAME_SOURCE)" = 1 ]; then \
+		"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/native_compat.h" \
+			-I"$(CURDIR)/../repos/bcc/libbpf-tools" \
+			-I"$(CURDIR)/bcc/libbpf-tools/x86" \
+			-I"$(CURDIR)/../repos/bcc/src/cc/libbpf/include/uapi" \
+			-I/usr/include -I/usr/include/x86_64-linux-gnu \
+			-o "$@" "$(CURDIR)/../repos/bcc/libbpf-tools/$*.bpf.c"; \
+	else \
+		"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/native_compat.h" \
+			-I"$(CURDIR)/bcc/libbpf-tools" -I"$(CURDIR)/bcc/libbpf-tools/x86" \
+			-I"$(CURDIR)/bcc/src/cc/libbpf/include/uapi" \
+			-I/usr/include -I/usr/include/x86_64-linux-gnu \
+			-o "$@" "$<"; \
+	fi
 
 $(NATIVE_OUT)/cilium/bpf_lxc.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_LXC_OPTIONS)
 $(NATIVE_OUT)/cilium/bpf_overlay.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_OVERLAY_OPTIONS)
