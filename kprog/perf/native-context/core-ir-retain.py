@@ -18,6 +18,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('build', 'raw', 'tracee-ir', 'tracee-bpf', 'target', 'output'):
         parser.add_argument('--' + name, type=Path, required=True)
+    parser.add_argument('--width-results', action='store_true')
     args = parser.parse_args()
     snapshot = args.raw / 'build-evidence'
     snapshot.mkdir()
@@ -53,8 +54,14 @@ def main():
                   observed_errors={name: (snapshot / (name + '.log')).read_text() for name in ('unguarded', 'shifted', 'resized')},
                   limits=['Host compiler/fixture evidence only; no native application installation or workload execution.',
                           'Tracee asm/context/helper and data-layout integration remains with its owner.',
-                          'Direct scalar field resizing is explicitly diagnosed and remains open under P1h.'],
+                          'Unsigned canonical direct access resizing is supported; other widened expressions remain open under P1h.'],
                   archive=dict(path=str(archive), bytes=archive.stat().st_size, sha256=digest(archive), files_byte_compared=count))
+    if args.width_results:
+        result['width_relocations'] = json.loads((snapshot / 'width.json').read_text())
+        result['signed_relocations'] = json.loads((snapshot / 'resized.json').read_text())
+        result['pending_widened_comparison'] = json.loads((snapshot / 'width-compare.json').read_text())
+        result['actual_bpf_reference'] = {name: (snapshot / (name + '.log')).read_text()
+                                        for name in ('width-bpf-reference', 'signed-bpf-reference')}
     with args.output.open('x') as output:
         json.dump(result, output, indent=2)
         output.write('\n')

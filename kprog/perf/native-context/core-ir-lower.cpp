@@ -58,15 +58,16 @@ static uint64_t number(StringRef S) {
   if (S.getAsInteger(10,N)) fail(Twine("malformed CO-RE numeric component: ")+S);
   return N;
 }
-static bool directMemory(Value *Root) {
+static SmallVector<Instruction *,8> directMemory(Value *Root) {
+  SmallVector<Instruction *,8> Accesses;
   SmallVector<Value *,16> Work{Root};SmallPtrSet<Value *,32> Seen;
   while (!Work.empty()) {
     auto *V=Work.pop_back_val();if (!Seen.insert(V).second) continue;
     for (auto *U:V->users()) {
       if (auto *L=dyn_cast<LoadInst>(U)) {
-        if (L->getPointerOperand()==V) return true;
+        if (L->getPointerOperand()==V) Accesses.push_back(L);
       } else if (auto *S=dyn_cast<StoreInst>(U)) {
-        if (S->getPointerOperand()==V) return true;
+        if (S->getPointerOperand()==V) Accesses.push_back(S);
       } else if (auto *Call=dyn_cast<CallInst>(U)) {
         auto *F=Call->getCalledFunction();
         if (F && F->getName().starts_with("llvm.bpf.passthrough.")) Work.push_back(Call);
@@ -74,13 +75,75 @@ static bool directMemory(Value *Root) {
         Work.push_back(U);
     }
   }
-  return false;
+  return Accesses;
+}
+static bool resizeMemory(GlobalVariable *G,const bpf_core_relo_res &R,unsigned &Count) {
+  SmallPtrSet<Instruction *,16> Accesses;
+  for (auto *U:G->users()) for (auto *I:directMemory(U)) Accesses.insert(I);
+  // Validate the complete use set before changing it. A helper taking a field
+  // address has no direct memory instruction and retains its compiled size.
+  for (auto *I:Accesses) {
+    auto *L=dyn_cast<LoadInst>(I);auto *S=dyn_cast<StoreInst>(I);
+    auto *Address=L?L->getPointerOperand():S->getPointerOperand();
+    auto *P=dyn_cast<GetElementPtrInst>(Address);
+    if (!P || P->getNumIndices()!=1 || !P->getSourceElementType()->isIntegerTy(8)) return false;
+    auto *Offset=dyn_cast<LoadInst>(P->getOperand(1));
+    if (!Offset || Offset->getPointerOperand()!=G) return false;
+    Type *Ty=L?L->getType():S->getValueOperand()->getType();
+    if ((!Ty->isIntegerTy() && !Ty->isPointerTy()) ||
+        I->getModule()->getDataLayout().getTypeStoreSize(Ty)!=R.orig_sz ||
+        (L && L->isAtomic()) || (S && S->isAtomic())) return false;
+    if (L && R.new_sz>R.orig_sz) {
+      if (!Ty->isIntegerTy()) return false;
+      for (auto *U:L->users()) {
+        auto *Z=dyn_cast<ZExtInst>(U);
+        if (!Z || Z->getType()->getIntegerBitWidth()<R.new_sz*8) return false;
+      }
+    }
+    if (S && R.new_sz>R.orig_sz) {
+      auto *Trunc=dyn_cast<TruncInst>(S->getValueOperand());
+      if (!Trunc || Trunc->getOperand(0)->getType()->getIntegerBitWidth()<R.new_sz*8) return false;
+    }
+  }
+  for (auto *I:Accesses) {
+    IRBuilder<> B(I);auto *Ty=B.getIntNTy(R.new_sz*8);
+    if (auto *L=dyn_cast<LoadInst>(I)) {
+      auto *New=B.CreateAlignedLoad(Ty,L->getPointerOperand(),Align(1));
+      New->setVolatile(L->isVolatile());New->setDebugLoc(L->getDebugLoc());
+      if (R.new_sz>R.orig_sz) {
+        SmallVector<ZExtInst *,8> Extensions;
+        for (auto *U:L->users()) Extensions.push_back(cast<ZExtInst>(U));
+        for (auto *Z:Extensions) { Z->replaceAllUsesWith(B.CreateZExtOrTrunc(New,Z->getType()));Z->eraseFromParent(); }
+      } else {
+        Value *V=L->getType()->isPointerTy()?B.CreateIntToPtr(New,L->getType()):B.CreateZExt(New,L->getType());
+        L->replaceAllUsesWith(V);
+      }
+    } else {
+      auto *S=cast<StoreInst>(I);auto *V=S->getValueOperand();
+      if (R.new_sz>R.orig_sz) V=cast<TruncInst>(V)->getOperand(0);
+      V=V->getType()->isPointerTy()?B.CreatePtrToInt(V,Ty):B.CreateZExtOrTrunc(V,Ty);
+      auto *New=B.CreateAlignedStore(V,S->getPointerOperand(),Align(1));
+      New->setVolatile(S->isVolatile());New->setDebugLoc(S->getDebugLoc());
+    }
+    I->eraseFromParent();++Count;
+  }
+  return true;
+}
+static void foldPassthrough(Module &M) {
+  SmallVector<CallInst *,32> Identity;
+  for (auto &F:M) for (auto &I:instructions(F)) if (auto *Call=dyn_cast<CallInst>(&I))
+    if (auto *Fn=Call->getCalledFunction()) if (Fn->getName().starts_with("llvm.bpf.passthrough.")) Identity.push_back(Call);
+  for (auto *Call:Identity) {
+    if (Call->arg_size()!=2 || Call->getType()!=Call->getArgOperand(1)->getType()) fail("invalid BPF passthrough signature");
+    Call->replaceAllUsesWith(Call->getArgOperand(1));Call->eraseFromParent();
+  }
 }
 int main(int argc,char **argv) {
   cl::ParseCommandLineOptions(argc,argv);
   auto L=readBTF(Local), T=readBTF(Target);
   LLVMContext C; SMDiagnostic Error; auto M=parseIRFile(Input,Error,C);
   if (!M) { Error.print(argv[0],errs()); return 1; }
+  foldPassthrough(*M);
   json::Array Rows;
   std::map<unsigned,std::vector<bpf_core_cand>> CandidateCache;
   SmallVector<GlobalVariable *,32> Globals;
@@ -152,19 +215,28 @@ int main(int argc,char **argv) {
     Candidates.resize(List.len);
     if (!TypeId && Result.validate && Result.orig_val!=number(Default))
       fail(Twine("local BTF default value differs from IR: ")+Name);
-    bool Resize=false;
+    bool Resize=false,MemoryPoison=false;unsigned MemoryRewrites=0;
     if (!Result.poison && K==BPF_CORE_FIELD_BYTE_OFFSET && Result.orig_sz!=Result.new_sz) {
       int Original=btf__resolve_type(L.get(),Result.orig_type_id);
       if (Original<0) fail("resolve source field type failed");
       const auto *OT=btf__type_by_id(L.get(),Original);
       bool Scalar=btf_is_int(OT) || btf_is_enum(OT) || btf_is_enum64(OT) || btf_is_ptr(OT);
-      if (Scalar) for (auto *U:G->users()) if (directMemory(U)) Resize=true;
+      bool Direct=false,Canonical=false;
+      for (auto *U:G->users()) for (auto *I:directMemory(U)) {
+        Direct=true;
+        auto *L=dyn_cast<LoadInst>(I);
+        auto *P=dyn_cast<GetElementPtrInst>(L?L->getPointerOperand():cast<StoreInst>(I)->getPointerOperand());
+        if (P && P->getNumIndices()==1 && P->getSourceElementType()->isIntegerTy(8) && P->getOperand(1)==U) Canonical=true;
+      }
+      MemoryPoison=Canonical && Result.fail_memsz_adjust;
+      if (Scalar && Direct && !MemoryPoison) Resize=!resizeMemory(G,Result,MemoryRewrites);
     }
     json::Object Row{{"global",Name.str()},{"kind",int64_t(K)},{"local_type_id",int64_t(Id)},
                      {"original",int64_t(Result.orig_val)},{"resolved",int64_t(Result.new_val)},
                      {"poison",Result.poison},{"matching_candidates",List.len},
                      {"original_field_bytes",int64_t(Result.orig_sz)},{"target_field_bytes",int64_t(Result.new_sz)},
-                     {"native_access_resize_pending",Resize}};
+                     {"native_access_resize_pending",Resize},{"memory_access_poison",MemoryPoison},
+                     {"native_memory_rewrites",int64_t(MemoryRewrites)}};
     SmallVector<LoadInst *,16> Loads;
     for (auto *U:G->users()) {
       auto *Load=dyn_cast<LoadInst>(U);
@@ -174,7 +246,7 @@ int main(int argc,char **argv) {
     }
     for (auto *Load:Loads) {
       Value *Value;
-      if (Result.poison || Resize) {
+      if (Result.poison || MemoryPoison || Resize) {
         auto Fn=M->getOrInsertFunction(std::string(Resize?"__kprog_core_resize_":"__kprog_core_unresolved_")+std::to_string(Rows.size()),
                                       FunctionType::get(Load->getType(),false));
         Value=IRBuilder<>(Load).CreateCall(Fn);
@@ -182,15 +254,6 @@ int main(int argc,char **argv) {
       Load->replaceAllUsesWith(Value);Load->eraseFromParent();
     }
     G->eraseFromParent();Rows.push_back(std::move(Row));
-  }
-  // Fold the frontend's identity markers so resolved guards can eliminate dead
-  // missing-field references just as the original BPF load does.
-  SmallVector<CallInst *,32> Identity;
-  for (auto &F:*M) for (auto &I:instructions(F)) if (auto *Call=dyn_cast<CallInst>(&I))
-    if (auto *Fn=Call->getCalledFunction()) if (Fn->getName().starts_with("llvm.bpf.passthrough.")) Identity.push_back(Call);
-  for (auto *Call:Identity) {
-    if (Call->arg_size()!=2 || Call->getType()!=Call->getArgOperand(1)->getType()) fail("invalid BPF passthrough signature");
-    Call->replaceAllUsesWith(Call->getArgOperand(1));Call->eraseFromParent();
   }
   LoopAnalysisManager LAM;FunctionAnalysisManager FAM;CGSCCAnalysisManager CGAM;ModuleAnalysisManager MAM;
   PassBuilder PB;PB.registerModuleAnalyses(MAM);PB.registerCGSCCAnalyses(CGAM);
@@ -200,12 +263,13 @@ int main(int argc,char **argv) {
   ToolOutputFile ReportFile(Report,EC,sys::fs::OF_Text);
   if (EC) fail(EC.message());
   ReportFile.os()<<formatv("{0:2}",json::Value(std::move(Rows)))<<'\n';ReportFile.keep();
+  ReportFile.os().flush();if (ReportFile.os().has_error()) fail("write CO-RE report failed");
   for (auto &F:*M) if (!F.use_empty()) {
     if (F.getName().starts_with("__kprog_core_unresolved_")) fail(Twine("reachable unresolved CO-RE relocation: ")+F.getName());
     if (F.getName().starts_with("__kprog_core_resize_")) fail(Twine("native scalar access resizing remains required: ")+F.getName());
   }
   if (verifyModule(*M,&errs())) return 1;
   ToolOutputFile Out(Output,EC,sys::fs::OF_None);if (EC) fail(EC.message());
-  WriteBitcodeToFile(*M,Out.os());Out.keep();
+  WriteBitcodeToFile(*M,Out.os());Out.keep();Out.os().flush();if (Out.os().has_error()) fail("write resolved IR failed");
   errs()<<"resolved CO-RE globals="<<Globals.size()<<"\n";
 }

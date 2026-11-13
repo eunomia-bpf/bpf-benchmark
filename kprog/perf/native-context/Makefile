@@ -370,5 +370,28 @@ core-ir-check: core-ir-tool $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)
 	$(CORE_IR_BUILD)/core-ir-lower $(CORE_IR_BUILD)/resized.bc --local-bpf $(CORE_IR_BUILD)/resized.bpf.o --target-btf $(KDIR)/vmlinux --report $(CORE_IR_BUILD)/resized.json -o $(CORE_IR_BUILD)/resized.fixed.bc > $(CORE_IR_BUILD)/resized.log 2>&1 && status=0 || status=$$?; test $$status = 1
 
 .PHONY: core-ir-retain
+CORE_IR_RETAIN_ARGS ?=
 core-ir-retain:
-	python3 $(HERE)/core-ir-retain.py --build $(CORE_IR_BUILD) --raw $(CORE_IR_RAW) --tracee-ir $(CORE_IR_INPUT) --tracee-bpf $(CORE_IR_LOCAL_BPF) --target $(KDIR)/vmlinux --output $(CORE_IR_RECEIPT)
+	python3 $(HERE)/core-ir-retain.py --build $(CORE_IR_BUILD) --raw $(CORE_IR_RAW) --tracee-ir $(CORE_IR_INPUT) --tracee-bpf $(CORE_IR_LOCAL_BPF) --target $(KDIR)/vmlinux --output $(CORE_IR_RECEIPT) $(CORE_IR_RETAIN_ARGS)
+
+.PHONY: core-ir-width-check
+core-ir-width-check: core-ir-tool $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
+	$(CC) -target bpf -O2 -g -emit-llvm -c $(HERE)/test-core-ir-width.c -o $(CORE_IR_BUILD)/width.bc
+	$(CC) -target bpf -O2 -g -c $(CORE_IR_BUILD)/width.bc -o $(CORE_IR_BUILD)/width.bpf.o
+	$(CORE_IR_BUILD)/core-ir-lower $(CORE_IR_BUILD)/width.bc --local-bpf $(CORE_IR_BUILD)/width.bpf.o --target-btf $(KDIR)/vmlinux --report $(CORE_IR_BUILD)/width.json -o $(CORE_IR_BUILD)/width.fixed.bc
+	python3 $(HERE)/socket-helper-names.py > $(CORE_IR_BUILD)/helper-names.json
+	$(SOCKET_BUILD)/socket-context-lower $(CORE_IR_BUILD)/width.fixed.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(CORE_IR_BUILD)/helper-names.json -o $(CORE_IR_BUILD)/width.native.bc
+	$(CC) -O2 -DTEST_DRIVER -I$(VMLINUX_DIR) -c $(HERE)/test-core-ir-width.c -o $(CORE_IR_BUILD)/width.driver.o
+	$(CC) -target x86_64-linux-gnu -O2 $(CORE_IR_BUILD)/width.native.bc $(CORE_IR_BUILD)/width.driver.o -o $(CORE_IR_BUILD)/width.fixed
+	$(CORE_IR_BUILD)/width.fixed
+	$(CC) -target bpf -O2 -g -DWIDE_COMPARE -emit-llvm -c $(HERE)/test-core-ir-width.c -o $(CORE_IR_BUILD)/width-compare.bc
+	$(CC) -target bpf -O2 -g -c $(CORE_IR_BUILD)/width-compare.bc -o $(CORE_IR_BUILD)/width-compare.bpf.o
+	$(CORE_IR_BUILD)/core-ir-lower $(CORE_IR_BUILD)/width-compare.bc --local-bpf $(CORE_IR_BUILD)/width-compare.bpf.o --target-btf $(KDIR)/vmlinux --report $(CORE_IR_BUILD)/width-compare.json -o $(CORE_IR_BUILD)/width-compare.fixed.bc > $(CORE_IR_BUILD)/width-compare.log 2>&1 && status=0 || status=$$?; test $$status = 1
+
+$(CORE_IR_BUILD)/width-bpf-reference: $(HERE)/test-core-width-bpf.c $(CORE_IR_BUILD)/libbpf/libbpf.a
+	$(CC) -O2 -g -I$(ROOT)/vendor/libbpf/src -I$(ROOT)/vendor/libbpf/include -I$(ROOT)/vendor/libbpf/include/uapi $< $(CORE_IR_BUILD)/libbpf/libbpf.a -lelf -lz -o $@
+
+.PHONY: core-ir-width-bpf-check
+core-ir-width-bpf-check: $(CORE_IR_BUILD)/width-bpf-reference
+	$(CORE_IR_BUILD)/width-bpf-reference $(CORE_IR_BUILD)/width.bpf.o $(KDIR)/vmlinux $(CORE_IR_BUILD)/width.patched.bpf.bin 0 > $(CORE_IR_BUILD)/width-bpf-reference.log 2>&1
+	$(CORE_IR_BUILD)/width-bpf-reference $(CORE_IR_BUILD)/resized.bpf.o $(KDIR)/vmlinux $(CORE_IR_BUILD)/signed.patched.bpf.bin 1 > $(CORE_IR_BUILD)/signed-bpf-reference.log 2>&1
