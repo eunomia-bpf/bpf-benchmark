@@ -1,0 +1,94 @@
+{
+  "recorded_utc": "2026-11-13T22:57:55+00:00",
+  "code_commit": "e718a0505",
+  "scope": "Generic optional kfunc binding component; host functional subset only",
+  "manifest_option": "objects[].kernel_kfunc_context; absent/false stays off",
+  "semantics": [
+    "Original program BTF FUNC_EXTERN declarations",
+    "Pinned libbpf extern prototype compatibility",
+    "Missing weak target yields named null binding; strong absence errors",
+    "Present target uses real first-name kallsyms address",
+    "No manufactured function body or forced availability"
+  ],
+  "checks": [
+    "Missing weak/strong ELF references",
+    "Genuine pointer-versus-integer prototype incompatibility",
+    "Target BTF ID namespace",
+    "Five genuine Tetragon kfunc declarations against boot-matched BTF",
+    "Absent/false/true manifest selection"
+  ],
+  "initial_failed_test": "Integer-width mismatch was incorrectly expected to fail; corrected fixture to genuine pointer/integer mismatch, retained libbpf semantics and failed log",
+  "host_make_exit": 0,
+  "live_kernel_address_test": "Prepared, not yet collected",
+  "original_inputs": [
+    {
+      "path": "/workspaces/kprog-raw/verified/20261113-kfunc/restart1/inputs/source.bpf.o",
+      "source": "/workspaces/kprog-raw/perf/20261113-tetragon-same-source/build-evidence/bpf_generic_kprobe_v61.direct.bpf.o",
+      "bytes": 1749096,
+      "sha256": "6c99a18706c6d37cc45947ff1ddf1bd571ca8bb38c6e1c2357ab19bdb374fa98"
+    },
+    {
+      "path": "/workspaces/kprog-raw/verified/20261113-kfunc/restart1/inputs/source.native.o",
+      "source": "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61.native.o",
+      "bytes": 1535496,
+      "sha256": "37ebde036edf1c3ed5750d7a32db2bec8b2212ca26921a03549bbef02dec8930"
+    }
+  ],
+  "kernel_elf_recovery": {
+    "before": "cbf23dfe6c1ff35b2a725466a13855758b1252d458ee539bf1e574e48d6fa9e1",
+    "after": "f3743c05960fc700e29f31e0035a23cdd4b2500d5e6e7542984d5f6fba75babe",
+    "boot_unchanged": "2667103e0fbb3fc54467f59bb15ef0cdc128e54ca7c30d7718e66d0199c4e1ec",
+    "method": "Exclusive image/base lock, extract sole boot into sole ELF; no second file/source/build"
+  },
+  "census_restart_checkpoints": [
+    {
+      "queue": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/queue-0",
+      "journal": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/restart-checkpoint/queue-0/outcomes.jsonl",
+      "completed": 0,
+      "body_groups": [],
+      "incomplete_journal_bytes": 0,
+      "state_files": 21,
+      "state_archive": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/restart-checkpoint/queue-0/state.tar.gz",
+      "archive_bytes": 42749307,
+      "sha256": "56641a636df8b557dadfc4dd9f29f889da9097b297585da51cdff2fe1b5770e0"
+    },
+    {
+      "queue": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/queue-1",
+      "journal": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/restart-checkpoint/queue-1/outcomes.jsonl",
+      "completed": 0,
+      "body_groups": [],
+      "incomplete_journal_bytes": 0,
+      "state_files": 21,
+      "state_archive": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/restart-checkpoint/queue-1/state.tar.gz",
+      "archive_bytes": 50135739,
+      "sha256": "56e92ae131ec1b5333a4c91ebf316a2a085acf62ebc85a742fdb1af158837cc9"
+    },
+    {
+      "queue": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/queue-2",
+      "journal": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/restart-checkpoint/queue-2/outcomes.jsonl",
+      "completed": 0,
+      "body_groups": [],
+      "incomplete_journal_bytes": 0,
+      "state_files": 21,
+      "state_archive": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/restart-checkpoint/queue-2/state.tar.gz",
+      "archive_bytes": 43127586,
+      "sha256": "2cbf7c678001865e02eedf3ee244a80e72e6675b437bfbbd124b512f96a8b6a4"
+    }
+  ],
+  "census_new_completed": 0,
+  "census_remaining": 215,
+  "application_counts": "No new native executions or whole-app results; prior 27 attempts/26 distinct, latest 16 installed/10 rejected retained",
+  "remaining_work": [
+    "Live-kernel address binding",
+    "Generic checked x86 kfunc call model",
+    "Whole-app verification and execution"
+  ],
+  "canonical_kfunc_deployed": false,
+  "kernel_source_changed": false,
+  "image_rebuilt": false,
+  "benchmark_settings_changed": false,
+  "raw_data_removed": false,
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-kfunc",
+  "archive": "kfunc-host.tar.gz",
+  "archive_sha256": "221bfba9c2ff7548c0f936a9ea85a48e752ad0ce1dee10ca11d6dc2b1eb0b3a1"
+}
