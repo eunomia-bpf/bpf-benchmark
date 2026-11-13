@@ -122,6 +122,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED u32 copy bounds通用候选（2026-11-13）** TRUNC32由empty GPR64 asm后shift32 pair改为GPR32 constraint `w`上的显式mov32；LLVM backend确有此constraint，无需猜测operand modifier。小型相同reg-write/copy/branch/map-store回归真实BPF反汇编从r1 copy+shiftpair变为w2/w1 moves，保留stock scalar ID传播条件。UBSan host逐项通过65536个u16 source offsets（前后各一次）、16 signed边界/high-word、3 partial lanes各189 bit/tag+2 boolean案例；对应6份BPF输入编译成功。完整输入/disassembly/log归档 `word32-copy-host*`，raw `/workspaces/kprog-raw/verified/20261113-word32-copy*`。实际stock拒绝/接受和应用body复测仍待下一guest，不能算class通过；P、kernel和image未改，无应用特例/新proof/gate。
+
 - **VERIFIED module自动重建纠正（2026-11-13）** body29 retry日志显示trusted-service-kvm在shared reader lock内于07:13:06自动编译了唯一base的module（source6df2a07f6，sha256 df2e3627b15227aa39b850fee23f29399633c0a9c05fd8eea4fc447cce9c6ee9），此前handoff的“base未变”不准确；kernel/image/loader binary未变，D23真实查询仍未验证。现移除service guest启动里的隐式module build，module只在独立writer-lock构建步骤更新；实际nested census Make dry-run已确认直接启动guest，不再调用module build。receipt `module-launch-fix.json`，原日志body29-retry1-job/make.log及dry-run全部保留；未删除或丢弃任何运行结果。
 
 - **VERIFIED 首22新body（2026-11-13）** 新增Tracee body31 trace_ret_vfs_readv_tail/source554实际1submitted/1stock mapbounds reject/0installed：BPF44357 probe_read_kernel目标event_data_map，vs32536/off65672/size64，processed5593、total/peak248；service06:18:35.924563→07:08:26.213685。main累计22submitted/13installed/9rejected，BCC8/8、Tracee8/3/5、Tetragon6/2/4，其余三app新queue各0；各项native execution0/workload待测，旧10body观察及独立回放另计。完整新request归档 `resident-body-outcome-22.tar.gz`（20955916bytes），累计receipt `resident-body-first-twenty-two-receipt.json`；raw `/workspaces/kprog-raw/verified/20261113-body-census/first-twenty-two/`。重复的u16 copy/bound路径支持继续通用宽度物化修复；未声称实际应用通过。

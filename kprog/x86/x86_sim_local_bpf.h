@@ -585,9 +585,11 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 /* One register read, one width update of that value and one register store:
  * the width ladder is spelled once rather than once per register. */
 #if defined(__BPF__) || defined(__bpf__)
-/* Materialize x86's architectural zero extension before BPF range consumers. */
+/* Materialize x86 zero extension with an ALU32 move. An empty GPR64 asm
+ * followed by truncation becomes a shift pair, losing linked scalar bounds
+ * on copies even when the source was already in the u32 range. */
 #define X86_SIM_L_TRUNC32(VALUE) \
-    ({ __u32 __x86_word=(VALUE); asm volatile("" : "+r"(__x86_word)); (__u64)__x86_word; })
+    ({ __u32 __x86_word=(VALUE); asm volatile("%0 = %0" : "+w"(__x86_word)); (__u64)__x86_word; })
 #else
 #define X86_SIM_L_TRUNC32(VALUE) ((__u64)(__u32)(VALUE))
 #endif

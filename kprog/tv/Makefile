@@ -96,6 +96,28 @@ linker-build:
 	cargo build --release --manifest-path ../x86/native_lab/native_link/Cargo.toml
 
 STACK_ALIAS_BUILD ?= /var/tmp/kprog-tmp/verified/stack-alias
+WORD32_COPY_BUILD ?= /var/tmp/kprog-tmp/verified/word32-copy
+WORD32_COPY_RAW ?= /workspaces/kprog-raw/verified/20261113-word32-copy
+WORD32_COPY_OUTPUT ?= $(WORD32_COPY_RAW)/control
+
+.PHONY: word32-copy-inputs
+word32-copy-inputs:
+	install -d "$(WORD32_COPY_BUILD)"
+	$(CC) -O2 -fsanitize=undefined -fno-sanitize-recover=all -I../.. -I../../vendor/libbpf/src ../test/word32_copy_range.c -o "$(WORD32_COPY_BUILD)/word32-copy-host"
+	"$(WORD32_COPY_BUILD)/word32-copy-host"
+	../stock-path/bin/clang -O3 -g -mcpu=v4 -target bpf -D__TARGET_ARCH_x86 -I../.. -I../../vendor/libbpf/src -I../../vendor/libbpf/include/uapi -I/usr/include/x86_64-linux-gnu -c ../test/word32_copy_range.c -o "$(WORD32_COPY_BUILD)/word32-copy.bpf.o"
+
+.PHONY: word32-copy-kvm word32-copy-guest
+word32-copy-kvm:
+	install -d "$(WORD32_COPY_OUTPUT)"
+	taskset -c 13 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+		--cwd "$(abspath ../..)" --rwdir "$(abspath ../..)" --rwdir "$(WORD32_COPY_RAW)" --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/tv word32-copy-guest WORD32_COPY_RAW=$(WORD32_COPY_RAW) WORD32_COPY_OUTPUT=$(WORD32_COPY_OUTPUT)'
+
+word32-copy-guest:
+	mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf
+	python3 ../test/check_word32_copy.py "$(WORD32_COPY_RAW)" "$(WORD32_COPY_OUTPUT)" "$(ISA_BPFTOOL)"
 SIGNED_BOUND_BUILD ?= /var/tmp/kprog-tmp/verified/signed-bound
 SIGNED_BOUND_RAW ?= /workspaces/kprog-raw/verified/20261113-signed-bound
 SIGNED_BOUND_OUTPUT ?= $(SIGNED_BOUND_RAW)/control

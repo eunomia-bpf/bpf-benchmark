@@ -1,0 +1,29 @@
+{
+  "scope": "General x86 B simulator zero-extension code generation; stock confirmation pending",
+  "mechanism": "Use a BPF GPR32 inline-asm operand and explicit mov32 instead of an empty GPR64 asm followed by truncation shifts",
+  "backend_evidence": "BPFISelLowering.cpp maps w to GPR32RegClass when ALU32 is enabled; BPFAsmPrinter prints the resulting w register",
+  "native_P_changed": false,
+  "host_results": {
+    "copied_u16_offsets_before": 65536,
+    "copied_u16_offsets_after": 65536,
+    "signed_edges_and_high_words": 16,
+    "partial_lanes": [0, 8, 16],
+    "bit_tag_cases_per_partial_lane": 189,
+    "boolean_cases_per_partial_lane": 2,
+    "undefined_behavior_sanitizer": "Pass"
+  },
+  "bpf_compilation": "Copy regression before/after, signed32 and three partial lanes compile at -O3 -mcpu=v4",
+  "disassembly": "Before: r1=r2 then r1 <<=32, r1 >>=32 before the w2 bound; after: w2=w2, w1=w2, w1=w1 with the same bound",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-word32-copy",
+  "raw_logs": [
+    "/workspaces/kprog-raw/verified/20261113-word32-copy-before.log",
+    "/workspaces/kprog-raw/verified/20261113-word32-copy-after.log",
+    "/workspaces/kprog-raw/verified/20261113-word32-copy-kvm-dry-run.log"
+  ],
+  "guest_plan": "Queue six stock BPF loads after owned body28 retry exits, preserving three active census/confirmation guests",
+  "guest_expected": "Copy baseline rejection; copy candidate and prior signed/partial repairs accepted",
+  "actual_guest_loads_at_recording": 0,
+  "application_replay": "Pending",
+  "kernel_or_image_changed": false,
+  "archive": "word32-copy-host.tar.gz"
+}
