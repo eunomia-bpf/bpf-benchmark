@@ -1,0 +1,84 @@
+[
+ {
+  "tool": "capable",
+  "upstream": {
+   "size": 16,
+   "align": 0
+  },
+  "shipped": {
+   "size": 16,
+   "align": 0
+  }
+ },
+ {
+  "tool": "biosnoop",
+  "upstream": {
+   "size": 8,
+   "align": 0
+  },
+  "shipped": {
+   "size": 8,
+   "align": 0
+  }
+ },
+ {
+  "tool": "vfsstat",
+  "upstream": null,
+  "shipped": null
+ },
+ {
+  "tool": "opensnoop",
+  "upstream": {
+   "size": 13,
+   "align": 0
+  },
+  "shipped": {
+   "size": 13,
+   "align": 0
+  }
+ },
+ {
+  "tool": "syscount",
+  "upstream": {
+   "size": 48,
+   "align": 0
+  },
+  "shipped": {
+   "size": 48,
+   "align": 0
+  }
+ },
+ {
+  "tool": "tcpconnect",
+  "upstream": {
+   "size": 280,
+   "align": 0
+  },
+  "shipped": {
+   "size": 280,
+   "align": 0
+  }
+ },
+ {
+  "tool": "tcplife",
+  "upstream": {
+   "size": 4118,
+   "align": 0
+  },
+  "shipped": {
+   "size": 4106,
+   "align": 0
+  }
+ },
+ {
+  "tool": "runqlat",
+  "upstream": {
+   "size": 12,
+   "align": 0
+  },
+  "shipped": {
+   "size": 12,
+   "align": 0
+  }
+ }
+]
