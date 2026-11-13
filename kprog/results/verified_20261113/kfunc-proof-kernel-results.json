@@ -1,0 +1,27 @@
+{
+  "recorded_utc": "2026-11-13T23:26:16+00:00",
+  "code_commit": "d99fb6a91",
+  "outer_pid": 54381,
+  "make_exit": 0,
+  "started": "2026-11-13T23:18:22Z",
+  "finished": "2026-11-13T23:18:39Z",
+  "scope": "General proof-loader function-address and weak-call functional subset",
+  "outcomes": [
+    {
+      "program": "guarded",
+      "accepted": true
+    },
+    {
+      "program": "unguarded",
+      "accepted": false
+    }
+  ],
+  "semantics": "Stock verifier accepts guarded present/missing functions, rejects reachable missing call with unknown#-1; five actual bindings remain passing",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-kfunc/proof-relocs",
+  "archive": "kfunc-proof-kernel-results.tar.gz",
+  "archive_sha256": "3b8c13d01ed6c71c7cc3c8955c430a429c610d5ef6b1a558cdff2083914259f2",
+  "application_results_added": 0,
+  "native_execution": 0,
+  "canonical_deployed": false,
+  "kernel_image_changed": false
+}

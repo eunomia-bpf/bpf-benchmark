@@ -148,6 +148,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED weak-kfunc proof plumbing实际kernel通过（2026-11-13）** d99fb6a91之后unit54381于23:18:22→23:18:39 Make0：完整生产relocate_trusted_proof处理真实Clang BPF ELF，guarded present/missing函数地址与调用经stock verifier接受；unguarded missing call以invalid func unknown#-1拒绝。原五个真实kernel bindings仍通过，完整ELF/重定位后insns/verifier logs归档 `kfunc-proof-kernel-results*`，raw `20261113-kfunc/proof-relocs/{kernel-launch,kernel}/`。只完善通用loader组件，非应用证明/执行；generic x86 typed ABI与指令生成继续，canonical未部署、native execution0。
+
 - **VERIFIED kfunc实际kernel子集通过（2026-11-13）** retry50711于23:06:41→23:06:46 Make0，通用resolver对原BTF .ksyms中的5个真实function均返回匹配target prototype与非零实际kernel地址，普通CEL extern未误归类。弱缺失null、强缺失错误、prototype/target-ID与relative BTF metadata回归均通过；完整ELF/log/地址证据 `kfunc-kernel-results*`，raw `20261113-kfunc/ksyms-fix/{kernel-launch,kernel}/`。仅loader组件，canonical未部署，native execution0；generic x86 checked call模型及真实整应用仍未完成。三台census继续，初始collection各0新完成。
 
 - **VERIFIED kfunc .ksyms kernel retry启动（2026-11-13）** 73effebba修复及host结果已push；dry-run后setsid/nohup outer50711，CPU13/2vCPU2G/AS8GiB、shared image lock，raw `20261113-kfunc/ksyms-fix/{kernel-launch,kernel}/`，使用同一已留存的真实BPF/native ELF及新fixture二进制。启动前MemAvailable90GiB；receipt `kfunc-ksyms-kernel-launch.json`。下turn收集，不轮询/不预报通过；三台census45406/45407/45408继续，未改canonical base/image。
