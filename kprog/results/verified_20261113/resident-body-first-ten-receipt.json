@@ -1,0 +1,251 @@
+{
+  "recorded_at": "2026-11-13T03:30:02.775435+00:00",
+  "scope": "Actual new distinct-body submissions; ten retained prior body observations are separate; load-only",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-body-census/first-ten",
+  "journal": "/workspaces/kprog-raw/verified/20261113-body-census/control/outcomes.jsonl",
+  "kernel_commit": "74d1097af561",
+  "model_commit": "mixed; see per-request model epochs",
+  "completed": 10,
+  "submitted": 10,
+  "native_selection_failed": 0,
+  "resource_failed": 0,
+  "stock_verifier_submissions": 10,
+  "verified": 6,
+  "verifier_rejected": 4,
+  "compilation_failed": 0,
+  "native_execution_requests": 0,
+  "applications": {
+    "bcc/set": {
+      "completed": 2,
+      "submitted": 2,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 2,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "katran": {
+      "completed": 0,
+      "submitted": 0,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "cilium/agent": {
+      "completed": 0,
+      "submitted": 0,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "otelcol-ebpf-profiler/profiling": {
+      "completed": 0,
+      "submitted": 0,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "tracee/monitor": {
+      "completed": 2,
+      "submitted": 2,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 2,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "tetragon/observer": {
+      "completed": 6,
+      "submitted": 6,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 2,
+      "verifier_rejected": 4,
+      "compilation_failed": 0,
+      "workload_run": null
+    }
+  },
+  "classes": {
+    "installed": 6,
+    "verifier_rejected": 1,
+    "verifier_stack_access": 2,
+    "verifier_callback_argument": 1
+  },
+  "new_requests": [
+    {
+      "application": "tetragon/observer",
+      "name": "generic_tracepo",
+      "retained_source_prog_id": 215,
+      "stage": "verifier_rejected",
+      "classified_class": "verifier_stack_access",
+      "diagnostic": "trusted-native-loader: service simulator verification failed: Permission denied\narg#0 reference type('UNKNOWN ') size cannot be determined: -22\n0: R1=ctx() R10=fp0\n0: (7b) *(u64 *)(r10 -656) = r1\ninvalid write to stack R10 off=-656 size=8\nprocessed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\n",
+      "service": {
+        "request_id": 6,
+        "started": "2026-11-13T03:02:24.110921+00:00",
+        "status": -5,
+        "failure_archive": "/workspaces/kprog-raw/verified/20261113-body-census/control/state/session-qqo3hylm/requests/6.failure.tar.gz",
+        "finished": "2026-11-13T03:16:28.856934+00:00"
+      },
+      "body_group": 15
+    },
+    {
+      "application": "tracee/monitor",
+      "name": "tracepoint__raw_syscalls__sys_exit",
+      "retained_source_prog_id": 467,
+      "stage": "installed",
+      "classified_class": "installed",
+      "diagnostic": "",
+      "service": {
+        "request_id": 7,
+        "started": "2026-11-13T03:21:10.452297+00:00",
+        "prog_id": 31,
+        "status": 0,
+        "artifact_archive": "/workspaces/kprog-raw/verified/20261113-body-census/control/state/session-qqo3hylm/requests/7.success.tar.gz",
+        "finished": "2026-11-13T03:21:16.751480+00:00"
+      },
+      "body_group": 16
+    },
+    {
+      "application": "tracee/monitor",
+      "name": "tracepoint__raw_syscalls__sys_enter",
+      "retained_source_prog_id": 463,
+      "stage": "installed",
+      "classified_class": "installed",
+      "diagnostic": "",
+      "service": {
+        "request_id": 8,
+        "started": "2026-11-13T03:25:42.882033+00:00",
+        "prog_id": 35,
+        "status": 0,
+        "artifact_archive": "/workspaces/kprog-raw/verified/20261113-body-census/control/state/session-qqo3hylm/requests/8.success.tar.gz",
+        "finished": "2026-11-13T03:25:48.694355+00:00"
+      },
+      "body_group": 17
+    },
+    {
+      "application": "bcc/set",
+      "name": "sys_exit",
+      "retained_source_prog_id": 51,
+      "stage": "installed",
+      "classified_class": "installed",
+      "diagnostic": "",
+      "service": {
+        "request_id": 9,
+        "started": "2026-11-13T03:25:48.798846+00:00",
+        "prog_id": 39,
+        "status": 0,
+        "artifact_archive": "/workspaces/kprog-raw/verified/20261113-body-census/control/state/session-qqo3hylm/requests/9.success.tar.gz",
+        "finished": "2026-11-13T03:25:57.944949+00:00"
+      },
+      "body_group": 18
+    },
+    {
+      "application": "bcc/set",
+      "name": "sys_enter",
+      "retained_source_prog_id": 46,
+      "stage": "installed",
+      "classified_class": "installed",
+      "diagnostic": "",
+      "service": {
+        "request_id": 10,
+        "started": "2026-11-13T03:25:58.053555+00:00",
+        "prog_id": 43,
+        "status": 0,
+        "artifact_archive": "/workspaces/kprog-raw/verified/20261113-body-census/control/state/session-qqo3hylm/requests/10.success.tar.gz",
+        "finished": "2026-11-13T03:26:01.983911+00:00"
+      },
+      "body_group": 19
+    }
+  ],
+  "archive": "resident-body-outcomes-6-10.tar.gz",
+  "archive_bytes": 25060643,
+  "previous_receipt": "kprog/results/verified_20261113/resident-body-first-five-receipt.json",
+  "previous_submitted": 5,
+  "previous_completed": 5,
+  "archived_requests": [
+    "/workspaces/kprog-raw/verified/20261113-body-census/control/state/session-qqo3hylm/requests/6.failure.tar.gz",
+    "/workspaces/kprog-raw/verified/20261113-body-census/control/state/session-qqo3hylm/requests/7.success.tar.gz",
+    "/workspaces/kprog-raw/verified/20261113-body-census/control/state/session-qqo3hylm/requests/8.success.tar.gz",
+    "/workspaces/kprog-raw/verified/20261113-body-census/control/state/session-qqo3hylm/requests/9.success.tar.gz",
+    "/workspaces/kprog-raw/verified/20261113-body-census/control/state/session-qqo3hylm/requests/10.success.tar.gz"
+  ],
+  "collector_commit": "c445b02e2",
+  "preparation_receipt": "resident-body-group-preparation.json",
+  "per_request_model_epochs": {
+    "1": {
+      "model_commit": "d0890b14f",
+      "evidence": "Archived preprocessed B does not clear pointer representative beside tag"
+    },
+    "2": {
+      "model_commit": "91fc2558a",
+      "evidence": "Archived preprocessed B clears pointer representative beside tag; actual post-fix compilation completed"
+    },
+    "3": {
+      "model_commit": "91fc2558a",
+      "helper_output_range_lowering": false,
+      "dead_pointer_clear": true,
+      "preprocessed_mtime_utc": "2026-11-13T02:30:15.552376+00:00",
+      "evidence": "Archived preprocessed B signatures and pre-cutover timestamps; full source retained"
+    },
+    "4": {
+      "model_commit": "91fc2558a",
+      "helper_output_range_lowering": false,
+      "dead_pointer_clear": true,
+      "preprocessed_mtime_utc": "2026-11-13T02:31:04.409441+00:00",
+      "evidence": "Archived preprocessed B signatures and pre-cutover timestamps; full source retained"
+    },
+    "5": {
+      "model_commit": "91fc2558a",
+      "helper_output_range_lowering": false,
+      "dead_pointer_clear": true,
+      "preprocessed_mtime_utc": "2026-11-13T02:53:18.678327+00:00",
+      "evidence": "Archived preprocessed B signatures and pre-cutover timestamps; full source retained"
+    },
+    "6": {
+      "model_commit": "91fc2558a",
+      "helper_output_range_lowering": false,
+      "dead_pointer_clear": true,
+      "preprocessed_mtime_utc": "2026-11-13T03:02:42.583777+00:00",
+      "evidence": "Archived preprocessed B signatures and pre-cutover timestamps; full source retained"
+    },
+    "7": {
+      "model_commit": "b177b6556",
+      "helper_output_range_lowering": true,
+      "dead_pointer_clear": true,
+      "preprocessed_mtime_utc": "2026-11-13T03:21:12.805799+00:00",
+      "evidence": "Archived preprocessed B signatures and pre-cutover timestamps; full source retained"
+    },
+    "8": {
+      "model_commit": "b177b6556",
+      "helper_output_range_lowering": true,
+      "dead_pointer_clear": true,
+      "preprocessed_mtime_utc": "2026-11-13T03:25:45.088729+00:00",
+      "evidence": "Archived preprocessed B signatures and pre-cutover timestamps; full source retained"
+    },
+    "9": {
+      "model_commit": "b177b6556",
+      "helper_output_range_lowering": true,
+      "dead_pointer_clear": true,
+      "preprocessed_mtime_utc": "2026-11-13T03:25:52.322886+00:00",
+      "evidence": "Archived preprocessed B signatures and pre-cutover timestamps; full source retained"
+    },
+    "10": {
+      "model_commit": "b177b6556",
+      "helper_output_range_lowering": true,
+      "dead_pointer_clear": true,
+      "preprocessed_mtime_utc": "2026-11-13T03:26:00.240059+00:00",
+      "evidence": "Archived preprocessed B signatures and pre-cutover timestamps; full source retained"
+    }
+  }
+}
