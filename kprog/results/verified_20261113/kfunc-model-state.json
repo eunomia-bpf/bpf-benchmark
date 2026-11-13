@@ -1,0 +1,38 @@
+{
+  "recorded_utc": "2026-11-13T23:54:43+00:00",
+  "scope": "Discard alias/constant facts for caller-clobbered XMM0 as well as definedness",
+  "host_subset": "Scalar and iterator native-byte generation, six return boundaries, pointer metadata clobbers and default BCC PASS; these fixtures are SIMD-free",
+  "allocated_section_comparisons": {
+    "generated": {
+      "allocated_sections_equal": true,
+      "sections": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "kprobe/trusted": "242a3bdc7e38ceaea1314f58b7f7a968efbdfe95fd5985e7f67b98797fb9b99e",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a"
+      }
+    },
+    "iterator": {
+      "allocated_sections_equal": true,
+      "sections": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "kprobe/trusted": "e5c6f3879f6993e7bd52dc9db56b7e9f541f3a3fa8ff0c64d72884ebf80fde58",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a"
+      }
+    },
+    "bcc-default": {
+      "allocated_sections_equal": true,
+      "sections": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "kprobe/trusted": "db5544e8d571cdcfd37419482023a3a3eae940b0e250cc58c6413d7585cc8520",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a"
+      }
+    }
+  },
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-kfunc/model-state",
+  "archive": "kfunc-model-state.tar.gz",
+  "archive_sha256": "9d246873201c5dad6fc34209ad2b8effbeac830b1b590af7b96d5bfe8bd29ec2",
+  "x86_abi_sha256": "d832682ab2fdfe2376db19f2e959655d181226ca0c4f400b0676ea6b10bcc1ae",
+  "kernel_outcome": "Generated-model unit pending",
+  "application_results_added": 0,
+  "canonical_deployed": false
+}

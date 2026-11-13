@@ -510,6 +510,8 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
                     bits[rax] = FULL if result['size'] >= 4 else (1 << (result['size'] * 8)) - 1
                     alias[rax] = False
                 bits[index['X86_XMM0']] = 0
+                alias[index['X86_XMM0']] = None
+                constants[index['X86_XMM0']] = None
                 push(context, next_pc, State(tuple(bits), tuple(alias), 0, opaque, pointers, tuple(constants)))
                 continue
             choices = targets.get(addr, ())
