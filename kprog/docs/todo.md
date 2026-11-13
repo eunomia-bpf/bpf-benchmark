@@ -99,6 +99,10 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED signed-width实际body replay（2026-11-13，a1d1fb198）** launcher1190459 make0，generic_kprobe_actions实际1submitted/0installed/1stock rejected，代表33成员。首拒绝从probe_read无界长度推进到BPF8644的policy_stats越界：value_size80、off2040、size8，processed55040；native execution0，workload待测。完整P/B/service及job日志归档 `helper-word32-replay*`，raw `/workspaces/kprog-raw/verified/20261113-helper-class-replay/word32-*`。下一类是通用comparison/index range保留。
+
+- **VERIFIED distinct-body新queue首20实际观察（2026-11-13）** 20submitted/13stock verified+installed/7rejected：BCC8/8、Tracee6/3/3、Tetragon6/2/4；其他三应用在新queue各0，旧观察分别保留。新增body29 trace_ret_vfs_read_tail在f169模型的BPF39231被stock verifier以modified ctx+80拒绝、processed3992；原始B预处理04:29:56，generic32 barrier模型后续。累计receipt `resident-body-first-twenty-receipt.json`、新增完整request `resident-body-outcome-20.tar.gz`（20007180bytes），raw `/workspaces/kprog-raw/verified/20261113-body-census/first-twenty/`。本项load-only，native execution0/workload待测。
+
 - **VERIFIED manifest阶段诊断激活（2026-11-13）** 已选objects条目的可选 `loader_timing_log` 路径复用单次manifest解析，非空env路径优先。C entry起点和source-context边界在选择前采时，选中后开启后续阶段；C ABI保持。host真实resolver的默认关闭/程序及类型筛选/escaped path/parse-error、80条4writers emitter及完整CPP syntax通过；raw `/workspaces/kprog-raw/verified/20261113-manifest-timings/`，归档 `manifest-timings-subset*`。源代码批次等待共享base/image集成，perf当前固定时长guest的payload保持。
 
 - **VERIFIED loader原始阶段诊断（2026-11-13，P1e，485789608）** C entry以默认关闭的 `BPFREJIT_NATIVE_LOADER_TIMING_LOG=<path>` 输出完成load的JSONL：PID/TID、原/native FD、steady-clock起止/total，source-context、manifest/symbol、companion-total、data-symbol及既有8项LoadTimings；C result字段/offset/error buffer保持，未匹配manifest也保留已做阶段。companion-total包含map pointer/lookup子阶段，total在日志IO前截止。真实emitter的80条并发记录/4writers/12phase/raw字段、disabled-path及IO错误回归通过，完整native_loader.cpp syntax检查通过；raw `/workspaces/kprog-raw/verified/20261113-loader-timings/`，完整host日志/原始JSONL归档 `loader-timings-subset*`。host回归完成，共享loader/base/image集成和真实阶段归因接续。
