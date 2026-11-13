@@ -234,8 +234,17 @@ BCC_SAME_SOURCE ?= 0
 # lane perf's CO-RE resolver: resolves the frontend IR's CO-RE queries against the
 # sole kernel's BTF before codegen, so a native object reads the real offsets
 # (without it runqlat reads task+0xb78 where the kernel has task+0xaf0).
-CORE_IR_LOWER ?= /var/tmp/kprog-tmp/perf/core-ir/core-ir-lower
+# Lane perf's CO-RE resolver, pinned in this lane's own scratch so a rebuild of
+# lane perf's default output cannot change what this recipe runs (they reported a
+# "Permission denied" from exactly that race at 2026-11-13T10:31).
+CORE_IR_LOWER ?= /var/tmp/kprog-tmp/C/tools/core-ir-lower
 KATRAN_TARGET_BTF ?= /workspaces/.agent-state/kprog-ck/build-x86/vmlinux
+# The BCC same-source route needs the SOLE kernel's release and BTF.  vendor/bpf
+# defaults both to the host ($(uname -r), /sys/kernel/btf/vmlinux), and `make -B`
+# there regenerates the tracked vmlinux headers from the host BTF — which on this
+# host is 7.3.0-070300rc3 while the sole kernel is 7.0.0-rc2+.  Set these along
+# with BCC_SAME_SOURCE=1:
+#   KERNEL_RELEASE=$(cat /workspaces/.agent-state/kprog-ck/build-x86/include/config/kernel.release)
 
 $(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/x86/vmlinux.h native_compat.h
 	install -d "$(dir $@)"

@@ -50,6 +50,25 @@
    "biosnoop": "305 shipped vs 311 switch-on"
   },
   "relocations": "match the shipped objects entry for entry (GOTPCRELX for data globals by name, PLT32 for helpers by name)",
-  "conclusion": "six of eight tools match the image's instruction counts exactly; capable is one instruction fewer and biosnoop six more. Both are codegen-order differences on the same source with the same relocations, not a semantic difference."
+  "conclusion": "six of eight tools match the image's instruction counts exactly; capable is one instruction fewer and biosnoop six more. Both are codegen-order differences on the same source with the same relocations, not a semantic difference.",
+  "byte_comparison": {
+   "method": "per-program AX section bytes, untouched-source switch-on vs the image's objects, both built from the sole kernel's BTF",
+   "result": {
+    "code identical": [
+     "capable",
+     "vfsstat",
+     "opensnoop",
+     "syscount",
+     "tcpconnect",
+     "runqlat"
+    ],
+    "differ": {
+     "biosnoop": "tp_btf/block_rq_insert and block_rq_issue: clang folds `mov [rip+X],%rax; cmpl $k,(%rax)` into `cmpl $k,[rip+X]` (one instruction fewer each)",
+     "tcplife": "tracepoint/sock/inet_sock_set_state: same folding plus a lea-vs-mov for the same address"
+    }
+   },
+   "reading": "six of eight are byte-identical executable code from untouched upstream source with CO-RE resolved; the other two differ only where clang picks a memory-operand form instead of a load-then-compare, which is fewer instructions, not different work."
+  },
+  "note_on_instruction_counts": "Instruction counts are a poor proxy here: both objects are the same size (AX 1776 for biosnoop on both sides) and the relocations match, but a folded compare changes the count. The byte comparison above is the measurement to quote."
  }
 }
