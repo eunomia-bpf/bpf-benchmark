@@ -24,14 +24,17 @@ $(BUILD)/layout.json: $(BUILD)/layout
 .PHONY: all
 all: $(BUILD)/perf-context-lower $(BUILD)/layout.json
 
-$(BUILD)/test.plain: $(HERE)/test-perf-context.c
+$(BUILD)/test-driver.o: $(HERE)/test-perf-context.c
 	install -d $(BUILD)
-	$(CC) -O3 $< -o $@
+	$(CC) -O3 -DTEST_DRIVER -c $< -o $@
 
-$(BUILD)/test.lowered: $(HERE)/test-perf-context.c $(BUILD)/perf-context-lower $(BUILD)/layout.json
+$(BUILD)/test.plain: $(HERE)/test-perf-context.c $(BUILD)/test-driver.o
+	$(CC) -O3 $< $(BUILD)/test-driver.o -o $@
+
+$(BUILD)/test.lowered: $(HERE)/test-perf-context.c $(BUILD)/test-driver.o $(BUILD)/perf-context-lower $(BUILD)/layout.json
 	$(CC) -O3 -emit-llvm -c $< -o $(BUILD)/test.bc
 	$(BUILD)/perf-context-lower $(BUILD)/test.bc --layout=$(BUILD)/layout.json -o $(BUILD)/test.lowered.bc
-	$(CC) -O3 $(BUILD)/test.lowered.bc -o $@
+	$(CC) -O3 $(BUILD)/test.lowered.bc $(BUILD)/test-driver.o -o $@
 
 .PHONY: check
 check: $(BUILD)/test.plain $(BUILD)/test.lowered

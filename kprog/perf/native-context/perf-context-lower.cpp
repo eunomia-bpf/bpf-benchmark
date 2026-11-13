@@ -73,6 +73,9 @@ int main(int argc, char **argv) {
       L->setMetadata(LLVMContext::MD_tbaa, nullptr);
       ++Count;
     }
+    // The physical view reads memory reached through pointers stored in ctx.
+    if (!Loads.empty())
+      F.setMemoryEffects(F.getMemoryEffects() | MemoryEffects::readOnly());
   }
   if (verifyModule(*M, &errs())) return 1;
   std::error_code EC;
