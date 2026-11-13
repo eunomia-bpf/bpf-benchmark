@@ -464,6 +464,10 @@ upstream-tetragon-link: upstream-tetragon-native
 upstream-tetragon-batch: core-ir-tool $(ASM_BUILD)/bpf-asm-lower $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
 	prlimit --as=17179869184 -- python3 $(HERE)/tetragon-batch.py --manifest $(TETRAGON_BATCH_MANIFEST) --raw $(TETRAGON_BATCH_RAW) --build $(TETRAGON_BATCH_BUILD) --socket-build $(SOCKET_BUILD) $(TETRAGON_BATCH_ARGS)
 
+.PHONY: upstream-tetragon-manifest
+upstream-tetragon-manifest:
+	python3 $(HERE)/tetragon-manifest.py --template $(TETRAGON_MANIFEST_TEMPLATE) --output $(TETRAGON_MANIFEST_OUTPUT) --receipt $(TETRAGON_MANIFEST_RECEIPT) $(TETRAGON_MANIFEST_BATCHES)
+
 WEAK_BUILD ?= /var/tmp/kprog-tmp/perf/weak-ksym
 .PHONY: weak-ksym-check
 weak-ksym-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
