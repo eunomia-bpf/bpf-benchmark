@@ -104,8 +104,9 @@ def observe(out):
                  dest / f'collector-{port}.txt')
         if '--loader-perf' in sys.argv and phase == 'post_rejit' and phase not in seen:
             profile_loader(sys.argv[sys.argv.index('--loader-perf') + 1], prefix, dest)
-        if '--tetra' in sys.argv:
-            client = sys.argv[sys.argv.index('--tetra') + 1]
+        if '--tetra' in sys.argv or '--tetra-policy' in sys.argv:
+            option = '--tetra' if '--tetra' in sys.argv else '--tetra-policy'
+            client = sys.argv[sys.argv.index(option) + 1]
             agent = save(prefix + ['pgrep', '-x', 'tetragon'], dest / 'tetragon-pid.txt')
             if agent.returncode == 0:
                 pid = agent.stdout.decode().strip()
@@ -115,7 +116,7 @@ def observe(out):
                     address = argv[argv.index('--server-address') + 1]
                     cli = [client, '--server-address', address, '--timeout', '2s']
                     save(prefix + cli + ['tracingpolicy', 'list', '-o', 'json'], dest / 'tracingpolicies.json')
-                    if sequence % 3 == 0:
+                    if '--tetra' in sys.argv and sequence % 3 == 0:
                         save(prefix + ['timeout', '--signal=INT', '--kill-after=2', '1s', *cli,
                                        'getevents', '-o', 'json'], dest / 'events.jsonl')
         if phase not in seen:
@@ -196,6 +197,8 @@ def main():
             observer.append('--trace')
         if client := os.environ.get('EQCODEX_TETRA'):
             observer += ['--tetra', client]
+        if client := os.environ.get('EQCODEX_TETRA_POLICIES'):
+            observer += ['--tetra-policy', client]
         if perf := os.environ.get('EQCODEX_LOADER_PERF'):
             observer += ['--loader-perf', perf]
         (out / 'guest-plan.json').write_text(json.dumps({'command': original, 'observer': observer}, indent=2) + '\n')

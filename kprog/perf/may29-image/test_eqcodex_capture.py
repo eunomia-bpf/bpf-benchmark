@@ -71,6 +71,15 @@ class GuestControl(unittest.TestCase):
             self.assertEqual((out / 'guest.log').read_text(), 'saved output\n')
             self.assertEqual((out / 'observer-exit-code').read_text(), '-15\n')
 
+    def test_policy_only_selection_does_not_enable_an_event_subscription(self):
+        with tempfile.TemporaryDirectory() as directory:
+            environment = {'EQCODEX_OUT': directory, 'EQCODEX_TETRA_POLICIES': '/a client/tetra'}
+            with patch.object(sys, 'argv', ['vng', '--exec', 'make corpus']), patch.dict(os.environ, environment, clear=True), patch.object(CAPTURE.os, 'execv'):
+                CAPTURE.main()
+            plan = json.loads((Path(directory) / 'guest-plan.json').read_text())
+            self.assertEqual(plan['observer'][-2:], ['--tetra-policy', '/a client/tetra'])
+            self.assertNotIn('--tetra', plan['observer'])
+
 
 if __name__ == '__main__':
     unittest.main()
