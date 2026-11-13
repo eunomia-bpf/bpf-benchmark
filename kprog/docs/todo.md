@@ -110,7 +110,7 @@
 
 ## 2. 应用覆盖
 
-- **VERIFIED context class并行复测准备（2026-11-13）** 所有已观察context失败body20/28/29（trace_sys_enter、trace_ret_vfs_read、trace_ret_vfs_read_tail，各1成员）分成三个guest数据inventory；根inventory保留完整class，源P和资源引用保持，通用service相同。新增完整/互斥分区与map资源保留回归，同组4tests通过；归档 `context-class-preparation*`，raw `/workspaces/kprog-raw/verified/20261113-context-class/ready/`。计划3×2vCPU/8G/AS16GiB，host12、13、14–15，model17c69；实际提交数后续收集。
+- **VERIFIED context class并行复测准备（2026-11-13）** 所有已观察context失败body20/28/29（trace_sys_enter、trace_ret_vfs_read、trace_ret_vfs_read_tail，各1成员）分成三个guest数据inventory；根inventory保留完整class，源P和资源引用保持，通用service相同。新增完整/互斥分区与map资源保留回归，同组4tests通过；归档 `context-class-preparation*`，raw `/workspaces/kprog-raw/verified/20261113-context-class/ready/`。三个guest已setsid/nohup启动：body20 outer1232281、body28 outer1232282、body29 outer1232283；各2vCPU/8G/AS16GiB，host12、13、14–15，model17c69/shared image read lock；精确命令见 `context-class-launch.json`，实际结果后续收集。
 
 - **VERIFIED ISA stock实际结果（2026-11-13）** unit1225193完成12个object-load调用/12份stock verifier log；6个candidate接受（partial low/high/word3、signed1、flat ctx2），6个baseline拒绝。Make2来自signed脚本限定diagnostic字串；实际baseline报R2负size bound、candidate接受，脚本保留接受/拒绝判定及全部日志。完整输入BPF/输出/service/job归档 `isa-stock-results*`，raw `/workspaces/kprog-raw/verified/20261113-raw-context/guest/`。native execution0，独立于应用body。
 
