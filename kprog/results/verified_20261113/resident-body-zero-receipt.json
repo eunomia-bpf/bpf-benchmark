@@ -1,0 +1,15 @@
+{
+  "scope": "Zero actual new submissions in the grouped queue; ten prior body observations are separate",
+  "completed": 0,
+  "submitted": 0,
+  "kernel_commit": "74d1097af561",
+  "model_commit": "mixed; see per-request model epochs",
+  "applications": {
+    "bcc/set": {},
+    "katran": {},
+    "cilium/agent": {},
+    "otelcol-ebpf-profiler/profiling": {},
+    "tracee/monitor": {},
+    "tetragon/observer": {}
+  }
+}
