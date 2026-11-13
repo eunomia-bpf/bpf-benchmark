@@ -1,0 +1,4017 @@
+{
+  "recorded_at": "2026-11-13T23:02:03.079380+00:00",
+  "protocol_commit": "f24670dfa",
+  "raw": "/workspaces/kprog-raw/perf/20261113-tetragon-multi-frontend",
+  "inputs": [],
+  "reports": [
+    {
+      "path": "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61.source.json",
+      "sha256": "f259c629f142dcf2be0aea0579a801beb658e26e6c769a71b0d6416979be1760",
+      "data": {
+        "unit": "bpf_multi_kprobe_v61",
+        "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_kprobe.c",
+        "source_sha256": "7f7d5acc5612a1a3c193adffe73af928e6ac7deb2a4765c94bc85ac66e0e5db9",
+        "makefiles": [
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/Makefile",
+            "sha256": "2fe0213c5371abf51f57541d6529da734ed436779f895f114fa38c4a7753af53"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/Makefile.defs",
+            "sha256": "4bc719977188a17472237840e943ed217c73c660bc0b8dc216deb397909add5d"
+          }
+        ],
+        "flag_command": [
+          "make",
+          "--no-print-directory",
+          "-s",
+          "-C",
+          "/workspaces/repository/vendor/repos/tetragon/bpf",
+          "-f",
+          "/workspaces/repository/kprog/perf/native-context/tetragon-flags.mk",
+          "BPF_TARGET_ARCH=x86",
+          "DEBUG=0",
+          "UNIT=bpf_multi_kprobe_v61",
+          "VARIANT=v61",
+          "flags"
+        ],
+        "flags": [
+          "-I./",
+          "-Wall",
+          "-Werror",
+          "-Wimplicit-fallthrough",
+          "-Wno-address-of-packed-member",
+          "-Wno-compare-distinct-pointer-types",
+          "-Wno-unknown-warning-option",
+          "-O2",
+          "-I",
+          "./libbpf/",
+          "-I",
+          "./include/",
+          "-I",
+          "./lib",
+          "-I",
+          "./errmetrics/",
+          "-target",
+          "bpf",
+          "-mcpu=v2",
+          "-g",
+          "-D__TARGET_ARCH_x86",
+          "-fdebug-default-version=4",
+          "-D__LARGE_BPF_PROG",
+          "-D__V511_BPF_PROG",
+          "-D__V61_BPF_PROG",
+          "-D__MULTI_KPROBE"
+        ],
+        "compiler_cwd": "/workspaces/repository/vendor/repos/tetragon/bpf",
+        "reference": {
+          "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_kprobe_v61.o",
+          "sha256": "cc2e31d1d943425e4944fb4ea90371c4eff221eb72a3b8acee9d52734205f673"
+        },
+        "commands": [
+          {
+            "label": "ir",
+            "argv": [
+              "clang-18",
+              "-I./",
+              "-Wall",
+              "-Werror",
+              "-Wimplicit-fallthrough",
+              "-Wno-address-of-packed-member",
+              "-Wno-compare-distinct-pointer-types",
+              "-Wno-unknown-warning-option",
+              "-O2",
+              "-I",
+              "./libbpf/",
+              "-I",
+              "./include/",
+              "-I",
+              "./lib",
+              "-I",
+              "./errmetrics/",
+              "-target",
+              "bpf",
+              "-mcpu=v2",
+              "-g",
+              "-D__TARGET_ARCH_x86",
+              "-fdebug-default-version=4",
+              "-D__LARGE_BPF_PROG",
+              "-D__V511_BPF_PROG",
+              "-D__V61_BPF_PROG",
+              "-D__MULTI_KPROBE",
+              "-MD",
+              "-MF",
+              "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61.ir.d",
+              "-emit-llvm",
+              "-c",
+              "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_kprobe.c",
+              "-o",
+              "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61.bc"
+            ],
+            "returncode": 0
+          },
+          {
+            "label": "direct",
+            "argv": [
+              "clang-18",
+              "-I./",
+              "-Wall",
+              "-Werror",
+              "-Wimplicit-fallthrough",
+              "-Wno-address-of-packed-member",
+              "-Wno-compare-distinct-pointer-types",
+              "-Wno-unknown-warning-option",
+              "-O2",
+              "-I",
+              "./libbpf/",
+              "-I",
+              "./include/",
+              "-I",
+              "./lib",
+              "-I",
+              "./errmetrics/",
+              "-target",
+              "bpf",
+              "-mcpu=v2",
+              "-g",
+              "-D__TARGET_ARCH_x86",
+              "-fdebug-default-version=4",
+              "-D__LARGE_BPF_PROG",
+              "-D__V511_BPF_PROG",
+              "-D__V61_BPF_PROG",
+              "-D__MULTI_KPROBE",
+              "-MD",
+              "-MF",
+              "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61.direct.d",
+              "-c",
+              "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_kprobe.c",
+              "-o",
+              "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61.direct.bpf.o"
+            ],
+            "returncode": 0
+          }
+        ],
+        "dependencies": [
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_kprobe.c",
+            "sha256": "7f7d5acc5612a1a3c193adffe73af928e6ac7deb2a4765c94bc85ac66e0e5db9"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/include/vmlinux.h",
+            "sha256": "747255472f09b0d9f45a4370966138676aff3b9b95cf0d93134eee0cf549168d"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/include/vmlinux_generated_x86.h",
+            "sha256": "88309ba267212e3171f2bf65392954e0c5d3ae9907da6c729d017f8738843bda"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/include/api.h",
+            "sha256": "e6cc98879e0f2f0a60a53aba722dbb7c8a08c09d3abaaf480d2b7a062fc8f3df"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/include/bpf_elf.h",
+            "sha256": "daf53c12bd7e31995b02cd83429cea835f6f1989eea6b39fae6ca1fd04804f61"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/include/compiler.h",
+            "sha256": "fef162f581610b7addb00b0ce7bc17a5f6dcd23d8938ab70a2ecae0b0b2c158d"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/lib/bpf_event.h",
+            "sha256": "9105138082eba0b5e10d56c434eb09716b733e59bb0adaf0b269e62df4837e44"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/lib/bpf_helpers.h",
+            "sha256": "7a3cc47c1abe24cc9301982a3b1c3799bd0c3ec975e04e3e5e626c50f017873a"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/libbpf/bpf_core_read.h",
+            "sha256": "8ed6bb4ff7eee627ef35b2020ddc2b73642e35d0e5da8da33f80b07761d10b6b"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/lib/bpf_task.h",
+            "sha256": "d72577da6ae79a9873e0f953f71d8fb05963dec337bc24abcd215abe81655377"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/lib/generic.h",
+            "sha256": "646ef8a0b0b5a8342467699346abfa81189e1bb19f0a0f4d9b75cc1f09857b16"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/lib/common.h",
+            "sha256": "0080ce8dd3363a62b22711e0821abef889ec71eca75dd9773dcae5c83156d2a0"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/lib/msg_types.h",
+            "sha256": "3289dc1ff42a65a8ccc977cf944ad46d328da38f4e91d87ad37692af260a8e29"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/lib/process.h",
+            "sha256": "14ae7891e2237b990c021188d5698c81634b8a26a0e68c634dedc5d211d6770a"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/lib/bpf_cred.h",
+            "sha256": "278a169aa89cd820fa8a418ab560f68a604d7b6f87b86ef697f5d86aa03a2f2e"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/lib/bpf_d_path.h",
+            "sha256": "88d0b013bd3a077866d0270d2449cad614dd6e7bba3df7210959b47827c35e75"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/lib/config.h",
+            "sha256": "b27bd1db8edbe34dc5e6ee75d525dfafc834873d031ad4c78f5a8968a3497b59"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/string_maps.h",
+            "sha256": "fc9e24c448a91fe345d13f0b03a74846619a5a76fc6cedf09e61ce00ff566f01"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/lib/policy_stats.h",
+            "sha256": "3e3ec9ba2e4cd46bcd0500a9276468bd1617ea0f2462903e21195066d92b7c76"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/lib/policy_conf.h",
+            "sha256": "4708658f4c6ec99276dd88c9ce6a8370c048b4cb5b60abde5d6165c3077ce76e"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/lib/errmetrics.h",
+            "sha256": "200edb95c5a874a262b20840e5a788fd20fb371492da665a9479832664c06c0a"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/lib/err.h",
+            "sha256": "195290e4be00315ce04568a76f46b99df0d57d31e6db6928d35b4e5f8ec8565a"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/include/errno.h",
+            "sha256": "6bc3a3456026257fefdaacc5d48ad4cd7876d7253e19ba4d0b5ce7bfee539ee7"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/errmetrics/get_fileid.h",
+            "sha256": "bdf1caf3ee856f170b6e8a31e7690110eed345dc8885fe94de6b414c054b60df"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/errmetrics/fileids.h",
+            "sha256": "72ff92ea9113f78b2585be12d3b06183a060e34a8d40de686f4146762989071a"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/lib/environ_conf.h",
+            "sha256": "b3500ad4eada42862f2ecbabc5ecee7367bc24fd2b815653c57179799a98b25b"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/retprobe_map.h",
+            "sha256": "9ec9fbdc261620ae7a7816630c752f14dd3f762da22dc04f7815dd0ba2559a76"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/libbpf/bpf_tracing.h",
+            "sha256": "202f08d2d4605537f60e77a81ffb31851455569b1f00d94b2d76a3f86ebd91e8"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/types/operations.h",
+            "sha256": "6dbfbc5f12dc7cdaf3b3d7f219cb8725e4a60a15c383191088990a88d4383984"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/types/basic.h",
+            "sha256": "f0ef5d0c995ec2e7cf2ed7ecea7dbe97eabecfa163527351c6969ebc40ce6874"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/types/skb.h",
+            "sha256": "e37ab29ca6f5765bd5f9d24542d2330b2200e09e6a4c1c9fe02a564360856dff"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/types/tuple.h",
+            "sha256": "447633e30a81aa91200ee8581aca05dd42193afcb5081cf76293d573d64b0e98"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/types/sock.h",
+            "sha256": "c89c661b43d7d643bcbef086bac7f7d0791f89a62ce247df60048e42df4a929f"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/types/sockaddr.h",
+            "sha256": "3f0046d3e44687b2596aee66c54b805f1e2040c9721a695a657f9b5168d983ab"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/types/sockaddr_un.h",
+            "sha256": "708f2c9ced650e284eb9508dcb87769eb374f21f92e7ab69c105e3f5da05a6ce"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/types/socket.h",
+            "sha256": "a41dc7d9bf889fd03f6b479a77c831589a254b29bcd8410164e2ce80747af1a9"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/types/net_device.h",
+            "sha256": "1578d70314ae74d49976a1c279d003cab282f61394183092dbe8cac49a1ad0f6"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_process_event.h",
+            "sha256": "71400c6a6f9e210744c97c009c3b8cbdadac23b7b307a8978c8e2e2f821c82cf"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/lib/bpf_cgroup.h",
+            "sha256": "9b5bdd665f24cd126fcfe60421641eabbf51002f4bf3862166d2608f5803b8e6"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/include/bpf_ktime.h",
+            "sha256": "7516751954062bbe08d171d6bb37ae0e72887f4c0135ddd1c7a7a6ead23a9c53"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/cgroup/cgtracker.h",
+            "sha256": "99ff07aeec09a7b45c6003c1620f8ad1d71aaeb0c89b2c8cb51644fa8b0d290e"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/types/bpfattr.h",
+            "sha256": "70168f9bd40860eada24243573244e31e5ec2e2ed2f5953ba9fc8d29c80a06bc"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/types/perfevent.h",
+            "sha256": "6a1443577807718da2fee6b53182c6cefd3919148558c673097f59305b0a53de"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/types/bpfmap.h",
+            "sha256": "d8b1eba5ddda9316ec36ae683c25f2efbf04a45c96077e2598c337075fd09476"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/types/capabilities.h",
+            "sha256": "4fb13e18eee1b2e7b876a82fd75c1cd4983bd403cc892c18d531a9dd71650a08"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/types/module.h",
+            "sha256": "b500387af0a91a2532cbea03f66e75c6ff720a99d3d182a1db7cf76b91af248a"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/argfilter_maps.h",
+            "sha256": "67e3ba39cf014c808656d440a617fd2d164d764d74f795a74bb1cb9ef3b12ae6"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/addr_lpm_maps.h",
+            "sha256": "1534f46e1a9149652ddc3528dcf26ddb2d4b7a437622f92e232c22abf3be1d32"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/string_maps.h",
+            "sha256": "fc9e24c448a91fe345d13f0b03a74846619a5a76fc6cedf09e61ce00ff566f01"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/data_event.h",
+            "sha256": "29ddc13714602b6fd62f99c4a0d5d1bf3537363ba104443abe44145af741ac75"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/lib/data_msg.h",
+            "sha256": "02982cd0f821ee7adce8dca7251c0f2f9b948664bd70b269a651121a60089723"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_enforcer.h",
+            "sha256": "4b4d4253cc9eea43b48ae8594c403b037fe191c4375ae7551253dbde5e752168"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/syscall64.h",
+            "sha256": "3037b6650535cbb230b3bbb5d6b9e88db91881a38513310b9f96baf392fbe30e"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/ratelimit_maps.h",
+            "sha256": "fe5bbf555df627617e2642453f2796f42b86d2b196d4e3cb77d8a293607b14ed"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/heap.h",
+            "sha256": "0c1599beeb1c4cbc193863a14a681944cae181c7f65e12ff8f0f179dcf932d8e"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_mbset.h",
+            "sha256": "0391f5244d7635d3f1ab8db1c2b428a2d5e6d28b7d4d87f9e60a79d519ed94fe"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/cel_expr.h",
+            "sha256": "e4f76c4dc05dab567013fec63214ffa75ec68b2481dfdef41ed65a832ed5c1ec"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/event_config.h",
+            "sha256": "5f90ebd78cf442739a3fd3b0640b1b1231671f7d46d8ac6ac5a6403e503b2914"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/generic_maps.h",
+            "sha256": "06f674e9c735aad7506f52712aef05ef276f2ac560362eab0eef4f4106ff4b54"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/policy_filter.h",
+            "sha256": "64b160fffd7cc73b107a82de9f802f91c120b047af4a12d3a8b0c1f6a66a4aab"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/generic_maps.h",
+            "sha256": "06f674e9c735aad7506f52712aef05ef276f2ac560362eab0eef4f4106ff4b54"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/generic_calls.h",
+            "sha256": "5556bbb2e96ffa9635262d5df385f4455d2f402b881f0ed10389e37de79fafc8"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/pfilter.h",
+            "sha256": "b29963e5a124ce38678a6b12d73d386ed2cd844e469174540089aeeb2e039bb5"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_process_event.h",
+            "sha256": "71400c6a6f9e210744c97c009c3b8cbdadac23b7b307a8978c8e2e2f821c82cf"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/generic_path.h",
+            "sha256": "9586863597b03d7d21a0b94b73d5ba3c8568cfcc1a2ae08c885a2091fd1eb3a9"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/regs.h",
+            "sha256": "835bb8fffd8d19d64a47cce23fd1b596888fcb0a435a3b73664e25657f5fbe2e"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/user_preload.h",
+            "sha256": "610631f2a17a93ea3817eecdb9848e2ae686b1b1cc88e6aadaf562f8c831530e"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/generic_arg.h",
+            "sha256": "ae47da1cf91cd194e754327054d33ff4f89f9db20aca8c75b18bc5149a6bc442"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/usdt_arg.h",
+            "sha256": "41259b194883b72181ecd8e8f8f18c34b297f500f9607479653fa196045deb65"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/tetragon/bpf/process/event_config.h",
+            "sha256": "5f90ebd78cf442739a3fd3b0640b1b1231671f7d46d8ac6ac5a6403e503b2914"
+          }
+        ],
+        "direct_comparison": {
+          "expected": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_kprobe_v61.o",
+          "actual": "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61.direct.bpf.o",
+          "sections": [
+            {
+              "section": ".maps",
+              "equal": true,
+              "expected_bytes": 1944,
+              "actual_bytes": 1944,
+              "expected_sha256": "46be13d2dc57d15a3505198ac0dcc7da2f1ec2f739e73f9789e9cb5bebfa34ab",
+              "actual_sha256": "46be13d2dc57d15a3505198ac0dcc7da2f1ec2f739e73f9789e9cb5bebfa34ab"
+            },
+            {
+              "section": ".rodata",
+              "equal": true,
+              "expected_bytes": 2,
+              "actual_bytes": 2,
+              "expected_sha256": "96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b78630a09cfc7",
+              "actual_sha256": "96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b78630a09cfc7"
+            },
+            {
+              "section": ".rodata.str1.1",
+              "equal": true,
+              "expected_bytes": 11,
+              "actual_bytes": 11,
+              "expected_sha256": "175dc64d82fd422d9690525d6141017991e7cfef76712196cd45e99ba5060699",
+              "actual_sha256": "175dc64d82fd422d9690525d6141017991e7cfef76712196cd45e99ba5060699"
+            },
+            {
+              "section": ".text",
+              "equal": true,
+              "expected_bytes": 38848,
+              "actual_bytes": 38848,
+              "expected_sha256": "e8fd1f03c1f51c7f3da4447fb84decffb4230f435d95afb913b2b5a509dadb18",
+              "actual_sha256": "e8fd1f03c1f51c7f3da4447fb84decffb4230f435d95afb913b2b5a509dadb18"
+            },
+            {
+              "section": "fmod_ret/security_task_prctl",
+              "equal": true,
+              "expected_bytes": 152,
+              "actual_bytes": 152,
+              "expected_sha256": "95a4bbe0549dab773d61ae975f9b59249d0d08c987e2860587f677c3ed17b835",
+              "actual_sha256": "95a4bbe0549dab773d61ae975f9b59249d0d08c987e2860587f677c3ed17b835"
+            },
+            {
+              "section": "kprobe.multi",
+              "equal": true,
+              "expected_bytes": 59312,
+              "actual_bytes": 59312,
+              "expected_sha256": "2a45c6230e121bdc34bfa1b18b9879e89a105855b59bf3c8510ff0d8b9045582",
+              "actual_sha256": "2a45c6230e121bdc34bfa1b18b9879e89a105855b59bf3c8510ff0d8b9045582"
+            },
+            {
+              "section": "kprobe.multi/generic_kprobe",
+              "equal": true,
+              "expected_bytes": 3440,
+              "actual_bytes": 3440,
+              "expected_sha256": "719c17b8b96ee98bc2c3467db1a6b97bd7b69285c6047f42e13464f1ea83756d",
+              "actual_sha256": "719c17b8b96ee98bc2c3467db1a6b97bd7b69285c6047f42e13464f1ea83756d"
+            },
+            {
+              "section": "kprobe.multi/generic_kprobe_override",
+              "equal": true,
+              "expected_bytes": 168,
+              "actual_bytes": 168,
+              "expected_sha256": "696a82a52da9b1e4b41f1bc87e486b96bec44e9c87ee3f2bcfab20185008b563",
+              "actual_sha256": "696a82a52da9b1e4b41f1bc87e486b96bec44e9c87ee3f2bcfab20185008b563"
+            },
+            {
+              "section": "license",
+              "equal": true,
+              "expected_bytes": 13,
+              "actual_bytes": 13,
+              "expected_sha256": "a711b6d9514fa9ca34a60c700d4cc7ba4576f8f3efac58014ed9eb2c78c922ba",
+              "actual_sha256": "a711b6d9514fa9ca34a60c700d4cc7ba4576f8f3efac58014ed9eb2c78c922ba"
+            }
+          ],
+          "all_allocated_sections_equal": true,
+          "relocations_equal": true,
+          "expected_relocations": [
+            {
+              "section": ".text",
+              "offset": 2312,
+              "type": 1,
+              "symbol": "data_heap",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 4064,
+              "type": 1,
+              "symbol": "tg_stats_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 4576,
+              "type": 1,
+              "symbol": "tg_conf_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 4648,
+              "type": 1,
+              "symbol": "tcpmon_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 4736,
+              "type": 1,
+              "symbol": "tg_rb_events",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 4952,
+              "type": 10,
+              "symbol": "cel_expr_1",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 5016,
+              "type": 10,
+              "symbol": "cel_expr_5",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 5072,
+              "type": 10,
+              "symbol": "cel_expr_3",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 5128,
+              "type": 10,
+              "symbol": "cel_expr_7",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 5160,
+              "type": 10,
+              "symbol": "cel_expr_0",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 5192,
+              "type": 10,
+              "symbol": "cel_expr_4",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 5224,
+              "type": 10,
+              "symbol": "cel_expr_2",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 5256,
+              "type": 10,
+              "symbol": "cel_expr_6",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 8512,
+              "type": 1,
+              "symbol": "argfilter_maps",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 12560,
+              "type": 1,
+              "symbol": "argfilter_maps",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 16896,
+              "type": 1,
+              "symbol": "argfilter_maps",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 21232,
+              "type": 1,
+              "symbol": "argfilter_maps",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 23992,
+              "type": 1,
+              "symbol": "bpf_strncasestr",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 24288,
+              "type": 1,
+              "symbol": "bpf_strnstr",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 25440,
+              "type": 1,
+              "symbol": "addr4lpm_maps",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 25752,
+              "type": 1,
+              "symbol": "addr6lpm_maps",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 27600,
+              "type": 1,
+              "symbol": "string_maps_heap",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 27664,
+              "type": 1,
+              "symbol": "heap_ro_zero",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28072,
+              "type": 1,
+              "symbol": "string_maps_0",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28112,
+              "type": 1,
+              "symbol": "string_maps_1",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28176,
+              "type": 1,
+              "symbol": "string_maps_7",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28232,
+              "type": 1,
+              "symbol": "string_maps_4",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28288,
+              "type": 1,
+              "symbol": "string_maps_3",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28312,
+              "type": 1,
+              "symbol": "string_maps_6",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28336,
+              "type": 1,
+              "symbol": "string_maps_9",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28360,
+              "type": 1,
+              "symbol": "string_maps_2",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28384,
+              "type": 1,
+              "symbol": "string_maps_10",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28408,
+              "type": 1,
+              "symbol": "string_maps_5",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28432,
+              "type": 1,
+              "symbol": "string_maps_8",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28680,
+              "type": 1,
+              "symbol": "string_prefix_maps",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28768,
+              "type": 1,
+              "symbol": "string_prefix_maps_heap",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 29120,
+              "type": 1,
+              "symbol": "string_postfix_maps",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 29208,
+              "type": 1,
+              "symbol": "string_postfix_maps_heap",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 30160,
+              "type": 1,
+              "symbol": "substring_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 30240,
+              "type": 10,
+              "symbol": "bpf_strncasestr",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 30272,
+              "type": 10,
+              "symbol": "bpf_strnstr",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 30448,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 31232,
+              "type": 1,
+              "symbol": "fdinstall_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 31592,
+              "type": 1,
+              "symbol": "fdinstall_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 31976,
+              "type": 1,
+              "symbol": "heap",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 32600,
+              "type": 1,
+              "symbol": "fdinstall_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 32928,
+              "type": 1,
+              "symbol": "socktrack_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 33232,
+              "type": 1,
+              "symbol": "override_tasks",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 33368,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 34168,
+              "type": 1,
+              "symbol": "enforcer_data",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 34424,
+              "type": 1,
+              "symbol": "enforcer_missed_notifications",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 34768,
+              "type": 1,
+              "symbol": "ratelimit_heap",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 34840,
+              "type": 1,
+              "symbol": "heap_ro_zero",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 34992,
+              "type": 1,
+              "symbol": "override_tasks",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 35080,
+              "type": 1,
+              "symbol": "enforcer_data",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 35256,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 35336,
+              "type": 1,
+              "symbol": "fdinstall_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 35464,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 35544,
+              "type": 1,
+              "symbol": "policy_stats",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 35736,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 35864,
+              "type": 1,
+              "symbol": "socktrack_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 35952,
+              "type": 1,
+              "symbol": "enforcer_missed_notifications",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 36136,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 36488,
+              "type": 1,
+              "symbol": "ratelimit_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 36592,
+              "type": 1,
+              "symbol": "ratelimit_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 36672,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 36712,
+              "type": 1,
+              "symbol": "config_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 36984,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 37024,
+              "type": 1,
+              "symbol": "config_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 37480,
+              "type": 1,
+              "symbol": "stack_trace_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 37632,
+              "type": 1,
+              "symbol": "stack_trace_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 37832,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 37920,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 37968,
+              "type": 1,
+              "symbol": "enforcer_missed_notifications",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 38072,
+              "type": 1,
+              "symbol": "enforcer_data",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 38320,
+              "type": 1,
+              "symbol": "enforcer_missed_notifications",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 38392,
+              "type": 1,
+              "symbol": "enforcer_data",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 38472,
+              "type": 1,
+              "symbol": "enforcer_missed_notifications",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 38640,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 38752,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 38800,
+              "type": 1,
+              "symbol": "enforcer_missed_notifications",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 40,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 96,
+              "type": 1,
+              "symbol": "config_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 1368,
+              "type": 1,
+              "symbol": "retprobe_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 1528,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 1640,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 1704,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 1744,
+              "type": 1,
+              "symbol": "config_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 1952,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 1992,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 2080,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 2208,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 2264,
+              "type": 1,
+              "symbol": "config_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 3776,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 4016,
+              "type": 1,
+              "symbol": "CONFIG_ITER_NUM",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 4088,
+              "type": 10,
+              "symbol": "bpf_iter_num_new",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 4104,
+              "type": 10,
+              "symbol": "bpf_iter_num_next",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 4488,
+              "type": 10,
+              "symbol": "bpf_iter_num_next",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 4520,
+              "type": 10,
+              "symbol": "bpf_iter_num_destroy",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 4608,
+              "type": 1,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 4768,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 5440,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 5912,
+              "type": 1,
+              "symbol": "buffer_heap_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 6848,
+              "type": 1,
+              "symbol": "CONFIG_ITER_NUM",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 6912,
+              "type": 10,
+              "symbol": "bpf_iter_num_new",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 7280,
+              "type": 10,
+              "symbol": "bpf_iter_num_next",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 7896,
+              "type": 1,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 10208,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 10480,
+              "type": 10,
+              "symbol": "bpf_iter_num_destroy",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 11128,
+              "type": 1,
+              "symbol": "fdinstall_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 14696,
+              "type": 1,
+              "symbol": "tg_ipv6_ext_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 15192,
+              "type": 1,
+              "symbol": "socktrack_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 15584,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 17064,
+              "type": 1,
+              "symbol": "retprobe_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 17224,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 21344,
+              "type": 1,
+              "symbol": "socktrack_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 22088,
+              "type": 1,
+              "symbol": "retprobe_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 22248,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 22392,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 28720,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 28760,
+              "type": 1,
+              "symbol": "config_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 28984,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 29040,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 29616,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 29760,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 29968,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 30176,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 30384,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 33712,
+              "type": 1,
+              "symbol": "buffer_heap_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 34792,
+              "type": 1,
+              "symbol": "CONFIG_ITER_NUM",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 34856,
+              "type": 10,
+              "symbol": "bpf_iter_num_new",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 35232,
+              "type": 10,
+              "symbol": "bpf_iter_num_next",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 35864,
+              "type": 1,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 35976,
+              "type": 10,
+              "symbol": "bpf_iter_num_destroy",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 36464,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 36576,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 36816,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 36928,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 37248,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 37360,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 37640,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 37752,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 37840,
+              "type": 1,
+              "symbol": "filter_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 38096,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 38208,
+              "type": 1,
+              "symbol": "tg_mb_sel_opts",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 38432,
+              "type": 1,
+              "symbol": "string_postfix_maps",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 38544,
+              "type": 1,
+              "symbol": "string_postfix_maps_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 38960,
+              "type": 1,
+              "symbol": "string_prefix_maps",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 39016,
+              "type": 1,
+              "symbol": "string_maps_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 39744,
+              "type": 1,
+              "symbol": "tg_mbset_gen",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 39816,
+              "type": 1,
+              "symbol": "CONFIG_ITER_NUM",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 39912,
+              "type": 10,
+              "symbol": "bpf_iter_num_new",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 39952,
+              "type": 10,
+              "symbol": "bpf_iter_num_destroy",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 39992,
+              "type": 10,
+              "symbol": "bpf_iter_num_next",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 40040,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 40096,
+              "type": 1,
+              "symbol": "tg_mbset_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 40320,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 40376,
+              "type": 1,
+              "symbol": "tg_mbset_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 40544,
+              "type": 1,
+              "symbol": "tg_mb_paths",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 40728,
+              "type": 1,
+              "symbol": "PARENTS_MAP_ENABLED",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 40760,
+              "type": 1,
+              "symbol": "tg_parents_bin",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 40872,
+              "type": 1,
+              "symbol": "tg_mb_sel_opts",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 41088,
+              "type": 1,
+              "symbol": "string_postfix_maps",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 41200,
+              "type": 1,
+              "symbol": "string_postfix_maps_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 41624,
+              "type": 1,
+              "symbol": "string_prefix_maps",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 41680,
+              "type": 1,
+              "symbol": "string_maps_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 42392,
+              "type": 1,
+              "symbol": "tg_mbset_gen",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 42456,
+              "type": 1,
+              "symbol": "CONFIG_ITER_NUM",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 42560,
+              "type": 10,
+              "symbol": "bpf_iter_num_new",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 42608,
+              "type": 10,
+              "symbol": "bpf_iter_num_destroy",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 42648,
+              "type": 10,
+              "symbol": "bpf_iter_num_next",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 42696,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 42752,
+              "type": 1,
+              "symbol": "tg_mbset_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 42976,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 43032,
+              "type": 1,
+              "symbol": "tg_mbset_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 43192,
+              "type": 1,
+              "symbol": "tg_mb_paths",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 44640,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 44800,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 44960,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 45120,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 45280,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 45440,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 45600,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 45768,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 45936,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 48696,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 51056,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 51944,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 52040,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 52104,
+              "type": 1,
+              "symbol": "filter_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 52672,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 53512,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 54152,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 54248,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 54360,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 54392,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 54848,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 54872,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 54904,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 54944,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 55200,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 55240,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 55336,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 55416,
+              "type": 1,
+              "symbol": "retprobe_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 55464,
+              "type": 1,
+              "symbol": "retprobe_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 55536,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 55608,
+              "type": 1,
+              "symbol": "filter_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 55872,
+              "type": 1,
+              "symbol": "policy_conf",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 55992,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 56104,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 56216,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 56248,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 56336,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 56464,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 58080,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 58424,
+              "type": 1,
+              "symbol": "tg_conf_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 58480,
+              "type": 1,
+              "symbol": "tcpmon_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 58600,
+              "type": 1,
+              "symbol": "tg_stats_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 58760,
+              "type": 1,
+              "symbol": "tg_rb_events",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 58848,
+              "type": 1,
+              "symbol": "tg_stats_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 58968,
+              "type": 1,
+              "symbol": "policy_stats",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 59032,
+              "type": 1,
+              "symbol": "policy_stats",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi/generic_kprobe",
+              "offset": 40,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi/generic_kprobe",
+              "offset": 120,
+              "type": 1,
+              "symbol": "config_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi/generic_kprobe",
+              "offset": 272,
+              "type": 1,
+              "symbol": "policy_filter_maps",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi/generic_kprobe",
+              "offset": 344,
+              "type": 1,
+              "symbol": "tg_conf_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi/generic_kprobe",
+              "offset": 1072,
+              "type": 1,
+              "symbol": "tg_cgtracker_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi/generic_kprobe",
+              "offset": 1304,
+              "type": 1,
+              "symbol": "policy_filter_maps",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi/generic_kprobe",
+              "offset": 3392,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi/generic_kprobe_override",
+              "offset": 40,
+              "type": 1,
+              "symbol": "override_tasks",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi/generic_kprobe_override",
+              "offset": 128,
+              "type": 1,
+              "symbol": "override_tasks",
+              "addend": null
+            },
+            {
+              "section": "fmod_ret/security_task_prctl",
+              "offset": 32,
+              "type": 1,
+              "symbol": "override_tasks",
+              "addend": null
+            },
+            {
+              "section": "fmod_ret/security_task_prctl",
+              "offset": 96,
+              "type": 1,
+              "symbol": "override_tasks",
+              "addend": null
+            },
+            {
+              "section": ".maps",
+              "offset": 24,
+              "type": 2,
+              "symbol": "generic_kprobe_setup_event",
+              "addend": null
+            },
+            {
+              "section": ".maps",
+              "offset": 32,
+              "type": 2,
+              "symbol": "generic_kprobe_process_event",
+              "addend": null
+            },
+            {
+              "section": ".maps",
+              "offset": 40,
+              "type": 2,
+              "symbol": "generic_kprobe_process_filter",
+              "addend": null
+            },
+            {
+              "section": ".maps",
+              "offset": 48,
+              "type": 2,
+              "symbol": "generic_kprobe_filter_arg",
+              "addend": null
+            },
+            {
+              "section": ".maps",
+              "offset": 56,
+              "type": 2,
+              "symbol": "generic_kprobe_actions",
+              "addend": null
+            },
+            {
+              "section": ".maps",
+              "offset": 64,
+              "type": 2,
+              "symbol": "generic_kprobe_output",
+              "addend": null
+            }
+          ],
+          "actual_relocations": [
+            {
+              "section": ".text",
+              "offset": 2312,
+              "type": 1,
+              "symbol": "data_heap",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 4064,
+              "type": 1,
+              "symbol": "tg_stats_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 4576,
+              "type": 1,
+              "symbol": "tg_conf_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 4648,
+              "type": 1,
+              "symbol": "tcpmon_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 4736,
+              "type": 1,
+              "symbol": "tg_rb_events",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 4952,
+              "type": 10,
+              "symbol": "cel_expr_1",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 5016,
+              "type": 10,
+              "symbol": "cel_expr_5",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 5072,
+              "type": 10,
+              "symbol": "cel_expr_3",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 5128,
+              "type": 10,
+              "symbol": "cel_expr_7",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 5160,
+              "type": 10,
+              "symbol": "cel_expr_0",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 5192,
+              "type": 10,
+              "symbol": "cel_expr_4",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 5224,
+              "type": 10,
+              "symbol": "cel_expr_2",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 5256,
+              "type": 10,
+              "symbol": "cel_expr_6",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 8512,
+              "type": 1,
+              "symbol": "argfilter_maps",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 12560,
+              "type": 1,
+              "symbol": "argfilter_maps",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 16896,
+              "type": 1,
+              "symbol": "argfilter_maps",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 21232,
+              "type": 1,
+              "symbol": "argfilter_maps",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 23992,
+              "type": 1,
+              "symbol": "bpf_strncasestr",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 24288,
+              "type": 1,
+              "symbol": "bpf_strnstr",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 25440,
+              "type": 1,
+              "symbol": "addr4lpm_maps",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 25752,
+              "type": 1,
+              "symbol": "addr6lpm_maps",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 27600,
+              "type": 1,
+              "symbol": "string_maps_heap",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 27664,
+              "type": 1,
+              "symbol": "heap_ro_zero",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28072,
+              "type": 1,
+              "symbol": "string_maps_0",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28112,
+              "type": 1,
+              "symbol": "string_maps_1",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28176,
+              "type": 1,
+              "symbol": "string_maps_7",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28232,
+              "type": 1,
+              "symbol": "string_maps_4",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28288,
+              "type": 1,
+              "symbol": "string_maps_3",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28312,
+              "type": 1,
+              "symbol": "string_maps_6",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28336,
+              "type": 1,
+              "symbol": "string_maps_9",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28360,
+              "type": 1,
+              "symbol": "string_maps_2",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28384,
+              "type": 1,
+              "symbol": "string_maps_10",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28408,
+              "type": 1,
+              "symbol": "string_maps_5",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28432,
+              "type": 1,
+              "symbol": "string_maps_8",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28680,
+              "type": 1,
+              "symbol": "string_prefix_maps",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 28768,
+              "type": 1,
+              "symbol": "string_prefix_maps_heap",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 29120,
+              "type": 1,
+              "symbol": "string_postfix_maps",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 29208,
+              "type": 1,
+              "symbol": "string_postfix_maps_heap",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 30160,
+              "type": 1,
+              "symbol": "substring_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 30240,
+              "type": 10,
+              "symbol": "bpf_strncasestr",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 30272,
+              "type": 10,
+              "symbol": "bpf_strnstr",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 30448,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 31232,
+              "type": 1,
+              "symbol": "fdinstall_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 31592,
+              "type": 1,
+              "symbol": "fdinstall_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 31976,
+              "type": 1,
+              "symbol": "heap",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 32600,
+              "type": 1,
+              "symbol": "fdinstall_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 32928,
+              "type": 1,
+              "symbol": "socktrack_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 33232,
+              "type": 1,
+              "symbol": "override_tasks",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 33368,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 34168,
+              "type": 1,
+              "symbol": "enforcer_data",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 34424,
+              "type": 1,
+              "symbol": "enforcer_missed_notifications",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 34768,
+              "type": 1,
+              "symbol": "ratelimit_heap",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 34840,
+              "type": 1,
+              "symbol": "heap_ro_zero",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 34992,
+              "type": 1,
+              "symbol": "override_tasks",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 35080,
+              "type": 1,
+              "symbol": "enforcer_data",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 35256,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 35336,
+              "type": 1,
+              "symbol": "fdinstall_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 35464,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 35544,
+              "type": 1,
+              "symbol": "policy_stats",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 35736,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 35864,
+              "type": 1,
+              "symbol": "socktrack_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 35952,
+              "type": 1,
+              "symbol": "enforcer_missed_notifications",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 36136,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 36488,
+              "type": 1,
+              "symbol": "ratelimit_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 36592,
+              "type": 1,
+              "symbol": "ratelimit_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 36672,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 36712,
+              "type": 1,
+              "symbol": "config_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 36984,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 37024,
+              "type": 1,
+              "symbol": "config_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 37480,
+              "type": 1,
+              "symbol": "stack_trace_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 37632,
+              "type": 1,
+              "symbol": "stack_trace_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 37832,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 37920,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 37968,
+              "type": 1,
+              "symbol": "enforcer_missed_notifications",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 38072,
+              "type": 1,
+              "symbol": "enforcer_data",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 38320,
+              "type": 1,
+              "symbol": "enforcer_missed_notifications",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 38392,
+              "type": 1,
+              "symbol": "enforcer_data",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 38472,
+              "type": 1,
+              "symbol": "enforcer_missed_notifications",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 38640,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 38752,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": ".text",
+              "offset": 38800,
+              "type": 1,
+              "symbol": "enforcer_missed_notifications",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 40,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 96,
+              "type": 1,
+              "symbol": "config_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 1368,
+              "type": 1,
+              "symbol": "retprobe_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 1528,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 1640,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 1704,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 1744,
+              "type": 1,
+              "symbol": "config_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 1952,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 1992,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 2080,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 2208,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 2264,
+              "type": 1,
+              "symbol": "config_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 3776,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 4016,
+              "type": 1,
+              "symbol": "CONFIG_ITER_NUM",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 4088,
+              "type": 10,
+              "symbol": "bpf_iter_num_new",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 4104,
+              "type": 10,
+              "symbol": "bpf_iter_num_next",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 4488,
+              "type": 10,
+              "symbol": "bpf_iter_num_next",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 4520,
+              "type": 10,
+              "symbol": "bpf_iter_num_destroy",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 4608,
+              "type": 1,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 4768,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 5440,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 5912,
+              "type": 1,
+              "symbol": "buffer_heap_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 6848,
+              "type": 1,
+              "symbol": "CONFIG_ITER_NUM",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 6912,
+              "type": 10,
+              "symbol": "bpf_iter_num_new",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 7280,
+              "type": 10,
+              "symbol": "bpf_iter_num_next",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 7896,
+              "type": 1,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 10208,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 10480,
+              "type": 10,
+              "symbol": "bpf_iter_num_destroy",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 11128,
+              "type": 1,
+              "symbol": "fdinstall_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 14696,
+              "type": 1,
+              "symbol": "tg_ipv6_ext_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 15192,
+              "type": 1,
+              "symbol": "socktrack_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 15584,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 17064,
+              "type": 1,
+              "symbol": "retprobe_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 17224,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 21344,
+              "type": 1,
+              "symbol": "socktrack_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 22088,
+              "type": 1,
+              "symbol": "retprobe_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 22248,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 22392,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 28720,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 28760,
+              "type": 1,
+              "symbol": "config_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 28984,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 29040,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 29616,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 29760,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 29968,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 30176,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 30384,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 33712,
+              "type": 1,
+              "symbol": "buffer_heap_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 34792,
+              "type": 1,
+              "symbol": "CONFIG_ITER_NUM",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 34856,
+              "type": 10,
+              "symbol": "bpf_iter_num_new",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 35232,
+              "type": 10,
+              "symbol": "bpf_iter_num_next",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 35864,
+              "type": 1,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 35976,
+              "type": 10,
+              "symbol": "bpf_iter_num_destroy",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 36464,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 36576,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 36816,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 36928,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 37248,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 37360,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 37640,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 37752,
+              "type": 1,
+              "symbol": "tg_errmetrics_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 37840,
+              "type": 1,
+              "symbol": "filter_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 38096,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 38208,
+              "type": 1,
+              "symbol": "tg_mb_sel_opts",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 38432,
+              "type": 1,
+              "symbol": "string_postfix_maps",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 38544,
+              "type": 1,
+              "symbol": "string_postfix_maps_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 38960,
+              "type": 1,
+              "symbol": "string_prefix_maps",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 39016,
+              "type": 1,
+              "symbol": "string_maps_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 39744,
+              "type": 1,
+              "symbol": "tg_mbset_gen",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 39816,
+              "type": 1,
+              "symbol": "CONFIG_ITER_NUM",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 39912,
+              "type": 10,
+              "symbol": "bpf_iter_num_new",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 39952,
+              "type": 10,
+              "symbol": "bpf_iter_num_destroy",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 39992,
+              "type": 10,
+              "symbol": "bpf_iter_num_next",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 40040,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 40096,
+              "type": 1,
+              "symbol": "tg_mbset_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 40320,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 40376,
+              "type": 1,
+              "symbol": "tg_mbset_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 40544,
+              "type": 1,
+              "symbol": "tg_mb_paths",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 40728,
+              "type": 1,
+              "symbol": "PARENTS_MAP_ENABLED",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 40760,
+              "type": 1,
+              "symbol": "tg_parents_bin",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 40872,
+              "type": 1,
+              "symbol": "tg_mb_sel_opts",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 41088,
+              "type": 1,
+              "symbol": "string_postfix_maps",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 41200,
+              "type": 1,
+              "symbol": "string_postfix_maps_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 41624,
+              "type": 1,
+              "symbol": "string_prefix_maps",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 41680,
+              "type": 1,
+              "symbol": "string_maps_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 42392,
+              "type": 1,
+              "symbol": "tg_mbset_gen",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 42456,
+              "type": 1,
+              "symbol": "CONFIG_ITER_NUM",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 42560,
+              "type": 10,
+              "symbol": "bpf_iter_num_new",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 42608,
+              "type": 10,
+              "symbol": "bpf_iter_num_destroy",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 42648,
+              "type": 10,
+              "symbol": "bpf_iter_num_next",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 42696,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 42752,
+              "type": 1,
+              "symbol": "tg_mbset_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 42976,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 43032,
+              "type": 1,
+              "symbol": "tg_mbset_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 43192,
+              "type": 1,
+              "symbol": "tg_mb_paths",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 44640,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 44800,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 44960,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 45120,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 45280,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 45440,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 45600,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 45768,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 45936,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 48696,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 51056,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 51944,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 52040,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 52104,
+              "type": 1,
+              "symbol": "filter_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 52672,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 53512,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 54152,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 54248,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 54360,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 54392,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 54848,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 54872,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 54904,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 54944,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 55200,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 55240,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 55336,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 55416,
+              "type": 1,
+              "symbol": "retprobe_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 55464,
+              "type": 1,
+              "symbol": "retprobe_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 55536,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 55608,
+              "type": 1,
+              "symbol": "filter_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 55872,
+              "type": 1,
+              "symbol": "policy_conf",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 55992,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 56104,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 56216,
+              "type": 10,
+              "symbol": ".text",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 56248,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 56336,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 56464,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 58080,
+              "type": 1,
+              "symbol": "execve_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 58424,
+              "type": 1,
+              "symbol": "tg_conf_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 58480,
+              "type": 1,
+              "symbol": "tcpmon_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 58600,
+              "type": 1,
+              "symbol": "tg_stats_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 58760,
+              "type": 1,
+              "symbol": "tg_rb_events",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 58848,
+              "type": 1,
+              "symbol": "tg_stats_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 58968,
+              "type": 1,
+              "symbol": "policy_stats",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi",
+              "offset": 59032,
+              "type": 1,
+              "symbol": "policy_stats",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi/generic_kprobe",
+              "offset": 40,
+              "type": 1,
+              "symbol": "process_call_heap",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi/generic_kprobe",
+              "offset": 120,
+              "type": 1,
+              "symbol": "config_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi/generic_kprobe",
+              "offset": 272,
+              "type": 1,
+              "symbol": "policy_filter_maps",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi/generic_kprobe",
+              "offset": 344,
+              "type": 1,
+              "symbol": "tg_conf_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi/generic_kprobe",
+              "offset": 1072,
+              "type": 1,
+              "symbol": "tg_cgtracker_map",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi/generic_kprobe",
+              "offset": 1304,
+              "type": 1,
+              "symbol": "policy_filter_maps",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi/generic_kprobe",
+              "offset": 3392,
+              "type": 1,
+              "symbol": "kprobe_calls",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi/generic_kprobe_override",
+              "offset": 40,
+              "type": 1,
+              "symbol": "override_tasks",
+              "addend": null
+            },
+            {
+              "section": "kprobe.multi/generic_kprobe_override",
+              "offset": 128,
+              "type": 1,
+              "symbol": "override_tasks",
+              "addend": null
+            },
+            {
+              "section": "fmod_ret/security_task_prctl",
+              "offset": 32,
+              "type": 1,
+              "symbol": "override_tasks",
+              "addend": null
+            },
+            {
+              "section": "fmod_ret/security_task_prctl",
+              "offset": 96,
+              "type": 1,
+              "symbol": "override_tasks",
+              "addend": null
+            },
+            {
+              "section": ".maps",
+              "offset": 24,
+              "type": 2,
+              "symbol": "generic_kprobe_setup_event",
+              "addend": null
+            },
+            {
+              "section": ".maps",
+              "offset": 32,
+              "type": 2,
+              "symbol": "generic_kprobe_process_event",
+              "addend": null
+            },
+            {
+              "section": ".maps",
+              "offset": 40,
+              "type": 2,
+              "symbol": "generic_kprobe_process_filter",
+              "addend": null
+            },
+            {
+              "section": ".maps",
+              "offset": 48,
+              "type": 2,
+              "symbol": "generic_kprobe_filter_arg",
+              "addend": null
+            },
+            {
+              "section": ".maps",
+              "offset": 56,
+              "type": 2,
+              "symbol": "generic_kprobe_actions",
+              "addend": null
+            },
+            {
+              "section": ".maps",
+              "offset": 64,
+              "type": 2,
+              "symbol": "generic_kprobe_output",
+              "addend": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61-links/report.json",
+      "sha256": "cccfb7c9df0a65617acf256d593f12fd6bf3726eac3253207c2e81a147fbcbb1",
+      "data": [
+        {
+          "symbol": "generic_fmodret_override",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61.native.o",
+            "--symbol",
+            "generic_fmodret_override",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61-links/generic_fmodret_override.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "generic_kprobe_actions",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61.native.o",
+            "--symbol",
+            "generic_kprobe_actions",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61-links/generic_kprobe_actions.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "generic_kprobe_event",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61.native.o",
+            "--symbol",
+            "generic_kprobe_event",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61-links/generic_kprobe_event.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "generic_kprobe_filter_arg",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61.native.o",
+            "--symbol",
+            "generic_kprobe_filter_arg",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61-links/generic_kprobe_filter_arg.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "generic_kprobe_output",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61.native.o",
+            "--symbol",
+            "generic_kprobe_output",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61-links/generic_kprobe_output.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "generic_kprobe_override",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61.native.o",
+            "--symbol",
+            "generic_kprobe_override",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61-links/generic_kprobe_override.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "generic_kprobe_process_event",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61.native.o",
+            "--symbol",
+            "generic_kprobe_process_event",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61-links/generic_kprobe_process_event.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "generic_kprobe_process_filter",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61.native.o",
+            "--symbol",
+            "generic_kprobe_process_filter",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61-links/generic_kprobe_process_filter.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "generic_kprobe_setup_event",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61.native.o",
+            "--symbol",
+            "generic_kprobe_setup_event",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/tetragon-multi-smoke/bpf_multi_kprobe_v61-links/generic_kprobe_setup_event.proof.o"
+          ],
+          "returncode": 0
+        }
+      ]
+    }
+  ],
+  "scope": "Host compiler/replay artifacts only; no kernel submission, native installation or application equal-work claim.",
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/perf_20261113/tetragon-multi-frontend.tar.gz",
+    "bytes": 3669463,
+    "sha256": "824ea2c0216e625a3f3b1b7519437ba67ff1da081f07467dfc428c2b1526abaa",
+    "files_byte_compared": 46
+  }
+}
