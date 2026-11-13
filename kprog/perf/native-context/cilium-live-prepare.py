@@ -11,6 +11,12 @@ import tarfile
 def digest(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def replacements(app, shim):
+    if app['post_rejit'] is None and not shim.exists():
+        return None
+    return shim.read_text().count('native-loader replaced prog=')
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--raw',type=Path,required=True)
@@ -47,9 +53,9 @@ def main():
                 make_exit=int((args.raw/'job/exit-code').read_text()),app_status=app['status'],app_error=app['error'],
                 programs={phase:len(app[phase]['bpf']) if app[phase] is not None else None for phase in ['baseline','post_rejit']},
                 samples=metadata['samples'],workload_seconds=metadata['workload_seconds'],
-                native_replacements=shim.read_text().count('native-loader replaced prog='),
+                native_replacements=replacements(app,shim),
                 observer_exit=int((args.capture/'observer-exit-code').read_text()),snapshots=snapshots,
-                extracted_baseline_snapshot=args.baseline_snapshot,
+                extracted_baseline_snapshot=args.baseline_snapshot if (args.raw/'baseline-state').exists() else None,
                 limits=['Diagnostic outcome only; actual manifest/linker selection is recorded in launch receipt and shim logs.',
                         'Snapshots may catch objects mid-build; each captured length and raw partial bytes are retained.',
                         'Progress labels can span app restarts before the next measurement marker; actual generation IDs and clocks remain necessary.',
