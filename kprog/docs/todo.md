@@ -145,6 +145,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED kfunc实际kernel子集通过（2026-11-13）** retry50711于23:06:41→23:06:46 Make0，通用resolver对原BTF .ksyms中的5个真实function均返回匹配target prototype与非零实际kernel地址，普通CEL extern未误归类。弱缺失null、强缺失错误、prototype/target-ID与relative BTF metadata回归均通过；完整ELF/log/地址证据 `kfunc-kernel-results*`，raw `20261113-kfunc/ksyms-fix/{kernel-launch,kernel}/`。仅loader组件，canonical未部署，native execution0；generic x86 checked call模型及真实整应用仍未完成。三台census继续，初始collection各0新完成。
+
 - **VERIFIED kfunc .ksyms kernel retry启动（2026-11-13）** 73effebba修复及host结果已push；dry-run后setsid/nohup outer50711，CPU13/2vCPU2G/AS8GiB、shared image lock，raw `20261113-kfunc/ksyms-fix/{kernel-launch,kernel}/`，使用同一已留存的真实BPF/native ELF及新fixture二进制。启动前MemAvailable90GiB；receipt `kfunc-ksyms-kernel-launch.json`。下turn收集，不轮询/不预报通过；三台census45406/45407/45408继续，未改canonical base/image。
 
 - **VERIFIED kfunc extern scope修复（2026-11-13）** actual-kernel unit45409于22:59:02→22:59:07 Make2，暴露普通应用cel_expr_2被误当作kernel function；保留完整失败，不计应用拒绝/执行。通用修复从原对象BTF .ksyms DATASEC选择FUNC，普通应用extern仍交正常链接；新增显式manifest-relative kernel_kfunc_btf输入，因为libbpf在BTF_LOAD前改写.ksyms与FUNC linkage，loaded-program BTF丢失该身份。默认关闭、弱缺失null、强缺失错误及既有libbpf prototype规则不变，无函数体/强制availability。含strong ordinary extern的弱/强kernel-function fixture、无.ksyms、真实五声明、相对BTF路径host回归通过；raw `20261113-kfunc/ksyms-fix/`，完整失败+修复证据 `kfunc-ksyms-scope*`。仅source/scratch，真实kernel retry及checked x86 kfunc模型仍待完成；census三台未停止。

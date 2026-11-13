@@ -1,0 +1,41 @@
+{
+  "recorded_utc": "2026-11-13T23:11:56+00:00",
+  "code_commit": "73effebba",
+  "outer_pid": 50711,
+  "started": "2026-11-13T23:06:41Z",
+  "finished": "2026-11-13T23:06:46Z",
+  "make_exit": 0,
+  "scope": "Actual sole-kernel function BTF/prototype/address component, no native application execution",
+  "bindings": [
+    {
+      "name": "bpf_iter_num_destroy",
+      "address": 18446744071768391440
+    },
+    {
+      "name": "bpf_iter_num_new",
+      "address": 18446744071768391264
+    },
+    {
+      "name": "bpf_iter_num_next",
+      "address": 18446744071768391360
+    },
+    {
+      "name": "bpf_strncasestr",
+      "address": 18446744071768368528
+    },
+    {
+      "name": "bpf_strnstr",
+      "address": 18446744071768368496
+    }
+  ],
+  "tests": "Real five functions resolved; ordinary extern separation, weak null/strong error, libbpf-compatible prototypes, manifest BTF relative path PASS",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-kfunc/ksyms-fix",
+  "archive": "kfunc-kernel-results.tar.gz",
+  "archive_sha256": "ec063bc7d9dd2b93bf51cbb149af4e0265cb19b8d90717a22a3d691a5c38b146",
+  "native_executions": 0,
+  "canonical_deployed": false,
+  "kernel_image_changed": false,
+  "remaining": "Generic x86 checked kfunc model, actual app linking and execution",
+  "benchmark_settings_changed": false,
+  "raw_removed": false
+}
