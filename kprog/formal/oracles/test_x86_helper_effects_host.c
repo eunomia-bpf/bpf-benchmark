@@ -34,6 +34,54 @@ int main(void) {
     X86_SIM_BPF_CALL_bpf_map_delete_elem();
     REQUIRE(map_value==0 && SAVED(-24).pointer==(void *)7);
 
+    /* Ordinary native calls spill and reload an address in the caller frame. */
+    __x86_rsp.ptr=(void *)-40;
+    X86_SIM_L_EXEC_LEA(X86_RCX, X86_RSP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 7);
+    void *caller_byte=__x86_rcx.ptr;
+    __x86_rsp.ptr=(void *)-232;
+    X86_SIM_L_EXEC_STORE(X86_OP_MOV_STORE_REG, X86_RSP, X86_RCX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 80);
+    REQUIRE(SAVED(-152).pointer==caller_byte);
+    X86_SIM_BPF_CALL_bpf_ktime_get_ns();
+    X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RSP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 80);
+    REQUIRE(__x86_rax_tag==X86_SIM_TAG_STACK && __x86_rax.ptr==caller_byte);
+    unsigned char output_buffer[16]={}, input_buffer[16]={3};
+    __x86_rbp.ptr=output_buffer; __x86_rbp_tag=X86_SIM_TAG_MAP_VALUE;
+    X86_SIM_L_EXEC_STORE(X86_OP_MOV_STORE_REG, X86_RSP, X86_RBP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 88);
+    X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RCX, X86_RSP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 88);
+    REQUIRE(__x86_rcx_tag==X86_SIM_TAG_MAP_VALUE && __x86_rcx.ptr==output_buffer);
+    X86_SIM_L_EXEC_ALU_IMM(X86_RCX, X86_WIDTH_64, X86_ALU_ADD, 1);
+    REQUIRE(__x86_rcx_tag==X86_SIM_TAG_MAP_VALUE && __x86_rcx.ptr==output_buffer+1);
+    X86_SIM_L_EXEC_LEA(X86_RDI, X86_RCX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0);
+    __x86_rsi.ptr=(void *)1; __x86_rdx.ptr=input_buffer;
+    X86_SIM_BPF_CALL_bpf_probe_read();
+    REQUIRE(SAVED(-152).pointer==caller_byte);
+
+    /* Every memory-region tag follows full-width offset arithmetic. */
+    for (unsigned tag=X86_SIM_TAG_ABI; tag<=X86_SIM_TAG_MAP_VALUE; ++tag) {
+        if (tag==X86_SIM_TAG_MAP_PTR) continue;
+        __x86_rbx.ptr=output_buffer+4; __x86_rbx_tag=tag;
+        __u64 prior_bits=X86_SIM_L_READ_REG(X86_RBX);
+        X86_SIM_L_EXEC_ALU_IMM(X86_RBX, X86_WIDTH_64, X86_ALU_SUB, 1);
+        REQUIRE(__x86_rbx_tag==tag && __x86_rbx.ptr==output_buffer+3);
+        REQUIRE(X86_SIM_L_READ_REG(X86_RBX)==prior_bits-1);
+        __x86_rdx.ptr=(void *)2; __x86_rdx_tag=X86_SIM_TAG_SCALAR;
+        X86_SIM_L_EXEC_ALU_REG(X86_RBX, X86_RDX, X86_WIDTH_64, X86_ALU_ADD);
+        REQUIRE(__x86_rbx_tag==tag && __x86_rbx.ptr==output_buffer+5);
+        X86_SIM_L_EXEC_ALU_REG(X86_RBX, X86_RDX, X86_WIDTH_64, X86_ALU_SUB);
+        REQUIRE(__x86_rbx_tag==tag && __x86_rbx.ptr==output_buffer+3);
+        __x86_rdx.ptr=(void *)1; __x86_rdx_tag=X86_SIM_TAG_SCALAR;
+        X86_SIM_L_EXEC_ALU_REG(X86_RDX, X86_RBX, X86_WIDTH_64, X86_ALU_ADD);
+        REQUIRE(__x86_rdx_tag==tag && __x86_rdx.ptr==output_buffer+4);
+        __x86_rcx.ptr=(void *)1; __x86_rcx_tag=X86_SIM_TAG_SCALAR;
+        X86_SIM_L_EXEC_LEA(X86_RDI, X86_RCX, X86_WIDTH_64, X86_MEM_AUX(X86_RBX, 0), 1);
+        REQUIRE(__x86_rdi_tag==tag && __x86_rdi.ptr==output_buffer+5);
+        X86_SIM_L_EXEC_ALU_REG(X86_RDI, X86_RDX, X86_WIDTH_64, X86_ALU_SUB);
+        REQUIRE(__x86_rdi_tag==X86_SIM_TAG_SCALAR && (__u64)(long)__x86_rdi.ptr==1);
+        X86_SIM_L_EXEC_ALU_IMM(X86_RBX, X86_WIDTH_32, X86_ALU_ADD, 1);
+        REQUIRE(__x86_rbx_tag==X86_SIM_TAG_SCALAR);
+    }
+    __x86_rsp.ptr=(void *)-32;
+
     unsigned char foreign[16]={}, source[16]={1,2,3,4};
     __x86_rdi.ptr=foreign; __x86_rdi_tag=X86_SIM_TAG_MAP_VALUE;
     __x86_rsi.ptr=(void *)4; __x86_rdx.ptr=source;

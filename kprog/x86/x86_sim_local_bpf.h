@@ -117,6 +117,10 @@ union x86_sim_stack_mem {
 #define X86_SIM_TAG_HELPER_ID 7U
 #define X86_SIM_TAG_CODE 8U
 
+/* Address arithmetic preserves the backing memory region's provenance. */
+#define X86_SIM_L_MEMORY_TAG(TAG) \
+    (((TAG)>=X86_SIM_TAG_ABI && (TAG)<=X86_SIM_TAG_STACK) || (TAG)==X86_SIM_TAG_MAP_VALUE)
+
 /* The pointer-write provenance selector indexes the tag codes above, so this
  * generated contract is included after them rather than with the other
  * generated contracts at the top of the file. */
@@ -1619,6 +1623,14 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 						KPROG_PTR_ADD64_BITS(          \
 							__x86_l_src_ptr, __x86_l_off);\
 				}                                         \
+				if (__x86_l_src_tag==X86_SIM_TAG_SCALAR && \
+				    KPROG_X86_MEM_INDEX_PRESENT(X86_MEM_AUX_INDEX(AUX)) && \
+				    X86_MEM_AUX_SCALE_LOG2(AUX)==0 && \
+				    X86_SIM_L_MEMORY_TAG(X86_SIM_L_REG_TAG(X86_MEM_AUX_INDEX(AUX)))) { \
+					__x86_l_result=KPROG_PTR_ADD64_BITS(X86_SIM_L_READ_REG_PTR(X86_MEM_AUX_INDEX(AUX)), \
+						(__u64)(long)__x86_l_src_ptr + x86_simm(IMM)); \
+					__x86_l_dst_tag=KPROG_PTR_ADD64_TAG(X86_SIM_L_REG_TAG(X86_MEM_AUX_INDEX(AUX))); \
+				} \
 				if ((DST) == X86_RSP)                      \
 					X86_SIM_L_WRITE_REG_WIDTH((DST),  \
 						(KPROG_X86_REG_ABSENT(SRC) ? 0 : X86_SIM_L_READ_REG(SRC)) + __x86_l_off, __x86_l_width); \
@@ -1734,6 +1746,12 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
                 (__x86_l_alu==X86_ALU_ADD || __x86_l_alu==X86_ALU_SUB)) \
                 X86_SIM_L_WRITE_REG_PTR_TAG((DST), KPROG_PTR_ADD64_BITS(__x86_rsp.ptr, \
                     __x86_l_alu==X86_ALU_ADD ? __x86_l_rhs : -__x86_l_rhs),X86_SIM_TAG_SCALAR); \
+            else if (__x86_l_width==X86_WIDTH_64 && __x86_l_dst_shift==0 && \
+                X86_SIM_L_MEMORY_TAG(X86_SIM_L_REG_TAG(DST)) && \
+                (__x86_l_alu==X86_ALU_ADD || __x86_l_alu==X86_ALU_SUB)) \
+                X86_SIM_L_WRITE_REG_PTR_TAG((DST), KPROG_PTR_ADD64_BITS(X86_SIM_L_READ_REG_PTR(DST), \
+                    __x86_l_alu==X86_ALU_ADD ? __x86_l_rhs : -__x86_l_rhs), \
+                    KPROG_PTR_ADD64_TAG(X86_SIM_L_REG_TAG(DST))); \
             else \
 			X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST), __x86_l_result,\
 				__x86_l_width, __x86_l_dst_shift);           \
@@ -1792,6 +1810,17 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
                 (__x86_l_alu==X86_ALU_ADD || __x86_l_alu==X86_ALU_SUB)) \
                 X86_SIM_L_WRITE_REG_PTR_TAG((DST), KPROG_PTR_ADD64_BITS(__x86_rsp.ptr, \
                     __x86_l_alu==X86_ALU_ADD ? __x86_l_rhs : -__x86_l_rhs),X86_SIM_TAG_SCALAR); \
+            else if (__x86_l_width==X86_WIDTH_64 && __x86_l_dst_shift==0 && __x86_l_src_shift==0 && \
+                X86_SIM_L_MEMORY_TAG(X86_SIM_L_REG_TAG(DST)) && X86_SIM_L_REG_TAG(SRC)==X86_SIM_TAG_SCALAR && \
+                (__x86_l_alu==X86_ALU_ADD || __x86_l_alu==X86_ALU_SUB)) \
+                X86_SIM_L_WRITE_REG_PTR_TAG((DST), KPROG_PTR_ADD64_BITS(X86_SIM_L_READ_REG_PTR(DST), \
+                    __x86_l_alu==X86_ALU_ADD ? __x86_l_rhs : -__x86_l_rhs), \
+                    KPROG_PTR_ADD64_TAG(X86_SIM_L_REG_TAG(DST))); \
+            else if (__x86_l_width==X86_WIDTH_64 && __x86_l_dst_shift==0 && __x86_l_src_shift==0 && \
+                __x86_l_alu==X86_ALU_ADD && X86_SIM_L_REG_TAG(DST)==X86_SIM_TAG_SCALAR && \
+                X86_SIM_L_MEMORY_TAG(X86_SIM_L_REG_TAG(SRC))) \
+                X86_SIM_L_WRITE_REG_PTR_TAG((DST), KPROG_PTR_ADD64_BITS(X86_SIM_L_READ_REG_PTR(SRC),__x86_l_lhs), \
+                    KPROG_PTR_ADD64_TAG(X86_SIM_L_REG_TAG(SRC))); \
             else \
 			X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST), __x86_l_result,\
 				__x86_l_width, __x86_l_dst_shift);           \
