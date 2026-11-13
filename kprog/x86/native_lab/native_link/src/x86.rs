@@ -1750,9 +1750,8 @@ pub(super) fn rewrite_x86(
                 });
             }
             PatchKind::TailCount { .. } => {
-                // Four-byte field the module rewrites with -16 - depth. The
-                // linker's own value is the plain entry offset; the module's
-                // patch is what makes a tail-called program count its runs.
+                // Counter-pointer displacement within the physical BPF frame.
+                // This is independent of the target program's entry offset.
                 relocs.push(RelocRecord {
                     offset: u32::try_from(p.global_offset)
                         .map_err(|_| anyhow!("tail-count reloc offset exceeds u32"))?,
@@ -3621,8 +3620,8 @@ fn append_x86_stub_callee_pop(bytes: &mut Vec<u8>, callee_saved_mask: u8) {
 
 /// Append `add rcx, imm` and return the offset of its immediate field.
 ///
-/// The default retains the compact encoding. Tail-count relocation requires
-/// an imm32 field for the module's `NATIVE_LAB_RELOC_X86_TAIL_COUNT` patch.
+/// The default retains the compact encoding, and opt-in retains its imm32 form.
+/// This entry immediate is not a tail-count relocation field.
 fn append_x86_add_rcx_imm(bytes: &mut Vec<u8>, imm: u32, tail_count_relocs: bool) -> usize {
     if !tail_count_relocs && imm <= 0x7f {
         bytes.extend_from_slice(&[0x48, 0x83, 0xC1, imm as u8]);
@@ -3682,6 +3681,7 @@ fn build_x86_tail_call_inline(
     } else {
         bail!("x86 bpf_tail_call lowering missing BPF rbp location");
     }
+    let tail_count_field = bytes.len();
     bytes.extend_from_slice(&(-16i32).to_le_bytes());
     bytes.extend_from_slice(&[0x48, 0x83, 0x38, MAX_TAIL_CALL_CNT]); // cmp qword [rax], 33
     let jae_out = append_x86_jcc_rel32(&mut bytes, 0x83);
@@ -3697,15 +3697,14 @@ fn build_x86_tail_call_inline(
     bytes.extend_from_slice(&[0x58, 0x58]); // pop tail_call_cnt_ptr; pop tail_call_cnt
     bytes.extend_from_slice(&[0x48, 0x8B, 0x89]); // mov rcx, [rcx + disp32]
     bytes.extend_from_slice(&prog_bpf_func.to_le_bytes());
-    let tail_count_field = append_x86_add_rcx_imm(&mut bytes, tail_call_offset, tail_count_relocs);
+    append_x86_add_rcx_imm(&mut bytes, tail_call_offset, tail_count_relocs);
     bytes.extend_from_slice(&[0xFF, 0xE1]); // jmp rcx
 
     let out = bytes.len();
     patch_x86_rel32(&mut bytes, jbe_out, out)?;
     patch_x86_rel32(&mut bytes, jae_out, out)?;
     patch_x86_rel32(&mut bytes, je_out, out)?;
-    // The module rewrites the tail-count field, so the caller has to know where it
-    // is: reported as an offset into the stub the chunks below are built from.
+    // Report the counter-pointer load's disp32, not the target-entry immediate.
     Ok((declared_byte_chunks(&bytes)?, tail_count_field))
 }
 
@@ -4047,11 +4046,41 @@ fn build_x86_array_update(spec: &UpdateSiteSpec) -> Result<Vec<Instruction>> {
 mod tests {
     use super::*;
 
-    /// The module rewrites the tail-count field with `-16 - depth`, so that field
-    /// has to be four bytes wide whatever the entry offset is: the imm8 form has
-    /// no field to rewrite and would leave the callee's stats prologue in place.
     #[test]
-    fn tail_count_field_is_always_four_bytes() {
+    fn tail_count_patch_preserves_target_entry() -> Result<()> {
+        let helpers = HashMap::from([
+            (X86_BPF_MAP_MAX_ENTRIES_OFFSET_KEY.to_owned(), 68),
+            (X86_BPF_ARRAY_PTRS_OFFSET_KEY.to_owned(), 304),
+            (X86_BPF_PROG_BPF_FUNC_OFFSET_KEY.to_owned(), 72),
+            (X86_TAIL_CALL_OFFSET_KEY.to_owned(), 12),
+        ]);
+        for (saved_frame, live_rbp) in [(Some(64), false), (None, true)] {
+            let (stub, field) = build_x86_tail_call_inline(
+                &helpers, 15, &[], saved_frame, live_rbp, true,
+            )?;
+            let mut bytes = BlockEncoder::encode(
+                64, InstructionBlock::new(&stub, 0), BlockEncoderOptions::NONE,
+            )?.code_buffer;
+            assert_eq!(&bytes[field..field + 4], &(-16i32).to_le_bytes(),
+                       "relocation must name the counter-frame displacement");
+            bytes[field..field + 4].copy_from_slice(&(-16i32).to_le_bytes());
+            let decoded = decode_x86(&bytes)?;
+            let entry = decoded.iter().find(|i| i.mnemonic() == Mnemonic::Add
+                && i.op0_register() == Register::RCX).expect("tail entry add");
+            assert_eq!(entry.immediate32to64(), 12,
+                       "kernel tail-count patch must not redirect the tail jump");
+            let load = decoded.iter().find(|i| i.mnemonic() == Mnemonic::Mov
+                && i.op0_register() == Register::RAX
+                && i.memory_base() == if live_rbp { Register::RBP } else { Register::RAX })
+                .expect("counter pointer load");
+            assert_eq!(load.memory_displacement64() as i64, -16);
+        }
+        Ok(())
+    }
+
+    /// Preserve the opt-in entry encoding while relocating the separate counter load.
+    #[test]
+    fn opt_in_tail_entry_offset_retains_imm32_encoding() {
         for imm in [0u32, 16, 0x7f, 0x80, 0x1000] {
             let mut bytes = Vec::new();
             let at = append_x86_add_rcx_imm(&mut bytes, imm, true);

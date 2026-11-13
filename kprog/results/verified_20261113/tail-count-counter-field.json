@@ -1,0 +1,41 @@
+{
+  "recorded_at": "2026-11-13T02:57:57.932436+00:00",
+  "scope": "Generic opt-in tail-count relocation correction, unit/debug build only",
+  "finding_source": "LANE PERF2026-11-13T02:53:15Z",
+  "kernel_commit": "74d1097af561",
+  "problem": "Stub reported add-RCX target-entry immediate(+12) as kind10; sole kernel writes-16 to kind10 and would jump to bpf_func-16",
+  "change": "Return the disp32 of the actual counter-pointer load instead. Emitted instruction bytes for default and opt-in modes are preserved; only opt-in relocation location changes.",
+  "regression": "tail_count_patch_preserves_target_entry applies kernel-style-16 patch for saved BPF-frame pointer on RSP and live RBP paths, requires counter displacement-16 and tail entry+12",
+  "before": {
+    "exit_code": 2,
+    "tests_passed": 5,
+    "tests_failed": 1,
+    "actual_field_bytes": [
+      12,
+      0,
+      0,
+      0
+    ],
+    "expected_counter_bytes": [
+      240,
+      255,
+      255,
+      255
+    ]
+  },
+  "after": {
+    "exit_code": 0,
+    "tests_passed": 6,
+    "tests_failed": 0
+  },
+  "command": "taskset -c8-15 make -C kprog/tv linker-tail-count-check",
+  "dry_run": "make -n -C kprog/tv linker-tail-count-check",
+  "limits": [
+    "Shared release native-link still a941c36c0; no kernel/base/image rebuild",
+    "No new enabled guest acceptance/execution or equal-work claim",
+    "Captured failing default path emits no kind10; this opt-in bug does not explain that default failure",
+    "Full confirmation deferred to assembled batch per operator"
+  ],
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-tail-count-counter-field",
+  "archive": "tail-count-counter-field.tar.gz"
+}

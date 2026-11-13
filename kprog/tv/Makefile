@@ -130,6 +130,10 @@ linker-entry-abi-check:
 	cargo test --manifest-path ../x86/native_lab/native_link/Cargo.toml
 	$(MAKE) linker-default-bytes OUTPUT="$(OUTPUT)/after" REFERENCE="$(OUTPUT)/before"
 
+.PHONY: linker-tail-count-check
+linker-tail-count-check:
+	cargo test --manifest-path ../x86/native_lab/native_link/Cargo.toml tail_
+
 kernel-check: linker-build
 
 build/test-loader: test_loader.cpp build/context-helper-25.bpf.o build/context-helper-27.bpf.o build/context-helper-67.bpf.o build/bcc-map-probe/manifest.json build/source-value.bpf.o build/source-value-wrong-site.bpf.o build/native-entry.o build/simulator.bpf.o build/runtime-config/simulator.bpf.o build/wrong-capacity/simulator.bpf.o build/wrong-value-size/simulator.bpf.o build/wrong-layout/simulator.bpf.o build/wrong-readonly/simulator.bpf.o build/wrong-data-layout/simulator.bpf.o ../libnativeloader/src/native_loader.cpp \
