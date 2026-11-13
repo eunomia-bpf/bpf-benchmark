@@ -274,6 +274,35 @@ def resume(args):
     print(json.dumps(source["resume"]), flush=True)
 
 
+def checkpoint(args):
+    """Snapshot already-paused guests, retaining unfinished journal bytes too."""
+    args.output.mkdir(parents=True, exist_ok=True)
+    queues = []
+    for queue in args.queue:
+        directory = args.output / queue.name
+        directory.mkdir()
+        journal = queue / "control/outcomes.jsonl"
+        raw = journal.read_bytes()
+        prefix = raw[:raw.rfind(b"\n") + 1]
+        rows = [json.loads(line) for line in prefix.splitlines()]
+        (directory / "journal.raw.jsonl").write_bytes(raw)
+        (directory / "outcomes.jsonl").write_bytes(prefix)
+        state = queue / "control/state"
+        files = [dict(path=str(path), bytes=path.stat().st_size)
+                 for path in sorted(state.rglob("*")) if path.is_file()]
+        write(directory / "state-files.json", files)
+        archive = directory / "state.tar.gz"
+        with tarfile.open(archive, "w:gz", compresslevel=1) as captured:
+            captured.add(state, arcname="state")
+        queues.append(dict(queue=str(queue), journal=str(directory / "outcomes.jsonl"),
+                           completed=len(rows), body_groups=[row["body_group"] for row in rows],
+                           incomplete_journal_bytes=len(raw) - len(prefix),
+                           state_files=len(files), state_archive=str(archive),
+                           archive_bytes=archive.stat().st_size))
+    write(args.output / "checkpoint.json", queues)
+    print(json.dumps(queues), flush=True)
+
+
 def retain_request_artifacts(result, directory):
     """Keep journal targets outside the service's temporary session directory."""
     service = result.get("submission", {}).get("service", {})
@@ -327,7 +356,7 @@ def guest(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("prepare", "group", "replay", "resume", "guest"))
+    parser.add_argument("mode", choices=("prepare", "group", "replay", "resume", "checkpoint", "guest"))
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--inputs", type=Path)
     parser.add_argument("--resources", type=Path)
@@ -342,8 +371,10 @@ def main():
     parser.add_argument("--failure-class", action="append", default=[])
     parser.add_argument("--priority-inventory", type=Path, action="append", default=[])
     parser.add_argument("--guest-count", type=int, default=3)
+    parser.add_argument("--queue", type=Path, action="append", default=[])
     args = parser.parse_args()
-    {"prepare": prepare, "group": group, "replay": replay, "resume": resume, "guest": guest}[args.mode](args)
+    {"prepare": prepare, "group": group, "replay": replay, "resume": resume,
+     "checkpoint": checkpoint, "guest": guest}[args.mode](args)
 
 
 if __name__ == "__main__":

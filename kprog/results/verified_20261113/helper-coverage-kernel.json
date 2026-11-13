@@ -1,0 +1,101 @@
+{
+  "source_commit": "ec3432bd6",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-helper-coverage",
+  "frontends": [
+    {
+      "frontend": "verified",
+      "make_exit": 0,
+      "finished": "2026-11-13T10:20:05Z",
+      "contexts": 10,
+      "returned_targets": 963,
+      "checks": 29,
+      "matches": true,
+      "network_checks": [
+        {
+          "context": "tc",
+          "checks": [
+            {
+              "helper": "bpf_fib_lookup",
+              "expected_symbol": "bpf_skb_fib_lookup",
+              "address": 18446744071911693328,
+              "matches": true
+            },
+            {
+              "helper": "bpf_skc_lookup_tcp",
+              "expected_symbol": "bpf_tc_skc_lookup_tcp",
+              "address": 18446744071911678256,
+              "matches": true
+            }
+          ]
+        },
+        {
+          "context": "xdp",
+          "checks": [
+            {
+              "helper": "bpf_fib_lookup",
+              "expected_symbol": "bpf_xdp_fib_lookup",
+              "address": 18446744071911693184,
+              "matches": true
+            },
+            {
+              "helper": "bpf_skc_lookup_tcp",
+              "expected_symbol": "bpf_xdp_skc_lookup_tcp",
+              "address": 18446744071911678352,
+              "matches": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "frontend": "direct",
+      "make_exit": 0,
+      "finished": "2026-11-13T10:20:05Z",
+      "contexts": 10,
+      "returned_targets": 963,
+      "checks": 29,
+      "matches": true,
+      "network_checks": [
+        {
+          "context": "tc",
+          "checks": [
+            {
+              "helper": "bpf_fib_lookup",
+              "expected_symbol": "bpf_skb_fib_lookup",
+              "address": 18446744071643257872,
+              "matches": true
+            },
+            {
+              "helper": "bpf_skc_lookup_tcp",
+              "expected_symbol": "bpf_tc_skc_lookup_tcp",
+              "address": 18446744071643242800,
+              "matches": true
+            }
+          ]
+        },
+        {
+          "context": "xdp",
+          "checks": [
+            {
+              "helper": "bpf_fib_lookup",
+              "expected_symbol": "bpf_xdp_fib_lookup",
+              "address": 18446744071643257728,
+              "matches": true
+            },
+            {
+              "helper": "bpf_skc_lookup_tcp",
+              "expected_symbol": "bpf_xdp_skc_lookup_tcp",
+              "address": 18446744071643242896,
+              "matches": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "scope": "Actual original-program prototype resolver on both unchanged module frontends",
+  "result": "PASS both ten-context suites including canonical network names and compatibility aliases",
+  "deployment": "Source/scratch only; next batched canonical loader/image refresh",
+  "application_success_claim": false,
+  "archive": "helper-coverage-kernel.tar.gz"
+}

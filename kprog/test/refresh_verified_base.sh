@@ -44,7 +44,7 @@ if [[ $refresh_operation == --finalize ]]; then
     refresh_new_image=$(docker image inspect --format '{{.Id}}' "$refresh_image")
     finalize_refresh
     exit 0
-elif [[ $refresh_operation != full && $refresh_operation != --modules-only ]]; then
+elif [[ $refresh_operation != full && $refresh_operation != --modules-only && $refresh_operation != --loader-only ]]; then
     printf 'Unknown refresh operation: %s\n' "$2" >&2
     exit 1
 fi
@@ -79,6 +79,13 @@ make -C "$refresh_root/kprog/libnativeloader" native-image-handoff-kvm \
     BUILD_DIR="$refresh_loader" NATIVE_MODULE="$refresh_direct/bpf_x86_native_lab.ko" SERVICE_HOST_CPUS=13
 fi
 
+if [[ $refresh_operation == --loader-only ]]; then
+    sha256sum "$refresh_kernel/arch/x86/boot/bzImage" "$refresh_kernel/vmlinux" \
+        "$refresh_kernel/.config" "$refresh_direct/bpf_x86_native_lab.ko" \
+        /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
+        > "$refresh_output/loader-only-before-sha256"
+    make -C "$refresh_root/kprog/libnativeloader" trusted-service BUILD_DIR="$refresh_loader"
+else
 # Kbuild's modules_install parser removes the installed kernel directory even
 # with make -n. Finish the sole build's module outputs before reinstalling;
 # retain the existing core ELF and boot image, with no source/version change.
@@ -108,6 +115,7 @@ sha256sum "$refresh_kernel/net/netfilter/nfnetlink.ko" \
     > "$refresh_output/nfnetlink-sha256"
 printf -- '- %s VERIFIED module packaging repair: completed module outputs and replaced incomplete modules-install in the sole build (INSTALL_MOD_STRIP=1); core ELF/boot retained, no source/version change; file inventories and raw logs retained in %s.\n' \
     "$(date -u +%FT%TZ)" "$refresh_output" >> "$refresh_root/kprog/docs/cleanup-log.md"
+fi
 
 # Use the frozen image recipe and existing stable kernel/application artifacts.
 # Rebuild its loader/shim; avoid unrelated source exports and object rebuilds.
@@ -119,6 +127,12 @@ done
 refresh_overrides+=" -o $refresh_kernel/arch/x86/boot/bzImage -o $refresh_kernel/vmlinux -o $refresh_kernel/modules.order"
 make -f "$refresh_root/kprog/perf/one-image/Makefile" image -o module -o negative -o tetragon-base \
     JOBS=1 OVERRIDES="$refresh_overrides"
+if [[ $refresh_operation == --loader-only ]]; then
+    sha256sum "$refresh_kernel/arch/x86/boot/bzImage" "$refresh_kernel/vmlinux" \
+        "$refresh_kernel/.config" "$refresh_direct/bpf_x86_native_lab.ko" \
+        /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
+        > "$refresh_output/loader-only-after-sha256"
+fi
 refresh_new_image=$(docker image inspect --format '{{.Id}}' "$refresh_image")
 printf '%s\n' "$refresh_new_image" > "$refresh_output/new-image"
 finalize_refresh

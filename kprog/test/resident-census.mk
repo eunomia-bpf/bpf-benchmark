@@ -12,7 +12,7 @@ RESOURCES := /workspaces/kprog-raw/var-tmp/CL/census-inputs/inputs/resource-inde
 STAGE := $(ROOT)/vendor/build/native-bpf/x86/stage
 STATS_RUNS ?= x86_kvm_corpus_20261111_184428_882758 x86_kvm_corpus_20261111_191024_348289 x86_kvm_corpus_20261111_193648_926655 x86_kvm_corpus_20261111_200309_471678 x86_kvm_corpus_20261111_202934_974828 x86_kvm_corpus_20261111_205641_469520
 
-.PHONY: prepare group replay resume run collect collector-check group-check launcher-check
+.PHONY: prepare group replay resume checkpoint run collect collector-check group-check launcher-check
 prepare:
 	install -d $(OUTPUT)/source-resources
 	tar --skip-old-files -xzf $(ROOT)/corpus/results/kprog_app_coverage_20261109/resident-census/stock-resource-inputs.tar.gz -C $(OUTPUT)/source-resources
@@ -46,8 +46,13 @@ run:
 		BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader OUTPUT=$(RUN_OUTPUT) VM_CPUS=$(VM_CPUS) VM_MEM=$(VM_MEM) SERVICE_HOST_CPUS=$(HOST_CPUS) \
 		SERVICE_RUN='python3 $(ROOT)/kprog/test/resident_verified_census.py guest --output $(OUTPUT) --service-state $(RUN_OUTPUT)/state --loader-directory /workspaces/.agent-state/kprog-ck/verified-loader'
 
+checkpoint:
+	taskset -c $(HOST_CPUS) python3 $(ROOT)/kprog/test/resident_verified_census.py checkpoint --output $(OUTPUT) \
+		$(foreach queue,$(QUEUES),--queue $(queue))
+
 collector-check:
 	taskset -c $(HOST_CPUS) python3 $(ROOT)/kprog/test/test_collect_resident_census.py
+	taskset -c $(HOST_CPUS) python3 $(ROOT)/kprog/test/test_census_checkpoint.py
 
 collect:
 	taskset -c $(HOST_CPUS) python3 $(ROOT)/kprog/test/collect_resident_census.py \

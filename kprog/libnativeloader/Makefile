@@ -13,6 +13,7 @@ HELPER_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-helper-context/function
 HELPER_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-helper-context/kernel
 HELPER_KERNEL_MODULE ?= /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
 REFRESH_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-shared-refresh
+REFRESH_OPERATION ?= full
 DATA_LAYOUT_BUILD ?= /var/tmp/kprog-tmp/verified/data-layout
 DATA_LAYOUT_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-data-layout/host
 DATA_LAYOUT_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-data-layout/kernel
@@ -47,7 +48,7 @@ guest-data-layout:
 
 .PHONY: shared-base-refresh shared-base-finalize shared-base-modules-repair shared-module-syntax
 shared-base-refresh:
-	bash ../test/refresh_verified_base.sh "$(REFRESH_OUTPUT)"
+	bash ../test/refresh_verified_base.sh "$(REFRESH_OUTPUT)" "$(REFRESH_OPERATION)"
 
 shared-base-finalize:
 	bash ../test/refresh_verified_base.sh "$(REFRESH_OUTPUT)" --finalize
