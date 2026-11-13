@@ -1,0 +1,86 @@
+{
+  "recorded_at": "2026-11-13T03:48:33.797519+00:00",
+  "controller_commit": "389511163",
+  "model_commit": "b177b6556",
+  "kernel_commit": "74d1097af561",
+  "scope": "Affected failure-class replay preparation; no new observation yet",
+  "selection": {
+    "classes": [
+      "verifier_scalar_memory_access"
+    ],
+    "input_inventory": "/workspaces/kprog-raw/verified/20261113-body-census/ready/inventory.json",
+    "completed_journal": "/workspaces/kprog-raw/verified/20261113-body-census/control/outcomes.jsonl",
+    "bodies": 1,
+    "represented_instances": 33,
+    "controller_commit": "5bb08526bd5d5b852160232f9002095cd2581d22"
+  },
+  "programs": [
+    {
+      "application": "tetragon/observer",
+      "source_prog_id": 37,
+      "name": "generic_kprobe_actions",
+      "native_candidates": [
+        {
+          "native_object": "/workspaces/repository/corpus/results/verified-tetragon-probe/tetragon/bpf_multi_kprobe_v61.native.o",
+          "symbol": "generic_kprobe_actions",
+          "selector": {
+            "native_object": "bpf_multi_kprobe_v61.native.o",
+            "program": "generic_kprobe_",
+            "source_bytecode_len": 9328,
+            "source_lacks_helper": 174,
+            "symbol": "generic_kprobe_actions"
+          },
+          "source_native_object": "/var/tmp/kprog-tmp/C/audit-recovery/native-inputs/payloads/tetragon/bpf_multi_kprobe_v61.native.o",
+          "retained_native_object": "/var/tmp/kprog-tmp/census-claude/inputs/native/c5196544446f44c1/bpf_multi_kprobe_v61.native.o"
+        }
+      ],
+      "priority": {
+        "measured_name": "generic_kprobe_",
+        "baseline_time_ns": 1086683629793,
+        "application_time_ns": 2129006675345,
+        "application_time_share": 0.5104181411816878,
+        "matching_census_instances": 231,
+        "retained_instance_time_ns": 0,
+        "scope": "Measured name family; matching instances share priority"
+      },
+      "resource": {
+        "application": "tetragon/observer",
+        "source_prog_id": 37,
+        "name": "generic_kprobe_actions",
+        "native_object": "/var/tmp/kprog-tmp/A/resident-census-linked/native/075c5a5afff42254bb9dad9dc7caaab826dbe11ca92b7dbd085f0e3aabbca8c9.native.o",
+        "entry": "generic_kprobe_actions",
+        "source_bpf": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_kprobe_v61.o",
+        "bpf_object": "/workspaces/kprog-raw/var-tmp/CL/census-inputs/inputs/bpf-resources/e12eceec78e9848b/bpf_multi_kprobe_v61.o",
+        "bpf_object_sha256": "e12eceec78e9848b0ba63f82ecb7fcc791403a200a99c3e082084a940b4bcb25",
+        "resource_stage": "source_object_captured",
+        "previous_bpf_object": "/var/tmp/kprog-tmp/A/resident-census-linked/bpf-resources/bpf_multi_kprobe_v61.o",
+        "census_bpf_object": "/var/tmp/kprog-tmp/census-claude/inputs/bpf-resources/e12eceec78e9848b/bpf_multi_kprobe_v61.o",
+        "recheck_bpf_object_source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_kprobe_v61.o linked with vendor/bpf/tetragon_cel_defaults.c (census-followups/bpf-link.c)"
+      },
+      "body_group": 6
+    }
+  ],
+  "resources": {
+    "replay": {
+      "host_cpus": "12-15",
+      "guest_cpus": 4,
+      "guest_memory": "8G",
+      "host_address_space_bytes": 17179869184
+    },
+    "main": {
+      "launcher": 1110190,
+      "qemu": 1110393,
+      "host_cpus": "8-11",
+      "guest_memory": "32G",
+      "host_address_space_bytes": 42949672960
+    }
+  },
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-helper-class-replay",
+  "archive": "helper-class-replay-preparation.tar.gz",
+  "limits": [
+    "One representative stands for33body members; not33actual submissions",
+    "Full census remains intact; replay is a separate diagnostic subset",
+    "Actual stock-verifier result and regression delta pending",
+    "Shared kernel/image/base binaries unchanged"
+  ]
+}
