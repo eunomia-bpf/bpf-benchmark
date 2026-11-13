@@ -23,7 +23,8 @@ for first, last in args.pair:
         "first": first, "last": last, "map_id": start["metrics_map_id"],
         "start_time": start["time"], "end_time": end["time"], "seconds": seconds,
         "metric_deltas": metrics,
-        "frames_per_attempt": metrics["metricID_UnwindNativeFrames"] / metrics["metricID_UnwindNativeAttempts"],
+        "frames_per_attempt": (metrics["metricID_UnwindNativeFrames"] / metrics["metricID_UnwindNativeAttempts"]
+                               if metrics["metricID_UnwindNativeAttempts"] else None),
         "collector_deltas": {key: end["collector"][key] - start["collector"][key] for key in shared},
         "collector_only_in_start": sorted(start["collector"].keys() - end["collector"].keys()),
         "collector_only_in_end": sorted(end["collector"].keys() - start["collector"].keys()),
