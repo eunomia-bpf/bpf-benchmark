@@ -1,0 +1,34 @@
+{
+  "launched_at": "2026-11-13T07:27:53Z",
+  "outer_pid": 1271626,
+  "source_commit": "d46c8a632",
+  "evidence_commit": "8b2b5f942",
+  "raw": "/workspaces/kprog-raw/perf/20261113-socket-context-dualstack",
+  "cpus": "16-19",
+  "host_address_space_limit_bytes": 8589934592,
+  "features": [
+    "-DENABLE_IPV4=1",
+    "-DENABLE_IPV6=1"
+  ],
+  "argv": [
+    "prlimit",
+    "--as=8589934592",
+    "--",
+    "bash",
+    "kprog/test/run_verified_make.sh",
+    "/workspaces/kprog-raw/perf/20261113-socket-context-dualstack/job",
+    "-f",
+    "kprog/perf/native-context/Makefile",
+    "socket-context-check",
+    "socket-context-errors",
+    "upstream-socket-proof",
+    "UPSTREAM_SOCKET_FEATURES=-DENABLE_IPV4=1 -DENABLE_IPV6=1"
+  ],
+  "dry_run_log": "/workspaces/kprog-raw/perf/20261113-socket-context-dualstack/dry-run.log",
+  "make_log": "/workspaces/kprog-raw/perf/20261113-socket-context-dualstack/job/make.log",
+  "exit_file": "/workspaces/kprog-raw/perf/20261113-socket-context-dualstack/job/exit-code",
+  "collect": "next turn; no post-launch polling",
+  "scope": "host compiler/ELF integration only; no guest or app timing",
+  "build_outputs": "/var/tmp/kprog-tmp/perf/socket-context",
+  "previous_outputs_retained": "/workspaces/kprog-raw/perf/20261113-socket-context/build-evidence"
+}
