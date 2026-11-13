@@ -103,6 +103,29 @@ ISA_BPFTOOL ?= $(abspath ../../vendor/build/x86/bpftool/bin/bpftool)
 PARTIAL_REG_BUILD ?= /var/tmp/kprog-tmp/verified/partial-reg
 PARTIAL_REG_RAW ?= /workspaces/kprog-raw/verified/20261113-partial-reg
 PARTIAL_REG_OUTPUT ?= $(PARTIAL_REG_RAW)/control
+RAW_CONTEXT_BUILD ?= /var/tmp/kprog-tmp/verified/raw-context
+RAW_CONTEXT_RAW ?= /workspaces/kprog-raw/verified/20261113-raw-context
+RAW_CONTEXT_OUTPUT ?= $(RAW_CONTEXT_RAW)/control
+.PHONY: raw-context-inputs raw-context-guest raw-context-routing-check
+raw-context-inputs: $(addprefix $(RAW_CONTEXT_BUILD)/route,0.bpf.o 1.bpf.o 2.bpf.o 3.bpf.o 4.bpf.o)
+
+$(RAW_CONTEXT_BUILD)/route%.bpf.o: ../test/raw_context_fixed.c ../x86/x86_sim_local_bpf.h
+	install -d "$(RAW_CONTEXT_BUILD)"
+	$(CC) -O2 -fsanitize=undefined -fno-sanitize-recover=all -DRAW_CONTEXT_READ_VALUE=$* -I../.. -I../../vendor/libbpf/src $< -o "$(RAW_CONTEXT_BUILD)/route$*-host"
+	"$(RAW_CONTEXT_BUILD)/route$*-host"
+	../stock-path/bin/clang -O3 -g -mcpu=v4 -target bpf -D__TARGET_ARCH_x86 -DRAW_CONTEXT_READ_VALUE=$* -I../.. -I../../vendor/libbpf/src -I../../vendor/libbpf/include/uapi -I/usr/include/x86_64-linux-gnu -c $< -o "$@"
+
+raw-context-routing-check:
+	install -d "$(RAW_CONTEXT_BUILD)"
+	$(CC) -O2 -fsanitize=undefined -fno-sanitize-recover=all -I../formal -I../x86 -I../.. -I../../vendor/libbpf/src ../formal/oracles/test_x86_mov_load_route_host.c -o "$(RAW_CONTEXT_BUILD)/mov-load-route"
+	"$(RAW_CONTEXT_BUILD)/mov-load-route"
+	$(CC) -O2 -fsanitize=undefined -fno-sanitize-recover=all -I../formal -I../x86 -I../.. -I../../vendor/libbpf/src ../formal/oracles/test_x86_mem_dispatch_route_host.c -o "$(RAW_CONTEXT_BUILD)/mem-dispatch-route"
+	"$(RAW_CONTEXT_BUILD)/mem-dispatch-route"
+
+raw-context-guest:
+	mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf
+	python3 ../test/check_raw_context.py "$(RAW_CONTEXT_RAW)" "$(RAW_CONTEXT_OUTPUT)" "$(ISA_BPFTOOL)"
+
 .PHONY: partial-reg-inputs partial-reg-guest
 partial-reg-inputs: $(addprefix $(PARTIAL_REG_BUILD)/lane,0.bpf.o 8.bpf.o 16.bpf.o)
 

@@ -1,0 +1,38 @@
+{
+  "recorded_at": "2026-11-13T05:52:43.726400+00:00",
+  "scope": "Generic flat-load encoding repair; host, BPF compilation and actual failure attribution",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-raw-context",
+  "actual_failure": {
+    "request": 20,
+    "application": "tracee/monitor",
+    "body_group": 29,
+    "bpf_instruction": 39231,
+    "native_instruction": "0x1adf: mov rbx,[r12+0x50]",
+    "generated_c_line": 8768,
+    "model_epoch": "f169281a4",
+    "cause": "Scalar-tagged raw context chose computed address plus zero-offset asm load; stock verifier rejects modified ctx+80"
+  },
+  "change": "Flat reads choose fixed-displacement encoding independently of semantic tag; dynamic and large displacements keep equivalent computed-address encoding. Pointer-valued 64-bit read routes share the selection.",
+  "tests": {
+    "mov_load_host_cases": 713,
+    "mem_dispatch_host_cases": 58,
+    "host_ubsan_exit": 0,
+    "new_fixture_routes": 5,
+    "host_values_per_route": 4,
+    "bpf_compilation_exit": 0,
+    "displacement_cases": [
+      "flat scalar-tagged context80: MOV_LOAD and READ_MEM_VALUE",
+      "dynamic",
+      "positive40000",
+      "negative40000"
+    ],
+    "generator_check_exit": 0
+  },
+  "before_artifacts": "before-scalar/route{0,1}.bpf.o; original ABI-tagged controls in before/",
+  "after_artifacts": "after-scalar/route{0,1}.bpf.o; five compile/host modes in after-encodings/",
+  "stock_verifier_results": "pending detached regression guest",
+  "native_execution_requests": 0,
+  "workload_run": null,
+  "archive": "raw-context-preparation.tar.gz",
+  "archive_bytes": 697222
+}

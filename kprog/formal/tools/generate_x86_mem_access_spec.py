@@ -129,18 +129,15 @@ kprog_x86_mem_load(const void *address, __u8 width)
     default: __builtin_trap();
     }}
 }}
-#if defined(__bpf__) || defined(__BPF__)
-extern void kprog_x86_fixed_displacement_required(void)
-    __attribute__((error("x86 fixed load requires a constant signed16 displacement")));
-#endif
 /* Preserve the context register itself: the verifier distinguishes a fixed
- * LDX offset from adding the same offset to a context pointer first. */
+ * LDX offset from adding the same offset to a context pointer first.
+ * Other displacements use the equivalent computed-address encoding. */
 static __attribute__((always_inline)) inline __u64
 kprog_x86_mem_load_fixed(const void *base, long long displacement, __u8 width)
 {{
 #if defined(__bpf__) || defined(__BPF__)
     if (!__builtin_constant_p(displacement) || displacement < -32768 || displacement > 32767)
-        kprog_x86_fixed_displacement_required();
+        return kprog_x86_mem_load((const __u8 *)base + displacement, width);
     __u64 value;
     switch (width ? width : X86_WIDTH_64) {{
 {fixed_body}

@@ -1269,13 +1269,15 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 				__x86_l_read_mem_width);                  \
 			break;                                           \
 		case KPROG_X86_MEM_SRC_ABI_PTR_LOAD:                     \
-			__x86_l_value =                                  \
-				(__u64)(long)X86_SIM_L_LOAD_PTR_ADDR(     \
-					__x86_l_addr);                    \
+			if (X86_MEM_AUX_INDEX(AUX) == X86_REG_NONE)       \
+				__x86_l_value = KPROG_X86_MEM_LOAD_FIXED( \
+					__x86_l_base_ptr, (STORE_DISP) ?   \
+					x86_store_imm_disp(IMM) : x86_simm(IMM), \
+					__x86_l_read_mem_width);         \
+			else __x86_l_value = (__u64)(long)X86_SIM_L_LOAD_PTR_ADDR(__x86_l_addr); \
 			break;                                           \
 		default:                                                 \
-			if (X86_SIM_L_REG_TAG(BASE_REG) == X86_SIM_TAG_ABI && \
-			    X86_MEM_AUX_INDEX(AUX) == X86_REG_NONE)       \
+			if (X86_MEM_AUX_INDEX(AUX) == X86_REG_NONE)       \
 				__x86_l_value = KPROG_X86_MEM_LOAD_FIXED( \
 					__x86_l_base_ptr, (STORE_DISP) ?   \
 					x86_store_imm_disp(IMM) : x86_simm(IMM), \
@@ -1395,17 +1397,21 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 				__x86_sim_abi_kind, __x86_l_disp,          \
 				X86_SIM_TAG_SCALAR, X86_SIM_TAG_PACKET,    \
 				X86_SIM_TAG_PACKET_END);                   \
+			void *__x86_l_ptr_value;                            \
+			if (X86_MEM_AUX_INDEX(AUX) == X86_REG_NONE)          \
+				__x86_l_ptr_value = (void *)(long)KPROG_X86_MEM_LOAD_FIXED( \
+					__x86_l_base_ptr, x86_simm(IMM), __x86_l_mem_width); \
+			else __x86_l_ptr_value = X86_SIM_L_LOAD_PTR_ADDR(__x86_l_addr); \
 			if ((DST) == X86_RSP)                             \
 				X86_SIM_L_WRITE_REG_WIDTH((DST),          \
-					(__u64)(long)X86_SIM_L_LOAD_PTR_ADDR(__x86_l_addr), X86_WIDTH_64); \
+					(__u64)(long)__x86_l_ptr_value, X86_WIDTH_64); \
 			else                                              \
 				X86_SIM_L_WRITE_REG_PTR_TAG((DST),         \
-					X86_SIM_L_LOAD_PTR_ADDR(__x86_l_addr), \
+					__x86_l_ptr_value,                     \
 					__x86_l_ptr_tag);                  \
 			break;                                           \
 		default:                                                 \
-			if (X86_SIM_L_REG_TAG(SRC) == X86_SIM_TAG_ABI && \
-			    X86_MEM_AUX_INDEX(AUX) == X86_REG_NONE)       \
+			if (X86_MEM_AUX_INDEX(AUX) == X86_REG_NONE)       \
 				__x86_l_value = KPROG_X86_MEM_LOAD_FIXED( \
 					__x86_l_base_ptr, x86_simm(IMM), __x86_l_mem_width); \
 			else                                             \

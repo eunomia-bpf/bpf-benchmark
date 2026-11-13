@@ -99,6 +99,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED flat-load context通用修复（2026-11-13）** request20的BPF39231定位到generatedC8768/native0x1adf（`mov rbx,[r12+80]`）：scalar tag路径把ctx+80放入地址寄存器后做LDX+0。所有flat read按固定displacement编码、独立于semantic tag；dynamic/大位移使用等价computed-address编码，8/16/32/64位访问和fault语义保持。既有MOV_LOAD713/mem-dispatch58 cases UBSan通过；新fixture的两种scalar-tag ctx路线及dynamic/+40000/-40000共5种编译/host通过，before/after disasm归档 `raw-context-preparation*`，raw `/workspaces/kprog-raw/verified/20261113-raw-context/`。stock/应用结果接续。
+
 - **VERIFIED ISA guest工具路径（2026-11-13）** unit outer1216111 make2在启动bpftool前结束，stock submissions0；组件Make向partial-reg和signed-bound脚本显式传入现有 `/workspaces/repository/vendor/build/x86/bpftool/bin/bpftool`，host动态库解析/脚本syntax/target dry-run通过。完整setup日志/service归档 `partial-reg-bpftool-setup*`；应用body outer1216112独立运行，unit retry使用新输出目录。
 
 - **VERIFIED partial-register通用范围保留（2026-11-13）** a1d实际BPF1494保存policy_conf指针、1495写boolean byte、1496宽读恢复scalar，2049仅得0–255范围。通用8/16位pointer partial-write在scalarize后重写同一lane，保留写入scalar范围；upper bits/tag语义保持。low/high byte和16位共567个bit/tag host cases及6个boolean cases、既有helper/stack UBSan通过；全称`x86_reg_write_at_idempotent`证明通过。before/after BPF fixture和日志归档 `partial-reg-preparation*`，raw `/workspaces/kprog-raw/verified/20261113-partial-reg/`。stock verifier unit batch outer1216111（2vCPU/2G/AS8GiB）和受影响33成员body replay outer1216112（4vCPU/8G/AS16GiB）已setsid/nohup启动，CPU12–15/shared image read lock；完整调用见 `partial-reg-launch.json`，实际结果后续收集。
