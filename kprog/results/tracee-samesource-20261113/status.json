@@ -1,0 +1,35 @@
+{
+ "question": "Can Tracee's native object be built from untouched upstream source?",
+ "obstacles": [
+  {
+   "what": "llvm.bpf.passthrough.<ty>(i32 CODE, V)",
+   "count": 36574,
+   "why": "BPF backend marker; returns V unchanged. x86 codegen fails with 'Cannot select: intrinsic %llvm.bpf.passthrough'.",
+   "fix": "fold each call to its argument, per function (SSA names repeat across functions)"
+  },
+  {
+   "what": "call void asm sideeffect \"\", \"~{memory}\"()",
+   "count": 810,
+   "why": "a bare compiler barrier, no data",
+   "fix": "drop"
+  },
+  {
+   "what": "asm sideeffect \"if $0 < $1 goto +1; $0 = $1;\" (\"r,i\")",
+   "count": 876,
+   "why": "the verifier idiom clamping a size register to an immediate; no output operand, so in SSA every later use of the value must see the clamp",
+   "fix": "llvm.smin of the value and the bound, applied to later uses"
+  },
+  {
+   "what": "asm sideeffect \"if $0 <= $1 goto +1; $0 = $1;\" (\"=r,r,0\")",
+   "count": 168,
+   "why": "common.h's update_min, which does have an output",
+   "fix": "llvm.smin of its two inputs"
+  }
+ ],
+ "notes": [
+  "Tracee's vmlinux.h is IDENTICAL to upstream: the layout claim posted earlier (native task_struct offsets 4/8/20/32/48/112/144) is about the trimmed header's content, not a tree modification, so it is a CO-RE question (P1h), not a same-source one.",
+  "The three source files that do differ (common/buffer.h, common/common.h, common/filesystem.h) differ only by MICRO_NATIVE guards around exactly these asm idioms.",
+  "The fix must be function-scoped: the first attempt used a whole-file alias map and produced a type error when %4 meant an i64 in one function and a ptr in another."
+ ],
+ "state": "lowering runs; x86 codegen not yet reached"
+}
