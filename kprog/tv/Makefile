@@ -98,6 +98,7 @@ linker-build:
 STACK_ALIAS_BUILD ?= /var/tmp/kprog-tmp/verified/stack-alias
 SIGNED_BOUND_BUILD ?= /var/tmp/kprog-tmp/verified/signed-bound
 SIGNED_BOUND_RAW ?= /workspaces/kprog-raw/verified/20261113-signed-bound
+SIGNED_BOUND_OUTPUT ?= $(SIGNED_BOUND_RAW)/control
 .PHONY: signed-bound-inputs signed-bound-guest
 signed-bound-inputs:
 	install -d "$(SIGNED_BOUND_BUILD)"
@@ -107,7 +108,7 @@ signed-bound-inputs:
 
 signed-bound-guest:
 	mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf
-	python3 ../test/check_signed_bound.py "$(SIGNED_BOUND_RAW)/before.bpf.o" "$(SIGNED_BOUND_RAW)/after.bpf.o" "$(SIGNED_BOUND_RAW)/control"
+	python3 ../test/check_signed_bound.py "$(SIGNED_BOUND_RAW)/before.bpf.o" "$(SIGNED_BOUND_RAW)/after.bpf.o" "$(SIGNED_BOUND_OUTPUT)"
 
 .PHONY: stack-alias-host-check
 stack-alias-host-check:
