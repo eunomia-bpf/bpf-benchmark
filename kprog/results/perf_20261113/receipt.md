@@ -366,3 +366,29 @@ explicitly. The dependency install succeeded; the in-place tool-only retry is
 launched under the same16GiB/4worker/CPU16–19 bounds. Original logs remain in
 `loader-cpu-profile/build`, with retry logs in `build2`. No sampling guest has
 been launched yet; build capabilities remain to be collected next turn.
+
+## Fixed-duration corrected Tetragon observation launched
+
+`tetragon-fixed-duration-launch.json` records the corrected Tetragon stats-on
+subset: three180-second samples, one frozen180-second warmup per arm, eight
+vCPUs/64GiB on CPUs0–7 with an80GiB host address-space cap. The standard Make
+corpus target holds the timing lock and shared image lock. The selected CORE
+manifest, runtime-map linker and upstream tetra hashes accompany the command.
+Policy-only observation reads states and action counters without GetEvents
+subscriptions; five observer regressions pass. The optional CPU profiler is off.
+
+Short1–120-second diagnostics do not establish whether loading is incomplete
+after the frozen180-second warmup. Optional profiling and a generic load-time
+optimization must not become extra prerequisites for observing that protocol.
+This run will retain all three samples, actual program inventories, policy
+states and counter read intervals against the shim measurement markers. Any
+observed work difference remains explicit. Outcomes are pending; this launch
+supplies no speedup, floor, six-app freeze or geomean claim. Raw job root:
+`/workspaces/kprog-raw/perf/20261113-tetragon-fixed-duration`.
+
+The sampler's second tool build also ended before compilation: explicitly
+setting Python required a missing python3-config. This software cpu-clock
+sampler does not use PMU event tables. `1e3ac8e29` selects NO_JEVENTS explicitly
+and keeps ELF/libdw support; the recursive Make dry run succeeds. The same-output
+tool retry is launched under16GiB/4workers/CPUs16–19. All earlier logs remain;
+kernel, base and image builds remain untouched.

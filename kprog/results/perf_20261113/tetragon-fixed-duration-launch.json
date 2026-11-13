@@ -1,0 +1,55 @@
+{
+  "recorded_at": "2026-11-13T05:20:29Z",
+  "scope": "P1 fixed-protocol Tetragon behavior/affected-app measurement; launch receipt, outcomes pending",
+  "outer_pid": 1205262,
+  "kernel": "74d1097af561",
+  "image": "bpf-benchmark/kprog:current",
+  "image_id": "d756bf5919e9",
+  "source_observer": "29550f302",
+  "contract": {
+    "cpus": "0-7",
+    "vcpus": 8,
+    "memory_gib": 64,
+    "host_address_space_limit_gib": 80,
+    "samples": 3,
+    "workload_seconds": 180,
+    "warmups": 1,
+    "stats": 1
+  },
+  "resource_locks": [
+    "exclusive timing",
+    "shared image"
+  ],
+  "command": "make -f kprog/perf/one-image/Makefile corpus APPS=tetragon/observer SAMPLES=3 WORKLOAD_DURATION=180 CPUS=0-7 VM_CPUS=8 VM_MEM=64G STATE=/var/tmp/kprog-tmp/perf/timing BPFREJIT_CORPUS_BPF_STATS=1 NATIVE_MANIFEST=/workspaces/repository/corpus/results/perf-core-20261113/manifest.json VNG_FLAGS=--verbose",
+  "environment": {
+    "EQCODEX_OUT": "/workspaces/repository/corpus/results/perf-tetragon-fixed-20261113",
+    "EQCODEX_NATIVE_LINK_BINARY": "/workspaces/repository/corpus/results/verified-linker-runtime-maps-20261113/native-link",
+    "EQCODEX_TETRA_POLICIES": "/workspaces/repository/corpus/results/perf-observers-20261113/tetra"
+  },
+  "excluded_observer_modes": [
+    "loader CPU sampler",
+    "GetEvents subscriber"
+  ],
+  "selection_hashes": {
+    "corpus/results/perf-core-20261113/manifest.json": "aae438b40af940934f2001f9911f95b55716fb00bbb5df23da6733aa39e29a62",
+    "corpus/results/verified-linker-runtime-maps-20261113/native-link": "f39d807c483375ed71a44962d31a0bf6ad32a4d316a4dc266c9d6607031640fb",
+    "corpus/results/verified-linker-runtime-maps-20261113/native-link.real": "10a4b7dadc0f4f4c89d04c60f9f448b079dcdb38568e065f959705ac5eda6322",
+    "corpus/results/perf-observers-20261113/tetra": "41f3de64cfc4475d50cf1c8227712b62e77ee4bafeb20921e097382c79579fe9"
+  },
+  "reason": "Short startup diagnostics do not establish that program/policy underloading persists after the frozen180-second warmup. Do not make optional profiling or a generic load-time optimization a prerequisite for observing the corrected full-duration protocol.",
+  "planned_observations": [
+    "All three raw samples, per-program stubs/inventory and actual map-generation/clock windows.",
+    "Policy states and action counters without adding an event subscription.",
+    "Compare read intervals with shim measure_start/finish; retain any incomplete startup or differing work as observed, not silently filtered."
+  ],
+  "status": "launched; outcome uncollected",
+  "estimated_minutes": 25,
+  "host_memory_before": "MemAvailable:   103019852 kB",
+  "raw": "/workspaces/kprog-raw/perf/20261113-tetragon-fixed-duration",
+  "limits": [
+    "Affected Tetragon subset only, not a six-application freeze or geomean claim.",
+    "Policy/counter observation adds diagnostic overhead; retain its exact timing and source.",
+    "Native context/CORE/runtime-map semantic fixes selected; default objects/image unchanged.",
+    "Stats-off affected run and remaining applications remain open."
+  ]
+}
