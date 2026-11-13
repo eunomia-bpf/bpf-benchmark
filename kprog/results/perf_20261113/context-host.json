@@ -1,0 +1,56 @@
+{
+  "recorded_at": "2026-11-13T03:02:14.645866+00:00",
+  "scope": "P1 host PERF_EVENT physical-context lowering subset; guest paired diagnostic running",
+  "implementation_commits": [
+    "e0939263e",
+    "ce863428d",
+    "00c863247"
+  ],
+  "kernel": "74d1097af561",
+  "image": "bpf-benchmark/kprog:current",
+  "image_id": "d756bf5919e9",
+  "layout": {
+    "regs_size": 168,
+    "ctx_regs": 0,
+    "ctx_data": 8,
+    "data_period": 8,
+    "data_addr": 184
+  },
+  "check_command": "taskset -c 16-19 make -f kprog/perf/native-context/Makefile check",
+  "check": {
+    "make_exit": 0,
+    "plain_fixture_exit": 1,
+    "corrected_fixture_exit": 0,
+    "checks": [
+      "register0",
+      "register20/SS",
+      "sample_period",
+      "addr",
+      "sample_period high half",
+      "original helper ctx identity",
+      "kprobe register layout"
+    ]
+  },
+  "build_command": "taskset -c 16-19 make -f /workspaces/repository/kprog/perf/native-context/Makefile otel",
+  "build_exit": 0,
+  "lowered_loads": {
+    "native_stack_trace": 10,
+    "other_units": 0
+  },
+  "candidate_manifest": "corpus/results/perf-context-20261113/manifest.json",
+  "runtime_switch": "NATIVE_MANIFEST=/workspaces/repository/corpus/results/perf-context-20261113/manifest.json",
+  "guest_launcher": 1126468,
+  "guest_log": "/workspaces/kprog-raw/perf/20261113-context/run/make.log",
+  "capture": "corpus/results/perf-context-capture-20261113",
+  "guest_contract": {
+    "cpus": "16-19",
+    "vcpus": 4,
+    "memory": "32G",
+    "samples": 1,
+    "duration_seconds": 30,
+    "stats": 1,
+    "purpose": "ABI/equal-work diagnostic"
+  },
+  "interpretation": "Host fixture and full OTel candidate build completed. Runtime equal-work counters and throughput remain pending.",
+  "raw": "/workspaces/kprog-raw/perf/20261113-context"
+}
