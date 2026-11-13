@@ -1,0 +1,1163 @@
+{
+  "completed": [
+    {
+      "object": "bpf_cgroup_release_v511",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/cgroup/bpf_cgroup_release.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 0,
+        "raw_tracepoint/cgroup_release": 1263
+      },
+      "corrected_sections": {
+        ".text": 0,
+        "raw_tracepoint/cgroup_release": 1266
+      }
+    },
+    {
+      "object": "bpf_cgroup_rmdir_v511",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/cgroup/bpf_cgroup_rmdir.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 0,
+        "raw_tracepoint/cgroup_rmdir": 1263
+      },
+      "corrected_sections": {
+        ".text": 0,
+        "raw_tracepoint/cgroup_rmdir": 1266
+      }
+    },
+    {
+      "object": "bpf_cgroup_mkdir_v511",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/cgroup/bpf_cgroup_mkdir.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 0,
+        "raw_tracepoint/cgroup_mkdir": 1540
+      },
+      "corrected_sections": {
+        ".text": 0,
+        "raw_tracepoint/cgroup_mkdir": 1543
+      }
+    },
+    {
+      "object": "bpf_cgroup",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_cgroup.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 0,
+        "raw_tracepoint/cgroup_rmdir": 118
+      },
+      "corrected_sections": {
+        ".text": 0,
+        "raw_tracepoint/cgroup_rmdir": 118
+      }
+    },
+    {
+      "object": "bpf_enforcer",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_enforcer.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__BPF_OVERRIDE_RETURN"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 0,
+        "kprobe/enforcer": 111
+      },
+      "corrected_sections": {
+        ".text": 0,
+        "kprobe/enforcer": 111
+      }
+    },
+    {
+      "object": "bpf_execve_bprm_commit_creds",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_execve_bprm_commit_creds.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 0,
+        "kprobe/security_bprm_committing_creds": 1291
+      },
+      "corrected_sections": {
+        ".text": 0,
+        "kprobe/security_bprm_committing_creds": 1291
+      }
+    },
+    {
+      "object": "bpf_cgtracker",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/cgroup/bpf_cgtracker.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 0,
+        "raw_tracepoint/cgroup_mkdir": 421,
+        "raw_tracepoint/cgroup_release": 119
+      },
+      "corrected_sections": {
+        ".text": 0,
+        "raw_tracepoint/cgroup_mkdir": 472,
+        "raw_tracepoint/cgroup_release": 119
+      }
+    },
+    {
+      "object": "bpf_execve_event_v61",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_execve_event.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 2191,
+        "tracepoint": 5122,
+        "tracepoint/sys_execve": 7851
+      },
+      "corrected_sections": {
+        ".text": 2191,
+        "tracepoint": 5122,
+        "tracepoint/sys_execve": 7867
+      }
+    },
+    {
+      "object": "bpf_execve_map_update_v61",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_execve_map_update.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 0,
+        "socket": 264
+      },
+      "corrected_sections": {
+        ".text": 0,
+        "socket": 264
+      }
+    },
+    {
+      "object": "bpf_fmodret_enforcer",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_enforcer.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 0,
+        "fmod_ret/security_task_prctl": 102
+      },
+      "corrected_sections": {
+        ".text": 0,
+        "fmod_ret/security_task_prctl": 102
+      }
+    },
+    {
+      "object": "bpf_exit_v511",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_exit.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 0,
+        "kprobe/acct_process": 708,
+        "kprobe/disassociate_ctty": 718
+      },
+      "corrected_sections": {
+        ".text": 0,
+        "kprobe/acct_process": 708,
+        "kprobe/disassociate_ctty": 718
+      }
+    },
+    {
+      "object": "bpf_fork_v511",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_fork.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 0,
+        "kprobe/wake_up_new_task": 3447
+      },
+      "corrected_sections": {
+        ".text": 0,
+        "kprobe/wake_up_new_task": 3450
+      }
+    },
+    {
+      "object": "bpf_generic_fexit_v61",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_fexit.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 11188,
+        "fexit/generic_fexit_tail": 2005,
+        "fexit/generic_fexit": 12532
+      },
+      "corrected_sections": {
+        ".text": 11188,
+        "fexit/generic_fexit_tail": 2005,
+        "fexit/generic_fexit": 12532
+      }
+    },
+    {
+      "object": "bpf_generic_fentry_v61",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_fentry.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 12356,
+        "fentry/generic_fentry_tail": 25853,
+        "fentry/generic_fentry": 1213
+      },
+      "corrected_sections": {
+        ".text": 12356,
+        "fentry/generic_fentry_tail": 25853,
+        "fentry/generic_fentry": 1213
+      }
+    },
+    {
+      "object": "bpf_generic_kprobe_v61",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 13519,
+        "kprobe": 25805,
+        "kprobe/generic_kprobe": 1213,
+        "kprobe/generic_kprobe_override": 87,
+        "fmod_ret/security_task_prctl": 80
+      },
+      "corrected_sections": {
+        ".text": 13519,
+        "kprobe": 25805,
+        "kprobe/generic_kprobe": 1213,
+        "kprobe/generic_kprobe_override": 87,
+        "fmod_ret/security_task_prctl": 80
+      }
+    },
+    {
+      "object": "bpf_generic_lsm_ima_bprm_v61",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_lsm_ima_bprm.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 0,
+        "lsm.s/generic_lsm_ima_bprm": 123
+      },
+      "corrected_sections": {
+        ".text": 0,
+        "lsm.s/generic_lsm_ima_bprm": 123
+      }
+    },
+    {
+      "object": "bpf_generic_lsm_ima_file_v61",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_lsm_ima_file.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 0,
+        "lsm.s/generic_lsm_ima_file": 116
+      },
+      "corrected_sections": {
+        ".text": 0,
+        "lsm.s/generic_lsm_ima_file": 116
+      }
+    },
+    {
+      "object": "bpf_generic_lsm_output_v61",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_lsm_output.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 0,
+        "lsm/generic_lsm_output": 1269
+      },
+      "corrected_sections": {
+        ".text": 0,
+        "lsm/generic_lsm_output": 1269
+      }
+    },
+    {
+      "object": "bpf_generic_lsm_core_v61",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_lsm_core.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 12541,
+        "lsm": 24841,
+        "lsm/generic_lsm_core": 1213
+      },
+      "corrected_sections": {
+        ".text": 12541,
+        "lsm": 24841,
+        "lsm/generic_lsm_core": 1213
+      }
+    },
+    {
+      "object": "bpf_generic_rawtp_v61",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_rawtp.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 12356,
+        "raw_tp": 25565,
+        "raw_tp/generic_tracepoint": 1213
+      },
+      "corrected_sections": {
+        ".text": 12356,
+        "raw_tp": 25565,
+        "raw_tp/generic_tracepoint": 1213
+      }
+    },
+    {
+      "object": "bpf_generic_retkprobe_v61",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_retkprobe.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 11188,
+        "kprobe": 2005,
+        "kprobe/generic_retkprobe": 12593
+      },
+      "corrected_sections": {
+        ".text": 11188,
+        "kprobe": 2005,
+        "kprobe/generic_retkprobe": 12593
+      }
+    },
+    {
+      "object": "bpf_generic_retuprobe_v61",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_retuprobe.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 11188,
+        "uprobe": 2005,
+        "uprobe/generic_retuprobe": 12516
+      },
+      "corrected_sections": {
+        ".text": 11188,
+        "uprobe": 2005,
+        "uprobe/generic_retuprobe": 12516
+      }
+    },
+    {
+      "object": "bpf_generic_lsm_core_v511",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_lsm_core.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 117,
+        "lsm": 192731,
+        "lsm/generic_lsm_core": 1225
+      },
+      "corrected_sections": {
+        ".text": 117,
+        "lsm": 192731,
+        "lsm/generic_lsm_core": 1225
+      }
+    },
+    {
+      "object": "bpf_loader_v511",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_loader.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 0,
+        "kprobe/perf_event_mmap_output": 790
+      },
+      "corrected_sections": {
+        ".text": 0,
+        "kprobe/perf_event_mmap_output": 790
+      }
+    },
+    {
+      "object": "bpf_generic_tracepoint_v61",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_tracepoint.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 12021,
+        "tracepoint": 24621,
+        "tracepoint/generic_tracepoint": 12597
+      },
+      "corrected_sections": {
+        ".text": 12021,
+        "tracepoint": 24621,
+        "tracepoint/generic_tracepoint": 12597
+      }
+    },
+    {
+      "object": "bpf_generic_uprobe_v61",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_uprobe.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 15455,
+        "uprobe": 25213,
+        "uprobe/generic_uprobe": 1213,
+        "uprobe.s/generic_uprobe": 689
+      },
+      "corrected_sections": {
+        ".text": 15455,
+        "uprobe": 25213,
+        "uprobe/generic_uprobe": 1213,
+        "uprobe.s/generic_uprobe": 689
+      }
+    },
+    {
+      "object": "bpf_generic_usdt_v61",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_usdt.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 15701,
+        "uprobe": 27341,
+        "uprobe/generic_usdt": 1213,
+        "uprobe.s/generic_usdt": 327
+      },
+      "corrected_sections": {
+        ".text": 15701,
+        "uprobe": 27341,
+        "uprobe/generic_usdt": 1213,
+        "uprobe.s/generic_usdt": 327
+      }
+    },
+    {
+      "object": "bpf_multi_enforcer",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_enforcer.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__BPF_OVERRIDE_RETURN",
+        "-D__MULTI_KPROBE"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 0,
+        "kprobe.multi/enforcer": 111
+      },
+      "corrected_sections": {
+        ".text": 0,
+        "kprobe.multi/enforcer": 111
+      }
+    },
+    {
+      "object": "bpf_multi_retkprobe_v61",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_retkprobe.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG",
+        "-D__MULTI_KPROBE"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 11188,
+        "kprobe.multi": 2005,
+        "kprobe.multi/generic_retkprobe": 12600
+      },
+      "corrected_sections": {
+        ".text": 11188,
+        "kprobe.multi": 2005,
+        "kprobe.multi/generic_retkprobe": 12600
+      }
+    },
+    {
+      "object": "bpf_multi_retuprobe_v61",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_retuprobe.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG",
+        "-D__MULTI_KPROBE"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 11188,
+        "uprobe.multi": 2005,
+        "uprobe.multi/generic_retuprobe": 12522
+      },
+      "corrected_sections": {
+        ".text": 11188,
+        "uprobe.multi": 2005,
+        "uprobe.multi/generic_retuprobe": 12522
+      }
+    },
+    {
+      "object": "bpf_multi_kprobe_v61",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG",
+        "-D__MULTI_KPROBE"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 13519,
+        "kprobe.multi": 25805,
+        "kprobe.multi/generic_kprobe": 1219,
+        "kprobe.multi/generic_kprobe_override": 87,
+        "fmod_ret/security_task_prctl": 80
+      },
+      "corrected_sections": {
+        ".text": 13519,
+        "kprobe.multi": 25805,
+        "kprobe.multi/generic_kprobe": 1219,
+        "kprobe.multi/generic_kprobe_override": 87,
+        "fmod_ret/security_task_prctl": 80
+      }
+    },
+    {
+      "object": "bpf_multi_uprobe_v61",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_uprobe.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG",
+        "-D__MULTI_KPROBE"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 15455,
+        "uprobe.multi": 25213,
+        "uprobe.multi/generic_uprobe": 1219,
+        "uprobe.multi.s/generic_uprobe": 689
+      },
+      "corrected_sections": {
+        ".text": 15455,
+        "uprobe.multi": 25213,
+        "uprobe.multi/generic_uprobe": 1219,
+        "uprobe.multi.s/generic_uprobe": 689
+      }
+    },
+    {
+      "object": "bpf_prog_iter",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_prog_iter.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 0,
+        "iter/bpf_prog": 64
+      },
+      "corrected_sections": {
+        ".text": 0,
+        "iter/bpf_prog": 64
+      }
+    },
+    {
+      "object": "bpf_multi_usdt_v61",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_usdt.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__V61_BPF_PROG",
+        "-D__MULTI_KPROBE"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 15701,
+        "uprobe.multi": 27341,
+        "uprobe.multi/generic_usdt": 1219,
+        "uprobe.multi.s/generic_usdt": 327
+      },
+      "corrected_sections": {
+        ".text": 15701,
+        "uprobe.multi": 27341,
+        "uprobe.multi/generic_usdt": 1219,
+        "uprobe.multi.s/generic_usdt": 327
+      }
+    },
+    {
+      "object": "bpf_multi_usdt_v511",
+      "source": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_usdt.c",
+      "flags": [
+        "-fms-extensions",
+        "-DMICRO_NATIVE_HELPER_MACROS",
+        "-DMICRO_NATIVE_TETRAGON",
+        "-D__TARGET_ARCH_x86",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/lib",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/process",
+        "-I/workspaces/repository/vendor/bpf/tetragon/bpf/errmetrics",
+        "-I/usr/include",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-D__LARGE_BPF_PROG",
+        "-D__V511_BPF_PROG",
+        "-D__MULTI_KPROBE"
+      ],
+      "plain_bytes_equal_shipped_code": true,
+      "plain_sections": {
+        ".text": 117,
+        "uprobe.multi": 196347,
+        "uprobe.multi/generic_usdt": 1231,
+        "uprobe.multi.s/generic_usdt": 27863
+      },
+      "corrected_sections": {
+        ".text": 117,
+        "uprobe.multi": 196347,
+        "uprobe.multi/generic_usdt": 1231,
+        "uprobe.multi.s/generic_usdt": 27863
+      }
+    }
+  ],
+  "failures": []
+}

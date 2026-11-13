@@ -1,0 +1,56 @@
+{
+  "recorded_at": "2026-11-13T03:42:51.233719+00:00",
+  "scope": "P1b selected context+dynamic-map OTel paired diagnostic",
+  "fix_commits": [
+    "00c863247",
+    "49f464cc6",
+    "371dc4bb6"
+  ],
+  "analysis_commits": [
+    "d50bb64f4",
+    "c07f3ea55"
+  ],
+  "kernel": "74d1097af561",
+  "image": "bpf-benchmark/kprog:current",
+  "make_exit": 0,
+  "app_status": "ok",
+  "workload_errors": 0,
+  "run": "corpus/results/x86_kvm_corpus_20261113_033039_387780",
+  "capture": "corpus/results/perf-context-runtime-maps-20261113",
+  "command": "taskset -c 16-19 make -f /workspaces/repository/kprog/perf/one-image/Makefile corpus APPS=otelcol-ebpf-profiler/profiling SAMPLES=1 WORKLOAD_DURATION=45 CPUS=16-19 VM_CPUS=4 VM_MEM=32G STATE=/var/tmp/kprog-tmp/perf LOGS=/workspaces/kprog-raw/perf/20261113-context/runtime-maps BPFREJIT_CORPUS_BPF_STATS=1 NATIVE_MANIFEST=/workspaces/repository/corpus/results/perf-context-20261113/manifest.json VNG_FLAGS=--verbose",
+  "guest_env_selection": "EQCODEX_NATIVE_LINK_BINARY=/workspaces/repository/corpus/results/verified-linker-runtime-maps-20261113/native-link; actual container command records BPFREJIT_NATIVE_LINK_BINARY at that path",
+  "contract": {
+    "cpus": "16-19",
+    "vcpus": 4,
+    "vm_memory_gib": 32,
+    "host_address_space_limit_gib": 48,
+    "samples": 1,
+    "duration_seconds": 45,
+    "stats": 1
+  },
+  "throughput_native_over_ebpf_rounded": 0.975,
+  "bpf_ns_per_invocation": {
+    "ebpf": 5140.6,
+    "native": 5119.6,
+    "speedup_rounded": 1.004
+  },
+  "stubs": 0,
+  "counter_windows": "otel-recovered-windows.json",
+  "baseline_map_id": 29,
+  "native_map_id": 360,
+  "analysis_commands": [
+    "python3 kprog/perf/may29-image/eqcodex-analyze.py corpus/results/perf-context-runtime-maps-20261113",
+    "python3 kprog/perf/may29-image/counter-windows.py snapshots.json --pair baseline-0002 baseline-0006 --pair post_rejit-0010 post_rejit-0012",
+    "python3 kprog/perf/may29-image/ratio.py off=corpus/results/x86_kvm_corpus_20261113_033039_387780 on=corpus/results/x86_kvm_corpus_20261113_033039_387780",
+    "python3 kprog/perf/may29-image/stubs.py corpus/results/x86_kvm_corpus_20261113_033039_387780"
+  ],
+  "interpretation": "Native unwinding, interpreter calls and exporter activity resume; the previously observed inner-map fault is resolved in this subset.",
+  "limits": [
+    "Stats-on, one-sample functional diagnostic on four vCPUs with concurrent host builds. Floor timing remains separate.",
+    "Exporter batch-send-size sums count exported pipeline items, rather than exact raw kernel trace emissions.",
+    "Window durations differ; compare raw deltas with their timestamps and normalized quantities.",
+    "The former native zero-attempt window is retained and yields a null frames/attempt ratio, preserving its observed zeros.",
+    "Remaining counter mix differences and full end-to-end behavior stay part of P1."
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261113-context/runtime-maps"
+}

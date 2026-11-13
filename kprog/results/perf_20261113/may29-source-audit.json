@@ -1,0 +1,35 @@
+{
+  "recorded_at": "2026-11-13T03:44:01.634567+00:00",
+  "scope": "P1c frozen source and retained May29-reference reproduction payload, with historical identity limit",
+  "frozen_source": "9f3855f6f",
+  "retained_payload_root": "/workspaces/kprog-raw/kprog-r-art/art/native-bpf/x86_64",
+  "payload_provenance": "Retained November reference-reproduction ART; restore.sh describes the six-application May29 recipe. OTel DWARF comp_dir refers to the October cilium-lab paper-tree build.",
+  "otel": {
+    "object": "otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+    "entry_native_pc": "0x361",
+    "read": "cmpq $0x2b,0xa0(%rbx) with original incoming context in RBX",
+    "mechanism": "public embedded pt_regs view; physical perf context requires regs pointer dereference"
+  },
+  "tetragon": {
+    "object": "tetragon/bpf_fork_v511.native.o",
+    "entry_native_pc": "0x300",
+    "read": "lea task+0x60 into probe-read source",
+    "DWARF_main_task_layout": {
+      "thread_pid": 2904,
+      "loginuid": 3552
+    },
+    "DWARF_flavor_layout": {
+      "thread_pid": 96,
+      "loginuid": 112
+    }
+  },
+  "dated_may_run_examined": "corpus/results/x86_kvm_corpus_20260529_000413_418475",
+  "conclusion": "Frozen source and retained reference-reproduction objects carry both defect mechanisms.",
+  "limits": [
+    "Original May29 dated-run object identity remains open; the examined ART was compiled later.",
+    "The dated run retains counters/metadata; a payload archive or identity receipt must tie exact original objects to it.",
+    "Historical per-arm Attempts/Frames or successful-event totals are not reconstructed from source or program sizes.",
+    "Paper decisions remain with the operator; this audit changes performance evidence notes only."
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261113-core/history"
+}

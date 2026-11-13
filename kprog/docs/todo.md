@@ -15,8 +15,9 @@
 **lane perf（Codex，gpt-6.1-sol）。目标：每个性能数字都是等量工作、可复现的；六应用几何平均 native/eBPF 达到 1.20x 以上，每个应用不低于 05-29 下限。**
 - [ ] P1 OTel、Tetragon 等量工作：读一次性 Codex 的报告 kprog/results/equal-work-20261113/report.md（以及 COORDINATION 里 FOR TEMP CODEX 的线索：内联 tail call 用到的内核偏移和计数槽）；查清哪一边偏了，按所属组件修（链接器、加载器、shim 属 lane verified，直接和它商量），新行为放在默认关闭的开关后。
 - [x] P1a PERF_EVENT physical-context host子集与候选构建（e0939263e、ce863428d、00c863247）：regs/sample_period/addr按唯一kernel BTF转换，helper/tailcall保留physical ctx；plain fixture=1、corrected=0，OTel 15 units合并构建rc0、10处context loads完成转换。receipt `kprog/results/perf_20261113/context-host.json`；实际配对guest已进入native unwinder，暴露动态inner-map lookup被编为percpu array后的panic；runtime receipt `context-runtime.json`，链接器修复交verified，P1继续。
-- [ ] P1b OTel动态inner-map lookup：与verified修复native_link未知map identity时按BPF调用序号分配map规格的通用问题，默认关闭的运行时选择；`context-runtime.json`/a2367ceae记录native unwinder在percpu lookup展开后panic。用现有`BPFREJIT_NATIVE_LINK_BINARY`选择修复候选，短配对复测后核对Attempts/Frames与collector计数。
+- [x] P1b OTel动态inner-map lookup（49f464cc6，371dc4bb6）：runtime-map候选配合context修复完成短配对run `x86_kvm_corpus_20261113_033039_387780`，make0/appok、0错误/0stub；native Attempts/Frames/Interpreter/collector均恢复，mature frames/attempt eBPF0.912213、native0.913468。stats开单样本诊断吞吐0.975x，正式floor另测。receipt `kprog/results/perf_20261113/otel-recovered.json`；P1整体继续核对counter mix与Tetragon。
 - [ ] P1c 查 05-29 存档运行（x86_kvm_corpus_20260529_*）的 OTel、Tetragon 原生对象是否带着同样的缺陷（OTel 按公开寄存器结构读 PERF_EVENT 上下文、不做用户栈展开；Tetragon CO-RE flavor 结构用声明偏移）。论文和 evaluation.md 的 OTel、Tetragon 数字依赖这一点；结论写进第 1 节，论文怎么改由运营者决定。
+- [x] P1d Tetragon target-BTF CO-RE compiler host子集（77e2916fb、abb4d8e02、3dfd738fd、c6b15fc34）：host plain1/corrected0，35 manifest objects全部构建成功，35/35 plain code逐节等于shipped default；fork原生PC0x2ff的task+96改成task+2904。`core-host.json`/`core-build-report.json`记录source epoch、4 workers/每process16GiB上限与完整输出。默认关闭NATIVE_MANIFEST选择；实际Tetragon配对guest1144536运行中，P1继续。
 - [ ] P2 修好后只重测受这处修复影响的应用（stats 关和开，每个应用 3×180 秒），每次运行用 stubs.py 和程序自身计数核对，增量写进第 1 节；六应用全量计时只在冻结前跑一次，正式下限表和几何平均以那次为准。
 - [ ] P3 等量工作成立的应用里，按每次调用的差距找原生一侧的通用优化（OTel、Tetragon、Cilium）。
 
@@ -39,6 +40,8 @@
 - 规则不变：一个工作树、一个内核、一个镜像、一个底座；原始数据不删；新行为放在默认关闭的开关后，默认路径字节不变；不新增检查；论文、故事、设计、benchmark 设置要运营者同意。
 
 ## 1. 性能（目标：六应用几何平均 native/JIT 1.20x–1.40x，来自原生代码）
+
+- **PERF P1 corrected subset（2026-11-13）** OTel context+runtime-map候选在唯一kernel74/image d756上完成 `x86_kvm_corpus_20261113_033039_387780`：make0/appok、0 workload错误/0stub，native用户展开与解释器/collector活动恢复。mature windows eBPF map29 39.7492s、native map360 19.744057s，frames/attempt0.912213/0.913468；stats开单样本吞吐0.975x，BPF5140.6→5119.6ns/次，CPU16–19/4vCPU、并行host构建，作为诊断，floor另测。全量Tetragon35对象CORE修复构建成功，plain与shipped code35/35相同，corrected fork地址+96→+2904；实际配对继续。receipts/archives `kprog/results/perf_20261113/{otel-recovered,core-host}*`。P1c初查：9f3855f6f源码和保留的后续May-reference payload都含同类访问，原始May运行的精确payload身份待对接；`may29-source-audit*`列出证据与界限，论文保持运营者决策。
 
 - **VERIFIED dynamic-map lookup通用修复batch（2026-11-13）** 回应perf P1b runtime fault线索：unknown native map按首个未使用BPF helper site分配类型不可靠。新增默认关闭`--runtime-map-lookups`，x86 kernel mode所有lookup按actual RDI调用kernel bpf_map_lookup_elem；不借用positional type/key_offset，缺generic target明确失败，proof模式不变。新回归旧selection导致1fail；新3/3pass（CLI默认关闭、percpu误配/缺target、真实ELF immediate/GOT两路relocation以及关闭时旧target）。现有Make入口已构建selectable payload `corpus/results/verified-linker-runtime-maps-20261113/native-link`（wrapper启用flag，邻接real binary），供perf通过已有BPFREJIT_NATIVE_LINK_BINARY做短OTel subset；共享release/base/image和冻结launchers未改。日志、payload、receipt归档 `kprog/results/verified_20261113/runtime-map-lookups-subset*`，raw `/workspaces/kprog-raw/verified/20261113-runtime-map-lookups/`。实际crashing map/index及故障消除/等量工作仍待runtime确认，不冒充已解决。
 

@@ -1,0 +1,293 @@
+{
+  "recorded_at": "2026-11-13T03:42:51.233217+00:00",
+  "scope": "P1 native CO-RE compiler host checks and all Tetragon manifest-object build",
+  "implementation_commits": [
+    "77e2916fb",
+    "971490a55",
+    "1643a44c7",
+    "abb4d8e02",
+    "f14b1d45d",
+    "3dfd738fd",
+    "c6b15fc34"
+  ],
+  "kernel": "74d1097af561",
+  "image": "bpf-benchmark/kprog:current",
+  "image_id": "d756bf5919e9",
+  "compiler": "Clang AST translation of generated native C; libbpf target BTF type/member/enum lookup",
+  "selection": "NATIVE_MANIFEST=/workspaces/repository/corpus/results/perf-core-20261113/manifest.json",
+  "host_check": {
+    "command": "taskset -c16-19 make -f kprog/perf/native-context/Makefile core-check",
+    "make_exit": 0,
+    "plain_exit": 1,
+    "corrected_exit": 0,
+    "coverage": [
+      "flavored thread_pid/loginuid offset",
+      "anonymous source aggregate",
+      "missing-field branch folding",
+      "target type size",
+      "array field size",
+      "target enum existence/value",
+      "target bitfield allocation size/read",
+      "bitfield temporary/source name separation"
+    ],
+    "logs": [
+      "/workspaces/kprog-raw/perf/20261113-core/check3.log",
+      "/workspaces/kprog-raw/perf/20261113-core/check4.log"
+    ]
+  },
+  "all_build": {
+    "command": "taskset -c 16-19 make -f /workspaces/repository/kprog/perf/native-context/Makefile tetragon-core CORE_SELECTION=--all\\ --jobs\\ 4",
+    "make_exit": 0,
+    "objects": 35,
+    "failures": [],
+    "plain_code_equal_shipped": 35,
+    "workers": 4,
+    "per_process_address_space_limit_gib": 16,
+    "translator_epoch": "abb4d8e02",
+    "builder_epoch": "3dfd738fd",
+    "units": [
+      {
+        "object": "bpf_cgroup",
+        "plain_code_equals_shipped": true,
+        "queries": 3,
+        "flavored_accesses": 6
+      },
+      {
+        "object": "bpf_cgroup_mkdir_v511",
+        "plain_code_equals_shipped": true,
+        "queries": 6,
+        "flavored_accesses": 12
+      },
+      {
+        "object": "bpf_cgroup_release_v511",
+        "plain_code_equals_shipped": true,
+        "queries": 6,
+        "flavored_accesses": 12
+      },
+      {
+        "object": "bpf_cgroup_rmdir_v511",
+        "plain_code_equals_shipped": true,
+        "queries": 6,
+        "flavored_accesses": 12
+      },
+      {
+        "object": "bpf_cgtracker",
+        "plain_code_equals_shipped": true,
+        "queries": 4,
+        "flavored_accesses": 11
+      },
+      {
+        "object": "bpf_enforcer",
+        "plain_code_equals_shipped": true,
+        "queries": 0,
+        "flavored_accesses": 0
+      },
+      {
+        "object": "bpf_execve_bprm_commit_creds",
+        "plain_code_equals_shipped": true,
+        "queries": 0,
+        "flavored_accesses": 0
+      },
+      {
+        "object": "bpf_execve_event_v61",
+        "plain_code_equals_shipped": true,
+        "queries": 9,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_execve_map_update_v61",
+        "plain_code_equals_shipped": true,
+        "queries": 0,
+        "flavored_accesses": 0
+      },
+      {
+        "object": "bpf_exit_v511",
+        "plain_code_equals_shipped": true,
+        "queries": 9,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_fmodret_enforcer",
+        "plain_code_equals_shipped": true,
+        "queries": 0,
+        "flavored_accesses": 0
+      },
+      {
+        "object": "bpf_fork_v511",
+        "plain_code_equals_shipped": true,
+        "queries": 9,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_generic_fentry_v61",
+        "plain_code_equals_shipped": true,
+        "queries": 19,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_generic_fexit_v61",
+        "plain_code_equals_shipped": true,
+        "queries": 19,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_generic_kprobe_v61",
+        "plain_code_equals_shipped": true,
+        "queries": 19,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_generic_lsm_core_v511",
+        "plain_code_equals_shipped": true,
+        "queries": 17,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_generic_lsm_core_v61",
+        "plain_code_equals_shipped": true,
+        "queries": 19,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_generic_lsm_ima_bprm_v61",
+        "plain_code_equals_shipped": true,
+        "queries": 15,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_generic_lsm_ima_file_v61",
+        "plain_code_equals_shipped": true,
+        "queries": 15,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_generic_lsm_output_v61",
+        "plain_code_equals_shipped": true,
+        "queries": 19,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_generic_rawtp_v61",
+        "plain_code_equals_shipped": true,
+        "queries": 19,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_generic_retkprobe_v61",
+        "plain_code_equals_shipped": true,
+        "queries": 19,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_generic_retuprobe_v61",
+        "plain_code_equals_shipped": true,
+        "queries": 19,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_generic_tracepoint_v61",
+        "plain_code_equals_shipped": true,
+        "queries": 19,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_generic_uprobe_v61",
+        "plain_code_equals_shipped": true,
+        "queries": 19,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_generic_usdt_v61",
+        "plain_code_equals_shipped": true,
+        "queries": 19,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_loader_v511",
+        "plain_code_equals_shipped": true,
+        "queries": 4,
+        "flavored_accesses": 6
+      },
+      {
+        "object": "bpf_multi_enforcer",
+        "plain_code_equals_shipped": true,
+        "queries": 0,
+        "flavored_accesses": 0
+      },
+      {
+        "object": "bpf_multi_kprobe_v61",
+        "plain_code_equals_shipped": true,
+        "queries": 19,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_multi_retkprobe_v61",
+        "plain_code_equals_shipped": true,
+        "queries": 19,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_multi_retuprobe_v61",
+        "plain_code_equals_shipped": true,
+        "queries": 19,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_multi_uprobe_v61",
+        "plain_code_equals_shipped": true,
+        "queries": 19,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_multi_usdt_v511",
+        "plain_code_equals_shipped": true,
+        "queries": 17,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_multi_usdt_v61",
+        "plain_code_equals_shipped": true,
+        "queries": 19,
+        "flavored_accesses": 20
+      },
+      {
+        "object": "bpf_prog_iter",
+        "plain_code_equals_shipped": true,
+        "queries": 0,
+        "flavored_accesses": 0
+      }
+    ]
+  },
+  "concrete_fork_read": {
+    "function": "event_wake_up_new_task",
+    "native_pc": "0x2ff",
+    "plain_thread_pid_offset": 96,
+    "corrected_thread_pid_offset": 2904
+  },
+  "generated_artifacts": "corpus/results/perf-core-20261113/",
+  "runtime": {
+    "launcher": 1144536,
+    "status": "running at receipt",
+    "log": "/workspaces/kprog-raw/perf/20261113-core/tetragon-run/make.log",
+    "capture": "corpus/results/perf-core-tetragon-capture-20261113",
+    "samples": 1,
+    "duration_seconds": 120,
+    "cpus": "16-19",
+    "vcpus": 4,
+    "vm_memory_gib": 32,
+    "host_address_space_limit_gib": 48,
+    "stats": 1,
+    "selected_linker": "49f464cc6 runtime-map-lookups payload"
+  },
+  "limits": [
+    "Host ABI checks and code-generation evidence; live Tetragon behavior comparison remains open.",
+    "The historical speedup and a new floor result are separate measurements.",
+    "Core bitfield temporary fix c6b15fc34 was checked on host fixture after the all-object build; those native outputs retain the recorded translator epoch."
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261113-core",
+  "archive_parts": [
+    "core-host.tar.gz.part-000",
+    "core-host.tar.gz.part-001"
+  ],
+  "full_archive_retained": "/workspaces/kprog-raw/perf/20261113-core/core-host-full.tar.gz"
+}
