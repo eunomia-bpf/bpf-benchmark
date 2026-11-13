@@ -1,0 +1,116 @@
+{
+  "recorded_at": "2026-11-13T06:03:17.644748+00:00",
+  "scope": "P1e opt-in Tetragon native startup CPU profile",
+  "run": "corpus/results/x86_kvm_corpus_20261113_052912_803766",
+  "capture": "corpus/results/perf-loader-cpu-capture-20261113",
+  "profile_snapshot": "post_rejit-0006",
+  "raw": "/workspaces/kprog-raw/perf/20261113-loader-cpu-profile",
+  "make_exit": 0,
+  "app_status": "ok",
+  "stub_records": 0,
+  "phase_programs": {
+    "baseline": 99,
+    "post_rejit": 84
+  },
+  "contract": {
+    "cpus": "16-19",
+    "vcpus": 4,
+    "memory_gib": 8,
+    "host_address_space_limit_gib": 16,
+    "samples": 1,
+    "workload_seconds": 1,
+    "stats": 1
+  },
+  "profile": {
+    "event": "cpu-clock",
+    "frequency_hz": 99,
+    "duration_seconds": 10,
+    "callgraph": "dwarf,8192",
+    "inherit": false,
+    "samples": 849,
+    "lost_reported": 0,
+    "cpu_period_sum_ns": 8575757490,
+    "record_clock": {
+      "start": {
+        "wall_time": "2026-11-13T05:30:26.233786+00:00",
+        "monotonic_ns": 165652975108
+      },
+      "end": {
+        "wall_time": "2026-11-13T05:30:36.817050+00:00",
+        "monotonic_ns": 176236238993
+      }
+    }
+  },
+  "stacks": "loader-cpu-stacks.json",
+  "source": {
+    "observer": "1bcd73d5e",
+    "symbol_extraction": "06ae12286",
+    "tool_receipt": "loader-cpu-tool.json"
+  },
+  "symbol_identity": {
+    "host_image_id": "sha256:d756bf5919e9eb35cc8628a38af95ca2cec2751e86f4c23f7c6e3f7bd07494a1",
+    "host_created": "2026-11-12T13:04:20.077571753Z",
+    "archives": [
+      {
+        "archive": ".cache/container-images/x86_64-runner-runtime.image.tar",
+        "config_sha256": "cdd06a49fd0ed181ccd9b35a9ce58148322e555d578a112e285c5b85e74e6851",
+        "repo_tags": [
+          "bpf-benchmark/kprog:current"
+        ],
+        "created": "2026-11-12T13:04:20.077571753Z",
+        "rootfs_matches_host": true
+      },
+      {
+        "archive": "/var/tmp/kprog-tmp/perf/timing/var-tmp/runtime.image.tar",
+        "config_sha256": "cdd06a49fd0ed181ccd9b35a9ce58148322e555d578a112e285c5b85e74e6851",
+        "repo_tags": [
+          "bpf-benchmark/kprog:current"
+        ],
+        "created": "2026-11-12T13:04:20.077571753Z",
+        "rootfs_matches_host": true
+      },
+      {
+        "archive": "/var/tmp/kprog-tmp/perf/cpu/var-tmp/runtime.image.tar",
+        "config_sha256": "cdd06a49fd0ed181ccd9b35a9ce58148322e555d578a112e285c5b85e74e6851",
+        "repo_tags": [
+          "bpf-benchmark/kprog:current"
+        ],
+        "created": "2026-11-12T13:04:20.077571753Z",
+        "rootfs_matches_host": true
+      }
+    ]
+  },
+  "symbols": {
+    "mapped_files": 11,
+    "purpose": "Offline perf symbol evidence only; no executable root/base and no source copy.",
+    "image_so_matches_captured_so": true,
+    "captured_so_build_id": "717273a31c83a9fca329c9390b0355a91987fee8",
+    "solebase_so_build_id": "2f5b55f52ec1d49e1f1365ec5cef3e8f87b51da8",
+    "solebase_so_not_used_for_symbolization": "Text/BuildID differs from actual captured image SO."
+  },
+  "findings": [
+    "Readlink309/849 inclusive;136 carry load_from_fd ancestor. Native-load inclusive251, getdents51/24withnative, mapinfo28/12withnative; groups overlap.",
+    "Captured image SO return PC3d899 follows readlink call3d894 inside readdir/numericFD/proc-self-fd/anon_inode:bpf-map scan and bpf_obj_get_info_by_fd. This matches collect_open_process_maps plus fd_is_bpf_map.",
+    "Verifier217samples have no recovered load_from_fd ancestry; cannot assign them all to native-stage work.",
+    "Resolved runtime app/DSO symbols reduce empty stacks122->80; all849 sample headers retained,368 contain file-backed user frames."
+  ],
+  "limits": [
+    "CPU sampling is not off-CPU or total startup wall attribution.",
+    "--no-inherit samples only attached existing Tetragon threads; later threads and linker children not inherited.",
+    "This1second diagnostic has incomplete startup inventory; no throughput/floor claim.",
+    "Host imageID and archive config digest differ but RootFS layers match and extracted loader bytes equal active capture; both identities retained.",
+    "Loader source fixes/optional stages not deployed in this captured image."
+  ],
+  "analysis_commands": [
+    "python3 kprog/perf/may29-image/runtime-symbols.py --image .cache/container-images/x86_64-runner-runtime.image.tar --maps corpus/results/perf-loader-cpu-capture-20261113/post_rejit-0006/loader-perf-maps.txt --output /workspaces/kprog-raw/perf/20261113-loader-cpu-profile/expanded-symbols",
+    "/var/tmp/kprog-tmp/perf/perf-build/perf script -i corpus/results/perf-loader-cpu-capture-20261113/post_rejit-0006/loader-perf.data --symfs /workspaces/kprog-raw/perf/20261113-loader-cpu-profile/expanded-symbols --kallsyms corpus/results/perf-loader-cpu-capture-20261113/post_rejit-0006/loader-perf-kallsyms.txt",
+    "python3 kprog/perf/may29-image/cpu-stack-summary.py /workspaces/kprog-raw/perf/20261113-loader-cpu-profile/resolved-script.txt",
+    "objdump -d --start-address=0x3d818 --stop-address=0x3d940 /workspaces/kprog-raw/perf/20261113-loader-cpu-profile/expanded-symbols/usr/local/lib/bpfrejit/libnative_loader.so"
+  ],
+  "archive": {
+    "path": "kprog/results/perf_20261113/loader-cpu-profile.tar.gz",
+    "bytes": 43494269,
+    "sha256": "fb736254c21e927f19d9af1f9cebf4e97b5a3889154525618b5eba28c17a5d37",
+    "files_byte_compared": 1414
+  }
+}

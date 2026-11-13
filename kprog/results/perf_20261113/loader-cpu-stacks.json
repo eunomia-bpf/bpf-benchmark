@@ -1,0 +1,76 @@
+{
+  "source": "/workspaces/kprog-raw/perf/20261113-loader-cpu-profile/resolved-script.txt",
+  "samples": 849,
+  "period_sum": 8575757490,
+  "events": {
+    "cpu-clock": 849
+  },
+  "tids": {
+    "3967": 369,
+    "3678": 146,
+    "3680": 72,
+    "3673": 2,
+    "3679": 260
+  },
+  "empty_stacks": 80,
+  "with_file_backed_frames": 368,
+  "groups": {
+    "readlink": {
+      "samples": 309,
+      "period_sum": 3121212090,
+      "with_native_load": 136,
+      "tids": {
+        "3967": 136,
+        "3678": 51,
+        "3679": 101,
+        "3680": 21
+      }
+    },
+    "verifier": {
+      "samples": 217,
+      "period_sum": 2191919170,
+      "with_native_load": 0,
+      "tids": {
+        "3967": 92,
+        "3678": 47,
+        "3679": 68,
+        "3680": 10
+      }
+    },
+    "getdents": {
+      "samples": 51,
+      "period_sum": 515151510,
+      "with_native_load": 24,
+      "tids": {
+        "3967": 25,
+        "3678": 7,
+        "3679": 13,
+        "3680": 6
+      }
+    },
+    "map_info": {
+      "samples": 28,
+      "period_sum": 282828280,
+      "with_native_load": 12,
+      "tids": {
+        "3967": 12,
+        "3678": 4,
+        "3679": 9,
+        "3680": 3
+      }
+    },
+    "native_load": {
+      "samples": 251,
+      "period_sum": 2535353510,
+      "with_native_load": 251,
+      "tids": {
+        "3967": 251
+      }
+    }
+  },
+  "limits": [
+    "Groups overlap; each group counts a sample once.",
+    "Periods are CPU event weights, not guest elapsed or loader wall cost.",
+    "Unknown or empty stacks remain in the sample denominator."
+  ]
+}
