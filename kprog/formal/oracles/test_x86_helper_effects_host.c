@@ -7,6 +7,8 @@
 unsigned long native_lab_entry_input(unsigned int kind) { return 0; }
 #define bpf_ktime_get_ns() 42ULL
 #define bpf_get_current_task_btf() ((void *)0x1234)
+#define bpf_map_update_elem(MAP, KEY, VALUE, FLAGS) (memcpy((MAP), (VALUE), 8), 0)
+#define bpf_map_delete_elem(MAP, KEY) (memset((MAP), 0, 8), 0)
 #define bpf_probe_read(DST, SIZE, SRC) (memcpy((DST), (SRC), (SIZE)), 0)
 #define bpf_skb_load_bytes(CTX, OFF, DST, SIZE) (memset((DST), 0x5a, (SIZE)), 0)
 #define REQUIRE(C) do { if (!(C)) { printf("helper effect failure line %d\n", __LINE__); return 1; } } while (0)
@@ -21,6 +23,16 @@ int main(void) {
     X86_SIM_BPF_CALL_bpf_get_current_task_btf();
     REQUIRE(__x86_rax.ptr==(void *)0x1234 && __x86_rax_tag==X86_SIM_TAG_MAP_VALUE);
     REQUIRE(SAVED(-24).pointer==(void *)7);
+
+    /* Map mutation reads caller key/value buffers and writes map storage. */
+    unsigned long map_value=0, input_value=17, key=0;
+    __x86_rdi.ptr=&map_value; __x86_rdi_tag=X86_SIM_TAG_MAP_VALUE;
+    __x86_rsi.ptr=&key; __x86_rdx.ptr=&input_value; __x86_rcx.ptr=0;
+    X86_SIM_BPF_CALL_bpf_map_update_elem();
+    REQUIRE(map_value==17 && SAVED(-24).pointer==(void *)7);
+    __x86_rdi.ptr=&map_value; __x86_rsi.ptr=&key;
+    X86_SIM_BPF_CALL_bpf_map_delete_elem();
+    REQUIRE(map_value==0 && SAVED(-24).pointer==(void *)7);
 
     unsigned char foreign[16]={}, source[16]={1,2,3,4};
     __x86_rdi.ptr=foreign; __x86_rdi_tag=X86_SIM_TAG_MAP_VALUE;

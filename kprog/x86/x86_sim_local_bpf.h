@@ -3091,11 +3091,12 @@ extern void __x86_sim_unsupported_helper(void)
 #define X86_SIM_BPF_CALL_bpf_map_lookup_elem() \
 	X86_SIM_L_HELPER_READONLY_POINTER_RESULT(bpf_map_lookup_elem((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI)))
 
+/* Map mutation reads caller key/value buffers and writes map-owned storage. */
 #define X86_SIM_BPF_CALL_bpf_map_update_elem() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_map_update_elem((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX)))
+	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_map_update_elem((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX)))
 
 #define X86_SIM_BPF_CALL_bpf_map_delete_elem() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_map_delete_elem((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI)))
+	X86_SIM_L_HELPER_READONLY_SCALAR_RESULT(bpf_map_delete_elem((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI)))
 
 #define X86_SIM_BPF_CALL_bpf_probe_read() \
 	X86_SIM_L_HELPER_WRITE_SCALAR_RESULT(bpf_probe_read((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)), X86_RDI, X86_RSI)
