@@ -219,9 +219,10 @@ socket-retain:
 CILIUM_CAPTURE ?=
 CILIUM_IR_BUILD ?= /var/tmp/kprog-tmp/perf/cilium-context
 CILIUM_UNIT ?= bpf_lxc
+CILIUM_INPUT_ARGS ?=
 .PHONY: upstream-cilium-ir
 upstream-cilium-ir:
-	prlimit --as=8589934592 -- python3 $(HERE)/cilium-upstream.py --capture $(CILIUM_CAPTURE) --output $(CILIUM_IR_BUILD)/$(CILIUM_UNIT)
+	prlimit --as=8589934592 -- python3 $(HERE)/cilium-upstream.py --capture $(CILIUM_CAPTURE) --output $(CILIUM_IR_BUILD)/$(CILIUM_UNIT) $(CILIUM_INPUT_ARGS)
 	llvm-dis-18 $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).bc -o $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).ll
 	prlimit --as=8589934592 -- $(CC) -target bpf -mcpu=v3 -O2 -c $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).bc -o $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).bpf.o
 
@@ -266,6 +267,14 @@ upstream-cilium-native: upstream-cilium-ir $(SOCKET_BUILD)/socket-context-lower 
 upstream-cilium-link: upstream-cilium-native
 	python3 $(HERE)/socket-proof.py --input $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).native.o --linker $(LINK_MEMORY_PAYLOAD)/native-link.real --output $(CILIUM_IR_BUILD)/$(CILIUM_UNIT)-links --section-prefix tc/ --section-prefix xdp
 
+.PHONY: cilium-object-compare
+cilium-object-compare:
+	python3 $(HERE)/cilium-object-compare.py --record $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).json --output $(CILIUM_IR_BUILD)/$(CILIUM_UNIT)-comparison.json
+
 .PHONY: cilium-retain
 cilium-retain:
 	python3 $(HERE)/cilium-retain.py --raw /workspaces/kprog-raw/perf/20261113-packet-context --upstream-build $(CILIUM_IR_BUILD) --packet-build $(PACKET_BUILD) --compiler $(SOCKET_BUILD)/socket-context-lower --output $(ROOT)/kprog/results/perf_20261113/packet-context-host.json
+
+.PHONY: cilium-live-prepare
+cilium-live-prepare:
+	python3 $(HERE)/cilium-live-prepare.py --raw /workspaces/kprog-raw/perf/20261113-cilium-live-config --capture $(ROOT)/corpus/results/perf-cilium-live-config-20261113 --run $(ROOT)/corpus/results/x86_kvm_corpus_20261113_075230_200030 --output $(ROOT)/kprog/results/perf_20261113/cilium-live-config-runtime.json
