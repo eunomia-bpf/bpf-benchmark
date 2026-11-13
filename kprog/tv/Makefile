@@ -105,6 +105,14 @@ stack-alias-host-check:
 	gcc -fsanitize=undefined "$(STACK_ALIAS_BUILD)/invocation-stack.o" -o "$(STACK_ALIAS_BUILD)/invocation-stack"
 	"$(STACK_ALIAS_BUILD)/invocation-stack"
 
+.PHONY: helper-effects-host-check
+helper-effects-host-check:
+	install -d "$(STACK_ALIAS_BUILD)"
+	$(CC) -O2 -Wall -Wextra -fsanitize=undefined -fno-sanitize-recover=all \
+		-I../.. -I../../vendor/libbpf/src \
+		../formal/oracles/test_x86_helper_effects_host.c -o "$(STACK_ALIAS_BUILD)/helper-effects"
+	"$(STACK_ALIAS_BUILD)/helper-effects"
+
 .PHONY: service-request-compile
 service-request-compile:
 	CLANG="$(abspath ../stock-path/bin/clang)" python3 ../test/recompile_service_request.py \

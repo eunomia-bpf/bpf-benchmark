@@ -1,0 +1,27 @@
+{
+  "recorded_at": "2026-11-13T03:15:03.695174+00:00",
+  "scope": "General helper side-effect lowering for saved caller stack pointers; batch subset checks",
+  "baseline_model": "91fc2558a",
+  "change": "Preserve allocated stack facts across all supported no-argument getter helpers; known full-write buffer helpers invalidate only possible stack destination interval; unclassified destinations conservatively clear facts; register and below-SP clobbers retained",
+  "helper_wrappers_changed": 19,
+  "no_argument_getters": 11,
+  "output_helpers": 8,
+  "output_effect_source": "kprog/helper_abi.py HELPER_FULL_WRITES existing eight-helper destination/size catalog",
+  "regression": {
+    "before": "Corrected host fixture fails after getter erased live pointer at line19, make2",
+    "after": "UBSan getter, pointer return, foreign/stack output, overlap/disjoint, zero and300-byte length, unknown alias all PASS; existing stack lifetime regression PASS",
+    "fixture_initial_error": "First fixture used nonexistent .x union member and omitted its320-byte test arena size; corrected before baseline behavior test, original compile log retained"
+  },
+  "commands": [
+    "make -n -C kprog/tv helper-effects-host-check",
+    "taskset -c8-15 make -C kprog/tv helper-effects-host-check stack-alias-host-check",
+    "taskset -c8-15 make -C kprog/tv helper-effects-host-check"
+  ],
+  "limits": [
+    "Actual verifier coverage and compiled-B frame gains not yet measured; full confirmation deferred to batch end",
+    "Other effect classes retain their prior conservative invalidation; no new helper capability fallback",
+    "No stack bound, runtime gate, kernel/image/shared-binary change or benchmark change"
+  ],
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-helper-effects",
+  "archive": "helper-effects-subset.tar.gz"
+}
