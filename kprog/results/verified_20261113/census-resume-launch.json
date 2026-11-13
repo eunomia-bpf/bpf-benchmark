@@ -1,0 +1,79 @@
+{
+  "recorded_utc": "2026-11-13T09:54:55.212223+00:00",
+  "controller_commit": "6fc82f22e",
+  "scope": "Module completion/image repair launched; three census queues depend on writer Make0; outcomes uncollected",
+  "writer": {
+    "outer_pid": 1331303,
+    "job_directory": "/workspaces/kprog-raw/verified/20261113-modules-repair-retry2/job",
+    "run_directory": "/workspaces/kprog-raw/verified/20261113-modules-repair-retry2/run",
+    "image_lock": "exclusive /workspaces/.agent-state/kprog-lanes/locks/image",
+    "host_cpus": "8-15",
+    "jobs": 1,
+    "host_address_space_limit_bytes": 17179869184,
+    "operation": "shared-base-modules-repair",
+    "module_completion": "make modules -o vmlinux -o vmlinux.o -j1, sole existing build/source/config"
+  },
+  "queues": [
+    {
+      "queue": 0,
+      "outer_pid": 1331305,
+      "job_directory": "/workspaces/kprog-raw/verified/20261113-census-resume/queue-0/job",
+      "control_directory": "/workspaces/kprog-raw/verified/20261113-census-resume/queue-0/control",
+      "inventory": "/workspaces/kprog-raw/verified/20261113-census-resume/ready/queues/0/inventory.json",
+      "bodies": 72,
+      "host_cpus": "8-11",
+      "vm_cpus": 4,
+      "vm_memory": "24G",
+      "host_address_space_limit_bytes": 34359738368,
+      "wait_for_pid": 1331303,
+      "wait_for_job": "/workspaces/kprog-raw/verified/20261113-modules-repair-retry2/job",
+      "image_lock": "shared after dependency exits successfully"
+    },
+    {
+      "queue": 1,
+      "outer_pid": 1331307,
+      "job_directory": "/workspaces/kprog-raw/verified/20261113-census-resume/queue-1/job",
+      "control_directory": "/workspaces/kprog-raw/verified/20261113-census-resume/queue-1/control",
+      "inventory": "/workspaces/kprog-raw/verified/20261113-census-resume/ready/queues/1/inventory.json",
+      "bodies": 72,
+      "host_cpus": "12-13",
+      "vm_cpus": 2,
+      "vm_memory": "24G",
+      "host_address_space_limit_bytes": 34359738368,
+      "wait_for_pid": 1331303,
+      "wait_for_job": "/workspaces/kprog-raw/verified/20261113-modules-repair-retry2/job",
+      "image_lock": "shared after dependency exits successfully"
+    },
+    {
+      "queue": 2,
+      "outer_pid": 1331310,
+      "job_directory": "/workspaces/kprog-raw/verified/20261113-census-resume/queue-2/job",
+      "control_directory": "/workspaces/kprog-raw/verified/20261113-census-resume/queue-2/control",
+      "inventory": "/workspaces/kprog-raw/verified/20261113-census-resume/ready/queues/2/inventory.json",
+      "bodies": 72,
+      "host_cpus": "14-15",
+      "vm_cpus": 2,
+      "vm_memory": "24G",
+      "host_address_space_limit_bytes": 34359738368,
+      "wait_for_pid": 1331303,
+      "wait_for_job": "/workspaces/kprog-raw/verified/20261113-modules-repair-retry2/job",
+      "image_lock": "shared after dependency exits successfully"
+    }
+  ],
+  "total_queued_bodies": 216,
+  "pending_main_bodies": 211,
+  "additional_class_replays": 5,
+  "launch_host_available_gib": 112,
+  "regressions": "Two real-Make dependency status tests PASS; seven resume/group regressions already passed d30fb7510",
+  "collection": "Next turn; no postlaunch outcome polling",
+  "image_completion_notice": "Writer posts IMAGE REBUILT only after successful finalization",
+  "counts_unchanged": {
+    "completed": 26,
+    "verified": 15,
+    "rejected": 11,
+    "native_execution": 0
+  },
+  "kernel_source": "74d1097af561",
+  "benchmark_settings_changed": false,
+  "raw_data_removed": false
+}
