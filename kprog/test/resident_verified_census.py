@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Order the retained resident census by measured BPF time and submit it serially.
+"""Order retained resident bodies by measured BPF time and submit representatives.
 
 The retained source objects supply maps/BTF only. Current producer manifests
 select P, and the existing registered service builds B from the kernel copy.
@@ -14,6 +14,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import tarfile
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "kprog"))
@@ -101,6 +102,86 @@ def prepare(args):
     print(json.dumps({k: v for k, v in summary.items() if k != "first_twenty"}), flush=True)
 
 
+def group_bodies(rows, bodies):
+    """Keep priority order and complete membership; compare linked ELF bytes."""
+    groups = {}
+    for row in rows:
+        candidates = row["native_candidates"]
+        candidate = candidates[0] if len(candidates) == 1 else None
+        body = bodies.get((candidate["native_object"], candidate["symbol"])) if candidate else None
+        # A selection/link failure has no known linked body. Submit it rather
+        # than assigning another program's observation to it.
+        key = body if body is not None else (row["application"], row["source_prog_id"])
+        group = groups.setdefault(key, dict(representative=row, members=[]))
+        group["members"].append(row)
+    return list(groups.values())
+
+
+def group(args):
+    source = json.loads(args.inputs.read_text())
+    args.output.mkdir(parents=True, exist_ok=True)
+    body_dir = args.output / "bodies"
+    body_dir.mkdir(exist_ok=True)
+    bodies, commands = {}, []
+    for row in source["programs"]:
+        if len(row["native_candidates"]) != 1:
+            continue
+        candidate = row["native_candidates"][0]
+        key = candidate["native_object"], candidate["symbol"]
+        if key in bodies:
+            continue
+        proof = body_dir / f"{len(commands)}.proof.o"
+        command = [str(ROOT / "kprog/x86/native_lab/native_link/target/release/native-link"),
+                   "--input", key[0], "--symbol", key[1], "--mode", "proof",
+                   "--preserve-entry-abi", "--output", str(proof)]
+        done = subprocess.run(command, capture_output=True, text=True)
+        commands.append(dict(command=command, returncode=done.returncode,
+                             stdout=done.stdout, stderr=done.stderr))
+        bodies[key] = proof.read_bytes() if done.returncode == 0 else None
+    write(args.output / "body-link-commands.json", commands)
+    groups = group_bodies(source["programs"], bodies)
+    by_instance = {(r["application"], r["source_prog_id"]): g
+                   for g in groups for r in g["members"]}
+    completed = [json.loads(line) for line in args.completed_journal.read_text().splitlines()]
+    retained = {}
+    for outcome in completed:
+        g = by_instance[outcome["application"], outcome["source_prog_id"]]
+        identity = id(g)
+        if identity in retained or not outcome.get("submission", {}).get("service"):
+            continue
+        member = next(r for r in g["members"] if r["source_prog_id"] == outcome["source_prog_id"]
+                      and r["application"] == outcome["application"])
+        candidate, = member["native_candidates"]
+        expected = bodies[candidate["native_object"], candidate["symbol"]]
+        service = outcome["submission"]["service"]
+        archive = service.get("artifact_archive", service.get("failure_archive"))
+        with tarfile.open(archive) as captured:
+            name = "request/generated/trusted_x86.proof.o"
+            if name in captured.getnames() and expected is not None:
+                if captured.extractfile(name).read() == expected:
+                    retained[identity] = outcome
+    pending, membership = [], []
+    with (args.output / "retained-outcomes.jsonl").open("w") as journal:
+        for number, g in enumerate(groups):
+            row = dict(g["representative"], body_group=number)
+            outcome = retained.get(id(g))
+            membership.append(dict(body_group=number, representative=row,
+                                   members=g["members"], retained_outcome=outcome))
+            if outcome is None:
+                pending.append(row)
+            else:
+                journal.write(json.dumps(dict(outcome, body_group=number)) + "\n")
+    source.update(programs=pending, body_groups=membership,
+                  scope="Distinct linked native bodies; representative load-only observations",
+                  grouping=dict(identity="Complete canonical proof ELF byte equality including data/relocations",
+                                input_inventory=str(args.inputs), previous_journal=str(args.completed_journal),
+                                instances=sum(len(g["members"]) for g in groups),
+                                bodies=len(groups), retained_bodies=len(retained), pending_bodies=len(pending)))
+    write(args.output / "inventory.json", source)
+    write(args.output / "preparation.json", source["grouping"])
+    print(json.dumps(source["grouping"]), flush=True)
+
+
 def guest(args):
     subprocess.run(["bash", "-eu", "-c",
                     "mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf"], check=True)
@@ -115,6 +196,8 @@ def guest(args):
     with (args.service_state.parent / "outcomes.jsonl").open("w") as journal:
         for row in source["programs"]:
             result = {k: row[k] for k in ("application", "source_prog_id", "name", "priority")}
+            if "body_group" in row:
+                result["body_group"] = row["body_group"]
             selected = row["native_candidates"]
             resource = row["resource"]
             if len(selected) != 1:
@@ -139,7 +222,7 @@ def guest(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("prepare", "guest"))
+    parser.add_argument("mode", choices=("prepare", "group", "guest"))
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--inputs", type=Path)
     parser.add_argument("--resources", type=Path)
@@ -149,8 +232,9 @@ def main():
     parser.add_argument("--stats-run", type=Path, action="append", default=[])
     parser.add_argument("--service-state", type=Path)
     parser.add_argument("--loader-directory", type=Path)
+    parser.add_argument("--completed-journal", type=Path)
     args = parser.parse_args()
-    (prepare if args.mode == "prepare" else guest)(args)
+    {"prepare": prepare, "group": group, "guest": guest}[args.mode](args)
 
 
 if __name__ == "__main__":
