@@ -101,7 +101,7 @@
 
 ## 2. 应用覆盖
 
-- **VERIFIED flat-load context通用修复（2026-11-13）** request20的BPF39231定位到generatedC8768/native0x1adf（`mov rbx,[r12+80]`）：scalar tag路径把ctx+80放入地址寄存器后做LDX+0。所有flat read按固定displacement编码、独立于semantic tag；dynamic/大位移使用等价computed-address编码，8/16/32/64位访问和fault语义保持。既有MOV_LOAD713/mem-dispatch58 cases UBSan通过；新fixture的两种scalar-tag ctx路线及dynamic/+40000/-40000共5种编译/host通过，before/after disasm归档 `raw-context-preparation*`，raw `/workspaces/kprog-raw/verified/20261113-raw-context/`。stock/应用结果接续。
+- **VERIFIED flat-load context通用修复（2026-11-13）** request20的BPF39231定位到generatedC8768/native0x1adf（`mov rbx,[r12+80]`）：scalar tag路径把ctx+80放入地址寄存器后做LDX+0。所有flat read按固定displacement编码、独立于semantic tag；dynamic/大位移使用等价computed-address编码，8/16/32/64位访问和fault语义保持。既有MOV_LOAD713/mem-dispatch58 cases UBSan通过；新fixture的两种scalar-tag ctx路线及dynamic/+40000/-40000共5种编译/host通过，before/after disasm归档 `raw-context-preparation*`，raw `/workspaces/kprog-raw/verified/20261113-raw-context/`。combined unit retry outer1225193已setsid/nohup启动（2vCPU/2G/AS8GiB，CPU12–15/shared image read lock），计划12个object-load调用，stock/应用实际结果后续收集；调用见 `raw-context-unit-launch.json`。
 
 - **VERIFIED ISA guest工具路径（2026-11-13）** unit outer1216111 make2在启动bpftool前结束，stock submissions0；组件Make向partial-reg和signed-bound脚本显式传入现有 `/workspaces/repository/vendor/build/x86/bpftool/bin/bpftool`，host动态库解析/脚本syntax/target dry-run通过。完整setup日志/service归档 `partial-reg-bpftool-setup*`；应用body outer1216112独立运行，unit retry使用新输出目录。
 
