@@ -155,6 +155,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED generated kfunc model kernel subset启动（2026-11-13）** e2a43d1ab候选和74b2d3941 caller-clobber抽象状态清理已push，remote临时pack错误经普通retry恢复。Scalar/iterator/default-BCC三份B在状态清理前后allocated sections逐字相同；新raw `20261113-kfunc/model-state/`，receipt/archive `kfunc-model-state*`。dry-run后outer69062，CPU13/2vCPU2G/AS8GiB/sharedimage；真实kernel将检查两份由原生字节生成的B及既有weak guard子集，输出 `.../model-state/{kernel-launch,kernel}/`，结果下turn收取，native execution0/无应用通过声明。下turn一次checkpoint自有census后推进独立unbound绑定的loader-only共享image刷新，待PERF67271 reader自然结束；不让checked模型的其余工作阻塞该独立track。
+
 - **VERIFIED typed kfunc direct-call model候选（2026-11-13）** 新通用bridge从实际target BTF/libbpf构造scalar/pointer/void签名及前向声明，保留原始weak函数地址与null guard，支持GOT load/compound CMP/TEST；按SysV参数寄存器和EAX32零扩展建模返回。const不当作无写副作用证明，可能指向private stack的pointer参数保守丢弃saved pointer metadata。原kernel_kfunc_context默认关闭，经loader metadata传service后才选择；B的.ksyms声明也用于P真实地址绑定。实际native scalar+iterator两入口生成stock普通输入B、五个真实签名、6个return边界、pointer-metadata失效、默认BCC及loader host子集均通过；raw `20261113-kfunc/model-safe/`，失败/先前attempt全留，archive `kfunc-model-host*`。这仍是source/scratch候选，actual kernel、完整P安装/运行、共享语义义务及间接调用等继续，不新增应用通过/执行数。
 
 - **VERIFIED weak-kfunc proof plumbing实际kernel通过（2026-11-13）** d99fb6a91之后unit54381于23:18:22→23:18:39 Make0：完整生产relocate_trusted_proof处理真实Clang BPF ELF，guarded present/missing函数地址与调用经stock verifier接受；unguarded missing call以invalid func unknown#-1拒绝。原五个真实kernel bindings仍通过，完整ELF/重定位后insns/verifier logs归档 `kfunc-proof-kernel-results*`，raw `20261113-kfunc/proof-relocs/{kernel-launch,kernel}/`。只完善通用loader组件，非应用证明/执行；generic x86 typed ABI与指令生成继续，canonical未部署、native execution0。
