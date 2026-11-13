@@ -4,11 +4,11 @@ from pathlib import Path
 import subprocess
 import sys
 
-before, after, output = map(Path, sys.argv[1:])
+before, after, output, bpftool = map(Path, sys.argv[1:])
 output.mkdir(parents=True, exist_ok=True)
 results = []
 for label, program in [('before', before), ('after', after)]:
-    command = ['bpftool', '-d', 'prog', 'load', str(program),
+    command = [str(bpftool), '-d', 'prog', 'load', str(program),
                '/sys/fs/bpf/verified_signed_' + label, 'type', 'kprobe']
     done = subprocess.run(command, capture_output=True, text=True)
     (output / (label + '.stdout')).write_text(done.stdout)

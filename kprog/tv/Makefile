@@ -99,6 +99,7 @@ STACK_ALIAS_BUILD ?= /var/tmp/kprog-tmp/verified/stack-alias
 SIGNED_BOUND_BUILD ?= /var/tmp/kprog-tmp/verified/signed-bound
 SIGNED_BOUND_RAW ?= /workspaces/kprog-raw/verified/20261113-signed-bound
 SIGNED_BOUND_OUTPUT ?= $(SIGNED_BOUND_RAW)/control
+ISA_BPFTOOL ?= $(abspath ../../vendor/build/x86/bpftool/bin/bpftool)
 PARTIAL_REG_BUILD ?= /var/tmp/kprog-tmp/verified/partial-reg
 PARTIAL_REG_RAW ?= /workspaces/kprog-raw/verified/20261113-partial-reg
 PARTIAL_REG_OUTPUT ?= $(PARTIAL_REG_RAW)/control
@@ -113,7 +114,7 @@ $(PARTIAL_REG_BUILD)/lane%.bpf.o: ../test/partial_reg_range.c ../formal/generate
 
 partial-reg-guest:
 	mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf
-	python3 ../test/check_partial_reg.py "$(PARTIAL_REG_RAW)" "$(PARTIAL_REG_OUTPUT)"
+	python3 ../test/check_partial_reg.py "$(PARTIAL_REG_RAW)" "$(PARTIAL_REG_OUTPUT)" "$(ISA_BPFTOOL)"
 
 .PHONY: signed-bound-inputs signed-bound-guest
 signed-bound-inputs:
@@ -124,7 +125,7 @@ signed-bound-inputs:
 
 signed-bound-guest:
 	mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf
-	python3 ../test/check_signed_bound.py "$(SIGNED_BOUND_RAW)/before.bpf.o" "$(SIGNED_BOUND_RAW)/after.bpf.o" "$(SIGNED_BOUND_OUTPUT)"
+	python3 ../test/check_signed_bound.py "$(SIGNED_BOUND_RAW)/before.bpf.o" "$(SIGNED_BOUND_RAW)/after.bpf.o" "$(SIGNED_BOUND_OUTPUT)" "$(ISA_BPFTOOL)"
 
 .PHONY: stack-alias-host-check
 stack-alias-host-check:

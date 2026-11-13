@@ -4,12 +4,12 @@ from pathlib import Path
 import subprocess
 import sys
 
-root, output = map(Path, sys.argv[1:])
+root, output, bpftool = map(Path, sys.argv[1:])
 output.mkdir(parents=True, exist_ok=True)
 rows = []
 for phase, directory in [('before', 'before-retry1'), ('after', 'after')]:
     for lane in [0, 8, 16]:
-        command = ['bpftool', '-d', 'prog', 'load', str(root / directory / f'lane{lane}.bpf.o'),
+        command = [str(bpftool), '-d', 'prog', 'load', str(root / directory / f'lane{lane}.bpf.o'),
                    f'/sys/fs/bpf/verified_partial_{phase}_{lane}', 'type', 'kprobe']
         done = subprocess.run(command, capture_output=True, text=True)
         (output / f'{phase}-lane{lane}.stdout').write_text(done.stdout)

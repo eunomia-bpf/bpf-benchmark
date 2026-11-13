@@ -1,0 +1,14 @@
+{
+  "recorded_at": "2026-11-13T05:45:36.876360+00:00",
+  "outer_pid": 1216111,
+  "make_exit": 2,
+  "scope": "Generic ISA regression guest setup error; actual application-body replay remains independent",
+  "cause": "bpftool executable absent from guest PATH",
+  "stock_verifier_submissions": 0,
+  "native_execution_requests": 0,
+  "tool": "/workspaces/repository/vendor/build/x86/bpftool/bin/bpftool",
+  "repair": "Pass the existing tool path explicitly from component Make to both ISA test scripts",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-partial-reg",
+  "archive": "partial-reg-bpftool-setup.tar.gz",
+  "archive_bytes": 2675
+}
