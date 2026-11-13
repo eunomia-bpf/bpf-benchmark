@@ -1,0 +1,35 @@
+{
+  "recorded_utc": "2026-11-13T10:21:32.492339+00:00",
+  "source_commit": "ec3432bd6",
+  "scope": "Production complete-UAPI helper query regressions against both unchanged module frontends",
+  "frontends": [
+    {
+      "frontend": "verified",
+      "outer_pid": 1388342,
+      "job_directory": "/workspaces/kprog-raw/verified/20261113-helper-coverage/job-verified",
+      "output": "/workspaces/kprog-raw/verified/20261113-helper-coverage/kernel-verified"
+    },
+    {
+      "frontend": "direct",
+      "outer_pid": 1388343,
+      "job_directory": "/workspaces/kprog-raw/verified/20261113-helper-coverage/job-direct",
+      "output": "/workspaces/kprog-raw/verified/20261113-helper-coverage/kernel-direct"
+    }
+  ],
+  "host_cpu": 13,
+  "vm_cpus": 2,
+  "vm_memory": "2G each",
+  "host_address_space_limit_bytes": 8589934592,
+  "image_lock": "shared /workspaces/.agent-state/kprog-lanes/locks/image",
+  "contexts": 10,
+  "new_regressions": [
+    "TC/XDP fib_lookup and skc_lookup_tcp actual proto addresses",
+    "canonical and implementation-name probe_read aliases share returned prototype"
+  ],
+  "prepared_binary": "/workspaces/kprog-raw/verified/20261113-helper-coverage/host/payload/helper-kernel",
+  "result": "Uncollected; no postlaunch polling",
+  "deployment": "Source/scratch only; batch with data-layout after tests and census checkpoint",
+  "canonical_base_image_changed": false,
+  "benchmark_settings_changed": false,
+  "application_success_claim": false
+}
