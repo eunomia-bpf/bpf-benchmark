@@ -1,0 +1,263 @@
+[
+  {
+    "argv": [
+      "clang-18",
+      "-O2",
+      "-Wno-unknown-attributes",
+      "-I",
+      "/workspaces/repository",
+      "-I",
+      "/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+      "-I",
+      "/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+      "-x",
+      "c",
+      "-",
+      "-o",
+      "kprog/results/source-diff-20261113/evidence/substring"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "In file included from <stdin>:6:\nIn file included from ./vendor/bpf/tetragon/bpf/include/vmlinux.h:9:\n./vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h:33936:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 33936 |         struct aes_enckey;\n       |         ^\n./vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h:48425:3: warning: declaration does not declare anything [-Wmissing-declarations]\n 48425 |                 struct ns_tree;\n       |                 ^\n./vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h:64466:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 64466 |         struct __filename_head;\n       |         ^\n./vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h:93550:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 93550 |         struct renamedata;\n       |         ^\n./vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h:97027:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 97027 |         union pipe_index;\n       |         ^\n./vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h:106672:4: warning: declaration does not declare anything [-Wmissing-declarations]\n 106672 |                         struct freelist_counters;\n        |                         ^\n6 warnings generated.\n"
+  },
+  {
+    "argv": [
+      "/workspaces/repository/kprog/results/source-diff-20261113/evidence/substring"
+    ],
+    "returncode": 0,
+    "stdout": "exact_suffix=-1 expected=0\nexact_suffix_case=-1 expected=0\nempty_at_len0=-1 expected=0\nnotfound=-1 expected=-2\nlong_needle=-1 expected=0\npast_nul=2 expected=-2\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "clang-18",
+      "-O2",
+      "-Wno-unknown-attributes",
+      "-I",
+      "/workspaces/repository",
+      "-I",
+      "/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+      "-I",
+      "/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+      "-x",
+      "c",
+      "-",
+      "-o",
+      "kprog/results/source-diff-20261113/evidence/syscall-regs"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "In file included from <stdin>:5:\n./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:33936:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 33936 |         struct aes_enckey;\n       |         ^\n./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:48425:3: warning: declaration does not declare anything [-Wmissing-declarations]\n 48425 |                 struct ns_tree;\n       |                 ^\n./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:64466:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 64466 |         struct __filename_head;\n       |         ^\n./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:93550:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 93550 |         struct renamedata;\n       |         ^\n./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:97027:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 97027 |         union pipe_index;\n       |         ^\n./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:106672:4: warning: declaration does not declare anything [-Wmissing-declarations]\n 106672 |                         struct freelist_counters;\n        |                         ^\n6 warnings generated.\n"
+  },
+  {
+    "argv": [
+      "/workspaces/repository/kprog/results/source-diff-20261113/evidence/syscall-regs"
+    ],
+    "returncode": 0,
+    "stdout": "syscall_arg4=111 expected=222\nwrapper_unwrapped=0 expected=1\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "clang-18",
+      "-O2",
+      "-Wno-unknown-attributes",
+      "-I",
+      "/workspaces/repository",
+      "-I",
+      "/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+      "-I",
+      "/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+      "-x",
+      "c",
+      "-",
+      "-o",
+      "kprog/results/source-diff-20261113/evidence/cilium-other-ctx"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "In file included from <stdin>:4:\n./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:33936:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 33936 |         struct aes_enckey;\n       |         ^\n./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:48425:3: warning: declaration does not declare anything [-Wmissing-declarations]\n 48425 |                 struct ns_tree;\n       |                 ^\n./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:64466:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 64466 |         struct __filename_head;\n       |         ^\n./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:93550:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 93550 |         struct renamedata;\n       |         ^\n./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:97027:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 97027 |         union pipe_index;\n       |         ^\n./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:106672:4: warning: declaration does not declare anything [-Wmissing-declarations]\n 106672 |                         struct freelist_counters;\n        |                         ^\n6 warnings generated.\n"
+  },
+  {
+    "argv": [
+      "/workspaces/repository/kprog/results/source-diff-20261113/evidence/cilium-other-ctx"
+    ],
+    "returncode": 0,
+    "stdout": "sock_native_user_ip4=0 expected=12345678\nsock_native_user_ip4_offset=4 physical_uaddr_pointer_offset=8\nxdp_native_ingress_ifindex=11223344 expected=7\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "clang-18",
+      "-O2",
+      "-Wno-unknown-attributes",
+      "-I",
+      "/workspaces/repository",
+      "-I",
+      "/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+      "-I",
+      "/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+      "-x",
+      "c",
+      "-",
+      "-o",
+      "kprog/results/source-diff-20261113/evidence/cel"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/workspaces/repository/kprog/results/source-diff-20261113/evidence/cel"
+    ],
+    "returncode": 0,
+    "stdout": "native_cel=0 (always zero)\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "clang-18",
+      "-O2",
+      "-Wno-unknown-attributes",
+      "-I",
+      "/workspaces/repository",
+      "-I",
+      "/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+      "-I",
+      "/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+      "-I",
+      "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/x86",
+      "-x",
+      "c",
+      "-",
+      "-o",
+      "kprog/results/source-diff-20261113/evidence/bcc-core"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "In file included from <stdin>:5:\nIn file included from ./vendor/bpf/bcc/libbpf-tools/core_fixes.bpf.h:7:\nIn file included from /workspaces/repository/vendor/bpf/tetragon/bpf/include/vmlinux.h:9:\n/workspaces/repository/vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h:33936:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 33936 |         struct aes_enckey;\n       |         ^\n/workspaces/repository/vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h:48425:3: warning: declaration does not declare anything [-Wmissing-declarations]\n 48425 |                 struct ns_tree;\n       |                 ^\n/workspaces/repository/vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h:64466:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 64466 |         struct __filename_head;\n       |         ^\n/workspaces/repository/vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h:93550:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 93550 |         struct renamedata;\n       |         ^\n/workspaces/repository/vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h:97027:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 97027 |         union pipe_index;\n       |         ^\n/workspaces/repository/vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h:106672:4: warning: declaration does not declare anything [-Wmissing-declarations]\n 106672 |                         struct freelist_counters;\n        |                         ^\nIn file included from <stdin>:5:\n./vendor/bpf/bcc/libbpf-tools/core_fixes.bpf.h:30:9: warning: passing 'typeof (((struct task_struct___o *)task)->state) *' (aka 'volatile long *') to parameter of type 'void *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]\n   30 |         return BPF_CORE_READ((struct task_struct___o *)task, state);\n      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n./vendor/bpf/native_compat.h:350:5: note: expanded from macro 'BPF_CORE_READ'\n  350 |     BPF_CORE_READ_INTO(&__r, (src), args); \\\n      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n./vendor/bpf/native_compat.h:356:5: note: expanded from macro 'BPF_CORE_READ_INTO'\n  356 |     __native_core_read_into(bpf_probe_read_kernel, (dst), (src), args)\n      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n./vendor/bpf/native_compat.h:307:24: note: expanded from macro '__native_core_read_into'\n  301 |     __native_core_pick(args, \\\n      |     ~~~~~~~~~~~~~~~~~~~~~~~~~~\n  302 |                        __native_core_read_into_6, \\\n      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n  303 |                        __native_core_read_into_5, \\\n      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n  304 |                        __native_core_read_into_4, \\\n      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n  305 |                        __native_core_read_into_3, \\\n      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n  306 |                        __native_core_read_into_2, \\\n      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n  307 |                        __native_core_read_into_1)(fn, dst, src, args)\n      |                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n./vendor/bpf/native_compat.h:243:63: note: expanded from macro '__native_core_pick'\n  243 | #define __native_core_pick(_1, _2, _3, _4, _5, _6, name, ...) name\n      |                                                               ^\n./vendor/bpf/native_compat.h:254:8: note: expanded from macro '__native_core_read_into_1'\n  254 |     fn((dst), sizeof(*(dst)), &((src)->a))\n      |        ^~~~~\n./vendor/bpf/native_compat.h:380:41: note: passing argument to parameter 'dst' here\n  380 | extern long bpf_probe_read_kernel(void *dst, unsigned int size,\n      |                                         ^\nIn file included from <stdin>:5:\n./vendor/bpf/bcc/libbpf-tools/core_fixes.bpf.h:30:9: warning: passing 'volatile long *' to parameter of type 'const void *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]\n   30 |         return BPF_CORE_READ((struct task_struct___o *)task, state);\n      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n./vendor/bpf/native_compat.h:350:5: note: expanded from macro 'BPF_CORE_READ'\n  350 |     BPF_CORE_READ_INTO(&__r, (src), args); \\\n      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n./vendor/bpf/native_compat.h:356:5: note: expanded from macro 'BPF_CORE_READ_INTO'\n  356 |     __native_core_read_into(bpf_probe_read_kernel, (dst), (src), args)\n      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n./vendor/bpf/native_compat.h:307:24: note: expanded from macro '__native_core_read_into'\n  301 |     __native_core_pick(args, \\\n      |     ~~~~~~~~~~~~~~~~~~~~~~~~~~\n  302 |                        __native_core_read_into_6, \\\n      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n  303 |                        __native_core_read_into_5, \\\n      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n  304 |                        __native_core_read_into_4, \\\n      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n  305 |                        __native_core_read_into_3, \\\n      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n  306 |                        __native_core_read_into_2, \\\n      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n  307 |                        __native_core_read_into_1)(fn, dst, src, args)\n      |                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n./vendor/bpf/native_compat.h:243:63: note: expanded from macro '__native_core_pick'\n  243 | #define __native_core_pick(_1, _2, _3, _4, _5, _6, name, ...) name\n      |                                                               ^\n./vendor/bpf/native_compat.h:254:31: note: expanded from macro '__native_core_read_into_1'\n  254 |     fn((dst), sizeof(*(dst)), &((src)->a))\n      |                               ^~~~~~~~~~~\n./vendor/bpf/native_compat.h:381:47: note: passing argument to parameter 'unsafe_ptr' here\n  381 |                                   const void *unsafe_ptr);\n      |                                               ^\n8 warnings generated.\n"
+  },
+  {
+    "argv": [
+      "/workspaces/repository/kprog/results/source-diff-20261113/evidence/bcc-core"
+    ],
+    "returncode": 0,
+    "stdout": "native_state_offset=0 target_state_offset=24\nnative_get_task_state=99 target_state=7\nnative_rq_disk_exists=1 expected=0 (target has no rq_disk)\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "clang-18",
+      "-O2",
+      "-Wno-unknown-attributes",
+      "-I",
+      "/workspaces/repository",
+      "-I",
+      "/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+      "-I",
+      "/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+      "-I",
+      "/workspaces/repository/vendor/bpf/cilium/bpf/include",
+      "-x",
+      "c",
+      "-",
+      "-o",
+      "kprog/results/source-diff-20261113/evidence/cilium-cb"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/workspaces/repository/kprog/results/source-diff-20261113/evidence/cilium-cb"
+    ],
+    "returncode": 0,
+    "stdout": "native_cb0_offset=40 expected=48 (BTF: skb.cb40+qdisc.data8)\nnative_cb4_offset=56 expected=64\nnative_cb0_wrote_kernel_pkt_len=1234\nkernel_cb0_reads_native_cb2=55\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "clang-18",
+      "-O2",
+      "-Wno-unknown-attributes",
+      "-I",
+      "/workspaces/repository",
+      "-I",
+      "/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+      "-I",
+      "/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+      "-c",
+      "-x",
+      "c",
+      "-",
+      "-o",
+      "kprog/results/source-diff-20261113/evidence/helper-args"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "llvm-objdump-18",
+      "-dr",
+      "kprog/results/source-diff-20261113/evidence/helper-args"
+    ],
+    "returncode": 0,
+    "stdout": "\nkprog/results/source-diff-20261113/evidence/helper-args:\tfile format elf64-x86-64\n\nDisassembly of section .text:\n\n0000000000000000 <test>:\n       0: 41 56                        \tpushq\t%r14\n       2: 53                           \tpushq\t%rbx\n       3: 50                           \tpushq\t%rax\n       4: 48 89 fb                     \tmovq\t%rdi, %rbx\n       7: e8 00 00 00 00               \tcallq\t0xc <test+0xc>\n\t\t0000000000000008:  R_X86_64_PLT32\tnext_key-0x4\n       c: b9 01 00 00 00               \tmovl\t$0x1, %ecx\n      11: 49 89 ce                     \tmovq\t%rcx, %r14\n      14: e8 00 00 00 00               \tcallq\t0x19 <test+0x19>\n\t\t0000000000000015:  R_X86_64_PLT32\tnext_key-0x4\n      19: 48 89 df                     \tmovq\t%rbx, %rdi\n      1c: 48 89 c6                     \tmovq\t%rax, %rsi\n      1f: 4c 89 f0                     \tmovq\t%r14, %rax\n      22: 48 83 c4 08                  \taddq\t$0x8, %rsp\n      26: 5b                           \tpopq\t%rbx\n      27: 41 5e                        \tpopq\t%r14\n      29: ff e0                        \tjmpq\t*%rax\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "pahole",
+      "-C",
+      "qdisc_skb_cb",
+      "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux"
+    ],
+    "returncode": 0,
+    "stdout": "struct qdisc_skb_cb {\n\tunsigned int               pkt_len;              /*     0     4 */\n\tu16                        pkt_segs;             /*     4     2 */\n\tu16                        tc_classid;           /*     6     2 */\n\tunsigned char              data[20];             /*     8    20 */\n\tu16                        slave_dev_queue_mapping; /*    28     2 */\n\tu8                         post_ct:1;            /*    30: 0  1 */\n\tu8                         post_ct_snat:1;       /*    30: 1  1 */\n\tu8                         post_ct_dnat:1;       /*    30: 2  1 */\n\n\t/* size: 32, cachelines: 1, members: 8 */\n\t/* padding: 1 */\n\t/* bit_padding: 5 bits */\n\t/* last cacheline: 32 bytes */\n};\n\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "pahole",
+      "-C",
+      "bpf_skb_data_end",
+      "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux"
+    ],
+    "returncode": 0,
+    "stdout": "struct bpf_skb_data_end {\n\tstruct qdisc_skb_cb        qdisc_cb;             /*     0    32 */\n\n\t/* XXX last struct has 1 byte of padding */\n\n\tvoid *                     data_meta;            /*    32     8 */\n\tvoid *                     data_end;             /*    40     8 */\n\n\t/* size: 48, cachelines: 1, members: 3 */\n\t/* paddings: 1, sum paddings: 1 */\n\t/* last cacheline: 48 bytes */\n};\n\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "clang-18",
+      "-O2",
+      "-Wno-unknown-attributes",
+      "-I",
+      "/workspaces/repository",
+      "-I",
+      "/workspaces/repository/vendor/bpf/tetragon/bpf/include",
+      "-I",
+      "/workspaces/repository/vendor/bpf/tetragon/bpf/libbpf",
+      "-x",
+      "c",
+      "-",
+      "-o",
+      "kprog/results/source-diff-20261113/evidence/helper-ids"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "In file included from <stdin>:4:\n./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:33936:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 33936 |         struct aes_enckey;\n       |         ^\n./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:48425:3: warning: declaration does not declare anything [-Wmissing-declarations]\n 48425 |                 struct ns_tree;\n       |                 ^\n./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:64466:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 64466 |         struct __filename_head;\n       |         ^\n./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:93550:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 93550 |         struct renamedata;\n       |         ^\n./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:97027:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 97027 |         union pipe_index;\n       |         ^\n./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:106672:4: warning: declaration does not declare anything [-Wmissing-declarations]\n 106672 |                         struct freelist_counters;\n        |                         ^\n6 warnings generated.\n"
+  },
+  {
+    "argv": [
+      "/workspaces/repository/kprog/results/source-diff-20261113/evidence/helper-ids"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

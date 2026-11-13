@@ -1,0 +1,238 @@
+struct sk_buff {
+	union {
+		struct {
+			struct sk_buff * next;           /*     0     8 */
+			struct sk_buff * prev;           /*     8     8 */
+			union {
+				struct net_device * dev; /*    16     8 */
+				long unsigned int dev_scratch; /*    16     8 */
+			};                               /*    16     8 */
+		};                                       /*     0    24 */
+		struct rb_node     rbnode __attribute__((__aligned__(8))); /*     0    24 */
+		struct list_head   list;                 /*     0    16 */
+		struct llist_node  ll_node;              /*     0     8 */
+	} __attribute__((__aligned__(8)));               /*     0    24 */
+	struct sock *              sk;                   /*    24     8 */
+	union {
+		ktime_t            tstamp;               /*    32     8 */
+		u64                skb_mstamp_ns;        /*    32     8 */
+	};                                               /*    32     8 */
+	char                       cb[48] __attribute__((__aligned__(8))); /*    40    48 */
+	/* --- cacheline 1 boundary (64 bytes) was 24 bytes ago --- */
+	union {
+		struct {
+			long unsigned int _skb_refdst;   /*    88     8 */
+			void       (*destructor)(struct sk_buff *); /*    96     8 */
+		};                                       /*    88    16 */
+		struct list_head   tcp_tsorted_anchor;   /*    88    16 */
+		long unsigned int  _sk_redir;            /*    88     8 */
+	};                                               /*    88    16 */
+	long unsigned int          _nfct;                /*   104     8 */
+	unsigned int               len;                  /*   112     4 */
+	unsigned int               data_len;             /*   116     4 */
+	__u16                      mac_len;              /*   120     2 */
+	__u16                      hdr_len;              /*   122     2 */
+	__u16                      queue_mapping;        /*   124     2 */
+	__u8                       __cloned_offset[0];   /*   126     0 */
+	__u8                       cloned:1;             /*   126: 0  1 */
+	__u8                       nohdr:1;              /*   126: 1  1 */
+	__u8                       fclone:2;             /*   126: 2  1 */
+	__u8                       peeked:1;             /*   126: 4  1 */
+	__u8                       head_frag:1;          /*   126: 5  1 */
+	__u8                       pfmemalloc:1;         /*   126: 6  1 */
+	__u8                       pp_recycle:1;         /*   126: 7  1 */
+	__u8                       active_extensions;    /*   127     1 */
+	/* --- cacheline 2 boundary (128 bytes) --- */
+	union {
+		struct {
+			__u8       __pkt_type_offset[0]; /*   128     0 */
+			__u8       pkt_type:3;           /*   128: 0  1 */
+			__u8       ignore_df:1;          /*   128: 3  1 */
+			__u8       dst_pending_confirm:1; /*   128: 4  1 */
+			__u8       ip_summed:2;          /*   128: 5  1 */
+			__u8       ooo_okay:1;           /*   128: 7  1 */
+			__u8       __mono_tc_offset[0];  /*   129     0 */
+			__u8       tstamp_type:2;        /*   129: 0  1 */
+			__u8       tc_at_ingress:1;      /*   129: 2  1 */
+			__u8       tc_skip_classify:1;   /*   129: 3  1 */
+			__u8       remcsum_offload:1;    /*   129: 4  1 */
+			__u8       csum_complete_sw:1;   /*   129: 5  1 */
+			__u8       csum_level:2;         /*   129: 6  1 */
+			__u8       inner_protocol_type:1; /*   130: 0  1 */
+			__u8       l4_hash:1;            /*   130: 1  1 */
+			__u8       sw_hash:1;            /*   130: 2  1 */
+			__u8       no_fcs:1;             /*   130: 3  1 */
+			__u8       encapsulation:1;      /*   130: 4  1 */
+			__u8       encap_hdr_csum:1;     /*   130: 5  1 */
+			__u8       csum_valid:1;         /*   130: 6  1 */
+
+			/* XXX 1 bit hole, try to pack */
+
+			/* Force alignment to the next boundary: */
+			__u8       :0;
+
+			__u8       ndisc_nodetype:2;     /*   131: 0  1 */
+			__u8       ipvs_property:1;      /*   131: 2  1 */
+			__u8       nf_trace:1;           /*   131: 3  1 */
+			__u8       offload_fwd_mark:1;   /*   131: 4  1 */
+			__u8       offload_l3_fwd_mark:1; /*   131: 5  1 */
+			__u8       redirected:1;         /*   131: 6  1 */
+			__u8       from_ingress:1;       /*   131: 7  1 */
+			__u8       nf_skip_egress:1;     /*   132: 0  1 */
+			__u8       decrypted:1;          /*   132: 1  1 */
+			__u8       slow_gro:1;           /*   132: 2  1 */
+			__u8       csum_not_inet:1;      /*   132: 3  1 */
+			__u8       unreadable:1;         /*   132: 4  1 */
+
+			/* XXX 3 bits hole, try to pack */
+			/* XXX 1 byte hole, try to pack */
+
+			__u16      tc_index;             /*   134     2 */
+			u16        alloc_cpu;            /*   136     2 */
+
+			/* XXX 2 bytes hole, try to pack */
+
+			union {
+				__wsum csum;             /*   140     4 */
+				struct {
+					__u16  csum_start; /*   140     2 */
+					__u16  csum_offset; /*   142     2 */
+				};                       /*   140     4 */
+			};                               /*   140     4 */
+			__u32      priority;             /*   144     4 */
+			int        skb_iif;              /*   148     4 */
+			__u32      hash;                 /*   152     4 */
+			union {
+				u32 vlan_all;            /*   156     4 */
+				struct {
+					__be16 vlan_proto; /*   156     2 */
+					__u16  vlan_tci; /*   158     2 */
+				};                       /*   156     4 */
+			};                               /*   156     4 */
+			union {
+				unsigned int napi_id;    /*   160     4 */
+				unsigned int sender_cpu; /*   160     4 */
+			};                               /*   160     4 */
+			__u32      secmark;              /*   164     4 */
+			union {
+				__u32 mark;              /*   168     4 */
+				__u32 reserved_tailroom; /*   168     4 */
+			};                               /*   168     4 */
+			union {
+				__be16 inner_protocol;   /*   172     2 */
+				__u8 inner_ipproto;      /*   172     1 */
+			};                               /*   172     2 */
+			__u16      inner_transport_header; /*   174     2 */
+			__u16      inner_network_header; /*   176     2 */
+			__u16      inner_mac_header;     /*   178     2 */
+			__be16     protocol;             /*   180     2 */
+			__u16      transport_header;     /*   182     2 */
+			__u16      network_header;       /*   184     2 */
+			__u16      mac_header;           /*   186     2 */
+		};                                       /*   128    60 */
+		struct {
+			__u8       __pkt_type_offset[0]; /*   128     0 */
+			__u8       pkt_type:3;           /*   128: 0  1 */
+			__u8       ignore_df:1;          /*   128: 3  1 */
+			__u8       dst_pending_confirm:1; /*   128: 4  1 */
+			__u8       ip_summed:2;          /*   128: 5  1 */
+			__u8       ooo_okay:1;           /*   128: 7  1 */
+			__u8       __mono_tc_offset[0];  /*   129     0 */
+			__u8       tstamp_type:2;        /*   129: 0  1 */
+			__u8       tc_at_ingress:1;      /*   129: 2  1 */
+			__u8       tc_skip_classify:1;   /*   129: 3  1 */
+			__u8       remcsum_offload:1;    /*   129: 4  1 */
+			__u8       csum_complete_sw:1;   /*   129: 5  1 */
+			__u8       csum_level:2;         /*   129: 6  1 */
+			__u8       inner_protocol_type:1; /*   130: 0  1 */
+			__u8       l4_hash:1;            /*   130: 1  1 */
+			__u8       sw_hash:1;            /*   130: 2  1 */
+			__u8       no_fcs:1;             /*   130: 3  1 */
+			__u8       encapsulation:1;      /*   130: 4  1 */
+			__u8       encap_hdr_csum:1;     /*   130: 5  1 */
+			__u8       csum_valid:1;         /*   130: 6  1 */
+
+			/* XXX 1 bit hole, try to pack */
+
+			/* Force alignment to the next boundary: */
+			__u8       :0;
+
+			__u8       ndisc_nodetype:2;     /*   131: 0  1 */
+			__u8       ipvs_property:1;      /*   131: 2  1 */
+			__u8       nf_trace:1;           /*   131: 3  1 */
+			__u8       offload_fwd_mark:1;   /*   131: 4  1 */
+			__u8       offload_l3_fwd_mark:1; /*   131: 5  1 */
+			__u8       redirected:1;         /*   131: 6  1 */
+			__u8       from_ingress:1;       /*   131: 7  1 */
+			__u8       nf_skip_egress:1;     /*   132: 0  1 */
+			__u8       decrypted:1;          /*   132: 1  1 */
+			__u8       slow_gro:1;           /*   132: 2  1 */
+			__u8       csum_not_inet:1;      /*   132: 3  1 */
+			__u8       unreadable:1;         /*   132: 4  1 */
+
+			/* XXX 3 bits hole, try to pack */
+			/* XXX 1 byte hole, try to pack */
+
+			__u16      tc_index;             /*   134     2 */
+			u16        alloc_cpu;            /*   136     2 */
+
+			/* XXX 2 bytes hole, try to pack */
+
+			union {
+				__wsum csum;             /*   140     4 */
+				struct {
+					__u16  csum_start; /*   140     2 */
+					__u16  csum_offset; /*   142     2 */
+				};                       /*   140     4 */
+			};                               /*   140     4 */
+			__u32      priority;             /*   144     4 */
+			int        skb_iif;              /*   148     4 */
+			__u32      hash;                 /*   152     4 */
+			union {
+				u32 vlan_all;            /*   156     4 */
+				struct {
+					__be16 vlan_proto; /*   156     2 */
+					__u16  vlan_tci; /*   158     2 */
+				};                       /*   156     4 */
+			};                               /*   156     4 */
+			union {
+				unsigned int napi_id;    /*   160     4 */
+				unsigned int sender_cpu; /*   160     4 */
+			};                               /*   160     4 */
+			__u32      secmark;              /*   164     4 */
+			union {
+				__u32 mark;              /*   168     4 */
+				__u32 reserved_tailroom; /*   168     4 */
+			};                               /*   168     4 */
+			union {
+				__be16 inner_protocol;   /*   172     2 */
+				__u8 inner_ipproto;      /*   172     1 */
+			};                               /*   172     2 */
+			__u16      inner_transport_header; /*   174     2 */
+			__u16      inner_network_header; /*   176     2 */
+			__u16      inner_mac_header;     /*   178     2 */
+			__be16     protocol;             /*   180     2 */
+			__u16      transport_header;     /*   182     2 */
+			__u16      network_header;       /*   184     2 */
+			__u16      mac_header;           /*   186     2 */
+		} headers;                               /*   128    60 */
+	};                                               /*   128    60 */
+	sk_buff_data_t             tail;                 /*   188     4 */
+	/* --- cacheline 3 boundary (192 bytes) --- */
+	sk_buff_data_t             end;                  /*   192     4 */
+
+	/* XXX 4 bytes hole, try to pack */
+
+	unsigned char *            head;                 /*   200     8 */
+	unsigned char *            data;                 /*   208     8 */
+	unsigned int               truesize;             /*   216     4 */
+	refcount_t                 users __attribute__((__aligned__(4))); /*   220     4 */
+	struct skb_ext *           extensions;           /*   224     8 */
+
+	/* size: 232, cachelines: 4, members: 28 */
+	/* sum members: 227, holes: 1, sum holes: 4 */
+	/* sum bitfield members: 8 bits (1 bytes) */
+	/* forced alignments: 3 */
+	/* last cacheline: 40 bytes */
+} __attribute__((__aligned__(8)));
+

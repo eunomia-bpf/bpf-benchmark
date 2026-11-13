@@ -1,0 +1,16 @@
+struct qdisc_skb_cb {
+	unsigned int               pkt_len;              /*     0     4 */
+	u16                        pkt_segs;             /*     4     2 */
+	u16                        tc_classid;           /*     6     2 */
+	unsigned char              data[20];             /*     8    20 */
+	u16                        slave_dev_queue_mapping; /*    28     2 */
+	u8                         post_ct:1;            /*    30: 0  1 */
+	u8                         post_ct_snat:1;       /*    30: 1  1 */
+	u8                         post_ct_dnat:1;       /*    30: 2  1 */
+
+	/* size: 32, cachelines: 1, members: 8 */
+	/* padding: 1 */
+	/* bit_padding: 5 bits */
+	/* last cacheline: 32 bytes */
+};
+

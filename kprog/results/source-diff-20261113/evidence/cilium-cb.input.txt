@@ -1,0 +1,15 @@
+
+#define MICRO_NATIVE
+#include "vendor/bpf/native_compat.h"
+#include "vendor/bpf/cilium/bpf/include/linux/bpf.h"
+extern int printf(const char *, ...);
+int main(void) {
+    struct __sk_buff skb={0};
+    skb.cb[0]=1234; skb.cb[1]=0x12345678; skb.cb[2]=55;
+    printf("native_cb0_offset=%lu expected=48 (BTF: skb.cb40+qdisc.data8)\n",
+        (unsigned long)offsetof(struct __sk_buff,cb[0]));
+    printf("native_cb4_offset=%lu expected=64\n",(unsigned long)offsetof(struct __sk_buff,cb[4]));
+    printf("native_cb0_wrote_kernel_pkt_len=%u\n", *(unsigned int *)((char *)&skb+40));
+    printf("kernel_cb0_reads_native_cb2=%u\n", *(unsigned int *)((char *)&skb+48));
+    return 0;
+}

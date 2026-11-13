@@ -1,0 +1,93 @@
+[
+  {
+    "app": "cilium",
+    "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+    "sha256": "e9b7159e096ddc7cb4933ea67b9a0a910d6dad39183ab30fcbf67cfa9d2218e5",
+    "disassembly": "cilium-bpf_lxc-native.txt.gz",
+    "lines": 19874
+  },
+  {
+    "app": "cilium",
+    "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+    "sha256": "4a5614b60dbd5e333eb481b8b768b09387f5b3b8ce7c018c085a88bac459e49f",
+    "disassembly": "cilium-bpf_host-native.txt.gz",
+    "lines": 16930
+  },
+  {
+    "app": "cilium",
+    "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+    "sha256": "d1e1429a89a6512411ad4ed6285bddd2cb0213eaaedd631745755e206fb0ab24",
+    "disassembly": "cilium-bpf_overlay-native.txt.gz",
+    "lines": 11256
+  },
+  {
+    "app": "cilium",
+    "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o",
+    "sha256": "61a00c02eb2d346220174741eef357def850dbd11ec9ed305d3730a2fe3db932",
+    "disassembly": "cilium-bpf_sock-native.txt.gz",
+    "lines": 2627
+  },
+  {
+    "app": "cilium",
+    "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_xdp.native.o",
+    "sha256": "f85cdb2b30e32d473f0a9223b50335553bd515b28628d82c838fbc5bcf76a3f6",
+    "disassembly": "cilium-bpf_xdp-native.txt.gz",
+    "lines": 5980
+  },
+  {
+    "app": "cilium",
+    "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+    "sha256": "3fb2dcea613db71d14baac830683664fdd1528a9ef19a7c02fa4df930bfd535e",
+    "disassembly": "cilium-bpf_wireguard-native.txt.gz",
+    "lines": 10345
+  },
+  {
+    "app": "bcc",
+    "object": "vendor/build/native-bpf/x86/stage/bcc/runqlat.native.o",
+    "sha256": "8b3dfb38e523e65f6386c4b4ff9712393e25663a5968358e53c97b40e04debc9",
+    "disassembly": "bcc-runqlat-native.txt.gz",
+    "lines": 481
+  },
+  {
+    "app": "bcc",
+    "object": "vendor/build/native-bpf/x86/stage/bcc/biosnoop.native.o",
+    "sha256": "4ae54e353e6eff7c9f12f11e26f25546e0781ec66335f2ee9bfb350b5928d3b4",
+    "disassembly": "bcc-biosnoop-native.txt.gz",
+    "lines": 381
+  },
+  {
+    "app": "bcc",
+    "object": "vendor/build/native-bpf/x86/stage/bcc/tcplife.native.o",
+    "sha256": "8bd16339714f93b4afa5989a2302396457610df47e609992824a130989cb331a",
+    "disassembly": "bcc-tcplife-native.txt.gz",
+    "lines": 363
+  },
+  {
+    "app": "tetragon",
+    "object": "vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_kprobe_v61.native.o",
+    "sha256": "14d51fe1b02bb885c71f0127a8b37d7d1a95fb64abbbd0cc955842e681ab3ed2",
+    "disassembly": "tetragon-bpf_generic_kprobe_v61-native.txt.gz",
+    "lines": 10074
+  },
+  {
+    "app": "tetragon",
+    "object": "vendor/build/native-bpf/x86/stage/tetragon/bpf_execve_event_v61.native.o",
+    "sha256": "6f7d7b306ebc2ad6e133277ea94e90a970004459e651e806c67cc5fd9cf25490",
+    "disassembly": "tetragon-bpf_execve_event_v61-native.txt.gz",
+    "lines": 3647
+  },
+  {
+    "app": "tetragon",
+    "object": "vendor/build/native-bpf/x86/stage/tetragon/bpf_fork_v511.native.o",
+    "sha256": "3c1db76f3a25d72a9d2d5882141a277f2a8dff0856f7d7f6933974c89c66b6a7",
+    "disassembly": "tetragon-bpf_fork_v511-native.txt.gz",
+    "lines": 821
+  },
+  {
+    "app": "tracee",
+    "object": "vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+    "sha256": "fb3f51b32b0013c1258595a785e1053c0ec49a32e7d2fb80afafd2d29817bb82",
+    "disassembly": "tracee-tracee-native.txt.gz",
+    "lines": 368041
+  }
+]

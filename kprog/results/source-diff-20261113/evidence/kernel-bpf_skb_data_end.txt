@@ -1,0 +1,13 @@
+struct bpf_skb_data_end {
+	struct qdisc_skb_cb        qdisc_cb;             /*     0    32 */
+
+	/* XXX last struct has 1 byte of padding */
+
+	void *                     data_meta;            /*    32     8 */
+	void *                     data_end;             /*    40     8 */
+
+	/* size: 48, cachelines: 1, members: 3 */
+	/* paddings: 1, sum paddings: 1 */
+	/* last cacheline: 48 bytes */
+};
+

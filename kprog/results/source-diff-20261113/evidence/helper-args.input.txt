@@ -1,0 +1,6 @@
+
+#define MICRO_NATIVE
+#define MICRO_NATIVE_HELPER_MACROS
+#include "vendor/bpf/native_compat.h"
+extern void *next_key(void);
+void *test(void *map) { return bpf_map_lookup_elem(map, next_key()); }

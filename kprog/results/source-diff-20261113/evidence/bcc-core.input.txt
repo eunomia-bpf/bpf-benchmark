@@ -1,0 +1,21 @@
+
+#define MICRO_NATIVE
+#define __TARGET_ARCH_x86
+#include "vendor/bpf/native_compat.h"
+#include "vendor/bpf/bcc/libbpf-tools/core_fixes.bpf.h"
+extern int printf(const char *, ...);
+long bpf_probe_read_kernel(void *dst, unsigned int size, const void *src) {
+    for (unsigned int i=0;i<size;i++) ((char *)dst)[i]=((const char *)src)[i];
+    return 0;
+}
+int main(void) {
+    struct task_struct task={0};
+    task.thread_info.flags=99; task.__state=7;
+    printf("native_state_offset=%lu target_state_offset=%lu\n",
+        (unsigned long)offsetof(struct task_struct___x,__state),
+        (unsigned long)offsetof(struct task_struct,__state));
+    printf("native_get_task_state=%lld target_state=7\n",(long long)get_task_state(&task));
+    printf("native_rq_disk_exists=%d expected=0 (target has no rq_disk)\n",
+        bpf_core_field_exists(((struct request___x *)0)->rq_disk));
+    return 0;
+}

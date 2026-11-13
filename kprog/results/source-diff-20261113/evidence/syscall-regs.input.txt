@@ -1,0 +1,13 @@
+
+#define MICRO_NATIVE
+#define __TARGET_ARCH_x86
+#include "vendor/bpf/native_compat.h"
+#include "vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h"
+extern int printf(const char *, ...);
+int main(void) {
+    struct pt_regs inner={0}, outer={0};
+    inner.cx=111; inner.r10=222; outer.di=(unsigned long)&inner;
+    printf("syscall_arg4=%lu expected=222\n", (unsigned long)PT_REGS_PARM4_CORE_SYSCALL(&inner));
+    printf("wrapper_unwrapped=%d expected=1\n", PT_REGS_SYSCALL_REGS(&outer)==&inner);
+    return 0;
+}

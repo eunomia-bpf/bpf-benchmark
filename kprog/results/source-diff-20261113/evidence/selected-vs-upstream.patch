@@ -1,0 +1,2368 @@
+--- vendor/repos/bcc/libbpf-tools/tcplife.bpf.c
++++ vendor/bpf/bcc/libbpf-tools/tcplife.bpf.c
+@@ -10,12 +10,18 @@
+ #define AF_INET		2
+ #define AF_INET6	10
+ 
++#ifdef MICRO_NATIVE
++#define NATIVE_RODATA_ALIGN(N) __attribute__((aligned(N)))
++#else
++#define NATIVE_RODATA_ALIGN(N)
++#endif
++
+ const volatile bool filter_sport = false;
+ const volatile bool filter_dport = false;
+-const volatile __u16 target_sports[MAX_PORTS] = {};
+-const volatile __u16 target_dports[MAX_PORTS] = {};
+-const volatile pid_t target_pid = 0;
+-const volatile __u16 target_family = 0;
++const volatile __u16 target_sports[MAX_PORTS] NATIVE_RODATA_ALIGN(2) = {};
++const volatile __u16 target_dports[MAX_PORTS] NATIVE_RODATA_ALIGN(2) = {};
++const volatile pid_t target_pid NATIVE_RODATA_ALIGN(4) = 0;
++const volatile __u16 target_family NATIVE_RODATA_ALIGN(2) = 0;
+ 
+ struct {
+ 	__uint(type, BPF_MAP_TYPE_HASH);
+--- vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/bpfdefs.h
++++ vendor/bpf/otel/support/ebpf/bpfdefs.h
+@@ -108,6 +108,145 @@
+ // definitions of bpf helper functions we need, as found in
+ // https://elixir.bootlin.com/linux/v4.11/source/samples/bpf/bpf_helpers.h
+ 
++  #if defined(MICRO_NATIVE)
++static __attribute__((always_inline)) unsigned long __native_helper_id(unsigned long id)
++{
++  asm volatile("" : "+r"(id) : : "memory");
++  return id;
++}
++
++static __attribute__((always_inline)) unsigned long
++__native_helper_id1(unsigned long id, unsigned long a0)
++{
++  asm volatile("" : "+r"(id) : "r"(a0) : "memory");
++  return id;
++}
++
++static __attribute__((always_inline)) unsigned long
++__native_helper_id2(unsigned long id, unsigned long a0, unsigned long a1)
++{
++  asm volatile("" : "+r"(id) : "r"(a0), "r"(a1) : "memory");
++  return id;
++}
++
++static __attribute__((always_inline)) unsigned long
++__native_helper_id3(unsigned long id, unsigned long a0, unsigned long a1, unsigned long a2)
++{
++  asm volatile("" : "+r"(id) : "r"(a0), "r"(a1), "r"(a2) : "memory");
++  return id;
++}
++
++static __attribute__((always_inline)) unsigned long
++__native_helper_id4(
++  unsigned long id, unsigned long a0, unsigned long a1, unsigned long a2, unsigned long a3)
++{
++  asm volatile("" : "+r"(id) : "r"(a0), "r"(a1), "r"(a2), "r"(a3) : "memory");
++  return id;
++}
++
++static __attribute__((always_inline)) unsigned long __native_helper_id5(
++  unsigned long id,
++  unsigned long a0,
++  unsigned long a1,
++  unsigned long a2,
++  unsigned long a3,
++  unsigned long a4)
++{
++  asm volatile(
++    "" : "+r"(id) : "r"(a0), "r"(a1), "r"(a2), "r"(a3), "r"(a4) : "memory");
++  return id;
++}
++
++    #define __native_bpf_helper0(_type, _id) ((_type)__native_helper_id((unsigned long)(_id)))
++    #define __native_bpf_helper1(_type, _id, _a0)                                                \
++      ((_type)__native_helper_id1((unsigned long)(_id), (unsigned long)(_a0)))
++    #define __native_bpf_helper2(_type, _id, _a0, _a1)                                           \
++      ((_type)__native_helper_id2(                                                               \
++        (unsigned long)(_id), (unsigned long)(_a0), (unsigned long)(_a1)))
++    #define __native_bpf_helper3(_type, _id, _a0, _a1, _a2)                                      \
++      ((_type)__native_helper_id3(                                                               \
++        (unsigned long)(_id), (unsigned long)(_a0), (unsigned long)(_a1), (unsigned long)(_a2)))
++    #define __native_bpf_helper4(_type, _id, _a0, _a1, _a2, _a3)                                 \
++      ((_type)__native_helper_id4(                                                               \
++        (unsigned long)(_id),                                                                    \
++        (unsigned long)(_a0),                                                                    \
++        (unsigned long)(_a1),                                                                    \
++        (unsigned long)(_a2),                                                                    \
++        (unsigned long)(_a3)))
++    #define __native_bpf_helper5(_type, _id, _a0, _a1, _a2, _a3, _a4)                            \
++      ((_type)__native_helper_id5(                                                               \
++        (unsigned long)(_id),                                                                    \
++        (unsigned long)(_a0),                                                                    \
++        (unsigned long)(_a1),                                                                    \
++        (unsigned long)(_a2),                                                                    \
++        (unsigned long)(_a3),                                                                    \
++        (unsigned long)(_a4)))
++    #define bpf_map_lookup_elem(map, key)                                                        \
++      __native_bpf_helper2(                                                                      \
++        void *(*)(void *, void *), BPF_FUNC_map_lookup_elem, (map), (key))((map), (key))
++    #define bpf_map_update_elem(map, key, value, flags)                                          \
++      __native_bpf_helper4(                                                                      \
++        int (*)(void *, void *, void *, u64),                                                     \
++        BPF_FUNC_map_update_elem,                                                                \
++        (map),                                                                                   \
++        (key),                                                                                   \
++        (value),                                                                                 \
++        (flags))((map), (key), (value), (flags))
++    #define bpf_map_delete_elem(map, key)                                                        \
++      __native_bpf_helper2(int (*)(void *, void *), BPF_FUNC_map_delete_elem, (map), (key))(      \
++        (map), (key))
++    #define bpf_probe_read(dst, size, unsafe_ptr)                                                \
++      __native_bpf_helper3(                                                                      \
++        int (*)(void *, int, const void *), BPF_FUNC_probe_read, (dst), (size), (unsafe_ptr))(    \
++        (dst), (size), (unsafe_ptr))
++    #define bpf_ktime_get_ns()                                                                   \
++      __native_bpf_helper0(unsigned long long (*)(void), BPF_FUNC_ktime_get_ns)()
++    #define bpf_get_current_pid_tgid()                                                           \
++      __native_bpf_helper0(unsigned long long (*)(void), BPF_FUNC_get_current_pid_tgid)()
++    #define bpf_get_current_comm(buf, buf_size)                                                  \
++      __native_bpf_helper2(int (*)(void *, int), BPF_FUNC_get_current_comm, (buf), (buf_size))(   \
++        (buf), (buf_size))
++    #define bpf_tail_call(ctx, map, index)                                                       \
++      __native_bpf_helper3(                                                                      \
++        void (*)(void *, void *, int), BPF_FUNC_tail_call, (ctx), (map), (index))(                \
++        (ctx), (map), (index))
++    #define bpf_get_current_task()                                                               \
++      __native_bpf_helper0(unsigned long long (*)(void), BPF_FUNC_get_current_task)()
++    #define bpf_perf_event_output(ctx, map, flags, data, size)                                   \
++      __native_bpf_helper5(                                                                      \
++        int (*)(void *, void *, unsigned long long, void *, int),                                 \
++        BPF_FUNC_perf_event_output,                                                              \
++        (ctx),                                                                                   \
++        (map),                                                                                   \
++        (flags),                                                                                 \
++        (data),                                                                                  \
++        (size))(                                                                                 \
++        (ctx), (map), (flags), (data), (size))
++    #define bpf_get_stackid(ctx, map, flags)                                                     \
++      __native_bpf_helper3(int (*)(void *, void *, u64), BPF_FUNC_get_stackid, (ctx), (map), (flags))( \
++        (ctx), (map), (flags))
++    #define bpf_get_prandom_u32()                                                                \
++      __native_bpf_helper0(unsigned long long (*)(void), BPF_FUNC_get_prandom_u32)()
++    #define bpf_trace_printk(fmt, fmt_size, ...)                                                 \
++      __native_bpf_helper2(int (*)(const char *, int, ...), BPF_FUNC_trace_printk, (fmt), (fmt_size))( \
++        (fmt), (fmt_size), ##__VA_ARGS__)
++    #define bpf_probe_read_user(dst, size, unsafe_ptr)                                           \
++      __native_bpf_helper3(                                                                      \
++        long (*)(void *, int, const void *),                                                      \
++        BPF_FUNC_probe_read_user,                                                                \
++        (dst),                                                                                   \
++        (size),                                                                                  \
++        (unsafe_ptr))(                                                                           \
++        (dst), (size), (unsafe_ptr))
++    #define bpf_probe_read_kernel(dst, size, unsafe_ptr)                                         \
++      __native_bpf_helper3(                                                                      \
++        long (*)(void *, int, const void *),                                                      \
++        BPF_FUNC_probe_read_kernel,                                                              \
++        (dst),                                                                                   \
++        (size),                                                                                  \
++        (unsafe_ptr))(                                                                           \
++        (dst), (size), (unsafe_ptr))
++  #else
+ static void *(*bpf_map_lookup_elem)(void *map, void *key) = (void *)BPF_FUNC_map_lookup_elem;
+ static int (*bpf_map_update_elem)(void *map, void *key, void *value, u64 flags) = (void *)
+   BPF_FUNC_map_update_elem;
+@@ -132,6 +271,7 @@
+   BPF_FUNC_probe_read_user;
+ static long (*bpf_probe_read_kernel)(void *dst, int size, const void *unsafe_ptr) = (void *)
+   BPF_FUNC_probe_read_kernel;
++  #endif
+ 
+   // The sizeof in bpf_trace_printk() must include \0, else no output
+   // is generated. The \n is not needed on 5.8+ kernels, but definitely on
+--- vendor/repos/cilium/bpf/bpf_host.c
++++ vendor/bpf/cilium/bpf/bpf_host.c
+@@ -1187,11 +1187,11 @@
+ 	/* Filter allowed vlan id's and pass them back to kernel.
+ 	 * We will see the packet again in from-netdev@eth0.vlanXXX.
+ 	 */
+-	if (ctx->vlan_present) {
++	if (ctx->vlan_all) {
+ 		__u32 vlan_id = ctx->vlan_tci & 0xfff;
+ 
+ 		if (vlan_id) {
+-			if (allow_vlan(ctx->ifindex, vlan_id))
++			if (allow_vlan(ctx_get_ifindex(ctx), vlan_id))
+ 				return CTX_ACT_OK;
+ 
+ 			ret = DROP_VLAN_FILTERED;
+@@ -1351,10 +1351,10 @@
+ 
+ 	/* Filter allowed vlan id's and pass them back to kernel.
+ 	 */
+-	if (ctx->vlan_present) {
++	if (ctx->vlan_all) {
+ 		vlan_id = ctx->vlan_tci & 0xfff;
+ 		if (vlan_id) {
+-			if (allow_vlan(ctx->ifindex, vlan_id))
++			if (allow_vlan(ctx_get_ifindex(ctx), vlan_id))
+ 				return CTX_ACT_OK;
+ 
+ 			ret = DROP_VLAN_FILTERED;
+--- vendor/repos/cilium/bpf/bpf_lxc.c
++++ vendor/bpf/cilium/bpf/bpf_lxc.c
+@@ -871,6 +871,7 @@
+ 		const union v6addr *daddr = (union v6addr *)&ip6->daddr;
+ 		bool same_subnet_id = false;
+ 
++#ifndef MICRO_NATIVE
+ 		if (CONFIG(hybrid_routing_enabled)) {
+ 			const union v6addr *saddr = (union v6addr *)&ip6->saddr;
+ 			__u32 src_subnet_id = lookup_ip6_subnet_id(saddr);
+@@ -878,6 +879,7 @@
+ 
+ 			same_subnet_id = (src_subnet_id == dst_subnet_id) && (src_subnet_id != 0);
+ 		}
++#endif
+ 
+ 		info = lookup_ip6_remote_endpoint(daddr, 0);
+ 		if (info) {
+@@ -1457,12 +1459,14 @@
+ 
+ 	bool same_subnet_id = false;
+ 
++#ifndef MICRO_NATIVE
+ 	if (CONFIG(hybrid_routing_enabled)) {
+ 		__u32 src_subnet_id = lookup_ip4_subnet_id(ip4->saddr);
+ 		__u32 dst_subnet_id = lookup_ip4_subnet_id(ip4->daddr);
+ 
+ 		same_subnet_id = (src_subnet_id == dst_subnet_id) && (src_subnet_id != 0);
+ 	}
++#endif
+ 
+ 	/* Determine the destination category for policy fallback. */
+ 	info = lookup_ip4_remote_endpoint(ip4->daddr, cluster_id);
+--- vendor/repos/cilium/bpf/include/bpf/access.h
++++ vendor/bpf/cilium/bpf/include/bpf/access.h
+@@ -30,6 +30,14 @@
+ 
+ 	return datum;
+ }
++#elif defined(MICRO_NATIVE)
++static __always_inline __maybe_unused __u32
++map_array_get_32(const __u32 *array, __u32 index, const __u32 limit)
++{
++	if ((index << 2) > limit)
++		return 0;
++	return array[index];
++}
+ #else
+ # define map_array_get_32(array, index, limit)	__throw_build_bug()
+ #endif /* __bpf__ */
+--- vendor/repos/cilium/bpf/include/bpf/ctx/skb.h
++++ vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h
+@@ -62,6 +62,35 @@
+  */
+ #define get_hash(ctx)		ctx->hash
+ 
++#ifdef MICRO_NATIVE
++struct __native_skb_net_device {
++	__u8 __pad[224];
++	int ifindex;
++};
++_Static_assert(__builtin_offsetof(struct __native_skb_net_device, ifindex) == 224,
++	       "native net_device ifindex offset");
++
++static __always_inline void *
++ctx_data(const struct __sk_buff *ctx)
++{
++	return ctx->data;
++}
++
++static __always_inline void *
++ctx_data_end(const struct __sk_buff *ctx)
++{
++	return ctx->data + (ctx->len - ctx->data_len);
++}
++
++static __always_inline void *
++ctx_data_meta(const struct __sk_buff *ctx)
++{
++	const __u8 *shinfo = ctx->head + ctx->end;
++	__u8 meta_len = *(const __u8 *)(shinfo + 1);
++
++	return ctx->data - meta_len;
++}
++#else
+ #define DEFINE_FUNC_CTX_POINTER(FIELD)						\
+ static __always_inline void *							\
+ ctx_ ## FIELD(const struct __sk_buff *ctx)					\
+@@ -84,6 +113,7 @@
+ /* This defines ctx_data_meta(). */
+ DEFINE_FUNC_CTX_POINTER(data_meta)
+ #undef DEFINE_FUNC_CTX_POINTER
++#endif
+ 
+ static __always_inline __maybe_unused int
+ ctx_redirect(const struct __sk_buff *ctx __maybe_unused, int ifindex, __u32 flags)
+@@ -112,7 +142,11 @@
+ static __always_inline __maybe_unused __u32
+ ctx_wire_len(const struct __sk_buff *ctx)
+ {
++#ifdef MICRO_NATIVE
++	return ctx->len;
++#else
+ 	return ctx->wire_len;
++#endif
+ }
+ 
+ static __always_inline __maybe_unused void
+@@ -145,7 +179,13 @@
+ static __always_inline __maybe_unused __u32
+ ctx_get_ifindex(const struct __sk_buff *ctx)
+ {
++#ifdef MICRO_NATIVE
++	if (!ctx->dev)
++		return 0;
++	return ((const struct __native_skb_net_device *)ctx->dev)->ifindex;
++#else
+ 	return ctx->ifindex;
++#endif
+ }
+ 
+ static __always_inline __maybe_unused __u32
+--- vendor/repos/cilium/bpf/include/bpf/ctx/xdp.h
++++ vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h
+@@ -32,10 +32,42 @@
+ /* This must be a mask and all offsets guaranteed to be less than that. */
+ #define __CTX_OFF_MAX			0xff
+ 
++#ifdef MICRO_NATIVE
++static __always_inline void *
++micro_native_xdp_data(const struct xdp_md *ctx)
++{
++	return *(void * const *)((const char *)ctx + 0);
++}
++
++static __always_inline void *
++micro_native_xdp_data_end(const struct xdp_md *ctx)
++{
++	return *(void * const *)((const char *)ctx + 8);
++}
++
++static __always_inline void *
++micro_native_xdp_data_meta(const struct xdp_md *ctx)
++{
++	return *(void * const *)((const char *)ctx + 16);
++}
++#endif
++
+ #ifndef HAVE_XDP_LOAD_BYTES
+ static __always_inline __maybe_unused int
+ xdp_load_bytes(const struct xdp_md *ctx, __u64 off, void *to, const __u64 len)
+ {
++#ifdef MICRO_NATIVE
++	char *data = micro_native_xdp_data(ctx);
++	char *data_end = micro_native_xdp_data_end(ctx);
++	char *from;
++
++	off &= __CTX_OFF_MAX;
++	from = data + off;
++	if (from + len > data_end)
++		return -EINVAL;
++	memcpy(to, from, len);
++	return 0;
++#else
+ 	void *from;
+ 	int ret;
+ 	/* LLVM tends to generate code that verifier doesn't understand,
+@@ -59,6 +91,7 @@
+ 	if (!ret)
+ 		memcpy(to, from, len);
+ 	return ret;
++#endif
+ }
+ #endif
+ 
+@@ -67,6 +100,18 @@
+ xdp_store_bytes(const struct xdp_md *ctx, __u64 off, const void *from,
+ 		const __u64 len, __u64 flags __maybe_unused)
+ {
++#ifdef MICRO_NATIVE
++	char *data = micro_native_xdp_data(ctx);
++	char *data_end = micro_native_xdp_data_end(ctx);
++	char *to;
++
++	off &= __CTX_OFF_MAX;
++	to = data + off;
++	if (to + len > data_end)
++		return -EINVAL;
++	memcpy(to, from, len);
++	return 0;
++#else
+ 	void *to;
+ 	int ret;
+ 	/* See xdp_load_bytes(). */
+@@ -87,6 +132,7 @@
+ 	if (!ret)
+ 		memcpy(to, from, len);
+ 	return ret;
++#endif
+ }
+ #endif
+ 
+@@ -114,6 +160,14 @@
+ #define get_hash(ctx)			({ 0; })
+ #define get_hash_recalc(ctx)		get_hash(ctx)
+ 
++#ifdef MICRO_NATIVE
++#define DEFINE_FUNC_CTX_POINTER(FIELD)						\
++static __always_inline void *							\
++ctx_ ## FIELD(const struct xdp_md *ctx)						\
++{										\
++	return micro_native_xdp_ ## FIELD(ctx);					\
++}
++#else
+ #define DEFINE_FUNC_CTX_POINTER(FIELD)						\
+ static __always_inline void *							\
+ ctx_ ## FIELD(const struct xdp_md *ctx)						\
+@@ -129,6 +183,7 @@
+ 		     : "r"(ctx), "i"(offsetof(struct xdp_md, FIELD)));		\
+ 	return ptr;								\
+ }
++#endif
+ /* This defines ctx_data(). */
+ DEFINE_FUNC_CTX_POINTER(data)
+ /* This defines ctx_data_end(). */
+@@ -156,12 +211,26 @@
+ {
+ 	__u32 size = flags & BPF_F_HDR_FIELD_MASK;
+ 	__sum16 *sum;
++#ifdef MICRO_NATIVE
++	char *data = micro_native_xdp_data(ctx);
++	char *data_end = micro_native_xdp_data_end(ctx);
++#else
+ 	int ret;
++#endif
+ 
+ 	if (unlikely(flags & ~(BPF_F_HDR_FIELD_MASK)))
+ 		return -EINVAL;
+ 	if (unlikely(size != 0 && size != 2))
+ 		return -EINVAL;
++#ifdef MICRO_NATIVE
++	off &= __CTX_OFF_MAX;
++	sum = (__sum16 *)(data + off);
++	if ((char *)sum + 2 > data_end)
++		return -EINVAL;
++	from ? __csum_replace_by_4(sum, from, to) :
++	       __csum_replace_by_diff(sum, to);
++	return 0;
++#else
+ 	/* See xdp_load_bytes(). */
+ 	asm volatile("r1 = *(u32 *)(%[ctx] +0)\n\t"
+ 		     "r2 = *(u32 *)(%[ctx] +4)\n\t"
+@@ -181,6 +250,7 @@
+ 		from ? __csum_replace_by_4(sum, from, to) :
+ 		       __csum_replace_by_diff(sum, to);
+ 	return ret;
++#endif
+ }
+ 
+ #define CSUM_MANGLED_0		((__sum16)0xffff)
+@@ -192,13 +262,31 @@
+ 	bool is_mmzero = flags & BPF_F_MARK_MANGLED_0;
+ 	__u32 size = flags & BPF_F_HDR_FIELD_MASK;
+ 	__sum16 *sum;
++#ifdef MICRO_NATIVE
++	char *data = micro_native_xdp_data(ctx);
++	char *data_end = micro_native_xdp_data_end(ctx);
++#else
+ 	int ret;
++#endif
+ 
+ 	if (unlikely(flags & ~(BPF_F_MARK_MANGLED_0 | BPF_F_PSEUDO_HDR |
+ 			       BPF_F_HDR_FIELD_MASK | BPF_F_IPV6)))
+ 		return -EINVAL;
+ 	if (unlikely(size != 0 && size != 2))
+ 		return -EINVAL;
++#ifdef MICRO_NATIVE
++	off &= __CTX_OFF_MAX;
++	sum = (__sum16 *)(data + off);
++	if ((char *)sum + 2 > data_end)
++		return -EINVAL;
++	if (is_mmzero && !*sum)
++		return 0;
++	from ? __csum_replace_by_4(sum, from, to) :
++	       __csum_replace_by_diff(sum, to);
++	if (is_mmzero && !*sum)
++		*sum = CSUM_MANGLED_0;
++	return 0;
++#else
+ 	/* See xdp_load_bytes(). */
+ 	asm volatile("r1 = *(u32 *)(%[ctx] +0)\n\t"
+ 		     "r2 = *(u32 *)(%[ctx] +4)\n\t"
+@@ -223,6 +311,7 @@
+ 			*sum = CSUM_MANGLED_0;
+ 	}
+ 	return ret;
++#endif
+ }
+ 
+ static __always_inline __maybe_unused int
+@@ -367,6 +456,10 @@
+ static __always_inline __maybe_unused __u64
+ ctx_full_len(const struct xdp_md *ctx)
+ {
++#ifdef MICRO_NATIVE
++	return (__u64)((unsigned long)micro_native_xdp_data_end(ctx) -
++		       (unsigned long)micro_native_xdp_data(ctx));
++#else
+ 	__u64 len;
+ 	/* Compute the length using inline assembly as clang
+ 	 * sometimes reorganizes expressions involving this,
+@@ -380,6 +473,7 @@
+ 		     : [ctx]"r"(ctx)
+ 		     : "r1", "r2");
+ 	return len;
++#endif
+ }
+ #endif
+ 
+--- vendor/repos/cilium/bpf/include/bpf/helpers.h
++++ vendor/bpf/cilium/bpf/include/bpf/helpers.h
+@@ -21,6 +21,122 @@
+ #ifndef BPF_FUNC_REMAP
+ # define BPF_FUNC_REMAP(NAME, ...)					\
+ 	(* NAME)(__VA_ARGS__) __maybe_unused
++#endif
++
++#ifdef MICRO_NATIVE
++static __always_inline unsigned long __native_helper_id(unsigned long id)
++{
++	asm volatile("" : "+r"(id) :: "memory");
++	return id;
++}
++
++#define __native_bpf_helper(NAME, ID)					\
++	((__typeof__(NAME))__native_helper_id((unsigned long)(ID)))
++
++#define map_lookup_elem(...)						\
++	__native_bpf_helper(map_lookup_elem, BPF_FUNC_map_lookup_elem)(__VA_ARGS__)
++#define map_update_elem(...)						\
++	__native_bpf_helper(map_update_elem, BPF_FUNC_map_update_elem)(__VA_ARGS__)
++#define map_delete_elem(...)						\
++	__native_bpf_helper(map_delete_elem, BPF_FUNC_map_delete_elem)(__VA_ARGS__)
++#define map_lookup_percpu_elem(...)					\
++	__native_bpf_helper(map_lookup_percpu_elem, BPF_FUNC_map_lookup_percpu_elem)(__VA_ARGS__)
++#define for_each_map_elem(...)						\
++	__native_bpf_helper(for_each_map_elem, BPF_FUNC_for_each_map_elem)(__VA_ARGS__)
++#define ktime_get_ns()							\
++	__native_bpf_helper(ktime_get_ns, BPF_FUNC_ktime_get_ns)()
++#define ktime_get_boot_ns()						\
++	__native_bpf_helper(ktime_get_boot_ns, BPF_FUNC_ktime_get_boot_ns)()
++#define jiffies64()							\
++	__native_bpf_helper(jiffies64, BPF_FUNC_jiffies64)()
++#define get_socket_cookie(...)						\
++	__native_bpf_helper(get_socket_cookie, BPF_FUNC_get_socket_cookie)(__VA_ARGS__)
++#define get_netns_cookie(...)						\
++	__native_bpf_helper(get_netns_cookie, BPF_FUNC_get_netns_cookie)(__VA_ARGS__)
++#define get_cgroup_classid()						\
++	__native_bpf_helper(get_cgroup_classid, BPF_FUNC_get_cgroup_classid)()
++#define trace_printk(...)						\
++	__native_bpf_helper(trace_printk, BPF_FUNC_trace_printk)(__VA_ARGS__)
++#define get_prandom_u32()						\
++	__native_bpf_helper(get_prandom_u32, BPF_FUNC_get_prandom_u32)()
++#define csum_diff_external(...)						\
++	__native_bpf_helper(csum_diff_external, BPF_FUNC_csum_diff)(__VA_ARGS__)
++#define tail_call(...)							\
++	__native_bpf_helper(tail_call, BPF_FUNC_tail_call)(__VA_ARGS__)
++#define get_smp_processor_id()						\
++	__native_bpf_helper(get_smp_processor_id, BPF_FUNC_get_smp_processor_id)()
++#define fib_lookup(...)							\
++	__native_bpf_helper(fib_lookup, BPF_FUNC_fib_lookup)(__VA_ARGS__)
++#define sk_lookup_tcp(...)						\
++	__native_bpf_helper(sk_lookup_tcp, BPF_FUNC_sk_lookup_tcp)(__VA_ARGS__)
++#define sk_lookup_udp(...)						\
++	__native_bpf_helper(sk_lookup_udp, BPF_FUNC_sk_lookup_udp)(__VA_ARGS__)
++#define get_socket_opt(...)						\
++	__native_bpf_helper(get_socket_opt, BPF_FUNC_getsockopt)(__VA_ARGS__)
++#define set_socket_opt(...)						\
++	__native_bpf_helper(set_socket_opt, BPF_FUNC_setsockopt)(__VA_ARGS__)
++#define get_current_cgroup_id()						\
++	__native_bpf_helper(get_current_cgroup_id, BPF_FUNC_get_current_cgroup_id)()
++#define set_retval(...)							\
++	__native_bpf_helper(set_retval, BPF_FUNC_set_retval)(__VA_ARGS__)
++#define loop(...)							\
++	__native_bpf_helper(loop, BPF_FUNC_loop)(__VA_ARGS__)
++#define ringbuf_reserve(...)						\
++	__native_bpf_helper(ringbuf_reserve, BPF_FUNC_ringbuf_reserve)(__VA_ARGS__)
++#define ringbuf_submit(...)						\
++	__native_bpf_helper(ringbuf_submit, BPF_FUNC_ringbuf_submit)(__VA_ARGS__)
++#define ringbuf_discard(...)						\
++	__native_bpf_helper(ringbuf_discard, BPF_FUNC_ringbuf_discard)(__VA_ARGS__)
++#define redirect(...)							\
++	__native_bpf_helper(redirect, BPF_FUNC_redirect)(__VA_ARGS__)
++#define redirect_peer(...)						\
++	__native_bpf_helper(redirect_peer, BPF_FUNC_redirect_peer)(__VA_ARGS__)
++#define clone_redirect(...)						\
++	__native_bpf_helper(clone_redirect, BPF_FUNC_clone_redirect)(__VA_ARGS__)
++#define skb_load_bytes(...)						\
++	__native_bpf_helper(skb_load_bytes, BPF_FUNC_skb_load_bytes)(__VA_ARGS__)
++#define skb_store_bytes(...)						\
++	__native_bpf_helper(skb_store_bytes, BPF_FUNC_skb_store_bytes)(__VA_ARGS__)
++#define skb_adjust_room(...)						\
++	__native_bpf_helper(skb_adjust_room, BPF_FUNC_skb_adjust_room)(__VA_ARGS__)
++#define skb_change_type(...)						\
++	__native_bpf_helper(skb_change_type, BPF_FUNC_skb_change_type)(__VA_ARGS__)
++#define skb_change_proto(...)						\
++	__native_bpf_helper(skb_change_proto, BPF_FUNC_skb_change_proto)(__VA_ARGS__)
++#define skb_change_tail(...)						\
++	__native_bpf_helper(skb_change_tail, BPF_FUNC_skb_change_tail)(__VA_ARGS__)
++#define skb_change_head(...)						\
++	__native_bpf_helper(skb_change_head, BPF_FUNC_skb_change_head)(__VA_ARGS__)
++#define skb_pull_data(...)						\
++	__native_bpf_helper(skb_pull_data, BPF_FUNC_skb_pull_data)(__VA_ARGS__)
++#define skb_get_tunnel_key(...)						\
++	__native_bpf_helper(skb_get_tunnel_key, BPF_FUNC_skb_get_tunnel_key)(__VA_ARGS__)
++#define skb_set_tunnel_key(...)						\
++	__native_bpf_helper(skb_set_tunnel_key, BPF_FUNC_skb_set_tunnel_key)(__VA_ARGS__)
++#define skb_get_tunnel_opt(...)						\
++	__native_bpf_helper(skb_get_tunnel_opt, BPF_FUNC_skb_get_tunnel_opt)(__VA_ARGS__)
++#define skb_set_tunnel_opt(...)						\
++	__native_bpf_helper(skb_set_tunnel_opt, BPF_FUNC_skb_set_tunnel_opt)(__VA_ARGS__)
++#define skb_event_output(...)						\
++	__native_bpf_helper(skb_event_output, BPF_FUNC_perf_event_output)(__VA_ARGS__)
++#define skc_lookup_tcp(...)						\
++	__native_bpf_helper(skc_lookup_tcp, BPF_FUNC_skc_lookup_tcp)(__VA_ARGS__)
++#define sk_release(...)							\
++	__native_bpf_helper(sk_release, BPF_FUNC_sk_release)(__VA_ARGS__)
++#define sk_assign(...)							\
++	__native_bpf_helper(sk_assign, BPF_FUNC_sk_assign)(__VA_ARGS__)
++#define xdp_adjust_meta(...)						\
++	__native_bpf_helper(xdp_adjust_meta, BPF_FUNC_xdp_adjust_meta)(__VA_ARGS__)
++#define xdp_adjust_head(...)						\
++	__native_bpf_helper(xdp_adjust_head, BPF_FUNC_xdp_adjust_head)(__VA_ARGS__)
++#define xdp_adjust_tail(...)						\
++	__native_bpf_helper(xdp_adjust_tail, BPF_FUNC_xdp_adjust_tail)(__VA_ARGS__)
++#define xdp_get_buff_len(...)						\
++	__native_bpf_helper(xdp_get_buff_len, BPF_FUNC_xdp_get_buff_len)(__VA_ARGS__)
++#define xdp_event_output(...)						\
++	__native_bpf_helper(xdp_event_output, BPF_FUNC_perf_event_output)(__VA_ARGS__)
++#define sock_event_output(...)						\
++	__native_bpf_helper(sock_event_output, BPF_FUNC_perf_event_output)(__VA_ARGS__)
+ #endif
+ 
+ #if __ctx_is == __ctx_skb
+--- vendor/repos/cilium/bpf/include/bpf/tailcall.h
++++ vendor/bpf/cilium/bpf/include/bpf/tailcall.h
+@@ -46,6 +46,19 @@
+ 	 */
+ 	tail_call(ctx, map, slot);
+ }
++#elif defined(MICRO_NATIVE)
++#define tail_call_static(ctx_ptr, map, slot)				\
++{								\
++	if (!__builtin_constant_p(slot))			\
++		__throw_build_bug();				\
++	tail_call((ctx_ptr), &(map), (slot));			\
++}
++
++static __always_inline __maybe_unused void
++tail_call_dynamic(struct __ctx_buff *ctx, const void *map, __u32 slot)
++{
++	tail_call(ctx, map, slot);
++}
+ #else
+ /* BPF unit tests compile some BPF code under their native arch. Tail calls
+  * won't work in this context. Only compile above under __bpf__ target.
+--- vendor/repos/cilium/bpf/include/linux/bpf.h
++++ vendor/bpf/cilium/bpf/include/linux/bpf.h
+@@ -6070,6 +6070,86 @@
+ 	 */
+ };
+ 
++#ifdef MICRO_NATIVE
++/*
++ * Native-lab TC/SchedCLS programs receive the kernel's real struct sk_buff *,
++ * not the UAPI mirror below. The verifier normally rewrites __sk_buff field
++ * accesses into real sk_buff accesses before JIT. Native C bypasses that
++ * rewrite, so model the real offsets used by the kernel entry ABI for the
++ * fields Cilium reads directly.
++ */
++struct __sk_buff {
++	void *next;
++	void *prev;
++	void *dev;
++	void *sk;
++	__u64 tstamp;
++	__u32 cb[12];
++	__u8 __native_pad88[24];
++	__u32 len;
++	__u32 data_len;
++	__u16 mac_len;
++	__u16 hdr_len;
++	__u16 queue_mapping;
++	__u8 __native_pad126[8];
++	__u16 tc_index;
++	__u16 alloc_cpu;
++	__u16 __native_pad138;
++	union {
++		__wsum csum;
++		struct {
++			__u16 csum_start;
++			__u16 csum_offset;
++		};
++	};
++	__u32 priority;
++	__s32 ingress_ifindex;
++	__u32 hash;
++	union {
++		__u32 vlan_all;
++		struct {
++			__be16 vlan_proto;
++			__u16 vlan_tci;
++		};
++	};
++	__u32 napi_id;
++	__u32 secmark;
++	__u32 mark;
++	union {
++		__be16 inner_protocol;
++		__u8 inner_ipproto;
++	};
++	__u16 inner_transport_header;
++	__u16 inner_network_header;
++	__u16 inner_mac_header;
++	__be16 protocol;
++	__u16 transport_header;
++	__u16 network_header;
++	__u16 mac_header;
++	__u32 tail;
++	__u32 end;
++	__u32 __native_pad196;
++	unsigned char *head;
++	unsigned char *data;
++	__u32 truesize;
++};
++#define __native_skb_off(member) __builtin_offsetof(struct __sk_buff, member)
++_Static_assert(__native_skb_off(len) == 112, "native __sk_buff len offset");
++_Static_assert(__native_skb_off(data_len) == 116, "native __sk_buff data_len offset");
++_Static_assert(__native_skb_off(queue_mapping) == 124, "native __sk_buff queue_mapping offset");
++_Static_assert(__native_skb_off(tc_index) == 134, "native __sk_buff tc_index offset");
++_Static_assert(__native_skb_off(priority) == 144, "native __sk_buff priority offset");
++_Static_assert(__native_skb_off(ingress_ifindex) == 148, "native __sk_buff ingress_ifindex offset");
++_Static_assert(__native_skb_off(hash) == 152, "native __sk_buff hash offset");
++_Static_assert(__native_skb_off(vlan_all) == 156, "native __sk_buff vlan_all offset");
++_Static_assert(__native_skb_off(mark) == 168, "native __sk_buff mark offset");
++_Static_assert(__native_skb_off(protocol) == 180, "native __sk_buff protocol offset");
++_Static_assert(__native_skb_off(tail) == 188, "native __sk_buff tail offset");
++_Static_assert(__native_skb_off(end) == 192, "native __sk_buff end offset");
++_Static_assert(__native_skb_off(head) == 200, "native __sk_buff head offset");
++_Static_assert(__native_skb_off(data) == 208, "native __sk_buff data offset");
++#undef __native_skb_off
++#else
+ /* user accessible mirror of in-kernel sk_buff.
+  * new fields can only be added to the end of this structure
+  */
+@@ -6114,6 +6194,7 @@
+ 	__u32 :24;		/* Padding, future use. */
+ 	__u64 hwtstamp;
+ };
++#endif /* MICRO_NATIVE */
+ 
+ struct bpf_tunnel_key {
+ 	__u32 tunnel_id;
+--- vendor/repos/cilium/bpf/lib/arp.h
++++ vendor/bpf/cilium/bpf/lib/arp.h
+@@ -49,8 +49,8 @@
+ arp_validate(const struct __ctx_buff *ctx, union macaddr *mac,
+ 	     union macaddr *smac, __be32 *sip, __be32 *tip)
+ {
+-	void *data_end = (void *) (long) ctx->data_end;
+-	void *data = (void *) (long) ctx->data;
++	void *data_end = ctx_data_end(ctx);
++	void *data = ctx_data(ctx);
+ 	struct arphdr *arp = data + ETH_HLEN;
+ 	struct ethhdr *eth = data;
+ 	struct arp_eth *arp_eth;
+--- vendor/repos/cilium/bpf/lib/hexdump.h
++++ vendor/bpf/cilium/bpf/lib/hexdump.h
+@@ -42,8 +42,8 @@
+ 	__u16 i;
+ 	char *b;
+ 	char buf[HD_MAX_BYTES * 2 + 1] = {0};
+-	void *data     = (void *)(long)ctx->data;
+-	void *data_end = (void *)(long)ctx->data_end;
++	void *data     = ctx_data(ctx);
++	void *data_end = ctx_data_end(ctx);
+ 
+ 	/**
+ 	 * Further clamp dump len to either max of pkt or HD_MAX_BYTES
+--- vendor/repos/cilium/bpf/lib/overloadable_skb.h
++++ vendor/bpf/cilium/bpf/lib/overloadable_skb.h
+@@ -19,7 +19,9 @@
+ 	WRITE_ONCE(ctx->cb[4], zero);
+ 
+ 	/* This needs to be cleared mainly for tcx. */
++#ifndef MICRO_NATIVE
+ 	WRITE_ONCE(ctx->tc_classid, zero);
++#endif
+ }
+ 
+ static __always_inline __maybe_unused void
+@@ -67,7 +69,7 @@
+ 	/* Looping back the packet into the originating netns. We xmit into the
+ 	 * hosts' veth device such that we end up on ingress in the peer.
+ 	 */
+-	return (int)ctx_redirect(ctx, ctx->ifindex, 0);
++	return (int)ctx_redirect(ctx, ctx_get_ifindex(ctx), 0);
+ }
+ 
+ static __always_inline __maybe_unused bool
+--- vendor/repos/cilium/bpf/lib/static_data.h
++++ vendor/bpf/cilium/bpf/lib/static_data.h
+@@ -62,6 +62,9 @@
+  * accesses must be done through this macro to ensure the loader's dead code
+  * elimination can recognize them.
+  */
++#ifdef MICRO_NATIVE
++#define CONFIG(name) (__config_##name)
++#else
+ #define CONFIG(name)	\
+ (*({			\
+ 	void *out;	\
+@@ -81,3 +84,4 @@
+ 			: "=r"(out));	\
+ 	(typeof(__config_##name) *)out;	\
+ }))
++#endif
+--- vendor/repos/tetragon/bpf/include/api.h
++++ vendor/bpf/tetragon/bpf/include/api.h
+@@ -284,6 +284,89 @@
+ static int BPF_FUNC(get_func_ret, void *ctx, __u64 *value);
+ static long BPF_FUNC(get_func_ip, void *ctx);
+ 
++#ifdef MICRO_NATIVE_HELPER_MACROS
++#undef map_lookup_elem
++#define map_lookup_elem(map, key) bpf_map_lookup_elem((map), (key))
++#undef map_update_elem
++#define map_update_elem(map, key, value, flags) bpf_map_update_elem((map), (key), (value), (flags))
++#undef map_delete_elem
++#define map_delete_elem(map, key) bpf_map_delete_elem((map), (key))
++#undef probe_read
++#define probe_read(dst, size, unsafe_ptr) bpf_probe_read((dst), (size), (unsafe_ptr))
++#undef probe_read_str
++#define probe_read_str(dst, size, unsafe_ptr) bpf_probe_read_str((dst), (size), (unsafe_ptr))
++#undef probe_read_kernel
++#define probe_read_kernel(dst, size, unsafe_ptr) bpf_probe_read_kernel((dst), (size), (unsafe_ptr))
++#undef probe_read_user
++#define probe_read_user(dst, size, unsafe_ptr) bpf_probe_read_user((dst), (size), (unsafe_ptr))
++#undef probe_write_user
++#define probe_write_user(dst, src, len) bpf_probe_write_user((dst), (src), (len))
++#undef copy_from_user
++#define copy_from_user(dst, size, unsafe_ptr) bpf_copy_from_user((dst), (size), (unsafe_ptr))
++#undef ktime_get_ns
++#define ktime_get_ns() bpf_ktime_get_ns()
++#undef ktime_get_boot_ns
++#define ktime_get_boot_ns() bpf_ktime_get_boot_ns()
++#undef get_prandom_u32
++#define get_prandom_u32() bpf_get_prandom_u32()
++#undef get_smp_processor_id
++#define get_smp_processor_id() bpf_get_smp_processor_id()
++#undef get_current_pid_tgid
++#define get_current_pid_tgid() bpf_get_current_pid_tgid()
++#undef get_current_uid_gid
++#define get_current_uid_gid() bpf_get_current_uid_gid()
++#undef get_current_comm
++#define get_current_comm(buf, size) bpf_get_current_comm((buf), (size))
++#undef get_current_cgroup_id
++#define get_current_cgroup_id() bpf_get_current_cgroup_id()
++#undef get_current_task
++#define get_current_task() bpf_get_current_task()
++#undef get_current_task_btf
++#define get_current_task_btf() bpf_get_current_task_btf()
++#undef get_attach_cookie
++#define get_attach_cookie(ctx) bpf_get_attach_cookie((ctx))
++#undef get_func_arg
++#define get_func_arg(ctx, n, value) bpf_get_func_arg((ctx), (n), (value))
++#undef get_func_ret
++#define get_func_ret(ctx, value) bpf_get_func_ret((ctx), (value))
++#undef get_func_ip
++#define get_func_ip(ctx) bpf_get_func_ip((ctx))
++#undef ima_inode_hash
++#define ima_inode_hash(inode, dst, size) bpf_ima_inode_hash((inode), (dst), (size))
++#undef ima_file_hash
++#define ima_file_hash(file, dst, size) bpf_ima_file_hash((file), (dst), (size))
++#undef perf_event_output
++#define perf_event_output(ctx, map, flags, data, size) \
++	bpf_perf_event_output((ctx), (map), (flags), (data), (size))
++#undef ringbuf_output
++#define ringbuf_output(ringbuf, data, size, flags) \
++	bpf_ringbuf_output((ringbuf), (data), (size), (flags))
++#undef ringbuf_reserve
++#define ringbuf_reserve(ringbuf, size, flags) \
++	bpf_ringbuf_reserve((ringbuf), (size), (flags))
++#undef ringbuf_submit
++#define ringbuf_submit(data, flags) bpf_ringbuf_submit((data), (flags))
++#undef ringbuf_discard
++#define ringbuf_discard(data, flags) bpf_ringbuf_discard((data), (flags))
++#undef ringbuf_query
++#define ringbuf_query(ringbuf, flags) bpf_ringbuf_query((ringbuf), (flags))
++#undef tail_call
++#define tail_call(ctx, map, index) bpf_tail_call((ctx), (map), (index))
++#undef get_stackid
++#define get_stackid(ctx, map, flags) bpf_get_stackid((ctx), (map), (flags))
++#undef get_stack
++#define get_stack(ctx, buf, size, flags) bpf_get_stack((ctx), (buf), (size), (flags))
++#undef send_signal
++#define send_signal(sig) bpf_send_signal((sig))
++#undef override_return
++#define override_return(ctx, rc) bpf_override_return((ctx), (rc))
++#undef seq_write
++#define seq_write(seq, data, len) bpf_seq_write((seq), (data), (len))
++#undef loop
++#define loop(nr_loops, callback_fn, callback_ctx, flags) \
++	bpf_loop((nr_loops), (callback_fn), (callback_ctx), (flags))
++#endif
++
+ /** LLVM built-ins, mem*() routines work for constant size */
+ 
+ #ifndef memset
+@@ -331,8 +414,53 @@
+ 	__FILTER_ARG_ALL,
+ };
+ 
++#ifdef MICRO_NATIVE
++static __attribute__((unused)) int native_ascii_tolower(int c)
++{
++	if (c >= 'A' && c <= 'Z')
++		return c + ('a' - 'A');
++	return c;
++}
++
++static __attribute__((unused)) int bpf_strnstr(const char *s1__ign, const char *s2__ign,
++					       size_t len)
++{
++	for (size_t i = 0; i < len; i++) {
++		size_t j = 0;
++
++		for (; j < 100 && i + j < len; j++) {
++			char c2 = s2__ign[j];
++
++			if (!c2)
++				return (int)i;
++			if (s1__ign[i + j] != c2)
++				break;
++		}
++	}
++	return -1;
++}
++
++static __attribute__((unused)) int bpf_strncasestr(const char *s1__ign,
++						   const char *s2__ign, size_t len)
++{
++	for (size_t i = 0; i < len; i++) {
++		size_t j = 0;
++
++		for (; j < 100 && i + j < len; j++) {
++			char c2 = s2__ign[j];
++
++			if (!c2)
++				return (int)i;
++			if (native_ascii_tolower(s1__ign[i + j]) != native_ascii_tolower(c2))
++				break;
++		}
++	}
++	return -1;
++}
++#else
+ // kfuncs
+ extern int bpf_strnstr(const char *s1__ign, const char *s2__ign, size_t len) __weak __ksym;
+ extern int bpf_strncasestr(const char *s1__ign, const char *s2__ign, size_t len) __weak __ksym;
++#endif
+ 
+ #endif /* __BPF_API__ */
+--- vendor/repos/tetragon/bpf/lib/bpf_d_path.h
++++ vendor/bpf/tetragon/bpf/lib/bpf_d_path.h
+@@ -145,8 +145,7 @@
+ 	// This ensures that namelen is < 256, which is aligned with kernel's max dentry name length
+ 	// that is 255 (https://elixir.bootlin.com/linux/v5.10/source/include/uapi/linux/limits.h#L12).
+ 	// Needed to bound that for probe_read call.
+-	asm volatile("%[namelen] &= 0xff;\n"
+-		     : [namelen] "+r"(namelen));
++	namelen &= 0xff;
+ 	probe_read(buf + buffer_offset + write_slash, namelen * sizeof(char), name);
+ 
+ 	*bufptr = buf + buffer_offset;
+--- vendor/repos/tetragon/bpf/lib/bpf_helpers.h
++++ vendor/bpf/tetragon/bpf/lib/bpf_helpers.h
+@@ -61,8 +61,10 @@
+  *    1, if matching field is present in target kernel;
+  *    0, if no matching field found.
+  */
++#ifndef bpf_core_field_exists
+ #define bpf_core_field_exists(field) \
+ 	__builtin_preserve_field_info(field, BPF_FIELD_EXISTS)
++#endif
+ 
+ /* second argument to __builtin_preserve_enum_value() built-in */
+ enum bpf_enum_value_kind {
+@@ -77,6 +79,9 @@
+  */
+ FUNC_INLINE void relax_verifier(void)
+ {
++#ifdef MICRO_NATIVE
++	compiler_barrier();
++#else
+ 	/* Calling get_smp_processor_id() in asm saves an instruction as we
+ 	 * don't have to store the result to ensure the call takes place.
+ 	 * However, we have to specifiy the call target by number and not
+@@ -85,13 +90,16 @@
+ 	 */
+ 	asm volatile("call 8;\n" ::
+ 			     : "r0", "r1", "r2", "r3", "r4", "r5");
++#endif
+ }
+ 
++#ifndef compiler_barrier
+ FUNC_INLINE void compiler_barrier(void)
+ {
+ 	asm volatile("" ::
+ 			     : "memory");
+ }
++#endif
+ 
+ #define __uint(name, val)  int(*name)[val]
+ #define __type(name, val)  typeof(val) *name
+--- vendor/repos/tetragon/bpf/lib/config.h
++++ vendor/bpf/tetragon/bpf/lib/config.h
+@@ -28,6 +28,10 @@
+ 			     : "=r"(out));                            \
+ 		(typeof(CONFIG_##name) *)out;                         \
+ 	}))
++#ifdef MICRO_NATIVE
++#undef CONFIG
++#define CONFIG(name) CONFIG_##name
++#endif
+ 
+ DECLARE_CONFIG(bool, ITER_NUM);
+ 
+--- vendor/repos/tetragon/bpf/lib/process.h
++++ vendor/bpf/tetragon/bpf/lib/process.h
+@@ -726,8 +726,7 @@
+ 	// verifier for the > 0 check)
+ 	if (exe->len > BINARY_PATH_MAX_LEN - 1)
+ 		exe->len = BINARY_PATH_MAX_LEN - 1;
+-	asm volatile("%[len] &= 0xff;\n"
+-		     : [len] "+r"(exe->len));
++	exe->len &= 0xff;
+ 	with_errmetrics(probe_read, exe->buf, exe->len, buffer);
+ 	if (revlen < STRING_POSTFIX_MAX_LENGTH)
+ 		with_errmetrics(probe_read, exe->end, revlen, (char *)(buffer + offset));
+--- vendor/repos/tetragon/bpf/process/bpf_execve_map_update.c
++++ vendor/bpf/tetragon/bpf/process/bpf_execve_map_update.c
+@@ -32,8 +32,12 @@
+ 	struct execve_map_value *curr;
+ 	__u32 pid;
+ 
++#ifdef MICRO_NATIVE
++	idx &= 0x7fff;
++#else
+ 	asm volatile("%[idx] &= 0x7fff;\n"
+ 		     : [idx] "+r"(idx));
++#endif
+ 	if (data->cnt == idx)
+ 		return 1;
+ 
+--- vendor/repos/tetragon/bpf/process/bpf_generic_tracepoint.c
++++ vendor/bpf/tetragon/bpf/process/bpf_generic_tracepoint.c
+@@ -203,40 +203,60 @@
+ 	msg->a0 = ({
+ 		unsigned long ctx_off = config->off[0];
+ 		int ty = config->arg[0];
+-		asm volatile("%[ctx_off] &= 0xffff;\n"
+-			     : [ctx_off] "+r"(ctx_off));
++#ifdef MICRO_NATIVE
++		ctx_off &= 0xffff;
++#else
++		asm volatile("%[ctx_off] &= 0xffff;\n"
++			     : [ctx_off] "+r"(ctx_off));
++#endif
+ 		get_ctx_ul((char *)ctx + ctx_off, ty);
+ 	});
+ 
+ 	msg->a1 = ({
+ 		unsigned long ctx_off = config->off[1];
+ 		int ty = config->arg[1];
+-		asm volatile("%[ctx_off] &= 0xffff;\n"
+-			     : [ctx_off] "+r"(ctx_off));
++#ifdef MICRO_NATIVE
++		ctx_off &= 0xffff;
++#else
++		asm volatile("%[ctx_off] &= 0xffff;\n"
++			     : [ctx_off] "+r"(ctx_off));
++#endif
+ 		get_ctx_ul((char *)ctx + ctx_off, ty);
+ 	});
+ 
+ 	msg->a2 = ({
+ 		unsigned long ctx_off = config->off[2];
+ 		int ty = config->arg[2];
+-		asm volatile("%[ctx_off] &= 0xffff;\n"
+-			     : [ctx_off] "+r"(ctx_off));
++#ifdef MICRO_NATIVE
++		ctx_off &= 0xffff;
++#else
++		asm volatile("%[ctx_off] &= 0xffff;\n"
++			     : [ctx_off] "+r"(ctx_off));
++#endif
+ 		get_ctx_ul((char *)ctx + ctx_off, ty);
+ 	});
+ 
+ 	msg->a3 = ({
+ 		unsigned long ctx_off = config->off[3];
+ 		int ty = config->arg[3];
+-		asm volatile("%[ctx_off] &= 0xffff;\n"
+-			     : [ctx_off] "+r"(ctx_off));
++#ifdef MICRO_NATIVE
++		ctx_off &= 0xffff;
++#else
++		asm volatile("%[ctx_off] &= 0xffff;\n"
++			     : [ctx_off] "+r"(ctx_off));
++#endif
+ 		get_ctx_ul((char *)ctx + ctx_off, ty);
+ 	});
+ 
+ 	msg->a4 = ({
+ 		unsigned long ctx_off = config->off[4];
+ 		int ty = config->arg[4];
+-		asm volatile("%[ctx_off] &= 0xffff;\n"
+-			     : [ctx_off] "+r"(ctx_off));
++#ifdef MICRO_NATIVE
++		ctx_off &= 0xffff;
++#else
++		asm volatile("%[ctx_off] &= 0xffff;\n"
++			     : [ctx_off] "+r"(ctx_off));
++#endif
+ 		get_ctx_ul((char *)ctx + ctx_off, ty);
+ 	});
+ 
+--- vendor/repos/tetragon/bpf/process/bpf_process_event.h
++++ vendor/bpf/tetragon/bpf/process/bpf_process_event.h
+@@ -70,10 +70,15 @@
+ 	if (!buffer)
+ 		return 0;
+ 
++#ifdef MICRO_NATIVE
++	offset &= 0x3ff;
++	size &= 0xfff;
++#else
+ 	asm volatile("%[offset] &= 0x3ff;\n"
+ 		     : [offset] "+r"(offset));
+ 	asm volatile("%[size] &= 0xfff;\n"
+ 		     : [size] "+r"(size));
++#endif
+ 	probe_read((char *)curr + offset, size, buffer);
+ 
+ 	// Unfortunate special case for '/' where nothing was added we need
+@@ -95,9 +100,22 @@
+ FUNC_INLINE void
+ __get_caps(struct msg_capabilities *msg, const struct cred *cred)
+ {
++#if defined(MICRO_NATIVE_TETRAGON) && !defined(MICRO_NATIVE_TETRAGON_PROBE_READS)
++	if (!cred) {
++		msg->effective = 0;
++		msg->inheritable = 0;
++		msg->permitted = 0;
++		return;
++	}
++
++	msg->effective = cred->cap_effective.val;
++	msg->inheritable = cred->cap_inheritable.val;
++	msg->permitted = cred->cap_permitted.val;
++#else
+ 	probe_read(&msg->effective, sizeof(__u64), _(&cred->cap_effective));
+ 	probe_read(&msg->inheritable, sizeof(__u64), _(&cred->cap_inheritable));
+ 	probe_read(&msg->permitted, sizeof(__u64), _(&cred->cap_permitted));
++#endif
+ }
+ 
+ /* @get_current_subj_caps:
+@@ -137,7 +155,11 @@
+ 	const struct cred *cred;
+ 
+ 	/* Get the task's subjective creds */
++#if defined(MICRO_NATIVE_TETRAGON) && !defined(MICRO_NATIVE_TETRAGON_PROBE_READS)
++	cred = task ? task->cred : 0;
++#else
+ 	probe_read(&cred, sizeof(cred), _(&task->cred));
++#endif
+ 	__get_caps(msg, cred);
+ }
+ 
+@@ -166,6 +188,52 @@
+ FUNC_INLINE void
+ get_namespaces(struct msg_ns *msg, struct task_struct *task)
+ {
++#if defined(MICRO_NATIVE_TETRAGON) && !defined(MICRO_NATIVE_TETRAGON_PROBE_READS)
++	struct nsproxy *nsp = task ? task->nsproxy : 0;
++	struct pid *p = task ? task->thread_pid : 0;
++	struct mm_struct *mm = task ? task->mm : 0;
++	struct user_namespace *user_ns = mm ? mm->user_ns : 0;
++
++	msg->uts_inum = 0;
++	msg->ipc_inum = 0;
++	msg->mnt_inum = 0;
++	msg->pid_inum = 0;
++	msg->pid_for_children_inum = 0;
++	msg->net_inum = 0;
++	msg->time_inum = 0;
++	msg->time_for_children_inum = 0;
++	msg->cgroup_inum = 0;
++	msg->user_inum = 0;
++
++	if (!nsp)
++		return;
++
++	if (nsp->uts_ns)
++		msg->uts_inum = nsp->uts_ns->ns.inum;
++	if (nsp->ipc_ns)
++		msg->ipc_inum = nsp->ipc_ns->ns.inum;
++	if (nsp->mnt_ns)
++		msg->mnt_inum = nsp->mnt_ns->ns.inum;
++	if (p) {
++		int level = p->level;
++
++		if (level >= 0 && p->numbers[level].ns)
++			msg->pid_inum = p->numbers[level].ns->ns.inum;
++	}
++	if (nsp->pid_ns_for_children)
++		msg->pid_for_children_inum = nsp->pid_ns_for_children->ns.inum;
++	if (nsp->net_ns)
++		msg->net_inum = nsp->net_ns->ns.inum;
++	if (nsp->time_ns)
++		msg->time_inum = nsp->time_ns->ns.inum;
++	if (nsp->time_ns_for_children)
++		msg->time_for_children_inum =
++			nsp->time_ns_for_children->ns.inum;
++	if (nsp->cgroup_ns)
++		msg->cgroup_inum = nsp->cgroup_ns->ns.inum;
++	if (user_ns)
++		msg->user_inum = user_ns->ns.inum;
++#else
+ 	struct nsproxy *nsproxy;
+ 	struct nsproxy nsp;
+ 
+@@ -266,6 +334,7 @@
+ 			msg->user_inum = 0;
+ 		}
+ 	}
++#endif
+ }
+ 
+ /* Gather current task cgroup name */
+@@ -358,17 +427,13 @@
+ 		return;
+ 	}
+ 
+-	asm volatile("%[len] &= %1;\n"
+-		     : [len] "+r"(len)
+-		     : "i"(BINARY_PATH_MAX_LEN - 1));
++	len &= BINARY_PATH_MAX_LEN - 1;
+ 	bin->path_length = with_errmetrics(probe_read, bin->path, len, exe->buf);
+ 	if (bin->path_length == 0)
+ 		bin->path_length = len;
+ 
+ 	revlen = len > STRING_POSTFIX_MAX_LENGTH - 1 ? STRING_POSTFIX_MAX_LENGTH - 1 : len;
+-	asm volatile("%[revlen] &= %1;\n"
+-		     : [revlen] "+r"(revlen)
+-		     : "i"(STRING_POSTFIX_MAX_LENGTH - 1));
++	revlen &= STRING_POSTFIX_MAX_LENGTH - 1;
+ 	with_errmetrics(probe_read, bin->end, revlen, exe->end);
+ }
+ 
+--- vendor/repos/tetragon/bpf/process/cel_expr.h
++++ vendor/bpf/tetragon/bpf/process/cel_expr.h
+@@ -8,7 +8,7 @@
+  * The code for the cel_expr_N functions will be generated and linked when the policy is loaded
+  */
+ 
+-#if defined(__LARGE_BPF_PROG) && (defined(GENERIC_KPROBE) || defined(GENERIC_UPROBE))
++#if defined(__LARGE_BPF_PROG) && (defined(GENERIC_KPROBE) || defined(GENERIC_UPROBE)) && !defined(MICRO_NATIVE)
+ int cel_expr_0(long *argsoff, char *args);
+ int cel_expr_1(long *argsoff, char *args);
+ int cel_expr_2(long *argsoff, char *args);
+--- vendor/repos/tetragon/bpf/process/data_event.h
++++ vendor/bpf/tetragon/bpf/process/data_event.h
+@@ -14,6 +14,10 @@
+ 	int err;
+ 
+ 	/* Code movement from clang forces us to inline bounds checks here */
++#ifdef MICRO_NATIVE
++	if (bytes > MSG_DATA_ARG_LEN)
++		bytes = MSG_DATA_ARG_LEN;
++#else
+ 	asm volatile goto(
+ 		"if %[bytes] < 0 goto %l[b]\n;"
+ 		"if %[bytes] < " XSTR(MSG_DATA_ARG_LEN) " goto %l[a]\n;"
+@@ -21,12 +25,17 @@
+ 		: [bytes] "+r"(bytes)::a, b);
+ 	bytes = MSG_DATA_ARG_LEN;
+ a:
++#endif
+ 	// < 5.3 verifier still requires value masking like 'val &= xxx'
+ #ifndef __LARGE_BPF_PROG
++#ifdef MICRO_NATIVE
++	bytes &= 0x3fff;
++#else
+ 	asm volatile("%[bytes] &= 0x3fff;\n"
+ 		     :
+ 		     : [bytes] "+r"(bytes)
+ 		     :);
++#endif
+ #endif
+ 	err = probe_read(&msg->arg[0], bytes, (char *)uptr);
+ 	if (err < 0)
+@@ -88,10 +97,16 @@
+ 	long ret;
+ 
+ 	/* Code movement from clang forces us to inline bounds checks here */
++#ifdef MICRO_NATIVE
++	max &= 0x7fff;
++	if (max >= 32736)
++		max = 32736;
++#else
+ 	asm volatile("%[max] &= 0x7fff;\n"
+ 		     "if %[max] < 32736 goto +1\n;"
+ 		     "%[max] = 32736;\n"
+ 		     : [max] "+r"(max));
++#endif
+ 
+ 	ret = probe_read_str(&msg->arg[0], max, (char *)arg);
+ 	if (ret < 0)
+@@ -105,8 +120,12 @@
+ 
+ 	size = ret + offsetof(struct msg_data, arg);
+ 	/* Code movement from clang forces us to inline bounds checks here */
++#ifdef MICRO_NATIVE
++	size &= 0x7fff;
++#else
+ 	asm volatile("%[size] &= 0x7fff;\n"
+ 		     : [size] "+r"(size));
++#endif
+ 	msg->common.size = size;
+ 	event_output_metric(ctx, MSG_OP_DATA, msg, size);
+ 	return ret;
+--- vendor/repos/tetragon/bpf/process/event_config.h
++++ vendor/bpf/tetragon/bpf/process/event_config.h
+@@ -94,9 +94,7 @@
+ 	if (!config)
+ 		return -1;
+ 
+-	asm volatile("%[index] &= %1 ;\n"
+-		     : [index] "+r"(index)
+-		     : "i"(MAX_POSSIBLE_ARGS_MASK));
++	index &= MAX_POSSIBLE_ARGS_MASK;
+ 	return config->idx[index];
+ }
+ 
+--- vendor/repos/tetragon/bpf/process/generic_arg.h
++++ vendor/bpf/tetragon/bpf/process/generic_arg.h
+@@ -33,9 +33,7 @@
+ {
+ 	struct config_btf_arg *btf_config;
+ 
+-	asm volatile("%[index] &= %1 ;\n"
+-		     : [index] "+r"(index)
+-		     : "i"(MAX_POSSIBLE_ARGS_MASK));
++	index &= MAX_POSSIBLE_ARGS_MASK;
+ 
+ 	if (index >= MAX_POSSIBLE_ARGS)
+ 		return;
+--- vendor/repos/tetragon/bpf/process/generic_calls.h
++++ vendor/bpf/tetragon/bpf/process/generic_calls.h
+@@ -106,8 +106,7 @@
+ 
+ 	/* Bound bytes <4095 to ensure bytes does not read past end of buffer */
+ 	rd_bytes = bytes < 0x1000 ? bytes : 0xfff;
+-	asm volatile("%[rd_bytes] &= 0xfff;\n"
+-		     : [rd_bytes] "+r"(rd_bytes));
++	rd_bytes &= 0xfff;
+ 	err = probe_read(&s[2], rd_bytes, (char *)arg);
+ 	if (err < 0)
+ 		return return_error(s, char_buf_pagefault);
+@@ -267,9 +266,7 @@
+ 			__u32 bytes = *((__u32 *)&val->file[0]);
+ 
+ 			probe_read(&args[0], sizeof(__u32), &fd);
+-			asm volatile("%[bytes] &= 0xfff;\n"
+-				     : [bytes] "+r"(bytes)
+-				     :);
++			bytes &= 0xfff;
+ 			probe_read(&args[4], bytes + 4, (char *)&val->file[0]);
+ 			size = bytes + 4 + 4;
+ 
+@@ -525,9 +522,7 @@
+ 	struct config_reg_arg *reg;
+ 	__u8 shift;
+ 
+-	asm volatile("%[index] &= %1 ;\n"
+-		     : [index] "+r"(index)
+-		     : "i"(EVENT_CONFIG_MAX_REG_ARG_MASK));
++	index &= EVENT_CONFIG_MAX_REG_ARG_MASK;
+ 	reg = &config->reg_arg[index];
+ 	shift = 64 - reg->size * 8;
+ 
+@@ -595,9 +590,7 @@
+ 	if (index >= MAX_POSSIBLE_ARGS)
+ 		return 0;
+ 
+-	asm volatile("%[index] &= %1 ;\n"
+-		     : [index] "+r"(index)
+-		     : "i"(MAX_POSSIBLE_ARGS_MASK));
++	index &= MAX_POSSIBLE_ARGS_MASK;
+ 
+ 	ty = config->arg[index];
+ 	am = config->arm[index];
+@@ -611,9 +604,7 @@
+ #endif
+ 
+ #if defined(GENERIC_TRACEPOINT) || defined(GENERIC_USDT)
+-	asm volatile("%[index] &= %1 ;\n"
+-		     : [index] "+r"(index)
+-		     : "i"(MAX_ACCESSIBLE_ARGS_MASK));
++	index &= MAX_ACCESSIBLE_ARGS_MASK;
+ 
+ 	a = (&e->a0)[index];
+ 	if (am & ARGM_PRELOAD)
+@@ -633,9 +624,7 @@
+ 	if (am & ARGM_PRELOAD) {
+ 		a = get_preload_arg(ctx, ty, &e->arg_status[index & MAX_POSSIBLE_ARGS_MASK]);
+ 	} else {
+-		asm volatile("%[index] &= %1 ;\n"
+-			     : [index] "+r"(index)
+-			     : "i"(MAX_POSSIBLE_ARGS_MASK));
++		index &= MAX_POSSIBLE_ARGS_MASK;
+ 		if (am & ARGM_PT_REGS) {
+ 			a = get_pt_regs_arg(ctx, config, index);
+ 		} else if (am & ARGM_CURRENT_TASK) {
+@@ -1145,15 +1134,11 @@
+ 	if (!f)
+ 		return 0;
+ 
+-	asm volatile("%[pass] &= 0x7ff;\n"
+-		     : [pass] "+r"(pass)
+-		     :);
++	pass &= 0x7ff;
+ 	arg = (struct selector_arg_filters *)&f[pass];
+ 
+ 	actoff = pass + arg->arglen;
+-	asm volatile("%[actoff] &= 0x7ff;\n"
+-		     : [actoff] "+r"(actoff)
+-		     :);
++	actoff &= 0x7ff;
+ 	actions = (struct selector_action *)&f[actoff];
+ 
+ 	postit = do_actions(ctx, actions);
+@@ -1203,10 +1188,9 @@
+ 
+ 	total = e->common.size + generic_kprobe_common_size();
+ 	/* Code movement from clang forces us to inline bounds checks here */
+-	asm volatile("%[total] &= 0x7fff;\n"
+-		     "if %[total] < 9000 goto +1\n;"
+-		     "%[total] = 9000;\n"
+-		     : [total] "+r"(total));
++	total &= 0x7fff;
++	if (total >= 9000)
++		total = 9000;
+ 	event_output_metric(ctx, op, e, total);
+ 	return 0;
+ }
+@@ -1275,8 +1259,12 @@
+ 	 * 0x1000 should be maximum argument length, so masking
+ 	 * with 0x1fff is safe and verifier will be happy.
+ 	 */
++#ifdef MICRO_NATIVE
++	size &= 0x1fff;
++#else
+ 	asm volatile("%[size] &= 0x1fff;\n"
+ 		     : [size] "+r"(size));
++#endif
+ 
+ 	switch (do_copy) {
+ 	case char_buf:
+@@ -1377,8 +1365,7 @@
+ 		/* Verify lost that msg is not null here so recheck */
+ 		int curr = sel->curr;
+ 
+-		asm volatile("%[curr] &= 0x1f;\n"
+-			     : [curr] "+r"(curr));
++		curr &= 0x1f;
+ 		sel->active[curr] = true;
+ 		sel->active[SELECTORS_ACTIVE] = true;
+ 		sel->pass |= true;
+--- vendor/repos/tetragon/bpf/process/generic_path.h
++++ vendor/bpf/tetragon/bpf/process/generic_path.h
+@@ -22,7 +22,11 @@
+ 
+ FUNC_INLINE char *get_buf(char *buffer, int off)
+ {
++#ifdef MICRO_NATIVE
++	off &= 0xfff;
++#else
+ 	asm volatile("%[off] &= 0xfff;\n" : [off] "+r"(off));
++#endif
+ 	return buffer + off;
+ }
+ 
+--- vendor/repos/tetragon/bpf/process/pfilter.h
++++ vendor/bpf/tetragon/bpf/process/pfilter.h
+@@ -136,8 +136,7 @@
+ 	else {
+ 		__u64 o = (__u64)off;
+ 		o = o / 4;
+-		asm volatile("%[o] &= 0x3ff;\n"
+-			     : [o] "+r"(o));
++		o &= 0x3ff;
+ 		sel = f[o];
+ 	}
+ 	return __process_filter_pid(sf->ty, sf->flags, sel, pid, enter);
+@@ -158,8 +157,7 @@
+ 	else {
+ 		__u64 o = (__u64)off;
+ 		o = o / 4;
+-		asm volatile("%[o] &= 0x3ff;\n"
+-			     : [o] "+r"(o));
++		o &= 0x3ff;
+ 		sel = f[o];
+ 	}
+ 
+@@ -287,8 +285,7 @@
+ 	// 5.4.278, the verifier complains than ty could be negative while in this
+ 	// context it's just the capability set type (effective, inheritable, or
+ 	// permitted), let's blindly remind the verifier it's a u32.
+-	asm volatile("%[ty] &= 0xffffffff;\n"
+-		     : [ty] "+r"(ty));
++	ty &= 0xffffffff;
+ 	ccaps = c->c[ty];
+ 
+ 	/* we have a change in the capabilities that we care */
+@@ -449,8 +446,7 @@
+ 	/* read the start offset of the corresponding selector */
+ 	/* selector section offset by reading the relative offset in the array */
+ 	i = index;
+-	asm volatile("%[i] &= 0x3ff;\n" // INDEX_MASK
+-		     : [i] "+r"(i));
++	i &= 0x3ff;
+ 	index += *(__u32 *)((__u64)f + i);
+ 	index &= INDEX_MASK;
+ 	index += 4; /* skip selector size field */
+--- vendor/repos/tetragon/bpf/process/regs.h
++++ vendor/bpf/tetragon/bpf/process/regs.h
+@@ -10,6 +10,14 @@
+ read_reg(struct pt_regs *ctx, __u32 src, __u8 shift)
+ {
+ 	/* Using inlined asm for same reason we use WRITE_REG above. */
++#ifdef MICRO_NATIVE
++#define READ_REG(reg) ({                                             \
++	__u64 val = *(__u64 *)((char *)ctx + offsetof(struct pt_regs, reg)); \
++	val <<= shift;                                               \
++	val >>= shift;                                               \
++	val;                                                         \
++})
++#else
+ #define READ_REG(reg) ({                                        \
+ 	__u64 val;                                              \
+ 	asm volatile("%[val] = *(u64 *)(%[ctx] + %[off])\n"     \
+@@ -20,6 +28,7 @@
+ 	val >>= shift;                                          \
+ 	val;                                                    \
+ })
++#endif
+ 
+ 	switch (src) {
+ 	case offsetof(struct pt_regs, r15):
+@@ -73,6 +82,20 @@
+ 	 * Using clang-20 seems to work, but we need to upgrade first ;-)
+ 	 */
+ 
++#ifdef MICRO_NATIVE
++#define WRITE_REG(reg) ({                                                  \
++	void *__p = (char *)ctx + offsetof(struct pt_regs, reg);            \
++	if (size == 8)                                                      \
++		*(__u64 *)__p = val;                                        \
++	else if (size == 4)                                                 \
++		*(__u32 *)__p = (__u32)val;                                 \
++	else if (size == 2)                                                 \
++		*(__u16 *)__p = (__u16)val;                                 \
++	else if (size == 1)                                                 \
++		*(__u8 *)__p = (__u8)val;                                   \
++	0;                                                                 \
++})
++#else
+ #define WRITE_REG(reg) ({                                                  \
+ 	asm volatile("if %[size] != 8 goto +2\n"                           \
+ 		     "*(u64 *)(%[ctx] + %[off]) = %[val]\n"                \
+@@ -90,6 +113,7 @@
+ 		     :);                                                   \
+ 	0;                                                                 \
+ })
++#endif
+ 
+ 	switch (dst) {
+ 	case offsetof(struct pt_regs, r15):
+--- vendor/repos/tetragon/bpf/process/types/basic.h
++++ vendor/bpf/tetragon/bpf/process/types/basic.h
+@@ -230,8 +230,12 @@
+ FUNC_INLINE char *
+ args_off(struct msg_generic_kprobe *e, unsigned long off)
+ {
++#ifdef MICRO_NATIVE
++	off &= 0x3fff;
++#else
+ 	asm volatile("%[off] &= 0x3fff;\n"
+ 		     : [off] "+r"(off));
++#endif
+ 	return e->args + (off & 0x3fff);
+ }
+ 
+@@ -242,6 +246,10 @@
+ FUNC_INLINE int
+ return_stack_error(char *args, int orig, int err)
+ {
++#ifdef MICRO_NATIVE
++	orig &= 0xfff;
++	*(int *)(args + orig) = err;
++#else
+ 	asm volatile("%[orig] &= 0xfff;\n"
+ 		     "r1 = *(u64 *)%[args];\n"
+ 		     "r1 += %[orig];\n"
+@@ -249,6 +257,7 @@
+ 		     : [orig] "+r"(orig), [args] "+m"(args), [err] "+r"(err)
+ 		     :
+ 		     : "r1");
++#endif
+ 	return sizeof(int);
+ }
+ 
+@@ -270,8 +279,12 @@
+ 		size = max;
+ 	if (size > 4094)
+ 		return char_buf_toolarge;
++#ifdef MICRO_NATIVE
++	size &= 0xfff;
++#else
+ 	asm volatile("%[size] &= 0xfff;\n"
+ 		     : [size] "+r"(size));
++#endif
+ 	err = probe_read(args_off(e, off), size, (char *)iov.iov_base);
+ 	if (err < 0)
+ 		return char_buf_pagefault;
+@@ -326,8 +339,7 @@
+ 	void *curr = &args[4];
+ 	umode_t i_mode;
+ 
+-	asm volatile("%[size] &= 0xfff;\n"
+-		     : [size] "+r"(size));
++	size &= 0xfff;
+ 	probe_read(curr, size, buffer);
+ 	*s = size;
+ 	size += 4;
+@@ -717,9 +729,7 @@
+ 	heap[0] = len;
+ #endif
+ 
+-	asm volatile("%[len] &= %1;\n"
+-		     : [len] "+r"(len)
+-		     : "i"(STRING_MAPS_HEAP_MASK));
++	len &= STRING_MAPS_HEAP_MASK;
+ #ifdef __LARGE_BPF_PROG
+ 	if (index <= 5)
+ 		probe_read(&heap[1], len, arg_str);
+@@ -731,9 +741,7 @@
+ 
+ 	// Pad string to multiple of key increment size
+ 	if (padded_len > len) {
+-		asm volatile("%[len] &= %1;\n"
+-			     : [len] "+r"(len)
+-			     : "i"(STRING_MAPS_HEAP_MASK));
++		len &= STRING_MAPS_HEAP_MASK;
+ #ifdef __LARGE_BPF_PROG
+ 		if (index <= 5)
+ 			probe_read(heap + len + 1, (padded_len - len) & STRING_MAPS_COPY_MASK, zero_heap);
+@@ -778,9 +786,7 @@
+ 	arg->prefixlen = arg_len * 8; // prefix is in bits
+ 
+ 	// Force the verifier to recheck the arg_len after register spilling on 4.19.
+-	asm volatile("%[arg_len] &= %[mask] ;\n"
+-		     : [arg_len] "+r"(arg_len)
+-		     : [mask] "i"(STRING_PREFIX_MAX_LENGTH - 1));
++	arg_len &= STRING_PREFIX_MAX_LENGTH - 1;
+ 
+ 	probe_read(arg->data, arg_len & (STRING_PREFIX_MAX_LENGTH - 1), arg_str);
+ 
+@@ -2073,11 +2079,9 @@
+ {
+ 	long argoff;
+ 
+-	asm volatile("%[index] &= %[mask];\n"
+-		     : [index] "+r"(index)
+-		     : [mask] "i"(MAX_POSSIBLE_ARGS_MASK));
++	index &= MAX_POSSIBLE_ARGS_MASK;
+ 	argoff = e->argsoff[index];
+-	asm volatile("%[argoff] &= 0x7ff;\n" : [argoff] "+r"(argoff));
++	argoff &= 0x7ff;
+ 	return &e->args[argoff];
+ }
+ 
+@@ -2254,8 +2258,7 @@
+ #endif
+ 	{
+ 		argsoff = filters->argoff[i];
+-		asm volatile("%[argsoff] &= 0x3ff;\n"
+-			     : [argsoff] "+r"(argsoff));
++		argsoff &= 0x3ff;
+ 
+ 		if (argsoff <= 0)
+ 			return seloff;
+@@ -2352,9 +2355,7 @@
+ 	/* Satisfies verifier but is a bit ugly, ideally we
+ 	 * can just '&' and drop the '>' case.
+ 	 */
+-	asm volatile("%[fd] &= %[mask];\n"
+-		     : [fd] "+r"(fd)
+-		     : [mask] "i"(MAX_POSSIBLE_ARGS_MASK));
++	fd &= MAX_POSSIBLE_ARGS_MASK;
+ 	if (fd >= MAX_POSSIBLE_ARGS)
+ 		return 0;
+ 
+@@ -2362,9 +2363,7 @@
+ 		return 0;
+ 
+ 	fdoff = e->argsoff[fd];
+-	asm volatile("%[fdoff] &= 0x7ff;\n"
+-		     : [fdoff] "+r"(fdoff)
+-		     :);
++	fdoff &= 0x7ff;
+ 	key.pad = 0;
+ 	key.fd = *(__u32 *)&e->args[fdoff];
+ 	key.tid = get_current_pid_tgid() >> 32;
+@@ -2372,9 +2371,7 @@
+ 	if (follow) {
+ 		__u32 size;
+ 
+-		asm volatile("%[name] &= %[mask];\n"
+-			     : [name] "+r"(name)
+-			     : [mask] "i"(MAX_POSSIBLE_ARGS_MASK));
++		name &= MAX_POSSIBLE_ARGS_MASK;
+ 		if (name >= MAX_POSSIBLE_ARGS)
+ 			return 0;
+ 
+@@ -2382,14 +2379,10 @@
+ 			return 0;
+ 
+ 		nameoff = e->argsoff[name];
+-		asm volatile("%[nameoff] &= 0x7ff;\n"
+-			     : [nameoff] "+r"(nameoff)
+-			     :);
++		nameoff &= 0x7ff;
+ 
+ 		size = *(__u32 *)&e->args[nameoff];
+-		asm volatile("%[size] &= 0xfff;\n"
+-			     : [size] "+r"(size)
+-			     :);
++		size &= 0xfff;
+ 
+ 		probe_read(&val->file[0], size + 4 /* size */ + 4 /* flags */,
+ 			   &e->args[nameoff]);
+@@ -2427,34 +2420,26 @@
+ 	int oldfdoff, newfdoff;
+ 	int err = 0;
+ 
+-	asm volatile("%[oldfd] &= %[mask];\n"
+-		     : [oldfd] "+r"(oldfd)
+-		     : [mask] "i"(MAX_POSSIBLE_ARGS_MASK));
++	oldfd &= MAX_POSSIBLE_ARGS_MASK;
+ 	if (oldfd >= MAX_POSSIBLE_ARGS)
+ 		return 0;
+ 	if (!is_arg_ok(e, oldfd))
+ 		return 0;
+ 	oldfdoff = e->argsoff[oldfd];
+-	asm volatile("%[oldfdoff] &= 0x7ff;\n"
+-		     : [oldfdoff] "+r"(oldfdoff)
+-		     :);
++	oldfdoff &= 0x7ff;
+ 	key.pad = 0;
+ 	key.fd = *(__u32 *)&e->args[oldfdoff];
+ 	key.tid = get_current_pid_tgid() >> 32;
+ 
+ 	val = map_lookup_elem(&fdinstall_map, &key);
+ 	if (val) {
+-		asm volatile("%[newfd] &= %[mask];\n"
+-			     : [newfd] "+r"(newfd)
+-			     : [mask] "i"(MAX_POSSIBLE_ARGS_MASK));
++		newfd &= MAX_POSSIBLE_ARGS_MASK;
+ 		if (newfd >= MAX_POSSIBLE_ARGS)
+ 			return 0;
+ 		if (!is_arg_ok(e, newfd))
+ 			return 0;
+ 		newfdoff = e->argsoff[newfd];
+-		asm volatile("%[newfdoff] &= 0x7ff;\n"
+-			     : [newfdoff] "+r"(newfdoff)
+-			     :);
++		newfdoff &= 0x7ff;
+ 		key.pad = 0;
+ 		key.fd = *(__u32 *)&e->args[newfdoff];
+ 		key.tid = get_current_pid_tgid() >> 32;
+@@ -2530,12 +2515,8 @@
+ 			key_index = (e->argsoff[i] - sizeof(arg_status_t)) & 16383;
+ 			if (arg_size > KEY_BYTES_PER_ARG)
+ 				arg_size = KEY_BYTES_PER_ARG;
+-			asm volatile("%[arg_size] &= 0x3f;\n" // ensure this mask is greater than KEY_BYTES_PER_ARG
+-				     : [arg_size] "+r"(arg_size)
+-				     :);
+-			asm volatile("%[index] &= 0xff;\n"
+-				     : [index] "+r"(index)
+-				     :);
++			arg_size &= 0x3f;
++			index &= 0xff;
+ 			probe_read(&dst[index], arg_size, &e->args[key_index]);
+ 			index += arg_size;
+ 		}
+@@ -2584,9 +2565,7 @@
+ 	/* Satisfies verifier but is a bit ugly, ideally we
+ 	 * can just '&' and drop the '>' case.
+ 	 */
+-	asm volatile("%[socki] &= %[mask];\n"
+-		     : [socki] "+r"(socki)
+-		     : [mask] "i"(MAX_POSSIBLE_ARGS_MASK));
++	socki &= MAX_POSSIBLE_ARGS_MASK;
+ 	if (socki >= MAX_POSSIBLE_ARGS)
+ 		return 0;
+ 
+@@ -2594,9 +2573,7 @@
+ 		return 0;
+ 
+ 	sockoff = e->argsoff[socki];
+-	asm volatile("%[sockoff] &= 0x7ff;\n"
+-		     : [sockoff] "+r"(sockoff)
+-		     :);
++	sockoff &= 0x7ff;
+ 	skt = (struct sk_type *)&e->args[sockoff];
+ 	sockaddr = skt->sockaddr;
+ 	if (!sockaddr)
+@@ -2720,6 +2697,13 @@
+ 
+ #define __STR(x) #x
+ 
++#ifdef MICRO_NATIVE
++#define set_if_not_errno_or_zero(x, y)         \
++	({                                     \
++		if ((long)(x) > 0 || (long)(x) < -4095) \
++			(x) = (y);                  \
++	})
++#else
+ #define set_if_not_errno_or_zero(x, y)                  \
+ 	({                                              \
+ 		asm volatile("if %0 s< -4095 goto +1\n" \
+@@ -2727,6 +2711,7 @@
+ 			     "%0 = " __STR(y) "\n"      \
+ 			     : "+r"(x));                \
+ 	})
++#endif
+ 
+ FUNC_INLINE int try_override(void *ctx, struct bpf_map_def *override_tasks)
+ {
+--- vendor/repos/tetragon/bpf/process/user_preload.h
++++ vendor/bpf/tetragon/bpf/process/user_preload.h
+@@ -61,9 +61,13 @@
+ 	__s32 ty;
+ 	arg_status_t status = 0;
+ 
++#ifdef MICRO_NATIVE
++	index &= EVENT_CONFIG_MAX_REG_ARG_MASK;
++#else
+ 	asm volatile("%[index] &= %1 ;\n"
+ 		     : [index] "+r"(index)
+ 		     : "i"(EVENT_CONFIG_MAX_REG_ARG_MASK));
++#endif
+ 
+ 	reg = &config->reg_arg[index];
+ 	shift = 64 - reg->size * 8;
+@@ -140,9 +144,13 @@
+ FUNC_LOCAL int
+ try_preload_arg(int idx, struct preload_arg_data *data)
+ {
++#ifdef MICRO_NATIVE
++	idx &= MAX_POSSIBLE_ARGS_MASK;
++#else
+ 	asm volatile("%[idx] &= %1 ;\n"
+ 		     : [idx] "+r"(idx)
+ 		     : "i"(MAX_POSSIBLE_ARGS_MASK));
++#endif
+ 
+ 	if (data->config->arm[idx] & ARGM_PRELOAD) {
+ 		if (data->config->arm[idx] & ARGM_PT_REGS)
+--- vendor/repos/tracee/pkg/ebpf/c/common/buffer.h
++++ vendor/bpf/tracee/pkg/ebpf/c/common/buffer.h
+@@ -96,11 +96,16 @@
+     // Save argument index (add 1 to offset later)
+     buf->args[buf->offset] = index;
+ 
++#ifdef MICRO_NATIVE
++    if (size > MAX_ELEMENT_SIZE)
++        size = MAX_ELEMENT_SIZE;
++#else
+     // Force verifier to compare size register with a bound maximum
+     asm volatile("if %[size] < %[max_size] goto +1;\n"
+                  "%[size] = %[max_size];\n"
+                  :
+                  : [size] "r"(size), [max_size] "i"(MAX_ELEMENT_SIZE));
++#endif
+ 
+     u32 buffer_arg_offset = buffer_index_offset + size; // buffer offset after writing the ptr
+ 
+@@ -718,11 +723,16 @@
+     // context + argnum + arg buffer size
+     u32 size = sizeof(event_context_t) + sizeof(u8) + p->event->args_buf.offset;
+ 
++#ifdef MICRO_NATIVE
++    if (size > MAX_EVENT_SIZE)
++        size = MAX_EVENT_SIZE;
++#else
+     // inline bounds check to force compiler to use the register of size
+     asm volatile("if %[size] < %[max_size] goto +1;\n"
+                  "%[size] = %[max_size];\n"
+                  :
+                  : [size] "r"(size), [max_size] "i"(MAX_EVENT_SIZE));
++#endif
+ 
+     long perf_ret = bpf_perf_event_output(p->ctx, &events, BPF_F_CURRENT_CPU, p->event, size);
+ 
+@@ -736,11 +746,16 @@
+     // signal id + argnum + arg buffer size
+     u32 size = sizeof(u32) + sizeof(u8) + sig->args_buf.offset;
+ 
++#ifdef MICRO_NATIVE
++    if (size > MAX_SIGNAL_SIZE)
++        size = MAX_SIGNAL_SIZE;
++#else
+     // inline bounds check to force compiler to use the register of size
+     asm volatile("if %[size] < %[max_size] goto +1;\n"
+                  "%[size] = %[max_size];\n"
+                  :
+                  : [size] "r"(size), [max_size] "i"(MAX_SIGNAL_SIZE));
++#endif
+ 
+     long perf_ret = bpf_perf_event_output(ctx, &signals, BPF_F_CURRENT_CPU, sig, size);
+ 
+--- vendor/repos/tracee/pkg/ebpf/c/common/common.h
++++ vendor/bpf/tracee/pkg/ebpf/c/common/common.h
+@@ -69,6 +69,13 @@
+     // update_min sets __value as __max_value if __value is greater than __max_value.
+     // It forces the check to be done via a register, which is sometimes necessary
+     // to satisfy the eBPF verifier.
++#ifdef MICRO_NATIVE
++    #define update_min(__value, __max_value)                                                       \
++        ({                                                                                         \
++            if ((__value) > (__max_value))                                                         \
++                (__value) = (__max_value);                                                         \
++        })
++#else
+     #define update_min(__value, __max_value)                                                       \
+         ({                                                                                         \
+             asm volatile("if %[size] <= %[max_size] goto +1;\n"                                    \
+@@ -76,6 +83,7 @@
+                          : [size] "+r"(__value)                                                    \
+                          : [max_size] "r"(__max_value));                                           \
+         })
++#endif
+ #endif
+ 
+ #ifndef min
+--- vendor/repos/tracee/pkg/ebpf/c/common/filesystem.h
++++ vendor/bpf/tracee/pkg/ebpf/c/common/filesystem.h
+@@ -508,21 +508,31 @@
+ {
+     u32 len = (u32) io_data.len;
+     if (io_data.is_buf) {
++#ifdef MICRO_NATIVE
++        if (len > FILE_MAGIC_HDR_SIZE)
++            len = FILE_MAGIC_HDR_SIZE;
++#else
+         // inline bounds check to force compiler to use the register of len
+         asm volatile("if %[size] < %[max_size] goto +1;\n"
+                      "%[size] = %[max_size];\n"
+                      :
+                      : [size] "r"(len), [max_size] "i"(FILE_MAGIC_HDR_SIZE));
++#endif
+         bpf_probe_read(header, len, io_data.ptr);
+     } else {
+         struct iovec io_vec;
+         __builtin_memset(&io_vec, 0, sizeof(io_vec));
+         bpf_probe_read(&io_vec, sizeof(struct iovec), io_data.ptr);
++#ifdef MICRO_NATIVE
++        if (len > FILE_MAGIC_HDR_SIZE)
++            len = FILE_MAGIC_HDR_SIZE;
++#else
+         // inline bounds check to force compiler to use the register of len
+         asm volatile("if %[size] < %[max_size] goto +1;\n"
+                      "%[size] = %[max_size];\n"
+                      :
+                      : [size] "r"(len), [max_size] "i"(FILE_MAGIC_HDR_SIZE));
++#endif
+         bpf_probe_read(header, len, io_vec.iov_base);
+     }
+ }
+--- vendor/repos/katran/katran/lib/bpf/healthchecking.c
++++ vendor/bpf/katran/katran/lib/bpf/healthchecking.c
+@@ -53,12 +53,12 @@
+     return TC_ACT_UNSPEC;
+   }
+ 
+-  if ((skb->data + sizeof(struct ethhdr)) > skb->data_end) {
++  if (katran_skb_data(skb) + sizeof(struct ethhdr) > katran_skb_data_end(skb)) {
+     prog_stats->pckts_dropped += 1;
+     return TC_ACT_SHOT;
+   }
+ 
+-  ethh = (void*)(long)skb->data;
++  ethh = katran_skb_data(skb);
+   if (ethh->h_proto == BE_ETH_P_IPV6) {
+     is_ipv6 = true;
+   }
+@@ -133,13 +133,13 @@
+     return TC_ACT_SHOT;
+   }
+ 
+-  if (skb->data + sizeof(struct ethhdr) > skb->data_end) {
++  if (katran_skb_data(skb) + sizeof(struct ethhdr) > katran_skb_data_end(skb)) {
+     prog_stats->pckts_dropped += 1;
+     return TC_ACT_SHOT;
+   }
+ 
+ #if HC_WITH_REDIRECT
+-  ethh = (void*)(long)skb->data;
++  ethh = katran_skb_data(skb);
+   memcpy(ethh->h_source, esrc->mac, 6);
+   memcpy(ethh->h_dest, edst->mac, 6);
+ #endif /* HC_WITH_REDIRECT */
+--- vendor/repos/katran/katran/lib/bpf/healthchecking_helpers.h
++++ vendor/bpf/katran/katran/lib/bpf/healthchecking_helpers.h
+@@ -36,12 +36,13 @@
+ 
+ __attribute__((__always_inline__)) static inline bool
+ set_hc_key(const struct __sk_buff* skb, struct hc_key* hckey, bool is_ipv6) {
+-  void* iphdr = (void*)(long)skb->data + sizeof(struct ethhdr);
++  void* data_end = katran_skb_data_end(skb);
++  void* iphdr = katran_skb_data(skb) + sizeof(struct ethhdr);
+   void* transport_hdr;
+ 
+   if (is_ipv6) {
+     struct ipv6hdr* ip6h = iphdr;
+-    if (ip6h + 1 > (void*)(long)skb->data_end) {
++    if (ip6h + 1 > data_end) {
+       return false;
+     }
+     transport_hdr = iphdr + sizeof(struct ipv6hdr);
+@@ -49,7 +50,7 @@
+     hckey->proto = ip6h->nexthdr;
+   } else {
+     struct iphdr* iph = iphdr;
+-    if (iph + 1 > (void*)(long)skb->data_end) {
++    if (iph + 1 > data_end) {
+       return false;
+     }
+     transport_hdr = iphdr + sizeof(struct iphdr);
+@@ -59,13 +60,13 @@
+ 
+   if (hckey->proto == IPPROTO_TCP) {
+     struct tcphdr* tcp = transport_hdr;
+-    if (tcp + 1 > (void*)(long)skb->data_end) {
++    if (tcp + 1 > data_end) {
+       return false;
+     }
+     hckey->port = tcp->dest;
+   } else if (hckey->proto == IPPROTO_UDP) {
+     struct udphdr* udp = transport_hdr;
+-    if (udp + 1 > (void*)(long)skb->data_end) {
++    if (udp + 1 > data_end) {
+       return false;
+     }
+     hckey->port = udp->dest;
+@@ -81,13 +82,14 @@
+     const struct __sk_buff* skb,
+     struct hc_dst_key* key,
+     bool is_ipv6) {
+-  void* iphdr = (void*)(long)skb->data + sizeof(struct ethhdr);
++  void* data_end = katran_skb_data_end(skb);
++  void* iphdr = katran_skb_data(skb) + sizeof(struct ethhdr);
+   void* transport_hdr;
+   __u8 proto;
+ 
+   if (is_ipv6) {
+     struct ipv6hdr* ip6h = iphdr;
+-    if (ip6h + 1 > (void*)(long)skb->data_end) {
++    if (ip6h + 1 > data_end) {
+       return false;
+     }
+     transport_hdr = iphdr + sizeof(struct ipv6hdr);
+@@ -96,7 +98,7 @@
+     proto = ip6h->nexthdr;
+   } else {
+     struct iphdr* iph = iphdr;
+-    if (iph + 1 > (void*)(long)skb->data_end) {
++    if (iph + 1 > data_end) {
+       return false;
+     }
+     transport_hdr = iphdr + sizeof(struct iphdr);
+@@ -107,13 +109,13 @@
+ 
+   if (proto == IPPROTO_TCP) {
+     struct tcphdr* tcp = transport_hdr;
+-    if (tcp + 1 > (void*)(long)skb->data_end) {
++    if (tcp + 1 > data_end) {
+       return false;
+     }
+     key->port = tcp->dest;
+   } else if (proto == IPPROTO_UDP) {
+     struct udphdr* udp = transport_hdr;
+-    if (udp + 1 > (void*)(long)skb->data_end) {
++    if (udp + 1 > data_end) {
+       return false;
+     }
+     key->port = udp->dest;
+@@ -152,14 +154,14 @@
+     if (bpf_skb_adjust_room(skb, adjust_len, BPF_ADJ_ROOM_MAC, flags)) {
+       return false;
+     }
+-    if ((skb->data + sizeof(struct ethhdr) + sizeof(struct ipv6hdr)) >
+-        skb->data_end) {
+-      return false;
+-    }
+-    ethh = (void*)(long)skb->data;
++    if (katran_skb_data(skb) + sizeof(struct ethhdr) + sizeof(struct ipv6hdr) >
++        katran_skb_data_end(skb)) {
++      return false;
++    }
++    ethh = katran_skb_data(skb);
+     ethh->h_proto = BE_ETH_P_IPV6;
+ 
+-    struct ipv6hdr* ip6h = (void*)(long)skb->data + sizeof(struct ethhdr);
++    struct ipv6hdr* ip6h = katran_skb_data(skb) + sizeof(struct ethhdr);
+     if (!is_ipv6) {
+       proto = IPPROTO_IPIP;
+     }
+@@ -182,11 +184,11 @@
+     if (bpf_skb_adjust_room(skb, adjust_len, BPF_ADJ_ROOM_MAC, flags)) {
+       return false;
+     }
+-    if ((skb->data + sizeof(struct ethhdr) + sizeof(struct iphdr)) >
+-        skb->data_end) {
+-      return false;
+-    }
+-    struct iphdr* iph = (void*)(long)skb->data + sizeof(struct ethhdr);
++    if (katran_skb_data(skb) + sizeof(struct ethhdr) + sizeof(struct iphdr) >
++        katran_skb_data_end(skb)) {
++      return false;
++    }
++    struct iphdr* iph = katran_skb_data(skb) + sizeof(struct ethhdr);
+ #ifdef MANGLE_HC_SRC
+     __u32 ip_src = create_encap_ipv4_src(MANGLED_HC_SRC_PORT, src->daddr);
+ #else
+@@ -233,14 +235,15 @@
+     if (bpf_skb_adjust_room(skb, adjust_len, BPF_ADJ_ROOM_MAC, flags)) {
+       return false;
+     }
+-    if ((skb->data + sizeof(struct ethhdr) + sizeof(struct ipv6hdr) +
+-         sizeof(struct udphdr)) > skb->data_end) {
+-      return false;
+-    }
+-    ethh = (void*)(long)skb->data;
++    if (katran_skb_data(skb) + sizeof(struct ethhdr) + sizeof(struct ipv6hdr) +
++            sizeof(struct udphdr) >
++        katran_skb_data_end(skb)) {
++      return false;
++    }
++    ethh = katran_skb_data(skb);
+     ethh->h_proto = BE_ETH_P_IPV6;
+ 
+-    struct ipv6hdr* ip6h = (void*)(long)skb->data + sizeof(struct ethhdr);
++    struct ipv6hdr* ip6h = katran_skb_data(skb) + sizeof(struct ethhdr);
+     struct udphdr* udph = (void*)ip6h + sizeof(struct ipv6hdr);
+     pkt_len += sizeof(struct udphdr);
+     create_udp_hdr(udph, sport, GUE_DPORT, pkt_len, GUE_CSUM);
+@@ -260,11 +263,12 @@
+     if (bpf_skb_adjust_room(skb, adjust_len, BPF_ADJ_ROOM_MAC, flags)) {
+       return false;
+     }
+-    if ((skb->data + sizeof(struct ethhdr) + sizeof(struct iphdr) +
+-         sizeof(struct udphdr)) > skb->data_end) {
+-      return false;
+-    }
+-    struct iphdr* iph = (void*)(long)skb->data + sizeof(struct ethhdr);
++    if (katran_skb_data(skb) + sizeof(struct ethhdr) + sizeof(struct iphdr) +
++            sizeof(struct udphdr) >
++        katran_skb_data_end(skb)) {
++      return false;
++    }
++    struct iphdr* iph = katran_skb_data(skb) + sizeof(struct ethhdr);
+     struct udphdr* udph = (void*)iph + sizeof(struct iphdr);
+     pkt_len += sizeof(struct udphdr);
+     create_udp_hdr(udph, sport, GUE_DPORT, pkt_len, GUE_CSUM);
+--- vendor/repos/katran/katran/lib/linux_includes/bpf.h
++++ vendor/bpf/katran/katran/lib/linux_includes/bpf.h
+@@ -2928,6 +2928,77 @@
+     __u64 : 64;                  \
+   } __attribute__((aligned(8)))
+ 
++#ifdef MICRO_NATIVE
++/*
++ * Native-lab TC programs receive the kernel's real struct sk_buff *, not the
++ * UAPI mirror below. Model the real offsets for the fields Katran reads
++ * directly.
++ */
++struct __sk_buff {
++  void* next;
++  void* prev;
++  void* dev;
++  void* sk;
++  __u64 tstamp;
++  __u32 cb[12];
++  __u8 __native_pad88[24];
++  __u32 len;
++  __u32 data_len;
++  __u16 mac_len;
++  __u16 hdr_len;
++  __u16 queue_mapping;
++  __u8 __native_pad126[8];
++  __u16 tc_index;
++  __u16 alloc_cpu;
++  __u16 __native_pad138;
++  union {
++    __u32 csum;
++    struct {
++      __u16 csum_start;
++      __u16 csum_offset;
++    };
++  };
++  __u32 priority;
++  __s32 ingress_ifindex;
++  __u32 hash;
++  union {
++    __u32 vlan_all;
++    struct {
++      __be16 vlan_proto;
++      __u16 vlan_tci;
++    };
++  };
++  __u32 napi_id;
++  __u32 secmark;
++  __u32 mark;
++  union {
++    __be16 inner_protocol;
++    __u8 inner_ipproto;
++  };
++  __u16 inner_transport_header;
++  __u16 inner_network_header;
++  __u16 inner_mac_header;
++  __be16 protocol;
++  __u16 transport_header;
++  __u16 network_header;
++  __u16 mac_header;
++  __u32 tail;
++  __u32 end;
++  __u32 __native_pad196;
++  unsigned char* head;
++  unsigned char* data;
++  __u32 truesize;
++};
++#define __native_skb_off(member) __builtin_offsetof(struct __sk_buff, member)
++_Static_assert(__native_skb_off(len) == 112, "native __sk_buff len offset");
++_Static_assert(__native_skb_off(mark) == 168, "native __sk_buff mark offset");
++_Static_assert(
++    __native_skb_off(protocol) == 180,
++    "native __sk_buff protocol offset");
++_Static_assert(__native_skb_off(head) == 200, "native __sk_buff head offset");
++_Static_assert(__native_skb_off(data) == 208, "native __sk_buff data offset");
++#undef __native_skb_off
++#else
+ /* user accessible mirror of in-kernel sk_buff.
+  * new fields can only be added to the end of this structure
+  */
+@@ -2968,6 +3039,25 @@
+   __u32 gso_segs;
+   __bpf_md_ptr(struct bpf_sock*, sk);
+ };
++#endif /* MICRO_NATIVE */
++
++#ifdef MICRO_NATIVE
++static inline void* katran_skb_data(const struct __sk_buff* skb) {
++  return skb->data;
++}
++
++static inline void* katran_skb_data_end(const struct __sk_buff* skb) {
++  return skb->head + skb->tail;
++}
++#else
++static inline void* katran_skb_data(const struct __sk_buff* skb) {
++  return (void*)(long)skb->data;
++}
++
++static inline void* katran_skb_data_end(const struct __sk_buff* skb) {
++  return (void*)(long)skb->data_end;
++}
++#endif
+ 
+ struct bpf_tunnel_key {
+   __u32 tunnel_id;
+@@ -3117,6 +3207,42 @@
+   XDP_REDIRECT,
+ };
+ 
++#ifdef MICRO_NATIVE
++/*
++ * Native-lab XDP programs receive the kernel's real struct xdp_buff *, not the
++ * UAPI xdp_md mirror. Keep the field names Katran source uses, but give them
++ * the real kernel pointer layout.
++ */
++struct xdp_md {
++  void* data;
++  void* data_end;
++  void* data_meta;
++  void* data_hard_start;
++  void* rxq;
++  void* txq;
++  union {
++    struct {
++      __u32 frame_sz;
++      __u32 flags;
++    };
++    __u64 frame_sz_flags_init;
++  };
++};
++#define __native_xdp_off(member) __builtin_offsetof(struct xdp_md, member)
++_Static_assert(__native_xdp_off(data) == 0, "native xdp_md data offset");
++_Static_assert(__native_xdp_off(data_end) == 8, "native xdp_md data_end offset");
++_Static_assert(
++    __native_xdp_off(data_meta) == 16,
++    "native xdp_md data_meta offset");
++_Static_assert(
++    __native_xdp_off(data_hard_start) == 24,
++    "native xdp_md data_hard_start offset");
++_Static_assert(__native_xdp_off(rxq) == 32, "native xdp_md rxq offset");
++_Static_assert(__native_xdp_off(txq) == 40, "native xdp_md txq offset");
++_Static_assert(__native_xdp_off(frame_sz) == 48, "native xdp_md frame_sz offset");
++_Static_assert(__native_xdp_off(flags) == 52, "native xdp_md flags offset");
++#undef __native_xdp_off
++#else
+ /* user accessible metadata for XDP packet hook
+  * new fields must be added to the end of this structure
+  */
+@@ -3128,6 +3254,7 @@
+   __u32 ingress_ifindex; /* rxq->dev->ifindex */
+   __u32 rx_queue_index; /* rxq->queue_index  */
+ };
++#endif /* MICRO_NATIVE */
+ 
+ enum sk_action {
+   SK_DROP = 0,

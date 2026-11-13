@@ -1,0 +1,123 @@
+clang-18 -O2 -Wno-unknown-attributes rc= 0
+In file included from <stdin>:6:
+In file included from ./vendor/bpf/tetragon/bpf/include/vmlinux.h:9:
+./vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h:33936:2: warning: declaration does not declare anything [-Wmissing-declarations]
+ 33936 |         struct aes_enckey;
+       |         ^
+./vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h:48425:3: warning: declaration does not declare anything [-Wmissing-declarations]
+ 48425 |                 struct ns_tree;
+       |                 ^
+./vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h:64466:2: warning: declaration does not declare anything [-Wmissing-declarations]
+ 64466 |         struct __filename_head;
+       |         ^
+./vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h:93550:2: warning: declaration does not declare anything [-Wmissing-declarations]
+ 93550 |         struct renamedata;
+       |         ^
+./vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h:97027:2: warning: declaration does not declare anything [-Wmissing-declarations]
+ 97027 |         union pipe_index;
+       |         ^
+./vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h:106672:4: warning: declaration does not declare anything [-Wmissing-declarations]
+ 106672 |                         struct freelist_counters;
+        |                         ^
+6 warnings generated.
+
+/workspaces/repository/kprog/results/source-diff-20261113/evidence/substring rc= 0
+exact_suffix=-1 expected=0
+exact_suffix_case=-1 expected=0
+empty_at_len0=-1 expected=0
+notfound=-1 expected=-2
+long_needle=-1 expected=0
+past_nul=2 expected=-2
+
+clang-18 -O2 -Wno-unknown-attributes rc= 0
+In file included from <stdin>:5:
+./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:33936:2: warning: declaration does not declare anything [-Wmissing-declarations]
+ 33936 |         struct aes_enckey;
+       |         ^
+./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:48425:3: warning: declaration does not declare anything [-Wmissing-declarations]
+ 48425 |                 struct ns_tree;
+       |                 ^
+./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:64466:2: warning: declaration does not declare anything [-Wmissing-declarations]
+ 64466 |         struct __filename_head;
+       |         ^
+./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:93550:2: warning: declaration does not declare anything [-Wmissing-declarations]
+ 93550 |         struct renamedata;
+       |         ^
+./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:97027:2: warning: declaration does not declare anything [-Wmissing-declarations]
+ 97027 |         union pipe_index;
+       |         ^
+./vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h:106672:4: warning: declaration does not declare anything [-Wmissing-declarations]
+ 106672 |                         struct freelist_counters;
+        |                         ^
+6 warnings generated.
+
+/workspaces/repository/kprog/results/source-diff-20261113/evidence/syscall-regs rc= 0
+syscall_arg4=111 expected=222
+wrapper_unwrapped=0 expected=1
+
+clang-18 -O2 -Wno-unknown-attributes rc= 0
+
+/workspaces/repository/kprog/results/source-diff-20261113/evidence/cel rc= 0
+native_cel=0 (always zero)
+
+clang-18 -O2 -Wno-unknown-attributes rc= 0
+
+llvm-objdump-18 -dr kprog/results/source-diff-20261113/evidence/helper-args rc= 0
+
+kprog/results/source-diff-20261113/evidence/helper-args:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000000000000 <test>:
+       0: 41 56                        	pushq	%r14
+       2: 53                           	pushq	%rbx
+       3: 50                           	pushq	%rax
+       4: 48 89 fb                     	movq	%rdi, %rbx
+       7: e8 00 00 00 00               	callq	0xc <test+0xc>
+		0000000000000008:  R_X86_64_PLT32	next_key-0x4
+       c: b9 01 00 00 00               	movl	$0x1, %ecx
+      11: 49 89 ce                     	movq	%rcx, %r14
+      14: e8 00 00 00 00               	callq	0x19 <test+0x19>
+		0000000000000015:  R_X86_64_PLT32	next_key-0x4
+      19: 48 89 df                     	movq	%rbx, %rdi
+      1c: 48 89 c6                     	movq	%rax, %rsi
+      1f: 4c 89 f0                     	movq	%r14, %rax
+      22: 48 83 c4 08                  	addq	$0x8, %rsp
+      26: 5b                           	popq	%rbx
+      27: 41 5e                        	popq	%r14
+      29: ff e0                        	jmpq	*%rax
+
+pahole -C qdisc_skb_cb rc= 0
+struct qdisc_skb_cb {
+	unsigned int               pkt_len;              /*     0     4 */
+	u16                        pkt_segs;             /*     4     2 */
+	u16                        tc_classid;           /*     6     2 */
+	unsigned char              data[20];             /*     8    20 */
+	u16                        slave_dev_queue_mapping; /*    28     2 */
+	u8                         post_ct:1;            /*    30: 0  1 */
+	u8                         post_ct_snat:1;       /*    30: 1  1 */
+	u8                         post_ct_dnat:1;       /*    30: 2  1 */
+
+	/* size: 32, cachelines: 1, members: 8 */
+	/* padding: 1 */
+	/* bit_padding: 5 bits */
+	/* last cacheline: 32 bytes */
+};
+
+
+pahole -C bpf_skb_data_end rc= 0
+struct bpf_skb_data_end {
+	struct qdisc_skb_cb        qdisc_cb;             /*     0    32 */
+
+	/* XXX last struct has 1 byte of padding */
+
+	void *                     data_meta;            /*    32     8 */
+	void *                     data_end;             /*    40     8 */
+
+	/* size: 48, cachelines: 1, members: 3 */
+	/* paddings: 1, sum paddings: 1 */
+	/* last cacheline: 48 bytes */
+};
+
+
+dependency commands: 103 failures: 0

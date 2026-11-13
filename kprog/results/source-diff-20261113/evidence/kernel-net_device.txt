@@ -1,0 +1,286 @@
+struct net_device {
+	__u8                       __cacheline_group_begin__net_device_read_tx[0]; /*     0     0 */
+	union {
+		struct {
+			long unsigned int priv_flags:32; /*     0: 0  8 */
+			long unsigned int lltx:1;        /*     0:32  8 */
+			long unsigned int netmem_tx:1;   /*     0:33  8 */
+		};                                       /*     0     8 */
+		struct {
+			long unsigned int priv_flags:32; /*     0: 0  8 */
+			long unsigned int lltx:1;        /*     0:32  8 */
+			long unsigned int netmem_tx:1;   /*     0:33  8 */
+		} priv_flags_fast;                       /*     0     8 */
+	};                                               /*     0     8 */
+	const struct net_device_ops  * netdev_ops;       /*     8     8 */
+	const struct header_ops  * header_ops;           /*    16     8 */
+	struct netdev_queue *      _tx;                  /*    24     8 */
+	netdev_features_t          gso_partial_features; /*    32     8 */
+	unsigned int               real_num_tx_queues;   /*    40     4 */
+	unsigned int               gso_max_size;         /*    44     4 */
+	unsigned int               gso_ipv4_max_size;    /*    48     4 */
+	u16                        gso_max_segs;         /*    52     2 */
+	s16                        num_tc;               /*    54     2 */
+	unsigned int               mtu;                  /*    56     4 */
+	short unsigned int         needed_headroom;      /*    60     2 */
+	struct netdev_tc_txq       tc_to_txq[16];        /*    62    64 */
+
+	/* XXX 2 bytes hole, try to pack */
+
+	/* --- cacheline 2 boundary (128 bytes) --- */
+	struct xps_dev_maps *      xps_maps[2];          /*   128    16 */
+	struct nf_hook_entries *   nf_hooks_egress;      /*   144     8 */
+	struct bpf_mprog_entry *   tcx_egress;           /*   152     8 */
+	__u8                       __cacheline_group_end__net_device_read_tx[0]; /*   160     0 */
+	__u8                       __cacheline_group_begin__net_device_read_txrx[0]; /*   160     0 */
+	union {
+		struct pcpu_lstats * lstats;             /*   160     8 */
+		struct pcpu_sw_netstats * tstats;        /*   160     8 */
+		struct pcpu_dstats * dstats;             /*   160     8 */
+	};                                               /*   160     8 */
+	long unsigned int          state;                /*   168     8 */
+	unsigned int               flags;                /*   176     4 */
+	short unsigned int         hard_header_len;      /*   180     2 */
+
+	/* XXX 2 bytes hole, try to pack */
+
+	netdev_features_t          features;             /*   184     8 */
+	/* --- cacheline 3 boundary (192 bytes) --- */
+	struct inet6_dev *         ip6_ptr;              /*   192     8 */
+	__u8                       __cacheline_group_end__net_device_read_txrx[0]; /*   200     0 */
+	__u8                       __cacheline_group_begin__net_device_read_rx[0]; /*   200     0 */
+	struct bpf_prog *          xdp_prog;             /*   200     8 */
+	struct list_head           ptype_specific;       /*   208    16 */
+	int                        ifindex;              /*   224     4 */
+	unsigned int               real_num_rx_queues;   /*   228     4 */
+	struct netdev_rx_queue *   _rx;                  /*   232     8 */
+	unsigned int               gro_max_size;         /*   240     4 */
+	unsigned int               gro_ipv4_max_size;    /*   244     4 */
+	rx_handler_func_t *        rx_handler;           /*   248     8 */
+	/* --- cacheline 4 boundary (256 bytes) --- */
+	void *                     rx_handler_data;      /*   256     8 */
+	possible_net_t             nd_net;               /*   264     8 */
+	struct bpf_mprog_entry *   tcx_ingress;          /*   272     8 */
+	__u8                       __cacheline_group_end__net_device_read_rx[0]; /*   280     0 */
+	char                       name[16];             /*   280    16 */
+	struct netdev_name_node *  name_node;            /*   296     8 */
+	struct dev_ifalias *       ifalias;              /*   304     8 */
+	long unsigned int          mem_end;              /*   312     8 */
+	/* --- cacheline 5 boundary (320 bytes) --- */
+	long unsigned int          mem_start;            /*   320     8 */
+	long unsigned int          base_addr;            /*   328     8 */
+	struct list_head           dev_list;             /*   336    16 */
+	struct list_head           napi_list;            /*   352    16 */
+	struct list_head           unreg_list;           /*   368    16 */
+	/* --- cacheline 6 boundary (384 bytes) --- */
+	struct list_head           close_list;           /*   384    16 */
+	struct list_head           ptype_all;            /*   400    16 */
+	struct {
+		struct list_head   upper;                /*   416    16 */
+		struct list_head   lower;                /*   432    16 */
+	} adj_list;                                      /*   416    32 */
+	/* --- cacheline 7 boundary (448 bytes) --- */
+	xdp_features_t             xdp_features;         /*   448     4 */
+
+	/* XXX 4 bytes hole, try to pack */
+
+	const struct xdp_metadata_ops  * xdp_metadata_ops; /*   456     8 */
+	const struct xsk_tx_metadata_ops  * xsk_tx_metadata_ops; /*   464     8 */
+	short unsigned int         gflags;               /*   472     2 */
+	short unsigned int         needed_tailroom;      /*   474     2 */
+
+	/* XXX 4 bytes hole, try to pack */
+
+	netdev_features_t          hw_features;          /*   480     8 */
+	netdev_features_t          wanted_features;      /*   488     8 */
+	netdev_features_t          vlan_features;        /*   496     8 */
+	netdev_features_t          hw_enc_features;      /*   504     8 */
+	/* --- cacheline 8 boundary (512 bytes) --- */
+	netdev_features_t          mpls_features;        /*   512     8 */
+	netdev_features_t          mangleid_features;    /*   520     8 */
+	unsigned int               min_mtu;              /*   528     4 */
+	unsigned int               max_mtu;              /*   532     4 */
+	short unsigned int         type;                 /*   536     2 */
+	unsigned char              min_header_len;       /*   538     1 */
+	unsigned char              name_assign_type;     /*   539     1 */
+	int                        group;                /*   540     4 */
+	struct net_device_stats    stats;                /*   544   184 */
+	/* --- cacheline 11 boundary (704 bytes) was 24 bytes ago --- */
+	struct net_device_core_stats * core_stats;       /*   728     8 */
+	atomic_t                   carrier_up_count __attribute__((__aligned__(4))); /*   736     4 */
+	atomic_t                   carrier_down_count __attribute__((__aligned__(4))); /*   740     4 */
+	const struct ethtool_ops  * ethtool_ops;         /*   744     8 */
+	const struct l3mdev_ops  * l3mdev_ops;           /*   752     8 */
+	const struct ndisc_ops  *  ndisc_ops;            /*   760     8 */
+	/* --- cacheline 12 boundary (768 bytes) --- */
+	const struct xfrmdev_ops  * xfrmdev_ops;         /*   768     8 */
+	const struct tlsdev_ops  * tlsdev_ops;           /*   776     8 */
+	unsigned int               operstate;            /*   784     4 */
+	unsigned char              link_mode;            /*   788     1 */
+	unsigned char              if_port;              /*   789     1 */
+	unsigned char              dma;                  /*   790     1 */
+	unsigned char              perm_addr[32];        /*   791    32 */
+	unsigned char              addr_assign_type;     /*   823     1 */
+	unsigned char              addr_len;             /*   824     1 */
+	unsigned char              upper_level;          /*   825     1 */
+	unsigned char              lower_level;          /*   826     1 */
+	u8                         threaded;             /*   827     1 */
+	short unsigned int         neigh_priv_len;       /*   828     2 */
+	short unsigned int         dev_id;               /*   830     2 */
+	/* --- cacheline 13 boundary (832 bytes) --- */
+	short unsigned int         dev_port;             /*   832     2 */
+
+	/* XXX 2 bytes hole, try to pack */
+
+	int                        irq;                  /*   836     4 */
+	u32                        priv_len;             /*   840     4 */
+	spinlock_t                 addr_list_lock __attribute__((__aligned__(4))); /*   844     4 */
+	struct netdev_hw_addr_list uc;                   /*   848    32 */
+	struct netdev_hw_addr_list mc;                   /*   880    32 */
+	/* --- cacheline 14 boundary (896 bytes) was 16 bytes ago --- */
+	struct netdev_hw_addr_list dev_addrs;            /*   912    32 */
+	struct kset *              queues_kset;          /*   944     8 */
+	unsigned int               promiscuity;          /*   952     4 */
+	unsigned int               allmulti;             /*   956     4 */
+	/* --- cacheline 15 boundary (960 bytes) --- */
+	bool                       uc_promisc;           /*   960     1 */
+
+	/* XXX 7 bytes hole, try to pack */
+
+	struct in_device *         ip_ptr;               /*   968     8 */
+	struct hlist_head          fib_nh_head;          /*   976     8 */
+	struct vlan_info *         vlan_info;            /*   984     8 */
+	struct tipc_bearer *       tipc_ptr;             /*   992     8 */
+	struct mpls_dev *          mpls_ptr;             /*  1000     8 */
+	const unsigned char  *     dev_addr;             /*  1008     8 */
+	unsigned int               num_rx_queues;        /*  1016     4 */
+	unsigned int               xdp_zc_max_segs;      /*  1020     4 */
+	/* --- cacheline 16 boundary (1024 bytes) --- */
+	struct netdev_queue *      ingress_queue;        /*  1024     8 */
+	struct nf_hook_entries *   nf_hooks_ingress;     /*  1032     8 */
+	unsigned char              broadcast[32];        /*  1040    32 */
+	struct cpu_rmap *          rx_cpu_rmap;          /*  1072     8 */
+	struct hlist_node          index_hlist;          /*  1080    16 */
+	/* --- cacheline 17 boundary (1088 bytes) was 8 bytes ago --- */
+	unsigned int               num_tx_queues;        /*  1096     4 */
+
+	/* XXX 4 bytes hole, try to pack */
+
+	struct Qdisc *             qdisc;                /*  1104     8 */
+	unsigned int               tx_queue_len;         /*  1112     4 */
+	spinlock_t                 tx_global_lock __attribute__((__aligned__(4))); /*  1116     4 */
+	struct xdp_dev_bulk_queue * xdp_bulkq;           /*  1120     8 */
+	struct hlist_head          qdisc_hash[16];       /*  1128   128 */
+	/* --- cacheline 19 boundary (1216 bytes) was 40 bytes ago --- */
+	struct timer_list          watchdog_timer;       /*  1256    40 */
+
+	/* XXX last struct has 4 bytes of padding */
+
+	/* --- cacheline 20 boundary (1280 bytes) was 16 bytes ago --- */
+	int                        watchdog_timeo;       /*  1296     4 */
+	u32                        proto_down_reason;    /*  1300     4 */
+	struct list_head           todo_list;            /*  1304    16 */
+	int *                      pcpu_refcnt;          /*  1320     8 */
+	struct ref_tracker_dir     refcnt_tracker;       /*  1328     0 */
+	struct list_head           link_watch_list;      /*  1328    16 */
+	/* --- cacheline 21 boundary (1344 bytes) --- */
+	u8                         reg_state;            /*  1344     1 */
+	bool                       dismantle;            /*  1345     1 */
+	bool                       moving_ns;            /*  1346     1 */
+	bool                       rtnl_link_initializing; /*  1347     1 */
+	bool                       needs_free_netdev;    /*  1348     1 */
+
+	/* XXX 3 bytes hole, try to pack */
+
+	void                       (*priv_destructor)(struct net_device *); /*  1352     8 */
+	void *                     ml_priv;              /*  1360     8 */
+	enum netdev_ml_priv_type   ml_priv_type;         /*  1368     4 */
+	enum netdev_stat_type      pcpu_stat_type:8;     /*  1372: 0  4 */
+
+	/* XXX 24 bits hole, try to pack */
+
+	struct garp_port *         garp_port;            /*  1376     8 */
+	struct mrp_port *          mrp_port;             /*  1384     8 */
+	struct device              dev __attribute__((__aligned__(8))); /*  1392   736 */
+
+	/* XXX last struct has 3 bytes of padding */
+
+	/* --- cacheline 33 boundary (2112 bytes) was 16 bytes ago --- */
+	const struct attribute_group  * sysfs_groups[5]; /*  2128    40 */
+	const struct attribute_group  * sysfs_rx_queue_group; /*  2168     8 */
+	/* --- cacheline 34 boundary (2176 bytes) --- */
+	const struct rtnl_link_ops  * rtnl_link_ops;     /*  2176     8 */
+	const struct netdev_stat_ops  * stat_ops;        /*  2184     8 */
+	const struct netdev_queue_mgmt_ops  * queue_mgmt_ops; /*  2192     8 */
+	unsigned int               tso_max_size;         /*  2200     4 */
+	u16                        tso_max_segs;         /*  2204     2 */
+
+	/* XXX 2 bytes hole, try to pack */
+
+	const struct dcbnl_rtnl_ops  * dcbnl_ops;        /*  2208     8 */
+	u8                         prio_tc_map[16];      /*  2216    16 */
+	struct netprio_map *       priomap;              /*  2232     8 */
+	/* --- cacheline 35 boundary (2240 bytes) --- */
+	struct phy_link_topology * link_topo;            /*  2240     8 */
+	struct phy_device *        phydev;               /*  2248     8 */
+	struct sfp_bus *           sfp_bus;              /*  2256     8 */
+	struct lock_class_key *    qdisc_tx_busylock;    /*  2264     8 */
+	bool                       proto_down;           /*  2272     1 */
+	bool                       irq_affinity_auto;    /*  2273     1 */
+	bool                       rx_cpu_rmap_auto;     /*  2274     1 */
+
+	/* Bitfield combined with previous fields */
+
+	long unsigned int          see_all_hwtstamp_requests:1; /*  2272:24  8 */
+	long unsigned int          change_proto_down:1;  /*  2272:25  8 */
+	long unsigned int          netns_immutable:1;    /*  2272:26  8 */
+	long unsigned int          fcoe_mtu:1;           /*  2272:27  8 */
+
+	/* XXX 36 bits hole, try to pack */
+
+	struct list_head           net_notifier_list;    /*  2280    16 */
+	const struct udp_tunnel_nic_info  * udp_tunnel_nic_info; /*  2296     8 */
+	/* --- cacheline 36 boundary (2304 bytes) --- */
+	struct udp_tunnel_nic *    udp_tunnel_nic;       /*  2304     8 */
+	struct netdev_config *     cfg;                  /*  2312     8 */
+	struct netdev_config *     cfg_pending;          /*  2320     8 */
+	struct ethtool_netdev_state * ethtool;           /*  2328     8 */
+	struct bpf_xdp_entity      xdp_state[3];         /*  2336    48 */
+	/* --- cacheline 37 boundary (2368 bytes) was 16 bytes ago --- */
+	u8                         dev_addr_shadow[32];  /*  2384    32 */
+	netdevice_tracker          linkwatch_dev_tracker; /*  2416     0 */
+	netdevice_tracker          watchdog_dev_tracker; /*  2416     0 */
+	netdevice_tracker          dev_registered_tracker; /*  2416     0 */
+	struct rtnl_hw_stats64 *   offload_xstats_l3;    /*  2416     8 */
+	struct devlink_port *      devlink_port;         /*  2424     8 */
+	/* --- cacheline 38 boundary (2432 bytes) --- */
+	struct hlist_head          page_pools;           /*  2432     8 */
+	struct dim_irq_moder *     irq_moder;            /*  2440     8 */
+	u64                        max_pacing_offload_horizon; /*  2448     8 */
+	struct napi_config *       napi_config;          /*  2456     8 */
+	u32                        num_napi_configs;     /*  2464     4 */
+	u32                        napi_defer_hard_irqs; /*  2468     4 */
+	long unsigned int          gro_flush_timeout;    /*  2472     8 */
+	bool                       up;                   /*  2480     1 */
+	bool                       request_ops_lock;     /*  2481     1 */
+
+	/* XXX 6 bytes hole, try to pack */
+
+	struct mutex               lock __attribute__((__aligned__(8))); /*  2488    32 */
+	/* --- cacheline 39 boundary (2496 bytes) was 24 bytes ago --- */
+	struct net_shaper_hierarchy * net_shaper_hierarchy; /*  2520     8 */
+	struct hlist_head          neighbours[2];        /*  2528    16 */
+	struct hwtstamp_provider * hwprov;               /*  2544     8 */
+
+	/* XXX 8 bytes hole, try to pack */
+
+	/* --- cacheline 40 boundary (2560 bytes) --- */
+	u8                         priv[] __attribute__((__aligned__(64))); /*  2560     0 */
+
+	/* size: 2560, cachelines: 40, members: 186 */
+	/* sum members: 2507, holes: 11, sum holes: 44 */
+	/* sum bitfield members: 12 bits, bit holes: 2, sum bit holes: 60 bits */
+	/* paddings: 2, sum paddings: 7 */
+	/* forced alignments: 7, forced holes: 2, sum forced holes: 14 */
+} __attribute__((__aligned__(64)));
+

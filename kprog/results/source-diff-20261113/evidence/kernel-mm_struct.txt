@@ -1,0 +1,121 @@
+struct mm_struct {
+	struct {
+		struct {
+			atomic_t   mm_count __attribute__((__aligned__(4))); /*     0     4 */
+		} __attribute__((__aligned__(64))) __attribute__((__aligned__(64)));      /*     0    64 */
+
+		/* XXX last struct has 60 bytes of padding */
+
+		/* --- cacheline 1 boundary (64 bytes) --- */
+		struct maple_tree  mm_mt __attribute__((__aligned__(8))); /*    64    16 */
+		long unsigned int  mmap_base;            /*    80     8 */
+		long unsigned int  mmap_legacy_base;     /*    88     8 */
+		long unsigned int  mmap_compat_base;     /*    96     8 */
+		long unsigned int  mmap_compat_legacy_base; /*   104     8 */
+		long unsigned int  task_size;            /*   112     8 */
+		pgd_t *            pgd;                  /*   120     8 */
+		/* --- cacheline 2 boundary (128 bytes) --- */
+		atomic_t           membarrier_state __attribute__((__aligned__(4))); /*   128     4 */
+		atomic_t           mm_users __attribute__((__aligned__(4))); /*   132     4 */
+
+		/* XXX 56 bytes hole, try to pack */
+
+		/* --- cacheline 3 boundary (192 bytes) --- */
+		struct mm_mm_cid   mm_cid __attribute__((__aligned__(64))); /*   192   192 */
+
+		/* XXX last struct has 56 bytes of padding */
+
+		/* --- cacheline 6 boundary (384 bytes) --- */
+		atomic_long_t      pgtables_bytes;       /*   384     8 */
+		int                map_count;            /*   392     4 */
+		spinlock_t         page_table_lock __attribute__((__aligned__(4))); /*   396     4 */
+		struct rw_semaphore mmap_lock __attribute__((__aligned__(8))); /*   400    40 */
+		struct list_head   mmlist;               /*   440    16 */
+		/* --- cacheline 7 boundary (448 bytes) was 8 bytes ago --- */
+		struct rcuwait     vma_writer_wait;      /*   456     8 */
+		seqcount_t         mm_lock_seq;          /*   464     4 */
+
+		/* XXX 4 bytes hole, try to pack */
+
+		struct mutex       futex_hash_lock __attribute__((__aligned__(8))); /*   472    32 */
+		struct futex_private_hash * futex_phash; /*   504     8 */
+		/* --- cacheline 8 boundary (512 bytes) --- */
+		struct futex_private_hash * futex_phash_new; /*   512     8 */
+		long unsigned int  futex_batches;        /*   520     8 */
+		struct callback_head futex_rcu __attribute__((__aligned__(8))); /*   528    16 */
+		atomic_long_t      futex_atomic;         /*   544     8 */
+		unsigned int *     futex_ref;            /*   552     8 */
+		long unsigned int  hiwater_rss;          /*   560     8 */
+		long unsigned int  hiwater_vm;           /*   568     8 */
+		/* --- cacheline 9 boundary (576 bytes) --- */
+		long unsigned int  total_vm;             /*   576     8 */
+		long unsigned int  locked_vm;            /*   584     8 */
+		atomic64_t         pinned_vm;            /*   592     8 */
+		long unsigned int  data_vm;              /*   600     8 */
+		long unsigned int  exec_vm;              /*   608     8 */
+		long unsigned int  stack_vm;             /*   616     8 */
+		vm_flags_t         def_flags;            /*   624     8 */
+		seqcount_t         write_protect_seq;    /*   632     4 */
+		spinlock_t         arg_lock __attribute__((__aligned__(4))); /*   636     4 */
+		/* --- cacheline 10 boundary (640 bytes) --- */
+		long unsigned int  start_code;           /*   640     8 */
+		long unsigned int  end_code;             /*   648     8 */
+		long unsigned int  start_data;           /*   656     8 */
+		long unsigned int  end_data;             /*   664     8 */
+		long unsigned int  start_brk;            /*   672     8 */
+		long unsigned int  brk;                  /*   680     8 */
+		long unsigned int  start_stack;          /*   688     8 */
+		long unsigned int  arg_start;            /*   696     8 */
+		/* --- cacheline 11 boundary (704 bytes) --- */
+		long unsigned int  arg_end;              /*   704     8 */
+		long unsigned int  env_start;            /*   712     8 */
+		long unsigned int  env_end;              /*   720     8 */
+		long unsigned int  saved_auxv[52];       /*   728   416 */
+		/* --- cacheline 17 boundary (1088 bytes) was 56 bytes ago --- */
+		struct percpu_counter rss_stat[4] __attribute__((__aligned__(8))); /*  1144   160 */
+		/* --- cacheline 20 boundary (1280 bytes) was 24 bytes ago --- */
+		struct linux_binfmt * binfmt;            /*  1304     8 */
+		mm_context_t       context __attribute__((__aligned__(8))); /*  1312    96 */
+		/* --- cacheline 22 boundary (1408 bytes) --- */
+		mm_flags_t         flags;                /*  1408     8 */
+		spinlock_t         ioctx_lock __attribute__((__aligned__(4))); /*  1416     4 */
+
+		/* XXX 4 bytes hole, try to pack */
+
+		struct kioctx_table * ioctx_table;       /*  1424     8 */
+		struct task_struct * owner;              /*  1432     8 */
+		struct user_namespace * user_ns;         /*  1440     8 */
+		struct file *      exe_file;             /*  1448     8 */
+		struct mmu_notifier_subscriptions * notifier_subscriptions; /*  1456     8 */
+		long unsigned int  numa_next_scan;       /*  1464     8 */
+		/* --- cacheline 23 boundary (1472 bytes) --- */
+		long unsigned int  numa_scan_offset;     /*  1472     8 */
+		int                numa_scan_seq;        /*  1480     4 */
+		atomic_t           tlb_flush_pending __attribute__((__aligned__(4))); /*  1484     4 */
+		atomic_t           tlb_flush_batched __attribute__((__aligned__(4))); /*  1488     4 */
+
+		/* XXX 4 bytes hole, try to pack */
+
+		struct uprobes_state uprobes_state;      /*  1496    16 */
+		atomic_long_t      hugetlb_usage;        /*  1512     8 */
+		struct work_struct async_put_work;       /*  1520    32 */
+		/* --- cacheline 24 boundary (1536 bytes) was 16 bytes ago --- */
+		struct iommu_mm_data * iommu_mm;         /*  1552     8 */
+		struct {
+			struct list_head list;           /*  1560    16 */
+			long unsigned int bitmap;        /*  1576     8 */
+			struct mem_cgroup * memcg;       /*  1584     8 */
+		} lru_gen;                               /*  1560    32 */
+		mm_id_t            mm_id;                /*  1592     4 */
+	} __attribute__((__aligned__(64))) __attribute__((__aligned__(64)));              /*     0  1600 */
+
+	/* XXX last struct has 4 bytes of padding */
+
+	/* --- cacheline 25 boundary (1600 bytes) --- */
+	char                       flexible_array[] __attribute__((__aligned__(8))); /*  1600     0 */
+
+	/* size: 1600, cachelines: 25, members: 2 */
+	/* paddings: 1, sum paddings: 4 */
+	/* forced alignments: 2 */
+} __attribute__((__aligned__(64)));
+

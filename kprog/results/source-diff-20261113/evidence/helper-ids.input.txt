@@ -1,0 +1,53 @@
+#define MICRO_NATIVE
+#define MICRO_NATIVE_HELPER_MACROS
+#include "vendor/bpf/native_compat.h"
+#include "vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h"
+_Static_assert(NATIVE_BPF_FUNC_map_lookup_elem == BPF_FUNC_map_lookup_elem, "helper ID map_lookup_elem");
+_Static_assert(NATIVE_BPF_FUNC_map_update_elem == BPF_FUNC_map_update_elem, "helper ID map_update_elem");
+_Static_assert(NATIVE_BPF_FUNC_map_delete_elem == BPF_FUNC_map_delete_elem, "helper ID map_delete_elem");
+_Static_assert(NATIVE_BPF_FUNC_probe_read == BPF_FUNC_probe_read, "helper ID probe_read");
+_Static_assert(NATIVE_BPF_FUNC_ktime_get_ns == BPF_FUNC_ktime_get_ns, "helper ID ktime_get_ns");
+_Static_assert(NATIVE_BPF_FUNC_get_prandom_u32 == BPF_FUNC_get_prandom_u32, "helper ID get_prandom_u32");
+_Static_assert(NATIVE_BPF_FUNC_get_smp_processor_id == BPF_FUNC_get_smp_processor_id, "helper ID get_smp_processor_id");
+_Static_assert(NATIVE_BPF_FUNC_tail_call == BPF_FUNC_tail_call, "helper ID tail_call");
+_Static_assert(NATIVE_BPF_FUNC_get_current_pid_tgid == BPF_FUNC_get_current_pid_tgid, "helper ID get_current_pid_tgid");
+_Static_assert(NATIVE_BPF_FUNC_get_current_uid_gid == BPF_FUNC_get_current_uid_gid, "helper ID get_current_uid_gid");
+_Static_assert(NATIVE_BPF_FUNC_get_current_comm == BPF_FUNC_get_current_comm, "helper ID get_current_comm");
+_Static_assert(NATIVE_BPF_FUNC_perf_event_output == BPF_FUNC_perf_event_output, "helper ID perf_event_output");
+_Static_assert(NATIVE_BPF_FUNC_skb_load_bytes == BPF_FUNC_skb_load_bytes, "helper ID skb_load_bytes");
+_Static_assert(NATIVE_BPF_FUNC_get_stackid == BPF_FUNC_get_stackid, "helper ID get_stackid");
+_Static_assert(NATIVE_BPF_FUNC_get_current_task == BPF_FUNC_get_current_task, "helper ID get_current_task");
+_Static_assert(NATIVE_BPF_FUNC_probe_write_user == BPF_FUNC_probe_write_user, "helper ID probe_write_user");
+_Static_assert(NATIVE_BPF_FUNC_current_task_under_cgroup == BPF_FUNC_current_task_under_cgroup, "helper ID current_task_under_cgroup");
+_Static_assert(NATIVE_BPF_FUNC_probe_read_str == BPF_FUNC_probe_read_str, "helper ID probe_read_str");
+_Static_assert(NATIVE_BPF_FUNC_get_stack == BPF_FUNC_get_stack, "helper ID get_stack");
+_Static_assert(NATIVE_BPF_FUNC_skb_load_bytes_relative == BPF_FUNC_skb_load_bytes_relative, "helper ID skb_load_bytes_relative");
+_Static_assert(NATIVE_BPF_FUNC_get_current_cgroup_id == BPF_FUNC_get_current_cgroup_id, "helper ID get_current_cgroup_id");
+_Static_assert(NATIVE_BPF_FUNC_map_push_elem == BPF_FUNC_map_push_elem, "helper ID map_push_elem");
+_Static_assert(NATIVE_BPF_FUNC_map_pop_elem == BPF_FUNC_map_pop_elem, "helper ID map_pop_elem");
+_Static_assert(NATIVE_BPF_FUNC_sk_fullsock == BPF_FUNC_sk_fullsock, "helper ID sk_fullsock");
+_Static_assert(NATIVE_BPF_FUNC_send_signal == BPF_FUNC_send_signal, "helper ID send_signal");
+_Static_assert(NATIVE_BPF_FUNC_probe_read_user == BPF_FUNC_probe_read_user, "helper ID probe_read_user");
+_Static_assert(NATIVE_BPF_FUNC_probe_read_kernel == BPF_FUNC_probe_read_kernel, "helper ID probe_read_kernel");
+_Static_assert(NATIVE_BPF_FUNC_probe_read_user_str == BPF_FUNC_probe_read_user_str, "helper ID probe_read_user_str");
+_Static_assert(NATIVE_BPF_FUNC_probe_read_kernel_str == BPF_FUNC_probe_read_kernel_str, "helper ID probe_read_kernel_str");
+_Static_assert(NATIVE_BPF_FUNC_ktime_get_boot_ns == BPF_FUNC_ktime_get_boot_ns, "helper ID ktime_get_boot_ns");
+_Static_assert(NATIVE_BPF_FUNC_seq_write == BPF_FUNC_seq_write, "helper ID seq_write");
+_Static_assert(NATIVE_BPF_FUNC_ringbuf_output == BPF_FUNC_ringbuf_output, "helper ID ringbuf_output");
+_Static_assert(NATIVE_BPF_FUNC_ringbuf_reserve == BPF_FUNC_ringbuf_reserve, "helper ID ringbuf_reserve");
+_Static_assert(NATIVE_BPF_FUNC_ringbuf_submit == BPF_FUNC_ringbuf_submit, "helper ID ringbuf_submit");
+_Static_assert(NATIVE_BPF_FUNC_ringbuf_discard == BPF_FUNC_ringbuf_discard, "helper ID ringbuf_discard");
+_Static_assert(NATIVE_BPF_FUNC_ringbuf_query == BPF_FUNC_ringbuf_query, "helper ID ringbuf_query");
+_Static_assert(NATIVE_BPF_FUNC_copy_from_user == BPF_FUNC_copy_from_user, "helper ID copy_from_user");
+_Static_assert(NATIVE_BPF_FUNC_get_current_task_btf == BPF_FUNC_get_current_task_btf, "helper ID get_current_task_btf");
+_Static_assert(NATIVE_BPF_FUNC_ima_inode_hash == BPF_FUNC_ima_inode_hash, "helper ID ima_inode_hash");
+_Static_assert(NATIVE_BPF_FUNC_get_func_ip == BPF_FUNC_get_func_ip, "helper ID get_func_ip");
+_Static_assert(NATIVE_BPF_FUNC_get_attach_cookie == BPF_FUNC_get_attach_cookie, "helper ID get_attach_cookie");
+_Static_assert(NATIVE_BPF_FUNC_task_pt_regs == BPF_FUNC_task_pt_regs, "helper ID task_pt_regs");
+_Static_assert(NATIVE_BPF_FUNC_loop == BPF_FUNC_loop, "helper ID loop");
+_Static_assert(NATIVE_BPF_FUNC_get_func_arg == BPF_FUNC_get_func_arg, "helper ID get_func_arg");
+_Static_assert(NATIVE_BPF_FUNC_get_func_ret == BPF_FUNC_get_func_ret, "helper ID get_func_ret");
+_Static_assert(NATIVE_BPF_FUNC_get_func_arg_cnt == BPF_FUNC_get_func_arg_cnt, "helper ID get_func_arg_cnt");
+_Static_assert(NATIVE_BPF_FUNC_ima_file_hash == BPF_FUNC_ima_file_hash, "helper ID ima_file_hash");
+_Static_assert(NATIVE_BPF_FUNC_override_return == BPF_FUNC_override_return, "helper ID override_return");
+int main(void) { return 0; }

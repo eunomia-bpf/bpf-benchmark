@@ -1,0 +1,32 @@
+struct skb_shared_info {
+	__u8                       flags;                /*     0     1 */
+	__u8                       meta_len;             /*     1     1 */
+	__u8                       nr_frags;             /*     2     1 */
+	__u8                       tx_flags;             /*     3     1 */
+	short unsigned int         gso_size;             /*     4     2 */
+	short unsigned int         gso_segs;             /*     6     2 */
+	struct sk_buff *           frag_list;            /*     8     8 */
+	union {
+		struct skb_shared_hwtstamps hwtstamps;   /*    16     8 */
+		struct xsk_tx_metadata_compl xsk_meta;   /*    16     8 */
+	};                                               /*    16     8 */
+	unsigned int               gso_type;             /*    24     4 */
+	u32                        tskey;                /*    28     4 */
+	atomic_t                   dataref __attribute__((__aligned__(4))); /*    32     4 */
+
+	/* XXX 4 bytes hole, try to pack */
+
+	union {
+		struct {
+			u32        xdp_frags_size;       /*    40     4 */
+			u32        xdp_frags_truesize;   /*    44     4 */
+		};                                       /*    40     8 */
+		void *             destructor_arg;       /*    40     8 */
+	};                                               /*    40     8 */
+	skb_frag_t                 frags[17];            /*    48   272 */
+
+	/* size: 320, cachelines: 5, members: 13 */
+	/* sum members: 316, holes: 1, sum holes: 4 */
+	/* forced alignments: 1 */
+} __attribute__((__aligned__(8)));
+

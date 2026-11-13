@@ -1,0 +1,21 @@
+
+#define MICRO_NATIVE
+#define MICRO_NATIVE_TETRAGON
+#define __TARGET_ARCH_x86
+#include "vendor/bpf/native_compat.h"
+#include "vendor/bpf/tetragon/bpf/include/vmlinux.h"
+#include "vendor/bpf/tetragon/bpf/include/api.h"
+extern int printf(const char *, ...);
+int main(void) {
+    char hay[240], needle[180];
+    for (int i=0; i<239; i++) hay[i]='a'; hay[239]=0;
+    for (int i=0; i<179; i++) needle[i]='a'; needle[179]=0;
+    printf("exact_suffix=%d expected=0\n", bpf_strnstr("abc", "abc", 3));
+    printf("exact_suffix_case=%d expected=0\n", bpf_strncasestr("ABC", "abc", 3));
+    printf("empty_at_len0=%d expected=0\n", bpf_strnstr("", "", 0));
+    printf("notfound=%d expected=-2\n", bpf_strnstr("abc", "z", 3));
+    printf("long_needle=%d expected=0\n", bpf_strnstr(hay, needle, 239));
+    const char embedded[6]={'a',0,'z',0,0,0};
+    printf("past_nul=%d expected=-2\n", bpf_strnstr(embedded, "z", 4));
+    return 0;
+}

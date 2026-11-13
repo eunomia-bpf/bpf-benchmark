@@ -1,0 +1,8 @@
+
+#define MICRO_NATIVE
+#define __LARGE_BPF_PROG
+#define GENERIC_KPROBE
+#define FUNC_INLINE static inline
+#include "vendor/bpf/tetragon/bpf/process/cel_expr.h"
+extern int printf(const char *, ...);
+int main(void) { long a=0; char b=0; printf("native_cel=%d (always zero)\n",cel_expr(0,&a,&b)); return 0; }

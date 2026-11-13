@@ -1,0 +1,22 @@
+
+#define MICRO_NATIVE
+#include "vendor/bpf/native_compat.h"
+#include "vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h"
+extern int printf(const char *, ...);
+int main(void) {
+    struct sockaddr_in addr={0}; addr.sin_addr.s_addr=0x12345678;
+    struct bpf_sock_addr_kern kern={0}; kern.uaddr=(void *)&addr;
+    unsigned int native_ip=0;
+    __builtin_memcpy(&native_ip,(char *)&kern+offsetof(struct bpf_sock_addr,user_ip4),4);
+    printf("sock_native_user_ip4=%x expected=12345678\n",native_ip);
+    printf("sock_native_user_ip4_offset=%lu physical_uaddr_pointer_offset=%lu\n",
+        (unsigned long)offsetof(struct bpf_sock_addr,user_ip4),
+        (unsigned long)offsetof(struct bpf_sock_addr_kern,uaddr));
+    struct net_device dev={}; dev.ifindex=7;
+    struct xdp_rxq_info rxq={0}; rxq.dev=&dev;
+    struct xdp_buff xdp={0}; xdp.rxq=&rxq; xdp.data_end=(void *)0x1122334455667788UL;
+    unsigned int native_ifindex=0;
+    __builtin_memcpy(&native_ifindex,(char *)&xdp+offsetof(struct xdp_md,ingress_ifindex),4);
+    printf("xdp_native_ingress_ifindex=%x expected=7\n",native_ifindex);
+    return 0;
+}

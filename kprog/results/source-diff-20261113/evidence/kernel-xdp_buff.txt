@@ -1,0 +1,19 @@
+struct xdp_buff {
+	void *                     data;                 /*     0     8 */
+	void *                     data_end;             /*     8     8 */
+	void *                     data_meta;            /*    16     8 */
+	void *                     data_hard_start;      /*    24     8 */
+	struct xdp_rxq_info *      rxq;                  /*    32     8 */
+	struct xdp_txq_info *      txq;                  /*    40     8 */
+	union {
+		struct {
+			u32        frame_sz;             /*    48     4 */
+			u32        flags;                /*    52     4 */
+		};                                       /*    48     8 */
+		u64                frame_sz_flags_init;  /*    48     8 */
+	};                                               /*    48     8 */
+
+	/* size: 56, cachelines: 1, members: 7 */
+	/* last cacheline: 56 bytes */
+};
+

@@ -1,0 +1,57 @@
+{
+  "utc": "2026-11-13T06:18:52.729120+00:00",
+  "source_drift_since_scan": [],
+  "head": {
+    "argv": [
+      "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "returncode": 0,
+    "stdout": "be3fc7f6da3cd5ed9d271a2835cb950ed483f1a4\n",
+    "stderr": ""
+  },
+  "tracked_status": {
+    "argv": [
+      "git",
+      "status",
+      "--porcelain",
+      "--untracked-files=no"
+    ],
+    "returncode": 0,
+    "stdout": " M kprog/perf/native-context/Makefile\n M kprog/perf/profile/callers.py\n M kprog/x86/native_lab/native_link/src/main.rs\n M kprog/x86/native_lab/native_link/src/x86.rs\n",
+    "stderr": ""
+  },
+  "ebpf_tetragon_undefined": {
+    "argv": [
+      "llvm-nm-18",
+      "--undefined-only",
+      "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_kprobe_v61.o"
+    ],
+    "returncode": 0,
+    "stdout": "                 w bpf_iter_num_destroy\n                 w bpf_iter_num_new\n                 w bpf_iter_num_next\n                 w bpf_strncasestr\n                 w bpf_strnstr\n                 U cel_expr_0\n                 U cel_expr_1\n                 U cel_expr_2\n                 U cel_expr_3\n                 U cel_expr_4\n                 U cel_expr_5\n                 U cel_expr_6\n                 U cel_expr_7\n",
+    "stderr": ""
+  },
+  "kernel_request": {
+    "argv": [
+      "pahole",
+      "-C",
+      "request",
+      "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux"
+    ],
+    "returncode": 0,
+    "stdout": "struct request {\n\tstruct request_queue *     q;                    /*     0     8 */\n\tstruct blk_mq_ctx *        mq_ctx;               /*     8     8 */\n\tstruct blk_mq_hw_ctx *     mq_hctx;              /*    16     8 */\n\tblk_opf_t                  cmd_flags;            /*    24     4 */\n\treq_flags_t                rq_flags;             /*    28     4 */\n\tint                        tag;                  /*    32     4 */\n\tint                        internal_tag;         /*    36     4 */\n\tunsigned int               timeout;              /*    40     4 */\n\tunsigned int               __data_len;           /*    44     4 */\n\tsector_t                   __sector;             /*    48     8 */\n\tstruct bio *               bio;                  /*    56     8 */\n\t/* --- cacheline 1 boundary (64 bytes) --- */\n\tstruct bio *               biotail;              /*    64     8 */\n\tunion {\n\t\tstruct list_head   queuelist;            /*    72    16 */\n\t\tstruct request *   rq_next;              /*    72     8 */\n\t};                                               /*    72    16 */\n\tstruct block_device *      part;                 /*    88     8 */\n\tu64                        alloc_time_ns;        /*    96     8 */\n\tu64                        start_time_ns;        /*   104     8 */\n\tu64                        io_start_time_ns;     /*   112     8 */\n\tshort unsigned int         wbt_flags;            /*   120     2 */\n\tshort unsigned int         stats_sectors;        /*   122     2 */\n\tshort unsigned int         nr_phys_segments;     /*   124     2 */\n\tshort unsigned int         nr_integrity_segments; /*   126     2 */\n\t/* --- cacheline 2 boundary (128 bytes) --- */\n\tunsigned char              phys_gap_bit;         /*   128     1 */\n\n\t/* XXX 7 bytes hole, try to pack */\n\n\tstruct bio_crypt_ctx *     crypt_ctx;            /*   136     8 */\n\tstruct blk_crypto_keyslot * crypt_keyslot;       /*   144     8 */\n\tenum mq_rq_state           state;                /*   152     4 */\n\tatomic_t                   ref __attribute__((__aligned__(4))); /*   156     4 */\n\tlong unsigned int          deadline;             /*   160     8 */\n\tunion {\n\t\tstruct hlist_node  hash;                 /*   168    16 */\n\t\tstruct llist_node  ipi_list;             /*   168     8 */\n\t};                                               /*   168    16 */\n\tunion {\n\t\tstruct rb_node     rb_node __attribute__((__aligned__(8))); /*   184    24 */\n\t\tstruct bio_vec     special_vec;          /*   184    16 */\n\t} __attribute__((__aligned__(8)));               /*   184    24 */\n\t/* --- cacheline 3 boundary (192 bytes) was 16 bytes ago --- */\n\tstruct {\n\t\tstruct io_cq *     icq;                  /*   208     8 */\n\t\tvoid *             priv[2];              /*   216    16 */\n\t} elv;                                           /*   208    24 */\n\tstruct {\n\t\tunsigned int       seq;                  /*   232     4 */\n\n\t\t/* XXX 4 bytes hole, try to pack */\n\n\t\trq_end_io_fn *     saved_end_io;         /*   240     8 */\n\t} flush;                                         /*   232    16 */\n\tu64                        fifo_time;            /*   248     8 */\n\t/* --- cacheline 4 boundary (256 bytes) --- */\n\trq_end_io_fn *             end_io;               /*   256     8 */\n\tvoid *                     end_io_data;          /*   264     8 */\n\n\t/* size: 272, cachelines: 5, members: 34 */\n\t/* sum members: 265, holes: 1, sum holes: 7 */\n\t/* forced alignments: 2 */\n\t/* last cacheline: 16 bytes */\n} __attribute__((__aligned__(8)));\n\n",
+    "stderr": ""
+  },
+  "kernel_pid_link": {
+    "argv": [
+      "pahole",
+      "-C",
+      "pid_link",
+      "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "pahole: type 'pid_link' not found\n"
+  }
+}

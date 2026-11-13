@@ -1,0 +1,362 @@
+[
+  {
+    "app": "bcc",
+    "selected": "vendor/bpf/bcc/libbpf-tools/tcplife.bpf.c",
+    "upstream": "vendor/repos/bcc/libbpf-tools/tcplife.bpf.c",
+    "sha256": "51b8cad1b03fa262df3751e3304053a9523d98577b7ecfcf8a41463714b611b0",
+    "kind": "different",
+    "upstream_sha256": "e962218922e66eb25ea8d15bbcc3b771553fc7dbef5b846d149c4cd04935126b",
+    "generated": false
+  },
+  {
+    "app": "bcc",
+    "selected": "vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h",
+    "upstream": "vendor/repos/bcc/libbpf-tools/x86/vmlinux.h",
+    "sha256": "39c424a6324887315c21d64924722762f757d85270e8a3c735630ea9fb8ca153",
+    "kind": "different",
+    "upstream_sha256": "72da48fdb872d8cf6a115e2b5362f3c64e595374535501f5a6bfdac0b86e00cd",
+    "generated": true
+  },
+  {
+    "app": "otel",
+    "selected": "vendor/bpf/otel/support/ebpf/bpfdefs.h",
+    "upstream": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/bpfdefs.h",
+    "sha256": "32b91c7c2e83227939a99c4ac1a60cce9935cc92769a2eb3264d02b345bcb49d",
+    "kind": "different",
+    "upstream_sha256": "bf547d7efe28be91a713516f70aff4d430472aefe9592e723a6adfebf435448d",
+    "generated": false
+  },
+  {
+    "app": "cilium",
+    "selected": "vendor/bpf/cilium/bpf/bpf_host.c",
+    "upstream": "vendor/repos/cilium/bpf/bpf_host.c",
+    "sha256": "b18cca811286f753ffbae667fa467680f4ac444aa141b0af4833372af9674399",
+    "kind": "different",
+    "upstream_sha256": "c8c68f808972c90ed5002c74f013f6a55386b67e2618a41ef84d997d2960a53f",
+    "generated": false
+  },
+  {
+    "app": "cilium",
+    "selected": "vendor/bpf/cilium/bpf/bpf_lxc.c",
+    "upstream": "vendor/repos/cilium/bpf/bpf_lxc.c",
+    "sha256": "07011bf40676984b1fde2dabec629d64c15fcb35efee7176fd673ccb47cf0f02",
+    "kind": "different",
+    "upstream_sha256": "8b6f6350a31ec16134c8877bd74fab848e09a85c109f0c6bce149f79d07c6e2b",
+    "generated": false
+  },
+  {
+    "app": "cilium",
+    "selected": "vendor/bpf/cilium/bpf/include/bpf/access.h",
+    "upstream": "vendor/repos/cilium/bpf/include/bpf/access.h",
+    "sha256": "0aa2e04ca4beab76721f101a71da48d479c0cdccc9b4a8da6b0b5ae77efce3e0",
+    "kind": "different",
+    "upstream_sha256": "1a95ac36419c3c148384bcde4621ce8e89d3f01df43a18acd99d385ff18086d8",
+    "generated": false
+  },
+  {
+    "app": "cilium",
+    "selected": "vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h",
+    "upstream": "vendor/repos/cilium/bpf/include/bpf/ctx/skb.h",
+    "sha256": "c8a6251487d57123d098bf325cfc4b049f58701cae4abb775f4685b7b32835ed",
+    "kind": "different",
+    "upstream_sha256": "ac60dfdc7296df713d9f360c55bfe941fcd8199bd68da8a602723a7c8d07ef6a",
+    "generated": false
+  },
+  {
+    "app": "cilium",
+    "selected": "vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h",
+    "upstream": "vendor/repos/cilium/bpf/include/bpf/ctx/xdp.h",
+    "sha256": "93bffd9691f1564c03d7b778ce57b20b80d4cecf3183e2c57ba23e97e9769911",
+    "kind": "different",
+    "upstream_sha256": "e1ddad2dac998db4ded4231acefe341d646b60d504043e43bfc60344701cb1bc",
+    "generated": false
+  },
+  {
+    "app": "cilium",
+    "selected": "vendor/bpf/cilium/bpf/include/bpf/helpers.h",
+    "upstream": "vendor/repos/cilium/bpf/include/bpf/helpers.h",
+    "sha256": "b05b5f0be5d980a7bc1826878bcd437a154d794a03b9fa3f203d9e8b11d4969a",
+    "kind": "different",
+    "upstream_sha256": "71195a79c78babfb37e5056face8a1c2bfb1f92250ee871217fea2de37277bb9",
+    "generated": false
+  },
+  {
+    "app": "cilium",
+    "selected": "vendor/bpf/cilium/bpf/include/bpf/tailcall.h",
+    "upstream": "vendor/repos/cilium/bpf/include/bpf/tailcall.h",
+    "sha256": "f08afac687c21334f2671d6f465415549a11e017265f54670d4f94cb1ef7c2c9",
+    "kind": "different",
+    "upstream_sha256": "8f76ef3d4af5d04f4e682ec360df4a3a9c1643ed942518f4702d098aba8323bc",
+    "generated": false
+  },
+  {
+    "app": "cilium",
+    "selected": "vendor/bpf/cilium/bpf/include/linux/bpf.h",
+    "upstream": "vendor/repos/cilium/bpf/include/linux/bpf.h",
+    "sha256": "657bd41a0692b69dec9943424380ddfb9f9855cb61ae8391b9ddc18597cc90ee",
+    "kind": "different",
+    "upstream_sha256": "137fdab2467c5090f0bf533c00ba3935055022576cc56f4d5820ab89c0ed0740",
+    "generated": false
+  },
+  {
+    "app": "cilium",
+    "selected": "vendor/bpf/cilium/bpf/lib/arp.h",
+    "upstream": "vendor/repos/cilium/bpf/lib/arp.h",
+    "sha256": "dcf275ea85176080684c13e352a0e65dc73a681758a47559f513759982e50455",
+    "kind": "different",
+    "upstream_sha256": "df70bb4b85369506e6f0bc160fc8a7397e32bfe669ec1e5ae7842c398f291e9e",
+    "generated": false
+  },
+  {
+    "app": "cilium",
+    "selected": "vendor/bpf/cilium/bpf/lib/hexdump.h",
+    "upstream": "vendor/repos/cilium/bpf/lib/hexdump.h",
+    "sha256": "a085c4e5a0eb438886fac7e034a87ac03bda1703ffaad1877e12e37ca3c3e750",
+    "kind": "different",
+    "upstream_sha256": "c8ce4bdf2b73838831458d48be88a1a90a60734754c3406c5c5a226586118cc2",
+    "generated": false
+  },
+  {
+    "app": "cilium",
+    "selected": "vendor/bpf/cilium/bpf/lib/overloadable_skb.h",
+    "upstream": "vendor/repos/cilium/bpf/lib/overloadable_skb.h",
+    "sha256": "d53a2226d2f770b77bfe40f6cc9330bbab2be3cc3ebeee02c2a29ab7ee0485ec",
+    "kind": "different",
+    "upstream_sha256": "244f09ff57b490cbd0e1b8341758d84c98eb970bb9bfc98f2d01fa2052783fa5",
+    "generated": false
+  },
+  {
+    "app": "cilium",
+    "selected": "vendor/bpf/cilium/bpf/lib/static_data.h",
+    "upstream": "vendor/repos/cilium/bpf/lib/static_data.h",
+    "sha256": "6c7b892c3a24cb6e5563d0766ab570071d1aec5ca9a13255a7674a029ace84ba",
+    "kind": "different",
+    "upstream_sha256": "543a50f9a107e348b653b77df8a26fc0a5bf00df0d83cb2e859cf0b48fdd6e4e",
+    "generated": false
+  },
+  {
+    "app": "tetragon",
+    "selected": "vendor/bpf/tetragon/bpf/include/api.h",
+    "upstream": "vendor/repos/tetragon/bpf/include/api.h",
+    "sha256": "891ba316a4300caba5f180c44823b726d0ccca7ae968bbb60f782bc72e9ac3d3",
+    "kind": "different",
+    "upstream_sha256": "e6cc98879e0f2f0a60a53aba722dbb7c8a08c09d3abaaf480d2b7a062fc8f3df",
+    "generated": false
+  },
+  {
+    "app": "tetragon",
+    "selected": "vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h",
+    "upstream": "vendor/repos/tetragon/bpf/include/vmlinux_generated_x86.h",
+    "sha256": "e6644ac306ffddf6447d02ca0e0fbfcbd596554d2003977be825ae2055895225",
+    "kind": "different",
+    "upstream_sha256": "88309ba267212e3171f2bf65392954e0c5d3ae9907da6c729d017f8738843bda",
+    "generated": true
+  },
+  {
+    "app": "tetragon",
+    "selected": "vendor/bpf/tetragon/bpf/lib/bpf_d_path.h",
+    "upstream": "vendor/repos/tetragon/bpf/lib/bpf_d_path.h",
+    "sha256": "f197ba4c4d564969d154f1375542203f2c7b480fcacfc8689ce8f276064527a7",
+    "kind": "different",
+    "upstream_sha256": "88d0b013bd3a077866d0270d2449cad614dd6e7bba3df7210959b47827c35e75",
+    "generated": false
+  },
+  {
+    "app": "tetragon",
+    "selected": "vendor/bpf/tetragon/bpf/lib/bpf_helpers.h",
+    "upstream": "vendor/repos/tetragon/bpf/lib/bpf_helpers.h",
+    "sha256": "a4d3142a1a8d7ee71c581f4418aa232b074b333b16e8e108abbd500a8d108a0e",
+    "kind": "different",
+    "upstream_sha256": "7a3cc47c1abe24cc9301982a3b1c3799bd0c3ec975e04e3e5e626c50f017873a",
+    "generated": false
+  },
+  {
+    "app": "tetragon",
+    "selected": "vendor/bpf/tetragon/bpf/lib/config.h",
+    "upstream": "vendor/repos/tetragon/bpf/lib/config.h",
+    "sha256": "f2c6270b94c1ec522fbdb884c94daf73a0dae4b24067ae15d7bbf41a93ae5d87",
+    "kind": "different",
+    "upstream_sha256": "b27bd1db8edbe34dc5e6ee75d525dfafc834873d031ad4c78f5a8968a3497b59",
+    "generated": false
+  },
+  {
+    "app": "tetragon",
+    "selected": "vendor/bpf/tetragon/bpf/lib/process.h",
+    "upstream": "vendor/repos/tetragon/bpf/lib/process.h",
+    "sha256": "11b24d9fc568e13872e1e4efe9d506906e4c53cfeb9c9fe2f48f3fa265733138",
+    "kind": "different",
+    "upstream_sha256": "14ae7891e2237b990c021188d5698c81634b8a26a0e68c634dedc5d211d6770a",
+    "generated": false
+  },
+  {
+    "app": "tetragon",
+    "selected": "vendor/bpf/tetragon/bpf/process/bpf_execve_map_update.c",
+    "upstream": "vendor/repos/tetragon/bpf/process/bpf_execve_map_update.c",
+    "sha256": "13d26ee97730b87929374389c752b621d16e6ea31aca04bd9b0fdb574e52a126",
+    "kind": "different",
+    "upstream_sha256": "5e3e1d543e8432a4745e79c49fb7dd81c29e924e3288fcbe58cefbfb54c684fa",
+    "generated": false
+  },
+  {
+    "app": "tetragon",
+    "selected": "vendor/bpf/tetragon/bpf/process/bpf_generic_tracepoint.c",
+    "upstream": "vendor/repos/tetragon/bpf/process/bpf_generic_tracepoint.c",
+    "sha256": "bd828e53ef32d95e406956f38bf3beabcb593aec79ca743ac574de70a3fbdd7b",
+    "kind": "different",
+    "upstream_sha256": "e623f6a10668865c9d65222387beb1b602743d6858b11e1bc519e9211bb46a9d",
+    "generated": false
+  },
+  {
+    "app": "tetragon",
+    "selected": "vendor/bpf/tetragon/bpf/process/bpf_process_event.h",
+    "upstream": "vendor/repos/tetragon/bpf/process/bpf_process_event.h",
+    "sha256": "431abdaa294855079874b893da4df4f67fe0dc23944a6185e2e21c96d0f03f75",
+    "kind": "different",
+    "upstream_sha256": "71400c6a6f9e210744c97c009c3b8cbdadac23b7b307a8978c8e2e2f821c82cf",
+    "generated": false
+  },
+  {
+    "app": "tetragon",
+    "selected": "vendor/bpf/tetragon/bpf/process/cel_expr.h",
+    "upstream": "vendor/repos/tetragon/bpf/process/cel_expr.h",
+    "sha256": "fc6146362d8d8519bc29538d4d745096a8c9a813ece9e81be19d387246ac1f4e",
+    "kind": "different",
+    "upstream_sha256": "e4f76c4dc05dab567013fec63214ffa75ec68b2481dfdef41ed65a832ed5c1ec",
+    "generated": false
+  },
+  {
+    "app": "tetragon",
+    "selected": "vendor/bpf/tetragon/bpf/process/data_event.h",
+    "upstream": "vendor/repos/tetragon/bpf/process/data_event.h",
+    "sha256": "dc8d33735342d7499d6043b3c27befa243754f45322fde38dcc9a313bd9d4cc9",
+    "kind": "different",
+    "upstream_sha256": "29ddc13714602b6fd62f99c4a0d5d1bf3537363ba104443abe44145af741ac75",
+    "generated": false
+  },
+  {
+    "app": "tetragon",
+    "selected": "vendor/bpf/tetragon/bpf/process/event_config.h",
+    "upstream": "vendor/repos/tetragon/bpf/process/event_config.h",
+    "sha256": "93e2e9fd0467bbb89c2ffe79dfa8fa60b6d0e1b729dedc69601e26a500c62529",
+    "kind": "different",
+    "upstream_sha256": "5f90ebd78cf442739a3fd3b0640b1b1231671f7d46d8ac6ac5a6403e503b2914",
+    "generated": false
+  },
+  {
+    "app": "tetragon",
+    "selected": "vendor/bpf/tetragon/bpf/process/generic_arg.h",
+    "upstream": "vendor/repos/tetragon/bpf/process/generic_arg.h",
+    "sha256": "a89f0c07b5883b24a8249dbebf728cd038e2e892640d2f81fcd0a69569943e70",
+    "kind": "different",
+    "upstream_sha256": "ae47da1cf91cd194e754327054d33ff4f89f9db20aca8c75b18bc5149a6bc442",
+    "generated": false
+  },
+  {
+    "app": "tetragon",
+    "selected": "vendor/bpf/tetragon/bpf/process/generic_calls.h",
+    "upstream": "vendor/repos/tetragon/bpf/process/generic_calls.h",
+    "sha256": "e040cf15de5165697eaa542e0c5cd0007ccab76739ab4abddfe85a2f70f9e5f3",
+    "kind": "different",
+    "upstream_sha256": "5556bbb2e96ffa9635262d5df385f4455d2f402b881f0ed10389e37de79fafc8",
+    "generated": false
+  },
+  {
+    "app": "tetragon",
+    "selected": "vendor/bpf/tetragon/bpf/process/generic_path.h",
+    "upstream": "vendor/repos/tetragon/bpf/process/generic_path.h",
+    "sha256": "9044319e95420e9ec654377028d718d441c0833c177747201a51499e8567cc69",
+    "kind": "different",
+    "upstream_sha256": "9586863597b03d7d21a0b94b73d5ba3c8568cfcc1a2ae08c885a2091fd1eb3a9",
+    "generated": false
+  },
+  {
+    "app": "tetragon",
+    "selected": "vendor/bpf/tetragon/bpf/process/pfilter.h",
+    "upstream": "vendor/repos/tetragon/bpf/process/pfilter.h",
+    "sha256": "14ce4ebb6b55248c0b08cc297cfe067069dc116740c22326d44b08f3a935ec2e",
+    "kind": "different",
+    "upstream_sha256": "b29963e5a124ce38678a6b12d73d386ed2cd844e469174540089aeeb2e039bb5",
+    "generated": false
+  },
+  {
+    "app": "tetragon",
+    "selected": "vendor/bpf/tetragon/bpf/process/regs.h",
+    "upstream": "vendor/repos/tetragon/bpf/process/regs.h",
+    "sha256": "05f520176b67566cb7ab64cc8a31288a0017287361495b558db3609bd2f552f6",
+    "kind": "different",
+    "upstream_sha256": "835bb8fffd8d19d64a47cce23fd1b596888fcb0a435a3b73664e25657f5fbe2e",
+    "generated": false
+  },
+  {
+    "app": "tetragon",
+    "selected": "vendor/bpf/tetragon/bpf/process/types/basic.h",
+    "upstream": "vendor/repos/tetragon/bpf/process/types/basic.h",
+    "sha256": "f86b33f98b51c79266b1139367c93d1e4f4dcee4d1e9b0a64756a73045ebb95c",
+    "kind": "different",
+    "upstream_sha256": "f0ef5d0c995ec2e7cf2ed7ecea7dbe97eabecfa163527351c6969ebc40ce6874",
+    "generated": false
+  },
+  {
+    "app": "tetragon",
+    "selected": "vendor/bpf/tetragon/bpf/process/user_preload.h",
+    "upstream": "vendor/repos/tetragon/bpf/process/user_preload.h",
+    "sha256": "e79a1ac200b8a907b056a8309d2af4f30920e7b8e8553933149099e57a3d2a99",
+    "kind": "different",
+    "upstream_sha256": "610631f2a17a93ea3817eecdb9848e2ae686b1b1cc88e6aadaf562f8c831530e",
+    "generated": false
+  },
+  {
+    "app": "tracee",
+    "selected": "vendor/bpf/tracee/pkg/ebpf/c/common/buffer.h",
+    "upstream": "vendor/repos/tracee/pkg/ebpf/c/common/buffer.h",
+    "sha256": "373a039ac7af6b60ad51e6a4b7517312506e8042e43d1e5128b3cfb6779090d3",
+    "kind": "different",
+    "upstream_sha256": "c97b8b1009ef202d3ac82afc0ffdf59262752524973c2bcf9b69afce3f23d6e1",
+    "generated": false
+  },
+  {
+    "app": "tracee",
+    "selected": "vendor/bpf/tracee/pkg/ebpf/c/common/common.h",
+    "upstream": "vendor/repos/tracee/pkg/ebpf/c/common/common.h",
+    "sha256": "f096805ca373df166348c1ee35117a03d7c94a7b3fe4813bf16ca5654df1e64e",
+    "kind": "different",
+    "upstream_sha256": "27318430673cbf411aa6356bb53c761f9d531e30c9511d394ccbec18d6c5427c",
+    "generated": false
+  },
+  {
+    "app": "tracee",
+    "selected": "vendor/bpf/tracee/pkg/ebpf/c/common/filesystem.h",
+    "upstream": "vendor/repos/tracee/pkg/ebpf/c/common/filesystem.h",
+    "sha256": "c6f04017207a8caec82317555be9f69346e5deb2f11114f599746c8d503a76c6",
+    "kind": "different",
+    "upstream_sha256": "ec299a96522c3c5b1731b456b6adc8ef96f4822f06661b144159bfb78b1bbddf",
+    "generated": false
+  },
+  {
+    "app": "katran",
+    "selected": "vendor/bpf/katran/katran/lib/bpf/healthchecking.c",
+    "upstream": "vendor/repos/katran/katran/lib/bpf/healthchecking.c",
+    "sha256": "4ee393ef94b1644685090400e248ccdfbfb67c99cea641cadd310c9c0af6a8bd",
+    "kind": "different",
+    "upstream_sha256": "cd3f00a85d16ee63ac12205e4d26492b8509a896faf14c9fba1445a85e4b3c1d",
+    "generated": false
+  },
+  {
+    "app": "katran",
+    "selected": "vendor/bpf/katran/katran/lib/bpf/healthchecking_helpers.h",
+    "upstream": "vendor/repos/katran/katran/lib/bpf/healthchecking_helpers.h",
+    "sha256": "020e88a98851cd1081819df4594d61d1ca6da81ff56e37cd5a4a1a492b081f39",
+    "kind": "different",
+    "upstream_sha256": "9207df2cb01fdb6942973a553989001372e6d4ae2dd9c02756a41e3a803c335f",
+    "generated": false
+  },
+  {
+    "app": "katran",
+    "selected": "vendor/bpf/katran/katran/lib/linux_includes/bpf.h",
+    "upstream": "vendor/repos/katran/katran/lib/linux_includes/bpf.h",
+    "sha256": "593e1d9e9dc2685c11da40e5b1b67e9026c5c4a7cad077ff5057f3607faf3746",
+    "kind": "different",
+    "upstream_sha256": "d6b39da81707e61ad50086cbb38434ba6057b69209c7a57c45efd6d2a50032a3",
+    "generated": false
+  }
+]
