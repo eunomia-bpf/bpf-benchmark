@@ -1,0 +1,39 @@
+{
+  "recorded_at": "2026-11-13T05:12:21.469546+00:00",
+  "scope": "Generic ISA regression guest setup error; no fixture program loaded",
+  "model_commit": "a1d1fb198",
+  "kernel_commit": "74d1097af561",
+  "launcher_pid": 1186389,
+  "make_exit_code": 2,
+  "stock_verifier_submissions": 0,
+  "native_source_submissions": 0,
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-signed-bound",
+  "error": "SERVICE_RUN nested make inherited libnativeloader cwd; relative -C kprog/tv was absent",
+  "service_summary": {
+    "started": "2026-11-13T04:54:43.724487+00:00",
+    "command": [
+      "make",
+      "-C",
+      "kprog/tv",
+      "signed-bound-guest",
+      "SIGNED_BOUND_RAW=/workspaces/kprog-raw/verified/20261113-signed-bound"
+    ],
+    "service": {
+      "ready": true,
+      "arch": 1,
+      "endpoint": "/sys/kernel/debug/bpf_x86_native_lab/specializer"
+    },
+    "returncode": 2,
+    "service_returncode": -15,
+    "finished": "2026-11-13T04:54:44.265803+00:00"
+  },
+  "forward_fix_commit": "873ef10ed",
+  "next_invocation": "Absolute -C /workspaces/repository/kprog/tv and SIGNED_BOUND_OUTPUT inside unique retry1 writable output; inputs stay at original raw directory",
+  "application_replay": {
+    "launcher_pid": 1190459,
+    "root": "/workspaces/kprog-raw/verified/20261113-helper-class-replay/word32-control",
+    "outcome": "uncollected; proceeds independently"
+  },
+  "archive": "signed-bound-cwd-failure.tar.gz",
+  "archive_bytes": 3059
+}

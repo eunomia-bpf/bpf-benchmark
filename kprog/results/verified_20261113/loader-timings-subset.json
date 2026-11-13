@@ -1,0 +1,53 @@
+{
+  "recorded_at": "2026-11-13T05:12:21.469546+00:00",
+  "source_commit": "485789608",
+  "scope": "Host log-protocol/ABI and production syntax subset; application phase attribution awaits sole-base integration",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-loader-timings",
+  "environment": "BPFREJIT_NATIVE_LOADER_TIMING_LOG",
+  "default": "unset or empty emits no records and collects no new phase clocks",
+  "c_abi": {
+    "prog_fd_offset": 0,
+    "replaced_offset": 4,
+    "error_offset": 8,
+    "error_buffer_bytes": 65536
+  },
+  "host_regression": {
+    "final_records": 80,
+    "writers": 4,
+    "phase_fields": 12,
+    "disabled_path": "PASS",
+    "open_error": "PASS",
+    "numeric_json_fields": "PASS",
+    "atomic_appends": "PASS",
+    "production_cpp_syntax": "PASS"
+  },
+  "phase_fields": [
+    "source_context_ns",
+    "manifest_ns",
+    "companion_total_ns",
+    "data_symbols_ns",
+    "companion_map_ptr_extract_ns",
+    "companion_lookup_spec_ns",
+    "cache_lookup_ns",
+    "native_link_exec_ns",
+    "native_link_read_ns",
+    "map_patch_ns",
+    "upload_ns",
+    "prog_load_ns"
+  ],
+  "phase_nesting": {
+    "companion_total_ns": [
+      "companion_map_ptr_extract_ns",
+      "companion_lookup_spec_ns"
+    ],
+    "upload_ns": [
+      "prog_load_ns"
+    ]
+  },
+  "clock": "steady_clock nanoseconds; total ends before diagnostic log I/O",
+  "completed_load_records_only": true,
+  "artifact_status": "Shared loader/base/image unchanged; source syntax and real emitter tested",
+  "raw_log_retention": "Distinct per-PID JSONL files for both host runs retained; first exact stdout captured from preserved supervisor trajectory, second stdout in check2.log",
+  "archive": "loader-timings-subset.tar.gz",
+  "archive_bytes": 1794
+}
