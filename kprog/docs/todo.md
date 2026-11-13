@@ -92,6 +92,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED distinct-body新queue首18实际观察（2026-11-13）** 新queue18submitted/13stock verified+installed/5verifier rejected，BCC8/8，Tracee4/3/1，Tetragon6/2/4；其余三应用在新queue各0，旧10body观察及原78实例观察各自保留。新增11–18包含Tracee context拒绝1、接受1与BCC接受6；八份完整request档案 `resident-body-outcomes-11-18.tar.gz`（27616113bytes）、累计 `resident-body-first-eighteen-receipt.json` 记录每request model epoch及实际raw位置。新增B均为b177，map mutation修复d0fd35ac1后的请求另记；load-only，native执行/workload待测。scalar class首轮完整request、journal、Make日志和map副作用host前后回归归档 `helper-class-first-replay*`（4303828bytes），同body新模型重放已后台启动1166404，raw `/workspaces/kprog-raw/verified/20261113-helper-class-replay/map-mutations-*`。
+
 - **VERIFIED map helper输入副作用（2026-11-13）** 同一scalar-memory body的b177重放完成：1真实提交、1stock verifier拒绝、0安装，native0xbe3对应BPF8524 scalar byte-store、processed6416；完整request保留在 `/workspaces/kprog-raw/verified/20261113-helper-class-replay/control/service.tar.gz`。继续补齐map update/delete的通用caller-stack effect：唯一kernel helpers.c原型key/value为输入，map存储是写目标，两个wrapper复用caller readonly effect。新增oracle旧header在map update后丢失live pointer（line32，make2），修复后UBSan通过；raw同目录map-effects-before/after.log。实际同body再重放接续，接受/安装计数随实际结果更新。
 
 - **VERIFIED request档案持久保留（2026-11-13）** census guest在写journal前将service request success/failure archive复制到RUN_OUTPUT/retained-requests/session目录，并把journal目标指向该持久位置。回归覆盖service临时session清理后archive仍可读取，group-check三项通过；既有已结束helper replay的完整request仍在control/service.tar.gz内保留，实际结果继续单列。
