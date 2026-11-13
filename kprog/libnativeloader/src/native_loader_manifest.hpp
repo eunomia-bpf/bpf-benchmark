@@ -43,6 +43,7 @@ struct ManifestResolution {
     std::vector<NativeMapRule> map_rules;
     std::string loader_timing_log;
     bool kernel_helper_context = false;
+    bool kernel_data_layout = false;
 };
 
 [[noreturn]] inline void manifest_fail(const std::string &message)
@@ -647,6 +648,7 @@ std::optional<ManifestResolution> resolve_native_manifest(
         if (auto timing_log = json_object_string(entry, "loader_timing_log"))
             candidate.loader_timing_log = *timing_log;
         candidate.kernel_helper_context = json_object_bool(entry, "kernel_helper_context").value_or(false);
+        candidate.kernel_data_layout = json_object_bool(entry, "kernel_data_layout").value_or(false);
         if (selected &&
             (selected->native_object_path != candidate.native_object_path ||
              selected->symbol_name != candidate.symbol_name)) {

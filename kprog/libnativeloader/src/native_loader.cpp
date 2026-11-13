@@ -8,6 +8,7 @@
 #include "native_loader_subprocess.hpp"
 #include "native_loader_timings.hpp"
 #include "native_loader_helper_query.hpp"
+#include "native_loader_data_layout.hpp"
 
 #include <bpf/bpf.h>
 #include <bpf/btf.h>
@@ -1574,6 +1575,8 @@ struct MapMeta {
     uint32_t max_entries;
     uint64_t kernel_addr;
     uint64_t value_addr;
+    uint32_t btf_id = 0;
+    uint32_t btf_value_type_id = 0;
 };
 
 struct HelperAlias {
@@ -1917,6 +1920,8 @@ MapMeta load_map_meta_from_fd(int map_fd)
         info.max_entries,
         lookup_kernel_map_ptr_by_fd(map_fd),
         lookup_array_value_addr_if_direct(info, map_fd),
+        info.btf_id,
+        info.btf_value_type_id,
     };
 }
 
@@ -1959,6 +1964,8 @@ std::vector<MapMeta> collect_open_process_maps(Predicate predicate)
             info.max_entries,
             lookup_kernel_map_ptr_by_fd(fd),
             lookup_array_value_addr_if_direct(info, fd),
+            info.btf_id,
+            info.btf_value_type_id,
         });
     }
     closedir(fd_dir);
@@ -2751,25 +2758,24 @@ CompanionLoad::LookupSite lookup_site_for_map_meta(const MapMeta &meta,
 }
 
 void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
-                                  CompanionLoad &load)
+                                  CompanionLoad &load, bool kernel_data_layout = false)
 {
-    int fd = open(native_object.c_str(), O_RDONLY | O_CLOEXEC);
+    std::unordered_map<uint32_t, std::unique_ptr<btf, decltype(&btf__free)>> data_types;
+    ScopedFd descriptor(open(native_object.c_str(), O_RDONLY | O_CLOEXEC));
+    const int fd = descriptor.get();
     if (fd < 0) {
         fail("open native object " + native_object.string() + ": " + std::strerror(errno));
     }
     if (elf_version(EV_CURRENT) == EV_NONE) {
-        close(fd);
         fail("libelf initialization failed");
     }
-    Elf *elf = elf_begin(fd, ELF_C_READ, nullptr);
+    std::unique_ptr<Elf, decltype(&elf_end)> handle(elf_begin(fd, ELF_C_READ, nullptr), elf_end);
+    Elf *elf = handle.get();
     if (!elf) {
-        close(fd);
         fail("elf_begin " + native_object.string() + ": " + elf_errmsg(-1));
     }
     size_t shstrndx = 0;
     if (elf_getshdrstrndx(elf, &shstrndx) != 0) {
-        elf_end(elf);
-        close(fd);
         fail("elf_getshdrstrndx " + native_object.string() + ": " + elf_errmsg(-1));
     }
 
@@ -2777,8 +2783,6 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
     while ((scn = elf_nextscn(elf, scn)) != nullptr) {
         GElf_Shdr shdr = {};
         if (!gelf_getshdr(scn, &shdr)) {
-            elf_end(elf);
-            close(fd);
             fail("gelf_getshdr " + native_object.string() + ": " + elf_errmsg(-1));
         }
         if (shdr.sh_type != SHT_SYMTAB && shdr.sh_type != SHT_DYNSYM) {
@@ -2792,8 +2796,6 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
         for (size_t i = 0; i < count; i++) {
             GElf_Sym sym = {};
             if (!gelf_getsym(data, static_cast<int>(i), &sym)) {
-                elf_end(elf);
-                close(fd);
                 fail("gelf_getsym " + native_object.string() + ": " + elf_errmsg(-1));
             }
             if (sym.st_shndx == SHN_UNDEF && GELF_ST_TYPE(sym.st_info) != STT_FUNC) {
@@ -2816,8 +2818,6 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
             }
             GElf_Shdr target_shdr = {};
             if (!gelf_getshdr(target_scn, &target_shdr)) {
-                elf_end(elf);
-                close(fd);
                 fail("gelf_getshdr target " + native_object.string() + ": " + elf_errmsg(-1));
             }
             const char *section = elf_strptr(elf, shstrndx, target_shdr.sh_name);
@@ -2833,27 +2833,34 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
                 continue;
             }
             if (sym.st_value < target_shdr.sh_addr) {
-                elf_end(elf);
-                close(fd);
                 fail("native data symbol " + std::string(name) + " is below section base");
             }
-            const uint64_t off = sym.st_value - target_shdr.sh_addr;
+            uint64_t off = sym.st_value - target_shdr.sh_addr;
             const uint64_t symbol_end = off + sym.st_size;
             const uint64_t section_end =
                 std::max<uint64_t>(target_shdr.sh_size, symbol_end);
-            const MapMeta *map = find_array_data_map(load, section, section_end);
+            const MapMeta *map = find_array_data_map(load, section, kernel_data_layout ? 0 : section_end);
             if (!map) {
                 continue;
             }
+            if (kernel_data_layout) {
+                auto types = data_types.find(map->btf_id);
+                if (types == data_types.end()) {
+                    if (!map->btf_id) fail("BPF data map " + map->name + " lacks BTF");
+                    std::unique_ptr<btf, decltype(&btf__free)> loaded(
+                        btf__load_from_kernel_by_id(map->btf_id), btf__free);
+                    const long error = libbpf_get_error(loaded.get());
+                    if (error || !loaded)
+                        fail("load BPF data map BTF: " + libbpf_error_string(error ? error : -errno));
+                    types = data_types.emplace(map->btf_id, std::move(loaded)).first;
+                }
+                off = native_data_symbol_offset(types->second.get(), map->btf_value_type_id, section, name);
+            }
             if (off + sym.st_size > map->value_size) {
-                elf_end(elf);
-                close(fd);
                 fail("native data symbol " + std::string(name) +
                      " exceeds BPF data map value_size for " + map->name);
             }
             if (map->value_addr == 0) {
-                elf_end(elf);
-                close(fd);
                 fail("native data map " + map->name +
                      " has no direct value address for symbol " + std::string(name));
             }
@@ -2863,8 +2870,6 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
             load.native_data_symbols.insert(name);
         }
     }
-    elf_end(elf);
-    close(fd);
     add_known_kconfig_symbol_addrs(load);
 }
 
@@ -3959,6 +3964,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     std::string symbol_name = options.symbol_name;
     std::vector<NativeMapRule> map_rules;
     bool kernel_helper_context = false;
+    bool kernel_data_layout = false;
     if (native_object_path.empty()) {
         if (source_insns.empty()) {
             fail("native_loader: manifest resolution requires source BPF bytecode");
@@ -3980,6 +3986,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         native_object_path = resolution->native_object_path;
         symbol_name = resolution->symbol_name;
         kernel_helper_context = resolution->kernel_helper_context;
+        kernel_data_layout = resolution->kernel_data_layout;
         map_rules = std::move(resolution->map_rules);
     }
     if (symbol_name.empty()) {
@@ -3996,7 +4003,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     if (kernel_helper_context)
         companion.context_helpers = query_program_helper_targets(options.original_prog_fd, prog_info.type);
     const auto data_symbols_start = diagnostic_now();
-    add_native_data_symbol_addrs(native_object_path, companion);
+    add_native_data_symbol_addrs(native_object_path, companion, kernel_data_layout);
     const auto data_symbols_end = diagnostic_now();
     const auto with_common_timings = [&](LoadedProgram result) {
         if (collecting_timings()) {

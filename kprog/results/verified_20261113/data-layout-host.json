@@ -1,0 +1,33 @@
+{
+  "scope": "Default-off general loaded-map BTF data symbol candidate; host subset only",
+  "flag": "objects[].kernel_data_layout=true; absent/false preserve existing native offset path",
+  "mechanism": "Map BTF DATASEC/VAR name -> actual BPF variable offset; same live map address/ID, no copying native initializers",
+  "sections": [
+    ".rodata",
+    ".data",
+    ".bss"
+  ],
+  "fixture": {
+    "symbols": 7,
+    "native_padding_offsets": [
+      0,
+      32,
+      48
+    ],
+    "bpf_offsets_rodata": [
+      0,
+      4,
+      8
+    ]
+  },
+  "host_tests": "PASS BTF scalar/array offsets, missing-symbol error, absent/false/true manifest selection; full production source compiles",
+  "kernel_tests": "Pending exact production binding against three actual BTF maps, live value preservation, default-path mismatch reproduction, metadata error FD cleanup",
+  "canonical_base_or_image_changed": false,
+  "current_image": "7f915aea1f2276fb9509027cb7e4fc2dd6e4182740312e002ebcc14dbc81c923",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-data-layout",
+  "archive": "data-layout-host.tar.gz",
+  "upstream_application_source_changed": false,
+  "benchmark_settings_changed": false,
+  "new_admission_gate": false,
+  "raw_data_removed": false
+}

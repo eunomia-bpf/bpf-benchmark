@@ -13,6 +13,37 @@ HELPER_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-helper-context/function
 HELPER_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-helper-context/kernel
 HELPER_KERNEL_MODULE ?= /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
 REFRESH_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-shared-refresh
+DATA_LAYOUT_BUILD ?= /var/tmp/kprog-tmp/verified/data-layout
+DATA_LAYOUT_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-data-layout/host
+DATA_LAYOUT_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-data-layout/kernel
+
+.PHONY: data-layout-inputs data-layout-check data-layout-kernel-kvm guest-data-layout
+data-layout-inputs:
+	install -d "$(DATA_LAYOUT_BUILD)"
+	clang-18 -O2 -fPIC -c ../test/native_data_layout_fixture.c -o "$(DATA_LAYOUT_BUILD)/fixture.o"
+	$(CXX) -std=gnu++20 -O1 -g -ffunction-sections -fdata-sections \
+		-Iinclude -I"$(KERNEL_OFFSETS_INCLUDE)" -I"$(LIBBPF_PREFIX)/include" \
+		-I"$(REPO_ROOT)/vendor/libbpf/include" -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
+		../test/native_loader_data_layout.cpp -Wl,--gc-sections "$(LIBBPF_LIBRARY)" -lelf -lz -ldl -pthread \
+		-o "$(DATA_LAYOUT_BUILD)/data-layout"
+
+data-layout-check: data-layout-inputs
+	install -d "$(DATA_LAYOUT_OUTPUT)"
+	"$(DATA_LAYOUT_BUILD)/data-layout" host "$(DATA_LAYOUT_BUILD)/fixture.o" "$(DATA_LAYOUT_OUTPUT)"
+
+data-layout-kernel-kvm:
+	install -d "$(DATA_LAYOUT_KERNEL_OUTPUT)"
+	install -m 0755 "$(DATA_LAYOUT_BUILD)/data-layout" "$(DATA_LAYOUT_KERNEL_OUTPUT)/data-layout"
+	install -m 0644 "$(DATA_LAYOUT_BUILD)/fixture.o" "$(DATA_LAYOUT_KERNEL_OUTPUT)/fixture.o"
+	taskset -c 13 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(DATA_LAYOUT_KERNEL_OUTPUT)" --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/libnativeloader guest-data-layout DATA_LAYOUT_KERNEL_OUTPUT=$(DATA_LAYOUT_KERNEL_OUTPUT)'
+
+guest-data-layout:
+	mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
+	"$(DATA_LAYOUT_KERNEL_OUTPUT)/data-layout" kernel "$(DATA_LAYOUT_KERNEL_OUTPUT)/fixture.o" "$(DATA_LAYOUT_KERNEL_OUTPUT)"
 
 .PHONY: shared-base-refresh shared-base-finalize shared-base-modules-repair shared-module-syntax
 shared-base-refresh:
