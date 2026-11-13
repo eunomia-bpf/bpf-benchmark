@@ -1,0 +1,20 @@
+{
+  "scope": "First D23 kernel unit attempt; guest executable startup failed before any helper query",
+  "test_commit": "221e719e0",
+  "kernel_commit": "74d1097af561",
+  "started": "2026-11-13T07:43:25Z",
+  "finished": "2026-11-13T07:43:34Z",
+  "make_exit": 2,
+  "guest_shell_error": "/var/tmp/kprog-tmp/verified/helper-context/helper-kernel: not found",
+  "guest_shell_status": 127,
+  "module_insmod": "Succeeded using prepared canonical module; no rebuild",
+  "actual_test_program_loads": 0,
+  "actual_helper_queries": 0,
+  "native_execution_requests": 0,
+  "host_binary": "Present; same /lib64/ld-linux-x86-64.so.2 interpreter as the working canonical loader",
+  "diagnosis": "Guest artifact visibility/startup failure; not a helper target verdict",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-helper-context/kernel",
+  "raw_job": "/workspaces/kprog-raw/verified/20261113-helper-context/kernel-job",
+  "archive": "helper-context-kernel-first-attempt.tar.gz",
+  "next": "Place exact prepared executable in persistent per-run output mount and retry with separate outputs"
+}
