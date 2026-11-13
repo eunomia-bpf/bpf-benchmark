@@ -14,7 +14,7 @@
 
 **lane perf（Codex，gpt-6.1-sol）。目标：每个性能数字都是等量工作、可复现的；六应用几何平均 native/eBPF 达到 1.20x 以上，每个应用不低于 05-29 下限。**
 - [ ] P1 OTel、Tetragon 等量工作：读一次性 Codex 的报告 kprog/results/equal-work-20261113/report.md（以及 COORDINATION 里 FOR TEMP CODEX 的线索：内联 tail call 用到的内核偏移和计数槽）；查清哪一边偏了，按所属组件修（链接器、加载器、shim 属 lane verified，直接和它商量），新行为放在默认关闭的开关后。
-- [ ] P2 修好后在 CPU 0-7 跑一轮六应用（stats 关和开，每个应用 3×180 秒，广度优先），每次运行用 stubs.py 和 equal-work 的程序自身计数核对；把下限表和几何平均写进第 1 节。
+- [ ] P2 修好后只重测受这处修复影响的应用（stats 关和开，每个应用 3×180 秒），每次运行用 stubs.py 和程序自身计数核对，增量写进第 1 节；六应用全量计时只在冻结前跑一次，正式下限表和几何平均以那次为准。
 - [ ] P3 等量工作成立的应用里，按每次调用的差距找原生一侧的通用优化（OTel、Tetragon、Cilium）。
 
 **lane C（omp，fleet/local-large）。目标：用对同类程序都适用的改动提高 Tracee、BCC、Katran 原生代码每次调用的速度。**
@@ -30,8 +30,9 @@
 
 **共用资源，由 lane 自己商量（建议做法，lane 可以改）：**
 - CPU：0-7 计时，一次一个 guest，计时前取 `flock /workspaces/.agent-state/kprog-lanes/locks/timing`；8-15 verified；16-19 perf；20-23 lane C。需要更多就在 COORDINATION 里和对方商量。
-- 内核、底座、镜像重建：要重建的 lane 先在 COORDINATION 说明，取 `flock .../locks/image`，确认没有别的 lane 的 guest 在用，重建后贴 IMAGE REBUILT，并由 lane perf 重跑一轮六应用确认下限。
+- 内核、底座、镜像重建：要重建的 lane 先在 COORDINATION 说明，取 `flock .../locks/image`，确认没有别的 lane 的 guest 在用，重建后贴 IMAGE REBUILT，只重测受这次改动影响的应用。
 - 文件：链接器、加载器、shim 归 verified；vendor/bpf 原生构建和 kprog/perf 的优化归 lane C；计时脚本、results 下的性能结果归 perf。改别人的文件先和对方在 COORDINATION 说好。
+- 运营者 2026-11-13 的"先做完再一次确认"六条（spark-manage workspace-rules.md，784fa638）同样适用："是不是过于慢了? 应该都弄好再?"：每处改动只在它影响的那一小批上检查；失败用多台 guest 并行定位，不逐个对半拆；耗时的端到端测量冻结前跑一次；队列按内存放开槽位；提交任务前先空跑。
 - 规则不变：一个工作树、一个内核、一个镜像、一个底座；原始数据不删；新行为放在默认关闭的开关后，默认路径字节不变；不新增检查；论文、故事、设计、benchmark 设置要运营者同意。
 
 ## 1. 性能（目标：六应用几何平均 native/JIT 1.20x–1.40x，来自原生代码）
@@ -81,6 +82,7 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED B storage同P编译结果（2026-11-13）** 91fc2558a清除dead pointer代表值未解决storage类：与request29相同kernel P及canonical proof逐字相同，make0（02:34:11→02:47:29）；first ctx spill仍R10-656，最深显式R10 offset2816→2808，section3192344→3193456bytes（399043→399182 slots）。因此不是512-byte stack修复，未再次提交verifier，不作接受声明。完整P/B/compiler/preprocessed/disassembly归档 `kprog/results/verified_20261113/ghost-pointer-frame-comparison*`，raw `/workspaces/kprog-raw/verified/20261113-ghost-pointer-lifetime/`。诊断结束立即SIGCONT恢复census QEMU1110393。后续采用operator batch-first：短subset检查批量修复，完整昂贵确认仅batch末尾；并行隔离须每job硬内存边界。
 - **VERIFIED distinct-body新queue首2实际观察（2026-11-13）** 新queue2submitted/2compiled/1verified/1verifier rejected，均Tetragon generic_tracepo（retained213/body10安装，retained210/body11在BPF7759 probe_read R2 length无界拒绝，processed7979）；不含10个复用body观察。request1于02:22:40→02:27:48，archive实际preprocessed B无ptr清除；request2于02:28:04→02:29:56，实际preprocessed B含91fc2558a清ptr，因此新header已完成一次真实compile/verifier提交，但此结果不是同body前后对照，也不证明stack类解决。完整两请求/累计新journal归档 `kprog/results/verified_20261113/resident-body-outcomes-1-2.tar.gz`，receipt `resident-body-first-two-receipt.json` 明列model epochs，raw `/workspaces/kprog-raw/verified/20261113-body-census/first-two/`。旧78实例提交和新body采样观察分开，native execution/workload未测。
 - **VERIFIED B pointer代表值寿命修正（2026-11-13）** 通用stack ghost tag失效时原先只清tag，ptr仍被保留；现在overlap erase、低于SP的frame release、global/helper clear同时清ptr，减少dead代表值跨控制流的活跃期，不改native byte arena。已有stack lifetime host regression新增死ptr清除、相邻live pointer和raw bytes保持：旧header在line76失败（make2），新header UBSan PASS（make0）。日志/receipt raw `/workspaces/kprog-raw/verified/20261113-ghost-pointer-lifetime/`，归档 `kprog/results/verified_20261113/ghost-pointer-lifetime*`。实际compiled B frame与verifier结果尚待测，未声称修完storage类；grouped guest首request已在d089下preprocess，后续可采用新header，按各请求实际B/source记录epoch。无limit/gate/kernel/image/settings修改。
 - **VERIFIED distinct-body准备完成（2026-11-13）** d528c508d controller运行0：549instances→247groups（246成功linked-body输入加1未选出native的待提交项）；已有10个body以archive实际proof逐字匹配复用，pending237。Tetragon287instances/31groups/7已有，Cilium72/26/1，OTel13/13/1，Katran1/1/1，BCC25/25/0，Tracee151/151/0。已有观察10中4verified，代表membership235；这是body采样及membership，不能当作235次真实验证。旧78次实际提交与raw全部保留，workload/execution未测。完整membership、P proof、link commands与旧observation引用归档 `kprog/results/verified_20261113/resident-body-group-preparation*`，raw `/workspaces/kprog-raw/verified/20261113-body-census/`。下一步pending-body guest，并从已知51.04% Tetragon BPF-time name family的通用B storage压力着手。
