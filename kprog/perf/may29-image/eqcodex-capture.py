@@ -36,7 +36,7 @@ def save(command, path):
 def profile_loader(perf, prefix, dest):
     agent = save(prefix + ['pgrep', '-x', 'tetragon'], dest / 'loader-perf-pid.txt')
     if agent.returncode:
-        return
+        raise RuntimeError(f'Tetragon PID query failed ({agent.returncode}); see {dest}/loader-perf-pid.txt.stderr')
     pid = str(int(agent.stdout.decode().strip()))
     save(['cat', f'/proc/{pid}/maps'], dest / 'loader-perf-maps.txt')
     symbols = dest / 'loader-perf-symbols'
@@ -50,13 +50,17 @@ def profile_loader(perf, prefix, dest):
                       '--call-graph', 'dwarf,8192', '-p', pid, '-o', str(data),
                       '--', 'sleep', '10'], dest / 'loader-perf-record.txt')
     if recording.returncode:
-        return
+        raise RuntimeError(f'loader perf record failed ({recording.returncode}); see {dest}/loader-perf-record.txt.stderr')
     shutil.copy2(data, dest / 'loader-perf.data')
     arguments = ['-i', str(data), '--symfs', str(symbols),
                  '--kallsyms', str(dest / 'loader-perf-kallsyms.txt')]
-    save([perf, 'report', *arguments, '--stdio', '--no-children', '--percent-limit', '0'],
-         dest / 'loader-perf-report.txt')
-    save([perf, 'script', *arguments], dest / 'loader-perf-script.txt')
+    report = save([perf, 'report', *arguments, '--stdio', '--no-children', '--percent-limit', '0'],
+                  dest / 'loader-perf-report.txt')
+    if report.returncode:
+        raise RuntimeError(f'loader perf report failed ({report.returncode}); see {dest}/loader-perf-report.txt.stderr')
+    script = save([perf, 'script', *arguments], dest / 'loader-perf-script.txt')
+    if script.returncode:
+        raise RuntimeError(f'loader perf script failed ({script.returncode}); see {dest}/loader-perf-script.txt.stderr')
 
 
 def observe(out):
