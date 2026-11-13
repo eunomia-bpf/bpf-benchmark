@@ -17,7 +17,15 @@ import time
 
 
 def save(command, path):
-    result = subprocess.run(command, capture_output=True, timeout=45)
+    started = {'wall_time': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+               'monotonic_ns': time.clock_gettime_ns(time.CLOCK_MONOTONIC)}
+    try:
+        result = subprocess.run(command, capture_output=True, timeout=45)
+    finally:
+        finished = {'wall_time': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                    'monotonic_ns': time.clock_gettime_ns(time.CLOCK_MONOTONIC)}
+        path.with_suffix(path.suffix + '.timing.json').write_text(
+            json.dumps({'start': started, 'end': finished}, indent=2) + '\n')
     path.write_bytes(result.stdout)
     path.with_suffix(path.suffix + '.stderr').write_bytes(result.stderr)
     path.with_suffix(path.suffix + '.rc').write_text(str(result.returncode) + '\n')

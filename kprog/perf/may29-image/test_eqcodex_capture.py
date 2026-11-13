@@ -17,6 +17,27 @@ SPEC.loader.exec_module(CAPTURE)
 
 
 class GuestControl(unittest.TestCase):
+    def test_observation_times_bound_the_actual_failed_command(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'sample.json'
+            result = CAPTURE.save([sys.executable, '-c', 'print("partial"); raise SystemExit(7)'], path)
+            clocks = json.loads(path.with_suffix('.json.timing.json').read_text())
+            self.assertEqual(result.returncode, 7)
+            self.assertEqual(path.read_text(), 'partial\n')
+            self.assertEqual(path.with_suffix('.json.rc').read_text(), '7\n')
+            self.assertLess(clocks['start']['monotonic_ns'], clocks['end']['monotonic_ns'])
+            self.assertLessEqual(clocks['start']['wall_time'], clocks['end']['wall_time'])
+
+    def test_observation_timeout_keeps_clock_bounds_and_propagates(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'sample.json'
+            with patch.object(CAPTURE.subprocess, 'run', side_effect=subprocess.TimeoutExpired(['tool'], 45)):
+                with self.assertRaises(subprocess.TimeoutExpired):
+                    CAPTURE.save(['tool'], path)
+            clocks = json.loads(path.with_suffix('.json.timing.json').read_text())
+            self.assertLessEqual(clocks['start']['monotonic_ns'], clocks['end']['monotonic_ns'])
+            self.assertFalse(path.exists())
+
     def test_long_command_stays_in_plan_and_guest_argv_stays_short(self):
         with tempfile.TemporaryDirectory() as directory:
             command = shlex.join(['python3', '-c', 'print("exact output")', 'x' * 5000])
