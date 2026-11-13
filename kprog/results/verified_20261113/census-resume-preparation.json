@@ -1,0 +1,100 @@
+{
+  "recorded_utc": "2026-11-13T09:46:24.296201+00:00",
+  "scope": "Prepared checkpoint resume; no guests launched or new verifier observations",
+  "controller_commit": "d30fb75104047d790b5908fdcaf0f9c565107df2",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-census-resume",
+  "resume": {
+    "input_inventory": "/workspaces/kprog-raw/verified/20261113-body-census/ready/inventory.json",
+    "completed_journals": [
+      "/workspaces/kprog-raw/verified/20261113-body-census/first-twenty-six/outcomes.jsonl"
+    ],
+    "priority_inventories": [
+      "/workspaces/kprog-raw/verified/20261113-map-bounds/ready-with-retries/inventory.json"
+    ],
+    "pending_bodies": 211,
+    "queued_bodies": 216,
+    "additional_replay_bodies": 5,
+    "controller_commit": "d30fb75104047d790b5908fdcaf0f9c565107df2",
+    "guest_inventories": [
+      "/workspaces/kprog-raw/verified/20261113-census-resume/ready/queues/0/inventory.json",
+      "/workspaces/kprog-raw/verified/20261113-census-resume/ready/queues/1/inventory.json",
+      "/workspaces/kprog-raw/verified/20261113-census-resume/ready/queues/2/inventory.json"
+    ]
+  },
+  "queues": [
+    {
+      "index": 0,
+      "inventory": "/workspaces/kprog-raw/verified/20261113-census-resume/ready/queues/0/inventory.json",
+      "bodies": 72,
+      "first_body_groups": [
+        20,
+        31,
+        37
+      ],
+      "applications": {
+        "tracee/monitor": 49,
+        "bcc/set": 5,
+        "tetragon/observer": 6,
+        "cilium/agent": 9,
+        "otelcol-ebpf-profiler/profiling": 3
+      },
+      "planned_host_cpus": "8-11",
+      "planned_vm_cpus": 4,
+      "planned_vm_memory": "24G",
+      "planned_host_address_space_limit_bytes": 34359738368
+    },
+    {
+      "index": 1,
+      "inventory": "/workspaces/kprog-raw/verified/20261113-census-resume/ready/queues/1/inventory.json",
+      "bodies": 72,
+      "first_body_groups": [
+        29,
+        32,
+        38
+      ],
+      "applications": {
+        "tracee/monitor": 46,
+        "bcc/set": 7,
+        "tetragon/observer": 6,
+        "otelcol-ebpf-profiler/profiling": 5,
+        "cilium/agent": 8
+      },
+      "planned_host_cpus": "12-13",
+      "planned_vm_cpus": 2,
+      "planned_vm_memory": "24G",
+      "planned_host_address_space_limit_bytes": 34359738368
+    },
+    {
+      "index": 2,
+      "inventory": "/workspaces/kprog-raw/verified/20261113-census-resume/ready/queues/2/inventory.json",
+      "bodies": 72,
+      "first_body_groups": [
+        30,
+        36,
+        39
+      ],
+      "applications": {
+        "tracee/monitor": 49,
+        "tetragon/observer": 6,
+        "bcc/set": 5,
+        "cilium/agent": 8,
+        "otelcol-ebpf-profiler/profiling": 4
+      },
+      "planned_host_cpus": "14-15",
+      "planned_vm_cpus": 2,
+      "planned_vm_memory": "24G",
+      "planned_host_address_space_limit_bytes": 34359738368
+    }
+  ],
+  "represented_instances": 293,
+  "retained_body_groups": 247,
+  "retained_census_instances": 549,
+  "unfinished_exec_body_group": 36,
+  "unit_regressions": "7 PASS; duplicate/completed/unfinished/priority replay/3-way resource preservation",
+  "dry_runs": "Resume preparation and each of three Make run commands passed",
+  "launch_dependency": "Collect repaired-image writer1325440 first; shared image locks, <=3 census guests and >30GB host available memory",
+  "archive": "census-resume-preparation.tar.gz",
+  "archive_sha256": "5f688eccb98ac9003b6f312486299b55dd24408ec36239cd1c4be5d9e4574b2f",
+  "raw_data_removed": false,
+  "benchmark_settings_changed": false
+}
