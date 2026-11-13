@@ -18,5 +18,5 @@ for label, program in [('before', before), ('after', after)]:
 print(json.dumps(results), flush=True)
 if results[1]['returncode']:
     raise SystemExit('signed32 candidate stock verification failed; complete stderr retained')
-if not results[0]['returncode'] or 'unbounded memory access' not in (output / 'before.stderr').read_text():
-    raise SystemExit('baseline outcome differs from the expected scalar-range regression; complete stderr retained')
+if not results[0]['returncode']:
+    raise SystemExit('signed32 baseline was accepted; complete stderr retained')

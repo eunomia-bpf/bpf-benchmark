@@ -1,0 +1,127 @@
+{
+  "recorded_at": "2026-11-13T06:01:56.477033+00:00",
+  "scope": "Generic ISA stock-verifier regressions, independent from application bodies",
+  "outer_pid": 1225193,
+  "make_exit": 2,
+  "make_error": "Signed32 script required one diagnostic phrase; actual before negative size bound rejection and after acceptance match the intended regression",
+  "object_load_invocations": 12,
+  "stock_verifier_logs": 12,
+  "candidate_verified": 6,
+  "baseline_rejected": 6,
+  "native_execution_requests": 0,
+  "workload_run": null,
+  "rows": [
+    {
+      "suite": "partial-control",
+      "label": "before-lane0",
+      "returncode": 255,
+      "verifier_logs": 1,
+      "processed_summaries": 1,
+      "object": "/workspaces/kprog-raw/verified/20261113-partial-reg/before-retry1/lane0.bpf.o",
+      "object_sha256": "571cd8f9abcaa6bd5a8dce530ded0dcbd15f8547100708311f4a0a627071c926"
+    },
+    {
+      "suite": "partial-control",
+      "label": "before-lane8",
+      "returncode": 255,
+      "verifier_logs": 1,
+      "processed_summaries": 1,
+      "object": "/workspaces/kprog-raw/verified/20261113-partial-reg/before-retry1/lane8.bpf.o",
+      "object_sha256": "69353f3809337727e40b26df8c39b288b9034f72d3782dc487d32b1e4626e2e3"
+    },
+    {
+      "suite": "partial-control",
+      "label": "before-lane16",
+      "returncode": 255,
+      "verifier_logs": 1,
+      "processed_summaries": 1,
+      "object": "/workspaces/kprog-raw/verified/20261113-partial-reg/before-retry1/lane16.bpf.o",
+      "object_sha256": "2e932088c94c99e55090aa2f04df86b3d32fde0354744987319a9b3580205657"
+    },
+    {
+      "suite": "partial-control",
+      "label": "after-lane0",
+      "returncode": 0,
+      "verifier_logs": 1,
+      "processed_summaries": 1,
+      "object": "/workspaces/kprog-raw/verified/20261113-partial-reg/after/lane0.bpf.o",
+      "object_sha256": "6cb5516cbbd760ceb0f53e95e1e7e2a924de49236879ff864e30458a1d978030"
+    },
+    {
+      "suite": "partial-control",
+      "label": "after-lane8",
+      "returncode": 0,
+      "verifier_logs": 1,
+      "processed_summaries": 1,
+      "object": "/workspaces/kprog-raw/verified/20261113-partial-reg/after/lane8.bpf.o",
+      "object_sha256": "cfaa3dd5d04534c6e22c3d3b06ed004ca19dbb8bf4939c2113d6fdaf647a8b7d"
+    },
+    {
+      "suite": "partial-control",
+      "label": "after-lane16",
+      "returncode": 0,
+      "verifier_logs": 1,
+      "processed_summaries": 1,
+      "object": "/workspaces/kprog-raw/verified/20261113-partial-reg/after/lane16.bpf.o",
+      "object_sha256": "b5891f45e260e26684c22b3d736b1e3a1009b31dda1cd2293f87e645a88e4033"
+    },
+    {
+      "suite": "signed-control",
+      "label": "before",
+      "returncode": 255,
+      "verifier_logs": 1,
+      "processed_summaries": 1,
+      "object": "/workspaces/kprog-raw/verified/20261113-signed-bound/before.bpf.o",
+      "object_sha256": "e4a9220d6e6cc0f7a7d28f43960c01da866c6ee4ff985ea2b7ad479db8efa3d2"
+    },
+    {
+      "suite": "signed-control",
+      "label": "after",
+      "returncode": 0,
+      "verifier_logs": 1,
+      "processed_summaries": 1,
+      "object": "/workspaces/kprog-raw/verified/20261113-signed-bound/after.bpf.o",
+      "object_sha256": "2314e5ec320287d3227835a4d5b4a0da5b6841d138f42b0c521918742708b2d0"
+    },
+    {
+      "suite": "context-control",
+      "label": "before-scalar-route0",
+      "returncode": 255,
+      "verifier_logs": 1,
+      "processed_summaries": 1,
+      "object": "/workspaces/kprog-raw/verified/20261113-raw-context/before-scalar/route0.bpf.o",
+      "object_sha256": "f94059c91ecd40b780c23b031dd30ebe55d7f37a6ae45412c065c31f2bb9d5cf"
+    },
+    {
+      "suite": "context-control",
+      "label": "before-scalar-route1",
+      "returncode": 255,
+      "verifier_logs": 1,
+      "processed_summaries": 1,
+      "object": "/workspaces/kprog-raw/verified/20261113-raw-context/before-scalar/route1.bpf.o",
+      "object_sha256": "2cce953116076c7525e2265b94ae64b7335425362dc28fd9fa078580c16a2040"
+    },
+    {
+      "suite": "context-control",
+      "label": "after-scalar-route0",
+      "returncode": 0,
+      "verifier_logs": 1,
+      "processed_summaries": 1,
+      "object": "/workspaces/kprog-raw/verified/20261113-raw-context/after-scalar/route0.bpf.o",
+      "object_sha256": "596eec500174123aac9ca878520a53a2677a31b9cca28467033c34d243186496"
+    },
+    {
+      "suite": "context-control",
+      "label": "after-scalar-route1",
+      "returncode": 0,
+      "verifier_logs": 1,
+      "processed_summaries": 1,
+      "object": "/workspaces/kprog-raw/verified/20261113-raw-context/after-scalar/route1.bpf.o",
+      "object_sha256": "7ac43a3da72cbf77563c57261b88e4fdedb9076deae4716a70b825d02bb898e5"
+    }
+  ],
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-raw-context",
+  "archive": "isa-stock-results.tar.gz",
+  "archive_bytes": 35694,
+  "script_repair": "Keep baseline rejection and candidate acceptance; preserve all diagnostic wording"
+}

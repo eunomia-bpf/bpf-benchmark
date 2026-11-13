@@ -103,6 +103,10 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED ISA stock实际结果（2026-11-13）** unit1225193完成12个object-load调用/12份stock verifier log；6个candidate接受（partial low/high/word3、signed1、flat ctx2），6个baseline拒绝。Make2来自signed脚本限定diagnostic字串；实际baseline报R2负size bound、candidate接受，脚本保留接受/拒绝判定及全部日志。完整输入BPF/输出/service/job归档 `isa-stock-results*`，raw `/workspaces/kprog-raw/verified/20261113-raw-context/guest/`。native execution0，独立于应用body。
+
+- **VERIFIED partial-register实际body结果（2026-11-13，1123c5755）** outer1216112 make0，generic_kprobe_actions实际1submitted/0installed/1stock rejected，代表33成员。首拒绝从policy_stats越界推进到verifier处理上限：processed1000001、max_states_per_insn29、total_states38381、peak2610，终止BPF10646。完整P/B/service/job归档 `helper-partial-reg-replay*`，raw `/workspaces/kprog-raw/verified/20261113-helper-class-replay/partial-*`；native execution0/workload待测，复杂度通用压缩接续。
+
 - **VERIFIED flat-load context通用修复（2026-11-13）** request20的BPF39231定位到generatedC8768/native0x1adf（`mov rbx,[r12+80]`）：scalar tag路径把ctx+80放入地址寄存器后做LDX+0。所有flat read按固定displacement编码、独立于semantic tag；dynamic/大位移使用等价computed-address编码，8/16/32/64位访问和fault语义保持。既有MOV_LOAD713/mem-dispatch58 cases UBSan通过；新fixture的两种scalar-tag ctx路线及dynamic/+40000/-40000共5种编译/host通过，before/after disasm归档 `raw-context-preparation*`，raw `/workspaces/kprog-raw/verified/20261113-raw-context/`。combined unit retry outer1225193已setsid/nohup启动（2vCPU/2G/AS8GiB，CPU12–15/shared image read lock），计划12个object-load调用，stock/应用实际结果后续收集；调用见 `raw-context-unit-launch.json`。
 
 - **VERIFIED ISA guest工具路径（2026-11-13）** unit outer1216111 make2在启动bpftool前结束，stock submissions0；组件Make向partial-reg和signed-bound脚本显式传入现有 `/workspaces/repository/vendor/build/x86/bpftool/bin/bpftool`，host动态库解析/脚本syntax/target dry-run通过。完整setup日志/service归档 `partial-reg-bpftool-setup*`；应用body outer1216112独立运行，unit retry使用新输出目录。
