@@ -28,5 +28,18 @@ class GeneratedState(unittest.TestCase):
                 index=json.load(archive.extractfile('capture.json'))
                 self.assertEqual(len(index['files']),3)
 
+    def test_probe_headers_outside_state_are_retained_as_generated_input(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)/'state';root.mkdir()
+            features=Path(directory)/'bpf/include/bpf';features.mkdir(parents=True)
+            for name in ['features.h','features_skb.h','features_xdp.h']:
+                (features/name).write_bytes(('#define '+name.replace('.','_')+' 1\n').encode())
+            output=io.BytesIO();CONFIG.capture(root,output,features);output.seek(0)
+            with tarfile.open(fileobj=output) as archive:
+                index=json.load(archive.extractfile('capture.json'))
+                self.assertEqual(len(index['files']),3)
+                self.assertEqual(archive.extractfile('generated-features/features_xdp.h').read(),b'#define features_xdp_h 1\n')
+                self.assertEqual(index['files'][2]['source'],str(features/'features_xdp.h'))
+
 
 if __name__=='__main__': unittest.main()

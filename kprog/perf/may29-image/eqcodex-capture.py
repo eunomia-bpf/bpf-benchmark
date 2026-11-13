@@ -79,7 +79,7 @@ def capture_cilium_configuration(prefix, dest):
     if not state:
         raise RuntimeError('running Cilium command has no state directory')
     source = Path(__file__).with_name('cilium-config.py').read_text()
-    archive = save(prefix + ['python3', '-c', source, state], dest / 'cilium-config.tar.gz')
+    archive = save(prefix + ['python3', '-c', source, state, '/var/lib/cilium/bpf/include/bpf'], dest / 'cilium-config.tar.gz')
     archive.check_returncode()
 
 
@@ -107,7 +107,7 @@ def observe(out):
             continue
         cid = ids[0]
         prefix = ['docker', 'exec', cid]
-        if '--cilium-config' in sys.argv and phase not in seen:
+        if '--cilium-config' in sys.argv:
             capture_cilium_configuration(prefix, dest)
         programs = save(prefix + ['bpftool', '-j', 'prog', 'show'], dest / 'programs.json')
         maps = save(prefix + ['bpftool', '-j', 'map', 'show'], dest / 'maps.json')

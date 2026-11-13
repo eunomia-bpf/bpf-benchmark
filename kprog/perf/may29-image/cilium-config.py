@@ -8,14 +8,17 @@ import sys
 import tarfile
 
 
-def capture(root, output):
+def capture(root, output, features=None):
     root=root.resolve(strict=True)
     records=[]
     with tarfile.open(fileobj=output,mode='w|gz') as target:
-        for path in sorted(root.rglob('*')):
-            if not path.is_file() or path.suffix not in ('.h','.o'): continue
+        paths=[(path,str(path.relative_to(root))) for path in sorted(root.rglob('*'))
+               if path.is_file() and path.suffix in ('.h','.o')]
+        if features is not None:
+            paths += [(features/name,'generated-features/'+name)
+                      for name in ('features.h','features_skb.h','features_xdp.h')]
+        for path,name in paths:
             data=path.read_bytes()
-            name=str(path.relative_to(root))
             info=tarfile.TarInfo(name);info.size=len(data)
             target.addfile(info,io.BytesIO(data))
             records.append(dict(source=str(path),archive=name,bytes=len(data),sha256=hashlib.sha256(data).hexdigest()))
@@ -24,4 +27,4 @@ def capture(root, output):
         target.addfile(info,io.BytesIO(data))
 
 
-if __name__=='__main__': capture(Path(sys.argv[1]),sys.stdout.buffer)
+if __name__=='__main__': capture(Path(sys.argv[1]),sys.stdout.buffer,Path(sys.argv[2]) if len(sys.argv)>2 else None)
