@@ -1,0 +1,93 @@
+{
+  "recorded_utc": "2026-11-13T10:31:25.975717+00:00",
+  "source_commit": "e48deb5cc",
+  "owned_processes": [
+    {
+      "qemu_pid": 1378243,
+      "owned_launcher": 1331305,
+      "parent_chain": [
+        1378243,
+        1370566,
+        1370565,
+        1370560,
+        1370557,
+        1370546,
+        1370541,
+        1331305,
+        1
+      ]
+    },
+    {
+      "qemu_pid": 1378222,
+      "owned_launcher": 1331307,
+      "parent_chain": [
+        1378222,
+        1370570,
+        1370569,
+        1370564,
+        1370563,
+        1370558,
+        1370550,
+        1331307,
+        1
+      ]
+    },
+    {
+      "qemu_pid": 1378217,
+      "owned_launcher": 1331310,
+      "parent_chain": [
+        1378217,
+        1370568,
+        1370567,
+        1370559,
+        1370556,
+        1370548,
+        1370543,
+        1331310,
+        1
+      ]
+    }
+  ],
+  "queues": [
+    {
+      "queue": "/workspaces/kprog-raw/verified/20261113-census-resume/queue-0",
+      "journal": "/workspaces/kprog-raw/verified/20261113-loader-refresh/checkpoint/queue-0/outcomes.jsonl",
+      "completed": 1,
+      "body_groups": [
+        20
+      ],
+      "incomplete_journal_bytes": 0,
+      "state_files": 23,
+      "state_archive": "/workspaces/kprog-raw/verified/20261113-loader-refresh/checkpoint/queue-0/state.tar.gz",
+      "archive_bytes": 54139351,
+      "sha256": "3e819f5a3da2038730a39e764f308a82b5770421e8fa437b39f41ae423cb7807"
+    },
+    {
+      "queue": "/workspaces/kprog-raw/verified/20261113-census-resume/queue-1",
+      "journal": "/workspaces/kprog-raw/verified/20261113-loader-refresh/checkpoint/queue-1/outcomes.jsonl",
+      "completed": 0,
+      "body_groups": [],
+      "incomplete_journal_bytes": 0,
+      "state_files": 21,
+      "state_archive": "/workspaces/kprog-raw/verified/20261113-loader-refresh/checkpoint/queue-1/state.tar.gz",
+      "archive_bytes": 42743383,
+      "sha256": "58bd67185337d6487e5ae0e7d281913dbb2191e666007cf56199b738563fd748"
+    },
+    {
+      "queue": "/workspaces/kprog-raw/verified/20261113-census-resume/queue-2",
+      "journal": "/workspaces/kprog-raw/verified/20261113-loader-refresh/checkpoint/queue-2/outcomes.jsonl",
+      "completed": 0,
+      "body_groups": [],
+      "incomplete_journal_bytes": 0,
+      "state_files": 21,
+      "state_archive": "/workspaces/kprog-raw/verified/20261113-loader-refresh/checkpoint/queue-2/state.tar.gz",
+      "archive_bytes": 50111122,
+      "sha256": "cba2951548ae64f780840b97cdcf34cac7babef185483a7333d6f7ee1001c817"
+    }
+  ],
+  "stop": "SIGSTOP for stable snapshot; after all archives completed SIGTERM+SIGCONT sent only to these three owned QEMU PIDs",
+  "retention": "Full state archives remain persistent under /workspaces; checkpoint index committed, prior completed class20 full request already archived in4908cd05c",
+  "kernel_source": "74d1097af561 unchanged",
+  "new_completed_bodies": 0,
+  "native_execution": 0
+}

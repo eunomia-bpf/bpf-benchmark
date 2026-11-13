@@ -1,0 +1,63 @@
+{
+  "scope": "Prepared215 still unfinished queued bodies after paused census checkpoint; no new results",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/ready",
+  "resume": {
+    "input_inventory": "/workspaces/kprog-raw/verified/20261113-census-resume/ready/inventory.json",
+    "completed_journals": [
+      "/workspaces/kprog-raw/verified/20261113-loader-refresh/checkpoint/queue-0/outcomes.jsonl",
+      "/workspaces/kprog-raw/verified/20261113-loader-refresh/checkpoint/queue-1/outcomes.jsonl",
+      "/workspaces/kprog-raw/verified/20261113-loader-refresh/checkpoint/queue-2/outcomes.jsonl"
+    ],
+    "priority_inventories": [],
+    "pending_bodies": 215,
+    "queued_bodies": 215,
+    "additional_replay_bodies": 0,
+    "controller_commit": "ec8c58690f6368299d5b2fcdde50a9a502e3bd72",
+    "guest_inventories": [
+      "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/ready/queues/0/inventory.json",
+      "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/ready/queues/1/inventory.json",
+      "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/ready/queues/2/inventory.json"
+    ]
+  },
+  "queues": [
+    {
+      "inventory": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/ready/queues/0/inventory.json",
+      "bodies": 72,
+      "first_groups": [
+        29,
+        32,
+        38
+      ]
+    },
+    {
+      "inventory": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/ready/queues/1/inventory.json",
+      "bodies": 72,
+      "first_groups": [
+        30,
+        36,
+        39
+      ]
+    },
+    {
+      "inventory": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/ready/queues/2/inventory.json",
+      "bodies": 71,
+      "first_groups": [
+        31,
+        37,
+        40
+      ]
+    }
+  ],
+  "remaining_main_bodies": 211,
+  "remaining_class_replays": [
+    29,
+    30,
+    31,
+    32
+  ],
+  "unfinished_exec_preserved": true,
+  "canonical_change": "Loader-only batch pending, helpercomplete+data-layout default-off candidates",
+  "archive": "census-after-loader-ready.tar.gz",
+  "raw_data_removed": false,
+  "benchmark_settings_changed": false
+}
