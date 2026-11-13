@@ -74,3 +74,17 @@ records endpoint API responses and raw `cilium_metrics` map counters so packet
 decisions can be compared alongside the workload. Original-program helper target
 deployment remains a separate integration task; matching BPF source objects does
 not certify native behavior.
+
+Native retargeting sets LLVM's `no-jump-tables` function attribute explicitly.
+Clang's driver flag alone does not set it when the input is already LLVM IR;
+otherwise a dense switch can leave an indirect branch rejected at kernel link.
+`native-switch-check` reproduces that failure and the corrected roundtrip.
+`cilium-kernel-roundtrip` exercises both offline linker modes for every entry,
+using synthetic helper addresses and ABI fields. It does not submit code to the
+kernel or establish actual runtime ABI correctness.
+
+`cilium-context-manifest` writes a separate manifest with
+`kernel_helper_context=true` on each object. Select this file with the existing
+runtime argument to request original-program helper resolution from the loader.
+The ordinary candidate manifest and default build remain unchanged. Deployment
+and application behavior must be checked in the resulting guest logs.

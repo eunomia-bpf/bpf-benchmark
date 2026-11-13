@@ -18,6 +18,7 @@ def main():
     parser.add_argument('--raw',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--protocol-commit',default='c4135e82c')
+    parser.add_argument('--kernel-roundtrip-results',action='store_true')
     args=parser.parse_args()
     snapshot=args.raw/'build-evidence'
     shutil.copytree(args.build,snapshot)
@@ -27,6 +28,8 @@ def main():
         comparison=json.loads((snapshot/(name+'-comparison.json')).read_text())
         links=json.loads((snapshot/(name+'-links/report.json')).read_text())
         units.append(dict(unit=name,source_inputs=record,comparison=comparison,offline_links=links))
+        if args.kernel_roundtrip_results:
+            units[-1]['kernel_link_roundtrip']=json.loads((snapshot/(name+'-roundtrip/report.json')).read_text())
     archive=args.output.with_suffix('.tar.gz')
     with tarfile.open(archive,'x:gz') as target: target.add(args.raw,arcname=args.raw.name)
     files=0
@@ -40,6 +43,7 @@ def main():
                  compiler_protocol_commit=args.protocol_commit,units=units,verifier_submissions=0,native_installs=0,
                  conclusion='Direct source byte/relocation comparisons, saved-IR reoptimization differences and all offline entry links are reported per unit and retained.',
                  limits=['No new compiler candidate executed in an application.',
+                         'Any kernel-link roundtrip uses synthetic addresses/layout inputs; no kernel submission or ABI execution is claimed.',
                          'Existing successful offline links do not certify matching configuration or equal work.'],
                  archive=dict(path=str(archive),bytes=archive.stat().st_size,sha256=digest(archive),files_byte_compared=files))
     with args.output.open('x') as output: json.dump(receipt,output,indent=2);output.write('\n')

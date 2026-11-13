@@ -293,8 +293,9 @@ CILIUM_REPLAY_BUILD ?= /var/tmp/kprog-tmp/perf/cilium-live-replay
 CILIUM_REPLAY_RAW ?= /workspaces/kprog-raw/perf/20261113-cilium-live-replay
 CILIUM_REPLAY_RECEIPT ?= $(ROOT)/kprog/results/perf_20261113/cilium-live-source-replay.json
 CILIUM_REPLAY_PROTOCOL ?= c4135e82c
+CILIUM_REPLAY_ARGS ?=
 cilium-replay-retain:
-	python3 $(HERE)/cilium-replay-retain.py --build $(CILIUM_REPLAY_BUILD) --raw $(CILIUM_REPLAY_RAW) --output $(CILIUM_REPLAY_RECEIPT) --protocol-commit $(CILIUM_REPLAY_PROTOCOL)
+	python3 $(HERE)/cilium-replay-retain.py --build $(CILIUM_REPLAY_BUILD) --raw $(CILIUM_REPLAY_RAW) --output $(CILIUM_REPLAY_RECEIPT) --protocol-commit $(CILIUM_REPLAY_PROTOCOL) $(CILIUM_REPLAY_ARGS)
 
 CILIUM_PAYLOAD ?= $(ROOT)/corpus/results/perf-cilium-same-source-20261113
 .PHONY: cilium-candidate
@@ -306,6 +307,10 @@ cilium-candidate:
 		--object $(CILIUM_PAYLOAD)/bpf_host.native.o,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne \
 		--object $(CILIUM_PAYLOAD)/bpf_xdp.native.o,prog_type=6
 
+.PHONY: cilium-context-manifest
+cilium-context-manifest:
+	python3 $(HERE)/manifest-context.py --input $(CILIUM_PAYLOAD)/manifest.json --output $(CILIUM_PAYLOAD)/manifest-context.json
+
 SWITCH_BUILD ?= /var/tmp/kprog-tmp/perf/native-switch
 .PHONY: native-switch-check
 native-switch-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
@@ -316,3 +321,7 @@ native-switch-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public
 	$(CC) -target x86_64-linux-gnu -O3 -fPIC -fno-optimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-jump-tables -c $(SWITCH_BUILD)/native.bc -o $(SWITCH_BUILD)/native.o
 	$(LINK_MEMORY_PAYLOAD)/native-link.real --mode proof --input $(SWITCH_BUILD)/native.o --symbol native_switch --output $(SWITCH_BUILD)/proof.o
 	$(LINK_MEMORY_PAYLOAD)/native-link.real --mode kernel --input $(SWITCH_BUILD)/proof.o --symbol native_switch --output $(SWITCH_BUILD)/blob.bin
+
+.PHONY: native-switch-evidence
+native-switch-evidence:
+	tar -czf $(ROOT)/kprog/results/perf_20261113/native-switch-regression.tar.gz -C /workspaces/kprog-raw/perf 20261113-native-switch
