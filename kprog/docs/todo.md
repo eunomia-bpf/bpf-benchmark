@@ -6,6 +6,34 @@
 
 状态基于 2026-11-12 14:20 UTC。审核 detour-20261112T09Z（已核实）：重启后 OTel、Cilium、Tetragon、Tracee 每次运行都有一个程序装成 36 字节空壳（内核单一 pending 槽 + x86 JIT 拿不到镜像时回落编译 r0=0 桩，违反 AGENTS.md:105），（更正 14:20：按 stats 开运行里的逐程序计数，OTel、Tetragon、Tracee 的空壳程序两个阶段都执行 0 次，不影响这三个应用的数字；Cilium 第 c 轮 stats 关那次空的是热点 cil_to_host，受影响，第 d 轮那次空的是只跑约 2 次的 cil_to_netdev，不受影响。1.240x 几何平均暂时成立，以修复后内核上的第 f 轮为准。）修复由 lane verified 做（每次桩装载要么拿到自己程序的镜像，要么失败）；OTel 的每 arm metrics map 导出在修复后由 lane C 做。
 
+## 0. Lane 目标与待办（协调者作为 advisor 设定，2026-11-13）
+
+运营者 2026-11-13："可以两个 codex lane. 尽可能不需要向你申请和协调, 你要给他们准备好 todo. 通知所有的实验管理者和写在 server manager, 不应该是申请协调, 而是你作为 advisor, 去 steer 和管理他们, 给他们设置目标和 todo? 这是不是更好? 多个的话让他们自己想办法协商"。
+
+做法：每条 lane 有一个目标和一张按顺序的待办，自己推进，不向协调者申请时段或许可；共用资源由 lane 之间在 COORDINATION.md 直接商量。协调者每小时核对提交和结果，必要时改目标、改待办顺序；omp 两三次不按待办做就停掉重开（运营者 11-12）。
+
+**lane perf（Codex，gpt-6.1-sol）。目标：每个性能数字都是等量工作、可复现的；六应用几何平均 native/eBPF 达到 1.20x 以上，每个应用不低于 05-29 下限。**
+- [ ] P1 OTel、Tetragon 等量工作：读一次性 Codex 的报告 kprog/results/equal-work-20261113/report.md（以及 COORDINATION 里 FOR TEMP CODEX 的线索：内联 tail call 用到的内核偏移和计数槽）；查清哪一边偏了，按所属组件修（链接器、加载器、shim 属 lane verified，直接和它商量），新行为放在默认关闭的开关后。
+- [ ] P2 修好后在 CPU 0-7 跑一轮六应用（stats 关和开，每个应用 3×180 秒，广度优先），每次运行用 stubs.py 和 equal-work 的程序自身计数核对；把下限表和几何平均写进第 1 节。
+- [ ] P3 等量工作成立的应用里，按每次调用的差距找原生一侧的通用优化（OTel、Tetragon、Cilium）。
+
+**lane C（omp，fleet/local-large）。目标：用对同类程序都适用的改动提高 Tracee、BCC、Katran 原生代码每次调用的速度。**
+- [ ] C1 Tracee：在 guest 里用 perf 剖析 raw_syscalls sys_enter、trace_sys_enter、trace_sys_exit 两边的时间去向，贴出剖析和运行目录。
+- [ ] C2 据此做一处通用改进（vendor/bpf 的原生构建），默认关闭的开关，默认对象逐字节不变；功能检查后计时。
+- [ ] C3 BCC：把构建时 .rodata 特化对象作为第二种配置（NATIVE_MANIFEST），两种配置各计时一轮。
+- [ ] C4 Katran。
+
+**lane verified（Codex，gpt-6.1-sol）。目标：六个应用在唯一内核和镜像上走通 verified 路径。**
+- [ ] V1 按程序体去重的常驻普查跑完；已发现的失败类别（栈写越界、callback、scalar 内存访问、编译器栈存储）现在就修，按 BPF 时间占比从大到小。
+- [ ] V2 六个应用整应用复测，记下每个应用加载、通过 verifier、执行的程序数和运行目录。
+- [ ] V3 100–100K 规模扫描（verifier 时间和内存）。
+
+**共用资源，由 lane 自己商量（建议做法，lane 可以改）：**
+- CPU：0-7 计时，一次一个 guest，计时前取 `flock /workspaces/.agent-state/kprog-lanes/locks/timing`；8-15 verified；16-19 perf；20-23 lane C。需要更多就在 COORDINATION 里和对方商量。
+- 内核、底座、镜像重建：要重建的 lane 先在 COORDINATION 说明，取 `flock .../locks/image`，确认没有别的 lane 的 guest 在用，重建后贴 IMAGE REBUILT，并由 lane perf 重跑一轮六应用确认下限。
+- 文件：链接器、加载器、shim 归 verified；vendor/bpf 原生构建和 kprog/perf 的优化归 lane C；计时脚本、results 下的性能结果归 perf。改别人的文件先和对方在 COORDINATION 说好。
+- 规则不变：一个工作树、一个内核、一个镜像、一个底座；原始数据不删；新行为放在默认关闭的开关后，默认路径字节不变；不新增检查；论文、故事、设计、benchmark 设置要运营者同意。
+
 ## 1. 性能（目标：六应用几何平均 native/JIT 1.20x–1.40x，来自原生代码）
 
 - **VERIFIED PERF_EVENT context布局诊断（2026-11-13）** 应C01:42要求比对实际default-manifest combined native entry及canonical proof-stage ELF：两者均保存incoming ctx到RBX，随后直接读ctx+160作SS比较（native PC0x361，proof PC0x35a），故该读取不是entry ABI strip引入。kernel74的bpf_overflow_handler传入physical bpf_perf_event_data_kern，offset0为regs指针；stock verifier先解引用该指针再读register field，native JIT未做该转换。发现通用PERF_EVENT public/physical context-view不匹配，与C报告失败一致；失败image/manifest的实际字节对应及运行根因仍待C确认。请求C负责通用producer lowering，保留helpers/tailcalls的original ctx，不能只改SS或盲目换入口指针。源码摘录、完整两套entry disassembly、ELF及receipt在 `kprog/results/verified_20261112/otel-perf-event-context*`，raw `/workspaces/kprog-raw/verified/20261113-perf-event-context-audit/`。未改B/kernel/image/runtime/settings。
