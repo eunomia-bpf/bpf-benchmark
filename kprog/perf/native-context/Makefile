@@ -405,8 +405,9 @@ upstream-tetragon-ir:
 
 upstream-tetragon-native: upstream-tetragon-ir core-ir-tool $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
 	prlimit --as=17179869184 -- $(CORE_IR_BUILD)/core-ir-lower $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).bc --local-bpf $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).direct.bpf.o --target-btf $(KDIR)/vmlinux --report $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).core.json -o $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).core.bc
-	python3 $(HERE)/socket-helper-names.py > $(TETRAGON_SAME_BUILD)/helper-names.json
-	$(SOCKET_BUILD)/socket-context-lower $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).core.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(TETRAGON_SAME_BUILD)/helper-names.json -o $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).native.bc
+	$(ASM_BUILD)/bpf-asm-lower $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).core.bc -o $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).asm.bc
+	python3 $(HERE)/socket-helper-names.py > $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).helper-names.json
+	$(SOCKET_BUILD)/socket-context-lower $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).asm.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).helper-names.json -o $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).native.bc
 	prlimit --as=17179869184 -- $(CC) -target x86_64-linux-gnu -O3 -g -fPIC -fno-optimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-jump-tables -c $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).native.bc -o $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).native.o
 
 .PHONY: cilium-helper-replay
@@ -417,3 +418,31 @@ cilium-helper-replay:
 .PHONY: retain-host-artifacts
 retain-host-artifacts:
 	python3 $(HERE)/retain-host-artifacts.py --raw $(HOST_ARTIFACT_RAW) --output $(HOST_ARTIFACT_RECEIPT) --protocol $(HOST_ARTIFACT_PROTOCOL) $(HOST_ARTIFACT_ARGS)
+
+ASM_BUILD ?= /var/tmp/kprog-tmp/perf/bpf-asm
+$(ASM_BUILD)/bpf-asm-lower: $(HERE)/bpf-asm-lower.cpp
+	install -d $(ASM_BUILD)
+	$(CXX) $$($(LLVM_CONFIG) --cxxflags) -std=c++17 -Wall -Wextra -Wno-unused-parameter $< -o $@ $$($(LLVM_CONFIG) --ldflags --libs core irreader bitwriter --system-libs)
+
+upstream-tetragon-native: $(ASM_BUILD)/bpf-asm-lower
+
+.PHONY: bpf-asm-check upstream-tetragon-link
+bpf-asm-check: $(ASM_BUILD)/bpf-asm-lower $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
+	$(CC) -target bpf -O2 -g -emit-llvm -c $(HERE)/test-bpf-asm.c -o $(ASM_BUILD)/fixture.bc
+	$(CC) -target bpf -O2 -g -c $(ASM_BUILD)/fixture.bc -o $(ASM_BUILD)/fixture.bpf.o
+	llvm-objdump-18 -d $(ASM_BUILD)/fixture.bpf.o > $(ASM_BUILD)/fixture.bpf.dis
+	$(ASM_BUILD)/bpf-asm-lower $(ASM_BUILD)/fixture.bc -o $(ASM_BUILD)/fixture.lowered.bc
+	python3 $(HERE)/socket-helper-names.py > $(ASM_BUILD)/helper-names.json
+	$(SOCKET_BUILD)/socket-context-lower $(ASM_BUILD)/fixture.lowered.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(ASM_BUILD)/helper-names.json -o $(ASM_BUILD)/fixture.native.bc
+	$(CC) -O2 -DTEST_DRIVER -c $(HERE)/test-bpf-asm.c -o $(ASM_BUILD)/driver.o
+	$(CC) -target x86_64-linux-gnu -O2 $(ASM_BUILD)/fixture.native.bc $(ASM_BUILD)/driver.o -o $(ASM_BUILD)/fixture
+	$(ASM_BUILD)/fixture
+	$(CC) -target bpf -O2 -g -emit-llvm -c $(HERE)/test-bpf-compare.c -o $(ASM_BUILD)/compare.bc
+	$(ASM_BUILD)/bpf-asm-lower $(ASM_BUILD)/compare.bc -o $(ASM_BUILD)/compare.lowered.bc
+	$(SOCKET_BUILD)/socket-context-lower $(ASM_BUILD)/compare.lowered.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(ASM_BUILD)/helper-names.json -o $(ASM_BUILD)/compare.native.bc
+	$(CC) -O2 -DTEST_DRIVER -c $(HERE)/test-bpf-compare.c -o $(ASM_BUILD)/compare.driver.o
+	$(CC) -target x86_64-linux-gnu -O2 $(ASM_BUILD)/compare.native.bc $(ASM_BUILD)/compare.driver.o -o $(ASM_BUILD)/compare
+	$(ASM_BUILD)/compare
+
+upstream-tetragon-link: upstream-tetragon-native
+	python3 $(HERE)/socket-proof.py --input $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).native.o --linker $(LINK_MEMORY_PAYLOAD)/native-link-off --output $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT)-links --section-prefix kprobe --section-prefix tracepoint --section-prefix raw_tracepoint --section-prefix uprobe --section-prefix fmod_ret/
