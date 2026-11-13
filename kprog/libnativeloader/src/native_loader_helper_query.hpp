@@ -1,9 +1,21 @@
 #pragma once
 #include "../../stock-path/module/native_lab_helper_query.h"
+#include <linux/bpf.h>
 #include <cstdint>
 #include <cstring>
 #include <stdexcept>
 #include <vector>
+
+struct NativeHelperIdentity {
+    uint32_t id;
+    const char *name;
+};
+
+#define KPROG_HELPER_IDENTITY(name) {BPF_FUNC_##name, "bpf_" #name}
+inline constexpr NativeHelperIdentity kCanonicalHelperIdentities[] = {
+    __BPF_FUNC_MAPPER(KPROG_HELPER_IDENTITY)
+};
+#undef KPROG_HELPER_IDENTITY
 
 inline std::vector<uint8_t> encode_helper_query(
     uint64_t verifier_ops, uint32_t program_fd, uint32_t program_type,

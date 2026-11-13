@@ -8,6 +8,20 @@
 int main(int argc, char **argv)
 {
     assert(argc == 2);
+    for (uint32_t id = 1; id < __BPF_FUNC_MAX_ID; ++id) {
+        size_t matches = 0;
+        for (const auto &helper : kCanonicalHelperIdentities)
+            matches += helper.id == id;
+        assert(matches == 1);
+    }
+    for (const auto &[id, name] : {NativeHelperIdentity{BPF_FUNC_fib_lookup, "bpf_fib_lookup"},
+                                  NativeHelperIdentity{BPF_FUNC_skc_lookup_tcp, "bpf_skc_lookup_tcp"},
+                                  NativeHelperIdentity{BPF_FUNC_probe_read, "bpf_probe_read"}}) {
+        bool found = false;
+        for (const auto &helper : kCanonicalHelperIdentities)
+            found |= helper.id == id && std::strcmp(helper.name, name) == 0;
+        assert(found);
+    }
     static_assert(offsetof(native_lab_helper_query, verifier_ops) == 0);
     static_assert(offsetof(native_lab_helper_query, program_fd) == 8);
     static_assert(offsetof(native_lab_helper_query, program_type) == 12);
@@ -50,5 +64,5 @@ int main(int argc, char **argv)
         const auto result = resolve_native_manifest(path, info, insns, map_info);
         assert(result && result->kernel_helper_context == (setting.find("true") != std::string::npos));
     }
-    std::cout << "helper query FD/type/IDs, target order/zero/short reply, default-off manifest: PASS\n";
+    std::cout << "helper UAPI identities, FD/type/IDs, target order/zero/short reply, default-off manifest: PASS\n";
 }

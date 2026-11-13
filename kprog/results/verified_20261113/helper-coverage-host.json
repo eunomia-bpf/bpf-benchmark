@@ -1,0 +1,14 @@
+{
+  "scope": "Complete canonical helper identity coverage for optional production prototype query",
+  "reason": "Actual Cilium run100207_102477 baseline72 completed, post null; missing fib_lookup/skc_lookup_tcp link bindings because old selected query enumerates partial kSupportedHelpers",
+  "mechanism": "Derive all helper IDs/canonical bpf_* names from UAPI __BPF_FUNC_MAPPER; query original program prototypes, emit nonzero targets; bind existing implementation-name aliases to the same returned address",
+  "baseline_path_changed": false,
+  "kernel_or_module_changed": false,
+  "host_tests": "PASS full UAPI ID membership, canonical identities, wire/default manifest/short reply; production C++ syntax and existing module syntax",
+  "kernel_tests": "Pending production resolver on unchanged verified/direct module frontends, ten program contexts incl new XDP and TC fib/skc plus canonical/compat probe aliases",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-helper-coverage",
+  "archive": "helper-coverage-host.tar.gz",
+  "application_success_claim": false,
+  "canonical_image_changed": false,
+  "benchmark_settings_changed": false
+}

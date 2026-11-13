@@ -10,6 +10,8 @@ struct HelperCase {
     const char *stack_symbol;
     const char *cookie_symbol;
     const char *netns_symbol;
+    const char *fib_symbol = nullptr;
+    const char *skc_symbol = nullptr;
 };
 
 static std::unordered_map<std::string, std::vector<uint64_t>> symbol_addresses()
@@ -70,7 +72,10 @@ try {
         {"kprobe", BPF_PROG_TYPE_KPROBE, {}, "bpf_perf_event_output", "bpf_get_stackid", "", ""},
         {"tracepoint", BPF_PROG_TYPE_TRACEPOINT, {}, "bpf_perf_event_output_tp", "bpf_get_stackid_tp", "", ""},
         {"raw_tp", BPF_PROG_TYPE_RAW_TRACEPOINT, {}, "bpf_perf_event_output_raw_tp", "bpf_get_stackid_raw_tp", "", ""},
-        {"tc", BPF_PROG_TYPE_SCHED_CLS, {}, nullptr, nullptr, "bpf_get_socket_cookie", "bpf_get_netns_cookie"},
+        {"tc", BPF_PROG_TYPE_SCHED_CLS, {}, nullptr, nullptr, "bpf_get_socket_cookie", "bpf_get_netns_cookie",
+         "bpf_skb_fib_lookup", "bpf_tc_skc_lookup_tcp"},
+        {"xdp", BPF_PROG_TYPE_XDP, {}, nullptr, nullptr, nullptr, nullptr,
+         "bpf_xdp_fib_lookup", "bpf_xdp_skc_lookup_tcp"},
         {"sock_create", BPF_PROG_TYPE_CGROUP_SOCK, BPF_CGROUP_INET_SOCK_CREATE, nullptr, nullptr,
          "bpf_get_socket_cookie_sock", "bpf_get_netns_cookie_sock"},
         {"sock_connect", BPF_PROG_TYPE_CGROUP_SOCK_ADDR, BPF_CGROUP_INET4_CONNECT, nullptr, nullptr,
@@ -121,6 +126,9 @@ try {
         const std::pair<const char *, const char *> checks[] = {
             {"bpf_perf_event_output", test.output_symbol}, {"bpf_get_stackid", test.stack_symbol},
             {"bpf_get_socket_cookie", test.cookie_symbol}, {"bpf_get_netns_cookie", test.netns_symbol},
+            {"bpf_fib_lookup", test.fib_symbol}, {"bpf_skc_lookup_tcp", test.skc_symbol},
+            {"bpf_probe_read", test.type == BPF_PROG_TYPE_KPROBE ? "bpf_probe_read_compat" : nullptr},
+            {"bpf_probe_read_compat", test.type == BPF_PROG_TYPE_KPROBE ? "bpf_probe_read_compat" : nullptr},
         };
         for (const auto &[name, expected] : checks) {
             if (!expected) continue;

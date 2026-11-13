@@ -1477,13 +1477,11 @@ std::vector<std::pair<std::string, uint64_t>> query_program_helper_targets(
         fail("native_loader: bpf_verifier_ops missing from /proc/kallsyms");
     std::vector<uint32_t> ids;
     std::vector<std::string> names;
-    for (const auto &helper : kSupportedHelpers) {
+    for (const auto &helper : kCanonicalHelperIdentities) {
+        if (helper.id == BPF_FUNC_unspec) continue;
         ids.push_back(helper.id);
-        names.emplace_back(helper.symbol);
+        names.emplace_back(helper.name);
     }
-    // This helper has context-specific implementations and no generic symbol.
-    ids.push_back(BPF_FUNC_get_netns_cookie);
-    names.emplace_back("bpf_get_netns_cookie");
     const auto request = encode_helper_query(ops, program_fd, program_type, ids);
     const std::string path = std::string(kNativeLabTarget.debugfs_dir) + "/helper_targets";
     ScopedFd fd(open(path.c_str(), O_RDWR | O_CLOEXEC));
@@ -1511,8 +1509,15 @@ std::vector<std::pair<std::string, uint64_t>> query_program_helper_targets(
     response.resize(offset);
     const auto targets = decode_helper_targets(response, ids.size());
     std::vector<std::pair<std::string, uint64_t>> result;
-    for (size_t i = 0; i < targets.size(); ++i)
-        if (targets[i]) result.emplace_back(names[i], targets[i]);
+    for (size_t i = 0; i < targets.size(); ++i) {
+        if (!targets[i]) continue;
+        result.emplace_back(names[i], targets[i]);
+        // Existing native objects can use an implementation's historical
+        // spelling. Bind it to the same actual prototype as the UAPI name.
+        for (const auto &legacy : kSupportedHelpers)
+            if (legacy.id == static_cast<int>(ids[i]) && names[i] != legacy.symbol)
+                result.emplace_back(legacy.symbol, targets[i]);
+    }
     return result;
 }
 
