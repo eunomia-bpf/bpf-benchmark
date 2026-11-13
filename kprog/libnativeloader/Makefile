@@ -11,6 +11,16 @@ SERVICE_RUN ?= $(abspath $(BUILD_DIR))/trusted-service-client $(abspath $(BUILD_
 HELPER_BUILD ?= /var/tmp/kprog-tmp/verified/helper-context
 HELPER_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-helper-context/functional
 HELPER_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-helper-context/kernel
+HELPER_KERNEL_MODULE ?= /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
+REFRESH_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-shared-refresh
+
+.PHONY: shared-base-refresh shared-module-syntax
+shared-base-refresh:
+	bash ../test/refresh_verified_base.sh "$(REFRESH_OUTPUT)"
+
+shared-module-syntax:
+	$(MAKE) -C ../stock-path/module syntax-check
+	python3 ../test/module_syntax_check.py "$(REPO_ROOT)/kinsn/module/x86/build" .bpf_x86_native_lab.o.cmd
 
 .PHONY: helper-context-kernel-input helper-context-kernel-kvm guest-helper-context-kernel
 helper-context-kernel-input:
@@ -28,11 +38,11 @@ helper-context-kernel-kvm:
 	taskset -c 13 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
 		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(HELPER_KERNEL_OUTPUT)" --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -C kprog/libnativeloader guest-helper-context-kernel HELPER_KERNEL_OUTPUT=$(HELPER_KERNEL_OUTPUT)'
+		--exec 'make -C kprog/libnativeloader guest-helper-context-kernel HELPER_KERNEL_OUTPUT=$(HELPER_KERNEL_OUTPUT) HELPER_KERNEL_MODULE=$(HELPER_KERNEL_MODULE)'
 
 guest-helper-context-kernel:
 	mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
-	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
+	insmod "$(HELPER_KERNEL_MODULE)"
 	"$(HELPER_KERNEL_OUTPUT)/helper-kernel" "$(HELPER_KERNEL_OUTPUT)"
 
 .PHONY: helper-context-check
@@ -77,7 +87,7 @@ native-image-handoff:
 
 # NATIVE_MODULE selects the coordinator-built direct-native module.
 native-image-handoff-kvm: native-image-handoff
-	taskset -c 8-19 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+	taskset -c $(SERVICE_HOST_CPUS) vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
 		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(abspath $(BUILD_DIR))" --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
 		--exec 'make -C kprog/libnativeloader guest-native-image-handoff BUILD_DIR=$(abspath $(BUILD_DIR)) NATIVE_MODULE=$(NATIVE_MODULE)'

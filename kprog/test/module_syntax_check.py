@@ -6,7 +6,8 @@ import subprocess
 import sys
 
 object_dir = pathlib.Path(sys.argv[1])
-line = (object_dir / ".kprog_stock.o.cmd").read_text().splitlines()[0]
+saved_command = sys.argv[2] if len(sys.argv) == 3 else ".kprog_stock.o.cmd"
+line = (object_dir / saved_command).read_text().splitlines()[0]
 args = shlex.split(line.split(":=", 1)[1])
 command = []
 skip = False

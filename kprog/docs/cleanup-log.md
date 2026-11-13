@@ -1,5 +1,7 @@
 # Cleanup log
 
+- 2026-11-13 VERIFIED refresh preflight: recursive kernel make commands marked for execution ran despite `make -n`, replacing some same-version module/temp build outputs in `/workspaces/.agent-state/kprog-ck/build-x86`; `bzImage` and `vmlinux` retained their 2026-11-12 timestamps. Second owned preflight process tree was terminated by exact PIDs after inspecting ancestry. No raw data or source tree removed. Full command logs retained under `/workspaces/kprog-raw/verified/20261113-shared-image-dry-run{,2,3}.log`; corrected preflight uses only the sole canonical kernel artifact and skips grouped kernel file targets.
+
 Operator, 2026-11-11: "确保需要的功能 merge 到一起之后, 删掉所有别的内核版本. 任何时候只允许一个镜像和一个底座. 所有原始数据不允许删掉, 不允许建立任何新的 worktree. 明确记录." "kinsn RFC 那个也可以清理掉?" "停掉所有的, 然后确保重新开始"
 
 Every kernel function stays in pushed commits on eunomia-bpf/linux: stock base c23719abc330; 2026-05-29 kernel 8e116c79d (kinsn-only, kop-only); master's 7d6b7d663680 (kprog-no-kinsn); 9c50491de2a5 (kinsn-only); a3cb8790e (archive/linux-framework-checkout-20261111); kinsn RFC trees bpf-next-rfc 9028b2244bcb and kfunc-copy-v2 b2cf461319ad (archive/bpf-next-rfc, archive/kfunc-copy-v2). Removed below: rebuildable outputs (kernel builds, kernel images, module trees, image tars, docker data disks, docker images) and the three extra worktrees. Raw data moved to /workspaces/kprog-raw (MOVED lines). The one base /workspaces/.agent-state/kprog-ck stays and is rebuilt in place from the new kernel series.

@@ -11,7 +11,7 @@
  * (BPFREJIT_SHIM_NATIVE_LOADER=post, a manifest, and
  * BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF unset) still uploads each 128-byte
  * chunk to blob<N> and its relocations to blob<N>.relocs. This module serves
- * exactly that upload and the three map queries, and carries the same module
+ * that upload, map queries and original-program helper queries, and carries the same module
  * name, debugfs directory and kfunc so it can stand in for the trusted module
  * in a benchmark image. The verified path has no endpoint here: a non-zero
  * generation in the sidecar payload is rejected.
@@ -31,6 +31,7 @@
 #include <linux/fs.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
+#include "../../stock-path/module/native_lab_helper_query_impl.h"
 #include <linux/mutex.h>
 #include <linux/slab.h>
 #include <linux/string.h>
@@ -725,6 +726,7 @@ static int __init bpf_x86_native_lab_init(void)
 		return PTR_ERR(debugfs_root);
 
 	debugfs_create_file("map_ptr", 0600, debugfs_root, NULL, &map_ptr_fops);
+	debugfs_create_file("helper_targets", 0600, debugfs_root, NULL, &helper_targets_fops);
 	debugfs_create_file("map_value_ptr", 0600, debugfs_root, NULL,
 			    &map_value_ptr_fops);
 	debugfs_create_file("map_update_elem", 0600, debugfs_root, NULL,

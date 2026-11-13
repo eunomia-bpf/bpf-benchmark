@@ -1,0 +1,17 @@
+{
+  "scope": "Prepare one-base/image refresh for original-program helper targets and accumulated loader changes",
+  "deployment_gap": "Image uses direct-native module; passing D23 test had used stock-path module. Direct frontend lacked helper_targets",
+  "fix": "Factor unchanged query implementation into shared native_lab_helper_query_impl.h and register its endpoint in both frontends",
+  "direct_native_upload_and_generation_rejection": "Preserved",
+  "checks": "Both full module sources pass syntax using saved canonical build flags; refresh script bash syntax and corrected frozen image recipe dry-run pass",
+  "planned_runtime_checks": ["Same helper query unit against verified module", "Same helper query unit against direct-native module", "Existing direct-native image handoff regression"],
+  "old_image": "sha256:d756bf5919e9eb35cc8628a38af95ca2cec2751e86f4c23f7c6e3f7bd07494a1",
+  "kernel_commit": "74d1097af561",
+  "refresh_recipe": "Committed shared-base-refresh target, exclusive image lock; rebuild canonical modules/loaders and frozen image, stable kernel/application artifacts reused",
+  "preflight_issue": "Initial make -n recursed into kernel file-target recipes and regenerated rebuildable module/temp outputs while main guest remained a reader. bzImage and vmlinux unchanged. First preflight completed; second own make tree terminated by exact PIDs. Corrected X86_RUNTIME_KERNEL_IMAGE to the sole existing bzImage and excluded all grouped kernel file targets; third dry-run has no kernel build",
+  "first_preflight_log": "/workspaces/kprog-raw/verified/20261113-shared-image-dry-run.log",
+  "second_preflight_log": "/workspaces/kprog-raw/verified/20261113-shared-image-dry-run2.log",
+  "corrected_preflight_log": "/workspaces/kprog-raw/verified/20261113-shared-image-dry-run3.log",
+  "actual_image_rebuilt_at_recording": false,
+  "archive": "shared-refresh-preparation.tar.gz"
+}
