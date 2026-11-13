@@ -31,5 +31,22 @@
   "The three source files that do differ (common/buffer.h, common/common.h, common/filesystem.h) differ only by MICRO_NATIVE guards around exactly these asm idioms.",
   "The fix must be function-scoped: the first attempt used a whole-file alias map and produced a type error when %4 meant an i64 in one function and a ptr in another."
  ],
- "state": "lowering runs; x86 codegen not yet reached"
+ "state": "compiles to x86 from untouched source; two linker gaps remain",
+ "reached": {
+  "x86 object": "tracee.same.native.o, 8,135,776 bytes, 172 defined text symbols, 0 SSE instructions",
+  "compiled from": "untouched vendor/repos/tracee source + headers (BPF target, -emit-llvm), then the four idioms folded out, then x86 codegen",
+  "cost": "lowering pass 2.4 s, x86 codegen 20.7 s"
+ },
+ "remaining": [
+  {
+   "gap": "R_X86_64_PC32 against the .maps section",
+   "linker says": "PC32 proof section-symbol target .maps is not rodata/bss",
+   "note": "the shipped build reaches the map through a GOTPCRELX load whose slot the loader fills (kind 5); here clang emitted a PC32 against the section symbol because the IR has no dso_local/GOT distinction. Katran needed -fPIC at the frontend for the same reason; the Tracee frontend is the BPF target, so the fix belongs in the linker (accept a PC32 .maps reference as a map-pointer relocation)."
+  },
+  {
+   "gap": "unresolved register-indirect helper call",
+   "linker says": "x86 unresolved register-indirect call in trace_sys_enter at local offset 0x34a through ...",
+   "note": "the IR carries helpers as `inttoptr (i64 35 to ptr)()`. clang hoisted the constant into a register and the linker's helper-site scan expects the immediate form the shipped object has (mov $imm32, %eax; call *%rax against an R_X86_64_PLT32/helper relocation)."
+  }
+ ]
 }

@@ -76,20 +76,8 @@ def main(argv):
                 return name
 
             resolved = {lhs: resolve(lhs) for lhs in aliases}
-            renaming = {}
-
             def fix(line):
-                m = re.match(r'^(\s*)(%[\w.$]+) = (.*)$', line)
-                folded = token.sub(lambda t: resolved.get(t.group(0), t.group(0)), line)
-                if m:
-                    indent, lhs, _rhs = m.groups()
-                    if re.search(re.escape(lhs) + r'(?![\w.])', folded):
-                        new_name = f'{lhs}.lp'
-                        renaming[lhs] = new_name
-                        folded = re.sub(re.escape(lhs) + r'(?![\w.])', new_name, folded)
-                for old_name, new_name in renaming.items():
-                    folded = re.sub(re.escape(old_name) + r'(?![\w.])', new_name, folded)
-                return folded
+                return token.sub(lambda t: resolved.get(t.group(0), t.group(0)), line)
 
             kept = [fix(line) for line in kept]
         return kept
@@ -117,6 +105,10 @@ def main(argv):
     counts.update({'barriers': 0, 'clamps': 0, 'constant_clamps': 0, 'output_mins': 0})
     index = 0
     for line in lines:
+        # Pending clamps are function-scoped: a name reused in the next function must not
+        # pick up this one's clamp.
+        if line.startswith('define ') or line.startswith('}'):
+            pending = []
         if EMPTY.match(line):
             counts['barriers'] += 1
             continue
