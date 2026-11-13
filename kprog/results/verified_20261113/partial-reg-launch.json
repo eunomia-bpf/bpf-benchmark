@@ -1,0 +1,45 @@
+{
+  "recorded_at": "2026-11-13T05:40:24.542388+00:00",
+  "model_commit": "1123c5755",
+  "kernel_commit": "74d1097af561",
+  "image": "bpf-benchmark/kprog:current",
+  "scope": "Detached affected-body replay plus independent generic ISA regression batch; outcomes pending",
+  "shared_base": "/workspaces/.agent-state/kprog-ck",
+  "host_mem_available_kb_at_launch": 92366692,
+  "jobs": [
+    {
+      "kind": "generic_partial_and_signed_unit",
+      "outer_pid": 1216111,
+      "host_cpus": "12-15",
+      "vm_cpus": 2,
+      "vm_mem": "2G",
+      "address_space_bytes": 8589934592,
+      "raw_directory": "/workspaces/kprog-raw/verified/20261113-partial-reg/guest",
+      "logs": "/workspaces/kprog-raw/verified/20261113-partial-reg/guest-job/make.log",
+      "command_file": "/workspaces/kprog-raw/verified/20261113-partial-reg/guest-job/make-command.txt",
+      "dry_run": "/workspaces/kprog-raw/verified/20261113-partial-reg/guest-dry-run.log",
+      "planned_stock_loads": 8
+    },
+    {
+      "kind": "actual_application_body",
+      "outer_pid": 1216112,
+      "host_cpus": "12-15",
+      "vm_cpus": 4,
+      "vm_mem": "8G",
+      "address_space_bytes": 17179869184,
+      "raw_directory": "/workspaces/kprog-raw/verified/20261113-helper-class-replay/partial-control",
+      "logs": "/workspaces/kprog-raw/verified/20261113-helper-class-replay/partial-job/make.log",
+      "command_file": "/workspaces/kprog-raw/verified/20261113-helper-class-replay/partial-job/make-command.txt",
+      "dry_run": "/workspaces/kprog-raw/verified/20261113-partial-reg/body-dry-run.log",
+      "application": "tetragon/observer",
+      "body_group": 6,
+      "name": "generic_kprobe_actions",
+      "represented_instances": 33,
+      "planned_stock_submissions": 1
+    }
+  ],
+  "resource_lock": "flock -s /workspaces/.agent-state/kprog-lanes/locks/image",
+  "launcher": "setsid nohup env VERIFIED_BUILD_CPUS=12-15 prlimit --as=<bytes> -- flock -s <image-lock> bash kprog/test/run_verified_make.sh <output> <make args>",
+  "app_execution_requests": 0,
+  "workload_run": null
+}

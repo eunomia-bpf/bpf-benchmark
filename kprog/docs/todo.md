@@ -99,7 +99,7 @@
 
 ## 2. 应用覆盖
 
-- **VERIFIED partial-register通用范围保留（2026-11-13）** a1d实际BPF1494保存policy_conf指针、1495写boolean byte、1496宽读恢复scalar，2049仅得0–255范围。通用8/16位pointer partial-write在scalarize后重写同一lane，保留写入scalar范围；upper bits/tag语义保持。low/high byte和16位共567个bit/tag host cases及6个boolean cases、既有helper/stack UBSan通过；全称`x86_reg_write_at_idempotent`证明通过。before/after BPF fixture和日志归档 `partial-reg-preparation*`，raw `/workspaces/kprog-raw/verified/20261113-partial-reg/`。stock verifier和受影响33成员body实际复测接续。
+- **VERIFIED partial-register通用范围保留（2026-11-13）** a1d实际BPF1494保存policy_conf指针、1495写boolean byte、1496宽读恢复scalar，2049仅得0–255范围。通用8/16位pointer partial-write在scalarize后重写同一lane，保留写入scalar范围；upper bits/tag语义保持。low/high byte和16位共567个bit/tag host cases及6个boolean cases、既有helper/stack UBSan通过；全称`x86_reg_write_at_idempotent`证明通过。before/after BPF fixture和日志归档 `partial-reg-preparation*`，raw `/workspaces/kprog-raw/verified/20261113-partial-reg/`。stock verifier unit batch outer1216111（2vCPU/2G/AS8GiB）和受影响33成员body replay outer1216112（4vCPU/8G/AS16GiB）已setsid/nohup启动，CPU12–15/shared image read lock；完整调用见 `partial-reg-launch.json`，实际结果后续收集。
 
 - **VERIFIED signed-width实际body replay（2026-11-13，a1d1fb198）** launcher1190459 make0，generic_kprobe_actions实际1submitted/0installed/1stock rejected，代表33成员。首拒绝从probe_read无界长度推进到BPF8644的policy_stats越界：value_size80、off2040、size8，processed55040；native execution0，workload待测。完整P/B/service及job日志归档 `helper-word32-replay*`，raw `/workspaces/kprog-raw/verified/20261113-helper-class-replay/word32-*`。下一类是通用comparison/index range保留。
 
