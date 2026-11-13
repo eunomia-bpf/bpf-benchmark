@@ -43,17 +43,22 @@ sources with the same native flags instead gives the mirror offsets:
          -Wno-unused-value -Wno-pointer-sign -Wno-compare-distinct-pointer-types \
          -O2 -emit-llvm -c -g -fPIC <upstream .c> -o x.bc
 
-2. `kprog/perf/native-context/build-x86/socket-context-lower` (lane perf's tool) with two
-   added rule pairs — `xdp` and `skb` — replaces each public context access with the
-   physical one, using exactly the verifier's conversion:
+2. `kprog/perf/native-context/build-x86/socket-context-lower` (lane perf's tool), driven by
+   lane perf's own `packet-public-layout.json` / `packet-physical-layout.json`
+   (`make -f kprog/perf/native-context/Makefile packet-context-check`, commit 1f74ce814;
+   lane perf chose route (b) at 2026-11-13T08:11:30Z, so none of their files are edited
+   here). Those tables cover the fields Katran needs with the same offsets mine did. The
+   tool replaces each public context access with the physical one, using exactly the
+   verifier's conversion:
 
        balancer.bc          -> 14 accesses lowered
        healthchecking_ipip  -> 4
        xdp_root             -> 0
 
-   `public.json` / `physical.json` here are the rule tables it was given. Public offsets
-   come from the untouched UAPI header; physical offsets from the sole kernel's BTF
-   (`xdp_buff.data` 0, `data_end` 8, `data_meta` 16; `sk_buff.len` 112, `mark` 168).
+   `public-layout.json` / `physical-layout.json` here are the tables it was given, copied
+   verbatim from lane perf's packet-context build. Public offsets come from the untouched
+   UAPI header; physical offsets from the sole kernel's BTF (`xdp_buff.data` 0, `data_end`
+   8, `data_meta` 16; `sk_buff.len` 112, `mark` 168).
 
 3. x86 codegen. Two details matter for native and both are in the command:
 

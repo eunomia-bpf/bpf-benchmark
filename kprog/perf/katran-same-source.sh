@@ -19,7 +19,15 @@ ROOT=/workspaces/repository
 UPSTREAM=$ROOT/vendor/repos/katran
 SHIPPED=$ROOT/vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran
 LOWER=${LOWER:-/var/tmp/kprog-tmp/perf/socket-context/socket-context-lower}
-RULES=${RULES:-$ROOT/kprog/results/katran-samesource-20261113}
+# The rule tables: lane perf's packet tables (make -f kprog/perf/native-context/Makefile
+# packet-context-check writes them under /var/tmp/kprog-tmp/perf/packet-context), or the
+# copies kept beside the evidence. Both name their files differently, so accept either.
+RULES=${RULES:-/var/tmp/kprog-tmp/perf/packet-context}
+first_existing() { for f in "$@"; do [ -f "$f" ] && { printf '%s' "$f"; return 0; }; done; return 1; }
+PUBLIC=$(first_existing "$RULES/public-layout.json" "$RULES/public.json") \
+  || { echo "no public layout table under $RULES" >&2; exit 1; }
+PHYSICAL=$(first_existing "$RULES/physical-layout.json" "$RULES/physical.json") \
+  || { echo "no physical layout table under $RULES" >&2; exit 1; }
 LINK=$ROOT/kprog/x86/native_lab/native_link/target/release/native-link
 CLANG=clang-18
 
@@ -43,8 +51,8 @@ install -d "$OUT"
 for pair in balancer_ingress:balancer healthcheck_encap:healthchecking_ipip xdp_root:xdp_root; do
   symbol=${pair%%:*}; src=${pair##*:}
   "$CLANG" "${FRONTEND[@]}" "$UPSTREAM/katran/lib/bpf/$src.c" -o "$OUT/$src.bc"
-  "$LOWER" "$OUT/$src.bc" --public-layout "$RULES/public.json" \
-    --physical-layout "$RULES/physical.json" -o "$OUT/$src.lowered.bc"
+  "$LOWER" "$OUT/$src.bc" --public-layout "$PUBLIC" \
+    --physical-layout "$PHYSICAL" -o "$OUT/$src.lowered.bc"
   llvm-dis-18 "$OUT/$src.lowered.bc" -o "$OUT/$src.lowered.ll"
   sed -E 's/"target-features"="[^"]*"//; s/"target-cpu"="[^"]*"//' \
     "$OUT/$src.lowered.ll" > "$OUT/$src.notf.ll"
