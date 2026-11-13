@@ -49,5 +49,6 @@
  "fixed_from_my_side": [
   "helper calls: the IR's `inttoptr (i64 N to ptr)(...)` calls were named as declarations (27 helpers, 37,948 call sites) so the linker binds them by name instead of failing with 'unresolved register-indirect call'",
   "map references: clearing `dso_local` on the 87 `.maps` globals turns the PC32 section-symbol reference into a GOTPCRELX load, which the linker accepts and the loader fills (the same fix -fPIC gives at a C frontend, as in Katran)"
- ]
+ ],
+ "helper_route_update": "Tracee's IR now gets the same four prep edits as BCC (name-helpers is folded into native-ir-prep.py, plus frame-pointer and data-global dso_local stripping). The native object then carries R_X86_64_PLT32 bpf_<name> for helpers \u2014 the shipped objects' form \u2014 yet native-link writes 166 helper relocations into the linked proof where the shipped object yields 25 and no helper relocations. BCC does not go through native-link in the same way, so this is now the only open question on Tracee and it is a linker-side decision about when to inline a named PLT32 helper call."
 }
