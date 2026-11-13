@@ -38,6 +38,7 @@ import re
 import shutil
 import subprocess
 import sys
+import symbolize
 
 ROOT = pathlib.Path("/workspaces/repository")
 HERE = ROOT / "kprog/perf/profile"
@@ -157,9 +158,6 @@ def run(args: argparse.Namespace) -> int:
     return report(out, annotate=args.annotate, limit=args.limit)
 
 
-_SYMBOL_ROW = re.compile(r"^\s*([0-9]+\.[0-9]+)%\s+(\S.*?)\s*$")
-
-
 def _kallsyms_args(out: pathlib.Path, phase: str) -> list[str]:
     """The guest's own symbol table for one phase, when the run captured one."""
     path = out / f"{phase}.kallsyms"
@@ -177,17 +175,12 @@ def _perf_report(out: pathlib.Path, phase: str, *extra: str) -> str:
 
 
 def _symbols(out: pathlib.Path, phase: str) -> collections.Counter:
-    """`{symbol: percent}` for one phase, `[k] `/`[.] ` markers stripped."""
-    result: collections.Counter = collections.Counter()
-    for line in _perf_report(
-        out, phase, "--stdio", "--sort", "symbol", "--percent-limit", "0.2",
-        "--no-children", "-q").splitlines():
-        match = _SYMBOL_ROW.match(line)
-        if match is None:
-            continue
-        symbol = re.sub(r"^\[[k.]\]\s*", "", match.group(2)).strip()
-        result[symbol] += float(match.group(1))
-    return result
+    """Root samples only, resolved with this phase's guest JIT symbols."""
+    ips = symbolize.samples(out / f"{phase}.data")
+    if not ips:
+        raise SystemExit(f"no root samples for {phase}")
+    counts = symbolize.resolve(ips, *symbolize.load_kallsyms(out / f"{phase}.kallsyms"))
+    return collections.Counter({name: count * 100 / len(ips) for name, count in counts.items()})
 
 
 def _program_name(symbol: str) -> str | None:

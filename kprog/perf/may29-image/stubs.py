@@ -1,30 +1,25 @@
 #!/usr/bin/env python3
-"""Report every program a run loaded as a stub, and whether it carried work.
+"""Report tiny program candidates and whether they carried work.
 
-A program whose jited size is a few dozen bytes is the JIT's fallback body, not
-the program's own code: the native loader had no image for it, so the kernel
-compiled r0 = 0. That is a fallback (AGENTS.md:105 forbids one), and an audit of
-this project voided four applications' floor comparisons over it.
+Size alone cannot distinguish an intentional empty application function from
+a fallback body. Tracee's empty_kprobe is one intentional example. Source or
+disassembly establishes that distinction; this report retains every candidate.
 
-What decides whether a run's numbers are affected is not the stub's presence but
-its work: a stub with zero executions contributes nothing to ns/inv, while one
-that runs is measured in place of the real program. Both are reported.
+For an established fallback, its invocation count quantifies affected work.
+Tiny intentional functions also execute legitimately. Both remain reported.
 
 Usage: stubs.py <run>... [--max-bytes N]
 
 Each argument is a corpus result directory. Prints one line per (run, app, phase)
-that has a stub, then a summary.
+that has a candidate, then a summary.
 """
 import argparse
 import json
 import pathlib
 import sys
 
-# The fallback body the x86 JIT emits for a program with no instructions. A
-# program that is genuinely tiny has a small original too (tracee's empty_kprobe
-# loads 16 bytes of original and is called that), so the stub is identified by
-# both: a small jited body OVER a small original. BCC's fentry_vfs_* are 40 bytes
-# jited from 48 bytes of original, six real instructions, and are not stubs.
+# Shape thresholds only: intentional empty functions can have the same sizes.
+# A normal native stub's xlated size also does not describe the native body.
 FALLBACK_BYTES = 40
 FALLBACK_XLATED = 24
 
@@ -43,7 +38,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("runs", nargs="+", type=pathlib.Path)
     parser.add_argument("--max-bytes", type=int, default=FALLBACK_BYTES,
-                        help="a program at or below this jited size is a stub")
+                        help="report programs at or below this jited size")
     parser.add_argument("--max-xlated", type=int, default=FALLBACK_XLATED,
                         help="and at or below this many original bytes")
     args = parser.parse_args()
@@ -66,17 +61,15 @@ def main() -> None:
                 runs = sum(v.get("run_cnt_delta", 0) for v in stubs)
                 ns = sum(v.get("run_time_ns_delta", 0) for v in stubs)
                 stubbed += len(stubs)
-                if runs:
-                    with_work += len(stubs)
+                with_work += sum(v.get("run_cnt_delta", 0) > 0 for v in stubs)
                 kinds = sorted({(v["name"], v["bytes_jited"], v["bytes_xlated"])
                                 for v in stubs})
-                print(f"{run.name} {name} {phase}: {len(stubs)} stubs, "
+                print(f"{run.name} {name} {phase}: {len(stubs)} tiny candidates, "
                       f"runs {runs}, ns {ns}")
                 for kind_name, jited, xlated in kinds:
                     print(f"    {kind_name:20} jited {jited:4} xlated {xlated:4}")
-    print(f"total {stubbed} stub records, {with_work} of them carried work"
-          + (" -- these distort the run" if with_work else
-             " -- none affected any ns/inv figure"))
+    print(f"total {stubbed} tiny-program candidates, {with_work} of them carried work"
+          " -- size alone does not establish a fallback or differing work")
 
 
 if __name__ == "__main__":

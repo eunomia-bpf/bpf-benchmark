@@ -46,28 +46,25 @@ def load_kallsyms(path: pathlib.Path) -> tuple[list[int], list[str], list[str]]:
 
 def samples(data: pathlib.Path) -> list[int]:
     done = subprocess.run(
-        [str(PERF), "script", "-i", str(data), "-F", "ip", "--no-inline"],
+        [str(PERF), "script", "-i", str(data), "-F", "ip", "--no-inline", "--hide-call-graph"],
         capture_output=True, text=True)
     if done.returncode != 0:
         raise SystemExit(f"perf script failed: {done.stderr.strip()}")
-    out = []
-    for line in done.stdout.splitlines():
-        token = line.strip().split(" ")[0]
-        if not token:
-            continue
-        try:
-            out.append(int(token, 16))
-        except ValueError:
-            continue
-    return out
+    return parse_root_ips(done.stdout)
+
+
+def parse_root_ips(text: str) -> list[int]:
+    """One IP per sample with --hide-call-graph; unexpected output is an error."""
+    return [int(line.strip(), 16) for line in text.splitlines() if line.strip()]
 
 
 def resolve(ips: list[int], addresses: list[int], names: list[str],
             modules: list[str]) -> collections.Counter:
-    """`{symbol}` per sample; `0`-address samples are dropped as lost."""
+    """`{symbol}` per sample, retaining unknown IPs in the denominator."""
     out: collections.Counter = collections.Counter()
     for ip in ips:
         if ip == 0:
+            out["[zero-ip]"] += 1
             continue
         index = bisect.bisect_right(addresses, ip) - 1
         if index < 0:
