@@ -182,6 +182,36 @@ def group(args):
     print(json.dumps(source["grouping"]), flush=True)
 
 
+def replay_programs(groups, outcomes, classes):
+    """Replay every observed body in a class, even after a later success."""
+    observations = [(g["body_group"], g["retained_outcome"]) for g in groups
+                    if g["retained_outcome"] is not None]
+    observations.extend((r["body_group"], r) for r in outcomes)
+    selected = {number for number, outcome in observations
+                if failure_class(outcome) in classes}
+    return [dict(g["representative"], body_group=g["body_group"])
+            for g in groups if g["body_group"] in selected]
+
+
+def replay(args):
+    source = json.loads(args.inputs.read_text())
+    outcomes = [json.loads(line) for line in args.completed_journal.read_text().splitlines()]
+    source["programs"] = replay_programs(source["body_groups"], outcomes, set(args.failure_class))
+    selected = {r["body_group"] for r in source["programs"]}
+    source["scope"] = "Affected-class body replay; separate from the full census"
+    source["replay"] = dict(classes=args.failure_class, input_inventory=str(args.inputs),
+                            completed_journal=str(args.completed_journal),
+                            bodies=len(selected),
+                            represented_instances=sum(len(g["members"]) for g in source["body_groups"]
+                                                      if g["body_group"] in selected),
+                            controller_commit=subprocess.check_output(
+                                ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip())
+    args.output.mkdir(parents=True, exist_ok=True)
+    write(args.output / "inventory.json", source)
+    write(args.output / "preparation.json", source["replay"])
+    print(json.dumps(source["replay"]), flush=True)
+
+
 def guest(args):
     subprocess.run(["bash", "-eu", "-c",
                     "mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf"], check=True)
@@ -222,7 +252,7 @@ def guest(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("prepare", "group", "guest"))
+    parser.add_argument("mode", choices=("prepare", "group", "replay", "guest"))
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--inputs", type=Path)
     parser.add_argument("--resources", type=Path)
@@ -233,8 +263,9 @@ def main():
     parser.add_argument("--service-state", type=Path)
     parser.add_argument("--loader-directory", type=Path)
     parser.add_argument("--completed-journal", type=Path)
+    parser.add_argument("--failure-class", action="append", default=[])
     args = parser.parse_args()
-    {"prepare": prepare, "group": group, "guest": guest}[args.mode](args)
+    {"prepare": prepare, "group": group, "replay": replay, "guest": guest}[args.mode](args)
 
 
 if __name__ == "__main__":
