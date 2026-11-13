@@ -12,7 +12,10 @@
 
 做法：每条 lane 有一个目标和一张按顺序的待办，自己推进，不向协调者申请时段或许可；共用资源由 lane 之间在 COORDINATION.md 直接商量。协调者每小时核对提交和结果，必要时改目标、改待办顺序；omp 两三次不按待办做就停掉重开（运营者 11-12）。
 
+运营者 2026-11-13："我觉得这个做法不是改源代码, 我们应该尽可能禁止改源代码吧? 尽可能减少修改? ... 你可以改链接器, 自己写 mmset, 不要用内核的; 顺便去看看有没有类似的情况, 这不公平也很容易出错, 我们应该在链接器或者编译 flag 上面做文章"。规则：不改应用源码，也不往编译里塞替换源码行为的头文件；原生代码的差异在链接器或编译 flag 上解决，改动尽量少。普查（协调者，2026-11-13，镜像里全部 *.native.o 的外部函数符号）：只有 memset 和 memcpy 两个库函数落到内核：memset 在 Tetragon 38 个对象、OTel 5 个、BCC 1 个、Tracee 1 个；memcpy 在 Tetragon 8 个、Tracee 1 个；Katran、Cilium 没有。
+
 **lane perf（Codex，gpt-6.1-sol）。目标：每个性能数字都是等量工作、可复现的；六应用几何平均 native/eBPF 达到 1.20x 以上，每个应用不低于 05-29 下限。**
+- [ ] P0 原生代码的 memset、memcpy 不再调用内核的实现：链接器自带这两个函数（简单的 8 字节写/拷贝循环加尾部，不用 rep stos/movs），把对象里的 memset、memcpy 重定位绑定到镜像内自带的这份；放在默认关闭的链接器选项后，默认输出字节不变；链接器归 lane verified，先和它在 COORDINATION 说好再改（或请它改）。先看编译 flag 能否让 clang 对常量大小直接展开（不改源码、不加头文件），能就优先用 flag。然后在 Tracee 上开/关各计时一轮（CPU 0-7，计时锁），用 perprog.py 和 phase-profile 看 memset 的 13.93% 是否消失。完成后 Tetragon、OTel、BCC 受影响的应用各重测一轮。
 - [ ] P1 OTel、Tetragon 等量工作：读一次性 Codex 的报告 kprog/results/equal-work-20261113/report.md（以及 COORDINATION 里 FOR TEMP CODEX 的线索：内联 tail call 用到的内核偏移和计数槽）；查清哪一边偏了，按所属组件修（链接器、加载器、shim 属 lane verified，直接和它商量），新行为放在默认关闭的开关后。
 - [x] P1a PERF_EVENT physical-context host子集与候选构建（e0939263e、ce863428d、00c863247）：regs/sample_period/addr按唯一kernel BTF转换，helper/tailcall保留physical ctx；plain fixture=1、corrected=0，OTel 15 units合并构建rc0、10处context loads完成转换。receipt `kprog/results/perf_20261113/context-host.json`；实际配对guest已进入native unwinder，暴露动态inner-map lookup被编为percpu array后的panic；runtime receipt `context-runtime.json`，链接器修复交verified，P1继续。
 - [x] P1b OTel动态inner-map lookup（49f464cc6，371dc4bb6）：runtime-map候选配合context修复完成短配对run `x86_kvm_corpus_20261113_033039_387780`，make0/appok、0错误/0stub；native Attempts/Frames/Interpreter/collector均恢复，mature frames/attempt eBPF0.912213、native0.913468。stats开单样本诊断吞吐0.975x，正式floor另测。receipt `kprog/results/perf_20261113/otel-recovered.json`；P1整体继续核对counter mix与Tetragon。
@@ -28,7 +31,8 @@
 
 **lane C（omp，fleet/local-large）。目标：用对同类程序都适用的改动提高 Tracee、BCC、Katran 原生代码每次调用的速度。**
 - [ ] C1 Tracee：在 guest 里用 perf 剖析 raw_syscalls sys_enter、trace_sys_enter、trace_sys_exit 两边的时间去向，贴出剖析和运行目录。
-- [ ] C2 据此做一处通用改进（vendor/bpf 的原生构建），默认关闭的开关，默认对象逐字节不变；功能检查后计时。
+- [x] C1 Tracee 剖析（f3367005a、d22c5dedb）：原生阶段 memset 占 guest CPU 13.93%，eBPF 阶段 0.72%。
+- [ ] C2 撤回：c9583219e 的 native_memset.h 头文件和 NATIVE_INLINE_MEMSET 开关属于源码层替换，按运营者的话撤掉（恢复 vendor/bpf/Makefile 并删去该头文件，一个提交）；memset 交给 lane perf 的 P0 在链接器/flag 上做。原 C2 文字："据此做一处通用改进（vendor/bpf 的原生构建），默认关闭的开关，默认对象逐字节不变；功能检查后计时。
 - [ ] C3 BCC：把构建时 .rodata 特化对象作为第二种配置（NATIVE_MANIFEST），两种配置各计时一轮。
 - [ ] C4 Katran。
 
