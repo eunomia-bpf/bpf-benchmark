@@ -1,0 +1,36 @@
+{
+ "c4_timing_20261113": {
+  "run": "corpus/results/x86_kvm_corpus_20261113_230940_181487",
+  "protocol": "kprog/perf/one-image/scripts/specialized-timing.sh katran corpus/results/katran-samesource-20261113/objects <state> 3 180 0-7",
+  "settings": {
+   "samples": 3,
+   "workload_seconds": 180,
+   "bpf_stats": 1,
+   "cpus": "0-7",
+   "native_manifest": "corpus/results/katran-samesource-20261113/objects/manifest.json"
+  },
+  "arms": {
+   "baseline (eBPF)": {
+    "program": "balancer_ingres",
+    "id": 9,
+    "run_cnt_delta": 1494134729,
+    "run_time_ns_delta": 231423681899,
+    "ns_per_run": 154.89,
+    "bytes_jited": 13641,
+    "bytes_xlated": 23840
+   },
+   "post_rejit (native)": {
+    "program": "balancer_ingres",
+    "id": 16,
+    "run_cnt_delta": 1758277963,
+    "run_time_ns_delta": 203987964811,
+    "ns_per_run": 116.02,
+    "bytes_jited": 10021,
+    "bytes_xlated": 16
+   }
+  },
+  "result": "1.335x per invocation (154.89 -> 116.02 ns/run)",
+  "native_path_confirmed_by": "bytes_xlated 16 for the native arm (machine code passed through) against 23840 for the eBPF arm, and jited 10021 against 13641",
+  "caveat": "one run of 3x180 s on CPUs 0-7, timing lock held, 4 guests from other lanes on 8-23 at the time; no per-sample counters were retained by the framework, so this is an aggregate ratio, not a confidence interval."
+ }
+}
