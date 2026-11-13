@@ -44,9 +44,7 @@
 
 **lane C（omp，fleet/local-large）。目标：用对同类程序都适用的改动提高 Tracee、BCC、Katran 原生代码每次调用的速度。**
 **lane C 的大任务：Katran、BCC、Tracee 的原生一侧改成同源构建，然后在其上优化。** 这三个应用的源码差异（Katran 的 D16/D19 部分，BCC、Tracee 的 D03/D04/D15/D23 等）移进编译 flag 或链接器，默认构建不变；用 lane perf 的共用机制（memset/memcpy、CO-RE），需要改链接器、加载器、shim 时先和 Codex lane 在 COORDINATION 讨论并由所属 lane 改。完成标准：两边应用输出对得上（Katran 包、BCC 工具输出、Tracee 事件），然后各计时一轮，再找每次调用的通用优化。撤回 C2 仍要先做。
-- [ ] C1 Tracee：在 guest 里用 perf 剖析 raw_syscalls sys_enter、trace_sys_enter、trace_sys_exit 两边的时间去向，贴出剖析和运行目录。
-- [x] C1 Tracee 剖析（f3367005a、d22c5dedb）：原生阶段 memset 占 guest CPU 13.93%，eBPF 阶段 0.72%。
-- [ ] C2 撤回：c9583219e 的 native_memset.h 头文件和 NATIVE_INLINE_MEMSET 开关属于源码层替换，按运营者的话撤掉（恢复 vendor/bpf/Makefile 并删去该头文件，一个提交）；memset 交给 lane perf 的 P0 在链接器/flag 上做。原 C2 文字："据此做一处通用改进（vendor/bpf 的原生构建），默认关闭的开关，默认对象逐字节不变；功能检查后计时。
+- [x] C1 Tracee 剖析（f3367005a、d22c5dedb、5e9895eea；运行目录 `corpus/results/x86_kvm_corpus_20261113_060149_355673`，raw `/workspaces/kprog-raw/C/20261113T060000Z-phase-profile-tracee-callchain`）：原生阶段 13.52% 的 guest CPU 样本落在内核 memset（eBPF 阶段 0.68%），但调用链显示其中 96%（30,690/31,928）是 **`bpf_probe_read_kernel` 的失败分支**（`include/linux/bpf.h:3381` 在 `copy_from_kernel_nofault` 返回负值时 `memset(dst, 0, size)`），不是原生函数体自己的清零：同一个 trace_sys_enter/trace_sys_exit，原生侧 55.1% 的样本在 probe read 里走到 memset，eBPF 侧 0.0%。所以真正的问题是原生侧 probe read 大量失败（下一项）。- [x] C2 **已撤回**（04362ac3d）：c9583219e 的 native_memset.h 头文件和 NATIVE_INLINE_MEMSET 开关属于源码层替换，按运营者 2026-11-13 的话撤掉——vendor/bpf/Makefile 恢复到 c9583219e^ 的 blob（014b53e01），头文件删除；memset 交给 lane perf 的 P0 在链接器/flag 上做。原 C2 文字："据此做一处通用改进（vendor/bpf 的原生构建），默认关闭的开关，默认对象逐字节不变；功能检查后计时。" 撤回的依据之一也记录在这里：开关打开后 x86_kvm_corpus_20261113_053141_230247 的 memset 占比仍有 13.50%（关闭 13.93%），因为成本在 helper 失败路径上，不在对象自身的 memset 调用上。
 - [ ] C5 Katran 的源码差异（审核 D16、D19 中 Katran 的部分：linux_includes/bpf.h 的结构改动、原生缺 -DDEBUG 等）移进编译 flag 或链接器，默认构建不变；对照两边输出后再做 C4 计时。
 - [ ] C4 先做（Katran 没有 CO-RE 和 memset 问题）；C3 等 P1h 和 P0 落地后再计时，否则测的是带缺陷的 BCC 对象。
 - [ ] C3 BCC：把构建时 .rodata 特化对象作为第二种配置（NATIVE_MANIFEST），两种配置各计时一轮。
