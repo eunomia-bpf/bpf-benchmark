@@ -1,0 +1,312 @@
+{
+  "recorded_at": "2026-11-13T10:44:05.715632+00:00",
+  "protocol_commit": "0c51af5af",
+  "raw": "/workspaces/kprog-raw/perf/20261113-tetragon-native-asm",
+  "inputs": [
+    {
+      "path": "/var/tmp/kprog-tmp/perf/bpf-asm/bpf-asm-lower",
+      "sha256": "b8ac2d746d4222eb66e8554956d9f2089d941b9b9d2d910a72a30b14ef2be68b"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/bpf-asm/fixture.bc",
+      "sha256": "012a16b0c04a0d7bcf8f794606742ca2e2fe94fc6bbb25e5f99ca632666bf19a"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/bpf-asm/fixture.lowered.bc",
+      "sha256": "afa0ae937c78a6ac0d972edd1ca070f0fd485c783af79333a0ad2f2af20a2800"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/bpf-asm/fixture.native.bc",
+      "sha256": "f37dc6ef2905f840db3dd981afec216ff2f1e0e52137ad09231e0ebd447be140"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/bpf-asm/fixture.bpf.o",
+      "sha256": "f077c1097f07f415687a3b17f8b580845da8537a912f9ebed769f25b0362fe7b"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/bpf-asm/fixture.bpf.dis",
+      "sha256": "2adee1b562dfe37a8a4ac289f393f2d2d69fb98b9220538e9af48aae06aa1417"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/bpf-asm/fixture",
+      "sha256": "6b6bb86bc20c1dd298a1acbd4f3513c375302117354f58454745666261c79719"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/bpf-asm/driver.o",
+      "sha256": "c12ba5b2c70867c0a4cc282c0e29691eb2e659a7d70480afb3c1d47da55677b4"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/bpf-asm/compare.bc",
+      "sha256": "4153c3eb47000581aa9e6bb824a2b18716b476d0a93bfbcb5103439d0d4f6bf3"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/bpf-asm/compare.lowered.bc",
+      "sha256": "0fc4e62c63271fe67376544ec64ce6b72d2c77977234ca83bd3eb31aa1a98ee2"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/bpf-asm/compare.native.bc",
+      "sha256": "f754e72aa7747a850758a34a270054e21ff3635fa6279da61b7d9234a4787f24"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/bpf-asm/compare.driver.o",
+      "sha256": "dfca466557da4c7682e93423f8ee8110303213905b933083491dc51a4028281b"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/bpf-asm/compare",
+      "sha256": "c9d34b43142cdf9857be2a02f9a8e500d04539ca8557b325594ea8ecbd95907c"
+    }
+  ],
+  "reports": [
+    {
+      "path": "/workspaces/kprog-raw/perf/20261113-tetragon-native-asm/summary.json",
+      "sha256": "85b0dd5f0415dfb24dd52822163d2597c4b751588532d93303f4cbcfefa8a9b4",
+      "data": {
+        "compiler_commit": "0c51af5af",
+        "units": [
+          {
+            "unit": "bpf_generic_kprobe_v61",
+            "native_object": "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61.native.o",
+            "native_sha256": "2a60b59d96fb025926d4712f3e7e82bc91e1b2bd2db0f7feb02d5be35db7bc1e",
+            "proofs": [
+              {
+                "symbol": "generic_fmodret_override",
+                "command": [
+                  "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+                  "--mode",
+                  "proof",
+                  "--input",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61.native.o",
+                  "--symbol",
+                  "generic_fmodret_override",
+                  "--output",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61-links/generic_fmodret_override.proof.o"
+                ],
+                "returncode": 0
+              },
+              {
+                "symbol": "generic_kprobe_actions",
+                "command": [
+                  "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+                  "--mode",
+                  "proof",
+                  "--input",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61.native.o",
+                  "--symbol",
+                  "generic_kprobe_actions",
+                  "--output",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61-links/generic_kprobe_actions.proof.o"
+                ],
+                "returncode": 0
+              },
+              {
+                "symbol": "generic_kprobe_event",
+                "command": [
+                  "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+                  "--mode",
+                  "proof",
+                  "--input",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61.native.o",
+                  "--symbol",
+                  "generic_kprobe_event",
+                  "--output",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61-links/generic_kprobe_event.proof.o"
+                ],
+                "returncode": 0
+              },
+              {
+                "symbol": "generic_kprobe_filter_arg",
+                "command": [
+                  "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+                  "--mode",
+                  "proof",
+                  "--input",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61.native.o",
+                  "--symbol",
+                  "generic_kprobe_filter_arg",
+                  "--output",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61-links/generic_kprobe_filter_arg.proof.o"
+                ],
+                "returncode": 1
+              },
+              {
+                "symbol": "generic_kprobe_output",
+                "command": [
+                  "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+                  "--mode",
+                  "proof",
+                  "--input",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61.native.o",
+                  "--symbol",
+                  "generic_kprobe_output",
+                  "--output",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61-links/generic_kprobe_output.proof.o"
+                ],
+                "returncode": 0
+              },
+              {
+                "symbol": "generic_kprobe_override",
+                "command": [
+                  "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+                  "--mode",
+                  "proof",
+                  "--input",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61.native.o",
+                  "--symbol",
+                  "generic_kprobe_override",
+                  "--output",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61-links/generic_kprobe_override.proof.o"
+                ],
+                "returncode": 0
+              },
+              {
+                "symbol": "generic_kprobe_process_event",
+                "command": [
+                  "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+                  "--mode",
+                  "proof",
+                  "--input",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61.native.o",
+                  "--symbol",
+                  "generic_kprobe_process_event",
+                  "--output",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61-links/generic_kprobe_process_event.proof.o"
+                ],
+                "returncode": 0
+              },
+              {
+                "symbol": "generic_kprobe_process_filter",
+                "command": [
+                  "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+                  "--mode",
+                  "proof",
+                  "--input",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61.native.o",
+                  "--symbol",
+                  "generic_kprobe_process_filter",
+                  "--output",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61-links/generic_kprobe_process_filter.proof.o"
+                ],
+                "returncode": 0
+              },
+              {
+                "symbol": "generic_kprobe_setup_event",
+                "command": [
+                  "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+                  "--mode",
+                  "proof",
+                  "--input",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61.native.o",
+                  "--symbol",
+                  "generic_kprobe_setup_event",
+                  "--output",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61-links/generic_kprobe_setup_event.proof.o"
+                ],
+                "returncode": 0
+              }
+            ]
+          },
+          {
+            "unit": "bpf_execve_event_v61",
+            "native_object": "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_execve_event_v61.native.o",
+            "native_sha256": "700c78ea5f8fa088311a36988814c90c66e0112a1bdcf893d9825c6faaa3cb1c",
+            "proofs": [
+              {
+                "symbol": "event_execve",
+                "command": [
+                  "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+                  "--mode",
+                  "proof",
+                  "--input",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_execve_event_v61.native.o",
+                  "--symbol",
+                  "event_execve",
+                  "--output",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_execve_event_v61-links/event_execve.proof.o"
+                ],
+                "returncode": 0
+              },
+              {
+                "symbol": "execve_rate",
+                "command": [
+                  "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+                  "--mode",
+                  "proof",
+                  "--input",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_execve_event_v61.native.o",
+                  "--symbol",
+                  "execve_rate",
+                  "--output",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_execve_event_v61-links/execve_rate.proof.o"
+                ],
+                "returncode": 0
+              },
+              {
+                "symbol": "execve_send",
+                "command": [
+                  "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+                  "--mode",
+                  "proof",
+                  "--input",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_execve_event_v61.native.o",
+                  "--symbol",
+                  "execve_send",
+                  "--output",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_execve_event_v61-links/execve_send.proof.o"
+                ],
+                "returncode": 0
+              }
+            ]
+          },
+          {
+            "unit": "bpf_fork_v511",
+            "native_object": "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_fork_v511.native.o",
+            "native_sha256": "5e353012760665667747763b504c0b3100ce2b4d51c2700166b22f83902ec6c6",
+            "proofs": [
+              {
+                "symbol": "event_wake_up_new_task",
+                "command": [
+                  "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+                  "--mode",
+                  "proof",
+                  "--input",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_fork_v511.native.o",
+                  "--symbol",
+                  "event_wake_up_new_task",
+                  "--output",
+                  "/var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_fork_v511-links/event_wake_up_new_task.proof.o"
+                ],
+                "returncode": 0
+              }
+            ]
+          }
+        ],
+        "asm_fixture": {
+          "make_status": 0,
+          "blocks": 10,
+          "boundary_values": 13
+        },
+        "compare_fixture": {
+          "make_status": 0,
+          "predicates": 10,
+          "widths": [
+            32,
+            64
+          ],
+          "boundary_pairs": 100
+        },
+        "limits": [
+          "Offline proof generation, not kernel acceptance or application equivalence.",
+          "One kprobe entry preserves external weak bpf_strncasestr and fails proof linking; no stub, forced availability or skipped program.",
+          "Initial EACCES compiler-output race and missing comparison/bound forms remain in the logs; retries use separate compiler build outputs."
+        ]
+      }
+    }
+  ],
+  "scope": "Host compiler/replay artifacts only; no kernel submission, native installation or application equal-work claim.",
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/perf_20261113/tetragon-native-asm.tar.gz",
+    "bytes": 10656797,
+    "sha256": "d15eff6ec74a9ba8ff1349eb1749c4f189df2fd0dc885afdac8a1288da58eb8e",
+    "files_byte_compared": 125
+  }
+}
