@@ -33,6 +33,9 @@ finalize_refresh() {
         "$refresh_direct/bpf_x86_native_lab.ko" \
         /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko > "$refresh_output/base-sha256"
     date -u +%FT%TZ > "$refresh_output/finished"
+    printf -- '- LANE VERIFIED %s: IMAGE REBUILT current %s; superseded %s cleanup=%s. Canonical image/base writer completed; raw logs/inventories/hashes %s. Application validation and census outcomes remain separate; frozen benchmark settings unchanged.\n' \
+        "$(date -u +%FT%TZ)" "$refresh_new_image" "$refresh_old_image" "$refresh_cleanup" \
+        "$refresh_output" >> /workspaces/.agent-state/kprog-lanes/COORDINATION.md
 }
 
 refresh_operation=${2:-full}
@@ -77,8 +80,8 @@ make -C "$refresh_root/kprog/libnativeloader" native-image-handoff-kvm \
 fi
 
 # Kbuild's modules_install parser removes the installed kernel directory even
-# with make -n. Restore the sole installed set from the already built modules;
-# no kernel compilation or source/version change is involved.
+# with make -n. Finish the sole build's module outputs before reinstalling;
+# retain the existing core ELF and boot image, with no source/version change.
 find "$refresh_kernel/modules-install" -type f -print > "$refresh_output/modules-before.txt"
 refresh_release=$(cat "$refresh_kernel/include/config/kernel.release")
 if [[ ! -e $refresh_kernel/modules.order ]]; then
@@ -90,6 +93,12 @@ if [[ ! -e $refresh_kernel/modules.order ]]; then
         > "$refresh_kernel/modules.order"
     cp "$refresh_kernel/modules.order" "$refresh_output/recovered-modules.order"
 fi
+sha256sum "$refresh_kernel/arch/x86/boot/bzImage" "$refresh_kernel/vmlinux" \
+    "$refresh_kernel/.config" > "$refresh_output/kernel-before-modules-sha256"
+make -C "$refresh_root/vendor/linux-framework" O="$refresh_kernel" ARCH=x86_64 \
+    -o vmlinux -o vmlinux.o modules -j1
+sha256sum "$refresh_kernel/arch/x86/boot/bzImage" "$refresh_kernel/vmlinux" \
+    "$refresh_kernel/.config" > "$refresh_output/kernel-after-modules-sha256"
 make -C "$refresh_root/vendor/linux-framework" O="$refresh_kernel" ARCH=x86_64 \
     INSTALL_MOD_PATH="$refresh_kernel/modules-install" INSTALL_MOD_STRIP=1 \
     DEPMOD=true modules_install -j1
@@ -97,7 +106,7 @@ find "$refresh_kernel/modules-install" -type f -print > "$refresh_output/modules
 sha256sum "$refresh_kernel/net/netfilter/nfnetlink.ko" \
     "$refresh_kernel/modules-install/lib/modules/$refresh_release/kernel/net/netfilter/nfnetlink.ko" \
     > "$refresh_output/nfnetlink-sha256"
-printf -- '- %s VERIFIED module packaging repair: replaced incomplete modules-install in the sole build using its existing .ko files (INSTALL_MOD_STRIP=1); no kernel compilation; file inventories and raw logs retained in %s.\n' \
+printf -- '- %s VERIFIED module packaging repair: completed module outputs and replaced incomplete modules-install in the sole build (INSTALL_MOD_STRIP=1); core ELF/boot retained, no source/version change; file inventories and raw logs retained in %s.\n' \
     "$(date -u +%FT%TZ)" "$refresh_output" >> "$refresh_root/kprog/docs/cleanup-log.md"
 
 # Use the frozen image recipe and existing stable kernel/application artifacts.

@@ -1,0 +1,11 @@
+{
+  "order_entries": 842,
+  "missing_final_modules": [
+    "fs/btrfs/btrfs.ko"
+  ],
+  "source_kernel": "74d1097af561 unchanged",
+  "repair": "Normal incremental Kbuild modules target, existing vmlinux/vmlinux.o marked complete; same source/config/build",
+  "raw_previous": "/workspaces/kprog-raw/verified/20261113-modules-repair-retry1",
+  "previous_make_exit": 2,
+  "previous_image_assembly_started": false
+}
