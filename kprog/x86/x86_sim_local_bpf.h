@@ -264,12 +264,15 @@ struct x86_sim_stack_value { void *pointer; __u8 tag; };
     _Pragma("unroll") \
     for (__u32 __x86_sv_i=0; __x86_sv_i<KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES); ++__x86_sv_i) { OP(__x86_sv_i) }
 #endif
-#define X86_SIM_L_SV_CLEAR_ONE(I) X86_SIM_L_SV_TAG(I)=X86_SIM_TAG_SCALAR;
+/* An invalidated fact no longer needs a pointer representative. Clearing
+ * both fields ends its compiler lifetime without touching native bytes. */
+#define X86_SIM_L_SV_CLEAR_ONE(I) \
+    do { X86_SIM_L_SV_TAG(I)=X86_SIM_TAG_SCALAR; X86_SIM_L_SV_PTR(I)=0; } while(0);
 #define X86_SIM_L_STACK_VALUES_CLEAR() do { X86_SIM_L_SV_EACH(X86_SIM_L_SV_CLEAR_ONE) } while(0)
 #define X86_SIM_L_SV_ERASE_ONE(I) \
     do { __u64 __x86_sv_start=(__u64)(I)*8U; \
          if (__x86_sv_index-__x86_sv_start<8U || __x86_sv_start-__x86_sv_index<__x86_sv_width) \
-             X86_SIM_L_SV_TAG(I)=X86_SIM_TAG_SCALAR; } while(0);
+             X86_SIM_L_SV_CLEAR_ONE(I) } while(0);
 #define X86_SIM_L_STACK_VALUES_ERASE(INDEX, WIDTH) \
     do { __u64 __x86_sv_index=(INDEX),__x86_sv_width=X86_SIM_L_EFFECTIVE_WIDTH(WIDTH); \
          X86_SIM_L_SV_EACH(X86_SIM_L_SV_ERASE_ONE) } while(0)
@@ -293,7 +296,7 @@ struct x86_sim_stack_value { void *pointer; __u8 tag; };
  * deallocated slots disappear while their architectural bytes stay raw. */
 #define X86_SIM_L_SV_BELOW_SP_ONE(I) \
     do { if ((__s64)((__u64)(I)*8U)-(__s64)X86_SIM_STACK_BYTES<__x86_sv_sp) \
-             X86_SIM_L_SV_TAG(I)=X86_SIM_TAG_SCALAR; } while(0);
+             X86_SIM_L_SV_CLEAR_ONE(I) } while(0);
 #define X86_SIM_L_STACK_VALUES_CALL_FRAME() \
     do { __s64 __x86_sv_sp=(__s64)(long)__x86_rsp.ptr; \
          X86_SIM_L_SV_EACH(X86_SIM_L_SV_BELOW_SP_ONE) } while(0)

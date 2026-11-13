@@ -1,0 +1,25 @@
+{
+  "recorded_at": "2026-11-13T02:29:34.200077+00:00",
+  "scope": "Generic B representation correction: release pointer representatives when tags are invalidated",
+  "model_baseline": "d0890b14f",
+  "paths": [
+    "kprog/x86/x86_sim_local_bpf.h",
+    "kprog/formal/oracles/test_invocation_stack_host.c"
+  ],
+  "test": "taskset -c 8-19 make -C kprog/tv stack-alias-host-check",
+  "before": {
+    "exit_code": 2,
+    "failure": "stack contract failure line76: overlapping write left the dead representative nonzero"
+  },
+  "after": {
+    "exit_code": 0,
+    "result": "stack lifetime PASS under UBSan"
+  },
+  "semantics": "Clearing tag and pointer together changes no architectural byte and no live tagged read; overlapping write, below-SP frame release and global invalidation share the same clearing primitive",
+  "limits": [
+    "Actual compiled-B frame size and stock-verifier acceptance not yet measured",
+    "Current grouped request started/preprocessed under d089; later requests may consume changed header, actual generated/preprocessed B retained",
+    "No compiler/kernel stack limit, extra runtime check, kernel/image/base binary or benchmark-setting change"
+  ],
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-ghost-pointer-lifetime"
+}
