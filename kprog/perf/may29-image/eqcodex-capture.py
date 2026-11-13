@@ -119,6 +119,9 @@ def main():
         out.mkdir(parents=True, exist_ok=True)
         index = arguments.index('--exec') + 1
         original = arguments[index]
+        selected_linker = os.environ.get('EQCODEX_NATIVE_LINK_BINARY')
+        if selected_linker:
+            original = shlex.join(['env', f'BPFREJIT_NATIVE_LINK_BINARY={selected_linker}']) + ' ' + original
         observer = shlex.join(['python3', str(Path(__file__).resolve()), '--observe', str(out)])
         if os.environ.get('EQCODEX_TRACE') == '1':
             observer += ' --trace'
