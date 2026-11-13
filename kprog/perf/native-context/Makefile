@@ -325,3 +325,50 @@ native-switch-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public
 .PHONY: native-switch-evidence
 native-switch-evidence:
 	tar -czf $(ROOT)/kprog/results/perf_20261113/native-switch-regression.tar.gz -C /workspaces/kprog-raw/perf 20261113-native-switch
+
+CORE_IR_BUILD ?= /var/tmp/kprog-tmp/perf/core-ir
+$(CORE_IR_BUILD)/libbpf/libbpf.a:
+	$(MAKE) -C $(ROOT)/vendor/libbpf/src BUILD_STATIC_ONLY=1 OBJDIR=$(CORE_IR_BUILD)/libbpf
+
+$(CORE_IR_BUILD)/core-ir-lower: $(HERE)/core-ir-lower.cpp $(CORE_IR_BUILD)/libbpf/libbpf.a
+	$(CXX) $$($(LLVM_CONFIG) --cxxflags) -std=c++17 -Wall -Wextra -Wno-unused-parameter -I$(ROOT)/vendor/libbpf/src -I$(ROOT)/vendor/libbpf/include/uapi $< -o $@ $(CORE_IR_BUILD)/libbpf/libbpf.a -lelf -lz $$($(LLVM_CONFIG) --ldflags --libs core irreader bitwriter passes --system-libs)
+
+.PHONY: core-ir-tool
+core-ir-tool: $(CORE_IR_BUILD)/core-ir-lower
+
+CORE_IR_INPUT ?= $(CORE_IR_BUILD)/input.bc
+CORE_IR_LOCAL_BPF ?= $(CORE_IR_BUILD)/input.bpf.o
+CORE_IR_OUTPUT ?= $(CORE_IR_BUILD)/resolved.bc
+CORE_IR_REPORT ?= $(CORE_IR_BUILD)/resolved.json
+.PHONY: core-ir-resolve
+core-ir-resolve: core-ir-tool
+	prlimit --as=17179869184 -- $(CORE_IR_BUILD)/core-ir-lower $(CORE_IR_INPUT) --local-bpf $(CORE_IR_LOCAL_BPF) --target-btf $(KDIR)/vmlinux --report $(CORE_IR_REPORT) -o $(CORE_IR_OUTPUT)
+
+.PHONY: core-ir-check
+core-ir-check: core-ir-tool $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
+	$(CC) -target bpf -O2 -g -I/usr/include/x86_64-linux-gnu -emit-llvm -c $(HERE)/test-core-ir.c -o $(CORE_IR_BUILD)/fixture.bc
+	$(CC) -target bpf -O2 -g -c $(CORE_IR_BUILD)/fixture.bc -o $(CORE_IR_BUILD)/fixture.bpf.o
+	$(CORE_IR_BUILD)/core-ir-lower $(CORE_IR_BUILD)/fixture.bc --local-bpf $(CORE_IR_BUILD)/fixture.bpf.o --target-btf $(KDIR)/vmlinux --report $(CORE_IR_BUILD)/fixture.json -o $(CORE_IR_BUILD)/fixture.fixed.bc
+	python3 $(HERE)/socket-helper-names.py > $(CORE_IR_BUILD)/helper-names.json
+	$(SOCKET_BUILD)/socket-context-lower $(CORE_IR_BUILD)/fixture.fixed.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(CORE_IR_BUILD)/helper-names.json -o $(CORE_IR_BUILD)/fixture.native.bc
+	$(CC) -O2 -DTEST_DRIVER -I$(VMLINUX_DIR) -c $(HERE)/test-core-ir.c -o $(CORE_IR_BUILD)/driver.o
+	$(CC) -target x86_64-linux-gnu -O2 $(CORE_IR_BUILD)/fixture.native.bc $(CORE_IR_BUILD)/driver.o -o $(CORE_IR_BUILD)/fixture.fixed
+	$(CORE_IR_BUILD)/fixture.fixed
+	$(CC) -target bpf -O2 -g -emit-llvm -c $(HERE)/test-core-ir-ids.c -o $(CORE_IR_BUILD)/ids.bc
+	$(CC) -target bpf -O2 -g -c $(CORE_IR_BUILD)/ids.bc -o $(CORE_IR_BUILD)/ids.bpf.o
+	$(CORE_IR_BUILD)/core-ir-lower $(CORE_IR_BUILD)/ids.bc --local-bpf $(CORE_IR_BUILD)/ids.bpf.o --target-btf $(KDIR)/vmlinux --report $(CORE_IR_BUILD)/ids.json -o $(CORE_IR_BUILD)/ids.fixed.bc
+	$(SOCKET_BUILD)/socket-context-lower $(CORE_IR_BUILD)/ids.fixed.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(CORE_IR_BUILD)/helper-names.json -o $(CORE_IR_BUILD)/ids.native.bc
+	$(CC) -target x86_64-linux-gnu -O2 -DTEST_DRIVER $(HERE)/test-core-ir-ids.c $(CORE_IR_BUILD)/ids.native.bc -lbpf -o $(CORE_IR_BUILD)/ids.fixed
+	$(CORE_IR_BUILD)/ids.fixed $(CORE_IR_BUILD)/ids.bpf.o $(KDIR)/vmlinux
+	$(CC) -target bpf -O2 -g -I/usr/include/x86_64-linux-gnu -DUNGUARDED_MISSING -emit-llvm -c $(HERE)/test-core-ir.c -o $(CORE_IR_BUILD)/unguarded.bc
+	$(CC) -target bpf -O2 -g -c $(CORE_IR_BUILD)/unguarded.bc -o $(CORE_IR_BUILD)/unguarded.bpf.o
+	$(CORE_IR_BUILD)/core-ir-lower $(CORE_IR_BUILD)/unguarded.bc --local-bpf $(CORE_IR_BUILD)/unguarded.bpf.o --target-btf $(KDIR)/vmlinux --report $(CORE_IR_BUILD)/unguarded.json -o $(CORE_IR_BUILD)/unguarded.fixed.bc > $(CORE_IR_BUILD)/unguarded.log 2>&1 && status=0 || status=$$?; test $$status = 1
+	$(CC) -target bpf -O2 -g -I/usr/include/x86_64-linux-gnu -DLOCAL_LAYOUT_SHIFT -c $(HERE)/test-core-ir.c -o $(CORE_IR_BUILD)/shifted.bpf.o
+	$(CORE_IR_BUILD)/core-ir-lower $(CORE_IR_BUILD)/fixture.bc --local-bpf $(CORE_IR_BUILD)/shifted.bpf.o --target-btf $(KDIR)/vmlinux --report $(CORE_IR_BUILD)/shifted.json -o $(CORE_IR_BUILD)/shifted.fixed.bc > $(CORE_IR_BUILD)/shifted.log 2>&1 && status=0 || status=$$?; test $$status = 1
+	$(CC) -target bpf -O2 -g -I/usr/include/x86_64-linux-gnu -DRESIZED_SCALAR -emit-llvm -c $(HERE)/test-core-ir.c -o $(CORE_IR_BUILD)/resized.bc
+	$(CC) -target bpf -O2 -g -c $(CORE_IR_BUILD)/resized.bc -o $(CORE_IR_BUILD)/resized.bpf.o
+	$(CORE_IR_BUILD)/core-ir-lower $(CORE_IR_BUILD)/resized.bc --local-bpf $(CORE_IR_BUILD)/resized.bpf.o --target-btf $(KDIR)/vmlinux --report $(CORE_IR_BUILD)/resized.json -o $(CORE_IR_BUILD)/resized.fixed.bc > $(CORE_IR_BUILD)/resized.log 2>&1 && status=0 || status=$$?; test $$status = 1
+
+.PHONY: core-ir-retain
+core-ir-retain:
+	python3 $(HERE)/core-ir-retain.py --build $(CORE_IR_BUILD) --raw $(CORE_IR_RAW) --tracee-ir $(CORE_IR_INPUT) --tracee-bpf $(CORE_IR_LOCAL_BPF) --target $(KDIR)/vmlinux --output $(CORE_IR_RECEIPT)
