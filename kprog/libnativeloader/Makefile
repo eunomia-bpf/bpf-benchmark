@@ -23,6 +23,14 @@ KFUNC_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/kernel
 KFUNC_BPF ?= /workspaces/kprog-raw/perf/20261113-tetragon-same-source/build-evidence/bpf_generic_kprobe_v61.direct.bpf.o
 KFUNC_NATIVE ?= /var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61.native.o
 KERNEL_ELF_RESTORE_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kernel-elf-restore
+KFUNC_MODEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/model
+
+.PHONY: kfunc-model-check
+kfunc-model-check:
+	install -d "$(KFUNC_MODEL_OUTPUT)"
+	clang-18 -O2 -fPIC -c ../test/kfunc_model_fixture.c -o "$(KFUNC_MODEL_OUTPUT)/fixture.native.o"
+	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" python3 ../test/check_kfunc_model.py "$(KFUNC_MODEL_OUTPUT)/fixture.native.o" \
+		/workspaces/.agent-state/kprog-ck/build-x86/vmlinux "$(KFUNC_MODEL_OUTPUT)"
 
 # Invoke under the exclusive image/base lock; the unchanged boot is authoritative.
 .PHONY: kernel-elf-from-boot
@@ -35,7 +43,13 @@ kernel-elf-from-boot:
 	sha256sum /workspaces/.agent-state/kprog-ck/build-x86/vmlinux \
 		/workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage > "$(KERNEL_ELF_RESTORE_OUTPUT)/after.sha256"
 
-.PHONY: kfunc-inputs kfunc-check kfunc-kernel-kvm guest-kfunc
+.PHONY: kfunc-inputs kfunc-check kfunc-kernel-kvm guest-kfunc kfunc-model-kernel-kvm
+kfunc-model-kernel-kvm:
+	install -d "$(KFUNC_KERNEL_OUTPUT)"
+	install -m 0644 "$(KFUNC_MODEL_OUTPUT)/generated/trusted_x86.bpf.o" "$(KFUNC_KERNEL_OUTPUT)/model.bpf.o"
+	install -m 0644 "$(KFUNC_MODEL_OUTPUT)/iterator/trusted_x86.bpf.o" "$(KFUNC_KERNEL_OUTPUT)/iterator.bpf.o"
+	$(MAKE) kfunc-kernel-kvm KFUNC_MODEL_PROOF="$(KFUNC_KERNEL_OUTPUT)/model.bpf.o $(KFUNC_KERNEL_OUTPUT)/iterator.bpf.o"
+
 kfunc-inputs:
 	install -d "$(KFUNC_BUILD)"
 	clang-18 -O2 -fPIC -c ../test/native_kfunc_fixture.c -o "$(KFUNC_BUILD)/weak.o"
@@ -64,12 +78,12 @@ kfunc-kernel-kvm:
 	taskset -c 13 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
 		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(KFUNC_KERNEL_OUTPUT)" --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -C kprog/libnativeloader guest-kfunc KFUNC_KERNEL_OUTPUT=$(KFUNC_KERNEL_OUTPUT)'
+		--exec 'make -C kprog/libnativeloader guest-kfunc KFUNC_KERNEL_OUTPUT=$(KFUNC_KERNEL_OUTPUT) KFUNC_MODEL_PROOF="$(KFUNC_MODEL_PROOF)"'
 
 guest-kfunc:
 	"$(KFUNC_KERNEL_OUTPUT)/kfunc" kernel "$(KFUNC_KERNEL_OUTPUT)/weak.o" "$(KFUNC_KERNEL_OUTPUT)/strong.o" \
 		"$(KFUNC_KERNEL_OUTPUT)/source.bpf.o" "$(KFUNC_KERNEL_OUTPUT)/source.native.o" \
-		/sys/kernel/btf/vmlinux "$(KFUNC_KERNEL_OUTPUT)" "$(KFUNC_KERNEL_OUTPUT)/proof.bpf.o"
+		/sys/kernel/btf/vmlinux "$(KFUNC_KERNEL_OUTPUT)" "$(KFUNC_KERNEL_OUTPUT)/proof.bpf.o" $(KFUNC_MODEL_PROOF)
 
 .PHONY: data-layout-inputs data-layout-check data-layout-kernel-kvm guest-data-layout
 data-layout-inputs:

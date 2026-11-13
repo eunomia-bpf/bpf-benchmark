@@ -495,6 +495,23 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
         next_pc = following.get(addr)
         direct = insn.reloc_target if insn.reloc_target is not None else decode.branch_target(args[0]) if args else None
         if op == 'call':
+            if insn.kernel_function is not None:
+                function = insn.kernel_function
+                for arg, reg in zip(function.get('arguments', []), ('rdi', 'rsi', 'rdx', 'rcx', 'r8', 'r9')):
+                    if not arg['pointer']:
+                        continue
+                    start = state.aliases[ri(reg)[0]]
+                    if type(start) is int or start is None or isinstance(start, PointerAlternatives):
+                        pointers = {}
+                for reg in CALLER_SAVED:
+                    bits[ri(reg)[0]] = 0; alias[ri(reg)[0]] = None; constants[ri(reg)[0]] = None
+                result = function.get('result')
+                if result and result['type'] != 'void':
+                    bits[rax] = FULL if result['size'] >= 4 else (1 << (result['size'] * 8)) - 1
+                    alias[rax] = False
+                bits[index['X86_XMM0']] = 0
+                push(context, next_pc, State(tuple(bits), tuple(alias), 0, opaque, pointers, tuple(constants)))
+                continue
             choices = targets.get(addr, ())
             names = [helper_idents()[v] for kind, v in choices if kind == 'scalar']
             if decode.is_helper_symbol(insn.reloc_symbol):

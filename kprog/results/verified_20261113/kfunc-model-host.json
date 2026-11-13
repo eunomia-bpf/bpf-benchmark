@@ -1,0 +1,54 @@
+{
+  "recorded_utc": "2026-11-13T23:50:03+00:00",
+  "scope": "Default-off generic direct kfunc ABI bridge candidate, host subset only",
+  "mechanism": [
+    "Actual target BTF via libbpf; scalar/pointer/void signatures and forward declarations",
+    "Manifest-selected kernel_kfunc_context is carried into verified service metadata; absent remains off",
+    "Native function GOT loads/comparisons retain weak __ksym declarations and genuine null guards",
+    "SysV register arguments and 32-bit EAX zero-extension; smaller returns retain unspecified upper bits",
+    "Pointer arguments that may alias native private stack discard saved pointer metadata; no readonly-memory inference from const",
+    "Proof BTF .ksyms declarations resolve matching native P targets in trusted loader; no producer C/signature inputs"
+  ],
+  "host_checks": [
+    "Five actual kernel function signatures",
+    "Six signed32 return boundaries and argument register mapping",
+    "Non-null scalar pointer args conservatively invalidate saved metadata",
+    "Actual native bytes generate ordinary-input stock B for guarded weak scalar calls",
+    "Actual iterator bytes generate B for writable pointer arguments/pointer returns/void calls",
+    "Actual BCC vfsstat generation with opt-in absent retains no kernel-function registry",
+    "Updated loader host ABI/weak null/strong error/manifest subset passes"
+  ],
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-kfunc/model-safe",
+  "prior_attempts_retained": [
+    "Initial host harness lacked unsigned byte typedef; harness corrected from actual BTF types",
+    "Compound GOT comparison exposed missing general address-slot form; added shared CMP/TEST flags composition",
+    "Early generation used default native-input compiler; rerun through committed stock compiler wrapper, never submitted early B to kernel"
+  ],
+  "archive": "kfunc-model-host.tar.gz",
+  "archive_bytes": 3615185,
+  "archive_sha256": "a28ebf165b7e5b98e7aae81d0f63ca74423a3cb42134ad9e2c22a66e064c19b9",
+  "source_sha256": {
+    "kprog/kernel_function_abi.py": "f8f021f4636d99ed96086501574971030f664fea825b1779a8199e3777ea648d",
+    "kprog/x86/micro-prog/kfunc_codegen.py": "b820d52e33c25662399648a6b94ecff2c33cd4666033a48bb58f6a8f20285a0a",
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "748438e87c1f0daaee18ff0af88d0a99a03f17d1554de674f4864a60b1959526",
+    "kprog/x86/micro-prog/x86_abi.py": "b2f490baf5280a50f8da62d32ce8278fa1b1e95bd0a94858a3949dfba73896a7",
+    "kprog/x86/trusted_specializer.py": "2b3afa8dbc2b4839a5b17fa9f93a1d4bb23c0c4d44a5f30e67bd7d1ddf179917",
+    "kprog/trusted_service.py": "df4c4579181bd883fda3194a34e5604123ce986dbe4f79f8b92a3f8f13c298d0",
+    "kprog/libnativeloader/src/native_loader.cpp": "36a8eba892eb6f771c848b8cfe9dd4c6c300960bca005fa5155b612e8bcae27f",
+    "kprog/test/check_kfunc_model.py": "efa7fe53fd2f0cbeedd8be94fde997e0fbe3952e630dd7e671afdc59345fea2e",
+    "kprog/test/kfunc_model_fixture.c": "ae07834e79631b870ae14cbf37cece31f2295eaa1ad8d0426c4266a30662a668",
+    "kprog/test/native_loader_kfunc.cpp": "53690cb865fe837cbc2dbd0cede4962b25576427aa20b18d443734705d5cd3b8"
+  },
+  "kernel_results": "Pending fresh actual-kernel generated-B subset",
+  "remaining": [
+    "Actual stock verifier results for both generated models",
+    "Full P binding/installation and application execution",
+    "Shared semantic obligations, indirect kfunc dispatch and any uncovered signature classes"
+  ],
+  "canonical_deployed": false,
+  "application_results_added": 0,
+  "native_execution": 0,
+  "kernel_image_changed": false,
+  "benchmark_settings_changed": false,
+  "raw_removed": false
+}

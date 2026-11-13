@@ -3559,7 +3559,8 @@ native_loader::LoadedProgram submit_trusted_native(
         << ",\"prog_ifindex\":" << info.ifindex
         << ",\"gpl_compatible\":" << info.gpl_compatible
         << ",\"source_btf_id\":" << info.btf_id
-        << ",\"token_present\":0},\"maps\":[";
+        << ",\"token_present\":0},\"kernel_kfunc_context\":"
+        << (companion.kernel_functions.empty() ? "false" : "true") << ",\"maps\":[";
     std::vector<std::unique_ptr<ScopedFd>> retained_maps;
     std::vector<int32_t> map_fds;
     std::unordered_set<uint32_t> retained_ids;
@@ -3955,6 +3956,20 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
     std::vector<bpf_insn> proof(instructions, instructions + count);
     relocate_trusted_proof(raw, options.proof_object_path, options.trusted_simulator_program,
                            companion, proof, pins, bindings);
+    // B's typed declarations are generated from the running target BTF. Use
+    // those same declarations to resolve the matching calls/addresses in P.
+    const auto *loaded_types = bpf_object__btf(raw);
+    if (loaded_types && btf__find_by_name_kind(loaded_types, ".ksyms", BTF_KIND_DATASEC) > 0) {
+        std::unique_ptr<btf, decltype(&btf__free)> proof_types(
+            btf__parse(options.proof_object_path.c_str(), nullptr), btf__free);
+        if (!proof_types) fail("read simulator BTF for native kernel functions");
+        if (!native_kfunc_declarations(proof_types.get()).empty()) {
+            std::unique_ptr<btf, decltype(&btf__free)> kernel(btf__load_vmlinux_btf(), btf__free);
+            if (!kernel) fail("read target BTF for native kernel functions");
+            companion.kernel_functions = native_kernel_function_targets(options.native_object_path,
+                proof_types.get(), kernel.get());
+        }
+    }
     LinkedBlob linked = load_or_link_native_blob(options.native_link_path, options.native_object_path,
         options.symbol_name, companion, options.trusted_native_proof_path);
     // P retains its relocated maps; B's LDDW references retain B's maps.

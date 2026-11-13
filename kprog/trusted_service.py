@@ -138,6 +138,7 @@ def normalize(envelope, actual):
         maps.append(typed)
     section = SECTIONS[context['prog_type']]
     metadata = dict(version=1,prog_type=context['prog_type'],section=section,maps=maps)
+    metadata['kernel_kfunc_context'] = envelope.get('kernel_kfunc_context', False)
     declarations(metadata)
     return metadata
 
@@ -188,6 +189,9 @@ def serve(args):
                         ROOT/'kprog'/isa/'micro-prog/generate_micro_sim_proofs.py',
                         ROOT/'kprog/libnativeloader/src/native_loader.cpp',
                         ROOT/'kinsn/module/include/native_lab_trusted_wire.h',args.native_link,args.loader]
+                    if isa == 'x86':
+                        source_paths.extend([ROOT/'kprog/kernel_function_abi.py',
+                            ROOT/'kprog/x86/micro-prog/kfunc_codegen.py', ROOT/'kprog/x86/micro-prog/x86_abi.py'])
                     identities={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in source_paths}
                     (job/'source-identities.json').write_text(json.dumps(identities,indent=2))
                     artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)

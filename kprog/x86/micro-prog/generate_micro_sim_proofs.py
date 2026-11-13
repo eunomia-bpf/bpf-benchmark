@@ -19,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from helper_abi import helper_idents, is_helper_symbol
 
 from x86_abi import check_definedness
+import kfunc_codegen
 
 from generated_x86_alu_decode import ALU_AUX
 from generated_x86_full_condition import CC_AUX
@@ -99,6 +100,7 @@ class NativeInsn:
     reloc_type: str | None = None
     symbol_offset: int = 0
     source_pointer: tuple[bool, str] | None = None
+    kernel_function: dict | None = None
 
 
 @dataclass(frozen=True)
@@ -486,6 +488,11 @@ def relocated_data_address(insn: NativeInsn, rodata_idents: dict[str,str]) -> st
 def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
     op = insn.mnemonic
     ops = insn.operands
+    if insn.kernel_function is not None and op != "call":
+        dst = reg_info(ops[0]) if ops else None
+        if op != "mov" or not insn.reloc_type or "GOTPCREL" not in insn.reloc_type or not dst or dst[1] != 64 or insn.symbol_offset:
+            raise ValueError(f"kernel function address needs a zero-offset GOT load: {insn.raw}")
+        return enc("X86_OP_MOV_LOAD_MAP_PTR", dst=dst[0], imm=c_ptr_u64(f"&{insn.reloc_symbol}"))
     if insn.source_pointer is not None:
         is_value, expression = insn.source_pointer
         dst = reg_info(ops[0]) if ops else None
@@ -1259,7 +1266,7 @@ def indirect_targets(insns: list[NativeInsn], exit_addr: int | None = None,
                             push(target, outgoing)
             helper_call = values is not None and any(k == "scalar" for k, v in values)
         else:
-            helper_call = op == "call" and (is_helper_symbol(insn.reloc_symbol) or
+            helper_call = op == "call" and (insn.kernel_function is not None or is_helper_symbol(insn.reloc_symbol) or
                                              insn.reloc_symbol in {"memcpy", "memset"})
             if op in {"jmp", "call"} and not helper_call:
                 target = insn.reloc_target if insn.reloc_target is not None else branch_target(args[0])
@@ -1437,6 +1444,26 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
     return_targets = return_targets or set()
     if is_indirect_branch(insn):
         append_indirect(lines, insn, (targets or {}).get(insn.addr, frozenset()), next_addr, indent)
+        return
+    if insn.mnemonic == "call" and insn.kernel_function is not None:
+        lines.extend(kfunc_codegen.call(insn.kernel_function, indent))
+        return
+    if (insn.kernel_function is not None and insn.mnemonic in {"cmp", "test"}
+            and insn.reloc_type and "GOTPCREL" in insn.reloc_type
+            and not insn.symbol_offset and is_mem(insn.operands[0])):
+        width = operand_width(insn.operands[0])
+        rhs = reg_info(insn.operands[1])
+        right = f'X86_SIM_L_READ_REG({rhs[0]})' if rhs else c_u64(parse_int(insn.operands[1]))
+        operator = '-' if insn.mnemonic == 'cmp' else '&'
+        lines.extend([indent + 'do {',
+            indent + f'    __u64 __kf_left = (__u64)(long)&{insn.reloc_symbol};',
+            indent + f'    __u64 __kf_right = {right};',
+            indent + f'    __u64 __kf_value = x86_apply_width(__kf_left {operator} __kf_right, X86_WIDTH_{width});'])
+        if insn.mnemonic == 'cmp':
+            lines.append(indent + f'    X86_SIM_L_SET_SUB_FLAGS(__kf_left, __kf_right, __kf_value, X86_WIDTH_{width});')
+        else:
+            lines.append(indent + f'    X86_SIM_L_SET_LOGIC_FLAGS(__kf_value, X86_WIDTH_{width});')
+        lines.append(indent + '} while (0);')
         return
     address = code_address(insn)
     if address in addrs and reg_info(insn.operands[0])[1] == 64:
@@ -1639,12 +1666,14 @@ def render_program(name: str, insns: list[NativeInsn],
                    original_source: Path | None = None,
                    original_symbols: set[str] | None = None,
                    source_map_bindings: list[dict] | None = None,
-                   trusted_map_bindings: list[dict] | None = None) -> str:
+                   trusted_map_bindings: list[dict] | None = None,
+                   kernel_functions: dict | None = None) -> str:
     if (original_source is None)!=(original_symbols is None):
         raise ValueError("original source and ELF symbols must be supplied together")
     rodata16 = {symbol:value for symbol,value in (rodata16 or {}).items()
                 if original_symbols is None or symbol not in original_symbols}
     trusted_map_bindings = trusted_map_bindings or []
+    kernel_functions = kernel_functions or {}
     trusted_names = set()
     if trusted_map_bindings:
         from trusted_generation import elf_symbol, c_symbol_aliases
@@ -1690,7 +1719,9 @@ def render_program(name: str, insns: list[NativeInsn],
                        if name not in trusted_names or name in referenced}
     used = referenced & source_pointers.keys()
     def source_annotations(body):
-        return [replace(i, source_pointer=source_pointers[i.reloc_symbol])
+        return [replace(i, kernel_function=kernel_functions[i.reloc_symbol])
+                if i.reloc_symbol in kernel_functions else
+                replace(i, source_pointer=source_pointers[i.reloc_symbol])
                 if i.reloc_symbol in source_pointers else i for i in body]
     insns = source_annotations(insns)
     subfunctions = {symbol: source_annotations(body) for symbol, body in subfunctions.items()}
@@ -1765,7 +1796,7 @@ def render_program(name: str, insns: list[NativeInsn],
         f'#include "{sim_header}"',
         "",
     ])
-    if has_indirect or subfunctions:
+    if has_indirect or subfunctions or kernel_functions:
         lines.extend([
             '#if defined(__bpf__) || defined(__BPF__)',
             'static __attribute__((always_inline)) inline void',
@@ -1781,6 +1812,7 @@ def render_program(name: str, insns: list[NativeInsn],
     if source_prelude:
         lines.append(source_prelude.rstrip())
         lines.append("")
+    lines.extend(kfunc_codegen.declarations(kernel_functions))
     for symbol in sorted(trusted_names & referenced):
         ident = trusted_idents[symbol]
         alias = '' if ident == symbol else ' __asm__(' + json.dumps(symbol) + ')'

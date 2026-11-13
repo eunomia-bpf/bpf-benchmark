@@ -13,6 +13,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "kprog"))
 from trusted_generation import context_kind, declarations, validate_native
+from kernel_function_abi import describe as kernel_functions
 sys.path.insert(0, str(ROOT / "kprog/x86/micro-prog"))
 
 _SPEC = importlib.util.spec_from_file_location("kprog_x86_trusted_generator",
@@ -67,7 +68,7 @@ def compile_simulator(clang, source: Path, obj: Path, run) -> None:
 
 
 def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
-               output_dir: Path, native_link: Path) -> dict:
+               output_dir: Path, native_link: Path, *, kernel_btf='/sys/kernel/btf/vmlinux') -> dict:
     validate_native(native_bytes, entry_symbol, "EM_X86_64")
     declarations(metadata)
     kind = context_kind(metadata["prog_type"])
@@ -90,9 +91,13 @@ def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
          "--mode", "proof", "--preserve-entry-abi", "--output", proof])
     instructions, functions, exit_addr, rodata = gen.parse_native_linked_program(name, output_dir)
     source = output_dir / (name + ".bpf.c")
+    functions_abi = kernel_functions(native_bytes, {m['name'] for m in metadata['maps']}, kernel_btf) \
+        if metadata.get('kernel_kfunc_context', False) else {}
+    (output_dir / 'kernel-functions.json').write_text(json.dumps(functions_abi, indent=2) + '\n')
     text = gen.render_program(name, instructions, functions, kind=kind,
         exit_addr=exit_addr, rodata16=rodata, program_section=metadata["section"],
-        trusted_map_bindings=[dict(native_symbol=m["name"], value_offset=m.get("value_offset")) for m in metadata["maps"]])
+        trusted_map_bindings=[dict(native_symbol=m["name"], value_offset=m.get("value_offset")) for m in metadata["maps"]],
+        kernel_functions=functions_abi)
     text = text.replace('#include "../x86_sim_local_bpf.h"',
                         '#include ' + json.dumps(str(ROOT / "kprog/x86/x86_sim_local_bpf.h")))
     source.write_text(text)

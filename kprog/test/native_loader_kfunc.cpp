@@ -117,9 +117,37 @@ static void kernel_proof(const std::filesystem::path &fixture, const std::filesy
     results.close(); require(static_cast<bool>(results), "write proof load report");
 }
 
+static void kernel_model(const std::filesystem::path &fixture, const std::filesystem::path &output)
+{
+    std::filesystem::create_directories(output);
+    ScopedFd input(bpf_map_create(BPF_MAP_TYPE_ARRAY, "kfunc_input", 4, 8, 1, nullptr));
+    require(input.get() >= 0, "create model environment input");
+    const auto info = load_map_info(input.get());
+    MapMeta meta{}; meta.kernel_id = info.id; meta.value_size = info.value_size;
+    CompanionLoad companion; companion.maps.push_back(meta);
+    std::unique_ptr<bpf_object, decltype(&bpf_object__close)> object(
+        bpf_object__open_file(fixture.c_str(), nullptr), bpf_object__close);
+    require(object != nullptr, "open generated kfunc model");
+    const char *name = "trusted_x86_x86_sim_xdp";
+    auto *program = bpf_object__find_program_by_name(object.get(), name);
+    require(program != nullptr, "find generated kfunc model");
+    std::vector<bpf_insn> proof(bpf_program__insns(program),
+        bpf_program__insns(program) + bpf_program__insn_cnt(program));
+    std::vector<std::unique_ptr<ScopedFd>> pins;
+    relocate_trusted_proof(object.get(), fixture, name, companion, proof, pins,
+        {{"kprog_unspecified_input", info.id, 0}});
+    std::vector<char> log(1024 * 1024);
+    bpf_prog_load_opts options{};
+    options.sz = sizeof(options); options.log_buf = log.data(); options.log_size = log.size(); options.log_level = 1;
+    ScopedFd loaded(bpf_prog_load(BPF_PROG_TYPE_KPROBE, "kfunc_model", "GPL", proof.data(), proof.size(), &options));
+    std::ofstream diagnostic(output / "model.verifier.log");
+    diagnostic << log.data(); diagnostic.close(); require(static_cast<bool>(diagnostic), "write model verifier log");
+    require(loaded.get() >= 0, "generated kfunc model rejected: " + std::string(log.data()));
+}
+
 int main(int argc, char **argv)
 try {
-    require(argc == 9, "usage: kfunc host|kernel WEAK_OBJECT STRONG_OBJECT SOURCE_BPF SOURCE_NATIVE KERNEL_BTF OUTPUT PROOF_FIXTURE");
+    require(argc >= 9, "usage: kfunc host|kernel WEAK_OBJECT STRONG_OBJECT SOURCE_BPF SOURCE_NATIVE KERNEL_BTF OUTPUT PROOF_FIXTURE [MODEL_PROOF...]");
     const bool kernel_mode = std::string(argv[1]) == "kernel";
     require(kernel_mode || std::string(argv[1]) == "host", "unknown kfunc test mode");
     auto local = fixture_btf(true, false, true);
@@ -166,6 +194,8 @@ try {
         addresses.close();
         require(static_cast<bool>(addresses), "write kfunc addresses");
         kernel_proof(argv[8], argv[7]);
+        for (int i = 9; i < argc; ++i)
+            kernel_model(argv[i], std::filesystem::path(argv[7]) / ("model-" + std::to_string(i - 9)));
     }
     const auto manifest = std::filesystem::path(argv[7]) / "kfunc-manifest.json";
     bpf_prog_info info{}; std::strcpy(info.name, "entry"); info.type = BPF_PROG_TYPE_KPROBE;
