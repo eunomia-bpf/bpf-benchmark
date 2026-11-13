@@ -1,0 +1,82 @@
+{
+  "recorded_at": "2026-11-13T02:20:59.995730+00:00",
+  "controller_commit": "d528c508d",
+  "kernel_commit": "74d1097af561",
+  "model_commit": "d0890b14f",
+  "image": "bpf-benchmark/kprog:current",
+  "scope": "Load-only distinct-body sampling; membership is not actual per-instance loading/verifying/running",
+  "grouping": {
+    "identity": "Complete canonical proof ELF byte equality including data/relocations",
+    "input_inventory": "/workspaces/kprog-raw/verified/20261112-resident-census/ready/inventory.json",
+    "previous_journal": "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/outcomes.jsonl",
+    "instances": 549,
+    "bodies": 247,
+    "retained_bodies": 10,
+    "pending_bodies": 237
+  },
+  "applications": {
+    "bcc/set": {
+      "instances": 25,
+      "bodies": 25,
+      "retained_body_observations": 0,
+      "pending_bodies": 25,
+      "retained_verified_body_observations": 0,
+      "workload_run": null
+    },
+    "katran": {
+      "instances": 1,
+      "bodies": 1,
+      "retained_body_observations": 1,
+      "pending_bodies": 0,
+      "retained_verified_body_observations": 0,
+      "workload_run": null
+    },
+    "cilium/agent": {
+      "instances": 72,
+      "bodies": 26,
+      "retained_body_observations": 1,
+      "pending_bodies": 25,
+      "retained_verified_body_observations": 0,
+      "workload_run": null
+    },
+    "otelcol-ebpf-profiler/profiling": {
+      "instances": 13,
+      "bodies": 13,
+      "retained_body_observations": 1,
+      "pending_bodies": 12,
+      "retained_verified_body_observations": 1,
+      "workload_run": null
+    },
+    "tracee/monitor": {
+      "instances": 151,
+      "bodies": 151,
+      "retained_body_observations": 0,
+      "pending_bodies": 151,
+      "retained_verified_body_observations": 0,
+      "workload_run": null
+    },
+    "tetragon/observer": {
+      "instances": 287,
+      "bodies": 31,
+      "retained_body_observations": 7,
+      "pending_bodies": 24,
+      "retained_verified_body_observations": 3,
+      "workload_run": null
+    }
+  },
+  "retained_body_observations": 10,
+  "retained_verified_body_observations": 4,
+  "retained_instance_membership": 235,
+  "native_execution_requests": 0,
+  "previous_instance_receipt": "kprog/results/verified_20261112/resident-first-seventy-eight-receipt.json",
+  "inflight_instance": "request-rfdniyp6 preserved when own old QEMU935751 stopped",
+  "body_link_commands": 246,
+  "body_link_failures": 0,
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-body-census",
+  "archive": "resident-body-group-preparation.tar.gz",
+  "limits": [
+    "Linked body observations retain representative resource context; other member contexts remain unsubmitted",
+    "Prior observations span recorded shared-linker epochs; source archives remain referenced in full membership",
+    "One body with no selected native candidate remains queued; no program excluded"
+  ]
+}
