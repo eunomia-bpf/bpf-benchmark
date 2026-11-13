@@ -96,6 +96,19 @@ linker-build:
 	cargo build --release --manifest-path ../x86/native_lab/native_link/Cargo.toml
 
 STACK_ALIAS_BUILD ?= /var/tmp/kprog-tmp/verified/stack-alias
+SIGNED_BOUND_BUILD ?= /var/tmp/kprog-tmp/verified/signed-bound
+SIGNED_BOUND_RAW ?= /workspaces/kprog-raw/verified/20261113-signed-bound
+.PHONY: signed-bound-inputs signed-bound-guest
+signed-bound-inputs:
+	install -d "$(SIGNED_BOUND_BUILD)"
+	$(CC) -O2 -fsanitize=undefined -fno-sanitize-recover=all -I../.. -I../../vendor/libbpf/src ../test/signed_bound.c -o "$(SIGNED_BOUND_BUILD)/signed-bound-host"
+	"$(SIGNED_BOUND_BUILD)/signed-bound-host"
+	../stock-path/bin/clang -O3 -g -mcpu=v4 -target bpf -D__TARGET_ARCH_x86 -I../.. -I../../vendor/libbpf/src -I../../vendor/libbpf/include/uapi -I/usr/include/x86_64-linux-gnu -c ../test/signed_bound.c -o "$(SIGNED_BOUND_BUILD)/signed-bound.bpf.o"
+
+signed-bound-guest:
+	mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf
+	python3 ../test/check_signed_bound.py "$(SIGNED_BOUND_RAW)/before.bpf.o" "$(SIGNED_BOUND_RAW)/after.bpf.o" "$(SIGNED_BOUND_RAW)/control"
+
 .PHONY: stack-alias-host-check
 stack-alias-host-check:
 	install -d "$(STACK_ALIAS_BUILD)"

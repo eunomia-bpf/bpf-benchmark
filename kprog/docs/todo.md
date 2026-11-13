@@ -97,6 +97,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED 32-bit scalar narrowing（2026-11-13，guest确认接续）** 通用x86 32-bit register write在BPF编译路径以u32 compiler barrier物化zero-extension，再走原reg_write契约；host路径保持u32 cast，native P保持。泛化signed TEST/CMP/CMOV clip fixture覆盖任意输入，host UBSan的16组边界/high-word组合通过；旧BPF先比较low32再直接传完整R2，修复后BPF先zeroextend并让同一value携带signed/unsigned bounds到helper。已有helper-effect及invocation-stack host回归通过。旧/new BPF对象与disasm保留 `/workspaces/kprog-raw/verified/20261113-signed-bound/`，同一stock guest的前后verifier结果接续记录；本项为ISA scalar-width回归，整应用验证继续走body class replay，helper长度保持原值。
+
 - **VERIFIED address replay实际结果（2026-11-13）** f169模型同一body真实提交1/stock verifier拒绝1/安装0，make0；B日志保留saved fp-33及ratelimit_heap+24/+184 typed pointer，当前首个拒绝改为BPF7304 probe_read的R2长度范围无上界、processed5669。next是通用signed TEST/CMP/CMOV的scalar range保持，完整body接受继续推进，原helper长度语义保持。完整request/journal/Make/archive `helper-address-replay*`（4435362bytes），raw `20261113-helper-class-replay/address-arithmetic-control/`。P1e child-launch code e5bf984fc的真实host回归、clone3 VM/VFORK trace和loader lifetime probe归档 `loader-spawn-subset*`（56573bytes），共享loader/image集成与真实应用成本测量接续。
 
 - **VERIFIED distinct-body新queue首19实际观察（2026-11-13）** 19submitted/13stock verified+installed/6rejected：BCC8/8、Tracee5/3/2、Tetragon6/2/4；其他三应用在新queue各0，旧观察分别保留。新增body28 trace_ret_vfs_read在b177模型的BPF34469被stock verifier以modified ctx+80拒绝、processed9999；source编译03:48→04:25，具体阶段见原始commands。累计receipt `resident-body-first-nineteen-receipt.json`、完整新增request `resident-body-outcome-19.tar.gz`（22134167bytes），raw `/workspaces/kprog-raw/verified/20261113-body-census/first-nineteen/`。该请求B早于d0fd/f169改动，model epoch单列；本项load-only，native execution/workload待测。

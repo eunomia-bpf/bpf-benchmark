@@ -584,6 +584,13 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 
 /* One register read, one width update of that value and one register store:
  * the width ladder is spelled once rather than once per register. */
+#if defined(__BPF__) || defined(__bpf__)
+/* Materialize x86's architectural zero extension before BPF range consumers. */
+#define X86_SIM_L_TRUNC32(VALUE) \
+    ({ __u32 __x86_word=(VALUE); asm volatile("" : "+r"(__x86_word)); (__u64)__x86_word; })
+#else
+#define X86_SIM_L_TRUNC32(VALUE) ((__u64)(__u32)(VALUE))
+#endif
 #define X86_SIM_L_WRITE_REG_WIDTH_SHIFT(REG, VALUE, WIDTH, DST_SHIFT)       \
 	do { __s64 __x86_write_old_sp=(__s64)(long)__x86_rsp.ptr;                                                                \
 		__u8 __x86_wr_raw_width = (WIDTH);                         \
@@ -609,6 +616,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 				__x86_wr_next, X86_SIM_TAG_SCALAR);         \
 		} else if (KPROG_X86_WRITE_WIDTH_ARM(__x86_wr_width) ==    \
 			   KPROG_X86_WRITE_WIDTH_ARM_B32) {                \
+			__x86_wr_next=X86_SIM_L_TRUNC32(__x86_wr_next); \
 			KPROG_X86_WRITE_REG32(__x86_wr_cell, __x86_wr_cell_tag, \
 				__x86_wr_next, X86_SIM_TAG_SCALAR);         \
 		} else {                                                  \
