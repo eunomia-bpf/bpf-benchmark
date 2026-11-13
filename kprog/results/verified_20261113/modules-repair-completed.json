@@ -1,0 +1,23 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-modules-repair-retry2",
+  "writer_outer_pid": 1331303,
+  "make_exit": 0,
+  "finished_utc": "2026-11-13T09:56:29Z",
+  "current_image": "sha256:7f915aea1f2276fb9509027cb7e4fc2dd6e4182740312e002ebcc14dbc81c923",
+  "image_tar_config": "blobs/sha256/83f01ed24eb007bf722268e6881fb8c3b29339d252949181d07e9d97f89d0567",
+  "superseded_image": "sha256:3c30779bd71612cf616821229c4af9ab673d34f0ded3a2ee3591064b8c41ece2",
+  "cleanup": "already-absent",
+  "installed_modules": 842,
+  "kernel_source": "74d1097af561 unchanged",
+  "core_artifacts_unchanged": true,
+  "kernel_hashes": [
+    "2667103e0fbb3fc54467f59bb15ef0cdc128e54ca7c30d7718e66d0199c4e1ec  /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage",
+    "f3743c05960fc700e29f31e0035a23cdd4b2500d5e6e7542984d5f6fba75babe  /workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+    "0b75fe318542db6698950f2b2ce5163e867118317fe61c538c4e7de7a1357163  /workspaces/.agent-state/kprog-ck/build-x86/.config"
+  ],
+  "raw_data_removed": false,
+  "benchmark_settings_changed": false,
+  "application_integration": "PERF baseline/native Cilium rerun still pending; module packaging repair is not application coverage",
+  "census_queues": "All three guest processes started after successful writer; outcomes not yet collected",
+  "archive": "modules-repair-completed.tar.gz"
+}
