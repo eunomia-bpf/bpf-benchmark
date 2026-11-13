@@ -1,0 +1,30 @@
+{
+  "launched_at": "2026-11-13T09:03:36Z",
+  "scope": "Exclusive canonical modules/loader/image refresh requested for D23 application integration",
+  "outer_pid": 1313928,
+  "source_commits": ["0f7f97f4d", "bc4664822"],
+  "lock": "exclusive /workspaces/.agent-state/kprog-lanes/locks/image",
+  "host_cpus": "8-15; validation guests CPU13",
+  "build_parallelism": 1,
+  "command": "make -C /workspaces/repository/kprog/libnativeloader shared-base-refresh REFRESH_OUTPUT=/workspaces/kprog-raw/verified/20261113-shared-refresh/run",
+  "job_directory": "/workspaces/kprog-raw/verified/20261113-shared-refresh/job",
+  "run_directory": "/workspaces/kprog-raw/verified/20261113-shared-refresh/run",
+  "nohup_log": "/workspaces/kprog-raw/verified/20261113-shared-refresh-nohup.log",
+  "old_image": "sha256:d756bf5919e9eb35cc8628a38af95ca2cec2751e86f4c23f7c6e3f7bd07494a1",
+  "kernel_source": "74d1097af561 unchanged; recover matching stripped ELF/BTF from the sole unchanged bzImage",
+  "main_checkpoint": {
+    "stopped_exact_owned_qemu": 1110393,
+    "completed_outcomes": 26,
+    "installed": 15,
+    "stock_rejected": 11,
+    "unfinished_request": "request-x9wdbqry / tracepoint__sched__sched_process_exec",
+    "raw_native_P_and_B": "Already persistent before stop; original files remain. Initial quoted tar wildcard captured only index (retained); corrected complete archive created after stop from those original files",
+    "archive": "main-census-refresh-checkpoint.tar.gz",
+    "index_archive": "main-census-refresh-checkpoint-index.tar.gz",
+    "resume": "Pending main bodies after completed prefix26; unfinished request must be included, never counted as verified/rejected"
+  },
+  "completed_context_retries": "Both exited naturally; no checkpoint or stop",
+  "class_replay": "Five observed map-bounds bodies prepared, not launched; resume after refresh",
+  "image_rebuilt_at_recording": "Not collected; no post-launch polling",
+  "result": "Collect writer output next turn; announce IMAGE REBUILT only after actual successful replacement"
+}
