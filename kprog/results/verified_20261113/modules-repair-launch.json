@@ -1,0 +1,20 @@
+{
+  "source_commit": "5cf65cdad",
+  "launched_utc": "2026-11-13T09:38:46.203919+00:00",
+  "outer_pid": 1323899,
+  "operation": "shared-base-modules-repair",
+  "lock": "exclusive /workspaces/.agent-state/kprog-lanes/locks/image",
+  "cpus": "8-15",
+  "jobs": 1,
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-modules-repair",
+  "job_directory": "/workspaces/kprog-raw/verified/20261113-modules-repair/job",
+  "run_directory": "/workspaces/kprog-raw/verified/20261113-modules-repair/run",
+  "collection": "Next turn; no postlaunch polling or completion claim",
+  "kernel_build": "/workspaces/.agent-state/kprog-ck/build-x86",
+  "existing_built_modules": 1683,
+  "before_installed_files": 3,
+  "kernel_source_commit": "74d1097af561 unchanged",
+  "image_tag": "bpf-benchmark/kprog:current",
+  "benchmark_settings_changed": false,
+  "raw_data_removed": false
+}
