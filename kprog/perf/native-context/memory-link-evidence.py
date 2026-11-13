@@ -46,6 +46,12 @@ def main():
         (ROOT/'kprog/x86/native_lab/native_link/src/x86.rs').read_text()))
     rows = []
     for label, source, symbol in cases:
+        original = source
+        content = source.read_bytes()
+        digest = hashlib.sha256(content).hexdigest()
+        source = args.output/'inputs'/(digest+'.native.o')
+        source.parent.mkdir(exist_ok=True)
+        source.write_bytes(content)
         directory = args.output/label
         directory.mkdir(exist_ok=True)
         data = details(source)
@@ -87,8 +93,8 @@ def main():
         local = details(enabled)
         if any(s['undefined'] and s['name'] in ['memset','memcpy'] for s in local['symbols']):
             raise ValueError(f'unbound memory symbol in {label}')
-        rows.append(dict(label=label, input=str(source), symbol=symbol,
-                         input_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
+        rows.append(dict(label=label, input=str(source), original_input=str(original), symbol=symbol,
+                         input_sha256=digest,
                          default_proof_text_equal=proof_equal, default_kernel_and_metadata_equal=kernel_equal,
                          proof_bytes_before=len(details(reference)['text']), proof_bytes_after=len(local['text']),
                          local_routines=[s for s in local['symbols'] if s['name'].startswith('__native_link_local_')]))
