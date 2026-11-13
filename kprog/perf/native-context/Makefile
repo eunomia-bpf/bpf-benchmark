@@ -108,3 +108,9 @@ loader-perf-build:
 loader-perf-tool:
 	install -D -m 755 $(LOADER_PERF_SOURCE) $(LOADER_PERF_OUTPUT)
 	$(LOADER_PERF_OUTPUT) version --build-options
+
+MEMORY_FLAGS_OUTPUT ?= /var/tmp/kprog-tmp/perf/memory-flags
+MEMORY_FLAGS_LOGS ?= /workspaces/kprog-raw/perf/20261113-memory-flags
+.PHONY: memory-flags
+memory-flags:
+	python3 $(HERE)/memory-flags.py --app tracee --only tracee --output $(MEMORY_FLAGS_OUTPUT) --logs $(MEMORY_FLAGS_LOGS)
