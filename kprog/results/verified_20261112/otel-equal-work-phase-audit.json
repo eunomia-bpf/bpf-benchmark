@@ -66,5 +66,16 @@
   },
   "finding": "The reported baseline series are from the eBPF side of each two-start run. The later13 post_rejit replacements do not identify the implementation of an earlier baseline metric sample. Thus the stated phase labels do not support the claim that these series compare native versus eBPF work.",
   "requested_correction": "C should capture the requested metrics from the actual post_rejit native app instance and pair with baseline eBPF data, preserving phase/map/program provenance. Owner handles capture tooling; no framework changes requested.",
-  "limits": "Retain all completed runs and counters; this does not invalidate throughput or add a validity gate. No native equal-work verdict is inferred from these baseline-only samples."
+  "limits": "Retain all completed runs and counters; this does not invalidate throughput or add a validity gate. No native equal-work verdict is inferred from these baseline-only samples.",
+  "lane_c_follow_up": {
+    "observed_at": "2026-11-13T01:11:55Z",
+    "source": "COORDINATION.md LANE C2026-11-13T00:52UTC correction",
+    "acknowledgment": "C confirms the earlier directories ran identical configurations and sampled baseline eBPF phases; native replacements occur only in post_rejit.",
+    "claims_withdrawn": [
+      "Earlier frames-per-attempt pair as native/eBPF equal-work evidence",
+      "Earlier1.366x reported-profile-rate pair as a native speedup"
+    ],
+    "next_step_reported_by_c": "Capture metrics in both phases of one run; recheck Tetragon phase attribution as well",
+    "verification_status": "C acknowledgment of the existing audit; no new independent metric/dump timestamp analysis in this follow-up. Native equal-work comparison remains pending."
+  }
 }
