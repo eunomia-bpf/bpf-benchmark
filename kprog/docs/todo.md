@@ -16,7 +16,10 @@
 
 **总目标的前提（2026-11-13，源码差异审核 kprog/results/source-diff-20261113/report.md，23 组差异，2526e7ea2）**：原生一侧编译的是与 eBPF 一侧相同、未改动的上游应用源码；所有差异放进链接器或编译 flag。审核发现六个应用的原生构建都有改变行为的源码差异（Cilium 也有：D01 socket 上下文未转换、D02 TC cb 元数据早 8 字节、D08 XDP ingress_ifindex、D09 去掉 hybrid routing 查表、D10 wire_len），所以在这些差异移走之前，没有一个应用的原生/eBPF 比值能算等量工作；优化让位于这项清理。
 
+**每条 lane 一个大任务（运营者 2026-11-13，经 ModelOS 转达、三个 research 都适用："能不能派一些比较大的任务" "确保至少一天的任务, 你去看看, 让它自由开发并且和 codex 讨论" "3个 research 都是这样的"；spark-manage workspace-rules.md 9e255013）。下面每条 lane 的"大任务"至少够做一天，lane 自己决定怎么做、按什么顺序；设计和跨 lane 的改动先在 COORDINATION 和 Codex lane 讨论。各 lane 原来的小项留作参考和历史记录，不再规定顺序。**
+
 **lane perf（Codex，gpt-6.1-sol）。目标：每个性能数字都是等量工作、可复现的；六应用几何平均 native/eBPF 达到 1.20x 以上，每个应用不低于 05-29 下限。**
+**lane perf 的大任务：Cilium、Tetragon、OTel 的原生一侧改成同源构建并证明等量工作。** 这三个应用编译与 eBPF 一侧相同、未改动的上游源码，源码差异审核里属于它们的差异（Cilium D01、D02、D08、D09、D10；Tetragon D03、D05–D07、D11、D14；OTel 的上下文读法）全部移进链接器或编译 flag，修正版由默认关闭的开关选择；共用机制也归你：链接器自带 memset/memcpy（P0）、目标内核 BTF 的 CO-RE（P1h），lane C 会用它们。完成标准：每个应用两边的应用输出（Cilium 判决、Tetragon 各类事件、OTel trace 与 metrics）对得上，然后在这三个应用上各计时一轮。
 - [ ] P0 原生代码的 memset、memcpy 不再调用内核的实现：链接器自带这两个函数（简单的 8 字节写/拷贝循环加尾部，不用 rep stos/movs），把对象里的 memset、memcpy 重定位绑定到镜像内自带的这份；放在默认关闭的链接器选项后，默认输出字节不变；链接器归 lane verified，先和它在 COORDINATION 说好再改（或请它改）。先看编译 flag 能否让 clang 对常量大小直接展开（不改源码、不加头文件），能就优先用 flag。运营者 2026-11-13 追问"这个是不是还能优化一下? 性能更好一些? 比如特殊硬件指令"：链接器那一路做快的版本：每个调用点的长度在调用前是常量（如 mov $0x170,%edx），链接器按长度生成完全展开的专用版本（xor 清零的通用寄存器、8 字节写，无循环），把该调用点绑到对应长度的版本；长度不定或很大的用 32 字节一轮的展开循环；链接器在加载时运行，可读 CPUID，只有在 FSRS/FSRM（短串 rep stosb/movsb 快速路径）存在且实测更快时才选 rep 形式；不用 SIMD/AVX 和 FPU 状态（内核上下文，且原生代码保持 SIMD-free，第 3 节 S14）；不用 movnti/clzero 这类非临时写（清零的缓冲区随后就要读）。各形式先做宿主微基准，再在 Tracee 上计时。然后在 Tracee 上开/关各计时一轮（CPU 0-7，计时锁），用 perprog.py 和 phase-profile 看 memset 的 13.93% 是否消失。完成后 Tetragon、OTel、BCC 受影响的应用各重测一轮。
 - [x] P0a 编译flag有界子集（9854bd220、688eb1874）：原始Tracee plain与max-store-memset/memcpy=4096均make0，执行节逐字相同且两种库调用都保留，不能解决P0。receipt/archive `memory-flags-result*`；vendor stage属于C已撤回header候选，plain_equal_stage=false不冒充冻结镜像差异。VERIFIED06:04:06交接linker所有权，perf接续默认关闭的local memory routines；P0整体继续。
 - [x] P0b 默认关闭linker内存函数host子集（04ea4d810、11dfe339d、e12e627e9）：CFG必然常量按长度共享展开routine（≤512字节），其余32字节循环及精确尾部；canonical proof含实际routine，kernel再链接同体。18组件测试含真实执行/unaligned/guard-page/PLT+GOT roundtrip通过；11个跨六app实物输入默认proof.code与kernel bytes/relocs/maps/ABI均等于旧reference。完整输入/候选/日志归档 `local-memory-host*`；未选REP/SIMD，P0整体仍待Tracee实测及后续受影响应用。
@@ -40,6 +43,7 @@
 - [ ] P3 等量工作成立的应用里，按每次调用的差距找原生一侧的通用优化（OTel、Tetragon、Cilium）。
 
 **lane C（omp，fleet/local-large）。目标：用对同类程序都适用的改动提高 Tracee、BCC、Katran 原生代码每次调用的速度。**
+**lane C 的大任务：Katran、BCC、Tracee 的原生一侧改成同源构建，然后在其上优化。** 这三个应用的源码差异（Katran 的 D16/D19 部分，BCC、Tracee 的 D03/D04/D15/D23 等）移进编译 flag 或链接器，默认构建不变；用 lane perf 的共用机制（memset/memcpy、CO-RE），需要改链接器、加载器、shim 时先和 Codex lane 在 COORDINATION 讨论并由所属 lane 改。完成标准：两边应用输出对得上（Katran 包、BCC 工具输出、Tracee 事件），然后各计时一轮，再找每次调用的通用优化。撤回 C2 仍要先做。
 - [ ] C1 Tracee：在 guest 里用 perf 剖析 raw_syscalls sys_enter、trace_sys_enter、trace_sys_exit 两边的时间去向，贴出剖析和运行目录。
 - [x] C1 Tracee 剖析（f3367005a、d22c5dedb）：原生阶段 memset 占 guest CPU 13.93%，eBPF 阶段 0.72%。
 - [ ] C2 撤回：c9583219e 的 native_memset.h 头文件和 NATIVE_INLINE_MEMSET 开关属于源码层替换，按运营者的话撤掉（恢复 vendor/bpf/Makefile 并删去该头文件，一个提交）；memset 交给 lane perf 的 P0 在链接器/flag 上做。原 C2 文字："据此做一处通用改进（vendor/bpf 的原生构建），默认关闭的开关，默认对象逐字节不变；功能检查后计时。
@@ -49,6 +53,7 @@
 - [ ] C4 Katran。
 
 **lane verified（Codex，gpt-6.1-sol）。目标：六个应用在唯一内核和镜像上走通 verified 路径。**
+**lane verified 的大任务：六个应用在唯一内核和镜像上走通 verified 路径。** 普查按程序体去重、最多三个 guest 并行跑完；失败类别按 BPF 时间占比从大到小修；每个应用整应用复测，记下加载、通过 verifier、执行的程序数和运行目录；之后做 100–100K 规模扫描。链接器、加载器、shim 归你，lane perf、lane C 的相关改动由你审看或代改。
 - [ ] V1 按程序体去重的常驻普查跑完；已发现的失败类别（栈写越界、callback、scalar 内存访问、编译器栈存储）现在就修，按 BPF 时间占比从大到小。
 - [ ] V2 六个应用整应用复测，记下每个应用加载、通过 verifier、执行的程序数和运行目录。
 - [ ] V3 100–100K 规模扫描（verifier 时间和内存）。
