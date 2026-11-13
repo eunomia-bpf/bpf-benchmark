@@ -1,0 +1,15 @@
+{
+  "scope": "Whole observed map-bounds class refreshed after completed context retries and main prefix24",
+  "previous_prepared_bodies": [20, 30, 31, 32],
+  "current_prepared_bodies": [20, 29, 30, 31, 32],
+  "represented_instances": 5,
+  "ready_directory": "/workspaces/kprog-raw/verified/20261113-map-bounds/ready-with-retries",
+  "observations": "Immutable main prefix24 plus all three completed first context attempts and both completed 24G retries",
+  "class_selector": "Existing verifier_map_bounds; additional journals merged by 7c00cb187",
+  "old_context_guests": "Both completed naturally; no process checkpoint or stop needed",
+  "new_guest_model": "2d05e6342 u32 moves and streamed preprocessing 755541874",
+  "queue_lock_change": "Optional VERIFIED_IMAGE_LOCK is acquired after VERIFIED_WAIT_PID exits; inactive queued jobs do not pin the shared image reader lock",
+  "launcher_validation": "bash -n passes; existing callers without VERIFIED_IMAGE_LOCK unchanged",
+  "actual_new_class_submissions_at_preparation": 0,
+  "archive": "map-bounds-replay-refresh.tar.gz"
+}

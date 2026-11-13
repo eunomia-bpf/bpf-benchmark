@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Run with setsid nohup: run_verified_make.sh OUTPUT [make arguments...]
 # VERIFIED_WAIT_PID defers the Make job until that owned guest launcher exits.
+# VERIFIED_IMAGE_LOCK takes its shared image lock after the dependency exits.
 set -euo pipefail
 run_dir=$1
 shift
@@ -13,6 +14,11 @@ if [[ -n ${VERIFIED_WAIT_PID:-} ]]; then
     printf '%s\n' "$VERIFIED_WAIT_PID" > "$run_dir/waiting-for.pid"
     date -u +%FT%TZ > "$run_dir/queued"
     tail --pid="$VERIFIED_WAIT_PID" -f /dev/null
+fi
+if [[ -n ${VERIFIED_IMAGE_LOCK:-} ]]; then
+    printf '%s\n' "$VERIFIED_IMAGE_LOCK" > "$run_dir/image-lock"
+    exec 9>>"$VERIFIED_IMAGE_LOCK"
+    flock -s 9
 fi
 date -u +%FT%TZ > "$run_dir/started"
 status=0
