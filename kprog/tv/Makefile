@@ -189,6 +189,11 @@ helper-effects-host-check:
 		../formal/oracles/test_x86_helper_effects_host.c -o "$(STACK_ALIAS_BUILD)/helper-effects"
 	"$(STACK_ALIAS_BUILD)/helper-effects"
 
+PREPROCESS_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-preprocess-stream/functional
+.PHONY: preprocess-stream-check
+preprocess-stream-check:
+	python3 ../test/check_preprocess_stream.py "$(abspath ../stock-path/bin/clang)" "$(PREPROCESS_OUTPUT)"
+
 .PHONY: service-request-compile
 service-request-compile:
 	CLANG="$(abspath ../stock-path/bin/clang)" python3 ../test/recompile_service_request.py \

@@ -126,6 +126,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED preprocessing parent内存生命周期修复（2026-11-13）** trusted_specializer不再保留全部expanded chunks/list及join副本到Clang运行结束，而是同样的head/body token依次写入aggregate并关闭后编译；chunk大小、compiler flags、P和B token语义均不改。真实Clang四piece含line/file展开，前后aggregate各自与旧materialized-join算法逐字一致；后续piece真实预处理错误传播、未调用-c或产生object。完整source/.i/ELF/commands/log归档 `preprocess-stream-subset*`，raw `20261113-preprocess-stream/`。仅去掉parent O(full B)持有，未测total Clang RSS/速度，不能声称解决先前SIGKILL；当前长guest已导入旧adapter，后续新guest才用新代码。
+
 - **VERIFIED D23真实kernel功能子集通过（2026-11-13）** retry1282465于07:58:44→07:58:51 Make0：9/9真实stock programs加载，生产resolver返回376条非零canonical targets，25/27/46/122的23个symbol/unavailable检查全部通过；相同sock-addr prog type在original connect attach可用bind、original bind attach不可用，两项通过；错误FD type由生产write传播EINVAL。完整ELF/9份verifier log/targets/错误与job归档 `helper-context-kernel-results*`，raw `20261113-helper-context/kernel-retry1/`。Native execution0，共享loader未部署，manifest→linker→application实际运行/等量工作仍待确认，不能计入应用coverage。
 
 - **VERIFIED D23 artifact修复后重试启动（2026-11-13）** outer1282465于07:58:44启动，CPU13/2vCPU2G/AS8GiB/shared image reader，消费相同ELF SHA542a60ebdfb87381ed294e6850e4bdd866c2880fba16f65b36d82e29741a2fa5，现从persistent output mount执行；独立raw `20261113-helper-context/kernel-retry1{,-job}/`，启动receipt `helper-context-kernel-retry1-launch.json`。不重建canonical module/loader/image；本turn不轮询，下一turn收集9个context query与日志。

@@ -49,17 +49,20 @@ def compile_simulator(clang, source: Path, obj: Path, run) -> None:
     bounds.append((start, len(lines)))
     location = json.dumps(str(source))
     preamble = "#line 1 " + location + "\n" + "\n".join(lines[:first]) + "\n"
-    joined = []
-    for number, (start, end) in enumerate(bounds):
-        piece = source.with_name(f"{source.stem}.piece{number}.c")
-        piece.write_text(preamble + PIECE_MARK + "\n" + f"#line {start + 1} {location}\n"
-                         + "\n".join(lines[start:end]) + "\n")
-        expanded = piece.with_suffix(".i")
-        run([clang, *COMPILE_FLAGS, "-E", piece, "-o", expanded])
-        head, body = expanded.read_text().split(PIECE_MARK + "\n")
-        joined.append((head if number == 0 else "") + body)
     preprocessed = source.with_suffix(".i")
-    preprocessed.write_text("".join(joined))
+    # Keep one expanded piece live, rather than every piece plus a joined copy.
+    # In particular, the parent must not retain the full B while clang optimizes it.
+    with preprocessed.open("w") as joined:
+        for number, (start, end) in enumerate(bounds):
+            piece = source.with_name(f"{source.stem}.piece{number}.c")
+            piece.write_text(preamble + PIECE_MARK + "\n" + f"#line {start + 1} {location}\n"
+                             + "\n".join(lines[start:end]) + "\n")
+            expanded = piece.with_suffix(".i")
+            run([clang, *COMPILE_FLAGS, "-E", piece, "-o", expanded])
+            head, body = expanded.read_text().split(PIECE_MARK + "\n")
+            if number == 0:
+                joined.write(head)
+            joined.write(body)
     run([clang, *COMPILE_FLAGS, "-c", preprocessed, "-o", obj])
 
 

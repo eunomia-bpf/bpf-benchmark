@@ -1,0 +1,16 @@
+{
+  "scope": "General specializer preprocessing memory lifetime reduction; no B token or compiler flag change",
+  "before": "Retain all expanded chunk bodies in a list, allocate a joined copy, keep the list live while clang compiles",
+  "after": "Write the same head/body token text incrementally and close the aggregate before clang; retain only the current expanded piece",
+  "production_chunk_size_changed": false,
+  "compile_flags_changed": false,
+  "native_P_changed": false,
+  "checks": "Actual clang preprocessing and BPF compilation, four chunks with line/file macro expansion; aggregate exactly equals independent previous materialized-join algorithm",
+  "error_path": "Actual preprocessing failure in later chunk propagates; compiler is never invoked on partial aggregate, no object produced",
+  "before_and_after_make_exit": 0,
+  "path_note": "Separate before/after directories change source-location text; each aggregate is byte-exact against the old join for its own actual preprocessor outputs",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-preprocess-stream",
+  "measured_total_clang_memory_or_speedup": null,
+  "limitation": "Removes parent retention proportional to full expanded B; does not establish total compiler RSS, CPU-time improvement, or resolution of prior SIGKILL",
+  "archive": "preprocess-stream-subset.tar.gz"
+}
