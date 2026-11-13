@@ -1,5 +1,7 @@
 # Cleanup log
 
+- 2026-11-13 VERIFIED preflight correction: terminating the second owned recursive kernel preflight also ran its cleanup trap and removed the canonical `build-x86/vmlinux`; the boot `bzImage` remains unchanged. The exclusive refresh restores the matching stripped ELF/BTF using `scripts/extract-vmlinux` on that exact existing image, with SHA records in the refresh raw directory. This restores the sole artifact; it creates no second kernel build or source copy. Full DWARF is not recovered by this extraction. Source/kernel version remains74d1097af561.
+
 - 2026-11-13 VERIFIED refresh preflight: recursive kernel make commands marked for execution ran despite `make -n`, replacing some same-version module/temp build outputs in `/workspaces/.agent-state/kprog-ck/build-x86`; `bzImage` and `vmlinux` retained their 2026-11-12 timestamps. Second owned preflight process tree was terminated by exact PIDs after inspecting ancestry. No raw data or source tree removed. Full command logs retained under `/workspaces/kprog-raw/verified/20261113-shared-image-dry-run{,2,3}.log`; corrected preflight uses only the sole canonical kernel artifact and skips grouped kernel file targets.
 
 Operator, 2026-11-11: "确保需要的功能 merge 到一起之后, 删掉所有别的内核版本. 任何时候只允许一个镜像和一个底座. 所有原始数据不允许删掉, 不允许建立任何新的 worktree. 明确记录." "kinsn RFC 那个也可以清理掉?" "停掉所有的, 然后确保重新开始"

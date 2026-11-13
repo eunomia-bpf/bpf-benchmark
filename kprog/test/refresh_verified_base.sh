@@ -12,6 +12,12 @@ date -u +%FT%TZ > "$refresh_output/started"
 refresh_old_image=$(docker image inspect --format '{{.Id}}' "$refresh_image")
 printf '%s\n' "$refresh_old_image" > "$refresh_output/old-image"
 
+# Interrupted recursive preflight removed vmlinux. Recover the matching ELF/BTF
+# directly from the sole unchanged boot image; do not build another kernel.
+"$refresh_root/vendor/linux-framework/scripts/extract-vmlinux" \
+    "$refresh_kernel/arch/x86/boot/bzImage" > "$refresh_kernel/vmlinux"
+sha256sum "$refresh_kernel/arch/x86/boot/bzImage" "$refresh_kernel/vmlinux" > "$refresh_output/kernel-sha256"
+
 make -C "$refresh_root/kprog/stock-path/module"
 make -C "$refresh_kernel" M="$refresh_root/kprog/perf/direct-native" MO="$refresh_direct" ARCH=x86 modules -j1
 make -C "$refresh_root/kprog/libnativeloader" trusted-service BUILD_DIR="$refresh_loader"
