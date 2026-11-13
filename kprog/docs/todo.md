@@ -20,7 +20,7 @@
 - [x] P1d Tetragon target-BTF CO-RE compiler host子集（77e2916fb、abb4d8e02、3dfd738fd、c6b15fc34）：host plain1/corrected0，35 manifest objects全部构建成功，35/35 plain code逐节等于shipped default；fork原生PC0x2ff的task+96改成task+2904。`core-host.json`/`core-build-report.json`记录source epoch、4 workers/每process16GiB上限与完整输出。默认关闭NATIVE_MANIFEST选择；两次配对guest均完成make0/appok，启动仍跨测量，交P1e，P1继续。
 - [ ] P1e Tetragon 原生启动仍跨测量：优化 selected linker 后 run `x86_kvm_corpus_20261113_041136_182808` make0/appok，但 result 两臂287/202个程序，native policy 9/15且 rawtp仍LOADING。现有shim日志288次native replacement的整次load中位815ms/合计256.48s；离线解析63f89e2d1、policy观测6ac73dcc4，receipt `tetragon-observed-runtime.json`。直接交verified定位通用loader/shim/linker成本；perf继续受影响行为子集，保留2.106x为启动工作不同的诊断，修复前不把它写作等量收益。
 - P1e 子集归因补证（9025380bb、82061db5b）：run `x86_kvm_corpus_20261113_043935_986036` make0/appok/0stub，288次native loads只有38proof+38kernel child（全0、76个全部唯一配对）；其余250次无child的load合计156.48s，中位284.30ms。全部child仅4.62s，不能用每次fork/link解释主要成本。receipt `kprog/results/perf_20261113/tetragon-link-cost.json`含全量archive；verified继续现有stage timings及manifest/data-symbol成本定位，P1e仍开，不宣称cache丢失或startup收益。
-- P1e/P2 固定协议观察已启动：不能由1–120s短诊断的启动重叠推断180s冻结warmup后仍缺程序；不把可选profiler或通用加载优化作为实测前置条件。29550f302 policy-only observer（5回归通过）无GetEvents订阅；corrected Tetragon stats开3×180s、8vCPU64G/AS80G、CPU0–7持timing/image锁，launch receipt `tetragon-fixed-duration-launch.json`，结果待收。保留全部样本和counter/policy差异，正式六应用确认仍只在冻结前一次。
+- P1e/P2 固定协议结果：run `x86_kvm_corpus_20261113_052009_146869` make0/appok/0错误/0stub，stats开3×180s+冻结180s warmup，287/287程序。实际测量时窗内42/39次读取均15policy ENABLED，但baseline connect post增61746234、datagram增23947470；native对应counter字段为空，accept仅增120对23952413。原始吞吐1.380x、generic_kprobe973.9→70.2ns/次保留为工作不同的观察；启动重叠不足以解释完全装载后的差异，P1e继续查语义。receipt/archive `tetragon-fixed-duration*`、`tetragon-fixed-policy-windows.json`；policy-window.py保留缺字段及负delta，1focused回归通过。
 - [x] P1f OTel counter-mix 时窗审计（b07cb025c、8e15cd19e）：全部相邻同generation窗口保留，frames按各自family attempts归一；baseline Ruby yield自身0.35–0.76，不能把此前跨窗口0.555/0.376直接归因于native。实际shim measure_start在warmup之后，progress标记在warmup之前；observer新增每次read的wall/monotonic边界，4+1 focused regressions通过。receipt `kprog/results/perf_20261113/otel-counter-mix.json`；不据此宣称完全等价，P1整体继续。
 - [x] P1g 旧OTel phase-counters解码可复现修复（0be31b60d）：去掉/tmp临时ID表依赖，修正移动后的源码根路径和显式enum赋值解析；2回归通过，两臂各99个raw counters逐项等于独立eqcodex解码。receipt `kprog/results/perf_20261113/counter-decoder-repair.json`；已有counter-window数字不变，不改framework或phase/generation判定。
 - [ ] P2 修好后只重测受这处修复影响的应用（stats 关和开，每个应用 3×180 秒），每次运行用 stubs.py 和程序自身计数核对，增量写进第 1 节；六应用全量计时只在冻结前跑一次，正式下限表和几何平均以那次为准。
@@ -45,6 +45,8 @@
 - 规则不变：一个工作树、一个内核、一个镜像、一个底座；原始数据不删；新行为放在默认关闭的开关后，默认路径字节不变；不新增检查；论文、故事、设计、benchmark 设置要运营者同意。
 
 ## 1. 性能（目标：六应用几何平均 native/JIT 1.20x–1.40x，来自原生代码）
+
+- **PERF 完全装载Tetragon仍有工作差异（2026-11-13）** stats开3×180s固定协议run052009_146869：Make0/appok/0error/0stub，287/287程序、15/15policy ENABLED覆盖两臂全部测量内query。原始吞吐1.380x；generic_kprobe973.9→70.2ns/次。但connect/datagram native action_counter字段持续为空，baseline增长数千万，accept delta120对23952413。P1e转向完全装载后的语义差异，不能仅归因启动。完整raw archive及真实时钟端点见 `kprog/results/perf_20261113/tetragon-fixed-duration.json` 和 `tetragon-fixed-policy-windows.json`；不认证等量收益或floor。
 
 - **PERF P1c有界结论（2026-11-13，5bb08526b/67519f2a6）** frozen9f与其实际kernel gitlink已含两种缺陷机制，后续reference对象有直接指令证据；原始May四run只有metadata/raw BPF与workload counters，精确ELF和OTel Attempts/Frames未知。因此不能把历史1.824x/1.323x认证为等量收益，也不声称原始OTel用户展开恰为0。`may29-bounded-answer.md/.json`给出逐项证据和界限，P1c按advisor要求结项，运营者决定论文；P1e继续。
 

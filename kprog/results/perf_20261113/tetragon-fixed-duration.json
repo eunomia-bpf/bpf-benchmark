@@ -1,0 +1,254 @@
+{
+  "recorded_at": "2026-11-13T05:57:25.231275+00:00",
+  "scope": "Corrected Tetragon full-duration affected-app observation; differing work persists",
+  "launch_receipt": "tetragon-fixed-duration-launch.json",
+  "run": "corpus/results/x86_kvm_corpus_20261113_052009_146869",
+  "capture": "corpus/results/perf-tetragon-fixed-20261113",
+  "raw": "/workspaces/kprog-raw/perf/20261113-tetragon-fixed-duration",
+  "make_exit": 0,
+  "app_status": "ok",
+  "workload_errors": 0,
+  "stub_records": 0,
+  "programs": {
+    "baseline": 287,
+    "post_rejit": 287
+  },
+  "contract": {
+    "stats": 1,
+    "samples": 3,
+    "workload_seconds": 180,
+    "warmup_seconds_per_arm": 180,
+    "cpus": "0-7",
+    "vcpus": 8,
+    "memory_gib": 64,
+    "host_address_space_limit_gib": 80
+  },
+  "throughput": {
+    "baseline_ops_per_second": [
+      307833,
+      292231,
+      296760
+    ],
+    "native_ops_per_second": [
+      409422,
+      411666,
+      327816
+    ],
+    "native_over_baseline_rounded": 1.38
+  },
+  "bpf_ns_per_invocation": {
+    "baseline": 792.3,
+    "native": 400.4
+  },
+  "generic_kprobe_ns_per_invocation": {
+    "baseline": 973.9,
+    "native": 70.2
+  },
+  "policy_evidence": "tetragon-fixed-policy-windows.json",
+  "observations": [
+    {
+      "phase": "baseline",
+      "interval": {
+        "phase": "baseline",
+        "pid": "1832",
+        "start_seconds": 296.158864,
+        "end_seconds": 836.379736
+      },
+      "inside_queries": 42,
+      "policy_states": {
+        "TP_STATE_ENABLED": 630
+      },
+      "policies": [
+        {
+          "name": "accept",
+          "action_counter_deltas": {
+            "post": 23952413
+          }
+        },
+        {
+          "name": "bpf",
+          "action_counter_deltas": {
+            "post": 24
+          }
+        },
+        {
+          "name": "connect",
+          "action_counter_deltas": {
+            "post": 61746234
+          }
+        },
+        {
+          "name": "datagram",
+          "action_counter_deltas": {
+            "post": 23947470
+          }
+        },
+        {
+          "name": "datagram-518",
+          "action_counter_deltas": {
+            "post": 130721540
+          }
+        },
+        {
+          "name": "fd-install",
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "file-monitoring",
+          "action_counter_deltas": {
+            "post": 4684
+          }
+        },
+        {
+          "name": "follow-symlink",
+          "action_counter_deltas": {
+            "post": 145839
+          }
+        },
+        {
+          "name": "monitor-kernel-modules",
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "process-exec-elf-begin",
+          "action_counter_deltas": {
+            "post": 990
+          }
+        },
+        {
+          "name": "raw-syscalls",
+          "action_counter_deltas": {
+            "post": 808638447
+          }
+        },
+        {
+          "name": "rawtp",
+          "action_counter_deltas": {
+            "post": 996
+          }
+        },
+        {
+          "name": "security-socket-connect",
+          "action_counter_deltas": {
+            "post": 177
+          }
+        },
+        {
+          "name": "syscalls",
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "tty",
+          "action_counter_deltas": {}
+        }
+      ]
+    },
+    {
+      "phase": "post_rejit",
+      "interval": {
+        "phase": "post_rejit",
+        "pid": "17100",
+        "start_seconds": 1048.099697,
+        "end_seconds": 1588.262783
+      },
+      "inside_queries": 39,
+      "policy_states": {
+        "TP_STATE_ENABLED": 585
+      },
+      "policies": [
+        {
+          "name": "accept",
+          "action_counter_deltas": {
+            "post": 120
+          }
+        },
+        {
+          "name": "bpf",
+          "action_counter_deltas": {
+            "post": 28
+          }
+        },
+        {
+          "name": "connect",
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "datagram",
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "datagram-518",
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "fd-install",
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "file-monitoring",
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "follow-symlink",
+          "action_counter_deltas": {
+            "post": 171269
+          }
+        },
+        {
+          "name": "monitor-kernel-modules",
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "process-exec-elf-begin",
+          "action_counter_deltas": {
+            "post": 859
+          }
+        },
+        {
+          "name": "raw-syscalls",
+          "action_counter_deltas": {
+            "post": 1091084696
+          }
+        },
+        {
+          "name": "rawtp",
+          "action_counter_deltas": {
+            "post": 872
+          }
+        },
+        {
+          "name": "security-socket-connect",
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "syscalls",
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "tty",
+          "action_counter_deltas": {}
+        }
+      ]
+    }
+  ],
+  "conclusion": "All policies fully enabled and both inventories complete during measurement, but native connect/datagram and other policy post counters remain absent while baseline counters advance by millions. Startup overlap alone cannot explain this behavior gap. Raw1.380x is not certified equal-work performance.",
+  "limits": [
+    "Policy windows cover different durations and different workload rates; raw endpoint deltas are not normalized speed comparisons.",
+    "Absent protobuf fields are retained as absent, not measured numeric zero.",
+    "No six-app floor/geomean claim; stats-off and corrected OTel full measurements remain open.",
+    "CORE/runtime-map candidates selected explicitly; default objects, kernel, image and base unchanged."
+  ],
+  "analysis_commands": [
+    "python3 kprog/perf/may29-image/tetragon-observation.py corpus/results/perf-tetragon-fixed-20261113 corpus/results/x86_kvm_corpus_20261113_052009_146869 --measurement-clock",
+    "python3 kprog/perf/may29-image/policy-window.py /workspaces/kprog-raw/perf/20261113-tetragon-fixed-duration/policy-report.json",
+    "python3 kprog/perf/may29-image/ratio.py off=corpus/results/x86_kvm_corpus_20261113_052009_146869 on=corpus/results/x86_kvm_corpus_20261113_052009_146869",
+    "python3 kprog/perf/may29-image/stubs.py corpus/results/x86_kvm_corpus_20261113_052009_146869",
+    "python3 kprog/perf/may29-image/perprog.py corpus/results/x86_kvm_corpus_20261113_052009_146869"
+  ],
+  "archive": {
+    "path": "kprog/results/perf_20261113/tetragon-fixed-duration.tar.gz",
+    "bytes": 5433378,
+    "sha256": "bbcc6d4e6d4c104706e624c1a5b767b46612f98785b618a863487c5e0bb23e0e",
+    "files_byte_compared": 4862
+  }
+}

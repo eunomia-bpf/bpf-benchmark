@@ -1,0 +1,1211 @@
+{
+  "source": "/workspaces/kprog-raw/perf/20261113-tetragon-fixed-duration/policy-report.json",
+  "windows": [
+    {
+      "interval": {
+        "phase": "baseline",
+        "pid": "1832",
+        "start_seconds": 296.158864,
+        "end_seconds": 836.379736
+      },
+      "observations": 42,
+      "policy_states": {
+        "TP_STATE_ENABLED": 630
+      },
+      "endpoints": [
+        {
+          "snapshot": "baseline-0013",
+          "clock": {
+            "start": {
+              "wall_time": "2026-11-13T05:23:20.053357+00:00",
+              "monotonic_ns": 300633831672
+            },
+            "end": {
+              "wall_time": "2026-11-13T05:23:23.641254+00:00",
+              "monotonic_ns": 304221728709
+            }
+          }
+        },
+        {
+          "snapshot": "baseline-0054",
+          "clock": {
+            "start": {
+              "wall_time": "2026-11-13T05:32:03.128481+00:00",
+              "monotonic_ns": 823708956919
+            },
+            "end": {
+              "wall_time": "2026-11-13T05:32:05.967298+00:00",
+              "monotonic_ns": 826547774447
+            }
+          }
+        }
+      ],
+      "policies": [
+        {
+          "name": "accept",
+          "endpoints": [
+            {
+              "id": "14",
+              "name": "accept",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "6722352",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "7440555"
+                }
+              }
+            },
+            {
+              "id": "14",
+              "name": "accept",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "6722352",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "31392968"
+                }
+              }
+            }
+          ],
+          "action_counter_deltas": {
+            "post": 23952413
+          }
+        },
+        {
+          "name": "bpf",
+          "endpoints": [
+            {
+              "id": "2",
+              "name": "bpf",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "2165416",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "832"
+                }
+              }
+            },
+            {
+              "id": "2",
+              "name": "bpf",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "2165416",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "856"
+                }
+              }
+            }
+          ],
+          "action_counter_deltas": {
+            "post": 24
+          }
+        },
+        {
+          "name": "connect",
+          "endpoints": [
+            {
+              "id": "15",
+              "name": "connect",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "2165416",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "19308461"
+                }
+              }
+            },
+            {
+              "id": "15",
+              "name": "connect",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "2165416",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "81054695"
+                }
+              }
+            }
+          ],
+          "action_counter_deltas": {
+            "post": 61746234
+          }
+        },
+        {
+          "name": "datagram",
+          "endpoints": [
+            {
+              "id": "3",
+              "name": "datagram",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "5259672",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "7437378"
+                }
+              }
+            },
+            {
+              "id": "3",
+              "name": "datagram",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "5259672",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "31384848"
+                }
+              }
+            }
+          ],
+          "action_counter_deltas": {
+            "post": 23947470
+          }
+        },
+        {
+          "name": "datagram-518",
+          "endpoints": [
+            {
+              "id": "4",
+              "name": "datagram-518",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "7216848",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "40714630"
+                }
+              }
+            },
+            {
+              "id": "4",
+              "name": "datagram-518",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "7216848",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "171436170"
+                }
+              }
+            }
+          ],
+          "action_counter_deltas": {
+            "post": 130721540
+          }
+        },
+        {
+          "name": "fd-install",
+          "endpoints": [
+            {
+              "id": "5",
+              "name": "fd-install",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            },
+            {
+              "id": "5",
+              "name": "fd-install",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            }
+          ],
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "file-monitoring",
+          "endpoints": [
+            {
+              "id": "6",
+              "name": "file-monitoring",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "2747264",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "1489"
+                }
+              }
+            },
+            {
+              "id": "6",
+              "name": "file-monitoring",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "2747264",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "6173"
+                }
+              }
+            }
+          ],
+          "action_counter_deltas": {
+            "post": 4684
+          }
+        },
+        {
+          "name": "follow-symlink",
+          "endpoints": [
+            {
+              "id": "12",
+              "name": "follow-symlink",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "37774"
+                }
+              }
+            },
+            {
+              "id": "12",
+              "name": "follow-symlink",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "183613"
+                }
+              }
+            }
+          ],
+          "action_counter_deltas": {
+            "post": 145839
+          }
+        },
+        {
+          "name": "monitor-kernel-modules",
+          "endpoints": [
+            {
+              "id": "7",
+              "name": "monitor-kernel-modules",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "3241760",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            },
+            {
+              "id": "7",
+              "name": "monitor-kernel-modules",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "3241760",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            }
+          ],
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "process-exec-elf-begin",
+          "endpoints": [
+            {
+              "id": "8",
+              "name": "process-exec-elf-begin",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "331"
+                }
+              }
+            },
+            {
+              "id": "8",
+              "name": "process-exec-elf-begin",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "1321"
+                }
+              }
+            }
+          ],
+          "action_counter_deltas": {
+            "post": 990
+          }
+        },
+        {
+          "name": "raw-syscalls",
+          "endpoints": [
+            {
+              "id": "9",
+              "name": "raw-syscalls",
+              "sensors": [
+                "generic_tracepoint"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "596624",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "253845891"
+                }
+              }
+            },
+            {
+              "id": "9",
+              "name": "raw-syscalls",
+              "sensors": [
+                "generic_tracepoint"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "596624",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "1062484338"
+                }
+              }
+            }
+          ],
+          "action_counter_deltas": {
+            "post": 808638447
+          }
+        },
+        {
+          "name": "rawtp",
+          "endpoints": [
+            {
+              "id": "10",
+              "name": "rawtp",
+              "sensors": [
+                "generic_tracepoint"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "859080",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "345"
+                }
+              }
+            },
+            {
+              "id": "10",
+              "name": "rawtp",
+              "sensors": [
+                "generic_tracepoint"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "859080",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "1341"
+                }
+              }
+            }
+          ],
+          "action_counter_deltas": {
+            "post": 996
+          }
+        },
+        {
+          "name": "security-socket-connect",
+          "endpoints": [
+            {
+              "id": "11",
+              "name": "security-socket-connect",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "54"
+                }
+              }
+            },
+            {
+              "id": "11",
+              "name": "security-socket-connect",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "231"
+                }
+              }
+            }
+          ],
+          "action_counter_deltas": {
+            "post": 177
+          }
+        },
+        {
+          "name": "syscalls",
+          "endpoints": [
+            {
+              "id": "13",
+              "name": "syscalls",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            },
+            {
+              "id": "13",
+              "name": "syscalls",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            }
+          ],
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "tty",
+          "endpoints": [
+            {
+              "id": "16",
+              "name": "tty",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            },
+            {
+              "id": "16",
+              "name": "tty",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            }
+          ],
+          "action_counter_deltas": {}
+        }
+      ]
+    },
+    {
+      "interval": {
+        "phase": "post_rejit",
+        "pid": "17100",
+        "start_seconds": 1048.099697,
+        "end_seconds": 1588.262783
+      },
+      "observations": 39,
+      "policy_states": {
+        "TP_STATE_ENABLED": 585
+      },
+      "endpoints": [
+        {
+          "snapshot": "post_rejit-0072",
+          "clock": {
+            "start": {
+              "wall_time": "2026-11-13T05:35:59.384831+00:00",
+              "monotonic_ns": 1059965306904
+            },
+            "end": {
+              "wall_time": "2026-11-13T05:36:01.636114+00:00",
+              "monotonic_ns": 1062216591608
+            }
+          }
+        },
+        {
+          "snapshot": "post_rejit-0110",
+          "clock": {
+            "start": {
+              "wall_time": "2026-11-13T05:44:37.689849+00:00",
+              "monotonic_ns": 1578270314028
+            },
+            "end": {
+              "wall_time": "2026-11-13T05:44:39.215678+00:00",
+              "monotonic_ns": 1579796153362
+            }
+          }
+        }
+      ],
+      "policies": [
+        {
+          "name": "accept",
+          "endpoints": [
+            {
+              "id": "14",
+              "name": "accept",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "6722352",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "20"
+                }
+              }
+            },
+            {
+              "id": "14",
+              "name": "accept",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "6722352",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "140"
+                }
+              }
+            }
+          ],
+          "action_counter_deltas": {
+            "post": 120
+          }
+        },
+        {
+          "name": "bpf",
+          "endpoints": [
+            {
+              "id": "2",
+              "name": "bpf",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "2165416",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "1505"
+                }
+              }
+            },
+            {
+              "id": "2",
+              "name": "bpf",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "2165416",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "1533"
+                }
+              }
+            }
+          ],
+          "action_counter_deltas": {
+            "post": 28
+          }
+        },
+        {
+          "name": "connect",
+          "endpoints": [
+            {
+              "id": "15",
+              "name": "connect",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "2165416",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            },
+            {
+              "id": "15",
+              "name": "connect",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "2165416",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            }
+          ],
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "datagram",
+          "endpoints": [
+            {
+              "id": "3",
+              "name": "datagram",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "5259672",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            },
+            {
+              "id": "3",
+              "name": "datagram",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "5259672",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            }
+          ],
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "datagram-518",
+          "endpoints": [
+            {
+              "id": "4",
+              "name": "datagram-518",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "7216848",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            },
+            {
+              "id": "4",
+              "name": "datagram-518",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "7216848",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            }
+          ],
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "fd-install",
+          "endpoints": [
+            {
+              "id": "5",
+              "name": "fd-install",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            },
+            {
+              "id": "5",
+              "name": "fd-install",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            }
+          ],
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "file-monitoring",
+          "endpoints": [
+            {
+              "id": "6",
+              "name": "file-monitoring",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "2747264",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            },
+            {
+              "id": "6",
+              "name": "file-monitoring",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "2747264",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            }
+          ],
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "follow-symlink",
+          "endpoints": [
+            {
+              "id": "12",
+              "name": "follow-symlink",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "25817"
+                }
+              }
+            },
+            {
+              "id": "12",
+              "name": "follow-symlink",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "197086"
+                }
+              }
+            }
+          ],
+          "action_counter_deltas": {
+            "post": 171269
+          }
+        },
+        {
+          "name": "monitor-kernel-modules",
+          "endpoints": [
+            {
+              "id": "7",
+              "name": "monitor-kernel-modules",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "3241760",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            },
+            {
+              "id": "7",
+              "name": "monitor-kernel-modules",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "3241760",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            }
+          ],
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "process-exec-elf-begin",
+          "endpoints": [
+            {
+              "id": "8",
+              "name": "process-exec-elf-begin",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "132"
+                }
+              }
+            },
+            {
+              "id": "8",
+              "name": "process-exec-elf-begin",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "991"
+                }
+              }
+            }
+          ],
+          "action_counter_deltas": {
+            "post": 859
+          }
+        },
+        {
+          "name": "raw-syscalls",
+          "endpoints": [
+            {
+              "id": "9",
+              "name": "raw-syscalls",
+              "sensors": [
+                "generic_tracepoint"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "596624",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "157905464"
+                }
+              }
+            },
+            {
+              "id": "9",
+              "name": "raw-syscalls",
+              "sensors": [
+                "generic_tracepoint"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "596624",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "1248990160"
+                }
+              }
+            }
+          ],
+          "action_counter_deltas": {
+            "post": 1091084696
+          }
+        },
+        {
+          "name": "rawtp",
+          "endpoints": [
+            {
+              "id": "10",
+              "name": "rawtp",
+              "sensors": [
+                "generic_tracepoint"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "859080",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "131"
+                }
+              }
+            },
+            {
+              "id": "10",
+              "name": "rawtp",
+              "sensors": [
+                "generic_tracepoint"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "859080",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {
+                  "post": "1003"
+                }
+              }
+            }
+          ],
+          "action_counter_deltas": {
+            "post": 872
+          }
+        },
+        {
+          "name": "security-socket-connect",
+          "endpoints": [
+            {
+              "id": "11",
+              "name": "security-socket-connect",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            },
+            {
+              "id": "11",
+              "name": "security-socket-connect",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            }
+          ],
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "syscalls",
+          "endpoints": [
+            {
+              "id": "13",
+              "name": "syscalls",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            },
+            {
+              "id": "13",
+              "name": "syscalls",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            }
+          ],
+          "action_counter_deltas": {}
+        },
+        {
+          "name": "tty",
+          "endpoints": [
+            {
+              "id": "16",
+              "name": "tty",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            },
+            {
+              "id": "16",
+              "name": "tty",
+              "sensors": [
+                "generic_kprobe"
+              ],
+              "enabled": true,
+              "state": "TP_STATE_ENABLED",
+              "kernel_memory_bytes": "860632",
+              "mode": "TP_MODE_MONITOR_ONLY",
+              "stats": {
+                "action_counters": {}
+              }
+            }
+          ],
+          "action_counter_deltas": {}
+        }
+      ]
+    }
+  ]
+}
