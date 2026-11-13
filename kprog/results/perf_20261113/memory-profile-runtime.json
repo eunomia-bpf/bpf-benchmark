@@ -1,0 +1,99 @@
+{
+  "recorded_at": "2026-11-13T07:04:54.827700+00:00",
+  "scope": "P0 selected Tracee local-memory functional and CPU subset",
+  "run": "corpus/results/x86_kvm_corpus_20261113_064311_015218",
+  "raw": "/workspaces/kprog-raw/perf/20261113-local-memory/profile-on",
+  "launch": "memory-profile-launch.json",
+  "make_exit": 0,
+  "app_status": "ok",
+  "app_error": "",
+  "phase_programs": {
+    "baseline": 167,
+    "post_rejit": 167
+  },
+  "native_replacements": 169,
+  "contract": {
+    "cpus": "16-19",
+    "vcpus": 4,
+    "memory_gib": 8,
+    "host_address_space_limit_gib": 16,
+    "stats": 1,
+    "samples": 1,
+    "workload_seconds": 45,
+    "profile_hz": 999
+  },
+  "raw_workload_ratio_rounded": 1.011,
+  "workload_errors": 0,
+  "program_ns_per_call": {
+    "trace_sys_enter": {
+      "baseline": 530.0,
+      "native": 623.5
+    },
+    "trace_sys_exit": {
+      "baseline": 539.5,
+      "native": 646.7
+    }
+  },
+  "profile": {
+    "samples": {
+      "baseline": 333804,
+      "native": 363453
+    },
+    "memset_callchain_samples": {
+      "baseline": 2277,
+      "native": 48951
+    },
+    "native_root_memset_percent_rounded": 13.45,
+    "main_memset_parent": "bpf_probe_read_kernel; bpf_get_current_comm also present",
+    "root_bpf_percent": {
+      "baseline": 5.61,
+      "native": 4.85
+    },
+    "root_idle_percent": {
+      "baseline": 2.31,
+      "native": 2.34
+    }
+  },
+  "tiny_candidates": [
+    {
+      "phase": "baseline",
+      "name": "empty_kprobe",
+      "jited": 20,
+      "xlated": 16,
+      "calls": 43
+    },
+    {
+      "phase": "post_rejit",
+      "name": "empty_kprobe",
+      "jited": 34,
+      "xlated": 16,
+      "calls": 45
+    }
+  ],
+  "tiny_interpretation": "Both are the upstream intentional empty_kprobe returning0, not established fallback bodies. They remain reported.",
+  "reporting_fix": {
+    "commit": "602e7c599",
+    "problems": [
+      "callgraph report format and unresolved guest JIT names yielded false0%BPF",
+      "symbolize previously counted callchain frames as samples",
+      "tiny shapes were mislabeled fallback; mixed idle/working candidate count overcounted"
+    ],
+    "tests_passed": 2,
+    "raw_unchanged": true
+  },
+  "conclusion": "The app completes and installs native programs. Kernel memset CPU cost remains mainly under probe-read helper error clearing. No workload speedup or equal-work floor is certified; source/ABI parity takes priority over additional optimization timing.",
+  "limits": [
+    "One sample45s diagnostic, not3x180 timing.",
+    "Profiler progress windows include warmup; do not treat them as exact counter measurement windows.",
+    "The optional eqcodex observer sees no progress snapshots because this profiler redirects app progress to its own guest.log. Raw result/callchains remain retained.",
+    "Known Tracee CO-RE/context/source/helper issues remain.",
+    "No on/off matched profile control run yet; old C13.93% profile is not a matched control.",
+    "Default kernel/image/base/workload/application source unchanged."
+  ],
+  "archive": {
+    "path": "kprog/results/perf_20261113/memory-profile-runtime.tar.gz",
+    "bytes": 20458540,
+    "sha256": "84ad0b47a34d0f0c28e79d93a099eaeea4c14dbd5b0337c3fb1793f263b2a681",
+    "files_byte_compared": 41
+  }
+}
