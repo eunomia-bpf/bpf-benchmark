@@ -392,3 +392,30 @@ sampler does not use PMU event tables. `1e3ac8e29` selects NO_JEVENTS explicitly
 and keeps ELF/libdw support; the recursive Make dry run succeeds. The same-output
 tool retry is launched under16GiB/4workers/CPUs16–19. All earlier logs remain;
 kernel, base and image builds remain untouched.
+
+## Loader CPU tool ready; measurement-clock report prepared
+
+`loader-cpu-tool.json` and its archive retain the successful software sampler
+build, executable and both earlier setup failures. Build3 exits0; the installed
+7.0.rc2.g74d1097af561 tool reports ELF, libdw and DWARF unwinding enabled.
+The exact executable is9253168bytes with SHA256
+`4f35b3527ee18e4fac9f4b2f4f7675d4865e55b9351dbf002c11db7511be4c37`.
+PMU event tables and Python bindings are explicitly unused by this cpu-clock
+sampler. No kernel, base or image was rebuilt.
+
+A short own-guest Tetragon profile is launched on CPUs16–19,4vCPU/8GiB and
+16GiB host address-space limit. It uses separate generated guest state from
+the ongoing CPUs0–7 full-duration run. The observer samples existing attached
+process threads for10seconds at99Hz, with inheritance disabled, retaining raw
+data, the actual loader library and the guest's own kernel symbols. Its runtime
+outcome is pending; build success supplies no hotspot or speedup claim.
+
+`016036457` adds an explicitly selected --measurement-clock mode to the offline
+policy report. It preserves actual shim start/finish intervals, matches query
+PID and monotonic read bounds, and distinguishes contained from overlapping
+queries. Incomplete intervals remain explicit. A regression covers restart PID
+mismatch, boundary overlap and an unfinished measurement. The default report
+is byte-identical to the prior real optimized-run receipt. Actual markers from
+the earlier short-run shim logs replay successfully; those old replay inputs
+have no policy query clocks, so measured policy classification awaits the new
+full-duration capture. All queries remain retained; this adds no admission gate.

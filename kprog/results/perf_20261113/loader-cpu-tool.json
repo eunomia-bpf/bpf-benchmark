@@ -1,0 +1,89 @@
+{
+  "recorded_at": "2026-11-13T05:32:11Z",
+  "scope": "P1e software CPU sampler build and launch, runtime profile pending",
+  "kernel_source": "74d1097af561",
+  "tool": "tool/perf",
+  "tool_bytes": 9253168,
+  "tool_sha256": "4f35b3527ee18e4fac9f4b2f4f7675d4865e55b9351dbf002c11db7511be4c37",
+  "build_attempts": [
+    {
+      "path": "build",
+      "make_exit": 2,
+      "reason": "No Python interpreter selected for PMU event generation"
+    },
+    {
+      "path": "build2",
+      "make_exit": 2,
+      "reason": "Explicit Python selection required absent python3-config"
+    },
+    {
+      "path": "build3",
+      "make_exit": 0,
+      "recipe": "1e3ac8e29",
+      "features": {
+        "libelf": true,
+        "libdw": true,
+        "dwarf_unwind": true
+      },
+      "command": "taskset -c 16-19 make -f /workspaces/repository/kprog/perf/native-context/Makefile loader-perf-build loader-perf-tool"
+    }
+  ],
+  "host_dependencies": {
+    "libdw-dev": "0.190-1.1ubuntu0.1",
+    "liblzma-dev": "5.6.1+really5.4.5-1ubuntu0.4"
+  },
+  "tool_contract": {
+    "event": "cpu-clock",
+    "pmu_event_tables": false,
+    "python_bindings": false,
+    "compiler_jobs": 4,
+    "build_host_as_gib": 16
+  },
+  "profile": {
+    "outer_pid": 1209011,
+    "cpus": "16-19",
+    "vcpus": 4,
+    "memory_gib": 8,
+    "host_as_gib": 16,
+    "state": "/var/tmp/kprog-tmp/perf/cpu",
+    "capture": "corpus/results/perf-loader-cpu-capture-20261113",
+    "observer_commit": "1bcd73d5e",
+    "sample_seconds": 10,
+    "frequency_hz": 99,
+    "inherit": false,
+    "phase": "post_rejit",
+    "status": "launched; outcome pending"
+  },
+  "independent_primary": {
+    "outer_pid": 1205262,
+    "launcher_pid": 1205267,
+    "contract": "Tetragon stats1 three180-second samples/frozen180-second warmup,8vCPU64G,0-7",
+    "observed_once": "baseline arm active; outcome pending"
+  },
+  "analysis": {
+    "measurement_clock_option": "--measurement-clock",
+    "regression_tests_passed": 1,
+    "default_report_byte_identical": true,
+    "real_shim_marker_replay": [
+      {
+        "phase": "baseline",
+        "pid": "1689",
+        "start_seconds": 95.062778,
+        "end_seconds": 96.10959
+      },
+      {
+        "phase": "post_rejit",
+        "pid": "3717",
+        "start_seconds": 145.984226,
+        "end_seconds": 147.084597
+      }
+    ],
+    "limits": "Old replay has no policy timing queries; actual query classification awaits the fixed-duration capture."
+  },
+  "raw": "/workspaces/kprog-raw/perf/20261113-loader-cpu-profile",
+  "limits": [
+    "No CPU hotspot, load-time speedup, equal-work throughput or floor result is inferred from build success.",
+    "Sampler guest state is separate from primary timing state; software sampling is an opt-in observation.",
+    "Actual loader library and guest kallsyms will be used by the guest observer, not host kernel symbols."
+  ]
+}
