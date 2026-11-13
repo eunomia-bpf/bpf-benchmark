@@ -15,6 +15,7 @@ LLC ?= llc-18
 BPF_LINK ?= llvm-link-18
 LLVM_NM ?= llvm-nm-18
 LLVM_STRIP ?= llvm-strip-18
+LLVM_DIS ?= llvm-dis-18
 BPFTOOL ?= $(VENDOR)/build/x86/bpftool/bin/bpftool
 VMLINUX_BTF ?= /sys/kernel/btf/vmlinux
 NATIVE_LINK ?= $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link
@@ -174,12 +175,49 @@ tracee:
 			-o "$(OUT)/tracee/lsm_support/$${src}.bpf.o"; \
 	done
 
+# Katran from the untouched upstream sources, behind a switch that defaults off.
+#
+# Katran's only behaviour-changing source difference is the XDP/TC context layout: this
+# tree's katran/lib/linux_includes/bpf.h redefines struct xdp_md/__sk_buff under
+# MICRO_NATIVE so the native body reads physical offsets, where the source reads the UAPI
+# mirror and the kernel's converter rewrites each access. With KATRAN_SAME_SOURCE=1 the
+# source and its headers stay as upstream: the eBPF arm's own frontend produces IR, lane
+# perf's context lowering replaces each public access with the physical one, and codegen
+# follows. Leaving it at 0 keeps the rule below exactly as before, so the default objects
+# are unchanged. Two codegen details are load-bearing and documented in
+# kprog/results/katran-samesource-20261113/README.md: -fPIC at the frontend (keeps .maps
+# globals non-dso_local so a map reference lowers to the GOTPCRELX load the loader patches)
+# and stripping the IR's +sse,+sse2 target-features (else memset/memcpy expand to SSE).
+KATRAN_SAME_SOURCE ?= 0
+KATRAN_CONTEXT_BUILD ?= /var/tmp/kprog-tmp/perf/packet-context
+KATRAN_CONTEXT_LOWER ?= /var/tmp/kprog-tmp/perf/socket-context/socket-context-lower
+KATRAN_SAME_SOURCE_FRONTEND := -I"$(CURDIR)/katran" -I"$(CURDIR)/katran/katran/lib/linux_includes" \
+	-DDEBUG -D__KERNEL__ -Wno-unused-value -Wno-pointer-sign \
+	-Wno-compare-distinct-pointer-types -O2 -emit-llvm -c -g -fPIC
+KATRAN_SAME_SOURCE_CODEGEN := -target x86_64-linux-gnu -O3 -g -fPIC \
+	-fno-optimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only \
+	-fno-stack-protector -fno-jump-tables
+
 $(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c
 	install -d "$(dir $@)"
-	"$(CLANG)" $(KATRAN_NATIVE_CFLAGS) \
-		-I"$(CURDIR)/katran" -I"$(CURDIR)/katran/katran/lib/linux_includes" \
-		-I/usr/include -I/usr/include/x86_64-linux-gnu \
-		-o "$@" "$<"
+	if [ "$(KATRAN_SAME_SOURCE)" = 1 ]; then \
+		set -e; \
+		stem="$*"; \
+		"$(CLANG)" $(KATRAN_SAME_SOURCE_FRONTEND) -o "$(dir $@)$${stem}.bc" "$<"; \
+		"$(KATRAN_CONTEXT_LOWER)" "$(dir $@)$${stem}.bc" \
+			--public-layout "$(KATRAN_CONTEXT_BUILD)/public-layout.json" \
+			--physical-layout "$(KATRAN_CONTEXT_BUILD)/physical-layout.json" \
+			-o "$(dir $@)$${stem}.lowered.bc"; \
+		"$(LLVM_DIS)" "$(dir $@)$${stem}.lowered.bc" -o "$(dir $@)$${stem}.lowered.ll"; \
+		sed -E 's/"target-features"="[^"]*"//; s/"target-cpu"="[^"]*"//' \
+			"$(dir $@)$${stem}.lowered.ll" > "$(dir $@)$${stem}.notf.ll"; \
+		"$(CLANG)" $(KATRAN_SAME_SOURCE_CODEGEN) -c "$(dir $@)$${stem}.notf.ll" -o "$@"; \
+	else \
+		"$(CLANG)" $(KATRAN_NATIVE_CFLAGS) \
+			-I"$(CURDIR)/katran" -I"$(CURDIR)/katran/katran/lib/linux_includes" \
+			-I/usr/include -I/usr/include/x86_64-linux-gnu \
+			-o "$@" "$<"; \
+	fi
 
 $(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/x86/vmlinux.h native_compat.h
 	install -d "$(dir $@)"
