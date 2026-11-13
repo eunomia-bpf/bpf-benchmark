@@ -45,3 +45,7 @@ OUTPUT ?= $(ROOT)/corpus/results/perf-context-20261113
 .PHONY: otel
 otel: all
 	python3 $(HERE)/build-otel.py --build $(BUILD) --output $(OUTPUT)
+
+$(BUILD)/core-flavor-lower: $(HERE)/core-flavor-lower.cpp
+	install -d $(BUILD)
+	$(CXX) $$($(LLVM_CONFIG) --cxxflags) -std=c++17 -Wall -Wextra -Wno-unused-parameter $< -o $@ -l:libclang-cpp.so.18.1 $$($(LLVM_CONFIG) --ldflags --libs --system-libs) -lbpf
