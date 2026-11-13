@@ -1,0 +1,236 @@
+{
+  "recorded_at": "2026-11-13T04:13:39.213846+00:00",
+  "scope": "P1c source-chain extension using the exact historical kernel gitlink and original table run references",
+  "parent_commit": "9f3855f6f",
+  "recorded_kernel_gitlink": "8e116c79d1043f8e4dadd708f3a1ee5a26d19246",
+  "chain_findings": [
+    "Frozen perf-event handler passes physical bpf_perf_event_data_kern with a regs pointer.",
+    "Frozen verifier ctx conversion dereferences regs before register-field loads.",
+    "Frozen loader emits chunked kinsn calls preserving incoming ctx, with no public-regs projection in the stub.",
+    "Frozen module copies native bytes and ignores prog type when emitting the blob.",
+    "Frozen Tetragon native Make recipe force-includes native_compat.h, whose preserve-access macro is identity; flavored field declarations retain synthetic layout."
+  ],
+  "original_table_reference": "kprog/docs/archive/native_eval_20260529.py CORPUS otel/tetragon stats_on/stats_off",
+  "runs": [
+    {
+      "run": "corpus/results/x86_kvm_corpus_20260529_021623_817446",
+      "app": "otelcol-ebpf-profiler/profiling",
+      "metadata": {
+        "bpf_stats": true,
+        "completed_at": "2026-05-29T02:40:37.647063+00:00",
+        "config": {
+          "enabled_passes": [
+            "noop",
+            "map_inline",
+            "const_prop",
+            "dce",
+            "rotate",
+            "cond_select",
+            "extract",
+            "endian_fusion",
+            "lea",
+            "ccmp",
+            "bulk_memory",
+            "prefetch",
+            "wide_mem",
+            "bounds_check_merge",
+            "skb_load_bytes_spec",
+            "noop",
+            "const_prop",
+            "dce"
+          ]
+        },
+        "details_dir": "details",
+        "generated_at": "2026-05-29T02:40:37.647067+00:00",
+        "last_updated_at": "2026-05-29T02:40:37.647063+00:00",
+        "launcher_boot_id": "b7688aa7-487e-449f-8dbc-38de6c7b8934",
+        "launcher_pid": 1840,
+        "launcher_start_ticks": 6845,
+        "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+        "run_type": "x86_kvm_corpus",
+        "samples": 3,
+        "started_at": "2026-05-29T02:16:23.817446+00:00",
+        "status": "completed",
+        "suite": "corpus",
+        "workload_only": false,
+        "workload_seconds": 180.0
+      },
+      "phase_program_counts": {
+        "baseline": 13,
+        "post_rejit": 13
+      },
+      "retained_files": [
+        "details/apps/otelcol-ebpf-profiler__profiling.json",
+        "details/progress.json",
+        "details/result.json",
+        "metadata.json"
+      ]
+    },
+    {
+      "run": "corpus/results/x86_kvm_corpus_20260529_024714_858694",
+      "app": "otelcol-ebpf-profiler/profiling",
+      "metadata": {
+        "bpf_stats": false,
+        "completed_at": "2026-05-29T03:11:28.531243+00:00",
+        "config": {
+          "enabled_passes": [
+            "noop",
+            "map_inline",
+            "const_prop",
+            "dce",
+            "rotate",
+            "cond_select",
+            "extract",
+            "endian_fusion",
+            "lea",
+            "ccmp",
+            "bulk_memory",
+            "prefetch",
+            "wide_mem",
+            "bounds_check_merge",
+            "skb_load_bytes_spec",
+            "noop",
+            "const_prop",
+            "dce"
+          ]
+        },
+        "details_dir": "details",
+        "generated_at": "2026-05-29T03:11:28.531246+00:00",
+        "last_updated_at": "2026-05-29T03:11:28.531243+00:00",
+        "launcher_boot_id": "0cb961b3-58a7-416b-8333-1c49f14b864f",
+        "launcher_pid": 1833,
+        "launcher_start_ticks": 7449,
+        "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+        "run_type": "x86_kvm_corpus",
+        "samples": 3,
+        "started_at": "2026-05-29T02:47:14.858694+00:00",
+        "status": "completed",
+        "suite": "corpus",
+        "workload_only": false,
+        "workload_seconds": 180.0
+      },
+      "phase_program_counts": {
+        "baseline": 13,
+        "post_rejit": 13
+      },
+      "retained_files": [
+        "details/apps/otelcol-ebpf-profiler__profiling.json",
+        "details/progress.json",
+        "details/result.json",
+        "metadata.json"
+      ]
+    },
+    {
+      "run": "corpus/results/x86_kvm_corpus_20260529_045551_393389",
+      "app": "tetragon/observer",
+      "metadata": {
+        "bpf_stats": true,
+        "completed_at": "2026-05-29T05:20:32.828345+00:00",
+        "config": {
+          "enabled_passes": [
+            "noop",
+            "map_inline",
+            "const_prop",
+            "dce",
+            "rotate",
+            "cond_select",
+            "extract",
+            "endian_fusion",
+            "lea",
+            "ccmp",
+            "bulk_memory",
+            "prefetch",
+            "wide_mem",
+            "bounds_check_merge",
+            "skb_load_bytes_spec",
+            "noop",
+            "const_prop",
+            "dce"
+          ]
+        },
+        "details_dir": "details",
+        "generated_at": "2026-05-29T05:20:32.828348+00:00",
+        "last_updated_at": "2026-05-29T05:20:32.828345+00:00",
+        "launcher_boot_id": "7c4fafca-cf00-4d2a-ae0a-6205943f6761",
+        "launcher_pid": 1836,
+        "launcher_start_ticks": 7597,
+        "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+        "run_type": "x86_kvm_corpus",
+        "samples": 3,
+        "started_at": "2026-05-29T04:55:51.393389+00:00",
+        "status": "completed",
+        "suite": "corpus",
+        "workload_only": false,
+        "workload_seconds": 180.0
+      },
+      "phase_program_counts": {
+        "baseline": 287,
+        "post_rejit": 287
+      },
+      "retained_files": [
+        "details/apps/tetragon__observer.json",
+        "details/progress.json",
+        "details/result.json",
+        "metadata.json"
+      ]
+    },
+    {
+      "run": "corpus/results/x86_kvm_corpus_20260529_052633_700199",
+      "app": "tetragon/observer",
+      "metadata": {
+        "bpf_stats": false,
+        "completed_at": "2026-05-29T05:51:12.980291+00:00",
+        "config": {
+          "enabled_passes": [
+            "noop",
+            "map_inline",
+            "const_prop",
+            "dce",
+            "rotate",
+            "cond_select",
+            "extract",
+            "endian_fusion",
+            "lea",
+            "ccmp",
+            "bulk_memory",
+            "prefetch",
+            "wide_mem",
+            "bounds_check_merge",
+            "skb_load_bytes_spec",
+            "noop",
+            "const_prop",
+            "dce"
+          ]
+        },
+        "details_dir": "details",
+        "generated_at": "2026-05-29T05:51:12.980295+00:00",
+        "last_updated_at": "2026-05-29T05:51:12.980291+00:00",
+        "launcher_boot_id": "19564db8-233a-4e32-b613-3b6d49690428",
+        "launcher_pid": 1833,
+        "launcher_start_ticks": 7338,
+        "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+        "run_type": "x86_kvm_corpus",
+        "samples": 3,
+        "started_at": "2026-05-29T05:26:33.700199+00:00",
+        "status": "completed",
+        "suite": "corpus",
+        "workload_only": false,
+        "workload_seconds": 180.0
+      },
+      "phase_program_counts": {
+        "baseline": 287,
+        "post_rejit": 287
+      },
+      "retained_files": [
+        "details/apps/tetragon__observer.json",
+        "details/progress.json",
+        "details/result.json",
+        "metadata.json"
+      ]
+    }
+  ],
+  "conclusion": "The documented May29 source chain already contains the two ABI defect mechanisms; they are not introduced solely by the later stock-kernel reconstruction.",
+  "limit": "Exact original-run native object content and historical per-arm own-counter behavior remain unmeasured from these retained metadata/counter files. This caveat does not gate new corrected subset measurements.",
+  "paper": "Operator controls paper changes; this audit only updates evidence notes.",
+  "raw": "/workspaces/kprog-raw/perf/20261113-core/history-chain"
+}

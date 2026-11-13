@@ -1,0 +1,2079 @@
+{
+  "run": "corpus/results/x86_kvm_corpus_20261113_041136_182808",
+  "capture": "corpus/results/perf-tetragon-observed2-20261113",
+  "app_status": "ok",
+  "app_error": "",
+  "phases": {
+    "baseline": {
+      "programs": 287,
+      "name_type_counts": {
+        "kprobe:generic_kprobe_": 231,
+        "kprobe:generic_retkpro": 36,
+        "tracepoint:generic_tracepo": 6,
+        "raw_tracepoint:generic_rawtp_f": 1,
+        "raw_tracepoint:generic_rawtp_o": 1,
+        "raw_tracepoint:generic_rawtp_a": 1,
+        "raw_tracepoint:generic_rawtp_s": 1,
+        "raw_tracepoint:generic_rawtp_e": 1,
+        "raw_tracepoint:generic_rawtp_p": 2,
+        "kprobe:event_exit_acct": 1,
+        "kprobe:event_wake_up_n": 1,
+        "tracepoint:execve_send": 1,
+        "tracepoint:event_execve": 1,
+        "tracepoint:execve_rate": 1,
+        "kprobe:tg_kp_bprm_comm": 1,
+        "socket_filter:execve_map_upda": 1
+      }
+    },
+    "post_rejit": {
+      "programs": 202,
+      "name_type_counts": {
+        "kprobe:event_exit_acct": 1,
+        "kprobe:event_wake_up_n": 1,
+        "tracepoint:event_execve": 1,
+        "tracepoint:execve_rate": 1,
+        "tracepoint:execve_send": 1,
+        "kprobe:tg_kp_bprm_comm": 1,
+        "socket_filter:execve_map_upda": 1,
+        "kprobe:generic_kprobe_": 154,
+        "kprobe:generic_retkpro": 28,
+        "tracepoint:generic_tracepo": 6,
+        "raw_tracepoint:generic_rawtp_a": 1,
+        "raw_tracepoint:generic_rawtp_o": 1,
+        "raw_tracepoint:generic_rawtp_f": 1,
+        "raw_tracepoint:generic_rawtp_p": 2,
+        "raw_tracepoint:generic_rawtp_s": 1,
+        "raw_tracepoint:generic_rawtp_e": 1
+      }
+    }
+  },
+  "snapshots": [
+    {
+      "snapshot": "baseline-0001",
+      "time": "2026-11-13T04:11:43.539707+00:00",
+      "programs": 87,
+      "tiny_xlated_programs": 0,
+      "send_failures_map_ids": [
+        18
+      ],
+      "server_address": "127.0.0.1:58629",
+      "pid": "1878",
+      "policy_query_rc": 0,
+      "policy_query_stderr": "",
+      "policies": [
+        {
+          "id": "6",
+          "name": "file-monitoring",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1631072",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "10",
+          "name": "rawtp",
+          "sensors": [
+            "generic_tracepoint"
+          ],
+          "state": "TP_STATE_LOADING"
+        },
+        {
+          "id": "4",
+          "name": "datagram-518",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "5600656",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "328"
+            }
+          }
+        },
+        {
+          "id": "5",
+          "name": "fd-install",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "7",
+          "name": "monitor-kernel-modules",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1993120",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "8",
+          "name": "process-exec-elf-begin",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "9",
+          "name": "raw-syscalls",
+          "sensors": [
+            "generic_tracepoint"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "390352",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "2",
+          "name": "bpf",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1357576",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "824"
+            }
+          }
+        },
+        {
+          "id": "3",
+          "name": "datagram",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "4348792",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "41"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "snapshot": "baseline-0002",
+      "time": "2026-11-13T04:12:34.462667+00:00",
+      "programs": 290,
+      "tiny_xlated_programs": 0,
+      "send_failures_map_ids": [
+        18
+      ],
+      "server_address": "127.0.0.1:58629",
+      "pid": "1878",
+      "policy_query_rc": 0,
+      "policy_query_stderr": "",
+      "policies": [
+        {
+          "id": "13",
+          "name": "syscalls",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "12",
+          "name": "follow-symlink",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "1707"
+            }
+          }
+        },
+        {
+          "id": "14",
+          "name": "accept",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "5238608",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "110479"
+            }
+          }
+        },
+        {
+          "id": "16",
+          "name": "tty",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "4",
+          "name": "datagram-518",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "5600656",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "977720"
+            }
+          }
+        },
+        {
+          "id": "5",
+          "name": "fd-install",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "7",
+          "name": "monitor-kernel-modules",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1993120",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "8",
+          "name": "process-exec-elf-begin",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "11"
+            }
+          }
+        },
+        {
+          "id": "9",
+          "name": "raw-syscalls",
+          "sensors": [
+            "generic_tracepoint"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "390352",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "8531555"
+            }
+          }
+        },
+        {
+          "id": "15",
+          "name": "connect",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1357576",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "774217"
+            }
+          }
+        },
+        {
+          "id": "2",
+          "name": "bpf",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1357576",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "824"
+            }
+          }
+        },
+        {
+          "id": "3",
+          "name": "datagram",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "4348792",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "110469"
+            }
+          }
+        },
+        {
+          "id": "6",
+          "name": "file-monitoring",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1631072",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "20"
+            }
+          }
+        },
+        {
+          "id": "10",
+          "name": "rawtp",
+          "sensors": [
+            "generic_tracepoint"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "521736",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "12"
+            }
+          }
+        },
+        {
+          "id": "11",
+          "name": "security-socket-connect",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        }
+      ]
+    },
+    {
+      "snapshot": "baseline-0003",
+      "time": "2026-11-13T04:12:48.526523+00:00",
+      "programs": 290,
+      "tiny_xlated_programs": 0,
+      "send_failures_map_ids": [
+        18
+      ],
+      "server_address": "127.0.0.1:58629",
+      "pid": "1878",
+      "policy_query_rc": 0,
+      "policy_query_stderr": "",
+      "policies": [
+        {
+          "id": "12",
+          "name": "follow-symlink",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "5985"
+            }
+          }
+        },
+        {
+          "id": "14",
+          "name": "accept",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "5238608",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "220370"
+            }
+          }
+        },
+        {
+          "id": "16",
+          "name": "tty",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "4",
+          "name": "datagram-518",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "5600656",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "1885536"
+            }
+          }
+        },
+        {
+          "id": "5",
+          "name": "fd-install",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "7",
+          "name": "monitor-kernel-modules",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1993120",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "8",
+          "name": "process-exec-elf-begin",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "23"
+            }
+          }
+        },
+        {
+          "id": "9",
+          "name": "raw-syscalls",
+          "sensors": [
+            "generic_tracepoint"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "390352",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "16778653"
+            }
+          }
+        },
+        {
+          "id": "15",
+          "name": "connect",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1357576",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "1443094"
+            }
+          }
+        },
+        {
+          "id": "2",
+          "name": "bpf",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1357576",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "824"
+            }
+          }
+        },
+        {
+          "id": "3",
+          "name": "datagram",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "4348792",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "220298"
+            }
+          }
+        },
+        {
+          "id": "6",
+          "name": "file-monitoring",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1631072",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "110"
+            }
+          }
+        },
+        {
+          "id": "10",
+          "name": "rawtp",
+          "sensors": [
+            "generic_tracepoint"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "521736",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "24"
+            }
+          }
+        },
+        {
+          "id": "11",
+          "name": "security-socket-connect",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "4"
+            }
+          }
+        },
+        {
+          "id": "13",
+          "name": "syscalls",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        }
+      ],
+      "events_query_rc": 124,
+      "events_query_stderr": "",
+      "sampled_events": []
+    },
+    {
+      "snapshot": "baseline-0004",
+      "time": "2026-11-13T04:13:04.403447+00:00",
+      "programs": 290,
+      "tiny_xlated_programs": 0,
+      "send_failures_map_ids": [
+        18
+      ],
+      "server_address": "127.0.0.1:58629",
+      "pid": "1878",
+      "policy_query_rc": 0,
+      "policy_query_stderr": "",
+      "policies": [
+        {
+          "id": "14",
+          "name": "accept",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "5238608",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "282159"
+            }
+          }
+        },
+        {
+          "id": "16",
+          "name": "tty",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "4",
+          "name": "datagram-518",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "5600656",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "3059352"
+            }
+          }
+        },
+        {
+          "id": "5",
+          "name": "fd-install",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "7",
+          "name": "monitor-kernel-modules",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1993120",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "8",
+          "name": "process-exec-elf-begin",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "36"
+            }
+          }
+        },
+        {
+          "id": "9",
+          "name": "raw-syscalls",
+          "sensors": [
+            "generic_tracepoint"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "390352",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "27260437"
+            }
+          }
+        },
+        {
+          "id": "15",
+          "name": "connect",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1357576",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "2399658"
+            }
+          }
+        },
+        {
+          "id": "2",
+          "name": "bpf",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1357576",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "824"
+            }
+          }
+        },
+        {
+          "id": "3",
+          "name": "datagram",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "4348792",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "282038"
+            }
+          }
+        },
+        {
+          "id": "6",
+          "name": "file-monitoring",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1631072",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "210"
+            }
+          }
+        },
+        {
+          "id": "10",
+          "name": "rawtp",
+          "sensors": [
+            "generic_tracepoint"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "521736",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "34"
+            }
+          }
+        },
+        {
+          "id": "11",
+          "name": "security-socket-connect",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "7"
+            }
+          }
+        },
+        {
+          "id": "13",
+          "name": "syscalls",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "12",
+          "name": "follow-symlink",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "8305"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "snapshot": "baseline-0005",
+      "time": "2026-11-13T04:13:20.524068+00:00",
+      "programs": 290,
+      "tiny_xlated_programs": 0,
+      "send_failures_map_ids": [
+        18
+      ],
+      "server_address": "127.0.0.1:58629",
+      "pid": "1878",
+      "policy_query_rc": 0,
+      "policy_query_stderr": "",
+      "policies": [
+        {
+          "id": "10",
+          "name": "rawtp",
+          "sensors": [
+            "generic_tracepoint"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "521736",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "49"
+            }
+          }
+        },
+        {
+          "id": "11",
+          "name": "security-socket-connect",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "10"
+            }
+          }
+        },
+        {
+          "id": "13",
+          "name": "syscalls",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "12",
+          "name": "follow-symlink",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "10323"
+            }
+          }
+        },
+        {
+          "id": "14",
+          "name": "accept",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "5238608",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "336676"
+            }
+          }
+        },
+        {
+          "id": "16",
+          "name": "tty",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "4",
+          "name": "datagram-518",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "5600656",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "3974392"
+            }
+          }
+        },
+        {
+          "id": "5",
+          "name": "fd-install",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "7",
+          "name": "monitor-kernel-modules",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1993120",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "8",
+          "name": "process-exec-elf-begin",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "52"
+            }
+          }
+        },
+        {
+          "id": "9",
+          "name": "raw-syscalls",
+          "sensors": [
+            "generic_tracepoint"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "390352",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "36761044"
+            }
+          }
+        },
+        {
+          "id": "15",
+          "name": "connect",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1357576",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "3128570"
+            }
+          }
+        },
+        {
+          "id": "2",
+          "name": "bpf",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1357576",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "825"
+            }
+          }
+        },
+        {
+          "id": "3",
+          "name": "datagram",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "4348792",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "336533"
+            }
+          }
+        },
+        {
+          "id": "6",
+          "name": "file-monitoring",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1631072",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "286"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "snapshot": "baseline-0006",
+      "time": "2026-11-13T04:13:35.435802+00:00",
+      "programs": 290,
+      "tiny_xlated_programs": 0,
+      "send_failures_map_ids": [
+        18
+      ],
+      "server_address": "127.0.0.1:58629",
+      "pid": "1878",
+      "policy_query_rc": 0,
+      "policy_query_stderr": "",
+      "policies": [
+        {
+          "id": "4",
+          "name": "datagram-518",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "5600656",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "4954348"
+            }
+          }
+        },
+        {
+          "id": "5",
+          "name": "fd-install",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "7",
+          "name": "monitor-kernel-modules",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1993120",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "8",
+          "name": "process-exec-elf-begin",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "73"
+            }
+          }
+        },
+        {
+          "id": "9",
+          "name": "raw-syscalls",
+          "sensors": [
+            "generic_tracepoint"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "390352",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "45812881"
+            }
+          }
+        },
+        {
+          "id": "15",
+          "name": "connect",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1357576",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "3926102"
+            }
+          }
+        },
+        {
+          "id": "2",
+          "name": "bpf",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1357576",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "825"
+            }
+          }
+        },
+        {
+          "id": "3",
+          "name": "datagram",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "4348792",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "403282"
+            }
+          }
+        },
+        {
+          "id": "6",
+          "name": "file-monitoring",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1631072",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "386"
+            }
+          }
+        },
+        {
+          "id": "10",
+          "name": "rawtp",
+          "sensors": [
+            "generic_tracepoint"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "521736",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "70"
+            }
+          }
+        },
+        {
+          "id": "11",
+          "name": "security-socket-connect",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "13"
+            }
+          }
+        },
+        {
+          "id": "13",
+          "name": "syscalls",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "12",
+          "name": "follow-symlink",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "12977"
+            }
+          }
+        },
+        {
+          "id": "14",
+          "name": "accept",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "5238608",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "403455"
+            }
+          }
+        },
+        {
+          "id": "16",
+          "name": "tty",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        }
+      ],
+      "events_query_rc": 124,
+      "events_query_stderr": "",
+      "sampled_events": []
+    },
+    {
+      "snapshot": "baseline-0007",
+      "time": "2026-11-13T04:13:50.739449+00:00",
+      "programs": 115,
+      "tiny_xlated_programs": 0,
+      "send_failures_map_ids": [
+        18
+      ],
+      "server_address": "127.0.0.1:58629",
+      "pid": "1878",
+      "policy_query_rc": 1,
+      "policy_query_stderr": "Error: failed to list tracing policies: max retries exhausted: failed after 2 attempts: rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:58629: connect: connection refused\"\n"
+    },
+    {
+      "snapshot": "baseline-0008",
+      "time": "2026-11-13T04:14:00.843860+00:00",
+      "programs": 29,
+      "tiny_xlated_programs": 12,
+      "send_failures_map_ids": [
+        3566
+      ],
+      "server_address": "127.0.0.1:39903",
+      "pid": "5119",
+      "policy_query_rc": 0,
+      "policy_query_stderr": "",
+      "policies": [
+        {
+          "id": "2",
+          "name": "bpf",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "state": "TP_STATE_LOADING",
+          "kernel_memory_bytes": "523000"
+        }
+      ]
+    },
+    {
+      "snapshot": "baseline-0009",
+      "time": "2026-11-13T04:14:10.081172+00:00",
+      "programs": 120,
+      "tiny_xlated_programs": 58,
+      "send_failures_map_ids": [
+        3566
+      ],
+      "server_address": "127.0.0.1:39903",
+      "pid": "5119",
+      "policy_query_rc": 0,
+      "policy_query_stderr": "",
+      "policies": [
+        {
+          "id": "2",
+          "name": "bpf",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1357576",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "552"
+            }
+          }
+        },
+        {
+          "id": "3",
+          "name": "datagram",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "4348792",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "4",
+          "name": "datagram-518",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "state": "TP_STATE_LOADING",
+          "kernel_memory_bytes": "3351200"
+        }
+      ],
+      "events_query_rc": 124,
+      "events_query_stderr": "",
+      "sampled_events": []
+    },
+    {
+      "snapshot": "post_rejit-0010",
+      "time": "2026-11-13T04:14:20.446431+00:00",
+      "programs": 190,
+      "tiny_xlated_programs": 93,
+      "send_failures_map_ids": [
+        3566
+      ],
+      "server_address": "127.0.0.1:39903",
+      "pid": "5119",
+      "policy_query_rc": 0,
+      "policy_query_stderr": "",
+      "policies": [
+        {
+          "id": "4",
+          "name": "datagram-518",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "5600656",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "5",
+          "name": "fd-install",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "6",
+          "name": "file-monitoring",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1631072",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "7",
+          "name": "monitor-kernel-modules",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "state": "TP_STATE_LOADING",
+          "kernel_memory_bytes": "686016"
+        },
+        {
+          "id": "2",
+          "name": "bpf",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1357576",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "552"
+            }
+          }
+        },
+        {
+          "id": "3",
+          "name": "datagram",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "4348792",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        }
+      ]
+    },
+    {
+      "snapshot": "post_rejit-0011",
+      "time": "2026-11-13T04:15:41.295836+00:00",
+      "programs": 367,
+      "tiny_xlated_programs": 181,
+      "send_failures_map_ids": [
+        3566
+      ],
+      "server_address": "127.0.0.1:39903",
+      "pid": "5119",
+      "policy_query_rc": 0,
+      "policy_query_stderr": "",
+      "policies": [
+        {
+          "id": "3",
+          "name": "datagram",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "4348792",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "4",
+          "name": "datagram-518",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "5600656",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "5",
+          "name": "fd-install",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "7",
+          "name": "monitor-kernel-modules",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1993120",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "2",
+          "name": "bpf",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1357576",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "552"
+            }
+          }
+        },
+        {
+          "id": "6",
+          "name": "file-monitoring",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1631072",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "8",
+          "name": "process-exec-elf-begin",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "9",
+          "name": "raw-syscalls",
+          "sensors": [
+            "generic_tracepoint"
+          ],
+          "state": "TP_STATE_LOADING"
+        }
+      ]
+    },
+    {
+      "snapshot": "post_rejit-0012",
+      "time": "2026-11-13T04:15:55.788979+00:00",
+      "programs": 381,
+      "tiny_xlated_programs": 188,
+      "send_failures_map_ids": [
+        3566
+      ],
+      "server_address": "127.0.0.1:39903",
+      "pid": "5119",
+      "policy_query_rc": 0,
+      "policy_query_stderr": "",
+      "policies": [
+        {
+          "id": "3",
+          "name": "datagram",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "4348792",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "4",
+          "name": "datagram-518",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "5600656",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "5",
+          "name": "fd-install",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "7",
+          "name": "monitor-kernel-modules",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1993120",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "10",
+          "name": "rawtp",
+          "sensors": [
+            "generic_tracepoint"
+          ],
+          "state": "TP_STATE_LOADING"
+        },
+        {
+          "id": "2",
+          "name": "bpf",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1357576",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {
+              "post": "552"
+            }
+          }
+        },
+        {
+          "id": "6",
+          "name": "file-monitoring",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "1631072",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "8",
+          "name": "process-exec-elf-begin",
+          "sensors": [
+            "generic_kprobe"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "523000",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        },
+        {
+          "id": "9",
+          "name": "raw-syscalls",
+          "sensors": [
+            "generic_tracepoint"
+          ],
+          "enabled": true,
+          "state": "TP_STATE_ENABLED",
+          "kernel_memory_bytes": "390352",
+          "mode": "TP_MODE_MONITOR_ONLY",
+          "stats": {
+            "action_counters": {}
+          }
+        }
+      ],
+      "events_query_rc": 124,
+      "events_query_stderr": "",
+      "sampled_events": []
+    },
+    {
+      "snapshot": "post_rejit-0013",
+      "time": "2026-11-13T04:16:11.296796+00:00",
+      "programs": 399,
+      "tiny_xlated_programs": 197,
+      "send_failures_map_ids": [
+        3566
+      ],
+      "server_address": "127.0.0.1:39903",
+      "pid": "5119",
+      "policy_query_rc": 1,
+      "policy_query_stderr": "Error: failed to list tracing policies: max retries exhausted: failed after 2 attempts: rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:39903: connect: connection refused\"\n"
+    },
+    {
+      "snapshot": "post_rejit-0014",
+      "time": "2026-11-13T04:16:24.867866+00:00",
+      "programs": 433,
+      "tiny_xlated_programs": 214,
+      "send_failures_map_ids": [
+        3566
+      ],
+      "server_address": "127.0.0.1:39903",
+      "pid": "5119",
+      "policy_query_rc": 1,
+      "policy_query_stderr": "Error: failed to list tracing policies: max retries exhausted: failed after 2 attempts: rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:39903: connect: connection refused\"\n"
+    },
+    {
+      "snapshot": "post_rejit-0015",
+      "time": "2026-11-13T04:16:35.316809+00:00",
+      "programs": 445,
+      "tiny_xlated_programs": 220,
+      "send_failures_map_ids": [
+        3566
+      ],
+      "server_address": "127.0.0.1:39903",
+      "pid": "5119",
+      "policy_query_rc": 1,
+      "policy_query_stderr": "Error: failed to list tracing policies: max retries exhausted: failed after 2 attempts: rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:39903: connect: connection refused\"\n",
+      "events_query_rc": 124,
+      "events_query_stderr": "Error: failed to call GetEvents: rpc error: code = Canceled desc = context canceled\n",
+      "sampled_events": []
+    },
+    {
+      "snapshot": "post_rejit-0016",
+      "time": "2026-11-13T04:16:46.793510+00:00",
+      "programs": 459,
+      "tiny_xlated_programs": 227,
+      "send_failures_map_ids": [
+        3566
+      ],
+      "server_address": "127.0.0.1:39903",
+      "pid": "5119",
+      "policy_query_rc": 1,
+      "policy_query_stderr": "Error: failed to list tracing policies: max retries exhausted: failed after 2 attempts: rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:39903: connect: connection refused\"\n"
+    },
+    {
+      "snapshot": "post_rejit-0017",
+      "time": "2026-11-13T04:16:57.378602+00:00",
+      "programs": 473,
+      "tiny_xlated_programs": 234,
+      "send_failures_map_ids": [
+        3566
+      ],
+      "server_address": "127.0.0.1:39903",
+      "pid": "5119",
+      "policy_query_rc": 1,
+      "policy_query_stderr": "Error: failed to list tracing policies: max retries exhausted: failed after 2 attempts: rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:39903: connect: connection refused\"\n"
+    },
+    {
+      "snapshot": "post_rejit-0018",
+      "time": "2026-11-13T04:17:07.960249+00:00",
+      "programs": 487,
+      "tiny_xlated_programs": 241,
+      "send_failures_map_ids": [
+        3566
+      ],
+      "server_address": "127.0.0.1:39903",
+      "pid": "5119",
+      "policy_query_rc": 1,
+      "policy_query_stderr": "Error: failed to list tracing policies: max retries exhausted: failed after 2 attempts: rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:39903: connect: connection refused\"\n",
+      "events_query_rc": 124,
+      "events_query_stderr": "Error: failed to call GetEvents: rpc error: code = Canceled desc = context canceled\n",
+      "sampled_events": []
+    },
+    {
+      "snapshot": "post_rejit-0019",
+      "time": "2026-11-13T04:17:19.361369+00:00",
+      "programs": 501,
+      "tiny_xlated_programs": 248,
+      "send_failures_map_ids": [
+        3566
+      ],
+      "server_address": "127.0.0.1:39903",
+      "pid": "5119",
+      "policy_query_rc": 1,
+      "policy_query_stderr": "Error: failed to list tracing policies: max retries exhausted: failed after 2 attempts: rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:39903: connect: connection refused\"\n"
+    },
+    {
+      "snapshot": "post_rejit-0020",
+      "time": "2026-11-13T04:17:29.593702+00:00",
+      "programs": 513,
+      "tiny_xlated_programs": 254,
+      "send_failures_map_ids": [
+        3566
+      ],
+      "server_address": "127.0.0.1:39903",
+      "pid": "5119",
+      "policy_query_rc": 1,
+      "policy_query_stderr": "Error: failed to list tracing policies: max retries exhausted: failed after 2 attempts: rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:39903: connect: connection refused\"\n"
+    },
+    {
+      "snapshot": "post_rejit-0021",
+      "time": "2026-11-13T04:17:40.125275+00:00",
+      "programs": 527,
+      "tiny_xlated_programs": 261,
+      "send_failures_map_ids": [
+        3566
+      ],
+      "server_address": "127.0.0.1:39903",
+      "pid": "5119",
+      "policy_query_rc": 1,
+      "policy_query_stderr": "Error: failed to list tracing policies: max retries exhausted: failed after 2 attempts: rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:39903: connect: connection refused\"\n",
+      "events_query_rc": 124,
+      "events_query_stderr": "Error: failed to call GetEvents: rpc error: code = Canceled desc = context canceled\n",
+      "sampled_events": []
+    },
+    {
+      "snapshot": "post_rejit-0022",
+      "time": "2026-11-13T04:17:51.742920+00:00",
+      "programs": 539,
+      "tiny_xlated_programs": 267,
+      "send_failures_map_ids": [
+        3566
+      ],
+      "server_address": "127.0.0.1:39903",
+      "pid": "5119",
+      "policy_query_rc": 1,
+      "policy_query_stderr": "Error: failed to list tracing policies: max retries exhausted: failed after 2 attempts: rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:39903: connect: connection refused\"\n"
+    },
+    {
+      "snapshot": "post_rejit-0023",
+      "time": "2026-11-13T04:18:02.059048+00:00",
+      "programs": 551,
+      "tiny_xlated_programs": 273,
+      "send_failures_map_ids": [
+        3566
+      ],
+      "server_address": "127.0.0.1:39903",
+      "pid": "5119",
+      "policy_query_rc": 1,
+      "policy_query_stderr": "Error: failed to list tracing policies: max retries exhausted: failed after 2 attempts: rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:39903: connect: connection refused\"\n"
+    },
+    {
+      "snapshot": "post_rejit-0024",
+      "time": "2026-11-13T04:18:12.281294+00:00",
+      "programs": 563,
+      "tiny_xlated_programs": 279,
+      "send_failures_map_ids": [
+        3566
+      ],
+      "server_address": "127.0.0.1:39903",
+      "pid": "5119",
+      "policy_query_rc": 1,
+      "policy_query_stderr": "Error: failed to list tracing policies: max retries exhausted: failed after 2 attempts: rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:39903: connect: connection refused\"\n",
+      "events_query_rc": 124,
+      "events_query_stderr": "Error: failed to call GetEvents: rpc error: code = Canceled desc = context canceled\n",
+      "sampled_events": []
+    },
+    {
+      "snapshot": "post_rejit-0025",
+      "time": "2026-11-13T04:18:23.876666+00:00",
+      "programs": 577,
+      "tiny_xlated_programs": 286,
+      "send_failures_map_ids": [
+        3566
+      ],
+      "server_address": "127.0.0.1:39903",
+      "pid": "5119",
+      "policy_query_rc": 1,
+      "policy_query_stderr": "Error: failed to list tracing policies: max retries exhausted: failed after 2 attempts: rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:39903: connect: connection refused\"\n"
+    },
+    {
+      "snapshot": "post_rejit-0026",
+      "time": "2026-11-13T04:18:34.236782+00:00",
+      "programs": 324,
+      "tiny_xlated_programs": 33,
+      "send_failures_map_ids": [
+        3566
+      ],
+      "server_address": "127.0.0.1:39903",
+      "pid": "5119",
+      "policy_query_rc": 1,
+      "policy_query_stderr": "Error: failed to list tracing policies: max retries exhausted: failed after 2 attempts: rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:39903: connect: connection refused\"\n"
+    }
+  ]
+}

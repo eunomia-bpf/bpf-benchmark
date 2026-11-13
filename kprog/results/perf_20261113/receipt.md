@@ -175,3 +175,67 @@ archive. A default-off observer extension now builds upstream `tetra` and can
 query loaded-policy state and sample successful gRPC event payloads. The
 legacy send-failure analysis note now accurately describes native counter
 writers; its existing raw fixture still decodes successfully.
+
+## Optimized Tetragon startup and policy observation
+
+`tetragon-observed-runtime.json`, `tetragon-observed-inventory.json`,
+`tetragon-observed-loads.json` and `tetragon-observed-runtime.tar.gz` retain
+run `x86_kvm_corpus_20261113_041136_182808`. It completes Make/application
+0/ok, with zero workload errors and zero stub records. This is one 60-second
+sample with stats on, four vCPUs/32 GiB on CPUs16–19, host address space
+bounded at48 GiB. The selected linker was rebuilt with Cargo dev optimization3
+and debug0; all three focused map-dispatch tests pass. Shared release, image,
+base, default objects and frozen runner stay unchanged.
+
+Raw throughput is2.106x native/eBPF and aggregate BPF cost705.6→140.1ns/inv.
+The startup imbalance persists: the result inventories287 baseline programs
+versus202 native programs. Mature baseline queries report all15 enabled
+policies, while native has9 policies with rawtp still LOADING at04:15:55.
+The baseline raw-syscalls action counter grows; the native snapshot is still
+empty. These measurements remain unequal-work startup observations.
+
+The existing shim log contains311 completed loads in each arm and no unmatched
+requests. Pairing by PID/TID yields308 successful baseline loads with a median
+37.19ms and a duration sum32.74s. There are288 native replacements with median
+815.34ms and sum256.48s; they finish at shim monotonic498.006927s. These times
+cover the whole intercepted load, including original loading and replacement;
+they do not isolate linker cost. Lane verified owns the load-time investigation.
+The offline parser's regression covers interleaved threads, failed loads and
+unfinished requests. Existing logs and all288 replacement records are retained.
+
+Eight one-second upstream tetra GetEvents subscriptions return empty output
+with timeout124 on both arms. This is a short delivered-event sample, not an
+emission total. Policy query results, action counters, errors and process/map
+generations are retained without interpreting connection refusals during
+shutdown as measurement-time failures. PID5119/map3566 already appears in
+baseline-labelled restart snapshots.
+
+An earlier attempt panicked in early boot before application execution. Its
+console and exact own-QEMU stop record remain in the archive. Replacing the
+expanded guest command with a short invocation reading an explicit plan file
+boots successfully. Two focused tests cover long commands, exact arguments,
+workload exit status and observer cleanup; the precise boot overflow cause is
+not independently established. The successful observer exits by its controller's
+SIGTERM after the workload completes; collected snapshots are present.
+
+## Exact historical source chain and table runs, P1c
+
+`may29-chain-audit.json` and its archive extend the earlier source audit using
+the frozen parent's actual kernel gitlink
+`8e116c79d1043f8e4dadd708f3a1ee5a26d19246`. That kernel's PERF_EVENT handler
+passes a physical context containing a regs pointer; its verifier dereferences
+the pointer before register-field reads. The old chunked loader stub preserves
+the incoming context, and the old module copies native bytes without adapting
+the context by program type. The frozen Tetragon native recipe force-includes
+the compatibility header that makes preserve-access an identity operation.
+Both mechanisms therefore predate the current stock-kernel reconstruction.
+
+The archive includes the exact four runs named by the original table script:
+OTel stats on/off021623_817446/024714_858694 and Tetragon
+045551_393389/052633_700199, all dated2026-05-29. Their metadata and raw counters
+are preserved. The exact objects used by those original runs and their own
+unwinding/emission counters remain unestablished. The retained later reference
+objects and source chain support the defect mechanism, not a claim that these
+historical raw counters prove zero work. P1c remains open for the exact artifact
+link; this does not delay corrected measurements. Paper decisions stay with
+the operator.

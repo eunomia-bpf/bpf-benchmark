@@ -1,0 +1,110 @@
+{
+  "recorded_at": "2026-11-13T04:27:55Z",
+  "scope": "P1 Tetragon corrected CORE/runtime map dispatch plus optimized selected linker, startup and policy diagnostic",
+  "kernel": "74d1097af561",
+  "image": "bpf-benchmark/kprog:current",
+  "image_id": "d756bf5919e9",
+  "run": "corpus/results/x86_kvm_corpus_20261113_041136_182808",
+  "capture": "corpus/results/perf-tetragon-observed2-20261113",
+  "make_exit": 0,
+  "app_status": "ok",
+  "workload_errors": 0,
+  "stub_records": 0,
+  "contract": {
+    "cpus": "16-19",
+    "vcpus": 4,
+    "memory_gib": 32,
+    "host_address_space_limit_gib": 48,
+    "samples": 1,
+    "duration_seconds": 60,
+    "stats": 1
+  },
+  "command": "taskset -c 16-19 make -f /workspaces/repository/kprog/perf/one-image/Makefile corpus APPS=tetragon/observer SAMPLES=1 WORKLOAD_DURATION=60 CPUS=16-19 VM_CPUS=4 VM_MEM=32G STATE=/var/tmp/kprog-tmp/perf LOGS=/workspaces/kprog-raw/perf/20261113-tetragon-observe/run2 BPFREJIT_CORPUS_BPF_STATS=1 NATIVE_MANIFEST=/workspaces/repository/corpus/results/perf-core-20261113/manifest.json VNG_FLAGS=--verbose",
+  "observer_environment": {
+    "EQCODEX_OUT": "/workspaces/repository/corpus/results/perf-tetragon-observed2-20261113",
+    "EQCODEX_TETRA": "/workspaces/repository/corpus/results/perf-observers-20261113/tetra",
+    "EQCODEX_NATIVE_LINK_BINARY": "/workspaces/repository/corpus/results/verified-linker-runtime-maps-20261113/native-link"
+  },
+  "selected_linker": {
+    "source": "49f464cc6 plus existing tail-count fix b433c23be; --runtime-map-lookups on, default tail-count relocations off",
+    "build_profile": "CARGO_PROFILE_DEV_OPT_LEVEL=3 CARGO_PROFILE_DEV_DEBUG=0",
+    "make_exit": 0,
+    "focused_tests_passed": 3,
+    "test_profile": "CARGO_PROFILE_TEST_OPT_LEVEL=3 CARGO_PROFILE_TEST_DEBUG=0",
+    "shared_release_unchanged": true
+  },
+  "artifact_hashes": {
+    "corpus/results/verified-linker-runtime-maps-20261113/native-link.real": "10a4b7dadc0f4f4c89d04c60f9f448b079dcdb38568e065f959705ac5eda6322",
+    "corpus/results/verified-linker-runtime-maps-20261113/native-link": "f39d807c483375ed71a44962d31a0bf6ad32a4d316a4dc266c9d6607031640fb",
+    "corpus/results/perf-observers-20261113/tetra": "41f3de64cfc4475d50cf1c8227712b62e77ee4bafeb20921e097382c79579fe9"
+  },
+  "analysis": {
+    "inventory": "tetragon-observed-inventory.json",
+    "loads": "tetragon-observed-loads.json",
+    "load_summary": [
+      {
+        "log": "corpus/results/x86_kvm_corpus_20261113_041136_182808/details/shim-logs/tetragon__observer.baseline.log",
+        "completed": 311,
+        "unmatched": 0,
+        "selected_successful_loads": 308,
+        "native_replacements": 0,
+        "median_seconds": 0.03718849999999918,
+        "sum_seconds": 32.74279800000002,
+        "first_start_seconds": 88.572255,
+        "last_end_seconds": 137.926667
+      },
+      {
+        "log": "corpus/results/x86_kvm_corpus_20261113_041136_182808/details/shim-logs/tetragon__observer.post_rejit.log",
+        "completed": 311,
+        "unmatched": 0,
+        "selected_successful_loads": 288,
+        "native_replacements": 288,
+        "median_seconds": 0.8153414999999882,
+        "sum_seconds": 256.47853299999963,
+        "first_start_seconds": 229.667848,
+        "last_end_seconds": 498.006927
+      }
+    ],
+    "throughput_native_over_ebpf_rounded": 2.106,
+    "bpf_ns_per_invocation": {
+      "ebpf": 705.6,
+      "native": 140.1
+    },
+    "phase_programs": {
+      "baseline": 287,
+      "post_rejit": 202
+    }
+  },
+  "interpretation": "Retained unequal-work startup measurement. Native policies/programs are still loading during measurement; compiler optimization did not remove the imbalance.",
+  "observations": [
+    "Baseline mature policy queries return15enabled policies. Native query at04:15:55 returns9policies with rawtp LOADING; raw-syscalls post action counter empty, baseline grows.",
+    "288 native replacements finish by shim monotonic498.006927s. Per-thread matched load duration totals256.478533s, median0.8153415s, versus308successful baseline loads total32.742798s/median0.0371885s. Durations include the entire intercepted load and do not isolate linker cost.",
+    "Eight1s GetEvents subscriptions across both arms yield no payloads (timeout124). This does not establish zero emissions. Later policy query connection-refused observations overlap shutdown.",
+    "PID5119/map3566 appears in baseline-labelled snapshots during restart; phase labels alone cannot identify an arm."
+  ],
+  "observer_changes": {
+    "commits": [
+      "072f10a1a",
+      "57b80e470",
+      "c470a4bcd",
+      "c724a34bd"
+    ],
+    "guest_control_tests": 2,
+    "load_timeline_test": 1,
+    "analysis_commits": [
+      "63f89e2d1",
+      "6ac73dcc4"
+    ]
+  },
+  "prior_boot_failure": {
+    "raw": "/workspaces/kprog-raw/perf/20261113-tetragon-observe/run",
+    "own_qemu": 1161505,
+    "stop_signal": "SIGTERM",
+    "reason": "Fortify panic before guest command; expanded exec length suspected. Short guest plan retry boots successfully, exact overflow cause not independently proven."
+  },
+  "raw": [
+    "/workspaces/kprog-raw/perf/20261113-tetragon-observe",
+    "/workspaces/kprog-raw/perf/20261113-optimized-linker"
+  ],
+  "next": "Lane verified investigates generic native load time; P1 remains open, corrected floor runs follow behavior fixes. Frozen runner/image/default objects untouched."
+}
