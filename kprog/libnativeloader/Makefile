@@ -24,15 +24,16 @@ helper-context-kernel-input:
 # Consume the prepared shared module; never rebuild it on a reader's startup.
 helper-context-kernel-kvm:
 	install -d "$(HELPER_KERNEL_OUTPUT)"
+	install -m 0755 "$(HELPER_BUILD)/helper-kernel" "$(HELPER_KERNEL_OUTPUT)/helper-kernel"
 	taskset -c 13 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
-		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(HELPER_BUILD)" --rwdir "$(HELPER_KERNEL_OUTPUT)" --overlay-rwdir /tmp \
+		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(HELPER_KERNEL_OUTPUT)" --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -C kprog/libnativeloader guest-helper-context-kernel HELPER_BUILD=$(HELPER_BUILD) HELPER_KERNEL_OUTPUT=$(HELPER_KERNEL_OUTPUT)'
+		--exec 'make -C kprog/libnativeloader guest-helper-context-kernel HELPER_KERNEL_OUTPUT=$(HELPER_KERNEL_OUTPUT)'
 
 guest-helper-context-kernel:
 	mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
-	"$(HELPER_BUILD)/helper-kernel" "$(HELPER_KERNEL_OUTPUT)"
+	"$(HELPER_KERNEL_OUTPUT)/helper-kernel" "$(HELPER_KERNEL_OUTPUT)"
 
 .PHONY: helper-context-check
 helper-context-check:

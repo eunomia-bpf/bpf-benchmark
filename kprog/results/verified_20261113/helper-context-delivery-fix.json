@@ -1,0 +1,14 @@
+{
+  "scope": "D23 functional test executable delivery into its KVM guest",
+  "failure": "Guest shell status127 before any program load/helper query; host binary exists",
+  "source_evidence": "/opt/virtme-ng/lib/python3.12/site-packages/virtme/guest/virtme-init:121 mounts tmpfs on /var/tmp",
+  "change": "Install the exact prepared ELF into persistent per-run output directory and execute from that existing guest mount",
+  "runtime_fallback": false,
+  "source_or_canonical_loader_rebuild": false,
+  "kernel_module_or_image_rebuild": false,
+  "validation": "Guest Make dry-run now consumes the persistent output artifact and exposes no /var/tmp build cache",
+  "dry_run": "/workspaces/kprog-raw/verified/20261113-helper-kernel-retry1-dry-run.log",
+  "retry_output": "/workspaces/kprog-raw/verified/20261113-helper-context/kernel-retry1",
+  "actual_retry_queries_at_recording": 0,
+  "archive": "helper-context-delivery-fix.tar.gz"
+}

@@ -125,6 +125,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED D23 guest artifact路径修复（2026-11-13）** 已安装virtme-init:121会在/var/tmp挂tmpfs，不能从该guest路径执行host build cache；component Make现在将同一个已编译ELF安装到persistent per-run输出目录，并从已有rw输出mount执行，取消cache目录映射。dry-run通过，原ELF SHA和virtme源码片段归档 `helper-context-delivery-fix*`；不重编译源代码/canonical loader/module/image，不做runtime fallback。retry使用kernel-retry1独立输出，实际helper结果后续收集。
+
 - **VERIFIED u32实际stock确认与D23首轮（2026-11-13）** unit1276775在07:43:15→07:43:25完成Make0：6次真实stock loads，copy-before因map vs66/off65537/size1拒绝，copy-after、signed-after和partial0/8/16共5候选接受，确认通用mov32保留copy bounds且旧signed/partial修复仍通过；native execution0，应用class复测尚待执行。完整log/观测归档 `word32-copy-stock-results*`，raw `20261113-word32-copy/immediate-control/`。D23 unit1276776在07:43:25→07:43:34 Make2，module insmod成功，但guest执行/var/tmp路径的helper-kernel报not found/status127，actual program loads/query均0，不是helper target拒绝；完整失败归档 `helper-context-kernel-first-attempt*`。准备将同一已编译ELF放入persistent per-run输出mount后重试；原数据保留。
 
 - **VERIFIED 小型功能guest立即调度（2026-11-13）** advisor06:19的上限是3台census guest，并非所有小型功能guest；CPU13空闲、MemAvailable77396740kB（约74GiB），因此终止仅自己的旧排队tail1270477（parent1270474/outer1270473，尚无started marker），保留全部原queue数据。新stock unit outer1276775先运行，D23 unit outer1276776等待该精确PID；均2vCPU2G/AS8GiB、CPU13/shared image reader，最多1台小型unit与3台census并行。stock输出 `20261113-word32-copy/immediate-{job,control}/`，D23输出 `20261113-helper-context/{kernel-job,kernel}/`，receipt `functional-kernel-launch.json`。不重建base module/loader/image，编译的helper-kernel payload在实际退出前保持不变；下一turn收集结果，本turn不轮询。
