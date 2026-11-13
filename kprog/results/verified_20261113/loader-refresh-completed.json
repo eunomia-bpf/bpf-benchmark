@@ -1,0 +1,35 @@
+{
+  "writer_outer_pid": 1393340,
+  "make_exit": 0,
+  "finished": "2026-11-13T10:35:59Z",
+  "current_image": "sha256:73985a057359241030b7f1181a64e6253fe81e567813e90e78a19e208d26d9a2",
+  "image_tar_config": "blobs/sha256/0761421c7fcf07dbb4cab6a8154dfcce12b5bb9882bb4a17806ed1555b40c176",
+  "superseded": "sha256:7f915aea1f2276fb9509027cb7e4fc2dd6e4182740312e002ebcc14dbc81c923",
+  "cleanup": "already-absent",
+  "core_config_modules_unchanged": true,
+  "before_after_hashes": [
+    "2667103e0fbb3fc54467f59bb15ef0cdc128e54ca7c30d7718e66d0199c4e1ec  /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage",
+    "f3743c05960fc700e29f31e0035a23cdd4b2500d5e6e7542984d5f6fba75babe  /workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+    "0b75fe318542db6698950f2b2ce5163e867118317fe61c538c4e7de7a1357163  /workspaces/.agent-state/kprog-ck/build-x86/.config",
+    "5a9f0b3b0a6a1f633a9f4227dd7bbfa0580bdfdc557a788712079e9c14a27fa7  /workspaces/repository/kinsn/module/x86/build/bpf_x86_native_lab.ko",
+    "c1338358c52b8962dbb2383a66b47755eb7f75920288c43fea13e86743b65db3  /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko"
+  ],
+  "canonical_hashes": [
+    "4ff4a05172a4d1ed40bc7d37c7f0dafe0963c8ada80282d83464399dc2b7746b  /workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.so",
+    "2a364bf1c60e37e8d737652c3cef148fa800e1a3768e1613c39b6a722bb2cf7e  /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+    "5a9f0b3b0a6a1f633a9f4227dd7bbfa0580bdfdc557a788712079e9c14a27fa7  /workspaces/repository/kinsn/module/x86/build/bpf_x86_native_lab.ko",
+    "c1338358c52b8962dbb2383a66b47755eb7f75920288c43fea13e86743b65db3  /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko"
+  ],
+  "image_loader_hash": "866aef133d6cab800ae03eb2cb38cda304337d43ae01ae4297ea26a224c9bd48  runner/build-llvmbpf/native_loader/libnative_loader.so",
+  "deployed": [
+    "Optional kernel_data_layout map-BTF global offset mapping",
+    "Optional kernel_helper_context now queries complete UAPI identity table"
+  ],
+  "validation": "Previous actual kernel data-layout and both ten-context helper suites PASS; unchanged tests not repeated",
+  "new_census": "Three dependent queues started; zero completed rows at initial collection",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-loader-refresh",
+  "archive": "loader-refresh-completed.tar.gz",
+  "scope": "Canonical deployment only; real application and census outcomes remain separate",
+  "benchmark_settings_changed": false,
+  "raw_data_removed": false
+}
