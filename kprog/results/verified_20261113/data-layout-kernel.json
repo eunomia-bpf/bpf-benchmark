@@ -1,0 +1,56 @@
+{
+  "source_commit": "2980d8af6",
+  "outer_pid": 1383485,
+  "make_exit": 0,
+  "finished_utc": "2026-11-13T10:08:18Z",
+  "result": "PASS",
+  "symbols": [
+    {
+      "section": ".rodata",
+      "symbol": "enabled",
+      "map_id": 1,
+      "offset": 0
+    },
+    {
+      "section": ".rodata",
+      "symbol": "threshold",
+      "map_id": 1,
+      "offset": 4
+    },
+    {
+      "section": ".rodata",
+      "symbol": "ports",
+      "map_id": 1,
+      "offset": 8
+    },
+    {
+      "section": ".data",
+      "symbol": "counter",
+      "map_id": 2,
+      "offset": 0
+    },
+    {
+      "section": ".data",
+      "symbol": "limit",
+      "map_id": 2,
+      "offset": 4
+    },
+    {
+      "section": ".bss",
+      "symbol": "tracker",
+      "map_id": 3,
+      "offset": 0
+    },
+    {
+      "section": ".bss",
+      "symbol": "generation",
+      "map_id": 3,
+      "offset": 8
+    }
+  ],
+  "checks": "Production binding preserves BPF offsets/map identities/configured bytes across three maps; reproduces old padding mismatch and cleans descriptors after metadata exception",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-data-layout",
+  "archive": "data-layout-kernel.tar.gz",
+  "deployment": "Source/scratch only; canonical base/image unchanged",
+  "application_coverage_claim": false
+}

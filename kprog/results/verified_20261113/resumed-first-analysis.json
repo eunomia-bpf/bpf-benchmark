@@ -1,0 +1,18 @@
+{
+  "scope": "Old26 distinct body observations plus one separately retained class replay, load-only",
+  "attempts": 27,
+  "distinct_bodies": 26,
+  "latest_installed": 16,
+  "latest_rejected": 10,
+  "replay": {
+    "body_group": 20,
+    "application": "tracee/monitor",
+    "name": "trace_sys_enter",
+    "source_prog_id": 470,
+    "stage": "installed"
+  },
+  "new_unique_bodies": 0,
+  "native_execution": 0,
+  "previous_receipt": "resident-body-first-twenty-six-receipt.json",
+  "incremental_receipt": "resumed-queue0-first-receipt.json"
+}

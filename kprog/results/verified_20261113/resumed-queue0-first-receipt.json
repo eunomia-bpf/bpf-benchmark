@@ -1,0 +1,108 @@
+{
+  "recorded_at": "2026-11-13T10:14:43.741392+00:00",
+  "scope": "Completed prefix of ongoing 549-instance load-only census",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-census-resume/queue-0/first-one",
+  "journal": "/workspaces/kprog-raw/verified/20261113-census-resume/queue-0/control/outcomes.jsonl",
+  "kernel_commit": "74d1097af561",
+  "model_commit": "u32 model2d05e6342, stream755541874; see per-request source identities",
+  "completed": 1,
+  "submitted": 1,
+  "native_selection_failed": 0,
+  "resource_failed": 0,
+  "stock_verifier_submissions": 1,
+  "verified": 1,
+  "verifier_rejected": 0,
+  "compilation_failed": 0,
+  "native_execution_requests": 0,
+  "applications": {
+    "bcc/set": {
+      "completed": 0,
+      "submitted": 0,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "katran": {
+      "completed": 0,
+      "submitted": 0,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "cilium/agent": {
+      "completed": 0,
+      "submitted": 0,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "otelcol-ebpf-profiler/profiling": {
+      "completed": 0,
+      "submitted": 0,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "tracee/monitor": {
+      "completed": 1,
+      "submitted": 1,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 1,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "tetragon/observer": {
+      "completed": 0,
+      "submitted": 0,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    }
+  },
+  "classes": {
+    "installed": 1
+  },
+  "new_requests": [
+    {
+      "application": "tracee/monitor",
+      "name": "trace_sys_enter",
+      "retained_source_prog_id": 470,
+      "stage": "installed",
+      "classified_class": "installed",
+      "diagnostic": "",
+      "service": {
+        "request_id": 1,
+        "started": "2026-11-13T10:01:10.536741+00:00",
+        "prog_id": 11,
+        "status": 0,
+        "artifact_archive": "/workspaces/kprog-raw/verified/20261113-census-resume/queue-0/control/retained-requests/session-tjmt7p7h/1.success.tar.gz",
+        "finished": "2026-11-13T10:09:45.154535+00:00"
+      }
+    }
+  ],
+  "archive": "resumed-queue0-first.tar.gz",
+  "archive_bytes": 11024927,
+  "previous_receipt": "/workspaces/kprog-raw/verified/20261113-census-resume/queue-0/first-one/seed.json",
+  "previous_submitted": 0,
+  "previous_completed": 0,
+  "archived_requests": [
+    "/workspaces/kprog-raw/verified/20261113-census-resume/queue-0/control/retained-requests/session-tjmt7p7h/1.success.tar.gz"
+  ]
+}
