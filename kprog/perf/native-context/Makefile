@@ -408,3 +408,8 @@ upstream-tetragon-native: upstream-tetragon-ir core-ir-tool $(SOCKET_BUILD)/sock
 	python3 $(HERE)/socket-helper-names.py > $(TETRAGON_SAME_BUILD)/helper-names.json
 	$(SOCKET_BUILD)/socket-context-lower $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).core.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(TETRAGON_SAME_BUILD)/helper-names.json -o $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).native.bc
 	prlimit --as=17179869184 -- $(CC) -target x86_64-linux-gnu -O3 -g -fPIC -fno-optimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-jump-tables -c $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).native.bc -o $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).native.o
+
+.PHONY: cilium-helper-replay
+cilium-helper-replay:
+	python3 $(HERE)/socket-helper-names.py > $(CILIUM_HELPER_RAW)/helper-names.json
+	python3 $(HERE)/cilium-helper-replay.py --capture $(CILIUM_HELPER_CAPTURE) --linker $(LINK_MEMORY_PAYLOAD)/native-link-off --helper-names $(CILIUM_HELPER_RAW)/helper-names.json --output $(CILIUM_HELPER_RAW)/replay
