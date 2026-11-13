@@ -1,0 +1,174 @@
+{
+  "launched_at": "2026-11-13T10:47:51Z",
+  "outer_pid": 1398950,
+  "candidate_commit": "28f37871d",
+  "capture_source_commit": "28f37871d",
+  "raw": "/workspaces/kprog-raw/perf/20261113-cilium-context-runtime-retry2",
+  "capture": "/workspaces/repository/corpus/results/perf-cilium-context-capture-retry2-20261113",
+  "cpus": "16-19",
+  "vm_cpus": 4,
+  "vm_memory_gib": 8,
+  "host_address_space_limit_bytes": 17179869184,
+  "shared_image_lock": "/workspaces/.agent-state/kprog-lanes/locks/image",
+  "image": "bpf-benchmark/kprog:current",
+  "kernel": "74d1097af561",
+  "argv": [
+    "make",
+    "-f",
+    "kprog/perf/one-image/Makefile",
+    "corpus",
+    "APPS=cilium/agent",
+    "CPUS=16-19",
+    "VM_CPUS=4",
+    "VM_MEM=8G",
+    "STATE=/var/tmp/kprog-tmp/perf/cilium-context-runtime-retry2",
+    "LOGS=/workspaces/kprog-raw/perf/20261113-cilium-context-runtime-retry2",
+    "SAMPLES=1",
+    "WORKLOAD_DURATION=45",
+    "BPFREJIT_CORPUS_BPF_STATS=1",
+    "NATIVE_MANIFEST=/workspaces/repository/corpus/results/perf-cilium-no-jump-20261113/manifest-context.json"
+  ],
+  "environment": {
+    "PATH_prefix": "/workspaces/repository/kprog/perf/may29-image/eqcodex-bin",
+    "EQCODEX_OUT": "/workspaces/repository/corpus/results/perf-cilium-context-capture-retry2-20261113",
+    "EQCODEX_CILIUM_CONFIG": "1",
+    "EQCODEX_NATIVE_LINK_BINARY": "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+    "VERIFIED_BUILD_CPUS": "16-19",
+    "VERIFIED_WAIT_PID": "",
+    "VERIFIED_IMAGE_LOCK": "",
+    "VERIFIED_WAIT_JOB": ""
+  },
+  "linker_selection": "runtime-map-lookups on; local memory routines off; same P0 binary",
+  "payload": [
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-no-jump-20261113/manifest-context.json",
+      "bytes": 13456,
+      "sha256": "31cf859d1a4fba07b2fe49741553e0a38cd2fd3d1f48b4c3062a8bc31b40fd71"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-no-jump-20261113/manifest.json",
+      "bytes": 11606,
+      "sha256": "9f4e7191c5a53af0d25abd9231b2fc1d1d45b17ad17425458616e45aee28de08"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-no-jump-20261113/bpf_host.native.o",
+      "bytes": 553800,
+      "sha256": "59ff3e87d00d6514e9d2a101d765cdc6bc88e60b6b2bc3b474943095af8e8a7c"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-no-jump-20261113/bpf_lxc.native.o",
+      "bytes": 585584,
+      "sha256": "ccec6315c26e07c783d57b96515edc243658a9ef49b07e64c33622108f6895d9"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-no-jump-20261113/bpf_xdp.native.o",
+      "bytes": 226408,
+      "sha256": "c152f471ec594990a3f060193eefbad3897f04d58a9e73f6d5d991680edb9b31"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+      "bytes": 445,
+      "sha256": "f7644e69df0606ac64e1af9631ffec0227c5c46282aaf2c5622758626de9f58a"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+      "bytes": 4407560,
+      "sha256": "65eebf5e64ed5e4c0adfda52dd4587c9c626c232aeffb2ac3ab76e90a01d5b72"
+    }
+  ],
+  "dry_run_log": "/workspaces/kprog-raw/perf/20261113-cilium-context-runtime-retry2/dry-run.log",
+  "make_log": "/workspaces/kprog-raw/perf/20261113-cilium-context-runtime-retry2/job/make.log",
+  "exit_file": "/workspaces/kprog-raw/perf/20261113-cilium-context-runtime-retry2/job/exit-code",
+  "collect": "NEXT turn; no post-launch polling",
+  "scope": "Retry unchanged corrected Cilium native payload after complete helper-query identity deployment. Optional kernel_data_layout remains unselected. Diagnostic only; no official throughput floor.",
+  "limits": [
+    "D23 requested through all 50 manifest rows; actual runtime deployment/behavior to be collected, not inferred from kernel unit tests.",
+    "Unmatched runtime-generated cil_host_policy/cil_lxc_policy retained as original BPF and listed for generic owner handling.",
+    "44 offline proof/kernel roundtrips use synthetic ABI/addresses, no actual kernel execution.",
+    "Exact source BPF reconstruction is not a native-runtime semantic certificate.",
+    "Installed payload files, selected linker and observer scripts frozen until actual exit.",
+    "Observer labels can cross app generations; compare map/config identity and clocks, not labels alone."
+  ],
+  "image_tar_manifest": [
+    {
+      "Config": "blobs/sha256/0761421c7fcf07dbb4cab6a8154dfcce12b5bb9882bb4a17806ed1555b40c176",
+      "RepoTags": [
+        "bpf-benchmark/kprog:current"
+      ],
+      "Layers": [
+        "blobs/sha256/7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+        "blobs/sha256/da94521aa2edb5320294ffd5a275ba249fd25cc7c36d315c09001be870516a6c",
+        "blobs/sha256/d7e5c4bcb413324a0587b08590497b13caf6babed909ec1de07db39172a4256f",
+        "blobs/sha256/4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+        "blobs/sha256/48a1dbf3ca7189d9bbde8552e8f8379e8e93acd55fd79a91f26e87dac42438cc",
+        "blobs/sha256/082fd1debfcf8c4d600cc438b9f1fffa4cd77cdcc452a66b75776deb4118a325",
+        "blobs/sha256/65a1690e2c42799c926b3c465a89a500601f43901589afa31663eb54f1cf11a4",
+        "blobs/sha256/6e3e5bcef4c08c63af76e3699a97a403649cea23bd8876a2f7cf1b64c8f897ae",
+        "blobs/sha256/544279ce7ce12036657d246d25f28b78f3f24ca532f7a7efecc2433c300ef841",
+        "blobs/sha256/d50cbbffd535ce88b1f149cd2567712c90ffff0fd07fcec575544ee51151a7e2",
+        "blobs/sha256/45ad7c1fe29d787f3bddaa8e7110e06db83bb384703d0907daf4cd3c8257b755",
+        "blobs/sha256/6fb42c663001468e0e4d12964f24208b5946af5875e24ce76cb8b2e14b0ce550",
+        "blobs/sha256/68080ae6a8407d43c6f06431d65c9452cd1fe3eadc5f3a71912b22963b7616ae",
+        "blobs/sha256/9b3e32bf007d91cf8917cf3e1c241454e1de6ef07dfd6946bc22738fbb5a8ddc",
+        "blobs/sha256/26fc66cf4b1ce5e62a7f987caed2079d2b1c4204eeba3cf4fa731dfadc820da7",
+        "blobs/sha256/9cd4084707bdbfcd85061113c961ce1a08a03a8ba6d721c28bcb5cf02ded355d",
+        "blobs/sha256/c29ea8bf8eb004eaee1f10f84d199fe8271cd3b1a41e42069c68a6bd9beec453",
+        "blobs/sha256/0a46b251d5f49ae4d8665065d3c713e0a3b7d472f240f464c99f693a99e7c377",
+        "blobs/sha256/f654ce6d048fa0bc1a0eded0a8c9ea6ecd84356c98bd20d4a0bdb895ddaa199e",
+        "blobs/sha256/eed09fc0e3e39af2ef3d752a81d1630dcb048117939fb45edf6c543f5e69992b",
+        "blobs/sha256/542cf1920378ce6172fd16ec40e264127b96ebec80e8c09aa7f1f2f392c3a517",
+        "blobs/sha256/94081ab9d664b26480766d79876178f43c7637f377693119b78de6742913cfad",
+        "blobs/sha256/8b4b58b35809294eac87fc94c82b8ea062c3f50ffe331545a1443a262ce1280d",
+        "blobs/sha256/c6a253e8bfd1560c879755460e36bd897411d5adfa26acb4153e17741174cae3",
+        "blobs/sha256/870b5dffac19af37d3d0d46ba822604ab72a9ae6f192cc0c468a729671646363",
+        "blobs/sha256/3e09016a48d737439fb01fe1ebdce52220d67854fbc4ae0c4d17641adb324039",
+        "blobs/sha256/af19f88edc12369646db6f6d732a95312d33a0f813a357c7d4c082b6172ef2ff",
+        "blobs/sha256/689698dfb4ba03e1e77164920bf04e399bc091af3d32c1bea6cad5c401640530",
+        "blobs/sha256/04ce3590b6bd07bb90053e61985f5879891a60b122229afbc41eb78116f0f3ec",
+        "blobs/sha256/bdf7cf17a587af521c5d69f4297ac6c2798aebbff46b9788b62e048e3cd7dbb3",
+        "blobs/sha256/8bd8d80fae7b5cdbe3f4099bc37e98faa68b06d918828de21e4c06cbdb6407eb",
+        "blobs/sha256/504c2c36478a7b778a93259e56633bb720c964003e8b4cb0eb43928171100e25",
+        "blobs/sha256/119fab2c54d858fc1174ac2643c6b98a8074358ef2c0f3748a3fbe138ef7ee29",
+        "blobs/sha256/adbe67feff107a24012b0109667e66bbefb0fe919fa09c11809e26bc11af7afd",
+        "blobs/sha256/a671c07af02e4725c003556cedabe61e9a8c789c1dfd8930445174133ffe87b5"
+      ]
+    }
+  ],
+  "shared_refresh": {
+    "writer_outer_pid": 1393340,
+    "make_exit": 0,
+    "finished": "2026-11-13T10:35:59Z",
+    "current_image": "sha256:73985a057359241030b7f1181a64e6253fe81e567813e90e78a19e208d26d9a2",
+    "image_tar_config": "blobs/sha256/0761421c7fcf07dbb4cab6a8154dfcce12b5bb9882bb4a17806ed1555b40c176",
+    "superseded": "sha256:7f915aea1f2276fb9509027cb7e4fc2dd6e4182740312e002ebcc14dbc81c923",
+    "cleanup": "already-absent",
+    "core_config_modules_unchanged": true,
+    "before_after_hashes": [
+      "2667103e0fbb3fc54467f59bb15ef0cdc128e54ca7c30d7718e66d0199c4e1ec  /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage",
+      "f3743c05960fc700e29f31e0035a23cdd4b2500d5e6e7542984d5f6fba75babe  /workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+      "0b75fe318542db6698950f2b2ce5163e867118317fe61c538c4e7de7a1357163  /workspaces/.agent-state/kprog-ck/build-x86/.config",
+      "5a9f0b3b0a6a1f633a9f4227dd7bbfa0580bdfdc557a788712079e9c14a27fa7  /workspaces/repository/kinsn/module/x86/build/bpf_x86_native_lab.ko",
+      "c1338358c52b8962dbb2383a66b47755eb7f75920288c43fea13e86743b65db3  /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko"
+    ],
+    "canonical_hashes": [
+      "4ff4a05172a4d1ed40bc7d37c7f0dafe0963c8ada80282d83464399dc2b7746b  /workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.so",
+      "2a364bf1c60e37e8d737652c3cef148fa800e1a3768e1613c39b6a722bb2cf7e  /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+      "5a9f0b3b0a6a1f633a9f4227dd7bbfa0580bdfdc557a788712079e9c14a27fa7  /workspaces/repository/kinsn/module/x86/build/bpf_x86_native_lab.ko",
+      "c1338358c52b8962dbb2383a66b47755eb7f75920288c43fea13e86743b65db3  /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko"
+    ],
+    "image_loader_hash": "866aef133d6cab800ae03eb2cb38cda304337d43ae01ae4297ea26a224c9bd48  runner/build-llvmbpf/native_loader/libnative_loader.so",
+    "deployed": [
+      "Optional kernel_data_layout map-BTF global offset mapping",
+      "Optional kernel_helper_context now queries complete UAPI identity table"
+    ],
+    "validation": "Previous actual kernel data-layout and both ten-context helper suites PASS; unchanged tests not repeated",
+    "new_census": "Three dependent queues started; zero completed rows at initial collection",
+    "raw_directory": "/workspaces/kprog-raw/verified/20261113-loader-refresh",
+    "archive": "loader-refresh-completed.tar.gz",
+    "scope": "Canonical deployment only; real application and census outcomes remain separate",
+    "benchmark_settings_changed": false,
+    "raw_data_removed": false
+  },
+  "launch_source_commit": "a876444a1",
+  "kernel_data_layout_selected": false
+}
