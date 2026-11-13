@@ -413,3 +413,7 @@ upstream-tetragon-native: upstream-tetragon-ir core-ir-tool $(SOCKET_BUILD)/sock
 cilium-helper-replay:
 	python3 $(HERE)/socket-helper-names.py > $(CILIUM_HELPER_RAW)/helper-names.json
 	python3 $(HERE)/cilium-helper-replay.py --capture $(CILIUM_HELPER_CAPTURE) --linker $(LINK_MEMORY_PAYLOAD)/native-link-off --helper-names $(CILIUM_HELPER_RAW)/helper-names.json --output $(CILIUM_HELPER_RAW)/replay
+
+.PHONY: retain-host-artifacts
+retain-host-artifacts:
+	python3 $(HERE)/retain-host-artifacts.py --raw $(HOST_ARTIFACT_RAW) --output $(HOST_ARTIFACT_RECEIPT) --protocol $(HOST_ARTIFACT_PROTOCOL) $(HOST_ARTIFACT_ARGS)
