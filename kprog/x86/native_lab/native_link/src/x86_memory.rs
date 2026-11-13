@@ -482,6 +482,108 @@ mod tests {
             }
             Ok(())
         }
+
+        #[test]
+        #[ignore = "opt-in host timing evidence, not a correctness or workload gate"]
+        fn memory_host_microbenchmark() -> Result<()> {
+            use std::hint::black_box;
+            use std::time::Instant;
+            let output = std::env::var_os("NATIVE_LINK_MEMORY_BENCH_OUTPUT").ok_or_else(|| {
+                anyhow!("NATIVE_LINK_MEMORY_BENCH_OUTPUT is required for timing evidence")
+            })?;
+            let max_leaf = std::arch::x86_64::__cpuid(0).eax;
+            let leaf = if max_leaf >= 7 {
+                std::arch::x86_64::__cpuid_count(7, 0)
+            } else {
+                std::arch::x86_64::__cpuid_count(0, 0)
+            };
+            let fsrm = max_leaf >= 7 && leaf.edx & (1 << 4) != 0;
+            let fsrs = max_leaf >= 7
+                && leaf.eax >= 1
+                && std::arch::x86_64::__cpuid_count(7, 1).eax & (1 << 11) != 0;
+            let mut results = Vec::new();
+            for copy in [false, true] {
+                for length in [0, 16, 32, 64, 71, 144, 200, 368, 512, 1024, 4096, 16384] {
+                    let mut forms = vec![(
+                        "gpr_loop",
+                        Routine {
+                            copy,
+                            length: None,
+                            zero: !copy,
+                        }
+                        .bytes()?,
+                    )];
+                    if length <= 512 {
+                        forms.push((
+                            "gpr_unrolled",
+                            Routine {
+                                copy,
+                                length: Some(length as u16),
+                                zero: !copy,
+                            }
+                            .bytes()?,
+                        ));
+                    }
+                    // These REP bodies are measurement controls only. Production
+                    // does not select REP from an unmeasured CPUID heuristic.
+                    let rep = if copy {
+                        vec![0x48, 0x89, 0xf8, 0x48, 0x89, 0xd1, 0xf3, 0xa4, 0xc3]
+                    } else {
+                        vec![
+                            0x49, 0x89, 0xf8, 0x48, 0x89, 0xf0, 0x48, 0x89, 0xd1, 0xf3, 0xaa, 0x4c,
+                            0x89, 0xc0, 0xc3,
+                        ]
+                    };
+                    forms.push(("rep", rep));
+                    let code: Vec<_> = forms.iter().map(|(_, b)| Mapping::code(b)).collect();
+                    for offset in [0, 1, 7] {
+                        let mut dest = vec![0xa5u8; length + 64];
+                        let source = vec![0x5au8; length + 64];
+                        let dst = unsafe { dest.as_mut_ptr().add(offset) };
+                        let arg = if copy {
+                            (unsafe { source.as_ptr().add(7 - offset) }) as usize
+                        } else {
+                            0
+                        };
+                        for round in 0..5 {
+                            for shift in 0..forms.len() {
+                                let index = (round + shift) % forms.len();
+                                let f: unsafe extern "C" fn(*mut u8, usize, usize) -> *mut u8 =
+                                    unsafe { std::mem::transmute(code[index].address) };
+                                for _ in 0..1000 {
+                                    black_box(unsafe { f(dst, arg, length) });
+                                }
+                                let start = Instant::now();
+                                for _ in 0..100_000 {
+                                    black_box(unsafe {
+                                        f(black_box(dst), black_box(arg), black_box(length))
+                                    });
+                                    if length != 0 {
+                                        black_box(unsafe {
+                                            std::ptr::read_volatile(dst.add(length - 1))
+                                        });
+                                    }
+                                }
+                                let elapsed = start.elapsed().as_nanos();
+                                assert!(dest[offset..offset + length]
+                                    .iter()
+                                    .all(|&v| v == if copy { 0x5a } else { 0 }));
+                                results.push(serde_json::json!({"copy":copy,"length":length,"offset":offset,
+                                    "form":forms[index].0,"round":round,"iterations":100_000,"elapsed_ns":elapsed}));
+                            }
+                        }
+                    }
+                }
+            }
+            fs::write(
+                output,
+                serde_json::to_vec_pretty(&serde_json::json!({
+                "host_cpuid":{"fsrm":fsrm,"fsrs":fsrs},"observations":results,
+                "limits":["Hot host buffers with immediate read; not guest or workload throughput.",
+                          "REP is a control only; no production selection was made."]}))?,
+            )?;
+            Ok(())
+        }
     }
 
     #[cfg(all(target_arch = "x86_64", target_os = "linux"))]

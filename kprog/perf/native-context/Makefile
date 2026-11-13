@@ -143,3 +143,8 @@ memory-link-payload:
 memory-profile:
 	env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(LINK_MEMORY_CAPTURE) EQCODEX_NATIVE_LINK_BINARY=$(LINK_MEMORY_PAYLOAD)/native-link-on \
 		python3 $(ROOT)/kprog/perf/profile/phase-profile.py run --app tracee/monitor --seconds 45 --cpus 16-19 --vcpus 4 --memory 8G --freq 999 --out $(LINK_MEMORY_PROFILE) --annotate 0
+
+.PHONY: memory-host-bench
+memory-host-bench:
+	NATIVE_LINK_MEMORY_BENCH_OUTPUT=/workspaces/kprog-raw/perf/20261113-local-memory/host-microbench.json CARGO_TARGET_DIR=$(LINK_MEMORY_TARGET) CARGO_PROFILE_DEV_OPT_LEVEL=3 CARGO_PROFILE_DEV_DEBUG=0 \
+		cargo test --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml memory_host_microbenchmark -- --ignored
