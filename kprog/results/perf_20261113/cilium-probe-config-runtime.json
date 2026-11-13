@@ -1,0 +1,292 @@
+{
+  "recorded_at": "2026-11-13T08:19:54.333012+00:00",
+  "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261113_080908_572151",
+  "raw": "/workspaces/kprog-raw/perf/20261113-cilium-probe-config",
+  "make_exit": 0,
+  "app_status": "ok",
+  "app_error": "",
+  "programs": {
+    "baseline": 72,
+    "post_rejit": 72
+  },
+  "native_replacements": 83,
+  "observer_exit": -15,
+  "snapshots": [
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-probe-config-20261113/baseline-0001/cilium-config.tar.gz",
+      "bytes": 700910,
+      "sha256": "2dac4c12fb3acac5644fccba0ec0cdb1b3398917c22249bfb43a9baf335bc1ef",
+      "index": {
+        "state_dir": "/var/tmp/ciliumrunner_45yys47g/state",
+        "files": [
+          {
+            "source": "/var/tmp/ciliumrunner_45yys47g/state/state/1488/ep_config.h",
+            "archive": "state/1488/ep_config.h",
+            "bytes": 607,
+            "sha256": "725c1d338d4a575a48253acf3d8ecd8a724991219fc74b7dfe98f9f1dbc71d26"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_45yys47g/state/state/283/ep_config.h",
+            "archive": "state/283/ep_config.h",
+            "bytes": 572,
+            "sha256": "36da87ed1796414755dce5cc66077d170eacbea88c94c8311612a589a9593342"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_45yys47g/state/state/3167/ep_config.h",
+            "archive": "state/3167/ep_config.h",
+            "bytes": 609,
+            "sha256": "16d4b327ff250e3dd7af56b78899b9f0cd2715132237515c850141b80039ca74"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_45yys47g/state/state/bpf_alignchecker.o",
+            "archive": "state/bpf_alignchecker.o",
+            "bytes": 161008,
+            "sha256": "d375dc40aa5f412bbb995063a9152607dd905a32bf44122cc2d4b368aa1886a5"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_45yys47g/state/state/bpf_xdp.o",
+            "archive": "state/bpf_xdp.o",
+            "bytes": 370552,
+            "sha256": "8802d1209da61361ec7ddd468119a659b9dfe71f8ba9321f9effb343d5a49666"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_45yys47g/state/state/filter_config.h",
+            "archive": "state/filter_config.h",
+            "bytes": 217,
+            "sha256": "ee52469d6b61d86e48952d759cc78c6546811594bb06a9e894ae99d6c784f312"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_45yys47g/state/state/globals/node_config.h",
+            "archive": "state/globals/node_config.h",
+            "bytes": 5440,
+            "sha256": "e1a872cab96c8d997626663366a6864cfe24c523a254c78fbfa51567844157e3"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_45yys47g/state/state/netdev_config.h",
+            "archive": "state/netdev_config.h",
+            "bytes": 176,
+            "sha256": "4f273b5d9571d5e8bdb6e88c3659d0fa7d8961ad72ac8e0a6560707d4e2709af"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_45yys47g/state/state/templates/a17e984b9f95ab37fdfa1c8439e9ade0646b38ddd4a1ee06f81d4dae0b83e604/bpf_lxc.o",
+            "archive": "state/templates/a17e984b9f95ab37fdfa1c8439e9ade0646b38ddd4a1ee06f81d4dae0b83e604/bpf_lxc.o",
+            "bytes": 1010480,
+            "sha256": "f1f5400753f423701074b24043f200a331d629bf2179aab76c5ad210a46e030e"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_45yys47g/state/state/templates/a17e984b9f95ab37fdfa1c8439e9ade0646b38ddd4a1ee06f81d4dae0b83e604/ep_config.h",
+            "archive": "state/templates/a17e984b9f95ab37fdfa1c8439e9ade0646b38ddd4a1ee06f81d4dae0b83e604/ep_config.h",
+            "bytes": 278,
+            "sha256": "514ff5a65e55a6cf6dfa9562e01c427ba4eaa434dc19dc4a10880c37af453b32"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_45yys47g/state/state/templates/fce499ea04fcda9ab1e9a102830ce14ebd544a0c554ad47adcdaae1a0db9e204/bpf_host.o",
+            "archive": "state/templates/fce499ea04fcda9ab1e9a102830ce14ebd544a0c554ad47adcdaae1a0db9e204/bpf_host.o",
+            "bytes": 923968,
+            "sha256": "ab482faefe56da0e06f137a5c7eeecb67f7373148aa71a9dbab4a79e8c514aef"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_45yys47g/state/state/templates/fce499ea04fcda9ab1e9a102830ce14ebd544a0c554ad47adcdaae1a0db9e204/ep_config.h",
+            "archive": "state/templates/fce499ea04fcda9ab1e9a102830ce14ebd544a0c554ad47adcdaae1a0db9e204/ep_config.h",
+            "bytes": 302,
+            "sha256": "7b99209783c8b493c4d0dd673f5475ead763e892534d7f639d4bfb36bfc1dcd3"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features.h",
+            "archive": "generated-features/features.h",
+            "bytes": 191,
+            "sha256": "0a48e078a3e4b671a7079ee22e0ce458b8d3d57159421d39bb54b06cef650888"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_skb.h",
+            "archive": "generated-features/features_skb.h",
+            "bytes": 186,
+            "sha256": "cafad9307518205d5456246937e74822ab6dcc9fc3586945d1335139aac88681"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_xdp.h",
+            "archive": "generated-features/features_xdp.h",
+            "bytes": 282,
+            "sha256": "c5d4abfaa278f428fb36d453f9784695b38d214d9cc8362ee6b540b0c6803a6b"
+          }
+        ]
+      }
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-probe-config-20261113/baseline-0002/cilium-config.tar.gz",
+      "bytes": 167567,
+      "sha256": "e16b8e2b3a560b0e3a23fb0b1eb3194babe40989dd4d46e5dd6746085feb2160",
+      "index": {
+        "state_dir": "/var/tmp/ciliumrunner_6utrn22x/state",
+        "files": [
+          {
+            "source": "/var/tmp/ciliumrunner_6utrn22x/state/state/817_next/ep_config.h",
+            "archive": "state/817_next/ep_config.h",
+            "bytes": 572,
+            "sha256": "fbbb52bf2bf251f04d0eea13a5ee9097640ff6f0fb5007730bf4d77aa0caeda5"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_6utrn22x/state/state/bpf_alignchecker.o",
+            "archive": "state/bpf_alignchecker.o",
+            "bytes": 161008,
+            "sha256": "fea1a83ad78ee56905b07b620745840b8443401fe7f2a0a90be4f795f715d51b"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_6utrn22x/state/state/bpf_xdp.o",
+            "archive": "state/bpf_xdp.o",
+            "bytes": 370552,
+            "sha256": "3ea64df1fcf454e485acc05588edafa0084f6c016caa74ee95110c1df6b9f069"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_6utrn22x/state/state/filter_config.h",
+            "archive": "state/filter_config.h",
+            "bytes": 217,
+            "sha256": "ee52469d6b61d86e48952d759cc78c6546811594bb06a9e894ae99d6c784f312"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_6utrn22x/state/state/globals/node_config.h",
+            "archive": "state/globals/node_config.h",
+            "bytes": 5440,
+            "sha256": "ea81a2a23ee3f64022246d40909a554beded329a86aa9e302a1f30e574835094"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_6utrn22x/state/state/netdev_config.h",
+            "archive": "state/netdev_config.h",
+            "bytes": 176,
+            "sha256": "4f273b5d9571d5e8bdb6e88c3659d0fa7d8961ad72ac8e0a6560707d4e2709af"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_6utrn22x/state/state/templates/7402c6aafa510724e702a1fbca2aadf67e9ed4010095944e7e9b06e6cd492d30/bpf_host.o",
+            "archive": "state/templates/7402c6aafa510724e702a1fbca2aadf67e9ed4010095944e7e9b06e6cd492d30/bpf_host.o",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_6utrn22x/state/state/templates/7402c6aafa510724e702a1fbca2aadf67e9ed4010095944e7e9b06e6cd492d30/ep_config.h",
+            "archive": "state/templates/7402c6aafa510724e702a1fbca2aadf67e9ed4010095944e7e9b06e6cd492d30/ep_config.h",
+            "bytes": 302,
+            "sha256": "7b99209783c8b493c4d0dd673f5475ead763e892534d7f639d4bfb36bfc1dcd3"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features.h",
+            "archive": "generated-features/features.h",
+            "bytes": 191,
+            "sha256": "0a48e078a3e4b671a7079ee22e0ce458b8d3d57159421d39bb54b06cef650888"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_skb.h",
+            "archive": "generated-features/features_skb.h",
+            "bytes": 186,
+            "sha256": "cafad9307518205d5456246937e74822ab6dcc9fc3586945d1335139aac88681"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_xdp.h",
+            "archive": "generated-features/features_xdp.h",
+            "bytes": 282,
+            "sha256": "c5d4abfaa278f428fb36d453f9784695b38d214d9cc8362ee6b540b0c6803a6b"
+          }
+        ]
+      }
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-probe-config-20261113/post_rejit-0003/cilium-config.tar.gz",
+      "bytes": 588276,
+      "sha256": "031bc8bc6375a8f2258c40914be7804c0f6709c60626a60c5fc7e319c13b5ecd",
+      "index": {
+        "state_dir": "/var/tmp/ciliumrunner_6utrn22x/state",
+        "files": [
+          {
+            "source": "/var/tmp/ciliumrunner_6utrn22x/state/state/817/ep_config.h",
+            "archive": "state/817/ep_config.h",
+            "bytes": 572,
+            "sha256": "fbbb52bf2bf251f04d0eea13a5ee9097640ff6f0fb5007730bf4d77aa0caeda5"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_6utrn22x/state/state/bpf_alignchecker.o",
+            "archive": "state/bpf_alignchecker.o",
+            "bytes": 161008,
+            "sha256": "fea1a83ad78ee56905b07b620745840b8443401fe7f2a0a90be4f795f715d51b"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_6utrn22x/state/state/bpf_xdp.o",
+            "archive": "state/bpf_xdp.o",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_6utrn22x/state/state/filter_config.h",
+            "archive": "state/filter_config.h",
+            "bytes": 217,
+            "sha256": "ee52469d6b61d86e48952d759cc78c6546811594bb06a9e894ae99d6c784f312"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_6utrn22x/state/state/globals/node_config.h",
+            "archive": "state/globals/node_config.h",
+            "bytes": 5440,
+            "sha256": "ea81a2a23ee3f64022246d40909a554beded329a86aa9e302a1f30e574835094"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_6utrn22x/state/state/netdev_config.h",
+            "archive": "state/netdev_config.h",
+            "bytes": 176,
+            "sha256": "4f273b5d9571d5e8bdb6e88c3659d0fa7d8961ad72ac8e0a6560707d4e2709af"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_6utrn22x/state/state/templates/7402c6aafa510724e702a1fbca2aadf67e9ed4010095944e7e9b06e6cd492d30/bpf_host.o",
+            "archive": "state/templates/7402c6aafa510724e702a1fbca2aadf67e9ed4010095944e7e9b06e6cd492d30/bpf_host.o",
+            "bytes": 923968,
+            "sha256": "753a2233ce3fd7f6255412b2d7eafab19f4cedb5b34e7a95d49b335d6e877fe6"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_6utrn22x/state/state/templates/7402c6aafa510724e702a1fbca2aadf67e9ed4010095944e7e9b06e6cd492d30/ep_config.h",
+            "archive": "state/templates/7402c6aafa510724e702a1fbca2aadf67e9ed4010095944e7e9b06e6cd492d30/ep_config.h",
+            "bytes": 302,
+            "sha256": "7b99209783c8b493c4d0dd673f5475ead763e892534d7f639d4bfb36bfc1dcd3"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_6utrn22x/state/state/templates/ad41e7a6f75ba987f880221133cc8b56621fd56ad3bdd9b55bee1c468e72278f/bpf_lxc.o",
+            "archive": "state/templates/ad41e7a6f75ba987f880221133cc8b56621fd56ad3bdd9b55bee1c468e72278f/bpf_lxc.o",
+            "bytes": 1010480,
+            "sha256": "d40ee2776abd2c0c08c7cb3f75ed3fdef0d4d177c602ca64388b7889c02e8da7"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_6utrn22x/state/state/templates/ad41e7a6f75ba987f880221133cc8b56621fd56ad3bdd9b55bee1c468e72278f/ep_config.h",
+            "archive": "state/templates/ad41e7a6f75ba987f880221133cc8b56621fd56ad3bdd9b55bee1c468e72278f/ep_config.h",
+            "bytes": 278,
+            "sha256": "514ff5a65e55a6cf6dfa9562e01c427ba4eaa434dc19dc4a10880c37af453b32"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features.h",
+            "archive": "generated-features/features.h",
+            "bytes": 191,
+            "sha256": "0a48e078a3e4b671a7079ee22e0ce458b8d3d57159421d39bb54b06cef650888"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_skb.h",
+            "archive": "generated-features/features_skb.h",
+            "bytes": 186,
+            "sha256": "cafad9307518205d5456246937e74822ab6dcc9fc3586945d1335139aac88681"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_xdp.h",
+            "archive": "generated-features/features_xdp.h",
+            "bytes": 282,
+            "sha256": "c5d4abfaa278f428fb36d453f9784695b38d214d9cc8362ee6b540b0c6803a6b"
+          }
+        ]
+      }
+    }
+  ],
+  "extracted_baseline_snapshot": "baseline-0001",
+  "limits": [
+    "One-sample1s diagnostic; default manifest and objects, not the new upstream compiler candidate.",
+    "Snapshots may catch objects mid-build; each captured length and raw partial bytes are retained.",
+    "No app-decision or throughput equivalence certified."
+  ],
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/perf_20261113/cilium-probe-config-runtime.tar.gz",
+    "bytes": 2189238,
+    "sha256": "cd0ecf90911d02d1b19898f288080663f2c582b56250e64a5293ba43ced1ae7f",
+    "files_byte_compared": 326
+  }
+}
