@@ -110,7 +110,7 @@
 
 ## 2. 应用覆盖
 
-- **VERIFIED input-only helper通用frame修复（2026-11-13）** 唯一kernel实现确认perf_event_output(25)、get_stackid(27)、ringbuf_output(130)保留caller stack；三种wrapper接入已有READONLY_SCALAR_RESULT，原helper调用/return/register clobbers保持。新回归在旧模型丢失saved fact（Make2），新模型对3helpers共10个成功/错误、zero/eight-byte输入案例通过；既有stack-lifetime UBSan和全称readonly_helper_frame模块通过，kernel effects分类单独取证。完整host/kernel证据归档 `input-helper-effects-subset*`，raw `/workspaces/kprog-raw/verified/20261113-input-helper-effects/`；33成员body实际复杂度回放接续。
+- **VERIFIED input-only helper通用frame修复（2026-11-13）** 唯一kernel实现确认perf_event_output(25)、get_stackid(27)、ringbuf_output(130)保留caller stack；三种wrapper接入已有READONLY_SCALAR_RESULT，原helper调用/return/register clobbers保持。新回归在旧模型丢失saved fact（Make2），新模型对3helpers共10个成功/错误、zero/eight-byte输入案例通过；既有stack-lifetime UBSan和全称readonly_helper_frame模块通过，kernel effects分类单独取证。完整host/kernel证据归档 `input-helper-effects-subset*`，raw `/workspaces/kprog-raw/verified/20261113-input-helper-effects/`；model c88223ba8的33成员body回放outer1241657已setsid/nohup启动（2vCPU8G/AS16GiB，CPU15/shared image read lock）；raw `20261113-helper-class-replay/input-*`，调用见 `input-helper-effects-launch.json`，实际结果后续收集。
 
 - **VERIFIED context class并行复测准备（2026-11-13）** 所有已观察context失败body20/28/29（trace_sys_enter、trace_ret_vfs_read、trace_ret_vfs_read_tail，各1成员）分成三个guest数据inventory；根inventory保留完整class，源P和资源引用保持，通用service相同。新增完整/互斥分区与map资源保留回归，同组4tests通过；归档 `context-class-preparation*`，raw `/workspaces/kprog-raw/verified/20261113-context-class/ready/`。三个guest已setsid/nohup启动：body20 outer1232281、body28 outer1232282、body29 outer1232283；各2vCPU/8G/AS16GiB，host12、13、14–15，model17c69/shared image read lock；精确命令见 `context-class-launch.json`，实际结果后续收集。
 
