@@ -119,6 +119,10 @@ struct Args {
     #[arg(long)]
     tail_count_relocs: bool,
 
+    /// Dispatch x86 kernel map lookups using the actual map pointer and helper.
+    #[arg(long)]
+    runtime_map_lookups: bool,
+
     /// Link mode. `proof` applies canonical ABI/link edits but leaves
     /// verifier-after helper/map lowering symbolic and emits a relocatable
     /// proof object for the eBPF simulator generator.
@@ -491,6 +495,7 @@ fn main() -> Result<()> {
                 proof_mode,
                 args.preserve_entry_abi,
                 args.tail_count_relocs,
+                args.runtime_map_lookups && !proof_mode,
                 args.show,
             )?
         }
@@ -2553,6 +2558,14 @@ fn disasm_arm64_words(blob: &[u8]) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn runtime_map_lookups_require_cli_opt_in() {
+        let argv = ["native-link", "--input", "p.o", "--symbol", "entry", "--output", "p.bin"];
+        assert!(!Args::try_parse_from(argv).unwrap().runtime_map_lookups);
+        assert!(Args::try_parse_from(argv.into_iter().chain(["--runtime-map-lookups"]))
+            .unwrap().runtime_map_lookups);
+    }
 
     #[test]
     fn tail_count_relocations_require_cli_opt_in() {

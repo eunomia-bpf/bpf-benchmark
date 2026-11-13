@@ -92,7 +92,17 @@ fn select_lookup_site(
     native_map_name: Option<&str>,
     sym_name: &str,
     generic_target_addr: u64,
+    runtime_map_lookups: bool,
 ) -> Result<(String, Option<usize>, LookupSiteSpec)> {
+    if runtime_map_lookups {
+        // Native and BPF helper ordering is not an identity relation. Dispatch
+        // on the actual RDI map instead of borrowing another site's layout.
+        let spec = generic_lookup_site(generic_target_addr, native_map_name)
+            .ok_or_else(|| anyhow!(
+                "x86 runtime map lookup {native_call_index} in {sym_name} requires the bpf_map_lookup_elem helper target"
+            ))?;
+        return Ok((format!("runtime:{native_call_index}"), None, spec));
+    }
     if let Some(map_name) = native_map_name {
         if let Some((idx, spec)) = lookup_sites
             .iter()
@@ -1078,6 +1088,7 @@ pub(super) fn rewrite_x86(
     proof_mode: bool,
     preserve_entry_abi: bool,
     tail_count_relocs: bool,
+    runtime_map_lookups: bool,
     show: bool,
 ) -> Result<RewriteResult> {
     let included_ranges: Vec<(u64, u64)> = included
@@ -1478,6 +1489,7 @@ pub(super) fn rewrite_x86(
                             native_map_name,
                             &sym.name,
                             map_lookup_helper_addr,
+                            runtime_map_lookups,
                         )?;
                         lookup_call_specs.insert(site_key, spec.clone());
                         match spec.kind {
@@ -1633,6 +1645,7 @@ pub(super) fn rewrite_x86(
                         lookup_map_name_for_call.as_deref(),
                         &sym.name,
                         map_lookup_helper_addr,
+                        runtime_map_lookups,
                     )?;
                     lookup_call_specs.insert(site_key, spec.clone());
                 }
@@ -4047,6 +4060,79 @@ mod tests {
     use super::*;
 
     #[test]
+    fn runtime_map_lookup_rewrites_immediate_and_got_calls() -> Result<()> {
+        for got in [false, true] {
+            let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::X86_64, Endianness::Little);
+            let text = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
+            let bytes = if got { vec![0xff, 0x15, 0, 0, 0, 0, 0xc3] }
+                        else { vec![0xb8, 1, 0, 0, 0, 0xff, 0xd0, 0xc3] };
+            object.append_section_data(text, &bytes, 1);
+            object.add_symbol(WriteSymbol {
+                name: b"entry".to_vec(), value: 0, size: bytes.len() as u64,
+                kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
+                section: WriteSymbolSection::Section(text), flags: SymbolFlags::None,
+            });
+            if got {
+                let helper = object.add_symbol(WriteSymbol {
+                    name: b"bpf_map_lookup_elem".to_vec(), value: 0, size: 0,
+                    kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
+                    section: WriteSymbolSection::Undefined, flags: SymbolFlags::None,
+                });
+                object.add_relocation(text, WriteRelocation {
+                    offset: 2, symbol: helper, addend: -4,
+                    flags: RelocationFlags::Elf { r_type: 9 },
+                })?;
+            }
+            let encoded = object.write()?;
+            let elf = object::File::parse(encoded.as_slice())?;
+            let entry = find_symbol_by_name(&elf, "entry")?;
+            let helpers = HashMap::from([("bpf_map_lookup_elem".to_owned(), 0x1234)]);
+            let site = generic_lookup_site(0x5678, None).expect("site");
+            for enabled in [false, true] {
+                let result = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers,
+                    &HashMap::new(), &[site.clone()], &HashMap::new(), &[],
+                    false, false, false, enabled, false)?;
+                let expected = if enabled { 0x1234 } else { 0x5678 };
+                assert!(result.relocs.iter().any(|r| r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32
+                    && r.target == expected), "got={got}, enabled={enabled}: actual helper target");
+                assert!(!result.relocs.iter().any(|r| r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32
+                    && r.target == if enabled { 0x5678 } else { 0x1234 }));
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn runtime_map_lookup_ignores_positional_type_and_keeps_default() -> Result<()> {
+        let sites = vec![LookupSiteSpec {
+            kind: LookupKind::PerCpuArray, target_addr: 0, key_offset: 0,
+            max_entries: 8, elem_size: 8, index_mask: 7, value_offset: 0,
+            percpu_base_addr: 0x8000, map_name: Some("outer".to_owned()),
+        }];
+        for name in [None, Some("outer")] {
+            let mut used = [false];
+            let (_, index, spec) = select_lookup_site(
+                &sites, &HashMap::new(), &mut used, 0, name, "entry", 0x1234, true,
+            )?;
+            assert!(matches!(spec.kind, LookupKind::Call));
+            assert_eq!(spec.target_addr, 0x1234);
+            assert_eq!(spec.key_offset, 0);
+            assert_eq!(index, None);
+            assert!(!used[0], "runtime dispatch cannot consume positional metadata");
+            let (_, index, spec) = select_lookup_site(
+                &sites, &HashMap::new(), &mut used, 0, name, "entry", 0x1234, false,
+            )?;
+            assert!(matches!(spec.kind, LookupKind::PerCpuArray));
+            assert_eq!(index, Some(0));
+            assert!(used[0]);
+        }
+        assert!(select_lookup_site(&sites, &HashMap::new(), &mut [false],
+                                  0, None, "entry", 0, true).is_err(),
+                "missing runtime helper must not use a guessed map type");
+        Ok(())
+    }
+
+    #[test]
     fn tail_count_patch_preserves_target_entry() -> Result<()> {
         let helpers = HashMap::from([
             (X86_BPF_MAP_MAX_ENTRIES_OFFSET_KEY.to_owned(), 68),
@@ -4152,7 +4238,7 @@ mod tests {
         let entry = find_symbol_by_name(&elf, "entry")?;
         for preserve in [false, true] {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(),
-                &HashMap::new(), &[], &HashMap::new(), &[], true, preserve, false, false)?;
+                &HashMap::new(), &[], &HashMap::new(), &[], true, preserve, false, false, false)?;
             let mut expected = if preserve { vec![0x53, 0x31, 0xc0, 0x5b] } else { vec![0x31, 0xc0] };
             expected.extend_from_slice(&[0xe9, 0, 0, 0, 0]); // Canonical entry exit in proof mode.
             assert_eq!(output.blob, expected);

@@ -142,6 +142,19 @@ linker-entry-abi-check:
 linker-tail-count-check:
 	cargo test --manifest-path ../x86/native_lab/native_link/Cargo.toml tail_
 
+.PHONY: linker-map-dispatch-check
+linker-map-dispatch-check:
+	cargo test --manifest-path ../x86/native_lab/native_link/Cargo.toml map_lookup
+
+.PHONY: linker-runtime-map-payload
+linker-runtime-map-payload:
+	cargo build --manifest-path ../x86/native_lab/native_link/Cargo.toml
+	install -d "$(OUTPUT)"
+	install -m 755 ../x86/native_lab/native_link/target/debug/native-link "$(OUTPUT)/native-link.real"
+	strip --strip-debug "$(OUTPUT)/native-link.real"
+	install -m 755 ../test/native-link-runtime-lookups.sh "$(OUTPUT)/native-link"
+	"$(OUTPUT)/native-link" --help > "$(OUTPUT)/help.txt"
+
 kernel-check: linker-build
 
 build/test-loader: test_loader.cpp build/context-helper-25.bpf.o build/context-helper-27.bpf.o build/context-helper-67.bpf.o build/bcc-map-probe/manifest.json build/source-value.bpf.o build/source-value-wrong-site.bpf.o build/native-entry.o build/simulator.bpf.o build/runtime-config/simulator.bpf.o build/wrong-capacity/simulator.bpf.o build/wrong-value-size/simulator.bpf.o build/wrong-layout/simulator.bpf.o build/wrong-readonly/simulator.bpf.o build/wrong-data-layout/simulator.bpf.o ../libnativeloader/src/native_loader.cpp \

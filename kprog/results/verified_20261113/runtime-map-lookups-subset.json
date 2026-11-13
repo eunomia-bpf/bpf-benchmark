@@ -1,0 +1,29 @@
+{
+  "recorded_at": "2026-11-13T03:27:15.833739+00:00",
+  "scope": "Default-off generic native map lookup dispatch repair, subset tested and selectable payload built",
+  "finding_source": "perf a2367ceae context-runtime receipt; exact crashing map/link-plan index remains unconfirmed",
+  "problem": "Unknown native map identity consumed first-unused BPF helper-site spec; backend order is not a map identity relation and can assign per-CPU arithmetic to another map type",
+  "change": "--runtime-map-lookups selects kernel bpf_map_lookup_elem dispatch on actual RDI for every native lookup in x86 kernel mode; no borrowed callsite type/value offset. Proof mode unchanged; missing generic helper target exits with explicit error.",
+  "tests": {
+    "before": "CLI opt-in1pass, positional-type regression1fail",
+    "after": "3/3 pass: CLI opt-in, metadata/type selection with missing-target error, real ELF immediate/GOT helper relocations in both enabled/default modes"
+  },
+  "payload": {
+    "selection_environment": "BPFREJIT_NATIVE_LINK_BINARY",
+    "selection_value": "/workspaces/repository/corpus/results/verified-linker-runtime-maps-20261113/native-link",
+    "binary": "/workspaces/repository/corpus/results/verified-linker-runtime-maps-20261113/native-link.real",
+    "binary_bytes": 9829720,
+    "wrapper_source": "kprog/test/native-link-runtime-lookups.sh",
+    "build_command": "taskset -c8-15 make -C kprog/tv linker-runtime-map-payload OUTPUT=/workspaces/repository/corpus/results/verified-linker-runtime-maps-20261113",
+    "build_exit": 0,
+    "profile": "debug with debug sections stripped; runtime native bytes produced by normal linker logic"
+  },
+  "limits": [
+    "No runtime app acceptance, fault-resolution or equal-work claim before perf subset run",
+    "Shared release linker/base/image and default native path unchanged",
+    "This mode covers map lookups; map update/delete behavior unchanged",
+    "No frozen runner/benchmark wiring changed; payload uses existing suite environment forwarding"
+  ],
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-runtime-map-lookups",
+  "archive": "runtime-map-lookups-subset.tar.gz"
+}
