@@ -1,0 +1,17 @@
+{
+  "recorded_at": "2026-11-13T05:54:13.826018+00:00",
+  "scope": "P1c bounded close requested by advisor 2026-11-13T05:44:11Z",
+  "answer": "kprog/results/perf_20261113/may29-bounded-answer.md",
+  "source_chain_defects": {
+    "otel_perf_context": true,
+    "tetragon_flavor_declaration_offsets": true
+  },
+  "exact_original_run_elf_identity": "not established",
+  "original_otel_user_unwinding_frequency": "not measured by retained counters",
+  "historical_equal_work": "not certified",
+  "evidence_commits": [
+    "5bb08526b",
+    "67519f2a6"
+  ],
+  "paper_decision": "operator"
+}

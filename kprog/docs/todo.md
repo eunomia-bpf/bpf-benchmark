@@ -16,7 +16,7 @@
 - [ ] P1 OTel、Tetragon 等量工作：读一次性 Codex 的报告 kprog/results/equal-work-20261113/report.md（以及 COORDINATION 里 FOR TEMP CODEX 的线索：内联 tail call 用到的内核偏移和计数槽）；查清哪一边偏了，按所属组件修（链接器、加载器、shim 属 lane verified，直接和它商量），新行为放在默认关闭的开关后。
 - [x] P1a PERF_EVENT physical-context host子集与候选构建（e0939263e、ce863428d、00c863247）：regs/sample_period/addr按唯一kernel BTF转换，helper/tailcall保留physical ctx；plain fixture=1、corrected=0，OTel 15 units合并构建rc0、10处context loads完成转换。receipt `kprog/results/perf_20261113/context-host.json`；实际配对guest已进入native unwinder，暴露动态inner-map lookup被编为percpu array后的panic；runtime receipt `context-runtime.json`，链接器修复交verified，P1继续。
 - [x] P1b OTel动态inner-map lookup（49f464cc6，371dc4bb6）：runtime-map候选配合context修复完成短配对run `x86_kvm_corpus_20261113_033039_387780`，make0/appok、0错误/0stub；native Attempts/Frames/Interpreter/collector均恢复，mature frames/attempt eBPF0.912213、native0.913468。stats开单样本诊断吞吐0.975x，正式floor另测。receipt `kprog/results/perf_20261113/otel-recovered.json`；P1整体继续核对counter mix与Tetragon。
-- [ ] P1c 查 05-29 存档运行（x86_kvm_corpus_20260529_*）的 OTel、Tetragon 原生对象是否带着同样的缺陷（OTel 按公开寄存器结构读 PERF_EVENT 上下文、不做用户栈展开；Tetragon CO-RE flavor 结构用声明偏移）。论文和 evaluation.md 的 OTel、Tetragon 数字依赖这一点；结论写进第 1 节，论文怎么改由运营者决定。
+- [x] P1c 05-29历史链有界审计（5bb08526b、67519f2a6；结论 `kprog/results/perf_20261113/may29-bounded-answer.md`）：frozen源码链已含OTel公开/physical ctx错读及Tetragon flavor声明偏移，两者亦在后续reference实物中确认；原始四run的精确ELF身份、OTel用户展开频率无保留证据，不能据此认证1.824x/1.323x等量收益。按advisor05:44要求结项；论文解释由运营者决定，纠正后实测继续。
 - [x] P1d Tetragon target-BTF CO-RE compiler host子集（77e2916fb、abb4d8e02、3dfd738fd、c6b15fc34）：host plain1/corrected0，35 manifest objects全部构建成功，35/35 plain code逐节等于shipped default；fork原生PC0x2ff的task+96改成task+2904。`core-host.json`/`core-build-report.json`记录source epoch、4 workers/每process16GiB上限与完整输出。默认关闭NATIVE_MANIFEST选择；两次配对guest均完成make0/appok，启动仍跨测量，交P1e，P1继续。
 - [ ] P1e Tetragon 原生启动仍跨测量：优化 selected linker 后 run `x86_kvm_corpus_20261113_041136_182808` make0/appok，但 result 两臂287/202个程序，native policy 9/15且 rawtp仍LOADING。现有shim日志288次native replacement的整次load中位815ms/合计256.48s；离线解析63f89e2d1、policy观测6ac73dcc4，receipt `tetragon-observed-runtime.json`。直接交verified定位通用loader/shim/linker成本；perf继续受影响行为子集，保留2.106x为启动工作不同的诊断，修复前不把它写作等量收益。
 - P1e 子集归因补证（9025380bb、82061db5b）：run `x86_kvm_corpus_20261113_043935_986036` make0/appok/0stub，288次native loads只有38proof+38kernel child（全0、76个全部唯一配对）；其余250次无child的load合计156.48s，中位284.30ms。全部child仅4.62s，不能用每次fork/link解释主要成本。receipt `kprog/results/perf_20261113/tetragon-link-cost.json`含全量archive；verified继续现有stage timings及manifest/data-symbol成本定位，P1e仍开，不宣称cache丢失或startup收益。
@@ -45,6 +45,8 @@
 - 规则不变：一个工作树、一个内核、一个镜像、一个底座；原始数据不删；新行为放在默认关闭的开关后，默认路径字节不变；不新增检查；论文、故事、设计、benchmark 设置要运营者同意。
 
 ## 1. 性能（目标：六应用几何平均 native/JIT 1.20x–1.40x，来自原生代码）
+
+- **PERF P1c有界结论（2026-11-13，5bb08526b/67519f2a6）** frozen9f与其实际kernel gitlink已含两种缺陷机制，后续reference对象有直接指令证据；原始May四run只有metadata/raw BPF与workload counters，精确ELF和OTel Attempts/Frames未知。因此不能把历史1.824x/1.323x认证为等量收益，也不声称原始OTel用户展开恰为0。`may29-bounded-answer.md/.json`给出逐项证据和界限，P1c按advisor要求结项，运营者决定论文；P1e继续。
 
 - **PERF P1c 历史链补证（2026-11-13）** frozen9f3855f6f实际kernel gitlink8e116c79的PERF_EVENT handler传physical regs指针，verifier解引用；当时loader chunk stub保留ctx，module按原native bytes拷贝，不按prog type投影。Tetragon native配方强制兼容头、preserve-access为identity。两种缺陷机制已在旧链，不是当前stock重建独有。`kprog/results/perf_20261113/may29-chain-audit.json/.tar.gz`含源码摘录与原表四次精确run（OTel021623/024714、Tetra045551/052633）的metadata/raw counters；原始run所用ELF及own-counter仍未建立，后续reference ART身份不冒充May原物。P1c继续；论文由运营者决定，不阻挡纠正后实测。
 
