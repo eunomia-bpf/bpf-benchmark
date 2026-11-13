@@ -1,0 +1,36 @@
+{
+  "recorded_at": "2026-11-13T05:08:01Z",
+  "scope": "P1 reproducible legacy OTel phase-counter decoding",
+  "fix_commit": "0be31b60d",
+  "bugs": [
+    "Fallback source path used parents[2] and searched repository/kprog/vendor instead of repository/vendor after the tool move.",
+    "Explicit enum assignment at ID0 was retained in the metric name rather than parsed as a numeric value.",
+    "An existing /tmp/otel-metric-ids.json hid the source-path error and supplied untracked decoding state."
+  ],
+  "before": "Reproduced FileNotFoundError with temporary mapping absent, without deleting or modifying the existing mapping.",
+  "repair": "Read the tracked enum at the repository root, parse explicit numeric assignments including gaps, and remove dependency on the temporary map.",
+  "unit_tests_passed": 2,
+  "real_snapshot_comparisons": [
+    {
+      "snapshot": "baseline-0002",
+      "counters_equal": 99,
+      "interpreter_calls": 4626320,
+      "native_attempts": 35451453
+    },
+    {
+      "snapshot": "post_rejit-0010",
+      "counters_equal": 99,
+      "interpreter_calls": 41875008,
+      "native_attempts": 296676631
+    }
+  ],
+  "source_enum": "vendor/bpf/otel/support/ebpf/types.h",
+  "source_enum_sha256": "6a39f6fb9571cccf7a97275f14a4c506d1a32c0865c398eaa90976a8baf3470f",
+  "prior_temp_mapping_retained": "/workspaces/kprog-raw/perf/20261113-phase-counter-decoder/prior-temp-metric-ids.json",
+  "limits": [
+    "This repairs the legacy offline decoder only; no workload, loader, image or result.json change.",
+    "The newer eqcodex-analyze.py/counter-windows.py receipts used a separate source decoder. All99counters in both retained snapshots match it; no existing published recovered counter value is changed.",
+    "Generation-aware comparisons still require the retained map IDs/timestamps. This repair does not make phase labels alone sufficient."
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261113-phase-counter-decoder"
+}

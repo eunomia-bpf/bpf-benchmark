@@ -342,3 +342,27 @@ host libdw development package and builds under `/var/tmp/kprog-tmp/perf`.
 This builds a userspace tool only; kernel, base, image, native objects, frozen
 launcher and C's existing tool stay unchanged. Actual build outcome and enabled
 capabilities will be collected next turn before a sampling run. P1e is open.
+
+## Legacy OTel decoder reproducibility repair
+
+`counter-decoder-repair.json` and its archive retain a concrete offline-tool
+repair (`0be31b60d`). Without its temporary ID mapping, phase-counters.py looked
+under repository/kprog/vendor instead of repository/vendor. Its enum parser
+also retained the explicit assignment in the first metric name. The tool now
+always reads the tracked enum at the correct root and parses assigned IDs and
+numeric gaps. The existing temporary mapping is preserved as raw evidence and
+stays untouched; it is no longer an input to this decoder.
+
+Two regressions pass. Against the recovered run's baseline-0002 and native
+post_rejit-0010 raw maps, all99 counters in each snapshot match the independent
+eqcodex-analyze.py output exactly. The newer counter-window receipts therefore
+retain their existing values. This changes offline decoding only and does not
+make progress phase labels sufficient to identify a map generation.
+
+The sampler's first build completed with Make2 before compilation: disabling
+Python bindings also suppressed automatic interpreter discovery, while event
+generation still required Python. `d5596b0bd` supplies /usr/bin/python3
+explicitly. The dependency install succeeded; the in-place tool-only retry is
+launched under the same16GiB/4worker/CPU16–19 bounds. Original logs remain in
+`loader-cpu-profile/build`, with retry logs in `build2`. No sampling guest has
+been launched yet; build capabilities remain to be collected next turn.

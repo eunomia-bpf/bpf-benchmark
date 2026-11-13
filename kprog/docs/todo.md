@@ -21,6 +21,7 @@
 - [ ] P1e Tetragon 原生启动仍跨测量：优化 selected linker 后 run `x86_kvm_corpus_20261113_041136_182808` make0/appok，但 result 两臂287/202个程序，native policy 9/15且 rawtp仍LOADING。现有shim日志288次native replacement的整次load中位815ms/合计256.48s；离线解析63f89e2d1、policy观测6ac73dcc4，receipt `tetragon-observed-runtime.json`。直接交verified定位通用loader/shim/linker成本；perf继续受影响行为子集，保留2.106x为启动工作不同的诊断，修复前不把它写作等量收益。
 - P1e 子集归因补证（9025380bb、82061db5b）：run `x86_kvm_corpus_20261113_043935_986036` make0/appok/0stub，288次native loads只有38proof+38kernel child（全0、76个全部唯一配对）；其余250次无child的load合计156.48s，中位284.30ms。全部child仅4.62s，不能用每次fork/link解释主要成本。receipt `kprog/results/perf_20261113/tetragon-link-cost.json`含全量archive；verified继续现有stage timings及manifest/data-symbol成本定位，P1e仍开，不宣称cache丢失或startup收益。
 - [x] P1f OTel counter-mix 时窗审计（b07cb025c、8e15cd19e）：全部相邻同generation窗口保留，frames按各自family attempts归一；baseline Ruby yield自身0.35–0.76，不能把此前跨窗口0.555/0.376直接归因于native。实际shim measure_start在warmup之后，progress标记在warmup之前；observer新增每次read的wall/monotonic边界，4+1 focused regressions通过。receipt `kprog/results/perf_20261113/otel-counter-mix.json`；不据此宣称完全等价，P1整体继续。
+- [x] P1g 旧OTel phase-counters解码可复现修复（0be31b60d）：去掉/tmp临时ID表依赖，修正移动后的源码根路径和显式enum赋值解析；2回归通过，两臂各99个raw counters逐项等于独立eqcodex解码。receipt `kprog/results/perf_20261113/counter-decoder-repair.json`；已有counter-window数字不变，不改framework或phase/generation判定。
 - [ ] P2 修好后只重测受这处修复影响的应用（stats 关和开，每个应用 3×180 秒），每次运行用 stubs.py 和程序自身计数核对，增量写进第 1 节；六应用全量计时只在冻结前跑一次，正式下限表和几何平均以那次为准。
 - [ ] P3 等量工作成立的应用里，按每次调用的差距找原生一侧的通用优化（OTel、Tetragon、Cilium）。
 
