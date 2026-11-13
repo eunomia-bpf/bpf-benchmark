@@ -1,0 +1,38 @@
+    48	FUNC_INLINE __u32 get_task_pid_vnr_by_task(struct task_struct *t)
+    49	{
+    50		struct task_struct___local *task = (struct task_struct___local *)t;
+    51		int thread_pid_exists;
+    52		unsigned int level;
+    53		struct upid upid;
+    54		struct pid *pid;
+    55		int upid_sz;
+    56
+    57		thread_pid_exists = bpf_core_field_exists(task->thread_pid);
+    58		if (thread_pid_exists) {
+    59			probe_read_kernel(&pid, sizeof(pid), _(&task->thread_pid));
+    60			if (!pid)
+    61				return 0;
+    62		} else {
+    63			struct pid_link link;
+    64			int link_sz = bpf_core_field_size(task->pids);
+    65
+    66			/* 4.14 verifier did not prune this branch even though we
+    67			 * have the if (0) above after BTF exists check. So it will
+    68			 * try to run this probe_read and throw an error. So lets
+    69			 * sanitize it for the verifier.
+    70			 */
+    71			if (!thread_pid_exists)
+    72				link_sz =
+    73					24; // voodoo magic, hard-code 24 to init stack
+    74			probe_read_kernel(&link, link_sz,
+    75					  (void *)_(&task->pids) + (PIDTYPE_PID * link_sz));
+    76			pid = link.pid;
+    77		}
+    78		upid_sz = bpf_core_field_size(pid->numbers[0]);
+    79		probe_read_kernel(&level, sizeof(level), _(&pid->level));
+    80		if (level < 1)
+    81			return 0;
+    82		probe_read_kernel(&upid, upid_sz,
+    83				  (void *)_(&pid->numbers) + (level * upid_sz));
+    84		return upid.nr;
+    85	}

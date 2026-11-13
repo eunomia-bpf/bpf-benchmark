@@ -1,0 +1,44 @@
+    60	#ifndef bpf_for
+    61	#define bpf_for(i, start, end) for ((i) = (start); (i) < (end); (i)++)
+    62	#endif
+    63	#ifndef bpf_repeat
+    64	#define bpf_repeat(n) for (int __native_repeat_i = 0; __native_repeat_i < (n); __native_repeat_i++)
+    65	#endif
+    66	#ifndef __builtin_preserve_access_index
+    67	#define __builtin_preserve_access_index(expr) (expr)
+    68	#endif
+    69	#ifndef _
+    70	#define _(P) (__builtin_preserve_access_index(P))
+    71	#endif
+    72
+    73	#define __PT_PARM1_REG di
+   309	#ifndef bpf_core_field_exists
+   310	#ifdef MICRO_NATIVE_TETRAGON
+   311	/*
+   312	 * Native objects are compiled against the generated target vmlinux header, not
+   313	 * libbpf-relocated BPF CO-RE metadata. Most field-existence probes used by the
+   314	 * corpus should therefore fold to true when the expression compiles. CO-RE
+   315	 * flavor structs are the exception. Their fields exist in the source C type,
+   316	 * but their offsets are synthetic until libbpf CO-RE relocates them against
+   317	 * the target kernel BTF. Taking those branches in native C reads the synthetic
+   318	 * layout instead of the real vmlinux_generated_*.h layout.
+   319	 */
+   320	#define __native_bpf_core_field_exists_text(field_text) \
+   321	    (__builtin_strcmp((field_text), "((struct kernfs_node___old *)0)->id.id") != 0 && \
+   322	     __builtin_strcmp((field_text), "cgrp_new->ancestors") != 0)
+   323	#define bpf_core_field_exists(field...) \
+   324	    __native_bpf_core_field_exists_text(#field)
+   325	#else
+   326	#define bpf_core_field_exists(field...) (1)
+   327	#endif
+   328	#endif
+   329	#ifndef bpf_core_type_exists
+   330	#define bpf_core_type_exists(type) (1)
+   331	#endif
+   332	#ifndef bpf_core_type_size
+   333	#define bpf_core_type_size(type) sizeof(type)
+   334	#endif
+   335	#ifndef bpf_core_field_size
+   336	#define bpf_core_field_size(field) sizeof(field)
+   337	#endif
+   338	#ifndef bpf_core_enum_value_exists

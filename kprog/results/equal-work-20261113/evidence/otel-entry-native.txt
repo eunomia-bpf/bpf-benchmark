@@ -1,0 +1,1271 @@
+
+vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o:	file format elf64-x86-64
+
+Disassembly of section perf_event/native_tracer_entry:
+
+0000000000000000 <native_tracer_entry>:
+       0: 55                           	pushq	%rbp
+       1: 41 57                        	pushq	%r15
+       3: 41 56                        	pushq	%r14
+       5: 41 55                        	pushq	%r13
+       7: 41 54                        	pushq	%r12
+       9: 53                           	pushq	%rbx
+       a: 48 81 ec 08 01 00 00         	subq	$0x108, %rsp            # imm = 0x108
+      11: 48 89 fb                     	movq	%rdi, %rbx
+      14: b8 0e 00 00 00               	movl	$0xe, %eax
+      19: ff d0                        	callq	*%rax
+      1b: 49 89 c5                     	movq	%rax, %r13
+      1e: 49 89 c4                     	movq	%rax, %r12
+      21: 49 c1 ec 20                  	shrq	$0x20, %r12
+      25: 0f 84 6f 01 00 00            	je	0x19a <native_tracer_entry+0x19a>
+      2b: b8 05 00 00 00               	movl	$0x5, %eax
+      30: ff d0                        	callq	*%rax
+      32: 48 89 c5                     	movq	%rax, %rbp
+      35: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0x3c <native_tracer_entry+0x3c>
+		0000000000000038:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+      3c: 83 38 00                     	cmpl	$0x0, (%rax)
+      3f: 0f 85 f3 09 00 00            	jne	0xa38 <native_tracer_entry+0xa38>
+      45: c7 44 24 10 00 00 00 00      	movl	$0x0, 0x10(%rsp)
+      4d: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x54 <native_tracer_entry+0x54>
+		0000000000000050:  R_X86_64_REX_GOTPCRELX	per_cpu_records-0x4
+      54: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+      59: b8 01 00 00 00               	movl	$0x1, %eax
+      5e: ff d0                        	callq	*%rax
+      60: 41 be ff ff ff ff            	movl	$0xffffffff, %r14d      # imm = 0xFFFFFFFF
+      66: 48 85 c0                     	testq	%rax, %rax
+      69: 0f 84 da 0b 00 00            	je	0xc49 <native_tracer_entry+0xc49>
+      6f: 49 89 c7                     	movq	%rax, %r15
+      72: 48 c7 80 00 0f 00 00 00 00 00 00     	movq	$0x0, 0xf00(%rax)
+      7d: c6 80 30 0f 00 00 00         	movb	$0x0, 0xf30(%rax)
+      84: 48 c7 80 d0 0e 00 00 00 00 00 00     	movq	$0x0, 0xed0(%rax)
+      8f: 48 c7 80 d8 0e 00 00 00 00 00 00     	movq	$0x0, 0xed8(%rax)
+      9a: 48 c7 80 e0 0e 00 00 00 00 00 00     	movq	$0x0, 0xee0(%rax)
+      a5: b8 ff ff ff ff               	movl	$0xffffffff, %eax       # imm = 0xFFFFFFFF
+      aa: 49 89 87 28 0f 00 00         	movq	%rax, 0xf28(%r15)
+      b1: 41 c7 87 80 13 00 00 00 00 00 00     	movl	$0x0, 0x1380(%r15)
+      bc: 66 41 c7 87 84 13 00 00 00 01	movw	$0x100, 0x1384(%r15)    # imm = 0x100
+      c6: 49 c7 87 38 0f 00 00 00 00 00 00     	movq	$0x0, 0xf38(%r15)
+      d1: 49 c7 87 40 0f 00 00 00 00 00 00     	movq	$0x0, 0xf40(%r15)
+      dc: 49 c7 87 58 0f 00 00 00 00 00 00     	movq	$0x0, 0xf58(%r15)
+      e7: 49 c7 87 60 0f 00 00 00 00 00 00     	movq	$0x0, 0xf60(%r15)
+      f2: 49 c7 87 68 0f 00 00 00 00 00 00     	movq	$0x0, 0xf68(%r15)
+      fd: 49 c7 87 70 0f 00 00 00 00 00 00     	movq	$0x0, 0xf70(%r15)
+     108: 49 c7 87 78 0f 00 00 00 00 00 00     	movq	$0x0, 0xf78(%r15)
+     113: 49 89 87 bc 02 00 00         	movq	%rax, 0x2bc(%r15)
+     11a: 49 8d 7f 20                  	leaq	0x20(%r15), %rdi
+     11e: ba 9c 02 00 00               	movl	$0x29c, %edx            # imm = 0x29C
+     123: 31 f6                        	xorl	%esi, %esi
+     125: e8 00 00 00 00               	callq	0x12a <native_tracer_entry+0x12a>
+		0000000000000126:  R_X86_64_PLT32	memset-0x4
+     12a: 41 c7 87 c4 02 00 00 01 00 00 00     	movl	$0x1, 0x2c4(%r15)
+     135: 45 89 27                     	movl	%r12d, (%r15)
+     138: 45 89 6f 04                  	movl	%r13d, 0x4(%r15)
+     13c: 49 89 6f 08                  	movq	%rbp, 0x8(%r15)
+     140: 49 c7 87 c8 02 00 00 00 00 00 00     	movq	$0x0, 0x2c8(%r15)
+     14b: 49 8d 7f 10                  	leaq	0x10(%r15), %rdi
+     14f: b8 10 00 00 00               	movl	$0x10, %eax
+     154: b9 10 00 00 00               	movl	$0x10, %ecx
+     159: be 10 00 00 00               	movl	$0x10, %esi
+     15e: ff d1                        	callq	*%rcx
+     160: 85 c0                        	testl	%eax, %eax
+     162: 0f 89 c7 01 00 00            	jns	0x32f <native_tracer_entry+0x32f>
+     168: c7 84 24 d0 00 00 00 34 00 00 00     	movl	$0x34, 0xd0(%rsp)
+     173: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x17a <native_tracer_entry+0x17a>
+		0000000000000176:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     17a: 48 8d b4 24 d0 00 00 00      	leaq	0xd0(%rsp), %rsi
+     182: b8 01 00 00 00               	movl	$0x1, %eax
+     187: ff d0                        	callq	*%rax
+     189: 48 85 c0                     	testq	%rax, %rax
+     18c: 0f 84 8d 01 00 00            	je	0x31f <native_tracer_entry+0x31f>
+     192: 48 ff 00                     	incq	(%rax)
+     195: e9 95 01 00 00               	jmp	0x32f <native_tracer_entry+0x32f>
+     19a: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0x1a1 <native_tracer_entry+0x1a1>
+		000000000000019d:  R_X86_64_REX_GOTPCRELX	filter_idle_frames-0x4
+     1a1: 45 31 f6                     	xorl	%r14d, %r14d
+     1a4: 80 38 00                     	cmpb	$0x0, (%rax)
+     1a7: 0f 85 9c 0a 00 00            	jne	0xc49 <native_tracer_entry+0xc49>
+     1ad: b8 05 00 00 00               	movl	$0x5, %eax
+     1b2: ff d0                        	callq	*%rax
+     1b4: 49 89 c7                     	movq	%rax, %r15
+     1b7: 4c 8b 25 00 00 00 00         	movq	(%rip), %r12            # 0x1be <native_tracer_entry+0x1be>
+		00000000000001ba:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+     1be: 41 83 3c 24 00               	cmpl	$0x0, (%r12)
+     1c3: 0f 85 45 0c 00 00            	jne	0xe0e <native_tracer_entry+0xe0e>
+     1c9: c7 44 24 10 00 00 00 00      	movl	$0x0, 0x10(%rsp)
+     1d1: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x1d8 <native_tracer_entry+0x1d8>
+		00000000000001d4:  R_X86_64_REX_GOTPCRELX	per_cpu_records-0x4
+     1d8: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     1dd: b8 01 00 00 00               	movl	$0x1, %eax
+     1e2: ff d0                        	callq	*%rax
+     1e4: 48 85 c0                     	testq	%rax, %rax
+     1e7: 0f 84 93 02 00 00            	je	0x480 <native_tracer_entry+0x480>
+     1ed: 49 89 c6                     	movq	%rax, %r14
+     1f0: 48 c7 80 00 0f 00 00 00 00 00 00     	movq	$0x0, 0xf00(%rax)
+     1fb: c6 80 30 0f 00 00 00         	movb	$0x0, 0xf30(%rax)
+     202: 48 c7 80 d0 0e 00 00 00 00 00 00     	movq	$0x0, 0xed0(%rax)
+     20d: 48 c7 80 d8 0e 00 00 00 00 00 00     	movq	$0x0, 0xed8(%rax)
+     218: 48 c7 80 e0 0e 00 00 00 00 00 00     	movq	$0x0, 0xee0(%rax)
+     223: b8 ff ff ff ff               	movl	$0xffffffff, %eax       # imm = 0xFFFFFFFF
+     228: 49 89 86 28 0f 00 00         	movq	%rax, 0xf28(%r14)
+     22f: 41 c7 86 80 13 00 00 00 00 00 00     	movl	$0x0, 0x1380(%r14)
+     23a: 66 41 c7 86 84 13 00 00 00 01	movw	$0x100, 0x1384(%r14)    # imm = 0x100
+     244: 49 c7 86 38 0f 00 00 00 00 00 00     	movq	$0x0, 0xf38(%r14)
+     24f: 49 c7 86 40 0f 00 00 00 00 00 00     	movq	$0x0, 0xf40(%r14)
+     25a: 49 c7 86 58 0f 00 00 00 00 00 00     	movq	$0x0, 0xf58(%r14)
+     265: 49 c7 86 60 0f 00 00 00 00 00 00     	movq	$0x0, 0xf60(%r14)
+     270: 49 c7 86 68 0f 00 00 00 00 00 00     	movq	$0x0, 0xf68(%r14)
+     27b: 49 c7 86 70 0f 00 00 00 00 00 00     	movq	$0x0, 0xf70(%r14)
+     286: 49 c7 86 78 0f 00 00 00 00 00 00     	movq	$0x0, 0xf78(%r14)
+     291: 49 89 86 bc 02 00 00         	movq	%rax, 0x2bc(%r14)
+     298: 49 8d 7e 20                  	leaq	0x20(%r14), %rdi
+     29c: ba 9c 02 00 00               	movl	$0x29c, %edx            # imm = 0x29C
+     2a1: 31 f6                        	xorl	%esi, %esi
+     2a3: e8 00 00 00 00               	callq	0x2a8 <native_tracer_entry+0x2a8>
+		00000000000002a4:  R_X86_64_PLT32	memset-0x4
+     2a8: 41 c7 86 c4 02 00 00 01 00 00 00     	movl	$0x1, 0x2c4(%r14)
+     2b3: 41 c7 06 00 00 00 00         	movl	$0x0, (%r14)
+     2ba: 45 89 6e 04                  	movl	%r13d, 0x4(%r14)
+     2be: 4d 89 7e 08                  	movq	%r15, 0x8(%r14)
+     2c2: 49 c7 86 c8 02 00 00 00 00 00 00     	movq	$0x0, 0x2c8(%r14)
+     2cd: 4c 89 f7                     	movq	%r14, %rdi
+     2d0: 48 83 c7 10                  	addq	$0x10, %rdi
+     2d4: b8 10 00 00 00               	movl	$0x10, %eax
+     2d9: b9 10 00 00 00               	movl	$0x10, %ecx
+     2de: be 10 00 00 00               	movl	$0x10, %esi
+     2e3: ff d1                        	callq	*%rcx
+     2e5: 85 c0                        	testl	%eax, %eax
+     2e7: 0f 89 60 03 00 00            	jns	0x64d <native_tracer_entry+0x64d>
+     2ed: c7 84 24 d0 00 00 00 34 00 00 00     	movl	$0x34, 0xd0(%rsp)
+     2f8: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x2ff <native_tracer_entry+0x2ff>
+		00000000000002fb:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     2ff: 48 8d b4 24 d0 00 00 00      	leaq	0xd0(%rsp), %rsi
+     307: b8 01 00 00 00               	movl	$0x1, %eax
+     30c: ff d0                        	callq	*%rax
+     30e: 48 85 c0                     	testq	%rax, %rax
+     311: 0f 84 2b 03 00 00            	je	0x642 <native_tracer_entry+0x642>
+     317: 48 ff 00                     	incq	(%rax)
+     31a: e9 2e 03 00 00               	jmp	0x64d <native_tracer_entry+0x64d>
+     31f: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0x326 <native_tracer_entry+0x326>
+		0000000000000322:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+     326: 83 38 00                     	cmpl	$0x0, (%rax)
+     329: 0f 85 0d 0c 00 00            	jne	0xf3c <native_tracer_entry+0xf3c>
+     32f: 48 8b 35 00 00 00 00         	movq	(%rip), %rsi            # 0x336 <native_tracer_entry+0x336>
+		0000000000000332:  R_X86_64_REX_GOTPCRELX	kernel_stackmap-0x4
+     336: b8 00 04 00 00               	movl	$0x400, %eax            # imm = 0x400
+     33b: b9 1b 00 00 00               	movl	$0x1b, %ecx
+     340: ba 00 04 00 00               	movl	$0x400, %edx            # imm = 0x400
+     345: 48 89 df                     	movq	%rbx, %rdi
+     348: ff d1                        	callq	*%rcx
+     34a: 41 89 87 bc 02 00 00         	movl	%eax, 0x2bc(%r15)
+     351: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0x358 <native_tracer_entry+0x358>
+		0000000000000354:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+     358: 83 38 00                     	cmpl	$0x0, (%rax)
+     35b: 0f 85 21 07 00 00            	jne	0xa82 <native_tracer_entry+0xa82>
+     361: 48 83 bb a0 00 00 00 2b      	cmpq	$0x2b, 0xa0(%rbx)
+     369: 0f 85 6d 07 00 00            	jne	0xadc <native_tracer_entry+0xadc>
+     36f: 48 83 bb 88 00 00 00 23      	cmpq	$0x23, 0x88(%rbx)
+     377: 75 0a                        	jne	0x383 <native_tracer_entry+0x383>
+     379: bd b1 0f 00 00               	movl	$0xfb1, %ebp            # imm = 0xFB1
+     37e: e9 f6 07 00 00               	jmp	0xb79 <native_tracer_entry+0xb79>
+     383: 48 8b 83 80 00 00 00         	movq	0x80(%rbx), %rax
+     38a: 49 89 87 d0 0e 00 00         	movq	%rax, 0xed0(%r15)
+     391: 48 8b 83 98 00 00 00         	movq	0x98(%rbx), %rax
+     398: 49 89 87 d8 0e 00 00         	movq	%rax, 0xed8(%r15)
+     39f: 48 8b 43 20                  	movq	0x20(%rbx), %rax
+     3a3: 49 89 87 e0 0e 00 00         	movq	%rax, 0xee0(%r15)
+     3aa: 48 8b 43 50                  	movq	0x50(%rbx), %rax
+     3ae: 49 89 87 e8 0e 00 00         	movq	%rax, 0xee8(%r15)
+     3b5: 48 8b 43 40                  	movq	0x40(%rbx), %rax
+     3b9: 49 89 87 f0 0e 00 00         	movq	%rax, 0xef0(%r15)
+     3c0: 48 8b 43 30                  	movq	0x30(%rbx), %rax
+     3c4: 49 89 87 f8 0e 00 00         	movq	%rax, 0xef8(%r15)
+     3cb: 48 8b 43 10                  	movq	0x10(%rbx), %rax
+     3cf: 49 89 87 00 0f 00 00         	movq	%rax, 0xf00(%r15)
+     3d6: 48 8b 03                     	movq	(%rbx), %rax
+     3d9: 49 89 87 08 0f 00 00         	movq	%rax, 0xf08(%r15)
+     3e0: 41 c6 87 30 0f 00 00 00      	movb	$0x0, 0xf30(%r15)
+     3e8: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0x3ef <native_tracer_entry+0x3ef>
+		00000000000003eb:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+     3ef: 83 38 00                     	cmpl	$0x0, (%rax)
+     3f2: 0f 85 0b 09 00 00            	jne	0xd03 <native_tracer_entry+0xd03>
+     3f8: c7 44 24 10 60 00 00 00      	movl	$0x60, 0x10(%rsp)
+     400: 44 0f 38 f1 64 24 14         	movbel	%r12d, 0x14(%rsp)
+     407: 48 c7 44 24 18 00 00 00 00   	movq	$0x0, 0x18(%rsp)
+     410: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x417 <native_tracer_entry+0x417>
+		0000000000000413:  R_X86_64_REX_GOTPCRELX	pid_page_to_mapping_info-0x4
+     417: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     41c: b8 01 00 00 00               	movl	$0x1, %eax
+     421: ff d0                        	callq	*%rax
+     423: 48 85 c0                     	testq	%rax, %rax
+     426: 74 63                        	je	0x48b <native_tracer_entry+0x48b>
+     428: 4c 89 f8                     	movq	%r15, %rax
+     42b: 48 05 d0 0e 00 00            	addq	$0xed0, %rax            # imm = 0xED0
+     431: 4c 8b 28                     	movq	(%rax), %r13
+     434: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0x43b <native_tracer_entry+0x43b>
+		0000000000000437:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+     43b: 8b 00                        	movl	(%rax), %eax
+     43d: 4d 85 ed                     	testq	%r13, %r13
+     440: 0f 84 0e 01 00 00            	je	0x554 <native_tracer_entry+0x554>
+     446: 85 c0                        	testl	%eax, %eax
+     448: 0f 85 6c 0b 00 00            	jne	0xfba <native_tracer_entry+0xfba>
+     44e: 4c 89 e8                     	movq	%r13, %rax
+     451: 48 c1 e8 38                  	shrq	$0x38, %rax
+     455: 0f 84 f1 0b 00 00            	je	0x104c <native_tracer_entry+0x104c>
+     45b: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0x462 <native_tracer_entry+0x462>
+		000000000000045e:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+     462: 83 38 00                     	cmpl	$0x0, (%rax)
+     465: 0f 85 04 0f 00 00            	jne	0x136f <native_tracer_entry+0x136f>
+     46b: 41 c7 87 28 0f 00 00 0b 00 00 00     	movl	$0xb, 0xf28(%r15)
+     476: bd ab 0f 00 00               	movl	$0xfab, %ebp            # imm = 0xFAB
+     47b: e9 f9 06 00 00               	jmp	0xb79 <native_tracer_entry+0xb79>
+     480: 41 be ff ff ff ff            	movl	$0xffffffff, %r14d      # imm = 0xFFFFFFFF
+     486: e9 be 07 00 00               	jmp	0xc49 <native_tracer_entry+0xc49>
+     48b: 4c 89 ac 24 c8 00 00 00      	movq	%r13, 0xc8(%rsp)
+     493: 44 89 64 24 08               	movl	%r12d, 0x8(%rsp)
+     498: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x49f <native_tracer_entry+0x49f>
+		000000000000049b:  R_X86_64_REX_GOTPCRELX	reported_pids-0x4
+     49f: 48 8d 74 24 08               	leaq	0x8(%rsp), %rsi
+     4a4: b8 01 00 00 00               	movl	$0x1, %eax
+     4a9: ff d0                        	callq	*%rax
+     4ab: 49 89 c6                     	movq	%rax, %r14
+     4ae: b8 05 00 00 00               	movl	$0x5, %eax
+     4b3: ff d0                        	callq	*%rax
+     4b5: 4d 85 f6                     	testq	%r14, %r14
+     4b8: 0f 84 b3 00 00 00            	je	0x571 <native_tracer_entry+0x571>
+     4be: 49 8b 0e                     	movq	(%r14), %rcx
+     4c1: 48 89 ce                     	movq	%rcx, %rsi
+     4c4: 48 83 e6 e0                  	andq	$-0x20, %rsi
+     4c8: 48 89 c2                     	movq	%rax, %rdx
+     4cb: 48 29 f2                     	subq	%rsi, %rdx
+     4ce: 89 ce                        	movl	%ecx, %esi
+     4d0: 40 80 e6 0f                  	andb	$0xf, %sil
+     4d4: bf 00 e1 f5 05               	movl	$0x5f5e100, %edi        # imm = 0x5F5E100
+     4d9: c4 e2 c9 f7 f7               	shlxq	%rsi, %rdi, %rsi
+     4de: 48 39 f2                     	cmpq	%rsi, %rdx
+     4e1: 0f 83 8e 00 00 00            	jae	0x575 <native_tracer_entry+0x575>
+     4e7: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0x4ee <native_tracer_entry+0x4ee>
+		00000000000004ea:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+     4ee: 83 38 00                     	cmpl	$0x0, (%rax)
+     4f1: 0f 84 39 05 00 00            	je	0xa30 <native_tracer_entry+0xa30>
+     4f7: 48 b8 6f 20 66 61 73 74 0a 00	movabsq	$0xa74736166206f, %rax  # imm = 0xA74736166206F
+     501: 48 89 44 24 28               	movq	%rax, 0x28(%rsp)
+     506: 48 b8 69 74 65 64 3a 20 74 6f	movabsq	$0x6f74203a64657469, %rax # imm = 0x6F74203A64657469
+     510: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+     515: 48 b8 76 65 6e 74 20 6c 69 6d	movabsq	$0x6d696c20746e6576, %rax # imm = 0x6D696C20746E6576
+     51f: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+     524: 48 b8 50 49 44 20 25 64 20 65	movabsq	$0x6520642520444950, %rax # imm = 0x6520642520444950
+     52e: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+     533: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     538: b8 20 00 00 00               	movl	$0x20, %eax
+     53d: b9 06 00 00 00               	movl	$0x6, %ecx
+     542: 8b 54 24 08                  	movl	0x8(%rsp), %edx
+     546: be 20 00 00 00               	movl	$0x20, %esi
+     54b: 31 c0                        	xorl	%eax, %eax
+     54d: ff d1                        	callq	*%rcx
+     54f: e9 dc 04 00 00               	jmp	0xa30 <native_tracer_entry+0xa30>
+     554: 85 c0                        	testl	%eax, %eax
+     556: 0f 85 97 0d 00 00            	jne	0x12f3 <native_tracer_entry+0x12f3>
+     55c: 41 c7 87 28 0f 00 00 01 00 00 00     	movl	$0x1, 0xf28(%r15)
+     567: bd ad 0f 00 00               	movl	$0xfad, %ebp            # imm = 0xFAD
+     56c: e9 08 06 00 00               	jmp	0xb79 <native_tracer_entry+0xb79>
+     571: 31 ed                        	xorl	%ebp, %ebp
+     573: eb 33                        	jmp	0x5a8 <native_tracer_entry+0x5a8>
+     575: 89 cd                        	movl	%ecx, %ebp
+     577: 40 80 e5 10                  	andb	$0x10, %bpl
+     57b: bf ff ff ff ff               	movl	$0xffffffff, %edi       # imm = 0xFFFFFFFF
+     580: 48 01 fe                     	addq	%rdi, %rsi
+     583: 48 81 c6 01 f2 05 2a         	addq	$0x2a05f201, %rsi       # imm = 0x2A05F201
+     58a: 48 39 f2                     	cmpq	%rsi, %rdx
+     58d: 73 19                        	jae	0x5a8 <native_tracer_entry+0x5a8>
+     58f: 83 e1 0f                     	andl	$0xf, %ecx
+     592: 31 d2                        	xorl	%edx, %edx
+     594: 40 84 ed                     	testb	%bpl, %bpl
+     597: 0f 94 c2                     	sete	%dl
+     59a: 8d 14 95 04 00 00 00         	leal	0x4(,%rdx,4), %edx
+     5a1: 39 d1                        	cmpl	%edx, %ecx
+     5a3: 80 d1 00                     	adcb	$0x0, %cl
+     5a6: eb 02                        	jmp	0x5aa <native_tracer_entry+0x5aa>
+     5a8: 31 c9                        	xorl	%ecx, %ecx
+     5aa: 48 8b 15 00 00 00 00         	movq	(%rip), %rdx            # 0x5b1 <native_tracer_entry+0x5b1>
+		00000000000005ad:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+     5b1: 83 3a 00                     	cmpl	$0x0, (%rdx)
+     5b4: 44 0f b6 f1                  	movzbl	%cl, %r14d
+     5b8: 0f 85 cd 0c 00 00            	jne	0x128b <native_tracer_entry+0x128b>
+     5be: 48 83 e0 e0                  	andq	$-0x20, %rax
+     5c2: 40 0f b6 cd                  	movzbl	%bpl, %ecx
+     5c6: 48 09 c1                     	orq	%rax, %rcx
+     5c9: 49 09 ce                     	orq	%rcx, %r14
+     5cc: 4c 89 b4 24 d0 00 00 00      	movq	%r14, 0xd0(%rsp)
+     5d4: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x5db <native_tracer_entry+0x5db>
+		00000000000005d7:  R_X86_64_REX_GOTPCRELX	reported_pids-0x4
+     5db: 31 c0                        	xorl	%eax, %eax
+     5dd: 48 8d 74 24 08               	leaq	0x8(%rsp), %rsi
+     5e2: 48 8d 94 24 d0 00 00 00      	leaq	0xd0(%rsp), %rdx
+     5ea: 41 b8 02 00 00 00            	movl	$0x2, %r8d
+     5f0: 31 c9                        	xorl	%ecx, %ecx
+     5f2: 41 ff d0                     	callq	*%r8
+     5f5: 85 c0                        	testl	%eax, %eax
+     5f7: 0f 84 00 01 00 00            	je	0x6fd <native_tracer_entry+0x6fd>
+     5fd: 48 8b 0d 00 00 00 00         	movq	(%rip), %rcx            # 0x604 <native_tracer_entry+0x604>
+		0000000000000600:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+     604: 83 39 00                     	cmpl	$0x0, (%rcx)
+     607: 0f 85 c5 0d 00 00            	jne	0x13d2 <native_tracer_entry+0x13d2>
+     60d: c7 84 24 c4 00 00 00 3d 00 00 00     	movl	$0x3d, 0xc4(%rsp)
+     618: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x61f <native_tracer_entry+0x61f>
+		000000000000061b:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     61f: 48 8d b4 24 c4 00 00 00      	leaq	0xc4(%rsp), %rsi
+     627: b8 01 00 00 00               	movl	$0x1, %eax
+     62c: ff d0                        	callq	*%rax
+     62e: 48 85 c0                     	testq	%rax, %rax
+     631: 0f 84 6f 01 00 00            	je	0x7a6 <native_tracer_entry+0x7a6>
+     637: 48 ff 00                     	incq	(%rax)
+     63a: 45 31 f6                     	xorl	%r14d, %r14d
+     63d: e9 07 06 00 00               	jmp	0xc49 <native_tracer_entry+0xc49>
+     642: 41 83 3c 24 00               	cmpl	$0x0, (%r12)
+     647: 0f 85 e6 0d 00 00            	jne	0x1433 <native_tracer_entry+0x1433>
+     64d: 48 8b 35 00 00 00 00         	movq	(%rip), %rsi            # 0x654 <native_tracer_entry+0x654>
+		0000000000000650:  R_X86_64_REX_GOTPCRELX	kernel_stackmap-0x4
+     654: b8 00 04 00 00               	movl	$0x400, %eax            # imm = 0x400
+     659: b9 1b 00 00 00               	movl	$0x1b, %ecx
+     65e: ba 00 04 00 00               	movl	$0x400, %edx            # imm = 0x400
+     663: 48 89 df                     	movq	%rbx, %rdi
+     666: ff d1                        	callq	*%rcx
+     668: 41 89 86 bc 02 00 00         	movl	%eax, 0x2bc(%r14)
+     66f: 41 83 3c 24 00               	cmpl	$0x0, (%r12)
+     674: 0f 85 de 07 00 00            	jne	0xe58 <native_tracer_entry+0xe58>
+     67a: c7 44 24 10 00 00 00 00      	movl	$0x0, 0x10(%rsp)
+     682: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x689 <native_tracer_entry+0x689>
+		0000000000000685:  R_X86_64_REX_GOTPCRELX	per_cpu_records-0x4
+     689: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     68e: b8 01 00 00 00               	movl	$0x1, %eax
+     693: ff d0                        	callq	*%rax
+     695: 48 85 c0                     	testq	%rax, %rax
+     698: 74 4f                        	je	0x6e9 <native_tracer_entry+0x6e9>
+     69a: 0f b6 88 84 13 00 00         	movzbl	0x1384(%rax), %ecx
+     6a1: 80 f9 1d                     	cmpb	$0x1d, %cl
+     6a4: 0f 82 d9 00 00 00            	jb	0x783 <native_tracer_entry+0x783>
+     6aa: 49 89 c6                     	movq	%rax, %r14
+     6ad: c7 80 2c 0f 00 00 05 00 00 00	movl	$0x5, 0xf2c(%rax)
+     6b7: c7 84 24 d0 00 00 00 44 00 00 00     	movl	$0x44, 0xd0(%rsp)
+     6c2: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x6c9 <native_tracer_entry+0x6c9>
+		00000000000006c5:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     6c9: 48 8d b4 24 d0 00 00 00      	leaq	0xd0(%rsp), %rsi
+     6d1: b8 01 00 00 00               	movl	$0x1, %eax
+     6d6: ff d0                        	callq	*%rax
+     6d8: 48 85 c0                     	testq	%rax, %rax
+     6db: 0f 84 8c 00 00 00            	je	0x76d <native_tracer_entry+0x76d>
+     6e1: 48 ff 00                     	incq	(%rax)
+     6e4: e9 8f 00 00 00               	jmp	0x778 <native_tracer_entry+0x778>
+     6e9: 48 8b 35 00 00 00 00         	movq	(%rip), %rsi            # 0x6f0 <native_tracer_entry+0x6f0>
+		00000000000006ec:  R_X86_64_REX_GOTPCRELX	perf_progs-0x4
+     6f0: 45 31 f6                     	xorl	%r14d, %r14d
+     6f3: b8 0c 00 00 00               	movl	$0xc, %eax
+     6f8: e9 9d 00 00 00               	jmp	0x79a <native_tracer_entry+0x79a>
+     6fd: c6 44 24 0f 01               	movb	$0x1, 0xf(%rsp)
+     702: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x709 <native_tracer_entry+0x709>
+		0000000000000705:  R_X86_64_REX_GOTPCRELX	pid_events-0x4
+     709: 31 c0                        	xorl	%eax, %eax
+     70b: 48 8d b4 24 c8 00 00 00      	leaq	0xc8(%rsp), %rsi
+     713: 48 8d 54 24 0f               	leaq	0xf(%rsp), %rdx
+     718: 41 b8 02 00 00 00            	movl	$0x2, %r8d
+     71e: 31 c9                        	xorl	%ecx, %ecx
+     720: 41 ff d0                     	callq	*%r8
+     723: 85 c0                        	testl	%eax, %eax
+     725: 0f 84 09 01 00 00            	je	0x834 <native_tracer_entry+0x834>
+     72b: 48 8b 0d 00 00 00 00         	movq	(%rip), %rcx            # 0x732 <native_tracer_entry+0x732>
+		000000000000072e:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+     732: 83 39 00                     	cmpl	$0x0, (%rcx)
+     735: 0f 85 65 0f 00 00            	jne	0x16a0 <native_tracer_entry+0x16a0>
+     73b: c7 84 24 d0 00 00 00 3e 00 00 00     	movl	$0x3e, 0xd0(%rsp)
+     746: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x74d <native_tracer_entry+0x74d>
+		0000000000000749:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     74d: 48 8d b4 24 d0 00 00 00      	leaq	0xd0(%rsp), %rsi
+     755: b8 01 00 00 00               	movl	$0x1, %eax
+     75a: ff d0                        	callq	*%rax
+     75c: 48 85 c0                     	testq	%rax, %rax
+     75f: 0f 84 40 01 00 00            	je	0x8a5 <native_tracer_entry+0x8a5>
+     765: 48 ff 00                     	incq	(%rax)
+     768: e9 c3 02 00 00               	jmp	0xa30 <native_tracer_entry+0xa30>
+     76d: 41 83 3c 24 00               	cmpl	$0x0, (%r12)
+     772: 0f 85 95 0d 00 00            	jne	0x150d <native_tracer_entry+0x150d>
+     778: 4c 89 f0                     	movq	%r14, %rax
+     77b: 41 0f b6 8e 84 13 00 00      	movzbl	0x1384(%r14), %ecx
+     783: fe c1                        	incb	%cl
+     785: 88 88 84 13 00 00            	movb	%cl, 0x1384(%rax)
+     78b: 48 8b 35 00 00 00 00         	movq	(%rip), %rsi            # 0x792 <native_tracer_entry+0x792>
+		000000000000078e:  R_X86_64_REX_GOTPCRELX	perf_progs-0x4
+     792: 45 31 f6                     	xorl	%r14d, %r14d
+     795: b8 0c 00 00 00               	movl	$0xc, %eax
+     79a: 48 89 df                     	movq	%rbx, %rdi
+     79d: 31 d2                        	xorl	%edx, %edx
+     79f: ff d0                        	callq	*%rax
+     7a1: e9 a3 04 00 00               	jmp	0xc49 <native_tracer_entry+0xc49>
+     7a6: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0x7ad <native_tracer_entry+0x7ad>
+		00000000000007a9:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+     7ad: 83 38 00                     	cmpl	$0x0, (%rax)
+     7b0: 0f 84 7a 02 00 00            	je	0xa30 <native_tracer_entry+0xa30>
+     7b6: 48 b8 63 49 44 20 25 64 0a 00	movabsq	$0xa642520444963, %rax  # imm = 0xA642520444963
+     7c0: 48 89 44 24 36               	movq	%rax, 0x36(%rsp)
+     7c5: 48 b8 20 6d 65 74 72 69 63 49	movabsq	$0x4963697274656d20, %rax # imm = 0x4963697274656D20
+     7cf: 48 89 44 24 30               	movq	%rax, 0x30(%rsp)
+     7d4: 48 b8 20 6d 61 70 20 66 6f 72	movabsq	$0x726f662070616d20, %rax # imm = 0x726F662070616D20
+     7de: 48 89 44 24 28               	movq	%rax, 0x28(%rsp)
+     7e3: 48 b8 20 6d 65 74 72 69 63 73	movabsq	$0x7363697274656d20, %rax # imm = 0x7363697274656D20
+     7ed: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+     7f2: 48 b8 6f 20 6c 6f 6f 6b 75 70	movabsq	$0x70756b6f6f6c206f, %rax # imm = 0x70756B6F6F6C206F
+     7fc: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+     801: 48 b8 46 61 69 6c 65 64 20 74	movabsq	$0x742064656c696146, %rax # imm = 0x742064656C696146
+     80b: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+     810: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     815: b8 2e 00 00 00               	movl	$0x2e, %eax
+     81a: b9 06 00 00 00               	movl	$0x6, %ecx
+     81f: 8b 94 24 c4 00 00 00         	movl	0xc4(%rsp), %edx
+     826: be 2e 00 00 00               	movl	$0x2e, %esi
+     82b: 31 c0                        	xorl	%eax, %eax
+     82d: ff d1                        	callq	*%rcx
+     82f: e9 fc 01 00 00               	jmp	0xa30 <native_tracer_entry+0xa30>
+     834: c7 84 24 c4 00 00 00 01 00 00 00     	movl	$0x1, 0xc4(%rsp)
+     83f: c6 44 24 08 01               	movb	$0x1, 0x8(%rsp)
+     844: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x84b <native_tracer_entry+0x84b>
+		0000000000000847:  R_X86_64_REX_GOTPCRELX	inhibit_events-0x4
+     84b: 48 8d b4 24 c4 00 00 00      	leaq	0xc4(%rsp), %rsi
+     853: 48 8d 54 24 08               	leaq	0x8(%rsp), %rdx
+     858: b8 01 00 00 00               	movl	$0x1, %eax
+     85d: 41 b8 02 00 00 00            	movl	$0x2, %r8d
+     863: b9 01 00 00 00               	movl	$0x1, %ecx
+     868: 41 ff d0                     	callq	*%r8
+     86b: 85 c0                        	testl	%eax, %eax
+     86d: 0f 88 c3 00 00 00            	js	0x936 <native_tracer_entry+0x936>
+     873: c7 84 24 d0 00 00 00 42 00 00 00     	movl	$0x42, 0xd0(%rsp)
+     87e: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x885 <native_tracer_entry+0x885>
+		0000000000000881:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     885: 48 8d b4 24 d0 00 00 00      	leaq	0xd0(%rsp), %rsi
+     88d: b8 01 00 00 00               	movl	$0x1, %eax
+     892: ff d0                        	callq	*%rax
+     894: 48 85 c0                     	testq	%rax, %rax
+     897: 0f 84 fa 00 00 00            	je	0x997 <native_tracer_entry+0x997>
+     89d: 48 ff 00                     	incq	(%rax)
+     8a0: e9 02 01 00 00               	jmp	0x9a7 <native_tracer_entry+0x9a7>
+     8a5: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0x8ac <native_tracer_entry+0x8ac>
+		00000000000008a8:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+     8ac: 83 38 00                     	cmpl	$0x0, (%rax)
+     8af: 0f 84 7b 01 00 00            	je	0xa30 <native_tracer_entry+0xa30>
+     8b5: 48 b8 63 49 44 20 25 64 0a 00	movabsq	$0xa642520444963, %rax  # imm = 0xA642520444963
+     8bf: 48 89 44 24 36               	movq	%rax, 0x36(%rsp)
+     8c4: 48 b8 20 6d 65 74 72 69 63 49	movabsq	$0x4963697274656d20, %rax # imm = 0x4963697274656D20
+     8ce: 48 89 44 24 30               	movq	%rax, 0x30(%rsp)
+     8d3: 48 b8 20 6d 61 70 20 66 6f 72	movabsq	$0x726f662070616d20, %rax # imm = 0x726F662070616D20
+     8dd: 48 89 44 24 28               	movq	%rax, 0x28(%rsp)
+     8e2: 48 b8 20 6d 65 74 72 69 63 73	movabsq	$0x7363697274656d20, %rax # imm = 0x7363697274656D20
+     8ec: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+     8f1: 48 b8 6f 20 6c 6f 6f 6b 75 70	movabsq	$0x70756b6f6f6c206f, %rax # imm = 0x70756B6F6F6C206F
+     8fb: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+     900: 48 b8 46 61 69 6c 65 64 20 74	movabsq	$0x742064656c696146, %rax # imm = 0x742064656C696146
+     90a: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+     90f: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     914: b8 2e 00 00 00               	movl	$0x2e, %eax
+     919: b9 06 00 00 00               	movl	$0x6, %ecx
+     91e: 8b 94 24 d0 00 00 00         	movl	0xd0(%rsp), %edx
+     925: be 2e 00 00 00               	movl	$0x2e, %esi
+     92a: 31 c0                        	xorl	%eax, %eax
+     92c: ff d1                        	callq	*%rcx
+     92e: 45 31 f6                     	xorl	%r14d, %r14d
+     931: e9 13 03 00 00               	jmp	0xc49 <native_tracer_entry+0xc49>
+     936: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0x93d <native_tracer_entry+0x93d>
+		0000000000000939:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+     93d: 83 38 00                     	cmpl	$0x0, (%rax)
+     940: 0f 84 b0 00 00 00            	je	0x9f6 <native_tracer_entry+0x9f6>
+     946: 48 b8 68 69 62 69 74 65 64 0a	movabsq	$0xa64657469626968, %rax # imm = 0xA64657469626968
+     950: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+     955: 48 b8 70 65 20 25 64 20 69 6e	movabsq	$0x6e69206425206570, %rax # imm = 0x6E69206425206570
+     95f: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+     964: 48 b8 45 76 65 6e 74 20 74 79	movabsq	$0x797420746e657645, %rax # imm = 0x797420746E657645
+     96e: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+     973: c6 44 24 28 00               	movb	$0x0, 0x28(%rsp)
+     978: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     97d: b8 19 00 00 00               	movl	$0x19, %eax
+     982: b9 06 00 00 00               	movl	$0x6, %ecx
+     987: be 19 00 00 00               	movl	$0x19, %esi
+     98c: ba 01 00 00 00               	movl	$0x1, %edx
+     991: 31 c0                        	xorl	%eax, %eax
+     993: ff d1                        	callq	*%rcx
+     995: eb 5f                        	jmp	0x9f6 <native_tracer_entry+0x9f6>
+     997: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0x99e <native_tracer_entry+0x99e>
+		000000000000099a:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+     99e: 83 38 00                     	cmpl	$0x0, (%rax)
+     9a1: 0f 85 29 0f 00 00            	jne	0x18d0 <native_tracer_entry+0x18d0>
+     9a7: c7 84 24 d0 00 00 00 01 00 00 00     	movl	$0x1, 0xd0(%rsp)
+     9b2: 48 8b 35 00 00 00 00         	movq	(%rip), %rsi            # 0x9b9 <native_tracer_entry+0x9b9>
+		00000000000009b5:  R_X86_64_REX_GOTPCRELX	report_events-0x4
+     9b9: b8 ff ff ff ff               	movl	$0xffffffff, %eax       # imm = 0xFFFFFFFF
+     9be: 48 8d 8c 24 d0 00 00 00      	leaq	0xd0(%rsp), %rcx
+     9c6: ba 04 00 00 00               	movl	$0x4, %edx
+     9cb: 41 b9 19 00 00 00            	movl	$0x19, %r9d
+     9d1: ba ff ff ff ff               	movl	$0xffffffff, %edx       # imm = 0xFFFFFFFF
+     9d6: 48 89 df                     	movq	%rbx, %rdi
+     9d9: 41 b8 04 00 00 00            	movl	$0x4, %r8d
+     9df: 41 ff d1                     	callq	*%r9
+     9e2: 85 c0                        	testl	%eax, %eax
+     9e4: 79 10                        	jns	0x9f6 <native_tracer_entry+0x9f6>
+     9e6: 48 8b 0d 00 00 00 00         	movq	(%rip), %rcx            # 0x9ed <native_tracer_entry+0x9ed>
+		00000000000009e9:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+     9ed: 83 39 00                     	cmpl	$0x0, (%rcx)
+     9f0: 0f 85 4b 0e 00 00            	jne	0x1841 <native_tracer_entry+0x1841>
+     9f6: c7 84 24 d0 00 00 00 3f 00 00 00     	movl	$0x3f, 0xd0(%rsp)
+     a01: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0xa08 <native_tracer_entry+0xa08>
+		0000000000000a04:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     a08: 48 8d b4 24 d0 00 00 00      	leaq	0xd0(%rsp), %rsi
+     a10: b8 01 00 00 00               	movl	$0x1, %eax
+     a15: ff d0                        	callq	*%rax
+     a17: 48 85 c0                     	testq	%rax, %rax
+     a1a: 0f 85 17 fc ff ff            	jne	0x637 <native_tracer_entry+0x637>
+     a20: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0xa27 <native_tracer_entry+0xa27>
+		0000000000000a23:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+     a27: 83 38 00                     	cmpl	$0x0, (%rax)
+     a2a: 0f 85 93 0d 00 00            	jne	0x17c3 <native_tracer_entry+0x17c3>
+     a30: 45 31 f6                     	xorl	%r14d, %r14d
+     a33: e9 11 02 00 00               	jmp	0xc49 <native_tracer_entry+0xc49>
+     a38: 48 b8 72 65 63 6f 72 64 0a 00	movabsq	$0xa64726f636572, %rax  # imm = 0xA64726F636572
+     a42: 48 89 44 24 1e               	movq	%rax, 0x1e(%rsp)
+     a47: 48 b8 67 20 43 50 55 20 72 65	movabsq	$0x6572205550432067, %rax # imm = 0x6572205550432067
+     a51: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+     a56: 48 b8 52 65 73 65 74 74 69 6e	movabsq	$0x6e69747465736552, %rax # imm = 0x6E69747465736552
+     a60: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+     a65: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     a6a: b8 16 00 00 00               	movl	$0x16, %eax
+     a6f: b9 06 00 00 00               	movl	$0x6, %ecx
+     a74: be 16 00 00 00               	movl	$0x16, %esi
+     a79: 31 c0                        	xorl	%eax, %eax
+     a7b: ff d1                        	callq	*%rcx
+     a7d: e9 c3 f5 ff ff               	jmp	0x45 <native_tracer_entry+0x45>
+     a82: 48 b8 64 20 3d 20 25 64 0a 00	movabsq	$0xa6425203d2064, %rax  # imm = 0xA6425203D2064
+     a8c: 48 89 44 24 1e               	movq	%rax, 0x1e(%rsp)
+     a91: 48 b8 74 61 63 6b 20 69 64 20	movabsq	$0x206469206b636174, %rax # imm = 0x206469206B636174
+     a9b: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+     aa0: 48 b8 6b 65 72 6e 65 6c 20 73	movabsq	$0x73206c656e72656b, %rax # imm = 0x73206C656E72656B
+     aaa: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+     aaf: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     ab4: b8 16 00 00 00               	movl	$0x16, %eax
+     ab9: b9 06 00 00 00               	movl	$0x6, %ecx
+     abe: 41 8b 97 bc 02 00 00         	movl	0x2bc(%r15), %edx
+     ac5: be 16 00 00 00               	movl	$0x16, %esi
+     aca: 31 c0                        	xorl	%eax, %eax
+     acc: ff d1                        	callq	*%rcx
+     ace: 48 83 bb a0 00 00 00 2b      	cmpq	$0x2b, 0xa0(%rbx)
+     ad6: 0f 84 93 f8 ff ff            	je	0x36f <native_tracer_entry+0x36f>
+     adc: b8 23 00 00 00               	movl	$0x23, %eax
+     ae1: ff d0                        	callq	*%rax
+     ae3: 48 8b 0d 00 00 00 00         	movq	(%rip), %rcx            # 0xaea <native_tracer_entry+0xaea>
+		0000000000000ae6:  R_X86_64_REX_GOTPCRELX	task_stack_offset-0x4
+     aea: 8b 11                        	movl	(%rcx), %edx
+     aec: 48 01 c2                     	addq	%rax, %rdx
+     aef: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     af4: b8 08 00 00 00               	movl	$0x8, %eax
+     af9: b9 71 00 00 00               	movl	$0x71, %ecx
+     afe: be 08 00 00 00               	movl	$0x8, %esi
+     b03: ff d1                        	callq	*%rcx
+     b05: 48 85 c0                     	testq	%rax, %rax
+     b08: 75 2f                        	jne	0xb39 <native_tracer_entry+0xb39>
+     b0a: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0xb11 <native_tracer_entry+0xb11>
+		0000000000000b0d:  R_X86_64_REX_GOTPCRELX	stack_ptregs_offset-0x4
+     b11: 8b 10                        	movl	(%rax), %edx
+     b13: 48 03 54 24 10               	addq	0x10(%rsp), %rdx
+     b18: 74 1f                        	je	0xb39 <native_tracer_entry+0xb39>
+     b1a: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     b1f: b8 a8 00 00 00               	movl	$0xa8, %eax
+     b24: b9 71 00 00 00               	movl	$0x71, %ecx
+     b29: be a8 00 00 00               	movl	$0xa8, %esi
+     b2e: ff d1                        	callq	*%rcx
+     b30: 48 85 c0                     	testq	%rax, %rax
+     b33: 0f 84 25 01 00 00            	je	0xc5e <native_tracer_entry+0xc5e>
+     b39: c7 84 24 c8 00 00 00 52 00 00 00     	movl	$0x52, 0xc8(%rsp)
+     b44: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0xb4b <native_tracer_entry+0xb4b>
+		0000000000000b47:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     b4b: 48 8d b4 24 c8 00 00 00      	leaq	0xc8(%rsp), %rsi
+     b53: b8 01 00 00 00               	movl	$0x1, %eax
+     b58: ff d0                        	callq	*%rax
+     b5a: 48 85 c0                     	testq	%rax, %rax
+     b5d: 74 05                        	je	0xb64 <native_tracer_entry+0xb64>
+     b5f: 48 ff 00                     	incq	(%rax)
+     b62: eb 10                        	jmp	0xb74 <native_tracer_entry+0xb74>
+     b64: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0xb6b <native_tracer_entry+0xb6b>
+		0000000000000b67:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+     b6b: 83 38 00                     	cmpl	$0x0, (%rax)
+     b6e: 0f 85 35 03 00 00            	jne	0xea9 <native_tracer_entry+0xea9>
+     b74: bd a9 0f 00 00               	movl	$0xfa9, %ebp            # imm = 0xFA9
+     b79: 45 31 e4                     	xorl	%r12d, %r12d
+     b7c: 41 89 af 2c 0f 00 00         	movl	%ebp, 0xf2c(%r15)
+     b83: c7 44 24 10 00 00 00 00      	movl	$0x0, 0x10(%rsp)
+     b8b: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0xb92 <native_tracer_entry+0xb92>
+		0000000000000b8e:  R_X86_64_REX_GOTPCRELX	per_cpu_records-0x4
+     b92: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     b97: b8 01 00 00 00               	movl	$0x1, %eax
+     b9c: ff d0                        	callq	*%rax
+     b9e: 48 85 c0                     	testq	%rax, %rax
+     ba1: 74 47                        	je	0xbea <native_tracer_entry+0xbea>
+     ba3: 0f b6 88 84 13 00 00         	movzbl	0x1384(%rax), %ecx
+     baa: 44 89 e2                     	movl	%r12d, %edx
+     bad: 80 f9 1d                     	cmpb	$0x1d, %cl
+     bb0: 72 65                        	jb	0xc17 <native_tracer_entry+0xc17>
+     bb2: 49 89 c7                     	movq	%rax, %r15
+     bb5: c7 80 2c 0f 00 00 05 00 00 00	movl	$0x5, 0xf2c(%rax)
+     bbf: c7 84 24 d0 00 00 00 44 00 00 00     	movl	$0x44, 0xd0(%rsp)
+     bca: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0xbd1 <native_tracer_entry+0xbd1>
+		0000000000000bcd:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     bd1: 48 8d b4 24 d0 00 00 00      	leaq	0xd0(%rsp), %rsi
+     bd9: b8 01 00 00 00               	movl	$0x1, %eax
+     bde: ff d0                        	callq	*%rax
+     be0: 48 85 c0                     	testq	%rax, %rax
+     be3: 74 15                        	je	0xbfa <native_tracer_entry+0xbfa>
+     be5: 48 ff 00                     	incq	(%rax)
+     be8: eb 20                        	jmp	0xc0a <native_tracer_entry+0xc0a>
+     bea: 48 8b 0d 00 00 00 00         	movq	(%rip), %rcx            # 0xbf1 <native_tracer_entry+0xbf1>
+		0000000000000bed:  R_X86_64_REX_GOTPCRELX	perf_progs-0x4
+     bf1: 31 d2                        	xorl	%edx, %edx
+     bf3: b8 0c 00 00 00               	movl	$0xc, %eax
+     bf8: eb 33                        	jmp	0xc2d <native_tracer_entry+0xc2d>
+     bfa: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0xc01 <native_tracer_entry+0xc01>
+		0000000000000bfd:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+     c01: 83 38 00                     	cmpl	$0x0, (%rax)
+     c04: 0f 85 03 06 00 00            	jne	0x120d <native_tracer_entry+0x120d>
+     c0a: 4c 89 f8                     	movq	%r15, %rax
+     c0d: 41 0f b6 8f 84 13 00 00      	movzbl	0x1384(%r15), %ecx
+     c15: 31 d2                        	xorl	%edx, %edx
+     c17: fe c1                        	incb	%cl
+     c19: 88 88 84 13 00 00            	movb	%cl, 0x1384(%rax)
+     c1f: 89 d1                        	movl	%edx, %ecx
+     c21: 48 8b 35 00 00 00 00         	movq	(%rip), %rsi            # 0xc28 <native_tracer_entry+0xc28>
+		0000000000000c24:  R_X86_64_REX_GOTPCRELX	perf_progs-0x4
+     c28: b8 0c 00 00 00               	movl	$0xc, %eax
+     c2d: 48 8b 35 00 00 00 00         	movq	(%rip), %rsi            # 0xc34 <native_tracer_entry+0xc34>
+		0000000000000c30:  R_X86_64_REX_GOTPCRELX	perf_progs-0x4
+     c34: 48 89 df                     	movq	%rbx, %rdi
+     c37: ff d0                        	callq	*%rax
+     c39: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0xc40 <native_tracer_entry+0xc40>
+		0000000000000c3c:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+     c40: 83 38 00                     	cmpl	$0x0, (%rax)
+     c43: 0f 85 43 01 00 00            	jne	0xd8c <native_tracer_entry+0xd8c>
+     c49: 44 89 f0                     	movl	%r14d, %eax
+     c4c: 48 81 c4 08 01 00 00         	addq	$0x108, %rsp            # imm = 0x108
+     c53: 5b                           	popq	%rbx
+     c54: 41 5c                        	popq	%r12
+     c56: 41 5d                        	popq	%r13
+     c58: 41 5e                        	popq	%r14
+     c5a: 41 5f                        	popq	%r15
+     c5c: 5d                           	popq	%rbp
+     c5d: c3                           	retq
+     c5e: 48 83 bc 24 b0 00 00 00 2b   	cmpq	$0x2b, 0xb0(%rsp)
+     c67: 0f 85 15 01 00 00            	jne	0xd82 <native_tracer_entry+0xd82>
+     c6d: 48 83 bc 24 98 00 00 00 23   	cmpq	$0x23, 0x98(%rsp)
+     c76: 0f 84 fd f6 ff ff            	je	0x379 <native_tracer_entry+0x379>
+     c7c: 48 8b 84 24 90 00 00 00      	movq	0x90(%rsp), %rax
+     c84: 49 89 87 d0 0e 00 00         	movq	%rax, 0xed0(%r15)
+     c8b: 48 8b 84 24 a8 00 00 00      	movq	0xa8(%rsp), %rax
+     c93: 49 89 87 d8 0e 00 00         	movq	%rax, 0xed8(%r15)
+     c9a: 48 8b 44 24 30               	movq	0x30(%rsp), %rax
+     c9f: 49 89 87 e0 0e 00 00         	movq	%rax, 0xee0(%r15)
+     ca6: 48 8b 44 24 60               	movq	0x60(%rsp), %rax
+     cab: 49 89 87 e8 0e 00 00         	movq	%rax, 0xee8(%r15)
+     cb2: 48 8b 44 24 50               	movq	0x50(%rsp), %rax
+     cb7: 49 89 87 f0 0e 00 00         	movq	%rax, 0xef0(%r15)
+     cbe: 48 8b 44 24 40               	movq	0x40(%rsp), %rax
+     cc3: 49 89 87 f8 0e 00 00         	movq	%rax, 0xef8(%r15)
+     cca: 48 8b 44 24 20               	movq	0x20(%rsp), %rax
+     ccf: 49 89 87 00 0f 00 00         	movq	%rax, 0xf00(%r15)
+     cd6: 48 8b 44 24 10               	movq	0x10(%rsp), %rax
+     cdb: 49 89 87 08 0f 00 00         	movq	%rax, 0xf08(%r15)
+     ce2: 48 83 bc 24 88 00 00 00 ff   	cmpq	$-0x1, 0x88(%rsp)
+     ceb: 41 0f 95 87 30 0f 00 00      	setne	0xf30(%r15)
+     cf3: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0xcfa <native_tracer_entry+0xcfa>
+		0000000000000cf6:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+     cfa: 83 38 00                     	cmpl	$0x0, (%rax)
+     cfd: 0f 84 f5 f6 ff ff            	je	0x3f8 <native_tracer_entry+0x3f8>
+     d03: 48 b8 3a 20 25 6c 6c 78 0a 00	movabsq	$0xa786c6c25203a, %rax  # imm = 0xA786C6C25203A
+     d0d: 48 89 44 24 2f               	movq	%rax, 0x2f(%rsp)
+     d12: 48 b8 25 6c 6c 78 20 66 70 3a	movabsq	$0x3a706620786c6c25, %rax # imm = 0x3A706620786C6C25
+     d1c: 48 89 44 24 28               	movq	%rax, 0x28(%rsp)
+     d21: 48 b8 6c 6c 78 20 73 70 3a 20	movabsq	$0x203a707320786c6c, %rax # imm = 0x203A707320786C6C
+     d2b: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+     d30: 48 b8 73 3a 20 70 63 3a 20 25	movabsq	$0x25203a6370203a73, %rax # imm = 0x25203A6370203A73
+     d3a: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+     d3f: 48 b8 52 65 61 64 20 72 65 67	movabsq	$0x6765722064616552, %rax # imm = 0x6765722064616552
+     d49: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+     d4e: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     d53: b8 27 00 00 00               	movl	$0x27, %eax
+     d58: 41 b9 06 00 00 00            	movl	$0x6, %r9d
+     d5e: 49 8b 97 d0 0e 00 00         	movq	0xed0(%r15), %rdx
+     d65: 49 8b 8f d8 0e 00 00         	movq	0xed8(%r15), %rcx
+     d6c: 4d 8b 87 e0 0e 00 00         	movq	0xee0(%r15), %r8
+     d73: be 27 00 00 00               	movl	$0x27, %esi
+     d78: 31 c0                        	xorl	%eax, %eax
+     d7a: 41 ff d1                     	callq	*%r9
+     d7d: e9 76 f6 ff ff               	jmp	0x3f8 <native_tracer_entry+0x3f8>
+     d82: 45 31 e4                     	xorl	%r12d, %r12d
+     d85: 31 ed                        	xorl	%ebp, %ebp
+     d87: e9 f0 fd ff ff               	jmp	0xb7c <native_tracer_entry+0xb7c>
+     d8c: 48 b8 61 63 65 72 5f 65 6e 74	movabsq	$0x746e655f72656361, %rax # imm = 0x746E655F72656361
+     d96: 48 89 44 24 38               	movq	%rax, 0x38(%rsp)
+     d9b: 48 b8 61 74 69 76 65 5f 74 72	movabsq	$0x72745f6576697461, %rax # imm = 0x72745F6576697461
+     da5: 48 89 44 24 30               	movq	%rax, 0x30(%rsp)
+     daa: 48 b8 20 25 64 20 69 6e 20 6e	movabsq	$0x6e206e6920642520, %rax # imm = 0x6E206E6920642520
+     db4: 48 89 44 24 28               	movq	%rax, 0x28(%rsp)
+     db9: 48 b8 69 6c 65 64 20 66 6f 72	movabsq	$0x726f662064656c69, %rax # imm = 0x726F662064656C69
+     dc3: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+     dc8: 48 b8 20 63 61 6c 6c 20 66 61	movabsq	$0x6166206c6c616320, %rax # imm = 0x6166206C6C616320
+     dd2: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+     dd7: 48 b8 62 70 66 5f 74 61 69 6c	movabsq	$0x6c6961745f667062, %rax # imm = 0x6C6961745F667062
+     de1: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+     de6: c7 44 24 40 72 79 0a 00      	movl	$0xa7972, 0x40(%rsp)    # imm = 0xA7972
+     dee: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     df3: b8 34 00 00 00               	movl	$0x34, %eax
+     df8: b9 06 00 00 00               	movl	$0x6, %ecx
+     dfd: be 34 00 00 00               	movl	$0x34, %esi
+     e02: 44 89 e2                     	movl	%r12d, %edx
+     e05: 31 c0                        	xorl	%eax, %eax
+     e07: ff d1                        	callq	*%rcx
+     e09: e9 3b fe ff ff               	jmp	0xc49 <native_tracer_entry+0xc49>
+     e0e: 48 b8 72 65 63 6f 72 64 0a 00	movabsq	$0xa64726f636572, %rax  # imm = 0xA64726F636572
+     e18: 48 89 44 24 1e               	movq	%rax, 0x1e(%rsp)
+     e1d: 48 b8 67 20 43 50 55 20 72 65	movabsq	$0x6572205550432067, %rax # imm = 0x6572205550432067
+     e27: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+     e2c: 48 b8 52 65 73 65 74 74 69 6e	movabsq	$0x6e69747465736552, %rax # imm = 0x6E69747465736552
+     e36: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+     e3b: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     e40: b8 16 00 00 00               	movl	$0x16, %eax
+     e45: b9 06 00 00 00               	movl	$0x6, %ecx
+     e4a: be 16 00 00 00               	movl	$0x16, %esi
+     e4f: 31 c0                        	xorl	%eax, %eax
+     e51: ff d1                        	callq	*%rcx
+     e53: e9 71 f3 ff ff               	jmp	0x1c9 <native_tracer_entry+0x1c9>
+     e58: 48 b8 64 20 3d 20 25 64 0a 00	movabsq	$0xa6425203d2064, %rax  # imm = 0xA6425203D2064
+     e62: 48 89 44 24 1e               	movq	%rax, 0x1e(%rsp)
+     e67: 48 b8 74 61 63 6b 20 69 64 20	movabsq	$0x206469206b636174, %rax # imm = 0x206469206B636174
+     e71: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+     e76: 48 b8 6b 65 72 6e 65 6c 20 73	movabsq	$0x73206c656e72656b, %rax # imm = 0x73206C656E72656B
+     e80: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+     e85: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     e8a: b8 16 00 00 00               	movl	$0x16, %eax
+     e8f: b9 06 00 00 00               	movl	$0x6, %ecx
+     e94: 41 8b 96 bc 02 00 00         	movl	0x2bc(%r14), %edx
+     e9b: be 16 00 00 00               	movl	$0x16, %esi
+     ea0: 31 c0                        	xorl	%eax, %eax
+     ea2: ff d1                        	callq	*%rcx
+     ea4: e9 d1 f7 ff ff               	jmp	0x67a <native_tracer_entry+0x67a>
+     ea9: 48 b8 63 49 44 20 25 64 0a 00	movabsq	$0xa642520444963, %rax  # imm = 0xA642520444963
+     eb3: 48 89 84 24 f6 00 00 00      	movq	%rax, 0xf6(%rsp)
+     ebb: 48 b8 20 6d 65 74 72 69 63 49	movabsq	$0x4963697274656d20, %rax # imm = 0x4963697274656D20
+     ec5: 48 89 84 24 f0 00 00 00      	movq	%rax, 0xf0(%rsp)
+     ecd: 48 b8 20 6d 61 70 20 66 6f 72	movabsq	$0x726f662070616d20, %rax # imm = 0x726F662070616D20
+     ed7: 48 89 84 24 e8 00 00 00      	movq	%rax, 0xe8(%rsp)
+     edf: 48 b8 20 6d 65 74 72 69 63 73	movabsq	$0x7363697274656d20, %rax # imm = 0x7363697274656D20
+     ee9: 48 89 84 24 e0 00 00 00      	movq	%rax, 0xe0(%rsp)
+     ef1: 48 b8 6f 20 6c 6f 6f 6b 75 70	movabsq	$0x70756b6f6f6c206f, %rax # imm = 0x70756B6F6F6C206F
+     efb: 48 89 84 24 d8 00 00 00      	movq	%rax, 0xd8(%rsp)
+     f03: 48 b8 46 61 69 6c 65 64 20 74	movabsq	$0x742064656c696146, %rax # imm = 0x742064656C696146
+     f0d: 48 89 84 24 d0 00 00 00      	movq	%rax, 0xd0(%rsp)
+     f15: 48 8d bc 24 d0 00 00 00      	leaq	0xd0(%rsp), %rdi
+     f1d: b8 2e 00 00 00               	movl	$0x2e, %eax
+     f22: b9 06 00 00 00               	movl	$0x6, %ecx
+     f27: 8b 94 24 c8 00 00 00         	movl	0xc8(%rsp), %edx
+     f2e: be 2e 00 00 00               	movl	$0x2e, %esi
+     f33: 31 c0                        	xorl	%eax, %eax
+     f35: ff d1                        	callq	*%rcx
+     f37: e9 38 fc ff ff               	jmp	0xb74 <native_tracer_entry+0xb74>
+     f3c: 48 b8 63 49 44 20 25 64 0a 00	movabsq	$0xa642520444963, %rax  # imm = 0xA642520444963
+     f46: 48 89 44 24 36               	movq	%rax, 0x36(%rsp)
+     f4b: 48 b8 20 6d 65 74 72 69 63 49	movabsq	$0x4963697274656d20, %rax # imm = 0x4963697274656D20
+     f55: 48 89 44 24 30               	movq	%rax, 0x30(%rsp)
+     f5a: 48 b8 20 6d 61 70 20 66 6f 72	movabsq	$0x726f662070616d20, %rax # imm = 0x726F662070616D20
+     f64: 48 89 44 24 28               	movq	%rax, 0x28(%rsp)
+     f69: 48 b8 20 6d 65 74 72 69 63 73	movabsq	$0x7363697274656d20, %rax # imm = 0x7363697274656D20
+     f73: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+     f78: 48 b8 6f 20 6c 6f 6f 6b 75 70	movabsq	$0x70756b6f6f6c206f, %rax # imm = 0x70756B6F6F6C206F
+     f82: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+     f87: 48 b8 46 61 69 6c 65 64 20 74	movabsq	$0x742064656c696146, %rax # imm = 0x742064656C696146
+     f91: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+     f96: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     f9b: b8 2e 00 00 00               	movl	$0x2e, %eax
+     fa0: b9 06 00 00 00               	movl	$0x6, %ecx
+     fa5: 8b 94 24 d0 00 00 00         	movl	0xd0(%rsp), %edx
+     fac: be 2e 00 00 00               	movl	$0x2e, %esi
+     fb1: 31 c0                        	xorl	%eax, %eax
+     fb3: ff d1                        	callq	*%rcx
+     fb5: e9 75 f3 ff ff               	jmp	0x32f <native_tracer_entry+0x32f>
+     fba: 48 b8 25 64 20 3d 3d 3d 3d 0a	movabsq	$0xa3d3d3d3d206425, %rax # imm = 0xA3D3D3D3D206425
+     fc4: 48 89 44 24 38               	movq	%rax, 0x38(%rsp)
+     fc9: 48 b8 3a 20 66 72 61 6d 65 20	movabsq	$0x20656d617266203a, %rax # imm = 0x20656D617266203A
+     fd3: 48 89 44 24 30               	movq	%rax, 0x30(%rsp)
+     fd8: 48 b8 75 6e 77 69 6e 64 65 72	movabsq	$0x7265646e69776e75, %rax # imm = 0x7265646E69776E75
+     fe2: 48 89 44 24 28               	movq	%rax, 0x28(%rsp)
+     fe7: 48 b8 74 20 66 72 61 6d 65 20	movabsq	$0x20656d6172662074, %rax # imm = 0x20656D6172662074
+     ff1: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+     ff6: 48 b8 6f 6c 76 65 20 6e 65 78	movabsq	$0x78656e2065766c6f, %rax # imm = 0x78656E2065766C6F
+    1000: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+    1005: 48 b8 3d 3d 3d 3d 20 52 65 73	movabsq	$0x736552203d3d3d3d, %rax # imm = 0x736552203D3D3D3D
+    100f: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+    1014: c6 44 24 40 00               	movb	$0x0, 0x40(%rsp)
+    1019: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    101e: b8 31 00 00 00               	movl	$0x31, %eax
+    1023: b9 06 00 00 00               	movl	$0x6, %ecx
+    1028: 41 8b 97 c0 02 00 00         	movl	0x2c0(%r15), %edx
+    102f: be 31 00 00 00               	movl	$0x31, %esi
+    1034: 31 c0                        	xorl	%eax, %eax
+    1036: ff d1                        	callq	*%rcx
+    1038: 4d 8b af d0 0e 00 00         	movq	0xed0(%r15), %r13
+    103f: 4c 89 e8                     	movq	%r13, %rax
+    1042: 48 c1 e8 38                  	shrq	$0x38, %rax
+    1046: 0f 85 0f f4 ff ff            	jne	0x45b <native_tracer_entry+0x45b>
+    104c: 49 81 fd ff 0f 00 00         	cmpq	$0xfff, %r13            # imm = 0xFFF
+    1053: 77 25                        	ja	0x107a <native_tracer_entry+0x107a>
+    1055: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0x105c <native_tracer_entry+0x105c>
+		0000000000001058:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+    105c: 83 38 00                     	cmpl	$0x0, (%rax)
+    105f: 0f 85 4c 04 00 00            	jne	0x14b1 <native_tracer_entry+0x14b1>
+    1065: 41 c7 87 28 0f 00 00 31 00 00 00     	movl	$0x31, 0xf28(%r15)
+    1070: bd ae 0f 00 00               	movl	$0xfae, %ebp            # imm = 0xFAE
+    1075: e9 ff fa ff ff               	jmp	0xb79 <native_tracer_entry+0xb79>
+    107a: 41 8b 07                     	movl	(%r15), %eax
+    107d: c7 84 24 d0 00 00 00 60 00 00 00     	movl	$0x60, 0xd0(%rsp)
+    1088: 0f 38 f1 84 24 d4 00 00 00   	movbel	%eax, 0xd4(%rsp)
+    1091: 4c 0f 38 f1 ac 24 d8 00 00 00	movbeq	%r13, 0xd8(%rsp)
+    109b: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x10a2 <native_tracer_entry+0x10a2>
+		000000000000109e:  R_X86_64_REX_GOTPCRELX	pid_page_to_mapping_info-0x4
+    10a2: 48 8d b4 24 d0 00 00 00      	leaq	0xd0(%rsp), %rsi
+    10aa: b8 01 00 00 00               	movl	$0x1, %eax
+    10af: ff d0                        	callq	*%rax
+    10b1: 48 85 c0                     	testq	%rax, %rax
+    10b4: 0f 84 2e 01 00 00            	je	0x11e8 <native_tracer_entry+0x11e8>
+    10ba: 48 b9 ff ff ff ff ff ff ff 00	movabsq	$0xffffffffffffff, %rcx # imm = 0xFFFFFFFFFFFFFF
+    10c4: 4c 8b 60 08                  	movq	0x8(%rax), %r12
+    10c8: 4c 21 e1                     	andq	%r12, %rcx
+    10cb: 49 89 8f 20 0f 00 00         	movq	%rcx, 0xf20(%r15)
+    10d2: 48 8b 00                     	movq	(%rax), %rax
+    10d5: 49 89 87 10 0f 00 00         	movq	%rax, 0xf10(%r15)
+    10dc: 49 c1 ec 38                  	shrq	$0x38, %r12
+    10e0: 4c 89 e8                     	movq	%r13, %rax
+    10e3: 48 29 c8                     	subq	%rcx, %rax
+    10e6: 49 89 87 18 0f 00 00         	movq	%rax, 0xf18(%r15)
+    10ed: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0x10f4 <native_tracer_entry+0x10f4>
+		00000000000010f0:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+    10f4: 83 38 00                     	cmpl	$0x0, (%rax)
+    10f7: 0f 85 8e 04 00 00            	jne	0x158b <native_tracer_entry+0x158b>
+    10fd: 31 ed                        	xorl	%ebp, %ebp
+    10ff: 41 83 fc 01                  	cmpl	$0x1, %r12d
+    1103: 0f 85 73 fa ff ff            	jne	0xb7c <native_tracer_entry+0xb7c>
+    1109: 49 8b 87 10 0f 00 00         	movq	0xf10(%r15), %rax
+    1110: 48 89 84 24 d0 00 00 00      	movq	%rax, 0xd0(%rsp)
+    1118: 4d 8b af 18 0f 00 00         	movq	0xf18(%r15), %r13
+    111f: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x1126 <native_tracer_entry+0x1126>
+		0000000000001122:  R_X86_64_REX_GOTPCRELX	interpreter_offsets-0x4
+    1126: 48 8d b4 24 d0 00 00 00      	leaq	0xd0(%rsp), %rsi
+    112e: b8 01 00 00 00               	movl	$0x1, %eax
+    1133: ff d0                        	callq	*%rax
+    1135: 41 bc 01 00 00 00            	movl	$0x1, %r12d
+    113b: 48 85 c0                     	testq	%rax, %rax
+    113e: 0f 84 38 fa ff ff            	je	0xb7c <native_tracer_entry+0xb7c>
+    1144: 4c 39 28                     	cmpq	%r13, (%rax)
+    1147: 77 06                        	ja	0x114f <native_tracer_entry+0x114f>
+    1149: 4c 39 68 08                  	cmpq	%r13, 0x8(%rax)
+    114d: 73 14                        	jae	0x1163 <native_tracer_entry+0x1163>
+    114f: 4c 39 68 10                  	cmpq	%r13, 0x10(%rax)
+    1153: 0f 87 23 fa ff ff            	ja	0xb7c <native_tracer_entry+0xb7c>
+    1159: 4c 39 68 18                  	cmpq	%r13, 0x18(%rax)
+    115d: 0f 82 19 fa ff ff            	jb	0xb7c <native_tracer_entry+0xb7c>
+    1163: 48 8b 0d 00 00 00 00         	movq	(%rip), %rcx            # 0x116a <native_tracer_entry+0x116a>
+		0000000000001166:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+    116a: 83 39 00                     	cmpl	$0x0, (%rcx)
+    116d: 0f 85 db 07 00 00            	jne	0x194e <native_tracer_entry+0x194e>
+    1173: 41 8b 8f 80 13 00 00         	movl	0x1380(%r15), %ecx
+    117a: 8b 50 20                     	movl	0x20(%rax), %edx
+    117d: 0f a3 d1                     	btl	%edx, %ecx
+    1180: 0f 83 3b 08 00 00            	jae	0x19c1 <native_tracer_entry+0x19c1>
+    1186: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0x118d <native_tracer_entry+0x118d>
+		0000000000001189:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+    118d: 83 38 00                     	cmpl	$0x0, (%rax)
+    1190: 0f 84 e6 f9 ff ff            	je	0xb7c <native_tracer_entry+0xb7c>
+    1196: 48 b8 6e 64 65 72 20 64 6f 6e	movabsq	$0x6e6f64207265646e, %rax # imm = 0x6E6F64207265646E
+    11a0: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+    11a5: 48 b8 74 65 72 20 75 6e 77 69	movabsq	$0x69776e7520726574, %rax # imm = 0x69776E7520726574
+    11af: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+    11b4: 48 b8 69 6e 74 65 72 70 72 65	movabsq	$0x6572707265746e69, %rax # imm = 0x6572707265746E69
+    11be: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+    11c3: c7 44 24 27 6e 65 0a 00      	movl	$0xa656e, 0x27(%rsp)    # imm = 0xA656E
+    11cb: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    11d0: b8 1b 00 00 00               	movl	$0x1b, %eax
+    11d5: b9 06 00 00 00               	movl	$0x6, %ecx
+    11da: be 1b 00 00 00               	movl	$0x1b, %esi
+    11df: 31 c0                        	xorl	%eax, %eax
+    11e1: ff d1                        	callq	*%rcx
+    11e3: e9 94 f9 ff ff               	jmp	0xb7c <native_tracer_entry+0xb7c>
+    11e8: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0x11ef <native_tracer_entry+0x11ef>
+		00000000000011eb:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+    11ef: 83 38 00                     	cmpl	$0x0, (%rax)
+    11f2: 0f 85 3d 05 00 00            	jne	0x1735 <native_tracer_entry+0x1735>
+    11f8: 41 c7 87 28 0f 00 00 0c 00 00 00     	movl	$0xc, 0xf28(%r15)
+    1203: bd ac 0f 00 00               	movl	$0xfac, %ebp            # imm = 0xFAC
+    1208: e9 6c f9 ff ff               	jmp	0xb79 <native_tracer_entry+0xb79>
+    120d: 48 b8 63 49 44 20 25 64 0a 00	movabsq	$0xa642520444963, %rax  # imm = 0xA642520444963
+    1217: 48 89 44 24 36               	movq	%rax, 0x36(%rsp)
+    121c: 48 b8 20 6d 65 74 72 69 63 49	movabsq	$0x4963697274656d20, %rax # imm = 0x4963697274656D20
+    1226: 48 89 44 24 30               	movq	%rax, 0x30(%rsp)
+    122b: 48 b8 20 6d 61 70 20 66 6f 72	movabsq	$0x726f662070616d20, %rax # imm = 0x726F662070616D20
+    1235: 48 89 44 24 28               	movq	%rax, 0x28(%rsp)
+    123a: 48 b8 20 6d 65 74 72 69 63 73	movabsq	$0x7363697274656d20, %rax # imm = 0x7363697274656D20
+    1244: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+    1249: 48 b8 6f 20 6c 6f 6f 6b 75 70	movabsq	$0x70756b6f6f6c206f, %rax # imm = 0x70756B6F6F6C206F
+    1253: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+    1258: 48 b8 46 61 69 6c 65 64 20 74	movabsq	$0x742064656c696146, %rax # imm = 0x742064656C696146
+    1262: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+    1267: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    126c: b8 2e 00 00 00               	movl	$0x2e, %eax
+    1271: b9 06 00 00 00               	movl	$0x6, %ecx
+    1276: 8b 94 24 d0 00 00 00         	movl	0xd0(%rsp), %edx
+    127d: be 2e 00 00 00               	movl	$0x2e, %esi
+    1282: 31 c0                        	xorl	%eax, %eax
+    1284: ff d1                        	callq	*%rcx
+    1286: e9 7f f9 ff ff               	jmp	0xc0a <native_tracer_entry+0xc0a>
+    128b: 48 b9 6d 70 74 3d 25 64 0a 00	movabsq	$0xa64253d74706d, %rcx  # imm = 0xA64253D74706D
+    1295: 48 89 4c 24 27               	movq	%rcx, 0x27(%rsp)
+    129a: 48 b9 64 2c 20 61 74 74 65 6d	movabsq	$0x6d65747461202c64, %rcx # imm = 0x6D65747461202C64
+    12a4: 48 89 4c 24 20               	movq	%rcx, 0x20(%rsp)
+    12a9: 48 b9 76 65 6e 74 20 73 65 6e	movabsq	$0x6e657320746e6576, %rcx # imm = 0x6E657320746E6576
+    12b3: 48 89 4c 24 18               	movq	%rcx, 0x18(%rsp)
+    12b8: 48 b9 50 49 44 20 25 64 20 65	movabsq	$0x6520642520444950, %rcx # imm = 0x6520642520444950
+    12c2: 48 89 4c 24 10               	movq	%rcx, 0x10(%rsp)
+    12c7: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    12cc: b9 1f 00 00 00               	movl	$0x1f, %ecx
+    12d1: 41 b8 06 00 00 00            	movl	$0x6, %r8d
+    12d7: 8b 54 24 08                  	movl	0x8(%rsp), %edx
+    12db: be 1f 00 00 00               	movl	$0x1f, %esi
+    12e0: 44 89 f1                     	movl	%r14d, %ecx
+    12e3: 49 89 c7                     	movq	%rax, %r15
+    12e6: 31 c0                        	xorl	%eax, %eax
+    12e8: 41 ff d0                     	callq	*%r8
+    12eb: 4c 89 f8                     	movq	%r15, %rax
+    12ee: e9 cb f2 ff ff               	jmp	0x5be <native_tracer_entry+0x5be>
+    12f3: 48 b8 43 20 3d 3d 20 30 29 0a	movabsq	$0xa2930203d3d2043, %rax # imm = 0xA2930203D3D2043
+    12fd: 48 89 44 24 38               	movq	%rax, 0x38(%rsp)
+    1302: 48 b8 69 6c 75 72 65 20 28 50	movabsq	$0x5028206572756c69, %rax # imm = 0x5028206572756C69
+    130c: 48 89 44 24 30               	movq	%rax, 0x30(%rsp)
+    1311: 48 b8 6e 77 69 6e 64 20 66 61	movabsq	$0x616620646e69776e, %rax # imm = 0x616620646E69776E
+    131b: 48 89 44 24 28               	movq	%rax, 0x28(%rsp)
+    1320: 48 b8 64 75 65 20 74 6f 20 75	movabsq	$0x75206f7420657564, %rax # imm = 0x75206F7420657564
+    132a: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+    132f: 48 b8 20 75 6e 77 69 6e 64 20	movabsq	$0x20646e69776e7520, %rax # imm = 0x20646E69776E7520
+    1339: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+    133e: 48 b8 53 74 6f 70 70 69 6e 67	movabsq	$0x676e6970706f7453, %rax # imm = 0x676E6970706F7453
+    1348: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+    134d: c6 44 24 40 00               	movb	$0x0, 0x40(%rsp)
+    1352: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1357: b8 31 00 00 00               	movl	$0x31, %eax
+    135c: b9 06 00 00 00               	movl	$0x6, %ecx
+    1361: be 31 00 00 00               	movl	$0x31, %esi
+    1366: 31 c0                        	xorl	%eax, %eax
+    1368: ff d1                        	callq	*%rcx
+    136a: e9 ed f1 ff ff               	jmp	0x55c <native_tracer_entry+0x55c>
+    136f: 48 b8 20 61 64 64 72 65 73 73	movabsq	$0x7373657264646120, %rax # imm = 0x7373657264646120
+    1379: 48 89 44 24 28               	movq	%rax, 0x28(%rsp)
+    137e: 48 b8 61 20 6b 65 72 6e 65 6c	movabsq	$0x6c656e72656b2061, %rax # imm = 0x6C656E72656B2061
+    1388: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+    138d: 48 b8 20 25 6c 78 20 69 73 20	movabsq	$0x20736920786c2520, %rax # imm = 0x20736920786C2520
+    1397: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+    139c: 48 b8 50 43 20 76 61 6c 75 65	movabsq	$0x65756c6176204350, %rax # imm = 0x65756C6176204350
+    13a6: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+    13ab: 66 c7 44 24 30 0a 00         	movw	$0xa, 0x30(%rsp)
+    13b2: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    13b7: b8 22 00 00 00               	movl	$0x22, %eax
+    13bc: b9 06 00 00 00               	movl	$0x6, %ecx
+    13c1: be 22 00 00 00               	movl	$0x22, %esi
+    13c6: 4c 89 ea                     	movq	%r13, %rdx
+    13c9: 31 c0                        	xorl	%eax, %eax
+    13cb: ff d1                        	callq	*%rcx
+    13cd: e9 99 f0 ff ff               	jmp	0x46b <native_tracer_entry+0x46b>
+    13d2: 48 b9 25 64 3a 20 25 64 0a 00	movabsq	$0xa6425203a6425, %rcx  # imm = 0xA6425203A6425
+    13dc: 48 89 4c 24 25               	movq	%rcx, 0x25(%rsp)
+    13e1: 48 b9 20 50 49 44 20 25 64 3a	movabsq	$0x3a64252044495020, %rcx # imm = 0x3A64252044495020
+    13eb: 48 89 4c 24 20               	movq	%rcx, 0x20(%rsp)
+    13f0: 48 b9 6f 20 72 65 70 6f 72 74	movabsq	$0x74726f706572206f, %rcx # imm = 0x74726F706572206F
+    13fa: 48 89 4c 24 18               	movq	%rcx, 0x18(%rsp)
+    13ff: 48 b9 46 61 69 6c 65 64 20 74	movabsq	$0x742064656c696146, %rcx # imm = 0x742064656C696146
+    1409: 48 89 4c 24 10               	movq	%rcx, 0x10(%rsp)
+    140e: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1413: b9 1d 00 00 00               	movl	$0x1d, %ecx
+    1418: 41 b8 06 00 00 00            	movl	$0x6, %r8d
+    141e: 8b 54 24 08                  	movl	0x8(%rsp), %edx
+    1422: be 1d 00 00 00               	movl	$0x1d, %esi
+    1427: 89 c1                        	movl	%eax, %ecx
+    1429: 31 c0                        	xorl	%eax, %eax
+    142b: 41 ff d0                     	callq	*%r8
+    142e: e9 da f1 ff ff               	jmp	0x60d <native_tracer_entry+0x60d>
+    1433: 48 b8 63 49 44 20 25 64 0a 00	movabsq	$0xa642520444963, %rax  # imm = 0xA642520444963
+    143d: 48 89 44 24 36               	movq	%rax, 0x36(%rsp)
+    1442: 48 b8 20 6d 65 74 72 69 63 49	movabsq	$0x4963697274656d20, %rax # imm = 0x4963697274656D20
+    144c: 48 89 44 24 30               	movq	%rax, 0x30(%rsp)
+    1451: 48 b8 20 6d 61 70 20 66 6f 72	movabsq	$0x726f662070616d20, %rax # imm = 0x726F662070616D20
+    145b: 48 89 44 24 28               	movq	%rax, 0x28(%rsp)
+    1460: 48 b8 20 6d 65 74 72 69 63 73	movabsq	$0x7363697274656d20, %rax # imm = 0x7363697274656D20
+    146a: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+    146f: 48 b8 6f 20 6c 6f 6f 6b 75 70	movabsq	$0x70756b6f6f6c206f, %rax # imm = 0x70756B6F6F6C206F
+    1479: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+    147e: 48 b8 46 61 69 6c 65 64 20 74	movabsq	$0x742064656c696146, %rax # imm = 0x742064656C696146
+    1488: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+    148d: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1492: b8 2e 00 00 00               	movl	$0x2e, %eax
+    1497: b9 06 00 00 00               	movl	$0x6, %ecx
+    149c: 8b 94 24 d0 00 00 00         	movl	0xd0(%rsp), %edx
+    14a3: be 2e 00 00 00               	movl	$0x2e, %esi
+    14a8: 31 c0                        	xorl	%eax, %eax
+    14aa: ff d1                        	callq	*%rcx
+    14ac: e9 9c f1 ff ff               	jmp	0x64d <native_tracer_entry+0x64d>
+    14b1: 48 b8 6e 6f 72 69 6e 67 0a 00	movabsq	$0xa676e69726f6e, %rax  # imm = 0xA676E69726F6E
+    14bb: 48 89 44 24 26               	movq	%rax, 0x26(%rsp)
+    14c0: 48 b8 6c 78 2c 20 69 67 6e 6f	movabsq	$0x6f6e6769202c786c, %rax # imm = 0x6F6E6769202C786C
+    14ca: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+    14cf: 48 b8 20 76 61 6c 75 65 20 25	movabsq	$0x252065756c617620, %rax # imm = 0x252065756C617620
+    14d9: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+    14de: 48 b8 73 6d 61 6c 6c 20 70 63	movabsq	$0x6370206c6c616d73, %rax # imm = 0x6370206C6C616D73
+    14e8: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+    14ed: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    14f2: b8 1e 00 00 00               	movl	$0x1e, %eax
+    14f7: b9 06 00 00 00               	movl	$0x6, %ecx
+    14fc: be 1e 00 00 00               	movl	$0x1e, %esi
+    1501: 4c 89 ea                     	movq	%r13, %rdx
+    1504: 31 c0                        	xorl	%eax, %eax
+    1506: ff d1                        	callq	*%rcx
+    1508: e9 58 fb ff ff               	jmp	0x1065 <native_tracer_entry+0x1065>
+    150d: 48 b8 63 49 44 20 25 64 0a 00	movabsq	$0xa642520444963, %rax  # imm = 0xA642520444963
+    1517: 48 89 44 24 36               	movq	%rax, 0x36(%rsp)
+    151c: 48 b8 20 6d 65 74 72 69 63 49	movabsq	$0x4963697274656d20, %rax # imm = 0x4963697274656D20
+    1526: 48 89 44 24 30               	movq	%rax, 0x30(%rsp)
+    152b: 48 b8 20 6d 61 70 20 66 6f 72	movabsq	$0x726f662070616d20, %rax # imm = 0x726F662070616D20
+    1535: 48 89 44 24 28               	movq	%rax, 0x28(%rsp)
+    153a: 48 b8 20 6d 65 74 72 69 63 73	movabsq	$0x7363697274656d20, %rax # imm = 0x7363697274656D20
+    1544: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+    1549: 48 b8 6f 20 6c 6f 6f 6b 75 70	movabsq	$0x70756b6f6f6c206f, %rax # imm = 0x70756B6F6F6C206F
+    1553: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+    1558: 48 b8 46 61 69 6c 65 64 20 74	movabsq	$0x742064656c696146, %rax # imm = 0x742064656C696146
+    1562: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+    1567: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    156c: b8 2e 00 00 00               	movl	$0x2e, %eax
+    1571: b9 06 00 00 00               	movl	$0x6, %ecx
+    1576: 8b 94 24 d0 00 00 00         	movl	0xd0(%rsp), %edx
+    157d: be 2e 00 00 00               	movl	$0x2e, %esi
+    1582: 31 c0                        	xorl	%eax, %eax
+    1584: ff d1                        	callq	*%rcx
+    1586: e9 ed f1 ff ff               	jmp	0x778 <native_tracer_entry+0x778>
+    158b: 48 b8 6e 64 65 72 20 25 64 29	movabsq	$0x296425207265646e, %rax # imm = 0x296425207265646E
+    1595: 48 89 44 24 38               	movq	%rax, 0x38(%rsp)
+    159a: 48 b8 6c 78 20 28 75 6e 77 69	movabsq	$0x69776e752820786c, %rax # imm = 0x69776E752820786C
+    15a4: 48 89 44 24 30               	movq	%rax, 0x30(%rsp)
+    15a9: 48 b8 6c 78 20 69 73 20 25 6c	movabsq	$0x6c2520736920786c, %rax # imm = 0x6C2520736920786C
+    15b3: 48 89 44 24 28               	movq	%rax, 0x28(%rsp)
+    15b8: 48 b8 66 6f 72 20 50 43 20 25	movabsq	$0x2520435020726f66, %rax # imm = 0x2520435020726F66
+    15c2: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+    15c7: 48 b8 74 69 6f 6e 20 69 64 20	movabsq	$0x206469206e6f6974, %rax # imm = 0x206469206E6F6974
+    15d1: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+    15d6: 48 bd 54 65 78 74 20 73 65 63	movabsq	$0x6365732074786554, %rbp # imm = 0x6365732074786554
+    15e0: 48 89 6c 24 10               	movq	%rbp, 0x10(%rsp)
+    15e5: 66 c7 44 24 40 0a 00         	movw	$0xa, 0x40(%rsp)
+    15ec: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    15f1: b8 32 00 00 00               	movl	$0x32, %eax
+    15f6: 41 b9 06 00 00 00            	movl	$0x6, %r9d
+    15fc: 49 8b 8f 10 0f 00 00         	movq	0xf10(%r15), %rcx
+    1603: be 32 00 00 00               	movl	$0x32, %esi
+    1608: 4c 89 ea                     	movq	%r13, %rdx
+    160b: 45 89 e0                     	movl	%r12d, %r8d
+    160e: 31 c0                        	xorl	%eax, %eax
+    1610: 41 ff d1                     	callq	*%r9
+    1613: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0x161a <native_tracer_entry+0x161a>
+		0000000000001616:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+    161a: 83 38 00                     	cmpl	$0x0, (%rax)
+    161d: 0f 84 da fa ff ff            	je	0x10fd <native_tracer_entry+0x10fd>
+    1623: 48 b8 73 20 25 6c 6c 78 0a 00	movabsq	$0xa786c6c252073, %rax  # imm = 0xA786C6C252073
+    162d: 48 89 44 24 37               	movq	%rax, 0x37(%rsp)
+    1632: 48 b8 66 66 73 65 74 20 69 73	movabsq	$0x7369207465736666, %rax # imm = 0x7369207465736666
+    163c: 48 89 44 24 30               	movq	%rax, 0x30(%rsp)
+    1641: 48 b8 78 2c 20 61 6e 64 20 6f	movabsq	$0x6f20646e61202c78, %rax # imm = 0x6F20646E61202C78
+    164b: 48 89 44 24 28               	movq	%rax, 0x28(%rsp)
+    1650: 48 b8 73 20 69 73 20 25 6c 6c	movabsq	$0x6c6c252073692073, %rax # imm = 0x6C6C252073692073
+    165a: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+    165f: 48 b8 74 69 6f 6e 20 62 69 61	movabsq	$0x616962206e6f6974, %rax # imm = 0x616962206E6F6974
+    1669: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+    166e: 48 89 6c 24 10               	movq	%rbp, 0x10(%rsp)
+    1673: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1678: b8 2f 00 00 00               	movl	$0x2f, %eax
+    167d: 41 b8 06 00 00 00            	movl	$0x6, %r8d
+    1683: 49 8b 8f 18 0f 00 00         	movq	0xf18(%r15), %rcx
+    168a: 49 8b 97 20 0f 00 00         	movq	0xf20(%r15), %rdx
+    1691: be 2f 00 00 00               	movl	$0x2f, %esi
+    1696: 31 c0                        	xorl	%eax, %eax
+    1698: 41 ff d0                     	callq	*%r8
+    169b: e9 5d fa ff ff               	jmp	0x10fd <native_tracer_entry+0x10fd>
+    16a0: 8b 8c 24 c8 00 00 00         	movl	0xc8(%rsp), %ecx
+    16a7: 48 ba 25 64 3a 20 25 64 0a 00	movabsq	$0xa6425203a6425, %rdx  # imm = 0xA6425203A6425
+    16b1: 48 89 54 24 3d               	movq	%rdx, 0x3d(%rsp)
+    16b6: 48 ba 54 49 44 3a 20 25 64 3a	movabsq	$0x3a6425203a444954, %rdx # imm = 0x3A6425203A444954
+    16c0: 48 89 54 24 38               	movq	%rdx, 0x38(%rsp)
+    16c5: 48 ba 20 50 49 44 20 25 64 20	movabsq	$0x2064252044495020, %rdx # imm = 0x2064252044495020
+    16cf: 48 89 54 24 30               	movq	%rdx, 0x30(%rsp)
+    16d4: 48 ba 6e 74 73 20 77 69 74 68	movabsq	$0x687469772073746e, %rdx # imm = 0x687469772073746E
+    16de: 48 89 54 24 28               	movq	%rdx, 0x28(%rsp)
+    16e3: 48 ba 20 70 69 64 5f 65 76 65	movabsq	$0x6576655f64697020, %rdx # imm = 0x6576655F64697020
+    16ed: 48 89 54 24 20               	movq	%rdx, 0x20(%rsp)
+    16f2: 48 ba 6f 20 75 70 64 61 74 65	movabsq	$0x657461647075206f, %rdx # imm = 0x657461647075206F
+    16fc: 48 89 54 24 18               	movq	%rdx, 0x18(%rsp)
+    1701: 48 ba 46 61 69 6c 65 64 20 74	movabsq	$0x742064656c696146, %rdx # imm = 0x742064656C696146
+    170b: 48 89 54 24 10               	movq	%rdx, 0x10(%rsp)
+    1710: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1715: ba 35 00 00 00               	movl	$0x35, %edx
+    171a: 41 b9 06 00 00 00            	movl	$0x6, %r9d
+    1720: be 35 00 00 00               	movl	$0x35, %esi
+    1725: 44 89 e2                     	movl	%r12d, %edx
+    1728: 41 89 c0                     	movl	%eax, %r8d
+    172b: 31 c0                        	xorl	%eax, %eax
+    172d: 41 ff d1                     	callq	*%r9
+    1730: e9 06 f0 ff ff               	jmp	0x73b <native_tracer_entry+0x73b>
+    1735: 48 b8 43 20 30 78 25 6c 78 0a	movabsq	$0xa786c2578302043, %rax # imm = 0xA786C2578302043
+    173f: 48 89 44 24 40               	movq	%rax, 0x40(%rsp)
+    1744: 48 b8 6e 67 20 66 6f 72 20 50	movabsq	$0x5020726f6620676e, %rax # imm = 0x5020726F6620676E
+    174e: 48 89 44 24 38               	movq	%rax, 0x38(%rsp)
+    1753: 48 b8 72 79 20 6d 61 70 70 69	movabsq	$0x697070616d207972, %rax # imm = 0x697070616D207972
+    175d: 48 89 44 24 30               	movq	%rax, 0x30(%rsp)
+    1762: 48 b8 76 61 6c 20 6d 65 6d 6f	movabsq	$0x6f6d656d206c6176, %rax # imm = 0x6F6D656D206C6176
+    176c: 48 89 44 24 28               	movq	%rax, 0x28(%rsp)
+    1771: 48 b8 75 70 20 69 6e 74 65 72	movabsq	$0x7265746e69207075, %rax # imm = 0x7265746E69207075
+    177b: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+    1780: 48 b8 74 6f 20 6c 6f 6f 6b 20	movabsq	$0x206b6f6f6c206f74, %rax # imm = 0x206B6F6F6C206F74
+    178a: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+    178f: 48 b8 46 61 69 6c 75 72 65 20	movabsq	$0x206572756c696146, %rax # imm = 0x206572756C696146
+    1799: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+    179e: c6 44 24 48 00               	movb	$0x0, 0x48(%rsp)
+    17a3: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    17a8: b8 39 00 00 00               	movl	$0x39, %eax
+    17ad: b9 06 00 00 00               	movl	$0x6, %ecx
+    17b2: be 39 00 00 00               	movl	$0x39, %esi
+    17b7: 4c 89 ea                     	movq	%r13, %rdx
+    17ba: 31 c0                        	xorl	%eax, %eax
+    17bc: ff d1                        	callq	*%rcx
+    17be: e9 35 fa ff ff               	jmp	0x11f8 <native_tracer_entry+0x11f8>
+    17c3: 48 b8 63 49 44 20 25 64 0a 00	movabsq	$0xa642520444963, %rax  # imm = 0xA642520444963
+    17cd: 48 89 44 24 36               	movq	%rax, 0x36(%rsp)
+    17d2: 48 b8 20 6d 65 74 72 69 63 49	movabsq	$0x4963697274656d20, %rax # imm = 0x4963697274656D20
+    17dc: 48 89 44 24 30               	movq	%rax, 0x30(%rsp)
+    17e1: 48 b8 20 6d 61 70 20 66 6f 72	movabsq	$0x726f662070616d20, %rax # imm = 0x726F662070616D20
+    17eb: 48 89 44 24 28               	movq	%rax, 0x28(%rsp)
+    17f0: 48 b8 20 6d 65 74 72 69 63 73	movabsq	$0x7363697274656d20, %rax # imm = 0x7363697274656D20
+    17fa: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+    17ff: 48 b8 6f 20 6c 6f 6f 6b 75 70	movabsq	$0x70756b6f6f6c206f, %rax # imm = 0x70756B6F6F6C206F
+    1809: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+    180e: 48 b8 46 61 69 6c 65 64 20 74	movabsq	$0x742064656c696146, %rax # imm = 0x742064656C696146
+    1818: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+    181d: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1822: b8 2e 00 00 00               	movl	$0x2e, %eax
+    1827: b9 06 00 00 00               	movl	$0x6, %ecx
+    182c: 8b 94 24 d0 00 00 00         	movl	0xd0(%rsp), %edx
+    1833: be 2e 00 00 00               	movl	$0x2e, %esi
+    1838: 31 c0                        	xorl	%eax, %eax
+    183a: ff d1                        	callq	*%rcx
+    183c: e9 ef f1 ff ff               	jmp	0xa30 <native_tracer_entry+0xa30>
+    1841: 48 b9 72 6f 72 20 25 64 0a 00	movabsq	$0xa642520726f72, %rcx  # imm = 0xA642520726F72
+    184b: 48 89 4c 24 3e               	movq	%rcx, 0x3e(%rsp)
+    1850: 48 b9 25 64 3a 20 65 72 72 6f	movabsq	$0x6f727265203a6425, %rcx # imm = 0x6F727265203A6425
+    185a: 48 89 4c 24 38               	movq	%rcx, 0x38(%rsp)
+    185f: 48 b9 64 20 65 76 65 6e 74 20	movabsq	$0x20746e6576652064, %rcx # imm = 0x20746E6576652064
+    1869: 48 89 4c 24 30               	movq	%rcx, 0x30(%rsp)
+    186e: 48 b9 64 20 74 6f 20 73 65 6e	movabsq	$0x6e6573206f742064, %rcx # imm = 0x6E6573206F742064
+    1878: 48 89 4c 24 28               	movq	%rcx, 0x28(%rsp)
+    187d: 48 b9 65 72 20 66 61 69 6c 65	movabsq	$0x656c696166207265, %rcx # imm = 0x656C696166207265
+    1887: 48 89 4c 24 20               	movq	%rcx, 0x20(%rsp)
+    188c: 48 b9 6e 64 5f 74 72 69 67 67	movabsq	$0x67676972745f646e, %rcx # imm = 0x67676972745F646E
+    1896: 48 89 4c 24 18               	movq	%rcx, 0x18(%rsp)
+    189b: 48 b9 65 76 65 6e 74 5f 73 65	movabsq	$0x65735f746e657665, %rcx # imm = 0x65735F746E657665
+    18a5: 48 89 4c 24 10               	movq	%rcx, 0x10(%rsp)
+    18aa: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    18af: b9 36 00 00 00               	movl	$0x36, %ecx
+    18b4: 41 b8 06 00 00 00            	movl	$0x6, %r8d
+    18ba: be 36 00 00 00               	movl	$0x36, %esi
+    18bf: ba 01 00 00 00               	movl	$0x1, %edx
+    18c4: 89 c1                        	movl	%eax, %ecx
+    18c6: 31 c0                        	xorl	%eax, %eax
+    18c8: 41 ff d0                     	callq	*%r8
+    18cb: e9 26 f1 ff ff               	jmp	0x9f6 <native_tracer_entry+0x9f6>
+    18d0: 48 b8 63 49 44 20 25 64 0a 00	movabsq	$0xa642520444963, %rax  # imm = 0xA642520444963
+    18da: 48 89 44 24 36               	movq	%rax, 0x36(%rsp)
+    18df: 48 b8 20 6d 65 74 72 69 63 49	movabsq	$0x4963697274656d20, %rax # imm = 0x4963697274656D20
+    18e9: 48 89 44 24 30               	movq	%rax, 0x30(%rsp)
+    18ee: 48 b8 20 6d 61 70 20 66 6f 72	movabsq	$0x726f662070616d20, %rax # imm = 0x726F662070616D20
+    18f8: 48 89 44 24 28               	movq	%rax, 0x28(%rsp)
+    18fd: 48 b8 20 6d 65 74 72 69 63 73	movabsq	$0x7363697274656d20, %rax # imm = 0x7363697274656D20
+    1907: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+    190c: 48 b8 6f 20 6c 6f 6f 6b 75 70	movabsq	$0x70756b6f6f6c206f, %rax # imm = 0x70756B6F6F6C206F
+    1916: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+    191b: 48 b8 46 61 69 6c 65 64 20 74	movabsq	$0x742064656c696146, %rax # imm = 0x742064656C696146
+    1925: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+    192a: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    192f: b8 2e 00 00 00               	movl	$0x2e, %eax
+    1934: b9 06 00 00 00               	movl	$0x6, %ecx
+    1939: 8b 94 24 d0 00 00 00         	movl	0xd0(%rsp), %edx
+    1940: be 2e 00 00 00               	movl	$0x2e, %esi
+    1945: 31 c0                        	xorl	%eax, %eax
+    1947: ff d1                        	callq	*%rcx
+    1949: e9 59 f0 ff ff               	jmp	0x9a7 <native_tracer_entry+0x9a7>
+    194e: 48 b9 74 63 68 20 25 64 0a 00	movabsq	$0xa642520686374, %rcx  # imm = 0xA642520686374
+    1958: 48 89 4c 24 26               	movq	%rcx, 0x26(%rsp)
+    195d: 48 b9 65 74 73 20 6d 61 74 63	movabsq	$0x6374616d20737465, %rcx # imm = 0x6374616D20737465
+    1967: 48 89 4c 24 20               	movq	%rcx, 0x20(%rsp)
+    196c: 48 b9 74 65 72 5f 6f 66 66 73	movabsq	$0x7366666f5f726574, %rcx # imm = 0x7366666F5F726574
+    1976: 48 89 4c 24 18               	movq	%rcx, 0x18(%rsp)
+    197b: 48 b9 69 6e 74 65 72 70 72 65	movabsq	$0x6572707265746e69, %rcx # imm = 0x6572707265746E69
+    1985: 48 89 4c 24 10               	movq	%rcx, 0x10(%rsp)
+    198a: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    198f: b9 1e 00 00 00               	movl	$0x1e, %ecx
+    1994: 41 b8 06 00 00 00            	movl	$0x6, %r8d
+    199a: 0f b7 50 20                  	movzwl	0x20(%rax), %edx
+    199e: be 1e 00 00 00               	movl	$0x1e, %esi
+    19a3: 49 89 c5                     	movq	%rax, %r13
+    19a6: 31 c0                        	xorl	%eax, %eax
+    19a8: 41 ff d0                     	callq	*%r8
+    19ab: 4c 89 e8                     	movq	%r13, %rax
+    19ae: 41 8b 8f 80 13 00 00         	movl	0x1380(%r15), %ecx
+    19b5: 8b 50 20                     	movl	0x20(%rax), %edx
+    19b8: 0f a3 d1                     	btl	%edx, %ecx
+    19bb: 0f 82 c5 f7 ff ff            	jb	0x1186 <native_tracer_entry+0x1186>
+    19c1: 49 89 c4                     	movq	%rax, %r12
+    19c4: c7 84 24 c8 00 00 00 00 00 00 00     	movl	$0x0, 0xc8(%rsp)
+    19cf: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x19d6 <native_tracer_entry+0x19d6>
+		00000000000019d2:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+    19d6: 48 8d b4 24 c8 00 00 00      	leaq	0xc8(%rsp), %rsi
+    19de: b8 01 00 00 00               	movl	$0x1, %eax
+    19e3: ff d0                        	callq	*%rax
+    19e5: 48 85 c0                     	testq	%rax, %rax
+    19e8: 74 08                        	je	0x19f2 <native_tracer_entry+0x19f2>
+    19ea: 48 ff 00                     	incq	(%rax)
+    19ed: 4c 89 e0                     	movq	%r12, %rax
+    19f0: eb 0f                        	jmp	0x1a01 <native_tracer_entry+0x1a01>
+    19f2: 48 8b 05 00 00 00 00         	movq	(%rip), %rax            # 0x19f9 <native_tracer_entry+0x19f9>
+		00000000000019f5:  R_X86_64_REX_GOTPCRELX	with_debug_output-0x4
+    19f9: 83 38 00                     	cmpl	$0x0, (%rax)
+    19fc: 4c 89 e0                     	movq	%r12, %rax
+    19ff: 75 0a                        	jne	0x1a0b <native_tracer_entry+0x1a0b>
+    1a01: 44 0f b7 60 20               	movzwl	0x20(%rax), %r12d
+    1a06: e9 71 f1 ff ff               	jmp	0xb7c <native_tracer_entry+0xb7c>
+    1a0b: 48 b8 63 49 44 20 25 64 0a 00	movabsq	$0xa642520444963, %rax  # imm = 0xA642520444963
+    1a15: 48 89 44 24 36               	movq	%rax, 0x36(%rsp)
+    1a1a: 48 b8 20 6d 65 74 72 69 63 49	movabsq	$0x4963697274656d20, %rax # imm = 0x4963697274656D20
+    1a24: 48 89 44 24 30               	movq	%rax, 0x30(%rsp)
+    1a29: 48 b8 20 6d 61 70 20 66 6f 72	movabsq	$0x726f662070616d20, %rax # imm = 0x726F662070616D20
+    1a33: 48 89 44 24 28               	movq	%rax, 0x28(%rsp)
+    1a38: 48 b8 20 6d 65 74 72 69 63 73	movabsq	$0x7363697274656d20, %rax # imm = 0x7363697274656D20
+    1a42: 48 89 44 24 20               	movq	%rax, 0x20(%rsp)
+    1a47: 48 b8 6f 20 6c 6f 6f 6b 75 70	movabsq	$0x70756b6f6f6c206f, %rax # imm = 0x70756B6F6F6C206F
+    1a51: 48 89 44 24 18               	movq	%rax, 0x18(%rsp)
+    1a56: 48 b8 46 61 69 6c 65 64 20 74	movabsq	$0x742064656c696146, %rax # imm = 0x742064656C696146
+    1a60: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+    1a65: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1a6a: b8 2e 00 00 00               	movl	$0x2e, %eax
+    1a6f: b9 06 00 00 00               	movl	$0x6, %ecx
+    1a74: 8b 94 24 c8 00 00 00         	movl	0xc8(%rsp), %edx
+    1a7b: be 2e 00 00 00               	movl	$0x2e, %esi
+    1a80: 31 c0                        	xorl	%eax, %eax
+    1a82: ff d1                        	callq	*%rcx
+    1a84: e9 64 ff ff ff               	jmp	0x19ed <native_tracer_entry+0x19ed>

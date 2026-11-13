@@ -1,0 +1,2 @@
+#!/bin/bash
+exec python3 /workspaces/repository/kprog/perf/may29-image/eqcodex-capture.py "$@"

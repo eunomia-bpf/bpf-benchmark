@@ -1,0 +1,144 @@
+usage: vng [-h] [--version] [--run [RUN] | --build | --clean | --dump DUMP |
+           --mcp] [--dry-run] [--no-virtme-ng-init] [--empty-passwords]
+           [--pin [PIN]] [--gdb] [--snaps] [--debug] [--kconfig]
+           [--skip-modules] [--commit COMMIT] [--config CONFIG]
+           [--configitem CONFIGITEM] [--busybox PATH_TO_BUSYBOX] [--qemu QEMU]
+           [--name NAME] [--user USER] [--shell BINARY] [--root ROOT]
+           [--root-release ROOT_RELEASE] [--rw] [--force-9p]
+           [--disable-microvm] [--disable-kvm] [--disable-monitor] [--cwd CWD]
+           [--rodir RODIR] [--rwdir RWDIR] [--overlay-rwdir OVERLAY_RWDIR]
+           [--cpus CPUS] [--memory MEMORY]
+           [--numa MEM[,cpus=FIRST_CPU1[-LAST_CPU1]][,cpus=FIRST_CPU2[-LAST_CPU2]]...]
+           [--numa-distance SRC,DST=VAL] [--balloon] [--network NETWORK]
+           [--no-dhcp] [--net-mac-address NET_MAC_ADDRESS] [--disk PATH]
+           [--exec EXEC] [--append APPEND] [--force-initramfs] [--sound]
+           [--graphics] [--verbose] [--quiet] [--qemu-opts QEMU_OPTS]
+           [--build-host BUILD_HOST]
+           [--build-host-exec-prefix BUILD_HOST_EXEC_PREFIX]
+           [--build-host-vmlinux] [--arch ARCH]
+           [--cross-compile CROSS_COMPILE] [--force]
+           [--nvgpu [GPU PCI Address]] [--vfio-pci PCI_ADDRESS]
+           [--console [PORT]] [--console-client [PORT]] [--ssh [PORT]]
+           [--ssh-client [PORT]] [--ssh-tcp] [--remote-cmd COMMAND]
+           [--systemd]
+           [envs ...]
+
+Build and run kernels inside a virtualized snapshot of your live system
+
+positional arguments:
+  envs                  Additional Makefile variables
+
+options:
+  -h, --help            show this help message and exit
+  --version, -V         show program's version number and exit
+  --dry-run             Only show the commands without actually running them.
+  --no-virtme-ng-init   Fallback to the bash virtme-init (useful for debugging/development)
+  --empty-passwords     Use empty passwords for all users
+  --pin [PIN], -P [PIN]
+                        Pin each QEMU vCPU thread to a distinct host CPU. If given without arguments, all host CPUs are used. If given with an argument, it must be a list/range of CPUs (e.g., 0,1,3-5,9).NOTE: only a single virtme-ng guest can be pinned at a time, pinning multiple virtme-ng guests is not supported yet.
+  --gdb                 Attach a debugging session to a running instance started with --debug
+  --snaps               Allow to execute snaps inside virtme-ng
+  --debug               Start the instance with debugging enabled: allow to generate crash dumps, attach a debugging session with GDB, etc.
+  --kconfig, -k         Only override the kernel .config without building/running anything
+  --skip-modules, -S    Run a really fast build by skipping external modules (no external modules support)
+  --commit COMMIT, -c COMMIT
+                        Use a kernel identified by a specific commit id, tag or branch
+  --config CONFIG, --custom CONFIG, -f CONFIG
+                        Use one (or more) kernel .config snippet files, or '-' for stdin
+  --configitem CONFIGITEM
+                        add a CONFIG_ITEM=val, after --config <fragments>, these override previous config settings
+  --busybox PATH_TO_BUSYBOX
+                        Use the specified busybox binary
+  --qemu QEMU           Use the specified QEMU binary
+  --name NAME           Set guest hostname and qemu -name flag
+  --user USER           Change user inside the guest (default is same user as the host)
+  --shell BINARY        Override the default user shell
+  --root ROOT           Pass a specific chroot to use inside the virtualized kernel (useful with --arch)
+  --root-release ROOT_RELEASE
+                        Use a target Ubuntu release to create a new chroot (used with --root)
+  --rw                  Give the guest read-write access to its root filesystem. WARNING: this can be dangerous for the host filesystem!
+  --force-9p            Use legacy 9p filesystem as rootfs
+  --disable-microvm     Avoid using the "microvm" QEMU architecture (only on x86_64)
+  --disable-kvm         Avoid using hardware virtualization / KVM
+  --disable-monitor     Disable QEMU STDIO monitor
+  --cwd CWD             Change guest working directory (default is current working directory when possible)
+  --rodir RODIR         Supply a read-only directory to the guest. Use --rodir=path or --rodir=guestpath=hostpath
+  --rwdir RWDIR         Supply a read/write directory to the guest. Use --rwdir=path or --rwdir=guestpath=hostpath
+  --overlay-rwdir OVERLAY_RWDIR
+                        Supply a directory that is r/w to the guest but read-only in the host. Use --overlay-rwdir=path.
+  --cpus CPUS, -p CPUS  Set guest CPU count (qemu -smp flag)
+  --memory MEMORY, -m MEMORY
+                        Set guest memory size (qemu -m flag)
+  --numa MEM[,cpus=FIRST_CPU1[-LAST_CPU1]][,cpus=FIRST_CPU2[-LAST_CPU2]]...
+                        Create a NUMA node in the guest. Use this option multiple times to create more NUMA nodes. The total memory size assigned to NUMA nodes must match the guest memory size (specified with --memory/-m). This option implicitly disables the microvm architecture.
+  --numa-distance SRC,DST=VAL
+                        Set a distance of VAL between NUMA node SRC_NODE and DST_NODE. Use this option multiple times to define multiple distances between NUMA nodes. This option is used only together with --numa.
+  --balloon             Allow the host to ask the guest to release memory
+  --network NETWORK, -n NETWORK
+                        Enable network access: user, bridge(=<br>), loop
+  --no-dhcp             Disable DHCP configuration for network interfaces.
+  --net-mac-address NET_MAC_ADDRESS
+                        The MAC address to assign to the NIC interface, e.g. 52:54:00:12:34:56. The last octet will be incremented for the next network devices.
+  --disk PATH, -D PATH  Add a file as virtio-scsi disk (can be used multiple times)
+  --exec EXEC, -e EXEC  Execute a command inside the kernel and exit
+  --append APPEND, -a APPEND
+                        Additional kernel boot options (can be used multiple times)
+  --force-initramfs     Use an initramfs even if unnecessary
+  --sound               Enable audio device (if the architecture supports it)
+  --graphics, -g        Show graphical output instead of using a console.
+  --verbose, -v         Increase console output verbosity.
+  --quiet, -q           Override verbose mode (disable --verbose).
+  --qemu-opts QEMU_OPTS, -o QEMU_OPTS
+                        Additional arguments for QEMU (can be used multiple times) or bundled together: --qemu-opts='...'
+  --build-host BUILD_HOST
+                        Perform kernel build on a remote server (ssh access required)
+  --build-host-exec-prefix BUILD_HOST_EXEC_PREFIX
+                        Prepend a command (e.g., chroot) to the make command executed on the remote build host
+  --build-host-vmlinux  Copy vmlinux back from the build host
+  --arch ARCH           Generate and test a kernel for a specific architecture (default is host architecture ; if set, to be used with --root)
+  --cross-compile CROSS_COMPILE
+                        Set cross-compile prefix
+  --force               Force reset git repository to target branch or commit (warning: this may drop uncommitted changes), and force kernel config override
+  --nvgpu [GPU PCI Address]
+                        Add a passthrough NVIDIA GPU
+  --vfio-pci PCI_ADDRESS
+                        Pass through a PCI device using vfio-pci (can be used multiple times), e.g. --vfio-pci 0000:ce:00.0
+  --systemd             Execute systemd as init (EXPERIMENTAL)
+
+Action:
+  --run [RUN], -r [RUN]
+                        Run a specified kernel; --run can accept one of the following arguments: 1) nothing (in this case it'll try to boot the same kernel running on the host), 2) a kernel binary (like ./arch/x86/boot/bzImage), 3) a directory (where it'll try to find a valid kernel binary file), 4) an upstream version, for example `vng --run v6.6.17` (in this case vng will download a precompiled upstream kernel from the Ubuntu mainline repository)
+  --build, -b           Build the kernel in the current directory (or remotely if used with --build-host)
+  --clean, -x           Clean the kernel repository (local or remote if used with --build-host)
+  --dump DUMP, -d DUMP  Generate a memory dump of the running kernel (instance needs to be started with --debug)
+  --mcp                 Start the MCP (Model Context Protocol) server for AI agent integration
+
+Remote Console:
+  --console [PORT]      Enable a server to communicate later from the host using '--console-client'. By default, a simple console will be offered using a VSOCK connection, and 'socat' for the proxy.
+  --console-client [PORT]
+                        Connect to a VM launched with the '--console' option for a remote control.
+  --ssh [PORT]          Enable SSH server to communicate later from the host to using '--ssh-client'.
+  --ssh-client [PORT]   Connect to a VM launched with the '--ssh' option for a remote control.
+  --ssh-tcp             Use TCP for the SSH connection to the guest
+  --remote-cmd COMMAND  To start in the VM a different command than the default one (--server), or to launch this command instead of a prompt (--client).
+
+virtme-ng is a tool that allows to easily and quickly recompile and test a
+Linux kernel, starting from the source code. It allows to re‐ compile  the
+kernel in a few minutes (rather than hours), then the kernel is automatically
+started in a virtualized environment that is an exact copy-on-write copy of
+your live system, which means that any changes made to the virtualized
+environment do not affect the host system.
+
+In order to do this, a minimal config is produced (with the bare minimum
+support to test the kernel inside qemu), then the selected kernel is
+automatically built and started inside qemu, using the filesystem of the host
+as a copy-on-write snapshot.
+
+This means that you can safely destroy the entire filesystem, crash the kernel,
+etc. without affecting the host.
+
+NOTE: kernels produced with virtme-ng are lacking lots of features, in order to
+reduce the build time to the minimum and still provide you a usable kernel
+capable of running your tests and experiments.
+
+virtme-ng is based on virtme, written by Andy Lutomirski <luto@kernel.org>.

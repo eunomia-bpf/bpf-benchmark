@@ -1,0 +1,821 @@
+
+vendor/build/native-bpf/x86/stage/tetragon/bpf_fork_v511.native.o:	file format elf64-x86-64
+
+Disassembly of section kprobe/wake_up_new_task:
+
+0000000000000000 <event_wake_up_new_task>:
+       0: 55                           	pushq	%rbp
+       1: 41 57                        	pushq	%r15
+       3: 41 56                        	pushq	%r14
+       5: 41 55                        	pushq	%r13
+       7: 41 54                        	pushq	%r12
+       9: 53                           	pushq	%rbx
+       a: 48 81 ec 18 01 00 00         	subq	$0x118, %rsp            # imm = 0x118
+      11: 4c 8b 77 70                  	movq	0x70(%rdi), %r14
+      15: 4d 85 f6                     	testq	%r14, %r14
+      18: 0f 84 45 0d 00 00            	je	0xd63 <event_wake_up_new_task+0xd63>
+      1e: 48 89 fb                     	movq	%rdi, %rbx
+      21: 49 8d 96 f4 0a 00 00         	leaq	0xaf4(%r14), %rdx
+      28: 48 8d bc 24 88 00 00 00      	leaq	0x88(%rsp), %rdi
+      30: b8 04 00 00 00               	movl	$0x4, %eax
+      35: b9 71 00 00 00               	movl	$0x71, %ecx
+      3a: be 04 00 00 00               	movl	$0x4, %esi
+      3f: ff d1                        	callq	*%rcx
+      41: 8b ac 24 88 00 00 00         	movl	0x88(%rsp), %ebp
+      48: 4c 89 b4 24 88 00 00 00      	movq	%r14, 0x88(%rsp)
+      50: 49 8d 86 00 0b 00 00         	leaq	0xb00(%r14), %rax
+      57: 48 8d bc 24 88 00 00 00      	leaq	0x88(%rsp), %rdi
+      5f: b9 08 00 00 00               	movl	$0x8, %ecx
+      64: 41 b8 71 00 00 00            	movl	$0x71, %r8d
+      6a: ba 00 0b 00 00               	movl	$0xb00, %edx            # imm = 0xB00
+      6f: 48 03 94 24 88 00 00 00      	addq	0x88(%rsp), %rdx
+      77: be 08 00 00 00               	movl	$0x8, %esi
+      7c: 41 ff d0                     	callq	*%r8
+      7f: 48 8b 84 24 88 00 00 00      	movq	0x88(%rsp), %rax
+      87: 48 85 c0                     	testq	%rax, %rax
+      8a: 0f 84 d3 0c 00 00            	je	0xd63 <event_wake_up_new_task+0xd63>
+      90: 48 05 f4 0a 00 00            	addq	$0xaf4, %rax            # imm = 0xAF4
+      96: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+      9b: b9 04 00 00 00               	movl	$0x4, %ecx
+      a0: 41 b8 71 00 00 00            	movl	$0x71, %r8d
+      a6: ba f4 0a 00 00               	movl	$0xaf4, %edx            # imm = 0xAF4
+      ab: 48 03 94 24 88 00 00 00      	addq	0x88(%rsp), %rdx
+      b3: be 04 00 00 00               	movl	$0x4, %esi
+      b8: 41 ff d0                     	callq	*%r8
+      bb: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+      bf: 89 44 24 48                  	movl	%eax, 0x48(%rsp)
+      c3: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0xca <event_wake_up_new_task+0xca>
+		00000000000000c6:  R_X86_64_REX_GOTPCRELX	execve_map-0x4
+      ca: 48 8d 74 24 48               	leaq	0x48(%rsp), %rsi
+      cf: b8 01 00 00 00               	movl	$0x1, %eax
+      d4: ff d0                        	callq	*%rax
+      d6: 48 85 c0                     	testq	%rax, %rax
+      d9: 74 0b                        	je	0xe6 <event_wake_up_new_task+0xe6>
+      db: 48 83 78 08 00               	cmpq	$0x0, 0x8(%rax)
+      e0: 0f 85 d2 01 00 00            	jne	0x2b8 <event_wake_up_new_task+0x2b8>
+      e6: ba 00 0b 00 00               	movl	$0xb00, %edx            # imm = 0xB00
+      eb: 48 8b 84 24 88 00 00 00      	movq	0x88(%rsp), %rax
+      f3: 48 01 d0                     	addq	%rdx, %rax
+      f6: 48 8d bc 24 88 00 00 00      	leaq	0x88(%rsp), %rdi
+      fe: b9 08 00 00 00               	movl	$0x8, %ecx
+     103: 41 b8 71 00 00 00            	movl	$0x71, %r8d
+     109: 48 03 94 24 88 00 00 00      	addq	0x88(%rsp), %rdx
+     111: be 08 00 00 00               	movl	$0x8, %esi
+     116: 41 ff d0                     	callq	*%r8
+     119: 48 8b 84 24 88 00 00 00      	movq	0x88(%rsp), %rax
+     121: 48 85 c0                     	testq	%rax, %rax
+     124: 0f 84 39 0c 00 00            	je	0xd63 <event_wake_up_new_task+0xd63>
+     12a: 48 05 f4 0a 00 00            	addq	$0xaf4, %rax            # imm = 0xAF4
+     130: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     135: b9 04 00 00 00               	movl	$0x4, %ecx
+     13a: 41 b8 71 00 00 00            	movl	$0x71, %r8d
+     140: ba f4 0a 00 00               	movl	$0xaf4, %edx            # imm = 0xAF4
+     145: 48 03 94 24 88 00 00 00      	addq	0x88(%rsp), %rdx
+     14d: be 04 00 00 00               	movl	$0x4, %esi
+     152: 41 ff d0                     	callq	*%r8
+     155: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+     159: 89 44 24 48                  	movl	%eax, 0x48(%rsp)
+     15d: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x164 <event_wake_up_new_task+0x164>
+		0000000000000160:  R_X86_64_REX_GOTPCRELX	execve_map-0x4
+     164: 48 8d 74 24 48               	leaq	0x48(%rsp), %rsi
+     169: b8 01 00 00 00               	movl	$0x1, %eax
+     16e: ff d0                        	callq	*%rax
+     170: 48 85 c0                     	testq	%rax, %rax
+     173: 74 0b                        	je	0x180 <event_wake_up_new_task+0x180>
+     175: 48 83 78 08 00               	cmpq	$0x0, 0x8(%rax)
+     17a: 0f 85 38 01 00 00            	jne	0x2b8 <event_wake_up_new_task+0x2b8>
+     180: ba 00 0b 00 00               	movl	$0xb00, %edx            # imm = 0xB00
+     185: 48 8b 84 24 88 00 00 00      	movq	0x88(%rsp), %rax
+     18d: 48 01 d0                     	addq	%rdx, %rax
+     190: 48 8d bc 24 88 00 00 00      	leaq	0x88(%rsp), %rdi
+     198: b9 08 00 00 00               	movl	$0x8, %ecx
+     19d: 41 b8 71 00 00 00            	movl	$0x71, %r8d
+     1a3: 48 03 94 24 88 00 00 00      	addq	0x88(%rsp), %rdx
+     1ab: be 08 00 00 00               	movl	$0x8, %esi
+     1b0: 41 ff d0                     	callq	*%r8
+     1b3: 48 8b 84 24 88 00 00 00      	movq	0x88(%rsp), %rax
+     1bb: 48 85 c0                     	testq	%rax, %rax
+     1be: 0f 84 9f 0b 00 00            	je	0xd63 <event_wake_up_new_task+0xd63>
+     1c4: 48 05 f4 0a 00 00            	addq	$0xaf4, %rax            # imm = 0xAF4
+     1ca: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     1cf: b9 04 00 00 00               	movl	$0x4, %ecx
+     1d4: 41 b8 71 00 00 00            	movl	$0x71, %r8d
+     1da: ba f4 0a 00 00               	movl	$0xaf4, %edx            # imm = 0xAF4
+     1df: 48 03 94 24 88 00 00 00      	addq	0x88(%rsp), %rdx
+     1e7: be 04 00 00 00               	movl	$0x4, %esi
+     1ec: 41 ff d0                     	callq	*%r8
+     1ef: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+     1f3: 89 44 24 48                  	movl	%eax, 0x48(%rsp)
+     1f7: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x1fe <event_wake_up_new_task+0x1fe>
+		00000000000001fa:  R_X86_64_REX_GOTPCRELX	execve_map-0x4
+     1fe: 48 8d 74 24 48               	leaq	0x48(%rsp), %rsi
+     203: b8 01 00 00 00               	movl	$0x1, %eax
+     208: ff d0                        	callq	*%rax
+     20a: 48 85 c0                     	testq	%rax, %rax
+     20d: 74 0b                        	je	0x21a <event_wake_up_new_task+0x21a>
+     20f: 48 83 78 08 00               	cmpq	$0x0, 0x8(%rax)
+     214: 0f 85 9e 00 00 00            	jne	0x2b8 <event_wake_up_new_task+0x2b8>
+     21a: ba 00 0b 00 00               	movl	$0xb00, %edx            # imm = 0xB00
+     21f: 48 8b 84 24 88 00 00 00      	movq	0x88(%rsp), %rax
+     227: 48 01 d0                     	addq	%rdx, %rax
+     22a: 48 8d bc 24 88 00 00 00      	leaq	0x88(%rsp), %rdi
+     232: b9 08 00 00 00               	movl	$0x8, %ecx
+     237: 41 b8 71 00 00 00            	movl	$0x71, %r8d
+     23d: 48 03 94 24 88 00 00 00      	addq	0x88(%rsp), %rdx
+     245: be 08 00 00 00               	movl	$0x8, %esi
+     24a: 41 ff d0                     	callq	*%r8
+     24d: 48 8b 84 24 88 00 00 00      	movq	0x88(%rsp), %rax
+     255: 48 85 c0                     	testq	%rax, %rax
+     258: 0f 84 05 0b 00 00            	je	0xd63 <event_wake_up_new_task+0xd63>
+     25e: 48 05 f4 0a 00 00            	addq	$0xaf4, %rax            # imm = 0xAF4
+     264: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     269: b9 04 00 00 00               	movl	$0x4, %ecx
+     26e: 41 b8 71 00 00 00            	movl	$0x71, %r8d
+     274: ba f4 0a 00 00               	movl	$0xaf4, %edx            # imm = 0xAF4
+     279: 48 03 94 24 88 00 00 00      	addq	0x88(%rsp), %rdx
+     281: be 04 00 00 00               	movl	$0x4, %esi
+     286: 41 ff d0                     	callq	*%r8
+     289: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+     28d: 89 44 24 48                  	movl	%eax, 0x48(%rsp)
+     291: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x298 <event_wake_up_new_task+0x298>
+		0000000000000294:  R_X86_64_REX_GOTPCRELX	execve_map-0x4
+     298: 48 8d 74 24 48               	leaq	0x48(%rsp), %rsi
+     29d: b8 01 00 00 00               	movl	$0x1, %eax
+     2a2: ff d0                        	callq	*%rax
+     2a4: 48 85 c0                     	testq	%rax, %rax
+     2a7: 0f 84 b6 0a 00 00            	je	0xd63 <event_wake_up_new_task+0xd63>
+     2ad: 48 83 78 08 00               	cmpq	$0x0, 0x8(%rax)
+     2b2: 0f 84 ab 0a 00 00            	je	0xd63 <event_wake_up_new_task+0xd63>
+     2b8: 49 89 c4                     	movq	%rax, %r12
+     2bb: 89 6c 24 48                  	movl	%ebp, 0x48(%rsp)
+     2bf: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x2c6 <event_wake_up_new_task+0x2c6>
+		00000000000002c2:  R_X86_64_REX_GOTPCRELX	execve_map-0x4
+     2c6: 48 8d 74 24 48               	leaq	0x48(%rsp), %rsi
+     2cb: b8 01 00 00 00               	movl	$0x1, %eax
+     2d0: ff d0                        	callq	*%rax
+     2d2: 48 85 c0                     	testq	%rax, %rax
+     2d5: 0f 84 15 01 00 00            	je	0x3f0 <event_wake_up_new_task+0x3f0>
+     2db: 49 89 c7                     	movq	%rax, %r15
+     2de: 49 83 7f 08 00               	cmpq	$0x0, 0x8(%r15)
+     2e3: 0f 85 7a 0a 00 00            	jne	0xd63 <event_wake_up_new_task+0xd63>
+     2e9: 41 c7 47 20 01 00 00 00      	movl	$0x1, 0x20(%r15)
+     2f1: 41 89 2f                     	movl	%ebp, (%r15)
+     2f4: b8 7d 00 00 00               	movl	$0x7d, %eax
+     2f9: ff d0                        	callq	*%rax
+     2fb: 49 89 47 08                  	movq	%rax, 0x8(%r15)
+     2ff: 49 8d 56 60                  	leaq	0x60(%r14), %rdx
+     303: 48 8d 7c 24 48               	leaq	0x48(%rsp), %rdi
+     308: b8 08 00 00 00               	movl	$0x8, %eax
+     30d: b9 71 00 00 00               	movl	$0x71, %ecx
+     312: be 08 00 00 00               	movl	$0x8, %esi
+     317: ff d1                        	callq	*%rcx
+     319: 48 8b 44 24 48               	movq	0x48(%rsp), %rax
+     31e: 31 ed                        	xorl	%ebp, %ebp
+     320: 48 85 c0                     	testq	%rax, %rax
+     323: 74 77                        	je	0x39c <event_wake_up_new_task+0x39c>
+     325: 48 83 c0 04                  	addq	$0x4, %rax
+     329: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     32e: b9 04 00 00 00               	movl	$0x4, %ecx
+     333: 41 b8 71 00 00 00            	movl	$0x71, %r8d
+     339: 48 8b 54 24 48               	movq	0x48(%rsp), %rdx
+     33e: 48 83 c2 04                  	addq	$0x4, %rdx
+     342: be 04 00 00 00               	movl	$0x4, %esi
+     347: 41 ff d0                     	callq	*%r8
+     34a: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+     34e: 85 c0                        	testl	%eax, %eax
+     350: 74 4a                        	je	0x39c <event_wake_up_new_task+0x39c>
+     352: 48 8b 4c 24 48               	movq	0x48(%rsp), %rcx
+     357: c1 e0 04                     	shll	$0x4, %eax
+     35a: 48 01 c8                     	addq	%rcx, %rax
+     35d: 48 05 80 00 00 00            	addq	$0x80, %rax
+     363: 48 8d bc 24 88 00 00 00      	leaq	0x88(%rsp), %rdi
+     36b: b9 10 00 00 00               	movl	$0x10, %ecx
+     370: 41 b8 71 00 00 00            	movl	$0x71, %r8d
+     376: 48 8b 44 24 48               	movq	0x48(%rsp), %rax
+     37b: 8b 4c 24 10                  	movl	0x10(%rsp), %ecx
+     37f: c1 e1 04                     	shll	$0x4, %ecx
+     382: 48 8d 14 08                  	leaq	(%rax,%rcx), %rdx
+     386: 48 81 c2 80 00 00 00         	addq	$0x80, %rdx
+     38d: be 10 00 00 00               	movl	$0x10, %esi
+     392: 41 ff d0                     	callq	*%r8
+     395: 8b ac 24 88 00 00 00         	movl	0x88(%rsp), %ebp
+     39c: 41 89 6f 24                  	movl	%ebp, 0x24(%r15)
+     3a0: 49 8d 7f 68                  	leaq	0x68(%r15), %rdi
+     3a4: 49 8d 74 24 68               	leaq	0x68(%r12), %rsi
+     3a9: ba 18 03 00 00               	movl	$0x318, %edx            # imm = 0x318
+     3ae: e8 00 00 00 00               	callq	0x3b3 <event_wake_up_new_task+0x3b3>
+		00000000000003af:  R_X86_64_PLT32	memcpy-0x4
+     3b3: 4c 89 e0                     	movq	%r12, %rax
+     3b6: 49 8b 0c 24                  	movq	(%r12), %rcx
+     3ba: 49 8b 54 24 08               	movq	0x8(%r12), %rdx
+     3bf: 49 89 57 18                  	movq	%rdx, 0x18(%r15)
+     3c3: 49 89 4f 10                  	movq	%rcx, 0x10(%r15)
+     3c7: 49 8b 8e 00 0d 00 00         	movq	0xd00(%r14), %rcx
+     3ce: 48 85 c9                     	testq	%rcx, %rcx
+     3d1: 0f 84 bf 00 00 00            	je	0x496 <event_wake_up_new_task+0x496>
+     3d7: 48 8b 51 40                  	movq	0x40(%rcx), %rdx
+     3db: 49 89 57 58                  	movq	%rdx, 0x58(%r15)
+     3df: 48 8b 51 30                  	movq	0x30(%rcx), %rdx
+     3e3: 49 89 57 60                  	movq	%rdx, 0x60(%r15)
+     3e7: 48 8b 49 38                  	movq	0x38(%rcx), %rcx
+     3eb: e9 b8 00 00 00               	jmp	0x4a8 <event_wake_up_new_task+0x4a8>
+     3f0: c7 44 24 10 00 00 00 00      	movl	$0x0, 0x10(%rsp)
+     3f8: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x3ff <event_wake_up_new_task+0x3ff>
+		00000000000003fb:  R_X86_64_REX_GOTPCRELX	execve_val-0x4
+     3ff: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     404: b8 01 00 00 00               	movl	$0x1, %eax
+     409: ff d0                        	callq	*%rax
+     40b: 48 85 c0                     	testq	%rax, %rax
+     40e: 0f 84 4f 09 00 00            	je	0xd63 <event_wake_up_new_task+0xd63>
+     414: 45 31 ed                     	xorl	%r13d, %r13d
+     417: ba 80 03 00 00               	movl	$0x380, %edx            # imm = 0x380
+     41c: 48 89 c7                     	movq	%rax, %rdi
+     41f: 31 f6                        	xorl	%esi, %esi
+     421: 49 89 c7                     	movq	%rax, %r15
+     424: e8 00 00 00 00               	callq	0x429 <event_wake_up_new_task+0x429>
+		0000000000000425:  R_X86_64_PLT32	memset-0x4
+     429: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x430 <event_wake_up_new_task+0x430>
+		000000000000042c:  R_X86_64_REX_GOTPCRELX	execve_map-0x4
+     430: 48 8d 74 24 48               	leaq	0x48(%rsp), %rsi
+     435: b8 02 00 00 00               	movl	$0x2, %eax
+     43a: 4c 89 fa                     	movq	%r15, %rdx
+     43d: 31 c9                        	xorl	%ecx, %ecx
+     43f: ff d0                        	callq	*%rax
+     441: 85 c0                        	testl	%eax, %eax
+     443: 0f 84 7b 03 00 00            	je	0x7c4 <event_wake_up_new_task+0x7c4>
+     449: c7 84 24 88 00 00 00 01 00 00 00     	movl	$0x1, 0x88(%rsp)
+     454: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x45b <event_wake_up_new_task+0x45b>
+		0000000000000457:  R_X86_64_REX_GOTPCRELX	execve_map_stats-0x4
+     45b: 48 8d b4 24 88 00 00 00      	leaq	0x88(%rsp), %rsi
+     463: b8 01 00 00 00               	movl	$0x1, %eax
+     468: ff d0                        	callq	*%rax
+     46a: 48 85 c0                     	testq	%rax, %rax
+     46d: 74 03                        	je	0x472 <event_wake_up_new_task+0x472>
+     46f: 48 ff 00                     	incq	(%rax)
+     472: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x479 <event_wake_up_new_task+0x479>
+		0000000000000475:  R_X86_64_REX_GOTPCRELX	execve_map-0x4
+     479: 48 8d 74 24 48               	leaq	0x48(%rsp), %rsi
+     47e: b8 01 00 00 00               	movl	$0x1, %eax
+     483: ff d0                        	callq	*%rax
+     485: 49 89 c7                     	movq	%rax, %r15
+     488: 48 85 c0                     	testq	%rax, %rax
+     48b: 0f 85 4d fe ff ff            	jne	0x2de <event_wake_up_new_task+0x2de>
+     491: e9 cd 08 00 00               	jmp	0xd63 <event_wake_up_new_task+0xd63>
+     496: 49 c7 47 60 00 00 00 00      	movq	$0x0, 0x60(%r15)
+     49e: 49 c7 47 58 00 00 00 00      	movq	$0x0, 0x58(%r15)
+     4a6: 31 c9                        	xorl	%ecx, %ecx
+     4a8: 49 89 4f 50                  	movq	%rcx, 0x50(%r15)
+     4ac: 49 8d 7f 28                  	leaq	0x28(%r15), %rdi
+     4b0: 49 8b 96 70 0d 00 00         	movq	0xd70(%r14), %rdx
+     4b7: 49 8b 8e 78 0a 00 00         	movq	0xa78(%r14), %rcx
+     4be: 48 85 c9                     	testq	%rcx, %rcx
+     4c1: 74 09                        	je	0x4cc <event_wake_up_new_task+0x4cc>
+     4c3: 48 8b 89 a0 05 00 00         	movq	0x5a0(%rcx), %rcx
+     4ca: eb 02                        	jmp	0x4ce <event_wake_up_new_task+0x4ce>
+     4cc: 31 c9                        	xorl	%ecx, %ecx
+     4ce: 49 8b b6 58 0b 00 00         	movq	0xb58(%r14), %rsi
+     4d5: 48 c7 47 20 00 00 00 00      	movq	$0x0, 0x20(%rdi)
+     4dd: 48 c7 47 18 00 00 00 00      	movq	$0x0, 0x18(%rdi)
+     4e5: 48 c7 47 10 00 00 00 00      	movq	$0x0, 0x10(%rdi)
+     4ed: 48 c7 47 08 00 00 00 00      	movq	$0x0, 0x8(%rdi)
+     4f5: 48 c7 07 00 00 00 00         	movq	$0x0, (%rdi)
+     4fc: 48 85 d2                     	testq	%rdx, %rdx
+     4ff: 0f 84 c8 00 00 00            	je	0x5cd <event_wake_up_new_task+0x5cd>
+     505: 4c 8b 42 08                  	movq	0x8(%rdx), %r8
+     509: 4d 85 c0                     	testq	%r8, %r8
+     50c: 74 0a                        	je	0x518 <event_wake_up_new_task+0x518>
+     50e: 45 8b 80 18 02 00 00         	movl	0x218(%r8), %r8d
+     515: 44 89 07                     	movl	%r8d, (%rdi)
+     518: 48 8b 7a 10                  	movq	0x10(%rdx), %rdi
+     51c: 48 85 ff                     	testq	%rdi, %rdi
+     51f: 74 0a                        	je	0x52b <event_wake_up_new_task+0x52b>
+     521: 8b bf d8 04 00 00            	movl	0x4d8(%rdi), %edi
+     527: 41 89 7f 2c                  	movl	%edi, 0x2c(%r15)
+     52b: 48 8b 7a 18                  	movq	0x18(%rdx), %rdi
+     52f: 48 85 ff                     	testq	%rdi, %rdi
+     532: 74 07                        	je	0x53b <event_wake_up_new_task+0x53b>
+     534: 8b 7f 58                     	movl	0x58(%rdi), %edi
+     537: 41 89 7f 30                  	movl	%edi, 0x30(%r15)
+     53b: 48 85 f6                     	testq	%rsi, %rsi
+     53e: 74 22                        	je	0x562 <event_wake_up_new_task+0x562>
+     540: 8b 7e 04                     	movl	0x4(%rsi), %edi
+     543: 85 ff                        	testl	%edi, %edi
+     545: 78 1b                        	js	0x562 <event_wake_up_new_task+0x562>
+     547: 48 c1 e7 04                  	shlq	$0x4, %rdi
+     54b: 48 8b b4 3e 88 00 00 00      	movq	0x88(%rsi,%rdi), %rsi
+     553: 48 85 f6                     	testq	%rsi, %rsi
+     556: 74 0a                        	je	0x562 <event_wake_up_new_task+0x562>
+     558: 8b b6 58 01 00 00            	movl	0x158(%rsi), %esi
+     55e: 41 89 77 34                  	movl	%esi, 0x34(%r15)
+     562: 48 8b 72 20                  	movq	0x20(%rdx), %rsi
+     566: 48 85 f6                     	testq	%rsi, %rsi
+     569: 74 0a                        	je	0x575 <event_wake_up_new_task+0x575>
+     56b: 8b b6 58 01 00 00            	movl	0x158(%rsi), %esi
+     571: 41 89 77 38                  	movl	%esi, 0x38(%r15)
+     575: 48 8b 72 28                  	movq	0x28(%rdx), %rsi
+     579: 48 85 f6                     	testq	%rsi, %rsi
+     57c: 74 0a                        	je	0x588 <event_wake_up_new_task+0x588>
+     57e: 8b b6 18 01 00 00            	movl	0x118(%rsi), %esi
+     584: 41 89 77 3c                  	movl	%esi, 0x3c(%r15)
+     588: 48 8b 72 30                  	movq	0x30(%rdx), %rsi
+     58c: 48 85 f6                     	testq	%rsi, %rsi
+     58f: 74 0a                        	je	0x59b <event_wake_up_new_task+0x59b>
+     591: 8b b6 98 00 00 00            	movl	0x98(%rsi), %esi
+     597: 41 89 77 40                  	movl	%esi, 0x40(%r15)
+     59b: 48 8b 72 38                  	movq	0x38(%rdx), %rsi
+     59f: 48 85 f6                     	testq	%rsi, %rsi
+     5a2: 74 0a                        	je	0x5ae <event_wake_up_new_task+0x5ae>
+     5a4: 8b b6 98 00 00 00            	movl	0x98(%rsi), %esi
+     5aa: 41 89 77 44                  	movl	%esi, 0x44(%r15)
+     5ae: 48 8b 52 40                  	movq	0x40(%rdx), %rdx
+     5b2: 48 85 d2                     	testq	%rdx, %rdx
+     5b5: 74 07                        	je	0x5be <event_wake_up_new_task+0x5be>
+     5b7: 8b 52 58                     	movl	0x58(%rdx), %edx
+     5ba: 41 89 57 48                  	movl	%edx, 0x48(%r15)
+     5be: 48 85 c9                     	testq	%rcx, %rcx
+     5c1: 74 0a                        	je	0x5cd <event_wake_up_new_task+0x5cd>
+     5c3: 8b 89 58 01 00 00            	movl	0x158(%rcx), %ecx
+     5c9: 41 89 4f 4c                  	movl	%ecx, 0x4c(%r15)
+     5cd: 49 8d 4f 10                  	leaq	0x10(%r15), %rcx
+     5d1: f6 40 23 02                  	testb	$0x2, 0x23(%rax)
+     5d5: 75 05                        	jne	0x5dc <event_wake_up_new_task+0x5dc>
+     5d7: 83 fd 01                     	cmpl	$0x1, %ebp
+     5da: 75 05                        	jne	0x5e1 <event_wake_up_new_task+0x5e1>
+     5dc: 41 80 4f 23 02               	orb	$0x2, 0x23(%r15)
+     5e1: c6 44 24 48 17               	movb	$0x17, 0x48(%rsp)
+     5e6: c7 44 24 4c 38 00 00 00      	movl	$0x38, 0x4c(%rsp)
+     5ee: 49 8b 47 08                  	movq	0x8(%r15), %rax
+     5f2: 48 89 44 24 50               	movq	%rax, 0x50(%rsp)
+     5f7: 48 8b 01                     	movq	(%rcx), %rax
+     5fa: 48 8b 49 08                  	movq	0x8(%rcx), %rcx
+     5fe: 48 89 44 24 58               	movq	%rax, 0x58(%rsp)
+     603: 48 89 4c 24 60               	movq	%rcx, 0x60(%rsp)
+     608: 41 8b 07                     	movl	(%r15), %eax
+     60b: 89 44 24 68                  	movl	%eax, 0x68(%rsp)
+     60f: 49 8d 96 f0 0a 00 00         	leaq	0xaf0(%r14), %rdx
+     616: 48 8d bc 24 88 00 00 00      	leaq	0x88(%rsp), %rdi
+     61e: b8 04 00 00 00               	movl	$0x4, %eax
+     623: b9 71 00 00 00               	movl	$0x71, %ecx
+     628: be 04 00 00 00               	movl	$0x4, %esi
+     62d: ff d1                        	callq	*%rcx
+     62f: 8b 84 24 88 00 00 00         	movl	0x88(%rsp), %eax
+     636: 89 44 24 6c                  	movl	%eax, 0x6c(%rsp)
+     63a: 49 8b 47 08                  	movq	0x8(%r15), %rax
+     63e: 48 89 44 24 78               	movq	%rax, 0x78(%rsp)
+     643: 41 8b 47 24                  	movl	0x24(%r15), %eax
+     647: 89 44 24 70                  	movl	%eax, 0x70(%rsp)
+     64b: 41 8b 47 20                  	movl	0x20(%r15), %eax
+     64f: 89 44 24 74                  	movl	%eax, 0x74(%rsp)
+     653: c7 44 24 44 00 00 00 00      	movl	$0x0, 0x44(%rsp)
+     65b: 48 8d bc 24 88 00 00 00      	leaq	0x88(%rsp), %rdi
+     663: 45 31 e4                     	xorl	%r12d, %r12d
+     666: ba 90 00 00 00               	movl	$0x90, %edx
+     66b: 31 f6                        	xorl	%esi, %esi
+     66d: e8 00 00 00 00               	callq	0x672 <event_wake_up_new_task+0x672>
+		000000000000066e:  R_X86_64_PLT32	memset-0x4
+     672: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x679 <event_wake_up_new_task+0x679>
+		0000000000000675:  R_X86_64_REX_GOTPCRELX	tg_conf_map-0x4
+     679: 48 8d 74 24 44               	leaq	0x44(%rsp), %rsi
+     67e: b8 01 00 00 00               	movl	$0x1, %eax
+     683: ff d0                        	callq	*%rax
+     685: 48 85 c0                     	testq	%rax, %rax
+     688: 74 0a                        	je	0x694 <event_wake_up_new_task+0x694>
+     68a: 4c 8b 78 20                  	movq	0x20(%rax), %r15
+     68e: 44 8b 60 10                  	movl	0x10(%rax), %r12d
+     692: eb 03                        	jmp	0x697 <event_wake_up_new_task+0x697>
+     694: 45 31 ff                     	xorl	%r15d, %r15d
+     697: 48 c7 44 24 38 00 00 00 00   	movq	$0x0, 0x38(%rsp)
+     6a0: 49 81 c6 88 0f 00 00         	addq	$0xf88, %r14            # imm = 0xF88
+     6a7: 48 8d 7c 24 08               	leaq	0x8(%rsp), %rdi
+     6ac: b8 08 00 00 00               	movl	$0x8, %eax
+     6b1: b9 71 00 00 00               	movl	$0x71, %ecx
+     6b6: be 08 00 00 00               	movl	$0x8, %esi
+     6bb: 4c 89 f2                     	movq	%r14, %rdx
+     6be: ff d1                        	callq	*%rcx
+     6c0: 48 8b 44 24 08               	movq	0x8(%rsp), %rax
+     6c5: 48 85 c0                     	testq	%rax, %rax
+     6c8: 74 7d                        	je	0x747 <event_wake_up_new_task+0x747>
+     6ca: 49 81 ff 70 72 67 63         	cmpq	$0x63677270, %r15       # imm = 0x63677270
+     6d1: 75 1f                        	jne	0x6f2 <event_wake_up_new_task+0x6f2>
+     6d3: 48 83 c0 78                  	addq	$0x78, %rax
+     6d7: 48 8d 7c 24 38               	leaq	0x38(%rsp), %rdi
+     6dc: b9 08 00 00 00               	movl	$0x8, %ecx
+     6e1: 41 b8 71 00 00 00            	movl	$0x71, %r8d
+     6e7: 48 8b 54 24 08               	movq	0x8(%rsp), %rdx
+     6ec: 48 83 c2 78                  	addq	$0x78, %rdx
+     6f0: eb 4d                        	jmp	0x73f <event_wake_up_new_task+0x73f>
+     6f2: 41 83 fc 0b                  	cmpl	$0xb, %r12d
+     6f6: 77 4f                        	ja	0x747 <event_wake_up_new_task+0x747>
+     6f8: 44 89 e2                     	movl	%r12d, %edx
+     6fb: 48 8d 04 d0                  	leaq	(%rax,%rdx,8), %rax
+     6ff: 48 c1 e2 03                  	shlq	$0x3, %rdx
+     703: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     708: b9 08 00 00 00               	movl	$0x8, %ecx
+     70d: 41 b8 71 00 00 00            	movl	$0x71, %r8d
+     713: 48 03 54 24 08               	addq	0x8(%rsp), %rdx
+     718: be 08 00 00 00               	movl	$0x8, %esi
+     71d: 41 ff d0                     	callq	*%r8
+     720: 48 8b 44 24 10               	movq	0x10(%rsp), %rax
+     725: 48 85 c0                     	testq	%rax, %rax
+     728: 74 1d                        	je	0x747 <event_wake_up_new_task+0x747>
+     72a: 48 8d 7c 24 38               	leaq	0x38(%rsp), %rdi
+     72f: b9 08 00 00 00               	movl	$0x8, %ecx
+     734: 41 b8 71 00 00 00            	movl	$0x71, %r8d
+     73a: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+     73f: be 08 00 00 00               	movl	$0x8, %esi
+     744: 41 ff d0                     	callq	*%r8
+     747: 4c 8b 74 24 38               	movq	0x38(%rsp), %r14
+     74c: 4d 85 f6                     	testq	%r14, %r14
+     74f: 0f 84 4b 01 00 00            	je	0x8a0 <event_wake_up_new_task+0x8a0>
+     755: 49 81 ff 70 72 67 63         	cmpq	$0x63677270, %r15       # imm = 0x63677270
+     75c: 75 0c                        	jne	0x76a <event_wake_up_new_task+0x76a>
+     75e: b8 50 00 00 00               	movl	$0x50, %eax
+     763: ff d0                        	callq	*%rax
+     765: e9 8b 00 00 00               	jmp	0x7f5 <event_wake_up_new_task+0x7f5>
+     76a: 48 c7 44 24 10 00 00 00 00   	movq	$0x0, 0x10(%rsp)
+     773: 49 8d 96 00 01 00 00         	leaq	0x100(%r14), %rdx
+     77a: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     77f: b8 08 00 00 00               	movl	$0x8, %eax
+     784: b9 71 00 00 00               	movl	$0x71, %ecx
+     789: be 08 00 00 00               	movl	$0x8, %esi
+     78e: ff d1                        	callq	*%rcx
+     790: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+     795: 48 c7 44 24 10 00 00 00 00   	movq	$0x0, 0x10(%rsp)
+     79e: 48 85 d2                     	testq	%rdx, %rdx
+     7a1: 74 50                        	je	0x7f3 <event_wake_up_new_task+0x7f3>
+     7a3: 48 83 c2 60                  	addq	$0x60, %rdx
+     7a7: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     7ac: b8 08 00 00 00               	movl	$0x8, %eax
+     7b1: b9 71 00 00 00               	movl	$0x71, %ecx
+     7b6: be 08 00 00 00               	movl	$0x8, %esi
+     7bb: ff d1                        	callq	*%rcx
+     7bd: 48 8b 44 24 10               	movq	0x10(%rsp), %rax
+     7c2: eb 31                        	jmp	0x7f5 <event_wake_up_new_task+0x7f5>
+     7c4: c7 84 24 88 00 00 00 00 00 00 00     	movl	$0x0, 0x88(%rsp)
+     7cf: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x7d6 <event_wake_up_new_task+0x7d6>
+		00000000000007d2:  R_X86_64_REX_GOTPCRELX	execve_map_stats-0x4
+     7d6: 48 8d b4 24 88 00 00 00      	leaq	0x88(%rsp), %rsi
+     7de: b8 01 00 00 00               	movl	$0x1, %eax
+     7e3: ff d0                        	callq	*%rax
+     7e5: 48 85 c0                     	testq	%rax, %rax
+     7e8: 0f 85 81 fc ff ff            	jne	0x46f <event_wake_up_new_task+0x46f>
+     7ee: e9 7f fc ff ff               	jmp	0x472 <event_wake_up_new_task+0x472>
+     7f3: 31 c0                        	xorl	%eax, %eax
+     7f5: 48 89 84 24 88 00 00 00      	movq	%rax, 0x88(%rsp)
+     7fd: 48 85 c0                     	testq	%rax, %rax
+     800: 74 2c                        	je	0x82e <event_wake_up_new_task+0x82e>
+     802: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+     807: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x80e <event_wake_up_new_task+0x80e>
+		000000000000080a:  R_X86_64_REX_GOTPCRELX	tg_cgtracker_map-0x4
+     80e: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     813: b8 01 00 00 00               	movl	$0x1, %eax
+     818: ff d0                        	callq	*%rax
+     81a: 48 85 c0                     	testq	%rax, %rax
+     81d: 74 05                        	je	0x824 <event_wake_up_new_task+0x824>
+     81f: 48 8b 00                     	movq	(%rax), %rax
+     822: eb 02                        	jmp	0x826 <event_wake_up_new_task+0x826>
+     824: 31 c0                        	xorl	%eax, %eax
+     826: 48 89 84 24 90 00 00 00      	movq	%rax, 0x90(%rsp)
+     82e: 49 81 c6 00 01 00 00         	addq	$0x100, %r14            # imm = 0x100
+     835: 48 8d 7c 24 08               	leaq	0x8(%rsp), %rdi
+     83a: b8 08 00 00 00               	movl	$0x8, %eax
+     83f: b9 71 00 00 00               	movl	$0x71, %ecx
+     844: be 08 00 00 00               	movl	$0x8, %esi
+     849: 4c 89 f2                     	movq	%r14, %rdx
+     84c: ff d1                        	callq	*%rcx
+     84e: 48 8b 44 24 08               	movq	0x8(%rsp), %rax
+     853: 48 83 c0 10                  	addq	$0x10, %rax
+     857: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     85c: b9 08 00 00 00               	movl	$0x8, %ecx
+     861: 41 b8 71 00 00 00            	movl	$0x71, %r8d
+     867: 48 8b 54 24 08               	movq	0x8(%rsp), %rdx
+     86c: 48 83 c2 10                  	addq	$0x10, %rdx
+     870: be 08 00 00 00               	movl	$0x8, %esi
+     875: 41 ff d0                     	callq	*%r8
+     878: 48 85 c0                     	testq	%rax, %rax
+     87b: 75 23                        	jne	0x8a0 <event_wake_up_new_task+0x8a0>
+     87d: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+     882: 48 85 d2                     	testq	%rdx, %rdx
+     885: 74 19                        	je	0x8a0 <event_wake_up_new_task+0x8a0>
+     887: 48 8d bc 24 98 00 00 00      	leaq	0x98(%rsp), %rdi
+     88f: b8 80 00 00 00               	movl	$0x80, %eax
+     894: b9 2d 00 00 00               	movl	$0x2d, %ecx
+     899: be 80 00 00 00               	movl	$0x80, %esi
+     89e: ff d1                        	callq	*%rcx
+     8a0: 4c 8b 7c 24 78               	movq	0x78(%rsp), %r15
+     8a5: 48 8b 84 24 88 00 00 00      	movq	0x88(%rsp), %rax
+     8ad: 48 89 44 24 08               	movq	%rax, 0x8(%rsp)
+     8b2: c7 84 24 80 00 00 00 00 00 00 00     	movl	$0x0, 0x80(%rsp)
+     8bd: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x8c4 <event_wake_up_new_task+0x8c4>
+		00000000000008c0:  R_X86_64_REX_GOTPCRELX	cgroup_rate_options_map-0x4
+     8c4: 48 8d b4 24 80 00 00 00      	leaq	0x80(%rsp), %rsi
+     8cc: b8 01 00 00 00               	movl	$0x1, %eax
+     8d1: ff d0                        	callq	*%rax
+     8d3: 48 85 c0                     	testq	%rax, %rax
+     8d6: 0f 84 1a 03 00 00            	je	0xbf6 <event_wake_up_new_task+0xbf6>
+     8dc: 4c 8b 60 08                  	movq	0x8(%rax), %r12
+     8e0: 4d 85 e4                     	testq	%r12, %r12
+     8e3: 0f 84 0d 03 00 00            	je	0xbf6 <event_wake_up_new_task+0xbf6>
+     8e9: 49 89 c5                     	movq	%rax, %r13
+     8ec: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x8f3 <event_wake_up_new_task+0x8f3>
+		00000000000008ef:  R_X86_64_REX_GOTPCRELX	cgroup_rate_map-0x4
+     8f3: 48 8d 74 24 08               	leaq	0x8(%rsp), %rsi
+     8f8: b8 01 00 00 00               	movl	$0x1, %eax
+     8fd: ff d0                        	callq	*%rax
+     8ff: 48 85 c0                     	testq	%rax, %rax
+     902: 74 38                        	je	0x93c <event_wake_up_new_task+0x93c>
+     904: 49 89 c6                     	movq	%rax, %r14
+     907: 48 8b 70 10                  	movq	0x10(%rax), %rsi
+     90b: 4c 89 f8                     	movq	%r15, %rax
+     90e: 48 29 f0                     	subq	%rsi, %rax
+     911: 4c 39 e0                     	cmpq	%r12, %rax
+     914: 76 4e                        	jbe	0x964 <event_wake_up_new_task+0x964>
+     916: 4b 8d 0c 24                  	leaq	(%r12,%r12), %rcx
+     91a: 48 39 c8                     	cmpq	%rcx, %rax
+     91d: 76 4e                        	jbe	0x96d <event_wake_up_new_task+0x96d>
+     91f: 4c 89 f8                     	movq	%r15, %rax
+     922: 4c 09 e0                     	orq	%r12, %rax
+     925: 48 c1 e8 20                  	shrq	$0x20, %rax
+     929: 0f 84 8b 00 00 00            	je	0x9ba <event_wake_up_new_task+0x9ba>
+     92f: 4c 89 f8                     	movq	%r15, %rax
+     932: 31 d2                        	xorl	%edx, %edx
+     934: 49 f7 f4                     	divq	%r12
+     937: e9 86 00 00 00               	jmp	0x9c2 <event_wake_up_new_task+0x9c2>
+     93c: 48 c7 44 24 10 01 00 00 00   	movq	$0x1, 0x10(%rsp)
+     945: 48 c7 44 24 18 00 00 00 00   	movq	$0x0, 0x18(%rsp)
+     94e: 4c 89 f8                     	movq	%r15, %rax
+     951: 4c 09 e0                     	orq	%r12, %rax
+     954: 48 c1 e8 20                  	shrq	$0x20, %rax
+     958: 74 1b                        	je	0x975 <event_wake_up_new_task+0x975>
+     95a: 4c 89 f8                     	movq	%r15, %rax
+     95d: 31 d2                        	xorl	%edx, %edx
+     95f: 49 f7 f4                     	divq	%r12
+     962: eb 19                        	jmp	0x97d <event_wake_up_new_task+0x97d>
+     964: 49 8b 0e                     	movq	(%r14), %rcx
+     967: 49 8b 56 08                  	movq	0x8(%r14), %rdx
+     96b: eb 67                        	jmp	0x9d4 <event_wake_up_new_task+0x9d4>
+     96d: 49 8b 16                     	movq	(%r14), %rdx
+     970: 4c 01 e6                     	addq	%r12, %rsi
+     973: eb 55                        	jmp	0x9ca <event_wake_up_new_task+0x9ca>
+     975: 44 89 f8                     	movl	%r15d, %eax
+     978: 31 d2                        	xorl	%edx, %edx
+     97a: 41 f7 f4                     	divl	%r12d
+     97d: 49 29 d7                     	subq	%rdx, %r15
+     980: 4c 89 7c 24 20               	movq	%r15, 0x20(%rsp)
+     985: 48 c7 44 24 28 00 00 00 00   	movq	$0x0, 0x28(%rsp)
+     98e: 48 c7 44 24 30 00 00 00 00   	movq	$0x0, 0x30(%rsp)
+     997: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0x99e <event_wake_up_new_task+0x99e>
+		000000000000099a:  R_X86_64_REX_GOTPCRELX	cgroup_rate_map-0x4
+     99e: 31 c0                        	xorl	%eax, %eax
+     9a0: 48 8d 74 24 08               	leaq	0x8(%rsp), %rsi
+     9a5: 48 8d 54 24 10               	leaq	0x10(%rsp), %rdx
+     9aa: 41 b8 02 00 00 00            	movl	$0x2, %r8d
+     9b0: 31 c9                        	xorl	%ecx, %ecx
+     9b2: 41 ff d0                     	callq	*%r8
+     9b5: e9 3c 02 00 00               	jmp	0xbf6 <event_wake_up_new_task+0xbf6>
+     9ba: 44 89 f8                     	movl	%r15d, %eax
+     9bd: 31 d2                        	xorl	%edx, %edx
+     9bf: 41 f7 f4                     	divl	%r12d
+     9c2: 4c 89 fe                     	movq	%r15, %rsi
+     9c5: 48 29 d6                     	subq	%rdx, %rsi
+     9c8: 31 d2                        	xorl	%edx, %edx
+     9ca: 49 89 56 08                  	movq	%rdx, 0x8(%r14)
+     9ce: 49 89 76 10                  	movq	%rsi, 0x10(%r14)
+     9d2: 31 c9                        	xorl	%ecx, %ecx
+     9d4: 48 ff c1                     	incq	%rcx
+     9d7: 49 89 0e                     	movq	%rcx, (%r14)
+     9da: 4c 89 e0                     	movq	%r12, %rax
+     9dd: 4c 29 f8                     	subq	%r15, %rax
+     9e0: 48 01 f0                     	addq	%rsi, %rax
+     9e3: 48 0f af c2                  	imulq	%rdx, %rax
+     9e7: 48 89 c2                     	movq	%rax, %rdx
+     9ea: 4c 09 e2                     	orq	%r12, %rdx
+     9ed: 48 c1 ea 20                  	shrq	$0x20, %rdx
+     9f1: 74 07                        	je	0x9fa <event_wake_up_new_task+0x9fa>
+     9f3: 31 d2                        	xorl	%edx, %edx
+     9f5: 49 f7 f4                     	divq	%r12
+     9f8: eb 05                        	jmp	0x9ff <event_wake_up_new_task+0x9ff>
+     9fa: 31 d2                        	xorl	%edx, %edx
+     9fc: 41 f7 f4                     	divl	%r12d
+     9ff: 48 01 c8                     	addq	%rcx, %rax
+     a02: 49 89 46 18                  	movq	%rax, 0x18(%r14)
+     a06: 49 83 7e 20 00               	cmpq	$0x0, 0x20(%r14)
+     a0b: 0f 85 52 03 00 00            	jne	0xd63 <event_wake_up_new_task+0xd63>
+     a11: 49 3b 45 00                  	cmpq	(%r13), %rax
+     a15: 0f 82 db 01 00 00            	jb	0xbf6 <event_wake_up_new_task+0xbf6>
+     a1b: 4d 89 7e 20                  	movq	%r15, 0x20(%r14)
+     a1f: c7 44 24 44 00 00 00 00      	movl	$0x0, 0x44(%rsp)
+     a27: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0xa2e <event_wake_up_new_task+0xa2e>
+		0000000000000a2a:  R_X86_64_REX_GOTPCRELX	throttle_heap_map-0x4
+     a2e: 48 8d 44 24 44               	leaq	0x44(%rsp), %rax
+     a33: b9 01 00 00 00               	movl	$0x1, %ecx
+     a38: c7 84 24 84 00 00 00 00 00 00 00     	movl	$0x0, 0x84(%rsp)
+     a43: 48 8d b4 24 84 00 00 00      	leaq	0x84(%rsp), %rsi
+     a4b: ff d1                        	callq	*%rcx
+     a4d: 48 85 c0                     	testq	%rax, %rax
+     a50: 0f 84 95 01 00 00            	je	0xbeb <event_wake_up_new_task+0xbeb>
+     a56: 49 89 c4                     	movq	%rax, %r12
+     a59: c7 40 04 a0 00 00 00         	movl	$0xa0, 0x4(%rax)
+     a60: 4c 89 78 08                  	movq	%r15, 0x8(%rax)
+     a64: 66 c7 00 1b 00               	movw	$0x1b, (%rax)
+     a69: 48 89 c7                     	movq	%rax, %rdi
+     a6c: 48 83 c7 10                  	addq	$0x10, %rdi
+     a70: 48 8d b4 24 88 00 00 00      	leaq	0x88(%rsp), %rsi
+     a78: ba 90 00 00 00               	movl	$0x90, %edx
+     a7d: e8 00 00 00 00               	callq	0xa82 <event_wake_up_new_task+0xa82>
+		0000000000000a7e:  R_X86_64_PLT32	memcpy-0x4
+     a82: c7 44 24 38 00 00 00 00      	movl	$0x0, 0x38(%rsp)
+     a8a: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0xa91 <event_wake_up_new_task+0xa91>
+		0000000000000a8d:  R_X86_64_REX_GOTPCRELX	tg_conf_map-0x4
+     a91: 48 8d 74 24 38               	leaq	0x38(%rsp), %rsi
+     a96: b8 01 00 00 00               	movl	$0x1, %eax
+     a9b: ff d0                        	callq	*%rax
+     a9d: 48 85 c0                     	testq	%rax, %rax
+     aa0: 0f 84 8a 00 00 00            	je	0xb30 <event_wake_up_new_task+0xb30>
+     aa6: 80 78 28 00                  	cmpb	$0x0, 0x28(%rax)
+     aaa: 0f 84 80 00 00 00            	je	0xb30 <event_wake_up_new_task+0xb30>
+     ab0: 48 8b 35 00 00 00 00         	movq	(%rip), %rsi            # 0xab7 <event_wake_up_new_task+0xab7>
+		0000000000000ab3:  R_X86_64_REX_GOTPCRELX	tcpmon_map-0x4
+     ab7: b8 ff ff ff ff               	movl	$0xffffffff, %eax       # imm = 0xFFFFFFFF
+     abc: b9 a0 00 00 00               	movl	$0xa0, %ecx
+     ac1: 41 b9 19 00 00 00            	movl	$0x19, %r9d
+     ac7: ba ff ff ff ff               	movl	$0xffffffff, %edx       # imm = 0xFFFFFFFF
+     acc: 41 b8 a0 00 00 00            	movl	$0xa0, %r8d
+     ad2: 48 89 df                     	movq	%rbx, %rdi
+     ad5: 4c 89 e1                     	movq	%r12, %rcx
+     ad8: 41 ff d1                     	callq	*%r9
+     adb: 48 85 c0                     	testq	%rax, %rax
+     ade: 0f 89 07 01 00 00            	jns	0xbeb <event_wake_up_new_task+0xbeb>
+     ae4: 49 89 c7                     	movq	%rax, %r15
+     ae7: c7 44 24 10 00 00 00 00      	movl	$0x0, 0x10(%rsp)
+     aef: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0xaf6 <event_wake_up_new_task+0xaf6>
+		0000000000000af2:  R_X86_64_REX_GOTPCRELX	tg_stats_map-0x4
+     af6: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     afb: b8 01 00 00 00               	movl	$0x1, %eax
+     b00: ff d0                        	callq	*%rax
+     b02: 48 85 c0                     	testq	%rax, %rax
+     b05: 0f 84 e0 00 00 00            	je	0xbeb <event_wake_up_new_task+0xbeb>
+     b0b: 49 83 ff f4                  	cmpq	$-0xc, %r15
+     b0f: 0f 8f a2 00 00 00            	jg	0xbb7 <event_wake_up_new_task+0xbb7>
+     b15: 49 83 ff e4                  	cmpq	$-0x1c, %r15
+     b19: 0f 84 b2 00 00 00            	je	0xbd1 <event_wake_up_new_task+0xbd1>
+     b1f: 49 83 ff ea                  	cmpq	$-0x16, %r15
+     b23: 75 6a                        	jne	0xb8f <event_wake_up_new_task+0xb8f>
+     b25: 48 05 08 06 00 00            	addq	$0x608, %rax            # imm = 0x608
+     b2b: e9 b7 00 00 00               	jmp	0xbe7 <event_wake_up_new_task+0xbe7>
+     b30: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0xb37 <event_wake_up_new_task+0xb37>
+		0000000000000b33:  R_X86_64_REX_GOTPCRELX	tg_rb_events-0x4
+     b37: 31 c0                        	xorl	%eax, %eax
+     b39: b9 a0 00 00 00               	movl	$0xa0, %ecx
+     b3e: 41 b8 82 00 00 00            	movl	$0x82, %r8d
+     b44: ba a0 00 00 00               	movl	$0xa0, %edx
+     b49: 4c 89 e6                     	movq	%r12, %rsi
+     b4c: 31 c9                        	xorl	%ecx, %ecx
+     b4e: 41 ff d0                     	callq	*%r8
+     b51: 48 85 c0                     	testq	%rax, %rax
+     b54: 0f 89 91 00 00 00            	jns	0xbeb <event_wake_up_new_task+0xbeb>
+     b5a: 49 89 c7                     	movq	%rax, %r15
+     b5d: c7 44 24 10 00 00 00 00      	movl	$0x0, 0x10(%rsp)
+     b65: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0xb6c <event_wake_up_new_task+0xb6c>
+		0000000000000b68:  R_X86_64_REX_GOTPCRELX	tg_stats_map-0x4
+     b6c: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     b71: b8 01 00 00 00               	movl	$0x1, %eax
+     b76: ff d0                        	callq	*%rax
+     b78: 48 85 c0                     	testq	%rax, %rax
+     b7b: 74 6e                        	je	0xbeb <event_wake_up_new_task+0xbeb>
+     b7d: 49 83 ff f4                  	cmpq	$-0xc, %r15
+     b81: 7f 1a                        	jg	0xb9d <event_wake_up_new_task+0xb9d>
+     b83: 49 83 ff e4                  	cmpq	$-0x1c, %r15
+     b87: 74 48                        	je	0xbd1 <event_wake_up_new_task+0xbd1>
+     b89: 49 83 ff ea                  	cmpq	$-0x16, %r15
+     b8d: 74 96                        	je	0xb25 <event_wake_up_new_task+0xb25>
+     b8f: 49 83 ff f0                  	cmpq	$-0x10, %r15
+     b93: 75 34                        	jne	0xbc9 <event_wake_up_new_task+0xbc9>
+     b95: 48 05 00 06 00 00            	addq	$0x600, %rax            # imm = 0x600
+     b9b: eb 4a                        	jmp	0xbe7 <event_wake_up_new_task+0xbe7>
+     b9d: 49 83 ff f5                  	cmpq	$-0xb, %r15
+     ba1: 74 36                        	je	0xbd9 <event_wake_up_new_task+0xbd9>
+     ba3: 49 83 ff f9                  	cmpq	$-0x7, %r15
+     ba7: 74 38                        	je	0xbe1 <event_wake_up_new_task+0xbe1>
+     ba9: 49 83 ff fe                  	cmpq	$-0x2, %r15
+     bad: 75 1a                        	jne	0xbc9 <event_wake_up_new_task+0xbc9>
+     baf: 48 05 f0 05 00 00            	addq	$0x5f0, %rax            # imm = 0x5F0
+     bb5: eb 30                        	jmp	0xbe7 <event_wake_up_new_task+0xbe7>
+     bb7: 49 83 ff f5                  	cmpq	$-0xb, %r15
+     bbb: 74 1c                        	je	0xbd9 <event_wake_up_new_task+0xbd9>
+     bbd: 49 83 ff f9                  	cmpq	$-0x7, %r15
+     bc1: 74 1e                        	je	0xbe1 <event_wake_up_new_task+0xbe1>
+     bc3: 49 83 ff fe                  	cmpq	$-0x2, %r15
+     bc7: 74 e6                        	je	0xbaf <event_wake_up_new_task+0xbaf>
+     bc9: 48 05 e8 05 00 00            	addq	$0x5e8, %rax            # imm = 0x5E8
+     bcf: eb 16                        	jmp	0xbe7 <event_wake_up_new_task+0xbe7>
+     bd1: 48 05 10 06 00 00            	addq	$0x610, %rax            # imm = 0x610
+     bd7: eb 0e                        	jmp	0xbe7 <event_wake_up_new_task+0xbe7>
+     bd9: 48 05 18 06 00 00            	addq	$0x618, %rax            # imm = 0x618
+     bdf: eb 06                        	jmp	0xbe7 <event_wake_up_new_task+0xbe7>
+     be1: 48 05 f8 05 00 00            	addq	$0x5f8, %rax            # imm = 0x5F8
+     be7: f0                           	lock
+     be8: 48 ff 00                     	incq	(%rax)
+     beb: 49 83 7e 20 00               	cmpq	$0x0, 0x20(%r14)
+     bf0: 0f 85 6d 01 00 00            	jne	0xd63 <event_wake_up_new_task+0xd63>
+     bf6: c7 44 24 08 00 00 00 00      	movl	$0x0, 0x8(%rsp)
+     bfe: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0xc05 <event_wake_up_new_task+0xc05>
+		0000000000000c01:  R_X86_64_REX_GOTPCRELX	tg_conf_map-0x4
+     c05: 48 8d 74 24 08               	leaq	0x8(%rsp), %rsi
+     c0a: b8 01 00 00 00               	movl	$0x1, %eax
+     c0f: ff d0                        	callq	*%rax
+     c11: 48 85 c0                     	testq	%rax, %rax
+     c14: 0f 84 8c 00 00 00            	je	0xca6 <event_wake_up_new_task+0xca6>
+     c1a: 80 78 28 00                  	cmpb	$0x0, 0x28(%rax)
+     c1e: 0f 84 82 00 00 00            	je	0xca6 <event_wake_up_new_task+0xca6>
+     c24: 48 8b 35 00 00 00 00         	movq	(%rip), %rsi            # 0xc2b <event_wake_up_new_task+0xc2b>
+		0000000000000c27:  R_X86_64_REX_GOTPCRELX	tcpmon_map-0x4
+     c2b: b8 ff ff ff ff               	movl	$0xffffffff, %eax       # imm = 0xFFFFFFFF
+     c30: 48 8d 4c 24 48               	leaq	0x48(%rsp), %rcx
+     c35: ba 38 00 00 00               	movl	$0x38, %edx
+     c3a: 41 b9 19 00 00 00            	movl	$0x19, %r9d
+     c40: ba ff ff ff ff               	movl	$0xffffffff, %edx       # imm = 0xFFFFFFFF
+     c45: 41 b8 38 00 00 00            	movl	$0x38, %r8d
+     c4b: 48 89 df                     	movq	%rbx, %rdi
+     c4e: 41 ff d1                     	callq	*%r9
+     c51: 48 85 c0                     	testq	%rax, %rax
+     c54: 0f 89 09 01 00 00            	jns	0xd63 <event_wake_up_new_task+0xd63>
+     c5a: 48 89 c3                     	movq	%rax, %rbx
+     c5d: c7 44 24 10 00 00 00 00      	movl	$0x0, 0x10(%rsp)
+     c65: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0xc6c <event_wake_up_new_task+0xc6c>
+		0000000000000c68:  R_X86_64_REX_GOTPCRELX	tg_stats_map-0x4
+     c6c: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     c71: b8 01 00 00 00               	movl	$0x1, %eax
+     c76: ff d0                        	callq	*%rax
+     c78: 48 85 c0                     	testq	%rax, %rax
+     c7b: 0f 84 e2 00 00 00            	je	0xd63 <event_wake_up_new_task+0xd63>
+     c81: 48 83 fb f4                  	cmpq	$-0xc, %rbx
+     c85: 0f 8f a4 00 00 00            	jg	0xd2f <event_wake_up_new_task+0xd2f>
+     c8b: 48 83 fb e4                  	cmpq	$-0x1c, %rbx
+     c8f: 0f 84 b4 00 00 00            	je	0xd49 <event_wake_up_new_task+0xd49>
+     c95: 48 83 fb ea                  	cmpq	$-0x16, %rbx
+     c99: 75 6c                        	jne	0xd07 <event_wake_up_new_task+0xd07>
+     c9b: 48 05 28 05 00 00            	addq	$0x528, %rax            # imm = 0x528
+     ca1: e9 b9 00 00 00               	jmp	0xd5f <event_wake_up_new_task+0xd5f>
+     ca6: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0xcad <event_wake_up_new_task+0xcad>
+		0000000000000ca9:  R_X86_64_REX_GOTPCRELX	tg_rb_events-0x4
+     cad: 31 c0                        	xorl	%eax, %eax
+     caf: 48 8d 74 24 48               	leaq	0x48(%rsp), %rsi
+     cb4: b9 38 00 00 00               	movl	$0x38, %ecx
+     cb9: 41 b8 82 00 00 00            	movl	$0x82, %r8d
+     cbf: ba 38 00 00 00               	movl	$0x38, %edx
+     cc4: 31 c9                        	xorl	%ecx, %ecx
+     cc6: 41 ff d0                     	callq	*%r8
+     cc9: 48 85 c0                     	testq	%rax, %rax
+     ccc: 0f 89 91 00 00 00            	jns	0xd63 <event_wake_up_new_task+0xd63>
+     cd2: 48 89 c3                     	movq	%rax, %rbx
+     cd5: c7 44 24 10 00 00 00 00      	movl	$0x0, 0x10(%rsp)
+     cdd: 48 8b 3d 00 00 00 00         	movq	(%rip), %rdi            # 0xce4 <event_wake_up_new_task+0xce4>
+		0000000000000ce0:  R_X86_64_REX_GOTPCRELX	tg_stats_map-0x4
+     ce4: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     ce9: b8 01 00 00 00               	movl	$0x1, %eax
+     cee: ff d0                        	callq	*%rax
+     cf0: 48 85 c0                     	testq	%rax, %rax
+     cf3: 74 6e                        	je	0xd63 <event_wake_up_new_task+0xd63>
+     cf5: 48 83 fb f4                  	cmpq	$-0xc, %rbx
+     cf9: 7f 1a                        	jg	0xd15 <event_wake_up_new_task+0xd15>
+     cfb: 48 83 fb e4                  	cmpq	$-0x1c, %rbx
+     cff: 74 48                        	je	0xd49 <event_wake_up_new_task+0xd49>
+     d01: 48 83 fb ea                  	cmpq	$-0x16, %rbx
+     d05: 74 94                        	je	0xc9b <event_wake_up_new_task+0xc9b>
+     d07: 48 83 fb f0                  	cmpq	$-0x10, %rbx
+     d0b: 75 34                        	jne	0xd41 <event_wake_up_new_task+0xd41>
+     d0d: 48 05 20 05 00 00            	addq	$0x520, %rax            # imm = 0x520
+     d13: eb 4a                        	jmp	0xd5f <event_wake_up_new_task+0xd5f>
+     d15: 48 83 fb f5                  	cmpq	$-0xb, %rbx
+     d19: 74 36                        	je	0xd51 <event_wake_up_new_task+0xd51>
+     d1b: 48 83 fb f9                  	cmpq	$-0x7, %rbx
+     d1f: 74 38                        	je	0xd59 <event_wake_up_new_task+0xd59>
+     d21: 48 83 fb fe                  	cmpq	$-0x2, %rbx
+     d25: 75 1a                        	jne	0xd41 <event_wake_up_new_task+0xd41>
+     d27: 48 05 10 05 00 00            	addq	$0x510, %rax            # imm = 0x510
+     d2d: eb 30                        	jmp	0xd5f <event_wake_up_new_task+0xd5f>
+     d2f: 48 83 fb f5                  	cmpq	$-0xb, %rbx
+     d33: 74 1c                        	je	0xd51 <event_wake_up_new_task+0xd51>
+     d35: 48 83 fb f9                  	cmpq	$-0x7, %rbx
+     d39: 74 1e                        	je	0xd59 <event_wake_up_new_task+0xd59>
+     d3b: 48 83 fb fe                  	cmpq	$-0x2, %rbx
+     d3f: 74 e6                        	je	0xd27 <event_wake_up_new_task+0xd27>
+     d41: 48 05 08 05 00 00            	addq	$0x508, %rax            # imm = 0x508
+     d47: eb 16                        	jmp	0xd5f <event_wake_up_new_task+0xd5f>
+     d49: 48 05 30 05 00 00            	addq	$0x530, %rax            # imm = 0x530
+     d4f: eb 0e                        	jmp	0xd5f <event_wake_up_new_task+0xd5f>
+     d51: 48 05 38 05 00 00            	addq	$0x538, %rax            # imm = 0x538
+     d57: eb 06                        	jmp	0xd5f <event_wake_up_new_task+0xd5f>
+     d59: 48 05 18 05 00 00            	addq	$0x518, %rax            # imm = 0x518
+     d5f: f0                           	lock
+     d60: 48 ff 00                     	incq	(%rax)
+     d63: 31 c0                        	xorl	%eax, %eax
+     d65: 48 81 c4 18 01 00 00         	addq	$0x118, %rsp            # imm = 0x118
+     d6c: 5b                           	popq	%rbx
+     d6d: 41 5c                        	popq	%r12
+     d6f: 41 5d                        	popq	%r13
+     d71: 41 5e                        	popq	%r14
+     d73: 41 5f                        	popq	%r15
+     d75: 5d                           	popq	%rbp
+     d76: c3                           	retq
