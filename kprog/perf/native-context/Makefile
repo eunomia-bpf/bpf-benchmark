@@ -91,9 +91,19 @@ linker-profile:
 	install -m 755 $(HERE)/link-cost.py $(LINK_PROFILE_OUTPUT)/native-link
 	python3 -c 'import json, pathlib, sys; (pathlib.Path(sys.argv[1]) / "config.json").write_text(json.dumps({"linker": sys.argv[2]}, indent=2) + "\n")' '$(LINK_PROFILE_OUTPUT)' '$(LINK_PROFILE_PAYLOAD)'
 
-LOADER_PERF_SOURCE ?= /var/tmp/kprog-tmp/C/perf-build/perf
+LOADER_PERF_BUILD ?= /var/tmp/kprog-tmp/perf/perf-build
+LOADER_PERF_SOURCE ?= $(LOADER_PERF_BUILD)/perf
 LOADER_PERF_OUTPUT ?= /var/tmp/kprog-tmp/perf/var-tmp/perf
-.PHONY: loader-perf-tool
+.PHONY: loader-perf-deps loader-perf-build loader-perf-tool
+loader-perf-deps:
+	apt-get install -y --no-install-recommends libdw-dev
+
+# Tool build only, from the sole kernel source; no kernel/base/image rebuild.
+loader-perf-build:
+	install -d $(LOADER_PERF_BUILD)
+	$(MAKE) -C $(ROOT)/vendor/linux-framework/tools/perf O=$(LOADER_PERF_BUILD)/ -j4 NO_LIBBPF=1 NO_LIBPYTHON=1 NO_LIBPERL=1 NO_LIBTRACEEVENT=1 NO_SLANG=1 NO_LIBUNWIND=1 NO_LIBNUMA=1 NO_AUXTRACE=1 NO_LIBCAP=1 NO_LIBLLVM=1
+	$(LOADER_PERF_SOURCE) version --build-options
+
 loader-perf-tool:
 	install -D -m 755 $(LOADER_PERF_SOURCE) $(LOADER_PERF_OUTPUT)
 	$(LOADER_PERF_OUTPUT) version --build-options
