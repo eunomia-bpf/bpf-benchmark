@@ -148,3 +148,64 @@ memory-profile:
 memory-host-bench:
 	NATIVE_LINK_MEMORY_BENCH_OUTPUT=/workspaces/kprog-raw/perf/20261113-local-memory/host-microbench.json CARGO_TARGET_DIR=$(LINK_MEMORY_TARGET) CARGO_PROFILE_DEV_OPT_LEVEL=3 CARGO_PROFILE_DEV_DEBUG=0 \
 		cargo test --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml memory_host_microbenchmark -- --ignored
+
+SOCKET_BUILD ?= /var/tmp/kprog-tmp/perf/socket-context
+CILIUM_UPSTREAM := $(ROOT)/vendor/repos/cilium/bpf
+UPSTREAM_SOCKET_FEATURES ?= -DENABLE_IPV4=1
+.PHONY: upstream-socket-ir
+upstream-socket-ir:
+	install -d $(SOCKET_BUILD)
+	prlimit --as=8589934592 -- $(CC) -target bpf -O2 -g -emit-llvm -c -D__TARGET_ARCH_x86 $(UPSTREAM_SOCKET_FEATURES) -DSKIP_DEBUG=1 \
+		-I$(CILIUM_UPSTREAM) -I$(CILIUM_UPSTREAM)/include -I/usr/include/x86_64-linux-gnu \
+		$(CILIUM_UPSTREAM)/bpf_sock.c -o $(SOCKET_BUILD)/upstream-sock.bc
+	llvm-dis-18 $(SOCKET_BUILD)/upstream-sock.bc -o $(SOCKET_BUILD)/upstream-sock.ll
+	$(CC) -target bpf -O2 -c $(SOCKET_BUILD)/upstream-sock.bc -o $(SOCKET_BUILD)/upstream-sock.bpf.o
+
+$(SOCKET_BUILD)/public-layout: $(HERE)/socket-public-layout.c $(CILIUM_UPSTREAM)/include/linux/bpf.h
+	install -d $(SOCKET_BUILD)
+	$(CC) -O2 -I$(CILIUM_UPSTREAM)/include -I/usr/include/x86_64-linux-gnu $< -o $@
+
+$(SOCKET_BUILD)/physical-layout: $(HERE)/socket-physical-layout.c $(VMLINUX_DIR)/vmlinux.h
+	install -d $(SOCKET_BUILD)
+	$(CC) -O2 -Wno-unknown-attributes -I$(VMLINUX_DIR) $< -o $@
+
+$(SOCKET_BUILD)/public-layout.json: $(SOCKET_BUILD)/public-layout
+	$< > $@
+$(SOCKET_BUILD)/physical-layout.json: $(SOCKET_BUILD)/physical-layout
+	$< > $@
+
+$(SOCKET_BUILD)/socket-context-lower: $(HERE)/socket-context-lower.cpp
+	install -d $(SOCKET_BUILD)
+	$(CXX) $$($(LLVM_CONFIG) --cxxflags) -std=c++17 -Wall -Wextra -Wno-unused-parameter $< -o $@ $$($(LLVM_CONFIG) --ldflags --libs core irreader bitwriter analysis support --system-libs)
+
+$(SOCKET_BUILD)/driver.o: $(HERE)/test-socket-driver.c $(VMLINUX_DIR)/vmlinux.h
+	install -d $(SOCKET_BUILD)
+	$(CC) -O2 -Wno-unknown-attributes -I$(VMLINUX_DIR) -c $< -o $@
+
+.PHONY: socket-context-check
+socket-context-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json $(SOCKET_BUILD)/driver.o
+	$(CC) -O2 -I$(CILIUM_UPSTREAM)/include -emit-llvm -c $(HERE)/test-socket-context.c -o $(SOCKET_BUILD)/fixture.bc
+	$(CC) -O2 $(SOCKET_BUILD)/fixture.bc $(SOCKET_BUILD)/driver.o -o $(SOCKET_BUILD)/plain
+	$(SOCKET_BUILD)/plain && result=0 || result=$$?; test $$result = 1
+	$(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/fixture.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json -o $(SOCKET_BUILD)/fixture.physical.bc
+	$(CC) -O2 $(SOCKET_BUILD)/fixture.physical.bc $(SOCKET_BUILD)/driver.o -o $(SOCKET_BUILD)/fixed
+	$(SOCKET_BUILD)/fixed
+
+.PHONY: upstream-socket-native
+upstream-socket-native: upstream-socket-ir $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
+	python3 $(HERE)/socket-helper-names.py > $(SOCKET_BUILD)/helper-names.json
+	$(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/upstream-sock.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(SOCKET_BUILD)/helper-names.json -o $(SOCKET_BUILD)/upstream-sock.physical.bc
+	$(CC) -target x86_64-linux-gnu -O3 -g -fPIC -fno-optimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-jump-tables -c $(SOCKET_BUILD)/upstream-sock.physical.bc -o $(SOCKET_BUILD)/upstream-sock.native.o
+	llvm-objdump-18 -dr $(SOCKET_BUILD)/upstream-sock.native.o > $(SOCKET_BUILD)/upstream-sock.native.dis
+
+.PHONY: socket-context-errors
+socket-context-errors: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
+	for kind in DYNAMIC OUTSIDE ESCAPE; do \
+		$(CC) -O2 -D$$kind -I$(CILIUM_UPSTREAM)/include -emit-llvm -c $(HERE)/test-socket-errors.c -o $(SOCKET_BUILD)/$$kind.bc; \
+		$(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/$$kind.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json -o $(SOCKET_BUILD)/$$kind.output.bc && result=0 || result=$$?; \
+		test $$result = 1; \
+	done
+
+.PHONY: upstream-socket-proof
+upstream-socket-proof: upstream-socket-native
+	python3 $(HERE)/socket-proof.py --input $(SOCKET_BUILD)/upstream-sock.native.o --linker $(LINK_MEMORY_PAYLOAD)/native-link.real --output $(SOCKET_BUILD)/proofs
