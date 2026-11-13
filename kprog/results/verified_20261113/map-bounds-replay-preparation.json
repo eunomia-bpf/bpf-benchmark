@@ -1,0 +1,25 @@
+{
+  "scope": "Prepare every observed map-bounds body for replay after the generic u32 stock confirmation",
+  "model_commit": "2d05e6342",
+  "initial_main_only_selection": [30, 31, 32],
+  "finding": "Main-only journal input omitted body20's independently observed map-bounds failure",
+  "fix": "Replay accepts repeated --additional-journal and merges every observation before the existing class selector",
+  "new_classifier_or_admission_gate": false,
+  "regression_before": "Make exit2: independent body omitted",
+  "regression_after": "Make exit0: all five grouping/replay/resource tests pass",
+  "completed_main_prefix": 23,
+  "additional_journals": [
+    "/workspaces/kprog-raw/verified/20261113-context-class/body20-receipt/outcomes.jsonl",
+    "/workspaces/kprog-raw/verified/20261113-context-class/body28-control/outcomes.jsonl",
+    "/workspaces/kprog-raw/verified/20261113-context-class/body29-receipt/outcomes.jsonl"
+  ],
+  "class": "verifier_map_bounds",
+  "bodies": [20, 30, 31, 32],
+  "represented_instances": 4,
+  "ready_directory": "/workspaces/kprog-raw/verified/20261113-map-bounds/ready-all-observations",
+  "partition": "One inventory per selected body; complete original source/resource references retained",
+  "actual_new_submissions": 0,
+  "native_execution_requests": 0,
+  "runtime_claim": "Prepared, not yet replayed; existing three census guests still active",
+  "archive": "map-bounds-replay-preparation.tar.gz"
+}

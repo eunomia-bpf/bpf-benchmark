@@ -31,6 +31,7 @@ group:
 replay:
 	taskset -c $(HOST_CPUS) python3 $(ROOT)/kprog/test/resident_verified_census.py replay --output $(OUTPUT) \
 		--inputs $(INVENTORY) --completed-journal $(COMPLETED_JOURNAL) \
+		$(foreach journal,$(OBSERVED_JOURNALS),--additional-journal $(journal)) \
 		$(foreach class,$(FAILURE_CLASSES),--failure-class $(class))
 
 run:

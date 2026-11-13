@@ -210,12 +210,15 @@ def write_replay_guests(source, output):
 
 def replay(args):
     source = json.loads(args.inputs.read_text())
-    outcomes = [json.loads(line) for line in args.completed_journal.read_text().splitlines()]
+    outcomes = [json.loads(line)
+                for journal in [args.completed_journal, *args.additional_journal]
+                for line in journal.read_text().splitlines()]
     source["programs"] = replay_programs(source["body_groups"], outcomes, set(args.failure_class))
     selected = {r["body_group"] for r in source["programs"]}
     source["scope"] = "Affected-class body replay; separate from the full census"
     source["replay"] = dict(classes=args.failure_class, input_inventory=str(args.inputs),
                             completed_journal=str(args.completed_journal),
+                            additional_journals=[str(path) for path in args.additional_journal],
                             bodies=len(selected),
                             represented_instances=sum(len(g["members"]) for g in source["body_groups"]
                                                       if g["body_group"] in selected),
@@ -292,6 +295,7 @@ def main():
     parser.add_argument("--service-state", type=Path)
     parser.add_argument("--loader-directory", type=Path)
     parser.add_argument("--completed-journal", type=Path)
+    parser.add_argument("--additional-journal", type=Path, action="append", default=[])
     parser.add_argument("--failure-class", action="append", default=[])
     args = parser.parse_args()
     {"prepare": prepare, "group": group, "replay": replay, "guest": guest}[args.mode](args)

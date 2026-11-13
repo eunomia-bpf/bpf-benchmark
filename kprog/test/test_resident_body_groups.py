@@ -3,11 +3,33 @@ import unittest
 import json
 from pathlib import Path
 import tempfile
+from types import SimpleNamespace
 
-from resident_verified_census import group_bodies, replay_programs, retain_request_artifacts, write_replay_guests
+from resident_verified_census import group_bodies, replay, replay_programs, retain_request_artifacts, write_replay_guests
 
 
 class BodyGrouping(unittest.TestCase):
+    def test_class_replay_includes_independent_guest_observations(self):
+        with tempfile.TemporaryDirectory() as work:
+            root = Path(work)
+            inputs, main, independent = (root / name for name in ("inputs.json", "main.jsonl", "independent.jsonl"))
+            source = dict(programs=[], applications=[dict(application="app", map_inventory=[7])],
+                          body_groups=[dict(body_group=n, representative=dict(source_prog_id=n,
+                                            resource=dict(map_inventory=[7])), members=[n], retained_outcome=None)
+                                       for n in (20, 30)])
+            inputs.write_text(json.dumps(source))
+            bounds = dict(stage="verifier_rejected", diagnostic="invalid access to map value")
+            main.write_text(json.dumps(dict(bounds, body_group=30)) + "\n")
+            independent.write_text(json.dumps(dict(bounds, body_group=20)) + "\n")
+            output = root / "replay"
+            replay(SimpleNamespace(inputs=inputs, completed_journal=main,
+                                   additional_journal=[independent], output=output,
+                                   failure_class=["verifier_map_bounds"]))
+            result = json.loads((output / "inventory.json").read_text())
+            self.assertEqual([row["body_group"] for row in result["programs"]], [20, 30])
+            self.assertEqual(result["replay"]["additional_journals"], [str(independent)])
+            self.assertEqual(result["applications"], source["applications"])
+
     def test_parallel_guest_inputs_preserve_the_entire_class_and_resources(self):
         source = dict(programs=[dict(body_group=n, source_prog_id=n+20,
                                     resource=dict(map_inventory=[n])) for n in [3,7,11]],
