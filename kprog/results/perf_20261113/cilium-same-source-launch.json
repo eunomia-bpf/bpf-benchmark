@@ -1,0 +1,83 @@
+{
+  "launched_at": "2026-11-13T08:32:06Z",
+  "outer_pid": 1293500,
+  "candidate_commit": "f37f4a187",
+  "capture_source_commit": "f37f4a187",
+  "raw": "/workspaces/kprog-raw/perf/20261113-cilium-same-source-runtime",
+  "capture": "/workspaces/repository/corpus/results/perf-cilium-same-source-capture-20261113",
+  "cpus": "16-19",
+  "vm_cpus": 4,
+  "vm_memory_gib": 8,
+  "host_address_space_limit_bytes": 17179869184,
+  "shared_image_lock": "/workspaces/.agent-state/kprog-lanes/locks/image",
+  "image": "bpf-benchmark/kprog:current",
+  "kernel": "74d1097af561",
+  "argv": [
+    "make",
+    "-f",
+    "kprog/perf/one-image/Makefile",
+    "corpus",
+    "APPS=cilium/agent",
+    "CPUS=16-19",
+    "VM_CPUS=4",
+    "VM_MEM=8G",
+    "STATE=/var/tmp/kprog-tmp/perf/cilium-same-source-runtime",
+    "LOGS=/workspaces/kprog-raw/perf/20261113-cilium-same-source-runtime",
+    "SAMPLES=1",
+    "WORKLOAD_DURATION=45",
+    "BPFREJIT_CORPUS_BPF_STATS=1",
+    "NATIVE_MANIFEST=/workspaces/repository/corpus/results/perf-cilium-same-source-20261113/manifest.json"
+  ],
+  "environment": {
+    "PATH_prefix": "/workspaces/repository/kprog/perf/may29-image/eqcodex-bin",
+    "EQCODEX_OUT": "/workspaces/repository/corpus/results/perf-cilium-same-source-capture-20261113",
+    "EQCODEX_CILIUM_CONFIG": "1",
+    "EQCODEX_NATIVE_LINK_BINARY": "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+    "VERIFIED_BUILD_CPUS": "16-19",
+    "VERIFIED_WAIT_PID": "",
+    "VERIFIED_IMAGE_LOCK": ""
+  },
+  "linker_selection": "runtime-map-lookups on; local memory routines off; same P0 binary",
+  "payload": [
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-same-source-20261113/manifest.json",
+      "bytes": 11606,
+      "sha256": "9f4e7191c5a53af0d25abd9231b2fc1d1d45b17ad17425458616e45aee28de08"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-same-source-20261113/bpf_host.native.o",
+      "bytes": 552040,
+      "sha256": "56f156c2662d46282169c78d9100b65ce56d10ab7716c28615a0d6cd9f39f844"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-same-source-20261113/bpf_lxc.native.o",
+      "bytes": 585008,
+      "sha256": "aa4cc5351274aa072e2a4bbc49e6de1ba7312301cff9fd03ebff5603bfa69a1f"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-same-source-20261113/bpf_xdp.native.o",
+      "bytes": 226408,
+      "sha256": "c152f471ec594990a3f060193eefbad3897f04d58a9e73f6d5d991680edb9b31"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+      "bytes": 4407560,
+      "sha256": "65eebf5e64ed5e4c0adfda52dd4587c9c626c232aeffb2ac3ab76e90a01d5b72"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+      "bytes": 445,
+      "sha256": "f7644e69df0606ac64e1af9631ffec0227c5c46282aaf2c5622758626de9f58a"
+    }
+  ],
+  "dry_run_log": "/workspaces/kprog-raw/perf/20261113-cilium-same-source-runtime/dry-run.log",
+  "make_log": "/workspaces/kprog-raw/perf/20261113-cilium-same-source-runtime/job/make.log",
+  "exit_file": "/workspaces/kprog-raw/perf/20261113-cilium-same-source-runtime/job/exit-code",
+  "collect": "NEXT turn; no post-launch polling",
+  "scope": "First actual selected-source native application diagnostic; endpoint API and raw Cilium verdict metrics capture; no official throughput floor",
+  "limits": [
+    "D23 original-program helper targets not selected; current image loader still old.",
+    "Exact original BPF source reconstruction is not a native-runtime semantic certificate.",
+    "All installed payload files and observer scripts frozen until job exits."
+  ]
+}
