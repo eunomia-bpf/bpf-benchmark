@@ -49,3 +49,22 @@ otel: all
 $(BUILD)/core-flavor-lower: $(HERE)/core-flavor-lower.cpp
 	install -d $(BUILD)
 	$(CXX) $$($(LLVM_CONFIG) --cxxflags) -std=c++17 -Wall -Wextra -Wno-unused-parameter $< -o $@ -l:libclang-cpp.so.18.1 $$($(LLVM_CONFIG) --ldflags --libs --system-libs) -lbpf
+
+$(BUILD)/core.fixture.plain: $(HERE)/test-core-flavor.c
+	install -d $(BUILD)
+	$(CC) -O2 -DMICRO_NATIVE -include $(ROOT)/vendor/bpf/native_compat.h -I$(VMLINUX_DIR) $< -o $@
+
+$(BUILD)/core.fixture.i: $(HERE)/test-core-flavor.c $(HERE)/core-queries.h
+	install -d $(BUILD)
+	$(CC) -DMICRO_NATIVE -DCORE_LOWER -include $(ROOT)/vendor/bpf/native_compat.h -I$(HERE) -I$(VMLINUX_DIR) -E -P $< -o $@
+
+$(BUILD)/core.fixture.lowered.i: $(BUILD)/core.fixture.i $(BUILD)/core-flavor-lower
+	$(BUILD)/core-flavor-lower $< $@ $(KDIR)/vmlinux
+
+$(BUILD)/core.fixture.fixed: $(BUILD)/core.fixture.lowered.i
+	$(CC) -O2 -fms-extensions -Wno-deprecated-non-prototype $< -o $@
+
+.PHONY: core-check
+core-check: $(BUILD)/core.fixture.plain $(BUILD)/core.fixture.fixed
+	$(BUILD)/core.fixture.plain && result=0 || result=$$?; test $$result = 1
+	$(BUILD)/core.fixture.fixed
