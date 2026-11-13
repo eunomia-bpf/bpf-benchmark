@@ -123,6 +123,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED 首23新body（2026-11-13）** 新增Tracee body32 tracepoint__sched__sched_switch/source506在旧u32模型触发同一event_data_map越界（vs32536/off65672/size1，BPF11650），processed3883、total/peak242；service07:13:21.750431→07:22:55.466351，早于2d05候选。累计23submitted/13installed/10stock rejected：BCC8/8、Tracee9/3/6、Tetragon6/2/4，其余三应用new queue各0；native execution0，workload待测；旧10body观察与独立回放另计。完整request23归档 `resident-body-outcome-23.tar.gz`（12065062bytes）和累计receipt `resident-body-first-twenty-three-receipt.json`，raw `/workspaces/kprog-raw/verified/20261113-body-census/first-twenty-three/`。u32 stock确认仍排队，context28/29 retry仍在运行，不将旧模型拒绝算候选结果。
+
 - **VERIFIED u32 stock子集排队（2026-11-13）** outer1270473等待自己的body28 retry outer1251409退出后，通过已提交Make目标启动2vCPU2G/AS8GiB、CPU13/shared image reader guest，实际加载copy before/after、signed-after及partial0/8/16共6份BPF回归；不编译/替换base module或loader，不新增application loader路径。raw `/workspaces/kprog-raw/verified/20261113-word32-copy/{guest-job,control}/`，启动receipt `word32-copy-stock-launch.json`；本turn结束，不轮询排队/运行结果，下一turn收集。
 
 - **VERIFIED u32 copy bounds通用候选（2026-11-13）** TRUNC32由empty GPR64 asm后shift32 pair改为GPR32 constraint `w`上的显式mov32；LLVM backend确有此constraint，无需猜测operand modifier。小型相同reg-write/copy/branch/map-store回归真实BPF反汇编从r1 copy+shiftpair变为w2/w1 moves，保留stock scalar ID传播条件。UBSan host逐项通过65536个u16 source offsets（前后各一次）、16 signed边界/high-word、3 partial lanes各189 bit/tag+2 boolean案例；对应6份BPF输入编译成功。完整输入/disassembly/log归档 `word32-copy-host*`，raw `/workspaces/kprog-raw/verified/20261113-word32-copy*`。实际stock拒绝/接受和应用body复测仍待下一guest，不能算class通过；P、kernel和image未改，无应用特例/新proof/gate。
