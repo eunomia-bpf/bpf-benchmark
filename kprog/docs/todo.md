@@ -14,6 +14,8 @@
 
 运营者 2026-11-13："我觉得这个做法不是改源代码, 我们应该尽可能禁止改源代码吧? 尽可能减少修改? ... 你可以改链接器, 自己写 mmset, 不要用内核的; 顺便去看看有没有类似的情况, 这不公平也很容易出错, 我们应该在链接器或者编译 flag 上面做文章"。规则：不改应用源码，也不往编译里塞替换源码行为的头文件；原生代码的差异在链接器或编译 flag 上解决，改动尽量少。普查（协调者，2026-11-13，镜像里全部 *.native.o 的外部函数符号）：只有 memset 和 memcpy 两个库函数落到内核：memset 在 Tetragon 38 个对象、OTel 5 个、BCC 1 个、Tracee 1 个；memcpy 在 Tetragon 8 个、Tracee 1 个；Katran、Cilium 没有。
 
+**总目标的前提（2026-11-13，源码差异审核 kprog/results/source-diff-20261113/report.md，23 组差异，2526e7ea2）**：原生一侧编译的是与 eBPF 一侧相同、未改动的上游应用源码；所有差异放进链接器或编译 flag。审核发现六个应用的原生构建都有改变行为的源码差异（Cilium 也有：D01 socket 上下文未转换、D02 TC cb 元数据早 8 字节、D08 XDP ingress_ifindex、D09 去掉 hybrid routing 查表、D10 wire_len），所以在这些差异移走之前，没有一个应用的原生/eBPF 比值能算等量工作；优化让位于这项清理。
+
 **lane perf（Codex，gpt-6.1-sol）。目标：每个性能数字都是等量工作、可复现的；六应用几何平均 native/eBPF 达到 1.20x 以上，每个应用不低于 05-29 下限。**
 - [ ] P0 原生代码的 memset、memcpy 不再调用内核的实现：链接器自带这两个函数（简单的 8 字节写/拷贝循环加尾部，不用 rep stos/movs），把对象里的 memset、memcpy 重定位绑定到镜像内自带的这份；放在默认关闭的链接器选项后，默认输出字节不变；链接器归 lane verified，先和它在 COORDINATION 说好再改（或请它改）。先看编译 flag 能否让 clang 对常量大小直接展开（不改源码、不加头文件），能就优先用 flag。运营者 2026-11-13 追问"这个是不是还能优化一下? 性能更好一些? 比如特殊硬件指令"：链接器那一路做快的版本：每个调用点的长度在调用前是常量（如 mov $0x170,%edx），链接器按长度生成完全展开的专用版本（xor 清零的通用寄存器、8 字节写，无循环），把该调用点绑到对应长度的版本；长度不定或很大的用 32 字节一轮的展开循环；链接器在加载时运行，可读 CPUID，只有在 FSRS/FSRM（短串 rep stosb/movsb 快速路径）存在且实测更快时才选 rep 形式；不用 SIMD/AVX 和 FPU 状态（内核上下文，且原生代码保持 SIMD-free，第 3 节 S14）；不用 movnti/clzero 这类非临时写（清零的缓冲区随后就要读）。各形式先做宿主微基准，再在 Tracee 上计时。然后在 Tracee 上开/关各计时一轮（CPU 0-7，计时锁），用 perprog.py 和 phase-profile 看 memset 的 13.93% 是否消失。完成后 Tetragon、OTel、BCC 受影响的应用各重测一轮。
 - [x] P0a 编译flag有界子集（9854bd220、688eb1874）：原始Tracee plain与max-store-memset/memcpy=4096均make0，执行节逐字相同且两种库调用都保留，不能解决P0。receipt/archive `memory-flags-result*`；vendor stage属于C已撤回header候选，plain_equal_stage=false不冒充冻结镜像差异。VERIFIED06:04:06交接linker所有权，perf接续默认关闭的local memory routines；P0整体继续。
@@ -26,6 +28,7 @@
 - [x] P1c 05-29历史链有界审计（5bb08526b、67519f2a6；结论 `kprog/results/perf_20261113/may29-bounded-answer.md`）：frozen源码链已含OTel公开/physical ctx错读及Tetragon flavor声明偏移，两者亦在后续reference实物中确认；原始四run的精确ELF身份、OTel用户展开频率无保留证据，不能据此认证1.824x/1.323x等量收益。按advisor05:44要求结项；论文解释由运营者决定，纠正后实测继续。
 - [x] P1d Tetragon target-BTF CO-RE compiler host子集（77e2916fb、abb4d8e02、3dfd738fd、c6b15fc34）：host plain1/corrected0，35 manifest objects全部构建成功，35/35 plain code逐节等于shipped default；fork原生PC0x2ff的task+96改成task+2904。`core-host.json`/`core-build-report.json`记录source epoch、4 workers/每process16GiB上限与完整输出。默认关闭NATIVE_MANIFEST选择；两次配对guest均完成make0/appok，启动仍跨测量，交P1e，P1继续。
 - [ ] P1h CO-RE 存在性检查整类修复（审核 03Z 第 2 条，已核实：native_compat.h:326/330 对非 Tetragon 应用仍把 field/type 存在性定义成 (1)）：把 P1d 的目标内核 BTF 做法推广到所有应用（Tracee 的 get_task_pid_vnr、BCC 的 biosnoop/runqlat 等都受影响），放在编译 flag/构建开关上、默认关闭；修好后用已存的运行数据和新运行逐应用对照两边的应用输出（Tracee 事件、BCC 工具输出、Cilium 判决、Katran 包）。在此之前只有 Cilium、Katran 算等量工作（第 f 轮 1.294x、1.100x，几何平均 1.193x）。
+- [ ] P1j 按源码差异审核的影响顺序，把 (b) 类差异逐条移进链接器或编译 flag（默认构建不变，修正版由开关选择），每条记下前后两边应用输出的对照：先 Cilium（D01、D02、D08、D09、D10），再 D03 系统调用参数宏（Tetragon、Tracee）、D23、D04（即 P1h）、D05–D07（Tetragon）、D11、D13、D14；(c) 类不必要的差异直接删掉。Katran 的 D16/D19 部分归 lane C。
 - [ ] P1e Tetragon 原生启动仍跨测量：优化 selected linker 后 run `x86_kvm_corpus_20261113_041136_182808` make0/appok，但 result 两臂287/202个程序，native policy 9/15且 rawtp仍LOADING。现有shim日志288次native replacement的整次load中位815ms/合计256.48s；离线解析63f89e2d1、policy观测6ac73dcc4，receipt `tetragon-observed-runtime.json`。直接交verified定位通用loader/shim/linker成本；perf继续受影响行为子集，保留2.106x为启动工作不同的诊断，修复前不把它写作等量收益。
 - P1e 子集归因补证（9025380bb、82061db5b）：run `x86_kvm_corpus_20261113_043935_986036` make0/appok/0stub，288次native loads只有38proof+38kernel child（全0、76个全部唯一配对）；其余250次无child的load合计156.48s，中位284.30ms。全部child仅4.62s，不能用每次fork/link解释主要成本。receipt `kprog/results/perf_20261113/tetragon-link-cost.json`含全量archive；verified继续现有stage timings及manifest/data-symbol成本定位，P1e仍开，不宣称cache丢失或startup收益。
 - P1e/P2 固定协议结果：run `x86_kvm_corpus_20261113_052009_146869` make0/appok/0错误/0stub，stats开3×180s+冻结180s warmup，287/287程序。实际测量时窗内42/39次读取均15policy ENABLED，但baseline connect post增61746234、datagram增23947470；native对应counter字段为空，accept仅增120对23952413。原始吞吐1.380x、generic_kprobe973.9→70.2ns/次保留为工作不同的观察；启动重叠不足以解释完全装载后的差异，P1e继续查语义。receipt/archive `tetragon-fixed-duration*`、`tetragon-fixed-policy-windows.json`；policy-window.py保留缺字段及负delta，1focused回归通过。
@@ -40,6 +43,7 @@
 - [ ] C1 Tracee：在 guest 里用 perf 剖析 raw_syscalls sys_enter、trace_sys_enter、trace_sys_exit 两边的时间去向，贴出剖析和运行目录。
 - [x] C1 Tracee 剖析（f3367005a、d22c5dedb）：原生阶段 memset 占 guest CPU 13.93%，eBPF 阶段 0.72%。
 - [ ] C2 撤回：c9583219e 的 native_memset.h 头文件和 NATIVE_INLINE_MEMSET 开关属于源码层替换，按运营者的话撤掉（恢复 vendor/bpf/Makefile 并删去该头文件，一个提交）；memset 交给 lane perf 的 P0 在链接器/flag 上做。原 C2 文字："据此做一处通用改进（vendor/bpf 的原生构建），默认关闭的开关，默认对象逐字节不变；功能检查后计时。
+- [ ] C5 Katran 的源码差异（审核 D16、D19 中 Katran 的部分：linux_includes/bpf.h 的结构改动、原生缺 -DDEBUG 等）移进编译 flag 或链接器，默认构建不变；对照两边输出后再做 C4 计时。
 - [ ] C4 先做（Katran 没有 CO-RE 和 memset 问题）；C3 等 P1h 和 P0 落地后再计时，否则测的是带缺陷的 BCC 对象。
 - [ ] C3 BCC：把构建时 .rodata 特化对象作为第二种配置（NATIVE_MANIFEST），两种配置各计时一轮。
 - [ ] C4 Katran。
