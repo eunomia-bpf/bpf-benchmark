@@ -5,6 +5,7 @@
 #include "kernel_offsets.h"
 
 #include "native_loader_manifest.hpp"
+#include "native_loader_subprocess.hpp"
 
 #include <bpf/bpf.h>
 #include <bpf/btf.h>
@@ -2015,56 +2016,7 @@ std::string format_command_limited(const std::vector<std::string> &argv, size_t 
     return out.str();
 }
 
-std::vector<char *> environment_without_ld_preload()
-{
-    std::vector<char *> clean_env;
-    for (char **env = environ; env && *env; ++env) {
-        if (std::strncmp(*env, "LD_PRELOAD=", 11) != 0) {
-            clean_env.push_back(*env);
-        }
-    }
-    clean_env.push_back(nullptr);
-    return clean_env;
-}
-
-/* Spawn the native-link binary with the supplied argv. Returns
- * subprocess exit code. */
-int run_subprocess(const std::vector<std::string> &argv,
-                   const std::filesystem::path &stderr_path)
-{
-    if (argv.empty()) return -1;
-    std::vector<char *> raw;
-    raw.reserve(argv.size() + 1);
-    for (auto &s : argv) {
-        raw.push_back(const_cast<char *>(s.c_str()));
-    }
-    raw.push_back(nullptr);
-    std::vector<char *> clean_env = environment_without_ld_preload();
-
-    pid_t pid = fork();
-    if (pid < 0) return -1;
-    if (pid == 0) {
-        if (!stderr_path.empty()) {
-            int fd = open(stderr_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0600);
-            if (fd >= 0) {
-                dup2(fd, STDERR_FILENO);
-                dup2(fd, STDOUT_FILENO);
-                if (fd != STDERR_FILENO && fd != STDOUT_FILENO) {
-                    close(fd);
-                }
-            }
-        }
-        execve(raw[0], raw.data(), clean_env.data());
-        std::fprintf(stderr, "execve %s failed: %s\n", raw[0], std::strerror(errno));
-        _exit(127);
-    }
-    int status = 0;
-    if (waitpid(pid, &status, 0) < 0) return -1;
-    if (!WIFEXITED(status)) return -1;
-    return WEXITSTATUS(status);
-}
-
-/* Path to the native-link binary. The runner invokes it via fork+exec.
+/* Path to the native-link binary. The runner starts it as a child process.
  * Resolution order:
  *   1. `--native-kernel-linker` CLI override.
  *   2. `BPFREJIT_NATIVE_LINK_BINARY` env var.
@@ -3137,11 +3089,13 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
         proof_argv.push_back("proof");
 
         const std::filesystem::path proof_stderr = base.string() + ".proof.stderr.txt";
-        int proof_rc = run_subprocess(proof_argv, proof_stderr);
+        int proof_rc = native_loader_detail::run_subprocess(proof_argv, proof_stderr);
+        const int proof_errno = errno;
         if (proof_rc != 0) {
             std::ostringstream msg;
             const std::string stderr_text = read_text_file_limited(proof_stderr, 2048);
             msg << "native-link proof failed (rc=" << proof_rc << ")";
+            if (proof_rc < 0) msg << ": " << std::strerror(proof_errno);
             if (!stderr_text.empty()) {
                 msg << "\nstderr:\n" << stderr_text;
             }
@@ -3177,11 +3131,13 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     argv.push_back(link_plan.string());
 
     const std::filesystem::path kernel_stderr = base.string() + ".kernel.stderr.txt";
-    int rc = run_subprocess(argv, kernel_stderr);
+    int rc = native_loader_detail::run_subprocess(argv, kernel_stderr);
+    const int kernel_errno = errno;
     if (rc != 0) {
         std::ostringstream msg;
         const std::string stderr_text = read_text_file_limited(kernel_stderr, 8192);
         msg << "native-link kernel failed (rc=" << rc << ")";
+        if (rc < 0) msg << ": " << std::strerror(kernel_errno);
         if (!stderr_text.empty()) {
             msg << "\nstderr:\n" << stderr_text;
         }
