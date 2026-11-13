@@ -53,3 +53,14 @@ own snapshot; later captures preserve subsequent build output. Endpoint-relative
 so distinct endpoint configs cannot overwrite one another. Each archive includes
 the original paths and hashes. The normal Make target still owns the workload;
 the observer neither changes configuration nor selects native candidates.
+
+`cilium-upstream.py` also accepts `--state-root` and `--state-object` to read a
+particular captured runtime template directly, with its original include order.
+Repeated `--feature-header` arguments supply the actual generated common and
+program-family feature configs. Clang preprocesses these configs; the resulting
+macro differences become recorded `-D`/`-U` compiler arguments. No application
+header or replacement implementation is injected. A one-shot source-to-BPF
+object is retained for comparison with the captured original: an additional
+optimization pipeline over saved IR can change BPF layout. The comparison tool
+reports allocated section bytes and relocations for both paths without gating
+the benchmark or discarding a mismatch.

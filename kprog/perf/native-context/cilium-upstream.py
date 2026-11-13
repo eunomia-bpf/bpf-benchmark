@@ -8,12 +8,33 @@ import shlex
 import subprocess
 
 
+def feature_flags(headers, output):
+    """Use Clang itself to interpret upstream-generated capability macros."""
+    base=['clang-18','-target','bpf','-undef','-dM','-E','-x','c','-']
+    commands=[base,base+sum((['-include',str(path)] for path in headers),[])]
+    results=[]
+    for label,command in zip(['features-base','features'],commands):
+        result=subprocess.run(command,input='',capture_output=True,text=True)
+        output.with_suffix('.'+label+'.stdout').write_text(result.stdout)
+        output.with_suffix('.'+label+'.stderr').write_text(result.stderr)
+        result.check_returncode()
+        results.append(dict(line[len('#define '):].split(' ',1) if ' ' in line[len('#define '):]
+                            else (line[len('#define '):],'') for line in result.stdout.splitlines()))
+    before,after=results
+    flags=['-U'+name for name in before.keys()-after.keys()]
+    flags += ['-D'+name+'='+value for name,value in after.items() if before.get(name)!=value]
+    record=dict(commands=commands,headers=[dict(path=str(path),sha256=hashlib.sha256(path.read_bytes()).hexdigest()) for path in headers],flags=flags)
+    output.with_suffix('.feature-defines.json').write_text(json.dumps(record,indent=2)+'\n')
+    return flags,record
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--capture', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--state-root', type=Path)
     parser.add_argument('--state-object', type=Path)
+    parser.add_argument('--feature-header', type=Path, action='append', default=[])
     args = parser.parse_args()
     if bool(args.state_root) != bool(args.state_object):
         parser.error('--state-root and --state-object are supplied together')
@@ -50,8 +71,13 @@ def main():
     if args.state_root:
         command += ['-MD', '-MF', str(args.output.with_suffix('.d'))]
     args.output.parent.mkdir(parents=True, exist_ok=True)
+    features=None
+    if args.feature_header:
+        flags,features=feature_flags(args.feature_header,args.output)
+        command += flags
     receipt = dict(capture=str(args.capture), original_command=original,
                    replay_command=command, sources=sources)
+    if features is not None: receipt['generated_features']=features
     if not args.state_root:
         receipt['configuration']=[dict(path=str(args.capture/h['archive']),
                                        retained_sha256=h['sha256'],
