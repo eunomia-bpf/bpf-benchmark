@@ -29,40 +29,33 @@ def main():
         parser.error('source must be in the canonical upstream Tetragon checkout')
     args.output.mkdir(parents=True, exist_ok=True)
     name = args.output / args.unit
-    flag_command = ['make', '--no-print-directory', '-s', '-f', str(HERE / 'tetragon-flags.mk'),
-                    'BPF_TARGET_ARCH=x86', 'DEBUG=0', 'flags']
+    stem, _, variant = args.unit.rpartition('_')
+    if not (variant.startswith('v') and variant[1:].isdigit()):
+        variant = ''
+    flag_command = ['make', '--no-print-directory', '-s', '-C', str(upstream),
+                    '-f', str(HERE / 'tetragon-flags.mk'), 'BPF_TARGET_ARCH=x86',
+                    'DEBUG=0', 'UNIT=' + args.unit, 'VARIANT=' + variant, 'flags']
     base = subprocess.run(flag_command, capture_output=True, text=True)
     name.with_suffix('.flags.stdout').write_text(base.stdout)
     name.with_suffix('.flags.stderr').write_text(base.stderr)
     base.check_returncode()
     flags = shlex.split(base.stdout)
-    # These are compiler variables from the upstream object/variant recipe,
-    # not the native producer's separate flags or compatibility header.
-    definitions = {}
-    for line in (upstream / 'Makefile').read_text().splitlines():
-        if line.startswith('CFLAGS_') and '=' in line:
-            key, value = line.split('=', 1)
-            definitions[key.strip()] = shlex.split(value)
-    stem, _, variant = args.unit.rpartition('_')
-    if variant.startswith('v') and variant[1:].isdigit():
-        flags += definitions['CFLAGS_' + variant]
-    flags += definitions.get('CFLAGS_' + args.unit + '.o', [])
     record = dict(unit=args.unit, source=str(source), source_sha256=digest(source),
                   makefiles=[dict(path=str(p), sha256=digest(p)) for p in (upstream / 'Makefile', upstream / 'Makefile.defs')],
-                  flag_command=flag_command, flags=flags,
+                  flag_command=flag_command, flags=flags, compiler_cwd=str(upstream),
                   reference=dict(path=str(args.reference), sha256=digest(args.reference)), commands=[])
     for label, extra, output in [('ir', ['-emit-llvm'], name.with_suffix('.bc')),
                                  ('direct', [], name.with_suffix('.direct.bpf.o'))]:
         command = ['clang-18', *flags, '-MD', '-MF', str(name.with_suffix('.' + label + '.d')),
                    *extra, '-c', str(source), '-o', str(output)]
-        result = subprocess.run(command, capture_output=True, text=True)
+        result = subprocess.run(command, cwd=upstream, capture_output=True, text=True)
         name.with_suffix('.' + label + '.stdout').write_text(result.stdout)
         name.with_suffix('.' + label + '.stderr').write_text(result.stderr)
         record['commands'].append(dict(label=label, argv=command, returncode=result.returncode))
         name.with_suffix('.source.json').write_text(json.dumps(record, indent=2) + '\n')
         result.check_returncode()
     dependencies = shlex.split(name.with_suffix('.ir.d').read_text().replace('\\\n', '').split(':', 1)[1])
-    record['dependencies'] = [dict(path=p, sha256=digest(Path(p))) for p in dependencies]
+    record['dependencies'] = [dict(path=str((upstream / p).resolve()), sha256=digest(upstream / p)) for p in dependencies]
     spec = importlib.util.spec_from_file_location('compare', HERE / 'cilium-object-compare.py')
     compare = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(compare)
