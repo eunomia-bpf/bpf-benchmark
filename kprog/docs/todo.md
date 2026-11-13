@@ -122,6 +122,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED module自动重建纠正（2026-11-13）** body29 retry日志显示trusted-service-kvm在shared reader lock内于07:13:06自动编译了唯一base的module（source6df2a07f6，sha256 df2e3627b15227aa39b850fee23f29399633c0a9c05fd8eea4fc447cce9c6ee9），此前handoff的“base未变”不准确；kernel/image/loader binary未变，D23真实查询仍未验证。现移除service guest启动里的隐式module build，module只在独立writer-lock构建步骤更新；实际nested census Make dry-run已确认直接启动guest，不再调用module build。receipt `module-launch-fix.json`，原日志body29-retry1-job/make.log及dry-run全部保留；未删除或丢弃任何运行结果。
+
 - **VERIFIED 首22新body（2026-11-13）** 新增Tracee body31 trace_ret_vfs_readv_tail/source554实际1submitted/1stock mapbounds reject/0installed：BPF44357 probe_read_kernel目标event_data_map，vs32536/off65672/size64，processed5593、total/peak248；service06:18:35.924563→07:08:26.213685。main累计22submitted/13installed/9rejected，BCC8/8、Tracee8/3/5、Tetragon6/2/4，其余三app新queue各0；各项native execution0/workload待测，旧10body观察及独立回放另计。完整新request归档 `resident-body-outcome-22.tar.gz`（20955916bytes），累计receipt `resident-body-first-twenty-two-receipt.json`；raw `/workspaces/kprog-raw/verified/20261113-body-census/first-twenty-two/`。重复的u16 copy/bound路径支持继续通用宽度物化修复；未声称实际应用通过。
 
 - **VERIFIED body29较大内存重试启动（2026-11-13）** dry-run后setsid/nohup outer1266108，2vCPU24G/AS32GiB、CPU14–15、shared image read lock；与main QEMU1110393及body28 retry QEMU1251615共三台census guest，启动前MemAvailable约85GiB。保留原8G失败，独立输出 `/workspaces/kprog-raw/verified/20261113-context-class/body29-retry1-{control,job}/`，精确调用/启动参数见 `context-body29-retry1-launch.json`；本turn不轮询，后续收集实际模型epoch与结果。

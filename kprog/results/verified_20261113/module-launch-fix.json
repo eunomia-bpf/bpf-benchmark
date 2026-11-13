@@ -1,0 +1,16 @@
+{
+  "scope": "Remove implicit shared-module compilation from service guest startup",
+  "finding": "Body29 retry rebuilt canonical module under a shared image-reader lock, contradicting prior handoff's unchanged-base statement",
+  "trigger": "resident-census.mk run invoked trusted-service-kvm, whose recipe unconditionally built ../stock-path/module",
+  "actual_module_build_utc": "2026-11-13T07:13:06Z",
+  "actual_module_sha256": "df2e3627b15227aa39b850fee23f29399633c0a9c05fd8eea4fc447cce9c6ee9",
+  "module_source_commit": "6df2a07f6",
+  "original_log": "/workspaces/kprog-raw/verified/20261113-context-class/body29-retry1-job/make.log",
+  "fix": "Service guests consume the prepared canonical module; module builds are explicit operations under the image writer lock",
+  "validation": "Make dry-run follows the actual nested census launch into vng and contains no module-build invocation",
+  "dry_run_log": "/workspaces/kprog-raw/verified/20261113-module-launch-fix-dry-run.log",
+  "kernel_source_or_image_changed": false,
+  "loader_binary_changed": false,
+  "module_query_runtime_tested": false,
+  "data": "All active/completed run evidence retained; no result discarded"
+}

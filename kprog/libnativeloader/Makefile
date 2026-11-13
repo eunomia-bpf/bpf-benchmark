@@ -119,8 +119,9 @@ guest-trusted-safety:
 	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" KPROG_STOCK_LOADER="$(abspath $(BUILD_DIR))" \
 		python3 ../stock-path/run_safety.py check --out "$(OUTPUT)" --inputs "$(SAFETY_INPUTS)"
 
+# The shared module is built explicitly under the image writer lock. Starting
+# a service guest must not replace it while another guest uses the sole base.
 trusted-service-kvm: trusted-service
-	$(MAKE) -C ../stock-path/module
 	install -d "$(OUTPUT)"
 	taskset -c $(SERVICE_HOST_CPUS) vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
 		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(OUTPUT)" --overlay-rwdir /tmp \
