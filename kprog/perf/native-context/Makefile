@@ -419,6 +419,10 @@ cilium-helper-replay:
 retain-host-artifacts:
 	python3 $(HERE)/retain-host-artifacts.py --raw $(HOST_ARTIFACT_RAW) --output $(HOST_ARTIFACT_RECEIPT) --protocol $(HOST_ARTIFACT_PROTOCOL) $(HOST_ARTIFACT_ARGS)
 
+.PHONY: split-host-artifacts
+split-host-artifacts:
+	python3 $(HERE)/split-retained-archive.py --receipt $(HOST_ARTIFACT_RECEIPT) --raw-archive $(HOST_ARTIFACT_RAW_ARCHIVE)
+
 ASM_BUILD ?= /var/tmp/kprog-tmp/perf/bpf-asm
 $(ASM_BUILD)/bpf-asm-lower: $(HERE)/bpf-asm-lower.cpp
 	install -d $(ASM_BUILD)
@@ -443,6 +447,14 @@ bpf-asm-check: $(ASM_BUILD)/bpf-asm-lower $(SOCKET_BUILD)/socket-context-lower $
 	$(CC) -O2 -DTEST_DRIVER -c $(HERE)/test-bpf-compare.c -o $(ASM_BUILD)/compare.driver.o
 	$(CC) -target x86_64-linux-gnu -O2 $(ASM_BUILD)/compare.native.bc $(ASM_BUILD)/compare.driver.o -o $(ASM_BUILD)/compare
 	$(ASM_BUILD)/compare
+	$(CC) -target bpf -O2 -g -emit-llvm -c $(HERE)/test-bpf-errno-store.c -o $(ASM_BUILD)/errno-store.bc
+	$(CC) -target bpf -O2 -g -c $(HERE)/test-bpf-errno-store.c -o $(ASM_BUILD)/errno-store.bpf.o
+	llvm-objdump-18 -d $(ASM_BUILD)/errno-store.bpf.o > $(ASM_BUILD)/errno-store.bpf.dis
+	$(ASM_BUILD)/bpf-asm-lower $(ASM_BUILD)/errno-store.bc -o $(ASM_BUILD)/errno-store.lowered.bc
+	$(SOCKET_BUILD)/socket-context-lower $(ASM_BUILD)/errno-store.lowered.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(ASM_BUILD)/helper-names.json -o $(ASM_BUILD)/errno-store.native.bc
+	$(CC) -O2 -DTEST_DRIVER -c $(HERE)/test-bpf-errno-store.c -o $(ASM_BUILD)/errno-store.driver.o
+	$(CC) -target x86_64-linux-gnu -O2 $(ASM_BUILD)/errno-store.native.bc $(ASM_BUILD)/errno-store.driver.o -o $(ASM_BUILD)/errno-store
+	$(ASM_BUILD)/errno-store
 
 TETRAGON_SECTION_ARGS ?= --section-prefix kprobe --section-prefix tracepoint --section-prefix raw_tracepoint --section-prefix uprobe --section-prefix fmod_ret/
 upstream-tetragon-link: upstream-tetragon-native

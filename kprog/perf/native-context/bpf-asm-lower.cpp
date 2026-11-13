@@ -67,6 +67,40 @@ int main(int argc,char **argv) {
       auto *Mask=dyn_cast<ConstantInt>(CI->getArgOperand(0));if (!Mask) fail("nonconstant BPF immediate mask");
       if (!Mask->getValue().isSignedIntN(32) && !Mask->getValue().isIntN(32)) fail("BPF mask exceeds immediate encoding");
       Result=B.CreateAnd(CI->getArgOperand(1),ConstantInt::get(CI->getType(),int64_t(int32_t(Mask->getSExtValue())),true));
+    } else if (Text=="if $0 s< -4095 goto +1\nif $0 s<= 0 goto +1\n$0 = -1\n" && Constraint=="=r,0") {
+      if (CI->arg_size()!=1 || (CI->getType()!=B.getInt32Ty() && CI->getType()!=B.getInt64Ty()) ||
+          CI->getArgOperand(0)->getType()!=CI->getType()) fail("invalid BPF errno range asm");
+      // The asm compares full BPF registers, including a zero-extended 32-bit
+      // input. In the real LSM object LDXW feeds these signed 64-bit jumps.
+      auto *InputValue=CI->getArgOperand(0);
+      auto *Register=B.CreateZExtOrTrunc(InputValue,B.getInt64Ty());
+      auto *InRange=B.CreateAnd(B.CreateICmpSGE(Register,B.getInt64(-4095)),B.CreateICmpSLE(Register,B.getInt64(0)));
+      Result=B.CreateSelect(InRange,InputValue,ConstantInt::getSigned(CI->getType(),-1));
+    } else if (Text=="if $2 != 8 goto +2\n*(u64 *)($0 + $3) = $1\ngoto +8\nif $2 != 4 goto +2\n*(u32 *)($0 + $3) = $1\ngoto +5\nif $2 != 2 goto +2\n*(u16 *)($0 + $3) = $1\ngoto +2\nif $2 != 1 goto +1\n*(u8 *)($0 + $3) = $1\n" && Constraint=="=r,=r,=r,i,0,1,2") {
+      auto *ST=dyn_cast<StructType>(CI->getType());
+      if (CI->arg_size()!=4 || !ST || ST->getNumElements()!=3 || !ST->getElementType(0)->isPointerTy() ||
+          ST->getElementType(1)!=B.getInt64Ty() || ST->getElementType(2)!=B.getInt8Ty() ||
+          !isa<ConstantInt>(CI->getArgOperand(0)) || CI->getArgOperand(0)->getType()->getIntegerBitWidth()>64 ||
+          CI->getArgOperand(1)->getType()!=ST->getElementType(0) || CI->getArgOperand(2)->getType()!=B.getInt64Ty() ||
+          CI->getArgOperand(3)->getType()!=B.getInt8Ty()) fail("invalid BPF width-selected store");
+      auto *Parent=CI->getParent();
+      auto *Continue=Parent->splitBasicBlock(CI,"bpf_store_done");
+      Parent->getTerminator()->eraseFromParent();
+      IRBuilder<> Test(Parent);Test.SetCurrentDebugLocation(CI->getDebugLoc());
+      auto *Address=Test.CreateGEP(B.getInt8Ty(),CI->getArgOperand(1),Test.CreateSExtOrTrunc(CI->getArgOperand(0),Test.getInt64Ty()));
+      for (unsigned Width:{8,4,2,1}) {
+        auto *Store=BasicBlock::Create(C,"bpf_store",Parent->getParent(),Continue);
+        auto *Next=Width==1?Continue:BasicBlock::Create(C,"bpf_store_size",Parent->getParent(),Continue);
+        Test.CreateCondBr(Test.CreateICmpEQ(CI->getArgOperand(3),Test.getInt8(Width)),Store,Next);
+        IRBuilder<> Write(Store);Write.SetCurrentDebugLocation(CI->getDebugLoc());
+        auto *Value=Write.CreateTruncOrBitCast(CI->getArgOperand(2),Write.getIntNTy(Width*8));
+        Write.CreateAlignedStore(Value,Address,Align(1))->setVolatile(true);Write.CreateBr(Continue);
+        Test.SetInsertPoint(Next);
+      }
+      B.SetInsertPoint(CI);
+      Result=B.CreateInsertValue(PoisonValue::get(ST),CI->getArgOperand(1),0);
+      Result=B.CreateInsertValue(Result,CI->getArgOperand(2),1);
+      Result=B.CreateInsertValue(Result,CI->getArgOperand(3),2);
     } else if (Text=="$0 &= 0xfff;\nr1 = *(u64 *)$1;\nr1 += $0;\n*(u32 *)(r1 + 0) = $2;\n" && Constraint=="=r,=*m,=r,0,*m,2,~{r1}") {
       auto *ST=dyn_cast<StructType>(CI->getType());
       if (CI->arg_size()!=4 || !ST || ST->getNumElements()!=2 || !ST->getElementType(0)->isIntegerTy(32) ||
