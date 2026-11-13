@@ -1,0 +1,182 @@
+{
+  "recorded_at": "2026-11-13T23:34:19.876038+00:00",
+  "protocol_commit": "dbb62ef37",
+  "raw": "/workspaces/kprog-raw/perf/20261113-config-globals-before-complete",
+  "inputs": [
+    {
+      "path": "/workspaces/kprog-raw/perf/20261113-config-globals-before/input-evidence/socket-context-lower",
+      "sha256": "3631232f7d80e705bd7c50e4c1aa3799d944811f05f080e9b2dbc871f107de4a"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261113-config-globals-before/check.log",
+      "sha256": "f24295604471c02feef537f5d93ac4499b3514baf99f3ac2f9cf595d04d92e88"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261113-config-globals-before/roundtrip.log",
+      "sha256": "ef0c580517f99528e5181c78529528ce201aa8f6831ad7039252d64086fecb75"
+    }
+  ],
+  "reports": [
+    {
+      "path": "/var/tmp/kprog-tmp/perf/config-globals-before/links/report.json",
+      "sha256": "ef1ed21340845e7e32d84af83562a037499c25cda852fdd72c1bc60ed7b509a9",
+      "data": [
+        {
+          "symbol": "read_counter",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/native.o",
+            "--symbol",
+            "read_counter",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_counter.proof.o",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/synthetic-plan.json"
+          ],
+          "returncode": 0,
+          "kernel_command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+            "--mode",
+            "kernel",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_counter.proof.o",
+            "--symbol",
+            "read_counter",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/synthetic-plan.json",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_counter.kernel.bin",
+            "--output-relocs",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_counter.kernel.relocs",
+            "--output-map-patches",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_counter.kernel.maps",
+            "--output-abi",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_counter.kernel.abi"
+          ],
+          "kernel_returncode": 0
+        },
+        {
+          "symbol": "read_flag",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/native.o",
+            "--symbol",
+            "read_flag",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_flag.proof.o",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/synthetic-plan.json"
+          ],
+          "returncode": 0,
+          "kernel_command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+            "--mode",
+            "kernel",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_flag.proof.o",
+            "--symbol",
+            "read_flag",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/synthetic-plan.json",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_flag.kernel.bin",
+            "--output-relocs",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_flag.kernel.relocs",
+            "--output-map-patches",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_flag.kernel.maps",
+            "--output-abi",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_flag.kernel.abi"
+          ],
+          "kernel_returncode": 0
+        },
+        {
+          "symbol": "read_pair",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/native.o",
+            "--symbol",
+            "read_pair",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_pair.proof.o",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/synthetic-plan.json"
+          ],
+          "returncode": 0,
+          "kernel_command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+            "--mode",
+            "kernel",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_pair.proof.o",
+            "--symbol",
+            "read_pair",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/synthetic-plan.json",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_pair.kernel.bin",
+            "--output-relocs",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_pair.kernel.relocs",
+            "--output-map-patches",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_pair.kernel.maps",
+            "--output-abi",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_pair.kernel.abi"
+          ],
+          "kernel_returncode": 0
+        },
+        {
+          "symbol": "read_word",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/native.o",
+            "--symbol",
+            "read_word",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_word.proof.o",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/synthetic-plan.json"
+          ],
+          "returncode": 0,
+          "kernel_command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-off",
+            "--mode",
+            "kernel",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_word.proof.o",
+            "--symbol",
+            "read_word",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/synthetic-plan.json",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_word.kernel.bin",
+            "--output-relocs",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_word.kernel.relocs",
+            "--output-map-patches",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_word.kernel.maps",
+            "--output-abi",
+            "/var/tmp/kprog-tmp/perf/config-globals-before/links/read_word.kernel.abi"
+          ],
+          "kernel_returncode": 0
+        }
+      ]
+    }
+  ],
+  "scope": "Host compiler/replay artifacts only; no kernel submission, native installation or application equal-work claim.",
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/perf_20261113/config-globals-before-complete.tar.gz",
+    "bytes": 113157,
+    "sha256": "5f12dd3591f9383dde070ae5d4aa258b232cff05d05cda70e601f7eb578f1778",
+    "files_byte_compared": 48
+  }
+}

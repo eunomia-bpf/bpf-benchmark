@@ -1,0 +1,19 @@
+{
+  "recorded_at": "2026-11-13T23:29:36.541964+00:00",
+  "protocol_commit": "85cf7471f",
+  "raw": "/workspaces/kprog-raw/perf/20261113-config-globals-before",
+  "inputs": [
+    {
+      "path": "/var/tmp/kprog-tmp/perf/tetragon-context/socket-context-lower",
+      "sha256": "3631232f7d80e705bd7c50e4c1aa3799d944811f05f080e9b2dbc871f107de4a"
+    }
+  ],
+  "reports": [],
+  "scope": "Host compiler/replay artifacts only; no kernel submission, native installation or application equal-work claim.",
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/perf_20261113/config-globals-before.tar.gz",
+    "bytes": 107523,
+    "sha256": "622e5ba702bd98a64cb5906451d95dccd2dc9d6cf520091f5d9862278b626eaa",
+    "files_byte_compared": 9
+  }
+}
