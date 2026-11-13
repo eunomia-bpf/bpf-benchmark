@@ -40,6 +40,9 @@ kfunc-inputs:
 	install -d "$(KFUNC_BUILD)"
 	clang-18 -O2 -fPIC -c ../test/native_kfunc_fixture.c -o "$(KFUNC_BUILD)/weak.o"
 	clang-18 -O2 -fPIC -DKFUNC_PRESENT_STRONG -c ../test/native_kfunc_fixture.c -o "$(KFUNC_BUILD)/strong.o"
+	clang-18 -target bpf -O2 -g -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
+		-I"$(REPO_ROOT)/vendor/libbpf/src" -I/usr/include/x86_64-linux-gnu \
+		-c ../test/kfunc_proof_fixture.bpf.c -o "$(KFUNC_BUILD)/proof.bpf.o"
 	$(CXX) -std=gnu++20 -O1 -g -ffunction-sections -fdata-sections \
 		-Iinclude -I"$(KERNEL_OFFSETS_INCLUDE)" -I"$(LIBBPF_PREFIX)/include" \
 		-I"$(REPO_ROOT)/vendor/libbpf/include" -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
@@ -49,12 +52,13 @@ kfunc-inputs:
 kfunc-check: kfunc-inputs
 	install -d "$(KFUNC_OUTPUT)"
 	"$(KFUNC_BUILD)/kfunc" host "$(KFUNC_BUILD)/weak.o" "$(KFUNC_BUILD)/strong.o" \
-		"$(KFUNC_BPF)" "$(KFUNC_NATIVE)" /workspaces/.agent-state/kprog-ck/build-x86/vmlinux "$(KFUNC_OUTPUT)"
+		"$(KFUNC_BPF)" "$(KFUNC_NATIVE)" /workspaces/.agent-state/kprog-ck/build-x86/vmlinux "$(KFUNC_OUTPUT)" "$(KFUNC_BUILD)/proof.bpf.o"
 
 kfunc-kernel-kvm:
 	install -d "$(KFUNC_KERNEL_OUTPUT)"
 	install -m 0755 "$(KFUNC_BUILD)/kfunc" "$(KFUNC_KERNEL_OUTPUT)/kfunc"
 	install -m 0644 "$(KFUNC_BUILD)/weak.o" "$(KFUNC_BUILD)/strong.o" "$(KFUNC_KERNEL_OUTPUT)/"
+	install -m 0644 "$(KFUNC_BUILD)/proof.bpf.o" "$(KFUNC_KERNEL_OUTPUT)/proof.bpf.o"
 	install -m 0644 "$(KFUNC_BPF)" "$(KFUNC_KERNEL_OUTPUT)/source.bpf.o"
 	install -m 0644 "$(KFUNC_NATIVE)" "$(KFUNC_KERNEL_OUTPUT)/source.native.o"
 	taskset -c 13 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
@@ -65,7 +69,7 @@ kfunc-kernel-kvm:
 guest-kfunc:
 	"$(KFUNC_KERNEL_OUTPUT)/kfunc" kernel "$(KFUNC_KERNEL_OUTPUT)/weak.o" "$(KFUNC_KERNEL_OUTPUT)/strong.o" \
 		"$(KFUNC_KERNEL_OUTPUT)/source.bpf.o" "$(KFUNC_KERNEL_OUTPUT)/source.native.o" \
-		/sys/kernel/btf/vmlinux "$(KFUNC_KERNEL_OUTPUT)"
+		/sys/kernel/btf/vmlinux "$(KFUNC_KERNEL_OUTPUT)" "$(KFUNC_KERNEL_OUTPUT)/proof.bpf.o"
 
 .PHONY: data-layout-inputs data-layout-check data-layout-kernel-kvm guest-data-layout
 data-layout-inputs:

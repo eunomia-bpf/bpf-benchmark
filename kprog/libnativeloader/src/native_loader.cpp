@@ -3680,13 +3680,31 @@ void relocate_vmlinux_proof_call(const btf *local, const btf *kernel,
     const char *name, const GElf_Sym &symbol, int64_t addend, bpf_insn &insn)
 {
     if (!name || symbol.st_shndx != SHN_UNDEF ||
-        GELF_ST_BIND(symbol.st_info) != STB_GLOBAL || addend ||
+        (GELF_ST_BIND(symbol.st_info) != STB_GLOBAL && GELF_ST_BIND(symbol.st_info) != STB_WEAK) || addend ||
         insn.code != (BPF_JMP | BPF_CALL) || insn.dst_reg ||
         insn.src_reg != BPF_PSEUDO_CALL || insn.off || insn.imm != -1)
         fail("invalid source proof kfunc call relocation");
-    const auto kernel_id = native_kfunc_type_id(local, kernel, name, false);
-    insn.src_reg = BPF_PSEUDO_KFUNC_CALL;
-    insn.imm = kernel_id;
+    const auto kernel_id = native_kfunc_type_id(local, kernel, name,
+        GELF_ST_BIND(symbol.st_info) == STB_WEAK);
+    // As with libbpf unresolved weak calls, only an eliminated call is safe.
+    insn.src_reg = kernel_id ? BPF_PSEUDO_KFUNC_CALL : 0;
+    insn.imm = kernel_id ? static_cast<int32_t>(kernel_id) : -1;
+}
+
+void relocate_vmlinux_proof_function_address(const btf *local, const btf *kernel,
+    const char *name, const GElf_Sym &symbol, int64_t addend,
+    bpf_insn &low, bpf_insn &high)
+{
+    if (!name || symbol.st_shndx != SHN_UNDEF ||
+        (GELF_ST_BIND(symbol.st_info) != STB_GLOBAL && GELF_ST_BIND(symbol.st_info) != STB_WEAK) || addend ||
+        low.code != (BPF_LD | BPF_DW | BPF_IMM) || low.src_reg || low.off || low.imm ||
+        high.code || high.dst_reg || high.src_reg || high.off || high.imm)
+        fail("invalid source proof kfunc address relocation");
+    const auto id = native_kfunc_type_id(local, kernel, name,
+        GELF_ST_BIND(symbol.st_info) == STB_WEAK);
+    low.src_reg = id ? BPF_PSEUDO_BTF_ID : 0;
+    low.imm = id;
+    high.imm = 0; // vmlinux BTF, as opposed to a module BTF FD.
 }
 
 
@@ -3737,6 +3755,14 @@ void relocate_trusted_proof(bpf_object *object, const std::filesystem::path &pat
     std::set<uint64_t> patched;
     std::unique_ptr<btf, decltype(&btf__free)> kernel_btf(nullptr, btf__free);
     std::unique_ptr<btf, decltype(&btf__free)> declaration_btf(nullptr, btf__free);
+    const auto kernel_types = [&]() -> const btf * {
+        if (!kernel_btf) {
+            btf *loaded = btf__load_vmlinux_btf();
+            if (libbpf_get_error(loaded) || !loaded) fail("load proof kfunc vmlinux BTF");
+            kernel_btf.reset(loaded);
+        }
+        return kernel_btf.get();
+    };
     std::unordered_map<uint32_t, int> map_fds, readonly_fds;
     section = nullptr;
     while ((section = elf_nextscn(elf.get(), section))) {
@@ -3768,14 +3794,8 @@ void relocate_trusted_proof(bpf_object *object, const std::filesystem::path &pat
             if (!gelf_getsym(symbol_data, GELF_R_SYM(relocation.r_info), &symbol)) fail("read source proof relocation symbol");
             const char *name = elf_strptr(elf.get(), symbol_table.sh_link, symbol.st_name);
             if (GELF_R_TYPE(relocation.r_info) == R_BPF_64_32) {
-                if (!kernel_btf) {
-                    btf *loaded = btf__load_vmlinux_btf();
-                    const long err = libbpf_get_error(loaded);
-                    if (err || !loaded) fail("load proof kfunc vmlinux BTF");
-                    kernel_btf.reset(loaded);
-                }
                 if (!declaration_btf) declaration_btf = source_proof_btf(elf.get());
-                relocate_vmlinux_proof_call(declaration_btf.get(), kernel_btf.get(), name,
+                relocate_vmlinux_proof_call(declaration_btf.get(), kernel_types(), name,
                     symbol, relocation.r_addend, proof[offset / sizeof(bpf_insn)]);
                 continue;
             }
@@ -3846,10 +3866,20 @@ void relocate_trusted_proof(bpf_object *object, const std::filesystem::path &pat
                 high.imm = static_cast<int32_t>(symbol_offset + relocation.r_addend + immediate);
                 continue;
             }
+            const auto binding = std::find_if(trusted.begin(), trusted.end(),
+                [&](const auto &item) { return name && item.native_symbol == name; });
+            if (name && binding == trusted.end()) {
+                if (!declaration_btf) declaration_btf = source_proof_btf(elf.get());
+                const int function_id = btf__find_by_name_kind(declaration_btf.get(), name, BTF_KIND_FUNC);
+                if (function_id > 0 && native_kfunc_declarations(declaration_btf.get()).contains(function_id)) {
+                    relocate_vmlinux_proof_function_address(declaration_btf.get(), kernel_types(), name,
+                        symbol, relocation.r_addend, proof[offset / sizeof(bpf_insn)],
+                        proof[offset / sizeof(bpf_insn) + 1]);
+                    continue;
+                }
+            }
             if (!name || GELF_ST_BIND(symbol.st_info) != STB_GLOBAL)
                 fail("source map relocation is not a strong explicit extern");
-            const auto binding = std::find_if(trusted.begin(), trusted.end(),
-                [&](const auto &item) { return item.native_symbol == name; });
             if (binding == trusted.end()) fail("unbound trusted proof extern: " + std::string(name));
             const uint32_t id = binding->map_id;
             const auto base = binding->value_offset;

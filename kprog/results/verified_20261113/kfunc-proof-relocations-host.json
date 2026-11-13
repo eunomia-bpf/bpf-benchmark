@@ -1,0 +1,31 @@
+{
+  "recorded_utc": "2026-11-13T23:17:39+00:00",
+  "scope": "General proof-loader weak typed-kfunc call and function-address plumbing; host subset",
+  "mechanism": [
+    "Present weak/strong calls use target BTF IDs",
+    "Present function address LDDW uses BPF_PSEUDO_BTF_ID/vmlinux ID",
+    "Missing weak function address remains zero",
+    "Missing weak call becomes illegal helper call -1, and must be unreachable",
+    "Existing trusted-map relocation path retained without new BTF requirement"
+  ],
+  "host_make_exit": 0,
+  "host_regressions": [
+    "Present weak call target ID matches address target ID",
+    "Missing weak call is poisoned, not an executable substitute",
+    "Missing weak LDDW guard value is null",
+    "Missing strong call/address errors preserved",
+    "Earlier .ksyms separation/real five declarations/prototype/manifest subset still passes"
+  ],
+  "kernel_fixture": "Actual Clang BPF ELF contains guarded present/missing function address loads and calls, plus a separate reachable unresolved call",
+  "kernel_expected": "Guarded entry accepted, reachable missing entry rejected by stock verifier; outcome pending",
+  "binary_sha256": "ab714780c5c15f63512a0144ebc7451db5d022808b630b3932da18678b147ac8",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-kfunc/proof-relocs",
+  "archive": "kfunc-proof-relocations-host.tar.gz",
+  "archive_sha256": "1dac756b6277fbed2bd12b7073859f1a4c13a2ffd14979d93ebd88d91ddcf7f0",
+  "canonical_deployed": false,
+  "kernel_or_image_changed": false,
+  "new_native_executions": 0,
+  "generic_x86_call_model": "Still requires typed ABI and instruction generation integration",
+  "benchmark_settings_changed": false,
+  "raw_removed": false
+}

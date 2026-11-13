@@ -51,15 +51,82 @@ static void fails(Function function, const char *reason)
     require(failed, reason);
 }
 
+static void proof_relocations(const btf *local, const btf *target, const btf *empty)
+{
+    GElf_Sym weak{};
+    weak.st_info = GELF_ST_INFO(STB_WEAK, STT_NOTYPE);
+    weak.st_shndx = SHN_UNDEF;
+    bpf_insn call{};
+    call.code = BPF_JMP | BPF_CALL; call.src_reg = BPF_PSEUDO_CALL; call.imm = -1;
+    auto present_call = call, missing_call = call;
+    relocate_vmlinux_proof_call(local, target, "present", weak, 0, present_call);
+    require(present_call.src_reg == BPF_PSEUDO_KFUNC_CALL && present_call.imm > 0,
+            "present weak call did not bind target BTF");
+    relocate_vmlinux_proof_call(local, empty, "present", weak, 0, missing_call);
+    require(!missing_call.src_reg && missing_call.imm == -1,
+            "missing weak call was made executable instead of poisoned");
+    bpf_insn low{}, high{};
+    low.code = BPF_LD | BPF_DW | BPF_IMM; low.dst_reg = BPF_REG_1;
+    auto present_address = low, missing_address = low;
+    relocate_vmlinux_proof_function_address(local, target, "present", weak, 0, present_address, high);
+    require(present_address.src_reg == BPF_PSEUDO_BTF_ID && present_address.imm == present_call.imm && !high.imm,
+            "function address did not use matching vmlinux BTF ID");
+    relocate_vmlinux_proof_function_address(local, empty, "present", weak, 0, missing_address, high);
+    require(!missing_address.src_reg && !missing_address.imm && !high.imm,
+            "missing weak function guard did not retain null");
+    GElf_Sym strong = weak;
+    strong.st_info = GELF_ST_INFO(STB_GLOBAL, STT_NOTYPE);
+    fails([&] { relocate_vmlinux_proof_call(local, empty, "present", strong, 0, call); },
+          "missing strong proof call became a poisoned weak call");
+    fails([&] { relocate_vmlinux_proof_function_address(local, empty, "present", strong, 0, low, high); },
+          "missing strong function address silently became null");
+}
+
+static void kernel_proof(const std::filesystem::path &fixture, const std::filesystem::path &output)
+{
+    std::ofstream results(output / "proof-loads.jsonl");
+    require(static_cast<bool>(results), "open proof load report");
+    for (const char *name : {"guarded", "unguarded"}) {
+        std::unique_ptr<bpf_object, decltype(&bpf_object__close)> object(
+            bpf_object__open_file(fixture.c_str(), nullptr), bpf_object__close);
+        require(object != nullptr, "open original proof fixture");
+        bpf_program *program = bpf_object__find_program_by_name(object.get(), name);
+        require(program != nullptr, "find proof fixture entry");
+        std::vector<bpf_insn> proof(bpf_program__insns(program),
+            bpf_program__insns(program) + bpf_program__insn_cnt(program));
+        CompanionLoad companion;
+        std::vector<std::unique_ptr<ScopedFd>> pins;
+        relocate_trusted_proof(object.get(), fixture, name, companion, proof, pins, {});
+        std::ofstream instructions(output / (std::string(name) + ".insns"), std::ios::binary);
+        instructions.write(reinterpret_cast<const char *>(proof.data()), proof.size() * sizeof(bpf_insn));
+        instructions.close(); require(static_cast<bool>(instructions), "write relocated fixture instructions");
+        std::vector<char> log(1024 * 1024);
+        bpf_prog_load_opts options{};
+        options.sz = sizeof(options); options.log_buf = log.data(); options.log_size = log.size(); options.log_level = 1;
+        ScopedFd loaded(bpf_prog_load(BPF_PROG_TYPE_KPROBE, name, "GPL", proof.data(), proof.size(), &options));
+        std::ofstream diagnostic(output / (std::string(name) + ".verifier.log"));
+        diagnostic << log.data(); diagnostic.close();
+        require(static_cast<bool>(diagnostic), "write fixture verifier log");
+        const bool expected = std::string(name) == "guarded";
+        require((loaded.get() >= 0) == expected, std::string(name) + " verifier outcome differs: " + log.data());
+        if (!expected)
+            require(std::string(log.data()).find("invalid func unknown#-1") != std::string::npos,
+                    "unguarded weak call rejected for unrelated reason");
+        results << "{\"program\":\"" << name << "\",\"accepted\":" << (loaded.get() >= 0 ? "true" : "false") << "}\n";
+    }
+    results.close(); require(static_cast<bool>(results), "write proof load report");
+}
+
 int main(int argc, char **argv)
 try {
-    require(argc == 8, "usage: kfunc host|kernel WEAK_OBJECT STRONG_OBJECT SOURCE_BPF SOURCE_NATIVE KERNEL_BTF OUTPUT");
+    require(argc == 9, "usage: kfunc host|kernel WEAK_OBJECT STRONG_OBJECT SOURCE_BPF SOURCE_NATIVE KERNEL_BTF OUTPUT PROOF_FIXTURE");
     const bool kernel_mode = std::string(argv[1]) == "kernel";
     require(kernel_mode || std::string(argv[1]) == "host", "unknown kfunc test mode");
     auto local = fixture_btf(true, false, true);
     auto target = fixture_btf(true, false, false);
     auto empty = fixture_btf(false, false, false);
     auto wrong = fixture_btf(true, true, false);
+    proof_relocations(local.get(), target.get(), empty.get());
     const auto id = native_kfunc_type_id(local.get(), target.get(), "present", false);
     require(id == static_cast<uint32_t>(btf__find_by_name_kind(target.get(), "present", BTF_KIND_FUNC)),
             "binding used the declaration's ID instead of target ID");
@@ -98,6 +165,7 @@ try {
         }
         addresses.close();
         require(static_cast<bool>(addresses), "write kfunc addresses");
+        kernel_proof(argv[8], argv[7]);
     }
     const auto manifest = std::filesystem::path(argv[7]) / "kfunc-manifest.json";
     bpf_prog_info info{}; std::strcpy(info.name, "entry"); info.type = BPF_PROG_TYPE_KPROBE;
