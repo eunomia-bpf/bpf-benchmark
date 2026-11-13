@@ -1,0 +1,27 @@
+{
+  "recorded_at": "2026-11-13T01:47:40.509048+00:00",
+  "scope": "Read-only perf-event native entry context diagnosis requested by C01:42",
+  "kernel_commit": "74d1097af561",
+  "native_input": "vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+  "canonical_proof_input": "/workspaces/kprog-raw/verified/20261112-tail-count-final/bytes/after/otelcol-ebpf-profiler-0011.proof.o",
+  "function": "native_tracer_entry",
+  "native_accesses": {
+    "save_incoming_ctx_to_rbx": "0x11",
+    "ss_compare_ctx_plus_160": "0x361"
+  },
+  "proof_accesses": {
+    "save_incoming_ctx_to_rbx": "0xa",
+    "ss_compare_ctx_plus_160": "0x35a"
+  },
+  "physical_context": "bpf_perf_event_data_kern contains regs pointer at offset zero; bpf_overflow_handler passes &ctx to bpf_prog_run",
+  "stock_conversion": "pe_prog_convert_ctx_access loads the regs pointer before a public register-field load",
+  "finding": "The inspected native producer uses embedded public pt_regs layout on a physical kernel pointer-layout context. The bad SS access exists before linker entry ABI stripping. The native-image JIT does not insert the stock context-access conversion.",
+  "requested_owner": "C native producer; general perf-event context lowering must preserve original helper/tail-call context identity",
+  "limits": [
+    "Failing-run image and manifest identity require C confirmation; runtime root cause is not independently proved here",
+    "No native producer, linker, B model, kernel, image or benchmark changes made",
+    "No per-program formal proof, extra runtime check, counter or admission gate added"
+  ],
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-perf-event-context-audit",
+  "archive": "otel-perf-event-context.tar.gz"
+}
