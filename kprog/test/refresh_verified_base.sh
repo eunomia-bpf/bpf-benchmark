@@ -8,6 +8,43 @@ refresh_loader=/workspaces/.agent-state/kprog-ck/verified-loader
 refresh_direct=$refresh_root/kinsn/module/x86/build
 refresh_image=bpf-benchmark/kprog:current
 install -d "$refresh_output"
+
+finalize_refresh() {
+    refresh_ids=$(docker image ls --no-trunc --format '{{.ID}}')
+    refresh_old_present=false
+    while IFS= read -r refresh_id; do
+        if [[ $refresh_id == "$refresh_old_image" ]]; then
+            refresh_old_present=true
+        fi
+    done <<< "$refresh_ids"
+    refresh_cleanup=unchanged
+    if [[ $refresh_old_image != "$refresh_new_image" ]]; then
+        if [[ $refresh_old_present == true ]]; then
+            docker image rm "$refresh_old_image"
+            refresh_cleanup=removed
+        else
+            refresh_cleanup=already-absent
+        fi
+    fi
+    printf '%s\n' "$refresh_cleanup" > "$refresh_output/image-cleanup"
+    printf -- '- %s VERIFIED shared refresh: superseded runtime image %s %s; current %s; raw retained in %s.\n' \
+        "$(date -u +%FT%TZ)" "$refresh_old_image" "$refresh_cleanup" "$refresh_new_image" "$refresh_output" >> "$refresh_root/kprog/docs/cleanup-log.md"
+    sha256sum "$refresh_loader/libnative_loader.so" "$refresh_loader/trusted-native-loader" \
+        "$refresh_direct/bpf_x86_native_lab.ko" \
+        /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko > "$refresh_output/base-sha256"
+    date -u +%FT%TZ > "$refresh_output/finished"
+}
+
+if [[ ${2:-} == --finalize ]]; then
+    refresh_old_image=$(cat "$refresh_output/old-image")
+    refresh_new_image=$(docker image inspect --format '{{.Id}}' "$refresh_image")
+    finalize_refresh
+    exit 0
+elif [[ -n ${2:-} ]]; then
+    printf 'Unknown refresh operation: %s\n' "$2" >&2
+    exit 1
+fi
+
 date -u +%FT%TZ > "$refresh_output/started"
 refresh_old_image=$(docker image inspect --format '{{.Id}}' "$refresh_image")
 printf '%s\n' "$refresh_old_image" > "$refresh_output/old-image"
@@ -48,12 +85,4 @@ make -f "$refresh_root/kprog/perf/one-image/Makefile" image -o module -o negativ
     JOBS=1 OVERRIDES="$refresh_overrides"
 refresh_new_image=$(docker image inspect --format '{{.Id}}' "$refresh_image")
 printf '%s\n' "$refresh_new_image" > "$refresh_output/new-image"
-if [[ $refresh_old_image != "$refresh_new_image" ]]; then
-    docker image rm "$refresh_old_image"
-    printf -- '- %s VERIFIED shared refresh: removed superseded runtime image %s; current %s; raw retained in %s.\n' \
-        "$(date -u +%FT%TZ)" "$refresh_old_image" "$refresh_new_image" "$refresh_output" >> "$refresh_root/kprog/docs/cleanup-log.md"
-fi
-sha256sum "$refresh_loader/libnative_loader.so" "$refresh_loader/trusted-native-loader" \
-    "$refresh_direct/bpf_x86_native_lab.ko" \
-    /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko > "$refresh_output/base-sha256"
-date -u +%FT%TZ > "$refresh_output/finished"
+finalize_refresh
