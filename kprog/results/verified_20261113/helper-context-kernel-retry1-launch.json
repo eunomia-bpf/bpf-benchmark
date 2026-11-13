@@ -1,0 +1,23 @@
+{
+  "launched_at": "2026-11-13T07:58:44Z",
+  "scope": "D23 real production resolver kernel unit retry after artifact delivery repair",
+  "outer_pid": 1282465,
+  "test_source_commit": "221e719e0",
+  "delivery_commit": "abb8120ca",
+  "kernel_commit": "74d1097af561",
+  "prepared_binary_sha256": "542a60ebdfb87381ed294e6850e4bdd866c2880fba16f65b36d82e29741a2fa5",
+  "host_cpu": 13,
+  "vm_cpus": 2,
+  "vm_mem": "2G",
+  "address_space_bytes": 8589934592,
+  "resource_lock": "shared /workspaces/.agent-state/kprog-lanes/locks/image",
+  "command": "make -C /workspaces/repository/kprog/libnativeloader helper-context-kernel-kvm HELPER_KERNEL_OUTPUT=/workspaces/kprog-raw/verified/20261113-helper-context/kernel-retry1",
+  "job_directory": "/workspaces/kprog-raw/verified/20261113-helper-context/kernel-retry1-job",
+  "results": "/workspaces/kprog-raw/verified/20261113-helper-context/kernel-retry1",
+  "dry_run": "/workspaces/kprog-raw/verified/20261113-helper-kernel-retry1-dry-run.log",
+  "planned_contexts": 9,
+  "actual_queries_at_recording": "Not collected; no post-launch polling",
+  "canonical_build_or_image_change": false,
+  "native_execution_requests": 0,
+  "result": "Collect later turn"
+}

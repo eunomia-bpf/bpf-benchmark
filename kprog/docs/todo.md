@@ -125,6 +125,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED D23 artifact修复后重试启动（2026-11-13）** outer1282465于07:58:44启动，CPU13/2vCPU2G/AS8GiB/shared image reader，消费相同ELF SHA542a60ebdfb87381ed294e6850e4bdd866c2880fba16f65b36d82e29741a2fa5，现从persistent output mount执行；独立raw `20261113-helper-context/kernel-retry1{,-job}/`，启动receipt `helper-context-kernel-retry1-launch.json`。不重建canonical module/loader/image；本turn不轮询，下一turn收集9个context query与日志。
+
 - **VERIFIED mapbounds整类重放准备与journal合并修复（2026-11-13）** stock u32确认后，main-only selector先得到body30/31/32，却漏掉独立context guest观察到的body20。replay现接受重复--additional-journal，将全部观察交给原class selector；未新增classifier/regex/admission gate，也无手写body筛选。新integration回归旧代码Make2复现遗漏，新代码5个group/resource/replay tests全部通过。合并已结束的context20/28/29 journals后，整类为body20/30/31/32，共4body/4instances，每body独立inventory且保留源P/资源；原三body准备也保留。归档 `map-bounds-replay-preparation*`，raw `/workspaces/kprog-raw/verified/20261113-map-bounds/ready-all-observations/`；当前3台census仍运行，actual新提交0，不能算class通过。
 
 - **VERIFIED D23 guest artifact路径修复（2026-11-13）** 已安装virtme-init:121会在/var/tmp挂tmpfs，不能从该guest路径执行host build cache；component Make现在将同一个已编译ELF安装到persistent per-run输出目录，并从已有rw输出mount执行，取消cache目录映射。dry-run通过，原ELF SHA和virtme源码片段归档 `helper-context-delivery-fix*`；不重编译源代码/canonical loader/module/image，不做runtime fallback。retry使用kernel-retry1独立输出，实际helper结果后续收集。
