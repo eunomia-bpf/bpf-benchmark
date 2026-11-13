@@ -1,0 +1,43 @@
+{
+  "recorded_utc": "2026-11-13T23:06:41+00:00",
+  "code_commit": "73effebba",
+  "scope": "Retry actual kernel kfunc address subset after generic .ksyms classification fix",
+  "outer_pid": 50711,
+  "command": [
+    "setsid",
+    "nohup",
+    "prlimit",
+    "--as=8589934592",
+    "env",
+    "VERIFIED_BUILD_CPUS=13",
+    "VERIFIED_IMAGE_LOCK=/workspaces/.agent-state/kprog-lanes/locks/image",
+    "bash",
+    "kprog/test/run_verified_make.sh",
+    "/workspaces/kprog-raw/verified/20261113-kfunc/ksyms-fix/kernel-launch/job",
+    "-C",
+    "kprog/libnativeloader",
+    "kfunc-kernel-kvm",
+    "KFUNC_BUILD=/workspaces/kprog-raw/verified/20261113-kfunc/ksyms-fix/payload",
+    "KFUNC_BPF=/workspaces/kprog-raw/verified/20261113-kfunc/restart1/inputs/source.bpf.o",
+    "KFUNC_NATIVE=/workspaces/kprog-raw/verified/20261113-kfunc/restart1/inputs/source.native.o",
+    "KFUNC_KERNEL_OUTPUT=/workspaces/kprog-raw/verified/20261113-kfunc/ksyms-fix/kernel"
+  ],
+  "job_directory": "/workspaces/kprog-raw/verified/20261113-kfunc/ksyms-fix/kernel-launch/job",
+  "output": "/workspaces/kprog-raw/verified/20261113-kfunc/ksyms-fix/kernel",
+  "vm_memory": "2G",
+  "vm_cpus": 2,
+  "host_cpus": "13",
+  "address_space_bytes": 8589934592,
+  "image_lock": "shared",
+  "host_available_gib_before_launch": 90,
+  "original_inputs": "/workspaces/kprog-raw/verified/20261113-kfunc/restart1/inputs",
+  "census_outer_pids": [
+    45406,
+    45407,
+    45408
+  ],
+  "canonical_deployed": false,
+  "kernel_or_image_rebuilt": false,
+  "outcomes": "Collect next turn; no postlaunch polling",
+  "native_execution": 0
+}

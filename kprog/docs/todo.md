@@ -145,6 +145,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED kfunc .ksyms kernel retry启动（2026-11-13）** 73effebba修复及host结果已push；dry-run后setsid/nohup outer50711，CPU13/2vCPU2G/AS8GiB、shared image lock，raw `20261113-kfunc/ksyms-fix/{kernel-launch,kernel}/`，使用同一已留存的真实BPF/native ELF及新fixture二进制。启动前MemAvailable90GiB；receipt `kfunc-ksyms-kernel-launch.json`。下turn收集，不轮询/不预报通过；三台census45406/45407/45408继续，未改canonical base/image。
+
 - **VERIFIED kfunc extern scope修复（2026-11-13）** actual-kernel unit45409于22:59:02→22:59:07 Make2，暴露普通应用cel_expr_2被误当作kernel function；保留完整失败，不计应用拒绝/执行。通用修复从原对象BTF .ksyms DATASEC选择FUNC，普通应用extern仍交正常链接；新增显式manifest-relative kernel_kfunc_btf输入，因为libbpf在BTF_LOAD前改写.ksyms与FUNC linkage，loaded-program BTF丢失该身份。默认关闭、弱缺失null、强缺失错误及既有libbpf prototype规则不变，无函数体/强制availability。含strong ordinary extern的弱/强kernel-function fixture、无.ksyms、真实五声明、相对BTF路径host回归通过；raw `20261113-kfunc/ksyms-fix/`，完整失败+修复证据 `kfunc-ksyms-scope*`。仅source/scratch，真实kernel retry及checked x86 kfunc模型仍待完成；census三台未停止。
 
 - **VERIFIED restart jobs launched（2026-11-13）** code e718a0505、host/recovery evidence9ae744e3b已push；全新attempt保持旧raw不覆盖。3个census outer45406/45407/45408，各24G/AS32GiB、CPU8-11/12-13/14-15、72/72/71体；raw `20261113-census-after-loader-refresh/restart1/queue-{0,1,2}/`。另启动generic kfunc实际kernel地址单元outer45409，2G/AS8GiB/CPU13，raw `20261113-kfunc/restart1/kernel-launch/`、输出 `.../kernel/`；使用保留的真实原BPF/native ELF及已测试二进制，不重新构建shared compiler/base。全部shared image锁，restore writer已释放；启动前MemAvailable117GiB，各Make dry-run已完成。Receipt `restart-census-kfunc-launch.json`，下turn收集，不把排队/启动算应用通过或执行；canonical kfunc flag仍未部署，checked x86 kfunc模型仍在worklist。
