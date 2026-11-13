@@ -5,7 +5,7 @@
 #include "core-queries.h"
 #endif
 struct task_struct___native_test {
-    struct pid *thread_pid;
+    union { struct pid *thread_pid; unsigned long synthetic_padding; };
     kuid_t loginuid;
     unsigned int in_iowait:1;
     unsigned int missing_native_test;
@@ -34,6 +34,7 @@ int main(void)
     if (p->thread_pid != (struct pid *)0x1234 || p->loginuid.val != 501)
         return 3;
     if (p->in_iowait != 1 || p->comm[0] != 'x'
+        || bpf_core_field_size(p->in_iowait) != sizeof(unsigned int)
         || bpf_core_field_size(p->comm) != sizeof(actual.comm))
         return 4;
     if (!bpf_core_enum_value_exists(enum bpf_map_type___native_test, BPF_MAP_TYPE_ARRAY___native_test)

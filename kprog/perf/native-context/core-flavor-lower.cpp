@@ -90,6 +90,8 @@ class Lower : public RecursiveASTVisitor<Lower> {
     if (auto *M = dyn_cast<MemberExpr>(E)) {
       auto Parent = resolve(M->getBase());
       if (M->isArrow()) Parent = pointee(Parent);
+      // Source anonymous aggregates add no named component to a CO-RE path.
+      if (M->getMemberNameInfo().getAsString().empty()) return Parent;
       return member(Parent, M->getMemberNameInfo().getAsString());
     }
     if (auto *A = dyn_cast<ArraySubscriptExpr>(E)) return pointee(resolve(A->getBase()));
@@ -136,6 +138,26 @@ class Lower : public RecursiveASTVisitor<Lower> {
     if (!V) return -1;
     return V.Pointers ? C.getTypeSize(C.VoidPtrTy) / 8 : btf__resolve_size(B, V.Id);
   }
+  std::pair<uint64_t, unsigned> storage(View V) const {
+    unsigned Width = size(V);
+    uint64_t Byte = V.Offset / 8 / Width * Width;
+    // Same allocation-unit expansion as libbpf/src/relo_core.c.
+    while (V.Offset + V.Bits - Byte * 8 > Width * 8 && Width < 8) {
+      Width *= 2;
+      Byte = V.Offset / 8 / Width * Width;
+    }
+    return {Byte, Width};
+  }
+  bool flavored(const Expr *E) const {
+    E = E->IgnoreParenImpCasts();
+    QualType Q = E->getType();
+    if (Q->isPointerType()) Q = Q->getPointeeType();
+    if (auto *R = Q->getAs<RecordType>())
+      for (const DeclContext *D = R->getDecl(); auto *Record = dyn_cast<RecordDecl>(D); D = Record->getDeclContext())
+        if (Record->getName().contains("___")) return true;
+    if (auto *M = dyn_cast<MemberExpr>(E)) return flavored(M->getBase());
+    return false;
+  }
 
 public:
   Lower(ASTContext &Context, const btf *Target, std::string Source)
@@ -153,6 +175,7 @@ public:
     else if (Name == "__kprog_core_type_exists") Value = pointee(V) ? "1UL" : "0UL";
     else if (Name == "__kprog_core_field_size" || Name == "__kprog_core_type_size") {
       auto N = size(Name == "__kprog_core_type_size" ? pointee(V) : V);
+      if (Name == "__kprog_core_field_size" && V.Bits) N = storage(V).second;
       Value = N >= 0 ? std::to_string(N) + "UL" : "__kprog_core_missing_value()";
     } else if (Name == "__kprog_core_enum_exists" || Name == "__kprog_core_enum_value") {
       auto *Cast = dyn_cast<ExplicitCastExpr>(Arg);
@@ -169,7 +192,7 @@ public:
             unsigned NameOff = btf_is_enum(T) ? btf_enum(T)[I].name_off : btf_enum64(T)[I].name_off;
             if (Wanted != btf__name_by_offset(B, NameOff)) continue;
             Found = true;
-            Number = btf_is_enum(T) ? uint64_t(int64_t(btf_enum(T)[I].val)) : btf_enum64_value(&btf_enum64(T)[I]);
+            Number = btf_is_enum(T) ? (btf_kflag(T) ? uint64_t(int64_t(btf_enum(T)[I].val)) : uint64_t(uint32_t(btf_enum(T)[I].val))) : btf_enum64_value(&btf_enum64(T)[I]);
           }
       }
       Value = Name == "__kprog_core_enum_exists" ? (Found ? "1UL" : "0UL") :
@@ -181,7 +204,7 @@ public:
   }
   bool VisitMemberExpr(MemberExpr *M) {
     auto *Field = dyn_cast<FieldDecl>(M->getMemberDecl());
-    if (!Field || Field->getParent()->getName().find("___") == llvm::StringRef::npos) return true;
+    if (!Field || Field->isAnonymousStructOrUnion() || !flavored(M)) return true;
     auto R = range(M);
     if (R.first == R.second) return true;
     std::string Original = Code.substr(R.first, R.second - R.first);
@@ -190,15 +213,24 @@ public:
       // Code generation diagnoses this marker if it survives existence folding.
       replace(M, "(*(__typeof__(" + Original + ") *)__kprog_core_missing_field())");
     } else {
-      std::string Base = render(M->getBase());
-      std::string Address = "((char *)" + std::string(M->isArrow() ? "(" : "&(") + Base + ") + " + std::to_string(V.Offset / 8) + ")";
+      const Expr *BaseExpr = M->getBase();
+      bool Arrow = M->isArrow();
+      while (auto *Implicit = dyn_cast<MemberExpr>(BaseExpr->IgnoreParenImpCasts())) {
+        auto *Anonymous = dyn_cast<FieldDecl>(Implicit->getMemberDecl());
+        if (!Anonymous || !Anonymous->isAnonymousStructOrUnion()) break;
+        Arrow = Implicit->isArrow();
+        BaseExpr = Implicit->getBase();
+      }
+      std::string Base = render(BaseExpr);
+      auto Storage = V.Bits ? storage(V) : std::make_pair(V.Offset / 8, unsigned(0));
+      std::string Address = "((char *)" + std::string(Arrow ? "(" : "&(") + Base + ") + " + std::to_string(Storage.first) + ")";
       if (V.Bits) {
-        unsigned Width = 1;
-        while (Width * 8 < V.Bits + V.Offset % 8) Width *= 2;
-        if (Width > 8) { llvm::errs() << "CO-RE bitfield exceeds 64-bit storage\n"; Failed = true; return true; }
+        unsigned Width = Storage.second;
+        unsigned Shift = V.Offset - Storage.first * 8;
+        if (Width > 8 || V.Bits + Shift > Width * 8) { llvm::errs() << "CO-RE bitfield exceeds 64-bit storage\n"; Failed = true; return true; }
         auto *T = btf__type_by_id(B, strip(V.Id));
         bool Signed = btf_is_int(T) && (btf_int_encoding(T) & BTF_INT_SIGNED);
-        std::string Shifted = "(__v >> " + std::to_string(V.Offset % 8) + ")";
+        std::string Shifted = "(__v >> " + std::to_string(Shift) + ")";
         std::string Value = Signed ? "(((long long)(" + Shifted + " << " + std::to_string(64 - V.Bits) + ")) >> " + std::to_string(64 - V.Bits) + ")" :
                             "(" + Shifted + " & (0xffffffffffffffffULL >> " + std::to_string(64 - V.Bits) + "))";
         replace(M, "({ unsigned long long __v = 0; __builtin_memcpy(&__v, " + Address + ", " + std::to_string(Width) + "); (" + M->getType().getAsString() + ")" + Value + "; })");
