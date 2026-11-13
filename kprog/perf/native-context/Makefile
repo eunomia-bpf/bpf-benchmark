@@ -68,3 +68,9 @@ $(BUILD)/core.fixture.fixed: $(BUILD)/core.fixture.lowered.i
 core-check: $(BUILD)/core.fixture.plain $(BUILD)/core.fixture.fixed
 	$(BUILD)/core.fixture.plain && result=0 || result=$$?; test $$result = 1
 	$(BUILD)/core.fixture.fixed
+
+CORE_OUTPUT ?= $(ROOT)/corpus/results/perf-core-20261113
+CORE_OBJECTS ?= bpf_fork bpf_generic_kprobe_v61
+.PHONY: tetragon-core
+tetragon-core: $(BUILD)/core-flavor-lower
+	python3 $(HERE)/build-tetragon.py --build $(BUILD) --kernel $(KDIR)/vmlinux --output $(CORE_OUTPUT) --only $(CORE_OBJECTS)
