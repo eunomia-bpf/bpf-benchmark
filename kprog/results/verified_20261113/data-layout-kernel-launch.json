@@ -1,0 +1,24 @@
+{
+  "recorded_utc": "2026-11-13T10:10:01.558815+00:00",
+  "source_commit": "2980d8af6",
+  "outer_pid": 1383485,
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-data-layout",
+  "job_directory": "/workspaces/kprog-raw/verified/20261113-data-layout/kernel-job",
+  "kernel_output": "/workspaces/kprog-raw/verified/20261113-data-layout/kernel",
+  "image_lock": "shared /workspaces/.agent-state/kprog-lanes/locks/image",
+  "host_cpu": 13,
+  "vm_cpus": 2,
+  "vm_memory": "2G",
+  "host_address_space_limit_bytes": 8589934592,
+  "mechanism": "Production add_native_data_symbol_addrs, kernel-loaded BTF and real ARRAY data maps",
+  "checks": [
+    "seven symbols across rodata/data/bss",
+    "legacy native padding mismatch reproduced",
+    "BPF offsets and map identities preserved",
+    "configured bytes unchanged",
+    "metadata failure descriptor cleanup"
+  ],
+  "result": "Uncollected; no postlaunch polling",
+  "canonical_base_image_changed": false,
+  "application_success_claim": false
+}
