@@ -189,8 +189,8 @@ tracee:
 # globals non-dso_local so a map reference lowers to the GOTPCRELX load the loader patches)
 # and stripping the IR's +sse,+sse2 target-features (else memset/memcpy expand to SSE).
 KATRAN_SAME_SOURCE ?= 0
-KATRAN_CONTEXT_BUILD ?= /var/tmp/kprog-tmp/perf/packet-context
-KATRAN_CONTEXT_LOWER ?= /var/tmp/kprog-tmp/perf/socket-context/socket-context-lower
+KATRAN_CONTEXT_BUILD ?= /var/tmp/kprog-tmp/C/ctx/packet-context
+KATRAN_CONTEXT_LOWER ?= /var/tmp/kprog-tmp/C/ctx/socket-context/socket-context-lower
 KATRAN_SAME_SOURCE_FRONTEND := -I"$(CURDIR)/katran" -I"$(CURDIR)/katran/katran/lib/linux_includes" \
 	-DDEBUG -D__KERNEL__ -Wno-unused-value -Wno-pointer-sign \
 	-Wno-compare-distinct-pointer-types -O2 -emit-llvm -c -g -fPIC
@@ -237,7 +237,7 @@ BCC_SAME_SOURCE ?= 0
 # Lane perf's CO-RE resolver, pinned in this lane's own scratch so a rebuild of
 # lane perf's default output cannot change what this recipe runs (they reported a
 # "Permission denied" from exactly that race at 2026-11-13T10:31).
-CORE_IR_LOWER ?= /var/tmp/kprog-tmp/C/tools/core-ir-lower
+CORE_IR_LOWER ?= /var/tmp/kprog-tmp/perf/core-ir/core-ir-lower
 NATIVE_IR_PREP ?= $(CURDIR)/../../kprog/results/tracee-samesource-20261113/native-ir-prep.py
 KATRAN_TARGET_BTF ?= /workspaces/.agent-state/kprog-ck/build-x86/vmlinux
 # The BCC same-source route needs the SOLE kernel's release and BTF.  vendor/bpf
