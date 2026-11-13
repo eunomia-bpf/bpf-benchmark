@@ -63,6 +63,20 @@ def observe(out):
         for port in (8888, 2112):
             save(prefix + ['curl', '-sS', '--max-time', '3', f'http://localhost:{port}/metrics'],
                  dest / f'collector-{port}.txt')
+        if '--tetra' in sys.argv:
+            client = sys.argv[sys.argv.index('--tetra') + 1]
+            agent = save(prefix + ['pgrep', '-x', 'tetragon'], dest / 'tetragon-pid.txt')
+            if agent.returncode == 0:
+                pid = agent.stdout.decode().strip()
+                command = save(prefix + ['cat', f'/proc/{pid}/cmdline'], dest / 'tetragon-command.bin')
+                if command.returncode == 0:
+                    argv = command.stdout.decode().split('\0')
+                    address = argv[argv.index('--server-address') + 1]
+                    cli = [client, '--server-address', address, '--timeout', '2s', '--retries', '0']
+                    save(prefix + cli + ['tracingpolicy', 'list', '-o', 'json'], dest / 'tracingpolicies.json')
+                    if sequence % 3 == 0:
+                        save(prefix + ['timeout', '--signal=INT', '--kill-after=2', '1s', *cli,
+                                       'getevents', '-o', 'json'], dest / 'events.jsonl')
         if phase not in seen:
             save(['docker', 'logs', cid], dest / 'container.log')
             save(prefix + ['sh', '-c', 'cat /opt/bpf-benchmark/native-bpf/x86_64/*/manifest.json'],
@@ -125,6 +139,8 @@ def main():
         observer = shlex.join(['python3', str(Path(__file__).resolve()), '--observe', str(out)])
         if os.environ.get('EQCODEX_TRACE') == '1':
             observer += ' --trace'
+        if client := os.environ.get('EQCODEX_TETRA'):
+            observer += ' --tetra ' + shlex.quote(client)
         log = shlex.quote(str(out / 'guest.log'))
         obslog = shlex.quote(str(out / 'observer.log'))
         arguments[index] = (f'{observer} >{obslog} 2>&1 & observer_pid=$!; '

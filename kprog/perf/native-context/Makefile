@@ -74,3 +74,11 @@ CORE_SELECTION ?= --only bpf_fork bpf_generic_kprobe_v61
 .PHONY: tetragon-core
 tetragon-core: $(BUILD)/core-flavor-lower
 	python3 $(HERE)/build-tetragon.py --build $(BUILD) --kernel $(KDIR)/vmlinux --output $(CORE_OUTPUT) $(CORE_SELECTION)
+
+OBSERVER_OUTPUT ?= $(ROOT)/corpus/results/perf-observers-20261113
+.PHONY: tetra-observer
+tetra-observer:
+	install -d $(BUILD) $(OBSERVER_OUTPUT)
+	cd $(ROOT)/vendor/repos/tetragon && CGO_ENABLED=0 go build -mod=vendor -p=4 -ldflags '-s -w' -o $(BUILD)/tetra ./cmd/tetra/
+	install -m 755 $(BUILD)/tetra $(OBSERVER_OUTPUT)/tetra
+	$(OBSERVER_OUTPUT)/tetra getevents --help > $(OBSERVER_OUTPUT)/getevents-help.txt

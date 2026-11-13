@@ -74,11 +74,9 @@ def main() -> int:
         ratio = f"{b / a:.3f}" if a else "--"
         print(f"{label:32} {a:14,} {b:14,} {ratio:>8}")
 
-    # Erasure check: a counter whose writer was replaced cannot be compared. Report it
-    # rather than let the ratio be read as measured.
-    print("\nA type produced by a REPLACED program has its counter written by code the")
-    print("replacement removed. Check the run's shim log before quoting any ratio:")
-    print(f"  grep -c 'replaced prog=' {run}/../*/details/shim-logs/*post_rejit.log")
+    print("\ntg_stats_map counts failed event writes by type and errno.")
+    print("Both eBPF and native implementations can write these counters.")
+    print("Match map generations and timestamps; successful emissions require a separate event source.")
     return 0
 
 
