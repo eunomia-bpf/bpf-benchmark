@@ -285,5 +285,19 @@ cilium-live-prepare:
 	python3 $(HERE)/cilium-live-prepare.py --raw $(CILIUM_LIVE_RAW) --capture $(CILIUM_LIVE_CAPTURE) --run $(CILIUM_LIVE_RUN) --output $(CILIUM_LIVE_RECEIPT) --baseline-snapshot $(CILIUM_BASELINE_SNAPSHOT)
 
 .PHONY: cilium-replay-retain
+CILIUM_REPLAY_BUILD ?= /var/tmp/kprog-tmp/perf/cilium-live-replay
+CILIUM_REPLAY_RAW ?= /workspaces/kprog-raw/perf/20261113-cilium-live-replay
+CILIUM_REPLAY_RECEIPT ?= $(ROOT)/kprog/results/perf_20261113/cilium-live-source-replay.json
+CILIUM_REPLAY_PROTOCOL ?= c4135e82c
 cilium-replay-retain:
-	python3 $(HERE)/cilium-replay-retain.py --build /var/tmp/kprog-tmp/perf/cilium-live-replay --raw /workspaces/kprog-raw/perf/20261113-cilium-live-replay --output $(ROOT)/kprog/results/perf_20261113/cilium-live-source-replay.json
+	python3 $(HERE)/cilium-replay-retain.py --build $(CILIUM_REPLAY_BUILD) --raw $(CILIUM_REPLAY_RAW) --output $(CILIUM_REPLAY_RECEIPT) --protocol-commit $(CILIUM_REPLAY_PROTOCOL)
+
+CILIUM_PAYLOAD ?= $(ROOT)/corpus/results/perf-cilium-same-source-20261113
+.PHONY: cilium-candidate
+cilium-candidate:
+	install -d $(CILIUM_PAYLOAD)
+	install -m644 $(CILIUM_IR_BUILD)/bpf_lxc.native.o $(CILIUM_IR_BUILD)/bpf_host.native.o $(CILIUM_IR_BUILD)/bpf_xdp.native.o $(CILIUM_PAYLOAD)
+	python3 $(ROOT)/vendor/bpf/write_native_manifest.py --app cilium --llvm-nm llvm-nm-18 --output $(CILIUM_PAYLOAD)/manifest.json \
+		--object $(CILIUM_PAYLOAD)/bpf_lxc.native.o,source_map_prefix=cilium_calls_0 \
+		--object $(CILIUM_PAYLOAD)/bpf_host.native.o,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne \
+		--object $(CILIUM_PAYLOAD)/bpf_xdp.native.o,prog_type=6

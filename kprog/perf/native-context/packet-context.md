@@ -64,3 +64,13 @@ object is retained for comparison with the captured original: an additional
 optimization pipeline over saved IR can change BPF layout. The comparison tool
 reports allocated section bytes and relocations for both paths without gating
 the benchmark or discarding a mismatch.
+
+After rebuilding all runtime units, `cilium-candidate` copies their native ELF
+outputs into `CILIUM_PAYLOAD` and uses the existing manifest writer with the
+original object-map prefixes. Select the resulting manifest through the existing
+`NATIVE_MANIFEST` run argument. This target does not rebuild the image. Keep the
+installed payload unchanged while a guest uses it. The opt-in observer also
+records endpoint API responses and raw `cilium_metrics` map counters so packet
+decisions can be compared alongside the workload. Original-program helper target
+deployment remains a separate integration task; matching BPF source objects does
+not certify native behavior.

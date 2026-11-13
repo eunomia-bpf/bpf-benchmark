@@ -17,6 +17,7 @@ def main():
     parser.add_argument('--build',type=Path,required=True)
     parser.add_argument('--raw',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True)
+    parser.add_argument('--protocol-commit',default='c4135e82c')
     args=parser.parse_args()
     snapshot=args.raw/'build-evidence'
     shutil.copytree(args.build,snapshot)
@@ -36,10 +37,9 @@ def main():
                 if hashlib.sha256(stream.read()).hexdigest()!=digest(args.raw.parent/member.name): raise ValueError('archive bytes differ: '+member.name)
             files+=1
     receipt=dict(recorded_at=datetime.now(timezone.utc).isoformat(),raw=str(args.raw),
-                 compiler_protocol_commit='c4135e82c',units=units,verifier_submissions=0,native_installs=0,
-                 conclusion='Fresh TC host/endpoint direct source builds match all allocated sections and relocations. XDP remains different; generated feature config was not captured in the first job. Both direct and extra-optimized IR outputs are retained.',
+                 compiler_protocol_commit=args.protocol_commit,units=units,verifier_submissions=0,native_installs=0,
+                 conclusion='Direct source byte/relocation comparisons, saved-IR reoptimization differences and all offline entry links are reported per unit and retained.',
                  limits=['No new compiler candidate executed in an application.',
-                         'XDP feature-header explanation awaits actual generated config capture/replay.',
                          'Existing successful offline links do not certify matching configuration or equal work.'],
                  archive=dict(path=str(archive),bytes=archive.stat().st_size,sha256=digest(archive),files_byte_compared=files))
     with args.output.open('x') as output: json.dump(receipt,output,indent=2);output.write('\n')

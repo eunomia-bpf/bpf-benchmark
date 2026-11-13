@@ -71,16 +71,25 @@ def capture_cilium_configuration(prefix, dest):
     command.check_returncode()
     argv = command.stdout.decode().rstrip('\0').split('\0')
     state = None
+    socket_path = None
     for index, argument in enumerate(argv):
         if argument.startswith('--state-dir='):
             state = argument.split('=', 1)[1]
         elif argument == '--state-dir':
             state = argv[index + 1]
+        if argument.startswith('--socket-path='):
+            socket_path = argument.split('=', 1)[1]
+        elif argument == '--socket-path':
+            socket_path = argv[index + 1]
     if not state:
         raise RuntimeError('running Cilium command has no state directory')
     source = Path(__file__).with_name('cilium-config.py').read_text()
     archive = save(prefix + ['python3', '-c', source, state, '/var/lib/cilium/bpf/include/bpf'], dest / 'cilium-config.tar.gz')
     archive.check_returncode()
+    if not socket_path:
+        raise RuntimeError('running Cilium command has no API socket path')
+    save(prefix + ['curl', '-sS', '--max-time', '3', '--unix-socket', socket_path,
+                   'http://localhost/v1/endpoint'], dest / 'cilium-endpoints.json')
 
 
 def observe(out):
@@ -117,7 +126,7 @@ def observe(out):
         map_records = json.loads(maps.stdout)
         for item in map_records:
             name = item.get('name', '')
-            if name in ('metrics', 'tg_stats_map') or (phase not in seen and (
+            if name in ('metrics', 'tg_stats_map') or ('--cilium-config' in sys.argv and name == 'cilium_metrics') or (phase not in seen and (
                     item['type'] == 'prog_array' or name in ('config_map', '.rodata.var', 'policy_conf'))):
                 save(prefix + ['bpftool', '-j', 'map', 'dump', 'id', str(item['id'])],
                      dest / f'map-{item["id"]}-{name}.json')
