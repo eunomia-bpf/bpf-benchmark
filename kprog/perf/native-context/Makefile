@@ -82,3 +82,11 @@ tetra-observer:
 	cd $(ROOT)/vendor/repos/tetragon && CGO_ENABLED=0 go build -mod=vendor -p=4 -ldflags '-s -w' -o $(BUILD)/tetra ./cmd/tetra/
 	install -m 755 $(BUILD)/tetra $(OBSERVER_OUTPUT)/tetra
 	$(OBSERVER_OUTPUT)/tetra getevents --help > $(OBSERVER_OUTPUT)/getevents-help.txt
+
+LINK_PROFILE_OUTPUT ?= $(ROOT)/corpus/results/perf-link-load-profile-20261113
+LINK_PROFILE_PAYLOAD ?= $(ROOT)/corpus/results/verified-linker-runtime-maps-20261113/native-link
+.PHONY: linker-profile
+linker-profile:
+	install -d $(LINK_PROFILE_OUTPUT)
+	install -m 755 $(HERE)/link-cost.py $(LINK_PROFILE_OUTPUT)/native-link
+	python3 -c 'import json, pathlib, sys; (pathlib.Path(sys.argv[1]) / "config.json").write_text(json.dumps({"linker": sys.argv[2]}, indent=2) + "\n")' '$(LINK_PROFILE_OUTPUT)' '$(LINK_PROFILE_PAYLOAD)'
