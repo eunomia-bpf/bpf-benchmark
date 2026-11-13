@@ -239,3 +239,46 @@ objects and source chain support the defect mechanism, not a claim that these
 historical raw counters prove zero work. P1c remains open for the exact artifact
 link; this does not delay corrected measurements. Paper decisions stay with
 the operator.
+
+## OTel counter mix and observation time bounds
+
+`otel-counter-mix.json`, `otel-counter-mix-adjacent.json` and the accompanying
+archive retain every adjacent same-generation window from the recovered run.
+The earlier broad comparison remains published. Within the eBPF generation,
+Ruby frames per Ruby attempt vary from0.35 to0.76; native windows include0.35,
+0.60 and0.376. The previous broad eBPF0.555/native0.376 difference therefore
+does not isolate a native Ruby defect. The later baseline window gives0.353,
+and PHP frame yield is1.8821 versus native1.8822. V8 yields4.7231 versus4.6057.
+These are temporal observations, not identical sampled inputs or an equality
+threshold. The full retained window set prevents selecting only a favorable
+comparison. Python and Perl still have zero frames and TSD errors in both arms;
+their dispatch counters establish calls, not successful frame collection.
+
+The shim's actual measure_start markers are monotonic130.852852 and244.497752,
+after each45-second warmup; measure_finish is180.872462 and295.719993. The
+progress measurement_start comes before warmup. Earlier receipts used mature
+to mean stable map generation, without proving exact measured-window containment.
+Their counter deltas stay as recorded. Historical snapshots have wall-clock
+start/end bounds only, and the read sequence can take seconds or longer.
+`b07cb025c` now records wall and CLOCK_MONOTONIC bounds around each observer
+command, including a timed-out command. The shim uses the same monotonic clock.
+Four focused observer/guest-control tests pass; the new counter-mix regression
+checks family denominators and null zero-attempt ratios. This adds observation
+metadata only; no benchmark lifecycle, workload or admission condition changes.
+
+## Tetragon linker child attribution started
+
+`9025380bb` adds an explicitly selected wrapper that invokes the existing
+runtime-map linker unchanged, preserving arguments, output and failure status.
+A real-child regression passes. Each child invocation records its wall/monotonic
+interval and user/system CPU, memory faults and context switches. Python wrapper
+startup adds overhead and is excluded from the child timing; full intercepted
+load time still comes from the original shim log. The linker owns native output.
+
+The short standard Make corpus job is running on CPUs16–19 with4vCPU/8 GiB,
+hard host address-space limit16 GiB, stats on and one1-second sample. It selects
+the same35 corrected CORE objects and optimized runtime-map payload through
+the wrapper. Raw root: `/workspaces/kprog-raw/perf/20261113-link-load-profile`;
+invocations: `corpus/results/perf-link-load-profile-20261113`. This is startup
+component attribution with no throughput claim. Lane verified owns the fixes;
+kernel, image, base, default objects and frozen runner stay unchanged.

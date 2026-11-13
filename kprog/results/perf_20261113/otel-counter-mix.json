@@ -1,0 +1,151 @@
+{
+  "recorded_at": "2026-11-13T04:38:43Z",
+  "scope": "P1 OTel recovered run counter-mix temporal audit",
+  "run": "corpus/results/x86_kvm_corpus_20261113_033039_387780",
+  "source_windows": "kprog/results/perf_20261113/otel-recovered-windows.json",
+  "window_analysis": "8e15cd19e",
+  "observer_clock_change": "b07cb025c",
+  "tests": {
+    "observer_clock_and_guest_control": 4,
+    "counter_mix": 1,
+    "linker_cost_wrapper": 1
+  },
+  "measurement_markers": {
+    "baseline": [
+      {
+        "monotonic_seconds": 130.852852,
+        "event": "measure_start"
+      },
+      {
+        "monotonic_seconds": 180.872462,
+        "event": "measure_finish"
+      }
+    ],
+    "post_rejit": [
+      {
+        "monotonic_seconds": 244.497752,
+        "event": "measure_start"
+      },
+      {
+        "monotonic_seconds": 295.719993,
+        "event": "measure_finish"
+      }
+    ]
+  },
+  "adjacent_observations": [
+    {
+      "first": "baseline-0001",
+      "last": "baseline-0002",
+      "map_id": 29,
+      "seconds": 35.965071,
+      "native_frames_per_attempt": 0.9004217401188042,
+      "ruby_frames_per_attempt": 0.3590658885202417,
+      "php_frames_per_attempt": 1.8859052887124412,
+      "v8_frames_per_attempt": 4.602059230818715
+    },
+    {
+      "first": "baseline-0002",
+      "last": "baseline-0003",
+      "map_id": 29,
+      "seconds": 9.758749,
+      "native_frames_per_attempt": 0.9174466269708661,
+      "ruby_frames_per_attempt": 0.6991650620540121,
+      "php_frames_per_attempt": 1.8829889747662372,
+      "v8_frames_per_attempt": 4.71690110374312
+    },
+    {
+      "first": "baseline-0003",
+      "last": "baseline-0004",
+      "map_id": 29,
+      "seconds": 9.901089,
+      "native_frames_per_attempt": 0.9129264960926274,
+      "ruby_frames_per_attempt": 0.764218291673979,
+      "php_frames_per_attempt": 1.8824517038745499,
+      "v8_frames_per_attempt": 4.589382109753529
+    },
+    {
+      "first": "baseline-0004",
+      "last": "baseline-0005",
+      "map_id": 29,
+      "seconds": 10.044511,
+      "native_frames_per_attempt": 0.9091056563456376,
+      "ruby_frames_per_attempt": 0.356674539933034,
+      "php_frames_per_attempt": 1.8832766875467621,
+      "v8_frames_per_attempt": 4.5894652209557325
+    },
+    {
+      "first": "baseline-0005",
+      "last": "baseline-0006",
+      "map_id": 29,
+      "seconds": 10.044851,
+      "native_frames_per_attempt": 0.9095657093212377,
+      "ruby_frames_per_attempt": 0.3541659732315556,
+      "php_frames_per_attempt": 1.8827015226863049,
+      "v8_frames_per_attempt": 4.596434566281845
+    },
+    {
+      "first": "baseline-0006",
+      "last": "baseline-0007",
+      "map_id": 29,
+      "seconds": 15.697924,
+      "native_frames_per_attempt": 0.9123620000971865,
+      "ruby_frames_per_attempt": 0.352663172939495,
+      "php_frames_per_attempt": 1.881061036268721,
+      "v8_frames_per_attempt": 4.8770823062724284
+    },
+    {
+      "first": "baseline-0008",
+      "last": "post_rejit-0009",
+      "map_id": 360,
+      "seconds": 8.729871,
+      "native_frames_per_attempt": 0.9007419439093669,
+      "ruby_frames_per_attempt": 0.3515986132511556,
+      "php_frames_per_attempt": 1.880794130340958,
+      "v8_frames_per_attempt": 4.614033282749042
+    },
+    {
+      "first": "post_rejit-0009",
+      "last": "post_rejit-0010",
+      "map_id": 360,
+      "seconds": 71.403511,
+      "native_frames_per_attempt": 0.9193326901345679,
+      "ruby_frames_per_attempt": 0.5969237903283808,
+      "php_frames_per_attempt": 1.8832888244857746,
+      "v8_frames_per_attempt": 4.6795918956554905
+    },
+    {
+      "first": "post_rejit-0010",
+      "last": "post_rejit-0011",
+      "map_id": 360,
+      "seconds": 9.948459,
+      "native_frames_per_attempt": 0.9136530701448633,
+      "ruby_frames_per_attempt": 0.3765876478572814,
+      "php_frames_per_attempt": 1.8814046047659831,
+      "v8_frames_per_attempt": 4.603931179697965
+    },
+    {
+      "first": "post_rejit-0011",
+      "last": "post_rejit-0012",
+      "map_id": 360,
+      "seconds": 9.795598,
+      "native_frames_per_attempt": 0.9132780828647881,
+      "ruby_frames_per_attempt": 0.37620355999035454,
+      "php_frames_per_attempt": 1.8830705992959749,
+      "v8_frames_per_attempt": 4.607323574043983
+    }
+  ],
+  "findings": [
+    "Family frames must be normalized by that family attempts, independently of native attempt rate.",
+    "Ruby frames/attempt varies0.35\u20130.76 within the eBPF generation, and native windows also include0.35,0.60,0.376. Aggregated Ruby yield difference is not isolated to native code.",
+    "PHP late baseline1.8821/native1.8822frames per PHP attempt; V8 late baseline4.7231/native4.6057. Earlier broad windows remain retained, not replaced by selected favorable windows.",
+    "Python and Perl have zero frames in both arms with existing TSD errors; restored dispatch is not evidence of successful Python/Perl frame collection.",
+    "measure_start monotonic130.852852/244.497752 occurs after each45s warmup. Progress measurement_start precedes warmup; it cannot mark the measured sample boundary. Original receipt used mature to mean map-generation stability, not proved exact measured-window containment.",
+    "Old captures lack per-command monotonic bounds. New observer records both clock domains around every read, including timeouts, without changing the measured workload or adding a gate."
+  ],
+  "limits": [
+    "Inputs are asynchronously sampled from separate process starts; no same-input native/eBPF equivalence is inferred.",
+    "All adjacent same-generation windows are retained, including restart and warmup; labels alone do not identify actual measurement time.",
+    "No statistical acceptance threshold, full equivalence claim, or replacement performance number is added. P1 remains open for complete behavior comparison."
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261113-context/counter-mix"
+}
