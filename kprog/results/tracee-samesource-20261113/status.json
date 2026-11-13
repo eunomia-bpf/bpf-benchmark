@@ -31,22 +31,23 @@
   "The three source files that do differ (common/buffer.h, common/common.h, common/filesystem.h) differ only by MICRO_NATIVE guards around exactly these asm idioms.",
   "The fix must be function-scoped: the first attempt used a whole-file alias map and produced a type error when %4 meant an i64 in one function and a ptr in another."
  ],
- "state": "compiles to x86 from untouched source; two linker gaps remain",
+ "state": "all 172 programs link from untouched upstream source; CO-RE placeholders unresolved (P1h)",
  "reached": {
-  "x86 object": "tracee.same.native.o, 8,135,776 bytes, 172 defined text symbols, 0 SSE instructions",
-  "compiled from": "untouched vendor/repos/tracee source + headers (BPF target, -emit-llvm), then the four idioms folded out, then x86 codegen",
-  "cost": "lowering pass 2.4 s, x86 codegen 20.7 s"
+  "x86 object": "tracee.nodso.native.o, 7,165,864 bytes, 172 defined text symbols, 0 SSE",
+  "link": "172 of 172 programs link with native-link --mode proof, 0 failures",
+  "pipeline": "untouched vendor/repos/tracee -> BPF frontend (-emit-llvm) -> name helpers -> fold 4 idioms -> clear dso_local on .maps globals -> x86 codegen -> link",
+  "cost": "name 10 s, fold 2.4 s, codegen 20 s, link 3 s for all 172"
  },
  "remaining": [
   {
-   "gap": "R_X86_64_PC32 against the .maps section",
-   "linker says": "PC32 proof section-symbol target .maps is not rodata/bss",
-   "note": "the shipped build reaches the map through a GOTPCRELX load whose slot the loader fills (kind 5); here clang emitted a PC32 against the section symbol because the IR has no dso_local/GOT distinction. Katran needed -fPIC at the frontend for the same reason; the Tracee frontend is the BPF target, so the fix belongs in the linker (accept a PC32 .maps reference as a map-pointer relocation)."
-  },
-  {
-   "gap": "unresolved register-indirect helper call",
-   "linker says": "x86 unresolved register-indirect call in trace_sys_enter at local offset 0x34a through ...",
-   "note": "the IR carries helpers as `inttoptr (i64 35 to ptr)()`. clang hoisted the constant into a register and the linker's helper-site scan expects the immediate form the shipped object has (mov $imm32, %eax; call *%rax against an R_X86_64_PLT32/helper relocation)."
+   "gap": "CO-RE placeholders",
+   "evidence": "135 R_X86_64_REX_GOTPCRELX relocations against `llvm.<struct>:<idx>:<off>` externals (e.g. llvm.task_struct:0:48$0:8, llvm.pid:0:0$0:0) with !llvm.preserve.access.index metadata; the shipped object has 0 such relocs and 25 relocations total against my 306.",
+   "why": "the BPF frontend emits CO-RE as extern globals; libbpf resolves them against the target BTF at load time. A native object must have them resolved to the sole kernel's real offsets BEFORE codegen, or the relocation stays and the linked blob reads the wrong address (the exact defect I measured in C1).",
+   "owner": "P1h, lane perf said at 09:36 they are implementing exactly this as an optional LLVM pass using the BPF ELF's local BTF + vendored libbpf resolver against the sole target BTF, and offered it for reuse. That is the right tool; I will use it rather than write a second one."
   }
+ ],
+ "fixed_from_my_side": [
+  "helper calls: the IR's `inttoptr (i64 N to ptr)(...)` calls were named as declarations (27 helpers, 37,948 call sites) so the linker binds them by name instead of failing with 'unresolved register-indirect call'",
+  "map references: clearing `dso_local` on the 87 `.maps` globals turns the PC32 section-symbol reference into a GOTPCRELX load, which the linker accepts and the loader fills (the same fix -fPIC gives at a C frontend, as in Katran)"
  ]
 }
