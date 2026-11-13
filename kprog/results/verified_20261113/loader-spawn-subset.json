@@ -1,0 +1,38 @@
+{
+  "recorded_at": "2026-11-13T04:42:55.526052+00:00",
+  "source_commit": "e5bf984fc",
+  "scope": "Host real-child boundary regression and loader lifetime probe; application runtime and startup performance remain unmeasured for this fix",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-loader-spawn",
+  "before_make_exit_code": 2,
+  "before_failure": "Log-file open failure ignored; child ran and produced exit7",
+  "after_make_exit_code": 0,
+  "coverage": [
+    "literal argv",
+    "preload removed in child, parent unchanged",
+    "other environment preserved",
+    "stdout/stderr redirection",
+    "exit status",
+    "redirection ENOENT",
+    "executable ENOENT",
+    "empty argv EINVAL",
+    "signal termination",
+    "interrupted wait"
+  ],
+  "syscall_evidence": "spawn.strace: actual child boundary uses clone3 CLONE_VM|CLONE_VFORK then execve",
+  "lifetime": {
+    "path": "/workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.so",
+    "before_mappings": 0,
+    "loaded_mappings": 5,
+    "after_close_mappings": 5,
+    "elf_gnu_unique": true,
+    "interpretation": "This host artifact retains mappings after dlclose; repeated cache loss is not established. Exact image behavior remains to be measured."
+  },
+  "core": {
+    "original": "kprog/libnativeloader/core.1177113",
+    "retained": "/workspaces/kprog-raw/verified/20261113-loader-spawn/core.1177113",
+    "bytes": 573440
+  },
+  "integration": "Sole loader/base/image artifacts unchanged; shared build and affected application measurement are subsequent work",
+  "archive": "loader-spawn-subset.tar.gz",
+  "archive_bytes": 56573
+}
