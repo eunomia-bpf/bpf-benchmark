@@ -127,3 +127,19 @@ LINK_MEMORY_EVIDENCE ?= /workspaces/kprog-raw/perf/20261113-local-memory/objects
 .PHONY: memory-link-evidence
 memory-link-evidence:
 	python3 $(HERE)/memory-link-evidence.py --candidate $(LINK_MEMORY_TARGET)/debug/native-link --reference $(ROOT)/corpus/results/verified-linker-runtime-maps-20261113/native-link.real --output $(LINK_MEMORY_EVIDENCE)
+
+LINK_MEMORY_PAYLOAD ?= $(ROOT)/corpus/results/perf-local-memory-20261113
+LINK_MEMORY_PROFILE ?= /workspaces/kprog-raw/perf/20261113-local-memory/profile-on
+LINK_MEMORY_CAPTURE ?= $(ROOT)/corpus/results/perf-memory-profile-on-20261113
+.PHONY: memory-link-payload memory-profile
+memory-link-payload:
+	install -d $(LINK_MEMORY_PAYLOAD)
+	install -m 755 $(LINK_MEMORY_TARGET)/debug/native-link $(LINK_MEMORY_PAYLOAD)/native-link.real
+	strip --strip-debug $(LINK_MEMORY_PAYLOAD)/native-link.real
+	install -m 755 $(HERE)/native-link-memory.sh $(LINK_MEMORY_PAYLOAD)/native-link-on
+	install -m 755 $(HERE)/native-link-memory.sh $(LINK_MEMORY_PAYLOAD)/native-link-off
+	$(LINK_MEMORY_PAYLOAD)/native-link-on --help > $(LINK_MEMORY_PAYLOAD)/help.txt
+
+memory-profile:
+	env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(LINK_MEMORY_CAPTURE) EQCODEX_NATIVE_LINK_BINARY=$(LINK_MEMORY_PAYLOAD)/native-link-on \
+		python3 $(ROOT)/kprog/perf/profile/phase-profile.py run --app tracee/monitor --seconds 45 --cpus 16-19 --vcpus 4 --memory 8G --freq 999 --out $(LINK_MEMORY_PROFILE) --annotate 0
