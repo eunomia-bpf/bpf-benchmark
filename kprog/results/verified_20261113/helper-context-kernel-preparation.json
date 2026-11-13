@@ -1,0 +1,27 @@
+{
+  "scope": "Actual production helper resolver functional unit, build/preparation only",
+  "query_implementation": "Includes repository native_loader.cpp; unused functions discarded at link time, canonical loader not rebuilt",
+  "binary": "/var/tmp/kprog-tmp/verified/helper-context/helper-kernel",
+  "contexts": ["kprobe", "tracepoint", "raw_tracepoint", "sched_cls", "cgroup_sock_create", "cgroup_sock_addr_connect", "cgroup_sock_addr_bind", "sock_ops", "sk_msg"],
+  "behavior": [
+    "Stock-load real minimal program FDs with requested type and expected_attach_type",
+    "Query production supported-helper batch using each original FD and kernel-reported type",
+    "Compare selected resolved targets with exact kernel symbols for helpers 25, 27, 46 and 122, including unavailable results",
+    "Query bind through the shared wire codec: same program type with connect versus bind attach metadata yields available versus unavailable",
+    "Wrong advertised FD type propagates the production query error",
+    "Persist every resolved canonical helper address and every stock verifier log"
+  ],
+  "build_command": "taskset -c 13 make -C kprog/libnativeloader helper-context-kernel-input",
+  "build_exit": 0,
+  "build_log": "/workspaces/kprog-raw/verified/20261113-helper-kernel-build.log",
+  "final_build_log": "/workspaces/kprog-raw/verified/20261113-helper-kernel-build-attempt2.log",
+  "first_binary_archive": "/workspaces/kprog-raw/verified/20261113-helper-kernel-preparation-first-build.tar.gz",
+  "dry_run": "/workspaces/kprog-raw/verified/20261113-helper-kernel-dry-run.log",
+  "actual_guest_queries_at_recording": 0,
+  "native_execution_requests": 0,
+  "canonical_module_build": false,
+  "canonical_loader_build": false,
+  "image_changed": false,
+  "runtime_claim": "Pending guest execution; not application/equal-work confirmation",
+  "archive": "helper-context-kernel-preparation.tar.gz"
+}

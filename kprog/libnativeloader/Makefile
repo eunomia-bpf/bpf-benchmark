@@ -10,6 +10,29 @@ KERNEL_OFFSETS_INCLUDE ?= $(REPO_ROOT)/micro/programs/build-x86
 SERVICE_RUN ?= $(abspath $(BUILD_DIR))/trusted-service-client $(abspath $(BUILD_DIR))/trusted-native.o
 HELPER_BUILD ?= /var/tmp/kprog-tmp/verified/helper-context
 HELPER_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-helper-context/functional
+HELPER_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-helper-context/kernel
+
+.PHONY: helper-context-kernel-input helper-context-kernel-kvm guest-helper-context-kernel
+helper-context-kernel-input:
+	install -d "$(HELPER_BUILD)"
+	$(CXX) -std=gnu++20 -O1 -g -ffunction-sections -fdata-sections \
+		-Iinclude -I"$(KERNEL_OFFSETS_INCLUDE)" -I"$(LIBBPF_PREFIX)/include" \
+		-I"$(REPO_ROOT)/vendor/libbpf/include" -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
+		../test/native_loader_helper_kernel.cpp -Wl,--gc-sections "$(LIBBPF_LIBRARY)" -lelf -lz -ldl -pthread \
+		-o "$(HELPER_BUILD)/helper-kernel"
+
+# Consume the prepared shared module; never rebuild it on a reader's startup.
+helper-context-kernel-kvm:
+	install -d "$(HELPER_KERNEL_OUTPUT)"
+	taskset -c 13 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(HELPER_BUILD)" --rwdir "$(HELPER_KERNEL_OUTPUT)" --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/libnativeloader guest-helper-context-kernel HELPER_BUILD=$(HELPER_BUILD) HELPER_KERNEL_OUTPUT=$(HELPER_KERNEL_OUTPUT)'
+
+guest-helper-context-kernel:
+	mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
+	"$(HELPER_BUILD)/helper-kernel" "$(HELPER_KERNEL_OUTPUT)"
 
 .PHONY: helper-context-check
 helper-context-check:

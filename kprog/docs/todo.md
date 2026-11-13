@@ -123,6 +123,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED D23 kernel功能子集准备（2026-11-13）** 测试直接包含生产native_loader.cpp并通过section GC只链接实际resolver，不另写loader；9个真实stock program FDs覆盖KPROBE/TP/rawTP/TC/sock-create/sock-addr connect与bind/sockops/skmsg，记录完整canonical helper targets；对25/27/46/122的不同真实kernel symbols和unavailable做功能比较，另用同wire codec确认bind是否可用取决于original expected_attach_type，并测试错误FD type传播。scratch binary编译成功，Make guest dry-run完成；源码/ELF/buildlog归档 `helper-context-kernel-preparation*`。实际query/app行为尚待guest，不重建canonical loader/module/image，无每程序证明或admission gate。raw `/workspaces/kprog-raw/verified/20261113-helper-context/kernel/`。
+
 - **VERIFIED 首23新body（2026-11-13）** 新增Tracee body32 tracepoint__sched__sched_switch/source506在旧u32模型触发同一event_data_map越界（vs32536/off65672/size1，BPF11650），processed3883、total/peak242；service07:13:21.750431→07:22:55.466351，早于2d05候选。累计23submitted/13installed/10stock rejected：BCC8/8、Tracee9/3/6、Tetragon6/2/4，其余三应用new queue各0；native execution0，workload待测；旧10body观察与独立回放另计。完整request23归档 `resident-body-outcome-23.tar.gz`（12065062bytes）和累计receipt `resident-body-first-twenty-three-receipt.json`，raw `/workspaces/kprog-raw/verified/20261113-body-census/first-twenty-three/`。u32 stock确认仍排队，context28/29 retry仍在运行，不将旧模型拒绝算候选结果。
 
 - **VERIFIED u32 stock子集排队（2026-11-13）** outer1270473等待自己的body28 retry outer1251409退出后，通过已提交Make目标启动2vCPU2G/AS8GiB、CPU13/shared image reader guest，实际加载copy before/after、signed-after及partial0/8/16共6份BPF回归；不编译/替换base module或loader，不新增application loader路径。raw `/workspaces/kprog-raw/verified/20261113-word32-copy/{guest-job,control}/`，启动receipt `word32-copy-stock-launch.json`；本turn结束，不轮询排队/运行结果，下一turn收集。
