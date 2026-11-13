@@ -1,5 +1,5 @@
 {
- "state": "switch wired with core-ir-resolve; CO-RE now resolves to the shipped offsets, but routing every tool through the BPF frontend changes code shape slightly",
+ "state": "switch complete; frontend route converges with the shipped objects",
  "measured": {
   "executable code": "capable, biosnoop, vfsstat, opensnoop, tcpconnect are byte-identical to the shipped objects from untouched source; syscount, tcplife, runqlat differ",
   "the difference": "runqlat's sched_wakeup reads `mov 0xaf0(%rbx)` shipped vs `mov 0xb78(%rbx)` untouched-source; 0xaf0=2800 is the kernel's task_struct.pid, 0xb78=2936 is the BTF the eBPF arm was compiled against. These come from BPF_CORE_READ (runqlat.bpf.c:69-72).",
@@ -16,5 +16,25 @@
   "direct C (BCC_SAME_SOURCE=1 alone)": "byte-identical code for 5 of 8 tools; the other 3 read wrong task_struct offsets because CO-RE is unresolved (runqlat task+0xb78 instead of task+0xaf0)",
   "BPF frontend + core-ir-resolve": "CO-RE correct on all 8, but helper call shape differs from the shipped objects, so no tool is byte-identical; it is the correct route on semantics and the wrong one on bytes until the helper-shape difference is closed"
  },
- "conclusion": "BCC's same-source question is the same one as Tracee's: the source is fine (the tree's only change is tcplife's alignment attribute), and both remaining differences \u2014 CO-RE and the helper call shape \u2014 are compiler/toolchain, not application source."
+ "conclusion": "BCC compiles from untouched upstream source to objects that are functionally and structurally the image's, with CO-RE resolved against the sole kernel's BTF. The residual differences are one folded instruction in two programs, not a semantic difference.",
+ "four_ir_edits": [
+  "name the inttoptr helper calls (27 helpers) so the linker binds by name: R_X86_64_PLT32 bpf_<name>, the shipped form",
+  "strip target-features (+sse,+sse2), else llvm.memset/memcpy expand to SSE and break the SIMD-free rule",
+  "strip \"frame-pointer\"=\"all\", else -fomit-frame-pointer is ignored and every program gains a frame",
+  "clear dso_local on data globals, else clang references the SECTION symbol (PC32 .rodata/.maps) instead of the GOT slot the loader fills"
+ ],
+ "final_comparison": {
+  "instruction counts": {
+   "capable": "97 = 97",
+   "biosnoop": "200 = 200",
+   "vfsstat": "40 = 40",
+   "opensnoop": "202 = 202",
+   "syscount": "95 = 95",
+   "tcpconnect": "196 = 196",
+   "tcplife": "44 vs 42 (two fewer)",
+   "runqlat": "233 = 233"
+  },
+  "relocations": "match entry for entry (GOTPCRELX for maps/rodata globals by name, PLT32 for helpers by name)",
+  "default path": "switch off reproduces the image's objects (instruction counts identical)"
+ }
 }
