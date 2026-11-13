@@ -208,6 +208,11 @@ int main(int argc,char **argv) {
     // symbol identity in PIC relocations rather than folding to section+offset.
     for (auto &Global:M->globals())
       if (Global.getSection()==".maps") Global.setDSOLocal(false);
+    // The BPF frontend marks extern weak function addresses dso_local. Native
+    // PIC must keep a nullable GOT slot so the loader's target-BTF binding can
+    // supply either the genuine address or zero without folding the guard.
+    for (auto &F:*M)
+      if (F.isDeclaration() && F.hasAddressTaken()) F.setDSOLocal(false);
     // Retarget BPF frontend IR from the unchanged upstream source. Configuration
     // symbol-address asm remains an opaque address dependency, so native LLVM
     // cannot replace live loader-supplied config values with initializers.

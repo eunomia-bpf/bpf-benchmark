@@ -446,3 +446,18 @@ bpf-asm-check: $(ASM_BUILD)/bpf-asm-lower $(SOCKET_BUILD)/socket-context-lower $
 
 upstream-tetragon-link: upstream-tetragon-native
 	python3 $(HERE)/socket-proof.py --input $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).native.o --linker $(LINK_MEMORY_PAYLOAD)/native-link-off --output $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT)-links --section-prefix kprobe --section-prefix tracepoint --section-prefix raw_tracepoint --section-prefix uprobe --section-prefix fmod_ret/
+
+WEAK_BUILD ?= /var/tmp/kprog-tmp/perf/weak-ksym
+.PHONY: weak-ksym-check
+weak-ksym-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
+	install -d $(WEAK_BUILD)
+	$(CC) -target bpf -O2 -g -emit-llvm -c $(HERE)/test-weak-ksym.c -o $(WEAK_BUILD)/input.bc
+	python3 $(HERE)/socket-helper-names.py > $(WEAK_BUILD)/helper-names.json
+	$(SOCKET_BUILD)/socket-context-lower $(WEAK_BUILD)/input.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(WEAK_BUILD)/helper-names.json -o $(WEAK_BUILD)/native.bc
+	$(CC) -target x86_64-linux-gnu -O2 -fPIC -c $(WEAK_BUILD)/native.bc -o $(WEAK_BUILD)/native.o
+	llvm-readelf-18 -r $(WEAK_BUILD)/native.o > $(WEAK_BUILD)/relocations.txt
+	llvm-objdump-18 -d $(WEAK_BUILD)/native.o > $(WEAK_BUILD)/disassembly.txt
+	$(CC) -O2 -fPIE -pie -DTEST_DRIVER $(HERE)/test-weak-ksym.c $(WEAK_BUILD)/native.o -o $(WEAK_BUILD)/absent
+	$(WEAK_BUILD)/absent
+	$(CC) -O2 -fPIE -pie -DTEST_DRIVER -DSYMBOL_PRESENT $(HERE)/test-weak-ksym.c $(WEAK_BUILD)/native.o -o $(WEAK_BUILD)/present
+	$(WEAK_BUILD)/present
