@@ -1,0 +1,168 @@
+{
+  "recorded_at": "2026-11-13T06:43:15.336927+00:00",
+  "source_commit": "abc41279f",
+  "scope": "P0 host memory-form microbenchmark, not guest throughput",
+  "host_cpuid": {
+    "fsrm": true,
+    "fsrs": true
+  },
+  "cpu": "16",
+  "observations": 990,
+  "contract": {
+    "rounds": 5,
+    "iterations_per_round": 100000,
+    "offsets": [
+      0,
+      1,
+      7
+    ],
+    "lengths": [
+      0,
+      16,
+      32,
+      64,
+      71,
+      144,
+      200,
+      368,
+      512,
+      1024,
+      4096,
+      16384
+    ],
+    "immediate_read": true
+  },
+  "selected_rows": [
+    {
+      "copy": false,
+      "length": 71,
+      "offset": 0,
+      "median_ns_per_call": {
+        "gpr_loop": 2.69409,
+        "gpr_unrolled": 2.66287,
+        "rep": 21.58897
+      },
+      "rep_hardware_eligible": true,
+      "fastest_observed_eligible": "gpr_unrolled"
+    },
+    {
+      "copy": false,
+      "length": 144,
+      "offset": 0,
+      "median_ns_per_call": {
+        "gpr_loop": 7.2351,
+        "gpr_unrolled": 7.22261,
+        "rep": 18.35515
+      },
+      "rep_hardware_eligible": true,
+      "fastest_observed_eligible": "gpr_unrolled"
+    },
+    {
+      "copy": false,
+      "length": 200,
+      "offset": 0,
+      "median_ns_per_call": {
+        "gpr_loop": 8.23512,
+        "gpr_unrolled": 8.23377,
+        "rep": 22.85924
+      },
+      "rep_hardware_eligible": true,
+      "fastest_observed_eligible": "gpr_unrolled"
+    },
+    {
+      "copy": false,
+      "length": 368,
+      "offset": 0,
+      "median_ns_per_call": {
+        "gpr_loop": 11.60263,
+        "gpr_unrolled": 11.61947,
+        "rep": 22.75553
+      },
+      "rep_hardware_eligible": true,
+      "fastest_observed_eligible": "gpr_loop"
+    },
+    {
+      "copy": false,
+      "length": 16384,
+      "offset": 0,
+      "median_ns_per_call": {
+        "gpr_loop": 328.81988,
+        "rep": 336.95105
+      },
+      "rep_hardware_eligible": true,
+      "fastest_observed_eligible": "gpr_loop"
+    },
+    {
+      "copy": true,
+      "length": 71,
+      "offset": 0,
+      "median_ns_per_call": {
+        "gpr_loop": 3.39964,
+        "gpr_unrolled": 2.8653,
+        "rep": 21.41844
+      },
+      "rep_hardware_eligible": true,
+      "fastest_observed_eligible": "gpr_unrolled"
+    },
+    {
+      "copy": true,
+      "length": 144,
+      "offset": 0,
+      "median_ns_per_call": {
+        "gpr_loop": 7.21693,
+        "gpr_unrolled": 7.21697,
+        "rep": 19.53064
+      },
+      "rep_hardware_eligible": true,
+      "fastest_observed_eligible": "gpr_loop"
+    },
+    {
+      "copy": true,
+      "length": 200,
+      "offset": 0,
+      "median_ns_per_call": {
+        "gpr_loop": 8.18399,
+        "gpr_unrolled": 8.23958,
+        "rep": 22.70796
+      },
+      "rep_hardware_eligible": true,
+      "fastest_observed_eligible": "gpr_loop"
+    },
+    {
+      "copy": true,
+      "length": 368,
+      "offset": 0,
+      "median_ns_per_call": {
+        "gpr_loop": 11.60445,
+        "gpr_unrolled": 11.6052,
+        "rep": 23.93291
+      },
+      "rep_hardware_eligible": true,
+      "fastest_observed_eligible": "gpr_loop"
+    },
+    {
+      "copy": true,
+      "length": 16384,
+      "offset": 0,
+      "median_ns_per_call": {
+        "gpr_loop": 465.4002,
+        "rep": 368.8068
+      },
+      "rep_hardware_eligible": true,
+      "fastest_observed_eligible": "rep"
+    }
+  ],
+  "production_selection": "GPR only. No REP selected. Host large-copy improvement is retained as an optimization lead.",
+  "kernel_feature_reference": "vendor/linux-framework/arch/x86/include/asm/cpufeatures.h: FSRS word12 CPUID7:1 EAX11, FSRM word18 CPUID7:0 EDX4",
+  "archive": {
+    "path": "kprog/results/perf_20261113/memory-host-microbench.tar.gz",
+    "bytes": 13918,
+    "sha256": "aa151c74e99c38aa3c468d8272642a5b15977ec5f2e73818b47fe3e56ed4a40e",
+    "files_byte_compared": 6
+  },
+  "limits": [
+    "Hot host buffers with immediate read, five rounds and three alignments.",
+    "These comparisons do not select production code and do not measure guest throughput."
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261113-local-memory"
+}

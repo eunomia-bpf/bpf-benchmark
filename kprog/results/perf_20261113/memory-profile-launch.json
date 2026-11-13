@@ -1,0 +1,40 @@
+{
+  "recorded_at": "2026-11-13T06:43:15.337269+00:00",
+  "scope": "P0 affected Tracee paired functional/CPU profile; launch only",
+  "outer_pid": 1254885,
+  "status": "launched; collect next turn",
+  "source_core": "04ea4d810",
+  "source_payload": "11dfe339d",
+  "host_benchmark": "abc41279f",
+  "entrypoint": "make -f kprog/perf/native-context/Makefile memory-profile",
+  "contract": {
+    "cpus": "16-19",
+    "vcpus": 4,
+    "memory_gib": 8,
+    "host_address_space_limit_gib": 16,
+    "samples": 1,
+    "workload_seconds": 45,
+    "stats": 1,
+    "profile_frequency_hz": 999
+  },
+  "lock": "shared /workspaces/.agent-state/kprog-lanes/locks/image",
+  "raw": "/workspaces/kprog-raw/perf/20261113-local-memory/profile-on",
+  "job": "/workspaces/kprog-raw/perf/20261113-local-memory/profile-job",
+  "capture": "corpus/results/perf-memory-profile-on-20261113",
+  "selected_linker": "corpus/results/perf-local-memory-20261113/native-link-on",
+  "default_manifest": "/opt/bpf-benchmark/native-bpf/x86_64/tracee/manifest.json",
+  "hashes": {
+    "corpus/results/perf-local-memory-20261113/native-link.real": "65eebf5e64ed5e4c0adfda52dd4587c9c626c232aeffb2ac3ab76e90a01d5b72",
+    "corpus/results/perf-local-memory-20261113/native-link-on": "f7644e69df0606ac64e1af9631ffec0227c5c46282aaf2c5622758626de9f58a",
+    "corpus/results/perf-local-memory-20261113/native-link-off": "f7644e69df0606ac64e1af9631ffec0227c5c46282aaf2c5622758626de9f58a"
+  },
+  "dry_run": "/workspaces/kprog-raw/perf/20261113-local-memory/profile-dry-run2.log",
+  "dry_run_exit": 0,
+  "limits": [
+    "Profile includes driver progress-window warmup; actual application counters and stub status remain to collect.",
+    "Same image native objects; no injected replacement header. Existing runtime-map option is enabled in both future on/off controls.",
+    "Tracee other CO-RE/source ABI defects remain; do not infer equal-work floor from this subset.",
+    "Selected payload remains immutable through guest exit; no image/base/kernel rebuild.",
+    "CPU0-7 remains available to lane C timing; full3x180 on/off follows functional/profile collection."
+  ]
+}
