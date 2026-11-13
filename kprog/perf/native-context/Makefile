@@ -101,7 +101,7 @@ loader-perf-deps:
 # Tool build only, from the sole kernel source; no kernel/base/image rebuild.
 loader-perf-build:
 	install -d $(LOADER_PERF_BUILD)
-	$(MAKE) -C $(ROOT)/vendor/linux-framework/tools/perf O=$(LOADER_PERF_BUILD)/ -j4 NO_LIBBPF=1 NO_LIBPYTHON=1 NO_LIBPERL=1 NO_LIBTRACEEVENT=1 NO_SLANG=1 NO_LIBUNWIND=1 NO_LIBNUMA=1 NO_AUXTRACE=1 NO_LIBCAP=1 NO_LIBLLVM=1
+	$(MAKE) -C $(ROOT)/vendor/linux-framework/tools/perf O=$(LOADER_PERF_BUILD)/ -j4 PYTHON=/usr/bin/python3 NO_LIBBPF=1 NO_LIBPYTHON=1 NO_LIBPERL=1 NO_LIBTRACEEVENT=1 NO_SLANG=1 NO_LIBUNWIND=1 NO_LIBNUMA=1 NO_AUXTRACE=1 NO_LIBCAP=1 NO_LIBLLVM=1
 	$(LOADER_PERF_SOURCE) version --build-options
 
 loader-perf-tool:
