@@ -17,6 +17,55 @@ REFRESH_OPERATION ?= full
 DATA_LAYOUT_BUILD ?= /var/tmp/kprog-tmp/verified/data-layout
 DATA_LAYOUT_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-data-layout/host
 DATA_LAYOUT_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-data-layout/kernel
+KFUNC_BUILD ?= /var/tmp/kprog-tmp/verified/kfunc
+KFUNC_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/host
+KFUNC_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/kernel
+KFUNC_BPF ?= /workspaces/kprog-raw/perf/20261113-tetragon-same-source/build-evidence/bpf_generic_kprobe_v61.direct.bpf.o
+KFUNC_NATIVE ?= /var/tmp/kprog-tmp/perf/tetragon-same-source/bpf_generic_kprobe_v61.native.o
+KERNEL_ELF_RESTORE_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kernel-elf-restore
+
+# Invoke under the exclusive image/base lock; the unchanged boot is authoritative.
+.PHONY: kernel-elf-from-boot
+kernel-elf-from-boot:
+	install -d "$(KERNEL_ELF_RESTORE_OUTPUT)"
+	sha256sum /workspaces/.agent-state/kprog-ck/build-x86/vmlinux \
+		/workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage > "$(KERNEL_ELF_RESTORE_OUTPUT)/before.sha256"
+	"$(REPO_ROOT)/vendor/linux-framework/scripts/extract-vmlinux" \
+		/workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage > /workspaces/.agent-state/kprog-ck/build-x86/vmlinux
+	sha256sum /workspaces/.agent-state/kprog-ck/build-x86/vmlinux \
+		/workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage > "$(KERNEL_ELF_RESTORE_OUTPUT)/after.sha256"
+
+.PHONY: kfunc-inputs kfunc-check kfunc-kernel-kvm guest-kfunc
+kfunc-inputs:
+	install -d "$(KFUNC_BUILD)"
+	clang-18 -O2 -fPIC -c ../test/native_kfunc_fixture.c -o "$(KFUNC_BUILD)/weak.o"
+	clang-18 -O2 -fPIC -DKFUNC_PRESENT_STRONG -c ../test/native_kfunc_fixture.c -o "$(KFUNC_BUILD)/strong.o"
+	$(CXX) -std=gnu++20 -O1 -g -ffunction-sections -fdata-sections \
+		-Iinclude -I"$(KERNEL_OFFSETS_INCLUDE)" -I"$(LIBBPF_PREFIX)/include" \
+		-I"$(REPO_ROOT)/vendor/libbpf/include" -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
+		../test/native_loader_kfunc.cpp -Wl,--gc-sections "$(LIBBPF_LIBRARY)" -lelf -lz -ldl -pthread \
+		-o "$(KFUNC_BUILD)/kfunc"
+
+kfunc-check: kfunc-inputs
+	install -d "$(KFUNC_OUTPUT)"
+	"$(KFUNC_BUILD)/kfunc" host "$(KFUNC_BUILD)/weak.o" "$(KFUNC_BUILD)/strong.o" \
+		"$(KFUNC_BPF)" "$(KFUNC_NATIVE)" /workspaces/.agent-state/kprog-ck/build-x86/vmlinux "$(KFUNC_OUTPUT)"
+
+kfunc-kernel-kvm:
+	install -d "$(KFUNC_KERNEL_OUTPUT)"
+	install -m 0755 "$(KFUNC_BUILD)/kfunc" "$(KFUNC_KERNEL_OUTPUT)/kfunc"
+	install -m 0644 "$(KFUNC_BUILD)/weak.o" "$(KFUNC_BUILD)/strong.o" "$(KFUNC_KERNEL_OUTPUT)/"
+	install -m 0644 "$(KFUNC_BPF)" "$(KFUNC_KERNEL_OUTPUT)/source.bpf.o"
+	install -m 0644 "$(KFUNC_NATIVE)" "$(KFUNC_KERNEL_OUTPUT)/source.native.o"
+	taskset -c 13 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(KFUNC_KERNEL_OUTPUT)" --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/libnativeloader guest-kfunc KFUNC_KERNEL_OUTPUT=$(KFUNC_KERNEL_OUTPUT)'
+
+guest-kfunc:
+	"$(KFUNC_KERNEL_OUTPUT)/kfunc" kernel "$(KFUNC_KERNEL_OUTPUT)/weak.o" "$(KFUNC_KERNEL_OUTPUT)/strong.o" \
+		"$(KFUNC_KERNEL_OUTPUT)/source.bpf.o" "$(KFUNC_KERNEL_OUTPUT)/source.native.o" \
+		/sys/kernel/btf/vmlinux "$(KFUNC_KERNEL_OUTPUT)"
 
 .PHONY: data-layout-inputs data-layout-check data-layout-kernel-kvm guest-data-layout
 data-layout-inputs:

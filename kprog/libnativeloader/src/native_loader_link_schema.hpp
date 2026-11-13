@@ -142,6 +142,8 @@ NativeLinkArgs build_native_link_args(
             add_name_addr(out.helpers, alias->first, alias->second);
         }
     }
+    for (const auto &[name, address] : companion.kernel_functions)
+        add_name_addr(out.helpers, name, address);
     for (const char *symbol : kRuntimeCallSymbols) {
         uint64_t addr = kallsyms_lookup(symbol);
         if (addr != 0) {

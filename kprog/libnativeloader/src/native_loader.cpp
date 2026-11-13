@@ -9,6 +9,7 @@
 #include "native_loader_timings.hpp"
 #include "native_loader_helper_query.hpp"
 #include "native_loader_data_layout.hpp"
+#include "native_loader_kfunc.hpp"
 
 #include <bpf/bpf.h>
 #include <bpf/btf.h>
@@ -2174,6 +2175,7 @@ struct CompanionLoad {
     std::unordered_set<std::string> ambiguous_exact_maps;
     uint32_t prog_type = 0;
     std::optional<std::vector<std::pair<std::string, uint64_t>>> context_helpers;
+    std::vector<std::pair<std::string, uint64_t>> kernel_functions;
     std::vector<MapMeta> maps;
     std::vector<NativeMapRule> map_rules;
     /* Per-call-site spec for every `bpf_map_lookup_elem` invocation in
@@ -2760,6 +2762,67 @@ CompanionLoad::LookupSite lookup_site_for_map_meta(const MapMeta &meta,
                                     array_offsets, htab_offsets,
                                     this_cpu_off_addr);
     return site;
+}
+
+std::vector<std::pair<std::string, uint64_t>> native_kernel_function_targets(
+    const std::filesystem::path &native_object, const btf *local, const btf *kernel)
+{
+    if (elf_version(EV_CURRENT) == EV_NONE) fail("initialize kernel-function ELF reader");
+    auto bytes = read_binary_file(native_object);
+    std::unique_ptr<Elf, decltype(&elf_end)> elf(
+        elf_memory(reinterpret_cast<char *>(bytes.data()), bytes.size()), elf_end);
+    if (!elf) fail("read native kernel-function symbols: " + native_object.string());
+    std::unordered_map<std::string, bool> undefined;
+    Elf_Scn *section = nullptr;
+    while ((section = elf_nextscn(elf.get(), section))) {
+        GElf_Shdr header{};
+        if (!gelf_getshdr(section, &header)) fail("read native function symbol table header");
+        if (header.sh_type != SHT_SYMTAB && header.sh_type != SHT_DYNSYM) continue;
+        Elf_Data *data = elf_getdata(section, nullptr);
+        if (!data || !header.sh_entsize) fail("empty native function symbol table");
+        for (size_t i = 0; i < header.sh_size / header.sh_entsize; ++i) {
+            GElf_Sym symbol{};
+            if (!gelf_getsym(data, i, &symbol)) fail("read native function symbol");
+            if (symbol.st_shndx != SHN_UNDEF) continue;
+            const char *name = elf_strptr(elf.get(), header.sh_link, symbol.st_name);
+            if (!name) fail("read native function name");
+            const int id = btf__find_by_name_kind(local, name, BTF_KIND_FUNC);
+            if (id <= 0 || btf_vlen(btf__type_by_id(local, id)) != BTF_FUNC_EXTERN) continue;
+            undefined.emplace(name, GELF_ST_BIND(symbol.st_info) == STB_WEAK);
+        }
+    }
+    std::vector<std::pair<std::string, uint64_t>> bindings;
+    std::unordered_set<std::string> present;
+    for (const auto &[name, weak] : undefined) {
+        const auto id = native_kfunc_type_id(local, kernel, name, weak);
+        bindings.emplace_back(name, 0);
+        if (id) present.insert(name);
+    }
+    std::sort(bindings.begin(), bindings.end());
+    if (present.empty()) return bindings;
+    std::ifstream symbols("/proc/kallsyms");
+    if (!symbols) fail("open /proc/kallsyms for BTF kernel functions");
+    std::unordered_map<std::string, uint64_t> addresses;
+    std::string line;
+    while (std::getline(symbols, line)) {
+        std::istringstream fields(line);
+        uint64_t address;
+        char type;
+        std::string name;
+        if (!(fields >> std::hex >> address >> type >> name)) fail("parse kernel-function kallsyms");
+        // Match the stock verifier's first-name kallsyms_lookup_name lookup.
+        if (present.contains(name)) addresses.emplace(name, address);
+    }
+    if (!symbols.eof()) fail("read kernel-function kallsyms");
+    for (auto &[name, address] : bindings) {
+        if (!present.contains(name)) continue;
+        const auto found = addresses.find(name);
+        if (found == addresses.end() || !found->second)
+            fail("BTF kernel function has no readable kernel address: " + name);
+        address = found->second;
+    }
+    std::sort(bindings.begin(), bindings.end());
+    return bindings;
 }
 
 void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
@@ -3620,15 +3683,7 @@ void relocate_vmlinux_proof_call(const btf *local, const btf *kernel,
         insn.code != (BPF_JMP | BPF_CALL) || insn.dst_reg ||
         insn.src_reg != BPF_PSEUDO_CALL || insn.off || insn.imm != -1)
         fail("invalid source proof kfunc call relocation");
-    const int local_id = local ? btf__find_by_name_kind(local, name, BTF_KIND_FUNC) : -1;
-    const int kernel_id = kernel ? btf__find_by_name_kind(kernel, name, BTF_KIND_FUNC) : -1;
-    if (local_id <= 0 || kernel_id <= 0)
-        fail("source proof kfunc requires matching vmlinux BTF: " + std::string(name));
-    const auto *declaration = btf__type_by_id(local, local_id);
-    const auto *target = btf__type_by_id(kernel, kernel_id);
-    if (btf_vlen(declaration) != BTF_FUNC_EXTERN ||
-        bpf_core_types_are_compat(local, declaration->type, kernel, target->type) <= 0)
-        fail("source proof kfunc prototype differs from vmlinux: " + std::string(name));
+    const auto kernel_id = native_kfunc_type_id(local, kernel, name, false);
     insn.src_reg = BPF_PSEUDO_KFUNC_CALL;
     insn.imm = kernel_id;
 }
@@ -3970,6 +4025,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     std::vector<NativeMapRule> map_rules;
     bool kernel_helper_context = false;
     bool kernel_data_layout = false;
+    bool kernel_kfunc_context = false;
     if (native_object_path.empty()) {
         if (source_insns.empty()) {
             fail("native_loader: manifest resolution requires source BPF bytecode");
@@ -3992,6 +4048,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         symbol_name = resolution->symbol_name;
         kernel_helper_context = resolution->kernel_helper_context;
         kernel_data_layout = resolution->kernel_data_layout;
+        kernel_kfunc_context = resolution->kernel_kfunc_context;
         map_rules = std::move(resolution->map_rules);
     }
     if (symbol_name.empty()) {
@@ -4007,6 +4064,14 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             std::move(map_rules));
     if (kernel_helper_context)
         companion.context_helpers = query_program_helper_targets(options.original_prog_fd, prog_info.type);
+    if (kernel_kfunc_context) {
+        if (!prog_info.btf_id) fail("kernel kfunc context requires original program BTF");
+        std::unique_ptr<btf, decltype(&btf__free)> local(
+            btf__load_from_kernel_by_id(prog_info.btf_id), btf__free);
+        std::unique_ptr<btf, decltype(&btf__free)> kernel(btf__load_vmlinux_btf(), btf__free);
+        if (!local || !kernel) fail("load original/vmlinux BTF for native kfuncs");
+        companion.kernel_functions = native_kernel_function_targets(native_object_path, local.get(), kernel.get());
+    }
     const auto data_symbols_start = diagnostic_now();
     add_native_data_symbol_addrs(native_object_path, companion, kernel_data_layout);
     const auto data_symbols_end = diagnostic_now();
