@@ -28,19 +28,8 @@ BCC_LAST_TOOL := runqlat
 BCC_TOOLS := $(BCC_TOOLS_WITH_COMMA) $(BCC_LAST_TOOL)
 BCC_OBJS := $(patsubst %,$(OUT)/bcc/output/%.bpf.o,$(BCC_TOOLS))
 CILIUM_OBJS := bpf_lxc.o bpf_overlay.o bpf_sock.o bpf_host.o bpf_wireguard.o bpf_xdp.o bpf_alignchecker.o
-
-# Zeroing a constant-size region with stores instead of a call to the kernel's memset,
-# which on x86 becomes a byte-at-a-time `rep stos`. Off by default: with the switch off
-# both flag lists below are unchanged and the objects are byte-identical to the ones the
-# image ships. On, `NATIVE_INLINE_MEMSET=1` gives every native object native_memset.h
-# and -fno-builtin-memset, and its objects land in their own tree so the two builds can
-# be compared side by side. The measurement behind it is in native_memset.h.
-NATIVE_INLINE_MEMSET ?= 0
-NATIVE_MEMSET_INCLUDE := $(if $(filter 1,$(NATIVE_INLINE_MEMSET)),-include "$(CURDIR)/native_memset.h")
-NATIVE_MEMSET_FLAGS := $(if $(filter 1,$(NATIVE_INLINE_MEMSET)),-fno-builtin-memset)
-NATIVE_OUT_SUFFIX := $(if $(filter 1,$(NATIVE_INLINE_MEMSET)),-inline-memset)
-NATIVE_OUT := $(OUT)/native$(NATIVE_OUT_SUFFIX)
-NATIVE_STAGE_ROOT := $(BUILD)/$(ARCH)/stage$(NATIVE_OUT_SUFFIX)
+NATIVE_OUT := $(OUT)/native
+NATIVE_STAGE_ROOT := $(BUILD)/$(ARCH)/stage
 KATRAN_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/katran
 BCC_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/bcc
 OTEL_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/otelcol-ebpf-profiler
@@ -51,13 +40,13 @@ TRACEE_LSM_SUPPORT_SRCS := kprobe_check lsm_check
 NATIVE_TARGET_FLAGS := $(if $(filter arm64 aarch64,$(ARCH)),--target=aarch64-linux-gnu)
 NATIVE_ARCH_CFLAGS := $(if $(filter x86,$(ARCH)),-march=native -mno-red-zone -mgeneral-regs-only) \
 	$(if $(filter arm64 aarch64,$(ARCH)),-mtune=neoverse-n1 -mgeneral-regs-only)
-NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE $(NATIVE_MEMSET_INCLUDE) \
-	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector $(NATIVE_MEMSET_FLAGS) \
+NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE \
+	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
 	-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
 	-fno-optimize-sibling-calls \
 	-Wno-unknown-attributes -mllvm -switch-to-lookup=false
-KATRAN_NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE $(NATIVE_MEMSET_INCLUDE) \
-	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector $(NATIVE_MEMSET_FLAGS) \
+KATRAN_NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE \
+	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
 	-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
 	-fno-optimize-sibling-calls \
 	-Wno-unknown-attributes -Wno-compare-distinct-pointer-types \
