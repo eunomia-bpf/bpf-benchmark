@@ -1,0 +1,42 @@
+{
+  "recorded_utc": "2026-11-13T23:06:01+00:00",
+  "scope": "Generic kernel-function declaration selection fix, host subset",
+  "first_live_kernel_test": {
+    "outer_pid": 45409,
+    "started": "2026-11-13T22:59:02Z",
+    "finished": "2026-11-13T22:59:07Z",
+    "make_exit": 2,
+    "error": "kfunc absent from vmlinux BTF: cel_expr_2",
+    "cause": "BTF FUNC_EXTERN also describes application-linked functions; membership in .ksyms identifies kernel functions",
+    "raw_directory": "/workspaces/kprog-raw/verified/20261113-kfunc/restart1/kernel-launch"
+  },
+  "fix": [
+    "Select FUNC IDs listed by original BTF .ksyms DATASEC",
+    "Leave ordinary application extern references to normal linking; no synthesized bodies or null strong symbols",
+    "Explicit manifest-relative kernel_kfunc_btf path supplies original object declarations; kernel_kfunc_context remains default false",
+    "Use running vmlinux BTF for target prototypes and kallsyms addresses; no changed libbpf compatibility rules"
+  ],
+  "source_evidence": [
+    "vendor/libbpf/src/libbpf.c find_extern_sec_btf_id and bpf_object__collect_externs",
+    "libbpf sanitizes .ksyms function linkage and DATASEC before BTF_LOAD",
+    "Tetragon raw BTF .ksyms lists exactly five functions; CEL ordinary declarations are outside it"
+  ],
+  "host_test": {
+    "make_exit": 0,
+    "raw_directory": "/workspaces/kprog-raw/verified/20261113-kfunc/ksyms-fix/host",
+    "regressions": [
+      "Strong ordinary ELF extern coexists with missing weak kfuncs without kernel resolution",
+      "Ordinary functions without .ksyms produce no kernel bindings",
+      "Weak null, strong missing, genuine prototype mismatch, target ID namespace remain covered",
+      "Five actual target declarations and manifest-relative original BTF path"
+    ]
+  },
+  "actual_kernel_retry": "Prepared; collect after launch in a later turn",
+  "new_native_executions": 0,
+  "canonical_deployed": false,
+  "kernel_or_image_changed": false,
+  "benchmark_settings_changed": false,
+  "raw_removed": false,
+  "archive": "kfunc-ksyms-scope.tar.gz",
+  "archive_sha256": "40efaa592a952639595e8394f7ce39e46a4dbbd9015fe9247cee2b3190f5db7b"
+}

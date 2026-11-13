@@ -1,10 +1,29 @@
 #pragma once
 #include <bpf/btf.h>
+#include <cerrno>
 #include <cstdint>
 #include <stdexcept>
 #include <string>
+#include <unordered_set>
 extern "C" {
 #include "../../../vendor/libbpf/src/relo_core.h"
+}
+
+inline std::unordered_set<uint32_t> native_kfunc_declarations(const btf *local)
+{
+    if (!local) throw std::runtime_error("kernel functions require original object BTF");
+    const int section_id = btf__find_by_name_kind(local, ".ksyms", BTF_KIND_DATASEC);
+    if (section_id == -ENOENT) return {};
+    if (section_id < 0) throw std::runtime_error("read original BTF .ksyms section");
+    const auto *section = btf__type_by_id(local, section_id);
+    const auto *entries = btf_var_secinfos(section);
+    std::unordered_set<uint32_t> functions;
+    for (uint32_t i = 0; i < btf_vlen(section); ++i) {
+        const auto *type = btf__type_by_id(local, entries[i].type);
+        if (!type) throw std::runtime_error("read original .ksyms declaration");
+        if (btf_kind(type) == BTF_KIND_FUNC) functions.insert(entries[i].type);
+    }
+    return functions;
 }
 
 inline uint32_t native_kfunc_type_id(const btf *local, const btf *kernel,

@@ -45,6 +45,7 @@ struct ManifestResolution {
     bool kernel_helper_context = false;
     bool kernel_data_layout = false;
     bool kernel_kfunc_context = false;
+    std::filesystem::path kernel_kfunc_btf;
 };
 
 [[noreturn]] inline void manifest_fail(const std::string &message)
@@ -651,6 +652,8 @@ std::optional<ManifestResolution> resolve_native_manifest(
         candidate.kernel_helper_context = json_object_bool(entry, "kernel_helper_context").value_or(false);
         candidate.kernel_data_layout = json_object_bool(entry, "kernel_data_layout").value_or(false);
         candidate.kernel_kfunc_context = json_object_bool(entry, "kernel_kfunc_context").value_or(false);
+        if (auto object_btf = json_object_string(entry, "kernel_kfunc_btf"))
+            candidate.kernel_kfunc_btf = manifest_relative_path(manifest_path, *object_btf);
         if (selected &&
             (selected->native_object_path != candidate.native_object_path ||
              selected->symbol_name != candidate.symbol_name)) {

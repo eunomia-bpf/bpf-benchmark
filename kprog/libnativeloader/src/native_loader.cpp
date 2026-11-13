@@ -2772,6 +2772,7 @@ std::vector<std::pair<std::string, uint64_t>> native_kernel_function_targets(
     std::unique_ptr<Elf, decltype(&elf_end)> elf(
         elf_memory(reinterpret_cast<char *>(bytes.data()), bytes.size()), elf_end);
     if (!elf) fail("read native kernel-function symbols: " + native_object.string());
+    const auto kernel_declarations = native_kfunc_declarations(local);
     std::unordered_map<std::string, bool> undefined;
     Elf_Scn *section = nullptr;
     while ((section = elf_nextscn(elf.get(), section))) {
@@ -2787,7 +2788,7 @@ std::vector<std::pair<std::string, uint64_t>> native_kernel_function_targets(
             const char *name = elf_strptr(elf.get(), header.sh_link, symbol.st_name);
             if (!name) fail("read native function name");
             const int id = btf__find_by_name_kind(local, name, BTF_KIND_FUNC);
-            if (id <= 0 || btf_vlen(btf__type_by_id(local, id)) != BTF_FUNC_EXTERN) continue;
+            if (id <= 0 || !kernel_declarations.contains(id)) continue;
             undefined.emplace(name, GELF_ST_BIND(symbol.st_info) == STB_WEAK);
         }
     }
@@ -4026,6 +4027,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     bool kernel_helper_context = false;
     bool kernel_data_layout = false;
     bool kernel_kfunc_context = false;
+    std::filesystem::path kernel_kfunc_btf;
     if (native_object_path.empty()) {
         if (source_insns.empty()) {
             fail("native_loader: manifest resolution requires source BPF bytecode");
@@ -4049,6 +4051,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         kernel_helper_context = resolution->kernel_helper_context;
         kernel_data_layout = resolution->kernel_data_layout;
         kernel_kfunc_context = resolution->kernel_kfunc_context;
+        kernel_kfunc_btf = resolution->kernel_kfunc_btf;
         map_rules = std::move(resolution->map_rules);
     }
     if (symbol_name.empty()) {
@@ -4065,11 +4068,13 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     if (kernel_helper_context)
         companion.context_helpers = query_program_helper_targets(options.original_prog_fd, prog_info.type);
     if (kernel_kfunc_context) {
-        if (!prog_info.btf_id) fail("kernel kfunc context requires original program BTF");
+        // libbpf rewrites .ksyms/linkage before BTF_LOAD. Use the unchanged
+        // object's declarations, not the sanitized loaded-program BTF.
+        if (kernel_kfunc_btf.empty()) fail("kernel kfunc context requires kernel_kfunc_btf");
         std::unique_ptr<btf, decltype(&btf__free)> local(
-            btf__load_from_kernel_by_id(prog_info.btf_id), btf__free);
+            btf__parse(kernel_kfunc_btf.c_str(), nullptr), btf__free);
         std::unique_ptr<btf, decltype(&btf__free)> kernel(btf__load_vmlinux_btf(), btf__free);
-        if (!local || !kernel) fail("load original/vmlinux BTF for native kfuncs");
+        if (!local || !kernel) fail("load object/vmlinux BTF for native kfuncs");
         companion.kernel_functions = native_kernel_function_targets(native_object_path, local.get(), kernel.get());
     }
     const auto data_symbols_start = diagnostic_now();

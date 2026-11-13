@@ -18,14 +18,26 @@ static TestBtf fixture_btf(bool present, bool wrong_kind, bool external)
     if (wrong_kind) arg = btf__add_ptr(types.get(), arg);
     require(result > 0 && arg > 0, "add fixture BTF scalars");
     if (!external) require(btf__add_int(types.get(), "extra_target_type", 1, 0) > 0, "add target-only type");
+    std::vector<uint32_t> kernel_functions;
     for (const char *name : {"present", "absent"}) {
         if (!external && !present) continue;
         if (!external && std::string(name) == "absent") continue;
         if (!present && std::string(name) == "present") continue;
         const int prototype = btf__add_func_proto(types.get(), result);
         require(prototype > 0 && !btf__add_func_param(types.get(), "value", arg), "add BTF prototype");
-        require(btf__add_func(types.get(), name, external ? BTF_FUNC_EXTERN : BTF_FUNC_GLOBAL,
-                             prototype) > 0, "add BTF function");
+        const int function = btf__add_func(types.get(), name,
+            external ? BTF_FUNC_EXTERN : BTF_FUNC_GLOBAL, prototype);
+        require(function > 0, "add BTF function");
+        kernel_functions.push_back(function);
+    }
+    const int ordinary_proto = btf__add_func_proto(types.get(), result);
+    require(ordinary_proto > 0 && !btf__add_func_param(types.get(), "value", arg), "add ordinary prototype");
+    require(btf__add_func(types.get(), "ordinary", external ? BTF_FUNC_EXTERN : BTF_FUNC_GLOBAL,
+                         ordinary_proto) > 0, "add ordinary function");
+    if (external) {
+        require(btf__add_datasec(types.get(), ".ksyms", 0) > 0, "add .ksyms");
+        for (const auto function : kernel_functions)
+            require(!btf__add_datasec_var_info(types.get(), function, 0, 0), "add .ksyms function");
     }
     return types;
 }
@@ -60,6 +72,8 @@ try {
     const auto missing = native_kernel_function_targets(argv[2], local.get(), empty.get());
     require(missing.size() == 2 && missing[0].first == "absent" && missing[1].first == "present"
             && !missing[0].second && !missing[1].second, "absent weak ELF bindings did not retain null values");
+    require(native_kernel_function_targets(argv[2], target.get(), target.get()).empty(),
+            "ordinary function without .ksyms was treated as a kernel extern");
     fails([&] { native_kernel_function_targets(argv[3], local.get(), empty.get()); }, "strong ELF reference silently became null");
 
     TestBtf source(btf__parse(argv[4], nullptr), btf__free);
@@ -89,12 +103,15 @@ try {
     bpf_prog_info info{}; std::strcpy(info.name, "entry"); info.type = BPF_PROG_TYPE_KPROBE;
     for (const std::string setting : {"", ",\"kernel_kfunc_context\":false", ",\"kernel_kfunc_context\":true"}) {
         std::ofstream out(manifest);
-        out << "{\"objects\":[{\"program\":\"entry\",\"native_object\":\"" << argv[2] << "\"" << setting << "}]}";
+        out << "{\"objects\":[{\"program\":\"entry\",\"native_object\":\"" << argv[2] << "\""
+            << setting << ",\"kernel_kfunc_btf\":\"../inputs/source.bpf.o\"}]}";
         out.close(); require(static_cast<bool>(out), "write kfunc manifest");
         const auto selected = resolve_native_manifest(manifest, info, std::vector<bpf_insn>(1),
             [](int) -> bpf_map_info { fail("unexpected map query"); });
         require(selected && selected->kernel_kfunc_context == (setting.find("true") != std::string::npos),
                 "kfunc manifest selection/default changed");
+        require(selected->kernel_kfunc_btf == manifest.parent_path() / "../inputs/source.bpf.o",
+                "original object BTF path was not relative to the manifest");
     }
     report.close(); require(static_cast<bool>(report), "write kfunc report");
     std::cout << "kfunc BTF prototype/weak null/strong error/real five declarations/default-off: PASS\n";
