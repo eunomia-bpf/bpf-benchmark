@@ -2,6 +2,7 @@
 #define NATIVE_LOADER_HPP
 
 #include <cstdint>
+#include <chrono>
 #include <filesystem>
 #include <linux/bpf.h>
 #include <optional>
@@ -42,6 +43,11 @@ struct TrustedMapBinding {
     std::optional<uint32_t> value_offset;
 };
 
+struct LoadDiagnostics {
+    std::string log_path;
+    std::chrono::steady_clock::time_point started;
+};
+
 struct FdLoadOptions {
     int original_prog_fd = -1;
     int trusted_service_fd = -1;
@@ -65,7 +71,7 @@ struct FdLoadOptions {
     uint32_t attach_btf_id = 0;
     uint32_t attach_btf_obj_id = 0;
     uint32_t attach_prog_id = 0;
-    bool collect_diagnostic_timings = false;
+    LoadDiagnostics *diagnostics = nullptr;
 };
 
 LoadedProgram load_from_fd(const FdLoadOptions &options);

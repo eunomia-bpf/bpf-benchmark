@@ -1,0 +1,20 @@
+{
+  "recorded_at": "2026-11-13T05:26:46.037139+00:00",
+  "scope": "Host selected-manifest diagnostics regression; application deployment follows shared-base integration",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-manifest-timings",
+  "archive": "manifest-timings-subset.tar.gz",
+  "archive_bytes": 1705,
+  "activation": "objects[].loader_timing_log on the selected native object entry; nonempty environment path takes precedence",
+  "timing_clock": "C entry start and source-context boundary captured before manifest selection; later diagnostic clocks enabled by selected path",
+  "tests": [
+    "absent and empty field retain disabled output",
+    "program and prog_type filters isolate selected metadata",
+    "escaped path retains native object and symbol selection",
+    "unmatched entry and parse error behavior",
+    "80 complete raw records across four concurrent writers",
+    "C result offsets 0/4/8 and 65536-byte error buffer",
+    "full production native_loader.cpp syntax"
+  ],
+  "make_exit": 0,
+  "application_submissions": 0
+}

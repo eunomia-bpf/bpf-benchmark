@@ -3885,9 +3885,10 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         fail("native_loader: missing native_object_path or manifest_path");
     }
     LoadedProgram out{};
-    const auto diagnostic_now = [&] { return options.collect_diagnostic_timings
+    const auto collecting_timings = [&] { return options.diagnostics && !options.diagnostics->log_path.empty(); };
+    const auto diagnostic_now = [&] { return collecting_timings()
         ? std::chrono::steady_clock::now() : std::chrono::steady_clock::time_point{}; };
-    const auto context_start = diagnostic_now();
+    const auto context_start = options.diagnostics ? options.diagnostics->started : std::chrono::steady_clock::time_point{};
     const bpf_prog_info prog_info = load_prog_info(options.original_prog_fd);
     std::vector<bpf_insn> source_insns;
     if (!options.source_bpf_path.empty() && !options.source_insns.empty()) {
@@ -3901,7 +3902,9 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     if (!source_insns.empty() && !options.source_fd_array.empty()) {
         canonicalize_source_fd_array(source_insns, options.source_fd_array);
     }
-    const auto context_end = diagnostic_now();
+    // Two entry clocks preserve context/manifest attribution when metadata enables logging.
+    const auto context_end = options.diagnostics ? std::chrono::steady_clock::now()
+        : std::chrono::steady_clock::time_point{};
     std::filesystem::path native_object_path = options.native_object_path;
     std::string symbol_name = options.symbol_name;
     std::vector<NativeMapRule> map_rules;
@@ -3915,12 +3918,14 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
                                     source_insns,
                                     load_map_info);
         if (!resolution) {
-            if (options.collect_diagnostic_timings) {
+            if (collecting_timings()) {
                 out.timings.source_context_ns = elapsed_ns(context_start, context_end);
                 out.timings.manifest_ns = elapsed_ns(context_end, diagnostic_now());
             }
             return out;
         }
+        if (options.diagnostics && options.diagnostics->log_path.empty())
+            options.diagnostics->log_path = resolution->loader_timing_log;
         native_object_path = resolution->native_object_path;
         symbol_name = resolution->symbol_name;
         map_rules = std::move(resolution->map_rules);
@@ -3940,7 +3945,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     add_native_data_symbol_addrs(native_object_path, companion);
     const auto data_symbols_end = diagnostic_now();
     const auto with_common_timings = [&](LoadedProgram result) {
-        if (options.collect_diagnostic_timings) {
+        if (collecting_timings()) {
             result.timings.source_context_ns = elapsed_ns(context_start, context_end);
             result.timings.manifest_ns = elapsed_ns(context_end, manifest_end);
             result.timings.companion_total_ns = elapsed_ns(manifest_end, data_symbols_start);
@@ -4067,11 +4072,9 @@ extern "C" int native_loader_load_from_fd_with_manifest_path_and_attach(
 
     try {
         const char *timing_env = std::getenv("BPFREJIT_NATIVE_LOADER_TIMING_LOG");
-        const std::string timing_path = timing_env ? timing_env : "";
-        const auto timing_start = timing_path.empty() ? std::chrono::steady_clock::time_point{}
-            : std::chrono::steady_clock::now();
+        native_loader::LoadDiagnostics diagnostics{timing_env ? timing_env : "", std::chrono::steady_clock::now()};
         native_loader::FdLoadOptions options{};
-        options.collect_diagnostic_timings = !timing_path.empty();
+        options.diagnostics = &diagnostics;
         options.original_prog_fd = original_prog_fd;
         options.manifest_path = manifest_path;
         options.source_bpf_path = source_bpf_path;
@@ -4088,10 +4091,10 @@ extern "C" int native_loader_load_from_fd_with_manifest_path_and_attach(
         options.attach_prog_id = attach_prog_id;
         native_loader::LoadedProgram loaded = native_loader::load_from_fd(options);
         try {
-            if (!timing_path.empty()) {
+            if (!diagnostics.log_path.empty()) {
                 const auto timing_end = std::chrono::steady_clock::now();
-                native_loader_detail::append_timing_record(timing_path, original_prog_fd, loaded,
-                    std::chrono::duration_cast<std::chrono::nanoseconds>(timing_start.time_since_epoch()).count(),
+                native_loader_detail::append_timing_record(diagnostics.log_path, original_prog_fd, loaded,
+                    std::chrono::duration_cast<std::chrono::nanoseconds>(diagnostics.started.time_since_epoch()).count(),
                     std::chrono::duration_cast<std::chrono::nanoseconds>(timing_end.time_since_epoch()).count());
             }
         } catch (...) {
