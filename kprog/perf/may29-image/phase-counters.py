@@ -14,8 +14,6 @@ import json
 import sys
 from pathlib import Path
 
-METRIC_IDS = Path("/tmp/otel-metric-ids.json")
-
 # The counters that answer "did this arm do work", as opposed to "did it run".
 QUESTION = (
     "UnwindNativeAttempts",
@@ -30,16 +28,18 @@ QUESTION = (
 )
 
 
-def load_ids() -> dict[str, str]:
-    if METRIC_IDS.exists():
-        return json.loads(METRIC_IDS.read_text())
-    types_h = Path(__file__).resolve().parents[2] / "vendor/bpf/otel/support/ebpf/types.h"
+def load_ids(types_h: Path | None = None) -> dict[str, str]:
+    if types_h is None:
+        types_h = Path(__file__).resolve().parents[3] / "vendor/bpf/otel/support/ebpf/types.h"
     ids: dict[str, str] = {}
     next_id = 0
     for line in types_h.read_text().splitlines():
-        line = line.strip().rstrip(",")
+        line = line.split("//", 1)[0].strip().rstrip(",")
         if line.startswith("metricID_"):
-            ids[str(next_id)] = line
+            name, assigned, value = line.partition("=")
+            if assigned:
+                next_id = int(value.strip(), 0)
+            ids[str(next_id)] = name.strip()
             next_id += 1
     return ids
 
