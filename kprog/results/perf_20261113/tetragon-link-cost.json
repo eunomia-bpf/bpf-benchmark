@@ -1,0 +1,126 @@
+{
+  "recorded_at": "2026-11-13T04:47:11Z",
+  "scope": "P1e Tetragon startup component attribution; no throughput claim",
+  "run": "corpus/results/x86_kvm_corpus_20261113_043935_986036",
+  "capture": "corpus/results/perf-link-load-capture-20261113",
+  "profile": "corpus/results/perf-link-load-profile-20261113",
+  "make_exit": 0,
+  "app_status": "ok",
+  "stub_records": 0,
+  "phase_programs": {
+    "baseline": 99,
+    "post_rejit": 83
+  },
+  "kernel": "74d1097af561",
+  "image_id": "d756bf5919e9",
+  "contract": {
+    "cpus": "16-19",
+    "vcpus": 4,
+    "memory_gib": 8,
+    "host_address_space_limit_gib": 16,
+    "samples": 1,
+    "workload_seconds": 1,
+    "stats": 1
+  },
+  "command": "taskset -c 16-19 make -f /workspaces/repository/kprog/perf/one-image/Makefile corpus APPS=tetragon/observer SAMPLES=1 WORKLOAD_DURATION=1 CPUS=16-19 VM_CPUS=4 VM_MEM=8G STATE=/var/tmp/kprog-tmp/perf LOGS=/workspaces/kprog-raw/perf/20261113-link-load-profile/run BPFREJIT_CORPUS_BPF_STATS=1 NATIVE_MANIFEST=/workspaces/repository/corpus/results/perf-core-20261113/manifest.json VNG_FLAGS=--verbose",
+  "environment": {
+    "EQCODEX_OUT": "/workspaces/repository/corpus/results/perf-link-load-capture-20261113",
+    "EQCODEX_NATIVE_LINK_BINARY": "/workspaces/repository/corpus/results/perf-link-load-profile-20261113/native-link",
+    "PATH_prefix": "/workspaces/repository/kprog/perf/may29-image/eqcodex-bin"
+  },
+  "code": {
+    "wrapper": "9025380bb",
+    "clock_bounds": "b07cb025c",
+    "analysis": "82061db5b",
+    "source_child_spawn_fix_not_deployed": "e5bf984fc"
+  },
+  "hashes": {
+    "corpus/results/perf-link-load-profile-20261113/native-link": "890162456aac9ab5bbb33de4603d1e148555fb99ca562bfb133ff895e6cea144",
+    "corpus/results/perf-link-load-profile-20261113/config.json": "5d2e795aa9c2ed60cd5dcce865a35ae8a55e55e2a642404728bf70967a79a724",
+    "corpus/results/verified-linker-runtime-maps-20261113/native-link.real": "10a4b7dadc0f4f4c89d04c60f9f448b079dcdb38568e065f959705ac5eda6322",
+    "corpus/results/perf-core-20261113/manifest.json": "aae438b40af940934f2001f9911f95b55716fb00bbb5df23da6733aa39e29a62"
+  },
+  "native_loads": {
+    "count": 288,
+    "total": 172.97358000000006,
+    "median": 0.30267450000000906
+  },
+  "groups": {
+    "with_recorded_children": {
+      "loads": 38,
+      "whole_load_seconds": 16.495034000000118,
+      "median_whole_load_seconds": 0.4296119999999988,
+      "recorded_child_wall_union_seconds": 4.620471976
+    },
+    "without_recorded_children": {
+      "loads": 250,
+      "whole_load_seconds": 156.47854599999994,
+      "median_whole_load_seconds": 0.2843025000000097,
+      "recorded_child_wall_union_seconds": 0.0
+    }
+  },
+  "child_modes": {
+    "proof": {
+      "wall_seconds": {
+        "count": 38,
+        "total": 2.68023996,
+        "median": 0.06966055800000001
+      },
+      "user_seconds": {
+        "count": 38,
+        "total": 0.317349,
+        "median": 0.009295999999999999
+      },
+      "system_seconds": {
+        "count": 38,
+        "total": 0.237453,
+        "median": 0.006385999999999999
+      },
+      "return_codes": {
+        "0": 38
+      }
+    },
+    "kernel": {
+      "wall_seconds": {
+        "count": 38,
+        "total": 1.940232016,
+        "median": 0.049849885999999996
+      },
+      "user_seconds": {
+        "count": 38,
+        "total": 0.217197,
+        "median": 0.0013574999999999998
+      },
+      "system_seconds": {
+        "count": 38,
+        "total": 0.303556,
+        "median": 0.009762
+      },
+      "return_codes": {
+        "0": 38
+      }
+    }
+  },
+  "unmatched_child_invocations": 0,
+  "findings": [
+    "76child calls allreturn0;38proof/38kernel. All76uniquely matched to38loads by original parentPID and monotonic containment. 250native replacements have no recorded linker child.",
+    "Recordings show successful reuse without repeated linker children; no observation of lost cache across each load. Existing source cached branch is consistent with these observations.",
+    "250no-child loads consume156.478546s of summed load duration; median284.3025ms. Child spawning cannot explain that no-child cost.",
+    "All288native replacements sum172.97358s. The76recorded children sum4.620471976s; their parent38loads sum16.495034s.",
+    "No individual residual cost is identified. Existing loader stages and native-symbol process-FD scans are the next attribution leads, owned by verified."
+  ],
+  "limits": [
+    "Python timing wrapper adds startup overhead, excluded from its child clock interval and included in the intercepted parent load.",
+    "One1-second sample intentionally starts during startup; result inventories99/83. This is not equal-work throughput or floor timing.",
+    "Per-load summed time is not guest elapsed time and may overlap across threads.",
+    "This8GiB/1s contract differs from the earlier32GiB/60s diagnostic, so changes in load medians do not establish a speedup.",
+    "The remaining interval includes original BPF loading, companion collection, cache/hash/read/map relocation, upload, native program load and wrapper startup; no unmeasured stage is labelled the root cause."
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261113-link-load-profile",
+  "analysis_commands": [
+    "python3 kprog/perf/may29-image/load-timeline.py <run>/details/shim-logs/tetragon__observer.baseline.log <run>/details/shim-logs/tetragon__observer.post_rejit.log",
+    "python3 kprog/perf/may29-image/link-cost-report.py <profile> loads.json",
+    "python3 kprog/perf/may29-image/stubs.py <run>"
+  ],
+  "next": "Verified exposes existing stage timings behind default-off diagnostic selection, then fixes measured common cost; affected subset only, full sweep at batch end."
+}

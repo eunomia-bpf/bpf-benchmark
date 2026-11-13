@@ -282,3 +282,45 @@ the wrapper. Raw root: `/workspaces/kprog-raw/perf/20261113-link-load-profile`;
 invocations: `corpus/results/perf-link-load-profile-20261113`. This is startup
 component attribution with no throughput claim. Lane verified owns the fixes;
 kernel, image, base, default objects and frozen runner stay unchanged.
+
+## Tetragon linker child attribution completed
+
+`tetragon-link-cost.json`, `tetragon-link-cost-report.json` and the full raw
+archive retain run `x86_kvm_corpus_20261113_043935_986036`. Make/application
+complete0/ok with zero stub records. The one-second startup diagnostic records
+99 baseline programs and83 native programs in its measured snapshots; it does
+not supply an equal-work throughput or floor result.
+
+The full shim log contains288 native replacements. Exactly38 loads have a
+recorded proof child and kernel child, giving76 invocations, all exit0. Every
+invocation matches uniquely by parent PID and CLOCK_MONOTONIC containment.
+Their summed child wall time is4.620472s, and their38 parent loads sum16.495034s.
+The other250 native loads have no recorded linker child and sum156.478546s,
+with median284.30ms. All288 loads sum172.97358s. The proof/kernel child medians
+are69.66/49.85ms. Native program loading continues beyond the short measured
+sample; these are startup observations, including the shutdown interval.
+
+This demonstrates that repeated linker execution cannot explain the no-child
+load cost. The existing source cache path is consistent with successful reuse;
+the evidence does not show dlopen/dlclose losing its cache on every load.
+The residual includes original BPF loading, manifest and companion collection,
+data-symbol resolution, cache/hash/read/map relocation, upload, native program
+loading and Python wrapper startup. No one of these stages is yet identified
+as the root cause. In particular, the child's recorded interval excludes the
+Python wrapper's startup and the parent's spawning work.
+
+Lane verified owns the next attribution using the loader's existing stage
+timing fields, plus any uncovered manifest/data-symbol time, behind an explicit
+diagnostic selection. Process-FD scans during map-symbol resolution are a source
+lead, not a measured attribution. Its child-launch fix `e5bf984fc` was not
+integrated into this run's image/base. A spawn improvement alone cannot explain
+the250 loads with no child. No comparison with the earlier32GiB/60-second run
+is used to claim a startup speedup: this run uses8GiB/1second.
+
+The offline join regression passes and covers clock units, PID matching,
+ambiguous matches, unmatched intervals and overlapping-child interval union.
+Its initial fixture had an end clock earlier than its start; that fixture was
+corrected and the first failed log is retained. Actual data have no unmatched
+child invocations. All raw clocks, commands, shim logs, child reports and observer
+files are archived. The guest and its image read-lock have exited; no process
+was stopped by perf in this turn.
