@@ -256,8 +256,8 @@ $(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/x86/vmli
 			--report "$(dir $@)$${stem}.core.json" \
 			-o "$(dir $@)$${stem}.resolved.bc"; \
 		"$(LLVM_DIS)" "$(dir $@)$${stem}.resolved.bc" -o "$(dir $@)$${stem}.resolved.ll"; \
-		sed -E 's/"target-features"="[^"]*"//; s/"target-cpu"="[^"]*"//' \
-			"$(dir $@)$${stem}.resolved.ll" > "$(dir $@)$${stem}.notf.ll"; \
+		python3 "$(CURDIR)/../../kprog/results/tracee-samesource-20261113/native-ir-prep.py" \
+			"$(dir $@)$${stem}.resolved.ll" "$(dir $@)$${stem}.notf.ll"; \
 		"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/native_compat.h" $$inc \
 			-o "$@" "$(dir $@)$${stem}.notf.ll"; \
 	else \
