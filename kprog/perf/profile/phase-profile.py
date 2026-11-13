@@ -119,7 +119,8 @@ def run(args: argparse.Namespace) -> int:
     shutil.copy2(KINSN, var_tmp / "bpf_x86_native_lab.ko")
     shutil.copy2(IMAGE_TAR, var_tmp / "runtime.image.tar")
     guest = var_tmp / "phase-profile-guest.sh"
-    manifest = f"/opt/bpf-benchmark/native-bpf/x86_64/{args.app.split('/')[0]}/manifest.json"
+    manifest = args.manifest or (
+        f"/opt/bpf-benchmark/native-bpf/x86_64/{args.app.split('/')[0]}/manifest.json")
     guest.write_text(GUEST, encoding="utf-8")
     guest.chmod(0o755)
     command = [
@@ -266,6 +267,8 @@ def main(argv: list[str]) -> int:
     run_parser.add_argument("--annotate", type=int, default=3)
     run_parser.add_argument("--out", default="")
     run_parser.add_argument("--label", default="")
+    run_parser.add_argument("--manifest", default="",
+                            help="native manifest to load instead of the image's own")
     report_parser = sub.add_parser("report")
     report_parser.add_argument("directory")
     report_parser.add_argument("--annotate", type=int, default=3)
