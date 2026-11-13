@@ -24,6 +24,7 @@ int main(void)
     actual.in_iowait = 1;
     actual.comm[0] = 'x';
     struct task_struct___native_test *p = (void *)&actual;
+    struct task_struct___native_test *__v = p;
     if (!bpf_core_field_exists(p->thread_pid) || bpf_core_field_exists(p->missing_native_test))
         return 1;
     if (bpf_core_field_exists(p->missing_native_test))
@@ -33,7 +34,7 @@ int main(void)
         return 2;
     if (p->thread_pid != (struct pid *)0x1234 || p->loginuid.val != 501)
         return 3;
-    if (p->in_iowait != 1 || p->comm[0] != 'x'
+    if (__v->in_iowait != 1 || p->comm[0] != 'x'
         || bpf_core_field_size(p->comm) != sizeof(actual.comm))
         return 4;
 #ifdef CORE_LOWER

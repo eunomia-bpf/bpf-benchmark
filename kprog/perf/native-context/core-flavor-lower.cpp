@@ -230,10 +230,12 @@ public:
         if (Width > 8 || V.Bits + Shift > Width * 8) { llvm::errs() << "CO-RE bitfield exceeds 64-bit storage\n"; Failed = true; return true; }
         auto *T = btf__type_by_id(B, strip(V.Id));
         bool Signed = btf_is_int(T) && (btf_int_encoding(T) & BTF_INT_SIGNED);
-        std::string Shifted = "(__v >> " + std::to_string(Shift) + ")";
+        std::string Temp = "__kprog_core_bits_" + std::to_string(R.first);
+        while (Code.find(Temp) != std::string::npos) Temp += "_";
+        std::string Shifted = "(" + Temp + " >> " + std::to_string(Shift) + ")";
         std::string Value = Signed ? "(((long long)(" + Shifted + " << " + std::to_string(64 - V.Bits) + ")) >> " + std::to_string(64 - V.Bits) + ")" :
                             "(" + Shifted + " & (0xffffffffffffffffULL >> " + std::to_string(64 - V.Bits) + "))";
-        replace(M, "({ unsigned long long __v = 0; __builtin_memcpy(&__v, " + Address + ", " + std::to_string(Width) + "); (" + M->getType().getAsString() + ")" + Value + "; })");
+        replace(M, "({ unsigned long long " + Temp + " = 0; __builtin_memcpy(&" + Temp + ", " + Address + ", " + std::to_string(Width) + "); (" + M->getType().getAsString() + ")" + Value + "; })");
       } else replace(M, "(*(__typeof__(" + Original + ") *)" + Address + ")");
     }
     ++Accesses;
@@ -245,6 +247,8 @@ public:
     llvm::raw_fd_ostream Out(Output, EC, llvm::sys::fs::OF_Text);
     if (EC) { llvm::errs() << EC.message() << '\n'; return false; }
     Out << render(0, Code.size());
+    Out.close();
+    if (Out.has_error()) { llvm::errs() << Out.error().message() << '\n'; return false; }
     llvm::errs() << "CO-RE queries=" << Queries << " flavored accesses=" << Accesses << '\n';
     return true;
   }
@@ -260,7 +264,7 @@ int main(int argc, char **argv) {
       {"-xc", "-fms-extensions", "-Wno-deprecated-non-prototype", "-Wno-unknown-attributes"}, argv[1]);
   if (!AST || AST->getDiagnostics().hasErrorOccurred()) { btf__free(B); return 1; }
   Lower Pass(AST->getASTContext(), B, (*Source)->getBuffer().str());
-  Pass.TraverseDecl(AST->getASTContext().getTranslationUnitDecl());
+  if (!Pass.TraverseDecl(AST->getASTContext().getTranslationUnitDecl())) { btf__free(B); return 1; }
   bool OK = Pass.write(argv[2]);
   btf__free(B);
   return OK ? 0 : 1;
