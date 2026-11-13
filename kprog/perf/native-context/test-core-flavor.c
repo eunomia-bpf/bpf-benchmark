@@ -34,9 +34,13 @@ int main(void)
     if (p->thread_pid != (struct pid *)0x1234 || p->loginuid.val != 501)
         return 3;
     if (p->in_iowait != 1 || p->comm[0] != 'x'
-        || bpf_core_field_size(p->in_iowait) != sizeof(unsigned int)
         || bpf_core_field_size(p->comm) != sizeof(actual.comm))
         return 4;
+#ifdef CORE_LOWER
+    // The legacy sizeof macro cannot parse a bitfield-size query.
+    if (bpf_core_field_size(p->in_iowait) != sizeof(unsigned int))
+        return 7;
+#endif
     if (!bpf_core_enum_value_exists(enum bpf_map_type___native_test, BPF_MAP_TYPE_ARRAY___native_test)
         || bpf_core_enum_value_exists(enum bpf_map_type___native_test, BPF_MAP_TYPE_ABSENT___native_test))
         return 5;
