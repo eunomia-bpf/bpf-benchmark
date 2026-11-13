@@ -1,0 +1,882 @@
+{
+  "recorded_at": "2026-11-13T23:41:21.875728+00:00",
+  "protocol_commit": "dbb62ef37",
+  "raw": "/workspaces/kprog-raw/perf/20261113-tetragon-public-data",
+  "inputs": [],
+  "reports": [
+    {
+      "path": "/workspaces/kprog-raw/perf/20261113-tetragon-public-data/report.json",
+      "sha256": "d69b40bd987e6d7f48c075b6d6899e745bfdcc9a841d2622a9ca0bb121d5022e",
+      "data": {
+        "manifest": "/workspaces/repository/corpus/results/perf-core-20261113/manifest.json",
+        "manifest_sha256": "aae438b40af940934f2001f9911f95b55716fb00bbb5df23da6733aa39e29a62",
+        "workers": 4,
+        "kernel_btf_sha256": "f3743c05960fc700e29f31e0035a23cdd4b2500d5e6e7542984d5f6fba75babe",
+        "started_at": "2026-11-13T23:37:01.202835+00:00",
+        "rows": [
+          {
+            "unit": "bpf_cgroup",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_cgroup.c",
+            "source_sha256": "1ff6867d6d22a69e20b17ef1184522ec2c8124cdd2408ea6010b635d98f399fe",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgroup.o",
+            "reference_sha256": "3c9b34f10d7a1dac5bd771daa6cdbb492de6c97bf4c91cec802b87e6d3e9ee81",
+            "entry_sections": [
+              "raw_tracepoint/cgroup_rmdir"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_cgroup",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_cgroup.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_cgroup",
+              "TETRAGON_SECTION_ARGS=--section-prefix raw_tracepoint/cgroup_rmdir"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:02.166764+00:00"
+          },
+          {
+            "unit": "bpf_cgroup_mkdir_v511",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/cgroup/bpf_cgroup_mkdir.c",
+            "source_sha256": "fed080b1d8ddc0c8b4e6ec3e8660fcc820ecd0e24d502ebc65c3ccccdd73bba5",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgroup_mkdir_v511.o",
+            "reference_sha256": "d2b8c1fc0c99b33dc350be8dee2c8bf0cc16990691b2a289ec96da6a1a28d4c6",
+            "entry_sections": [
+              "raw_tracepoint/cgroup_mkdir"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_cgroup_mkdir_v511",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/cgroup/bpf_cgroup_mkdir.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_cgroup_mkdir_v511",
+              "TETRAGON_SECTION_ARGS=--section-prefix raw_tracepoint/cgroup_mkdir"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:02.260074+00:00"
+          },
+          {
+            "unit": "bpf_cgroup_release_v511",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/cgroup/bpf_cgroup_release.c",
+            "source_sha256": "00a48c4b9ca1dc0b3edcb6d16b583e28bcac68516ef4e801759f700bbd91e024",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgroup_release_v511.o",
+            "reference_sha256": "d5592392d6bed8747fd73c0c2fa928d2be9b6401d5272fbba44c6c7fdc33326f",
+            "entry_sections": [
+              "raw_tracepoint/cgroup_release"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_cgroup_release_v511",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/cgroup/bpf_cgroup_release.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_cgroup_release_v511",
+              "TETRAGON_SECTION_ARGS=--section-prefix raw_tracepoint/cgroup_release"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:02.275582+00:00"
+          },
+          {
+            "unit": "bpf_cgroup_rmdir_v511",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/cgroup/bpf_cgroup_rmdir.c",
+            "source_sha256": "d1657dd8abd7388731a70e36db1d1f12919a0cece2a5310b725c906fb33c1679",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgroup_rmdir_v511.o",
+            "reference_sha256": "ef03bc4af979faaa33db60b877343a51c16671b877353ead9ebe4700dcc2ccf7",
+            "entry_sections": [
+              "raw_tracepoint/cgroup_rmdir"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_cgroup_rmdir_v511",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/cgroup/bpf_cgroup_rmdir.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_cgroup_rmdir_v511",
+              "TETRAGON_SECTION_ARGS=--section-prefix raw_tracepoint/cgroup_rmdir"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:02.252760+00:00"
+          },
+          {
+            "unit": "bpf_cgtracker",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/cgroup/bpf_cgtracker.c",
+            "source_sha256": "439134cbd8ddb4b21dcd5dc2a1b39136a14c0974c99eae9aa581b0d23a575268",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgtracker.o",
+            "reference_sha256": "6b8bdb394f4c6141984850f7ba0a3ccc07dd4d67e082f8245b9d459eb351b6cf",
+            "entry_sections": [
+              "raw_tracepoint/cgroup_mkdir",
+              "raw_tracepoint/cgroup_release"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_cgtracker",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/cgroup/bpf_cgtracker.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_cgtracker",
+              "TETRAGON_SECTION_ARGS=--section-prefix raw_tracepoint/cgroup_mkdir --section-prefix raw_tracepoint/cgroup_release"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:03.174682+00:00"
+          },
+          {
+            "unit": "bpf_enforcer",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_enforcer.c",
+            "source_sha256": "6c8924958dacbe1d6543432523d34504984f9ef5569708d5709768f9d3c82d19",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_enforcer.o",
+            "reference_sha256": "f04d9023646196739aedf346a33e55fec0fe3ea6be200f05e83549d87a743f27",
+            "entry_sections": [
+              "kprobe/enforcer"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_enforcer",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_enforcer.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_enforcer",
+              "TETRAGON_SECTION_ARGS=--section-prefix kprobe/enforcer"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:02.887922+00:00"
+          },
+          {
+            "unit": "bpf_execve_bprm_commit_creds",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_execve_bprm_commit_creds.c",
+            "source_sha256": "8c888c3ac938aa92603fe83895c55a8ed9bf1c60ba69e49fb7565d55c99a1480",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_bprm_commit_creds.o",
+            "reference_sha256": "d476e2f8ff675c7267b14e08de6a1fd28a7c371807b015e8e8986924ee4d26f7",
+            "entry_sections": [
+              "kprobe/security_bprm_committing_creds"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_execve_bprm_commit_creds",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_execve_bprm_commit_creds.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_execve_bprm_commit_creds",
+              "TETRAGON_SECTION_ARGS=--section-prefix kprobe/security_bprm_committing_creds"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:03.304289+00:00"
+          },
+          {
+            "unit": "bpf_execve_event_v61",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_execve_event.c",
+            "source_sha256": "29bd471732b457186f926303edf8db3a4daf4cd4eb8787f06de97d89fbd6efe6",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_event_v61.o",
+            "reference_sha256": "5f02b063c93db8e8c737a5778a3860b6cd58b17503a36be3b2671186e7e88b08",
+            "entry_sections": [
+              "tracepoint",
+              "tracepoint/sys_execve"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_execve_event_v61",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_execve_event.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_execve_event_v61",
+              "TETRAGON_SECTION_ARGS=--section-prefix tracepoint --section-prefix tracepoint/sys_execve"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:04.437376+00:00"
+          },
+          {
+            "unit": "bpf_execve_map_update_v61",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_execve_map_update.c",
+            "source_sha256": "5e3e1d543e8432a4745e79c49fb7dd81c29e924e3288fcbe58cefbfb54c684fa",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_map_update_v61.o",
+            "reference_sha256": "d8ee575d93afa6dd6a085171d60662aa85df4fa8b4bd5f6a3e201641a12b25b1",
+            "entry_sections": [
+              "socket"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_execve_map_update_v61",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_execve_map_update.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_execve_map_update_v61",
+              "TETRAGON_SECTION_ARGS=--section-prefix socket"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:03.558404+00:00"
+          },
+          {
+            "unit": "bpf_exit_v511",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_exit.c",
+            "source_sha256": "e9986d62d1c20ff4c3a8a45caa82f13c8e706a57bde47be0be11ca8f251313a1",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_exit_v511.o",
+            "reference_sha256": "225d351e8f963733677de0aa043be6d84080b3f46c852cd122de20944b54ecf5",
+            "entry_sections": [
+              "kprobe/acct_process",
+              "kprobe/disassociate_ctty"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_exit_v511",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_exit.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_exit_v511",
+              "TETRAGON_SECTION_ARGS=--section-prefix kprobe/acct_process --section-prefix kprobe/disassociate_ctty"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:04.224290+00:00"
+          },
+          {
+            "unit": "bpf_fmodret_enforcer",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_enforcer.c",
+            "source_sha256": "6c8924958dacbe1d6543432523d34504984f9ef5569708d5709768f9d3c82d19",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_fmodret_enforcer.o",
+            "reference_sha256": "ec146156596837500575fe66f17aaecff4177cb49f048822a04b59981f466d3d",
+            "entry_sections": [
+              "fmod_ret/security_task_prctl"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_fmodret_enforcer",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_enforcer.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_fmodret_enforcer",
+              "TETRAGON_SECTION_ARGS=--section-prefix fmod_ret/security_task_prctl"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:03.926841+00:00"
+          },
+          {
+            "unit": "bpf_fork_v511",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_fork.c",
+            "source_sha256": "5eeaf0ac35d7ce5c92c4f06af1a8ed517988542f11e1fd50acc31c9af293f3ce",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_fork_v511.o",
+            "reference_sha256": "6a3b96f21b0bb9b962b1373aa7975ce5e831504cfb53e6a0710d139043419db4",
+            "entry_sections": [
+              "kprobe/wake_up_new_task"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_fork_v511",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_fork.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_fork_v511",
+              "TETRAGON_SECTION_ARGS=--section-prefix kprobe/wake_up_new_task"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:05.106833+00:00"
+          },
+          {
+            "unit": "bpf_generic_fentry_v61",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_fentry.c",
+            "source_sha256": "07ab14f6304d59162283d17f1113f49b0b2d3f4611635e0d9cb6db223d55e986",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_fentry_v61.o",
+            "reference_sha256": "62adb3dcc14f5e247db152b1ff43ad3ce1ddbf8ad7bc3ef8d4eea965dcb3ba69",
+            "entry_sections": [
+              "fentry/generic_fentry_tail",
+              "fentry/generic_fentry"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_generic_fentry_v61",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_fentry.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_generic_fentry_v61",
+              "TETRAGON_SECTION_ARGS=--section-prefix fentry/generic_fentry_tail --section-prefix fentry/generic_fentry"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:07.827587+00:00"
+          },
+          {
+            "unit": "bpf_generic_fexit_v61",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_fexit.c",
+            "source_sha256": "5f33b121e34c2a0f922e9eef9bdff832860f6f4ec0a634cde7ec509230ab9f18",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_fexit_v61.o",
+            "reference_sha256": "920302cf9c6be727ed8ce0bb1a44f819a4e41fcda3f84b0fcbf9567e08de7610",
+            "entry_sections": [
+              "fexit/generic_fexit_tail",
+              "fexit/generic_fexit"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_generic_fexit_v61",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_fexit.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_generic_fexit_v61",
+              "TETRAGON_SECTION_ARGS=--section-prefix fexit/generic_fexit_tail --section-prefix fexit/generic_fexit"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:06.883679+00:00"
+          },
+          {
+            "unit": "bpf_generic_kprobe_v61",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_kprobe.c",
+            "source_sha256": "7f7d5acc5612a1a3c193adffe73af928e6ac7deb2a4765c94bc85ac66e0e5db9",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_kprobe_v61.o",
+            "reference_sha256": "7f938c1f10bf8c23b98bf804db70c47e20838d4201b94b04dc7d6437caf8821d",
+            "entry_sections": [
+              "kprobe",
+              "kprobe/generic_kprobe",
+              "kprobe/generic_kprobe_override",
+              "fmod_ret/security_task_prctl"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_generic_kprobe_v61",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_kprobe.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_generic_kprobe_v61",
+              "TETRAGON_SECTION_ARGS=--section-prefix kprobe --section-prefix kprobe/generic_kprobe --section-prefix kprobe/generic_kprobe_override --section-prefix fmod_ret/security_task_prctl"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:08.509565+00:00"
+          },
+          {
+            "unit": "bpf_generic_lsm_core_v511",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_lsm_core.c",
+            "source_sha256": "cb69f7abd3daabdf917126bc1c93aac30b5e85f0534365c5a01056f816354d64",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_core_v511.o",
+            "reference_sha256": "8cb71e9df850cb88c20cfe5e63790a3cdaa6e9acb48e00d8017684c87041d39d",
+            "entry_sections": [
+              "lsm",
+              "lsm/generic_lsm_core"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_generic_lsm_core_v511",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_lsm_core.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_generic_lsm_core_v511",
+              "TETRAGON_SECTION_ARGS=--section-prefix lsm --section-prefix lsm/generic_lsm_core"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:14.985603+00:00"
+          },
+          {
+            "unit": "bpf_generic_lsm_core_v61",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_lsm_core.c",
+            "source_sha256": "cb69f7abd3daabdf917126bc1c93aac30b5e85f0534365c5a01056f816354d64",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_core_v61.o",
+            "reference_sha256": "c85bfb4f8798c7a698ce60dbb615332f09961f0351918e9ac5e744bb3dd89894",
+            "entry_sections": [
+              "lsm",
+              "lsm/generic_lsm_core"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_generic_lsm_core_v61",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_lsm_core.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_generic_lsm_core_v61",
+              "TETRAGON_SECTION_ARGS=--section-prefix lsm --section-prefix lsm/generic_lsm_core"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:10.756498+00:00"
+          },
+          {
+            "unit": "bpf_generic_lsm_ima_bprm_v61",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_lsm_ima_bprm.c",
+            "source_sha256": "8ded6012da763fc16b12c85ee8111607581117a4649cc82d6777dcfcebe9aa51",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_ima_bprm_v61.o",
+            "reference_sha256": "3c26a835e4f9ffc60c2ca7de815047bce4a94170160d60fb852c2a5940af4db6",
+            "entry_sections": [
+              "lsm.s/generic_lsm_ima_bprm"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_generic_lsm_ima_bprm_v61",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_lsm_ima_bprm.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_generic_lsm_ima_bprm_v61",
+              "TETRAGON_SECTION_ARGS=--section-prefix lsm.s/generic_lsm_ima_bprm"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:08.835631+00:00"
+          },
+          {
+            "unit": "bpf_generic_lsm_ima_file_v61",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_lsm_ima_file.c",
+            "source_sha256": "dd0c7a431292c772e2e5178a16cd748fbfe4d59488f366c99a6e61c815f719e2",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_ima_file_v61.o",
+            "reference_sha256": "280a1402fdfd9549a56f361431a71dcd1454c9f93728ef58830345a203c4db03",
+            "entry_sections": [
+              "lsm.s/generic_lsm_ima_file"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_generic_lsm_ima_file_v61",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_lsm_ima_file.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_generic_lsm_ima_file_v61",
+              "TETRAGON_SECTION_ARGS=--section-prefix lsm.s/generic_lsm_ima_file"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:09.488476+00:00"
+          },
+          {
+            "unit": "bpf_generic_lsm_output_v61",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_lsm_output.c",
+            "source_sha256": "627f36c62e7926258ad4f24538e6a2a0d5c458d21d760c4c723142e0149aa3e6",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_output_v61.o",
+            "reference_sha256": "8e3777d239228c20037fbe1376898fc1b9791c072daf5551996b59fe42cadd5b",
+            "entry_sections": [
+              "lsm/generic_lsm_output"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_generic_lsm_output_v61",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_lsm_output.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_generic_lsm_output_v61",
+              "TETRAGON_SECTION_ARGS=--section-prefix lsm/generic_lsm_output"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:10.199408+00:00"
+          },
+          {
+            "unit": "bpf_generic_rawtp_v61",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_rawtp.c",
+            "source_sha256": "3c60d98aa09ef237311b2af765049c62f3347eedb23eb3beb6e816e9505d5038",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_rawtp_v61.o",
+            "reference_sha256": "005182c5d19ae1dd43bf2228016e0cf390a400152883668dee648314d38c7f1d",
+            "entry_sections": [
+              "raw_tp",
+              "raw_tp/generic_tracepoint"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_generic_rawtp_v61",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_rawtp.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_generic_rawtp_v61",
+              "TETRAGON_SECTION_ARGS=--section-prefix raw_tp --section-prefix raw_tp/generic_tracepoint"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:13.486165+00:00"
+          },
+          {
+            "unit": "bpf_generic_retkprobe_v61",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_retkprobe.c",
+            "source_sha256": "21ba7d54e4f845cf421265729918dbb1e4314ba7b1dbd46157e07845bc77ed20",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_retkprobe_v61.o",
+            "reference_sha256": "42e1e59cae7763bc2a977861865bc573247a3226829cd80e7fd6cf13460ab403",
+            "entry_sections": [
+              "kprobe",
+              "kprobe/generic_retkprobe"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_generic_retkprobe_v61",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_retkprobe.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_generic_retkprobe_v61",
+              "TETRAGON_SECTION_ARGS=--section-prefix kprobe --section-prefix kprobe/generic_retkprobe"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:12.857222+00:00"
+          },
+          {
+            "unit": "bpf_generic_retuprobe_v61",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_retuprobe.c",
+            "source_sha256": "a2d726f550a3eea8412f37d19a92196db43be33e349500d7a4afb87dd61d1c21",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_retuprobe_v61.o",
+            "reference_sha256": "2e829660cc89a1f4a2f02a018feccbcdfc623254dc34d1c666bec70c71148f69",
+            "entry_sections": [
+              "uprobe",
+              "uprobe/generic_retuprobe"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_generic_retuprobe_v61",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_retuprobe.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_generic_retuprobe_v61",
+              "TETRAGON_SECTION_ARGS=--section-prefix uprobe --section-prefix uprobe/generic_retuprobe"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:13.442458+00:00"
+          },
+          {
+            "unit": "bpf_generic_tracepoint_v61",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_tracepoint.c",
+            "source_sha256": "e623f6a10668865c9d65222387beb1b602743d6858b11e1bc519e9211bb46a9d",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_tracepoint_v61.o",
+            "reference_sha256": "f3dc6c209c8d80fa9651b3e8633ece29d6d608b18f8581b59426c5ef20e53059",
+            "entry_sections": [
+              "tracepoint",
+              "tracepoint/generic_tracepoint"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_generic_tracepoint_v61",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_tracepoint.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_generic_tracepoint_v61",
+              "TETRAGON_SECTION_ARGS=--section-prefix tracepoint --section-prefix tracepoint/generic_tracepoint"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:17.153444+00:00"
+          },
+          {
+            "unit": "bpf_generic_uprobe_v61",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_uprobe.c",
+            "source_sha256": "cef83d6aeb7c644aebcc2375f0868355a5b6f4a690e2c606eae9720ef66d12b2",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_uprobe_v61.o",
+            "reference_sha256": "ec46c4438e1efdcf2b2eccdbc16782691c6768c8988db59ae1d048ca6bcc23b7",
+            "entry_sections": [
+              "uprobe",
+              "uprobe/generic_uprobe",
+              "uprobe.s/generic_uprobe"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_generic_uprobe_v61",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_uprobe.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_generic_uprobe_v61",
+              "TETRAGON_SECTION_ARGS=--section-prefix uprobe --section-prefix uprobe/generic_uprobe --section-prefix uprobe.s/generic_uprobe"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:17.558224+00:00"
+          },
+          {
+            "unit": "bpf_generic_usdt_v61",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_usdt.c",
+            "source_sha256": "b831fdbe2198564039dbf41582a5277bf9de0a2b95e08253148067cf9ed8d668",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_usdt_v61.o",
+            "reference_sha256": "f319853ce3c93e340e33ecf68f0352311b598331ed1201c09532d691db72d827",
+            "entry_sections": [
+              "uprobe",
+              "uprobe/generic_usdt",
+              "uprobe.s/generic_usdt"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_generic_usdt_v61",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_usdt.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_generic_usdt_v61",
+              "TETRAGON_SECTION_ARGS=--section-prefix uprobe --section-prefix uprobe/generic_usdt --section-prefix uprobe.s/generic_usdt"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:17.546265+00:00"
+          },
+          {
+            "unit": "bpf_loader_v511",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_loader.c",
+            "source_sha256": "7e431388b5a2811411c7a8d50e3e3daeb02ff0e81c32155f02d05c76276bb7b0",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_loader_v511.o",
+            "reference_sha256": "e42fb579438e3dd620825852ac27208cedb70bcbb60e936f56b4a649c4244c67",
+            "entry_sections": [
+              "kprobe/perf_event_mmap_output"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_loader_v511",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_loader.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_loader_v511",
+              "TETRAGON_SECTION_ARGS=--section-prefix kprobe/perf_event_mmap_output"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:15.947353+00:00"
+          },
+          {
+            "unit": "bpf_multi_enforcer",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_enforcer.c",
+            "source_sha256": "6c8924958dacbe1d6543432523d34504984f9ef5569708d5709768f9d3c82d19",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_enforcer.o",
+            "reference_sha256": "5bbb475799fa1cb371dc731ceaee4abe961733965096b4ac3f49f06be9c31b1a",
+            "entry_sections": [
+              "kprobe.multi/enforcer"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_multi_enforcer",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_enforcer.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_multi_enforcer",
+              "TETRAGON_SECTION_ARGS=--section-prefix kprobe.multi/enforcer"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:16.563780+00:00"
+          },
+          {
+            "unit": "bpf_multi_kprobe_v61",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_kprobe.c",
+            "source_sha256": "7f7d5acc5612a1a3c193adffe73af928e6ac7deb2a4765c94bc85ac66e0e5db9",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_kprobe_v61.o",
+            "reference_sha256": "cc2e31d1d943425e4944fb4ea90371c4eff221eb72a3b8acee9d52734205f673",
+            "entry_sections": [
+              "kprobe.multi",
+              "kprobe.multi/generic_kprobe",
+              "kprobe.multi/generic_kprobe_override",
+              "fmod_ret/security_task_prctl"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_multi_kprobe_v61",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_kprobe.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_multi_kprobe_v61",
+              "TETRAGON_SECTION_ARGS=--section-prefix kprobe.multi --section-prefix kprobe.multi/generic_kprobe --section-prefix kprobe.multi/generic_kprobe_override --section-prefix fmod_ret/security_task_prctl"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:20.551330+00:00"
+          },
+          {
+            "unit": "bpf_multi_retkprobe_v61",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_retkprobe.c",
+            "source_sha256": "21ba7d54e4f845cf421265729918dbb1e4314ba7b1dbd46157e07845bc77ed20",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_retkprobe_v61.o",
+            "reference_sha256": "a05781d19f579115904a0cdaa51011c685335a9688048cc139e4aee4fd339eb4",
+            "entry_sections": [
+              "kprobe.multi",
+              "kprobe.multi/generic_retkprobe"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_multi_retkprobe_v61",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_retkprobe.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_multi_retkprobe_v61",
+              "TETRAGON_SECTION_ARGS=--section-prefix kprobe.multi --section-prefix kprobe.multi/generic_retkprobe"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:19.843620+00:00"
+          },
+          {
+            "unit": "bpf_multi_retuprobe_v61",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_retuprobe.c",
+            "source_sha256": "a2d726f550a3eea8412f37d19a92196db43be33e349500d7a4afb87dd61d1c21",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_retuprobe_v61.o",
+            "reference_sha256": "a11e34d0c44ceaa55a02bd2192fb7c8a39fc7ea53f04dc343477448e9fce3154",
+            "entry_sections": [
+              "uprobe.multi",
+              "uprobe.multi/generic_retuprobe"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_multi_retuprobe_v61",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_retuprobe.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_multi_retuprobe_v61",
+              "TETRAGON_SECTION_ARGS=--section-prefix uprobe.multi --section-prefix uprobe.multi/generic_retuprobe"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:20.236191+00:00"
+          },
+          {
+            "unit": "bpf_multi_uprobe_v61",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_uprobe.c",
+            "source_sha256": "cef83d6aeb7c644aebcc2375f0868355a5b6f4a690e2c606eae9720ef66d12b2",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_uprobe_v61.o",
+            "reference_sha256": "6510edc5f69b522543c0045e1ab79a1e77f544c8ffcc4dca3878f39e27c0eca4",
+            "entry_sections": [
+              "uprobe.multi",
+              "uprobe.multi/generic_uprobe",
+              "uprobe.multi.s/generic_uprobe"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_multi_uprobe_v61",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_uprobe.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_multi_uprobe_v61",
+              "TETRAGON_SECTION_ARGS=--section-prefix uprobe.multi --section-prefix uprobe.multi/generic_uprobe --section-prefix uprobe.multi.s/generic_uprobe"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:21.708387+00:00"
+          },
+          {
+            "unit": "bpf_multi_usdt_v511",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_usdt.c",
+            "source_sha256": "b831fdbe2198564039dbf41582a5277bf9de0a2b95e08253148067cf9ed8d668",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_usdt_v511.o",
+            "reference_sha256": "b26d5a53d71d3aa5a02fce33aba53286e8613f2a51d7b847ab9b15bb97dda763",
+            "entry_sections": [
+              "uprobe.multi",
+              "uprobe.multi/generic_usdt",
+              "uprobe.multi.s/generic_usdt"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_multi_usdt_v511",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_usdt.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_multi_usdt_v511",
+              "TETRAGON_SECTION_ARGS=--section-prefix uprobe.multi --section-prefix uprobe.multi/generic_usdt --section-prefix uprobe.multi.s/generic_usdt"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:29.870704+00:00"
+          },
+          {
+            "unit": "bpf_multi_usdt_v61",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_usdt.c",
+            "source_sha256": "b831fdbe2198564039dbf41582a5277bf9de0a2b95e08253148067cf9ed8d668",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_usdt_v61.o",
+            "reference_sha256": "e2d22a3fb7a85a882442d57cd7e409a53084b918688b8a865990a6e9cdb629e4",
+            "entry_sections": [
+              "uprobe.multi",
+              "uprobe.multi/generic_usdt",
+              "uprobe.multi.s/generic_usdt"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_multi_usdt_v61",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_usdt.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_multi_usdt_v61",
+              "TETRAGON_SECTION_ARGS=--section-prefix uprobe.multi --section-prefix uprobe.multi/generic_usdt --section-prefix uprobe.multi.s/generic_usdt"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:24.224706+00:00"
+          },
+          {
+            "unit": "bpf_prog_iter",
+            "source": "/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_prog_iter.c",
+            "source_sha256": "c60128df11eea130dd1c0f05be88fe5efd6bff3e86598f156737011c603c18e6",
+            "reference": "/workspaces/repository/vendor/build/x86/tetragon/bpf_prog_iter.o",
+            "reference_sha256": "2ae855754be64e0aeff67836ab927ff5d8ecfc55b19b1778ca988841f9187e15",
+            "entry_sections": [
+              "iter/bpf_prog"
+            ],
+            "command": [
+              "make",
+              "-f",
+              "/workspaces/repository/kprog/perf/native-context/Makefile",
+              "upstream-tetragon-link",
+              "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context",
+              "TETRAGON_UNIT=bpf_prog_iter",
+              "TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_prog_iter.c",
+              "TETRAGON_SAME_BUILD=/var/tmp/kprog-tmp/perf/tetragon-public-data/bpf_prog_iter",
+              "TETRAGON_SECTION_ARGS=--section-prefix iter/bpf_prog"
+            ],
+            "returncode": 0,
+            "finished_at": "2026-11-13T23:37:21.487930+00:00"
+          }
+        ],
+        "scope": "Unchanged-source host compilation and offline proof generation; no native installation or equal-work claim.",
+        "finished_at": "2026-11-13T23:37:29.871502+00:00"
+      }
+    }
+  ],
+  "scope": "Host compiler/replay artifacts only; no kernel submission, native installation or application equal-work claim.",
+  "archive": {
+    "path": "/workspaces/kprog-raw/perf/20261113-tetragon-public-data/full-compiler.tar.gz",
+    "bytes": 100462426,
+    "sha256": "cb1fb472ec4279bb59124c6f92ba905c67aa74690d2c06ec6c6b06974db14f59",
+    "files_byte_compared": 1101,
+    "parts": [
+      {
+        "path": "/workspaces/repository/kprog/results/perf_20261113/tetragon-public-data.tar.gz.part000",
+        "bytes": 41943040,
+        "sha256": "70c55bd011a3a1bd880c1931a2889ca4db0389154d54acf59261330eaa9ef4e4"
+      },
+      {
+        "path": "/workspaces/repository/kprog/results/perf_20261113/tetragon-public-data.tar.gz.part001",
+        "bytes": 41943040,
+        "sha256": "ebc4c67a5aae46c35a3966df396d2d03d1f83a31e0ae7d1e82f7291cb9669692"
+      },
+      {
+        "path": "/workspaces/repository/kprog/results/perf_20261113/tetragon-public-data.tar.gz.part002",
+        "bytes": 16576346,
+        "sha256": "cdcaae7a8dc98160f0ebb1368a9834c78e3ddb91e39d399ba7e2da321682ce48"
+      }
+    ],
+    "reconstruction": "Concatenate parts in listed order to recover the full tar.gz; verify original SHA256."
+  }
+}
