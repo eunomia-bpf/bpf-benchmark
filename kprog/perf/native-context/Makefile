@@ -276,5 +276,14 @@ cilium-retain:
 	python3 $(HERE)/cilium-retain.py --raw /workspaces/kprog-raw/perf/20261113-packet-context --upstream-build $(CILIUM_IR_BUILD) --packet-build $(PACKET_BUILD) --compiler $(SOCKET_BUILD)/socket-context-lower --output $(ROOT)/kprog/results/perf_20261113/packet-context-host.json
 
 .PHONY: cilium-live-prepare
+CILIUM_LIVE_RAW ?= /workspaces/kprog-raw/perf/20261113-cilium-live-config
+CILIUM_LIVE_CAPTURE ?= $(ROOT)/corpus/results/perf-cilium-live-config-20261113
+CILIUM_LIVE_RUN ?= $(ROOT)/corpus/results/x86_kvm_corpus_20261113_075230_200030
+CILIUM_LIVE_RECEIPT ?= $(ROOT)/kprog/results/perf_20261113/cilium-live-config-runtime.json
+CILIUM_BASELINE_SNAPSHOT ?= baseline-0001
 cilium-live-prepare:
-	python3 $(HERE)/cilium-live-prepare.py --raw /workspaces/kprog-raw/perf/20261113-cilium-live-config --capture $(ROOT)/corpus/results/perf-cilium-live-config-20261113 --run $(ROOT)/corpus/results/x86_kvm_corpus_20261113_075230_200030 --output $(ROOT)/kprog/results/perf_20261113/cilium-live-config-runtime.json
+	python3 $(HERE)/cilium-live-prepare.py --raw $(CILIUM_LIVE_RAW) --capture $(CILIUM_LIVE_CAPTURE) --run $(CILIUM_LIVE_RUN) --output $(CILIUM_LIVE_RECEIPT) --baseline-snapshot $(CILIUM_BASELINE_SNAPSHOT)
+
+.PHONY: cilium-replay-retain
+cilium-replay-retain:
+	python3 $(HERE)/cilium-replay-retain.py --build /var/tmp/kprog-tmp/perf/cilium-live-replay --raw /workspaces/kprog-raw/perf/20261113-cilium-live-replay --output $(ROOT)/kprog/results/perf_20261113/cilium-live-source-replay.json

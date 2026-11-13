@@ -1,0 +1,40 @@
+{
+  "launched_at": "2026-11-13T08:07:50Z",
+  "outer_pid": 1285612,
+  "source_commit": "b6af08023",
+  "raw": "/workspaces/kprog-raw/perf/20261113-cilium-probe-config",
+  "capture": "/workspaces/repository/corpus/results/perf-cilium-probe-config-20261113",
+  "cpus": "16-19",
+  "vm_cpus": 4,
+  "vm_memory_gib": 8,
+  "host_address_space_limit_bytes": 17179869184,
+  "image": "bpf-benchmark/kprog:current",
+  "shared_image_lock": "/workspaces/.agent-state/kprog-lanes/locks/image",
+  "argv": [
+    "make",
+    "-f",
+    "kprog/perf/one-image/Makefile",
+    "corpus",
+    "APPS=cilium/agent",
+    "CPUS=16-19",
+    "VM_CPUS=4",
+    "VM_MEM=8G",
+    "STATE=/var/tmp/kprog-tmp/perf/cilium-probe-config",
+    "LOGS=/workspaces/kprog-raw/perf/20261113-cilium-probe-config",
+    "SAMPLES=1",
+    "WORKLOAD_DURATION=1",
+    "BPFREJIT_CORPUS_BPF_STATS=1"
+  ],
+  "environment": {
+    "PATH_prefix": "/workspaces/repository/kprog/perf/may29-image/eqcodex-bin",
+    "EQCODEX_OUT": "/workspaces/repository/corpus/results/perf-cilium-probe-config-20261113",
+    "EQCODEX_CILIUM_CONFIG": "1",
+    "VERIFIED_BUILD_CPUS": "16-19"
+  },
+  "selection": "unchanged default image manifest/linker; no compiler candidate selected",
+  "dry_run_log": "/workspaces/kprog-raw/perf/20261113-cilium-probe-config/dry-run.log",
+  "make_log": "/workspaces/kprog-raw/perf/20261113-cilium-probe-config/job/make.log",
+  "exit_file": "/workspaces/kprog-raw/perf/20261113-cilium-probe-config/job/exit-code",
+  "collect": "NEXT turn; no post-launch polling",
+  "purpose": "Capture actual upstream-generated feature headers outside state directory and later object snapshots; no official throughput/equal-work claim"
+}

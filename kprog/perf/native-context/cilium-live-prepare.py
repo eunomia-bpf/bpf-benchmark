@@ -17,12 +17,13 @@ def main():
     parser.add_argument('--capture',type=Path,required=True)
     parser.add_argument('--run',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True)
+    parser.add_argument('--baseline-snapshot',default='baseline-0001')
     args=parser.parse_args()
     snapshots=[]
     for path in sorted(args.capture.glob('*-*/cilium-config.tar.gz')):
         with tarfile.open(path) as source:
             index=json.load(source.extractfile('capture.json'))
-            if path.parent.name.startswith('baseline-'):
+            if path.parent.name==args.baseline_snapshot:
                 state=args.raw/'baseline-state';state.mkdir()
                 source.extractall(state,filter='data')
         snapshots.append(dict(path=str(path),bytes=path.stat().st_size,sha256=digest(path),index=index))
@@ -46,8 +47,9 @@ def main():
                 programs={phase:len(app[phase]['bpf']) for phase in ['baseline','post_rejit']},
                 native_replacements=shim.read_text().count('native-loader replaced prog='),
                 observer_exit=int((args.capture/'observer-exit-code').read_text()),snapshots=snapshots,
+                extracted_baseline_snapshot=args.baseline_snapshot,
                 limits=['One-sample1s diagnostic; default manifest and objects, not the new upstream compiler candidate.',
-                        'First native state snapshot caught bpf_xdp.o mid-build at length0; raw partial bytes retained.',
+                        'Snapshots may catch objects mid-build; each captured length and raw partial bytes are retained.',
                         'No app-decision or throughput equivalence certified.'],
                 archive=dict(path=str(archive),bytes=archive.stat().st_size,sha256=digest(archive),files_byte_compared=files))
     with args.output.open('x') as output: json.dump(result,output,indent=2);output.write('\n')
