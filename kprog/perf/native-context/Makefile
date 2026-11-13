@@ -395,3 +395,16 @@ $(CORE_IR_BUILD)/width-bpf-reference: $(HERE)/test-core-width-bpf.c $(CORE_IR_BU
 core-ir-width-bpf-check: $(CORE_IR_BUILD)/width-bpf-reference
 	$(CORE_IR_BUILD)/width-bpf-reference $(CORE_IR_BUILD)/width.bpf.o $(KDIR)/vmlinux $(CORE_IR_BUILD)/width.patched.bpf.bin 0 > $(CORE_IR_BUILD)/width-bpf-reference.log 2>&1
 	$(CORE_IR_BUILD)/width-bpf-reference $(CORE_IR_BUILD)/resized.bpf.o $(KDIR)/vmlinux $(CORE_IR_BUILD)/signed.patched.bpf.bin 1 > $(CORE_IR_BUILD)/signed-bpf-reference.log 2>&1
+
+TETRAGON_SAME_BUILD ?= /var/tmp/kprog-tmp/perf/tetragon-same-source
+TETRAGON_UNIT ?= bpf_generic_kprobe_v61
+TETRAGON_SOURCE ?= $(ROOT)/vendor/repos/tetragon/bpf/process/bpf_generic_kprobe.c
+.PHONY: upstream-tetragon-ir upstream-tetragon-native
+upstream-tetragon-ir:
+	prlimit --as=17179869184 -- python3 $(HERE)/tetragon-upstream.py --unit $(TETRAGON_UNIT) --source $(TETRAGON_SOURCE) --output $(TETRAGON_SAME_BUILD) --reference $(ROOT)/vendor/build/x86/tetragon/$(TETRAGON_UNIT).o
+
+upstream-tetragon-native: upstream-tetragon-ir core-ir-tool $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
+	prlimit --as=17179869184 -- $(CORE_IR_BUILD)/core-ir-lower $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).bc --local-bpf $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).direct.bpf.o --target-btf $(KDIR)/vmlinux --report $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).core.json -o $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).core.bc
+	python3 $(HERE)/socket-helper-names.py > $(TETRAGON_SAME_BUILD)/helper-names.json
+	$(SOCKET_BUILD)/socket-context-lower $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).core.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(TETRAGON_SAME_BUILD)/helper-names.json -o $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).native.bc
+	prlimit --as=17179869184 -- $(CC) -target x86_64-linux-gnu -O3 -g -fPIC -fno-optimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-jump-tables -c $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).native.bc -o $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).native.o
