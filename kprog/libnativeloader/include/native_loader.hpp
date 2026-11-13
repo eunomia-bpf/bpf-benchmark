@@ -19,6 +19,10 @@ struct LoadTimings {
     uint64_t map_patch_ns = 0;
     uint64_t upload_ns = 0;
     uint64_t prog_load_ns = 0;
+    uint64_t source_context_ns = 0;
+    uint64_t manifest_ns = 0;
+    uint64_t companion_total_ns = 0;
+    uint64_t data_symbols_ns = 0;
 };
 
 struct LoadedProgram {
@@ -61,6 +65,7 @@ struct FdLoadOptions {
     uint32_t attach_btf_id = 0;
     uint32_t attach_btf_obj_id = 0;
     uint32_t attach_prog_id = 0;
+    bool collect_diagnostic_timings = false;
 };
 
 LoadedProgram load_from_fd(const FdLoadOptions &options);

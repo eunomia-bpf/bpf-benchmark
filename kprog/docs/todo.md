@@ -98,6 +98,10 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED loader原始阶段诊断（2026-11-13，P1e）** C entry以默认关闭的 `BPFREJIT_NATIVE_LOADER_TIMING_LOG=<path>` 输出完成load的JSONL：PID/TID、原/native FD、steady-clock起止/total，source-context、manifest/symbol、companion-total、data-symbol及既有8项LoadTimings；C result字段/offset/error buffer保持，未匹配manifest也保留已做阶段。companion-total包含map pointer/lookup子阶段，total在日志IO前截止。真实emitter的80条并发记录/4writers/12phase/raw字段、disabled-path及IO错误回归通过，完整native_loader.cpp syntax检查通过；raw `/workspaces/kprog-raw/verified/20261113-loader-timings/`。source只读/host检查，共享loader/base/image集成和真实阶段归因接续。
+
+- **VERIFIED signed-width guest设置结果（2026-11-13）** launcher1186389 make2发生在nested Make相对工作目录解析，实际BPF/stock verifier submissions0；原始service.tar.gz和job日志保留，计为setup error。下一调用改用绝对-C并由SIGNED_BOUND_OUTPUT把新control放进独立retry writable目录；该unit跟进与真实应用body replay分别推进。实际a1d1 body replay1190459已启动，4vCPU/8G/AS16GiB CPU12–15，raw `20261113-helper-class-replay/word32-*`，结果接续收集，应用计数保持已发布观察。
+
 - **VERIFIED 32-bit scalar narrowing（2026-11-13，guest确认接续）** 通用x86 32-bit register write在BPF编译路径以u32 compiler barrier物化zero-extension，再走原reg_write契约；host路径保持u32 cast，native P保持。泛化signed TEST/CMP/CMOV clip fixture覆盖任意输入，host UBSan的16组边界/high-word组合通过；旧BPF先比较low32再直接传完整R2，修复后BPF先zeroextend并让同一value携带signed/unsigned bounds到helper。已有helper-effect及invocation-stack host回归通过。旧/new BPF对象与disasm保留 `/workspaces/kprog-raw/verified/20261113-signed-bound/`，同一stock guest的前后verifier结果接续记录；本项为ISA scalar-width回归，整应用验证继续走body class replay，helper长度保持原值。
 
 - **VERIFIED address replay实际结果（2026-11-13）** f169模型同一body真实提交1/stock verifier拒绝1/安装0，make0；B日志保留saved fp-33及ratelimit_heap+24/+184 typed pointer，当前首个拒绝改为BPF7304 probe_read的R2长度范围无上界、processed5669。next是通用signed TEST/CMP/CMOV的scalar range保持，完整body接受继续推进，原helper长度语义保持。完整request/journal/Make/archive `helper-address-replay*`（4435362bytes），raw `20261113-helper-class-replay/address-arithmetic-control/`。P1e child-launch code e5bf984fc的真实host回归、clone3 VM/VFORK trace和loader lifetime probe归档 `loader-spawn-subset*`（56573bytes），共享loader/image集成与真实应用成本测量接续。

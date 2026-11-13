@@ -1,6 +1,8 @@
 BUILD_DIR ?= build
 SUBPROCESS_BUILD ?= /var/tmp/kprog-tmp/verified/loader-subprocess
 SUBPROCESS_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-loader-spawn/functional
+TIMING_BUILD ?= /var/tmp/kprog-tmp/verified/loader-timings
+TIMING_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-loader-timings/functional
 REPO_ROOT := $(abspath ../..)
 LIBBPF_PREFIX ?= $(REPO_ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix
 LIBBPF_LIBRARY ?= $(REPO_ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a
@@ -16,6 +18,13 @@ subprocess-check:
 .PHONY: lifetime-probe
 lifetime-probe:
 	python3 ../test/native_loader_lifetime.py "$(abspath $(BUILD_DIR))/libnative_loader.so"
+
+.PHONY: timings-check
+timings-check:
+	install -d "$(TIMING_BUILD)" "$(TIMING_OUTPUT)"
+	$(CXX) -std=c++20 -O2 -pthread -Wall -Wextra -Werror ../test/native_loader_timings.cpp -o "$(TIMING_BUILD)/phase-log"
+	python3 ../test/check_native_loader_timings.py "$(TIMING_BUILD)/phase-log" "$(TIMING_OUTPUT)"
+	$(CXX) -std=gnu++20 -fsyntax-only -Iinclude -I"$(KERNEL_OFFSETS_INCLUDE)" -I"$(LIBBPF_PREFIX)/include" -I"$(REPO_ROOT)/vendor/libbpf/include" -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" src/native_loader.cpp
 VM_MEM ?= 2G
 VM_CPUS ?= 2
 SERVICE_HOST_CPUS ?= 8-15
