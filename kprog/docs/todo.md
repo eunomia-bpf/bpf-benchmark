@@ -110,6 +110,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED input-only helper通用frame修复（2026-11-13）** 唯一kernel实现确认perf_event_output(25)、get_stackid(27)、ringbuf_output(130)保留caller stack；三种wrapper接入已有READONLY_SCALAR_RESULT，原helper调用/return/register clobbers保持。新回归在旧模型丢失saved fact（Make2），新模型对3helpers共10个成功/错误、zero/eight-byte输入案例通过；既有stack-lifetime UBSan和全称readonly_helper_frame模块通过，kernel effects分类单独取证。完整host/kernel证据归档 `input-helper-effects-subset*`，raw `/workspaces/kprog-raw/verified/20261113-input-helper-effects/`；33成员body实际复杂度回放接续。
+
 - **VERIFIED context class并行复测准备（2026-11-13）** 所有已观察context失败body20/28/29（trace_sys_enter、trace_ret_vfs_read、trace_ret_vfs_read_tail，各1成员）分成三个guest数据inventory；根inventory保留完整class，源P和资源引用保持，通用service相同。新增完整/互斥分区与map资源保留回归，同组4tests通过；归档 `context-class-preparation*`，raw `/workspaces/kprog-raw/verified/20261113-context-class/ready/`。三个guest已setsid/nohup启动：body20 outer1232281、body28 outer1232282、body29 outer1232283；各2vCPU/8G/AS16GiB，host12、13、14–15，model17c69/shared image read lock；精确命令见 `context-class-launch.json`，实际结果后续收集。
 
 - **VERIFIED ISA stock实际结果（2026-11-13）** unit1225193完成12个object-load调用/12份stock verifier log；6个candidate接受（partial low/high/word3、signed1、flat ctx2），6个baseline拒绝。Make2来自signed脚本限定diagnostic字串；实际baseline报R2负size bound、candidate接受，脚本保留接受/拒绝判定及全部日志。完整输入BPF/输出/service/job归档 `isa-stock-results*`，raw `/workspaces/kprog-raw/verified/20261113-raw-context/guest/`。native execution0，独立于应用body。

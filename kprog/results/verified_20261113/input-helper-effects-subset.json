@@ -1,0 +1,61 @@
+{
+  "recorded_at": "2026-11-13T06:14:49.899866+00:00",
+  "scope": "General caller-stack effect classification for helpers25,27,130; actual application replay follows",
+  "kernel_commit": "74d1097af561",
+  "baseline_model": "17c69dfec",
+  "helpers": [
+    "bpf_perf_event_output",
+    "bpf_get_stackid",
+    "bpf_ringbuf_output"
+  ],
+  "kernel_evidence": [
+    {
+      "path": "kernel/trace/bpf_trace.c",
+      "lines": [
+        657,
+        695,
+        1372,
+        1594
+      ],
+      "effect": "data MEM_RDONLY; perf-owned sample buffers; tracepoint/raw tracepoint variants forward or construct kernel regs"
+    },
+    {
+      "path": "kernel/bpf/stackmap.c",
+      "lines": [
+        249,
+        323,
+        347,
+        368
+      ],
+      "effect": "stack-map-owned buckets/callchain metadata; caller allocated stack preserved"
+    },
+    {
+      "path": "kernel/bpf/ringbuf.c",
+      "lines": [
+        613,
+        633
+      ],
+      "effect": "memcpy into reserved ring from MEM_RDONLY data"
+    }
+  ],
+  "change": "Use existing READONLY_SCALAR_RESULT with same helper expression, RAX scalar return and caller-register clobbers; preserve caller allocated stack facts",
+  "regression": {
+    "before_make_exit": 2,
+    "before_failed_line": 54,
+    "after_make_exit": 0,
+    "cases": "10 calls across all three helpers, successful/error returns, zero/eight-byte sources; checks forwarded arguments, emitted map data, input bytes, scalar return and saved stack facts"
+  },
+  "existing_stack_lifetime_exit": 0,
+  "formal": {
+    "module": "KProgFormal/X86HelperDispatch.lean",
+    "lean_exit": 0,
+    "theorem": "readonly_helper_frame",
+    "scope": "Existing universal metadata coordinate/policy theorem; helper read-only classification grounded separately in kernel source"
+  },
+  "actual_new_stock_submissions": 0,
+  "native_execution_requests": 0,
+  "workload_run": null,
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-input-helper-effects",
+  "archive": "input-helper-effects-subset.tar.gz",
+  "archive_bytes": 10455
+}

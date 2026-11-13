@@ -11,6 +11,15 @@ unsigned long native_lab_entry_input(unsigned int kind) { return 0; }
 #define bpf_map_delete_elem(MAP, KEY) (memset((MAP), 0, 8), 0)
 #define bpf_probe_read(DST, SIZE, SRC) (memcpy((DST), (SRC), (SIZE)), 0)
 #define bpf_skb_load_bytes(CTX, OFF, DST, SIZE) (memset((DST), 0x5a, (SIZE)), 0)
+static void *observed_ctx;
+static unsigned long observed_flags, observed_size;
+static long helper_return;
+#define bpf_get_stackid(CTX, MAP, FLAGS) \
+    (observed_ctx=(CTX), observed_flags=(FLAGS), *(unsigned long *)(MAP)=observed_flags, helper_return)
+#define bpf_perf_event_output(CTX, MAP, FLAGS, DATA, SIZE) \
+    (observed_ctx=(CTX), observed_flags=(FLAGS), observed_size=(SIZE), memcpy((MAP),(DATA),observed_size), helper_return)
+#define bpf_ringbuf_output(MAP, DATA, SIZE, FLAGS) \
+    (observed_flags=(FLAGS), observed_size=(SIZE), memcpy((MAP),(DATA),observed_size), helper_return)
 #define REQUIRE(C) do { if (!(C)) { printf("helper effect failure line %d\n", __LINE__); return 1; } } while (0)
 #define SAVE(OFF, VALUE) X86_SIM_L_STACK_VALUES_SAVE(X86_SIM_L_STACK_INDEX(OFF), 8, (void *)(VALUE), X86_SIM_TAG_STACK)
 #define SAVED(OFF) X86_SIM_L_STACK_VALUES_READ(X86_SIM_L_STACK_INDEX(OFF), 8)
@@ -33,6 +42,36 @@ int main(void) {
     __x86_rdi.ptr=&map_value; __x86_rsi.ptr=&key;
     X86_SIM_BPF_CALL_bpf_map_delete_elem();
     REQUIRE(map_value==0 && SAVED(-24).pointer==(void *)7);
+
+    /* Input-only helpers dropped saved caller facts on both return arms. */
+    for (unsigned error=0;error<2;++error) {
+        helper_return=error ? -7 : 23;
+        __x86_rdi.ptr=(void *)0x2345;
+        __x86_rsi.ptr=&map_value; __x86_rdx.ptr=(void *)9;
+        X86_SIM_BPF_CALL_bpf_get_stackid();
+        REQUIRE(observed_ctx==(void *)0x2345 && observed_flags==9 && map_value==9);
+        REQUIRE((__s64)(long)__x86_rax.ptr==helper_return && __x86_rax_tag==X86_SIM_TAG_SCALAR);
+        REQUIRE(SAVED(-24).pointer==(void *)7 && SAVED(-16).pointer==(void *)9);
+        for (unsigned size=0;size<=8;size+=8) {
+            const unsigned long sample=0x1122334455667788UL;
+            X86_SIM_L_STACK_WRITE(-32,8,sample);
+            map_value=0;
+            __x86_rdi.ptr=(void *)0x2345; __x86_rsi.ptr=&map_value;
+            __x86_rdx.ptr=(void *)11; __x86_rcx.ptr=X86_SIM_L_STACK_PTR(-32);
+            __x86_r8.ptr=(void *)(long)size;
+            X86_SIM_BPF_CALL_bpf_perf_event_output();
+            REQUIRE(observed_ctx==(void *)0x2345 && observed_flags==11 && observed_size==size);
+            REQUIRE(map_value==(size ? sample : 0) && X86_SIM_L_STACK_READ(-32,8)==sample);
+            REQUIRE((__s64)(long)__x86_rax.ptr==helper_return && SAVED(-24).pointer==(void *)7 && SAVED(-16).pointer==(void *)9);
+            map_value=0;
+            __x86_rdi.ptr=&map_value; __x86_rsi.ptr=X86_SIM_L_STACK_PTR(-32);
+            __x86_rdx.ptr=(void *)(long)size; __x86_rcx.ptr=(void *)13;
+            X86_SIM_BPF_CALL_bpf_ringbuf_output();
+            REQUIRE(observed_flags==13 && observed_size==size && map_value==(size ? sample : 0));
+            REQUIRE(X86_SIM_L_STACK_READ(-32,8)==sample && (__s64)(long)__x86_rax.ptr==helper_return);
+            REQUIRE(SAVED(-24).pointer==(void *)7 && SAVED(-16).pointer==(void *)9);
+        }
+    }
 
     /* Ordinary native calls spill and reload an address in the caller frame. */
     __x86_rsp.ptr=(void *)-40;
@@ -118,6 +157,6 @@ int main(void) {
     __x86_rsi.ptr=(void *)1; __x86_rdx.ptr=source;
     X86_SIM_BPF_CALL_bpf_probe_read();
     REQUIRE(SAVED(-16).tag==X86_SIM_TAG_SCALAR);
-    puts("helper effects PASS: getter, foreign/stack output, overlap, zero/large length, unknown alias");
+    puts("helper effects PASS: getter, input-only map/event, foreign/stack output, overlap, zero/large length, unknown alias");
     return 0;
 }
