@@ -1,0 +1,959 @@
+int generic_kprobe_event(struct pt_regs * ctx):
+; generic_kprobe_event(struct pt_regs *ctx)
+   0: (bf) r8 = r1
+       bf 18 00 00 00 00 00 00
+   1: (b7) r6 = 0
+       b7 06 00 00 00 00 00 00
+; int i, zero = 0;
+   2: (63) *(u32 *)(r10 -132) = r6
+       63 6a 7c ff 00 00 00 00
+   3: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+   4: (07) r2 += -132
+       07 02 00 00 7c ff ff ff
+; msg = map_lookup_elem(&process_call_heap, &zero);
+   5: (18) r1 = map[id:253]
+       18 11 00 00 fd 00 00 00 00 00 00 00 00 00 00 00
+   7: (07) r1 += 304
+       07 01 00 00 30 01 00 00
+   8: (61) r0 = *(u32 *)(r2 +0)
+       61 20 00 00 00 00 00 00
+   9: (35) if r0 >= 0x1 goto pc+5
+       35 00 05 00 01 00 00 00
+  10: (67) r0 <<= 3
+       67 00 00 00 03 00 00 00
+  11: (0f) r0 += r1
+       0f 10 00 00 00 00 00 00
+  12: (79) r0 = *(u64 *)(r0 +0)
+       79 00 00 00 00 00 00 00
+  13: (bf) r0 = &(void __percpu *)(r0)
+       bf 00 ff ff 00 00 00 00
+  14: (05) goto pc+1
+       05 00 01 00 00 00 00 00
+  15: (b7) r0 = 0
+       b7 00 00 00 00 00 00 00
+  16: (bf) r7 = r0
+       bf 07 00 00 00 00 00 00
+; if (!msg)
+  17: (15) if r7 == 0x0 goto pc+393
+       15 07 89 01 00 00 00 00
+; msg->idx = get_index(ctx);
+  18: (63) *(u32 *)(r7 +24312) = r6
+       63 67 f8 5e 00 00 00 00
+; msg->idx = get_index(ctx);
+  19: (bf) r2 = r7
+       bf 72 00 00 00 00 00 00
+  20: (07) r2 += 24312
+       07 02 00 00 f8 5e 00 00
+; config = map_lookup_elem(&config_map, &msg->idx);
+  21: (18) r1 = map[id:262]
+       18 11 00 00 06 01 00 00 00 00 00 00 00 00 00 00
+  23: (07) r1 += 304
+       07 01 00 00 30 01 00 00
+  24: (61) r0 = *(u32 *)(r2 +0)
+       61 20 00 00 00 00 00 00
+  25: (35) if r0 >= 0x1 goto pc+3
+       35 00 03 00 01 00 00 00
+  26: (27) r0 *= 736
+       27 00 00 00 e0 02 00 00
+  27: (0f) r0 += r1
+       0f 10 00 00 00 00 00 00
+  28: (05) goto pc+1
+       05 00 01 00 00 00 00 00
+  29: (b7) r0 = 0
+       b7 00 00 00 00 00 00 00
+; if (!config)
+  30: (15) if r0 == 0x0 goto pc+380
+       15 00 7c 01 00 00 00 00
+  31: (7b) *(u64 *)(r10 -144) = r8
+       7b 8a 70 ff 00 00 00 00
+; if (!policy_filter_check(config->policy_id))
+  32: (71) r1 = *(u8 *)(r0 +101)
+       71 01 65 00 00 00 00 00
+  33: (67) r1 <<= 8
+       67 01 00 00 08 00 00 00
+  34: (71) r2 = *(u8 *)(r0 +100)
+       71 02 64 00 00 00 00 00
+  35: (4f) r1 |= r2
+       4f 21 00 00 00 00 00 00
+  36: (71) r2 = *(u8 *)(r0 +102)
+       71 02 66 00 00 00 00 00
+  37: (67) r2 <<= 16
+       67 02 00 00 10 00 00 00
+  38: (71) r3 = *(u8 *)(r0 +103)
+       71 03 67 00 00 00 00 00
+  39: (67) r3 <<= 24
+       67 03 00 00 18 00 00 00
+  40: (4f) r3 |= r2
+       4f 23 00 00 00 00 00 00
+  41: (4f) r3 |= r1
+       4f 13 00 00 00 00 00 00
+  42: (63) *(u32 *)(r10 -116) = r3
+       63 3a 8c ff 00 00 00 00
+; if (!policy_id)
+  43: (15) if r3 == 0x0 goto pc+149
+       15 03 95 00 00 00 00 00
+  44: (7b) *(u64 *)(r10 -152) = r0
+       7b 0a 68 ff 00 00 00 00
+  45: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; policy_map = map_lookup_elem(&policy_filter_maps, &policy_id);
+  46: (07) r2 += -116
+       07 02 00 00 8c ff ff ff
+  47: (18) r1 = map[id:461]
+       18 11 00 00 cd 01 00 00 00 00 00 00 00 00 00 00
+  49: (85) call __htab_map_lookup_elem#313632
+       85 00 00 00 20 c9 04 00
+  50: (15) if r0 == 0x0 goto pc+2
+       15 00 02 00 00 00 00 00
+  51: (07) r0 += 56
+       07 00 00 00 38 00 00 00
+  52: (79) r0 = *(u64 *)(r0 +0)
+       79 00 00 00 00 00 00 00
+  53: (bf) r8 = r0
+       bf 08 00 00 00 00 00 00
+; if (!policy_map)
+  54: (15) if r8 == 0x0 goto pc+128
+       15 08 80 00 00 00 00 00
+  55: (b7) r1 = 0
+       b7 01 00 00 00 00 00 00
+; int zero = 0, subsys_idx = 0;
+  56: (63) *(u32 *)(r10 -12) = r1
+       63 1a f4 ff 00 00 00 00
+  57: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+  58: (07) r2 += -12
+       07 02 00 00 f4 ff ff ff
+; conf = map_lookup_elem(&tg_conf_map, &zero);
+  59: (18) r1 = map[id:10]
+       18 11 00 00 0a 00 00 00 00 00 00 00 00 00 00 00
+  61: (07) r1 += 304
+       07 01 00 00 30 01 00 00
+  62: (61) r0 = *(u32 *)(r2 +0)
+       61 20 00 00 00 00 00 00
+  63: (35) if r0 >= 0x1 goto pc+3
+       35 00 03 00 01 00 00 00
+  64: (27) r0 *= 48
+       27 00 00 00 30 00 00 00
+  65: (0f) r0 += r1
+       0f 10 00 00 00 00 00 00
+  66: (05) goto pc+1
+       05 00 01 00 00 00 00 00
+  67: (b7) r0 = 0
+       b7 00 00 00 00 00 00 00
+; if (conf) {
+  68: (05) goto pc+16
+       05 00 10 00 00 00 00 00
+; task = (struct task_struct *)get_current_task();
+  69: (b7) r0 = -1289027560
+       b7 00 00 00 18 00 2b b3
+  70: (bf) r0 = &(void __percpu *)(r0)
+       bf 00 ff ff 00 00 00 00
+  71: (79) r0 = *(u64 *)(r0 +0)
+       79 00 00 00 00 00 00 00
+  72: (b7) r1 = 0
+       b7 01 00 00 00 00 00 00
+; struct cgroup *cgrp = NULL;
+  73: (7b) *(u64 *)(r10 -8) = r1
+       7b 1a f8 ff 00 00 00 00
+  74: (b7) r1 = 3976
+       b7 01 00 00 88 0f 00 00
+  75: (0f) r0 += r1
+       0f 10 00 00 00 00 00 00
+  76: (bf) r1 = r10
+       bf a1 00 00 00 00 00 00
+; task = (struct task_struct *)get_current_task();
+  77: (07) r1 += -112
+       07 01 00 00 90 ff ff ff
+; probe_read_kernel(&cgroups, sizeof(cgroups), _(&task->cgroups));
+  78: (b7) r2 = 8
+       b7 02 00 00 08 00 00 00
+  79: (bf) r3 = r0
+       bf 03 00 00 00 00 00 00
+  80: (85) call bpf_probe_read_kernel#-91936
+       85 00 00 00 e0 98 fe ff
+; if (unlikely(!cgroups)) {
+  81: (79) r3 = *(u64 *)(r10 -112)
+       79 a3 90 ff 00 00 00 00
+; if (unlikely(!cgroups)) {
+  82: (15) if r3 == 0x0 goto pc+31
+       15 03 1f 00 00 00 00 00
+; if (cgrpfs_ver == CGROUP2_SUPER_MAGIC) {
+  83: (57) r6 &= 1
+       57 06 00 00 01 00 00 00
+  84: (05) goto pc+12
+       05 00 0c 00 00 00 00 00
+; cgrpfs_magic = conf->cgrp_fs_magic;
+  85: (79) r1 = *(u64 *)(r0 +32)
+       79 01 20 00 00 00 00 00
+  86: (b7) r6 = 1
+       b7 06 00 00 01 00 00 00
+  87: (15) if r1 == 0x63677270 goto pc+1
+       15 01 01 00 70 72 67 63
+  88: (b7) r6 = 0
+       b7 06 00 00 00 00 00 00
+; subsys_idx = conf->tg_cgrpv1_subsys_idx;
+  89: (61) r9 = *(u32 *)(r0 +16)
+       61 09 10 00 00 00 00 00
+  90: (18) r2 = 0x1
+       18 02 00 00 01 00 00 00 00 00 00 00 00 00 00 00
+; BPF_FUNC_get_current_cgroup_id) &&
+  92: (15) if r2 == 0x0 goto pc-24
+       15 02 e8 ff 00 00 00 00
+  93: (55) if r1 != 0x63677270 goto pc-25
+       55 01 e7 ff 70 72 67 63
+; return get_current_cgroup_id();
+  94: (85) call bpf_get_current_cgroup_id#262880
+       85 00 00 00 e0 02 04 00
+  95: (bf) r9 = r0
+       bf 09 00 00 00 00 00 00
+  96: (05) goto pc+39
+       05 00 27 00 00 00 00 00
+; if (unlikely(subsys_idx > pids_cgrp_id)) {
+  97: (25) if r9 > 0xb goto pc+16
+       25 09 10 00 0b 00 00 00
+  98: (b7) r1 = 0
+       b7 01 00 00 00 00 00 00
+  99: (0f) r3 += r1
+       0f 13 00 00 00 00 00 00
+; probe_read_kernel(&subsys, sizeof(subsys), _(&cgroups->subsys[subsys_idx]));
+ 100: (67) r9 <<= 3
+       67 09 00 00 03 00 00 00
+ 101: (0f) r3 += r9
+       0f 93 00 00 00 00 00 00
+ 102: (bf) r1 = r10
+       bf a1 00 00 00 00 00 00
+ 103: (07) r1 += -88
+       07 01 00 00 a8 ff ff ff
+; probe_read_kernel(&subsys, sizeof(subsys), _(&cgroups->subsys[subsys_idx]));
+ 104: (b7) r2 = 8
+       b7 02 00 00 08 00 00 00
+ 105: (85) call bpf_probe_read_kernel#-91936
+       85 00 00 00 e0 98 fe ff
+; if (unlikely(!subsys)) {
+ 106: (79) r3 = *(u64 *)(r10 -88)
+       79 a3 a8 ff 00 00 00 00
+; if (unlikely(!subsys)) {
+ 107: (15) if r3 == 0x0 goto pc+6
+       15 03 06 00 00 00 00 00
+ 108: (b7) r1 = 0
+       b7 01 00 00 00 00 00 00
+ 109: (0f) r3 += r1
+       0f 13 00 00 00 00 00 00
+ 110: (bf) r1 = r10
+       bf a1 00 00 00 00 00 00
+; 
+ 111: (07) r1 += -8
+       07 01 00 00 f8 ff ff ff
+ 112: (b7) r2 = 8
+       b7 02 00 00 08 00 00 00
+ 113: (85) call bpf_probe_read_kernel#-91936
+       85 00 00 00 e0 98 fe ff
+ 114: (79) r3 = *(u64 *)(r10 -8)
+       79 a3 f8 ff 00 00 00 00
+; if (!cgrp)
+ 115: (55) if r3 != 0x0 goto pc+1
+       55 03 01 00 00 00 00 00
+ 116: (05) goto pc+294
+       05 00 26 01 00 00 00 00
+ 117: (b7) r1 = 256
+       b7 01 00 00 00 01 00 00
+ 118: (0f) r3 += r1
+       0f 13 00 00 00 00 00 00
+ 119: (b7) r9 = 0
+       b7 09 00 00 00 00 00 00
+; struct kernfs_node *kn = NULL;
+ 120: (7b) *(u64 *)(r10 -88) = r9
+       7b 9a a8 ff 00 00 00 00
+ 121: (bf) r1 = r10
+       bf a1 00 00 00 00 00 00
+; 
+ 122: (07) r1 += -88
+       07 01 00 00 a8 ff ff ff
+; probe_read_kernel(&kn, sizeof(cgrp->kn), _(&cgrp->kn));
+ 123: (b7) r2 = 8
+       b7 02 00 00 08 00 00 00
+ 124: (85) call bpf_probe_read_kernel#-91936
+       85 00 00 00 e0 98 fe ff
+; return kn;
+ 125: (79) r3 = *(u64 *)(r10 -88)
+       79 a3 a8 ff 00 00 00 00
+; __u64 id = 0;
+ 126: (7b) *(u64 *)(r10 -88) = r9
+       7b 9a a8 ff 00 00 00 00
+; if (!kn)
+ 127: (15) if r3 == 0x0 goto pc+8
+       15 03 08 00 00 00 00 00
+ 128: (b7) r1 = 0
+       b7 01 00 00 00 00 00 00
+; if (BPF_CORE_READ_INTO(&id, old_kn, id.id) != 0)
+ 129: (b7) r1 = 96
+       b7 01 00 00 60 00 00 00
+ 130: (0f) r3 += r1
+       0f 13 00 00 00 00 00 00
+ 131: (bf) r1 = r10
+       bf a1 00 00 00 00 00 00
+; probe_read_kernel(&id, sizeof(id), _(&kn->id));
+ 132: (07) r1 += -88
+       07 01 00 00 a8 ff ff ff
+ 133: (b7) r2 = 8
+       b7 02 00 00 08 00 00 00
+ 134: (85) call bpf_probe_read_kernel#-91936
+       85 00 00 00 e0 98 fe ff
+; return id;
+ 135: (79) r9 = *(u64 *)(r10 -88)
+       79 a9 a8 ff 00 00 00 00
+; cgroupid = tg_get_current_cgroup_id();
+ 136: (7b) *(u64 *)(r10 -96) = r9
+       7b 9a a0 ff 00 00 00 00
+; if (!cgroupid)
+ 137: (15) if r9 == 0x0 goto pc+45
+       15 09 2d 00 00 00 00 00
+ 138: (7b) *(u64 *)(r10 -88) = r9
+       7b 9a a8 ff 00 00 00 00
+ 139: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+ 140: (07) r2 += -88
+       07 02 00 00 a8 ff ff ff
+; ret = map_lookup_elem(&tg_cgtracker_map, &cgid);
+ 141: (18) r1 = map[id:464]
+       18 11 00 00 d0 01 00 00 00 00 00 00 00 00 00 00
+ 143: (85) call __htab_map_lookup_elem#313632
+       85 00 00 00 20 c9 04 00
+ 144: (15) if r0 == 0x0 goto pc+1
+       15 00 01 00 00 00 00 00
+ 145: (07) r0 += 56
+       07 00 00 00 38 00 00 00
+; return ret ? *ret : 0;
+ 146: (55) if r0 != 0x0 goto pc+3
+       55 00 03 00 00 00 00 00
+ 147: (b7) r1 = 0
+       b7 01 00 00 00 00 00 00
+; trackerid = cgrp_get_tracker_id(cgroupid);
+ 148: (7b) *(u64 *)(r10 -128) = r1
+       7b 1a 80 ff 00 00 00 00
+ 149: (05) goto pc+4
+       05 00 04 00 00 00 00 00
+; return ret ? *ret : 0;
+ 150: (79) r1 = *(u64 *)(r0 +0)
+       79 01 00 00 00 00 00 00
+; trackerid = cgrp_get_tracker_id(cgroupid);
+ 151: (7b) *(u64 *)(r10 -128) = r1
+       7b 1a 80 ff 00 00 00 00
+; if (trackerid)
+ 152: (15) if r1 == 0x0 goto pc+1
+       15 01 01 00 00 00 00 00
+; cgroupid = trackerid;
+ 153: (7b) *(u64 *)(r10 -96) = r1
+       7b 1a a0 ff 00 00 00 00
+ 154: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; if (map_lookup_elem(policy_map, &cgroupid))
+ 155: (07) r2 += -96
+       07 02 00 00 a0 ff ff ff
+ 156: (bf) r1 = r8
+       bf 81 00 00 00 00 00 00
+ 157: (85) call __htab_map_lookup_elem#313632
+       85 00 00 00 20 c9 04 00
+ 158: (15) if r0 == 0x0 goto pc+1
+       15 00 01 00 00 00 00 00
+ 159: (07) r0 += 56
+       07 00 00 00 38 00 00 00
+ 160: (bf) r1 = r0
+       bf 01 00 00 00 00 00 00
+ 161: (79) r0 = *(u64 *)(r10 -152)
+       79 a0 68 ff 00 00 00 00
+; if (map_lookup_elem(policy_map, &cgroupid))
+ 162: (55) if r1 != 0x0 goto pc+30
+       55 01 1e 00 00 00 00 00
+ 163: (b7) r1 = -1
+       b7 01 00 00 ff ff ff ff
+; trackerid = HOST_SELECTOR_MODE;
+ 164: (7b) *(u64 *)(r10 -128) = r1
+       7b 1a 80 ff 00 00 00 00
+ 165: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+ 166: (07) r2 += -128
+       07 02 00 00 80 ff ff ff
+; if (!map_lookup_elem(policy_map, &trackerid))
+ 167: (bf) r1 = r8
+       bf 81 00 00 00 00 00 00
+ 168: (85) call __htab_map_lookup_elem#313632
+       85 00 00 00 20 c9 04 00
+ 169: (15) if r0 == 0x0 goto pc+1
+       15 00 01 00 00 00 00 00
+ 170: (07) r0 += 56
+       07 00 00 00 38 00 00 00
+; if (!map_lookup_elem(policy_map, &trackerid))
+ 171: (15) if r0 == 0x0 goto pc+11
+       15 00 0b 00 00 00 00 00
+ 172: (b7) r1 = 1
+       b7 01 00 00 01 00 00 00
+; policy_id = ALL_PODS_POLICY_ID;
+ 173: (63) *(u32 *)(r10 -116) = r1
+       63 1a 8c ff 00 00 00 00
+ 174: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+ 175: (07) r2 += -116
+       07 02 00 00 8c ff ff ff
+; policy_map = map_lookup_elem(&policy_filter_maps, &policy_id);
+ 176: (18) r1 = map[id:461]
+       18 11 00 00 cd 01 00 00 00 00 00 00 00 00 00 00
+ 178: (85) call __htab_map_lookup_elem#313632
+       85 00 00 00 20 c9 04 00
+ 179: (15) if r0 == 0x0 goto pc+2
+       15 00 02 00 00 00 00 00
+ 180: (07) r0 += 56
+       07 00 00 00 38 00 00 00
+ 181: (79) r0 = *(u64 *)(r0 +0)
+       79 00 00 00 00 00 00 00
+; if (!policy_map)
+ 182: (55) if r0 != 0x0 goto pc+1
+       55 00 01 00 00 00 00 00
+ 183: (05) goto pc+227
+       05 00 e3 00 00 00 00 00
+ 184: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; return !map_lookup_elem(policy_map, &cgroupid);
+ 185: (07) r2 += -96
+       07 02 00 00 a0 ff ff ff
+ 186: (bf) r1 = r0
+       bf 01 00 00 00 00 00 00
+ 187: (85) call __htab_map_lookup_elem#313632
+       85 00 00 00 20 c9 04 00
+ 188: (15) if r0 == 0x0 goto pc+1
+       15 00 01 00 00 00 00 00
+ 189: (07) r0 += 56
+       07 00 00 00 38 00 00 00
+ 190: (bf) r1 = r0
+       bf 01 00 00 00 00 00 00
+ 191: (79) r0 = *(u64 *)(r10 -152)
+       79 a0 68 ff 00 00 00 00
+; if (!policy_filter_check(config->policy_id))
+ 192: (55) if r1 != 0x0 goto pc+218
+       55 01 da 00 00 00 00 00
+; msg->func_id = config->func_id;
+ 193: (71) r1 = *(u8 *)(r0 +3)
+       71 01 03 00 00 00 00 00
+ 194: (71) r3 = *(u8 *)(r0 +2)
+       71 03 02 00 00 00 00 00
+ 195: (71) r4 = *(u8 *)(r0 +0)
+       71 04 00 00 00 00 00 00
+ 196: (71) r2 = *(u8 *)(r0 +1)
+       71 02 01 00 00 00 00 00
+ 197: (b7) r5 = 0
+       b7 05 00 00 00 00 00 00
+; msg->tailcall_index_selector = 0;
+ 198: (63) *(u32 *)(r7 +24320) = r5
+       63 57 00 5f 00 00 00 00
+; msg->tailcall_index_process = 0;
+ 199: (63) *(u32 *)(r7 +24316) = r5
+       63 57 fc 5e 00 00 00 00
+; msg->retprobe_id = 0;
+ 200: (7b) *(u64 *)(r7 +104) = r5
+       7b 57 68 00 00 00 00 00
+; msg->sel.curr = 0;
+ 201: (7b) *(u64 *)(r7 +24248) = r5
+       7b 57 b8 5e 00 00 00 00
+ 202: (7b) *(u64 *)(r7 +24256) = r5
+       7b 57 c0 5e 00 00 00 00
+ 203: (7b) *(u64 *)(r7 +24264) = r5
+       7b 57 c8 5e 00 00 00 00
+ 204: (7b) *(u64 *)(r7 +24272) = r5
+       7b 57 d0 5e 00 00 00 00
+ 205: (7b) *(u64 *)(r7 +24280) = r5
+       7b 57 d8 5e 00 00 00 00
+ 206: (73) *(u8 *)(r7 +24288) = r5
+       73 57 e0 5e 00 00 00 00
+; msg->func_id = config->func_id;
+ 207: (67) r2 <<= 8
+       67 02 00 00 08 00 00 00
+ 208: (4f) r2 |= r4
+       4f 42 00 00 00 00 00 00
+ 209: (67) r3 <<= 16
+       67 03 00 00 10 00 00 00
+ 210: (67) r1 <<= 24
+       67 01 00 00 18 00 00 00
+ 211: (4f) r1 |= r3
+       4f 31 00 00 00 00 00 00
+ 212: (4f) r1 |= r2
+       4f 21 00 00 00 00 00 00
+; msg->func_id = config->func_id;
+ 213: (7b) *(u64 *)(r7 +96) = r1
+       7b 17 60 00 00 00 00 00
+; task = (struct task_struct *)get_current_task();
+ 214: (b7) r0 = -1289027560
+       b7 00 00 00 18 00 2b b3
+ 215: (bf) r0 = &(void __percpu *)(r0)
+       bf 00 ff ff 00 00 00 00
+ 216: (79) r0 = *(u64 *)(r0 +0)
+       79 00 00 00 00 00 00 00
+ 217: (bf) r8 = r0
+       bf 08 00 00 00 00 00 00
+ 218: (b7) r1 = 3440
+       b7 01 00 00 70 0d 00 00
+ 219: (bf) r3 = r8
+       bf 83 00 00 00 00 00 00
+ 220: (0f) r3 += r1
+       0f 13 00 00 00 00 00 00
+ 221: (bf) r1 = r10
+       bf a1 00 00 00 00 00 00
+; msg->func_id = config->func_id;
+ 222: (07) r1 += -8
+       07 01 00 00 f8 ff ff ff
+; probe_read(&nsproxy, sizeof(nsproxy), _(&task->nsproxy));
+ 223: (b7) r2 = 8
+       b7 02 00 00 08 00 00 00
+ 224: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+; probe_read(&nsp, sizeof(nsp), _(nsproxy));
+ 225: (79) r3 = *(u64 *)(r10 -8)
+       79 a3 f8 ff 00 00 00 00
+ 226: (bf) r9 = r10
+       bf a9 00 00 00 00 00 00
+; msg->func_id = config->func_id;
+ 227: (07) r9 += -88
+       07 09 00 00 a8 ff ff ff
+; probe_read(&nsp, sizeof(nsp), _(nsproxy));
+ 228: (bf) r1 = r9
+       bf 91 00 00 00 00 00 00
+ 229: (b7) r2 = 72
+       b7 02 00 00 48 00 00 00
+ 230: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+; get_namespaces(&msg->ns, task);
+ 231: (bf) r1 = r7
+       bf 71 00 00 00 00 00 00
+ 232: (07) r1 += 32
+       07 01 00 00 20 00 00 00
+ 233: (b7) r2 = 1
+       b7 02 00 00 01 00 00 00
+; if (bpf_core_field_exists(nsproxy->uts_ns->ns)) {
+ 234: (b7) r2 = 536
+       b7 02 00 00 18 02 00 00
+; 
+ 235: (79) r3 = *(u64 *)(r9 +8)
+       79 93 08 00 00 00 00 00
+ 236: (0f) r3 += r2
+       0f 23 00 00 00 00 00 00
+ 237: (b7) r2 = 4
+       b7 02 00 00 04 00 00 00
+ 238: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+ 239: (b7) r1 = 1
+       b7 01 00 00 01 00 00 00
+; if (bpf_core_field_exists(nsproxy->ipc_ns->ns)) {
+ 240: (bf) r1 = r10
+       bf a1 00 00 00 00 00 00
+; _(&nsp.ipc_ns->ns.inum));
+ 241: (07) r1 += -88
+       07 01 00 00 a8 ff ff ff
+ 242: (79) r3 = *(u64 *)(r1 +16)
+       79 13 10 00 00 00 00 00
+ 243: (b7) r1 = 1240
+       b7 01 00 00 d8 04 00 00
+; instruction poisoned by CO-RE
+ 244: (0f) r3 += r1
+       0f 13 00 00 00 00 00 00
+; 
+ 245: (bf) r1 = r7
+       bf 71 00 00 00 00 00 00
+ 246: (07) r1 += 36
+       07 01 00 00 24 00 00 00
+ 247: (b7) r2 = 4
+       b7 02 00 00 04 00 00 00
+ 248: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+ 249: (b7) r1 = 1
+       b7 01 00 00 01 00 00 00
+; if (bpf_core_field_exists(nsproxy->mnt_ns->ns)) {
+ 250: (bf) r1 = r10
+       bf a1 00 00 00 00 00 00
+; _(&nsp.mnt_ns->ns.inum));
+ 251: (07) r1 += -88
+       07 01 00 00 a8 ff ff ff
+ 252: (79) r3 = *(u64 *)(r1 +24)
+       79 13 18 00 00 00 00 00
+ 253: (b7) r1 = 88
+       b7 01 00 00 58 00 00 00
+; instruction poisoned by CO-RE
+ 254: (0f) r3 += r1
+       0f 13 00 00 00 00 00 00
+; 
+ 255: (bf) r1 = r7
+       bf 71 00 00 00 00 00 00
+ 256: (07) r1 += 40
+       07 01 00 00 28 00 00 00
+ 257: (b7) r2 = 4
+       b7 02 00 00 04 00 00 00
+ 258: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+ 259: (b7) r1 = 1
+       b7 01 00 00 01 00 00 00
+; if (bpf_core_field_exists(task->thread_pid)) {
+ 260: (15) if r1 == 0x0 goto pc+40
+       15 01 28 00 00 00 00 00
+ 261: (b7) r6 = 0
+       b7 06 00 00 00 00 00 00
+; struct pid *p = 0;
+ 262: (7b) *(u64 *)(r10 -96) = r6
+       7b 6a a0 ff 00 00 00 00
+ 263: (b7) r1 = 2904
+       b7 01 00 00 58 0b 00 00
+ 264: (bf) r3 = r8
+       bf 83 00 00 00 00 00 00
+ 265: (0f) r3 += r1
+       0f 13 00 00 00 00 00 00
+ 266: (bf) r1 = r10
+       bf a1 00 00 00 00 00 00
+ 267: (07) r1 += -96
+       07 01 00 00 a0 ff ff ff
+; probe_read(&p, sizeof(p), _(&task->thread_pid));
+ 268: (b7) r2 = 8
+       b7 02 00 00 08 00 00 00
+ 269: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+; if (p) {
+ 270: (79) r3 = *(u64 *)(r10 -96)
+       79 a3 a0 ff 00 00 00 00
+; if (p) {
+ 271: (15) if r3 == 0x0 goto pc+28
+       15 03 1c 00 00 00 00 00
+; int level = 0;
+ 272: (63) *(u32 *)(r10 -128) = r6
+       63 6a 80 ff 00 00 00 00
+ 273: (b7) r1 = 4
+       b7 01 00 00 04 00 00 00
+ 274: (0f) r3 += r1
+       0f 13 00 00 00 00 00 00
+ 275: (bf) r1 = r10
+       bf a1 00 00 00 00 00 00
+ 276: (07) r1 += -128
+       07 01 00 00 80 ff ff ff
+; probe_read(&level, sizeof(level), _(&p->level));
+ 277: (b7) r2 = 4
+       b7 02 00 00 04 00 00 00
+ 278: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+ 279: (b7) r1 = 128
+       b7 01 00 00 80 00 00 00
+; probe_read(&up, sizeof(up), _(&p->numbers[level]));
+ 280: (79) r3 = *(u64 *)(r10 -96)
+       79 a3 a0 ff 00 00 00 00
+ 281: (0f) r3 += r1
+       0f 13 00 00 00 00 00 00
+ 282: (61) r1 = *(u32 *)(r10 -128)
+       61 a1 80 ff 00 00 00 00
+ 283: (67) r1 <<= 32
+       67 01 00 00 20 00 00 00
+ 284: (c7) r1 s>>= 32
+       c7 01 00 00 20 00 00 00
+ 285: (67) r1 <<= 4
+       67 01 00 00 04 00 00 00
+ 286: (0f) r3 += r1
+       0f 13 00 00 00 00 00 00
+ 287: (bf) r9 = r10
+       bf a9 00 00 00 00 00 00
+; int level = 0;
+ 288: (07) r9 += -112
+       07 09 00 00 90 ff ff ff
+; probe_read(&up, sizeof(up), _(&p->numbers[level]));
+ 289: (bf) r1 = r9
+       bf 91 00 00 00 00 00 00
+ 290: (b7) r2 = 16
+       b7 02 00 00 10 00 00 00
+ 291: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+; _(&up.ns->ns.inum));
+ 292: (79) r3 = *(u64 *)(r9 +8)
+       79 93 08 00 00 00 00 00
+ 293: (b7) r1 = 344
+       b7 01 00 00 58 01 00 00
+ 294: (0f) r3 += r1
+       0f 13 00 00 00 00 00 00
+; probe_read(&msg->pid_inum, sizeof(msg->pid_inum),
+ 295: (bf) r1 = r7
+       bf 71 00 00 00 00 00 00
+ 296: (07) r1 += 44
+       07 01 00 00 2c 00 00 00
+; probe_read(&msg->pid_inum, sizeof(msg->pid_inum),
+ 297: (b7) r2 = 4
+       b7 02 00 00 04 00 00 00
+ 298: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+ 299: (05) goto pc+1
+       05 00 01 00 00 00 00 00
+; msg->pid_inum = 0;
+ 300: (63) *(u32 *)(r7 +44) = r6
+       63 67 2c 00 00 00 00 00
+; 
+ 301: (bf) r1 = r7
+       bf 71 00 00 00 00 00 00
+ 302: (07) r1 += 48
+       07 01 00 00 30 00 00 00
+ 303: (b7) r2 = 1
+       b7 02 00 00 01 00 00 00
+; if (bpf_core_field_exists(nsproxy->pid_ns_for_children)) {
+ 304: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; _(&nsp.pid_ns_for_children->ns.inum));
+ 305: (07) r2 += -88
+       07 02 00 00 a8 ff ff ff
+ 306: (79) r3 = *(u64 *)(r2 +32)
+       79 23 20 00 00 00 00 00
+ 307: (b7) r2 = 344
+       b7 02 00 00 58 01 00 00
+ 308: (0f) r3 += r2
+       0f 23 00 00 00 00 00 00
+; probe_read(&msg->pid_for_children_inum,
+ 309: (b7) r2 = 4
+       b7 02 00 00 04 00 00 00
+ 310: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+; msg->pid_for_children_inum = 0;
+ 311: (b7) r1 = 1
+       b7 01 00 00 01 00 00 00
+; if (bpf_core_field_exists(nsproxy->net_ns->ns)) {
+ 312: (bf) r1 = r10
+       bf a1 00 00 00 00 00 00
+; _(&nsp.net_ns->ns.inum));
+ 313: (07) r1 += -88
+       07 01 00 00 a8 ff ff ff
+ 314: (79) r3 = *(u64 *)(r1 +40)
+       79 13 28 00 00 00 00 00
+ 315: (b7) r1 = 280
+       b7 01 00 00 18 01 00 00
+; instruction poisoned by CO-RE
+ 316: (0f) r3 += r1
+       0f 13 00 00 00 00 00 00
+; 
+ 317: (bf) r1 = r7
+       bf 71 00 00 00 00 00 00
+ 318: (07) r1 += 52
+       07 01 00 00 34 00 00 00
+ 319: (b7) r2 = 4
+       b7 02 00 00 04 00 00 00
+ 320: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+ 321: (b7) r1 = 1
+       b7 01 00 00 01 00 00 00
+; if (bpf_core_field_exists(nsproxy->time_ns)) {
+ 322: (15) if r1 == 0x0 goto pc+15
+       15 01 0f 00 00 00 00 00
+ 323: (bf) r6 = r10
+       bf a6 00 00 00 00 00 00
+; _(&nsp.time_ns->ns.inum));
+ 324: (07) r6 += -88
+       07 06 00 00 a8 ff ff ff
+ 325: (79) r3 = *(u64 *)(r6 +48)
+       79 63 30 00 00 00 00 00
+ 326: (b7) r9 = 152
+       b7 09 00 00 98 00 00 00
+ 327: (0f) r3 += r9
+       0f 93 00 00 00 00 00 00
+; probe_read(&msg->time_inum, sizeof(msg->time_inum),
+ 328: (bf) r1 = r7
+       bf 71 00 00 00 00 00 00
+ 329: (07) r1 += 56
+       07 01 00 00 38 00 00 00
+; probe_read(&msg->time_inum, sizeof(msg->time_inum),
+ 330: (b7) r2 = 4
+       b7 02 00 00 04 00 00 00
+ 331: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+; _(&nsp.time_ns_for_children->ns.inum));
+ 332: (79) r3 = *(u64 *)(r6 +56)
+       79 63 38 00 00 00 00 00
+ 333: (0f) r3 += r9
+       0f 93 00 00 00 00 00 00
+; probe_read(&msg->time_for_children_inum,
+ 334: (bf) r1 = r7
+       bf 71 00 00 00 00 00 00
+ 335: (07) r1 += 60
+       07 01 00 00 3c 00 00 00
+; probe_read(&msg->time_for_children_inum,
+ 336: (b7) r2 = 4
+       b7 02 00 00 04 00 00 00
+ 337: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+; 
+ 338: (bf) r1 = r7
+       bf 71 00 00 00 00 00 00
+ 339: (07) r1 += 64
+       07 01 00 00 40 00 00 00
+ 340: (b7) r2 = 1
+       b7 02 00 00 01 00 00 00
+; if (bpf_core_field_exists(nsproxy->cgroup_ns)) {
+ 341: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; _(&nsp.cgroup_ns->ns.inum));
+ 342: (07) r2 += -88
+       07 02 00 00 a8 ff ff ff
+ 343: (79) r3 = *(u64 *)(r2 +64)
+       79 23 40 00 00 00 00 00
+ 344: (b7) r2 = 88
+       b7 02 00 00 58 00 00 00
+ 345: (0f) r3 += r2
+       0f 23 00 00 00 00 00 00
+; probe_read(&msg->cgroup_inum, sizeof(msg->cgroup_inum),
+ 346: (b7) r2 = 4
+       b7 02 00 00 04 00 00 00
+ 347: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+; msg->cgroup_inum = 0;
+ 348: (b7) r1 = 0
+       b7 01 00 00 00 00 00 00
+; struct mm_struct *mm = NULL;
+ 349: (7b) *(u64 *)(r10 -112) = r1
+       7b 1a 90 ff 00 00 00 00
+ 350: (b7) r2 = 1
+       b7 02 00 00 01 00 00 00
+; if (bpf_core_field_exists(mm->user_ns)) {
+ 351: (b7) r1 = 2680
+       b7 01 00 00 78 0a 00 00
+ 352: (bf) r3 = r8
+       bf 83 00 00 00 00 00 00
+ 353: (0f) r3 += r1
+       0f 13 00 00 00 00 00 00
+ 354: (bf) r1 = r10
+       bf a1 00 00 00 00 00 00
+; probe_read(&mm, sizeof(mm), _(&task->mm));
+ 355: (07) r1 += -112
+       07 01 00 00 90 ff ff ff
+ 356: (b7) r2 = 8
+       b7 02 00 00 08 00 00 00
+ 357: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+ 358: (b7) r1 = 1440
+       b7 01 00 00 a0 05 00 00
+; probe_read(&user_ns, sizeof(user_ns), _(&mm->user_ns));
+ 359: (79) r3 = *(u64 *)(r10 -112)
+       79 a3 90 ff 00 00 00 00
+ 360: (0f) r3 += r1
+       0f 13 00 00 00 00 00 00
+ 361: (bf) r1 = r10
+       bf a1 00 00 00 00 00 00
+; probe_read(&mm, sizeof(mm), _(&task->mm));
+ 362: (07) r1 += -96
+       07 01 00 00 a0 ff ff ff
+; probe_read(&user_ns, sizeof(user_ns), _(&mm->user_ns));
+ 363: (b7) r2 = 8
+       b7 02 00 00 08 00 00 00
+ 364: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+ 365: (b7) r1 = 344
+       b7 01 00 00 58 01 00 00
+; _(&user_ns->ns.inum));
+ 366: (79) r3 = *(u64 *)(r10 -96)
+       79 a3 a0 ff 00 00 00 00
+ 367: (0f) r3 += r1
+       0f 13 00 00 00 00 00 00
+; probe_read(&msg->user_inum, sizeof(msg->user_inum),
+ 368: (bf) r1 = r7
+       bf 71 00 00 00 00 00 00
+ 369: (07) r1 += 68
+       07 01 00 00 44 00 00 00
+; probe_read(&msg->user_inum, sizeof(msg->user_inum),
+ 370: (b7) r2 = 4
+       b7 02 00 00 04 00 00 00
+ 371: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+; msg->user_inum = 0;
+ 372: (b7) r1 = 3328
+       b7 01 00 00 00 0d 00 00
+ 373: (0f) r8 += r1
+       0f 18 00 00 00 00 00 00
+ 374: (bf) r1 = r10
+       bf a1 00 00 00 00 00 00
+; 
+ 375: (07) r1 += -88
+       07 01 00 00 a8 ff ff ff
+; probe_read(&cred, sizeof(cred), _(&task->cred));
+ 376: (b7) r2 = 8
+       b7 02 00 00 08 00 00 00
+ 377: (bf) r3 = r8
+       bf 83 00 00 00 00 00 00
+ 378: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+ 379: (b7) r1 = 64
+       b7 01 00 00 40 00 00 00
+; __get_caps(msg, cred);
+ 380: (79) r8 = *(u64 *)(r10 -88)
+       79 a8 a8 ff 00 00 00 00
+ 381: (bf) r3 = r8
+       bf 83 00 00 00 00 00 00
+ 382: (0f) r3 += r1
+       0f 13 00 00 00 00 00 00
+; probe_read(&msg->effective, sizeof(__u64), _(&cred->cap_effective));
+ 383: (bf) r1 = r7
+       bf 71 00 00 00 00 00 00
+ 384: (07) r1 += 80
+       07 01 00 00 50 00 00 00
+; probe_read(&msg->effective, sizeof(__u64), _(&cred->cap_effective));
+ 385: (b7) r2 = 8
+       b7 02 00 00 08 00 00 00
+ 386: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+ 387: (b7) r1 = 48
+       b7 01 00 00 30 00 00 00
+ 388: (bf) r3 = r8
+       bf 83 00 00 00 00 00 00
+ 389: (0f) r3 += r1
+       0f 13 00 00 00 00 00 00
+; probe_read(&msg->inheritable, sizeof(__u64), _(&cred->cap_inheritable));
+ 390: (bf) r1 = r7
+       bf 71 00 00 00 00 00 00
+ 391: (07) r1 += 88
+       07 01 00 00 58 00 00 00
+; probe_read(&msg->inheritable, sizeof(__u64), _(&cred->cap_inheritable));
+ 392: (b7) r2 = 8
+       b7 02 00 00 08 00 00 00
+ 393: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+ 394: (b7) r1 = 56
+       b7 01 00 00 38 00 00 00
+ 395: (0f) r8 += r1
+       0f 18 00 00 00 00 00 00
+; get_current_subj_caps(&msg->caps, task);
+ 396: (bf) r1 = r7
+       bf 71 00 00 00 00 00 00
+ 397: (07) r1 += 72
+       07 01 00 00 48 00 00 00
+; probe_read(&msg->permitted, sizeof(__u64), _(&cred->cap_permitted));
+ 398: (b7) r2 = 8
+       b7 02 00 00 08 00 00 00
+ 399: (bf) r3 = r8
+       bf 83 00 00 00 00 00 00
+ 400: (85) call bpf_probe_read_compat#-85184
+       85 00 00 00 40 b3 fe ff
+ 401: (b7) r1 = 0
+       b7 01 00 00 00 00 00 00
+; msg->sel.match_cap = 0;
+ 402: (7b) *(u64 *)(r7 +24296) = r1
+       7b 17 e8 5e 00 00 00 00
+; msg->common.flags = 0;
+ 403: (73) *(u8 *)(r7 +1) = r1
+       73 17 01 00 00 00 00 00
+; msg->lsm.post = false;
+ 404: (73) *(u8 *)(r7 +24328) = r1
+       73 17 08 5f 00 00 00 00
+; msg->sel.match_cap = 0;
+ 405: (7b) *(u64 *)(r7 +24304) = r1
+       7b 17 f0 5e 00 00 00 00
+; tail_call(ctx, calls, TAIL_CALL_FILTER);
+ 406: (79) r1 = *(u64 *)(r10 -144)
+       79 a1 70 ff 00 00 00 00
+ 407: (18) r2 = map[id:261]
+       18 12 00 00 05 01 00 00 00 00 00 00 00 00 00 00
+ 409: (b7) r3 = 2
+       b7 03 00 00 02 00 00 00
+ 410: (85) call bpf_tail_call#12
+       85 00 00 00 0c 00 00 00
+; return generic_start_process_filter(ctx, (struct bpf_map_def *)&kprobe_calls);
+ 411: (b7) r0 = 0
+       b7 00 00 00 00 00 00 00
+ 412: (95) exit
+       95 00 00 00 00 00 00 00

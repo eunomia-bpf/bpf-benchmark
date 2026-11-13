@@ -70,5 +70,26 @@
    "reading": "six of eight are byte-identical executable code from untouched upstream source with CO-RE resolved; the other two differ only where clang picks a memory-operand form instead of a load-then-compare, which is fewer instructions, not different work."
   },
   "note_on_instruction_counts": "Instruction counts are a poor proxy here: both objects are the same size (AX 1776 for biosnoop on both sides) and the relocations match, but a folded compare changes the count. The byte comparison above is the measurement to quote."
+ },
+ "helper_naming_is_per_app": "Naming the inttoptr helpers is right where the frontend lets clang hoist the id away from the call (Tracee, BCC), and wrong where the frontend already emits the adjacent `mov $imm; call *reg` the linker inlines (Katran): there, naming turns an inlined call into a PLT32 relocation and the object grows (xdp_root 888 -> 1008 bytes). The prep takes --name-helpers, so each app states which it needs.",
+ "per_program_byte_identity": {
+  "bcc_total": "20 of 24 program bodies byte-identical to the image's objects",
+  "per_tool": {
+   "vfsstat": "4/4",
+   "opensnoop": "4/4",
+   "syscount": "2/2",
+   "tcpconnect": "4/4",
+   "runqlat": "3/3",
+   "capable": "1/2",
+   "biosnoop": "2/4",
+   "tcplife": "0/1"
+  },
+  "nature_of_the_rest": "clang folds `mov [rip+X],%rax; cmpl $k,(%rax)` into `cmpl $k,[rip+X]` and picks lea-vs-mov for the same address \u2014 fewer instructions, same work"
+ },
+ "katran_with_shared_prep": {
+  "xdp_root": "888 bytes, byte-identical",
+  "healthcheck_encap": "1360 bytes, byte-identical",
+  "balancer_ingress": "11000 vs shipped 11176, scheduling only",
+  "note": "Katran's frontend already gives adjacent helper immediates, so it takes the prep without --name-helpers"
  }
 }

@@ -1,0 +1,151 @@
+# HELP ELFInfoCacheHit Number of cache hits for ELF information
+# TYPE ELFInfoCacheHit counter
+ELFInfoCacheHit{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 18
+# HELP ELFInfoCacheMiss Number of cache misses for ELF information
+# TYPE ELFInfoCacheMiss counter
+ELFInfoCacheMiss{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 33
+# HELP ErrEmptyStack Number of times unwind_stop is called without a trace
+# TYPE ErrEmptyStack counter
+ErrEmptyStack{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 637
+# HELP GoSymbolizationSuccess Number of successfully symbolized Go frames
+# TYPE GoSymbolizationSuccess counter
+GoSymbolizationSuccess{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 981
+# HELP HashmapNumStackDeltaPages Current size of the stack delta pages hash map
+# TYPE HashmapNumStackDeltaPages gauge
+HashmapNumStackDeltaPages{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 1597
+# HELP HashmapPidPageToMappingInfo Current size of the hash map pid_page_to_mapping_info
+# TYPE HashmapPidPageToMappingInfo gauge
+HashmapPidPageToMappingInfo{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 281
+# HELP MaxProcParseUsec Max /proc/PID/maps parse time for a single collection interval, in microseconds
+# TYPE MaxProcParseUsec counter
+MaxProcParseUsec{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 506
+# HELP NumExeIDLoadedToEBPF The number of executables loaded to eBPF maps
+# TYPE NumExeIDLoadedToEBPF gauge
+NumExeIDLoadedToEBPF{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 32
+# HELP NumGenericPID Number of generic PID events (report_events)
+# TYPE NumGenericPID counter
+NumGenericPID{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 10
+# HELP NumProcAttempts Number of /proc/PID/maps process attempts
+# TYPE NumProcAttempts counter
+NumProcAttempts{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 11
+# HELP NumProcExit Number of exit PID events (report_events)
+# TYPE NumProcExit counter
+NumProcExit{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 1
+# HELP NumProcNew Number of new PID events (report_events)
+# TYPE NumProcNew counter
+NumProcNew{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 62
+# HELP NumUnknownPC Number of unknown PC events (report_events)
+# TYPE NumUnknownPC counter
+NumUnknownPC{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 6
+# HELP StackDeltaProviderSuccess Number of times the stack delta provider succeeded to extract stack deltas
+# TYPE StackDeltaProviderSuccess counter
+StackDeltaProviderSuccess{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 32
+# HELP TotalProcParseUsec Total /proc/PID/maps parse time for a single collection interval, in microseconds
+# TYPE TotalProcParseUsec counter
+TotalProcParseUsec{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 1898
+# HELP TraceCacheHit Number of cache hits in tracehandler trace cache by UM hash
+# TYPE TraceCacheHit counter
+TraceCacheHit{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 4486
+# HELP TraceCacheMiss Number of cache misses in tracehandler trace cache by UM hash
+# TYPE TraceCacheMiss counter
+TraceCacheMiss{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 981
+# HELP UnwindCallInterpreter Number of calls to interpreter unwinding in dispatch_interpreters()
+# TYPE UnwindCallInterpreter counter
+UnwindCallInterpreter{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 43057
+# HELP UnwindErrBadTLSAddr Number of failures to read from the TLS
+# TYPE UnwindErrBadTLSAddr counter
+UnwindErrBadTLSAddr{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 43056
+# HELP UnwindInfoArraySize Current size of the unwind info array
+# TYPE UnwindInfoArraySize gauge
+UnwindInfoArraySize{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 329
+# HELP UnwindNativeAttempts Unwind attempts since the previous check
+# TYPE UnwindNativeAttempts counter
+UnwindNativeAttempts{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 614886
+# HELP UnwindNativeErrLookupTextSection Number of failed range searches within 20 steps in get_stack_delta()
+# TYPE UnwindNativeErrLookupTextSection counter
+UnwindNativeErrLookupTextSection{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 115
+# HELP UnwindNativeErrPCRead Number of times failure to read PC from unwound stack (invalid stack delta)
+# TYPE UnwindNativeErrPCRead counter
+UnwindNativeErrPCRead{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 7357
+# HELP UnwindNativeErrReadKernelModeRegs Number of failures to read the kernel-mode registers
+# TYPE UnwindNativeErrReadKernelModeRegs counter
+UnwindNativeErrReadKernelModeRegs{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 67772
+# HELP UnwindNativeErrStackDeltaInvalid Number of invalid stack deltas in the native unwinder
+# TYPE UnwindNativeErrStackDeltaInvalid counter
+UnwindNativeErrStackDeltaInvalid{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 20825
+# HELP UnwindNativeErrWrongTextSection Number of failures to find the text section in get_text_section()
+# TYPE UnwindNativeErrWrongTextSection counter
+UnwindNativeErrWrongTextSection{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 649
+# HELP UnwindNativeFrames Unwound frames since the previous check
+# TYPE UnwindNativeFrames counter
+UnwindNativeFrames{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 544857
+# HELP UnwindNativeStackDeltaStop Number of stop stack deltas in the native unwinder (success)
+# TYPE UnwindNativeStackDeltaStop counter
+UnwindNativeStackDeltaStop{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 41734
+# HELP UnwindPythonAttempts Number of attempted python unwinds
+# TYPE UnwindPythonAttempts counter
+UnwindPythonAttempts{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 43059
+# HELP UnwindPythonErrNoProcInfo Number of times we didn't find an entry for this process in the Python process info array
+# TYPE UnwindPythonErrNoProcInfo counter
+UnwindPythonErrNoProcInfo{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 3
+# HELP UnwindPythonErrReadThreadStateAddr Number of failures to read the thread state pointer from TLD
+# TYPE UnwindPythonErrReadThreadStateAddr counter
+UnwindPythonErrReadThreadStateAddr{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 43067
+# HELP otelcol_exporter_queue_batch_send_size Number of units in the batch [Development]
+# TYPE otelcol_exporter_queue_batch_send_size histogram
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="10"} 0
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="25"} 0
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="50"} 0
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="75"} 0
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="100"} 0
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="250"} 0
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="500"} 0
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="750"} 0
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="1000"} 0
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="2000"} 0
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="3000"} 0
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="4000"} 1
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="5000"} 1
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="6000"} 1
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="7000"} 1
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="8000"} 1
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="9000"} 1
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="10000"} 1
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="20000"} 1
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="30000"} 1
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="50000"} 1
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="100000"} 1
+otelcol_exporter_queue_batch_send_size_bucket{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0",le="+Inf"} 1
+otelcol_exporter_queue_batch_send_size_sum{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 3366
+otelcol_exporter_queue_batch_send_size_count{exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 1
+# HELP otelcol_exporter_queue_capacity Fixed capacity of the retry queue (in batches). [Alpha]
+# TYPE otelcol_exporter_queue_capacity gauge
+otelcol_exporter_queue_capacity{data_type="profiles",exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 1
+# HELP otelcol_exporter_queue_size Current size of the retry queue (in batches). [Alpha]
+# TYPE otelcol_exporter_queue_size gauge
+otelcol_exporter_queue_size{data_type="profiles",exporter="debug",service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 0
+# HELP otelcol_process_cpu_seconds Total CPU user and system time in seconds [Alpha]
+# TYPE otelcol_process_cpu_seconds counter
+otelcol_process_cpu_seconds{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 2.26
+# HELP otelcol_process_memory_rss Total physical memory (resident set size) [Alpha]
+# TYPE otelcol_process_memory_rss gauge
+otelcol_process_memory_rss{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 8.5901312e+07
+# HELP otelcol_process_runtime_heap_alloc_bytes Bytes of allocated heap objects (see 'go doc runtime.MemStats.HeapAlloc') [Alpha]
+# TYPE otelcol_process_runtime_heap_alloc_bytes gauge
+otelcol_process_runtime_heap_alloc_bytes{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 3.1722128e+07
+# HELP otelcol_process_runtime_total_alloc_bytes Cumulative bytes allocated for heap objects (see 'go doc runtime.MemStats.TotalAlloc') [Alpha]
+# TYPE otelcol_process_runtime_total_alloc_bytes counter
+otelcol_process_runtime_total_alloc_bytes{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 6.05769888e+08
+# HELP otelcol_process_runtime_total_sys_memory_bytes Total bytes of memory obtained from the OS (see 'go doc runtime.MemStats.Sys') [Alpha]
+# TYPE otelcol_process_runtime_total_sys_memory_bytes gauge
+otelcol_process_runtime_total_sys_memory_bytes{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 8.745604e+07
+# HELP otelcol_process_uptime Uptime of the process [Alpha]
+# TYPE otelcol_process_uptime counter
+otelcol_process_uptime{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 5.305921164
+# HELP promhttp_metric_handler_errors_total Total number of internal errors encountered by the promhttp metric handler.
+# TYPE promhttp_metric_handler_errors_total counter
+promhttp_metric_handler_errors_total{cause="encoding"} 0
+promhttp_metric_handler_errors_total{cause="gathering"} 0
+# HELP target_info Target metadata
+# TYPE target_info gauge
+target_info{service_instance_id="316c02ec-f85e-408c-97fb-583686fa141f",service_name="otelcol-ebpf-profiler",service_version="0.140.0"} 1

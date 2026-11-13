@@ -51,9 +51,15 @@ def main(argv):
             return m.group(0)
         return f'@{name}('
 
-    text = CALL.sub(repl, text)
-    if missing:
-        raise SystemExit(f'helper ids with no uapi name: {sorted(missing)}')
+    # Naming is only right when the frontend leaves helpers as address-taken constants
+    # that clang can hoist away from the call (Tracee, BCC).  Where the frontend already
+    # produces the adjacent `mov $imm; call *reg` — Katran — naming converts a call the
+    # linker inlines into a PLT32 relocation it cannot, and the objects grow.  So: name
+    # only if the caller asked, by passing a third argument.
+    if len(argv) > 3 and argv[3] == '--name-helpers':
+        text = CALL.sub(repl, text)
+        if missing:
+            raise SystemExit(f'helper ids with no uapi name: {sorted(missing)}')
 
     # Declare each named helper once, typed by the first call site that uses it.
     for name in sorted(set(re.findall(r'@(bpf_\w+)\(', text))):

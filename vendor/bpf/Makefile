@@ -209,8 +209,8 @@ $(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c
 			--physical-layout "$(KATRAN_CONTEXT_BUILD)/physical-layout.json" \
 			-o "$(dir $@)$${stem}.lowered.bc"; \
 		"$(LLVM_DIS)" "$(dir $@)$${stem}.lowered.bc" -o "$(dir $@)$${stem}.lowered.ll"; \
-		sed -E 's/"target-features"="[^"]*"//; s/"target-cpu"="[^"]*"//' \
-			"$(dir $@)$${stem}.lowered.ll" > "$(dir $@)$${stem}.notf.ll"; \
+		python3 "$(NATIVE_IR_PREP)" \
+			"$(dir $@)$${stem}.lowered.ll" "$(dir $@)$${stem}.notf.ll"; \
 		"$(CLANG)" $(KATRAN_SAME_SOURCE_CODEGEN) -c "$(dir $@)$${stem}.notf.ll" -o "$@"; \
 	else \
 		"$(CLANG)" $(KATRAN_NATIVE_CFLAGS) \
@@ -238,6 +238,7 @@ BCC_SAME_SOURCE ?= 0
 # lane perf's default output cannot change what this recipe runs (they reported a
 # "Permission denied" from exactly that race at 2026-11-13T10:31).
 CORE_IR_LOWER ?= /var/tmp/kprog-tmp/C/tools/core-ir-lower
+NATIVE_IR_PREP ?= $(CURDIR)/../../kprog/results/tracee-samesource-20261113/native-ir-prep.py
 KATRAN_TARGET_BTF ?= /workspaces/.agent-state/kprog-ck/build-x86/vmlinux
 # The BCC same-source route needs the SOLE kernel's release and BTF.  vendor/bpf
 # defaults both to the host ($(uname -r), /sys/kernel/btf/vmlinux), and `make -B`
@@ -265,8 +266,8 @@ $(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/x86/vmli
 			--report "$(dir $@)$${stem}.core.json" \
 			-o "$(dir $@)$${stem}.resolved.bc"; \
 		"$(LLVM_DIS)" "$(dir $@)$${stem}.resolved.bc" -o "$(dir $@)$${stem}.resolved.ll"; \
-		python3 "$(CURDIR)/../../kprog/results/tracee-samesource-20261113/native-ir-prep.py" \
-			"$(dir $@)$${stem}.resolved.ll" "$(dir $@)$${stem}.notf.ll"; \
+		python3 "$(NATIVE_IR_PREP)" \
+			"$(dir $@)$${stem}.resolved.ll" "$(dir $@)$${stem}.notf.ll" --name-helpers; \
 		"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/native_compat.h" $$inc \
 			-o "$@" "$(dir $@)$${stem}.notf.ll"; \
 	else \
