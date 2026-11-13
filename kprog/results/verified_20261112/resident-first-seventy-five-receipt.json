@@ -1,0 +1,136 @@
+{
+  "recorded_at": "2026-11-13T00:55:25.761366+00:00",
+  "scope": "Completed prefix of ongoing 549-instance load-only census",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261112-resident-census/ready/first-seventy-five",
+  "journal": "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/outcomes.jsonl",
+  "kernel_commit": "74d1097af561",
+  "model_commit": "d0890b14f",
+  "completed": 75,
+  "submitted": 75,
+  "native_selection_failed": 0,
+  "resource_failed": 0,
+  "stock_verifier_submissions": 68,
+  "verified": 41,
+  "verifier_rejected": 27,
+  "compilation_failed": 7,
+  "native_execution_requests": 0,
+  "applications": {
+    "bcc/set": {
+      "completed": 0,
+      "submitted": 0,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "katran": {
+      "completed": 1,
+      "submitted": 1,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 0,
+      "verifier_rejected": 1,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "cilium/agent": {
+      "completed": 2,
+      "submitted": 2,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 0,
+      "verifier_rejected": 2,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "otelcol-ebpf-profiler/profiling": {
+      "completed": 1,
+      "submitted": 1,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 1,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    },
+    "tetragon/observer": {
+      "completed": 71,
+      "submitted": 71,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 40,
+      "verifier_rejected": 24,
+      "compilation_failed": 7,
+      "workload_run": null
+    },
+    "tracee/monitor": {
+      "completed": 0,
+      "submitted": 0,
+      "native_selection_failed": 0,
+      "resource_failed": 0,
+      "verified": 0,
+      "verifier_rejected": 0,
+      "compilation_failed": 0,
+      "workload_run": null
+    }
+  },
+  "classes": {
+    "verifier_instruction_complexity": 1,
+    "verifier_readonly_kernel_write": 2,
+    "installed": 41,
+    "verifier_callback_argument": 8,
+    "verifier_scalar_memory_access": 8,
+    "compiler_stack_storage": 7,
+    "verifier_stack_access": 8
+  },
+  "new_requests": [
+    {
+      "application": "tetragon/observer",
+      "name": "generic_kprobe_filter_arg",
+      "retained_source_prog_id": 96,
+      "stage": "verifier_rejected",
+      "classified_class": "verifier_stack_access",
+      "diagnostic": "trusted-native-loader: service simulator verification failed: Permission denied\narg#0 reference type('UNKNOWN ') size cannot be determined: -22\n0: R1=ctx() R10=fp0\n0: (7b) *(u64 *)(r10 -656) = r1\ninvalid write to stack R10 off=-656 size=8\nprocessed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\n",
+      "service": {
+        "request_id": 74,
+        "started": "2026-11-13T00:35:43.859250+00:00",
+        "status": -5,
+        "failure_archive": "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/74.failure.tar.gz",
+        "finished": "2026-11-13T00:50:28.058456+00:00"
+      }
+    },
+    {
+      "application": "tetragon/observer",
+      "name": "generic_kprobe_output",
+      "retained_source_prog_id": 97,
+      "stage": "installed",
+      "classified_class": "installed",
+      "diagnostic": "",
+      "service": {
+        "request_id": 75,
+        "started": "2026-11-13T00:50:28.928969+00:00",
+        "prog_id": 259,
+        "status": 0,
+        "artifact_archive": "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/75.success.tar.gz",
+        "finished": "2026-11-13T00:50:46.309630+00:00"
+      }
+    }
+  ],
+  "archive": "resident-outcomes-74-75.tar.gz",
+  "archive_bytes": 14821590,
+  "previous_receipt": "kprog/results/verified_20261112/resident-first-seventy-three-receipt.json",
+  "previous_submitted": 73,
+  "previous_completed": 73,
+  "archived_requests": [
+    "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/74.failure.tar.gz",
+    "/workspaces/kprog-raw/verified/20261112-resident-census/ready/retry2-control/state/session-e0ue5kr8/requests/75.success.tar.gz"
+  ],
+  "collector_commit": "c445b02e2",
+  "linker_provenance": {
+    "epoch_record": "resident-linker-epoch-change.json",
+    "final_publication": "tail-count-final-receipt.json",
+    "requests_74_75": "Both begin after the last recorded a941c36c0 shared release-linker publication on2026-11-12 at22:34:05. Full native inputs and service commands retained; cumulative census spans earlier tool epochs."
+  }
+}
