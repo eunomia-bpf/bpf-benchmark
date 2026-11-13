@@ -1,0 +1,27 @@
+{
+  "recorded_at": "2026-11-13T02:52:46.433658+00:00",
+  "scope": "Same captured P and metadata compile-only storage diagnosis, no new verifier load",
+  "model_baseline": "d0890b14f",
+  "model_candidate": "91fc2558a",
+  "native_p_equal": true,
+  "canonical_proof_elf_equal": true,
+  "before": {
+    "first_instruction": "0:\t*(u64 *)(r10 - 0x290) = r1",
+    "deepest_explicit_r10_offset": 2816,
+    "section_bytes": 3192344,
+    "instruction_slots": 399043
+  },
+  "after": {
+    "first_instruction": "0:\t*(u64 *)(r10 - 0x290) = r1",
+    "deepest_explicit_r10_offset": 2808,
+    "section_bytes": 3193456,
+    "instruction_slots": 399182
+  },
+  "make_exit": 0,
+  "started": "2026-11-13T02:34:11Z",
+  "finished": "2026-11-13T02:47:29Z",
+  "conclusion": "The pointer-representative lifetime correction does not resolve this storage class: first spill remains at R10-656, and deepest explicit offset only falls from2816 to2808. Both exceed stock512.",
+  "census": "QEMU1110393 resumed SIGCONT immediately after completed diagnostic was collected",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261113-ghost-pointer-lifetime",
+  "archive": "ghost-pointer-frame-comparison.tar.gz"
+}
