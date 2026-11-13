@@ -1,0 +1,34 @@
+{
+  "recorded_at": "2026-11-13T06:06:08.667478+00:00",
+  "scope": "P0 compiler-only feasibility launch; outcome pending",
+  "source_commit": "9854bd220",
+  "outer_pid": 1231938,
+  "raw": "/workspaces/kprog-raw/perf/20261113-memory-flags",
+  "build": "/var/tmp/kprog-tmp/perf/memory-flags",
+  "contract": {
+    "cpus": "16-19",
+    "workers": 2,
+    "per_compiler_address_space_gib": 8,
+    "outer_address_space_gib": 20
+  },
+  "variants": {
+    "plain": [],
+    "thresholds": [
+      "-mllvm",
+      "-max-store-memset=4096",
+      "-mllvm",
+      "-max-store-memcpy=4096"
+    ]
+  },
+  "source": "original vendor/bpf/tracee/pkg/ebpf/c/tracee.bpf.c",
+  "entrypoint": "make -f kprog/perf/native-context/Makefile memory-flags",
+  "dry_run_log": "/workspaces/kprog-raw/perf/20261113-memory-flags-dry-run.log",
+  "dry_run_exit": 0,
+  "status": "launched; collect next turn",
+  "ownership": "VERIFIED 2026-11-13T06:04:06Z handed native-link source to PERF for P0; PERF accepted in COORD",
+  "limits": [
+    "Compile-only; no guest or image/base rebuild and no performance claim.",
+    "No app source rewrite or new replacement header; existing frozen ABI includes and flags reused.",
+    "Compiler threshold expansion may leave variable memory calls; linker-owned implementation next if needed."
+  ]
+}
