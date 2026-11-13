@@ -265,3 +265,7 @@ upstream-cilium-native: upstream-cilium-ir $(SOCKET_BUILD)/socket-context-lower 
 .PHONY: upstream-cilium-link
 upstream-cilium-link: upstream-cilium-native
 	python3 $(HERE)/socket-proof.py --input $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).native.o --linker $(LINK_MEMORY_PAYLOAD)/native-link.real --output $(CILIUM_IR_BUILD)/$(CILIUM_UNIT)-links --section-prefix tc/ --section-prefix xdp
+
+.PHONY: cilium-retain
+cilium-retain:
+	python3 $(HERE)/cilium-retain.py --raw /workspaces/kprog-raw/perf/20261113-packet-context --upstream-build $(CILIUM_IR_BUILD) --packet-build $(PACKET_BUILD) --compiler $(SOCKET_BUILD)/socket-context-lower --output $(ROOT)/kprog/results/perf_20261113/packet-context-host.json

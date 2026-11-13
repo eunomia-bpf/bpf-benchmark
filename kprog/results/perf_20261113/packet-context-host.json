@@ -1,0 +1,992 @@
+{
+  "recorded_at": "2026-11-13T07:47:32.765044+00:00",
+  "raw": "/workspaces/kprog-raw/perf/20261113-packet-context",
+  "compiler_commit": "1f74ce814bc380887829bd18506b2cdf555ca37b",
+  "compiler_sha256": "2b4587ce86bc409c96287985b9c659d1d7712f3c4f94961d38f5a51cf542eaf3",
+  "units": [
+    {
+      "unit": "bpf_host",
+      "frontend": {
+        "capture": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_host/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c",
+        "original_command": [
+          "/usr/bin/clang",
+          "-I/var/tmp/ciliumrunner_j0zuxz2w/state/state/globals",
+          "-I/var/tmp/ciliumrunner_j0zuxz2w/state/state/templates/be129f26877ac608f2b984e068d96471fdb625dcc5b14af82197a82820ee7ede",
+          "-I/var/lib/cilium/bpf",
+          "-I/var/lib/cilium/bpf/include",
+          "-g",
+          "-O2",
+          "--target=bpf",
+          "-std=gnu99",
+          "-nostdinc",
+          "-ftrap-function=__undefined_trap",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-Wshadow",
+          "-Wno-address-of-packed-member",
+          "-Wno-unknown-warning-option",
+          "-Wno-gnu-variable-sized-type-not-at-end",
+          "-Wimplicit-int-conversion",
+          "-Wenum-conversion",
+          "-Wimplicit-fallthrough",
+          "-mcpu=v3",
+          "-c",
+          "/var/lib/cilium/bpf/bpf_host.c",
+          "-o",
+          "-"
+        ],
+        "replay_command": [
+          "clang-18",
+          "-I/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_host/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c/live-headers",
+          "-I/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_host/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c/live-headers",
+          "-I/workspaces/repository/vendor/repos/cilium/bpf",
+          "-I/workspaces/repository/vendor/repos/cilium/bpf/include",
+          "-g",
+          "-O2",
+          "--target=bpf",
+          "-std=gnu99",
+          "-nostdinc",
+          "-ftrap-function=__undefined_trap",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-Wshadow",
+          "-Wno-address-of-packed-member",
+          "-Wno-unknown-warning-option",
+          "-Wno-gnu-variable-sized-type-not-at-end",
+          "-Wimplicit-int-conversion",
+          "-Wenum-conversion",
+          "-Wimplicit-fallthrough",
+          "-mcpu=v3",
+          "-c",
+          "/workspaces/repository/vendor/repos/cilium/bpf/bpf_host.c",
+          "-o",
+          "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host.bc",
+          "-emit-llvm"
+        ],
+        "sources": [
+          {
+            "path": "/workspaces/repository/vendor/repos/cilium/bpf/bpf_host.c",
+            "sha256": "c8c68f808972c90ed5002c74f013f6a55386b67e2618a41ef84d997d2960a53f"
+          }
+        ],
+        "configuration": [
+          {
+            "path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_host/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c/headers/00-node_config.h",
+            "retained_sha256": "b4dd957a9db760c031602cf888647758b7544f591cdd2d4864ba129997a80458",
+            "replay_path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_host/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c/live-headers/node_config.h",
+            "replay_sha256": "b4dd957a9db760c031602cf888647758b7544f591cdd2d4864ba129997a80458"
+          },
+          {
+            "path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_host/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c/headers/01-ep_config.h",
+            "retained_sha256": "7b99209783c8b493c4d0dd673f5475ead763e892534d7f639d4bfb36bfc1dcd3",
+            "replay_path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_host/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c/live-headers/ep_config.h",
+            "replay_sha256": "7b99209783c8b493c4d0dd673f5475ead763e892534d7f639d4bfb36bfc1dcd3"
+          },
+          {
+            "path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_host/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c/headers/02-netdev_config.h",
+            "retained_sha256": "c39a8fe59c863257ee163865dd723a891b02545917043b2054cbdcf0a5b7e153",
+            "replay_path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_host/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c/live-headers/netdev_config.h",
+            "replay_sha256": "c39a8fe59c863257ee163865dd723a891b02545917043b2054cbdcf0a5b7e153"
+          },
+          {
+            "path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_host/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c/headers/03-filter_config.h",
+            "retained_sha256": "b8c6c7b95951346cee75ac932462e1cbbdfa00755438d3e4e97fffb021ae7098",
+            "replay_path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_host/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c/live-headers/filter_config.h",
+            "replay_sha256": "b8c6c7b95951346cee75ac932462e1cbbdfa00755438d3e4e97fffb021ae7098"
+          }
+        ],
+        "returncode": 0
+      },
+      "offline_links": [
+        {
+          "symbol": "cil_from_host",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host.native.o",
+            "--symbol",
+            "cil_from_host",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host-links/cil_from_host.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "cil_from_netdev",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host.native.o",
+            "--symbol",
+            "cil_from_netdev",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host-links/cil_from_netdev.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "cil_host_policy",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host.native.o",
+            "--symbol",
+            "cil_host_policy",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host-links/cil_host_policy.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "cil_to_host",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host.native.o",
+            "--symbol",
+            "cil_to_host",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host-links/cil_to_host.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "cil_to_netdev",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host.native.o",
+            "--symbol",
+            "cil_to_netdev",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host-links/cil_to_netdev.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_drop_notify",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host.native.o",
+            "--symbol",
+            "tail_drop_notify",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host-links/tail_drop_notify.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_handle_ipv4_cont_from_host",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host.native.o",
+            "--symbol",
+            "tail_handle_ipv4_cont_from_host",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host-links/tail_handle_ipv4_cont_from_host.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_handle_ipv4_cont_from_netdev",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host.native.o",
+            "--symbol",
+            "tail_handle_ipv4_cont_from_netdev",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host-links/tail_handle_ipv4_cont_from_netdev.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_handle_ipv4_from_host",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host.native.o",
+            "--symbol",
+            "tail_handle_ipv4_from_host",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host-links/tail_handle_ipv4_from_host.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_handle_ipv4_from_netdev",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host.native.o",
+            "--symbol",
+            "tail_handle_ipv4_from_netdev",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host-links/tail_handle_ipv4_from_netdev.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_handle_nat_fwd_ipv4",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host.native.o",
+            "--symbol",
+            "tail_handle_nat_fwd_ipv4",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host-links/tail_handle_nat_fwd_ipv4.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_handle_snat_fwd_ipv4",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host.native.o",
+            "--symbol",
+            "tail_handle_snat_fwd_ipv4",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host-links/tail_handle_snat_fwd_ipv4.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_icmp6_handle_ns",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host.native.o",
+            "--symbol",
+            "tail_icmp6_handle_ns",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host-links/tail_icmp6_handle_ns.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_icmp6_send_time_exceeded",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host.native.o",
+            "--symbol",
+            "tail_icmp6_send_time_exceeded",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host-links/tail_icmp6_send_time_exceeded.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_no_service_ipv4",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host.native.o",
+            "--symbol",
+            "tail_no_service_ipv4",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host-links/tail_no_service_ipv4.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_nodeport_nat_egress_ipv4",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host.native.o",
+            "--symbol",
+            "tail_nodeport_nat_egress_ipv4",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host-links/tail_nodeport_nat_egress_ipv4.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_nodeport_nat_ingress_ipv4",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host.native.o",
+            "--symbol",
+            "tail_nodeport_nat_ingress_ipv4",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host-links/tail_nodeport_nat_ingress_ipv4.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_nodeport_rev_dnat_ipv4",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host.native.o",
+            "--symbol",
+            "tail_nodeport_rev_dnat_ipv4",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_host-links/tail_nodeport_rev_dnat_ipv4.proof.o"
+          ],
+          "returncode": 0
+        }
+      ],
+      "bpf_object_sha256": "a6567db2e93cd767f51de8ffa89eb09bf06e2a0643dea98e824a86e32456db58",
+      "native_object_sha256": "56f156c2662d46282169c78d9100b65ce56d10ab7716c28615a0d6cd9f39f844"
+    },
+    {
+      "unit": "bpf_lxc",
+      "frontend": {
+        "capture": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_lxc/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315",
+        "original_command": [
+          "/usr/bin/clang",
+          "-I/var/tmp/ciliumrunner_j0zuxz2w/state/state/globals",
+          "-I/var/tmp/ciliumrunner_j0zuxz2w/state/state/templates/a3e8d10a913ae0c9eb50bbfe67eabff02218f0e2d9206f3ceff8593dc8c71b9f",
+          "-I/var/lib/cilium/bpf",
+          "-I/var/lib/cilium/bpf/include",
+          "-g",
+          "-O2",
+          "--target=bpf",
+          "-std=gnu99",
+          "-nostdinc",
+          "-ftrap-function=__undefined_trap",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-Wshadow",
+          "-Wno-address-of-packed-member",
+          "-Wno-unknown-warning-option",
+          "-Wno-gnu-variable-sized-type-not-at-end",
+          "-Wimplicit-int-conversion",
+          "-Wenum-conversion",
+          "-Wimplicit-fallthrough",
+          "-mcpu=v3",
+          "-c",
+          "/var/lib/cilium/bpf/bpf_lxc.c",
+          "-o",
+          "-"
+        ],
+        "replay_command": [
+          "clang-18",
+          "-I/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_lxc/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315/live-headers",
+          "-I/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_lxc/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315/live-headers",
+          "-I/workspaces/repository/vendor/repos/cilium/bpf",
+          "-I/workspaces/repository/vendor/repos/cilium/bpf/include",
+          "-g",
+          "-O2",
+          "--target=bpf",
+          "-std=gnu99",
+          "-nostdinc",
+          "-ftrap-function=__undefined_trap",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-Wshadow",
+          "-Wno-address-of-packed-member",
+          "-Wno-unknown-warning-option",
+          "-Wno-gnu-variable-sized-type-not-at-end",
+          "-Wimplicit-int-conversion",
+          "-Wenum-conversion",
+          "-Wimplicit-fallthrough",
+          "-mcpu=v3",
+          "-c",
+          "/workspaces/repository/vendor/repos/cilium/bpf/bpf_lxc.c",
+          "-o",
+          "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.bc",
+          "-emit-llvm"
+        ],
+        "sources": [
+          {
+            "path": "/workspaces/repository/vendor/repos/cilium/bpf/bpf_lxc.c",
+            "sha256": "8b6f6350a31ec16134c8877bd74fab848e09a85c109f0c6bce149f79d07c6e2b"
+          }
+        ],
+        "configuration": [
+          {
+            "path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_lxc/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315/headers/00-node_config.h",
+            "retained_sha256": "b4dd957a9db760c031602cf888647758b7544f591cdd2d4864ba129997a80458",
+            "replay_path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_lxc/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315/live-headers/node_config.h",
+            "replay_sha256": "b4dd957a9db760c031602cf888647758b7544f591cdd2d4864ba129997a80458"
+          },
+          {
+            "path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_lxc/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315/headers/01-ep_config.h",
+            "retained_sha256": "514ff5a65e55a6cf6dfa9562e01c427ba4eaa434dc19dc4a10880c37af453b32",
+            "replay_path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_lxc/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315/live-headers/ep_config.h",
+            "replay_sha256": "514ff5a65e55a6cf6dfa9562e01c427ba4eaa434dc19dc4a10880c37af453b32"
+          },
+          {
+            "path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_lxc/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315/headers/02-netdev_config.h",
+            "retained_sha256": "c39a8fe59c863257ee163865dd723a891b02545917043b2054cbdcf0a5b7e153",
+            "replay_path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_lxc/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315/live-headers/netdev_config.h",
+            "replay_sha256": "c39a8fe59c863257ee163865dd723a891b02545917043b2054cbdcf0a5b7e153"
+          },
+          {
+            "path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_lxc/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315/headers/03-filter_config.h",
+            "retained_sha256": "b8c6c7b95951346cee75ac932462e1cbbdfa00755438d3e4e97fffb021ae7098",
+            "replay_path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_lxc/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315/live-headers/filter_config.h",
+            "replay_sha256": "b8c6c7b95951346cee75ac932462e1cbbdfa00755438d3e4e97fffb021ae7098"
+          }
+        ],
+        "returncode": 0
+      },
+      "offline_links": [
+        {
+          "symbol": "cil_from_container",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.native.o",
+            "--symbol",
+            "cil_from_container",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc-links/cil_from_container.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "cil_lxc_policy",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.native.o",
+            "--symbol",
+            "cil_lxc_policy",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc-links/cil_lxc_policy.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "cil_lxc_policy_egress",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.native.o",
+            "--symbol",
+            "cil_lxc_policy_egress",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc-links/cil_lxc_policy_egress.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "cil_to_container",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.native.o",
+            "--symbol",
+            "cil_to_container",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc-links/cil_to_container.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_drop_notify",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.native.o",
+            "--symbol",
+            "tail_drop_notify",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc-links/tail_drop_notify.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_handle_arp",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.native.o",
+            "--symbol",
+            "tail_handle_arp",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc-links/tail_handle_arp.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_handle_ipv4",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.native.o",
+            "--symbol",
+            "tail_handle_ipv4",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc-links/tail_handle_ipv4.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_handle_ipv4_cont",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.native.o",
+            "--symbol",
+            "tail_handle_ipv4_cont",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc-links/tail_handle_ipv4_cont.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_icmp6_handle_ns",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.native.o",
+            "--symbol",
+            "tail_icmp6_handle_ns",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc-links/tail_icmp6_handle_ns.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_icmp6_send_time_exceeded",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.native.o",
+            "--symbol",
+            "tail_icmp6_send_time_exceeded",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc-links/tail_icmp6_send_time_exceeded.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_ipv4_ct_egress",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.native.o",
+            "--symbol",
+            "tail_ipv4_ct_egress",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc-links/tail_ipv4_ct_egress.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_ipv4_ct_ingress",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.native.o",
+            "--symbol",
+            "tail_ipv4_ct_ingress",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc-links/tail_ipv4_ct_ingress.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_ipv4_ct_ingress_policy_only",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.native.o",
+            "--symbol",
+            "tail_ipv4_ct_ingress_policy_only",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc-links/tail_ipv4_ct_ingress_policy_only.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_ipv4_policy",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.native.o",
+            "--symbol",
+            "tail_ipv4_policy",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc-links/tail_ipv4_policy.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_ipv4_to_endpoint",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.native.o",
+            "--symbol",
+            "tail_ipv4_to_endpoint",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc-links/tail_ipv4_to_endpoint.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_no_service_ipv4",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.native.o",
+            "--symbol",
+            "tail_no_service_ipv4",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc-links/tail_no_service_ipv4.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_nodeport_nat_egress_ipv4",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.native.o",
+            "--symbol",
+            "tail_nodeport_nat_egress_ipv4",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc-links/tail_nodeport_nat_egress_ipv4.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_nodeport_nat_ingress_ipv4",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.native.o",
+            "--symbol",
+            "tail_nodeport_nat_ingress_ipv4",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc-links/tail_nodeport_nat_ingress_ipv4.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_nodeport_rev_dnat_ipv4",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.native.o",
+            "--symbol",
+            "tail_nodeport_rev_dnat_ipv4",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc-links/tail_nodeport_rev_dnat_ipv4.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_policy_denied_ipv4",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc.native.o",
+            "--symbol",
+            "tail_policy_denied_ipv4",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_lxc-links/tail_policy_denied_ipv4.proof.o"
+          ],
+          "returncode": 0
+        }
+      ],
+      "bpf_object_sha256": "321e9952f1c56295421d21df7c31dc6bfaae0cd89c094b1d28b98bcf8fdd99de",
+      "native_object_sha256": "aa4cc5351274aa072e2a4bbc49e6de1ba7312301cff9fd03ebff5603bfa69a1f"
+    },
+    {
+      "unit": "bpf_xdp",
+      "frontend": {
+        "capture": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_xdp/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd",
+        "original_command": [
+          "/usr/bin/clang",
+          "-I/var/tmp/ciliumrunner_j0zuxz2w/state/state/globals",
+          "-I/var/tmp/ciliumrunner_j0zuxz2w/state/state",
+          "-I/var/lib/cilium/bpf",
+          "-I/var/lib/cilium/bpf/include",
+          "-g",
+          "-O2",
+          "--target=bpf",
+          "-std=gnu99",
+          "-nostdinc",
+          "-ftrap-function=__undefined_trap",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-Wshadow",
+          "-Wno-address-of-packed-member",
+          "-Wno-unknown-warning-option",
+          "-Wno-gnu-variable-sized-type-not-at-end",
+          "-Wimplicit-int-conversion",
+          "-Wenum-conversion",
+          "-Wimplicit-fallthrough",
+          "-mcpu=v3",
+          "-c",
+          "/var/lib/cilium/bpf/bpf_xdp.c",
+          "-o",
+          "-"
+        ],
+        "replay_command": [
+          "clang-18",
+          "-I/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_xdp/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd/live-headers",
+          "-I/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_xdp/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd/live-headers",
+          "-I/workspaces/repository/vendor/repos/cilium/bpf",
+          "-I/workspaces/repository/vendor/repos/cilium/bpf/include",
+          "-g",
+          "-O2",
+          "--target=bpf",
+          "-std=gnu99",
+          "-nostdinc",
+          "-ftrap-function=__undefined_trap",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-Wshadow",
+          "-Wno-address-of-packed-member",
+          "-Wno-unknown-warning-option",
+          "-Wno-gnu-variable-sized-type-not-at-end",
+          "-Wimplicit-int-conversion",
+          "-Wenum-conversion",
+          "-Wimplicit-fallthrough",
+          "-mcpu=v3",
+          "-c",
+          "/workspaces/repository/vendor/repos/cilium/bpf/bpf_xdp.c",
+          "-o",
+          "/var/tmp/kprog-tmp/perf/cilium-context/bpf_xdp.bc",
+          "-emit-llvm"
+        ],
+        "sources": [
+          {
+            "path": "/workspaces/repository/vendor/repos/cilium/bpf/bpf_xdp.c",
+            "sha256": "5540ee62a23be573453087b46f8ce7da0feab112a77633a66f4d57ae8d4235f2"
+          }
+        ],
+        "configuration": [
+          {
+            "path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_xdp/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd/headers/00-node_config.h",
+            "retained_sha256": "b4dd957a9db760c031602cf888647758b7544f591cdd2d4864ba129997a80458",
+            "replay_path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_xdp/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd/live-headers/node_config.h",
+            "replay_sha256": "b4dd957a9db760c031602cf888647758b7544f591cdd2d4864ba129997a80458"
+          },
+          {
+            "path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_xdp/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd/headers/01-netdev_config.h",
+            "retained_sha256": "4f273b5d9571d5e8bdb6e88c3659d0fa7d8961ad72ac8e0a6560707d4e2709af",
+            "replay_path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_xdp/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd/live-headers/netdev_config.h",
+            "replay_sha256": "4f273b5d9571d5e8bdb6e88c3659d0fa7d8961ad72ac8e0a6560707d4e2709af"
+          },
+          {
+            "path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_xdp/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd/headers/02-filter_config.h",
+            "retained_sha256": "ee52469d6b61d86e48952d759cc78c6546811594bb06a9e894ae99d6c784f312",
+            "replay_path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_xdp/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd/live-headers/filter_config.h",
+            "replay_sha256": "ee52469d6b61d86e48952d759cc78c6546811594bb06a9e894ae99d6c784f312"
+          },
+          {
+            "path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_xdp/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd/headers/03-ep_config.h",
+            "retained_sha256": "dab0355b4af4ea96d90d75a8b84852cbba14d8d4170fa7a72582ef6f2c621df5",
+            "replay_path": "/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_xdp/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd/live-headers/ep_config.h",
+            "replay_sha256": "dab0355b4af4ea96d90d75a8b84852cbba14d8d4170fa7a72582ef6f2c621df5"
+          }
+        ],
+        "returncode": 0
+      },
+      "offline_links": [
+        {
+          "symbol": "cil_xdp_entry",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_xdp.native.o",
+            "--symbol",
+            "cil_xdp_entry",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_xdp-links/cil_xdp_entry.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_drop_notify",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_xdp.native.o",
+            "--symbol",
+            "tail_drop_notify",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_xdp-links/tail_drop_notify.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_no_service_ipv4",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_xdp.native.o",
+            "--symbol",
+            "tail_no_service_ipv4",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_xdp-links/tail_no_service_ipv4.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_nodeport_nat_egress_ipv4",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_xdp.native.o",
+            "--symbol",
+            "tail_nodeport_nat_egress_ipv4",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_xdp-links/tail_nodeport_nat_egress_ipv4.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_nodeport_nat_ingress_ipv4",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_xdp.native.o",
+            "--symbol",
+            "tail_nodeport_nat_ingress_ipv4",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_xdp-links/tail_nodeport_nat_ingress_ipv4.proof.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "symbol": "tail_nodeport_rev_dnat_ipv4",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_xdp.native.o",
+            "--symbol",
+            "tail_nodeport_rev_dnat_ipv4",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/cilium-context/bpf_xdp-links/tail_nodeport_rev_dnat_ipv4.proof.o"
+          ],
+          "returncode": 0
+        }
+      ],
+      "bpf_object_sha256": "8becff4fa4fa9370519db619eaf538e3db32989ecb19194ee0b681efb6707dac",
+      "native_object_sha256": "4745f9ae7c6d368e093c96eb39b201f2fc9e826682bfe44ee29f9f4a747074c1"
+    }
+  ],
+  "socket_code_comparison": {
+    "old": "/workspaces/kprog-raw/perf/20261113-socket-context-dualstack/build-evidence/upstream-sock.native.o",
+    "new": "/var/tmp/kprog-tmp/perf/socket-context/upstream-sock.native.o",
+    "equal_executable_sections": true,
+    "section_count": 8
+  },
+  "host_fixture_log": "/workspaces/kprog-raw/perf/20261113-packet-context/check2.log",
+  "verifier_submissions": 0,
+  "native_installs": 0,
+  "application_execution": false,
+  "default_path_changed": false,
+  "limits": [
+    "Retained November9 generated runtime configuration, not a new live capture.",
+    "Host/compiler/linker integration only; no application decisions or throughput equivalence certified.",
+    "D23 original-program helper deployment remains with lane verified."
+  ],
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/perf_20261113/packet-context-host.tar.gz",
+    "bytes": 5053455,
+    "sha256": "cf1afb7e8608ac765b2f8f85cf8a47508468754ff87e252b38799d787ee3294b",
+    "files_byte_compared": 206
+  },
+  "upstream_revision": "1b721c2964e7799cab3e18c38066905ea240fa34",
+  "kernel_revision": "74d1097af56132da2b325699c5a560b29a790ff2"
+}
