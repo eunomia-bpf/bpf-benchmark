@@ -31,19 +31,19 @@
   "The three source files that do differ (common/buffer.h, common/common.h, common/filesystem.h) differ only by MICRO_NATIVE guards around exactly these asm idioms.",
   "The fix must be function-scoped: the first attempt used a whole-file alias map and produced a type error when %4 meant an i64 in one function and a ptr in another."
  ],
- "state": "all 172 programs link from untouched upstream source; CO-RE placeholders unresolved (P1h)",
+ "state": "all 172 programs compile and link from untouched upstream source WITH CO-RE resolved; the linked form uses name-bound helper relocations rather than the shipped object's inlined immediates",
  "reached": {
-  "x86 object": "tracee.nodso.native.o, 7,165,864 bytes, 172 defined text symbols, 0 SSE",
-  "link": "172 of 172 programs link with native-link --mode proof, 0 failures",
-  "pipeline": "untouched vendor/repos/tracee -> BPF frontend (-emit-llvm) -> name helpers -> fold 4 idioms -> clear dso_local on .maps globals -> x86 codegen -> link",
-  "cost": "name 10 s, fold 2.4 s, codegen 20 s, link 3 s for all 172"
+  "x86 object": "tracee.noplt.native.o, 5,925,264 bytes, 0 SSE instructions",
+  "link": "172 of 172 programs link, 0 failures",
+  "core": "lane perf's core-ir-resolve resolved 370 CO-RE globals against the sole kernel's BTF; **201 of 370 offsets actually changed** (e.g. llvm.task_struct:0:0 0 -> 16), 0 pending resize, 0 unresolved",
+  "relocations": "linked trace_sys_enter carries 166 name-bound helper relocations where the shipped object carries 25 and no helper relocations at all",
+  "pipeline": "untouched source -> BPF frontend (-emit-llvm) -> core-ir-resolve -> fold 4 idioms -> name helpers -> clear dso_local on .maps -> x86 codegen -> link"
  },
  "remaining": [
   {
-   "gap": "CO-RE placeholders",
-   "evidence": "135 R_X86_64_REX_GOTPCRELX relocations against `llvm.<struct>:<idx>:<off>` externals (e.g. llvm.task_struct:0:48$0:8, llvm.pid:0:0$0:0) with !llvm.preserve.access.index metadata; the shipped object has 0 such relocs and 25 relocations total against my 306.",
-   "why": "the BPF frontend emits CO-RE as extern globals; libbpf resolves them against the target BTF at load time. A native object must have them resolved to the sole kernel's real offsets BEFORE codegen, or the relocation stays and the linked blob reads the wrong address (the exact defect I measured in C1).",
-   "owner": "P1h, lane perf said at 09:36 they are implementing exactly this as an optional LLVM pass using the BPF ELF's local BTF + vendored libbpf resolver against the sole target BTF, and offered it for reuse. That is the right tool; I will use it rather than write a second one."
+   "gap": "helper call shape",
+   "detail": "the linker inlines a helper as `mov $imm; call *reg` only when the immediate is ADJACENT to the call (x86_immediate_helper_load_before_call, x86.rs:928-945). The shipped objects have that form and therefore 0 helper relocations. clang hoists the id in this IR (`mov $0x1,%ebx` reused across a call that clobbers rbx), so the immediate is not adjacent, and the linker emits a name-bound HELPER_CALL_REL32 patch slot instead (PatchKind::HelperCallRel32, resolved via helper_addrs by name at link time).",
+   "status": "the name-bound form is valid and loadable (the loader patches an e8 rel32 slot, NATIVE_LAB_RELOC_HELPER_CALL_REL32 in the lab module), but it is a different linked form from the shipped object and costs a relocation per helper call. Making it identical needs either a linker that tracks the id through registers across a clobber, or IR that keeps the id adjacent per call site."
   }
  ],
  "fixed_from_my_side": [

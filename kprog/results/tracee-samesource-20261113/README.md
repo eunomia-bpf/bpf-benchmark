@@ -72,7 +72,41 @@ Both looked like `native_link` bugs and were fixed from this side of the boundar
    the 87 map globals gives the shipped object's form. This is the same fix `-fPIC` gives a C
    frontend (Katran's case); Tracee's frontend is the BPF target, which has no such flag.
 
-## What remains: CO-RE placeholders
+## CO-RE resolved (lane perf's core-ir-resolve)
+
+Running lane perf's `core-ir-resolve` on the frontend IR, before the idiom fold, resolves the
+CO-RE queries against the sole kernel's BTF:
+
+```
+/var/tmp/kprog-tmp/perf/core-ir/core-ir-lower tracee.bc --local-bpf tracee.bpf.o \
+  --target-btf /workspaces/.agent-state/kprog-ck/build-x86/vmlinux \
+  --report tracee.core.json -o tracee.resolved.bc
+```
+
+370 CO-RE globals resolved, **201 of them to a different offset** (e.g. `llvm.task_struct:0:0`
+0 -> 16), 0 pending scalar resize, 0 unresolved. After the fold and codegen the linked proofs
+carry **zero** `llvm.*` relocations, against 135 before. The resolved offsets are visible in the
+generated code as the shipped object's `add $0x10` shifts.
+
+(The Makefile's `core-ir-resolve` target wraps the tool in `prlimit`, which fails with
+"Permission denied" on this mount even though the binary is +x; calling the binary directly
+works.)
+
+## What remains: the helper call shape
+
+The linked proof still differs from the shipped object in how helpers are called. The linker
+inlines a helper as `mov $imm; call *reg` **only when the immediate is adjacent to the call**
+(`x86_immediate_helper_load_before_call`, `x86.rs:928-945`). The shipped objects have that
+form, and therefore **0 helper relocations**. This IR lets clang hoist the id (`mov $0x1,%ebx`
+reused across a call that clobbers `rbx`), so the linker emits a name-bound
+`HELPER_CALL_REL32` patch slot instead: 166 relocations where the shipped object has 25.
+
+That form is valid — the loader patches an `e8 rel32` slot
+(`NATIVE_LAB_RELOC_HELPER_CALL_REL32`) — but it is a different linked shape and costs one
+relocation per helper call. Closing it needs either a linker that tracks the id through a
+clobber, or IR that keeps the id adjacent per call site.
+
+## Superseded: CO-RE placeholders
 
 The linked proofs still carry **135 relocations against `llvm.<struct>:<idx>:<off>` externals**
 (e.g. `llvm.task_struct:0:48$0:8`, `llvm.pid:0:0$0:0`) with `!llvm.preserve.access.index`
