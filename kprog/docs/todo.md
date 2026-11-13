@@ -22,6 +22,7 @@
 - [x] P1b OTel动态inner-map lookup（49f464cc6，371dc4bb6）：runtime-map候选配合context修复完成短配对run `x86_kvm_corpus_20261113_033039_387780`，make0/appok、0错误/0stub；native Attempts/Frames/Interpreter/collector均恢复，mature frames/attempt eBPF0.912213、native0.913468。stats开单样本诊断吞吐0.975x，正式floor另测。receipt `kprog/results/perf_20261113/otel-recovered.json`；P1整体继续核对counter mix与Tetragon。
 - [x] P1c 05-29历史链有界审计（5bb08526b、67519f2a6；结论 `kprog/results/perf_20261113/may29-bounded-answer.md`）：frozen源码链已含OTel公开/physical ctx错读及Tetragon flavor声明偏移，两者亦在后续reference实物中确认；原始四run的精确ELF身份、OTel用户展开频率无保留证据，不能据此认证1.824x/1.323x等量收益。按advisor05:44要求结项；论文解释由运营者决定，纠正后实测继续。
 - [x] P1d Tetragon target-BTF CO-RE compiler host子集（77e2916fb、abb4d8e02、3dfd738fd、c6b15fc34）：host plain1/corrected0，35 manifest objects全部构建成功，35/35 plain code逐节等于shipped default；fork原生PC0x2ff的task+96改成task+2904。`core-host.json`/`core-build-report.json`记录source epoch、4 workers/每process16GiB上限与完整输出。默认关闭NATIVE_MANIFEST选择；两次配对guest均完成make0/appok，启动仍跨测量，交P1e，P1继续。
+- [ ] P1h CO-RE 存在性检查整类修复（审核 03Z 第 2 条，已核实：native_compat.h:326/330 对非 Tetragon 应用仍把 field/type 存在性定义成 (1)）：把 P1d 的目标内核 BTF 做法推广到所有应用（Tracee 的 get_task_pid_vnr、BCC 的 biosnoop/runqlat 等都受影响），放在编译 flag/构建开关上、默认关闭；修好后用已存的运行数据和新运行逐应用对照两边的应用输出（Tracee 事件、BCC 工具输出、Cilium 判决、Katran 包）。在此之前只有 Cilium、Katran 算等量工作（第 f 轮 1.294x、1.100x，几何平均 1.193x）。
 - [ ] P1e Tetragon 原生启动仍跨测量：优化 selected linker 后 run `x86_kvm_corpus_20261113_041136_182808` make0/appok，但 result 两臂287/202个程序，native policy 9/15且 rawtp仍LOADING。现有shim日志288次native replacement的整次load中位815ms/合计256.48s；离线解析63f89e2d1、policy观测6ac73dcc4，receipt `tetragon-observed-runtime.json`。直接交verified定位通用loader/shim/linker成本；perf继续受影响行为子集，保留2.106x为启动工作不同的诊断，修复前不把它写作等量收益。
 - P1e 子集归因补证（9025380bb、82061db5b）：run `x86_kvm_corpus_20261113_043935_986036` make0/appok/0stub，288次native loads只有38proof+38kernel child（全0、76个全部唯一配对）；其余250次无child的load合计156.48s，中位284.30ms。全部child仅4.62s，不能用每次fork/link解释主要成本。receipt `kprog/results/perf_20261113/tetragon-link-cost.json`含全量archive；verified继续现有stage timings及manifest/data-symbol成本定位，P1e仍开，不宣称cache丢失或startup收益。
 - P1e/P2 固定协议结果：run `x86_kvm_corpus_20261113_052009_146869` make0/appok/0错误/0stub，stats开3×180s+冻结180s warmup，287/287程序。实际测量时窗内42/39次读取均15policy ENABLED，但baseline connect post增61746234、datagram增23947470；native对应counter字段为空，accept仅增120对23952413。原始吞吐1.380x、generic_kprobe973.9→70.2ns/次保留为工作不同的观察；启动重叠不足以解释完全装载后的差异，P1e继续查语义。receipt/archive `tetragon-fixed-duration*`、`tetragon-fixed-policy-windows.json`；policy-window.py保留缺字段及负delta，1focused回归通过。
@@ -36,6 +37,7 @@
 - [ ] C1 Tracee：在 guest 里用 perf 剖析 raw_syscalls sys_enter、trace_sys_enter、trace_sys_exit 两边的时间去向，贴出剖析和运行目录。
 - [x] C1 Tracee 剖析（f3367005a、d22c5dedb）：原生阶段 memset 占 guest CPU 13.93%，eBPF 阶段 0.72%。
 - [ ] C2 撤回：c9583219e 的 native_memset.h 头文件和 NATIVE_INLINE_MEMSET 开关属于源码层替换，按运营者的话撤掉（恢复 vendor/bpf/Makefile 并删去该头文件，一个提交）；memset 交给 lane perf 的 P0 在链接器/flag 上做。原 C2 文字："据此做一处通用改进（vendor/bpf 的原生构建），默认关闭的开关，默认对象逐字节不变；功能检查后计时。
+- [ ] C4 先做（Katran 没有 CO-RE 和 memset 问题）；C3 等 P1h 和 P0 落地后再计时，否则测的是带缺陷的 BCC 对象。
 - [ ] C3 BCC：把构建时 .rodata 特化对象作为第二种配置（NATIVE_MANIFEST），两种配置各计时一轮。
 - [ ] C4 Katran。
 
