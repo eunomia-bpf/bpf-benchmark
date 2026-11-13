@@ -13,7 +13,7 @@ def capture(root, output, features=None, artifacts=()):
     records=[]
     with tarfile.open(fileobj=output,mode='w|gz') as target:
         paths=[(path,str(path.relative_to(root))) for path in sorted(root.rglob('*'))
-               if path.is_file() and path.suffix in ('.h','.o')]
+               if path.is_file() and path.suffix in ('.h','.o','.json')]
         if features is not None:
             paths += [(features/name,'generated-features/'+name)
                       for name in ('features.h','features_skb.h','features_xdp.h')]

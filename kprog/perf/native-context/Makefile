@@ -308,8 +308,13 @@ cilium-candidate:
 		--object $(CILIUM_PAYLOAD)/bpf_xdp.native.o,prog_type=6
 
 .PHONY: cilium-context-manifest
+MANIFEST_CONTEXT_ARGS ?=
 cilium-context-manifest:
-	python3 $(HERE)/manifest-context.py --input $(CILIUM_PAYLOAD)/manifest.json --output $(CILIUM_PAYLOAD)/manifest-context.json
+	python3 $(HERE)/manifest-context.py --input $(CILIUM_PAYLOAD)/manifest.json --output $(CILIUM_PAYLOAD)/manifest-context.json $(MANIFEST_CONTEXT_ARGS)
+
+.PHONY: cilium-config-check
+cilium-config-check:
+	python3 -m unittest discover -s $(ROOT)/kprog/perf/may29-image -p test_cilium_config.py
 
 SWITCH_BUILD ?= /var/tmp/kprog-tmp/perf/native-switch
 .PHONY: native-switch-check

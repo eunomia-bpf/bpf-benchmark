@@ -1,4 +1,4 @@
-"""Catch flattened endpoint configs and truncated binary compiler evidence."""
+"""Catch missing runtime constants, flattened configs and truncated objects."""
 import importlib.util
 import io
 import json
@@ -18,15 +18,21 @@ class GeneratedState(unittest.TestCase):
             root=Path(directory)
             for name,data in [('state/templates/a/ep_config.h',b'endpoint-a\n'),
                               ('state/templates/b/ep_config.h',b'endpoint-b\n'),
+                              ('state/templates/a/bpf_lxc.config.json',b'{"variables":{"__config_hybrid_routing_enabled":"AA=="}}\n'),
+                              ('state/templates/b/bpf_lxc.config.json',b'{"variables":{"__config_hybrid_routing_enabled":"AQ=="}}\n'),
                               ('state/globals/bpf_xdp.o',bytes(range(256)))]:
                 path=root/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(data)
             output=io.BytesIO();CONFIG.capture(root,output);output.seek(0)
             with tarfile.open(fileobj=output) as archive:
                 self.assertEqual(archive.extractfile('state/templates/a/ep_config.h').read(),b'endpoint-a\n')
                 self.assertEqual(archive.extractfile('state/templates/b/ep_config.h').read(),b'endpoint-b\n')
+                self.assertEqual(json.load(archive.extractfile('state/templates/a/bpf_lxc.config.json')),
+                                 {"variables":{"__config_hybrid_routing_enabled":"AA=="}})
+                self.assertEqual(json.load(archive.extractfile('state/templates/b/bpf_lxc.config.json')),
+                                 {"variables":{"__config_hybrid_routing_enabled":"AQ=="}})
                 self.assertEqual(archive.extractfile('state/globals/bpf_xdp.o').read(),bytes(range(256)))
                 index=json.load(archive.extractfile('capture.json'))
-                self.assertEqual(len(index['files']),3)
+                self.assertEqual(len(index['files']),5)
 
     def test_probe_headers_outside_state_are_retained_as_generated_input(self):
         with tempfile.TemporaryDirectory() as directory:
