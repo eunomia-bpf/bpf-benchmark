@@ -122,6 +122,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED 首22新body（2026-11-13）** 新增Tracee body31 trace_ret_vfs_readv_tail/source554实际1submitted/1stock mapbounds reject/0installed：BPF44357 probe_read_kernel目标event_data_map，vs32536/off65672/size64，processed5593、total/peak248；service06:18:35.924563→07:08:26.213685。main累计22submitted/13installed/9rejected，BCC8/8、Tracee8/3/5、Tetragon6/2/4，其余三app新queue各0；各项native execution0/workload待测，旧10body观察及独立回放另计。完整新request归档 `resident-body-outcome-22.tar.gz`（20955916bytes），累计receipt `resident-body-first-twenty-two-receipt.json`；raw `/workspaces/kprog-raw/verified/20261113-body-census/first-twenty-two/`。重复的u16 copy/bound路径支持继续通用宽度物化修复；未声称实际应用通过。
+
 - **VERIFIED body29较大内存重试启动（2026-11-13）** dry-run后setsid/nohup outer1266108，2vCPU24G/AS32GiB、CPU14–15、shared image read lock；与main QEMU1110393及body28 retry QEMU1251615共三台census guest，启动前MemAvailable约85GiB。保留原8G失败，独立输出 `/workspaces/kprog-raw/verified/20261113-context-class/body29-retry1-{control,job}/`，精确调用/启动参数见 `context-body29-retry1-launch.json`；本turn不轮询，后续收集实际模型epoch与结果。
 
 - **VERIFIED context20/29完成结果（2026-11-13）** Tracee两个独立回放共2submitted/1stock verifier submission/0verified/0native execution：body20 trace_sys_enter(source470)从modified-ctx前进到event_data_map bounds拒绝，processed3302、total/peak230，u16 offset复制后只收紧r1、r6仍65535，再+137到65672（vs32536）；body29 trace_ret_vfs_read_tail(source551)在8G guest编译SIGKILL，0stock submission，原因未独立证实为OOM。完整P/B、诊断与各应用计数归档 `context-body20-first-attempt*`、`context-body29-first-attempt*`；raw `/workspaces/kprog-raw/verified/20261113-context-class/body{20,29}-control/`，日志body{20,29}-job；两次Make均0但service -5，不能算verified成功。main census21/13/8不变，两个回放不计入新body累计；body28 24G retry继续运行。
