@@ -46,7 +46,7 @@ def profile_loader(perf, prefix, dest):
     save(['cat', '/proc/kallsyms'], dest / 'loader-perf-kallsyms.txt')
     # perf data mmap needs a local filesystem, rather than the shared 9p mount.
     data = Path('/dev/shm') / f'eqcodex-loader-{pid}.data'
-    recording = save([perf, 'record', '--namespaces', '-e', 'cpu-clock', '-F', '99',
+    recording = save([perf, 'record', '--namespaces', '--no-inherit', '-e', 'cpu-clock', '-F', '99',
                       '--call-graph', 'dwarf,8192', '-p', pid, '-o', str(data),
                       '--', 'sleep', '10'], dest / 'loader-perf-record.txt')
     if recording.returncode:
