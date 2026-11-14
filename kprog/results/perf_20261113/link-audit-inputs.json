@@ -1,0 +1,851 @@
+{
+  "recorded_at": "2026-11-14T03:57:19.321773+00:00",
+  "protocol_commit": "228289729",
+  "raw": "/workspaces/kprog-raw/perf/20261114-link-audit-inputs-final",
+  "inputs": [],
+  "reports": [
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-link-audit-host/collection-final.json",
+      "sha256": "ff497c41a7623b32dcc33249da3be37f9f17de8f532a1082dc5a43c0b4db8a9e",
+      "data": {
+        "recorded_at": "2026-11-14T03:56:01Z",
+        "tests": {
+          "cases": [
+            {
+              "case": "proof-native_tracer_entry",
+              "returncode": 0,
+              "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-3919i6t9",
+              "identical_exit_stdout_stderr": true,
+              "inherited_fd_preserved": true,
+              "identical_emitted_files": true
+            },
+            {
+              "case": "kernel-native_tracer_entry",
+              "returncode": 0,
+              "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-utismhsn",
+              "identical_exit_stdout_stderr": true,
+              "inherited_fd_preserved": true,
+              "identical_emitted_files": true
+            },
+            {
+              "case": "kernel-entry_that_does_not_exist",
+              "returncode": 1,
+              "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-0s9ppf1q",
+              "identical_exit_stdout_stderr": true,
+              "inherited_fd_preserved": true,
+              "identical_emitted_files": false
+            }
+          ],
+          "incomplete_capture_reported": true,
+          "scope": "Actual CLI transport/capture regressions, synthetic host plan only; no kernel execution."
+        },
+        "replay": {
+          "linker": "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+          "linker_sha256": "619ddc7799fc541b76ccf999a30ad3f4982f46a746af775518cdd648eef6e534",
+          "cases": [
+            {
+              "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-0s9ppf1q",
+              "completed_capture": true,
+              "label": "host-regression-synthetic-plan",
+              "mode": "kernel",
+              "symbol": "entry_that_does_not_exist",
+              "actual_exit": 1,
+              "same_linker_binary": true,
+              "lookup_map_kinds": {},
+              "lookup_map_names": [],
+              "replayable": true,
+              "variants": {
+                "on": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "kernel",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-0s9ppf1q/input.elf",
+                    "--symbol",
+                    "entry_that_does_not_exist",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-0s9ppf1q/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-0s9ppf1q/on.image",
+                    "--output-relocs",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-0s9ppf1q/on.relocs",
+                    "--output-map-patches",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-0s9ppf1q/on.maps",
+                    "--output-abi",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-0s9ppf1q/on.abi",
+                    "--runtime-known-map-lookups"
+                  ],
+                  "returncode": 1
+                },
+                "off": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "kernel",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-0s9ppf1q/input.elf",
+                    "--symbol",
+                    "entry_that_does_not_exist",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-0s9ppf1q/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-0s9ppf1q/off.image",
+                    "--output-relocs",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-0s9ppf1q/off.relocs",
+                    "--output-map-patches",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-0s9ppf1q/off.maps",
+                    "--output-abi",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-0s9ppf1q/off.abi"
+                  ],
+                  "returncode": 1
+                }
+              }
+            },
+            {
+              "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-3919i6t9",
+              "completed_capture": true,
+              "label": "host-regression-synthetic-plan",
+              "mode": "proof",
+              "symbol": "native_tracer_entry",
+              "actual_exit": 0,
+              "same_linker_binary": true,
+              "lookup_map_kinds": {},
+              "lookup_map_names": [],
+              "replayable": true,
+              "variants": {
+                "on": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "proof",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-3919i6t9/input.elf",
+                    "--symbol",
+                    "native_tracer_entry",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-3919i6t9/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-3919i6t9/on.image",
+                    "--runtime-known-map-lookups"
+                  ],
+                  "returncode": 0
+                },
+                "off": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "proof",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-3919i6t9/input.elf",
+                    "--symbol",
+                    "native_tracer_entry",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-3919i6t9/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-3919i6t9/off.image"
+                  ],
+                  "returncode": 0
+                }
+              },
+              "captured_on_bytes_equal": {
+                "image": true
+              },
+              "on_off_equal": {
+                "image": true
+              }
+            },
+            {
+              "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-9dlvwy5o",
+              "completed_capture": true,
+              "label": "host-regression-synthetic-plan",
+              "mode": "kernel",
+              "symbol": "native_tracer_entry",
+              "actual_exit": 0,
+              "same_linker_binary": true,
+              "lookup_map_kinds": {},
+              "lookup_map_names": [],
+              "replayable": true,
+              "variants": {
+                "on": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "kernel",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-9dlvwy5o/input.elf",
+                    "--symbol",
+                    "native_tracer_entry",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-9dlvwy5o/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-9dlvwy5o/on.image",
+                    "--output-relocs",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-9dlvwy5o/on.relocs",
+                    "--output-map-patches",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-9dlvwy5o/on.maps",
+                    "--output-abi",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-9dlvwy5o/on.abi",
+                    "--runtime-known-map-lookups"
+                  ],
+                  "returncode": 0
+                },
+                "off": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "kernel",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-9dlvwy5o/input.elf",
+                    "--symbol",
+                    "native_tracer_entry",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-9dlvwy5o/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-9dlvwy5o/off.image",
+                    "--output-relocs",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-9dlvwy5o/off.relocs",
+                    "--output-map-patches",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-9dlvwy5o/off.maps",
+                    "--output-abi",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-9dlvwy5o/off.abi"
+                  ],
+                  "returncode": 0
+                }
+              },
+              "captured_on_bytes_equal": {
+                "image": true,
+                "relocs": true,
+                "maps": true,
+                "abi": true
+              },
+              "on_off_equal": {
+                "image": true,
+                "relocs": true,
+                "maps": true,
+                "abi": true
+              },
+              "helper_calls_on_off": [
+                64,
+                64
+              ],
+              "generic_lookup_calls_on_off": [
+                18,
+                18
+              ],
+              "helper_target_deltas": {}
+            },
+            {
+              "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-i1mrmji3",
+              "completed_capture": true,
+              "label": "host-regression-synthetic-plan",
+              "mode": "kernel",
+              "symbol": "native_tracer_entry",
+              "actual_exit": 0,
+              "same_linker_binary": true,
+              "lookup_map_kinds": {},
+              "lookup_map_names": [],
+              "replayable": true,
+              "variants": {
+                "on": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "kernel",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-i1mrmji3/input.elf",
+                    "--symbol",
+                    "native_tracer_entry",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-i1mrmji3/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-i1mrmji3/on.image",
+                    "--output-relocs",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-i1mrmji3/on.relocs",
+                    "--output-map-patches",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-i1mrmji3/on.maps",
+                    "--output-abi",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-i1mrmji3/on.abi",
+                    "--runtime-known-map-lookups"
+                  ],
+                  "returncode": 0
+                },
+                "off": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "kernel",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-i1mrmji3/input.elf",
+                    "--symbol",
+                    "native_tracer_entry",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-i1mrmji3/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-i1mrmji3/off.image",
+                    "--output-relocs",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-i1mrmji3/off.relocs",
+                    "--output-map-patches",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-i1mrmji3/off.maps",
+                    "--output-abi",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-i1mrmji3/off.abi"
+                  ],
+                  "returncode": 0
+                }
+              },
+              "captured_on_bytes_equal": {
+                "image": true,
+                "relocs": true,
+                "maps": true,
+                "abi": true
+              },
+              "on_off_equal": {
+                "image": true,
+                "relocs": true,
+                "maps": true,
+                "abi": true
+              },
+              "helper_calls_on_off": [
+                64,
+                64
+              ],
+              "generic_lookup_calls_on_off": [
+                18,
+                18
+              ],
+              "helper_target_deltas": {}
+            },
+            {
+              "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-o9qa7jfv",
+              "completed_capture": true,
+              "label": "host-regression-synthetic-plan",
+              "mode": "proof",
+              "symbol": "native_tracer_entry",
+              "actual_exit": 1,
+              "same_linker_binary": true,
+              "lookup_map_kinds": {},
+              "lookup_map_names": [],
+              "replayable": true,
+              "variants": {
+                "on": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "proof",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-o9qa7jfv/input.elf",
+                    "--symbol",
+                    "native_tracer_entry",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-o9qa7jfv/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-o9qa7jfv/on.image",
+                    "--output-relocs",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-o9qa7jfv/on.relocs",
+                    "--output-map-patches",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-o9qa7jfv/on.maps",
+                    "--output-abi",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-o9qa7jfv/on.abi",
+                    "--runtime-known-map-lookups"
+                  ],
+                  "returncode": 1
+                },
+                "off": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "proof",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-o9qa7jfv/input.elf",
+                    "--symbol",
+                    "native_tracer_entry",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-o9qa7jfv/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-o9qa7jfv/off.image",
+                    "--output-relocs",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-o9qa7jfv/off.relocs",
+                    "--output-map-patches",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-o9qa7jfv/off.maps",
+                    "--output-abi",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-o9qa7jfv/off.abi"
+                  ],
+                  "returncode": 1
+                }
+              }
+            },
+            {
+              "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-up7whxlm",
+              "completed_capture": true,
+              "label": "host-regression-synthetic-plan",
+              "mode": "proof",
+              "symbol": "native_tracer_entry",
+              "actual_exit": 0,
+              "same_linker_binary": true,
+              "lookup_map_kinds": {},
+              "lookup_map_names": [],
+              "replayable": true,
+              "variants": {
+                "on": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "proof",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-up7whxlm/input.elf",
+                    "--symbol",
+                    "native_tracer_entry",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-up7whxlm/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-up7whxlm/on.image",
+                    "--runtime-known-map-lookups"
+                  ],
+                  "returncode": 0
+                },
+                "off": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "proof",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-up7whxlm/input.elf",
+                    "--symbol",
+                    "native_tracer_entry",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-up7whxlm/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-up7whxlm/off.image"
+                  ],
+                  "returncode": 0
+                }
+              },
+              "captured_on_bytes_equal": {
+                "image": true
+              },
+              "on_off_equal": {
+                "image": true
+              }
+            },
+            {
+              "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-utismhsn",
+              "completed_capture": true,
+              "label": "host-regression-synthetic-plan",
+              "mode": "kernel",
+              "symbol": "native_tracer_entry",
+              "actual_exit": 0,
+              "same_linker_binary": true,
+              "lookup_map_kinds": {},
+              "lookup_map_names": [],
+              "replayable": true,
+              "variants": {
+                "on": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "kernel",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-utismhsn/input.elf",
+                    "--symbol",
+                    "native_tracer_entry",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-utismhsn/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-utismhsn/on.image",
+                    "--output-relocs",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-utismhsn/on.relocs",
+                    "--output-map-patches",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-utismhsn/on.maps",
+                    "--output-abi",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-utismhsn/on.abi",
+                    "--runtime-known-map-lookups"
+                  ],
+                  "returncode": 0
+                },
+                "off": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "kernel",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-utismhsn/input.elf",
+                    "--symbol",
+                    "native_tracer_entry",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-utismhsn/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-utismhsn/off.image",
+                    "--output-relocs",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-utismhsn/off.relocs",
+                    "--output-map-patches",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-utismhsn/off.maps",
+                    "--output-abi",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-utismhsn/off.abi"
+                  ],
+                  "returncode": 0
+                }
+              },
+              "captured_on_bytes_equal": {
+                "image": true,
+                "relocs": true,
+                "maps": true,
+                "abi": true
+              },
+              "on_off_equal": {
+                "image": true,
+                "relocs": true,
+                "maps": true,
+                "abi": true
+              },
+              "helper_calls_on_off": [
+                64,
+                64
+              ],
+              "generic_lookup_calls_on_off": [
+                18,
+                18
+              ],
+              "helper_target_deltas": {}
+            },
+            {
+              "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-uxju9hdo",
+              "completed_capture": true,
+              "label": "host-regression-synthetic-plan",
+              "mode": "kernel",
+              "symbol": "entry_that_does_not_exist",
+              "actual_exit": 1,
+              "same_linker_binary": true,
+              "lookup_map_kinds": {},
+              "lookup_map_names": [],
+              "replayable": true,
+              "variants": {
+                "on": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "kernel",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-uxju9hdo/input.elf",
+                    "--symbol",
+                    "entry_that_does_not_exist",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-uxju9hdo/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-uxju9hdo/on.image",
+                    "--output-relocs",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-uxju9hdo/on.relocs",
+                    "--output-map-patches",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-uxju9hdo/on.maps",
+                    "--output-abi",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-uxju9hdo/on.abi",
+                    "--runtime-known-map-lookups"
+                  ],
+                  "returncode": 1
+                },
+                "off": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "kernel",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-uxju9hdo/input.elf",
+                    "--symbol",
+                    "entry_that_does_not_exist",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-uxju9hdo/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-uxju9hdo/off.image",
+                    "--output-relocs",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-uxju9hdo/off.relocs",
+                    "--output-map-patches",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-uxju9hdo/off.maps",
+                    "--output-abi",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-uxju9hdo/off.abi"
+                  ],
+                  "returncode": 1
+                }
+              }
+            },
+            {
+              "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-xp72g_15",
+              "completed_capture": true,
+              "label": "host-regression-synthetic-plan",
+              "mode": "proof",
+              "symbol": "native_tracer_entry",
+              "actual_exit": 1,
+              "same_linker_binary": true,
+              "lookup_map_kinds": {},
+              "lookup_map_names": [],
+              "replayable": true,
+              "variants": {
+                "on": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "proof",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-xp72g_15/input.elf",
+                    "--symbol",
+                    "native_tracer_entry",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-xp72g_15/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-xp72g_15/on.image",
+                    "--output-relocs",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-xp72g_15/on.relocs",
+                    "--output-map-patches",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-xp72g_15/on.maps",
+                    "--output-abi",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-xp72g_15/on.abi",
+                    "--runtime-known-map-lookups"
+                  ],
+                  "returncode": 1
+                },
+                "off": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "proof",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-xp72g_15/input.elf",
+                    "--symbol",
+                    "native_tracer_entry",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-xp72g_15/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-xp72g_15/off.image",
+                    "--output-relocs",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-xp72g_15/off.relocs",
+                    "--output-map-patches",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-xp72g_15/off.maps",
+                    "--output-abi",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-xp72g_15/off.abi"
+                  ],
+                  "returncode": 1
+                }
+              }
+            },
+            {
+              "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-xy6k6m1p",
+              "completed_capture": true,
+              "label": "host-regression-synthetic-plan",
+              "mode": "kernel",
+              "symbol": "entry_that_does_not_exist",
+              "actual_exit": 1,
+              "same_linker_binary": true,
+              "lookup_map_kinds": {},
+              "lookup_map_names": [],
+              "replayable": true,
+              "variants": {
+                "on": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "kernel",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-xy6k6m1p/input.elf",
+                    "--symbol",
+                    "entry_that_does_not_exist",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-xy6k6m1p/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-xy6k6m1p/on.image",
+                    "--output-relocs",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-xy6k6m1p/on.relocs",
+                    "--output-map-patches",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-xy6k6m1p/on.maps",
+                    "--output-abi",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-xy6k6m1p/on.abi",
+                    "--runtime-known-map-lookups"
+                  ],
+                  "returncode": 1
+                },
+                "off": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "kernel",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-xy6k6m1p/input.elf",
+                    "--symbol",
+                    "entry_that_does_not_exist",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-xy6k6m1p/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-xy6k6m1p/off.image",
+                    "--output-relocs",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-xy6k6m1p/off.relocs",
+                    "--output-map-patches",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-xy6k6m1p/off.maps",
+                    "--output-abi",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-xy6k6m1p/off.abi"
+                  ],
+                  "returncode": 1
+                }
+              }
+            },
+            {
+              "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-z15m5cx7",
+              "completed_capture": true,
+              "label": "host-regression-synthetic-plan",
+              "mode": "kernel",
+              "symbol": "native_tracer_entry",
+              "actual_exit": 0,
+              "same_linker_binary": true,
+              "lookup_map_kinds": {},
+              "lookup_map_names": [],
+              "replayable": true,
+              "variants": {
+                "on": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "kernel",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-z15m5cx7/input.elf",
+                    "--symbol",
+                    "native_tracer_entry",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-z15m5cx7/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-z15m5cx7/on.image",
+                    "--output-relocs",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-z15m5cx7/on.relocs",
+                    "--output-map-patches",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-z15m5cx7/on.maps",
+                    "--output-abi",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-z15m5cx7/on.abi",
+                    "--runtime-known-map-lookups"
+                  ],
+                  "returncode": 0
+                },
+                "off": {
+                  "command": [
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/native-link.real",
+                    "--runtime-map-lookups",
+                    "--local-memory-routines",
+                    "--mode",
+                    "kernel",
+                    "--input",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-z15m5cx7/input.elf",
+                    "--symbol",
+                    "native_tracer_entry",
+                    "--link-plan",
+                    "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-z15m5cx7/link-plan.json",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-z15m5cx7/off.image",
+                    "--output-relocs",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-z15m5cx7/off.relocs",
+                    "--output-map-patches",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-z15m5cx7/off.maps",
+                    "--output-abi",
+                    "/workspaces/kprog-raw/perf/20261114-link-audit-host/replay-final/link-z15m5cx7/off.abi"
+                  ],
+                  "returncode": 0
+                }
+              },
+              "captured_on_bytes_equal": {
+                "image": true,
+                "relocs": true,
+                "maps": true,
+                "abi": true
+              },
+              "on_off_equal": {
+                "image": true,
+                "relocs": true,
+                "maps": true,
+                "abi": true
+              },
+              "helper_calls_on_off": [
+                64,
+                64
+              ],
+              "generic_lookup_calls_on_off": [
+                18,
+                18
+              ],
+              "helper_target_deltas": {}
+            }
+          ],
+          "scope": "Offline replay only, no kernel execution or workload validity gate. Helper call deltas establish emitted transformation counts, not performance gains."
+        },
+        "hashes": [
+          {
+            "path": "kprog/perf/native-context/native-link-audit.py",
+            "sha256": "4b50bfb9beb697c65aaadd963de4837cd675c06c590bf4752b7a193a4aa15b1f"
+          },
+          {
+            "path": "kprog/perf/native-context/test-link-audit.py",
+            "sha256": "66427db0854d66883460641431dc405047160162b64c02d1efb87b9104e5ba44"
+          },
+          {
+            "path": "kprog/perf/native-context/link-audit-replay.py",
+            "sha256": "7aa46598f64b0a2ba33b38d42355e142b852bc2f9972f4523c6593e8150cbfb0"
+          },
+          {
+            "path": "corpus/results/perf-link-audit-20261114/native-link.real",
+            "sha256": "619ddc7799fc541b76ccf999a30ad3f4982f46a746af775518cdd648eef6e534"
+          },
+          {
+            "path": "corpus/results/perf-link-audit-20261114/native-link-on",
+            "sha256": "4b50bfb9beb697c65aaadd963de4837cd675c06c590bf4752b7a193a4aa15b1f"
+          }
+        ],
+        "prior_artifacts_preserved": [
+          "/workspaces/kprog-raw/perf/20261114-link-audit-host-prior.tar.gz",
+          "/workspaces/kprog-raw/perf/20261114-link-audit-host-prior.json"
+        ],
+        "scope": "Final real CLI proof0/kernel0/error1 and inherited descriptor/stdio/output-byte transport tests pass. Incomplete final capture reporting regression passes; same-facts ON/OFF replay covers all retained host cases. All initial fixture/status/report failures remain raw, earlier unpublished archive preserved separately. Synthetic host plans only, no guest activation or performance claim."
+      }
+    }
+  ],
+  "scope": "Complete final host capture input/output groups and installed wrapper/binary, including final three transport cases and all prior fixture failures. Supersets initial build-evidence snapshot in link-audit-host archive. No guest or performance claim.",
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/perf_20261113/link-audit-inputs.tar.gz",
+    "bytes": 2481102,
+    "sha256": "75e017c9a4aad7b5e0e774f45069b504d716eacd5fa1c7590d0eee46ad610c87",
+    "files_byte_compared": 87
+  }
+}

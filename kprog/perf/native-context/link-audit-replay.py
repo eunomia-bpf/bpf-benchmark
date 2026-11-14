@@ -95,7 +95,8 @@ def main():
                 on, off = helper_targets(work / "on.relocs"), helper_targets(work / "off.relocs")
                 generic = [h["addr"] for h in plan.get("helpers", []) if h["name"] == "bpf_map_lookup_elem"]
                 row["helper_calls_on_off"] = [sum(on.values()), sum(off.values())]
-                row["generic_lookup_calls_on_off"] = [sum(on[t] for t in generic), sum(off[t] for t in generic)]
+                row["generic_lookup_calls_on_off"] = ([sum(on[t] for t in generic), sum(off[t] for t in generic)]
+                                                          if generic else None)
                 row["helper_target_deltas"] = {hex(t): on[t] - off[t] for t in on.keys() | off.keys()
                                                if on[t] != off[t]}
         rows.append(row)
