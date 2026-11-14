@@ -8,7 +8,7 @@ kprog belong in those forks. No replacement ISA semantics is defined locally.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
-| AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `de5a36443abd` | Lean 4.35.0 |
+| AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `d1b4b01d8879` | Lean 4.35.0 |
 | x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `74a2e2849cde` | Lean 4.32.0-rc1 |
 | Clight | [eunomia-bpf/clean](https://github.com/eunomia-bpf/clean), `external/clean/export` | `123f7f7767e2` | Lean 4.32.1 |
 
@@ -33,7 +33,7 @@ CompCert front end and the Lean export/semantics have separate trust claims.
 
 ## Operation coverage (M2 in progress)
 
-LNSym `de5a36443abd2ae020907a7f8d892b91ae724029`, x86lean `74a2e2849cde10fce9035c6abb7fdd49968b2915`.
+LNSym `d1b4b01d8879ea975ae099c8d77959dbdbf81c5f`, x86lean `74a2e2849cde10fce9035c6abb7fdd49968b2915`.
 
 Source inspection, not refinement proofs or conformance results. `present` means an execution path exists; `partial`/`missing` remain M2 work; `layer` identifies linking/ABI transport above an existing ISA form. Memory permissions, initialization, fault prefixes, exclusive ordering and ABI require explicit relations.
 
@@ -65,6 +65,14 @@ alignment failure commits neither data/writeback nor PC advance. The combined
 129-job build passed 68 load vectors, 33 store vectors and four refusal checks,
 plus the retained LDST suite (`m2-single-memory/build-2`). Permission, initialization
 and ordered-fault profiles remain part of the cross-cutting work below.
+
+LNSym `d1b4b01d8879` adds CNT 8B/16B and all five UADDLV arrangements through
+its SIMD dispatcher. The combined 131-job build passed 512 exhaustive byte cases,
+126 varied encoded vectors, nine illegal encodings and a retained REV64 check
+(`m2-vector-reductions/build-2`). These check upper clearing, V31, aliases and the
+GPR/SFP/flag frame within LNSym's enabled-SIMD domain. Exception-level trap profiles
+remain separate work. ARM source statuses are 60 present, four missing, eight
+partial and two linking-layer labels; these are not migrated theorem counts.
 
 ### AArch64: 74 simulator operations
 
@@ -106,8 +114,8 @@ and ordered-fault profiles remain part of the cross-cutting work below.
 | 0x21 | `LDP` | partial | [LDST/Reg_pair.lean](external/LNSym/Arm/Insts/LDST/Reg_pair.lean) | Pre/post/offset exists; pair width, overlap, LSE2/fault profiles need audit |
 | 0x22 | `STP` | partial | [LDST/Reg_pair.lean](external/LNSym/Arm/Insts/LDST/Reg_pair.lean) | Pre/post/offset exists; pair width, overlap, LSE2/fault profiles need audit |
 | 0x23 | `FMOV` | present | [DPSFP/Conversion_between_FP_and_Int.lean](external/LNSym/Arm/Insts/DPSFP/Conversion_between_FP_and_Int.lean) | Both GPR directions use ZR for field31; four encoded W/X ZR regressions pass |
-| 0x24 | `CNT` | missing | [DPSFP/Advanced_simd_two_reg_misc.lean](external/LNSym/Arm/Insts/DPSFP/Advanced_simd_two_reg_misc.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | Only reversals in two-reg-misc; across-lanes class absent |
-| 0x25 | `UADDLV` | missing | [DPSFP/Advanced_simd_two_reg_misc.lean](external/LNSym/Arm/Insts/DPSFP/Advanced_simd_two_reg_misc.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | Only reversals in two-reg-misc; across-lanes class absent |
+| 0x24 | `CNT` | present | [DPSFP/Advanced_simd_two_reg_misc.lean](external/LNSym/Arm/Insts/DPSFP/Advanced_simd_two_reg_misc.lean) | CNT 8B/16B; five UADDLV arrangements; upper clearing, alias and V31 checks |
+| 0x25 | `UADDLV` | present | [DPSFP/Advanced_simd_across_lanes.lean](external/LNSym/Arm/Insts/DPSFP/Advanced_simd_across_lanes.lean) | CNT 8B/16B; five UADDLV arrangements; upper clearing, alias and V31 checks |
 | 0x26 | `ADRP_GOT` | layer | [DPI/PC_rel_addressing.lean](external/LNSym/Arm/Insts/DPI/PC_rel_addressing.lean) | ADRP exists; relocation/GOT/readonly resolution is linking premise |
 | 0x27 | `ADRP_RODATA` | layer | [DPI/PC_rel_addressing.lean](external/LNSym/Arm/Insts/DPI/PC_rel_addressing.lean) | ADRP exists; relocation/GOT/readonly resolution is linking premise |
 | 0x28 | `LOAD_D0` | present | [LDST/Reg_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_imm.lean); [LDST/Reg_unscaled_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_unscaled_imm.lean) | D load via all five address modes; upper vector bits cleared |
