@@ -8,7 +8,7 @@ kprog belong in those forks. No replacement ISA semantics is defined locally.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
-| AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `909f455bd66d` | Lean 4.35.0 |
+| AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `dc8bd3f3ec9d` | Lean 4.35.0 |
 | x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `74a2e2849cde` | Lean 4.32.0-rc1 |
 | Clight | [eunomia-bpf/clean](https://github.com/eunomia-bpf/clean), `external/clean/export` | `123f7f7767e2` | Lean 4.32.1 |
 
@@ -33,7 +33,7 @@ CompCert front end and the Lean export/semantics have separate trust claims.
 
 ## Operation coverage (M2 in progress)
 
-LNSym `909f455bd66de3ea46591a240983ab7bfa72cfd4`, x86lean `74a2e2849cde10fce9035c6abb7fdd49968b2915`.
+LNSym `dc8bd3f3ec9dbdcd712785d5e83ed3b5dd4d9cad`, x86lean `74a2e2849cde10fce9035c6abb7fdd49968b2915`.
 
 Source inspection, not refinement proofs or conformance results. `present` means an execution path exists; `partial`/`missing` remain M2 work; `layer` identifies linking/ABI transport above an existing ISA form. Memory permissions, initialization, fault prefixes, exclusive ordering and ABI require explicit relations.
 
@@ -183,8 +183,29 @@ monitor-failure permission gating. This differs from the checked fork's source
 ordering. The native binding and retained fault observations need explicit
 reconciliation in M2/M3; these finite checks do not migrate those theorems.
 MMU/physical external aborts/concurrency remain outside this flat profile.
-Checked multiple-structure SIMD, x86 fault/canonicality and retained ARM controls
-are still open. M2 is not complete; M3-M6 have not started.
+At this checkpoint, the retained ARM controls and x86 fault/canonicality bindings
+were still open. M2 is not complete; M3-M6 have not started.
+
+LNSym `dc8bd3f3ec9d` adds retained TBZ/TBNZ and plain BR/BLR, and fixes register31
+in register branches to read XZR. BLR captures its target before writing X30,
+including BLR X30. BL/BLR now report X30 in their register footprint. TBZ/TBNZ
+have both CFG edges with the actual branch predicate; unresolved BR/BLR targets
+are explicitly refused by static CFG analysis rather than classified as RET.
+The plain branch projection excludes PAC, GCS and BTI state.
+
+The 151-job combined build and 112-job symbolic check passed 768 bit/PC-wrap
+cases covering all 64 tested bits, 40 signed-boundary/ZR cases, 54 indirect
+branch/alias/frame cases, six unsupported neighbors and two footprint checks,
+plus the original BranchTest regressions (`m2-control-branches/build-3`).
+GNU as assembled all 161 positive fixture words independently. Earlier test
+elaboration failures remain archived; no instruction assertions or old theorem
+premises were weakened, and no admissions were added.
+
+Scope inspection also confirms that LD1/ST1 multiple-structure instructions are
+absent from both the 74-operation roster and the old AArch64 reference. Their
+checked refusal is retained; expanding that class is not required for this
+migration. Remaining work includes MRS thread-pointer inputs, x86 fault and
+canonicality bindings, and reconciliation of old exclusive fault observations.
 
 ### AArch64: 74 simulator operations
 
@@ -263,9 +284,9 @@ are still open. M2 is not complete; M3-M6 have not started.
 | 0x46 | `LDADD` | present | [LDST/Atomic_memory_op.lean](external/LNSym/Arm/Insts/LDST/Atomic_memory_op.lean) | B/H/W/X, A/R and ST aliases; old/new/order observations; checked byte permissions/init/SP and effective LSE2 alignment, flat little-endian domain |
 | 0x47 | `LDSET` | present | [LDST/Atomic_memory_op.lean](external/LNSym/Arm/Insts/LDST/Atomic_memory_op.lean) | B/H/W/X, A/R and ST aliases; old/new/order observations; checked byte permissions/init/SP and effective LSE2 alignment, flat little-endian domain |
 | 0x48 | `LDCLR` | present | [LDST/Atomic_memory_op.lean](external/LNSym/Arm/Insts/LDST/Atomic_memory_op.lean) | B/H/W/X, A/R and ST aliases; old/new/order observations; checked byte permissions/init/SP and effective LSE2 alignment, flat little-endian domain |
-| 0xff | `RET` | present | [BR/Uncond_branch_reg.lean](external/LNSym/Arm/Insts/BR/Uncond_branch_reg.lean) | Only RET encoding accepted; BR/BLR absent |
+| 0xff | `RET` | present | [BR/Uncond_branch_reg.lean](external/LNSym/Arm/Insts/BR/Uncond_branch_reg.lean) | Plain RET/BR/BLR; XZR for Rn31, BLR captures target before LR update; unresolved indirect CFG targets refuse |
 
-Outside the 74-operation roster, LDXR/LDAXR/STXR and CLREX now execute in the fork. B/B.cond/CBZ/CBNZ already have paths; TBZ/TBNZ, MRS TPIDR_EL1/EL2 and BR/BLR helper calls remain retained-environment work. These are not extra completed operation tokens.
+Outside the 74-operation roster, LDXR/LDAXR/STXR and CLREX now execute in the fork. B/B.cond/CBZ/CBNZ/TBZ/TBNZ and plain BR/BLR have paths; MRS TPIDR_EL1/EL2 remains retained-environment work. These are not extra completed operation tokens.
 
 ### x86-64: 75 simulator operations
 
@@ -347,7 +368,7 @@ Outside the 74-operation roster, LDXR/LDAXR/STXR and CLREX now execute in the fo
 | 0x49 | `rorMem` | present | [rot .ror](external/x86lean/X86/Syntax.lean) |  |
 | 0xff | `ret` | present | [ret](external/x86lean/X86/Syntax.lean) | Native stack pop; simulator return modes need relation |
 
-Cross-cutting gaps: X86.Mem is a finite byte association list with implicit zero background, total reads/writes, no access-permission faults. Cpu has no 48/57-bit canonical-address profile. LNSym retains its total-byte-memory API and now also has a checked step for single/pair/exclusive transfers and LSE RMWs with byte permissions, initialization and ordered fault observations. That profile must be bound explicitly; it is not a full MMU/concurrency model. LSE RMWs retain old/new/order metadata in one checked effect; exclusives bind physical-monitor inputs and ordered monitor/memory effects. Checked multiple-structure SIMD paths are still refused; old exclusive fault/trace bindings differ and require reconciliation. Thread-pointer inputs and the remaining memory/platform bindings are open. These are not closed by listing instruction constructors; M2/M3 must preserve the existing theorem domains through external-model extensions and explicit relations. x86lean takes post-decode Instr.op/len. BZHI is absent from the differential roster, not absent from step: do not duplicate its semantics.
+Cross-cutting gaps: X86.Mem is a finite byte association list with implicit zero background, total reads/writes, no access-permission faults. Cpu has no 48/57-bit canonical-address profile. LNSym retains its total-byte-memory API and now also has a checked step for single/pair/exclusive transfers and LSE RMWs with byte permissions, initialization and ordered fault observations. That profile must be bound explicitly; it is not a full MMU/concurrency model. LSE RMWs retain old/new/order metadata in one checked effect; exclusives bind physical-monitor inputs and ordered monitor/memory effects. Out-of-roster multiple-structure SIMD paths remain explicitly refused. Old exclusive fault/trace bindings differ and require reconciliation. Thread-pointer inputs and the remaining memory/platform bindings are open. These are not closed by listing instruction constructors; M2/M3 must preserve the existing theorem domains through external-model extensions and explicit relations. x86lean takes post-decode Instr.op/len. BZHI is absent from the differential roster, not absent from step: do not duplicate its semantics.
 
 ## Legacy foundation (migration pending)
 
