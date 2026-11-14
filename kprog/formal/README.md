@@ -8,7 +8,7 @@ kprog belong in those forks. No replacement ISA semantics is defined locally.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
-| AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `d1b4b01d8879` | Lean 4.35.0 |
+| AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `9bd0c0f609fb` | Lean 4.35.0 |
 | x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `74a2e2849cde` | Lean 4.32.0-rc1 |
 | Clight | [eunomia-bpf/clean](https://github.com/eunomia-bpf/clean), `external/clean/export` | `123f7f7767e2` | Lean 4.32.1 |
 
@@ -33,7 +33,7 @@ CompCert front end and the Lean export/semantics have separate trust claims.
 
 ## Operation coverage (M2 in progress)
 
-LNSym `d1b4b01d8879ea975ae099c8d77959dbdbf81c5f`, x86lean `74a2e2849cde10fce9035c6abb7fdd49968b2915`.
+LNSym `9bd0c0f609fbfdc8f317c1e3c766f9067464d3ba`, x86lean `74a2e2849cde10fce9035c6abb7fdd49968b2915`.
 
 Source inspection, not refinement proofs or conformance results. `present` means an execution path exists; `partial`/`missing` remain M2 work; `layer` identifies linking/ABI transport above an existing ISA form. Memory permissions, initialization, fault prefixes, exclusive ordering and ABI require explicit relations.
 
@@ -74,6 +74,14 @@ GPR/SFP/flag frame within LNSym's enabled-SIMD domain. Exception-level trap prof
 remain separate work. ARM source statuses are 60 present, four missing, eight
 partial and two linking-layer labels; these are not migrated theorem counts.
 
+LNSym `9bd0c0f609fb` adds W/X extended-register ADD/ADDS/SUB/SUBS with all eight
+extension options, shifts 0..4, SP/ZR distinctions and CMP/CMN footprints. The
+combined 133-job build passed 160 retained encoded vectors and 12 invalid shifts
+(`m2-extended-arithmetic/build-2`). An expanded 832-case matrix also passed and is
+retained in raw; the committed suite uses representative cases to limit fixture
+size. ARM source statuses are now 66 present, four missing, two partial and two
+linking-layer labels. Exclusives, LSE and the pair/fault profiles remain open.
+
 ### AArch64: 74 simulator operations
 
 | Code | Operation | Source status | LNSym source (Arm/Insts unless Arm/) | Constraint / work |
@@ -85,7 +93,7 @@ partial and two linking-layer labels; these are not migrated theorem counts.
 | 0x04 | `SUB_IMM` | present | [DPI/Add_sub_imm.lean](external/LNSym/Arm/Insts/DPI/Add_sub_imm.lean) | S/op/Rd encode CMP/CMN |
 | 0x05 | `MOVK` | present | [DPI/Move_wide_imm.lean](external/LNSym/Arm/Insts/DPI/Move_wide_imm.lean) | MOVZ/MOVN/MOVK, retain width and encoding |
 | 0x06 | `ALU_IMM` | present | [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Requires architectural bitmask encoding |
-| 0x07 | `ALU_REG` | partial | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted forms exist; add/sub extended-register class absent |
+| 0x07 | `ALU_REG` | present | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Add_sub_extended_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_extended_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted/logical and all eight extended-register ADD/SUB options; SP/ZR and NZCV checks |
 | 0x08 | `SHIFT_IMM` | present | [DPI/Bitfield.lean](external/LNSym/Arm/Insts/DPI/Bitfield.lean); [DPI/Extract.lean](external/LNSym/Arm/Insts/DPI/Extract.lean) | LSL/LSR/ASR bitfield aliases and EXTR-based ROR |
 | 0x09 | `SHIFT_REG` | present | [DPR/Data_processing_two_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_two_source.lean) | LSLV/LSRV/ASRV/RORV |
 | 0x0a | `MADD` | present | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | MUL aliases MADD with Ra=XZR |
@@ -94,14 +102,14 @@ partial and two linking-layer labels; these are not migrated theorem counts.
 | 0x0d | `UMULL` | present | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | UMADDL alias with Ra=XZR |
 | 0x0e | `UDIV` | present | [DPR/Data_processing_two_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_two_source.lean) | W/X forms; divisor zero returns zero, flags unchanged |
 | 0x0f | `MVN` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
-| 0x10 | `NEG` | partial | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted forms exist; add/sub extended-register class absent |
+| 0x10 | `NEG` | present | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Add_sub_extended_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_extended_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted/logical and all eight extended-register ADD/SUB options; SP/ZR and NZCV checks |
 | 0x11 | `EXTR` | present | [DPI/Extract.lean](external/LNSym/Arm/Insts/DPI/Extract.lean) | Decoded W/X extraction, including ROR alias and shift-bound checks |
 | 0x12 | `BITFIELD` | present | [DPI/Bitfield.lean](external/LNSym/Arm/Insts/DPI/Bitfield.lean) | BFM/SBFM/UBFM and extension aliases |
 | 0x13 | `REV` | present | [DPR/Data_processing_one_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_one_source.lean) | REV widths per legal opcode |
 | 0x14 | `REV16` | present | [DPR/Data_processing_one_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_one_source.lean) | REV widths per legal opcode |
 | 0x15 | `SXTH` | present | [DPI/Bitfield.lean](external/LNSym/Arm/Insts/DPI/Bitfield.lean) | BFM/SBFM/UBFM and extension aliases |
 | 0x16 | `CMP_IMM` | present | [DPI/Add_sub_imm.lean](external/LNSym/Arm/Insts/DPI/Add_sub_imm.lean) | S/op/Rd encode CMP/CMN |
-| 0x17 | `CMP_REG` | partial | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted forms exist; add/sub extended-register class absent |
+| 0x17 | `CMP_REG` | present | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Add_sub_extended_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_extended_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted/logical and all eight extended-register ADD/SUB options; SP/ZR and NZCV checks |
 | 0x18 | `TST_IMM` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
 | 0x19 | `TST_REG` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
 | 0x1a | `CCMP_IMM` | present | [DPR/Conditional_compare.lean](external/LNSym/Arm/Insts/DPR/Conditional_compare.lean) | Unsigned imm5 operand; arithmetic or literal fallback NZCV, empty GPR footprint |
@@ -128,7 +136,7 @@ partial and two linking-layer labels; these are not migrated theorem counts.
 | 0x2f | `SXTW` | present | [DPI/Bitfield.lean](external/LNSym/Arm/Insts/DPI/Bitfield.lean) | BFM/SBFM/UBFM and extension aliases |
 | 0x30 | `SUBS_IMM` | present | [DPI/Add_sub_imm.lean](external/LNSym/Arm/Insts/DPI/Add_sub_imm.lean) | S/op/Rd encode CMP/CMN |
 | 0x31 | `ADDS_IMM` | present | [DPI/Add_sub_imm.lean](external/LNSym/Arm/Insts/DPI/Add_sub_imm.lean) | S/op/Rd encode CMP/CMN |
-| 0x32 | `SUBS_REG` | partial | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted forms exist; add/sub extended-register class absent |
+| 0x32 | `SUBS_REG` | present | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Add_sub_extended_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_extended_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted/logical and all eight extended-register ADD/SUB options; SP/ZR and NZCV checks |
 | 0x33 | `CMN_IMM` | present | [DPI/Add_sub_imm.lean](external/LNSym/Arm/Insts/DPI/Add_sub_imm.lean) | S/op/Rd encode CMP/CMN |
 | 0x34 | `CINV` | present | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases; 24 encoded W/X branch/ZR/wrap/frame checks pass |
 | 0x35 | `ORN_REG` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
@@ -136,7 +144,7 @@ partial and two linking-layer labels; these are not migrated theorem counts.
 | 0x37 | `ANDS_IMM` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
 | 0x38 | `STLXR` | missing | [Arm/Decode/LDST.lean](external/LNSym/Arm/Decode/LDST.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | Exclusive class, monitor/outcome state absent; LDXR also needed |
 | 0x39 | `LDRSW` | present | [LDST/Reg_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_imm.lean); [LDST/Reg_unscaled_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_unscaled_imm.lean) | Signed word to X across all five address modes |
-| 0x3a | `CMN_REG` | partial | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted forms exist; add/sub extended-register class absent |
+| 0x3a | `CMN_REG` | present | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Add_sub_extended_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_extended_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted/logical and all eight extended-register ADD/SUB options; SP/ZR and NZCV checks |
 | 0x3b | `UMADDL` | present | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | Unsigned32 multiplicands widened before multiplication |
 | 0x3c | `SXTB` | present | [DPI/Bitfield.lean](external/LNSym/Arm/Insts/DPI/Bitfield.lean) | BFM/SBFM/UBFM and extension aliases |
 | 0x3d | `CSINV` | present | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases; 24 encoded W/X branch/ZR/wrap/frame checks pass |
@@ -144,7 +152,7 @@ partial and two linking-layer labels; these are not migrated theorem counts.
 | 0x3f | `LDRSH` | present | [LDST/Reg_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_imm.lean); [LDST/Reg_unscaled_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_unscaled_imm.lean) | Signed halfword to W/X across all five address modes; W writes zero-extend in X |
 | 0x40 | `SMADDL` | present | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | Signed32 multiplicands widened before multiplication |
 | 0x41 | `CNEG` | present | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases; 24 encoded W/X branch/ZR/wrap/frame checks pass |
-| 0x42 | `ADDS_REG` | partial | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted forms exist; add/sub extended-register class absent |
+| 0x42 | `ADDS_REG` | present | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Add_sub_extended_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_extended_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted/logical and all eight extended-register ADD/SUB options; SP/ZR and NZCV checks |
 | 0x43 | `BICS_REG` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
 | 0x44 | `CSETM` | present | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases; 24 encoded W/X branch/ZR/wrap/frame checks pass |
 | 0x45 | `CSNEG` | present | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases; 24 encoded W/X branch/ZR/wrap/frame checks pass |
