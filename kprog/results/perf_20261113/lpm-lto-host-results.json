@@ -1,0 +1,53 @@
+{
+  "recorded_at": "2026-11-14T08:25:58Z",
+  "raw": "/workspaces/kprog-raw/perf/20261114-lpm-lto",
+  "cli": "--runtime-lpm-layout PATH; absent by default, ignored in proof mode",
+  "implementation": "Shared generic-lookup call routine checks actual map_type and live data_size. LPM12data bytes uses64+32bit big-endian XOR/BSR with short-prefix early exit, full match before intermediate-node flags, previous best fallback, RCU child traversal and data+12 value return. Other types/sizes call original helper with original args/SysV stack alignment; no name-based inference, SIMD or node-count limit.",
+  "tests": {
+    "passed": 33,
+    "failed": 0,
+    "existing_ignored": 1,
+    "host_vectors": "LPM host: 65590 compressed-trie/prefix/IM/guard/live-root/generic-ABI vectors PASS",
+    "reference": "Independent bit-at-a-time C lookup on64 compressed synthetic tries, node layout deliberately differs from kernel;65590 real emitted-code cases include short/invalid prefixes, intermediate/full-depth nodes, unaligned/guard-end keys, live root replacement and generic-helper ABI."
+  },
+  "offline": {
+    "default_cases": 11,
+    "runtime-default_cases": 11,
+    "actual_proof_entries": 14,
+    "proof_full_elf_on_off_equal": true,
+    "kernel_on_off_success_entries": 14,
+    "kernel_off_code_relocs_maps_abi_equal_capture": true,
+    "generic_external_calls_on_off": [
+      8,
+      124
+    ]
+  },
+  "files": [
+    {
+      "path": "corpus/results/perf-lpm-lto-linker-20261114/native-link.real",
+      "bytes": 4595248,
+      "sha256": "22bd4810d9a0667f90973fb8cd70a602c4c355c03b1626799522d2dd5eb316d6"
+    },
+    {
+      "path": "corpus/results/perf-lpm-lto-linker-20261114/runtime-lpm-layout.json",
+      "bytes": 186,
+      "sha256": "ea1bd0f3ed6be89836d5aaf3c4ca98117266ed60b4cebd2806c66b3764303272"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-lpm-lto/host-final.make.log",
+      "bytes": 5114,
+      "sha256": "0bf295b3d2544887d617cdcba63a234c801045111e86aa88fbb5171b6d9071d3"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-lpm-lto/host-final/stdout",
+      "bytes": 83,
+      "sha256": "a65093c34145553a03e9e7407c35c352d4e29f7e3958fca71a269819a25299c0"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-lpm-lto/host-final/lpm.bin",
+      "bytes": 319,
+      "sha256": "f5750cbd49aa70d97896289e8d505ab0caabc38abaf418ba241230a5c876cf6a"
+    }
+  ],
+  "scope": "Host semantics and real-object CLI/default parity only. No LPM kernel execution, whole-app installation, throughput or equal-work certification. Running read/hash jobs keep older immutable payloads."
+}

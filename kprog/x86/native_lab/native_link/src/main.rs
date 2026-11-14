@@ -145,6 +145,10 @@ struct Args {
     #[arg(long)]
     runtime_hash_layout: Option<PathBuf>,
 
+    /// Specialize LPM lookups after actual map-type/data-size dispatch.
+    #[arg(long)]
+    runtime_lpm_layout: Option<PathBuf>,
+
     /// Bind x86 memset/memcpy to linker-owned GPR routines in the proof image.
     #[arg(long)]
     local_memory_routines: bool,
@@ -225,6 +229,13 @@ struct RuntimeArrayLayout {
     index_mask: u32,
     value: u32,
     array_type: u32,
+}
+
+#[derive(Deserialize)]
+struct RuntimeLpmLayout {
+    map_type:u32,lpm_type:u32,root:u32,max_prefixlen:u32,data_size:u32,
+    child:u32,child_stride:u32,node_prefixlen:u32,node_flags:u32,node_data:u32,
+    key_prefixlen:u32,key_data:u32,
 }
 
 #[derive(Deserialize)]
@@ -510,11 +521,19 @@ fn main() -> Result<()> {
             Ok(serde_json::from_slice(&fs::read(path)?)?)
         }).transpose()?
     };
+    let runtime_lpm_layout:Option<RuntimeLpmLayout> = if proof_mode {None} else {
+        args.runtime_lpm_layout.as_ref().map(|path| -> Result<_> {
+            Ok(serde_json::from_slice(&fs::read(path)?)?)
+        }).transpose()?
+    };
     let bytes = fs::read(&args.input).with_context(|| format!("read {}", args.input.display()))?;
     let elf = object::File::parse(&*bytes)
         .with_context(|| format!("parse ELF {}", args.input.display()))?;
     if args.local_memory_routines && elf.architecture() != object::Architecture::X86_64 {
         bail!("--local-memory-routines requires x86-64 input");
+    }
+    if runtime_lpm_layout.is_some() && elf.architecture()!=object::Architecture::X86_64 {
+        bail!("--runtime-lpm-layout requires x86-64 input");
     }
     if runtime_hash_layout.is_some() && elf.architecture()!=object::Architecture::X86_64 {
         bail!("--runtime-hash-layout requires x86-64 input");
@@ -587,6 +606,7 @@ fn main() -> Result<()> {
                 args.runtime_array_shared && !proof_mode,
                 runtime_probe_read_layout.as_ref(),
                 runtime_hash_layout.as_ref(),
+                runtime_lpm_layout.as_ref(),
                 args.local_memory_routines,
                 args.show,
             )?
