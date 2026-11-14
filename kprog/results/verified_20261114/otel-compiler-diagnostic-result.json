@@ -111,5 +111,26 @@
     },
     "large_input_retry_pending": true,
     "whole_app_certification": false
+  },
+  "large_input_retry": {
+    "recorded": "2026-11-14T08:46:28Z",
+    "pid": 333934,
+    "wait_pid": 270915,
+    "implementation_commit": "b0139ffbd",
+    "raw": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/replay-no-warning-cfg",
+    "input": "Retained original1.13GB request3 preprocessed sim C",
+    "frontend_change": "Only -w added versus actual failed48GiB replay; same clang/optimization/debug/input/CPU/AS",
+    "stages": [
+      "clang frontend IR",
+      "current staged packet-bounds e02",
+      "clang BPF backend"
+    ],
+    "native_compilation_or_installation": false,
+    "stock_verification": false,
+    "host_cpus": "8-15",
+    "host_as_bytes": 51539607552,
+    "measurement": "os.wait4 per child RSS/time/status",
+    "resource_dependency_only": true,
+    "postlaunch_outcome_polled": false
   }
 }
