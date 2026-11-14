@@ -683,6 +683,8 @@
 
 - VERIFIED 2026-11-14 刷新收集：239086退出0，唯一image2aed63ff946f，direct模块逐字节等于233116已测候选d232c2e6，bounds工具e02a61a2已stage。boot/ELF/config/linker保持原hash；image/stage各1252应用制品逐项一致。实际image loader与service loader hash分别记录在 `kprog/results/verified_20261114/recovery-private-refresh-result.json`；旧verified-module不被替换。Katran239316已运行待收集，不把部署当应用验收，PERF继续whole-app LTO计时。
 
+- VERIFIED 2026-11-14 Tracee整应用checked-sim-c LTO复测257169已排在Katran239316之后（只等资源，不要求Katran通过），1x10s statsON/CPU8-15/8vCPU64G，既有冻结launcher和唯一镜像。raw `/workspaces/kprog-raw/verified/20261114-tracee-checked-lto`，launch receipt `kprog/results/verified_20261114/tracee-checked-lto-launch.json`；尚无执行/验收结论。
+
 ## 3. 安全：运行时缺口（有限用例和 guest 已验证）
 
 - [x] 退出契约 RBP/R12/RSP、below-SP 栈生命周期（S7，cdeb9804d）；ARM 隐式 SP 回写（55504ff90）。
