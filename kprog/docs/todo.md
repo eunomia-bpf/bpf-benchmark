@@ -685,7 +685,7 @@
 
 - VERIFIED 2026-11-14 Tracee整应用checked-sim-c LTO复测257169已排在Katran239316之后（只等资源，不要求Katran通过），1x10s statsON/CPU8-15/8vCPU64G，既有冻结launcher和唯一镜像。raw `/workspaces/kprog-raw/verified/20261114-tracee-checked-lto`，launch receipt `kprog/results/verified_20261114/tracee-checked-lto-launch.json`；尚无执行/验收结论。
 
-- VERIFIED 2026-11-14 PERF编译阻塞：235861的perf_unwind_native两次在clang -O3 -emit-llvm阶段SIGKILL，尚未进入stock verifier/native编译；不认定OOM。原始request3的预处理sim C为1132737246B。原命令host重放258314排在own Tracee257169之后，CPU8-15/AS80GiB，记录time-v RSS/status；raw `/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker`，receipt `kprog/results/verified_20261114/otel-compiler-blocker-launch.json`。未修改编译器/源码，待收取诊断，不声称修复或wholeapp通过。
+- VERIFIED 2026-11-14 PERF编译阻塞：235861的perf_unwind_native两次在clang -O3 -emit-llvm阶段SIGKILL，尚未进入stock verifier/native编译；不认定OOM。原始request3的预处理sim C为1132737246B。原命令host重放258314排在own Tracee257169之后，CPU8-15/AS80GiB，记录time-v RSS/status；raw `/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker`，receipt `kprog/results/verified_20261114/otel-compiler-blocker-launch.json`。未修改编译器/源码，待收取诊断，不声称修复或wholeapp通过。 保留输入只读统计为464645行，最长178403B；栈状态宏有大量重复展开（详见同一receipt的source_shape_investigation），不能据此认定SIGKILL原因。
 
 ## 3. 安全：运行时缺口（有限用例和 guest 已验证）
 

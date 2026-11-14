@@ -16,5 +16,32 @@
   "host_as_bytes": 85899345920,
   "dependency": "After own Tracee guest exits; no app success requirement",
   "postlaunch_outcome_polled": false,
-  "raw_removed": false
+  "raw_removed": false,
+  "source_shape_investigation": {
+    "recorded": "2026-11-14T07:42:05.929321+00:00",
+    "scope": "Read-only analysis of byte-preserved original request3 input; no compiler/model/default changes",
+    "lines": 464645,
+    "bytes": 1132737246,
+    "line_size_counts": {
+      "below_10000": 411064,
+      "10000_to_99999": 53573,
+      "100000_to_999999": 8,
+      "at_least_1000000": 0
+    },
+    "maximum_line_bytes": 178403,
+    "maximum_line_example": 441171,
+    "maximum_line_prefix": "for (__u32 __x86_release_lane=0; __x86_release_lane<8U;",
+    "token_occurrences": {
+      "__x86_release_lane": 377755,
+      "__x86_sv_sp": 3024550,
+      "__x86_stack_value_tag_0": 87044
+    },
+    "related_source": [
+      "kprog/x86/x86_sim_local_bpf.h:751",
+      "kprog/x86/x86_sim_local_bpf.h:579",
+      "kprog/x86/x86_sim_local_bpf.h:636"
+    ],
+    "interpretation": "Macro expansion contributes substantial source repetition before Clang optimization. Counts are lexical evidence, not measured compiler RSS or proof of the SIGKILL cause.",
+    "oom_confirmed": false
+  }
 }
