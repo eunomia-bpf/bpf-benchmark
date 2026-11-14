@@ -64,12 +64,19 @@ define i32 @dynamic(ptr %ctx, i64 %offset) section "kprobe/dynamic" {
 %v = load volatile i32, ptr %p, align 4
 ret i32 %v
 }
+define i32 @unrelated_output(ptr %ctx) section "kprobe/unrelated" {
+%p = getelementptr i8, ptr %ctx, i64 80
+%unrelated = call ptr asm sideeffect "", "=r,r"(ptr %p)
+%v = load volatile i32, ptr %unrelated, align 4
+ret i32 %v
+}
 ''')
     result = run([tool, negative, '-o', output/'other.bc', '--canonical-ctx-loads'])
     if 'constant context loads canonicalized=0' not in result.stderr:
-        raise ValueError('Unrelated section or dynamic address was changed')
+        raise ValueError('Unrelated section, dynamic address or untied output was changed')
     record = dict(default_bitcode_equal=True, tracing_load_widths=[8, 16, 32, 64],
-                  base_register=1, instruction_offset=80, other_section_and_dynamic_preserved=True)
+                  base_register=1, instruction_offset=80, other_section_and_dynamic_preserved=True,
+                  untied_asm_output_preserved=True)
     (output/'result.json').write_text(json.dumps(record, indent=2)+'\n')
     print(json.dumps(record))
 

@@ -36,6 +36,16 @@ static bool field(Value *value,Function &function,int64_t offset) {
   auto *base=GetPointerBaseWithConstantOffset(load->getPointerOperand(),actual,function.getParent()->getDataLayout());
   return base==function.getArg(0) && actual==offset;
 }
+static Value *context_origin(Value *value) {
+  while (auto *call=dyn_cast<CallInst>(value)) {
+    auto *assembly=dyn_cast<InlineAsm>(call->getCalledOperand());
+    if (!assembly || !assembly->getAsmString().empty() ||
+        assembly->getConstraintString()!="=r,0" || call->arg_size()!=1 ||
+        call->getType()!=call->getArgOperand(0)->getType()) break;
+    value=call->getArgOperand(0);
+  }
+  return value;
+}
 // Tracing contexts contain scalar register values. Keep the original context
 // operand and put a proven constant displacement in the memory instruction.
 // An opaque identity used by the simulator can otherwise make LLVM allocate
@@ -55,9 +65,9 @@ static unsigned canonical_context_loads(Module &module) {
       unsigned width=load->getType()->getIntegerBitWidth();
       if (width!=8 && width!=16 && width!=32 && width!=64) continue;
       int64_t offset=0;
-      auto *base=GetPointerBaseWithConstantOffset(origin(load->getPointerOperand()),
+      auto *base=GetPointerBaseWithConstantOffset(context_origin(load->getPointerOperand()),
           offset,module.getDataLayout());
-      if (origin(base)!=function.getArg(0) || offset < -32768 || offset > 32767) continue;
+      if (context_origin(base)!=function.getArg(0) || offset < -32768 || offset > 32767) continue;
       std::string displacement=offset<0?" - "+std::to_string(-offset):" + "+std::to_string(offset);
       std::string assembly="$0 = *(u"+std::to_string(width)+" *)($1"+displacement+")";
       auto *wide=Type::getInt64Ty(module.getContext());
