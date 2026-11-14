@@ -2,7 +2,7 @@ import KProgFormal.Reference.Memory
 import X86.CheckedMemory
 
 /-!
-The native x86-64 view of x86lean checked execution. Remaining legacy REP, LEAVE, UD2 and
+The native x86-64 view of x86lean checked execution. Remaining legacy LEAVE, UD2 and
 RET-immediate bodies are retired in the next binding step. Architectural rules
 come from Intel SDM
 Volume 2, instruction Operation/Flags Affected descriptions:
@@ -115,10 +115,11 @@ Potential reads come from the fork's own access plan; target values are
 recomputed after materialization. Only actual write effects update the native
 memory function, so untouched and uninitialized bytes keep their input values.
 No local arithmetic, flag, effective-address or permission interpreter runs. -/
-def nativeStep (op : _root_.X86.Op) (nextPc : Word) (s : State) : Transition State :=
+def nativeStep (op : _root_.X86.Op) (nextPc : Word) (s : State)
+    (context : _root_.X86.StringContext := {}) : Transition State :=
   let i : _root_.X86.Instr := { op, len := (nextPc-s.pc).toNat }
   let cpu := externalCpu s
-  match _root_.X86.plannedReadAddresses i cpu with
+  match _root_.X86.plannedReadAddresses i cpu context with
   | .error reason => ⟨{ s with modelError := some reason }, [], none⟩
   | .ok addresses =>
     let memory := addresses.foldl (fun memory address => memory.write address (s.memory.value address))
@@ -130,7 +131,7 @@ def nativeStep (op : _root_.X86.Op) (nextPc : Word) (s : State) : Transition Sta
           writable := s.memory.writable
           initialized := s.memory.initialized }
         addressWidth := match s.addressWidth with | .w48 => .la48 | .w57 => .la57 }
-    let output := _root_.X86.stepChecked i input
+    let output := _root_.X86.stepChecked i input context
     let effect := externalEffects s.memory output.events
     ⟨{ s with
         gpr := fun r => output.cpu.regs.get (_root_.X86.GPR.ofIndex r)
@@ -270,83 +271,24 @@ private def externalDestination (width : ScalarWidth) : ScalarDestination → _r
   | .register slice => externalRegister width slice
   | .memory address => .mem { disp := address }
 
-/-- REP uses the address size for all three implicit registers. In address32
-mode even zero-count execution clears their high halves before checking memory. -/
-def stringAddress (address32 : Bool) (value : Word) : Word :=
-  if address32 then (value.setWidth 32).setWidth 64 else value
-
-def stringStart (address32 : Bool) (s : State) : State :=
-  { s with gpr := fun r => if r = 1 ∨ r = 6 ∨ r = 7 then stringAddress address32 (s.gpr r) else s.gpr r }
-
-/-- One completed MOVS element changes the three implicit registers. Source
-segment overrides affect only the read, never ES:RDI. DF selects the stride. -/
-def stringAdvance (width : ScalarWidth) (address32 : Bool) (s : State) : State :=
-  let stride := BitVec.ofNat 64 width.bytes
-  let delta := if s.rflags.getLsbD 10 then -stride else stride
-  { s with gpr := fun r =>
-      if r = 1 then stringAddress address32 (s.gpr r - 1)
-      else if r = 6 ∨ r = 7 then stringAddress address32 (s.gpr r + delta)
-      else s.gpr r }
-
-/-- Faults stop before completing this element. Earlier completed iterations
-remain committed; a source read before a destination fault remains observable. -/
-def repMovsElement (width : ScalarWidth) (address32 : Bool) (sourceBase : Word)
-    (s : State) : Transition State :=
-  let source := sourceBase + stringAddress address32 (s.gpr 6)
-  let destination := stringAddress address32 (s.gpr 7)
-  match readMemory s.memory source width.bytes with
-  | .error fault => ⟨s, [.fault fault], some fault⟩
-  | .ok (value, read) =>
-      match writeMemory s.memory destination value width.bytes with
-      | .error fault => ⟨s, [read, .fault fault], some fault⟩
-      | .ok (memory, write) =>
-          ⟨{ stringAdvance width address32 s with memory := memory }, [read, write], none⟩
-
-/-- The repetition count comes from RCX/ECX, with no simulator bound. The PC
-advances only at completion; a fault retains the instruction PC for restart. -/
-def repMovsLoop (width : ScalarWidth) (address32 : Bool) (sourceBase nextPc : Word) :
-    Nat → State → Transition State
-  | 0, s => ⟨{ s with pc := nextPc }, [], none⟩
+/-- Compose the fork's interruptible iterations through its zero-count
+completion step. The only recursion bound is the full architectural RCX/ECX
+input count, obtained from the fork. Faults/refusals retain the completed prefix.
+Each iteration rematerializes current functional memory, so overlaps observe
+prior writes. No local element, pointer, stride or counter semantics runs. -/
+private def nativeRepeat (op : _root_.X86.Op) (context : _root_.X86.StringContext)
+    (nextPc : Word) : Nat -> State -> Transition State
+  | 0, s => nativeStep op nextPc s context
   | n + 1, s =>
-      let first := repMovsElement width address32 sourceBase s
-      if first.fault.isSome then first else
-        let rest := repMovsLoop width address32 sourceBase nextPc n first.state
-        ⟨rest.state, first.events ++ rest.events, rest.fault⟩
+      let first := nativeStep op nextPc s context
+      if first.fault.isSome || first.state.modelError.isSome then first else
+        let rest := nativeRepeat op context nextPc n first.state
+        { state := rest.state, events := first.events ++ rest.events, fault := rest.fault }
 
-def repMovsStep (width : ScalarWidth) (address32 : Bool) (sourceBase nextPc : Word)
-    (s : State) : Transition State :=
-  let start := stringStart address32 s
-  repMovsLoop width address32 sourceBase nextPc (start.gpr 1).toNat start
-
-/-- STOS has no source-memory access and never changes RSI. The accumulator
-is truncated by the architectural store; DF selects the signed destination
-stride. This reference covers the native64 address form emitted by P. -/
-def stosAdvance (width : ScalarWidth) (s : State) : State :=
-  let stride := BitVec.ofNat 64 width.bytes
-  let delta := if s.rflags.getLsbD 10 then -stride else stride
-  { s with gpr := fun r => if r = 1 then s.gpr r - 1
-      else if r = 7 then s.gpr r + delta else s.gpr r }
-
-def repStosElement (width : ScalarWidth) (s : State) : Transition State :=
-  match writeMemory s.memory (s.gpr 7) (s.gpr 0) width.bytes with
-  | .error fault => ⟨s, [.fault fault], some fault⟩
-  | .ok (memory, write) =>
-      ⟨{ stosAdvance width s with memory := memory }, [write], none⟩
-
-/-- Each completed store commits its RCX/RDI progress. A store fault retains
-that element's incoming state and instruction PC; completion advances the PC.
-There is no iteration bound besides the full64-bit architectural RCX value. -/
-def repStosLoop (width : ScalarWidth) (nextPc : Word) :
-    Nat → State → Transition State
-  | 0, s => ⟨{ s with pc := nextPc }, [], none⟩
-  | n + 1, s =>
-      let first := repStosElement width s
-      if first.fault.isSome then first else
-        let rest := repStosLoop width nextPc n first.state
-        ⟨rest.state, first.events ++ rest.events, rest.fault⟩
-
-def repStosStep (width : ScalarWidth) (nextPc : Word) (s : State) : Transition State :=
-  repStosLoop width nextPc (s.gpr 1).toNat s
+private def nativeRep (kind : _root_.X86.StringOp) (width : ScalarWidth)
+    (context : _root_.X86.StringContext) (nextPc : Word) (s : State) : Transition State :=
+  nativeRepeat (.repstrop .rep kind (externalSize width)) context nextPc
+    (context.count (externalCpu s)).toNat s
 
 def canonicalTarget (width : AddressWidth) (target : Word) : Bool :=
   (target.setWidth width.bits).signExtend 64 == target
@@ -456,8 +398,9 @@ def step (instruction : Instruction) (s : State) : Transition State :=
       nativeStep (.call target) nextPc s
   | .returnNear release nextPc =>
       if release == 0 then nativeStep .ret nextPc s else returnStep release s
-  | .repMovs width address32 sourceBase nextPc => repMovsStep width address32 sourceBase nextPc s
-  | .repStos width nextPc => repStosStep width nextPc s
+  | .repMovs width address32 sourceBase nextPc =>
+      nativeRep .movs width { address32, sourceBase } nextPc s
+  | .repStos width nextPc => nativeRep .stos width {} nextPc s
   | .xmm0Move store aligned address nextPc =>
       let kind := if aligned then _root_.X86.VMovKind.aps else .ups
       nativeStep (if store then .vstore kind { disp := address } .x0

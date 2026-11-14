@@ -10,7 +10,7 @@ described below.
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
 | AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `da428593b21d` | Lean 4.35.0 |
-| x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `daad9554c1f7` | Lean 4.32.0-rc1 |
+| x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `1fb8cfc69363` | Lean 4.32.0-rc1 |
 | Clight | [eunomia-bpf/clean](https://github.com/eunomia-bpf/clean), `external/clean/export` | `123f7f7767e2` | Lean 4.32.1 |
 
 `make -C kprog/formal mature` builds the migration Lake package on Lean 4.35.0,
@@ -79,10 +79,32 @@ The wire checks compare their independent expected masks as data, then allow
 only ISA-undefined flag/register bits to vary. All other physical state, memory,
 faults and complete event prefixes remain compared. Register-indexed memory BT
 now records the fork's selected-byte read; its immediate form retains the word
-read. Reconciling that observation with the old C is M5 work. REP (including
-address32 and source segments), RET imm16, LEAVE and UD2 remain local M3 work,
-as do provenance integration and the x86 Sail comparison. These component
+read. Reconciling that observation with the old C is M5 work. At that step, REP (including
+address32 and source segments), RET imm16, LEAVE and UD2 still awaited migration,
+along with provenance integration and the x86 Sail comparison. These component
 checks are not whole-package acceptance or migrated O1/O2/O4 counts.
+
+REP MOVS/STOS now also use the fork (`m3-x86-rep`). Its shared
+`StringContext` carries address32 and the resolved source base into both
+numerical execution and checked access. The native wrapper composes exactly
+the input RCX/ECX iterations plus the fork's zero-count completion step;
+it has no element-copy, stride or counter-decrement interpreter. Each
+iteration rematerializes current memory, so overlaps see preceding writes.
+Completed iterations and read prefixes survive faults; address32 entry
+normalization remains visible even at zero count or the first fault.
+
+The existing REP suite now covers STOS as well: 1360 hardware cases, 80 actual
+restart faults and 2150 full-state transitions pass, including counts above 64,
+maximal-count first faults, source segments, arbitrary initialization and
+wrapping. Original noncanonical maximal-count inputs remain, with the fork's
+canonicality-before-permission fault category. The previous 112704 x86 cases
+and base regressions pass again on the same executable. Fork `1fb8cfc69363`
+adds a 512-case prefix/access/frame matrix and preserves every prior checked-
+access case; all pass with the reference in 191 Lake jobs. The stopped-state law
+now covers arbitrary contexts, and
+two existing REP proofs explicitly unfold the default context without changing
+their statements. Raw attempts are in `/workspaces/kprog-raw/formal/m3-x86-rep`.
+RET imm16, LEAVE/UD2, provenance and x86 Sail integration still remain M3 work.
 
 AArch64 now stores the full LNSym `ArmState` in its thin native wrapper.
 The original native word is decoded by LNSym and loaded at the input PC;
