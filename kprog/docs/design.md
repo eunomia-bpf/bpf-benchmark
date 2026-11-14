@@ -21,7 +21,7 @@ corpus、micro 套件和测量基础设施),但用不同的设计和实现解决
 |---|---|---|---|---|
 | 1 | **Speculative eBPF optimization**(投机式 eBPF 优化) | 已加载的 eBPF 程序错失了那些只有在程序上线后才可见的优化机会(map 内容稳定下来、分支 profile 浮现、helper 调用模式显现)。 | 纯用户态工具:观察运行中的程序,施加 BPF-to-BPF 重写 pass(`map_inline`、`const_prop`、`dce`、`bounds_check_merge`、`branch_flip` 等),再用 stock 内核的原子或近原子 attach 更新机制换入优化后的候选程序。 | 接近零。 |
 | 2 | **Kinsn** | eBPF 指令集离硬件太远,无法表达若干 native 等价的优化(rotate、conditional select、BMI 位域提取、BLS 指令、prefetch)。 | 一个新的 OS 抽象:内核定义的双语义指令,以 kfunc 机制的 `KF_KINSN` 特化形式实现。verifier 把一个声明式 effect(`model_call` → `bpf_kinsn_effect`)施加到它的抽象状态上,JIT 则分派到内核模块提供的、按架构区分的 `emit_x86()` / `emit_arm64()` 回调。用户态优化器(`bpfopt`)负责识别候选模式。 | kinsn 框架 patch + 各架构模块,TCB 增长但有界。 |
-| 3 | **NativeBPF**(本文档) | 内核扩展被"安全 × 高效"三难逼着二选一:模块快但不安全、eBPF 安全但有 codegen 惩罚、Rust 快但安全靠信任编译器而非独立验证。如何同时拿到 native 性能 + 对不可信作者也成立的独立安全? | 用 eBPF C 写一个目标 ISA 的忠实解释器。针对某个具体目标程序特化,把解释器坍缩成 straight-line eBPF,**交给 stock eBPF verifier 做它平常那套安全分析**。**verifier 接受后直接裸跑 native P;那段 eBPF 只是被分析的对象,从不执行,无 lowering。** | 接近零(执行 native P 的路径除外)。 |
+| 3 | **NativeBPF**(本文档) | 内核扩展被"安全 × 高效"三难逼着二选一:模块快但不安全、eBPF 安全但有 codegen 惩罚、Rust 快但安全靠信任编译器而非独立验证。如何同时拿到 native 性能 + 对不可信作者也成立的独立安全? | 用 eBPF C 写一个目标 ISA 的忠实解释器。针对某个具体目标程序特化,把解释器坍缩成 straight-line eBPF,**交给 stock eBPF verifier 做它平常那套安全分析**。**verifier 接受后,P 经链接时优化(LTO)成原生代码执行;那段 eBPF 只是被分析的对象,从不执行。** | 接近零(执行原生代码的路径与 LTO 除外)。 |
 
 这三者不是同一个设计的递进版本。每个各自挑了一个不同的问题、一个在 trust /
 内核暴露面 / 覆盖面空间里不同的位置。本文档讲的是 idea #3。idea #1 在
@@ -70,10 +70,10 @@ extensions**。它的天然战场和 eBPF 相同(多租户、跑不可信扩展)
 NativeBPF 把 **stock eBPF verifier 复用成 native 代码的现成安全检查器(safety oracle)**:
 用一个目标 ISA 的**忠实解释器 `I`**(不插任何检查的纯翻译器),让 verifier 对"`I` 跑目标
 程序 P 的过程"跑它平常那套 abstract-interpretation 安全分析。**verifier 接受 = 它确证了
-"P 在 eBPF 内存安全策略下没问题"。然后内核直接裸跑原生 P 本身。**
+"P 在 eBPF 内存安全策略下没问题"。然后 P 经链接时优化(LTO)成原生代码,由内核直接执行。**
 
-**关键:那段 eBPF 只是被 verifier 分析的对象,不是被执行的东西。整条路径没有 lowering ——
-不把 P 翻译成 eBPF 再跑、也不 JIT eBPF 回 native。被执行的是未经改动的 native P。**
+**关键:那段 eBPF 只是被 verifier 分析的对象,不是被执行的东西。P 只在验证里
+表示成 eBPF。被执行的是被检查过的那份程序经链接时优化(LTO)得到的原生代码(见[编译流水线](#编译流水线))。**
 
 ```text
                 ┌─ 验证侧(只在 load / 验证期):
@@ -82,15 +82,16 @@ target P ───────┤     → 把 "I 跑 P" 表示成 verifier 可�
                 │     → stock eBPF verifier 跑它平常的安全分析(abstract interpretation)
                 │     → verifier 接受 = 确证 P 内存安全
                 │
-                └─ 执行侧(运行期):
-                      → 直接执行原生 P            ← 无 eBPF 执行,无 JIT-from-eBPF,无 lowering
+                └─ 执行侧(装载后、运行期):
+                      → 链接时优化(LTO):绑定并内联 map 查找和 helper,整体再优化
+                      → 直接执行原生代码          ← eBPF 只被分析
 ```
 
 > **机制提示(非本质,属可行性手段)**:通用解释器有无界循环,直接喂 verifier 过不了。
 > 怎么把"`I` 跑 P"变成 verifier 可处理的直线 eBPF —— 靠**部分求值 / 特化**(把 P 当静态
 > 输入,clang 常量传播把解释循环展开成直线)。这是让方案可行的工程技术,细节见
 > [机制](#mechanism),不是 idea 的概念核心。概念核心只有一句:**复用 eBPF verifier 当
-> native 的安全检查器,忠实解释器搭桥,裸跑 native。**
+> native 的安全检查器,忠实解释器搭桥,LTO 后跑 native。**
 
 > **关于 PCC 的措辞**:本 idea **不是** proof-carrying code —— 没有任何东西携带一份显式
 > proof 证书,verifier 也不是在校验证书,而是用自己的 abstract interpretation **推断**
@@ -103,14 +104,14 @@ target P ───────┤     → 把 "I 跑 P" 表示成 verifier 可�
 NativeBPF reuses the stock eBPF verifier as an off-the-shelf safety checker for
 native code: a once-verified, faithful ISA interpreter — specialized to the target
 program — turns "is P safe?" into an eBPF program that the verifier accepts or
-rejects via its ordinary abstract-interpretation analysis. The native program P
-itself then runs directly; the eBPF is only the analyzed artifact, never executed.
+rejects via its ordinary abstract-interpretation analysis. The checked program
+then runs as native code after link-time optimization; the eBPF is only the analyzed artifact, never executed.
 (Nothing carries an explicit proof and the verifier checks no certificate — this
 is not proof-carrying code; see Related Work.)
 ```
 
 用户向内核提交的是 native 程序 P(连同其特化解释器,供 verifier 分析)。verifier 接受后,
-**内核直接裸跑 P**;eBPF 全程不参与执行。
+**P 经链接时优化(LTO)成原生代码,由内核直接执行**;eBPF 全程只被分析。
 
 这个 idea 内部有两种生成"供 verifier 分析的 eBPF"的策略:
 
@@ -121,7 +122,26 @@ is not proof-carrying code; see Related Work.)
 - **NativeBPF-in-eBPF(JIT 变体)**:用 C 写一个 native→eBPF 的显式翻译器,编译成
   eBPF,离线对 P emit 出供 verifier 分析的 eBPF。翻译器只需验证一次。两个变体的 trust
   模型与 safety transfer 论证完全相同,区别只在于"特化"由 clang 隐式做(simulator 变体)
-  还是由显式 emitter 做(JIT 变体)。**两个变体的执行侧都一样 —— 跑 native P,不跑 eBPF。**
+  还是由显式 emitter 做(JIT 变体)。**两个变体的执行侧都一样 —— 跑 LTO 后的原生代码,eBPF 只被分析。**
+
+## 编译流水线
+
+运营者 2026-11-14:"应该是先优化, 再验证优化后的那一份, 再优化, 再链接时优化.""比如 inline map / helper 这个就是链接""这两个都叫做链接时优化. 没有额外的 受信改写, 只有 LTO""都叫做 LTO""改进去"
+
+NativeBPF 按内核自己的顺序处理一个扩展。内核里,verifier 先检查字节码,检查通过后在装载时补全并翻译:`do_misc_fixups` 把 array/hash 的 map 查找和部分 helper 内联成直接访存,JIT 翻译成机器码。NativeBPF 同样三步:
+
+1. **生成时优化**:应用的原样源码用正常的编译 flag 编成原生程序 P。产出者是谁都可以,结果交给第 2 步检查。
+2. **验证**:受保护的 service 把忠实解释器 `I` 特化到 P,得到一份 C 源码(sim C,P 的指令和冻结的 .rodata 都是 `static const`),编成直线 eBPF `B_{I,P}`,交 stock verifier 检查。
+3. **链接时优化(LTO)**:verifier 接受后,对同一份被检查过的程序做链接和整体优化:链接器绑定 map 地址、helper 和重定位,就地内联 map 查找和 helper(对应 `do_misc_fixups`),折叠冻结的 .rodata,编译器整体优化后编成原生代码(对应 JIT)。
+
+验证之后对代码的全部变换就是 LTO。执行的代码来自第 2 步被检查过的同一份程序;verify(B) 与 faithful(I,P) 给出 P 安全(见[安全性论证](#安全性论证)),LTO 保持语义,所以执行的原生代码同样安全。LTO 的链接器和编译器在 TCB 里,地位对应普通 eBPF 在验证之后信任的 `do_misc_fixups` 和 JIT。
+
+两种配置并存,由运行时开关选择,评估分别报告:
+
+- **LTO 配置(checked-sim-c)**:第 3 步拿被检查过的 sim C 做 LTO,map/helper 内联之后由编译器跨 helper 边界整体优化,再编成原生代码执行。
+- **直接原生配置**:执行 P 的机器码;LTO 由链接器直接在机器码上完成(绑定重定位,array/percpu 查找内联,hash 族改成直接调用)。这条路径保留作为对照。
+
+优化只在两处加:第 1 步的编译 flag,第 3 步的 LTO。
 
 ## 它是什么、不是什么
 
@@ -146,15 +166,15 @@ NativeBPF(不是 PCC):
   native P + 已验证的忠实解释器 I(特化到 P → 一段直线 eBPF,作为被分析对象)
     -> stock eBPF verifier 跑它平常的 abstract interpretation(推断,非校验证书)
     -> verifier 接受 = 确证 P 内存安全
-    -> 裸跑 native P              ← 直接跑 native,eBPF 不参与执行
+    -> 链接时优化(LTO)后跑原生代码  ← eBPF 只被分析
 ```
 
 **它不是"先把 P 翻译成 eBPF、再 JIT 回 native 来跑"。** eBPF 全程只是被 verifier 分析的
-对象;被执行的始终是未经改动的原生 P,没有任何 lowering 往返。(早期文档曾把它写成"执行
+对象;被执行的是被检查过的程序经 LTO 得到的原生代码,eBPF 只出现在验证里。(早期文档曾把它写成"执行
 eBPF-JIT 的产物"——那是错的:那样会白白背上 eBPF codegen 的性能惩罚,跑 native 的全部
 意义就没了。)
 
-它也不是"相信我,这段 native blob 是安全的"。native P 之所以能裸跑,是因为 verifier
+它也不是"相信我,这段 native blob 是安全的"。这份原生代码之所以能执行,是因为 verifier
 对"忠实解释器跑 P 的过程"的抽象解释**确证**了 P 的每一次内存访问都在 eBPF 安全策略之内
 (见 [安全性论证](#safety-argument));分析不过就拒绝,绝不裸跑。
 
@@ -194,11 +214,11 @@ Kinsn 覆盖的是"普通 eBPF 表达不好的少数几种模式"。NativeBPF �
 3. 内核 eBPF verifier 看到的是一个对 verifier 可处理的 BPF 程序:没有无界循环,没有
    对运行时可变 opcode 的间接 dispatch,只是一长串小小的 handler 体。
 4. **verifier 抽象解释这段 eBPF —— 它接受,就等于确证了"忠实解释器跑 P 的整个过程"
-   内存安全。这段 eBPF 的全部用途就是被分析。它在此之后不再被执行:运行期直接裸跑原生 P。**
+   内存安全。这段 eBPF 的全部用途就是被分析。它在此之后不再被执行:同一份特化后的 C 经链接时优化(LTO)编成原生代码,运行期执行这份代码。**
 
 这里没有"运行时 simulator"也没有"运行时 JIT" —— 特化只在验证期发生一次,产物只喂给
 verifier 做安全分析。simulator 是语义规格说明;verifier 看到的产物是它针对单个程序 P 的
-特化(被分析对象)。被执行的永远是 native P。
+特化(被分析对象)。被执行的是这份特化经 LTO 得到的原生代码。
 
 ### 为什么 verifier 会接受它
 
@@ -216,7 +236,7 @@ verifier 做安全分析。simulator 是语义规格说明;verifier 看到的产
 
 ### 安全性论证
 
-安全性通过一个 refinement(精化)论证,从 eBPF verifier **传递到裸跑的 native P**:
+安全性通过一个 refinement(精化)论证,从 eBPF verifier **传递到执行的原生代码**:
 
 ```text
 target native program P
@@ -224,12 +244,13 @@ target native program P
   -> result is eBPF program B_{I,P}   （= 供 verifier 分析的对象,从不执行)
   -> verifier accepts B_{I,P}         （= 证明 "I 跑 P" 内存安全)
   -> 由"I 忠实等价于 ISA 语义" => P 本身内存安全
-  -> 内核裸跑 native P
+  -> 链接时优化(LTO):链接、内联 map/helper、整体优化,语义不变
+  -> 内核执行 LTO 产出的原生代码
 ```
 
-**被执行的是原始目标二进制 `P`,不是 `B_{I,P}`。** `B_{I,P}` 永远不被执行 —— 它只是
+**被执行的是被检查过的程序经 LTO 得到的原生代码,不是 `B_{I,P}`。** `B_{I,P}` 永远不被执行 —— 它只是
 verifier 用来得出"P 安全"这一结论的被分析对象。验证期之后 eBPF 就退场,运行期 CPU 上跑的
-就是 P。
+是这份原生代码,它与 P 语义相同。
 
 为什么 verifier 接受 `B_{I,P}` 能证明 `P` 安全?**因为 `I` 是一个不插任何检查的纯忠实
 翻译器。** `P` 里的越界等不安全行为无法藏在 simulator 抽象背后:如果 `P` 越过 packet
@@ -257,16 +278,18 @@ verifier 友好的形式(PC dispatch)。其它 verifier 无法直接建模的指
 **clang 编译 `I` 不是新增 TCB。** `I` 是一个写一次、固定、每 ISA 一份的可信组件,地位
 等同于内核的一部分;编译它落在"信任工具链编译内核 / verifier 自身"这份**已经普遍预设**
 的信任里。注意普通 eBPF 的安全也不来自信任 clang —— 来自 verifier 重查字节码;这里执行的
-是裸 native P,而 `I` 作为可信代码被编译,与内核被 gcc/clang 编译同属一类信任,不是新项。
+是 LTO 产出的原生代码,而 `I` 作为可信代码被编译,与内核被 gcc/clang 编译同属一类信任,不是新项。
+
+**LTO 的链接器和编译器**:验证之后对代码的全部变换就是 LTO(见[编译流水线](#编译流水线))。它们在 TCB 里,地位对应普通 eBPF 在验证之后信任的 `do_misc_fixups` 和 JIT,替换了普通 eBPF 的那一层;净增项仍只有 `I`。
 
 ### 为什么"simulator"在运行时根本不存在
 
 朴素的误解:这不过是个软件 simulator,会很慢。
 
-更正:**simulator 在运行时根本不被执行。** 它只是验证期的一个**部分求值**对象(Futamura
+更正:**通用 simulator 的解释循环在运行时根本不存在。** 它只是验证期的一个**部分求值**对象(Futamura
 第一投影:把解释器特化到程序 = 得到对该程序的编译产物 / 此处是供 verifier 分析的直线 eBPF)。`I` 的特化残差
-是直线 eBPF,**唯一的消费者是 verifier**;它不被 JIT、不被运行。运行期 CPU 上跑的是原生
-`P`,因此性能就是 native 性能 —— 这正是相对"跑 eBPF/eBPF-JIT 产物"路线的根本收益:**不
+有两个去处:编成直线 eBPF 交 verifier 分析,这份 eBPF 从不运行;同一份特化后的 C 经链接时优化(LTO)编成原生代码运行。
+特化已经展开掉解释循环,LTO 产物里留下的是 P 本身的计算,因此性能就是 native 性能 —— 这正是相对"跑 eBPF/eBPF-JIT 产物"路线的根本收益:**不
 背 eBPF codegen 惩罚(10 寄存器、byte-recompose 等)。** "simulator" 纯粹是供 verifier
 做安全分析的语义锚点,不是任何运行时形态。
 
@@ -286,6 +309,8 @@ verifier 要求每个调用都走它的 helper 或 kfunc 表。
 
 tail call、exit 以及按 program 类型区分的返回值约定,同样在特化期 lower,各自使用现有
 的 eBPF 惯用法。
+
+验证之后,map 查找和 helper 调用在链接时优化(LTO)里绑定并内联(见[编译流水线](#编译流水线)),对应内核在验证之后由 `do_misc_fixups` 做的内联。
 
 ### 寄存器文件与栈
 
@@ -369,7 +394,7 @@ SCALAR 类型,只在真正执行指针类型操作的 handler 内部才把指针
 特化 simulator,并验证(a)clang 产出一个无 dispatch 的直线 eBPF,(b)内核 verifier
 接受它(= 确证 P 安全),(c)构造一个会越界的 P,确认它产出的 eBPF 被 verifier
 **拒绝**(验证忠实性:不安全的 P 必须无法通过分析)。注意 PoC 不需要执行那段 eBPF ——
-它只是被分析对象;真正要跑的是 native P。
+它只是被分析对象;真正要跑的是 LTO 后的原生代码。
 
 ### NativeBPF-In-eBPF 变体
 
@@ -399,14 +424,14 @@ idea #3 内部的另一条路是:用 C 写一个 native-to-eBPF JIT,把这个 JI
 预期的安全性主张是:
 
 ```text
-原生程序 P 在 eBPF 的内存 / 指针 / helper / 控制流策略下是安全的(因而可裸跑),
+原生程序 P 在 eBPF 的内存 / 指针 / helper / 控制流策略下是安全的(因而它的 LTO 产物可执行),
 当且仅当 stock eBPF verifier 接受 B_{I,P}(即把忠实解释器 I 特化到 P 的产物),
 且 I 是 native 语义到 verifier 已检查的同一批指针类型操作的、不插任何检查的 1:1 忠实翻译。
 ```
 
-在本模型下,内核不接受任意的 x86 或 arm64 blob:**裸跑 P 之所以安全,是因为 verifier
+在本模型下,内核不接受任意的 x86 或 arm64 blob:**执行 P 的 LTO 产物之所以安全,是因为 verifier
 对 `B_{I,P}` 的接受证明了 P 的每次访存都在 eBPF 安全策略内,而忠实等价把这份证明转移到了
-真正在 CPU 上执行的 P。** 注意 eBPF `B_{I,P}` 本身从不执行 —— 它只是被 verifier 分析的对象。
+P,语义不变的 LTO 再把它带到真正在 CPU 上执行的原生代码。** 注意 eBPF `B_{I,P}` 本身从不执行 —— 它只是被 verifier 分析的对象。
 
 用户或编译器都可以产出这份供 verifier 分析的 eBPF,但产出者在安全性上并不被信任。
 
@@ -421,23 +446,24 @@ idea #3 内部的另一条路是:用 C 写一个 native-to-eBPF JIT,把这个 JI
 - **clang 编译 `I`**:`I` 是固定的可信组件(地位等同内核的一部分),编译它落在"信任工具链
   编译内核/verifier 自身"这份**已经普遍预设**的信任里 —— 普通 eBPF 的安全也不来自信任
   clang(来自 verifier)。所以 clang **不是新增 TCB 项**。
-- **裸跑 native P 的执行路径**:内核本来就在跑 native;它不是独立的信任项。"proof 能否
+- **执行原生代码的路径**:内核本来就在跑 native;它不是独立的信任项。"proof 能否
   转移到裸跑的 P"这唯一的问题,**完全归结于上面那条 `I` 的忠实等价**。
-- **eBPF JIT**:不在 TCB 里(eBPF 从不执行)。
+- **eBPF JIT**:eBPF 从不执行;它在验证之后的位置由 LTO 的链接器和编译器接替,二者对应普通 eBPF 的 `do_misc_fixups` 和 JIT,属于普通 eBPF 本来就信任的那一层。
 
 对比经典 PCC(信任一份 per-program proof + 一个专用 checker),NativeBPF 把新增信任压缩成
 **一个 per-ISA、可一次性验证**的解释器 —— 这是它 TCB 论述上的核心优势。
 
 ## Safety Transfer 论证
 
-最强的安全性论证是一个 refinement(精化)论证。注意它的终点是**裸跑的 P**,不是 eBPF:
+最强的安全性论证是一个 refinement(精化)论证。注意它的终点是**执行的原生代码**,不是 eBPF:
 
 ```text
 native program P
   -> 把忠实解释器 I 特化到 P,得供 verifier 分析的 eBPF B = B_{I,P}
   -> verifier 接受 B          （证明 safe(I 跑 P))
   -> 忠实等价: B 的每个可观测访存/控制流 ≡ P 的对应行为(I 不插任何检查)
-  -> 内核裸跑 native P
+  -> 链接时优化(LTO),语义不变
+  -> 内核执行 LTO 产出的原生代码
 ```
 
 如果 verifier 证明了 `B` 安全,且忠实等价性表明 `B` 的每个可观测行为(访存、helper 调用、
@@ -446,6 +472,7 @@ native program P
 
 ```text
 safe(B) and B ≡ P faithfully  =>  safe(execute_native(P))
+safe(execute_native(P)) and LTO preserves semantics  =>  safe(execute_native(LTO(P)))
 ```
 
 `P` 不是因为某个独立的 NativeBPF 被验证过才安全 —— 它安全,是因为 verifier 证明了"忠实
@@ -519,6 +546,8 @@ load guest_mem[guest_addr]
 "运行侧"那一列是 P 裸跑时的真实机器状态 —— **没有 eBPF JIT、没有 stack-slot 寄存器文件**。
 `I` 的忠实性要求:证明侧对每个状态位的可观测操作,与运行侧 P 真实做的操作逐一对应,否则
 verifier 证的状态和 CPU 跑的状态对不上,safety transfer 断裂。
+
+LTO 配置下,运行侧是 LTO 产物的机器状态:寄存器分配由编译器决定,可观测行为(访存、helper 调用、控制流结果)与 P 相同;直接原生配置下,运行侧就是上表 P 的真实状态。
 
 ## Boundary Rules
 
@@ -690,9 +719,9 @@ unverified, eBPF is verified (against an untrusted producer) but pays a codegen
 penalty, and Rust-for-Linux is fast but its safety is compile-time and trusts the
 toolchain rather than independently checking an untrusted binary. NativeBPF hits
 the missing corner — native-code efficiency with eBPF-verifier safety that holds
-against an untrusted producer — by running the native extension directly while the
+against an untrusted producer — by running the checked native extension after link-time optimization while the
 stock eBPF verifier certifies it via a faithful, once-verified ISA simulator. The
-extension runs native (no eBPF execution, no lowering); the eBPF is only what the
+checked extension runs as native code after link-time optimization; the eBPF is only what the
 verifier analyzes.
 ```
 
@@ -706,7 +735,7 @@ Making Kernel Extensions Safe and Efficient with an eBPF Simulator
 
 - **主对比矩阵**:在同一组扩展上对比 eBPF / Rust-for-Linux / 裸内核模块 / NativeBPF,
   沿"性能(吞吐 / 延迟 / 指令数 / cache)× 安全(对不可信作者是否独立验证)× 表达力"摆位;
-- 性能就是 native x86/arm64(P 裸跑,无 eBPF 执行)——相同语义下**严格优于** eBPF-JIT 产物
+- 性能就是 native x86/arm64(LTO 后的原生代码,eBPF 只被分析)——相同语义下**严格优于** eBPF-JIT 产物
   (那 30–40% 差距是 idea #1 / llvmbpf 在追的),并接近裸模块 / Rust;
 - 安全:对不可信作者的独立 load-time 验证(模块没有、Rust 是编译器信任),并给出
   verifier 自然拒绝不忠实 / 不安全程序的失败案例;
@@ -738,15 +767,16 @@ Making Kernel Extensions Safe and Efficient with an eBPF Simulator
 因此最强的版本是保守的:
 
 ```text
-NativeBPF executes the user's native program P directly. The eBPF artifact is
-never executed — it is only what the verifier analyzes. A once-verified, faithful
+NativeBPF executes the user's native program P as native code after link-time
+optimization (LTO). The eBPF artifact is never executed — it is only what the verifier analyzes. A once-verified, faithful
 (no-sanitization) ISA interpreter, specialized to P, turns "is P memory-safe?"
 into an eBPF program that the stock eBPF verifier accepts or rejects via its
 ordinary abstract-interpretation analysis. Verifier acceptance, combined with the
 interpreter's faithful equivalence to the ISA, certifies that running P natively
 stays within eBPF's memory/pointer/control-flow policy. The eBPF verifier is
 reused as an off-the-shelf safety checker (not a proof checker — nothing is
-carried or certificate-checked); P runs with no lowering.
+carried or certificate-checked); after verification the only change to the code
+is LTO, which preserves its semantics.
 ```
 
 这正是它与传统 proof-carrying code、以及 kernel-ABI 变体(那个与 kinsn 重叠)二者的关键
