@@ -810,4 +810,3 @@
 - [ ] 公开文档（README、CONTRIBUTING、SECURITY，英文）和新 CI。
 - [ ] 安静窗口：内核合并，kinsn 和 kprog 拆成两个 submodule，全新环境构建验证。
 - [ ] 主树的 `corpus/driver.py`（冻结版）从 `runner/libs/rejit.py` 导入 `snapshot_app_maps`，主树的 `rejit.py` 已经改掉了这个函数，主树上 `make corpus` 在导入这一步就停下。计时目前用 `kprog/perf/may29-image` 从 9f3855f6f 读框架；主树框架要和冻结的 driver 重新对齐（运营者 2026-11-09："也要确保 benchmark framework 不能变化"）。
-
