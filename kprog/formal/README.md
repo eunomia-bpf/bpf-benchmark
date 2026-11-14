@@ -792,9 +792,10 @@ Their source-operation/token rows retain a separate6/6 raw count.
 M3 is replacing the local ISA definitions in
 [Reference/X86.lean](KProgFormal/Reference/X86.lean) and
 [Reference/AArch64.lean](KProgFormal/Reference/AArch64.lean) with bindings over
-the external steps. AArch64 and the migrated x86 families above already use
-that route; remaining local x86 families and the old proof counts below are
-pending migration.
+the external steps. All canonical AArch64 and x86 numerical/control execution
+now uses those steps, including complete REP composition. The provenance
+projection and all old handler proof counts remain pending their stated
+migration; the historical handler claims below are not a new M5 acceptance.
 Shared [native memory, permissions, initialization and ordered effects/faults](KProgFormal/Reference/Memory.lean)
 form the platform view rather than a second numerical ISA. [ReferenceMain.lean](ReferenceMain.lean) executes
 these same definitions through JSON for hardware and artifact comparisons.
@@ -807,6 +808,29 @@ records63 agreeing operation labels and four ANDN/BZHI model-stopped labels
 in the current selected comparison. Historical source epochs retain their observations. ACL28.7 retains72 memory-SHIFTX PC-1 observations
 with matching GPR/flags/XMM/memory, plus48 REP element/whole-step differences.
 Original source/certificate diagnostics and separate CPU evidence remain recorded.
+
+The maintained [x86 Sail comparison](tools/compare_sail_x86.py) also replays
+fresh x86lean execution against the pinned selected register and memory/control
+archive epochs. On 2026-11-14 all5052 requests completed:4524 agree,480 retain
+Sail's model-stopped outcome,48 retain the recorded REP difference. Register
+and memory cohorts stay separate (1692=1464+228;3360=3060+252+48). Every modeled
+GPR, PC and defined flag is compared; the fixed cohort also compares all512
+mapped bytes and the exact ordered data-byte read/write values. The comparator
+refuses changed observation masks and changed REP output/trace rather than
+classifying from the old status alone. Nine comparator checks include deliberate
+GPR/flag/PC/memory/trace/payload corruption and a changed REP frame. Raw requests,
+outputs, source/ELF/archive/payload hashes and cohort summaries are retained at
+`/workspaces/kprog-raw/formal/m3-x86-sail`. The executable SHA256 remains
+`00b2765fd68c811079d3865fd5b1ce58078d633a109cabb15307bcf51d6bbcc1`.
+Run from this directory with `python3 tools/compare_sail_x86.py --archive
+../results/kprog_verification_20261107/reference-x86-sail.log.gz --output
+/workspaces/kprog-raw/formal/NEW-OUTPUT` (one shell command). Its original
+`--model` mode is retained. These are archived Sail observations compared with
+a fresh fork executable, **not a live Sail rerun**; the old temporary model
+binary is absent. Stopped cases are not agreements. REP keeps the documented
+first-element/whole-instruction and pinned F3/ZF disagreement; no fabricated
+Sail completion is substituted. ARM's maintained archived ASL comparison above
+also remains distinct from a live model execution.
 
 Handler/dispatcher and specialized-token laws compose modeled registers,
 PC, ordered memory effects, faults and defined architectural outputs under
