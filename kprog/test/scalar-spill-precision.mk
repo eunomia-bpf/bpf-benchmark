@@ -11,7 +11,11 @@ REPLAY_BUILD ?= /var/tmp/kprog-tmp/perf/retained-proof-replay
 BACKEND_ARGS ?=
 CONTEXT_BUILD ?= /var/tmp/kprog-tmp/perf/context-loads
 
-.PHONY: build run analyze codegen whole-word replay values-build values-run backend-check checked-corpus context-build context-run
+.PHONY: build run analyze codegen whole-word replay values-build values-run backend-check checked-corpus context-build context-run context-replay
+context-replay:
+	install -d $(OUTPUT) $(CONTEXT_BUILD)
+	taskset -c 19 prlimit --as=25769803776 -- python3 $(ROOT)/kprog/test/replay_context_compiler.py --archive $(CONTEXT_ARCHIVE) --build $(CONTEXT_BUILD) --output $(OUTPUT) --tool $(CONTEXT_TOOL)
+
 context-build:
 	install -d $(OUTPUT) $(CONTEXT_BUILD)
 	taskset -c 18-19 clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I$(ROOT)/vendor/libbpf/include/uapi $(ROOT)/kprog/x86/packet_bounds_ir.cpp -o $(CONTEXT_BUILD)/packet-bounds $$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis support --system-libs)
