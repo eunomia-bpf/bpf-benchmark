@@ -903,6 +903,23 @@ Cilium compiler input differs only in initializer syntax; all allocated bytes
 and202 relocations remain equal. `make clight` passes. Evidence and the two
 entry typecheck failures remain in `/workspaces/kprog-raw/formal/m4-standard-c`.
 
+[c/Arm64Numeric.c](c/Arm64Numeric.c) now roots thirteen actual numeric bodies:
+ALU result, modifier, shift, bitfield, multiply/divide, extraction/reversal,
+unary, conditional select/negate, FMOV value/destination, immediate operand
+and ADRP tag selection. Each canonical header has a standard C output form;
+the existing expression facade uses that same body. Arithmetic, casts, operand
+evaluation and unsupported branches are unchanged. `make clight` exports the
+[thirteen Clight functions](KProgFormal/Clight/Arm64Numeric.lean); deterministic
+regeneration,230 component jobs and all1,038,547 existing UBSan oracle cases
+pass. Their native extraction objects retain all allocated bytes and203
+relocations; this is numeric-root parity, not whole-application ARM parity.
+All thirteen AST axiom queries retain only the standard three axioms.
+Raw evidence is in `/workspaces/kprog-raw/formal/m4-arm64-numeric`;
+`validation-2.json` corrects the initial receipt's baseline classification:
+eleven oracle binaries predate the first edit, while the last two are post-edit
+validation only. The complete native-object baseline predates every edit.
+These exports are not stateful dispatcher exports or M5 refinements.
+
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight
 handler exports, and matched OTel preprocessor expansion remain to do. Preserve
