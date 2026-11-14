@@ -61,6 +61,7 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-14 ~20:25 UTC: "不新建 worktree 结果一出来就提交, 有更改就提交 git, 但不能改论文 不许 revert 提交 都是我的原话. 我没说的不能收紧, 可以放宽 这个你自己斟酌一下, 可以按照我的意思来, 但是有可能你检查不完全导致出错, 自己判断, 要不还是不要放宽, 除非 blovk 了. 这些是要记录在 workspace 里面, 全部适用的"
 - 2026-11-14 ~20:58 UTC: "不新建 worktree, 不能 clone, 不能有多个编译产物"
 - 2026-11-14 ~23:41 UTC: "Katran 肯定要继续优化? 现在的情况是啥"
+- 2026-11-14 ~23:52 UTC: "Program body 70.3 74.7 肯定哪里不对. 肯定能有 40% 改进"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
