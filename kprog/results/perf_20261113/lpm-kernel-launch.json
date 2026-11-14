@@ -1,7 +1,7 @@
 {
   "recorded_at": "2026-11-14T08:55:10Z",
   "pid": 337492,
-  "status": "LAUNCHED_WITH_RESOURCE_DEPENDENCY_UNCOLLECTED_NO_POSTLAUNCH_POLLS",
+  "status": "SUPERSEDED_QUEUED_ONLY_BEFORE_ANY_MAKE_OR_GUEST",
   "source_commit": "f74381f47",
   "raw": "/workspaces/kprog-raw/perf/20261114-lpm-lto",
   "job": "/workspaces/kprog-raw/perf/20261114-lpm-lto/kernel-job",
@@ -67,5 +67,28 @@
     "writer_commit": "b0139ffbd",
     "sha256": "a69bf301169249bd027ec4c3946de369f255170f7906ab23735e0eab040dbee4"
   },
-  "scope": "Four actual LPM cases planned, no outcome observed. Same sole kernel/base/image, no canonical rebuild. Current service writer boundary consumed; model/header unchanged. Native program comes only after actual verification in checked configuration."
+  "scope": "Four actual LPM cases planned, no outcome observed. Same sole kernel/base/image, no canonical rebuild. Current service writer boundary consumed; model/header unchanged. Native program comes only after actual verification in checked configuration.",
+  "queue_revision": {
+    "recorded_at": "2026-11-14T09:06:46Z",
+    "proof": "/workspaces/kprog-raw/perf/20261114-lpm-lto/kernel-job/retired-queue.json",
+    "reason": "97266MiB MemAvailable;4GiB component can run after C3 timinglock release without waiting Tracee entire lifetime.",
+    "replacement": {
+      "pid": 342222,
+      "job": "/workspaces/kprog-raw/perf/20261114-lpm-lto/kernel-lock-ordered-job",
+      "output": "/workspaces/kprog-raw/perf/20261114-lpm-lto/kernel-lock-ordered",
+      "wait_pid": null,
+      "locks": [
+        "timing exclusive",
+        "image shared"
+      ],
+      "status": "LAUNCHED_LOCK_ORDERED_UNCOLLECTED_NO_POSTLAUNCH_POLLS",
+      "payload_and_fixture_unchanged": true
+    }
+  },
+  "combined_app_plans": {
+    "raw": "/workspaces/kprog-raw/perf/20261114-combined-lto-preflight",
+    "direct": "Existing probe-read-otel-timing target with RUNTIME_PROBE_PAYLOAD=LPM payload;3x180statsON/OFF and separate observer dirs.",
+    "checked": "Existing probe-read-otel-lto target with same payload override;1x10statsON wholeapp diagnosis, actual checked C/native afterverification. Large compiler retry333934 remains separate.",
+    "state": "DRYRUN0 only, no wholeapp queued/launched; wait for actual LPM component collection and resource ordering."
+  }
 }
