@@ -12,8 +12,8 @@
 #define KPROG_ABI_SKB_DATA_OFF 208LL
 #define KPROG_ABI_SKB_DATA_END_OFF 80LL
 
-#define KPROG_ABI_LOAD_TAG(KIND, OFFSET, SCALAR, PACKET, PACKET_END)         \
-	({                                                                 \
+#define KPROG_ABI_LOAD_TAG_INTO(OUTPUT, KIND, OFFSET, SCALAR, PACKET, PACKET_END)         \
+	do {                                                                 \
 		__u8 __kprog_abi_kind = (KIND);                            \
 		__s64 __kprog_abi_offset = (OFFSET);                       \
 		__u8 __kprog_abi_tag = (SCALAR);                           \
@@ -27,7 +27,11 @@
 		         (__kprog_abi_kind == KPROG_ABI_KIND_SKB &&        \
 		          __kprog_abi_offset == KPROG_ABI_SKB_DATA_END_OFF)) \
 			__kprog_abi_tag = (PACKET_END);                     \
-		__kprog_abi_tag;                                           \
-	})
+		(OUTPUT) = __kprog_abi_tag;                                           \
+	} while (0)
+#define KPROG_ABI_LOAD_TAG(KIND, OFFSET, SCALAR, PACKET, PACKET_END) \
+    ({ __u8 __kprog_address_result; \
+       KPROG_ABI_LOAD_TAG_INTO(__kprog_address_result, (KIND), (OFFSET), (SCALAR), (PACKET), (PACKET_END)); \
+       __kprog_address_result; })
 
 #endif

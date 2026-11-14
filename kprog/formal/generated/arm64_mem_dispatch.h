@@ -21,8 +21,8 @@
  * tag; WIDTH is the ARM64_WIDTH_* access code. Each predicate evaluates its
  * inputs and writes no NZCV.
  */
-#define KPROG_ARM64_MEM_READ_SRC(BASE_IS_SP, TAG, WIDTH)                    \
-	({                                                                 \
+#define KPROG_ARM64_MEM_READ_SRC_INTO(OUTPUT, BASE_IS_SP, TAG, WIDTH)                    \
+	do {                                                                 \
 		__u8 __kprog_a64_md_src;                                      \
 		if ((BASE_IS_SP) || (TAG) == ARM64_SIM_TAG_STACK)              \
 			__kprog_a64_md_src = KPROG_ARM64_MEM_SRC_STACK;            \
@@ -34,10 +34,14 @@
 			__kprog_a64_md_src = KPROG_ARM64_MEM_SRC_RELOC_PTR;              \
 		else                                                        \
 			__kprog_a64_md_src = KPROG_ARM64_MEM_SRC_NORMAL_LOAD;       \
-		__kprog_a64_md_src;                                         \
-	})
-#define KPROG_ARM64_MEM_READ_TAG(BASE_IS_SP, TAG, WIDTH)                    \
-	({                                                                 \
+		(OUTPUT) = __kprog_a64_md_src;                                         \
+	} while (0)
+#define KPROG_ARM64_MEM_READ_SRC(BASE_IS_SP, TAG, WIDTH) \
+    ({ __u8 __kprog_address_result; \
+       KPROG_ARM64_MEM_READ_SRC_INTO(__kprog_address_result, (BASE_IS_SP), (TAG), (WIDTH)); \
+       __kprog_address_result; })
+#define KPROG_ARM64_MEM_READ_TAG_INTO(OUTPUT, BASE_IS_SP, TAG, WIDTH)                    \
+	do {                                                                 \
 		__u8 __kprog_a64_md_tag;                                      \
 		if ((BASE_IS_SP) || (TAG) == ARM64_SIM_TAG_STACK)              \
 			__kprog_a64_md_tag = KPROG_ARM64_MEM_TAG_STACK;            \
@@ -49,6 +53,10 @@
 			__kprog_a64_md_tag = KPROG_ARM64_MEM_TAG_MAP_PTR;              \
 		else                                                        \
 			__kprog_a64_md_tag = KPROG_ARM64_MEM_TAG_SCALAR;          \
-		__kprog_a64_md_tag;                                         \
-	})
+		(OUTPUT) = __kprog_a64_md_tag;                                         \
+	} while (0)
+#define KPROG_ARM64_MEM_READ_TAG(BASE_IS_SP, TAG, WIDTH) \
+    ({ __u8 __kprog_address_result; \
+       KPROG_ARM64_MEM_READ_TAG_INTO(__kprog_address_result, (BASE_IS_SP), (TAG), (WIDTH)); \
+       __kprog_address_result; })
 #endif

@@ -14,8 +14,8 @@
  * evaluated exactly once and no NZCV is written. The result is the raw 64-bit
  * offset; the caller adds it to the base register.
  */
-#define KPROG_ARM64_MEM_OFFSET(PREPOST, HAS_INDEX, IMM, INDEX)              \
-	({ \
+#define KPROG_ARM64_MEM_OFFSET_INTO(OUTPUT, PREPOST, HAS_INDEX, IMM, INDEX)              \
+	do { \
 		__u64 __kprog_a64_mbo_imm = (IMM); \
 		__u64 __kprog_a64_mbo_index = (INDEX); \
 		int __kprog_a64_mbo_prepost = (PREPOST) ? 1 : 0; \
@@ -27,6 +27,10 @@
 		if (__kprog_a64_mbo_has_index) \
 			__kprog_a64_mbo_result = __kprog_a64_mbo_base + \
 				__kprog_a64_mbo_index; \
-		__kprog_a64_mbo_result; \
-	})
+		(OUTPUT) = __kprog_a64_mbo_result; \
+	} while (0)
+#define KPROG_ARM64_MEM_OFFSET(PREPOST, HAS_INDEX, IMM, INDEX) \
+    ({ __u64 __kprog_address_result; \
+       KPROG_ARM64_MEM_OFFSET_INTO(__kprog_address_result, (PREPOST), (HAS_INDEX), (IMM), (INDEX)); \
+       __kprog_address_result; })
 #endif

@@ -43,6 +43,8 @@ def main():
         parser.add_argument("--" + option, required=True)
     parser.add_argument("--also-header", action="append", default=[],
                         help="also replay a header directly included by --header")
+    parser.add_argument("--ir-pass", help="production LLVM IR pass applied before the BPF backend")
+    parser.add_argument("--objdump", help="record stage disassembly as raw diagnostic output")
     parser.add_argument("compiler", nargs=argparse.REMAINDER)
     args = parser.parse_args()
     compiler = args.compiler[1:] if args.compiler[:1] == ["--"] else args.compiler
@@ -95,6 +97,15 @@ def main():
         "include": directive, "recipe": "Replace at the actual include; retain every preceding define.",
     }, indent=2) + "\n")
     flags = compiler + ["-iquote", str(header.parent), "-iquote", str(source.parent)]
+    def compile_product(phase, unit):
+        if args.ir_pass:
+            ir = product.with_suffix(".bc")
+            run(phase + "-frontend", flags + ["-emit-llvm", "-c", str(unit), "-o", str(ir)])
+            run(phase + "-ir-pass", [args.ir_pass, str(ir), "-o", str(ir)])
+            run(phase + "-compile", flags + ["-c", str(ir), "-o", str(product)])
+        else:
+            run(phase + "-compile", flags + ["-c", str(unit), "-o", str(product)])
+
     observations = {}
     for phase, body in (("before", previous), ("after", header.read_text())):
         for path in nested:
@@ -112,9 +123,13 @@ def main():
         unit = (f'#line 1 "{source}"\n' + text[:position] + f'#line 1 "{header}"\n'
                 + body + f'\n#line {resume} "{source}"\n' + text[position + len(directive):])
         run(phase + "-preprocess", flags + ["-E", "-x", "c", "-", "-o", str(preprocessed)], unit)
-        run(phase + "-compile", flags + ["-c", str(preprocessed), "-o", str(product)])
+        compile_product(phase, preprocessed)
         observations[phase] = allocated(product)
-    run("normal-compile", flags + ["-c", str(source), "-o", str(product)])
+        if args.objdump:
+            run(phase + "-disassembly", [args.objdump, "-dr", str(product)])
+    compile_product("normal", source)
+    if args.objdump:
+        run("normal-disassembly", [args.objdump, "-dr", str(product)])
     before, after, normal = observations["before"], observations["after"], allocated(product)
     for phase, (sections, relocations) in (("before", before), ("after", after), ("normal", normal)):
         (output / f"{phase}-layout.json").write_text(json.dumps({

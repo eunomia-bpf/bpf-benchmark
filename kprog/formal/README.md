@@ -1103,6 +1103,37 @@ Clight memory to native addresses, initialization, volatile observations and
 ordered normal/fault outcomes remains a universal proof obligation. These access
 roots do not yet export the whole context/handler/fault chain or establish M5.
 
+[c/Arm64Addressing.c](c/Arm64Addressing.c) exports eight production consumers:
+modified register, memory offset, helper argument/context pointers, pre/post
+writeback, memory tag and payload recovery. They use the canonical numerical
+bodies and caller-owned register/cache/private storage, capacity/bias and live
+helper coordinates. Immediate suppression, lazy index/payload branches, raw ABI
+tags, invalid-register observations and nonboolean cache validity are retained.
+
+The new [oracle](oracles/test_arm64_addressing_host.c) exposed a pre-existing host
+C issue: ignored-register writeback computed an offset from null before ignoring
+the destination. The address primitive now uses existing wrapping pointer bits
+for host/Clight and keeps the original BPF pointer operand form. Invalid and zero
+address-word tests remain; source-body conversion and adapter equivalence still
+need their M5 proofs. An initial all-bits lowering changed the dynamic BPF fixture;
+the failure and disassembly remain, and isolation showed the operand form caused
+it. The final [dynamic fixture](oracles/arm64_addressing_compile.bpf.c) has identical
+allocated socket3856B and18 relocations, including runtime writeback flags.
+
+All245,843 coordinate/request/routing/frame/error cases pass on x86 and AArch64
+user-mode execution. Pre alignment faults preserve their input prefix/frame;
+relocation offsets reject; non-pointer payloads retain lazy index evaluation.
+Suppression, overbroad helper substitution, dropped payload and zero6 mutations
+fail. Existing modifier/offset/dispatch/helper/prepost/memory-token oracles pass.
+`make clight`,133 targeted component jobs and in-place deterministic exports pass
+with standard axioms only. Because the ABI selector is shared with x86, the actual
+matched Cilium pipeline was replayed too: code/data and202 relocations are exact.
+`compare_c_header.py --ir-pass` applies the production LLVM pass in place before
+the backend; optional `--objdump` retains stage disassembly in raw diagnostics.
+Raw evidence: `/workspaces/kprog-raw/formal/m4-arm64-addressing`. The complete
+context-read/fault chain, pointer/native-memory relation and full default-byte
+coverage remain open before M4/M5 acceptance.
+
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight
 handler exports and full default compiled-byte coverage remain to do. Preserve

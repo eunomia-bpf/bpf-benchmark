@@ -547,9 +547,15 @@ do { \
  * eleven modifiers and all four widths. ARM64_SIM_L_READ_REG is evaluated
  * exactly once.
  */
-#define ARM64_SIM_L_MOD_VALUE(REG, MOD, SHIFT, WIDTH)                       \
-	KPROG_ARM64_MOD_VALUE((MOD), ARM64_SIM_L_READ_REG(REG), (SHIFT),   \
-			      (WIDTH))
+#define ARM64_SIM_L_MOD_VALUE_INTO(OUTPUT, REG, MOD, SHIFT, WIDTH) \
+    do { __u64 __a64_modified_input; \
+         ARM64_SIM_L_READ_REG_INTO(__a64_modified_input, (REG)); \
+         KPROG_ARM64_MOD_VALUE_INTO((OUTPUT), (MOD), __a64_modified_input, (SHIFT), (WIDTH)); \
+    } while (0)
+#define ARM64_SIM_L_MOD_VALUE(REG, MOD, SHIFT, WIDTH) \
+    ({ __u64 __a64_modified_result; \
+       ARM64_SIM_L_MOD_VALUE_INTO(__a64_modified_result, (REG), (MOD), (SHIFT), (WIDTH)); \
+       __a64_modified_result; })
 
 /*
  * Multiply-family value (MADD/MSUB/MUL/UMULL/UDIV/UMULH/UMADDL/SMADDL). The
@@ -877,22 +883,37 @@ do { \
 
 /* Keep arena address formation inside its provenance branch. LLVM may
  * otherwise speculate fp + kernel_pointer before the verifier sees the tag. */
+#if defined(__COMPCERT__)
+#define ARM64_SIM_L_ADDRESS_OPACITY(VALUE) ((void)(VALUE))
+#else
+#define ARM64_SIM_L_ADDRESS_OPACITY(VALUE) asm volatile("" : "+r"(VALUE))
+#endif
+#define ARM64_SIM_L_HELPER_ARG_PTR_INTO(OUTPUT, REG) \
+    do { __u8 __a64_hap_tag; void *__a64_hap_ptr; \
+       ARM64_SIM_L_REG_TAG_INTO(__a64_hap_tag, (REG)); \
+       if (KPROG_ARM64_HELPER_ARG_PTR_BODY(__a64_hap_tag == ARM64_SIM_TAG_STACK) == KPROG_ARM64_HELPER_ARG_PTR_BODY_STACK_ARENA_PTR) { \
+           ARM64_SIM_L_READ_REG_PTR_INTO(__a64_hap_ptr, (REG)); \
+           __s64 __a64_hap_off = (__s64)(long)__a64_hap_ptr; \
+           ARM64_SIM_L_ADDRESS_OPACITY(__a64_hap_off); \
+           ARM64_SIM_L_STACK_PTR_INTO(__a64_hap_ptr, __a64_hap_off); \
+       } else { ARM64_SIM_L_READ_REG_PTR_INTO(__a64_hap_ptr, (REG)); } \
+       (OUTPUT) = __a64_hap_ptr; } while (0)
 #define ARM64_SIM_L_HELPER_ARG_PTR(REG) \
-    ({ void *__a64_hap_ptr; \
-       if (KPROG_ARM64_HELPER_ARG_PTR_BODY(ARM64_SIM_L_REG_TAG(REG) == ARM64_SIM_TAG_STACK) == KPROG_ARM64_HELPER_ARG_PTR_BODY_STACK_ARENA_PTR) { \
-           __s64 __a64_hap_off = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(REG); \
-           asm volatile("" : "+r"(__a64_hap_off)); \
-           __a64_hap_ptr = ARM64_SIM_L_STACK_PTR(__a64_hap_off); \
-       } else { __a64_hap_ptr = ARM64_SIM_L_READ_REG_PTR(REG); } \
-       __a64_hap_ptr; })
+    ({ void *__a64_hap_result; ARM64_SIM_L_HELPER_ARG_PTR_INTO(__a64_hap_result, (REG)); __a64_hap_result; })
 
 /* Only the proven expanded-context base denotes the original helper context.
  * Offset and arbitrary pointers retain their existing identity. */
-#define ARM64_SIM_L_HELPER_CTX_PTR(REG)                                  \
-	(ARM64_SIM_L_REG_TAG(REG) == ARM64_SIM_TAG_ABI ?                  \
-	 KPROG_ABI_HELPER_CONTEXT(ARM64_SIM_L_READ_REG_PTR(REG),          \
-		__a64_sim_helper_abi_base, __a64_sim_helper_ctx) :         \
-	 ARM64_SIM_L_HELPER_ARG_PTR(REG))
+#define ARM64_SIM_L_HELPER_CTX_PTR_INTO(OUTPUT, REG) \
+    do { __u8 __a64_hcp_tag; \
+         ARM64_SIM_L_REG_TAG_INTO(__a64_hcp_tag, (REG)); \
+         if (__a64_hcp_tag == ARM64_SIM_TAG_ABI) { \
+             void *__a64_hcp_pointer; \
+             ARM64_SIM_L_READ_REG_PTR_INTO(__a64_hcp_pointer, (REG)); \
+             (OUTPUT) = KPROG_ABI_HELPER_CONTEXT(__a64_hcp_pointer, __a64_sim_helper_abi_base, __a64_sim_helper_ctx); \
+         } else ARM64_SIM_L_HELPER_ARG_PTR_INTO((OUTPUT), (REG)); \
+    } while (0)
+#define ARM64_SIM_L_HELPER_CTX_PTR(REG) \
+    ({ void *__a64_hcp_result; ARM64_SIM_L_HELPER_CTX_PTR_INTO(__a64_hcp_result, (REG)); __a64_hcp_result; })
 
 #define ARM64_SIM_L_REFRESH_XDP_CONTEXT()                                \
 	do {                                                              \
@@ -965,24 +986,23 @@ typedef void *arm64_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
 #define ARM64_SIM_L_STORE_ADDR(ADDR, WIDTH, VALUE)                          \
 	KPROG_ARM64_STORE_BYTES((ADDR), (WIDTH), (VALUE))
 
-#define ARM64_SIM_L_MEM_BASE_OFF(AUX, INDEX, IMM)                           \
-	({                                                                 \
-		__u8 __a64_mbo_has_index = KPROG_ARM64_MEM_INDEX_PRESENT(INDEX);  \
-		__u8 __a64_mbo_isrc = KPROG_ARM64_MEM_INDEX_VALUE(        \
-			__a64_mbo_has_index);                             \
-		__s64 __a64_mbo_off = (__s64)KPROG_ARM64_MEM_OFFSET(      \
-			KPROG_ARM64_MEM_PREPOST_SUPPRESS(AUX),            \
-			__a64_mbo_has_index,                              \
-			(IMM),                                            \
-			(__a64_mbo_isrc                                   \
-				 == KPROG_ARM64_MEM_INDEX_VALUE_REGISTER  \
-				 ? ARM64_SIM_L_MOD_VALUE((INDEX),         \
-					ARM64_SIM_L_MOD(AUX),             \
-					ARM64_SIM_L_SHIFT(AUX),           \
-					ARM64_WIDTH_64)                   \
-				 : 0));                                   \
-		__a64_mbo_off;                                            \
-	})
+#define ARM64_SIM_L_MEM_BASE_OFF_INTO(OUTPUT, AUX, INDEX, IMM) \
+    do { \
+        __u8 __a64_mbo_has_index = KPROG_ARM64_MEM_INDEX_PRESENT(INDEX); \
+        __u8 __a64_mbo_isrc = KPROG_ARM64_MEM_INDEX_VALUE(__a64_mbo_has_index); \
+        __u64 __a64_mbo_imm = (IMM), __a64_mbo_index = 0, __a64_mbo_result; \
+        if (__a64_mbo_isrc == KPROG_ARM64_MEM_INDEX_VALUE_REGISTER) \
+            ARM64_SIM_L_MOD_VALUE_INTO(__a64_mbo_index, (INDEX), \
+                ARM64_SIM_L_MOD(AUX), ARM64_SIM_L_SHIFT(AUX), ARM64_WIDTH_64); \
+        KPROG_ARM64_MEM_OFFSET_INTO(__a64_mbo_result, \
+            KPROG_ARM64_MEM_PREPOST_SUPPRESS(AUX), __a64_mbo_has_index, \
+            __a64_mbo_imm, __a64_mbo_index); \
+        (OUTPUT) = (__s64)__a64_mbo_result; \
+    } while (0)
+#define ARM64_SIM_L_MEM_BASE_OFF(AUX, INDEX, IMM) \
+    ({ __s64 __a64_mbo_output; \
+       ARM64_SIM_L_MEM_BASE_OFF_INTO(__a64_mbo_output, (AUX), (INDEX), (IMM)); \
+       __a64_mbo_output; })
 
 /* The pre/post-indexed address writeback contract is a decode of the packed
  * memory-flag byte into which writeback a load/store performs. Both bodies
@@ -1001,10 +1021,13 @@ typedef void *arm64_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
 				ARM64_SIM_L_WRITE_REG_PTR_TAG(ARM64_SP,   \
 					(void *)(long)((__u64)__a64_sp + (__u64)__a64_l_pp), \
 					ARM64_SIM_TAG_STACK);                    \
-			else                                              \
-				ARM64_SIM_L_WRITE_REG_PTR_TAG((BASE),     \
-					(__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) + __a64_l_pp,\
-					ARM64_SIM_L_REG_TAG(BASE));       \
+			else { \
+                void *__a64_l_pp_pointer; __u8 __a64_l_pp_tag; \
+                ARM64_SIM_L_READ_REG_PTR_INTO(__a64_l_pp_pointer, (BASE)); \
+                ARM64_SIM_L_REG_TAG_INTO(__a64_l_pp_tag, (BASE)); \
+                ARM64_SIM_L_WRITE_REG_PTR_TAG((BASE), \
+                    KPROG_PTR_ADD64_NATIVE(__a64_l_pp_pointer, __a64_l_pp), __a64_l_pp_tag); \
+            } \
 		}                                                         \
 	} while (0)
 
@@ -1208,11 +1231,15 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 		__a64_mrd_value;                                          \
 	})
 
-#define ARM64_SIM_L_MEM_READ_TAG(BASE, INDEX, AUX, IMM, EXTRA, WIDTH)        \
-	({                                                                 \
-		__s64 __a64_mrt_off = ARM64_SIM_L_MEM_BASE_OFF((AUX), (INDEX), (IMM)) + (EXTRA);\
-		__u8 __a64_mrt_tag = ARM64_SIM_L_REG_TAG(BASE);          \
-		__u8 __a64_mrt_src = KPROG_ARM64_MEM_READ_TAG(           \
+#define ARM64_SIM_L_MEM_READ_TAG_INTO(OUTPUT, BASE, INDEX, AUX, IMM, EXTRA, WIDTH)        \
+	do {                                                                 \
+		__s64 __a64_mrt_off; \
+        ARM64_SIM_L_MEM_BASE_OFF_INTO(__a64_mrt_off, (AUX), (INDEX), (IMM)); \
+        __a64_mrt_off += (EXTRA);\
+		__u8 __a64_mrt_tag; \
+        ARM64_SIM_L_REG_TAG_INTO(__a64_mrt_tag, (BASE));          \
+		__u8 __a64_mrt_src; \
+        KPROG_ARM64_MEM_READ_TAG_INTO(__a64_mrt_src,            \
 			((BASE) == ARM64_SP), __a64_mrt_tag, (WIDTH));   \
 		__u8 __a64_mrt_value_tag;                                \
 		switch (__a64_mrt_src) {                                 \
@@ -1222,16 +1249,24 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 		__s64 __a64_mrt_base =                               \
 			(__a64_mrt_bsrc == KPROG_ARM64_MEM_BASE_SRC_SP_REGISTER)\
 				? __a64_sp                              \
-				: (__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);\
-			__a64_mrt_value_tag = ARM64_SIM_L_STACK_READ_TAG( \
+				: 0; \
+        if (__a64_mrt_bsrc != KPROG_ARM64_MEM_BASE_SRC_SP_REGISTER) { \
+            void *__a64_mrt_pointer; ARM64_SIM_L_READ_REG_PTR_INTO(__a64_mrt_pointer, (BASE)); \
+            __a64_mrt_base = (__s64)(long)__a64_mrt_pointer; }\
+			ARM64_SIM_L_STACK_READ_TAG_INTO(__a64_mrt_value_tag,  \
 				__a64_mrt_base + __a64_mrt_off, (WIDTH));\
 			break;                                             \
 		}                                                        \
 		case KPROG_ARM64_MEM_TAG_ABI:                            \
-			__a64_mrt_value_tag = __a64_sim_abi_kind == ARM64_SIM_ABI_KIND_RAW ? ARM64_SIM_TAG_ABI : KPROG_ABI_LOAD_TAG(          \
-				__a64_sim_abi_kind, ((__a64_sim_is_xdp || __a64_sim_abi_kind == KPROG_ABI_KIND_SKB) ? (__s64)((__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) - (__u8 *)(__a64_sim_is_xdp ? __a64_sim_helper_ctx : __a64_sim_helper_abi_base)) : 0) + __a64_mrt_off,           \
-				ARM64_SIM_TAG_SCALAR, ARM64_SIM_TAG_PACKET,   \
-				ARM64_SIM_TAG_PACKET_END);                    \
+            if (__a64_sim_abi_kind == ARM64_SIM_ABI_KIND_RAW) __a64_mrt_value_tag = ARM64_SIM_TAG_ABI; \
+            else { __s64 __a64_mrt_context_off = 0; \
+                if (__a64_sim_is_xdp || __a64_sim_abi_kind == KPROG_ABI_KIND_SKB) { \
+                    void *__a64_mrt_pointer; ARM64_SIM_L_READ_REG_PTR_INTO(__a64_mrt_pointer, (BASE)); \
+                    __a64_mrt_context_off = (__s64)((__u8 *)__a64_mrt_pointer - (__u8 *)(__a64_sim_is_xdp ? __a64_sim_helper_ctx : __a64_sim_helper_abi_base)); \
+                } \
+                KPROG_ABI_LOAD_TAG_INTO(__a64_mrt_value_tag, __a64_sim_abi_kind, __a64_mrt_context_off + __a64_mrt_off, \
+                    ARM64_SIM_TAG_SCALAR, ARM64_SIM_TAG_PACKET, ARM64_SIM_TAG_PACKET_END); \
+            } \
 			break;                                             \
 		case KPROG_ARM64_MEM_TAG_MAP_PTR:                        \
 			if (__a64_mrt_off != 0)                            \
@@ -1242,23 +1277,33 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			__a64_mrt_value_tag = ARM64_SIM_TAG_SCALAR;        \
 			break;                                             \
 		}                                                        \
-		__a64_mrt_value_tag;                                     \
-	})
+		(OUTPUT) = __a64_mrt_value_tag;                                     \
+	} while (0)
+#define ARM64_SIM_L_MEM_READ_TAG(BASE, INDEX, AUX, IMM, EXTRA, WIDTH) \
+    ({ __u8 __a64_metadata_result; \
+       ARM64_SIM_L_MEM_READ_TAG_INTO(__a64_metadata_result, (BASE), (INDEX), (AUX), (IMM), (EXTRA), (WIDTH)); \
+       __a64_metadata_result; })
 /* Ghost payloads recover relative addressing after a whole pointer spill.
  * Guest bytes remain materialized, so byte/word/vector observations see the
  * exact native address. Partial writes clear the corresponding tag first.
  */
-#define ARM64_SIM_L_MEM_PAYLOAD(BASE, INDEX, AUX, IMM, EXTRA, VALUE, TAG)   \
-	({ __u64 __a64_mp_value = (VALUE); __u8 __a64_mp_tag = (TAG);     \
+#define ARM64_SIM_L_MEM_PAYLOAD_INTO(OUTPUT, BASE, INDEX, AUX, IMM, EXTRA, VALUE, TAG)   \
+	do { __u64 __a64_mp_value = (VALUE); __u8 __a64_mp_tag = (TAG);     \
 	   switch (__a64_mp_tag) { \
 	   case ARM64_SIM_TAG_STACK: case ARM64_SIM_TAG_RETURN: { \
-		__s64 __a64_mp_base = KPROG_ARM64_MEM_BASE_SRC((BASE) == ARM64_SP) == KPROG_ARM64_MEM_BASE_SRC_SP_REGISTER ? __a64_sp :      \
-			(__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);        \
-		__s64 __a64_mp_off = ARM64_SIM_L_MEM_BASE_OFF((AUX), (INDEX), (IMM)) + (EXTRA); \
+		__s64 __a64_mp_base; \
+        if (KPROG_ARM64_MEM_BASE_SRC((BASE) == ARM64_SP) == KPROG_ARM64_MEM_BASE_SRC_SP_REGISTER) __a64_mp_base = __a64_sp; \
+        else { void *__a64_mp_pointer; ARM64_SIM_L_READ_REG_PTR_INTO(__a64_mp_pointer, (BASE)); __a64_mp_base = (__s64)(long)__a64_mp_pointer; }        \
+		__s64 __a64_mp_off; \
+        ARM64_SIM_L_MEM_BASE_OFF_INTO(__a64_mp_off, (AUX), (INDEX), (IMM)); __a64_mp_off += (EXTRA); \
 		__u64 __a64_mp_at = ARM64_SIM_L_STACK_INDEX(__a64_mp_base + __a64_mp_off); \
 		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_mp_at, ARM64_WIDTH_64);                      \
 		__a64_mp_value = ARM64_SIM_L_STACK_PAYLOAD_LOAD(KPROG_ARM64_STACK_WORD_INDEX(__a64_mp_at)); \
-	   break; } default: break; } __a64_mp_value; })
+	   break; } default: break; } (OUTPUT) = __a64_mp_value; } while (0)
+#define ARM64_SIM_L_MEM_PAYLOAD(BASE, INDEX, AUX, IMM, EXTRA, VALUE, TAG) \
+    ({ __u64 __a64_metadata_result; \
+       ARM64_SIM_L_MEM_PAYLOAD_INTO(__a64_metadata_result, (BASE), (INDEX), (AUX), (IMM), (EXTRA), (VALUE), (TAG)); \
+       __a64_metadata_result; })
 
 #define ARM64_SIM_L_MEM_WRITE(BASE, INDEX, AUX, IMM, EXTRA, WIDTH, VALUE, TAG)\
 	do {                                                               \
