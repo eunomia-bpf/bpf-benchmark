@@ -1,0 +1,453 @@
+{
+  "recorded_at": "2026-11-14T04:40:49.311148+00:00",
+  "protocol_commit": "228289729,f367ce365,48af2849d",
+  "raw": "/workspaces/kprog-raw/perf/20261114-link-audit-otel",
+  "inputs": [
+    {
+      "path": "kprog/results/perf_20261113/link-audit-otel-launch.json",
+      "sha256": "8b5f7e649e5e37fd86fa54f714160de36bd369c4fa0c6a1fdebdf0c4f05b6ad7"
+    }
+  ],
+  "reports": [
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-link-audit-otel/collection.json",
+      "sha256": "ddcf716a45e4e4ba8dc5248fcf59159f37d80673d431b07170c31b21ec421b8c",
+      "data": {
+        "recorded_at": "2026-11-14T04:40:40.763016+00:00",
+        "source_commits": [
+          "228289729",
+          "f367ce365",
+          "48af2849d"
+        ],
+        "raw": "/workspaces/kprog-raw/perf/20261114-link-audit-otel",
+        "run": "corpus/results/x86_kvm_corpus_20261114_040028_424344",
+        "make_exit": 0,
+        "finished": "2026-11-14T04:01:33Z",
+        "app_status": "ok",
+        "linker_sha256": "619ddc7799fc541b76ccf999a30ad3f4982f46a746af775518cdd648eef6e534",
+        "capture_groups": {
+          "all": 39,
+          "runtime": 28,
+          "runtime_proof": 14,
+          "runtime_kernel": 14,
+          "synthetic": 11
+        },
+        "all_runtime_cli_exit_zero": true,
+        "all_runtime_replay_exit_zero": true,
+        "all_runtime_capture_bytes_reproduced": true,
+        "all_runtime_same_binary": true,
+        "proof_on_off_equal": true,
+        "totals": {
+          "generic_off": 492,
+          "generic_on": 124,
+          "all_helpers_off": 2341,
+          "all_helpers_on": 2016,
+          "array_calls_removed": 325,
+          "hash_calls_retargeted": 43
+        },
+        "kernel_entries": [
+          {
+            "symbol": "custom__generic",
+            "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-13guxj5r",
+            "generic_off": 16,
+            "generic_on": 2,
+            "all_helpers_off": 54,
+            "all_helpers_on": 42,
+            "array_calls_removed": 12,
+            "hash_calls_retargeted": 2,
+            "helper_target_deltas": {
+              "0xffffffff9f4c69c0": 2,
+              "0xffffffff9f4b89f0": -14
+            },
+            "captured_on_bytes_equal": {
+              "image": true,
+              "relocs": true,
+              "maps": true,
+              "abi": true
+            },
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "perf_unwind_hotspot",
+            "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-1x1haj4a",
+            "generic_off": 59,
+            "generic_on": 28,
+            "all_helpers_off": 323,
+            "all_helpers_on": 297,
+            "array_calls_removed": 26,
+            "hash_calls_retargeted": 5,
+            "helper_target_deltas": {
+              "0xffffffff9f4b89f0": -31,
+              "0xffffffff9f4c69c0": 5
+            },
+            "captured_on_bytes_equal": {
+              "image": true,
+              "relocs": true,
+              "maps": true,
+              "abi": true
+            },
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "perf_go_labels",
+            "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-2k5q4j1z",
+            "generic_off": 3,
+            "generic_on": 0,
+            "all_helpers_off": 23,
+            "all_helpers_on": 21,
+            "array_calls_removed": 2,
+            "hash_calls_retargeted": 1,
+            "helper_target_deltas": {
+              "0xffffffff9f4b89f0": -3,
+              "0xffffffff9f4c69c0": 1
+            },
+            "captured_on_bytes_equal": {
+              "image": true,
+              "relocs": true,
+              "maps": true,
+              "abi": true
+            },
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "tracepoint__sched_process_free",
+            "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-30mutl0i",
+            "generic_off": 6,
+            "generic_on": 1,
+            "all_helpers_off": 16,
+            "all_helpers_on": 13,
+            "array_calls_removed": 3,
+            "hash_calls_retargeted": 2,
+            "helper_target_deltas": {
+              "0xffffffff9f4c69c0": 2,
+              "0xffffffff9f4b89f0": -5
+            },
+            "captured_on_bytes_equal": {
+              "image": true,
+              "relocs": true,
+              "maps": true,
+              "abi": true
+            },
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "perf_unwind_ruby",
+            "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-3bsjq_xg",
+            "generic_off": 42,
+            "generic_on": 0,
+            "all_helpers_off": 292,
+            "all_helpers_on": 251,
+            "array_calls_removed": 41,
+            "hash_calls_retargeted": 1,
+            "helper_target_deltas": {
+              "0xffffffff9f4b89f0": -42,
+              "0xffffffff9f4c69c0": 1
+            },
+            "captured_on_bytes_equal": {
+              "image": true,
+              "relocs": true,
+              "maps": true,
+              "abi": true
+            },
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "native_tracer_entry",
+            "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-6sg7oijc",
+            "generic_off": 15,
+            "generic_on": 2,
+            "all_helpers_off": 53,
+            "all_helpers_on": 42,
+            "array_calls_removed": 11,
+            "hash_calls_retargeted": 2,
+            "helper_target_deltas": {
+              "0xffffffff9f4b89f0": -13,
+              "0xffffffff9f4c69c0": 2
+            },
+            "captured_on_bytes_equal": {
+              "image": true,
+              "relocs": true,
+              "maps": true,
+              "abi": true
+            },
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "perf_unwind_php",
+            "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-8ouczvwj",
+            "generic_off": 29,
+            "generic_on": 1,
+            "all_helpers_off": 240,
+            "all_helpers_on": 213,
+            "array_calls_removed": 27,
+            "hash_calls_retargeted": 1,
+            "helper_target_deltas": {
+              "0xffffffff9f4b89f0": -28,
+              "0xffffffff9f4c69c0": 1
+            },
+            "captured_on_bytes_equal": {
+              "image": true,
+              "relocs": true,
+              "maps": true,
+              "abi": true
+            },
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "perf_unwind_dotnet",
+            "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-hc4ufifm",
+            "generic_off": 47,
+            "generic_on": 6,
+            "all_helpers_off": 209,
+            "all_helpers_on": 175,
+            "array_calls_removed": 34,
+            "hash_calls_retargeted": 7,
+            "helper_target_deltas": {
+              "0xffffffff9f4b89f0": -41,
+              "0xffffffff9f4c69c0": 7
+            },
+            "captured_on_bytes_equal": {
+              "image": true,
+              "relocs": true,
+              "maps": true,
+              "abi": true
+            },
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "perf_unwind_v8",
+            "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-hn2wl4rj",
+            "generic_off": 54,
+            "generic_on": 8,
+            "all_helpers_off": 303,
+            "all_helpers_on": 266,
+            "array_calls_removed": 37,
+            "hash_calls_retargeted": 9,
+            "helper_target_deltas": {
+              "0xffffffff9f4b89f0": -46,
+              "0xffffffff9f4c69c0": 9
+            },
+            "captured_on_bytes_equal": {
+              "image": true,
+              "relocs": true,
+              "maps": true,
+              "abi": true
+            },
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "perf_unwind_stop",
+            "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-kjtfqvzw",
+            "generic_off": 20,
+            "generic_on": 0,
+            "all_helpers_off": 70,
+            "all_helpers_on": 53,
+            "array_calls_removed": 17,
+            "hash_calls_retargeted": 3,
+            "helper_target_deltas": {
+              "0xffffffff9f4b89f0": -20,
+              "0xffffffff9f4c69c0": 3
+            },
+            "captured_on_bytes_equal": {
+              "image": true,
+              "relocs": true,
+              "maps": true,
+              "abi": true
+            },
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "perf_unwind_native",
+            "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-lwc57z5g",
+            "generic_off": 110,
+            "generic_on": 76,
+            "all_helpers_off": 242,
+            "all_helpers_on": 216,
+            "array_calls_removed": 26,
+            "hash_calls_retargeted": 8,
+            "helper_target_deltas": {
+              "0xffffffff9f4c69c0": 8,
+              "0xffffffff9f4b89f0": -34
+            },
+            "captured_on_bytes_equal": {
+              "image": true,
+              "relocs": true,
+              "maps": true,
+              "abi": true
+            },
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "perf_unwind_python",
+            "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-r8j24nse",
+            "generic_off": 41,
+            "generic_on": 0,
+            "all_helpers_off": 151,
+            "all_helpers_on": 111,
+            "array_calls_removed": 40,
+            "hash_calls_retargeted": 1,
+            "helper_target_deltas": {
+              "0xffffffff9f4b89f0": -41,
+              "0xffffffff9f4c69c0": 1
+            },
+            "captured_on_bytes_equal": {
+              "image": true,
+              "relocs": true,
+              "maps": true,
+              "abi": true
+            },
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "perf_unwind_perl",
+            "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-tpum5njm",
+            "generic_off": 49,
+            "generic_on": 0,
+            "all_helpers_off": 360,
+            "all_helpers_on": 312,
+            "array_calls_removed": 48,
+            "hash_calls_retargeted": 1,
+            "helper_target_deltas": {
+              "0xffffffff9f4b89f0": -49,
+              "0xffffffff9f4c69c0": 1
+            },
+            "captured_on_bytes_equal": {
+              "image": true,
+              "relocs": true,
+              "maps": true,
+              "abi": true
+            },
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "read_task_struct",
+            "capture": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-yy4vwkff",
+            "generic_off": 1,
+            "generic_on": 0,
+            "all_helpers_off": 5,
+            "all_helpers_on": 4,
+            "array_calls_removed": 1,
+            "hash_calls_retargeted": 0,
+            "helper_target_deltas": {
+              "0xffffffff9f4b89f0": -1
+            },
+            "captured_on_bytes_equal": {
+              "image": true,
+              "relocs": true,
+              "maps": true,
+              "abi": true
+            },
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          }
+        ],
+        "plan_entries_are_name_aliases_not_unique_maps": true,
+        "source_evidence": {
+          "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/native_stack_trace.ebpf.c",
+          "sha256": "31b833fa4ef6ba30450e2201f79d786b6d378889de959af2dee10b55162921e5",
+          "inner_array_declaration_lines": [
+            32,
+            44
+          ],
+          "frame_unroll_line": 616,
+          "frames_per_program": 4,
+          "bsearch_unroll_lines": [
+            217,
+            219
+          ],
+          "bsearch_steps": 16,
+          "final_inner_lookup_line": 238,
+          "outer_lookup_line": 193
+        },
+        "scope": [
+          "Diagnostic1x10s statsON CPU16-19/4vCPU16G, not a floor round.",
+          "CLI kernel entries include custom__generic and transient read_task_struct;14 entries are not14 measured programs or14 successful BPF loads.",
+          "Map address zero is a literal placeholder patched after CLI output; this does not certify final map ID or lifetime binding.",
+          "Counters are emitted static call sites, not dynamic execution counts or cycle savings.",
+          "Source repeats inner-array searches; precise attribution of every remaining generic site and runtime cost still open.",
+          "Completed array0.980x/hash0.965x throughput results unchanged; activation alone establishes no benefit."
+        ],
+        "cleanup": {
+          "path": "/var/tmp/kprog-tmp/perf/link-audit-otel/var-tmp/bpf-benchmark-docker.img",
+          "action": "Existing one-image Make cleanup removed rebuildable staging disk; absence confirmed, no raw removed."
+        }
+      }
+    }
+  ],
+  "scope": "Actual-CLI-diagnostic-and-offline-replay-only-no-floor-or-speedup-claim",
+  "archive": {
+    "path": "kprog/results/perf_20261113/link-audit-otel-results.tar.gz",
+    "bytes": 8543613,
+    "sha256": "97b797483e7d206b669b5a9aa3cdb2b5e065c90b3afe4178df7fec1b274474b4",
+    "files_byte_compared": 1109
+  }
+}
