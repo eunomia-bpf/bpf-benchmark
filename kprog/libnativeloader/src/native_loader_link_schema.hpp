@@ -167,7 +167,7 @@ NativeLinkArgs build_native_link_args(
     std::sort(native_map_symbols.begin(), native_map_symbols.end(),
               [](const auto &a, const auto &b) { return a.first < b.first; });
     for (const auto &kv : native_map_symbols) {
-        const MapMeta *meta = find_map_meta_by_loaded_name(companion, kv.second);
+        const MapMeta *meta = find_map_meta_by_native_symbol(companion, kv.first);
         if (!meta) {
             fail("native map symbol " + kv.first +
                  " references unknown loaded map " + kv.second);

@@ -29,6 +29,9 @@ DIRECT_TAIL_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-direct-tail/host
 FRAME_BUILD ?= /var/tmp/kprog-tmp/verified/frame-pointer
 FRAME_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-frame-pointer/kernel
 FRAME_LINKER ?= $(DIRECT_TAIL_BUILD)/cargo/debug/native-link
+SOURCE_MAP_BUILD ?= /var/tmp/kprog-tmp/verified/source-maps
+SOURCE_MAP_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-source-maps/host
+SOURCE_MAP_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-source-maps/kernel
 KFUNC_BUILD ?= /var/tmp/kprog-tmp/verified/kfunc
 KFUNC_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/host
 KFUNC_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/kernel
@@ -96,6 +99,43 @@ guest-kfunc:
 	"$(KFUNC_KERNEL_OUTPUT)/kfunc" kernel "$(KFUNC_KERNEL_OUTPUT)/weak.o" "$(KFUNC_KERNEL_OUTPUT)/strong.o" \
 		"$(KFUNC_KERNEL_OUTPUT)/source.bpf.o" "$(KFUNC_KERNEL_OUTPUT)/source.native.o" \
 		/sys/kernel/btf/vmlinux "$(KFUNC_KERNEL_OUTPUT)" "$(KFUNC_KERNEL_OUTPUT)/proof.bpf.o" $(KFUNC_MODEL_PROOF)
+
+.PHONY: source-maps-check
+source-maps-check:
+	install -d "$(SOURCE_MAP_BUILD)" "$(SOURCE_MAP_OUTPUT)"
+	clang-18 -O2 -g -target bpf -I/usr/include/x86_64-linux-gnu -I"$(LIBBPF_PREFIX)/include/bpf" \
+		-c ../test/source_maps_fixture.c -o "$(SOURCE_MAP_BUILD)/fixture.bpf.o"
+	clang-18 -O2 -fPIC -mno-red-zone -mgeneral-regs-only -fomit-frame-pointer -I"$(LIBBPF_PREFIX)/include/bpf" \
+		-c ../test/source_maps_fixture.c -o "$(SOURCE_MAP_BUILD)/fixture.native.o"
+	$(CXX) -std=gnu++20 -O1 -g -ffunction-sections -fdata-sections \
+		-Iinclude -I"$(KERNEL_OFFSETS_INCLUDE)" -I"$(LIBBPF_PREFIX)/include" \
+		-I"$(REPO_ROOT)/vendor/libbpf/include" -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
+		../test/native_loader_source_maps.cpp -Wl,--gc-sections "$(LIBBPF_LIBRARY)" -lelf -lz -ldl -pthread \
+		-o "$(SOURCE_MAP_BUILD)/source-maps"
+	"$(SOURCE_MAP_BUILD)/source-maps" "$(SOURCE_MAP_BUILD)/fixture.bpf.o" \
+		"$(SOURCE_MAP_BUILD)/fixture.native.o" "$(SOURCE_MAP_OUTPUT)"
+
+.PHONY: source-maps-kvm guest-source-maps
+source-maps-kvm:
+	install -d "$(SOURCE_MAP_KERNEL_OUTPUT)"
+	install -m 0755 "$(SOURCE_MAP_BUILD)/source-maps" "$(SOURCE_MAP_KERNEL_OUTPUT)/source-maps"
+	install -m 0644 "$(SOURCE_MAP_BUILD)/fixture.bpf.o" "$(SOURCE_MAP_BUILD)/fixture.native.o" "$(SOURCE_MAP_KERNEL_OUTPUT)/"
+	install -m 0755 "$(FRAME_LINKER)" "$(SOURCE_MAP_KERNEL_OUTPUT)/native-link.real"
+	taskset -c 14 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(SOURCE_MAP_KERNEL_OUTPUT)" --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/libnativeloader guest-source-maps SOURCE_MAP_KERNEL_OUTPUT=$(SOURCE_MAP_KERNEL_OUTPUT)'
+
+guest-source-maps:
+	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" KPROG_FRAME_LINKER="$(SOURCE_MAP_KERNEL_OUTPUT)/native-link.real" \
+		python3 ../trusted_service.py --arch 1 \
+		--endpoint /sys/kernel/debug/bpf_x86_native_lab/specializer \
+		--module /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
+		--state "$(SOURCE_MAP_KERNEL_OUTPUT)/state" --results "$(SOURCE_MAP_KERNEL_OUTPUT)/service.tar.gz" \
+		--native-link "$(REPO_ROOT)/kprog/test/tail_call_frame/native-link.sh" \
+		--loader /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader \
+		--run "$(SOURCE_MAP_KERNEL_OUTPUT)/source-maps" kernel "$(SOURCE_MAP_KERNEL_OUTPUT)/fixture.bpf.o" \
+		"$(SOURCE_MAP_KERNEL_OUTPUT)/fixture.native.o" "$(REPO_ROOT)/kprog/test/tail_call_frame/native-link.sh" "$(SOURCE_MAP_KERNEL_OUTPUT)"
 
 .PHONY: tail-frame-inputs tail-frame-kvm guest-tail-frame
 tail-frame-inputs:

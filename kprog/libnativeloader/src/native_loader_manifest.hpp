@@ -46,6 +46,7 @@ struct ManifestResolution {
     bool kernel_data_layout = false;
     bool kernel_kfunc_context = false;
     std::filesystem::path kernel_kfunc_btf;
+    std::filesystem::path source_bpf_object;
 };
 
 [[noreturn]] inline void manifest_fail(const std::string &message)
@@ -654,9 +655,12 @@ std::optional<ManifestResolution> resolve_native_manifest(
         candidate.kernel_kfunc_context = json_object_bool(entry, "kernel_kfunc_context").value_or(false);
         if (auto object_btf = json_object_string(entry, "kernel_kfunc_btf"))
             candidate.kernel_kfunc_btf = manifest_relative_path(manifest_path, *object_btf);
+        if (auto source = json_object_string(entry, "source_bpf_object"))
+            candidate.source_bpf_object = manifest_relative_path(manifest_path, *source);
         if (selected &&
             (selected->native_object_path != candidate.native_object_path ||
-             selected->symbol_name != candidate.symbol_name)) {
+             selected->symbol_name != candidate.symbol_name ||
+             selected->source_bpf_object != candidate.source_bpf_object)) {
             manifest_fail("native_loader: manifest has ambiguous entries for prog=" +
                           prog_name);
         }

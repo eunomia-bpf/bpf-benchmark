@@ -39,6 +39,7 @@
 #include <filesystem>
 #include <fstream>
 #include <limits>
+#include <map>
 #include <memory>
 #include <set>
 #include <bit>
@@ -46,6 +47,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -2177,6 +2179,7 @@ struct CompanionLoad {
     std::optional<std::vector<std::pair<std::string, uint64_t>>> context_helpers;
     std::vector<std::pair<std::string, uint64_t>> kernel_functions;
     std::vector<MapMeta> maps;
+    std::unordered_map<int, MapMeta> source_maps_by_fd;
     std::vector<NativeMapRule> map_rules;
     /* Per-call-site spec for every `bpf_map_lookup_elem` invocation in
      * the entry program, listed in BPF-source order. Each entry is a
@@ -2595,20 +2598,15 @@ void add_native_map_symbol_alias(CompanionLoad &load, const std::string &name)
     }
 }
 
-const MapMeta *find_map_meta_by_loaded_name(const CompanionLoad &load,
-                                            const std::string &loaded_name)
+const MapMeta *find_map_meta_by_native_symbol(const CompanionLoad &load,
+                                             const std::string &symbol)
 {
-    const MapMeta *match = nullptr;
+    const auto id = load.map_addr_ids.find(symbol);
+    if (id == load.map_addr_ids.end()) return nullptr;
     for (const MapMeta &meta : load.maps) {
-        if (meta.name == loaded_name) {
-            if (match && match->kernel_addr != meta.kernel_addr) {
-                fail("loaded map name " + loaded_name +
-                     " is ambiguous in native metadata");
-            }
-            match = &meta;
-        }
+        if (meta.kernel_id == id->second) return &meta;
     }
-    return match;
+    return nullptr;
 }
 
 bool has_native_map_shape(const NativeMapShape &shape)
@@ -2946,6 +2944,7 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
 }
 
 #include "native_loader_bytecode.hpp"
+#include "native_loader_source_maps.hpp"
 
 CompanionLoad load_from_loaded_program_fd(int program_fd,
                                           const bpf_prog_info &prog_info,
@@ -3092,6 +3091,7 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
     }
     const auto lookup_spec_end = std::chrono::steady_clock::now();
     out.lookup_spec_ns = elapsed_ns(lookup_spec_start, lookup_spec_end);
+    out.source_maps_by_fd = std::move(meta_by_source_fd);
 
     return out;
 }
@@ -4056,6 +4056,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     bool kernel_data_layout = false;
     bool kernel_kfunc_context = false;
     std::filesystem::path kernel_kfunc_btf;
+    std::filesystem::path source_bpf_object;
     if (native_object_path.empty()) {
         if (source_insns.empty()) {
             fail("native_loader: manifest resolution requires source BPF bytecode");
@@ -4080,6 +4081,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         kernel_data_layout = resolution->kernel_data_layout;
         kernel_kfunc_context = resolution->kernel_kfunc_context;
         kernel_kfunc_btf = resolution->kernel_kfunc_btf;
+        source_bpf_object = resolution->source_bpf_object;
         map_rules = std::move(resolution->map_rules);
     }
     if (symbol_name.empty()) {
@@ -4108,9 +4110,13 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     const auto data_symbols_start = diagnostic_now();
     std::filesystem::path entry_proof;
     std::optional<std::unordered_set<std::string>> entry_symbols;
-    if (kernel_data_layout) {
+    if (kernel_data_layout || !source_bpf_object.empty()) {
         entry_proof = cached_native_entry_proof(options.native_link_path, native_object_path, symbol_name);
         entry_symbols = native_entry_symbol_names(entry_proof);
+    }
+    if (!source_bpf_object.empty()) {
+        if (source_insns.empty()) fail("source_bpf_object requires intercepted source instructions");
+        bind_original_source_maps(source_bpf_object, symbol_name, source_insns, companion, &*entry_symbols);
     }
     add_native_data_symbol_addrs(native_object_path, companion, kernel_data_layout,
                                 entry_symbols ? &*entry_symbols : nullptr);
