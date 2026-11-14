@@ -741,6 +741,16 @@
 - [ ] **V** TCB 统计，在提交论文的版本上重新计数。
 - [ ] **协调者** 全量检查通过后重核论文的 O1、O2、O4 数字。
 
+### 外部形式化工件（eBPF runtime formal verification 调研转来，协调者 2026-11-14T06:16:35Z 定去向；运营者 2026-11-13 问"要不要通知需要的 kprog"）
+
+都是对所有程序成立的通用机制，作为证据和证明路线，代码里的装载判定保持原样。lane verified 在六应用和 LTO 配置之后按这个顺序接手：
+
+- [ ] Rocq 写的 Linux eBPF ISA 语义（OOPSLA'26，DOI 10.1145/3839449，github.com/OpenSourceVerif/linux-ebpf-semantics，可执行，153 条顺序指令，用 Linux 测试集验证；atomics 在范围外；配套 linux-ebpf-verifier-proofs 有 tnum soundness 的 Coq 证明，MIT）。用途：把检查过的 B 放到抽取出的语义解释器上执行，与原生执行对照，作为独立于内核解释器和 JIT 的 B 层对照，覆盖全部程序；同时作为 verify(B) 前提的支撑证据。先查清它对 helper 调用和 map 的处理范围。
+- [ ] Agni（github.com/bpfverif/agni，LLVM 14，示例到 6.10 / bpf-next）：对唯一内核的 verifier.c（vendor/linux-framework，相对 bpf-next +637/−80）跑一次 range analysis soundness 检查，支撑论文 §4 "verifier analysis trusted rather than proved"。它对改过的 verifier.c 能否直接用，先试。
+- [ ] Keel 的 EmbC + Clean（Lean 4，arXiv 2611.11117）：上面"全 simulator 的 C 源解释与 Lean C-model 对应关系"的路线：把 simulator 生成的 C 原语渲染成 EmbC AST 并证明精化，TCB 只剩 268 行打印器和 C 编译器。代码地址 github.com/rutgers-apl/keel 目前 404，公开后接手。
+- 只跟踪：BeePL 的 CompCert eBPF 后端（arXiv 2507.09883，对应"走经过验证的编译路径"，代码未公开）；x86-64 Isabelle 语义（SETTA'24，对应 O1 的 ANDN/BZHI 4 个形式，大概率缺 BMI）。
+- 只作对比（逐程序证明或逐程序证书，按 11-07 的规定留在 related work）：Heimdall、BCF、VEP、TUM LPC'26、refinement types。
+
 ## 5. 架构整理
 
 - [x] kinsn-free 内核路径，`verifier.c` 与 bpf-next 字节相同（35ea2cde39fc，970e4b205、fc443b4d4）。
