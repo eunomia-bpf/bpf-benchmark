@@ -199,8 +199,8 @@ checked-sim-stage:
 	"$(CHECKED_COMPILER_BASE)/physical-layout" > "$(CHECKED_COMPILER_BASE)/physical-layout.json"
 	sha256sum "$(CHECKED_COMPILER_BASE)"/* > "$(CHECKED_COMPILER_STAGE_OUTPUT)/tool-sha256"
 	sha256sum ../x86/compile_sim_ir.cpp ../x86/packet_bounds_ir.cpp \
-		../perf/native-context/socket-context-lower.cpp ../perf/native-context/packet-public-layout.c \
-		../perf/native-context/packet-physical-layout.c "$(CHECKED_PACKET_VMLINUX)" \
+		../build/socket-context-lower.cpp ../build/packet-public-layout.c \
+		../build/packet-physical-layout.c "$(CHECKED_PACKET_VMLINUX)" \
 		> "$(CHECKED_COMPILER_STAGE_OUTPUT)/source-at-stage-sha256"
 	install -m 0644 "$(CHECKED_COMPILER_BASE)/public-layout.json" "$(CHECKED_COMPILER_BASE)/physical-layout.json" \
 		"$(CHECKED_COMPILER_STAGE_OUTPUT)/"
@@ -246,7 +246,7 @@ checked-packet-layout-refresh:
 	"$(PACKET_LAYOUT_BPFTOOL)" btf dump file /workspaces/.agent-state/kprog-ck/build-x86/vmlinux format c \
 		> "$(CHECKED_PACKET_VMLINUX).tmp"
 	mv -f "$(CHECKED_PACKET_VMLINUX).tmp" "$(CHECKED_PACKET_VMLINUX)"
-	clang-18 -I"$(dir $(CHECKED_PACKET_VMLINUX))" ../perf/native-context/packet-physical-layout.c -o "$(CHECKED_PACKET_BUILD)/physical-layout"
+	clang-18 -I"$(dir $(CHECKED_PACKET_VMLINUX))" ../build/packet-physical-layout.c -o "$(CHECKED_PACKET_BUILD)/physical-layout"
 	"$(CHECKED_PACKET_BUILD)/physical-layout" > "$(PACKET_LAYOUT_REFRESH_OUTPUT)/after-layout.json"
 	$(MAKE) checked-sim-stage CHECKED_COMPILER_STAGE_OUTPUT="$(PACKET_LAYOUT_REFRESH_OUTPUT)/stage"
 	sha256sum /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
@@ -261,13 +261,13 @@ checked-packet-layout-refresh:
 checked-packet-inputs: checked-sim-inputs
 	install -d "$(CHECKED_PACKET_BUILD)"
 	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
-		../perf/native-context/socket-context-lower.cpp -o "$(CHECKED_PACKET_BUILD)/context-lower" \
+		../build/socket-context-lower.cpp -o "$(CHECKED_PACKET_BUILD)/context-lower" \
 		$$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis transformutils support --system-libs)
 	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
 		../x86/packet_bounds_ir.cpp -o "$(CHECKED_PACKET_BUILD)/packet-bounds" \
 		$$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis support --system-libs)
-	clang-18 -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" ../perf/native-context/packet-public-layout.c -o "$(CHECKED_PACKET_BUILD)/public-layout"
-	clang-18 -I"$(dir $(CHECKED_PACKET_VMLINUX))" ../perf/native-context/packet-physical-layout.c -o "$(CHECKED_PACKET_BUILD)/physical-layout"
+	clang-18 -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" ../build/packet-public-layout.c -o "$(CHECKED_PACKET_BUILD)/public-layout"
+	clang-18 -I"$(dir $(CHECKED_PACKET_VMLINUX))" ../build/packet-physical-layout.c -o "$(CHECKED_PACKET_BUILD)/physical-layout"
 	clang-18 -O2 -fPIC -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-asynchronous-unwind-tables \
 		-I"$(dir $(CHECKED_PACKET_VMLINUX))" -c ../test/checked_packet_native.c -o "$(CHECKED_PACKET_BUILD)/packet.native.o"
 	clang-18 -target bpf -mcpu=v4 -O2 -g -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" -I"$(LIBBPF_PREFIX)/include/bpf" \
@@ -728,3 +728,29 @@ checked-compiler-replay:
 source-maps-type-kvm: source-maps-check
 	install -d "$(SOURCE_MAP_KERNEL_OUTPUT)"
 	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16-19 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage --cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(SOURCE_MAP_KERNEL_OUTPUT)" --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec '$(SOURCE_MAP_BUILD)/source-maps kernel-type-ownership > $(SOURCE_MAP_KERNEL_OUTPUT)/ownership.json 2> $(SOURCE_MAP_KERNEL_OUTPUT)/ownership.stderr'
+
+# Keep virtme.exec short: x86 COMMAND_LINE_SIZE is 2048 including base64 exec.
+.PHONY: entry-data-mutable-kvm guest-entry-data-mutable
+entry-data-mutable-kvm: entry-data-inputs
+	install -d "$(ENTRY_DATA_KERNEL_OUTPUT)"
+	clang-18 -target bpf -mcpu=v4 -O2 -g -c ../test/native_entry_data_fixture.c -o "$(ENTRY_DATA_KERNEL_OUTPUT)/fixture.bpf.o"
+	install -m755 "$(ENTRY_DATA_BUILD)/entry-data" "$(ENTRY_DATA_KERNEL_OUTPUT)/entry-data"
+	install -m644 "$(ENTRY_DATA_BUILD)/fixture.o" "$(ENTRY_DATA_KERNEL_OUTPUT)/fixture.native.o"
+	install -m755 "$(ENTRY_DATA_LINKER)" "$(ENTRY_DATA_KERNEL_OUTPUT)/native-link.real"
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16-19 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(ENTRY_DATA_KERNEL_OUTPUT)" --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/libnativeloader guest-entry-data-mutable ENTRY_DATA_KERNEL_OUTPUT=$(ENTRY_DATA_KERNEL_OUTPUT)'
+
+guest-entry-data-mutable:
+	@status=0; for mode in submitted-native checked-sim-c; do \
+		out="$(ENTRY_DATA_KERNEL_OUTPUT)/$$mode"; install -d "$$out"; extra="--execution-mode $$mode"; \
+		if [ "$$mode" = checked-sim-c ]; then extra='$(CHECKED_COMPILER_SERVICE_ARGS)'; fi; \
+		CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" python3 ../trusted_service.py --arch 1 \
+			--endpoint /sys/kernel/debug/bpf_x86_native_lab/specializer --module /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
+			--state "$$out/state" --results "$$out/service.tar.gz" --native-link "$(ENTRY_DATA_KERNEL_OUTPUT)/native-link.real" \
+			--loader /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader $$extra \
+			--run "$(ENTRY_DATA_KERNEL_OUTPUT)/entry-data" kernel-mutable "$(ENTRY_DATA_KERNEL_OUTPUT)/fixture.native.o" \
+			"$(ENTRY_DATA_KERNEL_OUTPUT)/native-link.real" "$$out" "$(ENTRY_DATA_KERNEL_OUTPUT)/fixture.bpf.o" \
+			> "$$out/service.log" 2>&1 || status=1; cat "$$out/service.log"; \
+	done; exit $$status

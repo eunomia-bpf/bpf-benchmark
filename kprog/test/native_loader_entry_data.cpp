@@ -23,6 +23,8 @@ static void mutable_data(const std::filesystem::path &object,
     for (const std::string symbol : {"mutable_entry","mutable_immediate"}) {
         const auto proof=cached_native_entry_proof(linker,object,symbol);
         const auto names=native_entry_symbol_names(proof);
+        const auto repeated=cached_native_entry_proof(linker,proof,symbol);
+        require(native_entry_symbol_names(repeated)==names,"re-extraction changed mutable resource identities");
         require(names.contains("mutable_flag"),"mutable PC32 lost its original variable identity");
         const auto linked=invoke_native_link(object,symbol,args,output/symbol,{},proof);
         auto bytes=read_binary_file(linked.blob);
@@ -63,15 +65,18 @@ static int kernel_mutable(const char *native,const char *linker,const char *dire
         auto *program=bpf_object__find_program_by_name(object.get(),name.c_str());
         require(program,"source mutable program absent");
         const auto manifest=output/(name+".json");
+        const auto actual_name=prog_info_name_or_stub(load_prog_info(bpf_program__fd(program)));
         std::ofstream config(manifest);
-        config << "{\"objects\":[{\"program\":\"" << name << "\",\"symbol\":\"" << name
+        config << "{\"objects\":[{\"program\":\"" << actual_name << "\",\"symbol\":\"" << name
                << "\",\"native_object\":\"" << native << "\",\"kernel_data_layout\":true}]}";
         config.close();
         native_loader::FdLoadOptions request;request.original_prog_fd=bpf_program__fd(program);
+        request.source_insns.assign(bpf_program__insns(program),
+                                    bpf_program__insns(program)+bpf_program__insn_cnt(program));
         request.native_link_path=linker;request.manifest_path=manifest;
         require(!setenv("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF","1",1),"select registered service");
         auto loaded=native_loader::load_from_fd(request);
-        require(loaded.replaced && loaded.prog_fd>=0,"install mutable native program");
+        require(loaded.replaced && loaded.prog_fd>=0,"install mutable native program fd="+std::to_string(loaded.prog_fd)+" replaced="+std::to_string(loaded.replaced)+" id="+std::to_string(loaded.native_prog_id));
         for (uint32_t bias : {7,100}) for (const auto &[route,fd] :
                 std::vector<std::pair<const char*,int>>{{"stock",request.original_prog_fd},{"native",loaded.prog_fd}}) {
             std::fill(state.begin(),state.end(),0);state[0]=3;

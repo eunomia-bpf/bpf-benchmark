@@ -45,7 +45,7 @@ pub(super) fn references(elf: &object::File, included: &[SymInfo])
     Ok(result)
 }
 
-pub(super) fn instructions(mut insn:Instruction,reference:&Reference)
+pub(super) fn instructions(mut insn:Instruction,reference:&Reference,proof:bool)
     -> Result<Vec<(Instruction,Option<PatchKind>)>> {
     let mut factory=InstructionInfoFactory::new();
     let info=factory.info(&insn);
@@ -64,7 +64,13 @@ pub(super) fn instructions(mut insn:Instruction,reference:&Reference)
     };
     let mut result=Vec::new();
     if !lea {result.push((stack(0x50)?,None));}
-    result.push((build_x86_movabs_reg(scratch,0)?,Some(PatchKind::MapImmediate{name:reference.name.clone(),imm_offset:2})));
+    if proof {
+        let mut address=vec![0x48|if high {4} else {0},0x8d,0x05|(low<<3)];
+        address.extend_from_slice(&[0;4]);
+        result.push((declared_bytes(&address)?,Some(PatchKind::WritableAddress{name:reference.name.clone()})));
+    } else {
+        result.push((build_x86_movabs_reg(scratch,0)?,Some(PatchKind::MapImmediate{name:reference.name.clone(),imm_offset:2})));
+    }
     insn.set_memory_base(scratch);insn.set_memory_index(Register::None);
     insn.set_memory_displacement64(reference.offset as u64);insn.set_memory_displ_size(if reference.offset==0 {0} else {8});
     result.push((insn,None));

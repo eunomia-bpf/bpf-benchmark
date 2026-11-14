@@ -655,6 +655,8 @@ enum PatchKind {
     /// Rewritten `mov reg, [rip+GOT]` against a map symbol. The runner
     /// patches the immediate field with the live kernel map pointer.
     MapImmediate { name: String, imm_offset: usize },
+    /// Canonical address of a live writable DATASEC variable in the proof.
+    WritableAddress { name: String },
     /// The tail-call stub's `add rcx, imm32` that forms the callee's entry
     /// address. The module rewrites the field with `-16 - depth`, which steps
     /// over the prologue that increments `bpf_prog->stats.cnt`; without it a
@@ -1438,9 +1440,11 @@ pub(super) fn rewrite_x86(
                 }
             }
 
-            if !proof_mode && insn.is_ip_rel_memory_operand() {
+            if insn.is_ip_rel_memory_operand() {
                 let at=local_ip+u64::from(decoder.get_constant_offsets(&insn).displacement_offset() as u32);
-                if let Some(reference)=writable_references.get(&local_site_key(sym,at)) {
+                if let Some(reference)=writable_references.get(&local_site_key(sym,at)).filter(|r|
+                    !proof_mode || insn.mnemonic()!=Mnemonic::Lea || r.offset!=0 ||
+                    Some(insn.op0_register())!=x86_gpr64_family(insn.op0_register())) {
                     let mut factory=InstructionInfoFactory::new();
                     for register in factory.info(&insn).used_registers().iter().filter(|r|
                         matches!(r.access(),OpAccess::Write|OpAccess::CondWrite|OpAccess::ReadWrite|OpAccess::ReadCondWrite)) {
@@ -1448,7 +1452,7 @@ pub(super) fn rewrite_x86(
                             helper_got_registers.remove(&reg);helper_imm_registers.remove(&reg);map_symbol_registers.remove(&reg);
                         }
                     }
-                    for (index,(instruction,kind)) in writable_data::instructions(insn,reference)?.into_iter().enumerate() {
+                    for (index,(instruction,kind)) in writable_data::instructions(insn,reference,proof_mode)?.into_iter().enumerate() {
                         if index==0 {
                             push_x86_replacement(&mut local,&mut kinds,&mut insn_local_ip,local_ip,instruction,kind);
                         } else {
@@ -1456,6 +1460,7 @@ pub(super) fn rewrite_x86(
                             *kinds.last_mut().unwrap()=kind;
                         }
                     }
+                    canonicalized_relocations.insert(local_site_key(sym,at));
                     resolved_got_relocations.insert(local_site_key(sym,at));
                     continue;
                 }
@@ -2041,6 +2046,10 @@ pub(super) fn rewrite_x86(
                     kind: NATIVE_LAB_RELOC_X86_TAIL_COUNT,
                     target: 0,
                 });
+            }
+            PatchKind::WritableAddress { name } => {
+                tail_proof_relocs.push(ProofReloc{offset:(p.global_offset+3) as u64,r_type:2,
+                    symbol:name.clone(),addend:-4,data:None});
             }
             PatchKind::JmpEnd | PatchKind::DirectBranch { .. } | PatchKind::LocalMemory { .. } => {}
         }

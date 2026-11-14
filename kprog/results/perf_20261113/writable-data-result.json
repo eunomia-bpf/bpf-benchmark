@@ -1,0 +1,204 @@
+{
+  "recorded_at": "2026-11-14T12:14:00.719854+00:00",
+  "source_commit": "fae4cef0d plus canonical LEA followup",
+  "raw": "/workspaces/kprog-raw/perf/20261114-writable-data",
+  "candidate": "/workspaces/kprog-raw/perf/20261114-writable-data/canonical-address/native-link.real",
+  "candidate_sha256": "f76b709279395119e53c15b1156236e86739b5eecc2b3468775dc4de8679937a",
+  "kernel_job_exit": 0,
+  "host": "33 passed,1 existing ignored; RX execution/live writes/repeated state/external updates/immediate RIP bias/adjacent bytes PASS",
+  "default_real_object_groups": 11,
+  "default_proof_and_kernel_sidebands_equal": true,
+  "tracee_offline_entries": 172,
+  "tracee_offline_exit": 0,
+  "kernel": {
+    "submitted-native": {
+      "requests": [
+        {
+          "request_id": 1,
+          "source_prog_id": 6,
+          "native_prog_id": 11,
+          "status": 0,
+          "load": "{\"request_id\":1,\"prog_id\":11,\"phase\":\"load\",\"status\":0}\n",
+          "generation_returncodes": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "request_id": 2,
+          "source_prog_id": 8,
+          "native_prog_id": 14,
+          "status": 0,
+          "load": "{\"request_id\":2,\"prog_id\":14,\"phase\":\"load\",\"status\":0}\n",
+          "generation_returncodes": [
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "executions": [
+        {
+          "program": "mutable_entry",
+          "route": "stock",
+          "bias": 7,
+          "flag": 4,
+          "retval": 11
+        },
+        {
+          "program": "mutable_entry",
+          "route": "native",
+          "bias": 7,
+          "flag": 4,
+          "retval": 11
+        },
+        {
+          "program": "mutable_entry",
+          "route": "stock",
+          "bias": 100,
+          "flag": 4,
+          "retval": 104
+        },
+        {
+          "program": "mutable_entry",
+          "route": "native",
+          "bias": 100,
+          "flag": 4,
+          "retval": 104
+        },
+        {
+          "program": "mutable_immediate",
+          "route": "stock",
+          "bias": 7,
+          "flag": 9,
+          "retval": 9
+        },
+        {
+          "program": "mutable_immediate",
+          "route": "native",
+          "bias": 7,
+          "flag": 9,
+          "retval": 9
+        },
+        {
+          "program": "mutable_immediate",
+          "route": "stock",
+          "bias": 100,
+          "flag": 9,
+          "retval": 9
+        },
+        {
+          "program": "mutable_immediate",
+          "route": "native",
+          "bias": 100,
+          "flag": 9,
+          "retval": 9
+        }
+      ],
+      "service_archive": "/workspaces/kprog-raw/perf/20261114-writable-data/kernel-short-retry6/submitted-native/service.tar.gz"
+    },
+    "checked-sim-c": {
+      "requests": [
+        {
+          "request_id": 3,
+          "source_prog_id": 20,
+          "native_prog_id": 28,
+          "status": 0,
+          "verify": "{\"request_id\":3,\"prog_id\":25,\"phase\":\"verify\",\"status\":0}\n",
+          "load": "{\"request_id\":3,\"prog_id\":28,\"phase\":\"load\",\"status\":0}\n",
+          "generation_returncodes": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "request_id": 4,
+          "source_prog_id": 22,
+          "native_prog_id": 34,
+          "status": 0,
+          "verify": "{\"request_id\":4,\"prog_id\":31,\"phase\":\"verify\",\"status\":0}\n",
+          "load": "{\"request_id\":4,\"prog_id\":34,\"phase\":\"load\",\"status\":0}\n",
+          "generation_returncodes": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "executions": [
+        {
+          "program": "mutable_entry",
+          "route": "stock",
+          "bias": 7,
+          "flag": 4,
+          "retval": 11
+        },
+        {
+          "program": "mutable_entry",
+          "route": "native",
+          "bias": 7,
+          "flag": 4,
+          "retval": 11
+        },
+        {
+          "program": "mutable_entry",
+          "route": "stock",
+          "bias": 100,
+          "flag": 4,
+          "retval": 104
+        },
+        {
+          "program": "mutable_entry",
+          "route": "native",
+          "bias": 100,
+          "flag": 4,
+          "retval": 104
+        },
+        {
+          "program": "mutable_immediate",
+          "route": "stock",
+          "bias": 7,
+          "flag": 9,
+          "retval": 9
+        },
+        {
+          "program": "mutable_immediate",
+          "route": "native",
+          "bias": 7,
+          "flag": 9,
+          "retval": 9
+        },
+        {
+          "program": "mutable_immediate",
+          "route": "stock",
+          "bias": 100,
+          "flag": 9,
+          "retval": 9
+        },
+        {
+          "program": "mutable_immediate",
+          "route": "native",
+          "bias": 100,
+          "flag": 9,
+          "retval": 9
+        }
+      ],
+      "service_archive": "/workspaces/kprog-raw/perf/20261114-writable-data/kernel-short-retry6/checked-sim-c/service.tar.gz"
+    }
+  },
+  "scope": "Component oracle on sole kernel in both configurations. No full Tracee acceptance or throughput claim. Mutable bytes use original live DATASEC resources; no writable text. Synthetic offline addresses never executed.",
+  "retained_failures": [
+    "test section socket suffix unsupported",
+    "2401-byte virtme exec exceeded x86 2048 limit; exact own stalled VM retired, queue-only jobs retired",
+    "test guest shell arrays required POSIX correction",
+    "test manifest needed source snapshot and actual truncated kernel program name",
+    "direct PC32 access needed canonical zero-offset capability LEA for existing generator",
+    "exploratory whole-proof idempotence differs on preexisting JMP relaxation; actual resource identities/reused template checks retained, no new idempotence gate"
+  ]
+}
