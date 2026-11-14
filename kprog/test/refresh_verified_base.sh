@@ -6,6 +6,7 @@ refresh_root=/workspaces/repository
 refresh_kernel=/workspaces/.agent-state/kprog-ck/build-x86
 refresh_loader=/workspaces/.agent-state/kprog-ck/verified-loader
 refresh_direct=$refresh_root/kinsn/module/x86/build
+refresh_linker=$refresh_root/kprog/x86/native_lab/native_link/target/release/native-link
 refresh_image=bpf-benchmark/kprog:current
 install -d "$refresh_output"
 
@@ -30,6 +31,7 @@ finalize_refresh() {
     printf -- '- %s VERIFIED shared refresh: superseded runtime image %s %s; current %s; raw retained in %s.\n' \
         "$(date -u +%FT%TZ)" "$refresh_old_image" "$refresh_cleanup" "$refresh_new_image" "$refresh_output" >> "$refresh_root/kprog/docs/cleanup-log.md"
     sha256sum "$refresh_loader/libnative_loader.so" "$refresh_loader/trusted-native-loader" \
+        "$refresh_linker" \
         "$refresh_direct/bpf_x86_native_lab.ko" \
         /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko > "$refresh_output/base-sha256"
     date -u +%FT%TZ > "$refresh_output/finished"
@@ -52,6 +54,8 @@ fi
 date -u +%FT%TZ > "$refresh_output/started"
 refresh_old_image=$(docker image inspect --format '{{.Id}}' "$refresh_image")
 printf '%s\n' "$refresh_old_image" > "$refresh_output/old-image"
+make -C "$refresh_root/kprog/libnativeloader" shared-image-artifact-inventory \
+    IMAGE_INVENTORY_OUTPUT="$refresh_output/native-inputs-before.json"
 
 if [[ $refresh_operation == full ]]; then
 # Interrupted recursive preflight removed vmlinux. Recover the matching ELF/BTF
@@ -117,6 +121,14 @@ printf -- '- %s VERIFIED module packaging repair: completed module outputs and r
     "$(date -u +%FT%TZ)" "$refresh_output" >> "$refresh_root/kprog/docs/cleanup-log.md"
 fi
 
+# The frozen image recipe below skips stable Rust artifacts. Rebuild the
+# canonical linker explicitly so a loader refresh cannot package the old one.
+if [[ $refresh_operation != --modules-only ]]; then
+    sha256sum "$refresh_linker" > "$refresh_output/linker-before-sha256"
+    env -u CARGO_TARGET_DIR CARGO_BUILD_JOBS=1 make -C "$refresh_root" host-rust-x86 JOBS=1
+    sha256sum "$refresh_linker" > "$refresh_output/linker-after-sha256"
+fi
+
 # Use the frozen image recipe and existing stable kernel/application artifacts.
 # Rebuild its loader/shim; avoid unrelated source exports and object rebuilds.
 refresh_release=$(cat "$refresh_kernel/include/config/kernel.release")
@@ -135,4 +147,6 @@ if [[ $refresh_operation == --loader-only ]]; then
 fi
 refresh_new_image=$(docker image inspect --format '{{.Id}}' "$refresh_image")
 printf '%s\n' "$refresh_new_image" > "$refresh_output/new-image"
+make -C "$refresh_root/kprog/libnativeloader" shared-image-artifact-inventory \
+    IMAGE_INVENTORY_OUTPUT="$refresh_output/native-inputs-after.json"
 finalize_refresh
