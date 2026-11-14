@@ -14,6 +14,8 @@ HELPER_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-helper-context/k
 HELPER_KERNEL_MODULE ?= /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
 REFRESH_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-shared-refresh
 REFRESH_OPERATION ?= full
+IMAGE_INVENTORY_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-kfunc-refresh/native-inputs.json
+
 DATA_LAYOUT_BUILD ?= /var/tmp/kprog-tmp/verified/data-layout
 DATA_LAYOUT_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-data-layout/host
 DATA_LAYOUT_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-data-layout/kernel
@@ -112,6 +114,15 @@ guest-data-layout:
 	mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
 	"$(DATA_LAYOUT_KERNEL_OUTPUT)/data-layout" kernel "$(DATA_LAYOUT_KERNEL_OUTPUT)/fixture.o" "$(DATA_LAYOUT_KERNEL_OUTPUT)"
+
+.PHONY: shared-image-artifact-inventory shared-image-restore
+shared-image-artifact-inventory:
+	python3 ../test/image_native_inventory.py --image "$(REPO_ROOT)/.cache/container-images/x86_64-runner-runtime.image.tar" \
+		--stage "$(REPO_ROOT)/vendor/build/native-bpf/x86/stage" --output "$(IMAGE_INVENTORY_OUTPUT)"
+
+# Restore the same saved image after a daemon restart, under the image writer lock.
+shared-image-restore:
+	docker image load -i "$(REPO_ROOT)/.cache/container-images/x86_64-runner-runtime.image.tar"
 
 .PHONY: shared-base-refresh shared-base-finalize shared-base-modules-repair shared-module-syntax
 shared-base-refresh:
