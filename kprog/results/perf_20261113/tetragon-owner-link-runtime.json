@@ -1,0 +1,53 @@
+{
+  "recorded_at": "2026-11-14T01:57:20.958057+00:00",
+  "protocol_commit": "37a47af36",
+  "raw": "/workspaces/kprog-raw/perf/20261114-tetragon-owner-link-runtime",
+  "inputs": [
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_014544_026262/details/apps/tetragon__observer.json",
+      "sha256": "ff8cf6942243af17cb718247ad136c7723e45eefb06c37a830b61b9fbd44b85c"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_014544_026262/metadata.json",
+      "sha256": "36fac0466fec26385a81347acea39eb56e1e2a240705f513341a89142e7b644c"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_014544_026262/details/result.json",
+      "sha256": "d23b2c9da2eab6ee48195aa22c922b8a587e144bb628e8f463d6b02e382d24f4"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_014544_026262/details/shim-logs/tetragon__observer.baseline.log",
+      "sha256": "941520e16342412f2fd050fad2745417e1a23b5914433d0a96e44d0458823336"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_014544_026262/details/shim-logs/tetragon__observer.post_rejit.log",
+      "sha256": "22ebbe44726808396956ec319a9a7f6929023a699b83cf0b2e2b0cd0597c2b95"
+    }
+  ],
+  "reports": [],
+  "scope": "Actual diagnostic with owner linker; native startup still fails and no native measurement is recorded.",
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/perf_20261113/tetragon-owner-link-runtime.tar.gz",
+    "bytes": 726110,
+    "sha256": "9545b10fd0faea554d15666c23a16736146ea3e62220ecf2bcb74435432c40ea",
+    "files_byte_compared": 572
+  },
+  "outcome": {
+    "make_exit": 0,
+    "app_status": "error",
+    "run": "x86_kvm_corpus_20261114_014544_026262",
+    "programs": {
+      "baseline": 287,
+      "post_rejit": null
+    },
+    "native_replacement_events": 12,
+    "failed_program": "generic_kprobe_filter_arg",
+    "failure": "x86 helper call cel_expr_1 has no helper address"
+  },
+  "corrected_diagnosis": {
+    "original_and_native_elf": "cel_expr_0 through cel_expr_7 are genuine undefined symbols in both original BPF and native ELF.",
+    "upstream_dynamic_code": "pkg/selectors/celexpr.go RewriteProg appends generated policy functions; unused expression slots use CompileEmptyFunction; unsupported runtime removes cel_expr and replaces its calls with MOV0.",
+    "offline_limit": "Synthetic relocation tests assigned arbitrary addresses to every undefined symbol, including these generated functions. They never established body availability or equivalence.",
+    "next": "Use actual current-load generated function bytes and func_info/BTF correspondence; do not invent zero functions or external kernel helpers."
+  }
+}
