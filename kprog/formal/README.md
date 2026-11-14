@@ -8,7 +8,7 @@ kprog belong in those forks. No replacement ISA semantics is defined locally.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
-| AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `9bd0c0f609fb` | Lean 4.35.0 |
+| AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `1a5034a5a4d5` | Lean 4.35.0 |
 | x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `74a2e2849cde` | Lean 4.32.0-rc1 |
 | Clight | [eunomia-bpf/clean](https://github.com/eunomia-bpf/clean), `external/clean/export` | `123f7f7767e2` | Lean 4.32.1 |
 
@@ -21,7 +21,7 @@ hypothesis; its theorem statement and instruction semantics are unchanged.
 Build output and the earlier failed attempts are retained in
 `/workspaces/kprog-raw/formal/m1-compat-2` and `m1-compat-1`.
 The legacy package remains on Lean 4.19.0 while M3-M5 migrate its references
-and theorems. M2 coverage is pending; the legacy counts below describe the old
+and theorems. M2 is in progress; the legacy counts below describe the old
 foundation, not proofs against these external bases. Retirement occurs at M6.
 
 LNSym and x86lean retain their Apache-2.0 licenses. Clean retains its own
@@ -33,7 +33,7 @@ CompCert front end and the Lean export/semantics have separate trust claims.
 
 ## Operation coverage (M2 in progress)
 
-LNSym `9bd0c0f609fbfdc8f317c1e3c766f9067464d3ba`, x86lean `74a2e2849cde10fce9035c6abb7fdd49968b2915`.
+LNSym `1a5034a5a4d5c22091ed0646497348f04677a648`, x86lean `74a2e2849cde10fce9035c6abb7fdd49968b2915`.
 
 Source inspection, not refinement proofs or conformance results. `present` means an execution path exists; `partial`/`missing` remain M2 work; `layer` identifies linking/ABI transport above an existing ISA form. Memory permissions, initialization, fault prefixes, exclusive ordering and ABI require explicit relations.
 
@@ -81,6 +81,25 @@ combined 133-job build passed 160 retained encoded vectors and 12 invalid shifts
 retained in raw; the committed suite uses representative cases to limit fixture
 size. ARM source statuses are now 66 present, four missing, two partial and two
 linking-layer labels. Exclusives, LSE and the pair/fault profiles remain open.
+
+LNSym `1a5034a5a4d5` adds LSE LDADD/LDCLR/LDSET in B/H/W/X forms and all A/R
+variants, including store-only aliases. Each successful RMW records its captured
+address, old/new values and effective acquire/release attributes; acquire is
+suppressed for Rt=ZR. The combined 143-job build passed 240 encoded vectors,
+six refusal paths, encoding/footprint checks and existing memory proofs
+(`m2-lse/build-8`). It assumes enabled FEAT_LSE, flat little-endian memory and
+natural alignment; permission, initialization, translation and LSE2 profiles
+remain open. ARM source statuses are 69 present, one missing, two partial and
+two linking-layer labels, with exclusives and pair/fault work still pending.
+
+The same acceptance also passed 108 LNSym symbolic-test jobs in its own package
+context, avoiding the two forks' overlapping `Tests` library names. Fork
+`dd1cfdb` fixes the initial field-reflexivity proof's type and simplifies
+conditional PC updates with the existing validity/alignment premises. A direct
+kernel check and a fully proved final-state store regression cover the fixes.
+Imported upstream AES-GCM modules still contain existing `sorry` declarations;
+this validation is not a claim of migrated M5 refinements or an admission-free
+upstream proof corpus.
 
 ### AArch64: 74 simulator operations
 
@@ -156,9 +175,9 @@ linking-layer labels. Exclusives, LSE and the pair/fault profiles remain open.
 | 0x43 | `BICS_REG` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
 | 0x44 | `CSETM` | present | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases; 24 encoded W/X branch/ZR/wrap/frame checks pass |
 | 0x45 | `CSNEG` | present | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases; 24 encoded W/X branch/ZR/wrap/frame checks pass |
-| 0x46 | `LDADD` | missing | [Arm/Decode/LDST.lean](external/LNSym/Arm/Decode/LDST.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | LSE atomic RMW absent; include STADD/STSET/STCLR aliases |
-| 0x47 | `LDSET` | missing | [Arm/Decode/LDST.lean](external/LNSym/Arm/Decode/LDST.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | LSE atomic RMW absent; include STADD/STSET/STCLR aliases |
-| 0x48 | `LDCLR` | missing | [Arm/Decode/LDST.lean](external/LNSym/Arm/Decode/LDST.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | LSE atomic RMW absent; include STADD/STSET/STCLR aliases |
+| 0x46 | `LDADD` | present | [LDST/Atomic_memory_op.lean](external/LNSym/Arm/Insts/LDST/Atomic_memory_op.lean) | B/H/W/X, A/R and ST aliases; old/new/order observations; flat naturally aligned profile, permission/LSE2 work remains |
+| 0x47 | `LDSET` | present | [LDST/Atomic_memory_op.lean](external/LNSym/Arm/Insts/LDST/Atomic_memory_op.lean) | B/H/W/X, A/R and ST aliases; old/new/order observations; flat naturally aligned profile, permission/LSE2 work remains |
+| 0x48 | `LDCLR` | present | [LDST/Atomic_memory_op.lean](external/LNSym/Arm/Insts/LDST/Atomic_memory_op.lean) | B/H/W/X, A/R and ST aliases; old/new/order observations; flat naturally aligned profile, permission/LSE2 work remains |
 | 0xff | `RET` | present | [BR/Uncond_branch_reg.lean](external/LNSym/Arm/Insts/BR/Uncond_branch_reg.lean) | Only RET encoding accepted; BR/BLR absent |
 
 Outside the 74-operation roster: LDXR; B/B.cond/CBZ/CBNZ/TBZ/TBNZ; MRS TPIDR_EL1/EL2; BR/BLR helper calls. Required by retained reference environment, not extra completed tokens.
@@ -243,7 +262,7 @@ Outside the 74-operation roster: LDXR; B/B.cond/CBZ/CBNZ/TBZ/TBNZ; MRS TPIDR_EL1
 | 0x49 | `rorMem` | present | [rot .ror](external/x86lean/X86/Syntax.lean) |  |
 | 0xff | `ret` | present | [ret](external/x86lean/X86/Syntax.lean) | Native stack pop; simulator return modes need relation |
 
-Cross-cutting gaps: X86.Mem is a finite byte association list with implicit zero background, total reads/writes, no access-permission faults. Cpu has no 48/57-bit canonical-address profile. LNSym also uses total byte memory, without the retained permission/initialized/event/fault-prefix contract, exclusive monitor or thread-pointer inputs. These are not closed by listing instruction constructors; M2/M3 must preserve the existing theorem domains through external-model extensions and explicit relations. x86lean takes post-decode Instr.op/len. BZHI is absent from the differential roster, not absent from step: do not duplicate its semantics.
+Cross-cutting gaps: X86.Mem is a finite byte association list with implicit zero background, total reads/writes, no access-permission faults. Cpu has no 48/57-bit canonical-address profile. LNSym also uses total byte memory. Successful LSE RMWs now retain old/new values and ordering observations, but ordinary ordered-memory/fault-prefix, permission/initialization, exclusive-monitor and thread-pointer profiles remain absent. These are not closed by listing instruction constructors; M2/M3 must preserve the existing theorem domains through external-model extensions and explicit relations. x86lean takes post-decode Instr.op/len. BZHI is absent from the differential roster, not absent from step: do not duplicate its semantics.
 
 ## Legacy foundation (migration pending)
 
