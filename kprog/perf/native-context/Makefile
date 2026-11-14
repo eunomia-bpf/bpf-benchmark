@@ -158,6 +158,29 @@ known-map-otel-timing:
 	flock /workspaces/.agent-state/kprog-lanes/locks/timing flock -s /workspaces/.agent-state/kprog-lanes/locks/image env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(KNOWN_MAP_TIMING_CAPTURE) EQCODEX_NATIVE_LINK_BINARY=$(KNOWN_MAP_PAYLOAD)/native-link-known-on \
 		make -f $(ROOT)/kprog/perf/one-image/Makefile rotate ORDER=otelcol-ebpf-profiler/profiling STATS=1 SAMPLES=3 WORKLOAD_DURATION=180 CPUS=0-7 VM_CPUS=8 VM_MEM=64G NATIVE_MANIFEST=$(ROOT)/corpus/results/perf-otel-upstream-20261114/manifest-context.json STATE=$(KNOWN_MAP_TIMING_STATE) LOGS=$(KNOWN_MAP_TIMING_RAW)/timing
 
+.PHONY: link-audit-payload link-audit-check link-audit-otel
+LINK_AUDIT_PAYLOAD ?= $(ROOT)/corpus/results/perf-link-audit-20261114
+LINK_AUDIT_SOURCE ?= $(ROOT)/corpus/results/perf-known-hash-linker-20261114/native-link.real
+LINK_AUDIT_HOST ?= /workspaces/kprog-raw/perf/20261114-link-audit-host
+LINK_AUDIT_RAW ?= /workspaces/kprog-raw/perf/20261114-link-audit-otel
+LINK_AUDIT_CAPTURE ?= $(ROOT)/corpus/results/perf-link-audit-otel-20261114
+link-audit-payload:
+	install -d $(LINK_AUDIT_PAYLOAD)
+	install -m755 $(LINK_AUDIT_SOURCE) $(LINK_AUDIT_PAYLOAD)/native-link.real
+	install -m755 $(HERE)/native-link-audit.py $(LINK_AUDIT_PAYLOAD)/native-link-on
+
+link-audit-check:
+	taskset -c 8-15 prlimit --as=8589934592 -- python3 $(HERE)/test-link-audit.py --payload $(LINK_AUDIT_PAYLOAD) --evidence /workspaces/kprog-raw/perf/20261114-known-hash-linker/evidence/default/otel --output $(LINK_AUDIT_HOST) --scratch /var/tmp/kprog-tmp/perf/link-audit-host --replay $(HERE)/link-audit-replay.py
+
+.PHONY: link-audit-replay
+LINK_AUDIT_REPLAY ?= $(LINK_AUDIT_HOST)/replay
+link-audit-replay:
+	taskset -c 8-15 prlimit --as=8589934592 -- python3 $(HERE)/link-audit-replay.py $(LINK_AUDIT_PAYLOAD)/audit --linker $(LINK_AUDIT_PAYLOAD)/native-link.real --output $(LINK_AUDIT_REPLAY)
+
+link-audit-otel:
+	env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(LINK_AUDIT_CAPTURE) EQCODEX_NATIVE_LINK_BINARY=$(LINK_AUDIT_PAYLOAD)/native-link-on \
+		make -f $(ROOT)/kprog/perf/one-image/Makefile corpus APPS=otelcol-ebpf-profiler/profiling SAMPLES=1 WORKLOAD_DURATION=10 CPUS=16-19 VM_CPUS=4 VM_MEM=16G BPFREJIT_CORPUS_BPF_STATS=1 NATIVE_MANIFEST=$(ROOT)/corpus/results/perf-otel-upstream-20261114/manifest-context.json STATE=/var/tmp/kprog-tmp/perf/link-audit-otel LOGS=$(LINK_AUDIT_RAW)/run
+
 LINK_MEMORY_EVIDENCE ?= /workspaces/kprog-raw/perf/20261113-local-memory/objects
 .PHONY: memory-link-evidence
 memory-link-evidence:
