@@ -792,3 +792,36 @@ runtime-probe-read-payload: known-map-link-build runtime-probe-read-layout
 	install -m755 $(KNOWN_MAP_TARGET)/debug/native-link $(RUNTIME_PROBE_PAYLOAD)/native-link.real
 	strip --strip-debug $(RUNTIME_PROBE_PAYLOAD)/native-link.real
 	install -m644 $(RUNTIME_PROBE_BUILD)/runtime-probe-read-layout.json $(RUNTIME_PROBE_PAYLOAD)/runtime-probe-read-layout.json
+
+PROBE_KERNEL_BUILD ?= /var/tmp/kprog-tmp/perf/probe-read-kernel
+PROBE_KERNEL_OUTPUT ?= /workspaces/kprog-raw/perf/20261114-probe-read/kernel
+PROBE_KERNEL_LOADER := /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader
+PROBE_COMPILER := /workspaces/.agent-state/kprog-ck/verified-compiler
+PROBE_LIBBPF := $(ROOT)/runner/build-llvmbpf/vendor/libbpf
+.PHONY: probe-read-kernel-inputs probe-read-kernel guest-probe-read
+probe-read-kernel-inputs:
+	install -d $(PROBE_KERNEL_BUILD)
+	$(CC) -O2 -g -target bpf -I/usr/include/x86_64-linux-gnu -c $(HERE)/probe-read-kernel.c -o $(PROBE_KERNEL_BUILD)/source.bpf.o
+	$(CC) -O2 -fPIC -mno-red-zone -mgeneral-regs-only -fomit-frame-pointer -c $(HERE)/probe-read-kernel.c -o $(PROBE_KERNEL_BUILD)/source.native.o
+	clang++-18 -std=gnu++20 -O1 -ffunction-sections -fdata-sections -I$(ROOT)/micro/programs/build-x86 -I$(PROBE_LIBBPF)/prefix/include -I$(ROOT)/vendor/libbpf/include -I$(ROOT)/vendor/libbpf/include/uapi \
+		$(ROOT)/kprog/libnativeloader/src/native_loader.cpp $(HERE)/probe-read-kernel.cpp -Wl,--gc-sections $(PROBE_LIBBPF)/pic-obj/libbpf.a -lelf -lz -ldl -pthread -o $(PROBE_KERNEL_BUILD)/client
+
+probe-read-kernel: probe-read-kernel-inputs
+	install -d $(PROBE_KERNEL_OUTPUT)
+	install -m755 $(PROBE_KERNEL_BUILD)/client $(PROBE_KERNEL_OUTPUT)/client
+	install -m644 $(PROBE_KERNEL_BUILD)/source.bpf.o $(PROBE_KERNEL_BUILD)/source.native.o $(PROBE_KERNEL_OUTPUT)/
+	taskset -c 16-19 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(PROBE_KERNEL_OUTPUT) --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -f kprog/perf/native-context/Makefile guest-probe-read PROBE_KERNEL_OUTPUT=$(PROBE_KERNEL_OUTPUT)'
+
+guest-probe-read:
+	@status=0; for mode in submitted-native checked-sim-c; do \
+		install -d $(PROBE_KERNEL_OUTPUT)/$$mode; extra=(); \
+		if [[ $$mode == checked-sim-c ]]; then extra=(--sim-native-compiler $(PROBE_COMPILER)/compile-sim-ir --sim-context-compiler $(PROBE_COMPILER)/context-lower --sim-public-layout $(PROBE_COMPILER)/public-layout.json --sim-physical-layout $(PROBE_COMPILER)/physical-layout.json --sim-bounds-compiler $(PROBE_COMPILER)/packet-bounds); fi; \
+		CLANG=$(ROOT)/kprog/stock-path/bin/clang KPROG_PROBE_LINKER=$(RUNTIME_PROBE_PAYLOAD)/native-link.real KPROG_PROBE_LAYOUT=$(RUNTIME_PROBE_PAYLOAD)/runtime-probe-read-layout.json \
+		python3 $(ROOT)/kprog/trusted_service.py --arch 1 --endpoint /sys/kernel/debug/bpf_x86_native_lab/specializer --module /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
+			--state $(PROBE_KERNEL_OUTPUT)/$$mode/state --results $(PROBE_KERNEL_OUTPUT)/$$mode/service.tar.gz --native-link $(HERE)/native-link-probe-read.sh \
+			--loader $(PROBE_KERNEL_LOADER) --execution-mode $$mode "$${extra[@]}" --run $(PROBE_KERNEL_OUTPUT)/client $(PROBE_KERNEL_OUTPUT)/source.bpf.o $(PROBE_KERNEL_OUTPUT)/source.native.o $(HERE)/native-link-probe-read.sh $(PROBE_KERNEL_OUTPUT)/$$mode \
+			> $(PROBE_KERNEL_OUTPUT)/$$mode/service.log 2>&1 || status=1; \
+		cat $(PROBE_KERNEL_OUTPUT)/$$mode/service.log; \
+	done; exit $$status
