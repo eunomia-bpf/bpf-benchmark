@@ -176,13 +176,15 @@
 
 **lane 合并（运营者 2026-11-14："perf、verified、formal 需要3 个吗""不要互相等等"；协调者 2026-11-14T09:33:47Z）**：lane verified 并入 lane perf，kprog 留两条 Codex lane（perf、formal）和 lane C（omp）。perf 接手 verified 的全部任务和文件归属（链接器、加载器、shim、service、checked-sim-c 编译器）：顺序是 ① OTel 在等量工作下吞吐至少 1.20x（LTO：read、hash、LPM），② LTO 配置跑整应用（BCC 已通，Tracee、Katran 接着），③ 六应用 verified 路径剩下的应用；formal 的 M4/M6 改为和 perf 商定。**不互相等**：计时锁只给 CPU 0-7 上的计时运行用，功能和内核用例在各自的 CPU 上跑、不拿计时锁；镜像锁的独占只给镜像重建用，重建攒到一次做；一条 lane 等作业时在同一轮里用一条阻塞命令等，或者先做下一项；需要别的 lane 改的东西，自己按商定的范围改，写进 COORDINATION。
 
-**每条 lane 负责一部分代码（运营者 2026-11-14："明确记录, 以后建议每个 lane 负责一部分代码. 所有 research 都生效"；协调者 2026-11-14T09:43:05Z 按现有归属划分）**：
+**每条 lane 负责一部分代码（运营者 2026-11-14："明确记录, 以后建议每个 lane 负责一部分代码. 所有 research 都生效"；"我觉得要不要合并一下? 另外代码库的组织结构要不要整理?"；协调者 2026-11-14T10:02:41Z 按代码重新划分）**：过去 24 小时里 kprog/perf/native-context 被三条 lane 改过，C 构建 Katran、BCC、Tracee 时一再请 perf 改它，所以按“生成 P”和“运行 P”两侧划分：
 
-| lane | 负责的代码 |
-|---|---|
-| perf（Codex，并入了 verified） | 链接器 kprog/x86/native_lab/native_link、加载器 kprog/libnativeloader、shim bpfopt/shim、注册的 service 和 checked-sim-c 编译器、kprog/perf/profile、LTO 的各个发射器，以及 OTel、Cilium、Tetragon 的同源构建 |
-| formal（Codex） | kprog/formal 和其中的 submodule（LNSym、x86lean、clean）、.gitmodules 的这三项 |
-| C（omp） | vendor/bpf 的同源开关和 Katran、BCC、Tracee 的同源构建脚本（kprog/perf/katran-same-source.sh、native-ir-prep.py 等）、kprog/perf/direct-native 的计时模块、kprog/perf/one-image 的计时脚本 |
+| lane | 负责的代码 | 任务 |
+|---|---|---|
+| C（omp） | 生成 P 的一侧：同源构建流水线（现 kprog/perf/native-context，整理后 kprog/build）、vendor/bpf 的同源开关、各应用的同源构建脚本、计时脚本（kprog/perf/one-image、may29-image、direct-native） | 六个应用的同源构建、两边输出对照、计时；从 perf 接过 Cilium、Tetragon 的同源构建（D01/D02/D09、Tetragon 的 flags 和上游单元） |
+| perf（Codex） | 运行 P 的一侧：链接器 kprog/x86/native_lab/native_link、加载器 kprog/libnativeloader、shim bpfopt/shim、service 和 kprog/x86 下的特化器与编译器、kprog/stock-path、kprog/test、kprog/perf/profile、LTO 的各个发射器 | OTel 等量工作下吞吐至少 1.20x（LTO），LTO 配置跑整应用，六应用 verified 路径；Tetragon 加载时生成的函数属于链接一侧，仍归 perf |
+| formal（Codex） | kprog/formal 及其 submodule | M1–M6 |
+
+**代码库整理（C 负责，一个提交做完）**：① kprog/perf/native-context 用 git mv 改名为 kprog/build，所有引用（Makefile、脚本、vendor/bpf/Makefile、文档）一并改；② 正在被调用的工具搬出结果目录：kprog/results/tracee-samesource-20261113/native-ir-prep.py 和同目录的其他脚本、kprog/perf/katran-same-source.sh 搬进 kprog/build；③ 历史结果目录里的代码（kprog_fidelity_*、corpus/results/kprog_*_coverage_* 等）是当时结果的记录，保持原样；④ 冻结的 benchmark 路径逐字节一致，默认构建产物逐字节一致（搬之前、搬之后各构建一次比对）；⑤ 在一轮的开头做，做之前在 COORDINATION 说一声，做完写新路径，perf 和 formal 下一轮按新路径。一条 lane 需要别人那部分改动时，在 COORDINATION 说清楚，由负责的 lane 改；两条 lane 反复改同一块代码时，协调者把它们合并成一条。
 
 一条 lane 需要别人那部分改动时，在 COORDINATION 说清楚，由负责的 lane 改；两条 lane 反复改同一块代码时，协调者把它们合并成一条。
 
