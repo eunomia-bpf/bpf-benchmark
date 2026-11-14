@@ -1,0 +1,42 @@
+[
+  {
+    "name": "n1000_ptr_direct",
+    "native_source_equal": true,
+    "native_instructions": 1015
+  },
+  {
+    "name": "n1000_ptr_indirect",
+    "native_source_equal": true,
+    "native_instructions": 1021
+  },
+  {
+    "name": "n1000_scalar_direct",
+    "native_source_equal": true,
+    "native_instructions": 1015
+  },
+  {
+    "name": "n1000_scalar_indirect",
+    "native_source_equal": true,
+    "native_instructions": 1021
+  },
+  {
+    "name": "n100_ptr_direct",
+    "native_source_equal": true,
+    "native_instructions": 115
+  },
+  {
+    "name": "n100_ptr_indirect",
+    "native_source_equal": true,
+    "native_instructions": 121
+  },
+  {
+    "name": "n100_scalar_direct",
+    "native_source_equal": true,
+    "native_instructions": 115
+  },
+  {
+    "name": "n100_scalar_indirect",
+    "native_source_equal": true,
+    "native_instructions": 121
+  }
+]
