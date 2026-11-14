@@ -1,0 +1,22 @@
+{
+  "launched": "2026-11-14T00:35:35Z",
+  "outer_pid": 88348,
+  "command": "setsid nohup bash -c ulimit-v8GiB; VERIFIED_BUILD_CPUS=13 VERIFIED_IMAGE_LOCK=/workspaces/.agent-state/kprog-lanes/locks/image run_verified_make.sh ... -C kprog/libnativeloader entry-data-kernel-kvm",
+  "recipe_commit": "19e27380a",
+  "host_subset": "PASS; entry-data-host.json",
+  "host_cpu": 13,
+  "guest_cpus": 2,
+  "guest_memory": "2G",
+  "launcher_address_space": "8GiB",
+  "image_lock": "shared",
+  "kernel": "/workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage",
+  "image": "sha256:0bb7d4be1f0a9c4bb015ee20d14fb9ba26e56da9f84310a501257ae5376e084c",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-entry-data/kernel-launch",
+  "kernel_outputs": "/workspaces/kprog-raw/verified/20261114-entry-data/kernel",
+  "launcher_log": "/workspaces/kprog-raw/verified/20261114-entry-data/kernel-launch/launcher.log",
+  "job_log": "/workspaces/kprog-raw/verified/20261114-entry-data/kernel-launch/job/make.log",
+  "dry_run_log": "/workspaces/kprog-raw/verified/20261114-kfunc-refresh/entry-data-kernel-dry-run.log",
+  "binary_sha256": "9ae4bc6227d08c45098bc91c6f4183e43550211df98a9234e7a2eba702a32778",
+  "collected": false,
+  "canonical_changed": false
+}
