@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
+#include <iomanip>
 #include <stdexcept>
 #include <vector>
 #include <string>
@@ -20,10 +21,12 @@ try {
     unsigned size=bpf_map__key_size(map),kind=bpf_map__type(map);
     require(size%4==0 && size<=20,"fixture key size");
     native_loader::FdLoadOptions options;
-    options.original_prog_fd=source;options.native_object_path=argv[2];options.symbol_name="entry";options.native_link_path=argv[3];
-    bpf_map_info info{};unsigned info_size=sizeof(info);
-    require(!bpf_obj_get_info_by_fd(fd,&info,&info_size),"actual table identity");
-    options.trusted_maps.push_back({"table",info.id,std::nullopt});
+    const std::string manifest=std::string(argv[4])+"/runtime-manifest.json";
+    std::ofstream config(manifest);
+    config << "{\"objects\":[{\"program\":\"entry\",\"symbol\":\"entry\",\"native_object\":"
+           <<std::quoted(argv[2])<<",\"source_bpf_object\":"<<std::quoted(argv[1])<<"}]}";
+    config.close();require(bool(config),"original-source map binding manifest");
+    options.original_prog_fd=source;options.manifest_path=manifest;options.native_link_path=argv[3];
     options.source_insns.assign(bpf_program__insns(program),bpf_program__insns(program)+bpf_program__insn_cnt(program));
     setenv("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF","1",1);
     auto native=native_loader::load_from_fd(options);

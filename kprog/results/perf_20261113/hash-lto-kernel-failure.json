@@ -122,5 +122,95 @@
       "archive_sha256": "677c02a1bb08ba6668a23ddf4080fcbcdfe00224644dd4f0b773899b150f860c"
     }
   ],
-  "scope": "Retained failed kernel attempt. No kernel helper or throughput certification."
+  "scope": "Retained failed kernel attempt. No kernel helper or throughput certification.",
+  "retry1": {
+    "recorded_at": "2026-11-14T08:00:41Z",
+    "pid": 267115,
+    "make_exit": 2,
+    "raw": "/workspaces/kprog-raw/perf/20261114-hash-lto/kernel-retry1",
+    "counts": {
+      "stock_loaded": 18,
+      "checked_B_verified": 0,
+      "native_installed": 0,
+      "stock_or_native_test_executions": 0
+    },
+    "cause": "Previous trusted_maps field is read only by load_trusted_worker, not submission. All18 request maps remained empty; Clang exit1 undeclared table, before verification/link.",
+    "new_fixture_change": "Use existing manifest source_bpf_object binding with original source instructions, same established source-maps kernel fixture path. Removed ineffective worker-only binding; no loader/service source change.",
+    "new_host_inputs_build_exit": 0,
+    "new_kernel_result": "PENDING, not certified",
+    "cases": {
+      "checked-sim-c/1-1": {
+        "source_id": 50,
+        "archive_sha256": "6b16a3376f2712cd8c1fe7f89d5b0da3504dc63f4fa72d1358d3fd19d0702d97"
+      },
+      "checked-sim-c/2-1": {
+        "source_id": 55,
+        "archive_sha256": "b4bc32c9cb6b4d7f1818453f557181e257cda9d6b51cbf712d81c317cf622930"
+      },
+      "checked-sim-c/2-10": {
+        "source_id": 85,
+        "archive_sha256": "ddf16233200e6c1e9f53969ebd469fd40f83318f112faaca3a85c3a75f282a19"
+      },
+      "checked-sim-c/2-13": {
+        "source_id": 90,
+        "archive_sha256": "c4874f6be1de304a2ccc1b4e2085194d455ebfe83e7751d249cb1a9142ebb9af"
+      },
+      "checked-sim-c/2-5": {
+        "source_id": 75,
+        "archive_sha256": "8b6cadbfc65dd28437d2e8c26e892d90371dac4ecc9540d3221b11bad62ae5bf"
+      },
+      "checked-sim-c/2-9": {
+        "source_id": 80,
+        "archive_sha256": "6c404b1e71a77022f7b8c76bd64afc89ededcb55a07f41aaf3aedf4b98fd47b1"
+      },
+      "checked-sim-c/3-1": {
+        "source_id": 60,
+        "archive_sha256": "a1866c7d8f42c041f13ffff606ca941a57b26666a2d59c032f87e854e8fcb937"
+      },
+      "checked-sim-c/4-1": {
+        "source_id": 65,
+        "archive_sha256": "d22859a14a0fea3a2c550ba58db575b4646a30cb9c65153c13bb067c53152b6e"
+      },
+      "checked-sim-c/5-1": {
+        "source_id": 70,
+        "archive_sha256": "472927802c368496639b317d5eb0c58f69cee00af482fdd744519626515d146f"
+      },
+      "submitted-native/1-1": {
+        "source_id": 5,
+        "archive_sha256": "ab077ea4996268ef04ac7cb1e094370ffde54b8eba1648efdb490198de936c36"
+      },
+      "submitted-native/2-1": {
+        "source_id": 10,
+        "archive_sha256": "ff5563490255d309b18fe96f95b0abef76a98a421123f1b0f7cc0d86607edd6b"
+      },
+      "submitted-native/2-10": {
+        "source_id": 40,
+        "archive_sha256": "3d1a5e288768af4eb9ae6d0bec1d906e432523c96321946a86d7a75dd8d9e99d"
+      },
+      "submitted-native/2-13": {
+        "source_id": 45,
+        "archive_sha256": "2035ec2740144d55adf6b39c344f157a2dea270722f25aca5df630622ba999bc"
+      },
+      "submitted-native/2-5": {
+        "source_id": 30,
+        "archive_sha256": "e035706d03fa759a4f93fd4a3cca222f86d30c72ddd3b4f3147abad596ceb375"
+      },
+      "submitted-native/2-9": {
+        "source_id": 35,
+        "archive_sha256": "93de12512ea9a1cf4ce934ce98b473a3e2f4f807754911195ff01121cae4a3b5"
+      },
+      "submitted-native/3-1": {
+        "source_id": 15,
+        "archive_sha256": "8c4f46ba8f5185c01edafc9dc6980aa559403af706b3df43c850d9d857b9d61b"
+      },
+      "submitted-native/4-1": {
+        "source_id": 20,
+        "archive_sha256": "e1415e1ad563fb3372ebe23ad58468c5067a86cde277560d21d1438ae583cd4a"
+      },
+      "submitted-native/5-1": {
+        "source_id": 25,
+        "archive_sha256": "48d058d1ea04012913d2d348bd2655d504e0bf72fad1188fece560201349b4e1"
+      }
+    }
+  }
 }
