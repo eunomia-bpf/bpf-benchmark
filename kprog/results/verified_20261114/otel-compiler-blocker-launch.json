@@ -1,7 +1,7 @@
 {
   "recorded": "2026-11-14T07:38:10Z",
-  "pid": 262727,
-  "wait_pid": 239316,
+  "pid": 267051,
+  "wait_pid": 262728,
   "raw_directory": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker",
   "source_archive": "/workspaces/kprog-raw/perf/20261114-probe-read-otel-lto/control/service.tar.gz",
   "nested_request": "service/requests/3.failure.tar.gz",
@@ -53,6 +53,36 @@
     "wait_pid": 239316,
     "job_directory": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/replay-before-tracee",
     "application_outcome": null,
+    "postlaunch_outcome_polled": false
+  },
+  "replay_before_tracee_result": {
+    "pid": 262727,
+    "exit_code": 127,
+    "started": "2026-11-14T07:48:30Z",
+    "finished": "2026-11-14T07:48:30Z",
+    "compiler_invoked": false,
+    "classification": "harness failure: /usr/bin/time absent; no compiler result or RSS",
+    "raw": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/replay-before-tracee"
+  },
+  "current_replay": {
+    "recorded": "2026-11-14T07:51:47Z",
+    "pid": 267051,
+    "wait_pids": [
+      262728,
+      263016
+    ],
+    "raw": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/replay-python-rusage",
+    "measurement": "Python os.wait4 child-specific rusage, Linux peakRSS KiB",
+    "resource_preflight": {
+      "child_pid": 267050,
+      "returncode": 0,
+      "max_rss_kib": 12392,
+      "measurement": "os.wait4 child-specific rusage; Linux KiB"
+    },
+    "host_as_bytes": 85899345920,
+    "host_cpus": "8-15",
+    "same_input_and_clang_flags": true,
+    "resource_dependency_only": true,
     "postlaunch_outcome_polled": false
   }
 }
