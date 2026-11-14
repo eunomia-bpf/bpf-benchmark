@@ -676,3 +676,14 @@ guest-trusted-lifecycle:
 	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
 	python3 ../test/pending_native_snapshot.py "$(OUTPUT)" \
 		"$(REPO_ROOT)/bpfopt/shim/build-x86/libbpfrejit_shim.so" "$(BUILD_DIR)/libnative_loader.so"
+
+STACK_RELEASE_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-stack-release/host
+.PHONY: stack-release-check
+stack-release-check:
+	install -d "$(STACK_RELEASE_OUTPUT)"
+	$(CC) -O2 -g -fsanitize=undefined -fno-sanitize-recover=undefined -I"$(REPO_ROOT)" \
+		-I"$(LIBBPF_PREFIX)/include/bpf" ../formal/oracles/test_invocation_stack_host.c \
+		-o "$(STACK_RELEASE_OUTPUT)/host"
+	"$(STACK_RELEASE_OUTPUT)/host" > "$(STACK_RELEASE_OUTPUT)/host.log"
+	sha256sum ../x86/x86_sim_local_bpf.h ../formal/oracles/test_invocation_stack_host.c \
+		"$(STACK_RELEASE_OUTPUT)/host" > "$(STACK_RELEASE_OUTPUT)/sha256"

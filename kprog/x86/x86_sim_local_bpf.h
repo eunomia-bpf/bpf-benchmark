@@ -746,14 +746,21 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 #ifndef X86_SIM_L_STACK_SP
 #define X86_SIM_L_STACK_SP() ((__s64)(long)__x86_rsp.ptr)
 #endif
+/* One arbitrary word spans all independent byte combinations. Only whole
+ * released words are packed; boundary bytes retain independent choices. */
 #define X86_SIM_L_STACK_RELEASE(OLD) \
     do { __s64 __x86_release_old=(OLD), __x86_release_new=X86_SIM_L_STACK_SP(); \
       if (__x86_release_new>__x86_release_old) { \
         _Pragma("unroll") \
-        for (__u32 __x86_release_i=0; __x86_release_i<X86_SIM_STACK_BYTES; ++__x86_release_i) { \
+        for (__u32 __x86_release_i=0; __x86_release_i<X86_SIM_STACK_BYTES; __x86_release_i+=8U) { \
           __s64 __x86_release_off=(__s64)__x86_release_i-(__s64)X86_SIM_STACK_BYTES; \
-          if (__x86_release_off>=__x86_release_old && __x86_release_off<__x86_release_new) \
-            __x86_stack_mem.b[__x86_release_i]=(__u8)X86_SIM_L_UNSPECIFIED(); \
+          if (__x86_release_i+8U<=X86_SIM_STACK_BYTES && __x86_release_off>=__x86_release_old && __x86_release_off+8<=__x86_release_new) \
+            __x86_stack_mem.q[__x86_release_i/8U]=X86_SIM_L_UNSPECIFIED(); \
+          else { _Pragma("unroll") \
+            for (__u32 __x86_release_lane=0; __x86_release_lane<8U; ++__x86_release_lane) \
+              if (__x86_release_i+__x86_release_lane<X86_SIM_STACK_BYTES && __x86_release_off+__x86_release_lane>=__x86_release_old && __x86_release_off+__x86_release_lane<__x86_release_new) \
+                __x86_stack_mem.b[__x86_release_i+__x86_release_lane]=(__u8)X86_SIM_L_UNSPECIFIED(); \
+          } \
         } \
         X86_SIM_L_STACK_VALUES_CALL_FRAME(); \
       } \

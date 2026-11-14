@@ -1,7 +1,8 @@
 /* Native stack lifetime: allocated cells persist, released/below-SP cells draw fresh input. */
 #include <stdio.h>
 static unsigned long draws;
-static unsigned long fresh(void) { ++draws; return 0x5a5a5a5a5a5a5a5aUL; }
+static unsigned long fresh_value=0x5a5a5a5a5a5a5a5aUL;
+static unsigned long fresh(void) { ++draws; return fresh_value; }
 #ifdef TEST_ARM64
 #define ARM64_SIM_ENABLE_STACK 1
 #include "kprog/arm64/arm64_sim_local_bpf.h"
@@ -91,6 +92,24 @@ int main(void) {
     REQUIRE(X86_SIM_L_LOAD_ADDR_TAGGED(X86_SIM_L_STACK_PTR(-24),8,X86_SIM_TAG_STACK)==0x5a5a5a5a5a5a5a5aULL && draws==before+1);
     X86_SIM_L_STORE_ADDR_TAGGED(X86_SIM_L_STACK_PTR(-24),8,9,X86_SIM_TAG_STACK);
     REQUIRE(BYTE(-24)==0x5a);
+    /* Every release boundary keeps bytes outside the retired interval. */
+    for(long old=-32;old<=0;++old) for(long end=old;end<=0;++end) {
+      for(long byte=-64;byte<0;++byte) BYTE(byte)=0xc3;
+      __x86_rsp.ptr=(void *)end;
+      X86_SIM_L_STACK_RELEASE(old);
+      for(long byte=-64;byte<0;++byte)
+        REQUIRE(BYTE(byte)==(byte>=old && byte<end ? 0x5a : 0xc3));
+    }
+    /* Nonuniform full-word choices keep all 64 bits, not one byte repeated. */
+    for(unsigned bit=0;bit<64;++bit) {
+      fresh_value=1UL<<bit;
+      for(long byte=-64;byte<0;++byte) BYTE(byte)=0xc3;
+      __x86_rsp.ptr=0;
+      X86_SIM_L_STACK_RELEASE(-16);
+      for(long byte=-64;byte<0;++byte)
+        REQUIRE(BYTE(byte)==(byte>=-16 ? (fresh_value>>((byte+16)%8*8))&0xff : 0xc3));
+    }
+    fresh_value=0x5a5a5a5a5a5a5a5aUL;
     /* Alias writes preserve live bytes across SP for every width/alignment. */
     const unsigned widths[]={1,2,4,8};
     for(unsigned wi=0;wi<4;++wi) for(long off=-32;off+(long)widths[wi]<=0;++off)

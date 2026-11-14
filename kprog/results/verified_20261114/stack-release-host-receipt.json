@@ -1,0 +1,16 @@
+{
+  "recorded": "2026-11-14T06:23:49.986493+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-stack-release",
+  "before_host_exit": 0,
+  "after_host_exit": 0,
+  "undefined_behavior_sanitizer": true,
+  "release_boundary_pairs": 561,
+  "nonuniform_full_word_vectors": 64,
+  "scope": "Uniform x86 released-stack lowering; existing allocated/below-SP/alias/store/provenance cases plus every old/new boundary within32bytes and 64 nonuniform word choices",
+  "semantics": "A fresh64bit word ranges over every combination of eight independent bytes; each released word draws separately. Partial edges keep independent byte draws; live bytes and ghost-retirement routing unchanged.",
+  "proof_status": "Host component regression and direct byte-state argument, not full ISA/specialization proof or app coverage",
+  "archive": "kprog/results/verified_20261114/stack-release-host-results.tar.gz",
+  "bytes": 104217,
+  "sha256": "79b3bd1fe6b01b43ad7df79885cdeb6ba36c337068e9a30f80e36ec7d9935de6",
+  "raw_removed": false
+}
