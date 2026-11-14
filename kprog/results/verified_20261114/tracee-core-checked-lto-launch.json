@@ -1,0 +1,35 @@
+{
+  "recorded": "2026-11-14T08:01:03Z",
+  "pid": 270915,
+  "wait_pid": 267051,
+  "app": "tracee/monitor",
+  "configuration": "checked-sim-c LTO",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto",
+  "producer": {
+    "manifest": "/workspaces/repository/corpus/results/verified-tracee-core-reg/tracee/manifest.json",
+    "objects": 113,
+    "status": "native-objects-proof-linked",
+    "sha256": {
+      "manifest.json": "2bc637d934823adeb63b006fc745f85ea36da1ce4539b8a1373862fec6af02d2",
+      "kprobe_check.native.o": "d249e543e9e284e9c3c0fe345f9b48530a108a371264befc0e08011a0eb9d2e9",
+      "lsm_check.native.o": "55c87cf5e8d77ff8ae938728776a2c42e80bb3f2a41d9537166aef76e3c3e468",
+      "tracee.native.o": "489a7a69184baae011350d4c7632faf0f5539d9df8417aa2892246cc49be777f"
+    }
+  },
+  "producer_selector_commit": "b94e7d0ee",
+  "producer_build_receipt": "kprog/results/verified_20261112/tracee-core-reg-build-receipt.json",
+  "producer_compiler_flag": "MICRO_NATIVE_CORE_REG_PROBE_READS",
+  "scope": "Whole Tracee manifest, all113 entries; no app-source edits/program exclusions/verifier relaxation; existing supported producer selection",
+  "host_cpus": "8-15",
+  "guest_cpus": 8,
+  "guest_memory": "64G",
+  "host_as_bytes": 85899345920,
+  "samples": 1,
+  "workload_seconds": 10,
+  "bpf_stats": true,
+  "execution_mode": "checked-sim-c",
+  "dependency": "Wait compiler267051 resource release only; no compiler success requirement",
+  "dry_run_exit_code": 0,
+  "postlaunch_outcome_polled": false,
+  "application_completion_claimed": false
+}
