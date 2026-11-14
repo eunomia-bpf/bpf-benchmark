@@ -57,13 +57,19 @@ printf '%s\n' "$refresh_old_image" > "$refresh_output/old-image"
 make -C "$refresh_root/kprog/libnativeloader" shared-image-artifact-inventory \
     IMAGE_INVENTORY_OUTPUT="$refresh_output/native-inputs-before.json"
 
-if [[ $refresh_operation == full ]]; then
-# Interrupted recursive preflight removed vmlinux. Recover the matching ELF/BTF
-# directly from the sole unchanged boot image; do not build another kernel.
+if [[ $refresh_operation == full || $refresh_operation == --loader-only ]]; then
+# A caller's implicit Make rule can replace vmlinux without replacing the boot.
+# The sole boot is authoritative: restore its matching ELF/BTF, not a new build.
+sha256sum "$refresh_kernel/vmlinux" "$refresh_kernel/arch/x86/boot/bzImage" \
+    > "$refresh_output/kernel-before-elf-restore-sha256"
 "$refresh_root/vendor/linux-framework/scripts/extract-vmlinux" \
     "$refresh_kernel/arch/x86/boot/bzImage" > "$refresh_kernel/vmlinux"
 sha256sum "$refresh_kernel/arch/x86/boot/bzImage" "$refresh_kernel/vmlinux" > "$refresh_output/kernel-sha256"
+printf -- '- %s VERIFIED shared refresh: replaced the sole rebuildable vmlinux ELF with the matching ELF extracted from the unchanged sole boot image; no kernel build/version change; before/after hashes in %s.\n' \
+    "$(date -u +%FT%TZ)" "$refresh_output" >> "$refresh_root/kprog/docs/cleanup-log.md"
+fi
 
+if [[ $refresh_operation == full ]]; then
 make -C "$refresh_root/kprog/stock-path/module"
 make -C "$refresh_kernel" M="$refresh_root/kprog/perf/direct-native" MO="$refresh_direct" ARCH=x86 modules -j1
 make -C "$refresh_root/kprog/libnativeloader" trusted-service BUILD_DIR="$refresh_loader"
@@ -132,7 +138,7 @@ fi
 # Use the frozen image recipe and existing stable kernel/application artifacts.
 # Rebuild its loader/shim; avoid unrelated source exports and object rebuilds.
 refresh_release=$(cat "$refresh_kernel/include/config/kernel.release")
-refresh_overrides="HOST_KERNEL_BUILD_DIR_X86=$refresh_kernel X86_RUNTIME_KERNEL_IMAGE=$refresh_kernel/arch/x86/boot/bzImage X86_RUNNER_RUNTIME_IMAGE=$refresh_image JOBS=1 KERNEL_OFFSETS_INPUT=$refresh_root/micro/programs/build-x86/kernel_offsets.h VMLINUX_BTF=$refresh_kernel/vmlinux KERNEL_RELEASE=$refresh_release"
+refresh_overrides="HOST_KERNEL_BUILD_DIR_X86=$refresh_kernel X86_RUNTIME_KERNEL_IMAGE=$refresh_kernel/arch/x86/boot/bzImage X86_RUNNER_RUNTIME_IMAGE=$refresh_image JOBS=1 KERNEL_OFFSETS_INPUT=$refresh_root/micro/programs/build-x86/kernel_offsets.h KERNEL_RELEASE=$refresh_release"
 for refresh_stable in host-kernel-x86 host-kinsn-x86 host-micro-programs-x86 host-source-apps-x86 host-stage2-programs-x86 host-x86-sim-proofs host-native-bpf-x86 host-bpfopt-llvm-x86 host-rust-x86; do
     refresh_overrides+=" -o $refresh_stable"
 done
