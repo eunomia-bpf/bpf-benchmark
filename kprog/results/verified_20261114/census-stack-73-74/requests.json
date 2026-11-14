@@ -1,0 +1,40 @@
+[
+  {
+    "recorded": "2026-11-14T23:10:59Z",
+    "journal": "/workspaces/kprog-raw/perf/20261114-census-resume/control/outcomes.jsonl",
+    "application": "tracee/monitor",
+    "source_prog_id": 543,
+    "name": "trace_ret_vfs_writev_tail",
+    "body_group": 73,
+    "stage": "verifier_rejected",
+    "failure_class": "verifier_stack_access",
+    "service": {
+      "request_id": 19,
+      "started": "2026-11-14T21:36:07.301701+00:00",
+      "finished": "2026-11-14T22:54:52.896983+00:00",
+      "status": -5,
+      "failure_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/19.failure.tar.gz"
+    },
+    "archive_bytes": 41234892,
+    "scope": "Retained-producer load-only census, no execution request"
+  },
+  {
+    "recorded": "2026-11-14T23:10:59Z",
+    "journal": "/workspaces/kprog-raw/perf/20261114-census-resume/control/outcomes.jsonl",
+    "application": "tracee/monitor",
+    "source_prog_id": 477,
+    "name": "trace_ret_arch_prctl",
+    "body_group": 74,
+    "stage": "verifier_rejected",
+    "failure_class": "verifier_stack_access",
+    "service": {
+      "request_id": 20,
+      "started": "2026-11-14T22:58:08.408763+00:00",
+      "finished": "2026-11-14T23:04:09.342539+00:00",
+      "status": -5,
+      "failure_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/20.failure.tar.gz"
+    },
+    "archive_bytes": 20178028,
+    "scope": "Retained-producer load-only census, no execution request"
+  }
+]
