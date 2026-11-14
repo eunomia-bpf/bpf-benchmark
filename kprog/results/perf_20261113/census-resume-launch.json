@@ -1,0 +1,36 @@
+{
+  "recorded": "2026-11-14T16:57:45.193022+00:00",
+  "raw": "/workspaces/kprog-raw/perf/20261114-census-resume",
+  "job_pid": 524496,
+  "preparation": {
+    "input_inventory": "/workspaces/kprog-raw/verified/20261114-kfunc-refresh/ready/inventory.json",
+    "completed_journals": [
+      "kprog/results/verified_20261114/census-checkpoint-complete/outcomes.jsonl"
+    ],
+    "priority_inventories": [],
+    "pending_bodies": 192,
+    "queued_bodies": 192,
+    "additional_replay_bodies": 0,
+    "controller_commit": "03cba290cfb0f1626d7bab1f976d51817d0463a2",
+    "guest_inventories": [
+      "/workspaces/kprog-raw/perf/20261114-census-resume/ready/queues/0/inventory.json"
+    ]
+  },
+  "resources": {
+    "cpus": "20-23",
+    "vcpus": 4,
+    "memory": "24G",
+    "image_lock": "shared",
+    "timing_lock": false
+  },
+  "completed": [
+    {
+      "body_group": 49,
+      "application": "tracee/monitor",
+      "name": "trace_security_socket_sendmsg",
+      "stage": "installed",
+      "source_prog_id": 603
+    }
+  ],
+  "scope": "Continuation of old deduplicated load-only census, not new same-source Cilium/Tetragon or whole-app/native workload acceptance.192 queued at launch, first new body49 installed, no native workload counter claim."
+}

@@ -1,0 +1,138 @@
+{
+  "recorded": "2026-11-14T16:57:45.192764+00:00",
+  "raw_base": "/workspaces/kprog-raw/perf",
+  "archive_sha256": "1cbbb888d7831d4d15bb9b75320dd6b70f0fba638ab806d2fc551d2f02f4dc98",
+  "files": [
+    {
+      "path": "20261114-bpf-spill-layout/job.py",
+      "bytes": 2965,
+      "sha256": "a7b260e74a3ce88c0ac4bdb559d2fc5ae7c891b80545bf0e957ced8fd42d7cc1"
+    },
+    {
+      "path": "20261114-bpf-spill-layout/kernel/guest.sh",
+      "bytes": 534,
+      "sha256": "ba32ae8ebde59c43f75ce7d8f9606a703d1a634863512de089598bba54718242"
+    },
+    {
+      "path": "20261114-bpf-spill-layout/kernel/job.sh",
+      "bytes": 644,
+      "sha256": "41301df8f10bbc5e5985c8bfdd70e56ff0e598ae1d2e086c8a099bc6c37e7113"
+    },
+    {
+      "path": "20261114-bpf-spill-layout/kernel/verify_bpf_object.c",
+      "bytes": 1133,
+      "sha256": "ab44095799426d8b5a43bf11ebe3e3db54f54a19bf89048001c115a6ff205487"
+    },
+    {
+      "path": "20261114-bpf-spill-layout/retry1/job.py",
+      "bytes": 3044,
+      "sha256": "d851128e05b7c7a939579f27754c4a35679fdb66b57691b5af2cdd27389ed2d3"
+    },
+    {
+      "path": "20261114-bpf-spill-layout/retry2/job.py",
+      "bytes": 2793,
+      "sha256": "b7541be0ea9a2a6fc90de291b5360fe56a94ec815a487c34b4d8a34ad2033f12"
+    },
+    {
+      "path": "20261114-bpf-spill-layout/retry3/job.py",
+      "bytes": 2797,
+      "sha256": "510413e91c5620ff29d503a8817b2884af7c22d7893b4b06a1252f5e9093150a"
+    },
+    {
+      "path": "20261114-bpf-spill-layout/retry4/job.py",
+      "bytes": 2799,
+      "sha256": "93da418d5302a1a1c750988ea16b710ec97988c240edf6cefe4dab701624ddd4"
+    },
+    {
+      "path": "20261114-census-resume/control/guest-service.sh",
+      "bytes": 529,
+      "sha256": "6e0bdedcb6813574078146aca9c73bc015fafadc2e056b531874437eb58bf885"
+    },
+    {
+      "path": "20261114-census-resume/job.sh",
+      "bytes": 396,
+      "sha256": "404ac400250d5da497ad67610cea822402d92706bc14655836611d95246278a9"
+    },
+    {
+      "path": "20261114-compact-helper-dispatch/job.py",
+      "bytes": 1620,
+      "sha256": "498661906707fc06dc3bff522003788858f485713bc80e3a5e86096bfc73b43a"
+    },
+    {
+      "path": "20261114-compact-helper-dispatch/otel-main/job.py",
+      "bytes": 1626,
+      "sha256": "1a9c2f2a7fad20755d0fa50a33ab7627afdac7eaeac571dc1c6607ff79957a81"
+    },
+    {
+      "path": "20261114-mul-u64/compile-replay.py",
+      "bytes": 1739,
+      "sha256": "56bfcb3e860425dc9f4c8ab49337ce808efb72c4377e6260b83a6d59d5ecd252"
+    },
+    {
+      "path": "20261114-mul-u64/host-check/loader-fixture.py",
+      "bytes": 466,
+      "sha256": "23a14ec492b2cf3adbb576fe4ef81221f585885c3788eb0571942203cc95d4a9"
+    },
+    {
+      "path": "20261114-mul-u64/host-check.sh",
+      "bytes": 502,
+      "sha256": "7938dc78bb688585b59041aa0c73d3a66df3b7de8c10b7f0c7cf1e708899b9aa"
+    },
+    {
+      "path": "20261114-mul-u64/replay.py",
+      "bytes": 2701,
+      "sha256": "1faeaba8927e156dcf2781c69728e840550dbf6d9815f75c936b19ee6b30d32d"
+    },
+    {
+      "path": "20261114-otel-combined-codegen/checked/backend-matrix.py",
+      "bytes": 1154,
+      "sha256": "e73948105d8b46b83da091e66a9cc284ec074f35c8a918ec7c5f126fb9dde726"
+    },
+    {
+      "path": "20261114-otel-combined-codegen/checked/compare-retry.py",
+      "bytes": 2196,
+      "sha256": "f6d8d78cdec614be9824e8ae2a83ad25de0735a5e7dba3d9af36620f790a9cd9"
+    },
+    {
+      "path": "20261114-otel-combined-codegen/checked/guest.sh",
+      "bytes": 1554,
+      "sha256": "abe1c498a29409d3c86f60b40da35853c1544e96a0c9830951d80bc400fd841b"
+    },
+    {
+      "path": "20261114-otel-combined-codegen/checked/job.sh",
+      "bytes": 860,
+      "sha256": "585ca5140f4b18bf06f641d107483ad5c6b4f6653b0cbc6f4a4ee3bb109b75a0"
+    },
+    {
+      "path": "20261114-otel-expansion/analyze.py",
+      "bytes": 1840,
+      "sha256": "b7607424e654b929a52cca7f44f17a4480179ec79029e3dfb1d728eb06633b5e"
+    },
+    {
+      "path": "20261114-otel-stack-flags/job.py",
+      "bytes": 2802,
+      "sha256": "e55303fc9fe1bbc673c06151cc6fe617842edd836690f6e9c37e16e1e5366232"
+    },
+    {
+      "path": "20261114-scale-current/job.sh",
+      "bytes": 1136,
+      "sha256": "7e24e94266a1d215bd13780f1f687343c4d2e619a97cfb9429fde88139d00d24"
+    },
+    {
+      "path": "20261114-scale-current/retry1/job.py",
+      "bytes": 1513,
+      "sha256": "39660af42306a24054b97d45c19642b75d0fd6393d6fb6d070e066da3b8f6fb7"
+    },
+    {
+      "path": "20261114-scale-current/retry2/job.py",
+      "bytes": 1513,
+      "sha256": "39660af42306a24054b97d45c19642b75d0fd6393d6fb6d070e066da3b8f6fb7"
+    },
+    {
+      "path": "20261114-scale-current/retry3/job.py",
+      "bytes": 1513,
+      "sha256": "39660af42306a24054b97d45c19642b75d0fd6393d6fb6d070e066da3b8f6fb7"
+    }
+  ],
+  "scope": "Reproduction scripts for completed, failed and running experiments; full raw inputs remain in Workspace. Prototype scripts are not promoted compiler/runtime code."
+}
