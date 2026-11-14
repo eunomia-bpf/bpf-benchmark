@@ -687,6 +687,8 @@
 
 - VERIFIED 2026-11-14 PERF编译阻塞：235861的perf_unwind_native两次在clang -O3 -emit-llvm阶段SIGKILL，尚未进入stock verifier/native编译；不认定OOM。原始request3的预处理sim C为1132737246B。原命令host重放262727现直接排在Katran239316之后、Tracee262728之前（原未启动队列258314已撤换，记录保留），CPU8-15/AS80GiB，记录time-v RSS/status；raw `/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker`，receipt `kprog/results/verified_20261114/otel-compiler-blocker-launch.json`。未修改编译器/源码，待收取诊断，不声称修复或wholeapp通过。 保留输入只读统计为464645行，最长178403B；栈状态宏有大量重复展开（详见同一receipt的source_shape_investigation），不能据此认定SIGKILL原因。
 
+- VERIFIED 2026-11-14 Katran checked-sim-c整应用239316已收集：Make0/appOK，loaded1/stockverified1/installed1/run1；native id21计数28589324，无缺失/额外counter。stock B id18通过后从逐字节相同sim C编原生（原件/副本实际SHA均e87ce8d2d083，5条native命令全部0）。model529+preverifye6/boundse02，唯一image2aed63ff；corpus `x86_kvm_corpus_20261114_072451_546457`，receipt `kprog/results/verified_20261114/katran-private-input-lto-receipt.json`，完整38908366B归档只在raw，SHA7475de2c5124。先前Katran complexity失败在这批重试中已通过，不将1x10s覆盖运行当性能验收；其余应用仍继续。
+
 ## 3. 安全：运行时缺口（有限用例和 guest 已验证）
 
 - [x] 退出契约 RBP/R12/RSP、below-SP 栈生命周期（S7，cdeb9804d）；ARM 隐式 SP 回写（55504ff90）。

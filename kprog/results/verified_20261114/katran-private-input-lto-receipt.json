@@ -1,0 +1,215 @@
+{
+  "application": "katran",
+  "application_status": "ok",
+  "application_error": "",
+  "service_summary": {
+    "started": "2026-11-14T07:23:51.053539+00:00",
+    "command": [
+      "python3",
+      "/workspaces/repository/kprog/test/verified_corpus.py",
+      "katran",
+      "1",
+      "10",
+      "1"
+    ],
+    "service": {
+      "ready": true,
+      "arch": 1,
+      "endpoint": "/sys/kernel/debug/bpf_x86_native_lab/specializer"
+    },
+    "returncode": 0,
+    "service_returncode": -15,
+    "finished": "2026-11-14T07:48:27.049830+00:00"
+  },
+  "attempts": 1,
+  "loaded": 1,
+  "verified": 1,
+  "installed": 1,
+  "run": 1,
+  "installed_without_counter": [],
+  "native_counter_ids_without_install": [],
+  "baseline_counter_programs": 1,
+  "native_counter_programs": 1,
+  "programs": [
+    {
+      "request_id": 1,
+      "source_prog_id": 15,
+      "native_sha256": "ba252e0372d100f34b60a0deb3f0a7ccc16b632c3c1a5eb40e9b13d31e558c20",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T07:25:23.925718+00:00",
+      "prog_id": 21,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-katran-private-input-lto/control/state/session-7u_2cnzo/requests/1.success.tar.gz",
+      "finished": "2026-11-14T07:48:16.344951+00:00",
+      "stock_load": {
+        "request_id": 1,
+        "prog_id": 21,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 1,
+        "prog_id": 18,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 60802,
+        "bytes_xlated": 70320,
+        "id": 21,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 28589324,
+        "run_time_ns_delta": 4895204995,
+        "type": "xdp"
+      }
+    }
+  ],
+  "recorded": "2026-11-14T07:49:22.488848+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-katran-private-input-lto",
+  "corpus_run_directory": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_072451_546457",
+  "capture_directory": "/workspaces/repository/corpus/results/verified-captures-3wuwy528",
+  "make_exit_code": 0,
+  "launch_receipt": {
+    "recorded": "2026-11-14T06:59:16Z",
+    "pid": 239316,
+    "wait_pid": 239086,
+    "app": "katran",
+    "configuration": "checked-sim-c LTO",
+    "execution_mode": "checked-sim-c",
+    "service_execution_args": "$(CHECKED_COMPILER_SERVICE_ARGS)",
+    "raw_directory": "/workspaces/kprog-raw/verified/20261114-katran-private-input-lto",
+    "image": "bpf-benchmark/kprog:current after writer239086; actual SHA to collect",
+    "kernel": "74d1097af561 unchanged by planned writer",
+    "model_commit": "52964ca12",
+    "preverify_compiler_commit": "e6e64b725",
+    "expected_bounds_compiler_sha256": "e02a61a2659e87acc84ef6b9f3089528479df3dfead118543abeb423a8057af0",
+    "host_cpus": "8-15",
+    "guest_cpus": 8,
+    "guest_memory": "64G",
+    "host_as_bytes": 85899345920,
+    "image_lock": "shared AFTER writer exits",
+    "samples": 1,
+    "workload_seconds": 10,
+    "bpf_stats": true,
+    "dependency": "Writer Make0 required because it supplies the tested compiler/module/loader image; actual artifact prerequisite, not benchmark-success admission",
+    "dry_run_exit_code": 0,
+    "postlaunch_outcome_polled": false,
+    "application_completion_claimed": false,
+    "raw_removed": false
+  },
+  "corpus_metadata": {
+    "bpf_stats": true,
+    "completed_at": "2026-11-14T07:48:26.803026+00:00",
+    "config": {
+      "enabled_passes": [
+        "noop",
+        "map_inline",
+        "const_prop",
+        "dce",
+        "rotate",
+        "cond_select",
+        "extract",
+        "endian_fusion",
+        "lea",
+        "ccmp",
+        "bulk_memory",
+        "prefetch",
+        "wide_mem",
+        "bounds_check_merge",
+        "skb_load_bytes_spec",
+        "noop",
+        "const_prop",
+        "dce"
+      ]
+    },
+    "details_dir": "details",
+    "generated_at": "2026-11-14T07:48:26.803029+00:00",
+    "last_updated_at": "2026-11-14T07:48:26.803026+00:00",
+    "launcher_boot_id": "ea42fbbb-95a1-4988-9cda-dde53b359b28",
+    "launcher_pid": 1822,
+    "launcher_start_ticks": 6416,
+    "manifest": "/workspaces/repository/corpus/config/macro_apps.yaml",
+    "run_type": "x86_kvm_corpus",
+    "samples": 1,
+    "started_at": "2026-11-14T07:24:51.546457+00:00",
+    "status": "completed",
+    "suite": "corpus",
+    "workload_only": false,
+    "workload_seconds": 10.0
+  },
+  "scope": "Actual upstream two-start verified-B run; workload run means positive recorded native run_cnt_delta",
+  "raw_removed": false,
+  "archive": {
+    "raw_archive": "/workspaces/kprog-raw/verified/20261114-katran-private-input-lto/collection/full-evidence.tar.gz",
+    "sha256": "7475de2c5124818bff1d14e2d2378b5e13d2c86263bea78c34c4d7d27b3efa72",
+    "bytes": 38908366
+  },
+  "checked_source_identity": {
+    "actual_archive_sha256": {
+      "request/generated/checked-simulator.i": "e87ce8d2d083c845f7ea84c374bdb6ba7a366c50f925fd9482a7c46851ed1e41",
+      "request/generated/trusted_x86.bpf.i": "e87ce8d2d083c845f7ea84c374bdb6ba7a366c50f925fd9482a7c46851ed1e41"
+    },
+    "manifest": {
+      "source": "/workspaces/kprog-raw/verified/20261114-katran-private-input-lto/control/state/session-7u_2cnzo/requests/request-gckxefi8/generated/trusted_x86.bpf.i",
+      "copied_source": "/workspaces/kprog-raw/verified/20261114-katran-private-input-lto/control/state/session-7u_2cnzo/requests/request-gckxefi8/generated/checked-simulator.i",
+      "source_sha256": "e87ce8d2d083c845f7ea84c374bdb6ba7a366c50f925fd9482a7c46851ed1e41",
+      "copied_source_sha256": "e87ce8d2d083c845f7ea84c374bdb6ba7a366c50f925fd9482a7c46851ed1e41",
+      "executable_sha256": "ee03f75ec0778f8cf77a7f9c1cc18fe900964cb7446ccde20f17da53e58588a1",
+      "context_layouts": {
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json": "4994d101ae57abe7477ff941ec3c5e9b30d4f4b16281bfcad7aa6c96ad32f754",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json": "f5bc8aca1efb449a446f4789f49edebd27025bdc624df709a98fe509334c85f9"
+      },
+      "artifacts": {
+        "native_object": "/workspaces/kprog-raw/verified/20261114-katran-private-input-lto/control/state/session-7u_2cnzo/requests/request-gckxefi8/generated/checked-simulator.native.o",
+        "native_proof_object": "/workspaces/kprog-raw/verified/20261114-katran-private-input-lto/control/state/session-7u_2cnzo/requests/request-gckxefi8/generated/checked-simulator.proof.o",
+        "simulator_object": "/workspaces/kprog-raw/verified/20261114-katran-private-input-lto/control/state/session-7u_2cnzo/requests/request-gckxefi8/generated/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "simulator_source": "/workspaces/kprog-raw/verified/20261114-katran-private-input-lto/control/state/session-7u_2cnzo/requests/request-gckxefi8/generated/trusted_x86.bpf.c",
+        "simulator_preprocessed": "/workspaces/kprog-raw/verified/20261114-katran-private-input-lto/control/state/session-7u_2cnzo/requests/request-gckxefi8/generated/trusted_x86.bpf.i",
+        "context_kind": "xdp",
+        "symbol": "trusted_x86_x86_sim_xdp",
+        "native_sha256": "ba252e0372d100f34b60a0deb3f0a7ccc16b632c3c1a5eb40e9b13d31e558c20"
+      }
+    },
+    "native_command_returncodes": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "captured_source_and_tool_sha256": {
+      "/workspaces/repository/kprog/trusted_service.py": "0f220f9b9ca456f9920754e1f8d7d00ccb61f0b700e6604d6a2fe1a117321a7a",
+      "/workspaces/repository/kprog/trusted_generation.py": "8904adbab468569c0a8eddaf00084434bc92310c4db61f80476ecde7fc92404b",
+      "/workspaces/repository/kprog/x86/trusted_specializer.py": "f49ff815b96ae965c1c8c7f0d76b55b6618b58f4daf735a6fc936b9af1afde1a",
+      "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "f95f3e3b9ece20bd1a7340c9d2be478cb7befea33bae02892dfe353d525c0bb0",
+      "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "748438e87c1f0daaee18ff0af88d0a99a03f17d1554de674f4864a60b1959526",
+      "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "b1791b4c32a674eed66691ffa012422feaa48ccb27b08cfe8a0e7f4cbb64fcb0",
+      "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "2a476b9b47f02497c515f65874b6061ad60540cc1e9177d546e0520d8ca1227a",
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "8312f5ac05364dbb0f77f4301e571faf99f4fc65f92be37b058c8d884fe84dc5",
+      "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader": "0bdcbe743aca12b5afed11ae40116e0d6437657f3068ef722056ef09e0061bb5",
+      "/workspaces/repository/kprog/kernel_function_abi.py": "f8f021f4636d99ed96086501574971030f664fea825b1779a8199e3777ea648d",
+      "/workspaces/repository/kprog/x86/micro-prog/kfunc_codegen.py": "b820d52e33c25662399648a6b94ecff2c33cd4666033a48bb58f6a8f20285a0a",
+      "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py": "d832682ab2fdfe2376db19f2e959655d181226ca0c4f400b0676ea6b10bcc1ae",
+      "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir": "bfe23fdb831b367e5a6345e77f91d90f8e75b308e24b6d1ea92478430792d1bc",
+      "/workspaces/repository/kprog/x86/compile_sim_ir.cpp": "fdd6b6d347cc00e3270eb29a8005ecc519408cf336367f3e5acc2a0bf5e6d2cb",
+      "/workspaces/.agent-state/kprog-ck/verified-compiler/context-lower": "5f4549c07681c471cc57fe69b6c4bd1a9146a9775cd5cb43242a2131a84ea05d",
+      "/workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json": "4994d101ae57abe7477ff941ec3c5e9b30d4f4b16281bfcad7aa6c96ad32f754",
+      "/workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json": "f5bc8aca1efb449a446f4789f49edebd27025bdc624df709a98fe509334c85f9",
+      "/workspaces/repository/kprog/perf/native-context/socket-context-lower.cpp": "1f962a567bcfc64bbb88eb7466b634979a644813d8a15fba689c31380e85732f",
+      "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds": "e02a61a2659e87acc84ef6b9f3089528479df3dfead118543abeb423a8057af0",
+      "/workspaces/repository/kprog/x86/packet_bounds_ir.cpp": "f82edd33ceb27bcd1ca0180e775ac940521c86079026ff3240e34c97132e24ca"
+    }
+  },
+  "image_at_collection": "sha256:2aed63ff946f379ffb613586eb9d52a9c0274e3a92b25b675748292c9163d12c",
+  "image_scope": "Sole deployment image unchanged since writer239086; actual tag ID collected separately from per-request captured source identities."
+}
