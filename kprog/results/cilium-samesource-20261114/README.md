@@ -1,4 +1,4 @@
-# Cilium: same-source native build, and the four divergences closed
+# Cilium: same-source native build, and the divergences the audit listed
 
 Lane C took Cilium's same-source build over from lane PERF on 2026-11-14T10:02:41Z
 (COORDINATION, split by code). This file records the build, the source
@@ -29,26 +29,46 @@ is the host's, which silently swaps the tracked headers.
 | D01 | native dereferences public `bpf_sock_addr`/`bpf_sock` layouts; the real entry contexts are `bpf_sock_addr_kern`/`sock` | **already correct in the image's own build**: `bpf_sock.native.o` produced by `native-cilium` is byte-identical to the image's, section by section, so this is not a remaining divergence in the recipe. `kprog/build`'s `upstream-socket-native` target performs the lowering in IR (55 accesses) as the alternative route. |
 | D02 | native `cb[0]` at skb+40, eBPF at skb+48 | in the native `__sk_buff` model (`include/linux/bpf.h`, `-DMICRO_NATIVE` block) plus `packet-context-check`, which passes: "TC qdisc metadata/classid/wire_len, full-width packet pointers, XDP nested interfaces PASS" |
 | D08 | `ingress_ifindex` read as a public word at +12, inside the real `data_end` pointer | **fixed**, commit `67802556c` |
-| D09 | hybrid-routing subnet lookups removed, `same_subnet_id` left false | **fixed**, commit `377f85143` |
+| D09 | hybrid-routing subnet lookups removed, `same_subnet_id` left false | **the guard is correct**; the removal fails to load. Commit `85c7f9af2` restores it with the reason. |
 | D10 | `wire_len` returns `skb.len`; tc_classid clear skipped | in the native model and `packet-context-check`, as D02 |
 
-### D09, and why it mattered
+### D09, and why the guard has to stay
 
-`bpf_lxc.c` put both hybrid-routing blocks behind `#ifndef MICRO_NATIVE`. Under
-`MICRO_NATIVE`, `CONFIG(name)` is a direct reference to the captured config
-global (`lib/static_data.h`), so nothing forced the guard: the source could
-compile its own branch. Removing the guards restores it.
+`bpf_lxc.c` puts both hybrid-routing blocks behind `#ifndef MICRO_NATIVE`, which
+leaves `same_subnet_id` false and changes `skip_tunnel` — so it looked like a
+behavioural divergence, and removing the guards looked like the fix. It is not.
 
-The image's own `bpf_lxc.native.o` shows what the guard cost: it *declares*
-`__config_hybrid_routing_enabled` but never reads it, and has **zero**
-references to `cilium_subnet_map`, while the eBPF-side `bpf_lxc.o` has four. The
-native arm was skipping a map lookup the eBPF arm performs on every
-`handle_ipv4_from_lxc`/`handle_ipv6_from_lxc` call with hybrid routing enabled,
-and leaving `same_subnet_id=false`, which changes `skip_tunnel`.
+Removing them makes `bpf_lxc.native.o` name `cilium_subnet_map`, and the program
+stops loading. In run `x86_kvm_corpus_20261114_154232_483911` all 38 loads of
+`tail_handle_ipv4_cont` failed with
 
-After the fix the object reads the config twice (the truth test and the
-fall-through) and carries the `cilium_subnet_map` pointer load. `tc/tail` grows
-304 B (73 580 -> 73 884), `tc/entry` changes at equal size (7 618 B).
+```
+Error: GOT-relative reloc against unknown symbol cilium_subnet_map; add it to
+link-plan helpers or maps
+```
+
+while the rest of the object linked normally.
+
+The cause is Cilium's loader, not the recipe. `CONFIG()` must go through the
+macro "to ensure the loader's dead code elimination can recognize" it
+(`lib/static_data.h:60-62`), and the loader does exactly that at load time: the
+object's `tail_handle_ipv4_cont` is 28 072 B / 3509 insns, the loaded program is
+2022 insns with hybrid routing off, and **no `cilium_subnet_map` is created at
+all** — that run creates 182 maps, none of them this one. A config branch and the
+maps it references leave the loaded program together, so a native object that
+names the map statically has nothing to bind to.
+
+This also explains the image's own object: it declares
+`__config_hybrid_routing_enabled` and never reads it, because under this
+deployment's config the branch is gone. The native object matches the program it
+is loaded for.
+
+Doing better is a linker capability — drop a config branch together with its map
+references from the native object when the captured value folds the branch away —
+which is lane PERF's code (`kprog/x86/native_lab/native_link`), not this recipe.
+
+State after `85c7f9af2`: `bpf_lxc.native.o` back to 0 subnet references and
+`tc/tail` back to 73 580 B, identical to the image; both arms rc=0.
 
 ### D08, and the chain
 
@@ -89,5 +109,5 @@ matches the image's. Whether the same holds for the `cilium/agent` attach types
 Cilium's own loader uses on cgroup hooks is not established here.
 
 No timing for Cilium is claimed from this file. The next step is a both-arm run
-(`cilium/agent`) with the D08/D09 objects, comparing judgements and relay logs
+(`cilium/agent`) with the D08 objects, comparing judgements and relay logs
 between arms before any per-invocation number is quoted.
