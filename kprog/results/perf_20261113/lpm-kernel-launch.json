@@ -1,0 +1,71 @@
+{
+  "recorded_at": "2026-11-14T08:55:10Z",
+  "pid": 337492,
+  "status": "LAUNCHED_WITH_RESOURCE_DEPENDENCY_UNCOLLECTED_NO_POSTLAUNCH_POLLS",
+  "source_commit": "f74381f47",
+  "raw": "/workspaces/kprog-raw/perf/20261114-lpm-lto",
+  "job": "/workspaces/kprog-raw/perf/20261114-lpm-lto/kernel-job",
+  "output": "/workspaces/kprog-raw/perf/20261114-lpm-lto/kernel",
+  "wait_pid": 270915,
+  "wait_reason": "Resource order only after existing Tracee natural exit, not an acceptance gate",
+  "locks": [
+    "timing exclusive before image shared"
+  ],
+  "planned_kernel": {
+    "configurations": [
+      "submitted-native",
+      "checked-sim-c"
+    ],
+    "cases": [
+      "16byte LPMkey:12data-byte fastpath",
+      "8byte LPMkey:4data-byte original-helper fallback"
+    ],
+    "states": [
+      "empty",
+      "default0prefix",
+      "nested+full+intermediate nodes",
+      "live value rewrite",
+      "best/default deletion",
+      "empty after deletion"
+    ],
+    "oracle": "Actual kernel bpf_map_lookup_elem syscall for valid query prefixes; invalid prefix expectedNULL.",
+    "cpus": "16-19",
+    "vcpus": 2,
+    "guest_memory": "4G",
+    "host_address_space_bytes": 17179869184,
+    "planned_stock_native_executions": 3360,
+    "resource_order": "Queue after existing Tracee270915 natural exit, then existing timing EX /image SH to preserve C3 single-guest intent; no success gate."
+  },
+  "payload_inputs": [
+    {
+      "path": "corpus/results/perf-lpm-lto-linker-20261114/native-link.real",
+      "sha256": "22bd4810d9a0667f90973fb8cd70a602c4c355c03b1626799522d2dd5eb316d6"
+    },
+    {
+      "path": "corpus/results/perf-lpm-lto-linker-20261114/native-link-on",
+      "sha256": "2b80231a478f500400dacce9dcabfe756db6471f0b618b170e86e84dbbcbd610"
+    },
+    {
+      "path": "corpus/results/perf-lpm-lto-linker-20261114/native-link-off",
+      "sha256": "2b80231a478f500400dacce9dcabfe756db6471f0b618b170e86e84dbbcbd610"
+    },
+    {
+      "path": "corpus/results/perf-lpm-lto-linker-20261114/runtime-lpm-layout.json",
+      "sha256": "ea1bd0f3ed6be89836d5aaf3c4ca98117266ed60b4cebd2806c66b3764303272"
+    },
+    {
+      "path": "corpus/results/perf-lpm-lto-linker-20261114/runtime-hash-layout.json",
+      "sha256": "971f96e6e983c1272ef2daf2ce23eeda165ae87d914c398a2ee62870b23b432b"
+    },
+    {
+      "path": "corpus/results/perf-lpm-lto-linker-20261114/runtime-probe-read-layout.json",
+      "sha256": "75a971bd496f290b1763efcfe2f78b74e80d2c8bd3c7c064308337fe5026f12e"
+    }
+  ],
+  "service_source": {
+    "path": "kprog/x86/trusted_specializer.py",
+    "writer_commit": "b0139ffbd",
+    "sha256": "a69bf301169249bd027ec4c3946de369f255170f7906ab23735e0eab040dbee4"
+  },
+  "scope": "Four actual LPM cases planned, no outcome observed. Same sole kernel/base/image, no canonical rebuild. Current service writer boundary consumed; model/header unchanged. Native program comes only after actual verification in checked configuration."
+}
