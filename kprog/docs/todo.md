@@ -175,6 +175,8 @@
 
 - PERF 2026-11-14 静态helper特化：只按原dispatcher选择已知helper同一宏，不改P/ISA/body/动态未知路径。62份真实Cilium C除3272处调用拼写外完全相同；一个实际B的allocated字节+202reloc相同且展开97.3→46.8MB。实际OTel read_task_struct/stop两份stock验证+checked-C安装通过，B和checked-native allocated字节/reloc均等于旧接受输入。主程序完整编译/验证仍在跑；不报运行时收益或M4完成，spill对齐原型仍仅run-only。见 static-helper-specialization-result.json。
 
+- PERF 2026-11-14 LPM child读取重叠候选：原有默认关闭 runtime-lpm-layout 下，仅12-byte形状按sole-kernel max_prefixlen=data_size*8=96提前读取child，与prefix计算重叠；nodeprefix>=96不读不存在keybit，匹配后才消费。65590 host/33Rust+1原ignored/11真实对象默认逐字节组一致；实际kernel两配置×两形状合计3360次stock/native对照通过。尚无性能收益；已排队corrected OTel仍旧binary，未混入该改法。证据 lpm-child-overlap-result.json/evidence.tar.gz。
+
 **lane verified 的大任务：六个应用在唯一内核和镜像上走通 verified 路径。** 普查按程序体去重、最多三个 guest 并行跑完；失败类别按 BPF 时间占比从大到小修；每个应用整应用复测，记下加载、通过 verifier、执行的程序数和运行目录；之后做 100–100K 规模扫描。链接器、加载器、shim 归你，lane perf、lane C 的相关改动由你审看或代改。
 - [ ] V1 按程序体去重的常驻普查跑完；已发现的失败类别（栈写越界、callback、scalar 内存访问、编译器栈存储）现在就修，按 BPF 时间占比从大到小。
 - [ ] V2 六个应用整应用复测，记下每个应用加载、通过 verifier、执行的程序数和运行目录。

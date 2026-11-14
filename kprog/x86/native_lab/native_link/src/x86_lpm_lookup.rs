@@ -20,6 +20,17 @@ pub(super) fn routine(l:&RuntimeLpmLayout)->Result<(Vec<u8>,usize)> {
     let empty=append_x86_jcc_rel32(&mut b,0x84);
     mem(&mut b,&[0x44,0x8b,0x9a],l.node_prefixlen)?; // r11d=node prefix
     b.extend_from_slice(&[0x45,0x89,0xd9,0x45,0x39,0xd1,0x45,0x0f,0x47,0xca]); // r9d=min(node,query)
+    // LPM allocation fixes max_prefixlen=data_size*8, hence96 for this shape.
+    // Read the next child early, overlapping its latency with prefix matching.
+    // A full-depth node has no key bit at96 and must skip this read.
+    b.extend_from_slice(&[0x31,0xff,0x41,0x83,0xfb,96]);
+    let no_child=append_x86_jcc_rel32(&mut b,0x83);
+    b.extend_from_slice(&[0x44,0x89,0xd9,0xc1,0xe9,3]);
+    mem(&mut b,&[0x0f,0xb6,0x84,0x0e],l.key_data)?; // key data[node prefix /8]
+    b.extend_from_slice(&[0x44,0x89,0xd9,0x83,0xe1,7,0x83,0xf1,7,0xd3,0xe8,0x83,0xe0,1]);
+    b.extend_from_slice(&[0x48,0x69,0xc0]);b.extend_from_slice(&i32::try_from(l.child_stride)?.to_le_bytes());
+    mem(&mut b,&[0x48,0x8b,0xbc,0x02],l.child)?;
+    let child_ready=b.len();patch_x86_rel32(&mut b,no_child,child_ready)?;
     mem(&mut b,&[0x48,0x8b,0x82],l.node_data)?;
     mem(&mut b,&[0x48,0x33,0x86],l.key_data)?;
     b.extend_from_slice(&[0x48,0x0f,0xc8,0x48,0x85,0xc0]); // big endian XOR
@@ -42,7 +53,7 @@ pub(super) fn routine(l:&RuntimeLpmLayout)->Result<(Vec<u8>,usize)> {
     b.push(0xb9);b.extend_from_slice(&64u32.to_le_bytes());
     let clamp=b.len();patch_x86_rel32(&mut b,exact_done,clamp)?;patch_x86_rel32(&mut b,first_done,clamp)?;patch_x86_rel32(&mut b,second_done,clamp)?;
     b.extend_from_slice(&[0x44,0x39,0xc9,0x41,0x0f,0x47,0xc9]); // min(common prefix,limit)
-    mem(&mut b,&[0x48,0x3b,0x8f],l.max_prefixlen)?;
+    b.extend_from_slice(&[0x83,0xf9,96]);
     let full=append_x86_jcc_rel32(&mut b,0x84);
     b.extend_from_slice(&[0x44,0x39,0xd9]);
     let mismatch=append_x86_jcc_rel32(&mut b,0x82);
@@ -50,11 +61,7 @@ pub(super) fn routine(l:&RuntimeLpmLayout)->Result<(Vec<u8>,usize)> {
     let intermediate=append_x86_jcc_rel32(&mut b,0x85);
     b.extend_from_slice(&[0x49,0x89,0xd0]); // best=current, unless intermediate
     let descend=b.len();patch_x86_rel32(&mut b,intermediate,descend)?;
-    b.extend_from_slice(&[0x44,0x89,0xd9,0xc1,0xe9,3]);
-    mem(&mut b,&[0x0f,0xb6,0x84,0x0e],l.key_data)?; // key data[node prefix /8]
-    b.extend_from_slice(&[0x44,0x89,0xd9,0x83,0xe1,7,0x83,0xf1,7,0xd3,0xe8,0x83,0xe0,1]);
-    b.extend_from_slice(&[0x48,0x69,0xc0]);b.extend_from_slice(&i32::try_from(l.child_stride)?.to_le_bytes());
-    mem(&mut b,&[0x48,0x8b,0x94,0x02],l.child)?;
+    b.extend_from_slice(&[0x48,0x89,0xfa]); // current=previously-read child
     let back=jmp(&mut b);patch_x86_rel32(&mut b,back,walk)?;
     let found=b.len();patch_x86_rel32(&mut b,full,found)?;
     b.extend_from_slice(&[0x49,0x89,0xd0]); // exact max-prefix wins even before flags
@@ -93,7 +100,7 @@ mod tests {
         let root=PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../..");
         let driver=out.join("check");
         let cc=std::process::Command::new("cc").args(["-O2","-Wall","-Wextra","-Werror","-no-pie"])
-            .arg(root.join("kprog/perf/native-context/test-lpm-lookup.c")).arg("-o").arg(&driver).output()?;
+            .arg(root.join("kprog/build/test-lpm-lookup.c")).arg("-o").arg(&driver).output()?;
         fs::write(out.join("compile.stdout"),&cc.stdout)?;fs::write(out.join("compile.stderr"),&cc.stderr)?;
         if !cc.status.success(){bail!("LPM fixture compile: {}",String::from_utf8_lossy(&cc.stderr));}
         let (bytes,call)=routine(&layout)?;let binary=out.join("lpm.bin");fs::write(&binary,&bytes)?;

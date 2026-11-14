@@ -1,0 +1,288 @@
+{
+  "recorded": "2026-11-14T17:33:30.496106+00:00",
+  "raw": "/workspaces/kprog-raw/perf/20261114-lpm-overlap",
+  "scope": "LPM child-load overlap candidate: correctness only, not performance or whole-app acceptance.",
+  "implementation": "For validated12-byte LPM data shape, kernel allocation fixes max_prefixlen=96. Keep map-type/data-size/query-prefix guards, read child into caller-saved RDI early only when node_prefix<96, overlap its latency with unchanged prefix matching, consume only on descent. Full-depth skips key bit96; fallback retains original RDI/ABI. Replace repeated map.max_prefixlen load by invariant96.",
+  "kernel_invariant": "vendor/linux-framework/kernel/bpf/lpm_trie.c594-596",
+  "switch": "Existing opt-in --runtime-lpm-layout; default-off proof and kernel outputs unchanged.",
+  "host_vectors": 65590,
+  "rust_tests": {
+    "passed": 33,
+    "ignored": 1,
+    "scope": "existing ignored fixture unchanged"
+  },
+  "default_real_objects": {
+    "cases": [
+      {
+        "label": "bcc",
+        "input": "/workspaces/kprog-raw/perf/20261114-lpm-overlap/default/inputs/7f6b076b0c30b8569721b6c1b1c1fe603ec750281c8c500ef0f01673dabccfa9.native.o",
+        "original_input": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/syscount.native.o",
+        "symbol": "sys_enter",
+        "input_sha256": "7f6b076b0c30b8569721b6c1b1c1fe603ec750281c8c500ef0f01673dabccfa9",
+        "default_proof_full_elf_equal": true,
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 114,
+        "proof_bytes_after": 114,
+        "local_routines": []
+      },
+      {
+        "label": "cilium",
+        "input": "/workspaces/kprog-raw/perf/20261114-lpm-overlap/default/inputs/269b862447b45c4df64763b77acea8216aaa162cc453fbcdb79c26982c6d8ef7.native.o",
+        "original_input": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+        "symbol": "cil_from_container",
+        "input_sha256": "269b862447b45c4df64763b77acea8216aaa162cc453fbcdb79c26982c6d8ef7",
+        "default_proof_full_elf_equal": true,
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 1258,
+        "proof_bytes_after": 1258,
+        "local_routines": []
+      },
+      {
+        "label": "katran",
+        "input": "/workspaces/kprog-raw/perf/20261114-lpm-overlap/default/inputs/79b1618ff6aece26fa956377518e44f2726f0f71292171037c86a80c737df813.native.o",
+        "original_input": "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/balancer.native.o",
+        "symbol": "balancer_ingress",
+        "input_sha256": "79b1618ff6aece26fa956377518e44f2726f0f71292171037c86a80c737df813",
+        "default_proof_full_elf_equal": true,
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 8096,
+        "proof_bytes_after": 8096,
+        "local_routines": []
+      },
+      {
+        "label": "otel",
+        "input": "/workspaces/kprog-raw/perf/20261114-lpm-overlap/default/inputs/590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915.native.o",
+        "original_input": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "symbol": "native_tracer_entry",
+        "input_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915",
+        "default_proof_full_elf_equal": true,
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 6783,
+        "proof_bytes_after": 6909,
+        "local_routines": [
+          {
+            "name": "__native_link_local_memset_zero_dynamic",
+            "size": 126,
+            "offset": 6783,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          }
+        ]
+      },
+      {
+        "label": "tetragon",
+        "input": "/workspaces/kprog-raw/perf/20261114-lpm-overlap/default/inputs/d492f48ee6f8d1a678dd72715b61f7b4f809c7fc0da45386484ad0bd3a9587e9.native.o",
+        "original_input": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_kprobe_v61.native.o",
+        "symbol": "generic_kprobe_event",
+        "input_sha256": "d492f48ee6f8d1a678dd72715b61f7b4f809c7fc0da45386484ad0bd3a9587e9",
+        "default_proof_full_elf_equal": true,
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 1203,
+        "proof_bytes_after": 1203,
+        "local_routines": []
+      },
+      {
+        "label": "tetragon-execve",
+        "input": "/workspaces/kprog-raw/perf/20261114-lpm-overlap/default/inputs/52e2f0c3df13405cfb6a9fdd5ea0c0dc89cad5ff8ed3afcccc9fdf3bac13384c.native.o",
+        "original_input": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_execve_event_v61.native.o",
+        "symbol": "event_execve",
+        "input_sha256": "52e2f0c3df13405cfb6a9fdd5ea0c0dc89cad5ff8ed3afcccc9fdf3bac13384c",
+        "default_proof_full_elf_equal": true,
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 9997,
+        "proof_bytes_after": 10081,
+        "local_routines": [
+          {
+            "name": "__native_link_local_memset_zero_144",
+            "size": 84,
+            "offset": 9997,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          }
+        ]
+      },
+      {
+        "label": "bcc-biosnoop",
+        "input": "/workspaces/kprog-raw/perf/20261114-lpm-overlap/default/inputs/a07dfa5e538b540cfb5991ed6892cb303dbda7ecf31b03f4d0d0650bc44eb7b0.native.o",
+        "original_input": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/biosnoop.native.o",
+        "symbol": "block_rq_insert",
+        "input_sha256": "a07dfa5e538b540cfb5991ed6892cb303dbda7ecf31b03f4d0d0650bc44eb7b0",
+        "default_proof_full_elf_equal": true,
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 331,
+        "proof_bytes_after": 331,
+        "local_routines": []
+      },
+      {
+        "label": "tracee-trace_sys_enter",
+        "input": "/workspaces/kprog-raw/perf/20261114-lpm-overlap/default/inputs/ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1.native.o",
+        "original_input": "/workspaces/kprog-raw/perf/20261114-lpm-lto/default/inputs/ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1.native.o",
+        "symbol": "trace_sys_enter",
+        "input_sha256": "ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1",
+        "default_proof_full_elf_equal": true,
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 5884,
+        "proof_bytes_after": 6297,
+        "local_routines": [
+          {
+            "name": "__native_link_local_memset_zero_368",
+            "size": 280,
+            "offset": 5884,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          },
+          {
+            "name": "__native_link_local_memset_zero_200",
+            "size": 133,
+            "offset": 6164,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          }
+        ]
+      },
+      {
+        "label": "tracee-trace_sys_exit",
+        "input": "/workspaces/kprog-raw/perf/20261114-lpm-overlap/default/inputs/ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1.native.o",
+        "original_input": "/workspaces/kprog-raw/perf/20261114-lpm-lto/default/inputs/ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1.native.o",
+        "symbol": "trace_sys_exit",
+        "input_sha256": "ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1",
+        "default_proof_full_elf_equal": true,
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 5910,
+        "proof_bytes_after": 6323,
+        "local_routines": [
+          {
+            "name": "__native_link_local_memset_zero_368",
+            "size": 280,
+            "offset": 5910,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          },
+          {
+            "name": "__native_link_local_memset_zero_200",
+            "size": 133,
+            "offset": 6190,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          }
+        ]
+      },
+      {
+        "label": "tracee-sys_enter_submit",
+        "input": "/workspaces/kprog-raw/perf/20261114-lpm-overlap/default/inputs/ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1.native.o",
+        "original_input": "/workspaces/kprog-raw/perf/20261114-lpm-lto/default/inputs/ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1.native.o",
+        "symbol": "sys_enter_submit",
+        "input_sha256": "ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1",
+        "default_proof_full_elf_equal": true,
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 14267,
+        "proof_bytes_after": 14680,
+        "local_routines": [
+          {
+            "name": "__native_link_local_memset_zero_368",
+            "size": 280,
+            "offset": 14267,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          },
+          {
+            "name": "__native_link_local_memset_zero_200",
+            "size": 133,
+            "offset": 14547,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          }
+        ]
+      },
+      {
+        "label": "tracee-trace_ret_vfs_read_tail",
+        "input": "/workspaces/kprog-raw/perf/20261114-lpm-overlap/default/inputs/ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1.native.o",
+        "original_input": "/workspaces/kprog-raw/perf/20261114-lpm-lto/default/inputs/ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1.native.o",
+        "symbol": "trace_ret_vfs_read_tail",
+        "input_sha256": "ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1",
+        "default_proof_full_elf_equal": true,
+        "default_proof_text_equal": true,
+        "default_kernel_and_metadata_equal": true,
+        "proof_bytes_before": 14813,
+        "proof_bytes_after": 15319,
+        "local_routines": [
+          {
+            "name": "__native_link_local_memset_zero_368",
+            "size": 280,
+            "offset": 14813,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          },
+          {
+            "name": "__native_link_local_memset_zero_200",
+            "size": 133,
+            "offset": 15093,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          },
+          {
+            "name": "__native_link_local_memcpy_any_71",
+            "size": 93,
+            "offset": 15226,
+            "undefined": false,
+            "kind": "STT_FUNC"
+          }
+        ]
+      }
+    ],
+    "reference": "/workspaces/repository/corpus/results/perf-combined-codegen-compatible-20261114/native-link.real",
+    "candidate": "/workspaces/kprog-raw/perf/20261114-lpm-overlap/payload/native-link.real",
+    "limits": [
+      "Synthetic address plans are offline parity inputs, never kernel execution.",
+      "Vendor stage is current build data; Tracee uses the original-source plain flag experiment object.",
+      "Host executable/guard-page fixtures cover runtime memory semantics separately."
+    ]
+  },
+  "actual_kernel": {
+    "job_exit": 0,
+    "cases": [
+      {
+        "mode": "submitted-native",
+        "case": "4-11",
+        "executions": 840,
+        "scope": "Real ordinary B stock acceptance then native execution matched actual kernel LPM map"
+      },
+      {
+        "mode": "submitted-native",
+        "case": "2-11",
+        "executions": 840,
+        "scope": "Real ordinary B stock acceptance then native execution matched actual kernel LPM map"
+      },
+      {
+        "mode": "checked-sim-c",
+        "case": "4-11",
+        "executions": 840,
+        "scope": "Real ordinary B stock acceptance then native execution matched actual kernel LPM map"
+      },
+      {
+        "mode": "checked-sim-c",
+        "case": "2-11",
+        "executions": 840,
+        "scope": "Real ordinary B stock acceptance then native execution matched actual kernel LPM map"
+      }
+    ],
+    "total_executions": 3360,
+    "cpus": "22-23",
+    "vcpus": 1,
+    "memory": "4G",
+    "timing_lock": false
+  },
+  "initial_failure": "Prototype rustc flag --edition2021 was invalid; subsequent fixture had missing emitted blob and aborted. Corrected --edition=2021 and retained original host logs; all subsequent65KvectorsPASS.",
+  "candidate_sha256": "e248347b074c5445b288ac621da1cedb4bf2d721cb8f3e1082ee655dcb818ab2",
+  "performance": "Not measured. Existing queued corrected OTel uses old pinned linker, untouched. Batch this runtime change into a later all-LTO candidate; no per-piece long timing."
+}
