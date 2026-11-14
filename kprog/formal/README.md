@@ -1,6 +1,6 @@
 # Native simulator verification
 
-## External-base migration (M1 and M2 complete)
+## External-base migration (M1/M2 complete, M3 in progress)
 
 The operator's replacement plan is in [todo section 4](../docs/todo.md).
 The external bases are forks, pinned as Git submodules; changes needed by
@@ -9,7 +9,7 @@ kprog belong in those forks. No replacement ISA semantics is defined locally.
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
 | AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `da428593b21d` | Lean 4.35.0 |
-| x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `f41a556bd92b` | Lean 4.32.0-rc1 |
+| x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `78534ab39249` | Lean 4.32.0-rc1 |
 | Clight | [eunomia-bpf/clean](https://github.com/eunomia-bpf/clean), `external/clean/export` | `123f7f7767e2` | Lean 4.32.1 |
 
 `make -C kprog/formal mature` builds the migration Lake package on Lean 4.35.0,
@@ -20,8 +20,9 @@ uses an explicit Boolean-decision bridge for the existing masked-count
 hypothesis; its theorem statement and instruction semantics are unchanged.
 Build output and the earlier failed attempts are retained in
 `/workspaces/kprog-raw/formal/m1-compat-2` and `m1-compat-1`.
-The legacy package remains on Lean 4.19.0 while M3-M5 migrate its references
-and theorems. M2 is in progress; the legacy counts below describe the old
+The main package now uses Lean 4.35.0 and the same three pinned external
+path dependencies as the M1 integration package. M3 is in progress; the legacy
+counts below describe the old
 foundation, not proofs against these external bases. Retirement occurs at M6.
 
 LNSym and x86lean retain their Apache-2.0 licenses. Clean retains its own
@@ -31,9 +32,29 @@ LGPL-2.1-or-later. Keep those license terms separate. Clean explicitly labels
 its C-to-Lean exporter/semantics experimental in its upstream README; the
 CompCert front end and the Lean export/semantics have separate trust claims.
 
+M3's first native binding (`m3-root-integration`) routes canonical x86 NOP,
+MOV, arithmetic, logical, unary, LEA, BSWAP and MOVBE load/store families through
+the fork. `plannedReadAddresses` uses the fork's existing access plan to
+materialize arbitrary native byte functions into its finite representation;
+checked execution then recomputes targets and validates access. Only actual
+write effects update the original function, preserving untouched/uninitialized
+bytes. Atomic observations retain both old/new values in the existing adjacent
+atomic-read/write view. The undefined-bit oracle is internal choice state;
+every original architectural field, memory/effect/fault channel and distinct
+model refusal remains observed. JSON execution rejects model refusals.
+
+The binding and 38 kernel-decide regression cases passed a 17-job component
+build; the unchanged 8,103 fork cases passed 156 combined and 113 standalone
+jobs. Seventeen retired local numeric/handler definitions were removed; the
+reference module is 19 lines smaller. Its initial whole-package 4.35 baseline
+failed in 15 old modules (33 errors, retained), including the old AArch64
+decoder and legacy proof/API compatibility. This is not full-package acceptance:
+remaining x86 families, AArch64, provenance integration and Sail/ASL redirection
+are still M3 work; Clight/theorem migration and final checks remain M4-M6.
+
 ## Operation coverage (M2 complete)
 
-LNSym `da428593b21d6dfa02c6d063600d9ed817747fd5`, x86lean `f41a556bd92bc52cbab1a4f13ab2e7db4976d164`.
+LNSym `da428593b21d6dfa02c6d063600d9ed817747fd5`, x86lean `78534ab3924948a93a3182af95b53728bc0f811b`.
 
 Source inspection, not refinement proofs or conformance results. `present` means an execution path exists; `partial`/`missing` remain M2 work; `layer` identifies linking/ABI transport above an existing ISA form. Memory permissions, initialization, fault prefixes, exclusive ordering and ABI require explicit relations.
 
@@ -660,12 +681,13 @@ Their source-operation/token rows retain a separate6/6 raw count.
 
 ## Specification and proof scope
 
-The reference ISA is defined once in
+M3 is replacing the local ISA definitions in
 [Reference/X86.lean](KProgFormal/Reference/X86.lean) and
-[Reference/AArch64.lean](KProgFormal/Reference/AArch64.lean), with shared
-[memory, permissions, initialization and ordered effects/faults](KProgFormal/Reference/Memory.lean).
-These definitions cite Intel/Arm sources and are independent of generated
-implementation contracts. [ReferenceMain.lean](ReferenceMain.lean) executes
+[Reference/AArch64.lean](KProgFormal/Reference/AArch64.lean) with bindings over
+the external steps. The migrated x86 families above already use that route;
+remaining local families and the old proof counts below are pending migration.
+Shared [native memory, permissions, initialization and ordered effects/faults](KProgFormal/Reference/Memory.lean)
+form the platform view rather than a second numerical ISA. [ReferenceMain.lean](ReferenceMain.lean) executes
 these same definitions through JSON for hardware and artifact comparisons.
 The [Arm ASL state comparison](../results/kprog_verification_20261107/reference-arm-asl.md)
 records5016 agreeing observations across74 operation labels and explicit STLXR

@@ -1,4 +1,5 @@
 import KProgFormal.Reference.Memory
+import X86.CheckedMemory
 
 /-!
 The x86-64 reference semantics. Architectural rules come from Intel SDM
@@ -49,6 +50,96 @@ structure State where
   fsBase : Word
   gsBase : Word
   addressWidth : AddressWidth := .w48
+  /-- Free undefined-bit input for the external ISA, never inferred from tags. -/
+  oracle : _root_.X86.Oracle := default
+  /-- Model refusal is separate from an architectural fault. -/
+  modelError : Option _root_.X86.MsErr := none
+
+/-- RFLAGS transport; unmodeled bits remain part of the native state. -/
+private def externalFlags (flags : Word) : _root_.X86.Flags :=
+  { cf := flags.getLsbD 0, pf := flags.getLsbD 2, af := flags.getLsbD 4,
+    zf := flags.getLsbD 6, sf := flags.getLsbD 7, of := flags.getLsbD 11,
+    df := flags.getLsbD 10 }
+
+private def externalRflags (old : Word) (flags : _root_.X86.Flags) : Word :=
+  let fields : List (Word × Bool) := [(1,flags.cf),(4,flags.pf),(16,flags.af),
+    (64,flags.zf),(128,flags.sf),(2048,flags.of),(1024,flags.df)]
+  fields.foldl (fun value (mask,bit) => if bit then value ||| mask else value &&& ~~~mask) old
+
+private def externalCpu (s : State) : _root_.X86.Cpu :=
+  { regs := _root_.X86.GPR.all.foldl (fun regs r => regs.set r (s.gpr r.index)) default
+    rip := s.pc
+    flags := externalFlags s.rflags
+    xmm := { xmm0 := s.xmm0 }
+    fsBase := s.fsBase
+    gsBase := s.gsBase
+    oracle := s.oracle
+    ms := s.modelError }
+
+private def externalFault : _root_.X86.ExecutionFault → Fault
+  | .read a n => .read a n
+  | .write a n => .write a n
+  | .nonCanonical a => .nonCanonical a
+  | .invalidOpcode => .invalidOpcode
+  | .divideError => .divide
+  | .misaligned a n => .alignment a n
+
+private def storeBytes (memory : Memory) (address : Word) (bytes : List Byte) : Memory :=
+  (bytes.foldl (fun (memory,address) byte =>
+    (storeMemory memory address (byte.setWidth 64) 1, address+1)) (memory,address)).1
+
+/-- Representation projection only. An RMW remains an adjacent atomic-read and
+write pair in the existing native-event view, retaining both byte values. -/
+private def externalEffects (memory : Memory) (events : List _root_.X86.MemoryAccessEvent) :
+    Transition Memory :=
+  events.foldl (fun result event => match event with
+    | .memory kind address bytes initialized =>
+      match kind with
+      | .read => { result with events := result.events ++ [.memory .read address bytes initialized] }
+      | .write => { result with
+          state := storeBytes result.state address bytes
+          events := result.events ++ [.memory .write address bytes initialized] }
+    | .rmw address before after initialized =>
+      { result with
+        state := storeBytes result.state address after
+        events := result.events ++ [.memory .atomic address before initialized, .memory .write address after true] }
+    | .fault reason =>
+      let fault := externalFault reason
+      { result with events := result.events ++ [.fault fault], fault := some fault })
+    ⟨memory, [], none⟩
+
+/-- Execute the fork, with an explicit view of arbitrary native byte memory.
+Potential reads come from the fork's own access plan; target values are
+recomputed after materialization. Only actual write effects update the native
+memory function, so untouched and uninitialized bytes keep their input values.
+No local arithmetic, flag, effective-address or permission interpreter runs. -/
+def nativeStep (op : _root_.X86.Op) (nextPc : Word) (s : State) : Transition State :=
+  let i : _root_.X86.Instr := { op, len := (nextPc-s.pc).toNat }
+  let cpu := externalCpu s
+  match _root_.X86.plannedReadAddresses i cpu with
+  | .error reason => ⟨{ s with modelError := some reason }, [], none⟩
+  | .ok addresses =>
+    let memory := addresses.foldl (fun memory address => memory.write address (s.memory.value address))
+      _root_.X86.Mem.empty
+    let input : _root_.X86.CheckedState :=
+      { cpu := { cpu with mem := memory }
+        profile := some {
+          readable := s.memory.readable
+          writable := s.memory.writable
+          initialized := s.memory.initialized }
+        addressWidth := match s.addressWidth with | .w48 => .la48 | .w57 => .la57 }
+    let output := _root_.X86.stepChecked i input
+    let effect := externalEffects s.memory output.events
+    ⟨{ s with
+        gpr := fun r => output.cpu.regs.get (_root_.X86.GPR.ofIndex r)
+        rflags := externalRflags s.rflags output.cpu.flags
+        xmm0 := output.cpu.getXmm .x0
+        memory := effect.state
+        pc := output.cpu.rip
+        fsBase := output.cpu.fsBase
+        gsBase := output.cpu.gsBase
+        oracle := output.cpu.oracle
+        modelError := output.cpu.ms }, effect.events, effect.fault⟩
 
 /-- All sixteen architectural condition codes, including parity. -/
 def condition (flags : Word) (code : Fin 16) : Bool :=
@@ -257,33 +348,11 @@ def bmiShiftStep (width : BzhiWidth) (kind : BmiShift) (dst : Register) (source 
       let result := bmiShiftValue width kind value (countValue s count)
       ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), pc := nextPc }, events, none⟩
 
-/-- Reverse only the architectural operand bytes, stated by a byte-list
-permutation rather than the implementation's mask-and-shift ladder. -/
-def reverseBytes (value : Word) (bytes : Nat) : Word :=
-  littleEndian 64 (valueBytes value bytes).reverse
-
 def writeValue (width : CmovWidth) (old value : Word) : Word :=
   match width with
   | .w16 => (old &&& 0xffffffffffff0000) ||| (value &&& 0xffff)
   | .w32 => (value.setWidth 32).setWidth 64
   | .w64 => value
-
-def swapStep (width : BzhiWidth) (dst : Register) (nextPc : Word) (s : State) : Transition State :=
-  let value := reverseBytes (s.gpr dst) width.bytes
-  ⟨{ s with gpr := fun r => if r = dst then value else s.gpr r, pc := nextPc }, [], none⟩
-
-def movbeLoadStep (width : CmovWidth) (dst : Register) (address nextPc : Word) (s : State) : Transition State :=
-  match readSource s (.memory address) width.bytes with
-  | .error fault => ⟨s, [.fault fault], some fault⟩
-  | .ok (source, events) =>
-      let value := writeValue width (s.gpr dst) (reverseBytes source width.bytes)
-      ⟨{ s with gpr := fun r => if r = dst then value else s.gpr r, pc := nextPc }, events, none⟩
-
-def movbeStoreStep (width : CmovWidth) (src : Register) (address nextPc : Word) (s : State) : Transition State :=
-  let value := reverseBytes (s.gpr src) width.bytes
-  match writeMemory s.memory address value width.bytes with
-  | .error fault => ⟨s, [.fault fault], some fault⟩
-  | .ok (memory, event) => ⟨{ s with memory := memory, pc := nextPc }, [event], none⟩
 
 /-- Commit a PUSH transfer only after its read (if any) and whole-width
 write permission check. Memory faults preserve every architectural component;
@@ -311,62 +380,11 @@ implementation's four-bit lookup table. -/
 def evenParity (value : Word) : Bool :=
   !((List.range 8).foldl (fun parity bit => parity != value.getLsbD bit) false)
 
-/-- AF is carry/borrow across the low nibble. Widening to five bits retains
-both a right nibble of15 plus incoming carry and the outgoing addition bit. -/
-def auxiliaryCarry (subtract carry : Bool) (left right : Word) : Bool :=
-  let a := (left.setWidth 4).setWidth 5
-  let b := (right.setWidth 4).setWidth 5 + (if carry then (1 : BitVec 5) else 0)
-  if subtract then BitVec.ult a b else (a + b).getLsbD 4
-
 inductive ArithmeticKind | add | adc | sub | sbb | compare
   deriving DecidableEq, Repr
 
-def ArithmeticKind.subtract : ArithmeticKind → Bool
-  | .sub | .sbb | .compare => true | _ => false
-
-def ArithmeticKind.carry (kind : ArithmeticKind) (flags : Word) : Bool :=
-  (kind == .adc || kind == .sbb) && flags.getLsbD 0
-
-/-- Extra unsigned precision supplies carry/borrow; independent signed
-precision supplies overflow. Inputs are narrowed before either widening. -/
-def arithmeticValue (width : ScalarWidth) (subtract carry : Bool) (left right : Word) : Word :=
-  let a := (left.setWidth width.bits).setWidth 128
-  let b := (right.setWidth width.bits).setWidth 128
-  let incoming : BitVec 128 := if carry then 1 else 0
-  let result := if subtract then a - b - incoming else a + b + incoming
-  (result.setWidth width.bits).setWidth 64
-
-def arithmeticFlags (width : ScalarWidth) (subtract carry : Bool) (left right old : Word) : Word :=
-  let a := left.setWidth width.bits
-  let b := right.setWidth width.bits
-  let incoming : BitVec 128 := if carry then 1 else 0
-  let unsignedResult := if subtract then a.setWidth 128 - b.setWidth 128 - incoming
-    else a.setWidth 128 + b.setWidth 128 + incoming
-  let signedResult := if subtract then a.signExtend 128 - b.signExtend 128 - incoming
-    else a.signExtend 128 + b.signExtend 128 + incoming
-  let result := unsignedResult.setWidth width.bits
-  let cf := if subtract then BitVec.ult (a.setWidth 128) (b.setWidth 128 + incoming)
-    else unsignedResult.getLsbD width.bits
-  let pf := evenParity (result.setWidth 64)
-  let af := auxiliaryCarry subtract carry left right
-  let zf := result.setWidth 64 == (0 : Word)
-  let sf := result.getLsbD (width.bits - 1)
-  let of := signedResult != result.signExtend 128
-  (old &&& 0xfffffffffffff72a) ||| (if cf then 1 else 0) ||| (if pf then 4 else 0) |||
-    (if af then 16 else 0) ||| (if zf then 64 else 0) ||| (if sf then 128 else 0) ||| (if of then 2048 else 0)
-
 inductive LogicKind | and | or | xor | test
   deriving DecidableEq, Repr
-
-def logicalValue (width : ScalarWidth) (kind : LogicKind) (left right : Reference.Word) : Reference.Word :=
-  let a := left.setWidth width.bits
-  let b := right.setWidth width.bits
-  ((match kind with | .and | .test => a &&& b | .or => a ||| b | .xor => a ^^^ b).setWidth 64)
-
-def logicalFlags (width : ScalarWidth) (kind : LogicKind) (left right old : Reference.Word) : Reference.Word :=
-  let result := logicalValue width kind left right
-  (old &&& 0xfffffffffffff73a) ||| (if evenParity result then 4 else 0) |||
-    (if result = 0 then 64 else 0) ||| (if result.getLsbD (width.bits - 1) then 128 else 0)
 
 /-- Legacy shifts mask the count before use; rotates additionally reduce the
 result count modulo operand size, while flag rules use the masked count. -/
@@ -434,17 +452,6 @@ def legacyDefinedFlags (width : ScalarWidth) (kind : LegacyShift) (count : Word)
 
 inductive UnaryKind | inc | dec | neg | not
   deriving DecidableEq, Repr
-
-def unaryValue (width : ScalarWidth) (kind : UnaryKind) (source : Reference.Word) : Reference.Word :=
-  let value := source.setWidth width.bits
-  ((match kind with | .inc => value + 1 | .dec => value - 1 | .neg => -value | .not => ~~~value).setWidth 64)
-
-def unaryFlags (width : ScalarWidth) (kind : UnaryKind) (value old : Reference.Word) : Reference.Word :=
-  match kind with
-  | .inc => setFlag (arithmeticFlags width false false value 1 old) 0 (old.getLsbD 0)
-  | .dec => setFlag (arithmeticFlags width true false value 1 old) 0 (old.getLsbD 0)
-  | .neg => arithmeticFlags width true false 0 value old
-  | .not => old
 
 private def populationLane (x : BitVec 64) (i : Nat) : BitVec 8 :=
   ((x >>> (8 * i)) &&& 0xff).setWidth 8
@@ -526,64 +533,26 @@ def scalarWrite (s : State) (width : ScalarWidth) (destination : ScalarDestinati
 def ScalarDestination.source : ScalarDestination → ScalarSource
   | .register slice => .register slice | .memory address => .memory address
 
-/-- ADD/ADC/SUB/SBB/CMP replace all six arithmetic status flags, preserving
-all other RFLAGS bits. A write fault commits neither data nor flags. -/
-def arithmeticStep (width : ScalarWidth) (kind : ArithmeticKind) (dst : ScalarDestination)
-    (src : ScalarSource) (nextPc : Word) (s : State) : Transition State :=
-  match scalarRead s width dst.source with
-  | .error fault => ⟨s, [.fault fault], some fault⟩
-  | .ok (left, firstReads) =>
-      match scalarRead s width src with
-      | .error fault => ⟨s, firstReads ++ [.fault fault], some fault⟩
-      | .ok (right, secondReads) =>
-          let carry := kind.carry s.rflags
-          let flags := arithmeticFlags width kind.subtract carry left right s.rflags
-          let reads := firstReads ++ secondReads
-          if kind = .compare then ⟨{ s with rflags := flags, pc := nextPc }, reads, none⟩
-          else
-            match scalarWrite s width dst (arithmeticValue width kind.subtract carry left right) with
-            | .error fault => ⟨s, reads ++ [.fault fault], some fault⟩
-            | .ok (result, writes) => ⟨{ result with rflags := flags, pc := nextPc }, reads ++ writes, none⟩
+private def externalSize : ScalarWidth → _root_.X86.Size
+  | .w8 => .b | .w16 => .w | .w32 => .d | .w64 => .q
 
-/-- Ordinary MOV reads its source before changing an aliased destination or
-address register. Byte/word writes preserve other bits, E writes zero-extend,
-and every flag and vector is preserved, including on a memory fault. -/
-def moveStep (width : ScalarWidth) (dst : ScalarDestination) (src : ScalarSource)
-    (nextPc : Word) (s : State) : Transition State :=
-  match scalarRead s width src with
-  | .error fault => ⟨s, [.fault fault], some fault⟩
-  | .ok (value, reads) =>
-      match scalarWrite s width dst value with
-      | .error fault => ⟨s, reads ++ [.fault fault], some fault⟩
-      | .ok (result, writes) => ⟨{ result with pc := nextPc }, reads ++ writes, none⟩
+private def externalCmovSize : CmovWidth → _root_.X86.Size
+  | .w16 => .w | .w32 => .d | .w64 => .q
 
+private def externalBzhiSize : BzhiWidth → _root_.X86.Size
+  | .w32 => .d | .w64 => .q
 
-def logicalStep (width : ScalarWidth) (kind : LogicKind) (dst : ScalarDestination)
-    (src : ScalarSource) (nextPc : Reference.Word) (s : State) : Transition State :=
-  match scalarRead s width dst.source with
-  | .error fault => ⟨s, [.fault fault], some fault⟩
-  | .ok (left, firstReads) =>
-      match scalarRead s width src with
-      | .error fault => ⟨s, firstReads ++ [.fault fault], some fault⟩
-      | .ok (right, secondReads) =>
-          let flags := logicalFlags width kind left right s.rflags
-          let reads := firstReads ++ secondReads
-          if kind = .test then ⟨{ s with rflags := flags, pc := nextPc }, reads, none⟩
-          else
-            match scalarWrite s width dst (logicalValue width kind left right) with
-            | .error fault => ⟨s, reads ++ [.fault fault], some fault⟩
-            | .ok (result, writes) => ⟨{ result with rflags := flags, pc := nextPc }, reads ++ writes, none⟩
+private def externalRegister (width : ScalarWidth) (slice : RegisterSlice) : _root_.X86.Operand :=
+  .reg (_root_.X86.GPR.ofIndex slice.reg) (slice.shift width == 8)
 
+private def externalSource (width : ScalarWidth) : ScalarSource → _root_.X86.Operand
+  | .register slice => externalRegister width slice
+  | .memory address => .mem { disp := address }
+  | .immediate value => .imm value
 
-def unaryStep (width : ScalarWidth) (kind : UnaryKind) (dst : ScalarDestination)
-    (nextPc : Word) (s : State) : Transition State :=
-  match scalarRead s width dst.source with
-  | .error fault => ⟨s, [.fault fault], some fault⟩
-  | .ok (value, reads) =>
-      match scalarWrite s width dst (unaryValue width kind value) with
-      | .error fault => ⟨s, reads ++ [.fault fault], some fault⟩
-      | .ok (result, writes) =>
-          ⟨{ result with rflags := unaryFlags width kind value s.rflags, pc := nextPc }, reads ++ writes, none⟩
+private def externalDestination (width : ScalarWidth) : ScalarDestination → _root_.X86.Operand
+  | .register slice => externalRegister width slice
+  | .memory address => .mem { disp := address }
 
 /-- Register XCHG samples both lanes before either write. Sequential lane
 merges retain both changes when AL/AH (or another byte pair) share one GPR. -/
@@ -971,8 +940,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
   | .exchange width left right nextPc => exchangeStep width left right nextPc s
   | .legacyShift width kind dst count nextPc => legacyShiftStep width kind dst count nextPc s
   | .lea width dst address nextPc =>
-      let result := writeValue width (s.gpr dst) address
-      ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), pc := nextPc }, [], none⟩
+      nativeStep (.lea (externalCmovSize width) (_root_.X86.GPR.ofIndex dst) { disp := address }) nextPc s
   | .divide width source nextPc => divideStep width source nextPc s
   | .signedDivide width source nextPc => signedDivideStep width source nextPc s
   | .signHigh width nextPc =>
@@ -990,9 +958,13 @@ def step (instruction : Instruction) (s : State) : Transition State :=
       | .ok (value, events) =>
           let result := cmovValue width true (s.gpr dst) (popcountValue width value)
           ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), rflags := popcountFlags width value s.rflags, pc := nextPc }, events, none⟩
-  | .unary width kind dst nextPc => unaryStep width kind dst nextPc s
-  | .logic width kind dst src nextPc => logicalStep width kind dst src nextPc s
-  | .nop nextPc => ⟨{ s with pc := nextPc }, [], none⟩
+  | .unary width kind dst nextPc =>
+      let kind := match kind with | .inc => .inc | .dec => .dec | .neg => .neg | .not => .not
+      nativeStep (.un kind (externalSize width) (externalDestination width dst)) nextPc s
+  | .logic width kind dst src nextPc =>
+      let kind := match kind with | .and => .and | .or => .or | .xor => .xor | .test => .test
+      nativeStep (.bin kind (externalSize width) (externalDestination width dst) (externalSource width src)) nextPc s
+  | .nop nextPc => nativeStep (.nop none) nextPc s
   | .leave64 nextPc => leave64Step nextPc s
   | .branch cc target nextPc =>
       let taken := match cc with | none => true | some code => condition s.rflags code
@@ -1001,11 +973,17 @@ def step (instruction : Instruction) (s : State) : Transition State :=
       match scalarWrite s .w8 dst (if condition s.rflags cc then 1 else 0) with
       | .error fault => ⟨s, [.fault fault], some fault⟩
       | .ok (result, events) => ⟨{ result with pc := nextPc }, events, none⟩
-  | .arithmetic width kind dst src nextPc => arithmeticStep width kind dst src nextPc s
-  | .move width dst src nextPc => moveStep width dst src nextPc s
-  | .byteSwap width dst nextPc => swapStep width dst nextPc s
-  | .movbeLoad width dst address nextPc => movbeLoadStep width dst address nextPc s
-  | .movbeStore width src address nextPc => movbeStoreStep width src address nextPc s
+  | .arithmetic width kind dst src nextPc =>
+      let kind := match kind with | .add => .add | .adc => .adc | .sub => .sub | .sbb => .sbb | .compare => .cmp
+      nativeStep (.bin kind (externalSize width) (externalDestination width dst) (externalSource width src)) nextPc s
+  | .move width dst src nextPc =>
+      nativeStep (.mov (externalSize width) (externalDestination width dst) (externalSource width src)) nextPc s
+  | .byteSwap width dst nextPc =>
+      nativeStep (.bswap (externalBzhiSize width) (_root_.X86.GPR.ofIndex dst)) nextPc s
+  | .movbeLoad width dst address nextPc =>
+      nativeStep (.movbe (externalCmovSize width) (.reg (_root_.X86.GPR.ofIndex dst)) (.mem { disp := address })) nextPc s
+  | .movbeStore width src address nextPc =>
+      nativeStep (.movbe (externalCmovSize width) (.mem { disp := address }) (.reg (_root_.X86.GPR.ofIndex src))) nextPc s
   | .bmiShift width kind dst source count nextPc => bmiShiftStep width kind dst source count nextPc s
   | .push width src nextPc => pushTransfer width (s.gpr src) [] nextPc s
   | .pushImmediate width value nextPc => pushTransfer width value [] nextPc s
@@ -1114,8 +1092,11 @@ ISA semantics below admits every value for those bits, as required by the SDM. -
 def matchesTransition (i : Instruction) (expected actual : Transition State) : Prop :=
   expected.events = actual.events ∧ expected.fault = actual.fault ∧
     let mask := if expected.fault.isSome then 0xffffffffffffffff else definedFlags i
-    { expected.state with rflags := expected.state.rflags &&& mask, gpr := if expected.fault.isSome then expected.state.gpr else observedRegisters i expected.state } =
-      { actual.state with rflags := actual.state.rflags &&& mask, gpr := if expected.fault.isSome then actual.state.gpr else observedRegisters i actual.state }
+    -- The oracle implements undefined choices; it is not an architectural
+    -- observation. Every original native field, memory/effect/fault channel
+    -- and the distinct model-refusal outcome remain compared.
+    { expected.state with oracle := default, rflags := expected.state.rflags &&& mask, gpr := if expected.fault.isSome then expected.state.gpr else observedRegisters i expected.state } =
+      { actual.state with oracle := default, rflags := actual.state.rflags &&& mask, gpr := if expected.fault.isSome then actual.state.gpr else observedRegisters i actual.state }
 
 def Step (i : Instruction) (before : State) (after : Transition State) : Prop :=
   matchesTransition i (step i before) after

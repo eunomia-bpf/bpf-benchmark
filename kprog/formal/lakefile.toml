@@ -2,6 +2,18 @@ name = "KProgFormal"
 version = "0.1.0"
 defaultTargets = ["KProgFormal", "reference"]
 
+[[require]]
+name = "lnsym"
+path = "external/LNSym"
+
+[[require]]
+name = "x86lean"
+path = "external/x86lean"
+
+[[require]]
+name = "compcert-clight-lean"
+path = "external/clean/export"
+
 [[lean_lib]]
 name = "KProgFormal"
 globs = ["KProgFormal.*"]

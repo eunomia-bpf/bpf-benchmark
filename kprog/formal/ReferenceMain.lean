@@ -121,6 +121,7 @@ private def executeX86 (request : Json) : Except String Json := do
         let result ← X86Path.evaluate base bytes entries initial
         pure (result.effect, result.definedFlags, [])
   let s := output.state
+  if let some reason := s.modelError then throw s!"external x86 model refusal: {repr reason}"
   let profile := match state.getObjVal? "linear_address_bits" with
     | .error _ => []
     | .ok _ => [("linear_address_bits", number s.addressWidth.bits)]
