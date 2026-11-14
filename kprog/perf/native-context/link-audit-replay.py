@@ -50,10 +50,12 @@ def main():
                         help="With --runtime-array-layout, toggle shared versus inline dispatch")
     parser.add_argument("--runtime-probe-read-layout", type=Path,
                         help="Toggle probe-read LTO; both kernel variants emit recovery ABI")
+    parser.add_argument("--runtime-hash-layout", type=Path,
+                        help="Toggle typed raw hash lookup LTO")
     args = parser.parse_args()
     if args.runtime_array_shared and not args.runtime_array_layout:
         parser.error("--runtime-array-shared requires --runtime-array-layout")
-    if args.runtime_probe_read_layout and args.runtime_array_layout:
+    if sum(bool(x) for x in [args.runtime_probe_read_layout, args.runtime_array_layout, args.runtime_hash_layout]) > 1:
         parser.error("select one replay optimization at a time")
     args.output.mkdir(parents=True)
     binary_sha = hashlib.sha256(args.linker.read_bytes()).hexdigest()
@@ -84,7 +86,10 @@ def main():
             for flag, name in OUTPUTS.items():
                 replacements[flag] = work / (variant + "." + name)
             argv = rewrite(record["command"][1:], replacements)
-            if args.runtime_probe_read_layout:
+            if args.runtime_hash_layout:
+                if variant == "on":
+                    argv.extend(["--runtime-hash-layout", str(args.runtime_hash_layout)])
+            elif args.runtime_probe_read_layout:
                 if record["mode"] == "kernel":
                     if any(w.split("=",1)[0] == "--abi-load-sites" for w in argv):
                         argv = rewrite(argv, {"--abi-load-sites": "true"})
@@ -127,7 +132,8 @@ def main():
         rows.append(row)
     (args.output / "report.json").write_text(json.dumps(dict(
         linker=str(args.linker), linker_sha256=binary_sha, cases=rows,
-        switch=("--runtime-probe-read-layout" if args.runtime_probe_read_layout else
+        switch=("--runtime-hash-layout" if args.runtime_hash_layout else
+                "--runtime-probe-read-layout" if args.runtime_probe_read_layout else
                 "--runtime-array-shared" if args.runtime_array_shared else
                 "--runtime-array-layout" if args.runtime_array_layout else SWITCH),
         scope="Offline replay only, no kernel execution or workload validity gate. "

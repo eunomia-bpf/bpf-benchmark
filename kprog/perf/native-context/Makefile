@@ -851,3 +851,48 @@ RUNTIME_HASH_BUILD ?= /var/tmp/kprog-tmp/perf/runtime-hash-layout
 runtime-hash-layout:
 	$(MAKE) -f $(HERE)/Makefile $(RUNTIME_HASH_BUILD)/runtime-array-layout BUILD=$(RUNTIME_HASH_BUILD)
 	$(RUNTIME_HASH_BUILD)/runtime-array-layout $(KDIR)/vmlinux --hash > $(RUNTIME_HASH_BUILD)/runtime-hash-layout.json
+
+RUNTIME_HASH_PAYLOAD ?= $(ROOT)/corpus/results/perf-hash-lto-linker-20261114
+HASH_KERNEL_BUILD ?= /var/tmp/kprog-tmp/perf/hash-lookup-kernel
+HASH_KERNEL_OUTPUT ?= /workspaces/kprog-raw/perf/20261114-hash-lto/kernel
+HASH_KERNEL_CASES := 1-1 2-1 3-1 4-1 5-1 2-5 2-9 2-10 2-13
+.PHONY: runtime-hash-payload hash-lookup-kernel-inputs hash-lookup-kernel guest-hash-lookup
+runtime-hash-payload: known-map-link-build runtime-hash-layout
+	install -d $(RUNTIME_HASH_PAYLOAD)
+	install -m755 $(KNOWN_MAP_TARGET)/debug/native-link $(RUNTIME_HASH_PAYLOAD)/native-link.real
+	strip --strip-debug $(RUNTIME_HASH_PAYLOAD)/native-link.real
+	install -m644 $(RUNTIME_HASH_BUILD)/runtime-hash-layout.json $(RUNTIME_HASH_PAYLOAD)/runtime-hash-layout.json
+	install -m644 $(RUNTIME_PROBE_PAYLOAD)/runtime-probe-read-layout.json $(RUNTIME_HASH_PAYLOAD)/runtime-probe-read-layout.json
+	install -m755 $(HERE)/native-link-hash.sh $(RUNTIME_HASH_PAYLOAD)/native-link-on
+	install -m755 $(HERE)/native-link-hash.sh $(RUNTIME_HASH_PAYLOAD)/native-link-off
+
+hash-lookup-kernel-inputs:
+	install -d $(HASH_KERNEL_BUILD)
+	@for item in $(HASH_KERNEL_CASES); do \
+		$(CC) -O2 -g -target bpf -I/usr/include/x86_64-linux-gnu -I$(ROOT)/vendor/libbpf/src -DKEY_WORDS=$${item%-*} -DMAP_KIND=$${item#*-} -c $(HERE)/hash-lookup-kernel.c -o $(HASH_KERNEL_BUILD)/$$item.bpf.o; \
+		$(CC) -O2 -g -DMICRO_NATIVE -I$(ROOT)/micro/programs/build-x86 -fPIC -mno-red-zone -mgeneral-regs-only -fomit-frame-pointer -DKEY_WORDS=$${item%-*} -DMAP_KIND=$${item#*-} -c $(HERE)/hash-lookup-kernel.c -o $(HASH_KERNEL_BUILD)/$$item.native.o; \
+	done
+	clang++-18 -std=gnu++20 -O1 -ffunction-sections -fdata-sections -I$(ROOT)/micro/programs/build-x86 -I$(PROBE_LIBBPF)/prefix/include -I$(ROOT)/vendor/libbpf/include -I$(ROOT)/vendor/libbpf/include/uapi \
+		$(HERE)/hash-lookup-kernel.cpp -Wl,--gc-sections $(dir $(PROBE_KERNEL_LOADER))libnative_loader.a $(PROBE_LIBBPF)/pic-obj/libbpf.a -lelf -lz -ldl -pthread -o $(HASH_KERNEL_BUILD)/client
+
+hash-lookup-kernel: hash-lookup-kernel-inputs
+	install -d $(HASH_KERNEL_OUTPUT)
+	install -m755 $(HASH_KERNEL_BUILD)/client $(HASH_KERNEL_OUTPUT)/client
+	install -m644 $(HASH_KERNEL_BUILD)/*.bpf.o $(HASH_KERNEL_BUILD)/*.native.o $(HASH_KERNEL_OUTPUT)/
+	taskset -c 16-19 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(HASH_KERNEL_OUTPUT) --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -f kprog/perf/native-context/Makefile guest-hash-lookup HASH_KERNEL_OUTPUT=$(HASH_KERNEL_OUTPUT)'
+
+guest-hash-lookup:
+	cat /proc/cpuinfo > $(HASH_KERNEL_OUTPUT)/cpuinfo
+	uname -r > $(HASH_KERNEL_OUTPUT)/kernel.release
+	sha256sum $(RUNTIME_HASH_PAYLOAD)/native-link.real $(RUNTIME_HASH_PAYLOAD)/runtime-hash-layout.json $(PROBE_KERNEL_LOADER) $(PROBE_COMPILER)/compile-sim-ir $(ROOT)/kprog/x86/x86_sim_local_bpf.h > $(HASH_KERNEL_OUTPUT)/guest-input-sha256
+	@status=0; for mode in submitted-native checked-sim-c; do for item in $(HASH_KERNEL_CASES); do \
+		output=$(HASH_KERNEL_OUTPUT)/$$mode/$$item; install -d $$output; extra=(); \
+		if [[ $$mode == checked-sim-c ]]; then extra=(--sim-native-compiler $(PROBE_COMPILER)/compile-sim-ir --sim-context-compiler $(PROBE_COMPILER)/context-lower --sim-public-layout $(PROBE_COMPILER)/public-layout.json --sim-physical-layout $(PROBE_COMPILER)/physical-layout.json --sim-bounds-compiler $(PROBE_COMPILER)/packet-bounds); fi; \
+		CLANG=$(ROOT)/kprog/stock-path/bin/clang python3 $(ROOT)/kprog/trusted_service.py --arch 1 --endpoint /sys/kernel/debug/bpf_x86_native_lab/specializer --module /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
+			--state $$output/state --results $$output/service.tar.gz --native-link $(RUNTIME_HASH_PAYLOAD)/native-link-on \
+			--loader $(PROBE_KERNEL_LOADER) --execution-mode $$mode "$${extra[@]}" \
+			--run $(HASH_KERNEL_OUTPUT)/client $(HASH_KERNEL_OUTPUT)/$$item.bpf.o $(HASH_KERNEL_OUTPUT)/$$item.native.o $(RUNTIME_HASH_PAYLOAD)/native-link-on $$output \
+			> $$output/service.log 2>&1 || status=1; cat $$output/service.log; \
+	done; done; exit $$status

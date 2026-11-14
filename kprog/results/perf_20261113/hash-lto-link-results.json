@@ -1,0 +1,255 @@
+{
+  "recorded_at": "2026-11-14T07:43:53Z",
+  "raw": "/workspaces/kprog-raw/perf/20261114-hash-lto",
+  "default_cases": [
+    {
+      "mode": "default",
+      "label": "bcc",
+      "input_sha256": "7f6b076b0c30b8569721b6c1b1c1fe603ec750281c8c500ef0f01673dabccfa9",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "default",
+      "label": "cilium",
+      "input_sha256": "e9b7159e096ddc7cb4933ea67b9a0a910d6dad39183ab30fcbf67cfa9d2218e5",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "default",
+      "label": "katran",
+      "input_sha256": "ba252e0372d100f34b60a0deb3f0a7ccc16b632c3c1a5eb40e9b13d31e558c20",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "default",
+      "label": "otel",
+      "input_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "default",
+      "label": "tetragon",
+      "input_sha256": "14d51fe1b02bb885c71f0127a8b37d7d1a95fb64abbbd0cc955842e681ab3ed2",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "default",
+      "label": "tetragon-execve",
+      "input_sha256": "6f7d7b306ebc2ad6e133277ea94e90a970004459e651e806c67cc5fd9cf25490",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "default",
+      "label": "bcc-biosnoop",
+      "input_sha256": "a07dfa5e538b540cfb5991ed6892cb303dbda7ecf31b03f4d0d0650bc44eb7b0",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "default",
+      "label": "tracee-trace_sys_enter",
+      "input_sha256": "ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "default",
+      "label": "tracee-trace_sys_exit",
+      "input_sha256": "ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "default",
+      "label": "tracee-sys_enter_submit",
+      "input_sha256": "ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "default",
+      "label": "tracee-trace_ret_vfs_read_tail",
+      "input_sha256": "ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "runtime-default",
+      "label": "bcc",
+      "input_sha256": "7f6b076b0c30b8569721b6c1b1c1fe603ec750281c8c500ef0f01673dabccfa9",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "runtime-default",
+      "label": "cilium",
+      "input_sha256": "e9b7159e096ddc7cb4933ea67b9a0a910d6dad39183ab30fcbf67cfa9d2218e5",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "runtime-default",
+      "label": "katran",
+      "input_sha256": "ba252e0372d100f34b60a0deb3f0a7ccc16b632c3c1a5eb40e9b13d31e558c20",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "runtime-default",
+      "label": "otel",
+      "input_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "runtime-default",
+      "label": "tetragon",
+      "input_sha256": "14d51fe1b02bb885c71f0127a8b37d7d1a95fb64abbbd0cc955842e681ab3ed2",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "runtime-default",
+      "label": "tetragon-execve",
+      "input_sha256": "6f7d7b306ebc2ad6e133277ea94e90a970004459e651e806c67cc5fd9cf25490",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "runtime-default",
+      "label": "bcc-biosnoop",
+      "input_sha256": "a07dfa5e538b540cfb5991ed6892cb303dbda7ecf31b03f4d0d0650bc44eb7b0",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "runtime-default",
+      "label": "tracee-trace_sys_enter",
+      "input_sha256": "ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "runtime-default",
+      "label": "tracee-trace_sys_exit",
+      "input_sha256": "ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "runtime-default",
+      "label": "tracee-sys_enter_submit",
+      "input_sha256": "ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    },
+    {
+      "mode": "runtime-default",
+      "label": "tracee-trace_ret_vfs_read_tail",
+      "input_sha256": "ef2e2e4ce89cc80be4448c325fa5aa0fd1e545819b034d2e5054d03fd8a89df1",
+      "full_proof_elf_equal": true,
+      "kernel_code_relocs_maps_abi_equal": true
+    }
+  ],
+  "actual_runtime": {
+    "proof_entries": 14,
+    "proof_full_elf_on_off_equal": true,
+    "kernel_entries": 14,
+    "on_off_cli_all_success": true,
+    "off_code_relocs_maps_abi_equal_capture": true,
+    "typed_raw_call_sites_retargeted": 43,
+    "external_original_helper_fallback_sites": 13,
+    "generic_lookup_counts_on_off": [
+      [
+        2,
+        2
+      ],
+      [
+        28,
+        28
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        6,
+        6
+      ],
+      [
+        8,
+        8
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        76,
+        76
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  "scope": "Offline actual-object CLI checks only; captured addresses never dereferenced. Not kernel execution or throughput.",
+  "payload_inputs": [
+    {
+      "path": "corpus/results/perf-hash-lto-linker-20261114/native-link.real",
+      "bytes": 4577712,
+      "sha256": "f4a201a787dd10600945a5dbe40001ac7b4c68fbd2a93609d464d8108c1be0d8"
+    },
+    {
+      "path": "corpus/results/perf-hash-lto-linker-20261114/native-link-on",
+      "bytes": 663,
+      "sha256": "01c59cbaafe6b81a0b82199b79929c240e16322f6be710a9316f7825139bcce6"
+    },
+    {
+      "path": "corpus/results/perf-hash-lto-linker-20261114/native-link-off",
+      "bytes": 663,
+      "sha256": "01c59cbaafe6b81a0b82199b79929c240e16322f6be710a9316f7825139bcce6"
+    },
+    {
+      "path": "corpus/results/perf-hash-lto-linker-20261114/runtime-hash-layout.json",
+      "bytes": 133,
+      "sha256": "971f96e6e983c1272ef2daf2ce23eeda165ae87d914c398a2ee62870b23b432b"
+    },
+    {
+      "path": "corpus/results/perf-hash-lto-linker-20261114/runtime-probe-read-layout.json",
+      "bytes": 307,
+      "sha256": "75a971bd496f290b1763efcfe2f78b74e80d2c8bd3c7c064308337fe5026f12e"
+    }
+  ]
+}

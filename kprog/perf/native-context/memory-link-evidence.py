@@ -85,7 +85,7 @@ def main():
 
         reference = run(args.reference, 'reference', 'proof', source)
         candidate = run(args.candidate, 'default', 'proof', source)
-        proof_equal = details(reference)['text'] == details(candidate)['text']
+        proof_equal = reference.read_bytes() == candidate.read_bytes()
         old_kernel = run(args.reference, 'reference-kernel', 'kernel', reference)
         new_kernel = run(args.candidate, 'default-kernel', 'kernel', reference)
         kernel_equal = all(Path(str(old_kernel)+suffix).read_bytes() == Path(str(new_kernel)+suffix).read_bytes()
@@ -99,7 +99,7 @@ def main():
             raise ValueError(f'unbound memory symbol in {label}')
         rows.append(dict(label=label, input=str(source), original_input=str(original), symbol=symbol,
                          input_sha256=digest,
-                         default_proof_text_equal=proof_equal, default_kernel_and_metadata_equal=kernel_equal,
+                         default_proof_full_elf_equal=proof_equal, default_proof_text_equal=proof_equal, default_kernel_and_metadata_equal=kernel_equal,
                          proof_bytes_before=len(details(reference)['text']), proof_bytes_after=len(local['text']),
                          local_routines=[s for s in local['symbols'] if s['name'].startswith('__native_link_local_')]))
     (args.output/'report.json').write_text(json.dumps(dict(cases=rows,
