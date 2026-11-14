@@ -1113,7 +1113,24 @@ for _aux_key in AUX_STEP_MACROS:
 del _aux_key
 
 
+# Pick only an existing constant helper case before macro expansion. Expanding
+# the full dispatcher first duplicates every helper body at each static call.
+# Derive the spelling from that dispatcher, so unsupported/dynamic IDs retain
+# its original path and no second helper semantics table is introduced.
+_helper_dispatch = (Path(__file__).resolve().parents[1] / "x86_sim_local_bpf.h").read_text()
+_helper_dispatch = _helper_dispatch.split("#define X86_SIM_BPF_CALL_ID(ID)", 1)[1].split("#define ", 1)[0]
+_helper_dispatch = _helper_dispatch.replace(chr(92) + chr(10), "")
+STATIC_HELPER_CALLS = dict(re.findall(
+    r"case KPROG_X86_HELPER_SLOT\(X86_SIM_HELPER_(\w+)\):\s*"
+    r"(X86_SIM_BPF_CALL_\w+\(\));\s*break;", _helper_dispatch))
+del _helper_dispatch
+
+
 def direct_step_statement(encoded: EncodedInsn) -> str | None:
+    if encoded.op == "X86_OP_CALL_HELPER" and encoded.imm.startswith("X86_SIM_HELPER_"):
+        call = STATIC_HELPER_CALLS.get(encoded.imm.removeprefix("X86_SIM_HELPER_"))
+        if call is not None:
+            return call
     if encoded.aux != "0":
         template = AUX_STEP_MACROS.get(encoded.op)
         if template is not None:

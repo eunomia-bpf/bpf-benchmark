@@ -1,0 +1,428 @@
+{
+  "recorded": "2026-11-14T17:14:57.482588+00:00",
+  "raw": "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch",
+  "scope": "Static known-helper case selection before C macro expansion; original helper body/ISA/P unchanged. Compile-cost change, not measured runtime gain or M4 closure.",
+  "implementation": "17 lines in direct_step_statement: derive70 literal case-to-body spellings from unchanged helper dispatcher; numeric/dynamic/unmatched IDs retain original generic path.",
+  "input_sha256": "932f6b8c318d15a5093cfdb99fe449f10dba05844d75afc79db3173ba6c227c8",
+  "cilium_renders": [
+    {
+      "request": 1,
+      "literal_calls": 17,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "5ff1a58d4df04c44bc8da3b38fe047271c49d10ced69b5e818637ec3b390a9fb"
+    },
+    {
+      "request": 10,
+      "literal_calls": 71,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "6d61f7d33417a6650ade1dd4361f8108ecfab0440f3894083c930cd0b2af72d7"
+    },
+    {
+      "request": 11,
+      "literal_calls": 17,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "5ff1a58d4df04c44bc8da3b38fe047271c49d10ced69b5e818637ec3b390a9fb"
+    },
+    {
+      "request": 12,
+      "literal_calls": 71,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "6d61f7d33417a6650ade1dd4361f8108ecfab0440f3894083c930cd0b2af72d7"
+    },
+    {
+      "request": 13,
+      "literal_calls": 30,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "89f0f1ebd5efab58f3c7389142c34104316ac3f2ce17b84fd5ce49269440fc68"
+    },
+    {
+      "request": 14,
+      "literal_calls": 71,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "6d61f7d33417a6650ade1dd4361f8108ecfab0440f3894083c930cd0b2af72d7"
+    },
+    {
+      "request": 15,
+      "literal_calls": 30,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "89f0f1ebd5efab58f3c7389142c34104316ac3f2ce17b84fd5ce49269440fc68"
+    },
+    {
+      "request": 16,
+      "literal_calls": 12,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "7ad6fee974c3eb4c938d2d046791c9400170fb3adbe41681b0f6a55cf2159b80"
+    },
+    {
+      "request": 17,
+      "literal_calls": 10,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "2ea53a987fd45984f74a323ced610897b88a318c0103c50bad306bed089c4442"
+    },
+    {
+      "request": 18,
+      "literal_calls": 69,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "ff624562e308b2d5e8eb08363372b832b547e7483435b490838c54792d538f76"
+    },
+    {
+      "request": 19,
+      "literal_calls": 80,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "9c997dc23689704966f37ac33fa518e4944071d7dc84edad6a9b935c3e09f897"
+    },
+    {
+      "request": 2,
+      "literal_calls": 12,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "7ad6fee974c3eb4c938d2d046791c9400170fb3adbe41681b0f6a55cf2159b80"
+    },
+    {
+      "request": 20,
+      "literal_calls": 69,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "ff624562e308b2d5e8eb08363372b832b547e7483435b490838c54792d538f76"
+    },
+    {
+      "request": 21,
+      "literal_calls": 80,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "9c997dc23689704966f37ac33fa518e4944071d7dc84edad6a9b935c3e09f897"
+    },
+    {
+      "request": 22,
+      "literal_calls": 69,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "ff624562e308b2d5e8eb08363372b832b547e7483435b490838c54792d538f76"
+    },
+    {
+      "request": 23,
+      "literal_calls": 59,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "8c54a0279461e71b1e70c0417519a889d0694d1876c05cf483f93f7bd677f16d"
+    },
+    {
+      "request": 24,
+      "literal_calls": 69,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "ff624562e308b2d5e8eb08363372b832b547e7483435b490838c54792d538f76"
+    },
+    {
+      "request": 25,
+      "literal_calls": 59,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "8c54a0279461e71b1e70c0417519a889d0694d1876c05cf483f93f7bd677f16d"
+    },
+    {
+      "request": 26,
+      "literal_calls": 32,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "c6dc4ddcc6110d8bd23ac5b7116b327a4bbfcaba73eed172f140b0d962946d7f"
+    },
+    {
+      "request": 27,
+      "literal_calls": 32,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "c6dc4ddcc6110d8bd23ac5b7116b327a4bbfcaba73eed172f140b0d962946d7f"
+    },
+    {
+      "request": 28,
+      "literal_calls": 68,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "97c3cae948d9e76252370cda83a2dcd5442d007a67557e895d8509797d12ed4a"
+    },
+    {
+      "request": 29,
+      "literal_calls": 68,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "97c3cae948d9e76252370cda83a2dcd5442d007a67557e895d8509797d12ed4a"
+    },
+    {
+      "request": 3,
+      "literal_calls": 67,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "e52fe63f8665b39195afc6c7e39a214293405038d849652ee685e4f7bfcba3f7"
+    },
+    {
+      "request": 30,
+      "literal_calls": 53,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "39143d98539d273ab4562da3a74a4ae22babb8e1b11658108ba7297f1ba24a69"
+    },
+    {
+      "request": 31,
+      "literal_calls": 53,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "39143d98539d273ab4562da3a74a4ae22babb8e1b11658108ba7297f1ba24a69"
+    },
+    {
+      "request": 32,
+      "literal_calls": 69,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "ff624562e308b2d5e8eb08363372b832b547e7483435b490838c54792d538f76"
+    },
+    {
+      "request": 33,
+      "literal_calls": 69,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "ff624562e308b2d5e8eb08363372b832b547e7483435b490838c54792d538f76"
+    },
+    {
+      "request": 34,
+      "literal_calls": 32,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "effb5123a8d197d74598d0e6f233f4f32348e8e529a7818a72524a0727f5e3e3"
+    },
+    {
+      "request": 35,
+      "literal_calls": 32,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "effb5123a8d197d74598d0e6f233f4f32348e8e529a7818a72524a0727f5e3e3"
+    },
+    {
+      "request": 36,
+      "literal_calls": 12,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "7ad6fee974c3eb4c938d2d046791c9400170fb3adbe41681b0f6a55cf2159b80"
+    },
+    {
+      "request": 37,
+      "literal_calls": 10,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "2ea53a987fd45984f74a323ced610897b88a318c0103c50bad306bed089c4442"
+    },
+    {
+      "request": 38,
+      "literal_calls": 53,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "206cf312477d58b1a18e7f49e4e508833a54eed58bcdd2216611dd2d5b7b36c2"
+    },
+    {
+      "request": 39,
+      "literal_calls": 26,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "bc572dd2e23b1454c26a6590b92c5cb5fb80387e49e3afaf41e7b892e2bec43e"
+    },
+    {
+      "request": 4,
+      "literal_calls": 67,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "e52fe63f8665b39195afc6c7e39a214293405038d849652ee685e4f7bfcba3f7"
+    },
+    {
+      "request": 40,
+      "literal_calls": 53,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "206cf312477d58b1a18e7f49e4e508833a54eed58bcdd2216611dd2d5b7b36c2"
+    },
+    {
+      "request": 41,
+      "literal_calls": 26,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "bc572dd2e23b1454c26a6590b92c5cb5fb80387e49e3afaf41e7b892e2bec43e"
+    },
+    {
+      "request": 42,
+      "literal_calls": 123,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "b8e7ed6ab8466caf751e93483cfbfd3ac8db4d721e98740a074e60a821502fb3"
+    },
+    {
+      "request": 43,
+      "literal_calls": 30,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "89f0f1ebd5efab58f3c7389142c34104316ac3f2ce17b84fd5ce49269440fc68"
+    },
+    {
+      "request": 44,
+      "literal_calls": 123,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "b8e7ed6ab8466caf751e93483cfbfd3ac8db4d721e98740a074e60a821502fb3"
+    },
+    {
+      "request": 45,
+      "literal_calls": 30,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "89f0f1ebd5efab58f3c7389142c34104316ac3f2ce17b84fd5ce49269440fc68"
+    },
+    {
+      "request": 46,
+      "literal_calls": 69,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "ff624562e308b2d5e8eb08363372b832b547e7483435b490838c54792d538f76"
+    },
+    {
+      "request": 47,
+      "literal_calls": 26,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "bc572dd2e23b1454c26a6590b92c5cb5fb80387e49e3afaf41e7b892e2bec43e"
+    },
+    {
+      "request": 48,
+      "literal_calls": 69,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "ff624562e308b2d5e8eb08363372b832b547e7483435b490838c54792d538f76"
+    },
+    {
+      "request": 49,
+      "literal_calls": 26,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "bc572dd2e23b1454c26a6590b92c5cb5fb80387e49e3afaf41e7b892e2bec43e"
+    },
+    {
+      "request": 5,
+      "literal_calls": 71,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "6d61f7d33417a6650ade1dd4361f8108ecfab0440f3894083c930cd0b2af72d7"
+    },
+    {
+      "request": 50,
+      "literal_calls": 53,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "206cf312477d58b1a18e7f49e4e508833a54eed58bcdd2216611dd2d5b7b36c2"
+    },
+    {
+      "request": 51,
+      "literal_calls": 59,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "8c54a0279461e71b1e70c0417519a889d0694d1876c05cf483f93f7bd677f16d"
+    },
+    {
+      "request": 52,
+      "literal_calls": 53,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "206cf312477d58b1a18e7f49e4e508833a54eed58bcdd2216611dd2d5b7b36c2"
+    },
+    {
+      "request": 53,
+      "literal_calls": 59,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "8c54a0279461e71b1e70c0417519a889d0694d1876c05cf483f93f7bd677f16d"
+    },
+    {
+      "request": 54,
+      "literal_calls": 12,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "7ad6fee974c3eb4c938d2d046791c9400170fb3adbe41681b0f6a55cf2159b80"
+    },
+    {
+      "request": 55,
+      "literal_calls": 80,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "9c997dc23689704966f37ac33fa518e4944071d7dc84edad6a9b935c3e09f897"
+    },
+    {
+      "request": 56,
+      "literal_calls": 71,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "f87c1be3b73de72f2d6671825f9cc2a778c20b0eca2f7d85d36b20e2566184b1"
+    },
+    {
+      "request": 57,
+      "literal_calls": 80,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "9c997dc23689704966f37ac33fa518e4944071d7dc84edad6a9b935c3e09f897"
+    },
+    {
+      "request": 58,
+      "literal_calls": 71,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "f87c1be3b73de72f2d6671825f9cc2a778c20b0eca2f7d85d36b20e2566184b1"
+    },
+    {
+      "request": 59,
+      "literal_calls": 53,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "39143d98539d273ab4562da3a74a4ae22babb8e1b11658108ba7297f1ba24a69"
+    },
+    {
+      "request": 6,
+      "literal_calls": 71,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "6d61f7d33417a6650ade1dd4361f8108ecfab0440f3894083c930cd0b2af72d7"
+    },
+    {
+      "request": 60,
+      "literal_calls": 69,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "ff624562e308b2d5e8eb08363372b832b547e7483435b490838c54792d538f76"
+    },
+    {
+      "request": 61,
+      "literal_calls": 53,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "39143d98539d273ab4562da3a74a4ae22babb8e1b11658108ba7297f1ba24a69"
+    },
+    {
+      "request": 62,
+      "literal_calls": 69,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "ff624562e308b2d5e8eb08363372b832b547e7483435b490838c54792d538f76"
+    },
+    {
+      "request": 7,
+      "literal_calls": 32,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "c6dc4ddcc6110d8bd23ac5b7116b327a4bbfcaba73eed172f140b0d962946d7f"
+    },
+    {
+      "request": 8,
+      "literal_calls": 71,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "6d61f7d33417a6650ade1dd4361f8108ecfab0440f3894083c930cd0b2af72d7"
+    },
+    {
+      "request": 9,
+      "literal_calls": 32,
+      "only_selected_helper_spelling_changed": true,
+      "source_sha256": "c6dc4ddcc6110d8bd23ac5b7116b327a4bbfcaba73eed172f140b0d962946d7f"
+    }
+  ],
+  "cilium_compiled_example": {
+    "calls": 26,
+    "allocated_bytes_equal": true,
+    "old_preprocessed_bytes": 97335470,
+    "new_preprocessed_bytes": 46844405,
+    "scope": "Raw static-known-helper dispatch prototype on one real Cilium proof. Not full compiler promotion or M4 closure.",
+    "recorded": "2026-11-14T16:55:35.955446+00:00",
+    "raw": "/workspaces/kprog-raw/perf/20261114-compact-helper-dispatch",
+    "recipe": "Replace only literal X86_SIM_BPF_CALL_ID(X86_SIM_HELPER_name) by existing X86_SIM_BPF_CALL_name(), same compile_simulator/B frontend/bounds/backend. 26 static calls on original proof39. Allocated B sections equal; no model semantics change or source promotion yet.",
+    "otel_main_job": {
+      "pid": 527910,
+      "raw": "/workspaces/kprog-raw/perf/20261114-compact-helper-dispatch/otel-main",
+      "status": "running; not a verifier/native runtime acceptance"
+    },
+    "allocated_relocations_equal": true,
+    "allocated_relocation_count": 202
+  },
+  "actual_otel_checked_subset": [
+    {
+      "request": 1,
+      "actual_new_stock_verify_status": 0,
+      "trusted_x86.bpf.o": {
+        "allocated_bytes_equal": true,
+        "allocated_relocations_equal": true
+      },
+      "checked-simulator.native.o": {
+        "allocated_bytes_equal": true,
+        "allocated_relocations_equal": true
+      },
+      "packed_scalar_slots": []
+    },
+    {
+      "request": 2,
+      "actual_new_stock_verify_status": 0,
+      "trusted_x86.bpf.o": {
+        "allocated_bytes_equal": true,
+        "allocated_relocations_equal": true
+      },
+      "checked-simulator.native.o": {
+        "allocated_bytes_equal": true,
+        "allocated_relocations_equal": true
+      },
+      "packed_scalar_slots": []
+    }
+  ],
+  "host_make_exit": 0,
+  "remaining": "OTel main full B parity job527910 and bound checked main530434 are still running; no main verifier/whole-app/performance acceptance. Experimental spill compiler wrapper remains raw/run-only, not promoted."
+}

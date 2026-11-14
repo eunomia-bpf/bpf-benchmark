@@ -173,6 +173,8 @@
 **lane verified（Codex，gpt-6.1-sol）。目标：六个应用在唯一内核和镜像上走通 verified 路径。**
 - PERF 2026-11-14 编译流水线收取：合并P的checked主程序已实际到stock verifier，R10 -520拒绝；精确frame520=VM376+spill/alignment144，7个后端和5个producer flag候选未解决。私有32-bit spill对齐原型512帧，84792条B仅635条私有spill offset变化；独立libbpf诊断因map ksym未绑定而未进入verifier，仍待实际source-map绑定重放，未推广。OTel C731104B展开1011998390B，helper switch占624205306B；静态同helper宏原型在真实Cilium输入97.3→46.8MB，B allocated bytes相同，OTel完整编译后台验证中。MUL真实14类B编译为13通过/1未声明map失败，62份C生成和50605硬件vector通过；M4、整应用认证保持OPEN。结果见 `otel-combined-checked-result.json`、`otel-preprocessor-expansion.json`、`otel-spill-layout-prototype.json`、`compact-helper-dispatch-prototype.json`、`mul-u64-result.json`。
 
+- PERF 2026-11-14 静态helper特化：只按原dispatcher选择已知helper同一宏，不改P/ISA/body/动态未知路径。62份真实Cilium C除3272处调用拼写外完全相同；一个实际B的allocated字节+202reloc相同且展开97.3→46.8MB。实际OTel read_task_struct/stop两份stock验证+checked-C安装通过，B和checked-native allocated字节/reloc均等于旧接受输入。主程序完整编译/验证仍在跑；不报运行时收益或M4完成，spill对齐原型仍仅run-only。见 static-helper-specialization-result.json。
+
 **lane verified 的大任务：六个应用在唯一内核和镜像上走通 verified 路径。** 普查按程序体去重、最多三个 guest 并行跑完；失败类别按 BPF 时间占比从大到小修；每个应用整应用复测，记下加载、通过 verifier、执行的程序数和运行目录；之后做 100–100K 规模扫描。链接器、加载器、shim 归你，lane perf、lane C 的相关改动由你审看或代改。
 - [ ] V1 按程序体去重的常驻普查跑完；已发现的失败类别（栈写越界、callback、scalar 内存访问、编译器栈存储）现在就修，按 BPF 时间占比从大到小。
 - [ ] V2 六个应用整应用复测，记下每个应用加载、通过 verifier、执行的程序数和运行目录。
