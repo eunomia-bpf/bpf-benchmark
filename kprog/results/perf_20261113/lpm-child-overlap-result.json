@@ -284,5 +284,5 @@
   },
   "initial_failure": "Prototype rustc flag --edition2021 was invalid; subsequent fixture had missing emitted blob and aborted. Corrected --edition=2021 and retained original host logs; all subsequent65KvectorsPASS.",
   "candidate_sha256": "e248347b074c5445b288ac621da1cedb4bf2d721cb8f3e1082ee655dcb818ab2",
-  "performance": "Not measured. Existing queued corrected OTel uses old pinned linker, untouched. Batch this runtime change into a later all-LTO candidate; no per-piece long timing."
+  "performance": "Not measured yet. Added to replacement corrected all-LTO timing, after old queued job proved notstarted/noQEMU/nosamples and retired as superseded. One combined3x180 stats1+0, no per-piece long timing."
 }

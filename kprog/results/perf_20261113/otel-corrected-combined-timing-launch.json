@@ -3,7 +3,7 @@
   "raw": "/workspaces/kprog-raw/perf/20261114-otel-corrected-combined-timing",
   "job_pid": 557282,
   "observer_pid": 557281,
-  "status": "queued behind timingEX owner540550 Cilium; no result/acceptance yet",
+  "status": "retired-before-start; superseded after LPM correctness completed, no timing guest or samples started",
   "execution": "direct-native P with all runtime LTO and combined source flags, corrected original-source map bindings; NOTchecked-sim-C",
   "samples": 3,
   "duration_seconds": 180,
@@ -59,5 +59,20 @@
       "sha256": "f5a7cea515fa74d8a6588e8f2c7303af3137a1fca98e032f65d4d0cef9ea272e",
       "bytes": 2373920
     }
-  ]
+  ],
+  "retirement": {
+    "recorded": "2026-11-14T17:34:59.054614+00:00",
+    "reason": "Superseded BEFORE timing start by now-correctness-validated LPM overlap candidate; operator requires all pieces together and one combined timing, not component runs. No samples/guest were started.",
+    "processes": [
+      {
+        "pid": 557282,
+        "argv": "bash /workspaces/kprog-raw/perf/20261114-otel-corrected-combined-timing/job.sh "
+      },
+      {
+        "pid": 557286,
+        "argv": "flock -x 8 "
+      }
+    ]
+  },
+  "replacement_raw": "/workspaces/kprog-raw/perf/20261114-otel-corrected-all-lto-timing"
 }

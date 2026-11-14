@@ -1,0 +1,85 @@
+{
+  "recorded": "2026-11-14T17:35:44.882517+00:00",
+  "raw": "/workspaces/kprog-raw/perf/20261114-otel-corrected-all-lto-timing",
+  "job_pid": 562153,
+  "observer_pid": 562152,
+  "status": "queued behind existing timingEX owner, no samples yet",
+  "execution": "direct-native P corrected14source bindings+ALLruntimeLTO including db1179c2d LPMoverlap; sameef449combinedproducerP; checked-C remains separate actualfunctional job.",
+  "samples": 3,
+  "duration_seconds": 180,
+  "stats_modes": [
+    1,
+    0
+  ],
+  "resources": {
+    "cpus": "0-7",
+    "vcpus": 8,
+    "memory": "64G",
+    "timing": "exclusive",
+    "image": "shared"
+  },
+  "resident_jobs_at_queue": [
+    {
+      "pid": 524526,
+      "cpus": "20-23",
+      "memory": "24G",
+      "purpose": "census"
+    },
+    {
+      "pid": 530459,
+      "cpus": "16-17",
+      "memory": "48G",
+      "purpose": "checked OTel"
+    }
+  ],
+  "observer_scope": "read-only host pid/argv/all thread affinities/RSS at app and measurement log events, observed up to1s late; changing residentset retained, not quiet-host acceptance",
+  "inputs": [
+    {
+      "path": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/manifest-context.json",
+      "sha256": "87001c10efade3b14be657c8a70ec623f3e46a2a0db624aa02a72b53fe171fee",
+      "bytes": 7210
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/otelcol-ebpf-profiler.native.o",
+      "sha256": "ef44985c193e1d737ffd8980009b67f3c36ab91baf67af0c7878e69590d747da",
+      "bytes": 1630384
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/tracer.original.bpf.o",
+      "sha256": "f5a7cea515fa74d8a6588e8f2c7303af3137a1fca98e032f65d4d0cef9ea272e",
+      "bytes": 2373920
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-corrected-all-lto-linker-20261114/native-link.real",
+      "bytes": 2786792,
+      "sha256": "e248347b074c5445b288ac621da1cedb4bf2d721cb8f3e1082ee655dcb818ab2"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-corrected-all-lto-linker-20261114/native-link-on",
+      "bytes": 4226,
+      "sha256": "22fe25bd11b0e1c13058439cd0f1722143eb01a8918662b35681a99bd2dab804"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-corrected-all-lto-linker-20261114/runtime-array-layout.json",
+      "bytes": 93,
+      "sha256": "7d6163fe7fe3c406bace5e1a1e51486993ab43c9354d5a8f4865dee1c939ea75"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-corrected-all-lto-linker-20261114/runtime-lpm-layout.json",
+      "bytes": 186,
+      "sha256": "ea1bd0f3ed6be89836d5aaf3c4ca98117266ed60b4cebd2806c66b3764303272"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-corrected-all-lto-linker-20261114/runtime-hash-layout.json",
+      "bytes": 133,
+      "sha256": "971f96e6e983c1272ef2daf2ce23eeda165ae87d914c398a2ee62870b23b432b"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-corrected-all-lto-linker-20261114/runtime-probe-read-layout.json",
+      "bytes": 307,
+      "sha256": "75a971bd496f290b1763efcfe2f78b74e80d2c8bd3c7c064308337fe5026f12e"
+    }
+  ],
+  "supersedes": "/workspaces/kprog-raw/perf/20261114-otel-corrected-combined-timing",
+  "reason": "One final combined configuration only; previous queue never started."
+}
