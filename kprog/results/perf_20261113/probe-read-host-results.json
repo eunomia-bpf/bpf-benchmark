@@ -1,0 +1,75 @@
+{
+  "recorded_at": "2026-11-14T06:28:37.245912+00:00",
+  "raw": "/workspaces/kprog-raw/perf/20261114-probe-read",
+  "source_commits": [
+    "de0c62bd9",
+    "4894617bc",
+    "195aa5ff8"
+  ],
+  "candidate_sha256": "fb07b6f232801818559c202a9c22de336fd1a48f9bf4bc25446a29b0355687fd",
+  "jobs": {
+    "host": {
+      "pid": 215955,
+      "exit": 0,
+      "finished": "2026-11-14T06:10:07Z"
+    },
+    "payload": {
+      "pid": 218865,
+      "exit": 0,
+      "finished": "2026-11-14T06:14:59Z"
+    }
+  },
+  "observed_validation": {
+    "rust_passed": 30,
+    "rust_existing_ignored": 1,
+    "host_kernel": "probe-read host user=0: 1147 vectors, 121 exact-site faults, nesting/zero/error/bounds PASS",
+    "host_user": "probe-read host user=1: 1149 vectors, 121 exact-site faults, nesting/zero/error/bounds PASS",
+    "default_real_object_parity_cases": 22,
+    "actual_runtime_proof_full_elf_unchanged": 14,
+    "actual_runtime_kernel_on_off_success": 14,
+    "actual_kernel_off_code_relocs_maps_equal_capture": true,
+    "read_calls_retargeted": 696,
+    "source_r11_recovery_sites": 34,
+    "default_full_proof_elf_equal_cases": 22
+  },
+  "native_unwinder": {
+    "symbol": "perf_unwind_native",
+    "capture": "corpus/results/perf-link-audit-20261114/audit/link-lwc57z5g",
+    "calls_before": {
+      "bpf_probe_read_user": 24,
+      "bpf_probe_read_kernel": 0
+    },
+    "calls_after": {
+      "bpf_probe_read_user": 0,
+      "bpf_probe_read_kernel": 0
+    },
+    "sites": [
+      {
+        "offset": 30649,
+        "length": 3,
+        "destination": 11,
+        "opcode": "488b06"
+      },
+      {
+        "offset": 30692,
+        "length": 3,
+        "destination": 11,
+        "opcode": "0fb606"
+      }
+    ],
+    "bytes_off": 30511,
+    "bytes_on": 30840,
+    "on_abi": "/workspaces/kprog-raw/perf/20261114-probe-read/replay/link-lwc57z5g/on.abi",
+    "on_image": "/workspaces/kprog-raw/perf/20261114-probe-read/replay/link-lwc57z5g/on.image",
+    "on_relocs": "/workspaces/kprog-raw/perf/20261114-probe-read/replay/link-lwc57z5g/on.relocs",
+    "off_code_relocs_maps_match_capture": true,
+    "off_abi": "extra recovery records requested explicitly for both variants; captured ABI had none"
+  },
+  "archive": {
+    "path": "/workspaces/kprog-raw/perf/20261114-probe-read-host.tar.gz",
+    "bytes": 17462587,
+    "sha256": "7084e1983dc93e890acfdaa83a180641fa4fdd4afb686cccbcbfaa143d87b0f4",
+    "files_byte_compared": 1191
+  },
+  "scope": "Host emitted-code execution uses exact-site signal recovery and policy callback fixtures; SMAP execution is not certified by host tests. Real CLI transformation count is not actual program install/execution or performance gain. Full archive remains outside git under current coordinator policy. Actual registered-kernel subset is separate pending work; direct benchmark module still needs recovery support."
+}

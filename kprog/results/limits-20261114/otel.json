@@ -1,0 +1,170 @@
+{
+  "run": "corpus/results/x86_kvm_corpus_20261114_054100_189324",
+  "raw": "/workspaces/kprog-raw/perf/20261114-known-hash-instruction-profile",
+  "throughput_native_ebpf": 0.9544801316008642,
+  "ns_per_invocation": [
+    3315.2,
+    3745.7
+  ],
+  "root_profile": [
+    {
+      "phase": "baseline",
+      "bucket": "other_guest_kernel",
+      "cycles": 121691323909,
+      "guest_kernel_root_percent": 36.16647690829605,
+      "candidate_root_percent": null
+    },
+    {
+      "phase": "baseline",
+      "bucket": "lpm_lookup",
+      "cycles": 66464229800,
+      "guest_kernel_root_percent": 19.753068296692305,
+      "candidate_root_percent": 30.944662522096465
+    },
+    {
+      "phase": "baseline",
+      "bucket": "program_text",
+      "cycles": 47249642852,
+      "guest_kernel_root_percent": 14.042522196651941,
+      "candidate_root_percent": 21.99866389401427
+    },
+    {
+      "phase": "baseline",
+      "bucket": "user_nofault_copy",
+      "cycles": 57445350514,
+      "guest_kernel_root_percent": 17.072671050954845,
+      "candidate_root_percent": 26.74561926721177
+    },
+    {
+      "phase": "baseline",
+      "bucket": "hash_lookup",
+      "cycles": 32064832482,
+      "guest_kernel_root_percent": 9.529619584020875,
+      "candidate_root_percent": 14.928863585252088
+    },
+    {
+      "phase": "baseline",
+      "bucket": "array_lookup",
+      "cycles": 5223996383,
+      "guest_kernel_root_percent": 1.552563802297647,
+      "candidate_root_percent": 2.4322076036242217
+    },
+    {
+      "phase": "baseline",
+      "bucket": "generic_lookup_dispatch",
+      "cycles": 3362492719,
+      "guest_kernel_root_percent": 0.9993277365193752,
+      "candidate_root_percent": 1.5655218263352468
+    },
+    {
+      "phase": "baseline",
+      "bucket": "probe_read_user_entry",
+      "cycles": 2854992505,
+      "guest_kernel_root_percent": 0.848499442595055,
+      "candidate_root_percent": 1.3292379951770659
+    },
+    {
+      "phase": "baseline",
+      "bucket": "probe_read_kernel_entry",
+      "cycles": 78235529,
+      "guest_kernel_root_percent": 0.023251480566541544,
+      "candidate_root_percent": 0.03642518764495923
+    },
+    {
+      "phase": "baseline",
+      "bucket": "kernel_nofault_copy",
+      "cycles": 40375379,
+      "guest_kernel_root_percent": 0.01199950140536852,
+      "candidate_root_percent": 0.01879811864391364
+    },
+    {
+      "phase": "post_rejit",
+      "bucket": "other_guest_kernel",
+      "cycles": 121970437961,
+      "guest_kernel_root_percent": 32.24187578660178,
+      "candidate_root_percent": null
+    },
+    {
+      "phase": "post_rejit",
+      "bucket": "program_text",
+      "cycles": 63652299060,
+      "guest_kernel_root_percent": 16.825958438227154,
+      "candidate_root_percent": 24.83238524318543
+    },
+    {
+      "phase": "post_rejit",
+      "bucket": "user_nofault_copy",
+      "cycles": 59458736276,
+      "guest_kernel_root_percent": 15.717424824301157,
+      "candidate_root_percent": 23.19636944907229
+    },
+    {
+      "phase": "post_rejit",
+      "bucket": "lpm_lookup",
+      "cycles": 80047135666,
+      "guest_kernel_root_percent": 21.159797803150184,
+      "candidate_root_percent": 31.22842913494664
+    },
+    {
+      "phase": "post_rejit",
+      "bucket": "array_lookup",
+      "cycles": 16041056873,
+      "guest_kernel_root_percent": 4.24032062056261,
+      "candidate_root_percent": 6.25802539516604
+    },
+    {
+      "phase": "post_rejit",
+      "bucket": "hash_lookup",
+      "cycles": 29993226254,
+      "guest_kernel_root_percent": 7.928461121293354,
+      "candidate_root_percent": 11.701122504990497
+    },
+    {
+      "phase": "post_rejit",
+      "bucket": "generic_lookup_dispatch",
+      "cycles": 4250287146,
+      "guest_kernel_root_percent": 1.1235282295414877,
+      "candidate_root_percent": 1.6581454144200258
+    },
+    {
+      "phase": "post_rejit",
+      "bucket": "probe_read_user_entry",
+      "cycles": 2815622520,
+      "guest_kernel_root_percent": 0.7442865096608563,
+      "candidate_root_percent": 1.0984461543191364
+    },
+    {
+      "phase": "post_rejit",
+      "bucket": "kernel_nofault_copy",
+      "cycles": 50244548,
+      "guest_kernel_root_percent": 0.013281730414774264,
+      "candidate_root_percent": 0.019601679605156467
+    },
+    {
+      "phase": "post_rejit",
+      "bucket": "probe_read_kernel_entry",
+      "cycles": 19160563,
+      "guest_kernel_root_percent": 0.005064936246641096,
+      "candidate_root_percent": 0.007475024294783497
+    }
+  ],
+  "conditional_models": {
+    "baseline": {
+      "observed_guest_kernel_root_cycles": 336475472072,
+      "identified_candidate_root_cycles": 214784148163,
+      "program_fraction_of_candidate_roots": 0.21998663894014273,
+      "conditional_infinite_code_speed_ceiling": 1.2820293214480736,
+      "conditional_30percent_code_speedup": 1.053481180966341,
+      "code_speedup_needed_for_20percent_total": 4.125783070775802
+    },
+    "post_rejit": {
+      "observed_guest_kernel_root_cycles": 378298206867,
+      "identified_candidate_root_cycles": 256327768906,
+      "program_fraction_of_candidate_roots": 0.24832385243185431,
+      "conditional_infinite_code_speed_ceiling": 1.3303601600705863,
+      "conditional_30percent_code_speedup": 1.060789051676094,
+      "code_speedup_needed_for_20percent_total": 3.041053277857642
+    }
+  },
+  "scope": "Root-only hardware samples, not inclusive BPF time. Candidate roots omit other_guest_kernel including timers and unknown callers; they are not proven BPF-owned samples. BPF-time helper shares and tail attribution are unidentifiable from this capture and remain open, not zero. Conditional Amdahl calculations must not be presented as measured absolute bounds."
+}

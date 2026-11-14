@@ -1,0 +1,28 @@
+{
+  "recorded_at": "2026-11-14T06:30:44.158638+00:00",
+  "source_commit": "d5e5efa55",
+  "model_commit": "52964ca12",
+  "model_sha256": "9bafbd9ed139a97a1d892c7a73b991da51742d9a197759a24829731d284df0f5",
+  "kernel_outer_pid": 227579,
+  "input_outer_pid": 226727,
+  "input_build": "LAUNCHED_UNCOLLECTED",
+  "kernel_job": "LAUNCHED_UNCOLLECTED_NO_POSTLAUNCH_POLLS",
+  "raw": "/workspaces/kprog-raw/perf/20261114-probe-read/kernel-job",
+  "configuration": [
+    "submitted-native",
+    "checked-sim-c"
+  ],
+  "protocol": "existing registered service + existing trusted module; one boot, 2vCPU/4G on16-19, AS16GiB, imageSH, wait exact own input PID226727; existing kernel/image/base unchanged",
+  "expected": "9 stock/native case pairs per configuration, 18 executions each; no actual outcome assumed",
+  "cases": [
+    "user-valid",
+    "user-partial-fault",
+    "user-guard-fault",
+    "user-null",
+    "user-wrap",
+    "kernel-stack",
+    "kernel-denies-user",
+    "kernel-denies-null",
+    "kernel-fault"
+  ]
+}
