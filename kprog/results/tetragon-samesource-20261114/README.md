@@ -30,7 +30,11 @@ Smoke `x86_kvm_corpus_20261114_193521_704992` (1 x 30 s): `status ok`, 288
 Timing `x86_kvm_corpus_20261114_194008_916664` (3 x 180 s, CPUs 0-7, both arms in one
 window, `specialized-timing.sh tetragon/observer corpus/results/tetragon-samesource-20261114`):
 `status ok`, 0 workload errors, 288 `jit-info native` in the native arm and 0 in the
-baseline.
+baseline. The counters in `details/apps/tetragon__observer.json` hold **287** entries in
+*both* arms (231 `generic_kprobe_`, 36 `generic_retkprobe`, 6 `generic_tracepoint`,
+2 `generic_rawtp_*`, and the rest), one fewer than the 288 replacements. The 287/288 gap
+is present identically in both arms, so it is a counter-view-versus-load-view difference,
+not an arm difference; 288 is the load-side count and 287 the counter-side.
 
 ## Result, and the two caveats that matter
 
