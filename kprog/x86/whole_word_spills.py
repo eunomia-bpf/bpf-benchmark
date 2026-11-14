@@ -17,7 +17,7 @@ def lower(path, low, high):
     return lower_text(path.read_text(), low, high)
 
 
-def lower_text(text, low, high, *, require_final=True):
+def lower_text(text, low, high, *, require_final=True, reuse_dead_source=False):
     head, body = text.split('body:             |', 1)
     slots = {int(i): (int(n), int(a)) for i, n, a in re.findall(
         r'  - \{ id: (\d+),[^\n]*type: spill-slot,[^\n]*size: (\d+), alignment: (\d+),', head)}
@@ -68,9 +68,10 @@ def lower_text(text, low, high, *, require_final=True):
             if store:
                 source, slot = map(int, store.groups())
                 free = sorted(set(range(10)) - live - after - used)
-                if len(free) < 2:
+                reuse = reuse_dead_source and source not in after and len(free) == 1
+                if len(free) < 2 and not reuse:
                     raise ValueError(f'No two dead scratch registers at bb.{block}: {line}')
-                first, second = free[:2]
+                first, second = (free[0], source) if reuse else free[:2]
                 replacement.append(f'$r{first} = LDD %stack.{low}, 0')
                 if slot == low:
                     replacement += [f'$r{first} = SRL_ri killed $r{first}, 32',
@@ -80,12 +81,19 @@ def lower_text(text, low, high, *, require_final=True):
                     # Explicit shifts retain the required high-half truncation.
                     replacement += [f'$r{first} = SLL_ri killed $r{first}, 32',
                                     f'$r{first} = SRL_ri killed $r{first}, 32']
-                replacement.append(f'$w{second} = COPY $w{source}, implicit-def $r{second}')
+                if not reuse:
+                    replacement.append(f'$w{second} = COPY $w{source}, implicit-def $r{second}')
+                elif slot == low:
+                    replacement += [f'$r{second} = SLL_ri killed $r{second}, 32',
+                                    f'$r{second} = SRL_ri killed $r{second}, 32']
                 if slot == high:
                     replacement.append(f'$r{second} = SLL_ri killed $r{second}, 32')
                 replacement += [f'$r{first} = OR_rr killed $r{first}, killed $r{second}',
                                 f'STD killed $r{first}, %stack.{low}, 0']
-                changes.append(dict(block=block, original=line.strip(), scratch=free[:2]))
+                record = dict(block=block, original=line.strip(), scratch=[first, second])
+                if reuse:
+                    record['reuses_dead_source'] = True
+                changes.append(record)
             else:
                 destination, slot = map(int, load.groups())
                 replacement.append(f'$r{destination} = LDD %stack.{low}, 0')
@@ -132,7 +140,7 @@ def automatic(path, all_scalar_pairs=False):
         eligible = sorted(slot for slot, shape in slots.items() if shape == (4, 8))
         if all_scalar_pairs:
             for low, high in zip(eligible[-2::-2], eligible[::-2]):
-                document, changes = lower_text(document, low, high, require_final=False)
+                document, changes = lower_text(document, low, high, require_final=False, reuse_dead_source=True)
                 records.append(dict(document=index, low=low, high=high, changes=changes))
             documents[index] = document
             continue
