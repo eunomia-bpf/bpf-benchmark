@@ -1,0 +1,57 @@
+{
+  "recorded": "2026-11-14T21:05:20Z",
+  "raw": "/workspaces/kprog-raw/C/limits/tracee",
+  "programs": [
+    {
+      "id": 25,
+      "name": "trace_sys_exit",
+      "tag": "4dc9dfab1040a032",
+      "btf_id": 51,
+      "jited_bytes": 8227,
+      "line_count": 651,
+      "binary": "baseline.jit-lines.d/prog-25.bin",
+      "source_status": null,
+      "arm": "baseline",
+      "functions": [
+        {
+          "address": "0xffffffffc040c310",
+          "length": 8227
+        }
+      ]
+    },
+    {
+      "id": 216,
+      "name": "trace_sys_exit",
+      "tag": "4dc9dfab1040a032",
+      "btf_id": 65,
+      "jited_bytes": 8227,
+      "line_count": 651,
+      "binary": "post_rejit.jit-lines.d/prog-216.bin",
+      "source_status": null,
+      "arm": "post_rejit",
+      "functions": [
+        {
+          "address": "0xffffffffc0415658",
+          "length": 8227
+        }
+      ]
+    },
+    {
+      "id": 217,
+      "name": "trace_sys_exit",
+      "tag": "59f4a931744dcdc6",
+      "btf_id": 0,
+      "jited_bytes": 6359,
+      "line_count": 0,
+      "binary": "post_rejit.jit-lines.d/prog-217.bin",
+      "source_status": "Missing or unequal line arrays; no pairing inferred",
+      "arm": "post_rejit",
+      "functions": [
+        {
+          "address": "0xffffffffc04176a0",
+          "length": 6359
+        }
+      ]
+    }
+  ]
+}

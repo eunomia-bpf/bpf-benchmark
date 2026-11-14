@@ -1,0 +1,4 @@
+[254.487572 pid=20106 tid=20113] BPF_PROG_LOAD type=17 (raw_tracepoint) name=trace_sys_exit insn_cnt=1710 hash=898c5cde82d184d5 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=151 attach_btf_obj_fd=0 attach_prog_fd=0
+[254.524737 pid=20106 tid=20113] native-loader jit-info original fd=24 id=216 type=17 name=trace_sys_exit tag=4dc9dfab1040a032 jited_len=8227 xlated_len=13824 nr_jited_ksyms=1 ksym0=0xffffffffc0415658 ksym1=0x0
+[254.525084 pid=20106 tid=20113] native-loader jit-info native fd=174 id=217 type=17 name=trace_sys_exit tag=59f4a931744dcdc6 jited_len=6359 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc04176a0 ksym1=0x0
+[254.525380 pid=20106 tid=20113] native-loader replaced prog=trace_sys_exit original_fd=24 native_fd=174 manifest=/opt/bpf-benchmark/native-bpf/x86_64/tracee/manifest.json source=/tmp/bpfrejit_20106_898c5cde82d184d5.bpf
