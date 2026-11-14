@@ -1,17 +1,17 @@
 # Native simulator verification
 
-## External-base migration (M1/M2 complete, M3 in progress)
+## External-base migration (M1–M3 complete, M4 in progress)
 
 The operator's replacement plan is in [todo section 4](../docs/todo.md).
 The external bases are forks, pinned as Git submodules; changes needed by
-kprog belong in those forks. M3 retires the remaining local ISA bodies as
-described below.
+kprog belong in those forks. M3 replaced the local ISA bodies; M4 adapts the
+shared simulator C for Clight export, as described below.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
 | AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `da428593b21d` | Lean 4.35.0 |
 | x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `28640eb74b85` | Lean 4.32.0-rc1 |
-| Clight | [eunomia-bpf/clean](https://github.com/eunomia-bpf/clean), `external/clean/export` | `123f7f7767e2` | Lean 4.32.1 |
+| Clight | [eunomia-bpf/clean](https://github.com/eunomia-bpf/clean), `external/clean/export` | `fee9302` | Lean 4.32.1 |
 
 `make -C kprog/formal mature` builds the migration Lake package on Lean 4.35.0,
 importing the external `Arm`, `X86`, `CCLib` and `Clightdefs` libraries directly.
@@ -22,8 +22,8 @@ hypothesis; its theorem statement and instruction semantics are unchanged.
 Build output and the earlier failed attempts are retained in
 `/workspaces/kprog-raw/formal/m1-compat-2` and `m1-compat-1`.
 The main package now uses Lean 4.35.0 and the same three pinned external
-path dependencies as the M1 integration package. M3 is in progress; the legacy
-counts below describe the old
+path dependencies as the M1 integration package. M3 is complete; M4 is in
+progress. The legacy counts below describe the old
 foundation, not proofs against these external bases. Retirement occurs at M6.
 
 LNSym and x86lean retain their Apache-2.0 licenses. Clean retains its own
@@ -891,9 +891,14 @@ in `/workspaces/kprog-raw/formal/m4-bpf-abi`.
 The next M4 slice replaces the eleven GNU empty aggregate initializers in
 both shared simulator headers with standard C zero initialization. Both actual
 raw entrypoints now export through CompCert; the expanded dispatchers proceed
-to the next GNU statement-expression failure. The entry exports still exceed
-Lean's default recursion depth in the exporter's nested sequence syntax, so
-entry typechecking and complete-handler acceptance remain open. The matched
+to the next GNU statement-expression failure. The initial entry exports exceeded
+Lean's default recursion depth in the exporter's nested sequence syntax;
+complete-handler acceptance remains open. Clean fork `fee9302` now splits long
+statement syntax into named `Stmt` definitions, without changing the statement
+tree or raising Lean limits. Both entries typecheck on4.35 with36/65 parts;
+unfolding the parts reproduces the earlier exported syntax exactly. The upstream
+demo and256-statement regression pass on4.32.1; all229 root component jobs
+pass on4.35. The matched
 Cilium compiler input differs only in initializer syntax; all allocated bytes
 and202 relocations remain equal. `make clight` passes. Evidence and the two
 entry typecheck failures remain in `/workspaces/kprog-raw/formal/m4-standard-c`.
