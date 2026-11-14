@@ -61,6 +61,10 @@ MAP_BOUNDS_CLASS_WORKLIST ?= $(REPO_ROOT)/kprog/results/verified_20261114/map-bo
 MAP_BOUNDS_CLASS_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-map-bounds-class/native-evidence
 CLASS_INSPECT_ARGS ?=
 SELF_COMPARE_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-self-compare/before
+SELF_COMPARE_BUILD ?= /var/tmp/kprog-tmp/verified/self-compare
+SELF_COMPARE_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-self-compare/kernel
+SELF_COMPARE_BEFORE ?= /workspaces/kprog-raw/verified/20261114-self-compare/before/fixture.bpf.o
+SELF_COMPARE_AFTER ?= /workspaces/kprog-raw/verified/20261114-self-compare/after-initialized/fixture.bpf.o
 KFUNC_BUILD ?= /var/tmp/kprog-tmp/verified/kfunc
 KFUNC_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/host
 KFUNC_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/kernel
@@ -404,6 +408,25 @@ shared-image-restore:
 .PHONY: resident-census-checkpoint resident-census-publish resident-census-publish-test verified-app-collect verified-app-collect-test
 .PHONY: map-bounds-class-inspect
 .PHONY: self-compare-inputs
+.PHONY: self-compare-kernel-inputs self-compare-kvm guest-self-compare
+self-compare-kernel-inputs:
+	install -d "$(SELF_COMPARE_BUILD)" "$(SELF_COMPARE_KERNEL_OUTPUT)"
+	$(CXX) -std=gnu++20 -O1 -I"$(LIBBPF_PREFIX)/include" ../test/self_compare_kernel.cpp \
+		"$(LIBBPF_LIBRARY)" -lelf -lz -o "$(SELF_COMPARE_BUILD)/self-compare"
+	install -m 0755 "$(SELF_COMPARE_BUILD)/self-compare" "$(SELF_COMPARE_KERNEL_OUTPUT)/"
+	install -m 0644 "$(SELF_COMPARE_BEFORE)" "$(SELF_COMPARE_KERNEL_OUTPUT)/before.bpf.o"
+	install -m 0644 "$(SELF_COMPARE_AFTER)" "$(SELF_COMPARE_KERNEL_OUTPUT)/after.bpf.o"
+
+self-compare-kvm:
+	taskset -c 14 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(SELF_COMPARE_KERNEL_OUTPUT)" --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 1G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/libnativeloader guest-self-compare SELF_COMPARE_KERNEL_OUTPUT=$(SELF_COMPARE_KERNEL_OUTPUT)'
+
+guest-self-compare:
+	"$(SELF_COMPARE_KERNEL_OUTPUT)/self-compare" "$(SELF_COMPARE_KERNEL_OUTPUT)/before.bpf.o" \
+		"$(SELF_COMPARE_KERNEL_OUTPUT)/after.bpf.o" "$(SELF_COMPARE_KERNEL_OUTPUT)"
+
 self-compare-inputs:
 	install -d "$(SELF_COMPARE_OUTPUT)"
 	clang-18 -O2 -I"$(REPO_ROOT)" -I"$(LIBBPF_PREFIX)/include/bpf" \

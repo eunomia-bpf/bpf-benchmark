@@ -17,6 +17,7 @@ SEC("socket") int self_compare(struct __sk_buff *ctx)
 {
     X86_SIM_ENTRY_RAW(ctx);
     __u32 key = 0;
+    *(__u64 *)X86_SIM_L_STACK_PTR(-8) = 7;
     if (ctx->mark) {
         __x86_rax.ptr = bpf_map_lookup_elem(&values, &key);
         __x86_rax_tag = X86_SIM_TAG_SCALAR;
