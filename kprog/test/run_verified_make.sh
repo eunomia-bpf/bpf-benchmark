@@ -3,6 +3,7 @@
 # VERIFIED_WAIT_PID defers the Make job until that owned guest launcher exits.
 # VERIFIED_WAIT_JOB propagates the completed dependency's recorded Make status.
 # VERIFIED_IMAGE_LOCK takes its shared image lock after the dependency exits.
+# VERIFIED_IMAGE_LOCK_MODE=-x selects a base writer; the default remains -s.
 set -euo pipefail
 run_dir=$1
 shift
@@ -28,8 +29,9 @@ if [[ -n ${VERIFIED_WAIT_JOB:-} ]]; then
 fi
 if [[ -n ${VERIFIED_IMAGE_LOCK:-} ]]; then
     printf '%s\n' "$VERIFIED_IMAGE_LOCK" > "$run_dir/image-lock"
+    printf '%s\n' "${VERIFIED_IMAGE_LOCK_MODE:--s}" > "$run_dir/image-lock-mode"
     exec 9>>"$VERIFIED_IMAGE_LOCK"
-    flock -s 9
+    flock "${VERIFIED_IMAGE_LOCK_MODE:--s}" 9
 fi
 date -u +%FT%TZ > "$run_dir/started"
 status=0

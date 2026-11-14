@@ -35,6 +35,9 @@ SOURCE_MAP_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-source-maps/
 SOURCE_MAP_LOADER ?= /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader
 SOURCE_MAP_VM_MEMORY ?= 2G
 SERVICE_EXECUTION_ARGS ?=
+CHECKED_COMPILER_BASE ?= /workspaces/.agent-state/kprog-ck/verified-compiler
+CHECKED_COMPILER_STAGE_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-checked-compiler-stage/stage
+CHECKED_COMPILER_SERVICE_ARGS = --execution-mode checked-sim-c --sim-native-compiler $(CHECKED_COMPILER_BASE)/compile-sim-ir --sim-context-compiler $(CHECKED_COMPILER_BASE)/context-lower --sim-public-layout $(CHECKED_COMPILER_BASE)/public-layout.json --sim-physical-layout $(CHECKED_COMPILER_BASE)/physical-layout.json --sim-bounds-compiler $(CHECKED_COMPILER_BASE)/packet-bounds
 CHECKED_SIM_BUILD ?= /var/tmp/kprog-tmp/verified/checked-sim
 CHECKED_SIM_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-checked-sim/host
 CHECKED_SIM_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-checked-sim/kernel
@@ -154,7 +157,33 @@ guest-source-maps:
 		--run "$(SOURCE_MAP_KERNEL_OUTPUT)/source-maps" kernel "$(SOURCE_MAP_KERNEL_OUTPUT)/fixture.bpf.o" \
 		"$(SOURCE_MAP_KERNEL_OUTPUT)/fixture.native.o" "$(REPO_ROOT)/kprog/test/tail_call_frame/native-link.sh" "$(SOURCE_MAP_KERNEL_OUTPUT)"
 
-.PHONY: checked-sim-inputs checked-sim-check checked-sim-kvm
+.PHONY: checked-sim-inputs checked-sim-check checked-sim-kvm checked-sim-stage
+# Stage the tools already exercised by checked-packet-check/kvm. The caller
+# holds the image writer lock after existing service guests have exited.
+# The registered service runs outside the app image and reads this sole base.
+checked-sim-stage:
+	install -d "$(CHECKED_COMPILER_BASE)" "$(CHECKED_COMPILER_STAGE_OUTPUT)"
+	sha256sum "$(CHECKED_SIM_BUILD)/compile-sim-ir" "$(CHECKED_PACKET_BUILD)/context-lower" \
+		"$(CHECKED_PACKET_BUILD)/packet-bounds" "$(CHECKED_PACKET_BUILD)/public-layout" \
+		"$(CHECKED_PACKET_BUILD)/physical-layout" > "$(CHECKED_COMPILER_STAGE_OUTPUT)/input-tool-sha256"
+	install -m 0755 "$(CHECKED_SIM_BUILD)/compile-sim-ir" "$(CHECKED_PACKET_BUILD)/context-lower" \
+		"$(CHECKED_PACKET_BUILD)/packet-bounds" "$(CHECKED_PACKET_BUILD)/public-layout" \
+		"$(CHECKED_PACKET_BUILD)/physical-layout" "$(CHECKED_COMPILER_BASE)/"
+	"$(CHECKED_COMPILER_BASE)/public-layout" > "$(CHECKED_COMPILER_BASE)/public-layout.json"
+	"$(CHECKED_COMPILER_BASE)/physical-layout" > "$(CHECKED_COMPILER_BASE)/physical-layout.json"
+	sha256sum "$(CHECKED_COMPILER_BASE)"/* > "$(CHECKED_COMPILER_STAGE_OUTPUT)/tool-sha256"
+	sha256sum ../x86/compile_sim_ir.cpp ../x86/packet_bounds_ir.cpp \
+		../perf/native-context/socket-context-lower.cpp ../perf/native-context/packet-public-layout.c \
+		../perf/native-context/packet-physical-layout.c "$(CHECKED_PACKET_VMLINUX)" \
+		> "$(CHECKED_COMPILER_STAGE_OUTPUT)/source-at-stage-sha256"
+	install -m 0644 "$(CHECKED_COMPILER_BASE)/public-layout.json" "$(CHECKED_COMPILER_BASE)/physical-layout.json" \
+		"$(CHECKED_COMPILER_STAGE_OUTPUT)/"
+	printf '%s\n' '$(CHECKED_COMPILER_SERVICE_ARGS)' > "$(CHECKED_COMPILER_STAGE_OUTPUT)/service-args.txt"
+	date -u +%FT%TZ > "$(CHECKED_COMPILER_STAGE_OUTPUT)/finished"
+	printf -- '- LANE VERIFIED %s: BASE STAGED checked simulator compiler/context/bounds tools in %s; hashes/layouts/args %s. Sole image/kernel unchanged; actual app execution with this opt-in mode remains separate.\n' \
+		"$$(date -u +%FT%TZ)" "$(CHECKED_COMPILER_BASE)" "$(CHECKED_COMPILER_STAGE_OUTPUT)" \
+		>> /workspaces/.agent-state/kprog-lanes/COORDINATION.md
+
 checked-sim-inputs:
 	install -d "$(CHECKED_SIM_BUILD)"
 	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
@@ -526,7 +555,7 @@ trusted-service-kvm: trusted-service
 	taskset -c $(SERVICE_HOST_CPUS) vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
 		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(OUTPUT)" --overlay-rwdir /tmp \
 		--disable-monitor $(VNG_FLAGS) --cpus $(VM_CPUS) --memory $(VM_MEM) --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -C kprog/libnativeloader guest-trusted-service BUILD_DIR=$(abspath $(BUILD_DIR)) OUTPUT=$(OUTPUT) SERVICE_RUN="$(SERVICE_RUN)"'
+		--exec 'make -C kprog/libnativeloader guest-trusted-service BUILD_DIR=$(abspath $(BUILD_DIR)) OUTPUT=$(OUTPUT) SERVICE_RUN="$(SERVICE_RUN)" SERVICE_EXECUTION_ARGS="$(SERVICE_EXECUTION_ARGS)"'
 
 guest-trusted-service:
 	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" python3 ../trusted_service.py --arch 1 \
@@ -534,7 +563,7 @@ guest-trusted-service:
 		--module /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
 		--state "$(OUTPUT)/state" --results "$(OUTPUT)/service.tar.gz" \
 		--native-link "$(REPO_ROOT)/kprog/x86/native_lab/native_link/target/release/native-link" \
-		--loader "$(BUILD_DIR)/trusted-native-loader" \
+		--loader "$(BUILD_DIR)/trusted-native-loader" $(SERVICE_EXECUTION_ARGS) \
 		--run $(SERVICE_RUN)
 
 .PHONY: trusted-lifecycle-check guest-trusted-lifecycle
