@@ -1,0 +1,32 @@
+{
+  "recorded_at": "2026-11-14T00:53:23Z",
+  "outer_pid": 93688,
+  "raw": "/workspaces/kprog-raw/perf/20261114-tetragon-upstream-verbose",
+  "capture": "/workspaces/repository/corpus/results/perf-tetragon-upstream-verbose-20261114",
+  "prior_launch": "/workspaces/repository/kprog/results/perf_20261113/tetragon-upstream-runtime-launch.json",
+  "changed_option": "VNG_FLAGS=--verbose",
+  "command": [
+    "make",
+    "-f",
+    "kprog/perf/one-image/Makefile",
+    "corpus",
+    "APPS=tetragon/observer",
+    "CPUS=16-19",
+    "VM_CPUS=4",
+    "VM_MEM=16G",
+    "STATE=/var/tmp/kprog-tmp/perf/tetragon-upstream-verbose",
+    "LOGS=/workspaces/kprog-raw/perf/20261114-tetragon-upstream-verbose",
+    "SAMPLES=1",
+    "WORKLOAD_DURATION=45",
+    "BPFREJIT_CORPUS_BPF_STATS=1",
+    "NATIVE_MANIFEST=/workspaces/repository/corpus/results/perf-tetragon-upstream-data-20261113/manifest.json",
+    "VNG_FLAGS=--verbose"
+  ],
+  "environment": {
+    "EQCODEX_OUT": "/workspaces/repository/corpus/results/perf-tetragon-upstream-verbose-20261114",
+    "EQCODEX_TETRA": "/workspaces/repository/corpus/results/perf-observers-20261113/tetra",
+    "EQCODEX_NATIVE_LINK_BINARY": "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-on"
+  },
+  "scope": "Retry only to retain serial console for unresolved vng255. Same image, native candidate, observer, linker, workload and resource limits. No postlaunch polling or result claim.",
+  "outcome": null
+}

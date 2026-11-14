@@ -1,0 +1,35 @@
+{
+  "recorded_at": "2026-11-14T00:52:39.565453+00:00",
+  "protocol_commit": "f460ce212",
+  "raw": "/workspaces/kprog-raw/perf/20261114-tetragon-upstream-runtime",
+  "inputs": [
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_002912_344675/details/shim-logs/tetragon__observer.baseline.log",
+      "sha256": "b9dc1aa5fdf0baa3baf6a79cc15504b297a217d279e2c9490f9582f08fa5b41f"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_002912_344675/details/shim-logs/tetragon__observer.post_rejit.log",
+      "sha256": "f04c86bc9e4b1b15b3db0499a054ff06dd41c075c0512db2bd72950fca752a7b"
+    }
+  ],
+  "reports": [],
+  "scope": "Actual two-start application diagnostic interrupted during native startup; baseline completed, native measurement absent; no equal-work or throughput result.",
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/perf_20261113/tetragon-upstream-runtime-partial.tar.gz",
+    "bytes": 733950,
+    "sha256": "7aee00d05971488210f89a1ba191f9accb9f6c81aba32d76a530e534cf0ba885",
+    "files_byte_compared": 535
+  },
+  "outcome": {
+    "make_exit": 2,
+    "vng_exit": 255,
+    "finished_at": "2026-11-14T00:31:33Z",
+    "run": "x86_kvm_corpus_20261114_002912_344675",
+    "baseline_measurement": "done",
+    "post_measurement": null,
+    "result_json_present": false,
+    "observer_exit_recorded": false,
+    "last_post_load": "tg_kp_bprm_comm",
+    "cause": "Unresolved: no kernel serial console retained."
+  }
+}
