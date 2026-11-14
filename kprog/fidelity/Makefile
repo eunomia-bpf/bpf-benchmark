@@ -214,9 +214,16 @@ scale-build:
 	$(PYTHON) scale.py build --build $(SCALE_BUILD) --sizes $(SCALE_SIZES)
 
 scale-kvm:
-	vng --run $(ROOT)/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage \
-		--cwd $(ROOT) --disable-monitor --cpus 2 --mem 2G --rwdir $(ROOT) --overlay-rwdir /tmp \
-		--exec 'make -C $(ROOT)/kprog/fidelity scale-guest SCALE_BUILD=$(SCALE_BUILD) SCALE_OUT=$(SCALE_OUT)'
+	install -d $(SCALE_OUT)
+	date -u +%FT%TZ > $(SCALE_OUT)/started
+	exec 9>/workspaces/.agent-state/kprog-lanes/locks/image; flock -s 9; \
+	status=0; taskset -c 18-19 prlimit --as=17179869184 -- vng \
+		--run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+		--cwd $(ROOT) --disable-monitor --cpus 2 --memory 8G --rwdir $(ROOT) \
+		--rwdir $(abspath $(SCALE_BUILD)) --rwdir $(abspath $(SCALE_OUT)) --overlay-rwdir /tmp \
+		--append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C $(ROOT)/kprog/fidelity scale-guest SCALE_BUILD=$(abspath $(SCALE_BUILD)) SCALE_OUT=$(abspath $(SCALE_OUT))' || status=$$?; \
+	printf '%s\n' "$$status" > $(SCALE_OUT)/exit-code; date -u +%FT%TZ > $(SCALE_OUT)/finished; exit $$status
 
 scale-guest:
 	@mountpoint -q /sys/kernel/tracing || mount -t tracefs tracefs /sys/kernel/tracing
