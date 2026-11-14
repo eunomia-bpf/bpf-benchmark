@@ -1,0 +1,26 @@
+{
+  "recorded": "2026-11-14T04:42:48Z",
+  "pid": 177589,
+  "wait_pid": 175073,
+  "wait_order": "BCC173719 exits -> Katran175073 exits -> acquire imageEX -> stage tools",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-checked-compiler-stage",
+  "canonical_tool_directory": "/workspaces/.agent-state/kprog-ck/verified-compiler",
+  "make_target": "checked-sim-stage",
+  "source_commit": "94900a5ab",
+  "cpu_affinity": "8-15",
+  "host_address_space_limit_bytes": 4294967296,
+  "image_lock": "exclusive after dependency exit",
+  "shared_image_rebuilt": false,
+  "kernel_rebuilt": false,
+  "staging_completion_claimed": false,
+  "postlaunch_outcome_polled": false,
+  "dry_runs": [
+    "job/checked-stage-dry-run.log",
+    "job/checked-service-dry-run.log",
+    "job/checked-service-guest-dry-run.log"
+  ],
+  "validation": "bash -n; Make dry runs for staging and explicit execution-mode propagation passed",
+  "scope": "Stage already-tested tool bytes and generated target layouts under the existing sole base; service runs outside app image",
+  "source_provenance": "input-tool-sha256 identifies actual copied bytes; source-at-stage-sha256 is a source snapshot at staging time, not a claim that cached tools were rebuilt then",
+  "raw_removed": false
+}
