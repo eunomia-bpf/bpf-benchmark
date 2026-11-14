@@ -156,6 +156,8 @@
 - 运营者 2026-11-13 的"先做完再一次确认"六条（spark-manage workspace-rules.md，784fa638）同样适用："是不是过于慢了? 应该都弄好再?"：每处改动只在它影响的那一小批上检查；失败用多台 guest 并行定位，不逐个对半拆；耗时的端到端测量冻结前跑一次；队列按内存放开槽位；提交任务前先空跑。
 - 规则不变：一个工作树、一个内核、一个镜像、一个底座；原始数据不删；新行为放在默认关闭的开关后，默认路径字节不变；不新增检查；论文、故事、设计、benchmark 设置要运营者同意。
 
+**lane verified 的新大任务（协调者 2026-11-14T06:56:34Z）：形式化迁移到外部成熟项目（第 4 节 M1–M6，运营者 2026-11-13："让它清理掉, 换成成熟的."；"能不能基于什么上面 fork 一个改? 这也比较合理, 作为 submodule, 不要自己写."；"不是交叉对造, 而是引入作为 subdmoule, 替换掉."）。** 先收完手上已经发出的作业（BCC LTO 配置重试 213201、Katran 复杂度那一类），让 LTO 配置保持可用；之后按 M1 到 M6 推进。LTO 配置的整应用计时由 perf 做，LTO 配置的编译器问题只在挡住 perf 时回到 verified。六应用 verified 路径的其余应用（Tetragon、Cilium、Tracee、OTel）在迁移做完后继续。
+
 ## 1. 性能（目标：六应用几何平均 native/JIT 1.20x–1.40x，来自原生代码）
 
 - **PERF inline ARRAY 退化诊断（2026-11-14，ad56c93b1）** 188582/run050542_885568 make0/appok，1×10s statsON/16–19/4vCPU16G，吞吐 **0.394x**、3549.1→7293.1ns/次，0 workload错误/0tiny；13/12测量程序、13 replacement日志及custom__generic两次EINVAL完整保留。native generation302的两snapshot在startup/warmup，缺实际测量末端窗，不认证等量工作或floor；既有0.980x/0.965x结果不改。完整run/4个counter snapshots/失败JIT dump/logs/分析归档 `runtime-array-otel-results.json/.tar.gz`。共享routine后续候选只检验代码体积原因假说，不把host字节减少当速度收益。
@@ -766,9 +768,22 @@
 - [ ] Rocq 写的 Linux eBPF ISA 语义（OOPSLA'26，DOI 10.1145/3839449，github.com/OpenSourceVerif/linux-ebpf-semantics，可执行，153 条顺序指令，用 Linux 测试集验证；atomics 在范围外；配套 linux-ebpf-verifier-proofs 有 tnum soundness 的 Coq 证明，MIT）。用途：把检查过的 B 放到抽取出的语义解释器上执行，与原生执行对照，作为独立于内核解释器和 JIT 的 B 层对照，覆盖全部程序；同时作为 verify(B) 前提的支撑证据。先查清它对 helper 调用和 map 的处理范围。
 - [ ] Agni（github.com/bpfverif/agni，LLVM 14，示例到 6.10 / bpf-next）：对唯一内核的 verifier.c（vendor/linux-framework，相对 bpf-next +637/−80）跑一次 range analysis soundness 检查，支撑论文 §4 "verifier analysis trusted rather than proved"。它对改过的 verifier.c 能否直接用，先试。
 - [ ] Keel 的 EmbC + Clean（Lean 4，arXiv 2611.11117）：上面"全 simulator 的 C 源解释与 Lean C-model 对应关系"的路线：把 simulator 生成的 C 原语渲染成 EmbC AST 并证明精化，TCB 只剩 268 行打印器和 C 编译器。代码地址 github.com/rutgers-apl/keel 目前 404，公开后接手。定位（运营者 2026-11-13 问："'一份规范同时生成 C 和 Lean'的生成器……这个是不是自己造轮子了?"）：它替换生成器的 C 一侧。现在两个渲染器各自从 JSON 规范出 C 宏和 Lean 定义，对应关系靠信任生成器；改成规范生成 EmbC AST、打印成 C、在 Lean 里证明精化之后，C 与 Lean 的对应由定理给出，生成器只留 JSON 到 Lean 这一段。Bedrock2/Fiat-Crypto（Coq）和 Sail 是同一思路；这一层自建的原因是输出的 C 要编成 eBPF 并通过 verifier，Sail 的 C 依赖 GMP 和运行时，EmbC 的一阶 C 片段（u32/u64、指针、struct）正好合用。
-- 可选，排在 Sail/ASL 对照之后：AArch64 参考语义在 Lean 里多一个交叉参照 LNSym（github.com/leanprover/LNSym，Apache-2.0，AArch64 子集，带硬件 co-sim，最后一次 push 2024-11；运营者 2026-11-13 问："Lean 的 x86-64 和 AArch64 参考语义……是不是也是自己造轮子?"）。kinsn 的 KinsnLean4/ARM64/Defs.lean 已经用它核对过。
+- （已被下面的"形式化迁移到外部成熟项目"取代：LNSym 作为 submodule 替换 AArch64 参考，运营者："不是交叉对造, 而是引入作为 subdmoule, 替换掉."）
 - 只跟踪：BeePL 的 CompCert eBPF 后端（arXiv 2507.09883，对应"走经过验证的编译路径"，代码未公开）；x86-64 Isabelle 语义（SETTA'24，对应 O1 的 ANDN/BZHI 4 个形式，大概率缺 BMI）。
 - 只作对比（逐程序证明或逐程序证书，按 11-07 的规定留在 related work）：Heimdall、BCF、VEP、TUM LPC'26、refinement types。
+
+### 形式化迁移到外部成熟项目（运营者 2026-11-13，经调研会话原样转达："让它清理掉, 换成成熟的."；"能不能基于什么上面 fork 一个改? 这也比较合理, 作为 submodule, 不要自己写."；"不是交叉对造, 而是引入作为 subdmoule, 替换掉."；协调者 2026-11-14T06:56:34Z 定任务和顺序）
+
+自建的生成器和手写的两份 ISA 参考都换成外部成熟项目：fork 到 eunomia-bpf，作为 submodule 引入，在 fork 里补缺，补的部分尽量做成能回提上游的 PR。负责：lane verified（新的大任务，见第 0 节）。按这个顺序：
+
+- [ ] M1 fork 并接上三个 submodule：leanprover/LNSym（Apache-2.0，AArch64）、jyh/x86lean（Apache-2.0，x86-64，在 1,241 个 form 上和 ACL2 x86isa 做过差分测试）、Certora/clean（CompCert 3.17 + clightgen 的 -lean 后端，带 Lean 4 写的 Clight 语义和分离逻辑；CompCert 是非商业许可，作为独立 submodule 各自保留原许可，开源发布时单独标明）。放在 kprog/formal 下，lake 能编过。
+- [ ] M2 覆盖对照表：我们的 74 个 AArch64 操作对 LNSym（缺的大概率有 LDXR/STLXR 独占、LDADD 等 LSE 原子、带符号扩展的加载），75 个 x86-64 操作对 x86lean（BZHI 在它的覆盖表外）；缺的在 fork 里补。表放 kprog/formal/README.md。
+- [ ] M3 provenance tag 作为 kprog 自己的一层薄封装，放在 LNSym 和 x86lean 的 step 之上，替换 KProgFormal/Reference/AArch64.lean 和 X86.lean。Sail/ASL 那组对照保留，改成验证 fork 本身。
+- [ ] M4 生成器退役的前一半：现在生成出来的 simulator C 头文件改成签入仓库的普通 C 源码，以后直接编辑；用 clightgen -lean 从这份 C 导出 Lean。先确认 simulator C 落在 CompCert 支持的 C 子集里，helper 常量函数指针、__builtin、pragma 这类写法先包一层；默认构建的字节保持一致。
+- [ ] M5 定理迁移（量最大，现有 2,065 条定理对着 Reference/Generated 写）：证明导出的 Clight handler 精化 LNSym / x86lean 的 step。C 到 Lean 的对应从此由定理给出，剩下要信任的是 CompCert 前端、Lean 版 Clight 语义和 clang（clang 已在 design.md 写明的信任范围内）。O1、O2、O4 的计数按新基础重算。
+- [ ] M6 旧件退役：旧生成器、contracts、generated 按现有规则移动归档（kprog/docs/cleanup-log.md），冻结的 benchmark 路径逐字节保持一致。顺序固定：先接 submodule，再迁定理，最后退役旧件。
+- 备选：x86-64 用 Zellic/x86-formal-verification-research（Lean，research preview，带 Linux 进程模型）或 Verified-zkEVM/machine-checked（Lean，AArch64/x86-64/RISC-V，早期）；Keel 的 EmbC 公开后可作为 clightgen 的备选。
+- 论文 §4 里关于生成器、Lean 参考和 TCB 的段落，迁移完成后由调研会话起草，交运营者确认。
 
 ## 5. 架构整理
 
