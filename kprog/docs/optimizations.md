@@ -126,3 +126,11 @@ pointer. Measured depths16->8/16->16/16->24 show that temporary saves can
 outweigh packing. Service/default-byte checks pass; real main replay still
 fails on a `dead` load annotation. Mode remains default-off, no whole-body
 acceptance or performance gain. See spill-groups/report.md.
+
+Target-BTF CO-RE audit (9ab6012a8 / b244f3cfc): all13 relocation kinds match
+original-ELF/libbpf answers on the sole kernel (22 fixture records). Existing
+resolved Tracee/BCC reports also match, but selected direct-native producers
+bypass them. Static127-object audit finds differing answers in Tracee, three
+BCC objects and43 Tetragon objects;601 records remain unobserved. The resolved
+producer choice stays explicit/default-off, with existing writable DATASEC
+binding. This is correctness work with no speedup claim; see core-audit/report.md.

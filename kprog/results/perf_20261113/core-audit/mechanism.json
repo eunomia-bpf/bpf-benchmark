@@ -1,0 +1,33 @@
+{
+  "cases": [
+    {
+      "fixture": "test-core-ir.c",
+      "elf_relocations": 20,
+      "compiler_queries": 20,
+      "all_equal": true
+    },
+    {
+      "fixture": "test-core-ir-ids.c",
+      "elf_relocations": 2,
+      "compiler_queries": 2,
+      "all_equal": true
+    }
+  ],
+  "kinds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "all_equal": true,
+  "scope": "Host compiler/original ELF comparison; no native workload execution."
+}

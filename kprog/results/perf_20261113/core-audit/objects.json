@@ -1,0 +1,2606 @@
+[
+  {
+    "app": "tracee",
+    "object": "kprobe_check.native.o",
+    "native": "/workspaces/repository/corpus/results/tracee-samesource-20261114/kprobe_check.native.o",
+    "source": "/workspaces/repository/vendor/build/.tracee-build/x86/dist/lsm_support/kprobe_check.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "tracee",
+    "object": "lsm_check.native.o",
+    "native": "/workspaces/repository/corpus/results/tracee-samesource-20261114/lsm_check.native.o",
+    "source": "/workspaces/repository/vendor/build/.tracee-build/x86/dist/lsm_support/lsm_check.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "tracee",
+    "object": "tracee.native.o",
+    "native": "/workspaces/repository/corpus/results/tracee-samesource-20261114/tracee.native.o",
+    "source": "/workspaces/repository/vendor/build/.tracee-build/x86/dist/tracee.bpf.o",
+    "policy": "compat",
+    "report": "/var/tmp/kprog-tmp/C/tracee-samesource/tracee.core.json",
+    "report_native": "/var/tmp/kprog-tmp/C/tracee-samesource/tracee.native.o",
+    "counts": {
+      "relocations": 34769,
+      "equal": 9663,
+      "different": 24947,
+      "unobserved": 159
+    },
+    "core_relocation_bytes": 557540,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "equal": 34769
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "bcc",
+    "object": "biosnoop.native.o",
+    "native": "/workspaces/repository/corpus/results/bcc-samesource-20261114/biosnoop.native.o",
+    "source": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/biosnoop.bpf.o",
+    "policy": "compat",
+    "report": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/biosnoop.core.json",
+    "report_native": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/biosnoop.native.o",
+    "counts": {
+      "relocations": 24,
+      "equal": 15,
+      "different": 9,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 420,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "equal": 24
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "bcc",
+    "object": "capable.native.o",
+    "native": "/workspaces/repository/corpus/results/bcc-samesource-20261114/capable.native.o",
+    "source": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/capable.bpf.o",
+    "policy": "compat",
+    "report": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/capable.core.json",
+    "report_native": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/capable.native.o",
+    "counts": {
+      "relocations": 3,
+      "equal": 3,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 68,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "equal": 3
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "bcc",
+    "object": "opensnoop.native.o",
+    "native": "/workspaces/repository/corpus/results/bcc-samesource-20261114/opensnoop.native.o",
+    "source": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/opensnoop.bpf.o",
+    "policy": "compat",
+    "report": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/opensnoop.core.json",
+    "report_native": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/opensnoop.native.o",
+    "counts": {
+      "relocations": 6,
+      "equal": 6,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 132,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": true,
+    "compiler_report_comparison": {
+      "equal": 6
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "bcc",
+    "object": "runqlat.native.o",
+    "native": "/workspaces/repository/corpus/results/bcc-samesource-20261114/runqlat.native.o",
+    "source": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/runqlat.bpf.o",
+    "policy": "compat",
+    "report": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/runqlat.core.json",
+    "report_native": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/runqlat.native.o",
+    "counts": {
+      "relocations": 21,
+      "equal": 5,
+      "different": 16,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 380,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "equal": 21
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "bcc",
+    "object": "syscount.native.o",
+    "native": "/workspaces/repository/corpus/results/bcc-samesource-20261114/syscount.native.o",
+    "source": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/syscount.bpf.o",
+    "policy": "compat",
+    "report": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/syscount.core.json",
+    "report_native": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/syscount.native.o",
+    "counts": {
+      "relocations": 6,
+      "equal": 6,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 108,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": true,
+    "compiler_report_comparison": {
+      "equal": 6
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "bcc",
+    "object": "tcpconnect.native.o",
+    "native": "/workspaces/repository/corpus/results/bcc-samesource-20261114/tcpconnect.native.o",
+    "source": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/tcpconnect.bpf.o",
+    "policy": "compat",
+    "report": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/tcpconnect.core.json",
+    "report_native": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/tcpconnect.native.o",
+    "counts": {
+      "relocations": 16,
+      "equal": 16,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 292,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": true,
+    "compiler_report_comparison": {
+      "equal": 16
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "bcc",
+    "object": "tcplife.native.o",
+    "native": "/workspaces/repository/corpus/results/bcc-samesource-20261114/tcplife.native.o",
+    "source": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/tcplife.bpf.o",
+    "policy": "compat",
+    "report": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/tcplife.core.json",
+    "report_native": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/tcplife.native.o",
+    "counts": {
+      "relocations": 14,
+      "equal": 12,
+      "different": 2,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 236,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "equal": 14
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "bcc",
+    "object": "vfsstat.native.o",
+    "native": "/workspaces/repository/corpus/results/bcc-samesource-20261114/vfsstat.native.o",
+    "source": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/vfsstat.bpf.o",
+    "policy": "compat",
+    "report": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/vfsstat.core.json",
+    "report_native": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/vfsstat.native.o",
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_cgroup.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_cgroup.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgroup.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 4,
+      "equal": 3,
+      "different": 0,
+      "unobserved": 1
+    },
+    "core_relocation_bytes": 76,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 4
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_cgroup_mkdir.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_cgroup_mkdir.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgroup_mkdir.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 18,
+      "equal": 15,
+      "different": 2,
+      "unobserved": 1
+    },
+    "core_relocation_bytes": 300,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 18
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_cgroup_mkdir_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_cgroup_mkdir_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgroup_mkdir_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 18,
+      "equal": 15,
+      "different": 2,
+      "unobserved": 1
+    },
+    "core_relocation_bytes": 300,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 18
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_cgroup_release.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_cgroup_release.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgroup_release.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 13,
+      "equal": 10,
+      "different": 2,
+      "unobserved": 1
+    },
+    "core_relocation_bytes": 220,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 13
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_cgroup_release_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_cgroup_release_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgroup_release_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 13,
+      "equal": 10,
+      "different": 2,
+      "unobserved": 1
+    },
+    "core_relocation_bytes": 220,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 13
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_cgroup_rmdir.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_cgroup_rmdir.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgroup_rmdir.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 13,
+      "equal": 10,
+      "different": 2,
+      "unobserved": 1
+    },
+    "core_relocation_bytes": 220,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 13
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_cgroup_rmdir_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_cgroup_rmdir_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgroup_rmdir_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 13,
+      "equal": 10,
+      "different": 2,
+      "unobserved": 1
+    },
+    "core_relocation_bytes": 220,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 13
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_cgtracker.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_cgtracker.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgtracker.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 18,
+      "equal": 13,
+      "different": 2,
+      "unobserved": 3
+    },
+    "core_relocation_bytes": 308,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 18
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_enforcer.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_enforcer.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_enforcer.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_execve_bprm_commit_creds.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_execve_bprm_commit_creds.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_bprm_commit_creds.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 18,
+      "equal": 18,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 300,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 18
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_execve_event.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_execve_event.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_event.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 216,
+      "equal": 205,
+      "different": 6,
+      "unobserved": 5
+    },
+    "core_relocation_bytes": 3476,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 216
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_execve_event_v310.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_execve_event_v310.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_event_v310.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 204,
+      "equal": 192,
+      "different": 8,
+      "unobserved": 4
+    },
+    "core_relocation_bytes": 3284,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 204
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_execve_event_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_execve_event_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_event_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 1723,
+      "equal": 1712,
+      "different": 6,
+      "unobserved": 5
+    },
+    "core_relocation_bytes": 27588,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 1723
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_execve_event_v53.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_execve_event_v53.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_event_v53.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 1711,
+      "equal": 1700,
+      "different": 6,
+      "unobserved": 5
+    },
+    "core_relocation_bytes": 27396,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 1711
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_execve_event_v61.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_execve_event_v61.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_event_v61.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 194,
+      "equal": 183,
+      "different": 6,
+      "unobserved": 5
+    },
+    "core_relocation_bytes": 3132,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 194
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_execve_map_update.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_execve_map_update.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_map_update.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_execve_map_update_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_execve_map_update_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_map_update_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_execve_map_update_v53.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_execve_map_update_v53.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_map_update_v53.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_execve_map_update_v61.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_execve_map_update_v61.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_map_update_v61.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_exit.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_exit.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_exit.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 3,
+      "equal": 3,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 68,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 3
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_exit_v310.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_exit_v310.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_exit_v310.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 3,
+      "equal": 3,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 68,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 3
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_exit_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_exit_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_exit_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 5,
+      "equal": 5,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 100,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 5
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_fmodret_enforcer.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_fmodret_enforcer.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_fmodret_enforcer.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_fork.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_fork.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_fork.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 70,
+      "equal": 63,
+      "different": 2,
+      "unobserved": 5
+    },
+    "core_relocation_bytes": 1132,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 70
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_fork_v310.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_fork_v310.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_fork_v310.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 60,
+      "equal": 54,
+      "different": 2,
+      "unobserved": 4
+    },
+    "core_relocation_bytes": 972,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 60
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_fork_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_fork_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_fork_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 71,
+      "equal": 64,
+      "different": 2,
+      "unobserved": 5
+    },
+    "core_relocation_bytes": 1148,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 71
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_fentry.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_fentry.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_fentry.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 461,
+      "equal": 456,
+      "different": 0,
+      "unobserved": 5
+    },
+    "core_relocation_bytes": 7396,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 461
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_fentry_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_fentry_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_fentry_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 2644,
+      "equal": 2629,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 42324,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 2644
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_fentry_v53.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_fentry_v53.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_fentry_v53.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 2631,
+      "equal": 2616,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 42116,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 2631
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_fentry_v61.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_fentry_v61.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_fentry_v61.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 333,
+      "equal": 318,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 5356,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 333
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_fexit.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_fexit.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_fexit.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 186,
+      "equal": 186,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 2988,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 186
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_fexit_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_fexit_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_fexit_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 907,
+      "equal": 907,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 14532,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 907
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_fexit_v53.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_fexit_v53.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_fexit_v53.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 900,
+      "equal": 900,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 14420,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 900
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_fexit_v61.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_fexit_v61.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_fexit_v61.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 150,
+      "equal": 150,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 2420,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 150
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_kprobe.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_kprobe.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_kprobe.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 544,
+      "equal": 539,
+      "different": 0,
+      "unobserved": 5
+    },
+    "core_relocation_bytes": 8724,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 544
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_kprobe_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_kprobe_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_kprobe_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 2643,
+      "equal": 2628,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 42308,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 2643
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_kprobe_v53.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_kprobe_v53.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_kprobe_v53.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 2630,
+      "equal": 2615,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 42100,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 2630
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_kprobe_v61.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_kprobe_v61.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_kprobe_v61.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 332,
+      "equal": 317,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 5340,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 332
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_lsm_core.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_lsm_core.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_core.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 2579,
+      "equal": 2568,
+      "different": 2,
+      "unobserved": 9
+    },
+    "core_relocation_bytes": 41284,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 2579
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_lsm_core_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_lsm_core_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_core_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 2592,
+      "equal": 2581,
+      "different": 2,
+      "unobserved": 9
+    },
+    "core_relocation_bytes": 41492,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 2592
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_lsm_core_v61.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_lsm_core_v61.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_core_v61.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 281,
+      "equal": 270,
+      "different": 2,
+      "unobserved": 9
+    },
+    "core_relocation_bytes": 4524,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 281
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_lsm_ima_bprm_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_lsm_ima_bprm_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_ima_bprm_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 1,
+      "equal": 1,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 28,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 1
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_lsm_ima_bprm_v61.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_lsm_ima_bprm_v61.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_ima_bprm_v61.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 1,
+      "equal": 1,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 28,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 1
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_lsm_ima_file_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_lsm_ima_file_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_ima_file_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 1,
+      "equal": 1,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 28,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 1
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_lsm_ima_file_v61.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_lsm_ima_file_v61.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_ima_file_v61.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 1,
+      "equal": 1,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 28,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 1
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_lsm_output.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_lsm_output.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_output.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 45,
+      "equal": 41,
+      "different": 0,
+      "unobserved": 4
+    },
+    "core_relocation_bytes": 732,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 45
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_lsm_output_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_lsm_output_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_output_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 45,
+      "equal": 41,
+      "different": 0,
+      "unobserved": 4
+    },
+    "core_relocation_bytes": 732,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 45
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_lsm_output_v61.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_lsm_output_v61.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_output_v61.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 45,
+      "equal": 41,
+      "different": 0,
+      "unobserved": 4
+    },
+    "core_relocation_bytes": 732,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 45
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_rawtp.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_rawtp.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_rawtp.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 454,
+      "equal": 449,
+      "different": 0,
+      "unobserved": 5
+    },
+    "core_relocation_bytes": 7284,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 454
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_rawtp_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_rawtp_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_rawtp_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 2637,
+      "equal": 2622,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 42212,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 2637
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_rawtp_v53.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_rawtp_v53.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_rawtp_v53.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 2624,
+      "equal": 2609,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 42004,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 2624
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_rawtp_v61.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_rawtp_v61.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_rawtp_v61.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 326,
+      "equal": 311,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 5244,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 326
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_retkprobe.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_retkprobe.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_retkprobe.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 187,
+      "equal": 187,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 3004,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 187
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_retkprobe_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_retkprobe_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_retkprobe_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 907,
+      "equal": 907,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 14532,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 907
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_retkprobe_v53.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_retkprobe_v53.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_retkprobe_v53.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 900,
+      "equal": 900,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 14420,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 900
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_retkprobe_v61.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_retkprobe_v61.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_retkprobe_v61.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 150,
+      "equal": 150,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 2420,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 150
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_retuprobe.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_retuprobe.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_retuprobe.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 187,
+      "equal": 187,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 3004,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 187
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_retuprobe_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_retuprobe_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_retuprobe_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 907,
+      "equal": 907,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 14532,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 907
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_retuprobe_v53.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_retuprobe_v53.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_retuprobe_v53.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 900,
+      "equal": 900,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 14420,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 900
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_retuprobe_v61.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_retuprobe_v61.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_retuprobe_v61.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 150,
+      "equal": 150,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 2420,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 150
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_tracepoint.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_tracepoint.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_tracepoint.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 325,
+      "equal": 320,
+      "different": 0,
+      "unobserved": 5
+    },
+    "core_relocation_bytes": 5220,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 325
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_tracepoint_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_tracepoint_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_tracepoint_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 1849,
+      "equal": 1834,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 29604,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 1849
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_tracepoint_v53.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_tracepoint_v53.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_tracepoint_v53.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 1835,
+      "equal": 1820,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 29380,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 1835
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_tracepoint_v61.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_tracepoint_v61.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_tracepoint_v61.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 324,
+      "equal": 309,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 5212,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 324
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_uprobe.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_uprobe.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_uprobe.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 564,
+      "equal": 559,
+      "different": 0,
+      "unobserved": 5
+    },
+    "core_relocation_bytes": 9052,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 564
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_uprobe_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_uprobe_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_uprobe_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 2664,
+      "equal": 2649,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 42652,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 2664
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_uprobe_v53.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_uprobe_v53.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_uprobe_v53.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 2646,
+      "equal": 2631,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 42364,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 2646
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_uprobe_v61.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_uprobe_v61.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_uprobe_v61.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 330,
+      "equal": 315,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 5308,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 330
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_usdt.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_usdt.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_usdt.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 444,
+      "equal": 439,
+      "different": 0,
+      "unobserved": 5
+    },
+    "core_relocation_bytes": 7124,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 444
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_usdt_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_usdt_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_usdt_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 2627,
+      "equal": 2612,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 42052,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 2627
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_usdt_v53.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_usdt_v53.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_usdt_v53.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 2613,
+      "equal": 2598,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 41828,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 2613
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_generic_usdt_v61.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_generic_usdt_v61.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_usdt_v61.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 321,
+      "equal": 306,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 5164,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 321
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_loader.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_loader.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_loader.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 7,
+      "equal": 7,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 124,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 7
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_loader_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_loader_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_loader_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 8,
+      "equal": 8,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 140,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 8
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_multi_enforcer.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_multi_enforcer.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_enforcer.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_multi_kprobe_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_multi_kprobe_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_kprobe_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 2643,
+      "equal": 2628,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 42308,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 2643
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_multi_kprobe_v53.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_multi_kprobe_v53.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_kprobe_v53.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 2630,
+      "equal": 2615,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 42100,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 2630
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_multi_kprobe_v61.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_multi_kprobe_v61.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_kprobe_v61.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 332,
+      "equal": 317,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 5340,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 332
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_multi_retkprobe_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_multi_retkprobe_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_retkprobe_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 907,
+      "equal": 907,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 14532,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 907
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_multi_retkprobe_v53.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_multi_retkprobe_v53.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_retkprobe_v53.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 900,
+      "equal": 900,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 14420,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 900
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_multi_retkprobe_v61.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_multi_retkprobe_v61.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_retkprobe_v61.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 150,
+      "equal": 150,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 2420,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 150
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_multi_retuprobe_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_multi_retuprobe_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_retuprobe_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 907,
+      "equal": 907,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 14532,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 907
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_multi_retuprobe_v61.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_multi_retuprobe_v61.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_retuprobe_v61.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 150,
+      "equal": 150,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 2420,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 150
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_multi_uprobe_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_multi_uprobe_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_uprobe_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 2664,
+      "equal": 2649,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 42652,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 2664
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_multi_uprobe_v61.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_multi_uprobe_v61.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_uprobe_v61.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 330,
+      "equal": 315,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 5308,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 330
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_multi_usdt_v511.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_multi_usdt_v511.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_usdt_v511.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 2627,
+      "equal": 2612,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 42052,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 2627
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_multi_usdt_v61.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_multi_usdt_v61.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_usdt_v61.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 321,
+      "equal": 306,
+      "different": 2,
+      "unobserved": 13
+    },
+    "core_relocation_bytes": 5164,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 321
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "tetragon",
+    "object": "bpf_prog_iter.native.o",
+    "native": "/var/tmp/kprog-tmp/C/tetra-img/bpf_prog_iter.native.o",
+    "source": "/workspaces/repository/vendor/build/x86/tetragon/bpf_prog_iter.o",
+    "policy": "tetragon-compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 2,
+      "equal": 2,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 44,
+    "native_equals_report_build_object": false,
+    "native_allocated_bytes_and_relocations_equal_report_build": false,
+    "compiler_report_comparison": {
+      "absent": 2
+    },
+    "observation": "Layout/macro or compiler-report comparison; not per-machine-instruction tracing."
+  },
+  {
+    "app": "cilium",
+    "object": "bpf_alignchecker.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_alignchecker.native.o",
+    "source": "/workspaces/repository/vendor/bpf/cilium/bpf/bpf_alignchecker.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "cilium",
+    "object": "bpf_host.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+    "source": "/workspaces/repository/vendor/bpf/cilium/bpf/bpf_host.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "cilium",
+    "object": "bpf_lxc.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+    "source": "/workspaces/repository/vendor/bpf/cilium/bpf/bpf_lxc.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "cilium",
+    "object": "bpf_overlay.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+    "source": "/workspaces/repository/vendor/bpf/cilium/bpf/bpf_overlay.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "cilium",
+    "object": "bpf_sock.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o",
+    "source": "/workspaces/repository/vendor/bpf/cilium/bpf/bpf_sock.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "cilium",
+    "object": "bpf_wireguard.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+    "source": "/workspaces/repository/vendor/bpf/cilium/bpf/bpf_wireguard.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "cilium",
+    "object": "bpf_xdp.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_xdp.native.o",
+    "source": "/workspaces/repository/vendor/bpf/cilium/bpf/bpf_xdp.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "katran",
+    "object": "balancer.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/balancer.native.o",
+    "source": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/katran/balancer.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "katran",
+    "object": "healthchecking.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/healthchecking.native.o",
+    "source": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/katran/healthchecking.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "katran",
+    "object": "healthchecking_ipip.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/healthchecking_ipip.native.o",
+    "source": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/katran/healthchecking_ipip.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "katran",
+    "object": "xdp_root.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/xdp_root.native.o",
+    "source": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/katran/xdp_root.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "otel",
+    "object": "custom_trace.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/custom_trace.native.o",
+    "source": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/tracer.original.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "otel",
+    "object": "dotnet_tracer.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/dotnet_tracer.native.o",
+    "source": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/tracer.original.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "otel",
+    "object": "go_labels.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/go_labels.native.o",
+    "source": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/tracer.original.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "otel",
+    "object": "hotspot_tracer.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/hotspot_tracer.native.o",
+    "source": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/tracer.original.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "otel",
+    "object": "interpreter_dispatcher.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/interpreter_dispatcher.native.o",
+    "source": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/tracer.original.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "otel",
+    "object": "native_stack_trace.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/native_stack_trace.native.o",
+    "source": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/tracer.original.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "otel",
+    "object": "off_cpu.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/off_cpu.native.o",
+    "source": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/tracer.original.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "otel",
+    "object": "otelcol-ebpf-profiler.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+    "source": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/tracer.original.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "otel",
+    "object": "perl_tracer.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/perl_tracer.native.o",
+    "source": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/tracer.original.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "otel",
+    "object": "php_tracer.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/php_tracer.native.o",
+    "source": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/tracer.original.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "otel",
+    "object": "python_tracer.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/python_tracer.native.o",
+    "source": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/tracer.original.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "otel",
+    "object": "ruby_tracer.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/ruby_tracer.native.o",
+    "source": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/tracer.original.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "otel",
+    "object": "sched_monitor.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/sched_monitor.native.o",
+    "source": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/tracer.original.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "otel",
+    "object": "system_config.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/system_config.native.o",
+    "source": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/tracer.original.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "otel",
+    "object": "uprobe.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/uprobe.native.o",
+    "source": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/tracer.original.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "otel",
+    "object": "v8_tracer.native.o",
+    "native": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/v8_tracer.native.o",
+    "source": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/tracer.original.bpf.o",
+    "policy": "compat",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  },
+  {
+    "app": "otel",
+    "object": "otelcol-ebpf-profiler.native.o",
+    "native": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/otelcol-ebpf-profiler.native.o",
+    "source": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/tracer.original.bpf.o",
+    "policy": "selected-combined",
+    "report": null,
+    "report_native": null,
+    "counts": {
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "core_relocation_bytes": 0,
+    "observation": "No CO-RE records in the supplied source ELF; no native answer inferred."
+  }
+]

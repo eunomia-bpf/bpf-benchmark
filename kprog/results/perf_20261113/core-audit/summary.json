@@ -1,0 +1,54 @@
+{
+  "apps": {
+    "tracee": {
+      "objects": 3,
+      "errors": 0,
+      "relocations": 34769,
+      "equal": 9663,
+      "different": 24947,
+      "unobserved": 159
+    },
+    "bcc": {
+      "objects": 8,
+      "errors": 0,
+      "relocations": 90,
+      "equal": 63,
+      "different": 27,
+      "unobserved": 0
+    },
+    "tetragon": {
+      "objects": 88,
+      "errors": 0,
+      "relocations": 65789,
+      "equal": 65239,
+      "different": 108,
+      "unobserved": 442
+    },
+    "cilium": {
+      "objects": 7,
+      "errors": 0,
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "katran": {
+      "objects": 4,
+      "errors": 0,
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    },
+    "otel": {
+      "objects": 17,
+      "errors": 0,
+      "relocations": 0,
+      "equal": 0,
+      "different": 0,
+      "unobserved": 0
+    }
+  },
+  "failures": [],
+  "scope": "Current staged outputs, Tetragon image export, selected Tracee/BCC and combined OTel. OTel split units share one source ELF; counts are per object, not unique source queries. Missing observations stay explicit. No guest, load-path check or performance claim."
+}

@@ -9,6 +9,7 @@
 ## 0. Lane 目标与待办
 
 COORDINATOR 检查点 2026-11-14T21:21:50Z：六应用现状（吞吐 / 每次调用）：Katran 1.076x / 1.187x（同源、输出对照、计时）；BCC 约 1.00x；OTel 1.161x / 1.129x（18:40 全部 LTO 组合，等量工作认证进行中）；Cilium 1.285x 吞吐，两臂走的包路径不同（C fe1bc6c52、8dfa7c3e0），等量工作待定；Tetragon 1.2754x 吞吐（dd08c1571，两条说明见其 README），每次调用待按挂载点配对；Tracee 1.0111x，原生一侧 22% 的 probe_read 失败（dd83c38f7），即 P0 的 D03/D04 偏移根因。
+- [x] P-CORE-inventory（0b5273a5a、ee44d226f、f1acb15d1、9ab6012a8、b244f3cfc；本提交）：127对象静态表/逐条raw完成；all13种CO-RE真实ELF对libbpf22/22一致。Tracee24947、BCC27、Tetragon108条差异，601未观察；3个BCC+43个Tetragon+Tracee重建清单交C。syscount旧DWARF误判已按allocated bytes+relocs纠正；完整producer/执行等量仍开。`perf_20261113/core-audit/report.md`。
 - [ ] P-CORE-all（协调者 2026-11-14T22:18:35Z，依据 b9dc82ceb）：原生 217+0x17d0 处基线读 task->nsproxy +0xd70、uts_ns +8、nodename +0x41，原生一侧位移是 0，CO-RE 字段重定位没有落到原生代码上。PERF 对六个应用每个原生对象列出源 BPF 对象的 CO-RE 重定位，和 libbpf 在唯一内核 BTF 上算出的位移、存在性、大小逐条对照，结果记成表；在原生构建或链接器解析 CO-RE 的地方整类修好（默认路径字节不变、开关选择），告诉 C 要重建哪些 Tracee、BCC 对象；Tetragon 的行一致后 1.2754x 成立。
 - [ ] C-Tracee-BTF Tracee 原生一侧用唯一内核的 BTF 从同一份源码重建（VMLINUX_BTF=kprog-ck/build-x86/vmlinux），先对照实际运行的替换程序 217 与基线 25 在 common/filtering.h:144-146 的读偏移；EFAULT 份额回到 eBPF 一侧的 0.06% 后重新计时。归 C，链接器一侧的 P1h 与 PERF 商量。
 - [ ] C-Cilium-path 冻结的 pktgen 负载保持原样；找出原生一侧 cil_from_host/cil_to_host 每个包约跑两次的原因（cil_from_container 的返回码与重定向决定、重定向 helper 的内核函数与 flag、D09 原生守卫），修好后重测。归 C，helper 链接归 PERF。
