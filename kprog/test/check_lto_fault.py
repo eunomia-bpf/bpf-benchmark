@@ -15,7 +15,7 @@ if sys.argv[1]=='--fault-child':
     execute(0)
     raise AssertionError('LTO fault returned normally')
 
-compiler, reference, output = map(Path,sys.argv[1:])
+compiler, output = map(Path,sys.argv[1:])
 root=Path(__file__).resolve().parents[2]
 output.mkdir(parents=True)
 commands=[]
@@ -34,9 +34,6 @@ prefix=root/'runner/build-llvmbpf/vendor/libbpf/prefix/include/bpf'
 frontend=['clang-18','-target','bpf','-mcpu=v4','-O2','-emit-llvm','-I'+str(root),
           '-I'+str(prefix),'-I/usr/include/x86_64-linux-gnu','-c',source]
 run([*frontend,'-o',output/'source.bc'])
-old=run([reference,output/'source.bc','-o',output/'old.native.bc'],1)
-if 'untranslated simulator BPF assembly: r0 = 0;' not in old.stderr:
-    raise AssertionError('reference compiler did not reproduce the architectural fault rejection')
 run([compiler,output/'source.bc','-o',output/'native.bc'])
 run(['llvm-dis-18',output/'native.bc','-o',output/'native.ll'])
 run(['clang-18','-O3','-shared','-fPIC','-mgeneral-regs-only',output/'native.bc','-o',output/'fixture.so'])

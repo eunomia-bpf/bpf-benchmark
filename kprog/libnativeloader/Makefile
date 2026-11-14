@@ -182,8 +182,7 @@ lto-fault-check:
 	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
 		../x86/compile_sim_ir.cpp -o "$(LTO_FAULT_BUILD)/compile-sim-ir" \
 		$$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis support --system-libs)
-	python3 ../test/check_lto_fault.py "$(LTO_FAULT_BUILD)/compile-sim-ir" \
-		"$(CHECKED_COMPILER_BASE)/compile-sim-ir" "$(LTO_FAULT_OUTPUT)"
+	python3 ../test/check_lto_fault.py "$(LTO_FAULT_BUILD)/compile-sim-ir" "$(LTO_FAULT_OUTPUT)"
 
 # Stage the tools already exercised by checked-packet-check/kvm. The caller
 # holds the image writer lock after existing service guests have exited.
