@@ -1,0 +1,56 @@
+{
+  "recorded_at": "2026-11-14T07:45:45Z",
+  "pid": 262532,
+  "status": "LAUNCHED_UNCOLLECTED_NO_POSTLAUNCH_POLLS",
+  "source_commit": "731f7fef9",
+  "raw": "/workspaces/kprog-raw/perf/20261114-hash-lto",
+  "job": "/workspaces/kprog-raw/perf/20261114-hash-lto/kernel-job",
+  "output": "/workspaces/kprog-raw/perf/20261114-hash-lto/kernel",
+  "cpu_affinity": "16-19",
+  "vcpus": 2,
+  "guest_memory": "4G",
+  "host_address_space_bytes": 17179869184,
+  "image_lock": "shared",
+  "kernel_commit": "74d1097af56132da2b325699c5a560b29a790ff2",
+  "modes": [
+    "submitted-native",
+    "checked-sim-c"
+  ],
+  "fixtures": [
+    "key4/hash",
+    "key8/hash",
+    "key12/hash",
+    "key16/hash",
+    "key20/hash(original-helper fallback)",
+    "key8/percpu-hash",
+    "key8/lru-hash",
+    "key8/lru-percpu-hash",
+    "key8/hash-of-maps"
+  ],
+  "execution": "Each fixture tests32 actual keys, each absent/insert/rewrite/delete, on stock+native. Observe actual execution/service archive, do not infer full activation or success.",
+  "host_inputs_build_exit": 0,
+  "host_first_input_error": "missing existing kernel_offsets.h include; fixed by supplying micro/programs/build-x86 to the native compile",
+  "payload": [
+    {
+      "path": "corpus/results/perf-hash-lto-linker-20261114/native-link.real",
+      "sha256": "f4a201a787dd10600945a5dbe40001ac7b4c68fbd2a93609d464d8108c1be0d8"
+    },
+    {
+      "path": "corpus/results/perf-hash-lto-linker-20261114/native-link-on",
+      "sha256": "01c59cbaafe6b81a0b82199b79929c240e16322f6be710a9316f7825139bcce6"
+    },
+    {
+      "path": "corpus/results/perf-hash-lto-linker-20261114/native-link-off",
+      "sha256": "01c59cbaafe6b81a0b82199b79929c240e16322f6be710a9316f7825139bcce6"
+    },
+    {
+      "path": "corpus/results/perf-hash-lto-linker-20261114/runtime-hash-layout.json",
+      "sha256": "971f96e6e983c1272ef2daf2ce23eeda165ae87d914c398a2ee62870b23b432b"
+    },
+    {
+      "path": "corpus/results/perf-hash-lto-linker-20261114/runtime-probe-read-layout.json",
+      "sha256": "75a971bd496f290b1763efcfe2f78b74e80d2c8bd3c7c064308337fe5026f12e"
+    }
+  ],
+  "scope": "New native helper implementation only. Component kernel result pending, not application throughput. No kernel/base/image rebuild."
+}

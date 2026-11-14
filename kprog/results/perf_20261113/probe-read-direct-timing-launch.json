@@ -1,0 +1,51 @@
+{
+  "recorded_at": "2026-11-14T07:45:45Z",
+  "pid": 263016,
+  "status": "QUEUED_UNCOLLECTED_NO_POSTLAUNCH_POLLS",
+  "source_commit": "69f56f5a3",
+  "raw": "/workspaces/kprog-raw/perf/20261114-probe-read-direct-timing",
+  "wait_pid": 258314,
+  "wait_reason": "Resource order after owner Clang diagnostic natural exit, no success gate",
+  "configuration": "existing direct/submitted-native load-time path with read-LTO; checked-sim-c is a separate blocked configuration",
+  "app": "otelcol-ebpf-profiler/profiling",
+  "cpus": "0-7",
+  "vcpus": 8,
+  "guest_memory": "64G",
+  "host_address_space_bytes": 85899345920,
+  "samples": 3,
+  "workload_seconds": 180,
+  "stats_order": [
+    1,
+    0
+  ],
+  "image": "sha256:2aed63ff946f379ffb613586eb9d52a9c0274e3a92b25b675748292c9163d12c",
+  "kernel_commit": "74d1097af56132da2b325699c5a560b29a790ff2",
+  "locks": [
+    "exclusive timing",
+    "shared image"
+  ],
+  "capture": "corpus/results/perf-probe-read-direct-timing-20261114",
+  "input_hashes": [
+    {
+      "path": "corpus/results/perf-probe-read-linker-20261114/native-link.real",
+      "sha256": "fb07b6f232801818559c202a9c22de336fd1a48f9bf4bc25446a29b0355687fd"
+    },
+    {
+      "path": "corpus/results/perf-probe-read-linker-20261114/native-link-on",
+      "sha256": "399c75f75103482a1c3a0a0f2149e2cdc32722f3a71780ca561c92306d42025e"
+    },
+    {
+      "path": "corpus/results/perf-probe-read-linker-20261114/runtime-probe-read-layout.json",
+      "sha256": "75a971bd496f290b1763efcfe2f78b74e80d2c8bd3c7c064308337fe5026f12e"
+    },
+    {
+      "path": "corpus/results/perf-otel-upstream-20261114/manifest-context.json",
+      "sha256": "430b26ab4be8fd501a819f48c0451895d86bf90606533958a05639ac8a51573f"
+    },
+    {
+      "path": "kinsn/module/x86/build/bpf_x86_native_lab.ko",
+      "sha256": "d232c2e6bd5a52950528e1d26ee5da38bdf2d44884f6bd81aaf37f851812aefd"
+    }
+  ],
+  "scope": "Frozen existing workload/runner, original same-source context manifest, immutable fb07 read-LTO candidate. No outcome/throughput/equal-work/floor claim until collection. New hash candidate not used."
+}
