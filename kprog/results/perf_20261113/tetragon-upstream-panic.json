@@ -1,0 +1,57 @@
+{
+  "recorded_at": "2026-11-14T01:03:31.563260+00:00",
+  "protocol_commit": "132d25c78",
+  "raw": "/workspaces/kprog-raw/perf/20261114-tetragon-upstream-verbose",
+  "inputs": [
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_005425_721749/details/shim-logs/tetragon__observer.baseline.log",
+      "sha256": "2eee05d5138bb3d2ca891ed3b7d0c4cc94cace28a578b72cc9cbd9eed1f765ba"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_005425_721749/details/shim-logs/tetragon__observer.post_rejit.log",
+      "sha256": "f3740aa12eb9d845e51d2b06a638fba0ad9ba978d4f2c15c277422193af66f75"
+    }
+  ],
+  "reports": [],
+  "scope": "Actual application startup kernel panic. Baseline completed, native measurement absent; no equal-work or throughput result.",
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/perf_20261113/tetragon-upstream-panic.tar.gz",
+    "bytes": 665514,
+    "sha256": "421f1b1be46dc4a44e29afb92c8489f67c88b46e5191ccccc7e9985b20838168",
+    "files_byte_compared": 500
+  },
+  "outcome": {
+    "make_exit": 2,
+    "vng_exit": 255,
+    "run": "x86_kvm_corpus_20261114_005425_721749",
+    "finished_at": "2026-11-14T00:56:47Z",
+    "kernel_fault": {
+      "program": "event_execve",
+      "offset": "0x1d13",
+      "length": "0x2674",
+      "address": "0xfffffffffffffff0",
+      "register_rax": 0,
+      "instructions": [
+        "mov rax,[rsp+0]",
+        "mov rax,[rax-16]"
+      ]
+    },
+    "actual_loader_sha256": "3e909ad695039e68379911d23c9f2d2538580c656fbd7c379c2e186fe27d4a4a"
+  },
+  "diagnosis": {
+    "original_native_prologue": [
+      "push rbp",
+      "mov rbp,rsp",
+      "push r15",
+      "push r14",
+      "push r13",
+      "push r12",
+      "push rbx",
+      "sub rsp,0xd8"
+    ],
+    "inherited_ir_attribute": "frame-pointer=all",
+    "backend_flag": "-fomit-frame-pointer does not override IR attribute",
+    "linker_assumption": "Contiguous saved-register pushes then optional stack subtraction; mov rbp,rsp terminates this scan, leaving saved BPF RBP offset zero.",
+    "next": "Normalize the explicit native-codegen frame-pointer attribute and reproduce on affected host subset. General frame-pointer prologue planner repair remains with linker owner."
+  }
+}
