@@ -1,6 +1,6 @@
 # Native simulator verification
 
-## External-base migration (M1 in progress)
+## External-base migration (M1 complete)
 
 The operator's replacement plan is in [todo section 4](../docs/todo.md).
 The external bases are forks, pinned as Git submodules; changes needed by
@@ -9,19 +9,17 @@ kprog belong in those forks. No replacement ISA semantics is defined locally.
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
 | AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `49f8a1d9e46f` | Lean 4.35.0 |
-| x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `c64314085999` | Lean 4.32.0-rc1 |
+| x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `74a2e2849cde` | Lean 4.32.0-rc1 |
 | Clight | [eunomia-bpf/clean](https://github.com/eunomia-bpf/clean), `external/clean/export` | `123f7f7767e2` | Lean 4.32.1 |
 
 `make -C kprog/formal mature` builds the migration Lake package on Lean 4.35.0,
 importing the external `Arm`, `X86`, `CCLib` and `Clightdefs` libraries directly.
-The first compatibility build (job 249762) failed in `X86/Theorems.lean:1802`:
-`omega` could not prove the `Flags.shiftCount Size.w c` bound under Lean 4.35.0.
-The dependency manifest is pinned; M1 remains open until the combined build passes.
-The x86lean fork patch `c64314085999` uses the existing masked-count hypothesis
-directly for the Boolean refusal predicate. Its theorem statement and instruction
-semantics are unchanged. The patch is pushed; a combined rebuild is pending
-build-CPU agreement, so it is not yet build acceptance.
-LANE FORMAL owns compatibility repairs and M1-M6 after the handoff.
+The combined build passed on 2026-11-14 (121 Lake jobs), importing all four
+libraries on the common toolchain. The x86lean fork patch `74a2e2849cde`
+uses an explicit Boolean-decision bridge for the existing masked-count
+hypothesis; its theorem statement and instruction semantics are unchanged.
+Build output and the earlier failed attempts are retained in
+`/workspaces/kprog-raw/formal/m1-compat-2` and `m1-compat-1`.
 The legacy package remains on Lean 4.19.0 while M3-M5 migrate its references
 and theorems. M2 coverage is pending; the legacy counts below describe the old
 foundation, not proofs against these external bases. Retirement occurs at M6.
