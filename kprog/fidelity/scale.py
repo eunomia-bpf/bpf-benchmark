@@ -183,7 +183,8 @@ def check(directory,out):
     out.mkdir(parents=True,exist_ok=True)
     (out/'guest.txt').write_text(' '.join(os.uname())+'\n'+Path('/proc/cmdline').read_text())
     failed=False
-    records=sorted(directory.glob('n*.json'))
+    # Resource sidecars share the n<size> prefix but are not case records.
+    records=sorted([*directory.glob('n*_direct.json'), *directory.glob('n*_indirect.json')])
     if not records:raise RuntimeError('no scale build records in '+str(directory))
     for path in records:
         row=json.loads(path.read_text());name=row['name']

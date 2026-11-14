@@ -203,6 +203,10 @@ stage2-guest:
 SCALE_BUILD ?= build-x86/scale
 SCALE_SIZES ?= 100 1000 10000 100000
 SCALE_OUT ?= ../results/kprog_fidelity_20261106/scale/x86
+.PHONY: scale-records-test
+scale-records-test:
+	$(PYTHON) -m unittest test_scale_records
+
 scale-build:
 	install -d build-x86
 	$(CC) -Wall -Wextra -Werror -O2 -I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
