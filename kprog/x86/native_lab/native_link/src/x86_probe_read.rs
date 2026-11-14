@@ -59,7 +59,8 @@ pub(super) fn routine(layout: &RuntimeProbeReadLayout, user: bool, actual: u64)
         let no_smap = append_x86_jcc_rel32(&mut b, 0x84);
         b.extend_from_slice(&[0x0f,0x01,0xcb]); // STAC only with actual CPU SMAP capability
         let after = b.len(); patch_x86_rel32(&mut b, no_smap, after)?;
-        b.extend_from_slice(&[0x0f,0xae,0xe8]); // LFENCE before source access
+        // Match sole-target copy_user_generic: STAC/copy/CLAC. Its range
+        // check and nmi_uaccess_okay policy above do not add an LFENCE.
     }
     b.extend_from_slice(&[0x4c,0x89,0xe7,0x4c,0x89,0xf6,0x44,0x89,0xe9]); // copy args
     b.extend_from_slice(&[0x41,0xbb,1,0,0,0]); // R11 fault status=success
@@ -165,7 +166,7 @@ mod tests {
             .unwrap_or_else(|| std::env::temp_dir().join(format!("probe-read-{}",std::process::id())));
         fs::create_dir_all(&output)?;
         let source = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("../../../perf/native-context/test-probe-read.c");
+            .join("../../../build/test-probe-read.c");
         let driver = output.join("check");
         let compile = std::process::Command::new("cc")
             .args(["-O2","-Wall","-Wextra","-Werror","-no-pie"])
