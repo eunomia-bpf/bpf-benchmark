@@ -1,0 +1,145 @@
+{
+  "recorded_at": "2026-11-14T08:27:07Z",
+  "outer_pid": 263016,
+  "outer_status": "STATS0_STILL_RUNNING_AT_LAST_READ",
+  "run": "corpus/results/x86_kvm_corpus_20261114_074624_672860",
+  "stats": true,
+  "samples": 3,
+  "workload_seconds": 180,
+  "app_status": "error",
+  "app_error": "shim socket /var/run/bpfrejit/shim-14210.sock request failed: [Errno 111] Connection refused",
+  "baseline_workload_samples": 3,
+  "native_phase_result": "NULL, not zero",
+  "throughput_ratio": null,
+  "per_invocation_ratio": null,
+  "ratio_tool": "off= cannot calculate median because native samples absent; no ratio reported",
+  "native_install_ids": [
+    22,
+    26,
+    28,
+    30,
+    32,
+    34,
+    36,
+    38,
+    40,
+    42,
+    44,
+    46,
+    48
+  ],
+  "late_native_snapshot": {
+    "path": "/workspaces/kprog-raw/perf/20261114-probe-read-direct-timing/stats1-capture-retained/post_rejit-0142/programs.json",
+    "positive_counter_ids": [
+      46,
+      48
+    ],
+    "observed_counters": {
+      "26": {
+        "name": "perf_unwind_sto",
+        "run_cnt": null,
+        "run_time_ns": null,
+        "bytes_jited": 8104
+      },
+      "28": {
+        "name": "perf_unwind_nat",
+        "run_cnt": null,
+        "run_time_ns": null,
+        "bytes_jited": 30886
+      },
+      "30": {
+        "name": "perf_unwind_hot",
+        "run_cnt": null,
+        "run_time_ns": null,
+        "bytes_jited": 40298
+      },
+      "32": {
+        "name": "perf_unwind_per",
+        "run_cnt": null,
+        "run_time_ns": null,
+        "bytes_jited": 37061
+      },
+      "34": {
+        "name": "perf_unwind_php",
+        "run_cnt": null,
+        "run_time_ns": null,
+        "bytes_jited": 33677
+      },
+      "36": {
+        "name": "perf_unwind_pyt",
+        "run_cnt": null,
+        "run_time_ns": null,
+        "bytes_jited": 20802
+      },
+      "38": {
+        "name": "perf_unwind_rub",
+        "run_cnt": null,
+        "run_time_ns": null,
+        "bytes_jited": 27583
+      },
+      "40": {
+        "name": "perf_unwind_v8",
+        "run_cnt": null,
+        "run_time_ns": null,
+        "bytes_jited": 34423
+      },
+      "42": {
+        "name": "perf_unwind_dot",
+        "run_cnt": null,
+        "run_time_ns": null,
+        "bytes_jited": 36172
+      },
+      "44": {
+        "name": "perf_go_labels",
+        "run_cnt": null,
+        "run_time_ns": null,
+        "bytes_jited": 3299
+      },
+      "46": {
+        "name": "tracepoint__sch",
+        "run_cnt": 9838,
+        "run_time_ns": 18625181,
+        "bytes_jited": 1361
+      },
+      "48": {
+        "name": "native_tracer_e",
+        "run_cnt": 414101986,
+        "run_time_ns": 1180107538004,
+        "bytes_jited": 7057
+      }
+    },
+    "note": "Missing tail-program stats are UNKNOWN, not zero execution. Snapshot is partial, not arm-end counter certification."
+  },
+  "capture_issue": {
+    "cause": "Both stats modes shared EQCODEX_OUT; stats0 observer exited on existing baseline-0001 directory before writing new snapshots.",
+    "retained_stats1_files": 3726,
+    "retained_stats1_bytes": 26760371,
+    "raced": [],
+    "raw_manifest": "/workspaces/kprog-raw/perf/20261114-probe-read-direct-timing/stats1-capture-retained/preservation.json",
+    "fix": "Future own recipe uses distinct stats1/stats0 observer directories; currently running job unchanged.",
+    "correction": "Snapshot overwrite was initially suspected but not observed. Five later control/log files are separate from retained snapshots."
+  },
+  "scope": "App runtime/socket failure after successful native installation and observed positive partial counters. No actual crash cause/OOM/semantic diagnosis or throughput/equal-work/floor acceptance. Stats0 still runs; no interruption.",
+  "files": [
+    {
+      "path": "corpus/results/x86_kvm_corpus_20261114_074624_672860/details/apps/otelcol-ebpf-profiler__profiling.json",
+      "sha256": "e77436e89c72fd2c8f206fe58e49a0c2a7c9adcda1137e175576de536aab764d"
+    },
+    {
+      "path": "corpus/results/x86_kvm_corpus_20261114_074624_672860/metadata.json",
+      "sha256": "e1d4feb554df3f1cda25ba99f0b89af8bf293c0122e5a8fd5190c088dc53e978"
+    },
+    {
+      "path": "corpus/results/x86_kvm_corpus_20261114_074624_672860/details/shim-logs/otelcol-ebpf-profiler__profiling.post_rejit.log",
+      "sha256": "ee4ac5c55a004889c0bd1209de07f2c398ce59a1b90836e61cb13341605d29bf"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-probe-read-direct-timing/stats1-capture-retained/post_rejit-0142/programs.json",
+      "sha256": "5d7168ef5c9f6e8bf937d26af8c5365a9dc7a1ce75e1de92afe8fa516b8a8331"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-probe-read-direct-timing/stats0-observer-failure.log",
+      "sha256": "92afd68a567d32659a94413229744c2618f8314b9c230f800cfad61dbe8b1801"
+    }
+  ]
+}
