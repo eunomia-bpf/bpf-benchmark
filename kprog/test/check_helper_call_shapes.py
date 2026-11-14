@@ -23,7 +23,7 @@ def check(args):
     target = ctypes.cast(callback, ctypes.c_void_p).value
     plan = args.build/'plan.json'
     plan.write_text(json.dumps(dict(version=1, helpers=[dict(name='bpf_get_prandom_u32', addr=target)])))
-    flags = ['--runtime-map-lookups', '--runtime-known-map-lookups', '--local-memory-routines',
+    flags = ['--abi-load-sites', 'true', '--runtime-map-lookups', '--runtime-known-map-lookups', '--local-memory-routines',
              '--runtime-probe-read-layout', args.layouts/'runtime-probe-read-layout.json',
              '--runtime-probe-read-strings', '--runtime-percpu-loads',
              '--runtime-hash-layout', args.layouts/'runtime-hash-layout.json',
