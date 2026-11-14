@@ -1,0 +1,21 @@
+{
+  "recorded": "2026-11-14T06:42:59Z",
+  "pid": 233116,
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-direct-recovery",
+  "target": "direct-recovery-kvm",
+  "candidate_commit": "81c6d23cf",
+  "host_check": "PASS",
+  "module_build_exit_code": 0,
+  "kernel": "/workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage",
+  "kernel_or_image_built": false,
+  "canonical_deployed": false,
+  "guest_cpus": 2,
+  "guest_memory": "2G",
+  "host_cpus": "14-15",
+  "host_address_space_limit_bytes": 8589934592,
+  "image_lock": "shared",
+  "test_scope": "Default no-sites native return; faulting MOV at offset127 spanning old128byte boundary must clear R11; following reupload",
+  "dry_run_exit_code": 0,
+  "postlaunch_outcome_polled": false,
+  "raw_removed": false
+}

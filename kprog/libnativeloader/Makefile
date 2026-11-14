@@ -706,6 +706,6 @@ direct-recovery-kvm:
 	taskset -c 14-15 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage --cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(DIRECT_RECOVERY_KERNEL_OUTPUT)" --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -C kprog/libnativeloader guest-direct-recovery DIRECT_RECOVERY_KERNEL_OUTPUT=$(DIRECT_RECOVERY_KERNEL_OUTPUT)'
 
 guest-direct-recovery:
-	mount -t debugfs debugfs /sys/kernel/debug
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod "$(DIRECT_RECOVERY_KERNEL_OUTPUT)/bpf_x86_native_lab.ko"
 	"$(DIRECT_RECOVERY_KERNEL_OUTPUT)/recovery" kernel "$(DIRECT_RECOVERY_KERNEL_OUTPUT)"
