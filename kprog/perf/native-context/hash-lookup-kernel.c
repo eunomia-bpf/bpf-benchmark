@@ -6,9 +6,9 @@ struct inner { __uint(type, 2); __uint(max_entries, 1); __type(key, __u32); __ty
 #ifndef __array
 #define __array(name, val) typeof(val) *name[]
 #endif
-struct { __uint(type, MAP_KIND); __uint(max_entries, 64); __type(key, struct key); __array(values, struct inner); } table SEC(".maps");
+struct { __uint(type, MAP_KIND); __uint(max_entries, 64); __type(key, struct key); __array(values, struct inner); } table __attribute__((section(".maps"),used));
 #else
-struct { __uint(type, MAP_KIND); __uint(max_entries, 64); __type(key, struct key); __type(value, __u64); } table SEC(".maps");
+struct { __uint(type, MAP_KIND); __uint(max_entries, 64); __type(key, struct key); __type(value, __u64); } table __attribute__((section(".maps"),used));
 #endif
 SEC("raw_tp/sys_enter") int entry(const unsigned long *ctx)
 {

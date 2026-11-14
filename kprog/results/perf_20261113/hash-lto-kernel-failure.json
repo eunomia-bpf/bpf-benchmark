@@ -212,5 +212,151 @@
         "archive_sha256": "48d058d1ea04012913d2d348bd2655d504e0bf72fad1188fece560201349b4e1"
       }
     }
+  },
+  "retry2": {
+    "recorded_at": "2026-11-14T08:34:03Z",
+    "pid": 270781,
+    "make_exit": 2,
+    "raw": "/workspaces/kprog-raw/perf/20261114-hash-lto/kernel-retry2",
+    "counts": {
+      "stock_loaded": 18,
+      "checked_B_verified": 0,
+      "native_installed": 0,
+      "stock_or_native_test_executions": 0
+    },
+    "root_cause": "MICRO_NATIVE includes micro/programs/common.h:7 where SEC(NAME) only sets visibility. Native table was in .bss, stock table in .maps; submission treats .bss as data, not a map capability. Worker binding and source-manifest changes alone did not fix that.",
+    "fix": "Fixture map declarations now explicitly use section(.maps),used in both modes. Existing source-object manifest identity binding retained, shared headers/loader unchanged.",
+    "host_inputs_rebuild_exit": 0,
+    "section_and_text_checks": [
+      {
+        "case": "1-1.native.o",
+        "native_before": ".bss",
+        "native_after": ".maps",
+        "native_text_equal": true
+      },
+      {
+        "case": "2-1.native.o",
+        "native_before": ".bss",
+        "native_after": ".maps",
+        "native_text_equal": true
+      },
+      {
+        "case": "2-10.native.o",
+        "native_before": ".bss",
+        "native_after": ".maps",
+        "native_text_equal": true
+      },
+      {
+        "case": "2-13.native.o",
+        "native_before": ".bss",
+        "native_after": ".maps",
+        "native_text_equal": true
+      },
+      {
+        "case": "2-5.native.o",
+        "native_before": ".bss",
+        "native_after": ".maps",
+        "native_text_equal": true
+      },
+      {
+        "case": "2-9.native.o",
+        "native_before": ".bss",
+        "native_after": ".maps",
+        "native_text_equal": true
+      },
+      {
+        "case": "3-1.native.o",
+        "native_before": ".bss",
+        "native_after": ".maps",
+        "native_text_equal": true
+      },
+      {
+        "case": "4-1.native.o",
+        "native_before": ".bss",
+        "native_after": ".maps",
+        "native_text_equal": true
+      },
+      {
+        "case": "5-1.native.o",
+        "native_before": ".bss",
+        "native_after": ".maps",
+        "native_text_equal": true
+      }
+    ],
+    "cases": {
+      "checked-sim-c/1-1": {
+        "source_id": 50,
+        "archive_sha256": "495a79d420dae65d6893cd47c000ad8d286be9d2d1699f038578c5f59fd91c2c"
+      },
+      "checked-sim-c/2-1": {
+        "source_id": 55,
+        "archive_sha256": "0081f00f7622cf18bc30d534f89bcdbeb23533ce74c72006b868fdd4b1792c0a"
+      },
+      "checked-sim-c/2-10": {
+        "source_id": 85,
+        "archive_sha256": "7bf9f8886f6b995dccf3cf7c72ac5d226e136387986400154ec6097f37efea84"
+      },
+      "checked-sim-c/2-13": {
+        "source_id": 90,
+        "archive_sha256": "01f539bf49bf52525da0cceba13b52591a6bbd8946ac97c609baecaca97ca876"
+      },
+      "checked-sim-c/2-5": {
+        "source_id": 75,
+        "archive_sha256": "1297a1428fa82b706bc1d9de9ee9e7af7f6c50505030366a5a77dea2b4709bc4"
+      },
+      "checked-sim-c/2-9": {
+        "source_id": 80,
+        "archive_sha256": "611dc43753137becb029ba266dbc71a9c1b8320ad82c61aa8636e3003345f1dd"
+      },
+      "checked-sim-c/3-1": {
+        "source_id": 60,
+        "archive_sha256": "f6e478c1cae44573197863f374eb199736c18061a529ba7c74b209741d33dbef"
+      },
+      "checked-sim-c/4-1": {
+        "source_id": 65,
+        "archive_sha256": "6b3d28e76381a501b6fd13485934e5e91e11b40305f9f00c908a08bcb067f59d"
+      },
+      "checked-sim-c/5-1": {
+        "source_id": 70,
+        "archive_sha256": "208a201d431edf56642bdb407dfcb6340d4aa3f10aa6714678cde0cf5b22bd44"
+      },
+      "submitted-native/1-1": {
+        "source_id": 5,
+        "archive_sha256": "ad8e17523f050165186a336a38fef742dfecb550e63284888e2f6503b4cb637f"
+      },
+      "submitted-native/2-1": {
+        "source_id": 10,
+        "archive_sha256": "313f908f301560c1f70c1ef9789e7171d7887cce0ab98b451dfafd548a2c2a8a"
+      },
+      "submitted-native/2-10": {
+        "source_id": 40,
+        "archive_sha256": "c1b76cb779fbd3f15ac30e1bf6bf6e70ec6ddc3a986001b68058e14d9787746b"
+      },
+      "submitted-native/2-13": {
+        "source_id": 45,
+        "archive_sha256": "b8e010ee5e0be689a7dbe1c1bde29126d7f08d9e2a521940733589f7412bf72f"
+      },
+      "submitted-native/2-5": {
+        "source_id": 30,
+        "archive_sha256": "0f2c55ac6624bf290850c09d3889d068f56956a11f38cb9c10720388901d9e6f"
+      },
+      "submitted-native/2-9": {
+        "source_id": 35,
+        "archive_sha256": "a2a06303498316ce6a6396790ed898eacdd9deba5a14ed5dd7d1c2131da3122b"
+      },
+      "submitted-native/3-1": {
+        "source_id": 15,
+        "archive_sha256": "521610849761c06ac4d8fc4cb0d22267217985ed6a47dafb3663edb219ed36a6"
+      },
+      "submitted-native/4-1": {
+        "source_id": 20,
+        "archive_sha256": "7ae5b13b736a61555e23e61ded3022916c47dea5830d63fad0f1bb0385da09b9"
+      },
+      "submitted-native/5-1": {
+        "source_id": 25,
+        "archive_sha256": "adef89d49351a19ead04bcc4f46a48768e9a320eced3f6feb43dd388d5424fce"
+      }
+    },
+    "next_actual_kernel_result": "PENDING, no semantic or performance certification"
   }
 }
