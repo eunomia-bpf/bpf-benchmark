@@ -112,6 +112,7 @@
 - [x] P1 OTel paired-profile report 修复（bee22393c）：显式 --perf 传到 IP symbolizer，保留 standalone 默认路径；2 focused regressions 和 retained 20261114-otel-profile 真数据重报通过。客体两阶段 appok，原 Make2 是 host report 旧工具路径错误，不重跑 VM。
 - [x] P1 OTel guest PMU 能力探测（6a1a95e21）：130037 在应用启动前 make2，cycles:k 不支持且 host kvm.enable_pmu=N；全部错误/raw/archive保留，不改KVM设置、不宣称guest性能结果。
 - [x] P1 可选host guest-only recorder（e8e775991）：perf kvm 按原CPU集合包装原Make客体生命周期，默认关闭；保留两臂启动时的guest kallsyms和clock pairs。实际host record配置预检make0、5focused regressions通过；未运行客体的预检不等于捕获guest样本。
+- [x] P1 proven named-map fastpath 宿主实现（本提交）：owner02:44同意；默认关闭 --runtime-known-map-lookups，64-bit实际GOT map pointer+exact lookup_maps Array/PerCPU facts才内联，CFG join/partial-write/inner-result未知都走generic，绝不使用positional或截断名。24组件测试通过（含真实ELF/native数组边界执行）；六app11实物entry分别默认/runtime-map模式共22组proof text/kernel bytes+relocs/maps/ABI逐字节等于d401。新pinned payload perf-known-map-linker-20261114，当前profile133271仍用旧binary；guest吞吐/展开counter比较另做，不宣称性能收益。
 - [ ] P1 OTel interrupt-context 剖析：cpu-clock 20261114-otel-profile 两臂约73k样本，精确测量窗37,329/36,723样本无OTel/helper stack，硬中断计时盲点为推断；保留全部数据，默认关闭选择 cycles:k 做真实PMU能力检查和两阶段剖析，不能把零样本解释为零工作。PMU130037实际make2、应用未启动，guest cycles:k不支持且host kvm.enable_pmu=N；host cpu_atom/cycles/G计数器配置已接受（未证实guest样本），host guest-only采样133271已启动（otel-host-profile-launch.json），下一turn收集，不轮询。
 - [ ] P2 修好后只重测受这处修复影响的应用（stats 关和开，每个应用 3×180 秒），每次运行用 stubs.py 和程序自身计数核对，增量写进第 1 节；六应用全量计时只在冻结前跑一次，正式下限表和几何平均以那次为准。
 - [ ] P3 等量工作成立的应用里，按每次调用的差距找原生一侧的通用优化（OTel、Tetragon、Cilium）。

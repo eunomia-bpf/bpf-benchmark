@@ -31,6 +31,9 @@ def main():
     parser.add_argument('--candidate', required=True, type=Path)
     parser.add_argument('--reference', required=True, type=Path)
     parser.add_argument('--output', required=True, type=Path)
+    parser.add_argument('--runtime-map-lookups', action='store_true')
+    parser.add_argument('--tracee-object', type=Path,
+                        default=Path('/var/tmp/kprog-tmp/perf/memory-flags/tracee.plain.o'))
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     cases = [('bcc', STAGE/'bcc/syscount.native.o', 'sys_enter'),
@@ -40,7 +43,7 @@ def main():
              ('tetragon', STAGE/'tetragon/bpf_generic_kprobe_v61.native.o', 'generic_kprobe_event'),
              ('tetragon-execve', STAGE/'tetragon/bpf_execve_event_v61.native.o', 'event_execve'),
              ('bcc-biosnoop', STAGE/'bcc/biosnoop.native.o', 'block_rq_insert')]
-    plain = Path('/var/tmp/kprog-tmp/perf/memory-flags/tracee.plain.o')
+    plain = args.tracee_object
     cases += [('tracee-'+s, plain, s) for s in ['trace_sys_enter', 'trace_sys_exit', 'sys_enter_submit', 'trace_ret_vfs_read_tail']]
     helpers = set(re.findall(r'Some\("(bpf_[^"]+)"\)',
         (ROOT/'kprog/x86/native_lab/native_link/src/x86.rs').read_text()))
@@ -72,6 +75,7 @@ def main():
             command = [str(binary), '--mode', mode, '--input', str(input_path), '--symbol', symbol,
                        '--link-plan', str(plan_path), '--output', str(output)]
             if enabled: command += ['--local-memory-routines']
+            if args.runtime_map_lookups: command += ['--runtime-map-lookups']
             if mode == 'kernel': command += ['--output-relocs', str(output)+'.relocs',
                 '--output-map-patches', str(output)+'.maps', '--output-abi', str(output)+'.abi']
             with (directory/(name+'.log')).open('w') as log:

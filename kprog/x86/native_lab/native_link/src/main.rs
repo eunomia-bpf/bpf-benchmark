@@ -125,6 +125,10 @@ struct Args {
     #[arg(long)]
     runtime_map_lookups: bool,
 
+    /// Inline proven named array maps within actual-pointer runtime dispatch.
+    #[arg(long, requires = "runtime_map_lookups")]
+    runtime_known_map_lookups: bool,
+
     /// Bind x86 memset/memcpy to linker-owned GPR routines in the proof image.
     #[arg(long)]
     local_memory_routines: bool,
@@ -505,6 +509,7 @@ fn main() -> Result<()> {
                 args.preserve_entry_abi,
                 args.tail_count_relocs,
                 args.runtime_map_lookups && !proof_mode,
+                args.runtime_known_map_lookups && !proof_mode,
                 args.local_memory_routines,
                 args.show,
             )?
@@ -2583,6 +2588,16 @@ mod tests {
         assert!(!Args::try_parse_from(argv).unwrap().runtime_map_lookups);
         assert!(Args::try_parse_from(argv.into_iter().chain(["--runtime-map-lookups"]))
             .unwrap().runtime_map_lookups);
+    }
+
+    #[test]
+    fn known_map_lookups_require_runtime_dispatch_and_explicit_opt_in() {
+        let argv = ["native-link", "--input", "p.o", "--symbol", "entry", "--output", "p.bin"];
+        assert!(!Args::try_parse_from(argv).unwrap().runtime_known_map_lookups);
+        assert!(Args::try_parse_from(argv.into_iter().chain(["--runtime-known-map-lookups"])).is_err());
+        assert!(Args::try_parse_from(argv.into_iter().chain([
+            "--runtime-map-lookups", "--runtime-known-map-lookups"]))
+            .unwrap().runtime_known_map_lookups);
     }
 
     #[test]

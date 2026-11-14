@@ -11,6 +11,9 @@ use crate::*;
 #[path = "x86_memory.rs"]
 mod memory;
 
+#[path = "x86_known_maps.rs"]
+mod known_maps;
+
 const X86_CPU_NUMBER_HELPER_KEY: &str = "__native_x86_cpu_number";
 const X86_THIS_CPU_OFF_HELPER_KEY: &str = "__native_x86_this_cpu_off";
 const X86_BPF_MAP_MAX_ENTRIES_OFFSET_KEY: &str = "__native_x86_bpf_map_max_entries_offset";
@@ -96,8 +99,20 @@ fn select_lookup_site(
     sym_name: &str,
     generic_target_addr: u64,
     runtime_map_lookups: bool,
+    runtime_known_map_lookups: bool,
 ) -> Result<(String, Option<usize>, LookupSiteSpec)> {
     if runtime_map_lookups {
+        // Only an exact symbol whose actual pointer was traced to RDI may
+        // select a layout. Never consume positional or truncated-name facts.
+        if runtime_known_map_lookups {
+            if let Some(name) = native_map_name {
+                if let Some(spec) = lookup_maps.get(name) {
+                    if matches!(spec.kind, LookupKind::Array | LookupKind::PerCpuArray) {
+                        return Ok((format!("runtime-map:{name}"), None, spec.clone()));
+                    }
+                }
+            }
+        }
         // Native and BPF helper ordering is not an identity relation. Dispatch
         // on the actual RDI map instead of borrowing another site's layout.
         let spec = generic_lookup_site(generic_target_addr, native_map_name)
@@ -1164,6 +1179,7 @@ pub(super) fn rewrite_x86(
     preserve_entry_abi: bool,
     tail_count_relocs: bool,
     runtime_map_lookups: bool,
+    runtime_known_map_lookups: bool,
     local_memory_routines: bool,
     show: bool,
 ) -> Result<RewriteResult> {
@@ -1267,6 +1283,9 @@ pub(super) fn rewrite_x86(
         let mut helper_got_registers: HashMap<Register, String> = HashMap::new();
         let mut helper_imm_registers: HashMap<Register, u64> = HashMap::new();
         let mut map_symbol_registers: HashMap<Register, String> = HashMap::new();
+        let proven_maps = if runtime_known_map_lookups && !proof_mode {
+            known_maps::arguments(&bytes, sym, &got_relocations, map_addrs)?
+        } else { HashMap::new() };
 
         // Side table: per-entry patch kind, paired with each kept Instruction
         // in the symbol-local stream. `insn_local_ip` records the byte
@@ -1620,8 +1639,11 @@ pub(super) fn rewrite_x86(
                     if name == "bpf_map_lookup_elem" {
                         let native_call_index = lookup_call_counter;
                         lookup_call_counter += 1;
-                        let native_map_name =
-                            map_symbol_registers.get(&Register::RDI).map(String::as_str);
+                        let native_map_name = if runtime_known_map_lookups {
+                            proven_maps.get(&local_ip).map(String::as_str)
+                        } else {
+                            map_symbol_registers.get(&Register::RDI).map(String::as_str)
+                        };
                         let (site_label, _site_index, spec) = select_lookup_site(
                             lookup_sites,
                             lookup_maps,
@@ -1631,6 +1653,7 @@ pub(super) fn rewrite_x86(
                             &sym.name,
                             map_lookup_helper_addr,
                             runtime_map_lookups,
+                            runtime_known_map_lookups,
                         )?;
                         lookup_call_specs.insert(site_key, spec.clone());
                         match spec.kind {
@@ -1783,10 +1806,13 @@ pub(super) fn rewrite_x86(
                         lookup_maps,
                         &mut lookup_site_used,
                         native_call_index,
-                        lookup_map_name_for_call.as_deref(),
+                        if runtime_known_map_lookups {
+                            proven_maps.get(&local_ip).map(String::as_str)
+                        } else { lookup_map_name_for_call.as_deref() },
                         &sym.name,
                         map_lookup_helper_addr,
                         runtime_map_lookups,
+                        runtime_known_map_lookups,
                     )?;
                     lookup_call_specs.insert(site_key, spec.clone());
                 }
@@ -4330,10 +4356,10 @@ mod tests {
                 let empty = HashMap::new();
                 let helpers = HashMap::from([(name.to_owned(), 0x1234)]);
                 let plain = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &empty, &[],
-                    &HashMap::new(), &[], true, true, false, false, false, false)?;
+                    &HashMap::new(), &[], true, true, false, false, false, false, false)?;
                 assert_eq!(plain.proof_relocs.len(), 2, "default remains symbolic");
                 let proof = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &empty, &[],
-                    &HashMap::new(), &[], true, true, false, false, true, false)?;
+                    &HashMap::new(), &[], true, true, false, false, false, true, false)?;
                 assert!(proof.proof_relocs.is_empty(), "{name}, form={form}");
                 assert_eq!(proof.proof_symbols.len(), 2, "same length shares one routine");
                 assert!(proof.proof_symbols[1].name.starts_with("__native_link_local_"));
@@ -4347,7 +4373,7 @@ mod tests {
                 let included = discover_reachable(&elf, &entry)?;
                 assert_eq!(included.len(), 2);
                 let result = rewrite_x86(&elf, &entry, &included, &empty, &empty, &[],
-                    &HashMap::new(), &[], false, true, false, false, true, false)?;
+                    &HashMap::new(), &[], false, true, false, false, false, true, false)?;
                 assert!(result.relocs.is_empty());
                 #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
                 {
@@ -4399,7 +4425,7 @@ mod tests {
             for enabled in [false, true] {
                 let result = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers,
                     &HashMap::new(), &[site.clone()], &HashMap::new(), &[],
-                    false, false, false, enabled, false, false)?;
+                    false, false, false, enabled, false, false, false)?;
                 let expected = if enabled { 0x1234 } else { 0x5678 };
                 assert!(result.relocs.iter().any(|r| r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32
                     && r.target == expected), "got={got}, enabled={enabled}: actual helper target");
@@ -4420,7 +4446,7 @@ mod tests {
         for name in [None, Some("outer")] {
             let mut used = [false];
             let (_, index, spec) = select_lookup_site(
-                &sites, &HashMap::new(), &mut used, 0, name, "entry", 0x1234, true,
+                &sites, &HashMap::new(), &mut used, 0, name, "entry", 0x1234, true, false,
             )?;
             assert!(matches!(spec.kind, LookupKind::Call));
             assert_eq!(spec.target_addr, 0x1234);
@@ -4428,15 +4454,115 @@ mod tests {
             assert_eq!(index, None);
             assert!(!used[0], "runtime dispatch cannot consume positional metadata");
             let (_, index, spec) = select_lookup_site(
-                &sites, &HashMap::new(), &mut used, 0, name, "entry", 0x1234, false,
+                &sites, &HashMap::new(), &mut used, 0, name, "entry", 0x1234, false, false,
             )?;
             assert!(matches!(spec.kind, LookupKind::PerCpuArray));
             assert_eq!(index, Some(0));
             assert!(used[0]);
         }
         assert!(select_lookup_site(&sites, &HashMap::new(), &mut [false],
-                                  0, None, "entry", 0, true).is_err(),
+                                  0, None, "entry", 0, true, false).is_err(),
                 "missing runtime helper must not use a guessed map type");
+        Ok(())
+    }
+
+    #[test]
+    fn runtime_known_arrays_use_only_exact_named_map_facts() -> Result<()> {
+        let array = LookupSiteSpec {
+            kind: LookupKind::Array, target_addr: 0, key_offset: 0,
+            max_entries: 8, elem_size: 8, index_mask: 7, value_offset: 32,
+            percpu_base_addr: 0, map_name: Some("known_map".into()),
+        };
+        let sites = [array.clone()];
+        let mut maps = HashMap::from([("known_map".into(), array)]);
+        for kind in [LookupKind::Array, LookupKind::PerCpuArray, LookupKind::Hash,
+                     LookupKind::Call, LookupKind::HashOfMaps] {
+            maps.get_mut("known_map").unwrap().kind = kind;
+            for name in [None, Some("unknown"), Some("known_map")] {
+                for enabled in [false, true] {
+                    let mut used = [false];
+                    let (_, index, spec) = select_lookup_site(&sites, &maps, &mut used,
+                        0, name, "entry", 0x1234, true, enabled)?;
+                    let inline = enabled && name == Some("known_map")
+                        && matches!(kind, LookupKind::Array | LookupKind::PerCpuArray);
+                    assert_eq!(matches!(spec.kind, LookupKind::Array | LookupKind::PerCpuArray), inline);
+                    if !inline { assert_eq!(spec.target_addr, 0x1234); }
+                    assert!(index.is_none() && !used[0], "never consume positional sites");
+                }
+            }
+        }
+        maps.clear();
+        maps.insert("0123456789abcde_A".into(), sites[0].clone());
+        let (_, _, spec) = select_lookup_site(&sites, &maps, &mut [false], 0,
+            Some("0123456789abcde_B"), "entry", 0x1234, true, true)?;
+        assert!(matches!(spec.kind, LookupKind::Call), "truncation is not map identity");
+        Ok(())
+    }
+
+    #[test]
+    #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+    fn runtime_known_array_executes_real_keys_and_bounds() -> Result<()> {
+        use object::write::{Object as WriteObject, Relocation as WriteRelocation,
+            Symbol as WriteSymbol, SymbolSection as WriteSymbolSection};
+        use object::{BinaryFormat, Endianness, SectionKind, SymbolFlags, SymbolKind, SymbolScope};
+        let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::X86_64, Endianness::Little);
+        let text = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
+        // Native entry takes the key pointer; RDI then gets the actual named map.
+        let bytes = [0x48,0x89,0xfe, 0x48,0x8b,0x3d,0,0,0,0,
+                     0xb8,1,0,0,0, 0xff,0xd0, 0xc3];
+        object.append_section_data(text, &bytes, 1);
+        object.add_symbol(WriteSymbol { name: b"entry".to_vec(), value: 0, size: bytes.len() as u64,
+            kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
+            section: WriteSymbolSection::Section(text), flags: SymbolFlags::None });
+        let map = object.add_symbol(WriteSymbol { name: b"known_map".to_vec(), value: 0, size: 0,
+            kind: SymbolKind::Data, scope: SymbolScope::Linkage, weak: false,
+            section: WriteSymbolSection::Undefined, flags: SymbolFlags::None });
+        object.add_relocation(text, WriteRelocation { offset: 6, symbol: map, addend: -4,
+            flags: RelocationFlags::Elf { r_type: 9 } })?;
+        let encoded = object.write()?;
+        let elf = object::File::parse(encoded.as_slice())?;
+        let entry = find_symbol_by_name(&elf, "entry")?;
+        let array = [0u64; 16];
+        let maps = HashMap::from([("known_map".into(), array.as_ptr() as u64)]);
+        let helpers = HashMap::from([("bpf_map_lookup_elem".into(), 0x1234)]);
+        let facts = HashMap::from([("known_map".into(), LookupSiteSpec {
+            kind: LookupKind::Array, target_addr: 0, key_offset: 0, max_entries: 3,
+            elem_size: 8, index_mask: 3, value_offset: 32, percpu_base_addr: 0,
+            map_name: Some("known_map".into()),
+        })]);
+        for enabled in [false, true] {
+            let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps,
+                &[], &facts, &[], false, false, false, true, enabled, false, false)?;
+            if !enabled {
+                assert!(output.relocs.iter().any(|r| r.target == 0x1234));
+                continue;
+            }
+            assert!(output.relocs.is_empty(), "known array must avoid generic helper");
+            assert_eq!(output.map_patches.len(), 1);
+            let mut code = output.blob;
+            for patch in output.map_patches {
+                code[patch.offset..patch.offset + 8].copy_from_slice(&maps[&patch.name].to_le_bytes());
+            }
+            code.push(0xc3); // Stand in for the kernel's return epilogue.
+            unsafe extern "C" {
+                fn mmap(address: *mut std::ffi::c_void, length: usize, protection: i32,
+                        flags: i32, fd: i32, offset: i64) -> *mut std::ffi::c_void;
+                fn mprotect(address: *mut std::ffi::c_void, length: usize, protection: i32) -> i32;
+                fn munmap(address: *mut std::ffi::c_void, length: usize) -> i32;
+            }
+            unsafe {
+                let memory = mmap(std::ptr::null_mut(), 4096, 3, 0x22, -1, 0);
+                assert_ne!(memory as isize, -1);
+                std::ptr::copy_nonoverlapping(code.as_ptr(), memory.cast(), code.len());
+                assert_eq!(mprotect(memory, 4096, 5), 0);
+                let lookup: unsafe extern "C" fn(*const u32) -> u64 = std::mem::transmute(memory);
+                for key in [0u32, 1, 2, 3, u32::MAX] {
+                    let expected = if key < 3 { array.as_ptr() as u64 + 32 + u64::from(key) * 8 } else { 0 };
+                    assert_eq!(lookup(&key), expected, "key={key}");
+                }
+                assert_eq!(munmap(memory, 4096), 0);
+            }
+        }
         Ok(())
     }
 
@@ -4546,7 +4672,7 @@ mod tests {
         let entry = find_symbol_by_name(&elf, "entry")?;
         for preserve in [false, true] {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(),
-                &HashMap::new(), &[], &HashMap::new(), &[], true, preserve, false, false, false, false)?;
+                &HashMap::new(), &[], &HashMap::new(), &[], true, preserve, false, false, false, false, false)?;
             let mut expected = if preserve { vec![0x53, 0x31, 0xc0, 0x5b] } else { vec![0x31, 0xc0] };
             expected.extend_from_slice(&[0xe9, 0, 0, 0, 0]); // Canonical entry exit in proof mode.
             assert_eq!(output.blob, expected);

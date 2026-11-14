@@ -123,6 +123,33 @@ memory-link-check:
 memory-link-build:
 	CARGO_TARGET_DIR=$(LINK_MEMORY_TARGET) CARGO_PROFILE_DEV_OPT_LEVEL=3 CARGO_PROFILE_DEV_DEBUG=0 cargo build --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
 
+KNOWN_MAP_TARGET ?= /var/tmp/kprog-tmp/perf/native-link-known-maps
+.PHONY: known-map-link-check known-map-link-build
+known-map-link-check:
+	taskset -c 8-15 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(KNOWN_MAP_TARGET) CARGO_PROFILE_DEV_OPT_LEVEL=3 CARGO_PROFILE_DEV_DEBUG=0 cargo test --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
+
+known-map-link-build:
+	taskset -c 8-15 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(KNOWN_MAP_TARGET) CARGO_PROFILE_DEV_OPT_LEVEL=3 CARGO_PROFILE_DEV_DEBUG=0 cargo build --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
+
+.PHONY: known-map-link-evidence
+KNOWN_MAP_RAW ?= /workspaces/kprog-raw/perf/20261114-known-map-linker
+KNOWN_MAP_REFERENCE ?= /var/tmp/kprog-tmp/verified/direct-tail/cargo/debug/native-link
+KNOWN_MAP_EVIDENCE ?= $(KNOWN_MAP_RAW)/evidence
+known-map-link-evidence:
+	python3 $(HERE)/memory-link-evidence.py --candidate $(KNOWN_MAP_TARGET)/debug/native-link --reference $(KNOWN_MAP_REFERENCE) --output $(KNOWN_MAP_EVIDENCE)/default --tracee-object /workspaces/kprog-raw/perf/20261113-memory-flags/tracee.plain.o
+	python3 $(HERE)/memory-link-evidence.py --candidate $(KNOWN_MAP_TARGET)/debug/native-link --reference $(KNOWN_MAP_REFERENCE) --output $(KNOWN_MAP_EVIDENCE)/runtime --runtime-map-lookups --tracee-object /workspaces/kprog-raw/perf/20261113-memory-flags/tracee.plain.o
+
+.PHONY: known-map-link-payload
+KNOWN_MAP_PAYLOAD ?= $(ROOT)/corpus/results/perf-known-map-linker-20261114
+known-map-link-payload:
+	install -d $(KNOWN_MAP_PAYLOAD)
+	install -m755 $(KNOWN_MAP_TARGET)/debug/native-link $(KNOWN_MAP_PAYLOAD)/native-link.real
+	install -m755 $(HERE)/native-link-known-maps.sh $(KNOWN_MAP_PAYLOAD)/native-link-known-on
+	install -m755 $(HERE)/native-link-known-maps.sh $(KNOWN_MAP_PAYLOAD)/native-link-known-off
+	$(KNOWN_MAP_PAYLOAD)/native-link-known-on --help > $(KNOWN_MAP_RAW)/on-help.txt
+	$(KNOWN_MAP_PAYLOAD)/native-link-known-off --help > $(KNOWN_MAP_RAW)/off-help.txt
+	install -m755 $(KNOWN_MAP_REFERENCE) $(KNOWN_MAP_RAW)/reference-native-link
+
 LINK_MEMORY_EVIDENCE ?= /workspaces/kprog-raw/perf/20261113-local-memory/objects
 .PHONY: memory-link-evidence
 memory-link-evidence:
