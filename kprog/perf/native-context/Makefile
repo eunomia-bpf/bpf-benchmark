@@ -881,7 +881,7 @@ hash-lookup-kernel: hash-lookup-kernel-inputs
 	install -m644 $(HASH_KERNEL_BUILD)/*.bpf.o $(HASH_KERNEL_BUILD)/*.native.o $(HASH_KERNEL_OUTPUT)/
 	taskset -c 16-19 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(HASH_KERNEL_OUTPUT) --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -f kprog/perf/native-context/Makefile guest-hash-lookup HASH_KERNEL_OUTPUT=$(HASH_KERNEL_OUTPUT)'
+		--exec 'make -f kprog/perf/native-context/Makefile guest-hash-lookup HASH_KERNEL_OUTPUT=$(HASH_KERNEL_OUTPUT) RUNTIME_HASH_PAYLOAD=$(RUNTIME_HASH_PAYLOAD) HASH_KERNEL_CASES="$(HASH_KERNEL_CASES)"'
 
 guest-hash-lookup:
 	cat /proc/cpuinfo > $(HASH_KERNEL_OUTPUT)/cpuinfo
@@ -912,3 +912,20 @@ RUNTIME_LPM_BUILD ?= /var/tmp/kprog-tmp/perf/runtime-lpm-layout
 runtime-lpm-layout:
 	$(MAKE) -f $(HERE)/Makefile $(RUNTIME_LPM_BUILD)/runtime-array-layout BUILD=$(RUNTIME_LPM_BUILD)
 	$(RUNTIME_LPM_BUILD)/runtime-array-layout $(KDIR)/vmlinux --lpm > $(RUNTIME_LPM_BUILD)/runtime-lpm-layout.json
+
+RUNTIME_LPM_PAYLOAD ?= $(ROOT)/corpus/results/perf-lpm-lto-linker-20261114
+LPM_KERNEL_BUILD ?= /var/tmp/kprog-tmp/perf/lpm-lookup-kernel
+LPM_KERNEL_OUTPUT ?= /workspaces/kprog-raw/perf/20261114-lpm-lto/kernel
+.PHONY: runtime-lpm-payload lpm-lookup-kernel
+runtime-lpm-payload: known-map-link-build runtime-lpm-layout
+	install -d $(RUNTIME_LPM_PAYLOAD)
+	install -m755 $(KNOWN_MAP_TARGET)/debug/native-link $(RUNTIME_LPM_PAYLOAD)/native-link.real
+	strip --strip-debug $(RUNTIME_LPM_PAYLOAD)/native-link.real
+	install -m644 $(RUNTIME_LPM_BUILD)/runtime-lpm-layout.json $(RUNTIME_LPM_PAYLOAD)/runtime-lpm-layout.json
+	install -m644 $(RUNTIME_HASH_PAYLOAD)/runtime-hash-layout.json $(RUNTIME_LPM_PAYLOAD)/runtime-hash-layout.json
+	install -m644 $(RUNTIME_PROBE_PAYLOAD)/runtime-probe-read-layout.json $(RUNTIME_LPM_PAYLOAD)/runtime-probe-read-layout.json
+	install -m755 $(HERE)/native-link-lpm.sh $(RUNTIME_LPM_PAYLOAD)/native-link-on
+	install -m755 $(HERE)/native-link-lpm.sh $(RUNTIME_LPM_PAYLOAD)/native-link-off
+
+lpm-lookup-kernel:
+	flock /workspaces/.agent-state/kprog-lanes/locks/timing flock -s /workspaces/.agent-state/kprog-lanes/locks/image make -f $(HERE)/Makefile hash-lookup-kernel HASH_KERNEL_BUILD=$(LPM_KERNEL_BUILD) HASH_KERNEL_OUTPUT=$(LPM_KERNEL_OUTPUT) HASH_KERNEL_CASES='4-11 2-11' RUNTIME_HASH_PAYLOAD=$(RUNTIME_LPM_PAYLOAD)

@@ -1,0 +1,78 @@
+{
+  "recorded_at": "2026-11-14T08:53:15Z",
+  "host_inputs_build_exit": 0,
+  "existing_hash_objects_exec_bytes_equal": 18,
+  "new_object_sections": [
+    [
+      "2-11.bpf.o",
+      ".maps"
+    ],
+    [
+      "2-11.native.o",
+      ".maps"
+    ],
+    [
+      "4-11.bpf.o",
+      ".maps"
+    ],
+    [
+      "4-11.native.o",
+      ".maps"
+    ]
+  ],
+  "payload_inputs": [
+    {
+      "path": "corpus/results/perf-lpm-lto-linker-20261114/native-link.real",
+      "sha256": "22bd4810d9a0667f90973fb8cd70a602c4c355c03b1626799522d2dd5eb316d6"
+    },
+    {
+      "path": "corpus/results/perf-lpm-lto-linker-20261114/native-link-on",
+      "sha256": "2b80231a478f500400dacce9dcabfe756db6471f0b618b170e86e84dbbcbd610"
+    },
+    {
+      "path": "corpus/results/perf-lpm-lto-linker-20261114/native-link-off",
+      "sha256": "2b80231a478f500400dacce9dcabfe756db6471f0b618b170e86e84dbbcbd610"
+    },
+    {
+      "path": "corpus/results/perf-lpm-lto-linker-20261114/runtime-lpm-layout.json",
+      "sha256": "ea1bd0f3ed6be89836d5aaf3c4ca98117266ed60b4cebd2806c66b3764303272"
+    },
+    {
+      "path": "corpus/results/perf-lpm-lto-linker-20261114/runtime-hash-layout.json",
+      "sha256": "971f96e6e983c1272ef2daf2ce23eeda165ae87d914c398a2ee62870b23b432b"
+    },
+    {
+      "path": "corpus/results/perf-lpm-lto-linker-20261114/runtime-probe-read-layout.json",
+      "sha256": "75a971bd496f290b1763efcfe2f78b74e80d2c8bd3c7c064308337fe5026f12e"
+    }
+  ],
+  "wrapper": "ON=probe-read+hash+LPM; OFF=probe-read+hash; existing map/local-memory flags and explicit ABI sites retained",
+  "wrapper_smoke": "Retained actual OTel native-unwinder kernel CLI ON/OFF0;33031/32712byte images, literal historical addresses only. No kernel execution.",
+  "planned_kernel": {
+    "configurations": [
+      "submitted-native",
+      "checked-sim-c"
+    ],
+    "cases": [
+      "16byte LPMkey:12data-byte fastpath",
+      "8byte LPMkey:4data-byte original-helper fallback"
+    ],
+    "states": [
+      "empty",
+      "default0prefix",
+      "nested+full+intermediate nodes",
+      "live value rewrite",
+      "best/default deletion",
+      "empty after deletion"
+    ],
+    "oracle": "Actual kernel bpf_map_lookup_elem syscall for valid query prefixes; invalid prefix expectedNULL.",
+    "cpus": "16-19",
+    "vcpus": 2,
+    "guest_memory": "4G",
+    "host_address_space_bytes": 17179869184,
+    "planned_stock_native_executions": 3360,
+    "resource_order": "Queue after existing Tracee270915 natural exit, then existing timing EX /image SH to preserve C3 single-guest intent; no success gate."
+  },
+  "preflight": "Build0/shellsyntax0/make-n0. Recursive-MAKE dryrun initially entered own flock waiter336581 without starting guest; exact waiter terminated, changed outer recipe to literal make so dryrun has no lock acquisition.",
+  "scope": "Prepared only, not actual kernel result. Service source boundary b0139ffbd published; source tree clean for trusted_specializer. Runtime source identities captured by service."
+}
