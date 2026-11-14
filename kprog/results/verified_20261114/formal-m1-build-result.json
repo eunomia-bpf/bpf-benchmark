@@ -1,0 +1,12 @@
+{
+  "job": 249762,
+  "raw": "/workspaces/kprog-raw/verified/20261114-formal-migration/m1-build",
+  "exit_code": 2,
+  "toolchain": "v4.35.0",
+  "failed_target": "X86.Theorems",
+  "source": "X86/Theorems.lean:1802:42",
+  "diagnostic": "omega could not prove Flags.shiftCount Size.w c bound; possible counterexample >=17",
+  "m1_complete": false,
+  "handoff": "LANE FORMAL",
+  "fork_source_changes": false
+}

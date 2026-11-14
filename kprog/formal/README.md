@@ -14,7 +14,10 @@ kprog belong in those forks. No replacement ISA semantics is defined locally.
 
 `make -C kprog/formal mature` builds the migration Lake package on Lean 4.35.0,
 importing the external `Arm`, `X86`, `CCLib` and `Clightdefs` libraries directly.
-Its compatibility build is pending; adding submodules is not build acceptance.
+The first compatibility build (job 249762) failed in `X86/Theorems.lean:1802`:
+`omega` could not prove the `Flags.shiftCount Size.w c` bound under Lean 4.35.0.
+The dependency manifest is pinned; M1 remains open until the combined build passes.
+LANE FORMAL owns compatibility repairs and M1-M6 after the handoff.
 The legacy package remains on Lean 4.19.0 while M3-M5 migrate its references
 and theorems. M2 coverage is pending; the legacy counts below describe the old
 foundation, not proofs against these external bases. Retirement occurs at M6.
