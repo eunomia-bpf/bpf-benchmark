@@ -929,3 +929,38 @@ runtime-lpm-payload: known-map-link-build runtime-lpm-layout
 
 lpm-lookup-kernel:
 	flock /workspaces/.agent-state/kprog-lanes/locks/timing flock -s /workspaces/.agent-state/kprog-lanes/locks/image make -f $(HERE)/Makefile hash-lookup-kernel HASH_KERNEL_BUILD=$(LPM_KERNEL_BUILD) HASH_KERNEL_OUTPUT=$(LPM_KERNEL_OUTPUT) HASH_KERNEL_CASES='4-11 2-11' RUNTIME_HASH_PAYLOAD=$(RUNTIME_LPM_PAYLOAD)
+
+# Reuse the resource-substitution fixture/client for actual shared ARRAY LTO.
+ARRAY_KERNEL_BUILD ?= /var/tmp/kprog-tmp/perf/array-shared-kernel
+ARRAY_KERNEL_OUTPUT ?= /workspaces/kprog-raw/perf/20261114-array-shared-kernel/kernel
+ARRAY_KERNEL_PAYLOAD ?= $(ROOT)/corpus/results/perf-runtime-array-shared-linker-20261114
+.PHONY: array-shared-kernel-inputs array-shared-kernel array-shared-kernel-run guest-array-shared
+array-shared-kernel-inputs:
+	$(MAKE) -C $(ROOT)/kprog/libnativeloader source-maps-check SOURCE_MAP_BUILD=$(ARRAY_KERNEL_BUILD) SOURCE_MAP_OUTPUT=$(ARRAY_KERNEL_BUILD)/host
+
+array-shared-kernel:
+	flock /workspaces/.agent-state/kprog-lanes/locks/timing flock -s /workspaces/.agent-state/kprog-lanes/locks/image make -f $(HERE)/Makefile array-shared-kernel-run ARRAY_KERNEL_BUILD=$(ARRAY_KERNEL_BUILD) ARRAY_KERNEL_OUTPUT=$(ARRAY_KERNEL_OUTPUT) ARRAY_KERNEL_PAYLOAD=$(ARRAY_KERNEL_PAYLOAD)
+
+array-shared-kernel-run: array-shared-kernel-inputs
+	install -d $(ARRAY_KERNEL_OUTPUT)
+	sha256sum $(ARRAY_KERNEL_PAYLOAD)/native-link.real $(ARRAY_KERNEL_PAYLOAD)/runtime-array-layout.json $(HERE)/native-link-array-kernel.sh $(PROBE_KERNEL_LOADER) > $(ARRAY_KERNEL_OUTPUT)/input-sha256
+	@for mode in submitted-native checked-sim-c; do \
+		install -d $(ARRAY_KERNEL_OUTPUT)/$$mode; \
+		install -m755 $(ARRAY_KERNEL_BUILD)/source-maps $(ARRAY_KERNEL_OUTPUT)/$$mode/source-maps; \
+		install -m644 $(ARRAY_KERNEL_BUILD)/fixture.bpf.o $(ARRAY_KERNEL_BUILD)/fixture.native.o $(ARRAY_KERNEL_OUTPUT)/$$mode/; \
+		install -m755 $(HERE)/native-link-array-kernel.sh $(ARRAY_KERNEL_OUTPUT)/$$mode/native-link.real; \
+	done
+	taskset -c 16-19 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(ARRAY_KERNEL_OUTPUT) --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -f kprog/perf/native-context/Makefile guest-array-shared ARRAY_KERNEL_OUTPUT=$(ARRAY_KERNEL_OUTPUT) ARRAY_KERNEL_PAYLOAD=$(ARRAY_KERNEL_PAYLOAD)'
+
+guest-array-shared:
+	uname -r > $(ARRAY_KERNEL_OUTPUT)/kernel.release
+	@status=0; for mode in submitted-native checked-sim-c; do \
+		extra="--execution-mode $$mode"; \
+		if [[ $$mode == checked-sim-c ]]; then extra="$$extra --sim-native-compiler $(PROBE_COMPILER)/compile-sim-ir --sim-context-compiler $(PROBE_COMPILER)/context-lower --sim-public-layout $(PROBE_COMPILER)/public-layout.json --sim-physical-layout $(PROBE_COMPILER)/physical-layout.json --sim-bounds-compiler $(PROBE_COMPILER)/packet-bounds"; fi; \
+		KPROG_ARRAY_LINKER=$(ARRAY_KERNEL_PAYLOAD)/native-link.real KPROG_ARRAY_LAYOUT=$(ARRAY_KERNEL_PAYLOAD)/runtime-array-layout.json \
+		make -C $(ROOT)/kprog/libnativeloader guest-source-maps SOURCE_MAP_KERNEL_OUTPUT=$(ARRAY_KERNEL_OUTPUT)/$$mode SOURCE_MAP_LOADER=$(PROBE_KERNEL_LOADER) SERVICE_EXECUTION_ARGS="$$extra" \
+			> $(ARRAY_KERNEL_OUTPUT)/$$mode/service.log 2>&1 || status=1; \
+		cat $(ARRAY_KERNEL_OUTPUT)/$$mode/service.log; \
+	done; exit $$status
