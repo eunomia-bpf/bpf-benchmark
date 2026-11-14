@@ -804,7 +804,7 @@ probe-read-kernel-inputs:
 	$(CC) -O2 -g -target bpf -I/usr/include/x86_64-linux-gnu -c $(HERE)/probe-read-kernel.c -o $(PROBE_KERNEL_BUILD)/source.bpf.o
 	$(CC) -O2 -fPIC -mno-red-zone -mgeneral-regs-only -fomit-frame-pointer -c $(HERE)/probe-read-kernel.c -o $(PROBE_KERNEL_BUILD)/source.native.o
 	clang++-18 -std=gnu++20 -O1 -ffunction-sections -fdata-sections -I$(ROOT)/micro/programs/build-x86 -I$(PROBE_LIBBPF)/prefix/include -I$(ROOT)/vendor/libbpf/include -I$(ROOT)/vendor/libbpf/include/uapi \
-		$(ROOT)/kprog/libnativeloader/src/native_loader.cpp $(HERE)/probe-read-kernel.cpp -Wl,--gc-sections $(PROBE_LIBBPF)/pic-obj/libbpf.a -lelf -lz -ldl -pthread -o $(PROBE_KERNEL_BUILD)/client
+		$(HERE)/probe-read-kernel.cpp -Wl,--gc-sections $(dir $(PROBE_KERNEL_LOADER))libnative_loader.a $(PROBE_LIBBPF)/pic-obj/libbpf.a -lelf -lz -ldl -pthread -o $(PROBE_KERNEL_BUILD)/client
 
 probe-read-kernel: probe-read-kernel-inputs
 	install -d $(PROBE_KERNEL_OUTPUT)
@@ -815,6 +815,9 @@ probe-read-kernel: probe-read-kernel-inputs
 		--exec 'make -f kprog/perf/native-context/Makefile guest-probe-read PROBE_KERNEL_OUTPUT=$(PROBE_KERNEL_OUTPUT)'
 
 guest-probe-read:
+	cat /proc/cpuinfo > $(PROBE_KERNEL_OUTPUT)/cpuinfo
+	uname -r > $(PROBE_KERNEL_OUTPUT)/kernel.release
+	sha256sum $(RUNTIME_PROBE_PAYLOAD)/native-link.real $(RUNTIME_PROBE_PAYLOAD)/runtime-probe-read-layout.json $(PROBE_KERNEL_LOADER) $(PROBE_COMPILER)/compile-sim-ir $(ROOT)/kprog/x86/x86_sim_local_bpf.h > $(PROBE_KERNEL_OUTPUT)/guest-input-sha256
 	@status=0; for mode in submitted-native checked-sim-c; do \
 		install -d $(PROBE_KERNEL_OUTPUT)/$$mode; extra=(); \
 		if [[ $$mode == checked-sim-c ]]; then extra=(--sim-native-compiler $(PROBE_COMPILER)/compile-sim-ir --sim-context-compiler $(PROBE_COMPILER)/context-lower --sim-public-layout $(PROBE_COMPILER)/public-layout.json --sim-physical-layout $(PROBE_COMPILER)/physical-layout.json --sim-bounds-compiler $(PROBE_COMPILER)/packet-bounds); fi; \

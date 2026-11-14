@@ -1,0 +1,41 @@
+{
+  "recorded_at": "2026-11-14T06:35:56.620070+00:00",
+  "original_jobs": [
+    {
+      "pid": 226727,
+      "exit": 2,
+      "reason": "native_loader.hpp missing while compiling loader.cpp"
+    },
+    {
+      "pid": 227579,
+      "exit": 2,
+      "reason": "dependent install missing client; VM never launched"
+    }
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261114-probe-read",
+  "fix": "Link existing sole-base verified-loader/libnative_loader.a, avoid shared owner WIP source",
+  "retry_build": "make probe-read-kernel-inputs success",
+  "files": [
+    {
+      "path": "/var/tmp/kprog-tmp/perf/probe-read-kernel/client",
+      "bytes": 1959016,
+      "sha256": "b41fd66f2615987a2ae720677b6c5390c4c75abb03381358e36f0210d36f0647"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/probe-read-kernel/source.bpf.o",
+      "bytes": 6712,
+      "sha256": "d47863b5a593cd79a2ddefc258126325c58cef51f49c85057a8324f6eccdf9f1"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/probe-read-kernel/source.native.o",
+      "bytes": 1680,
+      "sha256": "de2732b0c6517bb3484c871471a4cdd0635180a614aa3b5113cb8c2597a83982"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.a",
+      "bytes": 3411956,
+      "sha256": "bd21e4337cea9294a19aff9d7b14d1aa25769d968c059506c2aa830b3aa2266d"
+    }
+  ],
+  "scope": "Input build fix only. No native kernel semantic execution, throughput or floor result."
+}
