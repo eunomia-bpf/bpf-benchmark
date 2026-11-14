@@ -203,6 +203,8 @@ stage2-guest:
 SCALE_BUILD ?= build-x86/scale
 SCALE_SIZES ?= 100 1000 10000 100000
 SCALE_OUT ?= ../results/kprog_fidelity_20261106/scale/x86
+SCALE_RECORDS ?= $(SCALE_BUILD)
+SCALE_ARGS ?=
 .PHONY: scale-records-test
 scale-records-test:
 	$(PYTHON) -m unittest test_scale_records
@@ -211,7 +213,7 @@ scale-build:
 	install -d build-x86
 	$(CC) -Wall -Wextra -Werror -O2 -I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
 		scale_probe.c ../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o build-x86/scale-probe
-	$(PYTHON) scale.py build --build $(SCALE_BUILD) --sizes $(SCALE_SIZES)
+	$(PYTHON) scale.py build --build $(SCALE_BUILD) --records $(SCALE_RECORDS) --sizes $(SCALE_SIZES) $(SCALE_ARGS)
 
 scale-kvm:
 	install -d $(SCALE_OUT)
@@ -222,13 +224,13 @@ scale-kvm:
 		--cwd $(ROOT) --disable-monitor --cpus 2 --memory 8G --rwdir $(ROOT) \
 		--rwdir $(abspath $(SCALE_BUILD)) --rwdir $(abspath $(SCALE_OUT)) --overlay-rwdir /tmp \
 		--append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -C $(ROOT)/kprog/fidelity scale-guest SCALE_BUILD=$(abspath $(SCALE_BUILD)) SCALE_OUT=$(abspath $(SCALE_OUT))' || status=$$?; \
+		--exec 'make -C $(ROOT)/kprog/fidelity scale-guest SCALE_BUILD=$(abspath $(SCALE_BUILD)) SCALE_OUT=$(abspath $(SCALE_OUT)) SCALE_RECORDS=$(abspath $(SCALE_RECORDS))' || status=$$?; \
 	printf '%s\n' "$$status" > $(SCALE_OUT)/exit-code; date -u +%FT%TZ > $(SCALE_OUT)/finished; exit $$status
 
 scale-guest:
 	@mountpoint -q /sys/kernel/tracing || mount -t tracefs tracefs /sys/kernel/tracing
 	printf '%s\n' 'p:kprog_f_check bpf_check' 'r:kprog_f_check_ret bpf_check' >> /sys/kernel/tracing/kprobe_events
-	$(PYTHON) scale.py check --build $(SCALE_BUILD) --out $(SCALE_OUT)
+	$(PYTHON) scale.py check --build $(SCALE_BUILD) --records $(SCALE_RECORDS) --out $(SCALE_OUT)
 
 .PHONY: arm64-control-build arm64-control-qemu
 ARM64_CONTROL_BUILD ?= build-arm64-control

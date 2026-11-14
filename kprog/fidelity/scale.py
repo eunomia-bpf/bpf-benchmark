@@ -5,13 +5,9 @@ import json
 import os
 from pathlib import Path
 import re
-import shutil
 import subprocess
 import sys
 import time
-import types
-
-from tcb import includes
 
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'kprog/x86/micro-prog'))
@@ -60,44 +56,36 @@ def assembly(size, pointer, indirect):
     return '\n'.join(lines)+'\n',value
 
 
-def build(directory,sizes):
+def build(directory,sizes,*,stock_pipeline=False,records=None):
     directory.mkdir(parents=True,exist_ok=True)
-    snapshot=directory/'snapshot'
-    saved_encoder=directory/'encoder.py.snapshot'
-    global encoder
-    if saved_encoder.exists():
-        # Resume with the encoder source already paired to this header snapshot.
-        frozen=types.ModuleType('fidelity_scale_frozen_encoder')
-        frozen.__file__=encoder.__file__
-        sys.modules[frozen.__name__]=frozen
-        exec(compile(saved_encoder.read_text(),frozen.__file__,'exec'),frozen.__dict__)
-        encoder=frozen
-    else:
-        for path in includes(ROOT/'kprog/x86/x86_sim_local_bpf.h'):
-            target=snapshot/path.relative_to(ROOT)
-            target.parent.mkdir(parents=True,exist_ok=True)
-            shutil.copyfile(path,target)
-        shutil.copyfile(ROOT/'kprog/x86/micro-prog/generate_micro_sim_proofs.py',saved_encoder)
+    records=records or directory
+    records.mkdir(parents=True,exist_ok=True)
+    if stock_pipeline:
+        sys.path.insert(0,str(ROOT/'kprog/x86'))
+        import trusted_specializer
     failed=False
     for size in sizes:
         for pointer in [False,True]:
             for indirect in [False,True]:
                 name=f'n{size}_{"ptr" if pointer else "scalar"}_{"indirect" if indirect else "direct"}'
-                record=directory/f'{name}.json'
+                record=records/f'{name}.json'
                 if record.exists():
                     row=json.loads(record.read_text())
                     if row['name']!=name or row['target_native_instructions']!=size:
                         raise RuntimeError('checkpoint does not match requested case: '+str(record))
+                    if stock_pipeline and row.get('pipeline')!='stock':
+                        raise RuntimeError('checkpoint uses the legacy compiler: '+str(record))
                     print(f"{name}: recorded {row['stage']} rc={row['returncode']}",flush=True)
                     failed |= row['returncode']!=0
                     continue
                 source,expected=assembly(size,pointer,indirect)
                 (directory/f'{name}.S').write_text(source)
                 row=dict(name=name,target_native_instructions=size,expected_result=expected,stage='native_compile')
-                rc=run(['cc','-c',directory/f'{name}.S','-o',directory/f'{name}.native.o'],directory/f'{name}.native.log')
+                if stock_pipeline:row['pipeline']='stock'
+                rc=run(['cc','-c',directory/f'{name}.S','-o',directory/f'{name}.native.o'],records/f'{name}.native.log')
                 if not rc:
                     dump=subprocess.run(['objdump','-dr','-Mintel','--insn-width=16',str(directory/f'{name}.native.o')],capture_output=True,text=True,check=True)
-                    (directory/f'{name}.asm').write_text(dump.stdout)
+                    (records/f'{name}.asm').write_text(dump.stdout)
                     instructions=encoder.parse_asm_text(dump.stdout)
                     row['native_instructions']=len(instructions)
                     row['stage']='specialization'
@@ -107,7 +95,7 @@ def build(directory,sizes):
                         row['error']=str(error); rc=1
                     else:
                         path=directory/f'{name}.bpf.c'
-                        path.write_text(proof.replace('#include "../x86_sim_local_bpf.h"',f'#include "{snapshot}/kprog/x86/x86_sim_local_bpf.h"'))
+                        path.write_text(proof.replace('#include "../x86_sim_local_bpf.h"',f'#include "{ROOT}/kprog/x86/x86_sim_local_bpf.h"'))
                         row['stage']='proof_compile'
                         flags=['-w','-g','-O3','-mcpu=v4','-target','bpf',
                             '-mllvm','-bpf-stack-size=4096','-D__TARGET_ARCH_x86',
@@ -115,10 +103,26 @@ def build(directory,sizes):
                             '-I'+str(ROOT/'vendor/libbpf/src'),'-I/usr/include/x86_64-linux-gnu']
                         preprocessed=directory/f'{name}.bpf.i'
                         row['generated_c_bytes']=path.stat().st_size
-                        rc=run(['clang-18',*flags,'-E',path,'-o',preprocessed],directory/f'{name}.preprocess.log')
-                        if not rc:
-                            row['preprocessed_bytes']=preprocessed.stat().st_size
-                            rc=run(['clang-18',*flags,'-c',preprocessed,'-o',directory/f'{name}.bpf.o'],directory/f'{name}.compile.log')
+                        if stock_pipeline:
+                            commands=[]
+                            def compile_step(command):
+                                command=list(map(str,command))
+                                log=records/f'{name}.compile-{len(commands):03d}.log'
+                                code=run(command,log)
+                                commands.append(dict(command=command,returncode=code,log=str(log)))
+                                (records/f'{name}.commands.json').write_text(json.dumps(commands,indent=2)+'\n')
+                                if code:raise subprocess.CalledProcessError(code,command)
+                            try:
+                                trusted_specializer.compile_simulator(str(ROOT/'kprog/stock-path/bin/clang'),
+                                    path,directory/f'{name}.bpf.o',compile_step,
+                                    bounds_compiler=Path('/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds'))
+                            except subprocess.CalledProcessError as error:
+                                row['error']=str(error);rc=error.returncode
+                        else:
+                            rc=run(['clang-18',*flags,'-E',path,'-o',preprocessed],records/f'{name}.preprocess.log')
+                            if not rc:
+                                rc=run(['clang-18',*flags,'-c',preprocessed,'-o',directory/f'{name}.bpf.o'],records/f'{name}.compile.log')
+                        if preprocessed.exists():row['preprocessed_bytes']=preprocessed.stat().st_size
                         if not rc:row['stage']='compiled'
                 row['returncode']=rc
                 record.write_text(json.dumps(row,indent=2)+'\n')
@@ -179,14 +183,15 @@ def memory_trace(text):
                 trace_lost_events=sum(int(n) for n in re.findall(r'\bLOST (\d+) EVENTS\b',text)))
 
 
-def check(directory,out):
+def check(directory,out,records=None):
     out.mkdir(parents=True,exist_ok=True)
     (out/'guest.txt').write_text(' '.join(os.uname())+'\n'+Path('/proc/cmdline').read_text())
     failed=False
     # Resource sidecars share the n<size> prefix but are not case records.
-    records=sorted([*directory.glob('n*_direct.json'), *directory.glob('n*_indirect.json')])
-    if not records:raise RuntimeError('no scale build records in '+str(directory))
-    for path in records:
+    record_directory=records or directory
+    paths=sorted([*record_directory.glob('n*_direct.json'), *record_directory.glob('n*_indirect.json')])
+    if not paths:raise RuntimeError('no scale build records in '+str(record_directory))
+    for path in paths:
         row=json.loads(path.read_text());name=row['name']
         if row['stage']=='compiled':
             command=['trace-cmd','record','-F','-c','-b','32768','-o',out/f'{name}.trace.dat']
@@ -227,11 +232,14 @@ def main():
     p.add_argument('mode',choices=['build','check'])
     p.add_argument('--build',type=Path,required=True)
     p.add_argument('--out',type=Path)
+    p.add_argument('--records',type=Path)
+    p.add_argument('--stock-pipeline',action='store_true')
     p.add_argument('--sizes',type=int,nargs='+',default=[100,1000,10000,100000])
     a=p.parse_args()
-    if a.mode=='build':return build(a.build.resolve(),a.sizes)
+    records=a.records.resolve() if a.records else None
+    if a.mode=='build':return build(a.build.resolve(),a.sizes,stock_pipeline=a.stock_pipeline,records=records)
     if a.out is None:p.error('check requires --out')
-    return check(a.build.resolve(),a.out.resolve())
+    return check(a.build.resolve(),a.out.resolve(),records)
 
 
 if __name__=='__main__':raise SystemExit(main())
