@@ -1,0 +1,25 @@
+{
+  "started": "2026-11-14T20:04:50Z",
+  "make_pid": 605029,
+  "qemu_pid": 609811,
+  "raw_directory": "/workspaces/kprog-raw/perf/20261114-otel-whole-word-checked",
+  "service_state": "/workspaces/kprog-raw/perf/20261114-otel-whole-word-checked/state/session-d1wppo7h",
+  "service_ready": {
+    "ready": true,
+    "arch": 1,
+    "endpoint": "/sys/kernel/debug/bpf_x86_native_lab/specializer"
+  },
+  "first_completed_request": {
+    "request_id": 1,
+    "source_prog_id": 21,
+    "native_sha256": "ef44985c193e1d737ffd8980009b67f3c36ab91baf67af0c7878e69590d747da",
+    "execution_mode": "checked-sim-c",
+    "started": "2026-11-14T20:06:42.888995+00:00",
+    "prog_id": 27,
+    "phase": "load",
+    "status": 0,
+    "artifact_archive": "/workspaces/kprog-raw/perf/20261114-otel-whole-word-checked/state/session-d1wppo7h/requests/1.success.tar.gz",
+    "finished": "2026-11-14T20:06:50.650975+00:00"
+  },
+  "scope": "Application diagnostic active; baseline measurement completed, first checked request installed; remaining native startup and workload are pending."
+}
