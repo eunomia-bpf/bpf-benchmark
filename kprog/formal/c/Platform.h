@@ -75,6 +75,19 @@ _Static_assert(sizeof(void *) == 8, "kprog models the 64-bit BPF context ABI");
  * Clight fault refinements must supply its nonreturning external semantics. */
 extern void kprog_c_trap(void) __attribute__((noreturn));
 #define KPROG_C_TRAP() kprog_c_trap()
+/* CompCert's alignment-1 memcpy builtin has upstream Clight semantics for
+ * the complete byte window, including pointer fragments. These adapters
+ * keep typed local storage aligned without imposing alignment on the source
+ * or destination. Native volatile/BPF accesses keep their existing bodies. */
+#define KPROG_C_UNALIGNED_LOAD_INTO(OUTPUT, TYPE, BASE, OFFSET) \
+    do { TYPE __kprog_c_load_value; \
+         __builtin_memcpy_aligned(&__kprog_c_load_value, \
+             (const __u8 *)(BASE) + (OFFSET), sizeof(TYPE), 1); \
+         (OUTPUT) = __kprog_c_load_value; } while (0)
+#define KPROG_C_UNALIGNED_STORE(TYPE, ADDR, VALUE) \
+    do { TYPE __kprog_c_store_value = (TYPE)(VALUE); \
+         __builtin_memcpy_aligned((void *)(ADDR), &__kprog_c_store_value, \
+             sizeof(TYPE), 1); } while (0)
 /* Empty register asm preserves the value; only native compilation needs the
  * optimizer barrier. This adapter applies only to that identity operation. */
 #define KPROG_C_BARRIER_VAR(VAR) ((void)(VAR))

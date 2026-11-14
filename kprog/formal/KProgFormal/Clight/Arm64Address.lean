@@ -17,9 +17,9 @@ namespace Info
   def normalized : Bool := true
 end Info
 
-def __2847 : Ident := identOfString "_2847"
-def __2876 : Ident := identOfString "_2876"
-def __2911 : Ident := identOfString "_2911"
+def __2838 : Ident := identOfString "_2838"
+def __2867 : Ident := identOfString "_2867"
+def __2902 : Ident := identOfString "_2902"
 def ___a64_adrp_tag : Ident := identOfString "__a64_adrp_tag"
 def ___a64_cells : Ident := identOfString "__a64_cells"
 def ___a64_l_next : Ident := identOfString "__a64_l_next"
@@ -1796,7 +1796,7 @@ def s_kprog_arm64_write_reg_6 : Stmt :=
                             (Stmt.Ssequence
                               (Stmt.Sset _t'11
                                 (Expr.Efield
-                                  (Expr.Evar ___a64_stack (Ty.Tstruct __2847 noattr))
+                                  (Expr.Evar ___a64_stack (Ty.Tstruct __2838 noattr))
                                   _b (tptr (tvolatile tuchar))))
                               (Stmt.Sbuiltin none
                                 (ExtFun.EF_vstore Chunk.Mint8unsigned)
@@ -2019,7 +2019,7 @@ def s_kprog_arm64_write_reg_7 : Stmt :=
                         (Stmt.Ssequence
                           (Stmt.Sassign
                             (Expr.Efield
-                              (Expr.Evar ___a64_stack (Ty.Tstruct __2847 noattr))
+                              (Expr.Evar ___a64_stack (Ty.Tstruct __2838 noattr))
                               _b (tptr (tvolatile tuchar)))
                             (Expr.Etempvar _stack_bytes (tptr (tvolatile tuchar))))
                           (Stmt.Sloop
@@ -2442,7 +2442,7 @@ def f_kprog_arm64_write_reg : Function := {
   fn_vars := [(___a64_cells,
                (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31)),
               (___a64_tag_cells, (tarray (tptr tuchar) 31)),
-              (___a64_stack, (Ty.Tstruct __2847 noattr))],
+              (___a64_stack, (Ty.Tstruct __2838 noattr))],
   fn_temps := [(___a64_write_old_sp, tlong), (___a64_l_reg, tulong),
                (___a64_l_next, tulong), (___a64_write_base, tulong),
                (___a64_release_old, tlong), (___a64_release_new, tlong),
@@ -2773,7 +2773,7 @@ def s_kprog_arm64_write_ptr_8 : Stmt :=
 def s_kprog_arm64_write_ptr_9 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'11
-    (Expr.Efield (Expr.Evar ___a64_stack (Ty.Tstruct __2876 noattr)) _b
+    (Expr.Efield (Expr.Evar ___a64_stack (Ty.Tstruct __2867 noattr)) _b
       (tptr (tvolatile tuchar))))
   (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
     [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
@@ -3253,7 +3253,7 @@ def s_kprog_arm64_write_ptr_13 : Stmt :=
                         (Stmt.Ssequence
                           (Stmt.Sassign
                             (Expr.Efield
-                              (Expr.Evar ___a64_stack (Ty.Tstruct __2876 noattr))
+                              (Expr.Evar ___a64_stack (Ty.Tstruct __2867 noattr))
                               _b (tptr (tvolatile tuchar)))
                             (Expr.Etempvar _stack_bytes (tptr (tvolatile tuchar))))
                           (Stmt.Sloop
@@ -3676,7 +3676,7 @@ def f_kprog_arm64_write_ptr : Function := {
   fn_vars := [(___a64_cells,
                (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31)),
               (___a64_tag_cells, (tarray (tptr tuchar) 31)),
-              (___a64_stack, (Ty.Tstruct __2876 noattr))],
+              (___a64_stack, (Ty.Tstruct __2867 noattr))],
   fn_temps := [(___a64_write_old_sp, tlong), (___a64_l_reg, tulong),
                (___a64_l_next_ptr, (tptr tvoid)),
                (___a64_l_next_tag, tuchar), (___a64_write_value, tulong),
@@ -4070,7 +4070,7 @@ def s_kprog_arm64_exec_adrp_11 : Stmt :=
     [(Expr.Econst_int (Integers.Int.repr 6) tint)])
   (Stmt.Ssequence
     (Stmt.Sset _t'11
-      (Expr.Efield (Expr.Evar ___a64_stack (Ty.Tstruct __2911 noattr)) _b
+      (Expr.Efield (Expr.Evar ___a64_stack (Ty.Tstruct __2902 noattr)) _b
         (tptr (tvolatile tuchar))))
     (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
       [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
@@ -4542,7 +4542,7 @@ def s_kprog_arm64_exec_adrp_16 : Stmt :=
                         (Stmt.Ssequence
                           (Stmt.Sassign
                             (Expr.Efield
-                              (Expr.Evar ___a64_stack (Ty.Tstruct __2911 noattr))
+                              (Expr.Evar ___a64_stack (Ty.Tstruct __2902 noattr))
                               _b (tptr (tvolatile tuchar)))
                             (Expr.Etempvar _stack_bytes (tptr (tvolatile tuchar))))
                           (Stmt.Sloop
@@ -4963,7 +4963,7 @@ def f_kprog_arm64_exec_adrp : Function := {
   fn_vars := [(___a64_cells,
                (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31)),
               (___a64_tag_cells, (tarray (tptr tuchar) 31)),
-              (___a64_stack, (Ty.Tstruct __2911 noattr))],
+              (___a64_stack, (Ty.Tstruct __2902 noattr))],
   fn_temps := [(___a64_adrp_tag, tuchar), (___kprog_a64_adrp_op, tuchar),
                (___kprog_a64_adrp_tag, tuchar), (___a64_write_old_sp, tlong),
                (___a64_l_reg, tulong), (___a64_l_next_ptr, (tptr tvoid)),
@@ -5190,13 +5190,13 @@ def composites : List CompositeDef :=
     (Member.Member_plain _sp_valid tuchar),
     (Member.Member_plain _return_valid tuchar)]
    noattr),
- (CompositeDef.Composite __2847 SU.Struct
+ (CompositeDef.Composite __2838 SU.Struct
    [(Member.Member_plain _b (tptr (tvolatile tuchar)))]
    noattr),
- (CompositeDef.Composite __2876 SU.Struct
+ (CompositeDef.Composite __2867 SU.Struct
    [(Member.Member_plain _b (tptr (tvolatile tuchar)))]
    noattr),
- (CompositeDef.Composite __2911 SU.Struct
+ (CompositeDef.Composite __2902 SU.Struct
    [(Member.Member_plain _b (tptr (tvolatile tuchar)))]
    noattr)]
 

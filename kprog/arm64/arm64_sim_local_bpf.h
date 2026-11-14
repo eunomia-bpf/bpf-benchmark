@@ -925,8 +925,8 @@ do { \
 /* Preserve one native-width pointer read and literal context offsets in BPF.
  * Host reads also permit unaligned words without alignment/effective-type UB. */
 #ifdef __BPF__
-#define ARM64_SIM_L_LOAD_PTR_AT(BASE, OFFSET)                               \
-	({ void *__a64_ptr_result;                                      \
+#define ARM64_SIM_L_LOAD_PTR_AT_INTO(OUTPUT, BASE, OFFSET)                               \
+	do { void *__a64_ptr_result;                                      \
 	   if (__builtin_constant_p(OFFSET) && (OFFSET) >= -32768 &&      \
 	       (OFFSET) <= 32767)                                       \
 		if ((OFFSET) < 0)                                       \
@@ -938,12 +938,19 @@ do { \
 	   else                                                        \
 		__asm__ volatile("%0 = *(u64 *)(%1 + 0)"                  \
 			: "=r"(__a64_ptr_result) : "r"((__u8 *)(BASE) + (OFFSET)) : "memory"); \
-	   __a64_ptr_result; })
+	   (OUTPUT) = __a64_ptr_result; } while (0)
+#elif defined(__COMPCERT__)
+#define ARM64_SIM_L_LOAD_PTR_AT_INTO(OUTPUT, BASE, OFFSET) \
+    KPROG_C_UNALIGNED_LOAD_INTO((OUTPUT), void *, (BASE), (OFFSET))
 #else
 typedef void *arm64_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
-#define ARM64_SIM_L_LOAD_PTR_AT(BASE, OFFSET) \
-	(*(arm64_sim_unaligned_ptr volatile *)((__u8 *)(BASE) + (OFFSET)))
+#define ARM64_SIM_L_LOAD_PTR_AT_INTO(OUTPUT, BASE, OFFSET) \
+    do { (OUTPUT) = *(arm64_sim_unaligned_ptr volatile *)((__u8 *)(BASE) + (OFFSET)); } while (0)
 #endif
+#define ARM64_SIM_L_LOAD_PTR_AT(BASE, OFFSET) \
+    ({ void *__a64_ptr_copy; \
+       ARM64_SIM_L_LOAD_PTR_AT_INTO(__a64_ptr_copy, (BASE), (OFFSET)); \
+       __a64_ptr_copy; })
 #define ARM64_SIM_L_LOAD_PTR_ADDR(ADDR) ARM64_SIM_L_LOAD_PTR_AT((ADDR), 0)
 
 /*

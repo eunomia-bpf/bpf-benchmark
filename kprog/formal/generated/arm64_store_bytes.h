@@ -14,6 +14,10 @@ _Static_assert(ARM64_WIDTH_64 == 8U, "arm64 store-bytes width code drift");
 #if defined(__bpf__) || defined(__BPF__)
 #define KPROG_ARM64_STORE_ACCESS(BITS, ADDR, VALUE) \
 	__asm__ __volatile__("*(u" #BITS " *)(%0 + 0) = %1" : : "r"(ADDR), "r"(VALUE) : "memory")
+#elif defined(__COMPCERT__)
+#include "../c/Platform.h"
+#define KPROG_ARM64_STORE_ACCESS(BITS, ADDR, VALUE) \
+    KPROG_C_UNALIGNED_STORE(__u##BITS, (ADDR), (VALUE))
 #else
 typedef __u8 kprog_arm64_store_u8_unaligned __attribute__((aligned(1),may_alias));
 typedef __u16 kprog_arm64_store_u16_unaligned __attribute__((aligned(1),may_alias));

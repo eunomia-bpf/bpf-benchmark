@@ -24,6 +24,12 @@ _Static_assert(ARM64_WIDTH_64 == 8U, "arm64 load-bytes width code drift");
 		} else \
 			KPROG_ARM64_LOAD_ACCESS(BITS, (const __u8 *)(BASE) + (OFFSET), OUT); \
 	} while (0)
+#elif defined(__COMPCERT__)
+#include "../c/Platform.h"
+#define KPROG_ARM64_LOAD_ACCESS(BITS, ADDR, OUT) \
+    KPROG_C_UNALIGNED_LOAD_INTO((OUT), __u##BITS, (ADDR), 0)
+#define KPROG_ARM64_LOAD_ACCESS_OFFSET(BITS, BASE, OFFSET, OUT) \
+    KPROG_C_UNALIGNED_LOAD_INTO((OUT), __u##BITS, (BASE), (OFFSET))
 #else
 typedef __u8 kprog_arm64_load_u8_unaligned __attribute__((aligned(1),may_alias));
 typedef __u16 kprog_arm64_load_u16_unaligned __attribute__((aligned(1),may_alias));
@@ -40,8 +46,8 @@ typedef __u64 kprog_arm64_load_u64_unaligned __attribute__((aligned(1),may_alias
  * result is the raw 64-bit value; the caller applies the destination width to
  * the *value* separately for the sign-extending loads.
  */
-#define KPROG_ARM64_LOAD_BYTES_OFFSET(ADDR, OFFSET, WIDTH)                                 \
-	({ \
+#define KPROG_ARM64_LOAD_BYTES_OFFSET_INTO(OUTPUT, ADDR, OFFSET, WIDTH)                                 \
+	do { \
 		volatile const __u8 *__kprog_a64_lb_addr = \
 			(volatile const __u8 *)(ADDR); \
 		__u8 __kprog_a64_lb_width = (WIDTH); \
@@ -54,8 +60,12 @@ typedef __u64 kprog_arm64_load_u64_unaligned __attribute__((aligned(1),may_alias
 			KPROG_ARM64_LOAD_ACCESS_OFFSET(16, __kprog_a64_lb_addr, (OFFSET), __kprog_a64_lb_value); \
 		else \
 			KPROG_ARM64_LOAD_ACCESS_OFFSET(8, __kprog_a64_lb_addr, (OFFSET), __kprog_a64_lb_value); \
-		__kprog_a64_lb_value; \
-	})
+		(OUTPUT) = __kprog_a64_lb_value; \
+	} while (0)
+#define KPROG_ARM64_LOAD_BYTES_OFFSET(ADDR, OFFSET, WIDTH) \
+    ({ __u64 __kprog_a64_loaded; \
+       KPROG_ARM64_LOAD_BYTES_OFFSET_INTO(__kprog_a64_loaded, (ADDR), (OFFSET), (WIDTH)); \
+       __kprog_a64_loaded; })
 /* Keep constant displacements inside the BPF memory instruction: some context
  * types forbid pointer arithmetic even for a fixed, valid field offset.
  * Variable or out-of-encoding-range offsets use ordinary address arithmetic.

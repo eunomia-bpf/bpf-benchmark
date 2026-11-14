@@ -1081,6 +1081,28 @@ Raw evidence: `/workspaces/kprog-raw/formal/m4-arm64-stack`. These checks do not
 establish universal storage/refinement relations, full-app ARM parity, or the
 remaining nonarena/unaligned/context/fault ABI; those obligations remain open.
 
+[c/Arm64Access.c](c/Arm64Access.c) exports the production nonarena numeric
+load/store and typed pointer read. Its CompCert-only unaligned adapter uses the
+existing Clean `EF_memcpy` semantics with alignment1 and sizes1/2/4/8; the pointer
+path copies eight bytes into a pointer-typed local. This keeps source/destination
+alignment arbitrary and retains pointer fragments. Native volatile accesses and
+BPF assembly remain the same bodies; width selection and literal context offsets
+are preserved. No new uninterpreted memory function is introduced.
+
+The [access oracle](oracles/test_arm64_access_host.c) checks19,968 cases in native
+and exact adapter modes, on x86 and AArch64 user-mode execution. It covers every
+width byte, signed offsets beyond the BPF immediate range, aligned/unaligned
+locations, full pointer bits, adjacent-byte frames, and one complete alignment-1
+copy per operation. Alignment8, narrowed reads and widened stores fail the oracle.
+One object/executable path is replaced between configurations. `make clight`,132
+targeted component jobs and in-place deterministic regeneration pass; standard
+axioms only. The new [BPF fixture](oracles/arm64_access_compile.bpf.c) has identical
+allocated code/data (socket600B) before/after and current replay equals normal.
+Raw evidence: `/workspaces/kprog-raw/formal/m4-single-output-2`. Binding the actual
+Clight memory to native addresses, initialization, volatile observations and
+ordered normal/fault outcomes remains a universal proof obligation. These access
+roots do not yet export the whole context/handler/fault chain or establish M5.
+
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight
 handler exports and full default compiled-byte coverage remain to do. Preserve
