@@ -1,0 +1,379 @@
+{
+  "recorded_at": "2026-11-14T01:42:36.141873+00:00",
+  "protocol_commit": "d401bc93a",
+  "raw": "/workspaces/kprog-raw/perf/20261114-owner-frame-subset",
+  "inputs": [
+    {
+      "path": "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link.real",
+      "sha256": "311d8de2101f6e97860e31a8a67868a9d5a6b49f1a6246b3e34422c7e1129bbb"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on",
+      "sha256": "f7644e69df0606ac64e1af9631ffec0227c5c46282aaf2c5622758626de9f58a"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-off",
+      "sha256": "f7644e69df0606ac64e1af9631ffec0227c5c46282aaf2c5622758626de9f58a"
+    }
+  ],
+  "reports": [
+    {
+      "path": "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/report.json",
+      "sha256": "405df386f6c34e756d3fce28a35b0fb2c16cec32cd887b147da2fbbd3dadea67",
+      "data": [
+        {
+          "symbol": "generic_fmodret_override",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61.native.o",
+            "--symbol",
+            "generic_fmodret_override",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_fmodret_override.proof.o",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/synthetic-plan.json"
+          ],
+          "returncode": 0,
+          "kernel_command": [
+            "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on",
+            "--mode",
+            "kernel",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_fmodret_override.proof.o",
+            "--symbol",
+            "generic_fmodret_override",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/synthetic-plan.json",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_fmodret_override.kernel.bin",
+            "--output-relocs",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_fmodret_override.kernel.relocs",
+            "--output-map-patches",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_fmodret_override.kernel.maps",
+            "--output-abi",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_fmodret_override.kernel.abi"
+          ],
+          "kernel_returncode": 0
+        },
+        {
+          "symbol": "generic_kprobe_actions",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61.native.o",
+            "--symbol",
+            "generic_kprobe_actions",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_actions.proof.o",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/synthetic-plan.json"
+          ],
+          "returncode": 0,
+          "kernel_command": [
+            "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on",
+            "--mode",
+            "kernel",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_actions.proof.o",
+            "--symbol",
+            "generic_kprobe_actions",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/synthetic-plan.json",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_actions.kernel.bin",
+            "--output-relocs",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_actions.kernel.relocs",
+            "--output-map-patches",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_actions.kernel.maps",
+            "--output-abi",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_actions.kernel.abi"
+          ],
+          "kernel_returncode": 0
+        },
+        {
+          "symbol": "generic_kprobe_event",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61.native.o",
+            "--symbol",
+            "generic_kprobe_event",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_event.proof.o",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/synthetic-plan.json"
+          ],
+          "returncode": 0,
+          "kernel_command": [
+            "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on",
+            "--mode",
+            "kernel",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_event.proof.o",
+            "--symbol",
+            "generic_kprobe_event",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/synthetic-plan.json",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_event.kernel.bin",
+            "--output-relocs",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_event.kernel.relocs",
+            "--output-map-patches",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_event.kernel.maps",
+            "--output-abi",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_event.kernel.abi"
+          ],
+          "kernel_returncode": 0
+        },
+        {
+          "symbol": "generic_kprobe_filter_arg",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61.native.o",
+            "--symbol",
+            "generic_kprobe_filter_arg",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_filter_arg.proof.o",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/synthetic-plan.json"
+          ],
+          "returncode": 0,
+          "kernel_command": [
+            "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on",
+            "--mode",
+            "kernel",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_filter_arg.proof.o",
+            "--symbol",
+            "generic_kprobe_filter_arg",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/synthetic-plan.json",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_filter_arg.kernel.bin",
+            "--output-relocs",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_filter_arg.kernel.relocs",
+            "--output-map-patches",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_filter_arg.kernel.maps",
+            "--output-abi",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_filter_arg.kernel.abi"
+          ],
+          "kernel_returncode": 0
+        },
+        {
+          "symbol": "generic_kprobe_output",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61.native.o",
+            "--symbol",
+            "generic_kprobe_output",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_output.proof.o",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/synthetic-plan.json"
+          ],
+          "returncode": 0,
+          "kernel_command": [
+            "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on",
+            "--mode",
+            "kernel",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_output.proof.o",
+            "--symbol",
+            "generic_kprobe_output",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/synthetic-plan.json",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_output.kernel.bin",
+            "--output-relocs",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_output.kernel.relocs",
+            "--output-map-patches",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_output.kernel.maps",
+            "--output-abi",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_output.kernel.abi"
+          ],
+          "kernel_returncode": 0
+        },
+        {
+          "symbol": "generic_kprobe_override",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61.native.o",
+            "--symbol",
+            "generic_kprobe_override",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_override.proof.o",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/synthetic-plan.json"
+          ],
+          "returncode": 0,
+          "kernel_command": [
+            "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on",
+            "--mode",
+            "kernel",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_override.proof.o",
+            "--symbol",
+            "generic_kprobe_override",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/synthetic-plan.json",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_override.kernel.bin",
+            "--output-relocs",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_override.kernel.relocs",
+            "--output-map-patches",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_override.kernel.maps",
+            "--output-abi",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_override.kernel.abi"
+          ],
+          "kernel_returncode": 0
+        },
+        {
+          "symbol": "generic_kprobe_process_event",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61.native.o",
+            "--symbol",
+            "generic_kprobe_process_event",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_process_event.proof.o",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/synthetic-plan.json"
+          ],
+          "returncode": 0,
+          "kernel_command": [
+            "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on",
+            "--mode",
+            "kernel",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_process_event.proof.o",
+            "--symbol",
+            "generic_kprobe_process_event",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/synthetic-plan.json",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_process_event.kernel.bin",
+            "--output-relocs",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_process_event.kernel.relocs",
+            "--output-map-patches",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_process_event.kernel.maps",
+            "--output-abi",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_process_event.kernel.abi"
+          ],
+          "kernel_returncode": 0
+        },
+        {
+          "symbol": "generic_kprobe_process_filter",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61.native.o",
+            "--symbol",
+            "generic_kprobe_process_filter",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_process_filter.proof.o",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/synthetic-plan.json"
+          ],
+          "returncode": 0,
+          "kernel_command": [
+            "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on",
+            "--mode",
+            "kernel",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_process_filter.proof.o",
+            "--symbol",
+            "generic_kprobe_process_filter",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/synthetic-plan.json",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_process_filter.kernel.bin",
+            "--output-relocs",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_process_filter.kernel.relocs",
+            "--output-map-patches",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_process_filter.kernel.maps",
+            "--output-abi",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_process_filter.kernel.abi"
+          ],
+          "kernel_returncode": 0
+        },
+        {
+          "symbol": "generic_kprobe_setup_event",
+          "command": [
+            "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on",
+            "--mode",
+            "proof",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61.native.o",
+            "--symbol",
+            "generic_kprobe_setup_event",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_setup_event.proof.o",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/synthetic-plan.json"
+          ],
+          "returncode": 0,
+          "kernel_command": [
+            "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on",
+            "--mode",
+            "kernel",
+            "--input",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_setup_event.proof.o",
+            "--symbol",
+            "generic_kprobe_setup_event",
+            "--link-plan",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/synthetic-plan.json",
+            "--output",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_setup_event.kernel.bin",
+            "--output-relocs",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_setup_event.kernel.relocs",
+            "--output-map-patches",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_setup_event.kernel.maps",
+            "--output-abi",
+            "/var/tmp/kprog-tmp/perf/owner-frame-on-subset/bpf_generic_kprobe_v61-links/generic_kprobe_setup_event.kernel.abi"
+          ],
+          "kernel_returncode": 0
+        }
+      ]
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-owner-frame-subset/owner-artifact.json",
+      "sha256": "75f1aa55eb92ac09e14011a1def508b22298e5a90208fdacbbc0c7505301b719",
+      "data": {
+        "owner_commit": "d401bc93a",
+        "owner_archive": "/workspaces/repository/kprog/results/verified_20261114/frame-pointer-host-results.tar.gz",
+        "owner_member": "candidate-native-link",
+        "original_compiled_sha256": "1d144785ca76bb0c6637d681afd7a244771cabc53254da892e4f6207cdf89802",
+        "packaged_sha256": "311d8de2101f6e97860e31a8a67868a9d5a6b49f1a6246b3e34422c7e1129bbb",
+        "scope": "Owner tested executable artifact extracted/verified, packaged by existing memory-link-payload. Source/owner/canonical binaries untouched."
+      }
+    }
+  ],
+  "scope": "Host compiler/replay artifacts only; no kernel submission, native installation or application equal-work claim.",
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/perf_20261113/owner-frame-subset.tar.gz",
+    "bytes": 8686745,
+    "sha256": "555ed2a21b6a829eff49c63b34fdbbb798e7e254acf1416cde3f37e1ca58c94f",
+    "files_byte_compared": 206
+  }
+}
