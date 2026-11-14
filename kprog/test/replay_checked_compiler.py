@@ -26,7 +26,8 @@ base = json.loads(a.command.read_text())
 base[base.index('taskset') + 2] = a.cpus
 if '-w' not in base:
     base.insert(base.index('-g'), '-w')
-source = Path(base[base.index('-c') + 1])
+compile_input = len(base) - 1 - base[::-1].index('-c') + 1
+source = Path(base[compile_input])
 h = hashlib.sha256()
 with source.open('rb') as f:
     for block in iter(lambda: f.read(1 << 20), b''):
@@ -37,7 +38,7 @@ base[-1] = str(a.output / 'trusted_x86.bpf.bounds-input.bc')
 bounds = base[:base.index('--') + 1] + [str(a.bounds), base[-1], '-o', str(a.output / 'trusted_x86.bpf.bounds.bc')]
 backend = list(base)
 backend.remove('-emit-llvm')
-backend[backend.index('-c') + 1] = bounds[-1]
+backend[compile_input] = bounds[-1]
 backend[-1] = str(a.output / 'trusted_x86.bpf.o')
 commands = [('frontend', base), ('bounds', bounds), ('bpf-backend', backend)]
 (a.output / 'commands.json').write_text(json.dumps(commands, indent=2) + '\n')

@@ -126,8 +126,7 @@ static int kernel_type_ownership()
     ScopedFd rejected(wrong);
     std::cout << "{\"same_resource_load\":true,\"wrong_resource_return\":" << wrong
         << ",\"wrong_resource_errno\":" << saved_errno << ",\"verifier_log_bytes\":"
-        << std::strlen(log.data()) << "}
-";
+        << std::strlen(log.data()) << "}" << std::endl;
     require(wrong < 0 && saved_errno == EINVAL, "wrong retained program-array owner must be rejected");
     return 0;
 }
