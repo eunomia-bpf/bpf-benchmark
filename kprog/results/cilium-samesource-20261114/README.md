@@ -111,3 +111,39 @@ Cilium's own loader uses on cgroup hooks is not established here.
 No timing for Cilium is claimed from this file. The next step is a both-arm run
 (`cilium/agent`) with the D08 objects, comparing judgements and relay logs
 between arms before any per-invocation number is quoted.
+## Both-arm run
+
+`specialized-timing.sh cilium/agent corpus/results/cilium-d08-20261114 ... 3 180 0-7`,
+run `x86_kvm_corpus_20261114_171558_223789`, 3 samples x 180 s, both arms back to
+back in one window, `status: ok`, 0 workload errors, 113 `jit-info native` in the
+native arm and 0 in the baseline.
+
+| arm | pps per sample | mean |
+|---|---|---|
+| baseline (eBPF) | 1 459 512 / 1 495 851 / 1 535 562 | 1 496 975 |
+| native | 1 948 160 / 1 923 015 / 1 900 666 | 1 923 947 |
+
+**1.2852x** throughput (sd 38 037 and 23 761 pps respectively). The BPF counters
+agree with the wire: `cil_from_container` runs 2 x 404.1M over the baseline's
+540 s, which is 1.497 Mpps, and 2 x 519.3M over the native arm's, which is 1.923
+Mpps.
+
+Per invocation, the one pair of program instances both arms track:
+
+| | baseline | native | ratio |
+|---|---|---|---|
+| `cil_from_container` ns/inv | 685.4 (687.2 / 683.6) | 287.0 (287.2 / 286.9) | **2.39x** |
+
+Two caveats on the per-program table, both about tracking and neither about code:
+
+- The host-side programs (`cil_from_host`, `cil_to_host`) are loaded once per
+  endpoint regeneration, so the arm keeps several instances and only the attached
+  one takes traffic. Both arms load the same set (9 each of `cil_from_host`,
+  `cil_from_netdev`, `cil_to_host`, `cil_to_netdev` in the log), but the
+  baseline's attached instance is not the one in `details/apps/*.json` — its
+  `cil_from_host` entry shows 2 runs against the native arm's 1.04G. The native
+  count is consistent (exactly 2x the `cil_from_container` count, one pass per
+  direction), so this is a tracking artifact, not a behavioural difference.
+- Consequently the weighted per-invocation re-expression cannot be computed for
+  this app; the wire measurement is the primary number, as the framework defines
+  it.
