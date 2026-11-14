@@ -141,6 +141,10 @@ struct Args {
     #[arg(long)]
     runtime_probe_read_layout: Option<PathBuf>,
 
+    /// Specialize proven raw hash lookups using the sole target's field layout.
+    #[arg(long)]
+    runtime_hash_layout: Option<PathBuf>,
+
     /// Bind x86 memset/memcpy to linker-owned GPR routines in the proof image.
     #[arg(long)]
     local_memory_routines: bool,
@@ -221,6 +225,12 @@ struct RuntimeArrayLayout {
     index_mask: u32,
     value: u32,
     array_type: u32,
+}
+
+#[derive(Deserialize)]
+struct RuntimeHashLayout {
+    key_size:u32, buckets:u32, n_buckets:u32, hashrnd:u32,
+    bucket_size:u32, head:u32, first:u32, node:u32, next:u32, hash:u32, key:u32,
 }
 
 #[derive(Deserialize)]
@@ -495,11 +505,19 @@ fn main() -> Result<()> {
             Ok(serde_json::from_slice(&fs::read(path)?)?)
         }).transpose()?
     };
+    let runtime_hash_layout:Option<RuntimeHashLayout> = if proof_mode {None} else {
+        args.runtime_hash_layout.as_ref().map(|path| -> Result<_> {
+            Ok(serde_json::from_slice(&fs::read(path)?)?)
+        }).transpose()?
+    };
     let bytes = fs::read(&args.input).with_context(|| format!("read {}", args.input.display()))?;
     let elf = object::File::parse(&*bytes)
         .with_context(|| format!("parse ELF {}", args.input.display()))?;
     if args.local_memory_routines && elf.architecture() != object::Architecture::X86_64 {
         bail!("--local-memory-routines requires x86-64 input");
+    }
+    if runtime_hash_layout.is_some() && elf.architecture()!=object::Architecture::X86_64 {
+        bail!("--runtime-hash-layout requires x86-64 input");
     }
     if runtime_probe_read_layout.is_some() && elf.architecture() != object::Architecture::X86_64 {
         bail!("--runtime-probe-read-layout requires x86-64 input");
@@ -568,6 +586,7 @@ fn main() -> Result<()> {
                 if proof_mode { None } else { runtime_array_layout.as_ref() },
                 args.runtime_array_shared && !proof_mode,
                 runtime_probe_read_layout.as_ref(),
+                runtime_hash_layout.as_ref(),
                 args.local_memory_routines,
                 args.show,
             )?

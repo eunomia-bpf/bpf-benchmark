@@ -1,0 +1,29 @@
+{
+  "recorded_at": "2026-11-14T07:22:44.936347+00:00",
+  "status": "HOST_TEST_LAUNCHED_UNCOLLECTED_NO_OUTCOME_POLL",
+  "outer_pid": 247281,
+  "raw": "/workspaces/kprog-raw/perf/20261114-hash-lto",
+  "build": "/var/tmp/kprog-tmp/perf/native-link-probe-read",
+  "cli": "--runtime-hash-layout PATH; default absent; ignored in proof mode",
+  "implementation": "one shared raw htab lookup routine per typed raw-helper target/image; live key_size/hashrnd/buckets/n_buckets, unrolled jhash2 and key comparison for4/8/12/16-byte keys; other sizes call original raw helper; retain nulls marker retry and raw htab_elem return, caller postprocessing unchanged",
+  "host_fixture": "actual generated code versus existing kernel tools jhash2 header, synthetic non-kernel layout, collisions/wrong full hash/empty/unaligned and guard-page keys, wrong nulls marker repaired by a thread, unknown-size original args and SysV alignment",
+  "scope": "Candidate code and launched host validation only. No new hash binary installed, kernel test, app run, throughput gain, full default parity or proof equivalence result claimed. Active235861 still uses immutable older fb07 read candidate; queued shared writer skips Rust builds and does not consume this private build directory.",
+  "files": [
+    {
+      "path": "kprog/x86/native_lab/native_link/src/main.rs",
+      "sha256": "6648ec0549e27ca5449dffd9cdf27a8d098f61970a5be37b06177781999653e2"
+    },
+    {
+      "path": "kprog/x86/native_lab/native_link/src/x86.rs",
+      "sha256": "d1518c3a719e3603a1bebf1ab5db0883fb801551d98d9e218ab6505d90803b8e"
+    },
+    {
+      "path": "kprog/x86/native_lab/native_link/src/x86_hash_lookup.rs",
+      "sha256": "b0c60d8743c61e377bc3a9601962543a2ae62afe04f5e53234471de08c4193b1"
+    },
+    {
+      "path": "kprog/perf/native-context/test-hash-lookup.c",
+      "sha256": "bd88d39c7b425cb7ca0a1eeb95d5f1c695c56e304f6d1fb77b9e92bcecf038a0"
+    }
+  ]
+}
