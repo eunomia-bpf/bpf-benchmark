@@ -1,0 +1,84 @@
+{
+  "recorded_at": "2026-11-14T08:38:29Z",
+  "outer_pid": 263016,
+  "outer_exit": 0,
+  "run": "corpus/results/x86_kvm_corpus_20261114_081149_034849",
+  "app_status": "ok",
+  "bpf_stats": false,
+  "samples": 3,
+  "workload_seconds": 180,
+  "throughput": {
+    "definition": "May29 ratio.py off= median(native throughput)/median(eBPF throughput)",
+    "ratio": 0.996365162723703,
+    "baseline": [
+      76797600.97578518,
+      78525876.2543936,
+      79575133.14531097
+    ],
+    "native": [
+      79337440.89958817,
+      78240447.47223026,
+      71495442.85459799
+    ],
+    "paired_ratios": [
+      1.0330718654167832,
+      0.996365162723703,
+      0.8984646337196975
+    ],
+    "errors": 0
+  },
+  "per_invocation_ratio": null,
+  "per_invocation_reason": "stats1 counterpart app failed with post_rejit=NULL; stats0 contains no BPF timing.",
+  "no_bpf_reference": null,
+  "native_no_bpf_ratio": null,
+  "native_install_ids": [
+    22,
+    26,
+    28,
+    30,
+    32,
+    34,
+    36,
+    38,
+    40,
+    42,
+    44,
+    46,
+    48
+  ],
+  "native_tiny_jits": [],
+  "configuration": "direct/submitted-native with immutable fb07 probe-read LTO; original same-source context manifest, existing workload/runner",
+  "cpus": "0-7",
+  "vcpus": 8,
+  "guest_memory": "64G",
+  "host_address_space_bytes": 85899345920,
+  "image": "2aed63ff946f379ffb613586eb9d52a9c0274e3a92b25b675748292c9163d12c",
+  "limitations": [
+    "Supplementary stats0 observer exited on shared capture directory collision; missing own-metrics snapshots do not discard raw throughput. Full counters/generation/family-mix comparison unavailable.",
+    "Owner host compiler324183 on8-15 started08:25:53 during this guest; actual effect unknown, not a causal speedup attribution.",
+    "stats1 failed; no per-invocation ratio or no-BPF reference is available.",
+    "Hash/LPM candidates not used, no1.20/floor/full-six acceptance."
+  ],
+  "files": [
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_081149_034849/details/apps/otelcol-ebpf-profiler__profiling.json",
+      "sha256": "c0a65f361b53996b839ad2c4ee3c1a7f37c34aca3a7505d903fe00ec034e2e32"
+    },
+    {
+      "path": "corpus/results/x86_kvm_corpus_20261114_081149_034849/metadata.json",
+      "sha256": "152958bc0e75881076acec91e1b7b215ca1836c8064beee97131efaa81f55fe2"
+    },
+    {
+      "path": "corpus/results/x86_kvm_corpus_20261114_081149_034849/details/shim-logs/otelcol-ebpf-profiler__profiling.post_rejit.log",
+      "sha256": "f5b4b82a0e13e02b6f69241d3a95c49d7eaea19561e64617119991b4d8452a48"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-probe-read-direct-timing/ratio-stats0.txt",
+      "sha256": "b4747d5505ba1da5fc5363265ea4276ecd1cd9369115e7ee2fbeeecc9c5cb442"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-probe-read-direct-timing/timing/progress.log",
+      "sha256": "672831ef0e055c756f9e2b80474a96c9863c34690dec53e7d0d3671c6959ffaf"
+    }
+  ]
+}
