@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Legacy shifts: numeric/CPU flags, byte lanes, RMW faults and exact state."""
 import copy
+from check_reference import assert_native_state
 import ctypes
 import json
 from pathlib import Path
@@ -122,7 +123,7 @@ def main():
         result = subprocess.run([str(binary)], input=''.join(json.dumps(r)+'\n' for r,_ in batch), text=True, capture_output=True, check=True)
         actual = [json.loads(line) for line in result.stdout.splitlines()]
         assert len(actual) == len(batch)
-        for (request, expected), observed in zip(batch, actual): assert observed == expected, (request, observed, expected)
+        for (request, expected), observed in zip(batch, actual): assert_native_state(observed, expected, (request, observed, expected))
     for code in ('c1e0', '48d3', 'c1d001', '66'*14+'d0e0'):
         request = copy.deepcopy(cases[0][0]); request['native_bytes'] = list(bytes.fromhex(code))
         result = subprocess.run([str(binary)], input=json.dumps(request)+'\n', text=True, capture_output=True)

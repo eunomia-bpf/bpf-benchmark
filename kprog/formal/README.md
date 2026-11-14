@@ -4,12 +4,13 @@
 
 The operator's replacement plan is in [todo section 4](../docs/todo.md).
 The external bases are forks, pinned as Git submodules; changes needed by
-kprog belong in those forks. No replacement ISA semantics is defined locally.
+kprog belong in those forks. M3 retires the remaining local ISA bodies as
+described below.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
 | AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `da428593b21d` | Lean 4.35.0 |
-| x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `78534ab39249` | Lean 4.32.0-rc1 |
+| x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `daad9554c1f7` | Lean 4.32.0-rc1 |
 | Clight | [eunomia-bpf/clean](https://github.com/eunomia-bpf/clean), `external/clean/export` | `123f7f7767e2` | Lean 4.32.1 |
 
 `make -C kprog/formal mature` builds the migration Lake package on Lean 4.35.0,
@@ -52,6 +53,36 @@ decoder and legacy proof/API compatibility. This is not full-package acceptance:
 remaining x86 families and provenance integration are still M3 work;
 Clight/theorem migration and final checks remain M4-M6. The AArch64 replacement
 and ARM comparison have since advanced as follows.
+
+The next x86 binding (`m3-x86-families`) routes CMOV/SETcc/branches,
+XCHG, shifts/rotates, BMI, IMUL/MULX, DIV/IDIV, widening/sign-high, POPCNT,
+XMM0 moves, stack transfers, CALL and zero-release RET through x86lean's
+checked step. Sixty retired local definitions were removed. Native F6/F7 `/4`
+now binds unsigned MUL to the existing `muldiv.mul`; no local product function
+was added. The shared C implementation remains PERF's implementation, with
+Clight refinement still pending M4/M5.
+
+Fork `daad9554c1f7` adds the missing register-only CEXT access plan and
+corrects CALL preflight priority: source read, stack-write check, then target
+canonicality. The existing hardware replay establishes the denied-write versus
+bad-target order. All original checked-access profiles remain; the revised
+CALL goldens and 30 new cases pass with the reference and 38 native-memory checks
+in 191 Lake jobs. Fourteen existing x86 suites pass 112,704 full-state cases,
+including faults, plus the base wire regressions; hardware/encoding checks run
+inside those suites also pass. The MOVX suite additionally passes 6144
+hardware/handler results and all three BPF compilations after selecting v3 for
+the existing ALU32 inline assembly. This changes a formal check command only.
+Raw results and all failed attempts are in
+`/workspaces/kprog-raw/formal/m3-x86-families`.
+
+The wire checks compare their independent expected masks as data, then allow
+only ISA-undefined flag/register bits to vary. All other physical state, memory,
+faults and complete event prefixes remain compared. Register-indexed memory BT
+now records the fork's selected-byte read; its immediate form retains the word
+read. Reconciling that observation with the old C is M5 work. REP (including
+address32 and source segments), RET imm16, LEAVE and UD2 remain local M3 work,
+as do provenance integration and the x86 Sail comparison. These component
+checks are not whole-package acceptance or migrated O1/O2/O4 counts.
 
 AArch64 now stores the full LNSym `ArmState` in its thin native wrapper.
 The original native word is decoded by LNSym and loaded at the input PC;

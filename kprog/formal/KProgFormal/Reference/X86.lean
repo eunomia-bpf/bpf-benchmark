@@ -2,7 +2,9 @@ import KProgFormal.Reference.Memory
 import X86.CheckedMemory
 
 /-!
-The x86-64 reference semantics. Architectural rules come from Intel SDM
+The native x86-64 view of x86lean checked execution. Remaining legacy REP, LEAVE, UD2 and
+RET-immediate bodies are retired in the next binding step. Architectural rules
+come from Intel SDM
 Volume 2, instruction Operation/Flags Affected descriptions:
 https://cdrdv2-public.intel.com/874240/325462-090-sdm-vol-1-2abcd-3abcd-4.pdf
 No simulator or generated-contract module is imported here.
@@ -141,31 +143,6 @@ def nativeStep (op : _root_.X86.Op) (nextPc : Word) (s : State) : Transition Sta
         oracle := output.cpu.oracle
         modelError := output.cpu.ms }, effect.events, effect.fault⟩
 
-/-- All sixteen architectural condition codes, including parity. -/
-def condition (flags : Word) (code : Fin 16) : Bool :=
-  let cf := flags.getLsbD 0
-  let pf := flags.getLsbD 2
-  let zf := flags.getLsbD 6
-  let sf := flags.getLsbD 7
-  let of := flags.getLsbD 11
-  match code.val with
-  | 0 => of
-  | 1 => !of
-  | 2 => cf
-  | 3 => !cf
-  | 4 => zf
-  | 5 => !zf
-  | 6 => cf || zf
-  | 7 => !cf && !zf
-  | 8 => sf
-  | 9 => !sf
-  | 10 => pf
-  | 11 => !pf
-  | 12 => sf != of
-  | 13 => sf == of
-  | 14 => zf || (sf != of)
-  | _ => !zf && (sf == of)
-
 /-- The operand is read before the destination is changed, including aliasing
 registers and a memory source addressed by the destination register. -/
 inductive Source
@@ -173,95 +150,9 @@ inductive Source
   | memory (address : Word)
   deriving DecidableEq, Repr
 
-def readSource (s : State) (source : Source) (bytes : Nat) :
-    Except Fault (Word × List Event) :=
-  match source with
-  | .register r => .ok (s.gpr r, [])
-  | .memory address =>
-      match readMemory s.memory address bytes with
-      | .error fault => .error fault
-      | .ok (value, event) => .ok (value, [event])
-
-/-- Intel CMOVcc Operation: 32-bit writes zero-extend even when the condition
-is false. The 16-bit untaken case preserves every destination bit. -/
-def cmovValue (width : CmovWidth) (taken : Bool) (old source : Word) : Word :=
-  match width with
-  | .w16 => if taken then (old &&& 0xffffffffffff0000) ||| (source &&& 0xffff)
-      else old
-  | .w32 => (if taken then source else old) &&& 0xffffffff
-  | .w64 => if taken then source else old
-
-/-- Bit selection wraps modulo the operand size. The instruction layer only
-supplies architectural widths; the generalized primitive also covers byte lanes. -/
-def bitTest (base index : Word) (operandBits : Nat) : Bool :=
-  (base &&& ((1 : Word) <<< (index &&& (BitVec.ofNat 64 operandBits - 1)))) != 0
-
-def setFlag (flags : Word) (bit : Nat) (value : Bool) : Word :=
-  let mask := (1 : Word) <<< bit
-  if value then flags ||| mask else flags &&& ~~~mask
-
-/-- BMI2 zero-high-bits takes an unsigned byte index. This generalized
-primitive also serves narrower implementation contracts. -/
-def zeroHighBits (source count : Word) (operandBits : Nat) : Word :=
-  let index := count &&& 0xff
-  let mask := BitVec.ofNat 64 (2 ^ operandBits) - 1
-  let kept := if BitVec.ult index (BitVec.ofNat 64 operandBits)
-    then ((1 : Word) <<< index) - 1 else mask
-  source &&& kept &&& mask
-
-def bzhiCarry (normalizedCount : Word) (operandBits : Nat) : Bool :=
-  BitVec.ule (BitVec.ofNat 64 operandBits) normalizedCount
-
-def resultZero (result : Word) : Bool := result == 0
-
-def resultSign (result : Word) (operandBits : Nat) : Bool :=
-  result.getLsbD (operandBits - 1)
-
-/-- ZF/SF follow the result; CF reports an index at least the operand size,
-OF is cleared. AF/PF are undefined and are handled by the step relation. -/
-def bzhiFlags (flags normalizedCount result : Word) (operandBits : Nat) : Word :=
-  setFlag (setFlag (setFlag (setFlag flags 0 (bzhiCarry normalizedCount operandBits))
-    6 (resultZero result)) 7 (resultSign result operandBits)) 11 false
-
-/-- BMI1 ANDN inverts its first source, not the memory/register second source. -/
-def andNot (first second : Word) : Word := ~~~first &&& second
-
-/-- CF/OF are zero and ZF/SF follow the operand-sized result. AF/PF are
-undefined, represented by preservation and unconstrained in the step relation. -/
-def andnFlags (flags result : Word) (operandBits : Nat) : Word :=
-  setFlag (setFlag (setFlag (setFlag flags 0 false) 6 (resultZero result))
-    7 (resultSign result operandBits)) 11 false
-
 /-- Double shifts use five count bits, or six at operand size 64. -/
 def doubleShiftCount (count : Word) (operandBits : Nat) : Word :=
   count &&& (if operandBits = 64 then 63 else 31)
-
-/-- Form a double-width concatenation, shift it, and select the destination
-half. For counts exceeding operand size the ISA permits any low-lane result;
-this expression is an executable representative, not an extra defined result. -/
-def doubleShiftValue (left : Bool) (destination source count : Word)
-    (operandBits : Nat) : Word :=
-  let mask := BitVec.ofNat 64 (2 ^ operandBits) - 1
-  let dst := (destination &&& mask).setWidth 128
-  let src := (source &&& mask).setWidth 128
-  let amount := (doubleShiftCount count operandBits).setWidth 128
-  let pair := if left then (dst <<< operandBits) ||| src else (src <<< operandBits) ||| dst
-  let shifted := if left then (pair <<< amount) >>> BitVec.ofNat 128 operandBits
-    else pair >>> amount
-  (shifted.setWidth operandBits).setWidth 64
-
-/-- OF at count one reports a sign change for both SHLD and SHRD. The
-preserved representative at other counts imposes no ISA-defined flag value. -/
-def doubleShiftOverflow (original result count : Word) (operandBits : Nat) (old : Bool) : Bool :=
-  if count = 1 then resultSign original operandBits != resultSign result operandBits else old
-
-/-- POP into SP/RSP increments the incoming stack pointer before writing
-its destination. The16-bit write retains the incremented pointer's high bits. -/
-def popRsp (rsp value : Word) (operandBits : Nat) : Word :=
-  let advanced := rsp + BitVec.ofNat 64 (operandBits / 8)
-  let mask := BitVec.ofNat 64 (2 ^ operandBits) - 1
-  if operandBits = 32 then value &&& mask
-  else (advanced &&& ~~~mask) ||| (value &&& mask)
 
 inductive BzhiWidth
   | w32 | w64
@@ -278,23 +169,6 @@ inductive BitIndex
 
 def CmovWidth.bits (width : CmovWidth) : Nat := width.bytes * 8
 
-def bitIndexValue (s : State) : BitIndex → Word
-  | .register r => s.gpr r
-  | .immediate b => b.setWidth 64
-
-/-- A memory bit string with a register index uses a signed word displacement;
-immediate indices use the instruction's already encoded effective address. -/
-def bitBaseSource (width : CmovWidth) (source : Source) (index : BitIndex)
-    (s : State) : Source :=
-  match source, index with
-  | .memory address, .register r =>
-      let value := match width with
-        | .w16 => ((s.gpr r).setWidth 16).toInt
-        | .w32 => ((s.gpr r).setWidth 32).toInt
-        | .w64 => (s.gpr r).toInt
-      .memory (address + BitVec.ofInt 64 (value / width.bits * width.bytes))
-  | _, _ => source
-
 inductive BmiShift | left | right | arithmetic | rotate
   deriving DecidableEq, Repr
 
@@ -302,69 +176,6 @@ inductive ShiftCount
   | register (reg : Register)
   | immediate (value : BitVec 8)
   deriving DecidableEq, Repr
-
-def countValue (s : State) : ShiftCount → Word
-  | .register r => s.gpr r | .immediate value => value.setWidth 64
-
-/-- MULX returns the exact unsigned product as two operand-sized halves.
-The 32-bit form fits in 64 bits; the 64-bit form uses 128 bits. No flags change. -/
-def mulxParts (width : BzhiWidth) (left right : Word) : Word × Word :=
-  match width with
-  | .w32 =>
-      let product := (left.setWidth 32).setWidth 64 * (right.setWidth 32).setWidth 64
-      ((product.setWidth 32).setWidth 64, ((product >>> 32).setWidth 32).setWidth 64)
-  | .w64 =>
-      let product := left.setWidth 128 * right.setWidth 128
-      (product.setWidth 64, (product >>> 64).setWidth 64)
-
-/-- Read the explicit operand and the incoming implicit RDX before either
-write. When the two destinations alias, the high half is the final value. -/
-def mulxStep (width : BzhiWidth) (high low : Register) (source : Source)
-    (nextPc : Word) (s : State) : Transition State :=
-  match readSource s source width.bytes with
-  | .error fault => ⟨s, [.fault fault], some fault⟩
-  | .ok (right, reads) =>
-      let parts := mulxParts width (s.gpr 2) right
-      ⟨{ s with gpr := fun r => if r = high then parts.2 else if r = low then parts.1 else s.gpr r, pc := nextPc }, reads, none⟩
-
-/-- BMI2 shifts read width-sized operands, mask counts to five/six bits,
-and leave every flag unchanged. Rotate selects a window in a doubled source. -/
-def bmiShiftValue (width : BzhiWidth) (kind : BmiShift) (value amount : Word) : Word :=
-  let source := value.setWidth width.bits
-  let count := amount &&& BitVec.ofNat 64 (width.bits - 1)
-  match kind with
-  | .left => (source <<< count).setWidth 64
-  | .right => (source >>> count).setWidth 64
-  | .arithmetic => (source.sshiftRight' count).setWidth 64
-  | .rotate =>
-      let pair := (source.setWidth 128 <<< width.bits) ||| source.setWidth 128
-      ((pair >>> count.setWidth 128).setWidth width.bits).setWidth 64
-
-def bmiShiftStep (width : BzhiWidth) (kind : BmiShift) (dst : Register) (source : Source)
-    (count : ShiftCount) (nextPc : Word) (s : State) : Transition State :=
-  match readSource s source width.bytes with
-  | .error fault => ⟨s, [.fault fault], some fault⟩
-  | .ok (value, events) =>
-      let result := bmiShiftValue width kind value (countValue s count)
-      ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), pc := nextPc }, events, none⟩
-
-def writeValue (width : CmovWidth) (old value : Word) : Word :=
-  match width with
-  | .w16 => (old &&& 0xffffffffffff0000) ||| (value &&& 0xffff)
-  | .w32 => (value.setWidth 32).setWidth 64
-  | .w64 => value
-
-/-- Commit a PUSH transfer only after its read (if any) and whole-width
-write permission check. Memory faults preserve every architectural component;
-ordered reads preceding a write fault remain observable events. -/
-def pushTransfer (width : StackWidth) (value : Word) (reads : List Event)
-    (nextPc : Word) (s : State) : Transition State :=
-  let address := s.gpr 4 - BitVec.ofNat 64 width.bytes
-  match writeMemory s.memory address value width.bytes with
-  | .error fault => ⟨s, reads ++ [.fault fault], some fault⟩
-  | .ok (memory, event) =>
-      ⟨{ s with gpr := (fun r => if r = 4 then address else s.gpr r), memory := memory, pc := nextPc },
-        reads ++ [event], none⟩
 
 /-- Scalar integer sizes, including byte-register lanes absent from CMOV. -/
 inductive ScalarWidth | w8 | w16 | w32 | w64
@@ -374,11 +185,6 @@ def ScalarWidth.bytes : ScalarWidth → Nat
   | .w8 => 1 | .w16 => 2 | .w32 => 4 | .w64 => 8
 
 def ScalarWidth.bits (width : ScalarWidth) : Nat := width.bytes * 8
-
-/-- PF is even parity of the low byte, stated as a bit walk rather than the
-implementation's four-bit lookup table. -/
-def evenParity (value : Word) : Bool :=
-  !((List.range 8).foldl (fun parity bit => parity != value.getLsbD bit) false)
 
 inductive ArithmeticKind | add | adc | sub | sbb | compare
   deriving DecidableEq, Repr
@@ -394,55 +200,6 @@ inductive LegacyShift | left | right | arithmetic | rotateLeft
 def legacyCount (width : ScalarWidth) (count : Word) : Word :=
   count &&& (if width = .w64 then 63 else 31)
 
-def legacyShiftValue (width : ScalarWidth) (kind : LegacyShift) (value count : Word) : Word :=
-  let a := (value.setWidth width.bits).setWidth 64
-  let n := legacyCount width count
-  let rotated := n &&& BitVec.ofNat 64 (width.bits - 1)
-  let shifted := match kind with
-    | .left => a <<< n
-    | .right => a >>> n
-    | .arithmetic => ((value.setWidth width.bits).signExtend 64).sshiftRight' n
-    | .rotateLeft => (a <<< rotated) ||| (a >>> (BitVec.ofNat 64 width.bits - rotated))
-  (shifted.setWidth width.bits).setWidth 64
-
-/-- Flags unaffected by the ISA are preserved. AF, OF at counts beyond one,
-and logical-shift CF at counts at least the width use stable representatives;
-legacyDefinedFlags below removes those bits from the architectural relation. -/
-def legacyShiftFlags (width : ScalarWidth) (kind : LegacyShift) (value count old : Word) : Word :=
-  let n := (legacyCount width count).toNat
-  let bits := width.bits
-  let a := (value.setWidth bits).setWidth 64
-  let result := legacyShiftValue width kind value count
-  let sign := result.getLsbD (bits - 1)
-  let cf := match kind with
-    | .left => if n ≤ bits then a.getLsbD (bits - n) else false
-    | .right => if n ≤ bits then a.getLsbD (n - 1) else false
-    | .arithmetic => if n ≤ bits then a.getLsbD (n - 1) else a.getLsbD (bits - 1)
-    | .rotateLeft => result.getLsbD 0
-  let of := match kind with
-    | .left | .rotateLeft => sign != cf
-    | .right => a.getLsbD (bits - 1)
-    | .arithmetic => false
-  if n = 0 then old else
-    let carryFlags := setFlag (setFlag old 0 cf) 11 (if n = 1 then of else old.getLsbD 11)
-    if kind = .rotateLeft then carryFlags else
-      setFlag (setFlag (setFlag carryFlags 2 (evenParity result)) 6 (result == 0)) 7 sign
-
-/-- ROR selects the low operand-width bits of a shifted double-width pair.
-Unlike the implementation's two-shift OR, this uses one concatenated source. -/
-def rotateRightValue (width : ScalarWidth) (value count : Word) : Word :=
-  let source := (value.setWidth width.bits).setWidth 128
-  let pair := (source <<< width.bits) ||| source
-  let amount := (legacyCount width count &&& BitVec.ofNat 64 (width.bits - 1)).setWidth 128
-  ((pair >>> amount).setWidth width.bits).setWidth 64
-
-def rotateRightFlags (width : ScalarWidth) (value count old : Word) : Word :=
-  let n := (legacyCount width count).toNat
-  let result := rotateRightValue width value count
-  let cf := result.getLsbD (width.bits - 1)
-  let of := cf != result.getLsbD (width.bits - 2)
-  if n = 0 then old else setFlag (setFlag old 0 cf) 11 (if n = 1 then of else old.getLsbD 11)
-
 def legacyDefinedFlags (width : ScalarWidth) (kind : LegacyShift) (count : Word) : Word :=
   let n := (legacyCount width count).toNat
   if n = 0 then 0xffffffffffffffff else
@@ -452,32 +209,6 @@ def legacyDefinedFlags (width : ScalarWidth) (kind : LegacyShift) (count : Word)
 
 inductive UnaryKind | inc | dec | neg | not
   deriving DecidableEq, Repr
-
-private def populationLane (x : BitVec 64) (i : Nat) : BitVec 8 :=
-  ((x >>> (8 * i)) &&& 0xff).setWidth 8
-
-/-- Independent per-byte population count: an explicit eight-bit walk, sharing no
-constant with the generated SWAR reduction. -/
-private def populationByte (b : BitVec 8) : BitVec 8 :=
-  (b.extractLsb' 0 1).setWidth 8 + (b.extractLsb' 1 1).setWidth 8 +
-  (b.extractLsb' 2 1).setWidth 8 + (b.extractLsb' 3 1).setWidth 8 +
-  (b.extractLsb' 4 1).setWidth 8 + (b.extractLsb' 5 1).setWidth 8 +
-  (b.extractLsb' 6 1).setWidth 8 + (b.extractLsb' 7 1).setWidth 8
-
-/-- Independent statement of the 64-bit population count: the sum of the eight
-byte lanes' bit walks, each lane narrowed before counting. -/
-def populationCount (x : BitVec 64) : BitVec 64 :=
-  (populationByte (populationLane x 0)).setWidth 64 + (populationByte (populationLane x 1)).setWidth 64 +
-  (populationByte (populationLane x 2)).setWidth 64 + (populationByte (populationLane x 3)).setWidth 64 +
-  (populationByte (populationLane x 4)).setWidth 64 + (populationByte (populationLane x 5)).setWidth 64 +
-  (populationByte (populationLane x 6)).setWidth 64 + (populationByte (populationLane x 7)).setWidth 64
-
-
-def popcountValue (width : CmovWidth) (source : Reference.Word) : Reference.Word :=
-  populationCount ((source.setWidth (width.bytes * 8)).setWidth 64)
-
-def popcountFlags (width : CmovWidth) (source old : Reference.Word) : Reference.Word :=
-  (old &&& 0xfffffffffffff72a) ||| (if source.setWidth (width.bytes * 8) = 0 then 64 else 0)
 
 inductive RegisterSlice
   | low (reg : Register)
@@ -504,35 +235,6 @@ inductive ScalarDestination
   | memory (address : Word)
   deriving DecidableEq, Repr
 
-def scalarRegisterValue (s : State) (width : ScalarWidth) (slice : RegisterSlice) : Word :=
-  (((s.gpr slice.reg) >>> slice.shift width).setWidth width.bits).setWidth 64
-
-def scalarWriteValue (old value : Word) (width : ScalarWidth) (slice : RegisterSlice) : Word :=
-  if width = .w32 then (value.setWidth 32).setWidth 64
-  else
-    let shift := slice.shift width
-    let mask := BitVec.ofNat 64 (2^width.bits - 1) <<< shift
-    (old &&& ~~~mask) ||| (((value.setWidth width.bits).setWidth 64) <<< shift)
-
-def scalarRead (s : State) (width : ScalarWidth) : ScalarSource → Except Fault (Word × List Event)
-  | .register slice => .ok (scalarRegisterValue s width slice, [])
-  | .immediate value => .ok (value, [])
-  | .memory address => readSource s (.memory address) width.bytes
-
-def scalarWrite (s : State) (width : ScalarWidth) (destination : ScalarDestination) (value : Word) :
-    Except Fault (State × List Event) :=
-  match destination with
-  | .register slice =>
-      .ok ({ s with gpr := fun r => if r = slice.reg then
-        scalarWriteValue (s.gpr r) value width slice else s.gpr r }, [])
-  | .memory address =>
-      match writeMemory s.memory address value width.bytes with
-      | .error fault => .error fault
-      | .ok (memory, event) => .ok ({ s with memory := memory }, [event])
-
-def ScalarDestination.source : ScalarDestination → ScalarSource
-  | .register slice => .register slice | .memory address => .memory address
-
 private def externalSize : ScalarWidth → _root_.X86.Size
   | .w8 => .b | .w16 => .w | .w32 => .d | .w64 => .q
 
@@ -541,6 +243,20 @@ private def externalCmovSize : CmovWidth → _root_.X86.Size
 
 private def externalBzhiSize : BzhiWidth → _root_.X86.Size
   | .w32 => .d | .w64 => .q
+
+private def externalStackSize : StackWidth -> _root_.X86.Size
+  | .w16 => .w | .w64 => .q
+
+private def externalPlainSource : Source -> _root_.X86.Operand
+  | .register r => .reg (_root_.X86.GPR.ofIndex r)
+  | .memory address => .mem { disp := address }
+
+private def externalCondition (cc : Fin 16) : _root_.X86.Cc :=
+  match cc.val with
+  | 0 => .o | 1 => .no | 2 => .b | 3 => .ae
+  | 4 => .e | 5 => .ne | 6 => .be | 7 => .a
+  | 8 => .s | 9 => .ns | 10 => .p | 11 => .np
+  | 12 => .l | 13 => .ge | 14 => .le | _ => .g
 
 private def externalRegister (width : ScalarWidth) (slice : RegisterSlice) : _root_.X86.Operand :=
   .reg (_root_.X86.GPR.ofIndex slice.reg) (slice.shift width == 8)
@@ -553,188 +269,6 @@ private def externalSource (width : ScalarWidth) : ScalarSource → _root_.X86.O
 private def externalDestination (width : ScalarWidth) : ScalarDestination → _root_.X86.Operand
   | .register slice => externalRegister width slice
   | .memory address => .mem { disp := address }
-
-/-- Register XCHG samples both lanes before either write. Sequential lane
-merges retain both changes when AL/AH (or another byte pair) share one GPR. -/
-def exchangeStep (width : ScalarWidth) (left right : RegisterSlice) (nextPc : Word)
-    (s : State) : Transition State :=
-  let a := scalarRegisterValue s width left
-  let b := scalarRegisterValue s width right
-  let first := { s with gpr := fun r => if r = left.reg then scalarWriteValue (s.gpr r) b width left else s.gpr r }
-  let second := { first with gpr := fun r => if r = right.reg then scalarWriteValue (first.gpr r) a width right else first.gpr r }
-  ⟨{ second with pc := nextPc }, [], none⟩
-
-/-- A legacy memory operand is a read-modify-write access even at count zero.
-Read or write faults commit neither flags nor data; a successful read precedes
-a write fault. Count/source aliases are sampled from the incoming state. -/
-def legacyShiftStep (width : ScalarWidth) (kind : LegacyShift) (dst : ScalarDestination)
-    (count nextPc : Word) (s : State) : Transition State :=
-  match scalarRead s width dst.source with
-  | .error fault => ⟨s, [.fault fault], some fault⟩
-  | .ok (value, reads) =>
-      match scalarWrite s width dst (legacyShiftValue width kind value count) with
-      | .error fault => ⟨s, reads ++ [.fault fault], some fault⟩
-      | .ok (result, writes) =>
-          ⟨{ result with rflags := legacyShiftFlags width kind value count s.rflags, pc := nextPc }, reads ++ writes, none⟩
-
-/-- Register or memory ROR, retaining the completed read on a write fault. -/
-def rotateRightStep (width : ScalarWidth) (dst : ScalarDestination) (count nextPc : Word)
-    (s : State) : Transition State :=
-  match scalarRead s width dst.source with
-  | .error fault => ⟨s, [.fault fault], some fault⟩
-  | .ok (value, reads) =>
-      match scalarWrite s width dst (rotateRightValue width value count) with
-      | .error fault => ⟨s, reads ++ [.fault fault], some fault⟩
-      | .ok (result, writes) =>
-          ⟨{ result with rflags := rotateRightFlags width value count s.rflags, pc := nextPc }, reads ++ writes, none⟩
-
-/-- Low-width product bits are independent of signed/unsigned interpretation.
-The signed magnitude product below separately decides representability. -/
-def multiplyValue (width : CmovWidth) (left right : Word) : Word :=
-  ((left.setWidth width.bits) * (right.setWidth width.bits)).setWidth 64
-
-def multiplyMagnitude (width : CmovWidth) (value : Word) : Word :=
-  let narrowed := value.setWidth width.bits
-  (if narrowed.getLsbD (width.bits - 1) then -narrowed else narrowed).setWidth 64
-
-def multiplyMixedSign (width : CmovWidth) (left right : Word) : Bool :=
-  left.getLsbD (width.bits - 1) != right.getLsbD (width.bits - 1)
-
-/-- A negative signed product may have magnitude2^(n-1), while a nonnegative
-one is bounded by2^(n-1)-1. Nat multiplication retains all128 product bits. -/
-def multiplyOverflow (width : CmovWidth) (left right : Word) : Bool :=
-  let limit := 2^(width.bits - 1) - (if multiplyMixedSign width left right then 0 else 1)
-  decide (limit < (multiplyMagnitude width left).toNat * (multiplyMagnitude width right).toNat)
-
-def multiplyFlags (width : CmovWidth) (left right old : Word) : Word :=
-  let overflow := multiplyOverflow width left right
-  setFlag (setFlag old 0 overflow) 11 overflow
-
-/-- The immediate container holds encoded operand bits. 6B sign-extends its
-byte on decoding;69 supplies16 or32 bits. REX.W still encodes only imm32. -/
-def multiplyImmediate (width : CmovWidth) (raw : BitVec 32) : Word :=
-  (raw.setWidth (if width = .w16 then 16 else 32)).signExtend 64
-
-def multiplyStep (width : CmovWidth) (dst : Register) (source : Source)
-    (immediate : Option (BitVec 32)) (nextPc : Word) (s : State) : Transition State :=
-  match readSource s source width.bytes with
-  | .error fault => ⟨s, [.fault fault], some fault⟩
-  | .ok (value, events) =>
-      let operands := match immediate with
-        | none => (s.gpr dst, value)
-        | some raw => (value, multiplyImmediate width raw)
-      let result := writeValue width (s.gpr dst) (multiplyValue width operands.1 operands.2)
-      ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), rflags := multiplyFlags width operands.1 operands.2 s.rflags, pc := nextPc }, events, none⟩
-
-/-- Widen the operand from its access width, independently of generated masks. -/
-def extendValue (sourceWidth : ScalarWidth) (signed : Bool) (source : Word) : Word :=
-  if signed then (source.setWidth sourceWidth.bits).signExtend 64
-  else (source.setWidth sourceWidth.bits).setWidth 64
-
-/-- DIV's dividend is AX at byte width and the complete DX:AX/EDX:EAX/
-RDX:RAX pair otherwise. Natural numbers avoid truncating the 128-bit case. -/
-def divideDividend (width : ScalarWidth) (s : State) : Nat :=
-  if width = .w8 then (s.gpr 0).toNat % 65536
-  else (s.gpr 2).toNat % (2 ^ width.bits) * (2 ^ width.bits) +
-    (s.gpr 0).toNat % (2 ^ width.bits)
-
-/-- Both zero divisor and an unrepresentable quotient raise #DE before any
-register/flag/PC write. A completed memory operand read remains observable. -/
-def divideStep (width : ScalarWidth) (source : ScalarSource) (nextPc : Word)
-    (s : State) : Transition State :=
-  match scalarRead s width source with
-  | .error fault => ⟨s, [.fault fault], some fault⟩
-  | .ok (operand, reads) =>
-      let divisor := operand.toNat % (2 ^ width.bits)
-      let dividend := divideDividend width s
-      let quotient := dividend / divisor
-      if divisor = 0 ∨ 2 ^ width.bits ≤ quotient then
-        ⟨s, reads ++ [.fault .divide], some .divide⟩
-      else
-        let remainder := dividend % divisor
-        if width = .w8 then
-          let result := scalarWriteValue (s.gpr 0) (BitVec.ofNat 64 (256 * remainder + quotient)) .w16 (.low 0)
-          ⟨{ s with gpr := (fun r => if r = 0 then result else s.gpr r), pc := nextPc }, reads, none⟩
-        else
-          let low := scalarWriteValue (s.gpr 0) (BitVec.ofNat 64 quotient) width (.low 0)
-          let high := scalarWriteValue (s.gpr 2) (BitVec.ofNat 64 remainder) width (.low 2)
-          ⟨{ s with gpr := (fun r => if r = 0 then low else if r = 2 then high else s.gpr r), pc := nextPc }, reads, none⟩
-
-/-- Intel SDM IDIV (F6/F7 /7) interprets the complete double-width dividend
-and width-sized divisor as signed integers. Its quotient truncates toward zero;
-zero divisors and signed-range overflow raise #DE before any writeback.
-The executable retains an undefined-flags representative, as for DIV. -/
-def signedDivideStep (width : ScalarWidth) (source : ScalarSource) (nextPc : Word)
-    (s : State) : Transition State :=
-  match scalarRead s width source with
-  | .error fault => ⟨s, [.fault fault], some fault⟩
-  | .ok (operand, reads) =>
-      let dividend := (BitVec.ofNat (2 * width.bits) (divideDividend width s)).toInt
-      let divisor := (operand.setWidth width.bits).toInt
-      let quotient := dividend.tdiv divisor
-      let limit : Int := 2 ^ (width.bits - 1)
-      if divisor = 0 ∨ quotient < -limit ∨ limit ≤ quotient then
-        ⟨s, reads ++ [.fault .divide], some .divide⟩
-      else
-        let remainder := dividend.tmod divisor
-        if width = .w8 then
-          let packed := (BitVec.ofInt 8 quotient).toNat + 256 * (BitVec.ofInt 8 remainder).toNat
-          let result := scalarWriteValue (s.gpr 0) (BitVec.ofNat 64 packed) .w16 (.low 0)
-          ⟨{ s with gpr := (fun r => if r = 0 then result else s.gpr r), pc := nextPc }, reads, none⟩
-        else
-          let low := scalarWriteValue (s.gpr 0) (BitVec.ofInt 64 quotient) width (.low 0)
-          let high := scalarWriteValue (s.gpr 2) (BitVec.ofInt 64 remainder) width (.low 2)
-          ⟨{ s with gpr := (fun r => if r = 0 then low else if r = 2 then high else s.gpr r), pc := nextPc }, reads, none⟩
-
-/-- Double-shift status flags; the executable preserves undefined AF/OF
-representatives. `definedFlags` below removes their architectural guarantees. -/
-def doubleShiftFlags (width : CmovWidth) (left : Bool) (destination source count old : Word) : Word :=
-  let amount := doubleShiftCount count width.bits
-  let n := amount.toNat
-  let result := doubleShiftValue left destination source count width.bits
-  let a := (destination.setWidth width.bits).setWidth 64
-  let cf := if left then (if n ≤ width.bits then a.getLsbD (width.bits - n) else false)
-    else (if n ≤ width.bits then a.getLsbD (n - 1) else false)
-  let of := doubleShiftOverflow destination result amount width.bits (old.getLsbD 11)
-  if n = 0 then old else
-    setFlag (setFlag (setFlag (setFlag (setFlag old 0 cf) 11 of)
-      2 (evenParity result)) 6 (result == 0)) 7 (result.getLsbD (width.bits - 1))
-
-def doubleShiftStep (width : CmovWidth) (left : Bool) (dst source : Register)
-    (count nextPc : Word) (s : State) : Transition State :=
-  let result := doubleShiftValue left (s.gpr dst) (s.gpr source) count width.bits
-  ⟨{ s with gpr := fun r => if r = dst then writeValue width (s.gpr r) result else s.gpr r, rflags := doubleShiftFlags width left (s.gpr dst) (s.gpr source) count s.rflags, pc := nextPc }, [], none⟩
-
-/-- CWD/CDQ/CQO take the upper half of a signed double-width accumulator.
-The low accumulator and all flags are preserved. -/
-def signHighValue (width : CmovWidth) (source : Word) : Word :=
-  if (source.setWidth width.bits).msb then BitVec.ofNat 64 (2 ^ width.bits - 1) else 0
-
-/-- Legacy128-bit SSE moves in the enabled-SSE profile. MOVAPS checks its
-16-byte alignment before a mapped-memory access; MOVUPS has no such constraint.
-The guest event is the complete architectural access, not private scalar lanes. -/
-def xmm0Bytes (value : BitVec 128) : List Byte :=
-  (List.range 16).map (fun i => (value >>> (8 * i)).setWidth 8)
-
-def xmm0Store (m : Memory) (address : Word) (value : BitVec 128) : Memory :=
-  { m with
-    value := fun a => if (a - address).toNat < 16 then
-      (value >>> (8 * (a - address).toNat)).setWidth 8 else m.value a
-    initialized := fun a => if (a - address).toNat < 16 then true else m.initialized a }
-
-def xmm0Step (store aligned : Bool) (address nextPc : Word) (s : State) : Transition State :=
-  if aligned && address &&& 15 != 0 then
-    ⟨s, [.fault (.alignment address 16)], some (.alignment address 16)⟩
-  else if store then
-    if permitted s.memory.writable address 16 then
-      ⟨{ s with memory := xmm0Store s.memory address s.xmm0, pc := nextPc },
-        [.memory .write address (xmm0Bytes s.xmm0) true], none⟩
-    else ⟨s, [.fault (.write address 16)], some (.write address 16)⟩
-  else
-    if permitted s.memory.readable address 16 then
-      ⟨{ s with xmm0 := littleEndian 128 (bytesAt s.memory address 16), pc := nextPc },
-        [.memory .read address (bytesAt s.memory address 16) (initializedAt s.memory address 16)], none⟩
-    else ⟨s, [.fault (.read address 16)], some (.read address 16)⟩
 
 /-- REP uses the address size for all three implicit registers. In address32
 mode even zero-count execution clears their high halves before checking memory. -/
@@ -817,20 +351,6 @@ def repStosStep (width : ScalarWidth) (nextPc : Word) (s : State) : Transition S
 def canonicalTarget (width : AddressWidth) (target : Word) : Bool :=
   (target.setWidth width.bits).signExtend 64 == target
 
-/-- Near CALL samples its source, including an incoming-RSP memory address,
-before pushing the fall-through. Stack access faults precede a noncanonical
-target fault; neither failure commits the prepared return-address write. -/
-def callStep (source : ScalarSource) (nextPc : Word) (s : State) : Transition State :=
-  match scalarRead s .w64 source with
-  | .error fault => ⟨s, [.fault fault], some fault⟩
-  | .ok (target, reads) =>
-      let address := s.gpr 4 - 8
-      if permitted s.memory.writable address 8 then
-        if canonicalTarget s.addressWidth target then
-          pushTransfer .w64 nextPc reads target s
-        else ⟨s, reads ++ [.fault (.nonCanonical target)], some (.nonCanonical target)⟩
-      else ⟨s, reads ++ [.fault (.write address 8)], some (.write address 8)⟩
-
 /-- Near RET reads the complete64-bit target before either RSP or PC changes.
 The optional unsigned imm16 releases arguments after a successful pop. -/
 def returnStep (release : BitVec 16) (s : State) : Transition State :=
@@ -881,6 +401,7 @@ inductive Instruction
   | exchange (width : ScalarWidth) (left right : RegisterSlice) (nextPc : Word)
   | legacyShift (width : ScalarWidth) (kind : LegacyShift) (dst : ScalarDestination) (count nextPc : Word)
   | lea (width : CmovWidth) (dst : Register) (address nextPc : Word)
+  | unsignedMultiply (width : ScalarWidth) (source : ScalarSource) (nextPc : Word)
   | divide (width : ScalarWidth) (source : ScalarSource) (nextPc : Word)
   | signedDivide (width : ScalarWidth) (source : ScalarSource) (nextPc : Word)
   | signHigh (width : CmovWidth) (nextPc : Word)
@@ -917,7 +438,7 @@ inductive Instruction
 /-- The encoded instruction's fall-through, independently of its chosen
 successor. Path certificates use this to check the consumed byte extent. -/
 def Instruction.fallthrough : Instruction → Word
-  | .call _ next | .returnNear _ next | .repMovs _ _ _ next | .repStos _ next | .xmm0Move _ _ _ next | .doubleShift _ _ _ _ _ next | .mulx _ _ _ _ next | .multiply _ _ _ _ next | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signedDivide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next | .leave64 next
+  | .call _ next | .returnNear _ next | .repMovs _ _ _ next | .repStos _ next | .xmm0Move _ _ _ next | .doubleShift _ _ _ _ _ next | .mulx _ _ _ _ next | .multiply _ _ _ _ next | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .unsignedMultiply _ _ next | .divide _ _ next | .signedDivide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next | .leave64 next
   | .branch _ _ next | .setcc _ _ next | .arithmetic _ _ _ _ next
   | .move _ _ _ next | .push _ _ next | .pushImmediate _ _ next
   | .pushMemory _ _ next | .popMemory _ _ next | .pop _ _ next
@@ -928,36 +449,61 @@ def Instruction.fallthrough : Instruction → Word
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
   | .ud2 _ => ⟨s, [.fault .invalidOpcode], some .invalidOpcode⟩
-  | .call source nextPc => callStep source nextPc s
-  | .returnNear release _ => returnStep release s
+  | .call source nextPc =>
+      let target := match source with
+        | .immediate address => _root_.X86.JmpTarget.rel (address-nextPc)
+        | _ => .indirect (externalSource .w64 source)
+      nativeStep (.call target) nextPc s
+  | .returnNear release nextPc =>
+      if release == 0 then nativeStep .ret nextPc s else returnStep release s
   | .repMovs width address32 sourceBase nextPc => repMovsStep width address32 sourceBase nextPc s
   | .repStos width nextPc => repStosStep width nextPc s
-  | .xmm0Move store aligned address nextPc => xmm0Step store aligned address nextPc s
-  | .doubleShift width left dst source count nextPc => doubleShiftStep width left dst source count nextPc s
-  | .mulx width high low source nextPc => mulxStep width high low source nextPc s
-  | .multiply width dst source immediate nextPc => multiplyStep width dst source immediate nextPc s
-  | .rotateRight width dst count nextPc => rotateRightStep width dst count nextPc s
-  | .exchange width left right nextPc => exchangeStep width left right nextPc s
-  | .legacyShift width kind dst count nextPc => legacyShiftStep width kind dst count nextPc s
+  | .xmm0Move store aligned address nextPc =>
+      let kind := if aligned then _root_.X86.VMovKind.aps else .ups
+      nativeStep (if store then .vstore kind { disp := address } .x0
+        else .vload kind .x0 { disp := address }) nextPc s
+  | .doubleShift width left dst source count nextPc =>
+      nativeStep (.dshift (if left then .shld else .shrd) (externalCmovSize width)
+        (.reg (_root_.X86.GPR.ofIndex dst)) (_root_.X86.GPR.ofIndex source)
+        (.imm8 (count.setWidth 8))) nextPc s
+  | .mulx width high low source nextPc =>
+      nativeStep (.mulx (externalBzhiSize width) (_root_.X86.GPR.ofIndex high)
+        (_root_.X86.GPR.ofIndex low) (externalPlainSource source)) nextPc s
+  | .multiply width dst source immediate nextPc =>
+      let immediate := immediate.map (fun raw =>
+        (raw.setWidth (if width == .w16 then 16 else 32)).signExtend 64)
+      nativeStep (.imulr (externalCmovSize width) (_root_.X86.GPR.ofIndex dst)
+        (externalPlainSource source) immediate) nextPc s
+  | .unsignedMultiply width source nextPc =>
+      nativeStep (.muldiv .mul (externalSize width) (externalSource width source)) nextPc s
+  | .rotateRight width dst count nextPc =>
+      nativeStep (.rot .ror (externalSize width) (externalDestination width dst)
+        (.imm8 (count.setWidth 8))) nextPc s
+  | .exchange width left right nextPc =>
+      nativeStep (.xchg (externalSize width) (externalRegister width left)
+        (externalRegister width right)) nextPc s
+  | .legacyShift width kind dst count nextPc =>
+      let op := match kind with
+        | .rotateLeft => _root_.X86.Op.rot .rol (externalSize width)
+            (externalDestination width dst) (.imm8 (count.setWidth 8))
+        | .left | .right | .arithmetic =>
+            .shift (match kind with | .left => .shl | .right => .shr | _ => .sar)
+              (externalSize width) (externalDestination width dst) (.imm8 (count.setWidth 8))
+      nativeStep op nextPc s
   | .lea width dst address nextPc =>
       nativeStep (.lea (externalCmovSize width) (_root_.X86.GPR.ofIndex dst) { disp := address }) nextPc s
-  | .divide width source nextPc => divideStep width source nextPc s
-  | .signedDivide width source nextPc => signedDivideStep width source nextPc s
+  | .divide width source nextPc =>
+      nativeStep (.muldiv .div (externalSize width) (externalSource width source)) nextPc s
+  | .signedDivide width source nextPc =>
+      nativeStep (.muldiv .idiv (externalSize width) (externalSource width source)) nextPc s
   | .signHigh width nextPc =>
-      let result := writeValue width (s.gpr 2) (signHighValue width (s.gpr 0))
-      ⟨{ s with gpr := (fun r => if r = 2 then result else s.gpr r), pc := nextPc }, [], none⟩
+      nativeStep (.cext (match width with | .w16 => .cwd | .w32 => .cdq | .w64 => .cqo)) nextPc s
   | .extend sourceWidth targetWidth signed dst source nextPc =>
-      match scalarRead s sourceWidth source with
-      | .error fault => ⟨s, [.fault fault], some fault⟩
-      | .ok (value, events) =>
-          let result := scalarWriteValue (s.gpr dst) (extendValue sourceWidth signed value) targetWidth (.low dst)
-          ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), pc := nextPc }, events, none⟩
+      nativeStep (.movx (if signed then .sign else .zero) (externalSize targetWidth)
+        (externalSize sourceWidth) (_root_.X86.GPR.ofIndex dst) (externalSource sourceWidth source)) nextPc s
   | .popcount width dst source nextPc =>
-      match readSource s source width.bytes with
-      | .error fault => ⟨s, [.fault fault], some fault⟩
-      | .ok (value, events) =>
-          let result := cmovValue width true (s.gpr dst) (popcountValue width value)
-          ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), rflags := popcountFlags width value s.rflags, pc := nextPc }, events, none⟩
+      nativeStep (.bitcnt .popcnt (externalCmovSize width) (_root_.X86.GPR.ofIndex dst)
+        (externalPlainSource source)) nextPc s
   | .unary width kind dst nextPc =>
       let kind := match kind with | .inc => .inc | .dec => .dec | .neg => .neg | .not => .not
       nativeStep (.un kind (externalSize width) (externalDestination width dst)) nextPc s
@@ -967,12 +513,11 @@ def step (instruction : Instruction) (s : State) : Transition State :=
   | .nop nextPc => nativeStep (.nop none) nextPc s
   | .leave64 nextPc => leave64Step nextPc s
   | .branch cc target nextPc =>
-      let taken := match cc with | none => true | some code => condition s.rflags code
-      ⟨{ s with pc := if taken then target else nextPc }, [], none⟩
+      nativeStep (match cc with
+        | none => .jmp (.rel (target-nextPc))
+        | some code => .jcc (externalCondition code) (target-nextPc)) nextPc s
   | .setcc cc dst nextPc =>
-      match scalarWrite s .w8 dst (if condition s.rflags cc then 1 else 0) with
-      | .error fault => ⟨s, [.fault fault], some fault⟩
-      | .ok (result, events) => ⟨{ result with pc := nextPc }, events, none⟩
+      nativeStep (.setcc (externalCondition cc) (externalDestination .w8 dst)) nextPc s
   | .arithmetic width kind dst src nextPc =>
       let kind := match kind with | .add => .add | .adc => .adc | .sub => .sub | .sbb => .sbb | .compare => .cmp
       nativeStep (.bin kind (externalSize width) (externalDestination width dst) (externalSource width src)) nextPc s
@@ -984,58 +529,43 @@ def step (instruction : Instruction) (s : State) : Transition State :=
       nativeStep (.movbe (externalCmovSize width) (.reg (_root_.X86.GPR.ofIndex dst)) (.mem { disp := address })) nextPc s
   | .movbeStore width src address nextPc =>
       nativeStep (.movbe (externalCmovSize width) (.mem { disp := address }) (.reg (_root_.X86.GPR.ofIndex src))) nextPc s
-  | .bmiShift width kind dst source count nextPc => bmiShiftStep width kind dst source count nextPc s
-  | .push width src nextPc => pushTransfer width (s.gpr src) [] nextPc s
-  | .pushImmediate width value nextPc => pushTransfer width value [] nextPc s
+  | .bmiShift width kind dst source count nextPc =>
+      let op : Except _root_.X86.MsErr _root_.X86.Op := match kind, count with
+        | .rotate, .immediate amount =>
+            .ok (_root_.X86.Op.rorx (externalBzhiSize width) (_root_.X86.GPR.ofIndex dst)
+              (externalPlainSource source) (amount.setWidth 64))
+        | .left, .register r | .right, .register r | .arithmetic, .register r =>
+            .ok (.shiftx (match kind with | .left => .shl | .right => .shr | _ => .sar)
+              (externalBzhiSize width) (_root_.X86.GPR.ofIndex dst) (externalPlainSource source)
+              (_root_.X86.GPR.ofIndex r))
+        | _, _ => .error (_root_.X86.MsErr.illegalOperands "BMI count form has no native encoding")
+      match op with
+      | .ok op => nativeStep op nextPc s
+      | .error reason => { state := { s with modelError := some reason }, events := [], fault := none }
+  | .push width src nextPc =>
+      nativeStep (.push (externalStackSize width) (.reg (_root_.X86.GPR.ofIndex src))) nextPc s
+  | .pushImmediate width value nextPc =>
+      nativeStep (.push (externalStackSize width) (.imm value)) nextPc s
   | .pushMemory width address nextPc =>
-      match readSource s (.memory address) width.bytes with
-      | .error fault => ⟨s, [.fault fault], some fault⟩
-      | .ok (value, events) => pushTransfer width value events nextPc s
+      nativeStep (.push (externalStackSize width) (.mem { disp := address })) nextPc s
   | .popMemory width address nextPc =>
-      match readSource s (.memory (s.gpr 4)) width.bytes with
-      | .error fault => ⟨s, [.fault fault], some fault⟩
-      | .ok (value, events) =>
-          match writeMemory s.memory address value width.bytes with
-          | .error fault => ⟨s, events ++ [.fault fault], some fault⟩
-          | .ok (memory, event) =>
-              let advanced := s.gpr 4 + BitVec.ofNat 64 width.bytes
-              ⟨{ s with gpr := (fun r => if r = 4 then advanced else s.gpr r), memory := memory, pc := nextPc },
-                events ++ [event], none⟩
+      nativeStep (.pop (externalStackSize width) (.mem { disp := address })) nextPc s
   | .pop width dst nextPc =>
-      match readSource s (.memory (s.gpr 4)) width.bytes with
-      | .error fault => ⟨s, [.fault fault], some fault⟩
-      | .ok (value, events) =>
-          let advanced := s.gpr 4 + BitVec.ofNat 64 width.bytes
-          let afterStack := fun r => if r = 4 then advanced else s.gpr r
-          let result := cmovValue width.registerWidth true (afterStack dst) value
-          ⟨{ s with gpr := (fun r => if r = dst then result else afterStack r), pc := nextPc }, events, none⟩
+      nativeStep (.pop (externalStackSize width) (.reg (_root_.X86.GPR.ofIndex dst))) nextPc s
   | .cmov width cc dst source nextPc =>
-      match readSource s source width.bytes with
-      | .error fault => ⟨s, [.fault fault], some fault⟩
-      | .ok (value, events) =>
-          let result := cmovValue width (condition s.rflags cc) (s.gpr dst) value
-          ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), pc := nextPc }, events, none⟩
+      nativeStep (.cmov (externalCondition cc) (externalCmovSize width)
+        (_root_.X86.GPR.ofIndex dst) (externalPlainSource source)) nextPc s
   | .bt width source index nextPc =>
-      match readSource s (bitBaseSource width source index s) width.bytes with
-      | .error fault => ⟨s, [.fault fault], some fault⟩
-      | .ok (value, events) =>
-          ⟨{ s with rflags := setFlag s.rflags 0 (bitTest value (bitIndexValue s index) width.bits), pc := nextPc },
-            events, none⟩
-
+      let offset := match index with
+        | .register r => _root_.X86.Operand.reg (_root_.X86.GPR.ofIndex r)
+        | .immediate value => .imm (value.setWidth 64)
+      nativeStep (.bit .bt (externalCmovSize width) (externalPlainSource source) offset) nextPc s
   | .andn width dst first second nextPc =>
-      match readSource s second width.bytes with
-      | .error fault => ⟨s, [.fault fault], some fault⟩
-      | .ok (value, events) =>
-          let mask := BitVec.ofNat 64 (2 ^ width.bits) - 1
-          let result := andNot (s.gpr first) value &&& mask
-          ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), rflags := andnFlags s.rflags result width.bits, pc := nextPc }, events, none⟩
+      nativeStep (.andn (externalBzhiSize width) (_root_.X86.GPR.ofIndex dst)
+        (_root_.X86.GPR.ofIndex first) (externalPlainSource second)) nextPc s
   | .bzhi width dst source count nextPc =>
-      match readSource s source width.bytes with
-      | .error fault => ⟨s, [.fault fault], some fault⟩
-      | .ok (value, events) =>
-          let count := s.gpr count &&& 0xff
-          let result := zeroHighBits value count width.bits
-          ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), rflags := bzhiFlags s.rflags count result width.bits, pc := nextPc }, events, none⟩
+      nativeStep (.bzhi (externalBzhiSize width) (_root_.X86.GPR.ofIndex dst)
+        (externalPlainSource source) (_root_.X86.GPR.ofIndex count)) nextPc s
 
 /-- Defined RFLAGS output bits. BT sets CF and preserves ZF; OF/SF/AF/PF
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
@@ -1050,7 +580,7 @@ def definedFlags : Instruction → Word
       if n = 0 then 0xffffffffffffffff else if width.bits < n then 0xfffffffffffff72a
       else if n = 1 then 0xffffffffffffffef else 0xfffffffffffff7ef
   | .mulx .. => 0xffffffffffffffff
-  | .multiply .. => 0xffffffffffffff2b
+  | .multiply .. | .unsignedMultiply .. => 0xffffffffffffff2b
   | .rotateRight width _ count _ => legacyDefinedFlags width .rotateLeft count
   | .exchange .. => 0xffffffffffffffff
   | .legacyShift width kind _ count _ => legacyDefinedFlags width kind count
@@ -1357,10 +887,11 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
   if first = 0xf6 ∨ first = 0xf7 then
     let modrm ← byteAt bytes (count + 1)
     let group := (modrm / 8) % 8
-    if group = 6 ∨ group = 7 then
+    if group = 4 ∨ group = 6 ∨ group = 7 then
       let width := scalarWidth p (first == 0xf6)
       let (source, nextPc, _) ← operand bytes s p modrm (count + 2) 0
-      return if group = 7 then .signedDivide width (scalarSource p width source) nextPc
+      return if group = 4 then .unsignedMultiply width (scalarSource p width source) nextPc
+        else if group = 7 then .signedDivide width (scalarSource p width source) nextPc
         else .divide width (scalarSource p width source) nextPc
     if group = 2 ∨ group = 3 then
       let width := scalarWidth p (first == 0xf6)

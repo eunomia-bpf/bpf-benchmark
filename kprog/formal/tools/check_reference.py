@@ -10,6 +10,29 @@ import sys
 ROOT = Path(__file__).resolve().parent.parent
 
 
+def assert_native_state(actual, expected, context):
+    """Compare all state/effects, allowing only independently declared ISA bits.
+
+    The expected masks are checked as data too. Faults retain the all-bits
+    obligation. This does not infer masks from an observed result or discard
+    memory, event prefixes, model refusals or any other state field.
+    """
+    assert actual.get("defined_flags") == expected["defined_flags"], (context, actual, expected)
+    assert actual.get("defined_registers") == expected.get("defined_registers"), (context, actual, expected)
+    observed = copy.deepcopy(actual)
+    wanted = copy.deepcopy(expected)
+    mask = expected["defined_flags"]
+    assert 0 <= mask < 1 << 64
+    if expected["fault"] is not None:
+        assert mask == (1 << 64) - 1
+    observed["flags"] &= mask
+    wanted["flags"] &= mask
+    for index, mask in enumerate(expected.get("defined_registers", [(1 << 64) - 1] * 16)):
+        observed["registers"][index] &= mask
+        wanted["registers"][index] &= mask
+    assert observed == wanted, (context, actual, expected)
+
+
 def main():
     base = {
         "state": {"registers": [0xDEADBEEF12345678] + list(range(1, 16)),
@@ -76,7 +99,7 @@ def main():
                                    "value": [c["value"] for c in read], "initialized": True}]
         elif i == 5:
             expected["registers"][8] = 0x55667788
-        assert out == expected, (i, out, expected)
+        assert_native_state(out, expected, (i, out, expected))
     # BT regressions: operand-size wrapping, signed memory bit strings, and
     # RIP-relative fall-through including the trailing immediate byte.
     bt_cases = []
@@ -118,9 +141,10 @@ def main():
                             flags=(expected["flags"] & ~1) | carry,
                             defined_flags=0xFFFFFFFFFFFFF76B, fault=None, events=[])
             if address is not None:
-                expected["events"] = [{"kind": "read", "address": address,
-                                       "value": [0, 128], "initialized": False}]
-        assert out == expected, (request, out, expected)
+                register_index = request["native_bytes"] == [0x66, 0x0F, 0xA3, 0x1F]
+                expected["events"] = [{"kind": "read", "address": address + int(register_index),
+                                       "value": [128] if register_index else [0, 128], "initialized": False}]
+        assert_native_state(out, expected, (request, out, expected))
     # BZHI sets SF from a retained sign bit and reads only the count's low byte.
     bzhi_cases = []
     def bzhi_request(code, count, value, result, flag_bits, dst=0, src=1, cnt=3, cells=None):
@@ -157,7 +181,7 @@ def main():
             expected["events"] = [{"kind": "read", "address": 0x2000,
                                    "value": list(bytes.fromhex("efcdab8967452381")),
                                    "initialized": True}]
-        assert out == expected, (request, out, expected)
+        assert_native_state(out, expected, (request, out, expected))
     # ANDN differs from ordinary AND: inversion applies to the first source,
     # while AF/PF are undefined. Include zero/sign, 32-bit upper clearing,
     # extended registers, aliasing and a destination-addressed memory source.
@@ -202,7 +226,7 @@ def main():
     outputs = [json.loads(line) for line in run.stdout.splitlines()]
     assert len(outputs) == len(andn_cases)
     for (request, expected), out in zip(andn_cases, outputs):
-        assert out == expected, (request, out, expected)
+        assert_native_state(out, expected, (request, out, expected))
     # POP reads the old stack, advances it, then writes the destination. Include
     # aliasing SP with a low16 carry, full RSP replacement, REX.B and faults.
     pop_cases = []
@@ -243,7 +267,7 @@ def main():
     outputs = [json.loads(line) for line in run.stdout.splitlines()]
     assert len(outputs) == len(pop_cases)
     for (request, expected), out in zip(pop_cases, outputs):
-        assert out == expected, (request, out, expected)
+        assert_native_state(out, expected, (request, out, expected))
     # PUSH captures the old source (including RSP), writes exactly the operand
     # bytes, initializes those bytes only, and commits nothing on a late fault.
     push_cases = []
@@ -300,7 +324,7 @@ def main():
     outputs = [json.loads(line) for line in run.stdout.splitlines()]
     assert len(outputs) == len(push_cases)
     for (request, expected), out in zip(push_cases, outputs):
-        assert out == expected, (request, out, expected)
+        assert_native_state(out, expected, (request, out, expected))
     # Full-field stack routes: signed immediates, source-before-decrement PUSH,
     # destination-after-increment POP, aliasing and read-before-write faults.
     stack_cases = []
@@ -374,7 +398,7 @@ def main():
     outputs = [json.loads(line) for line in run.stdout.splitlines()]
     assert len(outputs) == len(stack_cases)
     for (request, expected), out in zip(stack_cases, outputs):
-        assert out == expected, (request, out, expected)
+        assert_native_state(out, expected, (request, out, expected))
     # Flagless BMI2 shifts/rotates. Count masking and read/write aliasing must
     # preserve all RFLAGS even when the result is zero or has its sign set.
     bmi_cases = []
@@ -437,7 +461,7 @@ def main():
     outputs = [json.loads(line) for line in run.stdout.splitlines()]
     assert len(outputs) == len(bmi_cases)
     for (request, expected), out in zip(bmi_cases, outputs):
-        assert out == expected, (request, out, expected)
+        assert_native_state(out, expected, (request, out, expected))
     for raw in ("c4e260f7c1", "c4e265f7c1", "c4e373f0c101", "c4e37ff0c101"):
         request = copy.deepcopy(base)
         request["native_bytes"] = list(bytes.fromhex(raw))
@@ -517,7 +541,7 @@ def main():
     outputs = [json.loads(line) for line in run.stdout.splitlines()]
     assert len(outputs) == len(endian_cases)
     for (request, expected), out in zip(endian_cases, outputs):
-        assert out == expected, (request, out, expected)
+        assert_native_state(out, expected, (request, out, expected))
     # F2 selects CRC32, whose shared opcode must never decode as MOVBE.
     for raw in ("f20f38f04708", "f2480f38f14708", "0f38f0c1", "0f38f1c1"):
         request = copy.deepcopy(base)

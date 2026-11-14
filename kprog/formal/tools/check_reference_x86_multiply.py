@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """IMUL native encodings, full signed products, CPU flags and precise reads."""
 import copy
+from check_reference import assert_native_state
 import ctypes
 import json
 from pathlib import Path
@@ -22,6 +23,10 @@ def main():
         source.append(f'uint64_t multiply{bits}(uint64_t a,uint64_t b,uint64_t old,uint64_t *out){{uint64_t f;'
             '__asm__ volatile("pushfq;pushq %3;popfq;imul'+suffix+' '+operand+'2,'+operand+'0;pushfq;popq %1;popfq"'
             ':"+a"(a),"=r"(f):"r"(b),"r"(old):"cc","memory");*out=f;return a;}')
+    for bits, suffix, operand in ((8,'b','b'),(16,'w','w'),(32,'l','k'),(64,'q','')):
+        source.append('void unsigned'+str(bits)+'(uint64_t a,uint64_t b,uint64_t h,uint64_t old,uint64_t *out){uint64_t f;'
+            '__asm__ volatile("pushfq;pushq %[old];popfq;mul'+suffix+' %'+operand+'[b];pushfq;popq %[f];popfq"'
+            ':[a]"+a"(a),[h]"+d"(h),[f]"=&r"(f):[b]"c"(b),[old]"r"(old):"cc","memory");out[0]=a;out[1]=h;out[2]=f;}')
     (folder/'cpu.c').write_text('\n'.join(source)+'\n')
     subprocess.run(['cc','-O2','-shared','-fPIC','-mno-red-zone',folder/'cpu.c','-o',folder/'cpu.so'],check=True)
     cpu=ctypes.CDLL(str(folder/'cpu.so')); cases=[]; cpu_count=0
@@ -88,12 +93,55 @@ def main():
     add('66480fafc3',64,0x1234,MASK)
     add('486b0500000000f9',64,0x1234,(-7)&MASK,immediate=True,memory=True,address=4)
     add('4869050000000000000080',64,0x1234,(-0x80000000)&MASK,immediate=True,memory=True,address=7)
+    unsigned_count = 0
+    for bits in (8,16,32,64):
+        fn = getattr(cpu,'unsigned'+str(bits))
+        fn.argtypes = [ctypes.c_uint64]*4+[ctypes.POINTER(ctypes.c_uint64)]
+        narrow = (1 << bits)-1
+        forms = [(src,False,False,False) for src in range(16)]
+        if bits == 8: forms += [(src,True,False,False) for src in range(4)]
+        forms += [(7,False,True,fault) for fault in (False,True)]
+        for src,high_byte,memory,fault in forms:
+            for left,right in ((0,1),(1,1),(MASK,MASK),(1 << (bits-1),2),(0x8123456789abcdef,0xfedcba9876543210)):
+                registers = [(0xabcdef0123456789+17*i)&MASK for i in range(16)]
+                registers[0],registers[2] = left,0x87654321fedcba98
+                if src not in (0,2): registers[src] = right
+                if memory: registers[7] = 0x2001
+                value = right if memory else (registers[src] >> 8) if high_byte else registers[src]
+                product = (registers[0]&narrow)*(value&narrow)
+                low,high = product&narrow,product >> bits
+                wanted = registers.copy()
+                def write(index,value,width):
+                    wanted[index] = value if width >= 32 else (wanted[index]&~((1 << width)-1))|value
+                if bits == 8: write(0,product,16)
+                else: write(0,low,bits);write(2,high,bits)
+                anchor = (ctypes.c_uint64*3)()
+                fn(registers[0],value,registers[2],0xAD7,anchor)
+                assert list(anchor)[:2] == [wanted[0],wanted[2]], (bits,src,registers,list(anchor),wanted)
+                assert anchor[2]&0x801 == (0x801 if high else 0), (bits,src,product,list(anchor))
+                rex = (8 if bits==64 else 0)+(1 if src>=8 else 0)
+                # Byte codes4..7 need REX for SPL/BPL/SIL/DIL instead of AH..BH.
+                prefix = ([0x66] if bits==16 else [])+([0x40+rex] if rex or (bits==8 and src>=4 and not memory) else [])
+                code = prefix+[0xF6 if bits==8 else 0xF7,(0x20 if memory else 0xE0)+(src+4 if high_byte else src)%8]
+                state = dict(registers=registers,flags=0xAD7,pc=0x4000,xmm0=(1 << 127)+17,fs_base=0,gs_base=0,memory=[])
+                if memory:
+                    state['memory'] = [dict(address=0x2001+i,value=(value >> (8*i))&255,readable=not(fault and i==bits//8-1),writable=False,initialized=False) for i in range(bits//8)]
+                expected = copy.deepcopy(state)
+                expected.update(registers=wanted,flags=(0xAD7&~0x801)|(0x801 if high else 0),pc=0x4000+len(code),events=[],fault=None,defined_flags=MASK^0xD4)
+                if memory: expected['events'] = [dict(kind='read',address=0x2001,value=[c['value'] for c in state['memory']],initialized=False)]
+                if fault:
+                    expected = copy.deepcopy(state)
+                    reason = dict(kind='read',address=0x2001,bytes=bits//8)
+                    expected.update(fault=reason,events=[dict(kind='fault',fault=reason)],defined_flags=MASK)
+                cases.append((dict(isa='x86_64',native_bytes=code,state=state),expected))
+                unsigned_count += 1
+    print(f'x86 unsigned MUL: {unsigned_count} hardware/Python pair-product and native state cases: every GPR/high8 source, RAX/RDX aliases, exact memory reads/faults')
     binary=ROOT/'.lake/build/bin/reference'
     for start in range(0,len(cases),1024):
         batch=cases[start:start+1024]
         result=subprocess.run([str(binary)],input=''.join(json.dumps(r)+'\n' for r,_ in batch),text=True,capture_output=True,check=True)
         actual=[json.loads(line) for line in result.stdout.splitlines()];assert len(actual)==len(batch)
-        for (request,expected),observed in zip(batch,actual): assert observed==expected,(request,observed,expected)
+        for (request,expected),observed in zip(batch,actual): assert_native_state(observed, expected, (request,observed,expected))
     for code in ('0faf','486bc3','6669c300','66'*13+'0fafc3'):
         request=copy.deepcopy(cases[0][0]);request['native_bytes']=list(bytes.fromhex(code))
         result=subprocess.run([str(binary)],input=json.dumps(request)+'\n',text=True,capture_output=True)

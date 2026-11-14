@@ -125,7 +125,8 @@ int main(void) {{
                         str(path),"-o",str(path.with_suffix(""))],check=True)
         subprocess.run([str(path.with_suffix(""))],check=True)
         path.write_text(program)
-        subprocess.run(["clang-18","-target","bpfel","-O2","-D__TARGET_ARCH_x86",*includes,
+        # TRUNC32 uses BPF ALU32 (the w-register constraint), available at v3.
+        subprocess.run(["clang-18","-target","bpfel","-mcpu=v3","-O2","-D__TARGET_ARCH_x86",*includes,
                         "-c",str(path),"-o",str(path.with_suffix(".o"))],check=True)
     print("x86 sign-high: 6144 actual CPU/encoded-handler results and all three BPF compilations OK")
 

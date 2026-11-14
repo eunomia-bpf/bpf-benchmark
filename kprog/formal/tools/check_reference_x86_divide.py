@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Check architectural DIV/IDIV widths, full dividends, #DE and read-fault precedence."""
 import copy
+from check_reference import assert_native_state
 import json
 from pathlib import Path
 import subprocess
@@ -118,7 +119,7 @@ def main():
         input="".join(json.dumps(r)+"\n" for r,_ in cases),text=True,stdout=subprocess.PIPE,check=True)
     outputs=[json.loads(line) for line in run.stdout.splitlines()]
     assert len(outputs)==len(cases)
-    for (request,expected),actual in zip(cases,outputs): assert actual==expected,(request,actual,expected)
+    for (request,expected),actual in zip(cases,outputs): assert_native_state(actual, expected, (request,actual,expected))
     faults=sum(e["fault"] is not None for _,e in cases)
     print(f"x86 DIV/IDIV reference: {unsigned_count} unsigned and {len(cases)-unsigned_count} signed full-state cases; {len(cases)} full-state cases including {faults} divide/read faults; 128-bit dividends, aliases and ordered effects OK")
 

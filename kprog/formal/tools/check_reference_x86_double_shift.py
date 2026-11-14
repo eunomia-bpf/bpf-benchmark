@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """SHLD/SHRD defined results, undefined lanes, GNU encodings and CPU flags."""
 import copy
+from check_reference import assert_native_state
 import ctypes
 import json
 from pathlib import Path
@@ -99,7 +100,7 @@ def main():
         batch = cases[start:start+1024]
         result = subprocess.run([str(binary)],input=''.join(json.dumps(r)+'\n' for r,_ in batch),text=True,capture_output=True,check=True)
         actual = [json.loads(line) for line in result.stdout.splitlines()];assert len(actual)==len(batch)
-        for (request,expected),observed in zip(batch,actual): assert observed==expected,(request,observed,expected)
+        for (request,expected),observed in zip(batch,actual): assert_native_state(observed, expected, (request,observed,expected))
     for code in ('0fa4c3','480fad','66'*12+'0fa4c301'):
         request = copy.deepcopy(cases[0][0]);request['native_bytes'] = list(bytes.fromhex(code))
         result = subprocess.run([str(binary)],input=json.dumps(request)+'\n',text=True,capture_output=True)

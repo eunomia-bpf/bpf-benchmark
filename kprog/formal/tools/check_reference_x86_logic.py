@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Native logical encodings, five defined flags, lane writes and memory faults."""
 import copy
+from check_reference import assert_native_state
 import json
 from pathlib import Path
 import subprocess
@@ -79,7 +80,7 @@ def main():
         input="".join(json.dumps(r) + "\n" for r, _ in cases), text=True, stdout=subprocess.PIPE, check=True)
     outputs = [json.loads(line) for line in run.stdout.splitlines()]
     assert len(outputs) == len(cases)
-    for (r, e), actual in zip(cases, outputs): assert actual == e, (r, actual, e)
+    for (r, e), actual in zip(cases, outputs): assert_native_state(actual, e, (r, actual, e))
     print(f"x86 logical reference: {len(cases)} native forms/lanes/defined flags/memory/fault cases OK")
 
 
