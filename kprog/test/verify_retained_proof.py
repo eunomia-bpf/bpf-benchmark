@@ -6,6 +6,7 @@ cancels the submission after verification; it never installs or executes P.
 import argparse
 import ctypes as c
 import errno
+import hashlib
 import importlib.util
 import json
 import os
@@ -20,6 +21,9 @@ import trusted_service as service
 
 
 def replay(args):
+    checked_inputs = (args.checked_source, args.checked_frontend, args.checked_compiler)
+    if any(checked_inputs) and not all(checked_inputs):
+        raise ValueError('Checked replay requires source, frontend IR and native compiler together')
     spec = importlib.util.spec_from_file_location('retained_submit', ROOT / 'kprog/selftests/submit.py')
     submit = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(submit)
@@ -123,16 +127,39 @@ def replay(args):
             process = subprocess.run(command, pass_fds=(endpoint,), stdout=stdout, stderr=stderr)
         result.update(verify_exit=process.returncode, stock_accepted=process.returncode == 0,
                       context_and_map_shapes_equal=True)
+        if process.returncode == 0 and args.checked_source:
+            worker = service.adapter(1)
+            artifacts = dict(native_object=str(args.native), native_proof_object=str(args.native),
+                symbol=args.symbol, simulator_object=str(args.proof),
+                simulator_program='trusted_x86_x86_sim_xdp',
+                simulator_preprocessed=str(args.checked_source),
+                context_kind=worker.context_kind(expected['prog_type']),
+                simulator_frontend=dict(path=str(args.checked_frontend),
+                    source_sha256=hashlib.sha256(args.checked_source.read_bytes()).hexdigest(),
+                    ir_sha256=hashlib.sha256(args.checked_frontend.read_bytes()).hexdigest()))
+            checked = worker.compile_checked_simulator(artifacts, args.linker, args.checked_compiler)
+            result['checked_artifacts'] = checked
+            load_command = list(command)
+            load_command[1] = 'load'
+            load_command[5:8] = [checked['native_object'], checked['symbol'], checked['native_proof_object']]
+            (args.output / 'load-command.json').write_text(json.dumps(load_command, indent=2) + '\n')
+            with (args.output / 'load.stdout').open('w') as stdout, (args.output / 'load.stderr').open('w') as stderr:
+                loaded = subprocess.run(load_command, pass_fds=(endpoint,), stdout=stdout, stderr=stderr)
+            result['checked_load_exit'] = loaded.returncode
+            result['checked_installed'] = loaded.returncode == 0
+            completed = loaded.returncode == 0
+            loaded.check_returncode()
     except Exception as error:
         result['error'] = str(error)
         raise
     finally:
-        if request is not None:
+        if request is not None and not completed:
             service.ioctl(endpoint, service.COMPLETE, service.Result(request_id=request.request_id, status=-errno.ECANCELED))
             completed = True
         if thread is not None:
             thread.join()
-        result.update(submission_cancelled=completed, replies=replies, wait_errors=failures)
+        result.update(submission_cancelled=not result.get('checked_installed', False) and completed,
+                      replies=replies, wait_errors=failures)
         (args.output / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
         if descriptor is not None:
             os.close(descriptor)
@@ -148,5 +175,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__, fromfile_prefix_chars='@')
     for field in ('native', 'metadata', 'context', 'source', 'proof', 'linker', 'output'):
         parser.add_argument('--' + field, type=Path, required=True)
+    for field in ('checked-source', 'checked-frontend', 'checked-compiler'):
+        parser.add_argument('--' + field, type=Path)
     parser.add_argument('--symbol', required=True)
     replay(parser.parse_args())
