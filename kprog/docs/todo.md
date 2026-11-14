@@ -199,6 +199,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED checked-sim-C实际kernel通过（2026-11-14T03:17:19Z）** 149090 Make0：ordinary stock先验证prog6；复制的预处理simC SHA与检查输入均be4cc183c64a…，trusted compiler生成新的simulator executable SHA43658d8f305a…，最终native prog9。实际源map29/73更新后stock/native均58/146，未使用同名decoy11。完整P/B/simC/IR/native/命令/身份/执行证据 checked-sim-execution-kernel*，raw /workspaces/kprog-raw/verified/20261114-checked-sim/{kernel-launch,kernel}。仅组件路径通过，无canonical部署/应用覆盖声明；接续packet context target lowering与真实stock拒绝先于compiler负例。
+
 - **VERIFIED checked-sim-c实际kernel子集已启动（2026-11-14T03:14:01Z）** 1233721f4配置及host证据已push；Make dry-run通过后outer149090，CPU14/2vCPU1G/hostAS8GiB/shared image lock，prelaunch MemAvailable34,950,064kB。raw /workspaces/kprog-raw/verified/20261114-checked-sim/{kernel-launch,kernel}，receipt checked-sim-kernel-launch.json。测试实际先stock检查B、再从simC编译出的native按源map29/73读出58/146；结果下turn收取。canonical image/base/kernel仍未修改，无新应用完成数。
 
 - **VERIFIED checked-sim-c第二service配置宿主通过（2026-11-14T03:12:39Z）** 默认submitted-native保留；新开关先ordinary stock verifier检查B，成功后复制同一预处理simC .i，由trusted compiler重编IR、降BPF memory/helper语义并native优化编译，生成的simulator executable再link/arm。当前kernel ABI在最终BPF_LOAD时安装，所以仍有最终一次stock验证（共两次，代价明确记录），不改kernel/module。真实host live-map8boundary及width/unaligned60case、exact .i copy、拒绝先于编译transport分支、unknown asm报错、既有service lifecycle2case通过。完整失败attempt/输入/simC/B/native/IR/binary/log/sourceSHA归档 checked-sim-host-results*，raw /workspaces/kprog-raw/verified/20261114-checked-sim。未部署canonical/未做真实kernel新配置执行；packet context target lowering、dynamic CEL当前body frontend、全部应用仍开。

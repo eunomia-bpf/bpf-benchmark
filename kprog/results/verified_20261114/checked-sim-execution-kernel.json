@@ -1,0 +1,70 @@
+{
+  "recorded": "2026-11-14T03:17:17.272475+00:00",
+  "launcher_pid": 149090,
+  "code_commit": "1233721f4",
+  "make_exit": 0,
+  "finished": "2026-11-14T03:13:39Z",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-checked-sim",
+  "canonical_changed": false,
+  "scope": "Registered-service checked-sim-C kernel component, not application certification",
+  "execution": [
+    {
+      "route": "stock",
+      "configured": 29,
+      "retval": 58
+    },
+    {
+      "route": "native",
+      "configured": 29,
+      "retval": 58
+    },
+    {
+      "route": "stock",
+      "configured": 73,
+      "retval": 146
+    },
+    {
+      "route": "native",
+      "configured": 73,
+      "retval": 146
+    }
+  ],
+  "stock_verification": {
+    "request_id": 1,
+    "prog_id": 6,
+    "phase": "verify",
+    "status": 0
+  },
+  "compiler": {
+    "source": "/workspaces/kprog-raw/verified/20261114-checked-sim/kernel/state/session-9epaduv1/requests/request-0u0xxy4r/generated/trusted_x86.bpf.i",
+    "copied_source": "/workspaces/kprog-raw/verified/20261114-checked-sim/kernel/state/session-9epaduv1/requests/request-0u0xxy4r/generated/checked-simulator.i",
+    "source_sha256": "be4cc183c64a411deb7aac88c66696846e607b5c02a82c6e7ebb054b674d1790",
+    "copied_source_sha256": "be4cc183c64a411deb7aac88c66696846e607b5c02a82c6e7ebb054b674d1790",
+    "executable_sha256": "43658d8f305a9d14713d58e943e8224739d7d3833acb55ebf70712be523d2fae",
+    "artifacts": {
+      "native_object": "/workspaces/kprog-raw/verified/20261114-checked-sim/kernel/state/session-9epaduv1/requests/request-0u0xxy4r/generated/checked-simulator.native.o",
+      "native_proof_object": "/workspaces/kprog-raw/verified/20261114-checked-sim/kernel/state/session-9epaduv1/requests/request-0u0xxy4r/generated/checked-simulator.proof.o",
+      "simulator_object": "/workspaces/kprog-raw/verified/20261114-checked-sim/kernel/state/session-9epaduv1/requests/request-0u0xxy4r/generated/trusted_x86.bpf.o",
+      "simulator_program": "trusted_x86_x86_sim_xdp",
+      "simulator_source": "/workspaces/kprog-raw/verified/20261114-checked-sim/kernel/state/session-9epaduv1/requests/request-0u0xxy4r/generated/trusted_x86.bpf.c",
+      "simulator_preprocessed": "/workspaces/kprog-raw/verified/20261114-checked-sim/kernel/state/session-9epaduv1/requests/request-0u0xxy4r/generated/trusted_x86.bpf.i",
+      "symbol": "trusted_x86_x86_sim_xdp",
+      "native_sha256": "bde6335435694c41114e1bf7783d1146501bddc8094f135f684932b90929d092"
+    }
+  },
+  "requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 3,
+      "native_sha256": "bde6335435694c41114e1bf7783d1146501bddc8094f135f684932b90929d092",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T03:13:32.777324+00:00",
+      "prog_id": 9,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-checked-sim/kernel/state/session-9epaduv1/requests/1.success.tar.gz",
+      "finished": "2026-11-14T03:13:38.326810+00:00"
+    }
+  ],
+  "archive": "checked-sim-execution-kernel.tar.gz"
+}
