@@ -90,11 +90,17 @@ def compile_simulator(clang, source: Path, obj: Path, run, *, bounds_compiler=No
     spills = os.environ.get('KPROG_BPF_WHOLE_WORD_SPILLS', '0')
     if spills not in {'0', '1'}:
         raise ValueError('KPROG_BPF_WHOLE_WORD_SPILLS must be 0 or 1')
+    all_spills = os.environ.get('KPROG_BPF_WHOLE_WORD_SPILLS_ALL', '0')
+    if all_spills not in {'0', '1'}:
+        raise ValueError('KPROG_BPF_WHOLE_WORD_SPILLS_ALL must be 0 or 1')
+    if all_spills == '1' and spills != '1':
+        raise ValueError('KPROG_BPF_WHOLE_WORD_SPILLS_ALL requires KPROG_BPF_WHOLE_WORD_SPILLS')
     if spills == '1':
         before, packed = source.with_suffix('.before.mir'), source.with_suffix('.packed.mir')
         run([clang, *COMPILE_FLAGS, '-c', compiled_input, '-mllvm',
              '-stop-before=prologepilog', '-o', before])
-        run([sys.executable, ROOT / 'kprog/x86/whole_word_spills.py', before, packed])
+        run([sys.executable, ROOT / 'kprog/x86/whole_word_spills.py', before, packed,
+             *(['--all-scalar-pairs'] if all_spills == '1' else [])])
         run(['llc-18', '-O3', '-march=bpf', '-mcpu=v4', '-bpf-stack-size=4096',
              '-start-before=prologepilog', '-filetype=obj', packed, '-o', obj])
     else:

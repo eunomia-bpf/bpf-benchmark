@@ -1,4 +1,4 @@
-"""Optional MIR lowering for two scalar u32 spills into one whole word.
+"""Optional MIR lowering for independent scalar u32 pairs into whole words.
 
 Inputs must be pre-PEI physical MIR;
 all selected slot accesses must be direct STW32/LDW32 at offset zero.
@@ -17,11 +17,11 @@ def lower(path, low, high):
     return lower_text(path.read_text(), low, high)
 
 
-def lower_text(text, low, high):
+def lower_text(text, low, high, *, require_final=True):
     head, body = text.split('body:             |', 1)
     slots = {int(i): (int(n), int(a)) for i, n, a in re.findall(
         r'  - \{ id: (\d+),[^\n]*type: spill-slot,[^\n]*size: (\d+), alignment: (\d+),', head)}
-    if low >= high or high != max(slots) or slots[low] != (4, 8) or slots[high] != (4, 8):
+    if low >= high or (require_final and high != max(slots)) or slots[low] != (4, 8) or slots[high] != (4, 8):
         raise ValueError('Expected two scalar4/aligned8 slots, with the last slot selected second')
     blocks, current = {}, None
     for line in body.splitlines():
@@ -120,7 +120,7 @@ def lower_text(text, low, high):
     return output, changes
 
 
-def automatic(path):
+def automatic(path, all_scalar_pairs=False):
     documents = path.read_text().split('\n---\n')
     records = []
     for index, document in enumerate(documents):
@@ -130,6 +130,12 @@ def automatic(path):
         slots = {int(i): (int(n), int(a)) for i, n, a in re.findall(
             r'  - \{ id: (\d+),[^\n]*type: spill-slot,[^\n]*size: (\d+), alignment: (\d+),', head)}
         eligible = sorted(slot for slot, shape in slots.items() if shape == (4, 8))
+        if all_scalar_pairs:
+            for low, high in zip(eligible[-2::-2], eligible[::-2]):
+                document, changes = lower_text(document, low, high, require_final=False)
+                records.append(dict(document=index, low=low, high=high, changes=changes))
+            documents[index] = document
+            continue
         # Other frame shapes keep their existing compiler representation.
         if len(eligible) < 2 or eligible[-1] != max(slots):
             continue
@@ -145,11 +151,14 @@ if __name__ == '__main__':
     parser.add_argument('output', type=Path)
     parser.add_argument('--low', type=int)
     parser.add_argument('--high', type=int)
+    parser.add_argument('--all-scalar-pairs', action='store_true')
     args = parser.parse_args()
     if (args.low is None) != (args.high is None):
         parser.error('--low and --high are supplied together')
+    if args.all_scalar_pairs and args.low is not None:
+        parser.error('--all-scalar-pairs selects pairs automatically')
     if args.low is None:
-        output, changes = automatic(args.mir)
+        output, changes = automatic(args.mir, args.all_scalar_pairs)
     else:
         output, changes = lower(args.mir, args.low, args.high)
     args.output.write_text(output)
