@@ -42,7 +42,7 @@ class PerfSelection(unittest.TestCase):
         self.assertIs(profile.execution_command(guest, args, pathlib.Path("/out")), guest)
         args.host_event = "cpu_atom/cycles/G"
         command = profile.execution_command(guest, args, pathlib.Path("/out"))
-        self.assertEqual(command[:6], ["/selected/perf", "kvm", "-o", "/out/host.data", "record", "-a"])
+        self.assertEqual(command[:5], ["/selected/perf", "record", "-o", "/out/host.data", "-a"])
         self.assertEqual(command[command.index("-C") + 1], "16-19")
         self.assertEqual(command[command.index("-e") + 1], "cpu_atom/cycles/G")
         self.assertEqual(command[command.index("--") + 1:], guest)

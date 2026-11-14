@@ -124,7 +124,10 @@ def execution_command(command: list[str], args: argparse.Namespace,
                       out: pathlib.Path) -> list[str]:
     if not args.host_event:
         return command
-    return [str(PERF), "kvm", "-o", str(out / "host.data"), "record", "-a",
+    # The explicit G event modifier already selects guest execution. Avoid the
+    # perf-kvm frontend, whose argv cleanup can abort after a completed child.
+    # Offline decoding enables guest samples with the retained --guestkallsyms.
+    return [str(PERF), "record", "-o", str(out / "host.data"), "-a",
             "-C", args.cpus, "-e", args.host_event, "-F", str(args.freq),
             "--clockid", "monotonic", "--", *command]
 

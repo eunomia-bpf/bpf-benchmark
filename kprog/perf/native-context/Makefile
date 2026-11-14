@@ -197,10 +197,23 @@ host-guest-pmu-record-check:
 	install -d $(HOST_GUEST_PMU_OUTPUT)
 	$(PROFILE_TOOL_BUILD)/perf kvm -o $(HOST_GUEST_PMU_OUTPUT)/host.data record -a -C 16-19 -e $(HOST_GUEST_PMU_EVENT) -F 199 --clockid monotonic -- true
 
+.PHONY: host-record-cleanup-check
+HOST_RECORD_CHECK ?= /workspaces/kprog-raw/perf/20261114-otel-host-profile/record-cleanup-check
+host-record-cleanup-check:
+	install -d $(HOST_RECORD_CHECK)
+	$(PROFILE_TOOL_BUILD)/perf record -o $(HOST_RECORD_CHECK)/success.data -a -C 16-19 -e $(HOST_GUEST_PMU_EVENT) -F 199 --clockid monotonic -- python3 -c 'import sys;sys.exit(int(sys.argv[1]))' 0 --child-arg
+	$(PROFILE_TOOL_BUILD)/perf record -o $(HOST_RECORD_CHECK)/failure.data -a -C 16-19 -e $(HOST_GUEST_PMU_EVENT) -F 199 --clockid monotonic -- python3 -c 'import sys;sys.exit(int(sys.argv[1]))' 7 --child-arg && status=0 || status=$$?; test $$status = 7
+
 .PHONY: profile-tool otel-profile otel-profile-report profile-tool-check
 profile-tool-check:
 	python3 -m unittest discover -s $(ROOT)/kprog/perf/profile -p test_perf_selection.py
 	python3 -m unittest discover -s $(ROOT)/kprog/perf/profile -p test_window_costs.py
+	python3 -m unittest discover -s $(ROOT)/kprog/perf/profile -p test_host_costs.py
+
+.PHONY: otel-host-profile-costs
+HOST_PROFILE_RAW ?= /workspaces/kprog-raw/perf/20261114-otel-host-profile
+otel-host-profile-costs:
+	python3 $(ROOT)/kprog/perf/profile/host-costs.py $(HOST_PROFILE_RAW)/run --samples $(HOST_PROFILE_RAW)/guest-samples-period.txt --observation $(HOST_PROFILE_RAW)/counter-observation.json
 
 .PHONY: otel-profile-costs
 OTEL_PROFILE_OBSERVATION ?= /workspaces/kprog-raw/perf/20261114-otel-profile/counter-observation.json
