@@ -46,7 +46,7 @@ if [[ $refresh_operation == --finalize ]]; then
     refresh_new_image=$(docker image inspect --format '{{.Id}}' "$refresh_image")
     finalize_refresh
     exit 0
-elif [[ $refresh_operation != full && $refresh_operation != --modules-only && $refresh_operation != --loader-only ]]; then
+elif [[ $refresh_operation != full && $refresh_operation != --modules-only && $refresh_operation != --loader-only && $refresh_operation != --direct-recovery ]]; then
     printf 'Unknown refresh operation: %s\n' "$2" >&2
     exit 1
 fi
@@ -67,6 +67,18 @@ sha256sum "$refresh_kernel/vmlinux" "$refresh_kernel/arch/x86/boot/bzImage" \
 sha256sum "$refresh_kernel/arch/x86/boot/bzImage" "$refresh_kernel/vmlinux" > "$refresh_output/kernel-sha256"
 printf -- '- %s VERIFIED shared refresh: replaced the sole rebuildable vmlinux ELF with the matching ELF extracted from the unchanged sole boot image; no kernel build/version change; before/after hashes in %s.\n' \
     "$(date -u +%FT%TZ)" "$refresh_output" >> "$refresh_root/kprog/docs/cleanup-log.md"
+fi
+
+if [[ $refresh_operation == --direct-recovery ]]; then
+    # Promote the exact module already exercised in the isolated kernel guest.
+    # Keep the sole kernel, installed kernel modules and canonical linker intact.
+    install -d "$refresh_output/previous-tools"
+    cp -p "$refresh_direct/bpf_x86_native_lab.ko" "$refresh_loader/libnative_loader.so" \
+        "$refresh_loader/trusted-native-loader" "$refresh_output/previous-tools/"
+    sha256sum "$refresh_kernel/arch/x86/boot/bzImage" "$refresh_kernel/vmlinux" \
+        "$refresh_kernel/.config" "$refresh_linker" > "$refresh_output/direct-recovery-stable-before-sha256"
+    install -m 0644 "${3:?tested direct recovery module required}" "$refresh_direct/bpf_x86_native_lab.ko"
+    make -C "$refresh_root/kprog/libnativeloader" trusted-service BUILD_DIR="$refresh_loader"
 fi
 
 if [[ $refresh_operation == full ]]; then
@@ -95,7 +107,7 @@ if [[ $refresh_operation == --loader-only ]]; then
         /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
         > "$refresh_output/loader-only-before-sha256"
     make -C "$refresh_root/kprog/libnativeloader" trusted-service BUILD_DIR="$refresh_loader"
-else
+elif [[ $refresh_operation == full || $refresh_operation == --modules-only ]]; then
 # Kbuild's modules_install parser removes the installed kernel directory even
 # with make -n. Finish the sole build's module outputs before reinstalling;
 # retain the existing core ELF and boot image, with no source/version change.
@@ -129,7 +141,7 @@ fi
 
 # The frozen image recipe below skips stable Rust artifacts. Rebuild the
 # canonical linker explicitly so a loader refresh cannot package the old one.
-if [[ $refresh_operation != --modules-only ]]; then
+if [[ $refresh_operation != --modules-only && $refresh_operation != --direct-recovery ]]; then
     sha256sum "$refresh_linker" > "$refresh_output/linker-before-sha256"
     env -u CARGO_TARGET_DIR CARGO_BUILD_JOBS=1 make -C "$refresh_root" host-rust-x86 JOBS=1
     sha256sum "$refresh_linker" > "$refresh_output/linker-after-sha256"
@@ -150,6 +162,10 @@ if [[ $refresh_operation == --loader-only ]]; then
         "$refresh_kernel/.config" "$refresh_direct/bpf_x86_native_lab.ko" \
         /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
         > "$refresh_output/loader-only-after-sha256"
+fi
+if [[ $refresh_operation == --direct-recovery ]]; then
+    sha256sum "$refresh_kernel/arch/x86/boot/bzImage" "$refresh_kernel/vmlinux" \
+        "$refresh_kernel/.config" "$refresh_linker" > "$refresh_output/direct-recovery-stable-after-sha256"
 fi
 refresh_new_image=$(docker image inspect --format '{{.Id}}' "$refresh_image")
 printf '%s\n' "$refresh_new_image" > "$refresh_output/new-image"

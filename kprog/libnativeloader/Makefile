@@ -501,7 +501,7 @@ resident-census-checkpoint:
 		$(foreach queue,$(CENSUS_CHECKPOINT_QUEUES),--queue "$(queue)")
 
 shared-base-refresh:
-	bash ../test/refresh_verified_base.sh "$(REFRESH_OUTPUT)" "$(REFRESH_OPERATION)"
+	bash ../test/refresh_verified_base.sh "$(REFRESH_OUTPUT)" "$(REFRESH_OPERATION)" "$(DIRECT_RECOVERY_BUILD)/module/bpf_x86_native_lab.ko"
 
 shared-base-finalize:
 	bash ../test/refresh_verified_base.sh "$(REFRESH_OUTPUT)" --finalize
