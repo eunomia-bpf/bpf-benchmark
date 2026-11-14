@@ -221,6 +221,10 @@ int main(int argc,char **argv) {
     for (auto &F:*M) {
       F.removeFnAttr("target-cpu"); F.removeFnAttr("target-features"); F.removeFnAttr("target-abi");
       F.addFnAttr("disable-tail-calls","true");
+      // BPF frontend IR can require a frame pointer. The native backend's
+      // -fomit-frame-pointer does not override that existing IR attribute;
+      // honor the native flag here before the linker recovers the BPF frame.
+      F.addFnAttr("frame-pointer","none");
       // Driver frontend flags do not set attributes on an existing IR module.
       // Preserve the native linker's direct-branch contract when retargeting.
       F.addFnAttr("no-jump-tables","true");

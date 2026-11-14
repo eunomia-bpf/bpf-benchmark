@@ -574,3 +574,23 @@ upstream-otel-candidate:
 	install -m644 $(OTEL_UPSTREAM_BUILD)/tracer.bpf.o $(OTEL_UPSTREAM_PAYLOAD)/tracer.original.bpf.o
 	python3 $(ROOT)/vendor/bpf/write_native_manifest.py --app otelcol-ebpf-profiler --llvm-nm llvm-nm-18 --output $(OTEL_UPSTREAM_PAYLOAD)/manifest.json --object $(OTEL_UPSTREAM_PAYLOAD)/otelcol-ebpf-profiler.native.o
 	python3 $(HERE)/manifest-context.py --input $(OTEL_UPSTREAM_PAYLOAD)/manifest.json --output $(OTEL_UPSTREAM_PAYLOAD)/manifest-context.json --kernel-data-layout
+
+NATIVE_FRAME_BUILD ?= /var/tmp/kprog-tmp/perf/native-frame
+NATIVE_FRAME_REFERENCE_TOOL ?= /workspaces/kprog-raw/perf/20261114-otel-original-native/input-evidence/socket-context-lower
+.PHONY: native-frame-check
+native-frame-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
+	install -d $(NATIVE_FRAME_BUILD)
+	install -m755 $(NATIVE_FRAME_REFERENCE_TOOL) $(NATIVE_FRAME_BUILD)/reference-lower
+	$(CC) -target bpf -O2 -g -fno-omit-frame-pointer -emit-llvm -c $(HERE)/test-native-frame.c -o $(NATIVE_FRAME_BUILD)/input.bc
+	python3 $(HERE)/socket-helper-names.py > $(NATIVE_FRAME_BUILD)/helper-names.json
+	$(CC) -O2 -DTEST_DRIVER -c $(HERE)/test-native-frame.c -o $(NATIVE_FRAME_BUILD)/driver.o
+	for variant in before after; do \
+		tool=$(NATIVE_FRAME_BUILD)/reference-lower; if [[ $$variant = after ]]; then tool=$(SOCKET_BUILD)/socket-context-lower; fi; \
+		$$tool $(NATIVE_FRAME_BUILD)/input.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json -o $(NATIVE_FRAME_BUILD)/default-$$variant.bc; \
+		$$tool $(NATIVE_FRAME_BUILD)/input.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(NATIVE_FRAME_BUILD)/helper-names.json -o $(NATIVE_FRAME_BUILD)/$$variant.bc; \
+		$(CC) -target x86_64-linux-gnu -O3 -fPIC -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-jump-tables -c $(NATIVE_FRAME_BUILD)/$$variant.bc -o $(NATIVE_FRAME_BUILD)/$$variant.o; \
+		$(CC) $(NATIVE_FRAME_BUILD)/$$variant.o $(NATIVE_FRAME_BUILD)/driver.o -o $(NATIVE_FRAME_BUILD)/$$variant; \
+		$(NATIVE_FRAME_BUILD)/$$variant; \
+		python3 $(HERE)/socket-proof.py --input $(NATIVE_FRAME_BUILD)/$$variant.o --linker $(LINK_MEMORY_PAYLOAD)/native-link-off --output $(NATIVE_FRAME_BUILD)/$$variant-links --section-prefix frame-test --kernel-roundtrip; \
+	done
+	python3 $(HERE)/check-native-frame.py --build $(NATIVE_FRAME_BUILD)
