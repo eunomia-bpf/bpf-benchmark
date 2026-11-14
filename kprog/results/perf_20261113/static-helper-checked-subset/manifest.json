@@ -1,0 +1,43 @@
+{
+  "scope": "Actual accepted checked-sim-C requests read_task_struct and stop. Full main remains pending, no whole-app/equal-work/performance claim.",
+  "files": [
+    {
+      "path": "1.success.tar.gz",
+      "bytes": 1921911,
+      "sha256": "d58326374d8dff482dec17f3b10e19039c1da2212b092cb79f6f2ed66d45098c"
+    },
+    {
+      "path": "2.success.tar.gz",
+      "bytes": 24414673,
+      "sha256": "f2e47e2e6b087732913bd08125c67ca43fa73eeb10c6384f29ce4666741fdf3e"
+    }
+  ],
+  "comparison": [
+    {
+      "request": 1,
+      "actual_new_stock_verify_status": 0,
+      "trusted_x86.bpf.o": {
+        "allocated_bytes_equal": true,
+        "allocated_relocations_equal": true
+      },
+      "checked-simulator.native.o": {
+        "allocated_bytes_equal": true,
+        "allocated_relocations_equal": true
+      },
+      "packed_scalar_slots": []
+    },
+    {
+      "request": 2,
+      "actual_new_stock_verify_status": 0,
+      "trusted_x86.bpf.o": {
+        "allocated_bytes_equal": true,
+        "allocated_relocations_equal": true
+      },
+      "checked-simulator.native.o": {
+        "allocated_bytes_equal": true,
+        "allocated_relocations_equal": true
+      },
+      "packed_scalar_slots": []
+    }
+  ]
+}
