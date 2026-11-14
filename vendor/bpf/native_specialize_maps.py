@@ -111,7 +111,7 @@ PERCPU_ARRAY_BODY = """    unsigned int __k;
         return (void *)0;
     unsigned long __cpu_off;
     __asm__ __volatile__("movq %%gs:%c1, %0" : "=r"(__cpu_off)
-                         : "i"(PERCPU_BASE_ADDR));
+                         : "i"({cpu_off}));
     return (void *)((char *)__pp + __cpu_off);"""
 
 # The loader's own hash post-processing: the map's lookup function runs, then
@@ -121,6 +121,30 @@ HASH_BODY = """    void *__v = __sp_htab_lookup(map, key);
     if ((unsigned long)__v == 0)
         return (void *)0;
     return (void *)((char *)__v + {key_offset}u);"""
+
+
+# A map's entry count is a constant expression in the unit, not a literal: upstream
+# sources write it as a product of size macros (`(512 * 2)`) or in hex
+# (`0x00fffffe`), and the frontend has already expanded the macros away.  Accept
+# any expression built from integer literals and the four arithmetic operators
+# and evaluate it here; anything else stays unresolved, as before.
+ENTRIES_EXPR = re.compile(r"^[\s0-9a-fA-FxX()*+\-]*$")
+INT_LITERAL = re.compile(r"0[xX][0-9a-fA-F]+|\d+|[()+\-*/]")
+
+
+def constant_entries(text: str) -> "int | None":
+    """The entry count of a map declaration, or None if it is not a constant."""
+    if not text or not ENTRIES_EXPR.fullmatch(text):
+        return None
+    tokens = INT_LITERAL.findall(text)
+    if not tokens:
+        return None
+    expr = "".join(token if token in "()+-*/" else f"({token})" for token in tokens)
+    try:
+        value = eval(expr, {"__builtins__": {}}, {})  # literals and operators only
+    except Exception:
+        return None
+    return value if isinstance(value, int) and value > 0 else None
 
 
 def declarations(unit: Path) -> list[dict[str, object]]:
@@ -140,15 +164,15 @@ def declarations(unit: Path) -> list[dict[str, object]]:
             elif typeof_name is not None:
                 fields[typeof_name] = typeof_text
         type_text = fields.get("type", "").strip()
-        entries = fields.get("max_entries", "").strip()
-        if not type_text or not entries.isdigit():
+        entries = constant_entries(fields.get("max_entries", "").strip())
+        if not type_text or entries is None:
             continue
         key_type = (fields.get("key") or "").strip()
         found.append({
             "name": name,
             "struct": named or name,
             "type": type_text,
-            "entries": int(entries),
+            "entries": entries,
             "key_type": key_type,
             "key_size": KEY_SIZES.get(key_type, 0),
             "value_type": (fields.get("value") or "").strip(),
@@ -223,7 +247,8 @@ def body_for(map_decl: dict, value_size: int, include_hash: bool = False,
                                  elem_size=elem_size)
     return PERCPU_ARRAY_BODY.format(entries=map_decl["entries"],
                                     value_offset=PERCPU_ARRAY_PPTRS_OFFSET,
-                                    elem_size=8)
+                                    elem_size=8,
+                                    cpu_off=PERCPU_BASE_ADDR)
 
 
 DEFAULT_BODY = """
@@ -238,8 +263,10 @@ DISPATCH = """
 
 # Katran calls the helper by name with no indirection at all, so the unit has
 # plain calls: bpf_map_lookup_elem(&map, &key).
+# The key is usually the address of a local, but Katran also passes the address
+# of a struct member (`&pckt.real_index`), so a member chain is accepted.
 LOOKUP_PLAIN = re.compile(
-    r"\bbpf_map_lookup_elem\(&(?P<map>\w+), &(?P<key>\w+)\)")
+    r"\bbpf_map_lookup_elem\(&(?P<map>\w+), &(?P<key>\w+(?:\.\w+)*)\)")
 
 
 # Cilium's programs reach the same helper through a typed function pointer and
