@@ -1,0 +1,988 @@
+{
+  "version": 1,
+  "prog_type": 2,
+  "section": "kprobe/trusted",
+  "maps": [
+    {
+      "name": "sys_32_to_64_map",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 1024,
+      "value_size": 4
+    },
+    {
+      "name": "sys_enter_init_tail",
+      "value_offset": null,
+      "map_type": 3,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 794,
+      "value_size": 4
+    },
+    {
+      "name": "task_info_map",
+      "value_offset": null,
+      "map_type": 9,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 10240,
+      "value_size": 200
+    },
+    {
+      "name": "config_map",
+      "value_offset": null,
+      "map_type": 2,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 1,
+      "value_size": 272
+    },
+    {
+      "name": "sys_enter_submit_tail",
+      "value_offset": null,
+      "map_type": 3,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 794,
+      "value_size": 4
+    },
+    {
+      "name": "sys_enter_tails",
+      "value_offset": null,
+      "map_type": 3,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 794,
+      "value_size": 4
+    },
+    {
+      "name": "fd_arg_path_map",
+      "value_offset": null,
+      "map_type": 9,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 1024,
+      "value_size": 64
+    },
+    {
+      "name": "sys_exit_init_tail",
+      "value_offset": null,
+      "map_type": 3,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 794,
+      "value_size": 4
+    },
+    {
+      "name": "sys_exit_submit_tail",
+      "value_offset": null,
+      "map_type": 3,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 794,
+      "value_size": 4
+    },
+    {
+      "name": "sys_exit_tails",
+      "value_offset": null,
+      "map_type": 3,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 794,
+      "value_size": 4
+    },
+    {
+      "name": "generic_sys_enter_tails",
+      "value_offset": null,
+      "map_type": 3,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 794,
+      "value_size": 4
+    },
+    {
+      "name": "generic_sys_exit_tails",
+      "value_offset": null,
+      "map_type": 3,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 794,
+      "value_size": 4
+    },
+    {
+      "name": "proc_info_map",
+      "value_offset": null,
+      "map_type": 9,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 30720,
+      "value_size": 368
+    },
+    {
+      "name": "process_tree_map",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 10240,
+      "value_size": 16
+    },
+    {
+      "name": "process_tree_map_version",
+      "value_offset": null,
+      "map_type": 13,
+      "key_size": 2,
+      "map_flags": 0,
+      "max_entries": 64,
+      "value_size": 4,
+      "inner_map": {
+        "map_type": 1,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 10240,
+        "value_size": 16
+      }
+    },
+    {
+      "name": "module_context_map",
+      "value_offset": null,
+      "map_type": 6,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 1,
+      "value_size": 16
+    },
+    {
+      "name": "walk_mod_tree_queue",
+      "value_offset": null,
+      "map_type": 22,
+      "key_size": 0,
+      "map_flags": 0,
+      "max_entries": 330,
+      "value_size": 8
+    },
+    {
+      "name": "prog_array",
+      "value_offset": null,
+      "map_type": 3,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 15,
+      "value_size": 4
+    },
+    {
+      "name": "containers_map",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 10240,
+      "value_size": 1
+    },
+    {
+      "name": "prog_array_tp",
+      "value_offset": null,
+      "map_type": 3,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 15,
+      "value_size": 4
+    },
+    {
+      "name": "new_module_map",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 330,
+      "value_size": 16
+    },
+    {
+      "name": "recent_deleted_module_map",
+      "value_offset": null,
+      "map_type": 9,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 50,
+      "value_size": 8
+    },
+    {
+      "name": "cgrpctxmap_in",
+      "value_offset": null,
+      "map_type": 9,
+      "key_size": 48,
+      "map_flags": 0,
+      "max_entries": 4096,
+      "value_size": 198
+    },
+    {
+      "name": "cgrpctxmap_eg",
+      "value_offset": null,
+      "map_type": 9,
+      "key_size": 48,
+      "map_flags": 0,
+      "max_entries": 4096,
+      "value_size": 198
+    },
+    {
+      "name": "features_test_arena",
+      "value_offset": null,
+      "map_type": 33,
+      "key_size": 0,
+      "map_flags": 1024,
+      "max_entries": 1,
+      "value_size": 0
+    },
+    {
+      "name": "kconfig_map",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 10240,
+      "value_size": 4
+    },
+    {
+      "name": "args_map",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 10240,
+      "value_size": 48
+    },
+    {
+      "name": "ksymbols_map",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 64,
+      "map_flags": 0,
+      "max_entries": 1024,
+      "value_size": 8
+    },
+    {
+      "name": "file_write_path_filter",
+      "value_offset": null,
+      "map_type": 2,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 3,
+      "value_size": 64
+    },
+    {
+      "name": "file_read_path_filter",
+      "value_offset": null,
+      "map_type": 2,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 3,
+      "value_size": 64
+    },
+    {
+      "name": "file_type_filter",
+      "value_offset": null,
+      "map_type": 2,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 2,
+      "value_size": 4
+    },
+    {
+      "name": "netconfig_map",
+      "value_offset": null,
+      "map_type": 2,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 1,
+      "value_size": 8
+    },
+    {
+      "name": "expected_sys_call_table",
+      "value_offset": null,
+      "map_type": 2,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 500,
+      "value_size": 8
+    },
+    {
+      "name": "bufs",
+      "value_offset": null,
+      "map_type": 6,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 2,
+      "value_size": 32768
+    },
+    {
+      "name": "data_filter_bufs",
+      "value_offset": null,
+      "map_type": 6,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 1,
+      "value_size": 256
+    },
+    {
+      "name": "data_filter_lpm_bufs",
+      "value_offset": null,
+      "map_type": 6,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 1,
+      "value_size": 260
+    },
+    {
+      "name": "syscall_source_map",
+      "value_offset": null,
+      "map_type": 9,
+      "key_size": 24,
+      "map_flags": 0,
+      "max_entries": 4096,
+      "value_size": 1
+    },
+    {
+      "name": "stack_addresses",
+      "value_offset": null,
+      "map_type": 7,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 1024,
+      "value_size": 160
+    },
+    {
+      "name": "bpf_attach_map",
+      "value_offset": null,
+      "map_type": 9,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 1024,
+      "value_size": 32
+    },
+    {
+      "name": "bpf_attach_tmp_map",
+      "value_offset": null,
+      "map_type": 9,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 1024,
+      "value_size": 32
+    },
+    {
+      "name": "bpf_prog_load_map",
+      "value_offset": null,
+      "map_type": 9,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 1024,
+      "value_size": 8
+    },
+    {
+      "name": "event_data_map",
+      "value_offset": null,
+      "map_type": 6,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 1,
+      "value_size": 32536
+    },
+    {
+      "name": "signal_data_map",
+      "value_offset": null,
+      "map_type": 6,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 1,
+      "value_size": 32072
+    },
+    {
+      "name": "logs_count",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 88,
+      "map_flags": 0,
+      "max_entries": 4096,
+      "value_size": 16
+    },
+    {
+      "name": "scratch_map",
+      "value_offset": null,
+      "map_type": 6,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 2,
+      "value_size": 368
+    },
+    {
+      "name": "file_modification_map",
+      "value_offset": null,
+      "map_type": 9,
+      "key_size": 16,
+      "map_flags": 0,
+      "max_entries": 10240,
+      "value_size": 4
+    },
+    {
+      "name": "io_file_path_cache_map",
+      "value_offset": null,
+      "map_type": 9,
+      "key_size": 24,
+      "map_flags": 0,
+      "max_entries": 5,
+      "value_size": 4096
+    },
+    {
+      "name": "elf_files_map",
+      "value_offset": null,
+      "map_type": 9,
+      "key_size": 24,
+      "map_flags": 0,
+      "max_entries": 64,
+      "value_size": 1
+    },
+    {
+      "name": "policies_config_map",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 1,
+      "value_size": 256
+    },
+    {
+      "name": "policies_config_version",
+      "value_offset": null,
+      "map_type": 13,
+      "key_size": 2,
+      "map_flags": 0,
+      "max_entries": 64,
+      "value_size": 4,
+      "inner_map": {
+        "map_type": 1,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 1,
+        "value_size": 256
+      }
+    },
+    {
+      "name": "uid_filter",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 256,
+      "value_size": 16
+    },
+    {
+      "name": "uid_filter_version",
+      "value_offset": null,
+      "map_type": 13,
+      "key_size": 2,
+      "map_flags": 0,
+      "max_entries": 64,
+      "value_size": 4,
+      "inner_map": {
+        "map_type": 1,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 256,
+        "value_size": 16
+      }
+    },
+    {
+      "name": "pid_filter",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 256,
+      "value_size": 16
+    },
+    {
+      "name": "pid_filter_version",
+      "value_offset": null,
+      "map_type": 13,
+      "key_size": 2,
+      "map_flags": 0,
+      "max_entries": 64,
+      "value_size": 4,
+      "inner_map": {
+        "map_type": 1,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 256,
+        "value_size": 16
+      }
+    },
+    {
+      "name": "mnt_ns_filter",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 256,
+      "value_size": 16
+    },
+    {
+      "name": "mnt_ns_filter_version",
+      "value_offset": null,
+      "map_type": 13,
+      "key_size": 2,
+      "map_flags": 0,
+      "max_entries": 64,
+      "value_size": 4,
+      "inner_map": {
+        "map_type": 1,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 256,
+        "value_size": 16
+      }
+    },
+    {
+      "name": "pid_ns_filter",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 256,
+      "value_size": 16
+    },
+    {
+      "name": "pid_ns_filter_version",
+      "value_offset": null,
+      "map_type": 13,
+      "key_size": 2,
+      "map_flags": 0,
+      "max_entries": 64,
+      "value_size": 4,
+      "inner_map": {
+        "map_type": 1,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 256,
+        "value_size": 16
+      }
+    },
+    {
+      "name": "uts_ns_filter",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 16,
+      "map_flags": 0,
+      "max_entries": 256,
+      "value_size": 16
+    },
+    {
+      "name": "uts_ns_filter_version",
+      "value_offset": null,
+      "map_type": 13,
+      "key_size": 2,
+      "map_flags": 0,
+      "max_entries": 64,
+      "value_size": 4,
+      "inner_map": {
+        "map_type": 1,
+        "key_size": 16,
+        "map_flags": 0,
+        "max_entries": 256,
+        "value_size": 16
+      }
+    },
+    {
+      "name": "data_filter_exact",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 256,
+      "map_flags": 0,
+      "max_entries": 1024,
+      "value_size": 16
+    },
+    {
+      "name": "data_filter_exact_version",
+      "value_offset": null,
+      "map_type": 13,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 64,
+      "value_size": 4,
+      "inner_map": {
+        "map_type": 1,
+        "key_size": 256,
+        "map_flags": 0,
+        "max_entries": 1024,
+        "value_size": 16
+      }
+    },
+    {
+      "name": "data_filter_suffix",
+      "value_offset": null,
+      "map_type": 11,
+      "key_size": 260,
+      "map_flags": 1,
+      "max_entries": 1024,
+      "value_size": 16
+    },
+    {
+      "name": "data_filter_suffix_version",
+      "value_offset": null,
+      "map_type": 13,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 64,
+      "value_size": 4,
+      "inner_map": {
+        "map_type": 11,
+        "key_size": 260,
+        "map_flags": 1,
+        "max_entries": 1024,
+        "value_size": 16
+      }
+    },
+    {
+      "name": "data_filter_prefix",
+      "value_offset": null,
+      "map_type": 11,
+      "key_size": 260,
+      "map_flags": 1,
+      "max_entries": 1024,
+      "value_size": 16
+    },
+    {
+      "name": "data_filter_prefix_version",
+      "value_offset": null,
+      "map_type": 13,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 64,
+      "value_size": 4,
+      "inner_map": {
+        "map_type": 11,
+        "key_size": 260,
+        "map_flags": 1,
+        "max_entries": 1024,
+        "value_size": 16
+      }
+    },
+    {
+      "name": "comm_filter",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 16,
+      "map_flags": 0,
+      "max_entries": 256,
+      "value_size": 16
+    },
+    {
+      "name": "comm_filter_version",
+      "value_offset": null,
+      "map_type": 13,
+      "key_size": 2,
+      "map_flags": 0,
+      "max_entries": 64,
+      "value_size": 4,
+      "inner_map": {
+        "map_type": 1,
+        "key_size": 16,
+        "map_flags": 0,
+        "max_entries": 256,
+        "value_size": 16
+      }
+    },
+    {
+      "name": "cgroup_id_filter",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 256,
+      "value_size": 16
+    },
+    {
+      "name": "cgroup_id_filter_version",
+      "value_offset": null,
+      "map_type": 13,
+      "key_size": 2,
+      "map_flags": 0,
+      "max_entries": 64,
+      "value_size": 4,
+      "inner_map": {
+        "map_type": 1,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 256,
+        "value_size": 16
+      }
+    },
+    {
+      "name": "binary_filter",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 260,
+      "map_flags": 0,
+      "max_entries": 256,
+      "value_size": 16
+    },
+    {
+      "name": "binary_filter_version",
+      "value_offset": null,
+      "map_type": 13,
+      "key_size": 2,
+      "map_flags": 0,
+      "max_entries": 64,
+      "value_size": 4,
+      "inner_map": {
+        "map_type": 1,
+        "key_size": 260,
+        "map_flags": 0,
+        "max_entries": 256,
+        "value_size": 16
+      }
+    },
+    {
+      "name": "events_map",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 794,
+      "value_size": 64
+    },
+    {
+      "name": "events_map_version",
+      "value_offset": null,
+      "map_type": 13,
+      "key_size": 2,
+      "map_flags": 0,
+      "max_entries": 64,
+      "value_size": 4,
+      "inner_map": {
+        "map_type": 1,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 794,
+        "value_size": 64
+      }
+    },
+    {
+      "name": "logs",
+      "value_offset": null,
+      "map_type": 4,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 1024,
+      "value_size": 4
+    },
+    {
+      "name": "events",
+      "value_offset": null,
+      "map_type": 4,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 1024,
+      "value_size": 4
+    },
+    {
+      "name": "file_writes",
+      "value_offset": null,
+      "map_type": 4,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 1024,
+      "value_size": 4
+    },
+    {
+      "name": "signals",
+      "value_offset": null,
+      "map_type": 4,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 1024,
+      "value_size": 4
+    },
+    {
+      "name": "netflowmap",
+      "value_offset": null,
+      "map_type": 9,
+      "key_size": 41,
+      "map_flags": 0,
+      "max_entries": 65535,
+      "value_size": 9
+    },
+    {
+      "name": "inodemap",
+      "value_offset": null,
+      "map_type": 9,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 65535,
+      "value_size": 128
+    },
+    {
+      "name": "sockmap",
+      "value_offset": null,
+      "map_type": 9,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 65535,
+      "value_size": 8
+    },
+    {
+      "name": "entrymap",
+      "value_offset": null,
+      "map_type": 9,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 2048,
+      "value_size": 48
+    },
+    {
+      "name": "net_cap_events",
+      "value_offset": null,
+      "map_type": 4,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 10240,
+      "value_size": 4
+    },
+    {
+      "name": "net_heap_event",
+      "value_offset": null,
+      "map_type": 6,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 1,
+      "value_size": 32536
+    },
+    {
+      "name": "modules_map",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 660,
+      "value_size": 1
+    },
+    {
+      "name": "suspicious_syscall_source_syscalls",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 794,
+      "value_size": 4
+    },
+    {
+      "name": "stack_pivot_syscalls",
+      "value_offset": null,
+      "map_type": 1,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 794,
+      "value_size": 4
+    },
+    {
+      "name": "f3628a47.rodata",
+      "value_offset": null,
+      "map_type": 2,
+      "key_size": 4,
+      "map_flags": 1152,
+      "max_entries": 1,
+      "value_size": 72
+    },
+    {
+      "name": "TRACE_EVENT_FL_TRACEPOINT_BIT",
+      "value_offset": 0,
+      "map_type": 2,
+      "key_size": 4,
+      "map_flags": 1152,
+      "max_entries": 1,
+      "value_size": 72
+    },
+    {
+      "name": "TRACE_EVENT_FL_TRACEPOINT",
+      "value_offset": 4,
+      "map_type": 2,
+      "key_size": 4,
+      "map_flags": 1152,
+      "max_entries": 1,
+      "value_size": 72
+    },
+    {
+      "name": "type_size_table",
+      "value_offset": 8,
+      "map_type": 2,
+      "key_size": 4,
+      "map_flags": 1152,
+      "max_entries": 1,
+      "value_size": 72
+    },
+    {
+      "name": ".rodata.str1.1",
+      "value_offset": null,
+      "map_type": 2,
+      "key_size": 4,
+      "map_flags": 128,
+      "max_entries": 1,
+      "value_size": 246
+    },
+    {
+      "name": "f3628a47.bss",
+      "value_offset": null,
+      "map_type": 2,
+      "key_size": 4,
+      "map_flags": 1024,
+      "max_entries": 1,
+      "value_size": 19
+    },
+    {
+      "name": "start_scan_time_init_shown_mods",
+      "value_offset": 0,
+      "map_type": 2,
+      "key_size": 4,
+      "map_flags": 1024,
+      "max_entries": 1,
+      "value_size": 19
+    },
+    {
+      "name": "last_module_insert_time",
+      "value_offset": 8,
+      "map_type": 2,
+      "key_size": 4,
+      "map_flags": 1024,
+      "max_entries": 1,
+      "value_size": 19
+    },
+    {
+      "name": "hidden_old_mod_scan_done",
+      "value_offset": 16,
+      "map_type": 2,
+      "key_size": 4,
+      "map_flags": 1024,
+      "max_entries": 1,
+      "value_size": 19
+    },
+    {
+      "name": "use_security_bprm_creds_for_exec",
+      "value_offset": 17,
+      "map_type": 2,
+      "key_size": 4,
+      "map_flags": 1024,
+      "max_entries": 1,
+      "value_size": 19
+    },
+    {
+      "name": "alerted_find_vma_unsupported",
+      "value_offset": 18,
+      "map_type": 2,
+      "key_size": 4,
+      "map_flags": 1024,
+      "max_entries": 1,
+      "value_size": 19
+    }
+  ],
+  "kernel_kfunc_context": false
+}

@@ -1,0 +1,29 @@
+[
+  {
+    "application": "tetragon/observer",
+    "body_group": 68,
+    "stage": "verifier_rejected",
+    "failure_class": "verifier_stack_access",
+    "request_id": 14,
+    "finished": "2026-11-14T19:05:33.138311+00:00",
+    "raw_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/14.failure.tar.gz"
+  },
+  {
+    "application": "tetragon/observer",
+    "body_group": 69,
+    "stage": "installed",
+    "failure_class": "installed",
+    "request_id": 15,
+    "finished": "2026-11-14T19:05:44.592388+00:00",
+    "raw_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/15.success.tar.gz"
+  },
+  {
+    "application": "tracee/monitor",
+    "body_group": 70,
+    "stage": "verifier_rejected",
+    "failure_class": "verifier_context_access",
+    "request_id": 16,
+    "finished": "2026-11-14T19:44:18.939980+00:00",
+    "raw_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/16.failure.tar.gz"
+  }
+]

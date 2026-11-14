@@ -1,0 +1,4 @@
+application,body_group,stage,failure_class,request_id,finished,raw_archive
+tetragon/observer,68,verifier_rejected,verifier_stack_access,14,2026-11-14T19:05:33.138311+00:00,/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/14.failure.tar.gz
+tetragon/observer,69,installed,installed,15,2026-11-14T19:05:44.592388+00:00,/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/15.success.tar.gz
+tracee/monitor,70,verifier_rejected,verifier_context_access,16,2026-11-14T19:44:18.939980+00:00,/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/16.failure.tar.gz
