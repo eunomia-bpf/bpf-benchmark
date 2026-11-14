@@ -84,7 +84,7 @@ int main(int argc, char **argv)
         }
         free(code);
     }
-    for (i = 0; i < btf__type_cnt(local); ++i) bpf_core_free_cands(&cache[i]);
+    for (i = 0; i < btf__type_cnt(local); ++i) free(cache[i].cands);
     free(cache); free(seen);
     elf_end(elf);
     REQUIRE(close(fd) == 0 && !ferror(stdout));
