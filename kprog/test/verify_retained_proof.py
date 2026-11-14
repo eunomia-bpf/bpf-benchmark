@@ -119,7 +119,7 @@ def replay(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, fromfile_prefix_chars='@')
     for field in ('native', 'metadata', 'context', 'source', 'proof', 'linker', 'output'):
         parser.add_argument('--' + field, type=Path, required=True)
     parser.add_argument('--symbol', required=True)
