@@ -20,12 +20,75 @@
     "run_cnt_native": 402683675
   },
   "per_program_ns_per_run": {
-    "sys_exit": {"ebpf": 58.9, "native": 57.7, "speedup": 1.021},
-    "sys_enter": {"ebpf": 55.1, "native": 54.4, "speedup": 1.013},
-    "tracepoint__sys": {"ebpf": 459.7, "native": 464.9, "speedup": 0.989},
-    "kprobe__cap_cap": {"ebpf": 139.5, "native": 132.3, "speedup": 1.054},
-    "sched_switch": {"ebpf": 78.7, "native": 79.0, "speedup": 0.996},
-    "sched_wakeup": {"ebpf": 61.9, "native": 63.7, "speedup": 0.971}
+    "sys_exit": {
+      "ebpf": 58.9,
+      "native": 57.7,
+      "speedup": 1.021
+    },
+    "sys_enter": {
+      "ebpf": 55.1,
+      "native": 54.4,
+      "speedup": 1.013
+    },
+    "tracepoint__sys": {
+      "ebpf": 459.7,
+      "native": 464.9,
+      "speedup": 0.989
+    },
+    "kprobe__cap_cap": {
+      "ebpf": 139.5,
+      "native": 132.3,
+      "speedup": 1.054
+    },
+    "sched_switch": {
+      "ebpf": 78.7,
+      "native": 79.0,
+      "speedup": 0.996
+    },
+    "sched_wakeup": {
+      "ebpf": 61.9,
+      "native": 63.7,
+      "speedup": 0.971
+    }
   },
-  "caveat": "single sample, 20 s; aggregate includes programs with zero runs in one arm"
+  "caveat": "single sample, 20 s; aggregate includes programs with zero runs in one arm; c3 supersedes the 1x20 s exploratory sample",
+  "c3": {
+    "run": "corpus/results/x86_kvm_corpus_20261114_040509_396946",
+    "samples": 3,
+    "workload_seconds": 180,
+    "cpus": "0-7",
+    "status": "ok",
+    "native_replacements": 25,
+    "failures": 0,
+    "aggregate": {
+      "ebpf_ns_per_run": 72.97,
+      "native_ns_per_run": 70.77,
+      "ratio_native_over_ebpf": 1.0312,
+      "run_cnt_ebpf": 10666435612,
+      "run_cnt_native": 10942330648
+    },
+    "dominant_programs": {
+      "sys_exit_35.6pct_share": {
+        "ebpf": 59.3,
+        "native": 57.8,
+        "speedup": 1.025
+      },
+      "sys_enter_34.0pct_share": {
+        "ebpf": 56.6,
+        "native": 54.0,
+        "speedup": 1.048
+      },
+      "tracepoint__sys_19.1pct_share": {
+        "ebpf": 462.1,
+        "native": 451.5,
+        "speedup": 1.023
+      },
+      "kprobe__cap_cap_6.6pct_share": {
+        "ebpf": 138.3,
+        "native": 131.7,
+        "speedup": 1.05
+      }
+    },
+    "finding": "The two dominant programs (69.6% of run time) are 5-helper-call probes whose cost is dominated by bpf_map_update_elem / bpf_ktime_get_ns / bpf_get_current_pid_tgid, identical in both arms, so same-source can only save the surrounding address arithmetic."
+  }
 }
