@@ -1,0 +1,26 @@
+{
+  "recorded": "2026-11-14T04:54:44.208994+00:00",
+  "scope": "Complete eight-request historical failure-class native instruction evidence; no new application runs",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-map-bounds-class/native-evidence",
+  "archive": "kprog/results/verified_20261114/map-bounds-native-evidence.tar.gz",
+  "archive_sha256": "40c6badcad0ac61c57b14da3b641c75efe38d38acaf7c72c1a68f28b39b99e98",
+  "bytes": 772147,
+  "inspection_exit_code": 0,
+  "requests": 8,
+  "source_commit": "b8e35f5f4",
+  "example": {
+    "body_group": 32,
+    "symbol": "tracepoint__sched__sched_switch",
+    "guard_pc": "0x138f",
+    "guard": "cmp rax,0x6cfb; ja 0x1404",
+    "reload_pc": "0x13af",
+    "reload": "movzx eax,word ptr [r14+0x7d8a]",
+    "destination": "lea rdi,[rax+r14]; add rdi,0x8e",
+    "helper_pc": "0x13ca",
+    "helper": "call r8 (helper ID45)",
+    "observation": "Actual linked native instructions reload offset after the earlier bound check; stock B rejection sees the later load range65535. This is not evidence that adding an artificial simulator clamp or assuming immutable mutable-map bytes is valid."
+  },
+  "root_cause_of_reload_not_established": true,
+  "no_model_or_program_change": true,
+  "raw_removed": false
+}
