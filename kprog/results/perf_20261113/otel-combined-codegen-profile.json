@@ -1,0 +1,474 @@
+{
+  "recorded": "2026-11-14T15:01:30.976580+00:00",
+  "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_145600_567223",
+  "raw": "/workspaces/kprog-raw/perf/20261114-otel-combined-codegen/profile-clean",
+  "configuration": "All implemented runtime LTO on together; same original IR, combined producer candidate Pef44985c193e. Short diagnostic45s/stats1, not3x180 performance.",
+  "collector_errors": [],
+  "btf_line_records": 1646,
+  "source_text_mismatches": [],
+  "counts": {
+    "baseline": 17983571,
+    "post_rejit": 18475367
+  },
+  "native_body_end": "0x7029",
+  "native_body": {
+    "instructions": 5628,
+    "samples": 1761,
+    "sampled_period_cycles": 33830483688,
+    "cycles_per_measured_entry": 1831.1129455777523,
+    "cmov": 0,
+    "conditional_branches": 730,
+    "rsp_rbp_address_operands": 1216,
+    "proven_spill_reload_instructions": 209
+  },
+  "jit_body": {
+    "instructions": 5019,
+    "samples": 2114,
+    "sampled_period_cycles": 40592720124,
+    "cycles_per_measured_entry": 2257.211324936521,
+    "cmov": 0,
+    "conditional_branches": 624,
+    "rsp_rbp_address_operands": 637,
+    "proven_spill_reload_instructions": null
+  },
+  "hot_blocks": [
+    {
+      "offset": "0x500",
+      "source_group": "S1",
+      "mapped_source_instructions": 16,
+      "unmapped_source_instructions": 2,
+      "instructions": 18,
+      "samples": 67,
+      "sampled_period_cycles": 1269888221,
+      "cycles_per_measured_entry": 68.73412695942658,
+      "cmov": 0,
+      "conditional_branches": 4,
+      "rsp_rbp_address_operands": 3,
+      "proven_spill_reload_instructions": 1
+    },
+    {
+      "offset": "0x5600",
+      "source_group": "S2",
+      "mapped_source_instructions": 0,
+      "unmapped_source_instructions": 17,
+      "instructions": 17,
+      "samples": 47,
+      "sampled_period_cycles": 885724898,
+      "cycles_per_measured_entry": 47.94085541034178,
+      "cmov": 0,
+      "conditional_branches": 2,
+      "rsp_rbp_address_operands": 0,
+      "proven_spill_reload_instructions": 0
+    },
+    {
+      "offset": "0x540",
+      "source_group": "S3",
+      "mapped_source_instructions": 14,
+      "unmapped_source_instructions": 6,
+      "instructions": 20,
+      "samples": 40,
+      "sampled_period_cycles": 768534995,
+      "cycles_per_measured_entry": 41.59782022192036,
+      "cmov": 0,
+      "conditional_branches": 3,
+      "rsp_rbp_address_operands": 3,
+      "proven_spill_reload_instructions": 1
+    },
+    {
+      "offset": "0x1600",
+      "source_group": "S4",
+      "mapped_source_instructions": 7,
+      "unmapped_source_instructions": 9,
+      "instructions": 16,
+      "samples": 39,
+      "sampled_period_cycles": 748108434,
+      "cycles_per_measured_entry": 40.492209654076156,
+      "cmov": 0,
+      "conditional_branches": 3,
+      "rsp_rbp_address_operands": 1,
+      "proven_spill_reload_instructions": 0
+    },
+    {
+      "offset": "0x2f80",
+      "source_group": "S4",
+      "mapped_source_instructions": 7,
+      "unmapped_source_instructions": 8,
+      "instructions": 15,
+      "samples": 35,
+      "sampled_period_cycles": 683572037,
+      "cycles_per_measured_entry": 36.99910464566144,
+      "cmov": 0,
+      "conditional_branches": 2,
+      "rsp_rbp_address_operands": 1,
+      "proven_spill_reload_instructions": 0
+    },
+    {
+      "offset": "0x6880",
+      "source_group": "S5",
+      "mapped_source_instructions": 11,
+      "unmapped_source_instructions": 4,
+      "instructions": 15,
+      "samples": 33,
+      "sampled_period_cycles": 632523100,
+      "cycles_per_measured_entry": 34.236023565864755,
+      "cmov": 0,
+      "conditional_branches": 3,
+      "rsp_rbp_address_operands": 0,
+      "proven_spill_reload_instructions": 0
+    },
+    {
+      "offset": "0x580",
+      "source_group": "S3",
+      "mapped_source_instructions": 14,
+      "unmapped_source_instructions": 5,
+      "instructions": 19,
+      "samples": 31,
+      "sampled_period_cycles": 593527063,
+      "cycles_per_measured_entry": 32.125319242643464,
+      "cmov": 0,
+      "conditional_branches": 4,
+      "rsp_rbp_address_operands": 3,
+      "proven_spill_reload_instructions": 1
+    },
+    {
+      "offset": "0x20c0",
+      "source_group": "S6",
+      "mapped_source_instructions": 13,
+      "unmapped_source_instructions": 4,
+      "instructions": 17,
+      "samples": 27,
+      "sampled_period_cycles": 516066627,
+      "cycles_per_measured_entry": 27.932686100362716,
+      "cmov": 0,
+      "conditional_branches": 3,
+      "rsp_rbp_address_operands": 3,
+      "proven_spill_reload_instructions": 1
+    },
+    {
+      "offset": "0x4980",
+      "source_group": "S7",
+      "mapped_source_instructions": 9,
+      "unmapped_source_instructions": 1,
+      "instructions": 10,
+      "samples": 26,
+      "sampled_period_cycles": 509818196,
+      "cycles_per_measured_entry": 27.594482751005703,
+      "cmov": 0,
+      "conditional_branches": 1,
+      "rsp_rbp_address_operands": 2,
+      "proven_spill_reload_instructions": 0
+    },
+    {
+      "offset": "0x3a80",
+      "source_group": "S3",
+      "mapped_source_instructions": 13,
+      "unmapped_source_instructions": 6,
+      "instructions": 19,
+      "samples": 25,
+      "sampled_period_cycles": 491477609,
+      "cycles_per_measured_entry": 26.601777869960582,
+      "cmov": 0,
+      "conditional_branches": 3,
+      "rsp_rbp_address_operands": 4,
+      "proven_spill_reload_instructions": 1
+    }
+  ],
+  "limits": [
+    "Source statement sets form one-to-many counterparts across unrolled/reordered compiler CFGs. Shared source groups/ranges can occur in multiple rows; row totals must not be added.",
+    "Group totals cover every mapped emitted instruction with the same C source lines on each side, not a unique basic-block bijection.",
+    "Native appended helper routines/synthetic instructions are not assigned a caller source line. Root/source cycles are not inclusive helper costs or instruction latency; hardware skid remains.",
+    "Native spills/reloads are compiler-proven from byte-identical assembly. JIT RSP/RBP references remain syntax; its compiler-spill count is unknown, not zero.",
+    "Earlier overlapping baseline profile retained but not used; this clean profile starts after checked guest moved to20-23, no second guest on16-19. Long timing concurrently on0-7; root attribution is diagnostic."
+  ],
+  "source_groups": {
+    "S1": {
+      "keys": [
+        [
+          "native_stack_trace.ebpf.c",
+          122
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          123
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          124
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          128
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          133
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          208
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          219
+        ]
+      ],
+      "native": {
+        "instructions": 920,
+        "samples": 559,
+        "sampled_period_cycles": 10784972529,
+        "cycles_per_measured_entry": 583.7487574130463,
+        "cmov": 0,
+        "conditional_branches": 197,
+        "rsp_rbp_address_operands": 261,
+        "proven_spill_reload_instructions": 64
+      },
+      "jit": {
+        "instructions": 1908,
+        "samples": 938,
+        "sampled_period_cycles": 17950764778,
+        "cycles_per_measured_entry": 998.1757670931986,
+        "cmov": 0,
+        "conditional_branches": 256,
+        "rsp_rbp_address_operands": 161,
+        "proven_spill_reload_instructions": null
+      },
+      "jit_range_count": 133
+    },
+    "S2": {
+      "keys": [],
+      "native": null,
+      "jit": null,
+      "status": "No mapped source statements; counterpart unknown, not zero",
+      "jit_range_count": 0
+    },
+    "S3": {
+      "keys": [
+        [
+          "native_stack_trace.ebpf.c",
+          122
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          123
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          124
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          128
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          133
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          219
+        ]
+      ],
+      "native": {
+        "instructions": 836,
+        "samples": 545,
+        "sampled_period_cycles": 10506957842,
+        "cycles_per_measured_entry": 568.700900068724,
+        "cmov": 0,
+        "conditional_branches": 193,
+        "rsp_rbp_address_operands": 237,
+        "proven_spill_reload_instructions": 64
+      },
+      "jit": {
+        "instructions": 1900,
+        "samples": 933,
+        "sampled_period_cycles": 17858681153,
+        "cycles_per_measured_entry": 993.0553366180721,
+        "cmov": 0,
+        "conditional_branches": 256,
+        "rsp_rbp_address_operands": 161,
+        "proven_spill_reload_instructions": null
+      },
+      "jit_range_count": 133
+    },
+    "S4": {
+      "keys": [
+        [
+          "native_stack_trace.ebpf.c",
+          649
+        ],
+        [
+          "tracemgmt.h",
+          47
+        ],
+        [
+          "tracemgmt.h",
+          48
+        ],
+        [
+          "tracemgmt.h",
+          49
+        ]
+      ],
+      "native": {
+        "instructions": 205,
+        "samples": 149,
+        "sampled_period_cycles": 2861306943,
+        "cycles_per_measured_entry": 154.87145359548202,
+        "cmov": 0,
+        "conditional_branches": 28,
+        "rsp_rbp_address_operands": 42,
+        "proven_spill_reload_instructions": 8
+      },
+      "jit": {
+        "instructions": 311,
+        "samples": 138,
+        "sampled_period_cycles": 2686713620,
+        "cycles_per_measured_entry": 149.39822685939293,
+        "cmov": 0,
+        "conditional_branches": 24,
+        "rsp_rbp_address_operands": 1,
+        "proven_spill_reload_instructions": null
+      },
+      "jit_range_count": 20
+    },
+    "S5": {
+      "keys": [
+        [
+          "native_stack_trace.ebpf.c",
+          649
+        ],
+        [
+          "tracemgmt.h",
+          48
+        ],
+        [
+          "tracemgmt.h",
+          49
+        ],
+        [
+          "tracemgmt.h",
+          51
+        ]
+      ],
+      "native": {
+        "instructions": 540,
+        "samples": 128,
+        "sampled_period_cycles": 2463376011,
+        "cycles_per_measured_entry": 133.33299473834538,
+        "cmov": 0,
+        "conditional_branches": 48,
+        "rsp_rbp_address_operands": 178,
+        "proven_spill_reload_instructions": 8
+      },
+      "jit": {
+        "instructions": 139,
+        "samples": 46,
+        "sampled_period_cycles": 904547510,
+        "cycles_per_measured_entry": 50.298548046992444,
+        "cmov": 0,
+        "conditional_branches": 4,
+        "rsp_rbp_address_operands": 6,
+        "proven_spill_reload_instructions": null
+      },
+      "jit_range_count": 27
+    },
+    "S6": {
+      "keys": [
+        [
+          "native_stack_trace.ebpf.c",
+          122
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          123
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          124
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          128
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          208
+        ]
+      ],
+      "native": {
+        "instructions": 789,
+        "samples": 508,
+        "sampled_period_cycles": 9802645936,
+        "cycles_per_measured_entry": 530.5792267076481,
+        "cmov": 0,
+        "conditional_branches": 132,
+        "rsp_rbp_address_operands": 261,
+        "proven_spill_reload_instructions": 64
+      },
+      "jit": {
+        "instructions": 1766,
+        "samples": 880,
+        "sampled_period_cycles": 16855868777,
+        "cycles_per_measured_entry": 937.2926421009487,
+        "cmov": 0,
+        "conditional_branches": 192,
+        "rsp_rbp_address_operands": 160,
+        "proven_spill_reload_instructions": null
+      },
+      "jit_range_count": 192
+    },
+    "S7": {
+      "keys": [
+        [
+          "native_stack_trace.ebpf.c",
+          649
+        ],
+        [
+          "tracemgmt.h",
+          49
+        ]
+      ],
+      "native": {
+        "instructions": 125,
+        "samples": 122,
+        "sampled_period_cycles": 2350223517,
+        "cycles_per_measured_entry": 127.20848884896306,
+        "cmov": 0,
+        "conditional_branches": 8,
+        "rsp_rbp_address_operands": 28,
+        "proven_spill_reload_instructions": 8
+      },
+      "jit": {
+        "instructions": 83,
+        "samples": 42,
+        "sampled_period_cycles": 825207090,
+        "cycles_per_measured_entry": 45.886720162530565,
+        "cmov": 0,
+        "conditional_branches": 0,
+        "rsp_rbp_address_operands": 1,
+        "proven_spill_reload_instructions": null
+      },
+      "jit_range_count": 20
+    }
+  },
+  "binding": {
+    "proof_hash": "ecd363cfe6a14851eca8b14fdac97b4b36a39bb0e717aad0d1798ff8e100ec64",
+    "kernel_blob_sha256": "2ad79a013cd41775c50fd52c25cf96e89bff4d0c10d198831e300736d2dc88dd",
+    "jit_prefix": 33,
+    "jit_suffix": 13,
+    "unclassified_byte_differences": 0
+  },
+  "artifacts_sha256": {
+    "source-comparison.json": "4189e8e6992fa28d4ac10491271c7bd1018ad0355d67f48c3d3cefaa7c084dfc",
+    "replay-results.json": "94b24c45325189f17ad3c143297db73f13066fd8f086c8a1600471a4f04577b7",
+    "native-source-rows.json": "ebff9fbefbc824432349211d3d58b6c284dc01ab461ef742875d66c09934e4dc"
+  },
+  "previous_default_codegen_profile": {
+    "run": "x86_kvm_corpus_20261114_142556_667921",
+    "native_body_cycles_per_entry": 2874.763607851426,
+    "jit_body_cycles_per_entry": 2238.3373780074094,
+    "compiler_proven_spill_reload_instructions": 442
+  },
+  "body_jit_over_native": 1.2326991245339738,
+  "scope": "45-second diagnostic of combined producer flags plus all runtime LTO. Paired original JIT / post-link native body; outside helpers not charged to body. No total per-call/throughput result or target acceptance."
+}

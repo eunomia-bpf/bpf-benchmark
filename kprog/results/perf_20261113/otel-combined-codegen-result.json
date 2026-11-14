@@ -36,11 +36,24 @@
   "all_flags_rejected_root_bytes": 25899,
   "all_flags_rejection": "mutable section .data.rel.ro offset 0x0 lacks its data symbol",
   "short_status": "make0/appOK/10 seconds each arm; run x86_kvm_corpus_20261114_144450_033904, all workload components rc0",
-  "timing_status": "next: combined build only, stats1 per-call and stats0 throughput, each 3x180 seconds",
+  "timing_status": "running: PID454362 stats1+0 each3x180 on0-7/timingEX/imageSH",
   "recorded": "2026-11-14T14:49:15.163202+00:00",
   "short_native_main_jit_bytes": 31310,
   "short_collector_errors": 0,
   "short_limit": "Concurrent failed all-flags diagnostic on same CPUs: short sample cycles not used as a performance result. Only three map snapshots outside measured windows; no equal-output certification from short counter ratios.",
   "unsupported_all_flags_short": "Actual appERROR/failed load perf_unwind_native; profiler waited for unavailable post phase. App already terminal before verified own-QEMU452749 TERM; job255/raw retained.",
-  "checked_pipeline": "Still open: main checked-B512 stack wall and Cilium54 one-operand MUL generation failures; no whole-six-app acceptance claim"
+  "checked_pipeline": "Still open: main checked-B512 stack wall and Cilium54 one-operand MUL generation failures; no whole-six-app acceptance claim",
+  "compiler_proven_root_spill_reload_instructions": {
+    "default": 442,
+    "combined": 209,
+    "method": "Insert local labels only at compiler Spill/Reload annotations; reassemble and require the entire measured root section byte-equal. Static instruction counts, not stack bytes or latency."
+  },
+  "checked_status": "running: PID454688 actual new candidate/real frontend/no cache, CPU20-23/48GiB guest/80GiB AS/no timinglock",
+  "profile_status": "clean45s make0/appOK: run145600_567223, CPU16-19/no second guest there; real source/JIT binding zero unclassified differences",
+  "profile_body_cycles_per_entry": {
+    "native": 1831.1129455777523,
+    "jit": 2257.211324936521,
+    "jit_over_native": 1.2326991245339738
+  },
+  "profile_limits": "Root-only hardware-period attribution/skid, shared host, helper costs outside root. No total per-call/throughput acceptance; long timing still running."
 }
