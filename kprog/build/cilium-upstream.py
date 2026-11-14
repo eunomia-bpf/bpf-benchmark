@@ -39,7 +39,7 @@ def main():
     if bool(args.state_root) != bool(args.state_object):
         parser.error('--state-root and --state-object are supplied together')
     record = json.loads((args.capture/'parity.json').read_text())
-    repo = Path(__file__).resolve().parents[3]
+    repo = Path(__file__).resolve().parents[2]
     upstream = repo/'vendor/repos/cilium/bpf'
     original = record['bpf_command']
     state_object = args.state_root/args.state_object if args.state_root else None

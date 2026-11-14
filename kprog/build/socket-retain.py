@@ -29,7 +29,7 @@ def main():
     snapshot = args.raw/'build-evidence'
     shutil.copytree(args.build, snapshot)  # Existing evidence is never replaced.
     rows = json.loads((snapshot/'proofs/report.json').read_text())
-    repo = Path(__file__).resolve().parents[3]
+    repo = Path(__file__).resolve().parents[2]
     source = repo/'vendor/repos/cilium/bpf/bpf_sock.c'
     release = (Path('/workspaces/.agent-state/kprog-ck/build-x86')/
                'include/config/kernel.release').read_text().strip()

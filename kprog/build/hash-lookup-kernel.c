@@ -1,5 +1,5 @@
 /* Same P/stock source; actual live map types, key sizes and mutable values. */
-#include "../../test/include/native_helpers.h"
+#include "../test/include/native_helpers.h"
 struct key { __u32 words[KEY_WORDS]; };
 #if MAP_KIND == 13
 struct inner { __uint(type, 2); __uint(max_entries, 1); __type(key, __u32); __type(value, __u64); };

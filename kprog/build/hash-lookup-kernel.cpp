@@ -1,4 +1,4 @@
-#include "../../libnativeloader/include/native_loader.hpp"
+#include "../libnativeloader/include/native_loader.hpp"
 #include <bpf/bpf.h>
 #include <bpf/libbpf.h>
 #include <cstdio>

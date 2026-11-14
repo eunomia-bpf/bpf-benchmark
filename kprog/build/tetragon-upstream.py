@@ -8,7 +8,7 @@ import shlex
 import subprocess
 import importlib.util
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 
 

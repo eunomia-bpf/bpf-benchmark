@@ -12,7 +12,7 @@ from pathlib import Path
 import subprocess
 from elftools.elf.elffile import ELFFile
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def inspect(path):

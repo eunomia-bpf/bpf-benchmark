@@ -10,7 +10,7 @@ import shlex
 import subprocess
 from elftools.elf.elffile import ELFFile
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 
 
