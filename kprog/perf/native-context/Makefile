@@ -792,6 +792,8 @@ runtime-probe-read-payload: known-map-link-build runtime-probe-read-layout
 	install -m755 $(KNOWN_MAP_TARGET)/debug/native-link $(RUNTIME_PROBE_PAYLOAD)/native-link.real
 	strip --strip-debug $(RUNTIME_PROBE_PAYLOAD)/native-link.real
 	install -m644 $(RUNTIME_PROBE_BUILD)/runtime-probe-read-layout.json $(RUNTIME_PROBE_PAYLOAD)/runtime-probe-read-layout.json
+	install -m755 $(HERE)/native-link-probe-read.sh $(RUNTIME_PROBE_PAYLOAD)/native-link-on
+	install -m755 $(HERE)/native-link-probe-read.sh $(RUNTIME_PROBE_PAYLOAD)/native-link-off
 
 PROBE_KERNEL_BUILD ?= /var/tmp/kprog-tmp/perf/probe-read-kernel
 PROBE_KERNEL_OUTPUT ?= /workspaces/kprog-raw/perf/20261114-probe-read/kernel
