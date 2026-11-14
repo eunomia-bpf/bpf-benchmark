@@ -9,7 +9,7 @@ kprog belong in those forks. No replacement ISA semantics is defined locally.
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
 | AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `da428593b21d` | Lean 4.35.0 |
-| x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `74a2e2849cde` | Lean 4.32.0-rc1 |
+| x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `4777fb8e1b84` | Lean 4.32.0-rc1 |
 | Clight | [eunomia-bpf/clean](https://github.com/eunomia-bpf/clean), `external/clean/export` | `123f7f7767e2` | Lean 4.32.1 |
 
 `make -C kprog/formal mature` builds the migration Lake package on Lean 4.35.0,
@@ -33,7 +33,7 @@ CompCert front end and the Lean export/semantics have separate trust claims.
 
 ## Operation coverage (M2 in progress)
 
-LNSym `da428593b21d6dfa02c6d063600d9ed817747fd5`, x86lean `74a2e2849cde10fce9035c6abb7fdd49968b2915`.
+LNSym `da428593b21d6dfa02c6d063600d9ed817747fd5`, x86lean `4777fb8e1b84c1099eae8073f0cddfda6ea8c715`.
 
 Source inspection, not refinement proofs or conformance results. `present` means an execution path exists; `partial`/`missing` remain M2 work; `layer` identifies linking/ABI transport above an existing ISA form. Memory permissions, initialization, fault prefixes, exclusive ordering and ABI require explicit relations.
 
@@ -226,6 +226,28 @@ outside this projection. M3 must prove binding admissibility and map the typed
 denial to the retained fault observation. M2 remains open for x86 fault/canonical
 support and native exclusive-observation reconciliation; M3-M6 are untouched.
 
+x86lean `4777fb8e1b84` adds explicit `LinearAddressWidth.la48/la57` to the existing
+`canonical`, `Cpu.setRipChecked`, `step` and `run` functions. Default 48-bit
+behavior and all prior characterization statements/proofs remain unchanged.
+The selected width reaches existing JMP/CALL/Jcc/JCXZ/LOOP/RET target checks and
+the bit-string byte-address check. Two generic kernel proofs relate the test to
+selected-width sign extension and show that 48-bit canonicality implies 57-bit.
+Their inspected axiom dependencies stay within the upstream allowlist
+(`propext`, `Classical.choice`, `Quot.sound`); no native-reduction axiom, admission
+or proof-policy exception was added.
+
+The 154-job combined build and 113-job independent LNSym symbolic check passed
+632 kernel-`decide` checks: literal boundary classifications, actual step target
+selection, rejected CALL/RET stack preservation, conditional branches, LOOP,
+signed bit-byte addressing, run forwarding and stopped-state stability
+(`m2-x86-canonical/build-4`). Earlier lemma-name, conditional-proof and test-layout
+failures remain archived, with no assertion removed. These are post-decode AST
+checks, not encoded-form/hardware/ACL2 differential results or M5 refinements.
+Noncanonical outcomes still use the external model's refusal convention; precise
+architectural faults, ordinary memory permissions/canonical spans, initialization
+and ordered fault prefixes remain open. Existing fallthrough and LOOP model-stop
+behavior is retained. LAM/tag masking and page translation are outside this input.
+
 ### AArch64: 74 simulator operations
 
 | Code | Operation | Source status | LNSym source (Arm/Insts unless Arm/) | Constraint / work |
@@ -387,7 +409,7 @@ Outside the 74-operation roster, LDXR/LDAXR/STXR and CLREX now execute in the fo
 | 0x49 | `rorMem` | present | [rot .ror](external/x86lean/X86/Syntax.lean) |  |
 | 0xff | `ret` | present | [ret](external/x86lean/X86/Syntax.lean) | Native stack pop; simulator return modes need relation |
 
-Cross-cutting gaps: X86.Mem is a finite byte association list with implicit zero background, total reads/writes, no access-permission faults. Cpu has no 48/57-bit canonical-address profile. LNSym retains its total-byte-memory API and now also has a checked step for single/pair/exclusive transfers and LSE RMWs with byte permissions, initialization and ordered fault observations. That profile must be bound explicitly; it is not a full MMU/concurrency model. LSE RMWs retain old/new/order metadata in one checked effect; exclusives bind physical-monitor inputs and ordered monitor/memory effects. Out-of-roster multiple-structure SIMD paths remain explicitly refused. Old exclusive fault/trace bindings differ and require reconciliation. Thread-pointer outcomes now bind explicitly; native admissibility and the remaining memory/platform bindings are open. These are not closed by listing instruction constructors; M2/M3 must preserve the existing theorem domains through external-model extensions and explicit relations. x86lean takes post-decode Instr.op/len. BZHI is absent from the differential roster, not absent from step: do not duplicate its semantics.
+Cross-cutting gaps: X86.Mem is a finite byte association list with implicit zero background, total reads/writes, no access-permission faults. The external step now selects 48/57-bit canonicality for its existing target/bit-byte checks; ordinary data spans and precise architectural fault delivery remain open. LNSym retains its total-byte-memory API and now also has a checked step for single/pair/exclusive transfers and LSE RMWs with byte permissions, initialization and ordered fault observations. That profile must be bound explicitly; it is not a full MMU/concurrency model. LSE RMWs retain old/new/order metadata in one checked effect; exclusives bind physical-monitor inputs and ordered monitor/memory effects. Out-of-roster multiple-structure SIMD paths remain explicitly refused. Old exclusive fault/trace bindings differ and require reconciliation. Thread-pointer outcomes now bind explicitly; native admissibility and the remaining memory/platform bindings are open. These are not closed by listing instruction constructors; M2/M3 must preserve the existing theorem domains through external-model extensions and explicit relations. x86lean takes post-decode Instr.op/len. BZHI is absent from the differential roster, not absent from step: do not duplicate its semantics.
 
 ## Legacy foundation (migration pending)
 
