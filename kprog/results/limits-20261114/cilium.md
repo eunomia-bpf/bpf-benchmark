@@ -67,3 +67,22 @@ two arms exercise different programs.
 - Record: `kprog/results/cilium-d08-20261114/README.md`
 - Counters: `details/apps/cilium__agent.json` -> `.baseline.bpf` / `.post_rejit.bpf`
   (dicts keyed by record key; `run_cnt_delta`, `run_time_ns_delta`, `id`, `name`)
+
+## Cross-checks against pktgen's own counters
+
+Both arms report zero pktgen errors, and the pps figure is pktgen's own transmit
+counter, not a derived estimate:
+
+| | baseline | native | ratio |
+|---|---:|---:|---:|
+| pktgen packets sent (2 components x 180 s) | 262 672 979 | 350 532 461 | 1.3345 |
+| `cil_from_container` BPF runs | 808 155 242 | 1 038 623 997 | 1.2852 |
+| BPF runs per packet sent | 3.077 | 2.963 | — |
+
+`cil_from_container` runs are ~3x packets sent in both arms (the sum over the two
+container-side instances of a bidirectional path). The packets-sent ratio (1.3345) is
+slightly higher than the BPF-run ratio (1.2852); that is the signature of the native arm
+doing slightly less work per packet on the container path, which is the same fact as the
+2.39x ns/inv improvement. **The 1.2852x throughput gain is measured by the sender and is
+real.** What is not established is whether the baseline's host programs being off the
+traffic path makes the comparison unfair — both readings above remain open.
