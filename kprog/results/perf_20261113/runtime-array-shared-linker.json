@@ -401,6 +401,25 @@
       "corpus/results/perf-combined-array-linker-20261114/runtime-lpm-layout.json": "ea1bd0f3ed6be89836d5aaf3c4ca98117266ed60b4cebd2806c66b3764303272",
       "corpus/results/perf-combined-array-linker-20261114/runtime-probe-read-layout.json": "75a971bd496f290b1763efcfe2f78b74e80d2c8bd3c7c064308337fe5026f12e"
     },
-    "scope": "Host combined opt-in only. ON read/hash/LPM+shared ARRAY; OFF read/hash/LPM. Original running349398 payload untouched, canonical/default output unchanged. No combined execution/speed claim."
+    "scope": "Host combined opt-in only. ON read/hash/LPM+shared ARRAY; OFF read/hash/LPM. Original running349398 payload untouched, canonical/default output unchanged. No combined execution/speed claim.",
+    "timing_launch": {
+      "recorded_at": "2026-11-14T09:30:25.339994+00:00",
+      "pid": 355603,
+      "wait_pid": 349398,
+      "status": "LAUNCHED_RESOURCE_ORDERED_UNCOLLECTED_NO_POSTLAUNCH_POLLS",
+      "raw": "/workspaces/kprog-raw/perf/20261114-combined-array-timing",
+      "configuration": "direct-native read/hash/LPM/shared ARRAY",
+      "stats": [
+        1,
+        0
+      ],
+      "samples": 3,
+      "seconds": 180,
+      "cpus": "0-7",
+      "vcpus": 8,
+      "memory": "64G",
+      "address_space_bytes": 85899345920,
+      "scope": "Existing frozen workload, source manifest430b26ab andsoleimage. Wait onlyresourceorder, notdependency success; standardtimingEX/imageSH perstatsarm. No newresult/speed claim."
+    }
   }
 }
