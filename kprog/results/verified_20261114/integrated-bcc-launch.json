@@ -1,0 +1,22 @@
+{
+  "submitted": "2026-11-14T04:34:07Z",
+  "pid": 173719,
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-integrated-bcc",
+  "launcher_log": "/workspaces/kprog-raw/verified/20261114-integrated-bcc/launcher.log",
+  "app": "bcc/set",
+  "image": "sha256:66e9e88f197f975fd98f78f08be2eac3b7c313937e39a4cb2a45639d0615f2b8",
+  "kernel": "74d1097af561",
+  "cpu_affinity": "8-15",
+  "vcpu": 8,
+  "guest_memory": "64G",
+  "host_address_space_limit_bytes": 85899345920,
+  "image_lock": "shared",
+  "samples": 1,
+  "workload_duration_seconds": 10,
+  "bpf_stats": true,
+  "scope": "Actual upstream two-start verified-path diagnostic; result not collected",
+  "launcher": "kprog/test/run_verified_corpus.sh",
+  "skip_make_rebuild": "-o trusted-service",
+  "outcome_polled": false,
+  "raw_removed": false
+}
