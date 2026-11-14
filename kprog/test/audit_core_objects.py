@@ -36,7 +36,7 @@ def inventory():
         add('tracee', native, source, report=report, report_native=report_native)
     for native in sorted((ROOT/'corpus/results/bcc-samesource-20261114').glob('*.native.o')):
         stem = PRODUCTS/'native/bcc'/native.name.removesuffix('.native.o')
-        add('bcc', native, stem.with_suffix('.bpf.o'), 'resolved-report',
+        add('bcc', native, stem.with_suffix('.bpf.o'), 'compat',
             stem.with_suffix('.core.json'), stem.with_suffix('.native.o'))
     for native in sorted(Path('/var/tmp/kprog-tmp/C/tetra-img').glob('*.native.o')):
         add('tetragon', native, ROOT/'vendor/build/x86/tetragon'/
@@ -150,7 +150,16 @@ def audit(args):
                             if report_bound and reported is not None:
                                 answer = reported
                                 observation = 'compiler_report_same_build_object'
-                        elif kind in {8, 10} or (kind == 2 and obj['policy'] != 'tetragon-compat'):
+                        elif kind == 2 and obj['policy'] == 'tetragon-compat':
+                            # These are the two expression-specific exceptions
+                            # in native_compat.h. Source call sites are
+                            # bpf_cgroup.h:134 and bpf_cgtracker.c:29.
+                            zero = ((ref['root'], ref['access']) in {
+                                ('kernfs_node___old', '0:0:1'),
+                                ('cgroup___new', '0:1')})
+                            answer = (int(not zero), False)
+                            observation = 'native_compat_tetragon_expression_policy'
+                        elif kind in {2, 8, 10}:
                             answer = (1, False)
                             observation = 'native_compat_constant_one'
                         elif kind in {0, 1, 9, 11} and actual['status'] == 'native_layout' and not int(actual['poison']):
