@@ -36,7 +36,7 @@
   "all_flags_rejected_root_bytes": 25899,
   "all_flags_rejection": "mutable section .data.rel.ro offset 0x0 lacks its data symbol",
   "short_status": "make0/appOK/10 seconds each arm; run x86_kvm_corpus_20261114_144450_033904, all workload components rc0",
-  "timing_status": "running: PID454362 stats1+0 each3x180 on0-7/timingEX/imageSH",
+  "timing_status": "Collected both configurations of instrumentation stats1 and0, each3x180; natural completion15:41:07; all LTO and CPU/CMOV/sibling flags together. Throughput1.044323 is below requested1.20.",
   "recorded": "2026-11-14T14:49:15.163202+00:00",
   "short_native_main_jit_bytes": 31310,
   "short_collector_errors": 0,
@@ -55,5 +55,251 @@
     "jit": 2257.211324936521,
     "jit_over_native": 1.2326991245339738
   },
-  "profile_limits": "Root-only hardware-period attribution/skid, shared host, helper costs outside root. No total per-call/throughput acceptance; long timing still running."
+  "profile_limits": "Root-only hardware-period attribution/skid, shared host, helper costs outside root. No total per-call/throughput acceptance; long timing still running.",
+  "stats_on_completed": {
+    "recorded": "2026-11-14T15:34:16.061351+00:00",
+    "run": "x86_kvm_corpus_20261114_145101_018174",
+    "make_exit": 0,
+    "app_status": "ok",
+    "workload_errors": 0,
+    "baseline_entry": {
+      "bytes_jited": 3815,
+      "bytes_xlated": 5904,
+      "id": 17,
+      "name": "native_tracer_e",
+      "run_cnt_delta": 430187544,
+      "run_time_ns_delta": 1027741428969,
+      "type": "perf_event"
+    },
+    "native_entry": {
+      "bytes_jited": 9434,
+      "bytes_xlated": 24,
+      "id": 48,
+      "name": "native_tracer_e",
+      "run_cnt_delta": 430616062,
+      "run_time_ns_delta": 924017870094,
+      "type": "perf_event"
+    },
+    "baseline_ns_per_entry": 2389.054363157014,
+    "native_ns_per_entry": 2145.8044686080475,
+    "per_call_speedup": 1.1133606990327312,
+    "frozen_median_throughput_auxiliary": 1.0937314250103187,
+    "throughput_samples": {
+      "baseline": [
+        76125547,
+        75294285,
+        79247810
+      ],
+      "native": [
+        86410514,
+        83260903,
+        81995087
+      ]
+    },
+    "concurrency": "Checked OTel guest resident20-23 throughout; profile guests16-19 during baseline/early post and host functional jobs. Timing0-7 lock held. This is not an exclusive-host result.",
+    "scope": "3x180s all LTO plus combined producer flags. Below1.20 percall; primary stats-off throughput and equalwork windows still pending.",
+    "frozen_aggregate": {
+      "baseline": [
+        2389.036228985618,
+        2,
+        13
+      ],
+      "native": [
+        2145.797369682475,
+        2,
+        12
+      ],
+      "speedup": 1.1133559313380723
+    }
+  },
+  "stats_off_completed": {
+    "recorded": "2026-11-14T15:49:06.520597+00:00",
+    "run": "corpus/results/x86_kvm_corpus_20261114_151641_871572",
+    "make_exit": 0,
+    "app_status": "ok",
+    "throughput_native_over_bpf": 1.0443230517024655,
+    "baseline_samples": [
+      79820660.87259294,
+      79513118.53123069,
+      79064800.267439
+    ],
+    "native_samples": [
+      84340194.01470998,
+      83037382.59491469,
+      81756802.915766
+    ],
+    "sample_ratios": [
+      1.0566210939963396,
+      1.0443230517024655,
+      1.0340480547502964
+    ],
+    "errors": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "workload_errors": 0
+  },
+  "own_counter_windows": {
+    "stats1": [
+      {
+        "phase": "baseline",
+        "map_id": 6,
+        "first": "baseline-0019",
+        "last": "baseline-0079",
+        "seconds": 536.686379,
+        "attempts": 5527447795,
+        "native_frames_per_attempt": 0.9233508165589106,
+        "dispatches_per_native_attempt": 0.2377919136909732,
+        "measurement": {
+          "phase": "baseline",
+          "pid": "1824",
+          "start_seconds": 255.425729,
+          "end_seconds": 797.276237
+        },
+        "query_clocks": {
+          "first": {
+            "start": {
+              "wall_time": "2026-11-14T14:54:04.018767+00:00",
+              "monotonic_ns": 255829758583
+            },
+            "end": {
+              "wall_time": "2026-11-14T14:54:04.170806+00:00",
+              "monotonic_ns": 255981801029
+            }
+          },
+          "last": {
+            "start": {
+              "wall_time": "2026-11-14T15:03:00.395446+00:00",
+              "monotonic_ns": 792206458701
+            },
+            "end": {
+              "wall_time": "2026-11-14T15:03:00.552706+00:00",
+              "monotonic_ns": 792363701720
+            }
+          }
+        }
+      },
+      {
+        "phase": "post_rejit",
+        "map_id": 1116,
+        "first": "post_rejit-0101",
+        "last": "post_rejit-0161",
+        "seconds": 534.800917,
+        "attempts": 5566721819,
+        "native_frames_per_attempt": 0.9238739748852537,
+        "dispatches_per_native_attempt": 0.24185918207816232,
+        "measurement": {
+          "phase": "post_rejit",
+          "pid": "13896",
+          "start_seconds": 993.859679,
+          "end_seconds": 1534.62781
+        },
+        "query_clocks": {
+          "first": {
+            "start": {
+              "wall_time": "2026-11-14T15:06:27.193497+00:00",
+              "monotonic_ns": 999004491125
+            },
+            "end": {
+              "wall_time": "2026-11-14T15:06:27.360019+00:00",
+              "monotonic_ns": 999171041972
+            }
+          },
+          "last": {
+            "start": {
+              "wall_time": "2026-11-14T15:15:22.002455+00:00",
+              "monotonic_ns": 1533813442283
+            },
+            "end": {
+              "wall_time": "2026-11-14T15:15:22.166967+00:00",
+              "monotonic_ns": 1533977960853
+            }
+          }
+        }
+      }
+    ],
+    "stats0": [
+      {
+        "phase": "baseline",
+        "map_id": 28,
+        "first": "baseline-0021",
+        "last": "baseline-0080",
+        "seconds": 528.019217,
+        "attempts": 5463471150,
+        "native_frames_per_attempt": 0.9234702619414399,
+        "dispatches_per_native_attempt": 0.239182726351543,
+        "measurement": {
+          "phase": "baseline",
+          "pid": "1824",
+          "start_seconds": 258.263262,
+          "end_seconds": 799.575626
+        },
+        "query_clocks": {
+          "first": {
+            "start": {
+              "wall_time": "2026-11-14T15:19:53.419108+00:00",
+              "monotonic_ns": 267210021504
+            },
+            "end": {
+              "wall_time": "2026-11-14T15:19:53.675585+00:00",
+              "monotonic_ns": 267466495220
+            }
+          },
+          "last": {
+            "start": {
+              "wall_time": "2026-11-14T15:28:41.481186+00:00",
+              "monotonic_ns": 795272094019
+            },
+            "end": {
+              "wall_time": "2026-11-14T15:28:41.656872+00:00",
+              "monotonic_ns": 795447786831
+            }
+          }
+        }
+      },
+      {
+        "phase": "post_rejit",
+        "map_id": 1128,
+        "first": "post_rejit-0102",
+        "last": "post_rejit-0161",
+        "seconds": 527.64699,
+        "attempts": 5490723767,
+        "native_frames_per_attempt": 0.923811201263806,
+        "dispatches_per_native_attempt": 0.23996133859778634,
+        "measurement": {
+          "phase": "post_rejit",
+          "pid": "13993",
+          "start_seconds": 996.701626,
+          "end_seconds": 1537.911222
+        },
+        "query_clocks": {
+          "first": {
+            "start": {
+              "wall_time": "2026-11-14T15:32:09.109873+00:00",
+              "monotonic_ns": 1002900772379
+            },
+            "end": {
+              "wall_time": "2026-11-14T15:32:09.267281+00:00",
+              "monotonic_ns": 1003058188399
+            }
+          },
+          "last": {
+            "start": {
+              "wall_time": "2026-11-14T15:40:56.690943+00:00",
+              "monotonic_ns": 1530481849437
+            },
+            "end": {
+              "wall_time": "2026-11-14T15:40:56.882644+00:00",
+              "monotonic_ns": 1530673552549
+            }
+          }
+        }
+      }
+    ]
+  },
+  "remaining_pipeline_issue": "Actual baseline custom__generic stock load succeeds; native stub fails twice. Go loadProbeUnwinders rewrites perf program-array reference to actual kprobe array. Existing source_bpf_object metadata candidate on custom only is under seconds-long functional test; no hardcoded map-name alias or extra long timing."
 }
