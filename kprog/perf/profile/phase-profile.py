@@ -136,15 +136,15 @@ def run(args: argparse.Namespace) -> int:
         "--exec", f"/var/tmp/phase-profile-guest.sh /var/tmp/out {args.app} {args.seconds} "
                   f"{args.freq} {manifest}",
     ]
-    (out / "command.json").write_text(
-        json.dumps({"command": command, "app": args.app, "seconds": args.seconds,
-                    "freq": args.freq, "cpus": args.cpus, "vcpus": args.vcpus},
-                   indent=2, sort_keys=True) + "\n", encoding="utf-8")
     if args.persist_output:
         command[command.index("--exec"):command.index("--exec")] = ["--rwdir", str(out)]
         (var_tmp / "out").symlink_to(out, target_is_directory=True)
     else:
         (var_tmp / "out").mkdir(exist_ok=True)
+    (out / "command.json").write_text(
+        json.dumps({"command": command, "app": args.app, "seconds": args.seconds,
+                    "freq": args.freq, "cpus": args.cpus, "vcpus": args.vcpus},
+                   indent=2, sort_keys=True) + "\n", encoding="utf-8")
     log = (out / "host.log").open("w", encoding="utf-8")
     completed = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT)
     log.close()

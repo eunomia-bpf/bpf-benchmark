@@ -1,0 +1,64 @@
+{
+  "recorded_at": "2026-11-14T02:19:13Z",
+  "outer_pid": 125333,
+  "source_commits": [
+    "a66270ad4",
+    "4deebec05"
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261114-otel-profile",
+  "profile_output": "/workspaces/kprog-raw/perf/20261114-otel-profile/run",
+  "counter_capture": "/workspaces/repository/corpus/results/perf-otel-profile-20261114",
+  "command": [
+    "make",
+    "-f",
+    "kprog/perf/native-context/Makefile",
+    "otel-profile"
+  ],
+  "resources": {
+    "cpus": "16-19",
+    "vcpus": 4,
+    "guest_memory": "32G",
+    "host_as_bytes": 51539607552,
+    "image_lock": "shared"
+  },
+  "protocol": {
+    "samples": 1,
+    "seconds": 45,
+    "frequency_hz": 199,
+    "stats": 1,
+    "persist_output": true,
+    "observer_progress_log": "/var/tmp/out/guest.log"
+  },
+  "artifacts": [
+    {
+      "path": "/workspaces/repository/corpus/results/perf-otel-upstream-20261114/manifest-context.json",
+      "sha256": "430b26ab4be8fd501a819f48c0451895d86bf90606533958a05639ac8a51573f"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-otel-upstream-20261114/otelcol-ebpf-profiler.native.o",
+      "sha256": "7e6781470c8d4a1d2669cfd262405d11095e5c2a2cbf591a675e578718d6b644"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-on",
+      "sha256": "f7644e69df0606ac64e1af9631ffec0227c5c46282aaf2c5622758626de9f58a"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link.real",
+      "sha256": "65eebf5e64ed5e4c0adfda52dd4587c9c626c232aeffb2ac3ab76e90a01d5b72"
+    },
+    {
+      "path": "/workspaces/repository/kprog/perf/profile/phase-profile.py",
+      "sha256": "f7004abf2e0336f7c320f459eacd98682f4057e0a3edf1772cf6e71982e58320"
+    },
+    {
+      "path": "/workspaces/repository/kprog/perf/may29-image/eqcodex-capture.py",
+      "sha256": "fb784be680b194ba00473279d61fb2a03e3181246be664ca37f8e7992eda15d2"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/profile-tool/perf",
+      "sha256": "4f35b3527ee18e4fac9f4b2f4f7675d4865e55b9351dbf002c11db7511be4c37"
+    }
+  ],
+  "outcome": null,
+  "scope": "Launch of paired CPU-clock/callchain profiling and counter observation for original-source OTel direct native configuration. Current generic-map dispatch preserved. Profile brackets progress phases including warmup; exact shim clocks and observer queries are retained for measured-window analysis. No actual profile/performance/equal-work outcome or postlaunch polling."
+}
