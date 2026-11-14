@@ -705,6 +705,8 @@
 
 - VERIFIED 2026-11-14 Tracee CORE retry270915实时partial：已完成4个成功请求，sys_enter_init/source219现独立stock B222通过并安装checked-native225；同名失败类在当前CORE producer路径已推进通过。原件/副本实际sim C SHA同为4db655d3350a，4条native命令全0；已保留request4完整11405024B成功归档和journal snapshot于raw `20261114-tracee-core-checked-lto/partial-sys-enter-init`（SHA在launch receipt partial_progress）。当前sys_enter_submit仍在编译；整应用未完成，无post计数，不能认证执行/全覆盖，原始数据不删。
 
+- [ ] VERIFIED Cilium checked-sim-c 的 socket context 接入核对/补齐：静态链路中 `trusted_generation.context_kind` 只区分XDP/TC/cgroup_skb，其余（含prog_type9/18）为raw；`trusted_specializer.compile_checked_simulator` 对raw跳过context-lower；`checked-sim-stage` 的public/physical JSON来自packet providers，仅含XDP/SKB。service的SECTIONS已给9/18生成cgroup/sock和cgroup/bind4，现有 `socket-context-lower.cpp` 与 `socket-public-layout.c`/`socket-physical-layout.c` 已支持这些kind，后续应接入复用并用实际Cilium程序验证。此为静态接入缺口，尚无当前Cilium执行结论；不改变当前Tracee/编译重放的输入或增加准入条件。
+
 ## 3. 安全：运行时缺口（有限用例和 guest 已验证）
 
 - [x] 退出契约 RBP/R12/RSP、below-SP 栈生命周期（S7，cdeb9804d）；ARM 隐式 SP 回写（55504ff90）。
