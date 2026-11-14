@@ -871,6 +871,7 @@ static __always_inline int handle_ipv6_from_lxc(struct __ctx_buff *ctx, __u32 *d
 		const union v6addr *daddr = (union v6addr *)&ip6->daddr;
 		bool same_subnet_id = false;
 
+#ifndef MICRO_NATIVE
 		if (CONFIG(hybrid_routing_enabled)) {
 			const union v6addr *saddr = (union v6addr *)&ip6->saddr;
 			__u32 src_subnet_id = lookup_ip6_subnet_id(saddr);
@@ -878,6 +879,12 @@ static __always_inline int handle_ipv6_from_lxc(struct __ctx_buff *ctx, __u32 *d
 
 			same_subnet_id = (src_subnet_id == dst_subnet_id) && (src_subnet_id != 0);
 		}
+#else
+		/* The loader drops a config branch together with the maps it
+		 * references, so a static native reference to cilium_subnet_map
+		 * cannot be resolved when hybrid routing is off. Keep the branch
+		 * for the eBPF arm only until the linker can drop it too. */
+#endif
 
 		info = lookup_ip6_remote_endpoint(daddr, 0);
 		if (info) {
@@ -1457,12 +1464,17 @@ static __always_inline int handle_ipv4_from_lxc(struct __ctx_buff *ctx, __u32 *d
 
 	bool same_subnet_id = false;
 
+#ifndef MICRO_NATIVE
 	if (CONFIG(hybrid_routing_enabled)) {
 		__u32 src_subnet_id = lookup_ip4_subnet_id(ip4->saddr);
 		__u32 dst_subnet_id = lookup_ip4_subnet_id(ip4->daddr);
 
 		same_subnet_id = (src_subnet_id == dst_subnet_id) && (src_subnet_id != 0);
 	}
+#else
+	/* See handle_ipv6_from_lxc(): the loader's config DCE removes
+	 * cilium_subnet_map, so the native object cannot name it. */
+#endif
 
 	/* Determine the destination category for policy fallback. */
 	info = lookup_ip4_remote_endpoint(ip4->daddr, cluster_id);
