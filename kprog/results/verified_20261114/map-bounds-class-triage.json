@@ -1,0 +1,165 @@
+{
+  "recorded": "2026-11-14T04:38:08Z",
+  "input_journal": "kprog/results/verified_20261114/census-checkpoint-complete/outcomes.jsonl",
+  "scope": "Read-only triage of the full latest failure class, not a proof or program exclusion",
+  "class_name": "verifier_map_bounds",
+  "count": 8,
+  "observed": "All eight latest failures are Tracee probe-read helper destination writes to event_data_map (value_size32536) with a dynamic offset whose stock-verifier upper bound is65535.",
+  "next_investigation": "Trace native P checks, simulated scalar identity, mutable map reloads and helper side effects; preserve actual bytes and semantics. No new clamp, source rewrite or stock-verifier limit change is justified by these endpoint diagnostics alone.",
+  "root_cause_confirmed": false,
+  "shared_sources_modified": false,
+  "requests": [
+    {
+      "application": "tracee/monitor",
+      "body_group": 29,
+      "name": "trace_ret_vfs_read_tail",
+      "source_prog_id": 551,
+      "archive": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/restart1/queue-0/control/retained-requests/session-0ly4efd0/1.failure.tar.gz",
+      "diagnostic_tail": [
+        "44579: (bc) w2 = w2                   ; R2=64",
+        "44580: (56) if w4 != 0x71 goto pc+110         ; R4=113",
+        "44581: (0f) r3 += r0                  ; R0=fp-264 R3=fp-184",
+        "44582: (0f) r1 += r5                  ; R1=map_value(map=event_data_map,ks=4,vs=32536,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R5=map_value(map=event_data_map,ks=4,vs=32536)",
+        "44583: (07) r1 += 137                 ; R1=map_value(map=event_data_map,ks=4,vs=32536,off=137,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
+        "44584: (85) call bpf_probe_read_kernel#113",
+        "invalid access to map value, value_size=32536 off=65672 size=64",
+        "R1 max value is outside of the allowed memory range",
+        "processed 5569 insns (limit 1000000) max_states_per_insn 2 total_states 241 peak_states 241 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "application": "tracee/monitor",
+      "body_group": 31,
+      "name": "trace_ret_vfs_readv_tail",
+      "source_prog_id": 554,
+      "archive": "/workspaces/kprog-raw/verified/20261113-census-after-loader-refresh/restart1/queue-2/control/retained-requests/session-k8mdb9ef/1.failure.tar.gz",
+      "diagnostic_tail": [
+        "44810: (bc) w2 = w2                   ; R2=64",
+        "44811: (56) if w4 != 0x71 goto pc+66          ; R4=113",
+        "44812: (0f) r3 += r0                  ; R0=fp-264 R3=fp-184",
+        "44813: (0f) r1 += r5                  ; R1=map_value(map=event_data_map,ks=4,vs=32536,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R5=map_value(map=event_data_map,ks=4,vs=32536)",
+        "44814: (07) r1 += 137                 ; R1=map_value(map=event_data_map,ks=4,vs=32536,off=137,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
+        "44815: (85) call bpf_probe_read_kernel#113",
+        "invalid access to map value, value_size=32536 off=65672 size=64",
+        "R1 max value is outside of the allowed memory range",
+        "processed 5681 insns (limit 1000000) max_states_per_insn 2 total_states 250 peak_states 250 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "application": "tracee/monitor",
+      "body_group": 32,
+      "name": "tracepoint__sched__sched_switch",
+      "source_prog_id": 506,
+      "archive": "/workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-1/control/retained-requests/session-8l66qta4/1.failure.tar.gz",
+      "diagnostic_tail": [
+        "12556: (56) if w7 != 0x1 goto pc+1    ; R7=1",
+        "12557: (bf) r4 = r9                   ; R4=map_value(map=event_data_map,ks=4,vs=32536) R9=map_value(map=event_data_map,ks=4,vs=32536)",
+        "12558: (0f) r8 += r4                  ; R4=map_value(map=event_data_map,ks=4,vs=32536) R8=map_value(map=event_data_map,ks=4,vs=32536,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
+        "12559: (07) r8 += 142                 ; R8=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
+        "12560: (bf) r1 = r8                   ; R1=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R8=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
+        "12561: (85) call bpf_probe_read_str#45",
+        "invalid access to map value, value_size=32536 off=65677 size=4096",
+        "R1 max value is outside of the allowed memory range",
+        "processed 7151 insns (limit 1000000) max_states_per_insn 1 total_states 440 peak_states 440 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "application": "tracee/monitor",
+      "body_group": 36,
+      "name": "tracepoint__sched__sched_process_exec",
+      "source_prog_id": 499,
+      "archive": "/workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-2/control/retained-requests/session-5zig0xw0/1.failure.tar.gz",
+      "diagnostic_tail": [
+        "24877: (16) if w4 == 0x1 goto pc+1    ; R4=1",
+        "24879: (0f) r6 += r1                  ; R1=map_value(map=event_data_map,ks=4,vs=32536) R6=map_value(map=event_data_map,ks=4,vs=32536,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
+        "24880: (07) r6 += 142                 ; R6=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
+        "24881: (bf) r1 = r6                   ; R1=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R6=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
+        "24882: (bf) r3 = r8                   ; R3=scalar(id=365) R8=scalar(id=365)",
+        "24883: (85) call bpf_probe_read_str#45",
+        "invalid access to map value, value_size=32536 off=65677 size=4096",
+        "R1 max value is outside of the allowed memory range",
+        "processed 12571 insns (limit 1000000) max_states_per_insn 4 total_states 815 peak_states 815 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "application": "tracee/monitor",
+      "body_group": 41,
+      "name": "trace_security_file_permission",
+      "source_prog_id": 576,
+      "archive": "/workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-0/control/retained-requests/session-zr0hbpk6/3.failure.tar.gz",
+      "diagnostic_tail": [
+        "14067: (79) r4 = *(u64 *)(r10 -240)   ; R4=1 R10=fp0 fp-240=1",
+        "14068: (16) if w4 == 0x1 goto pc+1    ; R4=1",
+        "14070: (0f) r8 += r1                  ; R1=map_value(map=event_data_map,ks=4,vs=32536) R8=map_value(map=event_data_map,ks=4,vs=32536,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
+        "14071: (07) r8 += 140                 ; R8=map_value(map=event_data_map,ks=4,vs=32536,off=140,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
+        "14072: (bf) r1 = r8                   ; R1=map_value(map=event_data_map,ks=4,vs=32536,off=140,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R8=map_value(map=event_data_map,ks=4,vs=32536,off=140,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
+        "14073: (85) call bpf_probe_read#4",
+        "invalid access to map value, value_size=32536 off=65675 size=16",
+        "R1 max value is outside of the allowed memory range",
+        "processed 3970 insns (limit 1000000) max_states_per_insn 0 total_states 285 peak_states 285 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "application": "tracee/monitor",
+      "body_group": 40,
+      "name": "trace_security_file_open",
+      "source_prog_id": 516,
+      "archive": "/workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-2/control/retained-requests/session-5zig0xw0/2.failure.tar.gz",
+      "diagnostic_tail": [
+        "40886: (16) if w4 == 0x1 goto pc+1    ; R4=1",
+        "40888: (0f) r9 += r1                  ; R1=map_value(map=event_data_map,ks=4,vs=32536) R9=map_value(map=event_data_map,ks=4,vs=32536,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
+        "40889: (07) r9 += 142                 ; R9=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
+        "40890: (bf) r1 = r9                   ; R1=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R9=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
+        "40891: (79) r3 = *(u64 *)(r10 -288)   ; R3=map_value(map=bufs,ks=4,vs=32768,smin=smin32=0,smax=umax=smax32=umax32=16383,var_off=(0x0; 0x3fff)) R10=fp0 fp-288=map_value(map=bufs,ks=4,vs=32768,smin=smin32=0,smax=umax=smax32=umax32=16383,var_off=(0x0; 0x3fff))",
+        "40892: (85) call bpf_probe_read_str#45",
+        "invalid access to map value, value_size=32536 off=65677 size=4096",
+        "R1 max value is outside of the allowed memory range",
+        "processed 7462 insns (limit 1000000) max_states_per_insn 0 total_states 541 peak_states 541 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "application": "tracee/monitor",
+      "body_group": 47,
+      "name": "trace_security_bprm_creds_for_exec",
+      "source_prog_id": 589,
+      "archive": "/workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-0/control/retained-requests/session-zr0hbpk6/5.failure.tar.gz",
+      "diagnostic_tail": [
+        "12172: (bf) r1 = r5                   ; R1=map_value(map=event_data_map,ks=4,vs=32536) R5=map_value(map=event_data_map,ks=4,vs=32536)",
+        "12173: (16) if w9 == 0x1 goto pc+1    ; R9=1",
+        "12175: (0f) r8 += r1                  ; R1=map_value(map=event_data_map,ks=4,vs=32536) R8=map_value(map=event_data_map,ks=4,vs=32536,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
+        "12176: (07) r8 += 142                 ; R8=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
+        "12177: (bf) r1 = r8                   ; R1=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R8=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
+        "12178: (85) call bpf_probe_read_str#45",
+        "invalid access to map value, value_size=32536 off=65677 size=4096",
+        "R1 max value is outside of the allowed memory range",
+        "processed 3877 insns (limit 1000000) max_states_per_insn 0 total_states 235 peak_states 235 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "application": "tracee/monitor",
+      "body_group": 51,
+      "name": "trace_security_sb_mount",
+      "source_prog_id": 517,
+      "archive": "/workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-1/control/retained-requests/session-8l66qta4/6.failure.tar.gz",
+      "diagnostic_tail": [
+        "21530: (bf) r3 = r8                   ; R3=map_value(map=event_data_map,ks=4,vs=32536) R8=map_value(map=event_data_map,ks=4,vs=32536)",
+        "21531: (0f) r6 += r3                  ; R3=map_value(map=event_data_map,ks=4,vs=32536) R6=map_value(map=event_data_map,ks=4,vs=32536,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
+        "21532: (07) r6 += 142                 ; R6=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
+        "21533: (bf) r1 = r6                   ; R1=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R6=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
+        "21534: (79) r3 = *(u64 *)(r10 -288)   ; R3=0 R10=fp0 fp-288=0",
+        "21535: (85) call bpf_probe_read_str#45",
+        "invalid access to map value, value_size=32536 off=65677 size=4096",
+        "R1 max value is outside of the allowed memory range",
+        "processed 3615 insns (limit 1000000) max_states_per_insn 0 total_states 251 peak_states 251 mark_read 0",
+        ""
+      ]
+    }
+  ]
+}
