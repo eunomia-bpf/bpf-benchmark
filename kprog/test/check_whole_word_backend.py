@@ -30,6 +30,7 @@ SEC("socket") int backend(struct __sk_buff *ctx) {
 unsigned value = ctx->mark;
 x86_l_0:
 value ^= ctx->priority + 12345u;
+x86_l_1:
 return value;
 }
 char LICENSE[] SEC("license") = "GPL";
@@ -54,7 +55,11 @@ char LICENSE[] SEC("license") = "GPL";
             namespace = dict(__file__=str(ROOT/'kprog/x86/trusted_specializer.py'),
                              __name__='prior_preprocess_worker')
             exec(compile(prior_source, namespace['__file__'], 'exec'), namespace)
+            namespace['PIECE_SOURCE_BYTES'] = worker.PIECE_SOURCE_BYTES = 1
             namespace['compile_simulator'](clang, source, default, run)
+            prior_pieces = sum('-E' in row['command'] for row in commands)
+            if prior_pieces < 2:
+                raise ValueError('Prior/default comparison did not exercise the piece join')
             prior_bytes = default.read_bytes()
             prior_input = source.with_suffix('.i').read_bytes()
         worker.compile_simulator(clang, source, default, run)
@@ -81,7 +86,8 @@ char LICENSE[] SEC("license") = "GPL";
         result = dict(default_equals_previous_command=True, disabled_equals_default=True,
                       optional_pipeline_allocations_equal=True, optional_llc_executed=True)
         if prior_revision:
-            result.update(prior_revision=prior_revision, preprocessing_input_and_default_object_equal=True)
+            result.update(prior_revision=prior_revision, prior_preprocessing_pieces=prior_pieces,
+                          preprocessing_input_and_default_object_equal=True)
         if main_mir is not None:
             spill_spec = importlib.util.spec_from_file_location('whole_word_spills',
                 ROOT/'kprog/x86/whole_word_spills.py')
