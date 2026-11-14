@@ -78,8 +78,10 @@ extern void kprog_c_trap(void) __attribute__((noreturn));
 /* Empty register asm preserves the value; only native compilation needs the
  * optimizer barrier. This adapter applies only to that identity operation. */
 #define KPROG_C_BARRIER_VAR(VAR) ((void)(VAR))
+#define KPROG_C_VALUE_BARRIER_VAR(VAR) ((void)(VAR))
 #else
 #define KPROG_C_TRAP() __builtin_trap()
 #define KPROG_C_BARRIER_VAR(VAR) __asm__ volatile("" : "+r"(VAR))
+#define KPROG_C_VALUE_BARRIER_VAR(VAR) __asm__("" : "+r"(VAR))
 #endif
 #endif

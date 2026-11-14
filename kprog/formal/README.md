@@ -950,6 +950,22 @@ byte parity is inferred. All three preprocessed pieces and the joined input
 are retained in the same raw directory. Full dispatcher C-subset conversion
 and the memory/ABI bindings remain open.
 
+The x86 register read, write, MOV-immediate, MOV-register and MOVX bodies
+now also export from `c/X86Pointer.c`, retaining arbitrary register numbers,
+widths, lanes, provenance and incoming stack facts. Register reads and stack
+alias conversion use standard C output forms; the move handlers consume those
+forms. MOVX's nonvolatile empty-asm identity retains that qualifier in native
+builds and uses the CompCert identity adapter. The module contains six public
+roots and four actual callees; all ten typecheck and regenerate identically.
+The existing move/register/stack/flag oracles pass, and the old288 ALU-route
+failures retain their exact output. `make clight` and231 component jobs pass.
+The matched default Cilium code/data and202 relocations remain unchanged.
+The generic host MOV-register extraction object shrinks from8464 to5898 bytes;
+host-object byte parity is not claimed. This is separate from the default BPF
+comparison and is not a runtime gain. Raw evidence is in
+`/workspaces/kprog-raw/formal/m4-register-moves`; rebuildable preprocessing/IR
+is under `/var/tmp/kprog-tmp/formal/m4-register-moves`, with commands retained.
+
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight
 handler exports, and matched OTel preprocessor expansion remain to do. Preserve
