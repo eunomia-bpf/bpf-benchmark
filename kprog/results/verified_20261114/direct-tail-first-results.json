@@ -1,0 +1,13 @@
+{
+  "outer_pid": 97809,
+  "make_exit": 2,
+  "started": "2026-11-14T01:02:58Z",
+  "finished": "2026-11-14T01:03:52Z",
+  "rust_suite": "18 passed, 0 failed, 1 preexisting ignored microbenchmark",
+  "host_outcome": "Reached stack_entry extraction after earlier five execution cases; no overall host PASS",
+  "failure": "native-link: entry=stack_entry (31 bytes), 1 reachable symbol(s) total\n  - stack_entry (vaddr 0x3a, 31 bytes) [entry]\nError: PLT32 proof reloc in stack_entry at 0x16 targets 0x59, but no symbol covers that address\n",
+  "diagnosis": "Defined target stack_tail at0x59 follows an undefined symbol. find_symbol_in_section_at_address used section_index()? inside iteration, returning None at the undefined symbol instead of continuing.",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-direct-tail",
+  "archive": "direct-tail-first-results.tar.gz",
+  "canonical_changed": false
+}

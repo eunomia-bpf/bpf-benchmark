@@ -171,6 +171,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED tail首轮与census39收集（2026-11-14）** 97809 Make2：Rust18PASS/0fail/1既有ignored微基准，host前5entry后到stack_entry proof失败；通用lookup在undefined symbol处section_index()?提前返回，真实stack_tail0x59仍在其后，已定位待forward fix。完整首轮binary/ELF/log归档 `direct-tail-first-results*`。Census新增39 Tracee security_task_setrlimit installed（00:35:04→00:43:30），full P/B归档 `census-body-39*`，raw `20261114-kfunc-refresh/queue-1/control`。累计32attempts(18installed/14reject)，latest28distinct(18installed/10reject)/native0：BCC9/9/0、Tracee13/7/0、Tetra6/2/0，其他3新queue0；三guest继续，无整应用通过声明。general framepointer planner与lookup source修复正在合批，未部署。
+
 - **VERIFIED direct-tail host subset启动（2026-11-14）** ab225e3d7 source/recipe已push，dry-run后outer97809、CPU8–15/CARGO jobs1/AS8GiB/shared image锁，Make direct-tail-check运行全Rust+7个真实machine-code entry及第7/8 stack arguments/live globals/unaffected default byte比较；raw `/workspaces/kprog-raw/verified/20261114-direct-tail/{job,host}`，scratch `/var/tmp/kprog-tmp/verified/direct-tail`。当前未收集，无PASS/应用通过声明，canonical base/image/peer binary不变。启动receipt `direct-tail-launch.json`，下一turn收取并按结果修复。
 
 - **VERIFIED direct function tail linker候选（2026-11-14）** 通用PLT32/PC32与decoded near-tail发现callee closure；保持subprogram原E9/stack arguments，只有raw entry有function-tail exit时加入一次aligned call/exit wrapper，原body保留SysV prologue/RET，proof/links显式携带同体。正常entry默认bytes待实测比较，未部署/未宣称完成。ABI review发现per-tail CALL会移位stack参数，未提交该草案；新功能fixture覆盖第7/8参数、entry/nested/decoded/external/global/live value及unaffected default bytes。committed Make direct-tail-check准备全Rust与真实host execution子集；下一步启动scratch单job，结果后续turn收集。无需改kernel/module/benchmark/peer冻结binary。

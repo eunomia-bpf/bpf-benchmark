@@ -1,0 +1,50 @@
+{
+  "attempts": 32,
+  "attempt_stages": {
+    "installed": 18,
+    "verifier_rejected": 14
+  },
+  "distinct": 28,
+  "latest_stages": {
+    "installed": 18,
+    "verifier_rejected": 10
+  },
+  "native_run": 0,
+  "per_application": {
+    "bcc/set": {
+      "distinct": 9,
+      "latest_stages": {
+        "installed": 9
+      },
+      "native_run": 0
+    },
+    "tetragon/observer": {
+      "distinct": 6,
+      "latest_stages": {
+        "installed": 2,
+        "verifier_rejected": 4
+      },
+      "native_run": 0
+    },
+    "tracee/monitor": {
+      "distinct": 13,
+      "latest_stages": {
+        "installed": 7,
+        "verifier_rejected": 6
+      },
+      "native_run": 0
+    }
+  },
+  "new_outcome": {
+    "body_group": 39,
+    "application": "tracee/monitor",
+    "name": "trace_security_task_setrlimit",
+    "source_prog_id": 593,
+    "stage": "installed",
+    "started": "2026-11-14T00:35:04.354503+00:00",
+    "finished": "2026-11-14T00:43:30.059024+00:00"
+  },
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-1/control",
+  "archive": "census-body-39.tar.gz",
+  "scope": "Resident P/B replay; no workload execution or whole-app certification"
+}
