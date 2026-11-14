@@ -76,10 +76,16 @@ for _ in $(seq 1 150); do
   sleep 2
 done
 for ph in baseline post_rejit; do
+  ready=0
   for _ in $(seq 1 240); do
-    grep -q "\"event\": \"measurement_start\", \"phase\": \"$ph\"" "$O/guest.log" 2>/dev/null && break
+    if grep -q "\"event\": \"measurement_start\", \"phase\": \"$ph\"" "$O/guest.log" 2>/dev/null; then ready=1; break; fi
+    grep -q '"event": "app_done"' "$O/guest.log" 2>/dev/null && break
     sleep 2
   done
+  if [ "$ready" != 1 ]; then
+    echo "phase-profile: skipped unavailable phase $ph" >> "$O/phase-profile.log"
+    break
+  fi
   # Preserve JIT IP -> BTF source-line records while this phase is live.
   # Metadata failure stays explicit and does not gate the workload/profile.
   python3 kprog/perf/profile/jit-lines.py "$O/$ph.jit-lines.json" > "$O/$ph.jit-lines.log" 2>&1

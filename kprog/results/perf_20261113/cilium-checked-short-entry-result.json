@@ -1,0 +1,30 @@
+{
+  "application": "cilium/agent",
+  "application_status": "error",
+  "attempts": 62,
+  "loaded": 62,
+  "verified": 8,
+  "installed": 8,
+  "run": 0,
+  "installed_without_counter": [
+    214,
+    221,
+    237,
+    249,
+    256,
+    283,
+    290,
+    314
+  ],
+  "native_counter_ids_without_install": [],
+  "baseline_counter_programs": 53,
+  "native_counter_programs": 0,
+  "raw": "/workspaces/kprog-raw/verified/20261114-cilium-current-model-lto/perf-short-entry",
+  "job_exit": 0,
+  "finished": "2026-11-14T14:00:59Z",
+  "failure": "Post-start Cilium endpoint regeneration failed: BPF load invalid argument; no native measurement window. Missing native counters remain missing.",
+  "failure_classes": {
+    "unsupported mnemonic: mul    rdx": 24,
+    "unsupported mnemonic: mul    rcx": 30
+  }
+}
