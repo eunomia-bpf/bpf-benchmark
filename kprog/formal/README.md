@@ -8,7 +8,7 @@ kprog belong in those forks. No replacement ISA semantics is defined locally.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
-| AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `4a9bc9df5a6e` | Lean 4.35.0 |
+| AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `093c3a4d9eea` | Lean 4.35.0 |
 | x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `74a2e2849cde` | Lean 4.32.0-rc1 |
 | Clight | [eunomia-bpf/clean](https://github.com/eunomia-bpf/clean), `external/clean/export` | `123f7f7767e2` | Lean 4.32.1 |
 
@@ -33,7 +33,7 @@ CompCert front end and the Lean export/semantics have separate trust claims.
 
 ## Operation coverage (M2 in progress)
 
-LNSym `4a9bc9df5a6e66ba048c07c27da2f642093d9b95`, x86lean `74a2e2849cde10fce9035c6abb7fdd49968b2915`.
+LNSym `093c3a4d9eea0ea74b9d31132ff3050a4f3f2811`, x86lean `74a2e2849cde10fce9035c6abb7fdd49968b2915`.
 
 Source inspection, not refinement proofs or conformance results. `present` means an execution path exists; `partial`/`missing` remain M2 work; `layer` identifies linking/ABI transport above an existing ISA form. Memory permissions, initialization, fault prefixes, exclusive ordering and ABI require explicit relations.
 
@@ -42,6 +42,10 @@ its existing execution function and expands its random conformance generator.
 The combined build and 24 encoded regression vectors passed on 2026-11-14
 (`m2-select-3`, 122 Lake jobs). These use upstream-style `native_decide` finite
 checks; they are not hardware differential results or migrated refinement counts.
+
+LNSym `093c3a4d9eea` also fixes FMOV field31 to use XZR/WZR rather than SP.
+The combined build passed 123 Lake jobs including the conditional-select suite
+and the existing XZR suite with four new FMOV regressions (`m2-fmov-zr-1`).
 
 ### AArch64: 74 simulator operations
 
@@ -82,7 +86,7 @@ checks; they are not hardware differential results or migrated refinement counts
 | 0x20 | `STORE` | partial | [LDST/Reg_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_imm.lean); [LDST/Reg_unscaled_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_unscaled_imm.lean) | Byte/word/double immediate exists; halfword GPR, GPR unscaled, pre-index and register-offset absent |
 | 0x21 | `LDP` | partial | [LDST/Reg_pair.lean](external/LNSym/Arm/Insts/LDST/Reg_pair.lean) | Pre/post/offset exists; pair width, overlap, LSE2/fault profiles need audit |
 | 0x22 | `STP` | partial | [LDST/Reg_pair.lean](external/LNSym/Arm/Insts/LDST/Reg_pair.lean) | Pre/post/offset exists; pair width, overlap, LSE2/fault profiles need audit |
-| 0x23 | `FMOV` | partial | [DPSFP/Conversion_between_FP_and_Int.lean](external/LNSym/Arm/Insts/DPSFP/Conversion_between_FP_and_Int.lean) | FMOV GPR31 reads/writes SP via read_gpr/write_gpr; old reference uses XZR/WZR. Fix both directions, preserve SP |
+| 0x23 | `FMOV` | present | [DPSFP/Conversion_between_FP_and_Int.lean](external/LNSym/Arm/Insts/DPSFP/Conversion_between_FP_and_Int.lean) | Both GPR directions use ZR for field31; four encoded W/X ZR regressions pass |
 | 0x24 | `CNT` | missing | [DPSFP/Advanced_simd_two_reg_misc.lean](external/LNSym/Arm/Insts/DPSFP/Advanced_simd_two_reg_misc.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | Only reversals in two-reg-misc; across-lanes class absent |
 | 0x25 | `UADDLV` | missing | [DPSFP/Advanced_simd_two_reg_misc.lean](external/LNSym/Arm/Insts/DPSFP/Advanced_simd_two_reg_misc.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | Only reversals in two-reg-misc; across-lanes class absent |
 | 0x26 | `ADRP_GOT` | layer | [DPI/PC_rel_addressing.lean](external/LNSym/Arm/Insts/DPI/PC_rel_addressing.lean) | ADRP exists; relocation/GOT/readonly resolution is linking premise |
