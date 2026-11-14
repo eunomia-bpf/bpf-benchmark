@@ -75,6 +75,17 @@ ret i32 %result
     if counterexample['legacy'] == counterexample['expected']:
         raise ValueError('The actual legacy counterexample was disconnected')
     (output/'execution.json').write_text(json.dumps(observations, indent=2)+'\n')
+    # The native fixture pins a register to make the permitted untied output
+    # reproducible. Exercise the matching rule in BPF's own register domain too.
+    bpf = output/'bpf.ll'
+    bpf.write_text(source.replace('x86_64-unknown-linux-gnu', 'bpf').replace('={r12},{rdi}', '=r,r'))
+    run([legacy, bpf, '-o', output/'bpf-legacy.bc'])
+    bpf_result = run([tool, bpf, '-o', output/'bpf-strict.bc', '--strict-identities'])
+    if 'packet length predicates lowered=1' not in bpf_result.stderr:
+        raise ValueError('BPF untied output received invented field provenance')
+    for variant in ('legacy', 'strict'):
+        run(['clang-18', '-target', 'bpf', '-mcpu=v4', '-O3', '-c',
+             output/('bpf-'+variant+'.bc'), '-o', output/('bpf-'+variant+'.o')])
     replay = []
     for index, path in enumerate(retained):
         old, default, strict = [output/f'retained-{index}-{label}.bc' for label in ('old', 'off', 'strict')]
@@ -114,7 +125,8 @@ char LICENSE[] SEC("license") = "GPL";
         else:
             os.environ['KPROG_BPF_STRICT_IDENTITIES'] = saved
     result = dict(default_equal=True, counterexample=counterexample,
-                  execution_cases=len(observations), retained=replay, service_flag_forwarded=True)
+                  execution_cases=len(observations), retained=replay, service_flag_forwarded=True,
+                  bpf_untied_output_preserved=True)
     (output/'result.json').write_text(json.dumps(result, indent=2)+'\n')
     print(json.dumps(result))
 
