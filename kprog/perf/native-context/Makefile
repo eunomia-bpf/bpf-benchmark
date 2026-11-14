@@ -975,3 +975,15 @@ runtime-combined-array-payload:
 	install -m644 $(ARRAY_KERNEL_PAYLOAD)/runtime-array-layout.json $(RUNTIME_COMBINED_ARRAY_PAYLOAD)/runtime-array-layout.json
 	install -m755 $(HERE)/native-link-combined-array.sh $(RUNTIME_COMBINED_ARRAY_PAYLOAD)/native-link-on
 	install -m755 $(HERE)/native-link-combined-array.sh $(RUNTIME_COMBINED_ARRAY_PAYLOAD)/native-link-off
+
+# Profile-motivated backend comparison over the exact retained physical IR.
+OTEL_CMOV_BUILD ?= /var/tmp/kprog-tmp/perf/otel-cmov-codegen
+OTEL_CMOV_INPUT ?= $(OTEL_NATIVE_BUILD)/tracer.physical.bc
+.PHONY: otel-cmov-codegen
+otel-cmov-codegen:
+	install -d $(OTEL_CMOV_BUILD)
+	@set -x; for variant in default cmov; do \
+		extra=(); if [[ $$variant == cmov ]]; then extra=(-mllvm -x86-cmov-converter-force-all); fi; \
+		$(CC) -target x86_64-linux-gnu -O3 -g -fPIC -fno-optimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-jump-tables "$${extra[@]}" -c $(OTEL_CMOV_INPUT) -o $(OTEL_CMOV_BUILD)/$$variant.native.o; \
+		llvm-objdump-18 -dr $(OTEL_CMOV_BUILD)/$$variant.native.o > $(OTEL_CMOV_BUILD)/$$variant.dis; \
+	done
