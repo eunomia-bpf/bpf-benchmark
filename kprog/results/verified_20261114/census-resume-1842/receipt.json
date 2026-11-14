@@ -1,0 +1,186 @@
+{
+  "recorded": "2026-11-14T18:40:53.629751+00:00",
+  "scope": "Completed resident load-only replay; not whole-application startup or workload certification",
+  "base_journal": "kprog/results/verified_20261114/census-resume-1740/outcomes.jsonl",
+  "queue_journals": [
+    "/workspaces/kprog-raw/perf/20261114-census-resume/tail-1842.jsonl"
+  ],
+  "attempts": 61,
+  "attempt_stages": {
+    "installed": 25,
+    "verifier_rejected": 32,
+    "compilation_failed": 4
+  },
+  "distinct_bodies": 56,
+  "latest_stages": {
+    "installed": 25,
+    "verifier_rejected": 27,
+    "compilation_failed": 4
+  },
+  "latest_failure_classes": {
+    "verifier_rejected": 8,
+    "verifier_stack_access": 4,
+    "verifier_callback_argument": 1,
+    "verifier_context_access": 2,
+    "verifier_map_bounds": 12,
+    "compilation_failed": 4
+  },
+  "per_application": {
+    "bcc/set": {
+      "distinct_bodies": 10,
+      "latest_stages": {
+        "installed": 10
+      },
+      "native_run": 0
+    },
+    "katran": {
+      "distinct_bodies": 0,
+      "latest_stages": {},
+      "native_run": 0
+    },
+    "cilium/agent": {
+      "distinct_bodies": 0,
+      "latest_stages": {},
+      "native_run": 0
+    },
+    "otelcol-ebpf-profiler/profiling": {
+      "distinct_bodies": 0,
+      "latest_stages": {},
+      "native_run": 0
+    },
+    "tetragon/observer": {
+      "distinct_bodies": 6,
+      "latest_stages": {
+        "installed": 2,
+        "verifier_rejected": 4
+      },
+      "native_run": 0
+    },
+    "tracee/monitor": {
+      "distinct_bodies": 40,
+      "latest_stages": {
+        "installed": 13,
+        "verifier_rejected": 23,
+        "compilation_failed": 4
+      },
+      "native_run": 0
+    }
+  },
+  "native_run": 0,
+  "new_request_archives": [
+    {
+      "application": "tracee/monitor",
+      "body_group": 58,
+      "stage": "verifier_rejected",
+      "raw_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/5.failure.tar.gz",
+      "bytes": 23305972,
+      "sha256": "5e8ac0e9c284c6b9a0772a1c8bf1435add8109c644b521b87e6b37c3e3b447f4",
+      "parts": [
+        {
+          "path": "kprog/results/verified_20261114/census-resume-1842/body-58-5e8ac0e9c284.tar.gz.part000",
+          "bytes": 23305972,
+          "sha256": "5e8ac0e9c284c6b9a0772a1c8bf1435add8109c644b521b87e6b37c3e3b447f4"
+        }
+      ],
+      "reconstruction": "Concatenate listed parts; original SHA256 above."
+    },
+    {
+      "application": "tracee/monitor",
+      "body_group": 60,
+      "stage": "verifier_rejected",
+      "raw_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/6.failure.tar.gz",
+      "bytes": 14258962,
+      "sha256": "ba79aec8eabb14634357dbbecd13ec1a8bfcfc678245b052471d69a14549a756",
+      "parts": [
+        {
+          "path": "kprog/results/verified_20261114/census-resume-1842/body-60-ba79aec8eabb.tar.gz.part000",
+          "bytes": 14258962,
+          "sha256": "ba79aec8eabb14634357dbbecd13ec1a8bfcfc678245b052471d69a14549a756"
+        }
+      ],
+      "reconstruction": "Concatenate listed parts; original SHA256 above."
+    },
+    {
+      "application": "tracee/monitor",
+      "body_group": 61,
+      "stage": "verifier_rejected",
+      "raw_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/7.failure.tar.gz",
+      "bytes": 23692454,
+      "sha256": "a330a0f0aa39a10e37c84278bdf1534c717ee5cac395dd19a635ab7508667408",
+      "parts": [
+        {
+          "path": "kprog/results/verified_20261114/census-resume-1842/body-61-a330a0f0aa39.tar.gz.part000",
+          "bytes": 23692454,
+          "sha256": "a330a0f0aa39a10e37c84278bdf1534c717ee5cac395dd19a635ab7508667408"
+        }
+      ],
+      "reconstruction": "Concatenate listed parts; original SHA256 above."
+    },
+    {
+      "application": "tracee/monitor",
+      "body_group": 62,
+      "stage": "installed",
+      "raw_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/8.success.tar.gz",
+      "bytes": 13109278,
+      "sha256": "83143932ca4b8a7b9c5d3269af795f9fce70503678fc4566db406c7427b7a44c",
+      "parts": [
+        {
+          "path": "kprog/results/verified_20261114/census-resume-1842/body-62-83143932ca4b.tar.gz.part000",
+          "bytes": 13109278,
+          "sha256": "83143932ca4b8a7b9c5d3269af795f9fce70503678fc4566db406c7427b7a44c"
+        }
+      ],
+      "reconstruction": "Concatenate listed parts; original SHA256 above."
+    },
+    {
+      "application": "tracee/monitor",
+      "body_group": 63,
+      "stage": "verifier_rejected",
+      "raw_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/9.failure.tar.gz",
+      "bytes": 14164439,
+      "sha256": "2fbc08ae84dea99d544cd215b049af1482e27aba87411aab25a473884975364c",
+      "parts": [
+        {
+          "path": "kprog/results/verified_20261114/census-resume-1842/body-63-2fbc08ae84de.tar.gz.part000",
+          "bytes": 14164439,
+          "sha256": "2fbc08ae84dea99d544cd215b049af1482e27aba87411aab25a473884975364c"
+        }
+      ],
+      "reconstruction": "Concatenate listed parts; original SHA256 above."
+    },
+    {
+      "application": "tracee/monitor",
+      "body_group": 64,
+      "stage": "installed",
+      "raw_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/10.success.tar.gz",
+      "bytes": 5392531,
+      "sha256": "55ae6d67773e6700d02b79aed47493df9b3f4fe36c91bbca3cdc07bd5431534b",
+      "parts": [
+        {
+          "path": "kprog/results/verified_20261114/census-resume-1842/body-64-55ae6d67773e.tar.gz.part000",
+          "bytes": 5392531,
+          "sha256": "55ae6d67773e6700d02b79aed47493df9b3f4fe36c91bbca3cdc07bd5431534b"
+        }
+      ],
+      "reconstruction": "Concatenate listed parts; original SHA256 above."
+    },
+    {
+      "application": "bcc/set",
+      "body_group": 65,
+      "stage": "installed",
+      "raw_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/11.success.tar.gz",
+      "bytes": 1096288,
+      "sha256": "ede6c7b563fc044d78820f260dad473512809bf0b33c79ed47a974962f6bd56e",
+      "parts": [
+        {
+          "path": "kprog/results/verified_20261114/census-resume-1842/body-65-ede6c7b563fc.tar.gz.part000",
+          "bytes": 1096288,
+          "sha256": "ede6c7b563fc044d78820f260dad473512809bf0b33c79ed47a974962f6bd56e"
+        }
+      ],
+      "reconstruction": "Concatenate listed parts; original SHA256 above."
+    }
+  ],
+  "raw_directory": "/workspaces/kprog-raw/perf/20261114-census-resume/publication-1842",
+  "raw_removed": false
+}
