@@ -70,7 +70,7 @@ def check(args):
                     raise ValueError('Four independent scalar pairs were not selected')
                 mir.write_text(source)
             obj = args.build/'fixture.o'
-            run(['llc-18', '-O3', '-march=bpf', '-mcpu=v4', '-verify-machineinstrs',
+            run(['llc-18', '-O3', '-march=bpf', '-mcpu=v4', '-bpf-stack-size=4096', '-verify-machineinstrs',
                  '-start-before=prologepilog', '-filetype=obj', mir, '-o', obj])
             actual_depth = depth(obj)
             expected_depth = (512 if packed else 544) if large else (48 if packed else 80)
