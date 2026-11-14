@@ -26,3 +26,9 @@ native-layout:
 .PHONY: audit
 audit: $(BUILD)/core-reference
 	taskset -c 19 prlimit --as=4294967296 -- python3 $(ROOT)/kprog/test/audit_core_objects.py --build $(BUILD) --output $(OUTPUT) $(AUDIT_ARGS)
+
+.PHONY: macro-policy
+macro-policy:
+	install -d $(BUILD) $(OUTPUT)
+	$(CC) -O2 -Wall -Wextra -Werror $(ROOT)/kprog/test/core_macro_policy.c -o $(BUILD)/macro-policy
+	$(BUILD)/macro-policy > $(OUTPUT)/macro-policy.json
