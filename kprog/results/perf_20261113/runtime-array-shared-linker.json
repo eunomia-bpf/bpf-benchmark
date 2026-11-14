@@ -1,0 +1,278 @@
+{
+  "recorded_at": "2026-11-14T05:28:25.947073+00:00",
+  "protocol_commit": "3fbc1fdc6",
+  "raw": "/workspaces/kprog-raw/perf/20261114-runtime-array-shared",
+  "inputs": [],
+  "reports": [
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-runtime-array-shared/collection.json",
+      "sha256": "374b69e69467828275a3518ed0168b770d42320e7788c3dd45718759dca504bb",
+      "data": {
+        "recorded_at": "2026-11-14T05:28:17.861640+00:00",
+        "feature_commit": "3fbc1fdc6",
+        "inline_source": "9f51cfee7",
+        "regression_receipt": "ad56c93b1:kprog/results/perf_20261113/runtime-array-otel-results.json",
+        "scope": "Host-only LTO candidate. Code footprint test; no runtime speedup, work equivalence, floor or checked-sim-c execution claim.",
+        "tests": {
+          "passed": 28,
+          "failed": 0,
+          "preexisting_ignored": 1,
+          "command": "make -f kprog/perf/native-context/Makefile known-map-link-check",
+          "log": "20261114-runtime-array-shared-check-final.log",
+          "new_bugs_covered": [
+            "one routine shared by multiple calls without losing unrelated relocations",
+            "nested generic helper preserves SysV stack alignment and RDI/RSI",
+            "existing key/bounds/mask/wide-product/nonARRAY vectors execute both inline and shared forms",
+            "immediate/GOT/PLT and branch-entry actual encoded paths return through JmpEnd correctly",
+            "separate shared CLI opt-in requires runtime ARRAY layout"
+          ]
+        },
+        "default_parity_cases": 22,
+        "default_reference": "corpus/results/perf-runtime-array-linker-20261114/native-link.real",
+        "runtime_replays": 28,
+        "all_runtime_exits_zero": true,
+        "all_proof_on_off_equal": true,
+        "all_existing_inline_outputs_equal": true,
+        "binary_sha256": "dcb873855038e5dc0456b4d04252cf3dbf83e7232672074b95e86af58ddaa60c",
+        "layout": {
+          "map_type": 56,
+          "max_entries": 68,
+          "elem_size": 288,
+          "index_mask": 292,
+          "value": 304,
+          "array_type": 2
+        },
+        "kernel_rows": [
+          {
+            "symbol": "custom__generic",
+            "inline_bytes": 6810,
+            "shared_bytes": 6773,
+            "generic_calls_shared_inline": [
+              1,
+              2
+            ],
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "perf_unwind_hotspot",
+            "inline_bytes": 41379,
+            "shared_bytes": 39990,
+            "generic_calls_shared_inline": [
+              1,
+              28
+            ],
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "perf_go_labels",
+            "inline_bytes": 2938,
+            "shared_bytes": 2938,
+            "generic_calls_shared_inline": [
+              0,
+              0
+            ],
+            "on_off_equal": {
+              "image": true,
+              "relocs": true,
+              "maps": true,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "tracepoint__sched_process_free",
+            "inline_bytes": 1381,
+            "shared_bytes": 1396,
+            "generic_calls_shared_inline": [
+              1,
+              1
+            ],
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "perf_unwind_ruby",
+            "inline_bytes": 26953,
+            "shared_bytes": 26953,
+            "generic_calls_shared_inline": [
+              0,
+              0
+            ],
+            "on_off_equal": {
+              "image": true,
+              "relocs": true,
+              "maps": true,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "native_tracer_entry",
+            "inline_bytes": 6860,
+            "shared_bytes": 6823,
+            "generic_calls_shared_inline": [
+              1,
+              2
+            ],
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "perf_unwind_php",
+            "inline_bytes": 33354,
+            "shared_bytes": 33369,
+            "generic_calls_shared_inline": [
+              1,
+              1
+            ],
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "perf_unwind_dotnet",
+            "inline_bytes": 36109,
+            "shared_bytes": 35864,
+            "generic_calls_shared_inline": [
+              1,
+              6
+            ],
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "perf_unwind_v8",
+            "inline_bytes": 34464,
+            "shared_bytes": 34115,
+            "generic_calls_shared_inline": [
+              1,
+              8
+            ],
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "perf_unwind_stop",
+            "inline_bytes": 7474,
+            "shared_bytes": 7474,
+            "generic_calls_shared_inline": [
+              0,
+              0
+            ],
+            "on_off_equal": {
+              "image": true,
+              "relocs": true,
+              "maps": true,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "perf_unwind_native",
+            "inline_bytes": 34479,
+            "shared_bytes": 30578,
+            "generic_calls_shared_inline": [
+              1,
+              76
+            ],
+            "on_off_equal": {
+              "image": false,
+              "relocs": false,
+              "maps": false,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "perf_unwind_python",
+            "inline_bytes": 20172,
+            "shared_bytes": 20172,
+            "generic_calls_shared_inline": [
+              0,
+              0
+            ],
+            "on_off_equal": {
+              "image": true,
+              "relocs": true,
+              "maps": true,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "perf_unwind_perl",
+            "inline_bytes": 36431,
+            "shared_bytes": 36431,
+            "generic_calls_shared_inline": [
+              0,
+              0
+            ],
+            "on_off_equal": {
+              "image": true,
+              "relocs": true,
+              "maps": true,
+              "abi": true
+            }
+          },
+          {
+            "symbol": "read_task_struct",
+            "inline_bytes": 260,
+            "shared_bytes": 260,
+            "generic_calls_shared_inline": [
+              0,
+              0
+            ],
+            "on_off_equal": {
+              "image": true,
+              "relocs": true,
+              "maps": true,
+              "abi": true
+            }
+          }
+        ],
+        "generic_relocation_counts_shared_inline": [
+          8,
+          124
+        ],
+        "routine_bytes": 67,
+        "loader_abi": "Direct-native module helper relocation requires E8+zero disp32. Routine uses aligned nested E8 call then RET, not unsupported E9; no kernel/module/relocation ABI changes.",
+        "kernel": "74d1097af561",
+        "image": "66e9e88f197f975fd98f78f08be2eac3b7c313937e39a4cb2a45639d0615f2b8",
+        "source_layout_provenance": "Same boot-matched vmlinux BTF as9f51. The stale-header finding concerned the pre05:23 artifact; VERIFIED later refreshed packet layout/header from boot BTF. This provider continues to use actual BTF, not cached header.",
+        "runtime_plan": "Separate diagnostic1x30s statsON CPU16-19/4vCPU16G, unchanged frozen workload, existing observer; no new guest launched at this receipt.",
+        "lto_configurations": "Operator05:22 terminology: this is direct-native machine-code LTO. Also time checked-sim-c LTO configuration through actual service path; its execution evidence remains separate."
+      }
+    }
+  ],
+  "scope": "Host-only-LTO-candidate-default-and-inline-parity-no-runtime-gain-claim",
+  "archive": {
+    "path": "kprog/results/perf_20261113/runtime-array-shared-linker.tar.gz",
+    "bytes": 21251921,
+    "sha256": "6fcf7dd7a4fcc8d9f33d7aa3d9f70577d73481b81ed4e16d002c15bd1676f153",
+    "files_byte_compared": 1685
+  }
+}
