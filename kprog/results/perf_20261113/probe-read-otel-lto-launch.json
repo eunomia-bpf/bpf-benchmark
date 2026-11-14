@@ -56,5 +56,72 @@
       "sha256": "f95f3e3b9ece20bd1a7340c9d2be478cb7befea33bae02892dfe353d525c0bb0"
     }
   ],
-  "scope": "First whole-app diagnostic, not 3x180 formal timing/floor/throughput improvement certification. 36 actual kernel component executions already published; app verification/install/execution and workload outcomes remain unobserved. Existing direct benchmark image module not used for this registered service run."
+  "scope": "First whole-app diagnostic, not 3x180 formal timing/floor/throughput improvement certification. 36 actual kernel component executions already published; app verification/install/execution and workload outcomes remain unobserved. Existing direct benchmark image module not used for this registered service run.",
+  "live_checkpoint": {
+    "recorded_at": "2026-11-14T07:09:54.934365+00:00",
+    "status": "RUNNING_PARTIAL",
+    "source": "/workspaces/kprog-raw/perf/20261114-probe-read-otel-lto/checkpoint-070705.json",
+    "outer_pid": 235861,
+    "completed_source_requests": [
+      {
+        "request_id": 1,
+        "source_id": 21,
+        "entry": "read_task_struct",
+        "verify_id": 24,
+        "native_id": 27,
+        "checked_c_copy_sha256": "0d0c1aca1d8af519b37267b56c92783737ddf290883089d3638154bc490e17f6",
+        "read_lto_source_sites": [
+          [
+            1893,
+            3,
+            11
+          ],
+          [
+            1936,
+            3,
+            11
+          ]
+        ],
+        "archive": "/workspaces/kprog-raw/perf/20261114-probe-read-otel-lto/control/state/session-15wt2vwe/requests/1.success.tar.gz",
+        "archive_sha256": "5d81683e25ec9c1e182feecfb030ebe5463f0d973fdfc2c69f0c1dc5727c9d66"
+      },
+      {
+        "request_id": 2,
+        "source_id": 28,
+        "entry": "perf_unwind_stop",
+        "verify_id": 31,
+        "native_id": 34,
+        "checked_c_copy_sha256": "e4c84e8acc2f4c4c4b84e4461491f5aec76f81218e1f6c21d7cde28b4410b338",
+        "read_lto_source_sites": [
+          [
+            57261,
+            3,
+            11
+          ],
+          [
+            57304,
+            3,
+            11
+          ],
+          [
+            57528,
+            3,
+            11
+          ],
+          [
+            57571,
+            3,
+            11
+          ]
+        ],
+        "archive": "/workspaces/kprog-raw/perf/20261114-probe-read-otel-lto/control/state/session-15wt2vwe/requests/2.success.tar.gz",
+        "archive_sha256": "c73a23784d17b9429f27f53e68c777fe610fd2ab04162a58054a2b5674cf3e2d"
+      }
+    ],
+    "pending_entry": "perf_unwind_native",
+    "baseline_measurement_done_ok": true,
+    "native_measurement_started": false,
+    "throughput_result": "NOT AVAILABLE; pending is not zero",
+    "scope": "Two actual requests verified and installed; not full app coverage, execution or completion. Reader continues naturally; no signal/restart/new limit."
+  }
 }
