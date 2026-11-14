@@ -1,0 +1,55 @@
+{
+  "cases": [
+    {
+      "shape": "adjacent",
+      "named": true,
+      "assembly": ".intel_syntax noprefix\n.text\n.global entry\n.type entry,@function\nentry:\npush rbx\ncall bpf_get_prandom_u32\npop rbx\nret\n.size entry,.-entry\n.section .note.GNU-stack,\"\",@progbits\n",
+      "result": 101,
+      "calls": 1,
+      "bytes": 7
+    },
+    {
+      "shape": "adjacent",
+      "named": false,
+      "assembly": ".intel_syntax noprefix\n.text\n.global entry\n.type entry,@function\nentry:\npush rbx\nmov rax,7\ncall rax\npop rbx\nret\n.size entry,.-entry\n.section .note.GNU-stack,\"\",@progbits\n",
+      "result": 101,
+      "calls": 1,
+      "bytes": 7
+    },
+    {
+      "shape": "separated",
+      "named": true,
+      "assembly": ".intel_syntax noprefix\n.text\n.global entry\n.type entry,@function\nentry:\npush rbx\nxor r10d,r10d\ncall bpf_get_prandom_u32\npop rbx\nret\n.size entry,.-entry\n.section .note.GNU-stack,\"\",@progbits\n",
+      "result": 101,
+      "calls": 1,
+      "bytes": 10
+    },
+    {
+      "shape": "separated",
+      "named": false,
+      "assembly": ".intel_syntax noprefix\n.text\n.global entry\n.type entry,@function\nentry:\npush rbx\nmov rax,7\nxor r10d,r10d\ncall rax\npop rbx\nret\n.size entry,.-entry\n.section .note.GNU-stack,\"\",@progbits\n",
+      "result": 101,
+      "calls": 1,
+      "bytes": 10
+    },
+    {
+      "shape": "hoisted",
+      "named": true,
+      "assembly": ".intel_syntax noprefix\n.text\n.global entry\n.type entry,@function\nentry:\npush rbx\ncall bpf_get_prandom_u32\ncall bpf_get_prandom_u32\npop rbx\nret\n.size entry,.-entry\n.section .note.GNU-stack,\"\",@progbits\n",
+      "result": 102,
+      "calls": 2,
+      "bytes": 12
+    },
+    {
+      "shape": "hoisted",
+      "named": false,
+      "assembly": ".intel_syntax noprefix\n.text\n.global entry\n.type entry,@function\nentry:\npush rbx\nmov rbx,7\ncall rbx\ncall rbx\npop rbx\nret\n.size entry,.-entry\n.section .note.GNU-stack,\"\",@progbits\n",
+      "result": 102,
+      "calls": 2,
+      "bytes": 12
+    }
+  ],
+  "runtime_image_relocations_maps_abi_equal": true,
+  "combined_lto_options": true,
+  "linker": "/workspaces/repository/corpus/results/perf-corrected-all-lto-linker-20261114/native-link.real"
+}
