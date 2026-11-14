@@ -1,0 +1,1375 @@
+{
+  "recorded_at": "2026-11-14T00:07:14.655701+00:00",
+  "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261113_235107_777988",
+  "raw": "/workspaces/kprog-raw/perf/20261113-cilium-public-data-runtime",
+  "make_exit": 0,
+  "app_status": "error",
+  "app_error": "Cilium API PUT /v1/endpoint/0 returned HTTP 500: \"timeout while waiting for initial endpoint generation to complete: context deadline exceeded\"; cilium-agent output tail:\nID=72 containerInterface=\"\" subsys=endpoint file-path=72_next/verifier.log\ntime=2026-11-13T23:55:31.318555558Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\" file-path=72_next_fail\ntime=2026-11-13T23:55:31.318711246Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint reason=RegenerationFailure proxyWaitForAck=0s prepareBuild=129.747\u00b5s bpfWaitForELF=660.146\u00b5s waitingForLock=2.422\u00b5s mapSync=983ns bpfCompilation=0s buildPermitAcquisition=3.181\u00b5s waitingForPolicyRepository=88ns endpointPolicyCalculation=3.565\u00b5s total=662.139036ms proxyConfiguration=3.742\u00b5s proxyPolicyCalculation=45.502\u00b5s bpfLoadProg=595.116855ms waitingForCTClean=1.385\u00b5s policyCalculation=13.077\u00b5s selectorPolicyCalculation=0s bpfCompilation=0s bpfWaitForELF=660.146\u00b5s bpfLoadProg=595.116855ms error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\"\ntime=2026-11-13T23:55:31.31874801Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\"\ntime=2026-11-13T23:55:55.788873092Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\"\ntime=2026-11-13T23:55:55.789005583Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint file-path=72_next/verifier.log\ntime=2026-11-13T23:55:55.789014433Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\" file-path=72_next_fail\ntime=2026-11-13T23:55:55.789152815Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint reason=RegenerationFailure policyCalculation=12.713\u00b5s proxyWaitForAck=0s prepareBuild=123.014\u00b5s proxyConfiguration=3.23\u00b5s total=469.754951ms bpfLoadProg=448.971403ms waitingForPolicyRepository=93ns waitingForCTClean=341.339\u00b5s endpointPolicyCalculation=3.275\u00b5s proxyPolicyCalculation=38.821\u00b5s selectorPolicyCalculation=0s mapSync=1.025\u00b5s buildPermitAcquisition=2.762\u00b5s bpfCompilation=0s bpfWaitForELF=643.495\u00b5s waitingForLock=1.875\u00b5s bpfCompilation=0s bpfWaitForELF=643.495\u00b5s bpfLoadProg=448.971403ms error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\"\ntime=2026-11-13T23:55:55.789188762Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\"\ntime=2026-11-13T23:56:22.495196884Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\"\ntime=2026-11-13T23:56:22.495341994Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint file-path=72_next/verifier.log\ntime=2026-11-13T23:56:22.495350775Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\" file-path=72_next_fail\ntime=2026-11-13T23:56:22.495492629Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint reason=RegenerationFailure bpfWaitForELF=547.904\u00b5s waitingForPolicyRepository=91ns proxyConfiguration=3.903\u00b5s proxyPolicyCalculation=40.687\u00b5s total=705.314174ms waitingForCTClean=293.584\u00b5s selectorPolicyCalculation=0s endpointPolicyCalculation=2.814\u00b5s proxyWaitForAck=0s prepareBuild=118.184\u00b5s waitingForLock=1.784\u00b5s policyCalculation=11.458\u00b5s mapSync=1.02\u00b5s bpfCompilation=0s bpfLoadProg=682.215476ms buildPermitAcquisition=2.418\u00b5s bpfCompilation=0s bpfWaitForELF=547.904\u00b5s bpfLoadProg=682.215476ms error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\"\ntime=2026-11-13T23:56:22.495524033Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\"\ntime=2026-11-13T23:56:51.343881882Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\"\ntime=2026-11-13T23:56:51.344027019Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint file-path=72_next/verifier.log\ntime=2026-11-13T23:56:51.344035688Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\" file-path=72_next_fail\ntime=2026-11-13T23:56:51.34418113Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint reason=RegenerationFailure buildPermitAcquisition=2.923\u00b5s waitingForLock=1.792\u00b5s waitingForPolicyRepository=100ns waitingForCTClean=281.894\u00b5s mapSync=1.056\u00b5s prepareBuild=123.637\u00b5s total=848.508544ms bpfWaitForELF=582.463\u00b5s policyCalculation=12.309\u00b5s selectorPolicyCalculation=0s bpfCompilation=0s bpfLoadProg=824.354483ms proxyConfiguration=4.404\u00b5s endpointPolicyCalculation=3.111\u00b5s proxyPolicyCalculation=39.992\u00b5s proxyWaitForAck=0s bpfCompilation=0s bpfWaitForELF=582.463\u00b5s bpfLoadProg=824.354483ms error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\"\ntime=2026-11-13T23:56:51.344214027Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\"\ntime=2026-11-13T23:57:22.201990916Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\"\ntime=2026-11-13T23:57:22.202125895Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint file-path=72_next/verifier.log\ntime=2026-11-13T23:57:22.202134782Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\" file-path=72_next_fail\ntime=2026-11-13T23:57:22.20230099Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint reason=RegenerationFailure bpfWaitForELF=672.846\u00b5s mapSync=918ns bpfLoadProg=832.458032ms waitingForCTClean=319.158\u00b5s proxyPolicyCalculation=42.624\u00b5s proxyWaitForAck=0s waitingForLock=1.823\u00b5s waitingForPolicyRepository=96ns policyCalculation=11.426\u00b5s buildPermitAcquisition=2.849\u00b5s bpfCompilation=0s proxyConfiguration=3.148\u00b5s selectorPolicyCalculation=0s endpointPolicyCalculation=3.755\u00b5s prepareBuild=123.465\u00b5s total=857.027223ms bpfCompilation=0s bpfWaitForELF=672.846\u00b5s bpfLoadProg=832.458032ms error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\"\ntime=2026-11-13T23:57:22.20233584Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\"\ntime=2026-11-13T23:57:54.882636911Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=false\ntime=2026-11-13T23:57:54.973499328Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\"\ntime=2026-11-13T23:57:54.973658836Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint file-path=72_next/verifier.log\ntime=2026-11-13T23:57:54.973668334Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\" file-path=72_next_fail\ntime=2026-11-13T23:57:54.973835114Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint reason=RegenerationFailure mapSync=1.411\u00b5s buildPermitAcquisition=2.406\u00b5s bpfCompilation=0s waitingForLock=1.906\u00b5s proxyConfiguration=3.732\u00b5s selectorPolicyCalculation=0s prepareBuild=127.053\u00b5s total=770.372032ms bpfWaitForELF=543.031\u00b5s bpfLoadProg=745.539869ms policyCalculation=11.569\u00b5s endpointPolicyCalculation=3.253\u00b5s waitingForPolicyRepository=97ns waitingForCTClean=297.425\u00b5s proxyPolicyCalculation=40.745\u00b5s proxyWaitForAck=0s bpfCompilation=0s bpfWaitForELF=543.031\u00b5s bpfLoadProg=745.539869ms error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\"\ntime=2026-11-13T23:57:54.973895908Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\"\ntime=2026-11-13T23:58:29.798949496Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\"\ntime=2026-11-13T23:58:29.799089924Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint file-path=72_next/verifier.log\ntime=2026-11-13T23:58:29.799099015Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\" file-path=72_next_fail\ntime=2026-11-13T23:58:29.799252087Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint reason=RegenerationFailure waitingForCTClean=306.705\u00b5s total=825.021586ms bpfCompilation=0s bpfLoadProg=799.538457ms waitingForLock=1.567\u00b5s proxyConfiguration=2.944\u00b5s proxyPolicyCalculation=38.708\u00b5s proxyWaitForAck=0s mapSync=886ns buildPermitAcquisition=2.414\u00b5s bpfWaitForELF=534.833\u00b5s waitingForPolicyRepository=100ns policyCalculation=10.337\u00b5s selectorPolicyCalculation=0s endpointPolicyCalculation=2.653\u00b5s prepareBuild=120.073\u00b5s bpfCompilation=0s bpfWaitForELF=534.833\u00b5s bpfLoadProg=799.538457ms error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\"\ntime=2026-11-13T23:58:29.799285565Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4_cont: load program: invalid argument\"\ntime=2026-11-13T23:58:39.432330126Z level=info msg=\"Released last local use of key, invoking global release\" module=agent.controlplane.identity.identity subsys=kvstorebackend key=\"[container:app=bpfbench-cilium container:instance=a]\"\ntime=2026-11-13T23:58:39.760488501Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::d83d:34ff:fe76:cad (primary)\" device=*\ntime=2026-11-13T23:58:39.862224876Z level=info msg=\"Removed endpoint\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint\ntime=2026-11-13T23:58:39.862318149Z level=warn msg=\"Creation of endpoint failed\" k8sPodName=/ ciliumEndpointName=/ identity=5490 containerID=bpfbench-c ipv6=\"\" ipv4=10.244.0.9 endpointID=72 containerInterface=\"\" subsys=endpoint-api error=\"timeout while waiting for initial endpoint generation to complete: context deadline exceeded\"",
+  "programs": {
+    "baseline": 56,
+    "post_rejit": null
+  },
+  "samples": 1,
+  "workload_seconds": 45.0,
+  "native_replacements": 186,
+  "observer_exit": 1,
+  "snapshots": [
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-public-data-capture-20261113/baseline-0001/cilium-config.tar.gz",
+      "bytes": 705787,
+      "sha256": "fedd8316b9e6445571bcdd817dc87a8a260822c79be69e64b3b1e7506717f449",
+      "capture_exit": 0,
+      "index": {
+        "state_dir": "/var/tmp/ciliumrunner_lrpq4pp_/state",
+        "files": [
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1199/ep_config.h",
+            "archive": "state/1199/ep_config.h",
+            "bytes": 572,
+            "sha256": "78883f615dc54891d6330ade0dfd195018a909564b974d40e8590199cc1e330b"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1199/ep_config.json",
+            "archive": "state/1199/ep_config.json",
+            "bytes": 938,
+            "sha256": "841f572113bdcb770a179c59e9f83418dfe529937d29655f2f1acb45af6f3bab"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/bpf_lxc.json",
+            "archive": "state/1616/bpf_lxc.json",
+            "bytes": 4289,
+            "sha256": "12fa630b023237b68cbc5d9aef696044b3ac9eb1390b462d21af01c4947fb663"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/ep_config.h",
+            "archive": "state/1616/ep_config.h",
+            "bytes": 609,
+            "sha256": "411cae06944c42c4e19c8696c3e3be5ac1ac24c467e27905e701fdcc83e6c11e"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/ep_config.json",
+            "archive": "state/1616/ep_config.json",
+            "bytes": 1166,
+            "sha256": "a1dab2aab7a87a12821f04c5928e4dfd448ea93456190dc416773e09d67c6aca"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/bpf_lxc.json",
+            "archive": "state/883/bpf_lxc.json",
+            "bytes": 4283,
+            "sha256": "b3de88c5d449449052803e1977c03c5051bfc9d67660133140e12ccfe40e54e1"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/ep_config.h",
+            "archive": "state/883/ep_config.h",
+            "bytes": 607,
+            "sha256": "759fb040420e7e10d6d7d9dcb6d6657f8292303181eaab75fcb559aef515238e"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/ep_config.json",
+            "archive": "state/883/ep_config.json",
+            "bytes": 1163,
+            "sha256": "8f385e3f3c0d99355deefb4bbff74a3801b446def0d9dfa032eb2b0000eea55b"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/agent-runtime-config.json",
+            "archive": "state/agent-runtime-config.json",
+            "bytes": 8003,
+            "sha256": "366d87f6939619fe7c8a93146b631397b4324d87445a270074c0fd897c80f9ec"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/bpfbench0/bpf_host.json",
+            "archive": "state/bpf/bpfbench0/bpf_host.json",
+            "bytes": 4120,
+            "sha256": "4a68a28567cb14ee23fbee7077659e9683ed7b2bf1f631662c45aec8d6317b92"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/bpfbench0/bpf_xdp.json",
+            "archive": "state/bpf/bpfbench0/bpf_xdp.json",
+            "bytes": 3341,
+            "sha256": "24601779a37844b3e07664111639a3cbb3a408852b3b7bc475b429778fe4c068"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/cilium_host/bpf_host.json",
+            "archive": "state/bpf/cilium_host/bpf_host.json",
+            "bytes": 4118,
+            "sha256": "fb339ca43597ca259aaf8997e52fdf12e2bee2baad8ac1f00cfa48d9d7256504"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/cilium_net/bpf_host.json",
+            "archive": "state/bpf/cilium_net/bpf_host.json",
+            "bytes": 4118,
+            "sha256": "d6729f996c08775a4310245e9ed0d329d1a367f275d62b22b69e1f3c192d4a8f"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf_alignchecker.o",
+            "archive": "state/bpf_alignchecker.o",
+            "bytes": 161008,
+            "sha256": "b32fed1579f0bed23e274870ece3ff2a01ec4d0332624df0a823f2b033529ded"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf_xdp.o",
+            "archive": "state/bpf_xdp.o",
+            "bytes": 370552,
+            "sha256": "56f590214bd6e97e3494612146fe19127c5e40fd6a60e7f3f1d1365ef8a28345"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/filter_config.h",
+            "archive": "state/filter_config.h",
+            "bytes": 217,
+            "sha256": "ee52469d6b61d86e48952d759cc78c6546811594bb06a9e894ae99d6c784f312"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/globals/node_config.h",
+            "archive": "state/globals/node_config.h",
+            "bytes": 5440,
+            "sha256": "d39dddcb58bad0bab4068552cf55196a286f4a0bb3fdfa7985ac9d455ae8bbbe"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/netdev_config.h",
+            "archive": "state/netdev_config.h",
+            "bytes": 176,
+            "sha256": "4f273b5d9571d5e8bdb6e88c3659d0fa7d8961ad72ac8e0a6560707d4e2709af"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/nodes.json",
+            "archive": "state/nodes.json",
+            "bytes": 3,
+            "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/bpf_lxc.o",
+            "archive": "state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/bpf_lxc.o",
+            "bytes": 1010480,
+            "sha256": "cf276359b47e0443d1c9026541390b9c8674f6c6c316c822d56badd380828a45"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/ep_config.h",
+            "archive": "state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/ep_config.h",
+            "bytes": 278,
+            "sha256": "514ff5a65e55a6cf6dfa9562e01c427ba4eaa434dc19dc4a10880c37af453b32"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/bpf_host.o",
+            "archive": "state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/bpf_host.o",
+            "bytes": 923968,
+            "sha256": "2d689cd03ffa96b3dfc5b3d7b63e38c53aef9923490d6b488dc74d5371ce8f09"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/ep_config.h",
+            "archive": "state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/ep_config.h",
+            "bytes": 302,
+            "sha256": "7b99209783c8b493c4d0dd673f5475ead763e892534d7f639d4bfb36bfc1dcd3"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features.h",
+            "archive": "generated-features/features.h",
+            "bytes": 191,
+            "sha256": "0a48e078a3e4b671a7079ee22e0ce458b8d3d57159421d39bb54b06cef650888"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_skb.h",
+            "archive": "generated-features/features_skb.h",
+            "bytes": 186,
+            "sha256": "cafad9307518205d5456246937e74822ab6dcc9fc3586945d1335139aac88681"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_xdp.h",
+            "archive": "generated-features/features_xdp.h",
+            "bytes": 282,
+            "sha256": "c5d4abfaa278f428fb36d453f9784695b38d214d9cc8362ee6b540b0c6803a6b"
+          }
+        ]
+      }
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-public-data-capture-20261113/baseline-0002/cilium-config.tar.gz",
+      "bytes": 705787,
+      "sha256": "e6a655420b51d68d2f2de9c5546246ed881a5ff25daaecf306ec436ca7e4463f",
+      "capture_exit": 0,
+      "index": {
+        "state_dir": "/var/tmp/ciliumrunner_lrpq4pp_/state",
+        "files": [
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1199/ep_config.h",
+            "archive": "state/1199/ep_config.h",
+            "bytes": 572,
+            "sha256": "78883f615dc54891d6330ade0dfd195018a909564b974d40e8590199cc1e330b"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1199/ep_config.json",
+            "archive": "state/1199/ep_config.json",
+            "bytes": 938,
+            "sha256": "841f572113bdcb770a179c59e9f83418dfe529937d29655f2f1acb45af6f3bab"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/bpf_lxc.json",
+            "archive": "state/1616/bpf_lxc.json",
+            "bytes": 4289,
+            "sha256": "12fa630b023237b68cbc5d9aef696044b3ac9eb1390b462d21af01c4947fb663"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/ep_config.h",
+            "archive": "state/1616/ep_config.h",
+            "bytes": 609,
+            "sha256": "411cae06944c42c4e19c8696c3e3be5ac1ac24c467e27905e701fdcc83e6c11e"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/ep_config.json",
+            "archive": "state/1616/ep_config.json",
+            "bytes": 1166,
+            "sha256": "a1dab2aab7a87a12821f04c5928e4dfd448ea93456190dc416773e09d67c6aca"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/bpf_lxc.json",
+            "archive": "state/883/bpf_lxc.json",
+            "bytes": 4283,
+            "sha256": "b3de88c5d449449052803e1977c03c5051bfc9d67660133140e12ccfe40e54e1"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/ep_config.h",
+            "archive": "state/883/ep_config.h",
+            "bytes": 607,
+            "sha256": "759fb040420e7e10d6d7d9dcb6d6657f8292303181eaab75fcb559aef515238e"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/ep_config.json",
+            "archive": "state/883/ep_config.json",
+            "bytes": 1163,
+            "sha256": "8f385e3f3c0d99355deefb4bbff74a3801b446def0d9dfa032eb2b0000eea55b"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/agent-runtime-config.json",
+            "archive": "state/agent-runtime-config.json",
+            "bytes": 8003,
+            "sha256": "366d87f6939619fe7c8a93146b631397b4324d87445a270074c0fd897c80f9ec"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/bpfbench0/bpf_host.json",
+            "archive": "state/bpf/bpfbench0/bpf_host.json",
+            "bytes": 4120,
+            "sha256": "4a68a28567cb14ee23fbee7077659e9683ed7b2bf1f631662c45aec8d6317b92"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/bpfbench0/bpf_xdp.json",
+            "archive": "state/bpf/bpfbench0/bpf_xdp.json",
+            "bytes": 3341,
+            "sha256": "24601779a37844b3e07664111639a3cbb3a408852b3b7bc475b429778fe4c068"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/cilium_host/bpf_host.json",
+            "archive": "state/bpf/cilium_host/bpf_host.json",
+            "bytes": 4118,
+            "sha256": "fb339ca43597ca259aaf8997e52fdf12e2bee2baad8ac1f00cfa48d9d7256504"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/cilium_net/bpf_host.json",
+            "archive": "state/bpf/cilium_net/bpf_host.json",
+            "bytes": 4118,
+            "sha256": "d6729f996c08775a4310245e9ed0d329d1a367f275d62b22b69e1f3c192d4a8f"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf_alignchecker.o",
+            "archive": "state/bpf_alignchecker.o",
+            "bytes": 161008,
+            "sha256": "b32fed1579f0bed23e274870ece3ff2a01ec4d0332624df0a823f2b033529ded"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf_xdp.o",
+            "archive": "state/bpf_xdp.o",
+            "bytes": 370552,
+            "sha256": "56f590214bd6e97e3494612146fe19127c5e40fd6a60e7f3f1d1365ef8a28345"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/filter_config.h",
+            "archive": "state/filter_config.h",
+            "bytes": 217,
+            "sha256": "ee52469d6b61d86e48952d759cc78c6546811594bb06a9e894ae99d6c784f312"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/globals/node_config.h",
+            "archive": "state/globals/node_config.h",
+            "bytes": 5440,
+            "sha256": "d39dddcb58bad0bab4068552cf55196a286f4a0bb3fdfa7985ac9d455ae8bbbe"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/netdev_config.h",
+            "archive": "state/netdev_config.h",
+            "bytes": 176,
+            "sha256": "4f273b5d9571d5e8bdb6e88c3659d0fa7d8961ad72ac8e0a6560707d4e2709af"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/nodes.json",
+            "archive": "state/nodes.json",
+            "bytes": 3,
+            "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/bpf_lxc.o",
+            "archive": "state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/bpf_lxc.o",
+            "bytes": 1010480,
+            "sha256": "cf276359b47e0443d1c9026541390b9c8674f6c6c316c822d56badd380828a45"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/ep_config.h",
+            "archive": "state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/ep_config.h",
+            "bytes": 278,
+            "sha256": "514ff5a65e55a6cf6dfa9562e01c427ba4eaa434dc19dc4a10880c37af453b32"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/bpf_host.o",
+            "archive": "state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/bpf_host.o",
+            "bytes": 923968,
+            "sha256": "2d689cd03ffa96b3dfc5b3d7b63e38c53aef9923490d6b488dc74d5371ce8f09"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/ep_config.h",
+            "archive": "state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/ep_config.h",
+            "bytes": 302,
+            "sha256": "7b99209783c8b493c4d0dd673f5475ead763e892534d7f639d4bfb36bfc1dcd3"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features.h",
+            "archive": "generated-features/features.h",
+            "bytes": 191,
+            "sha256": "0a48e078a3e4b671a7079ee22e0ce458b8d3d57159421d39bb54b06cef650888"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_skb.h",
+            "archive": "generated-features/features_skb.h",
+            "bytes": 186,
+            "sha256": "cafad9307518205d5456246937e74822ab6dcc9fc3586945d1335139aac88681"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_xdp.h",
+            "archive": "generated-features/features_xdp.h",
+            "bytes": 282,
+            "sha256": "c5d4abfaa278f428fb36d453f9784695b38d214d9cc8362ee6b540b0c6803a6b"
+          }
+        ]
+      }
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-public-data-capture-20261113/baseline-0003/cilium-config.tar.gz",
+      "bytes": 705787,
+      "sha256": "a9ae0b5436552c253e363e57234db3eb41387449dd0d15418101fe513dd158e2",
+      "capture_exit": 0,
+      "index": {
+        "state_dir": "/var/tmp/ciliumrunner_lrpq4pp_/state",
+        "files": [
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1199/ep_config.h",
+            "archive": "state/1199/ep_config.h",
+            "bytes": 572,
+            "sha256": "78883f615dc54891d6330ade0dfd195018a909564b974d40e8590199cc1e330b"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1199/ep_config.json",
+            "archive": "state/1199/ep_config.json",
+            "bytes": 938,
+            "sha256": "841f572113bdcb770a179c59e9f83418dfe529937d29655f2f1acb45af6f3bab"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/bpf_lxc.json",
+            "archive": "state/1616/bpf_lxc.json",
+            "bytes": 4289,
+            "sha256": "12fa630b023237b68cbc5d9aef696044b3ac9eb1390b462d21af01c4947fb663"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/ep_config.h",
+            "archive": "state/1616/ep_config.h",
+            "bytes": 609,
+            "sha256": "411cae06944c42c4e19c8696c3e3be5ac1ac24c467e27905e701fdcc83e6c11e"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/ep_config.json",
+            "archive": "state/1616/ep_config.json",
+            "bytes": 1166,
+            "sha256": "a1dab2aab7a87a12821f04c5928e4dfd448ea93456190dc416773e09d67c6aca"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/bpf_lxc.json",
+            "archive": "state/883/bpf_lxc.json",
+            "bytes": 4283,
+            "sha256": "b3de88c5d449449052803e1977c03c5051bfc9d67660133140e12ccfe40e54e1"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/ep_config.h",
+            "archive": "state/883/ep_config.h",
+            "bytes": 607,
+            "sha256": "759fb040420e7e10d6d7d9dcb6d6657f8292303181eaab75fcb559aef515238e"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/ep_config.json",
+            "archive": "state/883/ep_config.json",
+            "bytes": 1163,
+            "sha256": "8f385e3f3c0d99355deefb4bbff74a3801b446def0d9dfa032eb2b0000eea55b"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/agent-runtime-config.json",
+            "archive": "state/agent-runtime-config.json",
+            "bytes": 8003,
+            "sha256": "366d87f6939619fe7c8a93146b631397b4324d87445a270074c0fd897c80f9ec"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/bpfbench0/bpf_host.json",
+            "archive": "state/bpf/bpfbench0/bpf_host.json",
+            "bytes": 4120,
+            "sha256": "4a68a28567cb14ee23fbee7077659e9683ed7b2bf1f631662c45aec8d6317b92"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/bpfbench0/bpf_xdp.json",
+            "archive": "state/bpf/bpfbench0/bpf_xdp.json",
+            "bytes": 3341,
+            "sha256": "24601779a37844b3e07664111639a3cbb3a408852b3b7bc475b429778fe4c068"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/cilium_host/bpf_host.json",
+            "archive": "state/bpf/cilium_host/bpf_host.json",
+            "bytes": 4118,
+            "sha256": "fb339ca43597ca259aaf8997e52fdf12e2bee2baad8ac1f00cfa48d9d7256504"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/cilium_net/bpf_host.json",
+            "archive": "state/bpf/cilium_net/bpf_host.json",
+            "bytes": 4118,
+            "sha256": "d6729f996c08775a4310245e9ed0d329d1a367f275d62b22b69e1f3c192d4a8f"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf_alignchecker.o",
+            "archive": "state/bpf_alignchecker.o",
+            "bytes": 161008,
+            "sha256": "b32fed1579f0bed23e274870ece3ff2a01ec4d0332624df0a823f2b033529ded"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf_xdp.o",
+            "archive": "state/bpf_xdp.o",
+            "bytes": 370552,
+            "sha256": "56f590214bd6e97e3494612146fe19127c5e40fd6a60e7f3f1d1365ef8a28345"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/filter_config.h",
+            "archive": "state/filter_config.h",
+            "bytes": 217,
+            "sha256": "ee52469d6b61d86e48952d759cc78c6546811594bb06a9e894ae99d6c784f312"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/globals/node_config.h",
+            "archive": "state/globals/node_config.h",
+            "bytes": 5440,
+            "sha256": "d39dddcb58bad0bab4068552cf55196a286f4a0bb3fdfa7985ac9d455ae8bbbe"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/netdev_config.h",
+            "archive": "state/netdev_config.h",
+            "bytes": 176,
+            "sha256": "4f273b5d9571d5e8bdb6e88c3659d0fa7d8961ad72ac8e0a6560707d4e2709af"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/nodes.json",
+            "archive": "state/nodes.json",
+            "bytes": 3,
+            "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/bpf_lxc.o",
+            "archive": "state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/bpf_lxc.o",
+            "bytes": 1010480,
+            "sha256": "cf276359b47e0443d1c9026541390b9c8674f6c6c316c822d56badd380828a45"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/ep_config.h",
+            "archive": "state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/ep_config.h",
+            "bytes": 278,
+            "sha256": "514ff5a65e55a6cf6dfa9562e01c427ba4eaa434dc19dc4a10880c37af453b32"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/bpf_host.o",
+            "archive": "state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/bpf_host.o",
+            "bytes": 923968,
+            "sha256": "2d689cd03ffa96b3dfc5b3d7b63e38c53aef9923490d6b488dc74d5371ce8f09"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/ep_config.h",
+            "archive": "state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/ep_config.h",
+            "bytes": 302,
+            "sha256": "7b99209783c8b493c4d0dd673f5475ead763e892534d7f639d4bfb36bfc1dcd3"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features.h",
+            "archive": "generated-features/features.h",
+            "bytes": 191,
+            "sha256": "0a48e078a3e4b671a7079ee22e0ce458b8d3d57159421d39bb54b06cef650888"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_skb.h",
+            "archive": "generated-features/features_skb.h",
+            "bytes": 186,
+            "sha256": "cafad9307518205d5456246937e74822ab6dcc9fc3586945d1335139aac88681"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_xdp.h",
+            "archive": "generated-features/features_xdp.h",
+            "bytes": 282,
+            "sha256": "c5d4abfaa278f428fb36d453f9784695b38d214d9cc8362ee6b540b0c6803a6b"
+          }
+        ]
+      }
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-public-data-capture-20261113/baseline-0004/cilium-config.tar.gz",
+      "bytes": 705787,
+      "sha256": "a1293eb197cbbdb2272dbdbe259f04eb16cc08f5aba0d28bd0c8e411cac6bfb4",
+      "capture_exit": 0,
+      "index": {
+        "state_dir": "/var/tmp/ciliumrunner_lrpq4pp_/state",
+        "files": [
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1199/ep_config.h",
+            "archive": "state/1199/ep_config.h",
+            "bytes": 572,
+            "sha256": "78883f615dc54891d6330ade0dfd195018a909564b974d40e8590199cc1e330b"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1199/ep_config.json",
+            "archive": "state/1199/ep_config.json",
+            "bytes": 938,
+            "sha256": "841f572113bdcb770a179c59e9f83418dfe529937d29655f2f1acb45af6f3bab"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/bpf_lxc.json",
+            "archive": "state/1616/bpf_lxc.json",
+            "bytes": 4289,
+            "sha256": "12fa630b023237b68cbc5d9aef696044b3ac9eb1390b462d21af01c4947fb663"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/ep_config.h",
+            "archive": "state/1616/ep_config.h",
+            "bytes": 609,
+            "sha256": "411cae06944c42c4e19c8696c3e3be5ac1ac24c467e27905e701fdcc83e6c11e"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/ep_config.json",
+            "archive": "state/1616/ep_config.json",
+            "bytes": 1166,
+            "sha256": "a1dab2aab7a87a12821f04c5928e4dfd448ea93456190dc416773e09d67c6aca"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/bpf_lxc.json",
+            "archive": "state/883/bpf_lxc.json",
+            "bytes": 4283,
+            "sha256": "b3de88c5d449449052803e1977c03c5051bfc9d67660133140e12ccfe40e54e1"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/ep_config.h",
+            "archive": "state/883/ep_config.h",
+            "bytes": 607,
+            "sha256": "759fb040420e7e10d6d7d9dcb6d6657f8292303181eaab75fcb559aef515238e"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/ep_config.json",
+            "archive": "state/883/ep_config.json",
+            "bytes": 1163,
+            "sha256": "8f385e3f3c0d99355deefb4bbff74a3801b446def0d9dfa032eb2b0000eea55b"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/agent-runtime-config.json",
+            "archive": "state/agent-runtime-config.json",
+            "bytes": 8003,
+            "sha256": "366d87f6939619fe7c8a93146b631397b4324d87445a270074c0fd897c80f9ec"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/bpfbench0/bpf_host.json",
+            "archive": "state/bpf/bpfbench0/bpf_host.json",
+            "bytes": 4120,
+            "sha256": "4a68a28567cb14ee23fbee7077659e9683ed7b2bf1f631662c45aec8d6317b92"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/bpfbench0/bpf_xdp.json",
+            "archive": "state/bpf/bpfbench0/bpf_xdp.json",
+            "bytes": 3341,
+            "sha256": "24601779a37844b3e07664111639a3cbb3a408852b3b7bc475b429778fe4c068"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/cilium_host/bpf_host.json",
+            "archive": "state/bpf/cilium_host/bpf_host.json",
+            "bytes": 4118,
+            "sha256": "fb339ca43597ca259aaf8997e52fdf12e2bee2baad8ac1f00cfa48d9d7256504"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/cilium_net/bpf_host.json",
+            "archive": "state/bpf/cilium_net/bpf_host.json",
+            "bytes": 4118,
+            "sha256": "d6729f996c08775a4310245e9ed0d329d1a367f275d62b22b69e1f3c192d4a8f"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf_alignchecker.o",
+            "archive": "state/bpf_alignchecker.o",
+            "bytes": 161008,
+            "sha256": "b32fed1579f0bed23e274870ece3ff2a01ec4d0332624df0a823f2b033529ded"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf_xdp.o",
+            "archive": "state/bpf_xdp.o",
+            "bytes": 370552,
+            "sha256": "56f590214bd6e97e3494612146fe19127c5e40fd6a60e7f3f1d1365ef8a28345"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/filter_config.h",
+            "archive": "state/filter_config.h",
+            "bytes": 217,
+            "sha256": "ee52469d6b61d86e48952d759cc78c6546811594bb06a9e894ae99d6c784f312"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/globals/node_config.h",
+            "archive": "state/globals/node_config.h",
+            "bytes": 5440,
+            "sha256": "d39dddcb58bad0bab4068552cf55196a286f4a0bb3fdfa7985ac9d455ae8bbbe"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/netdev_config.h",
+            "archive": "state/netdev_config.h",
+            "bytes": 176,
+            "sha256": "4f273b5d9571d5e8bdb6e88c3659d0fa7d8961ad72ac8e0a6560707d4e2709af"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/nodes.json",
+            "archive": "state/nodes.json",
+            "bytes": 3,
+            "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/bpf_lxc.o",
+            "archive": "state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/bpf_lxc.o",
+            "bytes": 1010480,
+            "sha256": "cf276359b47e0443d1c9026541390b9c8674f6c6c316c822d56badd380828a45"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/ep_config.h",
+            "archive": "state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/ep_config.h",
+            "bytes": 278,
+            "sha256": "514ff5a65e55a6cf6dfa9562e01c427ba4eaa434dc19dc4a10880c37af453b32"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/bpf_host.o",
+            "archive": "state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/bpf_host.o",
+            "bytes": 923968,
+            "sha256": "2d689cd03ffa96b3dfc5b3d7b63e38c53aef9923490d6b488dc74d5371ce8f09"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/ep_config.h",
+            "archive": "state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/ep_config.h",
+            "bytes": 302,
+            "sha256": "7b99209783c8b493c4d0dd673f5475ead763e892534d7f639d4bfb36bfc1dcd3"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features.h",
+            "archive": "generated-features/features.h",
+            "bytes": 191,
+            "sha256": "0a48e078a3e4b671a7079ee22e0ce458b8d3d57159421d39bb54b06cef650888"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_skb.h",
+            "archive": "generated-features/features_skb.h",
+            "bytes": 186,
+            "sha256": "cafad9307518205d5456246937e74822ab6dcc9fc3586945d1335139aac88681"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_xdp.h",
+            "archive": "generated-features/features_xdp.h",
+            "bytes": 282,
+            "sha256": "c5d4abfaa278f428fb36d453f9784695b38d214d9cc8362ee6b540b0c6803a6b"
+          }
+        ]
+      }
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-public-data-capture-20261113/baseline-0005/cilium-config.tar.gz",
+      "bytes": 705787,
+      "sha256": "408b0130bd1a6dfe0eca989b3e56b8ced9778343552841cc324aa0b80fe7b1c1",
+      "capture_exit": 0,
+      "index": {
+        "state_dir": "/var/tmp/ciliumrunner_lrpq4pp_/state",
+        "files": [
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1199/ep_config.h",
+            "archive": "state/1199/ep_config.h",
+            "bytes": 572,
+            "sha256": "78883f615dc54891d6330ade0dfd195018a909564b974d40e8590199cc1e330b"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1199/ep_config.json",
+            "archive": "state/1199/ep_config.json",
+            "bytes": 938,
+            "sha256": "841f572113bdcb770a179c59e9f83418dfe529937d29655f2f1acb45af6f3bab"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/bpf_lxc.json",
+            "archive": "state/1616/bpf_lxc.json",
+            "bytes": 4289,
+            "sha256": "12fa630b023237b68cbc5d9aef696044b3ac9eb1390b462d21af01c4947fb663"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/ep_config.h",
+            "archive": "state/1616/ep_config.h",
+            "bytes": 609,
+            "sha256": "411cae06944c42c4e19c8696c3e3be5ac1ac24c467e27905e701fdcc83e6c11e"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/ep_config.json",
+            "archive": "state/1616/ep_config.json",
+            "bytes": 1166,
+            "sha256": "a1dab2aab7a87a12821f04c5928e4dfd448ea93456190dc416773e09d67c6aca"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/bpf_lxc.json",
+            "archive": "state/883/bpf_lxc.json",
+            "bytes": 4283,
+            "sha256": "b3de88c5d449449052803e1977c03c5051bfc9d67660133140e12ccfe40e54e1"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/ep_config.h",
+            "archive": "state/883/ep_config.h",
+            "bytes": 607,
+            "sha256": "759fb040420e7e10d6d7d9dcb6d6657f8292303181eaab75fcb559aef515238e"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/ep_config.json",
+            "archive": "state/883/ep_config.json",
+            "bytes": 1163,
+            "sha256": "8f385e3f3c0d99355deefb4bbff74a3801b446def0d9dfa032eb2b0000eea55b"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/agent-runtime-config.json",
+            "archive": "state/agent-runtime-config.json",
+            "bytes": 8003,
+            "sha256": "366d87f6939619fe7c8a93146b631397b4324d87445a270074c0fd897c80f9ec"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/bpfbench0/bpf_host.json",
+            "archive": "state/bpf/bpfbench0/bpf_host.json",
+            "bytes": 4120,
+            "sha256": "4a68a28567cb14ee23fbee7077659e9683ed7b2bf1f631662c45aec8d6317b92"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/bpfbench0/bpf_xdp.json",
+            "archive": "state/bpf/bpfbench0/bpf_xdp.json",
+            "bytes": 3341,
+            "sha256": "24601779a37844b3e07664111639a3cbb3a408852b3b7bc475b429778fe4c068"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/cilium_host/bpf_host.json",
+            "archive": "state/bpf/cilium_host/bpf_host.json",
+            "bytes": 4118,
+            "sha256": "fb339ca43597ca259aaf8997e52fdf12e2bee2baad8ac1f00cfa48d9d7256504"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/cilium_net/bpf_host.json",
+            "archive": "state/bpf/cilium_net/bpf_host.json",
+            "bytes": 4118,
+            "sha256": "d6729f996c08775a4310245e9ed0d329d1a367f275d62b22b69e1f3c192d4a8f"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf_alignchecker.o",
+            "archive": "state/bpf_alignchecker.o",
+            "bytes": 161008,
+            "sha256": "b32fed1579f0bed23e274870ece3ff2a01ec4d0332624df0a823f2b033529ded"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf_xdp.o",
+            "archive": "state/bpf_xdp.o",
+            "bytes": 370552,
+            "sha256": "56f590214bd6e97e3494612146fe19127c5e40fd6a60e7f3f1d1365ef8a28345"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/filter_config.h",
+            "archive": "state/filter_config.h",
+            "bytes": 217,
+            "sha256": "ee52469d6b61d86e48952d759cc78c6546811594bb06a9e894ae99d6c784f312"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/globals/node_config.h",
+            "archive": "state/globals/node_config.h",
+            "bytes": 5440,
+            "sha256": "d39dddcb58bad0bab4068552cf55196a286f4a0bb3fdfa7985ac9d455ae8bbbe"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/netdev_config.h",
+            "archive": "state/netdev_config.h",
+            "bytes": 176,
+            "sha256": "4f273b5d9571d5e8bdb6e88c3659d0fa7d8961ad72ac8e0a6560707d4e2709af"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/nodes.json",
+            "archive": "state/nodes.json",
+            "bytes": 3,
+            "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/bpf_lxc.o",
+            "archive": "state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/bpf_lxc.o",
+            "bytes": 1010480,
+            "sha256": "cf276359b47e0443d1c9026541390b9c8674f6c6c316c822d56badd380828a45"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/ep_config.h",
+            "archive": "state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/ep_config.h",
+            "bytes": 278,
+            "sha256": "514ff5a65e55a6cf6dfa9562e01c427ba4eaa434dc19dc4a10880c37af453b32"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/bpf_host.o",
+            "archive": "state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/bpf_host.o",
+            "bytes": 923968,
+            "sha256": "2d689cd03ffa96b3dfc5b3d7b63e38c53aef9923490d6b488dc74d5371ce8f09"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/ep_config.h",
+            "archive": "state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/ep_config.h",
+            "bytes": 302,
+            "sha256": "7b99209783c8b493c4d0dd673f5475ead763e892534d7f639d4bfb36bfc1dcd3"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features.h",
+            "archive": "generated-features/features.h",
+            "bytes": 191,
+            "sha256": "0a48e078a3e4b671a7079ee22e0ce458b8d3d57159421d39bb54b06cef650888"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_skb.h",
+            "archive": "generated-features/features_skb.h",
+            "bytes": 186,
+            "sha256": "cafad9307518205d5456246937e74822ab6dcc9fc3586945d1335139aac88681"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_xdp.h",
+            "archive": "generated-features/features_xdp.h",
+            "bytes": 282,
+            "sha256": "c5d4abfaa278f428fb36d453f9784695b38d214d9cc8362ee6b540b0c6803a6b"
+          }
+        ]
+      }
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-public-data-capture-20261113/baseline-0006/cilium-config.tar.gz",
+      "bytes": 705787,
+      "sha256": "bef5ccc5d87f51d8ed89040e32fb98152a7511008faaab84fce216e521342497",
+      "capture_exit": 0,
+      "index": {
+        "state_dir": "/var/tmp/ciliumrunner_lrpq4pp_/state",
+        "files": [
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1199/ep_config.h",
+            "archive": "state/1199/ep_config.h",
+            "bytes": 572,
+            "sha256": "78883f615dc54891d6330ade0dfd195018a909564b974d40e8590199cc1e330b"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1199/ep_config.json",
+            "archive": "state/1199/ep_config.json",
+            "bytes": 938,
+            "sha256": "841f572113bdcb770a179c59e9f83418dfe529937d29655f2f1acb45af6f3bab"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/bpf_lxc.json",
+            "archive": "state/1616/bpf_lxc.json",
+            "bytes": 4289,
+            "sha256": "12fa630b023237b68cbc5d9aef696044b3ac9eb1390b462d21af01c4947fb663"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/ep_config.h",
+            "archive": "state/1616/ep_config.h",
+            "bytes": 609,
+            "sha256": "411cae06944c42c4e19c8696c3e3be5ac1ac24c467e27905e701fdcc83e6c11e"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/ep_config.json",
+            "archive": "state/1616/ep_config.json",
+            "bytes": 1166,
+            "sha256": "a1dab2aab7a87a12821f04c5928e4dfd448ea93456190dc416773e09d67c6aca"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/bpf_lxc.json",
+            "archive": "state/883/bpf_lxc.json",
+            "bytes": 4283,
+            "sha256": "b3de88c5d449449052803e1977c03c5051bfc9d67660133140e12ccfe40e54e1"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/ep_config.h",
+            "archive": "state/883/ep_config.h",
+            "bytes": 607,
+            "sha256": "759fb040420e7e10d6d7d9dcb6d6657f8292303181eaab75fcb559aef515238e"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/ep_config.json",
+            "archive": "state/883/ep_config.json",
+            "bytes": 1163,
+            "sha256": "8f385e3f3c0d99355deefb4bbff74a3801b446def0d9dfa032eb2b0000eea55b"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/agent-runtime-config.json",
+            "archive": "state/agent-runtime-config.json",
+            "bytes": 8003,
+            "sha256": "366d87f6939619fe7c8a93146b631397b4324d87445a270074c0fd897c80f9ec"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/bpfbench0/bpf_host.json",
+            "archive": "state/bpf/bpfbench0/bpf_host.json",
+            "bytes": 4120,
+            "sha256": "4a68a28567cb14ee23fbee7077659e9683ed7b2bf1f631662c45aec8d6317b92"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/bpfbench0/bpf_xdp.json",
+            "archive": "state/bpf/bpfbench0/bpf_xdp.json",
+            "bytes": 3341,
+            "sha256": "24601779a37844b3e07664111639a3cbb3a408852b3b7bc475b429778fe4c068"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/cilium_host/bpf_host.json",
+            "archive": "state/bpf/cilium_host/bpf_host.json",
+            "bytes": 4118,
+            "sha256": "fb339ca43597ca259aaf8997e52fdf12e2bee2baad8ac1f00cfa48d9d7256504"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/cilium_net/bpf_host.json",
+            "archive": "state/bpf/cilium_net/bpf_host.json",
+            "bytes": 4118,
+            "sha256": "d6729f996c08775a4310245e9ed0d329d1a367f275d62b22b69e1f3c192d4a8f"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf_alignchecker.o",
+            "archive": "state/bpf_alignchecker.o",
+            "bytes": 161008,
+            "sha256": "b32fed1579f0bed23e274870ece3ff2a01ec4d0332624df0a823f2b033529ded"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf_xdp.o",
+            "archive": "state/bpf_xdp.o",
+            "bytes": 370552,
+            "sha256": "56f590214bd6e97e3494612146fe19127c5e40fd6a60e7f3f1d1365ef8a28345"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/filter_config.h",
+            "archive": "state/filter_config.h",
+            "bytes": 217,
+            "sha256": "ee52469d6b61d86e48952d759cc78c6546811594bb06a9e894ae99d6c784f312"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/globals/node_config.h",
+            "archive": "state/globals/node_config.h",
+            "bytes": 5440,
+            "sha256": "d39dddcb58bad0bab4068552cf55196a286f4a0bb3fdfa7985ac9d455ae8bbbe"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/netdev_config.h",
+            "archive": "state/netdev_config.h",
+            "bytes": 176,
+            "sha256": "4f273b5d9571d5e8bdb6e88c3659d0fa7d8961ad72ac8e0a6560707d4e2709af"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/nodes.json",
+            "archive": "state/nodes.json",
+            "bytes": 3,
+            "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/bpf_lxc.o",
+            "archive": "state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/bpf_lxc.o",
+            "bytes": 1010480,
+            "sha256": "cf276359b47e0443d1c9026541390b9c8674f6c6c316c822d56badd380828a45"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/ep_config.h",
+            "archive": "state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/ep_config.h",
+            "bytes": 278,
+            "sha256": "514ff5a65e55a6cf6dfa9562e01c427ba4eaa434dc19dc4a10880c37af453b32"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/bpf_host.o",
+            "archive": "state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/bpf_host.o",
+            "bytes": 923968,
+            "sha256": "2d689cd03ffa96b3dfc5b3d7b63e38c53aef9923490d6b488dc74d5371ce8f09"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/ep_config.h",
+            "archive": "state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/ep_config.h",
+            "bytes": 302,
+            "sha256": "7b99209783c8b493c4d0dd673f5475ead763e892534d7f639d4bfb36bfc1dcd3"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features.h",
+            "archive": "generated-features/features.h",
+            "bytes": 191,
+            "sha256": "0a48e078a3e4b671a7079ee22e0ce458b8d3d57159421d39bb54b06cef650888"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_skb.h",
+            "archive": "generated-features/features_skb.h",
+            "bytes": 186,
+            "sha256": "cafad9307518205d5456246937e74822ab6dcc9fc3586945d1335139aac88681"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_xdp.h",
+            "archive": "generated-features/features_xdp.h",
+            "bytes": 282,
+            "sha256": "c5d4abfaa278f428fb36d453f9784695b38d214d9cc8362ee6b540b0c6803a6b"
+          }
+        ]
+      }
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-public-data-capture-20261113/baseline-0007/cilium-config.tar.gz",
+      "bytes": 705787,
+      "sha256": "3cffdda698dd72db956f208e770101d0c6663d8f862e0f8a08620cfaf204e642",
+      "capture_exit": 0,
+      "index": {
+        "state_dir": "/var/tmp/ciliumrunner_lrpq4pp_/state",
+        "files": [
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1199/ep_config.h",
+            "archive": "state/1199/ep_config.h",
+            "bytes": 572,
+            "sha256": "78883f615dc54891d6330ade0dfd195018a909564b974d40e8590199cc1e330b"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1199/ep_config.json",
+            "archive": "state/1199/ep_config.json",
+            "bytes": 938,
+            "sha256": "841f572113bdcb770a179c59e9f83418dfe529937d29655f2f1acb45af6f3bab"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/bpf_lxc.json",
+            "archive": "state/1616/bpf_lxc.json",
+            "bytes": 4289,
+            "sha256": "12fa630b023237b68cbc5d9aef696044b3ac9eb1390b462d21af01c4947fb663"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/ep_config.h",
+            "archive": "state/1616/ep_config.h",
+            "bytes": 609,
+            "sha256": "411cae06944c42c4e19c8696c3e3be5ac1ac24c467e27905e701fdcc83e6c11e"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/ep_config.json",
+            "archive": "state/1616/ep_config.json",
+            "bytes": 1166,
+            "sha256": "a1dab2aab7a87a12821f04c5928e4dfd448ea93456190dc416773e09d67c6aca"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/bpf_lxc.json",
+            "archive": "state/883/bpf_lxc.json",
+            "bytes": 4283,
+            "sha256": "b3de88c5d449449052803e1977c03c5051bfc9d67660133140e12ccfe40e54e1"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/ep_config.h",
+            "archive": "state/883/ep_config.h",
+            "bytes": 607,
+            "sha256": "759fb040420e7e10d6d7d9dcb6d6657f8292303181eaab75fcb559aef515238e"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/ep_config.json",
+            "archive": "state/883/ep_config.json",
+            "bytes": 1163,
+            "sha256": "8f385e3f3c0d99355deefb4bbff74a3801b446def0d9dfa032eb2b0000eea55b"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/agent-runtime-config.json",
+            "archive": "state/agent-runtime-config.json",
+            "bytes": 8003,
+            "sha256": "366d87f6939619fe7c8a93146b631397b4324d87445a270074c0fd897c80f9ec"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/bpfbench0/bpf_host.json",
+            "archive": "state/bpf/bpfbench0/bpf_host.json",
+            "bytes": 4120,
+            "sha256": "4a68a28567cb14ee23fbee7077659e9683ed7b2bf1f631662c45aec8d6317b92"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/bpfbench0/bpf_xdp.json",
+            "archive": "state/bpf/bpfbench0/bpf_xdp.json",
+            "bytes": 3341,
+            "sha256": "24601779a37844b3e07664111639a3cbb3a408852b3b7bc475b429778fe4c068"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/cilium_host/bpf_host.json",
+            "archive": "state/bpf/cilium_host/bpf_host.json",
+            "bytes": 4118,
+            "sha256": "fb339ca43597ca259aaf8997e52fdf12e2bee2baad8ac1f00cfa48d9d7256504"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/cilium_net/bpf_host.json",
+            "archive": "state/bpf/cilium_net/bpf_host.json",
+            "bytes": 4118,
+            "sha256": "d6729f996c08775a4310245e9ed0d329d1a367f275d62b22b69e1f3c192d4a8f"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf_alignchecker.o",
+            "archive": "state/bpf_alignchecker.o",
+            "bytes": 161008,
+            "sha256": "b32fed1579f0bed23e274870ece3ff2a01ec4d0332624df0a823f2b033529ded"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf_xdp.o",
+            "archive": "state/bpf_xdp.o",
+            "bytes": 370552,
+            "sha256": "56f590214bd6e97e3494612146fe19127c5e40fd6a60e7f3f1d1365ef8a28345"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/filter_config.h",
+            "archive": "state/filter_config.h",
+            "bytes": 217,
+            "sha256": "ee52469d6b61d86e48952d759cc78c6546811594bb06a9e894ae99d6c784f312"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/globals/node_config.h",
+            "archive": "state/globals/node_config.h",
+            "bytes": 5440,
+            "sha256": "d39dddcb58bad0bab4068552cf55196a286f4a0bb3fdfa7985ac9d455ae8bbbe"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/netdev_config.h",
+            "archive": "state/netdev_config.h",
+            "bytes": 176,
+            "sha256": "4f273b5d9571d5e8bdb6e88c3659d0fa7d8961ad72ac8e0a6560707d4e2709af"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/nodes.json",
+            "archive": "state/nodes.json",
+            "bytes": 3,
+            "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/bpf_lxc.o",
+            "archive": "state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/bpf_lxc.o",
+            "bytes": 1010480,
+            "sha256": "cf276359b47e0443d1c9026541390b9c8674f6c6c316c822d56badd380828a45"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/ep_config.h",
+            "archive": "state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/ep_config.h",
+            "bytes": 278,
+            "sha256": "514ff5a65e55a6cf6dfa9562e01c427ba4eaa434dc19dc4a10880c37af453b32"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/bpf_host.o",
+            "archive": "state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/bpf_host.o",
+            "bytes": 923968,
+            "sha256": "2d689cd03ffa96b3dfc5b3d7b63e38c53aef9923490d6b488dc74d5371ce8f09"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/ep_config.h",
+            "archive": "state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/ep_config.h",
+            "bytes": 302,
+            "sha256": "7b99209783c8b493c4d0dd673f5475ead763e892534d7f639d4bfb36bfc1dcd3"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features.h",
+            "archive": "generated-features/features.h",
+            "bytes": 191,
+            "sha256": "0a48e078a3e4b671a7079ee22e0ce458b8d3d57159421d39bb54b06cef650888"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_skb.h",
+            "archive": "generated-features/features_skb.h",
+            "bytes": 186,
+            "sha256": "cafad9307518205d5456246937e74822ab6dcc9fc3586945d1335139aac88681"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_xdp.h",
+            "archive": "generated-features/features_xdp.h",
+            "bytes": 282,
+            "sha256": "c5d4abfaa278f428fb36d453f9784695b38d214d9cc8362ee6b540b0c6803a6b"
+          }
+        ]
+      }
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-public-data-capture-20261113/baseline-0008/cilium-config.tar.gz",
+      "bytes": 705787,
+      "sha256": "1cd0e4e51903e265273612d6174a89facf736e02c52375dfe6029c1c0d6da2ff",
+      "capture_exit": 0,
+      "index": {
+        "state_dir": "/var/tmp/ciliumrunner_lrpq4pp_/state",
+        "files": [
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1199/ep_config.h",
+            "archive": "state/1199/ep_config.h",
+            "bytes": 572,
+            "sha256": "78883f615dc54891d6330ade0dfd195018a909564b974d40e8590199cc1e330b"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1199/ep_config.json",
+            "archive": "state/1199/ep_config.json",
+            "bytes": 938,
+            "sha256": "841f572113bdcb770a179c59e9f83418dfe529937d29655f2f1acb45af6f3bab"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/bpf_lxc.json",
+            "archive": "state/1616/bpf_lxc.json",
+            "bytes": 4289,
+            "sha256": "12fa630b023237b68cbc5d9aef696044b3ac9eb1390b462d21af01c4947fb663"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/ep_config.h",
+            "archive": "state/1616/ep_config.h",
+            "bytes": 609,
+            "sha256": "411cae06944c42c4e19c8696c3e3be5ac1ac24c467e27905e701fdcc83e6c11e"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/1616/ep_config.json",
+            "archive": "state/1616/ep_config.json",
+            "bytes": 1166,
+            "sha256": "a1dab2aab7a87a12821f04c5928e4dfd448ea93456190dc416773e09d67c6aca"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/bpf_lxc.json",
+            "archive": "state/883/bpf_lxc.json",
+            "bytes": 4283,
+            "sha256": "b3de88c5d449449052803e1977c03c5051bfc9d67660133140e12ccfe40e54e1"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/ep_config.h",
+            "archive": "state/883/ep_config.h",
+            "bytes": 607,
+            "sha256": "759fb040420e7e10d6d7d9dcb6d6657f8292303181eaab75fcb559aef515238e"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/883/ep_config.json",
+            "archive": "state/883/ep_config.json",
+            "bytes": 1163,
+            "sha256": "8f385e3f3c0d99355deefb4bbff74a3801b446def0d9dfa032eb2b0000eea55b"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/agent-runtime-config.json",
+            "archive": "state/agent-runtime-config.json",
+            "bytes": 8003,
+            "sha256": "366d87f6939619fe7c8a93146b631397b4324d87445a270074c0fd897c80f9ec"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/bpfbench0/bpf_host.json",
+            "archive": "state/bpf/bpfbench0/bpf_host.json",
+            "bytes": 4120,
+            "sha256": "4a68a28567cb14ee23fbee7077659e9683ed7b2bf1f631662c45aec8d6317b92"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/bpfbench0/bpf_xdp.json",
+            "archive": "state/bpf/bpfbench0/bpf_xdp.json",
+            "bytes": 3341,
+            "sha256": "24601779a37844b3e07664111639a3cbb3a408852b3b7bc475b429778fe4c068"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/cilium_host/bpf_host.json",
+            "archive": "state/bpf/cilium_host/bpf_host.json",
+            "bytes": 4118,
+            "sha256": "fb339ca43597ca259aaf8997e52fdf12e2bee2baad8ac1f00cfa48d9d7256504"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf/cilium_net/bpf_host.json",
+            "archive": "state/bpf/cilium_net/bpf_host.json",
+            "bytes": 4118,
+            "sha256": "d6729f996c08775a4310245e9ed0d329d1a367f275d62b22b69e1f3c192d4a8f"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf_alignchecker.o",
+            "archive": "state/bpf_alignchecker.o",
+            "bytes": 161008,
+            "sha256": "b32fed1579f0bed23e274870ece3ff2a01ec4d0332624df0a823f2b033529ded"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/bpf_xdp.o",
+            "archive": "state/bpf_xdp.o",
+            "bytes": 370552,
+            "sha256": "56f590214bd6e97e3494612146fe19127c5e40fd6a60e7f3f1d1365ef8a28345"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/filter_config.h",
+            "archive": "state/filter_config.h",
+            "bytes": 217,
+            "sha256": "ee52469d6b61d86e48952d759cc78c6546811594bb06a9e894ae99d6c784f312"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/globals/node_config.h",
+            "archive": "state/globals/node_config.h",
+            "bytes": 5440,
+            "sha256": "d39dddcb58bad0bab4068552cf55196a286f4a0bb3fdfa7985ac9d455ae8bbbe"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/netdev_config.h",
+            "archive": "state/netdev_config.h",
+            "bytes": 176,
+            "sha256": "4f273b5d9571d5e8bdb6e88c3659d0fa7d8961ad72ac8e0a6560707d4e2709af"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/nodes.json",
+            "archive": "state/nodes.json",
+            "bytes": 3,
+            "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/bpf_lxc.o",
+            "archive": "state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/bpf_lxc.o",
+            "bytes": 1010480,
+            "sha256": "cf276359b47e0443d1c9026541390b9c8674f6c6c316c822d56badd380828a45"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/ep_config.h",
+            "archive": "state/templates/fdcbfe03565a4c620fd0501592314cb520df20420671d312116754d57bee70fb/ep_config.h",
+            "bytes": 278,
+            "sha256": "514ff5a65e55a6cf6dfa9562e01c427ba4eaa434dc19dc4a10880c37af453b32"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/bpf_host.o",
+            "archive": "state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/bpf_host.o",
+            "bytes": 923968,
+            "sha256": "2d689cd03ffa96b3dfc5b3d7b63e38c53aef9923490d6b488dc74d5371ce8f09"
+          },
+          {
+            "source": "/var/tmp/ciliumrunner_lrpq4pp_/state/state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/ep_config.h",
+            "archive": "state/templates/fec123c8d4c13717582402af602573bde493769b9e43a406289a8f7bc0cb73ad/ep_config.h",
+            "bytes": 302,
+            "sha256": "7b99209783c8b493c4d0dd673f5475ead763e892534d7f639d4bfb36bfc1dcd3"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features.h",
+            "archive": "generated-features/features.h",
+            "bytes": 191,
+            "sha256": "0a48e078a3e4b671a7079ee22e0ce458b8d3d57159421d39bb54b06cef650888"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_skb.h",
+            "archive": "generated-features/features_skb.h",
+            "bytes": 186,
+            "sha256": "cafad9307518205d5456246937e74822ab6dcc9fc3586945d1335139aac88681"
+          },
+          {
+            "source": "/var/lib/cilium/bpf/include/bpf/features_xdp.h",
+            "archive": "generated-features/features_xdp.h",
+            "bytes": 282,
+            "sha256": "c5d4abfaa278f428fb36d453f9784695b38d214d9cc8362ee6b540b0c6803a6b"
+          }
+        ]
+      }
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-cilium-public-data-capture-20261113/baseline-0009/cilium-config.tar.gz",
+      "bytes": 466683,
+      "sha256": "35fbf1fa584477cb8e9b75336d744bf8026ef1e8efa2dc5e9b1cace340a84c8c",
+      "capture_exit": 1,
+      "index": null,
+      "capture_stderr": "Traceback (most recent call last):\n  File \"<string>\", line 37, in <module>\n  File \"<string>\", line 24, in capture\n  File \"/usr/lib/python3.12/pathlib.py\", line 1021, in read_bytes\n    with self.open(mode='rb') as f:\n         ^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/pathlib.py\", line 1015, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/tmp/native_kernel_link_cache/d9aa6255d0ee1602.tmp.5519.proof.stderr.txt'\n"
+    }
+  ],
+  "extracted_baseline_snapshot": "baseline-0001",
+  "limits": [
+    "Diagnostic outcome only; actual manifest/linker selection is recorded in launch receipt and shim logs.",
+    "Snapshots may catch objects mid-build; each captured length and raw partial bytes are retained.",
+    "Progress labels can span app restarts before the next measurement marker; actual generation IDs and clocks remain necessary.",
+    "No app-decision or throughput equivalence certified."
+  ],
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/perf_20261113/cilium-public-data-runtime.tar.gz",
+    "bytes": 6636091,
+    "sha256": "73c933b30677fea8628220b28c13ceaac337f541fb36bed1401d0f1dc192df89",
+    "files_byte_compared": 442
+  }
+}
