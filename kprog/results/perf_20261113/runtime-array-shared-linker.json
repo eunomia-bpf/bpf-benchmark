@@ -322,5 +322,59 @@
       "kprog/perf/native-context/native-link-array-kernel.sh": "b3b8db0934af99467b00d424c3e23fafc51013a42ed58a8d5de0c5c8a82057b9"
     },
     "scope": "Actual kernel integration pending; no throughput/equal-work/floor acceptance. Reuses existing owner fixture/client/service entrypoint, no canonical image/base/kernel/compiler or frozen workload changes."
+  },
+  "actual_kernel_result": {
+    "recorded_at": "2026-11-14T09:25:27.839862+00:00",
+    "pid": 346772,
+    "make_exit": 0,
+    "raw": "/workspaces/kprog-raw/perf/20261114-array-shared-kernel/kernel",
+    "source_loads": 2,
+    "native_verified_and_installed": 2,
+    "checked_separate_verifications": 1,
+    "checked_C_copies_equal": 1,
+    "checked_kernel_linked_proofs_equal": 1,
+    "stock_native_executions": 8,
+    "runtime_ARRAY_marker_images": 2,
+    "rows": [
+      {
+        "family": "array",
+        "mode": "submitted-native",
+        "case": "ARRAY",
+        "map_id": 1,
+        "key_bytes": 4,
+        "source_prog_id": 3,
+        "checked_verify_id": null,
+        "native_prog_id": 6,
+        "executions": 4,
+        "routine_offset": 103,
+        "image_bytes": 170,
+        "checked_copy_sha256": null,
+        "checked_linked_proof_sha256": null,
+        "archive_sha256": "d5d6b998c7f5831452bd63f7f49db814d1fd631f64e502162759b13557dffa25",
+        "prefixes": [
+          0
+        ]
+      },
+      {
+        "family": "array",
+        "mode": "checked-sim-c",
+        "case": "ARRAY",
+        "map_id": 4,
+        "key_bytes": 4,
+        "source_prog_id": 9,
+        "checked_verify_id": 12,
+        "native_prog_id": 15,
+        "executions": 4,
+        "routine_offset": 579,
+        "image_bytes": 646,
+        "checked_copy_sha256": "616c660edae093c4598f8ed3fa650c34cc5c4ebb2ba3a875fb0dafcdb158ea08",
+        "checked_linked_proof_sha256": "be47e6b4032936c9ab9adb96d719f6ddbc9809400cbef90ae0a8855fb03fa2d9",
+        "archive_sha256": "d6ad45d042b6b7965ddcbe39de4d49cc58d81ddd50bd2adde88970a54a8011d1",
+        "prefixes": [
+          0
+        ]
+      }
+    ],
+    "scope": "Actual shared ARRAY runtime dispatch, entry/subprogram resource identity, same-name decoy and live29->73 values; no wholeapp/speed claim."
   }
 }

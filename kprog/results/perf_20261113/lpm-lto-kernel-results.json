@@ -1,0 +1,15 @@
+{
+  "recorded_at": "2026-11-14T09:25:27.839862+00:00",
+  "job_pid": 342222,
+  "make_exit": 0,
+  "raw": "/workspaces/kprog-raw/perf/20261114-lpm-lto/kernel-lock-ordered",
+  "source_loads": 4,
+  "native_verified_and_installed": 4,
+  "checked_separate_verifications": 2,
+  "checked_C_copies_equal": 2,
+  "checked_kernel_linked_proofs_equal": 2,
+  "stock_native_executions": 3360,
+  "dispatch_marker_images": 4,
+  "evidence_csv": "kprog/results/perf_20261113/lpm-lto-kernel-results.csv",
+  "scope": "Actual LPM syscall oracle: live updates/deletions, IM/prefix edges,12data-byte fastpath and4data-byte original-helper fallback. Shared dispatch emitted in all images; fallback is not fastpath coverage. No wholeapp/speed/equalwork/floor claim."
+}
