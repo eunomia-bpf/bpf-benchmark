@@ -1,0 +1,283 @@
+{
+  "application": "tracee/monitor",
+  "application_status": "error",
+  "application_error": "shim socket /var/run/bpfrejit/shim-8524.sock request failed: [Errno 111] Connection refused",
+  "service_summary": {
+    "started": "2026-11-14T07:48:34.959762+00:00",
+    "command": [
+      "python3",
+      "/workspaces/repository/kprog/test/verified_corpus.py",
+      "tracee/monitor",
+      "1",
+      "10",
+      "1"
+    ],
+    "service": {
+      "ready": true,
+      "arch": 1,
+      "endpoint": "/sys/kernel/debug/bpf_x86_native_lab/specializer"
+    },
+    "returncode": 0,
+    "service_returncode": -15,
+    "finished": "2026-11-14T07:52:46.596316+00:00"
+  },
+  "attempts": 5,
+  "loaded": 5,
+  "verified": 3,
+  "installed": 3,
+  "run": 0,
+  "installed_without_counter": [
+    197,
+    207,
+    218
+  ],
+  "native_counter_ids_without_install": [],
+  "baseline_counter_programs": 167,
+  "native_counter_programs": 0,
+  "programs": [
+    {
+      "request_id": 1,
+      "source_prog_id": 191,
+      "native_sha256": "d249e543e9e284e9c3c0fe345f9b48530a108a371264befc0e08011a0eb9d2e9",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T07:50:34.497910+00:00",
+      "prog_id": 197,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-tracee-checked-lto/control/state/session-so8xksxv/requests/1.success.tar.gz",
+      "finished": "2026-11-14T07:50:37.551656+00:00",
+      "stock_load": {
+        "request_id": 1,
+        "prog_id": 197,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 1,
+        "prog_id": 194,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 201,
+      "native_sha256": "55c87cf5e8d77ff8ae938728776a2c42e80bb3f2a41d9537166aef76e3c3e468",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T07:50:37.572458+00:00",
+      "prog_id": 207,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-tracee-checked-lto/control/state/session-so8xksxv/requests/2.success.tar.gz",
+      "finished": "2026-11-14T07:50:39.853423+00:00",
+      "stock_load": {
+        "request_id": 2,
+        "prog_id": 207,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 2,
+        "prog_id": 204,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 212,
+      "native_sha256": "fb3f51b32b0013c1258595a785e1053c0ec49a32e7d2fb80afafd2d29817bb82",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T07:50:40.151197+00:00",
+      "prog_id": 218,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-tracee-checked-lto/control/state/session-so8xksxv/requests/3.success.tar.gz",
+      "finished": "2026-11-14T07:50:46.088489+00:00",
+      "stock_load": {
+        "request_id": 3,
+        "prog_id": 218,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 3,
+        "prog_id": 215,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 219,
+      "native_sha256": "fb3f51b32b0013c1258595a785e1053c0ec49a32e7d2fb80afafd2d29817bb82",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T07:50:46.119451+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'verify', '4', '4', '219', '/workspaces/kprog-raw/verified/20261114-tracee-checked-lto/control/state/session-so8xksxv/requests/request-1r8ie8wn/generated/request.native.o', 'sys_enter_init', '/workspaces/kprog-raw/verified/20261114-tracee-checked-lto/control/state/session-so8xksxv/requests/request-1r8ie8wn/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/verified/20261114-tracee-checked-lto/control/state/session-so8xksxv/requests/request-1r8ie8wn/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'binary_filter', '455', 'null', 'comm_filter', '449', 'null', 'mnt_ns_filter', '431', 'null', 'pid_filter', '428', 'null', 'features_test_arena', '398', 'null', 'events_map', '458', 'null', 'net_cap_events', '469', 'null', 'cgrpctxmap_in', '396', 'null', 'cgrpctxmap_eg', '397', 'null', 'sockmap', '467', 'null', 'inodemap', '466', 'null', 'syscall_source_map', '410', 'null', 'stack_pivot_syscalls', '473', 'null', 'uid_filter', '425', 'null', 'suspicious_syscall_source_syscalls', '472', 'null', 'use_security_bprm_creds_for_exec', '476', '17', 'bpf_attach_tmp_map', '413', 'null', 'file_read_path_filter', '403', 'null', 'file_type_filter', '404', 'null', 'file_modification_map', '419', 'null', 'sys_exit_submit_tail', '381', 'null', 'sys_exit_init_tail', '380', 'null', 'fd_arg_path_map', '379', 'null', 'expected_sys_call_table', '406', 'null', 'uts_ns_filter', '437', 'null', 'pid_ns_filter', '434', 'null', 'events_map_version', '460', 'null', 'comm_filter_version', '451', 'null', 'pid_ns_filter_version', '436', 'null', 'generic_sys_enter_tails', '383', 'null', 'kconfig_map', '399', 'null', 'file_write_path_filter', '402', 'null', 'binary_filter_version', '457', 'null', 'config_map', '376', 'null', 'sys_enter_init_tail', '374', 'null', 'mnt_ns_filter_version', '433', 'null', 'sys_enter_tails', '378', 'null', 'stack_addresses', '411', 'null', 'sys_32_to_64_map', '373', 'null', 'uts_ns_filter_version', '439', 'null', 'hidden_old_mod_scan_done', '476', '16', 'data_filter_lpm_bufs', '409', 'null', 'uid_filter_version', '427', 'null', 'walk_mod_tree_queue', '390', 'null', 'elf_files_map', '421', 'null', 'containers_map', '392', 'null', 'sys_enter_submit_tail', '377', 'null', 'netconfig_map', '405', 'null', 'bufs', '407', 'null', 'task_info_map', '375', 'null', 'scratch_map', '418', 'null', 'io_file_path_cache_map', '420', 'null', 'generic_sys_exit_tails', '384', 'null', 'event_data_map', '415', 'null', 'pid_filter_version', '430', 'null', 'logs_count', '417', 'null', 'events', '462', 'null', 'logs', '461', 'null', 'module_context_map', '389', 'null', 'modules_map', '471', 'null', 'last_module_insert_time', '476', '8', 'bpf_prog_load_map', '414', 'null', 'recent_deleted_module_map', '395', 'null', 'start_scan_time_init_shown_mods', '476', '0', 'prog_array', '391', 'null', 'signal_data_map', '416', 'null', 'prog_array_tp', '393', 'null', 'signals', '464', 'null', 'sys_exit_tails', '382', 'null', 'ksymbols_map', '401', 'null', 'proc_info_map', '385', 'null', 'new_module_map', '394', 'null', 'args_map', '400', 'null', 'net_heap_event', '470', 'null', 'bpf_attach_map', '412', 'null', 'entrymap', '468', 'null', 'data_filter_bufs', '408', 'null', 'netflowmap', '465', 'null', 'file_writes', '463', 'null']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 240, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 180, in load_service_artifacts\n    verified = load('verify', artifacts)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'verify', '4', '4', '219', '/workspaces/kprog-raw/verified/20261114-tracee-checked-lto/control/state/session-so8xksxv/requests/request-1r8ie8wn/generated/request.native.o', 'sys_enter_init', '/workspaces/kprog-raw/verified/20261114-tracee-checked-lto/control/state/session-so8xksxv/requests/request-1r8ie8wn/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/verified/20261114-tracee-checked-lto/control/state/session-so8xksxv/requests/request-1r8ie8wn/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'binary_filter', '455', 'null', 'comm_filter', '449', 'null', 'mnt_ns_filter', '431', 'null', 'pid_filter', '428', 'null', 'features_test_arena', '398', 'null', 'events_map', '458', 'null', 'net_cap_events', '469', 'null', 'cgrpctxmap_in', '396', 'null', 'cgrpctxmap_eg', '397', 'null', 'sockmap', '467', 'null', 'inodemap', '466', 'null', 'syscall_source_map', '410', 'null', 'stack_pivot_syscalls', '473', 'null', 'uid_filter', '425', 'null', 'suspicious_syscall_source_syscalls', '472', 'null', 'use_security_bprm_creds_for_exec', '476', '17', 'bpf_attach_tmp_map', '413', 'null', 'file_read_path_filter', '403', 'null', 'file_type_filter', '404', 'null', 'file_modification_map', '419', 'null', 'sys_exit_submit_tail', '381', 'null', 'sys_exit_init_tail', '380', 'null', 'fd_arg_path_map', '379', 'null', 'expected_sys_call_table', '406', 'null', 'uts_ns_filter', '437', 'null', 'pid_ns_filter', '434', 'null', 'events_map_version', '460', 'null', 'comm_filter_version', '451', 'null', 'pid_ns_filter_version', '436', 'null', 'generic_sys_enter_tails', '383', 'null', 'kconfig_map', '399', 'null', 'file_write_path_filter', '402', 'null', 'binary_filter_version', '457', 'null', 'config_map', '376', 'null', 'sys_enter_init_tail', '374', 'null', 'mnt_ns_filter_version', '433', 'null', 'sys_enter_tails', '378', 'null', 'stack_addresses', '411', 'null', 'sys_32_to_64_map', '373', 'null', 'uts_ns_filter_version', '439', 'null', 'hidden_old_mod_scan_done', '476', '16', 'data_filter_lpm_bufs', '409', 'null', 'uid_filter_version', '427', 'null', 'walk_mod_tree_queue', '390', 'null', 'elf_files_map', '421', 'null', 'containers_map', '392', 'null', 'sys_enter_submit_tail', '377', 'null', 'netconfig_map', '405', 'null', 'bufs', '407', 'null', 'task_info_map', '375', 'null', 'scratch_map', '418', 'null', 'io_file_path_cache_map', '420', 'null', 'generic_sys_exit_tails', '384', 'null', 'event_data_map', '415', 'null', 'pid_filter_version', '430', 'null', 'logs_count', '417', 'null', 'events', '462', 'null', 'logs', '461', 'null', 'module_context_map', '389', 'null', 'modules_map', '471', 'null', 'last_module_insert_time', '476', '8', 'bpf_prog_load_map', '414', 'null', 'recent_deleted_module_map', '395', 'null', 'start_scan_time_init_shown_mods', '476', '0', 'prog_array', '391', 'null', 'signal_data_map', '416', 'null', 'prog_array_tp', '393', 'null', 'signals', '464', 'null', 'sys_exit_tails', '382', 'null', 'ksymbols_map', '401', 'null', 'proc_info_map', '385', 'null', 'new_module_map', '394', 'null', 'args_map', '400', 'null', 'net_heap_event', '470', 'null', 'bpf_attach_map', '412', 'null', 'entrymap', '468', 'null', 'data_filter_bufs', '408', 'null', 'netflowmap', '465', 'null', 'file_writes', '463', 'null']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/verified/20261114-tracee-checked-lto/control/state/session-so8xksxv/requests/4.failure.tar.gz",
+      "finished": "2026-11-14T07:51:40.616603+00:00",
+      "stock_load": null,
+      "stock_verification": null,
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 5,
+      "source_prog_id": 222,
+      "native_sha256": "fb3f51b32b0013c1258595a785e1053c0ec49a32e7d2fb80afafd2d29817bb82",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T07:51:40.663614+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'verify', '4', '5', '222', '/workspaces/kprog-raw/verified/20261114-tracee-checked-lto/control/state/session-so8xksxv/requests/request-6zilb0fa/generated/request.native.o', 'sys_enter_init', '/workspaces/kprog-raw/verified/20261114-tracee-checked-lto/control/state/session-so8xksxv/requests/request-6zilb0fa/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/verified/20261114-tracee-checked-lto/control/state/session-so8xksxv/requests/request-6zilb0fa/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'binary_filter', '455', 'null', 'comm_filter', '449', 'null', 'mnt_ns_filter', '431', 'null', 'pid_filter', '428', 'null', 'features_test_arena', '398', 'null', 'events_map', '458', 'null', 'net_cap_events', '469', 'null', 'cgrpctxmap_in', '396', 'null', 'cgrpctxmap_eg', '397', 'null', 'sockmap', '467', 'null', 'inodemap', '466', 'null', 'syscall_source_map', '410', 'null', 'stack_pivot_syscalls', '473', 'null', 'uid_filter', '425', 'null', 'suspicious_syscall_source_syscalls', '472', 'null', 'use_security_bprm_creds_for_exec', '476', '17', 'bpf_attach_tmp_map', '413', 'null', 'file_read_path_filter', '403', 'null', 'file_type_filter', '404', 'null', 'file_modification_map', '419', 'null', 'sys_exit_submit_tail', '381', 'null', 'sys_exit_init_tail', '380', 'null', 'fd_arg_path_map', '379', 'null', 'expected_sys_call_table', '406', 'null', 'uts_ns_filter', '437', 'null', 'pid_ns_filter', '434', 'null', 'events_map_version', '460', 'null', 'comm_filter_version', '451', 'null', 'pid_ns_filter_version', '436', 'null', 'generic_sys_enter_tails', '383', 'null', 'kconfig_map', '399', 'null', 'file_write_path_filter', '402', 'null', 'binary_filter_version', '457', 'null', 'config_map', '376', 'null', 'sys_enter_init_tail', '374', 'null', 'mnt_ns_filter_version', '433', 'null', 'sys_enter_tails', '378', 'null', 'stack_addresses', '411', 'null', 'sys_32_to_64_map', '373', 'null', 'uts_ns_filter_version', '439', 'null', 'hidden_old_mod_scan_done', '476', '16', 'data_filter_lpm_bufs', '409', 'null', 'uid_filter_version', '427', 'null', 'walk_mod_tree_queue', '390', 'null', 'elf_files_map', '421', 'null', 'containers_map', '392', 'null', 'sys_enter_submit_tail', '377', 'null', 'netconfig_map', '405', 'null', 'bufs', '407', 'null', 'task_info_map', '375', 'null', 'scratch_map', '418', 'null', 'io_file_path_cache_map', '420', 'null', 'generic_sys_exit_tails', '384', 'null', 'event_data_map', '415', 'null', 'pid_filter_version', '430', 'null', 'logs_count', '417', 'null', 'events', '462', 'null', 'logs', '461', 'null', 'module_context_map', '389', 'null', 'modules_map', '471', 'null', 'last_module_insert_time', '476', '8', 'bpf_prog_load_map', '414', 'null', 'recent_deleted_module_map', '395', 'null', 'start_scan_time_init_shown_mods', '476', '0', 'prog_array', '391', 'null', 'signal_data_map', '416', 'null', 'prog_array_tp', '393', 'null', 'signals', '464', 'null', 'sys_exit_tails', '382', 'null', 'ksymbols_map', '401', 'null', 'proc_info_map', '385', 'null', 'new_module_map', '394', 'null', 'args_map', '400', 'null', 'net_heap_event', '470', 'null', 'bpf_attach_map', '412', 'null', 'entrymap', '468', 'null', 'data_filter_bufs', '408', 'null', 'netflowmap', '465', 'null', 'file_writes', '463', 'null']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 240, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 180, in load_service_artifacts\n    verified = load('verify', artifacts)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'verify', '4', '5', '222', '/workspaces/kprog-raw/verified/20261114-tracee-checked-lto/control/state/session-so8xksxv/requests/request-6zilb0fa/generated/request.native.o', 'sys_enter_init', '/workspaces/kprog-raw/verified/20261114-tracee-checked-lto/control/state/session-so8xksxv/requests/request-6zilb0fa/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/verified/20261114-tracee-checked-lto/control/state/session-so8xksxv/requests/request-6zilb0fa/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'binary_filter', '455', 'null', 'comm_filter', '449', 'null', 'mnt_ns_filter', '431', 'null', 'pid_filter', '428', 'null', 'features_test_arena', '398', 'null', 'events_map', '458', 'null', 'net_cap_events', '469', 'null', 'cgrpctxmap_in', '396', 'null', 'cgrpctxmap_eg', '397', 'null', 'sockmap', '467', 'null', 'inodemap', '466', 'null', 'syscall_source_map', '410', 'null', 'stack_pivot_syscalls', '473', 'null', 'uid_filter', '425', 'null', 'suspicious_syscall_source_syscalls', '472', 'null', 'use_security_bprm_creds_for_exec', '476', '17', 'bpf_attach_tmp_map', '413', 'null', 'file_read_path_filter', '403', 'null', 'file_type_filter', '404', 'null', 'file_modification_map', '419', 'null', 'sys_exit_submit_tail', '381', 'null', 'sys_exit_init_tail', '380', 'null', 'fd_arg_path_map', '379', 'null', 'expected_sys_call_table', '406', 'null', 'uts_ns_filter', '437', 'null', 'pid_ns_filter', '434', 'null', 'events_map_version', '460', 'null', 'comm_filter_version', '451', 'null', 'pid_ns_filter_version', '436', 'null', 'generic_sys_enter_tails', '383', 'null', 'kconfig_map', '399', 'null', 'file_write_path_filter', '402', 'null', 'binary_filter_version', '457', 'null', 'config_map', '376', 'null', 'sys_enter_init_tail', '374', 'null', 'mnt_ns_filter_version', '433', 'null', 'sys_enter_tails', '378', 'null', 'stack_addresses', '411', 'null', 'sys_32_to_64_map', '373', 'null', 'uts_ns_filter_version', '439', 'null', 'hidden_old_mod_scan_done', '476', '16', 'data_filter_lpm_bufs', '409', 'null', 'uid_filter_version', '427', 'null', 'walk_mod_tree_queue', '390', 'null', 'elf_files_map', '421', 'null', 'containers_map', '392', 'null', 'sys_enter_submit_tail', '377', 'null', 'netconfig_map', '405', 'null', 'bufs', '407', 'null', 'task_info_map', '375', 'null', 'scratch_map', '418', 'null', 'io_file_path_cache_map', '420', 'null', 'generic_sys_exit_tails', '384', 'null', 'event_data_map', '415', 'null', 'pid_filter_version', '430', 'null', 'logs_count', '417', 'null', 'events', '462', 'null', 'logs', '461', 'null', 'module_context_map', '389', 'null', 'modules_map', '471', 'null', 'last_module_insert_time', '476', '8', 'bpf_prog_load_map', '414', 'null', 'recent_deleted_module_map', '395', 'null', 'start_scan_time_init_shown_mods', '476', '0', 'prog_array', '391', 'null', 'signal_data_map', '416', 'null', 'prog_array_tp', '393', 'null', 'signals', '464', 'null', 'sys_exit_tails', '382', 'null', 'ksymbols_map', '401', 'null', 'proc_info_map', '385', 'null', 'new_module_map', '394', 'null', 'args_map', '400', 'null', 'net_heap_event', '470', 'null', 'bpf_attach_map', '412', 'null', 'entrymap', '468', 'null', 'data_filter_bufs', '408', 'null', 'netflowmap', '465', 'null', 'file_writes', '463', 'null']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/verified/20261114-tracee-checked-lto/control/state/session-so8xksxv/requests/5.failure.tar.gz",
+      "finished": "2026-11-14T07:52:34.354156+00:00",
+      "stock_load": null,
+      "stock_verification": null,
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    }
+  ],
+  "recorded": "2026-11-14T07:54:35.317740+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-tracee-checked-lto",
+  "corpus_run_directory": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_074936_153575",
+  "capture_directory": "/workspaces/repository/corpus/results/verified-captures-fuj_mcr7",
+  "make_exit_code": 0,
+  "launch_receipt": {
+    "recorded": "2026-11-14T07:36:21Z",
+    "pid": 257169,
+    "wait_pid": 239316,
+    "app": "tracee/monitor",
+    "configuration": "checked-sim-c LTO",
+    "raw_directory": "/workspaces/kprog-raw/verified/20261114-tracee-checked-lto",
+    "model_commit": "52964ca12",
+    "preverify_compiler_commit": "e6e64b725",
+    "expected_bounds_compiler_sha256": "e02a61a2659e87acc84ef6b9f3089528479df3dfead118543abeb423a8057af0",
+    "image": "bpf-benchmark/kprog:current",
+    "expected_image_sha256": "2aed63ff946f379ffb613586eb9d52a9c0274e3a92b25b675748292c9163d12c",
+    "host_cpus": "8-15",
+    "guest_cpus": 8,
+    "guest_memory": "64G",
+    "host_as_bytes": 85899345920,
+    "samples": 1,
+    "workload_seconds": 10,
+    "bpf_stats": true,
+    "image_lock": "shared after Katran239316 exits",
+    "dependency": "resource sequencing only; no requirement that Katran benchmark succeeds",
+    "dry_run_exit_code": 0,
+    "postlaunch_outcome_polled": false,
+    "application_completion_claimed": false,
+    "scope": "Whole-app verified path diagnosis; not performance acceptance",
+    "raw_removed": false
+  },
+  "corpus_metadata": {
+    "bpf_stats": true,
+    "config": {
+      "enabled_passes": [
+        "noop",
+        "map_inline",
+        "const_prop",
+        "dce",
+        "rotate",
+        "cond_select",
+        "extract",
+        "endian_fusion",
+        "lea",
+        "ccmp",
+        "bulk_memory",
+        "prefetch",
+        "wide_mem",
+        "bounds_check_merge",
+        "skb_load_bytes_spec",
+        "noop",
+        "const_prop",
+        "dce"
+      ]
+    },
+    "details_dir": "details",
+    "error_message": "corpus suite reported errors",
+    "generated_at": "2026-11-14T07:52:46.399447+00:00",
+    "last_updated_at": "2026-11-14T07:52:46.399444+00:00",
+    "launcher_boot_id": "5132dc5a-7e07-4463-b11c-e7e59eb2a4ea",
+    "launcher_pid": 1805,
+    "launcher_start_ticks": 6481,
+    "manifest": "/workspaces/repository/corpus/config/macro_apps.yaml",
+    "run_type": "x86_kvm_corpus",
+    "samples": 1,
+    "started_at": "2026-11-14T07:49:36.153575+00:00",
+    "status": "error",
+    "suite": "corpus",
+    "workload_only": false,
+    "workload_seconds": 10.0
+  },
+  "scope": "Actual upstream two-start verified-B run; workload run means positive recorded native run_cnt_delta",
+  "raw_removed": false,
+  "archive": {
+    "raw_archive": "/workspaces/kprog-raw/verified/20261114-tracee-checked-lto/collection/full-evidence.tar.gz",
+    "sha256": "86d9ee09a3061af06956e5b55d359faa958f9437df5355c16acc552867170cc6",
+    "bytes": 22442501
+  },
+  "failure_class_diagnosis": {
+    "failure_class": "scalar pointer dereference from raw-tracepoint register argument",
+    "deduplicated_failed_native_bodies": 1,
+    "failed_native_sha256": "fb3f51b32b0013c1258595a785e1053c0ec49a32e7d2fb80afafd2d29817bb82",
+    "entry": "sys_enter_init",
+    "prog_type": 17,
+    "rejected_bpf_instruction": 158,
+    "address": "scalar raw ctx arg0 plus112",
+    "verifier_message": "R1 invalid mem access scalar",
+    "processed_insns": 90,
+    "states": 7,
+    "verifier_tails": [
+      {
+        "request_id": 4,
+        "tail": "umax=smax32=umax32=255,var_off=(0x0; 0xff)) fp-152=????mmmm\n136: (18) r3 = 0x8000000000000098     ; R3=0x8000000000000098\n138: (ad) if r2 < r3 goto pc+4        ; R2=0 R3=0x8000000000000098\n143: (57) r1 &= 2                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=2,var_off=(0x0; 0x2))\n144: (55) if r1 != 0x0 goto pc+85     ; R1=0\n145: (bf) r1 = r9                     ; R1=scalar(id=13) R9=scalar(id=13)\n146: (b7) r2 = 0                      ; R2=0\n147: (bf) r4 = r9                     ; R4=scalar(id=13) R9=scalar(id=13)\n148: (07) r4 += 112                   ; R4=scalar(id=13+112)\n149: (b7) r3 = 0                      ; R3=0\n150: (a5) if r4 < 0x1000 goto pc+8    ; R1=scalar(id=13,umin=3984,umax=0xffffffffffffff8f) R4=scalar(id=13+112,umin=4096) R9=scalar(id=13,umin=3984,umax=0xffffffffffffff8f)\n151: (18) r3 = 0xffff8c0800ab0d30     ; R3=map_value(map=kprog_unspec,ks=4,vs=8)\n153: (79) r4 = *(u64 *)(r3 +0)        ; R3=map_value(map=kprog_unspec,ks=4,vs=8) R4=scalar()\n154: (57) r4 &= 1                     ; R4=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))\n155: (b7) r3 = 0                      ; R3=0\n156: (55) if r4 != 0x0 goto pc+2      ; R4=0\n157: (b7) r3 = 112                    ; R3=112\n158: (79) r3 = *(u64 *)(r1 +112)\nR1 invalid mem access 'scalar'\nprocessed 90 insns (limit 1000000) max_states_per_insn 0 total_states 7 peak_states 7 mark_read 0\n\n"
+      },
+      {
+        "request_id": 5,
+        "tail": "umax=smax32=umax32=255,var_off=(0x0; 0xff)) fp-152=????mmmm\n136: (18) r3 = 0x8000000000000098     ; R3=0x8000000000000098\n138: (ad) if r2 < r3 goto pc+4        ; R2=0 R3=0x8000000000000098\n143: (57) r1 &= 2                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=2,var_off=(0x0; 0x2))\n144: (55) if r1 != 0x0 goto pc+85     ; R1=0\n145: (bf) r1 = r9                     ; R1=scalar(id=13) R9=scalar(id=13)\n146: (b7) r2 = 0                      ; R2=0\n147: (bf) r4 = r9                     ; R4=scalar(id=13) R9=scalar(id=13)\n148: (07) r4 += 112                   ; R4=scalar(id=13+112)\n149: (b7) r3 = 0                      ; R3=0\n150: (a5) if r4 < 0x1000 goto pc+8    ; R1=scalar(id=13,umin=3984,umax=0xffffffffffffff8f) R4=scalar(id=13+112,umin=4096) R9=scalar(id=13,umin=3984,umax=0xffffffffffffff8f)\n151: (18) r3 = 0xffff8c0800ab0d30     ; R3=map_value(map=kprog_unspec,ks=4,vs=8)\n153: (79) r4 = *(u64 *)(r3 +0)        ; R3=map_value(map=kprog_unspec,ks=4,vs=8) R4=scalar()\n154: (57) r4 &= 1                     ; R4=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))\n155: (b7) r3 = 0                      ; R3=0\n156: (55) if r4 != 0x0 goto pc+2      ; R4=0\n157: (b7) r3 = 112                    ; R3=112\n158: (79) r3 = *(u64 *)(r1 +112)\nR1 invalid mem access 'scalar'\nprocessed 90 insns (limit 1000000) max_states_per_insn 0 total_states 7 peak_states 7 mark_read 0\n\n"
+      }
+    ],
+    "source_difference": "native_compat.h defaults PT_REGS_*_CORE to direct loads unless MICRO_NATIVE_CORE_REG_PROBE_READS; retained flagged producer uses BPF_CORE_READ",
+    "next_step": "Use existing whole Tracee CORE-register probe-read producer (b94e7d0ee/0f0b2815f), then actual whole-app checked-sim-c retry; no verifier relaxation",
+    "runtime_observation": "No post_rejit counters; run=0 is observed-count accounting, not proof installed programs never executed."
+  }
+}

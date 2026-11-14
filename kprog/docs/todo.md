@@ -690,6 +690,8 @@
 
 - VERIFIED 2026-11-14 Katran checked-sim-c整应用239316已收集：Make0/appOK，loaded1/stockverified1/installed1/run1；native id21计数28589324，无缺失/额外counter。stock B id18通过后从逐字节相同sim C编原生（原件/副本实际SHA均e87ce8d2d083，5条native命令全部0）。model529+preverifye6/boundse02，唯一image2aed63ff；corpus `x86_kvm_corpus_20261114_072451_546457`，receipt `kprog/results/verified_20261114/katran-private-input-lto-receipt.json`，完整38908366B归档只在raw，SHA7475de2c5124。先前Katran complexity失败在这批重试中已通过，不将1x10s覆盖运行当性能验收；其余应用仍继续。
 
+- VERIFIED 2026-11-14 Tracee checked-LTO262728已收集：Make0但appERROR（shim socket refused），baseline计数程序167，实际5份source提交/3stockverified/3installed/0observed-run；3个已安装程序缺少post计数，不能视为实际执行0。两个拒绝是同一sys_enter_init body，raw ctx arg0+112经scalar直接读取，BPF158拒绝，processed90/states7。原image producer未启用已有CORE-register probe-read flag；接续用保留的完整flag producer整应用重试，不放宽verifier。receipt `kprog/results/verified_20261114/tracee-checked-lto-receipt.json`，corpus `x86_kvm_corpus_20261114_074936_153575`，完整22442501B归档只在raw/SHA86d9ee09a306。
+
 ## 3. 安全：运行时缺口（有限用例和 guest 已验证）
 
 - [x] 退出契约 RBP/R12/RSP、below-SP 栈生命周期（S7，cdeb9804d）；ARM 隐式 SP 回写（55504ff90）。
