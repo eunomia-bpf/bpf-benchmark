@@ -8,6 +8,8 @@
 
 ## 0. Lane 目标与待办（协调者作为 advisor 设定，2026-11-13）
 
+PERF Workspace continuation 2026-11-14（7e219aa9a/fc6e199bf/730c99fd5）：阶段1先处理 OTel checked main。实际 ctx 拒绝链已缩小到32位溢出槽放到8字节槽上半部后，已知标签1重载为未知32位值；唯一内核4例复现，独立8对齐通过、上半部/两种成对写均拒绝。另2例完整64位写读+半字提取保留标签，即使另一半运行时未知；仅候选编译降级机制，不是完整程序通过。12组后端选项均仍520字节；保守活跃性未找到可共用槽。普查新增 Tetragon body66 callback、67 instruction-complexity 拒绝，累计63 attempts/58 bodies（最新25 installed/29 rejected/4 compile failed）；完整请求与journal保留于 `verified_20261114/census-resume-1902`。checked retry4、V3和优化成本原作业继续，无时间停止；不改变1.129x每次调用/1.161x吞吐、等量工作未结项的现状。
+
 PERF checkpoint 2026-11-14T18:40:53Z（65fe9615e / 4df2d82dd）：最新修正 map 绑定 + ef449 producer flags + 全部 LTO 的唯一组合3×180s，两配置均14 native replacements/0 loader failures；stats-off 冻结中位吞吐1.161336x，stats-on aggregate每次调用1.129008x，均低于1.20，不宣称完成。保留三轮（paired1.198247/1.198220/0.969553）、实际own-map完整时间窗和并行24G/48G guest；首stats-on baseline边界缺live证据，retrospective明确标记。原生帧/attempt接近但Python/解释器/错误计数不同，等量工作认证仍开。checked compiler复用产生B的原始pre-bounds IR（source/IR hash绑定，仍stock通过后编native），fresh/cached allocated bytes+relocs一致，篡改拒绝，真实sole-kernel1680执行PASS。static-helper完整OTel B bytes+3339relocs一致，预处理1.012GB->370MB；实际main512栈后仍tailcall ctx类型拒绝（832instructions/57states），非通过；不同输入retry4继续。census新增7已完成body全档归档到census-resume-1842（累计61attempts/56bodies），V3/checked/优化成本诊断继续，无时间停止。下一轮继续OTel性能/等量工作、checked实际失败和后台收取；FORMAL独写M4共享头，C保留producer/Tetragon归属。
 
 运营者 2026-11-13："可以两个 codex lane. 尽可能不需要向你申请和协调, 你要给他们准备好 todo. 通知所有的实验管理者和写在 server manager, 不应该是申请协调, 而是你作为 advisor, 去 steer 和管理他们, 给他们设置目标和 todo? 这是不是更好? 多个的话让他们自己想办法协商"。

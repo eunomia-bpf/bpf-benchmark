@@ -1,0 +1,107 @@
+{
+  "recorded": "2026-11-14T19:01:05.710933+00:00",
+  "scope": "Completed resident load-only replay; not whole-application startup or workload certification",
+  "base_journal": "kprog/results/verified_20261114/census-resume-1842/outcomes.jsonl",
+  "queue_journals": [
+    "/workspaces/kprog-raw/perf/20261114-census-resume/completed-after-1842.jsonl"
+  ],
+  "attempts": 63,
+  "attempt_stages": {
+    "installed": 25,
+    "verifier_rejected": 34,
+    "compilation_failed": 4
+  },
+  "distinct_bodies": 58,
+  "latest_stages": {
+    "installed": 25,
+    "verifier_rejected": 29,
+    "compilation_failed": 4
+  },
+  "latest_failure_classes": {
+    "verifier_rejected": 8,
+    "verifier_stack_access": 4,
+    "verifier_callback_argument": 2,
+    "verifier_context_access": 2,
+    "verifier_map_bounds": 12,
+    "compilation_failed": 4,
+    "verifier_instruction_complexity": 1
+  },
+  "per_application": {
+    "bcc/set": {
+      "distinct_bodies": 10,
+      "latest_stages": {
+        "installed": 10
+      },
+      "native_run": 0
+    },
+    "katran": {
+      "distinct_bodies": 0,
+      "latest_stages": {},
+      "native_run": 0
+    },
+    "cilium/agent": {
+      "distinct_bodies": 0,
+      "latest_stages": {},
+      "native_run": 0
+    },
+    "otelcol-ebpf-profiler/profiling": {
+      "distinct_bodies": 0,
+      "latest_stages": {},
+      "native_run": 0
+    },
+    "tetragon/observer": {
+      "distinct_bodies": 8,
+      "latest_stages": {
+        "installed": 2,
+        "verifier_rejected": 6
+      },
+      "native_run": 0
+    },
+    "tracee/monitor": {
+      "distinct_bodies": 40,
+      "latest_stages": {
+        "installed": 13,
+        "verifier_rejected": 23,
+        "compilation_failed": 4
+      },
+      "native_run": 0
+    }
+  },
+  "native_run": 0,
+  "new_request_archives": [
+    {
+      "application": "tetragon/observer",
+      "body_group": 66,
+      "stage": "verifier_rejected",
+      "raw_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/12.failure.tar.gz",
+      "bytes": 17914402,
+      "sha256": "bdc4c3b482d98414cf0f04faaa0e52df648fc929eeb053cf32accaeec6515154",
+      "parts": [
+        {
+          "path": "kprog/results/verified_20261114/census-resume-1902/body-66-bdc4c3b482d9.tar.gz.part000",
+          "bytes": 17914402,
+          "sha256": "bdc4c3b482d98414cf0f04faaa0e52df648fc929eeb053cf32accaeec6515154"
+        }
+      ],
+      "reconstruction": "Concatenate listed parts; original SHA256 above."
+    },
+    {
+      "application": "tetragon/observer",
+      "body_group": 67,
+      "stage": "verifier_rejected",
+      "raw_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/13.failure.tar.gz",
+      "bytes": 4102095,
+      "sha256": "74a5d2db50c1cdd8b76c4184045ccb5d4300c4f9beaf720d0460583df1e72744",
+      "parts": [
+        {
+          "path": "kprog/results/verified_20261114/census-resume-1902/body-67-74a5d2db50c1.tar.gz.part000",
+          "bytes": 4102095,
+          "sha256": "74a5d2db50c1cdd8b76c4184045ccb5d4300c4f9beaf720d0460583df1e72744"
+        }
+      ],
+      "reconstruction": "Concatenate listed parts; original SHA256 above."
+    }
+  ],
+  "raw_directory": "/workspaces/kprog-raw/perf/20261114-census-resume/publication-1902",
+  "raw_removed": false
+}
