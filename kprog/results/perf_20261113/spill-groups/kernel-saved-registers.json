@@ -1,0 +1,88 @@
+{
+  "compile_only": false,
+  "default_parity": [
+    {
+      "fixture": "scalar_spill_values.mir",
+      "default_equals_prior": true
+    },
+    {
+      "fixture": "scalar_spill_groups.mir",
+      "default_equals_prior": true
+    }
+  ],
+  "cases": [
+    {
+      "phase": "small-original",
+      "frame_access_depth": 80,
+      "pairs": 0,
+      "object": "/var/tmp/fixture.o",
+      "executions": 1060,
+      "failed": 0
+    },
+    {
+      "phase": "small-packed",
+      "frame_access_depth": 48,
+      "pairs": 4,
+      "object": "/var/tmp/fixture.o",
+      "executions": 1060,
+      "failed": 0
+    },
+    {
+      "phase": "large-original",
+      "frame_access_depth": 544,
+      "pairs": 0,
+      "stock_rejected": true,
+      "executions": 0
+    },
+    {
+      "phase": "large-packed",
+      "frame_access_depth": 512,
+      "pairs": 4,
+      "object": "/var/tmp/fixture.o",
+      "executions": 1060,
+      "failed": 0
+    },
+    {
+      "phase": "pressure-original",
+      "frame_access_depth": 16,
+      "object": "/var/tmp/fixture.o",
+      "executions": 1060,
+      "failed": 0
+    },
+    {
+      "phase": "pressure-packed",
+      "frame_access_depth": 8,
+      "object": "/var/tmp/fixture.o",
+      "executions": 1060,
+      "failed": 0
+    },
+    {
+      "phase": "pressure-context-original",
+      "frame_access_depth": 16,
+      "object": "/var/tmp/fixture.o",
+      "executions": 1060,
+      "failed": 0
+    },
+    {
+      "phase": "pressure-context-packed",
+      "frame_access_depth": 16,
+      "object": "/var/tmp/fixture.o",
+      "executions": 1060,
+      "failed": 0
+    },
+    {
+      "phase": "pressure-all-live-original",
+      "frame_access_depth": 16,
+      "object": "/var/tmp/fixture.o",
+      "executions": 1060,
+      "failed": 0
+    },
+    {
+      "phase": "pressure-all-live-packed",
+      "frame_access_depth": 24,
+      "object": "/var/tmp/fixture.o",
+      "executions": 1060,
+      "failed": 0
+    }
+  ]
+}

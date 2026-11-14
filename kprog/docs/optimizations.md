@@ -117,3 +117,12 @@ plus both packed forms match3180 actual reference executions. Existing
 single-pair MIR/selection equals the prior compiler with the mode off.
 Evidence: `spill-groups/report.md`; service wiring and actual-body replay
 remain next. No application acceptance or runtime gain is claimed.
+
+Spill-group register-pressure follow-up (54477bc97 / 2a372dc99): reuse a dead
+store source when possible; otherwise save live scratch registers in private
+eight-byte slots and restore them after the whole-word update. Nine variants
+pass9540 kernel executions, including restoring and using a live context
+pointer. Measured depths16->8/16->16/16->24 show that temporary saves can
+outweigh packing. Service/default-byte checks pass; real main replay still
+fails on a `dead` load annotation. Mode remains default-off, no whole-body
+acceptance or performance gain. See spill-groups/report.md.

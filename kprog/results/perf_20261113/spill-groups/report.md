@@ -33,3 +33,20 @@ records and exact commands are retained here; full raw logs at
 `/workspaces/kprog-raw/perf/20261114-spill-groups`. Service flag wiring and
 actual retained-body replay remain next. This proves the focused semantic
 and stack-boundary subset, not a census-body or full-app acceptance gain.
+
+Extended register-pressure subset (54477bc97 / 2a372dc99): nine accepted
+variants each execute1060 inputs, totaling9540 successful kernel executions.
+The one-free-register case packs16->8 bytes. Preserving a live context pointer
+uses a private full-width save slot (16->16); with all ten registers live, two
+save slots increase16->24. The pointer is used after restoration and checked
+against the independent reference. Thus grouping is not always a frame reduction.
+The original544-byte negative still rejects. See kernel-saved-registers.json.
+
+Current service wiring/default-byte comparison also passes after these changes
+(service-v2.json): default object/preprocessed input equal b9dc82ceb, actual
+all-pair CLI forwarding, and invalid configuration rejected before compilation.
+The real accepted OTel-main MIR replay reaches an unsupported access annotation:
+`dead $w1 = LDW32 %stack.2, 0`. The retained main-v3.log records this failure;
+there is no all-pair main acceptance result. The active whole-app run retains
+ALL=0 and its original single-pair mode. Further spill work is queued behind
+the coordinator's target-BTF CO-RE audit priority.
