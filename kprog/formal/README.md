@@ -8,7 +8,7 @@ kprog belong in those forks. No replacement ISA semantics is defined locally.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
-| AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `581d57515080` | Lean 4.35.0 |
+| AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `176be60339e6` | Lean 4.35.0 |
 | x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `74a2e2849cde` | Lean 4.32.0-rc1 |
 | Clight | [eunomia-bpf/clean](https://github.com/eunomia-bpf/clean), `external/clean/export` | `123f7f7767e2` | Lean 4.32.1 |
 
@@ -33,7 +33,7 @@ CompCert front end and the Lean export/semantics have separate trust claims.
 
 ## Operation coverage (M2 in progress)
 
-LNSym `581d57515080b7cc940e3b370f57355a73dcf6b2`, x86lean `74a2e2849cde10fce9035c6abb7fdd49968b2915`.
+LNSym `176be60339e6bb6d4b32c6fe7db65df74a8534e8`, x86lean `74a2e2849cde10fce9035c6abb7fdd49968b2915`.
 
 Source inspection, not refinement proofs or conformance results. `present` means an execution path exists; `partial`/`missing` remain M2 work; `layer` identifies linking/ABI transport above an existing ISA form. Memory permissions, initialization, fault prefixes, exclusive ordering and ABI require explicit relations.
 
@@ -138,10 +138,27 @@ unsupported-class and legacy-API checks (`m2-checked-memory/build-3`). Generic
 monad normalization rules preserve existing symbolic proofs without adding
 admissions or changing their premises. The original total API still has its
 original memory domain; M3 must use the checked interface for retained fault
-observations. Checked atomic/exclusive and multiple-structure SIMD paths
-explicitly refuse pending support. Flat little-endian platform binding, x86
+observations. At this checkpoint, checked atomic/exclusive and multiple-structure
+SIMD paths were refused; the atomic extension below addresses that class. Flat little-endian platform binding, x86
 memory/canonicality and retained control/system forms remain work. The source
 table now has 72 present and two linking-layer ARM labels; M2 remains open.
+
+LNSym `176be60339e6` extends the same checked step with B/H/W/X LSE ADD/CLR/SET
+and store aliases. Both read and write byte permissions are checked before
+committing an indivisible RMW. One typed atomic event captures old/new values,
+ordering and old initialization; only committed bytes become initialized.
+SP and effective LSE2 alignment faults preserve data registers, memory and PC.
+LSE2 relaxation requires the range to fit one aligned 16-byte quantity and an
+explicit platform attribute; pair access shape alone does not enable it.
+
+The 149-job combined build and 111-job standalone symbolic check passed all
+prior suites, 1,920 permission/initialization profiles over the existing 240
+assembled goldens, and 64 alignment/SP/permission combinations
+(`m2-checked-atomic/build-3`). Two earlier build failures (field notation and a
+test parser error) remain archived. No new admissions or legacy theorem premise
+changes were introduced. These finite checks do not establish MMU, external-abort
+or concurrent-memory conformance and are not M5 refinement counts. Checked
+exclusives and multiple-structure SIMD still refuse; M2 remains open.
 
 ### AArch64: 74 simulator operations
 
@@ -217,9 +234,9 @@ table now has 72 present and two linking-layer ARM labels; M2 remains open.
 | 0x43 | `BICS_REG` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
 | 0x44 | `CSETM` | present | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases; 24 encoded W/X branch/ZR/wrap/frame checks pass |
 | 0x45 | `CSNEG` | present | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases; 24 encoded W/X branch/ZR/wrap/frame checks pass |
-| 0x46 | `LDADD` | present | [LDST/Atomic_memory_op.lean](external/LNSym/Arm/Insts/LDST/Atomic_memory_op.lean) | B/H/W/X, A/R and ST aliases; old/new/order observations; flat naturally aligned profile, permission/LSE2 work remains |
-| 0x47 | `LDSET` | present | [LDST/Atomic_memory_op.lean](external/LNSym/Arm/Insts/LDST/Atomic_memory_op.lean) | B/H/W/X, A/R and ST aliases; old/new/order observations; flat naturally aligned profile, permission/LSE2 work remains |
-| 0x48 | `LDCLR` | present | [LDST/Atomic_memory_op.lean](external/LNSym/Arm/Insts/LDST/Atomic_memory_op.lean) | B/H/W/X, A/R and ST aliases; old/new/order observations; flat naturally aligned profile, permission/LSE2 work remains |
+| 0x46 | `LDADD` | present | [LDST/Atomic_memory_op.lean](external/LNSym/Arm/Insts/LDST/Atomic_memory_op.lean) | B/H/W/X, A/R and ST aliases; old/new/order observations; checked byte permissions/init/SP and effective LSE2 alignment, flat little-endian domain |
+| 0x47 | `LDSET` | present | [LDST/Atomic_memory_op.lean](external/LNSym/Arm/Insts/LDST/Atomic_memory_op.lean) | B/H/W/X, A/R and ST aliases; old/new/order observations; checked byte permissions/init/SP and effective LSE2 alignment, flat little-endian domain |
+| 0x48 | `LDCLR` | present | [LDST/Atomic_memory_op.lean](external/LNSym/Arm/Insts/LDST/Atomic_memory_op.lean) | B/H/W/X, A/R and ST aliases; old/new/order observations; checked byte permissions/init/SP and effective LSE2 alignment, flat little-endian domain |
 | 0xff | `RET` | present | [BR/Uncond_branch_reg.lean](external/LNSym/Arm/Insts/BR/Uncond_branch_reg.lean) | Only RET encoding accepted; BR/BLR absent |
 
 Outside the 74-operation roster, LDXR/LDAXR/STXR and CLREX now execute in the fork. B/B.cond/CBZ/CBNZ already have paths; TBZ/TBNZ, MRS TPIDR_EL1/EL2 and BR/BLR helper calls remain retained-environment work. These are not extra completed operation tokens.
@@ -304,7 +321,7 @@ Outside the 74-operation roster, LDXR/LDAXR/STXR and CLREX now execute in the fo
 | 0x49 | `rorMem` | present | [rot .ror](external/x86lean/X86/Syntax.lean) |  |
 | 0xff | `ret` | present | [ret](external/x86lean/X86/Syntax.lean) | Native stack pop; simulator return modes need relation |
 
-Cross-cutting gaps: X86.Mem is a finite byte association list with implicit zero background, total reads/writes, no access-permission faults. Cpu has no 48/57-bit canonical-address profile. LNSym retains its total-byte-memory API and now also has a checked step for single/pair transfers with byte permissions, initialization and ordered fault observations. That profile must be bound explicitly; it is not a full MMU/concurrency model. LSE RMWs retain old/new/order metadata and exclusives have per-attempt physical-monitor inputs, but their checked fault paths and multiple-structure SIMD paths are still refused, not silently run with total memory. Thread-pointer inputs and the remaining memory/platform bindings are open. These are not closed by listing instruction constructors; M2/M3 must preserve the existing theorem domains through external-model extensions and explicit relations. x86lean takes post-decode Instr.op/len. BZHI is absent from the differential roster, not absent from step: do not duplicate its semantics.
+Cross-cutting gaps: X86.Mem is a finite byte association list with implicit zero background, total reads/writes, no access-permission faults. Cpu has no 48/57-bit canonical-address profile. LNSym retains its total-byte-memory API and now also has a checked step for single/pair transfers and LSE RMWs with byte permissions, initialization and ordered fault observations. That profile must be bound explicitly; it is not a full MMU/concurrency model. LSE RMWs retain old/new/order metadata in one checked effect; exclusives have per-attempt physical-monitor inputs, but checked exclusive and multiple-structure SIMD paths are still refused. Thread-pointer inputs and the remaining memory/platform bindings are open. These are not closed by listing instruction constructors; M2/M3 must preserve the existing theorem domains through external-model extensions and explicit relations. x86lean takes post-decode Instr.op/len. BZHI is absent from the differential roster, not absent from step: do not duplicate its semantics.
 
 ## Legacy foundation (migration pending)
 
