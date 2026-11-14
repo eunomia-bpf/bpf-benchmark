@@ -1,0 +1,731 @@
+{
+  "recorded_utc": "2026-11-14T18:39:05.418653+00:00",
+  "raw": "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel",
+  "stock_accepted": false,
+  "actual_error": "tailcall R1 type=scalar expected=ctx",
+  "processed_instructions": 832,
+  "total_states": 57,
+  "frame_bytes": 512,
+  "source_id": 35,
+  "producer_sha256": "ef44985c193e1d737ffd8980009b67f3c36ab91baf67af0c7878e69590d747da",
+  "scope": "Actual bound checked-sim-C main first request, private spill-layout experiment. No native compilation/installation after rejected main B. Two preceding small programs accepted. No kernel limit relaxation.",
+  "retry": "Existing request4 continues; same P/normalized metadata but non-line preprocessed bytes differ, no duplicate retirement. Future backend uses adjacent4byte scalar spill pairs only, isolated slots8align; hypothesis, not main acceptance.",
+  "retry_comparison": {
+    "recorded": 1794680883.4415574,
+    "active_request": "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel/control/state/session-bnto_w16/requests/request-t48kkn20",
+    "failure_archive": "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel/control/state/session-bnto_w16/requests/3.failure.tar.gz",
+    "old": {
+      "preprocessed": {
+        "bytes": 375098736,
+        "sha256": "7c7b2d1ba96fbebdf7e06413249fea0b6d070a544e84c0f6305b996ce3a18869",
+        "tokens_sha256": "1b38cb983beef0af4816c6d29a3872c71ed0a5e955173a55491621d1e1297c56"
+      },
+      "metadata": {
+        "version": 1,
+        "prog_type": 7,
+        "section": "perf_event",
+        "maps": [
+          {
+            "name": "exe_id_to_22_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 4194304,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_8_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 256,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_12_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 4096,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_15_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 32768,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_19_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 524288,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_14_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 16384,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_11_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 2048,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_23_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 8388608,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_21_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 2097152,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "unwind_info_array",
+            "value_offset": null,
+            "key_size": 4,
+            "map_flags": 0,
+            "map_type": 2,
+            "max_entries": 16384,
+            "value_size": 12
+          },
+          {
+            "name": "exe_id_to_10_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 1024,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_13_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 8192,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_18_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 262144,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_16_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 65536,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_20_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 1048576,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "with_debug_output",
+            "value_offset": 40,
+            "key_size": 4,
+            "map_flags": 128,
+            "map_type": 2,
+            "max_entries": 1,
+            "value_size": 44
+          },
+          {
+            "name": "metrics",
+            "value_offset": null,
+            "key_size": 4,
+            "map_flags": 0,
+            "map_type": 6,
+            "max_entries": 99,
+            "value_size": 8
+          },
+          {
+            "name": "pid_page_to_mapping_info",
+            "value_offset": null,
+            "key_size": 16,
+            "map_flags": 1,
+            "map_type": 11,
+            "max_entries": 1048576,
+            "value_size": 16
+          },
+          {
+            "name": "exe_id_to_17_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 131072,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "interpreter_offsets",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 1,
+            "max_entries": 32,
+            "value_size": 40
+          },
+          {
+            "name": "per_cpu_records",
+            "value_offset": null,
+            "key_size": 4,
+            "map_flags": 0,
+            "map_type": 6,
+            "max_entries": 1,
+            "value_size": 5000
+          },
+          {
+            "name": "stack_delta_page_to_info",
+            "value_offset": null,
+            "key_size": 16,
+            "map_flags": 0,
+            "map_type": 1,
+            "max_entries": 65536,
+            "value_size": 8
+          },
+          {
+            "name": "perf_progs",
+            "value_offset": null,
+            "key_size": 4,
+            "map_flags": 0,
+            "map_type": 3,
+            "max_entries": 10,
+            "value_size": 4
+          },
+          {
+            "name": "exe_id_to_9_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 512,
+              "value_size": 4
+            }
+          }
+        ],
+        "kernel_kfunc_context": false
+      },
+      "native_sha256": "ef44985c193e1d737ffd8980009b67f3c36ab91baf67af0c7878e69590d747da"
+    },
+    "current": {
+      "metadata": {
+        "version": 1,
+        "prog_type": 7,
+        "section": "perf_event",
+        "maps": [
+          {
+            "name": "exe_id_to_22_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 4194304,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_8_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 256,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_12_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 4096,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_15_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 32768,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_19_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 524288,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_14_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 16384,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_11_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 2048,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_23_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 8388608,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_21_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 2097152,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "unwind_info_array",
+            "value_offset": null,
+            "key_size": 4,
+            "map_flags": 0,
+            "map_type": 2,
+            "max_entries": 16384,
+            "value_size": 12
+          },
+          {
+            "name": "exe_id_to_10_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 1024,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_13_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 8192,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_18_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 262144,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_16_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 65536,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_20_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 1048576,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "with_debug_output",
+            "value_offset": 40,
+            "key_size": 4,
+            "map_flags": 128,
+            "map_type": 2,
+            "max_entries": 1,
+            "value_size": 44
+          },
+          {
+            "name": "metrics",
+            "value_offset": null,
+            "key_size": 4,
+            "map_flags": 0,
+            "map_type": 6,
+            "max_entries": 99,
+            "value_size": 8
+          },
+          {
+            "name": "pid_page_to_mapping_info",
+            "value_offset": null,
+            "key_size": 16,
+            "map_flags": 1,
+            "map_type": 11,
+            "max_entries": 1048576,
+            "value_size": 16
+          },
+          {
+            "name": "exe_id_to_17_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 131072,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "interpreter_offsets",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 1,
+            "max_entries": 32,
+            "value_size": 40
+          },
+          {
+            "name": "per_cpu_records",
+            "value_offset": null,
+            "key_size": 4,
+            "map_flags": 0,
+            "map_type": 6,
+            "max_entries": 1,
+            "value_size": 5000
+          },
+          {
+            "name": "stack_delta_page_to_info",
+            "value_offset": null,
+            "key_size": 16,
+            "map_flags": 0,
+            "map_type": 1,
+            "max_entries": 65536,
+            "value_size": 8
+          },
+          {
+            "name": "perf_progs",
+            "value_offset": null,
+            "key_size": 4,
+            "map_flags": 0,
+            "map_type": 3,
+            "max_entries": 10,
+            "value_size": 4
+          },
+          {
+            "name": "exe_id_to_9_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_flags": 0,
+            "map_type": 13,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_flags": 0,
+              "map_type": 2,
+              "max_entries": 512,
+              "value_size": 4
+            }
+          }
+        ],
+        "kernel_kfunc_context": false
+      },
+      "native_sha256": "ef44985c193e1d737ffd8980009b67f3c36ab91baf67af0c7878e69590d747da",
+      "preprocessed": {
+        "bytes": 375098940,
+        "sha256": "ac1e093e49c4362d5f81c9959eda352ccab9c6ad31c73dd2d9edb1ec4bc8be96",
+        "tokens_sha256": "97199807a253dd86430aa162824ca856d3397ca905635234c838b9db2247b33a"
+      }
+    },
+    "native_equal": true,
+    "metadata_equal": true,
+    "token_equal": false,
+    "scope": "Compare only, no process stopped. Line markers excluded; all non-line-directive bytes, metadata and P hashes must match before treating retry as duplicate."
+  },
+  "spill_pairs_prototype": {
+    "recorded": 1794679570.548763,
+    "roundtrip_allocated_bytes_equal": true,
+    "changed_scalar_slots": [
+      {
+        "slots": [
+          17,
+          18
+        ],
+        "guard": "adjacent scalar4spill pairs only; isolated slots retain8align; usesLDW32/STW32/noescape"
+      }
+    ],
+    "stack_sizes": [
+      512
+    ],
+    "old_bpf_sha256": "965e24ccb10c33f5ab991cd2a40400c9a6d59fb44d297daf28169479746f92f9",
+    "new_bpf_sha256": "87ad43369f415946333db6914be18f80c924ad22f61e46073caf8b1b2193c708",
+    "scope": "Private compiler spill-layout prototype only. Architectural VM stack and source P/C unchanged; no kernel verification or native execution claim."
+  },
+  "full_failure_archive": "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel/control/state/session-bnto_w16/requests/3.failure.tar.gz",
+  "failure_sha256": "e347b2b67bd22d0dee819d67cd07685fab27da83d137bd6d9b608bceaad2e207"
+}

@@ -1,0 +1,1411 @@
+{
+  "recorded_utc": "2026-11-14T18:38:35.353017+00:00",
+  "raw": "/workspaces/kprog-raw/perf/20261114-otel-corrected-all-lto-timing",
+  "runs": [
+    {
+      "recorded": "2026-11-14T18:06:36.034779+00:00",
+      "stats": 1,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_174202_766748",
+      "make_exit": 0,
+      "app_status": "ok",
+      "app_error": "",
+      "throughput_ratio": 1.060343839547925,
+      "throughput_samples": {
+        "baseline": [
+          82279052.76960385,
+          80682740.38758259,
+          82360185.5636309
+        ],
+        "native": [
+          87875947.60016741,
+          87244086.72808808,
+          85629080.97889648
+        ],
+        "pairs": [
+          1.0680233260127079,
+          1.0813227997584887,
+          1.0396902385891307
+        ],
+        "errors": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "scope": "DirectP corrected allLTO combined. Stats0throughput is frozen primary; stats1throughput auxiliary. No automatic equivalence/acceptance inference.",
+      "aggregate_baseline": [
+        2323.187801137582,
+        2,
+        13
+      ],
+      "aggregate_native": [
+        2057.725227651497,
+        2,
+        13
+      ],
+      "per_call_ratio": 1.1290077848678857,
+      "native_replacements": 14,
+      "native_loader_failure_lines": []
+    },
+    {
+      "recorded": "2026-11-14T18:32:36.722234+00:00",
+      "stats": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_180807_307289",
+      "make_exit": 0,
+      "app_status": "ok",
+      "app_error": "",
+      "throughput_ratio": 1.161335650460904,
+      "throughput_samples": {
+        "baseline": [
+          69345076.61930671,
+          67210444.9628236,
+          80828569.83418211
+        ],
+        "native": [
+          83092562.8419786,
+          80532909.6619438,
+          78367570.59105457
+        ],
+        "pairs": [
+          1.1982474732581718,
+          1.1982201532290004,
+          0.9695528542917904
+        ],
+        "errors": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "scope": "DirectP corrected allLTO combined. Stats0throughput is frozen primary; stats1throughput auxiliary. No automatic equivalence/acceptance inference.",
+      "native_replacements": 14,
+      "native_loader_failure_lines": []
+    }
+  ],
+  "goal_met": false,
+  "execution_mode": "direct producer P; not checked-sim-c",
+  "producer_sha256": "ef44985c193e1d737ffd8980009b67f3c36ab91baf67af0c7878e69590d747da",
+  "candidate": "corrected original-source map binding + target CPU/CMOV/sibling producer + all runtime LTO including LPM child overlap",
+  "limits": [
+    "Stats0 frozen median throughput1.16133565 below1.20; all three samples retained; paired ratios1.19825,1.19822,0.96955",
+    "Co-resident census24G, checked48G and host compiler work; no quiet-host/exclusive acceptance",
+    "First stats1 baseline boundary missed live; catch_up observer rows retrospective",
+    "Own-map full metric windows have close native-frame yields but differing interpreter/error counters; not exact semantic equivalence proof"
+  ],
+  "own_counter_windows": {
+    "1": [
+      {
+        "first": "baseline-0020",
+        "last": "baseline-0080",
+        "map_id": 8,
+        "start_time": "2026-11-14T17:45:09.424470+00:00",
+        "end_time": "2026-11-14T17:54:03.910101+00:00",
+        "seconds": 534.485631,
+        "native_attempts": 5550923689,
+        "native_attempts_per_second": 10385543.3468145,
+        "interpreter_dispatches": 1333001900,
+        "interpreter_dispatches_per_native_attempt": 0.2401405558216457,
+        "families": {
+          "Native": {
+            "attempts": 5550923689,
+            "frames": 5127104759,
+            "frames_per_attempt": 0.9236489359708075,
+            "attempts_per_native_attempt": 1.0,
+            "other_counters": {
+              "metricID_UnwindNativeStackDeltaStop": {
+                "delta": 410160444,
+                "per_attempt": 0.0738904850759875
+              },
+              "metricID_UnwindNativeErrLookupTextSection": {
+                "delta": 335267,
+                "per_attempt": 6.03984163328317e-05
+              },
+              "metricID_UnwindNativeErrLookupIterations": {
+                "delta": 31,
+                "per_attempt": 5.584656128750467e-09
+              },
+              "metricID_UnwindNativeErrLookupRange": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindNativeErrKernelAddress": {
+                "delta": 22,
+                "per_attempt": 3.963304349435815e-09
+              },
+              "metricID_UnwindNativeErrWrongTextSection": {
+                "delta": 70825,
+                "per_attempt": 1.2759137752217801e-05
+              },
+              "metricID_UnwindNativeErrStackDeltaInvalid": {
+                "delta": 7848075,
+                "per_attempt": 0.0014138322628272039
+              },
+              "metricID_UnwindNativeErrPCRead": {
+                "delta": 5475136,
+                "per_attempt": 0.0009863468328433005
+              },
+              "metricID_UnwindNativeSmallPC": {
+                "delta": 52,
+                "per_attempt": 9.367810280484654e-09
+              },
+              "metricID_UnwindNativeErrLookupStackDeltaInnerMap": {
+                "delta": 39,
+                "per_attempt": 7.025857710363491e-09
+              },
+              "metricID_UnwindNativeErrLookupStackDeltaOuterMap": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindNativeLr0": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindNativeErrLrUnwindingMidTrace": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindNativeErrReadKernelModeRegs": {
+                "delta": 1686806,
+                "per_attempt": 0.00030387843438429226
+              },
+              "metricID_UnwindNativeErrChaseIrqStackLink": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindNativeErrBadUnwindInfoIndex": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "Perl": {
+            "attempts": 73286494,
+            "frames": 0,
+            "frames_per_attempt": 0.0,
+            "attempts_per_native_attempt": 0.013202576382959172,
+            "other_counters": {
+              "metricID_UnwindPerlTSD": {
+                "delta": 73286492,
+                "per_attempt": 0.999999972709842
+              },
+              "metricID_UnwindPerlReadStackInfo": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPerlReadContextStackEntry": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPerlResolveEGV": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "Python": {
+            "attempts": 72910755,
+            "frames": 0,
+            "frames_per_attempt": 0.0,
+            "attempts_per_native_attempt": 0.01313488692782496,
+            "other_counters": {
+              "metricID_UnwindPythonErrBadPyThreadStateCurrentAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrZeroThreadState": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadThreadStateFrameAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadFrameObjectBackAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadFrameCodeObjectAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonZeroFrameCodeObject": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadFrameLastInstructionAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadCodeObjectArgCountAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadCodeObjectKWOnlyArgCountAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadCodeObjectFlagsAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadCodeObjectFirstLineNumberAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadCFrameFrameAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrNoProcInfo": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadAutoTlsKeyAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrReadThreadStateAddr": {
+                "delta": 72910773,
+                "per_attempt": 1.0000002468771583
+              },
+              "metricID_UnwindPythonErrReadTsdBase": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "PHP": {
+            "attempts": 73738349,
+            "frames": 132825967,
+            "frames_per_attempt": 1.801314632091912,
+            "attempts_per_native_attempt": 0.01328397815054164,
+            "other_counters": {
+              "metricID_UnwindPHPErrBadCurrentExecuteData": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPHPErrBadZendExecuteData": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPHPErrBadZendFunction": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPHPErrBadZendOpline": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "Ruby": {
+            "attempts": 72387048,
+            "frames": 25040316,
+            "frames_per_attempt": 0.3459226020654966,
+            "attempts_per_native_attempt": 0.013040541008237233,
+            "other_counters": {
+              "metricID_UnwindRubyErrNoProcInfo": {
+                "delta": 1,
+                "per_attempt": 1.3814626064043943e-08
+              },
+              "metricID_UnwindRubyErrReadStackPtr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadStackSize": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadCfp": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadEp": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadIseqBody": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadIseqEncoded": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadIseqSize": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "V8": {
+            "attempts": 242098843,
+            "frames": 1110223418,
+            "frames_per_attempt": 4.58582702933446,
+            "attempts_per_native_attempt": 0.04361415442978539,
+            "other_counters": {
+              "metricID_UnwindV8ErrBadFP": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindV8ErrBadJSFunc": {
+                "delta": 3300,
+                "per_attempt": 1.3630796244656155e-05
+              },
+              "metricID_UnwindV8ErrBadCode": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindV8ErrNoProcInfo": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "Hotspot": {
+            "attempts": 0,
+            "frames": 0,
+            "frames_per_attempt": null,
+            "attempts_per_native_attempt": 0.0,
+            "other_counters": {
+              "metricID_UnwindHotspotErrNoCodeblob": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindHotspotErrInvalidCodeblob": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindHotspotErrInterpreterFP": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindHotspotErrInvalidRA": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindHotspotErrLrUnwindingMidTrace": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindHotspotUnsupportedFrameSize": {
+                "delta": 0,
+                "per_attempt": null
+              }
+            }
+          },
+          "Dotnet": {
+            "attempts": 0,
+            "frames": 0,
+            "frames_per_attempt": null,
+            "attempts_per_native_attempt": 0.0,
+            "other_counters": {
+              "metricID_UnwindDotnetErrNoProcInfo": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindDotnetErrBadFP": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindDotnetErrCodeHeader": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindDotnetErrCodeTooLarge": {
+                "delta": 0,
+                "per_attempt": null
+              }
+            }
+          }
+        }
+      },
+      {
+        "first": "post_rejit-0102",
+        "last": "post_rejit-0162",
+        "map_id": 1095,
+        "start_time": "2026-11-14T17:57:31.234659+00:00",
+        "end_time": "2026-11-14T18:06:24.215610+00:00",
+        "seconds": 532.980951,
+        "native_attempts": 5529061840,
+        "native_attempts_per_second": 10373845.124532415,
+        "interpreter_dispatches": 1324834255,
+        "interpreter_dispatches_per_native_attempt": 0.23961284813555278,
+        "families": {
+          "Native": {
+            "attempts": 5529061840,
+            "frames": 5106159916,
+            "frames_per_attempt": 0.9235128967195636,
+            "attempts_per_native_attempt": 1.0,
+            "other_counters": {
+              "metricID_UnwindNativeStackDeltaStop": {
+                "delta": 409776229,
+                "per_attempt": 0.07411315714276764
+              },
+              "metricID_UnwindNativeErrLookupTextSection": {
+                "delta": 314144,
+                "per_attempt": 5.6816872209192e-05
+              },
+              "metricID_UnwindNativeErrLookupIterations": {
+                "delta": 21,
+                "per_attempt": 3.798112701159443e-09
+              },
+              "metricID_UnwindNativeErrLookupRange": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindNativeErrKernelAddress": {
+                "delta": 16,
+                "per_attempt": 2.8938001532643377e-09
+              },
+              "metricID_UnwindNativeErrWrongTextSection": {
+                "delta": 70573,
+                "per_attempt": 1.2764009888520257e-05
+              },
+              "metricID_UnwindNativeErrStackDeltaInvalid": {
+                "delta": 7574061,
+                "per_attempt": 0.00136986368016459
+              },
+              "metricID_UnwindNativeErrPCRead": {
+                "delta": 5237156,
+                "per_attempt": 0.0009472051772168278
+              },
+              "metricID_UnwindNativeSmallPC": {
+                "delta": 85,
+                "per_attempt": 1.5373313314216793e-08
+              },
+              "metricID_UnwindNativeErrLookupStackDeltaInnerMap": {
+                "delta": 368,
+                "per_attempt": 6.655740352507976e-08
+              },
+              "metricID_UnwindNativeErrLookupStackDeltaOuterMap": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindNativeLr0": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindNativeErrLrUnwindingMidTrace": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindNativeErrReadKernelModeRegs": {
+                "delta": 1071158,
+                "per_attempt": 0.00019373232403564509
+              },
+              "metricID_UnwindNativeErrChaseIrqStackLink": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindNativeErrBadUnwindInfoIndex": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "Perl": {
+            "attempts": 73475200,
+            "frames": 0,
+            "frames_per_attempt": 0.0,
+            "attempts_per_native_attempt": 0.01328890906382049,
+            "other_counters": {
+              "metricID_UnwindPerlTSD": {
+                "delta": 73475200,
+                "per_attempt": 1.0
+              },
+              "metricID_UnwindPerlReadStackInfo": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPerlReadContextStackEntry": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPerlResolveEGV": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "Python": {
+            "attempts": 72824497,
+            "frames": 231171,
+            "frames_per_attempt": 0.0031743576615434776,
+            "attempts_per_native_attempt": 0.013171221286249892,
+            "other_counters": {
+              "metricID_UnwindPythonErrBadPyThreadStateCurrentAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrZeroThreadState": {
+                "delta": 3015678,
+                "per_attempt": 0.04141021392842576
+              },
+              "metricID_UnwindPythonErrBadThreadStateFrameAddr": {
+                "delta": 34087060,
+                "per_attempt": 0.4680713414333641
+              },
+              "metricID_UnwindPythonErrBadFrameObjectBackAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadFrameCodeObjectAddr": {
+                "delta": 52809,
+                "per_attempt": 0.0007251543392053913
+              },
+              "metricID_UnwindPythonZeroFrameCodeObject": {
+                "delta": 7,
+                "per_attempt": 9.612150153265047e-08
+              },
+              "metricID_UnwindPythonErrBadFrameLastInstructionAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadCodeObjectArgCountAddr": {
+                "delta": 67,
+                "per_attempt": 9.20020086098226e-07
+              },
+              "metricID_UnwindPythonErrBadCodeObjectKWOnlyArgCountAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadCodeObjectFlagsAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadCodeObjectFirstLineNumberAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadCFrameFrameAddr": {
+                "delta": 376930,
+                "per_attempt": 0.005175868224671706
+              },
+              "metricID_UnwindPythonErrNoProcInfo": {
+                "delta": 505,
+                "per_attempt": 6.9344797534269275e-06
+              },
+              "metricID_UnwindPythonErrBadAutoTlsKeyAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrReadThreadStateAddr": {
+                "delta": 35290059,
+                "per_attempt": 0.4845904943222608
+              },
+              "metricID_UnwindPythonErrReadTsdBase": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "PHP": {
+            "attempts": 73059032,
+            "frames": 131587508,
+            "frames_per_attempt": 1.8011121198539832,
+            "attempts_per_native_attempt": 0.013213639874934008,
+            "other_counters": {
+              "metricID_UnwindPHPErrBadCurrentExecuteData": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPHPErrBadZendExecuteData": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPHPErrBadZendFunction": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPHPErrBadZendOpline": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "Ruby": {
+            "attempts": 72580251,
+            "frames": 25240156,
+            "frames_per_attempt": 0.3477551489867402,
+            "attempts_per_native_attempt": 0.013127046341735255,
+            "other_counters": {
+              "metricID_UnwindRubyErrNoProcInfo": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadStackPtr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadStackSize": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadCfp": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadEp": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadIseqBody": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadIseqEncoded": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadIseqSize": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "V8": {
+            "attempts": 240565025,
+            "frames": 1102051821,
+            "frames_per_attempt": 4.581097443404335,
+            "attempts_per_native_attempt": 0.04350919413843995,
+            "other_counters": {
+              "metricID_UnwindV8ErrBadFP": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindV8ErrBadJSFunc": {
+                "delta": 2053,
+                "per_attempt": 8.534075142469277e-06
+              },
+              "metricID_UnwindV8ErrBadCode": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindV8ErrNoProcInfo": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "Hotspot": {
+            "attempts": 0,
+            "frames": 0,
+            "frames_per_attempt": null,
+            "attempts_per_native_attempt": 0.0,
+            "other_counters": {
+              "metricID_UnwindHotspotErrNoCodeblob": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindHotspotErrInvalidCodeblob": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindHotspotErrInterpreterFP": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindHotspotErrInvalidRA": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindHotspotErrLrUnwindingMidTrace": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindHotspotUnsupportedFrameSize": {
+                "delta": 0,
+                "per_attempt": null
+              }
+            }
+          },
+          "Dotnet": {
+            "attempts": 0,
+            "frames": 0,
+            "frames_per_attempt": null,
+            "attempts_per_native_attempt": 0.0,
+            "other_counters": {
+              "metricID_UnwindDotnetErrNoProcInfo": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindDotnetErrBadFP": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindDotnetErrCodeHeader": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindDotnetErrCodeTooLarge": {
+                "delta": 0,
+                "per_attempt": null
+              }
+            }
+          }
+        }
+      }
+    ],
+    "0": [
+      {
+        "first": "baseline-0021",
+        "last": "baseline-0076",
+        "map_id": 30,
+        "start_time": "2026-11-14T18:11:19.125161+00:00",
+        "end_time": "2026-11-14T18:20:06.121060+00:00",
+        "seconds": 526.995899,
+        "native_attempts": 4971003980,
+        "native_attempts_per_second": 9432718.526714759,
+        "interpreter_dispatches": 1199541976,
+        "interpreter_dispatches_per_native_attempt": 0.24130778829108884,
+        "families": {
+          "Native": {
+            "attempts": 4971003980,
+            "frames": 4591721468,
+            "frames_per_attempt": 0.9237010242747784,
+            "attempts_per_native_attempt": 1.0,
+            "other_counters": {
+              "metricID_UnwindNativeStackDeltaStop": {
+                "delta": 366966483,
+                "per_attempt": 0.07382140196958764
+              },
+              "metricID_UnwindNativeErrLookupTextSection": {
+                "delta": 302731,
+                "per_attempt": 6.089936785767772e-05
+              },
+              "metricID_UnwindNativeErrLookupIterations": {
+                "delta": 23,
+                "per_attempt": 4.626831942307156e-09
+              },
+              "metricID_UnwindNativeErrLookupRange": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindNativeErrKernelAddress": {
+                "delta": 21,
+                "per_attempt": 4.22449872993262e-09
+              },
+              "metricID_UnwindNativeErrWrongTextSection": {
+                "delta": 70883,
+                "per_attempt": 1.4259292546372091e-05
+              },
+              "metricID_UnwindNativeErrStackDeltaInvalid": {
+                "delta": 7107042,
+                "per_attempt": 0.001429699519170371
+              },
+              "metricID_UnwindNativeErrPCRead": {
+                "delta": 4905836,
+                "per_attempt": 0.0009868903786313203
+              },
+              "metricID_UnwindNativeSmallPC": {
+                "delta": 40,
+                "per_attempt": 8.046664247490705e-09
+              },
+              "metricID_UnwindNativeErrLookupStackDeltaInnerMap": {
+                "delta": 407,
+                "per_attempt": 8.187480871821793e-08
+              },
+              "metricID_UnwindNativeErrLookupStackDeltaOuterMap": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindNativeLr0": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindNativeErrLrUnwindingMidTrace": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindNativeErrReadKernelModeRegs": {
+                "delta": 1649850,
+                "per_attempt": 0.0003318947252180635
+              },
+              "metricID_UnwindNativeErrChaseIrqStackLink": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindNativeErrBadUnwindInfoIndex": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "Perl": {
+            "attempts": 66266567,
+            "frames": 0,
+            "frames_per_attempt": 0.0,
+            "attempts_per_native_attempt": 0.013330620387071185,
+            "other_counters": {
+              "metricID_UnwindPerlTSD": {
+                "delta": 66266566,
+                "per_attempt": 0.9999999849094341
+              },
+              "metricID_UnwindPerlReadStackInfo": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPerlReadContextStackEntry": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPerlResolveEGV": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "Python": {
+            "attempts": 65838775,
+            "frames": 0,
+            "frames_per_attempt": 0.0,
+            "attempts_per_native_attempt": 0.01324456292227712,
+            "other_counters": {
+              "metricID_UnwindPythonErrBadPyThreadStateCurrentAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrZeroThreadState": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadThreadStateFrameAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadFrameObjectBackAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadFrameCodeObjectAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonZeroFrameCodeObject": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadFrameLastInstructionAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadCodeObjectArgCountAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadCodeObjectKWOnlyArgCountAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadCodeObjectFlagsAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadCodeObjectFirstLineNumberAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadCFrameFrameAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrNoProcInfo": {
+                "delta": 934,
+                "per_attempt": 1.4186169168548474e-05
+              },
+              "metricID_UnwindPythonErrBadAutoTlsKeyAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrReadThreadStateAddr": {
+                "delta": 65838739,
+                "per_attempt": 0.9999994532097537
+              },
+              "metricID_UnwindPythonErrReadTsdBase": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "PHP": {
+            "attempts": 64799406,
+            "frames": 116716499,
+            "frames_per_attempt": 1.8011970510964253,
+            "attempts_per_native_attempt": 0.013035476587970867,
+            "other_counters": {
+              "metricID_UnwindPHPErrBadCurrentExecuteData": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPHPErrBadZendExecuteData": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPHPErrBadZendFunction": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPHPErrBadZendOpline": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "Ruby": {
+            "attempts": 64497664,
+            "frames": 22160536,
+            "frames_per_attempt": 0.34358664524656274,
+            "attempts_per_native_attempt": 0.01297477617388671,
+            "other_counters": {
+              "metricID_UnwindRubyErrNoProcInfo": {
+                "delta": 2,
+                "per_attempt": 3.100887498809259e-08
+              },
+              "metricID_UnwindRubyErrReadStackPtr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadStackSize": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadCfp": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadEp": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadIseqBody": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadIseqEncoded": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadIseqSize": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "V8": {
+            "attempts": 217981853,
+            "frames": 1000585586,
+            "frames_per_attempt": 4.5902242421987305,
+            "attempts_per_native_attempt": 0.04385066957842186,
+            "other_counters": {
+              "metricID_UnwindV8ErrBadFP": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindV8ErrBadJSFunc": {
+                "delta": 5060,
+                "per_attempt": 2.321294149196906e-05
+              },
+              "metricID_UnwindV8ErrBadCode": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindV8ErrNoProcInfo": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "Hotspot": {
+            "attempts": 0,
+            "frames": 0,
+            "frames_per_attempt": null,
+            "attempts_per_native_attempt": 0.0,
+            "other_counters": {
+              "metricID_UnwindHotspotErrNoCodeblob": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindHotspotErrInvalidCodeblob": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindHotspotErrInterpreterFP": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindHotspotErrInvalidRA": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindHotspotErrLrUnwindingMidTrace": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindHotspotUnsupportedFrameSize": {
+                "delta": 0,
+                "per_attempt": null
+              }
+            }
+          },
+          "Dotnet": {
+            "attempts": 0,
+            "frames": 0,
+            "frames_per_attempt": null,
+            "attempts_per_native_attempt": 0.0,
+            "other_counters": {
+              "metricID_UnwindDotnetErrNoProcInfo": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindDotnetErrBadFP": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindDotnetErrCodeHeader": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindDotnetErrCodeTooLarge": {
+                "delta": 0,
+                "per_attempt": null
+              }
+            }
+          }
+        }
+      },
+      {
+        "first": "post_rejit-0097",
+        "last": "post_rejit-0156",
+        "map_id": 1043,
+        "start_time": "2026-11-14T18:23:35.584311+00:00",
+        "end_time": "2026-11-14T18:32:23.096359+00:00",
+        "seconds": 527.512048,
+        "native_attempts": 5428223601,
+        "native_attempts_per_second": 10290236.25447129,
+        "interpreter_dispatches": 1296806407,
+        "interpreter_dispatches_per_native_attempt": 0.2389006979670291,
+        "families": {
+          "Native": {
+            "attempts": 5428223601,
+            "frames": 5012081789,
+            "frames_per_attempt": 0.9233373857474594,
+            "attempts_per_native_attempt": 1.0,
+            "other_counters": {
+              "metricID_UnwindNativeStackDeltaStop": {
+                "delta": 402688994,
+                "per_attempt": 0.07418430477436774
+              },
+              "metricID_UnwindNativeErrLookupTextSection": {
+                "delta": 323675,
+                "per_attempt": 5.96281626903453e-05
+              },
+              "metricID_UnwindNativeErrLookupIterations": {
+                "delta": 15,
+                "per_attempt": 2.763334951278843e-09
+              },
+              "metricID_UnwindNativeErrLookupRange": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindNativeErrKernelAddress": {
+                "delta": 21,
+                "per_attempt": 3.86866893179038e-09
+              },
+              "metricID_UnwindNativeErrWrongTextSection": {
+                "delta": 81469,
+                "per_attempt": 1.5008409009715737e-05
+              },
+              "metricID_UnwindNativeErrStackDeltaInvalid": {
+                "delta": 7701120,
+                "per_attempt": 0.001418718270666168
+              },
+              "metricID_UnwindNativeErrPCRead": {
+                "delta": 5427835,
+                "per_attempt": 0.0009999284110183066
+              },
+              "metricID_UnwindNativeSmallPC": {
+                "delta": 134,
+                "per_attempt": 2.468579223142433e-08
+              },
+              "metricID_UnwindNativeErrLookupStackDeltaInnerMap": {
+                "delta": 128,
+                "per_attempt": 2.3580458250912792e-08
+              },
+              "metricID_UnwindNativeErrLookupStackDeltaOuterMap": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindNativeLr0": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindNativeErrLrUnwindingMidTrace": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindNativeErrReadKernelModeRegs": {
+                "delta": 1190832,
+                "per_attempt": 0.0002193778457800858
+              },
+              "metricID_UnwindNativeErrChaseIrqStackLink": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindNativeErrBadUnwindInfoIndex": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "Perl": {
+            "attempts": 73306398,
+            "frames": 0,
+            "frames_per_attempt": 0.0,
+            "attempts_per_native_attempt": 0.013504675449717164,
+            "other_counters": {
+              "metricID_UnwindPerlTSD": {
+                "delta": 73306397,
+                "per_attempt": 0.9999999863586259
+              },
+              "metricID_UnwindPerlReadStackInfo": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPerlReadContextStackEntry": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPerlResolveEGV": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "Python": {
+            "attempts": 71905451,
+            "frames": 228545,
+            "frames_per_attempt": 0.003178409937238277,
+            "attempts_per_native_attempt": 0.013246589729051215,
+            "other_counters": {
+              "metricID_UnwindPythonErrBadPyThreadStateCurrentAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrZeroThreadState": {
+                "delta": 3138714,
+                "per_attempt": 0.043650571081182706
+              },
+              "metricID_UnwindPythonErrBadThreadStateFrameAddr": {
+                "delta": 34222162,
+                "per_attempt": 0.47593279124276683
+              },
+              "metricID_UnwindPythonErrBadFrameObjectBackAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadFrameCodeObjectAddr": {
+                "delta": 56078,
+                "per_attempt": 0.0007798852412454794
+              },
+              "metricID_UnwindPythonZeroFrameCodeObject": {
+                "delta": 7,
+                "per_attempt": 9.73500604286593e-08
+              },
+              "metricID_UnwindPythonErrBadFrameLastInstructionAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadCodeObjectArgCountAddr": {
+                "delta": 85,
+                "per_attempt": 1.18210787663372e-06
+              },
+              "metricID_UnwindPythonErrBadCodeObjectKWOnlyArgCountAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadCodeObjectFlagsAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadCodeObjectFirstLineNumberAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadCFrameFrameAddr": {
+                "delta": 394581,
+                "per_attempt": 0.005487497742000116
+              },
+              "metricID_UnwindPythonErrNoProcInfo": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrBadAutoTlsKeyAddr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPythonErrReadThreadStateAddr": {
+                "delta": 34092480,
+                "per_attempt": 0.4741292840232655
+              },
+              "metricID_UnwindPythonErrReadTsdBase": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "PHP": {
+            "attempts": 69462847,
+            "frames": 125153136,
+            "frames_per_attempt": 1.801727706323353,
+            "attempts_per_native_attempt": 0.012796607528695648,
+            "other_counters": {
+              "metricID_UnwindPHPErrBadCurrentExecuteData": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPHPErrBadZendExecuteData": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPHPErrBadZendFunction": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindPHPErrBadZendOpline": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "Ruby": {
+            "attempts": 72371461,
+            "frames": 25030160,
+            "frames_per_attempt": 0.3458567735699021,
+            "attempts_per_native_attempt": 0.013332439177094245,
+            "other_counters": {
+              "metricID_UnwindRubyErrNoProcInfo": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadStackPtr": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadStackSize": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadCfp": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadEp": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadIseqBody": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadIseqEncoded": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindRubyErrReadIseqSize": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "V8": {
+            "attempts": 235005589,
+            "frames": 1077032420,
+            "frames_per_attempt": 4.583007683276843,
+            "attempts_per_native_attempt": 0.043293277188638055,
+            "other_counters": {
+              "metricID_UnwindV8ErrBadFP": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindV8ErrBadJSFunc": {
+                "delta": 2820,
+                "per_attempt": 1.1999714611042719e-05
+              },
+              "metricID_UnwindV8ErrBadCode": {
+                "delta": 0,
+                "per_attempt": 0.0
+              },
+              "metricID_UnwindV8ErrNoProcInfo": {
+                "delta": 0,
+                "per_attempt": 0.0
+              }
+            }
+          },
+          "Hotspot": {
+            "attempts": 0,
+            "frames": 0,
+            "frames_per_attempt": null,
+            "attempts_per_native_attempt": 0.0,
+            "other_counters": {
+              "metricID_UnwindHotspotErrNoCodeblob": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindHotspotErrInvalidCodeblob": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindHotspotErrInterpreterFP": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindHotspotErrInvalidRA": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindHotspotErrLrUnwindingMidTrace": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindHotspotUnsupportedFrameSize": {
+                "delta": 0,
+                "per_attempt": null
+              }
+            }
+          },
+          "Dotnet": {
+            "attempts": 0,
+            "frames": 0,
+            "frames_per_attempt": null,
+            "attempts_per_native_attempt": 0.0,
+            "other_counters": {
+              "metricID_UnwindDotnetErrNoProcInfo": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindDotnetErrBadFP": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindDotnetErrCodeHeader": {
+                "delta": 0,
+                "per_attempt": null
+              },
+              "metricID_UnwindDotnetErrCodeTooLarge": {
+                "delta": 0,
+                "per_attempt": null
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
