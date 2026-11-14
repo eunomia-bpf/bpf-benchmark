@@ -91,12 +91,18 @@ def analyse(args, phase, program_id):
                     continue
                 instructions.append((ip, line))
     offsets = [i[0] for i in instructions]
+    source_lines = sorted(target.get('lines', []), key=lambda line: line['address'])
+    source_addresses = [line['address'] for line in source_lines]
     observations = []
     for (base, offset, helper), row in sorted(sites.items(), key=lambda item: item[1]['zero_fill_leaf_samples'], reverse=True):
         ip = base+offset
         end = bisect.bisect_left(offsets, ip)
+        call_ip = offsets[end-1] if end else None
+        source_index = bisect.bisect_right(source_addresses, call_ip)-1 if call_ip is not None else -1
+        source = source_lines[source_index] if source_index >= 0 else None
         observations.append(dict(function_base=hex(base), return_offset=hex(offset), return_ip=hex(ip),
             return_is_instruction_boundary=end < len(offsets) and offsets[end] == ip, helper=helper,
+            nearest_captured_source_before_call=source,
             samples=row['samples'], zero_fill_leaf_samples=row['zero_fill_leaf_samples'],
             leaves=dict(row['leaves']), instructions_before_return=[line for _, line in instructions[max(0,end-14):end]]))
     result = dict(recorded=datetime.now(timezone.utc).isoformat(), phase=phase, program_id=program_id,
