@@ -233,3 +233,5 @@ KEPT incremental kprog_stock.o and source; raw run archives and logs retained.
 - 2026-11-14T07:23:46Z VERIFIED shared refresh: superseded runtime image sha256:66e9e88f197f975fd98f78f08be2eac3b7c313937e39a4cb2a45639d0615f2b8 already-absent; current sha256:2aed63ff946f379ffb613586eb9d52a9c0274e3a92b25b675748292c9163d12c; raw retained in /workspaces/kprog-raw/verified/20261114-recovery-private-refresh/canonical-refresh.
 
 - 2026-11-14T07:45:09Z LANE PERF planned: existing one-image corpus recipe removes only rebuildable /var/tmp/kprog-tmp/perf/probe-read-direct-timing/var-tmp/bpf-benchmark-docker.img after each OTel read-LTO timing run; raw/captures retained.
+
+- 2026-11-14 FORMAL: the first upstream `external/clean/test/lean/check.sh` run created and removed its temporary generated `export/Demo_generated.lean` copy. The generated content is retained at `/workspaces/kprog-raw/formal/m4-standard-c/demo-standalone-run.lean`; the original tracked fixture is unchanged. Clean `fee9302` now writes both test exports under `export/.lake/build/` and retains them. No raw evidence, canonical source, kernel, image or base was removed; this is not M6 legacy retirement.
