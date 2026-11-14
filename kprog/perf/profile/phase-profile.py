@@ -56,8 +56,11 @@ GUEST = r"""#!/bin/sh
 # ("failed to mmap file" at /var/tmp); the file is copied to the shared mount after
 # recording ends.
 set -u
-O=$1 APP=$2 SECS=$3 FREQ=$4 MANIFEST=$5
+O=$1 APP=$2 SECS=$3 FREQ=$4 MANIFEST=$5 EVENT=$6
 cd /workspaces/repository || exit 2
+if [ "$EVENT" != cpu-clock ]; then
+  /var/tmp/perf stat -e "$EVENT" -- true > "$O/profile-event-preflight.log" 2>&1 || exit 2
+fi
 echo 0 > /proc/sys/kernel/kptr_restrict
 echo 1 > /proc/sys/net/core/bpf_jit_kallsyms
 echo "phase-profile: kptr_restrict=$(cat /proc/sys/kernel/kptr_restrict) \
@@ -77,7 +80,7 @@ for ph in baseline post_rejit; do
     sleep 2
   done
   echo "phase-profile: perf start $ph $(date -u +%FT%TZ)" >> "$O/phase-profile.log"
-  /var/tmp/perf record -a -g -e cpu-clock -F "$FREQ" -o "/dev/shm/$ph.data" \
+  /var/tmp/perf record -a -g -e "$EVENT" -F "$FREQ" -o "/dev/shm/$ph.data" \
     >> "$O/phase-profile.log" 2>&1 &
   P=$!
   for _ in $(seq 1 300); do
@@ -134,7 +137,7 @@ def run(args: argparse.Namespace) -> int:
         "--disable-monitor", "--cpus", str(args.vcpus), "--memory", args.memory,
         "--append", "loglevel=4 panic=30 oops=panic",
         "--exec", f"/var/tmp/phase-profile-guest.sh /var/tmp/out {args.app} {args.seconds} "
-                  f"{args.freq} {manifest}",
+                  f"{args.freq} {manifest} {args.event}",
     ]
     if args.persist_output:
         command[command.index("--exec"):command.index("--exec")] = ["--rwdir", str(out)]
@@ -143,7 +146,8 @@ def run(args: argparse.Namespace) -> int:
         (var_tmp / "out").mkdir(exist_ok=True)
     (out / "command.json").write_text(
         json.dumps({"command": command, "app": args.app, "seconds": args.seconds,
-                    "freq": args.freq, "cpus": args.cpus, "vcpus": args.vcpus},
+                    "freq": args.freq, "event": args.event,
+                    "cpus": args.cpus, "vcpus": args.vcpus},
                    indent=2, sort_keys=True) + "\n", encoding="utf-8")
     log = (out / "host.log").open("w", encoding="utf-8")
     completed = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT)
@@ -265,6 +269,8 @@ def main(argv: list[str]) -> int:
     run_parser.add_argument("--vcpus", default="4")
     run_parser.add_argument("--memory", default="32G")
     run_parser.add_argument("--freq", default="999")
+    run_parser.add_argument("--event", default="cpu-clock",
+                            help="perf event; cycles:k can sample interrupt-context BPF work")
     run_parser.add_argument("--limit", type=int, default=25)
     run_parser.add_argument("--annotate", type=int, default=3)
     run_parser.add_argument("--out", default="")

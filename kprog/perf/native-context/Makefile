@@ -149,9 +149,16 @@ OTEL_PROFILE_CAPTURE ?= $(ROOT)/corpus/results/perf-otel-profile-20261114
 OTEL_PROFILE_MANIFEST ?= $(ROOT)/corpus/results/perf-otel-upstream-20261114/manifest-context.json
 PROFILE_TOOL_BUILD ?= /var/tmp/kprog-tmp/perf/profile-tool
 PROFILE_PERF_SOURCE ?= /workspaces/kprog-raw/perf/20261113-loader-cpu-profile/tool/perf
+OTEL_PROFILE_EVENT ?= cpu-clock
 .PHONY: profile-tool otel-profile otel-profile-report profile-tool-check
 profile-tool-check:
 	python3 -m unittest discover -s $(ROOT)/kprog/perf/profile -p test_perf_selection.py
+	python3 -m unittest discover -s $(ROOT)/kprog/perf/profile -p test_window_costs.py
+
+.PHONY: otel-profile-costs
+OTEL_PROFILE_OBSERVATION ?= /workspaces/kprog-raw/perf/20261114-otel-profile/counter-observation.json
+otel-profile-costs:
+	python3 $(ROOT)/kprog/perf/profile/window-costs.py $(OTEL_PROFILE_RAW) --observation $(OTEL_PROFILE_OBSERVATION) --perf $(PROFILE_TOOL_BUILD)/perf
 
 otel-profile-report:
 	python3 $(ROOT)/kprog/perf/profile/phase-profile.py report $(OTEL_PROFILE_RAW) --annotate 0 --perf $(PROFILE_TOOL_BUILD)/perf
@@ -163,7 +170,7 @@ profile-tool:
 
 otel-profile: profile-tool
 	env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(OTEL_PROFILE_CAPTURE) EQCODEX_PROGRESS_LOG=/var/tmp/out/guest.log EQCODEX_NATIVE_LINK_BINARY=$(LINK_MEMORY_PAYLOAD)/native-link-on \
-		python3 $(ROOT)/kprog/perf/profile/phase-profile.py run --app otelcol-ebpf-profiler/profiling --seconds 45 --cpus 16-19 --vcpus 4 --memory 32G --freq 199 --out $(OTEL_PROFILE_RAW) --annotate 0 --manifest $(OTEL_PROFILE_MANIFEST) --state-root /var/tmp/kprog-tmp/perf/phase-profile --perf $(PROFILE_TOOL_BUILD)/perf --persist-output
+		python3 $(ROOT)/kprog/perf/profile/phase-profile.py run --app otelcol-ebpf-profiler/profiling --seconds 45 --cpus 16-19 --vcpus 4 --memory 32G --freq 199 --out $(OTEL_PROFILE_RAW) --annotate 0 --manifest $(OTEL_PROFILE_MANIFEST) --state-root /var/tmp/kprog-tmp/perf/phase-profile --perf $(PROFILE_TOOL_BUILD)/perf --persist-output --event $(OTEL_PROFILE_EVENT)
 
 .PHONY: memory-host-bench
 memory-host-bench:

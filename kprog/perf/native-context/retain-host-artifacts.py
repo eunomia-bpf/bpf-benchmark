@@ -18,6 +18,7 @@ def main():
     parser.add_argument('--raw', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--protocol', required=True)
+    parser.add_argument('--scope', default='Host compiler/replay artifacts only; no kernel submission, native installation or application equal-work claim.')
     parser.add_argument('--build', type=Path)
     parser.add_argument('--input', action='append', type=Path, default=[])
     parser.add_argument('--report', action='append', type=Path, default=[])
@@ -46,7 +47,7 @@ def main():
                 files += 1
     result = dict(recorded_at=datetime.now(timezone.utc).isoformat(), protocol_commit=args.protocol,
                   raw=str(args.raw), inputs=inputs, reports=reports,
-                  scope='Host compiler/replay artifacts only; no kernel submission, native installation or application equal-work claim.',
+                  scope=args.scope,
                   archive=dict(path=str(archive), bytes=archive.stat().st_size, sha256=digest(archive), files_byte_compared=files))
     with args.output.open('x') as output:
         json.dump(result, output, indent=2)
