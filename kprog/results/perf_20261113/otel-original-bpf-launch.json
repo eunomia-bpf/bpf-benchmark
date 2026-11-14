@@ -1,0 +1,20 @@
+{
+  "recorded_at": "2026-11-14T00:43:07Z",
+  "source_commit": "9b96606cf",
+  "outer_pid": 90626,
+  "raw": "/workspaces/kprog-raw/perf/20261114-otel-original-bpf",
+  "output": "/var/tmp/kprog-tmp/perf/otel-upstream-all",
+  "workers": 4,
+  "per_process_as_bytes": 17179869184,
+  "cpus": "16-19",
+  "image_lock": "shared",
+  "unit_count": 16,
+  "original_recipe": "Unchanged upstream x86 C frontend FLAGS -> llvm-link in sorted upstream unit order -> llc -march=bpf -mcpu=v2 -> strip debug.",
+  "reference": {
+    "path": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.amd64",
+    "bytes": 2419520,
+    "sha256": "8e9a95e69b663b96050c39f77c96e02c6b2f3bdbd1b38987d7b56039e09dba85"
+  },
+  "scope": "Launch only. Build all original units including integration_test omitted by the older native overlay. Record every compiler/backend failure and final original-BPF comparison; no native translation, install, equal-work result or postlaunch polling.",
+  "outcome": null
+}

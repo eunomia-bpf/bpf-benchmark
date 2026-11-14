@@ -1,0 +1,136 @@
+{
+  "recorded_at": "2026-11-14T00:43:06.983386+00:00",
+  "protocol_commit": "9b96606cf",
+  "raw": "/workspaces/kprog-raw/perf/20261114-otel-upstream-frontend",
+  "inputs": [],
+  "reports": [
+    {
+      "path": "/var/tmp/kprog-tmp/perf/otel-upstream/native_stack_trace.json",
+      "sha256": "3ccb8bf790a9bd36dcefd429e6ac112098c6c8d4563cdf142b3abe8c9b945a3a",
+      "data": {
+        "unit": "native_stack_trace",
+        "source": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/native_stack_trace.ebpf.c",
+        "source_sha256": "31b833fa4ef6ba30450e2201f79d786b6d378889de959af2dee10b55162921e5",
+        "makefile_sha256": "b1e250a779e95677ce26a8ffcb4bfde83432227f71fabd4a07997c15e9c55fc6",
+        "flags_command": [
+          "make",
+          "-s",
+          "--no-print-directory",
+          "-C",
+          "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf",
+          "-f",
+          "/workspaces/repository/kprog/perf/native-context/otel-flags.mk",
+          "DEPS=",
+          "TARGET_ARCH=amd64",
+          "OTEL_SOURCE=native_stack_trace.ebpf.c",
+          "flags"
+        ],
+        "flags": [
+          "-target",
+          "x86_64-linux-gnu",
+          "-g",
+          "-fno-jump-tables",
+          "-nostdlib",
+          "-nostdinc",
+          "-ffreestanding",
+          "-O2",
+          "-emit-llvm",
+          "-c",
+          "native_stack_trace.ebpf.c",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-Wno-address-of-packed-member",
+          "-Wno-unused-label",
+          "-Wno-sign-compare",
+          "-fno-stack-protector",
+          "-D__SOURCE_DATE_EPOCH__=0",
+          "-Xclang",
+          "-fdebug-prefix-map=/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf=.",
+          "-Xclang",
+          "-fmacro-prefix-map=/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf=."
+        ],
+        "frontend_command": [
+          "clang-18",
+          "-target",
+          "x86_64-linux-gnu",
+          "-g",
+          "-fno-jump-tables",
+          "-nostdlib",
+          "-nostdinc",
+          "-ffreestanding",
+          "-O2",
+          "-emit-llvm",
+          "-c",
+          "native_stack_trace.ebpf.c",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-Wno-address-of-packed-member",
+          "-Wno-unused-label",
+          "-Wno-sign-compare",
+          "-fno-stack-protector",
+          "-D__SOURCE_DATE_EPOCH__=0",
+          "-Xclang",
+          "-fdebug-prefix-map=/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf=.",
+          "-Xclang",
+          "-fmacro-prefix-map=/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf=.",
+          "-MMD",
+          "-MP",
+          "-MF",
+          "/var/tmp/kprog-tmp/perf/otel-upstream/native_stack_trace.d",
+          "-o",
+          "/var/tmp/kprog-tmp/perf/otel-upstream/native_stack_trace.bc"
+        ],
+        "cwd": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf",
+        "scope": "Unchanged upstream frontend IR only; final linked BPF reference comparison and native translation are separate steps.",
+        "returncode": 0,
+        "dependencies": [
+          {
+            "path": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/native_stack_trace.ebpf.c",
+            "sha256": "31b833fa4ef6ba30450e2201f79d786b6d378889de959af2dee10b55162921e5"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/bpfdefs.h",
+            "sha256": "bf547d7efe28be91a713516f70aff4d430472aefe9592e723a6adfebf435448d"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/kernel.h",
+            "sha256": "d84a78ec6b92dc0bd387dec0d7244afe69ca9abdfc3b9290a9650413e929619c"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/frametypes.h",
+            "sha256": "d26e84f1e6209cc0a73376a26ad1e22739db55848d7936d729cd9a3c66e4b14b"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/stackdeltatypes.h",
+            "sha256": "c7b507103aa8da1cabf140f0e090f2e57ca4a5ae8276eed25e63a052b34ddb13"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracemgmt.h",
+            "sha256": "692941f260c556f21b6eb0a4b2e508366a25776f282ed9d1421b13b9c380bdd8"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/errors.h",
+            "sha256": "900072dc94ec0ded7d0685159fae050eead732f9e9709474ab37dff1b243415d"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/extmaps.h",
+            "sha256": "1750b0c33b5fa450652ee4397db8d0ede5bd60a4b986a02c054c1bfb791ef5ad"
+          },
+          {
+            "path": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/types.h",
+            "sha256": "6a39f6fb9571cccf7a97275f14a4c506d1a32c0865c398eaa90976a8baf3470f"
+          }
+        ]
+      }
+    }
+  ],
+  "scope": "Host compiler/replay artifacts only; no kernel submission, native installation or application equal-work claim.",
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/perf_20261113/otel-upstream-frontend.tar.gz",
+    "bytes": 196324,
+    "sha256": "5be8a6911a6693f6ea1c69f6f613e1ad77ebe9d756012e752b54f49a657be344",
+    "files_byte_compared": 11
+  }
+}
