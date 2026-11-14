@@ -1,0 +1,10 @@
+make: Entering directory '/workspaces/repository/kprog/libnativeloader'
+install -d "/workspaces/kprog-raw/verified/20261114-source-maps/kernel"
+install -m 0755 "/var/tmp/kprog-tmp/verified/source-maps/source-maps" "/workspaces/kprog-raw/verified/20261114-source-maps/kernel/source-maps"
+install -m 0644 "/var/tmp/kprog-tmp/verified/source-maps/fixture.bpf.o" "/var/tmp/kprog-tmp/verified/source-maps/fixture.native.o" "/workspaces/kprog-raw/verified/20261114-source-maps/kernel/"
+install -m 0755 "/var/tmp/kprog-tmp/verified/direct-tail/cargo/debug/native-link" "/workspaces/kprog-raw/verified/20261114-source-maps/kernel/native-link.real"
+taskset -c 14 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+	--cwd "/workspaces/repository" --rwdir "/workspaces/repository" --rwdir "/workspaces/kprog-raw/verified/20261114-source-maps/kernel" --overlay-rwdir /tmp \
+	--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+	--exec 'make -C kprog/libnativeloader guest-source-maps SOURCE_MAP_KERNEL_OUTPUT=/workspaces/kprog-raw/verified/20261114-source-maps/kernel'
+make: Leaving directory '/workspaces/repository/kprog/libnativeloader'

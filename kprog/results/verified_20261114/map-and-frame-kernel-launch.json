@@ -1,0 +1,42 @@
+{
+  "recorded": "2026-11-14T02:52:49Z",
+  "code_commit": "8958ff36c8716ec6c45566564c48ae91af195def",
+  "kernel_commit": "74d1097af56132da2b325699c5a560b29a790ff2",
+  "image": "bpf-benchmark/kprog:current",
+  "image_digest": "0bb7d4be1f0a9c4bb015ee20d14fb9ba26e56da9f84310a501257ae5376e084c",
+  "image_lock": "shared /workspaces/.agent-state/kprog-lanes/locks/image",
+  "canonical_changed": false,
+  "jobs": [
+    {
+      "name": "frame-pointer execution retry2",
+      "launcher_pid": 137347,
+      "cpus": "13",
+      "guest_memory": "2G",
+      "host_address_space_kib": 8388608,
+      "launch_directory": "/workspaces/kprog-raw/verified/20261114-frame-pointer/retry2/launch",
+      "output_directory": "/workspaces/kprog-raw/verified/20261114-frame-pointer/retry2/kernel",
+      "make_target": "tail-frame-kvm",
+      "expected_execution": "Actual stock/native TEST_RUN return2 and tail count34; pending, no result collected"
+    },
+    {
+      "name": "original-load map identity",
+      "launcher_pid": 137348,
+      "cpus": "14",
+      "guest_memory": "2G",
+      "host_address_space_kib": 8388608,
+      "launch_directory": "/workspaces/kprog-raw/verified/20261114-source-maps/kernel-launch",
+      "output_directory": "/workspaces/kprog-raw/verified/20261114-source-maps/kernel",
+      "make_target": "source-maps-kvm",
+      "expected_execution": "Mutable actual source map29/73 -> stock/native58/146 despite logical decoy11; pending, no result collected"
+    }
+  ],
+  "artifacts": {
+    "kprog/test/tail_call_frame/client.cpp": "15cd9330efd37fdcf36b102fae7785b5a0553e83cf13b34ad8b5700071153aaf",
+    "kprog/libnativeloader/src/native_loader_source_maps.hpp": "23134177d0c5e3b7031d14292082a61c86b001347f71e250aa6b96c2d09b9f24",
+    "/var/tmp/kprog-tmp/verified/source-maps/source-maps": "e26b873895b2f0c2c1bb08bcf2f4891c70dab9a288498d7e86571e31777fff19",
+    "/var/tmp/kprog-tmp/verified/frame-pointer/client": "21cb9895856090292b27a5256c6dd21eca7a94c73e711ececd4acfc85641dd55",
+    "/var/tmp/kprog-tmp/verified/direct-tail/cargo/debug/native-link": "1d144785ca76bb0c6637d681afd7a244771cabc53254da892e4f6207cdf89802",
+    "/workspaces/kprog-raw/verified/20261114-frame-pointer/retry2/launch/dry-run.log": "62b870bf9fdfe420838c6bbd582b78cefd285427b0c9bfa03d8d84c0749e0f8b",
+    "/workspaces/kprog-raw/verified/20261114-source-maps/kernel-launch/dry-run.log": "b10686d15d795e2addb22fae6cfc75bca5e4f92de0f8c3ee7ec56660f29d8fd0"
+  }
+}

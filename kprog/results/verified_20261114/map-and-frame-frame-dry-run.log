@@ -1,0 +1,10 @@
+make: Entering directory '/workspaces/repository/kprog/libnativeloader'
+install -d "/workspaces/kprog-raw/verified/20261114-frame-pointer/retry2/kernel"
+install -m 0755 "/var/tmp/kprog-tmp/verified/frame-pointer/client" "/workspaces/kprog-raw/verified/20261114-frame-pointer/retry2/kernel/client"
+install -m 0644 "/var/tmp/kprog-tmp/verified/frame-pointer/source.bpf.o" "/var/tmp/kprog-tmp/verified/frame-pointer/frame.native.o" "/workspaces/kprog-raw/verified/20261114-frame-pointer/retry2/kernel/"
+install -m 0755 "/var/tmp/kprog-tmp/verified/direct-tail/cargo/debug/native-link" "/workspaces/kprog-raw/verified/20261114-frame-pointer/retry2/kernel/native-link.real"
+taskset -c 13 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+	--cwd "/workspaces/repository" --rwdir "/workspaces/repository" --rwdir "/workspaces/kprog-raw/verified/20261114-frame-pointer/retry2/kernel" --overlay-rwdir /tmp \
+	--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+	--exec 'make -C kprog/libnativeloader guest-tail-frame FRAME_OUTPUT=/workspaces/kprog-raw/verified/20261114-frame-pointer/retry2/kernel FRAME_LINKER=/workspaces/kprog-raw/verified/20261114-frame-pointer/retry2/kernel/native-link.real'
+make: Leaving directory '/workspaces/repository/kprog/libnativeloader'
