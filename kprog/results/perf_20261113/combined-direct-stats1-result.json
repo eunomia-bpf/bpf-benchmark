@@ -1,0 +1,125 @@
+{
+  "recorded_at": "2026-11-14T09:49:53.793623+00:00",
+  "outer_pid": 349398,
+  "outer_job_status": "STATS0_STILL_RUNNING",
+  "stats": 1,
+  "run": "corpus/results/x86_kvm_corpus_20261114_092117_209123",
+  "application_status": "ok",
+  "samples": 3,
+  "seconds": 180,
+  "workload_errors": 0,
+  "stats_ON_throughput_native_over_BPF": 0.9428891410869389,
+  "BPF_ops_per_sample": [
+    83346020.77337329,
+    77069938.7537505,
+    78471590.86320059
+  ],
+  "native_ops_per_sample": [
+    71186077.0193581,
+    73990010.90872888,
+    76278636.68826512
+  ],
+  "paired_throughput": [
+    0.8541028876821921,
+    0.9600372350773181,
+    0.9720541644331074
+  ],
+  "BPF_ns_per_invocation": 2362.00958832247,
+  "native_ns_per_invocation": 2728.9608953948555,
+  "per_invocation_speedup": 0.8655344209249686,
+  "native_replacements": 13,
+  "no_BPF_reference": null,
+  "counter_windows": [
+    {
+      "phase": "baseline",
+      "first": "baseline-0021",
+      "last": "baseline-0080",
+      "map_id": 53,
+      "seconds": 527.119685,
+      "measurement_seconds": 541.7498,
+      "native_attempts_per_second": 10314939.60427602,
+      "interpreter_dispatch_per_native_attempt": 0.238865314160616,
+      "families": {
+        "Native": {
+          "frames_per_attempt": 0.923458328095159,
+          "attempts_per_native_attempt": 1.0
+        },
+        "Perl": {
+          "frames_per_attempt": 0.0,
+          "attempts_per_native_attempt": 0.01337098338167866
+        },
+        "Python": {
+          "frames_per_attempt": 0.0,
+          "attempts_per_native_attempt": 0.01308443538100144
+        },
+        "PHP": {
+          "frames_per_attempt": 1.8013895881014081,
+          "attempts_per_native_attempt": 0.01341336506214385
+        },
+        "Ruby": {
+          "frames_per_attempt": 0.3464342482875494,
+          "attempts_per_native_attempt": 0.013149007863496714
+        },
+        "V8": {
+          "frames_per_attempt": 4.5858438481325425,
+          "attempts_per_native_attempt": 0.04323203422071213
+        },
+        "Hotspot": {
+          "frames_per_attempt": null,
+          "attempts_per_native_attempt": 0.0
+        },
+        "Dotnet": {
+          "frames_per_attempt": null,
+          "attempts_per_native_attempt": 0.0
+        }
+      }
+    },
+    {
+      "phase": "post_rejit",
+      "first": "post_rejit-0101",
+      "last": "post_rejit-0161",
+      "map_id": 1066,
+      "seconds": 534.506735,
+      "measurement_seconds": 542.0824309999999,
+      "native_attempts_per_second": 10282545.895329082,
+      "interpreter_dispatch_per_native_attempt": 0.24097952340785836,
+      "families": {
+        "Native": {
+          "frames_per_attempt": 0.9234716250283319,
+          "attempts_per_native_attempt": 1.0
+        },
+        "Perl": {
+          "frames_per_attempt": 0.0,
+          "attempts_per_native_attempt": 0.013223007183364492
+        },
+        "Python": {
+          "frames_per_attempt": 0.0,
+          "attempts_per_native_attempt": 0.01336858649430196
+        },
+        "PHP": {
+          "frames_per_attempt": 1.8020163195557268,
+          "attempts_per_native_attempt": 0.012936999859926239
+        },
+        "Ruby": {
+          "frames_per_attempt": 0.34327498641206516,
+          "attempts_per_native_attempt": 0.013334469149273038
+        },
+        "V8": {
+          "frames_per_attempt": 4.583236009510898,
+          "attempts_per_native_attempt": 0.04377730141092517
+        },
+        "Hotspot": {
+          "frames_per_attempt": null,
+          "attempts_per_native_attempt": 0.0
+        },
+        "Dotnet": {
+          "frames_per_attempt": null,
+          "attempts_per_native_attempt": 0.0
+        }
+      }
+    }
+  ],
+  "kernel_end_log_sha256": "86207982487643baac813f03ecec9ed867605fbf7ff964deaa17e218c818d4b3",
+  "raw": "/workspaces/kprog-raw/perf/20261114-combined-direct-timing",
+  "scope": "Read/hash/LPM direct-native on original same-source context manifest/frozen workload. StatsON result retained, not primary statsOFF throughput target. Same-generation windows inside actual shim measurement intervals; partial coverage/family mix observational, no new admission gate. Concurrent inheritedTracee270915 guest remains, effectUNKNOWN. No1.20/floor/full-six acceptance."
+}
