@@ -59,6 +59,7 @@ VERIFIED_APP_PREFIX ?= $(REPO_ROOT)/kprog/results/verified_20261114/integrated-b
 VERIFIED_APP_EXIT_FILE ?= exit-code
 MAP_BOUNDS_CLASS_WORKLIST ?= $(REPO_ROOT)/kprog/results/verified_20261114/map-bounds-class-triage.json
 MAP_BOUNDS_CLASS_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-map-bounds-class/native-evidence
+CLASS_INSPECT_ARGS ?=
 KFUNC_BUILD ?= /var/tmp/kprog-tmp/verified/kfunc
 KFUNC_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/host
 KFUNC_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/kernel
@@ -402,7 +403,7 @@ shared-image-restore:
 .PHONY: resident-census-checkpoint resident-census-publish resident-census-publish-test verified-app-collect verified-app-collect-test
 .PHONY: map-bounds-class-inspect
 map-bounds-class-inspect:
-	python3 ../test/inspect_map_bounds_class.py --worklist "$(MAP_BOUNDS_CLASS_WORKLIST)" --output "$(MAP_BOUNDS_CLASS_OUTPUT)"
+	python3 ../test/inspect_map_bounds_class.py --worklist "$(MAP_BOUNDS_CLASS_WORKLIST)" --output "$(MAP_BOUNDS_CLASS_OUTPUT)" $(CLASS_INSPECT_ARGS)
 
 verified-app-collect:
 	python3 ../test/collect_verified_app.py --raw "$(VERIFIED_APP_RAW)" --corpus "$(VERIFIED_APP_CORPUS)" \

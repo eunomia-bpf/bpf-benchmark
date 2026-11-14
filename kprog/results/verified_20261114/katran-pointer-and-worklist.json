@@ -1,0 +1,11 @@
+{
+  "scope": "All failed service requests in the completed Katran verified startup",
+  "requests": [
+    {
+      "application": "katran",
+      "body_group": 1,
+      "archive": "/workspaces/kprog-raw/verified/20261114-integrated-katran/control/service.tar.gz",
+      "member": "service/requests/1.failure.tar.gz"
+    }
+  ]
+}
