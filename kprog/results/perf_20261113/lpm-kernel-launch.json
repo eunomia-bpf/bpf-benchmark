@@ -89,6 +89,47 @@
     "raw": "/workspaces/kprog-raw/perf/20261114-combined-lto-preflight",
     "direct": "Existing probe-read-otel-timing target with RUNTIME_PROBE_PAYLOAD=LPM payload;3x180statsON/OFF and separate observer dirs.",
     "checked": "Existing probe-read-otel-lto target with same payload override;1x10statsON wholeapp diagnosis, actual checked C/native afterverification. Large compiler retry333934 remains separate.",
-    "state": "DRYRUN0 only, no wholeapp queued/launched; wait for actual LPM component collection and resource ordering."
+    "state": "DIRECT_QUEUED_RESOURCE_ONLY; checked plan dryrun0 only, no checked wholeapp launch this turn.",
+    "direct_launch": {
+      "recorded_at": "2026-11-14T09:19:11.572375+00:00",
+      "pid": 349398,
+      "status": "LAUNCHED_RESOURCE_ORDERED_UNCOLLECTED_NO_POSTLAUNCH_POLLS",
+      "wait_pid": 346772,
+      "wait_reason": "Only resource order after own ARRAY diagnostic natural exit; no dependency success gate. ARRAY waits own LPM342222.",
+      "raw": "/workspaces/kprog-raw/perf/20261114-combined-direct-timing",
+      "capture": "corpus/results/perf-combined-direct-timing-20261114",
+      "state": "/var/tmp/kprog-tmp/perf/combined-direct-timing",
+      "configuration": "direct-native machine-code LTO",
+      "features": [
+        "read",
+        "hash",
+        "LPM"
+      ],
+      "runtime_array_shared": false,
+      "stats": [
+        1,
+        0
+      ],
+      "samples": 3,
+      "seconds": 180,
+      "cpus": "0-7",
+      "vcpus": 8,
+      "memory": "64G",
+      "address_space_bytes": 85899345920,
+      "locks": [
+        "timing exclusive per stats arm",
+        "image shared after timing"
+      ],
+      "inputs": {
+        "corpus/results/perf-lpm-lto-linker-20261114/native-link.real": "22bd4810d9a0667f90973fb8cd70a602c4c355c03b1626799522d2dd5eb316d6",
+        "corpus/results/perf-lpm-lto-linker-20261114/native-link-on": "2b80231a478f500400dacce9dcabfe756db6471f0b618b170e86e84dbbcbd610",
+        "corpus/results/perf-lpm-lto-linker-20261114/runtime-probe-read-layout.json": "75a971bd496f290b1763efcfe2f78b74e80d2c8bd3c7c064308337fe5026f12e",
+        "corpus/results/perf-lpm-lto-linker-20261114/runtime-hash-layout.json": "971f96e6e983c1272ef2daf2ce23eeda165ae87d914c398a2ee62870b23b432b",
+        "corpus/results/perf-lpm-lto-linker-20261114/runtime-lpm-layout.json": "ea1bd0f3ed6be89836d5aaf3c4ca98117266ed60b4cebd2806c66b3764303272",
+        "corpus/results/perf-otel-upstream-20261114/manifest-context.json": "430b26ab4be8fd501a819f48c0451895d86bf90606533958a05639ac8a51573f"
+      },
+      "component_state": "Hash4608 actual executionPASS; LPM3360 planned, waiting timing lock atcollection; sharedARRAY8planned queuedafterLPM. No component result implied by this launch.",
+      "caveats": "Existing owner Tracee guest and compiler333934 may overlap; retain actual concurrency caveat. Frozen workload unchanged; native throughput/perinv/counters/noBPF missing values stay NA, no admission gates."
+    }
   }
 }
