@@ -17,9 +17,9 @@ make_args=(
     "SERVICE_RUN=python3 $repo_root/kprog/test/verified_corpus.py $app ${SAMPLES:-1} ${WORKLOAD_DURATION:-10} ${BPFREJIT_CORPUS_BPF_STATS:-1}"
     -j1
 )
-printf '%q ' taskset -c 8-19 make "${make_args[@]}" > "$run_dir/make-command.txt"
+printf '%q ' taskset -c 8-15 make "${make_args[@]}" > "$run_dir/make-command.txt"
 printf '\n' >> "$run_dir/make-command.txt"
 status=0
-taskset -c 8-19 make "${make_args[@]}" 2>&1 | tee "$run_dir/corpus.log" >/dev/null || status=$?
+taskset -c 8-15 make "${make_args[@]}" 2>&1 | tee "$run_dir/corpus.log" >/dev/null || status=$?
 printf '%s\n' "$status" > "$run_dir/exit-code"
 exit "$status"
