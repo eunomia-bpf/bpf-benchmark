@@ -85,7 +85,10 @@ def main():
                 samples.append(dict(argument=argument, configured=configured, actual=actual, expected=expected))
         del function
         image.close()
-        records.append(dict(entry=entry, samples=samples, maps=map_names))
+        record = dict(entry=entry, samples=samples, maps=map_names)
+        records.append(record)
+        with (args.output / 'outcomes.jsonl').open('a') as journal:
+            journal.write(json.dumps(record) + '\n')
 
     reference = link(args.reference, 'plain_entry', 'plain-reference')
     plain = args.output / 'plain_entry'

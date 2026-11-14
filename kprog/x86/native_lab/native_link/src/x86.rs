@@ -280,7 +280,7 @@ fn find_symbol_in_section_at_address(
         ) {
             continue;
         }
-        if sym.section_index()? != section_index {
+        if sym.section_index() != Some(section_index) {
             continue;
         }
         let addr = sym.address();
@@ -318,7 +318,7 @@ fn find_text_symbol_in_section_at_address(
         if sym.kind() != object::SymbolKind::Text {
             continue;
         }
-        if sym.section_index()? != section_index {
+        if sym.section_index() != Some(section_index) {
             continue;
         }
         let addr = sym.address();
@@ -2840,6 +2840,24 @@ struct X86EntryAbiStrip {
     tail_call_bpf_rbp_is_live: bool,
 }
 
+fn x86_frame_pointer_prologue(insns: &[Instruction]) -> Option<(Vec<Register>, u64)> {
+    let mut saved = Vec::new();
+    let mut frame_pointer = false;
+    let mut cursor = 0;
+    for insn in insns {
+        if let Some(reg) = x86_saved_push_reg(insn) {
+            saved.push(reg);
+        } else if x86_mov_gpr64_to_gpr64(insn) == Some((Register::RBP, Register::RSP))
+            && saved.contains(&Register::RBP) {
+            frame_pointer = true;
+        } else if insn.mnemonic() != Mnemonic::Endbr64 {
+            break;
+        }
+        cursor += 1;
+    }
+    frame_pointer.then(|| (saved, insns.get(cursor).and_then(x86_sub_rsp_imm).unwrap_or(0)))
+}
+
 fn plan_x86_entry_abi_strip(
     bytes: &[u8],
     base_ip: u64,
@@ -2866,6 +2884,14 @@ fn plan_x86_entry_abi_strip(
             u64::try_from(bytes.len()).map_err(|_| anyhow!("x86 symbol size exceeds u64"))?,
         )
         .ok_or_else(|| anyhow!("x86 symbol end address overflow"))?;
+
+    if let Some((saved, stack_alloc)) = x86_frame_pointer_prologue(&insns) {
+        // Keep frame-pointer saves in their native frame. Removing/renaming
+        // them would move rbp-relative locals. The tail helper must recover
+        // the original BPF RBP below every later save and the local allocation.
+        return x86_tail_call_frame_or_default(bytes, base_ip, &insns, &saved,
+            stack_alloc, require_tail_call_frame, symbol_end, proof_return_jmp_target);
+    }
 
     let mut prologue_regs: Vec<Register> = Vec::new();
     let mut prologue_local_ips: Vec<u64> = Vec::new();
@@ -3147,6 +3173,15 @@ fn plan_x86_tail_call_frame(
         let mut cursor = idx;
         while cursor > 0 {
             let prev = &insns[cursor - 1];
+            if prev.mnemonic() == Mnemonic::Leave && prologue_set.contains(&Register::RBP) {
+                seen.insert(Register::RBP);
+                cursor -= 1;
+                continue;
+            }
+            if x86_mov_gpr64_to_gpr64(prev) == Some((Register::RSP, Register::RBP)) {
+                cursor -= 1;
+                continue;
+            }
             let Some(reg) = x86_saved_pop_reg(prev) else {
                 break;
             };
@@ -4516,6 +4551,82 @@ mod tests {
             expected.extend_from_slice(&[0xe9, 0, 0, 0, 0]); // Canonical entry exit in proof mode.
             assert_eq!(output.blob, expected);
             assert_eq!(output.callee_saved_mask, if preserve { 0 } else { 1 });
+        }
+        Ok(())
+    }
+
+    #[test]
+    #[cfg(target_arch = "x86_64")]
+    fn frame_pointer_tail_cleanup_recovers_original_bpf_frame_and_restores_stack() -> Result<()> {
+        // Regression for push rbp; mov rbp,rsp; more saves; sub rsp,216.
+        // The old prefix scan stopped at MOV and read [rsp+0] as BPF RBP.
+        // Exercise the production slot and cleanup in executable code, with
+        // a sentinel at the same negative offset used by tail-count recovery.
+        unsafe extern "C" {
+            fn mmap(address: *mut std::ffi::c_void, length: usize, protection: i32,
+                flags: i32, fd: i32, offset: isize) -> *mut std::ffi::c_void;
+            fn mprotect(address: *mut std::ffi::c_void, length: usize, protection: i32) -> i32;
+            fn munmap(address: *mut std::ffi::c_void, length: usize) -> i32;
+        }
+        for cet in [false, true] {
+            for more_saves in [false, true] {
+                for allocation in [0u32, 216, 408] {
+                    for epilogue in 0..3 {
+                        let mut prefix = Vec::new();
+                        if cet { prefix.extend_from_slice(&[0xf3,0x0f,0x1e,0xfa]); }
+                        prefix.extend_from_slice(&[0x55,0x48,0x89,0xe5]);
+                        if more_saves { prefix.extend_from_slice(&[0x41,0x57,0x41,0x56,0x41,0x55,0x41,0x54,0x53]); }
+                        if allocation != 0 {
+                            prefix.extend_from_slice(&[0x48,0x81,0xec]);
+                            prefix.extend_from_slice(&allocation.to_le_bytes());
+                        }
+                        let mut cleanup = Vec::new();
+                        if allocation != 0 {
+                            cleanup.extend_from_slice(&[0x48,0x81,0xc4]);
+                            cleanup.extend_from_slice(&allocation.to_le_bytes());
+                        }
+                        if more_saves { cleanup.extend_from_slice(&[0x5b,0x41,0x5c,0x41,0x5d,0x41,0x5e,0x41,0x5f]); }
+                        match epilogue {
+                            0 => cleanup.push(0x5d),
+                            1 => cleanup.push(0xc9), // leave
+                            _ => cleanup.extend_from_slice(&[0x48,0x89,0xec,0x5d]),
+                        }
+                        let mut source = prefix.clone();
+                        source.extend_from_slice(&cleanup);
+                        source.push(0xc3);
+                        for preserve in [false, true] {
+                            let plan = plan_x86_entry_abi_strip(&source, 0, true, None, preserve)?;
+                            assert!(plan.drop_local_ips.is_empty() && plan.register_renames.is_empty());
+                            assert_eq!(plan.callee_saved_mask, 0);
+                            assert!(!plan.tail_call_bpf_rbp_is_live);
+                            let offset = allocation as i32 + if more_saves { 40 } else { 0 };
+                            assert_eq!(plan.tail_call_bpf_rbp_rsp_offset, Some(offset));
+                            assert_eq!(plan.tail_call_cleanup_bytes, cleanup);
+
+                            // Save the host RBP, install the incoming BPF frame
+                            // in RBP, run the real native prologue and planned
+                            // recovery/cleanup, then restore the host RBP.
+                            let mut code = vec![0x55,0x48,0x89,0xfd];
+                            code.extend_from_slice(&prefix);
+                            code.extend_from_slice(&[0x48,0x8b,0x84,0x24]);
+                            code.extend_from_slice(&offset.to_le_bytes());
+                            code.extend_from_slice(&[0x48,0x8b,0x40,0xf0]);
+                            code.extend_from_slice(&plan.tail_call_cleanup_bytes);
+                            code.extend_from_slice(&[0x5d,0xc3]);
+                            let frame = [0x1357_9bdf_2468_ace0u64, 0, 0];
+                            unsafe {
+                                let memory = mmap(std::ptr::null_mut(), 4096, 3, 0x22, -1, 0);
+                                assert_ne!(memory as isize, -1, "allocate native frame probe");
+                                std::ptr::copy_nonoverlapping(code.as_ptr(), memory.cast(), code.len());
+                                assert_eq!(mprotect(memory, 4096, 5), 0);
+                                let function: unsafe extern "C" fn(*const u64) -> u64 = std::mem::transmute(memory);
+                                assert_eq!(function(frame.as_ptr().add(2)), frame[0]);
+                                assert_eq!(munmap(memory, 4096), 0);
+                            }
+                        }
+                    }
+                }
+            }
         }
         Ok(())
     }
