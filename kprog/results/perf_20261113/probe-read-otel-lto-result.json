@@ -1,0 +1,87 @@
+{
+  "recorded_at": "2026-11-14T07:35:07.015580+00:00",
+  "outer_pid": 235861,
+  "outer_exit_code": 0,
+  "finished": "2026-11-14T07:22:35Z",
+  "app_status": "error",
+  "corpus_run": "corpus/results/x86_kvm_corpus_20261114_065115_405363",
+  "baseline_measurement_done_ok": true,
+  "native_measurement_started": false,
+  "throughput_result": null,
+  "service_archive": "/workspaces/kprog-raw/perf/20261114-probe-read-otel-lto/control/service.tar.gz",
+  "service_archive_bytes": 190686596,
+  "service_archive_sha256": "2b53d0b551463dc585527ad5f4a5f44ac0f80872ee9e20bdffbc0458ae8ece34",
+  "requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 21,
+      "status": 0,
+      "started": "2026-11-14T06:51:43.624156+00:00",
+      "finished": "2026-11-14T06:51:55.760178+00:00",
+      "entry": "read_task_struct",
+      "native_prog_id": 27,
+      "object_sizes": {
+        "request/generated/checked-simulator.native.o": 36664,
+        "request/generated/checked-simulator.proof.o": 3120,
+        "request/generated/kernel-link/e854120a02d21824.proof.o": 3120,
+        "request/generated/request.native.o": 1638120,
+        "request/generated/trusted_x86.bpf.o": 60272,
+        "request/generated/trusted_x86.proof.o": 1496,
+        "request/kernel.native.o": 1638120
+      }
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 28,
+      "status": 0,
+      "started": "2026-11-14T06:51:55.782927+00:00",
+      "finished": "2026-11-14T07:06:56.820525+00:00",
+      "entry": "perf_unwind_stop",
+      "native_prog_id": 34,
+      "object_sizes": {
+        "request/generated/checked-simulator.native.o": 542360,
+        "request/generated/checked-simulator.proof.o": 60824,
+        "request/generated/kernel-link/5b3b4d6792e1314c.proof.o": 60824,
+        "request/generated/request.native.o": 1638120,
+        "request/generated/trusted_x86.bpf.o": 1307960,
+        "request/generated/trusted_x86.proof.o": 11152,
+        "request/kernel.native.o": 1638120
+      }
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 35,
+      "status": -5,
+      "started": "2026-11-14T07:06:56.903072+00:00",
+      "finished": "2026-11-14T07:14:44.969839+00:00",
+      "entry": "perf_unwind_native",
+      "object_sizes": {
+        "request/generated/request.native.o": 1638120,
+        "request/generated/trusted_x86.proof.o": 42456,
+        "request/kernel.native.o": 1638120
+      },
+      "error": "Command '['/workspaces/repository/kprog/stock-path/bin/clang', '-g', '-O3', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_x86', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '-I', '/usr/include/x86_64-linux-gnu', '-emit-llvm', '-c', '/workspaces/kprog-raw/perf/20261114-probe-read-otel-lto/control/state/session-15wt2vwe/requests/request-h1hbh_c9/generated/trusted_x86.bpf.i', '-o', '/workspaces/kprog-raw/perf/20261114-probe-read-otel-lto/control/state/session-15wt2vwe/requests/request-h1hbh_c9/generated/trusted_x86.bpf.bounds-input.bc']' died with <Signals.SIGKILL: 9>.",
+      "phase": "clang -O3 -emit-llvm from trusted_x86.bpf.i to trusted_x86.bpf.bounds-input.bc",
+      "compile_sim_ir_reached": false,
+      "native_link_reached": false
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 36,
+      "status": -5,
+      "started": "2026-11-14T07:14:45.509357+00:00",
+      "finished": "2026-11-14T07:22:20.824625+00:00",
+      "entry": "perf_unwind_native",
+      "object_sizes": {
+        "request/generated/request.native.o": 1638120,
+        "request/generated/trusted_x86.proof.o": 42456,
+        "request/kernel.native.o": 1638120
+      },
+      "error": "Command '['/workspaces/repository/kprog/stock-path/bin/clang', '-g', '-O3', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_x86', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '-I', '/usr/include/x86_64-linux-gnu', '-emit-llvm', '-c', '/workspaces/kprog-raw/perf/20261114-probe-read-otel-lto/control/state/session-15wt2vwe/requests/request-cn3wiqlm/generated/trusted_x86.bpf.i', '-o', '/workspaces/kprog-raw/perf/20261114-probe-read-otel-lto/control/state/session-15wt2vwe/requests/request-cn3wiqlm/generated/trusted_x86.bpf.bounds-input.bc']' died with <Signals.SIGKILL: 9>.",
+      "phase": "clang -O3 -emit-llvm from trusted_x86.bpf.i to trusted_x86.bpf.bounds-input.bc",
+      "compile_sim_ir_reached": false,
+      "native_link_reached": false
+    }
+  ],
+  "scope": "No whole-app native execution or throughput result. SIGKILL observed, OOM cause not established. All raw retained outside Git."
+}
