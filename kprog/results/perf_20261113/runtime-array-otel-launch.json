@@ -1,0 +1,67 @@
+{
+  "recorded_at": "2026-11-14T05:05:23Z",
+  "source_commits": [
+    "9f51cfee7",
+    "ccb3595b8"
+  ],
+  "outer_pid": 188582,
+  "raw": "/workspaces/kprog-raw/perf/20261114-runtime-array-otel",
+  "log": "/workspaces/kprog-raw/perf/20261114-runtime-array-otel/job/make.log",
+  "counter_capture": "/workspaces/repository/corpus/results/perf-runtime-array-otel-20261114",
+  "payload": "/workspaces/repository/corpus/results/perf-runtime-array-linker-20261114",
+  "final_binary_sha256": "d2c6d05fd76be4ce1bd8e96ef675388f79d0fa3d3ae6a12128032293850d2173",
+  "command": [
+    "make",
+    "-f",
+    "kprog/perf/native-context/Makefile",
+    "runtime-array-otel"
+  ],
+  "launch": [
+    "setsid",
+    "nohup",
+    "env",
+    "VERIFIED_BUILD_CPUS=16-19",
+    "prlimit",
+    "--as=34359738368",
+    "--",
+    "bash",
+    "kprog/test/run_verified_make.sh",
+    "/workspaces/kprog-raw/perf/20261114-runtime-array-otel/job",
+    "-f",
+    "kprog/perf/native-context/Makefile",
+    "runtime-array-otel"
+  ],
+  "resources": {
+    "cpus": "16-19",
+    "vcpus": 4,
+    "guest_memory": "16G",
+    "host_address_space_bytes": 34359738368,
+    "image_lock": "shared",
+    "timing_lock": false
+  },
+  "protocol": {
+    "samples": 1,
+    "seconds": 10,
+    "stats": 1,
+    "source": "Existing original-source OTel manifest corpus/results/perf-otel-upstream-20261114/manifest-context.json",
+    "native_flags": [
+      "--runtime-map-lookups",
+      "--runtime-known-map-lookups",
+      "--local-memory-routines",
+      "--runtime-array-layout <adjacent boot-BTF layout>"
+    ],
+    "layout": {
+      "map_type": 56,
+      "max_entries": 68,
+      "elem_size": 288,
+      "index_mask": 292,
+      "value": 304,
+      "array_type": 2
+    }
+  },
+  "kernel": "74d1097af561",
+  "image": "66e9e88f197f975fd98f78f08be2eac3b7c313937e39a4cb2a45639d0615f2b8",
+  "base": "/workspaces/.agent-state/kprog-ck",
+  "outcome": null,
+  "scope": "Launch only, no postlaunch status/log/result/counter polling. Diagnostic not official timing/floor. No kernel/image/base/canonical linker/app/benchmark changes. Next turn collect entire job/raw counters and errors before any timing decision."
+}
