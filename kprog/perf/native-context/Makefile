@@ -928,7 +928,7 @@ runtime-lpm-payload: known-map-link-build runtime-lpm-layout
 	install -m755 $(HERE)/native-link-lpm.sh $(RUNTIME_LPM_PAYLOAD)/native-link-off
 
 lpm-lookup-kernel:
-	flock /workspaces/.agent-state/kprog-lanes/locks/timing flock -s /workspaces/.agent-state/kprog-lanes/locks/image make -f $(HERE)/Makefile hash-lookup-kernel HASH_KERNEL_BUILD=$(LPM_KERNEL_BUILD) HASH_KERNEL_OUTPUT=$(LPM_KERNEL_OUTPUT) HASH_KERNEL_CASES='4-11 2-11' RUNTIME_HASH_PAYLOAD=$(RUNTIME_LPM_PAYLOAD)
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image make -f $(HERE)/Makefile hash-lookup-kernel HASH_KERNEL_BUILD=$(LPM_KERNEL_BUILD) HASH_KERNEL_OUTPUT=$(LPM_KERNEL_OUTPUT) HASH_KERNEL_CASES='4-11 2-11' RUNTIME_HASH_PAYLOAD=$(RUNTIME_LPM_PAYLOAD)
 
 # Reuse the resource-substitution fixture/client for actual shared ARRAY LTO.
 ARRAY_KERNEL_BUILD ?= /var/tmp/kprog-tmp/perf/array-shared-kernel
@@ -939,7 +939,7 @@ array-shared-kernel-inputs:
 	$(MAKE) -C $(ROOT)/kprog/libnativeloader source-maps-check SOURCE_MAP_BUILD=$(ARRAY_KERNEL_BUILD) SOURCE_MAP_OUTPUT=$(ARRAY_KERNEL_BUILD)/host
 
 array-shared-kernel:
-	flock /workspaces/.agent-state/kprog-lanes/locks/timing flock -s /workspaces/.agent-state/kprog-lanes/locks/image make -f $(HERE)/Makefile array-shared-kernel-run ARRAY_KERNEL_BUILD=$(ARRAY_KERNEL_BUILD) ARRAY_KERNEL_OUTPUT=$(ARRAY_KERNEL_OUTPUT) ARRAY_KERNEL_PAYLOAD=$(ARRAY_KERNEL_PAYLOAD)
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image make -f $(HERE)/Makefile array-shared-kernel-run ARRAY_KERNEL_BUILD=$(ARRAY_KERNEL_BUILD) ARRAY_KERNEL_OUTPUT=$(ARRAY_KERNEL_OUTPUT) ARRAY_KERNEL_PAYLOAD=$(ARRAY_KERNEL_PAYLOAD)
 
 array-shared-kernel-run: array-shared-kernel-inputs
 	install -d $(ARRAY_KERNEL_OUTPUT)
