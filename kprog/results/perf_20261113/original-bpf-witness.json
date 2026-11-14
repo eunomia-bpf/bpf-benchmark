@@ -1,0 +1,140 @@
+{
+  "recorded_at": "2026-11-14T01:48:26.663065+00:00",
+  "protocol_commit": "474e04f32",
+  "raw": "/workspaces/kprog-raw/perf/20261114-original-bpf-witness",
+  "inputs": [
+    {
+      "path": "/workspaces/repository/corpus/results/perf-otel-upstream-20261114/otelcol-ebpf-profiler.native.o",
+      "sha256": "7e6781470c8d4a1d2669cfd262405d11095e5c2a2cbf591a675e578718d6b644"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-otel-upstream-20261114/tracer.original.bpf.o",
+      "sha256": "f5a7cea515fa74d8a6588e8f2c7303af3137a1fca98e032f65d4d0cef9ea272e"
+    }
+  ],
+  "reports": [
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-original-bpf-witness/summary.json",
+      "sha256": "dcfa48c51a94cb2d735a4eee717ab7897ab4d6ac29518b9448ded041802d349e",
+      "data": {
+        "protocol_commit": "474e04f32",
+        "cilium_llc": [
+          {
+            "unit": "bpf_host",
+            "comparisons": {
+              "direct": {
+                "all_allocated_sections_equal": true,
+                "relocations_equal": true
+              },
+              "saved_ir": {
+                "all_allocated_sections_equal": false,
+                "relocations_equal": false
+              },
+              "extra_bpf": {
+                "all_allocated_sections_equal": true,
+                "relocations_equal": true
+              }
+            },
+            "command": "make -f kprog/perf/native-context/Makefile cilium-llc-reference CILIUM_IR_BUILD=/var/tmp/kprog-tmp/perf/cilium-native-frame CILIUM_UNIT=bpf_host"
+          },
+          {
+            "unit": "bpf_xdp",
+            "comparisons": {
+              "direct": {
+                "all_allocated_sections_equal": true,
+                "relocations_equal": true
+              },
+              "saved_ir": {
+                "all_allocated_sections_equal": false,
+                "relocations_equal": false
+              },
+              "extra_bpf": {
+                "all_allocated_sections_equal": true,
+                "relocations_equal": true
+              }
+            },
+            "command": "make -f kprog/perf/native-context/Makefile cilium-llc-reference CILIUM_IR_BUILD=/var/tmp/kprog-tmp/perf/cilium-native-frame CILIUM_UNIT=bpf_xdp"
+          },
+          {
+            "unit": "bpf_lxc",
+            "comparisons": {
+              "direct": {
+                "all_allocated_sections_equal": true,
+                "relocations_equal": true
+              },
+              "saved_ir": {
+                "all_allocated_sections_equal": false,
+                "relocations_equal": false
+              },
+              "extra_bpf": {
+                "all_allocated_sections_equal": true,
+                "relocations_equal": true
+              }
+            },
+            "command": "make -f kprog/perf/native-context/Makefile cilium-llc-reference CILIUM_IR_BUILD=/var/tmp/kprog-tmp/perf/cilium-native-frame CILIUM_UNIT=bpf_lxc"
+          }
+        ],
+        "cilium_objects": [
+          {
+            "native_object": {
+              "path": "/workspaces/repository/corpus/results/perf-cilium-native-frame-20261114/bpf_lxc.native.o",
+              "sha256": "7447cddd9b0ca943175974aec42f3f30cc383a3f61886be91161b04a408f2820"
+            },
+            "original_bpf_object": {
+              "path": "/workspaces/repository/corpus/results/perf-cilium-native-frame-20261114/bpf_lxc.original.bpf.o",
+              "sha256": "7d4cf92091b0f918dd9fe1727d79c2c719431606263275172a11d142f04b226d"
+            },
+            "function_count": 22,
+            "code_relocation_count": 1086
+          },
+          {
+            "native_object": {
+              "path": "/workspaces/repository/corpus/results/perf-cilium-native-frame-20261114/bpf_host.native.o",
+              "sha256": "7069df10e637b2412f0b5a623c7ef1338856068770fffda28163b55a054ee184"
+            },
+            "original_bpf_object": {
+              "path": "/workspaces/repository/corpus/results/perf-cilium-native-frame-20261114/bpf_host.original.bpf.o",
+              "sha256": "84498fda445f663cae71ef9db1c6272bd295f60064c9f898ad931823ec7500e5"
+            },
+            "function_count": 21,
+            "code_relocation_count": 978
+          },
+          {
+            "native_object": {
+              "path": "/workspaces/repository/corpus/results/perf-cilium-native-frame-20261114/bpf_xdp.native.o",
+              "sha256": "d4a3741337f5d1fcce19205d09c455ccd27110793c986bdc09ac2e520258f5cf"
+            },
+            "original_bpf_object": {
+              "path": "/workspaces/repository/corpus/results/perf-cilium-native-frame-20261114/bpf_xdp.original.bpf.o",
+              "sha256": "d2170d76fe70bcf137571d46b568d8dece73929ea501e512b732a415efa2340e"
+            },
+            "function_count": 8,
+            "code_relocation_count": 263
+          }
+        ],
+        "otel_objects": [
+          {
+            "native_object": {
+              "path": "/workspaces/repository/corpus/results/perf-otel-upstream-20261114/otelcol-ebpf-profiler.native.o",
+              "sha256": "7e6781470c8d4a1d2669cfd262405d11095e5c2a2cbf591a675e578718d6b644"
+            },
+            "original_bpf_object": {
+              "path": "/workspaces/repository/corpus/results/perf-otel-upstream-20261114/tracer.original.bpf.o",
+              "sha256": "f5a7cea515fa74d8a6588e8f2c7303af3137a1fca98e032f65d4d0cef9ea272e"
+            },
+            "function_count": 31,
+            "code_relocation_count": 3395
+          }
+        ],
+        "scope": "Original-object indexing and source/IR provenance only. No current-load FD assignment, installed specialization, program exclusion or app equality/performance certification."
+      }
+    }
+  ],
+  "scope": "Host compiler/replay artifacts only; no kernel submission, native installation or application equal-work claim.",
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/perf_20261113/original-bpf-witness.tar.gz",
+    "bytes": 2529438,
+    "sha256": "efc9e879d535197c47cd0ada10dc9f74361518094a5c201c47a35bdaf7561542",
+    "files_byte_compared": 21
+  }
+}
