@@ -12,8 +12,8 @@
  * LANE is the byte lane 0..7 and VALUE the 64-bit source word. VALUE is
  * evaluated exactly once and no NZCV is written. The result is a __u8 byte.
  */
-#define KPROG_ARM64_BYTE_AT(LANE, VALUE, UNSUPPORTED)                       \
-	({ \
+#define KPROG_ARM64_BYTE_AT_INTO(OUTPUT, LANE, VALUE, UNSUPPORTED)                       \
+	do { \
 		__u64 __kprog_a64_bl_lane = (LANE); \
 		__u64 __kprog_a64_bl_value = (VALUE); \
 		__u64 __kprog_a64_bl_shift = 0; \
@@ -47,6 +47,10 @@
 			UNSUPPORTED; \
 			break; \
 		} \
-		(__u8)(__kprog_a64_bl_value >> __kprog_a64_bl_shift); \
-	})
+		(OUTPUT) = (__u8)(__kprog_a64_bl_value >> __kprog_a64_bl_shift); \
+	} while (0)
+#define KPROG_ARM64_BYTE_AT(LANE, VALUE, UNSUPPORTED) \
+    ({ __u8 __kprog_a64_byte_result; \
+       KPROG_ARM64_BYTE_AT_INTO(__kprog_a64_byte_result, (LANE), (VALUE), UNSUPPORTED); \
+       __kprog_a64_byte_result; })
 #endif

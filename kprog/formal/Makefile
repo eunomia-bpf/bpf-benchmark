@@ -729,6 +729,10 @@ clight: clightgen
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Numeric.lean c/Arm64Numeric.c
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Pointer.lean c/X86Pointer.c
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Address.lean c/Arm64Address.c
+	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Stack.lean c/Arm64Stack.c
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -c c/Arm64Stack.c -o build/arm64_stack_binding.o
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_stack_binding_host.c build/arm64_stack_binding.o -o build/test_arm64_stack_binding_host
+	./build/test_arm64_stack_binding_host
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -c c/Arm64Address.c -o build/arm64_address_binding.o
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_address_cache_host.c build/arm64_address_binding.o -o build/test_arm64_address_cache_host
 	./build/test_arm64_address_cache_host
@@ -742,3 +746,4 @@ clight: clightgen
 	  ./build/test_x86_storage_profile_host || exit $$?; \
 	done
 	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_arm64 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c oracles/arm64_address_compile.bpf.c -o build/arm64_address_compile.bpf.o
+	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_arm64 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c oracles/arm64_stack_compile.bpf.c -o build/arm64_stack_compile.bpf.o

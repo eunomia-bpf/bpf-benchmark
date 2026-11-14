@@ -40,6 +40,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for option in ("before", "header", "source", "output", "scratch"):
         parser.add_argument("--" + option, required=True)
+    parser.add_argument("--also-header", action="append", default=[],
+                        help="also replay a header directly included by --header")
     parser.add_argument("compiler", nargs=argparse.REMAINDER)
     args = parser.parse_args()
     compiler = args.compiler[1:] if args.compiler[:1] == ["--"] else args.compiler
@@ -63,6 +65,10 @@ def main():
     revision = subprocess.check_output(["git", "rev-parse", args.before], cwd=root, text=True).strip()
     previous = subprocess.check_output(
         ["git", "show", f"{revision}:{header.relative_to(root).as_posix()}"], cwd=root, text=True)
+    nested = [Path(path).resolve() for path in args.also_header]
+    historical_nested = {path: subprocess.check_output(
+        ["git", "show", f"{revision}:{path.relative_to(root).as_posix()}"],
+        cwd=root, text=True) for path in nested}
     commands = []
 
     def run(stage, command, stdin=None):
@@ -74,15 +80,29 @@ def main():
             raise SystemExit(f"{stage} exited {result.returncode}; see {output / (stage + '.log')}")
 
     (output / "header.diff").write_text(subprocess.check_output(
-        ["git", "diff", "--", str(header.relative_to(root))], cwd=root, text=True))
+        ["git", "diff", "--", str(header.relative_to(root))] +
+        [str(path.relative_to(root)) for path in nested], cwd=root, text=True))
     (output / "inputs.json").write_text(json.dumps({
         "before": revision, "header": str(header), "source": str(source),
+        "also_headers": [str(path) for path in nested],
         "current_head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip(),
         "current_header_patch": "header.diff",
         "include": directive, "recipe": "Replace at the actual include; retain every preceding define.",
     }, indent=2) + "\n")
     flags = compiler + ["-iquote", str(header.parent), "-iquote", str(source.parent)]
     for phase, body in (("before", previous), ("after", header.read_text())):
+        for path in nested:
+            candidates = {f'#include "{path}"',
+                          f'#include "{os.path.relpath(path, header.parent)}"'}
+            directives = [line.strip() for line in body.splitlines() if line.strip() in candidates]
+            if len(directives) != 1:
+                raise SystemExit(f"primary header must directly include {path} once")
+            include = directives[0]
+            at = body.index(include)
+            line = body[:at].count("\n") + 1
+            contents = historical_nested[path] if phase == "before" else path.read_text()
+            body = (body[:at] + f'#line 1 "{path}"\n' + contents
+                    + f'\n#line {line} "{header}"\n' + body[at + len(include):])
         unit = (f'#line 1 "{source}"\n' + text[:position] + f'#line 1 "{header}"\n'
                 + body + f'\n#line {resume} "{source}"\n' + text[position + len(directive):])
         preprocessed = scratch / f"{phase}.i"

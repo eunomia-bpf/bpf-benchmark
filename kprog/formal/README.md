@@ -1048,6 +1048,33 @@ component Lake jobs pass with standard axioms only. The focused production ARM
 fixture retains identical allocated bytes and386 relocations; whole-app ARM
 parity and M5's universal representation proofs remain open.
 
+[c/Arm64Stack.c](c/Arm64Stack.c) now exports six actual private-stack roots:
+owned/released reads, tag reads, owned/released writes and pointer formation.
+Packed-tag reads, byte extraction and the nested payload unmaterialization use
+standard-C output forms, with the original expression facades sharing those
+bodies. Native index-opacity asm is unchanged; CompCert uses its value-preserving
+identity. Capacity, signed bias, coordinate caches, byte/word views, tags and
+payload cells are caller inputs. Aligned words retain the word path, unaligned
+accesses retain byte lanes, and released bytes retain individual kind6 inputs.
+
+The independent [stack oracle](oracles/test_arm64_stack_binding_host.c) passes
+3,440,640 checks on both pre-edit and converted native root objects. Eight arena
+profiles include positive/negative biases above32 bits, all256 width codes and
+tags, aligned/unaligned and mapped escaped windows, and cold/nonboolean cache
+states. It compares bytes, packed-tag padding, payloads, caches and input order;
+mutations dropping payload writes, misplacing packed tags or zeroing kind6 fail.
+Existing memory/scalar/vector-token, stack arena/tag-route and byte-lane oracles
+also pass. Six actual Clight functions regenerate identically and typecheck;
+`make clight` and131 targeted component jobs pass with standard axioms only.
+The focused [BPF fixture](oracles/arm64_stack_compile.bpf.c) exercises dynamic
+width/alignment, payloads and release: allocated socket bytes6072 and6 relocations
+are identical before/after, and the current replay equals the normal build.
+`compare_c_header.py --also-header` replays the byte-lane header at its actual
+nested include as well as the canonical header, avoiding a mixed old/new baseline.
+Raw evidence: `/workspaces/kprog-raw/formal/m4-arm64-stack`. These checks do not
+establish universal storage/refinement relations, full-app ARM parity, or the
+remaining nonarena/unaligned/context/fault ABI; those obligations remain open.
+
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight
 handler exports and full default compiled-byte coverage remain to do. Preserve

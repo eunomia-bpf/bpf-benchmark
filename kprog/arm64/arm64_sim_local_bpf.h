@@ -231,7 +231,10 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 #define ARM64_SIM_TAG_STORAGE_BYTES(CAPACITY) ((KPROG_ARM64_STACK_TAG_SLOTS(CAPACITY)+7U)&~7U)
 #define ARM64_SIM_L_TAG_WORD_PTR(INDEX) ((volatile arm64_sim_tag_word *)(void *)&__a64_stack_tag[(__u64)(INDEX)&~7ULL])
-#define ARM64_SIM_L_TAG_GET(INDEX) ({ __u64 __ti=(INDEX); (__u8)(*ARM64_SIM_L_TAG_WORD_PTR(__ti) >> ((__ti&7U)*8U)); })
+#define ARM64_SIM_L_TAG_GET_INTO(OUTPUT, INDEX) \
+    do { __u64 __ti=(INDEX); (OUTPUT)=(__u8)(*ARM64_SIM_L_TAG_WORD_PTR(__ti) >> ((__ti&7U)*8U)); } while (0)
+#define ARM64_SIM_L_TAG_GET(INDEX) \
+    ({ __u8 __a64_tag_result; ARM64_SIM_L_TAG_GET_INTO(__a64_tag_result, (INDEX)); __a64_tag_result; })
 #define ARM64_SIM_L_TAG_SET(INDEX, TAG) do { __u64 __ti=(INDEX); __u32 __ts=(__ti&7U)*8U; volatile arm64_sim_tag_word *__tp=ARM64_SIM_L_TAG_WORD_PTR(__ti); __u64 __tv=*__tp; *__tp=(__tv&~(255ULL<<__ts))|((__u64)(__u8)(TAG)<<__ts); } while (0)
 #ifndef ARM64_SIM_STACK_PAYLOAD_WORDS
 #define ARM64_SIM_STACK_PAYLOAD_WORDS KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)
@@ -692,6 +695,9 @@ do { \
  * array UB. Known in-range indexes need no opacity; retaining their constants
  * lets LLVM scalarize the private ghost payload without changing BPF values.
  * The constant-p predicates eliminate this choice before BPF emission. */
+#if defined(__COMPCERT__)
+#define ARM64_SIM_L_STACK_INDEX_OPACITY(INDEX, WIDTH) ((void)(INDEX))
+#else
 #define ARM64_SIM_L_STACK_INDEX_OPACITY(INDEX, WIDTH)                      \
     do {                                                                  \
         if (!__builtin_constant_p(INDEX) || !__builtin_constant_p(WIDTH) || \
@@ -699,6 +705,7 @@ do { \
             (WIDTH) > ARM64_SIM_STACK_BYTES - (INDEX))                     \
             asm volatile("" : "+r"(INDEX));                              \
     } while (0)
+#endif
 
 /* Bytes below the current native SP have an independent environment value.
  * Releasing an allocated byte also releases its value and pointer provenance. */
@@ -722,13 +729,19 @@ do { \
       } \
     } while(0)
 
-#define ARM64_SIM_L_STACK_READ(OFF, WIDTH) \
-    ({ __u64 __a64_observed=ARM64_SIM_L_STACK_READ_OWNED((OFF),(WIDTH)); \
+#define ARM64_SIM_L_STACK_READ_INTO(OUTPUT, OFF, WIDTH) \
+    do { __u64 __a64_observed; \
+       ARM64_SIM_L_STACK_READ_OWNED_INTO(__a64_observed,(OFF),(WIDTH)); \
        if ((__s64)(OFF)<ARM64_SIM_L_STACK_SP()) __a64_observed=KPROG_ARM64_APPLY_WIDTH(ARM64_SIM_L_UNSPECIFIED(),(WIDTH)); \
-       __a64_observed; })
+       (OUTPUT) = __a64_observed; } while (0)
 
-#define ARM64_SIM_L_STACK_READ_OWNED(OFF, WIDTH)                                  \
-	({                                                                 \
+#define ARM64_SIM_L_STACK_READ(OFF, WIDTH) \
+({ __u64 __kprog_stack_result; \
+   ARM64_SIM_L_STACK_READ_INTO(__kprog_stack_result, (OFF), (WIDTH)); \
+   __kprog_stack_result; })
+
+#define ARM64_SIM_L_STACK_READ_OWNED_INTO(OUTPUT, OFF, WIDTH) \
+	do {                                                                 \
 		__u64 __a64_str_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
 		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_str_index, (WIDTH));     \
 		__u8 __a64_str_width = (WIDTH);                           \
@@ -757,11 +770,16 @@ do { \
 			if (__a64_str_width >= ARM64_WIDTH_64)\
 				__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 7] << 56;\
 		}                                                          \
-		__a64_str_value;                                          \
-	})
+		(OUTPUT) = __a64_str_value;                                 \
+	} while (0)
 
-#define ARM64_SIM_L_STACK_READ_TAG(OFF, WIDTH)                              \
-	({                                                                 \
+#define ARM64_SIM_L_STACK_READ_OWNED(OFF, WIDTH) \
+({ __u64 __kprog_stack_result; \
+   ARM64_SIM_L_STACK_READ_OWNED_INTO(__kprog_stack_result, (OFF), (WIDTH)); \
+   __kprog_stack_result; })
+
+#define ARM64_SIM_L_STACK_READ_TAG_INTO(OUTPUT, OFF, WIDTH) \
+	do {                                                                 \
 		__u64 __a64_srt_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
 		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_srt_index, (WIDTH));     \
 		__u8 __a64_srt_width = (WIDTH);                           \
@@ -772,11 +790,16 @@ do { \
 		__u8 __a64_srt_tag = ARM64_SIM_TAG_SCALAR;                \
 		if ((__s64)(OFF)>=ARM64_SIM_L_STACK_SP() && __a64_srt_source ==                                   \
 		    KPROG_ARM64_STACK_READ_TAG_SOURCE_STACK_TAG_ARRAY) {  \
-			__a64_srt_tag = ARM64_SIM_L_TAG_GET(                    \
+			ARM64_SIM_L_TAG_GET_INTO(__a64_srt_tag,                    \
 				KPROG_ARM64_STACK_WORD_INDEX(__a64_srt_index));\
 		}                                                          \
-		__a64_srt_tag;                                             \
-	})
+		(OUTPUT) = __a64_srt_tag;                                             \
+	} while (0)
+
+#define ARM64_SIM_L_STACK_READ_TAG(OFF, WIDTH) \
+({ __u8 __kprog_stack_result; \
+   ARM64_SIM_L_STACK_READ_TAG_INTO(__kprog_stack_result, (OFF), (WIDTH)); \
+   __kprog_stack_result; })
 
 #define ARM64_SIM_L_STACK_WRITE_TAG(OFF, WIDTH, VALUE, TAG) \
     do { __s64 __a64_loss_off=(OFF); __u8 __a64_loss_width=(WIDTH); __u64 __a64_loss_value=(VALUE); \
@@ -800,56 +823,57 @@ do { \
 		if (__a64_stw_action ==                              \
 		    KPROG_ARM64_STACK_WRITE_TAG_ACTION_WRITE_WORD_AND_TAG) {\
 			__a64_stack.q[KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index)] = __a64_stw_value;\
-			if ((TAG) == ARM64_SIM_TAG_STACK || (TAG) == ARM64_SIM_TAG_RETURN) ARM64_SIM_L_STACK_PAYLOAD_STORE(KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index), ARM64_SIM_L_UNMATERIALIZE(__a64_stw_value, (TAG)));\
+			if ((TAG) == ARM64_SIM_TAG_STACK || (TAG) == ARM64_SIM_TAG_RETURN) { \
+				__u64 __a64_stw_payload; \
+				ARM64_SIM_L_UNMATERIALIZE_INTO(__a64_stw_payload, __a64_stw_value, (TAG)); \
+				ARM64_SIM_L_STACK_PAYLOAD_STORE(KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index), __a64_stw_payload); \
+			}\
 			ARM64_SIM_L_TAG_SET(KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index), ((TAG)));\
 		} else {                                                   \
 			ARM64_SIM_L_TAG_SET(KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index), (ARM64_SIM_TAG_SCALAR));\
 			__u64 __a64_stw_last = __a64_stw_index + KPROG_ARM64_STACK_WRITE_LANE_COUNT(__a64_stw_width) - 1U; \
 			if (KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_last) != KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index)) \
 				ARM64_SIM_L_TAG_SET(KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_last), (ARM64_SIM_TAG_SCALAR)); \
-			__a64_stack.b[__a64_stw_index] =                   \
-				KPROG_ARM64_BYTE_AT(0, __a64_stw_value,    \
-					ARM64_SIM_L_UNSUPPORTED_OPCODE()); \
+			KPROG_ARM64_BYTE_AT_INTO(__a64_stack.b[__a64_stw_index], \
+				0, __a64_stw_value, ARM64_SIM_L_UNSUPPORTED_OPCODE()); \
 		if (KPROG_ARM64_STACK_WRITE_LANE_ACTIVE(__a64_stw_width, 1))\
-			__a64_stack.b[__a64_stw_index + 1] =       \
-				KPROG_ARM64_BYTE_AT(1, __a64_stw_value,\
-					ARM64_SIM_L_UNSUPPORTED_OPCODE());\
+			KPROG_ARM64_BYTE_AT_INTO(__a64_stack.b[__a64_stw_index + 1], \
+				1, __a64_stw_value, ARM64_SIM_L_UNSUPPORTED_OPCODE());\
 		if (KPROG_ARM64_STACK_WRITE_LANE_ACTIVE(__a64_stw_width, 2))\
-			__a64_stack.b[__a64_stw_index + 2] =       \
-				KPROG_ARM64_BYTE_AT(2, __a64_stw_value,\
-					ARM64_SIM_L_UNSUPPORTED_OPCODE());\
+			KPROG_ARM64_BYTE_AT_INTO(__a64_stack.b[__a64_stw_index + 2], \
+				2, __a64_stw_value, ARM64_SIM_L_UNSUPPORTED_OPCODE());\
 		if (KPROG_ARM64_STACK_WRITE_LANE_ACTIVE(__a64_stw_width, 3))\
-			__a64_stack.b[__a64_stw_index + 3] =       \
-				KPROG_ARM64_BYTE_AT(3, __a64_stw_value,\
-					ARM64_SIM_L_UNSUPPORTED_OPCODE());\
+			KPROG_ARM64_BYTE_AT_INTO(__a64_stack.b[__a64_stw_index + 3], \
+				3, __a64_stw_value, ARM64_SIM_L_UNSUPPORTED_OPCODE());\
 		if (KPROG_ARM64_STACK_WRITE_LANE_ACTIVE(__a64_stw_width, 4))\
-			__a64_stack.b[__a64_stw_index + 4] =       \
-				KPROG_ARM64_BYTE_AT(4, __a64_stw_value,\
-					ARM64_SIM_L_UNSUPPORTED_OPCODE());\
+			KPROG_ARM64_BYTE_AT_INTO(__a64_stack.b[__a64_stw_index + 4], \
+				4, __a64_stw_value, ARM64_SIM_L_UNSUPPORTED_OPCODE());\
 		if (KPROG_ARM64_STACK_WRITE_LANE_ACTIVE(__a64_stw_width, 5))\
-			__a64_stack.b[__a64_stw_index + 5] =       \
-				KPROG_ARM64_BYTE_AT(5, __a64_stw_value,\
-					ARM64_SIM_L_UNSUPPORTED_OPCODE());\
+			KPROG_ARM64_BYTE_AT_INTO(__a64_stack.b[__a64_stw_index + 5], \
+				5, __a64_stw_value, ARM64_SIM_L_UNSUPPORTED_OPCODE());\
 		if (KPROG_ARM64_STACK_WRITE_LANE_ACTIVE(__a64_stw_width, 6))\
-			__a64_stack.b[__a64_stw_index + 6] =       \
-				KPROG_ARM64_BYTE_AT(6, __a64_stw_value,\
-					ARM64_SIM_L_UNSUPPORTED_OPCODE());\
+			KPROG_ARM64_BYTE_AT_INTO(__a64_stack.b[__a64_stw_index + 6], \
+				6, __a64_stw_value, ARM64_SIM_L_UNSUPPORTED_OPCODE());\
 		if (KPROG_ARM64_STACK_WRITE_LANE_ACTIVE(__a64_stw_width, 7))\
-			__a64_stack.b[__a64_stw_index + 7] =       \
-				KPROG_ARM64_BYTE_AT(7, __a64_stw_value,\
-					ARM64_SIM_L_UNSUPPORTED_OPCODE());\
+			KPROG_ARM64_BYTE_AT_INTO(__a64_stack.b[__a64_stw_index + 7], \
+				7, __a64_stw_value, ARM64_SIM_L_UNSUPPORTED_OPCODE());\
 		}                                                         \
 	} while (0)
 
 #define ARM64_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)                          \
 	ARM64_SIM_L_STACK_WRITE_TAG((OFF), (WIDTH), (VALUE), ARM64_SIM_TAG_SCALAR)
 
-#define ARM64_SIM_L_STACK_PTR(OFF)                                         \
-	({                                                                 \
+#define ARM64_SIM_L_STACK_PTR_INTO(OUTPUT, OFF) \
+	do {                                                                 \
 		__s64 __a64_sp_ptr_index =                                 \
 			KPROG_ARM64_STACK_PTR_INDEX((OFF), ARM64_SIM_STACK_BIAS);\
-		(void *)&__a64_stack.b[__a64_sp_ptr_index];                \
-	})
+		(OUTPUT) = (void *)&__a64_stack.b[__a64_sp_ptr_index];                \
+	} while (0)
+
+#define ARM64_SIM_L_STACK_PTR(OFF) \
+({ void * __kprog_stack_result; \
+   ARM64_SIM_L_STACK_PTR_INTO(__kprog_stack_result, (OFF)); \
+   __kprog_stack_result; })
 
 /* Keep arena address formation inside its provenance branch. LLVM may
  * otherwise speculate fp + kernel_pointer before the verifier sees the tag. */
