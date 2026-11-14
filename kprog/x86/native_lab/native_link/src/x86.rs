@@ -14,6 +14,9 @@ mod memory;
 #[path = "x86_known_maps.rs"]
 mod known_maps;
 
+#[path = "x86_runtime_array.rs"]
+mod runtime_array;
+
 const X86_CPU_NUMBER_HELPER_KEY: &str = "__native_x86_cpu_number";
 const X86_THIS_CPU_OFF_HELPER_KEY: &str = "__native_x86_this_cpu_off";
 const X86_BPF_MAP_MAX_ENTRIES_OFFSET_KEY: &str = "__native_x86_bpf_map_max_entries_offset";
@@ -1182,6 +1185,7 @@ pub(super) fn rewrite_x86(
     tail_count_relocs: bool,
     runtime_map_lookups: bool,
     runtime_known_map_lookups: bool,
+    runtime_array_layout: Option<&RuntimeArrayLayout>,
     local_memory_routines: bool,
     show: bool,
 ) -> Result<RewriteResult> {
@@ -1658,6 +1662,29 @@ pub(super) fn rewrite_x86(
                             runtime_known_map_lookups,
                         )?;
                         lookup_call_specs.insert(site_key, spec.clone());
+                        if let Some(layout) = runtime_array_layout.filter(|_| matches!(spec.kind, LookupKind::Call)) {
+                            // Prefix-local branches skip exactly this five-byte helper
+                            // slot for ARRAY and NULL results. Other types use the
+                            // unmodified helper and original RDI/RSI arguments.
+                            for (index, ib) in declared_byte_chunks(&runtime_array::prefix(layout)?)?.into_iter().enumerate() {
+                                if index == 0 {
+                                    push_x86_replacement(&mut local, &mut kinds, &mut insn_local_ip,
+                                        local_ip, ib, None);
+                                } else {
+                                    push_x86_synthetic(&mut local, &mut kinds, &mut insn_local_ip,
+                                        &mut next_synthetic_ip, ib)?;
+                                }
+                            }
+                            push_x86_synthetic(&mut local, &mut kinds, &mut insn_local_ip,
+                                &mut next_synthetic_ip, build_x86_helper_call_rel32_slot()?)?;
+                            *kinds.last_mut().expect("helper slot") = Some(PatchKind::HelperBranchRel32 {
+                                target_addr: resolve_lookup_site_target(&spec, "runtime ARRAY generic dispatch")?,
+                                opcode: 0xe8,
+                            });
+                            resolved_helper_call_sites.insert(site_key);
+                            clear_x86_call_clobbered_registers(&mut map_symbol_registers);
+                            continue;
+                        }
                         match spec.kind {
                             LookupKind::Array | LookupKind::PerCpuArray => {
                                 for ib in build_x86_array_lookup(&spec)? {
@@ -4358,10 +4385,10 @@ mod tests {
                 let empty = HashMap::new();
                 let helpers = HashMap::from([(name.to_owned(), 0x1234)]);
                 let plain = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &empty, &[],
-                    &HashMap::new(), &[], true, true, false, false, false, false, false)?;
+                    &HashMap::new(), &[], true, true, false, false, false, None, false, false)?;
                 assert_eq!(plain.proof_relocs.len(), 2, "default remains symbolic");
                 let proof = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &empty, &[],
-                    &HashMap::new(), &[], true, true, false, false, false, true, false)?;
+                    &HashMap::new(), &[], true, true, false, false, false, None, true, false)?;
                 assert!(proof.proof_relocs.is_empty(), "{name}, form={form}");
                 assert_eq!(proof.proof_symbols.len(), 2, "same length shares one routine");
                 assert!(proof.proof_symbols[1].name.starts_with("__native_link_local_"));
@@ -4375,7 +4402,7 @@ mod tests {
                 let included = discover_reachable(&elf, &entry)?;
                 assert_eq!(included.len(), 2);
                 let result = rewrite_x86(&elf, &entry, &included, &empty, &empty, &[],
-                    &HashMap::new(), &[], false, true, false, false, false, true, false)?;
+                    &HashMap::new(), &[], false, true, false, false, false, None, true, false)?;
                 assert!(result.relocs.is_empty());
                 #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
                 {
@@ -4396,27 +4423,32 @@ mod tests {
     }
 
     #[test]
-    fn runtime_map_lookup_rewrites_immediate_and_got_calls() -> Result<()> {
-        for got in [false, true] {
+    fn runtime_map_lookup_rewrites_immediate_got_and_plt_calls() -> Result<()> {
+        for form in 0..3 {
             let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::X86_64, Endianness::Little);
             let text = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
-            let bytes = if got { vec![0xff, 0x15, 0, 0, 0, 0, 0xc3] }
-                        else { vec![0xb8, 1, 0, 0, 0, 0xff, 0xd0, 0xc3] };
+            let bytes = match form {
+                0 => vec![0xb8, 1, 0, 0, 0, 0xff, 0xd0, 0xc3],
+                // A branch enters the rewritten call: it must reach the
+                // type guard, not the helper slot after the inline prefix.
+                1 => vec![0xeb, 2, 0x90, 0x90, 0xff, 0x15, 0, 0, 0, 0, 0xc3],
+                _ => vec![0xe8, 0, 0, 0, 0, 0xc3],
+            };
             object.append_section_data(text, &bytes, 1);
             object.add_symbol(WriteSymbol {
                 name: b"entry".to_vec(), value: 0, size: bytes.len() as u64,
                 kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
                 section: WriteSymbolSection::Section(text), flags: SymbolFlags::None,
             });
-            if got {
+            if form != 0 {
                 let helper = object.add_symbol(WriteSymbol {
                     name: b"bpf_map_lookup_elem".to_vec(), value: 0, size: 0,
                     kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
                     section: WriteSymbolSection::Undefined, flags: SymbolFlags::None,
                 });
                 object.add_relocation(text, WriteRelocation {
-                    offset: 2, symbol: helper, addend: -4,
-                    flags: RelocationFlags::Elf { r_type: 9 },
+                    offset: if form == 1 { 6 } else { 1 }, symbol: helper, addend: -4,
+                    flags: RelocationFlags::Elf { r_type: if form == 1 { 9 } else { 4 } },
                 })?;
             }
             let encoded = object.write()?;
@@ -4424,15 +4456,30 @@ mod tests {
             let entry = find_symbol_by_name(&elf, "entry")?;
             let helpers = HashMap::from([("bpf_map_lookup_elem".to_owned(), 0x1234)]);
             let site = generic_lookup_site(0x5678, None).expect("site");
-            for enabled in [false, true] {
+            let array = RuntimeArrayLayout { map_type: 12, max_entries: 24, elem_size: 32,
+                index_mask: 36, value: 64, array_type: 2 };
+            for (enabled, layout) in [(false, None), (true, None), (true, Some(&array))] {
                 let result = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers,
                     &HashMap::new(), &[site.clone()], &HashMap::new(), &[],
-                    false, false, false, enabled, false, false, false)?;
+                    false, false, false, enabled, false, layout, false, false)?;
                 let expected = if enabled { 0x1234 } else { 0x5678 };
                 assert!(result.relocs.iter().any(|r| r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32
-                    && r.target == expected), "got={got}, enabled={enabled}: actual helper target");
+                    && r.target == expected), "form={form}, enabled={enabled}: actual helper target");
                 assert!(!result.relocs.iter().any(|r| r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32
                     && r.target == if enabled { 0x5678 } else { 0x1234 }));
+                #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+                if layout.is_some() {
+                    let mut map = [0u8; 128];
+                    for (offset, value) in [(12, 2u32), (24, 5), (32, 24), (36, 7)] {
+                        map[offset..offset+4].copy_from_slice(&value.to_ne_bytes());
+                    }
+                    let key = 4u32;
+                    let mut code = result.blob;
+                    code.push(0xc3);
+                    assert_eq!(memory::call_blob(&code, map.as_mut_ptr(), &key as *const _ as usize, 0)
+                        as usize, map.as_ptr() as usize + 64 + 4*24,
+                        "encoded form={form} must reach ARRAY continuation without helper");
+                }
             }
         }
         Ok(())
@@ -4585,7 +4632,7 @@ mod tests {
         })]);
         for enabled in [false, true] {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps,
-                &[], &facts, &[], false, false, false, true, enabled, false, false)?;
+                &[], &facts, &[], false, false, false, true, enabled, None, false, false)?;
             if !enabled {
                 assert!(output.relocs.iter().any(|r| r.target == 0x1234));
                 continue;
@@ -4725,7 +4772,7 @@ mod tests {
         let entry = find_symbol_by_name(&elf, "entry")?;
         for preserve in [false, true] {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(),
-                &HashMap::new(), &[], &HashMap::new(), &[], true, preserve, false, false, false, false, false)?;
+                &HashMap::new(), &[], &HashMap::new(), &[], true, preserve, false, false, false, None, false, false)?;
             let mut expected = if preserve { vec![0x53, 0x31, 0xc0, 0x5b] } else { vec![0x31, 0xc0] };
             expected.extend_from_slice(&[0xe9, 0, 0, 0, 0]); // Canonical entry exit in proof mode.
             assert_eq!(output.blob, expected);

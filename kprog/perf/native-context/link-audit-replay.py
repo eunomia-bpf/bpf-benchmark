@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Replay retained CLI inputs and bound plans, without kernel submission.
 
-Only the known-map optimization flag changes. All other captured flags/facts
+Only the selected optimization switch changes. All other captured flags/facts
 are retained. Historical addresses are literal linker inputs, never dereferenced.
 """
 import argparse
@@ -44,6 +44,8 @@ def main():
     parser.add_argument("capture", type=Path)
     parser.add_argument("--linker", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--runtime-array-layout", type=Path,
+                        help="Toggle runtime ARRAY dispatch instead of the known-map flag")
     args = parser.parse_args()
     args.output.mkdir(parents=True)
     binary_sha = hashlib.sha256(args.linker.read_bytes()).hexdigest()
@@ -74,19 +76,24 @@ def main():
             for flag, name in OUTPUTS.items():
                 replacements[flag] = work / (variant + "." + name)
             argv = rewrite(record["command"][1:], replacements)
-            argv = [word for word in argv if word != SWITCH]
-            if variant == "on":
-                argv.append(SWITCH)
+            if args.runtime_array_layout:
+                if variant == "on":
+                    argv.extend(["--runtime-array-layout", str(args.runtime_array_layout)])
+            else:
+                argv = [word for word in argv if word != SWITCH]
+                if variant == "on":
+                    argv.append(SWITCH)
             command = [str(args.linker), *argv]
             completed = subprocess.run(command, capture_output=True)
             (work / (variant + ".stdout")).write_bytes(completed.stdout)
             (work / (variant + ".stderr")).write_bytes(completed.stderr)
             variants[variant] = dict(command=command, returncode=completed.returncode)
         row.update(replayable=True, variants=variants)
-        if variants["on"]["returncode"] == 0:
-            row["captured_on_bytes_equal"] = {
-                name: (source / entry["capture"]).read_bytes() == (work / ("on." + name)).read_bytes()
-                for name, entry in record["outputs"].items() if entry and entry["exists"]}
+        for variant in ("on", "off"):
+            if variants[variant]["returncode"] == 0:
+                row["captured_" + variant + "_bytes_equal"] = {
+                    name: (source / entry["capture"]).read_bytes() == (work / (variant + "." + name)).read_bytes()
+                    for name, entry in record["outputs"].items() if entry and entry["exists"]}
         if all(variants[v]["returncode"] == 0 for v in variants):
             row["on_off_equal"] = {
                 name: (work / ("on." + name)).read_bytes() == (work / ("off." + name)).read_bytes()
@@ -102,6 +109,7 @@ def main():
         rows.append(row)
     (args.output / "report.json").write_text(json.dumps(dict(
         linker=str(args.linker), linker_sha256=binary_sha, cases=rows,
+        switch="--runtime-array-layout" if args.runtime_array_layout else SWITCH,
         scope="Offline replay only, no kernel execution or workload validity gate. "
               "Helper call deltas establish emitted transformation counts, not performance gains."), indent=2) + "\n")
 

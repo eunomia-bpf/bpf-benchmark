@@ -21,6 +21,34 @@ $(BUILD)/layout: $(HERE)/layout.c $(VMLINUX_DIR)/vmlinux.h
 $(BUILD)/layout.json: $(BUILD)/layout
 	$< > $@
 
+$(BUILD)/runtime-array-layout: $(HERE)/runtime-array-layout.c
+	install -d $(BUILD)
+	$(CC) -O2 -Wall -Wextra $< -lbpf -o $@
+
+$(BUILD)/runtime-array-layout.json: $(BUILD)/runtime-array-layout $(KDIR)/vmlinux
+	$< $(KDIR)/vmlinux > $@
+
+.PHONY: runtime-array-layout
+runtime-array-layout: $(BUILD)/runtime-array-layout.json
+
+RUNTIME_ARRAY_BUILD ?= /var/tmp/kprog-tmp/perf/runtime-array-layout
+RUNTIME_ARRAY_PAYLOAD ?= $(ROOT)/corpus/results/perf-runtime-array-linker-20261114
+RUNTIME_ARRAY_RAW ?= /workspaces/kprog-raw/perf/20261114-runtime-array-otel
+RUNTIME_ARRAY_CAPTURE ?= $(ROOT)/corpus/results/perf-runtime-array-otel-20261114
+.PHONY: runtime-array-link-payload runtime-array-otel
+runtime-array-link-payload: known-map-link-build
+	$(MAKE) -f $(HERE)/Makefile runtime-array-layout BUILD=$(RUNTIME_ARRAY_BUILD)
+	install -d $(RUNTIME_ARRAY_PAYLOAD)
+	install -m755 $(KNOWN_MAP_TARGET)/debug/native-link $(RUNTIME_ARRAY_PAYLOAD)/native-link.real
+	strip --strip-debug $(RUNTIME_ARRAY_PAYLOAD)/native-link.real
+	install -m644 $(RUNTIME_ARRAY_BUILD)/runtime-array-layout.json $(RUNTIME_ARRAY_PAYLOAD)/runtime-array-layout.json
+	install -m755 $(HERE)/native-link-runtime-array.sh $(RUNTIME_ARRAY_PAYLOAD)/native-link-array-on
+	install -m755 $(HERE)/native-link-runtime-array.sh $(RUNTIME_ARRAY_PAYLOAD)/native-link-array-off
+
+runtime-array-otel:
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(RUNTIME_ARRAY_CAPTURE) EQCODEX_NATIVE_LINK_BINARY=$(RUNTIME_ARRAY_PAYLOAD)/native-link-array-on \
+		$(MAKE) -f $(ROOT)/kprog/perf/one-image/Makefile corpus APPS=otelcol-ebpf-profiler/profiling SAMPLES=1 WORKLOAD_DURATION=10 CPUS=16-19 VM_CPUS=4 VM_MEM=16G BPFREJIT_CORPUS_BPF_STATS=1 NATIVE_MANIFEST=$(ROOT)/corpus/results/perf-otel-upstream-20261114/manifest-context.json STATE=/var/tmp/kprog-tmp/perf/runtime-array-otel LOGS=$(RUNTIME_ARRAY_RAW)/run
+
 .PHONY: all
 all: $(BUILD)/perf-context-lower $(BUILD)/layout.json
 
@@ -174,8 +202,10 @@ link-audit-check:
 
 .PHONY: link-audit-replay
 LINK_AUDIT_REPLAY ?= $(LINK_AUDIT_HOST)/replay
+LINK_AUDIT_REPLAY_LINKER ?= $(LINK_AUDIT_PAYLOAD)/native-link.real
+LINK_AUDIT_REPLAY_ARGS ?=
 link-audit-replay:
-	taskset -c 8-15 prlimit --as=8589934592 -- python3 $(HERE)/link-audit-replay.py $(LINK_AUDIT_PAYLOAD)/audit --linker $(LINK_AUDIT_PAYLOAD)/native-link.real --output $(LINK_AUDIT_REPLAY)
+	taskset -c 8-15 prlimit --as=8589934592 -- python3 $(HERE)/link-audit-replay.py $(LINK_AUDIT_PAYLOAD)/audit --linker $(LINK_AUDIT_REPLAY_LINKER) --output $(LINK_AUDIT_REPLAY) $(LINK_AUDIT_REPLAY_ARGS)
 
 link-audit-otel:
 	env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(LINK_AUDIT_CAPTURE) EQCODEX_NATIVE_LINK_BINARY=$(LINK_AUDIT_PAYLOAD)/native-link-on \

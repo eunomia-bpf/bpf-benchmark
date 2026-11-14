@@ -129,6 +129,10 @@ struct Args {
     #[arg(long, requires = "runtime_map_lookups")]
     runtime_known_map_lookups: bool,
 
+    /// Inline runtime ARRAY lookups using this target-kernel field layout.
+    #[arg(long, requires = "runtime_map_lookups")]
+    runtime_array_layout: Option<PathBuf>,
+
     /// Bind x86 memset/memcpy to linker-owned GPR routines in the proof image.
     #[arg(long)]
     local_memory_routines: bool,
@@ -199,6 +203,16 @@ struct LinkSideInputs {
     lookup_sites: Vec<LookupSiteSpec>,
     lookup_maps: HashMap<String, LookupSiteSpec>,
     update_sites: Vec<UpdateSiteSpec>,
+}
+
+#[derive(Deserialize)]
+struct RuntimeArrayLayout {
+    map_type: u32,
+    max_entries: u32,
+    elem_size: u32,
+    index_mask: u32,
+    value: u32,
+    array_type: u32,
 }
 
 #[derive(Deserialize)]
@@ -446,11 +460,20 @@ struct SymInfo {
 fn main() -> Result<()> {
     let args = Args::parse();
     let proof_mode = args.mode == LinkMode::Proof;
+    let runtime_array_layout: Option<RuntimeArrayLayout> = args.runtime_array_layout.as_ref()
+        .map(|path| -> Result<_> {
+            let bytes = fs::read(path).with_context(|| format!("read {}", path.display()))?;
+            Ok(serde_json::from_slice(&bytes)
+                .with_context(|| format!("parse runtime ARRAY layout {}", path.display()))?)
+        }).transpose()?;
     let bytes = fs::read(&args.input).with_context(|| format!("read {}", args.input.display()))?;
     let elf = object::File::parse(&*bytes)
         .with_context(|| format!("parse ELF {}", args.input.display()))?;
     if args.local_memory_routines && elf.architecture() != object::Architecture::X86_64 {
         bail!("--local-memory-routines requires x86-64 input");
+    }
+    if runtime_array_layout.is_some() && elf.architecture() != object::Architecture::X86_64 {
+        bail!("--runtime-array-layout requires x86-64 input");
     }
     let proof_input = elf.section_by_name(".native_link_abi").is_some();
     if !proof_mode && !proof_input {
@@ -510,6 +533,7 @@ fn main() -> Result<()> {
                 args.tail_count_relocs,
                 args.runtime_map_lookups && !proof_mode,
                 args.runtime_known_map_lookups && !proof_mode,
+                if proof_mode { None } else { runtime_array_layout.as_ref() },
                 args.local_memory_routines,
                 args.show,
             )?
@@ -2598,6 +2622,16 @@ mod tests {
         assert!(Args::try_parse_from(argv.into_iter().chain([
             "--runtime-map-lookups", "--runtime-known-map-lookups"]))
             .unwrap().runtime_known_map_lookups);
+    }
+
+    #[test]
+    fn runtime_array_layout_requires_explicit_runtime_dispatch() {
+        let argv = ["native-link", "--input", "p.o", "--symbol", "entry", "--output", "p.bin"];
+        assert!(Args::try_parse_from(argv).unwrap().runtime_array_layout.is_none());
+        assert!(Args::try_parse_from(argv.into_iter().chain(["--runtime-array-layout", "layout.json"])).is_err());
+        assert_eq!(Args::try_parse_from(argv.into_iter().chain([
+            "--runtime-map-lookups", "--runtime-array-layout", "layout.json"]))
+            .unwrap().runtime_array_layout, Some(PathBuf::from("layout.json")));
     }
 
     #[test]
