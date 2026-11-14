@@ -172,6 +172,8 @@
 
 **lane formal（新的 Codex lane，在本地 Codex 上跑；运营者 2026-11-14："M1–M6 新的一个 codex, 用 goal 设置好六个让它按顺序做, 这个和别的无关吧? 你可以开一个新的 worktree?"；协调者 2026-11-14T07:15:22Z）：第 4 节的 M1–M6，作为一个 Codex goal 按顺序做。**它只在 kprog/formal、新 submodule、.gitmodules 和自己的 todo 行里改动；M4、M6 改到 lane verified 的 service 和 B 生成用的 simulator C，先在 COORDINATION 和 verified 商定。用唯一的工作树（kprog/formal 与其他 lane 的路径分开，各自用 git commit --only 提交）。lane verified 的大任务保持原样：六应用 verified 路径和 LTO 配置。
 
+**lane 合并（运营者 2026-11-14："perf、verified、formal 需要3 个吗""不要互相等等"；协调者 2026-11-14T09:33:47Z）**：lane verified 并入 lane perf，kprog 留两条 Codex lane（perf、formal）和 lane C（omp）。perf 接手 verified 的全部任务和文件归属（链接器、加载器、shim、service、checked-sim-c 编译器）：顺序是 ① OTel 在等量工作下吞吐至少 1.20x（LTO：read、hash、LPM），② LTO 配置跑整应用（BCC 已通，Tracee、Katran 接着），③ 六应用 verified 路径剩下的应用；formal 的 M4/M6 改为和 perf 商定。**不互相等**：计时锁只给 CPU 0-7 上的计时运行用，功能和内核用例在各自的 CPU 上跑、不拿计时锁；镜像锁的独占只给镜像重建用，重建攒到一次做；一条 lane 等作业时在同一轮里用一条阻塞命令等，或者先做下一项；需要别的 lane 改的东西，自己按商定的范围改，写进 COORDINATION。
+
 ## 1. 性能（目标：六应用几何平均 native/JIT 1.20x–1.40x，来自原生代码）
 
 - **PERF inline ARRAY 退化诊断（2026-11-14，ad56c93b1）** 188582/run050542_885568 make0/appok，1×10s statsON/16–19/4vCPU16G，吞吐 **0.394x**、3549.1→7293.1ns/次，0 workload错误/0tiny；13/12测量程序、13 replacement日志及custom__generic两次EINVAL完整保留。native generation302的两snapshot在startup/warmup，缺实际测量末端窗，不认证等量工作或floor；既有0.980x/0.965x结果不改。完整run/4个counter snapshots/失败JIT dump/logs/分析归档 `runtime-array-otel-results.json/.tar.gz`。共享routine后续候选只检验代码体积原因假说，不把host字节减少当速度收益。
