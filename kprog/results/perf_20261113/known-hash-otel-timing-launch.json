@@ -1,0 +1,64 @@
+{
+  "recorded_at": "2026-11-14T03:24:59Z",
+  "source_commits": [
+    "48af2849d",
+    "eb0daffd9"
+  ],
+  "outer_pid": 153431,
+  "wait_own_pid": 144039,
+  "raw": "/workspaces/kprog-raw/perf/20261114-known-hash-otel-timing",
+  "counter_capture": "/workspaces/repository/corpus/results/perf-known-hash-otel-timing-20261114",
+  "command": [
+    "make",
+    "-f",
+    "kprog/perf/native-context/Makefile",
+    "known-map-otel-timing",
+    "KNOWN_MAP_PAYLOAD=/workspaces/repository/corpus/results/perf-known-hash-linker-20261114",
+    "KNOWN_MAP_TIMING_RAW=/workspaces/kprog-raw/perf/20261114-known-hash-otel-timing",
+    "KNOWN_MAP_TIMING_CAPTURE=/workspaces/repository/corpus/results/perf-known-hash-otel-timing-20261114",
+    "KNOWN_MAP_TIMING_STATE=/var/tmp/kprog-tmp/perf/known-hash-otel-timing"
+  ],
+  "resources": {
+    "cpus": "0-7",
+    "vcpus": 8,
+    "guest_memory": "64G",
+    "host_as_bytes": 85899345920,
+    "timing_lock": "exclusive, then image lock shared"
+  },
+  "protocol": {
+    "samples": 3,
+    "seconds": 180,
+    "stats": 1,
+    "warmup": "frozen existing driver",
+    "selected_switch": "--runtime-known-map-lookups",
+    "kinds": "exact proven arrays and hash family"
+  },
+  "artifacts": [
+    {
+      "path": "kprog/perf/native-context/Makefile",
+      "sha256": "88b86d96833fe3828259f32f74b6a8a8f3539b261c8a31de6a4a2cf7658927ba"
+    },
+    {
+      "path": "kprog/perf/may29-image/eqcodex-capture.py",
+      "sha256": "fb784be680b194ba00473279d61fb2a03e3181246be664ca37f8e7992eda15d2"
+    },
+    {
+      "path": "corpus/results/perf-known-hash-linker-20261114/native-link-known-on",
+      "sha256": "39cabea8345861b454c2622d43cc34288531631765da4e54fd1ed15b3495d43a"
+    },
+    {
+      "path": "corpus/results/perf-known-hash-linker-20261114/native-link.real",
+      "sha256": "619ddc7799fc541b76ccf999a30ad3f4982f46a746af775518cdd648eef6e534"
+    },
+    {
+      "path": "corpus/results/perf-otel-upstream-20261114/manifest-context.json",
+      "sha256": "430b26ab4be8fd501a819f48c0451895d86bf90606533958a05639ac8a51573f"
+    },
+    {
+      "path": "corpus/results/perf-otel-upstream-20261114/otelcol-ebpf-profiler.native.o",
+      "sha256": "7e6781470c8d4a1d2669cfd262405d11095e5c2a2cbf591a675e578718d6b644"
+    }
+  ],
+  "outcome": null,
+  "scope": "Queued affected OTel subset after current array-only run144039. No outcome polling after launch. Same frozen workload/source/candidate manifest and shared kernel/image, no equal-work/floor or optimized hash performance outcome claimed. Existing custom__generic failure may persist until actual source-map deployment; retain all measurements and counters/errors."
+}
