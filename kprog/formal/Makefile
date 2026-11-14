@@ -705,4 +705,4 @@ check:
 
 .PHONY: mature
 mature:
-	cd mature && lake build KProgMature @lnsym/+Tests.ConditionalSelectTest @lnsym/+Tests.XZRTest
+	cd mature && lake build KProgMature @lnsym/+Tests.ConditionalSelectTest @lnsym/+Tests.XZRTest @lnsym/+Tests.MultiplyDivideTest

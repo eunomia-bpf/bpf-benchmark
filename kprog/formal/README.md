@@ -8,7 +8,7 @@ kprog belong in those forks. No replacement ISA semantics is defined locally.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
-| AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `093c3a4d9eea` | Lean 4.35.0 |
+| AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `7f683544abb7` | Lean 4.35.0 |
 | x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `74a2e2849cde` | Lean 4.32.0-rc1 |
 | Clight | [eunomia-bpf/clean](https://github.com/eunomia-bpf/clean), `external/clean/export` | `123f7f7767e2` | Lean 4.32.1 |
 
@@ -33,7 +33,7 @@ CompCert front end and the Lean export/semantics have separate trust claims.
 
 ## Operation coverage (M2 in progress)
 
-LNSym `093c3a4d9eea0ea74b9d31132ff3050a4f3f2811`, x86lean `74a2e2849cde10fce9035c6abb7fdd49968b2915`.
+LNSym `7f683544abb7961ba4697e4221b7bfd167872049`, x86lean `74a2e2849cde10fce9035c6abb7fdd49968b2915`.
 
 Source inspection, not refinement proofs or conformance results. `present` means an execution path exists; `partial`/`missing` remain M2 work; `layer` identifies linking/ABI transport above an existing ISA form. Memory permissions, initialization, fault prefixes, exclusive ordering and ABI require explicit relations.
 
@@ -46,6 +46,12 @@ checks; they are not hardware differential results or migrated refinement counts
 LNSym `093c3a4d9eea` also fixes FMOV field31 to use XZR/WZR rather than SP.
 The combined build passed 123 Lake jobs including the conditional-select suite
 and the existing XZR suite with four new FMOV regressions (`m2-fmov-zr-1`).
+
+LNSym `7f683544abb7` adds MSUB, UMADDL/UMULL, SMADDL and UMULH plus W/X UDIV.
+Twenty-nine encoded vectors and an invalid-width check passed in the combined
+124-job build (`m2-multiply-divide/build-1`), covering aliasing, zero division,
+32-bit truncation, signed widening, high-half multiplication and the GPR/flag frame.
+These are finite regression checks; M2 remains open for the remaining forms.
 
 ### AArch64: 74 simulator operations
 
@@ -62,10 +68,10 @@ and the existing XZR suite with four new FMOV regressions (`m2-fmov-zr-1`).
 | 0x08 | `SHIFT_IMM` | partial | [DPI/Bitfield.lean](external/LNSym/Arm/Insts/DPI/Bitfield.lean) | LSL/LSR/ASR aliases exist; ROR requires scalar EXTR, absent |
 | 0x09 | `SHIFT_REG` | present | [DPR/Data_processing_two_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_two_source.lean) | LSLV/LSRV/ASRV/RORV |
 | 0x0a | `MADD` | present | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | MUL aliases MADD with Ra=XZR |
-| 0x0b | `MSUB` | missing | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | Only MADD executes; other valid forms explicitly Unimplemented |
+| 0x0b | `MSUB` | present | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | W/X forms; accumulator captured before destination write |
 | 0x0c | `MUL` | present | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | MUL aliases MADD with Ra=XZR |
-| 0x0d | `UMULL` | missing | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | Only MADD executes; other valid forms explicitly Unimplemented |
-| 0x0e | `UDIV` | missing | [DPR/Data_processing_two_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_two_source.lean) | Only variable shifts execute |
+| 0x0d | `UMULL` | present | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | UMADDL alias with Ra=XZR |
+| 0x0e | `UDIV` | present | [DPR/Data_processing_two_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_two_source.lean) | W/X forms; divisor zero returns zero, flags unchanged |
 | 0x0f | `MVN` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
 | 0x10 | `NEG` | partial | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted forms exist; add/sub extended-register class absent |
 | 0x11 | `EXTR` | missing | [Arm/Decode/DPR.lean](external/LNSym/Arm/Decode/DPR.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | Scalar EXTR absent; SIMD extract is different |
@@ -97,7 +103,7 @@ and the existing XZR suite with four new FMOV regressions (`m2-fmov-zr-1`).
 | 0x2b | `STORE_Q0` | partial | [LDST/Reg_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_imm.lean); [LDST/Reg_unscaled_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_unscaled_imm.lean) | SIMD immediate/unscaled exists; pre-index/register-offset absent |
 | 0x2c | `TST_BIC_REG` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
 | 0x2d | `ANDS_REG` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
-| 0x2e | `UMULH` | missing | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | Only MADD executes; other valid forms explicitly Unimplemented |
+| 0x2e | `UMULH` | present | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | Full 128-bit product, high64 result; Ra ignored |
 | 0x2f | `SXTW` | present | [DPI/Bitfield.lean](external/LNSym/Arm/Insts/DPI/Bitfield.lean) | BFM/SBFM/UBFM and extension aliases |
 | 0x30 | `SUBS_IMM` | present | [DPI/Add_sub_imm.lean](external/LNSym/Arm/Insts/DPI/Add_sub_imm.lean) | S/op/Rd encode CMP/CMN |
 | 0x31 | `ADDS_IMM` | present | [DPI/Add_sub_imm.lean](external/LNSym/Arm/Insts/DPI/Add_sub_imm.lean) | S/op/Rd encode CMP/CMN |
@@ -110,12 +116,12 @@ and the existing XZR suite with four new FMOV regressions (`m2-fmov-zr-1`).
 | 0x38 | `STLXR` | missing | [Arm/Decode/LDST.lean](external/LNSym/Arm/Decode/LDST.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | Exclusive class, monitor/outcome state absent; LDXR also needed |
 | 0x39 | `LDRSW` | missing | [LDST/Reg_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_imm.lean); [LDST/Reg_unscaled_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_unscaled_imm.lean) | Signed GPR loads absent |
 | 0x3a | `CMN_REG` | partial | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted forms exist; add/sub extended-register class absent |
-| 0x3b | `UMADDL` | missing | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | Only MADD executes; other valid forms explicitly Unimplemented |
+| 0x3b | `UMADDL` | present | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | Unsigned32 multiplicands widened before multiplication |
 | 0x3c | `SXTB` | present | [DPI/Bitfield.lean](external/LNSym/Arm/Insts/DPI/Bitfield.lean) | BFM/SBFM/UBFM and extension aliases |
 | 0x3d | `CSINV` | present | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases; 24 encoded W/X branch/ZR/wrap/frame checks pass |
 | 0x3e | `CSINC` | present | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases; 24 encoded W/X branch/ZR/wrap/frame checks pass |
 | 0x3f | `LDRSH` | missing | [LDST/Reg_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_imm.lean); [LDST/Reg_unscaled_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_unscaled_imm.lean) | Signed GPR loads absent |
-| 0x40 | `SMADDL` | missing | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | Only MADD executes; other valid forms explicitly Unimplemented |
+| 0x40 | `SMADDL` | present | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | Signed32 multiplicands widened before multiplication |
 | 0x41 | `CNEG` | present | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases; 24 encoded W/X branch/ZR/wrap/frame checks pass |
 | 0x42 | `ADDS_REG` | partial | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted forms exist; add/sub extended-register class absent |
 | 0x43 | `BICS_REG` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
