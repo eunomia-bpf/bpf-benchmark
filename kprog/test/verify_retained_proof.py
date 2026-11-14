@@ -40,6 +40,8 @@ def replay(args):
     completed = False
     result = dict(scope='Stock-only retained proof replay; submission cancelled after verification.',
                   native=str(args.native), proof=str(args.proof), context=str(args.context))
+    if args.checked_source:
+        result['scope'] = 'Load-only checked compiler replay; stock verification precedes native compilation.'
     replies = []
     failures = []
     thread = None
