@@ -247,7 +247,7 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 		__u64 q[KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)];  \
 	} __a64_stack;                                            \
 	volatile __u64 __a64_stack_payload[ARM64_SIM_STACK_PAYLOAD_WORDS]; \
-	__u8 __a64_stack_tag[ARM64_SIM_TAG_STORAGE_BYTES(ARM64_SIM_STACK_BYTES)] __attribute__((aligned(8))) = {};\
+	__u8 __a64_stack_tag[ARM64_SIM_TAG_STORAGE_BYTES(ARM64_SIM_STACK_BYTES)] __attribute__((aligned(8))) = {0};\
 	__s64 __a64_sp = 0
 #else
 #define ARM64_SIM_L_DECLARE_STACK()                                         \
@@ -256,7 +256,7 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 		__u64 q[KPROG_ARM64_STACK_WORDS(1U)];                     \
 	} __a64_stack;                                            \
 	__u64 __a64_stack_payload[KPROG_ARM64_STACK_WORDS(1U)];            \
-	__u8 __a64_stack_tag[ARM64_SIM_TAG_STORAGE_BYTES(1U)] __attribute__((aligned(8))) = {};     \
+	__u8 __a64_stack_tag[ARM64_SIM_TAG_STORAGE_BYTES(1U)] __attribute__((aligned(8))) = {0};     \
 	__s64 __a64_sp = 0
 #endif
 
@@ -299,8 +299,7 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 	__a64_x0_tag = ARM64_SIM_TAG_ABI
 
 #define ARM64_SIM_ENTRY_SKB(CTX)                                            \
-	struct arm64_sim_skb_abi __a64_sim_abi = {                         \
-	};                                                               \
+	struct arm64_sim_skb_abi __a64_sim_abi = {0};                       \
 	struct __sk_buff *__a64_sim_skb_ctx = (CTX);                      \
 	__u8 __a64_sim_abi_kind = KPROG_ABI_KIND_SKB;                    \
 	ARM64_SIM_L_DECLARE_STATE();                                      \
@@ -316,7 +315,7 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_SKB, "raw context ABI must have its own kind");
 
 #define ARM64_SIM_ENTRY_RAW(CTX)                                            \
-	struct arm64_sim_skb_abi __a64_sim_abi = {};                       \
+	struct arm64_sim_skb_abi __a64_sim_abi = {0};                       \
 	struct __sk_buff *__a64_sim_skb_ctx = (struct __sk_buff *)0;       \
 	__u8 __a64_sim_abi_kind = ARM64_SIM_ABI_KIND_RAW;                                      \
 	ARM64_SIM_L_DECLARE_STATE();                                      \

@@ -264,8 +264,8 @@ struct x86_sim_stack_value { void *pointer; __u8 tag; };
 #define X86_SIM_L_SV_TAG(I) __x86_stack_value_tags[(I)]
 #define X86_SIM_L_SV_PTR(I) __x86_stack_value_ptrs[(I)]
 #define X86_SIM_L_DECLARE_STACK_VALUES() \
-    __u8 __x86_stack_value_tags[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]={}; \
-    void *__x86_stack_value_ptrs[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]={}
+    __u8 __x86_stack_value_tags[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]={0}; \
+    void *__x86_stack_value_ptrs[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]={0}
 #define X86_SIM_L_SV_EACH(OP) \
     _Pragma("unroll") \
     for (__u32 __x86_sv_i=0; __x86_sv_i<KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES); ++__x86_sv_i) { OP(__x86_sv_i) }
@@ -299,7 +299,7 @@ struct x86_sim_stack_value { void *pointer; __u8 tag; };
          __x86_sv_result.tag=X86_SIM_L_SV_TAG(I); \
          if (__x86_sv_result.tag==X86_SIM_TAG_STACK) __x86_sv_result.pointer=X86_SIM_L_SV_PTR(I); } } while(0);
 #define X86_SIM_L_STACK_VALUES_READ(INDEX, WIDTH) \
-    ({ struct x86_sim_stack_value __x86_sv_result={}; __u64 __x86_sv_at=(INDEX); \
+    ({ struct x86_sim_stack_value __x86_sv_result={0}; __u64 __x86_sv_at=(INDEX); \
        if ((__s64)__x86_sv_at-(__s64)X86_SIM_STACK_BYTES>=X86_SIM_L_STACK_SP() && X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)==X86_WIDTH_64) { X86_SIM_L_SV_EACH(X86_SIM_L_SV_READ_ONE) } \
        __x86_sv_result; })
 /* Ordinary callees keep the caller's allocated frame. Ghost facts for older
@@ -467,7 +467,7 @@ struct x86_sim_state {
 #define X86_SIM_L_ENTRY_STACK_BASE() NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_SP)
 
 #define X86_SIM_ENTRY_XDP(CTX)                                               \
-	struct x86_sim_xdp_abi __x86_sim_abi = {};                                                               \
+	struct x86_sim_xdp_abi __x86_sim_abi = {0};                                                               \
 	struct __sk_buff *__x86_sim_skb_ctx = (struct __sk_buff *)0;      \
 	__u8 __x86_sim_abi_kind = KPROG_ABI_KIND_XDP;                    \
 	X86_SIM_L_DECLARE_STATE();                                           \
@@ -480,7 +480,7 @@ struct x86_sim_state {
 	__x86_rdi_tag = X86_SIM_TAG_ABI
 
 #define X86_SIM_ENTRY_SKB(CTX)                                               \
-	struct x86_sim_skb_abi __x86_sim_abi = {};                 \
+	struct x86_sim_skb_abi __x86_sim_abi = {0};                 \
 	struct __sk_buff *__x86_sim_skb_ctx = (CTX);                      \
 	__u8 __x86_sim_abi_kind = KPROG_ABI_KIND_SKB;                    \
 	X86_SIM_L_DECLARE_STATE();                                           \
@@ -497,7 +497,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
                "raw context must not acquire packet ABI pointer tags");
 
 #define X86_SIM_ENTRY_RAW(CTX)                                               \
-	struct x86_sim_skb_abi __x86_sim_abi = {};                       \
+	struct x86_sim_skb_abi __x86_sim_abi = {0};                       \
 	struct __sk_buff *__x86_sim_skb_ctx = (struct __sk_buff *)0;      \
 	__u8 __x86_sim_abi_kind = X86_SIM_ABI_KIND_RAW;                                     \
 	X86_SIM_L_DECLARE_STATE();                                       \
@@ -1431,7 +1431,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			if ((OP) == X86_OP_MOVSX_LOAD)                    \
 				__x86_l_value = x86_sign_extend(           \
 					__x86_l_value, __x86_l_mem_width);  \
-            struct x86_sim_stack_value __x86_mv_alias={}; \
+            struct x86_sim_stack_value __x86_mv_alias={0}; \
             if (X86_SIM_L_REG_TAG(SRC)==X86_SIM_TAG_STACK) \
                 __x86_mv_alias=X86_SIM_L_STACK_VALUES_READ( \
                     (__u64)(long)__x86_l_addr-(__u64)(long)&__x86_stack_mem.b[0],__x86_l_mem_width); \

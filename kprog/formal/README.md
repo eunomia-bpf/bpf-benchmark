@@ -888,6 +888,16 @@ stream is byte-identical to the measured after-object input. Numeric6304PASS
 and the existing288 routing failures remain unchanged. Full raw evidence is
 in `/workspaces/kprog-raw/formal/m4-bpf-abi`.
 
+The next M4 slice replaces the eleven GNU empty aggregate initializers in
+both shared simulator headers with standard C zero initialization. Both actual
+raw entrypoints now export through CompCert; the expanded dispatchers proceed
+to the next GNU statement-expression failure. The entry exports still exceed
+Lean's default recursion depth in the exporter's nested sequence syntax, so
+entry typechecking and complete-handler acceptance remain open. The matched
+Cilium compiler input differs only in initializer syntax; all allocated bytes
+and202 relocations remain equal. `make clight` passes. Evidence and the two
+entry typecheck failures remain in `/workspaces/kprog-raw/formal/m4-standard-c`.
+
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight
 handler exports, and matched OTel preprocessor expansion remain to do. Preserve
