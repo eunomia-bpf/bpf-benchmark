@@ -1,0 +1,128 @@
+{
+  "recorded": "2026-11-14T06:15:12Z",
+  "scope": "Read-only mapping of the complete latest Katran checked-sim-c complexity failure; no new run or semantic fix",
+  "worklist": "kprog/results/verified_20261114/katran-complexity-worklist.json",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-katran-complexity",
+  "inspection": {
+    "worklist": "/workspaces/repository/kprog/results/verified_20261114/katran-complexity-worklist.json",
+    "scope": "Read-only native P evidence for every request already in the full failure class",
+    "no_new_program_runs": true,
+    "no_model_change": true,
+    "requests": [
+      {
+        "application": "katran",
+        "body_group": 1,
+        "retained_archive": "/workspaces/kprog-raw/verified/20261114-lto-katran/control/service.tar.gz",
+        "retained_archive_sha256": "833b73b2c76e81323c039d2b14e55da96108a177436c104d398f620b1174786d",
+        "retained_member": "service/requests/1.failure.tar.gz",
+        "native_symbol": "balancer_ingress",
+        "submitted_native_sha256": "ba252e0372d100f34b60a0deb3f0a7ccc16b632c3c1a5eb40e9b13d31e558c20",
+        "files": {
+          "bpf-command.json": {
+            "bytes": 211,
+            "sha256": "b1d0f65c44d5d36fdeae222503e0b3d16d93cc35ca5be2265221c725451f316b"
+          },
+          "verify.stderr": {
+            "bytes": 126851,
+            "sha256": "e3174401d44cd612482fe969c00067d72f45839786d54dfc885d1d67e97516fd"
+          },
+          "kernel.metadata.json": {
+            "bytes": 2470,
+            "sha256": "5b3f167b315014dbc1b744f07298d1353593900c33800cad6f9c8ee0fadd96db"
+          },
+          "trusted_x86.proof.o": {
+            "bytes": 11184,
+            "sha256": "1e0279a2edf2837884135ac19c6c87b9ead76ac450d3a9bc1fe6f8ea71767b43"
+          },
+          "trusted_x86.bpf.c": {
+            "bytes": 301529,
+            "sha256": "110d4b7f86850992acedb3d82967c45a1c3262d3b38b590a39aecbcb71073c76"
+          },
+          "bpf.disassembly": {
+            "bytes": 1502633,
+            "sha256": "dbadf1cdfb8c07f1b1b4016d998e865a2b18a7d6db10e0d8f5b807149bd19775"
+          },
+          "command.json": {
+            "bytes": 264,
+            "sha256": "b26b19bb6eae609e26c618339edfcbb7ed4ecc0943b07f9a3a7523b93b7558bf"
+          },
+          "bpf-objdump.stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "native.disassembly": {
+            "bytes": 74877,
+            "sha256": "83ae451acee893190fb5e4781037c66ef1af76c2c351b10d97456b2178acc31f"
+          },
+          "trusted_x86.bpf.o": {
+            "bytes": 1910056,
+            "sha256": "aa07a32f00e1f5f5f2ac39bffdd78e8ddfb7acf11a52339b35d5aa3b2bdac7e2"
+          },
+          "source-identities.json": {
+            "bytes": 2726,
+            "sha256": "eda2c4efa9dbc9171427b5603692e7571ad4bdf22e543d03410909940978a58c"
+          },
+          "objdump.stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      }
+    ],
+    "raw_removed": false
+  },
+  "verifier": {
+    "processed": 1000001,
+    "limit": 1000000,
+    "total_states": 59837,
+    "peak_states": 1539
+  },
+  "mapped_regions": [
+    {
+      "native_pc": "0x194a",
+      "native_call": "map_lookup_elem",
+      "generated_source_line": 5536,
+      "bpf_call_pc": 20058,
+      "unknown_byte_release_pc": [
+        20062,
+        20077
+      ],
+      "released_byte_count": 8,
+      "subsequent_unknown_read_pc": [
+        20078,
+        20093
+      ],
+      "subsequent_unknown_read_count": 16
+    },
+    {
+      "native_pc": "0x195c",
+      "native_call": "ktime_get_ns",
+      "generated_source_line": 5571,
+      "bpf_call_pc": 20298,
+      "unknown_byte_release_pc": [
+        20302,
+        20317
+      ],
+      "released_byte_count": 8,
+      "subsequent_unknown_read_pc": [
+        20318,
+        20333
+      ],
+      "subsequent_unknown_read_count": 16
+    }
+  ],
+  "model_sites": {
+    "stack_release": "kprog/x86/x86_sim_local_bpf.h:749",
+    "helper_clobbers": "kprog/x86/x86_sim_local_bpf.h:3081"
+  },
+  "next_candidate": "Use one fresh arbitrary64 value for each fully released aligned eight-byte word; retain independent partial-edge bytes. Establish equal allowed byte states and preserve caller bytes/ghost facts. Not implemented or verified here.",
+  "complexity_root_cause_confirmed": false,
+  "model_changed": false,
+  "application_passed": false,
+  "raw_removed": false,
+  "archive": {
+    "path": "kprog/results/verified_20261114/katran-complexity-results.tar.gz",
+    "sha256": "8e6b7089de0b7ccbc9ce9ea6bd2f514f8a6832820766cf23b10f14b464b539e8",
+    "bytes": 747448
+  }
+}
