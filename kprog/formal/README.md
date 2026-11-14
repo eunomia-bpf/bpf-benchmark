@@ -8,7 +8,7 @@ kprog belong in those forks. No replacement ISA semantics is defined locally.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
-| AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `88fcbc0754ee` | Lean 4.35.0 |
+| AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `faa8ac3504f5` | Lean 4.35.0 |
 | x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `74a2e2849cde` | Lean 4.32.0-rc1 |
 | Clight | [eunomia-bpf/clean](https://github.com/eunomia-bpf/clean), `external/clean/export` | `123f7f7767e2` | Lean 4.32.1 |
 
@@ -33,7 +33,7 @@ CompCert front end and the Lean export/semantics have separate trust claims.
 
 ## Operation coverage (M2 in progress)
 
-LNSym `88fcbc0754eef2b62865c8dd3860d2a0259b215e`, x86lean `74a2e2849cde10fce9035c6abb7fdd49968b2915`.
+LNSym `faa8ac3504f57ed396a4114742a428cd814be43f`, x86lean `74a2e2849cde10fce9035c6abb7fdd49968b2915`.
 
 Source inspection, not refinement proofs or conformance results. `present` means an execution path exists; `partial`/`missing` remain M2 work; `layer` identifies linking/ABI transport above an existing ISA form. Memory permissions, initialization, fault prefixes, exclusive ordering and ABI require explicit relations.
 
@@ -114,6 +114,14 @@ lacks permission/translation/LSE2 fault handling. ARM source statuses are now
 70 present, zero missing, two partial and two linking-layer labels; this does
 not complete M2's remaining pair/fault and retained-environment work.
 
+LNSym `faa8ac3504f5` fixes the shared pair executor so SP-alignment faults do
+not advance PC. The 147-job combined build and 110-job symbolic check passed
+75 encoded pair loads, 68 stores and 75 refusal paths across W/X/S/D/Q, LDPSW,
+signed-offset/pre/post addressing, ZR/SP, V31, aliases, sign/upper bits, writeback
+and both access-history frames (`m2-pair/build-2`). LDP/STP remain `partial`
+because total memory still omits permission, initialization, LSE2 granularity
+and ordered partial-fault behavior. This audit does not narrow those obligations.
+
 ### AArch64: 74 simulator operations
 
 | Code | Operation | Source status | LNSym source (Arm/Insts unless Arm/) | Constraint / work |
@@ -151,8 +159,8 @@ not complete M2's remaining pair/fault and retained-environment work.
 | 0x1e | `CSET` | present | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases; 24 encoded W/X branch/ZR/wrap/frame checks pass |
 | 0x1f | `LOAD` | present | [LDST/Reg_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_imm.lean); [LDST/Reg_unscaled_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_unscaled_imm.lean) | Unsigned GPR sizes B/H/W/X; unsigned/unscaled/pre/post/register offsets |
 | 0x20 | `STORE` | present | [LDST/Reg_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_imm.lean); [LDST/Reg_unscaled_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_unscaled_imm.lean) | GPR sizes B/H/W/X; unsigned/unscaled/pre/post/register offsets |
-| 0x21 | `LDP` | partial | [LDST/Reg_pair.lean](external/LNSym/Arm/Insts/LDST/Reg_pair.lean) | Pre/post/offset exists; pair width, overlap, LSE2/fault profiles need audit |
-| 0x22 | `STP` | partial | [LDST/Reg_pair.lean](external/LNSym/Arm/Insts/LDST/Reg_pair.lean) | Pre/post/offset exists; pair width, overlap, LSE2/fault profiles need audit |
+| 0x21 | `LDP` | partial | [LDST/Reg_pair.lean](external/LNSym/Arm/Insts/LDST/Reg_pair.lean) | W/X/S/D/Q, LDPSW, three modes and SP fault PC audited; LSE2/permission/ordered-fault profiles remain |
+| 0x22 | `STP` | partial | [LDST/Reg_pair.lean](external/LNSym/Arm/Insts/LDST/Reg_pair.lean) | W/X/S/D/Q, LDPSW, three modes and SP fault PC audited; LSE2/permission/ordered-fault profiles remain |
 | 0x23 | `FMOV` | present | [DPSFP/Conversion_between_FP_and_Int.lean](external/LNSym/Arm/Insts/DPSFP/Conversion_between_FP_and_Int.lean) | Both GPR directions use ZR for field31; four encoded W/X ZR regressions pass |
 | 0x24 | `CNT` | present | [DPSFP/Advanced_simd_two_reg_misc.lean](external/LNSym/Arm/Insts/DPSFP/Advanced_simd_two_reg_misc.lean) | CNT 8B/16B; five UADDLV arrangements; upper clearing, alias and V31 checks |
 | 0x25 | `UADDLV` | present | [DPSFP/Advanced_simd_across_lanes.lean](external/LNSym/Arm/Insts/DPSFP/Advanced_simd_across_lanes.lean) | CNT 8B/16B; five UADDLV arrangements; upper clearing, alias and V31 checks |
