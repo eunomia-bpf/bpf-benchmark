@@ -1,0 +1,7 @@
+{
+  "application": "tracee/monitor",
+  "entry": "trace_ret_vfs_write",
+  "source_bpf": "/workspaces/kprog-raw/var-tmp/CL/census-inputs/inputs/bpf-resources/f3628a47ca845927/f3628a47ca845927e0aa238d08132e1d29f30b740a602e0c419c77e39da1abca.bpf.o",
+  "inventory": "/workspaces/kprog-raw/perf/20261114-census-resume/ready/queues/0/inventory.json",
+  "scope": "Retained producer resource source for subsequent stock-only replay; body compilation remains queued."
+}
