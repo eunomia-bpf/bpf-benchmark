@@ -66,8 +66,13 @@ def execute(case, text):
     observed = source.with_suffix(".i").read_bytes()
     assert observed == expected
     assert obj.stat().st_size > 0
+    reference = work / "diagnostics-enabled.bpf.o"
+    run([clang, *(flag for flag in module.COMPILE_FLAGS if flag != "-w"),
+         "-c", source.with_suffix(".i"), "-o", reference])
+    assert obj.read_bytes() == reference.read_bytes()
     return dict(case=case, pieces=len(parts), preprocessed_bytes=len(observed),
-                token_join_sha256=hashlib.sha256(observed).hexdigest(), exact_join=True)
+                token_join_sha256=hashlib.sha256(observed).hexdigest(), exact_join=True,
+                warning_analysis_object_bytes_equal=True)
 
 observations = [execute("valid", source_text),
                 execute("preprocessor-error", source_text.replace("x86_l_2:\n", "x86_l_2:\n#error deliberate preprocessing failure\n"))]

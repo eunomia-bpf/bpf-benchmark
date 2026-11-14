@@ -23,7 +23,10 @@ sys.modules[_SPEC.name] = gen
 _SPEC.loader.exec_module(gen)
 
 
-COMPILE_FLAGS = ["-g", "-O3", "-mcpu=v4", "-target", "bpf",
+# Generated functions can exhaust memory in Clang's warning CFG analysis
+# before code generation. -w skips that diagnostic-only analysis; syntax
+# errors and the optimization/code-generation flags remain unchanged.
+COMPILE_FLAGS = ["-w", "-g", "-O3", "-mcpu=v4", "-target", "bpf",
                  "-mllvm", "-bpf-stack-size=4096", "-D__TARGET_ARCH_x86",
                  "-I", ROOT / "vendor/libbpf/include/uapi", "-I", ROOT / "vendor/libbpf/src",
                  "-I", "/usr/include/x86_64-linux-gnu"]

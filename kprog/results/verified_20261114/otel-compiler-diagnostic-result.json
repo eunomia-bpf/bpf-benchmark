@@ -1,0 +1,115 @@
+{
+  "recorded": "2026-11-14T08:45:06.753191+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker",
+  "baseline": {
+    "resource": {
+      "returncode": 1,
+      "wait_status": 256,
+      "wall_seconds": 847.9987704220039,
+      "user_seconds": 822.206355,
+      "system_seconds": 15.925962,
+      "max_rss_kib": 50064692,
+      "measurement": "os.wait4 child-specific rusage; Linux KiB",
+      "compiler_invoked": true
+    },
+    "exit_code": 1,
+    "error": "LLVM ERROR: out of memory",
+    "stack_stage": [
+      "clang::CFGReverseBlockReachabilityAnalysis::mapReachability",
+      "clang::sema::AnalysisBasedWarnings::IssueWarnings",
+      "clang::Sema::PopFunctionScopeInfo"
+    ],
+    "before_llvm_optimization": true,
+    "clang_bitcode_produced": false,
+    "original_guest_sigkill_cause_confirmed": false,
+    "compiler_log_sha256": "bae64248717f2d889e1aa2a768a4359ed4ffc48fc3944e76ef573d25ddf668a8"
+  },
+  "fix": {
+    "scope": "Add -w only to generated simulator C compiler flags; Clang skips analysis-based warnings when IgnoreAllWarnings is set. No optimization/input/verifier/model/ABI change.",
+    "source": "https://github.com/llvm/llvm-project/blob/llvmorg-18.1.3/clang/lib/Sema/AnalysisBasedWarnings.cpp#L2336-L2341",
+    "preprocess_control": [
+      {
+        "case": "valid",
+        "pieces": 4,
+        "preprocessed_bytes": 89517,
+        "token_join_sha256": "b88248193ef090456bd225181a251bcb6d1031265d63f43be17d36b43485ad4d",
+        "exact_join": true,
+        "warning_analysis_object_bytes_equal": true
+      },
+      {
+        "case": "preprocessor-error",
+        "commands": 3,
+        "error_propagated": true
+      }
+    ],
+    "actual_program_control": {
+      "source": "Actual Tracee registered-service request1 successful preprocessed sim C",
+      "source_bytes": 899215,
+      "source_sha256": "7e94217556b3291a99299b9386eec5cfeda9896c7cae36b8eedf4ecaf3a2c047",
+      "object_bytes_equal": true,
+      "object_bytes": 23216,
+      "object_sha256": "10acde75dd23638893c0c0f80fd46278d23217c4a71a8fe144116c5b4a4350bb",
+      "commands": [
+        {
+          "mode": "warnings-enabled",
+          "command": [
+            "taskset",
+            "-c",
+            "8-14",
+            "kprog/stock-path/bin/clang",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/diagnostic-fix/actual-tracee-control/trusted_x86.bpf.i",
+            "-o",
+            "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/diagnostic-fix/actual-tracee-control/warnings-enabled.o"
+          ],
+          "returncode": 0
+        },
+        {
+          "mode": "warnings-disabled",
+          "command": [
+            "taskset",
+            "-c",
+            "8-14",
+            "kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/diagnostic-fix/actual-tracee-control/trusted_x86.bpf.i",
+            "-o",
+            "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/diagnostic-fix/actual-tracee-control/warnings-disabled.o"
+          ],
+          "returncode": 0
+        }
+      ]
+    },
+    "large_input_retry_pending": true,
+    "whole_app_certification": false
+  }
+}
