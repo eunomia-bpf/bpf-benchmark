@@ -1,0 +1,50 @@
+{
+  "writer_outer_pid": 73411,
+  "make_exit": 0,
+  "started": "2026-11-14T00:15:28Z",
+  "finished": "2026-11-14T00:18:13Z",
+  "current_image": "sha256:0bb7d4be1f0a9c4bb015ee20d14fb9ba26e56da9f84310a501257ae5376e084c",
+  "image_tar_config": "blobs/sha256/b3cd27c1fc94c23192834b5c60390231b7c3788e6bfaa4c1a0c3cdac3f344efb",
+  "superseded": "sha256:73985a057359241030b7f1181a64e6253fe81e567813e90e78a19e208d26d9a2",
+  "cleanup": "already-absent",
+  "core_config_modules_unchanged": true,
+  "before_after_hashes": [
+    "2667103e0fbb3fc54467f59bb15ef0cdc128e54ca7c30d7718e66d0199c4e1ec  /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage",
+    "f3743c05960fc700e29f31e0035a23cdd4b2500d5e6e7542984d5f6fba75babe  /workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+    "0b75fe318542db6698950f2b2ce5163e867118317fe61c538c4e7de7a1357163  /workspaces/.agent-state/kprog-ck/build-x86/.config",
+    "5a9f0b3b0a6a1f633a9f4227dd7bbfa0580bdfdc557a788712079e9c14a27fa7  /workspaces/repository/kinsn/module/x86/build/bpf_x86_native_lab.ko",
+    "c1338358c52b8962dbb2383a66b47755eb7f75920288c43fea13e86743b65db3  /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko"
+  ],
+  "canonical_hashes": [
+    "59e968a37fbb470daae49d845c55d5e73cb26575ecaeccbcc34d0e2006bfec19  /workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.so",
+    "3d6ea0a51155d4a5338443c0e8684f14e83bc5f8fee3362323e632f6fecc0a30  /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+    "5a9f0b3b0a6a1f633a9f4227dd7bbfa0580bdfdc557a788712079e9c14a27fa7  /workspaces/repository/kinsn/module/x86/build/bpf_x86_native_lab.ko",
+    "c1338358c52b8962dbb2383a66b47755eb7f75920288c43fea13e86743b65db3  /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko"
+  ],
+  "native_image_files_before": 1252,
+  "native_image_files_after": 1252,
+  "native_payload_changes": [],
+  "stage_differences": [],
+  "deployed": [
+    "Optional original-BTF .ksyms kernel kfunc binding and weak-address handling",
+    "Optional typed scalar/pointer/void generated model and caller state clobber"
+  ],
+  "validation": "Prior kernel/model subsets passed; canonical deployment only, no new whole-application certification",
+  "new_census": {
+    "outer_pids": [
+      73412,
+      73413,
+      73414
+    ],
+    "remaining_bodies": [
+      71,
+      71,
+      70
+    ],
+    "started": "2026-11-14T00:18:13Z"
+  },
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-kfunc-refresh",
+  "archive": "kfunc-refresh-completed.tar.gz",
+  "benchmark_settings_changed": false,
+  "raw_data_removed": false
+}
