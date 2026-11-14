@@ -1,0 +1,37 @@
+{
+  "scope": "Default-off kernel_data_layout selected-entry global binding; source/scratch only",
+  "host_make_exit": 0,
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-entry-data",
+  "host_log": "/workspaces/kprog-raw/verified/20261114-kfunc-refresh/entry-data-host-roundtrip.log",
+  "changes": [
+    "Read symbol names from canonical selected-entry ELF; bind only those original data symbols",
+    "Cache entry extraction by native content, linker identity and selected entry; reuse it in kernel linking",
+    "Keep default data layout and existing bound-service extraction from kernel P"
+  ],
+  "checks": [
+    "Call-reachable live global retained; other entry global absent",
+    "Same entry extraction cache hit retains its file timestamp",
+    "Fresh and reused proof, blob, relocations, map patches and ABI are byte-identical",
+    "Production ELF reader inventories retained real Cilium tail_no_service_ipv4 proof"
+  ],
+  "existing_real_proof_sha256": "7575b0aadd8f12ab082fdd15764ab09f4dffd30bf4d51347a0bdf363b31a5f38",
+  "existing_real_proof_symbols": [
+    "bpf_csum_diff",
+    "bpf_map_lookup_elem",
+    "bpf_map_update_elem",
+    "bpf_redirect",
+    "bpf_skb_adjust_room",
+    "bpf_skb_change_tail",
+    "bpf_skb_load_bytes",
+    "bpf_tail_call",
+    "cilium_calls",
+    "cilium_metrics",
+    "tail_no_service_ipv4"
+  ],
+  "kernel_validation": "Queued next; no kernel binding or application certification claimed yet",
+  "open_linker_observation": "Initial fixture entry returning shared_read() compiles to PLT32 E9 tail jump; existing native-link extraction kept shared_read undefined and did not include live_value. Ordinary CALL fixture now covers this binding change; tail-jump discovery/rewriting is a separate general linker defect to fix, not a program exclusion.",
+  "canonical_image_changed": false,
+  "benchmark_settings_changed": false,
+  "raw_deleted": false,
+  "archive": "entry-data-host.tar.gz"
+}

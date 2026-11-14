@@ -2827,7 +2827,8 @@ std::vector<std::pair<std::string, uint64_t>> native_kernel_function_targets(
 }
 
 void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
-                                  CompanionLoad &load, bool kernel_data_layout = false)
+                                  CompanionLoad &load, bool kernel_data_layout = false,
+                                  const std::unordered_set<std::string> *entry_symbols = nullptr)
 {
     std::unordered_map<uint32_t, std::unique_ptr<btf, decltype(&btf__free)>> data_types;
     ScopedFd descriptor(open(native_object.c_str(), O_RDONLY | O_CLOEXEC));
@@ -2867,8 +2868,11 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
             if (!gelf_getsym(data, static_cast<int>(i), &sym)) {
                 fail("gelf_getsym " + native_object.string() + ": " + elf_errmsg(-1));
             }
+            const char *name = elf_strptr(elf, shdr.sh_link, sym.st_name);
+            // The canonical entry extraction already follows native calls and
+            // data relocations. Other entries' globals need no map capability.
+            if (entry_symbols && (!name || !entry_symbols->contains(name))) continue;
             if (sym.st_shndx == SHN_UNDEF && GELF_ST_TYPE(sym.st_info) != STT_FUNC) {
-                const char *name = elf_strptr(elf, shdr.sh_link, sym.st_name);
                 if (name && name[0]) load.native_data_symbols.insert(name);
             }
             if (GELF_ST_TYPE(sym.st_info) != STT_OBJECT ||
@@ -2877,7 +2881,6 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
                 sym.st_shndx >= SHN_LORESERVE) {
                 continue;
             }
-            const char *name = elf_strptr(elf, shdr.sh_link, sym.st_name);
             if (!name || !name[0]) {
                 continue;
             }
@@ -3185,11 +3188,14 @@ void publish_cache_file(const std::filesystem::path &tmp,
     std::filesystem::remove(tmp, ec);
 }
 
+#include "native_loader_entry_data.hpp"
+
 LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
                                 const std::string &symbol_name,
                                 const NativeLinkArgs &link_args,
                                 const std::filesystem::path &base,
-                                const std::filesystem::path &trusted_proof)
+                                const std::filesystem::path &trusted_proof,
+                                const std::filesystem::path &entry_proof)
 {
     LinkerOutput out{};
     out.proof = base.string() + ".proof.o";
@@ -3198,37 +3204,13 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     out.map_patches = base.string() + ".map-patches.tsv";
     out.abi = base.string() + ".abi.tsv";
 
-    if (!trusted_proof.empty()) {
-        std::filesystem::copy_file(trusted_proof, out.proof,
+    const auto &prepared = trusted_proof.empty() ? entry_proof : trusted_proof;
+    if (!prepared.empty()) {
+        std::filesystem::copy_file(prepared, out.proof,
                                   std::filesystem::copy_options::overwrite_existing);
     } else {
-        std::vector<std::string> proof_argv;
-        proof_argv.push_back(link_args.linker.string());
-        proof_argv.push_back("--input");
-        proof_argv.push_back(elf_path.string());
-        proof_argv.push_back("--symbol");
-        proof_argv.push_back(symbol_name);
-        proof_argv.push_back("--output");
-        proof_argv.push_back(out.proof.string());
-        proof_argv.push_back("--mode");
-        proof_argv.push_back("proof");
-
-        const std::filesystem::path proof_stderr = base.string() + ".proof.stderr.txt";
-        int proof_rc = native_loader_detail::run_subprocess(proof_argv, proof_stderr);
-        const int proof_errno = errno;
-        if (proof_rc != 0) {
-            std::ostringstream msg;
-            const std::string stderr_text = read_text_file_limited(proof_stderr, 2048);
-            msg << "native-link proof failed (rc=" << proof_rc << ")";
-            if (proof_rc < 0) msg << ": " << std::strerror(proof_errno);
-            if (!stderr_text.empty()) {
-                msg << "\nstderr:\n" << stderr_text;
-            }
-            msg << "\ncommand: " << format_command_limited(proof_argv, 4096);
-            fail(msg.str());
-        }
-        std::error_code proof_ec;
-        std::filesystem::remove(proof_stderr, proof_ec);
+        write_native_entry_proof(link_args.linker, elf_path, symbol_name, out.proof,
+                                base.string() + ".proof.stderr.txt");
     }
 
     std::vector<std::string> argv;
@@ -3310,7 +3292,8 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
                                     const std::filesystem::path &elf_path,
                                     const std::string &symbol_name,
                                     const CompanionLoad &companion,
-                                    const std::filesystem::path &trusted_proof = {})
+                                    const std::filesystem::path &trusted_proof = {},
+                                    const std::filesystem::path &entry_proof = {})
 {
     const auto cache_lookup_start = std::chrono::steady_clock::now();
     NativeLinkArgs link_args =
@@ -3340,7 +3323,7 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
         const std::filesystem::path tmp_base =
             cache_dir / (key + ".tmp." + std::to_string(getpid()));
         const auto link_start = std::chrono::steady_clock::now();
-        LinkerOutput tmp = invoke_native_link(elf_path, symbol_name, link_args, tmp_base, trusted_proof);
+        LinkerOutput tmp = invoke_native_link(elf_path, symbol_name, link_args, tmp_base, trusted_proof, entry_proof);
         const auto link_end = std::chrono::steady_clock::now();
         source = tmp;
 
@@ -4123,7 +4106,14 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         companion.kernel_functions = native_kernel_function_targets(native_object_path, local.get(), kernel.get());
     }
     const auto data_symbols_start = diagnostic_now();
-    add_native_data_symbol_addrs(native_object_path, companion, kernel_data_layout);
+    std::filesystem::path entry_proof;
+    std::optional<std::unordered_set<std::string>> entry_symbols;
+    if (kernel_data_layout) {
+        entry_proof = cached_native_entry_proof(options.native_link_path, native_object_path, symbol_name);
+        entry_symbols = native_entry_symbol_names(entry_proof);
+    }
+    add_native_data_symbol_addrs(native_object_path, companion, kernel_data_layout,
+                                entry_symbols ? &*entry_symbols : nullptr);
     const auto data_symbols_end = diagnostic_now();
     const auto with_common_timings = [&](LoadedProgram result) {
         if (collecting_timings()) {
@@ -4149,7 +4139,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         options.native_link_path,
         native_object_path,
         symbol_name,
-        companion);
+        companion, {}, entry_proof);
 
     StubLoadAttrs stub_attrs{};
     stub_attrs.expected_attach_type = options.expected_attach_type;

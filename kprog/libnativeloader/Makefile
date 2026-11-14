@@ -19,6 +19,11 @@ IMAGE_INVENTORY_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-kfunc-refresh/
 DATA_LAYOUT_BUILD ?= /var/tmp/kprog-tmp/verified/data-layout
 DATA_LAYOUT_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-data-layout/host
 DATA_LAYOUT_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-data-layout/kernel
+ENTRY_DATA_BUILD ?= /var/tmp/kprog-tmp/verified/entry-data
+ENTRY_DATA_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-entry-data/host
+ENTRY_DATA_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-entry-data/kernel
+ENTRY_DATA_REAL_PROOF ?= /var/tmp/kprog-tmp/perf/cilium-config-symbols/bpf_lxc-roundtrip/tail_no_service_ipv4.proof.o
+ENTRY_DATA_LINKER ?= $(REPO_ROOT)/kprog/x86/native_lab/native_link/target/release/native-link
 KFUNC_BUILD ?= /var/tmp/kprog-tmp/verified/kfunc
 KFUNC_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/host
 KFUNC_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/kernel
@@ -86,6 +91,38 @@ guest-kfunc:
 	"$(KFUNC_KERNEL_OUTPUT)/kfunc" kernel "$(KFUNC_KERNEL_OUTPUT)/weak.o" "$(KFUNC_KERNEL_OUTPUT)/strong.o" \
 		"$(KFUNC_KERNEL_OUTPUT)/source.bpf.o" "$(KFUNC_KERNEL_OUTPUT)/source.native.o" \
 		/sys/kernel/btf/vmlinux "$(KFUNC_KERNEL_OUTPUT)" "$(KFUNC_KERNEL_OUTPUT)/proof.bpf.o" $(KFUNC_MODEL_PROOF)
+
+.PHONY: entry-data-inputs entry-data-check entry-data-kernel-kvm guest-entry-data
+entry-data-inputs:
+	install -d "$(ENTRY_DATA_BUILD)"
+	clang-18 -O2 -fPIC -c ../test/native_entry_data_fixture.c -o "$(ENTRY_DATA_BUILD)/fixture.o"
+	$(CXX) -std=gnu++20 -O1 -g -ffunction-sections -fdata-sections \
+		-Iinclude -I"$(KERNEL_OFFSETS_INCLUDE)" -I"$(LIBBPF_PREFIX)/include" \
+		-I"$(REPO_ROOT)/vendor/libbpf/include" -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
+		../test/native_loader_entry_data.cpp -Wl,--gc-sections "$(LIBBPF_LIBRARY)" -lelf -lz -ldl -pthread \
+		-o "$(ENTRY_DATA_BUILD)/entry-data"
+
+entry-data-check: entry-data-inputs
+	install -d "$(ENTRY_DATA_OUTPUT)"
+	install -m 0644 "$(ENTRY_DATA_REAL_PROOF)" "$(ENTRY_DATA_OUTPUT)/existing.proof.o"
+	"$(ENTRY_DATA_BUILD)/entry-data" host "$(ENTRY_DATA_BUILD)/fixture.o" "$(ENTRY_DATA_LINKER)" \
+		"$(ENTRY_DATA_OUTPUT)" "$(ENTRY_DATA_OUTPUT)/existing.proof.o"
+
+entry-data-kernel-kvm:
+	install -d "$(ENTRY_DATA_KERNEL_OUTPUT)"
+	install -m 0755 "$(ENTRY_DATA_BUILD)/entry-data" "$(ENTRY_DATA_KERNEL_OUTPUT)/entry-data"
+	install -m 0644 "$(ENTRY_DATA_BUILD)/fixture.o" "$(ENTRY_DATA_KERNEL_OUTPUT)/fixture.o"
+	install -m 0644 "$(ENTRY_DATA_REAL_PROOF)" "$(ENTRY_DATA_KERNEL_OUTPUT)/existing.proof.o"
+	taskset -c 13 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(ENTRY_DATA_KERNEL_OUTPUT)" --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/libnativeloader guest-entry-data ENTRY_DATA_KERNEL_OUTPUT=$(ENTRY_DATA_KERNEL_OUTPUT) ENTRY_DATA_LINKER=$(ENTRY_DATA_LINKER)'
+
+guest-entry-data:
+	mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
+	"$(ENTRY_DATA_KERNEL_OUTPUT)/entry-data" kernel "$(ENTRY_DATA_KERNEL_OUTPUT)/fixture.o" "$(ENTRY_DATA_LINKER)" \
+		"$(ENTRY_DATA_KERNEL_OUTPUT)" "$(ENTRY_DATA_KERNEL_OUTPUT)/existing.proof.o"
 
 .PHONY: data-layout-inputs data-layout-check data-layout-kernel-kvm guest-data-layout
 data-layout-inputs:
