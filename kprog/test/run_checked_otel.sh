@@ -10,7 +10,7 @@ export KPROG_BPF_WHOLE_WORD_SPILLS=1
 python3 kprog/trusted_service.py --arch 1 \
     --endpoint /sys/kernel/debug/bpf_x86_native_lab/specializer \
     --module /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
-    --state /var/tmp/service-state --results "$output/service.tar.gz" \
+    --state "$output/state" --results "$output/service.tar.gz" \
     --native-link /workspaces/repository/corpus/results/perf-corrected-all-lto-linker-20261114/native-link-on \
     --loader /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader \
     --execution-mode checked-sim-c \
