@@ -57,3 +57,7 @@ zero-compare-run:
 
 zero-compare-guest:
 	python3 $(ROOT)/kprog/test/check_core_zero_compare.py --kernel --client $(BUILD)/zero-client --compiler $(BUILD)/core-compiler/core-ir-lower --build $(BUILD) --output $(OUTPUT) --target $(KDIR)/vmlinux
+
+.PHONY: retained-parity
+retained-parity: $(CORE_COMPILER)
+	taskset -c 19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_core_retained.py --compiler $(CORE_COMPILER) --input /var/tmp/kprog-tmp/C/tracee-samesource/tracee.bc --local /var/tmp/kprog-tmp/C/tracee-samesource/tracee.bpf.o --target $(KDIR)/vmlinux --output $(OUTPUT)
