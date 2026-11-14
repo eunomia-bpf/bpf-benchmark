@@ -1,0 +1,60 @@
+{
+  "recorded_at": "2026-11-14T06:51:26.354291+00:00",
+  "outer_pid": 235861,
+  "source_commit": "c2bb11c15",
+  "wrapper_commit": "f5a593f07",
+  "raw": "/workspaces/kprog-raw/perf/20261114-probe-read-otel-lto",
+  "capture": "corpus/results/perf-probe-read-otel-lto-20261114",
+  "configuration": "checked-sim-c LTO with opt-in probe-read LTO",
+  "app": "otelcol-ebpf-profiler/profiling",
+  "image": "sha256:66e9e88f197f975fd98f78f08be2eac3b7c313937e39a4cb2a45639d0615f2b8",
+  "kernel_commit": "74d1097af56132da2b325699c5a560b29a790ff2",
+  "cpus": "16-19",
+  "vcpus": 4,
+  "guest_memory": "32G",
+  "host_address_space_bytes": 51539607552,
+  "samples": 1,
+  "workload_seconds": 10,
+  "bpf_stats": true,
+  "image_lock": "shared",
+  "canonical_tools_rebuilt": false,
+  "kernel_image_base_changed": false,
+  "source_manifest": "original upstream source + actual target PERF_EVENT context compiler candidate",
+  "program_selection": "all app programs, no exclusions; original errors retained",
+  "status": "LAUNCHED_UNCOLLECTED_NO_POSTLAUNCH_POLLS",
+  "inputs": [
+    {
+      "path": "corpus/results/perf-probe-read-linker-20261114/native-link.real",
+      "sha256": "fb07b6f232801818559c202a9c22de336fd1a48f9bf4bc25446a29b0355687fd"
+    },
+    {
+      "path": "corpus/results/perf-probe-read-linker-20261114/native-link-on",
+      "sha256": "399c75f75103482a1c3a0a0f2149e2cdc32722f3a71780ca561c92306d42025e"
+    },
+    {
+      "path": "corpus/results/perf-probe-read-linker-20261114/runtime-probe-read-layout.json",
+      "sha256": "75a971bd496f290b1763efcfe2f78b74e80d2c8bd3c7c064308337fe5026f12e"
+    },
+    {
+      "path": "corpus/results/perf-otel-upstream-20261114/manifest-context.json",
+      "sha256": "430b26ab4be8fd501a819f48c0451895d86bf90606533958a05639ac8a51573f"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+      "sha256": "c4d7246aa3111b7f627ba6fa7f38ee19d4db114c4a071b889b6dde7a9bb4e195"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+      "sha256": "bfe23fdb831b367e5a6345e77f91d90f8e75b308e24b6d1ea92478430792d1bc"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+      "sha256": "30b95f4e93d27747c7ae98983106599d18576e787f16e5c828be3e062305af87"
+    },
+    {
+      "path": "kprog/x86/x86_sim_local_bpf.h",
+      "sha256": "f95f3e3b9ece20bd1a7340c9d2be478cb7befea33bae02892dfe353d525c0bb0"
+    }
+  ],
+  "scope": "First whole-app diagnostic, not 3x180 formal timing/floor/throughput improvement certification. 36 actual kernel component executions already published; app verification/install/execution and workload outcomes remain unobserved. Existing direct benchmark image module not used for this registered service run."
+}
