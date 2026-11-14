@@ -212,6 +212,11 @@
 
 **阶段 2：优化**，全部在 LTO 里一起打开，只计时合起来的配置，按预期收益排：① helper 内联（probe_read_kernel/user 直接读、get_current_task/pid_tgid/smp_processor_id 的 per-CPU 读、map 查找按类型和链接时已知参数内联、LPM 特化）；② 尾调用直连（prog array 槽位在链接时已知时改成直接跳转）；③ LTO 配置下的整体优化：内联之后编译器跨 helper 边界做常量传播和死代码消除，冻结的 .rodata 和装载后只读的配置 map 折叠成常量（Tracee 的 config_map 在 sys_enter 里有 35 处查找）；④ 代码生成：编译 flag（-O2/-O3、帧指针、返回 thunk、对齐）对照，必要时用 vendor/llvmbpf 编同一个程序做诊断对照。每一项优化在 kprog/docs/optimizations.md 记一行：在哪里（代码、开关）、怎么做的、属于流水线哪一步、正确性怎么查、合并配置下的效果。落地的 lane 在同一个提交里写这一行。
 
+**审核 detour-20261114T15Z 的处理（协调者 2026-11-14T16:18:48Z，三条都已核实）**
+- verified 路径属于阶段 1（LTO 配置跑通六个应用就要经过它），已经停滞：普查停在 04:08，215 个程序体做了 45 个、装上 21 个；OTel 主程序栈帧 680 字节，超过 verifier 的 512；Katran 超过 100 万条指令；B 编译膨胀很大（OTel 1.13 GB，前端 4064 秒、21 GB 内存），这会是论文里的装载开销。lane perf：OTel 合并计时收完之后，查清膨胀从哪里来（模拟器 C 的宏展开），普查在空闲的 E 核上后台续跑，规模扫描（100 到 10 万条指令，design.md 的 V3）作为一个后台作业跑；lane formal：M4 重写模拟器 C 时量展开后的大小，和 perf 的结论对齐。
+- 计时干扰：12:19 的“正确性用例在别的 CPU 上并行”是错的，更正为：计时窗口在 COORDINATION 公布，4 vCPU 以上或 16 GiB 以上的 guest 在窗口之外起；lane C 跑一次 A/A（两侧同一个对象）量出偏差；选编译选项用的剖析在 P 核 0-7 上做（计时空档）。
+- Tetragon（BPF 份额最大，67%）交给 lane C 从头做到有等量工作的数字，排在 Cilium 的 D01/D02/D08/D10 之前；加载时生成的 CEL 函数在源码里找不到，perf 的 --bpf-function-bodies 编译输入可用。给运营者的提议：只对这些加载时生成的函数，用 vendor/llvmbpf 从捕获的字节码编原生代码，其余照同源。
+
 ## 1. 性能（目标：六应用几何平均 native/JIT 1.20x–1.40x，来自原生代码）
 
 - **PERF inline ARRAY 退化诊断（2026-11-14，ad56c93b1）** 188582/run050542_885568 make0/appok，1×10s statsON/16–19/4vCPU16G，吞吐 **0.394x**、3549.1→7293.1ns/次，0 workload错误/0tiny；13/12测量程序、13 replacement日志及custom__generic两次EINVAL完整保留。native generation302的两snapshot在startup/warmup，缺实际测量末端窗，不认证等量工作或floor；既有0.980x/0.965x结果不改。完整run/4个counter snapshots/失败JIT dump/logs/分析归档 `runtime-array-otel-results.json/.tar.gz`。共享routine后续候选只检验代码体积原因假说，不把host字节减少当速度收益。
