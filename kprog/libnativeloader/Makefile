@@ -113,10 +113,11 @@ tail-frame-kvm:
 	install -d "$(FRAME_OUTPUT)"
 	install -m 0755 "$(FRAME_BUILD)/client" "$(FRAME_OUTPUT)/client"
 	install -m 0644 "$(FRAME_BUILD)/source.bpf.o" "$(FRAME_BUILD)/frame.native.o" "$(FRAME_OUTPUT)/"
+	install -m 0755 "$(FRAME_LINKER)" "$(FRAME_OUTPUT)/native-link.real"
 	taskset -c 13 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
 		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(FRAME_OUTPUT)" --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -C kprog/libnativeloader guest-tail-frame FRAME_OUTPUT=$(FRAME_OUTPUT) FRAME_LINKER=$(FRAME_LINKER)'
+		--exec 'make -C kprog/libnativeloader guest-tail-frame FRAME_OUTPUT=$(FRAME_OUTPUT) FRAME_LINKER=$(FRAME_OUTPUT)/native-link.real'
 
 guest-tail-frame:
 	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" KPROG_FRAME_LINKER="$(FRAME_LINKER)" \

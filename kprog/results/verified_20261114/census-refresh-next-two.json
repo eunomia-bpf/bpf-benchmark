@@ -1,0 +1,73 @@
+{
+  "attempts": 35,
+  "attempt_stages": {
+    "installed": 18,
+    "verifier_rejected": 16,
+    "compilation_failed": 1
+  },
+  "distinct": 30,
+  "latest_stages": {
+    "installed": 18,
+    "verifier_rejected": 11,
+    "compilation_failed": 1
+  },
+  "native_run": 0,
+  "latest_failure_classes": {
+    "verifier_rejected": 1,
+    "verifier_stack_access": 3,
+    "verifier_callback_argument": 1,
+    "verifier_context_access": 2,
+    "verifier_map_bounds": 4,
+    "compilation_failed": 1
+  },
+  "per_application": {
+    "bcc/set": {
+      "distinct": 9,
+      "latest_stages": {
+        "installed": 9
+      },
+      "native_run": 0
+    },
+    "tetragon/observer": {
+      "distinct": 6,
+      "latest_stages": {
+        "installed": 2,
+        "verifier_rejected": 4
+      },
+      "native_run": 0
+    },
+    "tracee/monitor": {
+      "distinct": 15,
+      "latest_stages": {
+        "installed": 7,
+        "verifier_rejected": 7,
+        "compilation_failed": 1
+      },
+      "native_run": 0
+    }
+  },
+  "new_outcomes": [
+    {
+      "body_group": 30,
+      "name": "trace_ret_vfs_readv",
+      "application": "tracee/monitor",
+      "stage": "verifier_rejected",
+      "failure_class": "verifier_context_access",
+      "started": "2026-11-14T00:21:31.681146+00:00",
+      "finished": "2026-11-14T01:28:51.255949+00:00",
+      "archive": "census-body-30-refresh-results.tar.gz"
+    },
+    {
+      "body_group": 36,
+      "name": "tracepoint__sched__sched_process_exec",
+      "application": "tracee/monitor",
+      "stage": "verifier_rejected",
+      "failure_class": "verifier_map_bounds",
+      "started": "2026-11-14T00:22:25.444887+00:00",
+      "finished": "2026-11-14T01:26:10.333232+00:00",
+      "archive": "census-body-36-refresh-results.tar.gz"
+    }
+  ],
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-kfunc-refresh",
+  "scope": "Resident replay; no whole-app or native workload execution claim"
+}

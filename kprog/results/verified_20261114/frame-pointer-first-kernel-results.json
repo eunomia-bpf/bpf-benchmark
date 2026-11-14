@@ -1,0 +1,14 @@
+{
+  "outer_pid": 108698,
+  "make_exit": 2,
+  "started": "2026-11-14T01:26:24Z",
+  "finished": "2026-11-14T01:26:30Z",
+  "stage": "native-link executable launch before proof/verifier",
+  "cause": "Guest cannot see host /var/tmp build cache: native-link.sh exits127 No such file or directory",
+  "verifier_attempted": false,
+  "native_executed": false,
+  "fix": "Stage identical linker build artifact inside mounted run output; use that guest-visible path",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-frame-pointer",
+  "archive": "frame-pointer-first-kernel-results.tar.gz",
+  "canonical_changed": false
+}
