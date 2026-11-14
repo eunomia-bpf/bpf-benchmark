@@ -315,6 +315,7 @@ cilium-context-manifest:
 .PHONY: cilium-config-check
 cilium-config-check:
 	python3 -m unittest discover -s $(ROOT)/kprog/perf/may29-image -p test_cilium_config.py
+	python3 -m unittest discover -s $(HERE) -p test_cilium_live_prepare.py
 
 SWITCH_BUILD ?= /var/tmp/kprog-tmp/perf/native-switch
 .PHONY: native-switch-check
@@ -510,3 +511,32 @@ config-globals-default-check:
 	$(CONFIG_GLOBALS_BUILD)/reference-socket-context-lower $(CONFIG_GLOBALS_BUILD)/input.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json -o $(CONFIG_GLOBALS_BUILD)/default-before.bc
 	$(SOCKET_BUILD)/socket-context-lower $(CONFIG_GLOBALS_BUILD)/input.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json -o $(CONFIG_GLOBALS_BUILD)/default-after.bc
 	cmp $(CONFIG_GLOBALS_BUILD)/default-before.bc $(CONFIG_GLOBALS_BUILD)/default-after.bc
+
+FROZEN_BUILD ?= /var/tmp/kprog-tmp/perf/frozen-data
+$(FROZEN_BUILD)/frozen-data-lower: $(HERE)/frozen-data-lower.cpp
+	install -d $(FROZEN_BUILD)
+	$(CXX) $$($(LLVM_CONFIG) --cxxflags) -std=c++17 -Wall -Wextra -Wno-unused-parameter $< -o $@ $$($(LLVM_CONFIG) --ldflags --libs core irreader bitwriter analysis --system-libs)
+
+.PHONY: frozen-data-ir frozen-data-check
+frozen-data-ir: $(FROZEN_BUILD)/frozen-data-lower
+	$(FROZEN_BUILD)/frozen-data-lower $(FROZEN_INPUT) --constants $(FROZEN_CONSTANTS) --report $(FROZEN_REPORT) -o $(FROZEN_OUTPUT)
+
+frozen-data-check: $(FROZEN_BUILD)/frozen-data-lower $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
+	$(CC) -target bpf -O2 -g -emit-llvm -c $(HERE)/test-config-globals.c -o $(FROZEN_BUILD)/fixture.bc
+	$(FROZEN_BUILD)/frozen-data-lower $(FROZEN_BUILD)/fixture.bc --constants $(HERE)/test-frozen-data.json --report $(FROZEN_BUILD)/fixture.json -o $(FROZEN_BUILD)/fixture.frozen.bc
+	python3 $(HERE)/socket-helper-names.py > $(FROZEN_BUILD)/helper-names.json
+	$(SOCKET_BUILD)/socket-context-lower $(FROZEN_BUILD)/fixture.frozen.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(FROZEN_BUILD)/helper-names.json -o $(FROZEN_BUILD)/fixture.native.bc
+	$(CC) -target x86_64-linux-gnu -O3 -fPIC -c $(FROZEN_BUILD)/fixture.native.bc -o $(FROZEN_BUILD)/fixture.native.o
+	$(CC) -shared $(FROZEN_BUILD)/fixture.native.o -o $(FROZEN_BUILD)/libfrozen-fixture.so
+	$(CC) -O2 $(HERE)/test-frozen-data-driver.c -L$(FROZEN_BUILD) -lfrozen-fixture -Wl,--export-dynamic -Wl,-rpath,$(FROZEN_BUILD) -o $(FROZEN_BUILD)/check
+	$(FROZEN_BUILD)/check
+	$(FROZEN_BUILD)/frozen-data-lower $(FROZEN_BUILD)/fixture.bc --constants $(HERE)/test-frozen-data-mutable.json --report $(FROZEN_BUILD)/mutable.json -o $(FROZEN_BUILD)/mutable.bc > $(FROZEN_BUILD)/mutable.log 2>&1 && result=0 || result=$$?; test $$result = 1
+	$(FROZEN_BUILD)/frozen-data-lower $(FROZEN_BUILD)/fixture.bc --constants $(HERE)/test-frozen-data-short.json --report $(FROZEN_BUILD)/short.json -o $(FROZEN_BUILD)/short.bc > $(FROZEN_BUILD)/short.log 2>&1 && result=0 || result=$$?; test $$result = 1
+
+.PHONY: frozen-cilium-native
+frozen-cilium-native: frozen-data-ir $(SOCKET_BUILD)/socket-context-lower $(PACKET_BUILD)/public-layout $(PACKET_BUILD)/physical-layout
+	$(PACKET_BUILD)/public-layout > $(PACKET_BUILD)/public-layout.json
+	$(PACKET_BUILD)/physical-layout > $(PACKET_BUILD)/physical-layout.json
+	python3 $(HERE)/socket-helper-names.py > $(PACKET_BUILD)/helper-names.json
+	$(SOCKET_BUILD)/socket-context-lower $(FROZEN_OUTPUT) --public-layout $(PACKET_BUILD)/public-layout.json --physical-layout $(PACKET_BUILD)/physical-layout.json --native-codegen --helper-names $(PACKET_BUILD)/helper-names.json -o $(FROZEN_BUILD)/$(CILIUM_UNIT).native.bc
+	prlimit --as=8589934592 -- $(CC) -target x86_64-linux-gnu -O3 -g -fPIC -fno-optimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-jump-tables -c $(FROZEN_BUILD)/$(CILIUM_UNIT).native.bc -o $(FROZEN_BUILD)/$(CILIUM_UNIT).native.o
