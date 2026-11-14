@@ -41,6 +41,15 @@ def ___a64_l_reg__1 : Ident := identOfString "__a64_l_reg__1"
 def ___a64_l_reg__2 : Ident := identOfString "__a64_l_reg__2"
 def ___a64_l_reg__3 : Ident := identOfString "__a64_l_reg__3"
 def ___a64_l_reg__4 : Ident := identOfString "__a64_l_reg__4"
+def ___a64_l_reg__5 : Ident := identOfString "__a64_l_reg__5"
+def ___a64_l_reg__6 : Ident := identOfString "__a64_l_reg__6"
+def ___a64_l_reg__7 : Ident := identOfString "__a64_l_reg__7"
+def ___a64_l_reg__8 : Ident := identOfString "__a64_l_reg__8"
+def ___a64_l_reg__9 : Ident := identOfString "__a64_l_reg__9"
+def ___a64_loss_i : Ident := identOfString "__a64_loss_i"
+def ___a64_loss_off : Ident := identOfString "__a64_loss_off"
+def ___a64_loss_value : Ident := identOfString "__a64_loss_value"
+def ___a64_loss_width : Ident := identOfString "__a64_loss_width"
 def ___a64_mat_base : Ident := identOfString "__a64_mat_base"
 def ___a64_mat_base__1 : Ident := identOfString "__a64_mat_base__1"
 def ___a64_mat_base__2 : Ident := identOfString "__a64_mat_base__2"
@@ -54,6 +63,10 @@ def ___a64_mbo_imm : Ident := identOfString "__a64_mbo_imm"
 def ___a64_mbo_index : Ident := identOfString "__a64_mbo_index"
 def ___a64_mbo_isrc : Ident := identOfString "__a64_mbo_isrc"
 def ___a64_mbo_result : Ident := identOfString "__a64_mbo_result"
+def ___a64_memory_off : Ident := identOfString "__a64_memory_off"
+def ___a64_memory_source : Ident := identOfString "__a64_memory_source"
+def ___a64_memory_tag : Ident := identOfString "__a64_memory_tag"
+def ___a64_memory_value : Ident := identOfString "__a64_memory_value"
 def ___a64_modified_input : Ident := identOfString "__a64_modified_input"
 def ___a64_mp_at : Ident := identOfString "__a64_mp_at"
 def ___a64_mp_base : Ident := identOfString "__a64_mp_base"
@@ -61,6 +74,13 @@ def ___a64_mp_off : Ident := identOfString "__a64_mp_off"
 def ___a64_mp_pointer : Ident := identOfString "__a64_mp_pointer"
 def ___a64_mp_tag : Ident := identOfString "__a64_mp_tag"
 def ___a64_mp_value : Ident := identOfString "__a64_mp_value"
+def ___a64_mrd_base : Ident := identOfString "__a64_mrd_base"
+def ___a64_mrd_loaded : Ident := identOfString "__a64_mrd_loaded"
+def ___a64_mrd_pointer : Ident := identOfString "__a64_mrd_pointer"
+def ___a64_mrd_pointer__1 : Ident := identOfString "__a64_mrd_pointer__1"
+def ___a64_mrd_pointer__2 : Ident := identOfString "__a64_mrd_pointer__2"
+def ___a64_mrd_pointer__3 : Ident := identOfString "__a64_mrd_pointer__3"
+def ___a64_mrd_value : Ident := identOfString "__a64_mrd_value"
 def ___a64_mrt_base : Ident := identOfString "__a64_mrt_base"
 def ___a64_mrt_bsrc : Ident := identOfString "__a64_mrt_bsrc"
 def ___a64_mrt_context_off : Ident := identOfString "__a64_mrt_context_off"
@@ -70,6 +90,15 @@ def ___a64_mrt_pointer__1 : Ident := identOfString "__a64_mrt_pointer__1"
 def ___a64_mrt_src : Ident := identOfString "__a64_mrt_src"
 def ___a64_mrt_tag : Ident := identOfString "__a64_mrt_tag"
 def ___a64_mrt_value_tag : Ident := identOfString "__a64_mrt_value_tag"
+def ___a64_mwr_addr : Ident := identOfString "__a64_mwr_addr"
+def ___a64_mwr_arm : Ident := identOfString "__a64_mwr_arm"
+def ___a64_mwr_base : Ident := identOfString "__a64_mwr_base"
+def ___a64_mwr_bsrc : Ident := identOfString "__a64_mwr_bsrc"
+def ___a64_mwr_off : Ident := identOfString "__a64_mwr_off"
+def ___a64_mwr_pointer : Ident := identOfString "__a64_mwr_pointer"
+def ___a64_mwr_pointer__1 : Ident := identOfString "__a64_mwr_pointer__1"
+def ___a64_mwr_tag : Ident := identOfString "__a64_mwr_tag"
+def ___a64_observed : Ident := identOfString "__a64_observed"
 def ___a64_read_tag : Ident := identOfString "__a64_read_tag"
 def ___a64_read_value : Ident := identOfString "__a64_read_value"
 def ___a64_release_i : Ident := identOfString "__a64_release_i"
@@ -93,11 +122,34 @@ def ___a64_srt_index : Ident := identOfString "__a64_srt_index"
 def ___a64_srt_source : Ident := identOfString "__a64_srt_source"
 def ___a64_srt_tag : Ident := identOfString "__a64_srt_tag"
 def ___a64_srt_width : Ident := identOfString "__a64_srt_width"
+def ___a64_str_index : Ident := identOfString "__a64_str_index"
+def ___a64_str_value : Ident := identOfString "__a64_str_value"
+def ___a64_str_width : Ident := identOfString "__a64_str_width"
+def ___a64_stw_action : Ident := identOfString "__a64_stw_action"
+def ___a64_stw_action__1 : Ident := identOfString "__a64_stw_action__1"
+def ___a64_stw_index : Ident := identOfString "__a64_stw_index"
+def ___a64_stw_index__1 : Ident := identOfString "__a64_stw_index__1"
+def ___a64_stw_last : Ident := identOfString "__a64_stw_last"
+def ___a64_stw_last__1 : Ident := identOfString "__a64_stw_last__1"
+def ___a64_stw_payload : Ident := identOfString "__a64_stw_payload"
+def ___a64_stw_payload__1 : Ident := identOfString "__a64_stw_payload__1"
+def ___a64_stw_value : Ident := identOfString "__a64_stw_value"
+def ___a64_stw_value__1 : Ident := identOfString "__a64_stw_value__1"
+def ___a64_stw_width : Ident := identOfString "__a64_stw_width"
+def ___a64_stw_width__1 : Ident := identOfString "__a64_stw_width__1"
 def ___a64_sw_ctx_off : Ident := identOfString "__a64_sw_ctx_off"
 def ___a64_sw_off : Ident := identOfString "__a64_sw_off"
 def ___a64_sw_pointer : Ident := identOfString "__a64_sw_pointer"
 def ___a64_sw_value : Ident := identOfString "__a64_sw_value"
 def ___a64_tag_cells : Ident := identOfString "__a64_tag_cells"
+def ___a64_unmat_base : Ident := identOfString "__a64_unmat_base"
+def ___a64_unmat_base__1 : Ident := identOfString "__a64_unmat_base__1"
+def ___a64_unmat_base__2 : Ident := identOfString "__a64_unmat_base__2"
+def ___a64_unmat_base__3 : Ident := identOfString "__a64_unmat_base__3"
+def ___a64_unmat_tag : Ident := identOfString "__a64_unmat_tag"
+def ___a64_unmat_tag__1 : Ident := identOfString "__a64_unmat_tag__1"
+def ___a64_unmat_value : Ident := identOfString "__a64_unmat_value"
+def ___a64_unmat_value__1 : Ident := identOfString "__a64_unmat_value__1"
 def ___a64_write_base : Ident := identOfString "__a64_write_base"
 def ___a64_write_base__1 : Ident := identOfString "__a64_write_base__1"
 def ___a64_write_old_sp : Ident := identOfString "__a64_write_old_sp"
@@ -164,15 +216,70 @@ def ___compcert_va_composite : Ident := identOfString "__compcert_va_composite"
 def ___compcert_va_float64 : Ident := identOfString "__compcert_va_float64"
 def ___compcert_va_int32 : Ident := identOfString "__compcert_va_int32"
 def ___compcert_va_int64 : Ident := identOfString "__compcert_va_int64"
+def ___kprog_a64_bl_lane : Ident := identOfString "__kprog_a64_bl_lane"
+def ___kprog_a64_bl_lane__1 : Ident := identOfString "__kprog_a64_bl_lane__1"
+def ___kprog_a64_bl_lane__10 : Ident := identOfString "__kprog_a64_bl_lane__10"
+def ___kprog_a64_bl_lane__11 : Ident := identOfString "__kprog_a64_bl_lane__11"
+def ___kprog_a64_bl_lane__12 : Ident := identOfString "__kprog_a64_bl_lane__12"
+def ___kprog_a64_bl_lane__13 : Ident := identOfString "__kprog_a64_bl_lane__13"
+def ___kprog_a64_bl_lane__14 : Ident := identOfString "__kprog_a64_bl_lane__14"
+def ___kprog_a64_bl_lane__15 : Ident := identOfString "__kprog_a64_bl_lane__15"
+def ___kprog_a64_bl_lane__2 : Ident := identOfString "__kprog_a64_bl_lane__2"
+def ___kprog_a64_bl_lane__3 : Ident := identOfString "__kprog_a64_bl_lane__3"
+def ___kprog_a64_bl_lane__4 : Ident := identOfString "__kprog_a64_bl_lane__4"
+def ___kprog_a64_bl_lane__5 : Ident := identOfString "__kprog_a64_bl_lane__5"
+def ___kprog_a64_bl_lane__6 : Ident := identOfString "__kprog_a64_bl_lane__6"
+def ___kprog_a64_bl_lane__7 : Ident := identOfString "__kprog_a64_bl_lane__7"
+def ___kprog_a64_bl_lane__8 : Ident := identOfString "__kprog_a64_bl_lane__8"
+def ___kprog_a64_bl_lane__9 : Ident := identOfString "__kprog_a64_bl_lane__9"
+def ___kprog_a64_bl_shift : Ident := identOfString "__kprog_a64_bl_shift"
+def ___kprog_a64_bl_shift__1 : Ident := identOfString "__kprog_a64_bl_shift__1"
+def ___kprog_a64_bl_shift__10 : Ident := identOfString "__kprog_a64_bl_shift__10"
+def ___kprog_a64_bl_shift__11 : Ident := identOfString "__kprog_a64_bl_shift__11"
+def ___kprog_a64_bl_shift__12 : Ident := identOfString "__kprog_a64_bl_shift__12"
+def ___kprog_a64_bl_shift__13 : Ident := identOfString "__kprog_a64_bl_shift__13"
+def ___kprog_a64_bl_shift__14 : Ident := identOfString "__kprog_a64_bl_shift__14"
+def ___kprog_a64_bl_shift__15 : Ident := identOfString "__kprog_a64_bl_shift__15"
+def ___kprog_a64_bl_shift__2 : Ident := identOfString "__kprog_a64_bl_shift__2"
+def ___kprog_a64_bl_shift__3 : Ident := identOfString "__kprog_a64_bl_shift__3"
+def ___kprog_a64_bl_shift__4 : Ident := identOfString "__kprog_a64_bl_shift__4"
+def ___kprog_a64_bl_shift__5 : Ident := identOfString "__kprog_a64_bl_shift__5"
+def ___kprog_a64_bl_shift__6 : Ident := identOfString "__kprog_a64_bl_shift__6"
+def ___kprog_a64_bl_shift__7 : Ident := identOfString "__kprog_a64_bl_shift__7"
+def ___kprog_a64_bl_shift__8 : Ident := identOfString "__kprog_a64_bl_shift__8"
+def ___kprog_a64_bl_shift__9 : Ident := identOfString "__kprog_a64_bl_shift__9"
+def ___kprog_a64_bl_value : Ident := identOfString "__kprog_a64_bl_value"
+def ___kprog_a64_bl_value__1 : Ident := identOfString "__kprog_a64_bl_value__1"
+def ___kprog_a64_bl_value__10 : Ident := identOfString "__kprog_a64_bl_value__10"
+def ___kprog_a64_bl_value__11 : Ident := identOfString "__kprog_a64_bl_value__11"
+def ___kprog_a64_bl_value__12 : Ident := identOfString "__kprog_a64_bl_value__12"
+def ___kprog_a64_bl_value__13 : Ident := identOfString "__kprog_a64_bl_value__13"
+def ___kprog_a64_bl_value__14 : Ident := identOfString "__kprog_a64_bl_value__14"
+def ___kprog_a64_bl_value__15 : Ident := identOfString "__kprog_a64_bl_value__15"
+def ___kprog_a64_bl_value__2 : Ident := identOfString "__kprog_a64_bl_value__2"
+def ___kprog_a64_bl_value__3 : Ident := identOfString "__kprog_a64_bl_value__3"
+def ___kprog_a64_bl_value__4 : Ident := identOfString "__kprog_a64_bl_value__4"
+def ___kprog_a64_bl_value__5 : Ident := identOfString "__kprog_a64_bl_value__5"
+def ___kprog_a64_bl_value__6 : Ident := identOfString "__kprog_a64_bl_value__6"
+def ___kprog_a64_bl_value__7 : Ident := identOfString "__kprog_a64_bl_value__7"
+def ___kprog_a64_bl_value__8 : Ident := identOfString "__kprog_a64_bl_value__8"
+def ___kprog_a64_bl_value__9 : Ident := identOfString "__kprog_a64_bl_value__9"
 def ___kprog_a64_lb_addr : Ident := identOfString "__kprog_a64_lb_addr"
+def ___kprog_a64_lb_addr__1 : Ident := identOfString "__kprog_a64_lb_addr__1"
+def ___kprog_a64_lb_addr__2 : Ident := identOfString "__kprog_a64_lb_addr__2"
 def ___kprog_a64_lb_value : Ident := identOfString "__kprog_a64_lb_value"
+def ___kprog_a64_lb_value__1 : Ident := identOfString "__kprog_a64_lb_value__1"
+def ___kprog_a64_lb_value__2 : Ident := identOfString "__kprog_a64_lb_value__2"
 def ___kprog_a64_lb_width : Ident := identOfString "__kprog_a64_lb_width"
+def ___kprog_a64_lb_width__1 : Ident := identOfString "__kprog_a64_lb_width__1"
+def ___kprog_a64_lb_width__2 : Ident := identOfString "__kprog_a64_lb_width__2"
 def ___kprog_a64_mbo_base : Ident := identOfString "__kprog_a64_mbo_base"
 def ___kprog_a64_mbo_has_index : Ident := identOfString "__kprog_a64_mbo_has_index"
 def ___kprog_a64_mbo_imm : Ident := identOfString "__kprog_a64_mbo_imm"
 def ___kprog_a64_mbo_index : Ident := identOfString "__kprog_a64_mbo_index"
 def ___kprog_a64_mbo_prepost : Ident := identOfString "__kprog_a64_mbo_prepost"
 def ___kprog_a64_mbo_result : Ident := identOfString "__kprog_a64_mbo_result"
+def ___kprog_a64_md_src : Ident := identOfString "__kprog_a64_md_src"
 def ___kprog_a64_md_tag : Ident := identOfString "__kprog_a64_md_tag"
 def ___kprog_a64_mod : Ident := identOfString "__kprog_a64_mod"
 def ___kprog_a64_mod_amount : Ident := identOfString "__kprog_a64_mod_amount"
@@ -180,31 +287,63 @@ def ___kprog_a64_mod_shift : Ident := identOfString "__kprog_a64_mod_shift"
 def ___kprog_a64_mod_value : Ident := identOfString "__kprog_a64_mod_value"
 def ___kprog_a64_mod_w32 : Ident := identOfString "__kprog_a64_mod_w32"
 def ___kprog_a64_sb_addr : Ident := identOfString "__kprog_a64_sb_addr"
+def ___kprog_a64_sb_addr__1 : Ident := identOfString "__kprog_a64_sb_addr__1"
 def ___kprog_a64_sb_value : Ident := identOfString "__kprog_a64_sb_value"
+def ___kprog_a64_sb_value__1 : Ident := identOfString "__kprog_a64_sb_value__1"
 def ___kprog_a64_sb_width : Ident := identOfString "__kprog_a64_sb_width"
+def ___kprog_a64_sb_width__1 : Ident := identOfString "__kprog_a64_sb_width__1"
 def ___kprog_abi_kind : Ident := identOfString "__kprog_abi_kind"
 def ___kprog_abi_offset : Ident := identOfString "__kprog_abi_offset"
 def ___kprog_abi_tag : Ident := identOfString "__kprog_abi_tag"
 def ___kprog_c_load_value : Ident := identOfString "__kprog_c_load_value"
 def ___kprog_c_load_value__1 : Ident := identOfString "__kprog_c_load_value__1"
+def ___kprog_c_load_value__10 : Ident := identOfString "__kprog_c_load_value__10"
+def ___kprog_c_load_value__11 : Ident := identOfString "__kprog_c_load_value__11"
+def ___kprog_c_load_value__12 : Ident := identOfString "__kprog_c_load_value__12"
 def ___kprog_c_load_value__2 : Ident := identOfString "__kprog_c_load_value__2"
 def ___kprog_c_load_value__3 : Ident := identOfString "__kprog_c_load_value__3"
+def ___kprog_c_load_value__4 : Ident := identOfString "__kprog_c_load_value__4"
+def ___kprog_c_load_value__5 : Ident := identOfString "__kprog_c_load_value__5"
+def ___kprog_c_load_value__6 : Ident := identOfString "__kprog_c_load_value__6"
+def ___kprog_c_load_value__7 : Ident := identOfString "__kprog_c_load_value__7"
+def ___kprog_c_load_value__8 : Ident := identOfString "__kprog_c_load_value__8"
+def ___kprog_c_load_value__9 : Ident := identOfString "__kprog_c_load_value__9"
 def ___kprog_c_store_value : Ident := identOfString "__kprog_c_store_value"
 def ___kprog_c_store_value__1 : Ident := identOfString "__kprog_c_store_value__1"
 def ___kprog_c_store_value__2 : Ident := identOfString "__kprog_c_store_value__2"
 def ___kprog_c_store_value__3 : Ident := identOfString "__kprog_c_store_value__3"
+def ___kprog_c_store_value__4 : Ident := identOfString "__kprog_c_store_value__4"
+def ___kprog_c_store_value__5 : Ident := identOfString "__kprog_c_store_value__5"
+def ___kprog_c_store_value__6 : Ident := identOfString "__kprog_c_store_value__6"
+def ___kprog_c_store_value__7 : Ident := identOfString "__kprog_c_store_value__7"
 def ___kprog_padding_flow_keys : Ident := identOfString "__kprog_padding_flow_keys"
 def ___kprog_padding_sk : Ident := identOfString "__kprog_padding_sk"
 def ___kprog_reserved : Ident := identOfString "__kprog_reserved"
 def ___sk_buff : Ident := identOfString "__sk_buff"
 def ___ti : Ident := identOfString "__ti"
 def ___ti__1 : Ident := identOfString "__ti__1"
+def ___ti__2 : Ident := identOfString "__ti__2"
+def ___ti__3 : Ident := identOfString "__ti__3"
+def ___ti__4 : Ident := identOfString "__ti__4"
+def ___ti__5 : Ident := identOfString "__ti__5"
 def ___tp : Ident := identOfString "__tp"
 def ___tp__1 : Ident := identOfString "__tp__1"
+def ___tp__2 : Ident := identOfString "__tp__2"
+def ___tp__3 : Ident := identOfString "__tp__3"
+def ___tp__4 : Ident := identOfString "__tp__4"
+def ___tp__5 : Ident := identOfString "__tp__5"
 def ___ts : Ident := identOfString "__ts"
 def ___ts__1 : Ident := identOfString "__ts__1"
+def ___ts__2 : Ident := identOfString "__ts__2"
+def ___ts__3 : Ident := identOfString "__ts__3"
+def ___ts__4 : Ident := identOfString "__ts__4"
+def ___ts__5 : Ident := identOfString "__ts__5"
 def ___tv : Ident := identOfString "__tv"
 def ___tv__1 : Ident := identOfString "__tv__1"
+def ___tv__2 : Ident := identOfString "__tv__2"
+def ___tv__3 : Ident := identOfString "__tv__3"
+def ___tv__4 : Ident := identOfString "__tv__4"
+def ___tv__5 : Ident := identOfString "__tv__5"
 def _abi_kind : Ident := identOfString "abi_kind"
 def _addressing : Ident := identOfString "addressing"
 def _arm64_sim_gpr : Ident := identOfString "arm64_sim_gpr"
@@ -247,7 +386,9 @@ def _kprog_arm64_memory_offset : Ident := identOfString "kprog_arm64_memory_offs
 def _kprog_arm64_memory_payload : Ident := identOfString "kprog_arm64_memory_payload"
 def _kprog_arm64_memory_post : Ident := identOfString "kprog_arm64_memory_post"
 def _kprog_arm64_memory_pre : Ident := identOfString "kprog_arm64_memory_pre"
+def _kprog_arm64_memory_read : Ident := identOfString "kprog_arm64_memory_read"
 def _kprog_arm64_memory_tag : Ident := identOfString "kprog_arm64_memory_tag"
+def _kprog_arm64_memory_write : Ident := identOfString "kprog_arm64_memory_write"
 def _kprog_arm64_modified_reg : Ident := identOfString "kprog_arm64_modified_reg"
 def _kprog_arm64_skb_read : Ident := identOfString "kprog_arm64_skb_read"
 def _kprog_arm64_skb_write : Ident := identOfString "kprog_arm64_skb_write"
@@ -269,6 +410,7 @@ def _pkt_type : Ident := identOfString "pkt_type"
 def _priority : Ident := identOfString "priority"
 def _protocol : Ident := identOfString "protocol"
 def _ptr : Ident := identOfString "ptr"
+def _q : Ident := identOfString "q"
 def _queue_mapping : Ident := identOfString "queue_mapping"
 def _reg : Ident := identOfString "reg"
 def _registers : Ident := identOfString "registers"
@@ -360,13 +502,78 @@ def _t'15 : Ident := (Positive.ofNat 142)
 def _t'150 : Ident := (Positive.ofNat 277)
 def _t'151 : Ident := (Positive.ofNat 278)
 def _t'152 : Ident := (Positive.ofNat 279)
+def _t'153 : Ident := (Positive.ofNat 280)
+def _t'154 : Ident := (Positive.ofNat 281)
+def _t'155 : Ident := (Positive.ofNat 282)
+def _t'156 : Ident := (Positive.ofNat 283)
+def _t'157 : Ident := (Positive.ofNat 284)
+def _t'158 : Ident := (Positive.ofNat 285)
+def _t'159 : Ident := (Positive.ofNat 286)
 def _t'16 : Ident := (Positive.ofNat 143)
+def _t'160 : Ident := (Positive.ofNat 287)
+def _t'161 : Ident := (Positive.ofNat 288)
+def _t'162 : Ident := (Positive.ofNat 289)
+def _t'163 : Ident := (Positive.ofNat 290)
+def _t'164 : Ident := (Positive.ofNat 291)
+def _t'165 : Ident := (Positive.ofNat 292)
+def _t'166 : Ident := (Positive.ofNat 293)
+def _t'167 : Ident := (Positive.ofNat 294)
+def _t'168 : Ident := (Positive.ofNat 295)
+def _t'169 : Ident := (Positive.ofNat 296)
 def _t'17 : Ident := (Positive.ofNat 144)
+def _t'170 : Ident := (Positive.ofNat 297)
+def _t'171 : Ident := (Positive.ofNat 298)
+def _t'172 : Ident := (Positive.ofNat 299)
+def _t'173 : Ident := (Positive.ofNat 300)
+def _t'174 : Ident := (Positive.ofNat 301)
+def _t'175 : Ident := (Positive.ofNat 302)
+def _t'176 : Ident := (Positive.ofNat 303)
+def _t'177 : Ident := (Positive.ofNat 304)
+def _t'178 : Ident := (Positive.ofNat 305)
+def _t'179 : Ident := (Positive.ofNat 306)
 def _t'18 : Ident := (Positive.ofNat 145)
+def _t'180 : Ident := (Positive.ofNat 307)
+def _t'181 : Ident := (Positive.ofNat 308)
+def _t'182 : Ident := (Positive.ofNat 309)
+def _t'183 : Ident := (Positive.ofNat 310)
+def _t'184 : Ident := (Positive.ofNat 311)
+def _t'185 : Ident := (Positive.ofNat 312)
+def _t'186 : Ident := (Positive.ofNat 313)
+def _t'187 : Ident := (Positive.ofNat 314)
+def _t'188 : Ident := (Positive.ofNat 315)
+def _t'189 : Ident := (Positive.ofNat 316)
 def _t'19 : Ident := (Positive.ofNat 146)
+def _t'190 : Ident := (Positive.ofNat 317)
+def _t'191 : Ident := (Positive.ofNat 318)
+def _t'192 : Ident := (Positive.ofNat 319)
+def _t'193 : Ident := (Positive.ofNat 320)
+def _t'194 : Ident := (Positive.ofNat 321)
+def _t'195 : Ident := (Positive.ofNat 322)
+def _t'196 : Ident := (Positive.ofNat 323)
+def _t'197 : Ident := (Positive.ofNat 324)
+def _t'198 : Ident := (Positive.ofNat 325)
+def _t'199 : Ident := (Positive.ofNat 326)
 def _t'2 : Ident := (Positive.ofNat 129)
 def _t'20 : Ident := (Positive.ofNat 147)
+def _t'200 : Ident := (Positive.ofNat 327)
+def _t'201 : Ident := (Positive.ofNat 328)
+def _t'202 : Ident := (Positive.ofNat 329)
+def _t'203 : Ident := (Positive.ofNat 330)
+def _t'204 : Ident := (Positive.ofNat 331)
+def _t'205 : Ident := (Positive.ofNat 332)
+def _t'206 : Ident := (Positive.ofNat 333)
+def _t'207 : Ident := (Positive.ofNat 334)
+def _t'208 : Ident := (Positive.ofNat 335)
+def _t'209 : Ident := (Positive.ofNat 336)
 def _t'21 : Ident := (Positive.ofNat 148)
+def _t'210 : Ident := (Positive.ofNat 337)
+def _t'211 : Ident := (Positive.ofNat 338)
+def _t'212 : Ident := (Positive.ofNat 339)
+def _t'213 : Ident := (Positive.ofNat 340)
+def _t'214 : Ident := (Positive.ofNat 341)
+def _t'215 : Ident := (Positive.ofNat 342)
+def _t'216 : Ident := (Positive.ofNat 343)
+def _t'217 : Ident := (Positive.ofNat 344)
 def _t'22 : Ident := (Positive.ofNat 149)
 def _t'23 : Ident := (Positive.ofNat 150)
 def _t'24 : Ident := (Positive.ofNat 151)
@@ -23557,6 +23764,10903 @@ def f_kprog_arm64_cb_write : Function := {
   Stmt.Sbreak)
 }
 
+def s_kprog_arm64_memory_read_0 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'183
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+      (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+  (Stmt.Sassign
+    (Expr.Ederef
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+        (Expr.Econst_int (Integers.Int.repr 14) tint)
+        (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+      (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+    (Expr.Ebinop Binop.Oadd
+      (Expr.Etempvar _t'183 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 14) tuint) tuchar)
+      (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+
+def s_kprog_arm64_memory_read_1 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'182
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+      (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+  (Stmt.Sassign
+    (Expr.Ederef
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+        (Expr.Econst_int (Integers.Int.repr 15) tint)
+        (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+      (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+    (Expr.Ebinop Binop.Oadd
+      (Expr.Etempvar _t'182 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuchar)
+      (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+
+def s_kprog_arm64_memory_read_2 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'166
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags (tptr tuchar)))
+  (Stmt.Sassign
+    (Expr.Ederef
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+        (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr (tptr tuchar)))
+      (tptr tuchar))
+    (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'166 (tptr tuchar))
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar)
+      (tptr tuchar))))
+
+def s_kprog_arm64_memory_read_3 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'165
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags (tptr tuchar)))
+  (Stmt.Sassign
+    (Expr.Ederef
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+        (Expr.Econst_int (Integers.Int.repr 1) tint) (tptr (tptr tuchar)))
+      (tptr tuchar))
+    (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'165 (tptr tuchar))
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuchar)
+      (tptr tuchar))))
+
+def s_kprog_arm64_memory_read_4 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'149
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags (tptr tuchar)))
+  (Stmt.Sassign
+    (Expr.Ederef
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+        (Expr.Econst_int (Integers.Int.repr 17) tint) (tptr (tptr tuchar)))
+      (tptr tuchar))
+    (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'149 (tptr tuchar))
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 17) tuint) tuchar)
+      (tptr tuchar))))
+
+def s_kprog_arm64_memory_read_5 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'148
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags (tptr tuchar)))
+  (Stmt.Sassign
+    (Expr.Ederef
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+        (Expr.Econst_int (Integers.Int.repr 18) tint) (tptr (tptr tuchar)))
+      (tptr tuchar))
+    (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'148 (tptr tuchar))
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 18) tuint) tuchar)
+      (tptr tuchar))))
+
+def s_kprog_arm64_memory_read_6 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.One (Expr.Etempvar _index tulong)
+                      (Expr.Econst_int (Integers.Int.repr 255) tuint) tint)
+    (Stmt.Sset _t'1
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tint) tint))
+    (Stmt.Sset _t'1
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tint)))
+  (Stmt.Sset ___a64_mbo_has_index
+    (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'1 tint) tuchar) tuchar)))
+
+def s_kprog_arm64_memory_read_7 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'135
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _t'134 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+        (Ty.Tstruct _kprog_arm64_coordinates noattr)) _stack_offset tlong))
+  (Stmt.Sset _t'3
+    (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'135 tlong) tulong) tulong)))
+
+def s_kprog_arm64_memory_read_8 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'132
+      (Expr.Ederef
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+          (Expr.Ecast (Expr.Etempvar ___a64_l_reg tulong) tuchar)
+          (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+        (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+    (Stmt.Ssequence
+      (Stmt.Sset _t'133
+        (Expr.Efield
+          (Expr.Ederef
+            (Expr.Etempvar _t'132 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+            (Ty.Tunion _arm64_sim_gpr noattr)) _x tulong))
+      (Stmt.Sset _t'3 (Expr.Ecast (Expr.Etempvar _t'133 tulong) tulong))))
+  (Stmt.Sset _t'3 (Expr.Ecast (Expr.Etempvar _t'3 tulong) tulong)))
+
+def s_kprog_arm64_memory_read_9 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'3
+    (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 0) tulong) tulong))
+  (Stmt.Sset _t'3 (Expr.Ecast (Expr.Etempvar _t'3 tulong) tulong)))
+
+def s_kprog_arm64_memory_read_10 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'130
+      (Expr.Ederef
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+          (Expr.Ecast (Expr.Etempvar ___a64_l_reg__1 tulong) tuchar)
+          (tptr (tptr tuchar))) (tptr tuchar)))
+    (Stmt.Ssequence
+      (Stmt.Sset _t'131
+        (Expr.Ederef (Expr.Etempvar _t'130 (tptr tuchar)) tuchar))
+      (Stmt.Sset _t'4 (Expr.Ecast (Expr.Etempvar _t'131 tuchar) tuint))))
+  (Stmt.Sset _t'4 (Expr.Ecast (Expr.Etempvar _t'4 tuint) tuint)))
+
+def s_kprog_arm64_memory_read_11 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'4
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuint))
+  (Stmt.Sset _t'4 (Expr.Ecast (Expr.Etempvar _t'4 tuint) tuint)))
+
+def s_kprog_arm64_memory_read_12 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sloop
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sset _t'126
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+              (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+            (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+        (Stmt.Ssequence
+          (Stmt.Sset _t'127
+            (Expr.Efield
+              (Expr.Ederef
+                (Expr.Etempvar _t'126 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                (Ty.Tstruct _kprog_arm64_coordinates noattr)) _sp_valid
+              tuchar))
+          (Stmt.Sifthenelse (Expr.Eunop Unop.Onotbool
+                              (Expr.Etempvar _t'127 tuchar) tint)
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Scall (some _t'5)
+                  (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint]
+                                                       tulong cc_default))
+                  [(Expr.Econst_int (Integers.Int.repr 1) tint)])
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'129
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                        (Ty.Tstruct _kprog_arm64_addressing noattr))
+                      _coordinates
+                      (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                  (Stmt.Sassign
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _t'129 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                        (Ty.Tstruct _kprog_arm64_coordinates noattr))
+                      _sp_base tulong) (Expr.Etempvar _t'5 tulong))))
+              (Stmt.Ssequence
+                (Stmt.Sset _t'128
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                      (Ty.Tstruct _kprog_arm64_addressing noattr))
+                    _coordinates
+                    (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                (Stmt.Sassign
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _t'128 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                      (Ty.Tstruct _kprog_arm64_coordinates noattr)) _sp_valid
+                    tuchar) (Expr.Econst_int (Integers.Int.repr 1) tint))))
+            Stmt.Sskip)))
+      (Stmt.Ssequence
+        (Stmt.Sset _t'125
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+              (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+            (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+        (Stmt.Sset ___a64_mat_base
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _t'125 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+              (Ty.Tstruct _kprog_arm64_coordinates noattr)) _sp_base tulong))))
+    Stmt.Sbreak)
+  (Stmt.Sset ___a64_mat_value
+    (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___a64_mat_value tulong)
+      (Expr.Etempvar ___a64_mat_base tulong) tulong)))
+
+def s_kprog_arm64_memory_read_13 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                    (Expr.Etempvar ___a64_mat_tag tuchar)
+                    (Expr.Econst_int (Integers.Int.repr 10) tuint) tint)
+  (Stmt.Ssequence
+    (Stmt.Sloop
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sset _t'121
+            (Expr.Efield
+              (Expr.Ederef
+                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+              (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+          (Stmt.Ssequence
+            (Stmt.Sset _t'122
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _t'121 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                  (Ty.Tstruct _kprog_arm64_coordinates noattr)) _return_valid
+                tuchar))
+            (Stmt.Sifthenelse (Expr.Eunop Unop.Onotbool
+                                (Expr.Etempvar _t'122 tuchar) tint)
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Scall (some _t'6)
+                    (Expr.Evar _native_lab_entry_input (Ty.Tfunction 
+                                                         [tuint] tulong
+                                                         cc_default))
+                    [(Expr.Econst_int (Integers.Int.repr 3) tint)])
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'124
+                      (Expr.Efield
+                        (Expr.Ederef
+                          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                          (Ty.Tstruct _kprog_arm64_addressing noattr))
+                        _coordinates
+                        (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                    (Stmt.Sassign
+                      (Expr.Efield
+                        (Expr.Ederef
+                          (Expr.Etempvar _t'124 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                          (Ty.Tstruct _kprog_arm64_coordinates noattr))
+                        _return_base tulong) (Expr.Etempvar _t'6 tulong))))
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'123
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                        (Ty.Tstruct _kprog_arm64_addressing noattr))
+                      _coordinates
+                      (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                  (Stmt.Sassign
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _t'123 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                        (Ty.Tstruct _kprog_arm64_coordinates noattr))
+                      _return_valid tuchar)
+                    (Expr.Econst_int (Integers.Int.repr 1) tint))))
+              Stmt.Sskip)))
+        (Stmt.Ssequence
+          (Stmt.Sset _t'120
+            (Expr.Efield
+              (Expr.Ederef
+                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+              (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+          (Stmt.Sset ___a64_mat_base__1
+            (Expr.Efield
+              (Expr.Ederef
+                (Expr.Etempvar _t'120 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                (Ty.Tstruct _kprog_arm64_coordinates noattr)) _return_base
+              tulong))))
+      Stmt.Sbreak)
+    (Stmt.Sset ___a64_mat_value
+      (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___a64_mat_value tulong)
+        (Expr.Etempvar ___a64_mat_base__1 tulong) tulong)))
+  Stmt.Sskip)
+
+def s_kprog_arm64_memory_read_14 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                      (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                      (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
+    (Stmt.Sset _t'8
+      (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 255) tulong) tulong))
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                        (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                        (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+      (Stmt.Ssequence
+        (Stmt.Sset _t'8
+          (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 65535) tulong)
+            tulong))
+        (Stmt.Sset _t'8 (Expr.Ecast (Expr.Etempvar _t'8 tulong) tulong)))
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                          (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                          (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'8
+              (Expr.Ecast
+                (Expr.Econst_long (Integers.Int64.repr 4294967295) tulong)
+                tulong))
+            (Stmt.Sset _t'8 (Expr.Ecast (Expr.Etempvar _t'8 tulong) tulong)))
+          (Stmt.Sset _t'8 (Expr.Ecast (Expr.Etempvar _t'8 tulong) tulong)))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'8
+              (Expr.Ecast
+                (Expr.Econst_long (Integers.Int64.repr (-1)) tulong) tulong))
+            (Stmt.Sset _t'8 (Expr.Ecast (Expr.Etempvar _t'8 tulong) tulong)))
+          (Stmt.Sset _t'8 (Expr.Ecast (Expr.Etempvar _t'8 tulong) tulong))))))
+  (Stmt.Sset ___kprog_a64_mod_value
+    (Expr.Ebinop Binop.Oand
+      (Expr.Ebinop Binop.Oshl (Expr.Etempvar ___kprog_a64_mod_value tulong)
+        (Expr.Etempvar ___kprog_a64_mod_amount tuchar) tulong)
+      (Expr.Etempvar _t'8 tulong) tulong)))
+
+def s_kprog_arm64_memory_read_15 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                      (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                      (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
+    (Stmt.Sset _t'9
+      (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 255) tulong) tulong))
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                        (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                        (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+      (Stmt.Ssequence
+        (Stmt.Sset _t'9
+          (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 65535) tulong)
+            tulong))
+        (Stmt.Sset _t'9 (Expr.Ecast (Expr.Etempvar _t'9 tulong) tulong)))
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                          (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                          (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'9
+              (Expr.Ecast
+                (Expr.Econst_long (Integers.Int64.repr 4294967295) tulong)
+                tulong))
+            (Stmt.Sset _t'9 (Expr.Ecast (Expr.Etempvar _t'9 tulong) tulong)))
+          (Stmt.Sset _t'9 (Expr.Ecast (Expr.Etempvar _t'9 tulong) tulong)))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'9
+              (Expr.Ecast
+                (Expr.Econst_long (Integers.Int64.repr (-1)) tulong) tulong))
+            (Stmt.Sset _t'9 (Expr.Ecast (Expr.Etempvar _t'9 tulong) tulong)))
+          (Stmt.Sset _t'9 (Expr.Ecast (Expr.Etempvar _t'9 tulong) tulong))))))
+  (Stmt.Sset ___kprog_a64_mod_value
+    (Expr.Ebinop Binop.Oshr
+      (Expr.Ebinop Binop.Oand (Expr.Etempvar ___kprog_a64_mod_value tulong)
+        (Expr.Etempvar _t'9 tulong) tulong)
+      (Expr.Etempvar ___kprog_a64_mod_amount tuchar) tulong)))
+
+def s_kprog_arm64_memory_read_16 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                    (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                    (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+  (Stmt.Sset ___kprog_a64_mod_value
+    (Expr.Ecast
+      (Expr.Ebinop Binop.Oshr
+        (Expr.Ecast (Expr.Etempvar ___kprog_a64_mod_value tulong) tint)
+        (Expr.Etempvar ___kprog_a64_mod_amount tuchar) tint) tulong))
+  (Stmt.Sset ___kprog_a64_mod_value
+    (Expr.Ecast
+      (Expr.Ebinop Binop.Oshr
+        (Expr.Ecast (Expr.Etempvar ___kprog_a64_mod_value tulong) tlong)
+        (Expr.Etempvar ___kprog_a64_mod_amount tuchar) tlong) tulong)))
+
+def s_kprog_arm64_memory_read_17 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                    (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                    (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+  (Stmt.Ssequence
+    (Stmt.Sset ___kprog_a64_mod_w32
+      (Expr.Ecast (Expr.Etempvar ___kprog_a64_mod_value tulong) tuint))
+    (Stmt.Ssequence
+      (Stmt.Sifthenelse (Expr.Etempvar ___kprog_a64_mod_amount tuchar)
+        (Stmt.Sset _t'10
+          (Expr.Ecast
+            (Expr.Ecast
+              (Expr.Ebinop Binop.Oor
+                (Expr.Ebinop Binop.Oshr
+                  (Expr.Etempvar ___kprog_a64_mod_w32 tuint)
+                  (Expr.Etempvar ___kprog_a64_mod_amount tuchar) tuint)
+                (Expr.Ebinop Binop.Oshl
+                  (Expr.Etempvar ___kprog_a64_mod_w32 tuint)
+                  (Expr.Ebinop Binop.Osub
+                    (Expr.Econst_int (Integers.Int.repr 32) tuint)
+                    (Expr.Etempvar ___kprog_a64_mod_amount tuchar) tuint)
+                  tuint) tuint) tulong) tulong))
+        (Stmt.Sset _t'10
+          (Expr.Ecast
+            (Expr.Ecast (Expr.Etempvar ___kprog_a64_mod_w32 tuint) tulong)
+            tulong)))
+      (Stmt.Sset ___kprog_a64_mod_value (Expr.Etempvar _t'10 tulong))))
+  (Stmt.Sifthenelse (Expr.Etempvar ___kprog_a64_mod_amount tuchar)
+    (Stmt.Sset ___kprog_a64_mod_value
+      (Expr.Ebinop Binop.Oor
+        (Expr.Ebinop Binop.Oshr (Expr.Etempvar ___kprog_a64_mod_value tulong)
+          (Expr.Etempvar ___kprog_a64_mod_amount tuchar) tulong)
+        (Expr.Ebinop Binop.Oshl (Expr.Etempvar ___kprog_a64_mod_value tulong)
+          (Expr.Ebinop Binop.Osub
+            (Expr.Econst_int (Integers.Int.repr 64) tuint)
+            (Expr.Etempvar ___kprog_a64_mod_amount tuchar) tuint) tulong)
+        tulong))
+    Stmt.Sskip))
+
+def s_kprog_arm64_memory_read_18 : Stmt :=
+(Stmt.Sset ___kprog_a64_mod_value
+  (Expr.Ebinop Binop.Oshl
+    (Expr.Ecast
+      (Expr.Ecast (Expr.Etempvar ___kprog_a64_mod_value tulong) tuint)
+      tulong) (Expr.Etempvar ___kprog_a64_mod_shift tuchar) tulong))
+
+def s_kprog_arm64_memory_read_19 : Stmt :=
+(Stmt.Sset ___kprog_a64_mod_value
+  (Expr.Ebinop Binop.Oshl
+    (Expr.Ecast
+      (Expr.Ecast
+        (Expr.Ecast (Expr.Etempvar ___kprog_a64_mod_value tulong) tint)
+        tlong) tulong) (Expr.Etempvar ___kprog_a64_mod_shift tuchar) tulong))
+
+def s_kprog_arm64_memory_read_20 : Stmt :=
+(Stmt.Sset ___kprog_a64_mod_value
+  (Expr.Ebinop Binop.Oshl
+    (Expr.Ecast
+      (Expr.Ecast (Expr.Etempvar ___kprog_a64_mod_value tulong) tushort)
+      tulong) (Expr.Etempvar ___kprog_a64_mod_shift tuchar) tulong))
+
+def s_kprog_arm64_memory_read_21 : Stmt :=
+(Stmt.Sset ___kprog_a64_mod_value
+  (Expr.Ebinop Binop.Oshl
+    (Expr.Ecast
+      (Expr.Ecast
+        (Expr.Ecast (Expr.Etempvar ___kprog_a64_mod_value tulong) tshort)
+        tlong) tulong) (Expr.Etempvar ___kprog_a64_mod_shift tuchar) tulong))
+
+def s_kprog_arm64_memory_read_22 : Stmt :=
+(Stmt.Sset ___kprog_a64_mod_value
+  (Expr.Ebinop Binop.Oshl
+    (Expr.Ecast
+      (Expr.Ecast (Expr.Etempvar ___kprog_a64_mod_value tulong) tuchar)
+      tulong) (Expr.Etempvar ___kprog_a64_mod_shift tuchar) tulong))
+
+def s_kprog_arm64_memory_read_23 : Stmt :=
+(Stmt.Sset ___kprog_a64_mod_value
+  (Expr.Ebinop Binop.Oshl
+    (Expr.Ecast
+      (Expr.Ecast
+        (Expr.Ecast (Expr.Etempvar ___kprog_a64_mod_value tulong) tschar)
+        tlong) tulong) (Expr.Etempvar ___kprog_a64_mod_shift tuchar) tulong))
+
+def s_kprog_arm64_memory_read_24 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sifthenelse (Expr.Etempvar ___a64_mbo_has_index tuchar)
+      (Stmt.Sset _t'2
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuint))
+      (Stmt.Sset _t'2
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint)))
+    (Stmt.Sset ___a64_mbo_isrc
+      (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'2 tuint) tuchar) tuchar)))
+  (Stmt.Ssequence
+    (Stmt.Sset ___a64_mbo_imm (Expr.Etempvar _imm tulong))
+    (Stmt.Ssequence
+      (Stmt.Sset ___a64_mbo_index
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+      (Stmt.Ssequence
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                            (Expr.Etempvar ___a64_mbo_isrc tuchar)
+                            (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                            tint)
+          (Stmt.Sloop
+            (Stmt.Ssequence
+              (Stmt.Sloop
+                (Stmt.Ssequence
+                  (Stmt.Sloop
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___a64_l_reg (Expr.Etempvar _index tulong))
+                      (Stmt.Ssequence
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                            (Expr.Etempvar ___a64_l_reg tulong)
+                                            (Expr.Econst_int (Integers.Int.repr 32) tuint)
+                                            tint)
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'134
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                  (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                _coordinates
+                                (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                            s_kprog_arm64_memory_read_7)
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                              (Expr.Etempvar ___a64_l_reg tulong)
+                                              (Expr.Econst_int (Integers.Int.repr 31) tuint)
+                                              tint)
+                            s_kprog_arm64_memory_read_8
+                            s_kprog_arm64_memory_read_9))
+                        (Stmt.Sset ___a64_read_value
+                          (Expr.Etempvar _t'3 tulong))))
+                    Stmt.Sbreak)
+                  (Stmt.Ssequence
+                    (Stmt.Sloop
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___a64_l_reg__1
+                          (Expr.Etempvar _index tulong))
+                        (Stmt.Ssequence
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                              (Expr.Etempvar ___a64_l_reg__1 tulong)
+                                              (Expr.Econst_int (Integers.Int.repr 32) tuint)
+                                              tint)
+                            (Stmt.Sset _t'4
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                tuint))
+                            (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                                (Expr.Etempvar ___a64_l_reg__1 tulong)
+                                                (Expr.Econst_int (Integers.Int.repr 31) tuint)
+                                                tint)
+                              s_kprog_arm64_memory_read_10
+                              s_kprog_arm64_memory_read_11))
+                          (Stmt.Sset ___a64_read_tag
+                            (Expr.Ecast (Expr.Etempvar _t'4 tuint) tuchar))))
+                      Stmt.Sbreak)
+                    (Stmt.Sloop
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___a64_mat_value
+                          (Expr.Etempvar ___a64_read_value tulong))
+                        (Stmt.Ssequence
+                          (Stmt.Sset ___a64_mat_tag
+                            (Expr.Ecast
+                              (Expr.Etempvar ___a64_read_tag tuchar) tuchar))
+                          (Stmt.Ssequence
+                            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                (Expr.Etempvar ___a64_mat_tag tuchar)
+                                                (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                                tint)
+                              s_kprog_arm64_memory_read_12
+                              s_kprog_arm64_memory_read_13)
+                            (Stmt.Sset ___a64_modified_input
+                              (Expr.Etempvar ___a64_mat_value tulong)))))
+                      Stmt.Sbreak)))
+                Stmt.Sbreak)
+              (Stmt.Sloop
+                (Stmt.Ssequence
+                  (Stmt.Sset ___kprog_a64_mod_value
+                    (Expr.Etempvar ___a64_modified_input tulong))
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___kprog_a64_mod
+                      (Expr.Ecast
+                        (Expr.Ecast
+                          (Expr.Ebinop Binop.Oand
+                            (Expr.Ebinop Binop.Oshr
+                              (Expr.Etempvar _aux tuint)
+                              (Expr.Econst_int (Integers.Int.repr 8) tint)
+                              tuint)
+                            (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                            tuint) tuchar) tuchar))
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___kprog_a64_mod_shift
+                        (Expr.Ecast
+                          (Expr.Ecast
+                            (Expr.Ebinop Binop.Oand
+                              (Expr.Ebinop Binop.Oshr
+                                (Expr.Etempvar _aux tuint)
+                                (Expr.Econst_int (Integers.Int.repr 16) tint)
+                                tuint)
+                              (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                              tuint) tuchar) tuchar))
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                              (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                              (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                              tint)
+                            (Stmt.Sset _t'7
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 31) tuint)
+                                tuint))
+                            (Stmt.Sset _t'7
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 63) tuint)
+                                tuint)))
+                          (Stmt.Sset ___kprog_a64_mod_amount
+                            (Expr.Ecast
+                              (Expr.Ecast
+                                (Expr.Ebinop Binop.Oand
+                                  (Expr.Etempvar ___kprog_a64_mod_shift tuchar)
+                                  (Expr.Etempvar _t'7 tuint) tuint) tuchar)
+                              tuchar)))
+                        (Stmt.Ssequence
+                          (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_mod tuchar)
+                            (LStmts.LScons (some 0)
+                              Stmt.Sbreak
+                              (LStmts.LScons (some 1)
+                                (Stmt.Ssequence
+                                  s_kprog_arm64_memory_read_14
+                                  Stmt.Sbreak)
+                                (LStmts.LScons (some 2)
+                                  (Stmt.Ssequence
+                                    s_kprog_arm64_memory_read_15
+                                    Stmt.Sbreak)
+                                  (LStmts.LScons (some 3)
+                                    (Stmt.Ssequence
+                                      s_kprog_arm64_memory_read_16
+                                      Stmt.Sbreak)
+                                    (LStmts.LScons (some 4)
+                                      (Stmt.Ssequence
+                                        s_kprog_arm64_memory_read_17
+                                        Stmt.Sbreak)
+                                      (LStmts.LScons (some 5)
+                                        (Stmt.Ssequence
+                                          s_kprog_arm64_memory_read_18
+                                          Stmt.Sbreak)
+                                        (LStmts.LScons (some 6)
+                                          (Stmt.Ssequence
+                                            s_kprog_arm64_memory_read_19
+                                            Stmt.Sbreak)
+                                          (LStmts.LScons (some 7)
+                                            (Stmt.Ssequence
+                                              s_kprog_arm64_memory_read_20
+                                              Stmt.Sbreak)
+                                            (LStmts.LScons (some 8)
+                                              (Stmt.Ssequence
+                                                s_kprog_arm64_memory_read_21
+                                                Stmt.Sbreak)
+                                              (LStmts.LScons (some 9)
+                                                (Stmt.Ssequence
+                                                  s_kprog_arm64_memory_read_22
+                                                  Stmt.Sbreak)
+                                                (LStmts.LScons (some 10)
+                                                  (Stmt.Ssequence
+                                                    s_kprog_arm64_memory_read_23
+                                                    Stmt.Sbreak)
+                                                  LStmts.LSnil))))))))))))
+                          (Stmt.Sset ___a64_mbo_index
+                            (Expr.Etempvar ___kprog_a64_mod_value tulong)))))))
+                Stmt.Sbreak))
+            Stmt.Sbreak)
+          Stmt.Sskip)
+        (Stmt.Ssequence
+          (Stmt.Sloop
+            (Stmt.Ssequence
+              (Stmt.Sset ___kprog_a64_mbo_imm
+                (Expr.Etempvar ___a64_mbo_imm tulong))
+              (Stmt.Ssequence
+                (Stmt.Sset ___kprog_a64_mbo_index
+                  (Expr.Etempvar ___a64_mbo_index tulong))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oand
+                                          (Expr.Ecast
+                                            (Expr.Ebinop Binop.Oand
+                                              (Expr.Ebinop Binop.Oshr
+                                                (Expr.Etempvar _aux tuint)
+                                                (Expr.Econst_int (Integers.Int.repr 24) tuint)
+                                                tuint)
+                                              (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                                              tuint) tuint)
+                                          (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                          tuint)
+                        (Stmt.Sset _t'11
+                          (Expr.Econst_int (Integers.Int.repr 1) tint))
+                        (Stmt.Sset _t'11
+                          (Expr.Ecast
+                            (Expr.Ebinop Binop.Oand
+                              (Expr.Ecast
+                                (Expr.Ebinop Binop.Oand
+                                  (Expr.Ebinop Binop.Oshr
+                                    (Expr.Etempvar _aux tuint)
+                                    (Expr.Econst_int (Integers.Int.repr 24) tuint)
+                                    tuint)
+                                  (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                                  tuint) tuint)
+                              (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                              tuint) tbool)))
+                      (Stmt.Sifthenelse (Expr.Etempvar _t'11 tint)
+                        (Stmt.Sset _t'12
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 1) tint)
+                            tint))
+                        (Stmt.Sset _t'12
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 0) tint)
+                            tint))))
+                    (Stmt.Sset ___kprog_a64_mbo_prepost
+                      (Expr.Etempvar _t'12 tint)))
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sifthenelse (Expr.Etempvar ___a64_mbo_has_index tuchar)
+                        (Stmt.Sset _t'13
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 1) tint)
+                            tint))
+                        (Stmt.Sset _t'13
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 0) tint)
+                            tint)))
+                      (Stmt.Sset ___kprog_a64_mbo_has_index
+                        (Expr.Etempvar _t'13 tint)))
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sifthenelse (Expr.Etempvar ___kprog_a64_mbo_prepost tint)
+                          (Stmt.Sset _t'14
+                            (Expr.Ecast
+                              (Expr.Econst_long (Integers.Int64.repr 0) tulong)
+                              tulong))
+                          (Stmt.Sset _t'14
+                            (Expr.Ecast
+                              (Expr.Etempvar ___kprog_a64_mbo_imm tulong)
+                              tulong)))
+                        (Stmt.Sset ___kprog_a64_mbo_base
+                          (Expr.Etempvar _t'14 tulong)))
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___kprog_a64_mbo_result
+                          (Expr.Etempvar ___kprog_a64_mbo_base tulong))
+                        (Stmt.Ssequence
+                          (Stmt.Sifthenelse (Expr.Etempvar ___kprog_a64_mbo_has_index tint)
+                            (Stmt.Sset ___kprog_a64_mbo_result
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Etempvar ___kprog_a64_mbo_base tulong)
+                                (Expr.Etempvar ___kprog_a64_mbo_index tulong)
+                                tulong))
+                            Stmt.Sskip)
+                          (Stmt.Sset ___a64_mbo_result
+                            (Expr.Etempvar ___kprog_a64_mbo_result tulong)))))))))
+            Stmt.Sbreak)
+          (Stmt.Sset ___a64_memory_off
+            (Expr.Ecast (Expr.Etempvar ___a64_mbo_result tulong) tlong)))))))
+
+def s_kprog_arm64_memory_read_25 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___a64_l_reg__2 (Expr.Etempvar _base tulong))
+  (Stmt.Ssequence
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                        (Expr.Etempvar ___a64_l_reg__2 tulong)
+                        (Expr.Econst_int (Integers.Int.repr 32) tuint) tint)
+      (Stmt.Sset _t'15
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 4) tuint) tuint))
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                          (Expr.Etempvar ___a64_l_reg__2 tulong)
+                          (Expr.Econst_int (Integers.Int.repr 31) tuint)
+                          tint)
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'118
+              (Expr.Ederef
+                (Expr.Ebinop Binop.Oadd
+                  (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                  (Expr.Ecast (Expr.Etempvar ___a64_l_reg__2 tulong) tuchar)
+                  (tptr (tptr tuchar))) (tptr tuchar)))
+            (Stmt.Ssequence
+              (Stmt.Sset _t'119
+                (Expr.Ederef (Expr.Etempvar _t'118 (tptr tuchar)) tuchar))
+              (Stmt.Sset _t'15
+                (Expr.Ecast (Expr.Etempvar _t'119 tuchar) tuint))))
+          (Stmt.Sset _t'15 (Expr.Ecast (Expr.Etempvar _t'15 tuint) tuint)))
+        (Stmt.Ssequence
+          (Stmt.Sset _t'15
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuint))
+          (Stmt.Sset _t'15 (Expr.Ecast (Expr.Etempvar _t'15 tuint) tuint)))))
+    (Stmt.Sset ___a64_memory_tag
+      (Expr.Ecast (Expr.Etempvar _t'15 tuint) tuchar))))
+
+def s_kprog_arm64_memory_read_26 : Stmt :=
+Stmt.Sbreak
+
+def s_kprog_arm64_memory_read_27 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Scall (some _t'21)
+    (Expr.Evar _kprog_c_context_pointer (Ty.Tfunction
+                                          [(tptr tvoid), tuchar, tuint]
+                                          (tptr tvoid) cc_default))
+    [(Expr.Etempvar ___a64_xdp_ctx (tptr (Ty.Tstruct _xdp_md noattr))),
+     (Expr.Econst_int (Integers.Int.repr 0) tuint),
+     (Expr.Econst_long (Integers.Int64.repr 4) tulong)])
+  (Stmt.Sset ___a64_xdp_value
+    (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'21 (tptr tvoid)) tulong)
+      tulong)))
+
+def s_kprog_arm64_memory_read_28 : Stmt :=
+Stmt.Sbreak
+
+def s_kprog_arm64_memory_read_29 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Scall (some _t'22)
+    (Expr.Evar _kprog_c_context_pointer (Ty.Tfunction
+                                          [(tptr tvoid), tuchar, tuint]
+                                          (tptr tvoid) cc_default))
+    [(Expr.Etempvar ___a64_xdp_ctx (tptr (Ty.Tstruct _xdp_md noattr))),
+     (Expr.Econst_int (Integers.Int.repr 0) tuint),
+     (Expr.Econst_long (Integers.Int64.repr 8) tulong)])
+  (Stmt.Sset ___a64_xdp_value
+    (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'22 (tptr tvoid)) tulong)
+      tulong)))
+
+def s_kprog_arm64_memory_read_30 : Stmt :=
+Stmt.Sbreak
+
+def s_kprog_arm64_memory_read_31 : Stmt :=
+(Stmt.Sset _t'24
+  (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 255) tulong) tulong))
+
+def s_kprog_arm64_memory_read_32 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq (Expr.Etempvar _width tuchar)
+                    (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+  (Stmt.Ssequence
+    (Stmt.Sset _t'24
+      (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 65535) tulong)
+        tulong))
+    (Stmt.Sset _t'24 (Expr.Ecast (Expr.Etempvar _t'24 tulong) tulong)))
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq (Expr.Etempvar _width tuchar)
+                      (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sset _t'24
+          (Expr.Ecast
+            (Expr.Econst_long (Integers.Int64.repr 4294967295) tulong)
+            tulong))
+        (Stmt.Sset _t'24 (Expr.Ecast (Expr.Etempvar _t'24 tulong) tulong)))
+      (Stmt.Sset _t'24 (Expr.Ecast (Expr.Etempvar _t'24 tulong) tulong)))
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sset _t'24
+          (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr (-1)) tulong)
+            tulong))
+        (Stmt.Sset _t'24 (Expr.Ecast (Expr.Etempvar _t'24 tulong) tulong)))
+      (Stmt.Sset _t'24 (Expr.Ecast (Expr.Etempvar _t'24 tulong) tulong)))))
+
+def s_kprog_arm64_memory_read_33 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sbuiltin none (ExtFun.EF_memcpy 8 1) [(tptr tulong), (tptr tuchar)]
+    [(Expr.Eaddrof (Expr.Evar ___kprog_c_load_value tulong) (tptr tulong)),
+     (Expr.Ebinop Binop.Oadd
+       (Expr.Ecast
+         (Expr.Etempvar ___kprog_a64_lb_addr (tptr (tvolatile tuchar)))
+         (tptr tuchar)) (Expr.Etempvar ___a64_memory_off tlong)
+       (tptr tuchar))])
+  (Stmt.Sset ___kprog_a64_lb_value (Expr.Evar ___kprog_c_load_value tulong)))
+
+def s_kprog_arm64_memory_read_34 : Stmt :=
+Stmt.Sbreak
+
+def s_kprog_arm64_memory_read_35 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                    (Expr.Etempvar ___kprog_a64_lb_width tuchar)
+                    (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+  (Stmt.Sloop
+    (Stmt.Ssequence
+      (Stmt.Sbuiltin none (ExtFun.EF_memcpy 4 1)
+        [(tptr tuint), (tptr tuchar)]
+        [(Expr.Eaddrof (Expr.Evar ___kprog_c_load_value__1 tuint)
+           (tptr tuint)),
+         (Expr.Ebinop Binop.Oadd
+           (Expr.Ecast
+             (Expr.Etempvar ___kprog_a64_lb_addr (tptr (tvolatile tuchar)))
+             (tptr tuchar)) (Expr.Etempvar ___a64_memory_off tlong)
+           (tptr tuchar))])
+      (Stmt.Ssequence
+        (Stmt.Sset _t'111 (Expr.Evar ___kprog_c_load_value__1 tuint))
+        (Stmt.Sset ___kprog_a64_lb_value
+          (Expr.Ecast (Expr.Etempvar _t'111 tuint) tulong))))
+    Stmt.Sbreak)
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                      (Expr.Etempvar ___kprog_a64_lb_width tuchar)
+                      (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+    (Stmt.Sloop
+      (Stmt.Ssequence
+        (Stmt.Sbuiltin none (ExtFun.EF_memcpy 2 1)
+          [(tptr tushort), (tptr tuchar)]
+          [(Expr.Eaddrof (Expr.Evar ___kprog_c_load_value__2 tushort)
+             (tptr tushort)),
+           (Expr.Ebinop Binop.Oadd
+             (Expr.Ecast
+               (Expr.Etempvar ___kprog_a64_lb_addr (tptr (tvolatile tuchar)))
+               (tptr tuchar)) (Expr.Etempvar ___a64_memory_off tlong)
+             (tptr tuchar))])
+        (Stmt.Ssequence
+          (Stmt.Sset _t'110 (Expr.Evar ___kprog_c_load_value__2 tushort))
+          (Stmt.Sset ___kprog_a64_lb_value
+            (Expr.Ecast (Expr.Etempvar _t'110 tushort) tulong))))
+      Stmt.Sbreak)
+    (Stmt.Sloop
+      (Stmt.Ssequence
+        (Stmt.Sbuiltin none (ExtFun.EF_memcpy 1 1)
+          [(tptr tuchar), (tptr tuchar)]
+          [(Expr.Eaddrof (Expr.Evar ___kprog_c_load_value__3 tuchar)
+             (tptr tuchar)),
+           (Expr.Ebinop Binop.Oadd
+             (Expr.Ecast
+               (Expr.Etempvar ___kprog_a64_lb_addr (tptr (tvolatile tuchar)))
+               (tptr tuchar)) (Expr.Etempvar ___a64_memory_off tlong)
+             (tptr tuchar))])
+        (Stmt.Ssequence
+          (Stmt.Sset _t'109 (Expr.Evar ___kprog_c_load_value__3 tuchar))
+          (Stmt.Sset ___kprog_a64_lb_value
+            (Expr.Ecast (Expr.Etempvar _t'109 tuchar) tulong))))
+      Stmt.Sbreak)))
+
+def s_kprog_arm64_memory_read_36 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'107
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _t'106 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+        (Ty.Tstruct _kprog_arm64_coordinates noattr)) _stack_offset tlong))
+  (Stmt.Sset _t'27
+    (Expr.Ecast
+      (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'107 tlong) tlong)
+        (tptr tvoid)) (tptr tvoid))))
+
+def s_kprog_arm64_memory_read_37 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'104
+      (Expr.Ederef
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+          (Expr.Ecast (Expr.Etempvar ___a64_l_reg__4 tulong) tuchar)
+          (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+        (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+    (Stmt.Ssequence
+      (Stmt.Sset _t'105
+        (Expr.Efield
+          (Expr.Ederef
+            (Expr.Etempvar _t'104 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+            (Ty.Tunion _arm64_sim_gpr noattr)) _ptr (tptr tvoid)))
+      (Stmt.Sset _t'27
+        (Expr.Ecast (Expr.Etempvar _t'105 (tptr tvoid)) (tptr tvoid)))))
+  (Stmt.Sset _t'27
+    (Expr.Ecast (Expr.Etempvar _t'27 (tptr tvoid)) (tptr tvoid))))
+
+def s_kprog_arm64_memory_read_38 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'27
+    (Expr.Ecast
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid))
+      (tptr tvoid)))
+  (Stmt.Sset _t'27
+    (Expr.Ecast (Expr.Etempvar _t'27 (tptr tvoid)) (tptr tvoid))))
+
+def s_kprog_arm64_memory_read_39 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Scall (some _t'28)
+    (Expr.Evar _kprog_c_context_pointer (Ty.Tfunction
+                                          [(tptr tvoid), tuchar, tuint]
+                                          (tptr tvoid) cc_default))
+    [(Expr.Etempvar ___a64_sr_ctx (tptr (Ty.Tstruct ___sk_buff noattr))),
+     (Expr.Econst_int (Integers.Int.repr 1) tuint),
+     (Expr.Econst_long (Integers.Int64.repr 76) tulong)])
+  (Stmt.Sset ___a64_sr_value
+    (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'28 (tptr tvoid)) tulong)
+      tulong)))
+
+def s_kprog_arm64_memory_read_40 : Stmt :=
+Stmt.Sbreak
+
+def s_kprog_arm64_memory_read_41 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Scall (some _t'29)
+    (Expr.Evar _kprog_c_context_pointer (Ty.Tfunction
+                                          [(tptr tvoid), tuchar, tuint]
+                                          (tptr tvoid) cc_default))
+    [(Expr.Etempvar ___a64_sr_ctx (tptr (Ty.Tstruct ___sk_buff noattr))),
+     (Expr.Econst_int (Integers.Int.repr 1) tuint),
+     (Expr.Econst_long (Integers.Int64.repr 80) tulong)])
+  (Stmt.Sset ___a64_sr_value
+    (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'29 (tptr tvoid)) tulong)
+      tulong)))
+
+def s_kprog_arm64_memory_read_42 : Stmt :=
+Stmt.Sbreak
+
+def s_kprog_arm64_memory_read_43 : Stmt :=
+(Stmt.Scall (some _t'30)
+  (Expr.Evar _kprog_c_pointer_bits (Ty.Tfunction [(tptr tvoid)] tulong
+                                     cc_default))
+  [(Expr.Ecast (Expr.Ecast (Expr.Etempvar ___a64_sr_value tulong) tulong)
+     (tptr tvoid))])
+
+def s_kprog_arm64_memory_read_44 : Stmt :=
+(Stmt.Sset _t'31
+  (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 255) tulong) tulong))
+
+def s_kprog_arm64_memory_read_45 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq (Expr.Etempvar _width tuchar)
+                    (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+  (Stmt.Ssequence
+    (Stmt.Sset _t'31
+      (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 65535) tulong)
+        tulong))
+    (Stmt.Sset _t'31 (Expr.Ecast (Expr.Etempvar _t'31 tulong) tulong)))
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq (Expr.Etempvar _width tuchar)
+                      (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sset _t'31
+          (Expr.Ecast
+            (Expr.Econst_long (Integers.Int64.repr 4294967295) tulong)
+            tulong))
+        (Stmt.Sset _t'31 (Expr.Ecast (Expr.Etempvar _t'31 tulong) tulong)))
+      (Stmt.Sset _t'31 (Expr.Ecast (Expr.Etempvar _t'31 tulong) tulong)))
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sset _t'31
+          (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr (-1)) tulong)
+            tulong))
+        (Stmt.Sset _t'31 (Expr.Ecast (Expr.Etempvar _t'31 tulong) tulong)))
+      (Stmt.Sset _t'31 (Expr.Ecast (Expr.Etempvar _t'31 tulong) tulong)))))
+
+def s_kprog_arm64_memory_read_46 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sbuiltin (some _t'32) (ExtFun.EF_vload Chunk.Mint8unsigned)
+    [(tptr (tvolatile tuchar))]
+    [(Expr.Eaddrof
+       (Expr.Ederef
+         (Expr.Ebinop Binop.Oadd
+           (Expr.Etempvar ___a64_cbr_addr (tptr (tvolatile tuchar)))
+           (Expr.Econst_int (Integers.Int.repr 0) tint)
+           (tptr (tvolatile tuchar))) (tvolatile tuchar))
+       (tptr (tvolatile tuchar)))])
+  (Stmt.Sset ___a64_cbr_bytes_value
+    (Expr.Ecast (Expr.Etempvar _t'32 (tvolatile tuchar)) tulong)))
+
+def s_kprog_arm64_memory_read_47 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge (Expr.Etempvar _width tuchar)
+                      (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+    (Stmt.Ssequence
+      (Stmt.Sbuiltin (some _t'33) (ExtFun.EF_vload Chunk.Mint8unsigned)
+        [(tptr (tvolatile tuchar))]
+        [(Expr.Eaddrof
+           (Expr.Ederef
+             (Expr.Ebinop Binop.Oadd
+               (Expr.Etempvar ___a64_cbr_addr (tptr (tvolatile tuchar)))
+               (Expr.Econst_int (Integers.Int.repr 1) tint)
+               (tptr (tvolatile tuchar))) (tvolatile tuchar))
+           (tptr (tvolatile tuchar)))])
+      (Stmt.Sset ___a64_cbr_bytes_value
+        (Expr.Ebinop Binop.Oor (Expr.Etempvar ___a64_cbr_bytes_value tulong)
+          (Expr.Ebinop Binop.Oshl
+            (Expr.Ecast (Expr.Etempvar _t'33 (tvolatile tuchar)) tulong)
+            (Expr.Econst_int (Integers.Int.repr 8) tint) tulong) tulong)))
+    Stmt.Sskip)
+  (Stmt.Ssequence
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge (Expr.Etempvar _width tuchar)
+                        (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+      (Stmt.Ssequence
+        (Stmt.Sbuiltin (some _t'34) (ExtFun.EF_vload Chunk.Mint8unsigned)
+          [(tptr (tvolatile tuchar))]
+          [(Expr.Eaddrof
+             (Expr.Ederef
+               (Expr.Ebinop Binop.Oadd
+                 (Expr.Etempvar ___a64_cbr_addr (tptr (tvolatile tuchar)))
+                 (Expr.Econst_int (Integers.Int.repr 2) tint)
+                 (tptr (tvolatile tuchar))) (tvolatile tuchar))
+             (tptr (tvolatile tuchar)))])
+        (Stmt.Sset ___a64_cbr_bytes_value
+          (Expr.Ebinop Binop.Oor
+            (Expr.Etempvar ___a64_cbr_bytes_value tulong)
+            (Expr.Ebinop Binop.Oshl
+              (Expr.Ecast (Expr.Etempvar _t'34 (tvolatile tuchar)) tulong)
+              (Expr.Econst_int (Integers.Int.repr 16) tint) tulong) tulong)))
+      Stmt.Sskip)
+    (Stmt.Ssequence
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge (Expr.Etempvar _width tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+        (Stmt.Ssequence
+          (Stmt.Sbuiltin (some _t'35) (ExtFun.EF_vload Chunk.Mint8unsigned)
+            [(tptr (tvolatile tuchar))]
+            [(Expr.Eaddrof
+               (Expr.Ederef
+                 (Expr.Ebinop Binop.Oadd
+                   (Expr.Etempvar ___a64_cbr_addr (tptr (tvolatile tuchar)))
+                   (Expr.Econst_int (Integers.Int.repr 3) tint)
+                   (tptr (tvolatile tuchar))) (tvolatile tuchar))
+               (tptr (tvolatile tuchar)))])
+          (Stmt.Sset ___a64_cbr_bytes_value
+            (Expr.Ebinop Binop.Oor
+              (Expr.Etempvar ___a64_cbr_bytes_value tulong)
+              (Expr.Ebinop Binop.Oshl
+                (Expr.Ecast (Expr.Etempvar _t'35 (tvolatile tuchar)) tulong)
+                (Expr.Econst_int (Integers.Int.repr 24) tint) tulong) tulong)))
+        Stmt.Sskip)
+      (Stmt.Ssequence
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                            (Expr.Etempvar _width tuchar)
+                            (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                            tint)
+          (Stmt.Ssequence
+            (Stmt.Sbuiltin (some _t'36) (ExtFun.EF_vload Chunk.Mint8unsigned)
+              [(tptr (tvolatile tuchar))]
+              [(Expr.Eaddrof
+                 (Expr.Ederef
+                   (Expr.Ebinop Binop.Oadd
+                     (Expr.Etempvar ___a64_cbr_addr (tptr (tvolatile tuchar)))
+                     (Expr.Econst_int (Integers.Int.repr 4) tint)
+                     (tptr (tvolatile tuchar))) (tvolatile tuchar))
+                 (tptr (tvolatile tuchar)))])
+            (Stmt.Sset ___a64_cbr_bytes_value
+              (Expr.Ebinop Binop.Oor
+                (Expr.Etempvar ___a64_cbr_bytes_value tulong)
+                (Expr.Ebinop Binop.Oshl
+                  (Expr.Ecast (Expr.Etempvar _t'36 (tvolatile tuchar))
+                    tulong) (Expr.Econst_int (Integers.Int.repr 32) tint)
+                  tulong) tulong)))
+          Stmt.Sskip)
+        (Stmt.Ssequence
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                              (Expr.Etempvar _width tuchar)
+                              (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                              tint)
+            (Stmt.Ssequence
+              (Stmt.Sbuiltin (some _t'37)
+                (ExtFun.EF_vload Chunk.Mint8unsigned)
+                [(tptr (tvolatile tuchar))]
+                [(Expr.Eaddrof
+                   (Expr.Ederef
+                     (Expr.Ebinop Binop.Oadd
+                       (Expr.Etempvar ___a64_cbr_addr (tptr (tvolatile tuchar)))
+                       (Expr.Econst_int (Integers.Int.repr 5) tint)
+                       (tptr (tvolatile tuchar))) (tvolatile tuchar))
+                   (tptr (tvolatile tuchar)))])
+              (Stmt.Sset ___a64_cbr_bytes_value
+                (Expr.Ebinop Binop.Oor
+                  (Expr.Etempvar ___a64_cbr_bytes_value tulong)
+                  (Expr.Ebinop Binop.Oshl
+                    (Expr.Ecast (Expr.Etempvar _t'37 (tvolatile tuchar))
+                      tulong) (Expr.Econst_int (Integers.Int.repr 40) tint)
+                    tulong) tulong)))
+            Stmt.Sskip)
+          (Stmt.Ssequence
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                (Expr.Etempvar _width tuchar)
+                                (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                tint)
+              (Stmt.Ssequence
+                (Stmt.Sbuiltin (some _t'38)
+                  (ExtFun.EF_vload Chunk.Mint8unsigned)
+                  [(tptr (tvolatile tuchar))]
+                  [(Expr.Eaddrof
+                     (Expr.Ederef
+                       (Expr.Ebinop Binop.Oadd
+                         (Expr.Etempvar ___a64_cbr_addr (tptr (tvolatile tuchar)))
+                         (Expr.Econst_int (Integers.Int.repr 6) tint)
+                         (tptr (tvolatile tuchar))) (tvolatile tuchar))
+                     (tptr (tvolatile tuchar)))])
+                (Stmt.Sset ___a64_cbr_bytes_value
+                  (Expr.Ebinop Binop.Oor
+                    (Expr.Etempvar ___a64_cbr_bytes_value tulong)
+                    (Expr.Ebinop Binop.Oshl
+                      (Expr.Ecast (Expr.Etempvar _t'38 (tvolatile tuchar))
+                        tulong) (Expr.Econst_int (Integers.Int.repr 48) tint)
+                      tulong) tulong)))
+              Stmt.Sskip)
+            (Stmt.Ssequence
+              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                  (Expr.Etempvar _width tuchar)
+                                  (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                  tint)
+                (Stmt.Ssequence
+                  (Stmt.Sbuiltin (some _t'39)
+                    (ExtFun.EF_vload Chunk.Mint8unsigned)
+                    [(tptr (tvolatile tuchar))]
+                    [(Expr.Eaddrof
+                       (Expr.Ederef
+                         (Expr.Ebinop Binop.Oadd
+                           (Expr.Etempvar ___a64_cbr_addr (tptr (tvolatile tuchar)))
+                           (Expr.Econst_int (Integers.Int.repr 7) tint)
+                           (tptr (tvolatile tuchar))) (tvolatile tuchar))
+                       (tptr (tvolatile tuchar)))])
+                  (Stmt.Sset ___a64_cbr_bytes_value
+                    (Expr.Ebinop Binop.Oor
+                      (Expr.Etempvar ___a64_cbr_bytes_value tulong)
+                      (Expr.Ebinop Binop.Oshl
+                        (Expr.Ecast (Expr.Etempvar _t'39 (tvolatile tuchar))
+                          tulong)
+                        (Expr.Econst_int (Integers.Int.repr 56) tint) tulong)
+                      tulong)))
+                Stmt.Sskip)
+              (Stmt.Sset ___a64_sr_value
+                (Expr.Etempvar ___a64_cbr_bytes_value tulong)))))))))
+
+def s_kprog_arm64_memory_read_48 : Stmt :=
+(Stmt.Sset ___a64_l_reg__5 (Expr.Etempvar _base tulong))
+
+def s_kprog_arm64_memory_read_49 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                      (Expr.Etempvar ___a64_l_reg__5 tulong)
+                      (Expr.Econst_int (Integers.Int.repr 32) tuint) tint)
+    (Stmt.Ssequence
+      (Stmt.Sset _t'101
+        (Expr.Efield
+          (Expr.Ederef
+            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+            (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+          (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+      (Stmt.Ssequence
+        (Stmt.Sset _t'102
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _t'101 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+              (Ty.Tstruct _kprog_arm64_coordinates noattr)) _stack_offset
+            tlong))
+        (Stmt.Sset _t'40
+          (Expr.Ecast
+            (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'102 tlong) tlong)
+              (tptr tvoid)) (tptr tvoid)))))
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                        (Expr.Etempvar ___a64_l_reg__5 tulong)
+                        (Expr.Econst_int (Integers.Int.repr 31) tuint) tint)
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sset _t'99
+            (Expr.Ederef
+              (Expr.Ebinop Binop.Oadd
+                (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                (Expr.Ecast (Expr.Etempvar ___a64_l_reg__5 tulong) tuchar)
+                (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+              (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+          (Stmt.Ssequence
+            (Stmt.Sset _t'100
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _t'99 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                  (Ty.Tunion _arm64_sim_gpr noattr)) _ptr (tptr tvoid)))
+            (Stmt.Sset _t'40
+              (Expr.Ecast (Expr.Etempvar _t'100 (tptr tvoid)) (tptr tvoid)))))
+        (Stmt.Sset _t'40
+          (Expr.Ecast (Expr.Etempvar _t'40 (tptr tvoid)) (tptr tvoid))))
+      (Stmt.Ssequence
+        (Stmt.Sset _t'40
+          (Expr.Ecast
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+              (tptr tvoid)) (tptr tvoid)))
+        (Stmt.Sset _t'40
+          (Expr.Ecast (Expr.Etempvar _t'40 (tptr tvoid)) (tptr tvoid))))))
+  (Stmt.Sset ___a64_sr_pointer (Expr.Etempvar _t'40 (tptr tvoid))))
+
+def s_kprog_arm64_memory_read_50 : Stmt :=
+(Stmt.Sset ___kprog_a64_lb_addr__1
+  (Expr.Ecast (Expr.Etempvar ___a64_sr_pointer (tptr tvoid))
+    (tptr (tvolatile tuchar))))
+
+def s_kprog_arm64_memory_read_51 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_lb_width__1
+    (Expr.Ecast (Expr.Etempvar _width tuchar) tuchar))
+  (Stmt.Ssequence
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                        (Expr.Etempvar ___kprog_a64_lb_width__1 tuchar)
+                        (Expr.Econst_int (Integers.Int.repr 8) tuint) tint)
+      (Stmt.Sloop
+        (Stmt.Ssequence
+          (Stmt.Sbuiltin none (ExtFun.EF_memcpy 8 1)
+            [(tptr tulong), (tptr tuchar)]
+            [(Expr.Eaddrof (Expr.Evar ___kprog_c_load_value__4 tulong)
+               (tptr tulong)),
+             (Expr.Ebinop Binop.Oadd
+               (Expr.Ecast
+                 (Expr.Etempvar ___kprog_a64_lb_addr__1 (tptr (tvolatile tuchar)))
+                 (tptr tuchar)) (Expr.Etempvar ___a64_memory_off tlong)
+               (tptr tuchar))])
+          (Stmt.Sset ___kprog_a64_lb_value__1
+            (Expr.Evar ___kprog_c_load_value__4 tulong)))
+        Stmt.Sbreak)
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                          (Expr.Etempvar ___kprog_a64_lb_width__1 tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+        (Stmt.Sloop
+          (Stmt.Ssequence
+            (Stmt.Sbuiltin none (ExtFun.EF_memcpy 4 1)
+              [(tptr tuint), (tptr tuchar)]
+              [(Expr.Eaddrof (Expr.Evar ___kprog_c_load_value__5 tuint)
+                 (tptr tuint)),
+               (Expr.Ebinop Binop.Oadd
+                 (Expr.Ecast
+                   (Expr.Etempvar ___kprog_a64_lb_addr__1 (tptr (tvolatile tuchar)))
+                   (tptr tuchar)) (Expr.Etempvar ___a64_memory_off tlong)
+                 (tptr tuchar))])
+            (Stmt.Ssequence
+              (Stmt.Sset _t'98 (Expr.Evar ___kprog_c_load_value__5 tuint))
+              (Stmt.Sset ___kprog_a64_lb_value__1
+                (Expr.Ecast (Expr.Etempvar _t'98 tuint) tulong))))
+          Stmt.Sbreak)
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                            (Expr.Etempvar ___kprog_a64_lb_width__1 tuchar)
+                            (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                            tint)
+          (Stmt.Sloop
+            (Stmt.Ssequence
+              (Stmt.Sbuiltin none (ExtFun.EF_memcpy 2 1)
+                [(tptr tushort), (tptr tuchar)]
+                [(Expr.Eaddrof (Expr.Evar ___kprog_c_load_value__6 tushort)
+                   (tptr tushort)),
+                 (Expr.Ebinop Binop.Oadd
+                   (Expr.Ecast
+                     (Expr.Etempvar ___kprog_a64_lb_addr__1 (tptr (tvolatile tuchar)))
+                     (tptr tuchar)) (Expr.Etempvar ___a64_memory_off tlong)
+                   (tptr tuchar))])
+              (Stmt.Ssequence
+                (Stmt.Sset _t'97
+                  (Expr.Evar ___kprog_c_load_value__6 tushort))
+                (Stmt.Sset ___kprog_a64_lb_value__1
+                  (Expr.Ecast (Expr.Etempvar _t'97 tushort) tulong))))
+            Stmt.Sbreak)
+          (Stmt.Sloop
+            (Stmt.Ssequence
+              (Stmt.Sbuiltin none (ExtFun.EF_memcpy 1 1)
+                [(tptr tuchar), (tptr tuchar)]
+                [(Expr.Eaddrof (Expr.Evar ___kprog_c_load_value__7 tuchar)
+                   (tptr tuchar)),
+                 (Expr.Ebinop Binop.Oadd
+                   (Expr.Ecast
+                     (Expr.Etempvar ___kprog_a64_lb_addr__1 (tptr (tvolatile tuchar)))
+                     (tptr tuchar)) (Expr.Etempvar ___a64_memory_off tlong)
+                   (tptr tuchar))])
+              (Stmt.Ssequence
+                (Stmt.Sset _t'96 (Expr.Evar ___kprog_c_load_value__7 tuchar))
+                (Stmt.Sset ___kprog_a64_lb_value__1
+                  (Expr.Ecast (Expr.Etempvar _t'96 tuchar) tulong))))
+            Stmt.Sbreak))))
+    (Stmt.Sset ___a64_sr_value
+      (Expr.Etempvar ___kprog_a64_lb_value__1 tulong))))
+
+def s_kprog_arm64_memory_read_52 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                    (Expr.Etempvar ___a64_l_reg__6 tulong)
+                    (Expr.Econst_int (Integers.Int.repr 32) tuint) tint)
+  (Stmt.Ssequence
+    (Stmt.Sset _t'93
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+          (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+        (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+    (Stmt.Ssequence
+      (Stmt.Sset _t'94
+        (Expr.Efield
+          (Expr.Ederef
+            (Expr.Etempvar _t'93 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+            (Ty.Tstruct _kprog_arm64_coordinates noattr)) _stack_offset
+          tlong))
+      (Stmt.Sset _t'44
+        (Expr.Ecast
+          (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'94 tlong) tlong)
+            (tptr tvoid)) (tptr tvoid)))))
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                      (Expr.Etempvar ___a64_l_reg__6 tulong)
+                      (Expr.Econst_int (Integers.Int.repr 31) tuint) tint)
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sset _t'91
+          (Expr.Ederef
+            (Expr.Ebinop Binop.Oadd
+              (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+              (Expr.Ecast (Expr.Etempvar ___a64_l_reg__6 tulong) tuchar)
+              (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+            (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+        (Stmt.Ssequence
+          (Stmt.Sset _t'92
+            (Expr.Efield
+              (Expr.Ederef
+                (Expr.Etempvar _t'91 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                (Ty.Tunion _arm64_sim_gpr noattr)) _ptr (tptr tvoid)))
+          (Stmt.Sset _t'44
+            (Expr.Ecast (Expr.Etempvar _t'92 (tptr tvoid)) (tptr tvoid)))))
+      (Stmt.Sset _t'44
+        (Expr.Ecast (Expr.Etempvar _t'44 (tptr tvoid)) (tptr tvoid))))
+    (Stmt.Ssequence
+      (Stmt.Sset _t'44
+        (Expr.Ecast
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+            (tptr tvoid)) (tptr tvoid)))
+      (Stmt.Sset _t'44
+        (Expr.Ecast (Expr.Etempvar _t'44 (tptr tvoid)) (tptr tvoid))))))
+
+def s_kprog_arm64_memory_read_53 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'90
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _bias tlong))
+  (Stmt.Sset ___a64_str_index
+    (Expr.Ebinop Binop.Oadd (Expr.Ecast (Expr.Etempvar _t'90 tlong) tulong)
+      (Expr.Ecast
+        (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___a64_mrd_base tlong)
+          (Expr.Etempvar ___a64_memory_off tlong) tlong) tulong) tulong)))
+
+def s_kprog_arm64_memory_read_54 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___a64_str_width
+    (Expr.Ecast (Expr.Etempvar _width tuchar) tuchar))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                            (Expr.Etempvar ___a64_str_width tuchar)
+                            (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                            tint)
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                              (Expr.Ebinop Binop.Oand
+                                (Expr.Ecast
+                                  (Expr.Etempvar ___a64_str_index tulong)
+                                  tuint)
+                                (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                                tuint)
+                              (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                              tint)
+            (Stmt.Ssequence
+              (Stmt.Sset _t'55
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tint)
+                  tint))
+              (Stmt.Sset _t'55 (Expr.Ecast (Expr.Etempvar _t'55 tint) tbool)))
+            (Stmt.Ssequence
+              (Stmt.Sset _t'55
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+                  tint))
+              (Stmt.Sset _t'55 (Expr.Ecast (Expr.Etempvar _t'55 tint) tbool))))
+          (Stmt.Sset _t'55 (Expr.Econst_int (Integers.Int.repr 0) tint)))
+        (Stmt.Sifthenelse (Expr.Etempvar _t'55 tint)
+          (Stmt.Sset _t'56
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tint) tint))
+          (Stmt.Sset _t'56
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tint))))
+      (Stmt.Sifthenelse (Expr.Ecast (Expr.Etempvar _t'56 tint) tuchar)
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'89
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                  (Ty.Tstruct _kprog_arm64_addressing noattr)) _q
+                (tptr (tvolatile tulong))))
+            (Stmt.Sbuiltin (some _t'46) (ExtFun.EF_vload Chunk.Mint64)
+              [(tptr (tvolatile tulong))]
+              [(Expr.Eaddrof
+                 (Expr.Ederef
+                   (Expr.Ebinop Binop.Oadd
+                     (Expr.Etempvar _t'89 (tptr (tvolatile tulong)))
+                     (Expr.Ebinop Binop.Oshr
+                       (Expr.Ecast (Expr.Etempvar ___a64_str_index tulong)
+                         tulong) (Expr.Econst_int (Integers.Int.repr 3) tint)
+                       tulong) (tptr (tvolatile tulong))) (tvolatile tulong))
+                 (tptr (tvolatile tulong)))]))
+          (Stmt.Sset ___a64_str_value
+            (Expr.Etempvar _t'46 (tvolatile tulong))))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sset _t'88
+                (Expr.Efield
+                  (Expr.Ederef
+                    (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                    (Ty.Tstruct _kprog_arm64_addressing noattr)) _b
+                  (tptr (tvolatile tuchar))))
+              (Stmt.Sbuiltin (some _t'47)
+                (ExtFun.EF_vload Chunk.Mint8unsigned)
+                [(tptr (tvolatile tuchar))]
+                [(Expr.Eaddrof
+                   (Expr.Ederef
+                     (Expr.Ebinop Binop.Oadd
+                       (Expr.Etempvar _t'88 (tptr (tvolatile tuchar)))
+                       (Expr.Etempvar ___a64_str_index tulong)
+                       (tptr (tvolatile tuchar))) (tvolatile tuchar))
+                   (tptr (tvolatile tuchar)))]))
+            (Stmt.Sset ___a64_str_value
+              (Expr.Ecast (Expr.Etempvar _t'47 (tvolatile tuchar)) tulong)))
+          (Stmt.Ssequence
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                (Expr.Etempvar ___a64_str_width tuchar)
+                                (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                tint)
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'87
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                        (Ty.Tstruct _kprog_arm64_addressing noattr)) _b
+                      (tptr (tvolatile tuchar))))
+                  (Stmt.Sbuiltin (some _t'48)
+                    (ExtFun.EF_vload Chunk.Mint8unsigned)
+                    [(tptr (tvolatile tuchar))]
+                    [(Expr.Eaddrof
+                       (Expr.Ederef
+                         (Expr.Ebinop Binop.Oadd
+                           (Expr.Etempvar _t'87 (tptr (tvolatile tuchar)))
+                           (Expr.Ebinop Binop.Oadd
+                             (Expr.Etempvar ___a64_str_index tulong)
+                             (Expr.Econst_int (Integers.Int.repr 1) tint)
+                             tulong) (tptr (tvolatile tuchar)))
+                         (tvolatile tuchar)) (tptr (tvolatile tuchar)))]))
+                (Stmt.Sset ___a64_str_value
+                  (Expr.Ebinop Binop.Oor
+                    (Expr.Etempvar ___a64_str_value tulong)
+                    (Expr.Ebinop Binop.Oshl
+                      (Expr.Ecast (Expr.Etempvar _t'48 (tvolatile tuchar))
+                        tulong) (Expr.Econst_int (Integers.Int.repr 8) tint)
+                      tulong) tulong)))
+              Stmt.Sskip)
+            (Stmt.Ssequence
+              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                  (Expr.Etempvar ___a64_str_width tuchar)
+                                  (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                  tint)
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'86
+                      (Expr.Efield
+                        (Expr.Ederef
+                          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                          (Ty.Tstruct _kprog_arm64_addressing noattr)) _b
+                        (tptr (tvolatile tuchar))))
+                    (Stmt.Sbuiltin (some _t'49)
+                      (ExtFun.EF_vload Chunk.Mint8unsigned)
+                      [(tptr (tvolatile tuchar))]
+                      [(Expr.Eaddrof
+                         (Expr.Ederef
+                           (Expr.Ebinop Binop.Oadd
+                             (Expr.Etempvar _t'86 (tptr (tvolatile tuchar)))
+                             (Expr.Ebinop Binop.Oadd
+                               (Expr.Etempvar ___a64_str_index tulong)
+                               (Expr.Econst_int (Integers.Int.repr 2) tint)
+                               tulong) (tptr (tvolatile tuchar)))
+                           (tvolatile tuchar)) (tptr (tvolatile tuchar)))]))
+                  (Stmt.Sset ___a64_str_value
+                    (Expr.Ebinop Binop.Oor
+                      (Expr.Etempvar ___a64_str_value tulong)
+                      (Expr.Ebinop Binop.Oshl
+                        (Expr.Ecast (Expr.Etempvar _t'49 (tvolatile tuchar))
+                          tulong)
+                        (Expr.Econst_int (Integers.Int.repr 16) tint) tulong)
+                      tulong)))
+                Stmt.Sskip)
+              (Stmt.Ssequence
+                (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                    (Expr.Etempvar ___a64_str_width tuchar)
+                                    (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                    tint)
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'85
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                            (Ty.Tstruct _kprog_arm64_addressing noattr)) _b
+                          (tptr (tvolatile tuchar))))
+                      (Stmt.Sbuiltin (some _t'50)
+                        (ExtFun.EF_vload Chunk.Mint8unsigned)
+                        [(tptr (tvolatile tuchar))]
+                        [(Expr.Eaddrof
+                           (Expr.Ederef
+                             (Expr.Ebinop Binop.Oadd
+                               (Expr.Etempvar _t'85 (tptr (tvolatile tuchar)))
+                               (Expr.Ebinop Binop.Oadd
+                                 (Expr.Etempvar ___a64_str_index tulong)
+                                 (Expr.Econst_int (Integers.Int.repr 3) tint)
+                                 tulong) (tptr (tvolatile tuchar)))
+                             (tvolatile tuchar)) (tptr (tvolatile tuchar)))]))
+                    (Stmt.Sset ___a64_str_value
+                      (Expr.Ebinop Binop.Oor
+                        (Expr.Etempvar ___a64_str_value tulong)
+                        (Expr.Ebinop Binop.Oshl
+                          (Expr.Ecast
+                            (Expr.Etempvar _t'50 (tvolatile tuchar)) tulong)
+                          (Expr.Econst_int (Integers.Int.repr 24) tint)
+                          tulong) tulong)))
+                  Stmt.Sskip)
+                (Stmt.Ssequence
+                  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                      (Expr.Etempvar ___a64_str_width tuchar)
+                                      (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                      tint)
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'84
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                              (Ty.Tstruct _kprog_arm64_addressing noattr)) _b
+                            (tptr (tvolatile tuchar))))
+                        (Stmt.Sbuiltin (some _t'51)
+                          (ExtFun.EF_vload Chunk.Mint8unsigned)
+                          [(tptr (tvolatile tuchar))]
+                          [(Expr.Eaddrof
+                             (Expr.Ederef
+                               (Expr.Ebinop Binop.Oadd
+                                 (Expr.Etempvar _t'84 (tptr (tvolatile tuchar)))
+                                 (Expr.Ebinop Binop.Oadd
+                                   (Expr.Etempvar ___a64_str_index tulong)
+                                   (Expr.Econst_int (Integers.Int.repr 4) tint)
+                                   tulong) (tptr (tvolatile tuchar)))
+                               (tvolatile tuchar)) (tptr (tvolatile tuchar)))]))
+                      (Stmt.Sset ___a64_str_value
+                        (Expr.Ebinop Binop.Oor
+                          (Expr.Etempvar ___a64_str_value tulong)
+                          (Expr.Ebinop Binop.Oshl
+                            (Expr.Ecast
+                              (Expr.Etempvar _t'51 (tvolatile tuchar))
+                              tulong)
+                            (Expr.Econst_int (Integers.Int.repr 32) tint)
+                            tulong) tulong)))
+                    Stmt.Sskip)
+                  (Stmt.Ssequence
+                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                        (Expr.Etempvar ___a64_str_width tuchar)
+                                        (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                        tint)
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'83
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                (Ty.Tstruct _kprog_arm64_addressing noattr))
+                              _b (tptr (tvolatile tuchar))))
+                          (Stmt.Sbuiltin (some _t'52)
+                            (ExtFun.EF_vload Chunk.Mint8unsigned)
+                            [(tptr (tvolatile tuchar))]
+                            [(Expr.Eaddrof
+                               (Expr.Ederef
+                                 (Expr.Ebinop Binop.Oadd
+                                   (Expr.Etempvar _t'83 (tptr (tvolatile tuchar)))
+                                   (Expr.Ebinop Binop.Oadd
+                                     (Expr.Etempvar ___a64_str_index tulong)
+                                     (Expr.Econst_int (Integers.Int.repr 5) tint)
+                                     tulong) (tptr (tvolatile tuchar)))
+                                 (tvolatile tuchar))
+                               (tptr (tvolatile tuchar)))]))
+                        (Stmt.Sset ___a64_str_value
+                          (Expr.Ebinop Binop.Oor
+                            (Expr.Etempvar ___a64_str_value tulong)
+                            (Expr.Ebinop Binop.Oshl
+                              (Expr.Ecast
+                                (Expr.Etempvar _t'52 (tvolatile tuchar))
+                                tulong)
+                              (Expr.Econst_int (Integers.Int.repr 40) tint)
+                              tulong) tulong)))
+                      Stmt.Sskip)
+                    (Stmt.Ssequence
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                          (Expr.Etempvar ___a64_str_width tuchar)
+                                          (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                          tint)
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'82
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                  (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                _b (tptr (tvolatile tuchar))))
+                            (Stmt.Sbuiltin (some _t'53)
+                              (ExtFun.EF_vload Chunk.Mint8unsigned)
+                              [(tptr (tvolatile tuchar))]
+                              [(Expr.Eaddrof
+                                 (Expr.Ederef
+                                   (Expr.Ebinop Binop.Oadd
+                                     (Expr.Etempvar _t'82 (tptr (tvolatile tuchar)))
+                                     (Expr.Ebinop Binop.Oadd
+                                       (Expr.Etempvar ___a64_str_index tulong)
+                                       (Expr.Econst_int (Integers.Int.repr 6) tint)
+                                       tulong) (tptr (tvolatile tuchar)))
+                                   (tvolatile tuchar))
+                                 (tptr (tvolatile tuchar)))]))
+                          (Stmt.Sset ___a64_str_value
+                            (Expr.Ebinop Binop.Oor
+                              (Expr.Etempvar ___a64_str_value tulong)
+                              (Expr.Ebinop Binop.Oshl
+                                (Expr.Ecast
+                                  (Expr.Etempvar _t'53 (tvolatile tuchar))
+                                  tulong)
+                                (Expr.Econst_int (Integers.Int.repr 48) tint)
+                                tulong) tulong)))
+                        Stmt.Sskip)
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                          (Expr.Etempvar ___a64_str_width tuchar)
+                                          (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                          tint)
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'81
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                  (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                _b (tptr (tvolatile tuchar))))
+                            (Stmt.Sbuiltin (some _t'54)
+                              (ExtFun.EF_vload Chunk.Mint8unsigned)
+                              [(tptr (tvolatile tuchar))]
+                              [(Expr.Eaddrof
+                                 (Expr.Ederef
+                                   (Expr.Ebinop Binop.Oadd
+                                     (Expr.Etempvar _t'81 (tptr (tvolatile tuchar)))
+                                     (Expr.Ebinop Binop.Oadd
+                                       (Expr.Etempvar ___a64_str_index tulong)
+                                       (Expr.Econst_int (Integers.Int.repr 7) tint)
+                                       tulong) (tptr (tvolatile tuchar)))
+                                   (tvolatile tuchar))
+                                 (tptr (tvolatile tuchar)))]))
+                          (Stmt.Sset ___a64_str_value
+                            (Expr.Ebinop Binop.Oor
+                              (Expr.Etempvar ___a64_str_value tulong)
+                              (Expr.Ebinop Binop.Oshl
+                                (Expr.Ecast
+                                  (Expr.Etempvar _t'54 (tvolatile tuchar))
+                                  tulong)
+                                (Expr.Econst_int (Integers.Int.repr 56) tint)
+                                tulong) tulong)))
+                        Stmt.Sskip))))))))))
+    (Stmt.Sset ___a64_observed (Expr.Etempvar ___a64_str_value tulong))))
+
+def s_kprog_arm64_memory_read_55 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'80
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _t'79 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+        (Ty.Tstruct _kprog_arm64_coordinates noattr)) _stack_offset tlong))
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                      (Expr.Ecast
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Etempvar ___a64_mrd_base tlong)
+                          (Expr.Etempvar ___a64_memory_off tlong) tlong)
+                        tlong) (Expr.Etempvar _t'80 tlong) tint)
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Scall (some _t'57)
+          (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint] tulong
+                                               cc_default))
+          [(Expr.Econst_int (Integers.Int.repr 6) tint)])
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                            (Expr.Etempvar _width tuchar)
+                            (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                            tint)
+          (Stmt.Sset _t'58
+            (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+              tulong))
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                              (Expr.Etempvar _width tuchar)
+                              (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                              tint)
+            (Stmt.Ssequence
+              (Stmt.Sset _t'58
+                (Expr.Ecast
+                  (Expr.Econst_long (Integers.Int64.repr 65535) tulong)
+                  tulong))
+              (Stmt.Sset _t'58
+                (Expr.Ecast (Expr.Etempvar _t'58 tulong) tulong)))
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                (Expr.Etempvar _width tuchar)
+                                (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                tint)
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'58
+                    (Expr.Ecast
+                      (Expr.Econst_long (Integers.Int64.repr 4294967295) tulong)
+                      tulong))
+                  (Stmt.Sset _t'58
+                    (Expr.Ecast (Expr.Etempvar _t'58 tulong) tulong)))
+                (Stmt.Sset _t'58
+                  (Expr.Ecast (Expr.Etempvar _t'58 tulong) tulong)))
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'58
+                    (Expr.Ecast
+                      (Expr.Econst_long (Integers.Int64.repr (-1)) tulong)
+                      tulong))
+                  (Stmt.Sset _t'58
+                    (Expr.Ecast (Expr.Etempvar _t'58 tulong) tulong)))
+                (Stmt.Sset _t'58
+                  (Expr.Ecast (Expr.Etempvar _t'58 tulong) tulong)))))))
+      (Stmt.Sset ___a64_observed
+        (Expr.Ebinop Binop.Oand (Expr.Etempvar _t'57 tulong)
+          (Expr.Etempvar _t'58 tulong) tulong)))
+    Stmt.Sskip))
+
+def s_kprog_arm64_memory_read_56 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'77
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+      (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+  (Stmt.Ssequence
+    (Stmt.Sset _t'78
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _t'77 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+          (Ty.Tstruct _kprog_arm64_coordinates noattr)) _stack_offset tlong))
+    (Stmt.Sset _t'59
+      (Expr.Ecast
+        (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'78 tlong) tlong)
+          (tptr tvoid)) (tptr tvoid)))))
+
+def s_kprog_arm64_memory_read_57 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'75
+      (Expr.Ederef
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+          (Expr.Ecast (Expr.Etempvar ___a64_l_reg__7 tulong) tuchar)
+          (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+        (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+    (Stmt.Ssequence
+      (Stmt.Sset _t'76
+        (Expr.Efield
+          (Expr.Ederef
+            (Expr.Etempvar _t'75 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+            (Ty.Tunion _arm64_sim_gpr noattr)) _ptr (tptr tvoid)))
+      (Stmt.Sset _t'59
+        (Expr.Ecast (Expr.Etempvar _t'76 (tptr tvoid)) (tptr tvoid)))))
+  (Stmt.Sset _t'59
+    (Expr.Ecast (Expr.Etempvar _t'59 (tptr tvoid)) (tptr tvoid))))
+
+def s_kprog_arm64_memory_read_58 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'59
+    (Expr.Ecast
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid))
+      (tptr tvoid)))
+  (Stmt.Sset _t'59
+    (Expr.Ecast (Expr.Etempvar _t'59 (tptr tvoid)) (tptr tvoid))))
+
+def s_kprog_arm64_memory_read_59 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'73
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+      (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+  (Stmt.Ssequence
+    (Stmt.Sset _t'74
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _t'73 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+          (Ty.Tstruct _kprog_arm64_coordinates noattr)) _stack_offset tlong))
+    (Stmt.Sset _t'60
+      (Expr.Ecast
+        (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'74 tlong) tlong)
+          (tptr tvoid)) (tptr tvoid)))))
+
+def s_kprog_arm64_memory_read_60 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                    (Expr.Etempvar ___a64_l_reg__8 tulong)
+                    (Expr.Econst_int (Integers.Int.repr 31) tuint) tint)
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'71
+        (Expr.Ederef
+          (Expr.Ebinop Binop.Oadd
+            (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+            (Expr.Ecast (Expr.Etempvar ___a64_l_reg__8 tulong) tuchar)
+            (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+          (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+      (Stmt.Ssequence
+        (Stmt.Sset _t'72
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _t'71 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+              (Ty.Tunion _arm64_sim_gpr noattr)) _ptr (tptr tvoid)))
+        (Stmt.Sset _t'60
+          (Expr.Ecast (Expr.Etempvar _t'72 (tptr tvoid)) (tptr tvoid)))))
+    (Stmt.Sset _t'60
+      (Expr.Ecast (Expr.Etempvar _t'60 (tptr tvoid)) (tptr tvoid))))
+  (Stmt.Ssequence
+    (Stmt.Sset _t'60
+      (Expr.Ecast
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+          (tptr tvoid)) (tptr tvoid)))
+    (Stmt.Sset _t'60
+      (Expr.Ecast (Expr.Etempvar _t'60 (tptr tvoid)) (tptr tvoid)))))
+
+def s_kprog_arm64_memory_read_61 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'69
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+      (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+  (Stmt.Ssequence
+    (Stmt.Sset _t'70
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _t'69 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+          (Ty.Tstruct _kprog_arm64_coordinates noattr)) _stack_offset tlong))
+    (Stmt.Sset _t'61
+      (Expr.Ecast
+        (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'70 tlong) tlong)
+          (tptr tvoid)) (tptr tvoid)))))
+
+def s_kprog_arm64_memory_read_62 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'67
+      (Expr.Ederef
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+          (Expr.Ecast (Expr.Etempvar ___a64_l_reg__9 tulong) tuchar)
+          (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+        (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+    (Stmt.Ssequence
+      (Stmt.Sset _t'68
+        (Expr.Efield
+          (Expr.Ederef
+            (Expr.Etempvar _t'67 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+            (Ty.Tunion _arm64_sim_gpr noattr)) _ptr (tptr tvoid)))
+      (Stmt.Sset _t'61
+        (Expr.Ecast (Expr.Etempvar _t'68 (tptr tvoid)) (tptr tvoid)))))
+  (Stmt.Sset _t'61
+    (Expr.Ecast (Expr.Etempvar _t'61 (tptr tvoid)) (tptr tvoid))))
+
+def s_kprog_arm64_memory_read_63 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'61
+    (Expr.Ecast
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid))
+      (tptr tvoid)))
+  (Stmt.Sset _t'61
+    (Expr.Ecast (Expr.Etempvar _t'61 (tptr tvoid)) (tptr tvoid))))
+
+def s_kprog_arm64_memory_read_64 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sbuiltin none (ExtFun.EF_memcpy 8 1) [(tptr tulong), (tptr tuchar)]
+    [(Expr.Eaddrof (Expr.Evar ___kprog_c_load_value__9 tulong) (tptr tulong)),
+     (Expr.Ebinop Binop.Oadd
+       (Expr.Ecast
+         (Expr.Etempvar ___kprog_a64_lb_addr__2 (tptr (tvolatile tuchar)))
+         (tptr tuchar)) (Expr.Etempvar ___a64_memory_off tlong)
+       (tptr tuchar))])
+  (Stmt.Sset ___kprog_a64_lb_value__2
+    (Expr.Evar ___kprog_c_load_value__9 tulong)))
+
+def s_kprog_arm64_memory_read_65 : Stmt :=
+Stmt.Sbreak
+
+def s_kprog_arm64_memory_read_66 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                    (Expr.Etempvar ___kprog_a64_lb_width__2 tuchar)
+                    (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+  (Stmt.Sloop
+    (Stmt.Ssequence
+      (Stmt.Sbuiltin none (ExtFun.EF_memcpy 4 1)
+        [(tptr tuint), (tptr tuchar)]
+        [(Expr.Eaddrof (Expr.Evar ___kprog_c_load_value__10 tuint)
+           (tptr tuint)),
+         (Expr.Ebinop Binop.Oadd
+           (Expr.Ecast
+             (Expr.Etempvar ___kprog_a64_lb_addr__2 (tptr (tvolatile tuchar)))
+             (tptr tuchar)) (Expr.Etempvar ___a64_memory_off tlong)
+           (tptr tuchar))])
+      (Stmt.Ssequence
+        (Stmt.Sset _t'66 (Expr.Evar ___kprog_c_load_value__10 tuint))
+        (Stmt.Sset ___kprog_a64_lb_value__2
+          (Expr.Ecast (Expr.Etempvar _t'66 tuint) tulong))))
+    Stmt.Sbreak)
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                      (Expr.Etempvar ___kprog_a64_lb_width__2 tuchar)
+                      (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+    (Stmt.Sloop
+      (Stmt.Ssequence
+        (Stmt.Sbuiltin none (ExtFun.EF_memcpy 2 1)
+          [(tptr tushort), (tptr tuchar)]
+          [(Expr.Eaddrof (Expr.Evar ___kprog_c_load_value__11 tushort)
+             (tptr tushort)),
+           (Expr.Ebinop Binop.Oadd
+             (Expr.Ecast
+               (Expr.Etempvar ___kprog_a64_lb_addr__2 (tptr (tvolatile tuchar)))
+               (tptr tuchar)) (Expr.Etempvar ___a64_memory_off tlong)
+             (tptr tuchar))])
+        (Stmt.Ssequence
+          (Stmt.Sset _t'65 (Expr.Evar ___kprog_c_load_value__11 tushort))
+          (Stmt.Sset ___kprog_a64_lb_value__2
+            (Expr.Ecast (Expr.Etempvar _t'65 tushort) tulong))))
+      Stmt.Sbreak)
+    (Stmt.Sloop
+      (Stmt.Ssequence
+        (Stmt.Sbuiltin none (ExtFun.EF_memcpy 1 1)
+          [(tptr tuchar), (tptr tuchar)]
+          [(Expr.Eaddrof (Expr.Evar ___kprog_c_load_value__12 tuchar)
+             (tptr tuchar)),
+           (Expr.Ebinop Binop.Oadd
+             (Expr.Ecast
+               (Expr.Etempvar ___kprog_a64_lb_addr__2 (tptr (tvolatile tuchar)))
+               (tptr tuchar)) (Expr.Etempvar ___a64_memory_off tlong)
+             (tptr tuchar))])
+        (Stmt.Ssequence
+          (Stmt.Sset _t'64 (Expr.Evar ___kprog_c_load_value__12 tuchar))
+          (Stmt.Sset ___kprog_a64_lb_value__2
+            (Expr.Ecast (Expr.Etempvar _t'64 tuchar) tulong))))
+      Stmt.Sbreak)))
+
+def s_kprog_arm64_memory_read_67 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sloop
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq (Expr.Etempvar _base tulong)
+                            (Expr.Econst_int (Integers.Int.repr 32) tuint)
+                            tint)
+          (Stmt.Sset _t'18 (Expr.Econst_int (Integers.Int.repr 1) tint))
+          (Stmt.Sset _t'18
+            (Expr.Ecast
+              (Expr.Ebinop Binop.Oeq (Expr.Etempvar ___a64_memory_tag tuchar)
+                (Expr.Econst_int (Integers.Int.repr 4) tuint) tint) tbool)))
+        (Stmt.Sifthenelse (Expr.Etempvar _t'18 tint)
+          (Stmt.Sset ___kprog_a64_md_src
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar))
+          (Stmt.Ssequence
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                (Expr.Etempvar ___a64_memory_tag tuchar)
+                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                tint)
+              (Stmt.Sset _t'17
+                (Expr.Ecast
+                  (Expr.Ebinop Binop.Oeq (Expr.Etempvar _width tuchar)
+                    (Expr.Econst_int (Integers.Int.repr 8) tuint) tint)
+                  tbool))
+              (Stmt.Sset _t'17 (Expr.Econst_int (Integers.Int.repr 0) tint)))
+            (Stmt.Sifthenelse (Expr.Etempvar _t'17 tint)
+              (Stmt.Sset ___kprog_a64_md_src
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                  tuchar))
+              (Stmt.Ssequence
+                (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                    (Expr.Etempvar ___a64_memory_tag tuchar)
+                                    (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                                    tint)
+                  (Stmt.Sset _t'16
+                    (Expr.Ecast
+                      (Expr.Ebinop Binop.Oeq (Expr.Etempvar _width tuchar)
+                        (Expr.Econst_int (Integers.Int.repr 8) tuint) tint)
+                      tbool))
+                  (Stmt.Sset _t'16
+                    (Expr.Econst_int (Integers.Int.repr 0) tint)))
+                (Stmt.Sifthenelse (Expr.Etempvar _t'16 tint)
+                  (Stmt.Sset ___kprog_a64_md_src
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                      tuchar))
+                  (Stmt.Sset ___kprog_a64_md_src
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                      tuchar))))))))
+      (Stmt.Sset ___a64_memory_source
+        (Expr.Ecast (Expr.Etempvar ___kprog_a64_md_src tuchar) tuchar)))
+    Stmt.Sbreak)
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sset _t'117
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+              (Ty.Tstruct _kprog_arm64_addressing noattr)) _is_xdp tuchar))
+        (Stmt.Sifthenelse (Expr.Etempvar _t'117 tuchar)
+          (Stmt.Sset _t'63
+            (Expr.Ecast
+              (Expr.Ebinop Binop.Oeq (Expr.Etempvar ___a64_memory_tag tuchar)
+                (Expr.Econst_int (Integers.Int.repr 1) tuint) tint) tbool))
+          (Stmt.Sset _t'63 (Expr.Econst_int (Integers.Int.repr 0) tint))))
+      (Stmt.Sifthenelse (Expr.Etempvar _t'63 tint)
+        (Stmt.Sloop
+          (Stmt.Ssequence
+            (Stmt.Sloop
+              (Stmt.Ssequence
+                (Stmt.Sset ___a64_l_reg__3 (Expr.Etempvar _base tulong))
+                (Stmt.Ssequence
+                  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                      (Expr.Etempvar ___a64_l_reg__3 tulong)
+                                      (Expr.Econst_int (Integers.Int.repr 32) tuint)
+                                      tint)
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'115
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                            (Ty.Tstruct _kprog_arm64_addressing noattr))
+                          _coordinates
+                          (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'116
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Etempvar _t'115 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                              (Ty.Tstruct _kprog_arm64_coordinates noattr))
+                            _stack_offset tlong))
+                        (Stmt.Sset _t'19
+                          (Expr.Ecast
+                            (Expr.Ecast
+                              (Expr.Ecast (Expr.Etempvar _t'116 tlong) tlong)
+                              (tptr tvoid)) (tptr tvoid)))))
+                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                        (Expr.Etempvar ___a64_l_reg__3 tulong)
+                                        (Expr.Econst_int (Integers.Int.repr 31) tuint)
+                                        tint)
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'113
+                            (Expr.Ederef
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                                (Expr.Ecast
+                                  (Expr.Etempvar ___a64_l_reg__3 tulong)
+                                  tuchar)
+                                (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                              (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'114
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Etempvar _t'113 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                                  (Ty.Tunion _arm64_sim_gpr noattr)) _ptr
+                                (tptr tvoid)))
+                            (Stmt.Sset _t'19
+                              (Expr.Ecast (Expr.Etempvar _t'114 (tptr tvoid))
+                                (tptr tvoid)))))
+                        (Stmt.Sset _t'19
+                          (Expr.Ecast (Expr.Etempvar _t'19 (tptr tvoid))
+                            (tptr tvoid))))
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'19
+                          (Expr.Ecast
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 0) tint)
+                              (tptr tvoid)) (tptr tvoid)))
+                        (Stmt.Sset _t'19
+                          (Expr.Ecast (Expr.Etempvar _t'19 (tptr tvoid))
+                            (tptr tvoid))))))
+                  (Stmt.Sset ___a64_xdp_pointer
+                    (Expr.Etempvar _t'19 (tptr tvoid)))))
+              Stmt.Sbreak)
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sset _t'112
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                      (Ty.Tstruct _kprog_arm64_addressing noattr))
+                    _helper_context (tptr tvoid)))
+                (Stmt.Sset ___a64_xdp_off
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Ecast
+                      (Expr.Ebinop Binop.Osub
+                        (Expr.Ecast
+                          (Expr.Etempvar ___a64_xdp_pointer (tptr tvoid))
+                          (tptr tuchar))
+                        (Expr.Ecast (Expr.Etempvar _t'112 (tptr tvoid))
+                          (tptr tuchar)) tlong) tlong)
+                    (Expr.Etempvar ___a64_memory_off tlong) tlong)))
+              (Stmt.Ssequence
+                (Stmt.Sset ___a64_xdp_ctx
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                      (Ty.Tstruct _kprog_arm64_addressing noattr))
+                    _helper_context (tptr tvoid)))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                          (Expr.Etempvar ___a64_xdp_off tlong)
+                                          (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                          tint)
+                        (Stmt.Sset _t'25
+                          (Expr.Ecast
+                            (Expr.Ebinop Binop.Olt
+                              (Expr.Etempvar ___a64_xdp_off tlong)
+                              (Expr.Econst_int (Integers.Int.repr 24) tint)
+                              tint) tbool))
+                        (Stmt.Sset _t'25
+                          (Expr.Econst_int (Integers.Int.repr 0) tint)))
+                      (Stmt.Sifthenelse (Expr.Etempvar _t'25 tint)
+                        (Stmt.Sset _t'26
+                          (Expr.Ecast
+                            (Expr.Ebinop Binop.Ole
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Ebinop Binop.Oand
+                                  (Expr.Etempvar ___a64_xdp_off tlong)
+                                  (Expr.Econst_int (Integers.Int.repr 7) tint)
+                                  tlong) (Expr.Etempvar _width tuchar) tlong)
+                              (Expr.Econst_int (Integers.Int.repr 8) tint)
+                              tint) tbool))
+                        (Stmt.Sset _t'26
+                          (Expr.Econst_int (Integers.Int.repr 0) tint))))
+                    (Stmt.Sifthenelse (Expr.Etempvar _t'26 tint)
+                      (Stmt.Ssequence
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                            (Expr.Etempvar ___a64_xdp_off tlong)
+                                            (Expr.Econst_int (Integers.Int.repr 8) tint)
+                                            tint)
+                          (Stmt.Sloop
+                            (Stmt.Ssequence
+                              (Stmt.Scall (some _t'20)
+                                (Expr.Evar _kprog_c_context_pointer (Ty.Tfunction
+                                                                    [(tptr tvoid),
+                                                                    tuchar,
+                                                                    tuint]
+                                                                    (tptr tvoid)
+                                                                    cc_default))
+                                [(Expr.Etempvar ___a64_xdp_ctx (tptr (Ty.Tstruct _xdp_md noattr))),
+                                 (Expr.Econst_int (Integers.Int.repr 0) tuint),
+                                 (Expr.Econst_long (Integers.Int64.repr 0) tulong)])
+                              (Stmt.Sset ___a64_xdp_value
+                                (Expr.Ecast
+                                  (Expr.Ecast
+                                    (Expr.Etempvar _t'20 (tptr tvoid))
+                                    tulong) tulong)))
+                            Stmt.Sbreak)
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                              (Expr.Etempvar ___a64_xdp_off tlong)
+                                              (Expr.Econst_int (Integers.Int.repr 16) tint)
+                                              tint)
+                            (Stmt.Sloop
+                              s_kprog_arm64_memory_read_27
+                              s_kprog_arm64_memory_read_28)
+                            (Stmt.Sloop
+                              s_kprog_arm64_memory_read_29
+                              s_kprog_arm64_memory_read_30)))
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.One
+                                            (Expr.Etempvar _width tuchar)
+                                            (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                            tint)
+                          (Stmt.Ssequence
+                            (Stmt.Ssequence
+                              (Stmt.Scall (some _t'23)
+                                (Expr.Evar _kprog_c_pointer_bits (Ty.Tfunction
+                                                                   [(tptr tvoid)]
+                                                                   tulong
+                                                                   cc_default))
+                                [(Expr.Ecast
+                                   (Expr.Ecast
+                                     (Expr.Etempvar ___a64_xdp_value tulong)
+                                     tulong) (tptr tvoid))])
+                              (Stmt.Sset ___a64_xdp_value
+                                (Expr.Etempvar _t'23 tulong)))
+                            (Stmt.Ssequence
+                              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                  (Expr.Etempvar _width tuchar)
+                                                  (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                                  tint)
+                                s_kprog_arm64_memory_read_31
+                                s_kprog_arm64_memory_read_32)
+                              (Stmt.Sset ___a64_xdp_value
+                                (Expr.Ebinop Binop.Oand
+                                  (Expr.Ebinop Binop.Oshr
+                                    (Expr.Etempvar ___a64_xdp_value tulong)
+                                    (Expr.Ebinop Binop.Omul
+                                      (Expr.Ebinop Binop.Oand
+                                        (Expr.Etempvar ___a64_xdp_off tlong)
+                                        (Expr.Econst_int (Integers.Int.repr 7) tint)
+                                        tlong)
+                                      (Expr.Econst_int (Integers.Int.repr 8) tint)
+                                      tlong) tulong)
+                                  (Expr.Etempvar _t'24 tulong) tulong))))
+                          Stmt.Sskip))
+                      (Stmt.Sloop
+                        (Stmt.Ssequence
+                          (Stmt.Sset ___kprog_a64_lb_addr
+                            (Expr.Ecast
+                              (Expr.Etempvar ___a64_xdp_pointer (tptr tvoid))
+                              (tptr (tvolatile tuchar))))
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___kprog_a64_lb_width
+                              (Expr.Ecast (Expr.Etempvar _width tuchar)
+                                tuchar))
+                            (Stmt.Ssequence
+                              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                  (Expr.Etempvar ___kprog_a64_lb_width tuchar)
+                                                  (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                                  tint)
+                                (Stmt.Sloop
+                                  s_kprog_arm64_memory_read_33
+                                  s_kprog_arm64_memory_read_34)
+                                s_kprog_arm64_memory_read_35)
+                              (Stmt.Sset ___a64_xdp_value
+                                (Expr.Etempvar ___kprog_a64_lb_value tulong)))))
+                        Stmt.Sbreak)))
+                  (Stmt.Sset ___a64_memory_value
+                    (Expr.Etempvar ___a64_xdp_value tulong))))))
+          Stmt.Sbreak)
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'108
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                  (Ty.Tstruct _kprog_arm64_addressing noattr)) _abi_kind
+                tuchar))
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                (Expr.Etempvar _t'108 tuchar)
+                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                tint)
+              (Stmt.Sset _t'62
+                (Expr.Ecast
+                  (Expr.Ebinop Binop.Oeq
+                    (Expr.Etempvar ___a64_memory_tag tuchar)
+                    (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
+                  tbool))
+              (Stmt.Sset _t'62 (Expr.Econst_int (Integers.Int.repr 0) tint))))
+          (Stmt.Sifthenelse (Expr.Etempvar _t'62 tint)
+            (Stmt.Sloop
+              (Stmt.Ssequence
+                (Stmt.Sloop
+                  (Stmt.Ssequence
+                    (Stmt.Sloop
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___a64_l_reg__4
+                          (Expr.Etempvar _base tulong))
+                        (Stmt.Ssequence
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                              (Expr.Etempvar ___a64_l_reg__4 tulong)
+                                              (Expr.Econst_int (Integers.Int.repr 32) tuint)
+                                              tint)
+                            (Stmt.Ssequence
+                              (Stmt.Sset _t'106
+                                (Expr.Efield
+                                  (Expr.Ederef
+                                    (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                    (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                  _coordinates
+                                  (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                              s_kprog_arm64_memory_read_36)
+                            (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                                (Expr.Etempvar ___a64_l_reg__4 tulong)
+                                                (Expr.Econst_int (Integers.Int.repr 31) tuint)
+                                                tint)
+                              s_kprog_arm64_memory_read_37
+                              s_kprog_arm64_memory_read_38))
+                          (Stmt.Sset ___a64_skb_pointer
+                            (Expr.Etempvar _t'27 (tptr tvoid)))))
+                      Stmt.Sbreak)
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'103
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                            (Ty.Tstruct _kprog_arm64_addressing noattr))
+                          _helper_abi_base (tptr tvoid)))
+                      (Stmt.Sset ___a64_sr_off
+                        (Expr.Ecast
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Ebinop Binop.Osub
+                              (Expr.Ecast
+                                (Expr.Ecast
+                                  (Expr.Etempvar ___a64_skb_pointer (tptr tvoid))
+                                  tlong) tulong)
+                              (Expr.Ecast
+                                (Expr.Ecast
+                                  (Expr.Etempvar _t'103 (tptr tvoid)) tlong)
+                                tulong) tulong)
+                            (Expr.Ecast
+                              (Expr.Etempvar ___a64_memory_off tlong) tulong)
+                            tulong) tlong))))
+                  Stmt.Sbreak)
+                (Stmt.Ssequence
+                  (Stmt.Sset ___a64_sr_ctx
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                        (Ty.Tstruct _kprog_arm64_addressing noattr))
+                      _helper_context (tptr tvoid)))
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                            (Expr.Etempvar ___a64_sr_off tlong)
+                                            (Expr.Econst_long (Integers.Int64.repr 208) tlong)
+                                            tint)
+                          (Stmt.Sset _t'42
+                            (Expr.Ecast
+                              (Expr.Ebinop Binop.Ole
+                                (Expr.Etempvar ___a64_sr_off tlong)
+                                (Expr.Ebinop Binop.Osub
+                                  (Expr.Ebinop Binop.Oadd
+                                    (Expr.Econst_long (Integers.Int64.repr 208) tlong)
+                                    (Expr.Econst_int (Integers.Int.repr 8) tint)
+                                    tlong) (Expr.Etempvar _width tuchar)
+                                  tlong) tint) tbool))
+                          (Stmt.Sset _t'42
+                            (Expr.Econst_int (Integers.Int.repr 0) tint)))
+                        (Stmt.Sifthenelse (Expr.Etempvar _t'42 tint)
+                          (Stmt.Sset _t'43
+                            (Expr.Econst_int (Integers.Int.repr 1) tint))
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                              (Expr.Etempvar ___a64_sr_off tlong)
+                                              (Expr.Econst_long (Integers.Int64.repr 80) tlong)
+                                              tint)
+                            (Stmt.Ssequence
+                              (Stmt.Sset _t'43
+                                (Expr.Ecast
+                                  (Expr.Ebinop Binop.Ole
+                                    (Expr.Etempvar ___a64_sr_off tlong)
+                                    (Expr.Ebinop Binop.Osub
+                                      (Expr.Ebinop Binop.Oadd
+                                        (Expr.Econst_long (Integers.Int64.repr 80) tlong)
+                                        (Expr.Econst_int (Integers.Int.repr 8) tint)
+                                        tlong) (Expr.Etempvar _width tuchar)
+                                      tlong) tint) tbool))
+                              (Stmt.Sset _t'43
+                                (Expr.Ecast (Expr.Etempvar _t'43 tint) tbool)))
+                            (Stmt.Sset _t'43
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                tbool)))))
+                      (Stmt.Sifthenelse (Expr.Etempvar _t'43 tint)
+                        (Stmt.Ssequence
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                              (Expr.Etempvar ___a64_sr_off tlong)
+                                              (Expr.Econst_long (Integers.Int64.repr 208) tlong)
+                                              tint)
+                            (Stmt.Ssequence
+                              (Stmt.Sloop
+                                s_kprog_arm64_memory_read_39
+                                s_kprog_arm64_memory_read_40)
+                              (Stmt.Sset ___a64_sr_lane
+                                (Expr.Ebinop Binop.Osub
+                                  (Expr.Etempvar ___a64_sr_off tlong)
+                                  (Expr.Econst_long (Integers.Int64.repr 208) tlong)
+                                  tlong)))
+                            (Stmt.Ssequence
+                              (Stmt.Sloop
+                                s_kprog_arm64_memory_read_41
+                                s_kprog_arm64_memory_read_42)
+                              (Stmt.Sset ___a64_sr_lane
+                                (Expr.Ebinop Binop.Osub
+                                  (Expr.Etempvar ___a64_sr_off tlong)
+                                  (Expr.Econst_long (Integers.Int64.repr 80) tlong)
+                                  tlong))))
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.One
+                                              (Expr.Etempvar _width tuchar)
+                                              (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                              tint)
+                            (Stmt.Ssequence
+                              (Stmt.Ssequence
+                                s_kprog_arm64_memory_read_43
+                                (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                    (Expr.Etempvar _width tuchar)
+                                                    (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                                    tint)
+                                  s_kprog_arm64_memory_read_44
+                                  s_kprog_arm64_memory_read_45))
+                              (Stmt.Sset ___a64_sr_value
+                                (Expr.Ebinop Binop.Oand
+                                  (Expr.Ebinop Binop.Oshr
+                                    (Expr.Etempvar _t'30 tulong)
+                                    (Expr.Ebinop Binop.Omul
+                                      (Expr.Etempvar ___a64_sr_lane tlong)
+                                      (Expr.Econst_int (Integers.Int.repr 8) tint)
+                                      tlong) tulong)
+                                  (Expr.Etempvar _t'31 tulong) tulong)))
+                            Stmt.Sskip))
+                        (Stmt.Ssequence
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                              (Expr.Etempvar ___a64_sr_off tlong)
+                                              (Expr.Econst_long (Integers.Int64.repr 48) tlong)
+                                              tint)
+                            (Stmt.Sset _t'41
+                              (Expr.Ecast
+                                (Expr.Ebinop Binop.Ole
+                                  (Expr.Etempvar ___a64_sr_off tlong)
+                                  (Expr.Ebinop Binop.Osub
+                                    (Expr.Ebinop Binop.Oadd
+                                      (Expr.Econst_long (Integers.Int64.repr 48) tlong)
+                                      (Expr.Econst_int (Integers.Int.repr 20) tint)
+                                      tlong) (Expr.Etempvar _width tuchar)
+                                    tlong) tint) tbool))
+                            (Stmt.Sset _t'41
+                              (Expr.Econst_int (Integers.Int.repr 0) tint)))
+                          (Stmt.Sifthenelse (Expr.Etempvar _t'41 tint)
+                            (Stmt.Sloop
+                              (Stmt.Ssequence
+                                (Stmt.Sset ___a64_cbr_addr
+                                  (Expr.Ebinop Binop.Oadd
+                                    (Expr.Ecast
+                                      (Expr.Etempvar ___a64_sr_ctx (tptr (Ty.Tstruct ___sk_buff noattr)))
+                                      (tptr (tvolatile tuchar)))
+                                    (Expr.Ebinop Binop.Oadd
+                                      (Expr.Ebinop Binop.Osub
+                                        (Expr.Etempvar ___a64_sr_off tlong)
+                                        (Expr.Econst_long (Integers.Int64.repr 48) tlong)
+                                        tlong)
+                                      (Expr.Ecast
+                                        (Expr.Econst_long (Integers.Int64.repr 48) tulong)
+                                        tlong) tlong)
+                                    (tptr (tvolatile tuchar))))
+                                (Stmt.Ssequence
+                                  s_kprog_arm64_memory_read_46
+                                  s_kprog_arm64_memory_read_47))
+                              Stmt.Sbreak)
+                            (Stmt.Ssequence
+                              (Stmt.Sloop
+                                (Stmt.Ssequence
+                                  s_kprog_arm64_memory_read_48
+                                  s_kprog_arm64_memory_read_49)
+                                Stmt.Sbreak)
+                              (Stmt.Sloop
+                                (Stmt.Ssequence
+                                  s_kprog_arm64_memory_read_50
+                                  s_kprog_arm64_memory_read_51)
+                                Stmt.Sbreak))))))
+                    (Stmt.Sset ___a64_memory_value
+                      (Expr.Etempvar ___a64_sr_value tulong)))))
+              Stmt.Sbreak)
+            (Stmt.Sloop
+              (Stmt.Ssequence
+                (Stmt.Sswitch (Expr.Etempvar ___a64_memory_source tuchar)
+                  (LStmts.LScons (some 0)
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                            (Expr.Etempvar _base tulong)
+                                            (Expr.Econst_int (Integers.Int.repr 32) tuint)
+                                            tint)
+                          (Stmt.Sset _t'45
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                              tuint))
+                          (Stmt.Sset _t'45
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                              tuint)))
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                            (Expr.Ecast
+                                              (Expr.Etempvar _t'45 tuint)
+                                              tuchar)
+                                            (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                                            tint)
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'95
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                  (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                _coordinates
+                                (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                            (Stmt.Sset ___a64_mrd_base
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Etempvar _t'95 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                                  (Ty.Tstruct _kprog_arm64_coordinates noattr))
+                                _stack_offset tlong)))
+                          (Stmt.Ssequence
+                            (Stmt.Sloop
+                              (Stmt.Ssequence
+                                (Stmt.Sset ___a64_l_reg__6
+                                  (Expr.Etempvar _base tulong))
+                                (Stmt.Ssequence
+                                  s_kprog_arm64_memory_read_52
+                                  (Stmt.Sset ___a64_mrd_pointer
+                                    (Expr.Etempvar _t'44 (tptr tvoid)))))
+                              Stmt.Sbreak)
+                            (Stmt.Sset ___a64_mrd_base
+                              (Expr.Ecast
+                                (Expr.Ecast
+                                  (Expr.Etempvar ___a64_mrd_pointer (tptr tvoid))
+                                  tlong) tlong)))))
+                      (Stmt.Ssequence
+                        (Stmt.Sloop
+                          (Stmt.Ssequence
+                            (Stmt.Sloop
+                              (Stmt.Ssequence
+                                s_kprog_arm64_memory_read_53
+                                s_kprog_arm64_memory_read_54)
+                              Stmt.Sbreak)
+                            (Stmt.Ssequence
+                              (Stmt.Ssequence
+                                (Stmt.Sset _t'79
+                                  (Expr.Efield
+                                    (Expr.Ederef
+                                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                      (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                    _coordinates
+                                    (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                                s_kprog_arm64_memory_read_55)
+                              (Stmt.Sset ___a64_mrd_value
+                                (Expr.Etempvar ___a64_observed tulong))))
+                          Stmt.Sbreak)
+                        Stmt.Sbreak))
+                    (LStmts.LScons (some 1)
+                      (Stmt.Ssequence
+                        (Stmt.Sloop
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___a64_l_reg__7
+                              (Expr.Etempvar _base tulong))
+                            (Stmt.Ssequence
+                              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                  (Expr.Etempvar ___a64_l_reg__7 tulong)
+                                                  (Expr.Econst_int (Integers.Int.repr 32) tuint)
+                                                  tint)
+                                s_kprog_arm64_memory_read_56
+                                (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                                    (Expr.Etempvar ___a64_l_reg__7 tulong)
+                                                    (Expr.Econst_int (Integers.Int.repr 31) tuint)
+                                                    tint)
+                                  s_kprog_arm64_memory_read_57
+                                  s_kprog_arm64_memory_read_58))
+                              (Stmt.Sset ___a64_mrd_pointer__1
+                                (Expr.Etempvar _t'59 (tptr tvoid)))))
+                          Stmt.Sbreak)
+                        (Stmt.Ssequence
+                          (Stmt.Sloop
+                            (Stmt.Ssequence
+                              (Stmt.Sbuiltin none (ExtFun.EF_memcpy 8 1)
+                                [(tptr (tptr tvoid)), (tptr tuchar)]
+                                [(Expr.Eaddrof
+                                   (Expr.Evar ___kprog_c_load_value__8 (tptr tvoid))
+                                   (tptr (tptr tvoid))),
+                                 (Expr.Ebinop Binop.Oadd
+                                   (Expr.Ecast
+                                     (Expr.Etempvar ___a64_mrd_pointer__1 (tptr tvoid))
+                                     (tptr tuchar))
+                                   (Expr.Etempvar ___a64_memory_off tlong)
+                                   (tptr tuchar))])
+                              (Stmt.Sset ___a64_mrd_loaded
+                                (Expr.Evar ___kprog_c_load_value__8 (tptr tvoid))))
+                            Stmt.Sbreak)
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___a64_mrd_value
+                              (Expr.Ecast
+                                (Expr.Ecast
+                                  (Expr.Etempvar ___a64_mrd_loaded (tptr tvoid))
+                                  tlong) tulong))
+                            Stmt.Sbreak)))
+                      (LStmts.LScons (some 2)
+                        (Stmt.Ssequence
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.One
+                                              (Expr.Etempvar ___a64_memory_off tlong)
+                                              (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                              tint)
+                            (Stmt.Sloop
+                              (Stmt.Scall none
+                                (Expr.Evar _arm64_sim_unsupported_opcode 
+                                (Ty.Tfunction [] tvoid cc_default)) [])
+                              Stmt.Sbreak)
+                            Stmt.Sskip)
+                          (Stmt.Ssequence
+                            (Stmt.Sloop
+                              (Stmt.Ssequence
+                                (Stmt.Sset ___a64_l_reg__8
+                                  (Expr.Etempvar _base tulong))
+                                (Stmt.Ssequence
+                                  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                      (Expr.Etempvar ___a64_l_reg__8 tulong)
+                                                      (Expr.Econst_int (Integers.Int.repr 32) tuint)
+                                                      tint)
+                                    s_kprog_arm64_memory_read_59
+                                    s_kprog_arm64_memory_read_60)
+                                  (Stmt.Sset ___a64_mrd_pointer__2
+                                    (Expr.Etempvar _t'60 (tptr tvoid)))))
+                              Stmt.Sbreak)
+                            (Stmt.Ssequence
+                              (Stmt.Sset ___a64_mrd_value
+                                (Expr.Ecast
+                                  (Expr.Ecast
+                                    (Expr.Etempvar ___a64_mrd_pointer__2 (tptr tvoid))
+                                    tlong) tulong))
+                              Stmt.Sbreak)))
+                        (LStmts.LScons none
+                          (Stmt.Ssequence
+                            (Stmt.Sloop
+                              (Stmt.Ssequence
+                                (Stmt.Sset ___a64_l_reg__9
+                                  (Expr.Etempvar _base tulong))
+                                (Stmt.Ssequence
+                                  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                      (Expr.Etempvar ___a64_l_reg__9 tulong)
+                                                      (Expr.Econst_int (Integers.Int.repr 32) tuint)
+                                                      tint)
+                                    s_kprog_arm64_memory_read_61
+                                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                                        (Expr.Etempvar ___a64_l_reg__9 tulong)
+                                                        (Expr.Econst_int (Integers.Int.repr 31) tuint)
+                                                        tint)
+                                      s_kprog_arm64_memory_read_62
+                                      s_kprog_arm64_memory_read_63))
+                                  (Stmt.Sset ___a64_mrd_pointer__3
+                                    (Expr.Etempvar _t'61 (tptr tvoid)))))
+                              Stmt.Sbreak)
+                            (Stmt.Ssequence
+                              (Stmt.Sloop
+                                (Stmt.Ssequence
+                                  (Stmt.Sset ___kprog_a64_lb_addr__2
+                                    (Expr.Ecast
+                                      (Expr.Etempvar ___a64_mrd_pointer__3 (tptr tvoid))
+                                      (tptr (tvolatile tuchar))))
+                                  (Stmt.Ssequence
+                                    (Stmt.Sset ___kprog_a64_lb_width__2
+                                      (Expr.Ecast
+                                        (Expr.Etempvar _width tuchar) tuchar))
+                                    (Stmt.Ssequence
+                                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                          (Expr.Etempvar ___kprog_a64_lb_width__2 tuchar)
+                                                          (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                                          tint)
+                                        (Stmt.Sloop
+                                          s_kprog_arm64_memory_read_64
+                                          s_kprog_arm64_memory_read_65)
+                                        s_kprog_arm64_memory_read_66)
+                                      (Stmt.Sset ___a64_mrd_value
+                                        (Expr.Etempvar ___kprog_a64_lb_value__2 tulong)))))
+                                Stmt.Sbreak)
+                              Stmt.Sbreak))
+                          LStmts.LSnil)))))
+                (Stmt.Sset ___a64_memory_value
+                  (Expr.Etempvar ___a64_mrd_value tulong)))
+              Stmt.Sbreak)))))
+    (Stmt.Sset _result (Expr.Etempvar ___a64_memory_value tulong))))
+
+def s_kprog_arm64_memory_read_68 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'147
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+          (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags (tptr tuchar)))
+    (Stmt.Sassign
+      (Expr.Ederef
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+          (Expr.Econst_int (Integers.Int.repr 19) tint) (tptr (tptr tuchar)))
+        (tptr tuchar))
+      (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'147 (tptr tuchar))
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 19) tuint) tuchar)
+        (tptr tuchar))))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'146
+        (Expr.Efield
+          (Expr.Ederef
+            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+            (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags (tptr tuchar)))
+      (Stmt.Sassign
+        (Expr.Ederef
+          (Expr.Ebinop Binop.Oadd
+            (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+            (Expr.Econst_int (Integers.Int.repr 20) tint)
+            (tptr (tptr tuchar))) (tptr tuchar))
+        (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'146 (tptr tuchar))
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 20) tuint) tuchar)
+          (tptr tuchar))))
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sset _t'145
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+              (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+            (tptr tuchar)))
+        (Stmt.Sassign
+          (Expr.Ederef
+            (Expr.Ebinop Binop.Oadd
+              (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+              (Expr.Econst_int (Integers.Int.repr 21) tint)
+              (tptr (tptr tuchar))) (tptr tuchar))
+          (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'145 (tptr tuchar))
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 21) tuint)
+              tuchar) (tptr tuchar))))
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sset _t'144
+            (Expr.Efield
+              (Expr.Ederef
+                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+              (tptr tuchar)))
+          (Stmt.Sassign
+            (Expr.Ederef
+              (Expr.Ebinop Binop.Oadd
+                (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                (Expr.Econst_int (Integers.Int.repr 22) tint)
+                (tptr (tptr tuchar))) (tptr tuchar))
+            (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'144 (tptr tuchar))
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 22) tuint)
+                tuchar) (tptr tuchar))))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'143
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                  (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+                (tptr tuchar)))
+            (Stmt.Sassign
+              (Expr.Ederef
+                (Expr.Ebinop Binop.Oadd
+                  (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                  (Expr.Econst_int (Integers.Int.repr 23) tint)
+                  (tptr (tptr tuchar))) (tptr tuchar))
+              (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'143 (tptr tuchar))
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 23) tuint)
+                  tuchar) (tptr tuchar))))
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sset _t'142
+                (Expr.Efield
+                  (Expr.Ederef
+                    (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                    (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+                  (tptr tuchar)))
+              (Stmt.Sassign
+                (Expr.Ederef
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                    (Expr.Econst_int (Integers.Int.repr 24) tint)
+                    (tptr (tptr tuchar))) (tptr tuchar))
+                (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'142 (tptr tuchar))
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 24) tuint)
+                    tuchar) (tptr tuchar))))
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sset _t'141
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                      (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+                    (tptr tuchar)))
+                (Stmt.Sassign
+                  (Expr.Ederef
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                      (Expr.Econst_int (Integers.Int.repr 25) tint)
+                      (tptr (tptr tuchar))) (tptr tuchar))
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Etempvar _t'141 (tptr tuchar))
+                    (Expr.Ecast
+                      (Expr.Econst_int (Integers.Int.repr 25) tuint) tuchar)
+                    (tptr tuchar))))
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'140
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                        (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+                      (tptr tuchar)))
+                  (Stmt.Sassign
+                    (Expr.Ederef
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                        (Expr.Econst_int (Integers.Int.repr 26) tint)
+                        (tptr (tptr tuchar))) (tptr tuchar))
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Etempvar _t'140 (tptr tuchar))
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 26) tuint)
+                        tuchar) (tptr tuchar))))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'139
+                      (Expr.Efield
+                        (Expr.Ederef
+                          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                          (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+                        (tptr tuchar)))
+                    (Stmt.Sassign
+                      (Expr.Ederef
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                          (Expr.Econst_int (Integers.Int.repr 27) tint)
+                          (tptr (tptr tuchar))) (tptr tuchar))
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Etempvar _t'139 (tptr tuchar))
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 27) tuint)
+                          tuchar) (tptr tuchar))))
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'138
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                            (Ty.Tstruct _kprog_arm64_addressing noattr))
+                          _tags (tptr tuchar)))
+                      (Stmt.Sassign
+                        (Expr.Ederef
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                            (Expr.Econst_int (Integers.Int.repr 28) tint)
+                            (tptr (tptr tuchar))) (tptr tuchar))
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Etempvar _t'138 (tptr tuchar))
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 28) tuint)
+                            tuchar) (tptr tuchar))))
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'137
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                              (Ty.Tstruct _kprog_arm64_addressing noattr))
+                            _tags (tptr tuchar)))
+                        (Stmt.Sassign
+                          (Expr.Ederef
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                              (Expr.Econst_int (Integers.Int.repr 29) tint)
+                              (tptr (tptr tuchar))) (tptr tuchar))
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Etempvar _t'137 (tptr tuchar))
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 29) tuint)
+                              tuchar) (tptr tuchar))))
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'136
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                (Ty.Tstruct _kprog_arm64_addressing noattr))
+                              _tags (tptr tuchar)))
+                          (Stmt.Sassign
+                            (Expr.Ederef
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                                (Expr.Econst_int (Integers.Int.repr 30) tint)
+                                (tptr (tptr tuchar))) (tptr tuchar))
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Etempvar _t'136 (tptr tuchar))
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 30) tuint)
+                                tuchar) (tptr tuchar))))
+                        (Stmt.Ssequence
+                          (Stmt.Sloop
+                            (Stmt.Ssequence
+                              (Stmt.Sloop
+                                (Stmt.Ssequence
+                                  s_kprog_arm64_memory_read_6
+                                  s_kprog_arm64_memory_read_24)
+                                Stmt.Sbreak)
+                              (Stmt.Ssequence
+                                (Stmt.Sset ___a64_memory_off
+                                  (Expr.Ebinop Binop.Oadd
+                                    (Expr.Etempvar ___a64_memory_off tlong)
+                                    (Expr.Etempvar _extra tlong) tlong))
+                                (Stmt.Ssequence
+                                  (Stmt.Sloop
+                                    s_kprog_arm64_memory_read_25
+                                    s_kprog_arm64_memory_read_26)
+                                  s_kprog_arm64_memory_read_67)))
+                            Stmt.Sbreak)
+                          (Stmt.Sreturn (some (Expr.Etempvar _result tulong))))))))))))))))
+
+def s_kprog_arm64_memory_read_69 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'164
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+          (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags (tptr tuchar)))
+    (Stmt.Sassign
+      (Expr.Ederef
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+          (Expr.Econst_int (Integers.Int.repr 2) tint) (tptr (tptr tuchar)))
+        (tptr tuchar))
+      (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'164 (tptr tuchar))
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tuint) tuchar)
+        (tptr tuchar))))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'163
+        (Expr.Efield
+          (Expr.Ederef
+            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+            (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags (tptr tuchar)))
+      (Stmt.Sassign
+        (Expr.Ederef
+          (Expr.Ebinop Binop.Oadd
+            (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+            (Expr.Econst_int (Integers.Int.repr 3) tint)
+            (tptr (tptr tuchar))) (tptr tuchar))
+        (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'163 (tptr tuchar))
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuchar)
+          (tptr tuchar))))
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sset _t'162
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+              (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+            (tptr tuchar)))
+        (Stmt.Sassign
+          (Expr.Ederef
+            (Expr.Ebinop Binop.Oadd
+              (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+              (Expr.Econst_int (Integers.Int.repr 4) tint)
+              (tptr (tptr tuchar))) (tptr tuchar))
+          (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'162 (tptr tuchar))
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 4) tuint) tuchar)
+            (tptr tuchar))))
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sset _t'161
+            (Expr.Efield
+              (Expr.Ederef
+                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+              (tptr tuchar)))
+          (Stmt.Sassign
+            (Expr.Ederef
+              (Expr.Ebinop Binop.Oadd
+                (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                (Expr.Econst_int (Integers.Int.repr 5) tint)
+                (tptr (tptr tuchar))) (tptr tuchar))
+            (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'161 (tptr tuchar))
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 5) tuint)
+                tuchar) (tptr tuchar))))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'160
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                  (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+                (tptr tuchar)))
+            (Stmt.Sassign
+              (Expr.Ederef
+                (Expr.Ebinop Binop.Oadd
+                  (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                  (Expr.Econst_int (Integers.Int.repr 6) tint)
+                  (tptr (tptr tuchar))) (tptr tuchar))
+              (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'160 (tptr tuchar))
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 6) tuint)
+                  tuchar) (tptr tuchar))))
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sset _t'159
+                (Expr.Efield
+                  (Expr.Ederef
+                    (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                    (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+                  (tptr tuchar)))
+              (Stmt.Sassign
+                (Expr.Ederef
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                    (Expr.Econst_int (Integers.Int.repr 7) tint)
+                    (tptr (tptr tuchar))) (tptr tuchar))
+                (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'159 (tptr tuchar))
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                    tuchar) (tptr tuchar))))
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sset _t'158
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                      (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+                    (tptr tuchar)))
+                (Stmt.Sassign
+                  (Expr.Ederef
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                      (Expr.Econst_int (Integers.Int.repr 8) tint)
+                      (tptr (tptr tuchar))) (tptr tuchar))
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Etempvar _t'158 (tptr tuchar))
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                      tuchar) (tptr tuchar))))
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'157
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                        (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+                      (tptr tuchar)))
+                  (Stmt.Sassign
+                    (Expr.Ederef
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                        (Expr.Econst_int (Integers.Int.repr 9) tint)
+                        (tptr (tptr tuchar))) (tptr tuchar))
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Etempvar _t'157 (tptr tuchar))
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 9) tuint) tuchar)
+                      (tptr tuchar))))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'156
+                      (Expr.Efield
+                        (Expr.Ederef
+                          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                          (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+                        (tptr tuchar)))
+                    (Stmt.Sassign
+                      (Expr.Ederef
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                          (Expr.Econst_int (Integers.Int.repr 10) tint)
+                          (tptr (tptr tuchar))) (tptr tuchar))
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Etempvar _t'156 (tptr tuchar))
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 10) tuint)
+                          tuchar) (tptr tuchar))))
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'155
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                            (Ty.Tstruct _kprog_arm64_addressing noattr))
+                          _tags (tptr tuchar)))
+                      (Stmt.Sassign
+                        (Expr.Ederef
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                            (Expr.Econst_int (Integers.Int.repr 11) tint)
+                            (tptr (tptr tuchar))) (tptr tuchar))
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Etempvar _t'155 (tptr tuchar))
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 11) tuint)
+                            tuchar) (tptr tuchar))))
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'154
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                              (Ty.Tstruct _kprog_arm64_addressing noattr))
+                            _tags (tptr tuchar)))
+                        (Stmt.Sassign
+                          (Expr.Ederef
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                              (Expr.Econst_int (Integers.Int.repr 12) tint)
+                              (tptr (tptr tuchar))) (tptr tuchar))
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Etempvar _t'154 (tptr tuchar))
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 12) tuint)
+                              tuchar) (tptr tuchar))))
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'153
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                (Ty.Tstruct _kprog_arm64_addressing noattr))
+                              _tags (tptr tuchar)))
+                          (Stmt.Sassign
+                            (Expr.Ederef
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                                (Expr.Econst_int (Integers.Int.repr 13) tint)
+                                (tptr (tptr tuchar))) (tptr tuchar))
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Etempvar _t'153 (tptr tuchar))
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 13) tuint)
+                                tuchar) (tptr tuchar))))
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'152
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                  (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                _tags (tptr tuchar)))
+                            (Stmt.Sassign
+                              (Expr.Ederef
+                                (Expr.Ebinop Binop.Oadd
+                                  (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                                  (Expr.Econst_int (Integers.Int.repr 14) tint)
+                                  (tptr (tptr tuchar))) (tptr tuchar))
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Etempvar _t'152 (tptr tuchar))
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 14) tuint)
+                                  tuchar) (tptr tuchar))))
+                          (Stmt.Ssequence
+                            (Stmt.Ssequence
+                              (Stmt.Sset _t'151
+                                (Expr.Efield
+                                  (Expr.Ederef
+                                    (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                    (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                  _tags (tptr tuchar)))
+                              (Stmt.Sassign
+                                (Expr.Ederef
+                                  (Expr.Ebinop Binop.Oadd
+                                    (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                                    (Expr.Econst_int (Integers.Int.repr 15) tint)
+                                    (tptr (tptr tuchar))) (tptr tuchar))
+                                (Expr.Ebinop Binop.Oadd
+                                  (Expr.Etempvar _t'151 (tptr tuchar))
+                                  (Expr.Ecast
+                                    (Expr.Econst_int (Integers.Int.repr 15) tuint)
+                                    tuchar) (tptr tuchar))))
+                            (Stmt.Ssequence
+                              (Stmt.Ssequence
+                                (Stmt.Sset _t'150
+                                  (Expr.Efield
+                                    (Expr.Ederef
+                                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                      (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                    _tags (tptr tuchar)))
+                                (Stmt.Sassign
+                                  (Expr.Ederef
+                                    (Expr.Ebinop Binop.Oadd
+                                      (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                                      (Expr.Econst_int (Integers.Int.repr 16) tint)
+                                      (tptr (tptr tuchar))) (tptr tuchar))
+                                  (Expr.Ebinop Binop.Oadd
+                                    (Expr.Etempvar _t'150 (tptr tuchar))
+                                    (Expr.Ecast
+                                      (Expr.Econst_int (Integers.Int.repr 16) tuint)
+                                      tuchar) (tptr tuchar))))
+                              (Stmt.Ssequence
+                                s_kprog_arm64_memory_read_4
+                                (Stmt.Ssequence
+                                  s_kprog_arm64_memory_read_5
+                                  s_kprog_arm64_memory_read_68)))))))))))))))))
+
+def s_kprog_arm64_memory_read_70 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'181
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+          (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+        (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+    (Stmt.Sassign
+      (Expr.Ederef
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+          (Expr.Econst_int (Integers.Int.repr 16) tint)
+          (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+        (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Etempvar _t'181 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 16) tuint) tuchar)
+        (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'180
+        (Expr.Efield
+          (Expr.Ederef
+            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+            (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+          (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+      (Stmt.Sassign
+        (Expr.Ederef
+          (Expr.Ebinop Binop.Oadd
+            (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+            (Expr.Econst_int (Integers.Int.repr 17) tint)
+            (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+          (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Etempvar _t'180 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 17) tuint) tuchar)
+          (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sset _t'179
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+              (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+            (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+        (Stmt.Sassign
+          (Expr.Ederef
+            (Expr.Ebinop Binop.Oadd
+              (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+              (Expr.Econst_int (Integers.Int.repr 18) tint)
+              (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+            (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+          (Expr.Ebinop Binop.Oadd
+            (Expr.Etempvar _t'179 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 18) tuint)
+              tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sset _t'178
+            (Expr.Efield
+              (Expr.Ederef
+                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+              (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+          (Stmt.Sassign
+            (Expr.Ederef
+              (Expr.Ebinop Binop.Oadd
+                (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                (Expr.Econst_int (Integers.Int.repr 19) tint)
+                (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+              (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+            (Expr.Ebinop Binop.Oadd
+              (Expr.Etempvar _t'178 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 19) tuint)
+                tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'177
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                  (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+                (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+            (Stmt.Sassign
+              (Expr.Ederef
+                (Expr.Ebinop Binop.Oadd
+                  (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                  (Expr.Econst_int (Integers.Int.repr 20) tint)
+                  (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+              (Expr.Ebinop Binop.Oadd
+                (Expr.Etempvar _t'177 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 20) tuint)
+                  tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sset _t'176
+                (Expr.Efield
+                  (Expr.Ederef
+                    (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                    (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+                  (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+              (Stmt.Sassign
+                (Expr.Ederef
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                    (Expr.Econst_int (Integers.Int.repr 21) tint)
+                    (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                  (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                (Expr.Ebinop Binop.Oadd
+                  (Expr.Etempvar _t'176 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 21) tuint)
+                    tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sset _t'175
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                      (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+                    (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                (Stmt.Sassign
+                  (Expr.Ederef
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                      (Expr.Econst_int (Integers.Int.repr 22) tint)
+                      (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                    (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Etempvar _t'175 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                    (Expr.Ecast
+                      (Expr.Econst_int (Integers.Int.repr 22) tuint) tuchar)
+                    (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'174
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                        (Ty.Tstruct _kprog_arm64_addressing noattr))
+                      _registers (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                  (Stmt.Sassign
+                    (Expr.Ederef
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                        (Expr.Econst_int (Integers.Int.repr 23) tint)
+                        (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                      (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Etempvar _t'174 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 23) tuint)
+                        tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'173
+                      (Expr.Efield
+                        (Expr.Ederef
+                          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                          (Ty.Tstruct _kprog_arm64_addressing noattr))
+                        _registers (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                    (Stmt.Sassign
+                      (Expr.Ederef
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                          (Expr.Econst_int (Integers.Int.repr 24) tint)
+                          (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                        (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Etempvar _t'173 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 24) tuint)
+                          tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'172
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                            (Ty.Tstruct _kprog_arm64_addressing noattr))
+                          _registers
+                          (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                      (Stmt.Sassign
+                        (Expr.Ederef
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                            (Expr.Econst_int (Integers.Int.repr 25) tint)
+                            (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                          (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Etempvar _t'172 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 25) tuint)
+                            tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'171
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                              (Ty.Tstruct _kprog_arm64_addressing noattr))
+                            _registers
+                            (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                        (Stmt.Sassign
+                          (Expr.Ederef
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                              (Expr.Econst_int (Integers.Int.repr 26) tint)
+                              (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                            (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Etempvar _t'171 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 26) tuint)
+                              tuchar)
+                            (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'170
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                (Ty.Tstruct _kprog_arm64_addressing noattr))
+                              _registers
+                              (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                          (Stmt.Sassign
+                            (Expr.Ederef
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                                (Expr.Econst_int (Integers.Int.repr 27) tint)
+                                (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                              (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Etempvar _t'170 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 27) tuint)
+                                tuchar)
+                              (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'169
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                  (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                _registers
+                                (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                            (Stmt.Sassign
+                              (Expr.Ederef
+                                (Expr.Ebinop Binop.Oadd
+                                  (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                                  (Expr.Econst_int (Integers.Int.repr 28) tint)
+                                  (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                                (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Etempvar _t'169 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 28) tuint)
+                                  tuchar)
+                                (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                          (Stmt.Ssequence
+                            (Stmt.Ssequence
+                              (Stmt.Sset _t'168
+                                (Expr.Efield
+                                  (Expr.Ederef
+                                    (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                    (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                  _registers
+                                  (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                              (Stmt.Sassign
+                                (Expr.Ederef
+                                  (Expr.Ebinop Binop.Oadd
+                                    (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                                    (Expr.Econst_int (Integers.Int.repr 29) tint)
+                                    (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                                  (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                                (Expr.Ebinop Binop.Oadd
+                                  (Expr.Etempvar _t'168 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                                  (Expr.Ecast
+                                    (Expr.Econst_int (Integers.Int.repr 29) tuint)
+                                    tuchar)
+                                  (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                            (Stmt.Ssequence
+                              (Stmt.Ssequence
+                                (Stmt.Sset _t'167
+                                  (Expr.Efield
+                                    (Expr.Ederef
+                                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                      (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                    _registers
+                                    (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                                (Stmt.Sassign
+                                  (Expr.Ederef
+                                    (Expr.Ebinop Binop.Oadd
+                                      (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                                      (Expr.Econst_int (Integers.Int.repr 30) tint)
+                                      (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                                    (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                                  (Expr.Ebinop Binop.Oadd
+                                    (Expr.Etempvar _t'167 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                                    (Expr.Ecast
+                                      (Expr.Econst_int (Integers.Int.repr 30) tuint)
+                                      tuchar)
+                                    (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                              (Stmt.Ssequence
+                                s_kprog_arm64_memory_read_2
+                                (Stmt.Ssequence
+                                  s_kprog_arm64_memory_read_3
+                                  s_kprog_arm64_memory_read_69)))))))))))))))))
+
+def f_kprog_arm64_memory_read : Function := {
+  fn_return := tulong,
+  fn_callconv := cc_default,
+  fn_params := [(_addressing,
+                 (tptr (Ty.Tstruct _kprog_arm64_addressing noattr))),
+                (_base, tulong), (_index, tulong), (_aux, tuint),
+                (_imm, tulong), (_extra, tlong), (_width, tuchar)],
+  fn_vars := [(___a64_cells,
+               (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31)),
+              (___a64_tag_cells, (tarray (tptr tuchar) 31)),
+              (___kprog_c_load_value, tulong),
+              (___kprog_c_load_value__1, tuint),
+              (___kprog_c_load_value__2, tushort),
+              (___kprog_c_load_value__3, tuchar),
+              (___kprog_c_load_value__4, tulong),
+              (___kprog_c_load_value__5, tuint),
+              (___kprog_c_load_value__6, tushort),
+              (___kprog_c_load_value__7, tuchar),
+              (___kprog_c_load_value__8, (tptr tvoid)),
+              (___kprog_c_load_value__9, tulong),
+              (___kprog_c_load_value__10, tuint),
+              (___kprog_c_load_value__11, tushort),
+              (___kprog_c_load_value__12, tuchar)],
+  fn_temps := [(_result, tulong), (___a64_memory_off, tlong),
+               (___a64_mbo_has_index, tuchar), (___a64_mbo_isrc, tuchar),
+               (___a64_mbo_imm, tulong), (___a64_mbo_index, tulong),
+               (___a64_mbo_result, tulong), (___a64_modified_input, tulong),
+               (___a64_read_value, tulong), (___a64_read_tag, tuchar),
+               (___a64_l_reg, tulong), (___a64_l_reg__1, tulong),
+               (___a64_mat_value, tulong), (___a64_mat_tag, tuchar),
+               (___a64_mat_base, tulong), (___a64_mat_base__1, tulong),
+               (___kprog_a64_mod_value, tulong), (___kprog_a64_mod, tuchar),
+               (___kprog_a64_mod_shift, tuchar),
+               (___kprog_a64_mod_amount, tuchar),
+               (___kprog_a64_mod_w32, tuint), (___kprog_a64_mbo_imm, tulong),
+               (___kprog_a64_mbo_index, tulong),
+               (___kprog_a64_mbo_prepost, tint),
+               (___kprog_a64_mbo_has_index, tint),
+               (___kprog_a64_mbo_base, tulong),
+               (___kprog_a64_mbo_result, tulong),
+               (___a64_memory_tag, tuchar), (___a64_memory_source, tuchar),
+               (___a64_l_reg__2, tulong), (___kprog_a64_md_src, tuchar),
+               (___a64_memory_value, tulong),
+               (___a64_xdp_pointer, (tptr tvoid)), (___a64_l_reg__3, tulong),
+               (___a64_xdp_off, tlong),
+               (___a64_xdp_ctx, (tptr (Ty.Tstruct _xdp_md noattr))),
+               (___a64_xdp_value, tulong),
+               (___kprog_a64_lb_addr, (tptr (tvolatile tuchar))),
+               (___kprog_a64_lb_width, tuchar),
+               (___kprog_a64_lb_value, tulong), (___a64_sr_off, tlong),
+               (___a64_skb_pointer, (tptr tvoid)), (___a64_l_reg__4, tulong),
+               (___a64_sr_ctx, (tptr (Ty.Tstruct ___sk_buff noattr))),
+               (___a64_sr_value, tulong), (___a64_sr_lane, tlong),
+               (___a64_cbr_addr, (tptr (tvolatile tuchar))),
+               (___a64_cbr_bytes_value, tulong),
+               (___a64_sr_pointer, (tptr tvoid)), (___a64_l_reg__5, tulong),
+               (___kprog_a64_lb_addr__1, (tptr (tvolatile tuchar))),
+               (___kprog_a64_lb_width__1, tuchar),
+               (___kprog_a64_lb_value__1, tulong),
+               (___a64_mrd_value, tulong), (___a64_mrd_base, tlong),
+               (___a64_mrd_pointer, (tptr tvoid)), (___a64_l_reg__6, tulong),
+               (___a64_observed, tulong), (___a64_str_index, tulong),
+               (___a64_str_width, tuchar), (___a64_str_value, tulong),
+               (___a64_mrd_pointer__1, (tptr tvoid)),
+               (___a64_mrd_loaded, (tptr tvoid)), (___a64_l_reg__7, tulong),
+               (___a64_mrd_pointer__2, (tptr tvoid)),
+               (___a64_l_reg__8, tulong),
+               (___a64_mrd_pointer__3, (tptr tvoid)),
+               (___a64_l_reg__9, tulong),
+               (___kprog_a64_lb_addr__2, (tptr (tvolatile tuchar))),
+               (___kprog_a64_lb_width__2, tuchar),
+               (___kprog_a64_lb_value__2, tulong), (_t'63, tint),
+               (_t'62, tint), (_t'61, (tptr tvoid)), (_t'60, (tptr tvoid)),
+               (_t'59, (tptr tvoid)), (_t'58, tulong), (_t'57, tulong),
+               (_t'56, tint), (_t'55, tint), (_t'54, (tvolatile tuchar)),
+               (_t'53, (tvolatile tuchar)), (_t'52, (tvolatile tuchar)),
+               (_t'51, (tvolatile tuchar)), (_t'50, (tvolatile tuchar)),
+               (_t'49, (tvolatile tuchar)), (_t'48, (tvolatile tuchar)),
+               (_t'47, (tvolatile tuchar)), (_t'46, (tvolatile tulong)),
+               (_t'45, tuint), (_t'44, (tptr tvoid)), (_t'43, tint),
+               (_t'42, tint), (_t'41, tint), (_t'40, (tptr tvoid)),
+               (_t'39, (tvolatile tuchar)), (_t'38, (tvolatile tuchar)),
+               (_t'37, (tvolatile tuchar)), (_t'36, (tvolatile tuchar)),
+               (_t'35, (tvolatile tuchar)), (_t'34, (tvolatile tuchar)),
+               (_t'33, (tvolatile tuchar)), (_t'32, (tvolatile tuchar)),
+               (_t'31, tulong), (_t'30, tulong), (_t'29, (tptr tvoid)),
+               (_t'28, (tptr tvoid)), (_t'27, (tptr tvoid)), (_t'26, tint),
+               (_t'25, tint), (_t'24, tulong), (_t'23, tulong),
+               (_t'22, (tptr tvoid)), (_t'21, (tptr tvoid)),
+               (_t'20, (tptr tvoid)), (_t'19, (tptr tvoid)), (_t'18, tint),
+               (_t'17, tint), (_t'16, tint), (_t'15, tuint), (_t'14, tulong),
+               (_t'13, tint), (_t'12, tint), (_t'11, tint), (_t'10, tulong),
+               (_t'9, tulong), (_t'8, tulong), (_t'7, tuint), (_t'6, tulong),
+               (_t'5, tulong), (_t'4, tuint), (_t'3, tulong), (_t'2, tuint),
+               (_t'1, tint),
+               (_t'197, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'196, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'195, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'194, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'193, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'192, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'191, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'190, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'189, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'188, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'187, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'186, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'185, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'184, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'183, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'182, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'181, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'180, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'179, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'178, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'177, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'176, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'175, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'174, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'173, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'172, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'171, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'170, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'169, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'168, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'167, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'166, (tptr tuchar)), (_t'165, (tptr tuchar)),
+               (_t'164, (tptr tuchar)), (_t'163, (tptr tuchar)),
+               (_t'162, (tptr tuchar)), (_t'161, (tptr tuchar)),
+               (_t'160, (tptr tuchar)), (_t'159, (tptr tuchar)),
+               (_t'158, (tptr tuchar)), (_t'157, (tptr tuchar)),
+               (_t'156, (tptr tuchar)), (_t'155, (tptr tuchar)),
+               (_t'154, (tptr tuchar)), (_t'153, (tptr tuchar)),
+               (_t'152, (tptr tuchar)), (_t'151, (tptr tuchar)),
+               (_t'150, (tptr tuchar)), (_t'149, (tptr tuchar)),
+               (_t'148, (tptr tuchar)), (_t'147, (tptr tuchar)),
+               (_t'146, (tptr tuchar)), (_t'145, (tptr tuchar)),
+               (_t'144, (tptr tuchar)), (_t'143, (tptr tuchar)),
+               (_t'142, (tptr tuchar)), (_t'141, (tptr tuchar)),
+               (_t'140, (tptr tuchar)), (_t'139, (tptr tuchar)),
+               (_t'138, (tptr tuchar)), (_t'137, (tptr tuchar)),
+               (_t'136, (tptr tuchar)), (_t'135, tlong),
+               (_t'134, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'133, tulong),
+               (_t'132, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'131, tuchar), (_t'130, (tptr tuchar)),
+               (_t'129, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'128, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'127, tuchar),
+               (_t'126, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'125, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'124, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'123, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'122, tuchar),
+               (_t'121, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'120, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'119, tuchar), (_t'118, (tptr tuchar)), (_t'117, tuchar),
+               (_t'116, tlong),
+               (_t'115, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'114, (tptr tvoid)),
+               (_t'113, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'112, (tptr tvoid)), (_t'111, tuint), (_t'110, tushort),
+               (_t'109, tuchar), (_t'108, tuchar), (_t'107, tlong),
+               (_t'106, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'105, (tptr tvoid)),
+               (_t'104, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'103, (tptr tvoid)), (_t'102, tlong),
+               (_t'101, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'100, (tptr tvoid)),
+               (_t'99, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'98, tuint), (_t'97, tushort), (_t'96, tuchar),
+               (_t'95, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'94, tlong),
+               (_t'93, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'92, (tptr tvoid)),
+               (_t'91, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'90, tlong), (_t'89, (tptr (tvolatile tulong))),
+               (_t'88, (tptr (tvolatile tuchar))),
+               (_t'87, (tptr (tvolatile tuchar))),
+               (_t'86, (tptr (tvolatile tuchar))),
+               (_t'85, (tptr (tvolatile tuchar))),
+               (_t'84, (tptr (tvolatile tuchar))),
+               (_t'83, (tptr (tvolatile tuchar))),
+               (_t'82, (tptr (tvolatile tuchar))),
+               (_t'81, (tptr (tvolatile tuchar))), (_t'80, tlong),
+               (_t'79, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'78, tlong),
+               (_t'77, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'76, (tptr tvoid)),
+               (_t'75, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'74, tlong),
+               (_t'73, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'72, (tptr tvoid)),
+               (_t'71, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'70, tlong),
+               (_t'69, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'68, (tptr tvoid)),
+               (_t'67, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'66, tuint), (_t'65, tushort), (_t'64, tuchar)],
+  fn_body :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'197
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+          (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+        (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+    (Stmt.Sassign
+      (Expr.Ederef
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+          (Expr.Econst_int (Integers.Int.repr 0) tint)
+          (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+        (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Etempvar _t'197 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar)
+        (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'196
+        (Expr.Efield
+          (Expr.Ederef
+            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+            (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+          (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+      (Stmt.Sassign
+        (Expr.Ederef
+          (Expr.Ebinop Binop.Oadd
+            (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+            (Expr.Econst_int (Integers.Int.repr 1) tint)
+            (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+          (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Etempvar _t'196 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuchar)
+          (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sset _t'195
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+              (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+            (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+        (Stmt.Sassign
+          (Expr.Ederef
+            (Expr.Ebinop Binop.Oadd
+              (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+              (Expr.Econst_int (Integers.Int.repr 2) tint)
+              (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+            (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+          (Expr.Ebinop Binop.Oadd
+            (Expr.Etempvar _t'195 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tuint) tuchar)
+            (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sset _t'194
+            (Expr.Efield
+              (Expr.Ederef
+                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+              (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+          (Stmt.Sassign
+            (Expr.Ederef
+              (Expr.Ebinop Binop.Oadd
+                (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                (Expr.Econst_int (Integers.Int.repr 3) tint)
+                (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+              (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+            (Expr.Ebinop Binop.Oadd
+              (Expr.Etempvar _t'194 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'193
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                  (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+                (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+            (Stmt.Sassign
+              (Expr.Ederef
+                (Expr.Ebinop Binop.Oadd
+                  (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                  (Expr.Econst_int (Integers.Int.repr 4) tint)
+                  (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+              (Expr.Ebinop Binop.Oadd
+                (Expr.Etempvar _t'193 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                  tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sset _t'192
+                (Expr.Efield
+                  (Expr.Ederef
+                    (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                    (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+                  (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+              (Stmt.Sassign
+                (Expr.Ederef
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                    (Expr.Econst_int (Integers.Int.repr 5) tint)
+                    (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                  (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                (Expr.Ebinop Binop.Oadd
+                  (Expr.Etempvar _t'192 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 5) tuint)
+                    tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sset _t'191
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                      (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+                    (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                (Stmt.Sassign
+                  (Expr.Ederef
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                      (Expr.Econst_int (Integers.Int.repr 6) tint)
+                      (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                    (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Etempvar _t'191 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 6) tuint)
+                      tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'190
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                        (Ty.Tstruct _kprog_arm64_addressing noattr))
+                      _registers (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                  (Stmt.Sassign
+                    (Expr.Ederef
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                        (Expr.Econst_int (Integers.Int.repr 7) tint)
+                        (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                      (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Etempvar _t'190 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 7) tuint) tuchar)
+                      (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'189
+                      (Expr.Efield
+                        (Expr.Ederef
+                          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                          (Ty.Tstruct _kprog_arm64_addressing noattr))
+                        _registers (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                    (Stmt.Sassign
+                      (Expr.Ederef
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                          (Expr.Econst_int (Integers.Int.repr 8) tint)
+                          (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                        (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Etempvar _t'189 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                          tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'188
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                            (Ty.Tstruct _kprog_arm64_addressing noattr))
+                          _registers
+                          (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                      (Stmt.Sassign
+                        (Expr.Ederef
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                            (Expr.Econst_int (Integers.Int.repr 9) tint)
+                            (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                          (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Etempvar _t'188 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 9) tuint)
+                            tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'187
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                              (Ty.Tstruct _kprog_arm64_addressing noattr))
+                            _registers
+                            (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                        (Stmt.Sassign
+                          (Expr.Ederef
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                              (Expr.Econst_int (Integers.Int.repr 10) tint)
+                              (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                            (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Etempvar _t'187 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 10) tuint)
+                              tuchar)
+                            (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'186
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                (Ty.Tstruct _kprog_arm64_addressing noattr))
+                              _registers
+                              (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                          (Stmt.Sassign
+                            (Expr.Ederef
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                                (Expr.Econst_int (Integers.Int.repr 11) tint)
+                                (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                              (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Etempvar _t'186 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 11) tuint)
+                                tuchar)
+                              (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'185
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                  (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                _registers
+                                (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                            (Stmt.Sassign
+                              (Expr.Ederef
+                                (Expr.Ebinop Binop.Oadd
+                                  (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                                  (Expr.Econst_int (Integers.Int.repr 12) tint)
+                                  (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                                (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Etempvar _t'185 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 12) tuint)
+                                  tuchar)
+                                (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                          (Stmt.Ssequence
+                            (Stmt.Ssequence
+                              (Stmt.Sset _t'184
+                                (Expr.Efield
+                                  (Expr.Ederef
+                                    (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                    (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                  _registers
+                                  (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                              (Stmt.Sassign
+                                (Expr.Ederef
+                                  (Expr.Ebinop Binop.Oadd
+                                    (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                                    (Expr.Econst_int (Integers.Int.repr 13) tint)
+                                    (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                                  (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                                (Expr.Ebinop Binop.Oadd
+                                  (Expr.Etempvar _t'184 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                                  (Expr.Ecast
+                                    (Expr.Econst_int (Integers.Int.repr 13) tuint)
+                                    tuchar)
+                                  (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                            (Stmt.Ssequence
+                              s_kprog_arm64_memory_read_0
+                              (Stmt.Ssequence
+                                s_kprog_arm64_memory_read_1
+                                s_kprog_arm64_memory_read_70))))))))))))))))
+}
+
+def s_kprog_arm64_memory_write_0 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'203
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+      (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+  (Stmt.Sassign
+    (Expr.Ederef
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+        (Expr.Econst_int (Integers.Int.repr 14) tint)
+        (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+      (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+    (Expr.Ebinop Binop.Oadd
+      (Expr.Etempvar _t'203 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 14) tuint) tuchar)
+      (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+
+def s_kprog_arm64_memory_write_1 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'202
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+      (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+  (Stmt.Sassign
+    (Expr.Ederef
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+        (Expr.Econst_int (Integers.Int.repr 15) tint)
+        (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+      (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+    (Expr.Ebinop Binop.Oadd
+      (Expr.Etempvar _t'202 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuchar)
+      (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+
+def s_kprog_arm64_memory_write_2 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'186
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags (tptr tuchar)))
+  (Stmt.Sassign
+    (Expr.Ederef
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+        (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr (tptr tuchar)))
+      (tptr tuchar))
+    (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'186 (tptr tuchar))
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar)
+      (tptr tuchar))))
+
+def s_kprog_arm64_memory_write_3 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'185
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags (tptr tuchar)))
+  (Stmt.Sassign
+    (Expr.Ederef
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+        (Expr.Econst_int (Integers.Int.repr 1) tint) (tptr (tptr tuchar)))
+      (tptr tuchar))
+    (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'185 (tptr tuchar))
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuchar)
+      (tptr tuchar))))
+
+def s_kprog_arm64_memory_write_4 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'169
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags (tptr tuchar)))
+  (Stmt.Sassign
+    (Expr.Ederef
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+        (Expr.Econst_int (Integers.Int.repr 17) tint) (tptr (tptr tuchar)))
+      (tptr tuchar))
+    (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'169 (tptr tuchar))
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 17) tuint) tuchar)
+      (tptr tuchar))))
+
+def s_kprog_arm64_memory_write_5 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'168
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags (tptr tuchar)))
+  (Stmt.Sassign
+    (Expr.Ederef
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+        (Expr.Econst_int (Integers.Int.repr 18) tint) (tptr (tptr tuchar)))
+      (tptr tuchar))
+    (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'168 (tptr tuchar))
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 18) tuint) tuchar)
+      (tptr tuchar))))
+
+def s_kprog_arm64_memory_write_6 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.One (Expr.Etempvar _index tulong)
+                    (Expr.Econst_int (Integers.Int.repr 255) tuint) tint)
+  (Stmt.Sset _t'1
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tint) tint))
+  (Stmt.Sset _t'1
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tint)))
+
+def s_kprog_arm64_memory_write_7 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sifthenelse (Expr.Etempvar ___a64_mbo_has_index tuchar)
+    (Stmt.Sset _t'2
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuint))
+    (Stmt.Sset _t'2
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint)))
+  (Stmt.Sset ___a64_mbo_isrc
+    (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'2 tuint) tuchar) tuchar)))
+
+def s_kprog_arm64_memory_write_8 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'152
+    (Expr.Ederef
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+        (Expr.Ecast (Expr.Etempvar ___a64_l_reg tulong) tuchar)
+        (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+      (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+  (Stmt.Ssequence
+    (Stmt.Sset _t'153
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _t'152 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+          (Ty.Tunion _arm64_sim_gpr noattr)) _x tulong))
+    (Stmt.Sset _t'3 (Expr.Ecast (Expr.Etempvar _t'153 tulong) tulong))))
+
+def s_kprog_arm64_memory_write_9 : Stmt :=
+(Stmt.Sset _t'3
+  (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 0) tulong) tulong))
+
+def s_kprog_arm64_memory_write_10 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'150
+      (Expr.Ederef
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+          (Expr.Ecast (Expr.Etempvar ___a64_l_reg__1 tulong) tuchar)
+          (tptr (tptr tuchar))) (tptr tuchar)))
+    (Stmt.Ssequence
+      (Stmt.Sset _t'151
+        (Expr.Ederef (Expr.Etempvar _t'150 (tptr tuchar)) tuchar))
+      (Stmt.Sset _t'4 (Expr.Ecast (Expr.Etempvar _t'151 tuchar) tuint))))
+  (Stmt.Sset _t'4 (Expr.Ecast (Expr.Etempvar _t'4 tuint) tuint)))
+
+def s_kprog_arm64_memory_write_11 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'4
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuint))
+  (Stmt.Sset _t'4 (Expr.Ecast (Expr.Etempvar _t'4 tuint) tuint)))
+
+def s_kprog_arm64_memory_write_12 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'146
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+          (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+        (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+    (Stmt.Ssequence
+      (Stmt.Sset _t'147
+        (Expr.Efield
+          (Expr.Ederef
+            (Expr.Etempvar _t'146 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+            (Ty.Tstruct _kprog_arm64_coordinates noattr)) _sp_valid tuchar))
+      (Stmt.Sifthenelse (Expr.Eunop Unop.Onotbool
+                          (Expr.Etempvar _t'147 tuchar) tint)
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Scall (some _t'5)
+              (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint] tulong
+                                                   cc_default))
+              [(Expr.Econst_int (Integers.Int.repr 1) tint)])
+            (Stmt.Ssequence
+              (Stmt.Sset _t'149
+                (Expr.Efield
+                  (Expr.Ederef
+                    (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                    (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+                  (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+              (Stmt.Sassign
+                (Expr.Efield
+                  (Expr.Ederef
+                    (Expr.Etempvar _t'149 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                    (Ty.Tstruct _kprog_arm64_coordinates noattr)) _sp_base
+                  tulong) (Expr.Etempvar _t'5 tulong))))
+          (Stmt.Ssequence
+            (Stmt.Sset _t'148
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                  (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+                (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+            (Stmt.Sassign
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _t'148 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                  (Ty.Tstruct _kprog_arm64_coordinates noattr)) _sp_valid
+                tuchar) (Expr.Econst_int (Integers.Int.repr 1) tint))))
+        Stmt.Sskip)))
+  (Stmt.Ssequence
+    (Stmt.Sset _t'145
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+          (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+        (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+    (Stmt.Sset ___a64_mat_base
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _t'145 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+          (Ty.Tstruct _kprog_arm64_coordinates noattr)) _sp_base tulong))))
+
+def s_kprog_arm64_memory_write_13 : Stmt :=
+Stmt.Sbreak
+
+def s_kprog_arm64_memory_write_14 : Stmt :=
+(Stmt.Sset ___a64_mat_value
+  (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___a64_mat_value tulong)
+    (Expr.Etempvar ___a64_mat_base tulong) tulong))
+
+def s_kprog_arm64_memory_write_15 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sloop
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sset _t'141
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+              (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+            (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+        (Stmt.Ssequence
+          (Stmt.Sset _t'142
+            (Expr.Efield
+              (Expr.Ederef
+                (Expr.Etempvar _t'141 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                (Ty.Tstruct _kprog_arm64_coordinates noattr)) _return_valid
+              tuchar))
+          (Stmt.Sifthenelse (Expr.Eunop Unop.Onotbool
+                              (Expr.Etempvar _t'142 tuchar) tint)
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Scall (some _t'6)
+                  (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint]
+                                                       tulong cc_default))
+                  [(Expr.Econst_int (Integers.Int.repr 3) tint)])
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'144
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                        (Ty.Tstruct _kprog_arm64_addressing noattr))
+                      _coordinates
+                      (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                  (Stmt.Sassign
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _t'144 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                        (Ty.Tstruct _kprog_arm64_coordinates noattr))
+                      _return_base tulong) (Expr.Etempvar _t'6 tulong))))
+              (Stmt.Ssequence
+                (Stmt.Sset _t'143
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                      (Ty.Tstruct _kprog_arm64_addressing noattr))
+                    _coordinates
+                    (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                (Stmt.Sassign
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _t'143 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                      (Ty.Tstruct _kprog_arm64_coordinates noattr))
+                    _return_valid tuchar)
+                  (Expr.Econst_int (Integers.Int.repr 1) tint))))
+            Stmt.Sskip)))
+      (Stmt.Ssequence
+        (Stmt.Sset _t'140
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+              (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+            (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+        (Stmt.Sset ___a64_mat_base__1
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _t'140 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+              (Ty.Tstruct _kprog_arm64_coordinates noattr)) _return_base
+            tulong))))
+    Stmt.Sbreak)
+  (Stmt.Sset ___a64_mat_value
+    (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___a64_mat_value tulong)
+      (Expr.Etempvar ___a64_mat_base__1 tulong) tulong)))
+
+def s_kprog_arm64_memory_write_16 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                    (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                    (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
+  (Stmt.Sset _t'8
+    (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 255) tulong) tulong))
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                      (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                      (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+    (Stmt.Ssequence
+      (Stmt.Sset _t'8
+        (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 65535) tulong)
+          tulong))
+      (Stmt.Sset _t'8 (Expr.Ecast (Expr.Etempvar _t'8 tulong) tulong)))
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                        (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                        (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sset _t'8
+            (Expr.Ecast
+              (Expr.Econst_long (Integers.Int64.repr 4294967295) tulong)
+              tulong))
+          (Stmt.Sset _t'8 (Expr.Ecast (Expr.Etempvar _t'8 tulong) tulong)))
+        (Stmt.Sset _t'8 (Expr.Ecast (Expr.Etempvar _t'8 tulong) tulong)))
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sset _t'8
+            (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr (-1)) tulong)
+              tulong))
+          (Stmt.Sset _t'8 (Expr.Ecast (Expr.Etempvar _t'8 tulong) tulong)))
+        (Stmt.Sset _t'8 (Expr.Ecast (Expr.Etempvar _t'8 tulong) tulong))))))
+
+def s_kprog_arm64_memory_write_17 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                    (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                    (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
+  (Stmt.Sset _t'9
+    (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 255) tulong) tulong))
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                      (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                      (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+    (Stmt.Ssequence
+      (Stmt.Sset _t'9
+        (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 65535) tulong)
+          tulong))
+      (Stmt.Sset _t'9 (Expr.Ecast (Expr.Etempvar _t'9 tulong) tulong)))
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                        (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                        (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sset _t'9
+            (Expr.Ecast
+              (Expr.Econst_long (Integers.Int64.repr 4294967295) tulong)
+              tulong))
+          (Stmt.Sset _t'9 (Expr.Ecast (Expr.Etempvar _t'9 tulong) tulong)))
+        (Stmt.Sset _t'9 (Expr.Ecast (Expr.Etempvar _t'9 tulong) tulong)))
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sset _t'9
+            (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr (-1)) tulong)
+              tulong))
+          (Stmt.Sset _t'9 (Expr.Ecast (Expr.Etempvar _t'9 tulong) tulong)))
+        (Stmt.Sset _t'9 (Expr.Ecast (Expr.Etempvar _t'9 tulong) tulong))))))
+
+def s_kprog_arm64_memory_write_18 : Stmt :=
+(Stmt.Sset ___kprog_a64_mod_value
+  (Expr.Ecast
+    (Expr.Ebinop Binop.Oshr
+      (Expr.Ecast (Expr.Etempvar ___kprog_a64_mod_value tulong) tint)
+      (Expr.Etempvar ___kprog_a64_mod_amount tuchar) tint) tulong))
+
+def s_kprog_arm64_memory_write_19 : Stmt :=
+(Stmt.Sset ___kprog_a64_mod_value
+  (Expr.Ecast
+    (Expr.Ebinop Binop.Oshr
+      (Expr.Ecast (Expr.Etempvar ___kprog_a64_mod_value tulong) tlong)
+      (Expr.Etempvar ___kprog_a64_mod_amount tuchar) tlong) tulong))
+
+def s_kprog_arm64_memory_write_20 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_mod_w32
+    (Expr.Ecast (Expr.Etempvar ___kprog_a64_mod_value tulong) tuint))
+  (Stmt.Ssequence
+    (Stmt.Sifthenelse (Expr.Etempvar ___kprog_a64_mod_amount tuchar)
+      (Stmt.Sset _t'10
+        (Expr.Ecast
+          (Expr.Ecast
+            (Expr.Ebinop Binop.Oor
+              (Expr.Ebinop Binop.Oshr
+                (Expr.Etempvar ___kprog_a64_mod_w32 tuint)
+                (Expr.Etempvar ___kprog_a64_mod_amount tuchar) tuint)
+              (Expr.Ebinop Binop.Oshl
+                (Expr.Etempvar ___kprog_a64_mod_w32 tuint)
+                (Expr.Ebinop Binop.Osub
+                  (Expr.Econst_int (Integers.Int.repr 32) tuint)
+                  (Expr.Etempvar ___kprog_a64_mod_amount tuchar) tuint)
+                tuint) tuint) tulong) tulong))
+      (Stmt.Sset _t'10
+        (Expr.Ecast
+          (Expr.Ecast (Expr.Etempvar ___kprog_a64_mod_w32 tuint) tulong)
+          tulong)))
+    (Stmt.Sset ___kprog_a64_mod_value (Expr.Etempvar _t'10 tulong))))
+
+def s_kprog_arm64_memory_write_21 : Stmt :=
+(Stmt.Sifthenelse (Expr.Etempvar ___kprog_a64_mod_amount tuchar)
+  (Stmt.Sset ___kprog_a64_mod_value
+    (Expr.Ebinop Binop.Oor
+      (Expr.Ebinop Binop.Oshr (Expr.Etempvar ___kprog_a64_mod_value tulong)
+        (Expr.Etempvar ___kprog_a64_mod_amount tuchar) tulong)
+      (Expr.Ebinop Binop.Oshl (Expr.Etempvar ___kprog_a64_mod_value tulong)
+        (Expr.Ebinop Binop.Osub
+          (Expr.Econst_int (Integers.Int.repr 64) tuint)
+          (Expr.Etempvar ___kprog_a64_mod_amount tuchar) tuint) tulong)
+      tulong))
+  Stmt.Sskip)
+
+def s_kprog_arm64_memory_write_22 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___a64_mbo_imm (Expr.Etempvar _imm tulong))
+  (Stmt.Ssequence
+    (Stmt.Sset ___a64_mbo_index
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+    (Stmt.Ssequence
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                          (Expr.Etempvar ___a64_mbo_isrc tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 0) tuint) tint)
+        (Stmt.Sloop
+          (Stmt.Ssequence
+            (Stmt.Sloop
+              (Stmt.Ssequence
+                (Stmt.Sloop
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___a64_l_reg (Expr.Etempvar _index tulong))
+                    (Stmt.Ssequence
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                          (Expr.Etempvar ___a64_l_reg tulong)
+                                          (Expr.Econst_int (Integers.Int.repr 32) tuint)
+                                          tint)
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'154
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                (Ty.Tstruct _kprog_arm64_addressing noattr))
+                              _coordinates
+                              (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'155
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Etempvar _t'154 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                                  (Ty.Tstruct _kprog_arm64_coordinates noattr))
+                                _stack_offset tlong))
+                            (Stmt.Sset _t'3
+                              (Expr.Ecast
+                                (Expr.Ecast (Expr.Etempvar _t'155 tlong)
+                                  tulong) tulong))))
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                            (Expr.Etempvar ___a64_l_reg tulong)
+                                            (Expr.Econst_int (Integers.Int.repr 31) tuint)
+                                            tint)
+                          (Stmt.Ssequence
+                            s_kprog_arm64_memory_write_8
+                            (Stmt.Sset _t'3
+                              (Expr.Ecast (Expr.Etempvar _t'3 tulong) tulong)))
+                          (Stmt.Ssequence
+                            s_kprog_arm64_memory_write_9
+                            (Stmt.Sset _t'3
+                              (Expr.Ecast (Expr.Etempvar _t'3 tulong) tulong)))))
+                      (Stmt.Sset ___a64_read_value
+                        (Expr.Etempvar _t'3 tulong))))
+                  Stmt.Sbreak)
+                (Stmt.Ssequence
+                  (Stmt.Sloop
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___a64_l_reg__1
+                        (Expr.Etempvar _index tulong))
+                      (Stmt.Ssequence
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                            (Expr.Etempvar ___a64_l_reg__1 tulong)
+                                            (Expr.Econst_int (Integers.Int.repr 32) tuint)
+                                            tint)
+                          (Stmt.Sset _t'4
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                              tuint))
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                              (Expr.Etempvar ___a64_l_reg__1 tulong)
+                                              (Expr.Econst_int (Integers.Int.repr 31) tuint)
+                                              tint)
+                            s_kprog_arm64_memory_write_10
+                            s_kprog_arm64_memory_write_11))
+                        (Stmt.Sset ___a64_read_tag
+                          (Expr.Ecast (Expr.Etempvar _t'4 tuint) tuchar))))
+                    Stmt.Sbreak)
+                  (Stmt.Sloop
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___a64_mat_value
+                        (Expr.Etempvar ___a64_read_value tulong))
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___a64_mat_tag
+                          (Expr.Ecast (Expr.Etempvar ___a64_read_tag tuchar)
+                            tuchar))
+                        (Stmt.Ssequence
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                              (Expr.Etempvar ___a64_mat_tag tuchar)
+                                              (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                              tint)
+                            (Stmt.Ssequence
+                              (Stmt.Sloop
+                                s_kprog_arm64_memory_write_12
+                                s_kprog_arm64_memory_write_13)
+                              s_kprog_arm64_memory_write_14)
+                            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                (Expr.Etempvar ___a64_mat_tag tuchar)
+                                                (Expr.Econst_int (Integers.Int.repr 10) tuint)
+                                                tint)
+                              s_kprog_arm64_memory_write_15
+                              Stmt.Sskip))
+                          (Stmt.Sset ___a64_modified_input
+                            (Expr.Etempvar ___a64_mat_value tulong)))))
+                    Stmt.Sbreak)))
+              Stmt.Sbreak)
+            (Stmt.Sloop
+              (Stmt.Ssequence
+                (Stmt.Sset ___kprog_a64_mod_value
+                  (Expr.Etempvar ___a64_modified_input tulong))
+                (Stmt.Ssequence
+                  (Stmt.Sset ___kprog_a64_mod
+                    (Expr.Ecast
+                      (Expr.Ecast
+                        (Expr.Ebinop Binop.Oand
+                          (Expr.Ebinop Binop.Oshr (Expr.Etempvar _aux tuint)
+                            (Expr.Econst_int (Integers.Int.repr 8) tint)
+                            tuint)
+                          (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                          tuint) tuchar) tuchar))
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___kprog_a64_mod_shift
+                      (Expr.Ecast
+                        (Expr.Ecast
+                          (Expr.Ebinop Binop.Oand
+                            (Expr.Ebinop Binop.Oshr
+                              (Expr.Etempvar _aux tuint)
+                              (Expr.Econst_int (Integers.Int.repr 16) tint)
+                              tuint)
+                            (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                            tuint) tuchar) tuchar))
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                            (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                            (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                            tint)
+                          (Stmt.Sset _t'7
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 31) tuint)
+                              tuint))
+                          (Stmt.Sset _t'7
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 63) tuint)
+                              tuint)))
+                        (Stmt.Sset ___kprog_a64_mod_amount
+                          (Expr.Ecast
+                            (Expr.Ecast
+                              (Expr.Ebinop Binop.Oand
+                                (Expr.Etempvar ___kprog_a64_mod_shift tuchar)
+                                (Expr.Etempvar _t'7 tuint) tuint) tuchar)
+                            tuchar)))
+                      (Stmt.Ssequence
+                        (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_mod tuchar)
+                          (LStmts.LScons (some 0)
+                            Stmt.Sbreak
+                            (LStmts.LScons (some 1)
+                              (Stmt.Ssequence
+                                (Stmt.Ssequence
+                                  s_kprog_arm64_memory_write_16
+                                  (Stmt.Sset ___kprog_a64_mod_value
+                                    (Expr.Ebinop Binop.Oand
+                                      (Expr.Ebinop Binop.Oshl
+                                        (Expr.Etempvar ___kprog_a64_mod_value tulong)
+                                        (Expr.Etempvar ___kprog_a64_mod_amount tuchar)
+                                        tulong) (Expr.Etempvar _t'8 tulong)
+                                      tulong)))
+                                Stmt.Sbreak)
+                              (LStmts.LScons (some 2)
+                                (Stmt.Ssequence
+                                  (Stmt.Ssequence
+                                    s_kprog_arm64_memory_write_17
+                                    (Stmt.Sset ___kprog_a64_mod_value
+                                      (Expr.Ebinop Binop.Oshr
+                                        (Expr.Ebinop Binop.Oand
+                                          (Expr.Etempvar ___kprog_a64_mod_value tulong)
+                                          (Expr.Etempvar _t'9 tulong) tulong)
+                                        (Expr.Etempvar ___kprog_a64_mod_amount tuchar)
+                                        tulong)))
+                                  Stmt.Sbreak)
+                                (LStmts.LScons (some 3)
+                                  (Stmt.Ssequence
+                                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                        (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                                        (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                                        tint)
+                                      s_kprog_arm64_memory_write_18
+                                      s_kprog_arm64_memory_write_19)
+                                    Stmt.Sbreak)
+                                  (LStmts.LScons (some 4)
+                                    (Stmt.Ssequence
+                                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                          (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                                          (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                                          tint)
+                                        s_kprog_arm64_memory_write_20
+                                        s_kprog_arm64_memory_write_21)
+                                      Stmt.Sbreak)
+                                    (LStmts.LScons (some 5)
+                                      (Stmt.Ssequence
+                                        (Stmt.Sset ___kprog_a64_mod_value
+                                          (Expr.Ebinop Binop.Oshl
+                                            (Expr.Ecast
+                                              (Expr.Ecast
+                                                (Expr.Etempvar ___kprog_a64_mod_value tulong)
+                                                tuint) tulong)
+                                            (Expr.Etempvar ___kprog_a64_mod_shift tuchar)
+                                            tulong))
+                                        Stmt.Sbreak)
+                                      (LStmts.LScons (some 6)
+                                        (Stmt.Ssequence
+                                          (Stmt.Sset ___kprog_a64_mod_value
+                                            (Expr.Ebinop Binop.Oshl
+                                              (Expr.Ecast
+                                                (Expr.Ecast
+                                                  (Expr.Ecast
+                                                    (Expr.Etempvar ___kprog_a64_mod_value tulong)
+                                                    tint) tlong) tulong)
+                                              (Expr.Etempvar ___kprog_a64_mod_shift tuchar)
+                                              tulong))
+                                          Stmt.Sbreak)
+                                        (LStmts.LScons (some 7)
+                                          (Stmt.Ssequence
+                                            (Stmt.Sset ___kprog_a64_mod_value
+                                              (Expr.Ebinop Binop.Oshl
+                                                (Expr.Ecast
+                                                  (Expr.Ecast
+                                                    (Expr.Etempvar ___kprog_a64_mod_value tulong)
+                                                    tushort) tulong)
+                                                (Expr.Etempvar ___kprog_a64_mod_shift tuchar)
+                                                tulong))
+                                            Stmt.Sbreak)
+                                          (LStmts.LScons (some 8)
+                                            (Stmt.Ssequence
+                                              (Stmt.Sset ___kprog_a64_mod_value
+                                                (Expr.Ebinop Binop.Oshl
+                                                  (Expr.Ecast
+                                                    (Expr.Ecast
+                                                      (Expr.Ecast
+                                                        (Expr.Etempvar ___kprog_a64_mod_value tulong)
+                                                        tshort) tlong)
+                                                    tulong)
+                                                  (Expr.Etempvar ___kprog_a64_mod_shift tuchar)
+                                                  tulong))
+                                              Stmt.Sbreak)
+                                            (LStmts.LScons (some 9)
+                                              (Stmt.Ssequence
+                                                (Stmt.Sset ___kprog_a64_mod_value
+                                                  (Expr.Ebinop Binop.Oshl
+                                                    (Expr.Ecast
+                                                      (Expr.Ecast
+                                                        (Expr.Etempvar ___kprog_a64_mod_value tulong)
+                                                        tuchar) tulong)
+                                                    (Expr.Etempvar ___kprog_a64_mod_shift tuchar)
+                                                    tulong))
+                                                Stmt.Sbreak)
+                                              (LStmts.LScons (some 10)
+                                                (Stmt.Ssequence
+                                                  (Stmt.Sset ___kprog_a64_mod_value
+                                                    (Expr.Ebinop Binop.Oshl
+                                                      (Expr.Ecast
+                                                        (Expr.Ecast
+                                                          (Expr.Ecast
+                                                            (Expr.Etempvar ___kprog_a64_mod_value tulong)
+                                                            tschar) tlong)
+                                                        tulong)
+                                                      (Expr.Etempvar ___kprog_a64_mod_shift tuchar)
+                                                      tulong))
+                                                  Stmt.Sbreak)
+                                                LStmts.LSnil))))))))))))
+                        (Stmt.Sset ___a64_mbo_index
+                          (Expr.Etempvar ___kprog_a64_mod_value tulong)))))))
+              Stmt.Sbreak))
+          Stmt.Sbreak)
+        Stmt.Sskip)
+      (Stmt.Ssequence
+        (Stmt.Sloop
+          (Stmt.Ssequence
+            (Stmt.Sset ___kprog_a64_mbo_imm
+              (Expr.Etempvar ___a64_mbo_imm tulong))
+            (Stmt.Ssequence
+              (Stmt.Sset ___kprog_a64_mbo_index
+                (Expr.Etempvar ___a64_mbo_index tulong))
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oand
+                                        (Expr.Ecast
+                                          (Expr.Ebinop Binop.Oand
+                                            (Expr.Ebinop Binop.Oshr
+                                              (Expr.Etempvar _aux tuint)
+                                              (Expr.Econst_int (Integers.Int.repr 24) tuint)
+                                              tuint)
+                                            (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                                            tuint) tuint)
+                                        (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                        tuint)
+                      (Stmt.Sset _t'11
+                        (Expr.Econst_int (Integers.Int.repr 1) tint))
+                      (Stmt.Sset _t'11
+                        (Expr.Ecast
+                          (Expr.Ebinop Binop.Oand
+                            (Expr.Ecast
+                              (Expr.Ebinop Binop.Oand
+                                (Expr.Ebinop Binop.Oshr
+                                  (Expr.Etempvar _aux tuint)
+                                  (Expr.Econst_int (Integers.Int.repr 24) tuint)
+                                  tuint)
+                                (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                                tuint) tuint)
+                            (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                            tuint) tbool)))
+                    (Stmt.Sifthenelse (Expr.Etempvar _t'11 tint)
+                      (Stmt.Sset _t'12
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 1) tint) tint))
+                      (Stmt.Sset _t'12
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 0) tint) tint))))
+                  (Stmt.Sset ___kprog_a64_mbo_prepost
+                    (Expr.Etempvar _t'12 tint)))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sifthenelse (Expr.Etempvar ___a64_mbo_has_index tuchar)
+                      (Stmt.Sset _t'13
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 1) tint) tint))
+                      (Stmt.Sset _t'13
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 0) tint) tint)))
+                    (Stmt.Sset ___kprog_a64_mbo_has_index
+                      (Expr.Etempvar _t'13 tint)))
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sifthenelse (Expr.Etempvar ___kprog_a64_mbo_prepost tint)
+                        (Stmt.Sset _t'14
+                          (Expr.Ecast
+                            (Expr.Econst_long (Integers.Int64.repr 0) tulong)
+                            tulong))
+                        (Stmt.Sset _t'14
+                          (Expr.Ecast
+                            (Expr.Etempvar ___kprog_a64_mbo_imm tulong)
+                            tulong)))
+                      (Stmt.Sset ___kprog_a64_mbo_base
+                        (Expr.Etempvar _t'14 tulong)))
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___kprog_a64_mbo_result
+                        (Expr.Etempvar ___kprog_a64_mbo_base tulong))
+                      (Stmt.Ssequence
+                        (Stmt.Sifthenelse (Expr.Etempvar ___kprog_a64_mbo_has_index tint)
+                          (Stmt.Sset ___kprog_a64_mbo_result
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Etempvar ___kprog_a64_mbo_base tulong)
+                              (Expr.Etempvar ___kprog_a64_mbo_index tulong)
+                              tulong))
+                          Stmt.Sskip)
+                        (Stmt.Sset ___a64_mbo_result
+                          (Expr.Etempvar ___kprog_a64_mbo_result tulong)))))))))
+          Stmt.Sbreak)
+        (Stmt.Sset ___a64_mwr_off
+          (Expr.Ecast (Expr.Etempvar ___a64_mbo_result tulong) tlong))))))
+
+def s_kprog_arm64_memory_write_23 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___a64_l_reg__2 (Expr.Etempvar _base tulong))
+  (Stmt.Ssequence
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                        (Expr.Etempvar ___a64_l_reg__2 tulong)
+                        (Expr.Econst_int (Integers.Int.repr 32) tuint) tint)
+      (Stmt.Sset _t'15
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 4) tuint) tuint))
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                          (Expr.Etempvar ___a64_l_reg__2 tulong)
+                          (Expr.Econst_int (Integers.Int.repr 31) tuint)
+                          tint)
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'138
+              (Expr.Ederef
+                (Expr.Ebinop Binop.Oadd
+                  (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                  (Expr.Ecast (Expr.Etempvar ___a64_l_reg__2 tulong) tuchar)
+                  (tptr (tptr tuchar))) (tptr tuchar)))
+            (Stmt.Ssequence
+              (Stmt.Sset _t'139
+                (Expr.Ederef (Expr.Etempvar _t'138 (tptr tuchar)) tuchar))
+              (Stmt.Sset _t'15
+                (Expr.Ecast (Expr.Etempvar _t'139 tuchar) tuint))))
+          (Stmt.Sset _t'15 (Expr.Ecast (Expr.Etempvar _t'15 tuint) tuint)))
+        (Stmt.Ssequence
+          (Stmt.Sset _t'15
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuint))
+          (Stmt.Sset _t'15 (Expr.Ecast (Expr.Etempvar _t'15 tuint) tuint)))))
+    (Stmt.Sset ___a64_mwr_tag
+      (Expr.Ecast (Expr.Etempvar _t'15 tuint) tuchar))))
+
+def s_kprog_arm64_memory_write_24 : Stmt :=
+Stmt.Sbreak
+
+def s_kprog_arm64_memory_write_25 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq (Expr.Etempvar _base tulong)
+                        (Expr.Econst_int (Integers.Int.repr 32) tuint) tint)
+      (Stmt.Sset _t'16 (Expr.Econst_int (Integers.Int.repr 1) tint))
+      (Stmt.Sset _t'16
+        (Expr.Ecast
+          (Expr.Ebinop Binop.Oeq (Expr.Etempvar ___a64_mwr_tag tuchar)
+            (Expr.Econst_int (Integers.Int.repr 4) tuint) tint) tbool)))
+    (Stmt.Sifthenelse (Expr.Etempvar _t'16 tint)
+      (Stmt.Sset _t'17
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuint))
+      (Stmt.Sset _t'17
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))))
+  (Stmt.Sset ___a64_mwr_arm
+    (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'17 tuint) tuchar) tuchar)))
+
+def s_kprog_arm64_memory_write_26 : Stmt :=
+(Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+  [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+  [(Expr.Eaddrof
+     (Expr.Ederef
+       (Expr.Ebinop Binop.Oadd
+         (Expr.Etempvar ___a64_cbw_addr (tptr (tvolatile tuchar)))
+         (Expr.Econst_int (Integers.Int.repr 3) tint)
+         (tptr (tvolatile tuchar))) (tvolatile tuchar))
+     (tptr (tvolatile tuchar))),
+   (Expr.Ecast
+     (Expr.Ebinop Binop.Oshr (Expr.Etempvar ___a64_cbw_value tulong)
+       (Expr.Econst_int (Integers.Int.repr 24) tint) tulong) tuchar)])
+
+def s_kprog_arm64_memory_write_27 : Stmt :=
+(Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+  [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+  [(Expr.Eaddrof
+     (Expr.Ederef
+       (Expr.Ebinop Binop.Oadd
+         (Expr.Etempvar ___a64_cbw_addr (tptr (tvolatile tuchar)))
+         (Expr.Econst_int (Integers.Int.repr 4) tint)
+         (tptr (tvolatile tuchar))) (tvolatile tuchar))
+     (tptr (tvolatile tuchar))),
+   (Expr.Ecast
+     (Expr.Ebinop Binop.Oshr (Expr.Etempvar ___a64_cbw_value tulong)
+       (Expr.Econst_int (Integers.Int.repr 32) tint) tulong) tuchar)])
+
+def s_kprog_arm64_memory_write_28 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oge (Expr.Etempvar _width tuchar)
+                    (Expr.Econst_int (Integers.Int.repr 8) tuint) tint)
+  (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+    [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+    [(Expr.Eaddrof
+       (Expr.Ederef
+         (Expr.Ebinop Binop.Oadd
+           (Expr.Etempvar ___a64_cbw_addr (tptr (tvolatile tuchar)))
+           (Expr.Econst_int (Integers.Int.repr 5) tint)
+           (tptr (tvolatile tuchar))) (tvolatile tuchar))
+       (tptr (tvolatile tuchar))),
+     (Expr.Ecast
+       (Expr.Ebinop Binop.Oshr (Expr.Etempvar ___a64_cbw_value tulong)
+         (Expr.Econst_int (Integers.Int.repr 40) tint) tulong) tuchar)])
+  Stmt.Sskip)
+
+def s_kprog_arm64_memory_write_29 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge (Expr.Etempvar _width tuchar)
+                      (Expr.Econst_int (Integers.Int.repr 8) tuint) tint)
+    (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+      [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+      [(Expr.Eaddrof
+         (Expr.Ederef
+           (Expr.Ebinop Binop.Oadd
+             (Expr.Etempvar ___a64_cbw_addr (tptr (tvolatile tuchar)))
+             (Expr.Econst_int (Integers.Int.repr 6) tint)
+             (tptr (tvolatile tuchar))) (tvolatile tuchar))
+         (tptr (tvolatile tuchar))),
+       (Expr.Ecast
+         (Expr.Ebinop Binop.Oshr (Expr.Etempvar ___a64_cbw_value tulong)
+           (Expr.Econst_int (Integers.Int.repr 48) tint) tulong) tuchar)])
+    Stmt.Sskip)
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge (Expr.Etempvar _width tuchar)
+                      (Expr.Econst_int (Integers.Int.repr 8) tuint) tint)
+    (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+      [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+      [(Expr.Eaddrof
+         (Expr.Ederef
+           (Expr.Ebinop Binop.Oadd
+             (Expr.Etempvar ___a64_cbw_addr (tptr (tvolatile tuchar)))
+             (Expr.Econst_int (Integers.Int.repr 7) tint)
+             (tptr (tvolatile tuchar))) (tvolatile tuchar))
+         (tptr (tvolatile tuchar))),
+       (Expr.Ecast
+         (Expr.Ebinop Binop.Oshr (Expr.Etempvar ___a64_cbw_value tulong)
+           (Expr.Econst_int (Integers.Int.repr 56) tint) tulong) tuchar)])
+    Stmt.Sskip))
+
+def s_kprog_arm64_memory_write_30 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'127
+    (Expr.Ederef
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+        (Expr.Ecast (Expr.Etempvar ___a64_l_reg__4 tulong) tuchar)
+        (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+      (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+  (Stmt.Ssequence
+    (Stmt.Sset _t'128
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _t'127 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+          (Ty.Tunion _arm64_sim_gpr noattr)) _ptr (tptr tvoid)))
+    (Stmt.Sset _t'20
+      (Expr.Ecast (Expr.Etempvar _t'128 (tptr tvoid)) (tptr tvoid)))))
+
+def s_kprog_arm64_memory_write_31 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'21
+    (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 65535) tulong) tulong))
+  (Stmt.Sset _t'21 (Expr.Ecast (Expr.Etempvar _t'21 tulong) tulong)))
+
+def s_kprog_arm64_memory_write_32 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                    (Expr.Etempvar ___kprog_a64_sb_width tuchar)
+                    (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'21
+        (Expr.Ecast
+          (Expr.Econst_long (Integers.Int64.repr 4294967295) tulong) tulong))
+      (Stmt.Sset _t'21 (Expr.Ecast (Expr.Etempvar _t'21 tulong) tulong)))
+    (Stmt.Sset _t'21 (Expr.Ecast (Expr.Etempvar _t'21 tulong) tulong)))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'21
+        (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr (-1)) tulong)
+          tulong))
+      (Stmt.Sset _t'21 (Expr.Ecast (Expr.Etempvar _t'21 tulong) tulong)))
+    (Stmt.Sset _t'21 (Expr.Ecast (Expr.Etempvar _t'21 tulong) tulong))))
+
+def s_kprog_arm64_memory_write_33 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sassign (Expr.Evar ___kprog_c_store_value__1 tuint)
+    (Expr.Ecast (Expr.Etempvar ___kprog_a64_sb_value tulong) tuint))
+  (Stmt.Sbuiltin none (ExtFun.EF_memcpy 4 1) [(tptr tvoid), (tptr tuint)]
+    [(Expr.Ecast
+       (Expr.Etempvar ___kprog_a64_sb_addr (tptr (tvolatile tuchar)))
+       (tptr tvoid)),
+     (Expr.Eaddrof (Expr.Evar ___kprog_c_store_value__1 tuint) (tptr tuint))]))
+
+def s_kprog_arm64_memory_write_34 : Stmt :=
+Stmt.Sbreak
+
+def s_kprog_arm64_memory_write_35 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sassign (Expr.Evar ___kprog_c_store_value__2 tushort)
+    (Expr.Ecast (Expr.Etempvar ___kprog_a64_sb_value tulong) tushort))
+  (Stmt.Sbuiltin none (ExtFun.EF_memcpy 2 1) [(tptr tvoid), (tptr tushort)]
+    [(Expr.Ecast
+       (Expr.Etempvar ___kprog_a64_sb_addr (tptr (tvolatile tuchar)))
+       (tptr tvoid)),
+     (Expr.Eaddrof (Expr.Evar ___kprog_c_store_value__2 tushort)
+       (tptr tushort))]))
+
+def s_kprog_arm64_memory_write_36 : Stmt :=
+Stmt.Sbreak
+
+def s_kprog_arm64_memory_write_37 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sassign (Expr.Evar ___kprog_c_store_value__3 tuchar)
+    (Expr.Ecast (Expr.Etempvar ___kprog_a64_sb_value tulong) tuchar))
+  (Stmt.Sbuiltin none (ExtFun.EF_memcpy 1 1) [(tptr tvoid), (tptr tuchar)]
+    [(Expr.Ecast
+       (Expr.Etempvar ___kprog_a64_sb_addr (tptr (tvolatile tuchar)))
+       (tptr tvoid)),
+     (Expr.Eaddrof (Expr.Evar ___kprog_c_store_value__3 tuchar)
+       (tptr tuchar))]))
+
+def s_kprog_arm64_memory_write_38 : Stmt :=
+Stmt.Sbreak
+
+def s_kprog_arm64_memory_write_39 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'125
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _t'124 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+        (Ty.Tstruct _kprog_arm64_coordinates noattr)) _stack_offset tlong))
+  (Stmt.Sset _t'24
+    (Expr.Ecast
+      (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'125 tlong) tlong)
+        (tptr tvoid)) (tptr tvoid))))
+
+def s_kprog_arm64_memory_write_40 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'122
+      (Expr.Ederef
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+          (Expr.Ecast (Expr.Etempvar ___a64_l_reg__5 tulong) tuchar)
+          (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+        (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+    (Stmt.Ssequence
+      (Stmt.Sset _t'123
+        (Expr.Efield
+          (Expr.Ederef
+            (Expr.Etempvar _t'122 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+            (Ty.Tunion _arm64_sim_gpr noattr)) _ptr (tptr tvoid)))
+      (Stmt.Sset _t'24
+        (Expr.Ecast (Expr.Etempvar _t'123 (tptr tvoid)) (tptr tvoid)))))
+  (Stmt.Sset _t'24
+    (Expr.Ecast (Expr.Etempvar _t'24 (tptr tvoid)) (tptr tvoid))))
+
+def s_kprog_arm64_memory_write_41 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'24
+    (Expr.Ecast
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid))
+      (tptr tvoid)))
+  (Stmt.Sset _t'24
+    (Expr.Ecast (Expr.Etempvar _t'24 (tptr tvoid)) (tptr tvoid))))
+
+def s_kprog_arm64_memory_write_42 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                      (Expr.Etempvar ___a64_stw_width tuchar)
+                      (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
+    (Stmt.Sset _t'25
+      (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 255) tulong) tulong))
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                        (Expr.Etempvar ___a64_stw_width tuchar)
+                        (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+      (Stmt.Ssequence
+        (Stmt.Sset _t'25
+          (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 65535) tulong)
+            tulong))
+        (Stmt.Sset _t'25 (Expr.Ecast (Expr.Etempvar _t'25 tulong) tulong)))
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                          (Expr.Etempvar ___a64_stw_width tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'25
+              (Expr.Ecast
+                (Expr.Econst_long (Integers.Int64.repr 4294967295) tulong)
+                tulong))
+            (Stmt.Sset _t'25
+              (Expr.Ecast (Expr.Etempvar _t'25 tulong) tulong)))
+          (Stmt.Sset _t'25 (Expr.Ecast (Expr.Etempvar _t'25 tulong) tulong)))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'25
+              (Expr.Ecast
+                (Expr.Econst_long (Integers.Int64.repr (-1)) tulong) tulong))
+            (Stmt.Sset _t'25
+              (Expr.Ecast (Expr.Etempvar _t'25 tulong) tulong)))
+          (Stmt.Sset _t'25 (Expr.Ecast (Expr.Etempvar _t'25 tulong) tulong))))))
+  (Stmt.Sset ___a64_stw_value
+    (Expr.Ebinop Binop.Oand (Expr.Etempvar ___a64_loss_value tulong)
+      (Expr.Etempvar _t'25 tulong) tulong)))
+
+def s_kprog_arm64_memory_write_43 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'116
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+      (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+  (Stmt.Ssequence
+    (Stmt.Sset _t'117
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _t'116 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+          (Ty.Tstruct _kprog_arm64_coordinates noattr)) _sp_valid tuchar))
+    (Stmt.Sifthenelse (Expr.Eunop Unop.Onotbool (Expr.Etempvar _t'117 tuchar)
+                        tint)
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Scall (some _t'29)
+            (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint] tulong
+                                                 cc_default))
+            [(Expr.Econst_int (Integers.Int.repr 1) tint)])
+          (Stmt.Ssequence
+            (Stmt.Sset _t'119
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                  (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+                (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+            (Stmt.Sassign
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _t'119 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                  (Ty.Tstruct _kprog_arm64_coordinates noattr)) _sp_base
+                tulong) (Expr.Etempvar _t'29 tulong))))
+        (Stmt.Ssequence
+          (Stmt.Sset _t'118
+            (Expr.Efield
+              (Expr.Ederef
+                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+              (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+          (Stmt.Sassign
+            (Expr.Efield
+              (Expr.Ederef
+                (Expr.Etempvar _t'118 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                (Ty.Tstruct _kprog_arm64_coordinates noattr)) _sp_valid
+              tuchar) (Expr.Econst_int (Integers.Int.repr 1) tint))))
+      Stmt.Sskip)))
+
+def s_kprog_arm64_memory_write_44 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'115
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+      (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+  (Stmt.Sset ___a64_unmat_base
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _t'115 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+        (Ty.Tstruct _kprog_arm64_coordinates noattr)) _sp_base tulong)))
+
+def s_kprog_arm64_memory_write_45 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'111
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+          (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+        (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+    (Stmt.Ssequence
+      (Stmt.Sset _t'112
+        (Expr.Efield
+          (Expr.Ederef
+            (Expr.Etempvar _t'111 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+            (Ty.Tstruct _kprog_arm64_coordinates noattr)) _return_valid
+          tuchar))
+      (Stmt.Sifthenelse (Expr.Eunop Unop.Onotbool
+                          (Expr.Etempvar _t'112 tuchar) tint)
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Scall (some _t'30)
+              (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint] tulong
+                                                   cc_default))
+              [(Expr.Econst_int (Integers.Int.repr 3) tint)])
+            (Stmt.Ssequence
+              (Stmt.Sset _t'114
+                (Expr.Efield
+                  (Expr.Ederef
+                    (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                    (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+                  (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+              (Stmt.Sassign
+                (Expr.Efield
+                  (Expr.Ederef
+                    (Expr.Etempvar _t'114 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                    (Ty.Tstruct _kprog_arm64_coordinates noattr))
+                  _return_base tulong) (Expr.Etempvar _t'30 tulong))))
+          (Stmt.Ssequence
+            (Stmt.Sset _t'113
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                  (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+                (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+            (Stmt.Sassign
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _t'113 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                  (Ty.Tstruct _kprog_arm64_coordinates noattr)) _return_valid
+                tuchar) (Expr.Econst_int (Integers.Int.repr 1) tint))))
+        Stmt.Sskip)))
+  (Stmt.Ssequence
+    (Stmt.Sset _t'110
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+          (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+        (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+    (Stmt.Sset ___a64_unmat_base__1
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _t'110 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+          (Ty.Tstruct _kprog_arm64_coordinates noattr)) _return_base tulong))))
+
+def s_kprog_arm64_memory_write_46 : Stmt :=
+Stmt.Sbreak
+
+def s_kprog_arm64_memory_write_47 : Stmt :=
+(Stmt.Sset ___a64_unmat_value
+  (Expr.Ebinop Binop.Osub (Expr.Etempvar ___a64_unmat_value tulong)
+    (Expr.Etempvar ___a64_unmat_base__1 tulong) tulong))
+
+def s_kprog_arm64_memory_write_48 : Stmt :=
+(Stmt.Sset _t'36
+  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+
+def s_kprog_arm64_memory_write_49 : Stmt :=
+(Stmt.Sset _t'36
+  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+
+def s_kprog_arm64_memory_write_50 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_shift__1
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+  Stmt.Sbreak)
+
+def s_kprog_arm64_memory_write_51 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_shift__1
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tint) tulong))
+  Stmt.Sbreak)
+
+def s_kprog_arm64_memory_write_52 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_shift__1
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 16) tint) tulong))
+  Stmt.Sbreak)
+
+def s_kprog_arm64_memory_write_53 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_shift__1
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 24) tint) tulong))
+  Stmt.Sbreak)
+
+def s_kprog_arm64_memory_write_54 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_shift__1
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 32) tint) tulong))
+  Stmt.Sbreak)
+
+def s_kprog_arm64_memory_write_55 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_shift__1
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 40) tint) tulong))
+  Stmt.Sbreak)
+
+def s_kprog_arm64_memory_write_56 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_shift__1
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 48) tint) tulong))
+  Stmt.Sbreak)
+
+def s_kprog_arm64_memory_write_57 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_shift__1
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 56) tint) tulong))
+  Stmt.Sbreak)
+
+def s_kprog_arm64_memory_write_58 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sloop
+    (Stmt.Scall none
+      (Expr.Evar _arm64_sim_unsupported_opcode (Ty.Tfunction [] tvoid
+                                                 cc_default)) [])
+    Stmt.Sbreak)
+  Stmt.Sbreak)
+
+def s_kprog_arm64_memory_write_59 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'37
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+  (Stmt.Sset _t'37 (Expr.Ecast (Expr.Etempvar _t'37 tuint) tuint)))
+
+def s_kprog_arm64_memory_write_60 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'37
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+  (Stmt.Sset _t'37 (Expr.Ecast (Expr.Etempvar _t'37 tuint) tuint)))
+
+def s_kprog_arm64_memory_write_61 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_shift__2
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+  Stmt.Sbreak)
+
+def s_kprog_arm64_memory_write_62 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_shift__2
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tint) tulong))
+  Stmt.Sbreak)
+
+def s_kprog_arm64_memory_write_63 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_shift__2
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 16) tint) tulong))
+  Stmt.Sbreak)
+
+def s_kprog_arm64_memory_write_64 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_shift__2
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 24) tint) tulong))
+  Stmt.Sbreak)
+
+def s_kprog_arm64_memory_write_65 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_shift__2
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 32) tint) tulong))
+  Stmt.Sbreak)
+
+def s_kprog_arm64_memory_write_66 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_shift__2
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 40) tint) tulong))
+  Stmt.Sbreak)
+
+def s_kprog_arm64_memory_write_67 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_shift__2
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 48) tint) tulong))
+  Stmt.Sbreak)
+
+def s_kprog_arm64_memory_write_68 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_shift__2
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 56) tint) tulong))
+  Stmt.Sbreak)
+
+def s_kprog_arm64_memory_write_69 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sloop
+    (Stmt.Scall none
+      (Expr.Evar _arm64_sim_unsupported_opcode (Ty.Tfunction [] tvoid
+                                                 cc_default)) [])
+    Stmt.Sbreak)
+  Stmt.Sbreak)
+
+def s_kprog_arm64_memory_write_70 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'103
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _b
+      (tptr (tvolatile tuchar))))
+  (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+    [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+    [(Expr.Eaddrof
+       (Expr.Ederef
+         (Expr.Ebinop Binop.Oadd
+           (Expr.Etempvar _t'103 (tptr (tvolatile tuchar)))
+           (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___a64_stw_index tulong)
+             (Expr.Econst_int (Integers.Int.repr 2) tint) tulong)
+           (tptr (tvolatile tuchar))) (tvolatile tuchar))
+       (tptr (tvolatile tuchar))),
+     (Expr.Ecast
+       (Expr.Ebinop Binop.Oshr
+         (Expr.Etempvar ___kprog_a64_bl_value__2 tulong)
+         (Expr.Etempvar ___kprog_a64_bl_shift__2 tulong) tulong) tuchar)]))
+
+def s_kprog_arm64_memory_write_71 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'38
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+    (Stmt.Sset _t'38 (Expr.Ecast (Expr.Etempvar _t'38 tuint) tuint)))
+  (Stmt.Sset _t'38 (Expr.Ecast (Expr.Etempvar _t'38 tuint) tuint)))
+
+def s_kprog_arm64_memory_write_72 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'38
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+    (Stmt.Sset _t'38 (Expr.Ecast (Expr.Etempvar _t'38 tuint) tuint)))
+  (Stmt.Sset _t'38 (Expr.Ecast (Expr.Etempvar _t'38 tuint) tuint)))
+
+def s_kprog_arm64_memory_write_73 : Stmt :=
+(Stmt.Sswitch (Expr.Etempvar ___kprog_a64_bl_lane__3 tulong)
+  (LStmts.LScons (some 0)
+    (Stmt.Ssequence
+      (Stmt.Sset ___kprog_a64_bl_shift__3
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+      Stmt.Sbreak)
+    (LStmts.LScons (some 1)
+      (Stmt.Ssequence
+        (Stmt.Sset ___kprog_a64_bl_shift__3
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tint) tulong))
+        Stmt.Sbreak)
+      (LStmts.LScons (some 2)
+        (Stmt.Ssequence
+          (Stmt.Sset ___kprog_a64_bl_shift__3
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 16) tint) tulong))
+          Stmt.Sbreak)
+        (LStmts.LScons (some 3)
+          (Stmt.Ssequence
+            (Stmt.Sset ___kprog_a64_bl_shift__3
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 24) tint)
+                tulong))
+            Stmt.Sbreak)
+          (LStmts.LScons (some 4)
+            (Stmt.Ssequence
+              (Stmt.Sset ___kprog_a64_bl_shift__3
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 32) tint)
+                  tulong))
+              Stmt.Sbreak)
+            (LStmts.LScons (some 5)
+              (Stmt.Ssequence
+                (Stmt.Sset ___kprog_a64_bl_shift__3
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 40) tint)
+                    tulong))
+                Stmt.Sbreak)
+              (LStmts.LScons (some 6)
+                (Stmt.Ssequence
+                  (Stmt.Sset ___kprog_a64_bl_shift__3
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 48) tint)
+                      tulong))
+                  Stmt.Sbreak)
+                (LStmts.LScons (some 7)
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___kprog_a64_bl_shift__3
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 56) tint) tulong))
+                    Stmt.Sbreak)
+                  (LStmts.LScons none
+                    (Stmt.Ssequence
+                      (Stmt.Sloop
+                        (Stmt.Scall none
+                          (Expr.Evar _arm64_sim_unsupported_opcode (Ty.Tfunction
+                                                                    [] tvoid
+                                                                    cc_default))
+                          [])
+                        Stmt.Sbreak)
+                      Stmt.Sbreak)
+                    LStmts.LSnil))))))))))
+
+def s_kprog_arm64_memory_write_74 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'102
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _b
+      (tptr (tvolatile tuchar))))
+  (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+    [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+    [(Expr.Eaddrof
+       (Expr.Ederef
+         (Expr.Ebinop Binop.Oadd
+           (Expr.Etempvar _t'102 (tptr (tvolatile tuchar)))
+           (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___a64_stw_index tulong)
+             (Expr.Econst_int (Integers.Int.repr 3) tint) tulong)
+           (tptr (tvolatile tuchar))) (tvolatile tuchar))
+       (tptr (tvolatile tuchar))),
+     (Expr.Ecast
+       (Expr.Ebinop Binop.Oshr
+         (Expr.Etempvar ___kprog_a64_bl_value__3 tulong)
+         (Expr.Etempvar ___kprog_a64_bl_shift__3 tulong) tulong) tuchar)]))
+
+def s_kprog_arm64_memory_write_75 : Stmt :=
+(Stmt.Sset _t'39
+  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
+
+def s_kprog_arm64_memory_write_76 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'39
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+    (Stmt.Sset _t'39 (Expr.Ecast (Expr.Etempvar _t'39 tuint) tuint)))
+  (Stmt.Sset _t'39 (Expr.Ecast (Expr.Etempvar _t'39 tuint) tuint)))
+
+def s_kprog_arm64_memory_write_77 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'39
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+    (Stmt.Sset _t'39 (Expr.Ecast (Expr.Etempvar _t'39 tuint) tuint)))
+  (Stmt.Sset _t'39 (Expr.Ecast (Expr.Etempvar _t'39 tuint) tuint)))
+
+def s_kprog_arm64_memory_write_78 : Stmt :=
+(Stmt.Sset ___kprog_a64_bl_shift__4
+  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+
+def s_kprog_arm64_memory_write_79 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_bl_lane__4 tulong)
+    (LStmts.LScons (some 0)
+      (Stmt.Ssequence
+        (Stmt.Sset ___kprog_a64_bl_shift__4
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+        Stmt.Sbreak)
+      (LStmts.LScons (some 1)
+        (Stmt.Ssequence
+          (Stmt.Sset ___kprog_a64_bl_shift__4
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tint) tulong))
+          Stmt.Sbreak)
+        (LStmts.LScons (some 2)
+          (Stmt.Ssequence
+            (Stmt.Sset ___kprog_a64_bl_shift__4
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 16) tint)
+                tulong))
+            Stmt.Sbreak)
+          (LStmts.LScons (some 3)
+            (Stmt.Ssequence
+              (Stmt.Sset ___kprog_a64_bl_shift__4
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 24) tint)
+                  tulong))
+              Stmt.Sbreak)
+            (LStmts.LScons (some 4)
+              (Stmt.Ssequence
+                (Stmt.Sset ___kprog_a64_bl_shift__4
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 32) tint)
+                    tulong))
+                Stmt.Sbreak)
+              (LStmts.LScons (some 5)
+                (Stmt.Ssequence
+                  (Stmt.Sset ___kprog_a64_bl_shift__4
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 40) tint)
+                      tulong))
+                  Stmt.Sbreak)
+                (LStmts.LScons (some 6)
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___kprog_a64_bl_shift__4
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 48) tint) tulong))
+                    Stmt.Sbreak)
+                  (LStmts.LScons (some 7)
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___kprog_a64_bl_shift__4
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 56) tint)
+                          tulong))
+                      Stmt.Sbreak)
+                    (LStmts.LScons none
+                      (Stmt.Ssequence
+                        (Stmt.Sloop
+                          (Stmt.Scall none
+                            (Expr.Evar _arm64_sim_unsupported_opcode 
+                            (Ty.Tfunction [] tvoid cc_default)) [])
+                          Stmt.Sbreak)
+                        Stmt.Sbreak)
+                      LStmts.LSnil))))))))))
+  (Stmt.Ssequence
+    (Stmt.Sset _t'101
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+          (Ty.Tstruct _kprog_arm64_addressing noattr)) _b
+        (tptr (tvolatile tuchar))))
+    (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+      [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+      [(Expr.Eaddrof
+         (Expr.Ederef
+           (Expr.Ebinop Binop.Oadd
+             (Expr.Etempvar _t'101 (tptr (tvolatile tuchar)))
+             (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___a64_stw_index tulong)
+               (Expr.Econst_int (Integers.Int.repr 4) tint) tulong)
+             (tptr (tvolatile tuchar))) (tvolatile tuchar))
+         (tptr (tvolatile tuchar))),
+       (Expr.Ecast
+         (Expr.Ebinop Binop.Oshr
+           (Expr.Etempvar ___kprog_a64_bl_value__4 tulong)
+           (Expr.Etempvar ___kprog_a64_bl_shift__4 tulong) tulong) tuchar)])))
+
+def s_kprog_arm64_memory_write_80 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'40
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
+  (Stmt.Sset _t'40 (Expr.Ecast (Expr.Etempvar _t'40 tuint) tuint)))
+
+def s_kprog_arm64_memory_write_81 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                    (Expr.Etempvar ___a64_stw_width tuchar)
+                    (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'40
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+      (Stmt.Sset _t'40 (Expr.Ecast (Expr.Etempvar _t'40 tuint) tuint)))
+    (Stmt.Sset _t'40 (Expr.Ecast (Expr.Etempvar _t'40 tuint) tuint)))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'40
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+      (Stmt.Sset _t'40 (Expr.Ecast (Expr.Etempvar _t'40 tuint) tuint)))
+    (Stmt.Sset _t'40 (Expr.Ecast (Expr.Etempvar _t'40 tuint) tuint))))
+
+def s_kprog_arm64_memory_write_82 : Stmt :=
+(Stmt.Sset ___kprog_a64_bl_value__5 (Expr.Etempvar ___a64_stw_value tulong))
+
+def s_kprog_arm64_memory_write_83 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_shift__5
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+  (Stmt.Ssequence
+    (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_bl_lane__5 tulong)
+      (LStmts.LScons (some 0)
+        (Stmt.Ssequence
+          (Stmt.Sset ___kprog_a64_bl_shift__5
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+          Stmt.Sbreak)
+        (LStmts.LScons (some 1)
+          (Stmt.Ssequence
+            (Stmt.Sset ___kprog_a64_bl_shift__5
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tint)
+                tulong))
+            Stmt.Sbreak)
+          (LStmts.LScons (some 2)
+            (Stmt.Ssequence
+              (Stmt.Sset ___kprog_a64_bl_shift__5
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 16) tint)
+                  tulong))
+              Stmt.Sbreak)
+            (LStmts.LScons (some 3)
+              (Stmt.Ssequence
+                (Stmt.Sset ___kprog_a64_bl_shift__5
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 24) tint)
+                    tulong))
+                Stmt.Sbreak)
+              (LStmts.LScons (some 4)
+                (Stmt.Ssequence
+                  (Stmt.Sset ___kprog_a64_bl_shift__5
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 32) tint)
+                      tulong))
+                  Stmt.Sbreak)
+                (LStmts.LScons (some 5)
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___kprog_a64_bl_shift__5
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 40) tint) tulong))
+                    Stmt.Sbreak)
+                  (LStmts.LScons (some 6)
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___kprog_a64_bl_shift__5
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 48) tint)
+                          tulong))
+                      Stmt.Sbreak)
+                    (LStmts.LScons (some 7)
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___kprog_a64_bl_shift__5
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 56) tint)
+                            tulong))
+                        Stmt.Sbreak)
+                      (LStmts.LScons none
+                        (Stmt.Ssequence
+                          (Stmt.Sloop
+                            (Stmt.Scall none
+                              (Expr.Evar _arm64_sim_unsupported_opcode 
+                              (Ty.Tfunction [] tvoid cc_default)) [])
+                            Stmt.Sbreak)
+                          Stmt.Sbreak)
+                        LStmts.LSnil))))))))))
+    (Stmt.Ssequence
+      (Stmt.Sset _t'100
+        (Expr.Efield
+          (Expr.Ederef
+            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+            (Ty.Tstruct _kprog_arm64_addressing noattr)) _b
+          (tptr (tvolatile tuchar))))
+      (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+        [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+        [(Expr.Eaddrof
+           (Expr.Ederef
+             (Expr.Ebinop Binop.Oadd
+               (Expr.Etempvar _t'100 (tptr (tvolatile tuchar)))
+               (Expr.Ebinop Binop.Oadd
+                 (Expr.Etempvar ___a64_stw_index tulong)
+                 (Expr.Econst_int (Integers.Int.repr 5) tint) tulong)
+               (tptr (tvolatile tuchar))) (tvolatile tuchar))
+           (tptr (tvolatile tuchar))),
+         (Expr.Ecast
+           (Expr.Ebinop Binop.Oshr
+             (Expr.Etempvar ___kprog_a64_bl_value__5 tulong)
+             (Expr.Etempvar ___kprog_a64_bl_shift__5 tulong) tulong) tuchar)]))))
+
+def s_kprog_arm64_memory_write_84 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'41
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
+  (Stmt.Sset _t'41 (Expr.Ecast (Expr.Etempvar _t'41 tuint) tuint)))
+
+def s_kprog_arm64_memory_write_85 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                    (Expr.Etempvar ___a64_stw_width tuchar)
+                    (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'41
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+      (Stmt.Sset _t'41 (Expr.Ecast (Expr.Etempvar _t'41 tuint) tuint)))
+    (Stmt.Sset _t'41 (Expr.Ecast (Expr.Etempvar _t'41 tuint) tuint)))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'41
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+      (Stmt.Sset _t'41 (Expr.Ecast (Expr.Etempvar _t'41 tuint) tuint)))
+    (Stmt.Sset _t'41 (Expr.Ecast (Expr.Etempvar _t'41 tuint) tuint))))
+
+def s_kprog_arm64_memory_write_86 : Stmt :=
+(Stmt.Sset ___kprog_a64_bl_lane__6
+  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 6) tint) tulong))
+
+def s_kprog_arm64_memory_write_87 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_value__6
+    (Expr.Etempvar ___a64_stw_value tulong))
+  (Stmt.Ssequence
+    (Stmt.Sset ___kprog_a64_bl_shift__6
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+    (Stmt.Ssequence
+      (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_bl_lane__6 tulong)
+        (LStmts.LScons (some 0)
+          (Stmt.Ssequence
+            (Stmt.Sset ___kprog_a64_bl_shift__6
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+                tulong))
+            Stmt.Sbreak)
+          (LStmts.LScons (some 1)
+            (Stmt.Ssequence
+              (Stmt.Sset ___kprog_a64_bl_shift__6
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tint)
+                  tulong))
+              Stmt.Sbreak)
+            (LStmts.LScons (some 2)
+              (Stmt.Ssequence
+                (Stmt.Sset ___kprog_a64_bl_shift__6
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 16) tint)
+                    tulong))
+                Stmt.Sbreak)
+              (LStmts.LScons (some 3)
+                (Stmt.Ssequence
+                  (Stmt.Sset ___kprog_a64_bl_shift__6
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 24) tint)
+                      tulong))
+                  Stmt.Sbreak)
+                (LStmts.LScons (some 4)
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___kprog_a64_bl_shift__6
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 32) tint) tulong))
+                    Stmt.Sbreak)
+                  (LStmts.LScons (some 5)
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___kprog_a64_bl_shift__6
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 40) tint)
+                          tulong))
+                      Stmt.Sbreak)
+                    (LStmts.LScons (some 6)
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___kprog_a64_bl_shift__6
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 48) tint)
+                            tulong))
+                        Stmt.Sbreak)
+                      (LStmts.LScons (some 7)
+                        (Stmt.Ssequence
+                          (Stmt.Sset ___kprog_a64_bl_shift__6
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 56) tint)
+                              tulong))
+                          Stmt.Sbreak)
+                        (LStmts.LScons none
+                          (Stmt.Ssequence
+                            (Stmt.Sloop
+                              (Stmt.Scall none
+                                (Expr.Evar _arm64_sim_unsupported_opcode 
+                                (Ty.Tfunction [] tvoid cc_default)) [])
+                              Stmt.Sbreak)
+                            Stmt.Sbreak)
+                          LStmts.LSnil))))))))))
+      (Stmt.Ssequence
+        (Stmt.Sset _t'99
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+              (Ty.Tstruct _kprog_arm64_addressing noattr)) _b
+            (tptr (tvolatile tuchar))))
+        (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+          [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+          [(Expr.Eaddrof
+             (Expr.Ederef
+               (Expr.Ebinop Binop.Oadd
+                 (Expr.Etempvar _t'99 (tptr (tvolatile tuchar)))
+                 (Expr.Ebinop Binop.Oadd
+                   (Expr.Etempvar ___a64_stw_index tulong)
+                   (Expr.Econst_int (Integers.Int.repr 6) tint) tulong)
+                 (tptr (tvolatile tuchar))) (tvolatile tuchar))
+             (tptr (tvolatile tuchar))),
+           (Expr.Ecast
+             (Expr.Ebinop Binop.Oshr
+               (Expr.Etempvar ___kprog_a64_bl_value__6 tulong)
+               (Expr.Etempvar ___kprog_a64_bl_shift__6 tulong) tulong)
+             tuchar)])))))
+
+def s_kprog_arm64_memory_write_88 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'42
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
+  (Stmt.Sset _t'42 (Expr.Ecast (Expr.Etempvar _t'42 tuint) tuint)))
+
+def s_kprog_arm64_memory_write_89 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                    (Expr.Etempvar ___a64_stw_width tuchar)
+                    (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'42
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+      (Stmt.Sset _t'42 (Expr.Ecast (Expr.Etempvar _t'42 tuint) tuint)))
+    (Stmt.Sset _t'42 (Expr.Ecast (Expr.Etempvar _t'42 tuint) tuint)))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'42
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+      (Stmt.Sset _t'42 (Expr.Ecast (Expr.Etempvar _t'42 tuint) tuint)))
+    (Stmt.Sset _t'42 (Expr.Ecast (Expr.Etempvar _t'42 tuint) tuint))))
+
+def s_kprog_arm64_memory_write_90 : Stmt :=
+(Stmt.Sset ___kprog_a64_bl_lane__7
+  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 7) tint) tulong))
+
+def s_kprog_arm64_memory_write_91 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_value__7
+    (Expr.Etempvar ___a64_stw_value tulong))
+  (Stmt.Ssequence
+    (Stmt.Sset ___kprog_a64_bl_shift__7
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+    (Stmt.Ssequence
+      (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_bl_lane__7 tulong)
+        (LStmts.LScons (some 0)
+          (Stmt.Ssequence
+            (Stmt.Sset ___kprog_a64_bl_shift__7
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+                tulong))
+            Stmt.Sbreak)
+          (LStmts.LScons (some 1)
+            (Stmt.Ssequence
+              (Stmt.Sset ___kprog_a64_bl_shift__7
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tint)
+                  tulong))
+              Stmt.Sbreak)
+            (LStmts.LScons (some 2)
+              (Stmt.Ssequence
+                (Stmt.Sset ___kprog_a64_bl_shift__7
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 16) tint)
+                    tulong))
+                Stmt.Sbreak)
+              (LStmts.LScons (some 3)
+                (Stmt.Ssequence
+                  (Stmt.Sset ___kprog_a64_bl_shift__7
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 24) tint)
+                      tulong))
+                  Stmt.Sbreak)
+                (LStmts.LScons (some 4)
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___kprog_a64_bl_shift__7
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 32) tint) tulong))
+                    Stmt.Sbreak)
+                  (LStmts.LScons (some 5)
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___kprog_a64_bl_shift__7
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 40) tint)
+                          tulong))
+                      Stmt.Sbreak)
+                    (LStmts.LScons (some 6)
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___kprog_a64_bl_shift__7
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 48) tint)
+                            tulong))
+                        Stmt.Sbreak)
+                      (LStmts.LScons (some 7)
+                        (Stmt.Ssequence
+                          (Stmt.Sset ___kprog_a64_bl_shift__7
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 56) tint)
+                              tulong))
+                          Stmt.Sbreak)
+                        (LStmts.LScons none
+                          (Stmt.Ssequence
+                            (Stmt.Sloop
+                              (Stmt.Scall none
+                                (Expr.Evar _arm64_sim_unsupported_opcode 
+                                (Ty.Tfunction [] tvoid cc_default)) [])
+                              Stmt.Sbreak)
+                            Stmt.Sbreak)
+                          LStmts.LSnil))))))))))
+      (Stmt.Ssequence
+        (Stmt.Sset _t'98
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+              (Ty.Tstruct _kprog_arm64_addressing noattr)) _b
+            (tptr (tvolatile tuchar))))
+        (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+          [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+          [(Expr.Eaddrof
+             (Expr.Ederef
+               (Expr.Ebinop Binop.Oadd
+                 (Expr.Etempvar _t'98 (tptr (tvolatile tuchar)))
+                 (Expr.Ebinop Binop.Oadd
+                   (Expr.Etempvar ___a64_stw_index tulong)
+                   (Expr.Econst_int (Integers.Int.repr 7) tint) tulong)
+                 (tptr (tvolatile tuchar))) (tvolatile tuchar))
+             (tptr (tvolatile tuchar))),
+           (Expr.Ecast
+             (Expr.Ebinop Binop.Oshr
+               (Expr.Etempvar ___kprog_a64_bl_value__7 tulong)
+               (Expr.Etempvar ___kprog_a64_bl_shift__7 tulong) tulong)
+             tuchar)])))))
+
+def s_kprog_arm64_memory_write_92 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                          (Expr.Etempvar ___a64_stw_width tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 8) tuint) tint)
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                            (Expr.Ebinop Binop.Oand
+                              (Expr.Ecast
+                                (Expr.Etempvar ___a64_stw_index tulong)
+                                tuint)
+                              (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                              tuint)
+                            (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                            tint)
+          (Stmt.Ssequence
+            (Stmt.Sset _t'26
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tint) tint))
+            (Stmt.Sset _t'26 (Expr.Ecast (Expr.Etempvar _t'26 tint) tbool)))
+          (Stmt.Ssequence
+            (Stmt.Sset _t'26
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tint))
+            (Stmt.Sset _t'26 (Expr.Ecast (Expr.Etempvar _t'26 tint) tbool))))
+        (Stmt.Sset _t'26 (Expr.Econst_int (Integers.Int.repr 0) tint)))
+      (Stmt.Sifthenelse (Expr.Etempvar _t'26 tint)
+        (Stmt.Sset _t'27
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuint))
+        (Stmt.Ssequence
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                              (Expr.Ebinop Binop.Oand
+                                (Expr.Ecast
+                                  (Expr.Etempvar ___a64_stw_index tulong)
+                                  tuint)
+                                (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                                tuint)
+                              (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                              tint)
+            (Stmt.Sset _t'28
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tint) tint))
+            (Stmt.Sset _t'28
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tint)))
+          (Stmt.Sifthenelse (Expr.Etempvar _t'28 tint)
+            (Stmt.Ssequence
+              (Stmt.Sset _t'27
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                  tuint))
+              (Stmt.Sset _t'27
+                (Expr.Ecast (Expr.Etempvar _t'27 tuint) tuint)))
+            (Stmt.Ssequence
+              (Stmt.Sset _t'27
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                  tuint))
+              (Stmt.Sset _t'27
+                (Expr.Ecast (Expr.Etempvar _t'27 tuint) tuint)))))))
+    (Stmt.Sset ___a64_stw_action
+      (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'27 tuint) tuchar) tuchar)))
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                      (Expr.Etempvar ___a64_stw_action tuchar)
+                      (Expr.Econst_int (Integers.Int.repr 0) tuint) tint)
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sset _t'120
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+              (Ty.Tstruct _kprog_arm64_addressing noattr)) _q
+            (tptr (tvolatile tulong))))
+        (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint64)
+          [(tptr (tvolatile tulong)), (tvolatile tulong)]
+          [(Expr.Eaddrof
+             (Expr.Ederef
+               (Expr.Ebinop Binop.Oadd
+                 (Expr.Etempvar _t'120 (tptr (tvolatile tulong)))
+                 (Expr.Ebinop Binop.Oshr
+                   (Expr.Ecast (Expr.Etempvar ___a64_stw_index tulong)
+                     tulong) (Expr.Econst_int (Integers.Int.repr 3) tint)
+                   tulong) (tptr (tvolatile tulong))) (tvolatile tulong))
+             (tptr (tvolatile tulong))),
+           (Expr.Etempvar ___a64_stw_value tulong)]))
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                              (Expr.Etempvar _tag tuchar)
+                              (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                              tint)
+            (Stmt.Sset _t'31 (Expr.Econst_int (Integers.Int.repr 1) tint))
+            (Stmt.Sset _t'31
+              (Expr.Ecast
+                (Expr.Ebinop Binop.Oeq (Expr.Etempvar _tag tuchar)
+                  (Expr.Econst_int (Integers.Int.repr 10) tuint) tint) tbool)))
+          (Stmt.Sifthenelse (Expr.Etempvar _t'31 tint)
+            (Stmt.Ssequence
+              (Stmt.Sloop
+                (Stmt.Ssequence
+                  (Stmt.Sset ___a64_unmat_value
+                    (Expr.Etempvar ___a64_stw_value tulong))
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___a64_unmat_tag
+                      (Expr.Ecast (Expr.Etempvar _tag tuchar) tuchar))
+                    (Stmt.Ssequence
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                          (Expr.Etempvar ___a64_unmat_tag tuchar)
+                                          (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                          tint)
+                        (Stmt.Ssequence
+                          (Stmt.Sloop
+                            (Stmt.Ssequence
+                              s_kprog_arm64_memory_write_43
+                              s_kprog_arm64_memory_write_44)
+                            Stmt.Sbreak)
+                          (Stmt.Sset ___a64_unmat_value
+                            (Expr.Ebinop Binop.Osub
+                              (Expr.Etempvar ___a64_unmat_value tulong)
+                              (Expr.Etempvar ___a64_unmat_base tulong)
+                              tulong)))
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                            (Expr.Etempvar ___a64_unmat_tag tuchar)
+                                            (Expr.Econst_int (Integers.Int.repr 10) tuint)
+                                            tint)
+                          (Stmt.Ssequence
+                            (Stmt.Sloop
+                              s_kprog_arm64_memory_write_45
+                              s_kprog_arm64_memory_write_46)
+                            s_kprog_arm64_memory_write_47)
+                          Stmt.Sskip))
+                      (Stmt.Sset ___a64_stw_payload
+                        (Expr.Etempvar ___a64_unmat_value tulong)))))
+                Stmt.Sbreak)
+              (Stmt.Sloop
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'109
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                        (Ty.Tstruct _kprog_arm64_addressing noattr)) _payload
+                      (tptr tulong)))
+                  (Stmt.Sassign
+                    (Expr.Ederef
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Etempvar _t'109 (tptr tulong))
+                        (Expr.Ebinop Binop.Oshr
+                          (Expr.Ecast (Expr.Etempvar ___a64_stw_index tulong)
+                            tulong)
+                          (Expr.Econst_int (Integers.Int.repr 3) tint)
+                          tulong) (tptr tulong)) tulong)
+                    (Expr.Etempvar ___a64_stw_payload tulong)))
+                Stmt.Sbreak))
+            Stmt.Sskip))
+        (Stmt.Sloop
+          (Stmt.Ssequence
+            (Stmt.Sset ___ti
+              (Expr.Ebinop Binop.Oshr
+                (Expr.Ecast (Expr.Etempvar ___a64_stw_index tulong) tulong)
+                (Expr.Econst_int (Integers.Int.repr 3) tint) tulong))
+            (Stmt.Ssequence
+              (Stmt.Sset ___ts
+                (Expr.Ecast
+                  (Expr.Ebinop Binop.Omul
+                    (Expr.Ebinop Binop.Oand (Expr.Etempvar ___ti tulong)
+                      (Expr.Econst_int (Integers.Int.repr 7) tuint) tulong)
+                    (Expr.Econst_int (Integers.Int.repr 8) tuint) tulong)
+                  tuint))
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'108
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                        (Ty.Tstruct _kprog_arm64_addressing noattr))
+                      _stack_tags (tptr tuchar)))
+                  (Stmt.Sset ___tp
+                    (Expr.Ecast
+                      (Expr.Ecast
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Etempvar _t'108 (tptr tuchar))
+                          (Expr.Ebinop Binop.Oand
+                            (Expr.Ecast (Expr.Etempvar ___ti tulong) tulong)
+                            (Expr.Eunop Unop.Onotint
+                              (Expr.Econst_long (Integers.Int64.repr 7) tulong)
+                              tulong) tulong) (tptr tuchar)) (tptr tvoid))
+                      (tptr (tvolatile tulong)))))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sbuiltin (some _t'32)
+                      (ExtFun.EF_vload Chunk.Mint64)
+                      [(tptr (tvolatile tulong))]
+                      [(Expr.Eaddrof
+                         (Expr.Ederef
+                           (Expr.Etempvar ___tp (tptr (tvolatile tulong)))
+                           (tvolatile tulong)) (tptr (tvolatile tulong)))])
+                    (Stmt.Sset ___tv
+                      (Expr.Etempvar _t'32 (tvolatile tulong))))
+                  (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint64)
+                    [(tptr (tvolatile tulong)), (tvolatile tulong)]
+                    [(Expr.Eaddrof
+                       (Expr.Ederef
+                         (Expr.Etempvar ___tp (tptr (tvolatile tulong)))
+                         (tvolatile tulong)) (tptr (tvolatile tulong))),
+                     (Expr.Ebinop Binop.Oor
+                       (Expr.Ebinop Binop.Oand (Expr.Etempvar ___tv tulong)
+                         (Expr.Eunop Unop.Onotint
+                           (Expr.Ebinop Binop.Oshl
+                             (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+                             (Expr.Etempvar ___ts tuint) tulong) tulong)
+                         tulong)
+                       (Expr.Ebinop Binop.Oshl
+                         (Expr.Ecast
+                           (Expr.Ecast (Expr.Etempvar _tag tuchar) tuchar)
+                           tulong) (Expr.Etempvar ___ts tuint) tulong)
+                       tulong)])))))
+          Stmt.Sbreak)))
+    (Stmt.Ssequence
+      (Stmt.Sloop
+        (Stmt.Ssequence
+          (Stmt.Sset ___ti__1
+            (Expr.Ebinop Binop.Oshr
+              (Expr.Ecast (Expr.Etempvar ___a64_stw_index tulong) tulong)
+              (Expr.Econst_int (Integers.Int.repr 3) tint) tulong))
+          (Stmt.Ssequence
+            (Stmt.Sset ___ts__1
+              (Expr.Ecast
+                (Expr.Ebinop Binop.Omul
+                  (Expr.Ebinop Binop.Oand (Expr.Etempvar ___ti__1 tulong)
+                    (Expr.Econst_int (Integers.Int.repr 7) tuint) tulong)
+                  (Expr.Econst_int (Integers.Int.repr 8) tuint) tulong)
+                tuint))
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sset _t'107
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                      (Ty.Tstruct _kprog_arm64_addressing noattr))
+                    _stack_tags (tptr tuchar)))
+                (Stmt.Sset ___tp__1
+                  (Expr.Ecast
+                    (Expr.Ecast
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Etempvar _t'107 (tptr tuchar))
+                        (Expr.Ebinop Binop.Oand
+                          (Expr.Ecast (Expr.Etempvar ___ti__1 tulong) tulong)
+                          (Expr.Eunop Unop.Onotint
+                            (Expr.Econst_long (Integers.Int64.repr 7) tulong)
+                            tulong) tulong) (tptr tuchar)) (tptr tvoid))
+                    (tptr (tvolatile tulong)))))
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sbuiltin (some _t'33) (ExtFun.EF_vload Chunk.Mint64)
+                    [(tptr (tvolatile tulong))]
+                    [(Expr.Eaddrof
+                       (Expr.Ederef
+                         (Expr.Etempvar ___tp__1 (tptr (tvolatile tulong)))
+                         (tvolatile tulong)) (tptr (tvolatile tulong)))])
+                  (Stmt.Sset ___tv__1
+                    (Expr.Etempvar _t'33 (tvolatile tulong))))
+                (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint64)
+                  [(tptr (tvolatile tulong)), (tvolatile tulong)]
+                  [(Expr.Eaddrof
+                     (Expr.Ederef
+                       (Expr.Etempvar ___tp__1 (tptr (tvolatile tulong)))
+                       (tvolatile tulong)) (tptr (tvolatile tulong))),
+                   (Expr.Ebinop Binop.Oor
+                     (Expr.Ebinop Binop.Oand (Expr.Etempvar ___tv__1 tulong)
+                       (Expr.Eunop Unop.Onotint
+                         (Expr.Ebinop Binop.Oshl
+                           (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+                           (Expr.Etempvar ___ts__1 tuint) tulong) tulong)
+                       tulong)
+                     (Expr.Ebinop Binop.Oshl
+                       (Expr.Ecast
+                         (Expr.Ecast
+                           (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                           tuchar) tulong) (Expr.Etempvar ___ts__1 tuint)
+                       tulong) tulong)])))))
+        Stmt.Sbreak)
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                              (Expr.Etempvar ___a64_stw_width tuchar)
+                              (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                              tint)
+            (Stmt.Sset _t'34
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                tuint))
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                (Expr.Etempvar ___a64_stw_width tuchar)
+                                (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                tint)
+              (Stmt.Ssequence
+                (Stmt.Sset _t'34
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                    tuint))
+                (Stmt.Sset _t'34
+                  (Expr.Ecast (Expr.Etempvar _t'34 tuint) tuint)))
+              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                  (Expr.Etempvar ___a64_stw_width tuchar)
+                                  (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                  tint)
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'34
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 4) tuint) tuint))
+                    (Stmt.Sset _t'34
+                      (Expr.Ecast (Expr.Etempvar _t'34 tuint) tuint)))
+                  (Stmt.Sset _t'34
+                    (Expr.Ecast (Expr.Etempvar _t'34 tuint) tuint)))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'34
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 8) tuint) tuint))
+                    (Stmt.Sset _t'34
+                      (Expr.Ecast (Expr.Etempvar _t'34 tuint) tuint)))
+                  (Stmt.Sset _t'34
+                    (Expr.Ecast (Expr.Etempvar _t'34 tuint) tuint))))))
+          (Stmt.Sset ___a64_stw_last
+            (Expr.Ebinop Binop.Osub
+              (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___a64_stw_index tulong)
+                (Expr.Etempvar _t'34 tuint) tulong)
+              (Expr.Econst_int (Integers.Int.repr 1) tuint) tulong)))
+        (Stmt.Ssequence
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.One
+                              (Expr.Ebinop Binop.Oshr
+                                (Expr.Ecast
+                                  (Expr.Etempvar ___a64_stw_last tulong)
+                                  tulong)
+                                (Expr.Econst_int (Integers.Int.repr 3) tint)
+                                tulong)
+                              (Expr.Ebinop Binop.Oshr
+                                (Expr.Ecast
+                                  (Expr.Etempvar ___a64_stw_index tulong)
+                                  tulong)
+                                (Expr.Econst_int (Integers.Int.repr 3) tint)
+                                tulong) tint)
+            (Stmt.Sloop
+              (Stmt.Ssequence
+                (Stmt.Sset ___ti__2
+                  (Expr.Ebinop Binop.Oshr
+                    (Expr.Ecast (Expr.Etempvar ___a64_stw_last tulong)
+                      tulong) (Expr.Econst_int (Integers.Int.repr 3) tint)
+                    tulong))
+                (Stmt.Ssequence
+                  (Stmt.Sset ___ts__2
+                    (Expr.Ecast
+                      (Expr.Ebinop Binop.Omul
+                        (Expr.Ebinop Binop.Oand
+                          (Expr.Etempvar ___ti__2 tulong)
+                          (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                          tulong)
+                        (Expr.Econst_int (Integers.Int.repr 8) tuint) tulong)
+                      tuint))
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'106
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                            (Ty.Tstruct _kprog_arm64_addressing noattr))
+                          _stack_tags (tptr tuchar)))
+                      (Stmt.Sset ___tp__2
+                        (Expr.Ecast
+                          (Expr.Ecast
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Etempvar _t'106 (tptr tuchar))
+                              (Expr.Ebinop Binop.Oand
+                                (Expr.Ecast (Expr.Etempvar ___ti__2 tulong)
+                                  tulong)
+                                (Expr.Eunop Unop.Onotint
+                                  (Expr.Econst_long (Integers.Int64.repr 7) tulong)
+                                  tulong) tulong) (tptr tuchar))
+                            (tptr tvoid)) (tptr (tvolatile tulong)))))
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sbuiltin (some _t'35)
+                          (ExtFun.EF_vload Chunk.Mint64)
+                          [(tptr (tvolatile tulong))]
+                          [(Expr.Eaddrof
+                             (Expr.Ederef
+                               (Expr.Etempvar ___tp__2 (tptr (tvolatile tulong)))
+                               (tvolatile tulong)) (tptr (tvolatile tulong)))])
+                        (Stmt.Sset ___tv__2
+                          (Expr.Etempvar _t'35 (tvolatile tulong))))
+                      (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint64)
+                        [(tptr (tvolatile tulong)), (tvolatile tulong)]
+                        [(Expr.Eaddrof
+                           (Expr.Ederef
+                             (Expr.Etempvar ___tp__2 (tptr (tvolatile tulong)))
+                             (tvolatile tulong)) (tptr (tvolatile tulong))),
+                         (Expr.Ebinop Binop.Oor
+                           (Expr.Ebinop Binop.Oand
+                             (Expr.Etempvar ___tv__2 tulong)
+                             (Expr.Eunop Unop.Onotint
+                               (Expr.Ebinop Binop.Oshl
+                                 (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+                                 (Expr.Etempvar ___ts__2 tuint) tulong)
+                               tulong) tulong)
+                           (Expr.Ebinop Binop.Oshl
+                             (Expr.Ecast
+                               (Expr.Ecast
+                                 (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                                 tuchar) tulong)
+                             (Expr.Etempvar ___ts__2 tuint) tulong) tulong)])))))
+              Stmt.Sbreak)
+            Stmt.Sskip)
+          (Stmt.Ssequence
+            (Stmt.Sloop
+              (Stmt.Ssequence
+                (Stmt.Sset ___kprog_a64_bl_lane
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+                    tulong))
+                (Stmt.Ssequence
+                  (Stmt.Sset ___kprog_a64_bl_value
+                    (Expr.Etempvar ___a64_stw_value tulong))
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___kprog_a64_bl_shift
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+                    (Stmt.Ssequence
+                      (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_bl_lane tulong)
+                        (LStmts.LScons (some 0)
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___kprog_a64_bl_shift
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                tulong))
+                            Stmt.Sbreak)
+                          (LStmts.LScons (some 1)
+                            (Stmt.Ssequence
+                              (Stmt.Sset ___kprog_a64_bl_shift
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 8) tint)
+                                  tulong))
+                              Stmt.Sbreak)
+                            (LStmts.LScons (some 2)
+                              (Stmt.Ssequence
+                                (Stmt.Sset ___kprog_a64_bl_shift
+                                  (Expr.Ecast
+                                    (Expr.Econst_int (Integers.Int.repr 16) tint)
+                                    tulong))
+                                Stmt.Sbreak)
+                              (LStmts.LScons (some 3)
+                                (Stmt.Ssequence
+                                  (Stmt.Sset ___kprog_a64_bl_shift
+                                    (Expr.Ecast
+                                      (Expr.Econst_int (Integers.Int.repr 24) tint)
+                                      tulong))
+                                  Stmt.Sbreak)
+                                (LStmts.LScons (some 4)
+                                  (Stmt.Ssequence
+                                    (Stmt.Sset ___kprog_a64_bl_shift
+                                      (Expr.Ecast
+                                        (Expr.Econst_int (Integers.Int.repr 32) tint)
+                                        tulong))
+                                    Stmt.Sbreak)
+                                  (LStmts.LScons (some 5)
+                                    (Stmt.Ssequence
+                                      (Stmt.Sset ___kprog_a64_bl_shift
+                                        (Expr.Ecast
+                                          (Expr.Econst_int (Integers.Int.repr 40) tint)
+                                          tulong))
+                                      Stmt.Sbreak)
+                                    (LStmts.LScons (some 6)
+                                      (Stmt.Ssequence
+                                        (Stmt.Sset ___kprog_a64_bl_shift
+                                          (Expr.Ecast
+                                            (Expr.Econst_int (Integers.Int.repr 48) tint)
+                                            tulong))
+                                        Stmt.Sbreak)
+                                      (LStmts.LScons (some 7)
+                                        (Stmt.Ssequence
+                                          (Stmt.Sset ___kprog_a64_bl_shift
+                                            (Expr.Ecast
+                                              (Expr.Econst_int (Integers.Int.repr 56) tint)
+                                              tulong))
+                                          Stmt.Sbreak)
+                                        (LStmts.LScons none
+                                          (Stmt.Ssequence
+                                            (Stmt.Sloop
+                                              (Stmt.Scall none
+                                                (Expr.Evar _arm64_sim_unsupported_opcode 
+                                                (Ty.Tfunction [] tvoid
+                                                  cc_default)) [])
+                                              Stmt.Sbreak)
+                                            Stmt.Sbreak)
+                                          LStmts.LSnil))))))))))
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'105
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                              (Ty.Tstruct _kprog_arm64_addressing noattr)) _b
+                            (tptr (tvolatile tuchar))))
+                        (Stmt.Sbuiltin none
+                          (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                          [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                          [(Expr.Eaddrof
+                             (Expr.Ederef
+                               (Expr.Ebinop Binop.Oadd
+                                 (Expr.Etempvar _t'105 (tptr (tvolatile tuchar)))
+                                 (Expr.Etempvar ___a64_stw_index tulong)
+                                 (tptr (tvolatile tuchar)))
+                               (tvolatile tuchar)) (tptr (tvolatile tuchar))),
+                           (Expr.Ecast
+                             (Expr.Ebinop Binop.Oshr
+                               (Expr.Etempvar ___kprog_a64_bl_value tulong)
+                               (Expr.Etempvar ___kprog_a64_bl_shift tulong)
+                               tulong) tuchar)]))))))
+              Stmt.Sbreak)
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                    (Expr.Etempvar ___a64_stw_width tuchar)
+                                    (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                    tint)
+                  (Stmt.Sset _t'36
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                      tuint))
+                  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                      (Expr.Etempvar ___a64_stw_width tuchar)
+                                      (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                      tint)
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'36
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                          tuint))
+                      (Stmt.Sset _t'36
+                        (Expr.Ecast (Expr.Etempvar _t'36 tuint) tuint)))
+                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                        (Expr.Etempvar ___a64_stw_width tuchar)
+                                        (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                        tint)
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          s_kprog_arm64_memory_write_48
+                          (Stmt.Sset _t'36
+                            (Expr.Ecast (Expr.Etempvar _t'36 tuint) tuint)))
+                        (Stmt.Sset _t'36
+                          (Expr.Ecast (Expr.Etempvar _t'36 tuint) tuint)))
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          s_kprog_arm64_memory_write_49
+                          (Stmt.Sset _t'36
+                            (Expr.Ecast (Expr.Etempvar _t'36 tuint) tuint)))
+                        (Stmt.Sset _t'36
+                          (Expr.Ecast (Expr.Etempvar _t'36 tuint) tuint))))))
+                (Stmt.Sifthenelse (Expr.Ecast
+                                    (Expr.Ebinop Binop.Oand
+                                      (Expr.Ebinop Binop.Oshr
+                                        (Expr.Etempvar _t'36 tuint)
+                                        (Expr.Econst_int (Integers.Int.repr 1) tint)
+                                        tuint)
+                                      (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                      tuint) tuchar)
+                  (Stmt.Sloop
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___kprog_a64_bl_lane__1
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 1) tint)
+                          tulong))
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___kprog_a64_bl_value__1
+                          (Expr.Etempvar ___a64_stw_value tulong))
+                        (Stmt.Ssequence
+                          (Stmt.Sset ___kprog_a64_bl_shift__1
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 0) tint)
+                              tulong))
+                          (Stmt.Ssequence
+                            (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_bl_lane__1 tulong)
+                              (LStmts.LScons (some 0)
+                                s_kprog_arm64_memory_write_50
+                                (LStmts.LScons (some 1)
+                                  s_kprog_arm64_memory_write_51
+                                  (LStmts.LScons (some 2)
+                                    s_kprog_arm64_memory_write_52
+                                    (LStmts.LScons (some 3)
+                                      s_kprog_arm64_memory_write_53
+                                      (LStmts.LScons (some 4)
+                                        s_kprog_arm64_memory_write_54
+                                        (LStmts.LScons (some 5)
+                                          s_kprog_arm64_memory_write_55
+                                          (LStmts.LScons (some 6)
+                                            s_kprog_arm64_memory_write_56
+                                            (LStmts.LScons (some 7)
+                                              s_kprog_arm64_memory_write_57
+                                              (LStmts.LScons none
+                                                s_kprog_arm64_memory_write_58
+                                                LStmts.LSnil))))))))))
+                            (Stmt.Ssequence
+                              (Stmt.Sset _t'104
+                                (Expr.Efield
+                                  (Expr.Ederef
+                                    (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                    (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                  _b (tptr (tvolatile tuchar))))
+                              (Stmt.Sbuiltin none
+                                (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                                [(tptr (tvolatile tuchar)),
+                                 (tvolatile tuchar)]
+                                [(Expr.Eaddrof
+                                   (Expr.Ederef
+                                     (Expr.Ebinop Binop.Oadd
+                                       (Expr.Etempvar _t'104 (tptr (tvolatile tuchar)))
+                                       (Expr.Ebinop Binop.Oadd
+                                         (Expr.Etempvar ___a64_stw_index tulong)
+                                         (Expr.Econst_int (Integers.Int.repr 1) tint)
+                                         tulong) (tptr (tvolatile tuchar)))
+                                     (tvolatile tuchar))
+                                   (tptr (tvolatile tuchar))),
+                                 (Expr.Ecast
+                                   (Expr.Ebinop Binop.Oshr
+                                     (Expr.Etempvar ___kprog_a64_bl_value__1 tulong)
+                                     (Expr.Etempvar ___kprog_a64_bl_shift__1 tulong)
+                                     tulong) tuchar)]))))))
+                    Stmt.Sbreak)
+                  Stmt.Sskip))
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                      (Expr.Etempvar ___a64_stw_width tuchar)
+                                      (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                      tint)
+                    (Stmt.Sset _t'37
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
+                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                        (Expr.Etempvar ___a64_stw_width tuchar)
+                                        (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                        tint)
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'37
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                            tuint))
+                        (Stmt.Sset _t'37
+                          (Expr.Ecast (Expr.Etempvar _t'37 tuint) tuint)))
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                          (Expr.Etempvar ___a64_stw_width tuchar)
+                                          (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                          tint)
+                        (Stmt.Ssequence
+                          s_kprog_arm64_memory_write_59
+                          (Stmt.Sset _t'37
+                            (Expr.Ecast (Expr.Etempvar _t'37 tuint) tuint)))
+                        (Stmt.Ssequence
+                          s_kprog_arm64_memory_write_60
+                          (Stmt.Sset _t'37
+                            (Expr.Ecast (Expr.Etempvar _t'37 tuint) tuint))))))
+                  (Stmt.Sifthenelse (Expr.Ecast
+                                      (Expr.Ebinop Binop.Oand
+                                        (Expr.Ebinop Binop.Oshr
+                                          (Expr.Etempvar _t'37 tuint)
+                                          (Expr.Econst_int (Integers.Int.repr 2) tint)
+                                          tuint)
+                                        (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                        tuint) tuchar)
+                    (Stmt.Sloop
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___kprog_a64_bl_lane__2
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 2) tint)
+                            tulong))
+                        (Stmt.Ssequence
+                          (Stmt.Sset ___kprog_a64_bl_value__2
+                            (Expr.Etempvar ___a64_stw_value tulong))
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___kprog_a64_bl_shift__2
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                tulong))
+                            (Stmt.Ssequence
+                              (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_bl_lane__2 tulong)
+                                (LStmts.LScons (some 0)
+                                  s_kprog_arm64_memory_write_61
+                                  (LStmts.LScons (some 1)
+                                    s_kprog_arm64_memory_write_62
+                                    (LStmts.LScons (some 2)
+                                      s_kprog_arm64_memory_write_63
+                                      (LStmts.LScons (some 3)
+                                        s_kprog_arm64_memory_write_64
+                                        (LStmts.LScons (some 4)
+                                          s_kprog_arm64_memory_write_65
+                                          (LStmts.LScons (some 5)
+                                            s_kprog_arm64_memory_write_66
+                                            (LStmts.LScons (some 6)
+                                              s_kprog_arm64_memory_write_67
+                                              (LStmts.LScons (some 7)
+                                                s_kprog_arm64_memory_write_68
+                                                (LStmts.LScons none
+                                                  s_kprog_arm64_memory_write_69
+                                                  LStmts.LSnil))))))))))
+                              s_kprog_arm64_memory_write_70))))
+                      Stmt.Sbreak)
+                    Stmt.Sskip))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                        (Expr.Etempvar ___a64_stw_width tuchar)
+                                        (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                        tint)
+                      (Stmt.Sset _t'38
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                          tuint))
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                          (Expr.Etempvar ___a64_stw_width tuchar)
+                                          (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                          tint)
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'38
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                              tuint))
+                          (Stmt.Sset _t'38
+                            (Expr.Ecast (Expr.Etempvar _t'38 tuint) tuint)))
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                            (Expr.Etempvar ___a64_stw_width tuchar)
+                                            (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                            tint)
+                          s_kprog_arm64_memory_write_71
+                          s_kprog_arm64_memory_write_72)))
+                    (Stmt.Sifthenelse (Expr.Ecast
+                                        (Expr.Ebinop Binop.Oand
+                                          (Expr.Ebinop Binop.Oshr
+                                            (Expr.Etempvar _t'38 tuint)
+                                            (Expr.Econst_int (Integers.Int.repr 3) tint)
+                                            tuint)
+                                          (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                          tuint) tuchar)
+                      (Stmt.Sloop
+                        (Stmt.Ssequence
+                          (Stmt.Sset ___kprog_a64_bl_lane__3
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 3) tint)
+                              tulong))
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___kprog_a64_bl_value__3
+                              (Expr.Etempvar ___a64_stw_value tulong))
+                            (Stmt.Ssequence
+                              (Stmt.Sset ___kprog_a64_bl_shift__3
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                  tulong))
+                              (Stmt.Ssequence
+                                s_kprog_arm64_memory_write_73
+                                s_kprog_arm64_memory_write_74))))
+                        Stmt.Sbreak)
+                      Stmt.Sskip))
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                          (Expr.Etempvar ___a64_stw_width tuchar)
+                                          (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                          tint)
+                        (Stmt.Sset _t'39
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                            tuint))
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                            (Expr.Etempvar ___a64_stw_width tuchar)
+                                            (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                            tint)
+                          (Stmt.Ssequence
+                            s_kprog_arm64_memory_write_75
+                            (Stmt.Sset _t'39
+                              (Expr.Ecast (Expr.Etempvar _t'39 tuint) tuint)))
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                              (Expr.Etempvar ___a64_stw_width tuchar)
+                                              (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                              tint)
+                            s_kprog_arm64_memory_write_76
+                            s_kprog_arm64_memory_write_77)))
+                      (Stmt.Sifthenelse (Expr.Ecast
+                                          (Expr.Ebinop Binop.Oand
+                                            (Expr.Ebinop Binop.Oshr
+                                              (Expr.Etempvar _t'39 tuint)
+                                              (Expr.Econst_int (Integers.Int.repr 4) tint)
+                                              tuint)
+                                            (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                            tuint) tuchar)
+                        (Stmt.Sloop
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___kprog_a64_bl_lane__4
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 4) tint)
+                                tulong))
+                            (Stmt.Ssequence
+                              (Stmt.Sset ___kprog_a64_bl_value__4
+                                (Expr.Etempvar ___a64_stw_value tulong))
+                              (Stmt.Ssequence
+                                s_kprog_arm64_memory_write_78
+                                s_kprog_arm64_memory_write_79)))
+                          Stmt.Sbreak)
+                        Stmt.Sskip))
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                            (Expr.Etempvar ___a64_stw_width tuchar)
+                                            (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                            tint)
+                          (Stmt.Sset _t'40
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                              tuint))
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                              (Expr.Etempvar ___a64_stw_width tuchar)
+                                              (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                              tint)
+                            s_kprog_arm64_memory_write_80
+                            s_kprog_arm64_memory_write_81))
+                        (Stmt.Sifthenelse (Expr.Ecast
+                                            (Expr.Ebinop Binop.Oand
+                                              (Expr.Ebinop Binop.Oshr
+                                                (Expr.Etempvar _t'40 tuint)
+                                                (Expr.Econst_int (Integers.Int.repr 5) tint)
+                                                tuint)
+                                              (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                              tuint) tuchar)
+                          (Stmt.Sloop
+                            (Stmt.Ssequence
+                              (Stmt.Sset ___kprog_a64_bl_lane__5
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 5) tint)
+                                  tulong))
+                              (Stmt.Ssequence
+                                s_kprog_arm64_memory_write_82
+                                s_kprog_arm64_memory_write_83))
+                            Stmt.Sbreak)
+                          Stmt.Sskip))
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                              (Expr.Etempvar ___a64_stw_width tuchar)
+                                              (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                              tint)
+                            (Stmt.Sset _t'41
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                tuint))
+                            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                (Expr.Etempvar ___a64_stw_width tuchar)
+                                                (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                                tint)
+                              s_kprog_arm64_memory_write_84
+                              s_kprog_arm64_memory_write_85))
+                          (Stmt.Sifthenelse (Expr.Ecast
+                                              (Expr.Ebinop Binop.Oand
+                                                (Expr.Ebinop Binop.Oshr
+                                                  (Expr.Etempvar _t'41 tuint)
+                                                  (Expr.Econst_int (Integers.Int.repr 6) tint)
+                                                  tuint)
+                                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                                tuint) tuchar)
+                            (Stmt.Sloop
+                              (Stmt.Ssequence
+                                s_kprog_arm64_memory_write_86
+                                s_kprog_arm64_memory_write_87)
+                              Stmt.Sbreak)
+                            Stmt.Sskip))
+                        (Stmt.Ssequence
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                              (Expr.Etempvar ___a64_stw_width tuchar)
+                                              (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                              tint)
+                            (Stmt.Sset _t'42
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                tuint))
+                            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                (Expr.Etempvar ___a64_stw_width tuchar)
+                                                (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                                tint)
+                              s_kprog_arm64_memory_write_88
+                              s_kprog_arm64_memory_write_89))
+                          (Stmt.Sifthenelse (Expr.Ecast
+                                              (Expr.Ebinop Binop.Oand
+                                                (Expr.Ebinop Binop.Oshr
+                                                  (Expr.Etempvar _t'42 tuint)
+                                                  (Expr.Econst_int (Integers.Int.repr 7) tint)
+                                                  tuint)
+                                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                                tuint) tuchar)
+                            (Stmt.Sloop
+                              (Stmt.Ssequence
+                                s_kprog_arm64_memory_write_90
+                                s_kprog_arm64_memory_write_91)
+                              Stmt.Sbreak)
+                            Stmt.Sskip))))))))))))))
+
+def s_kprog_arm64_memory_write_93 : Stmt :=
+(Stmt.Sset ___a64_loss_i (Expr.Econst_int (Integers.Int.repr 0) tint))
+
+def s_kprog_arm64_memory_write_94 : Stmt :=
+(Stmt.Sset _t'44
+  (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 4294967295) tulong)
+    tulong))
+
+def s_kprog_arm64_memory_write_95 : Stmt :=
+(Stmt.Sset _t'44
+  (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr (-1)) tulong) tulong))
+
+def s_kprog_arm64_memory_write_96 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___a64_unmat_value__1
+    (Expr.Etempvar ___a64_stw_value__1 tulong))
+  (Stmt.Ssequence
+    (Stmt.Sset ___a64_unmat_tag__1
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar))
+    (Stmt.Ssequence
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                          (Expr.Etempvar ___a64_unmat_tag__1 tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+        (Stmt.Ssequence
+          (Stmt.Sloop
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sset _t'90
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                      (Ty.Tstruct _kprog_arm64_addressing noattr))
+                    _coordinates
+                    (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'91
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _t'90 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                        (Ty.Tstruct _kprog_arm64_coordinates noattr))
+                      _sp_valid tuchar))
+                  (Stmt.Sifthenelse (Expr.Eunop Unop.Onotbool
+                                      (Expr.Etempvar _t'91 tuchar) tint)
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Scall (some _t'48)
+                          (Expr.Evar _native_lab_entry_input (Ty.Tfunction
+                                                               [tuint] tulong
+                                                               cc_default))
+                          [(Expr.Econst_int (Integers.Int.repr 1) tint)])
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'93
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                (Ty.Tstruct _kprog_arm64_addressing noattr))
+                              _coordinates
+                              (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                          (Stmt.Sassign
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Etempvar _t'93 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                                (Ty.Tstruct _kprog_arm64_coordinates noattr))
+                              _sp_base tulong) (Expr.Etempvar _t'48 tulong))))
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'92
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                              (Ty.Tstruct _kprog_arm64_addressing noattr))
+                            _coordinates
+                            (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                        (Stmt.Sassign
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Etempvar _t'92 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                              (Ty.Tstruct _kprog_arm64_coordinates noattr))
+                            _sp_valid tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 1) tint))))
+                    Stmt.Sskip)))
+              (Stmt.Ssequence
+                (Stmt.Sset _t'89
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                      (Ty.Tstruct _kprog_arm64_addressing noattr))
+                    _coordinates
+                    (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                (Stmt.Sset ___a64_unmat_base__2
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _t'89 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                      (Ty.Tstruct _kprog_arm64_coordinates noattr)) _sp_base
+                    tulong))))
+            Stmt.Sbreak)
+          (Stmt.Sset ___a64_unmat_value__1
+            (Expr.Ebinop Binop.Osub
+              (Expr.Etempvar ___a64_unmat_value__1 tulong)
+              (Expr.Etempvar ___a64_unmat_base__2 tulong) tulong)))
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                            (Expr.Etempvar ___a64_unmat_tag__1 tuchar)
+                            (Expr.Econst_int (Integers.Int.repr 10) tuint)
+                            tint)
+          (Stmt.Ssequence
+            (Stmt.Sloop
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'85
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                        (Ty.Tstruct _kprog_arm64_addressing noattr))
+                      _coordinates
+                      (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'86
+                      (Expr.Efield
+                        (Expr.Ederef
+                          (Expr.Etempvar _t'85 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                          (Ty.Tstruct _kprog_arm64_coordinates noattr))
+                        _return_valid tuchar))
+                    (Stmt.Sifthenelse (Expr.Eunop Unop.Onotbool
+                                        (Expr.Etempvar _t'86 tuchar) tint)
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Scall (some _t'49)
+                            (Expr.Evar _native_lab_entry_input (Ty.Tfunction
+                                                                 [tuint]
+                                                                 tulong
+                                                                 cc_default))
+                            [(Expr.Econst_int (Integers.Int.repr 3) tint)])
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'88
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                  (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                _coordinates
+                                (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                            (Stmt.Sassign
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Etempvar _t'88 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                                  (Ty.Tstruct _kprog_arm64_coordinates noattr))
+                                _return_base tulong)
+                              (Expr.Etempvar _t'49 tulong))))
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'87
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                (Ty.Tstruct _kprog_arm64_addressing noattr))
+                              _coordinates
+                              (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                          (Stmt.Sassign
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Etempvar _t'87 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                                (Ty.Tstruct _kprog_arm64_coordinates noattr))
+                              _return_valid tuchar)
+                            (Expr.Econst_int (Integers.Int.repr 1) tint))))
+                      Stmt.Sskip)))
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'84
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                        (Ty.Tstruct _kprog_arm64_addressing noattr))
+                      _coordinates
+                      (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                  (Stmt.Sset ___a64_unmat_base__3
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _t'84 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                        (Ty.Tstruct _kprog_arm64_coordinates noattr))
+                      _return_base tulong))))
+              Stmt.Sbreak)
+            (Stmt.Sset ___a64_unmat_value__1
+              (Expr.Ebinop Binop.Osub
+                (Expr.Etempvar ___a64_unmat_value__1 tulong)
+                (Expr.Etempvar ___a64_unmat_base__3 tulong) tulong)))
+          Stmt.Sskip))
+      (Stmt.Sset ___a64_stw_payload__1
+        (Expr.Etempvar ___a64_unmat_value__1 tulong)))))
+
+def s_kprog_arm64_memory_write_97 : Stmt :=
+Stmt.Sbreak
+
+def s_kprog_arm64_memory_write_98 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'83
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _payload (tptr tulong)))
+  (Stmt.Sassign
+    (Expr.Ederef
+      (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'83 (tptr tulong))
+        (Expr.Ebinop Binop.Oshr
+          (Expr.Ecast (Expr.Etempvar ___a64_stw_index__1 tulong) tulong)
+          (Expr.Econst_int (Integers.Int.repr 3) tint) tulong) (tptr tulong))
+      tulong) (Expr.Etempvar ___a64_stw_payload__1 tulong)))
+
+def s_kprog_arm64_memory_write_99 : Stmt :=
+Stmt.Sbreak
+
+def s_kprog_arm64_memory_write_100 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'82
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _stack_tags
+      (tptr tuchar)))
+  (Stmt.Sset ___tp__3
+    (Expr.Ecast
+      (Expr.Ecast
+        (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'82 (tptr tuchar))
+          (Expr.Ebinop Binop.Oand
+            (Expr.Ecast (Expr.Etempvar ___ti__3 tulong) tulong)
+            (Expr.Eunop Unop.Onotint
+              (Expr.Econst_long (Integers.Int64.repr 7) tulong) tulong)
+            tulong) (tptr tuchar)) (tptr tvoid)) (tptr (tvolatile tulong)))))
+
+def s_kprog_arm64_memory_write_101 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sbuiltin (some _t'51) (ExtFun.EF_vload Chunk.Mint64)
+      [(tptr (tvolatile tulong))]
+      [(Expr.Eaddrof
+         (Expr.Ederef (Expr.Etempvar ___tp__3 (tptr (tvolatile tulong)))
+           (tvolatile tulong)) (tptr (tvolatile tulong)))])
+    (Stmt.Sset ___tv__3 (Expr.Etempvar _t'51 (tvolatile tulong))))
+  (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint64)
+    [(tptr (tvolatile tulong)), (tvolatile tulong)]
+    [(Expr.Eaddrof
+       (Expr.Ederef (Expr.Etempvar ___tp__3 (tptr (tvolatile tulong)))
+         (tvolatile tulong)) (tptr (tvolatile tulong))),
+     (Expr.Ebinop Binop.Oor
+       (Expr.Ebinop Binop.Oand (Expr.Etempvar ___tv__3 tulong)
+         (Expr.Eunop Unop.Onotint
+           (Expr.Ebinop Binop.Oshl
+             (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+             (Expr.Etempvar ___ts__3 tuint) tulong) tulong) tulong)
+       (Expr.Ebinop Binop.Oshl
+         (Expr.Ecast
+           (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar)
+           tulong) (Expr.Etempvar ___ts__3 tuint) tulong) tulong)]))
+
+def s_kprog_arm64_memory_write_102 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'81
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+        (Ty.Tstruct _kprog_arm64_addressing noattr)) _stack_tags
+      (tptr tuchar)))
+  (Stmt.Sset ___tp__4
+    (Expr.Ecast
+      (Expr.Ecast
+        (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'81 (tptr tuchar))
+          (Expr.Ebinop Binop.Oand
+            (Expr.Ecast (Expr.Etempvar ___ti__4 tulong) tulong)
+            (Expr.Eunop Unop.Onotint
+              (Expr.Econst_long (Integers.Int64.repr 7) tulong) tulong)
+            tulong) (tptr tuchar)) (tptr tvoid)) (tptr (tvolatile tulong)))))
+
+def s_kprog_arm64_memory_write_103 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sbuiltin (some _t'52) (ExtFun.EF_vload Chunk.Mint64)
+    [(tptr (tvolatile tulong))]
+    [(Expr.Eaddrof
+       (Expr.Ederef (Expr.Etempvar ___tp__4 (tptr (tvolatile tulong)))
+         (tvolatile tulong)) (tptr (tvolatile tulong)))])
+  (Stmt.Sset ___tv__4 (Expr.Etempvar _t'52 (tvolatile tulong))))
+
+def s_kprog_arm64_memory_write_104 : Stmt :=
+(Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint64)
+  [(tptr (tvolatile tulong)), (tvolatile tulong)]
+  [(Expr.Eaddrof
+     (Expr.Ederef (Expr.Etempvar ___tp__4 (tptr (tvolatile tulong)))
+       (tvolatile tulong)) (tptr (tvolatile tulong))),
+   (Expr.Ebinop Binop.Oor
+     (Expr.Ebinop Binop.Oand (Expr.Etempvar ___tv__4 tulong)
+       (Expr.Eunop Unop.Onotint
+         (Expr.Ebinop Binop.Oshl
+           (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+           (Expr.Etempvar ___ts__4 tuint) tulong) tulong) tulong)
+     (Expr.Ebinop Binop.Oshl
+       (Expr.Ecast
+         (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar)
+         tulong) (Expr.Etempvar ___ts__4 tuint) tulong) tulong)])
+
+def s_kprog_arm64_memory_write_105 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'53
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tuint) tuint))
+  (Stmt.Sset _t'53 (Expr.Ecast (Expr.Etempvar _t'53 tuint) tuint)))
+
+def s_kprog_arm64_memory_write_106 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                    (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                    (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'53
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 4) tuint) tuint))
+      (Stmt.Sset _t'53 (Expr.Ecast (Expr.Etempvar _t'53 tuint) tuint)))
+    (Stmt.Sset _t'53 (Expr.Ecast (Expr.Etempvar _t'53 tuint) tuint)))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'53
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tuint) tuint))
+      (Stmt.Sset _t'53 (Expr.Ecast (Expr.Etempvar _t'53 tuint) tuint)))
+    (Stmt.Sset _t'53 (Expr.Ecast (Expr.Etempvar _t'53 tuint) tuint))))
+
+def s_kprog_arm64_memory_write_107 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___ti__5
+    (Expr.Ebinop Binop.Oshr
+      (Expr.Ecast (Expr.Etempvar ___a64_stw_last__1 tulong) tulong)
+      (Expr.Econst_int (Integers.Int.repr 3) tint) tulong))
+  (Stmt.Ssequence
+    (Stmt.Sset ___ts__5
+      (Expr.Ecast
+        (Expr.Ebinop Binop.Omul
+          (Expr.Ebinop Binop.Oand (Expr.Etempvar ___ti__5 tulong)
+            (Expr.Econst_int (Integers.Int.repr 7) tuint) tulong)
+          (Expr.Econst_int (Integers.Int.repr 8) tuint) tulong) tuint))
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sset _t'80
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+              (Ty.Tstruct _kprog_arm64_addressing noattr)) _stack_tags
+            (tptr tuchar)))
+        (Stmt.Sset ___tp__5
+          (Expr.Ecast
+            (Expr.Ecast
+              (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'80 (tptr tuchar))
+                (Expr.Ebinop Binop.Oand
+                  (Expr.Ecast (Expr.Etempvar ___ti__5 tulong) tulong)
+                  (Expr.Eunop Unop.Onotint
+                    (Expr.Econst_long (Integers.Int64.repr 7) tulong) tulong)
+                  tulong) (tptr tuchar)) (tptr tvoid))
+            (tptr (tvolatile tulong)))))
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sbuiltin (some _t'54) (ExtFun.EF_vload Chunk.Mint64)
+            [(tptr (tvolatile tulong))]
+            [(Expr.Eaddrof
+               (Expr.Ederef
+                 (Expr.Etempvar ___tp__5 (tptr (tvolatile tulong)))
+                 (tvolatile tulong)) (tptr (tvolatile tulong)))])
+          (Stmt.Sset ___tv__5 (Expr.Etempvar _t'54 (tvolatile tulong))))
+        (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint64)
+          [(tptr (tvolatile tulong)), (tvolatile tulong)]
+          [(Expr.Eaddrof
+             (Expr.Ederef (Expr.Etempvar ___tp__5 (tptr (tvolatile tulong)))
+               (tvolatile tulong)) (tptr (tvolatile tulong))),
+           (Expr.Ebinop Binop.Oor
+             (Expr.Ebinop Binop.Oand (Expr.Etempvar ___tv__5 tulong)
+               (Expr.Eunop Unop.Onotint
+                 (Expr.Ebinop Binop.Oshl
+                   (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+                   (Expr.Etempvar ___ts__5 tuint) tulong) tulong) tulong)
+             (Expr.Ebinop Binop.Oshl
+               (Expr.Ecast
+                 (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                   tuchar) tulong) (Expr.Etempvar ___ts__5 tuint) tulong)
+             tulong)])))))
+
+def s_kprog_arm64_memory_write_108 : Stmt :=
+Stmt.Sbreak
+
+def s_kprog_arm64_memory_write_109 : Stmt :=
+(Stmt.Sset ___kprog_a64_bl_lane__8
+  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+
+def s_kprog_arm64_memory_write_110 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_value__8
+    (Expr.Etempvar ___a64_stw_value__1 tulong))
+  (Stmt.Ssequence
+    (Stmt.Sset ___kprog_a64_bl_shift__8
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+    (Stmt.Ssequence
+      (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_bl_lane__8 tulong)
+        (LStmts.LScons (some 0)
+          (Stmt.Ssequence
+            (Stmt.Sset ___kprog_a64_bl_shift__8
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+                tulong))
+            Stmt.Sbreak)
+          (LStmts.LScons (some 1)
+            (Stmt.Ssequence
+              (Stmt.Sset ___kprog_a64_bl_shift__8
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tint)
+                  tulong))
+              Stmt.Sbreak)
+            (LStmts.LScons (some 2)
+              (Stmt.Ssequence
+                (Stmt.Sset ___kprog_a64_bl_shift__8
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 16) tint)
+                    tulong))
+                Stmt.Sbreak)
+              (LStmts.LScons (some 3)
+                (Stmt.Ssequence
+                  (Stmt.Sset ___kprog_a64_bl_shift__8
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 24) tint)
+                      tulong))
+                  Stmt.Sbreak)
+                (LStmts.LScons (some 4)
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___kprog_a64_bl_shift__8
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 32) tint) tulong))
+                    Stmt.Sbreak)
+                  (LStmts.LScons (some 5)
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___kprog_a64_bl_shift__8
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 40) tint)
+                          tulong))
+                      Stmt.Sbreak)
+                    (LStmts.LScons (some 6)
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___kprog_a64_bl_shift__8
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 48) tint)
+                            tulong))
+                        Stmt.Sbreak)
+                      (LStmts.LScons (some 7)
+                        (Stmt.Ssequence
+                          (Stmt.Sset ___kprog_a64_bl_shift__8
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 56) tint)
+                              tulong))
+                          Stmt.Sbreak)
+                        (LStmts.LScons none
+                          (Stmt.Ssequence
+                            (Stmt.Sloop
+                              (Stmt.Scall none
+                                (Expr.Evar _arm64_sim_unsupported_opcode 
+                                (Ty.Tfunction [] tvoid cc_default)) [])
+                              Stmt.Sbreak)
+                            Stmt.Sbreak)
+                          LStmts.LSnil))))))))))
+      (Stmt.Ssequence
+        (Stmt.Sset _t'79
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+              (Ty.Tstruct _kprog_arm64_addressing noattr)) _b
+            (tptr (tvolatile tuchar))))
+        (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+          [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+          [(Expr.Eaddrof
+             (Expr.Ederef
+               (Expr.Ebinop Binop.Oadd
+                 (Expr.Etempvar _t'79 (tptr (tvolatile tuchar)))
+                 (Expr.Etempvar ___a64_stw_index__1 tulong)
+                 (tptr (tvolatile tuchar))) (tvolatile tuchar))
+             (tptr (tvolatile tuchar))),
+           (Expr.Ecast
+             (Expr.Ebinop Binop.Oshr
+               (Expr.Etempvar ___kprog_a64_bl_value__8 tulong)
+               (Expr.Etempvar ___kprog_a64_bl_shift__8 tulong) tulong)
+             tuchar)])))))
+
+def s_kprog_arm64_memory_write_111 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                    (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                    (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
+  (Stmt.Sset _t'55
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                      (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                      (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+    (Stmt.Ssequence
+      (Stmt.Sset _t'55
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
+      (Stmt.Sset _t'55 (Expr.Ecast (Expr.Etempvar _t'55 tuint) tuint)))
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                        (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                        (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sset _t'55
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+          (Stmt.Sset _t'55 (Expr.Ecast (Expr.Etempvar _t'55 tuint) tuint)))
+        (Stmt.Sset _t'55 (Expr.Ecast (Expr.Etempvar _t'55 tuint) tuint)))
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sset _t'55
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint)
+              tuint))
+          (Stmt.Sset _t'55 (Expr.Ecast (Expr.Etempvar _t'55 tuint) tuint)))
+        (Stmt.Sset _t'55 (Expr.Ecast (Expr.Etempvar _t'55 tuint) tuint))))))
+
+def s_kprog_arm64_memory_write_112 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_bl_lane__9
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tint) tulong))
+  (Stmt.Ssequence
+    (Stmt.Sset ___kprog_a64_bl_value__9
+      (Expr.Etempvar ___a64_stw_value__1 tulong))
+    (Stmt.Ssequence
+      (Stmt.Sset ___kprog_a64_bl_shift__9
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+      (Stmt.Ssequence
+        (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_bl_lane__9 tulong)
+          (LStmts.LScons (some 0)
+            (Stmt.Ssequence
+              (Stmt.Sset ___kprog_a64_bl_shift__9
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+                  tulong))
+              Stmt.Sbreak)
+            (LStmts.LScons (some 1)
+              (Stmt.Ssequence
+                (Stmt.Sset ___kprog_a64_bl_shift__9
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tint)
+                    tulong))
+                Stmt.Sbreak)
+              (LStmts.LScons (some 2)
+                (Stmt.Ssequence
+                  (Stmt.Sset ___kprog_a64_bl_shift__9
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 16) tint)
+                      tulong))
+                  Stmt.Sbreak)
+                (LStmts.LScons (some 3)
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___kprog_a64_bl_shift__9
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 24) tint) tulong))
+                    Stmt.Sbreak)
+                  (LStmts.LScons (some 4)
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___kprog_a64_bl_shift__9
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 32) tint)
+                          tulong))
+                      Stmt.Sbreak)
+                    (LStmts.LScons (some 5)
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___kprog_a64_bl_shift__9
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 40) tint)
+                            tulong))
+                        Stmt.Sbreak)
+                      (LStmts.LScons (some 6)
+                        (Stmt.Ssequence
+                          (Stmt.Sset ___kprog_a64_bl_shift__9
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 48) tint)
+                              tulong))
+                          Stmt.Sbreak)
+                        (LStmts.LScons (some 7)
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___kprog_a64_bl_shift__9
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 56) tint)
+                                tulong))
+                            Stmt.Sbreak)
+                          (LStmts.LScons none
+                            (Stmt.Ssequence
+                              (Stmt.Sloop
+                                (Stmt.Scall none
+                                  (Expr.Evar _arm64_sim_unsupported_opcode 
+                                  (Ty.Tfunction [] tvoid cc_default)) [])
+                                Stmt.Sbreak)
+                              Stmt.Sbreak)
+                            LStmts.LSnil))))))))))
+        (Stmt.Ssequence
+          (Stmt.Sset _t'78
+            (Expr.Efield
+              (Expr.Ederef
+                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                (Ty.Tstruct _kprog_arm64_addressing noattr)) _b
+              (tptr (tvolatile tuchar))))
+          (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+            [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+            [(Expr.Eaddrof
+               (Expr.Ederef
+                 (Expr.Ebinop Binop.Oadd
+                   (Expr.Etempvar _t'78 (tptr (tvolatile tuchar)))
+                   (Expr.Ebinop Binop.Oadd
+                     (Expr.Etempvar ___a64_stw_index__1 tulong)
+                     (Expr.Econst_int (Integers.Int.repr 1) tint) tulong)
+                   (tptr (tvolatile tuchar))) (tvolatile tuchar))
+               (tptr (tvolatile tuchar))),
+             (Expr.Ecast
+               (Expr.Ebinop Binop.Oshr
+                 (Expr.Etempvar ___kprog_a64_bl_value__9 tulong)
+                 (Expr.Etempvar ___kprog_a64_bl_shift__9 tulong) tulong)
+               tuchar)]))))))
+
+def s_kprog_arm64_memory_write_113 : Stmt :=
+Stmt.Sbreak
+
+def s_kprog_arm64_memory_write_114 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                      (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                      (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
+    (Stmt.Sset _t'56
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                        (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                        (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+      (Stmt.Ssequence
+        (Stmt.Sset _t'56
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
+        (Stmt.Sset _t'56 (Expr.Ecast (Expr.Etempvar _t'56 tuint) tuint)))
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                          (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'56
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint)
+                tuint))
+            (Stmt.Sset _t'56 (Expr.Ecast (Expr.Etempvar _t'56 tuint) tuint)))
+          (Stmt.Sset _t'56 (Expr.Ecast (Expr.Etempvar _t'56 tuint) tuint)))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'56
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                tuint))
+            (Stmt.Sset _t'56 (Expr.Ecast (Expr.Etempvar _t'56 tuint) tuint)))
+          (Stmt.Sset _t'56 (Expr.Ecast (Expr.Etempvar _t'56 tuint) tuint))))))
+  (Stmt.Sifthenelse (Expr.Ecast
+                      (Expr.Ebinop Binop.Oand
+                        (Expr.Ebinop Binop.Oshr (Expr.Etempvar _t'56 tuint)
+                          (Expr.Econst_int (Integers.Int.repr 2) tint) tuint)
+                        (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint)
+                      tuchar)
+    (Stmt.Sloop
+      (Stmt.Ssequence
+        (Stmt.Sset ___kprog_a64_bl_lane__10
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tint) tulong))
+        (Stmt.Ssequence
+          (Stmt.Sset ___kprog_a64_bl_value__10
+            (Expr.Etempvar ___a64_stw_value__1 tulong))
+          (Stmt.Ssequence
+            (Stmt.Sset ___kprog_a64_bl_shift__10
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+                tulong))
+            (Stmt.Ssequence
+              (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_bl_lane__10 tulong)
+                (LStmts.LScons (some 0)
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___kprog_a64_bl_shift__10
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+                    Stmt.Sbreak)
+                  (LStmts.LScons (some 1)
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___kprog_a64_bl_shift__10
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 8) tint)
+                          tulong))
+                      Stmt.Sbreak)
+                    (LStmts.LScons (some 2)
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___kprog_a64_bl_shift__10
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 16) tint)
+                            tulong))
+                        Stmt.Sbreak)
+                      (LStmts.LScons (some 3)
+                        (Stmt.Ssequence
+                          (Stmt.Sset ___kprog_a64_bl_shift__10
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 24) tint)
+                              tulong))
+                          Stmt.Sbreak)
+                        (LStmts.LScons (some 4)
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___kprog_a64_bl_shift__10
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 32) tint)
+                                tulong))
+                            Stmt.Sbreak)
+                          (LStmts.LScons (some 5)
+                            (Stmt.Ssequence
+                              (Stmt.Sset ___kprog_a64_bl_shift__10
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 40) tint)
+                                  tulong))
+                              Stmt.Sbreak)
+                            (LStmts.LScons (some 6)
+                              (Stmt.Ssequence
+                                (Stmt.Sset ___kprog_a64_bl_shift__10
+                                  (Expr.Ecast
+                                    (Expr.Econst_int (Integers.Int.repr 48) tint)
+                                    tulong))
+                                Stmt.Sbreak)
+                              (LStmts.LScons (some 7)
+                                (Stmt.Ssequence
+                                  (Stmt.Sset ___kprog_a64_bl_shift__10
+                                    (Expr.Ecast
+                                      (Expr.Econst_int (Integers.Int.repr 56) tint)
+                                      tulong))
+                                  Stmt.Sbreak)
+                                (LStmts.LScons none
+                                  (Stmt.Ssequence
+                                    (Stmt.Sloop
+                                      (Stmt.Scall none
+                                        (Expr.Evar _arm64_sim_unsupported_opcode 
+                                        (Ty.Tfunction [] tvoid cc_default))
+                                        [])
+                                      Stmt.Sbreak)
+                                    Stmt.Sbreak)
+                                  LStmts.LSnil))))))))))
+              (Stmt.Ssequence
+                (Stmt.Sset _t'77
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                      (Ty.Tstruct _kprog_arm64_addressing noattr)) _b
+                    (tptr (tvolatile tuchar))))
+                (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                  [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                  [(Expr.Eaddrof
+                     (Expr.Ederef
+                       (Expr.Ebinop Binop.Oadd
+                         (Expr.Etempvar _t'77 (tptr (tvolatile tuchar)))
+                         (Expr.Ebinop Binop.Oadd
+                           (Expr.Etempvar ___a64_stw_index__1 tulong)
+                           (Expr.Econst_int (Integers.Int.repr 2) tint)
+                           tulong) (tptr (tvolatile tuchar)))
+                       (tvolatile tuchar)) (tptr (tvolatile tuchar))),
+                   (Expr.Ecast
+                     (Expr.Ebinop Binop.Oshr
+                       (Expr.Etempvar ___kprog_a64_bl_value__10 tulong)
+                       (Expr.Etempvar ___kprog_a64_bl_shift__10 tulong)
+                       tulong) tuchar)]))))))
+      Stmt.Sbreak)
+    Stmt.Sskip))
+
+def s_kprog_arm64_memory_write_115 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                        (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                        (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
+      (Stmt.Sset _t'57
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                          (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+        (Stmt.Ssequence
+          (Stmt.Sset _t'57
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
+          (Stmt.Sset _t'57 (Expr.Ecast (Expr.Etempvar _t'57 tuint) tuint)))
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                            (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                            (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                            tint)
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sset _t'57
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint)
+                  tuint))
+              (Stmt.Sset _t'57
+                (Expr.Ecast (Expr.Etempvar _t'57 tuint) tuint)))
+            (Stmt.Sset _t'57 (Expr.Ecast (Expr.Etempvar _t'57 tuint) tuint)))
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sset _t'57
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                  tuint))
+              (Stmt.Sset _t'57
+                (Expr.Ecast (Expr.Etempvar _t'57 tuint) tuint)))
+            (Stmt.Sset _t'57 (Expr.Ecast (Expr.Etempvar _t'57 tuint) tuint))))))
+    (Stmt.Sifthenelse (Expr.Ecast
+                        (Expr.Ebinop Binop.Oand
+                          (Expr.Ebinop Binop.Oshr (Expr.Etempvar _t'57 tuint)
+                            (Expr.Econst_int (Integers.Int.repr 3) tint)
+                            tuint)
+                          (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                          tuint) tuchar)
+      (Stmt.Sloop
+        (Stmt.Ssequence
+          (Stmt.Sset ___kprog_a64_bl_lane__11
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tint) tulong))
+          (Stmt.Ssequence
+            (Stmt.Sset ___kprog_a64_bl_value__11
+              (Expr.Etempvar ___a64_stw_value__1 tulong))
+            (Stmt.Ssequence
+              (Stmt.Sset ___kprog_a64_bl_shift__11
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+                  tulong))
+              (Stmt.Ssequence
+                (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_bl_lane__11 tulong)
+                  (LStmts.LScons (some 0)
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___kprog_a64_bl_shift__11
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 0) tint)
+                          tulong))
+                      Stmt.Sbreak)
+                    (LStmts.LScons (some 1)
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___kprog_a64_bl_shift__11
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 8) tint)
+                            tulong))
+                        Stmt.Sbreak)
+                      (LStmts.LScons (some 2)
+                        (Stmt.Ssequence
+                          (Stmt.Sset ___kprog_a64_bl_shift__11
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 16) tint)
+                              tulong))
+                          Stmt.Sbreak)
+                        (LStmts.LScons (some 3)
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___kprog_a64_bl_shift__11
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 24) tint)
+                                tulong))
+                            Stmt.Sbreak)
+                          (LStmts.LScons (some 4)
+                            (Stmt.Ssequence
+                              (Stmt.Sset ___kprog_a64_bl_shift__11
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 32) tint)
+                                  tulong))
+                              Stmt.Sbreak)
+                            (LStmts.LScons (some 5)
+                              (Stmt.Ssequence
+                                (Stmt.Sset ___kprog_a64_bl_shift__11
+                                  (Expr.Ecast
+                                    (Expr.Econst_int (Integers.Int.repr 40) tint)
+                                    tulong))
+                                Stmt.Sbreak)
+                              (LStmts.LScons (some 6)
+                                (Stmt.Ssequence
+                                  (Stmt.Sset ___kprog_a64_bl_shift__11
+                                    (Expr.Ecast
+                                      (Expr.Econst_int (Integers.Int.repr 48) tint)
+                                      tulong))
+                                  Stmt.Sbreak)
+                                (LStmts.LScons (some 7)
+                                  (Stmt.Ssequence
+                                    (Stmt.Sset ___kprog_a64_bl_shift__11
+                                      (Expr.Ecast
+                                        (Expr.Econst_int (Integers.Int.repr 56) tint)
+                                        tulong))
+                                    Stmt.Sbreak)
+                                  (LStmts.LScons none
+                                    (Stmt.Ssequence
+                                      (Stmt.Sloop
+                                        (Stmt.Scall none
+                                          (Expr.Evar _arm64_sim_unsupported_opcode 
+                                          (Ty.Tfunction [] tvoid cc_default))
+                                          [])
+                                        Stmt.Sbreak)
+                                      Stmt.Sbreak)
+                                    LStmts.LSnil))))))))))
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'76
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                        (Ty.Tstruct _kprog_arm64_addressing noattr)) _b
+                      (tptr (tvolatile tuchar))))
+                  (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                    [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                    [(Expr.Eaddrof
+                       (Expr.Ederef
+                         (Expr.Ebinop Binop.Oadd
+                           (Expr.Etempvar _t'76 (tptr (tvolatile tuchar)))
+                           (Expr.Ebinop Binop.Oadd
+                             (Expr.Etempvar ___a64_stw_index__1 tulong)
+                             (Expr.Econst_int (Integers.Int.repr 3) tint)
+                             tulong) (tptr (tvolatile tuchar)))
+                         (tvolatile tuchar)) (tptr (tvolatile tuchar))),
+                     (Expr.Ecast
+                       (Expr.Ebinop Binop.Oshr
+                         (Expr.Etempvar ___kprog_a64_bl_value__11 tulong)
+                         (Expr.Etempvar ___kprog_a64_bl_shift__11 tulong)
+                         tulong) tuchar)]))))))
+        Stmt.Sbreak)
+      Stmt.Sskip))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                          (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
+        (Stmt.Sset _t'58
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                            (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                            (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                            tint)
+          (Stmt.Ssequence
+            (Stmt.Sset _t'58
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                tuint))
+            (Stmt.Sset _t'58 (Expr.Ecast (Expr.Etempvar _t'58 tuint) tuint)))
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                              (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                              (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                              tint)
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sset _t'58
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint)
+                    tuint))
+                (Stmt.Sset _t'58
+                  (Expr.Ecast (Expr.Etempvar _t'58 tuint) tuint)))
+              (Stmt.Sset _t'58
+                (Expr.Ecast (Expr.Etempvar _t'58 tuint) tuint)))
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sset _t'58
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                    tuint))
+                (Stmt.Sset _t'58
+                  (Expr.Ecast (Expr.Etempvar _t'58 tuint) tuint)))
+              (Stmt.Sset _t'58
+                (Expr.Ecast (Expr.Etempvar _t'58 tuint) tuint))))))
+      (Stmt.Sifthenelse (Expr.Ecast
+                          (Expr.Ebinop Binop.Oand
+                            (Expr.Ebinop Binop.Oshr
+                              (Expr.Etempvar _t'58 tuint)
+                              (Expr.Econst_int (Integers.Int.repr 4) tint)
+                              tuint)
+                            (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                            tuint) tuchar)
+        (Stmt.Sloop
+          (Stmt.Ssequence
+            (Stmt.Sset ___kprog_a64_bl_lane__12
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 4) tint)
+                tulong))
+            (Stmt.Ssequence
+              (Stmt.Sset ___kprog_a64_bl_value__12
+                (Expr.Etempvar ___a64_stw_value__1 tulong))
+              (Stmt.Ssequence
+                (Stmt.Sset ___kprog_a64_bl_shift__12
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+                    tulong))
+                (Stmt.Ssequence
+                  (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_bl_lane__12 tulong)
+                    (LStmts.LScons (some 0)
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___kprog_a64_bl_shift__12
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 0) tint)
+                            tulong))
+                        Stmt.Sbreak)
+                      (LStmts.LScons (some 1)
+                        (Stmt.Ssequence
+                          (Stmt.Sset ___kprog_a64_bl_shift__12
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 8) tint)
+                              tulong))
+                          Stmt.Sbreak)
+                        (LStmts.LScons (some 2)
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___kprog_a64_bl_shift__12
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 16) tint)
+                                tulong))
+                            Stmt.Sbreak)
+                          (LStmts.LScons (some 3)
+                            (Stmt.Ssequence
+                              (Stmt.Sset ___kprog_a64_bl_shift__12
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 24) tint)
+                                  tulong))
+                              Stmt.Sbreak)
+                            (LStmts.LScons (some 4)
+                              (Stmt.Ssequence
+                                (Stmt.Sset ___kprog_a64_bl_shift__12
+                                  (Expr.Ecast
+                                    (Expr.Econst_int (Integers.Int.repr 32) tint)
+                                    tulong))
+                                Stmt.Sbreak)
+                              (LStmts.LScons (some 5)
+                                (Stmt.Ssequence
+                                  (Stmt.Sset ___kprog_a64_bl_shift__12
+                                    (Expr.Ecast
+                                      (Expr.Econst_int (Integers.Int.repr 40) tint)
+                                      tulong))
+                                  Stmt.Sbreak)
+                                (LStmts.LScons (some 6)
+                                  (Stmt.Ssequence
+                                    (Stmt.Sset ___kprog_a64_bl_shift__12
+                                      (Expr.Ecast
+                                        (Expr.Econst_int (Integers.Int.repr 48) tint)
+                                        tulong))
+                                    Stmt.Sbreak)
+                                  (LStmts.LScons (some 7)
+                                    (Stmt.Ssequence
+                                      (Stmt.Sset ___kprog_a64_bl_shift__12
+                                        (Expr.Ecast
+                                          (Expr.Econst_int (Integers.Int.repr 56) tint)
+                                          tulong))
+                                      Stmt.Sbreak)
+                                    (LStmts.LScons none
+                                      (Stmt.Ssequence
+                                        (Stmt.Sloop
+                                          (Stmt.Scall none
+                                            (Expr.Evar _arm64_sim_unsupported_opcode 
+                                            (Ty.Tfunction [] tvoid
+                                              cc_default)) [])
+                                          Stmt.Sbreak)
+                                        Stmt.Sbreak)
+                                      LStmts.LSnil))))))))))
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'75
+                      (Expr.Efield
+                        (Expr.Ederef
+                          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                          (Ty.Tstruct _kprog_arm64_addressing noattr)) _b
+                        (tptr (tvolatile tuchar))))
+                    (Stmt.Sbuiltin none
+                      (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                      [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                      [(Expr.Eaddrof
+                         (Expr.Ederef
+                           (Expr.Ebinop Binop.Oadd
+                             (Expr.Etempvar _t'75 (tptr (tvolatile tuchar)))
+                             (Expr.Ebinop Binop.Oadd
+                               (Expr.Etempvar ___a64_stw_index__1 tulong)
+                               (Expr.Econst_int (Integers.Int.repr 4) tint)
+                               tulong) (tptr (tvolatile tuchar)))
+                           (tvolatile tuchar)) (tptr (tvolatile tuchar))),
+                       (Expr.Ecast
+                         (Expr.Ebinop Binop.Oshr
+                           (Expr.Etempvar ___kprog_a64_bl_value__12 tulong)
+                           (Expr.Etempvar ___kprog_a64_bl_shift__12 tulong)
+                           tulong) tuchar)]))))))
+          Stmt.Sbreak)
+        Stmt.Sskip))
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                            (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                            (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                            tint)
+          (Stmt.Sset _t'59
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                              (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                              (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                              tint)
+            (Stmt.Ssequence
+              (Stmt.Sset _t'59
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                  tuint))
+              (Stmt.Sset _t'59
+                (Expr.Ecast (Expr.Etempvar _t'59 tuint) tuint)))
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                                (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                tint)
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'59
+                    (Expr.Ecast
+                      (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+                  (Stmt.Sset _t'59
+                    (Expr.Ecast (Expr.Etempvar _t'59 tuint) tuint)))
+                (Stmt.Sset _t'59
+                  (Expr.Ecast (Expr.Etempvar _t'59 tuint) tuint)))
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'59
+                    (Expr.Ecast
+                      (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+                  (Stmt.Sset _t'59
+                    (Expr.Ecast (Expr.Etempvar _t'59 tuint) tuint)))
+                (Stmt.Sset _t'59
+                  (Expr.Ecast (Expr.Etempvar _t'59 tuint) tuint))))))
+        (Stmt.Sifthenelse (Expr.Ecast
+                            (Expr.Ebinop Binop.Oand
+                              (Expr.Ebinop Binop.Oshr
+                                (Expr.Etempvar _t'59 tuint)
+                                (Expr.Econst_int (Integers.Int.repr 5) tint)
+                                tuint)
+                              (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                              tuint) tuchar)
+          (Stmt.Sloop
+            (Stmt.Ssequence
+              (Stmt.Sset ___kprog_a64_bl_lane__13
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 5) tint)
+                  tulong))
+              (Stmt.Ssequence
+                (Stmt.Sset ___kprog_a64_bl_value__13
+                  (Expr.Etempvar ___a64_stw_value__1 tulong))
+                (Stmt.Ssequence
+                  (Stmt.Sset ___kprog_a64_bl_shift__13
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+                      tulong))
+                  (Stmt.Ssequence
+                    (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_bl_lane__13 tulong)
+                      (LStmts.LScons (some 0)
+                        (Stmt.Ssequence
+                          (Stmt.Sset ___kprog_a64_bl_shift__13
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 0) tint)
+                              tulong))
+                          Stmt.Sbreak)
+                        (LStmts.LScons (some 1)
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___kprog_a64_bl_shift__13
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 8) tint)
+                                tulong))
+                            Stmt.Sbreak)
+                          (LStmts.LScons (some 2)
+                            (Stmt.Ssequence
+                              (Stmt.Sset ___kprog_a64_bl_shift__13
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 16) tint)
+                                  tulong))
+                              Stmt.Sbreak)
+                            (LStmts.LScons (some 3)
+                              (Stmt.Ssequence
+                                (Stmt.Sset ___kprog_a64_bl_shift__13
+                                  (Expr.Ecast
+                                    (Expr.Econst_int (Integers.Int.repr 24) tint)
+                                    tulong))
+                                Stmt.Sbreak)
+                              (LStmts.LScons (some 4)
+                                (Stmt.Ssequence
+                                  (Stmt.Sset ___kprog_a64_bl_shift__13
+                                    (Expr.Ecast
+                                      (Expr.Econst_int (Integers.Int.repr 32) tint)
+                                      tulong))
+                                  Stmt.Sbreak)
+                                (LStmts.LScons (some 5)
+                                  (Stmt.Ssequence
+                                    (Stmt.Sset ___kprog_a64_bl_shift__13
+                                      (Expr.Ecast
+                                        (Expr.Econst_int (Integers.Int.repr 40) tint)
+                                        tulong))
+                                    Stmt.Sbreak)
+                                  (LStmts.LScons (some 6)
+                                    (Stmt.Ssequence
+                                      (Stmt.Sset ___kprog_a64_bl_shift__13
+                                        (Expr.Ecast
+                                          (Expr.Econst_int (Integers.Int.repr 48) tint)
+                                          tulong))
+                                      Stmt.Sbreak)
+                                    (LStmts.LScons (some 7)
+                                      (Stmt.Ssequence
+                                        (Stmt.Sset ___kprog_a64_bl_shift__13
+                                          (Expr.Ecast
+                                            (Expr.Econst_int (Integers.Int.repr 56) tint)
+                                            tulong))
+                                        Stmt.Sbreak)
+                                      (LStmts.LScons none
+                                        (Stmt.Ssequence
+                                          (Stmt.Sloop
+                                            (Stmt.Scall none
+                                              (Expr.Evar _arm64_sim_unsupported_opcode 
+                                              (Ty.Tfunction [] tvoid
+                                                cc_default)) [])
+                                            Stmt.Sbreak)
+                                          Stmt.Sbreak)
+                                        LStmts.LSnil))))))))))
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'74
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                            (Ty.Tstruct _kprog_arm64_addressing noattr)) _b
+                          (tptr (tvolatile tuchar))))
+                      (Stmt.Sbuiltin none
+                        (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                        [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                        [(Expr.Eaddrof
+                           (Expr.Ederef
+                             (Expr.Ebinop Binop.Oadd
+                               (Expr.Etempvar _t'74 (tptr (tvolatile tuchar)))
+                               (Expr.Ebinop Binop.Oadd
+                                 (Expr.Etempvar ___a64_stw_index__1 tulong)
+                                 (Expr.Econst_int (Integers.Int.repr 5) tint)
+                                 tulong) (tptr (tvolatile tuchar)))
+                             (tvolatile tuchar)) (tptr (tvolatile tuchar))),
+                         (Expr.Ecast
+                           (Expr.Ebinop Binop.Oshr
+                             (Expr.Etempvar ___kprog_a64_bl_value__13 tulong)
+                             (Expr.Etempvar ___kprog_a64_bl_shift__13 tulong)
+                             tulong) tuchar)]))))))
+            Stmt.Sbreak)
+          Stmt.Sskip))
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                              (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                              (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                              tint)
+            (Stmt.Sset _t'60
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                tuint))
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                                (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                tint)
+              (Stmt.Ssequence
+                (Stmt.Sset _t'60
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                    tuint))
+                (Stmt.Sset _t'60
+                  (Expr.Ecast (Expr.Etempvar _t'60 tuint) tuint)))
+              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                  (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                                  (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                  tint)
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'60
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+                    (Stmt.Sset _t'60
+                      (Expr.Ecast (Expr.Etempvar _t'60 tuint) tuint)))
+                  (Stmt.Sset _t'60
+                    (Expr.Ecast (Expr.Etempvar _t'60 tuint) tuint)))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'60
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                        tuint))
+                    (Stmt.Sset _t'60
+                      (Expr.Ecast (Expr.Etempvar _t'60 tuint) tuint)))
+                  (Stmt.Sset _t'60
+                    (Expr.Ecast (Expr.Etempvar _t'60 tuint) tuint))))))
+          (Stmt.Sifthenelse (Expr.Ecast
+                              (Expr.Ebinop Binop.Oand
+                                (Expr.Ebinop Binop.Oshr
+                                  (Expr.Etempvar _t'60 tuint)
+                                  (Expr.Econst_int (Integers.Int.repr 6) tint)
+                                  tuint)
+                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                tuint) tuchar)
+            (Stmt.Sloop
+              (Stmt.Ssequence
+                (Stmt.Sset ___kprog_a64_bl_lane__14
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 6) tint)
+                    tulong))
+                (Stmt.Ssequence
+                  (Stmt.Sset ___kprog_a64_bl_value__14
+                    (Expr.Etempvar ___a64_stw_value__1 tulong))
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___kprog_a64_bl_shift__14
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+                    (Stmt.Ssequence
+                      (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_bl_lane__14 tulong)
+                        (LStmts.LScons (some 0)
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___kprog_a64_bl_shift__14
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                tulong))
+                            Stmt.Sbreak)
+                          (LStmts.LScons (some 1)
+                            (Stmt.Ssequence
+                              (Stmt.Sset ___kprog_a64_bl_shift__14
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 8) tint)
+                                  tulong))
+                              Stmt.Sbreak)
+                            (LStmts.LScons (some 2)
+                              (Stmt.Ssequence
+                                (Stmt.Sset ___kprog_a64_bl_shift__14
+                                  (Expr.Ecast
+                                    (Expr.Econst_int (Integers.Int.repr 16) tint)
+                                    tulong))
+                                Stmt.Sbreak)
+                              (LStmts.LScons (some 3)
+                                (Stmt.Ssequence
+                                  (Stmt.Sset ___kprog_a64_bl_shift__14
+                                    (Expr.Ecast
+                                      (Expr.Econst_int (Integers.Int.repr 24) tint)
+                                      tulong))
+                                  Stmt.Sbreak)
+                                (LStmts.LScons (some 4)
+                                  (Stmt.Ssequence
+                                    (Stmt.Sset ___kprog_a64_bl_shift__14
+                                      (Expr.Ecast
+                                        (Expr.Econst_int (Integers.Int.repr 32) tint)
+                                        tulong))
+                                    Stmt.Sbreak)
+                                  (LStmts.LScons (some 5)
+                                    (Stmt.Ssequence
+                                      (Stmt.Sset ___kprog_a64_bl_shift__14
+                                        (Expr.Ecast
+                                          (Expr.Econst_int (Integers.Int.repr 40) tint)
+                                          tulong))
+                                      Stmt.Sbreak)
+                                    (LStmts.LScons (some 6)
+                                      (Stmt.Ssequence
+                                        (Stmt.Sset ___kprog_a64_bl_shift__14
+                                          (Expr.Ecast
+                                            (Expr.Econst_int (Integers.Int.repr 48) tint)
+                                            tulong))
+                                        Stmt.Sbreak)
+                                      (LStmts.LScons (some 7)
+                                        (Stmt.Ssequence
+                                          (Stmt.Sset ___kprog_a64_bl_shift__14
+                                            (Expr.Ecast
+                                              (Expr.Econst_int (Integers.Int.repr 56) tint)
+                                              tulong))
+                                          Stmt.Sbreak)
+                                        (LStmts.LScons none
+                                          (Stmt.Ssequence
+                                            (Stmt.Sloop
+                                              (Stmt.Scall none
+                                                (Expr.Evar _arm64_sim_unsupported_opcode 
+                                                (Ty.Tfunction [] tvoid
+                                                  cc_default)) [])
+                                              Stmt.Sbreak)
+                                            Stmt.Sbreak)
+                                          LStmts.LSnil))))))))))
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'73
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                              (Ty.Tstruct _kprog_arm64_addressing noattr)) _b
+                            (tptr (tvolatile tuchar))))
+                        (Stmt.Sbuiltin none
+                          (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                          [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                          [(Expr.Eaddrof
+                             (Expr.Ederef
+                               (Expr.Ebinop Binop.Oadd
+                                 (Expr.Etempvar _t'73 (tptr (tvolatile tuchar)))
+                                 (Expr.Ebinop Binop.Oadd
+                                   (Expr.Etempvar ___a64_stw_index__1 tulong)
+                                   (Expr.Econst_int (Integers.Int.repr 6) tint)
+                                   tulong) (tptr (tvolatile tuchar)))
+                               (tvolatile tuchar)) (tptr (tvolatile tuchar))),
+                           (Expr.Ecast
+                             (Expr.Ebinop Binop.Oshr
+                               (Expr.Etempvar ___kprog_a64_bl_value__14 tulong)
+                               (Expr.Etempvar ___kprog_a64_bl_shift__14 tulong)
+                               tulong) tuchar)]))))))
+              Stmt.Sbreak)
+            Stmt.Sskip))
+        (Stmt.Ssequence
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                              (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                              (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                              tint)
+            (Stmt.Sset _t'61
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                tuint))
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                                (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                tint)
+              (Stmt.Ssequence
+                (Stmt.Sset _t'61
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                    tuint))
+                (Stmt.Sset _t'61
+                  (Expr.Ecast (Expr.Etempvar _t'61 tuint) tuint)))
+              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                  (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                                  (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                  tint)
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'61
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+                    (Stmt.Sset _t'61
+                      (Expr.Ecast (Expr.Etempvar _t'61 tuint) tuint)))
+                  (Stmt.Sset _t'61
+                    (Expr.Ecast (Expr.Etempvar _t'61 tuint) tuint)))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'61
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                        tuint))
+                    (Stmt.Sset _t'61
+                      (Expr.Ecast (Expr.Etempvar _t'61 tuint) tuint)))
+                  (Stmt.Sset _t'61
+                    (Expr.Ecast (Expr.Etempvar _t'61 tuint) tuint))))))
+          (Stmt.Sifthenelse (Expr.Ecast
+                              (Expr.Ebinop Binop.Oand
+                                (Expr.Ebinop Binop.Oshr
+                                  (Expr.Etempvar _t'61 tuint)
+                                  (Expr.Econst_int (Integers.Int.repr 7) tint)
+                                  tuint)
+                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                tuint) tuchar)
+            (Stmt.Sloop
+              (Stmt.Ssequence
+                (Stmt.Sset ___kprog_a64_bl_lane__15
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 7) tint)
+                    tulong))
+                (Stmt.Ssequence
+                  (Stmt.Sset ___kprog_a64_bl_value__15
+                    (Expr.Etempvar ___a64_stw_value__1 tulong))
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___kprog_a64_bl_shift__15
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+                    (Stmt.Ssequence
+                      (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_bl_lane__15 tulong)
+                        (LStmts.LScons (some 0)
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___kprog_a64_bl_shift__15
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                tulong))
+                            Stmt.Sbreak)
+                          (LStmts.LScons (some 1)
+                            (Stmt.Ssequence
+                              (Stmt.Sset ___kprog_a64_bl_shift__15
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 8) tint)
+                                  tulong))
+                              Stmt.Sbreak)
+                            (LStmts.LScons (some 2)
+                              (Stmt.Ssequence
+                                (Stmt.Sset ___kprog_a64_bl_shift__15
+                                  (Expr.Ecast
+                                    (Expr.Econst_int (Integers.Int.repr 16) tint)
+                                    tulong))
+                                Stmt.Sbreak)
+                              (LStmts.LScons (some 3)
+                                (Stmt.Ssequence
+                                  (Stmt.Sset ___kprog_a64_bl_shift__15
+                                    (Expr.Ecast
+                                      (Expr.Econst_int (Integers.Int.repr 24) tint)
+                                      tulong))
+                                  Stmt.Sbreak)
+                                (LStmts.LScons (some 4)
+                                  (Stmt.Ssequence
+                                    (Stmt.Sset ___kprog_a64_bl_shift__15
+                                      (Expr.Ecast
+                                        (Expr.Econst_int (Integers.Int.repr 32) tint)
+                                        tulong))
+                                    Stmt.Sbreak)
+                                  (LStmts.LScons (some 5)
+                                    (Stmt.Ssequence
+                                      (Stmt.Sset ___kprog_a64_bl_shift__15
+                                        (Expr.Ecast
+                                          (Expr.Econst_int (Integers.Int.repr 40) tint)
+                                          tulong))
+                                      Stmt.Sbreak)
+                                    (LStmts.LScons (some 6)
+                                      (Stmt.Ssequence
+                                        (Stmt.Sset ___kprog_a64_bl_shift__15
+                                          (Expr.Ecast
+                                            (Expr.Econst_int (Integers.Int.repr 48) tint)
+                                            tulong))
+                                        Stmt.Sbreak)
+                                      (LStmts.LScons (some 7)
+                                        (Stmt.Ssequence
+                                          (Stmt.Sset ___kprog_a64_bl_shift__15
+                                            (Expr.Ecast
+                                              (Expr.Econst_int (Integers.Int.repr 56) tint)
+                                              tulong))
+                                          Stmt.Sbreak)
+                                        (LStmts.LScons none
+                                          (Stmt.Ssequence
+                                            (Stmt.Sloop
+                                              (Stmt.Scall none
+                                                (Expr.Evar _arm64_sim_unsupported_opcode 
+                                                (Ty.Tfunction [] tvoid
+                                                  cc_default)) [])
+                                              Stmt.Sbreak)
+                                            Stmt.Sbreak)
+                                          LStmts.LSnil))))))))))
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'72
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                              (Ty.Tstruct _kprog_arm64_addressing noattr)) _b
+                            (tptr (tvolatile tuchar))))
+                        (Stmt.Sbuiltin none
+                          (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                          [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                          [(Expr.Eaddrof
+                             (Expr.Ederef
+                               (Expr.Ebinop Binop.Oadd
+                                 (Expr.Etempvar _t'72 (tptr (tvolatile tuchar)))
+                                 (Expr.Ebinop Binop.Oadd
+                                   (Expr.Etempvar ___a64_stw_index__1 tulong)
+                                   (Expr.Econst_int (Integers.Int.repr 7) tint)
+                                   tulong) (tptr (tvolatile tuchar)))
+                               (tvolatile tuchar)) (tptr (tvolatile tuchar))),
+                           (Expr.Ecast
+                             (Expr.Ebinop Binop.Oshr
+                               (Expr.Etempvar ___kprog_a64_bl_value__15 tulong)
+                               (Expr.Etempvar ___kprog_a64_bl_shift__15 tulong)
+                               tulong) tuchar)]))))))
+              Stmt.Sbreak)
+            Stmt.Sskip))))))
+
+def s_kprog_arm64_memory_write_116 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                      (Expr.Etempvar ___a64_loss_i tuint)
+                      (Expr.Econst_int (Integers.Int.repr 8) tuint) tint)
+    Stmt.Sskip
+    Stmt.Sbreak)
+  (Stmt.Ssequence
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                        (Expr.Etempvar ___a64_loss_i tuint)
+                        (Expr.Etempvar ___a64_loss_width tuchar) tint)
+      (Stmt.Ssequence
+        (Stmt.Sset _t'96
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+              (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+            (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+        (Stmt.Ssequence
+          (Stmt.Sset _t'97
+            (Expr.Efield
+              (Expr.Ederef
+                (Expr.Etempvar _t'96 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                (Ty.Tstruct _kprog_arm64_coordinates noattr)) _stack_offset
+              tlong))
+          (Stmt.Sset _t'62
+            (Expr.Ecast
+              (Expr.Ebinop Binop.Olt
+                (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___a64_loss_off tlong)
+                  (Expr.Etempvar ___a64_loss_i tuint) tlong)
+                (Expr.Etempvar _t'97 tlong) tint) tbool))))
+      (Stmt.Sset _t'62 (Expr.Econst_int (Integers.Int.repr 0) tint)))
+    (Stmt.Sifthenelse (Expr.Etempvar _t'62 tint)
+      (Stmt.Sloop
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'95
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                  (Ty.Tstruct _kprog_arm64_addressing noattr)) _bias tlong))
+            (Stmt.Sset ___a64_stw_index__1
+              (Expr.Ebinop Binop.Oadd
+                (Expr.Ecast (Expr.Etempvar _t'95 tlong) tulong)
+                (Expr.Ecast
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Etempvar ___a64_loss_off tlong)
+                    (Expr.Etempvar ___a64_loss_i tuint) tlong) tulong)
+                tulong)))
+          (Stmt.Ssequence
+            (Stmt.Sset ___a64_stw_width__1
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                tuchar))
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Scall (some _t'43)
+                    (Expr.Evar _native_lab_entry_input (Ty.Tfunction 
+                                                         [tuint] tulong
+                                                         cc_default))
+                    [(Expr.Econst_int (Integers.Int.repr 6) tint)])
+                  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                      (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                                      (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                      tint)
+                    (Stmt.Sset _t'44
+                      (Expr.Ecast
+                        (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+                        tulong))
+                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                        (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                                        (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                        tint)
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'44
+                          (Expr.Ecast
+                            (Expr.Econst_long (Integers.Int64.repr 65535) tulong)
+                            tulong))
+                        (Stmt.Sset _t'44
+                          (Expr.Ecast (Expr.Etempvar _t'44 tulong) tulong)))
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                          (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                                          (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                          tint)
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            s_kprog_arm64_memory_write_94
+                            (Stmt.Sset _t'44
+                              (Expr.Ecast (Expr.Etempvar _t'44 tulong)
+                                tulong)))
+                          (Stmt.Sset _t'44
+                            (Expr.Ecast (Expr.Etempvar _t'44 tulong) tulong)))
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            s_kprog_arm64_memory_write_95
+                            (Stmt.Sset _t'44
+                              (Expr.Ecast (Expr.Etempvar _t'44 tulong)
+                                tulong)))
+                          (Stmt.Sset _t'44
+                            (Expr.Ecast (Expr.Etempvar _t'44 tulong) tulong)))))))
+                (Stmt.Sset ___a64_stw_value__1
+                  (Expr.Ebinop Binop.Oand (Expr.Etempvar _t'43 tulong)
+                    (Expr.Etempvar _t'44 tulong) tulong)))
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                        (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                                        (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                        tint)
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                          (Expr.Ebinop Binop.Oand
+                                            (Expr.Ecast
+                                              (Expr.Etempvar ___a64_stw_index__1 tulong)
+                                              tuint)
+                                            (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                                            tuint)
+                                          (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                                          tint)
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'45
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 1) tint)
+                              tint))
+                          (Stmt.Sset _t'45
+                            (Expr.Ecast (Expr.Etempvar _t'45 tint) tbool)))
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'45
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 0) tint)
+                              tint))
+                          (Stmt.Sset _t'45
+                            (Expr.Ecast (Expr.Etempvar _t'45 tint) tbool))))
+                      (Stmt.Sset _t'45
+                        (Expr.Econst_int (Integers.Int.repr 0) tint)))
+                    (Stmt.Sifthenelse (Expr.Etempvar _t'45 tint)
+                      (Stmt.Sset _t'46
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                          tuint))
+                      (Stmt.Ssequence
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                            (Expr.Ebinop Binop.Oand
+                                              (Expr.Ecast
+                                                (Expr.Etempvar ___a64_stw_index__1 tulong)
+                                                tuint)
+                                              (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                                              tuint)
+                                            (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                                            tint)
+                          (Stmt.Sset _t'47
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 1) tint)
+                              tint))
+                          (Stmt.Sset _t'47
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 0) tint)
+                              tint)))
+                        (Stmt.Sifthenelse (Expr.Etempvar _t'47 tint)
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'46
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                tuint))
+                            (Stmt.Sset _t'46
+                              (Expr.Ecast (Expr.Etempvar _t'46 tuint) tuint)))
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'46
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                tuint))
+                            (Stmt.Sset _t'46
+                              (Expr.Ecast (Expr.Etempvar _t'46 tuint) tuint)))))))
+                  (Stmt.Sset ___a64_stw_action__1
+                    (Expr.Ecast
+                      (Expr.Ecast (Expr.Etempvar _t'46 tuint) tuchar) tuchar)))
+                (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                    (Expr.Etempvar ___a64_stw_action__1 tuchar)
+                                    (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                                    tint)
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'94
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                            (Ty.Tstruct _kprog_arm64_addressing noattr)) _q
+                          (tptr (tvolatile tulong))))
+                      (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint64)
+                        [(tptr (tvolatile tulong)), (tvolatile tulong)]
+                        [(Expr.Eaddrof
+                           (Expr.Ederef
+                             (Expr.Ebinop Binop.Oadd
+                               (Expr.Etempvar _t'94 (tptr (tvolatile tulong)))
+                               (Expr.Ebinop Binop.Oshr
+                                 (Expr.Ecast
+                                   (Expr.Etempvar ___a64_stw_index__1 tulong)
+                                   tulong)
+                                 (Expr.Econst_int (Integers.Int.repr 3) tint)
+                                 tulong) (tptr (tvolatile tulong)))
+                             (tvolatile tulong)) (tptr (tvolatile tulong))),
+                         (Expr.Etempvar ___a64_stw_value__1 tulong)]))
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                            (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                                            (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                            tint)
+                          (Stmt.Sset _t'50
+                            (Expr.Econst_int (Integers.Int.repr 1) tint))
+                          (Stmt.Sset _t'50
+                            (Expr.Ecast
+                              (Expr.Ebinop Binop.Oeq
+                                (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                                (Expr.Econst_int (Integers.Int.repr 10) tuint)
+                                tint) tbool)))
+                        (Stmt.Sifthenelse (Expr.Etempvar _t'50 tint)
+                          (Stmt.Ssequence
+                            (Stmt.Sloop
+                              s_kprog_arm64_memory_write_96
+                              s_kprog_arm64_memory_write_97)
+                            (Stmt.Sloop
+                              s_kprog_arm64_memory_write_98
+                              s_kprog_arm64_memory_write_99))
+                          Stmt.Sskip))
+                      (Stmt.Sloop
+                        (Stmt.Ssequence
+                          (Stmt.Sset ___ti__3
+                            (Expr.Ebinop Binop.Oshr
+                              (Expr.Ecast
+                                (Expr.Etempvar ___a64_stw_index__1 tulong)
+                                tulong)
+                              (Expr.Econst_int (Integers.Int.repr 3) tint)
+                              tulong))
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___ts__3
+                              (Expr.Ecast
+                                (Expr.Ebinop Binop.Omul
+                                  (Expr.Ebinop Binop.Oand
+                                    (Expr.Etempvar ___ti__3 tulong)
+                                    (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                                    tulong)
+                                  (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                  tulong) tuint))
+                            (Stmt.Ssequence
+                              s_kprog_arm64_memory_write_100
+                              s_kprog_arm64_memory_write_101)))
+                        Stmt.Sbreak)))
+                  (Stmt.Ssequence
+                    (Stmt.Sloop
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___ti__4
+                          (Expr.Ebinop Binop.Oshr
+                            (Expr.Ecast
+                              (Expr.Etempvar ___a64_stw_index__1 tulong)
+                              tulong)
+                            (Expr.Econst_int (Integers.Int.repr 3) tint)
+                            tulong))
+                        (Stmt.Ssequence
+                          (Stmt.Sset ___ts__4
+                            (Expr.Ecast
+                              (Expr.Ebinop Binop.Omul
+                                (Expr.Ebinop Binop.Oand
+                                  (Expr.Etempvar ___ti__4 tulong)
+                                  (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                                  tulong)
+                                (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                tulong) tuint))
+                          (Stmt.Ssequence
+                            s_kprog_arm64_memory_write_102
+                            (Stmt.Ssequence
+                              s_kprog_arm64_memory_write_103
+                              s_kprog_arm64_memory_write_104))))
+                      Stmt.Sbreak)
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                            (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                                            (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                            tint)
+                          (Stmt.Sset _t'53
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                              tuint))
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                              (Expr.Etempvar ___a64_stw_width__1 tuchar)
+                                              (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                              tint)
+                            s_kprog_arm64_memory_write_105
+                            s_kprog_arm64_memory_write_106))
+                        (Stmt.Sset ___a64_stw_last__1
+                          (Expr.Ebinop Binop.Osub
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Etempvar ___a64_stw_index__1 tulong)
+                              (Expr.Etempvar _t'53 tuint) tulong)
+                            (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                            tulong)))
+                      (Stmt.Ssequence
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.One
+                                            (Expr.Ebinop Binop.Oshr
+                                              (Expr.Ecast
+                                                (Expr.Etempvar ___a64_stw_last__1 tulong)
+                                                tulong)
+                                              (Expr.Econst_int (Integers.Int.repr 3) tint)
+                                              tulong)
+                                            (Expr.Ebinop Binop.Oshr
+                                              (Expr.Ecast
+                                                (Expr.Etempvar ___a64_stw_index__1 tulong)
+                                                tulong)
+                                              (Expr.Econst_int (Integers.Int.repr 3) tint)
+                                              tulong) tint)
+                          (Stmt.Sloop
+                            s_kprog_arm64_memory_write_107
+                            s_kprog_arm64_memory_write_108)
+                          Stmt.Sskip)
+                        (Stmt.Ssequence
+                          (Stmt.Sloop
+                            (Stmt.Ssequence
+                              s_kprog_arm64_memory_write_109
+                              s_kprog_arm64_memory_write_110)
+                            Stmt.Sbreak)
+                          (Stmt.Ssequence
+                            (Stmt.Ssequence
+                              s_kprog_arm64_memory_write_111
+                              (Stmt.Sifthenelse (Expr.Ecast
+                                                  (Expr.Ebinop Binop.Oand
+                                                    (Expr.Ebinop Binop.Oshr
+                                                      (Expr.Etempvar _t'55 tuint)
+                                                      (Expr.Econst_int (Integers.Int.repr 1) tint)
+                                                      tuint)
+                                                    (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                                    tuint) tuchar)
+                                (Stmt.Sloop
+                                  s_kprog_arm64_memory_write_112
+                                  s_kprog_arm64_memory_write_113)
+                                Stmt.Sskip))
+                            (Stmt.Ssequence
+                              s_kprog_arm64_memory_write_114
+                              s_kprog_arm64_memory_write_115)))))))))))
+        Stmt.Sbreak)
+      Stmt.Sskip)))
+
+def s_kprog_arm64_memory_write_117 : Stmt :=
+(Stmt.Sset ___a64_loss_i
+  (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___a64_loss_i tuint)
+    (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))
+
+def s_kprog_arm64_memory_write_118 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'64
+      (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 4294967295) tulong)
+        tulong))
+    (Stmt.Sset _t'64 (Expr.Ecast (Expr.Etempvar _t'64 tulong) tulong)))
+  (Stmt.Sset _t'64 (Expr.Ecast (Expr.Etempvar _t'64 tulong) tulong)))
+
+def s_kprog_arm64_memory_write_119 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'64
+      (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr (-1)) tulong)
+        tulong))
+    (Stmt.Sset _t'64 (Expr.Ecast (Expr.Etempvar _t'64 tulong) tulong)))
+  (Stmt.Sset _t'64 (Expr.Ecast (Expr.Etempvar _t'64 tulong) tulong)))
+
+def s_kprog_arm64_memory_write_120 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sassign (Expr.Evar ___kprog_c_store_value__6 tushort)
+    (Expr.Ecast (Expr.Etempvar ___kprog_a64_sb_value__1 tulong) tushort))
+  (Stmt.Sbuiltin none (ExtFun.EF_memcpy 2 1) [(tptr tvoid), (tptr tushort)]
+    [(Expr.Ecast
+       (Expr.Etempvar ___kprog_a64_sb_addr__1 (tptr (tvolatile tuchar)))
+       (tptr tvoid)),
+     (Expr.Eaddrof (Expr.Evar ___kprog_c_store_value__6 tushort)
+       (tptr tushort))]))
+
+def s_kprog_arm64_memory_write_121 : Stmt :=
+Stmt.Sbreak
+
+def s_kprog_arm64_memory_write_122 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sassign (Expr.Evar ___kprog_c_store_value__7 tuchar)
+    (Expr.Ecast (Expr.Etempvar ___kprog_a64_sb_value__1 tulong) tuchar))
+  (Stmt.Sbuiltin none (ExtFun.EF_memcpy 1 1) [(tptr tvoid), (tptr tuchar)]
+    [(Expr.Ecast
+       (Expr.Etempvar ___kprog_a64_sb_addr__1 (tptr (tvolatile tuchar)))
+       (tptr tvoid)),
+     (Expr.Eaddrof (Expr.Evar ___kprog_c_store_value__7 tuchar)
+       (tptr tuchar))]))
+
+def s_kprog_arm64_memory_write_123 : Stmt :=
+Stmt.Sbreak
+
+def s_kprog_arm64_memory_write_124 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'137
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+          (Ty.Tstruct _kprog_arm64_addressing noattr)) _abi_kind tuchar))
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq (Expr.Etempvar _t'137 tuchar)
+                        (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
+      (Stmt.Sset _t'65
+        (Expr.Ecast
+          (Expr.Ebinop Binop.Oeq (Expr.Etempvar ___a64_mwr_tag tuchar)
+            (Expr.Econst_int (Integers.Int.repr 1) tuint) tint) tbool))
+      (Stmt.Sset _t'65 (Expr.Econst_int (Integers.Int.repr 0) tint))))
+  (Stmt.Sifthenelse (Expr.Etempvar _t'65 tint)
+    (Stmt.Sloop
+      (Stmt.Ssequence
+        (Stmt.Sloop
+          (Stmt.Ssequence
+            (Stmt.Sloop
+              (Stmt.Ssequence
+                (Stmt.Sset ___a64_l_reg__3 (Expr.Etempvar _base tulong))
+                (Stmt.Ssequence
+                  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                      (Expr.Etempvar ___a64_l_reg__3 tulong)
+                                      (Expr.Econst_int (Integers.Int.repr 32) tuint)
+                                      tint)
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'135
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                            (Ty.Tstruct _kprog_arm64_addressing noattr))
+                          _coordinates
+                          (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'136
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Etempvar _t'135 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                              (Ty.Tstruct _kprog_arm64_coordinates noattr))
+                            _stack_offset tlong))
+                        (Stmt.Sset _t'18
+                          (Expr.Ecast
+                            (Expr.Ecast
+                              (Expr.Ecast (Expr.Etempvar _t'136 tlong) tlong)
+                              (tptr tvoid)) (tptr tvoid)))))
+                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                        (Expr.Etempvar ___a64_l_reg__3 tulong)
+                                        (Expr.Econst_int (Integers.Int.repr 31) tuint)
+                                        tint)
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'133
+                            (Expr.Ederef
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                                (Expr.Ecast
+                                  (Expr.Etempvar ___a64_l_reg__3 tulong)
+                                  tuchar)
+                                (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                              (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'134
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Etempvar _t'133 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                                  (Ty.Tunion _arm64_sim_gpr noattr)) _ptr
+                                (tptr tvoid)))
+                            (Stmt.Sset _t'18
+                              (Expr.Ecast (Expr.Etempvar _t'134 (tptr tvoid))
+                                (tptr tvoid)))))
+                        (Stmt.Sset _t'18
+                          (Expr.Ecast (Expr.Etempvar _t'18 (tptr tvoid))
+                            (tptr tvoid))))
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'18
+                          (Expr.Ecast
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 0) tint)
+                              (tptr tvoid)) (tptr tvoid)))
+                        (Stmt.Sset _t'18
+                          (Expr.Ecast (Expr.Etempvar _t'18 (tptr tvoid))
+                            (tptr tvoid))))))
+                  (Stmt.Sset ___a64_skb_pointer
+                    (Expr.Etempvar _t'18 (tptr tvoid)))))
+              Stmt.Sbreak)
+            (Stmt.Ssequence
+              (Stmt.Sset _t'132
+                (Expr.Efield
+                  (Expr.Ederef
+                    (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                    (Ty.Tstruct _kprog_arm64_addressing noattr))
+                  _helper_abi_base (tptr tvoid)))
+              (Stmt.Sset ___a64_sw_off
+                (Expr.Ecast
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Ebinop Binop.Osub
+                      (Expr.Ecast
+                        (Expr.Ecast
+                          (Expr.Etempvar ___a64_skb_pointer (tptr tvoid))
+                          tlong) tulong)
+                      (Expr.Ecast
+                        (Expr.Ecast (Expr.Etempvar _t'132 (tptr tvoid))
+                          tlong) tulong) tulong)
+                    (Expr.Ecast (Expr.Etempvar ___a64_mwr_off tlong) tulong)
+                    tulong) tlong))))
+          Stmt.Sbreak)
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                (Expr.Etempvar _width tuchar)
+                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                tint)
+              (Stmt.Sset _t'19
+                (Expr.Ecast
+                  (Expr.Econst_long (Integers.Int64.repr 255) tulong) tulong))
+              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                  (Expr.Etempvar _width tuchar)
+                                  (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                  tint)
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'19
+                    (Expr.Ecast
+                      (Expr.Econst_long (Integers.Int64.repr 65535) tulong)
+                      tulong))
+                  (Stmt.Sset _t'19
+                    (Expr.Ecast (Expr.Etempvar _t'19 tulong) tulong)))
+                (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                    (Expr.Etempvar _width tuchar)
+                                    (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                    tint)
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'19
+                        (Expr.Ecast
+                          (Expr.Econst_long (Integers.Int64.repr 4294967295) tulong)
+                          tulong))
+                      (Stmt.Sset _t'19
+                        (Expr.Ecast (Expr.Etempvar _t'19 tulong) tulong)))
+                    (Stmt.Sset _t'19
+                      (Expr.Ecast (Expr.Etempvar _t'19 tulong) tulong)))
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'19
+                        (Expr.Ecast
+                          (Expr.Econst_long (Integers.Int64.repr (-1)) tulong)
+                          tulong))
+                      (Stmt.Sset _t'19
+                        (Expr.Ecast (Expr.Etempvar _t'19 tulong) tulong)))
+                    (Stmt.Sset _t'19
+                      (Expr.Ecast (Expr.Etempvar _t'19 tulong) tulong))))))
+            (Stmt.Sset ___a64_sw_value
+              (Expr.Ebinop Binop.Oand (Expr.Etempvar _value tulong)
+                (Expr.Etempvar _t'19 tulong) tulong)))
+          (Stmt.Ssequence
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                (Expr.Etempvar ___a64_sw_off tlong)
+                                (Expr.Econst_long (Integers.Int64.repr 48) tlong)
+                                tint)
+              (Stmt.Sset _t'22
+                (Expr.Ecast
+                  (Expr.Ebinop Binop.Ole (Expr.Etempvar ___a64_sw_off tlong)
+                    (Expr.Ebinop Binop.Osub
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Econst_long (Integers.Int64.repr 48) tlong)
+                        (Expr.Econst_int (Integers.Int.repr 20) tint) tlong)
+                      (Expr.Etempvar _width tuchar) tlong) tint) tbool))
+              (Stmt.Sset _t'22 (Expr.Econst_int (Integers.Int.repr 0) tint)))
+            (Stmt.Sifthenelse (Expr.Etempvar _t'22 tint)
+              (Stmt.Ssequence
+                (Stmt.Sset ___a64_sw_ctx_off
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Ebinop Binop.Osub
+                      (Expr.Etempvar ___a64_sw_off tlong)
+                      (Expr.Econst_long (Integers.Int64.repr 48) tlong)
+                      tlong)
+                    (Expr.Econst_long (Integers.Int64.repr 48) tulong)
+                    tulong))
+                (Stmt.Sloop
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'131
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                            (Ty.Tstruct _kprog_arm64_addressing noattr))
+                          _helper_context (tptr tvoid)))
+                      (Stmt.Sset ___a64_cbw_addr
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Ecast (Expr.Etempvar _t'131 (tptr tvoid))
+                            (tptr (tvolatile tuchar)))
+                          (Expr.Etempvar ___a64_sw_ctx_off tlong)
+                          (tptr (tvolatile tuchar)))))
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___a64_cbw_value
+                        (Expr.Etempvar ___a64_sw_value tulong))
+                      (Stmt.Ssequence
+                        (Stmt.Sbuiltin none
+                          (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                          [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                          [(Expr.Eaddrof
+                             (Expr.Ederef
+                               (Expr.Ebinop Binop.Oadd
+                                 (Expr.Etempvar ___a64_cbw_addr (tptr (tvolatile tuchar)))
+                                 (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                 (tptr (tvolatile tuchar)))
+                               (tvolatile tuchar)) (tptr (tvolatile tuchar))),
+                           (Expr.Ecast
+                             (Expr.Etempvar ___a64_cbw_value tulong) tuchar)])
+                        (Stmt.Ssequence
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                              (Expr.Etempvar _width tuchar)
+                                              (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                              tint)
+                            (Stmt.Sbuiltin none
+                              (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                              [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                              [(Expr.Eaddrof
+                                 (Expr.Ederef
+                                   (Expr.Ebinop Binop.Oadd
+                                     (Expr.Etempvar ___a64_cbw_addr (tptr (tvolatile tuchar)))
+                                     (Expr.Econst_int (Integers.Int.repr 1) tint)
+                                     (tptr (tvolatile tuchar)))
+                                   (tvolatile tuchar))
+                                 (tptr (tvolatile tuchar))),
+                               (Expr.Ecast
+                                 (Expr.Ebinop Binop.Oshr
+                                   (Expr.Etempvar ___a64_cbw_value tulong)
+                                   (Expr.Econst_int (Integers.Int.repr 8) tint)
+                                   tulong) tuchar)])
+                            Stmt.Sskip)
+                          (Stmt.Ssequence
+                            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                                (Expr.Etempvar _width tuchar)
+                                                (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                                tint)
+                              (Stmt.Sbuiltin none
+                                (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                                [(tptr (tvolatile tuchar)),
+                                 (tvolatile tuchar)]
+                                [(Expr.Eaddrof
+                                   (Expr.Ederef
+                                     (Expr.Ebinop Binop.Oadd
+                                       (Expr.Etempvar ___a64_cbw_addr (tptr (tvolatile tuchar)))
+                                       (Expr.Econst_int (Integers.Int.repr 2) tint)
+                                       (tptr (tvolatile tuchar)))
+                                     (tvolatile tuchar))
+                                   (tptr (tvolatile tuchar))),
+                                 (Expr.Ecast
+                                   (Expr.Ebinop Binop.Oshr
+                                     (Expr.Etempvar ___a64_cbw_value tulong)
+                                     (Expr.Econst_int (Integers.Int.repr 16) tint)
+                                     tulong) tuchar)])
+                              Stmt.Sskip)
+                            (Stmt.Ssequence
+                              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                                  (Expr.Etempvar _width tuchar)
+                                                  (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                                  tint)
+                                s_kprog_arm64_memory_write_26
+                                Stmt.Sskip)
+                              (Stmt.Ssequence
+                                (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                                    (Expr.Etempvar _width tuchar)
+                                                    (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                                    tint)
+                                  s_kprog_arm64_memory_write_27
+                                  Stmt.Sskip)
+                                (Stmt.Ssequence
+                                  s_kprog_arm64_memory_write_28
+                                  s_kprog_arm64_memory_write_29))))))))
+                  Stmt.Sbreak))
+              (Stmt.Ssequence
+                (Stmt.Sloop
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___a64_l_reg__4 (Expr.Etempvar _base tulong))
+                    (Stmt.Ssequence
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                          (Expr.Etempvar ___a64_l_reg__4 tulong)
+                                          (Expr.Econst_int (Integers.Int.repr 32) tuint)
+                                          tint)
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'129
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                (Ty.Tstruct _kprog_arm64_addressing noattr))
+                              _coordinates
+                              (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'130
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Etempvar _t'129 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                                  (Ty.Tstruct _kprog_arm64_coordinates noattr))
+                                _stack_offset tlong))
+                            (Stmt.Sset _t'20
+                              (Expr.Ecast
+                                (Expr.Ecast
+                                  (Expr.Ecast (Expr.Etempvar _t'130 tlong)
+                                    tlong) (tptr tvoid)) (tptr tvoid)))))
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                            (Expr.Etempvar ___a64_l_reg__4 tulong)
+                                            (Expr.Econst_int (Integers.Int.repr 31) tuint)
+                                            tint)
+                          (Stmt.Ssequence
+                            s_kprog_arm64_memory_write_30
+                            (Stmt.Sset _t'20
+                              (Expr.Ecast (Expr.Etempvar _t'20 (tptr tvoid))
+                                (tptr tvoid))))
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'20
+                              (Expr.Ecast
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                  (tptr tvoid)) (tptr tvoid)))
+                            (Stmt.Sset _t'20
+                              (Expr.Ecast (Expr.Etempvar _t'20 (tptr tvoid))
+                                (tptr tvoid))))))
+                      (Stmt.Sset ___a64_sw_pointer
+                        (Expr.Etempvar _t'20 (tptr tvoid)))))
+                  Stmt.Sbreak)
+                (Stmt.Sloop
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___kprog_a64_sb_addr
+                      (Expr.Ecast
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Ecast
+                            (Expr.Etempvar ___a64_sw_pointer (tptr tvoid))
+                            (tptr tuchar))
+                          (Expr.Etempvar ___a64_mwr_off tlong) (tptr tuchar))
+                        (tptr (tvolatile tuchar))))
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___kprog_a64_sb_width
+                        (Expr.Ecast (Expr.Etempvar _width tuchar) tuchar))
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                              (Expr.Etempvar ___kprog_a64_sb_width tuchar)
+                                              (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                              tint)
+                            (Stmt.Sset _t'21
+                              (Expr.Ecast
+                                (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+                                tulong))
+                            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                (Expr.Etempvar ___kprog_a64_sb_width tuchar)
+                                                (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                                tint)
+                              s_kprog_arm64_memory_write_31
+                              s_kprog_arm64_memory_write_32))
+                          (Stmt.Sset ___kprog_a64_sb_value
+                            (Expr.Ebinop Binop.Oand
+                              (Expr.Etempvar ___a64_sw_value tulong)
+                              (Expr.Etempvar _t'21 tulong) tulong)))
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                            (Expr.Etempvar ___kprog_a64_sb_width tuchar)
+                                            (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                            tint)
+                          (Stmt.Sloop
+                            (Stmt.Ssequence
+                              (Stmt.Sassign
+                                (Expr.Evar ___kprog_c_store_value tulong)
+                                (Expr.Ecast
+                                  (Expr.Etempvar ___kprog_a64_sb_value tulong)
+                                  tulong))
+                              (Stmt.Sbuiltin none (ExtFun.EF_memcpy 8 1)
+                                [(tptr tvoid), (tptr tulong)]
+                                [(Expr.Ecast
+                                   (Expr.Etempvar ___kprog_a64_sb_addr (tptr (tvolatile tuchar)))
+                                   (tptr tvoid)),
+                                 (Expr.Eaddrof
+                                   (Expr.Evar ___kprog_c_store_value tulong)
+                                   (tptr tulong))]))
+                            Stmt.Sbreak)
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                              (Expr.Etempvar ___kprog_a64_sb_width tuchar)
+                                              (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                              tint)
+                            (Stmt.Sloop
+                              s_kprog_arm64_memory_write_33
+                              s_kprog_arm64_memory_write_34)
+                            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                                (Expr.Etempvar ___kprog_a64_sb_width tuchar)
+                                                (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                                tint)
+                              (Stmt.Sloop
+                                s_kprog_arm64_memory_write_35
+                                s_kprog_arm64_memory_write_36)
+                              (Stmt.Sloop
+                                s_kprog_arm64_memory_write_37
+                                s_kprog_arm64_memory_write_38)))))))
+                  Stmt.Sbreak))))))
+      Stmt.Sbreak)
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                        (Expr.Etempvar ___a64_mwr_arm tuchar)
+                        (Expr.Econst_int (Integers.Int.repr 0) tuint) tint)
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                              (Expr.Etempvar _base tulong)
+                              (Expr.Econst_int (Integers.Int.repr 32) tuint)
+                              tint)
+            (Stmt.Sset _t'23
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                tuint))
+            (Stmt.Sset _t'23
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                tuint)))
+          (Stmt.Sset ___a64_mwr_bsrc
+            (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'23 tuint) tuchar)
+              tuchar)))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'126
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                  (Ty.Tstruct _kprog_arm64_addressing noattr)) _coordinates
+                (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+            (Stmt.Sset ___a64_mwr_base
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _t'126 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                  (Ty.Tstruct _kprog_arm64_coordinates noattr)) _stack_offset
+                tlong)))
+          (Stmt.Ssequence
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.One
+                                (Expr.Etempvar ___a64_mwr_bsrc tuchar)
+                                (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                                tint)
+              (Stmt.Ssequence
+                (Stmt.Sloop
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___a64_l_reg__5 (Expr.Etempvar _base tulong))
+                    (Stmt.Ssequence
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                          (Expr.Etempvar ___a64_l_reg__5 tulong)
+                                          (Expr.Econst_int (Integers.Int.repr 32) tuint)
+                                          tint)
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'124
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                (Ty.Tstruct _kprog_arm64_addressing noattr))
+                              _coordinates
+                              (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                          s_kprog_arm64_memory_write_39)
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                            (Expr.Etempvar ___a64_l_reg__5 tulong)
+                                            (Expr.Econst_int (Integers.Int.repr 31) tuint)
+                                            tint)
+                          s_kprog_arm64_memory_write_40
+                          s_kprog_arm64_memory_write_41))
+                      (Stmt.Sset ___a64_mwr_pointer
+                        (Expr.Etempvar _t'24 (tptr tvoid)))))
+                  Stmt.Sbreak)
+                (Stmt.Sset ___a64_mwr_base
+                  (Expr.Ecast
+                    (Expr.Ecast
+                      (Expr.Etempvar ___a64_mwr_pointer (tptr tvoid)) tlong)
+                    tlong)))
+              Stmt.Sskip)
+            (Stmt.Sloop
+              (Stmt.Ssequence
+                (Stmt.Sset ___a64_loss_off
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Etempvar ___a64_mwr_base tlong)
+                    (Expr.Etempvar ___a64_mwr_off tlong) tlong))
+                (Stmt.Ssequence
+                  (Stmt.Sset ___a64_loss_width
+                    (Expr.Ecast (Expr.Etempvar _width tuchar) tuchar))
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___a64_loss_value
+                      (Expr.Etempvar _value tulong))
+                    (Stmt.Ssequence
+                      (Stmt.Sloop
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'121
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                  (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                _bias tlong))
+                            (Stmt.Sset ___a64_stw_index
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Ecast (Expr.Etempvar _t'121 tlong)
+                                  tulong)
+                                (Expr.Ecast
+                                  (Expr.Etempvar ___a64_loss_off tlong)
+                                  tulong) tulong)))
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___a64_stw_width
+                              (Expr.Ecast
+                                (Expr.Etempvar ___a64_loss_width tuchar)
+                                tuchar))
+                            (Stmt.Ssequence
+                              s_kprog_arm64_memory_write_42
+                              s_kprog_arm64_memory_write_92)))
+                        Stmt.Sbreak)
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'70
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                              (Ty.Tstruct _kprog_arm64_addressing noattr))
+                            _coordinates
+                            (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'71
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Etempvar _t'70 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                                (Ty.Tstruct _kprog_arm64_coordinates noattr))
+                              _stack_offset tlong))
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                              (Expr.Etempvar ___a64_loss_off tlong)
+                                              (Expr.Etempvar _t'71 tlong)
+                                              tint)
+                            (Stmt.Ssequence
+                              s_kprog_arm64_memory_write_93
+                              (Stmt.Sloop
+                                s_kprog_arm64_memory_write_116
+                                s_kprog_arm64_memory_write_117))
+                            Stmt.Sskip)))))))
+              Stmt.Sbreak))))
+      (Stmt.Ssequence
+        (Stmt.Sloop
+          (Stmt.Ssequence
+            (Stmt.Sset ___a64_l_reg__6 (Expr.Etempvar _base tulong))
+            (Stmt.Ssequence
+              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                  (Expr.Etempvar ___a64_l_reg__6 tulong)
+                                  (Expr.Econst_int (Integers.Int.repr 32) tuint)
+                                  tint)
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'68
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                        (Ty.Tstruct _kprog_arm64_addressing noattr))
+                      _coordinates
+                      (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))))
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'69
+                      (Expr.Efield
+                        (Expr.Ederef
+                          (Expr.Etempvar _t'68 (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
+                          (Ty.Tstruct _kprog_arm64_coordinates noattr))
+                        _stack_offset tlong))
+                    (Stmt.Sset _t'63
+                      (Expr.Ecast
+                        (Expr.Ecast
+                          (Expr.Ecast (Expr.Etempvar _t'69 tlong) tlong)
+                          (tptr tvoid)) (tptr tvoid)))))
+                (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                    (Expr.Etempvar ___a64_l_reg__6 tulong)
+                                    (Expr.Econst_int (Integers.Int.repr 31) tuint)
+                                    tint)
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'66
+                        (Expr.Ederef
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                            (Expr.Ecast
+                              (Expr.Etempvar ___a64_l_reg__6 tulong) tuchar)
+                            (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                          (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'67
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Etempvar _t'66 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                              (Ty.Tunion _arm64_sim_gpr noattr)) _ptr
+                            (tptr tvoid)))
+                        (Stmt.Sset _t'63
+                          (Expr.Ecast (Expr.Etempvar _t'67 (tptr tvoid))
+                            (tptr tvoid)))))
+                    (Stmt.Sset _t'63
+                      (Expr.Ecast (Expr.Etempvar _t'63 (tptr tvoid))
+                        (tptr tvoid))))
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'63
+                      (Expr.Ecast
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 0) tint)
+                          (tptr tvoid)) (tptr tvoid)))
+                    (Stmt.Sset _t'63
+                      (Expr.Ecast (Expr.Etempvar _t'63 (tptr tvoid))
+                        (tptr tvoid))))))
+              (Stmt.Sset ___a64_mwr_pointer__1
+                (Expr.Etempvar _t'63 (tptr tvoid)))))
+          Stmt.Sbreak)
+        (Stmt.Ssequence
+          (Stmt.Sset ___a64_mwr_addr
+            (Expr.Ebinop Binop.Oadd
+              (Expr.Ecast (Expr.Etempvar ___a64_mwr_pointer__1 (tptr tvoid))
+                (tptr tuchar)) (Expr.Etempvar ___a64_mwr_off tlong)
+              (tptr tuchar)))
+          (Stmt.Sloop
+            (Stmt.Ssequence
+              (Stmt.Sset ___kprog_a64_sb_addr__1
+                (Expr.Ecast (Expr.Etempvar ___a64_mwr_addr (tptr tvoid))
+                  (tptr (tvolatile tuchar))))
+              (Stmt.Ssequence
+                (Stmt.Sset ___kprog_a64_sb_width__1
+                  (Expr.Ecast (Expr.Etempvar _width tuchar) tuchar))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                        (Expr.Etempvar ___kprog_a64_sb_width__1 tuchar)
+                                        (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                        tint)
+                      (Stmt.Sset _t'64
+                        (Expr.Ecast
+                          (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+                          tulong))
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                          (Expr.Etempvar ___kprog_a64_sb_width__1 tuchar)
+                                          (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                          tint)
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'64
+                            (Expr.Ecast
+                              (Expr.Econst_long (Integers.Int64.repr 65535) tulong)
+                              tulong))
+                          (Stmt.Sset _t'64
+                            (Expr.Ecast (Expr.Etempvar _t'64 tulong) tulong)))
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                            (Expr.Etempvar ___kprog_a64_sb_width__1 tuchar)
+                                            (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                            tint)
+                          s_kprog_arm64_memory_write_118
+                          s_kprog_arm64_memory_write_119)))
+                    (Stmt.Sset ___kprog_a64_sb_value__1
+                      (Expr.Ebinop Binop.Oand (Expr.Etempvar _value tulong)
+                        (Expr.Etempvar _t'64 tulong) tulong)))
+                  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                      (Expr.Etempvar ___kprog_a64_sb_width__1 tuchar)
+                                      (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                      tint)
+                    (Stmt.Sloop
+                      (Stmt.Ssequence
+                        (Stmt.Sassign
+                          (Expr.Evar ___kprog_c_store_value__4 tulong)
+                          (Expr.Ecast
+                            (Expr.Etempvar ___kprog_a64_sb_value__1 tulong)
+                            tulong))
+                        (Stmt.Sbuiltin none (ExtFun.EF_memcpy 8 1)
+                          [(tptr tvoid), (tptr tulong)]
+                          [(Expr.Ecast
+                             (Expr.Etempvar ___kprog_a64_sb_addr__1 (tptr (tvolatile tuchar)))
+                             (tptr tvoid)),
+                           (Expr.Eaddrof
+                             (Expr.Evar ___kprog_c_store_value__4 tulong)
+                             (tptr tulong))]))
+                      Stmt.Sbreak)
+                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                        (Expr.Etempvar ___kprog_a64_sb_width__1 tuchar)
+                                        (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                        tint)
+                      (Stmt.Sloop
+                        (Stmt.Ssequence
+                          (Stmt.Sassign
+                            (Expr.Evar ___kprog_c_store_value__5 tuint)
+                            (Expr.Ecast
+                              (Expr.Etempvar ___kprog_a64_sb_value__1 tulong)
+                              tuint))
+                          (Stmt.Sbuiltin none (ExtFun.EF_memcpy 4 1)
+                            [(tptr tvoid), (tptr tuint)]
+                            [(Expr.Ecast
+                               (Expr.Etempvar ___kprog_a64_sb_addr__1 (tptr (tvolatile tuchar)))
+                               (tptr tvoid)),
+                             (Expr.Eaddrof
+                               (Expr.Evar ___kprog_c_store_value__5 tuint)
+                               (tptr tuint))]))
+                        Stmt.Sbreak)
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
+                                          (Expr.Etempvar ___kprog_a64_sb_width__1 tuchar)
+                                          (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                          tint)
+                        (Stmt.Sloop
+                          s_kprog_arm64_memory_write_120
+                          s_kprog_arm64_memory_write_121)
+                        (Stmt.Sloop
+                          s_kprog_arm64_memory_write_122
+                          s_kprog_arm64_memory_write_123)))))))
+            Stmt.Sbreak))))))
+
+def s_kprog_arm64_memory_write_125 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'167
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+          (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags (tptr tuchar)))
+    (Stmt.Sassign
+      (Expr.Ederef
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+          (Expr.Econst_int (Integers.Int.repr 19) tint) (tptr (tptr tuchar)))
+        (tptr tuchar))
+      (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'167 (tptr tuchar))
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 19) tuint) tuchar)
+        (tptr tuchar))))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'166
+        (Expr.Efield
+          (Expr.Ederef
+            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+            (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags (tptr tuchar)))
+      (Stmt.Sassign
+        (Expr.Ederef
+          (Expr.Ebinop Binop.Oadd
+            (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+            (Expr.Econst_int (Integers.Int.repr 20) tint)
+            (tptr (tptr tuchar))) (tptr tuchar))
+        (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'166 (tptr tuchar))
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 20) tuint) tuchar)
+          (tptr tuchar))))
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sset _t'165
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+              (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+            (tptr tuchar)))
+        (Stmt.Sassign
+          (Expr.Ederef
+            (Expr.Ebinop Binop.Oadd
+              (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+              (Expr.Econst_int (Integers.Int.repr 21) tint)
+              (tptr (tptr tuchar))) (tptr tuchar))
+          (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'165 (tptr tuchar))
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 21) tuint)
+              tuchar) (tptr tuchar))))
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sset _t'164
+            (Expr.Efield
+              (Expr.Ederef
+                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+              (tptr tuchar)))
+          (Stmt.Sassign
+            (Expr.Ederef
+              (Expr.Ebinop Binop.Oadd
+                (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                (Expr.Econst_int (Integers.Int.repr 22) tint)
+                (tptr (tptr tuchar))) (tptr tuchar))
+            (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'164 (tptr tuchar))
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 22) tuint)
+                tuchar) (tptr tuchar))))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'163
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                  (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+                (tptr tuchar)))
+            (Stmt.Sassign
+              (Expr.Ederef
+                (Expr.Ebinop Binop.Oadd
+                  (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                  (Expr.Econst_int (Integers.Int.repr 23) tint)
+                  (tptr (tptr tuchar))) (tptr tuchar))
+              (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'163 (tptr tuchar))
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 23) tuint)
+                  tuchar) (tptr tuchar))))
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sset _t'162
+                (Expr.Efield
+                  (Expr.Ederef
+                    (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                    (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+                  (tptr tuchar)))
+              (Stmt.Sassign
+                (Expr.Ederef
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                    (Expr.Econst_int (Integers.Int.repr 24) tint)
+                    (tptr (tptr tuchar))) (tptr tuchar))
+                (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'162 (tptr tuchar))
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 24) tuint)
+                    tuchar) (tptr tuchar))))
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sset _t'161
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                      (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+                    (tptr tuchar)))
+                (Stmt.Sassign
+                  (Expr.Ederef
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                      (Expr.Econst_int (Integers.Int.repr 25) tint)
+                      (tptr (tptr tuchar))) (tptr tuchar))
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Etempvar _t'161 (tptr tuchar))
+                    (Expr.Ecast
+                      (Expr.Econst_int (Integers.Int.repr 25) tuint) tuchar)
+                    (tptr tuchar))))
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'160
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                        (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+                      (tptr tuchar)))
+                  (Stmt.Sassign
+                    (Expr.Ederef
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                        (Expr.Econst_int (Integers.Int.repr 26) tint)
+                        (tptr (tptr tuchar))) (tptr tuchar))
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Etempvar _t'160 (tptr tuchar))
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 26) tuint)
+                        tuchar) (tptr tuchar))))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'159
+                      (Expr.Efield
+                        (Expr.Ederef
+                          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                          (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+                        (tptr tuchar)))
+                    (Stmt.Sassign
+                      (Expr.Ederef
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                          (Expr.Econst_int (Integers.Int.repr 27) tint)
+                          (tptr (tptr tuchar))) (tptr tuchar))
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Etempvar _t'159 (tptr tuchar))
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 27) tuint)
+                          tuchar) (tptr tuchar))))
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'158
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                            (Ty.Tstruct _kprog_arm64_addressing noattr))
+                          _tags (tptr tuchar)))
+                      (Stmt.Sassign
+                        (Expr.Ederef
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                            (Expr.Econst_int (Integers.Int.repr 28) tint)
+                            (tptr (tptr tuchar))) (tptr tuchar))
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Etempvar _t'158 (tptr tuchar))
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 28) tuint)
+                            tuchar) (tptr tuchar))))
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'157
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                              (Ty.Tstruct _kprog_arm64_addressing noattr))
+                            _tags (tptr tuchar)))
+                        (Stmt.Sassign
+                          (Expr.Ederef
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                              (Expr.Econst_int (Integers.Int.repr 29) tint)
+                              (tptr (tptr tuchar))) (tptr tuchar))
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Etempvar _t'157 (tptr tuchar))
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 29) tuint)
+                              tuchar) (tptr tuchar))))
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'156
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                (Ty.Tstruct _kprog_arm64_addressing noattr))
+                              _tags (tptr tuchar)))
+                          (Stmt.Sassign
+                            (Expr.Ederef
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                                (Expr.Econst_int (Integers.Int.repr 30) tint)
+                                (tptr (tptr tuchar))) (tptr tuchar))
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Etempvar _t'156 (tptr tuchar))
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 30) tuint)
+                                tuchar) (tptr tuchar))))
+                        (Stmt.Sloop
+                          (Stmt.Ssequence
+                            (Stmt.Sloop
+                              (Stmt.Ssequence
+                                (Stmt.Ssequence
+                                  s_kprog_arm64_memory_write_6
+                                  (Stmt.Sset ___a64_mbo_has_index
+                                    (Expr.Ecast
+                                      (Expr.Ecast (Expr.Etempvar _t'1 tint)
+                                        tuchar) tuchar)))
+                                (Stmt.Ssequence
+                                  s_kprog_arm64_memory_write_7
+                                  s_kprog_arm64_memory_write_22))
+                              Stmt.Sbreak)
+                            (Stmt.Ssequence
+                              (Stmt.Sset ___a64_mwr_off
+                                (Expr.Ebinop Binop.Oadd
+                                  (Expr.Etempvar ___a64_mwr_off tlong)
+                                  (Expr.Etempvar _extra tlong) tlong))
+                              (Stmt.Ssequence
+                                (Stmt.Sloop
+                                  s_kprog_arm64_memory_write_23
+                                  s_kprog_arm64_memory_write_24)
+                                (Stmt.Ssequence
+                                  s_kprog_arm64_memory_write_25
+                                  s_kprog_arm64_memory_write_124))))
+                          Stmt.Sbreak)))))))))))))
+
+def s_kprog_arm64_memory_write_126 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'184
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+          (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags (tptr tuchar)))
+    (Stmt.Sassign
+      (Expr.Ederef
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+          (Expr.Econst_int (Integers.Int.repr 2) tint) (tptr (tptr tuchar)))
+        (tptr tuchar))
+      (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'184 (tptr tuchar))
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tuint) tuchar)
+        (tptr tuchar))))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'183
+        (Expr.Efield
+          (Expr.Ederef
+            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+            (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags (tptr tuchar)))
+      (Stmt.Sassign
+        (Expr.Ederef
+          (Expr.Ebinop Binop.Oadd
+            (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+            (Expr.Econst_int (Integers.Int.repr 3) tint)
+            (tptr (tptr tuchar))) (tptr tuchar))
+        (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'183 (tptr tuchar))
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuchar)
+          (tptr tuchar))))
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sset _t'182
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+              (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+            (tptr tuchar)))
+        (Stmt.Sassign
+          (Expr.Ederef
+            (Expr.Ebinop Binop.Oadd
+              (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+              (Expr.Econst_int (Integers.Int.repr 4) tint)
+              (tptr (tptr tuchar))) (tptr tuchar))
+          (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'182 (tptr tuchar))
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 4) tuint) tuchar)
+            (tptr tuchar))))
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sset _t'181
+            (Expr.Efield
+              (Expr.Ederef
+                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+              (tptr tuchar)))
+          (Stmt.Sassign
+            (Expr.Ederef
+              (Expr.Ebinop Binop.Oadd
+                (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                (Expr.Econst_int (Integers.Int.repr 5) tint)
+                (tptr (tptr tuchar))) (tptr tuchar))
+            (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'181 (tptr tuchar))
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 5) tuint)
+                tuchar) (tptr tuchar))))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'180
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                  (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+                (tptr tuchar)))
+            (Stmt.Sassign
+              (Expr.Ederef
+                (Expr.Ebinop Binop.Oadd
+                  (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                  (Expr.Econst_int (Integers.Int.repr 6) tint)
+                  (tptr (tptr tuchar))) (tptr tuchar))
+              (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'180 (tptr tuchar))
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 6) tuint)
+                  tuchar) (tptr tuchar))))
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sset _t'179
+                (Expr.Efield
+                  (Expr.Ederef
+                    (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                    (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+                  (tptr tuchar)))
+              (Stmt.Sassign
+                (Expr.Ederef
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                    (Expr.Econst_int (Integers.Int.repr 7) tint)
+                    (tptr (tptr tuchar))) (tptr tuchar))
+                (Expr.Ebinop Binop.Oadd (Expr.Etempvar _t'179 (tptr tuchar))
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                    tuchar) (tptr tuchar))))
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sset _t'178
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                      (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+                    (tptr tuchar)))
+                (Stmt.Sassign
+                  (Expr.Ederef
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                      (Expr.Econst_int (Integers.Int.repr 8) tint)
+                      (tptr (tptr tuchar))) (tptr tuchar))
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Etempvar _t'178 (tptr tuchar))
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                      tuchar) (tptr tuchar))))
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'177
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                        (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+                      (tptr tuchar)))
+                  (Stmt.Sassign
+                    (Expr.Ederef
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                        (Expr.Econst_int (Integers.Int.repr 9) tint)
+                        (tptr (tptr tuchar))) (tptr tuchar))
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Etempvar _t'177 (tptr tuchar))
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 9) tuint) tuchar)
+                      (tptr tuchar))))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'176
+                      (Expr.Efield
+                        (Expr.Ederef
+                          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                          (Ty.Tstruct _kprog_arm64_addressing noattr)) _tags
+                        (tptr tuchar)))
+                    (Stmt.Sassign
+                      (Expr.Ederef
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                          (Expr.Econst_int (Integers.Int.repr 10) tint)
+                          (tptr (tptr tuchar))) (tptr tuchar))
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Etempvar _t'176 (tptr tuchar))
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 10) tuint)
+                          tuchar) (tptr tuchar))))
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'175
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                            (Ty.Tstruct _kprog_arm64_addressing noattr))
+                          _tags (tptr tuchar)))
+                      (Stmt.Sassign
+                        (Expr.Ederef
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                            (Expr.Econst_int (Integers.Int.repr 11) tint)
+                            (tptr (tptr tuchar))) (tptr tuchar))
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Etempvar _t'175 (tptr tuchar))
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 11) tuint)
+                            tuchar) (tptr tuchar))))
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'174
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                              (Ty.Tstruct _kprog_arm64_addressing noattr))
+                            _tags (tptr tuchar)))
+                        (Stmt.Sassign
+                          (Expr.Ederef
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                              (Expr.Econst_int (Integers.Int.repr 12) tint)
+                              (tptr (tptr tuchar))) (tptr tuchar))
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Etempvar _t'174 (tptr tuchar))
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 12) tuint)
+                              tuchar) (tptr tuchar))))
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'173
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                (Ty.Tstruct _kprog_arm64_addressing noattr))
+                              _tags (tptr tuchar)))
+                          (Stmt.Sassign
+                            (Expr.Ederef
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                                (Expr.Econst_int (Integers.Int.repr 13) tint)
+                                (tptr (tptr tuchar))) (tptr tuchar))
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Etempvar _t'173 (tptr tuchar))
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 13) tuint)
+                                tuchar) (tptr tuchar))))
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'172
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                  (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                _tags (tptr tuchar)))
+                            (Stmt.Sassign
+                              (Expr.Ederef
+                                (Expr.Ebinop Binop.Oadd
+                                  (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                                  (Expr.Econst_int (Integers.Int.repr 14) tint)
+                                  (tptr (tptr tuchar))) (tptr tuchar))
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Etempvar _t'172 (tptr tuchar))
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 14) tuint)
+                                  tuchar) (tptr tuchar))))
+                          (Stmt.Ssequence
+                            (Stmt.Ssequence
+                              (Stmt.Sset _t'171
+                                (Expr.Efield
+                                  (Expr.Ederef
+                                    (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                    (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                  _tags (tptr tuchar)))
+                              (Stmt.Sassign
+                                (Expr.Ederef
+                                  (Expr.Ebinop Binop.Oadd
+                                    (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                                    (Expr.Econst_int (Integers.Int.repr 15) tint)
+                                    (tptr (tptr tuchar))) (tptr tuchar))
+                                (Expr.Ebinop Binop.Oadd
+                                  (Expr.Etempvar _t'171 (tptr tuchar))
+                                  (Expr.Ecast
+                                    (Expr.Econst_int (Integers.Int.repr 15) tuint)
+                                    tuchar) (tptr tuchar))))
+                            (Stmt.Ssequence
+                              (Stmt.Ssequence
+                                (Stmt.Sset _t'170
+                                  (Expr.Efield
+                                    (Expr.Ederef
+                                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                      (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                    _tags (tptr tuchar)))
+                                (Stmt.Sassign
+                                  (Expr.Ederef
+                                    (Expr.Ebinop Binop.Oadd
+                                      (Expr.Evar ___a64_tag_cells (tarray (tptr tuchar) 31))
+                                      (Expr.Econst_int (Integers.Int.repr 16) tint)
+                                      (tptr (tptr tuchar))) (tptr tuchar))
+                                  (Expr.Ebinop Binop.Oadd
+                                    (Expr.Etempvar _t'170 (tptr tuchar))
+                                    (Expr.Ecast
+                                      (Expr.Econst_int (Integers.Int.repr 16) tuint)
+                                      tuchar) (tptr tuchar))))
+                              (Stmt.Ssequence
+                                s_kprog_arm64_memory_write_4
+                                (Stmt.Ssequence
+                                  s_kprog_arm64_memory_write_5
+                                  s_kprog_arm64_memory_write_125)))))))))))))))))
+
+def s_kprog_arm64_memory_write_127 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'201
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+          (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+        (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+    (Stmt.Sassign
+      (Expr.Ederef
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+          (Expr.Econst_int (Integers.Int.repr 16) tint)
+          (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+        (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Etempvar _t'201 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 16) tuint) tuchar)
+        (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'200
+        (Expr.Efield
+          (Expr.Ederef
+            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+            (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+          (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+      (Stmt.Sassign
+        (Expr.Ederef
+          (Expr.Ebinop Binop.Oadd
+            (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+            (Expr.Econst_int (Integers.Int.repr 17) tint)
+            (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+          (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Etempvar _t'200 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 17) tuint) tuchar)
+          (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sset _t'199
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+              (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+            (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+        (Stmt.Sassign
+          (Expr.Ederef
+            (Expr.Ebinop Binop.Oadd
+              (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+              (Expr.Econst_int (Integers.Int.repr 18) tint)
+              (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+            (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+          (Expr.Ebinop Binop.Oadd
+            (Expr.Etempvar _t'199 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 18) tuint)
+              tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sset _t'198
+            (Expr.Efield
+              (Expr.Ederef
+                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+              (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+          (Stmt.Sassign
+            (Expr.Ederef
+              (Expr.Ebinop Binop.Oadd
+                (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                (Expr.Econst_int (Integers.Int.repr 19) tint)
+                (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+              (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+            (Expr.Ebinop Binop.Oadd
+              (Expr.Etempvar _t'198 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 19) tuint)
+                tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'197
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                  (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+                (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+            (Stmt.Sassign
+              (Expr.Ederef
+                (Expr.Ebinop Binop.Oadd
+                  (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                  (Expr.Econst_int (Integers.Int.repr 20) tint)
+                  (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+              (Expr.Ebinop Binop.Oadd
+                (Expr.Etempvar _t'197 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 20) tuint)
+                  tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sset _t'196
+                (Expr.Efield
+                  (Expr.Ederef
+                    (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                    (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+                  (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+              (Stmt.Sassign
+                (Expr.Ederef
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                    (Expr.Econst_int (Integers.Int.repr 21) tint)
+                    (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                  (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                (Expr.Ebinop Binop.Oadd
+                  (Expr.Etempvar _t'196 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 21) tuint)
+                    tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sset _t'195
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                      (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+                    (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                (Stmt.Sassign
+                  (Expr.Ederef
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                      (Expr.Econst_int (Integers.Int.repr 22) tint)
+                      (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                    (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Etempvar _t'195 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                    (Expr.Ecast
+                      (Expr.Econst_int (Integers.Int.repr 22) tuint) tuchar)
+                    (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'194
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                        (Ty.Tstruct _kprog_arm64_addressing noattr))
+                      _registers (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                  (Stmt.Sassign
+                    (Expr.Ederef
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                        (Expr.Econst_int (Integers.Int.repr 23) tint)
+                        (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                      (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Etempvar _t'194 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 23) tuint)
+                        tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'193
+                      (Expr.Efield
+                        (Expr.Ederef
+                          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                          (Ty.Tstruct _kprog_arm64_addressing noattr))
+                        _registers (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                    (Stmt.Sassign
+                      (Expr.Ederef
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                          (Expr.Econst_int (Integers.Int.repr 24) tint)
+                          (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                        (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Etempvar _t'193 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 24) tuint)
+                          tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'192
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                            (Ty.Tstruct _kprog_arm64_addressing noattr))
+                          _registers
+                          (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                      (Stmt.Sassign
+                        (Expr.Ederef
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                            (Expr.Econst_int (Integers.Int.repr 25) tint)
+                            (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                          (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Etempvar _t'192 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 25) tuint)
+                            tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'191
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                              (Ty.Tstruct _kprog_arm64_addressing noattr))
+                            _registers
+                            (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                        (Stmt.Sassign
+                          (Expr.Ederef
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                              (Expr.Econst_int (Integers.Int.repr 26) tint)
+                              (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                            (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Etempvar _t'191 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 26) tuint)
+                              tuchar)
+                            (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'190
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                (Ty.Tstruct _kprog_arm64_addressing noattr))
+                              _registers
+                              (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                          (Stmt.Sassign
+                            (Expr.Ederef
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                                (Expr.Econst_int (Integers.Int.repr 27) tint)
+                                (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                              (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Etempvar _t'190 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 27) tuint)
+                                tuchar)
+                              (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'189
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                  (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                _registers
+                                (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                            (Stmt.Sassign
+                              (Expr.Ederef
+                                (Expr.Ebinop Binop.Oadd
+                                  (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                                  (Expr.Econst_int (Integers.Int.repr 28) tint)
+                                  (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                                (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Etempvar _t'189 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 28) tuint)
+                                  tuchar)
+                                (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                          (Stmt.Ssequence
+                            (Stmt.Ssequence
+                              (Stmt.Sset _t'188
+                                (Expr.Efield
+                                  (Expr.Ederef
+                                    (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                    (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                  _registers
+                                  (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                              (Stmt.Sassign
+                                (Expr.Ederef
+                                  (Expr.Ebinop Binop.Oadd
+                                    (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                                    (Expr.Econst_int (Integers.Int.repr 29) tint)
+                                    (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                                  (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                                (Expr.Ebinop Binop.Oadd
+                                  (Expr.Etempvar _t'188 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                                  (Expr.Ecast
+                                    (Expr.Econst_int (Integers.Int.repr 29) tuint)
+                                    tuchar)
+                                  (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                            (Stmt.Ssequence
+                              (Stmt.Ssequence
+                                (Stmt.Sset _t'187
+                                  (Expr.Efield
+                                    (Expr.Ederef
+                                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                      (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                    _registers
+                                    (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                                (Stmt.Sassign
+                                  (Expr.Ederef
+                                    (Expr.Ebinop Binop.Oadd
+                                      (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                                      (Expr.Econst_int (Integers.Int.repr 30) tint)
+                                      (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                                    (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                                  (Expr.Ebinop Binop.Oadd
+                                    (Expr.Etempvar _t'187 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                                    (Expr.Ecast
+                                      (Expr.Econst_int (Integers.Int.repr 30) tuint)
+                                      tuchar)
+                                    (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                              (Stmt.Ssequence
+                                s_kprog_arm64_memory_write_2
+                                (Stmt.Ssequence
+                                  s_kprog_arm64_memory_write_3
+                                  s_kprog_arm64_memory_write_126)))))))))))))))))
+
+def f_kprog_arm64_memory_write : Function := {
+  fn_return := tvoid,
+  fn_callconv := cc_default,
+  fn_params := [(_addressing,
+                 (tptr (Ty.Tstruct _kprog_arm64_addressing noattr))),
+                (_base, tulong), (_index, tulong), (_aux, tuint),
+                (_imm, tulong), (_extra, tlong), (_width, tuchar),
+                (_value, tulong), (_tag, tuchar)],
+  fn_vars := [(___a64_cells,
+               (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31)),
+              (___a64_tag_cells, (tarray (tptr tuchar) 31)),
+              (___kprog_c_store_value, tulong),
+              (___kprog_c_store_value__1, tuint),
+              (___kprog_c_store_value__2, tushort),
+              (___kprog_c_store_value__3, tuchar),
+              (___kprog_c_store_value__4, tulong),
+              (___kprog_c_store_value__5, tuint),
+              (___kprog_c_store_value__6, tushort),
+              (___kprog_c_store_value__7, tuchar)],
+  fn_temps := [(___a64_mwr_off, tlong), (___a64_mbo_has_index, tuchar),
+               (___a64_mbo_isrc, tuchar), (___a64_mbo_imm, tulong),
+               (___a64_mbo_index, tulong), (___a64_mbo_result, tulong),
+               (___a64_modified_input, tulong), (___a64_read_value, tulong),
+               (___a64_read_tag, tuchar), (___a64_l_reg, tulong),
+               (___a64_l_reg__1, tulong), (___a64_mat_value, tulong),
+               (___a64_mat_tag, tuchar), (___a64_mat_base, tulong),
+               (___a64_mat_base__1, tulong),
+               (___kprog_a64_mod_value, tulong), (___kprog_a64_mod, tuchar),
+               (___kprog_a64_mod_shift, tuchar),
+               (___kprog_a64_mod_amount, tuchar),
+               (___kprog_a64_mod_w32, tuint), (___kprog_a64_mbo_imm, tulong),
+               (___kprog_a64_mbo_index, tulong),
+               (___kprog_a64_mbo_prepost, tint),
+               (___kprog_a64_mbo_has_index, tint),
+               (___kprog_a64_mbo_base, tulong),
+               (___kprog_a64_mbo_result, tulong), (___a64_mwr_tag, tuchar),
+               (___a64_l_reg__2, tulong), (___a64_mwr_arm, tuchar),
+               (___a64_sw_off, tlong), (___a64_skb_pointer, (tptr tvoid)),
+               (___a64_l_reg__3, tulong), (___a64_sw_value, tulong),
+               (___a64_sw_ctx_off, tlong),
+               (___a64_cbw_addr, (tptr (tvolatile tuchar))),
+               (___a64_cbw_value, tulong), (___a64_sw_pointer, (tptr tvoid)),
+               (___a64_l_reg__4, tulong),
+               (___kprog_a64_sb_addr, (tptr (tvolatile tuchar))),
+               (___kprog_a64_sb_width, tuchar),
+               (___kprog_a64_sb_value, tulong), (___a64_mwr_bsrc, tuchar),
+               (___a64_mwr_base, tlong), (___a64_mwr_pointer, (tptr tvoid)),
+               (___a64_l_reg__5, tulong), (___a64_loss_off, tlong),
+               (___a64_loss_width, tuchar), (___a64_loss_value, tulong),
+               (___a64_stw_index, tulong), (___a64_stw_width, tuchar),
+               (___a64_stw_value, tulong), (___a64_stw_action, tuchar),
+               (___a64_stw_payload, tulong), (___a64_unmat_value, tulong),
+               (___a64_unmat_tag, tuchar), (___a64_unmat_base, tulong),
+               (___a64_unmat_base__1, tulong), (___ti, tulong),
+               (___ts, tuint), (___tp, (tptr (tvolatile tulong))),
+               (___tv, tulong), (___ti__1, tulong), (___ts__1, tuint),
+               (___tp__1, (tptr (tvolatile tulong))), (___tv__1, tulong),
+               (___a64_stw_last, tulong), (___ti__2, tulong),
+               (___ts__2, tuint), (___tp__2, (tptr (tvolatile tulong))),
+               (___tv__2, tulong), (___kprog_a64_bl_lane, tulong),
+               (___kprog_a64_bl_value, tulong),
+               (___kprog_a64_bl_shift, tulong),
+               (___kprog_a64_bl_lane__1, tulong),
+               (___kprog_a64_bl_value__1, tulong),
+               (___kprog_a64_bl_shift__1, tulong),
+               (___kprog_a64_bl_lane__2, tulong),
+               (___kprog_a64_bl_value__2, tulong),
+               (___kprog_a64_bl_shift__2, tulong),
+               (___kprog_a64_bl_lane__3, tulong),
+               (___kprog_a64_bl_value__3, tulong),
+               (___kprog_a64_bl_shift__3, tulong),
+               (___kprog_a64_bl_lane__4, tulong),
+               (___kprog_a64_bl_value__4, tulong),
+               (___kprog_a64_bl_shift__4, tulong),
+               (___kprog_a64_bl_lane__5, tulong),
+               (___kprog_a64_bl_value__5, tulong),
+               (___kprog_a64_bl_shift__5, tulong),
+               (___kprog_a64_bl_lane__6, tulong),
+               (___kprog_a64_bl_value__6, tulong),
+               (___kprog_a64_bl_shift__6, tulong),
+               (___kprog_a64_bl_lane__7, tulong),
+               (___kprog_a64_bl_value__7, tulong),
+               (___kprog_a64_bl_shift__7, tulong), (___a64_loss_i, tuint),
+               (___a64_stw_index__1, tulong), (___a64_stw_width__1, tuchar),
+               (___a64_stw_value__1, tulong), (___a64_stw_action__1, tuchar),
+               (___a64_stw_payload__1, tulong),
+               (___a64_unmat_value__1, tulong),
+               (___a64_unmat_tag__1, tuchar), (___a64_unmat_base__2, tulong),
+               (___a64_unmat_base__3, tulong), (___ti__3, tulong),
+               (___ts__3, tuint), (___tp__3, (tptr (tvolatile tulong))),
+               (___tv__3, tulong), (___ti__4, tulong), (___ts__4, tuint),
+               (___tp__4, (tptr (tvolatile tulong))), (___tv__4, tulong),
+               (___a64_stw_last__1, tulong), (___ti__5, tulong),
+               (___ts__5, tuint), (___tp__5, (tptr (tvolatile tulong))),
+               (___tv__5, tulong), (___kprog_a64_bl_lane__8, tulong),
+               (___kprog_a64_bl_value__8, tulong),
+               (___kprog_a64_bl_shift__8, tulong),
+               (___kprog_a64_bl_lane__9, tulong),
+               (___kprog_a64_bl_value__9, tulong),
+               (___kprog_a64_bl_shift__9, tulong),
+               (___kprog_a64_bl_lane__10, tulong),
+               (___kprog_a64_bl_value__10, tulong),
+               (___kprog_a64_bl_shift__10, tulong),
+               (___kprog_a64_bl_lane__11, tulong),
+               (___kprog_a64_bl_value__11, tulong),
+               (___kprog_a64_bl_shift__11, tulong),
+               (___kprog_a64_bl_lane__12, tulong),
+               (___kprog_a64_bl_value__12, tulong),
+               (___kprog_a64_bl_shift__12, tulong),
+               (___kprog_a64_bl_lane__13, tulong),
+               (___kprog_a64_bl_value__13, tulong),
+               (___kprog_a64_bl_shift__13, tulong),
+               (___kprog_a64_bl_lane__14, tulong),
+               (___kprog_a64_bl_value__14, tulong),
+               (___kprog_a64_bl_shift__14, tulong),
+               (___kprog_a64_bl_lane__15, tulong),
+               (___kprog_a64_bl_value__15, tulong),
+               (___kprog_a64_bl_shift__15, tulong),
+               (___a64_mwr_pointer__1, (tptr tvoid)),
+               (___a64_l_reg__6, tulong), (___a64_mwr_addr, (tptr tvoid)),
+               (___kprog_a64_sb_addr__1, (tptr (tvolatile tuchar))),
+               (___kprog_a64_sb_width__1, tuchar),
+               (___kprog_a64_sb_value__1, tulong), (_t'65, tint),
+               (_t'64, tulong), (_t'63, (tptr tvoid)), (_t'62, tint),
+               (_t'61, tuint), (_t'60, tuint), (_t'59, tuint),
+               (_t'58, tuint), (_t'57, tuint), (_t'56, tuint),
+               (_t'55, tuint), (_t'54, (tvolatile tulong)), (_t'53, tuint),
+               (_t'52, (tvolatile tulong)), (_t'51, (tvolatile tulong)),
+               (_t'50, tint), (_t'49, tulong), (_t'48, tulong),
+               (_t'47, tint), (_t'46, tuint), (_t'45, tint), (_t'44, tulong),
+               (_t'43, tulong), (_t'42, tuint), (_t'41, tuint),
+               (_t'40, tuint), (_t'39, tuint), (_t'38, tuint),
+               (_t'37, tuint), (_t'36, tuint), (_t'35, (tvolatile tulong)),
+               (_t'34, tuint), (_t'33, (tvolatile tulong)),
+               (_t'32, (tvolatile tulong)), (_t'31, tint), (_t'30, tulong),
+               (_t'29, tulong), (_t'28, tint), (_t'27, tuint), (_t'26, tint),
+               (_t'25, tulong), (_t'24, (tptr tvoid)), (_t'23, tuint),
+               (_t'22, tint), (_t'21, tulong), (_t'20, (tptr tvoid)),
+               (_t'19, tulong), (_t'18, (tptr tvoid)), (_t'17, tuint),
+               (_t'16, tint), (_t'15, tuint), (_t'14, tulong), (_t'13, tint),
+               (_t'12, tint), (_t'11, tint), (_t'10, tulong), (_t'9, tulong),
+               (_t'8, tulong), (_t'7, tuint), (_t'6, tulong), (_t'5, tulong),
+               (_t'4, tuint), (_t'3, tulong), (_t'2, tuint), (_t'1, tint),
+               (_t'217, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'216, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'215, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'214, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'213, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'212, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'211, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'210, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'209, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'208, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'207, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'206, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'205, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'204, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'203, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'202, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'201, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'200, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'199, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'198, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'197, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'196, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'195, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'194, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'193, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'192, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'191, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'190, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'189, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'188, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'187, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'186, (tptr tuchar)), (_t'185, (tptr tuchar)),
+               (_t'184, (tptr tuchar)), (_t'183, (tptr tuchar)),
+               (_t'182, (tptr tuchar)), (_t'181, (tptr tuchar)),
+               (_t'180, (tptr tuchar)), (_t'179, (tptr tuchar)),
+               (_t'178, (tptr tuchar)), (_t'177, (tptr tuchar)),
+               (_t'176, (tptr tuchar)), (_t'175, (tptr tuchar)),
+               (_t'174, (tptr tuchar)), (_t'173, (tptr tuchar)),
+               (_t'172, (tptr tuchar)), (_t'171, (tptr tuchar)),
+               (_t'170, (tptr tuchar)), (_t'169, (tptr tuchar)),
+               (_t'168, (tptr tuchar)), (_t'167, (tptr tuchar)),
+               (_t'166, (tptr tuchar)), (_t'165, (tptr tuchar)),
+               (_t'164, (tptr tuchar)), (_t'163, (tptr tuchar)),
+               (_t'162, (tptr tuchar)), (_t'161, (tptr tuchar)),
+               (_t'160, (tptr tuchar)), (_t'159, (tptr tuchar)),
+               (_t'158, (tptr tuchar)), (_t'157, (tptr tuchar)),
+               (_t'156, (tptr tuchar)), (_t'155, tlong),
+               (_t'154, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'153, tulong),
+               (_t'152, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'151, tuchar), (_t'150, (tptr tuchar)),
+               (_t'149, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'148, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'147, tuchar),
+               (_t'146, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'145, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'144, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'143, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'142, tuchar),
+               (_t'141, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'140, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'139, tuchar), (_t'138, (tptr tuchar)), (_t'137, tuchar),
+               (_t'136, tlong),
+               (_t'135, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'134, (tptr tvoid)),
+               (_t'133, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'132, (tptr tvoid)), (_t'131, (tptr tvoid)),
+               (_t'130, tlong),
+               (_t'129, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'128, (tptr tvoid)),
+               (_t'127, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'126, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'125, tlong),
+               (_t'124, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'123, (tptr tvoid)),
+               (_t'122, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
+               (_t'121, tlong), (_t'120, (tptr (tvolatile tulong))),
+               (_t'119, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'118, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'117, tuchar),
+               (_t'116, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'115, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'114, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'113, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'112, tuchar),
+               (_t'111, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'110, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'109, (tptr tulong)), (_t'108, (tptr tuchar)),
+               (_t'107, (tptr tuchar)), (_t'106, (tptr tuchar)),
+               (_t'105, (tptr (tvolatile tuchar))),
+               (_t'104, (tptr (tvolatile tuchar))),
+               (_t'103, (tptr (tvolatile tuchar))),
+               (_t'102, (tptr (tvolatile tuchar))),
+               (_t'101, (tptr (tvolatile tuchar))),
+               (_t'100, (tptr (tvolatile tuchar))),
+               (_t'99, (tptr (tvolatile tuchar))),
+               (_t'98, (tptr (tvolatile tuchar))), (_t'97, tlong),
+               (_t'96, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'95, tlong), (_t'94, (tptr (tvolatile tulong))),
+               (_t'93, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'92, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'91, tuchar),
+               (_t'90, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'89, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'88, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'87, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'86, tuchar),
+               (_t'85, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'84, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'83, (tptr tulong)), (_t'82, (tptr tuchar)),
+               (_t'81, (tptr tuchar)), (_t'80, (tptr tuchar)),
+               (_t'79, (tptr (tvolatile tuchar))),
+               (_t'78, (tptr (tvolatile tuchar))),
+               (_t'77, (tptr (tvolatile tuchar))),
+               (_t'76, (tptr (tvolatile tuchar))),
+               (_t'75, (tptr (tvolatile tuchar))),
+               (_t'74, (tptr (tvolatile tuchar))),
+               (_t'73, (tptr (tvolatile tuchar))),
+               (_t'72, (tptr (tvolatile tuchar))), (_t'71, tlong),
+               (_t'70, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'69, tlong),
+               (_t'68, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+               (_t'67, (tptr tvoid)),
+               (_t'66, (tptr (Ty.Tunion _arm64_sim_gpr noattr)))],
+  fn_body :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'217
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+          (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+        (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+    (Stmt.Sassign
+      (Expr.Ederef
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+          (Expr.Econst_int (Integers.Int.repr 0) tint)
+          (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+        (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Etempvar _t'217 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar)
+        (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'216
+        (Expr.Efield
+          (Expr.Ederef
+            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+            (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+          (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+      (Stmt.Sassign
+        (Expr.Ederef
+          (Expr.Ebinop Binop.Oadd
+            (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+            (Expr.Econst_int (Integers.Int.repr 1) tint)
+            (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+          (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Etempvar _t'216 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuchar)
+          (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sset _t'215
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+              (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+            (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+        (Stmt.Sassign
+          (Expr.Ederef
+            (Expr.Ebinop Binop.Oadd
+              (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+              (Expr.Econst_int (Integers.Int.repr 2) tint)
+              (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+            (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+          (Expr.Ebinop Binop.Oadd
+            (Expr.Etempvar _t'215 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tuint) tuchar)
+            (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sset _t'214
+            (Expr.Efield
+              (Expr.Ederef
+                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+              (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+          (Stmt.Sassign
+            (Expr.Ederef
+              (Expr.Ebinop Binop.Oadd
+                (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                (Expr.Econst_int (Integers.Int.repr 3) tint)
+                (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+              (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+            (Expr.Ebinop Binop.Oadd
+              (Expr.Etempvar _t'214 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'213
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                  (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+                (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+            (Stmt.Sassign
+              (Expr.Ederef
+                (Expr.Ebinop Binop.Oadd
+                  (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                  (Expr.Econst_int (Integers.Int.repr 4) tint)
+                  (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+              (Expr.Ebinop Binop.Oadd
+                (Expr.Etempvar _t'213 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                  tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sset _t'212
+                (Expr.Efield
+                  (Expr.Ederef
+                    (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                    (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+                  (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+              (Stmt.Sassign
+                (Expr.Ederef
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                    (Expr.Econst_int (Integers.Int.repr 5) tint)
+                    (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                  (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                (Expr.Ebinop Binop.Oadd
+                  (Expr.Etempvar _t'212 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 5) tuint)
+                    tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sset _t'211
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                      (Ty.Tstruct _kprog_arm64_addressing noattr)) _registers
+                    (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                (Stmt.Sassign
+                  (Expr.Ederef
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                      (Expr.Econst_int (Integers.Int.repr 6) tint)
+                      (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                    (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Etempvar _t'211 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 6) tuint)
+                      tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'210
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                        (Ty.Tstruct _kprog_arm64_addressing noattr))
+                      _registers (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                  (Stmt.Sassign
+                    (Expr.Ederef
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                        (Expr.Econst_int (Integers.Int.repr 7) tint)
+                        (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                      (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Etempvar _t'210 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 7) tuint) tuchar)
+                      (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'209
+                      (Expr.Efield
+                        (Expr.Ederef
+                          (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                          (Ty.Tstruct _kprog_arm64_addressing noattr))
+                        _registers (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                    (Stmt.Sassign
+                      (Expr.Ederef
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                          (Expr.Econst_int (Integers.Int.repr 8) tint)
+                          (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                        (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Etempvar _t'209 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                          tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'208
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                            (Ty.Tstruct _kprog_arm64_addressing noattr))
+                          _registers
+                          (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                      (Stmt.Sassign
+                        (Expr.Ederef
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                            (Expr.Econst_int (Integers.Int.repr 9) tint)
+                            (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                          (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Etempvar _t'208 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 9) tuint)
+                            tuchar) (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'207
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                              (Ty.Tstruct _kprog_arm64_addressing noattr))
+                            _registers
+                            (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                        (Stmt.Sassign
+                          (Expr.Ederef
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                              (Expr.Econst_int (Integers.Int.repr 10) tint)
+                              (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                            (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Etempvar _t'207 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 10) tuint)
+                              tuchar)
+                            (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'206
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                (Ty.Tstruct _kprog_arm64_addressing noattr))
+                              _registers
+                              (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                          (Stmt.Sassign
+                            (Expr.Ederef
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                                (Expr.Econst_int (Integers.Int.repr 11) tint)
+                                (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                              (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Etempvar _t'206 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 11) tuint)
+                                tuchar)
+                              (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'205
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                  (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                _registers
+                                (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                            (Stmt.Sassign
+                              (Expr.Ederef
+                                (Expr.Ebinop Binop.Oadd
+                                  (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                                  (Expr.Econst_int (Integers.Int.repr 12) tint)
+                                  (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                                (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Etempvar _t'205 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 12) tuint)
+                                  tuchar)
+                                (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                          (Stmt.Ssequence
+                            (Stmt.Ssequence
+                              (Stmt.Sset _t'204
+                                (Expr.Efield
+                                  (Expr.Ederef
+                                    (Expr.Etempvar _addressing (tptr (Ty.Tstruct _kprog_arm64_addressing noattr)))
+                                    (Ty.Tstruct _kprog_arm64_addressing noattr))
+                                  _registers
+                                  (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                              (Stmt.Sassign
+                                (Expr.Ederef
+                                  (Expr.Ebinop Binop.Oadd
+                                    (Expr.Evar ___a64_cells (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31))
+                                    (Expr.Econst_int (Integers.Int.repr 13) tint)
+                                    (tptr (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
+                                  (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                                (Expr.Ebinop Binop.Oadd
+                                  (Expr.Etempvar _t'204 (tptr (Ty.Tunion _arm64_sim_gpr noattr)))
+                                  (Expr.Ecast
+                                    (Expr.Econst_int (Integers.Int.repr 13) tuint)
+                                    tuchar)
+                                  (tptr (Ty.Tunion _arm64_sim_gpr noattr)))))
+                            (Stmt.Ssequence
+                              s_kprog_arm64_memory_write_0
+                              (Stmt.Ssequence
+                                s_kprog_arm64_memory_write_1
+                                s_kprog_arm64_memory_write_127))))))))))))))))
+}
+
 def composites : List CompositeDef :=
 [(CompositeDef.Composite __150 SU.Union
    [(Member.Member_plain _flow_keys
@@ -23632,7 +34736,8 @@ def composites : List CompositeDef :=
     (Member.Member_plain _helper_context (tptr tvoid)),
     (Member.Member_plain _helper_abi_base (tptr tvoid)),
     (Member.Member_plain _is_xdp tuchar),
-    (Member.Member_plain _abi_kind tuchar)]
+    (Member.Member_plain _abi_kind tuchar),
+    (Member.Member_plain _q (tptr (tvolatile tulong)))]
    noattr)]
 
 def global_definitions : List (Ident × GlobDef FunDef Ty) :=
@@ -23936,22 +35041,25 @@ def global_definitions : List (Ident × GlobDef FunDef Ty) :=
  (_kprog_arm64_helper_context, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_helper_context)),
  (_kprog_arm64_memory_pre, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_memory_pre)),
  (_kprog_arm64_memory_post, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_memory_post)),
- (_arm64_sim_unsupported_opcode,
-   GlobDef.Gfun (FunDef.External (ExtFun.EF_external "arm64_sim_unsupported_opcode"
-                                   (mksignature [] XType.Xvoid cc_default))
-     [] tvoid cc_default)),
  (_kprog_arm64_memory_tag, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_memory_tag)),
  (_kprog_arm64_memory_payload, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_memory_payload)),
  (_kprog_arm64_xdp_read, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_xdp_read)),
  (_kprog_arm64_skb_read, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_skb_read)),
  (_kprog_arm64_skb_write, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_skb_write)),
  (_kprog_arm64_cb_read, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_cb_read)),
- (_kprog_arm64_cb_write, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_cb_write))]
+ (_kprog_arm64_cb_write, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_cb_write)),
+ (_kprog_arm64_memory_read, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_memory_read)),
+ (_arm64_sim_unsupported_opcode,
+   GlobDef.Gfun (FunDef.External (ExtFun.EF_external "arm64_sim_unsupported_opcode"
+                                   (mksignature [] XType.Xvoid cc_default))
+     [] tvoid cc_default)),
+ (_kprog_arm64_memory_write, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_memory_write))]
 
 def public_idents : List Ident :=
-[_kprog_arm64_cb_write, _kprog_arm64_cb_read, _kprog_arm64_skb_write,
- _kprog_arm64_skb_read, _kprog_arm64_xdp_read, _kprog_arm64_memory_payload,
- _kprog_arm64_memory_tag, _arm64_sim_unsupported_opcode,
+[_kprog_arm64_memory_write, _arm64_sim_unsupported_opcode,
+ _kprog_arm64_memory_read, _kprog_arm64_cb_write, _kprog_arm64_cb_read,
+ _kprog_arm64_skb_write, _kprog_arm64_skb_read, _kprog_arm64_xdp_read,
+ _kprog_arm64_memory_payload, _kprog_arm64_memory_tag,
  _kprog_arm64_memory_post, _kprog_arm64_memory_pre,
  _kprog_arm64_helper_context, _kprog_arm64_helper_argument,
  _kprog_arm64_memory_offset, _kprog_arm64_modified_reg,

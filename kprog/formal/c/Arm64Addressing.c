@@ -118,3 +118,20 @@ void kprog_arm64_cb_write(void *context, __s64 off, __u8 width, __u64 value)
 {
 	ARM64_SIM_L_SKB_CB_WRITE_BYTES(context, off, width, value);
 }
+
+__u64 kprog_arm64_memory_read(struct kprog_arm64_addressing *addressing,
+                             __u64 base, __u64 index, __u32 aux, __u64 imm,
+                             __s64 extra, __u8 width)
+{
+	REGISTERS();
+	__u64 result;
+	ARM64_SIM_L_MEM_READ_INTO(result, base, index, aux, imm, extra, width);
+	return result;
+}
+void kprog_arm64_memory_write(struct kprog_arm64_addressing *addressing,
+                              __u64 base, __u64 index, __u32 aux, __u64 imm,
+                              __s64 extra, __u8 width, __u64 value, __u8 tag)
+{
+	REGISTERS();
+	ARM64_SIM_L_MEM_WRITE(base, index, aux, imm, extra, width, value, tag);
+}

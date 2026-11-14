@@ -1155,9 +1155,32 @@ fixed; both diagnostics remain. The final
 (1152B/1896B) and four relocations, including dynamic `cb` reads and writes.
 `make clight`,133 targeted jobs, deterministic exports and standard-axiom checks
 pass. The other two regenerated modules change anonymous composite names only.
-Raw evidence: `/workspaces/kprog-raw/formal/m4-arm64-context`. The whole memory
-dispatcher and fault chain still await C-subset conversion; this step does not
+Raw evidence: `/workspaces/kprog-raw/formal/m4-arm64-context`. The full instruction
+dispatcher and fault chain still await C-subset conversion; these context roots do not
 complete M4 or migrate any of the2,065 theorems.
+
+The next two roots in `Arm64Addressing.c` export the complete memory read/write
+consumers, including stack observation, ABI typed loads, relocation-offset
+rejection, raw accesses and SKB stores. The binding gains the caller's live
+`q` view, which must alias `b` as in the canonical private union. CompCert uses
+the general base-plus-offset access instead of the compiler's known-context
+operand shortcut; native BPF keeps that shortcut. Their address, pointer and
+effect correspondence remains an explicit M5 obligation, including nonreturning
+rejection and the previously documented platform imports.
+
+The [complete-consumer oracle](oracles/test_arm64_memory_binding_host.c) checks
+49,152 read/write profiles against independent byte/frame/input expectations,
+before and after conversion on x86, and after conversion on AArch64 user mode,
+in native and CompCert-adapter modes. It covers all256 tag bytes, four widths,
+SP and GPR bases, three storage profiles, cold coordinates, suppressed
+immediates, released bytes and relocation rejection. Dropped extra offsets,
+owned-only reads and missing relocation guards fail. The context oracle now
+also drives the complete consumers with decoded index/pre-post/extra operands.
+Both BPF fixtures retain exact code/data and relocations: XDP1152B/TC1896B+4,
+and the expanded stack/raw/relocation fixture socket4624B+19. `make clight`,133
+targeted jobs, deterministic export and standard-axiom checks pass. Raw evidence:
+`/workspaces/kprog-raw/formal/m4-arm64-memory`. Instruction dispatch, fault
+selection/recovery, remaining C-subset work and full default-byte coverage remain.
 
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight

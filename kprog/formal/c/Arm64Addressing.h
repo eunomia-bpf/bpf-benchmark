@@ -13,6 +13,8 @@ struct kprog_arm64_addressing {
 	__s64 bias;
 	void *helper_context, *helper_abi_base;
 	__u8 is_xdp, abi_kind;
+	/* q and b name the same live private arena, as in Arm64Stack.h. */
+	volatile __u64 *q;
 };
 __u64 kprog_arm64_modified_reg(struct kprog_arm64_addressing *, __u64, __u8, __u8, __u8);
 __s64 kprog_arm64_memory_offset(struct kprog_arm64_addressing *, __u32, __u64, __u64);
@@ -27,4 +29,6 @@ __u64 kprog_arm64_skb_read(struct kprog_arm64_addressing *, __u64, __s64, __u8);
 void kprog_arm64_skb_write(struct kprog_arm64_addressing *, __u64, __s64, __u8, __u64);
 __u64 kprog_arm64_cb_read(void *, __s64, __u8);
 void kprog_arm64_cb_write(void *, __s64, __u8, __u64);
+__u64 kprog_arm64_memory_read(struct kprog_arm64_addressing *, __u64, __u64, __u32, __u64, __s64, __u8);
+void kprog_arm64_memory_write(struct kprog_arm64_addressing *, __u64, __u64, __u32, __u64, __s64, __u8, __u64, __u8);
 #endif

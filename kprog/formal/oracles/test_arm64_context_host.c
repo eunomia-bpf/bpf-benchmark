@@ -68,7 +68,7 @@ int main(void)
 	union arm64_sim_gpr regs[31] = {0}, original_regs[31];
 	struct kprog_arm64_coordinates coords = {0x123456789abcdef0ULL, 0xfedcba9876543210ULL, -80, 1, 1};
 	struct kprog_arm64_coordinates original_coords = coords;
-	struct kprog_arm64_addressing a = {&coords, regs, tags, bytes, packed, payload, sizeof(bytes), 96, bytes + 128, bytes + 512, 0, 0};
+	struct kprog_arm64_addressing a = {&coords, regs, tags, bytes, packed, payload, sizeof(bytes), 96, bytes + 128, bytes + 512, 0, 0, (volatile __u64 *)bytes};
 	struct kprog_arm64_addressing original_a = a;
 	const __u64 values[] = {0, 1, ~0ULL, 0x8000000000000000ULL, 0x12345678ffffffffULL, 0xfedcba9876543210ULL};
 	const unsigned widths[] = {1, 2, 4, 8};
@@ -83,9 +83,16 @@ int main(void)
 		for (unsigned i = 0; i < sizeof(bytes); i++) bytes[i] = (__u8)(cases + i * 17);
 		memcpy(expected, bytes, sizeof(bytes));
 		__u8 *base = kind == 0 ? a.helper_context : a.helper_abi_base;
-		regs[15].ptr = base + displacement;
+		regs[15].ptr = base + displacement; tags[15] = ARM64_SIM_TAG_ABI;
+		a.is_xdp = kind == 0; a.abi_kind = context_kind; original_a = a;
+		regs[10].x = cases % 4;
+		__u64 index = cases % 3 == 0 ? 255 : 10;
+		__s64 index_part = index == 255 ? 0 : (__s64)regs[10].x * 2;
+		__u32 mode = cases % 4, aux = (mode << 24) | (1U << 16) | (ARM64_MOD_LSL << 8);
 		memcpy(original_regs, regs, sizeof(regs)); memcpy(original_tags, tags, sizeof(tags));
 		__s64 off = logical - displacement;
+		__s64 extra = mode ? off - index_part : -3;
+		__u64 imm = mode ? 0xfedcba9876543210ULL : (__u64)(off - index_part - extra);
 		int field = -1, lane = 0, cb = 0;
 		__u32 physical_field = 0;
 		if (kind == 0 && logical >= 0 && logical < 24 && logical % 8 + width <= 8) {
@@ -99,26 +106,34 @@ int main(void)
 		const __u8 *read_address = cb ? (__u8 *)a.helper_context + offsetof(struct __sk_buff, cb) + logical - 48 : base + logical;
 		__u64 wanted = field >= 0 ? pointer_values[field] : little(read_address, width);
 		if (field >= 0 && width != 8) wanted = (wanted >> (lane * 8)) & ((1ULL << (width * 8)) - 1);
-		reset_observations();
-		__u64 actual = kind == 0 ? kprog_arm64_xdp_read(&a, 15, off, width) : kprog_arm64_skb_read(&a, 15, off, width);
-		check(actual == wanted, "pointer high bits/partial lane/cb/raw value");
-		if (field >= 0) {
-			check(field_calls == 1 && observed_context == context_key && observed_kind == context_kind && observed_field == physical_field && !copies, "exact selected context operation");
-			check(bit_calls == (width != 8), "full pointer retains identity; partial read projects once");
-			if (width != 8) check(observed_pointer == (void *)(uintptr_t)pointer_values[field], "projection pointer identity");
+		for (unsigned composed = 0; composed < 2; composed++) {
+			reset_observations();
+			__u64 actual = composed ? kprog_arm64_memory_read(&a, 15, index, aux, imm, extra, width) : kind == 0 ? kprog_arm64_xdp_read(&a, 15, off, width) : kprog_arm64_skb_read(&a, 15, off, width);
+			check(actual == wanted, "pointer high bits/partial lane/cb/raw value");
+			if (field >= 0) {
+				check(field_calls == 1 && observed_context == context_key && observed_kind == context_kind && observed_field == physical_field && !copies, "exact selected context operation");
+				check(bit_calls == (width != 8), "full pointer retains identity; partial read projects once");
+				if (width != 8) check(observed_pointer == (void *)(uintptr_t)pointer_values[field], "projection pointer identity");
 		} else {
 			no_context_access();
 			check(copies == (unsigned)!cb, "cb byte ladder/raw complete-window selection");
 			if (!cb) check(copy_source == read_address && copy_size == width && copy_alignment == 1, "raw read address/width/alignment");
 		}
 		check(!memcmp(bytes, expected, sizeof(bytes)), "read whole-memory frame");
+		}
+
 		if (kind == 1) {
 			__u8 *write_address = cb ? (__u8 *)a.helper_context + offsetof(struct __sk_buff, cb) + logical - 48 : base + logical;
 			for (unsigned i = 0; i < width; i++) expected[write_address - bytes + i] = (__u8)(values[vi] >> (i * 8));
-			reset_observations(); kprog_arm64_skb_write(&a, 15, off, width, values[vi]); no_context_access();
-			check(copies == (unsigned)!cb, "cb byte ladder/raw store selection");
-			if (!cb) check(copy_destination == write_address && copy_size == width && copy_alignment == 1, "raw store address/width/alignment");
-			check(!memcmp(bytes, expected, sizeof(bytes)), "store low bits/whole-memory frame");
+			for (unsigned composed = 0; composed < 2; composed++) {
+				reset_observations();
+				if (composed) kprog_arm64_memory_write(&a, 15, index, aux, imm, extra, width, values[vi], (__u8)cases);
+				else kprog_arm64_skb_write(&a, 15, off, width, values[vi]);
+				no_context_access();
+				check(copies == (unsigned)!cb, "cb byte ladder/raw store selection");
+				if (!cb) check(copy_destination == write_address && copy_size == width && copy_alignment == 1, "raw store address/width/alignment");
+				check(!memcmp(bytes, expected, sizeof(bytes)), "store low bits/whole-memory frame");
+			}
 		}
 		check(!memcmp(regs, original_regs, sizeof(regs)) && !memcmp(tags, original_tags, sizeof(tags)), "register/tag frame");
 		check(!memcmp(&coords, &original_coords, sizeof(coords)) && !memcmp(&a, &original_a, sizeof(a)), "coordinate/addressing frame");

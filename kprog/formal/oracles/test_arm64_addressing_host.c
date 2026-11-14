@@ -54,7 +54,7 @@ int main(void)
 	const __u64 values[]={0,1,~0ULL,0x8000000000000000ULL,0x12345678ffffffffULL,0xfedcba9876543210ULL};
 	const __u32 modes[]={0,1,2,3,255};
 	struct kprog_arm64_coordinates c;
-	struct kprog_arm64_addressing a={&c,regs,tags,bytes,stack_tags,payload,160,96,bytes+128,bytes+192,0,0};
+	struct kprog_arm64_addressing a={&c,regs,tags,bytes,stack_tags,payload,160,96,bytes+128,bytes+192,0,0,storage};
 	for(unsigned mod=0;mod<12;mod++) for(unsigned si=0;si<4;si++) for(unsigned ri=0;ri<10;ri++)
 	for(unsigned tag=0;tag<256;tag++) for(unsigned variant=0;variant<2;variant++) {
 		__u64 seed=0x9e3779b97f4a7c15ULL*(cases+1),reg=ids[ri];

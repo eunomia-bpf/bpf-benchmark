@@ -1218,58 +1218,82 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
           ARM64_SIM_L_STORE_ADDR((__u8 *)__a64_sw_pointer+(OFF),(WIDTH),__a64_sw_value); } \
  } while (0)
 
-/* A propagated context displacement can be encoded against the entry base.
- * Both address forms read the same native width at the same address; dynamic
- * displacements retain the existing base-register memory dispatch. */
-#define ARM64_SIM_L_MEM_READ(BASE, INDEX, AUX, IMM, EXTRA, WIDTH)            \
-	({                                                                 \
-		__s64 __a64_mrd_off = ARM64_SIM_L_MEM_BASE_OFF((AUX), (INDEX), (IMM)) + (EXTRA);\
-		__u8 __a64_mrd_tag = ARM64_SIM_L_REG_TAG(BASE);          \
-		__u64 __a64_mrd_value;                                    \
-		__u8 __a64_mrd_src = KPROG_ARM64_MEM_READ_SRC(           \
-			((BASE) == ARM64_SP), __a64_mrd_tag, (WIDTH));   \
-        __s64 __a64_mrd_ctx_off = (__s64)(                                \
-            (__u64)(long)ARM64_SIM_L_READ_REG_PTR(BASE) -                  \
-            (__u64)(long)__a64_sim_helper_ctx + (__u64)__a64_mrd_off);     \
-		if (__a64_sim_is_xdp && __a64_mrd_tag == ARM64_SIM_TAG_ABI) { \
-            __a64_mrd_value = ARM64_SIM_L_XDP_READ((BASE), __a64_mrd_off, (WIDTH)); \
-        } else if (__a64_sim_abi_kind == KPROG_ABI_KIND_SKB && __a64_mrd_tag == ARM64_SIM_TAG_ABI) { \
-            __a64_mrd_value = ARM64_SIM_L_SKB_READ((BASE), __a64_mrd_off, (WIDTH)); \
-        } else if (__a64_mrd_tag == ARM64_SIM_TAG_ABI &&                  \
-                   __builtin_constant_p(__a64_mrd_ctx_off)) {            \
-            __a64_mrd_value = KPROG_ARM64_LOAD_BYTES_OFFSET(             \
-                __a64_sim_helper_ctx, __a64_mrd_ctx_off, (WIDTH));       \
-        } else switch (__a64_mrd_src) {                                 \
-		case KPROG_ARM64_MEM_SRC_STACK: {                        \
-		__u8 __a64_mrd_bsrc = KPROG_ARM64_MEM_BASE_SRC(       \
-			(BASE) == ARM64_SP);                             \
-		__s64 __a64_mrd_base =                               \
-			(__a64_mrd_bsrc == KPROG_ARM64_MEM_BASE_SRC_SP_REGISTER)\
-				? __a64_sp                              \
-				: (__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);\
-			__a64_mrd_value = ARM64_SIM_L_STACK_READ(        \
-				__a64_mrd_base + __a64_mrd_off, (WIDTH));\
-			break;                                             \
-		}                                                        \
-		case KPROG_ARM64_MEM_SRC_ABI_PTR_LOAD: {                 \
-			__a64_mrd_value =                                \
-				(__u64)(long)ARM64_SIM_L_LOAD_PTR_AT(ARM64_SIM_L_READ_REG_PTR(BASE), __a64_mrd_off);\
-			break;                                             \
-		}                                                        \
-		case KPROG_ARM64_MEM_SRC_RELOC_PTR:                      \
-			if (__a64_mrd_off != 0)                            \
-				ARM64_SIM_L_UNSUPPORTED_OPCODE();          \
-			__a64_mrd_value =                                \
-				(__u64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);\
-			break;                                             \
-		default: {                                               \
-			__a64_mrd_value = KPROG_ARM64_LOAD_BYTES_OFFSET( \
-				ARM64_SIM_L_READ_REG_PTR(BASE), __a64_mrd_off, (WIDTH));\
-			break;                                             \
-		}                                                        \
-		}                                                        \
-		__a64_mrd_value;                                          \
-	})
+/* The generic memory dispatch retains stack observation, typed pointer loads,
+ * relocation-offset rejection and ordinary native-width loads. */
+#define ARM64_SIM_L_MEM_READ_DISPATCH_INTO(OUTPUT, BASE, OFF, WIDTH, SOURCE) \
+    do { \
+        __u64 __a64_mrd_value; \
+        switch (SOURCE) { \
+        case KPROG_ARM64_MEM_SRC_STACK: { \
+            __s64 __a64_mrd_base; \
+            if (KPROG_ARM64_MEM_BASE_SRC((BASE) == ARM64_SP) == KPROG_ARM64_MEM_BASE_SRC_SP_REGISTER) \
+                __a64_mrd_base = __a64_sp; \
+            else { void *__a64_mrd_pointer; ARM64_SIM_L_READ_REG_PTR_INTO(__a64_mrd_pointer, (BASE)); \
+                __a64_mrd_base = (__s64)(long)__a64_mrd_pointer; } \
+            ARM64_SIM_L_STACK_READ_INTO(__a64_mrd_value, __a64_mrd_base + (OFF), (WIDTH)); \
+            break; \
+        } \
+        case KPROG_ARM64_MEM_SRC_ABI_PTR_LOAD: { \
+            void *__a64_mrd_pointer, *__a64_mrd_loaded; \
+            ARM64_SIM_L_READ_REG_PTR_INTO(__a64_mrd_pointer, (BASE)); \
+            ARM64_SIM_L_LOAD_PTR_AT_INTO(__a64_mrd_loaded, __a64_mrd_pointer, (OFF)); \
+            __a64_mrd_value = (__u64)(long)__a64_mrd_loaded; \
+            break; \
+        } \
+        case KPROG_ARM64_MEM_SRC_RELOC_PTR: { \
+            if ((OFF) != 0) ARM64_SIM_L_UNSUPPORTED_OPCODE(); \
+            void *__a64_mrd_pointer; ARM64_SIM_L_READ_REG_PTR_INTO(__a64_mrd_pointer, (BASE)); \
+            __a64_mrd_value = (__u64)(long)__a64_mrd_pointer; \
+            break; \
+        } \
+        default: { \
+            void *__a64_mrd_pointer; ARM64_SIM_L_READ_REG_PTR_INTO(__a64_mrd_pointer, (BASE)); \
+            KPROG_ARM64_LOAD_BYTES_OFFSET_INTO(__a64_mrd_value, __a64_mrd_pointer, (OFF), (WIDTH)); \
+            break; \
+        } \
+        } \
+        (OUTPUT) = __a64_mrd_value; \
+    } while (0)
+
+/* A known context displacement uses the entry base as the BPF instruction
+ * operand. CompCert uses the generic base+offset access at that same address;
+ * it has no __builtin_constant_p or physical cross-block pointer subtraction.
+ * The operand/address correspondence is a platform proof obligation. */
+#if defined(__COMPCERT__)
+#define ARM64_SIM_L_MEM_READ_ADDRESS_INTO(OUTPUT, BASE, OFF, WIDTH, TAG, SOURCE) \
+    ARM64_SIM_L_MEM_READ_DISPATCH_INTO((OUTPUT), (BASE), (OFF), (WIDTH), (SOURCE))
+#else
+#define ARM64_SIM_L_MEM_READ_ADDRESS_INTO(OUTPUT, BASE, OFF, WIDTH, TAG, SOURCE) \
+    do { \
+        void *__a64_mra_pointer; ARM64_SIM_L_READ_REG_PTR_INTO(__a64_mra_pointer, (BASE)); \
+        __s64 __a64_mra_ctx_off = (__s64)((__u64)(long)__a64_mra_pointer - \
+            (__u64)(long)__a64_sim_helper_ctx + (__u64)(OFF)); \
+        if ((TAG) == ARM64_SIM_TAG_ABI && __builtin_constant_p(__a64_mra_ctx_off)) { \
+            KPROG_ARM64_LOAD_BYTES_OFFSET_INTO((OUTPUT), __a64_sim_helper_ctx, __a64_mra_ctx_off, (WIDTH)); \
+        } else ARM64_SIM_L_MEM_READ_DISPATCH_INTO((OUTPUT), (BASE), (OFF), (WIDTH), (SOURCE)); \
+    } while (0)
+#endif
+
+#define ARM64_SIM_L_MEM_READ_INTO(OUTPUT, BASE, INDEX, AUX, IMM, EXTRA, WIDTH) \
+    do { \
+        __s64 __a64_memory_off; \
+        ARM64_SIM_L_MEM_BASE_OFF_INTO(__a64_memory_off, (AUX), (INDEX), (IMM)); \
+        __a64_memory_off += (EXTRA); \
+        __u8 __a64_memory_tag, __a64_memory_source; \
+        ARM64_SIM_L_REG_TAG_INTO(__a64_memory_tag, (BASE)); \
+        KPROG_ARM64_MEM_READ_SRC_INTO(__a64_memory_source, (BASE) == ARM64_SP, __a64_memory_tag, (WIDTH)); \
+        __u64 __a64_memory_value; \
+        if (__a64_sim_is_xdp && __a64_memory_tag == ARM64_SIM_TAG_ABI) { \
+            ARM64_SIM_L_XDP_READ_INTO(__a64_memory_value, (BASE), __a64_memory_off, (WIDTH)); \
+        } else if (__a64_sim_abi_kind == KPROG_ABI_KIND_SKB && __a64_memory_tag == ARM64_SIM_TAG_ABI) { \
+            ARM64_SIM_L_SKB_READ_INTO(__a64_memory_value, (BASE), __a64_memory_off, (WIDTH)); \
+        } else ARM64_SIM_L_MEM_READ_ADDRESS_INTO(__a64_memory_value, (BASE), __a64_memory_off, (WIDTH), __a64_memory_tag, __a64_memory_source); \
+        (OUTPUT) = __a64_memory_value; \
+    } while (0)
+#define ARM64_SIM_L_MEM_READ(BASE, INDEX, AUX, IMM, EXTRA, WIDTH) \
+    ({ __u64 __a64_memory_result; \
+       ARM64_SIM_L_MEM_READ_INTO(__a64_memory_result, (BASE), (INDEX), (AUX), (IMM), (EXTRA), (WIDTH)); \
+       __a64_memory_result; })
 
 #define ARM64_SIM_L_MEM_READ_TAG_INTO(OUTPUT, BASE, INDEX, AUX, IMM, EXTRA, WIDTH)        \
 	do {                                                                 \
@@ -1347,8 +1371,9 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 
 #define ARM64_SIM_L_MEM_WRITE(BASE, INDEX, AUX, IMM, EXTRA, WIDTH, VALUE, TAG)\
 	do {                                                               \
-		__s64 __a64_mwr_off = ARM64_SIM_L_MEM_BASE_OFF((AUX), (INDEX), (IMM)) + (EXTRA);\
-		__u8 __a64_mwr_tag = ARM64_SIM_L_REG_TAG(BASE);          \
+		__s64 __a64_mwr_off; \
+        ARM64_SIM_L_MEM_BASE_OFF_INTO(__a64_mwr_off, (AUX), (INDEX), (IMM)); __a64_mwr_off += (EXTRA);\
+		__u8 __a64_mwr_tag; ARM64_SIM_L_REG_TAG_INTO(__a64_mwr_tag, (BASE));          \
 		__u8 __a64_mwr_arm = KPROG_ARM64_MEM_WRITE_ARM(          \
 			((BASE) == ARM64_SP), __a64_mwr_tag);            \
 		if (__a64_sim_abi_kind == KPROG_ABI_KIND_SKB && __a64_mwr_tag == ARM64_SIM_TAG_ABI) { \
@@ -1356,14 +1381,15 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
         } else if (__a64_mwr_arm == KPROG_ARM64_MEM_WRITE_ARM_STACK) {  \
 		__u8 __a64_mwr_bsrc = KPROG_ARM64_MEM_BASE_SRC(       \
 			(BASE) == ARM64_SP);                             \
-		__s64 __a64_mwr_base =                               \
-			(__a64_mwr_bsrc == KPROG_ARM64_MEM_BASE_SRC_SP_REGISTER)\
-				? __a64_sp                              \
-				: (__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);\
+		__s64 __a64_mwr_base = __a64_sp; \
+        if (__a64_mwr_bsrc != KPROG_ARM64_MEM_BASE_SRC_SP_REGISTER) { \
+            void *__a64_mwr_pointer; ARM64_SIM_L_READ_REG_PTR_INTO(__a64_mwr_pointer, (BASE)); \
+            __a64_mwr_base = (__s64)(long)__a64_mwr_pointer; }\
 			ARM64_SIM_L_STACK_WRITE_TAG(__a64_mwr_base + __a64_mwr_off,\
 						    (WIDTH), (VALUE), (TAG));\
 		} else {                                                   \
-			void *__a64_mwr_addr = (__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) + __a64_mwr_off;\
+			void *__a64_mwr_pointer; ARM64_SIM_L_READ_REG_PTR_INTO(__a64_mwr_pointer, (BASE)); \
+            void *__a64_mwr_addr = (__u8 *)__a64_mwr_pointer + __a64_mwr_off;\
 			ARM64_SIM_L_STORE_ADDR(__a64_mwr_addr, (WIDTH), (VALUE));\
 		}                                                         \
 	} while (0)

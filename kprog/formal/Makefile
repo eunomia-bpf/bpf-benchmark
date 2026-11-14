@@ -735,9 +735,13 @@ clight: clightgen
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -D__COMPCERT__ -include oracles/compcert_memory_host.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -c c/Arm64Addressing.c -o build/arm64_addressing_binding.o
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_context_host.c build/arm64_addressing_binding.o -o build/test_arm64_context_host
 	./build/test_arm64_context_host
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -DADAPTER=1 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_memory_binding_host.c build/arm64_addressing_binding.o -o build/test_arm64_memory_binding_host
+	./build/test_arm64_memory_binding_host
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -c c/Arm64Addressing.c -o build/arm64_addressing_binding.o
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_addressing_host.c build/arm64_addressing_binding.o -o build/test_arm64_addressing_host
 	./build/test_arm64_addressing_host
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -DADAPTER=0 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_memory_binding_host.c build/arm64_addressing_binding.o -o build/test_arm64_memory_binding_host
+	./build/test_arm64_memory_binding_host
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -D__COMPCERT__ -include oracles/compcert_memory_host.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -c c/Arm64Access.c -o build/arm64_access_binding.o
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -DADAPTER=1 -I../../vendor/libbpf/include/uapi oracles/test_arm64_access_host.c build/arm64_access_binding.o -o build/test_arm64_access_host
 	./build/test_arm64_access_host
