@@ -312,6 +312,26 @@ cilium-candidate:
 		--object $(CILIUM_PAYLOAD)/bpf_host.native.o,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne \
 		--object $(CILIUM_PAYLOAD)/bpf_xdp.native.o,prog_type=6
 
+.PHONY: cilium-candidate-witness
+cilium-candidate-witness: cilium-candidate
+	for unit in bpf_lxc bpf_host bpf_xdp; do install -m644 $(CILIUM_IR_BUILD)/$$unit.direct.bpf.o $(CILIUM_PAYLOAD)/$$unit.original.bpf.o; done
+	python3 $(HERE)/original-bpf-index.py --output $(CILIUM_PAYLOAD)/original-bpf-index.json \
+		--pair $(CILIUM_PAYLOAD)/bpf_lxc.native.o $(CILIUM_PAYLOAD)/bpf_lxc.original.bpf.o \
+		--pair $(CILIUM_PAYLOAD)/bpf_host.native.o $(CILIUM_PAYLOAD)/bpf_host.original.bpf.o \
+		--pair $(CILIUM_PAYLOAD)/bpf_xdp.native.o $(CILIUM_PAYLOAD)/bpf_xdp.original.bpf.o
+
+BPF_INDEX_BUILD ?= /var/tmp/kprog-tmp/perf/original-bpf-index
+.PHONY: original-bpf-index
+original-bpf-index:
+	python3 $(HERE)/original-bpf-index.py --output $(BPF_INDEX_OUTPUT) $(BPF_INDEX_PAIRS)
+
+.PHONY: original-bpf-index-check
+original-bpf-index-check:
+	install -d $(BPF_INDEX_BUILD)
+	$(CC) -target bpf -O2 -g -c $(HERE)/test-native-frame.c -o $(BPF_INDEX_BUILD)/fixture.bpf.o
+	$(CC) -O2 -g -c $(HERE)/test-native-frame.c -o $(BPF_INDEX_BUILD)/fixture.native.o
+	python3 $(HERE)/check-original-bpf-index.py $(BPF_INDEX_BUILD)/fixture.native.o $(BPF_INDEX_BUILD)/fixture.bpf.o
+
 .PHONY: cilium-context-manifest
 MANIFEST_CONTEXT_ARGS ?=
 cilium-context-manifest:
