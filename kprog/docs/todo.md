@@ -157,6 +157,7 @@
 **lane verified 的大任务：六个应用在唯一内核和镜像上走通 verified 路径。** 普查按程序体去重、最多三个 guest 并行跑完；失败类别按 BPF 时间占比从大到小修；每个应用整应用复测，记下加载、通过 verifier、执行的程序数和运行目录；之后做 100–100K 规模扫描。链接器、加载器、shim 归你，lane perf、lane C 的相关改动由你审看或代改。
 - [ ] V1 按程序体去重的常驻普查跑完；已发现的失败类别（栈写越界、callback、scalar 内存访问、编译器栈存储）现在就修，按 BPF 时间占比从大到小。
 - [ ] V2 六个应用整应用复测，记下每个应用加载、通过 verifier、执行的程序数和运行目录。
+- BCC 当前通用模型整应用复测已排队（本提交）：前次213201的25/25/25早于52964ca12/e6e64b725；复用现有whole-app入口、checked-sim-c及sole image，CPU8–15/8vCPU64G/AS80GiB、stats1/1×10，dryrun0。只等333934大输入重放自然退出以串行资源，不以其成功为gate；实际loaded/verified/installed/run/zero/missing待收取，不能从排队推断通过。小receipt `bcc-current-model-lto-launch.json`，原始数据 `/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto`。
 - [ ] V3 100–100K 规模扫描（verifier 时间和内存）。
 
 **共用资源，由 lane 自己商量（建议做法，lane 可以改）：**

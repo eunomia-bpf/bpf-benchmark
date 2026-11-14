@@ -1,0 +1,32 @@
+{
+  "recorded": "2026-11-14T09:23:53.726804+00:00",
+  "app": "bcc/set",
+  "configuration": "checked-sim-c LTO",
+  "pid": 351898,
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto",
+  "wait_pid": 333934,
+  "dependency": "Resource sequencing only, after queued fixed-input compiler replay; no success gate",
+  "reason": "Previous complete BCC213201 predates general model52964ca12 and pre-verifier e6e64b725; whole-app recheck on current shared base",
+  "host_cpus": "8-15",
+  "guest_cpus": 8,
+  "guest_memory": "64G",
+  "host_as_bytes": 85899345920,
+  "samples": 1,
+  "workload_seconds": 10,
+  "bpf_stats": true,
+  "image_lock": "shared after resource dependency exits",
+  "dry_run_exit_code": 0,
+  "postlaunch_outcome_polled": false,
+  "application_completion_claimed": false,
+  "input_hashes": {
+    "kprog/x86/trusted_specializer.py": "a69bf301169249bd027ec4c3946de369f255170f7906ab23735e0eab040dbee4",
+    "kprog/x86/x86_sim_local_bpf.h": "f95f3e3b9ece20bd1a7340c9d2be478cb7befea33bae02892dfe353d525c0bb0",
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "748438e87c1f0daaee18ff0af88d0a99a03f17d1554de674f4864a60b1959526",
+    "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds": "e02a61a2659e87acc84ef6b9f3089528479df3dfead118543abeb423a8057af0",
+    "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir": "bfe23fdb831b367e5a6345e77f91d90f8e75b308e24b6d1ea92478430792d1bc",
+    "/workspaces/.agent-state/kprog-ck/verified-compiler/context-lower": "5f4549c07681c471cc57fe69b6c4bd1a9146a9775cd5cb43242a2131a84ea05d"
+  },
+  "inputs_note": "Launch snapshot only: actual request commands and checked-source hashes must be collected; no input freeze or peer source edits",
+  "benchmark_settings_changed": false,
+  "producer_selector": "Existing default BCC manifest in sole current image; no app-source changes"
+}
