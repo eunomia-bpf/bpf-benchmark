@@ -317,6 +317,10 @@ cilium-config-check:
 	python3 -m unittest discover -s $(ROOT)/kprog/perf/may29-image -p test_cilium_config.py
 	python3 -m unittest discover -s $(HERE) -p test_cilium_live_prepare.py
 
+.PHONY: observer-check
+observer-check:
+	python3 -m unittest discover -s $(ROOT)/kprog/perf/may29-image -p test_eqcodex_capture.py
+
 SWITCH_BUILD ?= /var/tmp/kprog-tmp/perf/native-switch
 .PHONY: native-switch-check
 native-switch-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json

@@ -116,9 +116,10 @@ def observe(out):
             continue
         cid = ids[0]
         prefix = ['docker', 'exec', cid]
-        if '--cilium-config' in sys.argv:
+        if phase not in seen or '--cilium-config' in sys.argv:
             save(prefix + ['sha256sum', '/usr/local/lib/bpfrejit/libnative_loader.so'],
                  dest / 'native-loader-sha256.txt')
+        if '--cilium-config' in sys.argv:
             capture_cilium_configuration(prefix, dest)
         programs = save(prefix + ['bpftool', '-j', 'prog', 'show'], dest / 'programs.json')
         maps = save(prefix + ['bpftool', '-j', 'map', 'show'], dest / 'maps.json')
