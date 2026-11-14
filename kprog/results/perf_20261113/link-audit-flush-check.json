@@ -1,0 +1,52 @@
+{
+  "recorded_at": "2026-11-14T04:12:50.209261+00:00",
+  "protocol_commit": "228289729",
+  "raw": "/workspaces/kprog-raw/perf/20261114-link-audit-flush-check",
+  "inputs": [],
+  "reports": [
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-link-audit-flush-check/collection.json",
+      "sha256": "e932ab15cb9569d8e68fac8513cf7146a2adec7ea50575271683cd847bce1639",
+      "data": {
+        "report": {
+          "cases": [
+            {
+              "case": "proof-native_tracer_entry",
+              "returncode": 0,
+              "capture": "/workspaces/repository/corpus/results/perf-link-audit-flush-check-20261114/audit/link-69g8xt1k",
+              "identical_exit_stdout_stderr": true,
+              "inherited_fd_preserved": true,
+              "identical_emitted_files": true
+            },
+            {
+              "case": "kernel-native_tracer_entry",
+              "returncode": 0,
+              "capture": "/workspaces/repository/corpus/results/perf-link-audit-flush-check-20261114/audit/link-i13djzjl",
+              "identical_exit_stdout_stderr": true,
+              "inherited_fd_preserved": true,
+              "identical_emitted_files": true
+            },
+            {
+              "case": "kernel-entry_that_does_not_exist",
+              "returncode": 1,
+              "capture": "/workspaces/repository/corpus/results/perf-link-audit-flush-check-20261114/audit/link-w6o478l7",
+              "identical_exit_stdout_stderr": true,
+              "inherited_fd_preserved": true,
+              "identical_emitted_files": false
+            }
+          ],
+          "incomplete_capture_reported": true,
+          "scope": "Actual CLI transport/capture regressions, synthetic host plan only; no kernel execution."
+        },
+        "scope": "Source wrapper explicitly flushes stdio before forwarding a negative child signal; real proof/kernel/error1/FD/output and incomplete-capture regressions pass. Installed in separate regression payload only; active diagnostic164729 original wrapper immutable."
+      }
+    }
+  ],
+  "scope": "Future source wrapper flush before signal forwarding, actual proof/kernel/error1/FD/stdio/output and incomplete-record checks pass in separate regression payload. Active164729 payload unchanged; no new VM outcome.",
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/perf_20261113/link-audit-flush-check.tar.gz",
+    "bytes": 1900270,
+    "sha256": "b46dc88263bbcbc6b0bec904e7d4dc0c0fd85d75d44aa2fa3ec46880a9675a3a",
+    "files_byte_compared": 42
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "recorded_at": "2026-11-14T04:13:59Z",
+  "source_commits": [
+    "228289729",
+    "f367ce365"
+  ],
+  "outer_pid": 164729,
+  "raw": "/workspaces/kprog-raw/perf/20261114-link-audit-otel",
+  "counter_capture": "/workspaces/repository/corpus/results/perf-link-audit-otel-20261114",
+  "link_captures": "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit",
+  "command": [
+    "make",
+    "-f",
+    "kprog/perf/native-context/Makefile",
+    "link-audit-otel"
+  ],
+  "resources": {
+    "cpus": "16-19",
+    "vcpus": 4,
+    "guest_memory": "16G",
+    "host_as_bytes": 34359738368,
+    "image_lock": "shared"
+  },
+  "protocol": {
+    "samples": 1,
+    "seconds": 10,
+    "stats": 1,
+    "purpose": "Actual CLI input/plan/output capture, not official timing",
+    "source": "original same-source OTel manifest",
+    "linker": "pinned48af2849d with existing known-map/local-memory/runtime-map flags"
+  },
+  "artifacts": [
+    {
+      "path": "corpus/results/perf-link-audit-20261114/native-link-on",
+      "sha256": "4b50bfb9beb697c65aaadd963de4837cd675c06c590bf4752b7a193a4aa15b1f"
+    },
+    {
+      "path": "corpus/results/perf-link-audit-20261114/native-link.real",
+      "sha256": "619ddc7799fc541b76ccf999a30ad3f4982f46a746af775518cdd648eef6e534"
+    },
+    {
+      "path": "corpus/results/perf-otel-upstream-20261114/manifest-context.json",
+      "sha256": "430b26ab4be8fd501a819f48c0451895d86bf90606533958a05639ac8a51573f"
+    },
+    {
+      "path": "corpus/results/perf-otel-upstream-20261114/otelcol-ebpf-profiler.native.o",
+      "sha256": "7e6781470c8d4a1d2669cfd262405d11095e5c2a2cbf591a675e578718d6b644"
+    },
+    {
+      "path": "kprog/perf/may29-image/eqcodex-capture.py",
+      "sha256": "fb784be680b194ba00473279d61fb2a03e3181246be664ca37f8e7992eda15d2"
+    }
+  ],
+  "outcome": null,
+  "scope": "Launch only; no postlaunch outcome/capture polling. Separate host-regression groups have label host-regression-synthetic-plan and host bootID; real guest groups use runtime label and own bootID. CLI plans may contain zero map literal placeholders patched later by C++; emitted call deltas establish compiler transformations, not final resource lifetime binding. Active installed wrapper228289729 unchanged; subsequent source-only stdio flush fix tested in separate payload and not deployed to active guest. No workload/gate/program-exclusion/kernel/image change."
+}

@@ -23,12 +23,16 @@ def decode(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('capture', type=Path)
+    parser.add_argument('--snapshot', action='append',
+                        help='decode these explicit snapshot endpoints only; default decodes every snapshot')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[3]
     names = re.findall(r'^\s*(metricID_\w+)\s*(?:=\s*\d+)?\s*,',
         (root / 'vendor/bpf/otel/support/ebpf/types.h').read_text(), re.M)
     result = []
-    for snapshot in sorted(args.capture.iterdir()):
+    snapshots = ([args.capture / name for name in args.snapshot]
+                 if args.snapshot else sorted(args.capture.iterdir()))
+    for snapshot in snapshots:
         if not snapshot.is_dir() or not (snapshot / 'programs.json').exists():
             continue
         programs = decode(snapshot / 'programs.json')

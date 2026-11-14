@@ -72,6 +72,8 @@ def capture(argv, payload):
     (directory / "result.json").write_text(json.dumps(record, indent=2) + "\n")
     sys.stdout.buffer.write(result.stdout)
     sys.stderr.buffer.write(result.stderr)
+    sys.stdout.buffer.flush()
+    sys.stderr.buffer.flush()
     return result.returncode
 
 
