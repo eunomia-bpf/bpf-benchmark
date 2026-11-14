@@ -9,7 +9,7 @@ kprog belong in those forks. No replacement ISA semantics is defined locally.
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
 | AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `da428593b21d` | Lean 4.35.0 |
-| x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `4777fb8e1b84` | Lean 4.32.0-rc1 |
+| x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `9e6f4fe02488` | Lean 4.32.0-rc1 |
 | Clight | [eunomia-bpf/clean](https://github.com/eunomia-bpf/clean), `external/clean/export` | `123f7f7767e2` | Lean 4.32.1 |
 
 `make -C kprog/formal mature` builds the migration Lake package on Lean 4.35.0,
@@ -33,7 +33,7 @@ CompCert front end and the Lean export/semantics have separate trust claims.
 
 ## Operation coverage (M2 in progress)
 
-LNSym `da428593b21d6dfa02c6d063600d9ed817747fd5`, x86lean `4777fb8e1b84c1099eae8073f0cddfda6ea8c715`.
+LNSym `da428593b21d6dfa02c6d063600d9ed817747fd5`, x86lean `9e6f4fe024886f396973a1a480682097f730fb23`.
 
 Source inspection, not refinement proofs or conformance results. `present` means an execution path exists; `partial`/`missing` remain M2 work; `layer` identifies linking/ABI transport above an existing ISA form. Memory permissions, initialization, fault prefixes, exclusive ordering and ABI require explicit relations.
 
@@ -243,10 +243,36 @@ signed bit-byte addressing, run forwarding and stopped-state stability
 (`m2-x86-canonical/build-4`). Earlier lemma-name, conditional-proof and test-layout
 failures remain archived, with no assertion removed. These are post-decode AST
 checks, not encoded-form/hardware/ACL2 differential results or M5 refinements.
-Noncanonical outcomes still use the external model's refusal convention; precise
-architectural faults, ordinary memory permissions/canonical spans, initialization
-and ordered fault prefixes remain open. Existing fallthrough and LOOP model-stop
-behavior is retained. LAM/tag masking and page translation are outside this input.
+That step uses the external model's refusal convention on noncanonical inputs.
+Existing fallthrough and LOOP model-stop behavior is retained. The optional
+checked scalar entry below adds flat-memory faults; control transfers remain
+unported to that entry. LAM/tag masking and page translation are outside this input.
+
+x86lean `9e6f4fe02488` adds [stepChecked/runChecked](external/x86lean/X86/CheckedMemory.lean)
+over the existing numeric step. An explicit byte-permission/initialization profile
+surrounds the unchanged Cpu. Effective addresses use the existing Ea.addr;
+selected-width canonicality checks every byte before permissions. Successful
+reads expose actual bytes and ghost initialization, successful stores initialize
+their exact wrapping range, and a denied store retains the read prefix without
+committing CPU state. MOV, ordinary binary/unary arithmetic, extending loads,
+CMOV and SETcc are supported; LEA/NOP need no memory access. False-condition
+CMOV still reads its memory source. UD2/illegal LOCK have typed invalid-opcode
+outcomes. Missing profiles and unported instruction classes explicitly refuse;
+there is no total-memory fallback. These are flat access outcomes, without MMU,
+CR2/error codes, concurrency or exception-vector entry.
+
+The final 156-job combined build and 113-job standalone LNSym check passed
+793 kernel-decide cases (712 operand/permission/init, 56 canonical spans,
+16 malformed operands, nine capability/terminal/sequence checks), including
+literal values, flags/oracle/frame preservation, base/destination aliasing,
+RIP-relative/FS/GS addresses and ordered fault prefixes. The stopped-state
+theorem uses simp and only the existing allowed axioms. Numeric Semantics,
+State, Memory and all existing Theorems files are byte-identical to the entry
+pin. Raw `m2-x86-checked-access/build-3` retains the accepted result and earlier
+parser failure/successful revision; no assertion removed or admission added.
+These are post-decode finite checks, not hardware/ACL2 differential results or
+M5 refinements. Checked stack/control, shifts/rotates, strings, vectors and
+atomic classes remain open, as does ARM native exclusive binding; M2 is open.
 
 ### AArch64: 74 simulator operations
 
@@ -409,7 +435,7 @@ Outside the 74-operation roster, LDXR/LDAXR/STXR and CLREX now execute in the fo
 | 0x49 | `rorMem` | present | [rot .ror](external/x86lean/X86/Syntax.lean) |  |
 | 0xff | `ret` | present | [ret](external/x86lean/X86/Syntax.lean) | Native stack pop; simulator return modes need relation |
 
-Cross-cutting gaps: X86.Mem is a finite byte association list with implicit zero background, total reads/writes, no access-permission faults. The external step now selects 48/57-bit canonicality for its existing target/bit-byte checks; ordinary data spans and precise architectural fault delivery remain open. LNSym retains its total-byte-memory API and now also has a checked step for single/pair/exclusive transfers and LSE RMWs with byte permissions, initialization and ordered fault observations. That profile must be bound explicitly; it is not a full MMU/concurrency model. LSE RMWs retain old/new/order metadata in one checked effect; exclusives bind physical-monitor inputs and ordered monitor/memory effects. Out-of-roster multiple-structure SIMD paths remain explicitly refused. Old exclusive fault/trace bindings differ and require reconciliation. Thread-pointer outcomes now bind explicitly; native admissibility and the remaining memory/platform bindings are open. These are not closed by listing instruction constructors; M2/M3 must preserve the existing theorem domains through external-model extensions and explicit relations. x86lean takes post-decode Instr.op/len. BZHI is absent from the differential roster, not absent from step: do not duplicate its semantics.
+Cross-cutting gaps: X86.Mem retains its finite byte association list with implicit zero background and total default reads/writes. Its optional checked step now handles explicit permissions, initialization, canonical spans and ordered flat faults for the scalar subset above; other instruction classes refuse. The default step selects 48/57-bit canonicality for its existing target/bit-byte checks. Checked stack/control/string/vector/atomic and remaining families, plus precise platform fault delivery, remain open. LNSym retains its total-byte-memory API and now also has a checked step for single/pair/exclusive transfers and LSE RMWs with byte permissions, initialization and ordered fault observations. That profile must be bound explicitly; it is not a full MMU/concurrency model. LSE RMWs retain old/new/order metadata in one checked effect; exclusives bind physical-monitor inputs and ordered monitor/memory effects. Out-of-roster multiple-structure SIMD paths remain explicitly refused. Old exclusive fault/trace bindings differ and require reconciliation. Thread-pointer outcomes now bind explicitly; native admissibility and the remaining memory/platform bindings are open. These are not closed by listing instruction constructors; M2/M3 must preserve the existing theorem domains through external-model extensions and explicit relations. x86lean takes post-decode Instr.op/len. BZHI is absent from the differential roster, not absent from step: do not duplicate its semantics.
 
 ## Legacy foundation (migration pending)
 
