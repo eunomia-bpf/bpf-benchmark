@@ -267,7 +267,8 @@ $(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/x86/vmli
 			-o "$(dir $@)$${stem}.resolved.bc"; \
 		"$(LLVM_DIS)" "$(dir $@)$${stem}.resolved.bc" -o "$(dir $@)$${stem}.resolved.ll"; \
 		python3 "$(NATIVE_IR_PREP)" \
-			"$(dir $@)$${stem}.resolved.ll" "$(dir $@)$${stem}.notf.ll" --name-helpers; \
+			"$(dir $@)$${stem}.resolved.ll" "$(dir $@)$${stem}.notf.ll" --name-helpers \
+			--kconfig "$(patsubst %/,%,$(dir $(KATRAN_TARGET_BTF)))"; \
 		"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/native_compat.h" $$inc \
 			-o "$@" "$(dir $@)$${stem}.notf.ll"; \
 	else \

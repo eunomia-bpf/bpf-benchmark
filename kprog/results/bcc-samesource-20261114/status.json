@@ -1,0 +1,31 @@
+{
+  "app": "bcc/set",
+  "date_utc": "2026-11-14T04:25:00Z",
+  "route": "same-source (unmodified upstream bcc/libbpf-tools/*.bpf.c)",
+  "manifest": "corpus/results/bcc-samesource-20261114/manifest.json",
+  "manifest_entries": 29,
+  "run": "corpus/results/x86_kvm_corpus_20261114_035732_587182",
+  "run_status": "ok",
+  "programs_loaded": 25,
+  "native_replacements": 25,
+  "native_replacements_failed": 0,
+  "samples": 1,
+  "workload_seconds": 20,
+  "cpus": "0-7",
+  "aggregate": {
+    "ebpf_ns_per_run": 72.21,
+    "native_ns_per_run": 71.24,
+    "ratio_native_over_ebpf": 1.0137,
+    "run_cnt_ebpf": 397144285,
+    "run_cnt_native": 402683675
+  },
+  "per_program_ns_per_run": {
+    "sys_exit": {"ebpf": 58.9, "native": 57.7, "speedup": 1.021},
+    "sys_enter": {"ebpf": 55.1, "native": 54.4, "speedup": 1.013},
+    "tracepoint__sys": {"ebpf": 459.7, "native": 464.9, "speedup": 0.989},
+    "kprobe__cap_cap": {"ebpf": 139.5, "native": 132.3, "speedup": 1.054},
+    "sched_switch": {"ebpf": 78.7, "native": 79.0, "speedup": 0.996},
+    "sched_wakeup": {"ebpf": 61.9, "native": 63.7, "speedup": 0.971}
+  },
+  "caveat": "single sample, 20 s; aggregate includes programs with zero runs in one arm"
+}

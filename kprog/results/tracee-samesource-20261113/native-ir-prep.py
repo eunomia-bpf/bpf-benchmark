@@ -19,7 +19,15 @@ does not:
      symbol (`R_X86_64_PC32 .maps`, the *address* of a copy); without it, it emits the
      `GOTPCRELX` load whose slot the loader fills with the map pointer — the shipped form.
 
-Usage: native-ir-prep.py <in.ll> <out.ll>
+  4. **Fold `__kconfig` variables to the one kernel's values** (only with `--kconfig`).
+     Upstream declares e.g. `extern __u32 LINUX_KERNEL_VERSION __kconfig;` and libbpf
+     fills it at load time. The native linker has no `.kconfig` section to resolve, so the
+     object keeps an undefined `LINUX_KERNEL_VERSION` and the link fails with
+     `PC32 proof reloc target LINUX_KERNEL_VERSION has no section`. On a single known
+     kernel the value is a compile-time constant, so it is substituted here and the
+     global is dropped.
+
+Usage: native-ir-prep.py <in.ll> <out.ll> [--name-helpers] [--kconfig <kernel build dir>]
 """
 import re
 import pathlib
@@ -36,9 +44,74 @@ def helper_names() -> dict[int, str]:
 
 CALL = re.compile(r'inttoptr \(i64 (\d+) to ptr\)\(')
 
+KCONFIG_GLOBAL = re.compile(
+    r'^@(\w+) = external dso_local (?:local_unnamed_addr )?global (\w+), section "\.kconfig".*$',
+    re.M)
+
+
+def kconfig_values(build_dir) -> dict[str, int]:
+    """The one kernel's build configuration, as BPF `__kconfig` variables see it.
+
+    libbpf resolves a `__kconfig` extern from the kernel's own kconfig at load time.  The
+    native linker has no such section, so the same values are read from the build the
+    native object targets and folded into the IR as constants.  `build_dir` is that
+    kernel's build tree (`.../build-x86`), which holds both `.config` and the release.
+    """
+    build_dir = pathlib.Path(build_dir)
+    values = {}
+    for line in (build_dir / '.config').read_text().splitlines():
+        line = line.strip()
+        if not line.startswith('CONFIG_') or '=' not in line:
+            continue
+        key, raw = line.split('=', 1)
+        raw = raw.strip().strip('"')
+        if raw == 'y':
+            values[key] = 1
+        elif raw == 'n':
+            values[key] = 0
+        elif raw.isdigit():
+            values[key] = int(raw)
+    release = (build_dir / 'include/config/kernel.release').read_text().strip()
+    a, b, c = release.split('.', 2)
+    values['LINUX_KERNEL_VERSION'] = (
+        (int(a) << 16) + (int(b) << 8) + int(re.match(r'\d+', c).group(0)))
+    return values
+
+
+def fold_kconfig(text: str, values: dict[str, int]) -> tuple[str, list[str]]:
+    """Replace each `.kconfig` global with its constant and drop the declaration.
+
+    Only the single known target kernel can do this: the substitute is what that kernel
+    reports, which is exactly what libbpf would have written into `.kconfig` at load.
+    """
+    folded, unresolved = [], []
+    for m in KCONFIG_GLOBAL.finditer(text):
+        name = m.group(1)
+        if name in values:
+            folded.append(name)
+        else:
+            unresolved.append(name)
+    for name in folded:
+        # Every use is a load of the global, which is folded to its constant; the
+        # value's own metadata goes with it (nothing reads it to generate code).
+        text = re.sub(
+            r'^\s*(%[A-Za-z0-9_.]+) = load \w+, ptr @' + re.escape(name) + r'\b.*$',
+            lambda m: f'{m.group(1)} = add i32 0, {values[name]}', text, flags=re.M)
+        text = re.sub(r'^@%s = external dso_local .*$' % re.escape(name), '', text, flags=re.M)
+        # A leftover `@NAME` in the debug metadata (a DIGlobalVariable) is harmless:
+        # it is not a use, so it cannot produce a relocation.
+        if re.search(r'@%s\b' % re.escape(name), re.sub(r'^!.*$', '', text, flags=re.M)):
+            raise SystemExit(f'kconfig global {name} still referenced after folding')
+    return text, unresolved
+
 
 def main(argv):
     src, dst = pathlib.Path(argv[1]), pathlib.Path(argv[2])
+    flags = argv[3:]
+    name_helpers = '--name-helpers' in flags
+    build_dir = None
+    if '--kconfig' in flags:
+        build_dir = flags[flags.index('--kconfig') + 1]
     names = helper_names()
     text = src.read_text()
 
@@ -56,7 +129,7 @@ def main(argv):
     # produces the adjacent `mov $imm; call *reg` — Katran — naming converts a call the
     # linker inlines into a PLT32 relocation it cannot, and the objects grow.  So: name
     # only if the caller asked, by passing a third argument.
-    if len(argv) > 3 and argv[3] == '--name-helpers':
+    if name_helpers:
         text = CALL.sub(repl, text)
         if missing:
             raise SystemExit(f'helper ids with no uapi name: {sorted(missing)}')
@@ -83,10 +156,17 @@ def main(argv):
     text = re.sub(r'^(@\S+ = )dso_local (global .*)$', r'\1\2', text, flags=re.M)
     text = re.sub(r'^(@\S+ = )dso_local (constant .*)$', r'\1\2', text, flags=re.M)
 
+    # 4.  The one kernel's kconfig values, so no `.kconfig` global reaches the linker.
+    unresolved = []
+    if build_dir is not None:
+        text, unresolved = fold_kconfig(text, kconfig_values(build_dir))
+
     dst.write_text(text)
     named = len(set(re.findall(r'@(bpf_\w+)\(', text)))
     print('helpers named', named, '| passthrough left',
-          text.count('llvm.bpf.passthrough'))
+          text.count('llvm.bpf.passthrough'),
+          '| kconfig folded', 'no' if build_dir is None else 'yes',
+          '| kconfig unresolved', unresolved)
 
 
 if __name__ == '__main__':
