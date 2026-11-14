@@ -1,0 +1,100 @@
+{
+  "recorded": "2026-11-14T16:35:34.685239+00:00",
+  "execution_mode": "DIRECT NATIVE P, with full link-LTO switches or generic helpers as stated. These are NOT checked-sim-c acceptance runs.",
+  "scope": "Bind original BPF map relocation symbols to actual intercepted current load FDs; no application source edit or hardcoded perf->kprobe alias.",
+  "raw": "/workspaces/kprog-raw/perf/20261114-otel-source-alias",
+  "producer_source": "Go loadProbeUnwinders rewrites program-array references via AssociateMap; loader SourceBpfMaps.bind joins original relocation slot to actual source FD and overwrites the native symbolic map binding.",
+  "original_bpf_reference": {
+    "allocated_sections_equal": true,
+    "relocations_equal": true
+  },
+  "native_sha256": "ef44985c193e1d737ffd8980009b67f3c36ab91baf67af0c7878e69590d747da",
+  "source_bpf_sha256": "f5a7cea515fa74d8a6588e8f2c7303af3137a1fca98e032f65d4d0cef9ea272e",
+  "default_manifest_bytes_equal": true,
+  "missing_source_rejected_before_output": true,
+  "results": [
+    {
+      "configuration": "custom-only",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_154848_029564",
+      "app_status": "ok",
+      "phases": {
+        "baseline": {
+          "native_replacements": 0,
+          "native_load_failures": 0,
+          "custom_events": [
+            "[61.363002 pid=1743 tid=1756] BPF_PROG_LOAD type=2 (kprobe) name=custom__generic insn_cnt=1253 hash=79b122dbb9b8374c license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=10 attach_btf_obj_fd=0 attach_prog_fd=0"
+          ]
+        },
+        "post_rejit": {
+          "native_replacements": 14,
+          "native_load_failures": 0,
+          "custom_events": [
+            "[95.241542 pid=2444 tid=2456] BPF_PROG_LOAD type=2 (kprobe) name=custom__generic insn_cnt=1253 hash=35c80e9194bafb4b license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=10 attach_btf_obj_fd=0 attach_prog_fd=0",
+            "[95.828060 pid=2444 tid=2456] native-loader jit-info original fd=55 id=49 type=2 name=custom__generic tag=6c481ffe9a987240 jited_len=3679 xlated_len=5712 nr_jited_ksyms=1 ksym0=0xffffffffc06942cc ksym1=0x0",
+            "[95.828291 pid=2444 tid=2456] native-loader jit-info native fd=96 id=50 type=2 name=custom__generic tag=26449268576adffc jited_len=9389 xlated_len=24 nr_jited_ksyms=1 ksym0=0xffffffffc0695164 ksym1=0x0",
+            "[95.828369 pid=2444 tid=2456] native-loader replaced prog=custom__generic original_fd=55 native_fd=96 manifest=/workspaces/repository/corpus/results/perf-combined-codegen-source-alias-20261114/manifest-context.json source=/tmp/bpfrejit_2444_35c80e9194bafb4b.bpf"
+          ]
+        }
+      }
+    },
+    {
+      "configuration": "all-source-all-link-lto",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_155406_563155",
+      "app_status": "ok",
+      "phases": {
+        "baseline": {
+          "native_replacements": 0,
+          "native_load_failures": 0,
+          "custom_events": [
+            "[57.822405 pid=1744 tid=1752] BPF_PROG_LOAD type=2 (kprobe) name=custom__generic insn_cnt=1253 hash=a51af6dc9ebabcb8 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=10 attach_btf_obj_fd=0 attach_prog_fd=0"
+          ]
+        },
+        "post_rejit": {
+          "native_replacements": 14,
+          "native_load_failures": 0,
+          "custom_events": [
+            "[95.782176 pid=2442 tid=2451] BPF_PROG_LOAD type=2 (kprobe) name=custom__generic insn_cnt=1253 hash=b8cb9051c60adf25 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=55 attach_btf_obj_fd=0 attach_prog_fd=0",
+            "[96.283771 pid=2442 tid=2451] native-loader jit-info original fd=10 id=49 type=2 name=custom__generic tag=6c481ffe9a987240 jited_len=3679 xlated_len=5712 nr_jited_ksyms=1 ksym0=0xffffffffc04942c8 ksym1=0x0",
+            "[96.284131 pid=2442 tid=2451] native-loader jit-info native fd=96 id=50 type=2 name=custom__generic tag=26449268576adffc jited_len=9389 xlated_len=24 nr_jited_ksyms=1 ksym0=0xffffffffc0495164 ksym1=0x0",
+            "[96.284226 pid=2442 tid=2451] native-loader replaced prog=custom__generic original_fd=10 native_fd=96 manifest=/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/manifest-context.json source=/tmp/bpfrejit_2442_b8cb9051c60adf25.bpf"
+          ]
+        }
+      }
+    },
+    {
+      "configuration": "all-source-generic-helper-control",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_161356_500708",
+      "app_status": "ok",
+      "phases": {
+        "baseline": {
+          "native_replacements": 0,
+          "native_load_failures": 0,
+          "custom_events": [
+            "[50.721247 pid=1737 tid=1737] BPF_PROG_LOAD type=2 (kprobe) name=custom__generic insn_cnt=1253 hash=2ac3bb6a1097a208 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=10 attach_btf_obj_fd=0 attach_prog_fd=0"
+          ]
+        },
+        "post_rejit": {
+          "native_replacements": 14,
+          "native_load_failures": 0,
+          "custom_events": [
+            "[81.389813 pid=2579 tid=2585] BPF_PROG_LOAD type=2 (kprobe) name=custom__generic insn_cnt=1253 hash=d1ba77a4ebbf83d3 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=10 attach_btf_obj_fd=0 attach_prog_fd=0",
+            "[81.583199 pid=2579 tid=2585] native-loader jit-info original fd=53 id=49 type=2 name=custom__generic tag=6c481ffe9a987240 jited_len=3679 xlated_len=5712 nr_jited_ksyms=1 ksym0=0xffffffffc066b950 ksym1=0x0",
+            "[81.583405 pid=2579 tid=2585] native-loader jit-info native fd=96 id=50 type=2 name=custom__generic tag=26449268576adffc jited_len=6399 xlated_len=24 nr_jited_ksyms=1 ksym0=0xffffffffc066c7dc ksym1=0x0",
+            "[81.583480 pid=2579 tid=2585] native-loader replaced prog=custom__generic original_fd=53 native_fd=96 manifest=/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/manifest-context.json source=/tmp/bpfrejit_2579_d1ba77a4ebbf83d3.bpf"
+          ]
+        }
+      }
+    }
+  ],
+  "retained_failures": [
+    {
+      "test": "bare native-link.real mislabeled as no-LTO control",
+      "outcome": "guest exit255 before post measurement; raw retained; bare default retains legacy positional map inlining, so not a helper-only control"
+    },
+    {
+      "test": "direct-helper first retry",
+      "outcome": "appERROR because wrapper was in raw directory not mounted into app container; no kernel/codegen conclusion; wrapper moved into mounted corpus payload"
+    }
+  ],
+  "remaining": "Original combined timing1.044323 throughput/1.113356 percall used13 replacements+2optional failures and stays separate; current14-replacement configuration has only short correctness checks. Checked-sim-c main stillstockrejectR10-520, so neither full checked pipeline nor performance target is complete."
+}

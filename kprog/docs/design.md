@@ -141,6 +141,8 @@ NativeBPF 按内核自己的顺序处理一个扩展。内核里,verifier 先检
 - **LTO 配置(checked-sim-c)**:第 3 步拿被检查过的 sim C 做 LTO,map/helper 内联之后由编译器跨 helper 边界整体优化,再编成原生代码执行。
 - **直接原生配置**:执行 P 的机器码;LTO 由链接器直接在机器码上完成(绑定重定位,array/percpu 查找内联,hash 族改成直接调用)。这条路径保留作为对照。
 
+同源原生对象的 map 变量名必须绑定到本次实际装载的资源。运行时 manifest 的 `source_bpf_object` 提供原始 BPF ELF 重定位;loader 将原变量的指令槽对应到 intercepted source BPF 的当前 map FD,再验证实际 map 身份与形状。这样装载器对 program-array 的合法重写不会让原生代码继续使用另一个同类型 map;绑定不依赖重命名规则或 native/BPF helper 的位置顺序。
+
 优化只在两处加:第 1 步的编译 flag,第 3 步的 LTO。
 
 ## 它是什么、不是什么

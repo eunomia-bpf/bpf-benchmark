@@ -747,7 +747,7 @@ upstream-otel-candidate:
 	install -m644 $(OTEL_NATIVE_BUILD)/tracer.native.o $(OTEL_UPSTREAM_PAYLOAD)/otelcol-ebpf-profiler.native.o
 	install -m644 $(OTEL_UPSTREAM_BUILD)/tracer.bpf.o $(OTEL_UPSTREAM_PAYLOAD)/tracer.original.bpf.o
 	python3 $(ROOT)/vendor/bpf/write_native_manifest.py --app otelcol-ebpf-profiler --llvm-nm llvm-nm-18 --output $(OTEL_UPSTREAM_PAYLOAD)/manifest.json --object $(OTEL_UPSTREAM_PAYLOAD)/otelcol-ebpf-profiler.native.o
-	python3 $(HERE)/manifest-context.py --input $(OTEL_UPSTREAM_PAYLOAD)/manifest.json --output $(OTEL_UPSTREAM_PAYLOAD)/manifest-context.json --kernel-data-layout
+	python3 $(HERE)/manifest-context.py --input $(OTEL_UPSTREAM_PAYLOAD)/manifest.json --output $(OTEL_UPSTREAM_PAYLOAD)/manifest-context.json --kernel-data-layout --source-bpf-object tracer.original.bpf.o
 
 NATIVE_FRAME_BUILD ?= /var/tmp/kprog-tmp/perf/native-frame
 NATIVE_FRAME_REFERENCE_TOOL ?= /workspaces/kprog-raw/perf/20261114-otel-original-native/input-evidence/socket-context-lower
