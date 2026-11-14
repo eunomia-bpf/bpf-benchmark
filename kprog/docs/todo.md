@@ -166,6 +166,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED direct function tail linker候选（2026-11-14）** 通用PLT32/PC32与decoded near-tail发现callee closure；保持subprogram原E9/stack arguments，只有raw entry有function-tail exit时加入一次aligned call/exit wrapper，原body保留SysV prologue/RET，proof/links显式携带同体。正常entry默认bytes待实测比较，未部署/未宣称完成。ABI review发现per-tail CALL会移位stack参数，未提交该草案；新功能fixture覆盖第7/8参数、entry/nested/decoded/external/global/live value及unaffected default bytes。committed Make direct-tail-check准备全Rust与真实host execution子集；下一步启动scratch单job，结果后续turn收集。无需改kernel/module/benchmark/peer冻结binary。
+
 - **VERIFIED selected-entry binding实际kernel通过（2026-11-14）** 88348自然Make0/00:35:11：实际BTF offset/map identity、unused missing field排除、needed missing field仍报错、legacy默认与application config bytes均保持；source19e27380a未部署。完整fixture ELF/linked模板/log归档 `entry-data-kernel-results*`，raw `20261114-entry-data/{kernel-launch,kernel}`。Census新增group32 Tracee sched_switch retry仍mapbounds(vs32536/off65677/size4096)，full P/B归档 `census-body-32-retry*`；累计31attempts(17installed/14reject)，latest27distinct(17installed/10reject)/native0不增：BCC9/9/0、Tracee12/6/0、Tetra6/2/0，其他3新queue0；三guest继续。下步修general sibling-tail-jump的entry reachability，不触碰peer冻结二进制；current-load immutable CFG整类集成继续排在后面。
 
 - **VERIFIED reachable-data kernel subset启动（2026-11-14）** source19e27380a与host证据已push；dry-run后outer88348、CPU13/2vCPU2G/AS8GiB/shared image锁，运行committed `entry-data-kernel-kvm`，raw `/workspaces/kprog-raw/verified/20261114-entry-data/{kernel-launch,kernel}`。只验证通用实际BTF/map绑定与缺失needed field错误，不代表应用完整执行；当前未收集，sole image/base保持0bb7d4be，三台census继续。启动receipt `entry-data-kernel-launch.json`，下一turn收集。

@@ -2,8 +2,8 @@
 //!
 //! Reads a userspace-compiled `.so` (typically produced by
 //! `micro/programs/Makefile`'s `MICRO_NATIVE` build), discovers an entry
-//! function plus every static subprogram reachable from it via direct
-//! `call rel32` edges, and emits a single position-independent byte stream
+//! function plus every static subprogram reachable from direct calls or
+//! function tail jumps, and emits a single position-independent byte stream
 //! suitable for splatting into a BPF JIT image via the
 //! `bpf_x86_native_lab` kinsn.
 //!
@@ -14,6 +14,8 @@
 //!   1. Every `RET` in the **entry** function becomes `JMP rel32 -> end_label`.
 //!      Subprogram `RET`s are left alone — they pop the return address the
 //!      entry's `CALL` pushed and resume execution in the entry's body.
+//!      An entry with direct function tail exits gets a small call/exit wrapper;
+//!      its original body and tail callees keep their SysV returns and frames.
 //!   2. Every `CALL rel32` to a discovered subprogram has its `disp32`
 //!      patched so it points at the subprogram's new offset within the
 //!      blob (entry first, then subprograms in discovery order).

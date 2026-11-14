@@ -24,6 +24,8 @@ ENTRY_DATA_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-entry-data/host
 ENTRY_DATA_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-entry-data/kernel
 ENTRY_DATA_REAL_PROOF ?= /var/tmp/kprog-tmp/perf/cilium-config-symbols/bpf_lxc-roundtrip/tail_no_service_ipv4.proof.o
 ENTRY_DATA_LINKER ?= $(REPO_ROOT)/kprog/x86/native_lab/native_link/target/release/native-link
+DIRECT_TAIL_BUILD ?= /var/tmp/kprog-tmp/verified/direct-tail
+DIRECT_TAIL_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-direct-tail/host
 KFUNC_BUILD ?= /var/tmp/kprog-tmp/verified/kfunc
 KFUNC_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/host
 KFUNC_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/kernel
@@ -91,6 +93,18 @@ guest-kfunc:
 	"$(KFUNC_KERNEL_OUTPUT)/kfunc" kernel "$(KFUNC_KERNEL_OUTPUT)/weak.o" "$(KFUNC_KERNEL_OUTPUT)/strong.o" \
 		"$(KFUNC_KERNEL_OUTPUT)/source.bpf.o" "$(KFUNC_KERNEL_OUTPUT)/source.native.o" \
 		/sys/kernel/btf/vmlinux "$(KFUNC_KERNEL_OUTPUT)" "$(KFUNC_KERNEL_OUTPUT)/proof.bpf.o" $(KFUNC_MODEL_PROOF)
+
+.PHONY: direct-tail-check
+direct-tail-check:
+	install -d "$(DIRECT_TAIL_BUILD)" "$(DIRECT_TAIL_OUTPUT)"
+	CARGO_TARGET_DIR="$(DIRECT_TAIL_BUILD)/cargo" CARGO_BUILD_JOBS=1 CARGO_PROFILE_DEV_OPT_LEVEL=3 CARGO_PROFILE_DEV_DEBUG=0 \
+		cargo test --manifest-path "$(REPO_ROOT)/kprog/x86/native_lab/native_link/Cargo.toml"
+	CARGO_TARGET_DIR="$(DIRECT_TAIL_BUILD)/cargo" CARGO_BUILD_JOBS=1 CARGO_PROFILE_DEV_OPT_LEVEL=3 CARGO_PROFILE_DEV_DEBUG=0 \
+		cargo build --manifest-path "$(REPO_ROOT)/kprog/x86/native_lab/native_link/Cargo.toml"
+	clang-18 -fPIC -c ../test/native_direct_tail_fixture.S -o "$(DIRECT_TAIL_OUTPUT)/fixture.o"
+	clang-18 -shared "$(DIRECT_TAIL_OUTPUT)/fixture.o" -o "$(DIRECT_TAIL_OUTPUT)/control.so"
+	python3 ../test/check_native_direct_tail.py "$(DIRECT_TAIL_BUILD)/cargo/debug/native-link" \
+		"$(DIRECT_TAIL_OUTPUT)/fixture.o" "$(DIRECT_TAIL_OUTPUT)/control.so" "$(ENTRY_DATA_LINKER)" "$(DIRECT_TAIL_OUTPUT)"
 
 .PHONY: entry-data-inputs entry-data-check entry-data-kernel-kvm guest-entry-data
 entry-data-inputs:

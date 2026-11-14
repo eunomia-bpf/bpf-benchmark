@@ -4,7 +4,7 @@ use iced_x86::{
     FlowControl, Instruction, InstructionBlock, InstructionInfoFactory, Mnemonic, OpAccess, OpKind, Register,
 };
 use object::{Object, ObjectSection, ObjectSymbol, RelocationFlags, RelocationTarget};
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use crate::*;
 
@@ -498,6 +498,70 @@ fn x86_call_relocation_opcode_offsets(elf: &object::File, sym: &SymInfo) -> Resu
     Ok(out)
 }
 
+struct DirectTailTransfer {
+    symbol: String,
+    addend: i64,
+    defined: Option<SymInfo>,
+    relocation_offset: Option<u64>,
+}
+
+fn x86_direct_tail_transfers(
+    elf: &object::File,
+    sym: &SymInfo,
+) -> Result<BTreeMap<u64, DirectTailTransfer>> {
+    let section = elf.section_by_index(sym.section_index)?;
+    let bytes = read_symbol_bytes(elf, sym)?;
+    let relocations: HashMap<_, _> = section.relocations().collect();
+    let mut transfers = BTreeMap::new();
+    let mut decoder = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE);
+    while decoder.can_decode() {
+        let insn = decoder.decode();
+        if insn.flow_control() != FlowControl::UnconditionalBranch
+            || !matches!(insn.op0_kind(), OpKind::NearBranch64) { continue; }
+        let local_ip = insn.ip() - sym.address;
+        // Relocation targets are authoritative: an unlinked E9 disp32=0
+        // otherwise appears to jump to the following instruction.
+        if let Some(reloc) = relocations.get(&(insn.ip() + 1)) {
+            if matches!(reloc.flags(), RelocationFlags::Elf { r_type: 2 | 4 }) {
+                let target_index = match reloc.target() {
+                    RelocationTarget::Symbol(index) => index,
+                    _ => continue,
+                };
+                let target = elf.symbol_by_index(target_index)?;
+                let defined = resolve_x86_plt32_defined_target_addr(elf, reloc)?;
+                let (symbol, addend, callee) = if let Some((section, address)) = defined {
+                    if section == sym.section_index && address >= sym.address && address < sym.address + sym.size {
+                        continue; // A branch to a block in the same function.
+                    }
+                    let callee = find_text_symbol_in_section_at_address(elf, section, address)
+                        .ok_or_else(|| anyhow!("tail branch from {} has no function at {address:#x}", sym.name))?;
+                    // Cold fragments reached in the middle of another symbol
+                    // share a frame; they are not SysV function tail calls.
+                    if address != callee.address { continue; }
+                    let addend = i64::try_from(address - callee.address)? - 4;
+                    (callee.name.clone(), addend, Some(callee))
+                } else {
+                    (target.name()?.to_owned(), reloc.addend(), None)
+                };
+                transfers.insert(local_ip, DirectTailTransfer {
+                    symbol, addend, defined: callee, relocation_offset: Some(insn.ip() + 1 - sym.address),
+                });
+                continue;
+            }
+        }
+        let address = insn.near_branch_target();
+        if address >= sym.address && address < sym.address + sym.size { continue; }
+        if let Some(callee) = find_decoded_call_target(elf, sym, address) {
+            if address != callee.address { continue; }
+            let addend = i64::try_from(address - callee.address)? - 4;
+            transfers.insert(local_ip, DirectTailTransfer {
+                symbol: callee.name.clone(), addend, defined: Some(callee), relocation_offset: None,
+            });
+        }
+    }
+    Ok(transfers)
+}
+
 pub(super) fn discover_reachable(elf: &object::File, entry: &SymInfo) -> Result<Vec<SymInfo>> {
     let mut included: Vec<SymInfo> = vec![entry.clone()];
     let mut seen: HashSet<SymbolKey> = [symbol_key(entry)].into_iter().collect();
@@ -536,6 +600,14 @@ pub(super) fn discover_reachable(elf: &object::File, entry: &SymInfo) -> Result<
             }
         }
         discover_reloc_reachable(elf, &sym, &mut included, &mut seen, &mut queue)?;
+        for tail in x86_direct_tail_transfers(elf, &sym)?.into_values() {
+            if let Some(callee) = tail.defined {
+                if seen.insert(symbol_key(&callee)) {
+                    included.push(callee.clone());
+                    queue.push(callee);
+                }
+            }
+        }
     }
     Ok(included)
 }
@@ -544,13 +616,12 @@ pub(super) fn discover_reachable(elf: &object::File, entry: &SymInfo) -> Result<
 enum PatchKind {
     /// Rewritten RET in the entry function: disp targets end-of-blob.
     JmpEnd,
-    /// CALL rel32 to a discovered symbol: disp targets that symbol's new
-    /// global offset in the blob.
-    Call { target_symbol_key: SymbolKey },
+    /// A direct call or function tail jump to a discovered symbol.
+    DirectBranch { target_symbol_key: SymbolKey, opcode: u8 },
     /// `call rel32` placeholder for a kernel helper/map target. The module
     /// must patch the rel32 displacement after the blob lands in executable
     /// memory.
-    HelperCallRel32 { target_addr: u64 },
+    HelperBranchRel32 { target_addr: u64, opcode: u8 },
     LocalMemory { routine: memory::Routine },
     /// Rewritten `mov reg, [rip+GOT]` against a map symbol. The runner
     /// patches the immediate field with the live kernel map pointer.
@@ -1116,12 +1187,29 @@ pub(super) fn rewrite_x86(
         None
     };
 
+    let wrap_entry = proof_mode && !proof_input && !x86_direct_tail_transfers(elf, entry)?.is_empty();
+    let entry_body_name = if wrap_entry {
+        let names = elf.symbols().map(|s| s.name().map(str::to_owned))
+            .collect::<std::result::Result<HashSet<_>, _>>()?;
+        let mut name = format!("__native_tail_body_{}", entry.name);
+        while names.contains(&name) { name.push('_'); }
+        Some(name)
+    } else { None };
     let mut sym_global_offset: HashMap<SymbolKey, usize> = HashMap::new();
     let mut blob: Vec<u8> = Vec::new();
     let mut patches: Vec<PatchInfo> = Vec::new();
     let mut layouts: Vec<SymbolLayout> = Vec::new();
     let mut code_ranges = Vec::new();
     let mut callee_saved_mask: u8 = proof_callee_saved_mask.unwrap_or(0);
+    if wrap_entry {
+        // The BPF entry ABI has one context argument. Call its unchanged
+        // SysV body once, with normal alignment, then exit the inline image.
+        // Subprogram tail jumps keep their original stack arguments and RETs.
+        blob.extend_from_slice(&[0x48,0x83,0xec,8, 0xe8,9,0,0,0,
+            0x48,0x83,0xc4,8, 0xe9,0,0,0,0]);
+        patches.push(PatchInfo { global_offset: 13, kind: PatchKind::JmpEnd });
+        code_ranges.push((0, 18));
+    }
     // For each `bpf_map_lookup_elem` call site encountered in
     // reachable-symbol byte order, record (symbol_addr, local_call_offset)
     // -> selected spec. Filled during the decode loop; consumed by
@@ -1137,11 +1225,14 @@ pub(super) fn rewrite_x86(
     let mut update_call_counter: usize = 0;
     let mut resolved_helper_call_sites: HashSet<LocalSiteKey> = HashSet::new();
     let mut resolved_got_relocations: HashSet<LocalSiteKey> = HashSet::new();
-    let mut memory_relocations: HashSet<LocalSiteKey> = HashSet::new();
+    let mut canonicalized_relocations: HashSet<LocalSiteKey> = HashSet::new();
+    let mut tail_proof_relocs = Vec::new();
 
     for sym in included {
-        let is_entry = symbol_key(sym) == symbol_key(entry);
+        let is_entry = symbol_key(sym) == symbol_key(entry) && !wrap_entry;
         let bytes = read_symbol_bytes(elf, sym)?;
+        let mut tail_transfers = x86_direct_tail_transfers(elf, sym)?;
+        let mut tail_calls = Vec::new();
         let memory_constants = if local_memory_routines {
             memory::constants(&bytes, sym.address)?
         } else { HashMap::new() };
@@ -1206,6 +1297,30 @@ pub(super) fn rewrite_x86(
             }
             if is_entry {
                 remap_x86_entry_registers(&mut insn, &entry_abi_strip.register_renames)?;
+            }
+
+            if let Some(tail) = tail_transfers.remove(&local_ip) {
+                let mut jump = Instruction::default();
+                jump.set_code(Code::Jmp_rel32_64);
+                jump.set_op0_kind(OpKind::NearBranch64);
+                // Prevent branch relaxation from discarding its disp32 slot.
+                jump.set_near_branch64(X86_JMP_END_PLACEHOLDER_TARGET);
+                let kind = if let Some(callee) = &tail.defined {
+                    Some(PatchKind::DirectBranch { target_symbol_key: symbol_key(callee), opcode: 0xe9 })
+                } else if !proof_mode {
+                    let target_addr = *helper_addrs.get(&tail.symbol)
+                        .ok_or_else(|| anyhow!("missing helper target for tail branch {}", tail.symbol))?;
+                    Some(PatchKind::HelperBranchRel32 { target_addr, opcode: 0xe9 })
+                } else { None };
+                let index = local.len();
+                push_x86_replacement(&mut local, &mut kinds, &mut insn_local_ip,
+                    local_ip, jump, kind);
+                if let Some(offset) = tail.relocation_offset {
+                    canonicalized_relocations.insert(local_site_key(sym, offset));
+                }
+                if proof_mode { tail_calls.push((index, tail)); }
+                else { resolved_helper_call_sites.insert(site_key); }
+                continue;
             }
 
             let mut helper_imm_load_reg = None;
@@ -1276,7 +1391,7 @@ pub(super) fn rewrite_x86(
                             map_symbol_registers.remove(&dst_family);
                             if !proof_mode || local_memory {
                                 resolved_got_relocations.insert(patch_key);
-                                if local_memory { memory_relocations.insert(patch_key); }
+                                if local_memory { canonicalized_relocations.insert(patch_key); }
                                 continue;
                             }
                         }
@@ -1384,8 +1499,9 @@ pub(super) fn rewrite_x86(
                     let next = local_ip.wrapping_add(5);
                     insn.set_near_branch64(next);
                     local.push(insn);
-                    kinds.push(Some(PatchKind::Call {
+                    kinds.push(Some(PatchKind::DirectBranch {
                         target_symbol_key: symbol_key(target_symbol),
+                        opcode: 0xe8,
                     }));
                     insn_local_ip.push(local_ip);
                     clear_x86_call_clobbered_registers(&mut map_symbol_registers);
@@ -1431,7 +1547,7 @@ pub(super) fn rewrite_x86(
                             Some(PatchKind::LocalMemory { routine }));
                         resolved_helper_call_sites.insert(site_key);
                         if helper_call_sites.contains_key(&site_key) {
-                            memory_relocations.insert(local_site_key(sym, local_ip + insn.len() as u64 - 4));
+                            canonicalized_relocations.insert(local_site_key(sym, local_ip + insn.len() as u64 - 4));
                         }
                         clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                         continue;
@@ -1703,6 +1819,12 @@ pub(super) fn rewrite_x86(
 
         let sym_base = blob.len();
         sym_global_offset.insert(symbol_key(sym), sym_base);
+        for (index, tail) in tail_calls {
+            tail_proof_relocs.push(ProofReloc {
+                offset: (sym_base + encoded.new_instruction_offsets[index] as usize + 1) as u64,
+                r_type: 4, symbol: tail.symbol, addend: tail.addend, data: None,
+            });
+        }
         for (i, kind) in kinds.iter().enumerate() {
             let Some(kind) = kind else { continue };
             let off_in_sym = encoded
@@ -1756,19 +1878,19 @@ pub(super) fn rewrite_x86(
         }
     }
 
-    // Apply intra-blob Call patches first (cross-symbol direct calls);
+    // Apply intra-blob direct call and tail-jump patches first;
     // those need only `sym_global_offset` which is already known.
     for p in &patches {
-        if let PatchKind::Call { target_symbol_key } = &p.kind {
+        if let PatchKind::DirectBranch { target_symbol_key, opcode } = &p.kind {
             let off = p.global_offset;
-            if off + 5 > blob.len() || blob[off] != 0xE8 {
-                bail!("CALL at off {off:#x} did not encode as Call_rel32_64");
+            if off + 5 > blob.len() || blob[off] != *opcode {
+                bail!("direct branch at off {off:#x} lost its rel32 opcode");
             }
             let target_global = *sym_global_offset
                 .get(target_symbol_key)
-                .ok_or_else(|| anyhow!("call target sym key not in index map"))?;
+                .ok_or_else(|| anyhow!("branch target sym key not in index map"))?;
             let disp = target_global as i64 - (off + 5) as i64;
-            let d = i32::try_from(disp).map_err(|_| anyhow!("call disp {disp} exceeds i32"))?;
+            let d = i32::try_from(disp).map_err(|_| anyhow!("branch disp {disp} exceeds i32"))?;
             blob[off + 1..off + 5].copy_from_slice(&d.to_le_bytes());
         }
         if let PatchKind::LocalMemory { routine } = &p.kind {
@@ -1796,20 +1918,22 @@ pub(super) fn rewrite_x86(
                     offset,
                 });
             }
-            PatchKind::HelperCallRel32 { target_addr } => {
+            PatchKind::HelperBranchRel32 { target_addr, opcode } => {
                 let offset = u32::try_from(p.global_offset)
                     .map_err(|_| anyhow!("helper call reloc offset exceeds u32"))?;
                 let end = p
                     .global_offset
                     .checked_add(X86_HELPER_CALL_REL32_SLOT.len())
                     .ok_or_else(|| anyhow!("helper call slot offset overflow"))?;
-                if end > blob.len() || blob[p.global_offset..end] != X86_HELPER_CALL_REL32_SLOT[..]
+                if end > blob.len() || blob[p.global_offset] != *opcode
+                    || (*opcode == 0xe8 && blob[p.global_offset..end] != X86_HELPER_CALL_REL32_SLOT[..])
                 {
                     bail!(
-                        "helper call slot at off {:#x} did not encode as call rel32 placeholder",
+                        "helper branch slot at off {:#x} lost its rel32 opcode",
                         p.global_offset
                     );
                 }
+                blob[p.global_offset + 1..end].fill(0);
                 relocs.push(RelocRecord {
                     offset,
                     kind: NATIVE_LAB_RELOC_HELPER_CALL_REL32,
@@ -1826,15 +1950,17 @@ pub(super) fn rewrite_x86(
                     target: 0,
                 });
             }
-            PatchKind::JmpEnd | PatchKind::Call { .. } | PatchKind::LocalMemory { .. } => {}
+            PatchKind::JmpEnd | PatchKind::DirectBranch { .. } | PatchKind::LocalMemory { .. } => {}
         }
     }
 
     // Stage 2: resolve ELF relocations. GOT helper calls keep their original
     // RIP-relative indirect-call form and point at in-blob literal-pool entries;
     // PLT32 helper calls use in-blob absolute trampolines.
-    let proof_relocs = if proof_mode {
-        collect_x86_proof_relocs(elf, &layouts, &memory_relocations)?
+    let mut proof_relocs = if proof_mode {
+        let mut collected = collect_x86_proof_relocs(elf, &layouts, &canonicalized_relocations)?;
+        collected.extend(tail_proof_relocs);
+        collected
     } else {
         relocs.extend(apply_elf_relocations(
             elf,
@@ -1897,6 +2023,18 @@ pub(super) fn rewrite_x86(
     }
     let proof_symbols = if proof_mode {
         let mut symbols = proof_symbols_from_x86_layouts(&layouts, original_code_end)?;
+        if let Some(body) = entry_body_name {
+            for symbol in &mut symbols {
+                if symbol.name == entry.name { symbol.name = body.clone(); }
+            }
+            for reloc in &mut proof_relocs {
+                if reloc.symbol == entry.name { reloc.symbol = body.clone(); }
+            }
+            proof_relocs.push(ProofReloc {
+                offset: 5, r_type: 4, symbol: body, addend: -4, data: None,
+            });
+            symbols.insert(0, ProofSymbol { name: entry.name.clone(), offset: 0, size: 18 });
+        }
         symbols.extend(memory_symbols);
         symbols
     } else {
@@ -1961,7 +2099,7 @@ fn proof_symbols_from_x86_layouts(
 fn collect_x86_proof_relocs(
     elf: &object::File,
     layouts: &[SymbolLayout],
-    resolved_memory_relocations: &HashSet<LocalSiteKey>,
+    resolved_relocations: &HashSet<LocalSiteKey>,
 ) -> Result<Vec<ProofReloc>> {
     let mut relocs = Vec::new();
     let mut sections: HashMap<object::SectionIndex, Vec<&SymbolLayout>> = HashMap::new();
@@ -1998,7 +2136,7 @@ fn collect_x86_proof_relocs(
                 _ => continue,
             };
             let local_patch_off = reloc_offset - layout.sym.address;
-            if resolved_memory_relocations.contains(&local_site_key(&layout.sym, local_patch_off)) {
+            if resolved_relocations.contains(&local_site_key(&layout.sym, local_patch_off)) {
                 continue;
             }
             match r_type {
@@ -3639,8 +3777,9 @@ fn push_x86_helper_call_reloc(
         insn_local_ip,
         local_ip,
         insn,
-        Some(PatchKind::HelperCallRel32 {
+        Some(PatchKind::HelperBranchRel32 {
             target_addr: helper_addr,
+            opcode: 0xe8,
         }),
     );
     Ok(())
