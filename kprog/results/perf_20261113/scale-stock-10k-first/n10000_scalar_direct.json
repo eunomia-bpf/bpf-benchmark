@@ -1,0 +1,12 @@
+{
+  "name": "n10000_scalar_direct",
+  "target_native_instructions": 10000,
+  "expected_result": 15318568609386021639,
+  "stage": "proof_compile",
+  "pipeline": "stock",
+  "native_instructions": 10036,
+  "generated_c_bytes": 1067082,
+  "error": "Command '['/workspaces/repository/kprog/stock-path/bin/clang', '-w', '-g', '-O3', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_x86', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '-I', '/usr/include/x86_64-linux-gnu', '-emit-llvm', '-c', '/var/tmp/kprog-tmp/perf/scale/n10000_scalar_direct.bpf.i', '-o', '/var/tmp/kprog-tmp/perf/scale/n10000_scalar_direct.bpf.bounds-input.bc']' died with <Signals.SIGKILL: 9>.",
+  "preprocessed_bytes": 296927319,
+  "returncode": -9
+}

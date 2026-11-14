@@ -1,0 +1,14 @@
+{
+  "command": [
+    "cc",
+    "-c",
+    "/var/tmp/kprog-tmp/perf/scale/n10000_scalar_direct.S",
+    "-o",
+    "/var/tmp/kprog-tmp/perf/scale/n10000_scalar_direct.native.o"
+  ],
+  "returncode": 0,
+  "wall_seconds": 0.012801206001313403,
+  "user_seconds": 0.005265,
+  "system_seconds": 0.007209999999999999,
+  "max_rss_kib": 26552
+}
