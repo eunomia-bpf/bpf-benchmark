@@ -110,7 +110,43 @@
       ]
     },
     "large_input_retry_pending": true,
-    "whole_app_certification": false
+    "whole_app_certification": false,
+    "actual_native_control": {
+      "source": "Tracee registered-service successful request1, same already-verified preprocessed source",
+      "source_sha256": "7e94217556b3291a99299b9386eec5cfeda9896c7cae36b8eedf4ecaf3a2c047",
+      "native_object_bytes_equal": true,
+      "native_proof_bytes_equal": true,
+      "comparisons": [
+        {
+          "mode": "warnings-disabled",
+          "native_object": {
+            "bytes": 18120,
+            "sha256": "29b8a39c32a91f450f3ba530814b2c8e051d6a67ecfc6125f1fc108ef8e79808",
+            "saved": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/diagnostic-fix/actual-tracee-native-control/warnings-disabled.checked-simulator.native.o"
+          },
+          "native_proof_object": {
+            "bytes": 1304,
+            "sha256": "82cc55bae1187a524ae4b16e4653f902fd3024f23d72fb4617c0b3eea45ce200",
+            "saved": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/diagnostic-fix/actual-tracee-native-control/warnings-disabled.checked-simulator.proof.o"
+          }
+        },
+        {
+          "mode": "warnings-enabled",
+          "native_object": {
+            "bytes": 18120,
+            "sha256": "29b8a39c32a91f450f3ba530814b2c8e051d6a67ecfc6125f1fc108ef8e79808",
+            "saved": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/diagnostic-fix/actual-tracee-native-control/warnings-enabled.checked-simulator.native.o"
+          },
+          "native_proof_object": {
+            "bytes": 1304,
+            "sha256": "82cc55bae1187a524ae4b16e4653f902fd3024f23d72fb4617c0b3eea45ce200",
+            "saved": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/diagnostic-fix/actual-tracee-native-control/warnings-enabled.checked-simulator.proof.o"
+          }
+        }
+      ],
+      "stock_verification_repeated": false,
+      "kernel_installation": false
+    }
   },
   "large_input_retry": {
     "recorded": "2026-11-14T08:46:28Z",
