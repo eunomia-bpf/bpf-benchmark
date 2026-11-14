@@ -59,10 +59,21 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-14 ~20:22 UTC: "kops 确实没有退役."
 - 2026-11-14 ~20:22 UTC: "确保没有做错, 并且每一个原话都记录下来"
 - 2026-11-14 ~20:25 UTC: "不新建 worktree 结果一出来就提交, 有更改就提交 git, 但不能改论文 不许 revert 提交 都是我的原话. 我没说的不能收紧, 可以放宽 这个你自己斟酌一下, 可以按照我的意思来, 但是有可能你检查不完全导致出错, 自己判断, 要不还是不要放宽, 除非 blovk 了. 这些是要记录在 workspace 里面, 全部适用的"
+- 2026-11-14 ~20:58 UTC: "不新建 worktree, 不能 clone, 不能有多个编译产物"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
 - "不新建 worktree"
+- "不能 clone"
+- "不能有多个编译产物"
 - "结果一出来就提交, 有更改就提交 git, 但不能改论文"
 - "不许 revert 提交"
 
+
+## Rules relaxed earlier, and why each stays relaxed
+
+Checked on 2026-11-14 against "要不还是不要放宽, 除非 blovk 了" and "这些是我的原话. 这些不能还款":
+
+- "State-mutating git commands need the user's explicit, scoped ask" became "Commit and push every step (\"做一步 commit push 一步\")". The old sentence has no operator quote behind it in this record, and it blocked his words "结果一出来就提交, 有更改就提交 git". History rewrites and `git revert` stay forbidden ("不许 revert 提交").
+- The performance-floor clause "compared byte by byte with the 2026-05-29 code" was the coordinator's own wording (ed44df5f1, 2026-11-11); it blocked same-source builds. The floor itself keeps his words.
+- "Tell Codex DO NOT modify git state" has no operator quote behind it and blocked the same commit words.
