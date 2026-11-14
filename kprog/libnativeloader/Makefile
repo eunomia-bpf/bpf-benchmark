@@ -434,6 +434,10 @@ shared-image-restore:
 .PHONY: resident-census-checkpoint resident-census-publish resident-census-publish-test verified-app-collect verified-app-collect-test
 .PHONY: map-bounds-class-inspect
 .PHONY: self-compare-inputs
+.PHONY: self-compare-proof
+self-compare-proof:
+	cd ../formal && lake env lean KProgFormal/X86CmpOpHandler.lean
+
 .PHONY: self-compare-kernel-inputs self-compare-kvm guest-self-compare
 self-compare-kernel-inputs:
 	install -d "$(SELF_COMPARE_BUILD)" "$(SELF_COMPARE_KERNEL_OUTPUT)"

@@ -412,4 +412,43 @@ theorem x86_cmpop_mem_reg_borrow_w64 :
       { cf := true, zf := false, sf := true, of := false } := by
   decide
 
+/-- The equal-register/equal-lane branch added to the C handler observes the
+same architectural value on both sides. This is uniform over register bits,
+operand width, lane, memory and immediate inputs; it has no program parameter.
+The opaque compiler marker used for stack addresses does not change these bits. -/
+theorem x86_cmpop_equal_lane_observation (op : X86CmpOp)
+    (registerForm : op = .cmpReg ∨ op = .testReg)
+    (bits rawImm : BitVec 64) (byte : Nat → X86MemByte)
+    (width : X86Width) (lane : X86ByteLane) :
+    generatedX86CmpOpRhs op bits rawImm width lane =
+      generatedX86CmpOpLhs op bits byte width lane := by
+  rcases registerForm with h | h <;> subst op <;> rfl
+
+/-- For every value, resolved width and byte lane, TEST of that lane with
+itself takes zero and sign from the observed value, clearing carry and
+overflow. Reusing the read therefore preserves the four modeled flags;
+parity remains covered by the C flag regression, not this flag structure. -/
+theorem x86_cmpop_test_equal_lane_flags (flagsCode : Code)
+    (bits rawImm : BitVec 64) (byte : Nat → X86MemByte)
+    (lane : X86ByteLane) (dstOld : X86RegValue) :
+    (x86CmpOpStepSpec .testReg flagsCode bits bits rawImm byte lane lane dstOld).flags =
+      x86LogicFlagsSpec
+        (x86ZeroSpec (x86RegReadAtSpec bits (x86CmpOpWriteWidthSpec flagsCode) lane)
+          (x86CmpOpWriteWidthSpec flagsCode))
+        (x86SignSpec (x86RegReadAtSpec bits (x86CmpOpWriteWidthSpec flagsCode) lane)
+          (x86CmpOpWriteWidthSpec flagsCode)) := by
+  simp [x86CmpOpStepSpec, x86CmpOpFlagKindSpec, x86CmpOpLhsSpec,
+    x86CmpOpLhsSourceSpec, x86CmpOpRhsSpec, x86CmpOpRhsSourceSpec]
+
+/-- Equal-lane CMP sets zero and clears carry, sign and overflow for every
+register value, including all narrow and high-byte observations. -/
+theorem x86_cmpop_cmp_equal_lane_flags (flagsCode : Code)
+    (bits rawImm : BitVec 64) (byte : Nat → X86MemByte)
+    (lane : X86ByteLane) (dstOld : X86RegValue) :
+    (x86CmpOpStepSpec .cmpReg flagsCode bits bits rawImm byte lane lane dstOld).flags =
+      { cf := false, zf := true, sf := false, of := false } := by
+  simp [x86CmpOpStepSpec, x86CmpOpFlagKindSpec, x86CmpOpLhsSpec,
+    x86CmpOpLhsSourceSpec, x86CmpOpRhsSpec, x86CmpOpRhsSourceSpec,
+    x86SubResultSpec, x86SubFlagsSpec, x86NarrowSpec]
+
 end KProgFormal
