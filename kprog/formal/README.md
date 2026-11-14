@@ -965,9 +965,14 @@ host-object byte parity is not claimed. This is separate from the default BPF
 comparison and is not a runtime gain. Raw evidence is in
 `/workspaces/kprog-raw/formal/m4-register-moves`; rebuildable preprocessing/IR
 is under `/var/tmp/kprog-tmp/formal/m4-register-moves`, with commands retained.
-The same full OTel source now preprocesses to375,915,574 bytes after this
-register conversion (the same243 literal helper substitutions); no compile-time
-or runtime gain is inferred from that size change.
+The same full OTel source preprocessed to375,915,574 bytes after this
+register conversion (the same243 literal helper substitutions). After the
+profile bindings below, it expands to375,916,486 bytes:912 additional declaration
+bytes. The three archived pieces are unchanged; joining retains the first
+prefix once and all post-marker bodies, with exact reconstruction of the prior
+joined file checked. The current pieces stay in scratch; join offsets, commands
+and sizes stay in `m4-profile-bindings/otel-expansion.json` under the raw root.
+No compile-time or runtime gain is inferred from these size measurements.
 
 [c/Arm64Address.c](c/Arm64Address.c) exports eight production coordinate,
 register-read/write and ADRP bodies with incoming cache payloads/validity,
@@ -1045,7 +1050,7 @@ parity and M5's universal representation proofs remain open.
 
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight
-handler exports, and matched OTel preprocessor expansion remain to do. Preserve
+handler exports and full default compiled-byte coverage remain to do. Preserve
 unaligned memory and real context-pointer domains when binding the Clight
 memory/ABI semantics; header parsing does not establish those relations.
 The old generator's `--check` still expects its historical C rendering and
