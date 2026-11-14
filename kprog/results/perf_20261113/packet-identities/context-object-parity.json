@@ -1,0 +1,14 @@
+[
+  {
+    "current": "/workspaces/kprog-raw/perf/20261114-context-identity-regression/on.o",
+    "kernel_tested": "/workspaces/kprog-raw/perf/20261114-context-loads-v2/on.o",
+    "bytes": 1600,
+    "equal": true
+  },
+  {
+    "current": "/workspaces/kprog-raw/perf/20261114-context-identity-regression/off.o",
+    "kernel_tested": "/workspaces/kprog-raw/perf/20261114-context-loads-v2/off.o",
+    "bytes": 1536,
+    "equal": true
+  }
+]

@@ -1,0 +1,298 @@
+[
+  {
+    "command": [
+      "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/before.ll",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/legacy.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=2\nunused private inputs removed=0\n"
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/packet-identities-v3/packet-bounds",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/before.ll",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/off.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=2\nunused private inputs removed=0\n"
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/packet-identities-v3/packet-bounds",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/before.ll",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/strict.bc",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=1\nunused private inputs removed=0\n"
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/before.ll",
+      "/workspaces/repository/kprog/test/packet_choice_call.S",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/before.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "warning: overriding the module target triple with x86_64-pc-linux-gnu [-Woverride-module]\n1 warning generated.\n"
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/legacy.bc",
+      "/workspaces/repository/kprog/test/packet_choice_call.S",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/legacy.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "warning: overriding the module target triple with x86_64-pc-linux-gnu [-Woverride-module]\n1 warning generated.\n"
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/strict.bc",
+      "/workspaces/repository/kprog/test/packet_choice_call.S",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/strict.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "warning: overriding the module target triple with x86_64-pc-linux-gnu [-Woverride-module]\n1 warning generated.\n"
+  },
+  {
+    "command": [
+      "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/bpf.ll",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/bpf-legacy.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=2\nunused private inputs removed=0\n"
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/packet-identities-v3/packet-bounds",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/bpf.ll",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/bpf-strict.bc",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=1\nunused private inputs removed=0\n"
+  },
+  {
+    "command": [
+      "clang-18",
+      "-target",
+      "bpf",
+      "-mcpu=v4",
+      "-O3",
+      "-c",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/bpf-legacy.bc",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/bpf-legacy.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-target",
+      "bpf",
+      "-mcpu=v4",
+      "-O3",
+      "-c",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/bpf-strict.bc",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/bpf-strict.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+      "/workspaces/kprog-raw/perf/20261114-mul-u64/cilium-replay/38/trusted_x86.bpf.bounds-input.bc",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/retained-0-old.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=850\n"
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/packet-identities-v3/packet-bounds",
+      "/workspaces/kprog-raw/perf/20261114-mul-u64/cilium-replay/38/trusted_x86.bpf.bounds-input.bc",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/retained-0-off.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=850\n"
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/packet-identities-v3/packet-bounds",
+      "/workspaces/kprog-raw/perf/20261114-mul-u64/cilium-replay/38/trusted_x86.bpf.bounds-input.bc",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/retained-0-strict.bc",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=850\n"
+  },
+  {
+    "command": [
+      "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+      "/workspaces/kprog-raw/perf/20261114-mul-u64/cilium-replay/39/trusted_x86.bpf.bounds-input.bc",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/retained-1-old.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=433\n"
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/packet-identities-v3/packet-bounds",
+      "/workspaces/kprog-raw/perf/20261114-mul-u64/cilium-replay/39/trusted_x86.bpf.bounds-input.bc",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/retained-1-off.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=433\n"
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/packet-identities-v3/packet-bounds",
+      "/workspaces/kprog-raw/perf/20261114-mul-u64/cilium-replay/39/trusted_x86.bpf.bounds-input.bc",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/retained-1-strict.bc",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=433\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/pipeline.bpf.piece0.c",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/pipeline.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/pipeline.bpf.i",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/pipeline.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/packet-identities-v3/packet-bounds",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/pipeline.bpf.bounds-input.bc",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/pipeline.bpf.bounds.bc",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=1\nunused private inputs removed=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/pipeline.bpf.bounds.bc",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-packet-identities-v3/pipeline.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

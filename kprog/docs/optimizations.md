@@ -73,8 +73,14 @@ remain to be measured; combined LTO timing retains its existing scope.
 Optional packet-field identity matching: `KPROG_BPF_STRICT_IDENTITIES=1`
 forwards `--strict-identities` in the B-only IR stage. A packet field inferred
 through empty asm must have an explicitly tied output (`=r,0`). The default
-zero preserves the prior matcher. Validation compares actual native execution
-for tied and independently seeded untied outputs, plus retained packet IR
-against the base compiler. This changes B guard inference; runtime P and the
-checked-native frontend input retain their definitions. Results follow in the
-packet-identity receipt; combined runtime timing retains its prior scope.
+zero preserves the prior matcher. An actual untied-output counterexample
+returns0 before transformation and in strict mode, versus1 with the old
+matcher. Original/strict native executions match an independent reference in
+all60 cases. Legal BPF untied constraints and service flag forwarding also
+pass. Default bitcode equals the prior compiler; two retained Cilium inputs
+have zero eligible predicates and provide compatibility controls only.
+Both options together preserve the context-only bitcode and the exact
+previously kernel-tested fixture ELF bytes. This changes B guard inference;
+runtime P and the checked-native frontend input retain their definitions.
+Evidence: `packet-identities/report.md` (a267788ea/3ed4d58e9/977e9acef/42959d7d7).
+Whole-application acceptance and combined runtime timing retain their scope.

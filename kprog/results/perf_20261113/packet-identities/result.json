@@ -1,0 +1,28 @@
+{
+  "default_equal": true,
+  "counterexample": {
+    "function": "untied",
+    "start": 100,
+    "end": 200,
+    "seed": 0,
+    "expected": 0,
+    "before": 0,
+    "legacy": 1,
+    "strict": 0
+  },
+  "execution_cases": 60,
+  "retained": [
+    {
+      "input": "/workspaces/kprog-raw/perf/20261114-mul-u64/cilium-replay/38/trusted_x86.bpf.bounds-input.bc",
+      "default_equal": true,
+      "strict_equal": true
+    },
+    {
+      "input": "/workspaces/kprog-raw/perf/20261114-mul-u64/cilium-replay/39/trusted_x86.bpf.bounds-input.bc",
+      "default_equal": true,
+      "strict_equal": true
+    }
+  ],
+  "service_flag_forwarded": true,
+  "bpf_untied_output_preserved": true
+}
