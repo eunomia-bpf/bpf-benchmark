@@ -1,0 +1,20 @@
+{
+  "recorded": "2026-11-14T07:38:10Z",
+  "pid": 258314,
+  "wait_pid": 257169,
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker",
+  "source_archive": "/workspaces/kprog-raw/perf/20261114-probe-read-otel-lto/control/service.tar.gz",
+  "nested_request": "service/requests/3.failure.tar.gz",
+  "member": "request/generated/trusted_x86.bpf.i",
+  "preprocessed_input_bytes": 1132737246,
+  "input_sha256": "53c816ebaa63ad7d6baffc2859cc998dc97ac23a0aa921ec5f0ee1dbe56220f7  /workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/trusted_x86.bpf.i\na33c492fe50fe646bdcc4b263d1ada44e6d6eb8f46236c47ca0f8158b440b8ed  kprog/stock-path/bin/clang\n",
+  "original_failure": "SIGKILL9 during clang -O3 -emit-llvm before stock verification, compile-sim-ir and native-link",
+  "original_guest_memory": "32G",
+  "oom_confirmed": false,
+  "replay_scope": "Same preprocessed source and optimization/debug flags; host diagnostic with /usr/bin/time -v, no app/performance certification",
+  "host_cpus": "8-15",
+  "host_as_bytes": 85899345920,
+  "dependency": "After own Tracee guest exits; no app success requirement",
+  "postlaunch_outcome_polled": false,
+  "raw_removed": false
+}
