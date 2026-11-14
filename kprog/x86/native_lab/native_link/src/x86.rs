@@ -107,7 +107,9 @@ fn select_lookup_site(
         if runtime_known_map_lookups {
             if let Some(name) = native_map_name {
                 if let Some(spec) = lookup_maps.get(name) {
-                    if matches!(spec.kind, LookupKind::Array | LookupKind::PerCpuArray) {
+                    if matches!(spec.kind, LookupKind::Array | LookupKind::PerCpuArray |
+                        LookupKind::Hash | LookupKind::LruHash | LookupKind::PerCpuHash |
+                        LookupKind::HashOfMaps) {
                         return Ok((format!("runtime-map:{name}"), None, spec.clone()));
                     }
                 }
@@ -4467,7 +4469,7 @@ mod tests {
     }
 
     #[test]
-    fn runtime_known_arrays_use_only_exact_named_map_facts() -> Result<()> {
+    fn runtime_known_maps_use_only_exact_named_map_facts() -> Result<()> {
         let array = LookupSiteSpec {
             kind: LookupKind::Array, target_addr: 0, key_offset: 0,
             max_entries: 8, elem_size: 8, index_mask: 7, value_offset: 32,
@@ -4476,17 +4478,23 @@ mod tests {
         let sites = [array.clone()];
         let mut maps = HashMap::from([("known_map".into(), array)]);
         for kind in [LookupKind::Array, LookupKind::PerCpuArray, LookupKind::Hash,
+                     LookupKind::LruHash, LookupKind::PerCpuHash,
                      LookupKind::Call, LookupKind::HashOfMaps] {
             maps.get_mut("known_map").unwrap().kind = kind;
+            maps.get_mut("known_map").unwrap().target_addr = 0x5678;
             for name in [None, Some("unknown"), Some("known_map")] {
                 for enabled in [false, true] {
                     let mut used = [false];
                     let (_, index, spec) = select_lookup_site(&sites, &maps, &mut used,
                         0, name, "entry", 0x1234, true, enabled)?;
-                    let inline = enabled && name == Some("known_map")
-                        && matches!(kind, LookupKind::Array | LookupKind::PerCpuArray);
-                    assert_eq!(matches!(spec.kind, LookupKind::Array | LookupKind::PerCpuArray), inline);
-                    if !inline { assert_eq!(spec.target_addr, 0x1234); }
+                    let specialized = enabled && name == Some("known_map") && kind != LookupKind::Call;
+                    if specialized {
+                        assert_eq!(spec.kind, kind);
+                        assert_eq!(spec.target_addr, 0x5678);
+                    } else {
+                        assert_eq!(spec.kind, LookupKind::Call);
+                        assert_eq!(spec.target_addr, 0x1234);
+                    }
                     assert!(index.is_none() && !used[0], "never consume positional sites");
                 }
             }
@@ -4496,6 +4504,51 @@ mod tests {
         let (_, _, spec) = select_lookup_site(&sites, &maps, &mut [false], 0,
             Some("0123456789abcde_B"), "entry", 0x1234, true, true)?;
         assert!(matches!(spec.kind, LookupKind::Call), "truncation is not map identity");
+        Ok(())
+    }
+
+    #[test]
+    #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+    fn typed_hash_postprocess_preserves_null_value_pointer_and_lru_reference() -> Result<()> {
+        unsafe extern "C" {
+            fn mmap(address: *mut std::ffi::c_void, length: usize, protection: i32,
+                    flags: i32, fd: i32, offset: i64) -> *mut std::ffi::c_void;
+            fn mprotect(address: *mut std::ffi::c_void, length: usize, protection: i32) -> i32;
+            fn munmap(address: *mut std::ffi::c_void, length: usize) -> i32;
+        }
+        for kind in [LookupKind::Hash, LookupKind::LruHash, LookupKind::HashOfMaps] {
+            let spec = LookupSiteSpec { kind, target_addr: 0x5678, key_offset: 24,
+                max_entries: 0, elem_size: 0, index_mask: 0, value_offset: 8,
+                percpu_base_addr: 0, map_name: Some("known_map".into()) };
+            let instructions = build_x86_lookup_call_postprocess(&spec)?;
+            let post = BlockEncoder::encode(64, InstructionBlock::new(&instructions, 0),
+                                             BlockEncoderOptions::NONE)?.code_buffer;
+            let mut code = vec![0x48,0x89,0xf8]; // Actual helper return pointer -> RAX.
+            code.extend_from_slice(&post);
+            code.push(0xc3);
+            let inner = [0u64; 2];
+            let mut node = [0u64; 8];
+            node[3] = inner.as_ptr() as u64;
+            unsafe {
+                let memory = mmap(std::ptr::null_mut(), 4096, 3, 0x22, -1, 0);
+                assert_ne!(memory as isize, -1);
+                std::ptr::copy_nonoverlapping(code.as_ptr(), memory.cast(), code.len());
+                assert_eq!(mprotect(memory, 4096, 5), 0);
+                let postprocess: unsafe extern "C" fn(*mut u64) -> u64 = std::mem::transmute(memory);
+                assert_eq!(postprocess(std::ptr::null_mut()), 0, "{kind:?} miss must remain null");
+                let pointer = postprocess(node.as_mut_ptr());
+                let expected = if kind == LookupKind::HashOfMaps { inner.as_ptr() as u64 }
+                               else { node.as_ptr() as u64 + 24 };
+                assert_eq!(pointer, expected, "{kind:?} must return value, not hash node/key");
+                let mut expected_node = [0u64; 8];
+                expected_node[3] = inner.as_ptr() as u64;
+                if kind == LookupKind::LruHash { expected_node[1] = 1; }
+                assert_eq!(node, expected_node, "only LRU ref byte may change");
+                assert_eq!(postprocess(node.as_mut_ptr()), expected);
+                assert_eq!(node, expected_node, "existing LRU ref stays set");
+                assert_eq!(munmap(memory, 4096), 0);
+            }
+        }
         Ok(())
     }
 

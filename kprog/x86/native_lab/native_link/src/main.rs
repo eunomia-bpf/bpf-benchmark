@@ -125,7 +125,7 @@ struct Args {
     #[arg(long)]
     runtime_map_lookups: bool,
 
-    /// Inline proven named array maps within actual-pointer runtime dispatch.
+    /// Use proven named array/hash plans within actual-pointer runtime dispatch.
     #[arg(long, requires = "runtime_map_lookups")]
     runtime_known_map_lookups: bool,
 
@@ -146,7 +146,7 @@ enum LinkMode {
     Proof,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum LookupKind {
     Call,
     Hash,
