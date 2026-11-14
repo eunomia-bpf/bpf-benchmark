@@ -554,3 +554,14 @@ upstream-otel-ir:
 .PHONY: upstream-otel-bpf
 upstream-otel-bpf:
 	prlimit --as=17179869184 -- python3 $(HERE)/otel-upstream.py --all --output $(OTEL_UPSTREAM_BUILD) --bpf-reference $(ROOT)/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.amd64
+
+OTEL_NATIVE_BUILD ?= /var/tmp/kprog-tmp/perf/otel-original-native
+.PHONY: upstream-otel-native
+upstream-otel-native: all $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
+	install -d $(OTEL_NATIVE_BUILD)
+	python3 $(HERE)/socket-helper-names.py > $(OTEL_NATIVE_BUILD)/helper-names.json
+	prlimit --as=17179869184 -- python3 $(HERE)/otel-native.py --original $(OTEL_UPSTREAM_BUILD)/tracer.linked.bc --output $(OTEL_NATIVE_BUILD) --retarget $(SOCKET_BUILD)/socket-context-lower --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --perf-context $(BUILD)/perf-context-lower --perf-layout $(BUILD)/layout.json
+
+.PHONY: upstream-otel-link
+upstream-otel-link: upstream-otel-native
+	prlimit --as=17179869184 -- python3 $(HERE)/socket-proof.py --input $(OTEL_NATIVE_BUILD)/tracer.native.o --linker $(LINK_MEMORY_PAYLOAD)/native-link-off --output $(OTEL_NATIVE_BUILD)/links --section-prefix perf_event/ --section-prefix kprobe/ --section-prefix uprobe/ --section-prefix tracepoint/ --section-prefix raw_tracepoint/ --kernel-roundtrip
