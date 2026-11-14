@@ -50,7 +50,7 @@ def main():
     receipt = dict(
         recorded_at=datetime.now(timezone.utc).isoformat(),
         tree_head=git('rev-parse', 'HEAD'), raw=str(args.raw),
-        compiler_commit=git('log', '-1', '--format=%H', '--', str(repo/'kprog/perf/native-context/socket-context-lower.cpp')),
+        compiler_commit=git('log', '-1', '--format=%H', '--', str(repo/'kprog/build/socket-context-lower.cpp')),
         upstream_revision=git('-C', str(source.parents[1]), 'rev-parse', 'HEAD'),
         upstream_source=str(source.relative_to(repo)), source_sha256=digest(source),
         kernel_revision=git('-C', str(repo/'vendor/linux-framework'), 'rev-parse', 'HEAD'),

@@ -8,10 +8,11 @@
 #
 # Usage: katran-same-source.sh <output dir>
 #   Requires the lowering tool and its rule tables:
-#     kprog/perf/native-context/build-x86/socket-context-lower (make -f
-#       kprog/perf/native-context/Makefile socket-context-check builds it)
-#   The xdp/skb rule tables are passed explicitly; see the README next to this script for
-#   where their offsets come from and why lane perf's tool is the place for them.
+#     kprog/build/build-x86/socket-context-lower (make -f
+#       kprog/build/Makefile socket-context-check builds it)
+#   The xdp/skb rule tables are passed explicitly; see
+#   kprog/results/katran-samesource-20261113/README.md for where their offsets come from.
+#   The lowering tool and these tables are this lane's code, now under kprog/build.
 set -euo pipefail
 
 OUT=${1:?output directory}
@@ -19,7 +20,7 @@ ROOT=/workspaces/repository
 UPSTREAM=$ROOT/vendor/repos/katran
 SHIPPED=$ROOT/vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran
 LOWER=${LOWER:-/var/tmp/kprog-tmp/perf/socket-context/socket-context-lower}
-# The rule tables: lane perf's packet tables (make -f kprog/perf/native-context/Makefile
+# The rule tables: lane perf's packet tables (make -f kprog/build/Makefile
 # packet-context-check writes them under /var/tmp/kprog-tmp/perf/packet-context), or the
 # copies kept beside the evidence. Both name their files differently, so accept either.
 RULES=${RULES:-/var/tmp/kprog-tmp/perf/packet-context}

@@ -19,8 +19,8 @@ The BPF comparison intrinsic becomes its LLVM integer predicate while retaining
 the operand width and signedness.
 
 ```sh
-make -f kprog/perf/native-context/Makefile bpf-asm-check
-make -f kprog/perf/native-context/Makefile upstream-tetragon-link \
+make -f kprog/build/Makefile bpf-asm-check
+make -f kprog/build/Makefile upstream-tetragon-link \
   SOCKET_BUILD=/var/tmp/kprog-tmp/perf/tetragon-context \
   TETRAGON_UNIT=bpf_generic_kprobe_v61 \
   TETRAGON_SOURCE=/workspaces/repository/vendor/repos/tetragon/bpf/process/bpf_generic_kprobe.c

@@ -153,8 +153,8 @@ clang-18 -target bpf -O2 -g -mcpu=v2 -c <same flags> $SRC/tracee.bpf.c -o $T/tra
   --target-btf /workspaces/.agent-state/kprog-ck/build-x86/vmlinux \
   --report $T/tracee.core.json -o $T/tracee.resolved.bc        # resolved CO-RE globals=370
 llvm-dis-18 $T/tracee.resolved.bc -o $T/tracee.resolved.ll
-python3 kprog/results/tracee-samesource-20261113/name-helpers.py     $T/tracee.resolved.ll  $T/tracee.named.ll
-python3 kprog/results/tracee-samesource-20261113/lower-tracee-asm.py $T/tracee.named.ll     $T/tracee.namedfinal.ll
+python3 kprog/build/name-helpers.py     $T/tracee.resolved.ll  $T/tracee.named.ll
+python3 kprog/build/lower-tracee-asm.py $T/tracee.named.ll     $T/tracee.namedfinal.ll
 sed -E 's/"target-features"="[^"]*"//; s/"target-cpu"="[^"]*"//' $T/tracee.namedfinal.ll > $T/tracee.notf.ll
 sed -E 's/^(@[^ ]+ = )dso_local (global .*section "\.maps")/\1\2/' $T/tracee.notf.ll > $T/tracee.nodso.ll
 # then the no-jump-tables string attribute on every function attribute group

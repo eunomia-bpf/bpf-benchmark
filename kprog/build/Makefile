@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 ROOT := /workspaces/repository
-HERE := $(ROOT)/kprog/perf/native-context
+HERE := $(ROOT)/kprog/build
 BUILD ?= $(HERE)/build-x86
 KDIR := /workspaces/.agent-state/kprog-ck/build-x86
 KRELEASE := $(shell cat $(KDIR)/include/config/kernel.release)
@@ -814,7 +814,7 @@ probe-read-kernel: probe-read-kernel-inputs
 	install -m644 $(PROBE_KERNEL_BUILD)/source.bpf.o $(PROBE_KERNEL_BUILD)/source.native.o $(PROBE_KERNEL_OUTPUT)/
 	taskset -c 16-19 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(PROBE_KERNEL_OUTPUT) --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -f kprog/perf/native-context/Makefile guest-probe-read PROBE_KERNEL_OUTPUT=$(PROBE_KERNEL_OUTPUT)'
+		--exec 'make -f kprog/build/Makefile guest-probe-read PROBE_KERNEL_OUTPUT=$(PROBE_KERNEL_OUTPUT)'
 
 guest-probe-read:
 	cat /proc/cpuinfo > $(PROBE_KERNEL_OUTPUT)/cpuinfo
@@ -881,7 +881,7 @@ hash-lookup-kernel: hash-lookup-kernel-inputs
 	install -m644 $(HASH_KERNEL_BUILD)/*.bpf.o $(HASH_KERNEL_BUILD)/*.native.o $(HASH_KERNEL_OUTPUT)/
 	taskset -c 16-19 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(HASH_KERNEL_OUTPUT) --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -f kprog/perf/native-context/Makefile guest-hash-lookup HASH_KERNEL_OUTPUT=$(HASH_KERNEL_OUTPUT) RUNTIME_HASH_PAYLOAD=$(RUNTIME_HASH_PAYLOAD) HASH_KERNEL_CASES="$(HASH_KERNEL_CASES)"'
+		--exec 'make -f kprog/build/Makefile guest-hash-lookup HASH_KERNEL_OUTPUT=$(HASH_KERNEL_OUTPUT) RUNTIME_HASH_PAYLOAD=$(RUNTIME_HASH_PAYLOAD) HASH_KERNEL_CASES="$(HASH_KERNEL_CASES)"'
 
 guest-hash-lookup:
 	cat /proc/cpuinfo > $(HASH_KERNEL_OUTPUT)/cpuinfo
@@ -952,7 +952,7 @@ array-shared-kernel-run: array-shared-kernel-inputs
 	done
 	taskset -c 16-19 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(ARRAY_KERNEL_OUTPUT) --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -f kprog/perf/native-context/Makefile guest-array-shared ARRAY_KERNEL_OUTPUT=$(ARRAY_KERNEL_OUTPUT) ARRAY_KERNEL_PAYLOAD=$(ARRAY_KERNEL_PAYLOAD)'
+		--exec 'make -f kprog/build/Makefile guest-array-shared ARRAY_KERNEL_OUTPUT=$(ARRAY_KERNEL_OUTPUT) ARRAY_KERNEL_PAYLOAD=$(ARRAY_KERNEL_PAYLOAD)'
 
 guest-array-shared:
 	uname -r > $(ARRAY_KERNEL_OUTPUT)/kernel.release

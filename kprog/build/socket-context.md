@@ -7,7 +7,7 @@ an x86 native object. It does not select the runtime manifest or replace the
 default native build.
 
 ```sh
-make -f kprog/perf/native-context/Makefile socket-context-check socket-context-errors upstream-socket-proof
+make -f kprog/build/Makefile socket-context-check socket-context-errors upstream-socket-proof
 ```
 
 Outputs go to `/var/tmp/kprog-tmp/perf/socket-context`; retain evidence under

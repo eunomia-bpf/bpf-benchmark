@@ -5,8 +5,8 @@ read the unchanged `vendor/repos/cilium/bpf` sources. They do not select a runti
 manifest, replace the default native build, or modify the benchmark.
 
 ```sh
-make -f kprog/perf/native-context/Makefile packet-context-check
-make -f kprog/perf/native-context/Makefile upstream-cilium-link \
+make -f kprog/build/Makefile packet-context-check
+make -f kprog/build/Makefile upstream-cilium-link \
   CILIUM_UNIT=bpf_lxc CILIUM_CAPTURE=/path/to/retained/parity/bpf_lxc/capture
 ```
 

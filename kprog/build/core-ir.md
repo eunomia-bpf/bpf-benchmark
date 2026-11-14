@@ -7,8 +7,8 @@ target. No application source or replacement header is used by the translator.
 Default native builds do not invoke it.
 
 ```sh
-make -f kprog/perf/native-context/Makefile core-ir-check
-make -f kprog/perf/native-context/Makefile core-ir-resolve \
+make -f kprog/build/Makefile core-ir-check
+make -f kprog/build/Makefile core-ir-resolve \
   CORE_IR_INPUT=/path/to/source.bc CORE_IR_LOCAL_BPF=/path/to/source.bpf.o \
   CORE_IR_OUTPUT=/path/to/resolved.bc CORE_IR_REPORT=/path/to/relocations.json
 ```
