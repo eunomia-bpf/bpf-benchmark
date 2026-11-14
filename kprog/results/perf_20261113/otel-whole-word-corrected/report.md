@@ -36,6 +36,14 @@ and actual execution of the optional LLVM backend. `backend-parity.json` and
 `backend-commands.json` preserve that subset check. The automatic fixture output
 also equals the manually selected fixture already executed in the kernel.
 
+The actual retained OTel main was subsequently checked through the automatic
+selector (`dd3fd2845`). Its complete emitted MIR equals the corrected input
+that produced this accepted object, selecting scalar slots 17/18 and the same
+27 accesses. `backend-main-parity.json` records the input paths and selection;
+`backend-main-commands.json` retains the companion default/optional backend
+commands. This closes the automatic-selection linkage for this retained input;
+the queued application run exercises fresh generation.
+
 The separate application diagnostic uses the unchanged same-source OTel
 producer and the corrected combined LTO linker. Its command is:
 
