@@ -1,0 +1,330 @@
+{
+  "recorded": "2026-11-14T13:16:21.809811+00:00",
+  "scope": "Actual OTel B compilation and completed short checked-sim-c application attempt",
+  "run": "x86_kvm_corpus_20261114_125857_702560",
+  "raw": "/workspaces/kprog-raw/perf/20261114-otel-checked-resume",
+  "job_exit": 0,
+  "app_status": "error",
+  "app_error": "shim socket /var/run/bpfrejit/shim-2112.sock request failed: [Errno 111] Connection refused",
+  "counts": {
+    "attempts": 4,
+    "loaded": 4,
+    "verified": 2,
+    "installed": 2,
+    "run": 0,
+    "installed_without_counter": [
+      27,
+      34
+    ],
+    "baseline_counter_programs": 13,
+    "native_counter_programs": 0
+  },
+  "frontend_input": {
+    "path": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/trusted_x86.bpf.i",
+    "bytes": 1132737246,
+    "sha256": "53c816ebaa63ad7d6baffc2859cc998dc97ac23a0aa921ec5f0ee1dbe56220f7",
+    "command_source": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/replay-python-rusage-48g/command.json"
+  },
+  "compiler_stages": [
+    {
+      "stage": "frontend",
+      "child_pid": 389232,
+      "returncode": 0,
+      "wall_seconds": 4713.491889609992,
+      "user_seconds": 4611.097325,
+      "system_seconds": 37.702677,
+      "max_rss_kib": 21045664
+    },
+    {
+      "stage": "bounds",
+      "child_pid": 414079,
+      "returncode": 0,
+      "wall_seconds": 2.5249489350098884,
+      "user_seconds": 2.368786,
+      "system_seconds": 0.153921,
+      "max_rss_kib": 383496
+    },
+    {
+      "stage": "bpf-backend",
+      "child_pid": 414080,
+      "returncode": 0,
+      "wall_seconds": 7.503671796002891,
+      "user_seconds": 7.312348,
+      "system_seconds": 0.18862399999999999,
+      "max_rss_kib": 542700
+    }
+  ],
+  "compiled_b_sha256": "043a581e189b3ea85f8b4b24289b03f19d1550c111330a796992b6c25129fc4c",
+  "frontend_cache": {
+    "seed": {
+      "options": [
+        "-w",
+        "-g",
+        "-O3",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-emit-llvm",
+        "-c"
+      ],
+      "source": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/trusted_x86.bpf.i",
+      "source_sha256": "53c816ebaa63ad7d6baffc2859cc998dc97ac23a0aa921ec5f0ee1dbe56220f7",
+      "token_sha256": "eb41c8bc4396551ac2d35517b5e3ada9e6159c4b9cfa42cf4ee1de1c987d0013",
+      "clang_sha256": "a33c492fe50fe646bdcc4b263d1ada44e6d6eb8f46236c47ca0f8158b440b8ed",
+      "bc": "/workspaces/kprog-raw/perf/20261114-otel-compiler-unblocked/retry1/replay/trusted_x86.bpf.bounds-input.bc",
+      "bc_sha256": "0bfca7dca1b24a2cfc7498eae8a811daf576493e11fd3751d9908ac74d2b8797"
+    },
+    "scope": "Reuses only identical non-line-directive token bytes/options/tool/bitcode hash. Bounds/backend/stock verifier still run, all misses use real clang. Line directives affect debug location only.",
+    "events": [
+      {
+        "source": "/workspaces/kprog-raw/perf/20261114-otel-checked-resume/control/state/session-l8sl2jx6/requests/request-dra3fwyo/generated/trusted_x86.bpf.i",
+        "source_sha256": "6029063933502adda87c352dd111638e08e419b785bbfb426400083f402416d3",
+        "token_sha256": "c57f2603f76f8e64620d8c55206cb9809fbc765cd8fe361665ff5f75830301a4",
+        "hit": false
+      },
+      {
+        "source": "/workspaces/kprog-raw/perf/20261114-otel-checked-resume/control/state/session-l8sl2jx6/requests/request-dra3fwyo/generated/checked-simulator.i",
+        "source_sha256": "6029063933502adda87c352dd111638e08e419b785bbfb426400083f402416d3",
+        "token_sha256": "c57f2603f76f8e64620d8c55206cb9809fbc765cd8fe361665ff5f75830301a4",
+        "hit": false
+      },
+      {
+        "source": "/workspaces/kprog-raw/perf/20261114-otel-checked-resume/control/state/session-l8sl2jx6/requests/request-zxahj_1f/generated/trusted_x86.bpf.i",
+        "source_sha256": "b7e00a95e88516ea6d6e8b4ff3267671105dc3696b8ff3756c09aac5db96ce3f",
+        "token_sha256": "d42eda066e4c0c3bc058d9d1bff72e25f9b5a7303e494c15601ca38080c70acc",
+        "hit": false
+      },
+      {
+        "source": "/workspaces/kprog-raw/perf/20261114-otel-checked-resume/control/state/session-l8sl2jx6/requests/request-zxahj_1f/generated/checked-simulator.i",
+        "source_sha256": "b7e00a95e88516ea6d6e8b4ff3267671105dc3696b8ff3756c09aac5db96ce3f",
+        "token_sha256": "d42eda066e4c0c3bc058d9d1bff72e25f9b5a7303e494c15601ca38080c70acc",
+        "hit": false
+      },
+      {
+        "source": "/workspaces/kprog-raw/perf/20261114-otel-checked-resume/control/state/session-l8sl2jx6/requests/request-0jzqz4fm/generated/trusted_x86.bpf.i",
+        "source_sha256": "ba02ff31ed61c3d8d910dcc4a37f1357c6f488fd483e06fbaaa0003c2615f16f",
+        "token_sha256": "eb41c8bc4396551ac2d35517b5e3ada9e6159c4b9cfa42cf4ee1de1c987d0013",
+        "hit": true
+      },
+      {
+        "source": "/workspaces/kprog-raw/perf/20261114-otel-checked-resume/control/state/session-l8sl2jx6/requests/request-s4nxv60i/generated/trusted_x86.bpf.i",
+        "source_sha256": "9c1acfff72991c00baf4c742c327e8b36ab43f52788a87a954b9cd3e52f6767b",
+        "token_sha256": "eb41c8bc4396551ac2d35517b5e3ada9e6159c4b9cfa42cf4ee1de1c987d0013",
+        "hit": true
+      }
+    ]
+  },
+  "actual_requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 21,
+      "status": 0,
+      "execution_mode": "checked-sim-c",
+      "stock_load": {
+        "request_id": 1,
+        "prog_id": 27,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 1,
+        "prog_id": 24,
+        "phase": "verify",
+        "status": 0
+      },
+      "counters": null,
+      "archive_member": "service/requests/1.success.tar.gz",
+      "entry": "read_task_struct",
+      "source_copy_equal": true,
+      "verifier_log_bytes": 0,
+      "verifier_tail": "",
+      "compiled_b_sha256": "40a2d72e48db26b724ba177a6083945446d3b538e43af3b81b1ab48ab055a653"
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 28,
+      "status": 0,
+      "execution_mode": "checked-sim-c",
+      "stock_load": {
+        "request_id": 2,
+        "prog_id": 34,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 2,
+        "prog_id": 31,
+        "phase": "verify",
+        "status": 0
+      },
+      "counters": null,
+      "archive_member": "service/requests/2.success.tar.gz",
+      "entry": "perf_unwind_stop",
+      "source_copy_equal": true,
+      "verifier_log_bytes": 0,
+      "verifier_tail": "",
+      "compiled_b_sha256": "eb3ecc0c7b664ab2294f7d69dea3afc93ecc3c7e36ee8831c247730422de3ccb"
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 35,
+      "status": -5,
+      "execution_mode": "checked-sim-c",
+      "stock_load": null,
+      "stock_verification": null,
+      "counters": null,
+      "archive_member": "service/requests/3.failure.tar.gz",
+      "entry": "perf_unwind_native",
+      "verifier_log_bytes": 148420,
+      "verifier_tail": "  ; R6=0\n9686: (bc) w1 = w2                    ; R1=scalar(id=227,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R2=scalar(id=227,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n9687: (54) w1 &= 255                  ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n9688: (16) if w0 == 0x0 goto pc+1     ; R0=6\n9689: (bf) r3 = r6                    ; R3=0 R6=0\n9690: (7b) *(u64 *)(r10 -560) = r9\ninvalid write to stack R10 off=-560 size=8\nprocessed 2010 insns (limit 1000000) max_states_per_insn 1 total_states 148 peak_states 148 mark_read 0\n\n",
+      "compiled_b_sha256": "043a581e189b3ea85f8b4b24289b03f19d1550c111330a796992b6c25129fc4c"
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 38,
+      "status": -5,
+      "execution_mode": "checked-sim-c",
+      "stock_load": null,
+      "stock_verification": null,
+      "counters": null,
+      "archive_member": "service/requests/4.failure.tar.gz",
+      "entry": "perf_unwind_native",
+      "verifier_log_bytes": 148420,
+      "verifier_tail": "  ; R6=0\n9686: (bc) w1 = w2                    ; R1=scalar(id=227,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R2=scalar(id=227,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n9687: (54) w1 &= 255                  ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n9688: (16) if w0 == 0x0 goto pc+1     ; R0=6\n9689: (bf) r3 = r6                    ; R3=0 R6=0\n9690: (7b) *(u64 *)(r10 -560) = r9\ninvalid write to stack R10 off=-560 size=8\nprocessed 2010 insns (limit 1000000) max_states_per_insn 1 total_states 148 peak_states 148 mark_read 0\n\n",
+      "compiled_b_sha256": "043a581e189b3ea85f8b4b24289b03f19d1550c111330a796992b6c25129fc4c"
+    }
+  ],
+  "bpf_backend_same_ir": [
+    {
+      "flag": "-O3",
+      "recorded_original": true,
+      "instructions": 102707,
+      "min_direct_r10_offset": -680,
+      "sha256": "043a581e189b3ea85f8b4b24289b03f19d1550c111330a796992b6c25129fc4c"
+    },
+    {
+      "flag": "-O2",
+      "command": [
+        "taskset",
+        "-c",
+        "16-19",
+        "prlimit",
+        "--as=51539607552",
+        "--",
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-w",
+        "-g",
+        "-O2",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-c",
+        "/workspaces/kprog-raw/perf/20261114-otel-compiler-unblocked/retry1/replay/trusted_x86.bpf.bounds.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/20261114-otel-bpf-backend-flags/O2.bpf.o"
+      ],
+      "exit": 0,
+      "seconds": 10.904533856009948,
+      "instructions": 102705,
+      "min_direct_r10_offset": -680,
+      "sha256": "6c941b0ae4690083904162b3a6c8a9683d48c1c664b7bde82c9ae959a609ec1b"
+    },
+    {
+      "flag": "-Os",
+      "command": [
+        "taskset",
+        "-c",
+        "16-19",
+        "prlimit",
+        "--as=51539607552",
+        "--",
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-w",
+        "-g",
+        "-Os",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-c",
+        "/workspaces/kprog-raw/perf/20261114-otel-compiler-unblocked/retry1/replay/trusted_x86.bpf.bounds.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/20261114-otel-bpf-backend-flags/Os.bpf.o"
+      ],
+      "exit": 0,
+      "seconds": 11.331165046998649,
+      "instructions": 102705,
+      "min_direct_r10_offset": -680,
+      "sha256": "6c941b0ae4690083904162b3a6c8a9683d48c1c664b7bde82c9ae959a609ec1b"
+    },
+    {
+      "flag": "-Oz",
+      "command": [
+        "taskset",
+        "-c",
+        "16-19",
+        "prlimit",
+        "--as=51539607552",
+        "--",
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-w",
+        "-g",
+        "-Oz",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-c",
+        "/workspaces/kprog-raw/perf/20261114-otel-compiler-unblocked/retry1/replay/trusted_x86.bpf.bounds.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/20261114-otel-bpf-backend-flags/Oz.bpf.o"
+      ],
+      "exit": 0,
+      "seconds": 9.98942234799324,
+      "instructions": 102705,
+      "min_direct_r10_offset": -680,
+      "sha256": "6c941b0ae4690083904162b3a6c8a9683d48c1c664b7bde82c9ae959a609ec1b"
+    }
+  ],
+  "limits": [
+    "Main B stock rejection invalid write R10 -560; O3/O2/Os/Oz all have direct R10 references to -680. Stock512B rule unchanged.",
+    "Missing native counters stay missing; zero observed positive counters is not evidence of zero execution. App error retained despite job0.",
+    "O2/Os/Oz are backend tests on the same completed O3 IR, not full frontend flag comparisons. O1 frontend411911 still running.",
+    "No full checked app/equal-output or speed claim.",
+    "Raw wrapper flags/ABI guard were completed during image import before any request; initial versions/UTC evidence retained."
+  ]
+}

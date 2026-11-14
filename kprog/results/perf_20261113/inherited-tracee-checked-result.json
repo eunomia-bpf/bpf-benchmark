@@ -1,0 +1,139 @@
+{
+  "recorded": "2026-11-14T13:17:41.758481+00:00",
+  "job_exit": 0,
+  "finished": "2026-11-14T11:37:06Z",
+  "run": "x86_kvm_corpus_20261114_084108_415594",
+  "raw": "/workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto",
+  "app_status": "error",
+  "app_error": "Tracee exited before BPF programs were tracked by shim\nstderr tail:\n{\"level\":\"warn\",\"ts\":1794645728.0790567,\"msg\":\"KConfig: could not check enabled kconfig features\",\"error\":\"could not read /boot/config-7.0.0-rc2+: stat /boot/config-7.0.0-rc2+: no such file or directory\"}\n{\"level\":\"warn\",\"ts\":1794645728.0790985,\"msg\":\"KConfig: assuming kconfig values, might have unexpected behavior\"}\n{\"level\":\"warn\",\"ts\":1794645733.100692,\"msg\":\"Event canceled because of missing kernel symbol dependency\",\"missing symbols\":[\"non_existing_symbol\"],\"event\":\"multiple_fallbacks_test\"}\n{\"level\":\"warn\",\"ts\":1794645733.1054578,\"msg\":\"Event canceled because of missing kernel symbol dependency\",\"missing symbols\":[\"non_existing_symbol\"],\"event\":\"missing_ksymbol\"}\n{\"level\":\"error\",\"ts\":1794645733.1126316,\"msg\":\"Failed to register detector\",\"detector\":\"TRC-1013\",\"error\":\"detector TRC-1013 requires enrichment \\\"environment\\\" which is not enabled\"}\n{\"level\":\"error\",\"ts\":1794645733.1131556,\"msg\":\"Failed to register detector\",\"detector\":\"TRC-107\",\"error\":\"detector TRC-107 requires enrichment \\\"environment\\\" which is not enabled\"}\n{\"level\":\"fatal\",\"ts\":1794656216.490988,\"msg\":\"Tracee runner failed\",\"error\":\"cmd.Runner.Run: error initializing Tracee: ebpf.(*Tracee).Init: ebpf.(*Tracee).initBPF: failed to load BPF object: invalid argument\"}",
+  "counts": {
+    "attempts": 6,
+    "loaded": 6,
+    "verified": 6,
+    "installed": 4,
+    "run": 0,
+    "installed_without_counter": [
+      197,
+      207,
+      218,
+      225
+    ],
+    "baseline_counter_programs": 167,
+    "native_counter_programs": 0
+  },
+  "requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 191,
+      "status": 0,
+      "stock_load": {
+        "request_id": 1,
+        "prog_id": 197,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 1,
+        "prog_id": 194,
+        "phase": "verify",
+        "status": 0
+      },
+      "counters": null,
+      "entry": "security_bpf_kprobe"
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 201,
+      "status": 0,
+      "stock_load": {
+        "request_id": 2,
+        "prog_id": 207,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 2,
+        "prog_id": 204,
+        "phase": "verify",
+        "status": 0
+      },
+      "counters": null,
+      "entry": "lsm_bpf_check"
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 212,
+      "status": 0,
+      "stock_load": {
+        "request_id": 3,
+        "prog_id": 218,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 3,
+        "prog_id": 215,
+        "phase": "verify",
+        "status": 0
+      },
+      "counters": null,
+      "entry": "tracepoint__raw_syscalls__sys_enter"
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 219,
+      "status": 0,
+      "stock_load": {
+        "request_id": 4,
+        "prog_id": 225,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 4,
+        "prog_id": 222,
+        "phase": "verify",
+        "status": 0
+      },
+      "counters": null,
+      "entry": "sys_enter_init"
+    },
+    {
+      "request_id": 5,
+      "source_prog_id": 226,
+      "status": -5,
+      "stock_load": null,
+      "stock_verification": {
+        "request_id": 5,
+        "prog_id": 229,
+        "phase": "verify",
+        "status": 0
+      },
+      "counters": null,
+      "entry": "sys_enter_submit",
+      "verify.stderr": "libbpf: elf: skipping unrecognized data section(6) .native_lab.rodata\n",
+      "load.stderr": "x86_sim_xdp (109087 bytes), 1 reachable symbol(s) total\n  - trusted_x86_x86_sim_xdp (vaddr 0x0, 109087 bytes) [entry]\nError: x86 helper call bpf_probe_read has no helper address\n\ncommand: /workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link --input /workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto/control/state/session-l91msygo/requests/request-724s967s/generated/kernel-link/182ee7ba87ba9797.tmp.7076.proof.o --symbol trusted_x86_x86_sim_xdp --mode kernel --output /workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto/control/state/session-l91msygo/requests/request-724s967s/generated/kernel-link/182ee7ba87ba9797.tmp.7076.blob.bin --output-relocs /workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto/control/state/session-l91msygo/requests/request-724s967s/generated/kernel-link/182ee7ba87ba9797.tmp.7076.relocs.bin --output-map-patches /workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto/control/state/session-l91msygo/requests/request-724s967s/generated/kernel-link/182ee7ba87ba9797.tmp.7076.map-patches.tsv --output-abi /workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto/control/state/session-l91msygo/requests/request-724s967s/generated/kernel-link/182ee7ba87ba9797.tmp.7076.abi.tsv --abi-load-sites true --link-plan /workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto/control/state/session-l91msygo/requests/request-724s967s/generated/kernel-link/182ee7ba87ba9797.tmp.7076.link-plan.json\n"
+    },
+    {
+      "request_id": 6,
+      "source_prog_id": 232,
+      "status": -5,
+      "stock_load": null,
+      "stock_verification": {
+        "request_id": 6,
+        "prog_id": 235,
+        "phase": "verify",
+        "status": 0
+      },
+      "counters": null,
+      "entry": "sys_enter_submit",
+      "verify.stderr": "libbpf: elf: skipping unrecognized data section(6) .native_lab.rodata\n",
+      "load.stderr": "x86_sim_xdp (109087 bytes), 1 reachable symbol(s) total\n  - trusted_x86_x86_sim_xdp (vaddr 0x0, 109087 bytes) [entry]\nError: x86 helper call bpf_probe_read has no helper address\n\ncommand: /workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link --input /workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto/control/state/session-l91msygo/requests/request-8y36iega/generated/kernel-link/c5022895b7d854b7.tmp.7140.proof.o --symbol trusted_x86_x86_sim_xdp --mode kernel --output /workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto/control/state/session-l91msygo/requests/request-8y36iega/generated/kernel-link/c5022895b7d854b7.tmp.7140.blob.bin --output-relocs /workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto/control/state/session-l91msygo/requests/request-8y36iega/generated/kernel-link/c5022895b7d854b7.tmp.7140.relocs.bin --output-map-patches /workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto/control/state/session-l91msygo/requests/request-8y36iega/generated/kernel-link/c5022895b7d854b7.tmp.7140.map-patches.tsv --output-abi /workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto/control/state/session-l91msygo/requests/request-8y36iega/generated/kernel-link/c5022895b7d854b7.tmp.7140.abi.tsv --abi-load-sites true --link-plan /workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto/control/state/session-l91msygo/requests/request-8y36iega/generated/kernel-link/c5022895b7d854b7.tmp.7140.link-plan.json\n"
+    }
+  ],
+  "limits": [
+    "Inherited old producer489a7a69184b/113-entry manifest and earlier simulator/compiler; not new172-entry sole-target same-source Tracee acceptance.",
+    "Make0/appERROR both retained; native counters absent stay missing, not zero execution.",
+    "Current runtime writable-PC32 and helper flags were developed later and are not tested by this inherited job."
+  ]
+}

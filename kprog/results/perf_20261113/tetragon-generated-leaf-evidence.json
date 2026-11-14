@@ -1,0 +1,205 @@
+{
+  "recorded": "2026-11-14T13:14:56.157976+00:00",
+  "scope": "Actual earlier same-source workload baseline dynamic-function bodies, evidence only",
+  "run": "x86_kvm_corpus_20261114_014544_026262",
+  "rows": [
+    {
+      "source": "corpus/results/perf-tetragon-owner-link-runtime-20261114/baseline-0001/prog-41-xlated.txt",
+      "source_sha256": "f0a1c92098922e2f39a1690b24fe7f8224aed206aab6778f2a82f52cf2cf53c3",
+      "prog_id": 41,
+      "prog_name": "generic_kprobe_filter_arg",
+      "tag": "b0e1ab9ff5e07678",
+      "functions": [
+        {
+          "name": "cel_expr_0",
+          "return_type": "s32",
+          "first_xlated_instruction": 3717,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_1",
+          "return_type": "s32",
+          "first_xlated_instruction": 3719,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_2",
+          "return_type": "s32",
+          "first_xlated_instruction": 3721,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_3",
+          "return_type": "s32",
+          "first_xlated_instruction": 3723,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_4",
+          "return_type": "s32",
+          "first_xlated_instruction": 3725,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_5",
+          "return_type": "s32",
+          "first_xlated_instruction": 3727,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_6",
+          "return_type": "s32",
+          "first_xlated_instruction": 3729,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_7",
+          "return_type": "s32",
+          "first_xlated_instruction": 3731,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        }
+      ]
+    },
+    {
+      "source": "corpus/results/perf-tetragon-owner-link-runtime-20261114/baseline-0001/prog-42-xlated.txt",
+      "source_sha256": "444eff0cccc9d9748600ba4d58e32d7d1c85a918d7e5fbdc973fab65adc27b80",
+      "prog_id": 42,
+      "prog_name": "generic_kprobe_filter_arg",
+      "tag": "e7d3cf59813e36e7",
+      "functions": [
+        {
+          "name": "cel_expr_7",
+          "return_type": "s32",
+          "first_xlated_instruction": 3717,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_0",
+          "return_type": "s32",
+          "first_xlated_instruction": 3719,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_1",
+          "return_type": "s32",
+          "first_xlated_instruction": 3721,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_2",
+          "return_type": "s32",
+          "first_xlated_instruction": 3723,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_3",
+          "return_type": "s32",
+          "first_xlated_instruction": 3725,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_4",
+          "return_type": "s32",
+          "first_xlated_instruction": 3727,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_5",
+          "return_type": "s32",
+          "first_xlated_instruction": 3729,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_6",
+          "return_type": "s32",
+          "first_xlated_instruction": 3731,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        }
+      ]
+    },
+    {
+      "source": "corpus/results/perf-tetragon-owner-link-runtime-20261114/baseline-0001/prog-52-xlated.txt",
+      "source_sha256": "ef36076201149df3e0390c971a5d7b77d28010327a504eb4c9857e9b8a8ebd4e",
+      "prog_id": 52,
+      "prog_name": "generic_kprobe_filter_arg",
+      "tag": "7098a2b733ab273f",
+      "functions": [
+        {
+          "name": "cel_expr_3",
+          "return_type": "s32",
+          "first_xlated_instruction": 3717,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_4",
+          "return_type": "s32",
+          "first_xlated_instruction": 3719,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_5",
+          "return_type": "s32",
+          "first_xlated_instruction": 3721,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_6",
+          "return_type": "s32",
+          "first_xlated_instruction": 3723,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_7",
+          "return_type": "s32",
+          "first_xlated_instruction": 3725,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_0",
+          "return_type": "s32",
+          "first_xlated_instruction": 3727,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_1",
+          "return_type": "s32",
+          "first_xlated_instruction": 3729,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        },
+        {
+          "name": "cel_expr_2",
+          "return_type": "s32",
+          "first_xlated_instruction": 3731,
+          "instruction_count": 2,
+          "body_hex": "b7000000000000009500000000000000"
+        }
+      ]
+    }
+  ],
+  "next": "Derive function bodies/name/offset from the live request source prog FD + loaded BTF func_info/xlated bytes before proof generation; feed generic exact-body lowering. Do not reuse old captured zeros for a future generation.",
+  "implementation": "Existing exact-BPF constant-leaf IR compiler can handle these actual MOV64 IMM0+EXIT leaves; runtime live provider/binding remains open. Nonempty CEL requires its real body.",
+  "upstream": "vendor/repos/tetragon/pkg/selectors/celexpr.go CelExprFunctions.functions fills unused slots with actual CompileEmptyFunction bodies."
+}

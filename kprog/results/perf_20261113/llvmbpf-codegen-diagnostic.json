@@ -1,0 +1,139 @@
+{
+  "recorded": "2026-11-14T13:07:36.151172+00:00",
+  "raw": "/workspaces/kprog-raw/perf/20261114-llvmbpf-diagnostic",
+  "library_commit": "dd788ba56f1c16088f2541b56d9e5285466a8ae8",
+  "scope": "Code generation diagnostic only, not a replacement P or performance/equivalence claim",
+  "input": {
+    "source": "corpus/results/perf-otel-upstream-20261114/tracer.original.bpf.o",
+    "source_sha256": "f5a7cea515fa74d8a6588e8f2c7303af3137a1fca98e032f65d4d0cef9ea272e",
+    "program": "perf_unwind_native",
+    "instruction_bytes": 55776,
+    "relocated_sha256": "a684600c385518878c898cb343b3bb9f67f4bad26260db85d73d947f0731199b",
+    "scope": "Original source program, standard resource-address relocations only. Nonzero opaque diagnostic map/global addresses; never executed; no map/helper LTO. Not the verifier-pruned JIT instruction stream."
+  },
+  "resource_address_relocations": 204,
+  "settings": [
+    "kernel_compatible_mode=true",
+    "O3 generic / O3 actual LLVM host CPU arrowlake-s / O2 arrowlake-s",
+    "No map/helper inline descriptors registered; all helpers remain external"
+  ],
+  "retained_attempts": [
+    "Captured verifier-translated stream unchanged rejected at pc13: kernel MOV64 offset -1 per-CPU-address opcode is not supported by current llvmbpf. No instruction replaced by a fake identity.",
+    "Original unrelocated source AOT ran but null map immediates are unsuitable for a code-size comparison; not used.",
+    "Initial literal native CPU string was ignored by LLVM; logs/objects retained separately, resolved real host CPU in final runs.",
+    "Initial raw harness headers Support/Host.h then incomplete StringRef failed; corrected LLVM18 headers, build logs retained."
+  ],
+  "limits": [
+    "Input is the same original upstream BPF program with only map/global address relocations to opaque nonzero diagnostic addresses, never executed.",
+    "Source 6972 instructions differs from verifier-pruned 4628-instruction stream, so text sizes are not a controlled JIT/native speed comparison.",
+    "P-producing path and default compiler flags unchanged.",
+    "Library kernel-compatible mode alone still emitted SIMD (84 register occurrences); final diagnostic disables x87/MMX/SSE/SSE2/AVX/AVX2/AVX512 explicitly. No emitted SIMD in final variants.",
+    "These are diagnostic flags only; native runtime/compiler defaults and canonical P unchanged."
+  ],
+  "initial_library_kernel_mode_results": [
+    {
+      "configuration": "O3-generic",
+      "exit": 0,
+      "object_bytes": 41448,
+      "text_bytes": 33282,
+      "functions": [
+        {
+          "name": "bpf_main",
+          "bytes": 33282
+        }
+      ],
+      "external_relocations": 272,
+      "cmov": 164,
+      "conditional_branches": 538,
+      "vector_register_occurrences": 84,
+      "sha256": "c58f507457ef1463d1ded04d46ca62fe4923d6cc65cf75e43af69ec2f562403c",
+      "compiler_log": "AOT bytes=41448 CPU=generic features="
+    },
+    {
+      "configuration": "O3-native",
+      "exit": 0,
+      "object_bytes": 41440,
+      "text_bytes": 33278,
+      "functions": [
+        {
+          "name": "bpf_main",
+          "bytes": 33278
+        }
+      ],
+      "external_relocations": 272,
+      "cmov": 164,
+      "conditional_branches": 538,
+      "vector_register_occurrences": 84,
+      "sha256": "8c1d06d86afb66f4702b516d18f54a7eb9bfb6581ead2bb32feb6daa26408abe",
+      "compiler_log": "AOT bytes=41440 CPU=arrowlake-s features="
+    },
+    {
+      "configuration": "O2-native",
+      "exit": 0,
+      "object_bytes": 41440,
+      "text_bytes": 33278,
+      "functions": [
+        {
+          "name": "bpf_main",
+          "bytes": 33278
+        }
+      ],
+      "external_relocations": 272,
+      "cmov": 164,
+      "conditional_branches": 538,
+      "vector_register_occurrences": 84,
+      "sha256": "8c1d06d86afb66f4702b516d18f54a7eb9bfb6581ead2bb32feb6daa26408abe",
+      "compiler_log": "AOT bytes=41440 CPU=arrowlake-s features="
+    }
+  ],
+  "results_gpr_features_disabled": [
+    {
+      "configuration": "O3-generic",
+      "exit": 0,
+      "text_bytes": 35089,
+      "functions": [
+        {
+          "name": "bpf_main",
+          "bytes": 35089
+        }
+      ],
+      "sha256": "01a3d0b506379ed13fefa49baeea2e7c3c6052d9c98c7e1d56d8fb705f593215",
+      "vector_register_occurrences": 0,
+      "cmov": 164,
+      "conditional_branches": 538,
+      "compiler_log": "AOT bytes=41824 CPU=generic features=-x87,-mmx,-sse,-sse2,-avx,-avx2,-avx512f"
+    },
+    {
+      "configuration": "O3-native",
+      "exit": 0,
+      "text_bytes": 35089,
+      "functions": [
+        {
+          "name": "bpf_main",
+          "bytes": 35089
+        }
+      ],
+      "sha256": "1498025acc8e0a578e238dca814cff7fdd3f1f91f35c57dec465d340fb14e3e9",
+      "vector_register_occurrences": 0,
+      "cmov": 164,
+      "conditional_branches": 538,
+      "compiler_log": "AOT bytes=41824 CPU=arrowlake-s features=-x87,-mmx,-sse,-sse2,-avx,-avx2,-avx512f"
+    },
+    {
+      "configuration": "O2-native",
+      "exit": 0,
+      "text_bytes": 35089,
+      "functions": [
+        {
+          "name": "bpf_main",
+          "bytes": 35089
+        }
+      ],
+      "sha256": "1498025acc8e0a578e238dca814cff7fdd3f1f91f35c57dec465d340fb14e3e9",
+      "vector_register_occurrences": 0,
+      "cmov": 164,
+      "conditional_branches": 538,
+      "compiler_log": "AOT bytes=41824 CPU=arrowlake-s features=-x87,-mmx,-sse,-sse2,-avx,-avx2,-avx512f"
+    }
+  ]
+}

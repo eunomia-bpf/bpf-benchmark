@@ -1,0 +1,310 @@
+{
+  "recorded": "2026-11-14T12:59:56.582512+00:00",
+  "scope": "Bind measured guest hardware root IPs to captured program bytes and instructions.\n\nThis is sampled root attribution, with hardware skid; a sample after a call is\nnot proof that the following instruction consumed those cycles. Address-operand\ncategories describe syntax, not load latency or proven spills. Period sums are\nnormalized by the measured entry count, never the inlined tail program count.\n",
+  "run": "x86_kvm_corpus_20261114_122906_024105",
+  "candidate": "433cc6cb copy-path candidate, exact previously timed payload",
+  "raw": "/workspaces/kprog-raw/perf/20261114-probe-copy-profile",
+  "native_main": {
+    "id": 28,
+    "name": "perf_unwind_nat",
+    "sha256": "2584d5941b19584ddb6a3eaac50e169fc3b79101c7fcd03d0cab6459d3ab2dba",
+    "bytes": 33141,
+    "cycles_per_entry": 9998.198624581404
+  },
+  "native_main_regions": [
+    {
+      "name": "body_including_existing_inlines",
+      "start": "0x0",
+      "end": "0x7750",
+      "bytes": 30544,
+      "samples": 2263,
+      "period_cycles": 43310337825,
+      "cycles_per_measured_entry": 2918.2307361888784,
+      "top": [
+        {
+          "offset": "574",
+          "bytes": "4",
+          "samples": "49",
+          "period_cycles": "945161057",
+          "category": "other",
+          "previous_instruction": "cmp    %dx,(%rax)",
+          "instruction": "lea    0x1(%rcx),%r12d"
+        },
+        {
+          "offset": "3e60",
+          "bytes": "3",
+          "samples": "43",
+          "period_cycles": "843657697",
+          "category": "other",
+          "previous_instruction": "cmp    %dx,(%rax)",
+          "instruction": "lea    0x1(%rcx),%ebp"
+        },
+        {
+          "offset": "b1d",
+          "bytes": "4",
+          "samples": "36",
+          "period_cycles": "688515653",
+          "category": "other_memory_operand",
+          "previous_instruction": "mov    0x4(%rax),%r13d",
+          "instruction": "movzbl 0x2(%rax),%ecx"
+        }
+      ]
+    },
+    {
+      "name": "shared_array",
+      "start": "0x7750",
+      "end": "0x7793",
+      "bytes": 67,
+      "samples": 821,
+      "period_cycles": 15609466150,
+      "cycles_per_measured_entry": 1051.758683538504,
+      "top": [
+        {
+          "offset": "775e",
+          "bytes": "6",
+          "samples": "184",
+          "period_cycles": "3516755234",
+          "category": "other_memory_operand",
+          "previous_instruction": "mov    (%rsi),%eax",
+          "instruction": "cmp    0x44(%rdi),%eax"
+        },
+        {
+          "offset": "777e",
+          "bytes": "2",
+          "samples": "161",
+          "period_cycles": "3057938992",
+          "category": "control",
+          "previous_instruction": "lea    0x130(%rdi,%rax,1),%rax",
+          "instruction": "jmp    0xffffffffc06130d8"
+        },
+        {
+          "offset": "7766",
+          "bytes": "6",
+          "samples": "133",
+          "period_cycles": "2535543633",
+          "category": "other_memory_operand",
+          "previous_instruction": "jae    0xffffffffc06130d4",
+          "instruction": "and    0x124(%rdi),%eax"
+        }
+      ]
+    },
+    {
+      "name": "user_probe_read",
+      "start": "0x7793",
+      "end": "0x78d9",
+      "bytes": 326,
+      "samples": 1201,
+      "period_cycles": 22825232085,
+      "cycles_per_measured_entry": 1537.9536890299366,
+      "top": [
+        {
+          "offset": "787b",
+          "bytes": "6",
+          "samples": "288",
+          "period_cycles": "5508223790",
+          "category": "other_memory_operand",
+          "previous_instruction": "clac",
+          "instruction": "decl   0x24ac(%rbx)"
+        },
+        {
+          "offset": "7802",
+          "bytes": "3",
+          "samples": "260",
+          "period_cycles": "4959741504",
+          "category": "other",
+          "previous_instruction": "stac",
+          "instruction": "mov    %r12,%rdi"
+        },
+        {
+          "offset": "7881",
+          "bytes": "3",
+          "samples": "161",
+          "period_cycles": "3048804185",
+          "category": "other",
+          "previous_instruction": "decl   0x24ac(%rbx)",
+          "instruction": "test   %rax,%rax"
+        }
+      ]
+    },
+    {
+      "name": "typed_hash",
+      "start": "0x78d9",
+      "end": "0x8029",
+      "bytes": 1872,
+      "samples": 746,
+      "period_cycles": 14252404820,
+      "cycles_per_measured_entry": 960.320512354039,
+      "top": [
+        {
+          "offset": "7eab",
+          "bytes": "6",
+          "samples": "152",
+          "period_cycles": "2941921696",
+          "category": "control",
+          "previous_instruction": "cmp    %r10d,0x28(%rax)",
+          "instruction": "jne    0xffffffffc061395f"
+        },
+        {
+          "offset": "7e9c",
+          "bytes": "2",
+          "samples": "132",
+          "period_cycles": "2498254548",
+          "category": "other",
+          "previous_instruction": "mov    0x0(%rdx),%rax",
+          "instruction": "test   $0x1,%al"
+        },
+        {
+          "offset": "7ae4",
+          "bytes": "6",
+          "samples": "26",
+          "period_cycles": "495445888",
+          "category": "control",
+          "previous_instruction": "cmp    %r10d,0x28(%rax)",
+          "instruction": "jne    0xffffffffc06134ec"
+        }
+      ]
+    },
+    {
+      "name": "lpm",
+      "start": "0x8029",
+      "end": "0x8168",
+      "bytes": 319,
+      "samples": 2746,
+      "period_cycles": 52388824367,
+      "cycles_per_measured_entry": 3529.9350034700465,
+      "top": [
+        {
+          "offset": "8075",
+          "bytes": "3",
+          "samples": "463",
+          "period_cycles": "8883759555",
+          "category": "other",
+          "previous_instruction": "mov    0x10(%rdx),%r11d",
+          "instruction": "mov    %r11d,%r9d"
+        },
+        {
+          "offset": "80ea",
+          "bytes": "7",
+          "samples": "233",
+          "period_cycles": "4449456935",
+          "category": "other_memory_operand",
+          "previous_instruction": "cmova  %r9d,%ecx",
+          "instruction": "cmp    0x180(%rdi),%rcx"
+        },
+        {
+          "offset": "80f7",
+          "bytes": "3",
+          "samples": "203",
+          "period_cycles": "3861794394",
+          "category": "other",
+          "previous_instruction": "je     0xffffffffc0613a97",
+          "instruction": "cmp    %r11d,%ecx"
+        }
+      ]
+    },
+    {
+      "name": "entry_epilogue",
+      "start": "0x8168",
+      "end": "0x8175",
+      "bytes": 13,
+      "samples": 0,
+      "period_cycles": 0,
+      "cycles_per_measured_entry": 0.0,
+      "top": [
+        {
+          "offset": "8168",
+          "bytes": "2",
+          "samples": "0",
+          "period_cycles": "0",
+          "category": "stack_frame",
+          "previous_instruction": "ret",
+          "instruction": "pop    %r15"
+        },
+        {
+          "offset": "816a",
+          "bytes": "2",
+          "samples": "0",
+          "period_cycles": "0",
+          "category": "stack_frame",
+          "previous_instruction": "pop    %r15",
+          "instruction": "pop    %r14"
+        },
+        {
+          "offset": "816c",
+          "bytes": "2",
+          "samples": "0",
+          "period_cycles": "0",
+          "category": "stack_frame",
+          "previous_instruction": "pop    %r14",
+          "instruction": "pop    %r13"
+        }
+      ]
+    }
+  ],
+  "baseline_main": {
+    "id": 7,
+    "name": "perf_unwind_native",
+    "bytes": 21868,
+    "cycles_per_entry": 2243.940225144928,
+    "sha256": "4f33c2d46a0c0f4c1341d18325c9d9e1b4568764d811bfc70b361389c0541464"
+  },
+  "root_categories": {
+    "baseline": [
+      {
+        "root_categories": {
+          "other_guest_kernel": 5676,
+          "lpm_lookup": 3032,
+          "user_nofault_copy": 2642,
+          "hash_lookup": 1324,
+          "program_text": 2148,
+          "array_lookup": 240,
+          "generic_lookup_dispatch": 155,
+          "probe_read_user_entry": 147,
+          "kernel_nofault_copy": 6,
+          "probe_read_kernel_entry": 1
+        },
+        "root_category_cycles": {
+          "other_guest_kernel": 106346980681,
+          "lpm_lookup": 57769508631,
+          "user_nofault_copy": 50604053100,
+          "hash_lookup": 25145535208,
+          "program_text": 40945881949,
+          "array_lookup": 4497449525,
+          "generic_lookup_dispatch": 2979117315,
+          "probe_read_user_entry": 2815028713,
+          "kernel_nofault_copy": 109137872,
+          "probe_read_kernel_entry": 20099843
+        },
+        "sampled_cycles": 291232792837,
+        "guest_kernel_samples": 15371
+      }
+    ],
+    "post_rejit": [
+      {
+        "root_categories": {
+          "other_guest_kernel": 5209,
+          "program_text": 10419,
+          "hash_lookup": 311,
+          "generic_lookup_dispatch": 7,
+          "kernel_nofault_copy": 1
+        },
+        "root_category_cycles": {
+          "other_guest_kernel": 95526748622,
+          "program_text": 198576249566,
+          "hash_lookup": 5895734809,
+          "generic_lookup_dispatch": 126535801,
+          "kernel_nofault_copy": 19779062
+        },
+        "sampled_cycles": 300145047860,
+        "guest_kernel_samples": 15947
+      }
+    ]
+  },
+  "interpretation": [
+    "Native main total includes inline user read/hash/LPM/array; comparing total 9998 against baseline main alone 2244 incorrectly calls migrated helper cycles a body regression.",
+    "After separating appended routines, compare body sampled cycles with baseline cautiously: original known inlines and compiler differences remain; no causal throughput attribution from root samples/skid.",
+    "Top appended-region sites remain LPM prefix/child dependencies and STAC/CLAC/pagefault nesting; removing extra LFENCE did not remove these costs.",
+    "Host O3/O1 compiler and other guests overlapped; this is a diagnostic profile, not 3x180 acceptance.",
+    "Queried CPUs 0,8,16 report 64KiB L1I; no evidence for a 32KiB boundary hypothesis."
+  ]
+}

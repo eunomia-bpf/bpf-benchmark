@@ -1,0 +1,1875 @@
+{
+  "recorded": "2026-11-14T13:21:11.799087+00:00",
+  "raw": "/workspaces/kprog-raw/perf/20261114-probe-copy-profile",
+  "run": "x86_kvm_corpus_20261114_122906_024105",
+  "phases": {
+    "baseline": {
+      "program": "perf_unwind_native",
+      "program_id": 7,
+      "sha256": "4f33c2d46a0c0f4c1341d18325c9d9e1b4568764d811bfc70b361389c0541464",
+      "bytes_in_body": 21868,
+      "ten_hottest_body_blocks": [
+        {
+          "offset": "0x54c0",
+          "end": "0x5500",
+          "instruction_count": 18,
+          "period_cycles": 1021731360,
+          "cycles_per_measured_entry": 69.00866759274263,
+          "samples": 53,
+          "assembly": [
+            {
+              "offset": "54c0",
+              "instruction": "pop    %r13",
+              "sampled_cycles": 20234462
+            },
+            {
+              "offset": "54c2",
+              "instruction": "pop    %rbx",
+              "sampled_cycles": 19278078
+            },
+            {
+              "offset": "54c3",
+              "instruction": "pop    %rax",
+              "sampled_cycles": 19040099
+            },
+            {
+              "offset": "54c4",
+              "instruction": "pop    %rax",
+              "sampled_cycles": 40474763
+            },
+            {
+              "offset": "54c5",
+              "instruction": "add    $0x158,%rsp",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "54cc",
+              "instruction": "mov    0x48(%rcx),%rcx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "54d0",
+              "instruction": "add    $0xc,%rcx",
+              "sampled_cycles": 902453278
+            },
+            {
+              "offset": "54d4",
+              "instruction": "jmp    0xffffffffa30132e0",
+              "sampled_cycles": 20250680
+            },
+            {
+              "offset": "54d9",
+              "instruction": "movabs $0xffff88c801235358,%rdi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "54e3",
+              "instruction": "mov    0x0(%rdi),%edi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "54e6",
+              "instruction": "mov    $0xffffffff,%eax",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "54eb",
+              "instruction": "pop    %r15",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "54ed",
+              "instruction": "pop    %r14",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "54ef",
+              "instruction": "pop    %r13",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "54f1",
+              "instruction": "pop    %rbx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "54f2",
+              "instruction": "leave",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "54f3",
+              "instruction": "jmp    0xffffffffa30138a0",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "54f8",
+              "instruction": "movabs $0xffff88c801235358,%rdi",
+              "sampled_cycles": 0
+            }
+          ],
+          "rsp_rbp_address_operand_instructions": 0
+        },
+        {
+          "offset": "0x440",
+          "end": "0x480",
+          "instruction_count": 16,
+          "period_cycles": 1006227770,
+          "cycles_per_measured_entry": 67.9615409891272,
+          "samples": 52,
+          "assembly": [
+            {
+              "offset": "442",
+              "instruction": "call   0xffffffffa24b89f0",
+              "sampled_cycles": 18911350
+            },
+            {
+              "offset": "447",
+              "instruction": "test   %rax,%rax",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "44a",
+              "instruction": "je     0xffffffffc0602b8d",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "44c",
+              "instruction": "mov    -0x118(%rbp),%rdx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "453",
+              "instruction": "mov    %rdx,%rdi",
+              "sampled_cycles": 17946010
+            },
+            {
+              "offset": "456",
+              "instruction": "and    $0xffff,%rdi",
+              "sampled_cycles": 40436823
+            },
+            {
+              "offset": "45d",
+              "instruction": "movzwq 0x0(%rax),%rsi",
+              "sampled_cycles": 40336895
+            },
+            {
+              "offset": "462",
+              "instruction": "mov    -0x60(%rbp),%ebx",
+              "sampled_cycles": 447786617
+            },
+            {
+              "offset": "465",
+              "instruction": "mov    %r15,%rcx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "468",
+              "instruction": "cmp    %rdi,%rsi",
+              "sampled_cycles": 20051677
+            },
+            {
+              "offset": "46b",
+              "instruction": "ja     0xffffffffc0602b4c",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "46d",
+              "instruction": "mov    %rbx,%rcx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "470",
+              "instruction": "add    $0x1,%rcx",
+              "sampled_cycles": 120050445
+            },
+            {
+              "offset": "474",
+              "instruction": "mov    -0x120(%rbp),%rax",
+              "sampled_cycles": 82165321
+            },
+            {
+              "offset": "47b",
+              "instruction": "cmp    %rdi,%rsi",
+              "sampled_cycles": 198518721
+            },
+            {
+              "offset": "47e",
+              "instruction": "ja     0xffffffffc0602b5b",
+              "sampled_cycles": 20023911
+            }
+          ],
+          "rsp_rbp_address_operand_instructions": 3
+        },
+        {
+          "offset": "0x700",
+          "end": "0x740",
+          "instruction_count": 18,
+          "period_cycles": 508581061,
+          "cycles_per_measured_entry": 34.35002854616634,
+          "samples": 27,
+          "assembly": [
+            {
+              "offset": "703",
+              "instruction": "mov    -0x60(%rbp),%r15d",
+              "sampled_cycles": 228707875
+            },
+            {
+              "offset": "707",
+              "instruction": "mov    %r13,%rcx",
+              "sampled_cycles": 20339569
+            },
+            {
+              "offset": "70a",
+              "instruction": "cmp    %rdi,%rsi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "70d",
+              "instruction": "ja     0xffffffffc0602dee",
+              "sampled_cycles": 18778101
+            },
+            {
+              "offset": "70f",
+              "instruction": "mov    %r15,%rcx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "712",
+              "instruction": "add    $0x1,%rcx",
+              "sampled_cycles": 40581324
+            },
+            {
+              "offset": "716",
+              "instruction": "mov    -0x120(%rbp),%rax",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "71d",
+              "instruction": "cmp    %rdi,%rsi",
+              "sampled_cycles": 72498044
+            },
+            {
+              "offset": "720",
+              "instruction": "ja     0xffffffffc0602dfd",
+              "sampled_cycles": 16163756
+            },
+            {
+              "offset": "722",
+              "instruction": "mov    %rbx,%r15",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "725",
+              "instruction": "mov    %r15,%rdi",
+              "sampled_cycles": 16302511
+            },
+            {
+              "offset": "728",
+              "instruction": "shl    $0x20,%rdi",
+              "sampled_cycles": 16174995
+            },
+            {
+              "offset": "72c",
+              "instruction": "shr    $0x20,%rdi",
+              "sampled_cycles": 39661135
+            },
+            {
+              "offset": "730",
+              "instruction": "mov    %rcx,%rsi",
+              "sampled_cycles": 19159962
+            },
+            {
+              "offset": "733",
+              "instruction": "shl    $0x20,%rsi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "737",
+              "instruction": "shr    $0x20,%rsi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "73b",
+              "instruction": "cmp    %rdi,%rsi",
+              "sampled_cycles": 20213789
+            },
+            {
+              "offset": "73e",
+              "instruction": "jae    0xffffffffc0602b7d",
+              "sampled_cycles": 0
+            }
+          ],
+          "rsp_rbp_address_operand_instructions": 2
+        },
+        {
+          "offset": "0x2800",
+          "end": "0x2840",
+          "instruction_count": 16,
+          "period_cycles": 488400979,
+          "cycles_per_measured_entry": 32.98704740919479,
+          "samples": 25,
+          "assembly": [
+            {
+              "offset": "2804",
+              "instruction": "mov    -0x158(%rbp),%rdi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "280b",
+              "instruction": "and    $0xffff,%rdi",
+              "sampled_cycles": 19401287
+            },
+            {
+              "offset": "2812",
+              "instruction": "movzwq 0x0(%rax),%rsi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "2817",
+              "instruction": "mov    -0x60(%rbp),%ebx",
+              "sampled_cycles": 329824608
+            },
+            {
+              "offset": "281a",
+              "instruction": "cmp    %rdi,%rsi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "281d",
+              "instruction": "ja     0xffffffffc0604efe",
+              "sampled_cycles": 19976531
+            },
+            {
+              "offset": "281f",
+              "instruction": "mov    %rbx,%r14",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "2822",
+              "instruction": "add    $0x1,%r14",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "2826",
+              "instruction": "cmp    %rdi,%rsi",
+              "sampled_cycles": 39593941
+            },
+            {
+              "offset": "2829",
+              "instruction": "ja     0xffffffffc0604f06",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "282b",
+              "instruction": "mov    %r13,%rbx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "282e",
+              "instruction": "mov    %rbx,%rdi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "2831",
+              "instruction": "shl    $0x20,%rdi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "2835",
+              "instruction": "shr    $0x20,%rdi",
+              "sampled_cycles": 59708520
+            },
+            {
+              "offset": "2839",
+              "instruction": "mov    %r14,%rsi",
+              "sampled_cycles": 19896092
+            },
+            {
+              "offset": "283c",
+              "instruction": "shl    $0x20,%rsi",
+              "sampled_cycles": 0
+            }
+          ],
+          "rsp_rbp_address_operand_instructions": 2
+        },
+        {
+          "offset": "0x780",
+          "end": "0x7c0",
+          "instruction_count": 17,
+          "period_cycles": 465725611,
+          "cycles_per_measured_entry": 31.455532380767835,
+          "samples": 25,
+          "assembly": [
+            {
+              "offset": "784",
+              "instruction": "movzwq 0x0(%rax),%rsi",
+              "sampled_cycles": 39736579
+            },
+            {
+              "offset": "789",
+              "instruction": "mov    -0x60(%rbp),%r13d",
+              "sampled_cycles": 116267600
+            },
+            {
+              "offset": "78d",
+              "instruction": "mov    %rbx,%rcx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "790",
+              "instruction": "cmp    %rdi,%rsi",
+              "sampled_cycles": 20082701
+            },
+            {
+              "offset": "793",
+              "instruction": "ja     0xffffffffc0602e74",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "795",
+              "instruction": "mov    %r13,%rcx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "798",
+              "instruction": "add    $0x1,%rcx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "79c",
+              "instruction": "mov    -0x120(%rbp),%rax",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "7a3",
+              "instruction": "cmp    %rdi,%rsi",
+              "sampled_cycles": 59133348
+            },
+            {
+              "offset": "7a6",
+              "instruction": "ja     0xffffffffc0602e83",
+              "sampled_cycles": 40005280
+            },
+            {
+              "offset": "7a8",
+              "instruction": "mov    %r15,%r13",
+              "sampled_cycles": 20264423
+            },
+            {
+              "offset": "7ab",
+              "instruction": "mov    %r13,%rdi",
+              "sampled_cycles": 31622053
+            },
+            {
+              "offset": "7ae",
+              "instruction": "shl    $0x20,%rdi",
+              "sampled_cycles": 58801484
+            },
+            {
+              "offset": "7b2",
+              "instruction": "shr    $0x20,%rdi",
+              "sampled_cycles": 40392764
+            },
+            {
+              "offset": "7b6",
+              "instruction": "mov    %rcx,%rsi",
+              "sampled_cycles": 20102194
+            },
+            {
+              "offset": "7b9",
+              "instruction": "shl    $0x20,%rsi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "7bd",
+              "instruction": "shr    $0x20,%rsi",
+              "sampled_cycles": 19317185
+            }
+          ],
+          "rsp_rbp_address_operand_instructions": 2
+        },
+        {
+          "offset": "0x800",
+          "end": "0x840",
+          "instruction_count": 17,
+          "period_cycles": 416457601,
+          "cycles_per_measured_entry": 28.12792606647606,
+          "samples": 22,
+          "assembly": [
+            {
+              "offset": "803",
+              "instruction": "mov    %rdx,%rdi",
+              "sampled_cycles": 20373516
+            },
+            {
+              "offset": "806",
+              "instruction": "and    $0xffff,%rdi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "80d",
+              "instruction": "movzwq 0x0(%rax),%rsi",
+              "sampled_cycles": 14885829
+            },
+            {
+              "offset": "812",
+              "instruction": "mov    -0x60(%rbp),%r15d",
+              "sampled_cycles": 93340281
+            },
+            {
+              "offset": "816",
+              "instruction": "mov    %rbx,%rcx",
+              "sampled_cycles": 36035684
+            },
+            {
+              "offset": "819",
+              "instruction": "cmp    %rdi,%rsi",
+              "sampled_cycles": 80256314
+            },
+            {
+              "offset": "81c",
+              "instruction": "ja     0xffffffffc0602efd",
+              "sampled_cycles": 40155518
+            },
+            {
+              "offset": "81e",
+              "instruction": "mov    %r15,%rcx",
+              "sampled_cycles": 40082883
+            },
+            {
+              "offset": "821",
+              "instruction": "add    $0x1,%rcx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "825",
+              "instruction": "mov    -0x120(%rbp),%rax",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "82c",
+              "instruction": "cmp    %rdi,%rsi",
+              "sampled_cycles": 18756291
+            },
+            {
+              "offset": "82f",
+              "instruction": "ja     0xffffffffc0602f0c",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "831",
+              "instruction": "mov    %r13,%r15",
+              "sampled_cycles": 20084768
+            },
+            {
+              "offset": "834",
+              "instruction": "mov    %r15,%rdi",
+              "sampled_cycles": 37554472
+            },
+            {
+              "offset": "837",
+              "instruction": "shl    $0x20,%rdi",
+              "sampled_cycles": 14932045
+            },
+            {
+              "offset": "83b",
+              "instruction": "shr    $0x20,%rdi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "83f",
+              "instruction": "mov    %rcx,%rsi",
+              "sampled_cycles": 0
+            }
+          ],
+          "rsp_rbp_address_operand_instructions": 2
+        },
+        {
+          "offset": "0x2200",
+          "end": "0x2240",
+          "instruction_count": 13,
+          "period_cycles": 393926615,
+          "cycles_per_measured_entry": 26.606162729965828,
+          "samples": 21,
+          "assembly": [
+            {
+              "offset": "2201",
+              "instruction": "mov    -0x128(%rbp),%rdi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "2208",
+              "instruction": "mov    $0x8,%esi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "220d",
+              "instruction": "call   0xffffffffa24638c0",
+              "sampled_cycles": 19762392
+            },
+            {
+              "offset": "2212",
+              "instruction": "test   %rax,%rax",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "2215",
+              "instruction": "jne    0xffffffffc060712a",
+              "sampled_cycles": 35033624
+            },
+            {
+              "offset": "221b",
+              "instruction": "mov    $0x1,%edi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "2220",
+              "instruction": "mov    %dil,0xf30(%rbx)",
+              "sampled_cycles": 30124627
+            },
+            {
+              "offset": "2227",
+              "instruction": "mov    %r14,0xed8(%rbx)",
+              "sampled_cycles": 19824463
+            },
+            {
+              "offset": "222e",
+              "instruction": "mov    $0x6,%edi",
+              "sampled_cycles": 19911086
+            },
+            {
+              "offset": "2233",
+              "instruction": "mov    %edi,-0x20(%rbp)",
+              "sampled_cycles": 14226834
+            },
+            {
+              "offset": "2236",
+              "instruction": "mov    %rbp,%rsi",
+              "sampled_cycles": 195699950
+            },
+            {
+              "offset": "2239",
+              "instruction": "add    $0xffffffffffffffe0,%rsi",
+              "sampled_cycles": 40021400
+            },
+            {
+              "offset": "223d",
+              "instruction": "movabs $0xffff88c80415a800,%rdi",
+              "sampled_cycles": 19322239
+            }
+          ],
+          "rsp_rbp_address_operand_instructions": 2
+        },
+        {
+          "offset": "0x980",
+          "end": "0x9c0",
+          "instruction_count": 17,
+          "period_cycles": 379042124,
+          "cycles_per_measured_entry": 25.600850637258635,
+          "samples": 20,
+          "assembly": [
+            {
+              "offset": "980",
+              "instruction": "mov    %rax,%rdi",
+              "sampled_cycles": 60674188
+            },
+            {
+              "offset": "983",
+              "instruction": "call   0xffffffffa24b89f0",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "988",
+              "instruction": "test   %rax,%rax",
+              "sampled_cycles": 20089802
+            },
+            {
+              "offset": "98b",
+              "instruction": "je     0xffffffffc0602b8d",
+              "sampled_cycles": 20010080
+            },
+            {
+              "offset": "991",
+              "instruction": "mov    -0x118(%rbp),%rdi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "998",
+              "instruction": "and    $0xffff,%rdi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "99f",
+              "instruction": "movzwq 0x0(%rax),%rsi",
+              "sampled_cycles": 57430914
+            },
+            {
+              "offset": "9a4",
+              "instruction": "mov    -0x60(%rbp),%r13d",
+              "sampled_cycles": 19506929
+            },
+            {
+              "offset": "9a8",
+              "instruction": "cmp    %rdi,%rsi",
+              "sampled_cycles": 90188805
+            },
+            {
+              "offset": "9ab",
+              "instruction": "ja     0xffffffffc060308f",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "9ad",
+              "instruction": "mov    %r13,%rdx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "9b0",
+              "instruction": "add    $0x1,%rdx",
+              "sampled_cycles": 40023063
+            },
+            {
+              "offset": "9b4",
+              "instruction": "mov    %rdx,%rbx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "9b7",
+              "instruction": "cmp    %rdi,%rsi",
+              "sampled_cycles": 19059211
+            },
+            {
+              "offset": "9ba",
+              "instruction": "ja     0xffffffffc0603097",
+              "sampled_cycles": 52059132
+            },
+            {
+              "offset": "9bc",
+              "instruction": "mov    %r15,%r13",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "9bf",
+              "instruction": "mov    %r13,%rdi",
+              "sampled_cycles": 0
+            }
+          ],
+          "rsp_rbp_address_operand_instructions": 2
+        },
+        {
+          "offset": "0x0",
+          "end": "0x40",
+          "instruction_count": 22,
+          "period_cycles": 377062513,
+          "cycles_per_measured_entry": 25.467145905457176,
+          "samples": 19,
+          "assembly": [
+            {
+              "offset": "0",
+              "instruction": "nopl   0x0(%rax,%rax,1)",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "5",
+              "instruction": "xor    %rax,%rax",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "8",
+              "instruction": "push   %rbp",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "9",
+              "instruction": "mov    %rsp,%rbp",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "c",
+              "instruction": "sub    $0x158,%rsp",
+              "sampled_cycles": 78969871
+            },
+            {
+              "offset": "13",
+              "instruction": "cmp    $0x21,%rax",
+              "sampled_cycles": 19461731
+            },
+            {
+              "offset": "17",
+              "instruction": "ja     0xffffffffc06026f7",
+              "sampled_cycles": 20055755
+            },
+            {
+              "offset": "19",
+              "instruction": "push   %rax",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "1a",
+              "instruction": "mov    %rsp,%rax",
+              "sampled_cycles": 39106681
+            },
+            {
+              "offset": "1d",
+              "instruction": "jmp    0xffffffffc06026f8",
+              "sampled_cycles": 20239062
+            },
+            {
+              "offset": "1f",
+              "instruction": "push   %rax",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "20",
+              "instruction": "push   %rax",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "21",
+              "instruction": "push   %rbx",
+              "sampled_cycles": 40064256
+            },
+            {
+              "offset": "22",
+              "instruction": "push   %r13",
+              "sampled_cycles": 58892139
+            },
+            {
+              "offset": "24",
+              "instruction": "push   %r14",
+              "sampled_cycles": 20211254
+            },
+            {
+              "offset": "26",
+              "instruction": "push   %r15",
+              "sampled_cycles": 19201922
+            },
+            {
+              "offset": "28",
+              "instruction": "mov    %rdi,%r13",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "2b",
+              "instruction": "xor    %edi,%edi",
+              "sampled_cycles": 20095547
+            },
+            {
+              "offset": "2d",
+              "instruction": "mov    %edi,-0x100(%rbp)",
+              "sampled_cycles": 40764295
+            },
+            {
+              "offset": "33",
+              "instruction": "mov    %rbp,%rsi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "36",
+              "instruction": "add    $0xffffffffffffff00,%rsi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "3d",
+              "instruction": "movabs $0xffff88c805c28c00,%rdi",
+              "sampled_cycles": 0
+            }
+          ],
+          "rsp_rbp_address_operand_instructions": 1
+        },
+        {
+          "offset": "0x6c0",
+          "end": "0x700",
+          "instruction_count": 16,
+          "period_cycles": 366881761,
+          "cycles_per_measured_entry": 24.77952863332789,
+          "samples": 19,
+          "assembly": [
+            {
+              "offset": "6c1",
+              "instruction": "mov    %rcx,%r13",
+              "sampled_cycles": 60081833
+            },
+            {
+              "offset": "6c4",
+              "instruction": "add    %rcx,%rdi",
+              "sampled_cycles": 13727571
+            },
+            {
+              "offset": "6c7",
+              "instruction": "mov    $0xfffffffe,%esi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "6cc",
+              "instruction": "and    %rsi,%rdi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "6cf",
+              "instruction": "shr    $1,%rdi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "6d2",
+              "instruction": "mov    %edi,-0x60(%rbp)",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "6d5",
+              "instruction": "mov    %rbp,%rsi",
+              "sampled_cycles": 116739848
+            },
+            {
+              "offset": "6d8",
+              "instruction": "add    $0xffffffffffffffa0,%rsi",
+              "sampled_cycles": 40224233
+            },
+            {
+              "offset": "6dc",
+              "instruction": "mov    %rax,%rdi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "6df",
+              "instruction": "call   0xffffffffa24b89f0",
+              "sampled_cycles": 35630503
+            },
+            {
+              "offset": "6e4",
+              "instruction": "test   %rax,%rax",
+              "sampled_cycles": 20195166
+            },
+            {
+              "offset": "6e7",
+              "instruction": "je     0xffffffffc0602b8d",
+              "sampled_cycles": 20281400
+            },
+            {
+              "offset": "6ed",
+              "instruction": "mov    -0x118(%rbp),%rdx",
+              "sampled_cycles": 19520570
+            },
+            {
+              "offset": "6f4",
+              "instruction": "mov    %rdx,%rdi",
+              "sampled_cycles": 20192491
+            },
+            {
+              "offset": "6f7",
+              "instruction": "and    $0xffff,%rdi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "6fe",
+              "instruction": "movzwq 0x0(%rax),%rsi",
+              "sampled_cycles": 20288146
+            }
+          ],
+          "rsp_rbp_address_operand_instructions": 2
+        }
+      ]
+    },
+    "post_rejit": {
+      "program": "perf_unwind_nat",
+      "program_id": 28,
+      "sha256": "2584d5941b19584ddb6a3eaac50e169fc3b79101c7fcd03d0cab6459d3ab2dba",
+      "bytes_in_body": 30544,
+      "ten_hottest_body_blocks": [
+        {
+          "offset": "0x540",
+          "end": "0x580",
+          "instruction_count": 16,
+          "period_cycles": 1362580800,
+          "cycles_per_measured_entry": 91.81007054638071,
+          "samples": 71,
+          "assembly": [
+            {
+              "offset": "541",
+              "instruction": "jae    0xffffffffc060c259",
+              "sampled_cycles": 13552612
+            },
+            {
+              "offset": "547",
+              "instruction": "lea    0x0(%r13,%rbp,1),%eax",
+              "sampled_cycles": 72478993
+            },
+            {
+              "offset": "54c",
+              "instruction": "shr    $1,%eax",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "54e",
+              "instruction": "mov    %eax,0x10(%rsp)",
+              "sampled_cycles": 20076063
+            },
+            {
+              "offset": "552",
+              "instruction": "lea    0x10(%rsp),%rsi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "557",
+              "instruction": "mov    %r15,%rdi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "55a",
+              "instruction": "call   0xffffffffc06130a4",
+              "sampled_cycles": 11375518
+            },
+            {
+              "offset": "55f",
+              "instruction": "test   %rax,%rax",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "562",
+              "instruction": "je     0xffffffffc060c337",
+              "sampled_cycles": 40565899
+            },
+            {
+              "offset": "568",
+              "instruction": "mov    0x10(%rsp),%ecx",
+              "sampled_cycles": 141406606
+            },
+            {
+              "offset": "56c",
+              "instruction": "mov    0x68(%rsp),%rdx",
+              "sampled_cycles": 38867850
+            },
+            {
+              "offset": "571",
+              "instruction": "cmp    %dx,(%rax)",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "574",
+              "instruction": "lea    0x1(%rcx),%r12d",
+              "sampled_cycles": 945161057
+            },
+            {
+              "offset": "578",
+              "instruction": "cmova  %r13d,%r12d",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "57c",
+              "instruction": "cmova  %ecx,%ebp",
+              "sampled_cycles": 40291517
+            },
+            {
+              "offset": "57f",
+              "instruction": "cmp    %ebp,%r12d",
+              "sampled_cycles": 38804685
+            }
+          ],
+          "rsp_rbp_address_operand_instructions": 4
+        },
+        {
+          "offset": "0x600",
+          "end": "0x640",
+          "instruction_count": 16,
+          "period_cycles": 1052548214,
+          "cycles_per_measured_entry": 70.92021682736687,
+          "samples": 55,
+          "assembly": [
+            {
+              "offset": "600",
+              "instruction": "cmp    %ebp,%r12d",
+              "sampled_cycles": 20298836
+            },
+            {
+              "offset": "603",
+              "instruction": "jae    0xffffffffc060c259",
+              "sampled_cycles": 56601808
+            },
+            {
+              "offset": "609",
+              "instruction": "lea    (%r12,%rbp,1),%eax",
+              "sampled_cycles": 174212607
+            },
+            {
+              "offset": "60d",
+              "instruction": "shr    $1,%eax",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "60f",
+              "instruction": "mov    %eax,0x10(%rsp)",
+              "sampled_cycles": 20217674
+            },
+            {
+              "offset": "613",
+              "instruction": "lea    0x10(%rsp),%rsi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "618",
+              "instruction": "mov    %r15,%rdi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "61b",
+              "instruction": "call   0xffffffffc06130a4",
+              "sampled_cycles": 19215036
+            },
+            {
+              "offset": "620",
+              "instruction": "test   %rax,%rax",
+              "sampled_cycles": 20006827
+            },
+            {
+              "offset": "623",
+              "instruction": "je     0xffffffffc060c337",
+              "sampled_cycles": 19518584
+            },
+            {
+              "offset": "629",
+              "instruction": "mov    0x10(%rsp),%ecx",
+              "sampled_cycles": 98811875
+            },
+            {
+              "offset": "62d",
+              "instruction": "mov    0x68(%rsp),%rdx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "632",
+              "instruction": "cmp    %dx,(%rax)",
+              "sampled_cycles": 20212909
+            },
+            {
+              "offset": "635",
+              "instruction": "lea    0x1(%rcx),%r13d",
+              "sampled_cycles": 431985147
+            },
+            {
+              "offset": "639",
+              "instruction": "cmova  %r12d,%r13d",
+              "sampled_cycles": 20153192
+            },
+            {
+              "offset": "63d",
+              "instruction": "cmova  %ecx,%ebp",
+              "sampled_cycles": 151313719
+            }
+          ],
+          "rsp_rbp_address_operand_instructions": 4
+        },
+        {
+          "offset": "0x3e40",
+          "end": "0x3e80",
+          "instruction_count": 16,
+          "period_cycles": 1030653323,
+          "cycles_per_measured_entry": 69.44494909475586,
+          "samples": 53,
+          "assembly": [
+            {
+              "offset": "3e41",
+              "instruction": "mov    0x58(%rsp),%rdi",
+              "sampled_cycles": 16788814
+            },
+            {
+              "offset": "3e46",
+              "instruction": "call   0xffffffffc06130a4",
+              "sampled_cycles": 9979478
+            },
+            {
+              "offset": "3e4b",
+              "instruction": "test   %rax,%rax",
+              "sampled_cycles": 39182701
+            },
+            {
+              "offset": "3e4e",
+              "instruction": "je     0xffffffffc0611c85",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "3e54",
+              "instruction": "mov    0x10(%rsp),%ecx",
+              "sampled_cycles": 20255416
+            },
+            {
+              "offset": "3e58",
+              "instruction": "mov    0x50(%rsp),%rdx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "3e5d",
+              "instruction": "cmp    %dx,(%rax)",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "3e60",
+              "instruction": "lea    0x1(%rcx),%ebp",
+              "sampled_cycles": 843657697
+            },
+            {
+              "offset": "3e63",
+              "instruction": "cmova  %r13d,%ebp",
+              "sampled_cycles": 40437138
+            },
+            {
+              "offset": "3e67",
+              "instruction": "mov    0x8(%rsp),%rdx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "3e6c",
+              "instruction": "cmova  %ecx,%edx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "3e6f",
+              "instruction": "mov    %rdx,%rax",
+              "sampled_cycles": 18582048
+            },
+            {
+              "offset": "3e72",
+              "instruction": "mov    %rdx,0x8(%rsp)",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "3e77",
+              "instruction": "cmp    %edx,%ebp",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "3e79",
+              "instruction": "jae    0xffffffffc060fc44",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "3e7f",
+              "instruction": "mov    0x8(%rsp),%rax",
+              "sampled_cycles": 41770031
+            }
+          ],
+          "rsp_rbp_address_operand_instructions": 6
+        },
+        {
+          "offset": "0x580",
+          "end": "0x5c0",
+          "instruction_count": 16,
+          "period_cycles": 1010873621,
+          "cycles_per_measured_entry": 68.11220182868078,
+          "samples": 54,
+          "assembly": [
+            {
+              "offset": "582",
+              "instruction": "jae    0xffffffffc060c259",
+              "sampled_cycles": 20301046
+            },
+            {
+              "offset": "588",
+              "instruction": "lea    (%r12,%rbp,1),%eax",
+              "sampled_cycles": 112413475
+            },
+            {
+              "offset": "58c",
+              "instruction": "shr    $1,%eax",
+              "sampled_cycles": 60453620
+            },
+            {
+              "offset": "58e",
+              "instruction": "mov    %eax,0x10(%rsp)",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "592",
+              "instruction": "lea    0x10(%rsp),%rsi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "597",
+              "instruction": "mov    %r15,%rdi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "59a",
+              "instruction": "call   0xffffffffc06130a4",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "59f",
+              "instruction": "test   %rax,%rax",
+              "sampled_cycles": 39401769
+            },
+            {
+              "offset": "5a2",
+              "instruction": "je     0xffffffffc060c337",
+              "sampled_cycles": 20213469
+            },
+            {
+              "offset": "5a8",
+              "instruction": "mov    0x10(%rsp),%ecx",
+              "sampled_cycles": 76265211
+            },
+            {
+              "offset": "5ac",
+              "instruction": "mov    0x68(%rsp),%rdx",
+              "sampled_cycles": 20097051
+            },
+            {
+              "offset": "5b1",
+              "instruction": "cmp    %dx,(%rax)",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "5b4",
+              "instruction": "lea    0x1(%rcx),%r13d",
+              "sampled_cycles": 602658504
+            },
+            {
+              "offset": "5b8",
+              "instruction": "cmova  %r12d,%r13d",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "5bc",
+              "instruction": "cmova  %ecx,%ebp",
+              "sampled_cycles": 59069476
+            },
+            {
+              "offset": "5bf",
+              "instruction": "cmp    %ebp,%r13d",
+              "sampled_cycles": 0
+            }
+          ],
+          "rsp_rbp_address_operand_instructions": 4
+        },
+        {
+          "offset": "0xb00",
+          "end": "0xb40",
+          "instruction_count": 14,
+          "period_cycles": 973500066,
+          "cycles_per_measured_entry": 65.59398880152008,
+          "samples": 51,
+          "assembly": [
+            {
+              "offset": "b03",
+              "instruction": "add    %rdi,%rax",
+              "sampled_cycles": 20219294
+            },
+            {
+              "offset": "b06",
+              "instruction": "add    $0x130,%rax",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "b0c",
+              "instruction": "jmp    0xffffffffc060c464",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "b0e",
+              "instruction": "xor    %eax,%eax",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "b10",
+              "instruction": "test   %rax,%rax",
+              "sampled_cycles": 36740601
+            },
+            {
+              "offset": "b13",
+              "instruction": "je     0xffffffffc0611dea",
+              "sampled_cycles": 54891470
+            },
+            {
+              "offset": "b19",
+              "instruction": "mov    0x4(%rax),%r13d",
+              "sampled_cycles": 113927326
+            },
+            {
+              "offset": "b1d",
+              "instruction": "movzbl 0x2(%rax),%ecx",
+              "sampled_cycles": 688515653
+            },
+            {
+              "offset": "b21",
+              "instruction": "test   %cl,%cl",
+              "sampled_cycles": 59205722
+            },
+            {
+              "offset": "b23",
+              "instruction": "mov    %r15,0x98(%rsp)",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "b2b",
+              "instruction": "je     0xffffffffc060c5da",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "b31",
+              "instruction": "movabs $0xffff88c801235758,%rdx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "b3b",
+              "instruction": "cmpl   $0x0,(%rdx)",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "b3e",
+              "instruction": "jne    0xffffffffc060cbe7",
+              "sampled_cycles": 0
+            }
+          ],
+          "rsp_rbp_address_operand_instructions": 1
+        },
+        {
+          "offset": "0x5c0",
+          "end": "0x600",
+          "instruction_count": 15,
+          "period_cycles": 932984774,
+          "cycles_per_measured_entry": 62.8640869735131,
+          "samples": 49,
+          "assembly": [
+            {
+              "offset": "5c2",
+              "instruction": "jae    0xffffffffc060c259",
+              "sampled_cycles": 69541706
+            },
+            {
+              "offset": "5c8",
+              "instruction": "lea    0x0(%r13,%rbp,1),%eax",
+              "sampled_cycles": 137847273
+            },
+            {
+              "offset": "5cd",
+              "instruction": "shr    $1,%eax",
+              "sampled_cycles": 56515993
+            },
+            {
+              "offset": "5cf",
+              "instruction": "mov    %eax,0x10(%rsp)",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "5d3",
+              "instruction": "lea    0x10(%rsp),%rsi",
+              "sampled_cycles": 20235428
+            },
+            {
+              "offset": "5d8",
+              "instruction": "mov    %r15,%rdi",
+              "sampled_cycles": 53998044
+            },
+            {
+              "offset": "5db",
+              "instruction": "call   0xffffffffc06130a4",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "5e0",
+              "instruction": "test   %rax,%rax",
+              "sampled_cycles": 20258399
+            },
+            {
+              "offset": "5e3",
+              "instruction": "je     0xffffffffc060c337",
+              "sampled_cycles": 16535160
+            },
+            {
+              "offset": "5e9",
+              "instruction": "mov    0x10(%rsp),%ecx",
+              "sampled_cycles": 56447532
+            },
+            {
+              "offset": "5ed",
+              "instruction": "mov    0x68(%rsp),%rdx",
+              "sampled_cycles": 58795391
+            },
+            {
+              "offset": "5f2",
+              "instruction": "cmp    %dx,(%rax)",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "5f5",
+              "instruction": "lea    0x1(%rcx),%r12d",
+              "sampled_cycles": 369389549
+            },
+            {
+              "offset": "5f9",
+              "instruction": "cmova  %r13d,%r12d",
+              "sampled_cycles": 20226834
+            },
+            {
+              "offset": "5fd",
+              "instruction": "cmova  %ecx,%ebp",
+              "sampled_cycles": 53193465
+            }
+          ],
+          "rsp_rbp_address_operand_instructions": 4
+        },
+        {
+          "offset": "0x2380",
+          "end": "0x23c0",
+          "instruction_count": 15,
+          "period_cycles": 883937491,
+          "cycles_per_measured_entry": 59.55930349767204,
+          "samples": 46,
+          "assembly": [
+            {
+              "offset": "2380",
+              "instruction": "mov    0x58(%rsp),%rdi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "2385",
+              "instruction": "call   0xffffffffc06130a4",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "238a",
+              "instruction": "test   %rax,%rax",
+              "sampled_cycles": 20166670
+            },
+            {
+              "offset": "238d",
+              "instruction": "je     0xffffffffc0611c85",
+              "sampled_cycles": 79305565
+            },
+            {
+              "offset": "2393",
+              "instruction": "mov    0x10(%rsp),%ecx",
+              "sampled_cycles": 39853249
+            },
+            {
+              "offset": "2397",
+              "instruction": "mov    0x50(%rsp),%rdx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "239c",
+              "instruction": "cmp    %dx,(%rax)",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "239f",
+              "instruction": "lea    0x1(%rcx),%r13d",
+              "sampled_cycles": 551300834
+            },
+            {
+              "offset": "23a3",
+              "instruction": "cmova  %ebp,%r13d",
+              "sampled_cycles": 17051350
+            },
+            {
+              "offset": "23a7",
+              "instruction": "mov    0x8(%rsp),%rdx",
+              "sampled_cycles": 115973297
+            },
+            {
+              "offset": "23ac",
+              "instruction": "cmova  %ecx,%edx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "23af",
+              "instruction": "mov    %rdx,%rax",
+              "sampled_cycles": 40384130
+            },
+            {
+              "offset": "23b2",
+              "instruction": "mov    %rdx,0x8(%rsp)",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "23b7",
+              "instruction": "cmp    %edx,%r13d",
+              "sampled_cycles": 19902396
+            },
+            {
+              "offset": "23ba",
+              "instruction": "jae    0xffffffffc060e090",
+              "sampled_cycles": 0
+            }
+          ],
+          "rsp_rbp_address_operand_instructions": 5
+        },
+        {
+          "offset": "0x3e80",
+          "end": "0x3ec0",
+          "instruction_count": 15,
+          "period_cycles": 820674156,
+          "cycles_per_measured_entry": 55.29664894584706,
+          "samples": 42,
+          "assembly": [
+            {
+              "offset": "3e84",
+              "instruction": "add    %ebp,%eax",
+              "sampled_cycles": 20184295
+            },
+            {
+              "offset": "3e86",
+              "instruction": "shr    $1,%eax",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "3e88",
+              "instruction": "mov    %eax,0x10(%rsp)",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "3e8c",
+              "instruction": "lea    0x10(%rsp),%rsi",
+              "sampled_cycles": 20106982
+            },
+            {
+              "offset": "3e91",
+              "instruction": "mov    0x58(%rsp),%rdi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "3e96",
+              "instruction": "call   0xffffffffc06130a4",
+              "sampled_cycles": 40000117
+            },
+            {
+              "offset": "3e9b",
+              "instruction": "test   %rax,%rax",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "3e9e",
+              "instruction": "je     0xffffffffc0611c85",
+              "sampled_cycles": 59250340
+            },
+            {
+              "offset": "3ea4",
+              "instruction": "mov    0x10(%rsp),%ecx",
+              "sampled_cycles": 60209516
+            },
+            {
+              "offset": "3ea8",
+              "instruction": "mov    0x50(%rsp),%rdx",
+              "sampled_cycles": 19315044
+            },
+            {
+              "offset": "3ead",
+              "instruction": "cmp    %dx,(%rax)",
+              "sampled_cycles": 20150990
+            },
+            {
+              "offset": "3eb0",
+              "instruction": "lea    0x1(%rcx),%r13d",
+              "sampled_cycles": 468292702
+            },
+            {
+              "offset": "3eb4",
+              "instruction": "cmova  %ebp,%r13d",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "3eb8",
+              "instruction": "mov    0x8(%rsp),%rdx",
+              "sampled_cycles": 92880404
+            },
+            {
+              "offset": "3ebd",
+              "instruction": "cmova  %ecx,%edx",
+              "sampled_cycles": 20283766
+            }
+          ],
+          "rsp_rbp_address_operand_instructions": 6
+        },
+        {
+          "offset": "0x500",
+          "end": "0x540",
+          "instruction_count": 16,
+          "period_cycles": 812276064,
+          "cycles_per_measured_entry": 54.730789351337144,
+          "samples": 42,
+          "assembly": [
+            {
+              "offset": "501",
+              "instruction": "jne    0xffffffffc060caeb",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "507",
+              "instruction": "lea    (%r12,%rbp,1),%eax",
+              "sampled_cycles": 13349112
+            },
+            {
+              "offset": "50b",
+              "instruction": "shr    $1,%eax",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "50d",
+              "instruction": "mov    %eax,0x10(%rsp)",
+              "sampled_cycles": 19126989
+            },
+            {
+              "offset": "511",
+              "instruction": "lea    0x10(%rsp),%rsi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "516",
+              "instruction": "mov    %r15,%rdi",
+              "sampled_cycles": 19276278
+            },
+            {
+              "offset": "519",
+              "instruction": "call   0xffffffffc06130a4",
+              "sampled_cycles": 20300207
+            },
+            {
+              "offset": "51e",
+              "instruction": "test   %rax,%rax",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "521",
+              "instruction": "je     0xffffffffc060c337",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "527",
+              "instruction": "mov    0x10(%rsp),%ecx",
+              "sampled_cycles": 39627420
+            },
+            {
+              "offset": "52b",
+              "instruction": "mov    0x68(%rsp),%rdx",
+              "sampled_cycles": 40196976
+            },
+            {
+              "offset": "530",
+              "instruction": "cmp    %dx,(%rax)",
+              "sampled_cycles": 20046475
+            },
+            {
+              "offset": "533",
+              "instruction": "lea    0x1(%rcx),%r13d",
+              "sampled_cycles": 581077668
+            },
+            {
+              "offset": "537",
+              "instruction": "cmova  %r12d,%r13d",
+              "sampled_cycles": 20213368
+            },
+            {
+              "offset": "53b",
+              "instruction": "cmova  %ecx,%ebp",
+              "sampled_cycles": 39061571
+            },
+            {
+              "offset": "53e",
+              "instruction": "cmp    %ebp,%r13d",
+              "sampled_cycles": 0
+            }
+          ],
+          "rsp_rbp_address_operand_instructions": 4
+        },
+        {
+          "offset": "0x680",
+          "end": "0x6c0",
+          "instruction_count": 16,
+          "period_cycles": 790945911,
+          "cycles_per_measured_entry": 53.293573406642274,
+          "samples": 42,
+          "assembly": [
+            {
+              "offset": "681",
+              "instruction": "cmp    %ebp,%r12d",
+              "sampled_cycles": 20114315
+            },
+            {
+              "offset": "684",
+              "instruction": "jae    0xffffffffc060c259",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "68a",
+              "instruction": "lea    (%r12,%rbp,1),%eax",
+              "sampled_cycles": 146109594
+            },
+            {
+              "offset": "68e",
+              "instruction": "shr    $1,%eax",
+              "sampled_cycles": 40320330
+            },
+            {
+              "offset": "690",
+              "instruction": "mov    %eax,0x10(%rsp)",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "694",
+              "instruction": "lea    0x10(%rsp),%rsi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "699",
+              "instruction": "mov    %r15,%rdi",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "69c",
+              "instruction": "call   0xffffffffc06130a4",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "6a1",
+              "instruction": "test   %rax,%rax",
+              "sampled_cycles": 20166352
+            },
+            {
+              "offset": "6a4",
+              "instruction": "je     0xffffffffc060c337",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "6aa",
+              "instruction": "mov    0x10(%rsp),%ecx",
+              "sampled_cycles": 101062944
+            },
+            {
+              "offset": "6ae",
+              "instruction": "mov    0x68(%rsp),%rdx",
+              "sampled_cycles": 0
+            },
+            {
+              "offset": "6b3",
+              "instruction": "cmp    %dx,(%rax)",
+              "sampled_cycles": 20280107
+            },
+            {
+              "offset": "6b6",
+              "instruction": "lea    0x1(%rcx),%r13d",
+              "sampled_cycles": 330529307
+            },
+            {
+              "offset": "6ba",
+              "instruction": "cmova  %r12d,%r13d",
+              "sampled_cycles": 20201013
+            },
+            {
+              "offset": "6be",
+              "instruction": "cmova  %ecx,%ebp",
+              "sampled_cycles": 92161949
+            }
+          ],
+          "rsp_rbp_address_operand_instructions": 4
+        }
+      ]
+    }
+  },
+  "limits": [
+    "Lists rank body blocks independently for the two arms; same rank/address is NOT a semantic counterpart. Exact source-to-JIT line mapping was not captured in this old profile.",
+    "Frame-address operands are counted; they are NOT proven compiler spills/reloads, especially on BPF JIT stack.",
+    "Period cycles include hardware skid and are normalized by measured entry; no instruction-latency claim.",
+    "RBP can hold a non-stack pointer under -fomit-frame-pointer; these counts describe only RSP/RBP operand syntax, never a demonstrated stack/spill class."
+  ],
+  "next": "Map native postlink offsets back to original DWARF and JIT line-info before labeling counterpart or spill. Current exact assembly and region costs let C progress flags meanwhile."
+}
