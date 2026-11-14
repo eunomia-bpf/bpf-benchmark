@@ -31,3 +31,20 @@ Latest combined OTel measurement (all pieces together; corrected source maps and
 Compiler-private scalar spill packing diagnostic (2026-11-14): the actual OTel ctx rejection follows known tag1 stored at fp-388 becoming unconstrained32 on reload. Four sole-kernel load-only cases reproduce it: independent8byte-aligned u32 accepts, upper-half and either paired-half variant reject tail-call scalar ctx. Thus pair-only packing also loses verifier precision and is not a compiler fix. No simulator/ISA/default changes; next investigate spill lifetimes or codegen that keeps scalar slots independent. Receipt: scalar-spill-precision-result.json.
 
 Follow-up: all12 matched B backend cases (O2/O3 with deferred/reverse allocation; basic/split-size/rematerialization/loop-IV variants) retain520-byte frames. Conservative CFG spill analysis finds no noninterfering pair (partial writes keep whole old slots live); it does not prove minimum register demand. Two more actual sole-kernel cases show64-bit whole-word store/reload plus half extraction preserves tag1 even when the other half is runtime-unknown. This is a candidate lowering mechanism, not an implemented full compiler transform or OTel-main acceptance. See scalar-spill-codegen-result.json and full verifier logs.
+
+Optional B backend (2026-11-14): `KPROG_BPF_WHOLE_WORD_SPILLS=1` selects
+`kprog/x86/whole_word_spills.py` between physical register allocation and frame
+layout in `trusted_specializer.compile_simulator`; the default value is zero.
+It stores two final compiler-private scalar spills in one aligned word,
+preserves the other half on stores and uses explicit shifts for truncation.
+The fixture's original and corrected programs each match 1,060 actual stock
+kernel executions, including overflow and a live register across a block
+boundary. The initial self-copy counterexample is retained. Default and
+explicit-zero objects equal the previous compiler command byte for byte;
+the optional pipeline also preserves allocated bytes for an independent
+register fixture. Corrected OTel-main acceptance and checked installation are
+the next measurements. Runtime P and the pre-bounds IR used by the checked
+native compiler retain their existing definitions. This is B generation for
+verification feasibility; the combined runtime ratios retain their prior
+scope. Evidence: `whole-word-spill-values/report.md`, and raw
+`20261114-scalar-spill-precision/backend/{result,commands}.json`.

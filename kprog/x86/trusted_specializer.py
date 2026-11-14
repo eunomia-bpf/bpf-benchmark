@@ -73,7 +73,18 @@ def compile_simulator(clang, source: Path, obj: Path, run, *, bounds_compiler=No
         run([clang, *COMPILE_FLAGS, '-emit-llvm', '-c', preprocessed, '-o', initial])
         run([bounds_compiler, initial, '-o', lowered])
         compiled_input = lowered
-    run([clang, *COMPILE_FLAGS, "-c", compiled_input, "-o", obj])
+    spills = os.environ.get('KPROG_BPF_WHOLE_WORD_SPILLS', '0')
+    if spills not in {'0', '1'}:
+        raise ValueError('KPROG_BPF_WHOLE_WORD_SPILLS must be 0 or 1')
+    if spills == '1':
+        before, packed = source.with_suffix('.before.mir'), source.with_suffix('.packed.mir')
+        run([clang, *COMPILE_FLAGS, '-c', compiled_input, '-mllvm',
+             '-stop-before=prologepilog', '-o', before])
+        run([sys.executable, ROOT / 'kprog/x86/whole_word_spills.py', before, packed])
+        run(['llc-18', '-O3', '-march=bpf', '-mcpu=v4', '-bpf-stack-size=4096',
+             '-start-before=prologepilog', '-filetype=obj', packed, '-o', obj])
+    else:
+        run([clang, *COMPILE_FLAGS, "-c", compiled_input, "-o", obj])
 
 
 def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,

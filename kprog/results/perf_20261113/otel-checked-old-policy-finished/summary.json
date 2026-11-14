@@ -1,0 +1,21 @@
+{
+  "started": "2026-11-14T17:06:18.511756+00:00",
+  "command": [
+    "env",
+    "BPFREJIT_SHIM_NATIVE_MANIFEST=/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/manifest-context.json",
+    "python3",
+    "/workspaces/repository/kprog/test/verified_corpus.py",
+    "otelcol-ebpf-profiler/profiling",
+    "1",
+    "10",
+    "1"
+  ],
+  "service": {
+    "ready": true,
+    "arch": 1,
+    "endpoint": "/sys/kernel/debug/bpf_x86_native_lab/specializer"
+  },
+  "returncode": 0,
+  "service_returncode": -15,
+  "finished": "2026-11-14T19:27:15.924340+00:00"
+}

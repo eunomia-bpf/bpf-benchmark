@@ -9,12 +9,15 @@ CODEGEN_ARGS ?=
 REPLAY_ARGS ?=
 REPLAY_BUILD ?= /var/tmp/kprog-tmp/perf/retained-proof-replay
 
-.PHONY: build run analyze codegen whole-word replay values-build values-run
+.PHONY: build run analyze codegen whole-word replay values-build values-run backend-check
+backend-check:
+	taskset -c 18-19 python3 $(ROOT)/kprog/test/check_whole_word_backend.py --output $(OUTPUT) --clang $(ROOT)/kprog/stock-path/bin/clang
+
 values-build:
 	install -d $(OUTPUT)
 	$(CC) -O2 -g -Wall -Wextra -Werror -I$(LIBBPF)/prefix/include $(ROOT)/kprog/test/scalar_spill_values.c $(LIBBPF)/pic-obj/libbpf.a -lelf -lz -o $(OUTPUT)/values-client
 	llc-18 -O3 -march=bpf -mcpu=v4 -verify-machineinstrs -start-before=prologepilog -filetype=obj $(ROOT)/kprog/test/scalar_spill_values.mir -o $(OUTPUT)/original.o
-	python3 $(ROOT)/kprog/test/whole_word_spill_probe.py $(ROOT)/kprog/test/scalar_spill_values.mir $(OUTPUT)/lowered.mir --low 0 --high 1
+	python3 $(ROOT)/kprog/x86/whole_word_spills.py $(ROOT)/kprog/test/scalar_spill_values.mir $(OUTPUT)/lowered.mir
 	llc-18 -O3 -march=bpf -mcpu=v4 -verify-machineinstrs -start-before=prologepilog -filetype=obj $(OUTPUT)/lowered.mir -o $(OUTPUT)/lowered.o
 
 values-run: values-build
@@ -29,7 +32,7 @@ replay:
 
 whole-word:
 	install -d $(OUTPUT)
-	taskset -c 18-19 python3 $(ROOT)/kprog/test/whole_word_spill_probe.py $(MIR) $(OUTPUT)/whole.mir --low $(LOW) --high $(HIGH)
+	taskset -c 18-19 python3 $(ROOT)/kprog/x86/whole_word_spills.py $(MIR) $(OUTPUT)/whole.mir --low $(LOW) --high $(HIGH)
 	taskset -c 18-19 llc-18 -O3 -march=bpf -mcpu=v4 -bpf-stack-size=4096 -verify-machineinstrs -start-before=prologepilog -stop-after=prologepilog $(OUTPUT)/whole.mir -o $(OUTPUT)/after.mir
 	taskset -c 18-19 llc-18 -O3 -march=bpf -mcpu=v4 -bpf-stack-size=4096 -verify-machineinstrs -start-before=prologepilog -filetype=obj $(OUTPUT)/whole.mir -o $(OUTPUT)/whole.o
 

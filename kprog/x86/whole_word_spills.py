@@ -1,6 +1,6 @@
-"""Experimental MIR lowering for two scalar u32 spills into one whole word.
+"""Optional MIR lowering for two scalar u32 spills into one whole word.
 
-No production compiler uses this tool. Inputs must be pre-PEI physical MIR;
+Inputs must be pre-PEI physical MIR;
 all selected slot accesses must be direct STW32/LDW32 at offset zero.
 """
 import argparse
@@ -14,7 +14,11 @@ def registers(line):
 
 
 def lower(path, low, high):
-    head, body = path.read_text().split('body:             |', 1)
+    return lower_text(path.read_text(), low, high)
+
+
+def lower_text(text, low, high):
+    head, body = text.split('body:             |', 1)
     slots = {int(i): (int(n), int(a)) for i, n, a in re.findall(
         r'  - \{ id: (\d+),[^\n]*type: spill-slot,[^\n]*size: (\d+), alignment: (\d+),', head)}
     if low >= high or high != max(slots) or slots[low] != (4, 8) or slots[high] != (4, 8):
@@ -116,15 +120,39 @@ def lower(path, low, high):
     return output, changes
 
 
+def automatic(path):
+    documents = path.read_text().split('\n---\n')
+    records = []
+    for index, document in enumerate(documents):
+        if 'body:             |' not in document:
+            continue
+        head = document.split('body:             |', 1)[0]
+        slots = {int(i): (int(n), int(a)) for i, n, a in re.findall(
+            r'  - \{ id: (\d+),[^\n]*type: spill-slot,[^\n]*size: (\d+), alignment: (\d+),', head)}
+        eligible = sorted(slot for slot, shape in slots.items() if shape == (4, 8))
+        # Other frame shapes keep their existing compiler representation.
+        if len(eligible) < 2 or eligible[-1] != max(slots):
+            continue
+        low, high = eligible[-2:]
+        documents[index], changes = lower_text(document, low, high)
+        records.append(dict(document=index, low=low, high=high, changes=changes))
+    return '\n---\n'.join(documents), records
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mir', type=Path)
     parser.add_argument('output', type=Path)
-    parser.add_argument('--low', type=int, required=True)
-    parser.add_argument('--high', type=int, required=True)
+    parser.add_argument('--low', type=int)
+    parser.add_argument('--high', type=int)
     args = parser.parse_args()
-    output, changes = lower(args.mir, args.low, args.high)
+    if (args.low is None) != (args.high is None):
+        parser.error('--low and --high are supplied together')
+    if args.low is None:
+        output, changes = automatic(args.mir)
+    else:
+        output, changes = lower(args.mir, args.low, args.high)
     args.output.write_text(output)
     args.output.with_suffix('.lowering.json').write_text(json.dumps(dict(
         source=str(args.mir), low=args.low, high=args.high, changes=changes,
-        scope='Run-only compiler prototype; requires actual stock verification. No native execution claim.'), indent=2) + '\n')
+        scope='Compiler-private spill storage transformation; actual stock verification follows.'), indent=2) + '\n')
