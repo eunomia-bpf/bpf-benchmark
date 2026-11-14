@@ -205,6 +205,12 @@ SCALE_SIZES ?= 100 1000 10000 100000
 SCALE_OUT ?= ../results/kprog_fidelity_20261106/scale/x86
 SCALE_RECORDS ?= $(SCALE_BUILD)
 SCALE_ARGS ?=
+SCALE_WAIT_PID ?= 0
+SCALE_BATCH_ARGS ?=
+.PHONY: scale-stock-batch
+scale-stock-batch:
+	$(PYTHON) scale_batch.py --build $(abspath $(SCALE_BUILD)) --records $(abspath $(SCALE_RECORDS)) --out $(abspath $(SCALE_OUT)) --wait-pid $(SCALE_WAIT_PID) $(SCALE_BATCH_ARGS)
+
 .PHONY: scale-records-test
 scale-records-test:
 	$(PYTHON) -m unittest test_scale_records

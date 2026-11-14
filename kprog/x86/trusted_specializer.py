@@ -67,6 +67,8 @@ def compile_simulator(clang, source: Path, obj: Path, run, *, bounds_compiler=No
             if number == 0:
                 joined.write(head)
             joined.write(body)
+            expanded.unlink()
+            piece.unlink()
     compiled_input = preprocessed
     context_loads = os.environ.get('KPROG_BPF_CONTEXT_LOADS', '0')
     if context_loads not in {'0', '1'}:
