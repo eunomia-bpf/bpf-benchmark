@@ -51,6 +51,12 @@ CENSUS_PUBLISH_BASE ?= /workspaces/kprog-raw/verified/20261114-kfunc-refresh/cum
 CENSUS_PUBLISH_QUEUES ?= $(CENSUS_CHECKPOINT_OUTPUT)/queue-0/outcomes.jsonl $(CENSUS_CHECKPOINT_OUTPUT)/queue-1/outcomes.jsonl $(CENSUS_CHECKPOINT_OUTPUT)/queue-2/outcomes.jsonl
 CENSUS_PUBLISH_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-integration-checkpoint/publication
 CENSUS_PUBLISH_DESTINATION ?= $(REPO_ROOT)/kprog/results/verified_20261114/census-checkpoint-complete
+VERIFIED_APP_RAW ?= /workspaces/kprog-raw/verified/20261114-integrated-bcc
+VERIFIED_APP ?= bcc/set
+VERIFIED_APP_CORPUS ?= $(REPO_ROOT)/corpus/results/x86_kvm_corpus_20261114_043432_568815
+VERIFIED_APP_CAPTURES ?= $(REPO_ROOT)/corpus/results/verified-captures-07xostih
+VERIFIED_APP_PREFIX ?= $(REPO_ROOT)/kprog/results/verified_20261114/integrated-bcc
+VERIFIED_APP_EXIT_FILE ?= exit-code
 KFUNC_BUILD ?= /var/tmp/kprog-tmp/verified/kfunc
 KFUNC_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/host
 KFUNC_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/kernel
@@ -391,7 +397,14 @@ shared-image-restore:
 	docker image load -i "$(REPO_ROOT)/.cache/container-images/x86_64-runner-runtime.image.tar"
 
 .PHONY: shared-base-refresh shared-base-finalize shared-base-modules-repair shared-module-syntax
-.PHONY: resident-census-checkpoint resident-census-publish resident-census-publish-test
+.PHONY: resident-census-checkpoint resident-census-publish resident-census-publish-test verified-app-collect verified-app-collect-test
+verified-app-collect:
+	python3 ../test/collect_verified_app.py --raw "$(VERIFIED_APP_RAW)" --corpus "$(VERIFIED_APP_CORPUS)" \
+		--captures "$(VERIFIED_APP_CAPTURES)" --prefix "$(VERIFIED_APP_PREFIX)" --exit-file "$(VERIFIED_APP_EXIT_FILE)" --app "$(VERIFIED_APP)"
+
+verified-app-collect-test:
+	python3 ../test/test_collect_verified_app.py
+
 resident-census-publish:
 	python3 ../test/publish_checkpoint_census.py --base "$(CENSUS_PUBLISH_BASE)" \
 		$(foreach journal,$(CENSUS_PUBLISH_QUEUES),--queue "$(journal)") \
