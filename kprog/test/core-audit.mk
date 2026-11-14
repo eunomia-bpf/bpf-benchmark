@@ -8,6 +8,7 @@ LIBBPF := $(ROOT)/runner/build-llvmbpf/vendor/libbpf
 REFERENCE_ARGS ?=
 TARGET ?= $(KDIR)/vmlinux
 AUDIT_ARGS ?=
+CORE_COMPILER := /var/tmp/kprog-tmp/perf/core-ir/core-ir-lower
 
 $(BUILD)/core-reference: $(ROOT)/kprog/test/core_relocation_reference.c
 	install -d $(BUILD)
@@ -32,3 +33,10 @@ macro-policy:
 	install -d $(BUILD) $(OUTPUT)
 	$(CC) -O2 -Wall -Wextra -Werror $(ROOT)/kprog/test/core_macro_policy.c -o $(BUILD)/macro-policy
 	$(BUILD)/macro-policy > $(OUTPUT)/macro-policy.json
+
+$(CORE_COMPILER): $(ROOT)/kprog/build/core-ir-lower.cpp
+	install -d $(dir $@)
+	taskset -c 19 prlimit --as=8589934592 -- $(CXX) $$(llvm-config-18 --cxxflags) -std=c++17 -Wall -Wextra -Wno-unused-parameter -I$(ROOT)/vendor/libbpf/src -I$(ROOT)/vendor/libbpf/include/uapi $< -o $@ $(LIBBPF)/pic-obj/libbpf.a -lelf -lz $$(llvm-config-18 --ldflags --libs core irreader bitwriter passes --system-libs)
+
+.PHONY: core-compiler
+core-compiler: $(CORE_COMPILER)
