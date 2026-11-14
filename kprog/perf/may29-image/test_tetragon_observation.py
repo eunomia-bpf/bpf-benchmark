@@ -10,6 +10,19 @@ SPEC.loader.exec_module(OBS)
 
 
 class MeasurementClocks(unittest.TestCase):
+    def test_selected_app_log_is_not_replaced_by_tetragon_log(self):
+        with tempfile.TemporaryDirectory() as directory:
+            run = Path(directory)
+            logs = run / 'details/shim-logs'
+            logs.mkdir(parents=True)
+            for phase in ['baseline', 'post_rejit']:
+                (logs / ('otelcol-ebpf-profiler__profiling.' + phase + '.log')).write_text(
+                    '[20.0 pid=17 tid=18] socket: cmd=measure_start len=25\n'
+                    '[30.0 pid=17 tid=18] socket: cmd=measure_finish len=26\n')
+            rows = OBS.measurement_intervals(run, 'otelcol-ebpf-profiler__profiling')
+        self.assertEqual([row['phase'] for row in rows], ['baseline', 'post_rejit'])
+        self.assertEqual([row['pid'] for row in rows], ['17', '17'])
+
     def test_pid_and_read_bounds_determine_phase_not_snapshot_label(self):
         with tempfile.TemporaryDirectory() as directory:
             run = Path(directory)

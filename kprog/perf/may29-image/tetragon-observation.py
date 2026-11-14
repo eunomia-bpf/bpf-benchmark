@@ -16,12 +16,12 @@ def read_json(path):
     return json.JSONDecoder().raw_decode(path.read_text())[0]
 
 
-def measurement_intervals(run):
+def measurement_intervals(run, app='tetragon__observer'):
     intervals = []
     pattern = re.compile(r'^\[([0-9.]+) pid=(\d+) tid=\d+\] socket: cmd=(measure_start|measure_finish) ')
     for phase in ('baseline', 'post_rejit'):
         pending = {}
-        path = run / f'details/shim-logs/tetragon__observer.{phase}.log'
+        path = run / f'details/shim-logs/{app}.{phase}.log'
         for line in path.read_text().splitlines():
             match = pattern.match(line)
             if not match:
