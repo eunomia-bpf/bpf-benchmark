@@ -1029,8 +1029,19 @@ The descriptor contract requires matching byte/word views of the same arena,
 complete fact cells for the producer capacity, and separate live storage for
 registers, descriptors and facts. M5 must prove this field/cell relation, including
 scalar-list versus loop transport; these finite tests do not prove refinement.
-ARM extraction still uses arena160 with bias96; parameterizing that profile
-remains M4 work before M5's all-program scope can be established.
+The ARM [address binding](c/Arm64Address.h) also takes capacity and signed bias
+for its three writing roots. One generic object matches the canonical bodies at
+(capacity,bias) profiles(1,0), (7,-3), (9,4), (160,96), (200,160) and (376,280):
+245,760 executions each, with all256 tags, full-width register selectors, cache
+validities0/1/2/255, released bytes, packed-tag padding, and input identities/order
+observed. These are storage fixtures, not measurements of ARM applications.
+Fixed160-capacity, fixed96-bias and zero-unspecified-input mutants fail. The
+59,904-case independent cache/SP oracle now supplies and checks the production
+kind6 stream rather than the old host-only zero choice; its cache request order
+and frame assertions remain. `make clight`, deterministic regeneration and130
+component Lake jobs pass with standard axioms only. The focused production ARM
+fixture retains identical allocated bytes and386 relocations; whole-app ARM
+parity and M5's universal representation proofs remain open.
 
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight

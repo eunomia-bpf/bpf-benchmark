@@ -4,14 +4,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../c/Arm64Address.c"
+#define ARM64_SIM_ENABLE_STACK 1
+#include "../c/Arm64Address.h"
 
 static const __u64 input_sp = 0xfedcba9876543210ULL;
 static const __u64 input_return = 0x123456789abcdef0ULL;
 static unsigned requests[4], request_count;
 static unsigned long cases;
+static __u64 free_state;
+static unsigned free_count;
+static __u64 next_free(__u64 *state)
+{
+	*state ^= *state << 13; *state ^= *state >> 7; *state ^= *state << 17;
+	return *state;
+}
 unsigned long native_lab_entry_input(unsigned kind)
 {
+	if (kind == NATIVE_LAB_INPUT_UNSPECIFIED) { ++free_count; return next_free(&free_state); }
 	if (request_count == 4 || (kind != 1 && kind != 3)) abort();
 	requests[request_count++] = kind;
 	return kind == 1 ? input_sp : input_return;
@@ -104,8 +113,10 @@ int main(void)
 		struct kprog_arm64_coordinates s = initial(valid[si], valid[ri], ti), want = s;
 		__u64 sp_base = valid[si] ? s.sp_base : input_sp, ret_base = valid[ri] ? s.return_base : input_return;
 		__u64 pointer = (__u64)targets[ti] + (tag == 4 ? 0 : sp_base) - (tag == 10 ? ret_base : 0);
-		request_count = 0;
-		kprog_arm64_write_ptr(&s, regs, tags, bytes, stack_tags, 32, (void *)(uintptr_t)pointer, tag);
+		request_count = 0; free_count = 0;
+		__u64 expected_free = free_state = 0xfedcba9876543210ULL ^ tag ^ ti;
+		unsigned expected_count = 0;
+		kprog_arm64_write_ptr(&s, regs, tags, bytes, stack_tags, ARM64_SIM_STACK_BYTES, ARM64_SIM_STACK_BIAS, 32, (void *)(uintptr_t)pointer, tag);
 		unsigned expected_requests[2], count = 0;
 		if (tag == 10 && !valid[ri]) { want.return_base = input_return; want.return_valid = 1; expected_requests[count++] = 3; }
 		if (tag != 4 && !valid[si]) { want.sp_base = input_sp; want.sp_valid = 1; expected_requests[count++] = 1; }
@@ -114,12 +125,15 @@ int main(void)
 		if (targets[ti] > -35) {
 			for (unsigned i = 0; i < sizeof(bytes); ++i) {
 				__s64 offset = (__s64)i - ARM64_SIM_STACK_BIAS;
-				if (offset >= -35 && offset < targets[ti]) expected_bytes[i] = 0;
+				if (offset >= -35 && offset < targets[ti]) {
+					expected_bytes[i] = (__u8)next_free(&expected_free); ++expected_count;
+				}
 			}
 			for (unsigned w = 0; w < KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES); ++w)
 				if ((__s64)(w * 8) - ARM64_SIM_STACK_BIAS < targets[ti] &&
 				    (__s64)(w * 8 + 8) - ARM64_SIM_STACK_BIAS > -35) expected_tags[w] = 0;
 		}
+		check(free_count == expected_count && free_state == expected_free, "released byte input stream");
 		for (unsigned i = 0; i < sizeof(bytes); ++i) check(bytes[i] == expected_bytes[i], "released byte interval");
 		check(!memcmp(stack_tags, expected_tags, sizeof(tag_storage)), "released ghost facts/padding frame");
 		check(!memcmp(before, regs, sizeof(regs)) && !memcmp(before_tags, tags, sizeof(tags)), "SP write register frame"); cases++;

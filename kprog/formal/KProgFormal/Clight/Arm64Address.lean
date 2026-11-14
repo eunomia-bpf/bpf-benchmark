@@ -17,9 +17,9 @@ namespace Info
   def normalized : Bool := true
 end Info
 
-def __2795 : Ident := identOfString "_2795"
-def __2822 : Ident := identOfString "_2822"
-def __2855 : Ident := identOfString "_2855"
+def __2847 : Ident := identOfString "_2847"
+def __2876 : Ident := identOfString "_2876"
+def __2911 : Ident := identOfString "_2911"
 def ___a64_adrp_tag : Ident := identOfString "__a64_adrp_tag"
 def ___a64_cells : Ident := identOfString "__a64_cells"
 def ___a64_l_next : Ident := identOfString "__a64_l_next"
@@ -112,6 +112,8 @@ def ___tv : Ident := identOfString "__tv"
 def _arm64_sim_gpr : Ident := identOfString "arm64_sim_gpr"
 def _arm64_sim_unsupported_opcode : Ident := identOfString "arm64_sim_unsupported_opcode"
 def _b : Ident := identOfString "b"
+def _bias : Ident := identOfString "bias"
+def _capacity : Ident := identOfString "capacity"
 def _coordinates : Ident := identOfString "coordinates"
 def _dst : Ident := identOfString "dst"
 def _imm : Ident := identOfString "imm"
@@ -1760,8 +1762,7 @@ def s_kprog_arm64_write_reg_6 : Stmt :=
                   (Stmt.Ssequence
                     (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
                                         (Expr.Etempvar ___a64_release_i tuint)
-                                        (Expr.Econst_int (Integers.Int.repr 160) tuint)
-                                        tint)
+                                        (Expr.Etempvar _capacity tuint) tint)
                       Stmt.Sskip
                       Stmt.Sbreak)
                     (Stmt.Ssequence
@@ -1769,9 +1770,8 @@ def s_kprog_arm64_write_reg_6 : Stmt :=
                         (Expr.Ebinop Binop.Osub
                           (Expr.Ecast (Expr.Etempvar ___a64_release_i tuint)
                             tlong)
-                          (Expr.Ecast
-                            (Expr.Econst_long (Integers.Int64.repr 96) tlong)
-                            tlong) tlong))
+                          (Expr.Ecast (Expr.Etempvar _bias tlong) tlong)
+                          tlong))
                       (Stmt.Ssequence
                         (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
                                             (Expr.Etempvar ___a64_release_off tlong)
@@ -1796,7 +1796,7 @@ def s_kprog_arm64_write_reg_6 : Stmt :=
                             (Stmt.Ssequence
                               (Stmt.Sset _t'11
                                 (Expr.Efield
-                                  (Expr.Evar ___a64_stack (Ty.Tstruct __2795 noattr))
+                                  (Expr.Evar ___a64_stack (Ty.Tstruct __2847 noattr))
                                   _b (tptr (tvolatile tuchar))))
                               (Stmt.Sbuiltin none
                                 (ExtFun.EF_vstore Chunk.Mint8unsigned)
@@ -1827,7 +1827,7 @@ def s_kprog_arm64_write_reg_6 : Stmt :=
                                         (Expr.Ebinop Binop.Odiv
                                           (Expr.Ebinop Binop.Oadd
                                             (Expr.Ecast
-                                              (Expr.Econst_int (Integers.Int.repr 160) tuint)
+                                              (Expr.Etempvar _capacity tuint)
                                               tuint)
                                             (Expr.Econst_int (Integers.Int.repr 7) tuint)
                                             tuint)
@@ -1844,7 +1844,7 @@ def s_kprog_arm64_write_reg_6 : Stmt :=
                                                 (Expr.Econst_int (Integers.Int.repr 8) tuint)
                                                 tuint) tlong)
                                             (Expr.Ecast
-                                              (Expr.Econst_long (Integers.Int64.repr 96) tlong)
+                                              (Expr.Etempvar _bias tlong)
                                               tlong) tlong)
                                           (Expr.Etempvar ___a64_release_new tlong)
                                           tint)
@@ -1860,8 +1860,7 @@ def s_kprog_arm64_write_reg_6 : Stmt :=
                                       tuint)
                                     (Expr.Econst_int (Integers.Int.repr 8) tuint)
                                     tuint) tlong)
-                                (Expr.Ecast
-                                  (Expr.Econst_long (Integers.Int64.repr 96) tlong)
+                                (Expr.Ecast (Expr.Etempvar _bias tlong)
                                   tlong) tlong)
                               (Expr.Etempvar ___a64_release_old tlong) tint)
                             tbool))
@@ -2020,7 +2019,7 @@ def s_kprog_arm64_write_reg_7 : Stmt :=
                         (Stmt.Ssequence
                           (Stmt.Sassign
                             (Expr.Efield
-                              (Expr.Evar ___a64_stack (Ty.Tstruct __2795 noattr))
+                              (Expr.Evar ___a64_stack (Ty.Tstruct __2847 noattr))
                               _b (tptr (tvolatile tuchar)))
                             (Expr.Etempvar _stack_bytes (tptr (tvolatile tuchar))))
                           (Stmt.Sloop
@@ -2437,12 +2436,13 @@ def f_kprog_arm64_write_reg : Function := {
                 (_registers, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
                 (_tags, (tptr tuchar)),
                 (_stack_bytes, (tptr (tvolatile tuchar))),
-                (_stack_tags, (tptr tuchar)), (_reg, tulong),
-                (_value, tulong), (_width, tuchar)],
+                (_stack_tags, (tptr tuchar)), (_capacity, tuint),
+                (_bias, tlong), (_reg, tulong), (_value, tulong),
+                (_width, tuchar)],
   fn_vars := [(___a64_cells,
                (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31)),
               (___a64_tag_cells, (tarray (tptr tuchar) 31)),
-              (___a64_stack, (Ty.Tstruct __2795 noattr))],
+              (___a64_stack, (Ty.Tstruct __2847 noattr))],
   fn_temps := [(___a64_write_old_sp, tlong), (___a64_l_reg, tulong),
                (___a64_l_next, tulong), (___a64_write_base, tulong),
                (___a64_release_old, tlong), (___a64_release_new, tlong),
@@ -2773,7 +2773,7 @@ def s_kprog_arm64_write_ptr_8 : Stmt :=
 def s_kprog_arm64_write_ptr_9 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'11
-    (Expr.Efield (Expr.Evar ___a64_stack (Ty.Tstruct __2822 noattr)) _b
+    (Expr.Efield (Expr.Evar ___a64_stack (Ty.Tstruct __2876 noattr)) _b
       (tptr (tvolatile tuchar))))
   (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
     [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
@@ -3028,7 +3028,7 @@ def s_kprog_arm64_write_ptr_12 : Stmt :=
                     (Stmt.Ssequence
                       (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
                                           (Expr.Etempvar ___a64_release_i tuint)
-                                          (Expr.Econst_int (Integers.Int.repr 160) tuint)
+                                          (Expr.Etempvar _capacity tuint)
                                           tint)
                         Stmt.Sskip
                         Stmt.Sbreak)
@@ -3037,9 +3037,8 @@ def s_kprog_arm64_write_ptr_12 : Stmt :=
                           (Expr.Ebinop Binop.Osub
                             (Expr.Ecast
                               (Expr.Etempvar ___a64_release_i tuint) tlong)
-                            (Expr.Ecast
-                              (Expr.Econst_long (Integers.Int64.repr 96) tlong)
-                              tlong) tlong))
+                            (Expr.Ecast (Expr.Etempvar _bias tlong) tlong)
+                            tlong))
                         (Stmt.Ssequence
                           (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
                                               (Expr.Etempvar ___a64_release_off tlong)
@@ -3067,7 +3066,7 @@ def s_kprog_arm64_write_ptr_12 : Stmt :=
                                           (Expr.Ebinop Binop.Odiv
                                             (Expr.Ebinop Binop.Oadd
                                               (Expr.Ecast
-                                                (Expr.Econst_int (Integers.Int.repr 160) tuint)
+                                                (Expr.Etempvar _capacity tuint)
                                                 tuint)
                                               (Expr.Econst_int (Integers.Int.repr 7) tuint)
                                               tuint)
@@ -3084,7 +3083,7 @@ def s_kprog_arm64_write_ptr_12 : Stmt :=
                                                   (Expr.Econst_int (Integers.Int.repr 8) tuint)
                                                   tuint) tlong)
                                               (Expr.Ecast
-                                                (Expr.Econst_long (Integers.Int64.repr 96) tlong)
+                                                (Expr.Etempvar _bias tlong)
                                                 tlong) tlong)
                                             (Expr.Etempvar ___a64_release_new tlong)
                                             tint)
@@ -3100,8 +3099,7 @@ def s_kprog_arm64_write_ptr_12 : Stmt :=
                                         tuint)
                                       (Expr.Econst_int (Integers.Int.repr 8) tuint)
                                       tuint) tlong)
-                                  (Expr.Ecast
-                                    (Expr.Econst_long (Integers.Int64.repr 96) tlong)
+                                  (Expr.Ecast (Expr.Etempvar _bias tlong)
                                     tlong) tlong)
                                 (Expr.Etempvar ___a64_release_old tlong)
                                 tint) tbool))
@@ -3255,7 +3253,7 @@ def s_kprog_arm64_write_ptr_13 : Stmt :=
                         (Stmt.Ssequence
                           (Stmt.Sassign
                             (Expr.Efield
-                              (Expr.Evar ___a64_stack (Ty.Tstruct __2822 noattr))
+                              (Expr.Evar ___a64_stack (Ty.Tstruct __2876 noattr))
                               _b (tptr (tvolatile tuchar)))
                             (Expr.Etempvar _stack_bytes (tptr (tvolatile tuchar))))
                           (Stmt.Sloop
@@ -3672,12 +3670,13 @@ def f_kprog_arm64_write_ptr : Function := {
                 (_registers, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
                 (_tags, (tptr tuchar)),
                 (_stack_bytes, (tptr (tvolatile tuchar))),
-                (_stack_tags, (tptr tuchar)), (_reg, tulong),
-                (_value, (tptr tvoid)), (_tag, tuchar)],
+                (_stack_tags, (tptr tuchar)), (_capacity, tuint),
+                (_bias, tlong), (_reg, tulong), (_value, (tptr tvoid)),
+                (_tag, tuchar)],
   fn_vars := [(___a64_cells,
                (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31)),
               (___a64_tag_cells, (tarray (tptr tuchar) 31)),
-              (___a64_stack, (Ty.Tstruct __2822 noattr))],
+              (___a64_stack, (Ty.Tstruct __2876 noattr))],
   fn_temps := [(___a64_write_old_sp, tlong), (___a64_l_reg, tulong),
                (___a64_l_next_ptr, (tptr tvoid)),
                (___a64_l_next_tag, tuchar), (___a64_write_value, tulong),
@@ -4071,7 +4070,7 @@ def s_kprog_arm64_exec_adrp_11 : Stmt :=
     [(Expr.Econst_int (Integers.Int.repr 6) tint)])
   (Stmt.Ssequence
     (Stmt.Sset _t'11
-      (Expr.Efield (Expr.Evar ___a64_stack (Ty.Tstruct __2855 noattr)) _b
+      (Expr.Efield (Expr.Evar ___a64_stack (Ty.Tstruct __2911 noattr)) _b
         (tptr (tvolatile tuchar))))
     (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
       [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
@@ -4094,8 +4093,8 @@ def s_kprog_arm64_exec_adrp_12 : Stmt :=
             (Expr.Ebinop Binop.Omul (Expr.Etempvar ___a64_release_w tuint)
               (Expr.Econst_int (Integers.Int.repr 8) tuint) tuint)
             (Expr.Econst_int (Integers.Int.repr 8) tuint) tuint) tlong)
-        (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 96) tlong) tlong)
-        tlong) (Expr.Etempvar ___a64_release_old tlong) tint) tbool))
+        (Expr.Ecast (Expr.Etempvar _bias tlong) tlong) tlong)
+      (Expr.Etempvar ___a64_release_old tlong) tint) tbool))
 
 def s_kprog_arm64_exec_adrp_13 : Stmt :=
 (Stmt.Ssequence
@@ -4340,7 +4339,7 @@ def s_kprog_arm64_exec_adrp_15 : Stmt :=
                         (Stmt.Ssequence
                           (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
                                               (Expr.Etempvar ___a64_release_i tuint)
-                                              (Expr.Econst_int (Integers.Int.repr 160) tuint)
+                                              (Expr.Etempvar _capacity tuint)
                                               tint)
                             Stmt.Sskip
                             Stmt.Sbreak)
@@ -4350,8 +4349,7 @@ def s_kprog_arm64_exec_adrp_15 : Stmt :=
                                 (Expr.Ecast
                                   (Expr.Etempvar ___a64_release_i tuint)
                                   tlong)
-                                (Expr.Ecast
-                                  (Expr.Econst_long (Integers.Int64.repr 96) tlong)
+                                (Expr.Ecast (Expr.Etempvar _bias tlong)
                                   tlong) tlong))
                             (Stmt.Ssequence
                               s_kprog_arm64_exec_adrp_10
@@ -4373,7 +4371,7 @@ def s_kprog_arm64_exec_adrp_15 : Stmt :=
                                               (Expr.Ebinop Binop.Odiv
                                                 (Expr.Ebinop Binop.Oadd
                                                   (Expr.Ecast
-                                                    (Expr.Econst_int (Integers.Int.repr 160) tuint)
+                                                    (Expr.Etempvar _capacity tuint)
                                                     tuint)
                                                   (Expr.Econst_int (Integers.Int.repr 7) tuint)
                                                   tuint)
@@ -4390,7 +4388,7 @@ def s_kprog_arm64_exec_adrp_15 : Stmt :=
                                                       (Expr.Econst_int (Integers.Int.repr 8) tuint)
                                                       tuint) tlong)
                                                   (Expr.Ecast
-                                                    (Expr.Econst_long (Integers.Int64.repr 96) tlong)
+                                                    (Expr.Etempvar _bias tlong)
                                                     tlong) tlong)
                                                 (Expr.Etempvar ___a64_release_new tlong)
                                                 tint)
@@ -4544,7 +4542,7 @@ def s_kprog_arm64_exec_adrp_16 : Stmt :=
                         (Stmt.Ssequence
                           (Stmt.Sassign
                             (Expr.Efield
-                              (Expr.Evar ___a64_stack (Ty.Tstruct __2855 noattr))
+                              (Expr.Evar ___a64_stack (Ty.Tstruct __2911 noattr))
                               _b (tptr (tvolatile tuchar)))
                             (Expr.Etempvar _stack_bytes (tptr (tvolatile tuchar))))
                           (Stmt.Sloop
@@ -4959,12 +4957,13 @@ def f_kprog_arm64_exec_adrp : Function := {
                 (_registers, (tptr (Ty.Tunion _arm64_sim_gpr noattr))),
                 (_tags, (tptr tuchar)),
                 (_stack_bytes, (tptr (tvolatile tuchar))),
-                (_stack_tags, (tptr tuchar)), (_op, tulong), (_dst, tulong),
+                (_stack_tags, (tptr tuchar)), (_capacity, tuint),
+                (_bias, tlong), (_op, tulong), (_dst, tulong),
                 (_imm, tulong)],
   fn_vars := [(___a64_cells,
                (tarray (tptr (Ty.Tunion _arm64_sim_gpr noattr)) 31)),
               (___a64_tag_cells, (tarray (tptr tuchar) 31)),
-              (___a64_stack, (Ty.Tstruct __2855 noattr))],
+              (___a64_stack, (Ty.Tstruct __2911 noattr))],
   fn_temps := [(___a64_adrp_tag, tuchar), (___kprog_a64_adrp_op, tuchar),
                (___kprog_a64_adrp_tag, tuchar), (___a64_write_old_sp, tlong),
                (___a64_l_reg, tulong), (___a64_l_next_ptr, (tptr tvoid)),
@@ -5191,13 +5190,13 @@ def composites : List CompositeDef :=
     (Member.Member_plain _sp_valid tuchar),
     (Member.Member_plain _return_valid tuchar)]
    noattr),
- (CompositeDef.Composite __2795 SU.Struct
+ (CompositeDef.Composite __2847 SU.Struct
    [(Member.Member_plain _b (tptr (tvolatile tuchar)))]
    noattr),
- (CompositeDef.Composite __2822 SU.Struct
+ (CompositeDef.Composite __2876 SU.Struct
    [(Member.Member_plain _b (tptr (tvolatile tuchar)))]
    noattr),
- (CompositeDef.Composite __2855 SU.Struct
+ (CompositeDef.Composite __2911 SU.Struct
    [(Member.Member_plain _b (tptr (tvolatile tuchar)))]
    noattr)]
 

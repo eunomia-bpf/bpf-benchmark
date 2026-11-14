@@ -1,13 +1,15 @@
 /* Extraction bindings for the production address and register bodies.
  * Cache payloads/validity and stack facts are supplied by the caller. */
 #define ARM64_SIM_ENABLE_STACK 1
-#include "../../arm64/arm64_sim_local_bpf.h"
+#include "Arm64Address.h"
 
-struct kprog_arm64_coordinates {
-	__u64 sp_base, return_base;
-	__s64 stack_offset;
-	__u8 sp_valid, return_valid;
-};
+#undef ARM64_SIM_STACK_BYTES
+#define ARM64_SIM_STACK_BYTES capacity
+#undef ARM64_SIM_STACK_BIAS
+#define ARM64_SIM_STACK_BIAS bias
+#undef ARM64_SIM_L_UNSPECIFIED
+#define ARM64_SIM_L_UNSPECIFIED() NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_UNSPECIFIED)
+
 #define __a64_numeric_sp (coordinates->sp_base)
 #define __a64_numeric_return (coordinates->return_base)
 #define __a64_numeric_sp_valid (coordinates->sp_valid)
@@ -64,6 +66,7 @@ __u64 kprog_arm64_read_reg(struct kprog_arm64_coordinates *coordinates,
 void kprog_arm64_write_reg(struct kprog_arm64_coordinates *coordinates,
                            union arm64_sim_gpr *registers, __u8 *tags,
                            volatile __u8 *stack_bytes, __u8 *stack_tags,
+                           __u32 capacity, __s64 bias,
                            __u64 reg, __u64 value, __u8 width)
 {
 	KPROG_ADDRESS_REGISTERS();
@@ -74,6 +77,7 @@ void kprog_arm64_write_reg(struct kprog_arm64_coordinates *coordinates,
 void kprog_arm64_write_ptr(struct kprog_arm64_coordinates *coordinates,
                            union arm64_sim_gpr *registers, __u8 *tags,
                            volatile __u8 *stack_bytes, __u8 *stack_tags,
+                           __u32 capacity, __s64 bias,
                            __u64 reg, void *value, __u8 tag)
 {
 	KPROG_ADDRESS_REGISTERS();
@@ -84,6 +88,7 @@ void kprog_arm64_write_ptr(struct kprog_arm64_coordinates *coordinates,
 void kprog_arm64_exec_adrp(struct kprog_arm64_coordinates *coordinates,
                       union arm64_sim_gpr *registers, __u8 *tags,
                       volatile __u8 *stack_bytes, __u8 *stack_tags,
+                           __u32 capacity, __s64 bias,
                       __u64 op, __u64 dst, __u64 imm)
 {
 	KPROG_ADDRESS_REGISTERS();
