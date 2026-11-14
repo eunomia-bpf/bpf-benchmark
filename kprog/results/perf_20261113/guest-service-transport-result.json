@@ -1,0 +1,86 @@
+{
+  "recorded": "2026-11-14T13:54:53.234852+00:00",
+  "scope": "Fix launch transport; not application success or a throughput result",
+  "failure": {
+    "raw": "/workspaces/kprog-raw/verified/20261114-cilium-current-model-lto/perf-reordered",
+    "kernel_append_bytes": 2095,
+    "x86_limit_bytes": 2048,
+    "guest_service_files": [],
+    "qemu_cpu_jiffies_after_three_hours": 25,
+    "retired_only_own_qemu": {
+      "recorded": "2026-11-14T13:51:32.015824+00:00",
+      "pid": 381001,
+      "pgid": 379048,
+      "signal": "SIGTERM",
+      "reason": "Proven oversize2095>2048 init argv, zero guest output and only0.25s CPU in3hours. No compiler/app started; retain full old logs.",
+      "cmdline_sha256": "37834e1412cf5d50f1992161a899459dbb659e7f5359e31c095e7992987a718c"
+    },
+    "make_exit_after_retirement": 2
+  },
+  "fix": {
+    "where": "kprog/libnativeloader/Makefile trusted-service-kvm",
+    "how": "Serialize existing Make arguments into shared OUTPUT/guest-service.sh with shlex.join; kernel command line carries only short bash script path. No new configuration or application argument change.",
+    "tests": "3 actual Make dependency/transport tests PASS; long multiline workload with quotes survives actual staged shell execution via VM/inner-Make stand-ins."
+  },
+  "functional_retry": {
+    "launch": {
+      "recorded": "2026-11-14T13:52:57.272231+00:00",
+      "pid": 433950,
+      "command": [
+        "prlimit",
+        "--as=85899345920",
+        "--",
+        "bash",
+        "kprog/test/run_verified_make.sh",
+        "/workspaces/kprog-raw/verified/20261114-cilium-current-model-lto/perf-short-entry/job",
+        "-C",
+        "kprog/libnativeloader",
+        "-o",
+        "trusted-service",
+        "trusted-service-kvm",
+        "BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader",
+        "OUTPUT=/workspaces/kprog-raw/verified/20261114-cilium-current-model-lto/perf-short-entry/control",
+        "VM_CPUS=8",
+        "VM_MEM=64G",
+        "SERVICE_HOST_CPUS=8-15",
+        "VNG_FLAGS=--overlay-rwdir /run --overlay-rwdir /usr/local --rwdir /var/tmp=/var/tmp/kprog-tmp/perf/cilium-short-entry/var-tmp",
+        "SERVICE_RUN=env BPFREJIT_SHIM_NATIVE_MANIFEST=/workspaces/repository/corpus/results/perf-cilium-native-frame-20261114/manifest-context.json python3 /workspaces/repository/kprog/test/verified_corpus.py cilium/agent 1 10 1",
+        "SERVICE_EXECUTION_ARGS=$(CHECKED_COMPILER_SERVICE_ARGS) --native-link /workspaces/kprog-raw/perf/20261114-otel-checked-resume/native-link-on"
+      ],
+      "raw_directory": "/workspaces/kprog-raw/verified/20261114-cilium-current-model-lto/perf-short-entry",
+      "supersedes_failed_boot": "/workspaces/kprog-raw/verified/20261114-cilium-current-model-lto/perf-reordered",
+      "source_manifest": "/workspaces/repository/corpus/results/perf-cilium-native-frame-20261114/manifest-context.json",
+      "source_manifest_sha256": "fb142163f5735ba86576f61cbc75e93ab3280863f09714ccfb776e8f3951439f",
+      "changes": [
+        "Short shared guest-service script fixes2095>2048 boot command",
+        "All runtime LTO switches on together via existing generic wrapper; proof flags ignored as before",
+        "Independent var-tmp directory prevents shared scratch disk overlap"
+      ],
+      "unchanged": [
+        "Original same-source physical-context producer/50rule source workload",
+        "checked-sim-c/source map binding/kernel/base/image/models",
+        "1x10seconds/stats1/8vCPU64G/CPU8-15/AS80GiB"
+      ],
+      "image_lock": "SH",
+      "timing_lock": false,
+      "scope": "Short functional application attempt, not long timing or acceptance"
+    },
+    "short_boot": {
+      "recorded": "2026-11-14T13:53:48.187268+00:00",
+      "guest_script": "/workspaces/kprog-raw/verified/20261114-cilium-current-model-lto/perf-short-entry/control/guest-service.sh",
+      "guest_script_sha256": "35fb7b0c2528dc9cb6ad2238c9309e44b0038fca84ae904e4eb396ff2e3f55d3"
+    },
+    "qemu": [
+      {
+        "pid": 433979,
+        "append_bytes": 997
+      }
+    ],
+    "state": "Booted guest, imported the sole runtime image; app outcome pending. All runtime LTO switches enabled together, 1x10-second functional attempt only."
+  },
+  "limits": [
+    "Earlier notes called a live root PID a running Cilium job; inspection proves failed init, not an active compiler. Corrected here and in COORDINATION.",
+    "No kernel/image/base/model, source producer, workload or verifier changes.",
+    "Old launch and failed syntax-test evidence remain in tool/raw history; no old raw data removed."
+  ]
+}

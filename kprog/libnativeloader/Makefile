@@ -646,12 +646,19 @@ guest-trusted-safety:
 
 # The shared module is built explicitly under the image writer lock. Starting
 # a service guest must not replace it while another guest uses the sole base.
+# Transport full guest arguments in the existing shared OUTPUT directory.
+# virtme base64-encodes --exec into x86's 2048-byte kernel command line.
+trusted-service-kvm: export BUILD_DIR := $(abspath $(BUILD_DIR))
+trusted-service-kvm: export OUTPUT := $(abspath $(OUTPUT))
+trusted-service-kvm: export SERVICE_RUN := $(SERVICE_RUN)
+trusted-service-kvm: export SERVICE_EXECUTION_ARGS := $(SERVICE_EXECUTION_ARGS)
 trusted-service-kvm: trusted-service
 	install -d "$(OUTPUT)"
+	python3 -c 'import os,pathlib,shlex; command=["make","-C","kprog/libnativeloader","guest-trusted-service"]+[k+"="+os.environ[k] for k in ("BUILD_DIR","OUTPUT","SERVICE_RUN","SERVICE_EXECUTION_ARGS")]; pathlib.Path(os.environ["OUTPUT"],"guest-service.sh").write_text(chr(10).join(["#!/bin/sh","exec "+shlex.join(command),""]))'
 	taskset -c $(SERVICE_HOST_CPUS) vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
 		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(OUTPUT)" --overlay-rwdir /tmp \
 		--disable-monitor $(VNG_FLAGS) --cpus $(VM_CPUS) --memory $(VM_MEM) --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -C kprog/libnativeloader guest-trusted-service BUILD_DIR=$(abspath $(BUILD_DIR)) OUTPUT=$(OUTPUT) SERVICE_RUN="$(SERVICE_RUN)" SERVICE_EXECUTION_ARGS="$(SERVICE_EXECUTION_ARGS)"'
+		--exec 'bash "$(OUTPUT)/guest-service.sh"'
 
 guest-trusted-service:
 	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" python3 ../trusted_service.py --arch 1 \
