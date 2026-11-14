@@ -1,0 +1,90 @@
+{
+  "recorded": "2026-11-14T17:40:18.071618+00:00",
+  "scope": "Completed resident load-only replay; not whole-application startup or workload certification",
+  "base_journal": "kprog/results/verified_20261114/census-resume-1714/outcomes.jsonl",
+  "queue_journals": [
+    "/workspaces/kprog-raw/perf/20261114-census-resume/tail-1740.jsonl"
+  ],
+  "attempts": 54,
+  "attempt_stages": {
+    "installed": 22,
+    "verifier_rejected": 28,
+    "compilation_failed": 4
+  },
+  "distinct_bodies": 49,
+  "latest_stages": {
+    "installed": 22,
+    "verifier_rejected": 23,
+    "compilation_failed": 4
+  },
+  "latest_failure_classes": {
+    "verifier_rejected": 7,
+    "verifier_stack_access": 3,
+    "verifier_callback_argument": 1,
+    "verifier_context_access": 2,
+    "verifier_map_bounds": 10,
+    "compilation_failed": 4
+  },
+  "per_application": {
+    "bcc/set": {
+      "distinct_bodies": 9,
+      "latest_stages": {
+        "installed": 9
+      },
+      "native_run": 0
+    },
+    "katran": {
+      "distinct_bodies": 0,
+      "latest_stages": {},
+      "native_run": 0
+    },
+    "cilium/agent": {
+      "distinct_bodies": 0,
+      "latest_stages": {},
+      "native_run": 0
+    },
+    "otelcol-ebpf-profiler/profiling": {
+      "distinct_bodies": 0,
+      "latest_stages": {},
+      "native_run": 0
+    },
+    "tetragon/observer": {
+      "distinct_bodies": 6,
+      "latest_stages": {
+        "installed": 2,
+        "verifier_rejected": 4
+      },
+      "native_run": 0
+    },
+    "tracee/monitor": {
+      "distinct_bodies": 34,
+      "latest_stages": {
+        "installed": 11,
+        "verifier_rejected": 19,
+        "compilation_failed": 4
+      },
+      "native_run": 0
+    }
+  },
+  "native_run": 0,
+  "new_request_archives": [
+    {
+      "application": "tracee/monitor",
+      "body_group": 57,
+      "stage": "verifier_rejected",
+      "raw_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/4.failure.tar.gz",
+      "bytes": 24135490,
+      "sha256": "6b00c16fdd77e1eae937a9a7a3c678ccbf6ce7fabbeafefe87c3f42b87f82678",
+      "parts": [
+        {
+          "path": "kprog/results/verified_20261114/census-resume-1740/body-57-6b00c16fdd77.tar.gz.part000",
+          "bytes": 24135490,
+          "sha256": "6b00c16fdd77e1eae937a9a7a3c678ccbf6ce7fabbeafefe87c3f42b87f82678"
+        }
+      ],
+      "reconstruction": "Concatenate listed parts; original SHA256 above."
+    }
+  ],
+  "raw_directory": "/workspaces/kprog-raw/perf/20261114-census-resume/publication-1740",
+  "raw_removed": false
+}
