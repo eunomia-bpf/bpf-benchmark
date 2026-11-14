@@ -38,7 +38,7 @@ base[-1] = str(a.output / 'trusted_x86.bpf.bounds-input.bc')
 bounds = base[:base.index('--') + 1] + [str(a.bounds), base[-1], '-o', str(a.output / 'trusted_x86.bpf.bounds.bc')]
 backend = list(base)
 backend.remove('-emit-llvm')
-backend[compile_input] = bounds[-1]
+backend[len(backend) - 1 - backend[::-1].index('-c') + 1] = bounds[-1]
 backend[-1] = str(a.output / 'trusted_x86.bpf.o')
 commands = [('frontend', base), ('bounds', bounds), ('bpf-backend', backend)]
 (a.output / 'commands.json').write_text(json.dumps(commands, indent=2) + '\n')
