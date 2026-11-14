@@ -681,6 +681,8 @@
 - [x] **A** Exact OOM-input parser attribution published (f3f1e6b9c):210call-to-following thunk edges and7return thunks normalize in4f5; input/module identities retained, parser-only generation/verifier submissions0.
 - [x] **A** Existing ARM ISA48 fixed-frame replay collected: 48/48 cases, {"accepted_finding": 11, "specialization_rejected": 4, "valid_executed": 4, "verifier_rejected": 29}; original case bytes/annotations and suite exit 1 retained. Receipt entry-frame/isa48/replay; ARM applications remain deferred.
 
+- VERIFIED 2026-11-14 刷新收集：239086退出0，唯一image2aed63ff946f，direct模块逐字节等于233116已测候选d232c2e6，bounds工具e02a61a2已stage。boot/ELF/config/linker保持原hash；image/stage各1252应用制品逐项一致。实际image loader与service loader hash分别记录在 `kprog/results/verified_20261114/recovery-private-refresh-result.json`；旧verified-module不被替换。Katran239316已运行待收集，不把部署当应用验收，PERF继续whole-app LTO计时。
+
 ## 3. 安全：运行时缺口（有限用例和 guest 已验证）
 
 - [x] 退出契约 RBP/R12/RSP、below-SP 栈生命周期（S7，cdeb9804d）；ARM 隐式 SP 回写（55504ff90）。
@@ -809,4 +811,3 @@
 - [ ] 安静窗口：内核合并，kinsn 和 kprog 拆成两个 submodule，全新环境构建验证。
 - [ ] 主树的 `corpus/driver.py`（冻结版）从 `runner/libs/rejit.py` 导入 `snapshot_app_maps`，主树的 `rejit.py` 已经改掉了这个函数，主树上 `make corpus` 在导入这一步就停下。计时目前用 `kprog/perf/may29-image` 从 9f3855f6f 读框架；主树框架要和冻结的 driver 重新对齐（运营者 2026-11-09："也要确保 benchmark framework 不能变化"）。
 
-- VERIFIED 2026-11-14 刷新收集：239086退出0，唯一image2aed63ff946f，direct模块逐字节等于233116已测候选d232c2e6，bounds工具e02a61a2已stage。boot/ELF/config/linker保持原hash；image/stage各1252应用制品逐项一致。实际image loader与service loader hash分别记录在 `kprog/results/verified_20261114/recovery-private-refresh-result.json`；旧verified-module不被替换。Katran239316已运行待收集，不把部署当应用验收，PERF继续whole-app LTO计时。

@@ -8,5 +8,9 @@
   "diagnostic": "omega could not prove Flags.shiftCount Size.w c bound; possible counterexample >=17",
   "m1_complete": false,
   "handoff": "LANE FORMAL",
-  "fork_source_changes": false
+  "fork_source_changes": false,
+  "handoff_posted_utc": "2026-11-14T07:29:50Z",
+  "handoff_consumed_utc": "2026-11-14T07:31:23Z",
+  "handoff_evidence": "/workspaces/.agent-state/kprog-lanes/COORDINATION.md",
+  "continuing_owner": "LANE FORMAL owns all formal/fork writes and M1-M6; VERIFIED returns six apps and checked-sim-c LTO"
 }
