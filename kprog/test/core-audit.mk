@@ -51,9 +51,9 @@ zero-compare-build: $(BUILD)/core-reference
 	$(CC) -O2 -g -Wall -Wextra -Werror -I$(LIBBPF)/prefix/include $(ROOT)/kprog/test/core_zero_compare_client.c $(LIBBPF)/pic-obj/libbpf.a -lelf -lz -ldl -o $(BUILD)/zero-client
 
 zero-compare-run:
-	install -d $(OUTPUT)
+	install -d $(OUTPUT) $(BUILD)/core-compiler
 	exec 9>/workspaces/.agent-state/kprog-lanes/locks/image; flock -s 9; \
-	taskset -c 22-23 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir /var/tmp=$(BUILD) --rodir /kprog-core-compiler=$(dir $(CORE_COMPILER)) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(ROOT)/kprog/test/core-audit.mk zero-compare-guest BUILD=/var/tmp OUTPUT=$(OUTPUT)'
+	taskset -c 22-23 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir /var/tmp=$(BUILD) --rodir /var/tmp/core-compiler=$(dir $(CORE_COMPILER)) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(ROOT)/kprog/test/core-audit.mk zero-compare-guest BUILD=/var/tmp OUTPUT=$(OUTPUT)'
 
 zero-compare-guest:
-	python3 $(ROOT)/kprog/test/check_core_zero_compare.py --kernel --client $(BUILD)/zero-client --compiler /kprog-core-compiler/core-ir-lower --build $(BUILD) --output $(OUTPUT) --target $(KDIR)/vmlinux
+	python3 $(ROOT)/kprog/test/check_core_zero_compare.py --kernel --client $(BUILD)/zero-client --compiler $(BUILD)/core-compiler/core-ir-lower --build $(BUILD) --output $(OUTPUT) --target $(KDIR)/vmlinux
