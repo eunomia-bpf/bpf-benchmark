@@ -1,7 +1,7 @@
 {
   "recorded_at": "2026-11-14T07:45:45Z",
   "pid": 263016,
-  "status": "QUEUED_UNCOLLECTED_NO_POSTLAUNCH_POLLS",
+  "status": "LAUNCHED_UNCOLLECTED_DEPENDENCY_SUPERSEDED_START_UNKNOWN",
   "source_commit": "69f56f5a3",
   "raw": "/workspaces/kprog-raw/perf/20261114-probe-read-direct-timing",
   "wait_pid": 258314,
@@ -47,5 +47,10 @@
       "sha256": "d232c2e6bd5a52950528e1d26ee5da38bdf2d44884f6bd81aaf37f851812aefd"
     }
   ],
-  "scope": "Frozen existing workload/runner, original same-source context manifest, immutable fb07 read-LTO candidate. No outcome/throughput/equal-work/floor claim until collection. New hash candidate not used."
+  "scope": "Frozen existing workload/runner, original same-source context manifest, immutable fb07 read-LTO candidate. No outcome/throughput/equal-work/floor claim until collection. New hash candidate not used.",
+  "dependency_update": {
+    "recorded_at": "2026-11-14T07:46:33Z",
+    "notice": "VERIFIED07:45:01 terminated old queued258314 and reordered to Katran239316->compiler262727->Tracee262728",
+    "effect": "Old waitPID no longer establishes memory sequencing. Own263016 may already start. Active work preserved; notified owner about64G timing consumer. No postlaunch result poll or actual start assertion."
+  }
 }
