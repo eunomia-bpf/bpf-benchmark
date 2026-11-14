@@ -78,7 +78,7 @@ def analyse(args, phase, program_id):
 
     instructions = []
     for function in target['functions']:
-        command_disasm = ['objdump', '-D', '-b', 'binary', '-m', 'i386:x86-64', '-M', 'intel',
+        command_disasm = ['objdump', '-D', '-b', 'binary', '-m', 'i386:x86-64', '-M', 'intel', '--insn-width=16',
                           '--adjust-vma='+hex(function['address']), str(args.capture/target['binary'])]
         decoded = subprocess.run(command_disasm, text=True, capture_output=True, check=True)
         (args.output/(phase+'.disassembly.txt')).write_text(decoded.stdout)
