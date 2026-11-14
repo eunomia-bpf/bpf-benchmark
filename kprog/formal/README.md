@@ -8,7 +8,7 @@ kprog belong in those forks. No replacement ISA semantics is defined locally.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
-| AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `7f683544abb7` | Lean 4.35.0 |
+| AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `78658b3affc4` | Lean 4.35.0 |
 | x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `74a2e2849cde` | Lean 4.32.0-rc1 |
 | Clight | [eunomia-bpf/clean](https://github.com/eunomia-bpf/clean), `external/clean/export` | `123f7f7767e2` | Lean 4.32.1 |
 
@@ -33,7 +33,7 @@ CompCert front end and the Lean export/semantics have separate trust claims.
 
 ## Operation coverage (M2 in progress)
 
-LNSym `7f683544abb7961ba4697e4221b7bfd167872049`, x86lean `74a2e2849cde10fce9035c6abb7fdd49968b2915`.
+LNSym `78658b3affc405a732f65366f5ceac021b2c9d38`, x86lean `74a2e2849cde10fce9035c6abb7fdd49968b2915`.
 
 Source inspection, not refinement proofs or conformance results. `present` means an execution path exists; `partial`/`missing` remain M2 work; `layer` identifies linking/ABI transport above an existing ISA form. Memory permissions, initialization, fault prefixes, exclusive ordering and ABI require explicit relations.
 
@@ -53,6 +53,11 @@ Twenty-nine encoded vectors and an invalid-width check passed in the combined
 32-bit truncation, signed widening, high-half multiplication and the GPR/flag frame.
 These are finite regression checks; M2 remains open for the remaining forms.
 
+LNSym `78658b3affc4` adds decoded EXTR/ROR and conditional compare (CCMP/CCMN,
+register/imm5), including the flags-only register footprint. Eleven extraction
+vectors, 23 comparison vectors and three invalid extraction encodings passed
+with the previous suites in a 127-job combined build (`m2-extract-compare/build-1`).
+
 ### AArch64: 74 simulator operations
 
 | Code | Operation | Source status | LNSym source (Arm/Insts unless Arm/) | Constraint / work |
@@ -65,7 +70,7 @@ These are finite regression checks; M2 remains open for the remaining forms.
 | 0x05 | `MOVK` | present | [DPI/Move_wide_imm.lean](external/LNSym/Arm/Insts/DPI/Move_wide_imm.lean) | MOVZ/MOVN/MOVK, retain width and encoding |
 | 0x06 | `ALU_IMM` | present | [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Requires architectural bitmask encoding |
 | 0x07 | `ALU_REG` | partial | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted forms exist; add/sub extended-register class absent |
-| 0x08 | `SHIFT_IMM` | partial | [DPI/Bitfield.lean](external/LNSym/Arm/Insts/DPI/Bitfield.lean) | LSL/LSR/ASR aliases exist; ROR requires scalar EXTR, absent |
+| 0x08 | `SHIFT_IMM` | present | [DPI/Bitfield.lean](external/LNSym/Arm/Insts/DPI/Bitfield.lean); [DPI/Extract.lean](external/LNSym/Arm/Insts/DPI/Extract.lean) | LSL/LSR/ASR bitfield aliases and EXTR-based ROR |
 | 0x09 | `SHIFT_REG` | present | [DPR/Data_processing_two_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_two_source.lean) | LSLV/LSRV/ASRV/RORV |
 | 0x0a | `MADD` | present | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | MUL aliases MADD with Ra=XZR |
 | 0x0b | `MSUB` | present | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | W/X forms; accumulator captured before destination write |
@@ -74,7 +79,7 @@ These are finite regression checks; M2 remains open for the remaining forms.
 | 0x0e | `UDIV` | present | [DPR/Data_processing_two_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_two_source.lean) | W/X forms; divisor zero returns zero, flags unchanged |
 | 0x0f | `MVN` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
 | 0x10 | `NEG` | partial | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted forms exist; add/sub extended-register class absent |
-| 0x11 | `EXTR` | missing | [Arm/Decode/DPR.lean](external/LNSym/Arm/Decode/DPR.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | Scalar EXTR absent; SIMD extract is different |
+| 0x11 | `EXTR` | present | [DPI/Extract.lean](external/LNSym/Arm/Insts/DPI/Extract.lean) | Decoded W/X extraction, including ROR alias and shift-bound checks |
 | 0x12 | `BITFIELD` | present | [DPI/Bitfield.lean](external/LNSym/Arm/Insts/DPI/Bitfield.lean) | BFM/SBFM/UBFM and extension aliases |
 | 0x13 | `REV` | present | [DPR/Data_processing_one_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_one_source.lean) | REV widths per legal opcode |
 | 0x14 | `REV16` | present | [DPR/Data_processing_one_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_one_source.lean) | REV widths per legal opcode |
@@ -83,8 +88,8 @@ These are finite regression checks; M2 remains open for the remaining forms.
 | 0x17 | `CMP_REG` | partial | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted forms exist; add/sub extended-register class absent |
 | 0x18 | `TST_IMM` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
 | 0x19 | `TST_REG` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
-| 0x1a | `CCMP_IMM` | missing | [Arm/Decode/DPR.lean](external/LNSym/Arm/Decode/DPR.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | Conditional compare absent |
-| 0x1b | `CCMP_REG` | missing | [Arm/Decode/DPR.lean](external/LNSym/Arm/Decode/DPR.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | Conditional compare absent |
+| 0x1a | `CCMP_IMM` | present | [DPR/Conditional_compare.lean](external/LNSym/Arm/Insts/DPR/Conditional_compare.lean) | Unsigned imm5 operand; arithmetic or literal fallback NZCV, empty GPR footprint |
+| 0x1b | `CCMP_REG` | present | [DPR/Conditional_compare.lean](external/LNSym/Arm/Insts/DPR/Conditional_compare.lean) | GPR/ZR operand; arithmetic or literal fallback NZCV, empty GPR footprint |
 | 0x1c | `CSEL` | present | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSEL plus CSINC/CSINV/CSNEG, legal S=0/op2[1]=0 |
 | 0x1d | `CINC` | present | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases; 24 encoded W/X branch/ZR/wrap/frame checks pass |
 | 0x1e | `CSET` | present | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases; 24 encoded W/X branch/ZR/wrap/frame checks pass |
