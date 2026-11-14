@@ -54,6 +54,29 @@ class AppAccounting(unittest.TestCase):
         self.assertEqual(result['application_status'],'error')
         self.assertIsNone(result['programs'][0]['counters'])
 
+    def test_lto_failure_preserves_verification_without_double_counting(self):
+        files = {'service/summary.json':b'{"returncode":0}'}
+        rows = []
+        for request, success in [(1,False),(2,True)]:
+            nested = {'request/verify.stdout':json.dumps(dict(status=0,prog_id=10+request)).encode()}
+            if success:
+                nested['request/load.stdout'] = b'{"status":0,"prog_id":22}'
+            name = str(request)+('.success.tar.gz' if success else '.failure.tar.gz')
+            files['service/requests/'+name] = archive(nested).getvalue()
+            row = dict(request_id=request,source_prog_id=request+30,status=0 if success else -5)
+            row['artifact_archive' if success else 'failure_archive'] = '/retained/'+name
+            if success:
+                row['prog_id'] = 22
+            rows.append(row)
+        files['service/requests/requests.jsonl'] = ''.join(json.dumps(r)+'\n' for r in rows).encode()
+        app = dict(app='fixture',status='error',error='one LTO failure',baseline=dict(bpf={}),
+                   post_rejit=dict(bpf={'22':dict(run_cnt_delta=5)}))
+        with tarfile.open(fileobj=archive(files)) as service:
+            result = summarize(app,service)
+        self.assertEqual((result['loaded'],result['verified'],result['installed'],result['run']), (2,2,1,1))
+        self.assertEqual(result['programs'][0]['stock_verification']['prog_id'],11)
+        self.assertIsNone(result['programs'][0]['stock_load'])
+
 
 if __name__=='__main__':
     unittest.main()

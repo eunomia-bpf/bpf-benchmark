@@ -34,11 +34,15 @@ def summarize(app, service):
         record = dict(request)
         archive_key = 'artifact_archive' if request['status'] == 0 else 'failure_archive'
         retained = request.get(archive_key)
-        record.update(stock_load=None, generation_returncodes=None)
+        record.update(stock_load=None, stock_verification=None, generation_returncodes=None)
         if retained:
             name = 'service/requests/' + Path(retained).name
             with tarfile.open(fileobj=io.BytesIO(service.extractfile(name).read())) as inner:
                 names = set(inner.getnames())
+                if 'request/verify.stdout' in names:
+                    output = inner.extractfile('request/verify.stdout').read().decode().strip()
+                    if output:
+                        record['stock_verification'] = json.loads(output)
                 if 'request/load.stdout' in names:
                     output = inner.extractfile('request/load.stdout').read().decode().strip()
                     if output:
@@ -49,8 +53,11 @@ def summarize(app, service):
         record['counters'] = counters.get(str(request['prog_id'])) if request['status'] == 0 else None
         programs.append(record)
     installed = {r['prog_id'] for r in requests if r['status'] == 0}
-    verified = {r['stock_load']['prog_id'] for r in programs
-                if r['stock_load'] is not None and r['stock_load']['status'] == 0}
+    # LTO first verifies B, then compiles and installs. A later failure cannot
+    # erase that verification; successful verify+load is still one program.
+    verified = {r['source_prog_id'] for r in programs
+                if any(r[phase] is not None and r[phase]['status'] == 0
+                       for phase in ('stock_verification','stock_load'))}
     return dict(application=app['app'], application_status=app['status'], application_error=app['error'],
         service_summary=read_json(service, 'service/summary.json'), attempts=len(requests),
         loaded=len({r['source_prog_id'] for r in requests if r['source_prog_id'] > 0}),
