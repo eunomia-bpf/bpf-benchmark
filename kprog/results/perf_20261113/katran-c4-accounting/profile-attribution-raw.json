@@ -1,0 +1,160 @@
+{
+ "baseline": {
+  "samples": 475599,
+  "bpf_samples": 42159,
+  "bpf_share_of_all": 0.08864400471826055,
+  "buckets": {
+   "program_text": [
+    15251,
+    0.36174956711496953
+   ],
+   "ktime_get_mono_fast_ns": [
+    14229,
+    0.3375080054080979
+   ],
+   "htab_lru_map_lookup_elem": [
+    5882,
+    0.13951943831684813
+   ],
+   "__htab_map_lookup_elem": [
+    3630,
+    0.0861026115420195
+   ],
+   "lookup_nulls_elem_raw": [
+    1090,
+    0.025854503190303375
+   ],
+   "bpf_prog_b1e4e8bab2078b38": [
+    997,
+    0.023648568514433456
+   ],
+   "htab_lru_map_update_elem": [
+    454,
+    0.010768756374676818
+   ],
+   "bpf_xdp_adjust_head": [
+    288,
+    0.006831281576887498
+   ],
+   "bpf_ktime_get_ns": [
+    159,
+    0.003771436703906639
+   ],
+   "bpf_map_lookup_elem": [
+    100,
+    0.002371972769752603
+   ],
+   "its_return_thunk": [
+    77,
+    0.0018264190327095045
+   ],
+   "bpf_map_update_elem": [
+    2,
+    4.743945539505206e-05
+   ]
+  },
+  "categories": {
+   "program_text": [
+    15251,
+    0.36174956711496953
+   ],
+   "ktime_get_ns": [
+    14388,
+    0.34127944211200456
+   ],
+   "map_lookup": [
+    10702,
+    0.2538485258189236
+   ],
+   "other_helper": [
+    1362,
+    0.03230626912403046
+   ],
+   "map_update": [
+    456,
+    0.010816195830071871
+   ]
+  },
+  "per_program_inclusive": {
+   "balancer_ingres": [
+    42159,
+    1.0
+   ]
+  }
+ },
+ "post_rejit": {
+  "samples": 435681,
+  "bpf_samples": 34434,
+  "bpf_share_of_all": 0.07903489020636659,
+  "buckets": {
+   "program_text": [
+    15549,
+    0.4515595051402683
+   ],
+   "ktime_get_mono_fast_ns": [
+    13510,
+    0.3923447755125748
+   ],
+   "__htab_map_lookup_elem": [
+    3463,
+    0.10056920485566591
+   ],
+   "lookup_nulls_elem_raw": [
+    1050,
+    0.030493117267816693
+   ],
+   "htab_lru_map_update_elem": [
+    409,
+    0.011877795202416216
+   ],
+   "bpf_xdp_adjust_head": [
+    211,
+    0.006127664517627926
+   ],
+   "bpf_ktime_get_ns": [
+    140,
+    0.004065748969042226
+   ],
+   "array_of_map_lookup_elem": [
+    97,
+    0.0028169832142649707
+   ],
+   "its_return_thunk": [
+    4,
+    0.0001161642562583493
+   ],
+   "bpf_map_update_elem": [
+    1,
+    2.9041064064587326e-05
+   ]
+  },
+  "categories": {
+   "program_text": [
+    15549,
+    0.4515595051402683
+   ],
+   "ktime_get_ns": [
+    13650,
+    0.396410524481617
+   ],
+   "map_lookup": [
+    4610,
+    0.13387930533774758
+   ],
+   "map_update": [
+    410,
+    0.011906836266480803
+   ],
+   "other_helper": [
+    215,
+    0.006243828773886275
+   ]
+  },
+  "per_program_inclusive": {
+   "balancer_ingres": [
+    34434,
+    1.0
+   ]
+  }
+ }
+}

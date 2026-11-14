@@ -145,3 +145,19 @@ all-kind bitcode/reports equal the prior binary, and retained Tracee370-query
 bitcode is identical with off/on. This is a correctness extension with no
 runtime-gain claim; `core-zero-compare/report.md`. Producer selection remains
 C's integration task; every LTO piece stays in the combined configuration.
+
+Katran next combined configuration (operator/advisor23:41, preparation only):
+use existing KATRAN_SAME_SOURCE=1 and KATRAN_SAME_SOURCE_CODEGEN override to
+apply the18:40 target CPU/forced-CMOV/sibling-call flags, retaining existing
+no-jump-table/general-register constraints, with every current LTO piece.
+C owns producer/timing changes; PERFs subset timing follows remainingOTel.
+The clock candidate calls exactly ktime_get_mono_fast_ns: the sole kernel's
+bpf_ktime_get_ns already returns that function (kernel/bpf/helpers.c:178), so
+direct link binding can remove the wrapper, not the clock-read cost or change
+its NMI/order semantics. It remains unimplemented pending the combined baseline.
+C4 accounting is now committed in katran-c4-accounting/report.md:1.075982x
+successful-send throughput decomposes into1.058541x attempted rate and1.016477x
+admission fraction. Correct raw profile denominators are208.42M eBPF/217.10M
+native; program-text samples73.174->71.620 per million do not establish the
+previously quoted6percent body slowdown. Inlined-helper work is included in
+that bucket. No new performance gain or serial45percent fraction is inferred.
