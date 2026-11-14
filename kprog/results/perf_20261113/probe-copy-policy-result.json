@@ -1,0 +1,44 @@
+{
+  "recorded_at": "2026-11-14T11:21:36.957355+00:00",
+  "commit": "85db641d2",
+  "raw": "/workspaces/kprog-raw/perf/20261114-probe-copy-policy",
+  "reason": "Combined 45s actual-byte hardware profile places user STAC/LFENCE/CLAC among main/v8 root sites. Sole kernel copy_user_generic has STAC/copy/CLAC, without LFENCE. Remove extra LFENCE from existing opt-in read routine only.",
+  "host_tests": "33 PASS,1 existing ignored; kernel1147/user1149 byte-executed cases preserve policy/nesting/fault/fullzero/bounds",
+  "default_real_object_groups": 11,
+  "default_groups_equal": true,
+  "OTel_cli_proof_full_ELF_equal": 14,
+  "OTel_cli_kernel_success": 14,
+  "OTel_main_cli_bytes": [
+    33098,
+    33095
+  ],
+  "candidate": "corpus/results/perf-probe-copy-linker-20261114",
+  "binary_sha256": "433cc6cb214a392b781367bb0cd85ba3aac71bf479051e18f0bcfb1029daf499",
+  "kernel_pid": 394697,
+  "kernel_status": "PASS",
+  "timing_status": "LAUNCHED_UNCOLLECTED",
+  "scope": "No gain or 1.20x acceptance claim. Preserve old payload, raw, policies, SMAP, exception recovery, destination zeroing and defaults.",
+  "kernel_exit": 0,
+  "kernel_actual_stock_native_cases": {
+    "submitted-native": 18,
+    "checked-sim-c": 18
+  },
+  "kernel_raw": "/workspaces/kprog-raw/perf/20261114-probe-copy-policy/retry1",
+  "kernel_client_sha256": "b41fd66f2615987a2ae720677b6c5390c4c75abb03381358e36f0210d36f0647",
+  "kernel_fixture_provenance": "Existing unchanged compiled client reused: current moved source byteequals HEAD pre-reorg source. Newly compiled original BPF/native fixtures; first build attempt failed only moved include depth; raw kept.",
+  "timing_raw": "/workspaces/kprog-raw/perf/20261114-probe-copy-timing",
+  "timing_pid": 394951,
+  "timing_protocol": "Direct-native read/hash/LPM/shared ARRAY, same source manifest430b26ab; statsON+OFF3x180 CPU0-7/8vCPU64G/AS80GiB/timingEX then imageSH; checked-sim-c full app timing still pending B compilation. This component kernel PASS does not establish whole app gain.",
+  "timing_launch": {
+    "recorded_at": "2026-11-14T11:25:51.646179+00:00",
+    "pid": 394951,
+    "raw": "/workspaces/kprog-raw/perf/20261114-probe-copy-timing",
+    "status": "LAUNCHED_UNCOLLECTED",
+    "payload": "corpus/results/perf-probe-copy-linker-20261114",
+    "source_commit": "85db641d2",
+    "manifest_sha256": "430b26ab4be8fd501a819f48c0451895d86bf90606533958a05639ac8a51573f",
+    "timing_lock": "EX only CPU0-7 timed runs",
+    "image_lock": "SH after timing EX",
+    "stage": "read/hash/LPM/shared ARRAY, removes only extra LFENCE versus355603; sourceP/kernel/base/image/default unchanged"
+  }
+}
