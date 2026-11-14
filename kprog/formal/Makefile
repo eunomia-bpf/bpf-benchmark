@@ -728,3 +728,7 @@ clight: clightgen
 	external/clean/clightgen -lean -normalize -o KProgFormal/Clight/X86Numeric.lean c/X86Numeric.c
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Numeric.lean c/Arm64Numeric.c
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Pointer.lean c/X86Pointer.c
+	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Address.lean c/Arm64Address.c
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_address_cache_host.c -o build/test_arm64_address_cache_host
+	./build/test_arm64_address_cache_host
+	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_arm64 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c oracles/arm64_address_compile.bpf.c -o build/arm64_address_compile.bpf.o

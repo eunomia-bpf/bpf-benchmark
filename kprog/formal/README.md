@@ -944,7 +944,7 @@ The same archived OTel main is also preprocessed with current headers and
 PERF's243 constant-helper substitutions (all other source text identical).
 Original generated C is731,104 bytes; the selected form is726,973 bytes.
 PERF's historical expansions were1,011,998,390 bytes before selection and
-370,116,027 afterward; current M4 C expands to376,481,164 bytes. The additional
+370,116,027 afterward; that M4 step expands to376,481,164 bytes. The additional
 output facades increase the latter size; no compile-time gain or new whole-main
 byte parity is inferred. All three preprocessed pieces and the joined input
 are retained in the same raw directory. Full dispatcher C-subset conversion
@@ -965,6 +965,59 @@ host-object byte parity is not claimed. This is separate from the default BPF
 comparison and is not a runtime gain. Raw evidence is in
 `/workspaces/kprog-raw/formal/m4-register-moves`; rebuildable preprocessing/IR
 is under `/var/tmp/kprog-tmp/formal/m4-register-moves`, with commands retained.
+The same full OTel source now preprocesses to375,915,574 bytes after this
+register conversion (the same243 literal helper substitutions); no compile-time
+or runtime gain is inferred from that size change.
+
+[c/Arm64Address.c](c/Arm64Address.c) exports eight production coordinate,
+register-read/write and ADRP bodies with incoming cache payloads/validity,
+register tags and private bytes/facts supplied by the caller. Standard C output
+forms retain lazy SP/return input requests, cache updates and64-bit wrapping.
+The tag expression also retains its original unsigned-int promotion type; the
+new type regression check caught a byte-valued facade before it was corrected.
+All eight Clight functions regenerate identically and typecheck; `make clight`
+and232 component jobs pass. The59,904-case cache/SP-frame oracle passes against
+both pre-edit and post-edit x86 and AArch64 native objects (AArch64 via user-mode
+QEMU), checking cold/hot inputs, request order, arbitrary tag bytes, high register
+identifiers, wrapping and released-byte/ghost intervals. Existing ADRP, memory,
+scalar/vector-token, helper-pointer, arena and operand-routing checks pass.
+
+The existing return-token oracle still fails at `src=0 tag=10 value=0 table=0
+profile=2`: both the pre-edit and current header return while that oracle expects
+callee-frame rejection. Only its diagnostic was extended; its assertions and
+inputs remain unchanged. This discrepancy remains for the full migration.
+Generic native objects have small layout differences, so their byte parity is
+not claimed. A focused BPF fixture at the production ARM O2/v4 flags preserves
+all allocated code/data and386 relocations. This is a fixture comparison, not
+whole-application ARM acceptance. The first historical-header comparison had
+incorrect preamble ordering and is superseded; the corrected streamed current
+input also matches the normal fixture build. Raw receipts are under
+`/workspaces/kprog-raw/formal/m4-arm64-address` (`header-fidelity-final/`);
+large rebuildable inputs stay in scratch.
+
+[tools/compare_c_header.py](tools/compare_c_header.py) reproduces that comparison
+without a second checkout or header copy. It substitutes the historical header
+at the actual include location and checks the current stream against an ordinary
+current build, retaining compiler logs, commands and the current header patch.
+For example, from this directory:
+
+```sh
+python3 tools/compare_c_header.py --before ef13f6356 \
+  --header ../arm64/arm64_sim_local_bpf.h \
+  --source oracles/arm64_address_compile.bpf.c \
+  --output /workspaces/kprog-raw/formal/NEW-COMPARISON \
+  --scratch /var/tmp/kprog-tmp/formal/NEW-COMPARISON -- \
+  ../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf \
+  -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_arm64 \
+  -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src \
+  -I/usr/include/x86_64-linux-gnu
+```
+
+The current extraction interfaces use the default x86 arena64 and ARM arena160
+with bias96. Real producer inputs also use x86 arenas200/376 and scalarized
+stack facts. Carrying those capacities and storage representations into the
+exported interfaces remains M4 work; proofs confined to the default profiles
+would not establish M5's all-program scope.
 
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight

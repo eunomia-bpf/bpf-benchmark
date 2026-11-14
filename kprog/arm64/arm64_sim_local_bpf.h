@@ -326,60 +326,141 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 	__a64_x30_tag = ARM64_SIM_TAG_RETURN; \
 	__a64_x0_tag = ARM64_SIM_TAG_ABI
 
-#define ARM64_SIM_L_READ_REG_RAW(REG) \
-	({ __u64 __a64_l_reg = (REG); \
-	   __a64_l_reg == ARM64_SP ? (__u64)__a64_sp : \
-	   __a64_l_reg < KPROG_ARM64_GPR_COUNT ? \
-	     __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->x : 0ULL; })
-
-/* Cache only invocation-stable environment inputs. A register's payload stays
- * relative for stack indexing; its numeric observation carries native bits.
+/* Invocation-stable coordinate inputs are fetched only on the first use.
+ * Payloads remain relative for stack indexing; numeric views carry native bits.
  * The bound entry ABI preserves source SP, including stripped save deltas.
- */
-#define ARM64_SIM_L_STACK_BASE()                                         \
-	({ if (!__a64_numeric_sp_valid) {                                \
-		__a64_numeric_sp = NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_SP); \
-		__a64_numeric_sp_valid = 1;                                \
-	} __a64_numeric_sp; })
-#define ARM64_SIM_L_RETURN_BASE()                                        \
-	({ if (!__a64_numeric_return_valid) {                            \
-		__a64_numeric_return = NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_RETURN); \
-		__a64_numeric_return_valid = 1;                            \
-	} __a64_numeric_return; })
-#define ARM64_SIM_L_MATERIALIZE(VALUE, TAG)                               \
-	({ __u64 __a64_mat_value = (VALUE); __u8 __a64_mat_tag = (TAG);    \
-	   if (__a64_mat_tag == ARM64_SIM_TAG_STACK)                      \
-		__a64_mat_value += ARM64_SIM_L_STACK_BASE();               \
-	   else if (__a64_mat_tag == ARM64_SIM_TAG_RETURN)                \
-		__a64_mat_value += ARM64_SIM_L_RETURN_BASE();              \
-	   __a64_mat_value; })
-#define ARM64_SIM_L_UNMATERIALIZE(VALUE, TAG)                             \
-	({ __u64 __a64_unmat_value = (VALUE); __u8 __a64_unmat_tag = (TAG); \
-	   if (__a64_unmat_tag == ARM64_SIM_TAG_STACK)                    \
-		__a64_unmat_value -= ARM64_SIM_L_STACK_BASE();             \
-	   else if (__a64_unmat_tag == ARM64_SIM_TAG_RETURN)              \
-		__a64_unmat_value -= ARM64_SIM_L_RETURN_BASE();            \
-	   __a64_unmat_value; })
-#define ARM64_SIM_L_READ_REG(REG)                                        \
-	ARM64_SIM_L_MATERIALIZE(ARM64_SIM_L_READ_REG_RAW(REG), ARM64_SIM_L_REG_TAG(REG))
+ * Output forms share the production bodies with the public expression APIs. */
+#define ARM64_SIM_L_STACK_BASE_INTO(OUTPUT) \
+do { \
+    if (!__a64_numeric_sp_valid) { \
+        __a64_numeric_sp = NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_SP); \
+        __a64_numeric_sp_valid = 1; \
+    } \
+    (OUTPUT) = __a64_numeric_sp; \
+} while (0)
+
+#define ARM64_SIM_L_STACK_BASE() \
+({ __u64 __a64_stack_base_result; \
+   ARM64_SIM_L_STACK_BASE_INTO(__a64_stack_base_result); \
+   __a64_stack_base_result; })
+
+#define ARM64_SIM_L_RETURN_BASE_INTO(OUTPUT) \
+do { \
+    if (!__a64_numeric_return_valid) { \
+        __a64_numeric_return = NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_RETURN); \
+        __a64_numeric_return_valid = 1; \
+    } \
+    (OUTPUT) = __a64_numeric_return; \
+} while (0)
+
+#define ARM64_SIM_L_RETURN_BASE() \
+({ __u64 __a64_return_base_result; \
+   ARM64_SIM_L_RETURN_BASE_INTO(__a64_return_base_result); \
+   __a64_return_base_result; })
+
+#define ARM64_SIM_L_MATERIALIZE_INTO(OUTPUT, VALUE, TAG) \
+do { \
+    __u64 __a64_mat_value = (VALUE); \
+    __u8 __a64_mat_tag = (TAG); \
+    if (__a64_mat_tag == ARM64_SIM_TAG_STACK) { \
+        __u64 __a64_mat_base; \
+        ARM64_SIM_L_STACK_BASE_INTO(__a64_mat_base); \
+        __a64_mat_value += __a64_mat_base; \
+    } else if (__a64_mat_tag == ARM64_SIM_TAG_RETURN) { \
+        __u64 __a64_mat_base; \
+        ARM64_SIM_L_RETURN_BASE_INTO(__a64_mat_base); \
+        __a64_mat_value += __a64_mat_base; \
+    } \
+    (OUTPUT) = __a64_mat_value; \
+} while (0)
+
+#define ARM64_SIM_L_MATERIALIZE(VALUE, TAG) \
+({ __u64 __a64_mat_result; \
+   ARM64_SIM_L_MATERIALIZE_INTO(__a64_mat_result, VALUE, TAG); \
+   __a64_mat_result; })
+
+#define ARM64_SIM_L_UNMATERIALIZE_INTO(OUTPUT, VALUE, TAG) \
+do { \
+    __u64 __a64_unmat_value = (VALUE); \
+    __u8 __a64_unmat_tag = (TAG); \
+    if (__a64_unmat_tag == ARM64_SIM_TAG_STACK) { \
+        __u64 __a64_unmat_base; \
+        ARM64_SIM_L_STACK_BASE_INTO(__a64_unmat_base); \
+        __a64_unmat_value -= __a64_unmat_base; \
+    } else if (__a64_unmat_tag == ARM64_SIM_TAG_RETURN) { \
+        __u64 __a64_unmat_base; \
+        ARM64_SIM_L_RETURN_BASE_INTO(__a64_unmat_base); \
+        __a64_unmat_value -= __a64_unmat_base; \
+    } \
+    (OUTPUT) = __a64_unmat_value; \
+} while (0)
+
+#define ARM64_SIM_L_UNMATERIALIZE(VALUE, TAG) \
+({ __u64 __a64_unmat_result; \
+   ARM64_SIM_L_UNMATERIALIZE_INTO(__a64_unmat_result, VALUE, TAG); \
+   __a64_unmat_result; })
+
+#define ARM64_SIM_L_READ_REG_RAW_INTO(OUTPUT, REG) \
+do { \
+    __u64 __a64_l_reg = (REG); \
+    (OUTPUT) = __a64_l_reg == ARM64_SP ? (__u64)__a64_sp : \
+        __a64_l_reg < KPROG_ARM64_GPR_COUNT ? \
+        __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->x : 0ULL; \
+} while (0)
+
+#define ARM64_SIM_L_READ_REG_RAW(REG) \
+({ __u64 __a64_read_reg_raw_result; \
+   ARM64_SIM_L_READ_REG_RAW_INTO(__a64_read_reg_raw_result, REG); \
+   __a64_read_reg_raw_result; })
+
+#define ARM64_SIM_L_READ_REG_PTR_INTO(OUTPUT, REG) \
+do { \
+    __u64 __a64_l_reg = (REG); \
+    (OUTPUT) = __a64_l_reg == ARM64_SP ? (void *)(long)__a64_sp : \
+        __a64_l_reg < KPROG_ARM64_GPR_COUNT ? \
+        __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->ptr : (void *)0; \
+} while (0)
 
 #define ARM64_SIM_L_READ_REG_PTR(REG) \
-	({ __u64 __a64_l_reg = (REG); \
-	   __a64_l_reg == ARM64_SP ? (void *)(long)__a64_sp : \
-	   __a64_l_reg < KPROG_ARM64_GPR_COUNT ? \
-	     __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->ptr : (void *)0; })
+({ void * __a64_read_reg_ptr_result; \
+   ARM64_SIM_L_READ_REG_PTR_INTO(__a64_read_reg_ptr_result, REG); \
+   __a64_read_reg_ptr_result; })
 
+#define ARM64_SIM_L_REG_TAG_INTO(OUTPUT, REG) \
+do { \
+    __u64 __a64_l_reg = (REG); \
+    (OUTPUT) = __a64_l_reg == ARM64_SP ? ARM64_SIM_TAG_STACK : \
+        __a64_l_reg < KPROG_ARM64_GPR_COUNT ? \
+        *__a64_tag_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)] : ARM64_SIM_TAG_SCALAR; \
+} while (0)
+
+/* Preserve the original ternary expression's unsigned-int promotion type. */
 #define ARM64_SIM_L_REG_TAG(REG) \
-	({ __u64 __a64_l_reg = (REG); \
-	   __a64_l_reg == ARM64_SP ? ARM64_SIM_TAG_STACK : \
-	   __a64_l_reg < KPROG_ARM64_GPR_COUNT ? \
-	     *__a64_tag_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)] : ARM64_SIM_TAG_SCALAR; })
+({ __u32 __a64_reg_tag_result; \
+   ARM64_SIM_L_REG_TAG_INTO(__a64_reg_tag_result, REG); \
+   __a64_reg_tag_result; })
+
+#define ARM64_SIM_L_READ_REG_INTO(OUTPUT, REG) \
+do { \
+    __u64 __a64_read_value; \
+    __u8 __a64_read_tag; \
+    ARM64_SIM_L_READ_REG_RAW_INTO(__a64_read_value, REG); \
+    ARM64_SIM_L_REG_TAG_INTO(__a64_read_tag, REG); \
+    ARM64_SIM_L_MATERIALIZE_INTO(OUTPUT, __a64_read_value, __a64_read_tag); \
+} while (0)
+
+#define ARM64_SIM_L_READ_REG(REG) \
+({ __u64 __a64_read_result; \
+   ARM64_SIM_L_READ_REG_INTO(__a64_read_result, REG); \
+   __a64_read_result; })
 
 #define ARM64_SIM_L_WRITE_REG_WIDTH(REG, VALUE, WIDTH) \
 	do { __s64 __a64_write_old_sp=__a64_sp;  __u64 __a64_l_reg = (REG); \
 	     __u64 __a64_l_next = KPROG_ARM64_APPLY_WIDTH((VALUE), (WIDTH)); \
 	     if (__a64_l_reg == ARM64_SP) { \
-	       __a64_sp = (__s64)(__a64_l_next - ARM64_SIM_L_STACK_BASE()); \
+	       __u64 __a64_write_base; \
+	       ARM64_SIM_L_STACK_BASE_INTO(__a64_write_base); \
+	       __a64_sp = (__s64)(__a64_l_next - __a64_write_base); \
 	     } else if (__a64_l_reg < KPROG_ARM64_GPR_COUNT && KPROG_ARM64_REG_WRITABLE(__a64_l_reg)) { \
 	       if (KPROG_ARM64_WRITE_ARM((WIDTH) == ARM64_WIDTH_32) == KPROG_ARM64_WRITE_ARM_NARROW) \
 	         __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->x = (__u32)__a64_l_next; \
@@ -398,9 +479,14 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 	     void *__a64_l_next_ptr = (void *)(VALUE); \
 	     __u8 __a64_l_next_tag = (TAG); \
 	     if (__a64_l_reg == ARM64_SP) { \
-	       __a64_sp = __a64_l_next_tag == ARM64_SIM_TAG_STACK          \
-		? (__s64)(long)__a64_l_next_ptr                            \
-		: (__s64)(ARM64_SIM_L_MATERIALIZE((__u64)(long)__a64_l_next_ptr, __a64_l_next_tag) - ARM64_SIM_L_STACK_BASE()); \
+	       if (__a64_l_next_tag == ARM64_SIM_TAG_STACK) \
+	           __a64_sp = (__s64)(long)__a64_l_next_ptr; \
+	       else { \
+	           __u64 __a64_write_value, __a64_write_base; \
+	           ARM64_SIM_L_MATERIALIZE_INTO(__a64_write_value, (__u64)(long)__a64_l_next_ptr, __a64_l_next_tag); \
+	           ARM64_SIM_L_STACK_BASE_INTO(__a64_write_base); \
+	           __a64_sp = (__s64)(__a64_write_value - __a64_write_base); \
+	       } \
 	     } else if (__a64_l_reg < KPROG_ARM64_GPR_COUNT && KPROG_ARM64_REG_WRITABLE(__a64_l_reg)) { \
 	       __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->ptr = __a64_l_next_ptr; \
 	       *__a64_tag_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)] = __a64_l_next_tag; \
@@ -1489,14 +1575,20 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
         ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_la_old, (WIDTH) == ARM64_WIDTH_64 ? ARM64_WIDTH_64 : ARM64_WIDTH_32); \
  } while (0)
 
+#define ARM64_SIM_L_EXEC_ADRP(OP, DST, IMM) \
+do { \
+    __u8 __a64_adrp_tag; \
+    KPROG_ARM64_ADRP_TAG_INTO(__a64_adrp_tag, (OP), ARM64_SIM_L_UNSUPPORTED_OPCODE()); \
+    ARM64_SIM_L_WRITE_REG_PTR_TAG((DST), (void *)(long)(IMM), __a64_adrp_tag); \
+} while (0)
+
 #define ARM64_SIM_L_EXEC(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM)         \
 	do {                                                               \
 		__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS);\
 		if (KPROG_ARM64_DISP_NOP_HANDLED(OP)) {                    \
 			(void)0;                                           \
 		} else if (KPROG_ARM64_ADRP_HANDLED(OP)) {                 \
-			ARM64_SIM_L_WRITE_REG_PTR_TAG((DST), (void *)(long)(IMM),\
-				ARM64_SIM_L_ADRP_TAG((OP)));               \
+			ARM64_SIM_L_EXEC_ADRP((OP), (DST), (IMM));               \
 		} else if (KPROG_ARM64_MOV_HANDLED(OP)) {                  \
 			if (ARM64_SIM_L_MOV_PTR_TAG_PATH((OP), __a64_l_width)) {\
 				ARM64_SIM_L_WRITE_REG_PTR_TAG((DST),       \

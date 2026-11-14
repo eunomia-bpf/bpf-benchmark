@@ -99,7 +99,7 @@ int main(void)
   for(unsigned i=19;i<=29;i++)
    frame_ok=frame_ok&&out.before.regs[i]==0&&out.before.tags[i]==0;
   int expected=target==0&&effective_tag==10?(frame_ok?0:-1):effective_tag==9&&member?1:-1;
-  if(out.route!=expected||!!denied!=(expected==-1)){fprintf(stderr,"route src=%u tag=%u value=%llu table=%u\n",src,tag,(unsigned long long)target,table);return 1;}
+  if(out.route!=expected||!!denied!=(expected==-1)){fprintf(stderr,"route src=%u tag=%u value=%llu table=%u profile=%u got=%d want=%d denied=%d\n",src,tag,(unsigned long long)target,table,pattern,out.route,expected,denied);return 1;}
   struct snapshot want=out.before;want.lr=target;
   unsigned input_count=0;
   if(expected==0){
