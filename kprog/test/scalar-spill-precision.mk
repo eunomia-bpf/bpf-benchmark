@@ -12,6 +12,21 @@ BACKEND_ARGS ?=
 CONTEXT_BUILD ?= /var/tmp/kprog-tmp/perf/context-loads
 IDENTITY_ARGS ?=
 HELPER_SHAPE_BUILD ?= /var/tmp/kprog-tmp/perf/helper-shapes
+SPILL_GROUP_BUILD ?= /var/tmp/kprog-tmp/perf/spill-groups
+
+.PHONY: spill-groups-build spill-groups-run spill-groups-guest
+spill-groups-build:
+	install -d $(SPILL_GROUP_BUILD)
+	$(CC) -O2 -g -Wall -Wextra -Werror -I$(LIBBPF)/prefix/include $(ROOT)/kprog/test/scalar_spill_values.c $(LIBBPF)/pic-obj/libbpf.a -lelf -lz -o $(SPILL_GROUP_BUILD)/values-client
+	taskset -c 19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_spill_groups.py --build $(SPILL_GROUP_BUILD) --output $(OUTPUT) --compile-only
+
+spill-groups-run:
+	install -d $(OUTPUT)
+	exec 9>/workspaces/.agent-state/kprog-lanes/locks/image; flock -s 9; \
+	taskset -c 22-23 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir /var/tmp=$(SPILL_GROUP_BUILD) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(ROOT)/kprog/test/scalar-spill-precision.mk spill-groups-guest SPILL_GROUP_BUILD=/var/tmp OUTPUT=$(OUTPUT)'
+
+spill-groups-guest:
+	python3 $(ROOT)/kprog/test/check_spill_groups.py --build $(SPILL_GROUP_BUILD) --output $(OUTPUT)
 
 .PHONY: tracee-probe-sites
 tracee-probe-sites:
