@@ -85,3 +85,12 @@ previously kernel-tested fixture ELF bytes. This changes B guard inference;
 runtime P and the checked-native frontend input retain their definitions.
 Evidence: `packet-identities/report.md` (a267788ea/3ed4d58e9/977e9acef/42959d7d7).
 Whole-application acceptance and combined runtime timing retain their scope.
+
+Candidate after the current OTel work (advisor21:21, not implemented): bind
+`bpf_ktime_get_ns` to the same kernel monotonic clock implementation at link
+time. C's Katran profile attributes34% of BPF time to that path. First check
+which clock implementation the sole kernel helper actually uses; preserving
+its clock basis and concurrency rules is required. The sample share is not a
+predicted gain: removing a wrapper leaves the clock-read cost. This candidate
+will use the combined LTO configuration and focused correctness checks before
+any performance claim.

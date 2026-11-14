@@ -1,0 +1,15 @@
+{
+  "started": "2026-11-14T21:24:32Z",
+  "pid": 661355,
+  "source_commit": "d9ae8bb90",
+  "build": "/var/tmp/kprog-tmp/perf/scale",
+  "records": "/workspaces/kprog-raw/perf/20261114-scale-stock/compile",
+  "log": "/workspaces/kprog-raw/perf/20261114-scale-stock/smoke-build.log",
+  "cpus": "18-19",
+  "address_space_limit_bytes": 17179869184,
+  "sizes": [
+    100
+  ],
+  "pipeline": "production stock wrapper/chunk preprocess/B IR compiler",
+  "native_fixture": "unchanged scale.assembly and independent arithmetic reference"
+}
