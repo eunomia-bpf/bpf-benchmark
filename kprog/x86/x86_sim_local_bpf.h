@@ -321,27 +321,40 @@ struct x86_sim_stack_value { void *pointer; __u8 tag; };
 	union x86_sim_gpr NAME;                                             \
 	__u8 NAME##_tag;
 
-struct x86_sim_state {
-	X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_STATE_REG_FIELD)
-	__u64 native_stack_base;
-	__u8 cf;
-	__u8 zf;
-	__u8 sf;
-	__u8 of;
-	__u8 pf;
-	__u8 af;
-	__u64 xmm0_lo;
-	__u64 xmm0_hi;
-	__u64 ret_addr;
+/* Scalar fields are shared with profile-independent extraction bindings.
+ * The legacy state retains its embedded arena and original field order. */
+#define X86_SIM_L_SCALAR_STATE_FIELDS \
+	X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_STATE_REG_FIELD) \
+	__u64 native_stack_base; \
+	__u8 cf; \
+	__u8 zf; \
+	__u8 sf; \
+	__u8 of; \
+	__u8 pf; \
+	__u8 af; \
+	__u64 xmm0_lo; \
+	__u64 xmm0_hi; \
+	__u64 ret_addr; \
 	__u32 call_depth;
-	union x86_sim_stack_mem stack_mem;
-	struct x86_sim_xdp_abi xdp_abi;
-	struct x86_sim_skb_abi skb_abi;
-	struct __sk_buff *skb_ctx;
-	void *helper_ctx;
-	__u8 is_xdp;
-	void *helper_abi_base;
+
+#define X86_SIM_L_ENV_STATE_FIELDS \
+	struct x86_sim_xdp_abi xdp_abi; \
+	struct x86_sim_skb_abi skb_abi; \
+	struct __sk_buff *skb_ctx; \
+	void *helper_ctx; \
+	__u8 is_xdp; \
+	void *helper_abi_base; \
 	__u8 abi_kind;
+
+struct x86_sim_register_state {
+	X86_SIM_L_SCALAR_STATE_FIELDS
+	X86_SIM_L_ENV_STATE_FIELDS
+};
+
+struct x86_sim_state {
+	X86_SIM_L_SCALAR_STATE_FIELDS
+	union x86_sim_stack_mem stack_mem;
+	X86_SIM_L_ENV_STATE_FIELDS
 };
 
 #ifdef X86_SIM_USE_STATE_STRUCT

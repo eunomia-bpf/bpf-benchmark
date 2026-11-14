@@ -1013,11 +1013,24 @@ python3 tools/compare_c_header.py --before ef13f6356 \
   -I/usr/include/x86_64-linux-gnu
 ```
 
-The current extraction interfaces use the default x86 arena64 and ARM arena160
-with bias96. Real producer inputs also use x86 arenas200/376 and scalarized
-stack facts. Carrying those capacities and storage representations into the
-exported interfaces remains M4 work; proofs confined to the default profiles
-would not establish M5's all-program scope.
+The x86 [storage binding](c/X86Pointer.h) now passes arena capacity and byte/word
+views explicitly. Its fact descriptors address either array cells or separately
+scalarized cells; scalar registers reuse the canonical field declarations without
+an embedded fixed-size arena. Legacy state size, alignment and every named offset
+remain unchanged for capacities64/200/376. `make clight` links one generic root
+object against canonical array profiles1/7/9/64/200/376 and scalar profiles64/200/376,
+including the real Cilium25-cell and OTel47-cell layouts. Each checks102,816
+executions with identical arena addresses/free-input streams, comparing all
+registers, private bytes, facts and frames. Fixed64-capacity and wrong-cell
+mutants fail. The matched Cilium object still has identical allocated bytes and
+202 relocations. Raw evidence: `/workspaces/kprog-raw/formal/m4-profile-bindings`.
+
+The descriptor contract requires matching byte/word views of the same arena,
+complete fact cells for the producer capacity, and separate live storage for
+registers, descriptors and facts. M5 must prove this field/cell relation, including
+scalar-list versus loop transport; these finite tests do not prove refinement.
+ARM extraction still uses arena160 with bias96; parameterizing that profile
+remains M4 work before M5's all-program scope can be established.
 
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight
