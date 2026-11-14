@@ -1,0 +1,49 @@
+{
+  "recorded": "2026-11-14T06:47:12Z",
+  "job": 233116,
+  "make_exit_code": 0,
+  "finished": "2026-11-14T06:43:03Z",
+  "cases": [
+    {
+      "case": 0,
+      "fault": false,
+      "retval": 1,
+      "expected": 1
+    },
+    {
+      "case": 1,
+      "fault": true,
+      "retval": 0,
+      "expected": 0
+    },
+    {
+      "case": 2,
+      "fault": false,
+      "retval": 1,
+      "expected": 1
+    }
+  ],
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-direct-recovery",
+  "scope": "Direct measurement upload, existing sole kernel: no-sites baseline, cross-chunk fault clears R11 rather than faulting RCX, reupload baseline. Not verifier certification or probe-read helper/application execution.",
+  "kernel_or_image_rebuilt": false,
+  "canonical_deployed": false,
+  "files": {
+    "kernel/recovery": {
+      "bytes": 6375168,
+      "sha256": "1b5336285464f24052e405954a71700f6f53c094251d8dbf868381acc022b738"
+    },
+    "kernel/bpf_x86_native_lab.ko": {
+      "bytes": 689712,
+      "sha256": "d232c2e6bd5a52950528e1d26ee5da38bdf2d44884f6bd81aaf37f851812aefd"
+    },
+    "kernel/kernel-results.jsonl": {
+      "bytes": 146,
+      "sha256": "d394952a2da46a3b5e66a8116ab39c35598a5d5bbd703b7da48f2ee212fb10e0"
+    },
+    "kernel-job/make.log": {
+      "bytes": 1525,
+      "sha256": "72e562b548bfd87bdf235653b50ce29861e0546339aaab2a1653252a61e26943"
+    }
+  },
+  "raw_removed": false
+}
