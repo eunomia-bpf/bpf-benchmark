@@ -1,0 +1,154 @@
+{
+  "recorded_at": "2026-11-14T05:14:20.363214+00:00",
+  "protocol_commit": "9f51cfee7,ce05b481f",
+  "raw": "/workspaces/kprog-raw/perf/20261114-runtime-array-otel",
+  "inputs": [],
+  "reports": [
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-runtime-array-otel/collection.json",
+      "sha256": "d9177f4680af4e66354572ded64a9d7d8e83f62dc21288eb2eaf1bdaf061a3b1",
+      "data": {
+        "recorded_at": "2026-11-14T05:14:20.160016+00:00",
+        "source_commits": [
+          "9f51cfee7",
+          "ccb3595b8",
+          "ce05b481f"
+        ],
+        "outer_pid": 188582,
+        "make_exit": 0,
+        "finished": "2026-11-14T05:06:44Z",
+        "run": "corpus/results/x86_kvm_corpus_20261114_050542_885568",
+        "app_status": "ok",
+        "app_error": "",
+        "launch": {
+          "recorded_at": "2026-11-14T05:05:23Z",
+          "source_commits": [
+            "9f51cfee7",
+            "ccb3595b8"
+          ],
+          "outer_pid": 188582,
+          "raw": "/workspaces/kprog-raw/perf/20261114-runtime-array-otel",
+          "log": "/workspaces/kprog-raw/perf/20261114-runtime-array-otel/job/make.log",
+          "counter_capture": "/workspaces/repository/corpus/results/perf-runtime-array-otel-20261114",
+          "payload": "/workspaces/repository/corpus/results/perf-runtime-array-linker-20261114",
+          "final_binary_sha256": "d2c6d05fd76be4ce1bd8e96ef675388f79d0fa3d3ae6a12128032293850d2173",
+          "command": [
+            "make",
+            "-f",
+            "kprog/perf/native-context/Makefile",
+            "runtime-array-otel"
+          ],
+          "launch": [
+            "setsid",
+            "nohup",
+            "env",
+            "VERIFIED_BUILD_CPUS=16-19",
+            "prlimit",
+            "--as=34359738368",
+            "--",
+            "bash",
+            "kprog/test/run_verified_make.sh",
+            "/workspaces/kprog-raw/perf/20261114-runtime-array-otel/job",
+            "-f",
+            "kprog/perf/native-context/Makefile",
+            "runtime-array-otel"
+          ],
+          "resources": {
+            "cpus": "16-19",
+            "vcpus": 4,
+            "guest_memory": "16G",
+            "host_address_space_bytes": 34359738368,
+            "image_lock": "shared",
+            "timing_lock": false
+          },
+          "protocol": {
+            "samples": 1,
+            "seconds": 10,
+            "stats": 1,
+            "source": "Existing original-source OTel manifest corpus/results/perf-otel-upstream-20261114/manifest-context.json",
+            "native_flags": [
+              "--runtime-map-lookups",
+              "--runtime-known-map-lookups",
+              "--local-memory-routines",
+              "--runtime-array-layout <adjacent boot-BTF layout>"
+            ],
+            "layout": {
+              "map_type": 56,
+              "max_entries": 68,
+              "elem_size": 288,
+              "index_mask": 292,
+              "value": 304,
+              "array_type": 2
+            }
+          },
+          "kernel": "74d1097af561",
+          "image": "66e9e88f197f975fd98f78f08be2eac3b7c313937e39a4cb2a45639d0615f2b8",
+          "base": "/workspaces/.agent-state/kprog-ck",
+          "outcome": null,
+          "scope": "Launch only, no postlaunch status/log/result/counter polling. Diagnostic not official timing/floor. No kernel/image/base/canonical linker/app/benchmark changes. Next turn collect entire job/raw counters and errors before any timing decision."
+        },
+        "programs": {
+          "baseline": 13,
+          "post_rejit": 12
+        },
+        "native_replacements": 13,
+        "native_custom_generic_errors": [
+          "[81.400368 pid=2582 tid=2582] native-loader failed prog=custom__generic manifest=/workspaces/repository/corpus/results/perf-otel-upstream-20261114/manifest-context.json source=/tmp/bpfrejit_2582_1be13c169abf87f3.bpf error=BPF_PROG_LOAD native_lab stub: Invalid argument",
+          "[81.457846 pid=2582 tid=2582] native-loader failed prog=custom__generic manifest=/workspaces/repository/corpus/results/perf-otel-upstream-20261114/manifest-context.json source=/tmp/bpfrejit_2582_1be13c169abf87f3.bpf error=BPF_PROG_LOAD native_lab stub: Invalid argument"
+        ],
+        "reported_analysis": "corpus/results/x86_kvm_corpus_20261114_050542_885568 throughput native/eBPF 0.394x  eBPF [29942326] native [11800670] per-sample [0.394] errors 0\ncorpus/results/x86_kvm_corpus_20261114_050542_885568 ns/inv eBPF 3549.1 (2/13 progs) native 7293.1 (2/12) speedup 0.487x\n",
+        "stub_analysis": "total 0 tiny-program candidates, 0 of them carried work -- size alone does not establish a fallback or differing work\n",
+        "counter_snapshots": [
+          {
+            "snapshot": "baseline-0001",
+            "time": "2026-11-14T05:05:45.503785+00:00",
+            "metrics_map_id": 63,
+            "attempts": 274550,
+            "frames": 231036
+          },
+          {
+            "snapshot": "baseline-0002",
+            "time": "2026-11-14T05:06:06.091756+00:00",
+            "metrics_map_id": 63,
+            "attempts": 85113473,
+            "frames": 78535243
+          },
+          {
+            "snapshot": "baseline-0003",
+            "time": "2026-11-14T05:06:14.946994+00:00",
+            "metrics_map_id": 302,
+            "attempts": 154943,
+            "frames": 136362
+          },
+          {
+            "snapshot": "post_rejit-0004",
+            "time": "2026-11-14T05:06:23.513308+00:00",
+            "metrics_map_id": 302,
+            "attempts": 40000834,
+            "frames": 36765711
+          }
+        ],
+        "scope": [
+          "Completed short1x10s statsON diagnostic on16-19/4vCPU16G, not a floor round.",
+          "Throughput0.394x and3549.1->7293.1ns/inv retained. No claim of benefit, matched measurement-window counters or optimization root cause.",
+          "Two native-generation snapshots include baseline-labelled0003 and post0004; measurement-end native metrics missing. Snapshot read timing and all99 raw counters retained.",
+          "Several full native JIT dumps fail ENOENT after program lifetime ends during observer collection; failures are not empty successful captures.",
+          "Native_unwind emitted image grows30511->34479B in offline inline-prefix candidate; I-cache cost is a hypothesis, not established causal attribution. Shared out-of-line ARRAY dispatch is next targeted code-size candidate.",
+          "No benchmark setting, framework validity gate, app source or canonical binary/image/kernel change."
+        ],
+        "cleanup": {
+          "path": "/var/tmp/kprog-tmp/perf/runtime-array-otel/var-tmp/bpf-benchmark-docker.img",
+          "exists": false,
+          "action": "Existing Make cleanup completed; raw retained."
+        }
+      }
+    }
+  ],
+  "scope": "Completed-diagnostic-only-regression-retained-no-equal-work-or-floor-claim",
+  "archive": {
+    "path": "kprog/results/perf_20261113/runtime-array-otel-results.tar.gz",
+    "bytes": 541708,
+    "sha256": "cde3aee4c06e63ecf2c74f4c2a4a281e2b69abb4913ec801c312633df8a56243",
+    "files_byte_compared": 449
+  }
+}
