@@ -1,0 +1,409 @@
+{
+  "recorded": "2026-11-14T14:33:51.162038+00:00",
+  "run": "x86_kvm_corpus_20261114_142556_667921",
+  "raw": "/workspaces/kprog-raw/perf/20261114-jit-source-profile/retry2",
+  "configuration": "All implemented runtime LTO on together; same source P7e678147. Short diagnostic45s/stats1, not3x180 performance.",
+  "collector_errors": [],
+  "btf_line_records": 1646,
+  "source_text_mismatches": [],
+  "counts": {
+    "baseline": 17900165,
+    "post_rejit": 18015886
+  },
+  "native_body_end": "0x7750",
+  "native_body": {
+    "instructions": 5752,
+    "samples": 2644,
+    "sampled_period_cycles": 51791413436,
+    "cycles_per_measured_entry": 2874.763607851426,
+    "cmov": 140,
+    "conditional_branches": 651,
+    "rsp_rbp_address_operands": 1584,
+    "proven_spill_reload_instructions": 442
+  },
+  "jit_body": {
+    "instructions": 5019,
+    "samples": 2060,
+    "sampled_period_cycles": 40066608392,
+    "cycles_per_measured_entry": 2238.3373780074094,
+    "cmov": 0,
+    "conditional_branches": 624,
+    "rsp_rbp_address_operands": 637,
+    "proven_spill_reload_instructions": null
+  },
+  "hot_blocks": [
+    {
+      "offset": "0x3e40",
+      "source_group": "S1",
+      "instructions": 16,
+      "samples": 64,
+      "sampled_period_cycles": 1230311791,
+      "cycles_per_measured_entry": 68.29038499688552,
+      "cmov": 2,
+      "conditional_branches": 2,
+      "rsp_rbp_address_operands": 6,
+      "proven_spill_reload_instructions": 5
+    },
+    {
+      "offset": "0x640",
+      "source_group": "S2",
+      "instructions": 16,
+      "samples": 62,
+      "sampled_period_cycles": 1228602794,
+      "cycles_per_measured_entry": 68.19552443882027,
+      "cmov": 2,
+      "conditional_branches": 2,
+      "rsp_rbp_address_operands": 4,
+      "proven_spill_reload_instructions": 1
+    },
+    {
+      "offset": "0x580",
+      "source_group": "S2",
+      "instructions": 16,
+      "samples": 60,
+      "sampled_period_cycles": 1181390727,
+      "cycles_per_measured_entry": 65.57494463497382,
+      "cmov": 2,
+      "conditional_branches": 2,
+      "rsp_rbp_address_operands": 4,
+      "proven_spill_reload_instructions": 1
+    },
+    {
+      "offset": "0x5c0",
+      "source_group": "S3",
+      "instructions": 15,
+      "samples": 59,
+      "sampled_period_cycles": 1151110599,
+      "cycles_per_measured_entry": 63.894198653344056,
+      "cmov": 2,
+      "conditional_branches": 2,
+      "rsp_rbp_address_operands": 4,
+      "proven_spill_reload_instructions": 1
+    },
+    {
+      "offset": "0x500",
+      "source_group": "S4",
+      "instructions": 16,
+      "samples": 57,
+      "sampled_period_cycles": 1127041968,
+      "cycles_per_measured_entry": 62.558231551864836,
+      "cmov": 2,
+      "conditional_branches": 2,
+      "rsp_rbp_address_operands": 4,
+      "proven_spill_reload_instructions": 1
+    },
+    {
+      "offset": "0x3f00",
+      "source_group": "S2",
+      "instructions": 17,
+      "samples": 56,
+      "sampled_period_cycles": 1088462431,
+      "cycles_per_measured_entry": 60.41681386083371,
+      "cmov": 2,
+      "conditional_branches": 1,
+      "rsp_rbp_address_operands": 6,
+      "proven_spill_reload_instructions": 4
+    },
+    {
+      "offset": "0x540",
+      "source_group": "S5",
+      "instructions": 16,
+      "samples": 53,
+      "sampled_period_cycles": 1021105271,
+      "cycles_per_measured_entry": 56.67804908401396,
+      "cmov": 2,
+      "conditional_branches": 2,
+      "rsp_rbp_address_operands": 4,
+      "proven_spill_reload_instructions": 1
+    },
+    {
+      "offset": "0x22c0",
+      "source_group": "S2",
+      "instructions": 15,
+      "samples": 50,
+      "sampled_period_cycles": 995892903,
+      "cycles_per_measured_entry": 55.27859706705515,
+      "cmov": 0,
+      "conditional_branches": 2,
+      "rsp_rbp_address_operands": 6,
+      "proven_spill_reload_instructions": 3
+    },
+    {
+      "offset": "0x600",
+      "source_group": "S2",
+      "instructions": 16,
+      "samples": 50,
+      "sampled_period_cycles": 960307425,
+      "cycles_per_measured_entry": 53.30336931528097,
+      "cmov": 2,
+      "conditional_branches": 2,
+      "rsp_rbp_address_operands": 4,
+      "proven_spill_reload_instructions": 1
+    },
+    {
+      "offset": "0x2380",
+      "source_group": "S1",
+      "instructions": 15,
+      "samples": 47,
+      "sampled_period_cycles": 919450740,
+      "cycles_per_measured_entry": 51.035554954111056,
+      "cmov": 2,
+      "conditional_branches": 2,
+      "rsp_rbp_address_operands": 5,
+      "proven_spill_reload_instructions": 4
+    }
+  ],
+  "source_groups": {
+    "S1": {
+      "keys": [
+        [
+          "native_stack_trace.ebpf.c",
+          123
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          124
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          128
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          133
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          219
+        ]
+      ],
+      "native": {
+        "instructions": 764,
+        "samples": 1187,
+        "sampled_period_cycles": 23328206077,
+        "cycles_per_measured_entry": 1294.8686551968635,
+        "cmov": 128,
+        "conditional_branches": 127,
+        "rsp_rbp_address_operands": 173,
+        "proven_spill_reload_instructions": 109
+      },
+      "jit": {
+        "instructions": 1447,
+        "samples": 678,
+        "sampled_period_cycles": 13208944016,
+        "cycles_per_measured_entry": 737.9230312122821,
+        "cmov": 0,
+        "conditional_branches": 256,
+        "rsp_rbp_address_operands": 97,
+        "proven_spill_reload_instructions": null
+      },
+      "jit_range_count": 128
+    },
+    "S2": {
+      "keys": [
+        [
+          "native_stack_trace.ebpf.c",
+          122
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          123
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          124
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          128
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          133
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          219
+        ]
+      ],
+      "native": {
+        "instructions": 957,
+        "samples": 1325,
+        "sampled_period_cycles": 26012646626,
+        "cycles_per_measured_entry": 1443.872736872336,
+        "cmov": 128,
+        "conditional_branches": 127,
+        "rsp_rbp_address_operands": 238,
+        "proven_spill_reload_instructions": 109
+      },
+      "jit": {
+        "instructions": 1900,
+        "samples": 842,
+        "sampled_period_cycles": 16404423879,
+        "cycles_per_measured_entry": 916.4398137670798,
+        "cmov": 0,
+        "conditional_branches": 256,
+        "rsp_rbp_address_operands": 161,
+        "proven_spill_reload_instructions": null
+      },
+      "jit_range_count": 133
+    },
+    "S3": {
+      "keys": [
+        [
+          "native_stack_trace.ebpf.c",
+          122
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          123
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          124
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          128
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          219
+        ]
+      ],
+      "native": {
+        "instructions": 893,
+        "samples": 1276,
+        "sampled_period_cycles": 25049354951,
+        "cycles_per_measured_entry": 1390.4037220817227,
+        "cmov": 128,
+        "conditional_branches": 127,
+        "rsp_rbp_address_operands": 238,
+        "proven_spill_reload_instructions": 109
+      },
+      "jit": {
+        "instructions": 1900,
+        "samples": 842,
+        "sampled_period_cycles": 16404423879,
+        "cycles_per_measured_entry": 916.4398137670798,
+        "cmov": 0,
+        "conditional_branches": 256,
+        "rsp_rbp_address_operands": 161,
+        "proven_spill_reload_instructions": null
+      },
+      "jit_range_count": 133
+    },
+    "S4": {
+      "keys": [
+        [
+          "native_stack_trace.ebpf.c",
+          122
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          123
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          124
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          128
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          133
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          208
+        ]
+      ],
+      "native": {
+        "instructions": 978,
+        "samples": 1295,
+        "sampled_period_cycles": 25433918876,
+        "cycles_per_measured_entry": 1411.7495457064947,
+        "cmov": 128,
+        "conditional_branches": 68,
+        "rsp_rbp_address_operands": 266,
+        "proven_spill_reload_instructions": 109
+      },
+      "jit": {
+        "instructions": 1766,
+        "samples": 791,
+        "sampled_period_cycles": 15412860404,
+        "cycles_per_measured_entry": 861.0457168411576,
+        "cmov": 0,
+        "conditional_branches": 192,
+        "rsp_rbp_address_operands": 160,
+        "proven_spill_reload_instructions": null
+      },
+      "jit_range_count": 192
+    },
+    "S5": {
+      "keys": [
+        [
+          "native_stack_trace.ebpf.c",
+          122
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          123
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          124
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          128
+        ],
+        [
+          "native_stack_trace.ebpf.c",
+          133
+        ]
+      ],
+      "native": {
+        "instructions": 894,
+        "samples": 1288,
+        "sampled_period_cycles": 25301296687,
+        "cycles_per_measured_entry": 1404.3881431643163,
+        "cmov": 128,
+        "conditional_branches": 64,
+        "rsp_rbp_address_operands": 238,
+        "proven_spill_reload_instructions": 109
+      },
+      "jit": {
+        "instructions": 1758,
+        "samples": 785,
+        "sampled_period_cycles": 15303645056,
+        "cycles_per_measured_entry": 854.9443569933574,
+        "cmov": 0,
+        "conditional_branches": 192,
+        "rsp_rbp_address_operands": 160,
+        "proven_spill_reload_instructions": null
+      },
+      "jit_range_count": 192
+    }
+  },
+  "limits": [
+    "Source statement sets form one-to-many counterparts across unrolled/reordered compiler CFGs. Shared source groups/ranges can occur in multiple rows; row totals must not be added.",
+    "Group totals cover every mapped emitted instruction with the same C source lines on each side, not a unique basic-block bijection.",
+    "Native appended helper routines/synthetic instructions are not assigned a caller source line. Root/source cycles are not inclusive helper costs or instruction latency; hardware skid remains.",
+    "Native spills/reloads are compiler-proven from byte-identical assembly. JIT RSP/RBP references remain syntax; its compiler-spill count is unknown, not zero.",
+    "Raw first captureEFAULT and first two missing observer progress/dumps retained. Retry2 has real dump+line-info byte binding; no data fabricated from missing snapshots."
+  ],
+  "scope": "45-second combined-LTO diagnostic; source statement counterparts, not a throughput result",
+  "artifacts": {
+    "source-comparison.json": "41edf2e7edfa4623793c5e0b39b6e14bf8c4725a07b55ff80539f9db20e70a52",
+    "replay-results.json": "c973e5db6bf4070cc3c4d89008e026f2ec5304ed176f3fafd68183126731284a",
+    "native-source-rows.json": "7bdbd1e116572e3d1a5bc8346e6b6816f9c1431d087fb2c999e03750ccff9dc2"
+  },
+  "profile_tests": "11 existing tests PASS; Linux header ABI sizeof232 and offsets matched; actual guest metadata errors0, source-text mismatches0",
+  "failed_attempts_retained": [
+    "20261114-jit-source-profile",
+    "20261114-jit-source-profile/retry1"
+  ]
+}

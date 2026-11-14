@@ -80,6 +80,10 @@ for ph in baseline post_rejit; do
     grep -q "\"event\": \"measurement_start\", \"phase\": \"$ph\"" "$O/guest.log" 2>/dev/null && break
     sleep 2
   done
+  # Preserve JIT IP -> BTF source-line records while this phase is live.
+  # Metadata failure stays explicit and does not gate the workload/profile.
+  python3 kprog/perf/profile/jit-lines.py "$O/$ph.jit-lines.json" > "$O/$ph.jit-lines.log" 2>&1
+  echo $? > "$O/$ph.jit-lines.rc"
   echo "phase-profile: perf start $ph $(date -u +%FT%TZ)" >> "$O/phase-profile.log"
   if [ "$MODE" = host ]; then
     cat /proc/kallsyms > "$O/$ph.start.kallsyms"
@@ -171,9 +175,14 @@ def run(args: argparse.Namespace) -> int:
     if args.host_event:
         command[-1] += " host"
     actual_command = execution_command(command, args, out)
+    environment = dict(os.environ)
+    if environment.get("EQCODEX_OUT"):
+        # GUEST writes workload progress into this file, not its stdout.
+        environment.setdefault("EQCODEX_PROGRESS_LOG", "/var/tmp/out/guest.log")
     (out / "command.json").write_text(
         json.dumps({"command": command, "execution_command": actual_command,
                     "host_event": args.host_event,
+                    "observer_progress_log": environment.get("EQCODEX_PROGRESS_LOG"),
                     "app": args.app, "seconds": args.seconds,
                     "freq": args.freq, "event": args.event,
                     "cpus": args.cpus, "vcpus": args.vcpus},
@@ -182,7 +191,7 @@ def run(args: argparse.Namespace) -> int:
     if args.host_event:
         (out / "host.start.clock.json").write_text(json.dumps(dict(
             wall_ns=time.time_ns(), monotonic_ns=time.monotonic_ns())) + "\n")
-    completed = subprocess.run(actual_command, stdout=log, stderr=subprocess.STDOUT)
+    completed = subprocess.run(actual_command, stdout=log, stderr=subprocess.STDOUT, env=environment)
     if args.host_event:
         (out / "host.end.clock.json").write_text(json.dumps(dict(
             wall_ns=time.time_ns(), monotonic_ns=time.monotonic_ns())) + "\n")
@@ -194,8 +203,14 @@ def run(args: argparse.Namespace) -> int:
                               f"{phase}.end.clock.json"])
     else:
         artifacts.extend(["baseline.data", "post_rejit.data"])
+    for phase in PHASES:
+        artifacts.extend(f"{phase}.jit-lines.{suffix}" for suffix in ("json", "log", "rc", "d"))
     for name_ in artifacts:
         source = var_tmp / "out" / name_
+        if source.is_dir():
+            if not args.persist_output:
+                shutil.copytree(source, out / name_)
+            continue
         if not source.is_file():
             print(f"missing guest artifact: {source}", file=sys.stderr)
             continue

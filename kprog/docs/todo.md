@@ -901,3 +901,5 @@
 - [ ] 公开文档（README、CONTRIBUTING、SECURITY，英文）和新 CI。
 - [ ] 安静窗口：内核合并，kinsn 和 kprog 拆成两个 submodule，全新环境构建验证。
 - [ ] 主树的 `corpus/driver.py`（冻结版）从 `runner/libs/rejit.py` 导入 `snapshot_app_maps`，主树的 `rejit.py` 已经改掉了这个函数，主树上 `make corpus` 在导入这一步就停下。计时目前用 `kprog/perf/may29-image` 从 9f3855f6f 读框架；主树框架要和冻结的 driver 重新对齐（运营者 2026-11-09："也要确保 benchmark framework 不能变化"）。
+
+- P1 OTel JIT/source counterpart completed (2026-11-14, combined-only): live BTF/JIT 1646 records, zero capture/text errors; exact proof->kernel replay and actual JIT +33-byte binding. Body native2874.76 vs JIT2238.34 sampled cycles/entry; bsearch source group S2 native1443.87/JIT916.44, native128 CMOV+109 compiler-proven spill/reloads versus JIT0 CMOV (JIT spill count unknown). Groups overlap, never sum; 45s diagnostic only, no new throughput claim. Receipt `otel-jit-source-comparison.json`, raw `20261114-jit-source-profile/retry2`. Collector/progress-path fixed; prior failed captures retained. Next combined producer flags per coordinator14:18.
