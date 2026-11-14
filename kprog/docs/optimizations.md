@@ -51,3 +51,16 @@ native compiler retain their existing definitions. This is B generation for
 verification feasibility; the combined runtime ratios retain their prior
 scope. Evidence: `whole-word-spill-values/report.md`, and raw
 `20261114-scalar-spill-precision/backend/{result,commands}.json`.
+
+Optional tracing-context B lowering (`c5e3ba2c2`):
+`KPROG_BPF_CONTEXT_LOADS=1` forwards `--canonical-ctx-loads` to the B IR
+compiler. For KPROBE constant loads rooted in the original context, it keeps
+the root operand and encodes the proven displacement in the memory instruction,
+including an empty tied-register identity barrier. The load width, volatility
+and narrow-result zero extension are preserved. Default zero retains the
+existing B compiler invocation. This phase1 compiler representation change
+targets the modified-context rejection seen in census body70; host byte/width
+checks and actual stock-kernel load tests are the current subset validation.
+The shared simulator C, runtime P and pre-bounds IR used by checked native
+compilation retain their definitions. Whole-body replay and runtime effects
+remain to be measured; combined LTO timing retains its existing scope.
