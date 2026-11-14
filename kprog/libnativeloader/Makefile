@@ -26,6 +26,9 @@ ENTRY_DATA_REAL_PROOF ?= /var/tmp/kprog-tmp/perf/cilium-config-symbols/bpf_lxc-r
 ENTRY_DATA_LINKER ?= $(REPO_ROOT)/kprog/x86/native_lab/native_link/target/release/native-link
 DIRECT_TAIL_BUILD ?= /var/tmp/kprog-tmp/verified/direct-tail
 DIRECT_TAIL_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-direct-tail/host
+FRAME_BUILD ?= /var/tmp/kprog-tmp/verified/frame-pointer
+FRAME_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-frame-pointer/kernel
+FRAME_LINKER ?= $(DIRECT_TAIL_BUILD)/cargo/debug/native-link
 KFUNC_BUILD ?= /var/tmp/kprog-tmp/verified/kfunc
 KFUNC_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/host
 KFUNC_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/kernel
@@ -93,6 +96,38 @@ guest-kfunc:
 	"$(KFUNC_KERNEL_OUTPUT)/kfunc" kernel "$(KFUNC_KERNEL_OUTPUT)/weak.o" "$(KFUNC_KERNEL_OUTPUT)/strong.o" \
 		"$(KFUNC_KERNEL_OUTPUT)/source.bpf.o" "$(KFUNC_KERNEL_OUTPUT)/source.native.o" \
 		/sys/kernel/btf/vmlinux "$(KFUNC_KERNEL_OUTPUT)" "$(KFUNC_KERNEL_OUTPUT)/proof.bpf.o" $(KFUNC_MODEL_PROOF)
+
+.PHONY: tail-frame-inputs tail-frame-kvm guest-tail-frame
+tail-frame-inputs:
+	install -d "$(FRAME_BUILD)"
+	clang-18 -O2 -g -target bpf -I/usr/include/x86_64-linux-gnu -I"$(LIBBPF_PREFIX)/include/bpf" \
+		-c ../test/tail_call_frame/program.c -o "$(FRAME_BUILD)/source.bpf.o"
+	clang-18 -fPIC -c ../test/tail_call_frame/frame-pointer.S -o "$(FRAME_BUILD)/frame.native.o"
+	$(CXX) -std=gnu++20 -O1 -g -ffunction-sections -fdata-sections \
+		-Iinclude -I"$(KERNEL_OFFSETS_INCLUDE)" -I"$(LIBBPF_PREFIX)/include" \
+		-I"$(REPO_ROOT)/vendor/libbpf/include" -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
+		src/native_loader.cpp ../test/tail_call_frame/client.cpp -Wl,--gc-sections \
+		"$(LIBBPF_LIBRARY)" -lelf -lz -ldl -pthread -o "$(FRAME_BUILD)/client"
+
+tail-frame-kvm:
+	install -d "$(FRAME_OUTPUT)"
+	install -m 0755 "$(FRAME_BUILD)/client" "$(FRAME_OUTPUT)/client"
+	install -m 0644 "$(FRAME_BUILD)/source.bpf.o" "$(FRAME_BUILD)/frame.native.o" "$(FRAME_OUTPUT)/"
+	taskset -c 13 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(FRAME_OUTPUT)" --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/libnativeloader guest-tail-frame FRAME_OUTPUT=$(FRAME_OUTPUT) FRAME_LINKER=$(FRAME_LINKER)'
+
+guest-tail-frame:
+	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" KPROG_FRAME_LINKER="$(FRAME_LINKER)" \
+		python3 ../trusted_service.py --arch 1 \
+		--endpoint /sys/kernel/debug/bpf_x86_native_lab/specializer \
+		--module /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
+		--state "$(FRAME_OUTPUT)/state" --results "$(FRAME_OUTPUT)/service.tar.gz" \
+		--native-link "$(REPO_ROOT)/kprog/test/tail_call_frame/native-link.sh" \
+		--loader /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader \
+		--run "$(FRAME_OUTPUT)/client" "$(FRAME_OUTPUT)/source.bpf.o" "$(FRAME_OUTPUT)/frame.native.o" \
+		"$(REPO_ROOT)/kprog/test/tail_call_frame/native-link.sh" "$(FRAME_OUTPUT)/native-image.bin"
 
 .PHONY: direct-tail-check
 direct-tail-check:

@@ -1,0 +1,54 @@
+{
+  "source_commit": "d401bc93a",
+  "make_exit": 0,
+  "started": "2026-11-14T01:18:07Z",
+  "finished": "2026-11-14T01:18:16Z",
+  "rust_suite": "19 passed,0failed,1preexistingignored microbenchmark",
+  "frame_regression": "Production saved-BPF-RBP slot and cleanup execute correctly across frame sizes, save sets, CET prefix, pop/leave/MOV-RSP epilogues; source frame-pointer code preserved",
+  "host_cases": [
+    {
+      "entry": "entry",
+      "samples": 8,
+      "maps": []
+    },
+    {
+      "entry": "nested",
+      "samples": 8,
+      "maps": []
+    },
+    {
+      "entry": "global_tail",
+      "samples": 8,
+      "maps": [
+        "live_value"
+      ]
+    },
+    {
+      "entry": "external_entry",
+      "samples": 8,
+      "maps": []
+    },
+    {
+      "entry": "decoded_entry",
+      "samples": 8,
+      "maps": []
+    },
+    {
+      "entry": "stack_entry",
+      "samples": 8,
+      "maps": []
+    },
+    {
+      "entry": "plain_entry",
+      "samples": 8,
+      "maps": []
+    }
+  ],
+  "unaffected_default_identical": true,
+  "candidate_sha256": "1d144785ca76bb0c6637d681afd7a244771cabc53254da892e4f6207cdf89802",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-direct-tail",
+  "archive": "frame-pointer-host-results.tar.gz",
+  "canonical_changed": false,
+  "kernel_validation": "Prepared existing real tail-call harness with frame-pointer fixture; not run yet",
+  "scope": "Host ABI/linker validation only; no new whole-app or native kernel execution claim"
+}
