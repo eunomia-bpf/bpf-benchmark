@@ -1,0 +1,16 @@
+{
+  "recorded": "2026-11-14T05:16:03.277444+00:00",
+  "job": 190898,
+  "make_exit_code": 0,
+  "result": {
+    "before_pointer_and_rejected": true,
+    "after_verified": true,
+    "execution_cases": 8
+  },
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-self-compare",
+  "archive": "kprog/results/verified_20261114/self-compare-kernel-results.tar.gz",
+  "sha256": "5e2950fae07f925061b23badda26d7e335e85c4bd4cd74fbd4778dc40795cdd7",
+  "bytes": 186292,
+  "scope": "Stock-verifier and TEST_RUN regression of the general equal-register-lane CMP/TEST model repair; not application coverage",
+  "raw_removed": false
+}
