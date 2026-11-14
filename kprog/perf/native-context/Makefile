@@ -150,6 +150,12 @@ OTEL_PROFILE_MANIFEST ?= $(ROOT)/corpus/results/perf-otel-upstream-20261114/mani
 PROFILE_TOOL_BUILD ?= /var/tmp/kprog-tmp/perf/profile-tool
 PROFILE_PERF_SOURCE ?= /workspaces/kprog-raw/perf/20261113-loader-cpu-profile/tool/perf
 OTEL_PROFILE_EVENT ?= cpu-clock
+.PHONY: host-guest-pmu-check
+HOST_GUEST_PMU_EVENT ?= cpu_atom/cycles/G
+host-guest-pmu-check:
+	cat /sys/module/kvm/parameters/enable_pmu
+	$(PROFILE_TOOL_BUILD)/perf stat -e $(HOST_GUEST_PMU_EVENT) -- sleep 0.01
+
 .PHONY: profile-tool otel-profile otel-profile-report profile-tool-check
 profile-tool-check:
 	python3 -m unittest discover -s $(ROOT)/kprog/perf/profile -p test_perf_selection.py

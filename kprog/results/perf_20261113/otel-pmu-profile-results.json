@@ -1,0 +1,34 @@
+{
+  "recorded_at": "2026-11-14T02:38:50.728528+00:00",
+  "protocol_commit": "220a047c3",
+  "raw": "/workspaces/kprog-raw/perf/20261114-otel-pmu-profile",
+  "inputs": [],
+  "reports": [
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-otel-pmu-profile/collection.json",
+      "sha256": "1ba65a6ca14201be8fc063d0d1d253acf79c29c938d25587e4d73d1aeaf40fbc",
+      "data": {
+        "recorded_at": "2026-11-14T02:38:50Z",
+        "outer_pid": 130037,
+        "make_exit": 2,
+        "finished": "2026-11-14T02:33:47Z",
+        "app_started": false,
+        "guest_event": "cycles:k",
+        "guest_preflight": "Error:\nNo supported events found.\nThe cycles:k event is not supported.\n",
+        "kvm_enable_pmu": "N",
+        "host_guest_event": "cpu_atom/cycles/G",
+        "host_preflight": "cat /sys/module/kvm/parameters/enable_pmu\nN\n/var/tmp/kprog-tmp/perf/profile-tool/perf stat -e cpu_atom/cycles/G -- sleep 0.01\n\n Performance counter stats for 'sleep 0.01':\n\n                 0      cpu_atom/cycles/G                                                     \n\n       0.010738480 seconds time elapsed\n\n       0.000718000 seconds user\n       0.000000000 seconds sys\n\n\n",
+        "host_preflight_scope": "Counter configuration accepted; zero count without a guest does not prove guest sample capture.",
+        "source_commit": "220a047c3",
+        "scope": "Failed guest hardware-event capability probe only; no OTel run or performance number."
+      }
+    }
+  ],
+  "scope": "Actual guest PMU preflight failure before app startup and host guest-only counter configuration probe. No workload result, no guest sample capture proof.",
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/perf_20261113/otel-pmu-profile-results.tar.gz",
+    "bytes": 2925,
+    "sha256": "7b41e876ca3227bc636800faeeb9c583ad11450c96940072785ea46196b89034",
+    "files_byte_compared": 15
+  }
+}
