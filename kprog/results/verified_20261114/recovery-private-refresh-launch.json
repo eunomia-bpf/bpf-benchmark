@@ -1,0 +1,24 @@
+{
+  "recorded": "2026-11-14T06:58:29.662953+00:00",
+  "pid": 239086,
+  "wait_pid": 235861,
+  "dependency": "Wait resource reader before imageEX; no benchmark-success gate",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-recovery-private-refresh",
+  "targets": [
+    "shared-base-refresh --direct-recovery",
+    "checked-sim-stage"
+  ],
+  "implementation_commits": [
+    "81c6d23cf",
+    "e6e64b725",
+    "e591ca53f"
+  ],
+  "image": "bpf-benchmark/kprog:current",
+  "host_cpus": "8-15",
+  "host_as_bytes": 25769803776,
+  "kernel_or_rust_or_app_build": false,
+  "dry_run_exit_code": 0,
+  "postlaunch_outcome_polled": false,
+  "canonical_deployment_collected": false,
+  "raw_removed": false
+}
