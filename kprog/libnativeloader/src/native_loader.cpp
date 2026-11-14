@@ -3953,13 +3953,6 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
                 proof_types.get(), kernel.get());
         }
     }
-    LinkedBlob linked = load_or_link_native_blob(options.native_link_path, options.native_object_path,
-        options.symbol_name, companion, options.trusted_native_proof_path);
-    // P retains its relocated maps; B's LDDW references retain B's maps.
-    std::vector<int> fd_array = reopen_relocated_map_fds(linked.relocated_map_ids);
-    for (int fd : fd_array)
-        pins.push_back(std::make_unique<ScopedFd>(fd));
-
     bpf_prog_load_opts opts{}; opts.sz = sizeof(opts);
     opts.expected_attach_type = static_cast<bpf_attach_type>(options.expected_attach_type);
     opts.prog_flags = options.prog_flags;
@@ -3984,10 +3977,28 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
         opts.prog_btf_fd = source_btf.get();
         opts.func_info = &entry; opts.func_info_cnt = 1; opts.func_info_rec_size = sizeof(entry);
     }
-    opts.fd_array = fd_array.data(); opts.fd_array_cnt = fd_array.size();
-    opts.prog_flags |= NATIVE_LAB_PROG_F_NATIVE_IMAGE;
     std::vector<char> log(16 * 1024 * 1024, '\0');
     opts.log_buf = log.data(); opts.log_size = log.size(); opts.log_level = 1;
+    const auto name = prog_info_name_or_stub(info);
+    if (options.trusted_verify_only) {
+        ScopedFd verified(bpf_prog_load(static_cast<bpf_prog_type>(info.type), name.c_str(),
+            info.gpl_compatible ? "GPL" : "BSD", proof.data(), proof.size(), &opts));
+        if (verified.get() < 0)
+            fail("service simulator verification failed before native compilation: " +
+                libbpf_error_string(verified.get()) + "\n" + std::string(log.data(), strnlen(log.data(), log.size())));
+        native_loader::LoadedProgram out{};
+        out.prog_fd = verified.fd; verified.fd = -1;
+        out.bpf_bytecode_bytes = proof.size() * sizeof(bpf_insn);
+        return out;
+    }
+    LinkedBlob linked = load_or_link_native_blob(options.native_link_path, options.native_object_path,
+        options.symbol_name, companion, options.trusted_native_proof_path);
+    // P retains its relocated maps; B's LDDW references retain B's maps.
+    std::vector<int> fd_array = reopen_relocated_map_fds(linked.relocated_map_ids);
+    for (int fd : fd_array)
+        pins.push_back(std::make_unique<ScopedFd>(fd));
+    opts.fd_array = fd_array.data(); opts.fd_array_cnt = fd_array.size();
+    opts.prog_flags |= NATIVE_LAB_PROG_F_NATIVE_IMAGE;
     native_lab_trusted_chunk image{};
     image.request_id = options.trusted_request_id;
     image.native_user = ptr_to_u64(linked.blob.data()); image.native_size = linked.blob.size();
@@ -3997,7 +4008,6 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
     image.load_site_count = linked.load_sites.size();
     if (ioctl(options.trusted_service_fd, NATIVE_LAB_TRUSTED_CHUNK, &image))
         fail("arm kernel native image: " + std::string(std::strerror(errno)));
-    const auto name = prog_info_name_or_stub(info);
     ScopedFd verified(bpf_prog_load(static_cast<bpf_prog_type>(info.type), name.c_str(),
         info.gpl_compatible ? "GPL" : "BSD", proof.data(), proof.size(), &opts));
     if (verified.get() < 0)

@@ -114,6 +114,44 @@ def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
     compile_simulator(clang, source, obj, run)
     result = dict(native_object=str(native), native_proof_object=str(proof),
         simulator_object=str(obj), simulator_program=name + "_x86_sim_xdp",
+        simulator_source=str(source), simulator_preprocessed=str(source.with_suffix('.i')),
         symbol=entry_symbol, native_sha256=hashlib.sha256(native_bytes).hexdigest())
     (output_dir / "artifacts.json").write_text(json.dumps(result, indent=2) + "\n")
+    return result
+
+
+def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path) -> dict:
+    """Called by the service only after the stock verifier accepts B."""
+    source = Path(artifacts['simulator_preprocessed'])
+    copied = source.with_name('checked-simulator.i')
+    shutil.copyfile(source, copied)
+    directory = source.parent
+
+    def run(command):
+        result = subprocess.run([str(x) for x in command], text=True, capture_output=True)
+        with (directory/'native-commands.jsonl').open('a') as log:
+            log.write(json.dumps(dict(command=[str(x) for x in command], returncode=result.returncode,
+                                      stdout=result.stdout, stderr=result.stderr))+'\n')
+        result.check_returncode()
+
+    clang = os.environ.get('CLANG') or shutil.which('clang')
+    if not clang:
+        raise RuntimeError('checked simulator compilation requires clang')
+    ir, lowered = directory/'checked-simulator.bc', directory/'checked-simulator.native.bc'
+    native, proof = directory/'checked-simulator.native.o', directory/'checked-simulator.proof.o'
+    run([clang, *COMPILE_FLAGS, '-emit-llvm', '-c', copied, '-o', ir])
+    run([compiler, ir, '-o', lowered])
+    run([clang, '-target', 'x86_64-linux-gnu', '-O3', '-fPIC', '-mno-red-zone',
+         '-mgeneral-regs-only', '-fno-stack-protector', '-fno-asynchronous-unwind-tables',
+         '-c', lowered, '-o', native])
+    run([native_link, '--input', native, '--symbol', artifacts['simulator_program'],
+         '--mode', 'proof', '--preserve-entry-abi', '--output', proof])
+    result = dict(artifacts, native_object=str(native), native_proof_object=str(proof),
+                  symbol=artifacts['simulator_program'])
+    (directory/'checked-simulator.json').write_text(json.dumps(dict(
+        source=str(source), copied_source=str(copied),
+        source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
+        copied_source_sha256=hashlib.sha256(copied.read_bytes()).hexdigest(),
+        executable_sha256=hashlib.sha256(native.read_bytes()).hexdigest(),
+        artifacts=result), indent=2)+'\n')
     return result

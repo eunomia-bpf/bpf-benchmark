@@ -153,6 +153,36 @@ def adapter(arch):
     return worker
 
 
+def load_service_artifacts(args, worker, fd, request, actual, envelope, artifacts, job):
+    """Keep verification, trusted compilation, linking and installation ordered."""
+    mode = getattr(args, 'execution_mode', 'submitted-native')
+    def load(phase, candidate):
+        argv = [args.loader, phase, fd, request.request_id, request.source_prog_id,
+            candidate['native_object'], candidate['symbol'], candidate['native_proof_object'],
+            candidate['simulator_object'], candidate['simulator_program'], args.native_link]
+        argv.extend(actual[f] for f in ('expected_attach_type','prog_flags','attach_btf_id',
+            'attach_btf_obj_id','attach_prog_id','prog_ifindex'))
+        if not request.source_prog_id:
+            argv.extend([actual['prog_type'],actual['gpl_compatible'],
+                actual['source_btf_id'],actual.get('source_func_type_id',0)])
+        for item in envelope['maps']:
+            argv.extend([item['name'],item['map_id'],
+                'null' if item['value_offset'] is None else item['value_offset']])
+        result = subprocess.run([str(x) for x in argv], pass_fds=(fd,), text=True, capture_output=True)
+        (job/(phase+'.stdout')).write_text(result.stdout)
+        (job/(phase+'.stderr')).write_text(result.stderr)
+        result.check_returncode()
+        completion = strict_json(result.stdout)
+        if completion['request_id'] != request.request_id or completion['status'] or not completion['prog_id']:
+            raise RuntimeError('loader returned an invalid completion')
+        return completion
+    if mode == 'checked-sim-c':
+        verified = load('verify', artifacts)
+        (job/'checked-simulator-verification.json').write_text(json.dumps(verified, indent=2)+'\n')
+        artifacts = worker.compile_checked_simulator(artifacts, args.native_link, args.sim_native_compiler)
+    return load('load', artifacts)
+
+
 def serve(args):
     import hashlib
     import tarfile
@@ -170,7 +200,8 @@ def serve(args):
             request, (native,entry_bytes,meta_bytes) = next_request(fd)
             fcntl.flock(request_lock,fcntl.LOCK_EX)
             record = dict(request_id=request.request_id,source_prog_id=request.source_prog_id,
-                native_sha256=hashlib.sha256(native).hexdigest(),started=datetime.now(timezone.utc).isoformat())
+                native_sha256=hashlib.sha256(native).hexdigest(),execution_mode=args.execution_mode,
+                started=datetime.now(timezone.utc).isoformat())
             with tempfile.TemporaryDirectory(prefix='request-',dir=root) as temporary:
                 job = Path(temporary)
                 (job/'kernel.native.o').write_bytes(native)
@@ -192,27 +223,12 @@ def serve(args):
                     if isa == 'x86':
                         source_paths.extend([ROOT/'kprog/kernel_function_abi.py',
                             ROOT/'kprog/x86/micro-prog/kfunc_codegen.py', ROOT/'kprog/x86/micro-prog/x86_abi.py'])
+                    if args.execution_mode == 'checked-sim-c':
+                        source_paths.extend([args.sim_native_compiler, ROOT/'kprog/x86/compile_sim_ir.cpp'])
                     identities={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in source_paths}
                     (job/'source-identities.json').write_text(json.dumps(identities,indent=2))
                     artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)
-                    context = actual
-                    argv = [args.loader,'load',fd,request.request_id,request.source_prog_id,
-                        artifacts['native_object'],entry,artifacts['native_proof_object'],
-                        artifacts['simulator_object'],artifacts['simulator_program'],args.native_link]
-                    argv.extend(context[f] for f in ('expected_attach_type','prog_flags','attach_btf_id',
-                        'attach_btf_obj_id','attach_prog_id','prog_ifindex'))
-                    if not request.source_prog_id:
-                        argv.extend([context['prog_type'],context['gpl_compatible'],
-                            context['source_btf_id'],context.get('source_func_type_id',0)])
-                    for item in envelope['maps']:
-                        argv.extend([item['name'],item['map_id'],'null' if item['value_offset'] is None else item['value_offset']])
-                    result = subprocess.run([str(x) for x in argv],pass_fds=(fd,),text=True,capture_output=True)
-                    (job/'load.stdout').write_text(result.stdout)
-                    (job/'load.stderr').write_text(result.stderr)
-                    result.check_returncode()
-                    completion = strict_json(result.stdout)
-                    if completion['request_id'] != request.request_id or completion['status'] or not completion['prog_id']:
-                        raise RuntimeError('loader returned an invalid completion')
+                    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)
                     record.update(completion)
                 except Exception as error:
                     record.update(status=-errno.EINVAL if isinstance(error,(ValueError,KeyError,UnicodeError)) else -errno.EIO,
@@ -262,7 +278,10 @@ def run_application(args):
                 service=subprocess.Popen([sys.executable,str(Path(__file__).resolve()),
                     '--arch',str(args.arch),'--endpoint',str(args.endpoint),
                     '--state',str(private/'requests'),'--native-link',str(args.native_link),
-                    '--loader',str(args.loader)],stdout=subprocess.PIPE,
+                    '--loader',str(args.loader),
+                    '--execution-mode',getattr(args,'execution_mode','submitted-native'),
+                    *(['--sim-native-compiler',str(args.sim_native_compiler)]
+                      if getattr(args,'sim_native_compiler',None) else [])],stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT,text=True,start_new_session=True)
                 line=service.stdout.readline()
                 log.write(line);log.flush()
@@ -321,10 +340,14 @@ def main():
     parser.add_argument('--state',type=Path,required=True)
     parser.add_argument('--native-link',type=Path,required=True)
     parser.add_argument('--loader',type=Path,required=True)
+    parser.add_argument('--execution-mode',choices=('submitted-native','checked-sim-c'),default='submitted-native')
+    parser.add_argument('--sim-native-compiler',type=Path)
     parser.add_argument('--module',type=Path)
     parser.add_argument('--results',type=Path)
     parser.add_argument('--run',nargs=argparse.REMAINDER)
     args=parser.parse_args()
+    if args.execution_mode == 'checked-sim-c' and (args.arch != 1 or not args.sim_native_compiler):
+        parser.error('checked-sim-c requires --arch 1 and --sim-native-compiler')
     if args.run is not None:
         if not args.run:
             parser.error('--run requires an application command')

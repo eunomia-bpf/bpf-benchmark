@@ -32,6 +32,12 @@ FRAME_LINKER ?= $(DIRECT_TAIL_BUILD)/cargo/debug/native-link
 SOURCE_MAP_BUILD ?= /var/tmp/kprog-tmp/verified/source-maps
 SOURCE_MAP_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-source-maps/host
 SOURCE_MAP_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-source-maps/kernel
+SOURCE_MAP_LOADER ?= /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader
+SOURCE_MAP_VM_MEMORY ?= 2G
+SERVICE_EXECUTION_ARGS ?=
+CHECKED_SIM_BUILD ?= /var/tmp/kprog-tmp/verified/checked-sim
+CHECKED_SIM_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-checked-sim/host
+CHECKED_SIM_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-checked-sim/kernel
 KFUNC_BUILD ?= /var/tmp/kprog-tmp/verified/kfunc
 KFUNC_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/host
 KFUNC_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/kernel
@@ -124,8 +130,8 @@ source-maps-kvm:
 	install -m 0755 "$(FRAME_LINKER)" "$(SOURCE_MAP_KERNEL_OUTPUT)/native-link.real"
 	taskset -c 14 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
 		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(SOURCE_MAP_KERNEL_OUTPUT)" --overlay-rwdir /tmp \
-		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -C kprog/libnativeloader guest-source-maps SOURCE_MAP_KERNEL_OUTPUT=$(SOURCE_MAP_KERNEL_OUTPUT)'
+		--disable-monitor --cpus 2 --memory $(SOURCE_MAP_VM_MEMORY) --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/libnativeloader guest-source-maps SOURCE_MAP_KERNEL_OUTPUT=$(SOURCE_MAP_KERNEL_OUTPUT) SOURCE_MAP_LOADER=$(SOURCE_MAP_LOADER) SERVICE_EXECUTION_ARGS="$(SERVICE_EXECUTION_ARGS)"'
 
 guest-source-maps:
 	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" KPROG_FRAME_LINKER="$(SOURCE_MAP_KERNEL_OUTPUT)/native-link.real" \
@@ -134,9 +140,33 @@ guest-source-maps:
 		--module /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
 		--state "$(SOURCE_MAP_KERNEL_OUTPUT)/state" --results "$(SOURCE_MAP_KERNEL_OUTPUT)/service.tar.gz" \
 		--native-link "$(REPO_ROOT)/kprog/test/tail_call_frame/native-link.sh" \
-		--loader /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader \
+		--loader "$(SOURCE_MAP_LOADER)" $(SERVICE_EXECUTION_ARGS) \
 		--run "$(SOURCE_MAP_KERNEL_OUTPUT)/source-maps" kernel "$(SOURCE_MAP_KERNEL_OUTPUT)/fixture.bpf.o" \
 		"$(SOURCE_MAP_KERNEL_OUTPUT)/fixture.native.o" "$(REPO_ROOT)/kprog/test/tail_call_frame/native-link.sh" "$(SOURCE_MAP_KERNEL_OUTPUT)"
+
+.PHONY: checked-sim-inputs checked-sim-check checked-sim-kvm
+checked-sim-inputs:
+	install -d "$(CHECKED_SIM_BUILD)"
+	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
+		../x86/compile_sim_ir.cpp -o "$(CHECKED_SIM_BUILD)/compile-sim-ir" \
+		$$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis support --system-libs)
+	$(CXX) -std=gnu++20 -O1 -g -ffunction-sections -fdata-sections \
+		-Iinclude -I"$(KERNEL_OFFSETS_INCLUDE)" -I"$(LIBBPF_PREFIX)/include" \
+		-I"$(REPO_ROOT)/vendor/libbpf/include" -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
+		src/native_loader.cpp ../trusted_loader.cpp -Wl,--gc-sections \
+		"$(LIBBPF_LIBRARY)" -lelf -lz -ldl -pthread -o "$(CHECKED_SIM_BUILD)/trusted-native-loader"
+
+checked-sim-check: checked-sim-inputs
+	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" python3 ../test/check_checked_simulator.py \
+		"$(CHECKED_SIM_BUILD)/compile-sim-ir" "$(FRAME_LINKER)" "$(SOURCE_MAP_BUILD)/fixture.native.o" "$(CHECKED_SIM_OUTPUT)"
+	python3 ../test/check_trusted_service.py TrustedApplicationBootstrap
+
+checked-sim-kvm:
+	install -d "$(CHECKED_SIM_KERNEL_OUTPUT)"
+	install -m 0755 "$(CHECKED_SIM_BUILD)/compile-sim-ir" "$(CHECKED_SIM_BUILD)/trusted-native-loader" "$(CHECKED_SIM_KERNEL_OUTPUT)/"
+	$(MAKE) source-maps-kvm SOURCE_MAP_KERNEL_OUTPUT="$(CHECKED_SIM_KERNEL_OUTPUT)" \
+		SOURCE_MAP_LOADER="$(CHECKED_SIM_KERNEL_OUTPUT)/trusted-native-loader" \
+		SERVICE_EXECUTION_ARGS="--execution-mode checked-sim-c --sim-native-compiler $(CHECKED_SIM_KERNEL_OUTPUT)/compile-sim-ir"
 
 .PHONY: tail-frame-inputs tail-frame-kvm guest-tail-frame
 tail-frame-inputs:

@@ -1,0 +1,36 @@
+{
+  "recorded": "2026-11-14T03:12:39.671499+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-checked-sim",
+  "archive": "checked-sim-host-results.tar.gz",
+  "source_identities": {
+    "kprog/trusted_service.py": "4043e42c31191cf6cded5f3c7ee0edadd73dd26489360c957bc0f5a34f254452",
+    "kprog/trusted_loader.cpp": "430e13bddea19c022a68cf18b882f44f1d26b5e2f9bafac3953527390235c7b3",
+    "kprog/x86/trusted_specializer.py": "06bfb339e53bbe2fb8d1df8efe8b186145ae4d1b36bb8a774e3b5ac0346a1d79",
+    "kprog/x86/compile_sim_ir.cpp": "ca7de3a66ab6774dbbe0d3f842d9d99f01c600f866eb9508fdaf96eee82edbb4",
+    "kprog/libnativeloader/Makefile": "82fd0e62c321bfac24ca603fa0ad8d7fa9aa8b8f06247cd3fdbaee2601cc8d5e",
+    "kprog/libnativeloader/src/native_loader.cpp": "20fad9b7287a59b28401c100686cd7180c4d1c1cc7ab5ca15535860fe56865c1",
+    "kprog/libnativeloader/include/native_loader.hpp": "62b8990d24fceb0a93316229a4db7b20f0488e912158cd7b8d9386f6c7fcaa19",
+    "kprog/test/check_checked_simulator.py": "43f4c0141a312706382cfda39aad0d252f90f24c3414c3cddbd160f0f6fb8651",
+    "kprog/test/checked_sim_ir_fixture.c": "2d1486fae5002e9ea362b836f4ea6bc59f9f7d573ddea833f4d394facbdb5d8a"
+  },
+  "host_result": "PASS",
+  "host_vectors": 8,
+  "width_vectors": 60,
+  "lifecycle_tests": 2,
+  "exact_preprocessed_copy": true,
+  "rejection_before_native_compilation": "PASS: transport fixture, actual kernel rejection not yet tested",
+  "unknown_asm_error": "PASS",
+  "compile_fixups": [
+    "Preserve verifier-unreachable unresolved call -1 as native trap, not an invented target",
+    "Clear BPF frontend DSOLocal for actual native map/helper ELF linkage",
+    "Width fixture uses same mcpu=v4 as production simulator"
+  ],
+  "failed_attempts_retained": [
+    "host",
+    "retry1-host",
+    "final-host"
+  ],
+  "kernel_test": "Prepared, not launched yet",
+  "canonical_changed": false,
+  "scope": "New optional service configuration and host component regression; no application certification"
+}
