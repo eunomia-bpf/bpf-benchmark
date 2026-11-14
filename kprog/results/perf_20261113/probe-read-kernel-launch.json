@@ -2,7 +2,7 @@
   "recorded_at": "2026-11-14T06:30:44.158638+00:00",
   "source_commit": "d5e5efa55",
   "model_commit": "52964ca12",
-  "model_sha256": "9bafbd9ed139a97a1d892c7a73b991da51742d9a197759a24829731d284df0f5",
+  "model_sha256": "f95f3e3b9ece20bd1a7340c9d2be478cb7befea33bae02892dfe353d525c0bb0",
   "kernel_outer_pid": 227579,
   "input_outer_pid": 226727,
   "input_build": "LAUNCHED_UNCOLLECTED",
@@ -24,5 +24,7 @@
     "kernel-denies-user",
     "kernel-denies-null",
     "kernel-fault"
-  ]
+  ],
+  "model_path": "kprog/x86/x86_sim_local_bpf.h",
+  "model_matches_52964ca12": true
 }
