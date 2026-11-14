@@ -37,5 +37,24 @@
       "sha256": "bd21e4337cea9294a19aff9d7b14d1aa25769d968c059506c2aa830b3aa2266d"
     }
   ],
-  "scope": "Input build fix only. No native kernel semantic execution, throughput or floor result."
+  "scope": "Input build fix only. No native kernel semantic execution, throughput or floor result.",
+  "retry_launch": {
+    "recorded_at": "2026-11-14T06:39:40.273267+00:00",
+    "source_commit": "1fbe83feb",
+    "outer_pid": 230249,
+    "job": "/workspaces/kprog-raw/perf/20261114-probe-read/kernel-retry1-job",
+    "output": "/workspaces/kprog-raw/perf/20261114-probe-read/kernel-retry1",
+    "status": "LAUNCHED_UNCOLLECTED_NO_POSTLAUNCH_POLLS",
+    "cpus": "16-19",
+    "vcpus": 2,
+    "memory": "4G",
+    "address_space_bytes": 17179869184,
+    "image_lock": "shared",
+    "model_sha256": "f95f3e3b9ece20bd1a7340c9d2be478cb7befea33bae02892dfe353d525c0bb0",
+    "configurations": [
+      "submitted-native",
+      "checked-sim-c"
+    ],
+    "expected_cases": "9 stock/native pairs per configuration; no result assumed"
+  }
 }
