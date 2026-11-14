@@ -13,6 +13,12 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 
+def native_response(line):
+    output = json.loads(line)
+    assert output.pop('reference_base') == 'LNSym'
+    return output
+
+
 def check_logical_immediates(base):
     """Construct native words from semantic runs, not a second mask decoder."""
     base = copy.deepcopy(base)
@@ -80,7 +86,7 @@ def check_logical_immediates(base):
             process.stdin.flush()
             line = process.stdout.readline()
             assert line, (request, process.stderr.read())
-            output = json.loads(line)
+            output = native_response(line)
             assert output == expected, (request, output, expected)
             completed += 1
         for word, width, opcode, mask in words:
@@ -170,7 +176,7 @@ def check_thread_pointers(base):
                         process.stdin.flush()
                         line = process.stdout.readline()
                         assert line, (request, process.stderr.read())
-                        actual = json.loads(line)
+                        actual = native_response(line)
                         assert actual == expected, (request, actual, expected)
                         completed += 1
         process.stdin.close()
@@ -190,13 +196,13 @@ def check_thread_pointers(base):
                                 capture_output=True)
         assert output.returncode == 1 and expected_error.lower() in output.stderr.lower(), (request, output)
     # An adjacent writable system opcode and EL0 TP remain distinct native forms.
-    for word in (0xD518D08A, 0xD53BD04A):
+    for word, diagnostic in [(0xD518D08A, "LNSym cannot decode"), (0xD53BD04A, "StateError.Unimplemented")]:
         request = copy.deepcopy(base)
         request['native_bytes'] = list(word.to_bytes(4, 'little'))
         request['state']['thread_pointer_reads'] = dict(el1=1, el2=2)
         output = subprocess.run([binary], input=json.dumps(request) + '\n', text=True,
                                 capture_output=True)
-        assert output.returncode == 1 and 'unrecognized AArch64 native opcode' in output.stderr, (request, output)
+        assert output.returncode == 1 and diagnostic in output.stderr, (request, output)
     print(f'AArch64 MRS thread-pointer reference: {completed} complete-state/profile/fault cases, '
           '64 LLVM native encodings and7 wire/decode refusals PASS')
 
@@ -984,7 +990,7 @@ def main():
     run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                          input="".join(json.dumps(q) + "\n" for q, _ in cases),
                          text=True, stdout=subprocess.PIPE, check=True)
-    outputs = [json.loads(line) for line in run.stdout.splitlines()]
+    outputs = [native_response(line) for line in run.stdout.splitlines()]
     assert len(outputs) == len(cases)
     for (request, expected), out in zip(cases, outputs):
         assert out == expected, (request, out, expected)
@@ -1025,7 +1031,7 @@ def main():
         wrong_vectors = copy.deepcopy(bank_request)
         wrong_vectors["state"]["vectors"] = vectors
         bad.append(wrong_vectors)
-    for key in ("sp_alignment_check", "pair_single_access"):
+    for key in ("sp_alignment_check", "pair_single_access", "lse2_unaligned_within_16"):
         wrong_profile = copy.deepcopy(malformed)
         wrong_profile["state"][key] = 1
         bad.append(wrong_profile)

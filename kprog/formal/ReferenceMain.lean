@@ -39,7 +39,7 @@ private def parseCells (j : Json) : Except String (Array InputCell) := do
 
 /-- Absent cells are unmapped, never readable zero-filled memory. Every mapped
 cell, including an uninitialized one, must provide its actual input value. -/
-private def memoryOfCells (cells : Array InputCell) : Memory :=
+private def memoryOfCells (cells : Array InputCell) : KProgFormal.Reference.Memory :=
   let table := cells.foldl (fun m cell => m.insert cell.address.toNat cell)
     ({} : Std.HashMap Nat InputCell)
   { value := fun a => match table[a.toNat]? with | some c => c.value | none => 0
@@ -47,7 +47,7 @@ private def memoryOfCells (cells : Array InputCell) : Memory :=
     writable := fun a => match table[a.toNat]? with | some c => c.writable | none => false
     initialized := fun a => match table[a.toNat]? with | some c => c.initialized | none => false }
 
-private def parseState (j : Json) (cells : Array InputCell) : Except String X86.State := do
+private def parseState (j : Json) (cells : Array InputCell) : Except String KProgFormal.Reference.X86.State := do
   let registers ← (← j.getObjVal? "registers").getArr?
   let regs ← registers.mapM fun r => do
     let n ← r.getNat?
@@ -58,11 +58,11 @@ private def parseState (j : Json) (cells : Array InputCell) : Except String X86.
     let fs ← fieldWord j "fs_base"
     let gs ← fieldWord j "gs_base"
     let addressWidth ← match j.getObjVal? "linear_address_bits" with
-      | .error _ => pure X86.AddressWidth.w48
+      | .error _ => pure KProgFormal.Reference.X86.AddressWidth.w48
       | .ok value => do
           let bits ← value.getNat?
-          if bits = 48 then pure X86.AddressWidth.w48
-          else if bits = 57 then pure X86.AddressWidth.w57
+          if bits = 48 then pure KProgFormal.Reference.X86.AddressWidth.w48
+          else if bits = 57 then pure KProgFormal.Reference.X86.AddressWidth.w57
           else throw "linear_address_bits must be 48 or 57"
     let xmm ← fieldNat j "xmm0"
     if xmm ≥ 2^128 then throw "xmm0 is outside the 128-bit range"
@@ -109,11 +109,11 @@ private def executeX86 (request : Json) : Except String Json := do
   let bytes ← parseNativeBytes (← request.getObjVal? "native_bytes")
   let (output, mask, registers) ← match request.getObjVal? "native_path" with
     | .error _ => do
-        let instruction ← X86.decode bytes initial
-        let output := X86.step instruction initial
-        let masks := (List.finRange 16).map (fun r => (X86.definedRegister instruction r).toNat)
+        let instruction ← KProgFormal.Reference.X86.decode bytes initial
+        let output := KProgFormal.Reference.X86.step instruction initial
+        let masks := (List.finRange 16).map (fun r => (KProgFormal.Reference.X86.definedRegister instruction r).toNat)
         let metadata := if masks.all (· == 2^64-1) then [] else [("defined_registers", toJson masks)]
-        pure (output, if output.fault.isSome then 0xffffffffffffffff else X86.definedFlags instruction, metadata)
+        pure (output, if output.fault.isSome then 0xffffffffffffffff else KProgFormal.Reference.X86.definedFlags instruction, metadata)
     | .ok path => do
         let base ← fieldWord request "native_base"
         let entries ← (← path.getArr?).toList.mapM fun row => do
@@ -184,7 +184,7 @@ private def threadPointerJson (profile : AArch64.ThreadPointerRegister → Optio
   Json.mkObj [("el1", match profile .el1 with | some value => number value.toNat | none => Json.null),
     ("el2", match profile .el2 with | some value => number value.toNat | none => Json.null)]
 
-private def parseArmState (j : Json) (cells : Array InputCell) : Except String AArch64.State := do
+private def parseArmInput (j : Json) (cells : Array InputCell) : Except String AArch64.Input := do
   let rows ← (← j.getObjVal? "registers").getArr?
   let regs ← rows.mapM fun r => do
     let n ← r.getNat?
@@ -205,70 +205,81 @@ private def parseArmState (j : Json) (cells : Array InputCell) : Except String A
       | .error _ => pure none
       | .ok value => parseExclusiveMonitor value
     let exclusiveInputs ← match j.getObjVal? "exclusive_inputs" with
-      | .error _ => pure AArch64.emptyExclusiveInputs
-      | .ok value => parseExclusiveInputs value
-    let threadPointer : (AArch64.ThreadPointerRegister → Option Word) ← match j.getObjVal? "thread_pointer_reads" with
-      | .error _ => pure (fun (_ : AArch64.ThreadPointerRegister) => (none : Option Word))
-      | .ok value => parseThreadPointer value
+      | .error _ => pure none
+      | .ok value => do pure (some (← parseExclusiveInputs value))
+    let threadPointer ← match j.getObjVal? "thread_pointer_reads" with
+      | .error _ => pure none
+      | .ok value => do
+          let inputs ← parseThreadPointer value
+          pure (some ({ el1 := inputs .el1, el2 := inputs .el2 } : ThreadPointerInputs))
+    let lse2UnalignedWithin16 ← match j.getObjVal? "lse2_unaligned_within_16" with
+      | .error _ => pure false
+      | .ok value => value.getBool?
     pure { gpr := fun r => regs[r.val]'(by omega)
-           sp := regs[31]'(by omega), flags := flags, vector0 := BitVec.ofNat 128 vector,
-           vectorTail := vectorTail, spAlignmentCheck := spAlignmentCheck, pairSingleAccess := pairSingleAccess,
-           exclusiveMonitor := exclusiveMonitor, exclusiveInputs := exclusiveInputs, threadPointer := threadPointer,
-           memory := memoryOfCells cells, pc := pc }
+           sp := regs[31]'(by omega)
+           flags := flags
+           vectors := fun index => if h : index.val = 0 then BitVec.ofNat 128 vector else vectorTail ⟨index.val-1,by omega⟩
+           spAlignmentCheck := spAlignmentCheck
+           pairSingleAccess := pairSingleAccess
+           lse2UnalignedWithin16 := lse2UnalignedWithin16
+           exclusiveMonitor := exclusiveMonitor
+           exclusiveInputs := exclusiveInputs
+           threadPointer := threadPointer
+           memory := memoryOfCells cells
+           pc := pc }
   else throw "AArch64 registers must contain X0..X30 followed by SP (32 words)"
 
 private def executeArm (request : Json) : Except String Json := do
   let state ← request.getObjVal? "state"
   let cells ← parseCells (← state.getObjVal? "memory")
-  let initial ← parseArmState state cells
+  let input ← parseArmInput state cells
   let bytes ← parseNativeBytes (← request.getObjVal? "native_bytes")
   let instruction ← AArch64.decode bytes
-  match instruction with
-    | .readThreadPointer .. =>
+  match instruction.decoded with
+    | .BR (.Read_system_register _) =>
         if !(state.getObjVal? "thread_pointer_reads").isOk then
           throw "MRS requires explicit thread_pointer_reads access profile"
-    | .exclusive operation =>
+    | .BR (.Clear_exclusive _) =>
         if !(state.getObjVal? "exclusive_monitor").isOk then
           throw "exclusive instruction requires explicit monitor state"
-        match operation with
-        | .clear => pure ()
-        | .load width _ _ _ =>
-            if !(state.getObjVal? "exclusive_inputs").isOk then
-              throw "exclusive load requires explicit physical/granule/environment inputs"
-            if !AArch64.exclusiveCovers initial.exclusiveInputs.reservation initial.exclusiveInputs.physicalAddress width.bytes then
-              throw "exclusive load reservation does not cover the translated physical access"
-        | .store .. =>
-            if !(state.getObjVal? "exclusive_inputs").isOk then
-              throw "exclusive store requires explicit physical/environment inputs"
-    | .vectorMemory i =>
-        if i.bank.val ≠ 0 ∧ !(state.getObjVal? "vectors").isOk then
-          throw "nonzero SIMD register requires explicit vectors V0..V31"
-    | .fmovBank bank _ =>
-        if bank.val ≠ 0 ∧ !(state.getObjVal? "vectors").isOk then
-          throw "nonzero SIMD register requires explicit vectors V0..V31"
+    | .LDST (.Exclusive_single operation) =>
+        if !(state.getObjVal? "exclusive_monitor").isOk then
+          throw "exclusive instruction requires explicit monitor state"
+        let some inputs := input.exclusiveInputs | throw "exclusive instruction requires explicit physical/environment inputs"
+        if operation.L == 1 && !inputs.reservation.covers inputs.physicalAddress (2^operation.size.toNat) then
+          throw "exclusive load reservation does not cover the translated physical access"
     | _ => pure ()
-  let output := AArch64.step instruction initial
+  if AArch64.requiresVectorBank instruction && !(state.getObjVal? "vectors").isOk then
+    throw "nonzero SIMD register requires explicit vectors V0..V31"
+  let initial := AArch64.ofInput input instruction
+  let output := AArch64.step initial
+  if let some reason := AArch64.modelError output then throw s!"external AArch64 model refusal: {repr reason}"
   let s := output.state
+  let memory ← AArch64.memory s
+  let profile ← AArch64.profile s
   let threadPointerFields := if (state.getObjVal? "thread_pointer_reads").isOk then
-      [("thread_pointer_reads", threadPointerJson s.threadPointer)] else []
+      [("thread_pointer_reads", threadPointerJson (AArch64.threadPointer s))] else []
   let exclusiveFields := if (state.getObjVal? "exclusive_monitor").isOk then
-      [("exclusive_monitor", monitorJson s.exclusiveMonitor)] else []
+      [("exclusive_monitor", monitorJson (AArch64.exclusiveMonitor s))] else []
   let vectorFields := if (state.getObjVal? "vectors").isOk then
       [("vectors", toJson ((List.finRange 32).map fun index => (AArch64.readVector s index).toNat))]
     else []
   let alignmentFields := if (state.getObjVal? "sp_alignment_check").isOk then
-      [("sp_alignment_check", toJson s.spAlignmentCheck)] else []
+      [("sp_alignment_check", toJson profile.spAlignmentCheck)] else []
   let pairFields := if (state.getObjVal? "pair_single_access").isOk then
-      [("pair_single_access", toJson s.pairSingleAccess)] else []
-  pure <| Json.mkObj (threadPointerFields ++ exclusiveFields ++ vectorFields ++ alignmentFields ++ pairFields ++ [
-    ("registers", toJson (((List.finRange 31).map (fun r => (s.gpr r).toNat)) ++ [s.sp.toNat])),
-    ("flags", number s.flags.toNat), ("defined_flags", number (2^64 - 1)),
-    ("pc", number s.pc.toNat), ("vector0", number s.vector0.toNat),
+      [("pair_single_access", toJson profile.pairSingleAccess)] else []
+  let lse2Fields := if (state.getObjVal? "lse2_unaligned_within_16").isOk then
+      [("lse2_unaligned_within_16", toJson profile.lse2UnalignedWithin16)] else []
+  pure <| Json.mkObj (threadPointerFields ++ exclusiveFields ++ vectorFields ++ alignmentFields ++ pairFields ++ lse2Fields ++ [
+    ("reference_base", toJson "LNSym"),
+    ("registers", toJson (((List.finRange 31).map (fun r => (AArch64.gpr s r).toNat)) ++ [(AArch64.sp s).toNat])),
+    ("flags", number (AArch64.flags s).toNat), ("defined_flags", number (2^64 - 1)),
+    ("pc", number (AArch64.pc s).toNat), ("vector0", number (AArch64.readVector s 0).toNat),
     ("memory", Json.arr (cells.map fun c => Json.mkObj [
-      ("address", number c.address.toNat), ("value", number (s.memory.value c.address).toNat),
-      ("readable", toJson (s.memory.readable c.address)),
-      ("writable", toJson (s.memory.writable c.address)),
-      ("initialized", toJson (s.memory.initialized c.address))])),
+      ("address", number c.address.toNat), ("value", number (memory.value c.address).toNat),
+      ("readable", toJson (memory.readable c.address)),
+      ("writable", toJson (memory.writable c.address)),
+      ("initialized", toJson (memory.initialized c.address))])),
     ("events", toJson (output.events.map eventJson)),
     ("fault", match output.fault with | none => Json.null | some f => faultJson f)])
 

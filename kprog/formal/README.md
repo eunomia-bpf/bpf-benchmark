@@ -49,8 +49,37 @@ jobs. Seventeen retired local numeric/handler definitions were removed; the
 reference module is 19 lines smaller. Its initial whole-package 4.35 baseline
 failed in 15 old modules (33 errors, retained), including the old AArch64
 decoder and legacy proof/API compatibility. This is not full-package acceptance:
-remaining x86 families, AArch64, provenance integration and Sail/ASL redirection
-are still M3 work; Clight/theorem migration and final checks remain M4-M6.
+remaining x86 families and provenance integration are still M3 work;
+Clight/theorem migration and final checks remain M4-M6. The AArch64 replacement
+and ARM comparison have since advanced as follows.
+
+AArch64 now stores the full LNSym `ArmState` in its thin native wrapper.
+The original native word is decoded by LNSym and loaded at the input PC;
+`stepi_checked` supplies every numerical step. All GPRs/SP, all32 SIMD cells,
+arbitrary byte memory/attributes, per-step exclusive/MRS inputs and complete
+external traces remain in that machine. One extra word preserves native flag
+bits outside NZCV. The old local decoder, arithmetic and instruction dispatcher
+were removed. Model refusals stay distinct from architectural access faults.
+
+The rebuilt `reference` executable passed 184 Lake jobs, including the existing
+38 x86 binding checks. ARM protocol checks passed 962 full-state addressed/SIMD/
+LSE2 cases,84 exclusive cases,1280 MRS cases and35 input/encoding rejections;
+LLVM also independently encoded64 MRS words. LSE2 inputs change actual unaligned
+RMW admission, while crossings still fault. Exclusive goldens now retain the
+fork's reserve-before-read and translation-permission-before-attempt ordering;
+the old failures/raw expectations are preserved. This does not prove the old
+simulator C refines those effects: that reconciliation remains M5 work.
+
+[`compare_sail_arm.py`](tools/compare_sail_arm.py) restores the ARM comparison
+from the four retained ASL cohorts. It checks every selected archive payload's
+size/hash and compares fresh, explicitly identified LNSym output with the pinned
+ASL observations. The new run has5016 agreements and the same12 recorded
+monitor-profile differences; their original inputs/outcomes and the matching
+cohort are all retained (`m3-arm-binding/asl-replay-2`). The old Sail executable's
+`/var/tmp` target is absent, so this is **archived ASL observation comparison,
+not a live Sail rerun**. Scope remains X0..X30/SP/PC/NZCV/V0/supplied memory;
+permissions, typed effects and monitor ordering have separate protocol checks.
+The binding uses only the original three standard axioms, with no new admission.
 
 ## Operation coverage (M2 complete)
 
@@ -684,8 +713,9 @@ Their source-operation/token rows retain a separate6/6 raw count.
 M3 is replacing the local ISA definitions in
 [Reference/X86.lean](KProgFormal/Reference/X86.lean) and
 [Reference/AArch64.lean](KProgFormal/Reference/AArch64.lean) with bindings over
-the external steps. The migrated x86 families above already use that route;
-remaining local families and the old proof counts below are pending migration.
+the external steps. AArch64 and the migrated x86 families above already use
+that route; remaining local x86 families and the old proof counts below are
+pending migration.
 Shared [native memory, permissions, initialization and ordered effects/faults](KProgFormal/Reference/Memory.lean)
 form the platform view rather than a second numerical ISA. [ReferenceMain.lean](ReferenceMain.lean) executes
 these same definitions through JSON for hardware and artifact comparisons.

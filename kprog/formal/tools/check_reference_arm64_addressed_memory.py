@@ -144,13 +144,38 @@ for width,sizebit in [(4,0),(8,1<<31)]:
 q,_=fixture(8,True,'scaled',vector=True,reg=1)
 q['state'].pop('vectors');rejects.append((q,'nonzero SIMD register requires explicit vectors V0..V31'))
 
+# The explicit LSE2 profile must affect a real unaligned RMW, not merely echo
+# an input flag. Crossing the16-byte atomicity quantity still faults.
+for address,feature,success in [(0x4001,False,False),(0x4001,True,True),(0x4009,True,False)]:
+    q=copy.deepcopy(cases[0][0]);q['native_bytes']=list((0xf8220020).to_bytes(4,'little'))
+    st=q['state'];st['registers'][1]=address;st['registers'][2]=7
+    st['lse2_unaligned_within_16']=feature
+    st['memory']=[dict(address=address+i,value=i+1,readable=True,writable=True,initialized=False) for i in range(8)]
+    e=copy.deepcopy(st);e.update(defined_flags=MASK,events=[],fault=None)
+    if success:
+        e['pc']=0x1004;e['registers'][0]=0x0807060504030201
+        written=[8,2,3,4,5,6,7,8]
+        for cell,value in zip(e['memory'],written):cell.update(value=value,initialized=True)
+        e['events']=[dict(kind='atomic',address=address,value=list(range(1,9)),initialized=False),
+                     dict(kind='write',address=address,value=written,initialized=True)]
+    else:
+        fault=dict(kind='alignment',address=address,bytes=8)
+        e.update(fault=fault,events=[dict(kind='fault',fault=fault)])
+    cases.append((q,e))
+
 binary=ROOT/'.lake/build/bin/reference'
 result=subprocess.run([str(binary)],input=''.join(json.dumps(q)+'\n' for q,e in cases),text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=True)
 outputs=[json.loads(line) for line in result.stdout.splitlines()]
 assert len(outputs)==len(cases)
 for n,((q,e),out) in enumerate(zip(cases,outputs)):
+    assert out.pop('reference_base') == 'LNSym'
     assert e==out,(n,q,e,out)
 for q,message in rejects:
     result=subprocess.run([str(binary)],input=json.dumps(q)+'\n',text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-    assert result.returncode and not result.stdout and message in result.stderr,(q,message,result)
-print(f'Arm addressed/vector memory: {len(cases)} full-state cases, {len(rejects)} precise rejections PASS')
+    if message == 'nonzero SIMD register requires explicit vectors V0..V31':
+        diagnostic = 'reference: ' + message
+    else:
+        kind = 'Unimplemented' if message == 'reserved SIMD load/store size' else 'Illegal'
+        diagnostic = 'reference: external AArch64 model refusal: StateError.' + kind
+    assert result.returncode and not result.stdout and result.stderr.startswith(diagnostic),(q,message,result)
+print(f'Arm addressed/vector memory: {len(cases)} full-state cases, {len(rejects)} encoding/input rejections PASS')

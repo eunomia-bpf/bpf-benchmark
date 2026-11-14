@@ -39,7 +39,7 @@ for word,width,acquire in [(0x885f7c80,4,False),(0x885ffc80,4,True),
         e=expected(q)
         if not zr:e['registers'][0]=0x04030201 if width==4 else 0x0807060504030201
         e['exclusive_monitor']=dict(physical_start=0x9000,bytes=64)
-        e['events']=[dict(kind='read',address=0x2000,value=list(range(1,width+1)),initialized=True),effect('reserve',width,acquire)]
+        e['events']=[effect('reserve',width,acquire),dict(kind='read',address=0x2000,value=list(range(1,width+1)),initialized=True)]
         cases.append((q,e))
 for word,width,release in [(0x88007c81,4,False),(0x8800fc81,4,True),
                            (0xc8007c81,8,False),(0xc800fc81,8,True)]:
@@ -64,16 +64,20 @@ for word,width,release in [(0x88007c81,4,False),(0x8800fc81,4,True),
             for c,b in zip(e['memory'],value):c['value']=b
             e['events'].append(dict(kind='write',address=address,value=value,initialized=True))
         cases.append((q,e))
-# Fault-check policy is explicit; an empty monitor may suppress a data abort
-# on one implementation and still generate it on another permitted profile.
+# ASL translation permissions precede local-monitor checks. A successful VA
+# check can therefore fault even with an empty monitor, before any attempt or
+# clearing. Preserve both old abort-profile inputs as full fault cases.
 for abort in (False,True):
     q=request(0xc8007c81);q['state']['exclusive_monitor']=None;q['state']['memory']=[]
     q['state']['exclusive_inputs']['abort_on_failure']=abort
-    e=expected(q);e['events']=[effect('attempt',8,success=False)]
-    if abort:
-        fault=dict(kind='write',address=0x2000,bytes=8)
-        e['fault']=fault;e['pc']=0x1000;e['events'].append(dict(kind='fault',fault=fault))
-    else:e['registers'][0]=1
+    e=expected(q);fault=dict(kind='write',address=0x2000,bytes=8)
+    e.update(fault=fault,pc=0x1000,events=[dict(kind='fault',fault=fault)])
+    cases.append((q,e))
+    # VA failure returns before translation. This is a separate input profile,
+    # not a replacement for either permission-fault case above.
+    q=request(0xc8007c81);q['state']['memory']=[]
+    q['state']['exclusive_inputs'].update(virtual_pass=False,abort_on_failure=abort)
+    e=expected(q);e['registers'][0]=1;e['events']=[effect('attempt',8,success=False)]
     cases.append((q,e))
 for word,width in [(0x885f7c80,4),(0xc85f7c80,8),(0x88007c81,4),(0xc8007c81,8)]:
     q=request(word);q['state']['registers'][4]=0x2001
@@ -88,7 +92,9 @@ for word in (0x885f7fe0,0xc85f7fe0,0x88007fe1,0xc8007fe1):
 run=subprocess.run([str(ROOT/'.lake/build/bin/reference')],input=''.join(json.dumps(q)+'\n' for q,_ in cases),text=True,capture_output=True,check=True)
 rows=[json.loads(x) for x in run.stdout.splitlines()]
 assert len(rows)==len(cases)
-for (q,e),actual in zip(cases,rows):assert actual==e,(q,actual,e)
+for (q,e),actual in zip(cases,rows):
+    assert actual.pop('reference_base') == 'LNSym'
+    assert actual==e,(q,actual,e)
 invalid=[]
 for word in [0xc8017c81,0xc8047c81,0xc85f7880,0xc8007881]:invalid.append(request(word))
 for field in ['exclusive_monitor','exclusive_inputs']:
