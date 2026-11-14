@@ -274,5 +274,53 @@
     "bytes": 21251921,
     "sha256": "6fcf7dd7a4fcc8d9f33d7aa3d9f70577d73481b81ed4e16d002c15bd1676f153",
     "files_byte_compared": 1685
+  },
+  "actual_kernel_launch": {
+    "recorded_at": "2026-11-14T09:15:43.730252+00:00",
+    "implementation_commit": "7f3e17853",
+    "pid": 346772,
+    "status": "LAUNCHED_RESOURCE_ORDERED_UNCOLLECTED_NO_POSTLAUNCH_POLLS",
+    "raw": "/workspaces/kprog-raw/perf/20261114-array-shared-kernel",
+    "wait_pid": 342222,
+    "locks": [
+      "timing exclusive",
+      "image shared"
+    ],
+    "host": {
+      "build_exit": 0,
+      "source_maps_check": "PASS",
+      "dryrun_exit": 0,
+      "log": "/workspaces/kprog-raw/perf/20261114-array-shared-kernel/inputs.log",
+      "plan": "/workspaces/kprog-raw/perf/20261114-array-shared-kernel/guest-plan.txt"
+    },
+    "planned": {
+      "configurations": [
+        "submitted-native",
+        "checked-sim-c"
+      ],
+      "stock_native_executions": 8,
+      "values": [
+        29,
+        73
+      ],
+      "expected": [
+        58,
+        146
+      ],
+      "decoy_value": 11,
+      "entry_and_subprogram_share_actual_resource": true,
+      "cpus": "16-19",
+      "vcpus": 2,
+      "memory": "4G",
+      "address_space_bytes": 17179869184
+    },
+    "inputs": {
+      "corpus/results/perf-runtime-array-shared-linker-20261114/native-link.real": "dcb873855038e5dc0456b4d04252cf3dbf83e7232672074b95e86af58ddaa60c",
+      "corpus/results/perf-runtime-array-shared-linker-20261114/runtime-array-layout.json": "7d6163fe7fe3c406bace5e1a1e51486993ab43c9354d5a8f4865dee1c939ea75",
+      "kprog/test/source_maps_fixture.c": "a22f6c48b1ad2b0f6b76924c20c2b34e3048a798dec498e80e9cdb4a52068d56",
+      "kprog/test/native_loader_source_maps.cpp": "216600a57f128d618aa5de5b5bde776a7bf8930c969f72504f70cc3451bcef22",
+      "kprog/perf/native-context/native-link-array-kernel.sh": "b3b8db0934af99467b00d424c3e23fafc51013a42ed58a8d5de0c5c8a82057b9"
+    },
+    "scope": "Actual kernel integration pending; no throughput/equal-work/floor acceptance. Reuses existing owner fixture/client/service entrypoint, no canonical image/base/kernel/compiler or frozen workload changes."
   }
 }
