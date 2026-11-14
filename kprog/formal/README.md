@@ -789,13 +789,46 @@ Their source-operation/token rows retain a separate6/6 raw count.
 
 ## Specification and proof scope
 
-M3 is replacing the local ISA definitions in
+M3 replaces the local ISA definitions in
 [Reference/X86.lean](KProgFormal/Reference/X86.lean) and
 [Reference/AArch64.lean](KProgFormal/Reference/AArch64.lean) with bindings over
 the external steps. All canonical AArch64 and x86 numerical/control execution
-now uses those steps, including complete REP composition. The provenance
-projection and all old handler proof counts remain pending their stated
-migration; the historical handler claims below are not a new M5 acceptance.
+uses those steps, including complete REP composition. The historical handler
+claims and counts below still await M5 migration to exported Clight; they are
+not accepted as new Clight refinements.
+
+The thin [provenance layer](KProgFormal/Reference/Provenance.lean) retains the
+actual C raw words and all256 byte tags. ARM STACK4/RETURN10 use distinct entry
+origins; SP is a distinct stack offset. x86 RSP is an offset for every tag,
+while another STACK4 word is a private-arena pointer: subtract the arena before
+adding the native stack origin. Every other tag keeps its numeric bits. These
+are the existing C materialization rules, not a new instruction evaluator.
+`image` projects all31 ARM/16 x86 GPRs over the complete external state;
+`execute` calls its checked step. `observe` projects the actual handler's
+output, retaining its entire ordered effects/fault. The existing native `Step`
+relation compares these complete images. Output tags must come from C; the
+layer does not choose an arbitrary tag-transfer function or claim that a tag
+supplies memory permission. Program/guest memory addresses, arena-to-native
+memory correspondence, entry origins, labels and C ghost updates retain their
+explicit M5 witnesses. Existing Arm64RawRegister and X86Dispatcher.RawControl
+now use these state/image/observation definitions; their old handler scripts
+still need M5 and are not counted as migrated proofs.
+
+The 2026-11-14 provenance check passes192 component build jobs, retaining all
+previous checked/native cases and adding256 tag projection vectors plus17
+machine vectors (x86 four tagged MOVs and one denied read; ARM four each of
+NOP,ADD,LDR fault). ARM checks all31 GPRs,SP,32 SIMD cells, unmodeled flag bits,
+program/memory/profile/initialization, exclusive histories, MRS inputs and old
+access prefixes. ADD consumes materialized source bits; denied LDR faults at
+the materialized address. The public LNSym r/w/fetch helpers are irreducible
+for symbolic simulation, so literal ARM checks use Lean's kernel evaluator
+(`decide +kernel`), with no native-computation axiom, unsafe reducibility
+override or raised resource limits. All eight projection/execution axiom
+queries have no axioms or only propext/Classical.choice/Quot.sound. The
+reference ELF stays byte-identical to the Sail run. Raw attempts, final build8
+and axiom evidence stay in `/workspaces/kprog-raw/formal/m3-provenance`.
+M3 is complete; M4-M6 and final whole-library `lake build`/`make check` remain
+open, including all2065 old theorem migrations and the O1/O2/O4 recount.
 Shared [native memory, permissions, initialization and ordered effects/faults](KProgFormal/Reference/Memory.lean)
 form the platform view rather than a second numerical ISA. [ReferenceMain.lean](ReferenceMain.lean) executes
 these same definitions through JSON for hardware and artifact comparisons.

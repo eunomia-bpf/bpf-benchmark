@@ -1,29 +1,16 @@
+import KProgFormal.Reference.Provenance
 import KProgFormal.Refinement.Arm64Dispatcher
 
 namespace KProgFormal.Refinement.Arm64RawRegister
 open Reference
 open Reference.AArch64 (Register Gpr Width KeepInstruction)
 
-/-- Numeric inputs for the two C materialization cases. Their entry/platform
-identity is supplied independently of register-cell and stack storage layout. -/
-structure Origins where
-  stack : Word
-  returnAddress : Word
-
-/-- Raw architectural register words and the complete byte-tag domain.
-All remaining architectural fields stay in the shared reference frame. -/
-structure State where
-  raw : Reference.AArch64.State
-  tags : Gpr → Byte
-
-def materialize (origins : Origins) (word : Word) (tag : Byte) : Word :=
-  if tag = 4 then word + origins.stack
-  else if tag = 10 then word + origins.returnAddress else word
-
-def image (origins : Origins) (state : State) : Reference.AArch64.State :=
-  { state.raw with
-    gpr := fun r => materialize origins (state.raw.gpr r) (state.tags r)
-    sp := state.raw.sp + origins.stack }
+/-- Actual C coordinates over the mature machine; the handler laws below
+are retained for their M5 Clight migration. No local ISA lives in this image. -/
+abbrev Origins := Reference.Provenance.AArch64.Origins
+abbrev State := Reference.Provenance.AArch64.State
+abbrev materialize := Reference.Provenance.AArch64.materialize
+abbrev image := Reference.Provenance.AArch64.image
 
 def readRegister (origins : Origins) (state : State) (src : Register) : Word :=
   match GeneratedArm64RegDispatch.cellOf (Arm64Register.registerCode src) with
@@ -78,8 +65,7 @@ def advance (state : State) : State :=
 theorem advance_refines (origins : Origins) (state : State) :
     image origins (advance state) = { image origins state with pc := state.raw.pc + 4 } := rfl
 
-def observe (origins : Origins) (result : Transition State) : Transition Reference.AArch64.State :=
-  ⟨image origins result.state, result.events, result.fault⟩
+abbrev observe := Reference.Provenance.AArch64.observe
 
 def nop (state : State) : Transition State := ⟨advance state, [], none⟩
 

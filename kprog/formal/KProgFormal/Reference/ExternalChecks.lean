@@ -1,4 +1,4 @@
-import KProgFormal.Reference.X86
+import KProgFormal.Reference.Provenance
 
 /-! Functional native memory must survive the finite external representation.
 Literal observations catch zero-filled materialization, lost frame bytes,
@@ -188,5 +188,152 @@ example : ([(0x1000,true,true),(0x800000000000,false,true),(0xffffffffffffffff,t
           | some f => [.fault f]
           | none => [.memory .read base [0,1,2,3,4,5,6,7] false]) &&
         t.state.memory.value (base-1) == s.memory.value (base-1)))) = true := by decide
+
+
+-- Provenance regression: all256 tag bytes, distinct origins, wrapping64-bit
+-- values and RSP's unconditional offset rule. RETURN10 is not an x86 rebase.
+private def tagProjections (start : Nat) : Bool :=
+  (List.range 32).all (fun offset =>
+    let n := start + offset
+    let tag := BitVec.ofNat 8 n
+    let raw : Word := 0xfffffffffffffffe
+    let arm := Provenance.AArch64.materialize { stack := 7, returnAddress := 19 } raw tag
+    let x86 := Provenance.X86.materialize { stack := 7, arena := 13 } 0 raw tag
+    let rsp := Provenance.X86.materialize { stack := 7, arena := 13 } 4 raw tag
+    arm == (if n == 4 then 5 else if n == 10 then 17 else raw) &&
+    x86 == (if n == 4 then 0xfffffffffffffff8 else raw) && rsp == 5)
+
+example : tagProjections 0 = true := by decide
+example : tagProjections 32 = true := by decide
+example : tagProjections 64 = true := by decide
+example : tagProjections 96 = true := by decide
+example : tagProjections 128 = true := by decide
+example : tagProjections 160 = true := by decide
+example : tagProjections 192 = true := by decide
+example : tagProjections 224 = true := by decide
+
+-- All16 cells participate. A materialized source becomes the real MOV input;
+-- RSP's displacement and non-RSP arena pointers use different coordinates.
+example : ([0,4,10,255] : List Byte).all (fun tag =>
+    let state : Provenance.X86.State := { raw := input, tags := fun _ => tag }
+    let origins : Provenance.X86.Origins := { stack := 0x7000, arena := 0x1000 }
+    let image := Provenance.X86.image origins state
+    let output := Provenance.X86.execute origins
+      (.move .w64 (.register (.low 0)) (.register (.low 4)) 0x4003) state
+    (List.finRange 16).all (fun r => image.gpr r ==
+      (if r == 4 then input.gpr r + 0x7000 else
+       if tag == 4 then input.gpr r - 0x1000 + 0x7000 else input.gpr r)) &&
+    output.state.gpr 0 == 0xa000 && output.state.gpr 4 == 0xa000 &&
+    (List.finRange 16).all (fun r => r == 0 || output.state.gpr r == image.gpr r) &&
+    output.state.rflags == input.rflags && output.state.xmm0 == input.xmm0 &&
+    output.state.memory.value 0x12ff == 0xff && output.state.fsBase == input.fsBase &&
+    output.state.gsBase == input.gsBase && output.fault.isNone && output.events.isEmpty &&
+    output.state.pc == 0x4003) = true := by decide
+
+-- An offset/tag never supplies permission. Denied reads use the native image
+-- address, retaining the full register frame and the exact typed fault prefix.
+example : let raw := { input with memory := { input.memory with readable := fun _ => false } }
+    let state : Provenance.X86.State := { raw, tags := fun _ => 4 }
+    let out := Provenance.X86.execute { stack := 0x7000, arena := 0x1000 }
+      (.move .w64 (.register (.low 1)) (.memory 0x8000) 0x4003) state
+    let expected := Provenance.X86.observe { stack := 0x7000, arena := 0x1000 }
+      { state, events := [.fault (.read 0x8000 8)], fault := some (.read 0x8000 8) }
+    out.fault == expected.fault && out.events == expected.events &&
+    same out.state expected.state := by decide
+
+private def armProvenanceRaw : AArch64.State :=
+  let machine := (List.finRange 32).foldl (fun machine r =>
+    w (.GPR (BitVec.ofNat 5 r.val)) (0x100+BitVec.ofNat 64 r.val) machine) ArmState.default
+  let machine := (List.finRange 32).foldl (fun machine r =>
+    w (.SFP (BitVec.ofNat 5 r.val)) (0x123456789abcdef00000000000000000+BitVec.ofNat 128 r.val) machine) machine
+  { machine := { set_program (write_pc 0x4000 machine) [(0x4000,0xd503201f)] with
+      mem := fun a => a.setWidth 8
+      memoryProfile := some {
+        readable := fun a => a != 0x12ff
+        writable := fun a => a != 0x1300
+        initialized := fun a => a == 0x12fe
+        pairSingleAccess := true
+        lse2UnalignedWithin16 := true }
+      memoryAccesses := [.memory .read 0x77 [0x88] false]
+      exclusive := {
+        monitor := some { physicalStart := 0x5670, bytes := 16 }
+        accesses := [{
+          action := .reserve
+          address := 0x5678
+          bytes := 8
+          value := 9
+          acquire := true
+          release := false
+          success := true }] }
+      threadPointerInputs := some { el1 := some 0x1234, el2 := none } }
+    extraFlags := 0xdeadbeef01234567 }
+
+-- LNSym marks r/w/fetch_inst irreducible for symbolic simulation. The kernel
+-- evaluator unfolds them for these literal full-machine checks, without an
+-- unsafe reducibility override or a native-computation axiom.
+section NativeArmProvenanceChecks
+
+-- Full31GPR+SP and32SIMD projection; NOP must preserve all other machine
+-- histories/profiles and not re-emit an old access as a fresh event.
+example : ([0,4,10,255] : List Byte).all (fun tag =>
+    let state : Provenance.AArch64.State := { raw := armProvenanceRaw, tags := fun _ => tag }
+    let origins : Provenance.AArch64.Origins := { stack := 0x7000, returnAddress := 0x9000 }
+    let output := Provenance.AArch64.execute origins state
+    let s := output.state
+    (List.finRange 31).all (fun r => AArch64.gpr s r ==
+      0x100+BitVec.ofNat 64 r.val+(if tag == 4 then 0x7000 else if tag == 10 then 0x9000 else 0)) &&
+    AArch64.sp s == 0x711f && AArch64.pc s == 0x4004 &&
+    (List.finRange 32).all (fun r => AArch64.readVector s r ==
+      0x123456789abcdef00000000000000000+BitVec.ofNat 128 r.val) &&
+    s.extraFlags == armProvenanceRaw.extraFlags &&
+    s.machine.exclusive == armProvenanceRaw.machine.exclusive &&
+    s.machine.threadPointerInputs == armProvenanceRaw.machine.threadPointerInputs &&
+    s.machine.program == armProvenanceRaw.machine.program &&
+    s.machine.memoryAccesses == armProvenanceRaw.machine.memoryAccesses &&
+    s.machine.atomicAccesses == armProvenanceRaw.machine.atomicAccesses &&
+    s.machine.mem 0x12ff == 0xff &&
+    (match s.machine.memoryProfile with
+      | none => false
+      | some p => !p.readable 0x12ff && !p.writable 0x1300 && p.initialized 0x12fe &&
+        !p.initialized 0x12ff && p.pairSingleAccess && p.lse2UnalignedWithin16) &&
+    (AArch64.modelError output).isNone && output.events.isEmpty && output.fault.isNone) = true := by
+  decide +kernel
+
+-- ADD reads the materialized X1. Other GPRs/SP/flags keep their full image.
+example : ([0,4,10,255] : List Byte).all (fun tag =>
+    let raw := { armProvenanceRaw with machine := set_program armProvenanceRaw.machine [(0x4000,0x91000420)] }
+    let state : Provenance.AArch64.State := { raw, tags := fun _ => tag }
+    let origins : Provenance.AArch64.Origins := { stack := 0x7000, returnAddress := 0x9000 }
+    let before := Provenance.AArch64.image origins state
+    let output := Provenance.AArch64.execute origins state
+    AArch64.gpr output.state 0 == (if tag == 4 then 0x7102 else if tag == 10 then 0x9102 else 0x102) &&
+    (List.finRange 31).all (fun r => r == 0 || AArch64.gpr output.state r == AArch64.gpr before r) &&
+    AArch64.sp output.state == 0x711f && AArch64.flags output.state == AArch64.flags before &&
+    AArch64.pc output.state == 0x4004 && output.events.isEmpty && output.fault.isNone &&
+    (AArch64.modelError output).isNone) = true := by decide +kernel
+
+-- LDR permission failure is checked at the native address after tag erasure.
+-- The actual C-shaped unchanged raw frame projects with the exact fault trace.
+example : ([0,4,10,255] : List Byte).all (fun tag =>
+    let raw := { armProvenanceRaw with machine := {
+      set_program armProvenanceRaw.machine [(0x4000,0xf9400020)] with
+        memoryProfile := some { readable := fun _ => false } } }
+    let state : Provenance.AArch64.State := { raw, tags := fun _ => tag }
+    let origins : Provenance.AArch64.Origins := { stack := 0x7000, returnAddress := 0x9000 }
+    let reason : Fault := .read (if tag == 4 then 0x7101 else if tag == 10 then 0x9101 else 0x101) 8
+    let expected := Provenance.AArch64.observe origins
+      { state, events := [.fault reason], fault := some reason }
+    let output := Provenance.AArch64.execute origins state
+    output.events == expected.events && output.fault == expected.fault &&
+    (List.finRange 31).all (fun r => AArch64.gpr output.state r == AArch64.gpr expected.state r) &&
+    (List.finRange 32).all (fun r => AArch64.readVector output.state r == AArch64.readVector expected.state r) &&
+    AArch64.sp output.state == AArch64.sp expected.state &&
+    AArch64.pc output.state == 0x4000 && output.state.machine.mem 0x12ff == 0xff &&
+    output.state.machine.exclusive == raw.machine.exclusive &&
+    output.state.machine.memoryAccesses == raw.machine.memoryAccesses ++
+      [.fault (.read (if tag == 4 then 0x7101 else if tag == 10 then 0x9101 else 0x101) 8)] &&
+    (AArch64.modelError output).isNone) = true := by decide +kernel
+
+end NativeArmProvenanceChecks
 
 end KProgFormal.Reference.ExternalChecks

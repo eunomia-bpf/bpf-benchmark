@@ -1,3 +1,4 @@
+import KProgFormal.Reference.Provenance
 import KProgFormal.Generated.GeneratedX86PtrWrite
 import KProgFormal.X86BranchEmit
 import KProgFormal.Generated.GeneratedX86MemAux
@@ -5634,21 +5635,20 @@ open EntryEnvironment
 interprets RSP as an offset and other STACK4 words as private-arena pointers.
 Label extraction, native-code placement and C flag packing retain their
 existing entry/source/physical interfaces. -/
-structure State where
-  raw : Reference.X86.State
-  tags : Register → Reference.Byte
+abbrev State := Reference.Provenance.X86.State
 
 def registers (state : State) : RegisterState :=
   ⟨state.raw, fun reg => state.tags reg == (4#8)⟩
 
 def image (env : Environment) (frame : Frame) (arena : Reference.Word) (state : State) : Reference.X86.State :=
-  nativeRegisters env frame arena (registers state)
+  Reference.Provenance.X86.image { stack := base env frame .stack, arena } state
 
 def setPc (state : State) (pc : Reference.Word) : State :=
   { state with raw := { state.raw with pc := pc } }
 
 def observe (env : Environment) (frame : Frame) (arena : Reference.Word) (result : Transition State) :
-    Transition Reference.X86.State := ⟨image env frame arena result.state, result.events, result.fault⟩
+    Transition Reference.X86.State :=
+  Reference.Provenance.X86.observe { stack := base env frame .stack, arena } result
 
 theorem pc_projects (env : Environment) (frame : Frame) (arena : Reference.Word) (state : State) (pc : Reference.Word) :
     image env frame arena (setPc state pc) = { image env frame arena state with pc := pc } := rfl
