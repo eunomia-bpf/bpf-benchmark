@@ -1,0 +1,23 @@
+{
+  "recorded_at": "2026-11-14T10:34:44.510422+00:00",
+  "pid": 361533,
+  "make_exit": 0,
+  "raw": "/workspaces/kprog-raw/perf/20261114-cmov-codegen",
+  "default_full_ELF_equals_selected_P": true,
+  "variant_flag": "-mllvm -x86-cmov-converter-force-all",
+  "variants": {
+    "default": {
+      "object_sha256": "7e6781470c8d4a1d2669cfd262405d11095e5c2a2cbf591a675e578718d6b644",
+      "main_unwinder_bytes": 28937,
+      "cmov_instructions": 140,
+      "conditional_jumps": 613
+    },
+    "cmov": {
+      "object_sha256": "c17c7eeb4e29e22b9324f237f8a7213aa8bee2bbeda668e59eeb9744b387c805",
+      "main_unwinder_bytes": 27134,
+      "cmov_instructions": 0,
+      "conditional_jumps": 692
+    }
+  },
+  "scope": "Host backend comparison only; no runtime/speed claim. Same exact retained physical IR/all other codegen flags; producer side now laneC."
+}

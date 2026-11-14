@@ -717,3 +717,9 @@ private-input-check:
 	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" ../x86/packet_bounds_ir.cpp -o "$(CHECKED_PACKET_BUILD)/packet-bounds" $$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis support --system-libs)
 	python3 ../test/check_packet_bounds.py "$(CHECKED_PACKET_BUILD)/packet-bounds" "$(CHECKED_COMPILER_BASE)/compile-sim-ir" "$(PRIVATE_INPUT_OUTPUT)/tests"
 	sha256sum ../x86/packet_bounds_ir.cpp ../test/check_packet_bounds.py "$(CHECKED_PACKET_BUILD)/packet-bounds" > "$(PRIVATE_INPUT_OUTPUT)/sha256"
+
+CHECKED_REPLAY_COMMAND ?= /workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/replay-python-rusage-48g/command.json
+CHECKED_REPLAY_OUTPUT ?= /workspaces/kprog-raw/perf/20261114-otel-compiler-unblocked/replay
+.PHONY: checked-compiler-replay
+checked-compiler-replay:
+	python3 ../test/replay_checked_compiler.py "$(CHECKED_REPLAY_COMMAND)" "$(CHECKED_REPLAY_OUTPUT)" --cpus 16-19 --bounds "$(CHECKED_COMPILER_BASE)/packet-bounds"
