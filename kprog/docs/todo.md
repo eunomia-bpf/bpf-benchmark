@@ -223,6 +223,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED preverify私有输入无观察选择消除（2026-11-14）** 现有IR compiler仅删除结果use-empty、非atomic、i64、声明于.ksyms的私有kprog_unspecified_input[0]读取；所有used独立volatile读取、ordinary/atomic/narrow/nonzero-offset及非private section保持。现有140执行向量/113855算术case与新增两模块IR范围/独立性检查PASS。真实Katran stack-pack保留IR重放删除1360个未用读取、packet predicate1，xdp BPF代码205600→194832B，codegen0；不是stock通过/复杂度收益声明。raw `/workspaces/kprog-raw/verified/20261114-private-input`（初次诊断文本遗漏导致test失败及最终host-retry1日志均保留），smallreceipt `private-input-host.json`绑定候选compiler/实际输入输出SHA。候选尚未stage，canonical model529/compiler工具保持当前运行者字节。
+
 - **VERIFIED direct恢复metadata真实内核组件通过（2026-11-14）** 233116 Make0，实际sole-kernel guest三case返回1/0/1：默认无sites，offset127跨原128B边界故障MOV正确清R11（故障指令写RCX），后续重上传恢复默认返回。persistent候选81c6 loader/module，未部署canonical base/image，非native body verifier认证或完整probe-read/helper/app测试。receipt `direct-recovery-kernel-receipt.json`绑定实际binary/module/每case结果/guest日志SHA，完整raw `/workspaces/kprog-raw/verified/20261114-direct-recovery`留存；无新kernel/image或工作负载变更。
 
 - **VERIFIED direct恢复metadata真实内核检查已启动（2026-11-14T06:42:59Z）** PID233116，raw `/workspaces/kprog-raw/verified/20261114-direct-recovery/kernel-job` 与 `kernel`，现有committed wrapper/setsid/nohup/AS8GiB/imageSH/CPU14-15/2vCPU2G；使用81c6候选binary/module的持久raw拷贝，唯一现有kernel，无新image/base/canonical loader或module部署。测试默认无sites返回、跨原128B边界的故障MOV只清R11状态、后续重上传；不是实际probe-read helper/app认证。本turn不轮询结果，下一turn收取Make/guest/每case结果。dry-run0，receipt `direct-recovery-kernel-launch.json`。

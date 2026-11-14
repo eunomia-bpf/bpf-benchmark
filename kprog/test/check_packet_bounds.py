@@ -53,3 +53,35 @@ for start in [0,1,(1<<63),0xfffffffffffffff0]:
 (output/'execution.json').write_text(json.dumps(vectors,indent=2)+'\n')
 (output/'arithmetic.json').write_text(json.dumps(dict(cases=arithmetic,domain='ordered packet span <=PTRDIFF_MAX, all unsigned thresholds',predicate='length<K iff add overflows or start+K>end'),indent=2)+'\n')
 print(json.dumps(dict(executable_vectors=len(vectors),arithmetic_cases=arithmetic,scope='shared bounds lowering, not per-program proof')))
+
+# Keep live choices independent and all unrelated/atomic/narrow/offset reads.
+private_ir = '''target triple = "bpf"
+@kprog_unspecified_input = external global [0 x i64], section ".ksyms"
+@ordinary = external global i64
+define i64 @choices() {
+  %dead = load volatile i64, ptr @kprog_unspecified_input
+  %left = load volatile i64, ptr @kprog_unspecified_input
+  %right = load volatile i64, ptr @kprog_unspecified_input
+  %delta = sub i64 %left, %right
+  ret i64 %delta
+}
+define void @other() {
+  %ordinary_read = load volatile i64, ptr @ordinary
+  %nonzero = load volatile i64, ptr getelementptr (i64, ptr @kprog_unspecified_input, i64 1)
+  %atomic = load atomic volatile i64, ptr @kprog_unspecified_input monotonic, align 8
+  %narrow = load volatile i32, ptr @kprog_unspecified_input
+  ret void
+}
+'''
+for section,removed in [('.ksyms',1),('.data',0)]:
+    stem='private' if removed else 'ordinary-section'
+    source=output/(stem+'.ll');source.write_text(private_ir.replace('.ksyms',section))
+    result=run([tool,source,'-o',output/(stem+'.bc')])
+    assert f'unused private inputs removed={removed}' in result.stderr,result.stderr
+    run(['llvm-dis-18',output/(stem+'.bc'),'-o',output/(stem+'-after.ll')])
+    text=(output/(stem+'-after.ll')).read_text()
+    assert ('%dead = load' in text)==(not removed)
+    for name in ['left','right','ordinary_read','nonzero','atomic','narrow']:
+        assert '%'+name+' = load' in text,(section,name)
+    assert '%delta = sub i64 %left, %right' in text
+print('private input projection PASS: unused choice removed, both live draws and all other reads retained')

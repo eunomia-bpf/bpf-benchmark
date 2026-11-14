@@ -35,10 +35,29 @@ static bool field(Value *value,Function &function,int64_t offset) {
   auto *base=GetPointerBaseWithConstantOffset(load->getPointerOperand(),actual,function.getParent()->getDataLayout());
   return base==function.getArg(0) && actual==offset;
 }
+// Private unknown choices have no observable read effect. Dropping an unused
+// choice projects the same possible observable states; live reads stay distinct.
+static unsigned remove_unused_private_inputs(Module &module) {
+  SmallVector<LoadInst *,16> unused;
+  for (auto &function:module) for (auto &instruction:instructions(function)) {
+    auto *load=dyn_cast<LoadInst>(&instruction);
+    if (!load || !load->use_empty() || !load->isVolatile() || load->isAtomic() ||
+        !load->getType()->isIntegerTy(64)) continue;
+    int64_t offset=0;
+    auto *base=GetPointerBaseWithConstantOffset(load->getPointerOperand(),offset,module.getDataLayout());
+    auto *global=dyn_cast<GlobalVariable>(base);
+    if (offset==0 && global && global->isDeclaration() &&
+        global->getName()=="kprog_unspecified_input" && global->getSection()==".ksyms")
+      unused.push_back(load);
+  }
+  for (auto *load:unused) load->eraseFromParent();
+  return unused.size();
+}
 int main(int argc,char **argv) {
   cl::ParseCommandLineOptions(argc,argv);
   LLVMContext context;SMDiagnostic error;auto module=parseIRFile(Input,error,context);
   if (!module) { error.print(argv[0],errs());return 1; }
+  unsigned unused=remove_unused_private_inputs(*module);
   unsigned count=0;
   for (auto &function:*module) {
     if (function.isDeclaration() || function.arg_empty()) continue;
@@ -82,4 +101,5 @@ int main(int argc,char **argv) {
   WriteBitcodeToFile(*module,output.os());output.keep();output.os().flush();
   if (output.os().has_error()) { errs()<<"write packet bounds IR failed\n";return 1; }
   errs()<<"packet length predicates lowered="<<count<<'\n';
+  errs()<<"unused private inputs removed="<<unused<<'\n';
 }

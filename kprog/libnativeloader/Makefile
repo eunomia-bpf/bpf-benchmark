@@ -709,3 +709,11 @@ guest-direct-recovery:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod "$(DIRECT_RECOVERY_KERNEL_OUTPUT)/bpf_x86_native_lab.ko"
 	"$(DIRECT_RECOVERY_KERNEL_OUTPUT)/recovery" kernel "$(DIRECT_RECOVERY_KERNEL_OUTPUT)"
+
+PRIVATE_INPUT_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-private-input/host
+.PHONY: private-input-check
+private-input-check:
+	install -d "$(CHECKED_PACKET_BUILD)" "$(PRIVATE_INPUT_OUTPUT)"
+	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" ../x86/packet_bounds_ir.cpp -o "$(CHECKED_PACKET_BUILD)/packet-bounds" $$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis support --system-libs)
+	python3 ../test/check_packet_bounds.py "$(CHECKED_PACKET_BUILD)/packet-bounds" "$(CHECKED_COMPILER_BASE)/compile-sim-ir" "$(PRIVATE_INPUT_OUTPUT)/tests"
+	sha256sum ../x86/packet_bounds_ir.cpp ../test/check_packet_bounds.py "$(CHECKED_PACKET_BUILD)/packet-bounds" > "$(PRIVATE_INPUT_OUTPUT)/sha256"

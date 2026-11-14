@@ -1,0 +1,22 @@
+{
+  "recorded": "2026-11-14T06:56:16Z",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-private-input",
+  "compiler_sha256": "e02a61a2659e87acc84ef6b9f3089528479df3dfead118543abeb423a8057af0",
+  "host_check_exit_code": 0,
+  "executable_vectors": 140,
+  "arithmetic_cases": 113855,
+  "private_input_cases": "Unused64bit private.ksyms offset0 removed; two live draws, atomic/narrow/nonzero/other-global reads and same-name ordinary-section preserved",
+  "actual_katran_ir_replay": {
+    "removed_private_loads": 1360,
+    "packet_predicates_lowered": 1,
+    "before_xdp_bytes": 205600,
+    "after_xdp_bytes": 194832,
+    "codegen_exit_code": 0,
+    "before_ir_sha256": "77157354b632ce70872de219326cb797ddefacd243ac12e8800ccf74a4031ec0",
+    "after_object_sha256": "d7469d502853d4f18060ba2772d60b46c6d7c027daca9d33cb91c25d31297723"
+  },
+  "semantics": "Erase only unused non-atomic volatile i64 loads from declared .ksyms kprog_unspecified_input at offset0. No observable read effect; retaining every used read preserves independent choices.",
+  "canonical_deployed": false,
+  "stock_acceptance_claimed": false,
+  "raw_removed": false
+}
