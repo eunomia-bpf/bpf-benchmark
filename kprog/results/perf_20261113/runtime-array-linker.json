@@ -1,0 +1,181 @@
+{
+  "recorded_at": "2026-11-14T05:03:15.383608+00:00",
+  "protocol_commit": "9f51cfee7",
+  "raw": "/workspaces/kprog-raw/perf/20261114-runtime-array",
+  "inputs": [],
+  "reports": [
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-runtime-array/collection-final.json",
+      "sha256": "f223a2468d3bda7b973e6083c1fb8042bbfe265a957d896a42667548f309bf4e",
+      "data": {
+        "recorded_at": "2026-11-14T05:03:07.880847+00:00",
+        "source_parent": "cd8c329eb",
+        "kernel": "74d1097af561",
+        "shared_image": "66e9e88f197f975fd98f78f08be2eac3b7c313937e39a4cb2a45639d0615f2b8",
+        "canonical_binary": "kprog/x86/native_lab/native_link/target/release/native-link",
+        "scope": "Host/compiler/offline replay only. No new guest/installation/performance/floor/verified-path result yet.",
+        "switch": "--runtime-array-layout PATH requires --runtime-map-lookups; absent by default, ignored for proof emission, x86 only",
+        "layout": {
+          "map_type": 56,
+          "max_entries": 68,
+          "elem_size": 288,
+          "index_mask": 292,
+          "value": 304,
+          "array_type": 2
+        },
+        "layout_provenance": "libbpf reads BTF from sole boot-matched /workspaces/.agent-state/kprog-ck/build-x86/vmlinux. Array offsets relative to embedded bpf_map. Four loaded fields checked against BTF32-bit field widths; anonymous unions resolved.",
+        "stale_header_preliminary": {
+          "path": "vendor/bpf/targets/x86/7.0.0-rc2+/vmlinux.h",
+          "elem_size": 280,
+          "index_mask": 284,
+          "value": 296,
+          "used_for_payload": false
+        },
+        "instruction_crosscheck": {
+          "normalized_function_address": "0xffffffff814cb530",
+          "method": "Retained guest kallsyms array_map_lookup_elem834cb530 minus _text83000000 plus ELF text81000000. Actual instructions load elem+0x120/index+0x124/lea value+0x130, confirming BTF288/292/304 and frozen304.",
+          "captured_disassembly": "array-map-lookup-kernel.txt"
+        },
+        "tests": {
+          "command": "make -f kprog/perf/native-context/Makefile known-map-link-check",
+          "passed": 27,
+          "failed": 0,
+          "preexisting_ignored": 1,
+          "bugs_covered": [
+            "CLI opt-in requirement",
+            "u32 key read, last valid/equal-bound/UINT32_MAX key",
+            "live index_mask and non-power-of-two element size",
+            "64-bit element product above UINT32_MAX",
+            "non-ARRAY dispatch before invalid key dereference and original RDI/RSI preservation",
+            "actual immediate/GOT/PLT helper encoding, branch enters guard and ARRAY skips helper"
+          ]
+        },
+        "default_cases": 22,
+        "default_scope": "11 six-app real entries x default/runtime-map modes, proof text and kernel bytes+relocs+maps+ABI equal canonical prechange binary",
+        "actual_replay": {
+          "runtime_cases": 28,
+          "all_exits_zero": true,
+          "all_off_bytes_equal_captured": true,
+          "all_proof_on_off_equal": true,
+          "prior_capture_receipt": "dab9e2ce8:kprog/results/perf_20261113/link-audit-otel-results.json",
+          "rows": [
+            {
+              "symbol": "custom__generic",
+              "guarded_generic_calls": 2,
+              "prefixes_match": true,
+              "image_on_bytes": 6810,
+              "image_off_bytes": 6706
+            },
+            {
+              "symbol": "perf_unwind_hotspot",
+              "guarded_generic_calls": 28,
+              "prefixes_match": true,
+              "image_on_bytes": 41379,
+              "image_off_bytes": 39923
+            },
+            {
+              "symbol": "perf_go_labels",
+              "guarded_generic_calls": 0,
+              "prefixes_match": true,
+              "image_on_bytes": 2938,
+              "image_off_bytes": 2938
+            },
+            {
+              "symbol": "tracepoint__sched_process_free",
+              "guarded_generic_calls": 1,
+              "prefixes_match": true,
+              "image_on_bytes": 1381,
+              "image_off_bytes": 1329
+            },
+            {
+              "symbol": "perf_unwind_ruby",
+              "guarded_generic_calls": 0,
+              "prefixes_match": true,
+              "image_on_bytes": 26953,
+              "image_off_bytes": 26953
+            },
+            {
+              "symbol": "native_tracer_entry",
+              "guarded_generic_calls": 2,
+              "prefixes_match": true,
+              "image_on_bytes": 6860,
+              "image_off_bytes": 6756
+            },
+            {
+              "symbol": "perf_unwind_php",
+              "guarded_generic_calls": 1,
+              "prefixes_match": true,
+              "image_on_bytes": 33354,
+              "image_off_bytes": 33302
+            },
+            {
+              "symbol": "perf_unwind_dotnet",
+              "guarded_generic_calls": 6,
+              "prefixes_match": true,
+              "image_on_bytes": 36109,
+              "image_off_bytes": 35797
+            },
+            {
+              "symbol": "perf_unwind_v8",
+              "guarded_generic_calls": 8,
+              "prefixes_match": true,
+              "image_on_bytes": 34464,
+              "image_off_bytes": 34048
+            },
+            {
+              "symbol": "perf_unwind_stop",
+              "guarded_generic_calls": 0,
+              "prefixes_match": true,
+              "image_on_bytes": 7474,
+              "image_off_bytes": 7474
+            },
+            {
+              "symbol": "perf_unwind_native",
+              "guarded_generic_calls": 76,
+              "prefixes_match": true,
+              "image_on_bytes": 34479,
+              "image_off_bytes": 30511
+            },
+            {
+              "symbol": "perf_unwind_python",
+              "guarded_generic_calls": 0,
+              "prefixes_match": true,
+              "image_on_bytes": 20172,
+              "image_off_bytes": 20172
+            },
+            {
+              "symbol": "perf_unwind_perl",
+              "guarded_generic_calls": 0,
+              "prefixes_match": true,
+              "image_on_bytes": 36431,
+              "image_off_bytes": 36431
+            },
+            {
+              "symbol": "read_task_struct",
+              "guarded_generic_calls": 0,
+              "prefixes_match": true,
+              "image_on_bytes": 260,
+              "image_off_bytes": 260
+            }
+          ]
+        },
+        "guest_diagnostic": "Prepared Make target runtime-array-otel,1x10s statsON/CPU16-19/4vCPU16G; NOT launched at this receipt.",
+        "lifetime_scope": "No pointer caching, map identity assumption, attachment/refcount/RCU changes. Same live RDI map pointer as existing helper. Generic helper warns if BPF RCU not held (helpers.c:44); map_in_map.c:114-128 defers inner free. Preservation relies on unchanged caller BPF execution lifetime; not a new verified-path proof.",
+        "source_feature_commit": "9f51cfee7",
+        "final_binary_sha256": "d2c6d05fd76be4ce1bd8e96ef675388f79d0fa3d3ae6a12128032293850d2173",
+        "final_payload": "/workspaces/kprog-raw/perf/20261114-runtime-array/final-payload",
+        "final_tests_log": "20261114-runtime-array-check-source-final.log",
+        "final_default_evidence": "final-evidence/{default,runtime}/report.json",
+        "final_replay": "replay-final/report.json",
+        "preliminary_archive_preserved": "/workspaces/kprog-raw/perf/20261114-runtime-array-preliminary.tar.gz"
+      }
+    }
+  ],
+  "scope": "Final-pinned-binary-host-tests-default-parity-and-actual-plan-replay-only-no-guest-result",
+  "archive": {
+    "path": "kprog/results/perf_20261113/runtime-array-linker.tar.gz",
+    "bytes": 22580629,
+    "sha256": "99c47fec7de784bb285374bb4ed8f5194a2f01bf12d6028b751a5701e25281d6",
+    "files_byte_compared": 1699
+  }
+}
