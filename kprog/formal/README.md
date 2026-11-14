@@ -1063,6 +1063,8 @@ profiles include positive/negative biases above32 bits, all256 width codes and
 tags, aligned/unaligned and mapped escaped windows, and cold/nonboolean cache
 states. It compares bytes, packed-tag padding, payloads, caches and input order;
 mutations dropping payload writes, misplacing packed tags or zeroing kind6 fail.
+The converted roots also pass all3,440,640 checks as UBSan AArch64 objects under
+`qemu-aarch64-static` user-mode execution; no VM/image/base is involved.
 Existing memory/scalar/vector-token, stack arena/tag-route and byte-lane oracles
 also pass. Six actual Clight functions regenerate identically and typecheck;
 `make clight` and131 targeted component jobs pass with standard axioms only.
