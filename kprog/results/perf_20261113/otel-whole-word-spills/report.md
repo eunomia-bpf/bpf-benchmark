@@ -1,5 +1,11 @@
 # OTel main: stock acceptance with whole-word scalar spills
 
+Follow-up value preservation at 19:32 UTC found that LLVM removes a 32-bit
+self-copy in the initial transform. With mark 0 and priority 1, the lowered
+fixture returns 12347 versus the reference 12346. This accepted object retains
+that diagnostic defect. The corrected transform uses explicit 64-bit shifts
+for low-half truncation; its execution and main acceptance follow separately.
+
 The stock verifier accepted the retained OTel main proof after two compiler
 scalar spill slots were represented by one aligned 64-bit word. The compiled
 frame is 512 bytes. `verify.stdout` records `phase=verify`, `status=0`, and

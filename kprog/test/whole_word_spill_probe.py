@@ -72,7 +72,10 @@ def lower(path, low, high):
                     replacement += [f'$r{first} = SRL_ri killed $r{first}, 32',
                                     f'$r{first} = SLL_ri killed $r{first}, 32']
                 else:
-                    replacement.append(f'$w{first} = COPY killed $w{first}, implicit-def $r{first}')
+                    # A self COPY of wN is removed after register allocation.
+                    # Explicit shifts retain the required high-half truncation.
+                    replacement += [f'$r{first} = SLL_ri killed $r{first}, 32',
+                                    f'$r{first} = SRL_ri killed $r{first}, 32']
                 replacement.append(f'$w{second} = COPY $w{source}, implicit-def $r{second}')
                 if slot == high:
                     replacement.append(f'$r{second} = SLL_ri killed $r{second}, 32')
@@ -82,8 +85,11 @@ def lower(path, low, high):
             else:
                 destination, slot = map(int, load.groups())
                 replacement.append(f'$r{destination} = LDD %stack.{low}, 0')
-                replacement.append(f'$w{destination} = COPY killed $w{destination}, implicit-def $r{destination}'
-                                   if slot == low else f'$r{destination} = SRL_ri killed $r{destination}, 32')
+                if slot == low:
+                    replacement += [f'$r{destination} = SLL_ri killed $r{destination}, 32',
+                                    f'$r{destination} = SRL_ri killed $r{destination}, 32']
+                else:
+                    replacement.append(f'$r{destination} = SRL_ri killed $r{destination}, 32')
                 changes.append(dict(block=block, original=line.strip()))
             rewritten.extend(reversed(['    ' + instruction for instruction in replacement]))
         data['lines'] = list(reversed(rewritten))
