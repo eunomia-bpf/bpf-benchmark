@@ -1,0 +1,120 @@
+{
+  "recorded": "2026-11-14T03:47:02.647632+00:00",
+  "launcher_pid": 159584,
+  "make_exit": 2,
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-checked-packet",
+  "cases": [
+    {
+      "case": "xdp",
+      "command": [
+        "make",
+        "-C",
+        "/workspaces/repository/kprog/libnativeloader",
+        "guest-checked-packet-case",
+        "CHECKED_PACKET_KERNEL_OUTPUT=/workspaces/kprog-raw/verified/20261114-checked-packet/kernel",
+        "CHECKED_PACKET_CASE=xdp"
+      ],
+      "make_exit": 2,
+      "ok": false,
+      "error": "Command '['make', '-C', '/workspaces/repository/kprog/libnativeloader', 'guest-checked-packet-case', 'CHECKED_PACKET_KERNEL_OUTPUT=/workspaces/kprog-raw/verified/20261114-checked-packet/kernel', 'CHECKED_PACKET_CASE=xdp']' returned non-zero exit status 2."
+    },
+    {
+      "case": "tc",
+      "command": [
+        "make",
+        "-C",
+        "/workspaces/repository/kprog/libnativeloader",
+        "guest-checked-packet-case",
+        "CHECKED_PACKET_KERNEL_OUTPUT=/workspaces/kprog-raw/verified/20261114-checked-packet/kernel",
+        "CHECKED_PACKET_CASE=tc"
+      ],
+      "make_exit": 0,
+      "ok": true
+    },
+    {
+      "case": "reject",
+      "command": [
+        "make",
+        "-C",
+        "/workspaces/repository/kprog/libnativeloader",
+        "guest-checked-packet-case",
+        "CHECKED_PACKET_KERNEL_OUTPUT=/workspaces/kprog-raw/verified/20261114-checked-packet/kernel",
+        "CHECKED_PACKET_CASE=reject"
+      ],
+      "make_exit": 0,
+      "stock_rejected_before_compile": true,
+      "ok": true
+    }
+  ],
+  "tc_execution": [
+    {
+      "mode": "tc",
+      "a": 0,
+      "b": 0,
+      "stock": 2,
+      "native": 2,
+      "context_equal": true
+    },
+    {
+      "mode": "tc",
+      "a": 0,
+      "b": 4275878552,
+      "stock": 2,
+      "native": 2,
+      "context_equal": true
+    },
+    {
+      "mode": "tc",
+      "a": 1,
+      "b": 0,
+      "stock": 0,
+      "native": 0,
+      "context_equal": true
+    },
+    {
+      "mode": "tc",
+      "a": 1,
+      "b": 4275878552,
+      "stock": 0,
+      "native": 0,
+      "context_equal": true
+    },
+    {
+      "mode": "tc",
+      "a": 2147483648,
+      "b": 0,
+      "stock": 2,
+      "native": 2,
+      "context_equal": true
+    },
+    {
+      "mode": "tc",
+      "a": 2147483648,
+      "b": 4275878552,
+      "stock": 2,
+      "native": 2,
+      "context_equal": true
+    },
+    {
+      "mode": "tc",
+      "a": 4294967295,
+      "b": 0,
+      "stock": 0,
+      "native": 0,
+      "context_equal": true
+    },
+    {
+      "mode": "tc",
+      "a": 4294967295,
+      "b": 4275878552,
+      "stock": 0,
+      "native": 0,
+      "context_equal": true
+    }
+  ],
+  "xdp_failure": "Stock verifier rejects packet read: end-data >=64 is scalar comparison, no packet range propagation. No native compiler invocation.",
+  "negative": "PASS: actual stock out-of-struct read refusal before copied simC/native compile/install",
+  "canonical_changed": false,
+  "scope": "Kernel component cases, not application coverage",
+  "archive": "checked-packet-initial-kernel.tar.gz"
+}

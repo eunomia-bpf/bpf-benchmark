@@ -203,6 +203,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED checked-packet kernel初轮取证（2026-11-14T03:47:04Z）** 159584总体Make2：TC八case实际stock/native verdict及mark/priority/CB writes一致；unsafe ctx+0x100000实际stock拒绝，确认未复制checked simC/未启动native编译/未装载。XDP失败在stock验证：end-data>=64被编成scalar比较，后续packet byte read没有range证明，未编译native。全部P/B/simC/verifier/context/native/执行证据 checked-packet-initial-kernel*，raw /workspaces/kprog-raw/verified/20261114-checked-packet/kernel。接续通用packet-length到pointer-bound编译翻译，保留等价原比较，非新增准入gate；canonical无改动，无应用完成声明。
+
 - **VERIFIED checked-packet compiler host通过及kernel启动（2026-11-14T03:39:20Z）** 86de46225复用固定trusted context compiler及sole-target layout，补齐simulator byte-lane/aggregate/pointer/LLVM escaped OR语义，host XDP/TC/cgroup-skb25case与raw/map68case、lifecycle2case均通过。独立实际BTF确认raw skb.cb40+qdisc.data8=BPF metadata48，早先56诊断为false positive，未改模型offset。完整初始/修正attempt及P/B/simC/IR/native/binaries/layout/sourceSHA/log归档 checked-packet-host-results*（raw /workspaces/kprog-raw/verified/20261114-checked-packet）。两个Make dry-run后outer159584，CPU14/2vCPU1G/AS8GiB/shared image lock，actual XDP verdict、TC verdict+context writes、stock拒绝先于compiler三case下turn收取；receipt checked-packet-kernel-launch.json，raw kernel-launch/及kernel/。canonical kernel/base/image未变，无应用新完成数。
 
 - **VERIFIED checked-sim-C实际kernel通过（2026-11-14T03:17:19Z）** 149090 Make0：ordinary stock先验证prog6；复制的预处理simC SHA与检查输入均be4cc183c64a…，trusted compiler生成新的simulator executable SHA43658d8f305a…，最终native prog9。实际源map29/73更新后stock/native均58/146，未使用同名decoy11。完整P/B/simC/IR/native/命令/身份/执行证据 checked-sim-execution-kernel*，raw /workspaces/kprog-raw/verified/20261114-checked-sim/{kernel-launch,kernel}。仅组件路径通过，无canonical部署/应用覆盖声明；接续packet context target lowering与真实stock拒绝先于compiler负例。
