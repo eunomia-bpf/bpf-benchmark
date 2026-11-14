@@ -26,3 +26,7 @@ The result summary and exact dataset paths are in [evaluation.md](evaluation.md)
 Raw run artifacts remain under `micro/results/` and `corpus/results/`; local
 simulator proof records remain under `kprog/x86/results/` and
 `kprog/arm64/results/`.
+
+## Writing and research skills (reference)
+
+`vendor/academic-writing-skills` (yunwei37/academic-writing-skills) holds the writing and research skills, with the operator's repeated general rules merged in. It is reference material, applied with judgment and not enforced (operator, 2026-11-14: "作为参考但是不需要强制执行", "你也可以看看这个 skills 是不是有价值, 可以不需要严格遵守"). kprog's own rules stay in AGENTS.md, kprog/docs/todo.md and COORDINATION.md.
