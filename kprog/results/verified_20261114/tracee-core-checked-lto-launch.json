@@ -119,5 +119,77 @@
     ],
     "success_required": false,
     "postlaunch_outcome_polled": false
+  },
+  "partial_progress": {
+    "recorded": "2026-11-14T08:57:29.916912+00:00",
+    "scope": "Live whole-app partial evidence; no app completion or workload counters yet",
+    "completed_requests": [
+      {
+        "request_id": 1,
+        "source_prog_id": 191,
+        "status": 0
+      },
+      {
+        "request_id": 2,
+        "source_prog_id": 201,
+        "status": 0
+      },
+      {
+        "request_id": 3,
+        "source_prog_id": 212,
+        "status": 0
+      },
+      {
+        "request_id": 4,
+        "source_prog_id": 219,
+        "status": 0
+      }
+    ],
+    "request4": {
+      "request_id": 4,
+      "source_prog_id": 219,
+      "native_sha256": "489a7a69184baae011350d4c7632faf0f5539d9df8417aa2892246cc49be777f",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T08:42:19.381554+00:00",
+      "prog_id": 225,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto/control/state/session-l91msygo/requests/4.success.tar.gz",
+      "finished": "2026-11-14T08:44:06.739565+00:00"
+    },
+    "entry": "sys_enter_init",
+    "stock_verification": {
+      "request_id": 4,
+      "prog_id": 222,
+      "phase": "verify",
+      "status": 0
+    },
+    "native_installation": {
+      "request_id": 4,
+      "prog_id": 225,
+      "phase": "load",
+      "status": 0
+    },
+    "actual_checked_source_sha256": {
+      "request/generated/checked-simulator.i": "4db655d3350ac76fd66cd0225846b0366a6f9d5cd3112d5f80cbfd7b2e5985fc",
+      "request/generated/trusted_x86.bpf.i": "4db655d3350ac76fd66cd0225846b0366a6f9d5cd3112d5f80cbfd7b2e5985fc"
+    },
+    "native_command_returncodes": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "raw_archive": "/workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto/partial-sys-enter-init/4.success.tar.gz",
+    "archive_bytes": 11405024,
+    "archive_sha256": "14fe18e34314078d8608fbec910f4b4c96b458830a1d61cdca5bfa0e6b2d210c",
+    "pending": [
+      {
+        "entry": "sys_enter_submit",
+        "request_directory": "/workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto/control/state/session-l91msygo/requests/request-724s967s"
+      }
+    ],
+    "workload_execution": "unknown: no post-arm counters collected",
+    "application_complete": false
   }
 }

@@ -703,6 +703,8 @@
 
 - VERIFIED 2026-11-14 OTel宿主重放324183已收集：exit1，848.0s，peakRSS50064692KiB（约47.7GiB），48GiB AS下明确LLVM out-of-memory；栈在Clang AnalysisBasedWarnings/CFGReverseBlockReachabilityAnalysis，尚未进入LLVM优化。原guest SIGKILL原因仍不单独认证。生成sim C的COMPILE_FLAGS增加诊断选项-w，Clang18对应源码明确提前返回这项warning分析；不改变输入/优化/stock verifier。现有四piece拼接+错误传播通过，开关-w对象逐字节一致；实际Tracee sim C899215B对照的23216B对象SHA同为10acde75dd23。 同一已stock验证的实际sim C再走现有checked-sim-c原生编译/链接，warning ON/OFF的18120B原生对象SHA29b8a39c32a9及1304B proof ELF SHA82cc55bae118也逐字节一致；未重复安装，不计新增应用通过。原1.13GB大输入重放333934已排在Tracee270915之后：同48GiB/CPU/input/compiler flags仅加-w，frontend后接当前bounds-e02及BPF backend，分别记录RSS/time/status；不做未验证的原生编译/装载，未声明修复已完整通过。receipt `kprog/results/verified_20261114/otel-compiler-diagnostic-result.json`，raw `20261114-otel-compiler-blocker/diagnostic-fix`。
 
+- VERIFIED 2026-11-14 Tracee CORE retry270915实时partial：已完成4个成功请求，sys_enter_init/source219现独立stock B222通过并安装checked-native225；同名失败类在当前CORE producer路径已推进通过。原件/副本实际sim C SHA同为4db655d3350a，4条native命令全0；已保留request4完整11405024B成功归档和journal snapshot于raw `20261114-tracee-core-checked-lto/partial-sys-enter-init`（SHA在launch receipt partial_progress）。当前sys_enter_submit仍在编译；整应用未完成，无post计数，不能认证执行/全覆盖，原始数据不删。
+
 ## 3. 安全：运行时缺口（有限用例和 guest 已验证）
 
 - [x] 退出契约 RBP/R12/RSP、below-SP 栈生命周期（S7，cdeb9804d）；ARM 隐式 SP 回写（55504ff90）。
