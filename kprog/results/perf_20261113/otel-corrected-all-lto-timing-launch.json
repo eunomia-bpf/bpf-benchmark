@@ -2,7 +2,7 @@
   "recorded": "2026-11-14T17:35:44.882517+00:00",
   "raw": "/workspaces/kprog-raw/perf/20261114-otel-corrected-all-lto-timing",
   "job_pid": 562153,
-  "observer_pid": 562152,
+  "observer_pid": 565720,
   "status": "running; timingEX acquired after Cilium, actual started timestamp recorded, no acceptance yet",
   "execution": "direct-native P corrected14source bindings+ALLruntimeLTO including db1179c2d LPMoverlap; sameef449combinedproducerP; checked-C remains separate actualfunctional job.",
   "samples": 3,
@@ -32,7 +32,7 @@
       "purpose": "checked OTel"
     }
   ],
-  "observer_scope": "read-only host pid/argv/all thread affinities/RSS at app and measurement log events, observed up to1s late; changing residentset retained, not quiet-host acceptance",
+  "observer_scope": "V1 watched outer log, which eqcodex buffers until guest completion. First stats1 baseline start residency was NOT captured live; no reconstruction/acceptance claim. V2 directly tails stats*/guest.log, tags historical catch_up=true rows, captures subsequent live phase boundaries with up to1s observation delay.",
   "inputs": [
     {
       "path": "/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/manifest-context.json",
@@ -82,5 +82,11 @@
   ],
   "supersedes": "/workspaces/kprog-raw/perf/20261114-otel-corrected-combined-timing",
   "reason": "One final combined configuration only; previous queue never started.",
-  "started_utc": "2026-11-14T17:40:34Z"
+  "started_utc": "2026-11-14T17:40:34Z",
+  "observer_v1_retirement": {
+    "recorded": "2026-11-14T17:45:18.897462+00:00",
+    "pid": 562152,
+    "argv": "python3 /workspaces/kprog-raw/perf/20261114-otel-corrected-all-lto-timing/residency.py ",
+    "reason": "Outer make log is buffered by eqcodex-capture until guest completes. Baseline start not captured live. Replace only read-only observer, never stop timing workload; retrospective rows explicitly marked."
+  }
 }
