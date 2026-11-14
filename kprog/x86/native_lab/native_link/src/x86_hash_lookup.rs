@@ -139,7 +139,7 @@ mod tests {
         let root=PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../..");
         let driver=output.join("check");
         let compile=std::process::Command::new("cc").args(["-O2","-Wall","-Wextra","-Werror","-no-pie"])
-            .arg("-I").arg(root.join("vendor/linux-framework/tools/include"))
+            .arg("-isystem").arg(root.join("vendor/linux-framework/tools/include"))
             .arg(root.join("kprog/perf/native-context/test-hash-lookup.c"))
             .args(["-pthread","-o"]).arg(&driver).output()?;
         fs::write(output.join("compile.stdout"),&compile.stdout)?;fs::write(output.join("compile.stderr"),&compile.stderr)?;

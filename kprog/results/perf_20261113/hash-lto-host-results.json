@@ -1,0 +1,45 @@
+{
+  "recorded_at": "2026-11-14T07:40:13Z",
+  "raw": "/workspaces/kprog-raw/perf/20261114-hash-lto",
+  "initial_job": {
+    "pid": 247281,
+    "exit": 2,
+    "cause": "vendor tools jhash.h implicit-fallthrough warning under fixture -Werror; generated code had not executed"
+  },
+  "fix": "Only external kernel-tools include directory is passed as -isystem. Fixture itself remains -Wall -Wextra -Werror; kernel header unchanged.",
+  "retry": {
+    "make_exit": 0,
+    "passed": 32,
+    "failed": 0,
+    "existing_ignored": 1,
+    "hash_vectors": "hash host: 6173 kernel-jhash2/table/guard/collision/null/retry/ABI vectors PASS"
+  },
+  "scope": "Host generated-machine-code semantics only; actual kernel installation, complete real-object default parity and throughput remain open.",
+  "evidence": [
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-hash-lto/host-retry1.make.log",
+      "bytes": 4578,
+      "sha256": "f68c87a7770702d96c21c9765bac0299ebc75c34cdbafd8ba62191c35f6fa45d"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-hash-lto/host-retry1/stdout",
+      "bytes": 80,
+      "sha256": "f40834ec034ad6cd2fce3cd6ce6d2bcf8487e9a4d1b21232201f2df9bf90177a"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-hash-lto/host-retry1/hash.bin",
+      "bytes": 1896,
+      "sha256": "1be06625e7a69f7f6a01d0ec7f57f2904317eb146631fd0ce4c5a9dfef07d3fe"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-hash-lto/host-retry1/check",
+      "bytes": 16824,
+      "sha256": "052fdae81bfcd1385789530484dd881c866dfc7bb66cbeee61027d71b4374f34"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-hash-lto/host-retry1/compile.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}
