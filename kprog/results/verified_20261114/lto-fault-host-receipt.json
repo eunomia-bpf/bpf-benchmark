@@ -13,7 +13,9 @@
   "candidate": "/var/tmp/kprog-tmp/verified/lto-fault/compile-sim-ir",
   "candidate_sha256": "bfe23fdb831b367e5a6345e77f91d90f8e75b308e24b6d1ea92478430792d1bc",
   "currently_staged_sha256": "d0f30a61ac7479cab645db7d3e168e8d772c2c7c374c3008b264789298776bdf",
-  "canonical_deployed": false,
+  "canonical_deployed": null,
   "scope": "Architectural fault marker lowered to native llvm.trap during LTO, matching existing unresolved-dispatch fault behavior; host regression only",
-  "raw_removed": false
+  "raw_removed": false,
+  "canonical_deployment_collected": false,
+  "deployment_scope": "Stage job submitted separately; its outcome has not been collected."
 }
