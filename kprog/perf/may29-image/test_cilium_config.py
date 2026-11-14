@@ -6,6 +6,7 @@ from pathlib import Path
 import tarfile
 import tempfile
 import unittest
+from unittest.mock import patch
 
 SPEC=importlib.util.spec_from_file_location('config',Path(__file__).with_name('cilium-config.py'))
 CONFIG=importlib.util.module_from_spec(SPEC)
@@ -13,6 +14,29 @@ SPEC.loader.exec_module(CONFIG)
 
 
 class GeneratedState(unittest.TestCase):
+    def test_cache_file_disappearing_during_capture_is_an_explicit_record(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)/'state';root.mkdir()
+            (root/'node_config.h').write_bytes(b'node\n')
+            cache=Path(directory)/'cache';cache.mkdir()
+            temporary=cache/'entry.tmp.1.proof.stderr.txt';temporary.write_bytes(b'in flight')
+            read=Path.read_bytes
+            def disappear(path):
+                if path==temporary:
+                    temporary.unlink()
+                return read(path)
+            output=io.BytesIO()
+            with patch.object(Path,'read_bytes',disappear):
+                CONFIG.capture(root,output,artifacts=[(cache,'native-link-cache')])
+            output.seek(0)
+            with tarfile.open(fileobj=output) as archive:
+                index=json.load(archive.extractfile('capture.json'))
+                self.assertEqual(archive.extractfile('node_config.h').read(),b'node\n')
+                record=next(r for r in index['files'] if r['source']==str(temporary))
+                self.assertEqual(record['error']['errno'],2)
+                self.assertNotIn('bytes',record)
+                self.assertNotIn(record['archive'],archive.getnames())
+
     def test_distinct_endpoint_configs_and_binary_object_survive_together(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory)

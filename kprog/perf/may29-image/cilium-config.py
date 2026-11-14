@@ -21,7 +21,14 @@ def capture(root, output, features=None, artifacts=()):
             paths += [(path,prefix+'/'+str(path.relative_to(directory)))
                       for path in sorted(directory.rglob('*')) if path.is_file()]
         for path,name in paths:
-            data=path.read_bytes()
+            try:
+                data=path.read_bytes()
+            except FileNotFoundError as error:
+                # The live linker cache renames/removes temporary outputs.
+                # Preserve that observation rather than inventing file bytes.
+                records.append(dict(source=str(path),archive=name,
+                                    error=dict(errno=error.errno,message=str(error))))
+                continue
             info=tarfile.TarInfo(name);info.size=len(data)
             target.addfile(info,io.BytesIO(data))
             records.append(dict(source=str(path),archive=name,bytes=len(data),sha256=hashlib.sha256(data).hexdigest()))

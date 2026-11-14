@@ -17,6 +17,18 @@ def replacements(app, shim):
     return shim.read_text().count('native-loader replaced prog=')
 
 
+def snapshot_record(path):
+    status=int(path.with_suffix(path.suffix+'.rc').read_text())
+    record=dict(path=str(path),bytes=path.stat().st_size,sha256=digest(path),
+                capture_exit=status,index=None)
+    if status:
+        record['capture_stderr']=path.with_suffix(path.suffix+'.stderr').read_text()
+    else:
+        with tarfile.open(path) as source:
+            record['index']=json.load(source.extractfile('capture.json'))
+    return record
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--raw',type=Path,required=True)
@@ -27,12 +39,12 @@ def main():
     args=parser.parse_args()
     snapshots=[]
     for path in sorted(args.capture.glob('*-*/cilium-config.tar.gz')):
-        with tarfile.open(path) as source:
-            index=json.load(source.extractfile('capture.json'))
-            if path.parent.name==args.baseline_snapshot:
+        record=snapshot_record(path)
+        if record['index'] is not None and path.parent.name==args.baseline_snapshot:
+            with tarfile.open(path) as source:
                 state=args.raw/'baseline-state';state.mkdir()
                 source.extractall(state,filter='data')
-        snapshots.append(dict(path=str(path),bytes=path.stat().st_size,sha256=digest(path),index=index))
+        snapshots.append(record)
     app=json.loads((args.run/'details/apps/cilium__agent.json').read_text())
     metadata=json.loads((args.run/'metadata.json').read_text())
     shim=args.run/'details/shim-logs/cilium__agent.post_rejit.log'
