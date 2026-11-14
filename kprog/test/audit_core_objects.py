@@ -102,7 +102,8 @@ def allocated_binding(path):
 
 def audit(args):
     args.output.mkdir(parents=True, exist_ok=True)
-    objects = [r for r in inventory() if not args.app or r['app'] in args.app]
+    supplied = json.loads(args.inventory.read_text()) if args.inventory else inventory()
+    objects = [r for r in supplied if not args.app or r['app'] in args.app]
     (args.output/'inventory.json').write_text(json.dumps(objects, indent=2)+'\n')
     summaries = []
     failures = []
@@ -225,4 +226,6 @@ if __name__ == '__main__':
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--build', type=Path, required=True)
     parser.add_argument('--app', action='append')
+    parser.add_argument('--inventory', type=Path,
+                        help='Actual rebuilt source/native/report paths in the inventory.json row format')
     raise SystemExit(audit(parser.parse_args()))
