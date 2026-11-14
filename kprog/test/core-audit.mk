@@ -40,3 +40,7 @@ $(CORE_COMPILER): $(ROOT)/kprog/build/core-ir-lower.cpp
 
 .PHONY: core-compiler
 core-compiler: $(CORE_COMPILER)
+
+.PHONY: mechanism-check
+mechanism-check: $(CORE_COMPILER) $(BUILD)/core-reference
+	taskset -c 19 prlimit --as=4294967296 -- python3 $(ROOT)/kprog/test/check_core_mechanism.py --build $(BUILD) --output $(OUTPUT) --compiler $(CORE_COMPILER) --target $(KDIR)/vmlinux
