@@ -1,0 +1,41 @@
+{
+  "recorded_at": "2026-11-14T07:04:23.674703+00:00",
+  "raw": "/workspaces/kprog-raw/perf/20261114-hash-preflight",
+  "target": "sole boot-matched vmlinux BTF; bucket type follows bpf_htab.buckets pointer, never first arbitrary struct bucket by name",
+  "layout": {
+    "key_size": 60,
+    "buckets": 448,
+    "n_buckets": 824,
+    "hashrnd": 832,
+    "bucket_size": 16,
+    "head": 0,
+    "first": 0,
+    "node": 0,
+    "next": 0,
+    "hash": 40,
+    "key": 48
+  },
+  "old_provider_array_json_byte_equal": true,
+  "old_provider_probe_json_byte_equal": true,
+  "actual_named_plan_rows": 15,
+  "matched_plan_rows": 15,
+  "observed_key_sizes": {
+    "4": 10,
+    "8": 3,
+    "16": 2
+  },
+  "all_recorded_value_offsets_match_actual_btf_key_plus_rounded_size": true,
+  "inputs": [
+    {
+      "path": "corpus/results/perf-known-hash-instruction-profile-20261114/baseline-0001/maps.json",
+      "sha256": "456185d224c369165e606567909d700f354003e7fc854ce6bae0fedd2c8e062b"
+    },
+    {
+      "path": "corpus/results/perf-link-audit-20261114/audit/link-lwc57z5g/link-plan.json",
+      "sha256": "20673ebdec8e9332562c311bcd771e2c1be658cc35adc362a3259b7749de39e0"
+    }
+  ],
+  "kernel_algorithm": "hashtab.c:674-749: divisible-by4 key uses jhash2 with live hashrnd; bucket hash&(n_buckets-1); raw htab_elem output; hash equality then memcmp; nulls marker mismatch retries from actual head without bound. Existing caller postprocessing handles value/percpu/LRU/maps.",
+  "required_semantics": "No inferred key size from rounded value-pointer offset; exact actual key_size needed. Retain current map lifetime/RCU, nulls retry and returned element convention; no hard restart limit or fabricated NULL.",
+  "scope": "ABI/actual-plan preflight only; no new hash code emitter, VM, helper execution, performance or coverage gain claimed. Active OTel235861 selects immutable fb07/read payload and does not consume these source/provider changes."
+}

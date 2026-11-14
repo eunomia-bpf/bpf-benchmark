@@ -845,3 +845,9 @@ probe-read-otel-lto:
 		SERVICE_EXECUTION_ARGS='$$(CHECKED_COMPILER_SERVICE_ARGS) --native-link $(RUNTIME_PROBE_PAYLOAD)/native-link-on' || status=$$?; \
 	if [[ -f $(PROBE_OTEL_STATE)/var-tmp/bpf-benchmark-docker.img ]]; then rm -f $(PROBE_OTEL_STATE)/var-tmp/bpf-benchmark-docker.img; fi; \
 	exit $$status
+
+RUNTIME_HASH_BUILD ?= /var/tmp/kprog-tmp/perf/runtime-hash-layout
+.PHONY: runtime-hash-layout
+runtime-hash-layout:
+	$(MAKE) -f $(HERE)/Makefile $(RUNTIME_HASH_BUILD)/runtime-array-layout BUILD=$(RUNTIME_HASH_BUILD)
+	$(RUNTIME_HASH_BUILD)/runtime-array-layout $(KDIR)/vmlinux --hash > $(RUNTIME_HASH_BUILD)/runtime-hash-layout.json

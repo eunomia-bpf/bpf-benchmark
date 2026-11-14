@@ -56,12 +56,42 @@ static unsigned long long symbol(const char *map, const char *wanted)
 
 int main(int argc, char **argv)
 {
-    if (argc != 2 && !(argc == 4 && !strcmp(argv[2], "--probe-read"))) {
-        fprintf(stderr, "expected boot-matched-vmlinux [--probe-read matching-System.map]"); return 1;
+    if (argc != 2 && !(argc == 4 && !strcmp(argv[2], "--probe-read")) && !(argc == 3 && !strcmp(argv[2], "--hash"))) {
+        fprintf(stderr, "expected boot-matched-vmlinux [--probe-read matching-System.map | --hash]"); return 1;
     }
     struct btf *btf = btf__parse(argv[1], NULL);
     long error = libbpf_get_error(btf);
     if (error) { fprintf(stderr, "parse BTF %s: %ld\n", argv[1], error); return 1; }
+    if (argc == 3) {
+        int id = btf__find_by_name_kind(btf, "bpf_htab", BTF_KIND_STRUCT);
+        if (id < 0) { fprintf(stderr, "missing bpf_htab BTF"); return 1; }
+        const struct btf_type *htab = btf__type_by_id(btf, id);
+        const struct btf_member *members = btf_members(htab);
+        int bucket_id = -1;
+        for (unsigned i = 0; i < btf_vlen(htab); ++i) {
+            if (strcmp(btf__name_by_offset(btf, members[i].name_off), "buckets")) continue;
+            int pointer_id = btf__resolve_type(btf, members[i].type);
+            if (pointer_id < 0) break;
+            const struct btf_type *pointer = btf__type_by_id(btf, pointer_id);
+            if (!btf_is_ptr(pointer)) break;
+            bucket_id = btf__resolve_type(btf, pointer->type);
+        }
+        if (bucket_id < 0) { fprintf(stderr, "missing typed bpf_htab.buckets target"); return 1; }
+        const struct btf_type *bucket = btf__type_by_id(btf, bucket_id);
+        long bucket_size = btf__resolve_size(btf, bucket_id);
+        int head = member_offset(btf, bucket, "head", 0);
+        if (bucket_size <= 0 || head < 0) { fprintf(stderr, "unsupported actual bucket layout"); return 1; }
+        unsigned map_base = field(btf, "bpf_htab", "map", 0);
+        int result = printf("{\"key_size\":%u,\"buckets\":%u,\"n_buckets\":%u,"
+            "\"hashrnd\":%u,\"bucket_size\":%ld,\"head\":%d,\"first\":%u,"
+            "\"node\":%u,\"next\":%u,\"hash\":%u,\"key\":%u}",
+            field(btf, "bpf_map", "key_size", 1), field(btf, "bpf_htab", "buckets", 0)-map_base,
+            field(btf, "bpf_htab", "n_buckets", 1)-map_base, field(btf, "bpf_htab", "hashrnd", 1)-map_base,
+            bucket_size, head, field(btf, "hlist_nulls_head", "first", 0),
+            field(btf, "htab_elem", "hash_node", 0), field(btf, "hlist_nulls_node", "next", 0),
+            field(btf, "htab_elem", "hash", 1), field(btf, "htab_elem", "key", 0)) < 0;
+        putchar(10); btf__free(btf); return result;
+    }
     if (argc == 4) {
         int result = printf("{\"user_helper\":%llu,\"kernel_helper\":%llu,"
             "\"nmi_uaccess_okay\":%llu,\"kernel_allowed\":%llu,\"current_task\":%llu,"
