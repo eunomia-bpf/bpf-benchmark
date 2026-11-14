@@ -1,0 +1,59 @@
+{
+  "recorded_utc": "2026-11-14T18:49:47Z",
+  "kernel": "74d1097af561",
+  "command": "make -f kprog/test/scalar-spill-precision.mk run",
+  "raw": "/workspaces/kprog-raw/perf/20261114-scalar-spill-precision",
+  "make_exit": 0,
+  "cpus": "22-23",
+  "vcpu": 1,
+  "memory": "2G",
+  "results": [
+    {
+      "case": "aligned",
+      "offset": -8,
+      "paired": 0,
+      "accepted": true,
+      "errno": 0
+    },
+    {
+      "case": "upper",
+      "offset": -4,
+      "paired": 0,
+      "accepted": false,
+      "errno": 13
+    },
+    {
+      "case": "pair_lower",
+      "offset": -8,
+      "paired": 1,
+      "accepted": false,
+      "errno": 13
+    },
+    {
+      "case": "pair_upper",
+      "offset": -4,
+      "paired": 1,
+      "accepted": false,
+      "errno": 13
+    }
+  ],
+  "conclusion": "Stock verifier loses stored constant1 with upper-half or paired32bit spills. Independent8byte-aligned32bit spill retains it. Pair-only packing does not ensure verifier precision; no production promotion.",
+  "actual_otel_chain": [
+    {
+      "instruction": 4015,
+      "store": "known1 to fp-388"
+    },
+    {
+      "instruction": 4841,
+      "reload": "unconstrained32 from fp-388"
+    },
+    {
+      "instruction": 64974,
+      "reload": "unconstrained32 tag permits0"
+    },
+    {
+      "instruction": 65705,
+      "error": "R1 scalar expected ctx; saved ctx exists at fp-272"
+    }
+  ]
+}
