@@ -121,3 +121,54 @@ path, because reads from the wrong offset failed and the helper zeroed the desti
 This is lane perf's P1h: at 2026-11-13T09:36 they announced an optional LLVM pass using the
 BPF ELF's local BTF and the vendored libbpf resolver against the sole target BTF, offered for
 reuse. That is the right tool; a second CO-RE resolver written here would be duplicate work.
+
+## Rebuilt 2026-11-14 (artifacts were in /var/tmp, wiped by a reboot)
+
+172/172 programs build and link again from untouched upstream source. Three blockers
+were found and fixed, all on this side of the linker boundary:
+
+1. **`-fno-jump-tables` did not survive the saved IR.** `sys_enter_submit` linked in
+   kernel mode failed with `instruction at IP 0x129b is an indirect branch; rebuild with
+   -fno-jump-tables`. The flag is not a function attribute, so `clang -O3` over the
+   lowered `.ll` regenerated the jump table (`movslq (%rcx,%rax,4); addq %rcx; jmpq *%rdx`).
+   Fixed by writing the string attribute `"no-jump-tables"="true"` into every function
+   attribute group. Indirect jumps: 0.
+2. **Helper names came from the uapi, the linker binds from its own table.** Id 4 is
+   `probe_read` in uapi and `bpf_probe_read_compat` in the kernel and in
+   `native_link/src/x86.rs`. Naming from uapi produced `@bpf_probe_read`, which has no
+   helper address: `x86 helper call bpf_probe_read has no helper address`. `name-helpers.py`
+   now reads the linker's table (2,071 call sites affected).
+3. The 45 s workload / image tar were simply missing after the reboot; re-exported
+   (`docker save`), module present.
+
+## Pipeline (current)
+
+```sh
+T=/var/tmp/kprog-tmp/C/tracee-samesource
+SRC=vendor/repos/tracee/pkg/ebpf/c
+clang-18 -target bpf -O2 -g -mcpu=v2 -emit-llvm -c -D__TARGET_ARCH_x86 -D__BPF_TRACING__ \
+  -DCORE -DCOMMON_BUILD -I $SRC $SRC/tracee.bpf.c -o $T/tracee.bc
+clang-18 -target bpf -O2 -g -mcpu=v2 -c <same flags> $SRC/tracee.bpf.c -o $T/tracee.bpf.o
+/var/tmp/kprog-tmp/perf/core-ir/core-ir-lower $T/tracee.bc --local-bpf $T/tracee.bpf.o \
+  --target-btf /workspaces/.agent-state/kprog-ck/build-x86/vmlinux \
+  --report $T/tracee.core.json -o $T/tracee.resolved.bc        # resolved CO-RE globals=370
+llvm-dis-18 $T/tracee.resolved.bc -o $T/tracee.resolved.ll
+python3 kprog/results/tracee-samesource-20261113/name-helpers.py     $T/tracee.resolved.ll  $T/tracee.named.ll
+python3 kprog/results/tracee-samesource-20261113/lower-tracee-asm.py $T/tracee.named.ll     $T/tracee.namedfinal.ll
+sed -E 's/"target-features"="[^"]*"//; s/"target-cpu"="[^"]*"//' $T/tracee.namedfinal.ll > $T/tracee.notf.ll
+sed -E 's/^(@[^ ]+ = )dso_local (global .*section "\.maps")/\1\2/' $T/tracee.notf.ll > $T/tracee.nodso.ll
+# then the no-jump-tables string attribute on every function attribute group
+clang-18 -target x86_64-linux-gnu -O3 -g -fPIC -fno-optimize-sibling-calls -fomit-frame-pointer \
+  -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-jump-tables \
+  -c $T/tracee.nodso.ll -o $T/tracee.native.o
+```
+
+Manifest `corpus/results/tracee-samesource-20261114/manifest.json` is the image's file
+verbatim (113 entries: 111 `tracee.native.o`, 1 `kprobe_check`, 1 `lsm_check`), with
+174 proof objects generated from my objects.
+
+## Guest state
+
+169/169 programs replace with 0 load failures in the post arm — the previous
+`failed to load BPF object: invalid argument` is gone. The guest then exits before the
+arm reports, so there is no Tracee timing number yet.

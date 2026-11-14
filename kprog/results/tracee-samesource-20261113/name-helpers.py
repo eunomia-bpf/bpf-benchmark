@@ -18,13 +18,19 @@ import sys
 
 ROOT = pathlib.Path('/workspaces/repository')
 UAPI = ROOT / 'vendor/linux-framework/include/uapi/linux/bpf.h'
+# The linker binds a helper by NAME against this table, so the table is the authority.
+# The uapi spelling differs where the kernel renamed a helper but kept its id: id 4 is
+# `probe_read` in uapi and `bpf_probe_read_compat` in the kernel.  Naming from the uapi
+# produced `@bpf_probe_read`, which the linker cannot bind.
+HELPER_TABLE = ROOT / 'kprog/x86/native_lab/native_link/src/x86.rs'
 
 
 def helper_names() -> dict[int, str]:
-    out = {}
-    for match in re.finditer(r'FN\((\w+),\s*(\d+),', UAPI.read_text()):
-        out[int(match.group(2))] = 'bpf_' + match.group(1)
-    return out
+    if HELPER_TABLE.is_file():
+        return {int(m.group(1)): m.group(2) for m in re.finditer(
+            r'^\s*(\d+) => Some\("(\w+)"\)', HELPER_TABLE.read_text(), re.M)}
+    return {int(m.group(2)): 'bpf_' + m.group(1)
+            for m in re.finditer(r'FN\((\w+),\s*(\d+),', UAPI.read_text())}
 
 
 CALL = re.compile(r'inttoptr \(i64 (\d+) to ptr\)\(')
