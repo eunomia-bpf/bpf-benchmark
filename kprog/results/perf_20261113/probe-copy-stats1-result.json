@@ -1,0 +1,58 @@
+{
+  "recorded_at": "2026-11-14T12:24:57.701559+00:00",
+  "stats": 1,
+  "run": "corpus/results/x86_kvm_corpus_20261114_112435_142525",
+  "status": "ok",
+  "samples": 3,
+  "seconds": 180,
+  "workload_errors": 0,
+  "throughput_native_over_BPF": 0.9305427066501909,
+  "throughput_method": "Frozen May29 parser: median(native sample rates)/median(BPF sample rates), all workload components",
+  "rates": {
+    "BPF": [
+      79145860.87674782,
+      80123130.53316204,
+      77760033.86648631
+    ],
+    "native": [
+      73648603.60040836,
+      71147391.47040834,
+      75390863.58545458
+    ]
+  },
+  "paired_throughput": [
+    0.9305427066501909,
+    0.8879756818907775,
+    0.9695322884619677
+  ],
+  "BPF_ns_per_invocation": 2406.9806291859436,
+  "native_ns_per_invocation": 2705.050721427017,
+  "per_invocation_ratio": 0.8898097954762823,
+  "native_load_records": 13,
+  "native_errors": [
+    "[805.095146 pid=14063 tid=14074] native-loader failed prog=custom__generic manifest=/workspaces/repository/corpus/results/perf-otel-upstream-20261114/manifest-context.json source=/tmp/bpfrejit_14063_0c269ef5f9ca37cc.bpf error=BPF_PROG_LOAD native_lab stub: Invalid argument",
+    "[805.270100 pid=14063 tid=14074] native-loader failed prog=custom__generic manifest=/workspaces/repository/corpus/results/perf-otel-upstream-20261114/manifest-context.json source=/tmp/bpfrejit_14063_0c269ef5f9ca37cc.bpf error=BPF_PROG_LOAD native_lab stub: Invalid argument"
+  ],
+  "counter_windows": [
+    {
+      "first": "baseline-0020",
+      "last": "baseline-0079",
+      "map_id": 18,
+      "seconds": 525.441886,
+      "native_attempts_per_second": 10319796.716777163,
+      "frames_per_attempt": 0.9234449817176392,
+      "interpreter_dispatch_per_native": 0.23880803126119968
+    },
+    {
+      "first": "post_rejit-0100",
+      "last": "post_rejit-0159",
+      "map_id": 1106,
+      "seconds": 540.7472,
+      "native_attempts_per_second": 10039701.082132278,
+      "frames_per_attempt": 0.9234794368796893,
+      "interpreter_dispatch_per_native": 0.24053568893865349
+    }
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261114-probe-copy-timing",
+  "scope": "Throughput primary only with statsOFF; statsON throughput auxiliary. No1.20/fullapp equivalence claim. Same kernel/image/P/manifest as prior; only extra LFENCE removed; other functional/compiler work retained as concurrency caveats."
+}

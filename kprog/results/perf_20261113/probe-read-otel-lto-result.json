@@ -113,5 +113,47 @@
     },
     "state": "NEW_JOBS_UNCOLLECTED_NO_POSTLAUNCH_POLLS",
     "scope": "Resource reordering only/no successgate. Compiler frontend/bounds/BPFbackend output doesnotmeanstockverification/nativeexecution. Original queue/raw records retained."
+  },
+  "compiler_optimization_profile": {
+    "recorded_at": "2026-11-14T12:26:16.973896+00:00",
+    "raw": "/workspaces/kprog-raw/perf/20261114-otel-compiler-unblocked/retry1/profile",
+    "pid": 389232,
+    "seconds": 20,
+    "event": "cpu_atom/cycles/u",
+    "dwarf_bytes": 4096,
+    "lost_samples": 0,
+    "observation": "Collected stacks include ValueHandle deletion through JumpThreading. Current stage frontend encompasses Clang LLVM optimization; not stock verifier or native execution. OriginalO3 kept running.",
+    "pipeline": {
+      "O1_jump_threading_passes": 0,
+      "O2": 2,
+      "O3": 2
+    },
+    "O1_B_compilation_candidate": {
+      "recorded_at": "2026-11-14T12:20:16.509910+00:00",
+      "pid": 411911,
+      "command": [
+        "setsid",
+        "nohup",
+        "prlimit",
+        "--as=51539607552",
+        "--",
+        "bash",
+        "kprog/test/run_verified_make.sh",
+        "/workspaces/kprog-raw/perf/20261114-otel-compiler-O1/job",
+        "-C",
+        "kprog/libnativeloader",
+        "checked-compiler-replay",
+        "CHECKED_REPLAY_COMMAND=/workspaces/kprog-raw/perf/20261114-otel-compiler-O1/recorded-command.json",
+        "CHECKED_REPLAY_OUTPUT=/workspaces/kprog-raw/perf/20261114-otel-compiler-O1/replay"
+      ],
+      "reason": "Actual20s host profile shows ValueHandle deletion and JumpThreading in original O3 frontend; local opt-18 pipeline O1 omits JumpThreading while O2/O3 include it twice. Single O3->O1 delta, same1.13GB preprocessed input/-w/debug/48GiB/bounds/tools/CPU16-19; originalO3 job389209 kept running.",
+      "scope": "B compilation candidate only, no source/model/default/native-codegen/app acceptance change",
+      "timing_lock": false,
+      "image_lock": false,
+      "preflight_mem_available": "Prior observation93959008KiB; current actual value recorded separately, future peak not guaranteed.",
+      "status": "LAUNCHED_UNCOLLECTED",
+      "resource_observation_at": "2026-11-14T12:26:16.972649+00:00",
+      "observed_mem_available_kib": 72255328
+    }
   }
 }
