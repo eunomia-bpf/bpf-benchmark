@@ -1,0 +1,63 @@
+{
+  "recorded_at": "2026-11-14T03:02:20Z",
+  "source_commits": [
+    "6cf9f5cd9",
+    "8574aefb5",
+    "9d128f61e"
+  ],
+  "outer_pid": 144039,
+  "wait_own_pid": 133271,
+  "raw": "/workspaces/kprog-raw/perf/20261114-known-map-otel-timing",
+  "counter_capture": "/workspaces/repository/corpus/results/perf-known-map-otel-timing-20261114",
+  "command": [
+    "make",
+    "-f",
+    "kprog/perf/native-context/Makefile",
+    "known-map-otel-timing"
+  ],
+  "resources": {
+    "cpus": "0-7",
+    "vcpus": 8,
+    "guest_memory": "64G",
+    "host_as_bytes": 85899345920,
+    "timing_lock": "/workspaces/.agent-state/kprog-lanes/locks/timing",
+    "image_lock": "shared, after timing lock"
+  },
+  "protocol": {
+    "app": "otelcol-ebpf-profiler/profiling",
+    "samples": 3,
+    "seconds": 180,
+    "stats": 1,
+    "warmup": "Frozen existing driver behavior",
+    "selected_linker": "native-link-known-on",
+    "source": "original upstream OTel candidate, unchanged"
+  },
+  "artifacts": [
+    {
+      "path": "kprog/perf/native-context/Makefile",
+      "sha256": "b1717ea4ff26d459fd6fe9e21356e74f4ff983a67f9e681e928f264345e7ed18"
+    },
+    {
+      "path": "kprog/perf/may29-image/eqcodex-capture.py",
+      "sha256": "fb784be680b194ba00473279d61fb2a03e3181246be664ca37f8e7992eda15d2"
+    },
+    {
+      "path": "corpus/results/perf-known-map-linker-20261114/native-link-known-on",
+      "sha256": "39cabea8345861b454c2622d43cc34288531631765da4e54fd1ed15b3495d43a"
+    },
+    {
+      "path": "corpus/results/perf-known-map-linker-20261114/native-link.real",
+      "sha256": "312c53bde6c8286de21bb93db6cf8f439dc2663ec5e0f08e6a85f3140a178e35"
+    },
+    {
+      "path": "corpus/results/perf-otel-upstream-20261114/manifest-context.json",
+      "sha256": "430b26ab4be8fd501a819f48c0451895d86bf90606533958a05639ac8a51573f"
+    },
+    {
+      "path": "corpus/results/perf-otel-upstream-20261114/otelcol-ebpf-profiler.native.o",
+      "sha256": "7e6781470c8d4a1d2669cfd262405d11095e5c2a2cbf591a675e578718d6b644"
+    }
+  ],
+  "outcome": null,
+  "scope": "Queued affected-app timing only, after actual executable array host tests and22 disabled-byte parity cases. No postlaunch outcome polling. The existing custom__generic load gap may remain; retain completed throughput and counters/errors with caveats, no new admission gate or equal-work/floor certification. No six-app sweep or shared image/base/kernel rebuild."
+}
