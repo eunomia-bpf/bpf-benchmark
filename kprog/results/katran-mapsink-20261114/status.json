@@ -1,0 +1,50 @@
+{
+  "app": "katran",
+  "variant": "map-sinking (native_specialize_maps.py, array+percpu)",
+  "run": "corpus/results/x86_kvm_corpus_20261114_005810_024285",
+  "samples": 3,
+  "workload_seconds": 180,
+  "cpus": "0-7",
+  "status": "ok",
+  "object_md5": {
+    "balancer.native.o": "3ab8067cf454e3416c4cad234be6ff22",
+    "healthchecking_ipip.native.o": "7902dd9de3ca8732699bf723fba1d7a3",
+    "xdp_root.native.o": "5e346b37dd7d60f4d73ef9166cfa551a"
+  },
+  "programs": {
+    "baseline": {
+      "name": "balancer_ingres",
+      "run_cnt_delta": 1851159012,
+      "run_time_ns_delta": 225466694953,
+      "bytes_jited": 13641,
+      "bytes_xlated": 23840,
+      "ns_per_run": 121.8
+    },
+    "post_rejit": {
+      "name": "balancer_ingres",
+      "run_cnt_delta": 1965166575,
+      "run_time_ns_delta": 201798364240,
+      "bytes_jited": 9464,
+      "bytes_xlated": 16,
+      "ns_per_run": 102.69
+    }
+  },
+  "ratio_within_run": 1.186,
+  "note": "A/B is same-day, same-host, CPUs 0-7, 3x180 s each, same manifest with only balancer.native.o differing (other two objects byte-identical). Within-run ratios are not comparable across runs because the eBPF baseline moved from 154.89 ns/run (C4) to ~122 with other lanes' guests on the host.",
+  "ab_samesource_control": {
+    "run": "corpus/results/x86_kvm_corpus_20261114_012718_572545",
+    "samples": 3,
+    "workload_seconds": 180,
+    "cpus": "0-7",
+    "status": "ok",
+    "ns_per_run": 103.11,
+    "bytes_jited": 10021
+  },
+  "ab_result": {
+    "mapsink_ns_per_run": 102.69,
+    "samesource_ns_per_run": 103.11,
+    "delta_pct": 0.41,
+    "baseline_agreement_pct": 0.45,
+    "verdict": "wash: 0.41% faster than the same-source control, at or below the run-to-run noise floor (the two runs' eBPF baselines agree to 0.45%). Sinking 49 -> 7 map_lookup_elem calls and shrinking the object 10021 -> 9464 B did not change runtime. Not a regression; not an improvement to claim."
+  }
+}

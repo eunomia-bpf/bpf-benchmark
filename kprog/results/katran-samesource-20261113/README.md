@@ -164,9 +164,25 @@ verifier then rejects the program at load (`-EINVAL`, `stack depth 192`), which 
 as "native app exited before BPF programs were tracked by shim" rather than as a clear
 error.
 
-One 20 s sample on CPUs 0-7 (`corpus/results/x86_kvm_corpus_20261114_005338_982251`):
-baseline 120.39 ns/run, native 95.87 ns/run, jited 9464 vs 13641, status ok. That is a
-correctness signal, not a ratio; the 3x180 s measurement follows.
+Measured, 3x180 s on CPUs 0-7, same day, same manifest, only `balancer.native.o`
+differing (the other two objects byte-identical):
+
+| variant | native ns/run | jited | eBPF baseline ns/run |
+|---|---|---|---|
+| same-source control (`..._012718_572545`) | 103.11 | 10021 | 122.35 |
+| map-sinking (`..._005810_024285`) | 102.69 | 9464 | 121.80 |
+
+**Verdict: a wash (0.41%, below the noise floor).** The two runs' eBPF baselines agree
+to 0.45%, which is the resolution these numbers have. Cutting `balancer_ingress` from 87
+helper calls to 35, and its `map_lookup_elem` calls from 49 to 7, moved runtime by
+nothing measurable. The map lookups were not on the critical path: the program is
+dominated by the per-packet work between them, and clang already hoisted what it could.
+
+Not a regression, so the object stays available under
+`corpus/results/katran-mapsink-20261114/objects2/`; but it is not a headline result and
+the default Katran build is unchanged. Within-run ratios are not comparable across runs:
+the eBPF baseline moved from 154.89 ns/run (C4, 2026-11-13) to ~122 because other
+lanes' guests share the host, so only same-day A/B comparisons count.
 
 ## Not yet done
 
