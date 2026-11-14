@@ -110,9 +110,10 @@ int main(int argc,char **argv) {
     StringRef text=assembly->getAsmString(); IRBuilder<> b(call);
     b.SetCurrentDebugLocation(call->getDebugLoc()); Value *result=nullptr;
     if (text.empty()) continue; // Preserve the actual compiler barrier.
-    if (text=="call -1" && call->arg_empty() && call->getType()->isVoidTy()) {
-      // The simulator's unresolved-dispatch arm is a verifier error if reachable.
-      // Keep a faulting arm in native code; never supply an invented call target.
+    if ((text=="call -1" || text=="r0 = 0; *(u64 *)(r0 + 0) = r0; exit;") &&
+        call->arg_empty() && call->getType()->isVoidTy()) {
+      // Both unresolved dispatch and architectural faults are verifier errors
+      // if reachable. Preserve the fault in the LTO output, never a return value.
       b.CreateCall(Intrinsic::getDeclaration(m.get(),Intrinsic::trap));
     } else if (text=="$0 = $0" && call->arg_size()==1 && call->getArgOperand(0)->getType()==call->getType()) {
       result=call->getArgOperand(0);

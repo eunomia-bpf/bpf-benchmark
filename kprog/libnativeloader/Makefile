@@ -41,6 +41,8 @@ CHECKED_COMPILER_SERVICE_ARGS = --execution-mode checked-sim-c --sim-native-comp
 CHECKED_SIM_BUILD ?= /var/tmp/kprog-tmp/verified/checked-sim
 CHECKED_SIM_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-checked-sim/host
 CHECKED_SIM_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-checked-sim/kernel
+LTO_FAULT_BUILD ?= /var/tmp/kprog-tmp/verified/lto-fault
+LTO_FAULT_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-lto-fault/host
 CHECKED_PACKET_BUILD ?= /var/tmp/kprog-tmp/verified/checked-packet
 CHECKED_PACKET_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-checked-packet/host
 CHECKED_PACKET_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-checked-packet/kernel
@@ -174,6 +176,15 @@ guest-source-maps:
 		"$(SOURCE_MAP_KERNEL_OUTPUT)/fixture.native.o" "$(REPO_ROOT)/kprog/test/tail_call_frame/native-link.sh" "$(SOURCE_MAP_KERNEL_OUTPUT)"
 
 .PHONY: checked-sim-inputs checked-sim-check checked-sim-kvm checked-sim-stage
+.PHONY: lto-fault-check
+lto-fault-check:
+	install -d "$(LTO_FAULT_BUILD)"
+	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
+		../x86/compile_sim_ir.cpp -o "$(LTO_FAULT_BUILD)/compile-sim-ir" \
+		$$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis support --system-libs)
+	python3 ../test/check_lto_fault.py "$(LTO_FAULT_BUILD)/compile-sim-ir" \
+		"$(CHECKED_COMPILER_BASE)/compile-sim-ir" "$(LTO_FAULT_OUTPUT)"
+
 # Stage the tools already exercised by checked-packet-check/kvm. The caller
 # holds the image writer lock after existing service guests have exited.
 # The registered service runs outside the app image and reads this sole base.
