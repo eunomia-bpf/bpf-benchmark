@@ -920,6 +920,36 @@ eleven oracle binaries predate the first edit, while the last two are post-edit
 validation only. The complete native-object baseline predates every edit.
 These exports are not stateful dispatcher exports or M5 refinements.
 
+[c/X86Pointer.c](c/X86Pointer.c) roots the production pointer-load handler
+through the existing `x86_sim_state` ABI, with arbitrary incoming stack-tag
+and pointer-fact arrays. It does not reset them to a zero fixture. The pointer
+tag selectors, register-tag read and stack-coordinate materialization now have
+standard C output forms over the same bodies. Only the empty register-asm
+identity barrier becomes a no-op for CompCert; native compilation retains the
+asm. The structured stack union also gains the missing16/32-bit views already
+used by the standalone stack. Its allocation/layout stays unchanged; this fixes
+the existing condition test's missing-member compilation failure.
+
+`make clight` retains the actual handler and its `x86_width_effective` callee.
+Their export regenerates identically, typechecks and uses only the standard
+three axioms;231 component jobs pass. Existing production checks pass2,097,152
+pointer-load frames,71,657 stack cases,1,024 condition/flag rows,5,305,340
+arithmetic cases and72,866 register-routing cases. The old288 ALU routing
+failures remain byte-for-byte identical in their output. The final native
+handler preserves allocated bytes; the matched real Cilium proof39 preserves
+all code/data and202 relocations. These are not whole-app acceptance or M5
+refinements. Raw evidence is in `/workspaces/kprog-raw/formal/m4-x86-pointer`.
+
+The same archived OTel main is also preprocessed with current headers and
+PERF's243 constant-helper substitutions (all other source text identical).
+Original generated C is731,104 bytes; the selected form is726,973 bytes.
+PERF's historical expansions were1,011,998,390 bytes before selection and
+370,116,027 afterward; current M4 C expands to376,481,164 bytes. The additional
+output facades increase the latter size; no compile-time gain or new whole-main
+byte parity is inferred. All three preprocessed pieces and the joined input
+are retained in the same raw directory. Full dispatcher C-subset conversion
+and the memory/ABI bindings remain open.
+
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight
 handler exports, and matched OTel preprocessor expansion remain to do. Preserve

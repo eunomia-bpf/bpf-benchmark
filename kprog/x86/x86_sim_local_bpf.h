@@ -106,6 +106,8 @@ _Static_assert(__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__,
 
 union x86_sim_stack_mem {
 	__u8 b[X86_SIM_STACK_BYTES];
+	__u16 w[(X86_SIM_STACK_BYTES + 1U) / 2U];
+	__u32 d[(X86_SIM_STACK_BYTES + 3U) / 4U];
 	__u64 q[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)];
 };
 
@@ -519,13 +521,18 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 /* Pointer addressing uses the private arena; scalar reads expose native bits. */
 /* Keep pointer subtraction ahead of scalar-base addition: reassociation to
  * (native_base - arena_top) + pointer is verifier-illegal scalar-minus-fp. */
-#define X86_SIM_L_STACK_NUMERIC_BITS(VALUE)                                 \
-	({                                                                 \
+#define X86_SIM_L_STACK_NUMERIC_BITS_INTO(OUTPUT, VALUE)                                 \
+	do {                                                                 \
 		__u64 __x86_stack_delta = (__u64)(long)(VALUE) -             \
 			(__u64)(long)X86_SIM_L_STACK_PTR(0);                 \
 		X86_SIM_L_BARRIER_VAR(__x86_stack_delta);                   \
-		__x86_stack_delta + __x86_native_stack_base;               \
-	})
+		(OUTPUT) = __x86_stack_delta + __x86_native_stack_base;               \
+	} while (0)
+
+#define X86_SIM_L_STACK_NUMERIC_BITS(VALUE) \
+	({ __u64 __x86_stack_numeric_result; \
+	   X86_SIM_L_STACK_NUMERIC_BITS_INTO(__x86_stack_numeric_result, VALUE); \
+	   __x86_stack_numeric_result; })
 
 #define X86_SIM_L_READ_REG_WIDTH_SHIFT(REG, WIDTH, SRC_SHIFT)               \
 	({                                                                 \
@@ -552,16 +559,21 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		__x86_l_tag = __x86_##NAME##_tag;                       \
 		break;
 
-#define X86_SIM_L_REG_TAG(REG)                                             \
-	({                                                                 \
+#define X86_SIM_L_REG_TAG_INTO(OUTPUT, REG)                                             \
+	do {                                                                 \
 		__u8 __x86_l_tag = X86_SIM_TAG_SCALAR;                  \
 		switch (REG) {                                           \
 		X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_REG_TAG_CASE)           \
 		default:                                                 \
 			break;                                           \
 		}                                                        \
-		__x86_l_tag;                                             \
-	})
+		(OUTPUT) = __x86_l_tag;                                             \
+	} while (0)
+
+#define X86_SIM_L_REG_TAG(REG) \
+	({ __u8 __x86_reg_tag_result; \
+	   X86_SIM_L_REG_TAG_INTO(__x86_reg_tag_result, REG); \
+	   __x86_reg_tag_result; })
 
 #define X86_SIM_L_WRITE_REG_PTR_VALUE_CASE(REG, NAME)                       \
 	case REG:                                                          \
@@ -603,19 +615,26 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		__u8 __x86_wr_shift = (DST_SHIFT);                          \
 		__u64 __x86_wr_next = (VALUE);                            \
 		union x86_sim_gpr __x86_wr_cell = { .ptr = X86_SIM_L_REG_VALUE(REG) }; \
-		__u8 __x86_wr_cell_tag = X86_SIM_L_REG_TAG(REG);           \
+		__u8 __x86_wr_cell_tag; \
+		X86_SIM_L_REG_TAG_INTO(__x86_wr_cell_tag, REG);           \
 		if (KPROG_X86_WRITE_WIDTH_ARM(__x86_wr_width) ==            \
 		    KPROG_X86_WRITE_WIDTH_ARM_B8) {                        \
 			if ((REG) == X86_RSP) __x86_wr_cell.ptr = (void *)(long)((__u64)(long)__x86_wr_cell.ptr + __x86_native_stack_base); \
-			else if (__x86_wr_cell_tag == X86_SIM_TAG_STACK)    \
-				__x86_wr_cell.ptr = (void *)(long)X86_SIM_L_STACK_NUMERIC_BITS(__x86_wr_cell.ptr); \
+			else if (__x86_wr_cell_tag == X86_SIM_TAG_STACK) { \
+				__u64 __x86_wr_stack_bits; \
+				X86_SIM_L_STACK_NUMERIC_BITS_INTO(__x86_wr_stack_bits, __x86_wr_cell.ptr); \
+				__x86_wr_cell.ptr = (void *)(long)__x86_wr_stack_bits; \
+			} \
 			KPROG_X86_WRITE_REG8(__x86_wr_cell, __x86_wr_cell_tag, \
 				__x86_wr_next, __x86_wr_shift, X86_SIM_TAG_SCALAR); \
 		} else if (KPROG_X86_WRITE_WIDTH_ARM(__x86_wr_width) ==    \
 			   KPROG_X86_WRITE_WIDTH_ARM_B16) {                \
 			if ((REG) == X86_RSP) __x86_wr_cell.ptr = (void *)(long)((__u64)(long)__x86_wr_cell.ptr + __x86_native_stack_base); \
-			else if (__x86_wr_cell_tag == X86_SIM_TAG_STACK)    \
-				__x86_wr_cell.ptr = (void *)(long)X86_SIM_L_STACK_NUMERIC_BITS(__x86_wr_cell.ptr); \
+			else if (__x86_wr_cell_tag == X86_SIM_TAG_STACK) { \
+				__u64 __x86_wr_stack_bits; \
+				X86_SIM_L_STACK_NUMERIC_BITS_INTO(__x86_wr_stack_bits, __x86_wr_cell.ptr); \
+				__x86_wr_cell.ptr = (void *)(long)__x86_wr_stack_bits; \
+			} \
 			KPROG_X86_WRITE_REG16(__x86_wr_cell, __x86_wr_cell_tag, \
 				__x86_wr_next, X86_SIM_TAG_SCALAR);         \
 		} else if (KPROG_X86_WRITE_WIDTH_ARM(__x86_wr_width) ==    \
@@ -660,7 +679,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 	((__s64)KPROG_X86_MEM_OFFSET((AUX), (DISP), (INDEX_VALUE),         \
 				     (HAS_INDEX)))
 
-#define X86_SIM_L_BARRIER_VAR(VAR) asm volatile("" : "+r"(VAR))
+#define X86_SIM_L_BARRIER_VAR(VAR) KPROG_C_BARRIER_VAR(VAR)
 
 #define X86_SIM_L_STACK_INDEX(OFF)                                         \
 	KPROG_X86_STACK_INDEX(OFF, X86_SIM_STACK_BYTES)
@@ -2696,8 +2715,8 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 
 #define X86_SIM_L_EXEC_PTR_LOAD(OP, DST, AUX, IMM) \
 	do { \
-			__u8 __x86_l_pw_tag =                             \
-				KPROG_X86_PTR_WRITE_SOURCE_TAG(           \
+			__u8 __x86_l_pw_tag; \
+			KPROG_X86_PTR_WRITE_SOURCE_TAG_INTO(__x86_l_pw_tag,           \
 					(OP) == X86_OP_MOV_LOAD_MAP_PTR,   \
 					(OP) == X86_OP_MOV_LOAD_HELPER_ID, (AUX));\
 			if (KPROG_X86_PTR_WRITE_IS_HELPER_ID(             \

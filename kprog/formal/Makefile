@@ -727,3 +727,4 @@ clight: clightgen
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o build/BpfABILayout.lean oracles/test_bpf_abi_layout.c
 	external/clean/clightgen -lean -normalize -o KProgFormal/Clight/X86Numeric.lean c/X86Numeric.c
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Numeric.lean c/Arm64Numeric.c
+	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Pointer.lean c/X86Pointer.c

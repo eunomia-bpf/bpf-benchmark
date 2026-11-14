@@ -75,7 +75,11 @@ _Static_assert(sizeof(void *) == 8, "kprog models the 64-bit BPF context ABI");
  * Clight fault refinements must supply its nonreturning external semantics. */
 extern void kprog_c_trap(void) __attribute__((noreturn));
 #define KPROG_C_TRAP() kprog_c_trap()
+/* Empty register asm preserves the value; only native compilation needs the
+ * optimizer barrier. This adapter applies only to that identity operation. */
+#define KPROG_C_BARRIER_VAR(VAR) ((void)(VAR))
 #else
 #define KPROG_C_TRAP() __builtin_trap()
+#define KPROG_C_BARRIER_VAR(VAR) __asm__ volatile("" : "+r"(VAR))
 #endif
 #endif
