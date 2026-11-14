@@ -9,7 +9,18 @@ CODEGEN_ARGS ?=
 REPLAY_ARGS ?=
 REPLAY_BUILD ?= /var/tmp/kprog-tmp/perf/retained-proof-replay
 
-.PHONY: build run analyze codegen whole-word replay values-build values-run backend-check
+.PHONY: build run analyze codegen whole-word replay values-build values-run backend-check checked-corpus
+checked-corpus:
+	install -d $(OUTPUT) $(REPLAY_BUILD)
+	date -u +%FT%TZ > $(OUTPUT)/started
+	exec 9>/workspaces/.agent-state/kprog-lanes/locks/image; flock -s 9; \
+	status=0; taskset -c 16-17 prlimit --as=85899345920 -- vng --run $(KDIR)/arch/x86/boot/bzImage \
+		--cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rwdir /var/tmp=$(REPLAY_BUILD) \
+		--overlay-rwdir /tmp --overlay-rwdir /run --overlay-rwdir /usr/local \
+		--disable-monitor --verbose --cpus 2 --memory 48G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'bash $(ROOT)/kprog/test/run_checked_otel.sh $(OUTPUT)' || status=$$?; \
+	printf '%s\n' "$$status" > $(OUTPUT)/exit-code; date -u +%FT%TZ > $(OUTPUT)/finished; exit $$status
+
 backend-check:
 	taskset -c 18-19 python3 $(ROOT)/kprog/test/check_whole_word_backend.py --output $(OUTPUT) --clang $(ROOT)/kprog/stock-path/bin/clang
 
