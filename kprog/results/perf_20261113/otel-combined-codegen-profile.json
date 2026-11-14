@@ -470,5 +470,157 @@
     "compiler_proven_spill_reload_instructions": 442
   },
   "body_jit_over_native": 1.2326991245339738,
-  "scope": "45-second diagnostic of combined producer flags plus all runtime LTO. Paired original JIT / post-link native body; outside helpers not charged to body. No total per-call/throughput result or target acceptance."
+  "scope": "45-second diagnostic of combined producer flags plus all runtime LTO. Paired original JIT / post-link native body; outside helpers not charged to body. No total per-call/throughput result or target acceptance.",
+  "region_comparison": {
+    "recorded": "2026-11-14T15:11:11.075178+00:00",
+    "helper_tail_bytes": 2584,
+    "kernel_helper_anchor_slide": -620756992,
+    "proven_kaslr_fields": [
+      {
+        "helper_offset": 99,
+        "bytes": 8,
+        "old": "0xffffffffa92e4660",
+        "new": "0xffffffff842e4660",
+        "delta": -620756992
+      },
+      {
+        "helper_offset": 134,
+        "bytes": 4,
+        "old": "0xa92b0018",
+        "new": "0x842b0018",
+        "delta": -620756992
+      },
+      {
+        "helper_offset": 146,
+        "bytes": 8,
+        "old": "0xffffffffa8968a60",
+        "new": "0xffffffff83968a60",
+        "delta": -620756992
+      }
+    ],
+    "unclassified_helper_tail_differences": 0,
+    "reports": {
+      "default_codegen": {
+        "raw": "/workspaces/kprog-raw/perf/20261114-jit-source-profile/retry2",
+        "entry_count": 18015886,
+        "regions": [
+          {
+            "name": "body",
+            "start": "0x0",
+            "end": "0x7750",
+            "bytes": 30544,
+            "samples": 2644,
+            "sampled_period_cycles": 51791413436,
+            "cycles_per_measured_entry": 2874.763607851426
+          },
+          {
+            "name": "shared_array",
+            "start": "0x7750",
+            "end": "0x7793",
+            "bytes": 67,
+            "samples": 982,
+            "sampled_period_cycles": 19135022416,
+            "cycles_per_measured_entry": 1062.119421492787
+          },
+          {
+            "name": "user_probe_read",
+            "start": "0x7793",
+            "end": "0x78d9",
+            "bytes": 326,
+            "samples": 1469,
+            "sampled_period_cycles": 28691613219,
+            "cycles_per_measured_entry": 1592.5729780372722
+          },
+          {
+            "name": "typed_hash",
+            "start": "0x78d9",
+            "end": "0x8029",
+            "bytes": 1872,
+            "samples": 1000,
+            "sampled_period_cycles": 19387529264,
+            "cycles_per_measured_entry": 1076.135210002994
+          },
+          {
+            "name": "lpm",
+            "start": "0x8029",
+            "end": "0x8168",
+            "bytes": 319,
+            "samples": 3322,
+            "sampled_period_cycles": 64971137130,
+            "cycles_per_measured_entry": 3606.3248363139064
+          },
+          {
+            "name": "entry_epilogue",
+            "start": "0x8168",
+            "end": "0x8175",
+            "bytes": 13,
+            "samples": 0,
+            "sampled_period_cycles": 0,
+            "cycles_per_measured_entry": 0.0
+          }
+        ]
+      },
+      "combined_codegen": {
+        "raw": "/workspaces/kprog-raw/perf/20261114-otel-combined-codegen/profile-clean",
+        "entry_count": 18475367,
+        "regions": [
+          {
+            "name": "body",
+            "start": "0x0",
+            "end": "0x7029",
+            "bytes": 28713,
+            "samples": 1761,
+            "sampled_period_cycles": 33830483688,
+            "cycles_per_measured_entry": 1831.1129455777523
+          },
+          {
+            "name": "shared_array",
+            "start": "0x7029",
+            "end": "0x706c",
+            "bytes": 67,
+            "samples": 478,
+            "sampled_period_cycles": 9218759122,
+            "cycles_per_measured_entry": 498.9756967750627
+          },
+          {
+            "name": "user_probe_read",
+            "start": "0x706c",
+            "end": "0x71b2",
+            "bytes": 326,
+            "samples": 1578,
+            "sampled_period_cycles": 30458356969,
+            "cycles_per_measured_entry": 1648.5927975882698
+          },
+          {
+            "name": "typed_hash",
+            "start": "0x71b2",
+            "end": "0x7902",
+            "bytes": 1872,
+            "samples": 910,
+            "sampled_period_cycles": 17665276387,
+            "cycles_per_measured_entry": 956.152935256983
+          },
+          {
+            "name": "lpm",
+            "start": "0x7902",
+            "end": "0x7a41",
+            "bytes": 319,
+            "samples": 3426,
+            "sampled_period_cycles": 66282375113,
+            "cycles_per_measured_entry": 3587.6080357700066
+          },
+          {
+            "name": "entry_epilogue",
+            "start": "0x7a41",
+            "end": "0x7a4e",
+            "bytes": 13,
+            "samples": 0,
+            "sampled_period_cycles": 0,
+            "cycles_per_measured_entry": 0.0
+          }
+        ]
+      }
+    },
+    "limits": "Native whole-image samples include migrated helper bodies. JIT program bytes exclude those kernel helper bodies; whole-image8522 vs JIT2257 is not a per-call comparison. Regions are disjoint but hardware skid/cross-helper attribution still applies. No per-helper ablation timing."
+  }
 }
