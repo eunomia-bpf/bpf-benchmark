@@ -45,8 +45,9 @@ the optional pipeline also preserves allocated bytes for an independent
 register fixture. Corrected OTel main now passes stock verification and checked
 native installation (20e909db6). The automatic selector also emits exactly the
 retained accepted main MIR, choosing slots17/18 and27 accesses (dd3fd2845;
-`otel-whole-word-corrected/backend-main-parity.json`). Full application execution
-and own-counters are next. Runtime P and the pre-bounds IR used by the checked
+`otel-whole-word-corrected/backend-main-parity.json`). The fresh whole-app startup also installed `perf_unwind_native` as checked
+native41 at21:12:37Z (request3; `otel-whole-word-live-main/report.md`).
+Remaining application startup, execution and own-counters continue. Runtime P and the pre-bounds IR used by the checked
 native compiler retain their existing definitions. This is B generation for
 verification feasibility; the combined runtime ratios retain their prior
 scope. Evidence: `whole-word-spill-values/report.md`, and raw

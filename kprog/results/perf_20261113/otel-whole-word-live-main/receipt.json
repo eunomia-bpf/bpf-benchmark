@@ -1,0 +1,21 @@
+{
+  "recorded": "2026-11-14T21:13:42Z",
+  "request": {
+    "request_id": 3,
+    "source_prog_id": 35,
+    "native_sha256": "ef44985c193e1d737ffd8980009b67f3c36ab91baf67af0c7878e69590d747da",
+    "execution_mode": "checked-sim-c",
+    "started": "2026-11-14T20:09:02.656100+00:00",
+    "prog_id": 41,
+    "phase": "load",
+    "status": 0,
+    "artifact_archive": "/workspaces/kprog-raw/perf/20261114-otel-whole-word-checked/state/session-d1wppo7h/requests/3.success.tar.gz",
+    "finished": "2026-11-14T21:12:37.633637+00:00"
+  },
+  "archive_bytes": 126883360,
+  "raw": "/workspaces/kprog-raw/perf/20261114-otel-whole-word-checked",
+  "make_pid": 605029,
+  "qemu_pid": 609811,
+  "entry": "perf_unwind_native",
+  "scope": "Fresh same-source/all-LTO checked application startup; main installed, remaining startup/workload still in progress"
+}
