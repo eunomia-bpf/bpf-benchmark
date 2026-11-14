@@ -159,6 +159,7 @@
 **lane verified 的大任务：六个应用在唯一内核和镜像上走通 verified 路径。** 普查按程序体去重、最多三个 guest 并行跑完；失败类别按 BPF 时间占比从大到小修；每个应用整应用复测，记下加载、通过 verifier、执行的程序数和运行目录；之后做 100–100K 规模扫描。链接器、加载器、shim 归你，lane perf、lane C 的相关改动由你审看或代改。
 - [ ] V1 按程序体去重的常驻普查跑完；已发现的失败类别（栈写越界、callback、scalar 内存访问、编译器栈存储）现在就修，按 BPF 时间占比从大到小。
 - [ ] V2 六个应用整应用复测，记下每个应用加载、通过 verifier、执行的程序数和运行目录。
+- Cilium 当前模型整应用checked-sim-c已排队（本提交）：复用 `perf-cilium-native-frame-20261114/manifest-context.json` 的50-entry同源P（3 objects、physical context），当前保留常驻25程序为24TC+1XDP，无socket；socket扩展另项不阻塞本workload。dryrun0，CPU8–15/8vCPU64G/AS80GiB/stats1/1×10，只等BCC351898自然退出以串行资源，不要求通过。实际加载/验证/执行及新增失败待收取；小receipt `cilium-current-model-lto-launch.json` 记录manifest/ELF哈希，原始数据 `/workspaces/kprog-raw/verified/20261114-cilium-current-model-lto`。
 - BCC 当前通用模型整应用复测已排队（本提交）：前次213201的25/25/25早于52964ca12/e6e64b725；复用现有whole-app入口、checked-sim-c及sole image，CPU8–15/8vCPU64G/AS80GiB、stats1/1×10，dryrun0。只等333934大输入重放自然退出以串行资源，不以其成功为gate；实际loaded/verified/installed/run/zero/missing待收取，不能从排队推断通过。小receipt `bcc-current-model-lto-launch.json`，原始数据 `/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto`。
 - [ ] V3 100–100K 规模扫描（verifier 时间和内存）。
 
@@ -708,7 +709,7 @@
 
 - VERIFIED 2026-11-14 Tracee CORE retry270915实时partial：已完成4个成功请求，sys_enter_init/source219现独立stock B222通过并安装checked-native225；同名失败类在当前CORE producer路径已推进通过。原件/副本实际sim C SHA同为4db655d3350a，4条native命令全0；已保留request4完整11405024B成功归档和journal snapshot于raw `20261114-tracee-core-checked-lto/partial-sys-enter-init`（SHA在launch receipt partial_progress）。当前sys_enter_submit仍在编译；整应用未完成，无post计数，不能认证执行/全覆盖，原始数据不删。
 
-- [ ] VERIFIED Cilium checked-sim-c 的 socket context 接入核对/补齐：静态链路中 `trusted_generation.context_kind` 只区分XDP/TC/cgroup_skb，其余（含prog_type9/18）为raw；`trusted_specializer.compile_checked_simulator` 对raw跳过context-lower；`checked-sim-stage` 的public/physical JSON来自packet providers，仅含XDP/SKB。service的SECTIONS已给9/18生成cgroup/sock和cgroup/bind4，现有 `socket-context-lower.cpp` 与 `socket-public-layout.c`/`socket-physical-layout.c` 已支持这些kind，后续应接入复用并用实际Cilium程序验证。此为静态接入缺口，尚无当前Cilium执行结论；不改变当前Tracee/编译重放的输入或增加准入条件。
+- [ ] VERIFIED Cilium checked-sim-c 的 socket context 接入核对/补齐：静态链路中 `trusted_generation.context_kind` 只区分XDP/TC/cgroup_skb，其余（含prog_type9/18）为raw；`trusted_specializer.compile_checked_simulator` 对raw跳过context-lower；`checked-sim-stage` 的public/physical JSON来自packet providers，仅含XDP/SKB。service的SECTIONS已给9/18生成cgroup/sock和cgroup/bind4，现有 `socket-context-lower.cpp` 与 `socket-public-layout.c`/`socket-physical-layout.c` 已支持这些kind，后续应接入复用并用实际Cilium程序验证。此为静态接入缺口，尚无当前Cilium执行结论；不改变当前Tracee/编译重放的输入或增加准入条件。 PERF09:24已确认：当前50-entry整应用manifest仅含TC/XDP，保留常驻清单24TC+1XDP，不含socket，因此本项不阻塞该workload的V2运行；独立upstream-sock.native.o已经physical lowering，不能当public P再下沉。唯一kernel的BTF默认访问只允许读，cg_sock/cg_sock_addr无btf_struct_access写handler，仅加bpf_cast_to_kern_ctx不能覆盖socket字段写入；后续仍须保留P及嵌套pointer语义，复用现有布局。
 
 ## 3. 安全：运行时缺口（有限用例和 guest 已验证）
 
