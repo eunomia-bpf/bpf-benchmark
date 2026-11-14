@@ -113,7 +113,7 @@ def run(args: argparse.Namespace) -> int:
     stamp = _stamp()
     name = args.label or args.app.replace("/", "_")
     out = pathlib.Path(args.out) if args.out else RAW_ROOT / f"{stamp}-phase-profile-{name}"
-    state = pathlib.Path("/var/tmp/kprog-tmp/C/phase-profile") / stamp
+    state = pathlib.Path(args.state_root) / stamp
     var_tmp = state / "var-tmp"
     if out.exists():
         raise SystemExit(f"output directory exists: {out}")
@@ -250,6 +250,7 @@ def report(out: pathlib.Path, *, annotate: int = 3, limit: int = 25) -> int:
 
 
 def main(argv: list[str]) -> int:
+    global PERF
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
     run_parser = sub.add_parser("run")
@@ -265,11 +266,15 @@ def main(argv: list[str]) -> int:
     run_parser.add_argument("--label", default="")
     run_parser.add_argument("--manifest", default="",
                             help="native manifest to load instead of the image's own")
+    run_parser.add_argument("--state-root", default="/var/tmp/kprog-tmp/C/phase-profile")
+    run_parser.add_argument("--perf", default=str(PERF))
     report_parser = sub.add_parser("report")
     report_parser.add_argument("directory")
     report_parser.add_argument("--annotate", type=int, default=3)
     report_parser.add_argument("--limit", type=int, default=25)
+    report_parser.add_argument("--perf", default=str(PERF))
     args = parser.parse_args(argv)
+    PERF = pathlib.Path(args.perf)
     if args.command == "run":
         return run(args)
     return report(pathlib.Path(args.directory), annotate=args.annotate, limit=args.limit)

@@ -144,6 +144,21 @@ memory-profile:
 	env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(LINK_MEMORY_CAPTURE) EQCODEX_NATIVE_LINK_BINARY=$(LINK_MEMORY_PAYLOAD)/native-link-on \
 		python3 $(ROOT)/kprog/perf/profile/phase-profile.py run --app tracee/monitor --seconds 45 --cpus 16-19 --vcpus 4 --memory 8G --freq 999 --out $(LINK_MEMORY_PROFILE) --annotate 0
 
+OTEL_PROFILE_RAW ?= /workspaces/kprog-raw/perf/20261114-otel-profile/run
+OTEL_PROFILE_CAPTURE ?= $(ROOT)/corpus/results/perf-otel-profile-20261114
+OTEL_PROFILE_MANIFEST ?= $(ROOT)/corpus/results/perf-otel-upstream-20261114/manifest-context.json
+PROFILE_TOOL_BUILD ?= /var/tmp/kprog-tmp/perf/profile-tool
+PROFILE_PERF_SOURCE ?= /workspaces/kprog-raw/perf/20261113-loader-cpu-profile/tool/perf
+.PHONY: profile-tool otel-profile
+profile-tool:
+	install -d $(PROFILE_TOOL_BUILD)
+	install -m755 $(PROFILE_PERF_SOURCE) $(PROFILE_TOOL_BUILD)/perf
+	$(PROFILE_TOOL_BUILD)/perf version --build-options
+
+otel-profile: profile-tool
+	env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(OTEL_PROFILE_CAPTURE) EQCODEX_PROGRESS_LOG=/var/tmp/out/guest.log EQCODEX_NATIVE_LINK_BINARY=$(LINK_MEMORY_PAYLOAD)/native-link-on \
+		python3 $(ROOT)/kprog/perf/profile/phase-profile.py run --app otelcol-ebpf-profiler/profiling --seconds 45 --cpus 16-19 --vcpus 4 --memory 32G --freq 199 --out $(OTEL_PROFILE_RAW) --annotate 0 --manifest $(OTEL_PROFILE_MANIFEST) --state-root /var/tmp/kprog-tmp/perf/phase-profile --perf $(PROFILE_TOOL_BUILD)/perf
+
 .PHONY: memory-host-bench
 memory-host-bench:
 	NATIVE_LINK_MEMORY_BENCH_OUTPUT=/workspaces/kprog-raw/perf/20261113-local-memory/host-microbench.json CARGO_TARGET_DIR=$(LINK_MEMORY_TARGET) CARGO_PROFILE_DEV_OPT_LEVEL=3 CARGO_PROFILE_DEV_DEBUG=0 \

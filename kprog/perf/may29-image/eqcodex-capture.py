@@ -94,7 +94,8 @@ def capture_cilium_configuration(prefix, dest):
 
 def observe(out):
     out = Path(out)
-    log = out / 'guest.log'
+    log = (Path(sys.argv[sys.argv.index('--progress-log') + 1])
+           if '--progress-log' in sys.argv else out / 'guest.log')
     seen = set()
     sequence = 0
     trace_ready = False
@@ -227,6 +228,8 @@ def main():
         if selected_linker:
             original = shlex.join(['env', f'BPFREJIT_NATIVE_LINK_BINARY={selected_linker}']) + ' ' + original
         observer = ['python3', str(Path(__file__).resolve()), '--observe', str(out)]
+        if progress := os.environ.get('EQCODEX_PROGRESS_LOG'):
+            observer += ['--progress-log', progress]
         if os.environ.get('EQCODEX_TRACE') == '1':
             observer.append('--trace')
         if client := os.environ.get('EQCODEX_TETRA'):

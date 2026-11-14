@@ -1,0 +1,394 @@
+{
+  "recorded_at": "2026-11-14T02:12:46.249923+00:00",
+  "protocol_commit": "0b2992cf0",
+  "raw": "/workspaces/kprog-raw/perf/20261114-bpf-functions",
+  "inputs": [
+    {
+      "path": "/var/tmp/kprog-tmp/perf/bpf-function-tools/socket-context-lower",
+      "sha256": "11c9890b5d3fa97862bb9439d7cfc9e036dfa76a9042eeeb0346236cbc995985"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/bpf-function-tools/public-layout.json",
+      "sha256": "ebe020ea5615f11d4bf023525a8350973b348b3fb93960bc3b99ffb25a40be47"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/bpf-function-tools/physical-layout.json",
+      "sha256": "75c12be2d5d18421588632686c31c51bbe0fe6f3c4e53f7a95f223554d827726"
+    }
+  ],
+  "reports": [
+    {
+      "path": "/var/tmp/kprog-tmp/perf/bpf-functions/report.json",
+      "sha256": "0aa1be4a7e690a32bce3bb98634584c3210f9ba3afd152558c04e0df93fada80",
+      "data": {
+        "cases": [
+          {
+            "immediate": 0,
+            "vectors": 48,
+            "commands": [
+              {
+                "argv": [
+                  "/var/tmp/kprog-tmp/perf/bpf-function-tools/socket-context-lower",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/input.bc",
+                  "--public-layout",
+                  "/var/tmp/kprog-tmp/perf/bpf-function-tools/public-layout.json",
+                  "--physical-layout",
+                  "/var/tmp/kprog-tmp/perf/bpf-function-tools/physical-layout.json",
+                  "--native-codegen",
+                  "--helper-names",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/helpers.json",
+                  "--bpf-function-bodies",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-0.json",
+                  "-o",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-0.bc"
+                ],
+                "returncode": 0
+              },
+              {
+                "argv": [
+                  "clang-18",
+                  "-O3",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-0.bc",
+                  "-o",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-0"
+                ],
+                "returncode": 0
+              },
+              {
+                "argv": [
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-0",
+                  "0x0",
+                  "0x0"
+                ],
+                "returncode": 0
+              }
+            ]
+          },
+          {
+            "immediate": 1,
+            "vectors": 48,
+            "commands": [
+              {
+                "argv": [
+                  "/var/tmp/kprog-tmp/perf/bpf-function-tools/socket-context-lower",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/input.bc",
+                  "--public-layout",
+                  "/var/tmp/kprog-tmp/perf/bpf-function-tools/public-layout.json",
+                  "--physical-layout",
+                  "/var/tmp/kprog-tmp/perf/bpf-function-tools/physical-layout.json",
+                  "--native-codegen",
+                  "--helper-names",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/helpers.json",
+                  "--bpf-function-bodies",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-1.json",
+                  "-o",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-1.bc"
+                ],
+                "returncode": 0
+              },
+              {
+                "argv": [
+                  "clang-18",
+                  "-O3",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-1.bc",
+                  "-o",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-1"
+                ],
+                "returncode": 0
+              },
+              {
+                "argv": [
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-1",
+                  "0x1",
+                  "0x1"
+                ],
+                "returncode": 0
+              }
+            ]
+          },
+          {
+            "immediate": -1,
+            "vectors": 48,
+            "commands": [
+              {
+                "argv": [
+                  "/var/tmp/kprog-tmp/perf/bpf-function-tools/socket-context-lower",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/input.bc",
+                  "--public-layout",
+                  "/var/tmp/kprog-tmp/perf/bpf-function-tools/public-layout.json",
+                  "--physical-layout",
+                  "/var/tmp/kprog-tmp/perf/bpf-function-tools/physical-layout.json",
+                  "--native-codegen",
+                  "--helper-names",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/helpers.json",
+                  "--bpf-function-bodies",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-2.json",
+                  "-o",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-2.bc"
+                ],
+                "returncode": 0
+              },
+              {
+                "argv": [
+                  "clang-18",
+                  "-O3",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-2.bc",
+                  "-o",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-2"
+                ],
+                "returncode": 0
+              },
+              {
+                "argv": [
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-2",
+                  "0xffffffffffffffff",
+                  "0xffffffff"
+                ],
+                "returncode": 0
+              }
+            ]
+          },
+          {
+            "immediate": -2147483648,
+            "vectors": 48,
+            "commands": [
+              {
+                "argv": [
+                  "/var/tmp/kprog-tmp/perf/bpf-function-tools/socket-context-lower",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/input.bc",
+                  "--public-layout",
+                  "/var/tmp/kprog-tmp/perf/bpf-function-tools/public-layout.json",
+                  "--physical-layout",
+                  "/var/tmp/kprog-tmp/perf/bpf-function-tools/physical-layout.json",
+                  "--native-codegen",
+                  "--helper-names",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/helpers.json",
+                  "--bpf-function-bodies",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-3.json",
+                  "-o",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-3.bc"
+                ],
+                "returncode": 0
+              },
+              {
+                "argv": [
+                  "clang-18",
+                  "-O3",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-3.bc",
+                  "-o",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-3"
+                ],
+                "returncode": 0
+              },
+              {
+                "argv": [
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-3",
+                  "0xffffffff80000000",
+                  "0x80000000"
+                ],
+                "returncode": 0
+              }
+            ]
+          },
+          {
+            "immediate": 2147483647,
+            "vectors": 48,
+            "commands": [
+              {
+                "argv": [
+                  "/var/tmp/kprog-tmp/perf/bpf-function-tools/socket-context-lower",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/input.bc",
+                  "--public-layout",
+                  "/var/tmp/kprog-tmp/perf/bpf-function-tools/public-layout.json",
+                  "--physical-layout",
+                  "/var/tmp/kprog-tmp/perf/bpf-function-tools/physical-layout.json",
+                  "--native-codegen",
+                  "--helper-names",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/helpers.json",
+                  "--bpf-function-bodies",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-4.json",
+                  "-o",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-4.bc"
+                ],
+                "returncode": 0
+              },
+              {
+                "argv": [
+                  "clang-18",
+                  "-O3",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-4.bc",
+                  "-o",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-4"
+                ],
+                "returncode": 0
+              },
+              {
+                "argv": [
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-4",
+                  "0x7fffffff",
+                  "0x7fffffff"
+                ],
+                "returncode": 0
+              }
+            ]
+          },
+          {
+            "immediate": 305419896,
+            "vectors": 48,
+            "commands": [
+              {
+                "argv": [
+                  "/var/tmp/kprog-tmp/perf/bpf-function-tools/socket-context-lower",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/input.bc",
+                  "--public-layout",
+                  "/var/tmp/kprog-tmp/perf/bpf-function-tools/public-layout.json",
+                  "--physical-layout",
+                  "/var/tmp/kprog-tmp/perf/bpf-function-tools/physical-layout.json",
+                  "--native-codegen",
+                  "--helper-names",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/helpers.json",
+                  "--bpf-function-bodies",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-5.json",
+                  "-o",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-5.bc"
+                ],
+                "returncode": 0
+              },
+              {
+                "argv": [
+                  "clang-18",
+                  "-O3",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-5.bc",
+                  "-o",
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-5"
+                ],
+                "returncode": 0
+              },
+              {
+                "argv": [
+                  "/var/tmp/kprog-tmp/perf/bpf-functions/case-5",
+                  "0x12345678",
+                  "0x12345678"
+                ],
+                "returncode": 0
+              }
+            ]
+          }
+        ],
+        "failures": [
+          {
+            "case": "nonconstant",
+            "command": {
+              "argv": [
+                "/var/tmp/kprog-tmp/perf/bpf-function-tools/socket-context-lower",
+                "/var/tmp/kprog-tmp/perf/bpf-functions/input.bc",
+                "--public-layout",
+                "/var/tmp/kprog-tmp/perf/bpf-function-tools/public-layout.json",
+                "--physical-layout",
+                "/var/tmp/kprog-tmp/perf/bpf-function-tools/physical-layout.json",
+                "--native-codegen",
+                "--helper-names",
+                "/var/tmp/kprog-tmp/perf/bpf-functions/helpers.json",
+                "--bpf-function-bodies",
+                "/var/tmp/kprog-tmp/perf/bpf-functions/nonconstant.json",
+                "-o",
+                "/var/tmp/kprog-tmp/perf/bpf-functions/nonconstant.bc"
+              ],
+              "returncode": 1
+            }
+          },
+          {
+            "case": "wrong-register",
+            "command": {
+              "argv": [
+                "/var/tmp/kprog-tmp/perf/bpf-function-tools/socket-context-lower",
+                "/var/tmp/kprog-tmp/perf/bpf-functions/input.bc",
+                "--public-layout",
+                "/var/tmp/kprog-tmp/perf/bpf-function-tools/public-layout.json",
+                "--physical-layout",
+                "/var/tmp/kprog-tmp/perf/bpf-function-tools/physical-layout.json",
+                "--native-codegen",
+                "--helper-names",
+                "/var/tmp/kprog-tmp/perf/bpf-functions/helpers.json",
+                "--bpf-function-bodies",
+                "/var/tmp/kprog-tmp/perf/bpf-functions/wrong-register.json",
+                "-o",
+                "/var/tmp/kprog-tmp/perf/bpf-functions/wrong-register.bc"
+              ],
+              "returncode": 1
+            }
+          },
+          {
+            "case": "defined-function",
+            "command": {
+              "argv": [
+                "/var/tmp/kprog-tmp/perf/bpf-function-tools/socket-context-lower",
+                "/var/tmp/kprog-tmp/perf/bpf-functions/input.bc",
+                "--public-layout",
+                "/var/tmp/kprog-tmp/perf/bpf-function-tools/public-layout.json",
+                "--physical-layout",
+                "/var/tmp/kprog-tmp/perf/bpf-function-tools/physical-layout.json",
+                "--native-codegen",
+                "--helper-names",
+                "/var/tmp/kprog-tmp/perf/bpf-functions/helpers.json",
+                "--bpf-function-bodies",
+                "/var/tmp/kprog-tmp/perf/bpf-functions/defined-function.json",
+                "-o",
+                "/var/tmp/kprog-tmp/perf/bpf-functions/defined-function.bc"
+              ],
+              "returncode": 1
+            }
+          },
+          {
+            "case": "bad-hex",
+            "command": {
+              "argv": [
+                "/var/tmp/kprog-tmp/perf/bpf-function-tools/socket-context-lower",
+                "/var/tmp/kprog-tmp/perf/bpf-functions/input.bc",
+                "--public-layout",
+                "/var/tmp/kprog-tmp/perf/bpf-function-tools/public-layout.json",
+                "--physical-layout",
+                "/var/tmp/kprog-tmp/perf/bpf-function-tools/physical-layout.json",
+                "--native-codegen",
+                "--helper-names",
+                "/var/tmp/kprog-tmp/perf/bpf-functions/helpers.json",
+                "--bpf-function-bodies",
+                "/var/tmp/kprog-tmp/perf/bpf-functions/bad-hex.json",
+                "-o",
+                "/var/tmp/kprog-tmp/perf/bpf-functions/bad-hex.bc"
+              ],
+              "returncode": 1
+            }
+          },
+          {
+            "case": "disabled",
+            "command": {
+              "argv": [
+                "/var/tmp/kprog-tmp/perf/bpf-function-tools/socket-context-lower",
+                "/var/tmp/kprog-tmp/perf/bpf-functions/input.bc",
+                "--public-layout",
+                "/var/tmp/kprog-tmp/perf/bpf-function-tools/public-layout.json",
+                "--physical-layout",
+                "/var/tmp/kprog-tmp/perf/bpf-function-tools/physical-layout.json",
+                "--bpf-function-bodies",
+                "/var/tmp/kprog-tmp/perf/bpf-functions/disabled.json",
+                "-o",
+                "/var/tmp/kprog-tmp/perf/bpf-functions/disabled.bc"
+              ],
+              "returncode": 1
+            }
+          }
+        ],
+        "scope": "Host compiler/body ABI tests only; constructed test facts are never application runtime facts.",
+        "absent_facts_default_and_native_byte_identical": true
+      }
+    }
+  ],
+  "scope": "Host compiler/replay artifacts only; no kernel submission, native installation or application equal-work claim.",
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/perf_20261113/bpf-functions-host.tar.gz",
+    "bytes": 365034,
+    "sha256": "d0bed8ec034f4d867e190ea7ee94f5a0ffd3696f8194f538a789788006633533",
+    "files_byte_compared": 109
+  }
+}
