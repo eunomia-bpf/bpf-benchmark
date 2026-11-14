@@ -48,9 +48,13 @@ def main():
                         help="Toggle runtime ARRAY dispatch instead of the known-map flag")
     parser.add_argument("--runtime-array-shared", action="store_true",
                         help="With --runtime-array-layout, toggle shared versus inline dispatch")
+    parser.add_argument("--runtime-probe-read-layout", type=Path,
+                        help="Toggle probe-read LTO; both kernel variants emit recovery ABI")
     args = parser.parse_args()
     if args.runtime_array_shared and not args.runtime_array_layout:
         parser.error("--runtime-array-shared requires --runtime-array-layout")
+    if args.runtime_probe_read_layout and args.runtime_array_layout:
+        parser.error("select one replay optimization at a time")
     args.output.mkdir(parents=True)
     binary_sha = hashlib.sha256(args.linker.read_bytes()).hexdigest()
     rows = []
@@ -80,7 +84,15 @@ def main():
             for flag, name in OUTPUTS.items():
                 replacements[flag] = work / (variant + "." + name)
             argv = rewrite(record["command"][1:], replacements)
-            if args.runtime_array_layout:
+            if args.runtime_probe_read_layout:
+                if record["mode"] == "kernel":
+                    if any(w.split("=",1)[0] == "--abi-load-sites" for w in argv):
+                        argv = rewrite(argv, {"--abi-load-sites": "true"})
+                    else:
+                        argv.extend(["--abi-load-sites", "true"])
+                if variant == "on":
+                    argv.extend(["--runtime-probe-read-layout", str(args.runtime_probe_read_layout)])
+            elif args.runtime_array_layout:
                 if variant == "on" or args.runtime_array_shared:
                     argv.extend(["--runtime-array-layout", str(args.runtime_array_layout)])
                 if variant == "on" and args.runtime_array_shared:
@@ -115,7 +127,8 @@ def main():
         rows.append(row)
     (args.output / "report.json").write_text(json.dumps(dict(
         linker=str(args.linker), linker_sha256=binary_sha, cases=rows,
-        switch=("--runtime-array-shared" if args.runtime_array_shared else
+        switch=("--runtime-probe-read-layout" if args.runtime_probe_read_layout else
+                "--runtime-array-shared" if args.runtime_array_shared else
                 "--runtime-array-layout" if args.runtime_array_layout else SWITCH),
         scope="Offline replay only, no kernel execution or workload validity gate. "
               "Helper call deltas establish emitted transformation counts, not performance gains."), indent=2) + "\n")
