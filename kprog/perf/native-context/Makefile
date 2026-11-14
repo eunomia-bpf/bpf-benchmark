@@ -964,3 +964,14 @@ guest-array-shared:
 			> $(ARRAY_KERNEL_OUTPUT)/$$mode/service.log 2>&1 || status=1; \
 		cat $(ARRAY_KERNEL_OUTPUT)/$$mode/service.log; \
 	done; exit $$status
+
+RUNTIME_COMBINED_ARRAY_PAYLOAD ?= $(ROOT)/corpus/results/perf-combined-array-linker-20261114
+.PHONY: runtime-combined-array-payload
+runtime-combined-array-payload:
+	install -d $(RUNTIME_COMBINED_ARRAY_PAYLOAD)
+	install -m755 $(RUNTIME_LPM_PAYLOAD)/native-link.real $(RUNTIME_COMBINED_ARRAY_PAYLOAD)/native-link.real
+	install -m755 $(RUNTIME_LPM_PAYLOAD)/native-link-on $(RUNTIME_COMBINED_ARRAY_PAYLOAD)/native-link-base
+	install -m644 $(RUNTIME_LPM_PAYLOAD)/runtime-probe-read-layout.json $(RUNTIME_LPM_PAYLOAD)/runtime-hash-layout.json $(RUNTIME_LPM_PAYLOAD)/runtime-lpm-layout.json $(RUNTIME_COMBINED_ARRAY_PAYLOAD)/
+	install -m644 $(ARRAY_KERNEL_PAYLOAD)/runtime-array-layout.json $(RUNTIME_COMBINED_ARRAY_PAYLOAD)/runtime-array-layout.json
+	install -m755 $(HERE)/native-link-combined-array.sh $(RUNTIME_COMBINED_ARRAY_PAYLOAD)/native-link-on
+	install -m755 $(HERE)/native-link-combined-array.sh $(RUNTIME_COMBINED_ARRAY_PAYLOAD)/native-link-off

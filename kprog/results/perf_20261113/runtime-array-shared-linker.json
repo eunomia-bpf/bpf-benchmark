@@ -376,5 +376,31 @@
       }
     ],
     "scope": "Actual shared ARRAY runtime dispatch, entry/subprogram resource identity, same-name decoy and live29->73 values; no wholeapp/speed claim."
+  },
+  "combined_candidate": {
+    "recorded_at": "2026-11-14T09:28:50.449824+00:00",
+    "runtime_entries": 14,
+    "proof_full_ELF_on_off_equal": 14,
+    "kernel_both_success": 14,
+    "off_all_output_groups_equal_prior_read_hash_LPM": 28,
+    "raw": "/workspaces/kprog-raw/perf/20261114-combined-array/wrapper-replay",
+    "prior_replay_failure": "Initial existing replay API passed already-prefixed runtime flags to a wrapper that supplies them, allCLIexit2 duplicate--runtime-map-lookups; rawreplay retained. Correct actualwrapper replay uses captured argv, strips only3wrapper-supplied boolflags; no candidate/code semantic failure.",
+    "main_unwinder": {
+      "combined_shared_bytes": 33098,
+      "read_hash_LPM_bytes": 33031,
+      "ARRAY_marker_present": true,
+      "LPM_marker_present": true
+    },
+    "inputs": {
+      "corpus/results/perf-combined-array-linker-20261114/native-link-base": "2b80231a478f500400dacce9dcabfe756db6471f0b618b170e86e84dbbcbd610",
+      "corpus/results/perf-combined-array-linker-20261114/native-link-off": "fe8ab855457de481b0a1186a5bf7cd77cf7fb84aea4524dff8efccec122ed16f",
+      "corpus/results/perf-combined-array-linker-20261114/native-link-on": "fe8ab855457de481b0a1186a5bf7cd77cf7fb84aea4524dff8efccec122ed16f",
+      "corpus/results/perf-combined-array-linker-20261114/native-link.real": "22bd4810d9a0667f90973fb8cd70a602c4c355c03b1626799522d2dd5eb316d6",
+      "corpus/results/perf-combined-array-linker-20261114/runtime-array-layout.json": "7d6163fe7fe3c406bace5e1a1e51486993ab43c9354d5a8f4865dee1c939ea75",
+      "corpus/results/perf-combined-array-linker-20261114/runtime-hash-layout.json": "971f96e6e983c1272ef2daf2ce23eeda165ae87d914c398a2ee62870b23b432b",
+      "corpus/results/perf-combined-array-linker-20261114/runtime-lpm-layout.json": "ea1bd0f3ed6be89836d5aaf3c4ca98117266ed60b4cebd2806c66b3764303272",
+      "corpus/results/perf-combined-array-linker-20261114/runtime-probe-read-layout.json": "75a971bd496f290b1763efcfe2f78b74e80d2c8bd3c7c064308337fe5026f12e"
+    },
+    "scope": "Host combined opt-in only. ON read/hash/LPM+shared ARRAY; OFF read/hash/LPM. Original running349398 payload untouched, canonical/default output unchanged. No combined execution/speed claim."
   }
 }
