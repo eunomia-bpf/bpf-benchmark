@@ -1,0 +1,336 @@
+{
+  "version": 1,
+  "prog_type": 7,
+  "section": "perf_event",
+  "maps": [
+    {
+      "name": "exe_id_to_22_stack_deltas",
+      "value_offset": null,
+      "value_size": 4,
+      "map_type": 13,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 65536,
+      "inner_map": {
+        "value_size": 4,
+        "map_type": 2,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 4194304
+      }
+    },
+    {
+      "name": "exe_id_to_8_stack_deltas",
+      "value_offset": null,
+      "value_size": 4,
+      "map_type": 13,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 65536,
+      "inner_map": {
+        "value_size": 4,
+        "map_type": 2,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 256
+      }
+    },
+    {
+      "name": "exe_id_to_12_stack_deltas",
+      "value_offset": null,
+      "value_size": 4,
+      "map_type": 13,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 65536,
+      "inner_map": {
+        "value_size": 4,
+        "map_type": 2,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 4096
+      }
+    },
+    {
+      "name": "exe_id_to_15_stack_deltas",
+      "value_offset": null,
+      "value_size": 4,
+      "map_type": 13,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 65536,
+      "inner_map": {
+        "value_size": 4,
+        "map_type": 2,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 32768
+      }
+    },
+    {
+      "name": "exe_id_to_19_stack_deltas",
+      "value_offset": null,
+      "value_size": 4,
+      "map_type": 13,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 65536,
+      "inner_map": {
+        "value_size": 4,
+        "map_type": 2,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 524288
+      }
+    },
+    {
+      "name": "exe_id_to_14_stack_deltas",
+      "value_offset": null,
+      "value_size": 4,
+      "map_type": 13,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 65536,
+      "inner_map": {
+        "value_size": 4,
+        "map_type": 2,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 16384
+      }
+    },
+    {
+      "name": "exe_id_to_11_stack_deltas",
+      "value_offset": null,
+      "value_size": 4,
+      "map_type": 13,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 65536,
+      "inner_map": {
+        "value_size": 4,
+        "map_type": 2,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 2048
+      }
+    },
+    {
+      "name": "exe_id_to_23_stack_deltas",
+      "value_offset": null,
+      "value_size": 4,
+      "map_type": 13,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 65536,
+      "inner_map": {
+        "value_size": 4,
+        "map_type": 2,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 8388608
+      }
+    },
+    {
+      "name": "exe_id_to_21_stack_deltas",
+      "value_offset": null,
+      "value_size": 4,
+      "map_type": 13,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 65536,
+      "inner_map": {
+        "value_size": 4,
+        "map_type": 2,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 2097152
+      }
+    },
+    {
+      "name": "unwind_info_array",
+      "value_offset": null,
+      "value_size": 12,
+      "map_type": 2,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 16384
+    },
+    {
+      "name": "exe_id_to_10_stack_deltas",
+      "value_offset": null,
+      "value_size": 4,
+      "map_type": 13,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 65536,
+      "inner_map": {
+        "value_size": 4,
+        "map_type": 2,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 1024
+      }
+    },
+    {
+      "name": "exe_id_to_13_stack_deltas",
+      "value_offset": null,
+      "value_size": 4,
+      "map_type": 13,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 65536,
+      "inner_map": {
+        "value_size": 4,
+        "map_type": 2,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 8192
+      }
+    },
+    {
+      "name": "exe_id_to_18_stack_deltas",
+      "value_offset": null,
+      "value_size": 4,
+      "map_type": 13,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 65536,
+      "inner_map": {
+        "value_size": 4,
+        "map_type": 2,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 262144
+      }
+    },
+    {
+      "name": "exe_id_to_16_stack_deltas",
+      "value_offset": null,
+      "value_size": 4,
+      "map_type": 13,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 65536,
+      "inner_map": {
+        "value_size": 4,
+        "map_type": 2,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 65536
+      }
+    },
+    {
+      "name": "exe_id_to_20_stack_deltas",
+      "value_offset": null,
+      "value_size": 4,
+      "map_type": 13,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 65536,
+      "inner_map": {
+        "value_size": 4,
+        "map_type": 2,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 1048576
+      }
+    },
+    {
+      "name": "with_debug_output",
+      "value_offset": 40,
+      "value_size": 44,
+      "map_type": 2,
+      "key_size": 4,
+      "map_flags": 128,
+      "max_entries": 1
+    },
+    {
+      "name": "metrics",
+      "value_offset": null,
+      "value_size": 8,
+      "map_type": 6,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 99
+    },
+    {
+      "name": "pid_page_to_mapping_info",
+      "value_offset": null,
+      "value_size": 16,
+      "map_type": 11,
+      "key_size": 16,
+      "map_flags": 1,
+      "max_entries": 1048576
+    },
+    {
+      "name": "exe_id_to_17_stack_deltas",
+      "value_offset": null,
+      "value_size": 4,
+      "map_type": 13,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 65536,
+      "inner_map": {
+        "value_size": 4,
+        "map_type": 2,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 131072
+      }
+    },
+    {
+      "name": "interpreter_offsets",
+      "value_offset": null,
+      "value_size": 40,
+      "map_type": 1,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 32
+    },
+    {
+      "name": "per_cpu_records",
+      "value_offset": null,
+      "value_size": 5000,
+      "map_type": 6,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 1
+    },
+    {
+      "name": "stack_delta_page_to_info",
+      "value_offset": null,
+      "value_size": 8,
+      "map_type": 1,
+      "key_size": 16,
+      "map_flags": 0,
+      "max_entries": 65536
+    },
+    {
+      "name": "perf_progs",
+      "value_offset": null,
+      "value_size": 4,
+      "map_type": 3,
+      "key_size": 4,
+      "map_flags": 0,
+      "max_entries": 10
+    },
+    {
+      "name": "exe_id_to_9_stack_deltas",
+      "value_offset": null,
+      "value_size": 4,
+      "map_type": 13,
+      "key_size": 8,
+      "map_flags": 0,
+      "max_entries": 65536,
+      "inner_map": {
+        "value_size": 4,
+        "map_type": 2,
+        "key_size": 4,
+        "map_flags": 0,
+        "max_entries": 512
+      }
+    }
+  ],
+  "kernel_kfunc_context": false
+}

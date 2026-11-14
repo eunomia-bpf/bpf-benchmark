@@ -1,0 +1,188 @@
+{
+  "source": "/workspaces/kprog-raw/perf/20261114-bpf-spill-layout/before.mir",
+  "low": 17,
+  "high": 18,
+  "changes": [
+    {
+      "block": 4434,
+      "original": "STW32 killed $w1, %stack.17, 0, debug-location !1082490",
+      "scratch": [
+        3,
+        4
+      ]
+    },
+    {
+      "block": 4435,
+      "original": "STW32 killed $w1, %stack.17, 0",
+      "scratch": [
+        2,
+        3
+      ]
+    },
+    {
+      "block": 4465,
+      "original": "$w1 = LDW32 %stack.17, 0"
+    },
+    {
+      "block": 4882,
+      "original": "STW32 killed $w2, %stack.18, 0, debug-location !1085329",
+      "scratch": [
+        0,
+        3
+      ]
+    },
+    {
+      "block": 4882,
+      "original": "STW32 killed $w2, %stack.17, 0",
+      "scratch": [
+        0,
+        3
+      ]
+    },
+    {
+      "block": 4883,
+      "original": "STW32 killed $w1, %stack.18, 0",
+      "scratch": [
+        0,
+        2
+      ]
+    },
+    {
+      "block": 4913,
+      "original": "STW32 killed $w1, %stack.17, 0",
+      "scratch": [
+        0,
+        2
+      ]
+    },
+    {
+      "block": 4913,
+      "original": "$w1 = LDW32 %stack.18, 0"
+    },
+    {
+      "block": 4914,
+      "original": "$w1 = LDW32 %stack.17, 0"
+    },
+    {
+      "block": 7440,
+      "original": "STW32 killed $w1, %stack.17, 0, debug-location !1103554",
+      "scratch": [
+        3,
+        4
+      ]
+    },
+    {
+      "block": 7441,
+      "original": "STW32 killed $w1, %stack.17, 0",
+      "scratch": [
+        2,
+        3
+      ]
+    },
+    {
+      "block": 7471,
+      "original": "$w1 = LDW32 %stack.17, 0"
+    },
+    {
+      "block": 7888,
+      "original": "STW32 killed $w2, %stack.18, 0, debug-location !1106393",
+      "scratch": [
+        0,
+        3
+      ]
+    },
+    {
+      "block": 7888,
+      "original": "STW32 killed $w2, %stack.17, 0",
+      "scratch": [
+        0,
+        3
+      ]
+    },
+    {
+      "block": 7889,
+      "original": "STW32 killed $w1, %stack.18, 0",
+      "scratch": [
+        0,
+        2
+      ]
+    },
+    {
+      "block": 7919,
+      "original": "STW32 killed $w1, %stack.17, 0",
+      "scratch": [
+        0,
+        2
+      ]
+    },
+    {
+      "block": 7919,
+      "original": "$w1 = LDW32 %stack.18, 0"
+    },
+    {
+      "block": 7920,
+      "original": "$w1 = LDW32 %stack.17, 0"
+    },
+    {
+      "block": 10914,
+      "original": "STW32 killed $w1, %stack.17, 0, debug-location !1127584",
+      "scratch": [
+        3,
+        4
+      ]
+    },
+    {
+      "block": 10915,
+      "original": "STW32 killed $w1, %stack.17, 0",
+      "scratch": [
+        2,
+        3
+      ]
+    },
+    {
+      "block": 10945,
+      "original": "$w1 = LDW32 %stack.17, 0"
+    },
+    {
+      "block": 11364,
+      "original": "STW32 killed $w2, %stack.18, 0, debug-location !1130425",
+      "scratch": [
+        0,
+        3
+      ]
+    },
+    {
+      "block": 11364,
+      "original": "STW32 killed $w2, %stack.17, 0",
+      "scratch": [
+        0,
+        3
+      ]
+    },
+    {
+      "block": 11365,
+      "original": "STW32 killed $w1, %stack.18, 0",
+      "scratch": [
+        0,
+        2
+      ]
+    },
+    {
+      "block": 11395,
+      "original": "STW32 killed $w1, %stack.17, 0",
+      "scratch": [
+        0,
+        2
+      ]
+    },
+    {
+      "block": 11395,
+      "original": "$w1 = LDW32 %stack.18, 0"
+    },
+    {
+      "block": 11396,
+      "original": "$w1 = LDW32 %stack.17, 0"
+    }
+  ],
+  "scope": "Run-only compiler prototype; requires actual stock verification. No native execution claim."
+}

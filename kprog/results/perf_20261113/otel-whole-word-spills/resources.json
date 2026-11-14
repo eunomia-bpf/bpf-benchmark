@@ -1,0 +1,328 @@
+{
+  "section": "perf_event/unwind_native",
+  "maps": [
+    {
+      "name": "custom_context_map",
+      "map_id": 4
+    },
+    {
+      "name": "dotnet_procs",
+      "map_id": 5
+    },
+    {
+      "name": "hotspot_procs",
+      "map_id": 6
+    },
+    {
+      "name": "trace_events",
+      "map_id": 7
+    },
+    {
+      "name": "apm_int_procs",
+      "map_id": 8
+    },
+    {
+      "name": "go_labels_procs",
+      "map_id": 9
+    },
+    {
+      "name": "exe_id_to_8_stack_deltas",
+      "map_id": 11
+    },
+    {
+      "name": "exe_id_to_9_stack_deltas",
+      "map_id": 13
+    },
+    {
+      "name": "exe_id_to_10_stack_deltas",
+      "map_id": 15
+    },
+    {
+      "name": "exe_id_to_11_stack_deltas",
+      "map_id": 17
+    },
+    {
+      "name": "exe_id_to_12_stack_deltas",
+      "map_id": 19
+    },
+    {
+      "name": "exe_id_to_13_stack_deltas",
+      "map_id": 21
+    },
+    {
+      "name": "exe_id_to_14_stack_deltas",
+      "map_id": 23
+    },
+    {
+      "name": "exe_id_to_15_stack_deltas",
+      "map_id": 25
+    },
+    {
+      "name": "exe_id_to_16_stack_deltas",
+      "map_id": 27
+    },
+    {
+      "name": "exe_id_to_17_stack_deltas",
+      "map_id": 29
+    },
+    {
+      "name": "exe_id_to_18_stack_deltas",
+      "map_id": 31
+    },
+    {
+      "name": "exe_id_to_19_stack_deltas",
+      "map_id": 33
+    },
+    {
+      "name": "exe_id_to_20_stack_deltas",
+      "map_id": 35
+    },
+    {
+      "name": "exe_id_to_21_stack_deltas",
+      "map_id": 37
+    },
+    {
+      "name": "exe_id_to_22_stack_deltas",
+      "map_id": 39
+    },
+    {
+      "name": "exe_id_to_23_stack_deltas",
+      "map_id": 41
+    },
+    {
+      "name": "unwind_info_array",
+      "map_id": 42
+    },
+    {
+      "name": "stack_delta_page_to_info",
+      "map_id": 43
+    },
+    {
+      "name": "sched_times",
+      "map_id": 44
+    },
+    {
+      "name": "kprobe_progs",
+      "map_id": 45
+    },
+    {
+      "name": "perl_procs",
+      "map_id": 46
+    },
+    {
+      "name": "php_procs",
+      "map_id": 47
+    },
+    {
+      "name": "py_procs",
+      "map_id": 48
+    },
+    {
+      "name": "ruby_procs",
+      "map_id": 49
+    },
+    {
+      "name": "system_analysis",
+      "map_id": 50
+    },
+    {
+      "name": "kernel_stackmap",
+      "map_id": 51
+    },
+    {
+      "name": "pid_events",
+      "map_id": 52
+    },
+    {
+      "name": "reported_pids",
+      "map_id": 53
+    },
+    {
+      "name": "inhibit_events",
+      "map_id": 54
+    },
+    {
+      "name": "report_events",
+      "map_id": 55
+    },
+    {
+      "name": "v8_procs",
+      "map_id": 56
+    },
+    {
+      "name": "per_cpu_records",
+      "map_id": 57
+    },
+    {
+      "name": "metrics",
+      "map_id": 58
+    },
+    {
+      "name": "pid_page_to_mapping_info",
+      "map_id": 59
+    },
+    {
+      "name": "interpreter_offsets",
+      "map_id": 60
+    },
+    {
+      "name": "perf_progs",
+      "map_id": 61
+    },
+    {
+      "name": ".rodata.str1.16",
+      "map_id": 63
+    },
+    {
+      "name": ".rodata.str1.1",
+      "map_id": 64
+    },
+    {
+      "name": ".rodata.var",
+      "map_id": 65
+    }
+  ],
+  "pin_root": "/sys/fs/bpf/kprog-selftest-5nd8ogu4",
+  "attach_target_resolution": null,
+  "resource_globalized_entries": [
+    "kprobe_unwind_dotnet",
+    "perf_unwind_dotnet",
+    "kprobe_go_labels",
+    "perf_go_labels",
+    "kprobe_unwind_hotspot",
+    "perf_unwind_hotspot",
+    "kprobe_unwind_stop",
+    "perf_unwind_stop",
+    "kprobe_unwind_native",
+    "perf_unwind_native",
+    "kprobe_unwind_perl",
+    "perf_unwind_perl",
+    "kprobe_unwind_php",
+    "perf_unwind_php",
+    "kprobe_unwind_python",
+    "perf_unwind_python",
+    "kprobe_unwind_ruby",
+    "perf_unwind_ruby",
+    "kprobe_unwind_v8",
+    "perf_unwind_v8"
+  ],
+  "resource_view": "maps-and-btf",
+  "resource_pinning": [],
+  "resource_configured_maps": [
+    {
+      "name": "exe_id_to_8_stack_deltas",
+      "field": "max_entries",
+      "original": 4096,
+      "value": 65536
+    },
+    {
+      "name": "exe_id_to_9_stack_deltas",
+      "field": "max_entries",
+      "original": 4096,
+      "value": 65536
+    },
+    {
+      "name": "exe_id_to_10_stack_deltas",
+      "field": "max_entries",
+      "original": 4096,
+      "value": 65536
+    },
+    {
+      "name": "exe_id_to_11_stack_deltas",
+      "field": "max_entries",
+      "original": 4096,
+      "value": 65536
+    },
+    {
+      "name": "exe_id_to_12_stack_deltas",
+      "field": "max_entries",
+      "original": 4096,
+      "value": 65536
+    },
+    {
+      "name": "exe_id_to_13_stack_deltas",
+      "field": "max_entries",
+      "original": 4096,
+      "value": 65536
+    },
+    {
+      "name": "exe_id_to_14_stack_deltas",
+      "field": "max_entries",
+      "original": 4096,
+      "value": 65536
+    },
+    {
+      "name": "exe_id_to_15_stack_deltas",
+      "field": "max_entries",
+      "original": 4096,
+      "value": 65536
+    },
+    {
+      "name": "exe_id_to_16_stack_deltas",
+      "field": "max_entries",
+      "original": 4096,
+      "value": 65536
+    },
+    {
+      "name": "exe_id_to_17_stack_deltas",
+      "field": "max_entries",
+      "original": 4096,
+      "value": 65536
+    },
+    {
+      "name": "exe_id_to_18_stack_deltas",
+      "field": "max_entries",
+      "original": 4096,
+      "value": 65536
+    },
+    {
+      "name": "exe_id_to_19_stack_deltas",
+      "field": "max_entries",
+      "original": 4096,
+      "value": 65536
+    },
+    {
+      "name": "exe_id_to_20_stack_deltas",
+      "field": "max_entries",
+      "original": 4096,
+      "value": 65536
+    },
+    {
+      "name": "exe_id_to_21_stack_deltas",
+      "field": "max_entries",
+      "original": 4096,
+      "value": 65536
+    },
+    {
+      "name": "exe_id_to_22_stack_deltas",
+      "field": "max_entries",
+      "original": 4096,
+      "value": 65536
+    },
+    {
+      "name": "exe_id_to_23_stack_deltas",
+      "field": "max_entries",
+      "original": 4096,
+      "value": 65536
+    },
+    {
+      "name": "stack_delta_page_to_info",
+      "field": "max_entries",
+      "original": 40000,
+      "value": 65536
+    },
+    {
+      "name": "pid_page_to_mapping_info",
+      "field": "max_entries",
+      "original": 524288,
+      "value": 1048576
+    },
+    {
+      "name": ".rodata.var",
+      "field": "map_flags",
+      "original": 1152,
+      "value": 128
+    }
+  ],
+  "prog_type_source": "retained kernel request"
+}
