@@ -31,5 +31,71 @@
   "dependency": "Wait compiler267051 resource release only; no compiler success requirement",
   "dry_run_exit_code": 0,
   "postlaunch_outcome_polled": false,
-  "application_completion_claimed": false
+  "application_completion_claimed": false,
+  "producer_code_evidence": {
+    "recorded": "2026-11-14T08:16:35.786989+00:00",
+    "scope": "Read-only native-link proof and objdump comparison of retained failed sys_enter_init and selected whole producer; no app/kernel verification acceptance inferred",
+    "raw_directory": "/workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto/producer-comparison",
+    "linker": "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+    "linker_sha256": "8312f5ac05364dbb0f77f4301e571faf99f4fc65f92be37b058c8d884fe84dc5",
+    "artifacts": {
+      "failed.proof.o": {
+        "bytes": 3040,
+        "sha256": "b912d24a117ae7f630020d49466de0082723beda100c92b882ac27c770023edf"
+      },
+      "core.proof.o": {
+        "bytes": 3176,
+        "sha256": "7c27ee8cbfe0de3e6844585465a76c641e572cddfd5e0985bfd1c2dd43ea070e"
+      },
+      "failed.disasm": {
+        "bytes": 21999,
+        "sha256": "ef18ae3ee97611e57c160f361323032bd2b936e4bd613788a54c213434547d76"
+      },
+      "core.disasm": {
+        "bytes": 23475,
+        "sha256": "7e107e6eb6ffb0d2faa6817d9c0a5cd4bacc852a16827c391ee2877569c362ec"
+      }
+    },
+    "failed_first_register_load": {
+      "instruction_address": "0x6c",
+      "instruction": "mov 0x70(%r12),%rax",
+      "raw_context_register": "%r12",
+      "offset": 112
+    },
+    "core_first_register_load": {
+      "address_sequence": [
+        "0x70",
+        "0x7d",
+        "0x87"
+      ],
+      "instructions": [
+        "lea 0x70(%r12),%rdx",
+        "mov $0x71,%ecx",
+        "call *%rcx"
+      ],
+      "helper_id": 113,
+      "read_bytes": 8,
+      "result_load": "mov (%rsp),%rax"
+    },
+    "argument_offsets": {
+      "previous_direct": [
+        112,
+        104,
+        96,
+        88,
+        72,
+        64
+      ],
+      "selected_core_probe": [
+        112,
+        104,
+        96,
+        56,
+        72,
+        64
+      ],
+      "arg4_change": "si offset88 to r10 offset56; consistent with existing source-diff D03"
+    },
+    "queue_inputs_changed": false
+  }
 }

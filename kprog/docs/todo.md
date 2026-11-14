@@ -692,7 +692,7 @@
 
 - VERIFIED 2026-11-14 Tracee checked-LTO262728已收集：Make0但appERROR（shim socket refused），baseline计数程序167，实际5份source提交/3stockverified/3installed/0observed-run；3个已安装程序缺少post计数，不能视为实际执行0。两个拒绝是同一sys_enter_init body，raw ctx arg0+112经scalar直接读取，BPF158拒绝，processed90/states7。原image producer未启用已有CORE-register probe-read flag；接续用保留的完整flag producer整应用重试，不放宽verifier。receipt `kprog/results/verified_20261114/tracee-checked-lto-receipt.json`，corpus `x86_kvm_corpus_20261114_074936_153575`，完整22442501B归档只在raw/SHA86d9ee09a306。
 
-- VERIFIED 2026-11-14 Tracee CORE-register整应用checked-LTO重试270915已排在OTel编译重放267051资源释放之后（不要求其成功）；使用保留的b94e7d0ee/0f0b2815f完整113-entry producer，已有MICRO_NATIVE_CORE_REG_PROBE_READS flag恢复CORE helper读取及syscall arg4/r10，不改应用源码/producer文件/verifier。通过现有manifest选择接口，文件哈希已记录；1x10s statsON/CPU8-15/8vCPU64G/AS80GiB/imageSH，raw `/workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto`，launch receipt `kprog/results/verified_20261114/tracee-core-checked-lto-launch.json`，dryrun0，未查询启动后结果。
+- VERIFIED 2026-11-14 Tracee CORE-register整应用checked-LTO重试270915已排在OTel编译重放267051资源释放之后（不要求其成功）；使用保留的b94e7d0ee/0f0b2815f完整113-entry producer，已有MICRO_NATIVE_CORE_REG_PROBE_READS flag恢复CORE helper读取及syscall arg4/r10，不改应用源码/producer文件/verifier。通过现有manifest选择接口，文件哈希已记录；1x10s statsON/CPU8-15/8vCPU64G/AS80GiB/imageSH，raw `/workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto`，launch receipt `kprog/results/verified_20261114/tracee-core-checked-lto-launch.json`，dryrun0，未查询启动后结果。 独立native-link/objdump核对：失败P的0x6c直接读ctx-arg寄存器+112；保留CORE P改为helper113读取8B，且arg4从si+88恢复r10+56。两份proof及反汇编SHA保留raw/receipt，不把该静态核对当verifier或应用通过。
 
 ## 3. 安全：运行时缺口（有限用例和 guest 已验证）
 
