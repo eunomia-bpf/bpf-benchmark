@@ -1,0 +1,122 @@
+{
+  "recorded": "2026-11-14T17:13:36.956758+00:00",
+  "scope": "Completed resident load-only replay; not whole-application startup or workload certification",
+  "base_journal": "kprog/results/verified_20261114/census-checkpoint-complete/outcomes.jsonl",
+  "queue_journals": [
+    "/workspaces/kprog-raw/perf/20261114-census-resume/prefix-1714.jsonl"
+  ],
+  "attempts": 53,
+  "attempt_stages": {
+    "installed": 22,
+    "verifier_rejected": 27,
+    "compilation_failed": 4
+  },
+  "distinct_bodies": 48,
+  "latest_stages": {
+    "installed": 22,
+    "verifier_rejected": 22,
+    "compilation_failed": 4
+  },
+  "latest_failure_classes": {
+    "verifier_rejected": 7,
+    "verifier_stack_access": 3,
+    "verifier_callback_argument": 1,
+    "verifier_context_access": 2,
+    "verifier_map_bounds": 9,
+    "compilation_failed": 4
+  },
+  "per_application": {
+    "bcc/set": {
+      "distinct_bodies": 9,
+      "latest_stages": {
+        "installed": 9
+      },
+      "native_run": 0
+    },
+    "katran": {
+      "distinct_bodies": 0,
+      "latest_stages": {},
+      "native_run": 0
+    },
+    "cilium/agent": {
+      "distinct_bodies": 0,
+      "latest_stages": {},
+      "native_run": 0
+    },
+    "otelcol-ebpf-profiler/profiling": {
+      "distinct_bodies": 0,
+      "latest_stages": {},
+      "native_run": 0
+    },
+    "tetragon/observer": {
+      "distinct_bodies": 6,
+      "latest_stages": {
+        "installed": 2,
+        "verifier_rejected": 4
+      },
+      "native_run": 0
+    },
+    "tracee/monitor": {
+      "distinct_bodies": 33,
+      "latest_stages": {
+        "installed": 11,
+        "verifier_rejected": 18,
+        "compilation_failed": 4
+      },
+      "native_run": 0
+    }
+  },
+  "native_run": 0,
+  "new_request_archives": [
+    {
+      "application": "tracee/monitor",
+      "body_group": 49,
+      "stage": "installed",
+      "raw_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/1.success.tar.gz",
+      "bytes": 13321574,
+      "sha256": "5aadc4537d51bda495123515edfa030e6835d7b7f38ec11c0e75c2d395f02d55",
+      "parts": [
+        {
+          "path": "kprog/results/verified_20261114/census-resume-1714/body-49-5aadc4537d51.tar.gz.part000",
+          "bytes": 13321574,
+          "sha256": "5aadc4537d51bda495123515edfa030e6835d7b7f38ec11c0e75c2d395f02d55"
+        }
+      ],
+      "reconstruction": "Concatenate listed parts; original SHA256 above."
+    },
+    {
+      "application": "tracee/monitor",
+      "body_group": 52,
+      "stage": "verifier_rejected",
+      "raw_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/2.failure.tar.gz",
+      "bytes": 15156015,
+      "sha256": "d06e8720d65dd4fdf3c6a680d20325b7cd585fb184ead41765c3f0bb05219a26",
+      "parts": [
+        {
+          "path": "kprog/results/verified_20261114/census-resume-1714/body-52-d06e8720d65d.tar.gz.part000",
+          "bytes": 15156015,
+          "sha256": "d06e8720d65dd4fdf3c6a680d20325b7cd585fb184ead41765c3f0bb05219a26"
+        }
+      ],
+      "reconstruction": "Concatenate listed parts; original SHA256 above."
+    },
+    {
+      "application": "tracee/monitor",
+      "body_group": 55,
+      "stage": "verifier_rejected",
+      "raw_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/3.failure.tar.gz",
+      "bytes": 14638732,
+      "sha256": "017d88dc7505118d1b24acbc3d896e022e64c7c112c7dce3fdd3dc9065002f0d",
+      "parts": [
+        {
+          "path": "kprog/results/verified_20261114/census-resume-1714/body-55-017d88dc7505.tar.gz.part000",
+          "bytes": 14638732,
+          "sha256": "017d88dc7505118d1b24acbc3d896e022e64c7c112c7dce3fdd3dc9065002f0d"
+        }
+      ],
+      "reconstruction": "Concatenate listed parts; original SHA256 above."
+    }
+  ],
+  "raw_directory": "/workspaces/kprog-raw/perf/20261114-census-resume/publication-1714",
+  "raw_removed": false
+}

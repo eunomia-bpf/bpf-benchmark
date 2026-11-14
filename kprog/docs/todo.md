@@ -180,6 +180,7 @@
 - [ ] V2 六个应用整应用复测，记下每个应用加载、通过 verifier、执行的程序数和运行目录。
 - Cilium 当前模型整应用checked-sim-c已排队（本提交）：复用 `perf-cilium-native-frame-20261114/manifest-context.json` 的50-entry同源P（3 objects、physical context），当前保留常驻25程序为24TC+1XDP，无socket；socket扩展另项不阻塞本workload。dryrun0，CPU8–15/8vCPU64G/AS80GiB/stats1/1×10，只等BCC351898自然退出以串行资源，不要求通过。实际加载/验证/执行及新增失败待收取；小receipt `cilium-current-model-lto-launch.json` 记录manifest/ELF哈希，原始数据 `/workspaces/kprog-raw/verified/20261114-cilium-current-model-lto`。
 - BCC 当前通用模型整应用复测已排队（本提交）：前次213201的25/25/25早于52964ca12/e6e64b725；复用现有whole-app入口、checked-sim-c及sole image，CPU8–15/8vCPU64G/AS80GiB、stats1/1×10，dryrun0。只等333934大输入重放自然退出以串行资源，不以其成功为gate；实际loaded/verified/installed/run/zero/missing待收取，不能从排队推断通过。小receipt `bcc-current-model-lto-launch.json`，原始数据 `/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto`。
+- PERF 2026-11-14 census新prefix：恢复队列首3体=Tracee body49安装、body52 event_data_map bounds拒绝、body55 probe_read长度无界拒绝；累计53attempts/48distinct，最新22installed/22rejected/4compilefail。旧队列仍运行，非整应用/工作负载执行证明。完整3份请求与累计journal/receipt已发布 `verified_20261114/census-resume-1714`；不删除失败/不抬verifier限制。
 - [ ] V3 100–100K 规模扫描（verifier 时间和内存）。
   - 2026-11-14 PERF：收完合并计时后已恢复 census（旧队列剩192体，CPU20–23/4vCPU24G/imageSH，raw `20261114-census-resume`）；V3 用当前模型快照/clang18 O3 BPFv4 后台扫描100/1K/10K/100K，CPU18–19，sole kernel 后验。首个4类100指令输入全部B编译通过，完整编译/内核结果仍待收取。旧脚本漏 `-mcpu=v4` 的真实 +w 失败保留；同脚本增加展开字节与逐阶段 wall/RSS，去掉原900秒人工截断。见 `scale-current-launch.json`。
 
