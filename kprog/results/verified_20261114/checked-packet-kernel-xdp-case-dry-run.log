@@ -1,0 +1,17 @@
+make: Entering directory '/workspaces/repository/kprog/libnativeloader'
+CLANG="/workspaces/repository/kprog/stock-path/bin/clang" KPROG_FRAME_LINKER="/workspaces/kprog-raw/verified/20261114-checked-packet/kernel/native-link.real" \
+	python3 ../trusted_service.py --arch 1 --endpoint /sys/kernel/debug/bpf_x86_native_lab/specializer \
+	--module /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
+	--state "/workspaces/kprog-raw/verified/20261114-checked-packet/kernel/xdp/state" \
+	--results "/workspaces/kprog-raw/verified/20261114-checked-packet/kernel/xdp/service.tar.gz" \
+	--native-link "/workspaces/repository/kprog/test/tail_call_frame/native-link.sh" \
+	--loader "/workspaces/kprog-raw/verified/20261114-checked-packet/kernel/trusted-native-loader" --execution-mode checked-sim-c \
+	--sim-native-compiler "/workspaces/kprog-raw/verified/20261114-checked-packet/kernel/compile-sim-ir" \
+	--sim-context-compiler "/workspaces/kprog-raw/verified/20261114-checked-packet/kernel/context-lower" \
+	--sim-public-layout "/workspaces/kprog-raw/verified/20261114-checked-packet/kernel/public-layout.json" \
+	--sim-physical-layout "/workspaces/kprog-raw/verified/20261114-checked-packet/kernel/physical-layout.json" \
+	--run "/workspaces/kprog-raw/verified/20261114-checked-packet/kernel/client" "/workspaces/kprog-raw/verified/20261114-checked-packet/kernel/source.bpf.o" \
+	"/workspaces/kprog-raw/verified/20261114-checked-packet/kernel/packet.native.o" \
+	"/workspaces/repository/kprog/test/tail_call_frame/native-link.sh" "xdp" \
+	"/workspaces/kprog-raw/verified/20261114-checked-packet/kernel/xdp/execution.jsonl"
+make: Leaving directory '/workspaces/repository/kprog/libnativeloader'

@@ -1,0 +1,33 @@
+{
+  "recorded": "2026-11-14T03:39:20Z",
+  "launcher_pid": 159584,
+  "code_commit": "86de46225",
+  "kernel_commit": "74d1097af56132da2b325699c5a560b29a790ff2",
+  "image_digest": "0bb7d4be1f0a9c4bb015ee20d14fb9ba26e56da9f84310a501257ae5376e084c",
+  "make_target": "checked-packet-kvm SOURCE_MAP_VM_MEMORY=1G",
+  "host_cpu": "14",
+  "guest_vcpus": 2,
+  "guest_memory": "1G",
+  "host_address_space_kib": 8388608,
+  "prelaunch_memavailable_kib": 32905348,
+  "image_lock": "shared /workspaces/.agent-state/kprog-lanes/locks/image",
+  "launch_directory": "/workspaces/kprog-raw/verified/20261114-checked-packet/kernel-launch",
+  "output_directory": "/workspaces/kprog-raw/verified/20261114-checked-packet/kernel",
+  "dry_run": "PASS: kernel launcher and service case arguments",
+  "result": "Pending; collect next turn, no postlaunch polls",
+  "canonical_changed": false,
+  "cases": [
+    "xdp: actual stock/native packet verdicts",
+    "tc: actual stock/native verdicts and mark/priority/CB writes",
+    "reject: actual stock failure with no checked-simulator copy/native commands/install"
+  ],
+  "artifacts": {
+    "/var/tmp/kprog-tmp/verified/checked-sim/compile-sim-ir": "d0f30a61ac7479cab645db7d3e168e8d772c2c7c374c3008b264789298776bdf",
+    "/var/tmp/kprog-tmp/verified/checked-sim/trusted-native-loader": "5f6c718af3ae5efdf4483916f89eaa9dd491b10b85f9c2d23ad75bac8a9d737b",
+    "/var/tmp/kprog-tmp/verified/checked-packet/client": "f4e0a565508cbfd47a66947d5c931370d178f0e6885992f616b51db3db86c824",
+    "/var/tmp/kprog-tmp/verified/checked-packet/context-lower": "5f4549c07681c471cc57fe69b6c4bd1a9146a9775cd5cb43242a2131a84ea05d",
+    "/var/tmp/kprog-tmp/verified/checked-packet/packet.native.o": "89e87f603de48891fbc9f0258b97788e84f8cd1caf9aedac79ef1a02d4fff6a4",
+    "/var/tmp/kprog-tmp/verified/checked-packet/bad.native.o": "e72327e5d09b89461a282372564d4e8e2301ed19d0fe53c669479dc2454bac01",
+    "/var/tmp/kprog-tmp/verified/checked-packet/source.bpf.o": "41899d458d16e378b6487358a927c27084d105eff0dda13257aff2391e36441d"
+  }
+}
