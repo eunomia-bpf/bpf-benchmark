@@ -6,7 +6,15 @@
 
 状态基于 2026-11-12 14:20 UTC。审核 detour-20261112T09Z（已核实）：重启后 OTel、Cilium、Tetragon、Tracee 每次运行都有一个程序装成 36 字节空壳（内核单一 pending 槽 + x86 JIT 拿不到镜像时回落编译 r0=0 桩，违反 AGENTS.md:105），（更正 14:20：按 stats 开运行里的逐程序计数，OTel、Tetragon、Tracee 的空壳程序两个阶段都执行 0 次，不影响这三个应用的数字；Cilium 第 c 轮 stats 关那次空的是热点 cil_to_host，受影响，第 d 轮那次空的是只跑约 2 次的 cil_to_netdev，不受影响。1.240x 几何平均暂时成立，以修复后内核上的第 f 轮为准。）修复由 lane verified 做（每次桩装载要么拿到自己程序的镜像，要么失败）；OTel 的每 arm metrics map 导出在修复后由 lane C 做。
 
-## 0. Lane 目标与待办（协调者作为 advisor 设定，2026-11-13）
+## 0. Lane 目标与待办
+
+COORDINATOR 检查点 2026-11-14T21:21:50Z：六应用现状（吞吐 / 每次调用）：Katran 1.076x / 1.187x（同源、输出对照、计时）；BCC 约 1.00x；OTel 1.161x / 1.129x（18:40 全部 LTO 组合，等量工作认证进行中）；Cilium 1.285x 吞吐，两臂走的包路径不同（C fe1bc6c52、8dfa7c3e0），等量工作待定；Tetragon 1.2754x 吞吐（dd08c1571，两条说明见其 README），每次调用待按挂载点配对；Tracee 1.0111x，原生一侧 22% 的 probe_read 失败（dd83c38f7），即 P0 的 D03/D04 偏移根因。
+- [ ] C-Tracee-BTF Tracee 原生一侧用唯一内核的 BTF 从同一份源码重建（VMLINUX_BTF=kprog-ck/build-x86/vmlinux），先对照实际运行的替换程序 217 与基线 25 在 common/filtering.h:144-146 的读偏移；EFAULT 份额回到 eBPF 一侧的 0.06% 后重新计时。归 C，链接器一侧的 P1h 与 PERF 商量。
+- [ ] C-Cilium-path 冻结的 pktgen 负载保持原样；找出原生一侧 cil_from_host/cil_to_host 每个包约跑两次的原因（cil_from_container 的返回码与重定向决定、重定向 helper 的内核函数与 flag、D09 原生守卫），修好后重测。归 C，helper 链接归 PERF。
+- [ ] C-Tetragon-percall 两臂 generic_kprobe_ 实例按挂载点配对，给出带流量实例的每次调用 ns/inv 比值。归 C。
+- [ ] P-ktime-LTO bpf_ktime_get_ns 占 Katran BPF 时间 34%：链接时把调用直接绑定到内核的快速单调时钟路径，作为 LTO 候选记入 optimizations.md，排在 OTel 各项之后。归 PERF。
+- [ ] P-Tracee-PLT32 Tracee PLT32 收敛（33 351 对镜像 252，native_link/src/x86.rs:999-1016 的 mov $imm; call 相邻要求）。归 PERF，与 C 商量。
+（协调者作为 advisor 设定，2026-11-13）
 
 PERF checkpoint 2026-11-14T19:47Z（fb6695afa / 23fef254e；本提交）：corrected whole-word scalar spill 的 OTel main 真实 stock verify 后，生产 checked compiler 复用原始 pre-bounds IR，成功编译并安装 native program14；512-byte frame、完整原始context/map shape匹配。初版 LLVM selfCOPY 被消除的反例保留，改为显式shift后两程序各1060次真实kernel执行匹配C参考；默认/显式0 object与旧命令逐字相同。完整receipt为 `perf_20261113/otel-whole-word-corrected/report.md`。下一步为同源/全部LTO的whole-app diagnostic（CPUs16–17/2vCPU48G/1×10s），随后应用own-counters与等量工作；P1/P2/P3、1.20目标和最终六app确认继续。旧48G任务自然结束，完整service/archive与main两种拒绝保留；编译成本已收完，InstCombine44.3%+SROA42.4%。23个已完成任务的可重建大文件移入scratch，每条路径见cleanup-log.md，原始数据保留。
 
