@@ -174,6 +174,16 @@
 
 **lane 合并（运营者 2026-11-14："perf、verified、formal 需要3 个吗""不要互相等等"；协调者 2026-11-14T09:33:47Z）**：lane verified 并入 lane perf，kprog 留两条 Codex lane（perf、formal）和 lane C（omp）。perf 接手 verified 的全部任务和文件归属（链接器、加载器、shim、service、checked-sim-c 编译器）：顺序是 ① OTel 在等量工作下吞吐至少 1.20x（LTO：read、hash、LPM），② LTO 配置跑整应用（BCC 已通，Tracee、Katran 接着），③ 六应用 verified 路径剩下的应用；formal 的 M4/M6 改为和 perf 商定。**不互相等**：计时锁只给 CPU 0-7 上的计时运行用，功能和内核用例在各自的 CPU 上跑、不拿计时锁；镜像锁的独占只给镜像重建用，重建攒到一次做；一条 lane 等作业时在同一轮里用一条阻塞命令等，或者先做下一项；需要别的 lane 改的东西，自己按商定的范围改，写进 COORDINATION。
 
+**每条 lane 负责一部分代码（运营者 2026-11-14："明确记录, 以后建议每个 lane 负责一部分代码. 所有 research 都生效"；协调者 2026-11-14T09:43:05Z 按现有归属划分）**：
+
+| lane | 负责的代码 |
+|---|---|
+| perf（Codex，并入了 verified） | 链接器 kprog/x86/native_lab/native_link、加载器 kprog/libnativeloader、shim bpfopt/shim、注册的 service 和 checked-sim-c 编译器、kprog/perf/profile、LTO 的各个发射器，以及 OTel、Cilium、Tetragon 的同源构建 |
+| formal（Codex） | kprog/formal 和其中的 submodule（LNSym、x86lean、clean）、.gitmodules 的这三项 |
+| C（omp） | vendor/bpf 的同源开关和 Katran、BCC、Tracee 的同源构建脚本（kprog/perf/katran-same-source.sh、native-ir-prep.py 等）、kprog/perf/direct-native 的计时模块、kprog/perf/one-image 的计时脚本 |
+
+一条 lane 需要别人那部分改动时，在 COORDINATION 说清楚，由负责的 lane 改；两条 lane 反复改同一块代码时，协调者把它们合并成一条。
+
 ## 1. 性能（目标：六应用几何平均 native/JIT 1.20x–1.40x，来自原生代码）
 
 - **PERF inline ARRAY 退化诊断（2026-11-14，ad56c93b1）** 188582/run050542_885568 make0/appok，1×10s statsON/16–19/4vCPU16G，吞吐 **0.394x**、3549.1→7293.1ns/次，0 workload错误/0tiny；13/12测量程序、13 replacement日志及custom__generic两次EINVAL完整保留。native generation302的两snapshot在startup/warmup，缺实际测量末端窗，不认证等量工作或floor；既有0.980x/0.965x结果不改。完整run/4个counter snapshots/失败JIT dump/logs/分析归档 `runtime-array-otel-results.json/.tar.gz`。共享routine后续候选只检验代码体积原因假说，不把host字节减少当速度收益。
