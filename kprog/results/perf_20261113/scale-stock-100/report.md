@@ -31,3 +31,8 @@ loader logs and verifier/allocation traces:
 allocation interval and zero lost events in these four recorded traces.
 The100/1K subset and full100–100K production scale work remain in progress;
 old legacy compiler failures retain their separate published receipts.
+
+The existing1K build continues in the same build location. `batch-queue.json`
+records the bounded background queue that waits for it, verifies100/1K,
+compiles10K/100K through production, then records the final kernel batch.
+Every stage's status/log is retained; the larger results remain pending.

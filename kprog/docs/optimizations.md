@@ -94,3 +94,11 @@ its clock basis and concurrency rules is required. The sample share is not a
 predicted gain: removing a wrapper leaves the clock-read cost. This candidate
 will use the combined LTO configuration and focused correctness checks before
 any performance claim.
+
+Compiler storage (354bfbcbb): after successful preprocessing, each temporary
+piece C/expanded input is removed once its tokens are joined. The canonical
+simulator C and joined input stay. A two-piece comparison against the prior
+compiler loaded from git into memory produces identical joined/default B
+bytes; explicit0/previous backend/optional allocated-output controls pass
+(0e4593e46/bffd94728, `preprocess-cleanup/report.md`). No runtime gain is
+claimed; existing live services retain their imported function.

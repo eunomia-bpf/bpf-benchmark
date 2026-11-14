@@ -1,0 +1,24 @@
+{
+  "recorded": "2026-11-14T21:40:05Z",
+  "pid": 666038,
+  "wait_pid": 662651,
+  "build": "/var/tmp/kprog-tmp/perf/scale",
+  "records": "/workspaces/kprog-raw/perf/20261114-scale-stock/compile",
+  "output": "/workspaces/kprog-raw/perf/20261114-scale-stock/batch",
+  "log": "/workspaces/kprog-raw/perf/20261114-scale-stock/batch-queue.log",
+  "source_commits": [
+    "d9ae8bb90",
+    "9d8e1288b",
+    "354bfbcbb",
+    "0e4593e46"
+  ],
+  "host_cpus": "18",
+  "compiler_address_space_limit_bytes": 85899345920,
+  "kernel_guest": "18-19/2vCPU8G/16GiBAS/imageSH",
+  "stages": [
+    "verify existing100/1K subset",
+    "compile10000/100000 through production pipeline",
+    "final kernel/execution/memory trace for all recorded cases"
+  ],
+  "scope": "Every stage retained; compiler failures do not hide independent completed cases"
+}
