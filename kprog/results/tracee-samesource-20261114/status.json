@@ -1,0 +1,55 @@
+{
+  "app": "tracee/monitor",
+  "date_utc": "2026-11-14T10:43:00Z",
+  "route": "same-source via the Makefile rule (`make native-tracee`)",
+  "route_note": "the 2026-11-13 hand pipeline (compile to BPF, core-ir lower, name-helpers, lower-tracee-asm, native codegen) produces different objects and crashed the post arm; the Makefile rule compiles tracee.bpf.c straight to native with -include native_compat.h",
+  "manifest": "corpus/results/tracee-samesource-20261114/manifest.json",
+  "manifest_sha256": "2bc637d934823adeb63b006fc745f85ea36da1ce4539b8a1373862fec6af02d2",
+  "fidelity": {
+    "claim": "all 179 build outputs (175 proof objects, 3 native objects, manifest) have the image's sha256",
+    "reference": "/opt/bpf-benchmark/native-bpf/x86_64/tracee/ in bpf-benchmark/kprog:current",
+    "files_compared": 179,
+    "files_differing": 0,
+    "reproducible_sha256": "fb3f51b32b0013c1258595a785e1053c0ec49a32e7d2fb80afafd2d29817bb82"
+  },
+  "c3": {
+    "run": "corpus/results/x86_kvm_corpus_20261114_085217_843248",
+    "samples": 3,
+    "workload_seconds": 180,
+    "cpus": "0-7",
+    "status": "ok",
+    "baseline_native_programs": 0,
+    "post_native_programs": 169,
+    "native_load_errors": 0,
+    "perf_event_ioc_disable_baseline": 165,
+    "perf_event_ioc_disable_post": 165,
+    "aggregate": {
+      "ebpf_ns_per_run": 248.35,
+      "native_ns_per_run": 242.52,
+      "ratio_native_over_ebpf": 0.9765,
+      "speedup_native_over_ebpf": 1.0241,
+      "run_cnt_ebpf": 10005627141,
+      "run_cnt_native": 10165959455
+    },
+    "workload_bogo_ops_per_sample": {
+      "baseline": [109352373, 108528148, 114635178],
+      "post_rejit": [115733687, 110825392, 111917590]
+    },
+    "workload_throughput_direction": "post >= baseline in 2 of 3 samples and in the mean (+1.8%), consistent with the ns/run ratio",
+    "retained_programs_min_runs_100": 29,
+    "per_program_geomean_ratio": 0.8179,
+    "programs_with_runs_both_arms": 42
+  },
+  "headroom": {
+    "target": "six-application geomean native/eBPF >= 1.20x",
+    "tracee_status": "1.0241x, below target",
+    "dominant_weight_programs": {
+      "tracepoint__raw": {"ebpf": 333.4, "native": 307.7, "speedup": 1.084},
+      "trace_sys_enter": {"ebpf": 273.4, "native": 278.5, "speedup": 0.982},
+      "trace_sys_exit": {"ebpf": 271.7, "native": 282.6, "speedup": 0.961},
+      "trace_ret_vfs_r": {"ebpf": 419.7, "native": 468.7, "speedup": 0.896},
+      "tracepoint__sch": {"ebpf": 314.0, "native": 309.5, "speedup": 1.015}
+    },
+    "note": "the image's own objects give 1.0241x; reaching 1.20x requires a different native code path, not a different build of this one"
+  }
+}
