@@ -213,6 +213,8 @@ def main():
                     observer.terminate()
                 observer_status = observer.wait()
                 (out / 'observer-exit-code').write_text(str(observer_status) + '\n')
+        # Preserve OOM/fault evidence after measurement, before this guest exits.
+        save(['/bin/sh', '-c', 'dmesg'], out / 'kernel-end.log')
         sys.stdout.buffer.write((out / 'guest.log').read_bytes())
         return result.returncode
     if len(sys.argv) > 1 and sys.argv[1] == '--observe':
