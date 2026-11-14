@@ -1,0 +1,23 @@
+{
+  "recorded": "2026-11-14T06:39:58.032477+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-direct-recovery",
+  "host_check": "PASS: actual ABI parser, wire bytes, instruction/chunk edge, overlapping relocation boundaries, bounds and empty/default ABI",
+  "module_build_exit_code": 0,
+  "build_kernel": "/workspaces/.agent-state/kprog-ck/build-x86",
+  "candidate_files": {
+    "/workspaces/kprog-raw/verified/20261114-direct-recovery/candidate/recovery": {
+      "bytes": 6375168,
+      "sha256": "1b5336285464f24052e405954a71700f6f53c094251d8dbf868381acc022b738"
+    },
+    "/workspaces/kprog-raw/verified/20261114-direct-recovery/candidate/module/bpf_x86_native_lab.ko": {
+      "bytes": 689712,
+      "sha256": "d232c2e6bd5a52950528e1d26ee5da38bdf2d44884f6bd81aaf37f851812aefd"
+    }
+  },
+  "kernel_execution_collected": false,
+  "canonical_deployed": false,
+  "canonical_kernel_image_changed": false,
+  "default_metadata": "Absent unless selected linker explicitly emits it; no additional direct upload with empty sites",
+  "code_growth": "About147 production lines for two-sided transport/reset/rebasing; actual production-path component test and Make entrypoints, no runtime switch or benchmark validity gate",
+  "raw_removed": false
+}

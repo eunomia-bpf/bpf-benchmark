@@ -55,6 +55,6 @@ Functional only; the 2-second run says nothing about performance.
 
 ## Limits
 
-- The blob upload carries no load-site data and this module emits no exception-table entries, so a native object must take no faults. Native objects that rely on faulting memory reads (probe-read load sites) are outside this path.
+- On the sole stock native-image kernel, optional `blob<N>.sites` uploads carry existing `native_lab_load_site` records (u32 chunk-relative offset, u16 instruction length, u16 recovery register; 0xffff means resume-only). The module rebases them into the whole image and the kernel emits its exception table. Reuploading a blob clears its old sites. The selected linker must explicitly emit `load_site` ABI records, for example with its existing `--abi-load-sites true` option; an empty/default ABI sends no sites and retains the original upload behavior. Module and loader deployment must both precede using recovery in an application.
 - Native code per program is capped at 512 chunks of 128 bytes, the same limit as before `82f8e9e77`.
 - The restored image's `libnative_loader.so` (from 2026-11-07) does the linking; the overlaid objects must work with it.

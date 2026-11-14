@@ -19,8 +19,9 @@
  * The uploaded bytes are splatted inline by the JIT. A blob reaches the next
  * BPF instruction by falling through (no ret); rax holds the return value.
  * The ABI mask in the payload marks BPF r6-r9 used so the JIT prologue saves
- * rbx/r13-r15 when native-link dropped those saves. This code path has no
- * exception-table entries, so native code must not take faults here.
+ * rbx/r13-r15 when native-link dropped those saves. This code path accepts
+ * optional exception-table sites supplied by the selected linker. Without
+ * such metadata native code must not take faults here.
  */
 
 #include <linux/bpf.h>
@@ -41,6 +42,8 @@
 #endif
 
 #include "kinsn_common.h"
+#include "native_lab_trusted_wire.h"
+#include <linux/ptrace.h>
 
 #define NATIVE_LAB_MAX_BLOBS		512
 #define NATIVE_LAB_MAX_BLOB_BYTES	128
@@ -76,6 +79,8 @@ struct native_blob {
 	size_t len;
 	struct native_lab_reloc_record *relocs;
 	size_t reloc_count;
+	struct native_lab_load_site *load_sites;
+	size_t load_site_count;
 };
 
 static struct native_blob blobs[NATIVE_LAB_MAX_BLOBS];
@@ -334,6 +339,18 @@ static int native_lab_arm_chunks(void)
 {
 	struct bpf_native_image *image;
 	struct bpf_native_reloc *relocs = NULL;
+	struct bpf_native_site *sites = NULL;
+	static const u16 registers[] = {
+		offsetof(struct pt_regs, ax), offsetof(struct pt_regs, cx),
+		offsetof(struct pt_regs, dx), offsetof(struct pt_regs, bx),
+		offsetof(struct pt_regs, sp), offsetof(struct pt_regs, bp),
+		offsetof(struct pt_regs, si), offsetof(struct pt_regs, di),
+		offsetof(struct pt_regs, r8), offsetof(struct pt_regs, r9),
+		offsetof(struct pt_regs, r10), offsetof(struct pt_regs, r11),
+		offsetof(struct pt_regs, r12), offsetof(struct pt_regs, r13),
+		offsetof(struct pt_regs, r14), offsetof(struct pt_regs, r15),
+	};
+	size_t ns = 0, si = 0;
 	size_t len = 0, nr = 0, off = 0, k = 0;
 	u8 *bytes;
 	u32 i, j;
@@ -341,6 +358,7 @@ static int native_lab_arm_chunks(void)
 	for (i = 0; i < NATIVE_LAB_MAX_BLOBS && blobs[i].bytes; i++) {
 		len += blobs[i].len;
 		nr += blobs[i].reloc_count;
+		ns += blobs[i].load_site_count;
 	}
 	if (!len)
 		return 0;
@@ -354,6 +372,10 @@ static int native_lab_arm_chunks(void)
 			return -ENOMEM;
 		}
 	}
+	if (ns) {
+		sites = kvcalloc(ns, sizeof(*sites), GFP_KERNEL);
+		if (!sites) { kvfree(bytes); kvfree(relocs); return -ENOMEM; }
+	}
 	for (i = 0; i < NATIVE_LAB_MAX_BLOBS && blobs[i].bytes; i++) {
 		memcpy(bytes + off, blobs[i].bytes, blobs[i].len);
 		for (j = 0; j < blobs[i].reloc_count; j++, k++) {
@@ -361,18 +383,28 @@ static int native_lab_arm_chunks(void)
 			relocs[k].kind = blobs[i].relocs[j].kind;
 			relocs[k].target = blobs[i].relocs[j].target;
 		}
+		for (j = 0; j < blobs[i].load_site_count; j++, si++) {
+			const struct native_lab_load_site *site = &blobs[i].load_sites[j];
+			u32 reg = site->destination < ARRAY_SIZE(registers) ? registers[site->destination] : 1;
+
+			sites[si].offset = off + site->offset;
+			sites[si].fixup = site->insn_len | (reg << 8);
+		}
 		off += blobs[i].len;
 	}
 	image = kzalloc(sizeof(*image), GFP_KERNEL);
 	if (!image) {
 		kvfree(bytes);
 		kvfree(relocs);
+		kvfree(sites);
 		return -ENOMEM;
 	}
 	image->bytes = bytes;
 	image->len = len;
 	image->relocs = relocs;
 	image->nr_relocs = nr;
+	image->sites = sites;
+	image->nr_sites = ns;
 	bpf_native_image_arm(image);
 	return 0;
 }
@@ -433,6 +465,7 @@ static ssize_t blob_write(struct file *file, const char __user *ubuf,
 		for (k = 1; k < NATIVE_LAB_MAX_BLOBS; k++) {
 			kfree(blobs[k].bytes);
 			kfree(blobs[k].relocs);
+			kfree(blobs[k].load_sites);
 			memset(&blobs[k], 0, sizeof(blobs[k]));
 		}
 	}
@@ -440,6 +473,9 @@ static ssize_t blob_write(struct file *file, const char __user *ubuf,
 	kfree(blobs[priv->id].bytes);
 	/* Reuploading the blob invalidates any previously uploaded relocs. */
 	kfree(blobs[priv->id].relocs);
+	kfree(blobs[priv->id].load_sites);
+	blobs[priv->id].load_sites = NULL;
+	blobs[priv->id].load_site_count = 0;
 	blobs[priv->id].relocs = NULL;
 	blobs[priv->id].reloc_count = 0;
 	blobs[priv->id].bytes = kbuf;
@@ -506,6 +542,44 @@ static ssize_t relocs_write(struct file *file, const char __user *ubuf,
 	return len;
 }
 
+#if __has_include(<linux/bpf_native.h>)
+static ssize_t sites_write(struct file *file, const char __user *ubuf,
+                          size_t len, loff_t *ppos)
+{
+	struct blob_file_priv *priv = file->private_data;
+	struct native_lab_load_site *sites;
+	size_t count = len / sizeof(*sites), i;
+	int err = 0;
+
+	if (!capable(CAP_SYS_ADMIN)) return -EPERM;
+	if (*ppos || len % sizeof(*sites) || count > NATIVE_LAB_MAX_BLOB_BYTES)
+		return -EINVAL;
+	sites = memdup_user(ubuf, len);
+	if (IS_ERR(sites)) return PTR_ERR(sites);
+	mutex_lock(&blobs_lock);
+	for (i = 0; i < count; i++) {
+		if (!sites[i].insn_len || sites[i].insn_len > 15 ||
+		    sites[i].offset >= blobs[priv->id].len ||
+		    sites[i].insn_len > blobs[priv->id].len - sites[i].offset ||
+		    (sites[i].destination >= 16 && sites[i].destination != NATIVE_LAB_LOAD_RESUME_ONLY)) {
+			err = -EINVAL;
+			goto out;
+		}
+	}
+	kfree(blobs[priv->id].load_sites);
+	blobs[priv->id].load_sites = sites;
+	blobs[priv->id].load_site_count = count;
+	sites = NULL;
+	err = native_lab_arm_chunks();
+out:
+	mutex_unlock(&blobs_lock);
+	kfree(sites);
+	if (err) return err;
+	*ppos = len;
+	return len;
+}
+#endif
+
 static ssize_t blob_read(struct file *file, char __user *ubuf, size_t len,
 			 loff_t *ppos)
 {
@@ -563,6 +637,16 @@ static const struct file_operations relocs_fops = {
 	.write = relocs_write,
 	.llseek = default_llseek,
 };
+
+#if __has_include(<linux/bpf_native.h>)
+static const struct file_operations sites_fops = {
+	.owner = THIS_MODULE,
+	.open = blob_open,
+	.release = blob_release,
+	.write = sites_write,
+	.llseek = default_llseek,
+};
+#endif
 
 static int map_ptr_open(struct inode *inode, struct file *file)
 {
@@ -703,6 +787,7 @@ static void native_lab_free_blobs(void)
 	for (i = 0; i < NATIVE_LAB_MAX_BLOBS; i++) {
 		kfree(blobs[i].bytes);
 		kfree(blobs[i].relocs);
+		kfree(blobs[i].load_sites);
 		memset(&blobs[i], 0, sizeof(blobs[i]));
 	}
 	mutex_unlock(&blobs_lock);
@@ -741,6 +826,10 @@ static int __init bpf_x86_native_lab_init(void)
 		scnprintf(name, sizeof(name), "blob%ld.relocs", i);
 		debugfs_create_file(name, 0600, debugfs_root, (void *)i,
 				    &relocs_fops);
+#if __has_include(<linux/bpf_native.h>)
+		scnprintf(name, sizeof(name), "blob%ld.sites", i);
+		debugfs_create_file(name, 0600, debugfs_root, (void *)i, &sites_fops);
+#endif
 	}
 
 	err = register_btf_kfunc_id_set(BPF_PROG_TYPE_UNSPEC,

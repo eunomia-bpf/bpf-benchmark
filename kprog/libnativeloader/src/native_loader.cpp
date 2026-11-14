@@ -568,7 +568,8 @@ std::vector<NativeLabReloc> parse_native_lab_relocs(const std::vector<uint8_t> &
 }
 
 std::vector<NativeBlobChunk> plan_blob_chunks(size_t blob_size,
-                                              const std::vector<NativeLabReloc> &relocs)
+                                              const std::vector<NativeLabReloc> &relocs,
+                                              const std::vector<native_lab_load_site> &load_sites = {})
 {
     if (blob_size == 0) {
         fail("native blob is empty");
@@ -585,6 +586,10 @@ std::vector<NativeBlobChunk> plan_blob_chunks(size_t blob_size,
             if (offset < reloc_start && reloc_start < end && end < reloc_end) {
                 end = reloc_start;
             }
+        }
+        for (const auto &site : load_sites) {
+            const size_t start = site.offset, finish = start + site.insn_len;
+            if (offset < start && start < end && end < finish) end = start;
         }
         if (end == offset) {
             fail("native blob chunk planner made no progress at offset " +
@@ -664,6 +669,48 @@ void upload_relocs(const std::vector<NativeLabReloc> &relocs,
         if (!by_chunk[i].empty()) {
             upload_reloc_chunk(by_chunk[i], i);
         }
+    }
+}
+
+std::vector<std::vector<uint8_t>> encode_load_sites(
+    const std::vector<native_lab_load_site> &sites,
+    const std::vector<NativeBlobChunk> &chunks)
+{
+    std::vector<std::vector<uint8_t>> encoded(chunks.size());
+    for (const auto &site : sites) {
+        bool assigned = false;
+        for (size_t i = 0; i < chunks.size(); ++i) {
+            const auto &chunk = chunks[i];
+            if (site.offset < chunk.offset || site.offset >= chunk.offset + chunk.len ||
+                site.insn_len == 0 || site.insn_len > chunk.offset + chunk.len - site.offset)
+                continue;
+            append_u32_le(encoded[i], site.offset - chunk.offset);
+            append_u32_le(encoded[i], site.insn_len | (uint32_t(site.destination) << 16));
+            assigned = true;
+            break;
+        }
+        if (!assigned) fail("native load site crosses or exceeds blob chunks");
+    }
+    return encoded;
+}
+
+void upload_load_sites(const std::vector<native_lab_load_site> &sites,
+                       const std::vector<NativeBlobChunk> &chunks)
+{
+    if (sites.empty()) return;
+    const auto encoded = encode_load_sites(sites, chunks);
+    for (size_t i = 0; i < encoded.size(); ++i) {
+        if (encoded[i].empty()) continue;
+        const std::string path = std::string(kNativeLabTarget.debugfs_dir) +
+            "/blob" + std::to_string(i) + ".sites";
+        const int fd = open(path.c_str(), O_WRONLY | O_TRUNC);
+        if (fd < 0) fail("open " + path + ": " + std::strerror(errno));
+        const auto &bytes = encoded[i];
+        const auto written = write(fd, bytes.data(), bytes.size());
+        const int saved = errno;
+        close(fd);
+        if (written != static_cast<ssize_t>(bytes.size()))
+            fail("write " + path + ": " + (written < 0 ? std::strerror(saved) : "short write"));
     }
 }
 
@@ -3340,7 +3387,7 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
         auto map_patches = read_map_patch_file(source.map_patches);
         linked.relocated_map_ids =
             collect_relocated_map_ids(map_patches, companion.map_addr_ids);
-        linked.callee_saved_mask = read_link_abi_file(source.abi, trusted_proof.empty() ? nullptr : &linked.load_sites);
+        linked.callee_saved_mask = read_link_abi_file(source.abi, &linked.load_sites);
         const auto read_end = std::chrono::steady_clock::now();
         publish_cache_file(tmp.proof, cache.proof);
         publish_cache_file(tmp.blob, cache.blob);
@@ -3366,7 +3413,7 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
     auto map_patches = read_map_patch_file(source.map_patches);
     linked.relocated_map_ids =
         collect_relocated_map_ids(map_patches, companion.map_addr_ids);
-    linked.callee_saved_mask = read_link_abi_file(source.abi, trusted_proof.empty() ? nullptr : &linked.load_sites);
+    linked.callee_saved_mask = read_link_abi_file(source.abi, &linked.load_sites);
     const auto read_end = std::chrono::steady_clock::now();
     const auto patch_start = std::chrono::steady_clock::now();
     if (trusted_proof.empty()) patch_map_literals(linked.blob, map_patches, companion.map_addrs);
@@ -3400,9 +3447,10 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
         NativeLabUploadLock upload_lock;
         ensure_debugfs_mounted();
         relocs = parse_native_lab_relocs(linked.relocs, linked.blob.size());
-        chunks = plan_blob_chunks(linked.blob.size(), relocs);
+        chunks = plan_blob_chunks(linked.blob.size(), relocs, linked.load_sites);
         upload_blob(linked.blob, chunks);
         upload_relocs(relocs, chunks);
+        upload_load_sites(linked.load_sites, chunks);
         upload_end = std::chrono::steady_clock::now();
 
         const auto prog_load_start = std::chrono::steady_clock::now();
