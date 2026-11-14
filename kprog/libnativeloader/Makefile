@@ -45,6 +45,8 @@ CHECKED_PACKET_BUILD ?= /var/tmp/kprog-tmp/verified/checked-packet
 CHECKED_PACKET_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-checked-packet/host
 CHECKED_PACKET_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-checked-packet/kernel
 CHECKED_PACKET_VMLINUX ?= $(REPO_ROOT)/vendor/bpf/targets/x86/$(shell cat /workspaces/.agent-state/kprog-ck/build-x86/include/config/kernel.release)/vmlinux.h
+PACKET_LAYOUT_REFRESH_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-boot-packet-layout/refresh
+PACKET_LAYOUT_BPFTOOL ?= $(REPO_ROOT)/vendor/build/x86/bpftool/bin/bpftool
 CENSUS_CHECKPOINT_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-integration-checkpoint/snapshot
 CENSUS_CHECKPOINT_QUEUES ?= /workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-0 /workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-1 /workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-2
 CENSUS_PUBLISH_BASE ?= /workspaces/kprog-raw/verified/20261114-kfunc-refresh/cumulative-outcomes.jsonl
@@ -221,7 +223,31 @@ checked-sim-kvm:
 		SOURCE_MAP_LOADER="$(CHECKED_SIM_KERNEL_OUTPUT)/trusted-native-loader" \
 		SERVICE_EXECUTION_ARGS="--execution-mode checked-sim-c --sim-native-compiler $(CHECKED_SIM_KERNEL_OUTPUT)/compile-sim-ir"
 
-.PHONY: checked-packet-inputs checked-packet-check
+.PHONY: checked-packet-inputs checked-packet-check checked-packet-layout-refresh
+# Rebuild only the generated target header and its packet-layout emitter. The
+# caller holds imageEX after service guests exit; kernel/app/image builds stay
+# untouched. No VMLINUX_BTF Make override can trigger an implicit ELF rebuild.
+checked-packet-layout-refresh:
+	install -d "$(PACKET_LAYOUT_REFRESH_OUTPUT)" "$(CHECKED_PACKET_BUILD)"
+	sha256sum /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+		/workspaces/.agent-state/kprog-ck/build-x86/vmlinux "$(CHECKED_PACKET_VMLINUX)" \
+		> "$(PACKET_LAYOUT_REFRESH_OUTPUT)/before-core-header-sha256"
+	install -m 0644 "$(CHECKED_COMPILER_BASE)/physical-layout.json" "$(PACKET_LAYOUT_REFRESH_OUTPUT)/before-layout.json"
+	"$(PACKET_LAYOUT_BPFTOOL)" btf dump file /workspaces/.agent-state/kprog-ck/build-x86/vmlinux format c \
+		> "$(CHECKED_PACKET_VMLINUX).tmp"
+	mv -f "$(CHECKED_PACKET_VMLINUX).tmp" "$(CHECKED_PACKET_VMLINUX)"
+	clang-18 -I"$(dir $(CHECKED_PACKET_VMLINUX))" ../perf/native-context/packet-physical-layout.c -o "$(CHECKED_PACKET_BUILD)/physical-layout"
+	"$(CHECKED_PACKET_BUILD)/physical-layout" > "$(PACKET_LAYOUT_REFRESH_OUTPUT)/after-layout.json"
+	$(MAKE) checked-sim-stage CHECKED_COMPILER_STAGE_OUTPUT="$(PACKET_LAYOUT_REFRESH_OUTPUT)/stage"
+	sha256sum /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+		/workspaces/.agent-state/kprog-ck/build-x86/vmlinux "$(CHECKED_PACKET_VMLINUX)" \
+		> "$(PACKET_LAYOUT_REFRESH_OUTPUT)/after-core-header-sha256"
+	printf -- '- %s VERIFIED: replaced sole generated target vmlinux.h from unchanged boot-matched ELF BTF, rebuilt packet physical-layout in place and restaged same-base compiler tools; raw before/after hashes/layouts %s. No kernel/app/image rebuild or raw deletion.\n' \
+		"$$(date -u +%FT%TZ)" "$(PACKET_LAYOUT_REFRESH_OUTPUT)" >> "$(REPO_ROOT)/kprog/docs/cleanup-log.md"
+	printf -- '- LANE VERIFIED %s: BASE packet-layout refreshed from boot-matched ELF BTF via the sole target header; before/after hashes/layouts %s. Kernel/native app objects/image unchanged; field deltas and affected subset execution to be collected separately.\n' \
+		"$$(date -u +%FT%TZ)" "$(PACKET_LAYOUT_REFRESH_OUTPUT)" >> /workspaces/.agent-state/kprog-lanes/COORDINATION.md
+	date -u +%FT%TZ > "$(PACKET_LAYOUT_REFRESH_OUTPUT)/finished"
+
 checked-packet-inputs: checked-sim-inputs
 	install -d "$(CHECKED_PACKET_BUILD)"
 	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
