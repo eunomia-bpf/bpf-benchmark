@@ -68,10 +68,16 @@ def compile_simulator(clang, source: Path, obj: Path, run, *, bounds_compiler=No
                 joined.write(head)
             joined.write(body)
     compiled_input = preprocessed
+    context_loads = os.environ.get('KPROG_BPF_CONTEXT_LOADS', '0')
+    if context_loads not in {'0', '1'}:
+        raise ValueError('KPROG_BPF_CONTEXT_LOADS must be 0 or 1')
+    if context_loads == '1' and not bounds_compiler:
+        raise ValueError('KPROG_BPF_CONTEXT_LOADS requires the B IR compiler')
     if bounds_compiler:
         initial, lowered = source.with_suffix('.bounds-input.bc'), source.with_suffix('.bounds.bc')
         run([clang, *COMPILE_FLAGS, '-emit-llvm', '-c', preprocessed, '-o', initial])
-        run([bounds_compiler, initial, '-o', lowered])
+        run([bounds_compiler, initial, '-o', lowered,
+             *(['--canonical-ctx-loads'] if context_loads == '1' else [])])
         compiled_input = lowered
     spills = os.environ.get('KPROG_BPF_WHOLE_WORD_SPILLS', '0')
     if spills not in {'0', '1'}:

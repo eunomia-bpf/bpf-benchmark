@@ -9,8 +9,19 @@ CODEGEN_ARGS ?=
 REPLAY_ARGS ?=
 REPLAY_BUILD ?= /var/tmp/kprog-tmp/perf/retained-proof-replay
 BACKEND_ARGS ?=
+CONTEXT_BUILD ?= /var/tmp/kprog-tmp/perf/context-loads
 
-.PHONY: build run analyze codegen whole-word replay values-build values-run backend-check checked-corpus
+.PHONY: build run analyze codegen whole-word replay values-build values-run backend-check checked-corpus context-build context-run
+context-build:
+	install -d $(OUTPUT) $(CONTEXT_BUILD)
+	taskset -c 18-19 clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I$(ROOT)/vendor/libbpf/include/uapi $(ROOT)/kprog/x86/packet_bounds_ir.cpp -o $(CONTEXT_BUILD)/packet-bounds $$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis support --system-libs)
+	taskset -c 18-19 python3 $(ROOT)/kprog/test/check_context_loads.py --tool $(CONTEXT_BUILD)/packet-bounds --legacy /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds --output $(OUTPUT)
+	$(CC) -O2 -g -Wall -Wextra -Werror -I$(LIBBPF)/prefix/include $(ROOT)/kprog/test/context_load_client.c $(LIBBPF)/pic-obj/libbpf.a -lelf -lz -o $(OUTPUT)/context-client
+
+context-run:
+	exec 9>/workspaces/.agent-state/kprog-lanes/locks/image; flock -s 9; \
+	taskset -c 22-23 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec '$(OUTPUT)/context-client $(OUTPUT)/off.o $(OUTPUT)/on.o'
+
 checked-corpus:
 	install -d $(OUTPUT) $(REPLAY_BUILD)
 	date -u +%FT%TZ > $(OUTPUT)/started

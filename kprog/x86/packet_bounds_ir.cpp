@@ -17,6 +17,7 @@
 using namespace llvm;
 static cl::opt<std::string> Input(cl::Positional,cl::Required);
 static cl::opt<std::string> Output("o",cl::Required);
+static cl::opt<bool> CanonicalContextLoads("canonical-ctx-loads",cl::init(false));
 static Value *origin(Value *value) {
   while (true) {
     if (auto *extension=dyn_cast<ZExtInst>(value)) { value=extension->getOperand(0); continue; }
@@ -34,6 +35,41 @@ static bool field(Value *value,Function &function,int64_t offset) {
   int64_t actual=0;
   auto *base=GetPointerBaseWithConstantOffset(load->getPointerOperand(),actual,function.getParent()->getDataLayout());
   return base==function.getArg(0) && actual==offset;
+}
+// Tracing contexts contain scalar register values. Keep the original context
+// operand and put a proven constant displacement in the memory instruction.
+// An opaque identity used by the simulator can otherwise make LLVM allocate
+// ctx+K as a separate pointer, which the stock verifier treats differently.
+static unsigned canonical_context_loads(Module &module) {
+  unsigned count=0;
+  for (auto &function:module) {
+    if (function.isDeclaration() || function.arg_empty() ||
+        !function.getArg(0)->getType()->isPointerTy()) continue;
+    auto section=function.getSection();
+    if (section!="kprobe" && !section.starts_with("kprobe/")) continue;
+    SmallVector<LoadInst *,16> loads;
+    for (auto &instruction:instructions(function))
+      if (auto *load=dyn_cast<LoadInst>(&instruction)) loads.push_back(load);
+    for (auto *load:loads) {
+      if (load->isAtomic() || !load->getType()->isIntegerTy()) continue;
+      unsigned width=load->getType()->getIntegerBitWidth();
+      if (width!=8 && width!=16 && width!=32 && width!=64) continue;
+      int64_t offset=0;
+      auto *base=GetPointerBaseWithConstantOffset(origin(load->getPointerOperand()),
+          offset,module.getDataLayout());
+      if (origin(base)!=function.getArg(0) || offset < -32768 || offset > 32767) continue;
+      std::string displacement=offset<0?" - "+std::to_string(-offset):" + "+std::to_string(offset);
+      std::string assembly="$0 = *(u"+std::to_string(width)+" *)($1"+displacement+")";
+      auto *wide=Type::getInt64Ty(module.getContext());
+      auto *signature=FunctionType::get(wide,{function.getArg(0)->getType()},false);
+      auto *operation=InlineAsm::get(signature,assembly,"=r,r,~{memory}",load->isVolatile());
+      IRBuilder<> builder(load);builder.SetCurrentDebugLocation(load->getDebugLoc());
+      Value *result=builder.CreateCall(operation,{function.getArg(0)},"ctx_load");
+      if (width!=64) result=builder.CreateTrunc(result,load->getType());
+      load->replaceAllUsesWith(result);load->eraseFromParent();++count;
+    }
+  }
+  return count;
 }
 // Private unknown choices have no observable read effect. Dropping an unused
 // choice projects the same possible observable states; live reads stay distinct.
@@ -58,6 +94,7 @@ int main(int argc,char **argv) {
   LLVMContext context;SMDiagnostic error;auto module=parseIRFile(Input,error,context);
   if (!module) { error.print(argv[0],errs());return 1; }
   unsigned unused=remove_unused_private_inputs(*module);
+  unsigned contexts=CanonicalContextLoads?canonical_context_loads(*module):0;
   unsigned count=0;
   for (auto &function:*module) {
     if (function.isDeclaration() || function.arg_empty()) continue;
@@ -102,4 +139,5 @@ int main(int argc,char **argv) {
   if (output.os().has_error()) { errs()<<"write packet bounds IR failed\n";return 1; }
   errs()<<"packet length predicates lowered="<<count<<'\n';
   errs()<<"unused private inputs removed="<<unused<<'\n';
+  if (CanonicalContextLoads) errs()<<"constant context loads canonicalized="<<contexts<<'\n';
 }
