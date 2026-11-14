@@ -45,6 +45,7 @@ class GuestControl(unittest.TestCase):
             environment = {'EQCODEX_OUT': directory, 'EQCODEX_TETRA': '/a client/tetra',
                            'EQCODEX_PROGRESS_LOG': '/a nested profile/progress.log',
                            'EQCODEX_LOADER_PERF': '/a perf tool/perf',
+                           'EQCODEX_ALL_JIT_PROGRAMS': '1',
                            'EQCODEX_NATIVE_LINK_BINARY': '/a linker/native-link'}
             with patch.object(sys, 'argv', argv), patch.dict(os.environ, environment, clear=True), patch.object(CAPTURE.os, 'execv') as execute:
                 CAPTURE.main()
@@ -52,6 +53,7 @@ class GuestControl(unittest.TestCase):
             wire_command = actual[actual.index('--exec') + 1]
             self.assertLess(len(wire_command), 500)
             plan = json.loads((Path(directory) / 'guest-plan.json').read_text())
+            self.assertIn('--all-jit-programs', plan['observer'])
             progress_at = plan['observer'].index('--progress-log')
             self.assertEqual(plan['observer'][progress_at + 1], '/a nested profile/progress.log')
             self.assertEqual(shlex.split(plan['command']),

@@ -161,12 +161,13 @@ def observe(out):
             save(prefix + ['sh', '-c', 'sha256sum /opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/*.o /opt/bpf-benchmark/native-bpf/x86_64/tetragon/*.o'],
                  dest / 'native-object-sha256.txt')
             records = json.loads(programs.stdout)
-            # Full disassembly identifies same-name entry/tail programs. It is
-            # taken only once per phase, outside the framework's timed counters.
+            # Identify every selected entry/tail program, including native
+            # replacements after their originals. Read clocks retain any
+            # overlap of this once-per-phase capture with measurement.
             selected = [item for item in records if item.get('name', '').startswith(
                 ('native_tracer', 'perf_unwind_', 'kprobe_unwind_', 'unwind_',
                  'generic_kprobe', 'generic_tracepo'))]
-            for item in selected[:18]:
+            for item in (selected if '--all-jit-programs' in sys.argv else selected[:18]):
                 ident = str(item['id'])
                 save(prefix + ['bpftool', 'prog', 'dump', 'xlated', 'id', ident, 'opcodes'], dest / f'prog-{ident}-xlated.txt')
                 save(['/workspaces/repository/kprog/results/equal-work-20261113/eqcodex-jit',
@@ -232,6 +233,8 @@ def main():
             observer += ['--progress-log', progress]
         if os.environ.get('EQCODEX_TRACE') == '1':
             observer.append('--trace')
+        if os.environ.get('EQCODEX_ALL_JIT_PROGRAMS') == '1':
+            observer.append('--all-jit-programs')
         if client := os.environ.get('EQCODEX_TETRA'):
             observer += ['--tetra', client]
         if client := os.environ.get('EQCODEX_TETRA_POLICIES'):
