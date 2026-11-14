@@ -134,6 +134,40 @@ The context tools and layout tables are pinned in this lane's own scratch
 (`/var/tmp/kprog-tmp/C/ctx/...`) after a reboot cleared `/var/tmp`; they reproduce with
 `make -f kprog/perf/native-context/Makefile` plus running the two layout binaries.
 
+
+## Map-lookup sinking on the same-source route (2026-11-14)
+
+`balancer_ingress` makes 46 `bpf_map_lookup_elem` calls (84 of its 87 calls are
+helpers), and the map lookups were the largest remaining structure. The repo's
+`vendor/bpf/native_specialize_maps.py` gives a lookup a C body built from the map
+layout, so clang folds through it. Three defects kept the upstream maps out of that
+path, all fixed (8394230ed):
+
+- `max_entries` is a constant expression after preprocessing, not a literal: Katran
+  writes `(512 * 2)` for `stats` and `(512 * 65537)` for `ch_rings`, and
+  `server_id_map` is `0x00fffffe`. `isdigit()` dropped all of them, so `stats` — the
+  hottest map, 15 call sites — never inlined.
+- the percpu body emitted the literal text `PERCPU_BASE_ADDR` instead of its value,
+  so every `--percpu` run failed to compile. `0` is right: `this_cpu_off` is at
+  offset 0 of `.data..percpu` in this kernel, and the kernel's own
+  `arch_raw_cpu_ptr` is `raw_cpu_read_long(this_cpu_off) + ptr`, i.e. `gs:0`.
+- a lookup key can be the address of a struct member (`&pckt.real_index`).
+
+Result on `balancer_ingress`: **49 -> 7 map_lookup_elem calls, 87 -> 35 calls total**.
+
+**Order matters, and getting it wrong fails the load.** The maps tool rewrites a
+preprocessed C unit; the XDP/TC context lowering works on bitcode. So the route is
+unit -> `native_specialize_maps.py` -> `clang -emit-llvm -c` -> `socket-context-lower`
+-> codegen. Sinking maps on the *plain* unit and skipping the context lowering leaves
+the public 32-bit context offsets (`mov (%rdi),%r12d`) in the object, and the eBPF-side
+verifier then rejects the program at load (`-EINVAL`, `stack depth 192`), which shows up
+as "native app exited before BPF programs were tracked by shim" rather than as a clear
+error.
+
+One 20 s sample on CPUs 0-7 (`corpus/results/x86_kvm_corpus_20261114_005338_982251`):
+baseline 120.39 ns/run, native 95.87 ns/run, jited 9464 vs 13641, status ok. That is a
+correctness signal, not a ratio; the 3x180 s measurement follows.
+
 ## Not yet done
 
 - C4 timing for the switch-on objects: running since 2026-11-13T23:08Z, 3x180 s on CPUs
