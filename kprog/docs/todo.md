@@ -157,7 +157,7 @@
 - 运营者 2026-11-13 的"先做完再一次确认"六条（spark-manage workspace-rules.md，784fa638）同样适用："是不是过于慢了? 应该都弄好再?"：每处改动只在它影响的那一小批上检查；失败用多台 guest 并行定位，不逐个对半拆；耗时的端到端测量冻结前跑一次；队列按内存放开槽位；提交任务前先空跑。
 - 规则不变：一个工作树、一个内核、一个镜像、一个底座；原始数据不删；新行为放在默认关闭的开关后，默认路径字节不变；不新增检查；论文、故事、设计、benchmark 设置要运营者同意。
 
-**lane verified 的新大任务（协调者 2026-11-14T06:56:34Z）：形式化迁移到外部成熟项目（第 4 节 M1–M6，运营者 2026-11-13："让它清理掉, 换成成熟的."；"能不能基于什么上面 fork 一个改? 这也比较合理, 作为 submodule, 不要自己写."；"不是交叉对造, 而是引入作为 subdmoule, 替换掉."）。** 先收完手上已经发出的作业（BCC LTO 配置重试 213201、Katran 复杂度那一类），让 LTO 配置保持可用；之后按 M1 到 M6 推进。LTO 配置的整应用计时由 perf 做，LTO 配置的编译器问题只在挡住 perf 时回到 verified。六应用 verified 路径的其余应用（Tetragon、Cilium、Tracee、OTel）在迁移做完后继续。
+**lane formal（新的 Codex lane，在本地 Codex 上跑；运营者 2026-11-14："M1–M6 新的一个 codex, 用 goal 设置好六个让它按顺序做, 这个和别的无关吧? 你可以开一个新的 worktree?"；协调者 2026-11-14T07:15:22Z）：第 4 节的 M1–M6，作为一个 Codex goal 按顺序做。**它只在 kprog/formal、新 submodule、.gitmodules 和自己的 todo 行里改动；M4、M6 改到 lane verified 的 service 和 B 生成用的 simulator C，先在 COORDINATION 和 verified 商定。用唯一的工作树（kprog/formal 与其他 lane 的路径分开，各自用 git commit --only 提交）。lane verified 的大任务保持原样：六应用 verified 路径和 LTO 配置。
 
 ## 1. 性能（目标：六应用几何平均 native/JIT 1.20x–1.40x，来自原生代码）
 
@@ -777,7 +777,7 @@
 
 ### 形式化迁移到外部成熟项目（运营者 2026-11-13，经调研会话原样转达："让它清理掉, 换成成熟的."；"能不能基于什么上面 fork 一个改? 这也比较合理, 作为 submodule, 不要自己写."；"不是交叉对造, 而是引入作为 subdmoule, 替换掉."；协调者 2026-11-14T06:56:34Z 定任务和顺序）
 
-自建的生成器和手写的两份 ISA 参考都换成外部成熟项目：fork 到 eunomia-bpf，作为 submodule 引入，在 fork 里补缺，补的部分尽量做成能回提上游的 PR。负责：lane verified（新的大任务，见第 0 节）。按这个顺序：
+自建的生成器和手写的两份 ISA 参考都换成外部成熟项目：fork 到 eunomia-bpf，作为 submodule 引入，在 fork 里补缺，补的部分尽量做成能回提上游的 PR。负责：lane formal（新的 Codex lane，用 Codex goal 按 M1 到 M6 的顺序做，见第 0 节）。按这个顺序：
 
 - [ ] M1 fork 并接上三个 submodule：leanprover/LNSym（Apache-2.0，AArch64）、jyh/x86lean（Apache-2.0，x86-64，在 1,241 个 form 上和 ACL2 x86isa 做过差分测试）、Certora/clean（CompCert 3.17 + clightgen 的 -lean 后端，带 Lean 4 写的 Clight 语义和分离逻辑；CompCert 是非商业许可，作为独立 submodule 各自保留原许可，开源发布时单独标明）。放在 kprog/formal 下，lake 能编过。
 - [ ] M2 覆盖对照表：我们的 74 个 AArch64 操作对 LNSym（缺的大概率有 LDXR/STLXR 独占、LDADD 等 LSE 原子、带符号扩展的加载），75 个 x86-64 操作对 x86lean（BZHI 在它的覆盖表外）；缺的在 fork 里补。表放 kprog/formal/README.md。
