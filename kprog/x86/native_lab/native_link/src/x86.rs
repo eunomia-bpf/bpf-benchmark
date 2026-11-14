@@ -1186,6 +1186,7 @@ pub(super) fn rewrite_x86(
     runtime_map_lookups: bool,
     runtime_known_map_lookups: bool,
     runtime_array_layout: Option<&RuntimeArrayLayout>,
+    runtime_array_shared: bool,
     local_memory_routines: bool,
     show: bool,
 ) -> Result<RewriteResult> {
@@ -1662,7 +1663,7 @@ pub(super) fn rewrite_x86(
                             runtime_known_map_lookups,
                         )?;
                         lookup_call_specs.insert(site_key, spec.clone());
-                        if let Some(layout) = runtime_array_layout.filter(|_| matches!(spec.kind, LookupKind::Call)) {
+                        if let Some(layout) = runtime_array_layout.filter(|_| !runtime_array_shared && matches!(spec.kind, LookupKind::Call)) {
                             // Prefix-local branches skip exactly this five-byte helper
                             // slot for ARRAY and NULL results. Other types use the
                             // unmodified helper and original RDI/RSI arguments.
@@ -2030,6 +2031,13 @@ pub(super) fn rewrite_x86(
         )?);
         Vec::new()
     };
+
+    if runtime_array_shared && !proof_mode {
+        let layout = runtime_array_layout.ok_or_else(|| anyhow!("shared ARRAY dispatch needs a runtime layout"))?;
+        if let Some(range) = runtime_array::share(&mut blob, &mut relocs, layout, map_lookup_helper_addr)? {
+            code_ranges.push(range);
+        }
+    }
 
     // Patch JmpEnd disps LAST so they target the byte AFTER any
     // trampolines we just appended -- i.e., where the BPF JIT will emit
@@ -4385,10 +4393,10 @@ mod tests {
                 let empty = HashMap::new();
                 let helpers = HashMap::from([(name.to_owned(), 0x1234)]);
                 let plain = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &empty, &[],
-                    &HashMap::new(), &[], true, true, false, false, false, None, false, false)?;
+                    &HashMap::new(), &[], true, true, false, false, false, None, false, false, false)?;
                 assert_eq!(plain.proof_relocs.len(), 2, "default remains symbolic");
                 let proof = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &empty, &[],
-                    &HashMap::new(), &[], true, true, false, false, false, None, true, false)?;
+                    &HashMap::new(), &[], true, true, false, false, false, None, false, true, false)?;
                 assert!(proof.proof_relocs.is_empty(), "{name}, form={form}");
                 assert_eq!(proof.proof_symbols.len(), 2, "same length shares one routine");
                 assert!(proof.proof_symbols[1].name.starts_with("__native_link_local_"));
@@ -4402,7 +4410,7 @@ mod tests {
                 let included = discover_reachable(&elf, &entry)?;
                 assert_eq!(included.len(), 2);
                 let result = rewrite_x86(&elf, &entry, &included, &empty, &empty, &[],
-                    &HashMap::new(), &[], false, true, false, false, false, None, true, false)?;
+                    &HashMap::new(), &[], false, true, false, false, false, None, false, true, false)?;
                 assert!(result.relocs.is_empty());
                 #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
                 {
@@ -4458,10 +4466,11 @@ mod tests {
             let site = generic_lookup_site(0x5678, None).expect("site");
             let array = RuntimeArrayLayout { map_type: 12, max_entries: 24, elem_size: 32,
                 index_mask: 36, value: 64, array_type: 2 };
-            for (enabled, layout) in [(false, None), (true, None), (true, Some(&array))] {
+            for (enabled, layout, shared) in [(false, None, false), (true, None, false),
+                (true, Some(&array), false), (true, Some(&array), true)] {
                 let result = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers,
                     &HashMap::new(), &[site.clone()], &HashMap::new(), &[],
-                    false, false, false, enabled, false, layout, false, false)?;
+                    false, false, false, enabled, false, layout, shared, false, false)?;
                 let expected = if enabled { 0x1234 } else { 0x5678 };
                 assert!(result.relocs.iter().any(|r| r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32
                     && r.target == expected), "form={form}, enabled={enabled}: actual helper target");
@@ -4632,7 +4641,7 @@ mod tests {
         })]);
         for enabled in [false, true] {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps,
-                &[], &facts, &[], false, false, false, true, enabled, None, false, false)?;
+                &[], &facts, &[], false, false, false, true, enabled, None, false, false, false)?;
             if !enabled {
                 assert!(output.relocs.iter().any(|r| r.target == 0x1234));
                 continue;
@@ -4772,7 +4781,7 @@ mod tests {
         let entry = find_symbol_by_name(&elf, "entry")?;
         for preserve in [false, true] {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(),
-                &HashMap::new(), &[], &HashMap::new(), &[], true, preserve, false, false, false, None, false, false)?;
+                &HashMap::new(), &[], &HashMap::new(), &[], true, preserve, false, false, false, None, false, false, false)?;
             let mut expected = if preserve { vec![0x53, 0x31, 0xc0, 0x5b] } else { vec![0x31, 0xc0] };
             expected.extend_from_slice(&[0xe9, 0, 0, 0, 0]); // Canonical entry exit in proof mode.
             assert_eq!(output.blob, expected);

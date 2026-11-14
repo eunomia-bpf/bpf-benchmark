@@ -35,6 +35,9 @@ RUNTIME_ARRAY_BUILD ?= /var/tmp/kprog-tmp/perf/runtime-array-layout
 RUNTIME_ARRAY_PAYLOAD ?= $(ROOT)/corpus/results/perf-runtime-array-linker-20261114
 RUNTIME_ARRAY_RAW ?= /workspaces/kprog-raw/perf/20261114-runtime-array-otel
 RUNTIME_ARRAY_CAPTURE ?= $(ROOT)/corpus/results/perf-runtime-array-otel-20261114
+RUNTIME_ARRAY_STATE ?= /var/tmp/kprog-tmp/perf/runtime-array-otel
+RUNTIME_ARRAY_LINK_WRAPPER ?= native-link-array-on
+RUNTIME_ARRAY_SECONDS ?= 10
 .PHONY: runtime-array-link-payload runtime-array-otel
 runtime-array-link-payload: known-map-link-build
 	$(MAKE) -f $(HERE)/Makefile runtime-array-layout BUILD=$(RUNTIME_ARRAY_BUILD)
@@ -44,10 +47,12 @@ runtime-array-link-payload: known-map-link-build
 	install -m644 $(RUNTIME_ARRAY_BUILD)/runtime-array-layout.json $(RUNTIME_ARRAY_PAYLOAD)/runtime-array-layout.json
 	install -m755 $(HERE)/native-link-runtime-array.sh $(RUNTIME_ARRAY_PAYLOAD)/native-link-array-on
 	install -m755 $(HERE)/native-link-runtime-array.sh $(RUNTIME_ARRAY_PAYLOAD)/native-link-array-off
+	install -m755 $(HERE)/native-link-runtime-array.sh $(RUNTIME_ARRAY_PAYLOAD)/native-link-array-shared-on
+	install -m755 $(HERE)/native-link-runtime-array.sh $(RUNTIME_ARRAY_PAYLOAD)/native-link-array-shared-off
 
 runtime-array-otel:
-	flock -s /workspaces/.agent-state/kprog-lanes/locks/image env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(RUNTIME_ARRAY_CAPTURE) EQCODEX_NATIVE_LINK_BINARY=$(RUNTIME_ARRAY_PAYLOAD)/native-link-array-on \
-		$(MAKE) -f $(ROOT)/kprog/perf/one-image/Makefile corpus APPS=otelcol-ebpf-profiler/profiling SAMPLES=1 WORKLOAD_DURATION=10 CPUS=16-19 VM_CPUS=4 VM_MEM=16G BPFREJIT_CORPUS_BPF_STATS=1 NATIVE_MANIFEST=$(ROOT)/corpus/results/perf-otel-upstream-20261114/manifest-context.json STATE=/var/tmp/kprog-tmp/perf/runtime-array-otel LOGS=$(RUNTIME_ARRAY_RAW)/run
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(RUNTIME_ARRAY_CAPTURE) EQCODEX_NATIVE_LINK_BINARY=$(RUNTIME_ARRAY_PAYLOAD)/$(RUNTIME_ARRAY_LINK_WRAPPER) \
+		$(MAKE) -f $(ROOT)/kprog/perf/one-image/Makefile corpus APPS=otelcol-ebpf-profiler/profiling SAMPLES=1 WORKLOAD_DURATION=$(RUNTIME_ARRAY_SECONDS) CPUS=16-19 VM_CPUS=4 VM_MEM=16G BPFREJIT_CORPUS_BPF_STATS=1 NATIVE_MANIFEST=$(ROOT)/corpus/results/perf-otel-upstream-20261114/manifest-context.json STATE=$(RUNTIME_ARRAY_STATE) LOGS=$(RUNTIME_ARRAY_RAW)/run
 
 .PHONY: all
 all: $(BUILD)/perf-context-lower $(BUILD)/layout.json

@@ -133,6 +133,10 @@ struct Args {
     #[arg(long, requires = "runtime_map_lookups")]
     runtime_array_layout: Option<PathBuf>,
 
+    /// Share one runtime ARRAY routine instead of expanding every lookup site.
+    #[arg(long, requires = "runtime_array_layout")]
+    runtime_array_shared: bool,
+
     /// Bind x86 memset/memcpy to linker-owned GPR routines in the proof image.
     #[arg(long)]
     local_memory_routines: bool,
@@ -534,6 +538,7 @@ fn main() -> Result<()> {
                 args.runtime_map_lookups && !proof_mode,
                 args.runtime_known_map_lookups && !proof_mode,
                 if proof_mode { None } else { runtime_array_layout.as_ref() },
+                args.runtime_array_shared && !proof_mode,
                 args.local_memory_routines,
                 args.show,
             )?
@@ -2628,10 +2633,15 @@ mod tests {
     fn runtime_array_layout_requires_explicit_runtime_dispatch() {
         let argv = ["native-link", "--input", "p.o", "--symbol", "entry", "--output", "p.bin"];
         assert!(Args::try_parse_from(argv).unwrap().runtime_array_layout.is_none());
+        assert!(!Args::try_parse_from(argv).unwrap().runtime_array_shared);
+        assert!(Args::try_parse_from(argv.into_iter().chain(["--runtime-array-shared"])).is_err());
         assert!(Args::try_parse_from(argv.into_iter().chain(["--runtime-array-layout", "layout.json"])).is_err());
         assert_eq!(Args::try_parse_from(argv.into_iter().chain([
             "--runtime-map-lookups", "--runtime-array-layout", "layout.json"]))
             .unwrap().runtime_array_layout, Some(PathBuf::from("layout.json")));
+        assert!(Args::try_parse_from(argv.into_iter().chain([
+            "--runtime-map-lookups", "--runtime-array-layout", "layout.json", "--runtime-array-shared"]))
+            .unwrap().runtime_array_shared);
     }
 
     #[test]

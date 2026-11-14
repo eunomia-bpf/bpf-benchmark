@@ -46,7 +46,11 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--runtime-array-layout", type=Path,
                         help="Toggle runtime ARRAY dispatch instead of the known-map flag")
+    parser.add_argument("--runtime-array-shared", action="store_true",
+                        help="With --runtime-array-layout, toggle shared versus inline dispatch")
     args = parser.parse_args()
+    if args.runtime_array_shared and not args.runtime_array_layout:
+        parser.error("--runtime-array-shared requires --runtime-array-layout")
     args.output.mkdir(parents=True)
     binary_sha = hashlib.sha256(args.linker.read_bytes()).hexdigest()
     rows = []
@@ -77,8 +81,10 @@ def main():
                 replacements[flag] = work / (variant + "." + name)
             argv = rewrite(record["command"][1:], replacements)
             if args.runtime_array_layout:
-                if variant == "on":
+                if variant == "on" or args.runtime_array_shared:
                     argv.extend(["--runtime-array-layout", str(args.runtime_array_layout)])
+                if variant == "on" and args.runtime_array_shared:
+                    argv.append("--runtime-array-shared")
             else:
                 argv = [word for word in argv if word != SWITCH]
                 if variant == "on":
@@ -109,7 +115,8 @@ def main():
         rows.append(row)
     (args.output / "report.json").write_text(json.dumps(dict(
         linker=str(args.linker), linker_sha256=binary_sha, cases=rows,
-        switch="--runtime-array-layout" if args.runtime_array_layout else SWITCH,
+        switch=("--runtime-array-shared" if args.runtime_array_shared else
+                "--runtime-array-layout" if args.runtime_array_layout else SWITCH),
         scope="Offline replay only, no kernel execution or workload validity gate. "
               "Helper call deltas establish emitted transformation counts, not performance gains."), indent=2) + "\n")
 
