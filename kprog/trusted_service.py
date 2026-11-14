@@ -231,9 +231,12 @@ def serve(args):
                         if args.sim_context_compiler:
                             source_paths.extend([args.sim_context_compiler,args.sim_public_layout,args.sim_physical_layout,
                                 ROOT/'kprog/perf/native-context/socket-context-lower.cpp'])
+                    if args.sim_bounds_compiler:
+                        source_paths.extend([args.sim_bounds_compiler,ROOT/'kprog/x86/packet_bounds_ir.cpp'])
                     identities={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in source_paths}
                     (job/'source-identities.json').write_text(json.dumps(identities,indent=2))
-                    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)
+                    generation_options = dict(bounds_compiler=args.sim_bounds_compiler) if args.sim_bounds_compiler else {}
+                    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link,**generation_options)
                     completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)
                     record.update(completion)
                 except Exception as error:
@@ -291,7 +294,8 @@ def run_application(args):
                     *[value for option,attribute in (
                         ('--sim-context-compiler','sim_context_compiler'),
                         ('--sim-public-layout','sim_public_layout'),
-                        ('--sim-physical-layout','sim_physical_layout'))
+                        ('--sim-physical-layout','sim_physical_layout'),
+                        ('--sim-bounds-compiler','sim_bounds_compiler'))
                       if getattr(args,attribute,None)
                       for value in (option,str(getattr(args,attribute)))]],stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT,text=True,start_new_session=True)
@@ -357,6 +361,7 @@ def main():
     parser.add_argument('--sim-context-compiler',type=Path)
     parser.add_argument('--sim-public-layout',type=Path)
     parser.add_argument('--sim-physical-layout',type=Path)
+    parser.add_argument('--sim-bounds-compiler',type=Path)
     parser.add_argument('--module',type=Path)
     parser.add_argument('--results',type=Path)
     parser.add_argument('--run',nargs=argparse.REMAINDER)
@@ -365,6 +370,8 @@ def main():
         parser.error('checked-sim-c requires --arch 1 and --sim-native-compiler')
     if args.sim_context_compiler and (not args.sim_public_layout or not args.sim_physical_layout):
         parser.error('--sim-context-compiler requires public and physical layouts')
+    if args.sim_bounds_compiler and args.arch != 1:
+        parser.error('--sim-bounds-compiler requires --arch 1')
     if args.run is not None:
         if not args.run:
             parser.error('--run requires an application command')

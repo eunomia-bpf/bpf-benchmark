@@ -1,0 +1,25 @@
+{
+  "recorded": "2026-11-14T03:59:27.786677+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-packet-bounds",
+  "archive": "packet-bounds-host-results.tar.gz",
+  "source_identities": {
+    "kprog/x86/packet_bounds_ir.cpp": "eba63ff5bbe504c660ba541ef2ba90172b780d5946d867759f67a075056283f1",
+    "kprog/x86/trusted_specializer.py": "f49ff815b96ae965c1c8c7f0d76b55b6618b58f4daf735a6fc936b9af1afde1a",
+    "kprog/trusted_service.py": "0f220f9b9ca456f9920754e1f8d7d00ccb61f0b700e6604d6a2fe1a117321a7a",
+    "kprog/libnativeloader/Makefile": "db4110270af1cc1fee41fc105be80f0928726403fd0f8fa16101ebd16768cbe1",
+    "kprog/test/check_packet_bounds.py": "cf07e22b4fe5fc61bed48e7a3e098595ba23d04dc2e9c27c8a8b47e578392e9a",
+    "kprog/test/packet_bounds_fixture.c": "304f923ce284dea62f63dab14a9a14389e77240751465834004abf8b01088aea",
+    "kprog/test/check_checked_packet.py": "663517954b423e55944700c338cfe736adc770e1fd3bd643c533be9ccf810931"
+  },
+  "generated_packet_vectors": 25,
+  "executable_predicate_vectors": 140,
+  "shared_arithmetic_cases": 113855,
+  "predicates": 6,
+  "ordinary_scalar_control": true,
+  "default_preprocess_control": "4-piece exact join PASS; deliberate error propagates before compile",
+  "lowering": "Preserve original scalar reject (including overflow), OR with equivalent start+K>end pointer form for ordered packet span <=PTRDIFF_MAX. Inverse predicates negate both. No numeric packet-pointer comparison against ULONG_MAX.",
+  "first_design": "Direct overflow expression emitted forbidden pointer-vs-constant check; host artifacts retained, never kernel-launched. Final B has canonical pointer comparison and original scalar comparison.",
+  "kernel_result": "Pending retry, not yet launched",
+  "canonical_changed": false,
+  "scope": "Shared compiler class regression, no per-program proof or new application result"
+}

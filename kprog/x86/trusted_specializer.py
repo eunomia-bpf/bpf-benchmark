@@ -38,7 +38,7 @@ PIECE_SOURCE_BYTES = 1 << 18
 PIECE_MARK = "#pragma kprog_preprocessed_piece"
 
 
-def compile_simulator(clang, source: Path, obj: Path, run) -> None:
+def compile_simulator(clang, source: Path, obj: Path, run, *, bounds_compiler=None) -> None:
     lines = source.read_text().split("\n")
     first = next(i for i, line in enumerate(lines) if INSTRUCTION_LABEL.fullmatch(line))
     bounds, start, size = [], first, 0
@@ -64,11 +64,17 @@ def compile_simulator(clang, source: Path, obj: Path, run) -> None:
             if number == 0:
                 joined.write(head)
             joined.write(body)
-    run([clang, *COMPILE_FLAGS, "-c", preprocessed, "-o", obj])
+    compiled_input = preprocessed
+    if bounds_compiler:
+        initial, lowered = source.with_suffix('.bounds-input.bc'), source.with_suffix('.bounds.bc')
+        run([clang, *COMPILE_FLAGS, '-emit-llvm', '-c', preprocessed, '-o', initial])
+        run([bounds_compiler, initial, '-o', lowered])
+        compiled_input = lowered
+    run([clang, *COMPILE_FLAGS, "-c", compiled_input, "-o", obj])
 
 
 def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
-               output_dir: Path, native_link: Path, *, kernel_btf='/sys/kernel/btf/vmlinux') -> dict:
+               output_dir: Path, native_link: Path, *, kernel_btf='/sys/kernel/btf/vmlinux', bounds_compiler=None) -> dict:
     validate_native(native_bytes, entry_symbol, "EM_X86_64")
     declarations(metadata)
     kind = context_kind(metadata["prog_type"])
@@ -111,7 +117,7 @@ def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
     if not clang:
         candidates = sorted(Path("/usr/lib").glob("llvm-*/bin/clang"))
         clang = str(candidates[-1]) if candidates else "clang"
-    compile_simulator(clang, source, obj, run)
+    compile_simulator(clang, source, obj, run, bounds_compiler=bounds_compiler)
     result = dict(native_object=str(native), native_proof_object=str(proof),
         simulator_object=str(obj), simulator_program=name + "_x86_sim_xdp",
         simulator_source=str(source), simulator_preprocessed=str(source.with_suffix('.i')),

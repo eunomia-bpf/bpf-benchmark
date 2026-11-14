@@ -178,6 +178,9 @@ checked-packet-inputs: checked-sim-inputs
 	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
 		../perf/native-context/socket-context-lower.cpp -o "$(CHECKED_PACKET_BUILD)/context-lower" \
 		$$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis transformutils support --system-libs)
+	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
+		../x86/packet_bounds_ir.cpp -o "$(CHECKED_PACKET_BUILD)/packet-bounds" \
+		$$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis support --system-libs)
 	clang-18 -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" ../perf/native-context/packet-public-layout.c -o "$(CHECKED_PACKET_BUILD)/public-layout"
 	clang-18 -I"$(dir $(CHECKED_PACKET_VMLINUX))" ../perf/native-context/packet-physical-layout.c -o "$(CHECKED_PACKET_BUILD)/physical-layout"
 	clang-18 -O2 -fPIC -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-asynchronous-unwind-tables \
@@ -198,13 +201,15 @@ checked-packet-check: checked-packet-inputs
 	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" python3 ../test/check_checked_packet.py \
 		"$(CHECKED_SIM_BUILD)/compile-sim-ir" "$(FRAME_LINKER)" "$(CHECKED_PACKET_BUILD)/context-lower" \
 		"$(CHECKED_PACKET_OUTPUT)/public-layout.json" "$(CHECKED_PACKET_OUTPUT)/physical-layout.json" \
-		"$(CHECKED_PACKET_BUILD)/packet.native.o" "$(CHECKED_PACKET_OUTPUT)/tests"
+		"$(CHECKED_PACKET_BUILD)/packet.native.o" "$(CHECKED_PACKET_OUTPUT)/tests" "$(CHECKED_PACKET_BUILD)/packet-bounds"
+	python3 ../test/check_packet_bounds.py "$(CHECKED_PACKET_BUILD)/packet-bounds" "$(CHECKED_SIM_BUILD)/compile-sim-ir" "$(CHECKED_PACKET_OUTPUT)/bounds-tests"
+	python3 ../test/check_preprocess_stream.py "$(REPO_ROOT)/kprog/stock-path/bin/clang" "$(CHECKED_PACKET_OUTPUT)/preprocess-control"
 
 .PHONY: checked-packet-kvm guest-checked-packet guest-checked-packet-case
 checked-packet-kvm:
 	install -d "$(CHECKED_PACKET_KERNEL_OUTPUT)"
 	install -m 0755 "$(CHECKED_SIM_BUILD)/compile-sim-ir" "$(CHECKED_SIM_BUILD)/trusted-native-loader" \
-		"$(CHECKED_PACKET_BUILD)/context-lower" "$(CHECKED_PACKET_BUILD)/client" "$(CHECKED_PACKET_KERNEL_OUTPUT)/"
+		"$(CHECKED_PACKET_BUILD)/context-lower" "$(CHECKED_PACKET_BUILD)/packet-bounds" "$(CHECKED_PACKET_BUILD)/client" "$(CHECKED_PACKET_KERNEL_OUTPUT)/"
 	install -m 0644 "$(CHECKED_PACKET_BUILD)/source.bpf.o" "$(CHECKED_PACKET_BUILD)/packet.native.o" \
 		"$(CHECKED_PACKET_BUILD)/bad.native.o" "$(CHECKED_PACKET_KERNEL_OUTPUT)/"
 	install -m 0755 "$(FRAME_LINKER)" "$(CHECKED_PACKET_KERNEL_OUTPUT)/native-link.real"
@@ -230,6 +235,7 @@ guest-checked-packet-case:
 		--sim-context-compiler "$(CHECKED_PACKET_KERNEL_OUTPUT)/context-lower" \
 		--sim-public-layout "$(CHECKED_PACKET_KERNEL_OUTPUT)/public-layout.json" \
 		--sim-physical-layout "$(CHECKED_PACKET_KERNEL_OUTPUT)/physical-layout.json" \
+		--sim-bounds-compiler "$(CHECKED_PACKET_KERNEL_OUTPUT)/packet-bounds" \
 		--run "$(CHECKED_PACKET_KERNEL_OUTPUT)/client" "$(CHECKED_PACKET_KERNEL_OUTPUT)/source.bpf.o" \
 		"$(CHECKED_PACKET_KERNEL_OUTPUT)/$(if $(filter reject,$(CHECKED_PACKET_CASE)),bad,packet).native.o" \
 		"$(REPO_ROOT)/kprog/test/tail_call_frame/native-link.sh" "$(CHECKED_PACKET_CASE)" \

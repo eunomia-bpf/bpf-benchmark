@@ -8,7 +8,7 @@ ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'kprog'))
 from trusted_service import adapter
 from kernel_function_abi import KernelTypes, Type
-compiler,linker,context,public,physical,native,output=map(Path,sys.argv[1:])
+compiler,linker,context,public,physical,native,output,bounds=map(Path,sys.argv[1:])
 output.mkdir(parents=True)
 rules=json.loads(physical.read_text())
 def offset(kind,field):
@@ -39,7 +39,7 @@ worker=adapter(1)
 rows=[]
 for kind,entry,prog_type,section in [('xdp','packet_xdp',6,'xdp'),('tc','packet_tc',3,'tc'),('cgroup_skb','packet_tc',8,'cgroup_skb/egress')]:
     directory=output/kind;directory.mkdir()
-    artifact=worker.specialize(native.read_bytes(),entry,dict(version=1,prog_type=prog_type,section=section,maps=[]),directory/'generated',linker)
+    artifact=worker.specialize(native.read_bytes(),entry,dict(version=1,prog_type=prog_type,section=section,maps=[]),directory/'generated',linker,bounds_compiler=bounds)
     result=worker.compile_checked_simulator(artifact,linker,compiler,context_compiler=context,public_layout=public,physical_layout=physical)
     harness=directory/'harness.c'
     harness.write_text('unsigned long long kprog_unspecified_input[1];\nvoid *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }\n')
