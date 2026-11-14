@@ -1,0 +1,5 @@
+{"object":"/workspaces/kprog-raw/perf/20261114-scalar-spill-precision/values/original.o","executions":1060,"failed":0}
+{"object":"/workspaces/kprog-raw/perf/20261114-scalar-spill-precision/values/lowered.o","executions":1,"failed":1}
+6) .rel.eh_frame for section(5) .eh_frame
+value mismatch /workspaces/kprog-raw/perf/20261114-scalar-spill-precision/values/lowered.o mark=0 priority=1 got=12347 expected=12346
+make: *** [kprog/test/scalar-spill-precision.mk:21: values-run] Error 1

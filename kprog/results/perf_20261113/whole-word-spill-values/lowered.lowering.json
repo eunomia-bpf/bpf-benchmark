@@ -1,0 +1,56 @@
+{
+  "source": "/workspaces/repository/kprog/test/scalar_spill_values.mir",
+  "low": 0,
+  "high": 1,
+  "changes": [
+    {
+      "block": 0,
+      "original": "STW32 killed $w3, %stack.1, 0",
+      "scratch": [
+        0,
+        1
+      ]
+    },
+    {
+      "block": 0,
+      "original": "STW32 killed $w2, %stack.0, 0",
+      "scratch": [
+        0,
+        1
+      ]
+    },
+    {
+      "block": 1,
+      "original": "$w3 = LDW32 %stack.1, 0"
+    },
+    {
+      "block": 1,
+      "original": "$w2 = LDW32 %stack.0, 0"
+    },
+    {
+      "block": 1,
+      "original": "STW32 killed $w3, %stack.1, 0",
+      "scratch": [
+        0,
+        1
+      ]
+    },
+    {
+      "block": 1,
+      "original": "STW32 killed $w2, %stack.0, 0",
+      "scratch": [
+        0,
+        1
+      ]
+    },
+    {
+      "block": 1,
+      "original": "$w3 = LDW32 %stack.1, 0"
+    },
+    {
+      "block": 1,
+      "original": "$w2 = LDW32 %stack.0, 0"
+    }
+  ],
+  "scope": "Run-only compiler prototype; requires actual stock verification. No native execution claim."
+}
