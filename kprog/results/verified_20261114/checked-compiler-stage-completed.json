@@ -1,0 +1,15 @@
+{
+  "recorded": "2026-11-14T05:00:14.516842+00:00",
+  "job": 177589,
+  "make_exit_code": 0,
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-checked-compiler-stage",
+  "canonical_directory": "/workspaces/.agent-state/kprog-ck/verified-compiler",
+  "archive": "kprog/results/verified_20261114/checked-compiler-stage-results.tar.gz",
+  "sha256": "51a8210b7adbe561b1cb05a72edcc5eaa906fa75fd780a6b3b625dfc174802f7",
+  "bytes": 217538,
+  "image_rebuilt": false,
+  "kernel_rebuilt": false,
+  "layout_provenance_caveat": "Packet physical-layout executable was built against the cached vendor target header. PERF reports bpf_array fields in that header differ from boot-matched ELF BTF. Earlier XDP9/TC8 kernel checks cover their exercised fields only; do not infer all emitted packet fields match authoritative BTF. Follow-up should use boot-matched BTF facts rather than treating this header as authoritative.",
+  "actual_new_app_execution": false,
+  "raw_removed": false
+}
