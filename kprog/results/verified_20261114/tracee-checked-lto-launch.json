@@ -1,7 +1,7 @@
 {
   "recorded": "2026-11-14T07:36:21Z",
-  "pid": 257169,
-  "wait_pid": 239316,
+  "pid": 262728,
+  "wait_pid": 262727,
   "app": "tracee/monitor",
   "configuration": "checked-sim-c LTO",
   "raw_directory": "/workspaces/kprog-raw/verified/20261114-tracee-checked-lto",
@@ -23,5 +23,16 @@
   "postlaunch_outcome_polled": false,
   "application_completion_claimed": false,
   "scope": "Whole-app verified path diagnosis; not performance acceptance",
-  "raw_removed": false
+  "raw_removed": false,
+  "queue_revision": {
+    "recorded": "2026-11-14T07:45:01Z",
+    "superseded_pid": 257169,
+    "superseded_was_started": false,
+    "reason": "Prioritize existing PERF compiler blocker; preserve active Katran and original queue records",
+    "pid": 262728,
+    "wait_pid": 262727,
+    "job_directory": "/workspaces/kprog-raw/verified/20261114-tracee-checked-lto/job-reordered1",
+    "application_outcome": null,
+    "postlaunch_outcome_polled": false
+  }
 }

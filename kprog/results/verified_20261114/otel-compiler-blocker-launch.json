@@ -1,7 +1,7 @@
 {
   "recorded": "2026-11-14T07:38:10Z",
-  "pid": 258314,
-  "wait_pid": 257169,
+  "pid": 262727,
+  "wait_pid": 239316,
   "raw_directory": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker",
   "source_archive": "/workspaces/kprog-raw/perf/20261114-probe-read-otel-lto/control/service.tar.gz",
   "nested_request": "service/requests/3.failure.tar.gz",
@@ -43,5 +43,16 @@
     ],
     "interpretation": "Macro expansion contributes substantial source repetition before Clang optimization. Counts are lexical evidence, not measured compiler RSS or proof of the SIGKILL cause.",
     "oom_confirmed": false
+  },
+  "queue_revision": {
+    "recorded": "2026-11-14T07:45:01Z",
+    "superseded_pid": 258314,
+    "superseded_was_started": false,
+    "reason": "Prioritize existing PERF compiler blocker; preserve active Katran and original queue records",
+    "pid": 262727,
+    "wait_pid": 239316,
+    "job_directory": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/replay-before-tracee",
+    "application_outcome": null,
+    "postlaunch_outcome_polled": false
   }
 }
