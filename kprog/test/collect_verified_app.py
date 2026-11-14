@@ -28,7 +28,7 @@ def read_json(archive, name):
 def summarize(app, service):
     requests = [json.loads(line) for line in service.extractfile(
         'service/requests/requests.jsonl').read().decode().splitlines()]
-    counters = app['post_rejit']['bpf']
+    counters = {} if app['post_rejit'] is None else app['post_rejit']['bpf']
     programs = []
     for request in requests:
         record = dict(request)
@@ -46,7 +46,7 @@ def summarize(app, service):
                 if 'request/generated/commands.jsonl' in names:
                     record['generation_returncodes'] = [json.loads(line)['returncode'] for line in
                         inner.extractfile('request/generated/commands.jsonl').read().decode().splitlines()]
-        record['counters'] = counters.get(str(request['prog_id']))
+        record['counters'] = counters.get(str(request['prog_id'])) if request['status'] == 0 else None
         programs.append(record)
     installed = {r['prog_id'] for r in requests if r['status'] == 0}
     verified = {r['stock_load']['prog_id'] for r in programs
@@ -71,7 +71,7 @@ def collect(raw, corpus, captures, prefix, exit_file, application):
         result = summarize(app, service)
     result.update(recorded=datetime.now(timezone.utc).isoformat(), raw_directory=str(raw),
         corpus_run_directory=str(corpus), capture_directory=str(captures),
-        make_exit_code=int((raw/exit_file).read_text()),
+        make_exit_code=int((raw/exit_file).read_text()) if (raw/exit_file).exists() else None,
         launch_receipt=json.loads((raw/'launch-receipt.json').read_text()),
         corpus_metadata=json.loads((corpus/'metadata.json').read_text()),
         scope='Actual upstream two-start verified-B run; workload run means positive recorded native run_cnt_delta',

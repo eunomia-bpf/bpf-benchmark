@@ -30,7 +30,7 @@ class AppAccounting(unittest.TestCase):
             requests.append(dict(request_id=request, source_prog_id=prog+20,
                                  prog_id=prog, status=0, artifact_archive='/old/'+name))
         # A refused request must not be counted as verified or installed.
-        requests.append(dict(request_id=4, source_prog_id=33, prog_id=0, status=-22))
+        requests.append(dict(request_id=4, source_prog_id=33, status=-22))
         files['service/requests/requests.jsonl'] = ''.join(json.dumps(r)+'\n' for r in requests).encode()
         app = dict(app='fixture',status='ok',error='',baseline=dict(bpf={}),
                    post_rejit=dict(bpf={'10':dict(name='same_name',run_cnt_delta=5),
@@ -42,6 +42,17 @@ class AppAccounting(unittest.TestCase):
         self.assertEqual(len(result['programs']), 4)
         self.assertEqual(result['programs'][1]['counters']['run_cnt_delta'], 0)
         self.assertIsNone(result['programs'][3]['stock_load'])
+
+    def test_failed_startup_has_no_native_phase_or_program_id(self):
+        files = {'service/summary.json':b'{"returncode":0}',
+                 'service/requests/requests.jsonl':b'{"request_id":1,"source_prog_id":15,"status":-5}\n'}
+        app = dict(app='fixture',status='error',error='native startup refused',
+                   baseline=dict(bpf={'6':dict(run_cnt_delta=1)}),post_rejit=None)
+        with tarfile.open(fileobj=archive(files)) as service:
+            result = summarize(app, service)
+        self.assertEqual((result['loaded'],result['verified'],result['installed'],result['run']), (1,0,0,0))
+        self.assertEqual(result['application_status'],'error')
+        self.assertIsNone(result['programs'][0]['counters'])
 
 
 if __name__=='__main__':
