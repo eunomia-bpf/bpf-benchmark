@@ -15,7 +15,8 @@
 
 int main(int argc, char **argv)
 {
-    REQUIRE(argc == 3);
+    REQUIRE(argc == 3 || (argc == 4 && !strcmp(argv[3], "--native-layout")));
+    bool native_layout = argc == 4;
     struct btf_ext *ext = NULL;
     struct btf *local = btf__parse_elf(argv[1], &ext);
     struct btf *target = btf__parse(argv[2], NULL);
@@ -29,7 +30,7 @@ int main(int argc, char **argv)
     Elf *elf = elf_begin(fd, ELF_C_READ, NULL);
     size_t strings;
     REQUIRE(elf && elf_getshdrstrndx(elf, &strings) == 0);
-    puts("section\tinsn_off\tlocal_type_id\troot\tkind\taccess\tspec\toriginal\tresolved\tpoison\toriginal_bytes\ttarget_bytes\tfail_memsz_adjust\tpatched_code\tpatched_offset\tpatched_immediate");
+    puts("section\tinsn_off\tlocal_type_id\troot\tkind\taccess\tspec\toriginal\tresolved\tpoison\toriginal_bytes\ttarget_bytes\tfail_memsz_adjust\tpatched_code\tpatched_offset\tpatched_immediate\tstatus");
     struct btf_ext_info *segment = &ext->core_relo_info;
     struct btf_ext_info_sec *sec;
     unsigned int i, count = 0;
@@ -63,23 +64,46 @@ int main(int argc, char **argv)
                 struct bpf_core_cand source = {local, relo->type_id};
                 REQUIRE(bpf_core_add_cands(&source, bpf_core_essential_name_len(root),
                                           target, "vmlinux", 1, candidates) == 0);
+                if (native_layout) {
+                    int kept = 0;
+                    for (int n = 0; n < candidates->len; ++n) {
+                        const struct btf_type *t = btf__type_by_id(target, candidates->cands[n].id);
+                        const char *exact = btf__name_by_offset(target, t->name_off);
+                        if (!strcmp(root, exact)) candidates->cands[kept++] = candidates->cands[n];
+                    }
+                    candidates->len = kept;
+                }
                 seen[relo->type_id] = true;
             }
             struct bpf_core_spec specs[3] = {};
             struct bpf_core_relo_res result = {};
+            const char *status = "resolved";
+            struct bpf_core_cand_list physical = *candidates;
+            if (native_layout) {
+                status = candidates->len == 1 ? "native_layout" :
+                         candidates->len == 0 ? "native_layout_absent" : "native_layout_ambiguous";
+                /* Native C uses the exact source type, including its flavor.
+                 * Each physical field is independent of other CO-RE probes. */
+                candidates = &physical;
+            }
+            bool observable = !native_layout || candidates->len == 1;
+            if (observable) {
             REQUIRE(bpf_core_calc_relo_insn(name, relo, count, local,
                                            candidates, specs, &result) == 0);
+            } else {
+                REQUIRE(bpf_core_parse_spec(name, local, relo, &specs[0]) == 0);
+            }
             char spec[4096];
             REQUIRE(bpf_core_format_spec(spec, sizeof(spec), &specs[0]) >= 0);
             unsigned int index = relo->insn_off / sizeof(*code);
             if (code[index].code == (BPF_LD | BPF_DW | BPF_IMM))
                 REQUIRE(index + 1 < data->d_size / sizeof(*code));
-            REQUIRE(bpf_core_patch_insn(name, code + index, index, relo, count, &result) == 0);
-            printf("%s\t%u\t%u\t%s\t%u\t%s\t%s\t%llu\t%llu\t%d\t%u\t%u\t%d\t%u\t%d\t%d\n",
+            if (observable) REQUIRE(bpf_core_patch_insn(name, code + index, index, relo, count, &result) == 0);
+            printf("%s\t%u\t%u\t%s\t%u\t%s\t%s\t%llu\t%llu\t%d\t%u\t%u\t%d\t%u\t%d\t%d\t%s\n",
                    name, relo->insn_off, relo->type_id, root, relo->kind, access, spec,
                    (unsigned long long)result.orig_val, (unsigned long long)result.new_val,
                    result.poison, result.orig_sz, result.new_sz, result.fail_memsz_adjust,
-                   code[index].code, code[index].off, code[index].imm);
+                   code[index].code, code[index].off, code[index].imm, status);
             ++count;
         }
         free(code);

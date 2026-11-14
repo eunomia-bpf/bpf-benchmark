@@ -5,6 +5,8 @@ BUILD := /var/tmp/kprog-tmp/perf/core-audit
 OUTPUT ?= /workspaces/kprog-raw/perf/20261114-core-audit
 KDIR := /workspaces/.agent-state/kprog-ck/build-x86
 LIBBPF := $(ROOT)/runner/build-llvmbpf/vendor/libbpf
+REFERENCE_ARGS ?=
+TARGET ?= $(KDIR)/vmlinux
 
 $(BUILD)/core-reference: $(ROOT)/kprog/test/core_relocation_reference.c
 	install -d $(BUILD)
@@ -13,4 +15,9 @@ $(BUILD)/core-reference: $(ROOT)/kprog/test/core_relocation_reference.c
 .PHONY: reference
 reference: $(BUILD)/core-reference
 	install -d $(OUTPUT)
-	taskset -c 19 prlimit --as=4294967296 -- $(BUILD)/core-reference $(SOURCE) $(KDIR)/vmlinux > $(OUTPUT)/reference.tsv
+	taskset -c 19 prlimit --as=4294967296 -- $(BUILD)/core-reference $(SOURCE) $(TARGET) $(REFERENCE_ARGS) > $(OUTPUT)/reference.tsv
+
+.PHONY: native-layout
+native-layout:
+	install -d $(BUILD) $(OUTPUT)
+	taskset -c 19 prlimit --as=4294967296 -- pahole --btf_encode_detached=$(BUILD)/native.btf $(NATIVE) > $(OUTPUT)/pahole.log 2>&1
