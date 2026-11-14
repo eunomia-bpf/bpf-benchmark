@@ -180,11 +180,11 @@
 
 **lane 合并（运营者 2026-11-14："perf、verified、formal 需要3 个吗""不要互相等等"；协调者 2026-11-14T09:33:47Z）**：lane verified 并入 lane perf，kprog 留两条 Codex lane（perf、formal）和 lane C（omp）。perf 接手 verified 的全部任务和文件归属（链接器、加载器、shim、service、checked-sim-c 编译器）：顺序是 ① OTel 在等量工作下吞吐至少 1.20x（LTO：read、hash、LPM），② LTO 配置跑整应用（BCC 已通，Tracee、Katran 接着），③ 六应用 verified 路径剩下的应用；formal 的 M4/M6 改为和 perf 商定。**不互相等**：计时锁只给 CPU 0-7 上的计时运行用，功能和内核用例在各自的 CPU 上跑、不拿计时锁；镜像锁的独占只给镜像重建用，重建攒到一次做；一条 lane 等作业时在同一轮里用一条阻塞命令等，或者先做下一项；需要别的 lane 改的东西，自己按商定的范围改，写进 COORDINATION。
 
-**每条 lane 负责一部分代码（运营者 2026-11-14："明确记录, 以后建议每个 lane 负责一部分代码. 所有 research 都生效"；"我觉得要不要合并一下? 另外代码库的组织结构要不要整理?"；协调者 2026-11-14T10:02:41Z 按代码重新划分）**：过去 24 小时里 kprog/perf/native-context 被三条 lane 改过，C 构建 Katran、BCC、Tracee 时一再请 perf 改它，所以按“生成 P”和“运行 P”两侧划分：
+**每条 lane 负责一部分代码（运营者 2026-11-14："明确记录, 以后建议每个 lane 负责一部分代码. 所有 research 都生效"；"我觉得要不要合并一下? 另外代码库的组织结构要不要整理?"；协调者 2026-11-14T10:02:41Z 按代码重新划分）**：过去 24 小时里 kprog/build 被三条 lane 改过，C 构建 Katran、BCC、Tracee 时一再请 perf 改它，所以按“生成 P”和“运行 P”两侧划分：
 
 | lane | 负责的代码 | 任务 |
 |---|---|---|
-| C（omp） | 生成 P 的一侧：同源构建流水线（现 kprog/perf/native-context，整理后 kprog/build）、vendor/bpf 的同源开关、各应用的同源构建脚本、计时脚本（kprog/perf/one-image、may29-image、direct-native） | 六个应用的同源构建、两边输出对照、计时；从 perf 接过 Cilium、Tetragon 的同源构建（D01/D02/D09、Tetragon 的 flags 和上游单元） |
+| C（omp） | 生成 P 的一侧：同源构建流水线（现 kprog/build，整理后 kprog/build）、vendor/bpf 的同源开关、各应用的同源构建脚本、计时脚本（kprog/perf/one-image、may29-image、direct-native） | 六个应用的同源构建、两边输出对照、计时；从 perf 接过 Cilium、Tetragon 的同源构建（D01/D02/D09、Tetragon 的 flags 和上游单元） |
 | perf（Codex） | 运行 P 的一侧：链接器 kprog/x86/native_lab/native_link、加载器 kprog/libnativeloader、shim bpfopt/shim、service 和 kprog/x86 下的特化器与编译器、kprog/stock-path、kprog/test、kprog/perf/profile、LTO 的各个发射器 | OTel 等量工作下吞吐至少 1.20x（LTO），LTO 配置跑整应用，六应用 verified 路径；Tetragon 加载时生成的函数属于链接一侧，仍归 perf |
 | formal（Codex） | kprog/formal 及其 submodule | M1–M6 |
 
@@ -192,6 +192,7 @@
 
 一条 lane 需要别人那部分改动时，在 COORDINATION 说清楚，由负责的 lane 改；两条 lane 反复改同一块代码时，协调者把它们合并成一条。
 
+**更正（协调者 2026-11-14T11:20:00Z）**：085217_843248 的 Tracee 原生对象来自 vendor/bpf/Makefile 第 315–318 行的 `-include native_compat.h` 规则（与镜像逐字节相同），native_compat.h:326 把 bpf_core_field_exists 定成 (1)；按运营者 11-13 的规则（"不改源码，也不往编译里塞替换源码行为的头文件"）这属于镜像构建，Tracee 的同源构建仍待完成：走 target BTF 解析 CO-RE 的同源路线（11-13 已编好 172 个程序），它在 guest 里缺页是因为 native_link 把 .bss 段符号的字节放进只读的 .native_link_rodata（lane C 10:21 的分析）——这是链接器的问题，归 perf 修：.bss/.data 段符号引用的目标放进可写内存。修好后 lane C 用同源对象重测 Tracee 3×180 秒。下面 1.016x 的分析（热程序由 helper 主导）仍然适用于程序结构。
 **Tracee 1.016x 的原因和下一步（运营者 2026-11-14："同源构建测得 1.016x 我觉得肯定不对. 不可能这么点"；协调者 2026-11-14T10:46:11Z 核对）**：x86_kvm_corpus_20261114_085217_843248 里原生代码确实在跑（stubs.py 只有 empty_kprobe 一个小程序，逐程序耗时两边各不相同）；热点 tracepoint__raw 1.12x、trace_sys_enter 0.98x、trace_sys_exit 0.96x，合计占 eBPF 时间 86%。原生 trace_sys_enter 1425 条指令里有 141 处 helper 调用：bpf_probe_read_kernel 79、map 查找 35、smp_processor_id 6、get_current_task 4 等，sys_exit 相同。两边调用同一批 helper，JIT 一侧还得到内核在验证之后的内联（array 查找、smp_processor_id），所以每次调用持平。11-07 的 1.539x 来自原生一侧读失败提前结束。提升要靠 LTO 把这些 helper 做便宜：① probe_read_kernel/probe_read_kernel_str 内联成带异常表的直接读（perf 给 OTel 做的 read LTO 已覆盖内核读）；② map 查找按链接时已知的 map 参数内联；③ smp_processor_id、get_current_task 内联成 per-cpu 读。分工：perf 在自己的链接器里把 ①②③ 对 Tracee 打开（默认关闭开关），lane C 用这些开关给 Tracee 计时 3×180 秒，并跑一次两边硬件剖析给出上限表。目标：Tracee 吞吐至少 1.20x。
 
 ## 1. 性能（目标：六应用几何平均 native/JIT 1.20x–1.40x，来自原生代码）
