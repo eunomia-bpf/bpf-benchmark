@@ -12,7 +12,7 @@
 
 做法：每条 lane 有一个目标和一张按顺序的待办，自己推进，不向协调者申请时段或许可；共用资源由 lane 之间在 COORDINATION.md 直接商量。协调者每小时核对提交和结果，必要时改目标、改待办顺序；omp 两三次不按待办做就停掉重开（运营者 11-12）。
 
-运营者 2026-11-13："我觉得这个做法不是改源代码, 我们应该尽可能禁止改源代码吧? 尽可能减少修改? ... 你可以改链接器, 自己写 mmset, 不要用内核的; 顺便去看看有没有类似的情况, 这不公平也很容易出错, 我们应该在链接器或者编译 flag 上面做文章"。规则：不改应用源码，也不往编译里塞替换源码行为的头文件；原生代码的差异在链接器或编译 flag 上解决，改动尽量少。普查（协调者，2026-11-13，镜像里全部 *.native.o 的外部函数符号）：只有 memset 和 memcpy 两个库函数落到内核：memset 在 Tetragon 38 个对象、OTel 5 个、BCC 1 个、Tracee 1 个；memcpy 在 Tetragon 8 个、Tracee 1 个；Katran、Cilium 没有。
+运营者 2026-11-13："我觉得这个做法不是改源代码, 我们应该尽可能禁止改源代码吧? 尽可能减少修改? ... 你可以改链接器, 自己写 mmset, 不要用内核的; 顺便去看看有没有类似的情况, 这不公平也很容易出错, 我们应该在链接器或者编译 flag 上面做文章"。规则（按运营者原话，2026-11-14 更正："我没说过不行吧?"）：尽可能不改应用源码，原生代码的差异在链接器或编译 flag 上解决，改动尽量少；用 -include 加头文件属于编译 flag，可以用，前提是两边工作量相同（头文件给出的字段偏移和存在性要与唯一内核上 libbpf 的结果一致）。普查（协调者，2026-11-13，镜像里全部 *.native.o 的外部函数符号）：只有 memset 和 memcpy 两个库函数落到内核：memset 在 Tetragon 38 个对象、OTel 5 个、BCC 1 个、Tracee 1 个；memcpy 在 Tetragon 8 个、Tracee 1 个；Katran、Cilium 没有。
 
 **总目标的前提（2026-11-13，源码差异审核 kprog/results/source-diff-20261113/report.md，23 组差异，2526e7ea2）**：原生一侧编译的是与 eBPF 一侧相同、未改动的上游应用源码；所有差异放进链接器或编译 flag。审核发现六个应用的原生构建都有改变行为的源码差异（Cilium 也有：D01 socket 上下文未转换、D02 TC cb 元数据早 8 字节、D08 XDP ingress_ifindex、D09 去掉 hybrid routing 查表、D10 wire_len），所以在这些差异移走之前，没有一个应用的原生/eBPF 比值能算等量工作；优化让位于这项清理。
 
@@ -194,7 +194,7 @@
 
 一条 lane 需要别人那部分改动时，在 COORDINATION 说清楚，由负责的 lane 改；两条 lane 反复改同一块代码时，协调者把它们合并成一条。
 
-**更正（协调者 2026-11-14T11:20:00Z）**：085217_843248 的 Tracee 原生对象来自 vendor/bpf/Makefile 第 315–318 行的 `-include native_compat.h` 规则（与镜像逐字节相同），native_compat.h:326 把 bpf_core_field_exists 定成 (1)；按运营者 11-13 的规则（"不改源码，也不往编译里塞替换源码行为的头文件"）这属于镜像构建，Tracee 的同源构建仍待完成：走 target BTF 解析 CO-RE 的同源路线（11-13 已编好 172 个程序），它在 guest 里缺页是因为 native_link 把 .bss 段符号的字节放进只读的 .native_link_rodata（lane C 10:21 的分析）——这是链接器的问题，归 perf 修：.bss/.data 段符号引用的目标放进可写内存。修好后 lane C 用同源对象重测 Tracee 3×180 秒。下面 1.016x 的分析（热程序由 helper 主导）仍然适用于程序结构。
+**更正（协调者 2026-11-14T11:20:00Z）**：085217_843248 的 Tracee 原生对象来自 vendor/bpf/Makefile 第 315–318 行的 `-include native_compat.h` 规则（与镜像逐字节相同），native_compat.h:326 把 bpf_core_field_exists 定成 (1)；（2026-11-14T12:21:51Z 再更正：-include 头文件属于编译 flag，运营者："我没说过不行吧?"。问题在正确性：这个头文件把 __builtin_preserve_access_index 展开成普通表达式、按 Tracee 自带的 vmlinux.h 取字段偏移（这台内核上 370 个 CO-RE 字段里 201 个偏移不同），并让 bpf_core_field_exists 恒为 1，两边工作量因此不同。）两条路任选先通的一条：头文件路线改成按唯一内核生成的 vmlinux 头编译、存在性按这台内核给出（Tetragon 的头文件已是这种做法）；或者同源路线：走 target BTF 解析 CO-RE 的同源路线（11-13 已编好 172 个程序），它在 guest 里缺页是因为 native_link 把 .bss 段符号的字节放进只读的 .native_link_rodata（lane C 10:21 的分析）——这是链接器的问题，归 perf 修：.bss/.data 段符号引用的目标放进可写内存。修好后 lane C 用同源对象重测 Tracee 3×180 秒。下面 1.016x 的分析（热程序由 helper 主导）仍然适用于程序结构。
 **Tracee 1.016x 的原因和下一步（运营者 2026-11-14："同源构建测得 1.016x 我觉得肯定不对. 不可能这么点"；协调者 2026-11-14T10:46:11Z 核对）**：x86_kvm_corpus_20261114_085217_843248 里原生代码确实在跑（stubs.py 只有 empty_kprobe 一个小程序，逐程序耗时两边各不相同）；热点 tracepoint__raw 1.12x、trace_sys_enter 0.98x、trace_sys_exit 0.96x，合计占 eBPF 时间 86%。原生 trace_sys_enter 1425 条指令里有 141 处 helper 调用：bpf_probe_read_kernel 79、map 查找 35、smp_processor_id 6、get_current_task 4 等，sys_exit 相同。两边调用同一批 helper，JIT 一侧还得到内核在验证之后的内联（array 查找、smp_processor_id），所以每次调用持平。11-07 的 1.539x 来自原生一侧读失败提前结束。提升要靠 LTO 把这些 helper 做便宜：① probe_read_kernel/probe_read_kernel_str 内联成带异常表的直接读（perf 给 OTel 做的 read LTO 已覆盖内核读）；② map 查找按链接时已知的 map 参数内联；③ smp_processor_id、get_current_task 内联成 per-cpu 读。分工：perf 在自己的链接器里把 ①②③ 对 Tracee 打开（默认关闭开关），lane C 用这些开关给 Tracee 计时 3×180 秒，并跑一次两边硬件剖析给出上限表。目标：Tracee 吞吐至少 1.20x。
 
 ## 1. 性能（目标：六应用几何平均 native/JIT 1.20x–1.40x，来自原生代码）
