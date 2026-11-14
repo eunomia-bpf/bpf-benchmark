@@ -1,0 +1,27 @@
+{
+  "announced": "2026-11-14T01:04:06Z",
+  "outer_pid": 97809,
+  "recipe_commit": "ab225e3d7",
+  "make_target": "make -C kprog/libnativeloader direct-tail-check",
+  "cpu_set": "8-15",
+  "cargo_jobs": 1,
+  "address_space_limit": "8GiB",
+  "image_lock": "shared",
+  "build_directory": "/var/tmp/kprog-tmp/verified/direct-tail",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-direct-tail",
+  "job_log": "/workspaces/kprog-raw/verified/20261114-direct-tail/job/make.log",
+  "launcher_log": "/workspaces/kprog-raw/verified/20261114-direct-tail/launcher.log",
+  "dry_run_log": "/workspaces/kprog-raw/verified/20261114-direct-tail/dry-run.log",
+  "tests": [
+    "Existing Rust linker suite",
+    "Real native entry/nested/decoded/external/global paths",
+    "7th/8th stack arguments across subprogram tail jump",
+    "Live global changes on repeated calls",
+    "Unaffected plain entry proof/blob/relocs/maps/ABI bytes versus retained reference"
+  ],
+  "reference_binary": "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+  "reference_sha256": "98df3bb93726cc89bb7d97cb01c8a4d9119f14742228108f12d3cb77ac2a78f3",
+  "result_collected": false,
+  "canonical_image_or_base_changed": false,
+  "scope": "Source/scratch candidate; not application certification or checked-path acceptance"
+}
