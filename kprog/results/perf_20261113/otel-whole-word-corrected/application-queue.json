@@ -1,0 +1,20 @@
+{
+  "queued": "2026-11-14T19:50:18Z",
+  "queue_pid": 605029,
+  "wait_for_timing_wrapper_pid": 602191,
+  "observed_timing_guest_pid": 602226,
+  "source_commit": "8392ad783",
+  "main_result_commit": "20e909db6",
+  "command": [
+    "make",
+    "-f",
+    "kprog/test/scalar-spill-precision.mk",
+    "checked-corpus",
+    "OUTPUT=/workspaces/kprog-raw/perf/20261114-otel-whole-word-checked",
+    "REPLAY_BUILD=/var/tmp/kprog-tmp/perf/otel-whole-word-checked"
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261114-otel-whole-word-checked",
+  "log": "/workspaces/kprog-raw/perf/20261114-otel-whole-word-checked/queue.log",
+  "resource_ordering": "Begin after the current complete Tetragon timing wrapper exits; functional guest uses image SH and CPUs16-17.",
+  "scope": "Queued application diagnostic; its actual startup and application result are collected separately."
+}
