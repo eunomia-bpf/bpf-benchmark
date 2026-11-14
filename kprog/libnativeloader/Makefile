@@ -44,6 +44,10 @@ CHECKED_PACKET_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-checked-
 CHECKED_PACKET_VMLINUX ?= $(REPO_ROOT)/vendor/bpf/targets/x86/$(shell cat /workspaces/.agent-state/kprog-ck/build-x86/include/config/kernel.release)/vmlinux.h
 CENSUS_CHECKPOINT_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-integration-checkpoint/snapshot
 CENSUS_CHECKPOINT_QUEUES ?= /workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-0 /workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-1 /workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-2
+CENSUS_PUBLISH_BASE ?= /workspaces/kprog-raw/verified/20261114-kfunc-refresh/cumulative-outcomes.jsonl
+CENSUS_PUBLISH_QUEUES ?= $(CENSUS_CHECKPOINT_OUTPUT)/queue-0/outcomes.jsonl $(CENSUS_CHECKPOINT_OUTPUT)/queue-1/outcomes.jsonl $(CENSUS_CHECKPOINT_OUTPUT)/queue-2/outcomes.jsonl
+CENSUS_PUBLISH_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-integration-checkpoint/publication
+CENSUS_PUBLISH_DESTINATION ?= $(REPO_ROOT)/kprog/results/verified_20261114/census-checkpoint-complete
 KFUNC_BUILD ?= /var/tmp/kprog-tmp/verified/kfunc
 KFUNC_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/host
 KFUNC_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/kernel
@@ -358,7 +362,15 @@ shared-image-restore:
 	docker image load -i "$(REPO_ROOT)/.cache/container-images/x86_64-runner-runtime.image.tar"
 
 .PHONY: shared-base-refresh shared-base-finalize shared-base-modules-repair shared-module-syntax
-.PHONY: resident-census-checkpoint
+.PHONY: resident-census-checkpoint resident-census-publish resident-census-publish-test
+resident-census-publish:
+	python3 ../test/publish_checkpoint_census.py --base "$(CENSUS_PUBLISH_BASE)" \
+		$(foreach journal,$(CENSUS_PUBLISH_QUEUES),--queue "$(journal)") \
+		--output "$(CENSUS_PUBLISH_OUTPUT)" --published "$(CENSUS_PUBLISH_DESTINATION)"
+
+resident-census-publish-test:
+	python3 ../test/test_publish_checkpoint_census.py
+
 resident-census-checkpoint:
 	python3 ../test/resident_verified_census.py checkpoint --output "$(CENSUS_CHECKPOINT_OUTPUT)" \
 		$(foreach queue,$(CENSUS_CHECKPOINT_QUEUES),--queue "$(queue)")
