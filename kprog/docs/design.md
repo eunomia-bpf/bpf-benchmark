@@ -371,7 +371,8 @@ SCALAR 类型,只在真正执行指针类型操作的 handler 内部才把指针
 | 特化 driver | 500–1k Rust/C | 读取目标二进制,emit 特化后的 simulator 源码或直接 emit eBPF |
 | Helper/kfunc 识别表 | 200–500 LOC | 每个内核 build 一份「绝对地址 -> helper id」映射 |
 | 验证用内核改动 | ~0 | proof 检查复用 stock verifier(eBPF JIT 不参与,eBPF 不执行) |
-| 执行 native P 的路径 | 待定 | 认证后需一条裸跑 P 的内核路径(模块/可执行页);这本身是开放设计点,**不是零成本** |
+| 执行原生代码的路径 | 内核补丁 | 内核按 `BPF_F_NATIVE_IMAGE` 把每份原生镜像绑定到它自己的那次程序装载;镜像缺失时装载失败 |
+| LTO | 链接器 + 编译器 | 验证之后唯一的变换:绑定并内联 map 查找和 helper,LTO 配置下再由编译器整体优化 |
 
 不需要新的内核 syscall,不需要新的 verifier hook,也不需要新的 JIT 路径。最终产物是一个
 用户态工具,外加一份为运行中内核重新生成的 helper 地址表。
@@ -645,7 +646,7 @@ NativeBPF 的主战场是"如何安全高效地扩展内核",所以最直接的�
 
 **NativeBPF 与 SFI 是最尖锐的对照**:两者**都不信任作者**(同属"管住二进制"而非"信编译器"),
 但强制方式正相反 —— **SFI 靠二进制改写 + 运行时插 check/mask(代码被改、每访问付开销);
-NativeBPF 靠静态验证一次,然后裸跑未改动的 native(运行时零插桩、零隔离开销)。** 这比
+NativeBPF 靠静态验证一次,然后跑 LTO 后的 native(运行时零插桩、零隔离开销)。** 这比
 "native vs eBPF-JIT"更能凸显 NativeBPF 的独特性。
 
 NativeBPF 独占的格子:**静态 + 独立(不信任作者)验证 + native 速度裸跑、运行时无开销** ——
