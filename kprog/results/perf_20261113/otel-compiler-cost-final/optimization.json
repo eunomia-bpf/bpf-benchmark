@@ -1,0 +1,18 @@
+{
+  "recorded": "2026-11-14T19:01:54.359223+00:00",
+  "argv": [
+    "opt-18",
+    "-passes=default<O3>",
+    "-debug-pass-manager",
+    "-time-passes",
+    "/workspaces/kprog-raw/perf/20261114-otel-compiler-breakdown/irgen/unoptimized.bc",
+    "-o",
+    "/workspaces/kprog-raw/perf/20261114-otel-compiler-breakdown/optimization/optimized.bc"
+  ],
+  "exit": 0,
+  "wall_seconds": 3150.0072921959945,
+  "user_seconds": 3016.280174,
+  "system_seconds": 73.865976,
+  "max_rss_kib": 13934196,
+  "scope": "Compiler-cost diagnostic defaultO3 replay on exact archived unoptimized B IR, not P flag selection/native execution/verifier acceptance; opt pipeline may differ from clang target hooks, record actual pass logs and do not infer speedup."
+}

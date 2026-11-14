@@ -65,6 +65,7 @@
     "scope": "IR-generation diagnostic on exact archived370MB OTel input/same O3flags with LLVM passes disabled; no nativeP flag candidate, machine code or verifier acceptance. Shared E-core timings are not a controlled speedup comparison."
   },
   "optimization_job_pid": 570910,
-  "optimization_status": "active; diagnostic default<O3>, last observed SROA/AA, no speedup or acceptance inference",
-  "scope": "Shared E-core compiler-cost attribution only; neither producer flags nor native runtime candidate. FORMAL owns simulator headers for M4."
+  "optimization_status": "completed naturally with exit0; pass attribution in otel-compiler-cost-final/report.md",
+  "scope": "Shared E-core compiler-cost attribution only; neither producer flags nor native runtime candidate. FORMAL owns simulator headers for M4.",
+  "optimization_result": "otel-compiler-cost-final/optimization.json"
 }
