@@ -95,6 +95,7 @@ def main(args):
     shutil.copyfile(source,args.output/'app-raw.json')
     shutil.copyfile(args.run/'metadata.json',args.output/'metadata-raw.json')
     shutil.copyfile(args.profile_capture/'attribution.json',args.output/'profile-attribution-raw.json')
+    shutil.copyfile(args.profile_run/'details/apps/katran.json',args.output/'profile-app-raw.json')
     lines=['# Katran C4 packet accounting','',
         f'Source `{args.run.name}`, status `{app["status"]}`, stats on, three180-second samples. '
         'No workload or runner change; this is retrospective analysis.','',
@@ -144,9 +145,15 @@ def main(args):
         lines.append(f'| {key} | {prof["baseline"]["samples_per_million_runs"][key]:.3f} | '
                      f'{prof["post_rejit"]["samples_per_million_runs"][key]:.3f} |')
     lines += ['',
-        'The program-text bucket includes logic moved into the program by helper inlining; its '
-        'increase is not an isolated measurement of unchanged application-body code generation. '
-        'Clock samples per counted invocation barely change; helper binding remains a candidate.','',
+        'The raw profile JSON labels baseline208420472 invocations and native217104606, with '
+        'JIT sizes13641/10196 respectively. The earlier217.1M/208.4M prose reverses those '
+        'denominators. The corrected table does not support the quoted native-body6% slowdown '
+        'or unchanged normalized clock samples. These are sampled observations from a different '
+        'run, not a causal attribution of C4\'s per-call gain.','',
+        'The program-text bucket includes logic moved into the program by helper inlining; '
+        'it is not an isolated measurement of unchanged application-body code generation. '
+        'The clock helper still calls the same implementation; reducing its wrapper remains '
+        'a candidate rather than a predicted saving of the entire clock sample share.','',
         'Next in the authorized order: after the remaining OTel app, use C\'s existing producer '
         'switches for the18:40 target-CPU/CMOV/sibling-call configuration and every LTO piece, then '
         'subset-time Katran. After that baseline, bind the clock helper directly to the same '
