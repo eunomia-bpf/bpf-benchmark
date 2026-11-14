@@ -67,5 +67,142 @@
   ],
   "kernel": "pending until full sequential build finishes",
   "prior_failures": "First launch lacked /usr/bin/time; first legacy scanner cases all failed missing mcpu=v4/+w. Outputs retained; only own erroneous same-cause matrix retired after exact process-group capture. No raw deletion.",
-  "timeout": "Removed legacy synthetic900s process timeout; true costs and terminal compiler/kernel failures recorded per invocation through wait4."
+  "timeout": "Removed legacy synthetic900s process timeout; true costs and terminal compiler/kernel failures recorded per invocation through wait4.",
+  "resource_budget": {
+    "recorded": "2026-11-14T17:08:40.023340+00:00",
+    "reason": "Same80GiBAS budget used for prior large compiler jobs, inherited by remaining scale cases; avoids host-wide OOM while measuring real compiler resource failures. Not a verifier instruction/stack limit change.",
+    "processes": [
+      {
+        "pid": 525521,
+        "argv": "python3 /workspaces/kprog-raw/perf/20261114-scale-current/retry3/job.py ",
+        "old": [
+          -1,
+          -1
+        ],
+        "new": [
+          85899345920,
+          85899345920
+        ]
+      },
+      {
+        "pid": 525544,
+        "argv": "make -C kprog/fidelity scale-build SCALE_BUILD=/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build SCALE_SIZES=100 1000 10000 100000 ",
+        "old": [
+          -1,
+          -1
+        ],
+        "new": [
+          85899345920,
+          85899345920
+        ]
+      },
+      {
+        "pid": 525553,
+        "argv": "python3 scale.py build --build /workspaces/kprog-raw/perf/20261114-scale-current/retry3/build --sizes 100 1000 10000 100000 ",
+        "old": [
+          -1,
+          -1
+        ],
+        "new": [
+          85899345920,
+          85899345920
+        ]
+      },
+      {
+        "pid": 530880,
+        "argv": "clang-18 -w -g -O3 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I/workspaces/repository/vendor/libbpf/include/uapi -I/workspaces/repository/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c /workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_scalar_direct.bpf.i -o /workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_scalar_direct.bpf.o ",
+        "old": [
+          -1,
+          -1
+        ],
+        "new": [
+          85899345920,
+          85899345920
+        ]
+      }
+    ]
+  },
+  "latest_completed_cases": [
+    {
+      "name": "n1000_ptr_direct",
+      "target_native_instructions": 1000,
+      "expected_result": 506,
+      "stage": "compiled",
+      "native_instructions": 1015,
+      "generated_c_bytes": 148737,
+      "preprocessed_bytes": 89899087,
+      "returncode": 0
+    },
+    {
+      "name": "n1000_ptr_indirect",
+      "target_native_instructions": 1000,
+      "expected_result": 509,
+      "stage": "compiled",
+      "native_instructions": 1021,
+      "generated_c_bytes": 149950,
+      "preprocessed_bytes": 90034187,
+      "returncode": 0
+    },
+    {
+      "name": "n1000_scalar_direct",
+      "target_native_instructions": 1000,
+      "expected_result": 10444927170976545278,
+      "stage": "compiled",
+      "native_instructions": 1015,
+      "generated_c_bytes": 106366,
+      "preprocessed_bytes": 30655007,
+      "returncode": 0
+    },
+    {
+      "name": "n1000_scalar_indirect",
+      "target_native_instructions": 1000,
+      "expected_result": 10444927170976545281,
+      "stage": "compiled",
+      "native_instructions": 1021,
+      "generated_c_bytes": 107579,
+      "preprocessed_bytes": 30737991,
+      "returncode": 0
+    },
+    {
+      "name": "n100_ptr_direct",
+      "target_native_instructions": 100,
+      "expected_result": 56,
+      "stage": "compiled",
+      "native_instructions": 115,
+      "generated_c_bytes": 16548,
+      "preprocessed_bytes": 9907070,
+      "returncode": 0
+    },
+    {
+      "name": "n100_ptr_indirect",
+      "target_native_instructions": 100,
+      "expected_result": 59,
+      "stage": "compiled",
+      "native_instructions": 121,
+      "generated_c_bytes": 17761,
+      "preprocessed_bytes": 9973586,
+      "returncode": 0
+    },
+    {
+      "name": "n100_scalar_direct",
+      "target_native_instructions": 100,
+      "expected_result": 17694198624199650402,
+      "stage": "compiled",
+      "native_instructions": 115,
+      "generated_c_bytes": 12315,
+      "preprocessed_bytes": 3988260,
+      "returncode": 0
+    },
+    {
+      "name": "n100_scalar_indirect",
+      "target_native_instructions": 100,
+      "expected_result": 17694198624199650405,
+      "stage": "compiled",
+      "native_instructions": 121,
+      "generated_c_bytes": 13528,
+      "preprocessed_bytes": 4049560,
+      "returncode": 0
+    }
+  ],
+  "latest_snapshot": "2026-11-14T17:17:18.846484+00:00"
 }

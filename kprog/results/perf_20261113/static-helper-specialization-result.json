@@ -1,5 +1,5 @@
 {
-  "recorded": "2026-11-14T17:14:57.482588+00:00",
+  "recorded": "2026-11-14T17:17:18.835511+00:00",
   "raw": "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch",
   "scope": "Static known-helper case selection before C macro expansion; original helper body/ISA/P unchanged. Compile-cost change, not measured runtime gain or M4 closure.",
   "implementation": "17 lines in direct_step_statement: derive70 literal case-to-body spellings from unchanged helper dispatcher; numeric/dynamic/unmatched IDs retain original generic path.",
@@ -424,5 +424,12 @@
     }
   ],
   "host_make_exit": 0,
-  "remaining": "OTel main full B parity job527910 and bound checked main530434 are still running; no main verifier/whole-app/performance acceptance. Experimental spill compiler wrapper remains raw/run-only, not promoted."
+  "remaining": "OTel main full B parity job527910 and bound checked main530434 are still running; no main verifier/whole-app/performance acceptance. Experimental spill compiler wrapper remains raw/run-only, not promoted.",
+  "otel_main_preprocessing": {
+    "completed": true,
+    "old_bytes": 1011998390,
+    "new_bytes": 370116027,
+    "reduction_fraction": 0.6342721187530743,
+    "scope": "Preprocessing complete; full B compiler/parity still running. No native gain claim."
+  }
 }
