@@ -149,7 +149,13 @@ OTEL_PROFILE_CAPTURE ?= $(ROOT)/corpus/results/perf-otel-profile-20261114
 OTEL_PROFILE_MANIFEST ?= $(ROOT)/corpus/results/perf-otel-upstream-20261114/manifest-context.json
 PROFILE_TOOL_BUILD ?= /var/tmp/kprog-tmp/perf/profile-tool
 PROFILE_PERF_SOURCE ?= /workspaces/kprog-raw/perf/20261113-loader-cpu-profile/tool/perf
-.PHONY: profile-tool otel-profile
+.PHONY: profile-tool otel-profile otel-profile-report profile-tool-check
+profile-tool-check:
+	python3 -m unittest discover -s $(ROOT)/kprog/perf/profile -p test_perf_selection.py
+
+otel-profile-report:
+	python3 $(ROOT)/kprog/perf/profile/phase-profile.py report $(OTEL_PROFILE_RAW) --annotate 0 --perf $(PROFILE_TOOL_BUILD)/perf
+
 profile-tool:
 	install -d $(PROFILE_TOOL_BUILD)
 	install -m755 $(PROFILE_PERF_SOURCE) $(PROFILE_TOOL_BUILD)/perf

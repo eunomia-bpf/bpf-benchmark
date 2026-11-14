@@ -181,7 +181,7 @@ def _perf_report(out: pathlib.Path, phase: str, *extra: str) -> str:
 
 def _symbols(out: pathlib.Path, phase: str) -> collections.Counter:
     """Root samples only, resolved with this phase's guest JIT symbols."""
-    ips = symbolize.samples(out / f"{phase}.data")
+    ips = symbolize.samples(out / f"{phase}.data", perf=PERF)
     if not ips:
         raise SystemExit(f"no root samples for {phase}")
     counts = symbolize.resolve(ips, *symbolize.load_kallsyms(out / f"{phase}.kallsyms"))

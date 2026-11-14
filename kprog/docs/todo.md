@@ -109,6 +109,7 @@
 - [x] P1f OTel counter-mix 时窗审计（b07cb025c、8e15cd19e）：全部相邻同generation窗口保留，frames按各自family attempts归一；baseline Ruby yield自身0.35–0.76，不能把此前跨窗口0.555/0.376直接归因于native。实际shim measure_start在warmup之后，progress标记在warmup之前；observer新增每次read的wall/monotonic边界，4+1 focused regressions通过。receipt `kprog/results/perf_20261113/otel-counter-mix.json`；不据此宣称完全等价，P1整体继续。
 - [x] P1g 旧OTel phase-counters解码可复现修复（0be31b60d）：去掉/tmp临时ID表依赖，修正移动后的源码根路径和显式enum赋值解析；2回归通过，两臂各99个raw counters逐项等于独立eqcodex解码。receipt `kprog/results/perf_20261113/counter-decoder-repair.json`；已有counter-window数字不变，不改framework或phase/generation判定。
 - [ ] P1i 完全装载Tetragon kprobe语义差异（原perf P1h，保留advisor新增P1h整类CO-RE优先）：依据c3f089bb5的真实时窗policy计数，定位native generic_kprobe提前返回/选择器/参数或尾调用路径；CO-RE flavor修复单独不足。先复用retained entry JIT/map证据，按组件owner修默认关闭候选，只测受影响行为子集。
+- [x] P1 OTel paired-profile report 修复（本提交）：显式 --perf 传到 IP symbolizer，保留 standalone 默认路径；2 focused regressions 和 retained 20261114-otel-profile 真数据重报通过。客体两阶段 appok，原 Make2 是 host report 旧工具路径错误，不重跑 VM。
 - [ ] P2 修好后只重测受这处修复影响的应用（stats 关和开，每个应用 3×180 秒），每次运行用 stubs.py 和程序自身计数核对，增量写进第 1 节；六应用全量计时只在冻结前跑一次，正式下限表和几何平均以那次为准。
 - [ ] P3 等量工作成立的应用里，按每次调用的差距找原生一侧的通用优化（OTel、Tetragon、Cilium）。
 

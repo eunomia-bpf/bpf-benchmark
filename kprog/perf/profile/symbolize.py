@@ -44,9 +44,9 @@ def load_kallsyms(path: pathlib.Path) -> tuple[list[int], list[str], list[str]]:
     return [r[0] for r in rows], [r[1] for r in rows], [r[2] for r in rows]
 
 
-def samples(data: pathlib.Path) -> list[int]:
+def samples(data: pathlib.Path, *, perf: pathlib.Path = PERF) -> list[int]:
     done = subprocess.run(
-        [str(PERF), "script", "-i", str(data), "-F", "ip", "--no-inline", "--hide-call-graph"],
+        [str(perf), "script", "-i", str(data), "-F", "ip", "--no-inline", "--hide-call-graph"],
         capture_output=True, text=True)
     if done.returncode != 0:
         raise SystemExit(f"perf script failed: {done.stderr.strip()}")
