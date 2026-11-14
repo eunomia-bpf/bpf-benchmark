@@ -41,6 +41,9 @@ def check(tool, legacy, output):
     result = run([tool, before, '-o', output/'on.bc', '--canonical-ctx-loads'])
     if 'constant context loads canonicalized=4' not in result.stderr:
         raise ValueError('Constant context loads were disconnected')
+    run([tool, before, '-o', output/'combined.bc', '--canonical-ctx-loads', '--strict-identities'])
+    if (output/'combined.bc').read_bytes() != (output/'on.bc').read_bytes():
+        raise ValueError('Strict identity selection changes canonical tracing loads')
     for variant in ('off', 'on'):
         run(['clang-18', '-target', 'bpf', '-mcpu=v4', '-O3', '-c',
              output/(variant+'.bc'), '-o', output/(variant+'.o')])
@@ -76,7 +79,7 @@ ret i32 %v
         raise ValueError('Unrelated section, dynamic address or untied output was changed')
     record = dict(default_bitcode_equal=True, tracing_load_widths=[8, 16, 32, 64],
                   base_register=1, instruction_offset=80, other_section_and_dynamic_preserved=True,
-                  untied_asm_output_preserved=True)
+                  untied_asm_output_preserved=True, combined_options_equal=True)
     (output/'result.json').write_text(json.dumps(record, indent=2)+'\n')
     print(json.dumps(record))
 
