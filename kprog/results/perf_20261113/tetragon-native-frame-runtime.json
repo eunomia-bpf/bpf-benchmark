@@ -1,0 +1,51 @@
+{
+  "recorded_at": "2026-11-14T01:32:20.072909+00:00",
+  "protocol_commit": "b98de6e1e",
+  "raw": "/workspaces/kprog-raw/perf/20261114-tetragon-native-frame-runtime",
+  "inputs": [
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_012434_458999/details/apps/tetragon__observer.json",
+      "sha256": "c9e9cd1d7f0aa1367cea0a78acb96cdc1c4826325248ed671922ffc0859f78e5"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_012434_458999/metadata.json",
+      "sha256": "f3cb41a1c2ca8519d05eb148242490b3db4f20d9c184fa509305935cc0535fd6"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_012434_458999/details/result.json",
+      "sha256": "64bedd87107a7f1d91a64711c56812c3f1aeda463a45633ccddabd515d6f415d"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_012434_458999/details/shim-logs/tetragon__observer.baseline.log",
+      "sha256": "a8d4f575eb88a56c6a60021a88d7804506f052e7649291895beba260ea11f028"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_012434_458999/details/shim-logs/tetragon__observer.post_rejit.log",
+      "sha256": "55073dccafa58e1a44e7fd058ba2fc7970b7b79416e33e1ba2d1fbe3345e3613"
+    }
+  ],
+  "reports": [],
+  "scope": "Actual two-start Tetragon diagnostic stopped during native startup; no native measurement/equal-work or floor result.",
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/perf_20261113/tetragon-native-frame-runtime.tar.gz",
+    "bytes": 755422,
+    "sha256": "da221bf1331052d61e26c33566d03f377d078e86796e1fd33502cfb97cbfd325",
+    "files_byte_compared": 624
+  },
+  "outcome": {
+    "make_exit": 0,
+    "app_status": "error",
+    "run": "x86_kvm_corpus_20261114_012434_458999",
+    "programs": {
+      "baseline": 287,
+      "post_rejit": null
+    },
+    "native_replacement_events": 10,
+    "native_failure_events": 2,
+    "failure_program": "generic_kprobe_filter_arg",
+    "failure": "x86 helper call cel_expr_1 has no helper address",
+    "prior_kernel_panic_observed": false,
+    "observer_exit": -15
+  },
+  "next": "Confirm actual omitted function-tail closure with owner tested d401bc93a linker. New native runtime measurement remains absent."
+}
