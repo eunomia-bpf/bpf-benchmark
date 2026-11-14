@@ -1103,7 +1103,7 @@ Clight memory to native addresses, initialization, volatile observations and
 ordered normal/fault outcomes remains a universal proof obligation. These access
 roots do not yet export the whole context/handler/fault chain or establish M5.
 
-[c/Arm64Addressing.c](c/Arm64Addressing.c) exports eight production consumers:
+[c/Arm64Addressing.c](c/Arm64Addressing.c) first exports eight production consumers:
 modified register, memory offset, helper argument/context pointers, pre/post
 writeback, memory tag and payload recovery. They use the canonical numerical
 bodies and caller-owned register/cache/private storage, capacity/bias and live
@@ -1133,6 +1133,31 @@ the backend; optional `--objdump` retains stage disassembly in raw diagnostics.
 Raw evidence: `/workspaces/kprog-raw/formal/m4-arm64-addressing`. The complete
 context-read/fault chain, pointer/native-memory relation and full default-byte
 coverage remain open before M4/M5 acceptance.
+
+Five more roots export XDP/SKB reads, SKB writes and the ordered `cb` byte
+read/write ladders. Their output forms retain the native expression APIs and
+BPF asm. CompCert uses two explicit platform operations: select the full pointer
+by actual context, ABI kind and UAPI field offset, and expose that pointer's
+bits for partial reads. The kernel's `xdp_convert_ctx_access` and
+`bpf_convert_ctx_access` in `vendor/linux-framework/net/core/filter.c` explain
+why copying the UAPI `__u32` fields would truncate the native value. The imports
+have no arbitrary-input or zero implementation. Their memory, provenance,
+permissions and ordered fault interpretation must be bound in M5; declaring
+them does not establish a refinement.
+
+The [context oracle](oracles/test_arm64_context_host.c) supplies a fixture
+interpretation and passes112,368 full-pointer/partial-lane/context-identity,
+displaced-base, raw-access, `cb` and whole-frame cases on x86 and AArch64 user
+mode. Three mutations (pointer truncation, wrong field and wrong `cb` offset)
+fail. A nested macro-variable collision found by the first BPF comparison was
+fixed; both diagnostics remain. The final
+[XDP/TC fixture](oracles/arm64_context_compile.bpf.c) retains exact code/data
+(1152B/1896B) and four relocations, including dynamic `cb` reads and writes.
+`make clight`,133 targeted jobs, deterministic exports and standard-axiom checks
+pass. The other two regenerated modules change anonymous composite names only.
+Raw evidence: `/workspaces/kprog-raw/formal/m4-arm64-context`. The whole memory
+dispatcher and fault chain still await C-subset conversion; this step does not
+complete M4 or migrate any of the2,065 theorems.
 
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight

@@ -85,3 +85,36 @@ __u64 kprog_arm64_memory_payload(struct kprog_arm64_addressing *addressing,
 	ARM64_SIM_L_MEM_PAYLOAD_INTO(result, base, index, aux, imm, extra, value, tag);
 	return result;
 }
+
+__u64 kprog_arm64_xdp_read(struct kprog_arm64_addressing *addressing,
+                          __u64 base, __s64 off, __u8 width)
+{
+	REGISTERS();
+	__u64 result;
+	ARM64_SIM_L_XDP_READ_INTO(result, base, off, width);
+	return result;
+}
+__u64 kprog_arm64_skb_read(struct kprog_arm64_addressing *addressing,
+                          __u64 base, __s64 off, __u8 width)
+{
+	REGISTERS();
+	__u64 result;
+	ARM64_SIM_L_SKB_READ_INTO(result, base, off, width);
+	return result;
+}
+void kprog_arm64_skb_write(struct kprog_arm64_addressing *addressing,
+                           __u64 base, __s64 off, __u8 width, __u64 value)
+{
+	REGISTERS();
+	ARM64_SIM_L_SKB_WRITE(base, off, width, value);
+}
+__u64 kprog_arm64_cb_read(void *context, __s64 off, __u8 width)
+{
+	__u64 result;
+	ARM64_SIM_L_SKB_CB_READ_BYTES_INTO(result, context, off, width);
+	return result;
+}
+void kprog_arm64_cb_write(void *context, __s64 off, __u8 width, __u64 value)
+{
+	ARM64_SIM_L_SKB_CB_WRITE_BYTES(context, off, width, value);
+}

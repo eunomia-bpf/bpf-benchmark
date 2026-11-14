@@ -75,6 +75,12 @@ _Static_assert(sizeof(void *) == 8, "kprog models the 64-bit BPF context ABI");
  * Clight fault refinements must supply its nonreturning external semantics. */
 extern void kprog_c_trap(void) __attribute__((noreturn));
 #define KPROG_C_TRAP() kprog_c_trap()
+/* Verifier-converted packet fields return native pointer values, even when
+ * their BPF load opcode is 32 bits. OFFSET is the UAPI field offset, KIND is
+ * the entry ABI. The interpretation must bind the actual context/field and
+ * pointer exposure; these are not arbitrary fresh inputs or low32 loads. */
+extern void *kprog_c_context_pointer(const void *context, __u8 kind, __u32 offset);
+extern __u64 kprog_c_pointer_bits(const void *pointer);
 /* CompCert's alignment-1 memcpy builtin has upstream Clight semantics for
  * the complete byte window, including pointer fragments. These adapters
  * keep typed local storage aligned without imposing alignment on the source

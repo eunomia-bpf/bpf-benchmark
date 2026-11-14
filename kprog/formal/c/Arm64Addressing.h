@@ -22,4 +22,9 @@ void kprog_arm64_memory_pre(struct kprog_arm64_addressing *, __u64, __u32, __u64
 void kprog_arm64_memory_post(struct kprog_arm64_addressing *, __u64, __u32, __u64);
 __u8 kprog_arm64_memory_tag(struct kprog_arm64_addressing *, __u64, __u64, __u32, __u64, __s64, __u8);
 __u64 kprog_arm64_memory_payload(struct kprog_arm64_addressing *, __u64, __u64, __u32, __u64, __s64, __u64, __u8);
+__u64 kprog_arm64_xdp_read(struct kprog_arm64_addressing *, __u64, __s64, __u8);
+__u64 kprog_arm64_skb_read(struct kprog_arm64_addressing *, __u64, __s64, __u8);
+void kprog_arm64_skb_write(struct kprog_arm64_addressing *, __u64, __s64, __u8, __u64);
+__u64 kprog_arm64_cb_read(void *, __s64, __u8);
+void kprog_arm64_cb_write(void *, __s64, __u8, __u64);
 #endif
