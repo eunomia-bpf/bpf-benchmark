@@ -896,3 +896,11 @@ guest-hash-lookup:
 			--run $(HASH_KERNEL_OUTPUT)/client $(HASH_KERNEL_OUTPUT)/$$item.bpf.o $(HASH_KERNEL_OUTPUT)/$$item.native.o $(RUNTIME_HASH_PAYLOAD)/native-link-on $$output \
 			> $$output/service.log 2>&1 || status=1; cat $$output/service.log; \
 	done; done; exit $$status
+
+PROBE_TIMING_RAW ?= /workspaces/kprog-raw/perf/20261114-probe-read-direct-timing
+PROBE_TIMING_CAPTURE ?= $(ROOT)/corpus/results/perf-probe-read-direct-timing-20261114
+PROBE_TIMING_STATE ?= /var/tmp/kprog-tmp/perf/probe-read-direct-timing
+.PHONY: probe-read-otel-timing
+probe-read-otel-timing:
+	flock /workspaces/.agent-state/kprog-lanes/locks/timing flock -s /workspaces/.agent-state/kprog-lanes/locks/image env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(PROBE_TIMING_CAPTURE) EQCODEX_ALL_JIT_PROGRAMS=1 EQCODEX_NATIVE_LINK_BINARY=$(RUNTIME_PROBE_PAYLOAD)/native-link-on \
+		make -f $(ROOT)/kprog/perf/one-image/Makefile rotate ORDER=otelcol-ebpf-profiler/profiling STATS='1 0' SAMPLES=3 WORKLOAD_DURATION=180 CPUS=0-7 VM_CPUS=8 VM_MEM=64G NATIVE_MANIFEST=$(ROOT)/corpus/results/perf-otel-upstream-20261114/manifest-context.json STATE=$(PROBE_TIMING_STATE) LOGS=$(PROBE_TIMING_RAW)/timing

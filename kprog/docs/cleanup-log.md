@@ -231,3 +231,5 @@ KEPT incremental kprog_stock.o and source; raw run archives and logs retained.
 
 - 2026-11-14 PERF, planned probe-read OTel checked-LTO diagnostic: its recipe removes only generated `/var/tmp/kprog-tmp/perf/probe-read-otel-lto/var-tmp/bpf-benchmark-docker.img` after the vng command returns, preserving its command status. This is rebuildable Docker staging; every run/capture/service archive stays under `/workspaces`. Actual outcome is checked at collection, not inferred from launch.
 - 2026-11-14T07:23:46Z VERIFIED shared refresh: superseded runtime image sha256:66e9e88f197f975fd98f78f08be2eac3b7c313937e39a4cb2a45639d0615f2b8 already-absent; current sha256:2aed63ff946f379ffb613586eb9d52a9c0274e3a92b25b675748292c9163d12c; raw retained in /workspaces/kprog-raw/verified/20261114-recovery-private-refresh/canonical-refresh.
+
+- 2026-11-14T07:45:09Z LANE PERF planned: existing one-image corpus recipe removes only rebuildable /var/tmp/kprog-tmp/perf/probe-read-direct-timing/var-tmp/bpf-benchmark-docker.img after each OTel read-LTO timing run; raw/captures retained.
