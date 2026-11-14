@@ -11,12 +11,12 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT/'kprog'))
 from trusted_service import adapter, load_service_artifacts
 
-compiler, linker, original, output = map(Path, sys.argv[1:])
+compiler, linker, original, output, bounds = map(Path, sys.argv[1:])
 output.mkdir(parents=True)
 worker = adapter(1)
 metadata = dict(version=1, prog_type=1, section='socket', maps=[dict(
     name='logical', map_type=2, key_size=4, value_size=8, max_entries=1, map_flags=0, value_offset=None)])
-artifacts = worker.specialize(original.read_bytes(), 'entry', metadata, output/'generated', linker)
+artifacts = worker.specialize(original.read_bytes(), 'entry', metadata, output/'generated', linker, bounds_compiler=bounds)
 # A subprocess transport fixture exercises phase ordering with the REAL native
 # compiler. It does not emulate stock verifier acceptance (the guest does that).
 loader = output/'loader-fixture.py'
@@ -39,6 +39,44 @@ actual=dict(expected_attach_type=0,prog_flags=0,attach_btf_id=0,attach_btf_obj_i
 with open('/dev/null','rb') as fd:
     load_service_artifacts(args,worker,fd.fileno(),request,actual,dict(maps=[]),artifacts,output)
 compiled=json.loads((output/'generated/checked-simulator.json').read_text())['artifacts']
+# Reuse must bind the exact C and pre-bounds IR already used to produce B.
+assert (output/'generated/frontend-ir-reuse.json').is_file()
+from elftools.elf.elffile import ELFFile
+from elftools.elf.relocation import RelocationSection
+
+def allocation(path):
+    with Path(path).open('rb') as stream:
+        elf=ELFFile(stream)
+        data={section.name:section.data() for section in elf.iter_sections()
+              if section['sh_flags'] & 2 and section['sh_type']!='SHT_NOBITS'}
+        relocations=[]
+        for section in elf.iter_sections():
+            if not isinstance(section,RelocationSection) or not elf.get_section(section['sh_info'])['sh_flags'] & 2: continue
+            symbols=elf.get_section(section['sh_link'])
+            relocations += [(elf.get_section(section['sh_info']).name,row['r_offset'],row['r_info_type'],symbols.get_symbol(row['r_info_sym']).name,row.entry.get('r_addend')) for row in section.iter_relocations()]
+        return data,sorted(relocations)
+
+fresh=output/'fresh-frontend';fresh.mkdir()
+shutil.copyfile(artifacts['simulator_preprocessed'],fresh/'simulator.i')
+uncached=dict(artifacts,simulator_preprocessed=str(fresh/'simulator.i'))
+uncached.pop('simulator_frontend')
+uncached=worker.compile_checked_simulator(uncached,linker,compiler)
+assert allocation(compiled['native_object'])==allocation(uncached['native_object'])
+for mutation in ('source','ir'):
+    directory=output/('mutated-'+mutation);directory.mkdir()
+    source=directory/'simulator.i';shutil.copyfile(artifacts['simulator_preprocessed'],source)
+    evidence=dict(artifacts['simulator_frontend'])
+    if mutation=='source':
+        with source.open('a') as stream:stream.write('/* changed after verification */')
+    else:
+        changed=directory/'frontend.bc';raw=bytearray(Path(evidence['path']).read_bytes());raw[-1]^=1;changed.write_bytes(raw);evidence['path']=str(changed)
+    bad=dict(artifacts,simulator_preprocessed=str(source),simulator_frontend=evidence)
+    try: worker.compile_checked_simulator(bad,linker,compiler)
+    except ValueError as error:
+        assert ('source differs' if mutation=='source' else 'IR content changed') in str(error)
+    else: raise AssertionError('mutated verified frontend reused: '+mutation)
+    assert not (directory/'checked-simulator.native.o').exists()
+
 reject=output/'rejected';reject.mkdir()
 (reject/'reject').write_text('transport fixture rejection\n')
 shutil.copyfile(artifacts['simulator_object'],reject/'proof.bpf.o')

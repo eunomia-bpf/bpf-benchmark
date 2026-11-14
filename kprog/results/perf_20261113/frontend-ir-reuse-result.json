@@ -1,0 +1,42 @@
+{
+  "scope": "Reuse the exact pre-bounds B frontend IR only after actual stock B acceptance; no producer recompile, ISA change or new runtime optimization. Main OTel is still unaccepted; these fixtures do not imply whole-app acceptance.",
+  "host_exit": 0,
+  "host_checks": [
+    "cached/fresh native allocated bytes and relocations equal",
+    "source and IR tamper rejected before native output",
+    "8 host executions",
+    "60 width cases",
+    "2 service bootstrap tests",
+    "50605 hardware MUL vectors"
+  ],
+  "recorded_utc": "2026-11-14T18:36:28.525430+00:00",
+  "raw": "/workspaces/kprog-raw/perf/20261114-frontend-ir-reuse",
+  "guest": "1vCPU/4GiB pinned22-23; imageSH, no timing lock",
+  "guest_kernel": "/workspaces/.agent-state/kprog-ck/build-x86",
+  "kernel_cases": [
+    {
+      "case": "4-11",
+      "exit": 0,
+      "oracle_executions": 840,
+      "reuse": {
+        "path": "/workspaces/kprog-raw/perf/20261114-frontend-ir-reuse/kernel/4-11/state/session-p9sjmwrq/requests/request-jzrd8g61/generated/trusted_x86.bpf.bounds-input.bc",
+        "source_sha256": "432dd47282e2bf49db41ab51c9be25a31aa81c359d05f9eca4f4ce64f6fe483a",
+        "ir_sha256": "3976b906d622c73ad0067e801dbc73a58aedc2e2cf194375da2172bbdfad7151"
+      },
+      "native_commands": 3,
+      "duplicate_frontend_commands": 0
+    },
+    {
+      "case": "2-11",
+      "exit": 0,
+      "oracle_executions": 840,
+      "reuse": {
+        "path": "/workspaces/kprog-raw/perf/20261114-frontend-ir-reuse/kernel/2-11/state/session-tamf3u8j/requests/request-7ibewvzd/generated/trusted_x86.bpf.bounds-input.bc",
+        "source_sha256": "eb75442cc5c78a91b47d95e960c18ccf0df5fe67c9affbf6bc07e6676c25407a",
+        "ir_sha256": "2e97ef2fdacbeef32ec88ff4619259e3bd8b64fbd42cfb4f5eaeaf4ccc5c753a"
+      },
+      "native_commands": 3,
+      "duplicate_frontend_commands": 0
+    }
+  ]
+}

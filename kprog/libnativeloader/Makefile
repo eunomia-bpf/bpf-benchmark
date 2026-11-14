@@ -223,7 +223,7 @@ checked-sim-inputs:
 
 checked-sim-check: checked-sim-inputs
 	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" python3 ../test/check_checked_simulator.py \
-		"$(CHECKED_SIM_BUILD)/compile-sim-ir" "$(FRAME_LINKER)" "$(SOURCE_MAP_BUILD)/fixture.native.o" "$(CHECKED_SIM_OUTPUT)"
+		"$(CHECKED_SIM_BUILD)/compile-sim-ir" "$(FRAME_LINKER)" "$(SOURCE_MAP_BUILD)/fixture.native.o" "$(CHECKED_SIM_OUTPUT)" "$(CHECKED_COMPILER_BASE)/packet-bounds"
 	python3 ../test/check_trusted_service.py TrustedApplicationBootstrap
 	python3 ../test/check_x86_mul.py "$(CHECKED_SIM_OUTPUT)/mul-oracle"
 

@@ -125,6 +125,13 @@ def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
         simulator_object=str(obj), simulator_program=name + "_x86_sim_xdp",
         simulator_source=str(source), simulator_preprocessed=str(source.with_suffix('.i')),
         context_kind=kind, symbol=entry_symbol, native_sha256=hashlib.sha256(native_bytes).hexdigest())
+    if bounds_compiler:
+        # This is the same frontend IR that produced B, before B-only bounds
+        # lowering. Retain its binding so native LTO need not recompile the C.
+        initial = source.with_suffix('.bounds-input.bc')
+        result['simulator_frontend'] = dict(path=str(initial),
+            source_sha256=hashlib.sha256(source.with_suffix('.i').read_bytes()).hexdigest(),
+            ir_sha256=hashlib.sha256(initial.read_bytes()).hexdigest())
     (output_dir / "artifacts.json").write_text(json.dumps(result, indent=2) + "\n")
     return result
 
@@ -149,7 +156,17 @@ def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path
         raise RuntimeError('checked simulator compilation requires clang')
     ir, lowered = directory/'checked-simulator.bc', directory/'checked-simulator.native.bc'
     native, proof = directory/'checked-simulator.native.o', directory/'checked-simulator.proof.o'
-    run([clang, *COMPILE_FLAGS, '-emit-llvm', '-c', copied, '-o', ir])
+    frontend = artifacts.get('simulator_frontend')
+    if frontend:
+        # A stale/mutated cache cannot change the source selected by verification.
+        if hashlib.sha256(copied.read_bytes()).hexdigest() != frontend['source_sha256']:
+            raise ValueError('checked simulator source differs from the B frontend')
+        shutil.copyfile(frontend['path'], ir)
+        if hashlib.sha256(ir.read_bytes()).hexdigest() != frontend['ir_sha256']:
+            raise ValueError('checked simulator B frontend IR content changed')
+        (directory/'frontend-ir-reuse.json').write_text(json.dumps(frontend, indent=2)+chr(10))
+    else:
+        run([clang, *COMPILE_FLAGS, '-emit-llvm', '-c', copied, '-o', ir])
     run([compiler, ir, '-o', lowered])
     if artifacts['context_kind'] != 'raw':
         if not context_compiler or not public_layout or not physical_layout:
