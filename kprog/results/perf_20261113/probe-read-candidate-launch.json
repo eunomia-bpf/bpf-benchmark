@@ -1,0 +1,71 @@
+{
+  "recorded_at": "2026-11-14T06:13:55.545000+00:00",
+  "raw": "/workspaces/kprog-raw/perf/20261114-probe-read",
+  "source_base": "f08893a89d8f85e7d56aa1d15c07fd72ecb60fe0",
+  "files": [
+    {
+      "path": "kprog/x86/native_lab/native_link/src/main.rs",
+      "sha256": "7ca712503e2b11ce48a38fbe4555b62bba5d24480c60cf0c56a7aabd7b4a0a74"
+    },
+    {
+      "path": "kprog/x86/native_lab/native_link/src/x86.rs",
+      "sha256": "0b93902292aa1a15ee7d76b4a8a2b82151819e92b01b2e49dab0161cc8c5d2d5"
+    },
+    {
+      "path": "kprog/x86/native_lab/native_link/src/x86_probe_read.rs",
+      "sha256": "3d221e88809ac5d6180806a8b82f4338a2b964133d4103963c5bcd66ab15bd40"
+    },
+    {
+      "path": "kprog/perf/native-context/runtime-array-layout.c",
+      "sha256": "7e65db2272744c8abff405fe9e83a5b0b26bf84480fde1f306b9fe7d3fd9934d"
+    },
+    {
+      "path": "kprog/perf/native-context/test-probe-read.c",
+      "sha256": "842efc10831ba90eb654768686b90d0c703b1dc8719b43f996e08f3024bb1211"
+    },
+    {
+      "path": "kprog/perf/native-context/Makefile",
+      "sha256": "454eacf4b3bb108a78ab56ef207f4cd1ea1a9ba8647cbb146011f682d689f7a6"
+    }
+  ],
+  "layout": {
+    "user_helper": 18446744071583447232,
+    "kernel_helper": 18446744071583447424,
+    "nmi_uaccess_okay": 18446744071581569456,
+    "kernel_allowed": 18446744071581569664,
+    "current_task": 18446744071631994904,
+    "user_ptr_max": 18446744071632209504,
+    "boot_cpu_data": 18446744071622265440,
+    "pagefault_disabled": 9388,
+    "x86_capability": 48
+  },
+  "host_fixture_launch": {
+    "outer_pid": 215955,
+    "job": "/workspaces/kprog-raw/perf/20261114-probe-read/job",
+    "status": "LAUNCHED_UNCOLLECTED_NO_OUTCOME_POLLS",
+    "environment": {
+      "NATIVE_LINK_PROBE_TEST_OUTPUT": "/workspaces/kprog-raw/perf/20261114-probe-read/host"
+    }
+  },
+  "validation": {
+    "initial_rust_suite": "28 passed, one existing ignored, before the two new probe-read tests",
+    "host_driver": "cc -O2 -Wall -Wextra -Werror -fsyntax-only passed",
+    "layout_provider": "actual sole vmlinux BTF + same build System.map, actual success",
+    "array_default": "provider JSON matches pinned shared-array provider bytes",
+    "new_probe_execution": "NOT COLLECTED"
+  },
+  "abi": {
+    "option": "--runtime-probe-read-layout PATH",
+    "kernel_requirements": [
+      "--abi-load-sites true",
+      "--output-abi PATH",
+      "consumer transports selected-GPR recovery sites"
+    ],
+    "proof": "option ignored; no post-verification helper LTO in proof output",
+    "source_load_record": "load_site<TAB>offset,3,11; existing EX_TYPE_BPF clears R11 then skips exact MOV source load",
+    "call": "SysV dst RDI, u32 size ESI, src RDX; signed long return RAX; preserves RBX/R12-R15; two shared routines per image at most",
+    "policy": "user live USER_PTR_MAX plus nmi_uaccess_okay; kernel copy_from_kernel_nofault_allowed -> ERANGE; exact fault -> EFAULT; whole original destination zeroed for any negative return; actual CPU SMAP bit controls STAC/CLAC; task pagefault_disabled nested counter from BTF",
+    "symbol_binding": "each routine rebases sole target symbols by actual link-plan helper address, not historical guest pointers"
+  },
+  "deployment": "NO shared linker/base/image/module/kernel mutation; no OTel guest/timing/new gain or kernel semantic certification. Direct unbound loader currently does not transport recovery records; owner integration remains actual work."
+}

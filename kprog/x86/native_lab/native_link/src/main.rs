@@ -137,6 +137,10 @@ struct Args {
     #[arg(long, requires = "runtime_array_layout")]
     runtime_array_shared: bool,
 
+    /// Inline fault-recovering probe reads using the sole target's ABI/symbols.
+    #[arg(long)]
+    runtime_probe_read_layout: Option<PathBuf>,
+
     /// Bind x86 memset/memcpy to linker-owned GPR routines in the proof image.
     #[arg(long)]
     local_memory_routines: bool,
@@ -217,6 +221,19 @@ struct RuntimeArrayLayout {
     index_mask: u32,
     value: u32,
     array_type: u32,
+}
+
+#[derive(Deserialize)]
+struct RuntimeProbeReadLayout {
+    user_helper: u64,
+    kernel_helper: u64,
+    nmi_uaccess_okay: u64,
+    kernel_allowed: u64,
+    current_task: u64,
+    user_ptr_max: u64,
+    boot_cpu_data: u64,
+    pagefault_disabled: u32,
+    x86_capability: u32,
 }
 
 #[derive(Deserialize)]
@@ -470,11 +487,22 @@ fn main() -> Result<()> {
             Ok(serde_json::from_slice(&bytes)
                 .with_context(|| format!("parse runtime ARRAY layout {}", path.display()))?)
         }).transpose()?;
+    let runtime_probe_read_layout: Option<RuntimeProbeReadLayout> = if proof_mode { None } else {
+        args.runtime_probe_read_layout.as_ref().map(|path| -> Result<_> {
+            if !args.abi_load_sites || args.output_abi.is_none() {
+                bail!("--runtime-probe-read-layout requires --abi-load-sites true and --output-abi: source faults need recovery metadata");
+            }
+            Ok(serde_json::from_slice(&fs::read(path)?)?)
+        }).transpose()?
+    };
     let bytes = fs::read(&args.input).with_context(|| format!("read {}", args.input.display()))?;
     let elf = object::File::parse(&*bytes)
         .with_context(|| format!("parse ELF {}", args.input.display()))?;
     if args.local_memory_routines && elf.architecture() != object::Architecture::X86_64 {
         bail!("--local-memory-routines requires x86-64 input");
+    }
+    if runtime_probe_read_layout.is_some() && elf.architecture() != object::Architecture::X86_64 {
+        bail!("--runtime-probe-read-layout requires x86-64 input");
     }
     if runtime_array_layout.is_some() && elf.architecture() != object::Architecture::X86_64 {
         bail!("--runtime-array-layout requires x86-64 input");
@@ -539,6 +567,7 @@ fn main() -> Result<()> {
                 args.runtime_known_map_lookups && !proof_mode,
                 if proof_mode { None } else { runtime_array_layout.as_ref() },
                 args.runtime_array_shared && !proof_mode,
+                runtime_probe_read_layout.as_ref(),
                 args.local_memory_routines,
                 args.show,
             )?

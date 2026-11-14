@@ -37,12 +37,43 @@ static unsigned field(const struct btf *btf, const char *name, const char *membe
     return offset;
 }
 
+static unsigned long long symbol(const char *map, const char *wanted)
+{
+    FILE *file = fopen(map, "r");
+    if (!file) { perror(map); exit(1); }
+    char line[1024], name[512], kind;
+    unsigned long long address, result = 0;
+    int found = 0;
+    while (fgets(line, sizeof(line), file)) {
+        if (sscanf(line, "%llx %c %511s", &address, &kind, name) != 3) continue;
+        if (!strcmp(name, wanted)) { result = address; ++found; }
+    }
+    if (ferror(file) || fclose(file) || found != 1) {
+        fprintf(stderr, "missing/ambiguous target symbol %s in %s\n", wanted, map); exit(1);
+    }
+    return result;
+}
+
 int main(int argc, char **argv)
 {
-    if (argc != 2) { fprintf(stderr, "usage: %s boot-matched-vmlinux\n", argv[0]); return 1; }
+    if (argc != 2 && !(argc == 4 && !strcmp(argv[2], "--probe-read"))) {
+        fprintf(stderr, "expected boot-matched-vmlinux [--probe-read matching-System.map]"); return 1;
+    }
     struct btf *btf = btf__parse(argv[1], NULL);
     long error = libbpf_get_error(btf);
     if (error) { fprintf(stderr, "parse BTF %s: %ld\n", argv[1], error); return 1; }
+    if (argc == 4) {
+        int result = printf("{\"user_helper\":%llu,\"kernel_helper\":%llu,"
+            "\"nmi_uaccess_okay\":%llu,\"kernel_allowed\":%llu,\"current_task\":%llu,"
+            "\"user_ptr_max\":%llu,\"boot_cpu_data\":%llu,"
+            "\"pagefault_disabled\":%u,\"x86_capability\":%u}\n",
+            symbol(argv[3], "bpf_probe_read_user"), symbol(argv[3], "bpf_probe_read_kernel"),
+            symbol(argv[3], "nmi_uaccess_okay"), symbol(argv[3], "copy_from_kernel_nofault_allowed"),
+            symbol(argv[3], "const_current_task"), symbol(argv[3], "USER_PTR_MAX"),
+            symbol(argv[3], "boot_cpu_data"), field(btf, "task_struct", "pagefault_disabled", 1),
+            field(btf, "cpuinfo_x86", "x86_capability", 0)) < 0;
+        btf__free(btf); return result;
+    }
     int id = btf__find_by_name_kind(btf, "bpf_map_type", BTF_KIND_ENUM);
     if (id < 0) { fprintf(stderr, "missing BTF enum bpf_map_type: %d\n", id); return 1; }
     const struct btf_type *type = btf__type_by_id(btf, id);

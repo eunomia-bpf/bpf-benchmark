@@ -778,3 +778,9 @@ bpf-function-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-
 	$(CC) -O2 -g -emit-llvm -c $(HERE)/test-bpf-function.c -o $(BPF_FUNCTION_BUILD)/input.bc
 	python3 $(HERE)/socket-helper-names.py > $(BPF_FUNCTION_BUILD)/helpers.json
 	python3 $(HERE)/test-bpf-functions.py --build $(BPF_FUNCTION_BUILD) --compiler $(SOCKET_BUILD)/socket-context-lower --reference $(BPF_FUNCTION_BUILD)/reference-lower --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json
+
+RUNTIME_PROBE_BUILD ?= /var/tmp/kprog-tmp/perf/runtime-probe-read-layout
+.PHONY: runtime-probe-read-layout
+runtime-probe-read-layout:
+	$(MAKE) -f $(HERE)/Makefile $(RUNTIME_PROBE_BUILD)/runtime-array-layout BUILD=$(RUNTIME_PROBE_BUILD)
+	$(RUNTIME_PROBE_BUILD)/runtime-array-layout $(KDIR)/vmlinux --probe-read $(KDIR)/System.map > $(RUNTIME_PROBE_BUILD)/runtime-probe-read-layout.json
