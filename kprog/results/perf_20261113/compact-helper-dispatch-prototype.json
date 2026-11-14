@@ -1,0 +1,15 @@
+{
+  "calls": 26,
+  "allocated_bytes_equal": true,
+  "old_preprocessed_bytes": 97335470,
+  "new_preprocessed_bytes": 46844405,
+  "scope": "Raw static-known-helper dispatch prototype on one real Cilium proof. Not full compiler promotion or M4 closure.",
+  "recorded": "2026-11-14T16:55:35.955446+00:00",
+  "raw": "/workspaces/kprog-raw/perf/20261114-compact-helper-dispatch",
+  "recipe": "Replace only literal X86_SIM_BPF_CALL_ID(X86_SIM_HELPER_name) by existing X86_SIM_BPF_CALL_name(), same compile_simulator/B frontend/bounds/backend. 26 static calls on original proof39. Allocated B sections equal; no model semantics change or source promotion yet.",
+  "otel_main_job": {
+    "pid": 527910,
+    "raw": "/workspaces/kprog-raw/perf/20261114-compact-helper-dispatch/otel-main",
+    "status": "running; not a verifier/native runtime acceptance"
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "recorded": "2026-11-14T15:39:17.781819+00:00",
+  "recorded": "2026-11-14T16:45:10.364630+00:00",
   "scope": "Generic MUL-r64 runtime lowering; actual Cilium proof regeneration only, not new stock-kernel/app acceptance or M4 completion.",
   "raw": "/workspaces/kprog-raw/perf/20261114-mul-u64",
   "production_lines_added": 26,
@@ -471,13 +471,125 @@
       }
     ]
   },
-  "compiler_status": "All14 unique failed shapes compiling real B frontend/bounds/backend on16-19; job506402; no checked-native compilation before stock verification.",
-  "model_status": "New direct architectural C lowering, like existing REP STOS; opcode registry and Lean unchanged. Formal M4 binding requested14:53 and exact C lowering facts posted15:26.",
+  "compiler_status": "14 unique formerly failing shapes attempted real B frontend/bounds/backend:13compiled,1frontend failure. Request19 C references cilium_subnet_map without a declaration; preserved compile-commands.jsonl. No stock-verifier/app acceptance claimed.",
+  "model_status": "FORMAL agreed shared C placement and consumed57a43c2aa16:27; M3 MUL binding0433586fd/380 independent hardware/Python/state cases. M4-M6 open.",
   "inputs": {
     "kprog/x86/x86_sim_local_bpf.h": "628937d75be24c97a5736cbf321b43eec8b64fe482fac9e4c2534165130c1452",
     "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "6608bc1b525a0b78a602867f0f33f9638bb1683276558760a416f943975b080f",
     "kprog/test/check_x86_mul.py": "8fcdc1604dbeff46eb74be8764118798e03151446034f37095292c3874743f3b"
   },
   "unsupported": "Memory,8/16/32bit MUL forms still explicitly rejected; no fake zero/default body.",
-  "initial_failure": "Host fixture omitted stack declaration; first compile failure retained, corrected fixture passed50605 vectors."
+  "initial_failure": "Host fixture omitted stack declaration; first compile failure retained, corrected fixture passed50605 vectors.",
+  "compiler_results": [
+    {
+      "request": 39,
+      "source_prog_id": 291,
+      "proof_sha256": "52d024baed045a3a922dfa2e1ddc97da555ea1a08bae32f3e9babfb46973e2e1",
+      "status": "compiled",
+      "bytes": 429472,
+      "seconds": 46.122488132998114
+    },
+    {
+      "request": 13,
+      "source_prog_id": 238,
+      "proof_sha256": "c10032d8698384a74ec30f6bd7c69041abc6ddfcb483e0534964b69a7e7fe47d",
+      "status": "compiled",
+      "bytes": 485656,
+      "seconds": 53.45678444100486
+    },
+    {
+      "request": 7,
+      "source_prog_id": 226,
+      "proof_sha256": "a63da7b9610d8500ea0cd4490c4af8b1a50709c406053a85b3106f93317d485b",
+      "status": "compiled",
+      "bytes": 517576,
+      "seconds": 59.054048826990766
+    },
+    {
+      "request": 34,
+      "source_prog_id": 274,
+      "proof_sha256": "e1afe4ae1841623a55277f7a378463df82e454aa570580eaca4632acee1ed694",
+      "status": "compiled",
+      "bytes": 767416,
+      "seconds": 66.57261350899353
+    },
+    {
+      "request": 56,
+      "source_prog_id": 316,
+      "proof_sha256": "e5f1f628f2c758791e075fb5e84a3b26852b921936f7cb613b3a8be8e1c371a9",
+      "status": "compiled",
+      "bytes": 871456,
+      "seconds": 151.92078541399678
+    },
+    {
+      "request": 3,
+      "source_prog_id": 222,
+      "proof_sha256": "2892f595542eecbf43b66df9f051d39a1fa3fbc21340dff63de43107717e7148",
+      "status": "compiled",
+      "bytes": 971768,
+      "seconds": 107.3469142600079
+    },
+    {
+      "request": 38,
+      "source_prog_id": 284,
+      "proof_sha256": "e447c83bc0e667b93e4d34f64e3420b537889e1690181e4de82eff225879936b",
+      "status": "compiled",
+      "bytes": 966096,
+      "seconds": 143.1180050999974
+    },
+    {
+      "request": 28,
+      "source_prog_id": 267,
+      "proof_sha256": "4fa1703605131a7faeed44810cf23bba57caf25c17b83eb2e7a2d661ca30d0c6",
+      "status": "compiled",
+      "bytes": 1057720,
+      "seconds": 123.72270299900265
+    },
+    {
+      "request": 23,
+      "source_prog_id": 262,
+      "proof_sha256": "8794b63492d9f296b0fad47d53f806cb1865abc80926e40c3ed035f508ce003d",
+      "status": "compiled",
+      "bytes": 1234472,
+      "seconds": 194.76683526799025
+    },
+    {
+      "request": 30,
+      "source_prog_id": 269,
+      "proof_sha256": "f663e3ec3a4349e4ce2aacf44b1cff00aa8446df505848075558da46157c7b1f",
+      "status": "compiled",
+      "bytes": 1281424,
+      "seconds": 196.92049341800157
+    },
+    {
+      "request": 18,
+      "source_prog_id": 250,
+      "proof_sha256": "8ee70f7ff9654e5b300daec46e29a6d5e857a99040a32dbfd9d05f076c9e8d33",
+      "status": "compiled",
+      "bytes": 1256344,
+      "seconds": 228.55319655299536
+    },
+    {
+      "request": 5,
+      "source_prog_id": 224,
+      "proof_sha256": "8fe49d9462ee4c06475db403ca74f92b1cabda321e8053fb1c864dee8fbc6f7f",
+      "status": "compiled",
+      "bytes": 1253384,
+      "seconds": 207.24625886000285
+    },
+    {
+      "request": 19,
+      "status": "error",
+      "error": "Command '['/workspaces/repository/kprog/stock-path/bin/clang', '-w', '-g', '-O3', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_x86', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '-I', '/usr/include/x86_64-linux-gnu', '-emit-llvm', '-c', '/workspaces/kprog-raw/perf/20261114-mul-u64/cilium-replay/19/trusted_x86.bpf.i', '-o', '/workspaces/kprog-raw/perf/20261114-mul-u64/cilium-replay/19/trusted_x86.bpf.bounds-input.bc']' returned non-zero exit status 1.",
+      "seconds": 42.770573620000505
+    },
+    {
+      "request": 42,
+      "source_prog_id": 294,
+      "proof_sha256": "c54109968debe7c51462e960aab0f4930e5d8cd552660b1149350179e74a3035",
+      "status": "compiled",
+      "bytes": 2025824,
+      "seconds": 373.3215631310013
+    }
+  ]
 }

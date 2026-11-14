@@ -1,0 +1,101 @@
+{
+  "recorded": 1794675128.6946833,
+  "roundtrip_allocated_bytes_equal": true,
+  "changed_scalar_slots": [
+    {
+      "slots": [
+        2,
+        9,
+        17,
+        18
+      ],
+      "guard": "all uses LDW32 or STW32 only; no address escape"
+    }
+  ],
+  "stack_sizes": [
+    512
+  ],
+  "old_bpf_sha256": "965e24ccb10c33f5ab991cd2a40400c9a6d59fb44d297daf28169479746f92f9",
+  "new_bpf_sha256": "cd78e7e18ed62522a5658f682a7183f474d485ad63b0b3ac3ca7b66c18db10fe",
+  "scope": "Raw compiler-private spill-layout prototype. VM376 unchanged; 84792 BPF instructions same except635 private spill offsets. Frame512 is not verifier acceptance or trusted compiler promotion.",
+  "byte_comparison": {
+    "code_instruction_count": 84792,
+    "only_private_spill_offsets_changed": true,
+    "changed_instructions": 635,
+    "minimum_direct_r10_offsets": [
+      -520,
+      -512
+    ],
+    "architectural_vm_stack_bytes": 376,
+    "examples": [
+      {
+        "index": 4015,
+        "old": -392,
+        "new": -388
+      },
+      {
+        "index": 4232,
+        "old": -392,
+        "new": -388
+      },
+      {
+        "index": 4841,
+        "old": -392,
+        "new": -388
+      },
+      {
+        "index": 4843,
+        "old": -392,
+        "new": -388
+      },
+      {
+        "index": 5516,
+        "old": -392,
+        "new": -388
+      },
+      {
+        "index": 6593,
+        "old": -392,
+        "new": -388
+      },
+      {
+        "index": 7422,
+        "old": -392,
+        "new": -388
+      },
+      {
+        "index": 7436,
+        "old": -392,
+        "new": -388
+      },
+      {
+        "index": 7547,
+        "old": -448,
+        "new": -444
+      },
+      {
+        "index": 7559,
+        "old": -392,
+        "new": -388
+      },
+      {
+        "index": 7598,
+        "old": -448,
+        "new": -444
+      },
+      {
+        "index": 7602,
+        "old": -448,
+        "new": -444
+      }
+    ],
+    "scope": "Compiler-private spill layout byte comparison only; actual verifier still required."
+  },
+  "stock_kernel_attempt": {
+    "raw": "/workspaces/kprog-raw/perf/20261114-bpf-spill-layout/kernel",
+    "original_exit": 1,
+    "compact_exit": 1,
+    "actual_bpf_verifier_reached": false,
+    "error": "libbpf unresolved map ksym exe_id_to_10_stack_deltas; no verifier log for either. A bound source-map service replay is still required."
+  }
+}

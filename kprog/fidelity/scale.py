@@ -8,6 +8,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 import types
 
 from tcb import includes
@@ -18,14 +19,17 @@ import generate_micro_sim_proofs as encoder
 
 
 def run(args, log):
-    try:
-        result=subprocess.run([str(a) for a in args],capture_output=True,text=True,timeout=900)
-    except subprocess.TimeoutExpired as error:
-        parts=[x.decode(errors='replace') if isinstance(x,bytes) else x or '' for x in [error.stdout,error.stderr]]
-        log.write_text('\n'.join(parts)+'\ncommand exceeded 900 seconds\n')
-        return 124
-    log.write_text(result.stdout+result.stderr)
-    return result.returncode
+    command = [str(a) for a in args]
+    start = time.monotonic()
+    with log.open('w') as output:
+        process = subprocess.Popen(command, stdout=output, stderr=subprocess.STDOUT)
+        _, status, usage = os.wait4(process.pid, 0)
+        process.returncode = os.waitstatus_to_exitcode(status)
+    log.with_suffix(log.suffix + '.resources.json').write_text(json.dumps(dict(
+        command=command, returncode=process.returncode,
+        wall_seconds=time.monotonic() - start, user_seconds=usage.ru_utime,
+        system_seconds=usage.ru_stime, max_rss_kib=usage.ru_maxrss), indent=2) + chr(10))
+    return process.returncode
 
 
 def assembly(size, pointer, indirect):
@@ -105,9 +109,16 @@ def build(directory,sizes):
                         path=directory/f'{name}.bpf.c'
                         path.write_text(proof.replace('#include "../x86_sim_local_bpf.h"',f'#include "{snapshot}/kprog/x86/x86_sim_local_bpf.h"'))
                         row['stage']='proof_compile'
-                        rc=run(['clang','-g','-O2','-target','bpf','-mllvm','-bpf-stack-size=4096',
-                            '-I'+str(ROOT/'vendor/libbpf/include/uapi'),'-I'+str(ROOT/'vendor/libbpf/src'),
-                            '-I/usr/include/x86_64-linux-gnu','-c',path,'-o',directory/f'{name}.bpf.o'],directory/f'{name}.compile.log')
+                        flags=['-w','-g','-O3','-mcpu=v4','-target','bpf',
+                            '-mllvm','-bpf-stack-size=4096','-D__TARGET_ARCH_x86',
+                            '-I'+str(ROOT/'vendor/libbpf/include/uapi'),
+                            '-I'+str(ROOT/'vendor/libbpf/src'),'-I/usr/include/x86_64-linux-gnu']
+                        preprocessed=directory/f'{name}.bpf.i'
+                        row['generated_c_bytes']=path.stat().st_size
+                        rc=run(['clang-18',*flags,'-E',path,'-o',preprocessed],directory/f'{name}.preprocess.log')
+                        if not rc:
+                            row['preprocessed_bytes']=preprocessed.stat().st_size
+                            rc=run(['clang-18',*flags,'-c',preprocessed,'-o',directory/f'{name}.bpf.o'],directory/f'{name}.compile.log')
                         if not rc:row['stage']='compiled'
                 row['returncode']=rc
                 record.write_text(json.dumps(row,indent=2)+'\n')

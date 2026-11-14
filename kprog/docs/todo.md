@@ -171,12 +171,15 @@
 - [ ] C4 Katran。
 
 **lane verified（Codex，gpt-6.1-sol）。目标：六个应用在唯一内核和镜像上走通 verified 路径。**
+- PERF 2026-11-14 编译流水线收取：合并P的checked主程序已实际到stock verifier，R10 -520拒绝；精确frame520=VM376+spill/alignment144，7个后端和5个producer flag候选未解决。私有32-bit spill对齐原型512帧，84792条B仅635条私有spill offset变化；独立libbpf诊断因map ksym未绑定而未进入verifier，仍待实际source-map绑定重放，未推广。OTel C731104B展开1011998390B，helper switch占624205306B；静态同helper宏原型在真实Cilium输入97.3→46.8MB，B allocated bytes相同，OTel完整编译后台验证中。MUL真实14类B编译为13通过/1未声明map失败，62份C生成和50605硬件vector通过；M4、整应用认证保持OPEN。结果见 `otel-combined-checked-result.json`、`otel-preprocessor-expansion.json`、`otel-spill-layout-prototype.json`、`compact-helper-dispatch-prototype.json`、`mul-u64-result.json`。
+
 **lane verified 的大任务：六个应用在唯一内核和镜像上走通 verified 路径。** 普查按程序体去重、最多三个 guest 并行跑完；失败类别按 BPF 时间占比从大到小修；每个应用整应用复测，记下加载、通过 verifier、执行的程序数和运行目录；之后做 100–100K 规模扫描。链接器、加载器、shim 归你，lane perf、lane C 的相关改动由你审看或代改。
 - [ ] V1 按程序体去重的常驻普查跑完；已发现的失败类别（栈写越界、callback、scalar 内存访问、编译器栈存储）现在就修，按 BPF 时间占比从大到小。
 - [ ] V2 六个应用整应用复测，记下每个应用加载、通过 verifier、执行的程序数和运行目录。
 - Cilium 当前模型整应用checked-sim-c已排队（本提交）：复用 `perf-cilium-native-frame-20261114/manifest-context.json` 的50-entry同源P（3 objects、physical context），当前保留常驻25程序为24TC+1XDP，无socket；socket扩展另项不阻塞本workload。dryrun0，CPU8–15/8vCPU64G/AS80GiB/stats1/1×10，只等BCC351898自然退出以串行资源，不要求通过。实际加载/验证/执行及新增失败待收取；小receipt `cilium-current-model-lto-launch.json` 记录manifest/ELF哈希，原始数据 `/workspaces/kprog-raw/verified/20261114-cilium-current-model-lto`。
 - BCC 当前通用模型整应用复测已排队（本提交）：前次213201的25/25/25早于52964ca12/e6e64b725；复用现有whole-app入口、checked-sim-c及sole image，CPU8–15/8vCPU64G/AS80GiB、stats1/1×10，dryrun0。只等333934大输入重放自然退出以串行资源，不以其成功为gate；实际loaded/verified/installed/run/zero/missing待收取，不能从排队推断通过。小receipt `bcc-current-model-lto-launch.json`，原始数据 `/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto`。
 - [ ] V3 100–100K 规模扫描（verifier 时间和内存）。
+  - 2026-11-14 PERF：收完合并计时后已恢复 census（旧队列剩192体，CPU20–23/4vCPU24G/imageSH，raw `20261114-census-resume`）；V3 用当前模型快照/clang18 O3 BPFv4 后台扫描100/1K/10K/100K，CPU18–19，sole kernel 后验。首个4类100指令输入全部B编译通过，完整编译/内核结果仍待收取。旧脚本漏 `-mcpu=v4` 的真实 +w 失败保留；同脚本增加展开字节与逐阶段 wall/RSS，去掉原900秒人工截断。见 `scale-current-launch.json`。
 
 **共用资源，由 lane 自己商量（建议做法，lane 可以改）：**
 - CPU：0-7 计时，一次一个 guest，计时前取 `flock /workspaces/.agent-state/kprog-lanes/locks/timing`；8-15 verified；16-19 perf；20-23 lane C。需要更多就在 COORDINATION 里和对方商量。

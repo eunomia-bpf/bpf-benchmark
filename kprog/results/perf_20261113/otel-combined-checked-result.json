@@ -1,0 +1,134 @@
+{
+  "recorded": "2026-11-14T16:50:05.483811+00:00",
+  "scope": "Actual first combined-P checked-sim-C main rejection, not full-app completion.",
+  "raw": "/workspaces/kprog-raw/perf/20261114-otel-combined-codegen/checked",
+  "native_sha256": "ef44985c193e1d737ffd8980009b67f3c36ab91baf67af0c7878e69590d747da",
+  "source_prog_id": 35,
+  "successful_previous_source_ids": [
+    21,
+    28
+  ],
+  "actual_verifier": {
+    "error": "invalid write to stack R10 off=-520 size=4",
+    "processed_instructions": 3043,
+    "max_states_per_instruction": 3,
+    "total_states": 256,
+    "peak_states": 256
+  },
+  "exact_backend_frame": {
+    "total_bytes": 520,
+    "architectural_vm_bytes": 376,
+    "spill_alignment_bytes": 144,
+    "command": "/workspaces/kprog-raw/perf/20261114-otel-combined-codegen/checked/first-main-failure/mir-command.json"
+  },
+  "backend_matrix": [
+    {
+      "name": "O2",
+      "exit": 0,
+      "seconds": 6.568727883990505,
+      "stack_sizes": [
+        520
+      ]
+    },
+    {
+      "name": "Os",
+      "exit": 0,
+      "seconds": 6.669016346000717,
+      "stack_sizes": [
+        520
+      ]
+    },
+    {
+      "name": "Oz",
+      "exit": 0,
+      "seconds": 6.574027451002621,
+      "stack_sizes": [
+        520
+      ]
+    },
+    {
+      "name": "O3-basic",
+      "exit": 0,
+      "seconds": 6.538395918003516,
+      "stack_sizes": [
+        520
+      ]
+    },
+    {
+      "name": "O3-no-misched",
+      "exit": 0,
+      "seconds": 6.506778619004763,
+      "stack_sizes": [
+        520
+      ]
+    },
+    {
+      "name": "O3-icmp",
+      "exit": 0,
+      "seconds": 6.602664594989619,
+      "stack_sizes": [
+        520
+      ]
+    },
+    {
+      "name": "O3-memcpy",
+      "exit": 0,
+      "seconds": 6.523202230993775,
+      "stack_sizes": [
+        520
+      ]
+    }
+  ],
+  "producer_matrix": [
+    {
+      "name": "O2",
+      "exit": 0,
+      "proof_exit": 0,
+      "vm_stack_bytes": 376,
+      "instructions": 5330,
+      "source_sha256": "ef97b7602bb757a684295d29646e40efc4053ecf36253344551536ef819a4a63"
+    },
+    {
+      "name": "Os",
+      "exit": 0,
+      "proof_exit": 0,
+      "vm_stack_bytes": 376,
+      "instructions": 5330,
+      "source_sha256": "ef97b7602bb757a684295d29646e40efc4053ecf36253344551536ef819a4a63"
+    },
+    {
+      "name": "Oz",
+      "exit": 0,
+      "proof_exit": 0,
+      "vm_stack_bytes": 376,
+      "instructions": 5330,
+      "source_sha256": "ef97b7602bb757a684295d29646e40efc4053ecf36253344551536ef819a4a63"
+    },
+    {
+      "name": "native-tune-O3",
+      "exit": 0,
+      "proof_exit": 0,
+      "vm_stack_bytes": 376,
+      "instructions": 5393,
+      "source_sha256": "17d51746960f4369c6e8b07c98e3c810d384ef3c2da09d90cd9c47951effb2f3"
+    },
+    {
+      "name": "native-tune-Os",
+      "exit": 0,
+      "proof_exit": 0,
+      "vm_stack_bytes": 376,
+      "instructions": 5330,
+      "source_sha256": "0b4e598cdca9ab230c6cfd695bf440081d8d214ff1ec7d4f11133635a1e27e3d"
+    }
+  ],
+  "termination": {
+    "whole_app": "interrupted/incomplete; exit255 after own duplicate guest retirement",
+    "reason": "First main already reached real stock verifier and failed. Retry P, normalized metadata and all non-line-directive preprocessor bytes proven equal; retired duplicate after exact PID/argv match, not elapsed time.",
+    "tokens_sha256": "b454c2c8f712e0f90994fb78f860431bec23584bdc9e73ab0cfd60b8d64d0224",
+    "evidence": [
+      "duplicate-comparison.json",
+      "retired-duplicate.json"
+    ]
+  },
+  "constraints": "Actual stock 512-byte stack retained. No native compilation before verifier acceptance; MIR spill layout is separate raw-only prototype, not accepted."
+}
