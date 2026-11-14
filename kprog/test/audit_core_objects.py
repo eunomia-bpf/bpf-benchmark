@@ -12,6 +12,7 @@ import struct
 import subprocess
 
 from elftools.elf.elffile import ELFFile
+from elftools.elf.relocation import RelocationSection
 
 ROOT = Path(__file__).resolve().parents[2]
 STAGE = ROOT/'vendor/build/native-bpf/x86/stage'
@@ -75,6 +76,30 @@ def report_queries(path):
     return queries
 
 
+def allocated_binding(path):
+    """Debug layouts can retain the pre-CO-RE source type after IR resolution."""
+    with path.open('rb') as stream:
+        elf = ELFFile(stream)
+        sections = {section.name: section.data() for section in elf.iter_sections()
+                    if section['sh_flags'] & 2}
+        relocations = []
+        for section in elf.iter_sections():
+            if not isinstance(section, RelocationSection):
+                continue
+            target = elf.get_section(section['sh_info'])
+            if not target['sh_flags'] & 2:
+                continue
+            symbols = elf.get_section(section['sh_link'])
+            for relocation in section.iter_relocations():
+                symbol = symbols.get_symbol(relocation['r_info_sym'])
+                index = symbol['st_shndx']
+                owner = elf.get_section(index).name if isinstance(index, int) else index
+                relocations.append((target.name, relocation['r_offset'], relocation['r_info_type'],
+                                    relocation['r_addend'] if section.is_RELA() else None,
+                                    symbol.name, owner, symbol['st_value'], symbol['st_size']))
+        return sections, sorted(relocations)
+
+
 def audit(args):
     args.output.mkdir(parents=True, exist_ok=True)
     objects = [r for r in inventory() if not args.app or r['app'] in args.app]
@@ -124,6 +149,9 @@ def audit(args):
                 report_bound = bool(obj['report_native'] and
                                     native.read_bytes() == Path(obj['report_native']).read_bytes())
                 summary['native_equals_report_build_object'] = report_bound
+                report_code_bound = bool(obj['report_native'] and
+                    allocated_binding(native) == allocated_binding(Path(obj['report_native'])))
+                summary['native_allocated_bytes_and_relocations_equal_report_build'] = report_code_bound
                 run('native-layout', NATIVE=native)
                 run('reference', SOURCE=source, TARGET=args.build/'native.btf',
                     REFERENCE_ARGS='--native-layout')
@@ -146,7 +174,10 @@ def audit(args):
                         answer = None
                         observation = actual['status']
                         kind = int(ref['kind'])
-                        if kind == 2 and obj['policy'] == 'tetragon-compat':
+                        if report_code_bound and reported is not None:
+                            answer = reported
+                            observation = 'compiler_report_allocated_bytes_and_relocations_match'
+                        elif kind == 2 and obj['policy'] == 'tetragon-compat':
                             # These are the two expression-specific exceptions
                             # in native_compat.h. Source call sites are
                             # bpf_cgroup.h:134 and bpf_cgtracker.c:29.
