@@ -1,0 +1,47 @@
+{
+  "recorded_at": "2026-11-14T01:44:44Z",
+  "outer_pid": 114490,
+  "raw": "/workspaces/kprog-raw/perf/20261114-tetragon-owner-link-runtime",
+  "capture": "/workspaces/repository/corpus/results/perf-tetragon-owner-link-runtime-20261114",
+  "prior_launch": "/workspaces/repository/kprog/results/perf_20261113/tetragon-native-frame-runtime-launch.json",
+  "owner_source_commit": "d401bc93a",
+  "subset_commit": "0097b46a8",
+  "command": [
+    "make",
+    "-f",
+    "kprog/perf/one-image/Makefile",
+    "corpus",
+    "APPS=tetragon/observer",
+    "CPUS=16-19",
+    "VM_CPUS=4",
+    "VM_MEM=16G",
+    "STATE=/var/tmp/kprog-tmp/perf/tetragon-owner-link-runtime",
+    "LOGS=/workspaces/kprog-raw/perf/20261114-tetragon-owner-link-runtime",
+    "SAMPLES=1",
+    "WORKLOAD_DURATION=45",
+    "BPFREJIT_CORPUS_BPF_STATS=1",
+    "NATIVE_MANIFEST=/workspaces/repository/corpus/results/perf-tetragon-native-frame-20261114/manifest.json",
+    "VNG_FLAGS=--verbose"
+  ],
+  "environment": {
+    "EQCODEX_OUT": "/workspaces/repository/corpus/results/perf-tetragon-owner-link-runtime-20261114",
+    "EQCODEX_TETRA": "/workspaces/repository/corpus/results/perf-observers-20261113/tetra",
+    "EQCODEX_NATIVE_LINK_BINARY": "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on"
+  },
+  "new_linker": [
+    {
+      "path": "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-on",
+      "sha256": "f7644e69df0606ac64e1af9631ffec0227c5c46282aaf2c5622758626de9f58a"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link-off",
+      "sha256": "f7644e69df0606ac64e1af9631ffec0227c5c46282aaf2c5622758626de9f58a"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-owner-frame-linker-20261114/native-link.real",
+      "sha256": "311d8de2101f6e97860e31a8a67868a9d5a6b49f1a6246b3e34422c7e1129bbb"
+    }
+  ],
+  "outcome": null,
+  "scope": "Same frame-fixed Tetragon candidate; change only selected owner-tested linker artifact and retain exact local-memory/runtime-map flags. Next-turn actual event/policy/load/phase identity collection; no postlaunch polling or equivalence/floor claim."
+}
