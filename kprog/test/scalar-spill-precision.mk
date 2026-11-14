@@ -11,6 +11,11 @@ REPLAY_BUILD ?= /var/tmp/kprog-tmp/perf/retained-proof-replay
 BACKEND_ARGS ?=
 CONTEXT_BUILD ?= /var/tmp/kprog-tmp/perf/context-loads
 IDENTITY_ARGS ?=
+HELPER_SHAPE_BUILD ?= /var/tmp/kprog-tmp/perf/helper-shapes
+
+.PHONY: helper-shapes
+helper-shapes:
+	taskset -c 19 python3 $(ROOT)/kprog/test/check_helper_call_shapes.py --linker $(ROOT)/corpus/results/perf-corrected-all-lto-linker-20261114/native-link.real --layouts $(ROOT)/corpus/results/perf-corrected-all-lto-linker-20261114 --build $(HELPER_SHAPE_BUILD) --output $(OUTPUT)
 
 .PHONY: build run analyze codegen whole-word replay values-build values-run backend-check checked-corpus context-build context-run context-replay identity-check
 identity-check:
