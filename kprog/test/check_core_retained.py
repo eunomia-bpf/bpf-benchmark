@@ -21,7 +21,7 @@ def main(args):
         result.check_returncode()
         controls.append(result.stdout)
     if controls[0]!=controls[1]:
-        raise ValueError('Optional zero-compare mode changed retained Tracee bitcode')
+        raise ValueError('Optional zero-compare mode changed the control input bitcode')
     rows=json.loads((args.output/'enabled.json').read_text())
     (args.output/'result.json').write_text(json.dumps(dict(input=str(args.input),local_bpf=str(args.local),
         bitcode_bytes=len(controls[0]),default_enabled_bitcode_equal=True,queries=len(rows),

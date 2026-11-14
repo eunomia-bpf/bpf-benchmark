@@ -61,3 +61,9 @@ zero-compare-guest:
 .PHONY: retained-parity
 retained-parity: $(CORE_COMPILER)
 	taskset -c 19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_core_retained.py --compiler $(CORE_COMPILER) --input /var/tmp/kprog-tmp/C/tracee-samesource/tracee.bc --local /var/tmp/kprog-tmp/C/tracee-samesource/tracee.bpf.o --target $(KDIR)/vmlinux --output $(OUTPUT)
+
+.PHONY: width-parity
+width-parity: $(CORE_COMPILER)
+	clang-18 -target bpf -O2 -g -emit-llvm -c $(ROOT)/kprog/build/test-core-ir-width.c -o $(BUILD)/width.bc
+	clang-18 -target bpf -O2 -g -c $(BUILD)/width.bc -o $(BUILD)/width.bpf.o
+	taskset -c 19 prlimit --as=4294967296 -- python3 $(ROOT)/kprog/test/check_core_retained.py --compiler $(CORE_COMPILER) --input $(BUILD)/width.bc --local $(BUILD)/width.bpf.o --target $(KDIR)/vmlinux --output $(OUTPUT)
