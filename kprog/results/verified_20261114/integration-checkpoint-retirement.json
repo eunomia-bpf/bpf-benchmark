@@ -1,0 +1,94 @@
+{
+  "recorded": "2026-11-14T04:05:47.179138+00:00",
+  "checkpoint_job_exit": 0,
+  "snapshots": [
+    {
+      "queue": "/workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-0",
+      "journal": "/workspaces/kprog-raw/verified/20261114-integration-checkpoint/snapshot/queue-0/outcomes.jsonl",
+      "completed": 9,
+      "body_groups": [
+        30,
+        38,
+        41,
+        44,
+        47,
+        50,
+        53,
+        56,
+        59
+      ],
+      "incomplete_journal_bytes": 0,
+      "state_files": 28,
+      "state_archive": "/workspaces/kprog-raw/verified/20261114-integration-checkpoint/snapshot/queue-0/state.tar.gz",
+      "archive_bytes": 182267034,
+      "archive_sha256": "22c6b1d1f9a2fbfd439368b98ce7d9bce2dc26884fdc33a3f009e49e71c0eafe",
+      "raw_retained": true
+    },
+    {
+      "queue": "/workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-1",
+      "journal": "/workspaces/kprog-raw/verified/20261114-integration-checkpoint/snapshot/queue-1/outcomes.jsonl",
+      "completed": 7,
+      "body_groups": [
+        32,
+        39,
+        42,
+        45,
+        48,
+        51,
+        54
+      ],
+      "incomplete_journal_bytes": 0,
+      "state_files": 30,
+      "state_archive": "/workspaces/kprog-raw/verified/20261114-integration-checkpoint/snapshot/queue-1/state.tar.gz",
+      "archive_bytes": 158985354,
+      "archive_sha256": "18c48949dca2d0baa1791322fdd3e59a3e6060d2e1b0dddf835cf72b705e57f9",
+      "raw_retained": true
+    },
+    {
+      "queue": "/workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-2",
+      "journal": "/workspaces/kprog-raw/verified/20261114-integration-checkpoint/snapshot/queue-2/outcomes.jsonl",
+      "completed": 4,
+      "body_groups": [
+        36,
+        40,
+        43,
+        46
+      ],
+      "incomplete_journal_bytes": 0,
+      "state_files": 23,
+      "state_archive": "/workspaces/kprog-raw/verified/20261114-integration-checkpoint/snapshot/queue-2/state.tar.gz",
+      "archive_bytes": 145186919,
+      "archive_sha256": "f354604b170ff5c9af97effc5f9e705d9af1539ea4f4da60a325c0e6a22510b4",
+      "raw_retained": true
+    }
+  ],
+  "signals": [
+    "SIGTERM",
+    "SIGCONT"
+  ],
+  "processes": [
+    {
+      "pid": 82951,
+      "launcher": 73412,
+      "starttime": "2427103",
+      "previous_state": "T",
+      "qemu_exited": true
+    },
+    {
+      "pid": 82973,
+      "launcher": 73413,
+      "starttime": "2427104",
+      "previous_state": "T",
+      "qemu_exited": true
+    },
+    {
+      "pid": 82974,
+      "launcher": 73414,
+      "starttime": "2427104",
+      "previous_state": "T",
+      "qemu_exited": true
+    }
+  ],
+  "raw_retained": true,
+  "canonical_changed": false
+}

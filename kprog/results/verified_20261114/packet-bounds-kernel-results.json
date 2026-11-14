@@ -1,0 +1,184 @@
+{
+  "recorded": "2026-11-14T04:08:54.657066+00:00",
+  "launcher_pid": 165124,
+  "make_exit": 0,
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-packet-bounds",
+  "cases": [
+    {
+      "case": "xdp",
+      "command": [
+        "make",
+        "-C",
+        "/workspaces/repository/kprog/libnativeloader",
+        "guest-checked-packet-case",
+        "CHECKED_PACKET_KERNEL_OUTPUT=/workspaces/kprog-raw/verified/20261114-packet-bounds/kernel",
+        "CHECKED_PACKET_CASE=xdp"
+      ],
+      "make_exit": 0,
+      "ok": true
+    },
+    {
+      "case": "tc",
+      "command": [
+        "make",
+        "-C",
+        "/workspaces/repository/kprog/libnativeloader",
+        "guest-checked-packet-case",
+        "CHECKED_PACKET_KERNEL_OUTPUT=/workspaces/kprog-raw/verified/20261114-packet-bounds/kernel",
+        "CHECKED_PACKET_CASE=tc"
+      ],
+      "make_exit": 0,
+      "ok": true
+    },
+    {
+      "case": "reject",
+      "command": [
+        "make",
+        "-C",
+        "/workspaces/repository/kprog/libnativeloader",
+        "guest-checked-packet-case",
+        "CHECKED_PACKET_KERNEL_OUTPUT=/workspaces/kprog-raw/verified/20261114-packet-bounds/kernel",
+        "CHECKED_PACKET_CASE=reject"
+      ],
+      "make_exit": 0,
+      "stock_rejected_before_compile": true,
+      "ok": true
+    }
+  ],
+  "execution": {
+    "xdp": [
+      {
+        "mode": "xdp",
+        "a": 63,
+        "b": 0,
+        "stock": 1,
+        "native": 1
+      },
+      {
+        "mode": "xdp",
+        "a": 63,
+        "b": 90,
+        "stock": 1,
+        "native": 1
+      },
+      {
+        "mode": "xdp",
+        "a": 63,
+        "b": 255,
+        "stock": 1,
+        "native": 1
+      },
+      {
+        "mode": "xdp",
+        "a": 64,
+        "b": 0,
+        "stock": 1,
+        "native": 1
+      },
+      {
+        "mode": "xdp",
+        "a": 64,
+        "b": 90,
+        "stock": 2,
+        "native": 2
+      },
+      {
+        "mode": "xdp",
+        "a": 64,
+        "b": 255,
+        "stock": 1,
+        "native": 1
+      },
+      {
+        "mode": "xdp",
+        "a": 65,
+        "b": 0,
+        "stock": 1,
+        "native": 1
+      },
+      {
+        "mode": "xdp",
+        "a": 65,
+        "b": 90,
+        "stock": 2,
+        "native": 2
+      },
+      {
+        "mode": "xdp",
+        "a": 65,
+        "b": 255,
+        "stock": 1,
+        "native": 1
+      }
+    ],
+    "tc": [
+      {
+        "mode": "tc",
+        "a": 0,
+        "b": 0,
+        "stock": 2,
+        "native": 2,
+        "context_equal": true
+      },
+      {
+        "mode": "tc",
+        "a": 0,
+        "b": 4275878552,
+        "stock": 2,
+        "native": 2,
+        "context_equal": true
+      },
+      {
+        "mode": "tc",
+        "a": 1,
+        "b": 0,
+        "stock": 0,
+        "native": 0,
+        "context_equal": true
+      },
+      {
+        "mode": "tc",
+        "a": 1,
+        "b": 4275878552,
+        "stock": 0,
+        "native": 0,
+        "context_equal": true
+      },
+      {
+        "mode": "tc",
+        "a": 2147483648,
+        "b": 0,
+        "stock": 2,
+        "native": 2,
+        "context_equal": true
+      },
+      {
+        "mode": "tc",
+        "a": 2147483648,
+        "b": 4275878552,
+        "stock": 2,
+        "native": 2,
+        "context_equal": true
+      },
+      {
+        "mode": "tc",
+        "a": 4294967295,
+        "b": 0,
+        "stock": 0,
+        "native": 0,
+        "context_equal": true
+      },
+      {
+        "mode": "tc",
+        "a": 4294967295,
+        "b": 4275878552,
+        "stock": 0,
+        "native": 0,
+        "context_equal": true
+      }
+    ]
+  },
+  "canonical_changed": false,
+  "scope": "Actual registered-service checked-sim-C packet kernel components, not application coverage",
+  "archive": "packet-bounds-kernel-results.tar.gz"
+}
