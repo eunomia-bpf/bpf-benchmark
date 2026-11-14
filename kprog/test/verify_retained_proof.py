@@ -41,6 +41,32 @@ def replay(args):
     thread = None
     try:
         resources.__init__('x86', args.source, args.symbol, args.output, expected['maps'])
+        # Applications resize maps before loading. Recreate those captured
+        # resource shapes through libbpf's map setters before prepare().
+        resources.bind('bpf_map__map_flags', c.c_uint32, c.c_void_p)
+        resources.bind('bpf_map__set_map_flags', c.c_int, c.c_void_p, c.c_uint32)
+        sections = resources.datasections(resources.lib.bpf_object__btf(resources.obj))
+        for item in resources.maps:
+            name = resources.lib.bpf_map__name(item).decode()
+            names = {name}
+            if resources.lib.bpf_map__is_internal(item):
+                for section, variables in sections:
+                    if name == section or name.endswith(section):
+                        names.update(symbol for symbol, _ in variables)
+            profiles = [profile for profile in expected['maps'] if profile['name'] in names]
+            for field in ('max_entries', 'map_flags'):
+                values = {profile[field] for profile in profiles}
+                if len(values) > 1:
+                    raise ValueError(f'Captured aliases disagree for {name}/{field}')
+                if not values:
+                    continue
+                value = next(iter(values))
+                original = getattr(resources.lib, 'bpf_map__' + field)(item)
+                if original != value:
+                    resources.ok(getattr(resources.lib, 'bpf_map__set_' + field)(item, value),
+                                 'recreate captured map ' + field)
+                    resources.configured_maps.append(dict(name=name, field=field,
+                                                         original=original, value=value))
         envelope, fds, details = resources.load(args.source)
         # Resident applications can supply a type for sections libbpf leaves
         # unspecified. Reuse the captured request's type, as submit.py does.
