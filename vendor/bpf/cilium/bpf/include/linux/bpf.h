@@ -6106,6 +6106,9 @@ struct __sk_buff {
 	__s32 ingress_ifindex;
 	__u32 hash;
 	union {
+		/* The kernel lowers reads of vlan_present to "vlan_all != 0", and
+		 * every Cilium use is a truth test, so the same word serves. */
+		__u32 vlan_present;
 		__u32 vlan_all;
 		struct {
 			__be16 vlan_proto;
