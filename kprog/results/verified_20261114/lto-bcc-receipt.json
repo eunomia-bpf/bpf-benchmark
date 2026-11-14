@@ -1,0 +1,977 @@
+{
+  "application": "bcc/set",
+  "application_status": "error",
+  "application_error": "BCC tool runqlat exited with rc=1: libbpf: prog 'sched_switch': BPF program load failed: Invalid argument\nlibbpf: prog 'sched_switch': -- BEGIN PROG LOAD LOG --\nprocessed 775 insns (limit 1000000) max_states_per_insn 5 total_states 55 peak_states 44 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'sched_switch': failed to load: -22\nlibbpf: failed to load object 'runqlat_bpf'\nlibbpf: failed to load BPF skeleton 'runqlat_bpf': -22\nfailed to load BPF object: -22\nstderr tail:\nrunqlat:\nlibbpf: prog 'sched_switch': BPF program load failed: Invalid argument\nlibbpf: prog 'sched_switch': -- BEGIN PROG LOAD LOG --\nprocessed 775 insns (limit 1000000) max_states_per_insn 5 total_states 55 peak_states 44 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'sched_switch': failed to load: -22\nlibbpf: failed to load object 'runqlat_bpf'\nlibbpf: failed to load BPF skeleton 'runqlat_bpf': -22\nfailed to load BPF object: -22",
+  "service_summary": {
+    "started": "2026-11-14T05:29:53.717476+00:00",
+    "command": [
+      "python3",
+      "/workspaces/repository/kprog/test/verified_corpus.py",
+      "bcc/set",
+      "1",
+      "10",
+      "1"
+    ],
+    "service": {
+      "ready": true,
+      "arch": 1,
+      "endpoint": "/sys/kernel/debug/bpf_x86_native_lab/specializer"
+    },
+    "returncode": 0,
+    "service_returncode": -15,
+    "finished": "2026-11-14T05:41:15.196883+00:00"
+  },
+  "attempts": 26,
+  "loaded": 26,
+  "verified": 26,
+  "installed": 24,
+  "run": 0,
+  "installed_without_counter": [
+    133,
+    141,
+    149,
+    156,
+    164,
+    172,
+    180,
+    188,
+    196,
+    203,
+    210,
+    217,
+    224,
+    231,
+    238,
+    245,
+    252,
+    259,
+    270,
+    277,
+    284,
+    291,
+    301,
+    308
+  ],
+  "native_counter_ids_without_install": [],
+  "baseline_counter_programs": 25,
+  "native_counter_programs": 0,
+  "programs": [
+    {
+      "request_id": 1,
+      "source_prog_id": 107,
+      "native_sha256": "33479c6b04d8a945a471975ed9d5101637458f570f5e534fe8a45a854b3b69c9",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:31:31.644548+00:00",
+      "prog_id": 133,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/1.success.tar.gz",
+      "finished": "2026-11-14T05:31:38.327972+00:00",
+      "stock_load": {
+        "request_id": 1,
+        "prog_id": 133,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 1,
+        "prog_id": 130,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 113,
+      "native_sha256": "a07dfa5e538b540cfb5991ed6892cb303dbda7ecf31b03f4d0d0650bc44eb7b0",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:31:38.343755+00:00",
+      "prog_id": 141,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/2.success.tar.gz",
+      "finished": "2026-11-14T05:31:43.831896+00:00",
+      "stock_load": {
+        "request_id": 2,
+        "prog_id": 141,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 2,
+        "prog_id": 138,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 117,
+      "native_sha256": "0e80639dfe877e1ec90e520bd48684cfb353e87024a7713334f0092cfb74e027",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:31:43.851220+00:00",
+      "prog_id": 149,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/3.success.tar.gz",
+      "finished": "2026-11-14T05:31:45.312275+00:00",
+      "stock_load": {
+        "request_id": 3,
+        "prog_id": 149,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 3,
+        "prog_id": 146,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 120,
+      "native_sha256": "7f6b076b0c30b8569721b6c1b1c1fe603ec750281c8c500ef0f01673dabccfa9",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:31:45.323693+00:00",
+      "prog_id": 156,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/4.success.tar.gz",
+      "finished": "2026-11-14T05:31:50.476577+00:00",
+      "stock_load": {
+        "request_id": 4,
+        "prog_id": 156,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 4,
+        "prog_id": 153,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 5,
+      "source_prog_id": 123,
+      "native_sha256": "d19552e4428658ed0d6340c555143e44b9f6dd31e235862b33a81624fb2f1b9d",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:31:50.493461+00:00",
+      "prog_id": 164,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/5.success.tar.gz",
+      "finished": "2026-11-14T05:31:56.003491+00:00",
+      "stock_load": {
+        "request_id": 5,
+        "prog_id": 164,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 5,
+        "prog_id": 161,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 6,
+      "source_prog_id": 125,
+      "native_sha256": "3d8c8667842217b78a9c28019817fa25490ba23e7a15f0e02273ed44a4c09dd3",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:31:56.020557+00:00",
+      "prog_id": 172,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/6.success.tar.gz",
+      "finished": "2026-11-14T05:33:56.317643+00:00",
+      "stock_load": {
+        "request_id": 6,
+        "prog_id": 172,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 6,
+        "prog_id": 169,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 7,
+      "source_prog_id": 127,
+      "native_sha256": "fc2779158e1cda6d72a8178922a7fc3c54afa6544c2d3a1894e6be276001587c",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:33:56.359901+00:00",
+      "prog_id": 180,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/7.success.tar.gz",
+      "finished": "2026-11-14T05:34:01.166252+00:00",
+      "stock_load": {
+        "request_id": 7,
+        "prog_id": 180,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 7,
+        "prog_id": 177,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 8,
+      "source_prog_id": 121,
+      "native_sha256": "b5fdbe7ad4062119b740d0925dcf22c6d45377224ca5e21ad2797795d7d1303a",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:34:01.183231+00:00",
+      "prog_id": 188,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/8.success.tar.gz",
+      "finished": "2026-11-14T05:34:05.699009+00:00",
+      "stock_load": {
+        "request_id": 8,
+        "prog_id": 188,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 8,
+        "prog_id": 185,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 9,
+      "source_prog_id": 135,
+      "native_sha256": "33479c6b04d8a945a471975ed9d5101637458f570f5e534fe8a45a854b3b69c9",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:34:05.716085+00:00",
+      "prog_id": 196,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/9.success.tar.gz",
+      "finished": "2026-11-14T05:34:30.373800+00:00",
+      "stock_load": {
+        "request_id": 9,
+        "prog_id": 196,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 9,
+        "prog_id": 193,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 10,
+      "source_prog_id": 143,
+      "native_sha256": "a07dfa5e538b540cfb5991ed6892cb303dbda7ecf31b03f4d0d0650bc44eb7b0",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:34:30.398079+00:00",
+      "prog_id": 203,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/10.success.tar.gz",
+      "finished": "2026-11-14T05:34:42.920019+00:00",
+      "stock_load": {
+        "request_id": 10,
+        "prog_id": 203,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 10,
+        "prog_id": 200,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 11,
+      "source_prog_id": 150,
+      "native_sha256": "0e80639dfe877e1ec90e520bd48684cfb353e87024a7713334f0092cfb74e027",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:34:42.937402+00:00",
+      "prog_id": 210,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/11.success.tar.gz",
+      "finished": "2026-11-14T05:34:44.333915+00:00",
+      "stock_load": {
+        "request_id": 11,
+        "prog_id": 210,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 11,
+        "prog_id": 207,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 12,
+      "source_prog_id": 158,
+      "native_sha256": "7f6b076b0c30b8569721b6c1b1c1fe603ec750281c8c500ef0f01673dabccfa9",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:34:44.347679+00:00",
+      "prog_id": 217,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/12.success.tar.gz",
+      "finished": "2026-11-14T05:34:59.053559+00:00",
+      "stock_load": {
+        "request_id": 12,
+        "prog_id": 217,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 12,
+        "prog_id": 214,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 13,
+      "source_prog_id": 166,
+      "native_sha256": "d19552e4428658ed0d6340c555143e44b9f6dd31e235862b33a81624fb2f1b9d",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:34:59.074244+00:00",
+      "prog_id": 224,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/13.success.tar.gz",
+      "finished": "2026-11-14T05:35:04.541367+00:00",
+      "stock_load": {
+        "request_id": 13,
+        "prog_id": 224,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 13,
+        "prog_id": 221,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 14,
+      "source_prog_id": 182,
+      "native_sha256": "fc2779158e1cda6d72a8178922a7fc3c54afa6544c2d3a1894e6be276001587c",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:35:04.556277+00:00",
+      "prog_id": 231,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/14.success.tar.gz",
+      "finished": "2026-11-14T05:35:09.291169+00:00",
+      "stock_load": {
+        "request_id": 14,
+        "prog_id": 231,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 14,
+        "prog_id": 228,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 15,
+      "source_prog_id": 190,
+      "native_sha256": "b5fdbe7ad4062119b740d0925dcf22c6d45377224ca5e21ad2797795d7d1303a",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:35:09.306392+00:00",
+      "prog_id": 238,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/15.success.tar.gz",
+      "finished": "2026-11-14T05:35:41.108721+00:00",
+      "stock_load": {
+        "request_id": 15,
+        "prog_id": 238,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 15,
+        "prog_id": 235,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 16,
+      "source_prog_id": 204,
+      "native_sha256": "a07dfa5e538b540cfb5991ed6892cb303dbda7ecf31b03f4d0d0650bc44eb7b0",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:35:41.139117+00:00",
+      "prog_id": 245,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/16.success.tar.gz",
+      "finished": "2026-11-14T05:35:57.747756+00:00",
+      "stock_load": {
+        "request_id": 16,
+        "prog_id": 245,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 16,
+        "prog_id": 242,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 17,
+      "source_prog_id": 211,
+      "native_sha256": "0e80639dfe877e1ec90e520bd48684cfb353e87024a7713334f0092cfb74e027",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:35:57.766536+00:00",
+      "prog_id": 252,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/17.success.tar.gz",
+      "finished": "2026-11-14T05:35:59.180294+00:00",
+      "stock_load": {
+        "request_id": 17,
+        "prog_id": 252,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 17,
+        "prog_id": 249,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 18,
+      "source_prog_id": 225,
+      "native_sha256": "d19552e4428658ed0d6340c555143e44b9f6dd31e235862b33a81624fb2f1b9d",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:35:59.193284+00:00",
+      "prog_id": 259,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/18.success.tar.gz",
+      "finished": "2026-11-14T05:36:24.541381+00:00",
+      "stock_load": {
+        "request_id": 18,
+        "prog_id": 259,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 18,
+        "prog_id": 256,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 19,
+      "source_prog_id": 232,
+      "native_sha256": "fc2779158e1cda6d72a8178922a7fc3c54afa6544c2d3a1894e6be276001587c",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:36:24.565129+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir', '/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/request-urdfcjy2/generated/checked-simulator.bc', '-o', '/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/request-urdfcjy2/generated/checked-simulator.native.bc']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 240, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 182, in load_service_artifacts\n    artifacts = worker.compile_checked_simulator(artifacts, args.native_link, args.sim_native_compiler,\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 150, in compile_checked_simulator\n    run([compiler, ir, '-o', lowered])\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 142, in run\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir', '/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/request-urdfcjy2/generated/checked-simulator.bc', '-o', '/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/request-urdfcjy2/generated/checked-simulator.native.bc']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/19.failure.tar.gz",
+      "finished": "2026-11-14T05:37:47.143279+00:00",
+      "stock_load": null,
+      "stock_verification": {
+        "request_id": 19,
+        "prog_id": 263,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 20,
+      "source_prog_id": 239,
+      "native_sha256": "b5fdbe7ad4062119b740d0925dcf22c6d45377224ca5e21ad2797795d7d1303a",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:37:47.181213+00:00",
+      "prog_id": 270,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/20.success.tar.gz",
+      "finished": "2026-11-14T05:37:51.784762+00:00",
+      "stock_load": {
+        "request_id": 20,
+        "prog_id": 270,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 20,
+        "prog_id": 267,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 21,
+      "source_prog_id": 246,
+      "native_sha256": "a07dfa5e538b540cfb5991ed6892cb303dbda7ecf31b03f4d0d0650bc44eb7b0",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:37:51.801559+00:00",
+      "prog_id": 277,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/21.success.tar.gz",
+      "finished": "2026-11-14T05:38:19.206876+00:00",
+      "stock_load": {
+        "request_id": 21,
+        "prog_id": 277,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 21,
+        "prog_id": 274,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 22,
+      "source_prog_id": 253,
+      "native_sha256": "0e80639dfe877e1ec90e520bd48684cfb353e87024a7713334f0092cfb74e027",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:38:19.235387+00:00",
+      "prog_id": 284,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/22.success.tar.gz",
+      "finished": "2026-11-14T05:38:21.439085+00:00",
+      "stock_load": {
+        "request_id": 22,
+        "prog_id": 284,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 22,
+        "prog_id": 281,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 23,
+      "source_prog_id": 260,
+      "native_sha256": "d19552e4428658ed0d6340c555143e44b9f6dd31e235862b33a81624fb2f1b9d",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:38:21.458871+00:00",
+      "prog_id": 291,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/23.success.tar.gz",
+      "finished": "2026-11-14T05:38:53.203191+00:00",
+      "stock_load": {
+        "request_id": 23,
+        "prog_id": 291,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 23,
+        "prog_id": 288,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 24,
+      "source_prog_id": 264,
+      "native_sha256": "fc2779158e1cda6d72a8178922a7fc3c54afa6544c2d3a1894e6be276001587c",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:38:53.228829+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir', '/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/request-1uxikii1/generated/checked-simulator.bc', '-o', '/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/request-1uxikii1/generated/checked-simulator.native.bc']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 240, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 182, in load_service_artifacts\n    artifacts = worker.compile_checked_simulator(artifacts, args.native_link, args.sim_native_compiler,\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 150, in compile_checked_simulator\n    run([compiler, ir, '-o', lowered])\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 142, in run\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir', '/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/request-1uxikii1/generated/checked-simulator.bc', '-o', '/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/request-1uxikii1/generated/checked-simulator.native.bc']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/24.failure.tar.gz",
+      "finished": "2026-11-14T05:40:22.719421+00:00",
+      "stock_load": null,
+      "stock_verification": {
+        "request_id": 24,
+        "prog_id": 295,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 25,
+      "source_prog_id": 271,
+      "native_sha256": "b5fdbe7ad4062119b740d0925dcf22c6d45377224ca5e21ad2797795d7d1303a",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:40:22.755484+00:00",
+      "prog_id": 301,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/25.success.tar.gz",
+      "finished": "2026-11-14T05:40:58.146015+00:00",
+      "stock_load": {
+        "request_id": 25,
+        "prog_id": 301,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 25,
+        "prog_id": 298,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 26,
+      "source_prog_id": 285,
+      "native_sha256": "0e80639dfe877e1ec90e520bd48684cfb353e87024a7713334f0092cfb74e027",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T05:40:58.178274+00:00",
+      "prog_id": 308,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/control/state/session-5eggzdwv/requests/26.success.tar.gz",
+      "finished": "2026-11-14T05:40:59.609776+00:00",
+      "stock_load": {
+        "request_id": 26,
+        "prog_id": 308,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 26,
+        "prog_id": 305,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    }
+  ],
+  "recorded": "2026-11-14T06:00:11.198845+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-lto-bcc",
+  "corpus_run_directory": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_053047_359687",
+  "capture_directory": "/workspaces/repository/corpus/results/verified-captures-omaqxlxa",
+  "make_exit_code": 0,
+  "launch_receipt": {
+    "recorded": "2026-11-14T05:32:34Z",
+    "configuration": "LTO (checked-sim-c)",
+    "pipeline": "copy same checked preprocessed simulator C, LTO, install",
+    "execution_mode": "checked-sim-c",
+    "service_execution_args": "$(CHECKED_COMPILER_SERVICE_ARGS)",
+    "kernel": "74d1097af561",
+    "image": "sha256:66e9e88f197f975fd98f78f08be2eac3b7c313937e39a4cb2a45639d0615f2b8",
+    "cpu": "8-15",
+    "vcpu": 8,
+    "guest_memory": "64G",
+    "host_address_space_limit_bytes": 85899345920,
+    "image_lock": "shared after exact dependency exit",
+    "samples": 1,
+    "workload_seconds": 10,
+    "bpf_stats": true,
+    "canonical_loader_rebuilt": false,
+    "shared_kernel_base_image_built": false,
+    "compiler_base": "/workspaces/.agent-state/kprog-ck/verified-compiler",
+    "general_packet_bounds_compiler_enabled": true,
+    "workload_or_runtime_definition_changed": false,
+    "postlaunch_outcome_polled": false,
+    "application_completion_claimed": false,
+    "raw_removed": false,
+    "app": "bcc/set",
+    "pid": 201613,
+    "wait_pid": 193281,
+    "raw_directory": "/workspaces/kprog-raw/verified/20261114-lto-bcc",
+    "dependency_policy": "Resource order only; no benchmark success/admission gate"
+  },
+  "corpus_metadata": {
+    "bpf_stats": true,
+    "config": {
+      "enabled_passes": [
+        "noop",
+        "map_inline",
+        "const_prop",
+        "dce",
+        "rotate",
+        "cond_select",
+        "extract",
+        "endian_fusion",
+        "lea",
+        "ccmp",
+        "bulk_memory",
+        "prefetch",
+        "wide_mem",
+        "bounds_check_merge",
+        "skb_load_bytes_spec",
+        "noop",
+        "const_prop",
+        "dce"
+      ]
+    },
+    "details_dir": "details",
+    "error_message": "corpus suite reported errors",
+    "generated_at": "2026-11-14T05:41:14.956958+00:00",
+    "last_updated_at": "2026-11-14T05:41:14.956955+00:00",
+    "launcher_boot_id": "f1ccd815-0d62-4bbf-9a9b-b67226fb286f",
+    "launcher_pid": 1804,
+    "launcher_start_ticks": 5698,
+    "manifest": "/workspaces/repository/corpus/config/macro_apps.yaml",
+    "run_type": "x86_kvm_corpus",
+    "samples": 1,
+    "started_at": "2026-11-14T05:30:47.359687+00:00",
+    "status": "error",
+    "suite": "corpus",
+    "workload_only": false,
+    "workload_seconds": 10.0
+  },
+  "scope": "Actual upstream two-start verified-B run; workload run means positive recorded native run_cnt_delta",
+  "raw_removed": false,
+  "archive": {
+    "raw_archive": "/workspaces/kprog-raw/verified/20261114-lto-bcc/collection/full-evidence.tar.gz",
+    "sha256": "4a39892a32b01f76b3ac23094c58ea5b1dd5f5f322013628e4da9915497ee00b",
+    "bytes": 67480459,
+    "parts": [
+      {
+        "path": "/workspaces/repository/kprog/results/verified_20261114/lto-bcc-results.tar.gz.part000",
+        "bytes": 41943040,
+        "sha256": "606e12e1f780e9b25118ae37680118ad205aefd23dcb5055a842a1e71e422ca7"
+      },
+      {
+        "path": "/workspaces/repository/kprog/results/verified_20261114/lto-bcc-results.tar.gz.part001",
+        "bytes": 25537419,
+        "sha256": "6231266c978cf6220c1681f0ec9042e0f73eeefc69f2e4e169c72d89d698fc7f"
+      }
+    ],
+    "reconstruction": "Concatenate parts in receipt order; verify original SHA256."
+  }
+}
