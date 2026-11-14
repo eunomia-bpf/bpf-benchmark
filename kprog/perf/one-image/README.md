@@ -26,6 +26,14 @@ No other image is kept. Removals are listed in `kprog/docs/cleanup-log.md`.
 
 `scripts/specialized-timing.sh <app> <manifest-dir> <state-dir> <samples>
 <seconds> <cpus>` runs one application with either configuration against its own
-eBPF baseline in the same run. Measured on BCC (3x180 s, stats on, CPUs 0-7):
-per invocation 1.006x with the image's objects and 1.221x with the specialized
-ones; `sys_exit` alone goes 85.1 -> 41.9 ns per invocation (2.033x).
+eBPF baseline in the same run. Measured on BCC (3x180 s, stats on, CPUs 0-7), per
+invocation: 0.982x with the image's objects and 1.001x with the specialized
+ones, and `.rodata`-only specialization 1.007x. Specialization does not move
+BCC: only 5 of its 20 programs change bytes, and the dominant ones are
+byte-identical in every configuration.
+
+An earlier revision of this file claimed 1.221x specialized and `sys_exit` 85.1
+-> 41.9 ns; both were taken while another lane's guest shared the host, and the
+baseline arm alone moved 72.97 -> 95.56 ns across those runs. The pair above was
+measured back to back in one clean window. Details, per-program tables and the
+drift analysis: [kprog/results/bcc-samesource-20261114/README.md](../../results/bcc-samesource-20261114/README.md).
