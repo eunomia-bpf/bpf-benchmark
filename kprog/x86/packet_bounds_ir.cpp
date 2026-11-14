@@ -18,12 +18,18 @@ using namespace llvm;
 static cl::opt<std::string> Input(cl::Positional,cl::Required);
 static cl::opt<std::string> Output("o",cl::Required);
 static cl::opt<bool> CanonicalContextLoads("canonical-ctx-loads",cl::init(false));
+static cl::opt<bool> StrictIdentities("strict-identities",cl::init(false));
+static bool tied_identity(CallInst *call,InlineAsm *assembly) {
+  return assembly->getAsmString().empty() && assembly->getConstraintString()=="=r,0" &&
+      call->arg_size()==1 && call->getType()==call->getArgOperand(0)->getType();
+}
 static Value *origin(Value *value) {
   while (true) {
     if (auto *extension=dyn_cast<ZExtInst>(value)) { value=extension->getOperand(0); continue; }
     if (auto *call=dyn_cast<CallInst>(value))
       if (auto *assembly=dyn_cast<InlineAsm>(call->getCalledOperand()))
-        if (assembly->getAsmString().empty() && call->arg_size()==1 && call->getType()==call->getArgOperand(0)->getType()) {
+        if (assembly->getAsmString().empty() && call->arg_size()==1 && call->getType()==call->getArgOperand(0)->getType() &&
+            (!StrictIdentities || tied_identity(call,assembly))) {
           value=call->getArgOperand(0); continue;
         }
     return value;
@@ -39,9 +45,7 @@ static bool field(Value *value,Function &function,int64_t offset) {
 static Value *context_origin(Value *value) {
   while (auto *call=dyn_cast<CallInst>(value)) {
     auto *assembly=dyn_cast<InlineAsm>(call->getCalledOperand());
-    if (!assembly || !assembly->getAsmString().empty() ||
-        assembly->getConstraintString()!="=r,0" || call->arg_size()!=1 ||
-        call->getType()!=call->getArgOperand(0)->getType()) break;
+    if (!assembly || !tied_identity(call,assembly)) break;
     value=call->getArgOperand(0);
   }
   return value;

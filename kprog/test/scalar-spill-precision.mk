@@ -10,8 +10,14 @@ REPLAY_ARGS ?=
 REPLAY_BUILD ?= /var/tmp/kprog-tmp/perf/retained-proof-replay
 BACKEND_ARGS ?=
 CONTEXT_BUILD ?= /var/tmp/kprog-tmp/perf/context-loads
+IDENTITY_ARGS ?=
 
-.PHONY: build run analyze codegen whole-word replay values-build values-run backend-check checked-corpus context-build context-run context-replay
+.PHONY: build run analyze codegen whole-word replay values-build values-run backend-check checked-corpus context-build context-run context-replay identity-check
+identity-check:
+	install -d $(OUTPUT) $(CONTEXT_BUILD)
+	taskset -c 18-19 clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I$(ROOT)/vendor/libbpf/include/uapi $(ROOT)/kprog/x86/packet_bounds_ir.cpp -o $(CONTEXT_BUILD)/packet-bounds $$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis support --system-libs)
+	taskset -c 18-19 python3 $(ROOT)/kprog/test/check_packet_identities.py --tool $(CONTEXT_BUILD)/packet-bounds --legacy /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds --output $(OUTPUT) $(IDENTITY_ARGS)
+
 context-replay:
 	install -d $(OUTPUT) $(CONTEXT_BUILD)
 	taskset -c 19 prlimit --as=25769803776 -- python3 $(ROOT)/kprog/test/replay_context_compiler.py --archive $(CONTEXT_ARCHIVE) --build $(CONTEXT_BUILD) --output $(OUTPUT) --tool $(CONTEXT_TOOL)

@@ -69,3 +69,12 @@ OTel job, with24GiB AS/CPU19 and the frontend IR retained for reuse.
 The shared simulator C, runtime P and pre-bounds IR used by checked native
 compilation retain their definitions. Whole-body replay and runtime effects
 remain to be measured; combined LTO timing retains its existing scope.
+
+Optional packet-field identity matching: `KPROG_BPF_STRICT_IDENTITIES=1`
+forwards `--strict-identities` in the B-only IR stage. A packet field inferred
+through empty asm must have an explicitly tied output (`=r,0`). The default
+zero preserves the prior matcher. Validation compares actual native execution
+for tied and independently seeded untied outputs, plus retained packet IR
+against the base compiler. This changes B guard inference; runtime P and the
+checked-native frontend input retain their definitions. Results follow in the
+packet-identity receipt; combined runtime timing retains its prior scope.
