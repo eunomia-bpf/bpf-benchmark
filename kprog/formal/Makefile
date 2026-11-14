@@ -721,4 +721,8 @@ clightgen:
 	$(MAKE) -C external/clean clightgen
 
 clight: clightgen
+	install -d build
+	$(CC) -std=c11 -Wall -Wextra -O2 -I../../vendor/libbpf/include/uapi oracles/test_bpf_abi_layout.c -o build/test_bpf_abi_layout
+	./build/test_bpf_abi_layout
+	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o build/BpfABILayout.lean oracles/test_bpf_abi_layout.c
 	external/clean/clightgen -lean -normalize -o KProgFormal/Clight/X86Numeric.lean c/X86Numeric.c

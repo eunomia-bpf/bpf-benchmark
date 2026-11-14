@@ -860,11 +860,39 @@ stdout digest retained); it has not been relabeled passing or narrowed.
 Raw C/request/object/log/source identities stay in
 `/workspaces/kprog-raw/formal/m4-c-subset`.
 
-M4 remains open: both complete simulator headers now reach the actual Linux
-UAPI anonymous64-bit pointer-padding bitfield errors; the x86 ALU statement
-expression was the earlier parser failure. Other handler expression macros,
-constant helper function pointers, builtin/asm/pragma adaptation, full-state
-Clight handler exports, and matched OTel preprocessor expansion remain to do.
+The next M4 slice adds [c/Platform.h](c/Platform.h), preserving the complete
+vendor/libbpf UAPI `__sk_buff`, `xdp_md` and `bpf_dynptr` layouts (41 named
+fields). Only padding syntax changes: named64-bit union padding replaces the
+anonymous64-bit bitfields, and the reserved24 bits become three bytes. Both
+GCC against the real vendor UAPI and CompCert against the adapter check every
+field offset/size plus complete structure size/alignment (88 layout assertions,
+plus the64-bit pointer assertion). The UAPI's GPL-2.0 WITH Linux-syscall-note
+and original copyright remain on this adapter; normal builds keep the original
+Linux/vmlinux declarations. `make clight` runs this actual ABI check through
+both frontends. The two full header translation units now parse successfully;
+that is not an export/acceptance of their unexpanded handler macros.
+
+The unsupported `__builtin_trap` sites use `KPROG_C_TRAP`: native/BPF builds
+retain the exact builtin, while CompCert imports a named nonreturning platform
+primitive. Its terminal external semantics remains a required fault-proof
+interface, not a successful return/zero fallback. Existing memory-access
+vectors pass40260 cases and nine native invalid-width trap probes retain
+SIGILL. CompCert now selects the same free kind6 entry input as production
+BPF for both ISAs' unspecified values, rather than the legacy host zero
+fixture. The ABI check exports both actual input calls and rejects either
+zero substitution (two negative fixtures). Final ABI export typechecking and
+all229 component jobs pass. This slice also preserves all code/data bytes,
+202 allocated relocs,44 BTF types/function-info/CO-RE for the matched Cilium
+proof39; only debug/line metadata changes. Its final default preprocessor
+stream is byte-identical to the measured after-object input. Numeric6304PASS
+and the existing288 routing failures remain unchanged. Full raw evidence is
+in `/workspaces/kprog-raw/formal/m4-bpf-abi`.
+
+M4 remains open: handler expression macros, constant helper function pointers,
+remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight
+handler exports, and matched OTel preprocessor expansion remain to do. Preserve
+unaligned memory and real context-pointer domains when binding the Clight
+memory/ABI semantics; header parsing does not establish those relations.
 The old generator's `--check` still expects its historical C rendering and
 will disagree with this directly edited canonical header. Its comparisons and
 old artifacts await the ordered M6 retirement; do not regenerate this C from

@@ -3,7 +3,9 @@
 
 #define KPROG_X86_ENTRY_SAVES_CALLEE 1
 
-#ifndef __VMLINUX_H__
+#if defined(__COMPCERT__)
+#include "../formal/c/Platform.h"
+#elif !defined(__VMLINUX_H__)
 #include <linux/bpf.h>
 #endif
 #include <bpf_helpers.h>
@@ -397,7 +399,7 @@ struct x86_sim_state {
 #define __x86_sim_abi_kind (__x86_state->abi_kind)
 #endif
 
-#if defined(__bpf__) || defined(__BPF__)
+#if defined(__bpf__) || defined(__BPF__) || defined(__COMPCERT__)
 #define X86_SIM_L_UNSPECIFIED() NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_UNSPECIFIED)
 #else
 #define X86_SIM_L_UNSPECIFIED() 0ULL
@@ -2717,7 +2719,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
     __builtin_unreachable();                                             \
 } while (0)
 #else
-#define X86_SIM_L_ARCHITECTURAL_FAULT() __builtin_trap()
+#define X86_SIM_L_ARCHITECTURAL_FAULT() KPROG_C_TRAP()
 #endif
 
 #define X86_SIM_L_DIVIDE_FAULT() X86_SIM_L_ARCHITECTURAL_FAULT()

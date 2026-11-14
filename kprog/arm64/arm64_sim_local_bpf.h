@@ -1,7 +1,9 @@
 #ifndef ARM64_SIM_LOCAL_BPF_H
 #define ARM64_SIM_LOCAL_BPF_H
 
-#ifndef __VMLINUX_H__
+#if defined(__COMPCERT__)
+#include "../formal/c/Platform.h"
+#elif !defined(__VMLINUX_H__)
 #include <linux/bpf.h>
 #endif
 #include <bpf_helpers.h>
@@ -190,7 +192,7 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	       KPROG_ABI_SKB_DATA_END_OFF,
 	       "skb data_end offset disagrees with ABI spec");
 
-#if defined(__bpf__) || defined(__BPF__)
+#if defined(__bpf__) || defined(__BPF__) || defined(__COMPCERT__)
 #define ARM64_SIM_L_UNSPECIFIED() NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_UNSPECIFIED)
 #else
 #define ARM64_SIM_L_UNSPECIFIED() 0ULL
