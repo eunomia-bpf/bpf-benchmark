@@ -1,0 +1,122 @@
+[
+  {
+    "recorded": "2026-11-14T23:39:58Z",
+    "journal": "/workspaces/kprog-raw/perf/20261114-census-resume/control/outcomes.jsonl",
+    "application": "tracee/monitor",
+    "source_prog_id": 521,
+    "name": "trace_cap_capable",
+    "body_group": 75,
+    "stage": "installed",
+    "failure_class": "installed",
+    "service": {
+      "request_id": 21,
+      "started": "2026-11-14T23:07:46.810005+00:00",
+      "finished": "2026-11-14T23:11:15.306909+00:00",
+      "status": 0,
+      "prog_id": 76,
+      "artifact_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/21.success.tar.gz"
+    },
+    "archive_bytes": 12944401,
+    "scope": "Retained-producer submitted-native load-only census; no execution request"
+  },
+  {
+    "recorded": "2026-11-14T23:39:58Z",
+    "journal": "/workspaces/kprog-raw/perf/20261114-census-resume/control/outcomes.jsonl",
+    "application": "bcc/set",
+    "source_prog_id": 68,
+    "name": "fentry_vfs_open",
+    "body_group": 76,
+    "stage": "installed",
+    "failure_class": "installed",
+    "service": {
+      "request_id": 22,
+      "started": "2026-11-14T23:11:15.731772+00:00",
+      "finished": "2026-11-14T23:11:16.548163+00:00",
+      "status": 0,
+      "prog_id": 80,
+      "artifact_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/22.success.tar.gz"
+    },
+    "archive_bytes": 127466,
+    "scope": "Retained-producer submitted-native load-only census; no execution request"
+  },
+  {
+    "recorded": "2026-11-14T23:39:58Z",
+    "journal": "/workspaces/kprog-raw/perf/20261114-census-resume/control/outcomes.jsonl",
+    "application": "tracee/monitor",
+    "source_prog_id": 549,
+    "name": "trace_vfs_read",
+    "body_group": 77,
+    "stage": "installed",
+    "failure_class": "installed",
+    "service": {
+      "request_id": 23,
+      "started": "2026-11-14T23:14:28.934567+00:00",
+      "finished": "2026-11-14T23:14:33.550284+00:00",
+      "status": 0,
+      "prog_id": 84,
+      "artifact_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/23.success.tar.gz"
+    },
+    "archive_bytes": 5262288,
+    "scope": "Retained-producer submitted-native load-only census; no execution request"
+  },
+  {
+    "recorded": "2026-11-14T23:39:58Z",
+    "journal": "/workspaces/kprog-raw/perf/20261114-census-resume/control/outcomes.jsonl",
+    "application": "tracee/monitor",
+    "source_prog_id": 519,
+    "name": "trace_commit_creds",
+    "body_group": 78,
+    "stage": "installed",
+    "failure_class": "installed",
+    "service": {
+      "request_id": 24,
+      "started": "2026-11-14T23:17:34.767066+00:00",
+      "finished": "2026-11-14T23:25:52.116590+00:00",
+      "status": 0,
+      "prog_id": 88,
+      "artifact_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/24.success.tar.gz"
+    },
+    "archive_bytes": 17424710,
+    "scope": "Retained-producer submitted-native load-only census; no execution request"
+  },
+  {
+    "recorded": "2026-11-14T23:39:58Z",
+    "journal": "/workspaces/kprog-raw/perf/20261114-census-resume/control/outcomes.jsonl",
+    "application": "tracee/monitor",
+    "source_prog_id": 476,
+    "name": "trace_arch_prctl",
+    "body_group": 79,
+    "stage": "installed",
+    "failure_class": "installed",
+    "service": {
+      "request_id": 25,
+      "started": "2026-11-14T23:29:02.692322+00:00",
+      "finished": "2026-11-14T23:29:34.682490+00:00",
+      "status": 0,
+      "prog_id": 92,
+      "artifact_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/25.success.tar.gz"
+    },
+    "archive_bytes": 6944562,
+    "scope": "Retained-producer submitted-native load-only census; no execution request"
+  },
+  {
+    "recorded": "2026-11-14T23:39:58Z",
+    "journal": "/workspaces/kprog-raw/perf/20261114-census-resume/control/outcomes.jsonl",
+    "application": "tracee/monitor",
+    "source_prog_id": 535,
+    "name": "vfs_write_magic_enter",
+    "body_group": 80,
+    "stage": "installed",
+    "failure_class": "installed",
+    "service": {
+      "request_id": 26,
+      "started": "2026-11-14T23:32:57.624038+00:00",
+      "finished": "2026-11-14T23:33:03.626905+00:00",
+      "status": 0,
+      "prog_id": 96,
+      "artifact_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/26.success.tar.gz"
+    },
+    "archive_bytes": 5404305,
+    "scope": "Retained-producer submitted-native load-only census; no execution request"
+  }
+]
