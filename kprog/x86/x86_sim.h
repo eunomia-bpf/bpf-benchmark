@@ -263,7 +263,9 @@ static __always_inline __u64 x86_popcount64(__u64 value)
 static __always_inline __u64 x86_alu_result(__u64 lhs, __u64 rhs,
 					    __u32 alu, __u8 width)
 {
-	return KPROG_X86_ALU_RESULT(lhs, rhs, alu, width, (void)0);
+	__u64 result;
+	KPROG_X86_ALU_RESULT_INTO(result, lhs, rhs, alu, width, (void)0);
+	return result;
 }
 
 static __always_inline __u64 x86_shld(__u64 dst, __u64 src, __u64 shift,

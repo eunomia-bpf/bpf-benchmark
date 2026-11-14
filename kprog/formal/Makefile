@@ -709,3 +709,16 @@ check:
 mature:
 	cd mature && lake build KProgMature @x86lean/+Tests.CanonicalAddress @x86lean/+Tests.CheckedAccess @lnsym/+Tests.ConditionalSelectTest @lnsym/+Tests.BranchTest @lnsym/+Tests.ThreadPointerTest @lnsym/+Tests.XZRTest @lnsym/+Tests.MultiplyDivideTest @lnsym/+Tests.ExtractCompareTest @lnsym/+Tests.SingleRegMemoryTest @lnsym/+Tests.LDSTTest @lnsym/+Tests.VectorReductionTest @lnsym/+Tests.ExtendedArithmeticTest @lnsym/+Tests.AtomicMemoryTest @lnsym/+Tests.ExclusiveMemoryTest @lnsym/+Tests.PairMemoryTest @lnsym/+Tests.CheckedMemoryTest @lnsym/+Tests.MayModifiedRegsTest @lnsym/+Arm.Memory.MemoryProofs
 	cd external/LNSym && lake build Tests.Tactics.Sym Tests.Tactics.ReduceFetchInst
+
+# CompCert's frontend exports the production C helpers. System build dependencies
+# are Coq, OCaml/findlib, Menhir and the Menhir/Zarith development libraries.
+.PHONY: clightgen clight
+clightgen:
+	test -f external/clean/Makefile.config || (cd external/clean && ./configure -clightgen x86_64-linux)
+	$(MAKE) -C external/clean depend
+	$(MAKE) -C external/clean proof
+	$(MAKE) -C external/clean extraction
+	$(MAKE) -C external/clean clightgen
+
+clight: clightgen
+	external/clean/clightgen -lean -normalize -o KProgFormal/Clight/X86Numeric.lean c/X86Numeric.c

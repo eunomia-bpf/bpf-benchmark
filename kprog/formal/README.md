@@ -829,6 +829,48 @@ reference ELF stays byte-identical to the Sail run. Raw attempts, final build8
 and axiom evidence stay in `/workspaces/kprog-raw/formal/m3-provenance`.
 M3 is complete; M4-M6 and final whole-library `lake build`/`make check` remain
 open, including all2065 old theorem migrations and the O1/O2/O4 recount.
+
+M4 has started with CompCert's actual C frontend, after PERF's17:37:30 shared
+header writer agreement (VERIFIED's09:40 handoff makes PERF its owner). The
+`clightgen` build uses the existing clean fork configured with `-clightgen
+x86_64-linux`; Coq8.18/OCaml4.14/Menhir build its proofs and extraction. Run
+`make clight` to build that frontend incrementally and regenerate the checked-in
+[Clight module](KProgFormal/Clight/X86Numeric.lean) from
+[c/X86Numeric.c](c/X86Numeric.c). The C unit directly calls the production
+`x86_alu_result`, retaining that actual static function and its four shift
+callees; an include-only unit is removed by the frontend's unused-function
+cleanup and is insufficient. The final export contains six real function
+bodies, not just builtin declarations. Byte-for-byte regeneration and229 Lake
+component jobs pass, including the rooted Clight AST and retained native/access
+checks. All six AST axiom queries use only the three standard Lean axioms.
+These are syntax/type checks, not M5 refinement theorems.
+
+The first canonical C change is [the ALU result header](generated/x86_alu_result.h):
+its existing16-arm/default switch now has a standard-C `INTO` output entry.
+The original expression macro remains a facade over that one body, and
+`x86_sim.h` uses the output form. No arithmetic formula, case number, helper
+body or public macro signature is replaced. A matched real Cilium proof39
+compilation preserves every allocated code/data byte and202 allocated
+relocations. Its44 BTF types normalize identically; BTF function information
+and CO-RE relocation blocks are unchanged. Full ELF bytes differ in debug,
+BTF string and line metadata; full-file identity is not claimed. The existing
+numeric oracle still passes6304 cases. The older routing oracle already failed
+288 tag expectations before this edit and fails identically afterward (exact
+stdout digest retained); it has not been relabeled passing or narrowed.
+Raw C/request/object/log/source identities stay in
+`/workspaces/kprog-raw/formal/m4-c-subset`.
+
+M4 remains open: both complete simulator headers now reach the actual Linux
+UAPI anonymous64-bit pointer-padding bitfield errors; the x86 ALU statement
+expression was the earlier parser failure. Other handler expression macros,
+constant helper function pointers, builtin/asm/pragma adaptation, full-state
+Clight handler exports, and matched OTel preprocessor expansion remain to do.
+The old generator's `--check` still expects its historical C rendering and
+will disagree with this directly edited canonical header. Its comparisons and
+old artifacts await the ordered M6 retirement; do not regenerate this C from
+the old JSON contracts. M5 must prove the actual exported handlers against
+the mature steps and recount O1/O2/O4; no theorem migration is inferred here.
+
 Shared [native memory, permissions, initialization and ordered effects/faults](KProgFormal/Reference/Memory.lean)
 form the platform view rather than a second numerical ISA. [ReferenceMain.lean](ReferenceMain.lean) executes
 these same definitions through JSON for hardware and artifact comparisons.
