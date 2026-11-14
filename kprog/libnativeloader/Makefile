@@ -723,3 +723,8 @@ CHECKED_REPLAY_OUTPUT ?= /workspaces/kprog-raw/perf/20261114-otel-compiler-unblo
 .PHONY: checked-compiler-replay
 checked-compiler-replay:
 	python3 ../test/replay_checked_compiler.py "$(CHECKED_REPLAY_COMMAND)" "$(CHECKED_REPLAY_OUTPUT)" --cpus 16-19 --bounds "$(CHECKED_COMPILER_BASE)/packet-bounds"
+
+.PHONY: source-maps-type-kvm
+source-maps-type-kvm: source-maps-check
+	install -d "$(SOURCE_MAP_KERNEL_OUTPUT)"
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16-19 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage --cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(SOURCE_MAP_KERNEL_OUTPUT)" --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec '$(SOURCE_MAP_BUILD)/source-maps kernel-type-ownership > $(SOURCE_MAP_KERNEL_OUTPUT)/ownership.json 2> $(SOURCE_MAP_KERNEL_OUTPUT)/ownership.stderr'

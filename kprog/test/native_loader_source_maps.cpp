@@ -99,8 +99,43 @@ static int kernel_binding(const char *original, const char *native,
     return 0;
 }
 
+// A retained PROG_ARRAY carries the original program-type ownership even
+// when it is present only in fd_array and no instruction accesses it.
+static int kernel_type_ownership()
+{
+    ScopedFd actual(bpf_map_create(BPF_MAP_TYPE_PROG_ARRAY, "actual_resource", 4, 4, 1, nullptr));
+    ScopedFd decoy(bpf_map_create(BPF_MAP_TYPE_PROG_ARRAY, "native_symbol", 4, 4, 1, nullptr));
+    require(actual.get() >= 0 && decoy.get() >= 0, "create ownership resources");
+    bpf_insn code[] = {{.code=BPF_ALU64|BPF_MOV|BPF_K}, {.code=BPF_JMP|BPF_EXIT}};
+    std::vector<char> log(1 << 16);
+    auto load = [&](bpf_prog_type type, int map) {
+        std::fill(log.begin(), log.end(), 0);
+        bpf_prog_load_opts opts{}; opts.sz=sizeof(opts);
+        opts.fd_array=&map; opts.fd_array_cnt=1;
+        opts.log_buf=log.data(); opts.log_size=log.size(); opts.log_level=2;
+        return bpf_prog_load(type, "type_owner", "GPL", code, 2, &opts);
+    };
+    ScopedFd perf(load(BPF_PROG_TYPE_PERF_EVENT, decoy.get()));
+    require(perf.get() >= 0, "bind distinct PERF_EVENT owner: " + std::string(log.data()));
+    ScopedFd source(load(BPF_PROG_TYPE_KPROBE, actual.get()));
+    require(source.get() >= 0, "bind source KPROBE owner: " + std::string(log.data()));
+    ScopedFd same(load(BPF_PROG_TYPE_KPROBE, actual.get()));
+    require(same.get() >= 0, "same resource/type should load");
+    int wrong=load(BPF_PROG_TYPE_KPROBE, decoy.get());
+    int saved_errno=errno;
+    ScopedFd rejected(wrong);
+    std::cout << "{\"same_resource_load\":true,\"wrong_resource_return\":" << wrong
+        << ",\"wrong_resource_errno\":" << saved_errno << ",\"verifier_log_bytes\":"
+        << std::strlen(log.data()) << "}
+";
+    require(wrong < 0 && saved_errno == EINVAL, "wrong retained program-array owner must be rejected");
+    return 0;
+}
+
 int main(int argc, char **argv)
 try {
+    if (argc == 2 && std::string(argv[1]) == "kernel-type-ownership")
+        return kernel_type_ownership();
     if (argc == 6 && std::string(argv[1]) == "kernel")
         return kernel_binding(argv[2], argv[3], argv[4], argv[5]);
     require(argc == 4, "usage: source-maps ORIGINAL_BPF NATIVE OUTPUT");
