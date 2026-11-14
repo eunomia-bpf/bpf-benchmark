@@ -1,0 +1,31 @@
+{
+  "recorded": "2026-11-14T05:12:21Z",
+  "fix_commit": "32e02cfe5",
+  "scope": "General CMP/TEST identical-register/lane read reuse; host semantics and typed-pointer CFG compiler characterization",
+  "host_vectors": 33344,
+  "flags": [
+    "CF",
+    "ZF",
+    "SF",
+    "OF",
+    "PF"
+  ],
+  "width_bits": [
+    8,
+    16,
+    32,
+    64
+  ],
+  "operands": "equal/different registers and equal/different byte lanes",
+  "native_failure_pc": "0x182a TEST RAX,RAX",
+  "simulator_source_line": 5260,
+  "rejected_bpf_pc": 22150,
+  "observation": "Repeated opaque stack conversion prevents equal-operand folding across stack/map register-tag merges. Before fixture emits pointer AND; repaired fixture emits a null comparison. No all-flags replacement or pointer clamp.",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-self-compare",
+  "archive": "kprog/results/verified_20261114/self-compare-host-results.tar.gz",
+  "archive_sha256": "8816941cff15c7c521d576eabbb098649f41aa72d5212c8d384f23ddd740fb55",
+  "bytes": 782733,
+  "kernel_result_collected": false,
+  "app_result_collected": false,
+  "raw_removed": false
+}

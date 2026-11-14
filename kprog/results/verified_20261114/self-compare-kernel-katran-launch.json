@@ -1,0 +1,35 @@
+{
+  "recorded": "2026-11-14T05:12:21Z",
+  "model_fix_commit": "32e02cfe5",
+  "kernel_job": {
+    "pid": 190898,
+    "raw_directory": "/workspaces/kprog-raw/verified/20261114-self-compare/kernel-job",
+    "target": "self-compare-kvm",
+    "cpu": "14 on host affinity8-15",
+    "vcpu": 2,
+    "guest_memory": "1G",
+    "host_address_space_limit_bytes": 8589934592,
+    "image_lock": "shared"
+  },
+  "katran_job": {
+    "pid": 190952,
+    "wait_pid": 190898,
+    "raw_directory": "/workspaces/kprog-raw/verified/20261114-katran-self-compare-retry",
+    "target": "trusted-service-kvm",
+    "cpu": "8-15",
+    "vcpu": 8,
+    "guest_memory": "64G",
+    "host_address_space_limit_bytes": 85899345920,
+    "image_lock": "shared after dependency exit",
+    "samples": 1,
+    "workload_seconds": 10,
+    "bpf_stats": true,
+    "canonical_loader_rebuild": false
+  },
+  "dependency_policy": "Resource sequencing only; Katran proceeds regardless of the fixture exit status, no new benchmark gate",
+  "image": "sha256:66e9e88f197f975fd98f78f08be2eac3b7c313937e39a4cb2a45639d0615f2b8",
+  "kernel": "74d1097af561",
+  "postlaunch_outcome_polled": false,
+  "shared_base_or_image_rebuilt": false,
+  "raw_removed": false
+}
