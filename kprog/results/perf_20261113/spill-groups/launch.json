@@ -1,0 +1,18 @@
+{
+  "recorded": "2026-11-14T22:22:20Z",
+  "pid": 677055,
+  "cpus": "22-23",
+  "vcpus": 1,
+  "memory": "2G",
+  "host_address_space_limit_bytes": 8589934592,
+  "lock": "image shared",
+  "build": "/var/tmp/kprog-tmp/perf/spill-groups",
+  "output": "/workspaces/kprog-raw/perf/20261114-spill-groups/kernel",
+  "source_commits": [
+    "4c2c594c0",
+    "4afdb8824",
+    "c162875d4",
+    "2662ac31e"
+  ],
+  "scope": "Independent B storage/value/stock-boundary test; compiler stack setting4096 matches production, kernel limit unchanged"
+}

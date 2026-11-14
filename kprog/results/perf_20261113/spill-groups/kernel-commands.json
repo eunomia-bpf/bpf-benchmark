@@ -1,0 +1,118 @@
+[
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-verify-machineinstrs",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/fixture.mir",
+      "-o",
+      "/var/tmp/fixture.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/values-client",
+      "--groups",
+      "small-original",
+      "/var/tmp/fixture.o"
+    ],
+    "returncode": 0,
+    "stdout": "{\"object\":\"/var/tmp/fixture.o\",\"phase\":\"small-original\",\"executions\":1060,\"failed\":0}\n",
+    "stderr": "libbpf: elf: skipping unrecognized data section(5) .eh_frame\nlibbpf: elf: skipping relo section(6) .rel.eh_frame for section(5) .eh_frame\n"
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-verify-machineinstrs",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/fixture.mir",
+      "-o",
+      "/var/tmp/fixture.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/values-client",
+      "--groups",
+      "small-packed",
+      "/var/tmp/fixture.o"
+    ],
+    "returncode": 0,
+    "stdout": "{\"object\":\"/var/tmp/fixture.o\",\"phase\":\"small-packed\",\"executions\":1060,\"failed\":0}\n",
+    "stderr": "libbpf: elf: skipping unrecognized data section(5) .eh_frame\nlibbpf: elf: skipping relo section(6) .rel.eh_frame for section(5) .eh_frame\n"
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-verify-machineinstrs",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/fixture.mir",
+      "-o",
+      "/var/tmp/fixture.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/values-client",
+      "--groups",
+      "large-original",
+      "/var/tmp/fixture.o"
+    ],
+    "returncode": 1,
+    "stdout": "",
+    "stderr": "libbpf: elf: skipping unrecognized data section(5) .eh_frame\nlibbpf: elf: skipping relo section(6) .rel.eh_frame for section(5) .eh_frame\nlibbpf: prog 'spill_values': BPF program load failed: -EACCES\nlibbpf: prog 'spill_values': failed to load: -EACCES\nlibbpf: failed to load object '/var/tmp/fixture.o'\nload spill fixture: Permission denied\n0: R1=ctx() R10=fp0\n0: (61) r2 = *(u32 *)(r1 +8)          ; R1=ctx() R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n1: (61) r3 = *(u32 *)(r1 +32)         ; R1=ctx() R3=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n2: (bc) w6 = w3                       ; R3=scalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=scalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n3: (7b) *(u64 *)(r10 -72) = r6        ; R6=scalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-72=scalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n4: (63) *(u32 *)(r10 -544) = r2\ninvalid write to stack R10 off=-544 size=4\nprocessed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n"
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-verify-machineinstrs",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/fixture.mir",
+      "-o",
+      "/var/tmp/fixture.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/values-client",
+      "--groups",
+      "large-packed",
+      "/var/tmp/fixture.o"
+    ],
+    "returncode": 0,
+    "stdout": "{\"object\":\"/var/tmp/fixture.o\",\"phase\":\"large-packed\",\"executions\":1060,\"failed\":0}\n",
+    "stderr": "libbpf: elf: skipping unrecognized data section(5) .eh_frame\nlibbpf: elf: skipping relo section(6) .rel.eh_frame for section(5) .eh_frame\n"
+  }
+]

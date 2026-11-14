@@ -103,7 +103,7 @@ bytes; explicit0/previous backend/optional allocated-output controls pass
 (0e4593e46/bffd94728, `preprocess-cleanup/report.md`). No runtime gain is
 claimed; existing live services retain their imported function.
 
-Optional B spill groups (4c2c594c0, subset pending):
+Optional B spill groups (4c2c594c0):
 `KPROG_BPF_WHOLE_WORD_SPILLS_ALL=1` with whole-word spills enabled selects
 independent scalar pairs throughout the physical spill list, including pairs
 before a later non-scalar spill. Its default is zero and the existing
@@ -111,5 +111,9 @@ single-pair CLI selection stays unchanged for the running OTel service.
 Selected scalar slots still require direct four-byte accesses; the same
 whole-word masking and physical-register liveness mechanism is reused.
 This addresses the known fp-544 stack class with a32-byte packing opportunity;
-it changes B storage only. Sparse frame-ID and actual kernel value/boundary
-checks are next; no application acceptance or runtime gain is claimed.
+it changes B storage only. Sparse frame-ID tests reduce544->512 and80->48;
+actual stock kernel rejects the original544-byte form, and the small control
+plus both packed forms match3180 actual reference executions. Existing
+single-pair MIR/selection equals the prior compiler with the mode off.
+Evidence: `spill-groups/report.md`; service wiring and actual-body replay
+remain next. No application acceptance or runtime gain is claimed.
