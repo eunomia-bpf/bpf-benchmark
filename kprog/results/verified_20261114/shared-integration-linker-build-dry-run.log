@@ -1,0 +1,2 @@
+cargo build --release --workspace --target-dir "/workspaces/repository/bpfopt/target" --manifest-path "/workspaces/repository/bpfopt/Cargo.toml" -p kinsnprober
+cargo build --release --manifest-path "/workspaces/repository/kprog/x86/native_lab/native_link/Cargo.toml"
