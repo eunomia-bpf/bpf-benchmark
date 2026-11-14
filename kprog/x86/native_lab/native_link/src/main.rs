@@ -141,6 +141,14 @@ struct Args {
     #[arg(long)]
     runtime_probe_read_layout: Option<PathBuf>,
 
+    /// Inline kernel string reads using the existing fault-recovering read ABI.
+    #[arg(long, requires = "runtime_probe_read_layout")]
+    runtime_probe_read_strings: bool,
+
+    /// Inline CPU/current-task helpers when sole-target per-CPU facts exist.
+    #[arg(long)]
+    runtime_percpu_loads: bool,
+
     /// Specialize proven raw hash lookups using the sole target's field layout.
     #[arg(long)]
     runtime_hash_layout: Option<PathBuf>,
@@ -608,8 +616,7 @@ fn main() -> Result<()> {
                 runtime_hash_layout.as_ref(),
                 runtime_lpm_layout.as_ref(),
                 args.local_memory_routines,
-                args.show,
-            )?
+                args.show, args.runtime_probe_read_strings && !proof_mode, args.runtime_percpu_loads && !proof_mode)?
         }
         object::Architecture::Aarch64 => {
             let entry = find_symbol_by_name(&elf, &args.symbol)?;

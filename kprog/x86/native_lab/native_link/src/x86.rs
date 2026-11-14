@@ -1203,6 +1203,8 @@ pub(super) fn rewrite_x86(
     runtime_lpm_layout: Option<&RuntimeLpmLayout>,
     local_memory_routines: bool,
     show: bool,
+    runtime_probe_read_strings: bool,
+    runtime_percpu_loads: bool,
 ) -> Result<RewriteResult> {
     let included_ranges: Vec<(u64, u64)> = included
         .iter()
@@ -1667,6 +1669,16 @@ pub(super) fn rewrite_x86(
                         clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                         continue;
                     }
+                    if runtime_percpu_loads {
+                        if let Some(inline)=probe_read::percpu(runtime_probe_read_layout,helper_addrs,&name)? {
+                            for ib in inline {
+                                push_x86_synthetic(&mut local,&mut kinds,&mut insn_local_ip,&mut next_synthetic_ip,ib)?;
+                            }
+                            resolved_helper_call_sites.insert(site_key);
+                            clear_x86_call_clobbered_registers(&mut map_symbol_registers);
+                            continue;
+                        }
+                    }
                     if name == "bpf_get_smp_processor_id" {
                         if let Some(inline) = build_x86_get_smp_processor_id_inline(helper_addrs)? {
                             for ib in inline {
@@ -2085,7 +2097,7 @@ pub(super) fn rewrite_x86(
     }
 
     let read_sites = if let Some(layout) = runtime_probe_read_layout.filter(|_| !proof_mode) {
-        let (ranges,sites) = probe_read::share(&mut blob, &mut relocs, layout, helper_addrs)?;
+        let (ranges,sites) = probe_read::share(&mut blob, &mut relocs, layout, helper_addrs, runtime_probe_read_strings)?;
         code_ranges.extend(ranges);
         sites
     } else { Vec::new() };
@@ -4476,10 +4488,10 @@ mod tests {
                 let empty = HashMap::new();
                 let helpers = HashMap::from([(name.to_owned(), 0x1234)]);
                 let plain = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &empty, &[],
-                    &HashMap::new(), &[], true, true, false, false, false, None, false, None, None, None, false, false)?;
+                    &HashMap::new(), &[], true, true, false, false, false, None, false, None, None, None, false, false, false, false)?;
                 assert_eq!(plain.proof_relocs.len(), 2, "default remains symbolic");
                 let proof = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &empty, &[],
-                    &HashMap::new(), &[], true, true, false, false, false, None, false, None, None, None, true, false)?;
+                    &HashMap::new(), &[], true, true, false, false, false, None, false, None, None, None, true, false, false, false)?;
                 assert!(proof.proof_relocs.is_empty(), "{name}, form={form}");
                 assert_eq!(proof.proof_symbols.len(), 2, "same length shares one routine");
                 assert!(proof.proof_symbols[1].name.starts_with("__native_link_local_"));
@@ -4493,7 +4505,7 @@ mod tests {
                 let included = discover_reachable(&elf, &entry)?;
                 assert_eq!(included.len(), 2);
                 let result = rewrite_x86(&elf, &entry, &included, &empty, &empty, &[],
-                    &HashMap::new(), &[], false, true, false, false, false, None, false, None, None, None, true, false)?;
+                    &HashMap::new(), &[], false, true, false, false, false, None, false, None, None, None, true, false, false, false)?;
                 assert!(result.relocs.is_empty());
                 #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
                 {
@@ -4553,7 +4565,7 @@ mod tests {
                 (true, Some(&array), false), (true, Some(&array), true)] {
                 let result = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers,
                     &HashMap::new(), &[site.clone()], &HashMap::new(), &[],
-                    false, false, false, enabled, false, layout, shared, None, None, None, false, false)?;
+                    false, false, false, enabled, false, layout, shared, None, None, None, false, false, false, false)?;
                 let expected = if enabled { 0x1234 } else { 0x5678 };
                 assert!(result.relocs.iter().any(|r| r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32
                     && r.target == expected), "form={form}, enabled={enabled}: actual helper target");
@@ -4724,7 +4736,7 @@ mod tests {
         })]);
         for enabled in [false, true] {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps,
-                &[], &facts, &[], false, false, false, true, enabled, None, false, None, None, None, false, false)?;
+                &[], &facts, &[], false, false, false, true, enabled, None, false, None, None, None, false, false, false, false)?;
             if !enabled {
                 assert!(output.relocs.iter().any(|r| r.target == 0x1234));
                 continue;
@@ -4864,7 +4876,7 @@ mod tests {
         let entry = find_symbol_by_name(&elf, "entry")?;
         for preserve in [false, true] {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(),
-                &HashMap::new(), &[], &HashMap::new(), &[], true, preserve, false, false, false, None, false, None, None, None, false, false)?;
+                &HashMap::new(), &[], &HashMap::new(), &[], true, preserve, false, false, false, None, false, None, None, None, false, false, false, false)?;
             let mut expected = if preserve { vec![0x53, 0x31, 0xc0, 0x5b] } else { vec![0x31, 0xc0] };
             expected.extend_from_slice(&[0xe9, 0, 0, 0, 0]); // Canonical entry exit in proof mode.
             assert_eq!(output.blob, expected);

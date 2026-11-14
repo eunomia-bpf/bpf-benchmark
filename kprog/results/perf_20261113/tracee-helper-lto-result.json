@@ -1,0 +1,141 @@
+{
+  "recorded": "2026-11-14T12:52:24Z",
+  "scope": "Default-off runtime linker helpers; no whole-app speed or kernel-string acceptance claim",
+  "binary": "/workspaces/kprog-raw/perf/20261114-tracee-helper-lto/native-link.real",
+  "sha256": "37c9353255317b3098384c0b654bb8986406acdb19b942e8dea7b175525c02a7",
+  "switches": {
+    "kernel_string": "--runtime-probe-read-layout PATH --abi-load-sites true --output-abi PATH --runtime-probe-read-strings",
+    "percpu": "--runtime-percpu-loads; current-task additionally needs existing runtime-probe-read-layout",
+    "maps": "--runtime-map-lookups --runtime-known-map-lookups"
+  },
+  "behavior": [
+    "kernel_str only; user_str retains original helper",
+    "Current task and CPU use target-fact GS loads; absent/non-disp32 facts retain existing implementation",
+    "String policy, nested pagefault disable, full destination zero on fault, NUL/truncation and signed int return preserved",
+    "Proof mode ignores new switches"
+  ],
+  "host": {
+    "rust_pass": 33,
+    "existing_ignored": 1,
+    "bulk_kernel_vectors": 1147,
+    "bulk_user_vectors": 1149,
+    "kernel_string_vectors": 191,
+    "kernel_string_exact_faults": 121,
+    "percpu_execution_variants": 3,
+    "raw": "/workspaces/kprog-raw/perf/20261114-tracee-helper-lto/final-host"
+  },
+  "default_parity": {
+    "real_objects": 11,
+    "full_proof_elf_kernel_sidebands_equal": true,
+    "reference": "/workspaces/kprog-raw/perf/20261114-writable-data/canonical-address/native-link.real",
+    "raw": "/workspaces/kprog-raw/perf/20261114-tracee-helper-lto/default-parity"
+  },
+  "tracee_offline": {
+    "original_source_sha256": "0a43ba598f7ce393146732dd86504d94ccece30ddedf9dfd460263ea9a30cc1d",
+    "entries": 172,
+    "proof_on_off_equal": true,
+    "kernel_cli_both_arms_success": true,
+    "kernel_images_changed": 138,
+    "activation": [
+      {
+        "symbol": "trace_sys_enter",
+        "off": {
+          "bytes": 5814,
+          "helper_calls": {
+            "bpf_probe_read_kernel": 0,
+            "bpf_probe_read_kernel_str": 3,
+            "bpf_get_current_task": 3,
+            "bpf_get_smp_processor_id": 0
+          },
+          "r11_recovery_sites": 2
+        },
+        "on": {
+          "bytes": 6050,
+          "helper_calls": {
+            "bpf_probe_read_kernel": 0,
+            "bpf_probe_read_kernel_str": 0,
+            "bpf_get_current_task": 0,
+            "bpf_get_smp_processor_id": 0
+          },
+          "r11_recovery_sites": 3
+        }
+      },
+      {
+        "symbol": "trace_sys_exit",
+        "off": {
+          "bytes": 5835,
+          "helper_calls": {
+            "bpf_probe_read_kernel": 0,
+            "bpf_probe_read_kernel_str": 3,
+            "bpf_get_current_task": 3,
+            "bpf_get_smp_processor_id": 0
+          },
+          "r11_recovery_sites": 2
+        },
+        "on": {
+          "bytes": 6071,
+          "helper_calls": {
+            "bpf_probe_read_kernel": 0,
+            "bpf_probe_read_kernel_str": 0,
+            "bpf_get_current_task": 0,
+            "bpf_get_smp_processor_id": 0
+          },
+          "r11_recovery_sites": 3
+        }
+      },
+      {
+        "symbol": "sys_enter_submit",
+        "off": {
+          "bytes": 12649,
+          "helper_calls": {
+            "bpf_probe_read_kernel": 0,
+            "bpf_probe_read_kernel_str": 25,
+            "bpf_get_current_task": 3,
+            "bpf_get_smp_processor_id": 0
+          },
+          "r11_recovery_sites": 2
+        },
+        "on": {
+          "bytes": 12885,
+          "helper_calls": {
+            "bpf_probe_read_kernel": 0,
+            "bpf_probe_read_kernel_str": 0,
+            "bpf_get_current_task": 0,
+            "bpf_get_smp_processor_id": 0
+          },
+          "r11_recovery_sites": 3
+        }
+      },
+      {
+        "symbol": "trace_ret_vfs_read_tail",
+        "off": {
+          "bytes": 12377,
+          "helper_calls": {
+            "bpf_probe_read_kernel": 0,
+            "bpf_probe_read_kernel_str": 23,
+            "bpf_get_current_task": 3,
+            "bpf_get_smp_processor_id": 0
+          },
+          "r11_recovery_sites": 2
+        },
+        "on": {
+          "bytes": 12580,
+          "helper_calls": {
+            "bpf_probe_read_kernel": 0,
+            "bpf_probe_read_kernel_str": 0,
+            "bpf_get_current_task": 0,
+            "bpf_get_smp_processor_id": 0
+          },
+          "r11_recovery_sites": 3
+        }
+      }
+    ],
+    "raw": "/workspaces/kprog-raw/perf/20261114-tracee-helper-lto/tracee-offline",
+    "addresses": "Synthetic, never executed"
+  },
+  "pending": [
+    "Actual kernel string/current-task combined execution and same-source whole-app timing (C lane)",
+    "All LTO pieces timed together; no component throughput ratio"
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261114-tracee-helper-lto"
+}

@@ -15,7 +15,7 @@ static struct { int unused, disabled; } task;
 static uintptr_t user_max = UINTPTR_MAX;
 static uint32_t capabilities[10]; /* SMAP deliberately off in user-mode test. */
 static unsigned char *code;
-static unsigned sites[2], lengths[2];
+static unsigned sites[2], lengths[2], site_count;
 static unsigned faults, denied, callbacks;
 static const void *expected_src;
 static unsigned expected_size;
@@ -34,7 +34,7 @@ static void fault(int sig, siginfo_t *info, void *context)
     (void)sig; (void)info;
     ucontext_t *uc = context;
     uintptr_t ip = uc->uc_mcontext.gregs[REG_RIP];
-    for (unsigned i = 0; i < 2; ++i) {
+    for (unsigned i = 0; i < site_count; ++i) {
         if (ip != (uintptr_t)code + sites[i]) continue;
         assert(task.disabled == 8);
         ++faults;
@@ -59,10 +59,25 @@ static void check(void *dst, const void *src, unsigned n, long expected)
     else for (unsigned i=0; i<n; ++i) assert(d[i] == 0);
 }
 
+static void check_string(void *dst, const void *src, unsigned n, long expected)
+{
+    unsigned char *d = dst;
+    memset(d-1,0xa5,n+2);
+    expected_src=src; expected_size=n;
+    long result=((long (*)(void *,unsigned,const void *))code)(dst,n,src);
+    assert(result==expected && task.disabled==7);
+    assert(d[-1]==0xa5 && d[n]==0xa5);
+    if (expected>0) {
+        assert(!memcmp(d,src,expected-1) && d[expected-1]==0);
+        for (unsigned i=expected;i<n;++i) assert(d[i]==0xa5);
+    } else if (expected<0) for (unsigned i=0;i<n;++i) assert(d[i]==0);
+}
+
 int main(int argc, char **argv)
 {
     assert(argc == 4);
-    user = atoi(argv[3]);
+    int mode = atoi(argv[3]);
+    user = mode == 1;
     FILE *f = fopen(argv[1],"rb"); assert(f);
     assert(!fseek(f,0,SEEK_END)); long size = ftell(f); assert(size > 0);
     rewind(f);
@@ -75,8 +90,23 @@ int main(int argc, char **argv)
             value == 0x5555666677778888ULL ? (uintptr_t)&capabilities : 0;
         if (target) memcpy(code+i,&target,8);
     }
+    if (mode >= 3) {
+        struct { uintptr_t current; unsigned cpu, pad; uintptr_t offset; } gs =
+            {0x123456789abcdef0ULL, 123, 0, 0};
+        gs.offset = (uintptr_t)&gs;
+        uintptr_t old_gs;
+        assert(!mprotect(code,size,PROT_READ|PROT_EXEC));
+        assert(!syscall(SYS_arch_prctl,ARCH_GET_GS,&old_gs));
+        assert(!syscall(SYS_arch_prctl,ARCH_SET_GS,&gs));
+        uint64_t value = ((uint64_t (*)(void))code)();
+        assert(!syscall(SYS_arch_prctl,ARCH_SET_GS,old_gs));
+        assert(value == (mode == 3 ? gs.current : gs.cpu));
+        puts("percpu emitted load: full-width task and zero-extended CPU PASS");
+        return 0;
+    }
     f = fopen(argv[2],"r"); assert(f);
-    for (unsigned i=0; i<2; ++i) {
+    assert(fscanf(f,"%u",&site_count) == 1 && site_count > 0 && site_count <= 2);
+    for (unsigned i=0; i<site_count; ++i) {
         unsigned destination;
         assert(fscanf(f,"%u %u %u",sites+i,lengths+i,&destination) == 3);
         assert(destination == 11 && lengths[i] == 3);
@@ -97,6 +127,23 @@ int main(int argc, char **argv)
     assert(src != MAP_FAILED); for (unsigned i=0;i<4096;++i) src[i]=(i*17)^0x5a;
     assert(!mprotect(src+4096,4096,PROT_NONE));
     unsigned char dest[1026]; unsigned vectors = 0;
+    if (mode == 2) {
+        unsigned before=callbacks;
+        check_string(dest+1,src+4096,0,0); ++vectors;
+        assert(callbacks==before);
+        memset(src,'x',4096);
+        for (unsigned n=1;n<=65;++n) {
+            check_string(dest+1,src+4096-n,n,n); ++vectors;
+            check_string(dest+1,src+4096,n,-14); ++vectors;
+            if (n>9) {check_string(dest+1,src+4087,n,-14); ++vectors;}
+        }
+        src[4095]=0;check_string(dest+1,src+4088,65,8); ++vectors;
+        src[0]=0;check_string(dest+1,src,65,1); ++vectors;
+        denied=1;check_string(dest+1,src,33,-34); ++vectors;
+        before=callbacks;check_string(dest+1,src+4096,0,0); ++vectors;
+        assert(callbacks==before); denied=0;
+        puts("kernel string: NUL/truncation/zero-count/policy/partial-fault/full-zero PASS");
+    } else {
     for (unsigned n=0;n<=1024;++n) { check(dest+1,src+4096-n,n,0); ++vectors; }
     for (unsigned n=1;n<=65;++n) {
         check(dest+1,src+4096,n,-14); ++vectors;
@@ -109,6 +156,7 @@ int main(int argc, char **argv)
         check(dest+1,src,17,-14); ++vectors;
         check(dest+1,(void *)(UINTPTR_MAX-3),8,-14); ++vectors;
         assert(callbacks == before); /* Invalid range never invokes NMI check. */
+    }
     }
     assert(!syscall(SYS_arch_prctl,ARCH_SET_GS,old_gs));
     printf("probe-read host user=%d: %u vectors, %u exact-site faults, nesting/zero/error/bounds PASS\n",user,vectors,faults);
