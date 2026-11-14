@@ -1,0 +1,119 @@
+{
+  "recorded_at": "2026-11-14T10:50:44.086615+00:00",
+  "pid": 355603,
+  "stats": 1,
+  "run": "corpus/results/x86_kvm_corpus_20261114_101302_128108",
+  "status": "ok",
+  "samples": 3,
+  "seconds": 180,
+  "workload_errors": 0,
+  "stats_ON_throughput_native_over_BPF": 0.9033770877327925,
+  "BPF_ns_per_invocation": 2295.2528363558226,
+  "native_ns_per_invocation": 2715.682559098123,
+  "per_invocation_speedup": 0.8451845112258168,
+  "BPF_ops_per_sample": [
+    83970831.15460835,
+    84164599.01561247,
+    82921877.74465802
+  ],
+  "native_ops_per_sample": [
+    73026468.39188401,
+    75857324.90295213,
+    79229232.78149043
+  ],
+  "paired_throughput": [
+    0.8696647084203154,
+    0.9012972887672246,
+    0.9554683870698347
+  ],
+  "native_replacements": 13,
+  "custom_generic_native_errors": 2,
+  "counter_windows": [
+    {
+      "first": "baseline-0021",
+      "last": "baseline-0081",
+      "map_id": 26,
+      "seconds": 532.937705,
+      "native_attempts_per_second": 10347399.83728492,
+      "interpreter_dispatches_per_native_attempt": 0.2381978358694076,
+      "families": {
+        "Native": {
+          "frames_per_attempt": 0.9234031700649767,
+          "attempts_per_native_attempt": 1.0
+        },
+        "Perl": {
+          "frames_per_attempt": 0.0,
+          "attempts_per_native_attempt": 0.013109424077944175
+        },
+        "Python": {
+          "frames_per_attempt": 0.0,
+          "attempts_per_native_attempt": 0.013312146544614227
+        },
+        "PHP": {
+          "frames_per_attempt": 1.7978810508919851,
+          "attempts_per_native_attempt": 0.013184799457130292
+        },
+        "Ruby": {
+          "frames_per_attempt": 0.34776398784355605,
+          "attempts_per_native_attempt": 0.01341928643189596
+        },
+        "V8": {
+          "frames_per_attempt": 4.580286607139726,
+          "attempts_per_native_attempt": 0.043128536049454935
+        },
+        "Hotspot": {
+          "frames_per_attempt": null,
+          "attempts_per_native_attempt": 0.0
+        },
+        "Dotnet": {
+          "frames_per_attempt": null,
+          "attempts_per_native_attempt": 0.0
+        }
+      }
+    },
+    {
+      "first": "post_rejit-0102",
+      "last": "post_rejit-0161",
+      "map_id": 1144,
+      "seconds": 526.641789,
+      "native_attempts_per_second": 10362111.945886618,
+      "interpreter_dispatches_per_native_attempt": 0.239224855856064,
+      "families": {
+        "Native": {
+          "frames_per_attempt": 0.9235605498254528,
+          "attempts_per_native_attempt": 1.0
+        },
+        "Perl": {
+          "frames_per_attempt": 0.0,
+          "attempts_per_native_attempt": 0.013034108597756805
+        },
+        "Python": {
+          "frames_per_attempt": 0.0,
+          "attempts_per_native_attempt": 0.013159517577749047
+        },
+        "PHP": {
+          "frames_per_attempt": 1.8014728728555816,
+          "attempts_per_native_attempt": 0.013453267881101528
+        },
+        "Ruby": {
+          "frames_per_attempt": 0.3439716256526395,
+          "attempts_per_native_attempt": 0.013340183164739854
+        },
+        "V8": {
+          "frames_per_attempt": 4.586179367589131,
+          "attempts_per_native_attempt": 0.043323777410284016
+        },
+        "Hotspot": {
+          "frames_per_attempt": null,
+          "attempts_per_native_attempt": 0.0
+        },
+        "Dotnet": {
+          "frames_per_attempt": null,
+          "attempts_per_native_attempt": 0.0
+        }
+      }
+    }
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261114-combined-array-timing",
+  "scope": "Combinedread/hash/LPM/sharedARRAY direct-native, frozen workload/originalmanifest. StatsOFF still running, no1.20/floor/equalwork certification. ExistingTracee and newlylaunchedcompiler mayoverlap; retain actualconcurrency caveats/no causalcomparison. No noBPF reference."
+}

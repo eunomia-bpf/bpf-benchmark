@@ -420,6 +420,26 @@
       "memory": "64G",
       "address_space_bytes": 85899345920,
       "scope": "Existing frozen workload, source manifest430b26ab andsoleimage. Wait onlyresourceorder, notdependency success; standardtimingEX/imageSH perstatsarm. No newresult/speed claim."
+    },
+    "profile_launch": {
+      "recorded_at": "2026-11-14T10:49:02.942410+00:00",
+      "pid": 382571,
+      "wait_pid": 379046,
+      "reason": "CPU16-19 resource order after ownhostcompiler naturalexit, no successgate, no timinglock",
+      "raw": "/workspaces/kprog-raw/perf/20261114-combined-array-profile",
+      "configuration": "direct-native read/hash/LPM/sharedARRAY",
+      "cpus": "16-19",
+      "vcpus": 4,
+      "memory": "16G",
+      "host_as_bytes": 51539607552,
+      "seconds": 45,
+      "samples": 1,
+      "stats": 1,
+      "frequency_hz": 199,
+      "host_event": "cpu_atom/cycles/G",
+      "manifest_sha256": "430b26ab4be8fd501a819f48c0451895d86bf90606533958a05639ac8a51573f",
+      "state": "LAUNCHED_RESOURCE_ORDERED_UNCOLLECTED",
+      "scope": "Updated actual JIT instruction/helper profile for the combined candidate, not3x180 timing or gain certification. Stable runtime phase-profile.py entrypoint avoids C-owned oldMake path. Keepactualconcurrency/clock/PMUlimitations."
     }
   }
 }
