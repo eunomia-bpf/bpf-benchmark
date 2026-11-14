@@ -808,3 +808,5 @@
 - [ ] 公开文档（README、CONTRIBUTING、SECURITY，英文）和新 CI。
 - [ ] 安静窗口：内核合并，kinsn 和 kprog 拆成两个 submodule，全新环境构建验证。
 - [ ] 主树的 `corpus/driver.py`（冻结版）从 `runner/libs/rejit.py` 导入 `snapshot_app_maps`，主树的 `rejit.py` 已经改掉了这个函数，主树上 `make corpus` 在导入这一步就停下。计时目前用 `kprog/perf/may29-image` 从 9f3855f6f 读框架；主树框架要和冻结的 driver 重新对齐（运营者 2026-11-09："也要确保 benchmark framework 不能变化"）。
+
+- VERIFIED 2026-11-14 刷新收集：239086退出0，唯一image2aed63ff946f，direct模块逐字节等于233116已测候选d232c2e6，bounds工具e02a61a2已stage。boot/ELF/config/linker保持原hash；image/stage各1252应用制品逐项一致。实际image loader与service loader hash分别记录在 `kprog/results/verified_20261114/recovery-private-refresh-result.json`；旧verified-module不被替换。Katran239316已运行待收集，不把部署当应用验收，PERF继续whole-app LTO计时。

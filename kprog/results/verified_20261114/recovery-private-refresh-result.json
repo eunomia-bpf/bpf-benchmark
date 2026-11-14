@@ -1,0 +1,44 @@
+{
+  "recorded": "2026-11-14T07:31:32.678454+00:00",
+  "job": 239086,
+  "exit_code": 0,
+  "raw": "/workspaces/kprog-raw/verified/20261114-recovery-private-refresh",
+  "image": "sha256:2aed63ff946f379ffb613586eb9d52a9c0274e3a92b25b675748292c9163d12c",
+  "image_cleanup": "already-absent",
+  "stable_kernel_config_linker_hashes": {
+    "/workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage": "2667103e0fbb3fc54467f59bb15ef0cdc128e54ca7c30d7718e66d0199c4e1ec",
+    "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux": "f3743c05960fc700e29f31e0035a23cdd4b2500d5e6e7542984d5f6fba75babe",
+    "/workspaces/.agent-state/kprog-ck/build-x86/.config": "98c9d7927c024d3a70ed45d365dd4b1582d755d892158edfe3e9e1f4e01cb864",
+    "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "8312f5ac05364dbb0f77f4301e571faf99f4fc65f92be37b058c8d884fe84dc5"
+  },
+  "native_image_files_equal": 1252,
+  "native_stage_files_equal": 1252,
+  "inventory_config_changed": true,
+  "native_inventory_differences": [],
+  "deployed_direct_module_sha256": "d232c2e6bd5a52950528e1d26ee5da38bdf2d44884f6bd81aaf37f851812aefd",
+  "deployed_direct_module_matches_tested_candidate": true,
+  "canonical_tools": {
+    "/workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.so": "f2c3375096b3bca214a2d42f7a8693d713a0fa4eb00d57df50c47c3b1fdc9f6e",
+    "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader": "0bdcbe743aca12b5afed11ae40116e0d6437657f3068ef722056ef09e0061bb5",
+    "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "8312f5ac05364dbb0f77f4301e571faf99f4fc65f92be37b058c8d884fe84dc5",
+    "/workspaces/repository/kinsn/module/x86/build/bpf_x86_native_lab.ko": "d232c2e6bd5a52950528e1d26ee5da38bdf2d44884f6bd81aaf37f851812aefd",
+    "/workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko": "c1338358c52b8962dbb2383a66b47755eb7f75920288c43fea13e86743b65db3"
+  },
+  "image_tools": {
+    "/usr/local/lib/bpfrejit/libnative_loader.so": "50b6f41deeb0de590e9a5d0ec93495695863d34b0920dc06868e1f57539e63cf",
+    "/usr/local/bin/native-link": "8312f5ac05364dbb0f77f4301e571faf99f4fc65f92be37b058c8d884fe84dc5"
+  },
+  "checked_compiler_tools": {
+    "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir": "bfe23fdb831b367e5a6345e77f91d90f8e75b308e24b6d1ea92478430792d1bc",
+    "/workspaces/.agent-state/kprog-ck/verified-compiler/context-lower": "5f4549c07681c471cc57fe69b6c4bd1a9146a9775cd5cb43242a2131a84ea05d",
+    "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds": "e02a61a2659e87acc84ef6b9f3089528479df3dfead118543abeb423a8057af0",
+    "/workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout": "6d199c589ce3692685a2501bd88639ef7037020eb5574347176dc89b9009b549",
+    "/workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json": "f5bc8aca1efb449a446f4789f49edebd27025bdc624df709a98fe509334c85f9",
+    "/workspaces/.agent-state/kprog-ck/verified-compiler/public-layout": "6ae327d8418266cdc9732c7f4cbd98fbea389e81fee0762f6b4a0233477dc9eb",
+    "/workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json": "4994d101ae57abe7477ff941ec3c5e9b30d4f4b16281bfcad7aa6c96ad32f754"
+  },
+  "service_args": "--execution-mode checked-sim-c --sim-native-compiler /workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir --sim-context-compiler /workspaces/.agent-state/kprog-ck/verified-compiler/context-lower --sim-public-layout /workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json --sim-physical-layout /workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json --sim-bounds-compiler /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+  "application_certification": false,
+  "katran_followup_job": 239316,
+  "note": "Direct-native module promoted; separate verified-module copy unchanged. Image loader uses frozen recipe stripped build; its actual hash recorded separately from trusted service loader."
+}
