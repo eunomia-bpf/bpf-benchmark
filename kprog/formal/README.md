@@ -1182,6 +1182,37 @@ targeted jobs, deterministic export and standard-axiom checks pass. Raw evidence
 `/workspaces/kprog-raw/formal/m4-arm64-memory`. Instruction dispatch, fault
 selection/recovery, remaining C-subset work and full default-byte coverage remain.
 
+Four more `Arm64Addressing` roots export the fault predicate and complete scalar
+LOAD, signed LOAD and STORE bodies (19 functions total). Dispatcher and direct
+entries now share those three bodies. Fault selection retains lazy SP/stack/
+relocation/context exclusions, full-width zero-page/pre-index arithmetic and
+the actual kind6 outcome. Recovery still precedes overlap checks and writeback;
+stores retain their original path. Native caller hooks, destination-width
+capture, pointer tags, relative spill payloads and SP release are preserved.
+The load-tag and signed-load selectors now have standard output forms with
+their original expression facades.
+
+The extended consumer oracle passes221,184 fault-domain/address/input profiles,
+1,200 scalar recovery/transfer/writeback profiles,1,280 tag/payload profiles
+and36 source/index input-order profiles,
+alongside its49,152 memory profiles. Baseline/current x86 and current AArch64
+user mode pass in native and adapter modes. Four mutations fail: discarded high
+draw bits, omitted recovery, overlap checks before recovery and lost pointer
+tags. A new cold-coordinate regression caught and corrected eager source capture:
+the resolved store now observes its index before its source. Native after-include
+hook behavior is checked separately. `make clight`,
+133 targeted jobs, deterministic export and standard-axiom checks pass. The
+same-source BPF fixture adds all five scalar operations and a dynamic scalar
+fault address; socket5208B and23 allocated relocations remain exact, with all
+five changed headers replayed together. Raw evidence:
+`/workspaces/kprog-raw/formal/m4-arm64-scalar-memory`. This exports the existing
+recovery selection, not a proof of the actual exception-site/native/Clight
+correspondence. Pair/vector/atomic and remaining instruction dispatch still
+require C-subset conversion; all2,065 refinements and recount remain M5 work.
+The protected-read recovery regression passes. The separate read-follow-up
+oracle retains ten memcpy discrepancies, with byte-identical diagnostics against
+the preceding commit; its original assertions and inputs remain unresolved.
+
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight
 handler exports and full default compiled-byte coverage remain to do. Preserve

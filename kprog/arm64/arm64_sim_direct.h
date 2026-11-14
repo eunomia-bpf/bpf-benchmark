@@ -1,4 +1,4 @@
-/* Generated from the canonical C dispatcher by generate_sim_dispatch.py. */
+/* Canonical simulator C; edited directly (formal/README.md, M4). */
 #ifndef ARM64_SIM_DIRECT_H
 #define ARM64_SIM_DIRECT_H
 #define ARM64_SIM_DIRECT_BODY_0(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
@@ -275,51 +275,18 @@ int __a64_l_taken = ARM64_SIM_L_EVAL_COND(AUX) ? 1 : 0; \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_23(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
-(void)__a64_l_width; \
-if (ARM64_SIM_L_READ_FAULT((SRC), (SRC2), (AUX), (IMM))) { \
-                ARM64_SIM_L_CLEAR_READ_DEST(DST); \
-                break; \
-            } \
-			ARM64_SIM_L_WRITEBACK_OVERLAP((SRC), (DST), (AUX)); \
-			ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM)); \
-			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, __a64_l_width); \
-			__u8 __a64_l_value_tag = ARM64_SIM_L_MEM_READ_TAG( \
-				(SRC), (SRC2), (AUX), (IMM), 0, __a64_l_width); \
-			if (ARM64_SIM_L_LOAD_TAG_PRESERVE((OP), \
-					__a64_l_value_tag, __a64_l_width)) \
-				ARM64_SIM_L_WRITE_REG_PTR_TAG((DST), \
-					(void *)(long)ARM64_SIM_L_MEM_PAYLOAD((SRC), (SRC2), (AUX), (IMM), 0, __a64_l_value, __a64_l_value_tag), \
-					__a64_l_value_tag); \
-			else \
-				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width); \
-			ARM64_SIM_L_MEM_POST((SRC), (AUX), (IMM)); \
+    __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+    ARM64_SIM_L_LOAD_STEP((OP), (DST), (SRC), (SRC2), (AUX), (IMM), __a64_l_width); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_24(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
-(void)__a64_l_width; \
-if (ARM64_SIM_L_READ_FAULT((SRC), (SRC2), (AUX), (IMM))) { \
-                ARM64_SIM_L_CLEAR_READ_DEST(DST); \
-                break; \
-            } \
-			ARM64_SIM_L_WRITEBACK_OVERLAP((SRC), (DST), (AUX)); \
-			ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM)); \
-			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, ARM64_SIM_L_LDRSX_LOAD_WIDTH((OP))); \
-			__u64 __a64_l_sxop = ARM64_SIM_L_LDRSX_SXOP((OP)); \
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_EXTREV_SIGNEXT(__a64_l_sxop, __a64_l_value, __a64_l_width), __a64_l_width); \
-			ARM64_SIM_L_MEM_POST((SRC), (AUX), (IMM)); \
+    __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+    ARM64_SIM_L_LDRSX_STEP((OP), (DST), (SRC), (SRC2), (AUX), (IMM), __a64_l_width); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_25(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
-(void)__a64_l_width; \
-ARM64_SIM_L_WRITEBACK_OVERLAP((DST), (SRC), (AUX)); \
-			ARM64_SIM_L_MEM_PRE((DST), (AUX), (IMM)); \
-			ARM64_SIM_L_MEM_WRITE((DST), (SRC2), (AUX), (IMM), 0, \
-				__a64_l_width, ARM64_SIM_L_READ_REG(SRC), \
-				ARM64_SIM_L_REG_TAG(SRC)); \
-			ARM64_SIM_L_MEM_POST((DST), (AUX), (IMM)); \
+    __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+    ARM64_SIM_L_STORE_STEP((DST), (SRC), (SRC2), (AUX), (IMM), __a64_l_width); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_26(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \

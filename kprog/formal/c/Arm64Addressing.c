@@ -135,3 +135,30 @@ void kprog_arm64_memory_write(struct kprog_arm64_addressing *addressing,
 	REGISTERS();
 	ARM64_SIM_L_MEM_WRITE(base, index, aux, imm, extra, width, value, tag);
 }
+
+int kprog_arm64_read_fault(struct kprog_arm64_addressing *addressing,
+                          __u64 base, __u64 index, __u32 aux, __u64 imm)
+{
+	REGISTERS();
+	int result;
+	ARM64_SIM_L_READ_FAULT_INTO(result, base, index, aux, imm);
+	return result;
+}
+void kprog_arm64_load(struct kprog_arm64_addressing *addressing,
+                      __u64 dst, __u64 base, __u64 index, __u32 aux, __u64 imm, __u8 flags)
+{
+	REGISTERS();
+	ARM64_SIM_L_LOAD_STEP(ARM64_OP_LOAD, dst, base, index, aux, imm, ARM64_SIM_L_EFFECTIVE_WIDTH(flags));
+}
+void kprog_arm64_signed_load(struct kprog_arm64_addressing *addressing, __u32 op,
+                             __u64 dst, __u64 base, __u64 index, __u32 aux, __u64 imm, __u8 flags)
+{
+	REGISTERS();
+	ARM64_SIM_L_LDRSX_STEP(op, dst, base, index, aux, imm, ARM64_SIM_L_EFFECTIVE_WIDTH(flags));
+}
+void kprog_arm64_store(struct kprog_arm64_addressing *addressing,
+                       __u64 base, __u64 src, __u64 index, __u32 aux, __u64 imm, __u8 flags)
+{
+	REGISTERS();
+	ARM64_SIM_L_STORE_STEP(base, src, index, aux, imm, ARM64_SIM_L_EFFECTIVE_WIDTH(flags));
+}

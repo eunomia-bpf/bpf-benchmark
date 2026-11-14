@@ -7,13 +7,14 @@
 #include <setjmp.h>
 #include "../c/Arm64Addressing.h"
 static unsigned long cases;
-static unsigned requests[32], wanted[32], count, wanted_count, copies;
+static unsigned requests[512], wanted[512], count, wanted_count, copies;
 static __u64 entropy, expected_entropy;
 static const void *copy_source;
 static void *copy_destination;
 static size_t copy_size, copy_alignment;
 static jmp_buf rejected;
-static int allow_reject;
+static int allow_reject, force_draw;
+static __u64 draw_value;
 static void check(int ok, const char *what)
 {
 	if (!ok) { fprintf(stderr, "ARM memory adapter=%u case=%lu: %s\n", ADAPTER, cases, what); exit(1); }
@@ -21,10 +22,10 @@ static void check(int ok, const char *what)
 static __u64 fresh(__u64 *s) { *s ^= *s << 13; *s ^= *s >> 7; *s ^= *s << 17; return *s; }
 unsigned long native_lab_entry_input(unsigned kind)
 {
-	check(count < 32, "input overflow"); requests[count++] = kind;
+	check(count < 512, "input overflow"); requests[count++] = kind;
 	if (kind == 1) return 2;
 	if (kind == 3) return 3;
-	check(kind == 6, "unexpected input kind"); return fresh(&entropy);
+	check(kind == 6, "unexpected input kind"); return force_draw ? draw_value : fresh(&entropy);
 }
 void arm64_sim_unsupported_opcode(void)
 {
@@ -61,6 +62,16 @@ static void inputs_equal(struct kprog_arm64_coordinates *actual, struct kprog_ar
 {
 	check(actual->sp_base == expected->sp_base && actual->return_base == expected->return_base && actual->stack_offset == expected->stack_offset && actual->sp_valid == expected->sp_valid && actual->return_valid == expected->return_valid, "coordinate state/cache frame");
 	check(count == wanted_count && !memcmp(requests, wanted, count * sizeof(*requests)) && entropy == expected_entropy, "exact input order/identity/laziness");
+}
+/* The native instruction front must retain an after-include caller hook. */
+static unsigned override_visits;
+#undef ARM64_SIM_L_READ_FAULT
+#define ARM64_SIM_L_READ_FAULT(BASE, INDEX, AUX, IMM) (++override_visits, 73)
+static void check_native_hook(void)
+{
+	int result;
+	ARM64_SIM_L_READ_FAULT_CALL_INTO(result, 255, 255, 0, 0);
+	check(result == 73 && override_visits == 1, "native fault-hook override");
 }
 int main(void)
 {
@@ -132,5 +143,133 @@ int main(void)
 		cases++;
 	}
 	printf("ARM complete memory adapter %u: %lu routing/cache/input/frame/rejection cases\n", ADAPTER, cases);
+	const __u64 fault_bases[] = {0, 15, 30, 31, 32, 33, 255, 0x100000020ULL, ~0ULL};
+	const __u64 values[] = {0, 4095, 4096, ~0ULL, 0x12345678ffffffffULL, 0x8000000000000000ULL};
+	const __u64 draws[] = {0, 1, 0x8000000000000000ULL, ~0ULL};
+	unsigned long start = cases;
+	force_draw = 1;
+	for (unsigned bi = 0; bi < 9; bi++) for (unsigned tag = 0; tag < 256; tag++)
+	for (unsigned vi = 0; vi < 6; vi++) for (unsigned mode = 0; mode < 4; mode++)
+	for (unsigned di = 0; di < 4; di++) {
+		__u64 base = fault_bases[bi], index = mode & 2 ? 10 : 255, imm = values[(vi + 2) % 6];
+		unsigned index_tag = vi % 3 == 0 ? 0 : vi % 3 == 1 ? 4 : 10;
+		__u32 aux = (mode << 24) | ((mode & 1) << 16) | (ARM64_MOD_LSL << 8);
+		c = (struct kprog_arm64_coordinates){5, 7, -80, (__u8)(mode & 1), (__u8)(mode & 2)};
+		if (base < 31) { regs[base].x = values[vi]; tags[base] = tag; }
+		regs[10].x = values[(vi + 1) % 6]; tags[10] = index_tag;
+		a.is_xdp = vi % 3 == 0 ? 0 : vi % 3 == 1 ? 1 : 255;
+		a.abi_kind = (tag + mode) % 4 == 3 ? 255 : (tag + mode) % 4; before_a = a;
+		memcpy(before_regs, regs, sizeof(regs)); memcpy(before_tags, tags, sizeof(tags));
+		count = wanted_count = copies = 0; expected_c = c; expected_entropy = entropy; draw_value = draws[di];
+		unsigned effective_tag = base == 32 ? 4 : base < 31 ? tag : 0;
+		int expected_fault = 0;
+		if (base != 32 && effective_tag != 4 && effective_tag != 7 && !((a.is_xdp || a.abi_kind == 1) && effective_tag == 1)) {
+			if (effective_tag == 0) {
+				__u64 index_value = index == 255 ? 0 : regs[10].x + (index_tag == 4 ? coordinate(&expected_c, 1) : index_tag == 10 ? coordinate(&expected_c, 3) : 0);
+				__u64 offset = (mode ? 0 : imm) + (index_value << (mode & 1));
+				expected_fault = ((base < 31 ? regs[base].x : 0) + offset + (mode & 1 ? imm : 0)) < 4096;
+			}
+			if (!expected_fault) { wanted[wanted_count++] = 6; expected_fault = draw_value != 0; }
+		}
+		check(kprog_arm64_read_fault(&a, base, index, aux, imm) == expected_fault, "fault domain/low page/pre delta/nonzero normalization");
+		inputs_equal(&c, &expected_c);
+		check(!copies && !memcmp(&a, &before_a, sizeof(a)) && !memcmp(regs, before_regs, sizeof(regs)) && !memcmp(tags, before_tags, sizeof(tags)), "fault query GPR/profile/access frame");
+		check(!memcmp(arena, before_arena, sizeof(arena)) && !memcmp(raw, expected_raw, sizeof(raw)) && !memcmp(packed, before_packed, sizeof(packed)) && !memcmp(payload, expected_payload, sizeof(payload)), "fault query complete-memory frame");
+		cases++;
+	}
+	printf("ARM fault predicate adapter %u: %lu lazy/domain/address/input/frame cases\n", ADAPTER, cases - start);
+	start = cases;
+	const unsigned ops[] = {ARM64_OP_LOAD, ARM64_OP_LDRSB, ARM64_OP_LDRSH, ARM64_OP_LDRSW, ARM64_OP_STORE};
+	const unsigned destinations[] = {0, 15, 30, 31, 32, 255}, flags[] = {0, 1, 2, 4, 8};
+	for (unsigned oi = 0; oi < 5; oi++) for (unsigned ri = 0; ri < 6; ri++)
+	for (unsigned fi = 0; fi < 5; fi++) for (unsigned mode = 0; mode < 4; mode++)
+	for (unsigned di = 0; di < 2; di++) {
+		unsigned data = destinations[ri], width = flags[fi] ? flags[fi] : 8, op = ops[oi], store = op == ARM64_OP_STORE;
+		__u32 aux = mode << 24;
+		c = (struct kprog_arm64_coordinates){5, 7, -80, (__u8)(mode & 1), 0}; expected_c = c;
+		a = (struct kprog_arm64_addressing){&c, regs, tags, (__u8 *)arena, (__u8 *)packed, payload, 160, 96, NULL, NULL, 0, 255, arena}; before_a = a;
+		for (unsigned i = 0; i < 31; i++) { regs[i].x = 0xfedcba9876543210ULL ^ i; tags[i] = 0; }
+		regs[15].ptr = raw + 200; tags[15] = 6;
+		for (unsigned i = 0; i < sizeof(raw); i++) raw[i] = (__u8)(cases + i * 31);
+		memcpy(expected_raw, raw, sizeof(raw)); memcpy(before_arena, arena, sizeof(arena)); memcpy(before_packed, packed, sizeof(packed)); memcpy(expected_payload, payload, sizeof(payload)); memcpy(before_regs, regs, sizeof(regs)); memcpy(before_tags, tags, sizeof(tags));
+		count = wanted_count = copies = 0; expected_entropy = entropy; draw_value = di;
+		int fault = !store && di, rejects = data == 15 && mode && !fault;
+		if (!store) wanted[wanted_count++] = 6;
+		if (!rejects) {
+			if (mode & 1 && !fault) before_regs[15].ptr = raw + 208;
+			if (store) {
+				__u64 value = data == 32 ? (__u64)c.stack_offset + coordinate(&expected_c, 1) : data < 31 ? before_regs[data].x : 0;
+				for (unsigned i = 0; i < width; i++) expected_raw[(mode == 2 ? 200 : 208) + i] = (__u8)(value >> (i * 8));
+			} else {
+				unsigned load_width = op == ARM64_OP_LOAD ? width : op == ARM64_OP_LDRSB ? 1 : op == ARM64_OP_LDRSH ? 2 : 4;
+				__u64 value = fault ? 0 : little(raw + (mode == 2 ? 200 : 208), load_width);
+				if (op != ARM64_OP_LOAD && (value & (1ULL << (load_width * 8 - 1)))) value |= ~mask(load_width);
+				value &= mask(fault ? 8 : width);
+				if (data < 31) { before_regs[data].x = value; before_tags[data] = 0; }
+				else if (data == 32) {
+					__s64 old = expected_c.stack_offset;
+					expected_c.stack_offset = (__s64)(value - coordinate(&expected_c, 1));
+					if (expected_c.stack_offset > old) {
+						for (unsigned i = 0; i < a.capacity; i++) if ((__s64)i - a.bias >= old && (__s64)i - a.bias < expected_c.stack_offset) { ((__u8 *)before_arena)[i] = (__u8)draw_value; wanted[wanted_count++] = 6; }
+						for (unsigned i = 0; i < (a.capacity + 7) / 8; i++) if ((__s64)(i * 8) - a.bias < expected_c.stack_offset && (__s64)(i * 8 + 8) - a.bias > old) ((__u8 *)before_packed)[i] = 0;
+					}
+				}
+			}
+			if (mode & 2 && !fault) before_regs[15].ptr = raw + (mode == 3 ? 216 : 208);
+		}
+		allow_reject = rejects;
+		if (setjmp(rejected) == 0) {
+			if (store) kprog_arm64_store(&a, 15, data, 255, aux, 8, flags[fi]);
+			else if (op == ARM64_OP_LOAD) kprog_arm64_load(&a, data, 15, 255, aux, 8, flags[fi]);
+			else kprog_arm64_signed_load(&a, op, data, 15, 255, aux, 8, flags[fi]);
+			check(!rejects, "missing scalar writeback-overlap rejection");
+		}
+		allow_reject = 0;
+		inputs_equal(&c, &expected_c);
+		check(copies == (unsigned)(ADAPTER && !fault && !rejects), "fault/overlap precedes transfer");
+		check(!memcmp(&a, &before_a, sizeof(a)) && !memcmp(regs, before_regs, sizeof(regs)) && !memcmp(tags, before_tags, sizeof(tags)), "scalar instruction register/tag/writeback/profile frame");
+		check(!memcmp(arena, before_arena, sizeof(arena)) && !memcmp(raw, expected_raw, sizeof(raw)) && !memcmp(packed, before_packed, sizeof(packed)) && !memcmp(payload, expected_payload, sizeof(payload)), "scalar instruction complete-memory frame");
+		cases++;
+	}
+	printf("ARM scalar memory adapter %u: %lu transfer/recovery/writeback/frame cases\n", ADAPTER, cases - start);
+	start = cases;
+	const unsigned targets[] = {0, 15, 30, 31, 255};
+	for (unsigned tag = 0; tag < 256; tag++) for (unsigned ti = 0; ti < 5; ti++) {
+		unsigned dst = targets[ti];
+		c = (struct kprog_arm64_coordinates){0xfedcba9876543210ULL, 0x123456789abcdef0ULL, -80, 0, 0}; expected_c = c;
+		a = (struct kprog_arm64_addressing){&c, regs, tags, (__u8 *)arena, (__u8 *)packed, payload, 160, 96, NULL, NULL, 0, 255, arena}; before_a = a;
+		arena[2] = values[tag % 6]; payload[2] = values[(tag + 1) % 6]; ((__u8 *)packed)[2] = tag;
+		memcpy(before_arena, arena, sizeof(arena)); memcpy(before_packed, packed, sizeof(packed)); memcpy(expected_payload, payload, sizeof(payload));
+		memcpy(before_regs, regs, sizeof(regs)); memcpy(before_tags, tags, sizeof(tags));
+		if (dst < 31) { before_regs[dst].x = tag == 4 || tag == 10 ? payload[2] : arena[2]; before_tags[dst] = tag; }
+		count = wanted_count = copies = 0; expected_entropy = entropy;
+		kprog_arm64_load(&a, dst, 32, 255, 0, 0, 8);
+		inputs_equal(&c, &expected_c);
+		check(!copies && !memcmp(&a, &before_a, sizeof(a)) && !memcmp(regs, before_regs, sizeof(regs)) && !memcmp(tags, before_tags, sizeof(tags)), "whole pointer/tag/relative payload writeback");
+		check(!memcmp(arena, before_arena, sizeof(arena)) && !memcmp(raw, expected_raw, sizeof(raw)) && !memcmp(packed, before_packed, sizeof(packed)) && !memcmp(payload, expected_payload, sizeof(payload)), "whole pointer load memory frame");
+		cases++;
+	}
+	printf("ARM load provenance adapter %u: %lu tag/payload/ignored-destination cases\n", ADAPTER, cases - start);
+	start = cases;
+	const unsigned operand_tags[] = {0, 4, 10};
+	for (unsigned si = 0; si < 3; si++) for (unsigned ii = 0; ii < 3; ii++) for (unsigned mode = 0; mode < 4; mode++) {
+		c = (struct kprog_arm64_coordinates){5, 7, -80, 0, 0}; expected_c = c;
+		a = (struct kprog_arm64_addressing){&c, regs, tags, (__u8 *)arena, (__u8 *)packed, payload, 160, 96, NULL, NULL, 0, 255, arena}; before_a = a;
+		regs[15].ptr = raw + 200; tags[15] = 6; regs[0].x = 0xfedcba9876543210ULL; tags[0] = operand_tags[si]; regs[10].x = 1; tags[10] = operand_tags[ii];
+		memcpy(before_regs, regs, sizeof(regs)); memcpy(before_tags, tags, sizeof(tags)); memcpy(expected_raw, raw, sizeof(raw));
+		count = wanted_count = copies = 0; expected_entropy = entropy;
+		__u64 offset = regs[10].x + (tags[10] == 4 ? coordinate(&expected_c, 1) : tags[10] == 10 ? coordinate(&expected_c, 3) : 0);
+		__u64 value = regs[0].x + (tags[0] == 4 ? coordinate(&expected_c, 1) : tags[0] == 10 ? coordinate(&expected_c, 3) : 0);
+		unsigned address = (mode == 2 ? 200 : 208) + offset;
+		for (unsigned i = 0; i < 8; i++) expected_raw[address + i] = (__u8)(value >> (i * 8));
+		if (mode) before_regs[15].ptr = raw + (mode == 3 ? 216 : 208);
+		kprog_arm64_store(&a, 15, 0, 10, mode << 24, 8, 8);
+		inputs_equal(&c, &expected_c);
+		check(copies == ADAPTER && !memcmp(raw, expected_raw, sizeof(raw)) && !memcmp(&a, &before_a, sizeof(a)) && !memcmp(regs, before_regs, sizeof(regs)) && !memcmp(tags, before_tags, sizeof(tags)), "indexed store address/value/input ordering/frame");
+		check(!memcmp(arena, before_arena, sizeof(arena)) && !memcmp(packed, before_packed, sizeof(packed)) && !memcmp(payload, expected_payload, sizeof(payload)), "indexed store private-memory frame");
+		cases++;
+	}
+	printf("ARM indexed store adapter %u: %lu source/index cold-input order cases\n", ADAPTER, cases - start);
+	check_native_hook();
 	return 0;
 }
