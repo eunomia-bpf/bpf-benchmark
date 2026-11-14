@@ -784,3 +784,11 @@ RUNTIME_PROBE_BUILD ?= /var/tmp/kprog-tmp/perf/runtime-probe-read-layout
 runtime-probe-read-layout:
 	$(MAKE) -f $(HERE)/Makefile $(RUNTIME_PROBE_BUILD)/runtime-array-layout BUILD=$(RUNTIME_PROBE_BUILD)
 	$(RUNTIME_PROBE_BUILD)/runtime-array-layout $(KDIR)/vmlinux --probe-read $(KDIR)/System.map > $(RUNTIME_PROBE_BUILD)/runtime-probe-read-layout.json
+
+RUNTIME_PROBE_PAYLOAD ?= $(ROOT)/corpus/results/perf-probe-read-linker-20261114
+.PHONY: runtime-probe-read-payload
+runtime-probe-read-payload: known-map-link-build runtime-probe-read-layout
+	install -d $(RUNTIME_PROBE_PAYLOAD)
+	install -m755 $(KNOWN_MAP_TARGET)/debug/native-link $(RUNTIME_PROBE_PAYLOAD)/native-link.real
+	strip --strip-debug $(RUNTIME_PROBE_PAYLOAD)/native-link.real
+	install -m644 $(RUNTIME_PROBE_BUILD)/runtime-probe-read-layout.json $(RUNTIME_PROBE_PAYLOAD)/runtime-probe-read-layout.json
