@@ -38,6 +38,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 import symbolize
 
 ROOT = pathlib.Path("/workspaces/repository")
@@ -56,7 +57,7 @@ GUEST = r"""#!/bin/sh
 # ("failed to mmap file" at /var/tmp); the file is copied to the shared mount after
 # recording ends.
 set -u
-O=$1 APP=$2 SECS=$3 FREQ=$4 MANIFEST=$5 EVENT=$6
+O=$1 APP=$2 SECS=$3 FREQ=$4 MANIFEST=$5 EVENT=$6 MODE=${7:-guest}
 cd /workspaces/repository || exit 2
 if [ "$EVENT" != cpu-clock ]; then
   /var/tmp/perf stat -e "$EVENT" -- true > "$O/profile-event-preflight.log" 2>&1 || exit 2
@@ -80,9 +81,14 @@ for ph in baseline post_rejit; do
     sleep 2
   done
   echo "phase-profile: perf start $ph $(date -u +%FT%TZ)" >> "$O/phase-profile.log"
+  if [ "$MODE" = host ]; then
+    cat /proc/kallsyms > "$O/$ph.start.kallsyms"
+    python3 -c 'import json,time; print(json.dumps(dict(wall_ns=time.time_ns(), monotonic_ns=time.monotonic_ns())))' > "$O/$ph.start.clock.json"
+  else
   /var/tmp/perf record -a -g -e "$EVENT" -F "$FREQ" -o "/dev/shm/$ph.data" \
     >> "$O/phase-profile.log" 2>&1 &
   P=$!
+  fi
   for _ in $(seq 1 300); do
     grep -q "\"event\": \"measurement_done\", \"phase\": \"$ph\"" "$O/guest.log" 2>/dev/null && break
     sleep 2
@@ -92,12 +98,18 @@ for ph in baseline post_rejit; do
   # resolves guest addresses against whatever it is given, so without this file
   # every sample is named after an unrelated host symbol.
   cat /proc/kallsyms > "$O/$ph.kallsyms"
+  if [ "$MODE" = host ]; then
+    python3 -c 'import json,time; print(json.dumps(dict(wall_ns=time.time_ns(), monotonic_ns=time.monotonic_ns())))' > "$O/$ph.end.clock.json"
+  else
   kill -INT "$P" 2>/dev/null
   wait "$P" 2>/dev/null
+  fi
   echo "phase-profile: perf stop $ph $(date -u +%FT%TZ) kallsyms=$ph.kallsyms" \
     >> "$O/phase-profile.log"
-  cp "/dev/shm/$ph.data" "$O/$ph.data"
-  rm -f "/dev/shm/$ph.data"
+  if [ "$MODE" != host ]; then
+    cp "/dev/shm/$ph.data" "$O/$ph.data"
+    rm -f "/dev/shm/$ph.data"
+  fi
 done
 wait "$G"
 echo "phase-profile: guest done rc=$? $(date -u +%FT%TZ)" >> "$O/phase-profile.log"
@@ -106,6 +118,15 @@ echo "phase-profile: guest done rc=$? $(date -u +%FT%TZ)" >> "$O/phase-profile.l
 
 def _stamp() -> str:
     return subprocess.check_output(["date", "-u", "+%Y%m%dT%H%M%SZ"], text=True).strip()
+
+
+def execution_command(command: list[str], args: argparse.Namespace,
+                      out: pathlib.Path) -> list[str]:
+    if not args.host_event:
+        return command
+    return [str(PERF), "kvm", "-o", str(out / "host.data"), "record", "-a",
+            "-C", args.cpus, "-e", args.host_event, "-F", str(args.freq),
+            "--clockid", "monotonic", "--", *command]
 
 
 def run(args: argparse.Namespace) -> int:
@@ -144,16 +165,33 @@ def run(args: argparse.Namespace) -> int:
         (var_tmp / "out").symlink_to(out, target_is_directory=True)
     else:
         (var_tmp / "out").mkdir(exist_ok=True)
+    if args.host_event:
+        command[-1] += " host"
+    actual_command = execution_command(command, args, out)
     (out / "command.json").write_text(
-        json.dumps({"command": command, "app": args.app, "seconds": args.seconds,
+        json.dumps({"command": command, "execution_command": actual_command,
+                    "host_event": args.host_event,
+                    "app": args.app, "seconds": args.seconds,
                     "freq": args.freq, "event": args.event,
                     "cpus": args.cpus, "vcpus": args.vcpus},
                    indent=2, sort_keys=True) + "\n", encoding="utf-8")
     log = (out / "host.log").open("w", encoding="utf-8")
-    completed = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT)
+    if args.host_event:
+        (out / "host.start.clock.json").write_text(json.dumps(dict(
+            wall_ns=time.time_ns(), monotonic_ns=time.monotonic_ns())) + "\n")
+    completed = subprocess.run(actual_command, stdout=log, stderr=subprocess.STDOUT)
+    if args.host_event:
+        (out / "host.end.clock.json").write_text(json.dumps(dict(
+            wall_ns=time.time_ns(), monotonic_ns=time.monotonic_ns())) + "\n")
     log.close()
-    for name_ in ("guest.log", "phase-profile.log", "baseline.data", "post_rejit.data",
-                  "baseline.kallsyms", "post_rejit.kallsyms"):
+    artifacts = ["guest.log", "phase-profile.log", "baseline.kallsyms", "post_rejit.kallsyms"]
+    if args.host_event:
+        for phase in PHASES:
+            artifacts.extend([f"{phase}.start.kallsyms", f"{phase}.start.clock.json",
+                              f"{phase}.end.clock.json"])
+    else:
+        artifacts.extend(["baseline.data", "post_rejit.data"])
+    for name_ in artifacts:
         source = var_tmp / "out" / name_
         if not source.is_file():
             print(f"missing guest artifact: {source}", file=sys.stderr)
@@ -164,6 +202,9 @@ def run(args: argparse.Namespace) -> int:
     print(f"run directory: {out}")
     if completed.returncode != 0:
         return completed.returncode
+    if args.host_event:
+        print("host guest-only recording retained; analyze guest IPs and clock mapping offline")
+        return 0
     return report(out, annotate=args.annotate, limit=args.limit)
 
 
@@ -271,6 +312,8 @@ def main(argv: list[str]) -> int:
     run_parser.add_argument("--freq", default="999")
     run_parser.add_argument("--event", default="cpu-clock",
                             help="perf event; cycles:k can sample interrupt-context BPF work")
+    run_parser.add_argument("--host-event", default="",
+                            help="record guest IPs with host perf kvm, e.g. cpu_atom/cycles/G")
     run_parser.add_argument("--limit", type=int, default=25)
     run_parser.add_argument("--annotate", type=int, default=3)
     run_parser.add_argument("--out", default="")

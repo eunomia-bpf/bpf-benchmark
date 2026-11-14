@@ -150,11 +150,18 @@ OTEL_PROFILE_MANIFEST ?= $(ROOT)/corpus/results/perf-otel-upstream-20261114/mani
 PROFILE_TOOL_BUILD ?= /var/tmp/kprog-tmp/perf/profile-tool
 PROFILE_PERF_SOURCE ?= /workspaces/kprog-raw/perf/20261113-loader-cpu-profile/tool/perf
 OTEL_PROFILE_EVENT ?= cpu-clock
+OTEL_PROFILE_HOST_ARGS ?=
 .PHONY: host-guest-pmu-check
 HOST_GUEST_PMU_EVENT ?= cpu_atom/cycles/G
 host-guest-pmu-check:
 	cat /sys/module/kvm/parameters/enable_pmu
 	$(PROFILE_TOOL_BUILD)/perf stat -e $(HOST_GUEST_PMU_EVENT) -- sleep 0.01
+
+.PHONY: host-guest-pmu-record-check
+HOST_GUEST_PMU_OUTPUT ?= /workspaces/kprog-raw/perf/20261114-otel-host-profile/preflight
+host-guest-pmu-record-check:
+	install -d $(HOST_GUEST_PMU_OUTPUT)
+	$(PROFILE_TOOL_BUILD)/perf kvm -o $(HOST_GUEST_PMU_OUTPUT)/host.data record -a -C 16-19 -e $(HOST_GUEST_PMU_EVENT) -F 199 --clockid monotonic -- true
 
 .PHONY: profile-tool otel-profile otel-profile-report profile-tool-check
 profile-tool-check:
@@ -176,7 +183,7 @@ profile-tool:
 
 otel-profile: profile-tool
 	env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(OTEL_PROFILE_CAPTURE) EQCODEX_PROGRESS_LOG=/var/tmp/out/guest.log EQCODEX_NATIVE_LINK_BINARY=$(LINK_MEMORY_PAYLOAD)/native-link-on \
-		python3 $(ROOT)/kprog/perf/profile/phase-profile.py run --app otelcol-ebpf-profiler/profiling --seconds 45 --cpus 16-19 --vcpus 4 --memory 32G --freq 199 --out $(OTEL_PROFILE_RAW) --annotate 0 --manifest $(OTEL_PROFILE_MANIFEST) --state-root /var/tmp/kprog-tmp/perf/phase-profile --perf $(PROFILE_TOOL_BUILD)/perf --persist-output --event $(OTEL_PROFILE_EVENT)
+		python3 $(ROOT)/kprog/perf/profile/phase-profile.py run --app otelcol-ebpf-profiler/profiling --seconds 45 --cpus 16-19 --vcpus 4 --memory 32G --freq 199 --out $(OTEL_PROFILE_RAW) --annotate 0 --manifest $(OTEL_PROFILE_MANIFEST) --state-root /var/tmp/kprog-tmp/perf/phase-profile --perf $(PROFILE_TOOL_BUILD)/perf --persist-output --event $(OTEL_PROFILE_EVENT) $(OTEL_PROFILE_HOST_ARGS)
 
 .PHONY: memory-host-bench
 memory-host-bench:

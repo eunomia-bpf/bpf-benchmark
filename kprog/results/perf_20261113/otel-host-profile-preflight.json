@@ -1,0 +1,44 @@
+{
+  "recorded_at": "2026-11-14T02:42:42.063583+00:00",
+  "protocol_commit": "6a1a95e21",
+  "raw": "/workspaces/kprog-raw/perf/20261114-otel-host-profile/preflight",
+  "inputs": [],
+  "reports": [
+    {
+      "path": "/workspaces/kprog-raw/perf/20261114-otel-host-profile/preflight/collection.json",
+      "sha256": "ef609b77df3d8d81dd2c5273efd3e838dc5a02e481e683ad04cf548251148c1c",
+      "data": {
+        "recorded_at": "2026-11-14T02:42:42Z",
+        "prior_commit": "6a1a95e21",
+        "event": "cpu_atom/cycles/G",
+        "cpus": "16-19",
+        "make_exit": 0,
+        "preflight_command": "make -f kprog/perf/native-context/Makefile host-guest-pmu-record-check",
+        "preflight_log": "install -d /workspaces/kprog-raw/perf/20261114-otel-host-profile/preflight\n/var/tmp/kprog-tmp/perf/profile-tool/perf kvm -o /workspaces/kprog-raw/perf/20261114-otel-host-profile/preflight/host.data record -a -C 16-19 -e cpu_atom/cycles/G -F 199 --clockid monotonic -- true\n[ perf record: Woken up 1 times to write data ]\n[ perf record: Captured and wrote 0.173 MB /workspaces/kprog-raw/perf/20261114-otel-host-profile/preflight/host.data ]\n",
+        "tests": "python3 -m unittest discover -s /workspaces/repository/kprog/perf/profile -p test_perf_selection.py\n...\n----------------------------------------------------------------------\nRan 3 tests in 0.004s\n\nOK\npython3 -m unittest discover -s /workspaces/repository/kprog/perf/profile -p test_window_costs.py\n..\n----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK\n",
+        "source_files": [
+          {
+            "path": "kprog/perf/profile/phase-profile.py",
+            "sha256": "718874742840674bb7daf057660a7c6a10b3b7bac873b0ba984d15cb1b522c76"
+          },
+          {
+            "path": "kprog/perf/profile/test_perf_selection.py",
+            "sha256": "f82dcac2da6da82221ef4c613d739f4b31b96640064709c075eaf068725d0f7d"
+          },
+          {
+            "path": "kprog/perf/native-context/Makefile",
+            "sha256": "1ef9947c62934cf62d67be0191f7e7fcc713f47665e0889c36d77bcbfcee2f7f"
+          }
+        ],
+        "scope": "Actual host guest-only hardware recorder configuration accepted and perf wrote metadata. Command true did not run a guest; no guest sample capture or application result proven. Optional wrapper uses perf kvm to own existing Make-backed guest lifetime, same CPU mask, separate host recording, start-phase guest kallsyms and wall/monotonic clocks. Default guest cpu-clock path retained."
+      }
+    }
+  ],
+  "scope": "Host guest-only hardware recorder preflight and source hashes, no VM ran and no guest samples proven.",
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/perf_20261113/otel-host-profile-preflight.tar.gz",
+    "bytes": 22999,
+    "sha256": "56df576cf53f1e35ea8d9600a54e3ddf1e313e1bfb17362aecfe30f44c6c01aa",
+    "files_byte_compared": 2
+  }
+}
