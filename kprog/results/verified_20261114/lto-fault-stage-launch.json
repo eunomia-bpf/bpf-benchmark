@@ -1,0 +1,18 @@
+{
+  "recorded": "2026-11-14T05:50:12Z",
+  "pid": 207118,
+  "wait_pid": 201684,
+  "dependency_chain": "BCC201613 -> Katran201684 -> imageEX -> compiler stage",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-lto-fault/stage-job",
+  "make_target": "checked-sim-stage",
+  "make_arguments": [
+    "CHECKED_SIM_BUILD=/var/tmp/kprog-tmp/verified/lto-fault",
+    "CHECKED_COMPILER_STAGE_OUTPUT=/workspaces/kprog-raw/verified/20261114-lto-fault/stage"
+  ],
+  "cpu": "8-15",
+  "host_address_space_limit_bytes": 4294967296,
+  "new_guest": false,
+  "kernel_or_image_build": false,
+  "postlaunch_outcome_polled": false,
+  "completion_claimed": false
+}

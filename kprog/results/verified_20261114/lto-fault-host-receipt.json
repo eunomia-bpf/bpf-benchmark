@@ -1,0 +1,19 @@
+{
+  "recorded": "2026-11-14T05:50:12Z",
+  "fix_commit": "6ac92b55f",
+  "test_commit": "cd5f3bb2a",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-lto-fault",
+  "archive": "kprog/results/verified_20261114/lto-fault-host-results.tar.gz",
+  "sha256": "46639d1cb1ee8d5ac70155b24e704ae20c9725a92623e9ad2e188c6c7cc3e3e7",
+  "bytes": 76515,
+  "make_exit_code": 0,
+  "safe_vectors": 8,
+  "faulting_children": 2,
+  "unknown_asm_rejected": true,
+  "candidate": "/var/tmp/kprog-tmp/verified/lto-fault/compile-sim-ir",
+  "candidate_sha256": "bfe23fdb831b367e5a6345e77f91d90f8e75b308e24b6d1ea92478430792d1bc",
+  "currently_staged_sha256": "d0f30a61ac7479cab645db7d3e168e8d772c2c7c374c3008b264789298776bdf",
+  "canonical_deployed": false,
+  "scope": "Architectural fault marker lowered to native llvm.trap during LTO, matching existing unresolved-dispatch fault behavior; host regression only",
+  "raw_removed": false
+}
