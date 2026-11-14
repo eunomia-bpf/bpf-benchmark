@@ -1,0 +1,143 @@
+{
+  "application": "katran",
+  "application_status": "error",
+  "application_error": "native app exited before BPF programs were tracked by shim\nstderr tail:\nI20261114 05:13:00.253722  2776 KatranGrpcService.cpp:69] Starting Katran\nE20261114 05:13:00.253902  2776 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20261114 05:13:00.253909  2776 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20261114 05:13:00.254041  2776 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20261114 05:13:00.254046  2776 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20261114 05:13:00.257952  2776 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20261114 05:13:00.257961  2776 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20261114 05:23:29.919363  2776 BaseBpfAdapter.cpp:144] libbpf: prog 'balancer_ingress': BPF program load failed: -EINVAL\nE20261114 05:23:29.919395  2776 BaseBpfAdapter.cpp:144] libbpf: prog 'balancer_ingress': -- BEGIN PROG LOAD LOG --\nverification time 24121 usec\nstack depth 192+0+0\nprocessed 67939 insns (limit 1000000) max_states_per_insn 20 total_states 3993 peak_states 1206 mark_read 0\n-- END PROG LOAD LOG --\nE20261114 05:23:29.919420  2776 BaseBpfAdapter.cpp:144] libbpf: prog 'balancer_ingress': failed to load: -EINVAL\nE20261114 05:23:29.919453  2776 BaseBpfAdapter.cpp:144] libbpf: failed to load object '/artifacts/user/repo-artifacts/x86_64/katran/bpf/balancer.bpf.o'\nE20261114 05:23:29.919456  2776 BpfLoader.cpp:326] error while trying to load bpf object: /artifacts/user/repo-artifacts/x86_64/katran/bpf/balancer.bpf.o\nterminate called after throwing an instance of 'std::invalid_argument'\n  what():  can't load main bpf program\n*** Aborted at 1794633809 (Unix time, try 'date -d @1794633809') ***\n*** Signal 6 (SIGABRT) (0xad8) received by PID 2776 (pthread TID 0x7f932303f440) (linux TID 2776) (maybe from PID 2776, UID 0) (code: sent by tkill or tgkill), stack trace: ***\n    @ 000000000010f558 (unknown)\n    @ 000000000004532f (unknown)\n    @ 000000000009ebec pthread_kill\n    @ 000000000004527d gsignal\n    @ 00000000000288fe abort\n    @ 00000000000a5ff4 (unknown)\n    @ 00000000000bb0d9 (unknown)\n    @ 00000000000a5a54 std::terminate()\n    @ 00000000000bb390 __cxa_throw\n    @ 00000000000a3930 __cxa_throw\n    @ 00000000002e01f2 (unknown)\n    @ 000000000017c977 (unknown)\n    @ 000000000009895b (unknown)\n    @ 00000000000996ca (unknown)\n    @ 000000000002a1c9 (unknown)\n    @ 000000000002a28a __libc_start_main\n    @ 0000000000098594 (unknown)",
+  "service_summary": {
+    "started": "2026-11-14T05:11:30.897932+00:00",
+    "command": [
+      "python3",
+      "/workspaces/repository/kprog/test/verified_corpus.py",
+      "katran",
+      "1",
+      "10",
+      "1"
+    ],
+    "service": {
+      "ready": true,
+      "arch": 1,
+      "endpoint": "/sys/kernel/debug/bpf_x86_native_lab/specializer"
+    },
+    "returncode": 0,
+    "service_returncode": -15,
+    "finished": "2026-11-14T05:23:39.812540+00:00"
+  },
+  "attempts": 1,
+  "loaded": 1,
+  "verified": 0,
+  "installed": 0,
+  "run": 0,
+  "installed_without_counter": [],
+  "native_counter_ids_without_install": [],
+  "baseline_counter_programs": 1,
+  "native_counter_programs": 0,
+  "programs": [
+    {
+      "request_id": 1,
+      "source_prog_id": 15,
+      "native_sha256": "ba252e0372d100f34b60a0deb3f0a7ccc16b632c3c1a5eb40e9b13d31e558c20",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-14T05:13:00.423649+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '1', '15', '/workspaces/kprog-raw/verified/20261114-katran-self-compare-retry/control/state/session-6ixasb_f/requests/request-p_g743lz/generated/request.native.o', 'balancer_ingress', '/workspaces/kprog-raw/verified/20261114-katran-self-compare-retry/control/state/session-6ixasb_f/requests/request-p_g743lz/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/verified/20261114-katran-self-compare-retry/control/state/session-6ixasb_f/requests/request-p_g743lz/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '37', '0', '0', '0', '0', '0', 'decap_vip_stats', '34', 'null', 'stable_rt_stats', '33', 'null', 'stats', '22', 'null', 'vip_map', '24', 'null', 'tpr_stats_map', '36', 'null', 'server_id_stats', '37', 'null', 'ctl_array', '23', 'null', 'lru_mapping', '26', 'null', 'fallback_cache', '25', 'null', 'quic_stats_map', '32', 'null', 'vip_to_down_reals_map', '39', 'null', 'reals_stats', '29', 'null', 'ch_rings', '27', 'null', 'server_id_map', '35', 'null', 'vip_miss_stats', '31', 'null', 'reals', '28', 'null', 'lru_miss_stats', '30', 'null']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 240, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 186, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '1', '15', '/workspaces/kprog-raw/verified/20261114-katran-self-compare-retry/control/state/session-6ixasb_f/requests/request-p_g743lz/generated/request.native.o', 'balancer_ingress', '/workspaces/kprog-raw/verified/20261114-katran-self-compare-retry/control/state/session-6ixasb_f/requests/request-p_g743lz/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/verified/20261114-katran-self-compare-retry/control/state/session-6ixasb_f/requests/request-p_g743lz/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '37', '0', '0', '0', '0', '0', 'decap_vip_stats', '34', 'null', 'stable_rt_stats', '33', 'null', 'stats', '22', 'null', 'vip_map', '24', 'null', 'tpr_stats_map', '36', 'null', 'server_id_stats', '37', 'null', 'ctl_array', '23', 'null', 'lru_mapping', '26', 'null', 'fallback_cache', '25', 'null', 'quic_stats_map', '32', 'null', 'vip_to_down_reals_map', '39', 'null', 'reals_stats', '29', 'null', 'ch_rings', '27', 'null', 'server_id_map', '35', 'null', 'vip_miss_stats', '31', 'null', 'reals', '28', 'null', 'lru_miss_stats', '30', 'null']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/verified/20261114-katran-self-compare-retry/control/state/session-6ixasb_f/requests/1.failure.tar.gz",
+      "finished": "2026-11-14T05:23:29.918907+00:00",
+      "stock_load": null,
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    }
+  ],
+  "recorded": "2026-11-14T05:27:52.888853+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-katran-self-compare-retry",
+  "corpus_run_directory": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_051228_215728",
+  "capture_directory": "/workspaces/repository/corpus/results/verified-captures-ofu97w6j",
+  "make_exit_code": 0,
+  "launch_receipt": {
+    "recorded": "2026-11-14T05:12:21Z",
+    "model_fix_commit": "32e02cfe5",
+    "kernel_job": {
+      "pid": 190898,
+      "raw_directory": "/workspaces/kprog-raw/verified/20261114-self-compare/kernel-job",
+      "target": "self-compare-kvm",
+      "cpu": "14 on host affinity8-15",
+      "vcpu": 2,
+      "guest_memory": "1G",
+      "host_address_space_limit_bytes": 8589934592,
+      "image_lock": "shared"
+    },
+    "katran_job": {
+      "pid": 190952,
+      "wait_pid": 190898,
+      "raw_directory": "/workspaces/kprog-raw/verified/20261114-katran-self-compare-retry",
+      "target": "trusted-service-kvm",
+      "cpu": "8-15",
+      "vcpu": 8,
+      "guest_memory": "64G",
+      "host_address_space_limit_bytes": 85899345920,
+      "image_lock": "shared after dependency exit",
+      "samples": 1,
+      "workload_seconds": 10,
+      "bpf_stats": true,
+      "canonical_loader_rebuild": false
+    },
+    "dependency_policy": "Resource sequencing only; Katran proceeds regardless of the fixture exit status, no new benchmark gate",
+    "image": "sha256:66e9e88f197f975fd98f78f08be2eac3b7c313937e39a4cb2a45639d0615f2b8",
+    "kernel": "74d1097af561",
+    "postlaunch_outcome_polled": false,
+    "shared_base_or_image_rebuilt": false,
+    "raw_removed": false
+  },
+  "corpus_metadata": {
+    "bpf_stats": true,
+    "config": {
+      "enabled_passes": [
+        "noop",
+        "map_inline",
+        "const_prop",
+        "dce",
+        "rotate",
+        "cond_select",
+        "extract",
+        "endian_fusion",
+        "lea",
+        "ccmp",
+        "bulk_memory",
+        "prefetch",
+        "wide_mem",
+        "bounds_check_merge",
+        "skb_load_bytes_spec",
+        "noop",
+        "const_prop",
+        "dce"
+      ]
+    },
+    "details_dir": "details",
+    "error_message": "corpus suite reported errors",
+    "generated_at": "2026-11-14T05:23:38.187738+00:00",
+    "last_updated_at": "2026-11-14T05:23:38.187734+00:00",
+    "launcher_boot_id": "73c300d6-19f2-4e54-9542-8c9275f7b20f",
+    "launcher_pid": 1821,
+    "launcher_start_ticks": 6083,
+    "manifest": "/workspaces/repository/corpus/config/macro_apps.yaml",
+    "run_type": "x86_kvm_corpus",
+    "samples": 1,
+    "started_at": "2026-11-14T05:12:28.215728+00:00",
+    "status": "error",
+    "suite": "corpus",
+    "workload_only": false,
+    "workload_seconds": 10.0
+  },
+  "scope": "Actual upstream two-start verified-B run; workload run means positive recorded native run_cnt_delta",
+  "raw_removed": false,
+  "archive": {
+    "raw_archive": "/workspaces/kprog-raw/verified/20261114-katran-self-compare-retry/collection/full-evidence.tar.gz",
+    "sha256": "3ac58dc8a4089b2710794d9225b111ed5982d426d88eaf4090fcb2cb52b984c2",
+    "bytes": 12131020,
+    "published_archive": "/workspaces/repository/kprog/results/verified_20261114/katran-self-compare-retry-results.tar.gz"
+  }
+}
