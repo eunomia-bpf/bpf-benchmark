@@ -110,7 +110,9 @@
 - [x] P1g 旧OTel phase-counters解码可复现修复（0be31b60d）：去掉/tmp临时ID表依赖，修正移动后的源码根路径和显式enum赋值解析；2回归通过，两臂各99个raw counters逐项等于独立eqcodex解码。receipt `kprog/results/perf_20261113/counter-decoder-repair.json`；已有counter-window数字不变，不改framework或phase/generation判定。
 - [ ] P1i 完全装载Tetragon kprobe语义差异（原perf P1h，保留advisor新增P1h整类CO-RE优先）：依据c3f089bb5的真实时窗policy计数，定位native generic_kprobe提前返回/选择器/参数或尾调用路径；CO-RE flavor修复单独不足。先复用retained entry JIT/map证据，按组件owner修默认关闭候选，只测受影响行为子集。
 - [x] P1 OTel paired-profile report 修复（bee22393c）：显式 --perf 传到 IP symbolizer，保留 standalone 默认路径；2 focused regressions 和 retained 20261114-otel-profile 真数据重报通过。客体两阶段 appok，原 Make2 是 host report 旧工具路径错误，不重跑 VM。
-- [ ] P1 OTel interrupt-context 剖析：cpu-clock 20261114-otel-profile 两臂约73k样本，精确测量窗37,329/36,723样本无OTel/helper stack，硬中断计时盲点为推断；保留全部数据，默认关闭选择 cycles:k 做真实PMU能力检查和两阶段剖析，不能把零样本解释为零工作。PMU130037实际make2、应用未启动，guest cycles:k不支持且host kvm.enable_pmu=N；host cpu_atom/cycles/G计数器配置已接受（未证实guest样本），接续host guest-only采样。
+- [x] P1 OTel guest PMU 能力探测（6a1a95e21）：130037 在应用启动前 make2，cycles:k 不支持且 host kvm.enable_pmu=N；全部错误/raw/archive保留，不改KVM设置、不宣称guest性能结果。
+- [x] P1 可选host guest-only recorder（e8e775991）：perf kvm 按原CPU集合包装原Make客体生命周期，默认关闭；保留两臂启动时的guest kallsyms和clock pairs。实际host record配置预检make0、5focused regressions通过；未运行客体的预检不等于捕获guest样本。
+- [ ] P1 OTel interrupt-context 剖析：cpu-clock 20261114-otel-profile 两臂约73k样本，精确测量窗37,329/36,723样本无OTel/helper stack，硬中断计时盲点为推断；保留全部数据，默认关闭选择 cycles:k 做真实PMU能力检查和两阶段剖析，不能把零样本解释为零工作。PMU130037实际make2、应用未启动，guest cycles:k不支持且host kvm.enable_pmu=N；host cpu_atom/cycles/G计数器配置已接受（未证实guest样本），host guest-only采样133271已启动（otel-host-profile-launch.json），下一turn收集，不轮询。
 - [ ] P2 修好后只重测受这处修复影响的应用（stats 关和开，每个应用 3×180 秒），每次运行用 stubs.py 和程序自身计数核对，增量写进第 1 节；六应用全量计时只在冻结前跑一次，正式下限表和几何平均以那次为准。
 - [ ] P3 等量工作成立的应用里，按每次调用的差距找原生一侧的通用优化（OTel、Tetragon、Cilium）。
 

@@ -1,0 +1,71 @@
+{
+  "recorded_at": "2026-11-14T02:44:08Z",
+  "source_commit": "e8e775991",
+  "outer_pid": 133271,
+  "raw": "/workspaces/kprog-raw/perf/20261114-otel-host-profile",
+  "profile_output": "/workspaces/kprog-raw/perf/20261114-otel-host-profile/run",
+  "counter_capture": "/workspaces/repository/corpus/results/perf-otel-host-profile-20261114",
+  "command": [
+    "make",
+    "-f",
+    "kprog/perf/native-context/Makefile",
+    "otel-profile",
+    "OTEL_PROFILE_HOST_ARGS=--host-event cpu_atom/cycles/G",
+    "OTEL_PROFILE_RAW=/workspaces/kprog-raw/perf/20261114-otel-host-profile/run",
+    "OTEL_PROFILE_CAPTURE=/workspaces/repository/corpus/results/perf-otel-host-profile-20261114"
+  ],
+  "resources": {
+    "cpus": "16-19",
+    "vcpus": 4,
+    "guest_memory": "32G",
+    "host_as_bytes": 51539607552,
+    "image_lock": "shared"
+  },
+  "protocol": {
+    "host_event": "cpu_atom/cycles/G",
+    "host_clock": "monotonic",
+    "guest_software_recording": false,
+    "frequency_hz": 199,
+    "samples": 1,
+    "seconds": 45,
+    "stats": 1,
+    "guest_pmu_required": false,
+    "guest_pmu_setting_changed": false
+  },
+  "artifacts": [
+    {
+      "path": "kprog/perf/profile/phase-profile.py",
+      "sha256": "718874742840674bb7daf057660a7c6a10b3b7bac873b0ba984d15cb1b522c76"
+    },
+    {
+      "path": "kprog/perf/profile/symbolize.py",
+      "sha256": "fecbd562ee6ef09e4de772249f07915213ce26c7e3e3393b263013c60d0b65ae"
+    },
+    {
+      "path": "kprog/perf/may29-image/eqcodex-capture.py",
+      "sha256": "fb784be680b194ba00473279d61fb2a03e3181246be664ca37f8e7992eda15d2"
+    },
+    {
+      "path": "corpus/results/perf-otel-upstream-20261114/manifest-context.json",
+      "sha256": "430b26ab4be8fd501a819f48c0451895d86bf90606533958a05639ac8a51573f"
+    },
+    {
+      "path": "corpus/results/perf-otel-upstream-20261114/otelcol-ebpf-profiler.native.o",
+      "sha256": "7e6781470c8d4a1d2669cfd262405d11095e5c2a2cbf591a675e578718d6b644"
+    },
+    {
+      "path": "corpus/results/perf-local-memory-20261113/native-link-on",
+      "sha256": "f7644e69df0606ac64e1af9631ffec0227c5c46282aaf2c5622758626de9f58a"
+    },
+    {
+      "path": "corpus/results/perf-local-memory-20261113/native-link.real",
+      "sha256": "65eebf5e64ed5e4c0adfda52dd4587c9c626c232aeffb2ac3ab76e90a01d5b72"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/profile-tool/perf",
+      "sha256": "4f35b3527ee18e4fac9f4b2f4f7675d4865e55b9351dbf002c11db7511be4c37"
+    }
+  ],
+  "outcome": null,
+  "scope": "Host recorder launch only, no postlaunch outcome polling. Real event/recorder preflights configured successfully without a VM; actual guest sample capture remains to be established. Host/guest wall+monotonic clocks and start-phase kallsyms support later measured-window analysis. Same original-source OTel direct configuration, known custom__generic load gap unchanged, no equal-work/floor/optimization result."
+}
