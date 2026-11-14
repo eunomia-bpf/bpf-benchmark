@@ -1,0 +1,24 @@
+{
+  "recorded": "2026-11-14T03:14:01Z",
+  "launcher_pid": 149090,
+  "code_commit": "1233721f4",
+  "kernel_commit": "74d1097af56132da2b325699c5a560b29a790ff2",
+  "image_digest": "0bb7d4be1f0a9c4bb015ee20d14fb9ba26e56da9f84310a501257ae5376e084c",
+  "make_target": "checked-sim-kvm SOURCE_MAP_VM_MEMORY=1G",
+  "host_cpu": "14",
+  "guest_vcpus": 2,
+  "guest_memory": "1G",
+  "host_address_space_kib": 8388608,
+  "prelaunch_memavailable_kib": 34950064,
+  "image_lock": "shared /workspaces/.agent-state/kprog-lanes/locks/image",
+  "launch_directory": "/workspaces/kprog-raw/verified/20261114-checked-sim/kernel-launch",
+  "output_directory": "/workspaces/kprog-raw/verified/20261114-checked-sim/kernel",
+  "dry_run": "PASS",
+  "result": "Pending; collect next turn, no outcome polls",
+  "canonical_changed": false,
+  "expected": "Actual stock verification of B before compilation; generated checked-sim-C executable must follow actual map29/73 and return58/146 despite same-name decoy11",
+  "artifacts": {
+    "/var/tmp/kprog-tmp/verified/checked-sim/compile-sim-ir": "d51d80e5d06373587daeae67879fefafbec173418ed7a8946fe27971c5ec3272",
+    "/var/tmp/kprog-tmp/verified/checked-sim/trusted-native-loader": "5f6c718af3ae5efdf4483916f89eaa9dd491b10b85f9c2d23ad75bac8a9d737b"
+  }
+}
