@@ -1,0 +1,24 @@
+{
+  "recorded": "2026-11-14T02:55:31.558414+00:00",
+  "code_commit": "8958ff36c",
+  "make_exit": 0,
+  "finished": "2026-11-14T02:51:52Z",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-frame-pointer/retry2",
+  "archive": "frame-pointer-execution-kernel.tar.gz",
+  "canonical_changed": false,
+  "scope": "Functional registered-service kernel regression, not application certification",
+  "execution": [
+    {
+      "route": "stock",
+      "retval": 2,
+      "invocations": 34,
+      "tail_transfers": 33
+    },
+    {
+      "route": "native",
+      "retval": 2,
+      "invocations": 34,
+      "tail_transfers": 33
+    }
+  ]
+}

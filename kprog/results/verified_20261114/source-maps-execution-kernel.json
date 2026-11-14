@@ -1,0 +1,32 @@
+{
+  "recorded": "2026-11-14T02:55:32.390881+00:00",
+  "code_commit": "8958ff36c",
+  "make_exit": 0,
+  "finished": "2026-11-14T02:51:50Z",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-source-maps",
+  "archive": "source-maps-execution-kernel.tar.gz",
+  "canonical_changed": false,
+  "scope": "Functional registered-service kernel regression, not application certification",
+  "execution": [
+    {
+      "route": "stock",
+      "configured": 29,
+      "retval": 58
+    },
+    {
+      "route": "native",
+      "configured": 29,
+      "retval": 58
+    },
+    {
+      "route": "stock",
+      "configured": 73,
+      "retval": 146
+    },
+    {
+      "route": "native",
+      "configured": 73,
+      "retval": 146
+    }
+  ]
+}
