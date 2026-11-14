@@ -251,7 +251,8 @@ def loaded_rodata(capture: Path) -> dict[str, bytes]:
     for ref in sorted(capture.glob("*/ref.json")):
         meta = json.loads(ref.read_text())
         map_name = meta.get("map_name", "")
-        if not map_name.startswith(".rodata"):
+        if not (map_name.startswith(".rodata")
+                or map_name.endswith(".rodata")):
             continue
         dump = ref.parent / "map-values" / f"map-{meta['map_id']}.dump.json"
         if not dump.exists():
@@ -346,25 +347,32 @@ def publish_manifest(app: str, output: Path, published: dict[str, str],
                for entry in manifest["objects"]}
     missing = sorted(shipped - set(published))
     if missing:
-        sys.exit(f"{app}: {len(missing)} objects the manifest ships were not "
-                 f"specialized: {missing}")
+        # An object with no .rodata map is not specialized at all; its entry
+        # keeps naming the object the run already loads.
+        print(f"{app}: {len(missing)} objects left unspecialized: {missing}",
+              file=sys.stderr)
     for stem, path in published.items():
         target = output / f"{stem}.native.o"
         if Path(path).resolve() != target.resolve():
             target.write_bytes(Path(path).read_bytes())
-    kept, dropped = [], set()
+    # A stem that was not specialized keeps the manifest's own object, copied
+    # next to the specialized ones so the directory holds every object the
+    # manifest names.
     for entry in manifest["objects"]:
         stem = Path(entry["native_object"]).name.replace(".native.o", "")
         if stem in published:
-            kept.append(entry)
-        else:
-            dropped.add(entry["native_object"])
-    manifest["objects"] = kept
+            continue
+        source = image_manifest.parent / Path(entry["native_object"]).name
+        if not source.is_file():
+            sys.exit(f"{app}: {stem} is neither specialized nor beside the "
+                     f"manifest ({source})")
+        target = output / source.name
+        if target.resolve() != source.resolve():
+            target.write_bytes(source.read_bytes())
     manifest["status"] = "specialized"
     (output / "manifest.json").write_text(json.dumps(manifest, indent=1) + "\n")
-    print(f"{app}: manifest {len(kept)} entries over {len(published)} objects"
-          + (f", {len(dropped)} objects left out: {sorted(dropped)}" if dropped else ""),
-          file=sys.stderr)
+    print(f"{app}: manifest {len(manifest['objects'])} entries over "
+          f"{len(published)} specialized objects", file=sys.stderr)
 
 
 def main() -> None:
@@ -435,7 +443,11 @@ def main() -> None:
                 tool = match[0]
         if tool not in loaded:
             if not args.maps:
-                print(f"{stem:22} no captured .rodata map", file=sys.stderr)
+                # No .rodata map at all (vfsstat keeps its state in .bss), so
+                # there is no constant to fold: the object is not specialized
+                # and the manifest keeps the one the run already loads.
+                print(f"{stem:22} no captured .rodata map; object unchanged",
+                      file=sys.stderr)
                 continue
         # An object with no captured .rodata (katran keeps its configuration in
         # a regular map) still goes through the map rule, with no image to
