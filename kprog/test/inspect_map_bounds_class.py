@@ -32,7 +32,12 @@ def inspect(worklist, output, bpf=False):
             archive = tarfile.open(fileobj=stream) if stream is not None else outer
             artifacts = json.load(archive.extractfile('request/generated/artifacts.json'))
             names = ['generated/trusted_x86.proof.o', 'generated/trusted_x86.bpf.c',
-                     'source-identities.json', 'load.stderr', 'kernel.metadata.json']
+                     'source-identities.json', 'kernel.metadata.json']
+            # checked-sim-c may fail initial verification before load is run.
+            members = set(archive.getnames())
+            names.append('load.stderr' if 'request/load.stderr' in members else 'verify.stderr')
+            if 'request/load.stderr' in members and 'request/verify.stderr' in members:
+                names.append('verify.stderr')
             if bpf:
                 names.append('generated/trusted_x86.bpf.o')
             for name in names:
