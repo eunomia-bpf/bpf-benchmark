@@ -449,6 +449,6 @@ theorem x86_cmpop_cmp_equal_lane_flags (flagsCode : Code)
       { cf := false, zf := true, sf := false, of := false } := by
   simp [x86CmpOpStepSpec, x86CmpOpFlagKindSpec, x86CmpOpLhsSpec,
     x86CmpOpLhsSourceSpec, x86CmpOpRhsSpec, x86CmpOpRhsSourceSpec,
-    x86SubResultSpec, x86SubFlagsSpec, x86NarrowSpec]
+    x86SubResultSpec, x86SubFlagsSpec, x86NarrowSpec, BitVec.ult]
 
 end KProgFormal

@@ -1,0 +1,30 @@
+{
+  "recorded": "2026-11-14T05:25:34.393912+00:00",
+  "scope": "Shared CMP/TEST contract, no application/program parameter",
+  "theorems": [
+    "x86_cmpop_equal_lane_observation",
+    "x86_cmpop_test_equal_lane_flags",
+    "x86_cmpop_cmp_equal_lane_flags"
+  ],
+  "quantification": "All register BitVec64 values, resolved widths, byte lanes, immediate and memory inputs",
+  "proved_flags": [
+    "CF",
+    "ZF",
+    "SF",
+    "OF"
+  ],
+  "parity_scope": "PF checked by33344 C regression vectors, not represented in existing X86Flags theorem structure",
+  "model_fix": "32e02cfe5",
+  "proof_file": "kprog/formal/KProgFormal/X86CmpOpHandler.lean",
+  "proof_source_sha256": "c4d21b0272795e929b9ce4d34d4fd7577e03972d030db24addb22551aa17f32b",
+  "lean_toolchain": "leanprover/lean4:v4.19.0",
+  "initial_exit": 2,
+  "final_exit": 0,
+  "initial_failure": "Unsigned self-comparison simplification missing; discharged by unfolding BitVec.ult",
+  "command": "make -C kprog/libnativeloader self-compare-proof",
+  "production_or_model_changed": false,
+  "raw_removed": false,
+  "archive": "kprog/results/verified_20261114/equal-lane-proof-results.tar.gz",
+  "archive_sha256": "0e39a8527de3fc2d894630df52b34b11ea9833d26acc84d3ee271f2b6b398154",
+  "bytes": 1379
+}
