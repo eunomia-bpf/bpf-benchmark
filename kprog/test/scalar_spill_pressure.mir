@@ -25,15 +25,23 @@ body:             |
 
     $w2 = LDW32 $r1, 8
     $w3 = LDW32 killed $r1, 32
-    $r4 = ADD_ri $r2, 1
-    $r5 = ADD_ri $r3, 3
-    $r6 = ADD_ri $r2, 5
-    $r7 = ADD_ri $r3, 7
-    $r8 = XOR_ri $r2, -2147483648
-    $r9 = XOR_ri $r3, 2147483647
-    $r1 = ADD_ri $r2, 1
+    $r4 = COPY $r2
+    $r4 = ADD_ri killed $r4, 1
+    $r5 = COPY $r3
+    $r5 = ADD_ri killed $r5, 3
+    $r6 = COPY $r2
+    $r6 = ADD_ri killed $r6, 5
+    $r7 = COPY $r3
+    $r7 = ADD_ri killed $r7, 7
+    $r8 = COPY $r2
+    $r8 = XOR_ri killed $r8, -2147483648
+    $r9 = COPY $r3
+    $r9 = XOR_ri killed $r9, 2147483647
+    $r1 = COPY $r2
+    $r1 = ADD_ri killed $r1, 1
     STW32 killed $w1, %stack.0, 0
-    $r1 = ADD_ri $r3, 9
+    $r1 = COPY $r3
+    $r1 = ADD_ri killed $r1, 9
     STW32 killed $w1, %stack.1, 0
     JMP %bb.1
 

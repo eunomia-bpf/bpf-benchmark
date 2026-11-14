@@ -74,7 +74,7 @@ int main(int argc, char **argv)
     int groups = argc == 4 ? (!strcmp(argv[1], "--groups") ? 1 :
                               !strcmp(argv[1], "--pressure") ? 2 : 0) : 0;
     if (argc != 3 && !groups) {
-        fprintf(stderr, "usage: scalar-spill-values ORIGINAL LOWERED | --groups PHASE OBJECT\n"); return 1;
+        fprintf(stderr, "usage: scalar-spill-values ORIGINAL LOWERED | --groups/--pressure PHASE OBJECT\n"); return 1;
     }
     if (offsetof(struct __sk_buff, mark) != 8 || offsetof(struct __sk_buff, priority) != 32) {
         fprintf(stderr, "fixture context offsets differ\n"); return 1;
