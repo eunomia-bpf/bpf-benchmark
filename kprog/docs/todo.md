@@ -201,9 +201,9 @@
 
 **两阶段计划（运营者 2026-11-14："然后你要想办法优化一下, LTO + native 我觉得到 40% 性能进步是完全肯定可以的. 先确保管线正确, 然后开始考虑优化. 每一个优化也得记录在哪里怎么做的."；协调者 2026-11-14T12:36:52Z）**
 
-**目标**：每次调用 native/eBPF 的六应用几何平均到 1.40x（至少 1.20x）。吞吐一并报告，它受 BPF 在整机 CPU 里的份额限制（Katran 约 45%：每次调用 1.4x 时吞吐约 1.15x）。
+**目标**：每次调用 native/eBPF 的六应用几何平均到 1.40x（至少 1.20x）；吞吐至少好 30%（运营者："吞吐肯定也需要好 30% 以上"）。吞吐受 BPF 相关开销的份额限制。两种估计：bpf stats 的程序时间份额（Tracee 57.6%、Tetragon 67%、OTel 32%、BCC 18%），和 05-29 存档里卸掉 eBPF 后省下的时间（evaluation.md：Tracee 86%、Tetragon 77%、Katran 65%、OTel 60%、BCC 55%、Cilium 32%，含内核分派和用户态消费事件，原生代码优化不到后者）。吞吐要快 30%，BPF 部分要快：Tracee 1.4–1.7x、Tetragon 1.4–1.6x、Katran 约 2x（按实测反推份额约 45%）、OTel 1.7–3.6x、BCC 1.7x 起（按 bpf stats 份额算到不了）、Cilium 3.6x 以上。所以吞吐 30% 先在 BPF 占大头的 Tracee、Tetragon、Katran 上争取；上限表要同时给出这两种份额。
 
-**阶段 1：管线正确**（完成之前的计时都算中间结果）。① 六个应用都同源、等量工作（Tracee：头文件按唯一内核的 vmlinux 头编，或同源路线等 .bss 修复；Cilium：D01/D02/D09；Tetragon：加载时生成的函数）；② 直接原生配置和 LTO 配置都跑通六个应用，两边应用输出一致；③ 链接后的代码里没有 JIT 一侧没有的额外开销：所有优化关闭时，原生每次调用至少和 JIT 持平（OTel 现在 0.866x，先查清，12:08 的多余 LFENCE 是第一处）。
+**阶段 1：管线正确**（完成之前的计时都算中间结果）。① 六个应用都同源、等量工作（Tracee：头文件按唯一内核的 vmlinux 头编，或同源路线等 .bss 修复；Cilium：D01/D02/D09；Tetragon：加载时生成的函数）；② 直接原生配置和 LTO 配置都跑通六个应用，两边应用输出一致；③ 编译选项开对（运营者："编译选项是不是得开对?"）：镜像构建用 -O3 -march=native -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fomit-frame-pointer；同源构建（kprog/build Makefile 第 346、412、504 行，vendor/bpf KATRAN_SAME_SOURCE_CODEGEN）少了 -march=native，这台 Core Ultra 9 285K 有 BMI1/BMI2，内核 JIT 在有 BMI2 时会用 shlx/sarx/shrx；同源构建还多了 -fno-jump-tables 和 -fno-optimize-sibling-calls，各自的理由要写清楚，链接器和模型用不着的就去掉。lane C 负责（生成 P 的一侧），每个 flag 在 optimizations.md 记一行；④ 链接后的代码里没有 JIT 一侧没有的额外开销：所有优化关闭时，原生每次调用至少和 JIT 持平（OTel 现在 0.866x，先查清，12:08 的多余 LFENCE 是第一处）。
 
 **阶段 2：优化**，全部在 LTO 里一起打开，只计时合起来的配置，按预期收益排：① helper 内联（probe_read_kernel/user 直接读、get_current_task/pid_tgid/smp_processor_id 的 per-CPU 读、map 查找按类型和链接时已知参数内联、LPM 特化）；② 尾调用直连（prog array 槽位在链接时已知时改成直接跳转）；③ LTO 配置下的整体优化：内联之后编译器跨 helper 边界做常量传播和死代码消除，冻结的 .rodata 和装载后只读的配置 map 折叠成常量（Tracee 的 config_map 在 sys_enter 里有 35 处查找）；④ 代码生成：编译 flag（-O2/-O3、帧指针、返回 thunk、对齐）对照，必要时用 vendor/llvmbpf 编同一个程序做诊断对照。每一项优化在 kprog/docs/optimizations.md 记一行：在哪里（代码、开关）、怎么做的、属于流水线哪一步、正确性怎么查、合并配置下的效果。落地的 lane 在同一个提交里写这一行。
 
