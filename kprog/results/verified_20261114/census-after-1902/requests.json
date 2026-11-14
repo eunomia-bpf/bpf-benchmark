@@ -1,0 +1,77 @@
+{
+  "recorded": "2026-11-14T21:11:47Z",
+  "journal": "/workspaces/kprog-raw/perf/20261114-census-resume/control/outcomes.jsonl",
+  "queue_prefix": 17,
+  "previous_prefix": 13,
+  "observations": [
+    {
+      "application": "tetragon/observer",
+      "source_prog_id": 64,
+      "name": "generic_retkprobe_filter_arg",
+      "body_group": 68,
+      "stage": "verifier_rejected",
+      "class": "verifier_stack_access",
+      "service": {
+        "request_id": 14,
+        "started": "2026-11-14T18:46:59.122205+00:00",
+        "finished": "2026-11-14T19:05:33.138311+00:00",
+        "status": -5,
+        "failure_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/14.failure.tar.gz"
+      },
+      "archive_bytes": 16817213,
+      "diagnostic_tail": "0: (7b) *(u64 *)(r10 -928) = r1\ninvalid write to stack R10 off=-928 size=8\nprocessed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n"
+    },
+    {
+      "application": "tetragon/observer",
+      "source_prog_id": 66,
+      "name": "generic_retkprobe_output",
+      "body_group": 69,
+      "stage": "installed",
+      "class": "installed",
+      "service": {
+        "request_id": 15,
+        "started": "2026-11-14T19:05:40.890186+00:00",
+        "finished": "2026-11-14T19:05:44.592388+00:00",
+        "status": 0,
+        "prog_id": 57,
+        "artifact_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/15.success.tar.gz"
+      },
+      "archive_bytes": 1399365,
+      "diagnostic_tail": ""
+    },
+    {
+      "application": "tracee/monitor",
+      "source_prog_id": 536,
+      "name": "trace_ret_vfs_write",
+      "body_group": 70,
+      "stage": "verifier_rejected",
+      "class": "verifier_context_access",
+      "service": {
+        "request_id": 16,
+        "started": "2026-11-14T19:08:54.267310+00:00",
+        "finished": "2026-11-14T19:44:18.939980+00:00",
+        "status": -5,
+        "failure_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/16.failure.tar.gz"
+      },
+      "archive_bytes": 28893342,
+      "diagnostic_tail": "43860: (61) r2 = *(u32 *)(r7 +0)\ndereference of modified ctx ptr R7 off=80 disallowed\nprocessed 13303 insns (limit 1000000) max_states_per_insn 0 total_states 964 peak_states 964 mark_read 0\n"
+    },
+    {
+      "application": "tracee/monitor",
+      "source_prog_id": 538,
+      "name": "trace_ret_vfs_write_tail",
+      "body_group": 71,
+      "stage": "verifier_rejected",
+      "class": "verifier_stack_access",
+      "service": {
+        "request_id": 17,
+        "started": "2026-11-14T19:47:46.218398+00:00",
+        "finished": "2026-11-14T20:55:37.381032+00:00",
+        "status": -5,
+        "failure_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/17.failure.tar.gz"
+      },
+      "archive_bytes": 40830912,
+      "diagnostic_tail": "16027: (7b) *(u64 *)(r10 -544) = r0\ninvalid write to stack R10 off=-544 size=8\nprocessed 5014 insns (limit 1000000) max_states_per_insn 0 total_states 368 peak_states 368 mark_read 0\n"
+    }
+  ]
+}

@@ -1,0 +1,420 @@
+[
+  {
+    "name": "n100000_ptr_direct",
+    "target_native_instructions": 100000,
+    "expected_result": 50007,
+    "stage": "proof_compile",
+    "native_instructions": 100036,
+    "generated_c_bytes": 15056952,
+    "returncode": 1
+  },
+  {
+    "name": "n100000_ptr_indirect",
+    "target_native_instructions": 100000,
+    "expected_result": 50023,
+    "stage": "proof_compile",
+    "native_instructions": 100084,
+    "generated_c_bytes": 15064503,
+    "returncode": 1
+  },
+  {
+    "name": "n100000_scalar_direct",
+    "target_native_instructions": 100000,
+    "expected_result": 10713441450579470919,
+    "stage": "proof_compile",
+    "native_instructions": 100036,
+    "generated_c_bytes": 10819467,
+    "returncode": 1
+  },
+  {
+    "name": "n100000_scalar_indirect",
+    "target_native_instructions": 100000,
+    "expected_result": 1685323454157403831,
+    "stage": "proof_compile",
+    "native_instructions": 100084,
+    "generated_c_bytes": 10827018,
+    "returncode": 1
+  },
+  {
+    "name": "n10000_ptr_direct",
+    "target_native_instructions": 10000,
+    "expected_result": 5015,
+    "stage": "proof_compile",
+    "native_instructions": 10036,
+    "generated_c_bytes": 1490872,
+    "returncode": 1
+  },
+  {
+    "name": "n10000_ptr_indirect",
+    "target_native_instructions": 10000,
+    "expected_result": 5023,
+    "stage": "proof_compile",
+    "native_instructions": 10084,
+    "generated_c_bytes": 1498229,
+    "returncode": 1
+  },
+  {
+    "name": "n10000_scalar_direct",
+    "target_native_instructions": 10000,
+    "expected_result": 15318568609386021639,
+    "stage": "proof_compile",
+    "native_instructions": 10036,
+    "generated_c_bytes": 1067131,
+    "preprocessed_bytes": 298211058,
+    "returncode": -9
+  },
+  {
+    "name": "n10000_scalar_indirect",
+    "target_native_instructions": 10000,
+    "expected_result": 12877716020613431511,
+    "stage": "proof_compile",
+    "native_instructions": 10084,
+    "generated_c_bytes": 1074488,
+    "preprocessed_bytes": 298918911,
+    "returncode": -9
+  },
+  {
+    "name": "n1000_ptr_direct",
+    "target_native_instructions": 1000,
+    "expected_result": 506,
+    "stage": "load_or_execution_failed",
+    "native_instructions": 1015,
+    "generated_c_bytes": 148737,
+    "preprocessed_bytes": 89899087,
+    "returncode": 1,
+    "trace_returncode": 0,
+    "verifier_allocation_intervals": [
+      {
+        "slab_peak_bytes": 39632,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 42472,
+        "vmap_reserved_peak_bytes": 32768
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 267032,
+        "vmap_reserved_peak_bytes": 274432
+      }
+    ],
+    "verifier_slab_peak_bytes": 267032,
+    "verifier_vmap_reserved_peak_bytes": 274432,
+    "trace_lost_events": 0,
+    "verification_time_us": 208,
+    "peak_states": 0,
+    "diagnostic": "BPF_MOV uses reserved fields"
+  },
+  {
+    "name": "n1000_ptr_indirect",
+    "target_native_instructions": 1000,
+    "expected_result": 509,
+    "stage": "load_or_execution_failed",
+    "native_instructions": 1021,
+    "generated_c_bytes": 149950,
+    "preprocessed_bytes": 90034187,
+    "returncode": 1,
+    "trace_returncode": 0,
+    "verifier_allocation_intervals": [
+      {
+        "slab_peak_bytes": 39632,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 42472,
+        "vmap_reserved_peak_bytes": 32768
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 267032,
+        "vmap_reserved_peak_bytes": 274432
+      }
+    ],
+    "verifier_slab_peak_bytes": 267032,
+    "verifier_vmap_reserved_peak_bytes": 274432,
+    "trace_lost_events": 0,
+    "verification_time_us": 210,
+    "peak_states": 0,
+    "diagnostic": "BPF_MOV uses reserved fields"
+  },
+  {
+    "name": "n1000_scalar_direct",
+    "target_native_instructions": 1000,
+    "expected_result": 10444927170976545278,
+    "stage": "load_or_execution_failed",
+    "native_instructions": 1015,
+    "generated_c_bytes": 106366,
+    "preprocessed_bytes": 30655007,
+    "returncode": 1,
+    "trace_returncode": 0,
+    "verifier_allocation_intervals": [
+      {
+        "slab_peak_bytes": 39632,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 42472,
+        "vmap_reserved_peak_bytes": 32768
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 58272,
+        "vmap_reserved_peak_bytes": 20480
+      }
+    ],
+    "verifier_slab_peak_bytes": 58272,
+    "verifier_vmap_reserved_peak_bytes": 20480,
+    "trace_lost_events": 0,
+    "verification_time_us": 38,
+    "peak_states": 0,
+    "diagnostic": "BPF_MOV uses reserved fields"
+  },
+  {
+    "name": "n1000_scalar_indirect",
+    "target_native_instructions": 1000,
+    "expected_result": 10444927170976545281,
+    "stage": "load_or_execution_failed",
+    "native_instructions": 1021,
+    "generated_c_bytes": 107579,
+    "preprocessed_bytes": 30737991,
+    "returncode": 1,
+    "trace_returncode": 0,
+    "verifier_allocation_intervals": [
+      {
+        "slab_peak_bytes": 39632,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 42472,
+        "vmap_reserved_peak_bytes": 32768
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 58344,
+        "vmap_reserved_peak_bytes": 20480
+      }
+    ],
+    "verifier_slab_peak_bytes": 58344,
+    "verifier_vmap_reserved_peak_bytes": 20480,
+    "trace_lost_events": 0,
+    "verification_time_us": 33,
+    "peak_states": 0,
+    "diagnostic": "BPF_MOV uses reserved fields"
+  },
+  {
+    "name": "n100_ptr_direct",
+    "target_native_instructions": 100,
+    "expected_result": 56,
+    "stage": "load_or_execution_failed",
+    "native_instructions": 115,
+    "generated_c_bytes": 16548,
+    "preprocessed_bytes": 9907070,
+    "returncode": 1,
+    "trace_returncode": 0,
+    "verifier_allocation_intervals": [
+      {
+        "slab_peak_bytes": 39632,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 42472,
+        "vmap_reserved_peak_bytes": 32768
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 80216,
+        "vmap_reserved_peak_bytes": 45056
+      }
+    ],
+    "verifier_slab_peak_bytes": 80216,
+    "verifier_vmap_reserved_peak_bytes": 45056,
+    "trace_lost_events": 0,
+    "verification_time_us": 52,
+    "peak_states": 0,
+    "diagnostic": "BPF_MOV uses reserved fields"
+  },
+  {
+    "name": "n100_ptr_indirect",
+    "target_native_instructions": 100,
+    "expected_result": 59,
+    "stage": "load_or_execution_failed",
+    "native_instructions": 121,
+    "generated_c_bytes": 17761,
+    "preprocessed_bytes": 9973586,
+    "returncode": 1,
+    "trace_returncode": 0,
+    "verifier_allocation_intervals": [
+      {
+        "slab_peak_bytes": 39632,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 42472,
+        "vmap_reserved_peak_bytes": 32768
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 80216,
+        "vmap_reserved_peak_bytes": 45056
+      }
+    ],
+    "verifier_slab_peak_bytes": 80216,
+    "verifier_vmap_reserved_peak_bytes": 45056,
+    "trace_lost_events": 0,
+    "verification_time_us": 50,
+    "peak_states": 0,
+    "diagnostic": "BPF_MOV uses reserved fields"
+  },
+  {
+    "name": "n100_scalar_direct",
+    "target_native_instructions": 100,
+    "expected_result": 17694198624199650402,
+    "stage": "load_or_execution_failed",
+    "native_instructions": 115,
+    "generated_c_bytes": 12315,
+    "preprocessed_bytes": 3988260,
+    "returncode": 1,
+    "trace_returncode": 0,
+    "verifier_allocation_intervals": [
+      {
+        "slab_peak_bytes": 39632,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 42472,
+        "vmap_reserved_peak_bytes": 32768
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 58344,
+        "vmap_reserved_peak_bytes": 20480
+      }
+    ],
+    "verifier_slab_peak_bytes": 58344,
+    "verifier_vmap_reserved_peak_bytes": 20480,
+    "trace_lost_events": 0,
+    "verification_time_us": 36,
+    "peak_states": 0,
+    "diagnostic": "BPF_MOV uses reserved fields"
+  },
+  {
+    "name": "n100_scalar_indirect",
+    "target_native_instructions": 100,
+    "expected_result": 17694198624199650405,
+    "stage": "load_or_execution_failed",
+    "native_instructions": 121,
+    "generated_c_bytes": 13528,
+    "preprocessed_bytes": 4049560,
+    "returncode": 1,
+    "trace_returncode": 0,
+    "verifier_allocation_intervals": [
+      {
+        "slab_peak_bytes": 39632,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 42472,
+        "vmap_reserved_peak_bytes": 32768
+      },
+      {
+        "slab_peak_bytes": 39616,
+        "vmap_reserved_peak_bytes": 16384
+      },
+      {
+        "slab_peak_bytes": 58344,
+        "vmap_reserved_peak_bytes": 20480
+      }
+    ],
+    "verifier_slab_peak_bytes": 58344,
+    "verifier_vmap_reserved_peak_bytes": 20480,
+    "trace_lost_events": 0,
+    "verification_time_us": 40,
+    "peak_states": 0,
+    "diagnostic": "BPF_MOV uses reserved fields"
+  }
+]
