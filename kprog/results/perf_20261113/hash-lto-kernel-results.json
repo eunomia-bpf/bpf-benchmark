@@ -1,0 +1,22 @@
+{
+  "recorded_at": "2026-11-14T08:44:09Z",
+  "job_pid": 328161,
+  "make_exit": 0,
+  "raw": "/workspaces/kprog-raw/perf/20261114-hash-lto/kernel-retry3",
+  "source_commits": [
+    "43ef8b167",
+    "38be41160",
+    "867152aae"
+  ],
+  "source_loads": 18,
+  "native_verified_and_installed": 18,
+  "checked_sim_c_separate_verifications": 9,
+  "checked_C_byte_copies_equal": 9,
+  "stock_native_executions": 4608,
+  "typed_hash_routine_images": 16,
+  "generic_only_lru_percpu_images": 2,
+  "unsupported20byte_keys": "Actual original-helper fallback executed in both configurations; shared dispatch routine still emitted.",
+  "evidence_csv": "kprog/results/perf_20261113/hash-lto-kernel-results.csv",
+  "evidence_csv_sha256": "c0e65c4dc88def1651a3d1074ee76b1baf17885941e683ad4cdbb97a46db29d0",
+  "scope": "Actual map mutable-value/absent/insert/rewrite/delete execution on sole kernel, two configurations. LRU-percpu type10 remains generic; no independent LRU eviction/percpu CPU-index certification, whole-app coverage, throughput gain or equal-work/floor acceptance."
+}
