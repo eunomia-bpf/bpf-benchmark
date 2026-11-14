@@ -115,6 +115,34 @@ def check(args):
             row.update(execution)
         cases.append(row)
         (args.output/'cases.json').write_text(json.dumps(cases, indent=2)+'\n')
+    for name, option, saved_count in [('scalar_spill_pressure_ctx.mir','--pressure-context',1),
+                                      ('scalar_spill_pressure_all.mir','--pressure-all-live',2)]:
+        fixture = ROOT/'kprog/test'/name
+        for packed in (False, True):
+            label = option[2:]+('-packed' if packed else '-original')
+            source = fixture.read_text()
+            if packed:
+                source, pairs = spills.automatic(fixture, all_scalar_pairs=True)
+                if max(len(c.get('saved_live_registers', [])) for p in pairs for c in p['changes']) != saved_count:
+                    raise ValueError('Live scratch preservation was not exercised')
+            mir = args.build/'fixture.mir'
+            mir.write_text(source)
+            obj = args.build/'fixture.o'
+            run(['llc-18', '-O3', '-march=bpf', '-mcpu=v4', '-verify-machineinstrs',
+                 '-start-before=prologepilog', '-filetype=obj', mir, '-o', obj])
+            actual_depth = depth(obj)
+            expected_depth = 8+saved_count*8 if packed else 16
+            if actual_depth != expected_depth:
+                raise ValueError('Live scratch frame layout differs')
+            row = dict(phase=label, frame_access_depth=actual_depth)
+            if not args.compile_only:
+                result = run([args.build/'values-client', option, label, obj])
+                execution = json.loads(result.stdout)
+                if execution['failed'] or execution['executions'] != 1060:
+                    raise ValueError('Saved live register or context pointer changed')
+                row.update(execution)
+            cases.append(row)
+            (args.output/'cases.json').write_text(json.dumps(cases, indent=2)+'\n')
     (args.output/'result.json').write_text(json.dumps(dict(compile_only=args.compile_only,
         default_parity=parity, cases=cases), indent=2)+'\n')
     print(json.dumps(cases))

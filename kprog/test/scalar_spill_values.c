@@ -46,8 +46,12 @@ static int run(const char *path, int groups, const char *phase)
                 ^ (mark ^ UINT32_C(0x80000000)) ^ (priority ^ UINT32_C(0x7fffffff))
                 ^ (mark + UINT32_C(74565)) ^ (priority + UINT32_C(344865))
                 ^ (priority * UINT32_C(3)) ^ (priority + UINT32_C(11)) ^ (mark + UINT32_C(17));
-        } else if (groups == 2) {
+        } else if (groups >= 2) {
             expected = (mark + UINT32_C(1)) ^ (priority + UINT32_C(9));
+            if (groups == 3)
+                expected ^= mark + UINT32_C(17);
+            else if (groups == 4)
+                expected ^= (mark + UINT32_C(17)) + (priority + UINT32_C(9));
             expected += mark;
             expected += priority;
             expected += mark + UINT32_C(1);
@@ -72,7 +76,9 @@ static int run(const char *path, int groups, const char *phase)
 int main(int argc, char **argv)
 {
     int groups = argc == 4 ? (!strcmp(argv[1], "--groups") ? 1 :
-                              !strcmp(argv[1], "--pressure") ? 2 : 0) : 0;
+                              !strcmp(argv[1], "--pressure") ? 2 :
+                              !strcmp(argv[1], "--pressure-context") ? 3 :
+                              !strcmp(argv[1], "--pressure-all-live") ? 4 : 0) : 0;
     if (argc != 3 && !groups) {
         fprintf(stderr, "usage: scalar-spill-values ORIGINAL LOWERED | --groups/--pressure PHASE OBJECT\n"); return 1;
     }
