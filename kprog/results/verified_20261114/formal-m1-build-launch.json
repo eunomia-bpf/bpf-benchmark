@@ -1,0 +1,18 @@
+{
+  "recorded": "2026-11-14T07:22:50Z",
+  "pid": 249762,
+  "target": "make -C kprog/formal mature",
+  "toolchain": "leanprover/lean4:v4.35.0",
+  "integration_commit": "8f84d0651",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-formal-migration/m1-build",
+  "host_cpus": "8-15",
+  "imports": [
+    "Arm",
+    "X86",
+    "CCLib",
+    "Clightdefs"
+  ],
+  "scope": "M1 common Lean package importing actual forked bases; no local replacement ISA model; legacy package unchanged",
+  "postlaunch_outcome_polled": false,
+  "build_pass_claimed": false
+}

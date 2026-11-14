@@ -781,6 +781,7 @@
 自建的生成器和手写的两份 ISA 参考都换成外部成熟项目：fork 到 eunomia-bpf，作为 submodule 引入，在 fork 里补缺，补的部分尽量做成能回提上游的 PR。负责：lane formal（新的 Codex lane，用 Codex goal 按 M1 到 M6 的顺序做，见第 0 节）。按这个顺序：
 
 - [ ] M1 fork 并接上三个 submodule：leanprover/LNSym（Apache-2.0，AArch64）、jyh/x86lean（Apache-2.0，x86-64，在 1,241 个 form 上和 ACL2 x86isa 做过差分测试）、Certora/clean（CompCert 3.17 + clightgen 的 -lean 后端，带 Lean 4 写的 Clight 语义和分离逻辑；CompCert 是非商业许可，作为独立 submodule 各自保留原许可，开源发布时单独标明）。放在 kprog/formal 下，lake 能编过。
+  - 2026-11-14：三个 eunomia-bpf fork 已创建，`8f84d0651`将 LNSym49f8a1d9e46f、x86lean30c9b2e4e264、clean123f7f7767e2 作为 `kprog/formal/external/` submodule 接入。`mature/` Lake 包直接 import Arm/X86/CCLib/Clightdefs，统一4.35兼容性构建249762已启动（raw `/workspaces/kprog-raw/verified/20261114-formal-migration/m1-build`）；M1仍等待实际构建，不把fork/checkout当作build通过，M2尚未开始。原库4.19及旧证明保留到M3-M6，未写替代ISA语义；Clean实验性状态及独立许可见formal README。
 - [ ] M2 覆盖对照表：我们的 74 个 AArch64 操作对 LNSym（缺的大概率有 LDXR/STLXR 独占、LDADD 等 LSE 原子、带符号扩展的加载），75 个 x86-64 操作对 x86lean（BZHI 在它的覆盖表外）；缺的在 fork 里补。表放 kprog/formal/README.md。
 - [ ] M3 provenance tag 作为 kprog 自己的一层薄封装，放在 LNSym 和 x86lean 的 step 之上，替换 KProgFormal/Reference/AArch64.lean 和 X86.lean。Sail/ASL 那组对照保留，改成验证 fork 本身。
 - [ ] M4 生成器退役的前一半：现在生成出来的 simulator C 头文件改成签入仓库的普通 C 源码，以后直接编辑；用 clightgen -lean 从这份 C 导出 Lean。先确认 simulator C 落在 CompCert 支持的 C 子集里，helper 常量函数指针、__builtin、pragma 这类写法先包一层；默认构建的字节保持一致。
