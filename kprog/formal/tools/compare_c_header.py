@@ -3,7 +3,8 @@
 
 Stream the historical/current header at the fixture's actual include location,
 then check the current stream against an ordinary current compilation as well.
-Compiler arguments follow --; logs/objects persist, preprocessing uses scratch.
+Compiler arguments follow --. One fixture build is replaced in place;
+raw logs, commands and comparison results persist under --output.
 """
 from __future__ import annotations
 
@@ -38,7 +39,7 @@ def allocated(path: Path):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    for option in ("before", "header", "source", "output", "scratch"):
+    for option in ("before", "header", "source", "output"):
         parser.add_argument("--" + option, required=True)
     parser.add_argument("--also-header", action="append", default=[],
                         help="also replay a header directly included by --header")
@@ -49,10 +50,13 @@ def main():
         parser.error("provide the compiler and flags after --")
     root = Path(__file__).resolve().parents[3]
     header, source = Path(args.header).resolve(), Path(args.source).resolve()
-    output, scratch = Path(args.output).resolve(), Path(args.scratch).resolve()
+    output = Path(args.output).resolve()
+    build = root / "kprog/formal/build"
+    build.mkdir(parents=True, exist_ok=True)
+    product = build / (source.stem + ".o")
+    preprocessed = build / (source.stem + ".i")
     # Unique run directories retain earlier successes and failed attempts.
     output.mkdir(parents=True, exist_ok=False)
-    scratch.mkdir(parents=True, exist_ok=False)
     text = source.read_text()
     candidates = {f'#include "{header}"',
                   f'#include "{os.path.relpath(header, source.parent)}"'}
@@ -85,11 +89,13 @@ def main():
     (output / "inputs.json").write_text(json.dumps({
         "before": revision, "header": str(header), "source": str(source),
         "also_headers": [str(path) for path in nested],
+        "product": str(product), "preprocessed": str(preprocessed),
         "current_head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip(),
         "current_header_patch": "header.diff",
         "include": directive, "recipe": "Replace at the actual include; retain every preceding define.",
     }, indent=2) + "\n")
     flags = compiler + ["-iquote", str(header.parent), "-iquote", str(source.parent)]
+    observations = {}
     for phase, body in (("before", previous), ("after", header.read_text())):
         for path in nested:
             candidates = {f'#include "{path}"',
@@ -105,11 +111,16 @@ def main():
                     + f'\n#line {line} "{header}"\n' + body[at + len(include):])
         unit = (f'#line 1 "{source}"\n' + text[:position] + f'#line 1 "{header}"\n'
                 + body + f'\n#line {resume} "{source}"\n' + text[position + len(directive):])
-        preprocessed = scratch / f"{phase}.i"
         run(phase + "-preprocess", flags + ["-E", "-x", "c", "-", "-o", str(preprocessed)], unit)
-        run(phase + "-compile", flags + ["-c", str(preprocessed), "-o", str(output / f"{phase}.o")])
-    run("normal-compile", flags + ["-c", str(source), "-o", str(output / "normal.o")])
-    before, after, normal = (allocated(output / f"{name}.o") for name in ("before", "after", "normal"))
+        run(phase + "-compile", flags + ["-c", str(preprocessed), "-o", str(product)])
+        observations[phase] = allocated(product)
+    run("normal-compile", flags + ["-c", str(source), "-o", str(product)])
+    before, after, normal = observations["before"], observations["after"], allocated(product)
+    for phase, (sections, relocations) in (("before", before), ("after", after), ("normal", normal)):
+        (output / f"{phase}-layout.json").write_text(json.dumps({
+            "allocated_section_bytes": {name: len(data) for name, data in sections.items()},
+            "relocations": relocations,
+        }, indent=2, default=dict) + "\n")
     result = {"allocated_sections_equal": before[0] == after[0],
               "allocated_relocations_equal": before[1] == after[1],
               "current_stream_equals_normal_build": after == normal,

@@ -1011,7 +1011,7 @@ python3 tools/compare_c_header.py --before ef13f6356 \
   --header ../arm64/arm64_sim_local_bpf.h \
   --source oracles/arm64_address_compile.bpf.c \
   --output /workspaces/kprog-raw/formal/NEW-COMPARISON \
-  --scratch /var/tmp/kprog-tmp/formal/NEW-COMPARISON -- \
+  -- \
   ../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf \
   -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_arm64 \
   -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src \
@@ -1073,6 +1073,10 @@ width/alignment, payloads and release: allocated socket bytes6072 and6 relocatio
 are identical before/after, and the current replay equals the normal build.
 `compare_c_header.py --also-header` replays the byte-lane header at its actual
 nested include as well as the canonical header, avoiding a mixed old/new baseline.
+Following the single-output rule, header comparisons now replace the fixture's
+`build/<source-stem>.o` and `.i` in place. Before/current observations stay in
+memory; raw stage logs, commands, section sizes and relocations remain. Completed
+duplicate M4 products are removed with paths recorded in the cleanup log.
 Raw evidence: `/workspaces/kprog-raw/formal/m4-arm64-stack`. These checks do not
 establish universal storage/refinement relations, full-app ARM parity, or the
 remaining nonarena/unaligned/context/fault ABI; those obligations remain open.
