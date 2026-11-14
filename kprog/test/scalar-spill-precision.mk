@@ -7,7 +7,18 @@ LIBBPF := $(ROOT)/runner/build-llvmbpf/vendor/libbpf
 OPTIMIZATION ?= O3
 CODEGEN_ARGS ?=
 
-.PHONY: build run analyze codegen
+.PHONY: build run analyze codegen whole-word replay
+replay:
+	install -d $(OUTPUT)
+	exec 9>/workspaces/.agent-state/kprog-lanes/locks/image; flock -s 9; \
+	taskset -c 22-23 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 8G --append 'loglevel=4 panic=30 oops=panic' --exec 'mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug; mount -t bpf bpffs /sys/fs/bpf; insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko; python3 $(ROOT)/kprog/test/verify_retained_proof.py --native $(NATIVE) --metadata $(METADATA) --context $(CONTEXT) --source $(SOURCE) --proof $(PROOF) --symbol $(SYMBOL) --linker $(LINKER) --output $(OUTPUT)'
+
+whole-word:
+	install -d $(OUTPUT)
+	taskset -c 18-19 python3 $(ROOT)/kprog/test/whole_word_spill_probe.py $(MIR) $(OUTPUT)/whole.mir --low $(LOW) --high $(HIGH)
+	taskset -c 18-19 llc-18 -O3 -march=bpf -mcpu=v4 -bpf-stack-size=4096 -verify-machineinstrs -start-before=prologepilog -stop-after=prologepilog $(OUTPUT)/whole.mir -o $(OUTPUT)/after.mir
+	taskset -c 18-19 llc-18 -O3 -march=bpf -mcpu=v4 -bpf-stack-size=4096 -verify-machineinstrs -start-before=prologepilog -filetype=obj $(OUTPUT)/whole.mir -o $(OUTPUT)/whole.o
+
 codegen:
 	taskset -c 18-19 python3 $(ROOT)/kprog/test/spill_codegen_probe.py $(BITCODE) $(OUTPUT) --optimization $(OPTIMIZATION) $(CODEGEN_ARGS)
 
