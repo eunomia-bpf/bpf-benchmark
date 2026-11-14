@@ -15,8 +15,14 @@
 
 int main(int argc, char **argv)
 {
-    REQUIRE(argc == 3 || (argc == 4 && !strcmp(argv[3], "--native-layout")));
-    bool native_layout = argc == 4;
+    REQUIRE(argc >= 3);
+    bool native_layout = false;
+    const char *patch_output = NULL;
+    for (int arg = 3; arg < argc; ++arg) {
+        if (!strcmp(argv[arg], "--native-layout")) native_layout = true;
+        else if (!strcmp(argv[arg], "--patch-output") && arg + 1 < argc) patch_output = argv[++arg];
+        else REQUIRE(!"unsupported reference argument");
+    }
     struct btf_ext *ext = NULL;
     struct btf *local = btf__parse_elf(argv[1], &ext);
     struct btf *target = btf__parse(argv[2], NULL);
@@ -34,6 +40,7 @@ int main(int argc, char **argv)
     struct btf_ext_info *segment = &ext->core_relo_info;
     struct btf_ext_info_sec *sec;
     unsigned int i, count = 0;
+    unsigned int patched_sections = 0;
     struct bpf_core_relo *relo;
     for_each_btf_ext_sec(segment, sec) {
         const char *name = btf__name_by_offset(local, sec->sec_name_off);
@@ -106,12 +113,17 @@ int main(int argc, char **argv)
                    code[index].code, code[index].off, code[index].imm, status);
             ++count;
         }
+        if (patch_output) {
+            REQUIRE(++patched_sections == 1);
+            FILE *out = fopen(patch_output, "wb");
+            REQUIRE(out && fwrite(code, 1, data->d_size, out) == data->d_size && fclose(out) == 0);
+        }
         free(code);
     }
     for (i = 0; i < btf__type_cnt(local); ++i) free(cache[i].cands);
     free(cache); free(seen);
     elf_end(elf);
-    REQUIRE(close(fd) == 0 && !ferror(stdout));
+    REQUIRE(close(fd) == 0 && !ferror(stdout) && (!patch_output || patched_sections == 1));
     btf_ext__free(ext); btf__free(local); btf__free(target);
     return 0;
 }

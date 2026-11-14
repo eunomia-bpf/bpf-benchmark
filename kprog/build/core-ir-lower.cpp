@@ -30,6 +30,9 @@ static cl::opt<std::string> Output("o",cl::Required);
 static cl::opt<std::string> Local("local-bpf",cl::Required);
 static cl::opt<std::string> Target("target-btf",cl::Required);
 static cl::opt<std::string> Report("report",cl::Required);
+static cl::opt<bool> WidenZeroCompare("widen-zero-compare",cl::init(false),
+  cl::desc("Use original BPF register widths for direct widened-field zero comparisons"));
+#include "../x86/core_zero_compare.h"
 using BTF = std::unique_ptr<btf,decltype(&btf__free)>;
 static BTF readBTF(StringRef Path) {
   btf *B=btf__parse(Path.str().c_str(),nullptr);
@@ -77,8 +80,10 @@ static SmallVector<Instruction *,8> directMemory(Value *Root) {
   }
   return Accesses;
 }
-static bool resizeMemory(GlobalVariable *G,const bpf_core_relo_res &R,unsigned &Count) {
+static bool resizeMemory(GlobalVariable *G,const bpf_core_relo_res &R,unsigned &Count,
+                         const btf *LocalBTF,unsigned Id,StringRef Access,unsigned &Comparisons) {
   SmallPtrSet<Instruction *,16> Accesses;
+  std::map<LoadInst *,unsigned> ComparisonWidths;
   for (auto *U:G->users()) for (auto *I:directMemory(U)) Accesses.insert(I);
   // Validate the complete use set before changing it. A helper taking a field
   // address has no direct memory instruction and retains its compiled size.
@@ -97,7 +102,14 @@ static bool resizeMemory(GlobalVariable *G,const bpf_core_relo_res &R,unsigned &
       if (!Ty->isIntegerTy()) return false;
       for (auto *U:L->users()) {
         auto *Z=dyn_cast<ZExtInst>(U);
-        if (!Z || Z->getType()->getIntegerBitWidth()<R.new_sz*8) return false;
+        if (Z && Z->getType()->getIntegerBitWidth()>=R.new_sz*8) continue;
+        auto *Cmp=dyn_cast<ICmpInst>(U);
+        if (!WidenZeroCompare || !Cmp || !Cmp->isEquality()) return false;
+        auto *Other=dyn_cast<ConstantInt>(Cmp->getOperand(Cmp->getOperand(0)==L?1:0));
+        if (!Other || !Other->isZero()) return false;
+        auto Width=coreZeroJumpWidth(Local,LocalBTF,Id,Access,L->getFunction()->getName());
+        if (!Width) return false;
+        ComparisonWidths[L]=*Width;
       }
     }
     if (S && R.new_sz>R.orig_sz) {
@@ -111,9 +123,18 @@ static bool resizeMemory(GlobalVariable *G,const bpf_core_relo_res &R,unsigned &
       auto *New=B.CreateAlignedLoad(Ty,L->getPointerOperand(),Align(1));
       New->setVolatile(L->isVolatile());New->setDebugLoc(L->getDebugLoc());
       if (R.new_sz>R.orig_sz) {
-        SmallVector<ZExtInst *,8> Extensions;
-        for (auto *U:L->users()) Extensions.push_back(cast<ZExtInst>(U));
-        for (auto *Z:Extensions) { Z->replaceAllUsesWith(B.CreateZExtOrTrunc(New,Z->getType()));Z->eraseFromParent(); }
+        SmallVector<Instruction *,8> Uses;
+        for (auto *U:L->users()) Uses.push_back(cast<Instruction>(U));
+        for (auto *U:Uses) {
+          if (auto *Z=dyn_cast<ZExtInst>(U)) {
+            Z->replaceAllUsesWith(B.CreateZExtOrTrunc(New,Z->getType()));Z->eraseFromParent();
+          } else {
+            auto *Cmp=cast<ICmpInst>(U);IRBuilder<> CB(Cmp);
+            auto *V=CB.CreateZExtOrTrunc(New,CB.getIntNTy(ComparisonWidths.at(L)));
+            Cmp->replaceAllUsesWith(CB.CreateICmp(Cmp->getPredicate(),V,ConstantInt::get(V->getType(),0)));
+            Cmp->eraseFromParent();++Comparisons;
+          }
+        }
       } else {
         Value *V=L->getType()->isPointerTy()?B.CreateIntToPtr(New,L->getType()):B.CreateZExt(New,L->getType());
         L->replaceAllUsesWith(V);
@@ -215,7 +236,7 @@ int main(int argc,char **argv) {
     Candidates.resize(List.len);
     if (!TypeId && Result.validate && Result.orig_val!=number(Default))
       fail(Twine("local BTF default value differs from IR: ")+Name);
-    bool Resize=false,MemoryPoison=false;unsigned MemoryRewrites=0;
+    bool Resize=false,MemoryPoison=false;unsigned MemoryRewrites=0,ZeroComparisons=0;
     if (!Result.poison && K==BPF_CORE_FIELD_BYTE_OFFSET && Result.orig_sz!=Result.new_sz) {
       int Original=btf__resolve_type(L.get(),Result.orig_type_id);
       if (Original<0) fail("resolve source field type failed");
@@ -229,7 +250,7 @@ int main(int argc,char **argv) {
         if (P && P->getNumIndices()==1 && P->getSourceElementType()->isIntegerTy(8) && P->getOperand(1)==U) Canonical=true;
       }
       MemoryPoison=Canonical && Result.fail_memsz_adjust;
-      if (Scalar && Direct && !MemoryPoison) Resize=!resizeMemory(G,Result,MemoryRewrites);
+      if (Scalar && Direct && !MemoryPoison) Resize=!resizeMemory(G,Result,MemoryRewrites,L.get(),Id,AccessSpec,ZeroComparisons);
     }
     json::Object Row{{"global",Name.str()},{"kind",int64_t(K)},{"local_type_id",int64_t(Id)},
                      {"original",int64_t(Result.orig_val)},{"resolved",int64_t(Result.new_val)},
@@ -237,6 +258,7 @@ int main(int argc,char **argv) {
                      {"original_field_bytes",int64_t(Result.orig_sz)},{"target_field_bytes",int64_t(Result.new_sz)},
                      {"native_access_resize_pending",Resize},{"memory_access_poison",MemoryPoison},
                      {"native_memory_rewrites",int64_t(MemoryRewrites)}};
+    if (WidenZeroCompare) Row["native_zero_comparisons"]=int64_t(ZeroComparisons);
     SmallVector<LoadInst *,16> Loads;
     for (auto *U:G->users()) {
       auto *Load=dyn_cast<LoadInst>(U);
