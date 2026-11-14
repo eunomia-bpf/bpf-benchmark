@@ -175,7 +175,7 @@
 
 - PERF 2026-11-14 静态helper特化：只按原dispatcher选择已知helper同一宏，不改P/ISA/body/动态未知路径。62份真实Cilium C除3272处调用拼写外完全相同；一个实际B的allocated字节+202reloc相同且展开97.3→46.8MB。实际OTel read_task_struct/stop两份stock验证+checked-C安装通过，B和checked-native allocated字节/reloc均等于旧接受输入。主程序完整编译/验证仍在跑；不报运行时收益或M4完成，spill对齐原型仍仅run-only。见 static-helper-specialization-result.json。
 
-- PERF 2026-11-14 LPM child读取重叠候选：原有默认关闭 runtime-lpm-layout 下，仅12-byte形状按sole-kernel max_prefixlen=data_size*8=96提前读取child，与prefix计算重叠；nodeprefix>=96不读不存在keybit，匹配后才消费。65590 host/33Rust+1原ignored/11真实对象默认逐字节组一致；实际kernel两配置×两形状合计3360次stock/native对照通过。尚无性能收益；已排队corrected OTel仍旧binary，未混入该改法。证据 lpm-child-overlap-result.json/evidence.tar.gz。
+- PERF 2026-11-14 LPM child读取重叠候选：原有默认关闭 runtime-lpm-layout 下，仅12-byte形状按sole-kernel max_prefixlen=data_size*8=96提前读取child，与prefix计算重叠；nodeprefix>=96不读不存在keybit，匹配后才消费。65590 host/33Rust+1原ignored/11真实对象默认逐字节组一致；实际kernel两配置×两形状合计3360次stock/native对照通过。尚无性能收益；旧binary排队在开始前已退役（无guest/样本）；现仅排一轮包含此改法的完整LTO修正配置3x180，raw20261114-otel-corrected-all-lto-timing。证据 lpm-child-overlap-result.json/evidence.tar.gz。
 
 **lane verified 的大任务：六个应用在唯一内核和镜像上走通 verified 路径。** 普查按程序体去重、最多三个 guest 并行跑完；失败类别按 BPF 时间占比从大到小修；每个应用整应用复测，记下加载、通过 verifier、执行的程序数和运行目录；之后做 100–100K 规模扫描。链接器、加载器、shim 归你，lane perf、lane C 的相关改动由你审看或代改。
 - [ ] V1 按程序体去重的常驻普查跑完；已发现的失败类别（栈写越界、callback、scalar 内存访问、编译器栈存储）现在就修，按 BPF 时间占比从大到小。
@@ -183,6 +183,7 @@
 - Cilium 当前模型整应用checked-sim-c已排队（本提交）：复用 `perf-cilium-native-frame-20261114/manifest-context.json` 的50-entry同源P（3 objects、physical context），当前保留常驻25程序为24TC+1XDP，无socket；socket扩展另项不阻塞本workload。dryrun0，CPU8–15/8vCPU64G/AS80GiB/stats1/1×10，只等BCC351898自然退出以串行资源，不要求通过。实际加载/验证/执行及新增失败待收取；小receipt `cilium-current-model-lto-launch.json` 记录manifest/ELF哈希，原始数据 `/workspaces/kprog-raw/verified/20261114-cilium-current-model-lto`。
 - BCC 当前通用模型整应用复测已排队（本提交）：前次213201的25/25/25早于52964ca12/e6e64b725；复用现有whole-app入口、checked-sim-c及sole image，CPU8–15/8vCPU64G/AS80GiB、stats1/1×10，dryrun0。只等333934大输入重放自然退出以串行资源，不以其成功为gate；实际loaded/verified/installed/run/zero/missing待收取，不能从排队推断通过。小receipt `bcc-current-model-lto-launch.json`，原始数据 `/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto`。
 - PERF 2026-11-14 census新prefix：恢复队列首3体=Tracee body49安装、body52 event_data_map bounds拒绝、body55 probe_read长度无界拒绝；累计53attempts/48distinct，最新22installed/22rejected/4compilefail。旧队列仍运行，非整应用/工作负载执行证明。完整3份请求与累计journal/receipt已发布 `verified_20261114/census-resume-1714`；不删除失败/不抬verifier限制。
+- PERF 2026-11-14 census下个完成prefix已发布 `verified_20261114/census-resume-1740`：新增body57 trace_security_kernel_read_file的真实map bounds拒绝；累计54attempts/49distinct，最新22installed/23rejected/4compilefail。完整请求/journal/SHA保留，负面结果未删除；队列继续，不是整应用/执行认证。
 - [ ] V3 100–100K 规模扫描（verifier 时间和内存）。
   - 2026-11-14 PERF：收完合并计时后已恢复 census（旧队列剩192体，CPU20–23/4vCPU24G/imageSH，raw `20261114-census-resume`）；V3 用当前模型快照/clang18 O3 BPFv4 后台扫描100/1K/10K/100K，CPU18–19，sole kernel 后验。首个4类100指令输入全部B编译通过，完整编译/内核结果仍待收取。旧脚本漏 `-mcpu=v4` 的真实 +w 失败保留；同脚本增加展开字节与逐阶段 wall/RSS，去掉原900秒人工截断。见 `scale-current-launch.json`。
 
