@@ -60,7 +60,12 @@ including an empty tied-register identity barrier. The load width, volatility
 and narrow-result zero extension are preserved. Default zero retains the
 existing B compiler invocation. This phase1 compiler representation change
 targets the modified-context rejection seen in census body70; host byte/width
-checks and actual stock-kernel load tests are the current subset validation.
+checks and actual stock-kernel load tests pass for8/16/32/64-bit reads at80:
+four original forms reject and four rewritten forms load. `5a75da273` requires
+an explicitly tied empty identity; untied outputs retain their representation.
+Both refined fixture objects equal those loaded in the kernel. Evidence:
+`context-loads/report.md`; whole archived-body replay is queued after the active
+OTel job, with24GiB AS/CPU19 and the frontend IR retained for reuse.
 The shared simulator C, runtime P and pre-bounds IR used by checked native
 compilation retain their definitions. Whole-body replay and runtime effects
 remain to be measured; combined LTO timing retains its existing scope.

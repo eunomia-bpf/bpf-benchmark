@@ -1,0 +1,80 @@
+[
+  {
+    "command": [
+      "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+      "/workspaces/kprog-raw/perf/20261114-context-loads-v2/before.ll",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-context-loads-v2/legacy.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=0\n"
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/workspaces/kprog-raw/perf/20261114-context-loads-v2/before.ll",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-context-loads-v2/off.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=0\n"
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/workspaces/kprog-raw/perf/20261114-context-loads-v2/before.ll",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-context-loads-v2/on.bc",
+      "--canonical-ctx-loads"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=0\nconstant context loads canonicalized=4\n"
+  },
+  {
+    "command": [
+      "clang-18",
+      "-target",
+      "bpf",
+      "-mcpu=v4",
+      "-O3",
+      "-c",
+      "/workspaces/kprog-raw/perf/20261114-context-loads-v2/off.bc",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-context-loads-v2/off.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-target",
+      "bpf",
+      "-mcpu=v4",
+      "-O3",
+      "-c",
+      "/workspaces/kprog-raw/perf/20261114-context-loads-v2/on.bc",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-context-loads-v2/on.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/workspaces/kprog-raw/perf/20261114-context-loads-v2/other.ll",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-context-loads-v2/other.bc",
+      "--canonical-ctx-loads"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=0\nconstant context loads canonicalized=0\n"
+  }
+]

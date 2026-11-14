@@ -1,0 +1,13 @@
+{
+  "default_bitcode_equal": true,
+  "tracing_load_widths": [
+    8,
+    16,
+    32,
+    64
+  ],
+  "base_register": 1,
+  "instruction_offset": 80,
+  "other_section_and_dynamic_preserved": true,
+  "untied_asm_output_preserved": true
+}

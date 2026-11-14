@@ -1,0 +1,23 @@
+{"object":"/workspaces/kprog-raw/perf/20261114-context-loads/off.o","entry":"ctx8","accepted":0,"failed":0}
+{"object":"/workspaces/kprog-raw/perf/20261114-context-loads/on.o","entry":"ctx8","accepted":1,"failed":0}
+{"object":"/workspaces/kprog-raw/perf/20261114-context-loads/off.o","entry":"ctx16","accepted":0,"failed":0}
+{"object":"/workspaces/kprog-raw/perf/20261114-context-loads/on.o","entry":"ctx16","accepted":1,"failed":0}
+{"object":"/workspaces/kprog-raw/perf/20261114-context-loads/off.o","entry":"ctx32","accepted":0,"failed":0}
+{"object":"/workspaces/kprog-raw/perf/20261114-context-loads/on.o","entry":"ctx32","accepted":1,"failed":0}
+{"object":"/workspaces/kprog-raw/perf/20261114-context-loads/off.o","entry":"ctx64","accepted":0,"failed":0}
+{"object":"/workspaces/kprog-raw/perf/20261114-context-loads/on.o","entry":"ctx64","accepted":1,"failed":0}
+ipping relo section(9) .rel.eh_frame for section(8) .eh_frame
+libbpf: elf: skipping unrecognized data section(8) .eh_frame
+libbpf: elf: skipping relo section(9) .rel.eh_frame for section(8) .eh_frame
+libbpf: prog 'ctx32': BPF program load failed: -EACCES
+libbpf: prog 'ctx32': failed to load: -EACCES
+libbpf: failed to load object '/workspaces/kprog-raw/perf/20261114-context-loads/off.o'
+libbpf: elf: skipping unrecognized data section(8) .eh_frame
+libbpf: elf: skipping relo section(9) .rel.eh_frame for section(8) .eh_frame
+libbpf: elf: skipping unrecognized data section(8) .eh_frame
+libbpf: elf: skipping relo section(9) .rel.eh_frame for section(8) .eh_frame
+libbpf: prog 'ctx64': BPF program load failed: -EACCES
+libbpf: prog 'ctx64': failed to load: -EACCES
+libbpf: failed to load object '/workspaces/kprog-raw/perf/20261114-context-loads/off.o'
+libbpf: elf: skipping unrecognized data section(8) .eh_frame
+libbpf: elf: skipping relo section(9) .rel.eh_frame for section(8) .eh_frame

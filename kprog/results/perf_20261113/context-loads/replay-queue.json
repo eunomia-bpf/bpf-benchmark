@@ -1,0 +1,16 @@
+{
+  "queue_pid": 617107,
+  "wait_for_application_pid": 605029,
+  "source_commit": "2cd061594",
+  "command": [
+    "make",
+    "-f",
+    "kprog/test/scalar-spill-precision.mk",
+    "context-replay",
+    "OUTPUT=/workspaces/kprog-raw/perf/20261114-context-body-replay",
+    "CONTEXT_BUILD=/var/tmp/kprog-tmp/perf/context-body-replay",
+    "CONTEXT_ARCHIVE=/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/16.failure.tar.gz",
+    "CONTEXT_TOOL=/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds"
+  ],
+  "scope": "Compile-only archived generated-C replay, starts after current large OTel guest ends; raw request facts and commands persistent, build intermediates scratch;24GiB AS/CPU19."
+}
