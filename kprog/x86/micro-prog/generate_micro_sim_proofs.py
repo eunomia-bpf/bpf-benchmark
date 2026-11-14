@@ -1465,6 +1465,13 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
             lines.append(indent + f'    X86_SIM_L_SET_LOGIC_FLAGS(__kf_value, X86_WIDTH_{width});')
         lines.append(indent + '} while (0);')
         return
+    if insn.mnemonic == "mul":
+        source = reg_info(insn.operands[0]) if len(insn.operands) == 1 else None
+        if source is None or source[1] != 64:
+            raise ValueError(f"unsupported unsigned multiply form: {insn.raw}")
+        lines.extend([f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */",
+                      f"{indent}X86_SIM_L_EXEC_MUL_U64({source[0]});"])
+        return
     address = code_address(insn)
     if address in addrs and reg_info(insn.operands[0])[1] == 64:
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")

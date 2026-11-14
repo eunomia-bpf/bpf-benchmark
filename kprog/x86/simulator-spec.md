@@ -232,6 +232,15 @@ Python is not allowed to select semantic helpers based on benchmark names,
 expected values, verifier failures, or opcode-specific shortcuts. It may parse
 native operands into numeric macro arguments.
 
+The 64-bit register form of unsigned `MUL` uses the direct architectural macro
+`X86_SIM_L_EXEC_MUL_U64(src)`, alongside the existing direct REP STOS lowering.
+Python only checks the operand form and supplies its register number. The C
+semantics capture incoming RAX and the explicit operand before writing the full
+RDX:RAX product, set CF/OF from a nonzero high half, and preserve the other,
+undefined flags. Memory and narrower MUL forms still fail generation. This
+runtime extension leaves the opcode-number registry unchanged; its M4 binding
+remains separate from host oracle and kernel-verifier acceptance.
+
 ## Branches
 
 Conditional branches read only architectural flags:

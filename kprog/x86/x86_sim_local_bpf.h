@@ -2121,6 +2121,25 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 					  __x86_l_width);                    \
 	} while (0)
 
+/* MUL r64: capture both inputs before writing implicit RDX:RAX.
+ * Four unsigned 32-bit products retain all 128 bits without __multi3.
+ * Only CF/OF are defined; preserve the other incoming flags. */
+#define X86_SIM_L_EXEC_MUL_U64(SRC) \
+    do { \
+        __u64 __um_a = X86_SIM_L_READ_REG(X86_RAX); \
+        __u64 __um_b = X86_SIM_L_READ_REG(SRC); \
+        __u64 __um_p0 = (__u64)(__u32)__um_a * (__u32)__um_b; \
+        __u64 __um_p1 = (__u64)(__u32)__um_a * (__um_b >> 32); \
+        __u64 __um_p2 = (__um_a >> 32) * (__u32)__um_b; \
+        __u64 __um_p3 = (__um_a >> 32) * (__um_b >> 32); \
+        __u64 __um_mid = (__um_p0 >> 32) + (__u32)__um_p1 + (__u32)__um_p2; \
+        __u64 __um_hi = __um_p3 + (__um_p1 >> 32) + (__um_p2 >> 32) + (__um_mid >> 32); \
+        __u64 __um_lo = __um_a * __um_b; \
+        X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, __um_lo, X86_WIDTH_64); \
+        X86_SIM_L_WRITE_REG_WIDTH(X86_RDX, __um_hi, X86_WIDTH_64); \
+        __x86_cf = __x86_of = (__um_hi != 0); \
+    } while (0)
+
 #define X86_SIM_L_EXEC_MULX(DST, SRC, AUX, FLAGS)                           \
 	do {                                                               \
 		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
