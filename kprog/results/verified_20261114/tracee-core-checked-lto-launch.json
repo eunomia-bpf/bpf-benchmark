@@ -97,5 +97,27 @@
       "arg4_change": "si offset88 to r10 offset56; consistent with existing source-diff D03"
     },
     "queue_inputs_changed": false
+  },
+  "resource_resume": {
+    "recorded": "2026-11-14T08:25:53Z",
+    "pid": 324183,
+    "raw": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/replay-python-rusage-48g",
+    "host_as_bytes": 51539607552,
+    "host_cpus": "8-15",
+    "initial_mem_available_mib": 80842,
+    "reserve_rationale": "48GiB address-space cap leaves about30GiB from current available memory",
+    "same_clang_flags_and_fixed_input": true,
+    "peer_timing_overlap": true,
+    "scope": "Host compiler diagnostic, not benchmark timing",
+    "superseded_queued_only_pid": 267051,
+    "tracee_pid": 270915,
+    "tracee_parent_held_before_start": true,
+    "resume_helper_pid": 324184,
+    "tracee_resume_after_pids": [
+      324183,
+      263016
+    ],
+    "success_required": false,
+    "postlaunch_outcome_polled": false
   }
 }

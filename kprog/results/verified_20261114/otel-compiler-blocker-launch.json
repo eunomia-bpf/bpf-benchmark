@@ -1,7 +1,7 @@
 {
   "recorded": "2026-11-14T07:38:10Z",
-  "pid": 267051,
-  "wait_pid": 262728,
+  "pid": 324183,
+  "wait_pid": null,
   "raw_directory": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker",
   "source_archive": "/workspaces/kprog-raw/perf/20261114-probe-read-otel-lto/control/service.tar.gz",
   "nested_request": "service/requests/3.failure.tar.gz",
@@ -65,24 +65,25 @@
     "raw": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/replay-before-tracee"
   },
   "current_replay": {
-    "recorded": "2026-11-14T07:51:47Z",
-    "pid": 267051,
-    "wait_pids": [
-      262728,
+    "recorded": "2026-11-14T08:25:53Z",
+    "pid": 324183,
+    "raw": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/replay-python-rusage-48g",
+    "host_as_bytes": 51539607552,
+    "host_cpus": "8-15",
+    "initial_mem_available_mib": 80842,
+    "reserve_rationale": "48GiB address-space cap leaves about30GiB from current available memory",
+    "same_clang_flags_and_fixed_input": true,
+    "peer_timing_overlap": true,
+    "scope": "Host compiler diagnostic, not benchmark timing",
+    "superseded_queued_only_pid": 267051,
+    "tracee_pid": 270915,
+    "tracee_parent_held_before_start": true,
+    "resume_helper_pid": 324184,
+    "tracee_resume_after_pids": [
+      324183,
       263016
     ],
-    "raw": "/workspaces/kprog-raw/verified/20261114-otel-compiler-blocker/replay-python-rusage",
-    "measurement": "Python os.wait4 child-specific rusage, Linux peakRSS KiB",
-    "resource_preflight": {
-      "child_pid": 267050,
-      "returncode": 0,
-      "max_rss_kib": 12392,
-      "measurement": "os.wait4 child-specific rusage; Linux KiB"
-    },
-    "host_as_bytes": 85899345920,
-    "host_cpus": "8-15",
-    "same_input_and_clang_flags": true,
-    "resource_dependency_only": true,
+    "success_required": false,
     "postlaunch_outcome_polled": false
   }
 }
