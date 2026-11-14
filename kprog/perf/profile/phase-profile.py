@@ -140,7 +140,11 @@ def run(args: argparse.Namespace) -> int:
         json.dumps({"command": command, "app": args.app, "seconds": args.seconds,
                     "freq": args.freq, "cpus": args.cpus, "vcpus": args.vcpus},
                    indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    (var_tmp / "out").mkdir(exist_ok=True)
+    if args.persist_output:
+        command[command.index("--exec"):command.index("--exec")] = ["--rwdir", str(out)]
+        (var_tmp / "out").symlink_to(out, target_is_directory=True)
+    else:
+        (var_tmp / "out").mkdir(exist_ok=True)
     log = (out / "host.log").open("w", encoding="utf-8")
     completed = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT)
     log.close()
@@ -150,7 +154,8 @@ def run(args: argparse.Namespace) -> int:
         if not source.is_file():
             print(f"missing guest artifact: {source}", file=sys.stderr)
             continue
-        shutil.copy2(source, out / name_)
+        if not args.persist_output:
+            shutil.copy2(source, out / name_)
     shutil.rmtree(state)
     print(f"run directory: {out}")
     if completed.returncode != 0:
@@ -268,6 +273,8 @@ def main(argv: list[str]) -> int:
                             help="native manifest to load instead of the image's own")
     run_parser.add_argument("--state-root", default="/var/tmp/kprog-tmp/C/phase-profile")
     run_parser.add_argument("--perf", default=str(PERF))
+    run_parser.add_argument("--persist-output", action="store_true",
+                            help="write guest artifacts directly to the persistent output directory")
     report_parser = sub.add_parser("report")
     report_parser.add_argument("directory")
     report_parser.add_argument("--annotate", type=int, default=3)

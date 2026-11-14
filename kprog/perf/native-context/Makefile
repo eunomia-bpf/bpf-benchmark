@@ -157,7 +157,7 @@ profile-tool:
 
 otel-profile: profile-tool
 	env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(OTEL_PROFILE_CAPTURE) EQCODEX_PROGRESS_LOG=/var/tmp/out/guest.log EQCODEX_NATIVE_LINK_BINARY=$(LINK_MEMORY_PAYLOAD)/native-link-on \
-		python3 $(ROOT)/kprog/perf/profile/phase-profile.py run --app otelcol-ebpf-profiler/profiling --seconds 45 --cpus 16-19 --vcpus 4 --memory 32G --freq 199 --out $(OTEL_PROFILE_RAW) --annotate 0 --manifest $(OTEL_PROFILE_MANIFEST) --state-root /var/tmp/kprog-tmp/perf/phase-profile --perf $(PROFILE_TOOL_BUILD)/perf
+		python3 $(ROOT)/kprog/perf/profile/phase-profile.py run --app otelcol-ebpf-profiler/profiling --seconds 45 --cpus 16-19 --vcpus 4 --memory 32G --freq 199 --out $(OTEL_PROFILE_RAW) --annotate 0 --manifest $(OTEL_PROFILE_MANIFEST) --state-root /var/tmp/kprog-tmp/perf/phase-profile --perf $(PROFILE_TOOL_BUILD)/perf --persist-output
 
 .PHONY: memory-host-bench
 memory-host-bench:
