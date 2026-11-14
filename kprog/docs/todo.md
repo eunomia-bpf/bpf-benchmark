@@ -763,7 +763,8 @@
 
 - [ ] Rocq 写的 Linux eBPF ISA 语义（OOPSLA'26，DOI 10.1145/3839449，github.com/OpenSourceVerif/linux-ebpf-semantics，可执行，153 条顺序指令，用 Linux 测试集验证；atomics 在范围外；配套 linux-ebpf-verifier-proofs 有 tnum soundness 的 Coq 证明，MIT）。用途：把检查过的 B 放到抽取出的语义解释器上执行，与原生执行对照，作为独立于内核解释器和 JIT 的 B 层对照，覆盖全部程序；同时作为 verify(B) 前提的支撑证据。先查清它对 helper 调用和 map 的处理范围。
 - [ ] Agni（github.com/bpfverif/agni，LLVM 14，示例到 6.10 / bpf-next）：对唯一内核的 verifier.c（vendor/linux-framework，相对 bpf-next +637/−80）跑一次 range analysis soundness 检查，支撑论文 §4 "verifier analysis trusted rather than proved"。它对改过的 verifier.c 能否直接用，先试。
-- [ ] Keel 的 EmbC + Clean（Lean 4，arXiv 2611.11117）：上面"全 simulator 的 C 源解释与 Lean C-model 对应关系"的路线：把 simulator 生成的 C 原语渲染成 EmbC AST 并证明精化，TCB 只剩 268 行打印器和 C 编译器。代码地址 github.com/rutgers-apl/keel 目前 404，公开后接手。
+- [ ] Keel 的 EmbC + Clean（Lean 4，arXiv 2611.11117）：上面"全 simulator 的 C 源解释与 Lean C-model 对应关系"的路线：把 simulator 生成的 C 原语渲染成 EmbC AST 并证明精化，TCB 只剩 268 行打印器和 C 编译器。代码地址 github.com/rutgers-apl/keel 目前 404，公开后接手。定位（运营者 2026-11-13 问："'一份规范同时生成 C 和 Lean'的生成器……这个是不是自己造轮子了?"）：它替换生成器的 C 一侧。现在两个渲染器各自从 JSON 规范出 C 宏和 Lean 定义，对应关系靠信任生成器；改成规范生成 EmbC AST、打印成 C、在 Lean 里证明精化之后，C 与 Lean 的对应由定理给出，生成器只留 JSON 到 Lean 这一段。Bedrock2/Fiat-Crypto（Coq）和 Sail 是同一思路；这一层自建的原因是输出的 C 要编成 eBPF 并通过 verifier，Sail 的 C 依赖 GMP 和运行时，EmbC 的一阶 C 片段（u32/u64、指针、struct）正好合用。
+- 可选，排在 Sail/ASL 对照之后：AArch64 参考语义在 Lean 里多一个交叉参照 LNSym（github.com/leanprover/LNSym，Apache-2.0，AArch64 子集，带硬件 co-sim，最后一次 push 2024-11；运营者 2026-11-13 问："Lean 的 x86-64 和 AArch64 参考语义……是不是也是自己造轮子?"）。kinsn 的 KinsnLean4/ARM64/Defs.lean 已经用它核对过。
 - 只跟踪：BeePL 的 CompCert eBPF 后端（arXiv 2507.09883，对应"走经过验证的编译路径"，代码未公开）；x86-64 Isabelle 语义（SETTA'24，对应 O1 的 ANDN/BZHI 4 个形式，大概率缺 BMI）。
 - 只作对比（逐程序证明或逐程序证书，按 11-07 的规定留在 related work）：Heimdall、BCF、VEP、TUM LPC'26、refinement types。
 
