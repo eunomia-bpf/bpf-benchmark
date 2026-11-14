@@ -15,19 +15,35 @@ static struct bpf_insn insn(unsigned char code, unsigned char dst,
 }
 
 static int check(const char *directory, int map, const char *name,
-                 short offset, int paired, int expect_accepted)
+                 short offset, int paired, int whole_word, int expect_accepted)
 {
-    struct bpf_insn program[20];
+    struct bpf_insn program[30];
     size_t count = 0;
     program[count++] = insn(BPF_ALU64 | BPF_MOV | BPF_X, 6, 1, 0, 0);
-    program[count++] = insn(BPF_ALU | BPF_MOV | BPF_K, 1, 0, 0, 1);
-    program[count++] = insn(BPF_STX | BPF_MEM | BPF_W, 10, 1, offset, 0);
-    if (paired) {
-        program[count++] = insn(BPF_ALU | BPF_MOV | BPF_K, 2, 0, 0, 4);
-        program[count++] = insn(BPF_STX | BPF_MEM | BPF_W, 10, 2,
-                               offset == -8 ? -4 : -8, 0);
+    if (whole_word) {
+        /* Keep the other half unknown: only tracking the written half proves ctx. */
+        program[count++] = insn(BPF_JMP | BPF_CALL, 0, 0, 0, BPF_FUNC_get_prandom_u32);
+        program[count++] = insn(BPF_ALU | BPF_MOV | BPF_X, 0, 0, 0, 0);
+        program[count++] = insn(BPF_ALU | BPF_MOV | BPF_K, 1, 0, 0, 1);
+        program[count++] = insn(BPF_ALU64 | BPF_LSH | BPF_K,
+                               offset == -8 ? 0 : 1, 0, 0, 32);
+        program[count++] = insn(BPF_ALU64 | BPF_OR | BPF_X, 1, 0, 0, 0);
+        program[count++] = insn(BPF_STX | BPF_MEM | BPF_DW, 10, 1, -8, 0);
+        program[count++] = insn(BPF_LDX | BPF_MEM | BPF_DW, 1, 10, -8, 0);
+        if (offset == -8)
+            program[count++] = insn(BPF_ALU | BPF_MOV | BPF_X, 1, 1, 0, 0);
+        else
+            program[count++] = insn(BPF_ALU64 | BPF_RSH | BPF_K, 1, 0, 0, 32);
+    } else {
+        program[count++] = insn(BPF_ALU | BPF_MOV | BPF_K, 1, 0, 0, 1);
+        program[count++] = insn(BPF_STX | BPF_MEM | BPF_W, 10, 1, offset, 0);
+        if (paired) {
+            program[count++] = insn(BPF_ALU | BPF_MOV | BPF_K, 2, 0, 0, 4);
+            program[count++] = insn(BPF_STX | BPF_MEM | BPF_W, 10, 2,
+                                   offset == -8 ? -4 : -8, 0);
+        }
+        program[count++] = insn(BPF_LDX | BPF_MEM | BPF_W, 1, 10, offset, 0);
     }
-    program[count++] = insn(BPF_LDX | BPF_MEM | BPF_W, 1, 10, offset, 0);
     /* Only verifier knowledge of the stored value prunes the invalid ctx. */
     program[count++] = insn(BPF_JMP32 | BPF_JEQ | BPF_K, 1, 0, 1, 1);
     program[count++] = insn(BPF_ALU64 | BPF_MOV | BPF_K, 6, 0, 0, 0);
@@ -55,8 +71,8 @@ static int check(const char *directory, int map, const char *name,
     int failed = fwrite(log, 1, strlen(log), output) != strlen(log);
     if (fclose(output)) failed = 1;
     if (fd >= 0 && close(fd)) { perror("close program"); failed = 1; }
-    printf("{\"case\":\"%s\",\"offset\":%d,\"paired\":%d,\"accepted\":%s,\"errno\":%d}\n",
-           name, offset, paired, error ? "false" : "true", error);
+    printf("{\"case\":\"%s\",\"offset\":%d,\"paired\":%d,\"whole_word\":%d,\"accepted\":%s,\"errno\":%d}\n",
+           name, offset, paired, whole_word, error ? "false" : "true", error);
     if ((!error) != expect_accepted ||
         (error && !strstr(log, "R1 type=scalar expected=ctx"))) {
         fprintf(stderr, "%s: unexpected stock verifier outcome\n%s", name, log);
@@ -70,10 +86,12 @@ int main(int argc, char **argv)
     if (argc != 2) { fprintf(stderr, "usage: scalar-spill-precision OUTPUT\n"); return 1; }
     int map = bpf_map_create(BPF_MAP_TYPE_PROG_ARRAY, "spill_jumps", 4, 4, 1, NULL);
     if (map < 0) { perror("create prog array"); return 1; }
-    int failed = check(argv[1], map, "aligned", -8, 0, 1);
-    failed |= check(argv[1], map, "upper", -4, 0, 0);
-    failed |= check(argv[1], map, "pair_lower", -8, 1, 0);
-    failed |= check(argv[1], map, "pair_upper", -4, 1, 0);
+    int failed = check(argv[1], map, "aligned", -8, 0, 0, 1);
+    failed |= check(argv[1], map, "upper", -4, 0, 0, 0);
+    failed |= check(argv[1], map, "pair_lower", -8, 1, 0, 0);
+    failed |= check(argv[1], map, "pair_upper", -4, 1, 0, 0);
+    failed |= check(argv[1], map, "whole_lower", -8, 1, 1, 1);
+    failed |= check(argv[1], map, "whole_upper", -4, 1, 1, 1);
     if (close(map)) { perror("close map"); failed = 1; }
     return failed;
 }

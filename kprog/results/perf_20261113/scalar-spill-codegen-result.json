@@ -1,0 +1,445 @@
+{
+  "recorded_utc": "2026-11-14T18:57:31Z",
+  "raw": "/workspaces/kprog-raw/perf/20261114-scalar-spill-precision",
+  "lifetime": {
+    "input": "/workspaces/kprog-raw/perf/20261114-bpf-spill-layout/before.mir",
+    "blocks": 12702,
+    "slots": {
+      "1": 8,
+      "2": 4,
+      "3": 8,
+      "4": 8,
+      "5": 8,
+      "6": 8,
+      "7": 8,
+      "8": 8,
+      "9": 4,
+      "10": 8,
+      "11": 8,
+      "12": 8,
+      "13": 8,
+      "14": 8,
+      "15": 8,
+      "16": 8,
+      "17": 4,
+      "18": 4
+    },
+    "rounds": 4,
+    "conservative_maximum_live_slots": 18,
+    "noninterfering_pairs": [],
+    "scope": "Direct spill CFG diagnostic; partial stores keep the whole old slot live. No rewrite, verifier acceptance or execution."
+  },
+  "codegen": [
+    {
+      "input": "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel/first-main-failure/trusted_x86.bpf.bounds.bc",
+      "input_sha256": "9da84b3ca4999e17e6b65ac3ae58b7864e3d4811a7e135d28a18f0da30f2dd17",
+      "scope": "B compiler diagnostic, no P flags changed; stock acceptance not implied.",
+      "cases": [
+        {
+          "name": "default",
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-mllvm",
+            "-stop-after=prologepilog",
+            "-c",
+            "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel/first-main-failure/trusted_x86.bpf.bounds.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/20261114-scalar-spill-precision/codegen/default.mir"
+          ],
+          "exit": 0,
+          "wall_seconds": 8.242055208989768,
+          "stack_sizes": [
+            520
+          ],
+          "mir_sha256": "0d2a0d616556889c087f56736d496a565d67e75dbd5aa174591b7103c6ca9acd"
+        },
+        {
+          "name": "deferred",
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-mllvm",
+            "-stop-after=prologepilog",
+            "-mllvm",
+            "-enable-deferred-spilling",
+            "-c",
+            "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel/first-main-failure/trusted_x86.bpf.bounds.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/20261114-scalar-spill-precision/codegen/deferred.mir"
+          ],
+          "exit": 0,
+          "wall_seconds": 8.191786459996365,
+          "stack_sizes": [
+            520
+          ],
+          "mir_sha256": "10e29fbe32b42d2f47dea121285eead7a9a02a52fd916e5ed7e3b21f1066f762"
+        },
+        {
+          "name": "reverse",
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-mllvm",
+            "-stop-after=prologepilog",
+            "-mllvm",
+            "-greedy-reverse-local-assignment",
+            "-c",
+            "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel/first-main-failure/trusted_x86.bpf.bounds.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/20261114-scalar-spill-precision/codegen/reverse.mir"
+          ],
+          "exit": 0,
+          "wall_seconds": 8.213275964008062,
+          "stack_sizes": [
+            520
+          ],
+          "mir_sha256": "d660ffa0cb1c89beac992f526795f7d621a47591646ddf3627306dac31486ca0"
+        },
+        {
+          "name": "both",
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-mllvm",
+            "-stop-after=prologepilog",
+            "-mllvm",
+            "-enable-deferred-spilling",
+            "-mllvm",
+            "-greedy-reverse-local-assignment",
+            "-c",
+            "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel/first-main-failure/trusted_x86.bpf.bounds.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/20261114-scalar-spill-precision/codegen/both.mir"
+          ],
+          "exit": 0,
+          "wall_seconds": 8.601947699004086,
+          "stack_sizes": [
+            520
+          ],
+          "mir_sha256": "5ef3c8c7d7422664f926cd3569ffa4b95ba33852398bb83bd16d470de4dcc406"
+        }
+      ]
+    },
+    {
+      "input": "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel/first-main-failure/trusted_x86.bpf.bounds.bc",
+      "input_sha256": "9da84b3ca4999e17e6b65ac3ae58b7864e3d4811a7e135d28a18f0da30f2dd17",
+      "scope": "B compiler diagnostic, no P flags changed; stock acceptance not implied.",
+      "cases": [
+        {
+          "name": "default",
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-mllvm",
+            "-stop-after=prologepilog",
+            "-c",
+            "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel/first-main-failure/trusted_x86.bpf.bounds.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/20261114-scalar-spill-precision/codegen-o2/default.mir"
+          ],
+          "exit": 0,
+          "wall_seconds": 8.200367081008153,
+          "stack_sizes": [
+            520
+          ],
+          "mir_sha256": "0d2a0d616556889c087f56736d496a565d67e75dbd5aa174591b7103c6ca9acd"
+        },
+        {
+          "name": "deferred",
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-mllvm",
+            "-stop-after=prologepilog",
+            "-mllvm",
+            "-enable-deferred-spilling",
+            "-c",
+            "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel/first-main-failure/trusted_x86.bpf.bounds.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/20261114-scalar-spill-precision/codegen-o2/deferred.mir"
+          ],
+          "exit": 0,
+          "wall_seconds": 8.216292202996556,
+          "stack_sizes": [
+            520
+          ],
+          "mir_sha256": "10e29fbe32b42d2f47dea121285eead7a9a02a52fd916e5ed7e3b21f1066f762"
+        },
+        {
+          "name": "reverse",
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-mllvm",
+            "-stop-after=prologepilog",
+            "-mllvm",
+            "-greedy-reverse-local-assignment",
+            "-c",
+            "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel/first-main-failure/trusted_x86.bpf.bounds.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/20261114-scalar-spill-precision/codegen-o2/reverse.mir"
+          ],
+          "exit": 0,
+          "wall_seconds": 8.207609905002755,
+          "stack_sizes": [
+            520
+          ],
+          "mir_sha256": "d660ffa0cb1c89beac992f526795f7d621a47591646ddf3627306dac31486ca0"
+        },
+        {
+          "name": "both",
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-mllvm",
+            "-stop-after=prologepilog",
+            "-mllvm",
+            "-enable-deferred-spilling",
+            "-mllvm",
+            "-greedy-reverse-local-assignment",
+            "-c",
+            "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel/first-main-failure/trusted_x86.bpf.bounds.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/20261114-scalar-spill-precision/codegen-o2/both.mir"
+          ],
+          "exit": 0,
+          "wall_seconds": 8.33056381199276,
+          "stack_sizes": [
+            520
+          ],
+          "mir_sha256": "5ef3c8c7d7422664f926cd3569ffa4b95ba33852398bb83bd16d470de4dcc406"
+        }
+      ]
+    },
+    {
+      "input": "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel/first-main-failure/trusted_x86.bpf.bounds.bc",
+      "input_sha256": "9da84b3ca4999e17e6b65ac3ae58b7864e3d4811a7e135d28a18f0da30f2dd17",
+      "scope": "B compiler diagnostic, no P flags changed; stock acceptance not implied.",
+      "cases": [
+        {
+          "name": "basic",
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-mllvm",
+            "-stop-after=prologepilog",
+            "-mllvm",
+            "-regalloc=basic",
+            "-c",
+            "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel/first-main-failure/trusted_x86.bpf.bounds.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/20261114-scalar-spill-precision/allocators/basic.mir"
+          ],
+          "exit": 0,
+          "wall_seconds": 8.133373805991141,
+          "stack_sizes": [
+            520
+          ],
+          "mir_sha256": "386bb8956930f2ee4210c75c87dcd24c177e3c842e8cb2c0836dfe87e286f54f"
+        },
+        {
+          "name": "split_size",
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-mllvm",
+            "-stop-after=prologepilog",
+            "-mllvm",
+            "-split-spill-mode=size",
+            "-c",
+            "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel/first-main-failure/trusted_x86.bpf.bounds.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/20261114-scalar-spill-precision/allocators/split_size.mir"
+          ],
+          "exit": 0,
+          "wall_seconds": 8.115858800010756,
+          "stack_sizes": [
+            520
+          ],
+          "mir_sha256": "368268565630cac6cd0075fc69f99f527bf659ba6503f547773d44218e94e52b"
+        },
+        {
+          "name": "rematerialize",
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-mllvm",
+            "-stop-after=prologepilog",
+            "-mllvm",
+            "-regalloc-cheap-remat-weight=0",
+            "-c",
+            "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel/first-main-failure/trusted_x86.bpf.bounds.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/20261114-scalar-spill-precision/allocators/rematerialize.mir"
+          ],
+          "exit": 0,
+          "wall_seconds": 8.149580393001088,
+          "stack_sizes": [
+            520
+          ],
+          "mir_sha256": "0d2a0d616556889c087f56736d496a565d67e75dbd5aa174591b7103c6ca9acd"
+        },
+        {
+          "name": "no_loop_iv",
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-mllvm",
+            "-stop-after=prologepilog",
+            "-mllvm",
+            "-enable-split-loopiv-heuristic=false",
+            "-c",
+            "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel/first-main-failure/trusted_x86.bpf.bounds.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/20261114-scalar-spill-precision/allocators/no_loop_iv.mir"
+          ],
+          "exit": 0,
+          "wall_seconds": 8.220658634003485,
+          "stack_sizes": [
+            520
+          ],
+          "mir_sha256": "0d2a0d616556889c087f56736d496a565d67e75dbd5aa174591b7103c6ca9acd"
+        }
+      ]
+    }
+  ],
+  "whole_word": {
+    "make_exit": 0,
+    "results": [
+      {
+        "case": "aligned",
+        "offset": -8,
+        "paired": 0,
+        "whole_word": 0,
+        "accepted": true,
+        "errno": 0
+      },
+      {
+        "case": "upper",
+        "offset": -4,
+        "paired": 0,
+        "whole_word": 0,
+        "accepted": false,
+        "errno": 13
+      },
+      {
+        "case": "pair_lower",
+        "offset": -8,
+        "paired": 1,
+        "whole_word": 0,
+        "accepted": false,
+        "errno": 13
+      },
+      {
+        "case": "pair_upper",
+        "offset": -4,
+        "paired": 1,
+        "whole_word": 0,
+        "accepted": false,
+        "errno": 13
+      },
+      {
+        "case": "whole_lower",
+        "offset": -8,
+        "paired": 1,
+        "whole_word": 1,
+        "accepted": true,
+        "errno": 0
+      },
+      {
+        "case": "whole_upper",
+        "offset": -4,
+        "paired": 1,
+        "whole_word": 1,
+        "accepted": true,
+        "errno": 0
+      }
+    ]
+  },
+  "scope": "Diagnostic only: 12 compiler cases remain520 bytes. No pipeline fix or production spill packing promoted. Whole-word64 packing keeps a known half with the other half runtime-unknown, unlike partial32 writes; a full compiler transform is not implemented."
+}

@@ -4,8 +4,16 @@ ROOT := /workspaces/repository
 OUTPUT ?= /workspaces/kprog-raw/perf/20261114-scalar-spill-precision
 KDIR := /workspaces/.agent-state/kprog-ck/build-x86
 LIBBPF := $(ROOT)/runner/build-llvmbpf/vendor/libbpf
+OPTIMIZATION ?= O3
+CODEGEN_ARGS ?=
 
-.PHONY: build run
+.PHONY: build run analyze codegen
+codegen:
+	taskset -c 18-19 python3 $(ROOT)/kprog/test/spill_codegen_probe.py $(BITCODE) $(OUTPUT) --optimization $(OPTIMIZATION) $(CODEGEN_ARGS)
+
+analyze:
+	taskset -c 18-19 python3 $(ROOT)/kprog/test/analyze_spill_lifetimes.py $(MIR) $(REPORT)
+
 build:
 	install -d $(OUTPUT)
 	$(CC) -O2 -g -Wall -Wextra -Werror -I$(LIBBPF)/prefix/include $(ROOT)/kprog/test/scalar_spill_precision.c $(LIBBPF)/pic-obj/libbpf.a -lelf -lz -o $(OUTPUT)/client
