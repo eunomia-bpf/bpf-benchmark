@@ -1,0 +1,15 @@
+{
+  "body_group": 42,
+  "application": "tracee/monitor",
+  "name": "trace_security_mmap_file",
+  "stage": "compilation_failed",
+  "started": "2026-11-14T00:47:40.335580+00:00",
+  "finished": "2026-11-14T01:41:53.308651+00:00",
+  "diagnostic": "Command '['/workspaces/repository/kprog/stock-path/bin/clang', '-g', '-O3', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_x86', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '-I', '/usr/include/x86_64-linux-gnu', '-c', '/workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-1/control/state/session-8l66qta4/requests/request-j2jvx0p0/generated/trusted_x86.bpf.i', '-o', '/workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-1/control/state/session-8l66qta4/requests/request-j2jvx0p0/generated/trusted_x86.bpf.o']' died with <Signals.SIGKILL: 9>.",
+  "cause": "Clang terminated by SIGKILL; OOM not confirmed from retained console",
+  "verifier_attempted": false,
+  "native_run": 0,
+  "archive": "census-body-42-compilation-failure.tar.gz",
+  "archive_bytes": 41749988,
+  "raw_archive": "/workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-1/control/retained-requests/session-8l66qta4/3.failure.tar.gz"
+}
