@@ -208,7 +208,7 @@ migration. That checkpoint left MRS thread-pointer inputs, x86 fault and
 canonicality bindings, and old exclusive fault observations to reconcile.
 
 LNSym `da428593b21d` adds decoded TPIDR_EL1/TPIDR_EL2 MRS with explicit per-step
-`ThreadPointerInputs`. No binding refuses execution; a bound denial returns typed
+`ThreadPointerInputs`. Missing bindings are refused; a bound denial returns typed
 `SystemRegisterDenied` with the register encoding, preserving Xt/PC and all effect
 histories. Permitted reads write Xt and advance PC; Xt=31 still checks access and
 discards the value. Canonical state equality includes the new input component.
