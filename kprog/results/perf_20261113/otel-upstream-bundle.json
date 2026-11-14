@@ -1,0 +1,213 @@
+{
+  "recorded_at": "2026-11-14T00:56:57.791476+00:00",
+  "protocol_commit": "4a897b54e",
+  "raw": "/workspaces/kprog-raw/perf/20261114-otel-upstream-bundle",
+  "inputs": [],
+  "reports": [
+    {
+      "path": "/workspaces/repository/corpus/results/perf-otel-upstream-20261114/manifest-context.json",
+      "sha256": "430b26ab4be8fd501a819f48c0451895d86bf90606533958a05639ac8a51573f",
+      "data": {
+        "app": "otelcol-ebpf-profiler",
+        "objects": [
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "custom__generic",
+            "symbol": "custom__generic",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "finish_task_swi",
+            "symbol": "finish_task_switch",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "kprobe__dummy",
+            "symbol": "kprobe__dummy",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "kprobe_go_label",
+            "symbol": "kprobe_go_labels",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "kprobe_unwind_d",
+            "symbol": "kprobe_unwind_dotnet",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "kprobe_unwind_h",
+            "symbol": "kprobe_unwind_hotspot",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "kprobe_unwind_n",
+            "symbol": "kprobe_unwind_native",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "kprobe_unwind_p",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "kprobe_unwind_r",
+            "symbol": "kprobe_unwind_ruby",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "kprobe_unwind_s",
+            "symbol": "kprobe_unwind_stop",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "kprobe_unwind_v",
+            "symbol": "kprobe_unwind_v8",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "native_tracer_e",
+            "symbol": "native_tracer_entry",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "perf_go_labels",
+            "symbol": "perf_go_labels",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "perf_unwind_dot",
+            "symbol": "perf_unwind_dotnet",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "perf_unwind_hot",
+            "symbol": "perf_unwind_hotspot",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "perf_unwind_nat",
+            "symbol": "perf_unwind_native",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "perf_unwind_per",
+            "symbol": "perf_unwind_perl",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "perf_unwind_php",
+            "symbol": "perf_unwind_php",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "perf_unwind_pyt",
+            "symbol": "perf_unwind_python",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "perf_unwind_rub",
+            "symbol": "perf_unwind_ruby",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "perf_unwind_sto",
+            "symbol": "perf_unwind_stop",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "perf_unwind_v8",
+            "symbol": "perf_unwind_v8",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "read_kernel_mem",
+            "symbol": "read_kernel_memory",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "read_task_struc",
+            "symbol": "read_task_struct",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "tracepoint__sch",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "tracepoint_inte",
+            "symbol": "tracepoint_integration__sched_switch",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          },
+          {
+            "native_object": "otelcol-ebpf-profiler.native.o",
+            "program": "uprobe__generic",
+            "symbol": "uprobe__generic",
+            "kernel_helper_context": true,
+            "kernel_data_layout": true
+          }
+        ],
+        "status": "native-objects-proof-linked",
+        "version": 1
+      }
+    }
+  ],
+  "scope": "Host compiler/replay artifacts only; no kernel submission, native installation or application equal-work claim.",
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/perf_20261113/otel-upstream-bundle.tar.gz",
+    "bytes": 628059,
+    "sha256": "0bde55fd1cbf8be53bc634b1523df8546be2a25914adb640ebed1939375b2679",
+    "files_byte_compared": 4
+  }
+}

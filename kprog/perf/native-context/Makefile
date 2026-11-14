@@ -565,3 +565,12 @@ upstream-otel-native: all $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/p
 .PHONY: upstream-otel-link
 upstream-otel-link: upstream-otel-native
 	prlimit --as=17179869184 -- python3 $(HERE)/socket-proof.py --input $(OTEL_NATIVE_BUILD)/tracer.native.o --linker $(LINK_MEMORY_PAYLOAD)/native-link-off --output $(OTEL_NATIVE_BUILD)/links --section-prefix perf_event/ --section-prefix kprobe/ --section-prefix uprobe/ --section-prefix tracepoint/ --section-prefix raw_tracepoint/ --kernel-roundtrip
+
+OTEL_UPSTREAM_PAYLOAD ?= $(ROOT)/corpus/results/perf-otel-upstream-20261114
+.PHONY: upstream-otel-candidate
+upstream-otel-candidate:
+	install -d $(OTEL_UPSTREAM_PAYLOAD)
+	install -m644 $(OTEL_NATIVE_BUILD)/tracer.native.o $(OTEL_UPSTREAM_PAYLOAD)/otelcol-ebpf-profiler.native.o
+	install -m644 $(OTEL_UPSTREAM_BUILD)/tracer.bpf.o $(OTEL_UPSTREAM_PAYLOAD)/tracer.original.bpf.o
+	python3 $(ROOT)/vendor/bpf/write_native_manifest.py --app otelcol-ebpf-profiler --llvm-nm llvm-nm-18 --output $(OTEL_UPSTREAM_PAYLOAD)/manifest.json --object $(OTEL_UPSTREAM_PAYLOAD)/otelcol-ebpf-profiler.native.o
+	python3 $(HERE)/manifest-context.py --input $(OTEL_UPSTREAM_PAYLOAD)/manifest.json --output $(OTEL_UPSTREAM_PAYLOAD)/manifest-context.json --kernel-data-layout
