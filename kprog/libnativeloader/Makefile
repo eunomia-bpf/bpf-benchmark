@@ -112,8 +112,9 @@ source-maps-check:
 		-I"$(REPO_ROOT)/vendor/libbpf/include" -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
 		../test/native_loader_source_maps.cpp -Wl,--gc-sections "$(LIBBPF_LIBRARY)" -lelf -lz -ldl -pthread \
 		-o "$(SOURCE_MAP_BUILD)/source-maps"
-	"$(SOURCE_MAP_BUILD)/source-maps" "$(SOURCE_MAP_BUILD)/fixture.bpf.o" \
-		"$(SOURCE_MAP_BUILD)/fixture.native.o" "$(SOURCE_MAP_OUTPUT)"
+	install -m 0644 "$(SOURCE_MAP_BUILD)/fixture.bpf.o" "$(SOURCE_MAP_BUILD)/fixture.native.o" "$(SOURCE_MAP_OUTPUT)/"
+	"$(SOURCE_MAP_BUILD)/source-maps" "$(SOURCE_MAP_OUTPUT)/fixture.bpf.o" \
+		"$(SOURCE_MAP_OUTPUT)/fixture.native.o" "$(SOURCE_MAP_OUTPUT)"
 
 .PHONY: source-maps-kvm guest-source-maps
 source-maps-kvm:

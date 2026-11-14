@@ -1,0 +1,30 @@
+{
+  "base_commit": "6ce4f6239",
+  "host_make_exit": 0,
+  "host_log": "/workspaces/kprog-raw/verified/20261114-source-maps/host-final.log",
+  "source_identities": {
+    "kprog/libnativeloader/src/native_loader.cpp": "bbecce58d16ecb677e0335884ab74bf5c7e5ddae0a50bcdd0668582f945cbee8",
+    "kprog/libnativeloader/src/native_loader_source_maps.hpp": "23134177d0c5e3b7031d14292082a61c86b001347f71e250aa6b96c2d09b9f24",
+    "kprog/libnativeloader/src/native_loader_manifest.hpp": "4444be1344bda3691ef0b22f2ad2723f98d10d535627ceddc9cf0992be046bb2",
+    "kprog/libnativeloader/src/native_loader_link_schema.hpp": "f89d718172ca1d26d0639450cdf72165c4b0068d042901d851e20ae8e82daff5",
+    "kprog/test/native_loader_source_maps.cpp": "216600a57f128d618aa5de5b5bde776a7bf8930c969f72504f70cc3451bcef22",
+    "kprog/test/source_maps_fixture.c": "a22f6c48b1ad2b0f6b76924c20c2b34e3048a798dec498e80e9cdb4a52068d56",
+    "kprog/libnativeloader/Makefile": "74db4fb32f0db2bc774c1b9cb226df4f3946ab15e5aa275a1e66ceff96ecb693"
+  },
+  "tests": [
+    "Actual original BPF ELF map and call relocations paired with changed load FDs",
+    "Entry and separately located subprogram references",
+    "Different FDs for same kernel map identity accepted",
+    "Same-named decoy/duplicate names cannot override actual map ID",
+    "Different current identities for one native global fail",
+    "Unused source map needs no binding; missing needed FD errors",
+    "Undefined generated callees not mistaken for original local functions",
+    "Manifest source_bpf_object absent by default and relative path honored"
+  ],
+  "compile_fix": "Rename new relocation record to SourceMapRelocation; existing helper tracker already owns SourceMapBinding",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-source-maps",
+  "archive": "source-maps-host-results.tar.gz",
+  "canonical_changed": false,
+  "kernel_validation": "Prepared real map-substitution test with mutable values29/73, not run yet",
+  "scope": "Host loader/ELF/resource-binding regression only; no application certification"
+}

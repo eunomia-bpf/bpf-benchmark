@@ -1,6 +1,6 @@
 #pragma once
 
-struct SourceMapBinding {
+struct SourceMapRelocation {
     std::string symbol;
     int fd;
     size_t loaded_slot;
@@ -100,7 +100,7 @@ public:
         }
     }
 
-    std::vector<SourceMapBinding> bind(const std::string &entry,
+    std::vector<SourceMapRelocation> bind(const std::string &entry,
                                       const std::vector<bpf_insn> &loaded,
                                       const std::unordered_set<std::string> *needed = nullptr) const {
         const Function *root = nullptr;
@@ -108,7 +108,7 @@ public:
         if (!root) fail("original BPF object lacks entry " + entry);
         std::vector<std::pair<const Function *, size_t>> pending{{root, 0}};
         std::set<std::tuple<size_t, uint64_t, size_t>> seen;
-        std::vector<SourceMapBinding> bindings;
+        std::vector<SourceMapRelocation> bindings;
         while (!pending.empty()) {
             const auto [f, base] = pending.back(); pending.pop_back();
             if (!seen.emplace(f->section, f->start, base).second) continue;

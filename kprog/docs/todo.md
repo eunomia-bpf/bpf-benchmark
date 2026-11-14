@@ -198,6 +198,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED original-load map consumer host通过（2026-11-14）** 6ce4f6239引入optional source_bpf_object；按原始ELF map relocation/subcall graph与最终intercepted source_insns对齐实际FD，保留current kernel mapID，native alias/lookup facts先按ID取，不让全进程同名map覆盖。默认无field路径保持；复用selected-entry extraction只绑定P所需map。Host regression通过：entry/subprogram、changed FD、同ID多FD、同名decoy/ambiguous names、conflicting IDs、needed-vs-unused、undefined generated callee、manifest default-off/relative path。首编译record与既有SourceMapBinding同名已改SourceMapRelocation，失败log保留；完整原始/本机ELF+binary/sourceSHA/log归档 `source-maps-host-results*`，raw `20261114-source-maps`。真实mutable-map源实例+decoy的registered-service kernel TEST_RUN待启动；未部署/无应用完成声明，generated CEL current-code frontend仍下一类。
+
 - **VERIFIED FP P/B及native安装实际通过（2026-11-14）** 115161 service status0/prog8、完整native image262B，stock verifier与P安装通过；Make2因旧client要求positive JIT stack及固定编码而在TEST_RUN前退出，实际JIT depth0合法/native FP私栈216+5saves存在。删除该unit旧pattern gate，保留既有真实stock/native retval2及34次self-tail对照和raw image。完整P/B/service/image/log归档 `frame-pointer-installed-kernel-results*`，raw `20261114-frame-pointer/retry1`。尚无native execution/应用通过声明；source map relocation→current FD/ID consumer及真实mutable-map kernel regression接续，不改canonical base/image。
 
 - **VERIFIED FP kernel guest-path retry启动（2026-11-14）** 61cb2cef7在mounted run输出部署同一已测linker artifact；dry-run后outer115161、CPU13/2vCPU2G/AS8GiB/shared image，raw `/workspaces/kprog-raw/verified/20261114-frame-pointer/retry1/{launch,kernel}`。首轮127在verifier前，retry当前未收集/不声明通过；没有base/image/kernel变更。receipt `frame-pointer-kernel-retry-launch.json`，下一turn收取真实P/B/load/run结果后接original-load ELF map slot/FD绑定整类实现。

@@ -160,16 +160,17 @@ try {
     catch (const std::runtime_error &error) { failed = std::string(error.what()).find("current map FD") != std::string::npos; }
     require(failed, "missing intercepted relocation silently used process-name lookup");
 
-    const auto manifest = std::filesystem::path(argv[3]) / "manifest.json";
     bpf_prog_info info{}; info.type = BPF_PROG_TYPE_SOCKET_FILTER; std::strcpy(info.name, "entry");
     for (bool enabled : {false, true}) {
+        const auto manifest = std::filesystem::path(argv[3]) /
+            (enabled ? "enabled-manifest.json" : "disabled-manifest.json");
         std::ofstream f(manifest);
         f << "{\"objects\":[{\"program\":\"entry\",\"native_object\":\"" << argv[2] << "\"";
-        if (enabled) f << ",\"source_bpf_object\":\"../fixture.bpf.o\"";
+        if (enabled) f << ",\"source_bpf_object\":\"fixture.bpf.o\"";
         f << "}]}"; f.close(); require(static_cast<bool>(f), "write manifest");
         const auto selected = resolve_native_manifest(manifest, info, std::vector<bpf_insn>(1),
             [](int) -> bpf_map_info { fail("unexpected map resolution"); });
-        require(selected && (enabled ? selected->source_bpf_object == manifest.parent_path() / "../fixture.bpf.o"
+        require(selected && (enabled ? selected->source_bpf_object == manifest.parent_path() / "fixture.bpf.o"
                                      : selected->source_bpf_object.empty()), "optional source object path/default changed");
     }
     std::cout << "original ELF/final FD binding, subprogram layout, resource-ID lookup, conflicts, default-off manifest: PASS\n";
