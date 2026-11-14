@@ -60,6 +60,7 @@ VERIFIED_APP_EXIT_FILE ?= exit-code
 MAP_BOUNDS_CLASS_WORKLIST ?= $(REPO_ROOT)/kprog/results/verified_20261114/map-bounds-class-triage.json
 MAP_BOUNDS_CLASS_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-map-bounds-class/native-evidence
 CLASS_INSPECT_ARGS ?=
+SELF_COMPARE_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-self-compare/before
 KFUNC_BUILD ?= /var/tmp/kprog-tmp/verified/kfunc
 KFUNC_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/host
 KFUNC_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/kernel
@@ -402,6 +403,18 @@ shared-image-restore:
 .PHONY: shared-base-refresh shared-base-finalize shared-base-modules-repair shared-module-syntax
 .PHONY: resident-census-checkpoint resident-census-publish resident-census-publish-test verified-app-collect verified-app-collect-test
 .PHONY: map-bounds-class-inspect
+.PHONY: self-compare-inputs
+self-compare-inputs:
+	install -d "$(SELF_COMPARE_OUTPUT)"
+	clang-18 -O2 -I"$(REPO_ROOT)" -I"$(LIBBPF_PREFIX)/include/bpf" \
+		../test/self_compare.c -o "$(SELF_COMPARE_OUTPUT)/host"
+	"$(SELF_COMPARE_OUTPUT)/host" > "$(SELF_COMPARE_OUTPUT)/host.log"
+	clang-18 -target bpf -mcpu=v4 -O2 -g -I"$(REPO_ROOT)" -I"$(LIBBPF_PREFIX)/include/bpf" \
+		-I/usr/include/x86_64-linux-gnu -c ../test/self_compare.c -o "$(SELF_COMPARE_OUTPUT)/fixture.bpf.o"
+	llvm-objdump-18 -d -l --no-show-raw-insn "$(SELF_COMPARE_OUTPUT)/fixture.bpf.o" > "$(SELF_COMPARE_OUTPUT)/bpf.disassembly"
+	sha256sum ../x86/x86_sim_local_bpf.h ../test/self_compare.c "$(SELF_COMPARE_OUTPUT)/fixture.bpf.o" \
+		> "$(SELF_COMPARE_OUTPUT)/sha256"
+
 map-bounds-class-inspect:
 	python3 ../test/inspect_map_bounds_class.py --worklist "$(MAP_BOUNDS_CLASS_WORKLIST)" --output "$(MAP_BOUNDS_CLASS_OUTPUT)" $(CLASS_INSPECT_ARGS)
 
