@@ -67,5 +67,14 @@
     "policy": "user live USER_PTR_MAX plus nmi_uaccess_okay; kernel copy_from_kernel_nofault_allowed -> ERANGE; exact fault -> EFAULT; whole original destination zeroed for any negative return; actual CPU SMAP bit controls STAC/CLAC; task pagefault_disabled nested counter from BTF",
     "symbol_binding": "each routine rebases sole target symbols by actual link-plan helper address, not historical guest pointers"
   },
-  "deployment": "NO shared linker/base/image/module/kernel mutation; no OTel guest/timing/new gain or kernel semantic certification. Direct unbound loader currently does not transport recovery records; owner integration remains actual work."
+  "deployment": "NO shared linker/base/image/module/kernel mutation; no OTel guest/timing/new gain or kernel semantic certification. Direct unbound loader currently does not transport recovery records; owner integration remains actual work.",
+  "payload_launch": {
+    "recorded_at": "2026-11-14T06:15:29.678151+00:00",
+    "source_commit": "a2cb7a9fae6128e314d6c23f3a2f5c65923508ba",
+    "outer_pid": 218865,
+    "waits_for_exact_pid": 215955,
+    "job": "/workspaces/kprog-raw/perf/20261114-probe-read/payload-job",
+    "output": "/workspaces/repository/corpus/results/perf-probe-read-linker-20261114",
+    "status": "LAUNCHED_UNCOLLECTED_NO_OUTCOME_POLLS"
+  }
 }
