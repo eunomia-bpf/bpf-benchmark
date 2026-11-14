@@ -46,6 +46,7 @@ char LICENSE[] SEC("license") = "GPL";
         result.check_returncode()
 
     saved = os.environ.pop('KPROG_BPF_WHOLE_WORD_SPILLS', None)
+    saved_all = os.environ.pop('KPROG_BPF_WHOLE_WORD_SPILLS_ALL', None)
     try:
         default = output/'default.o'
         prior_bytes = prior_input = None
@@ -66,25 +67,46 @@ char LICENSE[] SEC("license") = "GPL";
         if prior_revision and (default.read_bytes() != prior_bytes or
                                source.with_suffix('.i').read_bytes() != prior_input):
             raise ValueError('Preprocessing cleanup changed default object or input bytes')
-        legacy = output/'legacy.o'
-        run([clang, *worker.COMPILE_FLAGS, '-c', source.with_suffix('.i'), '-o', legacy])
-        if default.read_bytes() != legacy.read_bytes():
+        default_bytes = default.read_bytes()
+        default_allocated = allocated(default)
+        run([clang, *worker.COMPILE_FLAGS, '-c', source.with_suffix('.i'), '-o', default])
+        if default_bytes != default.read_bytes():
             raise ValueError('Default compiler object differs from the previous backend command')
         os.environ['KPROG_BPF_WHOLE_WORD_SPILLS'] = '0'
-        off = output/'off.o'
-        worker.compile_simulator(clang, source, off, run)
-        if off.read_bytes() != default.read_bytes():
+        worker.compile_simulator(clang, source, default, run)
+        if default_bytes != default.read_bytes():
             raise ValueError('Explicitly disabled compiler object differs from default')
         os.environ['KPROG_BPF_WHOLE_WORD_SPILLS'] = '1'
-        on = output/'on.o'
         start = len(commands)
-        worker.compile_simulator(clang, source, on, run)
-        if allocated(on) != allocated(default):
+        worker.compile_simulator(clang, source, default, run)
+        if allocated(default) != default_allocated:
             raise ValueError('Optional pipeline changed code for a fixture with independent registers')
         if not any('llc-18' == row['command'][0] for row in commands[start:]):
             raise ValueError('Optional MIR backend was disconnected')
+        os.environ['KPROG_BPF_WHOLE_WORD_SPILLS_ALL'] = '1'
+        start = len(commands)
+        worker.compile_simulator(clang, source, default, run)
+        if allocated(default) != default_allocated:
+            raise ValueError('All-pairs pipeline changed the independent-register fixture')
+        if not any('--all-scalar-pairs' in row['command'] for row in commands[start:]):
+            raise ValueError('All-pairs selection was not forwarded to the real MIR command')
+        for enabled, selection in [('0','1'),('1','invalid')]:
+            os.environ['KPROG_BPF_WHOLE_WORD_SPILLS'] = enabled
+            os.environ['KPROG_BPF_WHOLE_WORD_SPILLS_ALL'] = selection
+            start = len(commands)
+            try:
+                worker.compile_simulator(clang, source, default, run)
+            except ValueError as error:
+                if 'KPROG_BPF_WHOLE_WORD_SPILLS_ALL' not in str(error):
+                    raise
+            else:
+                raise ValueError('Invalid all-pairs configuration was accepted')
+            if len(commands) != start:
+                raise ValueError('Invalid all-pairs configuration reached compilation')
         result = dict(default_equals_previous_command=True, disabled_equals_default=True,
-                      optional_pipeline_allocations_equal=True, optional_llc_executed=True)
+                      optional_pipeline_allocations_equal=True, optional_llc_executed=True,
+                      all_pairs_forwarded=True, all_pairs_allocations_equal=True,
+                      invalid_all_pairs_configuration_fails_before_compilation=True)
         if prior_revision:
             result.update(prior_revision=prior_revision, prior_preprocessing_pieces=prior_pieces,
                           preprocessing_input_and_default_object_equal=True)
@@ -107,6 +129,10 @@ char LICENSE[] SEC("license") = "GPL";
             os.environ.pop('KPROG_BPF_WHOLE_WORD_SPILLS', None)
         else:
             os.environ['KPROG_BPF_WHOLE_WORD_SPILLS'] = saved
+        if saved_all is None:
+            os.environ.pop('KPROG_BPF_WHOLE_WORD_SPILLS_ALL', None)
+        else:
+            os.environ['KPROG_BPF_WHOLE_WORD_SPILLS_ALL'] = saved_all
 
 
 if __name__ == '__main__':
