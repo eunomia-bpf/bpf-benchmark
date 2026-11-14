@@ -3,8 +3,10 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+import sys
 
 import scale
+import scale_probe_status
 
 
 class ScaleRecords(unittest.TestCase):
@@ -30,6 +32,16 @@ class ScaleRecords(unittest.TestCase):
             (directory/'n100_scalar_direct.json').write_text('{"returncode": 1}')
             with self.assertRaises(KeyError):
                 scale.check(directory, directory/'out')
+
+    def test_loader_failure_status_survives_a_successful_recorder(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            status = Path(temporary)/'probe-status'
+            # A recorder may ignore this return code. The actual child result
+            # must remain independently observable, including successful runs.
+            for expected in (7, 0):
+                self.assertEqual(scale_probe_status.run(status, [
+                    sys.executable, '-c', f'import sys; sys.exit({expected})']), expected)
+                self.assertEqual(int(status.read_text()), expected)
 
 
 if __name__ == '__main__':

@@ -189,13 +189,17 @@ def check(directory,out):
     for path in records:
         row=json.loads(path.read_text());name=row['name']
         if row['stage']=='compiled':
-            command=['trace-cmd','record','-F','-b','32768','-o',out/f'{name}.trace.dat']
+            command=['trace-cmd','record','-F','-c','-b','32768','-o',out/f'{name}.trace.dat']
             for event in ['kmem:kmalloc','kmem:kfree','kmem:kmem_cache_alloc','kmem:kmem_cache_free',
                           'vmalloc:alloc_vmap_area','vmalloc:free_vmap_area_noflush',
                           'kprobes:kprog_f_check','kprobes:kprog_f_check_ret']:
                 command+=['-e',event]
-            row['returncode']=run(command+[ROOT/'kprog/fidelity/build-x86/scale-probe',directory/f'{name}.bpf.o',
+            status=out/f'{name}.probe-status'
+            row['trace_returncode']=run(command+[sys.executable,ROOT/'kprog/fidelity/scale_probe_status.py',status,
+                ROOT/'kprog/fidelity/build-x86/scale-probe',directory/f'{name}.bpf.o',
                 out/f'{name}.verifier.log',row['expected_result']],out/f'{name}.load.log')
+            row['returncode']=int(status.read_text())
+            failed |= row['trace_returncode']!=0
             row['stage']='passed' if row['returncode']==0 else 'load_or_execution_failed'
             counters=[json.loads(line) for line in (out/f'{name}.load.log').read_text().splitlines() if line.startswith('{')]
             if counters:row['probe_counters']=counters
