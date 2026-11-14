@@ -147,6 +147,7 @@
 #define X86_PUSHPOP_AUX_MEM (2U << 24)
 #define X86_PUSHPOP_AUX_MODE(AUX) (((__u32)(AUX) >> 24) & 0xffU)
 
+/* Sole target: skb.cb is at40, qdisc_skb_cb.data adds8; BPF metadata is at48. */
 #define X86_SKB_CB_OFF 0x30LL
 #define X86_SKB_DATA_END_OFF 0x50LL
 #define X86_SKB_DATA_OFF 0xd0LL

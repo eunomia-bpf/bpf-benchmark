@@ -112,7 +112,7 @@ int main(int argc,char **argv) {
     auto Section=F.getSection(); std::string Kind;
     if (Section.starts_with("cgroup/") && (Section.contains("connect") || Section.contains("sendmsg") || Section.contains("recvmsg") || Section.contains("peername") || Section.contains("sockname") || Section.starts_with("cgroup/bind"))) Kind="sock_addr";
     else if (Section.starts_with("cgroup/post_bind") || Section=="cgroup/sock" || Section=="cgroup/sock_create" || Section=="cgroup/sock_release") Kind="sock";
-    else if (Section=="tc" || Section.starts_with("tc/") || Section=="classifier") Kind="skb";
+    else if (Section=="tc" || Section.starts_with("tc/") || Section=="classifier" || Section.starts_with("cgroup_skb/")) Kind="skb";
     else if (Section=="xdp" || Section.starts_with("xdp/")) Kind="xdp";
     if (Kind.empty()) continue;
     SmallVector<CallInst *,16> PointerCalls;

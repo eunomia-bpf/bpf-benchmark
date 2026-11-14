@@ -115,12 +115,13 @@ def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
     result = dict(native_object=str(native), native_proof_object=str(proof),
         simulator_object=str(obj), simulator_program=name + "_x86_sim_xdp",
         simulator_source=str(source), simulator_preprocessed=str(source.with_suffix('.i')),
-        symbol=entry_symbol, native_sha256=hashlib.sha256(native_bytes).hexdigest())
+        context_kind=kind, symbol=entry_symbol, native_sha256=hashlib.sha256(native_bytes).hexdigest())
     (output_dir / "artifacts.json").write_text(json.dumps(result, indent=2) + "\n")
     return result
 
 
-def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path) -> dict:
+def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path, *,
+                              context_compiler=None, public_layout=None, physical_layout=None) -> dict:
     """Called by the service only after the stock verifier accepts B."""
     source = Path(artifacts['simulator_preprocessed'])
     copied = source.with_name('checked-simulator.i')
@@ -141,6 +142,13 @@ def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path
     native, proof = directory/'checked-simulator.native.o', directory/'checked-simulator.proof.o'
     run([clang, *COMPILE_FLAGS, '-emit-llvm', '-c', copied, '-o', ir])
     run([compiler, ir, '-o', lowered])
+    if artifacts['context_kind'] != 'raw':
+        if not context_compiler or not public_layout or not physical_layout:
+            raise ValueError('packet simulator native compilation requires target context compiler/layouts')
+        context_ir = directory/'checked-simulator.context.bc'
+        run([context_compiler, lowered, '--public-layout', public_layout,
+             '--physical-layout', physical_layout, '-o', context_ir])
+        lowered = context_ir
     run([clang, '-target', 'x86_64-linux-gnu', '-O3', '-fPIC', '-mno-red-zone',
          '-mgeneral-regs-only', '-fno-stack-protector', '-fno-asynchronous-unwind-tables',
          '-c', lowered, '-o', native])
@@ -153,5 +161,7 @@ def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path
         source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
         copied_source_sha256=hashlib.sha256(copied.read_bytes()).hexdigest(),
         executable_sha256=hashlib.sha256(native.read_bytes()).hexdigest(),
+        context_layouts={str(p):hashlib.sha256(Path(p).read_bytes()).hexdigest()
+                         for p in (public_layout, physical_layout) if p is not None},
         artifacts=result), indent=2)+'\n')
     return result

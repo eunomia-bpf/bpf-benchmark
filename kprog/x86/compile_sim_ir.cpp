@@ -15,6 +15,7 @@
 #include "llvm/Support/ToolOutputFile.h"
 #include <linux/bpf.h>
 #include <cstdlib>
+#include <map>
 using namespace llvm;
 [[noreturn]] static void fail(const Twine &s) { errs()<<s<<'\n'; std::exit(1); }
 static cl::opt<std::string> Input(cl::Positional,cl::Required);
@@ -22,6 +23,57 @@ static cl::opt<std::string> Output("o",cl::Required);
 #define HELPER_NAME(name) "bpf_" #name
 static const char *HelperNames[] = {__BPF_FUNC_MAPPER(HELPER_NAME)};
 #undef HELPER_NAME
+
+// Simulator byte-lane asm is straight-line BPF register code. Translate its
+// loads/stores/combines together, preserving every lane and temporary output.
+static Value *memoryAsm(CallInst *call, StringRef text, IRBuilder<> &b) {
+  auto integer=[](StringRef s) { unsigned v; if (s.getAsInteger(10,v)) fail("invalid simulator asm operand"); return v; };
+  auto *aggregate=dyn_cast<StructType>(call->getType());
+  unsigned outputs=aggregate?aggregate->getNumElements():(call->getType()->isVoidTy()?0:1);
+  std::map<unsigned,Value *> regs;
+  for (unsigned i=0;i<call->arg_size();++i) regs.emplace(outputs+i,call->getArgOperand(i));
+  auto read=[&](StringRef token) -> Value * {
+    if (!token.consume_front("$")) return b.getInt64(integer(token));
+    auto value=regs.find(integer(token));
+    if (value==regs.end()) fail("simulator asm reads an undefined register");
+    return value->second;
+  };
+  auto bits=[&](Value *v) -> Value * { return v->getType()->isPointerTy()?b.CreatePtrToInt(v,b.getInt64Ty()):b.CreateZExtOrTrunc(v,b.getInt64Ty()); };
+  auto address=[&](StringRef base,StringRef sign,StringRef displacement) {
+    auto *pointer=read(base); if (!pointer->getType()->isPointerTy()) pointer=b.CreateIntToPtr(pointer,b.getPtrTy());
+    auto *offset=bits(read(displacement)); if (sign=="-") offset=b.CreateNeg(offset);
+    return b.CreateGEP(b.getInt8Ty(),pointer,offset);
+  };
+  Regex load("^(\\$[0-9]+) = \\*\\(u(8|16|32|64) \\*\\)\\((\\$[0-9]+) ([+-]) (\\$[0-9]+|[0-9]+)\\)$");
+  Regex store("^\\*\\(u(8|16|32|64) \\*\\)\\((\\$[0-9]+) ([+-]) (\\$[0-9]+|[0-9]+)\\) = (\\$[0-9]+)$");
+  Regex move("^(\\$[0-9]+) = (\\$[0-9]+)$");
+  Regex combine("^(\\$[0-9]+) (<<=|>>=|\\$?\\|=) (\\$[0-9]+|[0-9]+)$");
+  SmallVector<StringRef,16> lines; text.split(lines,'\n',-1,false);
+  for (auto line:lines) {
+    SmallVector<StringRef,8> match;
+    if (load.match(line,&match)) {
+      auto *value=b.CreateAlignedLoad(b.getIntNTy(integer(match[2])),address(match[3],match[4],match[5]),Align(1));
+      value->setVolatile(true); regs[integer(match[1].drop_front())]=bits(value);
+    } else if (store.match(line,&match)) {
+      auto *value=b.CreateTruncOrBitCast(bits(read(match[5])),b.getIntNTy(integer(match[1])));
+      b.CreateAlignedStore(value,address(match[2],match[3],match[4]),Align(1))->setVolatile(true);
+    } else if (move.match(line,&match)) regs[integer(match[1].drop_front())]=read(match[2]);
+    else if (combine.match(line,&match)) {
+      auto *left=bits(read(match[1])), *right=bits(read(match[3]));
+      regs[integer(match[1].drop_front())]=match[2]=="<<="?b.CreateShl(left,right):match[2]==">>="?b.CreateLShr(left,right):b.CreateOr(left,right);
+    } else fail("untranslated simulator BPF assembly: "+line);
+  }
+  auto output=[&](unsigned index,Type *type) -> Value * {
+    auto value=regs.find(index); if (value==regs.end()) fail("simulator asm output is undefined");
+    if (type->isPointerTy()) return value->second->getType()->isPointerTy()?value->second:b.CreateIntToPtr(bits(value->second),type);
+    return b.CreateZExtOrTrunc(bits(value->second),type);
+  };
+  if (!outputs) return nullptr;
+  if (!aggregate) return output(0,call->getType());
+  Value *result=PoisonValue::get(aggregate);
+  for (unsigned i=0;i<outputs;++i) result=b.CreateInsertValue(result,output(i,aggregate->getElementType(i)),i);
+  return result;
+}
 
 int main(int argc,char **argv) {
   cl::ParseCommandLineOptions(argc,argv);
@@ -38,8 +90,6 @@ int main(int argc,char **argv) {
     f.addFnAttr("disable-tail-calls","true");
     for (auto &i:instructions(f)) if (auto *call=dyn_cast<CallInst>(&i)) calls.push_back(call);
   }
-  Regex load("^\\$0 = \\*\\(u(8|16|32|64) \\*\\)\\(\\$([0-9]+) ([+-]) (\\$[0-9]+|[0-9]+)\\)$");
-  Regex store("^\\*\\(u(8|16|32|64) \\*\\)\\(\\$([0-9]+) ([+-]) (\\$[0-9]+|[0-9]+)\\) = \\$([0-9]+)$");
   unsigned lowered=0;
   for (auto *call:calls) {
     call->setTailCallKind(CallInst::TCK_None);
@@ -67,34 +117,11 @@ int main(int argc,char **argv) {
     } else if (text=="$0 = $0" && call->arg_size()==1 && call->getArgOperand(0)->getType()==call->getType()) {
       result=call->getArgOperand(0);
     } else {
-      SmallVector<StringRef,8> match;
-      bool is_load=load.match(text,&match);
-      if (is_load || store.match(text,&match)) {
-        auto integer=[](StringRef s) { unsigned v; if (s.getAsInteger(10,v)) fail("invalid simulator asm operand"); return v; };
-        auto operand=[&](StringRef s) -> Value * {
-          unsigned index=integer(s); unsigned outputs=is_load?1:0;
-          if (index<outputs || index-outputs>=call->arg_size()) fail("simulator asm operand is absent");
-          return call->getArgOperand(index-outputs);
-        };
-        auto *base=operand(match[2]);
-        if (!base->getType()->isPointerTy()) base=b.CreateIntToPtr(base,b.getPtrTy());
-        StringRef displacement=match[4];
-        Value *offset=displacement.consume_front("$")?b.CreateSExtOrTrunc(operand(displacement),b.getInt64Ty()):b.getInt64(integer(displacement));
-        if (match[3]=="-") offset=b.CreateNeg(offset);
-        auto *address=b.CreateGEP(b.getInt8Ty(),base,offset);
-        auto *type=b.getIntNTy(integer(match[1]));
-        if (is_load) {
-          auto *value=b.CreateAlignedLoad(type,address,Align(1)); value->setVolatile(true);
-          result=b.CreateZExtOrTrunc(value,call->getType());
-        } else {
-          auto *value=b.CreateZExtOrTrunc(operand(match[5]),type);
-          b.CreateAlignedStore(value,address,Align(1))->setVolatile(true);
-        }
-      } else if (text.starts_with("$0 = ") && text.ends_with(" ll")) {
+      if (text.starts_with("$0 = ") && text.ends_with(" ll")) {
         auto name=text.drop_front(5).drop_back(3); auto *global=m->getNamedGlobal(name);
         if (!global || !call->getType()->isPointerTy() || !call->arg_empty()) fail("invalid simulator symbol address");
         result=global;
-      } else fail("untranslated simulator BPF assembly: "+text);
+      } else result=memoryAsm(call,text,b);
     }
     if (result) call->replaceAllUsesWith(result);
     call->eraseFromParent(); ++lowered;

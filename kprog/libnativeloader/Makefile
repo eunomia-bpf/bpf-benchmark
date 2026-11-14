@@ -38,6 +38,10 @@ SERVICE_EXECUTION_ARGS ?=
 CHECKED_SIM_BUILD ?= /var/tmp/kprog-tmp/verified/checked-sim
 CHECKED_SIM_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-checked-sim/host
 CHECKED_SIM_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-checked-sim/kernel
+CHECKED_PACKET_BUILD ?= /var/tmp/kprog-tmp/verified/checked-packet
+CHECKED_PACKET_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-checked-packet/host
+CHECKED_PACKET_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-checked-packet/kernel
+CHECKED_PACKET_VMLINUX ?= $(REPO_ROOT)/vendor/bpf/targets/x86/$(shell cat /workspaces/.agent-state/kprog-ck/build-x86/include/config/kernel.release)/vmlinux.h
 KFUNC_BUILD ?= /var/tmp/kprog-tmp/verified/kfunc
 KFUNC_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/host
 KFUNC_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/kernel
@@ -167,6 +171,69 @@ checked-sim-kvm:
 	$(MAKE) source-maps-kvm SOURCE_MAP_KERNEL_OUTPUT="$(CHECKED_SIM_KERNEL_OUTPUT)" \
 		SOURCE_MAP_LOADER="$(CHECKED_SIM_KERNEL_OUTPUT)/trusted-native-loader" \
 		SERVICE_EXECUTION_ARGS="--execution-mode checked-sim-c --sim-native-compiler $(CHECKED_SIM_KERNEL_OUTPUT)/compile-sim-ir"
+
+.PHONY: checked-packet-inputs checked-packet-check
+checked-packet-inputs: checked-sim-inputs
+	install -d "$(CHECKED_PACKET_BUILD)"
+	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
+		../perf/native-context/socket-context-lower.cpp -o "$(CHECKED_PACKET_BUILD)/context-lower" \
+		$$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis transformutils support --system-libs)
+	clang-18 -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" ../perf/native-context/packet-public-layout.c -o "$(CHECKED_PACKET_BUILD)/public-layout"
+	clang-18 -I"$(dir $(CHECKED_PACKET_VMLINUX))" ../perf/native-context/packet-physical-layout.c -o "$(CHECKED_PACKET_BUILD)/physical-layout"
+	clang-18 -O2 -fPIC -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-asynchronous-unwind-tables \
+		-I"$(dir $(CHECKED_PACKET_VMLINUX))" -c ../test/checked_packet_native.c -o "$(CHECKED_PACKET_BUILD)/packet.native.o"
+	clang-18 -target bpf -mcpu=v4 -O2 -g -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" -I"$(LIBBPF_PREFIX)/include/bpf" \
+		-I/usr/include/x86_64-linux-gnu -c ../test/checked_packet.bpf.c -o "$(CHECKED_PACKET_BUILD)/source.bpf.o"
+	clang-18 -c ../test/checked_packet_bad.S -o "$(CHECKED_PACKET_BUILD)/bad.native.o"
+	$(CXX) -std=gnu++20 -O1 -g -ffunction-sections -fdata-sections \
+		-Iinclude -I"$(KERNEL_OFFSETS_INCLUDE)" -I"$(LIBBPF_PREFIX)/include" \
+		-I"$(REPO_ROOT)/vendor/libbpf/include" -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" \
+		src/native_loader.cpp ../test/checked_packet_client.cpp -Wl,--gc-sections \
+		"$(LIBBPF_LIBRARY)" -lelf -lz -ldl -pthread -o "$(CHECKED_PACKET_BUILD)/client"
+
+checked-packet-check: checked-packet-inputs
+	install -d "$(CHECKED_PACKET_OUTPUT)"
+	"$(CHECKED_PACKET_BUILD)/public-layout" > "$(CHECKED_PACKET_OUTPUT)/public-layout.json"
+	"$(CHECKED_PACKET_BUILD)/physical-layout" > "$(CHECKED_PACKET_OUTPUT)/physical-layout.json"
+	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" python3 ../test/check_checked_packet.py \
+		"$(CHECKED_SIM_BUILD)/compile-sim-ir" "$(FRAME_LINKER)" "$(CHECKED_PACKET_BUILD)/context-lower" \
+		"$(CHECKED_PACKET_OUTPUT)/public-layout.json" "$(CHECKED_PACKET_OUTPUT)/physical-layout.json" \
+		"$(CHECKED_PACKET_BUILD)/packet.native.o" "$(CHECKED_PACKET_OUTPUT)/tests"
+
+.PHONY: checked-packet-kvm guest-checked-packet guest-checked-packet-case
+checked-packet-kvm:
+	install -d "$(CHECKED_PACKET_KERNEL_OUTPUT)"
+	install -m 0755 "$(CHECKED_SIM_BUILD)/compile-sim-ir" "$(CHECKED_SIM_BUILD)/trusted-native-loader" \
+		"$(CHECKED_PACKET_BUILD)/context-lower" "$(CHECKED_PACKET_BUILD)/client" "$(CHECKED_PACKET_KERNEL_OUTPUT)/"
+	install -m 0644 "$(CHECKED_PACKET_BUILD)/source.bpf.o" "$(CHECKED_PACKET_BUILD)/packet.native.o" \
+		"$(CHECKED_PACKET_BUILD)/bad.native.o" "$(CHECKED_PACKET_KERNEL_OUTPUT)/"
+	install -m 0755 "$(FRAME_LINKER)" "$(CHECKED_PACKET_KERNEL_OUTPUT)/native-link.real"
+	"$(CHECKED_PACKET_BUILD)/public-layout" > "$(CHECKED_PACKET_KERNEL_OUTPUT)/public-layout.json"
+	"$(CHECKED_PACKET_BUILD)/physical-layout" > "$(CHECKED_PACKET_KERNEL_OUTPUT)/physical-layout.json"
+	taskset -c 14 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(CHECKED_PACKET_KERNEL_OUTPUT)" --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory $(SOURCE_MAP_VM_MEMORY) --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/libnativeloader guest-checked-packet CHECKED_PACKET_KERNEL_OUTPUT=$(CHECKED_PACKET_KERNEL_OUTPUT)'
+
+guest-checked-packet:
+	python3 ../test/check_checked_packet_guest.py "$(CHECKED_PACKET_KERNEL_OUTPUT)"
+
+guest-checked-packet-case:
+	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" KPROG_FRAME_LINKER="$(CHECKED_PACKET_KERNEL_OUTPUT)/native-link.real" \
+		python3 ../trusted_service.py --arch 1 --endpoint /sys/kernel/debug/bpf_x86_native_lab/specializer \
+		--module /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
+		--state "$(CHECKED_PACKET_KERNEL_OUTPUT)/$(CHECKED_PACKET_CASE)/state" \
+		--results "$(CHECKED_PACKET_KERNEL_OUTPUT)/$(CHECKED_PACKET_CASE)/service.tar.gz" \
+		--native-link "$(REPO_ROOT)/kprog/test/tail_call_frame/native-link.sh" \
+		--loader "$(CHECKED_PACKET_KERNEL_OUTPUT)/trusted-native-loader" --execution-mode checked-sim-c \
+		--sim-native-compiler "$(CHECKED_PACKET_KERNEL_OUTPUT)/compile-sim-ir" \
+		--sim-context-compiler "$(CHECKED_PACKET_KERNEL_OUTPUT)/context-lower" \
+		--sim-public-layout "$(CHECKED_PACKET_KERNEL_OUTPUT)/public-layout.json" \
+		--sim-physical-layout "$(CHECKED_PACKET_KERNEL_OUTPUT)/physical-layout.json" \
+		--run "$(CHECKED_PACKET_KERNEL_OUTPUT)/client" "$(CHECKED_PACKET_KERNEL_OUTPUT)/source.bpf.o" \
+		"$(CHECKED_PACKET_KERNEL_OUTPUT)/$(if $(filter reject,$(CHECKED_PACKET_CASE)),bad,packet).native.o" \
+		"$(REPO_ROOT)/kprog/test/tail_call_frame/native-link.sh" "$(CHECKED_PACKET_CASE)" \
+		"$(CHECKED_PACKET_KERNEL_OUTPUT)/$(CHECKED_PACKET_CASE)/execution.jsonl"
 
 .PHONY: tail-frame-inputs tail-frame-kvm guest-tail-frame
 tail-frame-inputs:

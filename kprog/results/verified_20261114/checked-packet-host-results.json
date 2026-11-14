@@ -1,0 +1,42 @@
+{
+  "recorded": "2026-11-14T03:37:38.494465+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-checked-packet",
+  "archive": "checked-packet-host-results.tar.gz",
+  "source_identities": {
+    "kprog/trusted_service.py": "c4cfa5ad3596c8dd8cf7af2caccd7718e25b3aec62febdb0945a886e92d0e107",
+    "kprog/x86/trusted_specializer.py": "9a4952466052dbe11d0348d6c2124d407b8d17c660deb4326d07b3ed5bfd965d",
+    "kprog/x86/compile_sim_ir.cpp": "f204a8056dcdc127ea0757d6634dc7b02a770ac888f2355d2cd41c96e2e94e20",
+    "kprog/x86/x86_sim.h": "9bafbd9ed139a97a1d892c7a73b991da51742d9a197759a24829731d284df0f5",
+    "kprog/perf/native-context/socket-context-lower.cpp": "1f962a567bcfc64bbb88eb7466b634979a644813d8a15fba689c31380e85732f",
+    "kprog/libnativeloader/Makefile": "05032a8ee7d6e904485e29d8809760d08ca6b789c104d558e09171fe5cbe9b86",
+    "kprog/test/checked_packet_native.c": "e557be636f33674634d187ff696dabd3145c025d29310e622a8a875b4136e849",
+    "kprog/test/checked_packet.bpf.c": "7bd94f0a51cfea7c18e1361bdce722e6f3eff4172211fd4d2432c5966ceceafb",
+    "kprog/test/checked_packet_bad.S": "6e88b2a43989ed16c4f966e72743daa08979ea5aa1be25094ba15b77a22f2bb1",
+    "kprog/test/checked_packet_client.cpp": "3f0bb5f2f67bd233e94d4246c6f14b87d99ee89b2d9b6cec3a33940a6d2cdcdc",
+    "kprog/test/check_checked_packet.py": "5ee238e7a5b8eb3cf7fd275358b55f998bb706a74f422409e59f2c77ef1980de",
+    "kprog/test/check_checked_packet_guest.py": "e64304554e51dbbe4495b62062aa3c08f3cd0a355343cbc7fbd1acee5dc615be",
+    "vendor/bpf/targets/x86/7.0.0-rc2+/vmlinux.h": "762812f923caa5cf13b94c68ad5a55a3e41c855345576ede300f8fe2776f9d2e",
+    "vendor/libbpf/include/uapi/linux/bpf.h": "d116a84a62207260a394206e2b1f0811ac72f3563b88d4f49b8dce7377c08ab4"
+  },
+  "host_packet_vectors": 25,
+  "packet_kinds": [
+    "xdp",
+    "tc",
+    "cgroup_skb"
+  ],
+  "raw_regression_vectors": 68,
+  "lifecycle_tests": 2,
+  "final_packet_log": "/workspaces/kprog-raw/verified/20261114-checked-packet/target-btf-host.log",
+  "full_regression_log": "/workspaces/kprog-raw/verified/20261114-checked-packet/final-host.log",
+  "target_btf": {
+    "skb_cb": 40,
+    "qdisc_data": 8,
+    "bpf_cb": 48
+  },
+  "cb_diagnosis": "Earlier proposed CB_DATA56 was FALSE POSITIVE: sole skb.cb40 + qdisc.data8 = BPF metadata48. No functional model-offset change; target comment clarified. Initial uncommitted wrong-offset attempt retained, excluded from final result.",
+  "backend_fix": "LLVM escaped OR $|= is decoded in byte-lane asm; pointer outputs and aggregate temporaries preserved",
+  "context_configuration": "Fixed service-owned existing context translator and public/physical layouts, not producer paths",
+  "kernel_test": "Prepared XDP/TC and actual stock rejection before compiler; not launched yet",
+  "canonical_changed": false,
+  "scope": "Host native-input versus checked-sim-C native compiler regressions only"
+}

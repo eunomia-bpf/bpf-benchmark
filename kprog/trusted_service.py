@@ -179,7 +179,10 @@ def load_service_artifacts(args, worker, fd, request, actual, envelope, artifact
     if mode == 'checked-sim-c':
         verified = load('verify', artifacts)
         (job/'checked-simulator-verification.json').write_text(json.dumps(verified, indent=2)+'\n')
-        artifacts = worker.compile_checked_simulator(artifacts, args.native_link, args.sim_native_compiler)
+        artifacts = worker.compile_checked_simulator(artifacts, args.native_link, args.sim_native_compiler,
+            context_compiler=getattr(args,'sim_context_compiler',None),
+            public_layout=getattr(args,'sim_public_layout',None),
+            physical_layout=getattr(args,'sim_physical_layout',None))
     return load('load', artifacts)
 
 
@@ -225,6 +228,9 @@ def serve(args):
                             ROOT/'kprog/x86/micro-prog/kfunc_codegen.py', ROOT/'kprog/x86/micro-prog/x86_abi.py'])
                     if args.execution_mode == 'checked-sim-c':
                         source_paths.extend([args.sim_native_compiler, ROOT/'kprog/x86/compile_sim_ir.cpp'])
+                        if args.sim_context_compiler:
+                            source_paths.extend([args.sim_context_compiler,args.sim_public_layout,args.sim_physical_layout,
+                                ROOT/'kprog/perf/native-context/socket-context-lower.cpp'])
                     identities={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in source_paths}
                     (job/'source-identities.json').write_text(json.dumps(identities,indent=2))
                     artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)
@@ -281,7 +287,13 @@ def run_application(args):
                     '--loader',str(args.loader),
                     '--execution-mode',getattr(args,'execution_mode','submitted-native'),
                     *(['--sim-native-compiler',str(args.sim_native_compiler)]
-                      if getattr(args,'sim_native_compiler',None) else [])],stdout=subprocess.PIPE,
+                      if getattr(args,'sim_native_compiler',None) else []),
+                    *[value for option,attribute in (
+                        ('--sim-context-compiler','sim_context_compiler'),
+                        ('--sim-public-layout','sim_public_layout'),
+                        ('--sim-physical-layout','sim_physical_layout'))
+                      if getattr(args,attribute,None)
+                      for value in (option,str(getattr(args,attribute)))]],stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT,text=True,start_new_session=True)
                 line=service.stdout.readline()
                 log.write(line);log.flush()
@@ -342,12 +354,17 @@ def main():
     parser.add_argument('--loader',type=Path,required=True)
     parser.add_argument('--execution-mode',choices=('submitted-native','checked-sim-c'),default='submitted-native')
     parser.add_argument('--sim-native-compiler',type=Path)
+    parser.add_argument('--sim-context-compiler',type=Path)
+    parser.add_argument('--sim-public-layout',type=Path)
+    parser.add_argument('--sim-physical-layout',type=Path)
     parser.add_argument('--module',type=Path)
     parser.add_argument('--results',type=Path)
     parser.add_argument('--run',nargs=argparse.REMAINDER)
     args=parser.parse_args()
     if args.execution_mode == 'checked-sim-c' and (args.arch != 1 or not args.sim_native_compiler):
         parser.error('checked-sim-c requires --arch 1 and --sim-native-compiler')
+    if args.sim_context_compiler and (not args.sim_public_layout or not args.sim_physical_layout):
+        parser.error('--sim-context-compiler requires public and physical layouts')
     if args.run is not None:
         if not args.run:
             parser.error('--run requires an application command')
