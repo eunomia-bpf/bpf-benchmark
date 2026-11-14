@@ -56,12 +56,36 @@ static unsigned long long symbol(const char *map, const char *wanted)
 
 int main(int argc, char **argv)
 {
-    if (argc != 2 && !(argc == 4 && !strcmp(argv[2], "--probe-read")) && !(argc == 3 && !strcmp(argv[2], "--hash"))) {
-        fprintf(stderr, "expected boot-matched-vmlinux [--probe-read matching-System.map | --hash]"); return 1;
+    if (argc != 2 && !(argc == 4 && !strcmp(argv[2], "--probe-read")) && !(argc == 3 && (!strcmp(argv[2], "--hash") || !strcmp(argv[2], "--lpm")))) {
+        fprintf(stderr, "expected boot-matched-vmlinux [--probe-read matching-System.map | --hash | --lpm]"); return 1;
     }
     struct btf *btf = btf__parse(argv[1], NULL);
     long error = libbpf_get_error(btf);
     if (error) { fprintf(stderr, "parse BTF %s: %ld\n", argv[1], error); return 1; }
+    if (argc == 3 && !strcmp(argv[2], "--lpm")) {
+        int id = btf__find_by_name_kind(btf, "bpf_map_type", BTF_KIND_ENUM);
+        if (id < 0) { fprintf(stderr, "missing bpf_map_type BTF"); return 1; }
+        const struct btf_type *type = btf__type_by_id(btf, id);
+        const struct btf_enum *values = btf_enum(type);
+        int kind = -1;
+        for (unsigned i = 0; i < btf_vlen(type); ++i)
+            if (!strcmp(btf__name_by_offset(btf, values[i].name_off), "BPF_MAP_TYPE_LPM_TRIE")) kind = values[i].val;
+        if (kind < 0) { fprintf(stderr, "missing LPM trie enum"); return 1; }
+        unsigned base = field(btf, "lpm_trie", "map", 0);
+        int result = printf("{\"map_type\":%u,\"lpm_type\":%d,\"root\":%u,"
+            "\"max_prefixlen\":%u,\"data_size\":%u,\"child\":%u,\"child_stride\":%zu,"
+            "\"node_prefixlen\":%u,\"node_flags\":%u,\"node_data\":%u,"
+            "\"key_prefixlen\":%u,\"key_data\":%u}",
+            field(btf, "bpf_map", "map_type", 1), kind,
+            field(btf, "lpm_trie", "root", 0)-base,
+            field(btf, "lpm_trie", "max_prefixlen", 0)-base,
+            field(btf, "lpm_trie", "data_size", 0)-base,
+            field(btf, "lpm_trie_node", "child", 0), btf__pointer_size(btf),
+            field(btf, "lpm_trie_node", "prefixlen", 1), field(btf, "lpm_trie_node", "flags", 1),
+            field(btf, "lpm_trie_node", "data", 0), field(btf, "bpf_lpm_trie_key_u8", "prefixlen", 1),
+            field(btf, "bpf_lpm_trie_key_u8", "data", 0)) < 0;
+        putchar(10); btf__free(btf); return result;
+    }
     if (argc == 3) {
         int id = btf__find_by_name_kind(btf, "bpf_htab", BTF_KIND_STRUCT);
         if (id < 0) { fprintf(stderr, "missing bpf_htab BTF"); return 1; }

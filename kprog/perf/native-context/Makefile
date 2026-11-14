@@ -904,3 +904,9 @@ PROBE_TIMING_STATE ?= /var/tmp/kprog-tmp/perf/probe-read-direct-timing
 probe-read-otel-timing:
 	flock /workspaces/.agent-state/kprog-lanes/locks/timing flock -s /workspaces/.agent-state/kprog-lanes/locks/image env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(PROBE_TIMING_CAPTURE) EQCODEX_ALL_JIT_PROGRAMS=1 EQCODEX_NATIVE_LINK_BINARY=$(RUNTIME_PROBE_PAYLOAD)/native-link-on \
 		make -f $(ROOT)/kprog/perf/one-image/Makefile rotate ORDER=otelcol-ebpf-profiler/profiling STATS='1 0' SAMPLES=3 WORKLOAD_DURATION=180 CPUS=0-7 VM_CPUS=8 VM_MEM=64G NATIVE_MANIFEST=$(ROOT)/corpus/results/perf-otel-upstream-20261114/manifest-context.json STATE=$(PROBE_TIMING_STATE) LOGS=$(PROBE_TIMING_RAW)/timing
+
+RUNTIME_LPM_BUILD ?= /var/tmp/kprog-tmp/perf/runtime-lpm-layout
+.PHONY: runtime-lpm-layout
+runtime-lpm-layout:
+	$(MAKE) -f $(HERE)/Makefile $(RUNTIME_LPM_BUILD)/runtime-array-layout BUILD=$(RUNTIME_LPM_BUILD)
+	$(RUNTIME_LPM_BUILD)/runtime-array-layout $(KDIR)/vmlinux --lpm > $(RUNTIME_LPM_BUILD)/runtime-lpm-layout.json

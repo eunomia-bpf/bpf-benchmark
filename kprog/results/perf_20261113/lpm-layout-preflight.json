@@ -1,0 +1,48 @@
+{
+  "recorded_at": "2026-11-14T07:54:53Z",
+  "raw": "/workspaces/kprog-raw/perf/20261114-lpm-preflight",
+  "layout": {
+    "map_type": 56,
+    "lpm_type": 11,
+    "root": 288,
+    "max_prefixlen": 384,
+    "data_size": 392,
+    "child": 0,
+    "child_stride": 8,
+    "node_prefixlen": 16,
+    "node_flags": 20,
+    "node_data": 24,
+    "key_prefixlen": 0,
+    "key_data": 4
+  },
+  "source": "sole boot BTF vmlinux74d1097; actual lpm_trie/node/key fields confirmed with pahole",
+  "existing_array_hash_probe_provider_bytes_equal": true,
+  "actual_otel_map": {
+    "snapshot": "corpus/results/perf-known-hash-instruction-profile-20261114/baseline-0001/maps.json",
+    "id": 35,
+    "name": "pid_page_to_map",
+    "key_bytes": 16,
+    "value_bytes": 16,
+    "data_bytes": 12,
+    "max_prefix_bits": 96
+  },
+  "actual_plan": {
+    "path": "corpus/results/perf-link-audit-20261114/audit/link-lwc57z5g/link-plan.json",
+    "aliases": [
+      "pid_page_to_map",
+      "pid_page_to_mapping_info"
+    ],
+    "kinds": [
+      "call",
+      "call"
+    ],
+    "generic_helper_target_unchanged": true
+  },
+  "semantics": [
+    "Kernel lpm_trie.c238-289 checks key.prefixlen<=live max_prefixlen; RCU root/child traversal.",
+    "Matchlen min(node.prefixlen,key.prefixlen); big-endian prefix compare; exact max-prefix node wins before intermediate-node flag check.",
+    "Partial mismatch returns previous non-intermediate best node; return node.data+live data_size, never raw node.",
+    "Current plan aliases have generic call kind and target shared with unrelated map types. Cannot treat kind=call or map-name text as proof of LPM identity; future optimization must preserve generic dispatch for other actual map types."
+  ],
+  "scope": "ABI/source preflight for next approved LPM item only, no LPM emitter or helper replacement, no kernel execution/performance claim."
+}
