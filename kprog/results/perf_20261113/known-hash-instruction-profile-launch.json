@@ -1,0 +1,56 @@
+{
+  "recorded_at": "2026-11-14T05:40:57Z",
+  "outer_pid": 204811,
+  "source_commits": [
+    "bda47aba4",
+    "48af2849d"
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261114-known-hash-instruction-profile",
+  "log": "/workspaces/kprog-raw/perf/20261114-known-hash-instruction-profile/job/make.log",
+  "profile_output": "/workspaces/kprog-raw/perf/20261114-known-hash-instruction-profile/run",
+  "capture": "corpus/results/perf-known-hash-instruction-profile-20261114",
+  "command": [
+    "make",
+    "-f",
+    "kprog/perf/native-context/Makefile",
+    "otel-profile",
+    "OTEL_PROFILE_RAW=/workspaces/kprog-raw/perf/20261114-known-hash-instruction-profile/run",
+    "OTEL_PROFILE_CAPTURE=/workspaces/repository/corpus/results/perf-known-hash-instruction-profile-20261114",
+    "OTEL_PROFILE_LINKER=/workspaces/repository/corpus/results/perf-known-hash-linker-20261114/native-link-known-on",
+    "OTEL_PROFILE_HOST_ARGS=--host-event cpu_atom/cycles/G"
+  ],
+  "resources": {
+    "cpus": "16-19",
+    "vcpus": 4,
+    "guest_memory": "32G",
+    "host_address_space_bytes": 51539607552,
+    "image_lock": "shared after waiting for exact writer PID193281",
+    "timing_lock": false
+  },
+  "environment": {
+    "VERIFIED_WAIT_PID": "193281",
+    "VERIFIED_IMAGE_LOCK": "/workspaces/.agent-state/kprog-lanes/locks/image",
+    "EQCODEX_ALL_JIT_PROGRAMS": "1"
+  },
+  "protocol": {
+    "samples": 1,
+    "seconds": 45,
+    "stats": 1,
+    "event": "cpu_atom/cycles/G",
+    "frequency_hz": 199,
+    "recorder": "Host plain perf record; guest PMU remains disabled, no KVM configuration change",
+    "manifest": "corpus/results/perf-otel-upstream-20261114/manifest-context.json",
+    "candidate": "Pinned48af proven hash/array lookup LTO with actual-pointer generic dispatch for unknown maps; shared ARRAY flag absent",
+    "capture_scope": "Opt-in all selected JIT programs to retain native entry after original+native duplicates; default capture retains prior18 cap"
+  },
+  "purpose": "Advisor05:30 first item: per-instruction profile of both arms on known-hash chain whose earlier3x180 throughput was0.965x. Bind root samples to exact retained live JIT addresses/bytes, report skid/helper attribution limits.",
+  "preflight": {
+    "make_dry_run": "PASS",
+    "capture_tests": 5,
+    "host_event_configuration": "accepted; not guest-sample evidence"
+  },
+  "kernel": "74d1097af561",
+  "image": "66e9e88f197f975fd98f78f08be2eac3b7c313937e39a4cb2a45639d0615f2b8",
+  "outcome": null,
+  "scope": "Launch only. NO postlaunch status/log/counter/result polling this turn; next turn collect all raw/errors/guest clock/JIT binding. Diagnostic profile is not3x180 timing, floor, optimization gain or equal-work certification. Shared ARRAY host candidate3fbc is complete but its separate runtime check was not launched after advisor changed order."
+}
