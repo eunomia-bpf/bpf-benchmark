@@ -1,0 +1,365 @@
+{
+  "recorded_at": "2026-11-14T06:48:13.646676+00:00",
+  "outer_pid": 230249,
+  "make_exit": 0,
+  "finished": "2026-11-14T06:36:36Z",
+  "kernel": "7.0.0-rc2+",
+  "source_commit": "1fbe83feb",
+  "candidate_sha256": "fb07b6f232801818559c202a9c22de336fd1a48f9bf4bc25446a29b0355687fd",
+  "guest_input_hashes": [
+    "fb07b6f232801818559c202a9c22de336fd1a48f9bf4bc25446a29b0355687fd  /workspaces/repository/corpus/results/perf-probe-read-linker-20261114/native-link.real",
+    "75a971bd496f290b1763efcfe2f78b74e80d2c8bd3c7c064308337fe5026f12e  /workspaces/repository/corpus/results/perf-probe-read-linker-20261114/runtime-probe-read-layout.json",
+    "c4d7246aa3111b7f627ba6fa7f38ee19d4db114c4a071b889b6dde7a9bb4e195  /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+    "bfe23fdb831b367e5a6345e77f91d90f8e75b308e24b6d1ea92478430792d1bc  /workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+    "f95f3e3b9ece20bd1a7340c9d2be478cb7befea33bae02892dfe353d525c0bb0  /workspaces/repository/kprog/x86/x86_sim_local_bpf.h"
+  ],
+  "guest_cpu_smap_advertised": true,
+  "configurations": [
+    {
+      "mode": "submitted-native",
+      "request": {
+        "request_id": 1,
+        "source_prog_id": 7,
+        "native_sha256": "de2732b0c6517bb3484c871471a4cdd0635180a614aa3b5113cb8c2597a83982",
+        "execution_mode": "submitted-native",
+        "started": "2026-11-14T06:36:21.956783+00:00",
+        "prog_id": 11,
+        "phase": "load",
+        "status": 0,
+        "artifact_archive": "/workspaces/kprog-raw/perf/20261114-probe-read/kernel-retry1/submitted-native/state/session-3xoa0cqg/requests/1.success.tar.gz",
+        "finished": "2026-11-14T06:36:26.721144+00:00"
+      },
+      "executions": [
+        {
+          "case": "user-valid",
+          "route": "stock",
+          "test_exit": 0,
+          "retval": 522240,
+          "expected": 522240
+        },
+        {
+          "case": "user-valid",
+          "route": "native",
+          "test_exit": 0,
+          "retval": 522240,
+          "expected": 522240
+        },
+        {
+          "case": "user-partial-fault",
+          "route": "stock",
+          "test_exit": 0,
+          "retval": 242,
+          "expected": 242
+        },
+        {
+          "case": "user-partial-fault",
+          "route": "native",
+          "test_exit": 0,
+          "retval": 242,
+          "expected": 242
+        },
+        {
+          "case": "user-guard-fault",
+          "route": "stock",
+          "test_exit": 0,
+          "retval": 242,
+          "expected": 242
+        },
+        {
+          "case": "user-guard-fault",
+          "route": "native",
+          "test_exit": 0,
+          "retval": 242,
+          "expected": 242
+        },
+        {
+          "case": "user-null",
+          "route": "stock",
+          "test_exit": 0,
+          "retval": 242,
+          "expected": 242
+        },
+        {
+          "case": "user-null",
+          "route": "native",
+          "test_exit": 0,
+          "retval": 242,
+          "expected": 242
+        },
+        {
+          "case": "user-wrap",
+          "route": "stock",
+          "test_exit": 0,
+          "retval": 242,
+          "expected": 242
+        },
+        {
+          "case": "user-wrap",
+          "route": "native",
+          "test_exit": 0,
+          "retval": 242,
+          "expected": 242
+        },
+        {
+          "case": "kernel-stack",
+          "route": "stock",
+          "test_exit": 0,
+          "retval": 34816,
+          "expected": 34816
+        },
+        {
+          "case": "kernel-stack",
+          "route": "native",
+          "test_exit": 0,
+          "retval": 34816,
+          "expected": 34816
+        },
+        {
+          "case": "kernel-denies-user",
+          "route": "stock",
+          "test_exit": 0,
+          "retval": 222,
+          "expected": 222
+        },
+        {
+          "case": "kernel-denies-user",
+          "route": "native",
+          "test_exit": 0,
+          "retval": 222,
+          "expected": 222
+        },
+        {
+          "case": "kernel-denies-null",
+          "route": "stock",
+          "test_exit": 0,
+          "retval": 222,
+          "expected": 222
+        },
+        {
+          "case": "kernel-denies-null",
+          "route": "native",
+          "test_exit": 0,
+          "retval": 222,
+          "expected": 222
+        },
+        {
+          "case": "kernel-fault",
+          "route": "stock",
+          "test_exit": 0,
+          "retval": 242,
+          "expected": 242
+        },
+        {
+          "case": "kernel-fault",
+          "route": "native",
+          "test_exit": 0,
+          "retval": 242,
+          "expected": 242
+        }
+      ],
+      "recovery_sites_r11": [
+        [
+          358,
+          3,
+          11
+        ],
+        [
+          401,
+          3,
+          11
+        ],
+        [
+          625,
+          3,
+          11
+        ],
+        [
+          668,
+          3,
+          11
+        ]
+      ],
+      "linked_native_sha256": "ea2174976d92169a188eec6604f3e1e3dc112de66533f9deedb09f63ee2a775f"
+    },
+    {
+      "mode": "checked-sim-c",
+      "request": {
+        "request_id": 2,
+        "source_prog_id": 18,
+        "native_sha256": "de2732b0c6517bb3484c871471a4cdd0635180a614aa3b5113cb8c2597a83982",
+        "execution_mode": "checked-sim-c",
+        "started": "2026-11-14T06:36:27.585411+00:00",
+        "prog_id": 25,
+        "phase": "load",
+        "status": 0,
+        "artifact_archive": "/workspaces/kprog-raw/perf/20261114-probe-read/kernel-retry1/checked-sim-c/state/session-zb2mifu_/requests/2.success.tar.gz",
+        "finished": "2026-11-14T06:36:34.933349+00:00"
+      },
+      "executions": [
+        {
+          "case": "user-valid",
+          "route": "stock",
+          "test_exit": 0,
+          "retval": 522240,
+          "expected": 522240
+        },
+        {
+          "case": "user-valid",
+          "route": "native",
+          "test_exit": 0,
+          "retval": 522240,
+          "expected": 522240
+        },
+        {
+          "case": "user-partial-fault",
+          "route": "stock",
+          "test_exit": 0,
+          "retval": 242,
+          "expected": 242
+        },
+        {
+          "case": "user-partial-fault",
+          "route": "native",
+          "test_exit": 0,
+          "retval": 242,
+          "expected": 242
+        },
+        {
+          "case": "user-guard-fault",
+          "route": "stock",
+          "test_exit": 0,
+          "retval": 242,
+          "expected": 242
+        },
+        {
+          "case": "user-guard-fault",
+          "route": "native",
+          "test_exit": 0,
+          "retval": 242,
+          "expected": 242
+        },
+        {
+          "case": "user-null",
+          "route": "stock",
+          "test_exit": 0,
+          "retval": 242,
+          "expected": 242
+        },
+        {
+          "case": "user-null",
+          "route": "native",
+          "test_exit": 0,
+          "retval": 242,
+          "expected": 242
+        },
+        {
+          "case": "user-wrap",
+          "route": "stock",
+          "test_exit": 0,
+          "retval": 242,
+          "expected": 242
+        },
+        {
+          "case": "user-wrap",
+          "route": "native",
+          "test_exit": 0,
+          "retval": 242,
+          "expected": 242
+        },
+        {
+          "case": "kernel-stack",
+          "route": "stock",
+          "test_exit": 0,
+          "retval": 34816,
+          "expected": 34816
+        },
+        {
+          "case": "kernel-stack",
+          "route": "native",
+          "test_exit": 0,
+          "retval": 34816,
+          "expected": 34816
+        },
+        {
+          "case": "kernel-denies-user",
+          "route": "stock",
+          "test_exit": 0,
+          "retval": 222,
+          "expected": 222
+        },
+        {
+          "case": "kernel-denies-user",
+          "route": "native",
+          "test_exit": 0,
+          "retval": 222,
+          "expected": 222
+        },
+        {
+          "case": "kernel-denies-null",
+          "route": "stock",
+          "test_exit": 0,
+          "retval": 222,
+          "expected": 222
+        },
+        {
+          "case": "kernel-denies-null",
+          "route": "native",
+          "test_exit": 0,
+          "retval": 222,
+          "expected": 222
+        },
+        {
+          "case": "kernel-fault",
+          "route": "stock",
+          "test_exit": 0,
+          "retval": 242,
+          "expected": 242
+        },
+        {
+          "case": "kernel-fault",
+          "route": "native",
+          "test_exit": 0,
+          "retval": 242,
+          "expected": 242
+        }
+      ],
+      "recovery_sites_r11": [
+        [
+          1226,
+          3,
+          11
+        ],
+        [
+          1269,
+          3,
+          11
+        ],
+        [
+          1493,
+          3,
+          11
+        ],
+        [
+          1536,
+          3,
+          11
+        ]
+      ],
+      "linked_native_sha256": "ede5062e765c351cf457fc1491eb89b0dbcf1a41cc75538b1036ea1fa3095621",
+      "verify": {
+        "request_id": 2,
+        "prog_id": 22,
+        "phase": "verify",
+        "status": 0
+      },
+      "same_checked_c_copy_sha256": "18a78bb8812201522fa4d152bd3c7ed1744bf6bb5a72c0864a5af68c7584e878"
+    }
+  ],
+  "archive": {
+    "path": "/workspaces/kprog-raw/perf/20261114-probe-read-kernel-results.tar.gz",
+    "bytes": 2166499,
+    "sha256": "3b0016ca7c042703c77fa307793649949762e1c55c76d857f9a9e5810bec2f79",
+    "files_byte_compared": 40
+  },
+  "scope": "Actual sole-kernel registered-service component execution. 18 stock/native executions in each configuration, 36 total. Error checksum zero establishes all16 unsigned destination bytes zero. SMAP advertised; no separate STAC execution counter, forced NMI rejection or task-counter probe. No whole-app, throughput improvement, direct-module deployment or 1.20x/floor certification."
+}

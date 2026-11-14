@@ -830,3 +830,18 @@ guest-probe-read:
 			> $(PROBE_KERNEL_OUTPUT)/$$mode/service.log 2>&1 || status=1; \
 		cat $(PROBE_KERNEL_OUTPUT)/$$mode/service.log; \
 	done; exit $$status
+
+PROBE_OTEL_RAW ?= /workspaces/kprog-raw/perf/20261114-probe-read-otel-lto
+PROBE_OTEL_STATE ?= /var/tmp/kprog-tmp/perf/probe-read-otel-lto
+PROBE_OTEL_CAPTURE ?= $(ROOT)/corpus/results/perf-probe-read-otel-lto-20261114
+.PHONY: probe-read-otel-lto
+probe-read-otel-lto:
+	install -d $(PROBE_OTEL_STATE)/var-tmp $(PROBE_OTEL_RAW)
+	@status=0; env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(PROBE_OTEL_CAPTURE) EQCODEX_ALL_JIT_PROGRAMS=1 \
+	make -C $(ROOT)/kprog/libnativeloader -o trusted-service trusted-service-kvm \
+		BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader OUTPUT=$(PROBE_OTEL_RAW)/control SERVICE_HOST_CPUS=16-19 VM_CPUS=4 VM_MEM=32G \
+		VNG_FLAGS='--overlay-rwdir /run --overlay-rwdir /usr/local --rwdir /var/tmp=$(PROBE_OTEL_STATE)/var-tmp' \
+		SERVICE_RUN='env BPFREJIT_SHIM_NATIVE_MANIFEST=$(ROOT)/corpus/results/perf-otel-upstream-20261114/manifest-context.json python3 $(ROOT)/kprog/test/verified_corpus.py otelcol-ebpf-profiler/profiling 1 10 1' \
+		SERVICE_EXECUTION_ARGS='$$(CHECKED_COMPILER_SERVICE_ARGS) --native-link $(RUNTIME_PROBE_PAYLOAD)/native-link-on' || status=$$?; \
+	if [[ -f $(PROBE_OTEL_STATE)/var-tmp/bpf-benchmark-docker.img ]]; then rm -f $(PROBE_OTEL_STATE)/var-tmp/bpf-benchmark-docker.img; fi; \
+	exit $$status
