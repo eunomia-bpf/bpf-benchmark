@@ -8,6 +8,9 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 
 use crate::*;
 
+#[path = "x86_writable_data.rs"]
+mod writable_data;
+
 #[path = "x86_memory.rs"]
 mod memory;
 
@@ -1207,6 +1210,7 @@ pub(super) fn rewrite_x86(
     let helper_call_sites = scan_helper_calls(elf, included)?;
     let got_relocations = scan_x86_got_relocations(elf, included)?;
     let pc_relative_relocations = scan_x86_pc_relative_relocations(elf, included)?;
+    let writable_references = writable_data::references(elf, included)?;
     let proof_input = elf.section_by_name(".native_link_abi").is_some();
     let proof_entry_end_target = if !proof_mode && proof_input {
         included.iter().map(|sym| sym.address + sym.size).max()
@@ -1431,6 +1435,29 @@ pub(super) fn rewrite_x86(
                             }
                         }
                     }
+                }
+            }
+
+            if !proof_mode && insn.is_ip_rel_memory_operand() {
+                let at=local_ip+u64::from(decoder.get_constant_offsets(&insn).displacement_offset() as u32);
+                if let Some(reference)=writable_references.get(&local_site_key(sym,at)) {
+                    let mut factory=InstructionInfoFactory::new();
+                    for register in factory.info(&insn).used_registers().iter().filter(|r|
+                        matches!(r.access(),OpAccess::Write|OpAccess::CondWrite|OpAccess::ReadWrite|OpAccess::ReadCondWrite)) {
+                        if let Some(reg)=x86_gpr64_family(register.register()) {
+                            helper_got_registers.remove(&reg);helper_imm_registers.remove(&reg);map_symbol_registers.remove(&reg);
+                        }
+                    }
+                    for (index,(instruction,kind)) in writable_data::instructions(insn,reference)?.into_iter().enumerate() {
+                        if index==0 {
+                            push_x86_replacement(&mut local,&mut kinds,&mut insn_local_ip,local_ip,instruction,kind);
+                        } else {
+                            push_x86_synthetic(&mut local,&mut kinds,&mut insn_local_ip,&mut next_synthetic_ip,instruction)?;
+                            *kinds.last_mut().unwrap()=kind;
+                        }
+                    }
+                    resolved_got_relocations.insert(local_site_key(sym,at));
+                    continue;
                 }
             }
 
@@ -2023,7 +2050,7 @@ pub(super) fn rewrite_x86(
     // RIP-relative indirect-call form and point at in-blob literal-pool entries;
     // PLT32 helper calls use in-blob absolute trampolines.
     let mut proof_relocs = if proof_mode {
-        let mut collected = collect_x86_proof_relocs(elf, &layouts, &canonicalized_relocations)?;
+        let mut collected = collect_x86_proof_relocs(elf, &layouts, &canonicalized_relocations, &writable_references)?;
         collected.extend(tail_proof_relocs);
         collected
     } else {
@@ -2196,6 +2223,7 @@ fn collect_x86_proof_relocs(
     elf: &object::File,
     layouts: &[SymbolLayout],
     resolved_relocations: &HashSet<LocalSiteKey>,
+    writable_references: &HashMap<LocalSiteKey,writable_data::Reference>,
 ) -> Result<Vec<ProofReloc>> {
     let mut relocs = Vec::new();
     let mut sections: HashMap<object::SectionIndex, Vec<&SymbolLayout>> = HashMap::new();
@@ -2233,6 +2261,17 @@ fn collect_x86_proof_relocs(
             };
             let local_patch_off = reloc_offset - layout.sym.address;
             if resolved_relocations.contains(&local_site_key(&layout.sym, local_patch_off)) {
+                continue;
+            }
+            if let Some(reference)=writable_references.get(&local_site_key(&layout.sym,local_patch_off)) {
+                let index=layout.insn_local_ip.iter().enumerate()
+                    .filter(|(_,ip)|**ip!=u64::MAX && **ip<=local_patch_off)
+                    .max_by_key(|(_,ip)|**ip).map(|(i,_)|i)
+                    .ok_or_else(||anyhow!("mutable PC32 relocation has no instruction"))?;
+                let offset=layout.base_in_blob+layout.new_offset_in_sym[index] as usize+
+                    (local_patch_off-layout.insn_local_ip[index]) as usize;
+                relocs.push(ProofReloc{offset:offset as u64,r_type,symbol:reference.name.clone(),
+                    addend:reference.addend,data:None});
                 continue;
             }
             match r_type {
@@ -2755,6 +2794,8 @@ fn apply_elf_relocations(
                 // mechanism (PC-relative form here -- clang shouldn't
                 // be emitting 32S in -fPIC code, but handle defensively).
                 2 => {
+                    if resolved_got_relocations.contains(&local_site_key(&layout.sym,local_patch_off)) {continue;}
+
                     let target_section_idx = target_sym.section_index().ok_or_else(|| {
                         anyhow!("PC32 reloc target {} has no section", target_name)
                     })?;

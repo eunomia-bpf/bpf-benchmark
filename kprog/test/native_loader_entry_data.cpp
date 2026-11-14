@@ -2,15 +2,103 @@
 // load; a reachable global missing from that same DATASEC must still fail.
 #include "../libnativeloader/src/native_loader.cpp"
 #include <iostream>
+#include <sys/mman.h>
 
 static void require(bool condition, const std::string &message)
 {
     if (!condition) fail(message);
 }
 
+static void mutable_data(const std::filesystem::path &object,
+                         const std::filesystem::path &linker,
+                         const std::filesystem::path &output)
+{
+    struct { uint32_t before=0x12345678; uint8_t flag=0; uint8_t pad[3]={1,2,3};
+             uint32_t bias=7, after=0x87654321; } live;
+    NativeLinkArgs args; args.linker=linker;
+    args.maps={{"mutable_flag",reinterpret_cast<uint64_t>(&live.flag)},
+               {"mutable_bias",reinterpret_cast<uint64_t>(&live.bias)}};
+    std::unordered_map<std::string,uint64_t> addresses;
+    for (const auto &map : args.maps) addresses[map.name]=map.addr;
+    for (const std::string symbol : {"mutable_entry","mutable_immediate"}) {
+        const auto proof=cached_native_entry_proof(linker,object,symbol);
+        const auto names=native_entry_symbol_names(proof);
+        require(names.contains("mutable_flag"),"mutable PC32 lost its original variable identity");
+        const auto linked=invoke_native_link(object,symbol,args,output/symbol,{},proof);
+        auto bytes=read_binary_file(linked.blob);
+        patch_map_literals(bytes,read_map_patch_file(linked.map_patches),addresses);
+        bytes.push_back(0xc3); // The inline image's exit lands just past its bytes.
+        const size_t size=(bytes.size()+4095)&~size_t(4095);
+        void *code=mmap(nullptr,size,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
+        require(code!=MAP_FAILED,"allocate mutable-data execution image");
+        std::memcpy(code,bytes.data(),bytes.size());
+        require(!mprotect(code,size,PROT_READ|PROT_EXEC),"protect actual native text RX");
+        auto run=reinterpret_cast<unsigned(*)(void*)>(code);
+        if (symbol=="mutable_entry") {
+            require(run(nullptr)==8 && run(nullptr)==9 && live.flag==2,"mutable state did not persist");
+            live.bias=100;
+            require(run(nullptr)==103 && live.flag==3,"native data copied instead of using live binding");
+        } else require(run(nullptr)==9 && live.flag==9,"trailing immediate PC32 bias changed its target");
+        require(live.before==0x12345678 && live.after==0x87654321 &&
+                live.pad[0]==1 && live.pad[1]==2 && live.pad[2]==3,"mutable write damaged adjacent bytes");
+        require(!munmap(code,size),"release native text mapping");
+    }
+    std::cout << "RX native text, live writable DATASEC aliases, persistent state, runtime updates and immediate-store bias: PASS" << std::endl;
+}
+
+static int kernel_mutable(const char *native,const char *linker,const char *directory,const char *original)
+{
+    std::unique_ptr<bpf_object,decltype(&bpf_object__close)> object(bpf_object__open_file(original,nullptr),bpf_object__close);
+    require(object && !libbpf_get_error(object.get()),"open mutable source BPF");
+    require(!bpf_object__load(object.get()),"load mutable source BPF");
+    auto *flags=bpf_object__find_map_by_name(object.get(),".bss");
+    auto *data=bpf_object__find_map_by_name(object.get(),".data");
+    require(flags && data,"source mutable DATASEC maps absent");
+    const uint32_t key=0;
+    std::vector<uint8_t> state(bpf_map__value_size(flags));
+    std::vector<uint8_t> values(bpf_map__value_size(data));
+    const auto output=std::filesystem::path(directory);
+    std::ofstream results(output/"mutable-execution.jsonl");
+    for (const std::string name : {"mutable_entry","mutable_immediate"}) {
+        auto *program=bpf_object__find_program_by_name(object.get(),name.c_str());
+        require(program,"source mutable program absent");
+        const auto manifest=output/(name+".json");
+        std::ofstream config(manifest);
+        config << "{\"objects\":[{\"program\":\"" << name << "\",\"symbol\":\"" << name
+               << "\",\"native_object\":\"" << native << "\",\"kernel_data_layout\":true}]}";
+        config.close();
+        native_loader::FdLoadOptions request;request.original_prog_fd=bpf_program__fd(program);
+        request.native_link_path=linker;request.manifest_path=manifest;
+        require(!setenv("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF","1",1),"select registered service");
+        auto loaded=native_loader::load_from_fd(request);
+        require(loaded.replaced && loaded.prog_fd>=0,"install mutable native program");
+        for (uint32_t bias : {7,100}) for (const auto &[route,fd] :
+                std::vector<std::pair<const char*,int>>{{"stock",request.original_prog_fd},{"native",loaded.prog_fd}}) {
+            std::fill(state.begin(),state.end(),0);state[0]=3;
+            std::fill(values.begin(),values.end(),0);std::memcpy(values.data(),&bias,4);
+            require(!bpf_map_update_elem(bpf_map__fd(flags),&key,state.data(),0) &&
+                    !bpf_map_update_elem(bpf_map__fd(data),&key,values.data(),0),"configure live source globals");
+            unsigned char packet[64]{};
+            bpf_test_run_opts run{};run.sz=sizeof(run);run.data_in=packet;run.data_size_in=sizeof(packet);run.repeat=1;
+            require(!bpf_prog_test_run_opts(fd,&run),"run actual mutable program");
+            require(!bpf_map_lookup_elem(bpf_map__fd(flags),&key,state.data()),"read changed live source global");
+            const unsigned flag=name=="mutable_entry"?4:9;
+            const unsigned expected=name=="mutable_entry"?bias+flag:flag;
+            results << "{\"program\":\"" << name << "\",\"route\":\"" << route
+                << "\",\"bias\":" << bias << ",\"flag\":" << unsigned(state[0])
+                << ",\"retval\":" << run.retval << "}" << std::endl;
+            require(run.retval==expected && state[0]==flag,"native write/return differs from source live DATASEC");
+        }
+        native_loader::close_loaded_program(&loaded);
+    }
+    std::cout << "kernel mutable source/native live DATASEC: 8 executions PASS" << std::endl;
+    return 0;
+}
+
 int main(int argc, char **argv)
 try {
     require(argc == 6, "usage: entry-data host|kernel NATIVE_OBJECT NATIVE_LINK OUTPUT EXISTING_PROOF");
+    if (std::string(argv[1])=="kernel-mutable") return kernel_mutable(argv[2],argv[3],argv[4],argv[5]);
     const bool kernel = std::string(argv[1]) == "kernel";
     require(kernel || std::string(argv[1]) == "host", "unknown mode");
     const std::filesystem::path output = argv[4];
@@ -44,6 +132,7 @@ try {
             read_binary_file(fresh.map_patches) == read_binary_file(reused.map_patches) &&
             read_binary_file(fresh.abi) == read_binary_file(reused.abi),
             "reused entry extraction changed native code or its sidebands");
+    mutable_data(argv[2],argv[3],output);
     if (!kernel) {
         std::cout << "entry/callee/global reachability, cache, real ELF inventory, identical fresh/reused native template: PASS\n";
         return 0;
