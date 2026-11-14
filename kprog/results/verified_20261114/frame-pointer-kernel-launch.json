@@ -1,0 +1,47 @@
+{
+  "announced": "2026-11-14T01:27:41Z",
+  "outer_pid": 108698,
+  "recipe_commit": "9d8270a51",
+  "source_commit": "d401bc93a",
+  "make_target": "make -C kprog/libnativeloader tail-frame-kvm",
+  "input_build": "make tail-frame-inputs exit0",
+  "host_cpu": 13,
+  "guest_cpus": 2,
+  "guest_memory": "2G",
+  "launcher_address_space": "8GiB",
+  "image_lock": "shared",
+  "host_available_at_launch_kib": 56387472,
+  "kernel": "/workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage",
+  "image": "sha256:0bb7d4be1f0a9c4bb015ee20d14fb9ba26e56da9f84310a501257ae5376e084c",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-frame-pointer",
+  "launcher_log": "/workspaces/kprog-raw/verified/20261114-frame-pointer/kernel-launch/launcher.log",
+  "job_log": "/workspaces/kprog-raw/verified/20261114-frame-pointer/kernel-launch/job/make.log",
+  "kernel_output": "/workspaces/kprog-raw/verified/20261114-frame-pointer/kernel",
+  "inputs": [
+    {
+      "path": "/var/tmp/kprog-tmp/verified/frame-pointer/client",
+      "bytes": 6318704,
+      "sha256": "7b925e86692f236b91efd20c593e9b1ea003c1181f558bd8f3214f1659b2f748"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/verified/frame-pointer/source.bpf.o",
+      "bytes": 6616,
+      "sha256": "4f1c053d617778ffbb879cb3b776b71457ce37f1d2a10b136e9d302bc7fc0f3a"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/verified/frame-pointer/frame.native.o",
+      "bytes": 856,
+      "sha256": "8d617adf62df257f47df65d242655d5af03b7c259d0c732d0c54a6d9f2297288"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/verified/direct-tail/cargo/debug/native-link",
+      "bytes": 4515360,
+      "sha256": "1d144785ca76bb0c6637d681afd7a244771cabc53254da892e4f6207cdf89802"
+    }
+  ],
+  "scope": "Existing real registered-service tail-call client with frame-pointer fixture; native load/execute result uncollected",
+  "collected": false,
+  "canonical_changed": false,
+  "benchmark_settings_changed": false,
+  "archive": "frame-pointer-kernel-inputs.tar.gz"
+}
