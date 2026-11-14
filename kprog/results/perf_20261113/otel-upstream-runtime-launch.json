@@ -1,0 +1,68 @@
+{
+  "recorded_at": "2026-11-14T00:58:10Z",
+  "outer_pid": 95672,
+  "wait_owned_pid": 93688,
+  "dependency_status_required": false,
+  "source_commits": [
+    "9b96606cf",
+    "4a897b54e",
+    "ad88f9563"
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261114-otel-upstream-runtime",
+  "capture": "/workspaces/repository/corpus/results/perf-otel-upstream-runtime-20261114",
+  "command": [
+    "make",
+    "-f",
+    "kprog/perf/one-image/Makefile",
+    "corpus",
+    "APPS=otelcol-ebpf-profiler/profiling",
+    "CPUS=16-19",
+    "VM_CPUS=4",
+    "VM_MEM=32G",
+    "STATE=/var/tmp/kprog-tmp/perf/otel-upstream-runtime",
+    "LOGS=/workspaces/kprog-raw/perf/20261114-otel-upstream-runtime",
+    "SAMPLES=1",
+    "WORKLOAD_DURATION=45",
+    "BPFREJIT_CORPUS_BPF_STATS=1",
+    "NATIVE_MANIFEST=/workspaces/repository/corpus/results/perf-otel-upstream-20261114/manifest-context.json",
+    "VNG_FLAGS=--verbose"
+  ],
+  "environment": {
+    "EQCODEX_OUT": "/workspaces/repository/corpus/results/perf-otel-upstream-runtime-20261114",
+    "EQCODEX_NATIVE_LINK_BINARY": "/workspaces/repository/corpus/results/perf-local-memory-20261113/native-link-on",
+    "VERIFIED_BUILD_CPUS": "16-19",
+    "VERIFIED_IMAGE_LOCK": "/workspaces/.agent-state/kprog-lanes/locks/image",
+    "VERIFIED_WAIT_PID": "93688"
+  },
+  "resources": {
+    "cpus": "16-19",
+    "guest_cpus": 4,
+    "guest_memory": "32G",
+    "host_as_bytes": 51539607552
+  },
+  "payload": [
+    {
+      "path": "/workspaces/repository/corpus/results/perf-otel-upstream-20261114/manifest-context.json",
+      "bytes": 5806,
+      "sha256": "430b26ab4be8fd501a819f48c0451895d86bf90606533958a05639ac8a51573f"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-otel-upstream-20261114/manifest.json",
+      "bytes": 3889,
+      "sha256": "19b73363ff5f2a47abc3c4c4dc2276759d318d52dcabcfb11adbf94f8e81a228"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-otel-upstream-20261114/otelcol-ebpf-profiler.native.o",
+      "bytes": 1638120,
+      "sha256": "7e6781470c8d4a1d2669cfd262405d11095e5c2a2cbf591a675e578718d6b644"
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/perf-otel-upstream-20261114/tracer.original.bpf.o",
+      "bytes": 2373920,
+      "sha256": "f5a7cea515fa74d8a6588e8f2c7303af3137a1fca98e032f65d4d0cef9ea272e"
+    }
+  ],
+  "expected_image": "0bb7d4be1f0a9c4bb015ee20d14fb9ba26e56da9f84310a501257ae5376e084c",
+  "scope": "Original-source native candidate application diagnostic only. Existing metrics/collector snapshots and actual phase loader identity retained. Runtime result, equal-work behavior and floor are unmeasured at launch. No postlaunch polling.",
+  "outcome": null
+}
