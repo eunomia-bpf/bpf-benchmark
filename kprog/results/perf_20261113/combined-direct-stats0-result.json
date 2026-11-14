@@ -1,0 +1,135 @@
+{
+  "recorded_at": "2026-11-14T10:14:36.457354+00:00",
+  "outer_pid": 349398,
+  "outer_make_exit": 0,
+  "outer_finished_at": "2026-11-14T10:11:26Z",
+  "stats": 0,
+  "run": "corpus/results/x86_kvm_corpus_20261114_094710_154738",
+  "application_status": "ok",
+  "samples": 3,
+  "seconds": 180,
+  "workload_errors": 0,
+  "throughput_native_over_BPF": 0.9731040666436546,
+  "BPF_ops_per_sample": [
+    78965480.11503905,
+    80786816.71899296,
+    77042993.52323042
+  ],
+  "native_ops_per_sample": [
+    78664687.81485969,
+    76353251.92272644,
+    76841629.82441314
+  ],
+  "paired_throughput": [
+    0.9961908380758129,
+    0.9451201944038947,
+    0.9973863463813024
+  ],
+  "per_invocation_from_stats1": {
+    "run": "corpus/results/x86_kvm_corpus_20261114_092117_209123",
+    "BPF_ns": 2362.00958832247,
+    "native_ns": 2728.9608953948555,
+    "speedup": 0.8655344209249686
+  },
+  "native_replacements": 13,
+  "tiny_candidates": 0,
+  "custom_generic_native_load_failures_by_stats": {
+    "1": 2,
+    "0": 2
+  },
+  "custom_generic_scope": "Originalbaseline source load succeeds; actual native-lab9insn kprobe stub rejected EINVAL twice perarm, empty verifier log. Retain failures; native missing counters not0, statsOFF all run_cnt disabled. No exclusion added. Cause unresolved; inspect source-load BTF/func_info versus transport9insns as hypothesis only.",
+  "no_BPF_reference": null,
+  "counter_windows": [
+    {
+      "phase": "baseline",
+      "first": "baseline-0021",
+      "last": "baseline-0080",
+      "map_id": 15,
+      "seconds": 531.127268,
+      "measurement_seconds": 541.1813960000001,
+      "native_attempts_per_second": 10256067.31417149,
+      "interpreter_dispatch_per_native_attempt": 0.23945407602497487,
+      "families": {
+        "Native": {
+          "frames_per_attempt": 0.9236803573587602,
+          "attempts_per_native_attempt": 1.0
+        },
+        "Perl": {
+          "frames_per_attempt": 0.0,
+          "attempts_per_native_attempt": 0.01299880395856784
+        },
+        "Python": {
+          "frames_per_attempt": 0.0,
+          "attempts_per_native_attempt": 0.01317889246841576
+        },
+        "PHP": {
+          "frames_per_attempt": 1.8012983674893213,
+          "attempts_per_native_attempt": 0.012965928083231848
+        },
+        "Ruby": {
+          "frames_per_attempt": 0.34238904460323244,
+          "attempts_per_native_attempt": 0.013555327886535004
+        },
+        "V8": {
+          "frames_per_attempt": 4.584506422991049,
+          "attempts_per_native_attempt": 0.04344605835818543
+        },
+        "Hotspot": {
+          "frames_per_attempt": null,
+          "attempts_per_native_attempt": 0.0
+        },
+        "Dotnet": {
+          "frames_per_attempt": null,
+          "attempts_per_native_attempt": 0.0
+        }
+      }
+    },
+    {
+      "phase": "post_rejit",
+      "first": "post_rejit-0101",
+      "last": "post_rejit-0160",
+      "map_id": 1147,
+      "seconds": 526.118511,
+      "measurement_seconds": 541.381708,
+      "native_attempts_per_second": 10334221.25115077,
+      "interpreter_dispatch_per_native_attempt": 0.23781698354003386,
+      "families": {
+        "Native": {
+          "frames_per_attempt": 0.9233633178868514,
+          "attempts_per_native_attempt": 1.0
+        },
+        "Perl": {
+          "frames_per_attempt": 0.0,
+          "attempts_per_native_attempt": 0.0131453809252115
+        },
+        "Python": {
+          "frames_per_attempt": 0.0,
+          "attempts_per_native_attempt": 0.013504314710725347
+        },
+        "PHP": {
+          "frames_per_attempt": 1.8011666264270303,
+          "attempts_per_native_attempt": 0.013285559421062205
+        },
+        "Ruby": {
+          "frames_per_attempt": 0.34628682146661277,
+          "attempts_per_native_attempt": 0.013492683717880583
+        },
+        "V8": {
+          "frames_per_attempt": 4.58385173579649,
+          "attempts_per_native_attempt": 0.04289703171108978
+        },
+        "Hotspot": {
+          "frames_per_attempt": null,
+          "attempts_per_native_attempt": 0.0
+        },
+        "Dotnet": {
+          "frames_per_attempt": null,
+          "attempts_per_native_attempt": 0.0
+        }
+      }
+    }
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261114-combined-direct-timing",
+  "kernel_end_log_sha256": "98abadee9a2caecc22a6c84fb3686e2da0158b3a69c05fc304b4b7cead8d8ddc",
+  "scope": "Combinedread/hash/LPM direct-native, originalsame-sourcecontextmanifest/frozenworkload/soleimage. Current statsON/OFF3x180 complete. Concurrent inheritedTracee guest/hostcmov job caveats; no causal improvement attribution versus earlier0.996. Counter windows same generation and inside actual clocks, partial coverage/family mix notfullapp equivalence certification. Throughput<1.20/floors/full-six remainOPEN."
+}
