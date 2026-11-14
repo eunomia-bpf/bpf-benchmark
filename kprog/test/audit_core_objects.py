@@ -146,11 +146,7 @@ def audit(args):
                         answer = None
                         observation = actual['status']
                         kind = int(ref['kind'])
-                        if obj['policy'] == 'resolved-report':
-                            if report_bound and reported is not None:
-                                answer = reported
-                                observation = 'compiler_report_same_build_object'
-                        elif kind == 2 and obj['policy'] == 'tetragon-compat':
+                        if kind == 2 and obj['policy'] == 'tetragon-compat':
                             # These are the two expression-specific exceptions
                             # in native_compat.h. Source call sites are
                             # bpf_cgroup.h:134 and bpf_cgtracker.c:29.
