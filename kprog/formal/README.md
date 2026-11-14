@@ -10,7 +10,7 @@ described below.
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
 | AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `da428593b21d` | Lean 4.35.0 |
-| x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `1fb8cfc69363` | Lean 4.32.0-rc1 |
+| x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `28640eb74b85` | Lean 4.32.0-rc1 |
 | Clight | [eunomia-bpf/clean](https://github.com/eunomia-bpf/clean), `external/clean/export` | `123f7f7767e2` | Lean 4.32.1 |
 
 `make -C kprog/formal mature` builds the migration Lake package on Lean 4.35.0,
@@ -105,6 +105,32 @@ now covers arbitrary contexts, and
 two existing REP proofs explicitly unfold the default context without changing
 their statements. Raw attempts are in `/workspaces/kprog-raw/formal/m3-x86-rep`.
 RET imm16, LEAVE/UD2, provenance and x86 Sail integration still remain M3 work.
+
+The remaining x86 control entries now also execute the fork
+(`m3-x86-control`). Fork `28640eb74b85` extends the existing near-RET operation
+with an unsigned imm16 release, defaulting to zero for the old API, and adds
+LEAVE's incoming-RBP read to checked access. RET imm16, LEAVE and UD2 now have
+no local interpreter bodies. Seven original embedded LEAVE/UD2 proof statements
+and scripts are retained in the existing `Refinement/X86Dispatcher.lean` for
+M5; they are not claimed as proofs against the new basis.
+
+The reference and checked-access suites pass 191 Lake jobs, including 65
+native-view cases and 60 new fork control cases. The fork's coverage module
+passes 22 standalone jobs on 4.35; its `Tests` namespace is checked there to
+avoid the existing root-package overlap with LNSym's `Tests`. The extended
+CALL/RET/LEAVE/UD2 harness passes 476 complete CPU/trap observations and 1659
+full-state/profile/fault transitions, including 48/57-bit boundaries, imm16
+release, ignored old RSP, wrapped reads and malformed input rejection.
+Noncanonical LEAVE stack accesses produce hardware #SS (trap 12), while bad
+CALL/RET targets produce #GP (trap 13); both retain the flat reference's
+`non_canonical` category. All registers, memory and flags before exception
+delivery remain checked. All other x86 suites, including REP, pass again;
+combined this is 115,234 full-state cases plus base regressions. Signed RET
+assembly aliases and the default zero-release API are also retained.
+Raw attempts/CPU rows/hashes are in
+`/workspaces/kprog-raw/formal/m3-x86-control`. Numerical execution replacement
+is complete; provenance and x86 Sail integration remain M3 work. Whole-package
+Clight/theorem migration and final checks remain M4-M6.
 
 AArch64 now stores the full LNSym `ArmState` in its thin native wrapper.
 The original native word is decoded by LNSym and loaded at the input PC;

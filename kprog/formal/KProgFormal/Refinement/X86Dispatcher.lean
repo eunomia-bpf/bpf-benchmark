@@ -5786,3 +5786,75 @@ end KProgFormal.Refinement.X86Dispatcher.RawControl
 #print axioms KProgFormal.Refinement.X86Dispatcher.RawControl.jump_frame
 #print axioms KProgFormal.Refinement.X86Dispatcher.RawControl.production
 #print axioms KProgFormal.Refinement.X86Dispatcher.RawControl.step_refines
+
+/-! Legacy control proof statements retained during M3. Their original proof
+scripts target the retired reference interpreter and are migrated with the
+other generated/handler refinements in M5. The executable imports only the new
+foreign-step view; no legacy interpreter body is retained here. -/
+namespace KProgFormal.Reference.X86
+
+def canonicalTarget (width : AddressWidth) (target : Word) : Bool :=
+  (target.setWidth width.bits).signExtend 64 == target
+
+
+/-- Flat long-mode stack profile, with LASS disabled (its user/supervisor
+policy is not imported from the hardware replay host). Every byte of the
+implicit frame read must have a canonical linear
+address under the same48/57-bit paging profile as CALL/RET. Byte addresses
+wrap at64 bits exactly as in the shared memory model. The incoming old RSP
+is not an address operand of LEAVE. -/
+def leave64FrameCanonical (s : State) : Bool :=
+  canonicalTarget s.addressWidth (s.gpr 5) &&
+  canonicalTarget s.addressWidth (s.gpr 5 + 7)
+
+
+/-- Complete successful LEAVE result, retaining the original ordered read. -/
+theorem leave64_read_success (nextPc value : Word) (event : Event) (s : State)
+    (canonical : leave64FrameCanonical s = true)
+    (read : readMemory s.memory (s.gpr 5) 8 = .ok (value, event)) :
+    step (.leave64 nextPc) s =
+      ⟨{ s with gpr := (fun r => if r = 4 then s.gpr 5 + 8 else if r = 5 then value else s.gpr r), pc := nextPc }, [event], none⟩ := by
+  simp only [step, leave64Step, canonical, ↓reduceIte, read]
+
+/-- A failed frame read changes no architectural state, including old RSP. -/
+theorem leave64_read_fault (nextPc : Word) (fault : Fault) (s : State)
+    (canonical : leave64FrameCanonical s = true)
+    (read : readMemory s.memory (s.gpr 5) 8 = .error fault) :
+    step (.leave64 nextPc) s = ⟨s, [.fault fault], some fault⟩ := by
+  simp only [step, leave64Step, canonical, ↓reduceIte, read]
+
+theorem leave64_unreadable (nextPc : Word) (s : State)
+    (canonical : leave64FrameCanonical s = true)
+    (denied : permitted s.memory.readable (s.gpr 5) 8 = false) :
+    step (.leave64 nextPc) s = ⟨s, [.fault (.read (s.gpr 5) 8)], some (.read (s.gpr 5) 8)⟩ := by
+  simp only [step, leave64Step, canonical, readMemory, denied, Bool.false_eq_true, ↓reduceIte]
+
+/-- The stack-address fault has no read effect and changes no state. -/
+theorem leave64_noncanonical (nextPc : Word) (s : State)
+    (noncanonical : leave64FrameCanonical s = false) :
+    step (.leave64 nextPc) s =
+      ⟨s, [.fault (.nonCanonical (s.gpr 5))], some (.nonCanonical (s.gpr 5))⟩ := by
+  simp only [step, leave64Step, noncanonical, Bool.false_eq_true, ↓reduceIte]
+
+/-- Memory and all flags are preserved on every outcome; no delivery RF or
+write effect is manufactured by the ISA step. -/
+theorem leave64_memory_flags (nextPc : Word) (s : State) :
+    (step (.leave64 nextPc) s).state.memory = s.memory ∧
+      (step (.leave64 nextPc) s).state.rflags = s.rflags := by
+  simp only [step, leave64Step]
+  split
+  · cases read : readMemory s.memory (s.gpr 5) 8 with
+    | error fault => exact ⟨rfl, rfl⟩
+    | ok pair => exact ⟨rfl, rfl⟩
+  · exact ⟨rfl, rfl⟩
+
+/-- UD2 is an unconditional invalid-opcode fault before exception delivery.
+Its encoded extent is separate from the unchanged faulting PC/state. -/
+theorem ud2_step (nextPc : Word) (state : State) :
+    step (.ud2 nextPc) state = ⟨state, [.fault .invalidOpcode], some .invalidOpcode⟩ := rfl
+
+
+theorem ud2_refines (nextPc : Word) (state : State) :
+    Step (.ud2 nextPc) state ⟨state, [.fault .invalidOpcode], some .invalidOpcode⟩ := by
+  exact ⟨rfl, rfl, rfl⟩
+end KProgFormal.Reference.X86

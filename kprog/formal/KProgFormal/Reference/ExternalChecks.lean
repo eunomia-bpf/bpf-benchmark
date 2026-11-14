@@ -147,4 +147,46 @@ example : let t := X86.nativeStep (.mov .q (.mem { disp := 0x1000 }) (.mem { dis
     t.state.pc == input.pc && t.state.gpr 0 == input.gpr 0 &&
     t.state.memory.value 0x12ff == 0xff := by decide
 
+-- All control families use the foreign checked executor, preserving every
+-- original native field and arbitrary memory bytes even on faults.
+example : ([0,0x202,0xdeadbeefcafebabe,0xffffffffffffffff] : List Word).all (fun flags =>
+    [X86.AddressWidth.w48,.w57].all (fun width =>
+      let s := { input with rflags := flags, addressWidth := width }
+      let t := X86.step (.ud2 0x4002) s
+      same t.state s && t.fault == some .invalidOpcode && t.events == [.fault .invalidOpcode] &&
+      t.state.memory.value 0x12ff == 0xff && !t.state.memory.initialized 0x12ff)) = true := by decide
+
+example : let s := { input with modelError := some (.unimplemented "prior model refusal") }
+    let t := X86.step (.ud2 0x4002) s
+    (match t.state.modelError with | some (.unimplemented text) => text == "prior model refusal" | _ => false) &&
+    same { t.state with modelError := none } input && t.fault.isNone && t.events.isEmpty := by decide
+
+example : ([0,8,65535] : List (BitVec 16)).all (fun release => [false,true].all (fun bad =>
+    let target : Word := if bad then 0x800000000000 else 0x5000
+    let s := { input with memory := { input.memory with value := fun a =>
+      if (a-0x3000).toNat < 8 then (target >>> (8*(a-0x3000).toNat)).setWidth 8 else input.memory.value a } }
+    let t := X86.step (.returnNear release 0x4003) s
+    let read : Event := .memory .read 0x3000 (valueBytes target 8) false
+    if bad then same t.state s && t.fault == some (.nonCanonical target) && t.events == [read,.fault (.nonCanonical target)]
+    else same t.state { s with gpr := fun r => if r == 4 then 0x3008+release.setWidth 64 else s.gpr r, pc := 0x5000 } &&
+      t.fault.isNone && t.events == [read] && t.state.memory.value 0x12ff == 0xff)) = true := by decide
+
+example : ([(0x1000,true,true),(0x800000000000,false,true),(0xffffffffffffffff,true,true)] :
+    List (Word × Bool × Bool)).all (fun (base,lo,hi) =>
+      [(X86.AddressWidth.w48,lo),(.w57,hi)].all (fun (width,valid) => [false,true].all (fun deny =>
+        let s := { input with
+          gpr := fun r => if r == 5 then base else input.gpr r
+          addressWidth := width
+          memory := { input.memory with
+            readable := fun _ => !deny
+            value := fun a => if (a-base).toNat < 8 then (a-base).setWidth 8 else input.memory.value a } }
+        let t := X86.step (.leave64 0x4001) s
+        let fault := if !valid then some (Fault.nonCanonical base) else if deny then some (.read base 8) else none
+        let expected := if fault.isSome then s else
+          { s with gpr := fun r => if r == 4 then base+8 else if r == 5 then 0x0706050403020100 else s.gpr r, pc := 0x4001 }
+        same t.state expected && t.fault == fault && t.events == (match fault with
+          | some f => [.fault f]
+          | none => [.memory .read base [0,1,2,3,4,5,6,7] false]) &&
+        t.state.memory.value (base-1) == s.memory.value (base-1)))) = true := by decide
+
 end KProgFormal.Reference.ExternalChecks

@@ -2,9 +2,8 @@ import KProgFormal.Reference.Memory
 import X86.CheckedMemory
 
 /-!
-The native x86-64 view of x86lean checked execution. Remaining legacy LEAVE, UD2 and
-RET-immediate bodies are retired in the next binding step. Architectural rules
-come from Intel SDM
+The native x86-64 view of x86lean checked execution. All instruction numerical
+steps come from the fork. Architectural rules come from Intel SDM
 Volume 2, instruction Operation/Flags Affected descriptions:
 https://cdrdv2-public.intel.com/874240/325462-090-sdm-vol-1-2abcd-3abcd-4.pdf
 No simulator or generated-contract module is imported here.
@@ -290,43 +289,6 @@ private def nativeRep (kind : _root_.X86.StringOp) (width : ScalarWidth)
   nativeRepeat (.repstrop .rep kind (externalSize width)) context nextPc
     (context.count (externalCpu s)).toNat s
 
-def canonicalTarget (width : AddressWidth) (target : Word) : Bool :=
-  (target.setWidth width.bits).signExtend 64 == target
-
-/-- Near RET reads the complete64-bit target before either RSP or PC changes.
-The optional unsigned imm16 releases arguments after a successful pop. -/
-def returnStep (release : BitVec 16) (s : State) : Transition State :=
-  match readMemory s.memory (s.gpr 4) 8 with
-  | .error fault => ⟨s, [.fault fault], some fault⟩
-  | .ok (target, read) =>
-      if canonicalTarget s.addressWidth target then
-        ⟨{ s with gpr := fun r => if r = 4 then s.gpr 4 + 8 + release.setWidth 64 else s.gpr r, pc := target }, [read], none⟩
-      else ⟨s, [read, .fault (.nonCanonical target)], some (.nonCanonical target)⟩
-
-/-- Flat long-mode stack profile, with LASS disabled (its user/supervisor
-policy is not imported from the hardware replay host). Every byte of the
-implicit frame read must have a canonical linear
-address under the same48/57-bit paging profile as CALL/RET. Byte addresses
-wrap at64 bits exactly as in the shared memory model. The incoming old RSP
-is not an address operand of LEAVE. -/
-def leave64FrameCanonical (s : State) : Bool :=
-  canonicalTarget s.addressWidth (s.gpr 5) &&
-  canonicalTarget s.addressWidth (s.gpr 5 + 7)
-
-/-- Long-mode LEAVE64 (C9), Intel SDM Vol2A3-597/598:
-https://cdrdv2-public.intel.com/812383/253666-sdm-vol-2a.pdf
-A noncanonical stack operand faults before a memory read. Commit RSP/RBP
-only after the incoming-RBP8 read succeeds. F's hardware receipt confirms
-ALL-GPR rollback on faults, including old RSP/RBP. Delivery RF and concrete
-OS trap metadata remain outside the architectural instruction transition. -/
-def leave64Step (nextPc : Word) (s : State) : Transition State :=
-  if leave64FrameCanonical s then
-    match readMemory s.memory (s.gpr 5) 8 with
-    | .error fault => ⟨s, [.fault fault], some fault⟩
-    | .ok (value, event) =>
-        ⟨{ s with gpr := (fun r => if r = 4 then s.gpr 5 + 8 else if r = 5 then value else s.gpr r), pc := nextPc }, [event], none⟩
-  else ⟨s, [.fault (.nonCanonical (s.gpr 5))], some (.nonCanonical (s.gpr 5))⟩
-
 /-- One architectural instruction with its decoded fall-through address.
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
@@ -390,14 +352,13 @@ def Instruction.fallthrough : Instruction → Word
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
-  | .ud2 _ => ⟨s, [.fault .invalidOpcode], some .invalidOpcode⟩
+  | .ud2 nextPc => nativeStep .ud2 nextPc s
   | .call source nextPc =>
       let target := match source with
         | .immediate address => _root_.X86.JmpTarget.rel (address-nextPc)
         | _ => .indirect (externalSource .w64 source)
       nativeStep (.call target) nextPc s
-  | .returnNear release nextPc =>
-      if release == 0 then nativeStep .ret nextPc s else returnStep release s
+  | .returnNear release nextPc => nativeStep (.ret release) nextPc s
   | .repMovs width address32 sourceBase nextPc =>
       nativeRep .movs width { address32, sourceBase } nextPc s
   | .repStos width nextPc => nativeRep .stos width {} nextPc s
@@ -454,7 +415,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
       let kind := match kind with | .and => .and | .or => .or | .xor => .xor | .test => .test
       nativeStep (.bin kind (externalSize width) (externalDestination width dst) (externalSource width src)) nextPc s
   | .nop nextPc => nativeStep (.nop none) nextPc s
-  | .leave64 nextPc => leave64Step nextPc s
+  | .leave64 nextPc => nativeStep .leave nextPc s
   | .branch cc target nextPc =>
       nativeStep (match cc with
         | none => .jmp (.rel (target-nextPc))
@@ -1132,61 +1093,13 @@ macro "canonical_x86_decode" : tactic =>
 theorem leave64_decode (s : State) :
     decode #[(0xc9 : Byte)] s = .ok (.leave64 (s.pc + 1)) := by rfl
 
-/-- Complete successful LEAVE result, retaining the original ordered read. -/
-theorem leave64_read_success (nextPc value : Word) (event : Event) (s : State)
-    (canonical : leave64FrameCanonical s = true)
-    (read : readMemory s.memory (s.gpr 5) 8 = .ok (value, event)) :
-    step (.leave64 nextPc) s =
-      ⟨{ s with gpr := (fun r => if r = 4 then s.gpr 5 + 8 else if r = 5 then value else s.gpr r), pc := nextPc }, [event], none⟩ := by
-  simp only [step, leave64Step, canonical, ↓reduceIte, read]
-
-/-- A failed frame read changes no architectural state, including old RSP. -/
-theorem leave64_read_fault (nextPc : Word) (fault : Fault) (s : State)
-    (canonical : leave64FrameCanonical s = true)
-    (read : readMemory s.memory (s.gpr 5) 8 = .error fault) :
-    step (.leave64 nextPc) s = ⟨s, [.fault fault], some fault⟩ := by
-  simp only [step, leave64Step, canonical, ↓reduceIte, read]
-
-theorem leave64_unreadable (nextPc : Word) (s : State)
-    (canonical : leave64FrameCanonical s = true)
-    (denied : permitted s.memory.readable (s.gpr 5) 8 = false) :
-    step (.leave64 nextPc) s = ⟨s, [.fault (.read (s.gpr 5) 8)], some (.read (s.gpr 5) 8)⟩ := by
-  simp only [step, leave64Step, canonical, readMemory, denied, Bool.false_eq_true, ↓reduceIte]
-
-/-- The stack-address fault has no read effect and changes no state. -/
-theorem leave64_noncanonical (nextPc : Word) (s : State)
-    (noncanonical : leave64FrameCanonical s = false) :
-    step (.leave64 nextPc) s =
-      ⟨s, [.fault (.nonCanonical (s.gpr 5))], some (.nonCanonical (s.gpr 5))⟩ := by
-  simp only [step, leave64Step, noncanonical, Bool.false_eq_true, ↓reduceIte]
-
-/-- Memory and all flags are preserved on every outcome; no delivery RF or
-write effect is manufactured by the ISA step. -/
-theorem leave64_memory_flags (nextPc : Word) (s : State) :
-    (step (.leave64 nextPc) s).state.memory = s.memory ∧
-      (step (.leave64 nextPc) s).state.rflags = s.rflags := by
-  simp only [step, leave64Step]
-  split
-  · cases read : readMemory s.memory (s.gpr 5) 8 with
-    | error fault => exact ⟨rfl, rfl⟩
-    | ok pair => exact ⟨rfl, rfl⟩
-  · exact ⟨rfl, rfl⟩
 
 end KProgFormal.Reference.X86
 
 namespace KProgFormal.Reference.X86
-/-- UD2 is an unconditional invalid-opcode fault before exception delivery.
-Its encoded extent is separate from the unchanged faulting PC/state. -/
-theorem ud2_step (nextPc : Word) (state : State) :
-    step (.ud2 nextPc) state = ⟨state, [.fault .invalidOpcode], some .invalidOpcode⟩ := rfl
-
 theorem ud2_decodes (state : State) :
     decode #[0x0f, 0x0b] state = .ok (.ud2 (state.pc + 2)) := by rfl
 
-theorem ud2_refines (nextPc : Word) (state : State) :
-    Step (.ud2 nextPc) state ⟨state, [.fault .invalidOpcode], some .invalidOpcode⟩ := by
-  exact ⟨rfl, rfl, rfl⟩
+
 end KProgFormal.Reference.X86
-#print axioms KProgFormal.Reference.X86.ud2_step
 #print axioms KProgFormal.Reference.X86.ud2_decodes
-#print axioms KProgFormal.Reference.X86.ud2_refines

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Near CALL/RET at native instruction boundaries, including stack/target faults."""
+"""CALL/RET/LEAVE/UD2 instruction boundaries and precise complete-state faults."""
 import copy
 import json
 from pathlib import Path
@@ -15,7 +15,7 @@ def main():
     regs=['rax','rcx','rdx','rbx','rsp','rbp','rsi','rdi']+[f'r{i}' for i in range(8,16)]
     forms=[f'call *%{r}' for r in regs]+['call common_land','call *(%rdi)','call *(%rsp)',
         'call *-8(%rsp)','call *target_slot(%rip)','call *(%rdi,%rcx,8)',
-        'ret','ret $8','ret $65535','.byte 0x66,0xc3','.byte 0x67,0xc3','.byte 0x48,0xc3']
+        'ret','ret $8','ret $65535','.byte 0x66,0xc3','.byte 0x67,0xc3','.byte 0x48,0xc3','leave','ud2']
     assembly=['.text','.hidden common_land','.hidden target_slot']
     for kind,instruction in enumerate(forms):
         assembly += [f'.globl cpu{kind},insn{kind},next{kind}',f'.type cpu{kind},@function',f'cpu{kind}:',
@@ -77,9 +77,14 @@ static int run(int kind,int mode,int seed,size_t page){
  }else if(kind==18)source=rsp;
  else if(kind==19)source=rsp-8;
  else if(kind==20){source=(uintptr_t)&target_slot;target_slot=target;}
- else if(kind>=22)source=rsp;
+ else if(kind>=22&&kind<28)source=rsp;
+ if(kind==28){
+  in[5]=mode==1||mode==4?0x0200000000000000ull:(mode==2?(uintptr_t)stack+2*page-4:(uintptr_t)stack+page+256);
+  source=mode==1||mode==4?0:in[5];
+  if(mode==3){rsp=0x0200000000000000ull;in[4]=rsp;}
+ }
  if(source)memcpy((void*)source,&target,8);
- ncells=0;memory(rsp-16,40,(uintptr_t)stack+page,(uintptr_t)data+page,page);
+ ncells=0;if(!(kind==28&&mode==3))memory(rsp-16,40,(uintptr_t)stack+page,(uintptr_t)data+page,page);
  if(source)memory(source,8,(uintptr_t)stack+page,(uintptr_t)data+page,page);
  if(mprotect(stack,page,PROT_NONE)||mprotect(stack+2*page,page,PROT_NONE)||mprotect(data,page,PROT_NONE)||mprotect(data+2*page,page,PROT_NONE))return 2;
  void(*fn[])(const uint64_t*)={FUNCTIONS};
@@ -99,10 +104,10 @@ int main(void){
  size_t page=sysconf(_SC_PAGESIZE);void *alt=mmap(0,65536,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);if(alt==MAP_FAILED)return 6;
  stack_t ss={.ss_sp=alt,.ss_size=65536};if(sigaltstack(&ss,0))return 7;
  struct sigaction action={0};action.sa_sigaction=stopped;action.sa_flags=SA_SIGINFO|SA_ONSTACK;
- if(sigaction(SIGTRAP,&action,0)||sigaction(SIGSEGV,&action,0)||sigaction(SIGBUS,&action,0))return 8;
- for(int kind=0;kind<28;kind++)for(int mode=0;mode<5;mode++)for(int seed=0;seed<4;seed++){
+ if(sigaction(SIGILL,&action,0)||sigaction(SIGTRAP,&action,0)||sigaction(SIGSEGV,&action,0)||sigaction(SIGBUS,&action,0))return 8;
+ for(int kind=0;kind<30;kind++)for(int mode=0;mode<5;mode++)for(int seed=0;seed<4;seed++){
   if((kind==4||kind==16)&&(mode==1||mode==4))continue;
-  if(mode==3&&kind!=17&&kind!=18&&kind!=19&&kind!=21)continue;
+  if(mode==3&&kind!=17&&kind!=18&&kind!=19&&kind!=21&&kind!=28)continue;
   if(mode==3&&(kind==18||kind==19))continue;
   int rc=run(kind,mode,seed,page);if(rc)return rc;
  }
@@ -117,14 +122,29 @@ int main(void){
     (folder/'cpu.jsonl').write_text(cpu_output)
     cpu_rows=[json.loads(line) for line in cpu_output.splitlines()]
     rng=random.Random(0x4e454152);cases=[]
-    def expected(request,call,target,source=None,release=0):
+    def expected(request,call,target,source=None,release=0,control=None):
         s=copy.deepcopy(request['state']);events=[];fault=None;cells={c['address']:c for c in s['memory']}
         def read(address):
             nonlocal fault
             addresses=[(address+i)&MASK for i in range(8)]
+            bits=s.get('linear_address_bits',48)
+            if not all(a >> bits == (((1 << (64-bits))-1) if a & (1 << (bits-1)) else 0) for a in addresses):
+                fault=dict(kind='non_canonical',address=address);return None
             if not all(a in cells and cells[a]['readable'] for a in addresses):fault=dict(kind='read',address=address,bytes=8);return None
             value=[cells[a]['value'] for a in addresses];events.append(dict(kind='read',address=address,value=value,initialized=all(cells[a]['initialized'] for a in addresses)))
             return int.from_bytes(bytes(value),'little')
+        if control == 'ud2':
+            reason=dict(kind='invalid_opcode')
+            s.update(events=[dict(kind='fault',fault=reason)],fault=reason,defined_flags=MASK)
+            return s
+        if control == 'leave':
+            frame=s['registers'][5];value=read(frame)
+            if fault:events.append(dict(kind='fault',fault=fault))
+            else:
+                s['registers'][4]=(frame+8)&MASK;s['registers'][5]=value
+                s['pc']=(s['pc']+len(request['native_bytes']))&MASK
+            s.update(events=events,fault=fault,defined_flags=MASK)
+            return s
         if source is not None:target=read(source)
         if fault is None and call:
             address=(s['registers'][4]-8)&MASK
@@ -149,14 +169,18 @@ int main(void){
         s=dict(registers=row['registers'],flags=row['flags'],pc=row['pc'],xmm0=row['xmm'][0]+(row['xmm'][1]<<64),fs_base=0,gs_base=0,
             memory=[{k:v for k,v in c.items() if k!='after'} for c in row['memory']])
         request=dict(isa='x86_64',native_bytes=row['code'],state=s)
-        e=expected(request,call,row['target'],row['source'] or None,8 if kind==23 else 65535 if kind==24 else 0)
+        e=expected(request,call,row['target'],row['source'] or None,8 if kind==23 else 65535 if kind==24 else 0,
+                   'leave' if kind==28 else 'ud2' if kind==29 else None)
         assert e['registers']==row['after_registers'],(row,e)
         assert e['pc']==row['after_pc'],(row,e)
         assert (e['flags']^row['after_flags'])&0xcd5==0,(row,e)
         assert e['xmm0']==row['after_xmm'][0]+(row['after_xmm'][1]<<64),(row,e)
         assert [c['value'] for c in e['memory']]==[c['after'] for c in row['memory']],(row,e)
         if e['fault']:
-            assert row['trap']==(13 if e['fault']['kind']=='non_canonical' else 14),(row,e)
+            # An implicit LEAVE stack address raises #SS, while a bad
+            # CALL/RET control target raises #GP. The flat reference records
+            # both as non_canonical, before OS signal/exception delivery.
+            assert row['trap']==((12 if kind==28 else 13) if e['fault']['kind']=='non_canonical' else 6 if e['fault']['kind']=='invalid_opcode' else 14),(row,e)
             if row['trap']==14:
                 assert bool(row['page_error']&2)==(e['fault']['kind']=='write') and not row['page_error']&16,(row,e)
                 assert ((row['fault_address']-e['fault']['address'])&MASK)<8,(row,e)
@@ -206,6 +230,21 @@ int main(void){
             last=expected(second,False,0,source=second['state']['registers'][4]);last['events']=e['events']+last['events'];last['pc']=(base+12)&MASK
             r.update(native_base=base,native_path=[dict(offset=o,length=n) for o,n in ((0,5),(8,1),(9,1),(5,2),(11,1))])
             cases.append((r,last));path_count+=1
+    # LEAVE ignores the old RSP even when it is noncanonical, and the loaded
+    # RBP is data rather than a control target. Preserve all unrelated fields.
+    for bits in (48,57):
+        for frame in (0,0x5000,0x7ffffffffffc,0x800000000000,0x00fffffffffffffc,0xffffffffffffffff):
+            for old_sp in (0x4008,0x800000000000,MASK):
+                for value in (0,0x800000000000,MASK):
+                    for bad in (None,0,7):
+                        r=copy.deepcopy(cases[0][0]);r['native_bytes']=[0xc9]
+                        r['state']['linear_address_bits']=bits;r['state']['registers'][4]=old_sp;r['state']['registers'][5]=frame
+                        r['state']['memory']=[dict(address=(frame+i)&MASK,value=(value >> (8*i))&255,readable=i!=bad,writable=False,initialized=bool(i%2)) for i in range(8)]
+                        cases.append((r,expected(r,False,0,control='leave')))
+    for flags in (0,0x202,0xAD7,MASK):
+        for code in ('0f0b','660f0b','670f0b','480f0b','40'*13+'0f0b'):
+            r=copy.deepcopy(cases[0][0]);r['native_bytes']=list(bytes.fromhex(code));r['state']['flags']=flags
+            r['state']['memory']=[];cases.append((r,expected(r,False,0,control='ud2')))
     binary=ROOT/'.lake/build/bin/reference'
     for start in range(0,len(cases),64):
         batch=cases[start:start+64]
@@ -224,7 +263,7 @@ int main(void){
         r=copy.deepcopy(cases[-1][0]);r['native_path']=bad
         result=subprocess.run([binary],input=json.dumps(r)+'\n',text=True,capture_output=True)
         assert result.returncode==1 and result.stderr.startswith('reference:'),(r,result)
-    print(f'x86 near CALL/RET: {len(cpu_rows)} actual CPU complete-state/trap cases, {len(cases)} canonical full-state/profile/fault transitions including {path_count} composed native paths PASS')
+    print(f'x86 CALL/RET/LEAVE/UD2: {len(cpu_rows)} actual CPU complete-state/trap cases, {len(cases)} canonical full-state/profile/fault transitions including {path_count} composed native paths PASS')
 
 
 if __name__=='__main__':main()
