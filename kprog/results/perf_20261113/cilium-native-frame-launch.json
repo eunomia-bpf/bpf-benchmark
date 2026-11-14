@@ -1,0 +1,80 @@
+{
+  "recorded_at": "2026-11-14T01:26:26Z",
+  "compiler_commit": "1833e5383",
+  "raw": "/workspaces/kprog-raw/perf/20261114-cilium-native-frame",
+  "build": "/var/tmp/kprog-tmp/perf/cilium-native-frame",
+  "per_process_as_bytes": 17179869184,
+  "native_clang_as_bytes": 8589934592,
+  "launches": [
+    {
+      "unit": "bpf_host",
+      "outer_pid": 108750,
+      "cpus": "16",
+      "raw": "/workspaces/kprog-raw/perf/20261114-cilium-native-frame/bpf_host",
+      "prior_frontend_record": "/var/tmp/kprog-tmp/perf/cilium-public-data/bpf_host.json",
+      "prior_frontend_record_sha256": "f6e490fc0423a4787ebb2c000af57f2e5aa3d14e05618a0ae1679341f2bb0c20",
+      "command": [
+        "make",
+        "-f",
+        "kprog/perf/native-context/Makefile",
+        "upstream-cilium-native",
+        "cilium-kernel-roundtrip",
+        "cilium-object-compare",
+        "CILIUM_UNIT=bpf_host",
+        "CILIUM_CAPTURE=/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_host/eaa2254a4957b79562d805173df7134fdbe89b2b7ce91fa77f27a19383de105c",
+        "CILIUM_IR_BUILD=/var/tmp/kprog-tmp/perf/cilium-native-frame",
+        "CILIUM_INPUT_ARGS=--state-root /workspaces/kprog-raw/perf/20261113-cilium-probe-config/baseline-state --state-object state/templates/fce499ea04fcda9ab1e9a102830ce14ebd544a0c554ad47adcdaae1a0db9e204/bpf_host.o --feature-header /workspaces/kprog-raw/perf/20261113-cilium-probe-config/baseline-state/generated-features/features.h --feature-header /workspaces/kprog-raw/perf/20261113-cilium-probe-config/baseline-state/generated-features/features_skb.h",
+        "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/native-frame-tools",
+        "PACKET_BUILD=/var/tmp/kprog-tmp/perf/cilium-native-frame-tools/bpf_host"
+      ],
+      "outcome": null
+    },
+    {
+      "unit": "bpf_xdp",
+      "outer_pid": 108754,
+      "cpus": "17",
+      "raw": "/workspaces/kprog-raw/perf/20261114-cilium-native-frame/bpf_xdp",
+      "prior_frontend_record": "/var/tmp/kprog-tmp/perf/cilium-public-data/bpf_xdp.json",
+      "prior_frontend_record_sha256": "e91d0972a1942d262a66a6ad8dd354569cf29fe6dbae8500f55c24983dabc3a8",
+      "command": [
+        "make",
+        "-f",
+        "kprog/perf/native-context/Makefile",
+        "upstream-cilium-native",
+        "cilium-kernel-roundtrip",
+        "cilium-object-compare",
+        "CILIUM_UNIT=bpf_xdp",
+        "CILIUM_CAPTURE=/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_xdp/45d3a3d16e72a4254eeff6b0ec0552232a5a5a6e953e70f26c4490c80b15a9cd",
+        "CILIUM_IR_BUILD=/var/tmp/kprog-tmp/perf/cilium-native-frame",
+        "CILIUM_INPUT_ARGS=--state-root /workspaces/kprog-raw/perf/20261113-cilium-probe-config/baseline-state --state-object state/bpf_xdp.o --feature-header /workspaces/kprog-raw/perf/20261113-cilium-probe-config/baseline-state/generated-features/features.h --feature-header /workspaces/kprog-raw/perf/20261113-cilium-probe-config/baseline-state/generated-features/features_xdp.h",
+        "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/native-frame-tools",
+        "PACKET_BUILD=/var/tmp/kprog-tmp/perf/cilium-native-frame-tools/bpf_xdp"
+      ],
+      "outcome": null
+    },
+    {
+      "unit": "bpf_lxc",
+      "outer_pid": 108762,
+      "cpus": "18-19",
+      "raw": "/workspaces/kprog-raw/perf/20261114-cilium-native-frame/bpf_lxc",
+      "prior_frontend_record": "/var/tmp/kprog-tmp/perf/cilium-config-symbols/bpf_lxc.json",
+      "prior_frontend_record_sha256": "772331a5e4e6c977f0ff27c1303773fc366877b0ab581edac3b78e88d12116dd",
+      "command": [
+        "make",
+        "-f",
+        "kprog/perf/native-context/Makefile",
+        "upstream-cilium-native",
+        "cilium-kernel-roundtrip",
+        "cilium-object-compare",
+        "CILIUM_UNIT=bpf_lxc",
+        "CILIUM_CAPTURE=/workspaces/kprog-raw/var-tmp/CL/hc/payloads/cilium/parity/bpf_lxc/220835d942ec321e6534cd7760a05b67330ae63c62a951e7fa711313d563d315",
+        "CILIUM_IR_BUILD=/var/tmp/kprog-tmp/perf/cilium-native-frame",
+        "CILIUM_INPUT_ARGS=--state-root /workspaces/kprog-raw/perf/20261113-cilium-probe-config/baseline-state --state-object state/templates/a17e984b9f95ab37fdfa1c8439e9ade0646b38ddd4a1ee06f81d4dae0b83e604/bpf_lxc.o --feature-header /workspaces/kprog-raw/perf/20261113-cilium-probe-config/baseline-state/generated-features/features.h --feature-header /workspaces/kprog-raw/perf/20261113-cilium-probe-config/baseline-state/generated-features/features_skb.h",
+        "SOCKET_BUILD=/var/tmp/kprog-tmp/perf/native-frame-tools",
+        "PACKET_BUILD=/var/tmp/kprog-tmp/perf/cilium-native-frame-tools/bpf_lxc"
+      ],
+      "outcome": null
+    }
+  ],
+  "scope": "Affected Cilium original-source native frame-flag rebuild, original BPF comparison and offline synthetic relocation checks only. No immutable specialization or runtime candidate selection; no postlaunch polling or app performance/equivalence claim."
+}
