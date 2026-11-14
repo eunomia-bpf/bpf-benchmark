@@ -1,0 +1,81 @@
+phase,program_id,return_offset,helper,probe_path_samples,zero_fill_leaf_samples,direct_call_target,source_file,source_line,source_text
+baseline,25,0x1f1b,bpf_probe_read_kernel,622,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,153,"    struct nsproxy *np = BPF_CORE_READ(task, nsproxy);"
+baseline,25,0x1f60,bpf_probe_read_kernel,930,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,155,"    return BPF_CORE_READ(uts_ns, name.nodename);"
+baseline,25,0x1ae0,bpf_probe_read_kernel,597,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,129,"    level = BPF_CORE_READ(pid, level);"
+baseline,25,0x1d74,bpf_probe_read_kernel,702,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,131,"    return BPF_CORE_READ(pid, numbers[level].nr);"
+baseline,25,0x1d44,bpf_probe_read_kernel,748,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,129,"    level = BPF_CORE_READ(pid, level);"
+baseline,25,0x1b5b,bpf_probe_read_kernel,656,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,0,
+baseline,25,0x1baf,bpf_probe_read_kernel,620,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,131,"    return BPF_CORE_READ(pid, numbers[level].nr);"
+baseline,25,0x1f3c,bpf_probe_read_kernel,565,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,154,"    struct uts_namespace *uts_ns = BPF_CORE_READ(np, uts_ns);"
+baseline,25,0x1bd9,bpf_probe_read_kernel,679,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,0,
+baseline,25,0x1bfd,bpf_probe_read_kernel,730,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,87,"    level = BPF_CORE_READ(pid, level);"
+baseline,25,0x1c9c,bpf_probe_read_kernel,617,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,87,"    level = BPF_CORE_READ(pid, level);"
+baseline,25,0x1e29,bpf_probe_read_kernel,748,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,0,
+baseline,25,0x1c51,bpf_probe_read_kernel,580,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,94,"    return BPF_CORE_READ(ns, ns.inum);"
+baseline,25,0x1f8d,bpf_probe_read_kernel,1812,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/buffer.h,708,"    bpf_probe_read_kernel(&p->task_info->context, sizeof(task_context_t), &p->event->context.task);"
+baseline,25,0x1cf0,bpf_probe_read_kernel,595,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,94,"    return BPF_CORE_READ(ns, ns.inum);"
+baseline,25,0x1d20,bpf_probe_read_kernel,590,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,0,
+baseline,25,0x1c78,bpf_probe_read_kernel,744,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,0,
+baseline,25,0x1b38,bpf_probe_read_kernel,690,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,141,"    struct task_struct *group_leader = BPF_CORE_READ(task, group_leader);"
+baseline,25,0x1940,bpf_probe_read_kernel,577,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/arch.h,25,"    return BPF_CORE_READ(task, thread_info.status) & TS_COMPAT;"
+baseline,25,0x1e8f,bpf_probe_read_kernel,680,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,0,
+baseline,25,0x1c30,bpf_probe_read_kernel,602,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,88,"    return BPF_CORE_READ(pid, numbers[level].ns);"
+baseline,25,0x1dc9,bpf_probe_read_kernel,658,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/namespaces.h,21,"    return BPF_CORE_READ(ns, mnt_ns, ns.inum);"
+baseline,25,0x1a92,bpf_probe_read_kernel,697,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,160,"    return BPF_CORE_READ(task, pid);"
+baseline,25,0x1abc,bpf_probe_read_kernel,666,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,0,
+baseline,25,0x1eb7,bpf_probe_read_kernel,745,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/arch.h,25,"    return BPF_CORE_READ(task, thread_info.status) & TS_COMPAT;"
+baseline,25,0x1da8,bpf_probe_read_kernel,576,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,67,"    return get_mnt_ns_id(BPF_CORE_READ(task, nsproxy));"
+baseline,25,0x1dea,bpf_probe_read_kernel,515,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/namespaces.h,21,"    return BPF_CORE_READ(ns, mnt_ns, ns.inum);"
+baseline,25,0x1b7f,bpf_probe_read_kernel,623,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,129,"    level = BPF_CORE_READ(pid, level);"
+baseline,25,0x26f,bpf_probe_read_kernel,347,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/arch.h,54,"    int id = BPF_CORE_READ(regs, orig_ax);"
+baseline,25,0x1a6d,bpf_probe_read_kernel,607,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,200,"    return BPF_CORE_READ(task, group_leader);"
+baseline,25,0x19e0,bpf_probe_read_compat,628,0,0xffffffff844653e0,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/buffer.h,112,"    if (bpf_probe_read(&(buf->args[buffer_index_offset]), size, ptr) < 0)"
+baseline,25,0x1b10,bpf_probe_read_kernel,611,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,131,"    return BPF_CORE_READ(pid, numbers[level].nr);"
+baseline,25,0x1e5c,bpf_probe_read_kernel,691,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,0,
+baseline,25,0x1f78,bpf_probe_read_kernel_str,1383,0,0xffffffff844639e0,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/context.h,67,"        bpf_probe_read_kernel_str(&tsk_ctx->uts_name, TASK_COMM_LEN, uts_name);"
+baseline,25,0x1a51,bpf_probe_read_kernel,656,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,195,"    return BPF_CORE_READ(task, real_parent);"
+baseline,25,0x1904,bpf_probe_read_kernel,590,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/arch.h,54,"    int id = BPF_CORE_READ(regs, orig_ax);"
+baseline,25,0x20c,bpf_probe_read_kernel,318,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,40,"    return BPF_CORE_READ(task, flags);"
+baseline,25,0x297,bpf_probe_read_kernel,489,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/arch.h,25,"    return BPF_CORE_READ(task, thread_info.status) & TS_COMPAT;"
+baseline,25,0x1a2c,bpf_probe_read_kernel,693,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,200,"    return BPF_CORE_READ(task, group_leader);"
+baseline,25,0x1ccf,bpf_probe_read_kernel,678,0,0xffffffff84463980,/workspaces/repository/vendor/repos/tracee/./pkg/ebpf/c/common/task.h,88,"    return BPF_CORE_READ(pid, numbers[level].ns);"
+post_rejit,217,0x143b,bpf_probe_read_kernel,976,575,0xffffffff84463980,,,
+post_rejit,217,0x17d0,bpf_probe_read_kernel,470,212,0xffffffff84463980,,,
+post_rejit,217,0x14a8,bpf_probe_read_kernel,419,207,0xffffffff84463980,,,
+post_rejit,217,0x156e,bpf_probe_read_kernel,394,198,0xffffffff84463980,,,
+post_rejit,217,0x1518,bpf_probe_read_kernel,374,179,0xffffffff84463980,,,
+post_rejit,217,0x15c5,bpf_probe_read_kernel,384,176,0xffffffff84463980,,,
+post_rejit,217,0x1539,bpf_probe_read_kernel,387,174,0xffffffff84463980,,,
+post_rejit,217,0x1671,bpf_probe_read_kernel,379,174,0xffffffff84463980,,,
+post_rejit,217,0x1455,bpf_probe_read_kernel,361,174,0xffffffff84463980,,,
+post_rejit,217,0x15de,bpf_probe_read_kernel,408,172,0xffffffff84463980,,,
+post_rejit,217,0x1650,bpf_probe_read_kernel,392,170,0xffffffff84463980,,,
+post_rejit,217,0x158f,bpf_probe_read_kernel,358,168,0xffffffff84463980,,,
+post_rejit,217,0x1637,bpf_probe_read_kernel,397,167,0xffffffff84463980,,,
+post_rejit,217,0x173d,bpf_probe_read_kernel,371,165,0xffffffff84463980,,,
+post_rejit,217,0x14ff,bpf_probe_read_kernel,432,160,0xffffffff84463980,,,
+post_rejit,217,0x146f,bpf_probe_read_kernel,434,160,0xffffffff84463980,,,
+post_rejit,217,0x15a9,bpf_probe_read_kernel,381,159,0xffffffff84463980,,,
+post_rejit,217,0x171c,bpf_probe_read_kernel,459,159,0xffffffff84463980,,,
+post_rejit,217,0x15ff,bpf_probe_read_kernel,356,158,0xffffffff84463980,,,
+post_rejit,217,0x1619,bpf_probe_read_kernel,353,148,0xffffffff84463980,,,
+post_rejit,217,0x14c9,bpf_probe_read_kernel,376,146,0xffffffff84463980,,,
+post_rejit,217,0x16d2,bpf_probe_read_kernel,387,144,0xffffffff84463980,,,
+post_rejit,217,0x16b6,bpf_probe_read_kernel,363,87,0xffffffff84463980,,,
+post_rejit,217,0x17b7,bpf_probe_read_kernel,364,72,0xffffffff84463980,,,
+post_rejit,217,0x1803,bpf_probe_read_kernel,1075,0,0xffffffff84463980,,,
+post_rejit,217,0x14e5,bpf_probe_read_kernel,273,0,0xffffffff84463980,,,
+post_rejit,217,0x148f,bpf_probe_read_kernel,282,0,0xffffffff84463980,,,
+post_rejit,217,0x1341,bpf_probe_read_kernel,927,0,0xffffffff84463980,,,
+post_rejit,217,0x1362,bpf_probe_read_kernel,790,0,0xffffffff84463980,,,
+post_rejit,217,0x13e1,bpf_probe_read_compat,849,0,0xffffffff844653e0,,,
+post_rejit,217,0x227,bpf_probe_read_kernel,564,0,0xffffffff84463980,,,
+post_rejit,217,0x141c,bpf_probe_read_kernel,660,0,0xffffffff84463980,,,
+post_rejit,217,0x17a1,bpf_probe_read_kernel,354,0,0xffffffff84463980,,,
+post_rejit,217,0x20b,bpf_probe_read_kernel,412,0,0xffffffff84463980,,,
+post_rejit,217,0x16f9,bpf_probe_read_kernel,323,0,0xffffffff84463980,,,
+post_rejit,217,0x169c,bpf_probe_read_kernel,276,0,0xffffffff84463980,,,
+post_rejit,217,0x1555,bpf_probe_read_kernel,290,0,0xffffffff84463980,,,
+post_rejit,217,0x17e9,bpf_probe_read_kernel_str,502,0,0xffffffff844639e0,,,
+post_rejit,217,0x1d6,bpf_probe_read_kernel,366,0,0xffffffff84463980,,,
+post_rejit,217,0x175a,bpf_probe_read_kernel,298,0,0xffffffff84463980,,,
