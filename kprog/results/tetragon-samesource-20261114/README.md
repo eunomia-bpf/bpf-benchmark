@@ -90,3 +90,19 @@ native arm's freeing of that time shows up directly in `stress-ng` throughput.
 - Capture: `/workspaces/kprog-raw/C/one-image-runs/20261114T193854Z-specialized-tetragon_observer-s3.log`
 - Run: `corpus/results/x86_kvm_corpus_20261114_194008_916664`
 - Staged manifest: `corpus/results/tetragon-samesource-20261114/`
+## Restaging the manifest directory
+
+`*.native.o` is gitignored (`*.o`), so only `manifest.json` is committed. Rebuild
+the objects and restage them with the sole kernel's BTF:
+
+```sh
+cd vendor/bpf
+export KERNEL_RELEASE=$(cat /workspaces/.agent-state/kprog-ck/build-x86/include/config/kernel.release)
+make VMLINUX_BTF=/workspaces/.agent-state/kprog-ck/build-x86/vmlinux native-tetragon
+R=vendor/build/native-bpf/x86/$KERNEL_RELEASE/native/tetragon   # from the repo root
+install -d corpus/results/tetragon-samesource-20261114
+cp $R/*.native.o $R/manifest.json corpus/results/tetragon-samesource-20261114/
+```
+
+`VMLINUX_BTF` must be the sole kernel's; the default is the host's, and the wrong BTF
+silently swaps tracked headers.
