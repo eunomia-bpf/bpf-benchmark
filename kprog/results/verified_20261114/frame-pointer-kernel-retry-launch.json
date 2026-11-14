@@ -1,0 +1,21 @@
+{
+  "announced": "2026-11-14T01:47:31Z",
+  "outer_pid": 115161,
+  "recipe_commit": "61cb2cef7",
+  "make_target": "make -C kprog/libnativeloader tail-frame-kvm FRAME_OUTPUT=/workspaces/kprog-raw/verified/20261114-frame-pointer/retry1/kernel",
+  "host_cpu": 13,
+  "guest_cpus": 2,
+  "guest_memory": "2G",
+  "launcher_address_space": "8GiB",
+  "image_lock": "shared",
+  "guest_linker": "/workspaces/kprog-raw/verified/20261114-frame-pointer/retry1/kernel/native-link.real",
+  "linker_source": "/var/tmp/kprog-tmp/verified/direct-tail/cargo/debug/native-link",
+  "linker_host_validation": "frame-pointer-host-results.json",
+  "dry_run": "/workspaces/kprog-raw/verified/20261114-frame-pointer/retry1-dry-run.log",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-frame-pointer/retry1",
+  "launcher_log": "/workspaces/kprog-raw/verified/20261114-frame-pointer/retry1/launch/launcher.log",
+  "job_log": "/workspaces/kprog-raw/verified/20261114-frame-pointer/retry1/launch/job/make.log",
+  "reason": "First job failed127 before proof because host build cache was not guest-visible",
+  "collected": false,
+  "canonical_changed": false
+}
