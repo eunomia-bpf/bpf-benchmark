@@ -16,6 +16,7 @@
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include <algorithm>
 #include <cstdlib>
+#include <linux/bpf.h>
 using namespace llvm;
 [[noreturn]] static void fail(const Twine &Message) { errs()<<Message<<'\n'; std::exit(1); }
 static cl::opt<std::string> Input(cl::Positional,cl::Required);
@@ -24,6 +25,7 @@ static cl::opt<std::string> Public("public-layout",cl::Required);
 static cl::opt<std::string> Physical("physical-layout",cl::Required);
 static cl::opt<bool> Native("native-codegen",cl::init(false));
 static cl::opt<std::string> HelperNames("helper-names");
+static cl::opt<std::string> FunctionBodies("bpf-function-bodies");
 struct Rule { std::string Kind, Child; int64_t PublicOffset, PublicWidth, Offset, Width; SmallVector<int64_t,2> Pointers; bool PointerValue, Boolean; int64_t Mask, StoreMax; };
 static json::Value readJSON(StringRef Path) {
   auto File=MemoryBuffer::getFile(Path);
@@ -35,6 +37,48 @@ static json::Value readJSON(StringRef Path) {
 static int64_t integer(json::Object *O,StringRef K) {
   if (!O) fail("expected layout object");
   auto V=O->getInteger(K); if (!V) fail(Twine("missing integer ")+K); return *V;
+}
+static void materializeFunctions(Module &M,StringRef Path) {
+  auto Document=readJSON(Path);auto *Object=Document.getAsObject();
+  auto *Functions=Object?Object->getObject("functions"):nullptr;
+  if (!Functions) fail("BPF function bodies require a functions object");
+  struct Body { Function *F; uint64_t Value; };
+  SmallVector<Body,16> Bodies;
+  for (auto &Entry:*Functions) {
+    auto *F=M.getFunction(Entry.first);
+    if (!F || !F->isDeclaration()) fail(Twine("BPF body needs an existing function declaration: ")+StringRef(Entry.first));
+    auto Text=Entry.second.getAsString();
+    if (!Text || Text->size()!=sizeof(bpf_insn)*4) fail("BPF constant leaf requires two complete instructions");
+    bpf_insn Code[2]{};auto *Bytes=reinterpret_cast<unsigned char *>(Code);
+    for (unsigned I=0;I<sizeof(Code);++I) {
+      unsigned Byte;
+      if (Text->substr(I*2,2).getAsInteger(16,Byte)) fail("malformed BPF function instruction hex");
+      Bytes[I]=Byte;
+    }
+    bool Wide=Code[0].code==(BPF_ALU64|BPF_MOV|BPF_K);
+    bool Narrow=Code[0].code==(BPF_ALU|BPF_MOV|BPF_K);
+    if ((!Wide && !Narrow) || Code[0].dst_reg!=BPF_REG_0 || Code[0].src_reg || Code[0].off ||
+        Code[1].code!=(BPF_JMP|BPF_EXIT) || Code[1].dst_reg || Code[1].src_reg || Code[1].off || Code[1].imm)
+      fail(Twine("BPF function body is not an exact constant-return leaf: ")+StringRef(Entry.first));
+    auto *Return=F->getReturnType();
+    if ((!Return->isIntegerTy() || Return->getIntegerBitWidth()>64) && !Return->isPointerTy() && !Return->isVoidTy())
+      fail("BPF scalar return has an incompatible native return type");
+    Bodies.push_back({F,Wide?uint64_t(int64_t(Code[0].imm)):uint64_t(uint32_t(Code[0].imm))});
+  }
+  // Validate every body before modifying the module; unsupported code is never
+  // replaced by an empty implementation or a partial generated result.
+  for (auto Body:Bodies) {
+    auto *Block=BasicBlock::Create(M.getContext(),"original_bpf_leaf",Body.F);
+    Body.F->setLinkage(GlobalValue::InternalLinkage);
+    Body.F->setDSOLocal(true);
+    // A declaration's debug node is not a definition, and describes the C
+    // declaration rather than the provided current-load BPF body.
+    Body.F->setSubprogram(nullptr);
+    IRBuilder<> B(Block);auto *Return=Body.F->getReturnType();
+    if (Return->isVoidTy()) B.CreateRetVoid();
+    else if (Return->isPointerTy()) B.CreateRet(B.CreateIntToPtr(B.getInt64(Body.Value),Return));
+    else B.CreateRet(ConstantInt::get(Return,Body.Value));
+  }
 }
 int main(int argc,char **argv) {
   cl::ParseCommandLineOptions(argc,argv);
@@ -58,6 +102,10 @@ int main(int argc,char **argv) {
   }
   LLVMContext C; SMDiagnostic Error; auto M=parseIRFile(Input,Error,C);
   if (!M) { Error.print(argv[0],errs()); return 1; }
+  if (!FunctionBodies.empty()) {
+    if (!Native) fail("BPF function bodies require explicit native-codegen");
+    materializeFunctions(*M,FunctionBodies);
+  }
   const auto &DL=M->getDataLayout(); unsigned Count=0;
   for (auto &F:*M) {
     if (F.isDeclaration() || F.arg_empty()) continue;

@@ -620,3 +620,13 @@ native-frame-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-
 		python3 $(HERE)/socket-proof.py --input $(NATIVE_FRAME_BUILD)/$$variant.o --linker $(LINK_MEMORY_PAYLOAD)/native-link-off --output $(NATIVE_FRAME_BUILD)/$$variant-links --section-prefix frame-test --kernel-roundtrip; \
 	done
 	python3 $(HERE)/check-native-frame.py --build $(NATIVE_FRAME_BUILD)
+
+BPF_FUNCTION_BUILD ?= /var/tmp/kprog-tmp/perf/bpf-functions
+BPF_FUNCTION_REFERENCE ?= /workspaces/kprog-raw/perf/20261114-native-frame/input-evidence/socket-context-lower
+.PHONY: bpf-function-check
+bpf-function-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
+	install -d $(BPF_FUNCTION_BUILD)
+	install -m755 $(BPF_FUNCTION_REFERENCE) $(BPF_FUNCTION_BUILD)/reference-lower
+	$(CC) -O2 -g -emit-llvm -c $(HERE)/test-bpf-function.c -o $(BPF_FUNCTION_BUILD)/input.bc
+	python3 $(HERE)/socket-helper-names.py > $(BPF_FUNCTION_BUILD)/helpers.json
+	python3 $(HERE)/test-bpf-functions.py --build $(BPF_FUNCTION_BUILD) --compiler $(SOCKET_BUILD)/socket-context-lower --reference $(BPF_FUNCTION_BUILD)/reference-lower --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json

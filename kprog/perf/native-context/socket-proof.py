@@ -2,6 +2,8 @@
 """Build canonical linker artifacts for every selected entry section.
 
 Offline linker execution only: no verifier submission or native installation.
+Undefined symbols get synthetic addresses, so a successful roundtrip proves
+relocation arithmetic, not that their implementations or resources exist.
 """
 import argparse
 import json
@@ -41,6 +43,11 @@ def main():
     rows = []
     if args.kernel_roundtrip:
         (args.output/'synthetic-plan.json').write_text(json.dumps(plan,indent=2)+'\n')
+        (args.output/'synthetic-external-targets.json').write_text(json.dumps(dict(
+            scope='Placeholder addresses only; no function body or runtime resource availability is established.',
+            targets=[dict(name=s.name, elf_type=s['st_info']['type'],
+                          elf_binding=s['st_info']['bind'], address=helpers[s.name])
+                     for s in symbols if s.name and s['st_shndx']=='SHN_UNDEF']),indent=2)+'\n')
     for name in sorted(entries):
         command = [str(args.linker), '--mode', 'proof', '--input', str(args.input),
                    '--symbol', name, '--output', str(args.output/(name+'.proof.o'))]
