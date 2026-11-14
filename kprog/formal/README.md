@@ -9,7 +9,7 @@ kprog belong in those forks. No replacement ISA semantics is defined locally.
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
 | AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `da428593b21d` | Lean 4.35.0 |
-| x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `46a30ddcd946` | Lean 4.32.0-rc1 |
+| x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `fdabbf55107e` | Lean 4.32.0-rc1 |
 | Clight | [eunomia-bpf/clean](https://github.com/eunomia-bpf/clean), `external/clean/export` | `123f7f7767e2` | Lean 4.32.1 |
 
 `make -C kprog/formal mature` builds the migration Lake package on Lean 4.35.0,
@@ -33,7 +33,7 @@ CompCert front end and the Lean export/semantics have separate trust claims.
 
 ## Operation coverage (M2 in progress)
 
-LNSym `da428593b21d6dfa02c6d063600d9ed817747fd5`, x86lean `46a30ddcd946ffcfca4ae5b8971c72629b491e94`.
+LNSym `da428593b21d6dfa02c6d063600d9ed817747fd5`, x86lean `fdabbf55107e5de490111f959694f0770795ec5c`.
 
 Source inspection, not refinement proofs or conformance results. `present` means an execution path exists; `partial`/`missing` remain M2 work; `layer` identifies linking/ABI transport above an existing ISA form. Memory permissions, initialization, fault prefixes, exclusive ordering and ABI require explicit relations.
 
@@ -348,12 +348,38 @@ and all prior tests are unchanged; checked-step axiom dependencies remain the
 existing three standard axioms. These are finite post-decode checks, not M5
 refinements or a new hardware differential run.
 
-M2 now continues retained atomic/XCHG support. A runtime reproduction also found
-that register-first XCHG with the register as memory base resolves its writeback
-address after the register update in the default step; that address-capture bug
-must be fixed as part of the upcoming fork atomic change. The checked entry
-still explicitly refuses XCHG. Bit-byte/native-word and vector/native-split
-observation relations remain M3/M5 work, without added M2 gates.
+At that checkpoint M2 still needed retained atomic/XCHG support, including a
+reproduced register-first XCHG memory-base alias bug in its default step.
+
+x86lean `fdabbf55107e` fixes that address capture before either write. Two generic
+kernel simp theorems characterize the corrected whole-state result and prove
+operand-order equivalence for arbitrary widths, addresses, registers and high8
+views. All older theorem statements/proofs are retained. Checked memory XCHG
+(implicit/explicit LOCK) and legal LOCK binary/unary/bit RMWs now report one
+old/new/init event on success; denied stores retain the read prefix without
+CPU commit. Incoming public events and exact initialized ranges are preserved.
+Register-only XCHG needs no profile. Atomicity remains recorded under the fork's
+existing TRUSTBASE, without a new concurrent memory-ordering proof.
+
+The combined 156-job and standalone 113-job builds passed 7,473 focused
+kernel-decide cases, including 1,230 new atomic cases (`m2-x86-atomic/build-3`).
+Independent goldens cover all four sizes, AH, both operand orders, implicit and
+explicit LOCK, base/index/RIP/FS/high-negative/unaligned addresses, old wrong-
+address guards, permissions/init/48-57-bit spans, malformed operands and
+multi-step atomic/fault prefixes. Earlier source/test fixture/layout failures
+remain retained. All prior tests are unchanged, the two new generic laws and
+checked-step dependencies use only the standard allowed axioms, and the old
+counterexample now leaves the wrong address untouched. These are not M5 counts
+or a new hardware/ACL2 differential run.
+
+The source audit matches all 74 ARM names/codes and 75 x86 names, verifies all
+linked implementation paths and checked paths for all 34 mapped x86 constructors.
+One concrete M2 domain gap remains: 16-bit SHLD/SHRD memory results at masked
+counts greater than 16 still stop as unimplemented, while the existing C helper
+has a live total count-at-or-above-width arm. The fork needs undefined-memory-
+result execution so migration can preserve that input domain. Bit-byte/native-
+word, vector/native-split and exclusive observation relations remain M3/M5
+work, without extra M2 gates or unused ISA expansion.
 
 ### AArch64: 74 simulator operations
 
@@ -516,7 +542,7 @@ Outside the 74-operation roster, LDXR/LDAXR/STXR and CLREX now execute in the fo
 | 0x49 | `rorMem` | present | [rot .ror](external/x86lean/X86/Syntax.lean) |  |
 | 0xff | `ret` | present | [ret](external/x86lean/X86/Syntax.lean) | Native stack pop; simulator return modes need relation |
 
-Cross-cutting gaps: X86.Mem retains its finite byte association list with implicit zero background and total default reads/writes. Its optional checked step now handles explicit permissions, initialization, canonical spans and ordered flat/divide faults for the scalar subset above, including shifts and retained scalar-source families; other instruction classes refuse. The default step selects 48/57-bit canonicality for its existing target/bit-byte checks. Checked near stack/control transfers now share the original target/count logic and preserve typed fault prefixes. Checked retained bit/XMM/MOVS transfers now use byte-count spans over the same numerical step. Retained atomic/XCHG support remains open; other unused string/SIMD families are not migration gates. Native observation/fault-delivery relations are M3/M5 work. LNSym retains its total-byte-memory API and now also has a checked step for single/pair/exclusive transfers and LSE RMWs with byte permissions, initialization and ordered fault observations. That profile must be bound explicitly; it is not a full MMU/concurrency model. LSE RMWs retain old/new/order metadata in one checked effect; exclusives bind physical-monitor inputs and ordered monitor/memory effects. Out-of-roster multiple-structure SIMD paths remain explicitly refused. Old exclusive fault/trace bindings differ and require reconciliation in M3/M5. Thread-pointer outcomes now bind explicitly; native admissibility and the remaining memory/platform bindings are open. These are not closed by listing instruction constructors; M2/M3 must preserve the existing theorem domains through external-model extensions and explicit relations. x86lean takes post-decode Instr.op/len. BZHI is absent from the differential roster, not absent from step: do not duplicate its semantics.
+Cross-cutting gaps: X86.Mem retains its finite byte association list with implicit zero background and total default reads/writes. Its optional checked step now handles explicit permissions, initialization, canonical spans and ordered flat/divide faults for the scalar subset above, including shifts and retained scalar-source families; other instruction classes refuse. The default step selects 48/57-bit canonicality for its existing target/bit-byte checks. Checked near stack/control transfers now share the original target/count logic and preserve typed fault prefixes. Checked retained bit/XMM/MOVS transfers now use byte-count spans over the same numerical step. Retained memory XCHG and legal LOCK ALU/unary/bit RMWs now record old/new/init in one event; the remaining concrete fork gap is undefined16-bit double-shift memory results. Other unused string/SIMD families are not migration gates. Native observation/fault-delivery relations are M3/M5 work. LNSym retains its total-byte-memory API and now also has a checked step for single/pair/exclusive transfers and LSE RMWs with byte permissions, initialization and ordered fault observations. That profile must be bound explicitly; it is not a full MMU/concurrency model. LSE RMWs retain old/new/order metadata in one checked effect; exclusives bind physical-monitor inputs and ordered monitor/memory effects. Out-of-roster multiple-structure SIMD paths remain explicitly refused. Old exclusive fault/trace bindings differ and require reconciliation in M3/M5. Thread-pointer outcomes now bind explicitly; native admissibility and the remaining memory/platform bindings are open. These are not closed by listing instruction constructors; M2/M3 must preserve the existing theorem domains through external-model extensions and explicit relations. x86lean takes post-decode Instr.op/len. BZHI is absent from the differential roster, not absent from step: do not duplicate its semantics.
 
 ## Legacy foundation (migration pending)
 
