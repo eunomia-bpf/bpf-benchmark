@@ -1,0 +1,19 @@
+{
+  "recorded": "2026-11-14T21:43:33Z",
+  "journal": "/workspaces/kprog-raw/perf/20261114-census-resume/control/outcomes.jsonl",
+  "application": "tracee/monitor",
+  "source_prog_id": 541,
+  "name": "trace_ret_vfs_writev",
+  "body_group": 72,
+  "stage": "verifier_rejected",
+  "class": "verifier_context_access",
+  "service": {
+    "request_id": 18,
+    "started": "2026-11-14T20:58:39.322236+00:00",
+    "finished": "2026-11-14T21:33:08.729805+00:00",
+    "status": -5,
+    "failure_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/18.failure.tar.gz"
+  },
+  "archive_bytes": 29156192,
+  "scope": "Ongoing retained-producer load-only census; no execution request"
+}
