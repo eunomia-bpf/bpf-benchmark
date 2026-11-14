@@ -42,6 +42,8 @@ CHECKED_PACKET_BUILD ?= /var/tmp/kprog-tmp/verified/checked-packet
 CHECKED_PACKET_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-checked-packet/host
 CHECKED_PACKET_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-checked-packet/kernel
 CHECKED_PACKET_VMLINUX ?= $(REPO_ROOT)/vendor/bpf/targets/x86/$(shell cat /workspaces/.agent-state/kprog-ck/build-x86/include/config/kernel.release)/vmlinux.h
+CENSUS_CHECKPOINT_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-integration-checkpoint/snapshot
+CENSUS_CHECKPOINT_QUEUES ?= /workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-0 /workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-1 /workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-2
 KFUNC_BUILD ?= /var/tmp/kprog-tmp/verified/kfunc
 KFUNC_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/host
 KFUNC_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-kfunc/kernel
@@ -356,6 +358,11 @@ shared-image-restore:
 	docker image load -i "$(REPO_ROOT)/.cache/container-images/x86_64-runner-runtime.image.tar"
 
 .PHONY: shared-base-refresh shared-base-finalize shared-base-modules-repair shared-module-syntax
+.PHONY: resident-census-checkpoint
+resident-census-checkpoint:
+	python3 ../test/resident_verified_census.py checkpoint --output "$(CENSUS_CHECKPOINT_OUTPUT)" \
+		$(foreach queue,$(CENSUS_CHECKPOINT_QUEUES),--queue "$(queue)")
+
 shared-base-refresh:
 	bash ../test/refresh_verified_base.sh "$(REFRESH_OUTPUT)" "$(REFRESH_OPERATION)"
 
