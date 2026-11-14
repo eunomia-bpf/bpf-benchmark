@@ -1,7 +1,9 @@
 """Catch invented packet-field provenance from an untied empty asm output."""
 import argparse
 import ctypes as c
+import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 
@@ -83,8 +85,36 @@ ret i32 %result
             raise ValueError('Default compiler changed a retained packet input')
         replay.append(dict(input=str(path), default_equal=True,
                            strict_equal=old.read_bytes()==strict.read_bytes()))
+    pipeline = output/'pipeline.bpf.c'
+    pipeline.write_text('''#include <linux/bpf.h>
+#include <bpf_helpers.h>
+SEC("xdp") int pipeline(struct xdp_md *ctx) {
+unsigned long long start = ctx->data;
+unsigned long long end = ctx->data_end;
+x86_l_0:
+asm volatile ("" : "+r"(end));
+return end-start < 64;
+}
+char LICENSE[] SEC("license") = "GPL";
+''')
+    spec = importlib.util.spec_from_file_location('identity_worker', ROOT/'kprog/x86/trusted_specializer.py')
+    worker = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(worker)
+    saved = os.environ.get('KPROG_BPF_STRICT_IDENTITIES')
+    try:
+        os.environ['KPROG_BPF_STRICT_IDENTITIES'] = '1'
+        first = len(calls)
+        worker.compile_simulator(str(ROOT/'kprog/stock-path/bin/clang'), pipeline,
+                                 output/'pipeline.o', run, bounds_compiler=tool)
+        if not any('--strict-identities' in row['command'] for row in calls[first:]):
+            raise ValueError('Service compiler did not forward strict identity selection')
+    finally:
+        if saved is None:
+            os.environ.pop('KPROG_BPF_STRICT_IDENTITIES')
+        else:
+            os.environ['KPROG_BPF_STRICT_IDENTITIES'] = saved
     result = dict(default_equal=True, counterexample=counterexample,
-                  execution_cases=len(observations), retained=replay)
+                  execution_cases=len(observations), retained=replay, service_flag_forwarded=True)
     (output/'result.json').write_text(json.dumps(result, indent=2)+'\n')
     print(json.dumps(result))
 
