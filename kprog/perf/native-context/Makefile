@@ -544,3 +544,13 @@ frozen-cilium-native: frozen-data-ir $(SOCKET_BUILD)/socket-context-lower $(PACK
 	python3 $(HERE)/socket-helper-names.py > $(PACKET_BUILD)/helper-names.json
 	$(SOCKET_BUILD)/socket-context-lower $(FROZEN_OUTPUT) --public-layout $(PACKET_BUILD)/public-layout.json --physical-layout $(PACKET_BUILD)/physical-layout.json --native-codegen --helper-names $(PACKET_BUILD)/helper-names.json -o $(FROZEN_BUILD)/$(CILIUM_UNIT).native.bc
 	prlimit --as=8589934592 -- $(CC) -target x86_64-linux-gnu -O3 -g -fPIC -fno-optimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-jump-tables -c $(FROZEN_BUILD)/$(CILIUM_UNIT).native.bc -o $(FROZEN_BUILD)/$(CILIUM_UNIT).native.o
+
+OTEL_UPSTREAM_BUILD ?= /var/tmp/kprog-tmp/perf/otel-upstream
+OTEL_UNIT ?= native_stack_trace
+.PHONY: upstream-otel-ir
+upstream-otel-ir:
+	prlimit --as=17179869184 -- python3 $(HERE)/otel-upstream.py --unit $(OTEL_UNIT) --output $(OTEL_UPSTREAM_BUILD)
+
+.PHONY: upstream-otel-bpf
+upstream-otel-bpf:
+	prlimit --as=17179869184 -- python3 $(HERE)/otel-upstream.py --all --output $(OTEL_UPSTREAM_BUILD) --bpf-reference $(ROOT)/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.amd64
