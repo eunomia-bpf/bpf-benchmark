@@ -9,7 +9,6 @@ import hashlib
 import io
 import json
 from pathlib import Path
-import shutil
 import tarfile
 
 
@@ -92,20 +91,7 @@ def collect(raw, corpus, captures, prefix, exit_file, application):
         destination.add(captures, arcname='captures')
     size = archive.stat().st_size
     record = dict(raw_archive=str(archive), sha256=sha256(archive), bytes=size)
-    if size <= 40 * 1024 * 1024:
-        path = Path(str(prefix)+'-results.tar.gz')
-        with archive.open('rb') as source, path.open('xb') as destination:
-            shutil.copyfileobj(source, destination)
-        record['published_archive'] = str(path)
-    else:
-        parts = []
-        with archive.open('rb') as source:
-            while block := source.read(40 * 1024 * 1024):
-                path = Path(str(prefix)+f'-results.tar.gz.part{len(parts):03d}')
-                with path.open('xb') as destination:
-                    destination.write(block)
-                parts.append(dict(path=str(path), bytes=len(block), sha256=hashlib.sha256(block).hexdigest()))
-        record.update(parts=parts, reconstruction='Concatenate parts in receipt order; verify original SHA256.')
+    # Raw evidence stays under /workspaces/kprog-raw; Git receives the receipt.
     result['archive'] = record
     text = json.dumps(result, indent=2)+'\n'
     (output/'receipt.json').write_text(text)
