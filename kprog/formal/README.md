@@ -31,6 +31,175 @@ LGPL-2.1-or-later. Keep those license terms separate. Clean explicitly labels
 its C-to-Lean exporter/semantics experimental in its upstream README; the
 CompCert front end and the Lean export/semantics have separate trust claims.
 
+## Operation coverage (M2 in progress)
+
+LNSym `49f8a1d9e46f8dcfc345f4bc15d35b0ba845ff5c`, x86lean `74a2e2849cde10fce9035c6abb7fdd49968b2915`.
+
+Source inspection, not refinement proofs or conformance results. `present` means an execution path exists; `partial`/`missing` remain M2 work; `layer` identifies linking/ABI transport above an existing ISA form. Memory permissions, initialization, fault prefixes, exclusive ordering and ABI require explicit relations.
+
+### AArch64: 74 simulator operations
+
+| Code | Operation | Source status | LNSym source (Arm/Insts unless Arm/) | Constraint / work |
+|---|---|---|---|---|
+| 0x00 | `NOP` | present | [BR/Hints.lean](external/LNSym/Arm/Insts/BR/Hints.lean) | NOP encoding |
+| 0x01 | `MOV_IMM` | present | [DPI/Move_wide_imm.lean](external/LNSym/Arm/Insts/DPI/Move_wide_imm.lean) | MOVZ/MOVN/MOVK, retain width and encoding |
+| 0x02 | `MOV_REG` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Add_sub_imm.lean](external/LNSym/Arm/Insts/DPI/Add_sub_imm.lean) | ORR alias for GPR/ZR; ADD immediate0 alias for SP, keep register identities |
+| 0x03 | `ADD_IMM` | present | [DPI/Add_sub_imm.lean](external/LNSym/Arm/Insts/DPI/Add_sub_imm.lean) | S/op/Rd encode CMP/CMN |
+| 0x04 | `SUB_IMM` | present | [DPI/Add_sub_imm.lean](external/LNSym/Arm/Insts/DPI/Add_sub_imm.lean) | S/op/Rd encode CMP/CMN |
+| 0x05 | `MOVK` | present | [DPI/Move_wide_imm.lean](external/LNSym/Arm/Insts/DPI/Move_wide_imm.lean) | MOVZ/MOVN/MOVK, retain width and encoding |
+| 0x06 | `ALU_IMM` | present | [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Requires architectural bitmask encoding |
+| 0x07 | `ALU_REG` | partial | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted forms exist; add/sub extended-register class absent |
+| 0x08 | `SHIFT_IMM` | partial | [DPI/Bitfield.lean](external/LNSym/Arm/Insts/DPI/Bitfield.lean) | LSL/LSR/ASR aliases exist; ROR requires scalar EXTR, absent |
+| 0x09 | `SHIFT_REG` | present | [DPR/Data_processing_two_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_two_source.lean) | LSLV/LSRV/ASRV/RORV |
+| 0x0a | `MADD` | present | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | MUL aliases MADD with Ra=XZR |
+| 0x0b | `MSUB` | missing | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | Only MADD executes; other valid forms explicitly Unimplemented |
+| 0x0c | `MUL` | present | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | MUL aliases MADD with Ra=XZR |
+| 0x0d | `UMULL` | missing | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | Only MADD executes; other valid forms explicitly Unimplemented |
+| 0x0e | `UDIV` | missing | [DPR/Data_processing_two_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_two_source.lean) | Only variable shifts execute |
+| 0x0f | `MVN` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
+| 0x10 | `NEG` | partial | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted forms exist; add/sub extended-register class absent |
+| 0x11 | `EXTR` | missing | [Arm/Decode/DPR.lean](external/LNSym/Arm/Decode/DPR.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | Scalar EXTR absent; SIMD extract is different |
+| 0x12 | `BITFIELD` | present | [DPI/Bitfield.lean](external/LNSym/Arm/Insts/DPI/Bitfield.lean) | BFM/SBFM/UBFM and extension aliases |
+| 0x13 | `REV` | present | [DPR/Data_processing_one_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_one_source.lean) | REV widths per legal opcode |
+| 0x14 | `REV16` | present | [DPR/Data_processing_one_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_one_source.lean) | REV widths per legal opcode |
+| 0x15 | `SXTH` | present | [DPI/Bitfield.lean](external/LNSym/Arm/Insts/DPI/Bitfield.lean) | BFM/SBFM/UBFM and extension aliases |
+| 0x16 | `CMP_IMM` | present | [DPI/Add_sub_imm.lean](external/LNSym/Arm/Insts/DPI/Add_sub_imm.lean) | S/op/Rd encode CMP/CMN |
+| 0x17 | `CMP_REG` | partial | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted forms exist; add/sub extended-register class absent |
+| 0x18 | `TST_IMM` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
+| 0x19 | `TST_REG` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
+| 0x1a | `CCMP_IMM` | missing | [Arm/Decode/DPR.lean](external/LNSym/Arm/Decode/DPR.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | Conditional compare absent |
+| 0x1b | `CCMP_REG` | missing | [Arm/Decode/DPR.lean](external/LNSym/Arm/Decode/DPR.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | Conditional compare absent |
+| 0x1c | `CSEL` | present | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | Only op=0,S=0,op2=00 executes |
+| 0x1d | `CINC` | missing | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases unsupported |
+| 0x1e | `CSET` | missing | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases unsupported |
+| 0x1f | `LOAD` | partial | [LDST/Reg_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_imm.lean); [LDST/Reg_unscaled_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_unscaled_imm.lean) | Byte/word/double immediate exists; halfword GPR, GPR unscaled, pre-index and register-offset absent |
+| 0x20 | `STORE` | partial | [LDST/Reg_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_imm.lean); [LDST/Reg_unscaled_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_unscaled_imm.lean) | Byte/word/double immediate exists; halfword GPR, GPR unscaled, pre-index and register-offset absent |
+| 0x21 | `LDP` | partial | [LDST/Reg_pair.lean](external/LNSym/Arm/Insts/LDST/Reg_pair.lean) | Pre/post/offset exists; pair width, overlap, LSE2/fault profiles need audit |
+| 0x22 | `STP` | partial | [LDST/Reg_pair.lean](external/LNSym/Arm/Insts/LDST/Reg_pair.lean) | Pre/post/offset exists; pair width, overlap, LSE2/fault profiles need audit |
+| 0x23 | `FMOV` | partial | [DPSFP/Conversion_between_FP_and_Int.lean](external/LNSym/Arm/Insts/DPSFP/Conversion_between_FP_and_Int.lean) | FMOV GPR31 reads/writes SP via read_gpr/write_gpr; old reference uses XZR/WZR. Fix both directions, preserve SP |
+| 0x24 | `CNT` | missing | [DPSFP/Advanced_simd_two_reg_misc.lean](external/LNSym/Arm/Insts/DPSFP/Advanced_simd_two_reg_misc.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | Only reversals in two-reg-misc; across-lanes class absent |
+| 0x25 | `UADDLV` | missing | [DPSFP/Advanced_simd_two_reg_misc.lean](external/LNSym/Arm/Insts/DPSFP/Advanced_simd_two_reg_misc.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | Only reversals in two-reg-misc; across-lanes class absent |
+| 0x26 | `ADRP_GOT` | layer | [DPI/PC_rel_addressing.lean](external/LNSym/Arm/Insts/DPI/PC_rel_addressing.lean) | ADRP exists; relocation/GOT/readonly resolution is linking premise |
+| 0x27 | `ADRP_RODATA` | layer | [DPI/PC_rel_addressing.lean](external/LNSym/Arm/Insts/DPI/PC_rel_addressing.lean) | ADRP exists; relocation/GOT/readonly resolution is linking premise |
+| 0x28 | `LOAD_D0` | partial | [LDST/Reg_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_imm.lean); [LDST/Reg_unscaled_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_unscaled_imm.lean) | SIMD immediate/unscaled exists; pre-index/register-offset absent |
+| 0x29 | `STORE_D0` | partial | [LDST/Reg_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_imm.lean); [LDST/Reg_unscaled_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_unscaled_imm.lean) | SIMD immediate/unscaled exists; pre-index/register-offset absent |
+| 0x2a | `LOAD_Q0` | partial | [LDST/Reg_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_imm.lean); [LDST/Reg_unscaled_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_unscaled_imm.lean) | SIMD immediate/unscaled exists; pre-index/register-offset absent |
+| 0x2b | `STORE_Q0` | partial | [LDST/Reg_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_imm.lean); [LDST/Reg_unscaled_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_unscaled_imm.lean) | SIMD immediate/unscaled exists; pre-index/register-offset absent |
+| 0x2c | `TST_BIC_REG` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
+| 0x2d | `ANDS_REG` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
+| 0x2e | `UMULH` | missing | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | Only MADD executes; other valid forms explicitly Unimplemented |
+| 0x2f | `SXTW` | present | [DPI/Bitfield.lean](external/LNSym/Arm/Insts/DPI/Bitfield.lean) | BFM/SBFM/UBFM and extension aliases |
+| 0x30 | `SUBS_IMM` | present | [DPI/Add_sub_imm.lean](external/LNSym/Arm/Insts/DPI/Add_sub_imm.lean) | S/op/Rd encode CMP/CMN |
+| 0x31 | `ADDS_IMM` | present | [DPI/Add_sub_imm.lean](external/LNSym/Arm/Insts/DPI/Add_sub_imm.lean) | S/op/Rd encode CMP/CMN |
+| 0x32 | `SUBS_REG` | partial | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted forms exist; add/sub extended-register class absent |
+| 0x33 | `CMN_IMM` | present | [DPI/Add_sub_imm.lean](external/LNSym/Arm/Insts/DPI/Add_sub_imm.lean) | S/op/Rd encode CMP/CMN |
+| 0x34 | `CINV` | missing | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases unsupported |
+| 0x35 | `ORN_REG` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
+| 0x36 | `LDRSB` | missing | [LDST/Reg_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_imm.lean); [LDST/Reg_unscaled_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_unscaled_imm.lean) | Signed GPR loads absent |
+| 0x37 | `ANDS_IMM` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
+| 0x38 | `STLXR` | missing | [Arm/Decode/LDST.lean](external/LNSym/Arm/Decode/LDST.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | Exclusive class, monitor/outcome state absent; LDXR also needed |
+| 0x39 | `LDRSW` | missing | [LDST/Reg_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_imm.lean); [LDST/Reg_unscaled_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_unscaled_imm.lean) | Signed GPR loads absent |
+| 0x3a | `CMN_REG` | partial | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted forms exist; add/sub extended-register class absent |
+| 0x3b | `UMADDL` | missing | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | Only MADD executes; other valid forms explicitly Unimplemented |
+| 0x3c | `SXTB` | present | [DPI/Bitfield.lean](external/LNSym/Arm/Insts/DPI/Bitfield.lean) | BFM/SBFM/UBFM and extension aliases |
+| 0x3d | `CSINV` | missing | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases unsupported |
+| 0x3e | `CSINC` | missing | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases unsupported |
+| 0x3f | `LDRSH` | missing | [LDST/Reg_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_imm.lean); [LDST/Reg_unscaled_imm.lean](external/LNSym/Arm/Insts/LDST/Reg_unscaled_imm.lean) | Signed GPR loads absent |
+| 0x40 | `SMADDL` | missing | [DPR/Data_processing_three_source.lean](external/LNSym/Arm/Insts/DPR/Data_processing_three_source.lean) | Only MADD executes; other valid forms explicitly Unimplemented |
+| 0x41 | `CNEG` | missing | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases unsupported |
+| 0x42 | `ADDS_REG` | partial | [DPR/Add_sub_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Add_sub_shifted_reg.lean); [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean) | Shifted forms exist; add/sub extended-register class absent |
+| 0x43 | `BICS_REG` | present | [DPR/Logical_shifted_reg.lean](external/LNSym/Arm/Insts/DPR/Logical_shifted_reg.lean); [DPI/Logical_imm.lean](external/LNSym/Arm/Insts/DPI/Logical_imm.lean) | Alias encodings |
+| 0x44 | `CSETM` | missing | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases unsupported |
+| 0x45 | `CSNEG` | missing | [DPR/Conditional_select.lean](external/LNSym/Arm/Insts/DPR/Conditional_select.lean) | CSINC/CSINV/CSNEG and aliases unsupported |
+| 0x46 | `LDADD` | missing | [Arm/Decode/LDST.lean](external/LNSym/Arm/Decode/LDST.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | LSE atomic RMW absent; include STADD/STSET/STCLR aliases |
+| 0x47 | `LDSET` | missing | [Arm/Decode/LDST.lean](external/LNSym/Arm/Decode/LDST.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | LSE atomic RMW absent; include STADD/STSET/STCLR aliases |
+| 0x48 | `LDCLR` | missing | [Arm/Decode/LDST.lean](external/LNSym/Arm/Decode/LDST.lean); [Arm/Exec.lean](external/LNSym/Arm/Exec.lean) | LSE atomic RMW absent; include STADD/STSET/STCLR aliases |
+| 0xff | `RET` | present | [BR/Uncond_branch_reg.lean](external/LNSym/Arm/Insts/BR/Uncond_branch_reg.lean) | Only RET encoding accepted; BR/BLR absent |
+
+Outside the 74-operation roster: LDXR; B/B.cond/CBZ/CBNZ/TBZ/TBNZ; MRS TPIDR_EL1/EL2; BR/BLR helper calls. Required by retained reference environment, not extra completed tokens.
+
+### x86-64: 75 simulator operations
+
+| Code | Operation | Source status | x86lean constructor | Constraint / work |
+|---|---|---|---|---|
+| 0x00 | `nop` | present | [nop](external/x86lean/X86/Syntax.lean) |  |
+| 0x01 | `movImm` | present | [mov](external/x86lean/X86/Syntax.lean) |  |
+| 0x02 | `movReg` | present | [mov](external/x86lean/X86/Syntax.lean) |  |
+| 0x03 | `addImm` | present | [bin / un / shift](external/x86lean/X86/Syntax.lean) | Select ALU subopcode, retain width/high8/old flags |
+| 0x04 | `addReg` | present | [bin / un / shift](external/x86lean/X86/Syntax.lean) | Select ALU subopcode, retain width/high8/old flags |
+| 0x05 | `xorReg` | present | [bin / un / shift](external/x86lean/X86/Syntax.lean) | Select ALU subopcode, retain width/high8/old flags |
+| 0x06 | `movLoad` | present | [mov](external/x86lean/X86/Syntax.lean) |  |
+| 0x07 | `movStoreImm` | present | [mov](external/x86lean/X86/Syntax.lean) |  |
+| 0x08 | `movStoreReg` | present | [mov](external/x86lean/X86/Syntax.lean) |  |
+| 0x09 | `lea` | present | [lea](external/x86lean/X86/Syntax.lean) |  |
+| 0x0a | `aluImm` | present | [bin / un / shift](external/x86lean/X86/Syntax.lean) | Select ALU subopcode, retain width/high8/old flags |
+| 0x0b | `aluReg` | present | [bin / un / shift](external/x86lean/X86/Syntax.lean) | Select ALU subopcode, retain width/high8/old flags |
+| 0x0c | `cmpImm` | present | [bin / un / shift](external/x86lean/X86/Syntax.lean) | Select ALU subopcode, retain width/high8/old flags |
+| 0x0d | `cmpReg` | present | [bin / un / shift](external/x86lean/X86/Syntax.lean) | Select ALU subopcode, retain width/high8/old flags |
+| 0x0e | `testImm` | present | [bin / un / shift](external/x86lean/X86/Syntax.lean) | Select ALU subopcode, retain width/high8/old flags |
+| 0x0f | `testReg` | present | [bin / un / shift](external/x86lean/X86/Syntax.lean) | Select ALU subopcode, retain width/high8/old flags |
+| 0x10 | `jcc` | present | [jcc](external/x86lean/X86/Syntax.lean) |  |
+| 0x11 | `jmp` | present | [jmp](external/x86lean/X86/Syntax.lean) |  |
+| 0x12 | `push` | present | [push](external/x86lean/X86/Syntax.lean) |  |
+| 0x13 | `pop` | present | [pop](external/x86lean/X86/Syntax.lean) |  |
+| 0x14 | `call` | present | [call](external/x86lean/X86/Syntax.lean) | Native CALL; external ABI/effects separate |
+| 0x15 | `cmov` | present | [cmov](external/x86lean/X86/Syntax.lean) | Read memory before condition test |
+| 0x16 | `setcc` | present | [setcc](external/x86lean/X86/Syntax.lean) |  |
+| 0x17 | `bswap` | present | [bswap](external/x86lean/X86/Syntax.lean) |  |
+| 0x18 | `popcnt` | present | [bitcnt .popcnt](external/x86lean/X86/Syntax.lean) |  |
+| 0x19 | `xchg` | present | [xchg](external/x86lean/X86/Syntax.lean) |  |
+| 0x1a | `div` | present | [muldiv .div / .idiv](external/x86lean/X86/Syntax.lean) | Signed/unsigned subopcodes, all sizes |
+| 0x1b | `shldImm` | present | [dshift](external/x86lean/X86/Syntax.lean) | 16-bit memory destination with masked count>16 explicitly stops as unimplemented; preserve actual register/memory domain |
+| 0x1c | `shrdImm` | present | [dshift](external/x86lean/X86/Syntax.lean) | 16-bit memory destination with masked count>16 explicitly stops as unimplemented; preserve actual register/memory domain |
+| 0x1d | `cmpMemImm` | present | [bin / un / shift](external/x86lean/X86/Syntax.lean) | Select ALU subopcode, retain width/high8/old flags |
+| 0x1e | `testMemImm` | present | [bin / un / shift](external/x86lean/X86/Syntax.lean) | Select ALU subopcode, retain width/high8/old flags |
+| 0x1f | `cmpMemReg` | present | [bin / un / shift](external/x86lean/X86/Syntax.lean) | Select ALU subopcode, retain width/high8/old flags |
+| 0x20 | `movzxReg` | present | [movx](external/x86lean/X86/Syntax.lean) |  |
+| 0x21 | `movsxReg` | present | [movx](external/x86lean/X86/Syntax.lean) |  |
+| 0x22 | `movsxLoad` | present | [movx](external/x86lean/X86/Syntax.lean) |  |
+| 0x23 | `aluMem` | present | [bin / un / shift](external/x86lean/X86/Syntax.lean) | Select ALU subopcode, retain width/high8/old flags |
+| 0x24 | `cmpRegMem` | present | [bin / un / shift](external/x86lean/X86/Syntax.lean) | Select ALU subopcode, retain width/high8/old flags |
+| 0x25 | `movLoadScalar` | present | [mov](external/x86lean/X86/Syntax.lean) |  |
+| 0x26 | `shiftx` | present | [shiftx](external/x86lean/X86/Syntax.lean) |  |
+| 0x27 | `rorx` | present | [rorx](external/x86lean/X86/Syntax.lean) |  |
+| 0x28 | `movbeLoad` | present | [movbe](external/x86lean/X86/Syntax.lean) |  |
+| 0x29 | `movbeStore` | present | [movbe](external/x86lean/X86/Syntax.lean) |  |
+| 0x2a | `shiftxMem` | present | [shiftx](external/x86lean/X86/Syntax.lean) |  |
+| 0x2b | `rorxMem` | present | [rorx](external/x86lean/X86/Syntax.lean) |  |
+| 0x2c | `movLoadMapPtr` | layer | [mov / call](external/x86lean/X86/Syntax.lean) | Symbol/helper resolution or library effects belong to decoded-sequence/ABI relation |
+| 0x2d | `movLoadHelperId` | layer | [mov / call](external/x86lean/X86/Syntax.lean) | Symbol/helper resolution or library effects belong to decoded-sequence/ABI relation |
+| 0x2e | `callHelper` | layer | [mov / call](external/x86lean/X86/Syntax.lean) | Symbol/helper resolution or library effects belong to decoded-sequence/ABI relation |
+| 0x2f | `callReg` | present | [call](external/x86lean/X86/Syntax.lean) | Native CALL; external ABI/effects separate |
+| 0x30 | `loadXmm0` | present | [vload/vstore; vloadq/vstoreq](external/x86lean/X86/Syntax.lean) | Retain actual D/Q width, alignment, scalar upper bits |
+| 0x31 | `storeXmm0` | present | [vload/vstore; vloadq/vstoreq](external/x86lean/X86/Syntax.lean) | Retain actual D/Q width, alignment, scalar upper bits |
+| 0x32 | `aluMemUnary` | present | [un / shift](external/x86lean/X86/Syntax.lean) |  |
+| 0x33 | `aluMemImm` | present | [bin / un / shift](external/x86lean/X86/Syntax.lean) | Select ALU subopcode, retain width/high8/old flags |
+| 0x34 | `bzhi` | present | [bzhi](external/x86lean/X86/Syntax.lean) | Already implemented30c9b2e: Value.bzhi, Flags.bzhi, step_bzhi_cf and bzhi_index_past; coverage T-frame, x86isa refuses |
+| 0x35 | `bzhiMem` | present | [bzhi](external/x86lean/X86/Syntax.lean) | Already implemented30c9b2e: Value.bzhi, Flags.bzhi, step_bzhi_cf and bzhi_index_past; coverage T-frame, x86isa refuses |
+| 0x36 | `aluMemReg` | present | [bin / un / shift](external/x86lean/X86/Syntax.lean) | Select ALU subopcode, retain width/high8/old flags |
+| 0x37 | `bt` | present | [bit .bt](external/x86lean/X86/Syntax.lean) |  |
+| 0x38 | `imulImm` | present | [imulr](external/x86lean/X86/Syntax.lean) |  |
+| 0x39 | `mulx` | present | [mulx](external/x86lean/X86/Syntax.lean) |  |
+| 0x3a | `repMovs` | present | [repstrop .rep .movs](external/x86lean/X86/Syntax.lean) | Rep semantics and fault-prefix transport remain explicit |
+| 0x3b | `testMemReg` | present | [bin / un / shift](external/x86lean/X86/Syntax.lean) | Select ALU subopcode, retain width/high8/old flags |
+| 0x3c | `callMemset` | layer | [mov / call](external/x86lean/X86/Syntax.lean) | Symbol/helper resolution or library effects belong to decoded-sequence/ABI relation |
+| 0x3d | `andn` | present | [andn](external/x86lean/X86/Syntax.lean) |  |
+| 0x3e | `setccMem` | present | [setcc](external/x86lean/X86/Syntax.lean) |  |
+| 0x3f | `callMemcpy` | layer | [mov / call](external/x86lean/X86/Syntax.lean) | Symbol/helper resolution or library effects belong to decoded-sequence/ABI relation |
+| 0x40 | `cmovMem` | present | [cmov](external/x86lean/X86/Syntax.lean) | Read memory before condition test |
+| 0x41 | `imulMemImm` | present | [imulr](external/x86lean/X86/Syntax.lean) |  |
+| 0x42 | `btImm` | present | [bit .bt](external/x86lean/X86/Syntax.lean) |  |
+| 0x43 | `btMemImm` | present | [bit .bt](external/x86lean/X86/Syntax.lean) |  |
+| 0x44 | `andnMem` | present | [andn](external/x86lean/X86/Syntax.lean) |  |
+| 0x45 | `callMemsetReg` | layer | [mov / call](external/x86lean/X86/Syntax.lean) | Symbol/helper resolution or library effects belong to decoded-sequence/ABI relation |
+| 0x46 | `callMemcpyReg` | layer | [mov / call](external/x86lean/X86/Syntax.lean) | Symbol/helper resolution or library effects belong to decoded-sequence/ABI relation |
+| 0x47 | `popcntMem` | present | [bitcnt .popcnt](external/x86lean/X86/Syntax.lean) |  |
+| 0x48 | `ror` | present | [rot .ror](external/x86lean/X86/Syntax.lean) |  |
+| 0x49 | `rorMem` | present | [rot .ror](external/x86lean/X86/Syntax.lean) |  |
+| 0xff | `ret` | present | [ret](external/x86lean/X86/Syntax.lean) | Native stack pop; simulator return modes need relation |
+
+Cross-cutting gaps: X86.Mem is a finite byte association list with implicit zero background, total reads/writes, no access-permission faults. Cpu has no 48/57-bit canonical-address profile. LNSym also uses total byte memory, without the retained permission/initialized/event/fault-prefix contract, exclusive monitor or thread-pointer inputs. These are not closed by listing instruction constructors; M2/M3 must preserve the existing theorem domains through external-model extensions and explicit relations. x86lean takes post-decode Instr.op/len. BZHI is absent from the differential roster, not absent from step: do not duplicate its semantics.
+
 ## Legacy foundation (migration pending)
 
 Safety uses two facts: the stock verifier accepts B, and B faithfully simulates
