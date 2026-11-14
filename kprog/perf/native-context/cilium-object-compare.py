@@ -52,11 +52,14 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--record',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True)
+    parser.add_argument('--extra-bpf',type=Path)
     args=parser.parse_args()
     record=json.loads(args.record.read_text())
     original=Path(record['runtime_object']['path'])
     result=dict(direct=compare(original,args.record.with_suffix('.direct.bpf.o')),
                 saved_ir=compare(original,args.record.with_suffix('.bpf.o')))
+    if args.extra_bpf:
+        result['extra_bpf']=compare(original,args.extra_bpf)
     args.output.write_text(json.dumps(result,indent=2)+'\n')
     print(json.dumps({key:{name:value[name] for name in ['all_allocated_sections_equal','relocations_equal']}
                       for key,value in result.items()}))

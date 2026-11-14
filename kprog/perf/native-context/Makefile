@@ -275,6 +275,11 @@ cilium-kernel-roundtrip:
 cilium-object-compare:
 	python3 $(HERE)/cilium-object-compare.py --record $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).json --output $(CILIUM_IR_BUILD)/$(CILIUM_UNIT)-comparison.json
 
+.PHONY: cilium-llc-reference
+cilium-llc-reference:
+	prlimit --as=8589934592 -- llc-18 -march=bpf -mcpu=v3 -filetype=obj $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).bc -o $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).llc.bpf.o
+	python3 $(HERE)/cilium-object-compare.py --record $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).json --extra-bpf $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).llc.bpf.o --output $(CILIUM_IR_BUILD)/$(CILIUM_UNIT)-llc-comparison.json
+
 .PHONY: cilium-retain
 cilium-retain:
 	python3 $(HERE)/cilium-retain.py --raw /workspaces/kprog-raw/perf/20261113-packet-context --upstream-build $(CILIUM_IR_BUILD) --packet-build $(PACKET_BUILD) --compiler $(SOCKET_BUILD)/socket-context-lower --output $(ROOT)/kprog/results/perf_20261113/packet-context-host.json
@@ -467,8 +472,9 @@ bpf-asm-check: $(ASM_BUILD)/bpf-asm-lower $(SOCKET_BUILD)/socket-context-lower $
 	$(ASM_BUILD)/errno-store
 
 TETRAGON_SECTION_ARGS ?= --section-prefix kprobe --section-prefix tracepoint --section-prefix raw_tracepoint --section-prefix uprobe --section-prefix fmod_ret/
+TETRAGON_LINKER ?= $(LINK_MEMORY_PAYLOAD)/native-link-off
 upstream-tetragon-link: upstream-tetragon-native
-	python3 $(HERE)/socket-proof.py --input $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).native.o --linker $(LINK_MEMORY_PAYLOAD)/native-link-off --output $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT)-links $(TETRAGON_SECTION_ARGS)
+	python3 $(HERE)/socket-proof.py --input $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).native.o --linker $(TETRAGON_LINKER) --output $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT)-links $(TETRAGON_SECTION_ARGS)
 
 .PHONY: upstream-tetragon-batch
 upstream-tetragon-batch: core-ir-tool $(ASM_BUILD)/bpf-asm-lower $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
