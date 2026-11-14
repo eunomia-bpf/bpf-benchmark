@@ -1,0 +1,4 @@
+make: Entering directory '/workspaces/repository/kprog/libnativeloader'
+python3 ../test/resident_verified_census.py checkpoint --output "/workspaces/kprog-raw/verified/20261114-integration-checkpoint/snapshot" \
+	--queue "/workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-0" --queue "/workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-1" --queue "/workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-2"
+make: Leaving directory '/workspaces/repository/kprog/libnativeloader'

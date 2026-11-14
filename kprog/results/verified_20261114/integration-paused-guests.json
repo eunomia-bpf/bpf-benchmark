@@ -1,0 +1,56 @@
+{
+  "paused": "2026-11-14T04:00:41.621910+00:00",
+  "purpose": "Durable census checkpoint before shared loader/linker image integration",
+  "signal": "SIGSTOP",
+  "processes": [
+    {
+      "pid": 82951,
+      "launcher": 73412,
+      "starttime": "2427103",
+      "ancestors": [
+        82951,
+        82914,
+        82913,
+        82892,
+        82891,
+        82888,
+        82886,
+        73412
+      ],
+      "command": "/usr/bin/qemu-system-x86_64 -name virtme-ng -m 24G -fsdev local,id=virtfs5,path=/,security_model=none,readonly=on,multidevs=remap -device virtio-9p-pci,fsdev=virtfs5,mount_tag=/dev/root -fsdev local,id=virtfs9,path=/workspaces/repository,security_model=none,multidevs=remap -device virtio-9p-pci,fsdev=virtfs9,mount_tag=virtme.initmount0 -fsdev local,id=virtfs13,path=/workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-0/control,security_model=none,multidevs=remap -device virtio-9p-pci,fsdev=virtfs13,mount_tag=virtme.initmount1 -machine accel=kvm:tcg -device i6300esb,id=watchdog0 -cpu host,topoext=on -parallel none -net none -smp 4 -vga none -display none -serial chardev:console -chardev file,id=console,path=/dev/null -chardev stdio,id=stdin,signal=on,mux=off -device virtio-serial-pci -device virtserialport,name=virtme.stdin,chardev=stdin -chardev file,id=stdout,path=/proc/self/fd/1 -device virtio-serial-pci -device virtserialport,name=virtme.stdout,chardev=stdout -chardev file,id=stderr,path=/proc/self/fd/2 -device virtio-serial-pci -device virtserialport,name=virtme.stderr,chardev=stderr -chardev file,id=dev_stdout,path=/proc/self/fd/1 -device virtio-serial-pci -device virtserialport,name=virtme.dev_stdout,chardev=dev_stdout -chardev file,id=dev_stderr,path=/proc/self/fd/2 -device virtio-serial-pci -device virtserialport,name=virtme.dev_stderr,chardev=dev_stderr -chardev file,id=ret,path=/tmp/virtme_retfsu4o5xp -device virtio-serial-pci -device virtserialport,name=virtme.ret,chardev=ret -no-reboot -kernel /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage -append virtme_hostname=virtme-ng nr_open=1048576 virtme_link_mods=/workspaces/.agent-state/kprog-ck/build-x86/.virtme_mods/lib/modules/0.0.0 virtme_initmount0=workspaces/repository virtme_initmount1=workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-0/control virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_console=ttyS0 console=ttyS0 earlyprintk=serial,ttyS0,115200 quiet loglevel=0 panic=-1 virtme.exec=`bWFrZSAtQyBrcHJvZy9saWJuYXRpdmVsb2FkZXIgZ3Vlc3QtdHJ1c3RlZC1zZXJ2aWNlIEJVSUxEX0RJUj0vd29ya3NwYWNlcy8uYWdlbnQtc3RhdGUva3Byb2ctY2svdmVyaWZpZWQtbG9hZGVyIE9VVFBVVD0vd29ya3NwYWNlcy9rcHJvZy1yYXcvdmVyaWZpZWQvMjAyNjExMTQta2Z1bmMtcmVmcmVzaC9xdWV1ZS0wL2NvbnRyb2wgU0VSVklDRV9SVU49InB5dGhvbjMgL3dvcmtzcGFjZXMvcmVwb3NpdG9yeS9rcHJvZy90ZXN0L3Jlc2lkZW50X3ZlcmlmaWVkX2NlbnN1cy5weSBndWVzdCAtLW91dHB1dCAvd29ya3NwYWNlcy9rcHJvZy1yYXcvdmVyaWZpZWQvMjAyNjExMTQta2Z1bmMtcmVmcmVzaC9yZWFkeS9xdWV1ZXMvMCAtLXNlcnZpY2Utc3RhdGUgL3dvcmtzcGFjZXMva3Byb2ctcmF3L3ZlcmlmaWVkLzIwMjYxMTE0LWtmdW5jLXJlZnJlc2gvcXVldWUtMC9jb250cm9sL3N0YXRlIC0tbG9hZGVyLWRpcmVjdG9yeSAvd29ya3NwYWNlcy8uYWdlbnQtc3RhdGUva3Byb2ctY2svdmVyaWZpZWQtbG9hZGVyIg==` virtme_chdir=workspaces/repository virtme_root_user=1 quiet loglevel=1 loglevel=4 panic=30 oops=panic init=/opt/virtme-ng/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init -initrd /proc/self/fd/4 "
+    },
+    {
+      "pid": 82973,
+      "launcher": 73413,
+      "starttime": "2427104",
+      "ancestors": [
+        82973,
+        82916,
+        82915,
+        82907,
+        82906,
+        82899,
+        82896,
+        73413
+      ],
+      "command": "/usr/bin/qemu-system-x86_64 -name virtme-ng -m 24G -fsdev local,id=virtfs5,path=/,security_model=none,readonly=on,multidevs=remap -device virtio-9p-pci,fsdev=virtfs5,mount_tag=/dev/root -fsdev local,id=virtfs9,path=/workspaces/repository,security_model=none,multidevs=remap -device virtio-9p-pci,fsdev=virtfs9,mount_tag=virtme.initmount0 -fsdev local,id=virtfs13,path=/workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-1/control,security_model=none,multidevs=remap -device virtio-9p-pci,fsdev=virtfs13,mount_tag=virtme.initmount1 -machine accel=kvm:tcg -device i6300esb,id=watchdog0 -cpu host,topoext=on -parallel none -net none -smp 2 -vga none -display none -serial chardev:console -chardev file,id=console,path=/dev/null -chardev stdio,id=stdin,signal=on,mux=off -device virtio-serial-pci -device virtserialport,name=virtme.stdin,chardev=stdin -chardev file,id=stdout,path=/proc/self/fd/1 -device virtio-serial-pci -device virtserialport,name=virtme.stdout,chardev=stdout -chardev file,id=stderr,path=/proc/self/fd/2 -device virtio-serial-pci -device virtserialport,name=virtme.stderr,chardev=stderr -chardev file,id=dev_stdout,path=/proc/self/fd/1 -device virtio-serial-pci -device virtserialport,name=virtme.dev_stdout,chardev=dev_stdout -chardev file,id=dev_stderr,path=/proc/self/fd/2 -device virtio-serial-pci -device virtserialport,name=virtme.dev_stderr,chardev=dev_stderr -chardev file,id=ret,path=/tmp/virtme_rete80frj7n -device virtio-serial-pci -device virtserialport,name=virtme.ret,chardev=ret -no-reboot -kernel /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage -append virtme_hostname=virtme-ng nr_open=1048576 virtme_link_mods=/workspaces/.agent-state/kprog-ck/build-x86/.virtme_mods/lib/modules/0.0.0 virtme_initmount0=workspaces/repository virtme_initmount1=workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-1/control virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_console=ttyS0 console=ttyS0 earlyprintk=serial,ttyS0,115200 quiet loglevel=0 panic=-1 virtme.exec=`bWFrZSAtQyBrcHJvZy9saWJuYXRpdmVsb2FkZXIgZ3Vlc3QtdHJ1c3RlZC1zZXJ2aWNlIEJVSUxEX0RJUj0vd29ya3NwYWNlcy8uYWdlbnQtc3RhdGUva3Byb2ctY2svdmVyaWZpZWQtbG9hZGVyIE9VVFBVVD0vd29ya3NwYWNlcy9rcHJvZy1yYXcvdmVyaWZpZWQvMjAyNjExMTQta2Z1bmMtcmVmcmVzaC9xdWV1ZS0xL2NvbnRyb2wgU0VSVklDRV9SVU49InB5dGhvbjMgL3dvcmtzcGFjZXMvcmVwb3NpdG9yeS9rcHJvZy90ZXN0L3Jlc2lkZW50X3ZlcmlmaWVkX2NlbnN1cy5weSBndWVzdCAtLW91dHB1dCAvd29ya3NwYWNlcy9rcHJvZy1yYXcvdmVyaWZpZWQvMjAyNjExMTQta2Z1bmMtcmVmcmVzaC9yZWFkeS9xdWV1ZXMvMSAtLXNlcnZpY2Utc3RhdGUgL3dvcmtzcGFjZXMva3Byb2ctcmF3L3ZlcmlmaWVkLzIwMjYxMTE0LWtmdW5jLXJlZnJlc2gvcXVldWUtMS9jb250cm9sL3N0YXRlIC0tbG9hZGVyLWRpcmVjdG9yeSAvd29ya3NwYWNlcy8uYWdlbnQtc3RhdGUva3Byb2ctY2svdmVyaWZpZWQtbG9hZGVyIg==` virtme_chdir=workspaces/repository virtme_root_user=1 quiet loglevel=1 loglevel=4 panic=30 oops=panic init=/opt/virtme-ng/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init -initrd /proc/self/fd/4 "
+    },
+    {
+      "pid": 82974,
+      "launcher": 73414,
+      "starttime": "2427104",
+      "ancestors": [
+        82974,
+        82918,
+        82917,
+        82912,
+        82911,
+        82908,
+        82903,
+        73414
+      ],
+      "command": "/usr/bin/qemu-system-x86_64 -name virtme-ng -m 24G -fsdev local,id=virtfs5,path=/,security_model=none,readonly=on,multidevs=remap -device virtio-9p-pci,fsdev=virtfs5,mount_tag=/dev/root -fsdev local,id=virtfs9,path=/workspaces/repository,security_model=none,multidevs=remap -device virtio-9p-pci,fsdev=virtfs9,mount_tag=virtme.initmount0 -fsdev local,id=virtfs13,path=/workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-2/control,security_model=none,multidevs=remap -device virtio-9p-pci,fsdev=virtfs13,mount_tag=virtme.initmount1 -machine accel=kvm:tcg -device i6300esb,id=watchdog0 -cpu host,topoext=on -parallel none -net none -smp 2 -vga none -display none -serial chardev:console -chardev file,id=console,path=/dev/null -chardev stdio,id=stdin,signal=on,mux=off -device virtio-serial-pci -device virtserialport,name=virtme.stdin,chardev=stdin -chardev file,id=stdout,path=/proc/self/fd/1 -device virtio-serial-pci -device virtserialport,name=virtme.stdout,chardev=stdout -chardev file,id=stderr,path=/proc/self/fd/2 -device virtio-serial-pci -device virtserialport,name=virtme.stderr,chardev=stderr -chardev file,id=dev_stdout,path=/proc/self/fd/1 -device virtio-serial-pci -device virtserialport,name=virtme.dev_stdout,chardev=dev_stdout -chardev file,id=dev_stderr,path=/proc/self/fd/2 -device virtio-serial-pci -device virtserialport,name=virtme.dev_stderr,chardev=dev_stderr -chardev file,id=ret,path=/tmp/virtme_retbd5f4zfc -device virtio-serial-pci -device virtserialport,name=virtme.ret,chardev=ret -no-reboot -kernel /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage -append virtme_hostname=virtme-ng nr_open=1048576 virtme_link_mods=/workspaces/.agent-state/kprog-ck/build-x86/.virtme_mods/lib/modules/0.0.0 virtme_initmount0=workspaces/repository virtme_initmount1=workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-2/control virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_console=ttyS0 console=ttyS0 earlyprintk=serial,ttyS0,115200 quiet loglevel=0 panic=-1 virtme.exec=`bWFrZSAtQyBrcHJvZy9saWJuYXRpdmVsb2FkZXIgZ3Vlc3QtdHJ1c3RlZC1zZXJ2aWNlIEJVSUxEX0RJUj0vd29ya3NwYWNlcy8uYWdlbnQtc3RhdGUva3Byb2ctY2svdmVyaWZpZWQtbG9hZGVyIE9VVFBVVD0vd29ya3NwYWNlcy9rcHJvZy1yYXcvdmVyaWZpZWQvMjAyNjExMTQta2Z1bmMtcmVmcmVzaC9xdWV1ZS0yL2NvbnRyb2wgU0VSVklDRV9SVU49InB5dGhvbjMgL3dvcmtzcGFjZXMvcmVwb3NpdG9yeS9rcHJvZy90ZXN0L3Jlc2lkZW50X3ZlcmlmaWVkX2NlbnN1cy5weSBndWVzdCAtLW91dHB1dCAvd29ya3NwYWNlcy9rcHJvZy1yYXcvdmVyaWZpZWQvMjAyNjExMTQta2Z1bmMtcmVmcmVzaC9yZWFkeS9xdWV1ZXMvMiAtLXNlcnZpY2Utc3RhdGUgL3dvcmtzcGFjZXMva3Byb2ctcmF3L3ZlcmlmaWVkLzIwMjYxMTE0LWtmdW5jLXJlZnJlc2gvcXVldWUtMi9jb250cm9sL3N0YXRlIC0tbG9hZGVyLWRpcmVjdG9yeSAvd29ya3NwYWNlcy8uYWdlbnQtc3RhdGUva3Byb2ctY2svdmVyaWZpZWQtbG9hZGVyIg==` virtme_chdir=workspaces/repository virtme_root_user=1 quiet loglevel=1 loglevel=4 panic=30 oops=panic init=/opt/virtme-ng/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init -initrd /proc/self/fd/4 "
+    }
+  ],
+  "canonical_changed": false
+}

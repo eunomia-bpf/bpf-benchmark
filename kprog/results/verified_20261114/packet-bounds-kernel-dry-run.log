@@ -1,0 +1,14 @@
+make: Entering directory '/workspaces/repository/kprog/libnativeloader'
+install -d "/workspaces/kprog-raw/verified/20261114-packet-bounds/kernel"
+install -m 0755 "/var/tmp/kprog-tmp/verified/checked-sim/compile-sim-ir" "/var/tmp/kprog-tmp/verified/checked-sim/trusted-native-loader" \
+	"/var/tmp/kprog-tmp/verified/checked-packet/context-lower" "/var/tmp/kprog-tmp/verified/checked-packet/packet-bounds" "/var/tmp/kprog-tmp/verified/checked-packet/client" "/workspaces/kprog-raw/verified/20261114-packet-bounds/kernel/"
+install -m 0644 "/var/tmp/kprog-tmp/verified/checked-packet/source.bpf.o" "/var/tmp/kprog-tmp/verified/checked-packet/packet.native.o" \
+	"/var/tmp/kprog-tmp/verified/checked-packet/bad.native.o" "/workspaces/kprog-raw/verified/20261114-packet-bounds/kernel/"
+install -m 0755 "/var/tmp/kprog-tmp/verified/direct-tail/cargo/debug/native-link" "/workspaces/kprog-raw/verified/20261114-packet-bounds/kernel/native-link.real"
+"/var/tmp/kprog-tmp/verified/checked-packet/public-layout" > "/workspaces/kprog-raw/verified/20261114-packet-bounds/kernel/public-layout.json"
+"/var/tmp/kprog-tmp/verified/checked-packet/physical-layout" > "/workspaces/kprog-raw/verified/20261114-packet-bounds/kernel/physical-layout.json"
+taskset -c 14 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+	--cwd "/workspaces/repository" --rwdir "/workspaces/repository" --rwdir "/workspaces/kprog-raw/verified/20261114-packet-bounds/kernel" --overlay-rwdir /tmp \
+	--disable-monitor --cpus 2 --memory 1G --append 'loglevel=4 panic=30 oops=panic' \
+	--exec 'make -C kprog/libnativeloader guest-checked-packet CHECKED_PACKET_KERNEL_OUTPUT=/workspaces/kprog-raw/verified/20261114-packet-bounds/kernel'
+make: Leaving directory '/workspaces/repository/kprog/libnativeloader'

@@ -203,6 +203,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED bounds retry与integration checkpoint启动（2026-11-14T04:02:08Z）** 487f41adf/0b98ec455已push；packet retry165124，CPU14/2vCPU1G/AS8GiB/shared image，raw /workspaces/kprog-raw/verified/20261114-packet-bounds/{kernel-launch,kernel}。仅暂停已核实own census QEMU82951/82973/82974（outer73412/73413/73414），checkpoint165122使用既有snapshotter保存completed journal及unfinished P/B，raw /workspaces/kprog-raw/verified/20261114-integration-checkpoint/{job,snapshot}。两job下turn收取，不轮询；下一turn先确认durable checkpoint后停own guest释放reader，再等既有PERF读者自然结束以writer flock原地更新独立loader/linker修复，不能被剩余packet模型项阻塞。image/base此刻未改，census reader locks仍持有。receipt packet-retry-and-checkpoint-launch.json、integration-paused-guests.json。
+
 - **VERIFIED packet-length bounds通用编译翻译host通过（2026-11-14T03:59:27Z）** 默认关闭sim-bounds-compiler识别同一typed ctx的data_end/data及既有length比较，在BPF backend中保留原scalar条件（含overflow语义）并表达等价pointer-bound条件，便于stock verifier传播packet范围；same simC .i及native执行未改，无准入gate/stock-limit变化。六种比较+ordinary scalar control实际机器码140vector、共享算术113855case、generated XDP/TC/cgroup-skb25vector均通过；默认preprocess4piece精确拼接及错误传播通过。初始直接overflow表达生成了verifier不支持的pointer/constant比较，已改为保留原条件，未启动该初版kernel。完整记录 packet-bounds-host-results*，raw /workspaces/kprog-raw/verified/20261114-packet-bounds；实际kernel retry接续。
 
 - **VERIFIED checked-packet kernel初轮取证（2026-11-14T03:47:04Z）** 159584总体Make2：TC八case实际stock/native verdict及mark/priority/CB writes一致；unsafe ctx+0x100000实际stock拒绝，确认未复制checked simC/未启动native编译/未装载。XDP失败在stock验证：end-data>=64被编成scalar比较，后续packet byte read没有range证明，未编译native。全部P/B/simC/verifier/context/native/执行证据 checked-packet-initial-kernel*，raw /workspaces/kprog-raw/verified/20261114-checked-packet/kernel。接续通用packet-length到pointer-bound编译翻译，保留等价原比较，非新增准入gate；canonical无改动，无应用完成声明。
