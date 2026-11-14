@@ -1,0 +1,9 @@
+{
+  "input": "/var/tmp/kprog-tmp/C/tracee-samesource/tracee.bc",
+  "local_bpf": "/var/tmp/kprog-tmp/C/tracee-samesource/tracee.bpf.o",
+  "bitcode_bytes": 11158928,
+  "default_enabled_bitcode_equal": true,
+  "queries": 370,
+  "zero_comparison_rewrites": 0,
+  "scope": "Retained real source compiler input; no native app installation or execution."
+}

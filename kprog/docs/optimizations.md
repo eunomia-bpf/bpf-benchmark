@@ -134,3 +134,14 @@ bypass them. Static127-object audit finds differing answers in Tracee, three
 BCC objects and43 Tetragon objects;601 records remain unobserved. The resolved
 producer choice stays explicit/default-off, with existing writable DATASEC
 binding. This is correctness work with no speedup claim; see core-audit/report.md.
+
+Optional target-BTF widened zero comparisons (768932a16):
+`--widen-zero-compare` defaults false and uses the original ELF's actual load
+and first consuming zero jump to select32/64-bit comparison semantics. It
+preserves the existing explicit error for other unsupported widened uses.
+Six CPU/predicate cases pass6210 sole-kernel BPF executions against emitted
+userspace native code; v2 cmp64 and v3/v4 cmp32 both exercised. Disabled
+all-kind bitcode/reports equal the prior binary, and retained Tracee370-query
+bitcode is identical with off/on. This is a correctness extension with no
+runtime-gain claim; `core-zero-compare/report.md`. Producer selection remains
+C's integration task; every LTO piece stays in the combined configuration.

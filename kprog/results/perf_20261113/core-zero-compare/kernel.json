@@ -1,0 +1,144 @@
+{
+  "cases": [
+    {
+      "executions": 1035,
+      "failed": 0,
+      "cpu": "v2",
+      "predicate": "eq",
+      "compiler_rows": [
+        {
+          "global": "llvm.task_struct___zero_compare:0:8$0:1",
+          "kind": 0,
+          "local_type_id": 5,
+          "matching_candidates": 1,
+          "memory_access_poison": false,
+          "native_access_resize_pending": false,
+          "native_memory_rewrites": 1,
+          "native_zero_comparisons": 1,
+          "original": 8,
+          "original_field_bytes": 2,
+          "poison": false,
+          "resolved": 3152,
+          "target_field_bytes": 8
+        }
+      ]
+    },
+    {
+      "executions": 1035,
+      "failed": 0,
+      "cpu": "v2",
+      "predicate": "ne",
+      "compiler_rows": [
+        {
+          "global": "llvm.task_struct___zero_compare:0:8$0:1",
+          "kind": 0,
+          "local_type_id": 5,
+          "matching_candidates": 1,
+          "memory_access_poison": false,
+          "native_access_resize_pending": false,
+          "native_memory_rewrites": 1,
+          "native_zero_comparisons": 1,
+          "original": 8,
+          "original_field_bytes": 2,
+          "poison": false,
+          "resolved": 3152,
+          "target_field_bytes": 8
+        }
+      ]
+    },
+    {
+      "executions": 1035,
+      "failed": 0,
+      "cpu": "v3",
+      "predicate": "eq",
+      "compiler_rows": [
+        {
+          "global": "llvm.task_struct___zero_compare:0:8$0:1",
+          "kind": 0,
+          "local_type_id": 5,
+          "matching_candidates": 1,
+          "memory_access_poison": false,
+          "native_access_resize_pending": false,
+          "native_memory_rewrites": 1,
+          "native_zero_comparisons": 1,
+          "original": 8,
+          "original_field_bytes": 2,
+          "poison": false,
+          "resolved": 3152,
+          "target_field_bytes": 8
+        }
+      ]
+    },
+    {
+      "executions": 1035,
+      "failed": 0,
+      "cpu": "v3",
+      "predicate": "ne",
+      "compiler_rows": [
+        {
+          "global": "llvm.task_struct___zero_compare:0:8$0:1",
+          "kind": 0,
+          "local_type_id": 5,
+          "matching_candidates": 1,
+          "memory_access_poison": false,
+          "native_access_resize_pending": false,
+          "native_memory_rewrites": 1,
+          "native_zero_comparisons": 1,
+          "original": 8,
+          "original_field_bytes": 2,
+          "poison": false,
+          "resolved": 3152,
+          "target_field_bytes": 8
+        }
+      ]
+    },
+    {
+      "executions": 1035,
+      "failed": 0,
+      "cpu": "v4",
+      "predicate": "eq",
+      "compiler_rows": [
+        {
+          "global": "llvm.task_struct___zero_compare:0:8$0:1",
+          "kind": 0,
+          "local_type_id": 5,
+          "matching_candidates": 1,
+          "memory_access_poison": false,
+          "native_access_resize_pending": false,
+          "native_memory_rewrites": 1,
+          "native_zero_comparisons": 1,
+          "original": 8,
+          "original_field_bytes": 2,
+          "poison": false,
+          "resolved": 3152,
+          "target_field_bytes": 8
+        }
+      ]
+    },
+    {
+      "executions": 1035,
+      "failed": 0,
+      "cpu": "v4",
+      "predicate": "ne",
+      "compiler_rows": [
+        {
+          "global": "llvm.task_struct___zero_compare:0:8$0:1",
+          "kind": 0,
+          "local_type_id": 5,
+          "matching_candidates": 1,
+          "memory_access_poison": false,
+          "native_access_resize_pending": false,
+          "native_memory_rewrites": 1,
+          "native_zero_comparisons": 1,
+          "original": 8,
+          "original_field_bytes": 2,
+          "poison": false,
+          "resolved": 3152,
+          "target_field_bytes": 8
+        }
+      ]
+    }
+  ],
+  "total_executions": 6210,
+  "scope": "Original ELF/libbpf-patched BPF on sole kernel versus emitted native IR code in userspace."
+}

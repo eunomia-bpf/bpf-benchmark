@@ -1,0 +1,9 @@
+{
+  "input": "/var/tmp/kprog-tmp/perf/core-audit/width.bc",
+  "local_bpf": "/var/tmp/kprog-tmp/perf/core-audit/width.bpf.o",
+  "bitcode_bytes": 5276,
+  "default_enabled_bitcode_equal": true,
+  "queries": 2,
+  "zero_comparison_rewrites": 0,
+  "scope": "Retained real source compiler input; no native app installation or execution."
+}

@@ -1,0 +1,16 @@
+{
+  "default_parity": [
+    {
+      "fixture": "test-core-ir.c",
+      "bitcode_equal": true,
+      "report_equal": true
+    },
+    {
+      "fixture": "test-core-ir-ids.c",
+      "bitcode_equal": true,
+      "report_equal": true
+    }
+  ],
+  "disabled_rejection_unchanged": true,
+  "nonzero_comparison_still_explicit_error": true
+}
