@@ -78,7 +78,7 @@ int handle_l2_announcement(struct __ctx_buff *ctx, struct ipv6hdr *ip6)
 			return CTX_ACT_OK;
 
 		key.ip4.be32 = tip;
-		key.ifindex = ctx->ingress_ifindex;
+		key.ifindex = ctx_get_ingress_ifindex(ctx);
 		stats = map_lookup_elem(&cilium_l2_responder_v4, &key);
 		if (!stats)
 			return CTX_ACT_OK;
@@ -93,7 +93,7 @@ int handle_l2_announcement(struct __ctx_buff *ctx, struct ipv6hdr *ip6)
 			return CTX_ACT_OK;
 
 		key6.ip6 = tip6;
-		key6.ifindex = ctx->ingress_ifindex;
+		key6.ifindex = ctx_get_ingress_ifindex(ctx);
 		key6.pad = 0;
 		stats = map_lookup_elem(&cilium_l2_responder_v6, &key6);
 		if (!stats)

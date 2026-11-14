@@ -50,6 +50,24 @@ micro_native_xdp_data_meta(const struct xdp_md *ctx)
 {
 	return *(void * const *)((const char *)ctx + 16);
 }
+
+/* The real entry context is struct xdp_buff: rxq at +32, xdp_rxq_info.dev at
+ * +0, net_device.ifindex at +224. The kernel lowers a read of
+ * xdp_md.ingress_ifindex to exactly that chain (net/core/filter.c,
+ * "rxq->dev->ifindex"), so this reads the same word the verifier would. */
+static __always_inline __u32
+micro_native_xdp_ingress_ifindex(const struct xdp_md *ctx)
+{
+	const void *rxq = *(const void * const *)((const char *)ctx + 32);
+	const void *dev;
+
+	if (unlikely(!rxq))
+		return 0;
+	dev = *(const void * const *)rxq;
+	if (unlikely(!dev))
+		return 0;
+	return *(const __u32 *)((const char *)dev + 224);
+}
 #endif
 
 #ifndef HAVE_XDP_LOAD_BYTES
@@ -428,10 +446,30 @@ ctx_adjust_hroom(struct xdp_md *ctx, const __s32 len_diff, const __u32 mode,
 	return ret;
 }
 
+static __always_inline __maybe_unused __u32
+ctx_get_ifindex(const struct xdp_md *ctx)
+{
+#ifdef MICRO_NATIVE
+	return micro_native_xdp_ingress_ifindex(ctx);
+#else
+	return ctx->ingress_ifindex;
+#endif
+}
+
+static __always_inline __maybe_unused __u32
+ctx_get_ingress_ifindex(const struct xdp_md *ctx)
+{
+#ifdef MICRO_NATIVE
+	return micro_native_xdp_ingress_ifindex(ctx);
+#else
+	return ctx->ingress_ifindex;
+#endif
+}
+
 static __always_inline __maybe_unused int
 ctx_redirect(const struct xdp_md *ctx, int ifindex, const __u32 flags)
 {
-	if ((__u32)ifindex == ctx->ingress_ifindex)
+	if ((__u32)ifindex == ctx_get_ingress_ifindex(ctx))
 		return CTX_ACT_TX;
 
 	return redirect(ifindex, flags);
@@ -539,14 +577,3 @@ ctx_get_protocol(const struct xdp_md *ctx)
 	return eth->h_proto;
 }
 
-static __always_inline __maybe_unused __u32
-ctx_get_ifindex(const struct xdp_md *ctx)
-{
-	return ctx->ingress_ifindex;
-}
-
-static __always_inline __maybe_unused __u32
-ctx_get_ingress_ifindex(const struct xdp_md *ctx)
-{
-	return ctx->ingress_ifindex;
-}
