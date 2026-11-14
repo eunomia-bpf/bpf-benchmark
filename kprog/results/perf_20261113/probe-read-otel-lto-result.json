@@ -83,5 +83,35 @@
       "native_link_reached": false
     }
   ],
-  "scope": "No whole-app native execution or throughput result. SIGKILL observed, OOM cause not established. All raw retained outside Git."
+  "scope": "No whole-app native execution or throughput result. SIGKILL observed, OOM cause not established. All raw retained outside Git.",
+  "compiler_resource_queue_revision": {
+    "recorded_at": "2026-11-14T10:38:38.591664+00:00",
+    "reason": "Inherited compiler wait depended on wholeTracee lifecycle only forresources. MemAvailable94601748KiB permits original48GiB test on independent16-19 with~42GiB remaining. Onlyqueued roots retired afterSTOP/no-start/group checks; liveTracee270915 untouched.",
+    "retired_queued_only": [
+      333934,
+      351898,
+      356144
+    ],
+    "proof": "/workspaces/kprog-raw/perf/20261114-inherited-queue-reorder/old-queued.json",
+    "new_compiler": {
+      "pid": 379046,
+      "raw": "/workspaces/kprog-raw/perf/20261114-otel-compiler-unblocked",
+      "cpus": "16-19",
+      "address_space_bytes": 51539607552,
+      "input": "Same captured1.13GB preprocessedC, originaldebug/O3/tools plus-w; CPU placement/output paths changed, no compile-time speed attribution.",
+      "source_commit": "ed3a54a8b"
+    },
+    "new_BCC": {
+      "pid": 379047,
+      "wait_pid": 379046,
+      "raw": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered"
+    },
+    "new_Cilium": {
+      "pid": 379048,
+      "wait_pid": 379047,
+      "raw": "/workspaces/kprog-raw/verified/20261114-cilium-current-model-lto/perf-reordered"
+    },
+    "state": "NEW_JOBS_UNCOLLECTED_NO_POSTLAUNCH_POLLS",
+    "scope": "Resource reordering only/no successgate. Compiler frontend/bounds/BPFbackend output doesnotmeanstockverification/nativeexecution. Original queue/raw records retained."
+  }
 }
