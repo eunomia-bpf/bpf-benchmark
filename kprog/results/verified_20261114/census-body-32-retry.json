@@ -1,0 +1,52 @@
+{
+  "attempts": 31,
+  "attempt_stages": {
+    "installed": 17,
+    "verifier_rejected": 14
+  },
+  "distinct": 27,
+  "latest_stages": {
+    "installed": 17,
+    "verifier_rejected": 10
+  },
+  "native_run": 0,
+  "per_application": {
+    "bcc/set": {
+      "distinct": 9,
+      "latest_stages": {
+        "installed": 9
+      },
+      "native_run": 0
+    },
+    "tetragon/observer": {
+      "distinct": 6,
+      "latest_stages": {
+        "installed": 2,
+        "verifier_rejected": 4
+      },
+      "native_run": 0
+    },
+    "tracee/monitor": {
+      "distinct": 12,
+      "latest_stages": {
+        "installed": 6,
+        "verifier_rejected": 6
+      },
+      "native_run": 0
+    }
+  },
+  "new_outcomes": [
+    {
+      "application": "tracee/monitor",
+      "body_group": 32,
+      "source_prog_id": 506,
+      "stage": "verifier_rejected",
+      "failure_class": "verifier_map_bounds",
+      "started": "2026-11-14T00:22:23.603798+00:00",
+      "finished": "2026-11-14T00:30:57.870237+00:00"
+    }
+  ],
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-kfunc-refresh/queue-1",
+  "archive": "census-body-32-retry.tar.gz",
+  "scope": "Resident replay outcomes; not whole application loaded/run"
+}

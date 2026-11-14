@@ -1,0 +1,17 @@
+{
+  "outer_pid": 88348,
+  "make_exit": 0,
+  "started": "2026-11-14T00:35:07Z",
+  "finished": "2026-11-14T00:35:11Z",
+  "tests": [
+    "Actual BTF offset/map identity for reachable global",
+    "Absent unused global does not bind",
+    "Needed missing BTF global still errors",
+    "Default data layout unchanged",
+    "Application config map bytes unchanged"
+  ],
+  "canonical_changed": false,
+  "whole_application_certification": false,
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-entry-data",
+  "archive": "entry-data-kernel-results.tar.gz"
+}
