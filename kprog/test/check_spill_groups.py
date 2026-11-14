@@ -90,6 +90,31 @@ def check(args):
                     row.update(execution)
             cases.append(row)
             (args.output/'cases.json').write_text(json.dumps(cases, indent=2)+'\n')
+    pressure = ROOT/'kprog/test/scalar_spill_pressure.mir'
+    for packed in (False, True):
+        label = 'pressure-packed' if packed else 'pressure-original'
+        source = pressure.read_text()
+        if packed:
+            source, pairs = spills.automatic(pressure, all_scalar_pairs=True)
+            if not any(c.get('reuses_dead_source') for p in pairs for c in p['changes']):
+                raise ValueError('Pressure fixture did not exercise dead-source reuse')
+        mir = args.build/'fixture.mir'
+        mir.write_text(source)
+        obj = args.build/'fixture.o'
+        run(['llc-18', '-O3', '-march=bpf', '-mcpu=v4', '-verify-machineinstrs',
+             '-start-before=prologepilog', '-filetype=obj', mir, '-o', obj])
+        actual_depth = depth(obj)
+        if actual_depth != (8 if packed else 16):
+            raise ValueError('Pressure fixture frame layout changed unexpectedly')
+        row = dict(phase=label, frame_access_depth=actual_depth)
+        if not args.compile_only:
+            result = run([args.build/'values-client', '--pressure', label, obj])
+            execution = json.loads(result.stdout)
+            if execution['failed'] or execution['executions'] != 1060:
+                raise ValueError('Dead-source reuse changed live registers or values')
+            row.update(execution)
+        cases.append(row)
+        (args.output/'cases.json').write_text(json.dumps(cases, indent=2)+'\n')
     (args.output/'result.json').write_text(json.dumps(dict(compile_only=args.compile_only,
         default_parity=parity, cases=cases), indent=2)+'\n')
     print(json.dumps(cases))

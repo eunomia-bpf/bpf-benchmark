@@ -41,11 +41,21 @@ static int run(const char *path, int groups, const char *phase)
             perror("execute spill fixture"); failed = 1; break;
         }
         uint32_t expected = mark ^ (priority + UINT32_C(12345));
-        if (groups) {
+        if (groups == 1) {
             expected = mark ^ priority ^ (mark + UINT32_C(1)) ^ (priority + UINT32_C(2))
                 ^ (mark ^ UINT32_C(0x80000000)) ^ (priority ^ UINT32_C(0x7fffffff))
                 ^ (mark + UINT32_C(74565)) ^ (priority + UINT32_C(344865))
                 ^ (priority * UINT32_C(3)) ^ (priority + UINT32_C(11)) ^ (mark + UINT32_C(17));
+        } else if (groups == 2) {
+            expected = (mark + UINT32_C(1)) ^ (priority + UINT32_C(9));
+            expected += mark;
+            expected += priority;
+            expected += mark + UINT32_C(1);
+            expected += priority + UINT32_C(3);
+            expected += mark + UINT32_C(5);
+            expected += priority + UINT32_C(7);
+            expected += mark ^ UINT32_C(0x80000000);
+            expected += priority ^ UINT32_C(0x7fffffff);
         }
         if (options.retval != expected) {
             fprintf(stderr, "value mismatch %s mark=%u priority=%u got=%u expected=%u\n",
@@ -61,13 +71,14 @@ static int run(const char *path, int groups, const char *phase)
 
 int main(int argc, char **argv)
 {
-    int groups = argc == 4 && !strcmp(argv[1], "--groups");
+    int groups = argc == 4 ? (!strcmp(argv[1], "--groups") ? 1 :
+                              !strcmp(argv[1], "--pressure") ? 2 : 0) : 0;
     if (argc != 3 && !groups) {
         fprintf(stderr, "usage: scalar-spill-values ORIGINAL LOWERED | --groups PHASE OBJECT\n"); return 1;
     }
     if (offsetof(struct __sk_buff, mark) != 8 || offsetof(struct __sk_buff, priority) != 32) {
         fprintf(stderr, "fixture context offsets differ\n"); return 1;
     }
-    if (groups) return run(argv[3], 1, argv[2]);
+    if (groups) return run(argv[3], groups, argv[2]);
     return run(argv[1], 0, "original") | run(argv[2], 0, "lowered");
 }

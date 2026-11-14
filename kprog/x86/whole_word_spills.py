@@ -68,7 +68,7 @@ def lower_text(text, low, high, *, require_final=True, reuse_dead_source=False):
             if store:
                 source, slot = map(int, store.groups())
                 free = sorted(set(range(10)) - live - after - used)
-                reuse = reuse_dead_source and source not in after and len(free) == 1
+                reuse = reuse_dead_source and source < 10 and source not in after and len(free) == 1
                 if len(free) < 2 and not reuse:
                     raise ValueError(f'No two dead scratch registers at bb.{block}: {line}')
                 first, second = (free[0], source) if reuse else free[:2]
