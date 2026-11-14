@@ -1,0 +1,103 @@
+--- |
+  target triple = "bpf"
+  @_license = constant [4 x i8] c"GPL\00", section "license", align 1
+  define i32 @spill_values(ptr %context) section "socket" { ret i32 0 }
+...
+---
+name:            spill_values
+alignment:       8
+tracksRegLiveness: true
+liveins:
+  - { reg: '$r1', virtual-reg: '' }
+frameInfo:
+  maxAlignment:    8
+stack:
+  - { id: 0, name: '', type: spill-slot, offset: 0, size: 4, alignment: 8,
+      stack-id: default, callee-saved-register: '', callee-saved-restored: true,
+      debug-info-variable: '', debug-info-expression: '', debug-info-location: '' }
+  - { id: 1, name: '', type: spill-slot, offset: 0, size: 4, alignment: 8,
+      stack-id: default, callee-saved-register: '', callee-saved-restored: true,
+      debug-info-variable: '', debug-info-expression: '', debug-info-location: '' }
+  - { id: 2, name: '', type: spill-slot, offset: 0, size: 4, alignment: 8,
+      stack-id: default, callee-saved-register: '', callee-saved-restored: true,
+      debug-info-variable: '', debug-info-expression: '', debug-info-location: '' }
+  - { id: 3, name: '', type: spill-slot, offset: 0, size: 4, alignment: 8,
+      stack-id: default, callee-saved-register: '', callee-saved-restored: true,
+      debug-info-variable: '', debug-info-expression: '', debug-info-location: '' }
+  - { id: 4, name: '', type: spill-slot, offset: 0, size: 4, alignment: 8,
+      stack-id: default, callee-saved-register: '', callee-saved-restored: true,
+      debug-info-variable: '', debug-info-expression: '', debug-info-location: '' }
+  - { id: 5, name: '', type: spill-slot, offset: 0, size: 4, alignment: 8,
+      stack-id: default, callee-saved-register: '', callee-saved-restored: true,
+      debug-info-variable: '', debug-info-expression: '', debug-info-location: '' }
+  - { id: 6, name: '', type: spill-slot, offset: 0, size: 4, alignment: 8,
+      stack-id: default, callee-saved-register: '', callee-saved-restored: true,
+      debug-info-variable: '', debug-info-expression: '', debug-info-location: '' }
+  - { id: 7, name: '', type: spill-slot, offset: 0, size: 4, alignment: 8,
+      stack-id: default, callee-saved-register: '', callee-saved-restored: true,
+      debug-info-variable: '', debug-info-expression: '', debug-info-location: '' }
+  - { id: 8, name: '', type: spill-slot, offset: 0, size: 8, alignment: 8,
+      stack-id: default, callee-saved-register: '', callee-saved-restored: true,
+      debug-info-variable: '', debug-info-expression: '', debug-info-location: '' }
+  - { id: 9, name: '', type: default, offset: 0, size: 8, alignment: 8,
+      stack-id: default, callee-saved-register: '', callee-saved-restored: true,
+      debug-info-variable: '', debug-info-expression: '', debug-info-location: '' }
+body:             |
+  bb.0:
+    successors: %bb.1(0x80000000)
+    liveins: $r1
+
+    $w2 = LDW32 $r1, 8
+    $w3 = LDW32 killed $r1, 32
+    $w6 = COPY $w3, implicit-def $r6
+    STD $r6, %stack.8, 0
+    STW32 $w2, %stack.9, 0
+    STW32 $w2, %stack.9, 4
+    STW32 $w2, %stack.0, 0
+    STW32 $w3, %stack.1, 0
+    $r2 = ADD_ri killed $r2, 1
+    $r3 = ADD_ri killed $r3, 2
+    STW32 $w2, %stack.2, 0
+    STW32 $w3, %stack.3, 0
+    $r2 = ADD_ri killed $r2, -1
+    $r3 = ADD_ri killed $r3, -2
+    $r2 = XOR_ri killed $r2, -2147483648
+    $r3 = XOR_ri killed $r3, 2147483647
+    STW32 $w2, %stack.4, 0
+    STW32 $w3, %stack.5, 0
+    $r2 = XOR_ri killed $r2, -2147483648
+    $r3 = XOR_ri killed $r3, 2147483647
+    $r2 = ADD_ri killed $r2, 74565
+    $r3 = ADD_ri killed $r3, 344865
+    STW32 killed $w2, %stack.6, 0
+    STW32 killed $w3, %stack.7, 0
+    JMP %bb.1
+
+  bb.1:
+    liveins: $r6
+
+    $w0 = LDW32 %stack.0, 0
+    $w2 = LDW32 %stack.1, 0
+    $r0 = XOR_rr killed $r0, killed $r2
+    $w2 = LDW32 %stack.2, 0
+    $r0 = XOR_rr killed $r0, killed $r2
+    $w2 = LDW32 %stack.3, 0
+    $r0 = XOR_rr killed $r0, killed $r2
+    $w2 = LDW32 %stack.4, 0
+    $r0 = XOR_rr killed $r0, killed $r2
+    $w2 = LDW32 %stack.5, 0
+    $r0 = XOR_rr killed $r0, killed $r2
+    $w2 = LDW32 %stack.6, 0
+    $r0 = XOR_rr killed $r0, killed $r2
+    $w2 = LDW32 %stack.7, 0
+    $r0 = XOR_rr killed $r0, killed $r2
+    $r6 = MUL_ri killed $r6, 3
+    $r0 = XOR_rr killed $r0, killed $r6
+    $r5 = LDD %stack.8, 0
+    $r5 = ADD_ri killed $r5, 11
+    $r0 = XOR_rr killed $r0, killed $r5
+    $w2 = LDW32 %stack.9, 4
+    $r2 = ADD_ri killed $r2, 17
+    $r0 = XOR_rr killed $r0, killed $r2
+    RET implicit $r0
+...

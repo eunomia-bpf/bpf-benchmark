@@ -6,13 +6,21 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <unistd.h>
+#include <string.h>
 
-static int run(const char *path)
+static int run(const char *path, int groups, const char *phase)
 {
-    struct bpf_object *object = bpf_object__open_file(path, NULL);
+    char verifier_log[1024 * 1024] = {};
+    LIBBPF_OPTS(bpf_object_open_opts, open_options, .kernel_log_buf = verifier_log,
+                .kernel_log_size = sizeof(verifier_log), .kernel_log_level = 1);
+    struct bpf_object *object = bpf_object__open_file(path, groups ? &open_options : NULL);
     long error = libbpf_get_error(object);
     if (error) { fprintf(stderr, "open %s: %ld\n", path, error); return 1; }
-    if (bpf_object__load(object)) { perror("load spill fixture"); bpf_object__close(object); return 1; }
+    if (bpf_object__load(object)) {
+        perror("load spill fixture");
+        if (groups) fprintf(stderr, "%s", verifier_log);
+        bpf_object__close(object); return 1;
+    }
     struct bpf_program *program = bpf_object__find_program_by_name(object, "spill_values");
     if (!program) { fprintf(stderr, "spill_values entry missing\n"); bpf_object__close(object); return 1; }
     const uint32_t edges[] = {0, 1, 0x7fffffff, 0x80000000, 0xffffffff, 0xffffcfc7};
@@ -33,6 +41,12 @@ static int run(const char *path)
             perror("execute spill fixture"); failed = 1; break;
         }
         uint32_t expected = mark ^ (priority + UINT32_C(12345));
+        if (groups) {
+            expected = mark ^ priority ^ (mark + UINT32_C(1)) ^ (priority + UINT32_C(2))
+                ^ (mark ^ UINT32_C(0x80000000)) ^ (priority ^ UINT32_C(0x7fffffff))
+                ^ (mark + UINT32_C(74565)) ^ (priority + UINT32_C(344865))
+                ^ (priority * UINT32_C(3)) ^ (priority + UINT32_C(11)) ^ (mark + UINT32_C(17));
+        }
         if (options.retval != expected) {
             fprintf(stderr, "value mismatch %s mark=%u priority=%u got=%u expected=%u\n",
                     path, mark, priority, options.retval, expected);
@@ -41,15 +55,19 @@ static int run(const char *path)
         ++count;
     }
     bpf_object__close(object);
-    printf("{\"object\":\"%s\",\"executions\":%u,\"failed\":%d}\n", path, count, failed);
+    printf("{\"object\":\"%s\",\"phase\":\"%s\",\"executions\":%u,\"failed\":%d}\n", path, phase, count, failed);
     return failed;
 }
 
 int main(int argc, char **argv)
 {
-    if (argc != 3) { fprintf(stderr, "usage: scalar-spill-values ORIGINAL LOWERED\n"); return 1; }
+    int groups = argc == 4 && !strcmp(argv[1], "--groups");
+    if (argc != 3 && !groups) {
+        fprintf(stderr, "usage: scalar-spill-values ORIGINAL LOWERED | --groups PHASE OBJECT\n"); return 1;
+    }
     if (offsetof(struct __sk_buff, mark) != 8 || offsetof(struct __sk_buff, priority) != 32) {
         fprintf(stderr, "fixture context offsets differ\n"); return 1;
     }
-    return run(argv[1]) | run(argv[2]);
+    if (groups) return run(argv[3], 1, argv[2]);
+    return run(argv[1], 0, "original") | run(argv[2], 0, "lowered");
 }
