@@ -1,0 +1,126 @@
+{
+  "recorded_at": "2026-11-14T07:51:45Z",
+  "pid": 262532,
+  "make_exit": 2,
+  "raw": "/workspaces/kprog-raw/perf/20261114-hash-lto/kernel",
+  "counts": {
+    "stock_loaded": 18,
+    "checked_B_verified": 0,
+    "native_installed": 0,
+    "stock_or_native_test_executions": 0
+  },
+  "cause": "Fixture omitted FdLoadOptions.trusted_maps; every service request metadata.maps was empty, generated C referenced undeclared table. Clang exit1 before verification/link/install, not hash-helper runtime failure.",
+  "fix": "Client queries its actual table map ID and submits explicit TrustedMapBinding(table,id,nullopt) through existing API. No loader/service/model/production code change.",
+  "host_inputs_rebuild_exit": 0,
+  "rows": [
+    {
+      "case": "checked-sim-c/1-1",
+      "source_id": 50,
+      "status": -5,
+      "archive_sha256": "a83209e625d13be527bf386dab18893a742bcd76f655bd6a323929a9683d2af0"
+    },
+    {
+      "case": "checked-sim-c/2-1",
+      "source_id": 55,
+      "status": -5,
+      "archive_sha256": "66030cdd57be9726c0da6ea6793ab7ccc4e4c8f826abd5bfa8f5fb87ab094a49"
+    },
+    {
+      "case": "checked-sim-c/2-10",
+      "source_id": 85,
+      "status": -5,
+      "archive_sha256": "ed2c424ec99dd98977585af0239240a4cb443fd030b002316ddb4b5ebfd52f5e"
+    },
+    {
+      "case": "checked-sim-c/2-13",
+      "source_id": 90,
+      "status": -5,
+      "archive_sha256": "122928613d459542d9c9bd8b85cd3919d301819607c65063b8ee1cee100e9f49"
+    },
+    {
+      "case": "checked-sim-c/2-5",
+      "source_id": 75,
+      "status": -5,
+      "archive_sha256": "354a70d7181a93714170901fa9bcf8a65848d3fd00a89cf89a471afd8148da69"
+    },
+    {
+      "case": "checked-sim-c/2-9",
+      "source_id": 80,
+      "status": -5,
+      "archive_sha256": "67a1fd3d46b866f85780394f69bf284c255ef1fa6f48aeefece2cd0977e1cb6a"
+    },
+    {
+      "case": "checked-sim-c/3-1",
+      "source_id": 60,
+      "status": -5,
+      "archive_sha256": "3e67d914e684d6a7c6b0358637ad48fea18ef0398afccb76949f728a3a3115ac"
+    },
+    {
+      "case": "checked-sim-c/4-1",
+      "source_id": 65,
+      "status": -5,
+      "archive_sha256": "cde3039edf3f3fa77297f9a41a52e486dea122ed0c15fa77e1213cfad33d370b"
+    },
+    {
+      "case": "checked-sim-c/5-1",
+      "source_id": 70,
+      "status": -5,
+      "archive_sha256": "88196c9f05ea506a2cf82f82d3391c9ba80dd3b5c894bd963f3c4776e0f3fef1"
+    },
+    {
+      "case": "submitted-native/1-1",
+      "source_id": 5,
+      "status": -5,
+      "archive_sha256": "81c6647376e83083f7b5d449c8a50252b8c8b754690b5a8f755dbccb7f6e535c"
+    },
+    {
+      "case": "submitted-native/2-1",
+      "source_id": 10,
+      "status": -5,
+      "archive_sha256": "d0d965a324c67f224be0705ec4a91985edc330303dcc6cdb0153ed42d824d2d4"
+    },
+    {
+      "case": "submitted-native/2-10",
+      "source_id": 40,
+      "status": -5,
+      "archive_sha256": "22247abd24c6a9e80d235e7907906ec831dcd53ac11219fafbf9dd4f1d74c764"
+    },
+    {
+      "case": "submitted-native/2-13",
+      "source_id": 45,
+      "status": -5,
+      "archive_sha256": "79e4b36dfbfff8120b972a908db3b64a05438a5a26c8e05597cd8810412f0ffe"
+    },
+    {
+      "case": "submitted-native/2-5",
+      "source_id": 30,
+      "status": -5,
+      "archive_sha256": "cd5c3978dd8569c038a47070cb5798e7e046a934e4ab1584585fde72d9f6d7c5"
+    },
+    {
+      "case": "submitted-native/2-9",
+      "source_id": 35,
+      "status": -5,
+      "archive_sha256": "ffc23df9c49aa25fd6e0d663f48a9664ff3474235e1ede5284bc8d344fe5e1b0"
+    },
+    {
+      "case": "submitted-native/3-1",
+      "source_id": 15,
+      "status": -5,
+      "archive_sha256": "85e0477a0b84ac931af7ad686d0cfb16fb1d96d721b6f1a51fa8e3d67b6f6046"
+    },
+    {
+      "case": "submitted-native/4-1",
+      "source_id": 20,
+      "status": -5,
+      "archive_sha256": "c30bcd1516dc8b0710bf8df6ed37760793877f94e6673f8e750c8d23ca0511a3"
+    },
+    {
+      "case": "submitted-native/5-1",
+      "source_id": 25,
+      "status": -5,
+      "archive_sha256": "677c02a1bb08ba6668a23ddf4080fcbcdfe00224644dd4f0b773899b150f860c"
+    }
+  ],
+  "scope": "Retained failed kernel attempt. No kernel helper or throughput certification."
+}
