@@ -18,7 +18,7 @@ def allocated(path):
                 if section['sh_flags'] & 2}
 
 
-def check(output, clang, main_mir=None, accepted_mir=None):
+def check(output, clang, main_mir=None, accepted_mir=None, prior_revision=None):
     output.mkdir(parents=True, exist_ok=True)
     spec = importlib.util.spec_from_file_location('spill_backend', ROOT/'kprog/x86/trusted_specializer.py')
     worker = importlib.util.module_from_spec(spec)
@@ -47,7 +47,20 @@ char LICENSE[] SEC("license") = "GPL";
     saved = os.environ.pop('KPROG_BPF_WHOLE_WORD_SPILLS', None)
     try:
         default = output/'default.o'
+        prior_bytes = prior_input = None
+        if prior_revision:
+            prior_source = subprocess.run(['git', 'show', prior_revision+':kprog/x86/trusted_specializer.py'],
+                cwd=ROOT, text=True, capture_output=True, check=True).stdout
+            namespace = dict(__file__=str(ROOT/'kprog/x86/trusted_specializer.py'),
+                             __name__='prior_preprocess_worker')
+            exec(compile(prior_source, namespace['__file__'], 'exec'), namespace)
+            namespace['compile_simulator'](clang, source, default, run)
+            prior_bytes = default.read_bytes()
+            prior_input = source.with_suffix('.i').read_bytes()
         worker.compile_simulator(clang, source, default, run)
+        if prior_revision and (default.read_bytes() != prior_bytes or
+                               source.with_suffix('.i').read_bytes() != prior_input):
+            raise ValueError('Preprocessing cleanup changed default object or input bytes')
         legacy = output/'legacy.o'
         run([clang, *worker.COMPILE_FLAGS, '-c', source.with_suffix('.i'), '-o', legacy])
         if default.read_bytes() != legacy.read_bytes():
@@ -67,6 +80,8 @@ char LICENSE[] SEC("license") = "GPL";
             raise ValueError('Optional MIR backend was disconnected')
         result = dict(default_equals_previous_command=True, disabled_equals_default=True,
                       optional_pipeline_allocations_equal=True, optional_llc_executed=True)
+        if prior_revision:
+            result.update(prior_revision=prior_revision, preprocessing_input_and_default_object_equal=True)
         if main_mir is not None:
             spill_spec = importlib.util.spec_from_file_location('whole_word_spills',
                 ROOT/'kprog/x86/whole_word_spills.py')
@@ -94,7 +109,8 @@ if __name__ == '__main__':
     parser.add_argument('--clang', required=True)
     parser.add_argument('--main-mir', type=Path)
     parser.add_argument('--accepted-mir', type=Path)
+    parser.add_argument('--prior-revision')
     args = parser.parse_args()
     if (args.main_mir is None) != (args.accepted_mir is None):
         parser.error('--main-mir and --accepted-mir are supplied together')
-    check(args.output, args.clang, args.main_mir, args.accepted_mir)
+    check(args.output, args.clang, args.main_mir, args.accepted_mir, args.prior_revision)
