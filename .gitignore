@@ -684,3 +684,6 @@ kprog/perf/measure/
 
 # Closed run output preserved by the 2026-11-09 shared-tree cleanup (completed-arm-replay).
 /kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/trusted-arm64-service-result/summary.json
+
+# External formal migration build cache
+kprog/formal/mature/.lake/

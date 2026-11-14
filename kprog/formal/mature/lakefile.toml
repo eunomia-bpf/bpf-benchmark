@@ -1,0 +1,18 @@
+name = "KProgMature"
+version = "0.1.0"
+defaultTargets = ["KProgMature"]
+
+[[require]]
+name = "lnsym"
+path = "../external/LNSym"
+
+[[require]]
+name = "x86lean"
+path = "../external/x86lean"
+
+[[require]]
+name = "compcert-clight-lean"
+path = "../external/clean/export"
+
+[[lean_lib]]
+name = "KProgMature"

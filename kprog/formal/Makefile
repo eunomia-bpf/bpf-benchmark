@@ -702,3 +702,7 @@ check:
 	./build/test_arm64_decode_host
 	$(MAKE) -C ../tv native-link-arm-percpu-check
 	$(MAKE) -C ../tv cmov-check
+
+.PHONY: mature
+mature:
+	cd mature && lake build

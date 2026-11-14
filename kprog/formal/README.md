@@ -1,5 +1,33 @@
 # Native simulator verification
 
+## External-base migration (M1 in progress)
+
+The operator's replacement plan is in [todo section 4](../docs/todo.md).
+The external bases are forks, pinned as Git submodules; changes needed by
+kprog belong in those forks. No replacement ISA semantics is defined locally.
+
+| Base | Fork / submodule | Pinned source | Upstream toolchain |
+|---|---|---|---|
+| AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `49f8a1d9e46f` | Lean 4.35.0 |
+| x86-64 | [eunomia-bpf/x86lean](https://github.com/eunomia-bpf/x86lean), `external/x86lean` | `30c9b2e4e264` | Lean 4.32.0-rc1 |
+| Clight | [eunomia-bpf/clean](https://github.com/eunomia-bpf/clean), `external/clean/export` | `123f7f7767e2` | Lean 4.32.1 |
+
+`make -C kprog/formal mature` builds the migration Lake package on Lean 4.35.0,
+importing the external `Arm`, `X86`, `CCLib` and `Clightdefs` libraries directly.
+Its compatibility build is pending; adding submodules is not build acceptance.
+The legacy package remains on Lean 4.19.0 while M3-M5 migrate its references
+and theorems. M2 coverage is pending; the legacy counts below describe the old
+foundation, not proofs against these external bases. Retirement occurs at M6.
+
+LNSym and x86lean retain their Apache-2.0 licenses. Clean retains its own
+[LICENSE](external/clean/LICENSE): its tree is under INRIA non-commercial
+terms, with the listed components, including `export/`, also offered under
+LGPL-2.1-or-later. Keep those license terms separate. Clean explicitly labels
+its C-to-Lean exporter/semantics experimental in its upstream README; the
+CompCert front end and the Lean export/semantics have separate trust claims.
+
+## Legacy foundation (migration pending)
+
 Safety uses two facts: the stock verifier accepts B, and B faithfully simulates
 P. This directory proves generic simulator and token laws; native-link
 preservation lives in [tv/](../tv/). The current

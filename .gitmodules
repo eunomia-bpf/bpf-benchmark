@@ -55,3 +55,12 @@
 [submodule "vendor/academic-writing-skills"]
 	path = vendor/academic-writing-skills
 	url = https://github.com/yunwei37/academic-writing-skills.git
+[submodule "kprog/formal/external/LNSym"]
+	path = kprog/formal/external/LNSym
+	url = https://github.com/eunomia-bpf/LNSym.git
+[submodule "kprog/formal/external/x86lean"]
+	path = kprog/formal/external/x86lean
+	url = https://github.com/eunomia-bpf/x86lean.git
+[submodule "kprog/formal/external/clean"]
+	path = kprog/formal/external/clean
+	url = https://github.com/eunomia-bpf/clean.git
