@@ -707,5 +707,5 @@ check:
 # from its own package, after the combined external-library/regression build.
 .PHONY: mature
 mature:
-	cd mature && lake build KProgMature @lnsym/+Tests.ConditionalSelectTest @lnsym/+Tests.XZRTest @lnsym/+Tests.MultiplyDivideTest @lnsym/+Tests.ExtractCompareTest @lnsym/+Tests.SingleRegMemoryTest @lnsym/+Tests.LDSTTest @lnsym/+Tests.VectorReductionTest @lnsym/+Tests.ExtendedArithmeticTest @lnsym/+Tests.AtomicMemoryTest @lnsym/+Tests.MayModifiedRegsTest @lnsym/+Arm.Memory.MemoryProofs
+	cd mature && lake build KProgMature @lnsym/+Tests.ConditionalSelectTest @lnsym/+Tests.XZRTest @lnsym/+Tests.MultiplyDivideTest @lnsym/+Tests.ExtractCompareTest @lnsym/+Tests.SingleRegMemoryTest @lnsym/+Tests.LDSTTest @lnsym/+Tests.VectorReductionTest @lnsym/+Tests.ExtendedArithmeticTest @lnsym/+Tests.AtomicMemoryTest @lnsym/+Tests.ExclusiveMemoryTest @lnsym/+Tests.MayModifiedRegsTest @lnsym/+Arm.Memory.MemoryProofs
 	cd external/LNSym && lake build Tests.Tactics.Sym Tests.Tactics.ReduceFetchInst
