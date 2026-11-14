@@ -193,6 +193,8 @@
 
 ## 2. 应用覆盖
 
+- **VERIFIED FP P/B及native安装实际通过（2026-11-14）** 115161 service status0/prog8、完整native image262B，stock verifier与P安装通过；Make2因旧client要求positive JIT stack及固定编码而在TEST_RUN前退出，实际JIT depth0合法/native FP私栈216+5saves存在。删除该unit旧pattern gate，保留既有真实stock/native retval2及34次self-tail对照和raw image。完整P/B/service/image/log归档 `frame-pointer-installed-kernel-results*`，raw `20261114-frame-pointer/retry1`。尚无native execution/应用通过声明；source map relocation→current FD/ID consumer及真实mutable-map kernel regression接续，不改canonical base/image。
+
 - **VERIFIED FP kernel guest-path retry启动（2026-11-14）** 61cb2cef7在mounted run输出部署同一已测linker artifact；dry-run后outer115161、CPU13/2vCPU2G/AS8GiB/shared image，raw `/workspaces/kprog-raw/verified/20261114-frame-pointer/retry1/{launch,kernel}`。首轮127在verifier前，retry当前未收集/不声明通过；没有base/image/kernel变更。receipt `frame-pointer-kernel-retry-launch.json`，下一turn收取真实P/B/load/run结果后接original-load ELF map slot/FD绑定整类实现。
 
 - **VERIFIED census计数更正及compiler failure原件（2026-11-14）** row42在上一collection写档时完成，committed `census-refresh-next-two.json` 已包含它，手写34/29 prose滞后。准确累计35attempts=18installed/16verifier reject/1compile failure，latest30distinct=18installed/11reject/1compile failure，native0。Tracee15distinct/7installed/7reject/1compile failure，BCC9/9/0、Tetra6/2/0；42 trace_security_mmap_file的Clang在00:47:40→01:41:53以SIGKILL终止、未到verifier（OOM未由保留console确认）。40MB完整request/generated source/error归档 `census-body-42-compilation-failure*`，raw原件保留，不算verifier reject或隐藏程序。

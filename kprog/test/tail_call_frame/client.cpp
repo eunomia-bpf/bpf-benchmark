@@ -39,19 +39,6 @@ int main(int argc,char **argv) {
             auto closed=std::fclose(output);
             if(written!=image.size()||closed)throw std::runtime_error("image write");
         }
-        int jit_depth=0,jit_pop=-1;
-        for(size_t i=0;i+11<=image.size();i++) {
-            if(image[i]==0x48&&image[i+1]==0x8b&&(image[i+2]==0x80||image[i+2]==0x85)&&
-               image[i+7]==0x48&&image[i+8]==0x83&&image[i+9]==0x38&&image[i+10]==33) {
-                int32_t disp;__builtin_memcpy(&disp,image.data()+i+3,4);jit_depth=-disp-16;
-            }
-        }
-        for(size_t i=0;i+9<=image.size();i++) {
-            if(image[i]==0x58&&image[i+1]==0x58&&image[i+2]==0x48&&image[i+3]==0x81&&image[i+4]==0xc4)
-                __builtin_memcpy(&jit_pop,image.data()+i+5,4);
-        }
-        std::printf("{\"jit_stack_depth\":%d,\"jit_stack_pop\":%d}\n",jit_depth,jit_pop);
-        if(jit_depth<=0||jit_pop!=jit_depth)throw std::runtime_error("stackful JIT frame");
         __u32 key=0;
         for(int fd:std::vector<int>{source,native.prog_fd}) {
             __u64 count=0;

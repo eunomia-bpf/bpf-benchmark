@@ -1,0 +1,22 @@
+{
+  "outer_pid": 115161,
+  "make_exit": 2,
+  "finished": "2026-11-14T01:46:14Z",
+  "service_request": {
+    "request_id": 1,
+    "source_prog_id": 5,
+    "native_sha256": "8d617adf62df257f47df65d242655d5af03b7c259d0c732d0c54a6d9f2297288",
+    "started": "2026-11-14T01:46:06.593923+00:00",
+    "prog_id": 8,
+    "status": 0,
+    "artifact_archive": "/workspaces/kprog-raw/verified/20261114-frame-pointer/retry1/kernel/state/session-7nw0tvk9/requests/1.success.tar.gz",
+    "finished": "2026-11-14T01:46:12.930280+00:00"
+  },
+  "stock_verifier_and_native_install": "PASS; registered requeststatus0/nativeprog8, image262bytes",
+  "execution": "Not attempted: old client rejected valid zero JIT stack depth before TEST_RUN",
+  "cause": "Unit assumed positive JIT stack depth and fixed instruction encodings; emitted native private frame is present at rsp-216 with correct saved slot256",
+  "fix": "Use existing actual stock/native TEST_RUN retval/tail-count comparisons, retain raw image, remove obsolete byte-pattern assertion",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-frame-pointer/retry1",
+  "archive": "frame-pointer-installed-kernel-results.tar.gz",
+  "canonical_changed": false
+}
