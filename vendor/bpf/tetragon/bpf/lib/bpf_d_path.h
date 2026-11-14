@@ -145,7 +145,14 @@ prepend_name(char *buf, char **bufptr, int *buflen, const char *name, u32 namele
 	// This ensures that namelen is < 256, which is aligned with kernel's max dentry name length
 	// that is 255 (https://elixir.bootlin.com/linux/v5.10/source/include/uapi/linux/limits.h#L12).
 	// Needed to bound that for probe_read call.
+#ifdef MICRO_NATIVE
+	/* The upstream form is BPF inline asm, which a native target cannot
+	 * assemble; the AND is the same operation either way. */
 	namelen &= 0xff;
+#else
+	asm volatile("%[namelen] &= 0xff;\n"
+		     : [namelen] "+r"(namelen));
+#endif
 	probe_read(buf + buffer_offset + write_slash, namelen * sizeof(char), name);
 
 	*bufptr = buf + buffer_offset;

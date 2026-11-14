@@ -726,7 +726,12 @@ read_exe(struct task_struct *task, struct heap_exe *exe)
 	// verifier for the > 0 check)
 	if (exe->len > BINARY_PATH_MAX_LEN - 1)
 		exe->len = BINARY_PATH_MAX_LEN - 1;
+#ifdef MICRO_NATIVE
 	exe->len &= 0xff;
+#else
+	asm volatile("%[len] &= 0xff;\n"
+		     : [len] "+r"(exe->len));
+#endif
 	with_errmetrics(probe_read, exe->buf, exe->len, buffer);
 	if (revlen < STRING_POSTFIX_MAX_LENGTH)
 		with_errmetrics(probe_read, exe->end, revlen, (char *)(buffer + offset));
