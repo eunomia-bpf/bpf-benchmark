@@ -8,6 +8,7 @@ OPTIMIZATION ?= O3
 CODEGEN_ARGS ?=
 REPLAY_ARGS ?=
 REPLAY_BUILD ?= /var/tmp/kprog-tmp/perf/retained-proof-replay
+BACKEND_ARGS ?=
 
 .PHONY: build run analyze codegen whole-word replay values-build values-run backend-check checked-corpus
 checked-corpus:
@@ -22,7 +23,7 @@ checked-corpus:
 	printf '%s\n' "$$status" > $(OUTPUT)/exit-code; date -u +%FT%TZ > $(OUTPUT)/finished; exit $$status
 
 backend-check:
-	taskset -c 18-19 python3 $(ROOT)/kprog/test/check_whole_word_backend.py --output $(OUTPUT) --clang $(ROOT)/kprog/stock-path/bin/clang
+	taskset -c 18-19 python3 $(ROOT)/kprog/test/check_whole_word_backend.py --output $(OUTPUT) --clang $(ROOT)/kprog/stock-path/bin/clang $(BACKEND_ARGS)
 
 values-build:
 	install -d $(OUTPUT)

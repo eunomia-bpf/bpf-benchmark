@@ -18,7 +18,7 @@ def allocated(path):
                 if section['sh_flags'] & 2}
 
 
-def check(output, clang):
+def check(output, clang, main_mir=None, accepted_mir=None):
     output.mkdir(parents=True, exist_ok=True)
     spec = importlib.util.spec_from_file_location('spill_backend', ROOT/'kprog/x86/trusted_specializer.py')
     worker = importlib.util.module_from_spec(spec)
@@ -67,6 +67,18 @@ char LICENSE[] SEC("license") = "GPL";
             raise ValueError('Optional MIR backend was disconnected')
         result = dict(default_equals_previous_command=True, disabled_equals_default=True,
                       optional_pipeline_allocations_equal=True, optional_llc_executed=True)
+        if main_mir is not None:
+            spill_spec = importlib.util.spec_from_file_location('whole_word_spills',
+                ROOT/'kprog/x86/whole_word_spills.py')
+            spills = importlib.util.module_from_spec(spill_spec)
+            spill_spec.loader.exec_module(spills)
+            automatic, records = spills.automatic(main_mir)
+            if automatic != accepted_mir.read_text():
+                raise ValueError('Automatic main MIR differs from the retained accepted compilation input')
+            result['main_automatic_equals_accepted_mir'] = True
+            result['main_selection'] = records
+            result['main_mir'] = str(main_mir)
+            result['accepted_mir'] = str(accepted_mir)
         (output/'result.json').write_text(json.dumps(result, indent=2)+'\n')
         print(json.dumps(result))
     finally:
@@ -80,5 +92,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--clang', required=True)
+    parser.add_argument('--main-mir', type=Path)
+    parser.add_argument('--accepted-mir', type=Path)
     args = parser.parse_args()
-    check(args.output, args.clang)
+    if (args.main_mir is None) != (args.accepted_mir is None):
+        parser.error('--main-mir and --accepted-mir are supplied together')
+    check(args.output, args.clang, args.main_mir, args.accepted_mir)
