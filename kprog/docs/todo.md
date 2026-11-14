@@ -191,6 +191,8 @@
 
 一条 lane 需要别人那部分改动时，在 COORDINATION 说清楚，由负责的 lane 改；两条 lane 反复改同一块代码时，协调者把它们合并成一条。
 
+**Tracee 1.016x 的原因和下一步（运营者 2026-11-14："同源构建测得 1.016x 我觉得肯定不对. 不可能这么点"；协调者 2026-11-14T10:46:11Z 核对）**：x86_kvm_corpus_20261114_085217_843248 里原生代码确实在跑（stubs.py 只有 empty_kprobe 一个小程序，逐程序耗时两边各不相同）；热点 tracepoint__raw 1.12x、trace_sys_enter 0.98x、trace_sys_exit 0.96x，合计占 eBPF 时间 86%。原生 trace_sys_enter 1425 条指令里有 141 处 helper 调用：bpf_probe_read_kernel 79、map 查找 35、smp_processor_id 6、get_current_task 4 等，sys_exit 相同。两边调用同一批 helper，JIT 一侧还得到内核在验证之后的内联（array 查找、smp_processor_id），所以每次调用持平。11-07 的 1.539x 来自原生一侧读失败提前结束。提升要靠 LTO 把这些 helper 做便宜：① probe_read_kernel/probe_read_kernel_str 内联成带异常表的直接读（perf 给 OTel 做的 read LTO 已覆盖内核读）；② map 查找按链接时已知的 map 参数内联；③ smp_processor_id、get_current_task 内联成 per-cpu 读。分工：perf 在自己的链接器里把 ①②③ 对 Tracee 打开（默认关闭开关），lane C 用这些开关给 Tracee 计时 3×180 秒，并跑一次两边硬件剖析给出上限表。目标：Tracee 吞吐至少 1.20x。
+
 ## 1. 性能（目标：六应用几何平均 native/JIT 1.20x–1.40x，来自原生代码）
 
 - **PERF inline ARRAY 退化诊断（2026-11-14，ad56c93b1）** 188582/run050542_885568 make0/appok，1×10s statsON/16–19/4vCPU16G，吞吐 **0.394x**、3549.1→7293.1ns/次，0 workload错误/0tiny；13/12测量程序、13 replacement日志及custom__generic两次EINVAL完整保留。native generation302的两snapshot在startup/warmup，缺实际测量末端窗，不认证等量工作或floor；既有0.980x/0.965x结果不改。完整run/4个counter snapshots/失败JIT dump/logs/分析归档 `runtime-array-otel-results.json/.tar.gz`。共享routine后续候选只检验代码体积原因假说，不把host字节减少当速度收益。
