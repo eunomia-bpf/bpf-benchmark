@@ -1,0 +1,17 @@
+{
+  "recorded": "2026-11-14T21:08:01Z",
+  "pid": 651651,
+  "source_commits": [
+    "0659b4ee4",
+    "8dcdc41f8"
+  ],
+  "input_build": "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build",
+  "output": "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/kernel-trace",
+  "log": "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/resume-trace.log",
+  "cpus": "18-19",
+  "vcpus": 2,
+  "memory": "8G",
+  "host_address_space_bytes": 17179869184,
+  "lock": "image shared",
+  "scope": "Existing eight compiled cases; no compile batch repeated"
+}

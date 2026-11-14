@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "taskset",
+    "-c",
+    "18-19",
+    "vng",
+    "--run",
+    "/workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage",
+    "--cwd",
+    "/workspaces/repository",
+    "--rwdir",
+    "/workspaces/repository",
+    "--rwdir",
+    "/workspaces/kprog-raw/perf/20261114-scale-current/retry3",
+    "--overlay-rwdir",
+    "/tmp",
+    "--disable-monitor",
+    "--cpus",
+    "2",
+    "--memory",
+    "8G",
+    "--append",
+    "loglevel=4 panic=30 oops=panic",
+    "--exec",
+    "make -C /workspaces/repository/kprog/fidelity scale-guest SCALE_BUILD=/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build SCALE_OUT=/workspaces/kprog-raw/perf/20261114-scale-current/retry3/kernel"
+  ],
+  "exit": 2,
+  "seconds": 4.587542039997061,
+  "user_seconds": 1.7516180000000001,
+  "system_seconds": 2.17005,
+  "max_rss_kib": 577220
+}

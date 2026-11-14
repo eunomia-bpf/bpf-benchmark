@@ -1,0 +1,1094 @@
+[
+  {
+    "name": "n100000_ptr_direct",
+    "target_native_instructions": 100000,
+    "expected_result": 50007,
+    "stage": "proof_compile",
+    "native_instructions": 100036,
+    "generated_c_bytes": 15056952,
+    "returncode": 1,
+    "resources": {
+      "native": {
+        "command": [
+          "cc",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100000_ptr_direct.S",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100000_ptr_direct.native.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.12146229000063613,
+        "user_seconds": 0.08741199999999999,
+        "system_seconds": 0.024725999999999998,
+        "max_rss_kib": 223296
+      },
+      "preprocess": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-E",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100000_ptr_direct.bpf.c",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100000_ptr_direct.bpf.i"
+        ],
+        "returncode": 1,
+        "wall_seconds": 29.646490218990948,
+        "user_seconds": 28.402612,
+        "system_seconds": 1.200115,
+        "max_rss_kib": 1826632
+      }
+    },
+    "preprocess_diagnostic": "fatal error: translation unit is too large for Clang to process: ran out of source locations"
+  },
+  {
+    "name": "n100000_ptr_indirect",
+    "target_native_instructions": 100000,
+    "expected_result": 50023,
+    "stage": "proof_compile",
+    "native_instructions": 100084,
+    "generated_c_bytes": 15064503,
+    "returncode": 1,
+    "resources": {
+      "native": {
+        "command": [
+          "cc",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100000_ptr_indirect.S",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100000_ptr_indirect.native.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.12068944299244322,
+        "user_seconds": 0.08667699999999999,
+        "system_seconds": 0.024822999999999998,
+        "max_rss_kib": 223296
+      },
+      "preprocess": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-E",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100000_ptr_indirect.bpf.c",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100000_ptr_indirect.bpf.i"
+        ],
+        "returncode": 1,
+        "wall_seconds": 29.467437836006866,
+        "user_seconds": 28.201153,
+        "system_seconds": 1.202024,
+        "max_rss_kib": 1825720
+      }
+    },
+    "preprocess_diagnostic": "fatal error: translation unit is too large for Clang to process: ran out of source locations"
+  },
+  {
+    "name": "n100000_scalar_direct",
+    "target_native_instructions": 100000,
+    "expected_result": 10713441450579470919,
+    "stage": "proof_compile",
+    "native_instructions": 100036,
+    "generated_c_bytes": 10819467,
+    "returncode": 1,
+    "resources": {
+      "native": {
+        "command": [
+          "cc",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100000_scalar_direct.S",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100000_scalar_direct.native.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.07376070700411219,
+        "user_seconds": 0.05593,
+        "system_seconds": 0.007724,
+        "max_rss_kib": 41532
+      },
+      "preprocess": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-E",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100000_scalar_direct.bpf.c",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100000_scalar_direct.bpf.i"
+        ],
+        "returncode": 1,
+        "wall_seconds": 25.840229818000807,
+        "user_seconds": 24.686899,
+        "system_seconds": 1.104607,
+        "max_rss_kib": 1583332
+      }
+    },
+    "preprocess_diagnostic": "fatal error: translation unit is too large for Clang to process: ran out of source locations"
+  },
+  {
+    "name": "n100000_scalar_indirect",
+    "target_native_instructions": 100000,
+    "expected_result": 1685323454157403831,
+    "stage": "proof_compile",
+    "native_instructions": 100084,
+    "generated_c_bytes": 10827018,
+    "returncode": 1,
+    "resources": {
+      "native": {
+        "command": [
+          "cc",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100000_scalar_indirect.S",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100000_scalar_indirect.native.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.06440294500498567,
+        "user_seconds": 0.057608,
+        "system_seconds": 0.005924,
+        "max_rss_kib": 208560
+      },
+      "preprocess": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-E",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100000_scalar_indirect.bpf.c",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100000_scalar_indirect.bpf.i"
+        ],
+        "returncode": 1,
+        "wall_seconds": 25.672762927992153,
+        "user_seconds": 24.558886,
+        "system_seconds": 1.076534,
+        "max_rss_kib": 1583232
+      }
+    },
+    "preprocess_diagnostic": "fatal error: translation unit is too large for Clang to process: ran out of source locations"
+  },
+  {
+    "name": "n10000_ptr_direct",
+    "target_native_instructions": 10000,
+    "expected_result": 5015,
+    "stage": "proof_compile",
+    "native_instructions": 10036,
+    "generated_c_bytes": 1490872,
+    "returncode": 1,
+    "resources": {
+      "native": {
+        "command": [
+          "cc",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_ptr_direct.S",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_ptr_direct.native.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.018174790995544754,
+        "user_seconds": 0.01014,
+        "system_seconds": 0.006993,
+        "max_rss_kib": 40016
+      },
+      "preprocess": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-E",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_ptr_direct.bpf.c",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_ptr_direct.bpf.i"
+        ],
+        "returncode": 1,
+        "wall_seconds": 29.24035031198582,
+        "user_seconds": 27.903637,
+        "system_seconds": 1.228091,
+        "max_rss_kib": 1820236
+      }
+    },
+    "preprocess_diagnostic": "fatal error: translation unit is too large for Clang to process: ran out of source locations"
+  },
+  {
+    "name": "n10000_ptr_indirect",
+    "target_native_instructions": 10000,
+    "expected_result": 5023,
+    "stage": "proof_compile",
+    "native_instructions": 10084,
+    "generated_c_bytes": 1498229,
+    "returncode": 1,
+    "resources": {
+      "native": {
+        "command": [
+          "cc",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_ptr_indirect.S",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_ptr_indirect.native.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.017752012005075812,
+        "user_seconds": 0.00946,
+        "system_seconds": 0.008009,
+        "max_rss_kib": 40016
+      },
+      "preprocess": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-E",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_ptr_indirect.bpf.c",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_ptr_indirect.bpf.i"
+        ],
+        "returncode": 1,
+        "wall_seconds": 30.01381095800025,
+        "user_seconds": 28.688297,
+        "system_seconds": 1.185672,
+        "max_rss_kib": 1821512
+      }
+    },
+    "preprocess_diagnostic": "fatal error: translation unit is too large for Clang to process: ran out of source locations"
+  },
+  {
+    "name": "n10000_scalar_direct",
+    "target_native_instructions": 10000,
+    "expected_result": 15318568609386021639,
+    "stage": "proof_compile",
+    "native_instructions": 10036,
+    "generated_c_bytes": 1067131,
+    "preprocessed_bytes": 298211058,
+    "returncode": -9,
+    "resources": {
+      "native": {
+        "command": [
+          "cc",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_scalar_direct.S",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_scalar_direct.native.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.015820364002138376,
+        "user_seconds": 0.008121,
+        "system_seconds": 0.004488,
+        "max_rss_kib": 24024
+      },
+      "preprocess": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-E",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_scalar_direct.bpf.c",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_scalar_direct.bpf.i"
+        ],
+        "returncode": 0,
+        "wall_seconds": 9.680988130989135,
+        "user_seconds": 9.335922,
+        "system_seconds": 0.33896,
+        "max_rss_kib": 672612
+      },
+      "compile": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_scalar_direct.bpf.i",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_scalar_direct.bpf.o"
+        ],
+        "returncode": -9,
+        "wall_seconds": 7030.056232231989,
+        "user_seconds": 6906.59306,
+        "system_seconds": 33.811854,
+        "max_rss_kib": 83234848
+      }
+    }
+  },
+  {
+    "name": "n10000_scalar_indirect",
+    "target_native_instructions": 10000,
+    "expected_result": 12877716020613431511,
+    "stage": "proof_compile",
+    "native_instructions": 10084,
+    "generated_c_bytes": 1074488,
+    "preprocessed_bytes": 298918911,
+    "returncode": -9,
+    "resources": {
+      "native": {
+        "command": [
+          "cc",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_scalar_indirect.S",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_scalar_indirect.native.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.03771642599895131,
+        "user_seconds": 0.011458,
+        "system_seconds": 0.006095,
+        "max_rss_kib": 40016
+      },
+      "preprocess": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-E",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_scalar_indirect.bpf.c",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_scalar_indirect.bpf.i"
+        ],
+        "returncode": 0,
+        "wall_seconds": 10.508842387003824,
+        "user_seconds": 9.972395,
+        "system_seconds": 0.44350599999999996,
+        "max_rss_kib": 675784
+      },
+      "compile": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_scalar_indirect.bpf.i",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n10000_scalar_indirect.bpf.o"
+        ],
+        "returncode": -9,
+        "wall_seconds": 6938.866528366998,
+        "user_seconds": 6853.833508,
+        "system_seconds": 31.507773,
+        "max_rss_kib": 82620896
+      }
+    }
+  },
+  {
+    "name": "n1000_ptr_direct",
+    "target_native_instructions": 1000,
+    "expected_result": 506,
+    "stage": "compiled",
+    "native_instructions": 1015,
+    "generated_c_bytes": 148737,
+    "preprocessed_bytes": 89899087,
+    "returncode": 0,
+    "resources": {
+      "native": {
+        "command": [
+          "cc",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_ptr_direct.S",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_ptr_direct.native.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.014104325004154816,
+        "user_seconds": 0.003552,
+        "system_seconds": 0.003743,
+        "max_rss_kib": 23640
+      },
+      "preprocess": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-E",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_ptr_direct.bpf.c",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_ptr_direct.bpf.i"
+        ],
+        "returncode": 0,
+        "wall_seconds": 3.6525364620028995,
+        "user_seconds": 3.519197,
+        "system_seconds": 0.132969,
+        "max_rss_kib": 306632
+      },
+      "compile": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_ptr_direct.bpf.i",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_ptr_direct.bpf.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 506.54777362800087,
+        "user_seconds": 503.943888,
+        "system_seconds": 2.496553,
+        "max_rss_kib": 8813952
+      }
+    }
+  },
+  {
+    "name": "n1000_ptr_indirect",
+    "target_native_instructions": 1000,
+    "expected_result": 509,
+    "stage": "compiled",
+    "native_instructions": 1021,
+    "generated_c_bytes": 149950,
+    "preprocessed_bytes": 90034187,
+    "returncode": 0,
+    "resources": {
+      "native": {
+        "command": [
+          "cc",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_ptr_indirect.S",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_ptr_indirect.native.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.013968887011287734,
+        "user_seconds": 0.0020269999999999997,
+        "system_seconds": 0.00537,
+        "max_rss_kib": 23832
+      },
+      "preprocess": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-E",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_ptr_indirect.bpf.c",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_ptr_indirect.bpf.i"
+        ],
+        "returncode": 0,
+        "wall_seconds": 3.5563788389990805,
+        "user_seconds": 3.438006,
+        "system_seconds": 0.118,
+        "max_rss_kib": 306240
+      },
+      "compile": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_ptr_indirect.bpf.i",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_ptr_indirect.bpf.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 522.8145749990072,
+        "user_seconds": 520.102311,
+        "system_seconds": 2.6349,
+        "max_rss_kib": 8826908
+      }
+    }
+  },
+  {
+    "name": "n1000_scalar_direct",
+    "target_native_instructions": 1000,
+    "expected_result": 10444927170976545278,
+    "stage": "compiled",
+    "native_instructions": 1015,
+    "generated_c_bytes": 106366,
+    "preprocessed_bytes": 30655007,
+    "returncode": 0,
+    "resources": {
+      "native": {
+        "command": [
+          "cc",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_scalar_direct.S",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_scalar_direct.native.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.01429773100244347,
+        "user_seconds": 0.003042,
+        "system_seconds": 0.004593,
+        "max_rss_kib": 21912
+      },
+      "preprocess": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-E",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_scalar_direct.bpf.c",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_scalar_direct.bpf.i"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.9783071809943067,
+        "user_seconds": 0.9160609999999999,
+        "system_seconds": 0.062004,
+        "max_rss_kib": 129836
+      },
+      "compile": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_scalar_direct.bpf.i",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_scalar_direct.bpf.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 72.9382599540113,
+        "user_seconds": 72.056637,
+        "system_seconds": 0.8779589999999999,
+        "max_rss_kib": 2614344
+      }
+    }
+  },
+  {
+    "name": "n1000_scalar_indirect",
+    "target_native_instructions": 1000,
+    "expected_result": 10444927170976545281,
+    "stage": "compiled",
+    "native_instructions": 1021,
+    "generated_c_bytes": 107579,
+    "preprocessed_bytes": 30737991,
+    "returncode": 0,
+    "resources": {
+      "native": {
+        "command": [
+          "cc",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_scalar_indirect.S",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_scalar_indirect.native.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.013998744994751178,
+        "user_seconds": 0.004321,
+        "system_seconds": 0.0029479999999999997,
+        "max_rss_kib": 23448
+      },
+      "preprocess": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-E",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_scalar_indirect.bpf.c",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_scalar_indirect.bpf.i"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.9859826229949249,
+        "user_seconds": 0.941475,
+        "system_seconds": 0.044022,
+        "max_rss_kib": 129680
+      },
+      "compile": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_scalar_indirect.bpf.i",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n1000_scalar_indirect.bpf.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 73.19730836700182,
+        "user_seconds": 72.33866,
+        "system_seconds": 0.8539479999999999,
+        "max_rss_kib": 2622268
+      }
+    }
+  },
+  {
+    "name": "n100_ptr_direct",
+    "target_native_instructions": 100,
+    "expected_result": 56,
+    "stage": "compiled",
+    "native_instructions": 115,
+    "generated_c_bytes": 16548,
+    "preprocessed_bytes": 9907070,
+    "returncode": 0,
+    "resources": {
+      "native": {
+        "command": [
+          "cc",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_ptr_direct.S",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_ptr_direct.native.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.013495824998244643,
+        "user_seconds": 0.00407,
+        "system_seconds": 0.002185,
+        "max_rss_kib": 21912
+      },
+      "preprocess": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-E",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_ptr_direct.bpf.c",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_ptr_direct.bpf.i"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.39351704699220136,
+        "user_seconds": 0.372272,
+        "system_seconds": 0.021015,
+        "max_rss_kib": 93392
+      },
+      "compile": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_ptr_direct.bpf.i",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_ptr_direct.bpf.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 6.304924424999626,
+        "user_seconds": 6.163276,
+        "system_seconds": 0.141006,
+        "max_rss_kib": 359284
+      }
+    }
+  },
+  {
+    "name": "n100_ptr_indirect",
+    "target_native_instructions": 100,
+    "expected_result": 59,
+    "stage": "compiled",
+    "native_instructions": 121,
+    "generated_c_bytes": 17761,
+    "preprocessed_bytes": 9973586,
+    "returncode": 0,
+    "resources": {
+      "native": {
+        "command": [
+          "cc",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_ptr_indirect.S",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_ptr_indirect.native.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.013812281002174132,
+        "user_seconds": 0.0009559999999999999,
+        "system_seconds": 0.0058249999999999994,
+        "max_rss_kib": 21912
+      },
+      "preprocess": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-E",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_ptr_indirect.bpf.c",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_ptr_indirect.bpf.i"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.39370707199850585,
+        "user_seconds": 0.36744299999999996,
+        "system_seconds": 0.026031,
+        "max_rss_kib": 94012
+      },
+      "compile": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_ptr_indirect.bpf.i",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_ptr_indirect.bpf.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 6.211273254011758,
+        "user_seconds": 6.054693,
+        "system_seconds": 0.156017,
+        "max_rss_kib": 361480
+      }
+    }
+  },
+  {
+    "name": "n100_scalar_direct",
+    "target_native_instructions": 100,
+    "expected_result": 17694198624199650402,
+    "stage": "compiled",
+    "native_instructions": 115,
+    "generated_c_bytes": 12315,
+    "preprocessed_bytes": 3988260,
+    "returncode": 0,
+    "resources": {
+      "native": {
+        "command": [
+          "cc",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_scalar_direct.S",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_scalar_direct.native.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.008020709996344522,
+        "user_seconds": 0.00316,
+        "system_seconds": 0.003315,
+        "max_rss_kib": 21912
+      },
+      "preprocess": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-E",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_scalar_direct.bpf.c",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_scalar_direct.bpf.i"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.14445773100305814,
+        "user_seconds": 0.128135,
+        "system_seconds": 0.016016,
+        "max_rss_kib": 75148
+      },
+      "compile": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_scalar_direct.bpf.i",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_scalar_direct.bpf.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 1.897288309992291,
+        "user_seconds": 1.824967,
+        "system_seconds": 0.07199799999999999,
+        "max_rss_kib": 205600
+      }
+    }
+  },
+  {
+    "name": "n100_scalar_indirect",
+    "target_native_instructions": 100,
+    "expected_result": 17694198624199650405,
+    "stage": "compiled",
+    "native_instructions": 121,
+    "generated_c_bytes": 13528,
+    "preprocessed_bytes": 4049560,
+    "returncode": 0,
+    "resources": {
+      "native": {
+        "command": [
+          "cc",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_scalar_indirect.S",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_scalar_indirect.native.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.01385754399234429,
+        "user_seconds": 0.005765999999999999,
+        "system_seconds": 0.000935,
+        "max_rss_kib": 21912
+      },
+      "preprocess": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-E",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_scalar_indirect.bpf.c",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_scalar_indirect.bpf.i"
+        ],
+        "returncode": 0,
+        "wall_seconds": 0.14569325400225352,
+        "user_seconds": 0.13053499999999998,
+        "system_seconds": 0.014946,
+        "max_rss_kib": 75944
+      },
+      "compile": {
+        "command": [
+          "clang-18",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-I/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_scalar_indirect.bpf.i",
+          "-o",
+          "/workspaces/kprog-raw/perf/20261114-scale-current/retry3/build/n100_scalar_indirect.bpf.o"
+        ],
+        "returncode": 0,
+        "wall_seconds": 1.9844522749917815,
+        "user_seconds": 1.9150939999999999,
+        "system_seconds": 0.069003,
+        "max_rss_kib": 207040
+      }
+    }
+  }
+]
