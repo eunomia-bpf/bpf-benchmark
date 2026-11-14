@@ -109,7 +109,7 @@ struct Args {
     #[arg(long)]
     link_plan: Option<PathBuf>,
 
-    /// Print a human-readable disassembly of the rewritten blob to stderr.
+    /// Print rewritten disassembly and retained x86 instruction source maps to stderr.
     #[arg(long)]
     show: bool,
 

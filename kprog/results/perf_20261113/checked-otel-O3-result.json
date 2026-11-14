@@ -323,8 +323,103 @@
   "limits": [
     "Main B stock rejection invalid write R10 -560; O3/O2/Os/Oz all have direct R10 references to -680. Stock512B rule unchanged.",
     "Missing native counters stay missing; zero observed positive counters is not evidence of zero execution. App error retained despite job0.",
-    "O2/Os/Oz are backend tests on the same completed O3 IR, not full frontend flag comparisons. O1 frontend411911 still running.",
+    "O2/Os/Oz are backend tests on the same completed O3 IR, not full frontend flag comparisons. Full O1 completion is recorded under O1_completion.",
     "No full checked app/equal-output or speed claim.",
     "Raw wrapper flags/ABI guard were completed during image import before any request; initial versions/UTC evidence retained."
-  ]
+  ],
+  "O1_completion": {
+    "recorded": "2026-11-14T13:46:02.886710+00:00",
+    "finished": "2026-11-14T13:28:12Z",
+    "job_exit": 0,
+    "stages": [
+      {
+        "stage": "frontend",
+        "child_pid": 411918,
+        "returncode": 0,
+        "wall_seconds": 4064.4967175710044,
+        "user_seconds": 3939.654689,
+        "system_seconds": 44.203827,
+        "max_rss_kib": 21060992
+      },
+      {
+        "stage": "bounds",
+        "child_pid": 428670,
+        "returncode": 0,
+        "wall_seconds": 2.7984800089907367,
+        "user_seconds": 2.639472,
+        "system_seconds": 0.157968,
+        "max_rss_kib": 424848
+      },
+      {
+        "stage": "bpf-backend",
+        "child_pid": 428671,
+        "returncode": 0,
+        "wall_seconds": 7.453203823999502,
+        "user_seconds": 7.236674,
+        "system_seconds": 0.214947,
+        "max_rss_kib": 593084
+      }
+    ],
+    "bpf_instructions": 107150,
+    "min_direct_r10_offset": -680,
+    "compiled_b_sha256": "1d8407f042fbf4bb0ceec188c5cbbbacb1ca95b1bb81179a66caaade44e6f429",
+    "stock_verification": "Not submitted: emitted -680 references remain beyond actual512B wall. No admission/acceptance claim."
+  },
+  "exact_clang_frame": {
+    "recorded": "2026-11-14T13:46:02.886710+00:00",
+    "raw": "/workspaces/kprog-raw/perf/20261114-otel-stack-analysis",
+    "command": [
+      "taskset",
+      "-c",
+      "16-19",
+      "prlimit",
+      "--as=51539607552",
+      "--",
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-mllvm",
+      "-stop-after=prologepilog",
+      "-c",
+      "/workspaces/kprog-raw/perf/20261114-otel-compiler-unblocked/retry1/replay/trusted_x86.bpf.bounds.bc",
+      "-o",
+      "/workspaces/kprog-raw/perf/20261114-otel-stack-analysis/clang-O3.mir"
+    ],
+    "exit": 0,
+    "stack_size": 680,
+    "source_alloca_bytes": 392,
+    "spill_slots": 36,
+    "spill_slot_unaligned_bytes": 256,
+    "spill_slot_aligned_bytes": 288,
+    "source_native_stack": {
+      "default": {
+        "locals": 344,
+        "six_saves": 48,
+        "total": 392
+      },
+      "target_cpu_cmov": {
+        "locals": 328,
+        "six_saves": 48,
+        "total": 376
+      }
+    },
+    "limits": [
+      "MIR from exact recorded clang backend with stop-after=prologepilog; separate llc diagnostic frame672 is retained but not substituted.",
+      "Initial MIR command inserted flags at taskset -c and failed; corrected to final compile -c, both command/log versions kept.",
+      "No stack limit, kernel or simulator semantic relaxation. Native candidate reduces source stack16B; actual candidate B not compiled or accepted."
+    ]
+  }
 }

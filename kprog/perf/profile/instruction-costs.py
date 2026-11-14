@@ -3,7 +3,14 @@
 
 This is sampled root attribution, with hardware skid; a sample after a call is
 not proof that the following instruction consumed those cycles. Address-operand
-categories describe syntax, not load latency or proven spills. Period sums are
+categories describe syntax, not load latency or proven spills. Native-link
+`--show` also emits `native-link-source-map` JSON records for retained x86
+instructions, including input section/symbol offset, output offset and length.
+Join proof and kernel stages against the exact input/output byte hashes before
+using them to recover source locations; synthetic/expanded/dropped instructions
+have no source row and must remain unmapped. These records do not supply the
+JIT arm's line info or turn RSP/RBP operands into demonstrated spills.
+Period sums are
 normalized by the measured entry count, never the inlined tail program count.
 """
 import argparse

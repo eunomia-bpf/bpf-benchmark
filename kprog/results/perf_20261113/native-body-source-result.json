@@ -1,0 +1,604 @@
+{
+  "recorded": "2026-11-14T13:46:02.886710+00:00",
+  "scope": "Native arm source/spill mapping only. Captured JIT bytes match replay outside explicit map/helper/KASLR fields; proof/kernel maps compose through exact proof hash. JIT-source counterpart mapping remains pending; no fabricated pairing.",
+  "binary": "/workspaces/kprog-raw/perf/20261114-source-mapping/native-link.real",
+  "binary_sha256": "726c8ae1014a173b6f4011042ebe3ccd4b05d3d0382b32129fb2da575fb1b006",
+  "source_map_switch": "Existing --show; no new CLI flag. Emits native-link-source-map JSON to stderr for retained instructions with encoder offsets. Missing rows remain unmapped.",
+  "host_tests": {
+    "pass": 33,
+    "existing_ignored": 1
+  },
+  "actual_two_stage_replay": [
+    {
+      "mode": "proof",
+      "command": [
+        "/workspaces/kprog-raw/perf/20261114-source-mapping/native-link-show",
+        "--input",
+        "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-1qs6wxd3/input.elf",
+        "--symbol",
+        "perf_unwind_native",
+        "--output",
+        "/workspaces/kprog-raw/perf/20261114-source-mapping/proof/on.image",
+        "--mode",
+        "proof"
+      ],
+      "output_equal": true,
+      "mapping_rows": 5509,
+      "source_sha256": "7e6781470c8d4a1d2669cfd262405d11095e5c2a2cbf591a675e578718d6b644",
+      "output_sha256": "df46828d150a5d932b5e93086d0a1d485c3ca2b8bce95bcfd19761969248b4c6"
+    },
+    {
+      "mode": "kernel",
+      "command": [
+        "/workspaces/kprog-raw/perf/20261114-source-mapping/native-link-show",
+        "--input",
+        "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-lwc57z5g/input.elf",
+        "--symbol",
+        "perf_unwind_native",
+        "--mode",
+        "kernel",
+        "--output",
+        "/workspaces/kprog-raw/perf/20261114-source-mapping/kernel/on.image",
+        "--output-relocs",
+        "/workspaces/kprog-raw/perf/20261114-source-mapping/kernel/on.relocs",
+        "--output-map-patches",
+        "/workspaces/kprog-raw/perf/20261114-source-mapping/kernel/on.maps",
+        "--output-abi",
+        "/workspaces/kprog-raw/perf/20261114-source-mapping/kernel/on.abi",
+        "--link-plan",
+        "/workspaces/repository/corpus/results/perf-link-audit-20261114/audit/link-lwc57z5g/link-plan.json"
+      ],
+      "output_equal": true,
+      "mapping_rows": 5482,
+      "source_sha256": "df46828d150a5d932b5e93086d0a1d485c3ca2b8bce95bcfd19761969248b4c6",
+      "output_sha256": "d5754767c4a06949ce850eadfaa27e45fd0fd1defe3ed260a01e297e992d329a"
+    }
+  ],
+  "byte_binding": {
+    "kernel_blob_sha256": "d5754767c4a06949ce850eadfaa27e45fd0fd1defe3ed260a01e297e992d329a",
+    "captured_jit_sha256": "2584d5941b19584ddb6a3eaac50e169fc3b79101c7fcd03d0cab6459d3ab2dba",
+    "jit_prologue_bytes": 33,
+    "jit_suffix_bytes": 13,
+    "kaslr_slide": 50331648,
+    "unclassified_byte_differences": 0,
+    "source_native_section_byte_equal": true,
+    "native_compiler_spill_annotations": 442
+  },
+  "kaslr_fields": 25,
+  "hot_blocks": [
+    {
+      "offset": "0x540",
+      "sampled_cycles_per_entry": 91.81007054638071,
+      "instruction_count": 16,
+      "mapped_instructions": 16,
+      "compiler_proven_spill_reload_instructions": 1,
+      "source_locations": [
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:?",
+          "instruction_count": 2
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:122",
+          "instruction_count": 3
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:123",
+          "instruction_count": 2
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:124",
+          "instruction_count": 2
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:128",
+          "instruction_count": 6
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:133",
+          "instruction_count": 1
+        }
+      ],
+      "spill_instructions": [
+        {
+          "offset": "56c",
+          "source_offset": 1186,
+          "compiler_annotation": "movq\t104(%rsp), %rdx                 # 8-byte Reload",
+          "sampled_period_cycles": 38867850
+        }
+      ]
+    },
+    {
+      "offset": "0x600",
+      "sampled_cycles_per_entry": 70.92021682736687,
+      "instruction_count": 16,
+      "mapped_instructions": 16,
+      "compiler_proven_spill_reload_instructions": 1,
+      "source_locations": [
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:133",
+          "instruction_count": 1
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:219",
+          "instruction_count": 1
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:122",
+          "instruction_count": 3
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:?",
+          "instruction_count": 1
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:123",
+          "instruction_count": 2
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:124",
+          "instruction_count": 2
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:128",
+          "instruction_count": 6
+        }
+      ],
+      "spill_instructions": [
+        {
+          "offset": "62d",
+          "source_offset": 1379,
+          "compiler_annotation": "movq\t104(%rsp), %rdx                 # 8-byte Reload",
+          "sampled_period_cycles": 0
+        }
+      ]
+    },
+    {
+      "offset": "0x3e40",
+      "sampled_cycles_per_entry": 69.44494909475586,
+      "instruction_count": 16,
+      "mapped_instructions": 16,
+      "compiler_proven_spill_reload_instructions": 5,
+      "source_locations": [
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:?",
+          "instruction_count": 4
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:123",
+          "instruction_count": 1
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:124",
+          "instruction_count": 2
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:128",
+          "instruction_count": 7
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:133",
+          "instruction_count": 1
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:219",
+          "instruction_count": 1
+        }
+      ],
+      "spill_instructions": [
+        {
+          "offset": "3e41",
+          "source_offset": 15055,
+          "compiler_annotation": "movq\t88(%rsp), %rdi                  # 8-byte Reload",
+          "sampled_period_cycles": 16788814
+        },
+        {
+          "offset": "3e58",
+          "source_offset": 15078,
+          "compiler_annotation": "movq\t80(%rsp), %rdx                  # 8-byte Reload",
+          "sampled_period_cycles": 0
+        },
+        {
+          "offset": "3e67",
+          "source_offset": 15093,
+          "compiler_annotation": "movq\t8(%rsp), %rdx                   # 8-byte Reload",
+          "sampled_period_cycles": 0
+        },
+        {
+          "offset": "3e72",
+          "source_offset": 15104,
+          "compiler_annotation": "movq\t%rdx, 8(%rsp)                   # 8-byte Spill",
+          "sampled_period_cycles": 0
+        },
+        {
+          "offset": "3e7f",
+          "source_offset": 15117,
+          "compiler_annotation": "movq\t8(%rsp), %rax                   # 8-byte Reload",
+          "sampled_period_cycles": 41770031
+        }
+      ]
+    },
+    {
+      "offset": "0x580",
+      "sampled_cycles_per_entry": 68.11220182868078,
+      "instruction_count": 16,
+      "mapped_instructions": 16,
+      "compiler_proven_spill_reload_instructions": 1,
+      "source_locations": [
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:219",
+          "instruction_count": 1
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:122",
+          "instruction_count": 3
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:?",
+          "instruction_count": 1
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:123",
+          "instruction_count": 2
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:124",
+          "instruction_count": 2
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:128",
+          "instruction_count": 6
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:133",
+          "instruction_count": 1
+        }
+      ],
+      "spill_instructions": [
+        {
+          "offset": "5ac",
+          "source_offset": 1250,
+          "compiler_annotation": "movq\t104(%rsp), %rdx                 # 8-byte Reload",
+          "sampled_period_cycles": 20097051
+        }
+      ]
+    },
+    {
+      "offset": "0xb00",
+      "sampled_cycles_per_entry": 65.59398880152008,
+      "instruction_count": 14,
+      "mapped_instructions": 10,
+      "compiler_proven_spill_reload_instructions": 1,
+      "source_locations": [
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:438",
+          "instruction_count": 2
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:443",
+          "instruction_count": 1
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:444",
+          "instruction_count": 4
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:445",
+          "instruction_count": 3
+        }
+      ],
+      "spill_instructions": [
+        {
+          "offset": "b23",
+          "source_offset": 2587,
+          "compiler_annotation": "movq\t%r15, 152(%rsp)                 # 8-byte Spill",
+          "sampled_period_cycles": 0
+        }
+      ]
+    },
+    {
+      "offset": "0x5c0",
+      "sampled_cycles_per_entry": 62.8640869735131,
+      "instruction_count": 15,
+      "mapped_instructions": 15,
+      "compiler_proven_spill_reload_instructions": 1,
+      "source_locations": [
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:219",
+          "instruction_count": 1
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:122",
+          "instruction_count": 3
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:?",
+          "instruction_count": 1
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:123",
+          "instruction_count": 2
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:124",
+          "instruction_count": 2
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:128",
+          "instruction_count": 6
+        }
+      ],
+      "spill_instructions": [
+        {
+          "offset": "5ed",
+          "source_offset": 1315,
+          "compiler_annotation": "movq\t104(%rsp), %rdx                 # 8-byte Reload",
+          "sampled_period_cycles": 58795391
+        }
+      ]
+    },
+    {
+      "offset": "0x2380",
+      "sampled_cycles_per_entry": 59.55930349767204,
+      "instruction_count": 15,
+      "mapped_instructions": 15,
+      "compiler_proven_spill_reload_instructions": 4,
+      "source_locations": [
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:?",
+          "instruction_count": 3
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:123",
+          "instruction_count": 1
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:124",
+          "instruction_count": 2
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:128",
+          "instruction_count": 7
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:133",
+          "instruction_count": 1
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:219",
+          "instruction_count": 1
+        }
+      ],
+      "spill_instructions": [
+        {
+          "offset": "2380",
+          "source_offset": 8544,
+          "compiler_annotation": "movq\t88(%rsp), %rdi                  # 8-byte Reload",
+          "sampled_period_cycles": 0
+        },
+        {
+          "offset": "2397",
+          "source_offset": 8567,
+          "compiler_annotation": "movq\t80(%rsp), %rdx                  # 8-byte Reload",
+          "sampled_period_cycles": 0
+        },
+        {
+          "offset": "23a7",
+          "source_offset": 8583,
+          "compiler_annotation": "movq\t8(%rsp), %rdx                   # 8-byte Reload",
+          "sampled_period_cycles": 115973297
+        },
+        {
+          "offset": "23b2",
+          "source_offset": 8594,
+          "compiler_annotation": "movq\t%rdx, 8(%rsp)                   # 8-byte Spill",
+          "sampled_period_cycles": 0
+        }
+      ]
+    },
+    {
+      "offset": "0x3e80",
+      "sampled_cycles_per_entry": 55.29664894584706,
+      "instruction_count": 15,
+      "mapped_instructions": 15,
+      "compiler_proven_spill_reload_instructions": 3,
+      "source_locations": [
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:122",
+          "instruction_count": 3
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:?",
+          "instruction_count": 2
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:123",
+          "instruction_count": 1
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:124",
+          "instruction_count": 2
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:128",
+          "instruction_count": 7
+        }
+      ],
+      "spill_instructions": [
+        {
+          "offset": "3e91",
+          "source_offset": 15135,
+          "compiler_annotation": "movq\t88(%rsp), %rdi                  # 8-byte Reload",
+          "sampled_period_cycles": 0
+        },
+        {
+          "offset": "3ea8",
+          "source_offset": 15158,
+          "compiler_annotation": "movq\t80(%rsp), %rdx                  # 8-byte Reload",
+          "sampled_period_cycles": 19315044
+        },
+        {
+          "offset": "3eb8",
+          "source_offset": 15174,
+          "compiler_annotation": "movq\t8(%rsp), %rdx                   # 8-byte Reload",
+          "sampled_period_cycles": 92880404
+        }
+      ]
+    },
+    {
+      "offset": "0x500",
+      "sampled_cycles_per_entry": 54.730789351337144,
+      "instruction_count": 16,
+      "mapped_instructions": 16,
+      "compiler_proven_spill_reload_instructions": 1,
+      "source_locations": [
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:208",
+          "instruction_count": 1
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:122",
+          "instruction_count": 4
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:123",
+          "instruction_count": 2
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:124",
+          "instruction_count": 2
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:128",
+          "instruction_count": 6
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:133",
+          "instruction_count": 1
+        }
+      ],
+      "spill_instructions": [
+        {
+          "offset": "52b",
+          "source_offset": 1121,
+          "compiler_annotation": "movq\t104(%rsp), %rdx                 # 8-byte Reload",
+          "sampled_period_cycles": 40196976
+        }
+      ]
+    },
+    {
+      "offset": "0x680",
+      "sampled_cycles_per_entry": 53.293573406642274,
+      "instruction_count": 16,
+      "mapped_instructions": 16,
+      "compiler_proven_spill_reload_instructions": 1,
+      "source_locations": [
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:133",
+          "instruction_count": 1
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:219",
+          "instruction_count": 1
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:122",
+          "instruction_count": 3
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:?",
+          "instruction_count": 1
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:123",
+          "instruction_count": 2
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:124",
+          "instruction_count": 2
+        },
+        {
+          "function": "perf_unwind_native",
+          "location": "././native_stack_trace.ebpf.c:128",
+          "instruction_count": 6
+        }
+      ],
+      "spill_instructions": [
+        {
+          "offset": "6ae",
+          "source_offset": 1508,
+          "compiler_annotation": "movq\t104(%rsp), %rdx                 # 8-byte Reload",
+          "sampled_period_cycles": 0
+        }
+      ]
+    }
+  ],
+  "mapped_instructions": 151,
+  "total_hot_instructions": 155,
+  "proven_spill_reload_instructions": 19,
+  "raw": "/workspaces/kprog-raw/perf/20261114-source-mapping",
+  "limits": [
+    "Assembly labels are diagnostic only; perf_event/unwind_native section is byte-identical to actual measured native input.",
+    "Native source maps compose through exact proof ELF hash, and captured JIT payload is byte-identical outside explicitly classified helper/map/KASLR fields.",
+    "JIT source counterpart mapping needs line-info capture; ranks are not paired. Periods include skid, not instruction latency.",
+    "No LTO code/config or workload changed; no per-component long timing."
+  ]
+}

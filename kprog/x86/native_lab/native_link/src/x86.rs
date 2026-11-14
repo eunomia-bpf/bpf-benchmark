@@ -2155,6 +2155,24 @@ pub(super) fn rewrite_x86(
     }
 
     if show {
+        // Map only retained source instructions with a real encoder offset.
+        // Synthetic, dropped, or expanded instructions have no such row;
+        // never attribute their bytes to a nearby source instruction.
+        for layout in &layouts {
+            for (&source, &encoded) in layout.insn_local_ip.iter().zip(&layout.new_offset_in_sym) {
+                if source == u64::MAX || encoded == u32::MAX { continue; }
+                let output = layout.base_in_blob + encoded as usize;
+                if output >= blob.len() { continue; }
+                let mut decoder = Decoder::with_ip(64, &blob[output..], output as u64, DecoderOptions::NONE);
+                let instruction = decoder.decode();
+                if instruction.is_invalid() { continue; }
+                eprintln!("native-link-source-map {}", serde_json::json!({
+                    "symbol": layout.sym.name, "section": layout.sym.section_index.0,
+                    "input_offset": layout.sym.address + source, "symbol_offset": source,
+                    "output_offset": output, "length": instruction.len(),
+                }));
+            }
+        }
         disasm(&blob);
     }
     let proof_symbols = if proof_mode {
