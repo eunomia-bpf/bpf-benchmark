@@ -3,7 +3,7 @@
   "raw": "/workspaces/kprog-raw/perf/20261114-otel-corrected-all-lto-timing",
   "job_pid": 562153,
   "observer_pid": 562152,
-  "status": "queued behind existing timingEX owner, no samples yet",
+  "status": "running; timingEX acquired after Cilium, actual started timestamp recorded, no acceptance yet",
   "execution": "direct-native P corrected14source bindings+ALLruntimeLTO including db1179c2d LPMoverlap; sameef449combinedproducerP; checked-C remains separate actualfunctional job.",
   "samples": 3,
   "duration_seconds": 180,
@@ -81,5 +81,6 @@
     }
   ],
   "supersedes": "/workspaces/kprog-raw/perf/20261114-otel-corrected-combined-timing",
-  "reason": "One final combined configuration only; previous queue never started."
+  "reason": "One final combined configuration only; previous queue never started.",
+  "started_utc": "2026-11-14T17:40:34Z"
 }
