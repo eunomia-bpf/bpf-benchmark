@@ -1,0 +1,34 @@
+{
+  "scope": "Load-only checked compiler replay; stock verification precedes native compilation.",
+  "native": "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel/first-main-failure/kernel.native.o",
+  "proof": "/workspaces/kprog-raw/perf/20261114-scalar-spill-precision/whole-word-fixed.bpf.o",
+  "context": "/workspaces/kprog-raw/perf/20261114-static-helper-dispatch/checked-kernel/first-main-failure/kernel.facts.json",
+  "verify_exit": 0,
+  "stock_accepted": true,
+  "context_and_map_shapes_equal": true,
+  "checked_artifacts": {
+    "native_object": "/var/tmp/checked-simulator.native.o",
+    "native_proof_object": "/var/tmp/checked-simulator.proof.o",
+    "symbol": "trusted_x86_x86_sim_xdp",
+    "simulator_object": "/workspaces/kprog-raw/perf/20261114-scalar-spill-precision/whole-word-fixed.bpf.o",
+    "simulator_program": "trusted_x86_x86_sim_xdp",
+    "simulator_preprocessed": "/var/tmp/trusted_x86.bpf.i",
+    "context_kind": "raw",
+    "simulator_frontend": {
+      "path": "/var/tmp/trusted_x86.bpf.bounds-input.bc",
+      "source_sha256": "7c7b2d1ba96fbebdf7e06413249fea0b6d070a544e84c0f6305b996ce3a18869",
+      "ir_sha256": "6482c82fb5820ff755764f62b848642b913cb8702a086e862fd2cb1240562cbf"
+    }
+  },
+  "checked_load_exit": 0,
+  "checked_installed": true,
+  "submission_cancelled": false,
+  "replies": [
+    {
+      "request_id": 1,
+      "status": 0,
+      "prog_id": 14
+    }
+  ],
+  "wait_errors": []
+}
