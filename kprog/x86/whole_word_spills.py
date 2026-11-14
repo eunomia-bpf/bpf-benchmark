@@ -17,12 +17,27 @@ def lower(path, low, high):
     return lower_text(path.read_text(), low, high)
 
 
-def lower_text(text, low, high, *, require_final=True, reuse_dead_source=False):
+def lower_text(text, low, high, *, require_final=True, reuse_dead_source=False, save_live_scratch=False):
     head, body = text.split('body:             |', 1)
     slots = {int(i): (int(n), int(a)) for i, n, a in re.findall(
         r'  - \{ id: (\d+),[^\n]*type: spill-slot,[^\n]*size: (\d+), alignment: (\d+),', head)}
     if low >= high or (require_final and high != max(slots)) or slots[low] != (4, 8) or slots[high] != (4, 8):
         raise ValueError('Expected two scalar4/aligned8 slots, with the last slot selected second')
+    scratch_slots = {int(n): int(slot) for n, slot in re.findall(
+        r'^# kprog_spill_scratch_(\d+): (\d+)$', head, re.M)}
+
+    def scratch_slot(number):
+        nonlocal head
+        if number not in scratch_slots:
+            ids = list(map(int, re.findall(r'^  - \{ id: (\d+),', head, re.M)))
+            slot = max(ids)+1
+            definition = f"  - {{ id: {slot}, name: '', type: spill-slot, offset: 0, size: 8, alignment: 8,\n" \
+                "      stack-id: default, callee-saved-register: '', callee-saved-restored: true,\n" \
+                "      debug-info-variable: '', debug-info-expression: '', debug-info-location: '' }\n"
+            head = head.replace('stack:\n', 'stack:\n'+definition, 1)
+            head += f'# kprog_spill_scratch_{number}: {slot}\n'
+            scratch_slots[number] = slot
+        return scratch_slots[number]
     blocks, current = {}, None
     for line in body.splitlines():
         match = re.match(r'  bb\.(\d+)[^:]*:', line)
@@ -68,10 +83,20 @@ def lower_text(text, low, high, *, require_final=True, reuse_dead_source=False):
             if store:
                 source, slot = map(int, store.groups())
                 free = sorted(set(range(10)) - live - after - used)
-                reuse = reuse_dead_source and source < 10 and source not in after and len(free) == 1
-                if len(free) < 2 and not reuse:
+                reuse = reuse_dead_source and source < 10 and source not in after and len(free) < 2
+                required = 1 if reuse else 2
+                saved = []
+                scratch = free[:required]
+                if save_live_scratch:
+                    for reg in sorted(set(range(10))-used-set(scratch)):
+                        if len(scratch) == required:
+                            break
+                        saved.append((reg, scratch_slot(len(saved))))
+                        scratch.append(reg)
+                if len(scratch) < required:
                     raise ValueError(f'No two dead scratch registers at bb.{block}: {line}')
-                first, second = (free[0], source) if reuse else free[:2]
+                first, second = (scratch[0], source) if reuse else scratch
+                replacement += [f'STD killed $r{reg}, %stack.{slot_id}, 0' for reg, slot_id in saved]
                 replacement.append(f'$r{first} = LDD %stack.{low}, 0')
                 if slot == low:
                     replacement += [f'$r{first} = SRL_ri killed $r{first}, 32',
@@ -90,9 +115,12 @@ def lower_text(text, low, high, *, require_final=True, reuse_dead_source=False):
                     replacement.append(f'$r{second} = SLL_ri killed $r{second}, 32')
                 replacement += [f'$r{first} = OR_rr killed $r{first}, killed $r{second}',
                                 f'STD killed $r{first}, %stack.{low}, 0']
+                replacement += [f'$r{reg} = LDD %stack.{slot_id}, 0' for reg, slot_id in reversed(saved)]
                 record = dict(block=block, original=line.strip(), scratch=[first, second])
                 if reuse:
                     record['reuses_dead_source'] = True
+                if saved:
+                    record['saved_live_registers'] = [dict(register=reg, slot=slot_id) for reg, slot_id in saved]
                 changes.append(record)
             else:
                 destination, slot = map(int, load.groups())
@@ -140,7 +168,8 @@ def automatic(path, all_scalar_pairs=False):
         eligible = sorted(slot for slot, shape in slots.items() if shape == (4, 8))
         if all_scalar_pairs:
             for low, high in zip(eligible[-2::-2], eligible[::-2]):
-                document, changes = lower_text(document, low, high, require_final=False, reuse_dead_source=True)
+                document, changes = lower_text(document, low, high, require_final=False,
+                                              reuse_dead_source=True, save_live_scratch=True)
                 records.append(dict(document=index, low=low, high=high, changes=changes))
             documents[index] = document
             continue
