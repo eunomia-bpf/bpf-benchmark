@@ -1,0 +1,34 @@
+{
+  "app": "tracee/monitor",
+  "date_utc": "2026-11-14T08:48:30Z",
+  "purpose": "functional check that the Makefile-rule native objects install and the post arm survives",
+  "route": "Makefile rule (`make native-tracee`), byte-identical to the image's objects",
+  "manifest": "corpus/results/tracee-samesource-20261114/manifest.json",
+  "manifest_sha256": "2bc637d934823adeb63b006fc745f85ea36da1ce4539b8a1373862fec6af02d2",
+  "run": "corpus/results/x86_kvm_corpus_20261114_084334_578144",
+  "run_status": "ok",
+  "samples": 1,
+  "workload_seconds": 30,
+  "cpus": "0-7",
+  "baseline": {
+    "native_jit_info": 0,
+    "perf_event_ioc_disable": 165,
+    "errors": 0
+  },
+  "post_rejit": {
+    "native_jit_info": 169,
+    "perf_event_ioc_disable": 165,
+    "errors": 0,
+    "rejit_result_status": "skipped",
+    "note": "rejit_result tracks the plan path, which the load-time native loader does not use; the shim log shows 169 native programs loaded"
+  },
+  "aggregate": {
+    "ebpf_ns_per_run": 257.47,
+    "native_ns_per_run": 258.56,
+    "ratio_native_over_ebpf": 1.0042,
+    "run_cnt_ebpf": 532155499,
+    "run_cnt_native": 512355924,
+    "programs_with_runs": 40
+  },
+  "caveat": "one 30 s sample; the C3 3x180 s pair supersedes it"
+}
