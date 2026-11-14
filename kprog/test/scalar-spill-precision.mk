@@ -14,6 +14,10 @@ IDENTITY_ARGS ?=
 HELPER_SHAPE_BUILD ?= /var/tmp/kprog-tmp/perf/helper-shapes
 SPILL_GROUP_BUILD ?= /var/tmp/kprog-tmp/perf/spill-groups
 
+.PHONY: spill-groups-main
+spill-groups-main:
+	taskset -c 19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/replay_spill_groups_mir.py --archive /workspaces/kprog-raw/perf/20261114-otel-whole-word-checked/state/session-d1wppo7h/requests/3.success.tar.gz --build $(SPILL_GROUP_BUILD) --output $(OUTPUT)
+
 .PHONY: spill-groups-build spill-groups-run spill-groups-guest
 spill-groups-build:
 	install -d $(SPILL_GROUP_BUILD)
