@@ -2329,6 +2329,13 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			if (KPROG_X86_CMPOP_LHS_SOURCE(OP_IS_MEM) ==       \
 			    KPROG_X86_CMPOP_LHS_MEMORY)                    \
 				__x86_l_rhs = X86_SIM_L_READ_REG((SRC));   \
+			else if ((DST) == (SRC) &&                         \
+				 KPROG_X86_REG_LANE_AUX_DST_SHIFT(__x86_l_aux) == \
+				 KPROG_X86_REG_LANE_AUX_SRC_SHIFT(__x86_l_aux)) \
+				/* One native lane has one value. Repeating the opaque \
+				 * stack conversion hides this identity from LLVM when \
+				 * stack and live-pointer register tags merge. */ \
+				__x86_l_rhs = __x86_l_lhs;                  \
 			else                                               \
 				__x86_l_rhs =                              \
 					X86_SIM_L_READ_REG_WIDTH_SHIFT(    \
