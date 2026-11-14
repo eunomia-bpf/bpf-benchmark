@@ -1,0 +1,54 @@
+{
+  "recorded_at": "2026-11-14T11:12:43.802167+00:00",
+  "pid": 355603,
+  "job_exit": 0,
+  "stats": 0,
+  "run": "corpus/results/x86_kvm_corpus_20261114_103843_798390",
+  "status": "ok",
+  "samples": 3,
+  "seconds": 180,
+  "workload_errors": [],
+  "throughput_native_over_BPF": 0.8720257128490222,
+  "rates_ops_per_second": {
+    "baseline": [
+      80719248.61657023,
+      75313205.70954749,
+      79159445.30266997
+    ],
+    "post_rejit": [
+      68443084.07593487,
+      62082460.59765114,
+      74567839.25652324
+    ]
+  },
+  "paired_throughput": [
+    0.8479152773219041,
+    0.8243237027657278,
+    0.9419954747207928
+  ],
+  "counter_windows": [
+    {
+      "first": "baseline-0016",
+      "last": "baseline-0074",
+      "map_id": 58,
+      "seconds": 529.862751,
+      "frames_per_attempt": 0.9235451810586975,
+      "dispatch_per_native": 0.23938139588273702
+    },
+    {
+      "first": "post_rejit-0095",
+      "last": "post_rejit-0152",
+      "map_id": 1093,
+      "seconds": 529.541749,
+      "frames_per_attempt": 0.923477021221513,
+      "dispatch_per_native": 0.23972266398245998
+    }
+  ],
+  "native_load_records": 13,
+  "native_errors": [
+    "[814.020785 pid=13240 tid=13248] native-loader failed prog=custom__generic manifest=/workspaces/repository/corpus/results/perf-otel-upstream-20261114/manifest-context.json source=/tmp/bpfrejit_13240_d7b9e2b1c3befa20.bpf error=BPF_PROG_LOAD native_lab stub: Invalid argument",
+    "[814.105019 pid=13240 tid=13248] native-loader failed prog=custom__generic manifest=/workspaces/repository/corpus/results/perf-otel-upstream-20261114/manifest-context.json source=/tmp/bpfrejit_13240_d7b9e2b1c3befa20.bpf error=BPF_PROG_LOAD native_lab stub: Invalid argument"
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261114-combined-array-timing",
+  "scope": "Observed throughput; no 1.20x or full app-equivalence acceptance. No BPF per-invocation ratio with stats disabled. Concurrent CPU16-19 diagnostic profile and CPU8-15 checked guests retained as caveats; no causal comparison against previous configuration."
+}

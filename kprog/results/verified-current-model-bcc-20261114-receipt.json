@@ -1,0 +1,1147 @@
+{
+  "application": "bcc/set",
+  "application_status": "ok",
+  "application_error": "",
+  "service_summary": {
+    "started": "2026-11-14T10:37:40.684530+00:00",
+    "command": [
+      "python3",
+      "/workspaces/repository/kprog/test/verified_corpus.py",
+      "bcc/set",
+      "1",
+      "10",
+      "1"
+    ],
+    "service": {
+      "ready": true,
+      "arch": 1,
+      "endpoint": "/sys/kernel/debug/bpf_x86_native_lab/specializer"
+    },
+    "returncode": 0,
+    "service_returncode": -15,
+    "finished": "2026-11-14T10:45:44.796571+00:00"
+  },
+  "attempts": 25,
+  "loaded": 25,
+  "verified": 25,
+  "installed": 25,
+  "run": 17,
+  "installed_without_counter": [],
+  "native_counter_ids_without_install": [],
+  "baseline_counter_programs": 25,
+  "native_counter_programs": 25,
+  "programs": [
+    {
+      "request_id": 1,
+      "source_prog_id": 113,
+      "native_sha256": "33479c6b04d8a945a471975ed9d5101637458f570f5e534fe8a45a854b3b69c9",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:39:38.063284+00:00",
+      "prog_id": 133,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/1.success.tar.gz",
+      "finished": "2026-11-14T10:39:45.583394+00:00",
+      "stock_load": {
+        "request_id": 1,
+        "prog_id": 133,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 1,
+        "prog_id": 130,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 894,
+        "bytes_xlated": 616,
+        "id": 133,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 2452482,
+        "run_time_ns_delta": 179420872,
+        "type": "kprobe"
+      }
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 110,
+      "native_sha256": "d19552e4428658ed0d6340c555143e44b9f6dd31e235862b33a81624fb2f1b9d",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:39:45.602352+00:00",
+      "prog_id": 141,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/2.success.tar.gz",
+      "finished": "2026-11-14T10:39:51.210460+00:00",
+      "stock_load": {
+        "request_id": 2,
+        "prog_id": 141,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 2,
+        "prog_id": 138,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 1054,
+        "bytes_xlated": 656,
+        "id": 141,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      }
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 114,
+      "native_sha256": "b5fdbe7ad4062119b740d0925dcf22c6d45377224ca5e21ad2797795d7d1303a",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:39:51.230670+00:00",
+      "prog_id": 149,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/3.success.tar.gz",
+      "finished": "2026-11-14T10:39:56.147696+00:00",
+      "stock_load": {
+        "request_id": 3,
+        "prog_id": 149,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 3,
+        "prog_id": 146,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 701,
+        "bytes_xlated": 384,
+        "id": 149,
+        "name": "tcp_v4_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 122,
+      "native_sha256": "0e80639dfe877e1ec90e520bd48684cfb353e87024a7713334f0092cfb74e027",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:39:56.171703+00:00",
+      "prog_id": 157,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/4.success.tar.gz",
+      "finished": "2026-11-14T10:39:57.770215+00:00",
+      "stock_load": {
+        "request_id": 4,
+        "prog_id": 157,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 4,
+        "prog_id": 154,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 140,
+        "bytes_xlated": 88,
+        "id": 157,
+        "name": "fentry_vfs_read",
+        "run_cnt_delta": 49104,
+        "run_time_ns_delta": 2882587,
+        "type": "tracing"
+      }
+    },
+    {
+      "request_id": 5,
+      "source_prog_id": 119,
+      "native_sha256": "3d8c8667842217b78a9c28019817fa25490ba23e7a15f0e02273ed44a4c09dd3",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:39:57.784328+00:00",
+      "prog_id": 164,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/5.success.tar.gz",
+      "finished": "2026-11-14T10:41:10.497662+00:00",
+      "stock_load": {
+        "request_id": 5,
+        "prog_id": 164,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 5,
+        "prog_id": 161,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 10376,
+        "bytes_xlated": 6016,
+        "id": 164,
+        "name": "inet_sock_set_s",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      }
+    },
+    {
+      "request_id": 6,
+      "source_prog_id": 123,
+      "native_sha256": "a07dfa5e538b540cfb5991ed6892cb303dbda7ecf31b03f4d0d0650bc44eb7b0",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:41:10.547448+00:00",
+      "prog_id": 172,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/6.success.tar.gz",
+      "finished": "2026-11-14T10:41:15.761090+00:00",
+      "stock_load": {
+        "request_id": 6,
+        "prog_id": 172,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 6,
+        "prog_id": 169,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 1126,
+        "bytes_xlated": 576,
+        "id": 172,
+        "name": "blk_account_io_",
+        "run_cnt_delta": 50,
+        "run_time_ns_delta": 11468,
+        "type": "kprobe"
+      }
+    },
+    {
+      "request_id": 7,
+      "source_prog_id": 125,
+      "native_sha256": "7f6b076b0c30b8569721b6c1b1c1fe603ec750281c8c500ef0f01673dabccfa9",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:41:15.781703+00:00",
+      "prog_id": 180,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/7.success.tar.gz",
+      "finished": "2026-11-14T10:41:20.798288+00:00",
+      "stock_load": {
+        "request_id": 7,
+        "prog_id": 180,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 7,
+        "prog_id": 177,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 762,
+        "bytes_xlated": 424,
+        "id": 180,
+        "name": "sys_enter",
+        "run_cnt_delta": 66478242,
+        "run_time_ns_delta": 5629593941,
+        "type": "tracepoint"
+      }
+    },
+    {
+      "request_id": 8,
+      "source_prog_id": 127,
+      "native_sha256": "fc2779158e1cda6d72a8178922a7fc3c54afa6544c2d3a1894e6be276001587c",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:41:20.815772+00:00",
+      "prog_id": 188,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/8.success.tar.gz",
+      "finished": "2026-11-14T10:41:25.506788+00:00",
+      "stock_load": {
+        "request_id": 8,
+        "prog_id": 188,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 8,
+        "prog_id": 185,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 850,
+        "bytes_xlated": 624,
+        "id": 188,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 2546551,
+        "run_time_ns_delta": 239528571,
+        "type": "tracing"
+      }
+    },
+    {
+      "request_id": 9,
+      "source_prog_id": 135,
+      "native_sha256": "33479c6b04d8a945a471975ed9d5101637458f570f5e534fe8a45a854b3b69c9",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:41:25.528963+00:00",
+      "prog_id": 196,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/9.success.tar.gz",
+      "finished": "2026-11-14T10:41:42.040812+00:00",
+      "stock_load": {
+        "request_id": 9,
+        "prog_id": 196,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 9,
+        "prog_id": 193,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 4617,
+        "bytes_xlated": 1984,
+        "id": 196,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 2452481,
+        "run_time_ns_delta": 869835578,
+        "type": "kprobe"
+      }
+    },
+    {
+      "request_id": 10,
+      "source_prog_id": 143,
+      "native_sha256": "d19552e4428658ed0d6340c555143e44b9f6dd31e235862b33a81624fb2f1b9d",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:41:42.066784+00:00",
+      "prog_id": 203,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/10.success.tar.gz",
+      "finished": "2026-11-14T10:41:47.180536+00:00",
+      "stock_load": {
+        "request_id": 10,
+        "prog_id": 203,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 10,
+        "prog_id": 200,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 1054,
+        "bytes_xlated": 656,
+        "id": 203,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 2368400,
+        "run_time_ns_delta": 202899292,
+        "type": "tracepoint"
+      }
+    },
+    {
+      "request_id": 11,
+      "source_prog_id": 151,
+      "native_sha256": "b5fdbe7ad4062119b740d0925dcf22c6d45377224ca5e21ad2797795d7d1303a",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:41:47.197384+00:00",
+      "prog_id": 210,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/11.success.tar.gz",
+      "finished": "2026-11-14T10:42:09.129338+00:00",
+      "stock_load": {
+        "request_id": 11,
+        "prog_id": 210,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 11,
+        "prog_id": 207,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 5051,
+        "bytes_xlated": 2592,
+        "id": 210,
+        "name": "tcp_v4_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    {
+      "request_id": 12,
+      "source_prog_id": 158,
+      "native_sha256": "0e80639dfe877e1ec90e520bd48684cfb353e87024a7713334f0092cfb74e027",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:42:09.160367+00:00",
+      "prog_id": 217,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/12.success.tar.gz",
+      "finished": "2026-11-14T10:42:10.582319+00:00",
+      "stock_load": {
+        "request_id": 12,
+        "prog_id": 217,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 12,
+        "prog_id": 214,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 147,
+        "bytes_xlated": 88,
+        "id": 217,
+        "name": "fentry_vfs_writ",
+        "run_cnt_delta": 49474,
+        "run_time_ns_delta": 1681138,
+        "type": "tracing"
+      }
+    },
+    {
+      "request_id": 13,
+      "source_prog_id": 174,
+      "native_sha256": "a07dfa5e538b540cfb5991ed6892cb303dbda7ecf31b03f4d0d0650bc44eb7b0",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:42:10.596025+00:00",
+      "prog_id": 224,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/13.success.tar.gz",
+      "finished": "2026-11-14T10:42:20.412676+00:00",
+      "stock_load": {
+        "request_id": 13,
+        "prog_id": 224,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 13,
+        "prog_id": 221,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 2385,
+        "bytes_xlated": 1672,
+        "id": 224,
+        "name": "block_rq_insert",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      }
+    },
+    {
+      "request_id": 14,
+      "source_prog_id": 182,
+      "native_sha256": "7f6b076b0c30b8569721b6c1b1c1fe603ec750281c8c500ef0f01673dabccfa9",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:42:20.432583+00:00",
+      "prog_id": 231,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/14.success.tar.gz",
+      "finished": "2026-11-14T10:42:32.364823+00:00",
+      "stock_load": {
+        "request_id": 14,
+        "prog_id": 231,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 14,
+        "prog_id": 228,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 1894,
+        "bytes_xlated": 1240,
+        "id": 231,
+        "name": "sys_exit",
+        "run_cnt_delta": 66478246,
+        "run_time_ns_delta": 3551526393,
+        "type": "tracepoint"
+      }
+    },
+    {
+      "request_id": 15,
+      "source_prog_id": 190,
+      "native_sha256": "fc2779158e1cda6d72a8178922a7fc3c54afa6544c2d3a1894e6be276001587c",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:42:32.387591+00:00",
+      "prog_id": 238,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/15.success.tar.gz",
+      "finished": "2026-11-14T10:42:37.058349+00:00",
+      "stock_load": {
+        "request_id": 15,
+        "prog_id": 238,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 15,
+        "prog_id": 235,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 850,
+        "bytes_xlated": 624,
+        "id": 238,
+        "name": "sched_wakeup_ne",
+        "run_cnt_delta": 39,
+        "run_time_ns_delta": 15128,
+        "type": "tracing"
+      }
+    },
+    {
+      "request_id": 16,
+      "source_prog_id": 204,
+      "native_sha256": "d19552e4428658ed0d6340c555143e44b9f6dd31e235862b33a81624fb2f1b9d",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:42:37.077157+00:00",
+      "prog_id": 245,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/16.success.tar.gz",
+      "finished": "2026-11-14T10:42:57.772759+00:00",
+      "stock_load": {
+        "request_id": 16,
+        "prog_id": 245,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 16,
+        "prog_id": 242,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 2617,
+        "bytes_xlated": 2152,
+        "id": 245,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      }
+    },
+    {
+      "request_id": 17,
+      "source_prog_id": 211,
+      "native_sha256": "b5fdbe7ad4062119b740d0925dcf22c6d45377224ca5e21ad2797795d7d1303a",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:42:57.805549+00:00",
+      "prog_id": 252,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/17.success.tar.gz",
+      "finished": "2026-11-14T10:43:02.858368+00:00",
+      "stock_load": {
+        "request_id": 17,
+        "prog_id": 252,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 17,
+        "prog_id": 249,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 701,
+        "bytes_xlated": 384,
+        "id": 252,
+        "name": "tcp_v6_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    {
+      "request_id": 18,
+      "source_prog_id": 218,
+      "native_sha256": "0e80639dfe877e1ec90e520bd48684cfb353e87024a7713334f0092cfb74e027",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:43:02.880908+00:00",
+      "prog_id": 259,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/18.success.tar.gz",
+      "finished": "2026-11-14T10:43:04.510121+00:00",
+      "stock_load": {
+        "request_id": 18,
+        "prog_id": 259,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 18,
+        "prog_id": 256,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 147,
+        "bytes_xlated": 88,
+        "id": 259,
+        "name": "fentry_vfs_fsyn",
+        "run_cnt_delta": 14,
+        "run_time_ns_delta": 2110,
+        "type": "tracing"
+      }
+    },
+    {
+      "request_id": 19,
+      "source_prog_id": 225,
+      "native_sha256": "a07dfa5e538b540cfb5991ed6892cb303dbda7ecf31b03f4d0d0650bc44eb7b0",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:43:04.526795+00:00",
+      "prog_id": 266,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/19.success.tar.gz",
+      "finished": "2026-11-14T10:43:18.414711+00:00",
+      "stock_load": {
+        "request_id": 19,
+        "prog_id": 266,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 19,
+        "prog_id": 263,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 3130,
+        "bytes_xlated": 2064,
+        "id": 266,
+        "name": "block_rq_issue",
+        "run_cnt_delta": 50,
+        "run_time_ns_delta": 48015,
+        "type": "tracing"
+      }
+    },
+    {
+      "request_id": 20,
+      "source_prog_id": 239,
+      "native_sha256": "fc2779158e1cda6d72a8178922a7fc3c54afa6544c2d3a1894e6be276001587c",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:43:18.442897+00:00",
+      "prog_id": 273,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/20.success.tar.gz",
+      "finished": "2026-11-14T10:44:07.952610+00:00",
+      "stock_load": {
+        "request_id": 20,
+        "prog_id": 273,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 20,
+        "prog_id": 270,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 3614,
+        "bytes_xlated": 3384,
+        "id": 273,
+        "name": "sched_switch",
+        "run_cnt_delta": 5087139,
+        "run_time_ns_delta": 730000293,
+        "type": "tracing"
+      }
+    },
+    {
+      "request_id": 21,
+      "source_prog_id": 246,
+      "native_sha256": "d19552e4428658ed0d6340c555143e44b9f6dd31e235862b33a81624fb2f1b9d",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:44:07.997580+00:00",
+      "prog_id": 279,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/21.success.tar.gz",
+      "finished": "2026-11-14T10:44:26.145177+00:00",
+      "stock_load": {
+        "request_id": 21,
+        "prog_id": 279,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 21,
+        "prog_id": 276,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 2617,
+        "bytes_xlated": 2152,
+        "id": 279,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 2368400,
+        "run_time_ns_delta": 2459944648,
+        "type": "tracepoint"
+      }
+    },
+    {
+      "request_id": 22,
+      "source_prog_id": 253,
+      "native_sha256": "b5fdbe7ad4062119b740d0925dcf22c6d45377224ca5e21ad2797795d7d1303a",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:44:26.169461+00:00",
+      "prog_id": 286,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/22.success.tar.gz",
+      "finished": "2026-11-14T10:44:48.826110+00:00",
+      "stock_load": {
+        "request_id": 22,
+        "prog_id": 286,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 22,
+        "prog_id": 283,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 5954,
+        "bytes_xlated": 2600,
+        "id": 286,
+        "name": "tcp_v6_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    {
+      "request_id": 23,
+      "source_prog_id": 260,
+      "native_sha256": "0e80639dfe877e1ec90e520bd48684cfb353e87024a7713334f0092cfb74e027",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:44:48.854165+00:00",
+      "prog_id": 293,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/23.success.tar.gz",
+      "finished": "2026-11-14T10:44:50.290017+00:00",
+      "stock_load": {
+        "request_id": 23,
+        "prog_id": 293,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 23,
+        "prog_id": 290,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 147,
+        "bytes_xlated": 88,
+        "id": 293,
+        "name": "fentry_vfs_open",
+        "run_cnt_delta": 2368553,
+        "run_time_ns_delta": 46052917,
+        "type": "tracing"
+      }
+    },
+    {
+      "request_id": 24,
+      "source_prog_id": 267,
+      "native_sha256": "a07dfa5e538b540cfb5991ed6892cb303dbda7ecf31b03f4d0d0650bc44eb7b0",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:44:50.306968+00:00",
+      "prog_id": 300,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/24.success.tar.gz",
+      "finished": "2026-11-14T10:45:05.552806+00:00",
+      "stock_load": {
+        "request_id": 24,
+        "prog_id": 300,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 24,
+        "prog_id": 297,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 5456,
+        "bytes_xlated": 2440,
+        "id": 300,
+        "name": "block_rq_comple",
+        "run_cnt_delta": 58,
+        "run_time_ns_delta": 236539,
+        "type": "tracing"
+      }
+    },
+    {
+      "request_id": 25,
+      "source_prog_id": 294,
+      "native_sha256": "0e80639dfe877e1ec90e520bd48684cfb353e87024a7713334f0092cfb74e027",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-14T10:45:05.576128+00:00",
+      "prog_id": 307,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control/state/session-c_y8vpzi/requests/25.success.tar.gz",
+      "finished": "2026-11-14T10:45:06.994293+00:00",
+      "stock_load": {
+        "request_id": 25,
+        "prog_id": 307,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 25,
+        "prog_id": 304,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": {
+        "bytes_jited": 147,
+        "bytes_xlated": 88,
+        "id": 307,
+        "name": "fentry_vfs_crea",
+        "run_cnt_delta": 15,
+        "run_time_ns_delta": 1755,
+        "type": "tracing"
+      }
+    }
+  ],
+  "recorded": "2026-11-14T11:14:38.303989+00:00",
+  "raw_directory": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered",
+  "corpus_run_directory": "corpus/results/x86_kvm_corpus_20261114_103843_313617",
+  "capture_directory": "corpus/results/verified-captures-a9b5mwm7",
+  "make_exit_code": 0,
+  "launch_receipt": {
+    "recorded": "2026-11-14T09:23:53.726804+00:00",
+    "app": "bcc/set",
+    "configuration": "checked-sim-c LTO",
+    "pid": 379047,
+    "raw_directory": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto",
+    "wait_pid": 379046,
+    "dependency": "Resource sequencing only, after queued fixed-input compiler replay; no success gate",
+    "reason": "Previous complete BCC213201 predates general model52964ca12 and pre-verifier e6e64b725; whole-app recheck on current shared base",
+    "host_cpus": "8-15",
+    "guest_cpus": 8,
+    "guest_memory": "64G",
+    "host_as_bytes": 85899345920,
+    "samples": 1,
+    "workload_seconds": 10,
+    "bpf_stats": true,
+    "image_lock": "shared after resource dependency exits",
+    "dry_run_exit_code": 0,
+    "postlaunch_outcome_polled": false,
+    "application_completion_claimed": false,
+    "input_hashes": {
+      "kprog/x86/trusted_specializer.py": "a69bf301169249bd027ec4c3946de369f255170f7906ab23735e0eab040dbee4",
+      "kprog/x86/x86_sim_local_bpf.h": "f95f3e3b9ece20bd1a7340c9d2be478cb7befea33bae02892dfe353d525c0bb0",
+      "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "748438e87c1f0daaee18ff0af88d0a99a03f17d1554de674f4864a60b1959526",
+      "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds": "e02a61a2659e87acc84ef6b9f3089528479df3dfead118543abeb423a8057af0",
+      "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir": "bfe23fdb831b367e5a6345e77f91d90f8e75b308e24b6d1ea92478430792d1bc",
+      "/workspaces/.agent-state/kprog-ck/verified-compiler/context-lower": "5f4549c07681c471cc57fe69b6c4bd1a9146a9775cd5cb43242a2131a84ea05d"
+    },
+    "inputs_note": "Launch snapshot only: actual request commands and checked-source hashes must be collected; no input freeze or peer source edits",
+    "benchmark_settings_changed": false,
+    "producer_selector": "Existing default BCC manifest in sole current image; no app-source changes",
+    "recorded_at": "2026-11-14T10:37:36.774057+00:00",
+    "raw": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered",
+    "status": "QUEUED_RESOURCE_ONLY_UNCOLLECTED",
+    "superseded_pid": 351898,
+    "command": [
+      "setsid",
+      "nohup",
+      "prlimit",
+      "--as=85899345920",
+      "--",
+      "bash",
+      "kprog/test/run_verified_make.sh",
+      "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/job",
+      "-C",
+      "kprog/libnativeloader",
+      "-o",
+      "trusted-service",
+      "trusted-service-kvm",
+      "BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader",
+      "OUTPUT=/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/control",
+      "VM_CPUS=8",
+      "VM_MEM=64G",
+      "SERVICE_HOST_CPUS=8-15",
+      "VNG_FLAGS=--overlay-rwdir /run --overlay-rwdir /usr/local --rwdir /var/tmp=/var/tmp/kprog-tmp/verified/corpus-state",
+      "SERVICE_RUN=python3 /workspaces/repository/kprog/test/verified_corpus.py bcc/set 1 10 1",
+      "SERVICE_EXECUTION_ARGS=$(CHECKED_COMPILER_SERVICE_ARGS)"
+    ],
+    "queue_revision_proof": "/workspaces/kprog-raw/perf/20261114-inherited-queue-reorder/old-queued.json"
+  },
+  "corpus_metadata": {
+    "bpf_stats": true,
+    "completed_at": "2026-11-14T10:45:44.579353+00:00",
+    "config": {
+      "enabled_passes": [
+        "noop",
+        "map_inline",
+        "const_prop",
+        "dce",
+        "rotate",
+        "cond_select",
+        "extract",
+        "endian_fusion",
+        "lea",
+        "ccmp",
+        "bulk_memory",
+        "prefetch",
+        "wide_mem",
+        "bounds_check_merge",
+        "skb_load_bytes_spec",
+        "noop",
+        "const_prop",
+        "dce"
+      ]
+    },
+    "details_dir": "details",
+    "generated_at": "2026-11-14T10:45:44.579356+00:00",
+    "last_updated_at": "2026-11-14T10:45:44.579353+00:00",
+    "launcher_boot_id": "6644820e-7836-436c-9d32-987204572fec",
+    "launcher_pid": 1811,
+    "launcher_start_ticks": 6581,
+    "manifest": "/workspaces/repository/corpus/config/macro_apps.yaml",
+    "run_type": "x86_kvm_corpus",
+    "samples": 1,
+    "started_at": "2026-11-14T10:38:43.313617+00:00",
+    "status": "completed",
+    "suite": "corpus",
+    "workload_only": false,
+    "workload_seconds": 10.0
+  },
+  "scope": "Actual upstream two-start verified-B run; workload run means positive recorded native run_cnt_delta",
+  "raw_removed": false,
+  "archive": {
+    "raw_archive": "/workspaces/kprog-raw/verified/20261114-bcc-current-model-lto/perf-reordered/collection/full-evidence.tar.gz",
+    "sha256": "b6c6e6c883f6959fead990be72833ef59c840236aea9be2bdd72bec2834500da",
+    "bytes": 61570831
+  }
+}

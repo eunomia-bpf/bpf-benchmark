@@ -1,0 +1,756 @@
+{
+  "raw": "/workspaces/kprog-raw/perf/20261114-combined-array-profile",
+  "run": "corpus/results/x86_kvm_corpus_20261114_105012_928169",
+  "host_costs": {
+    "scope": "Actual host hardware guest root samples only. Cycles sum sample periods. Leaf categories do not establish inclusive helper cost or caller ownership. Inlined maps/tails remain program text; other guest activity stays included. Clock pairs observe offsets/drift, not exact host/guest clock synchronization.",
+    "sample_count": 178177,
+    "all_modes": {
+      "G": 96698,
+      "K": 3015,
+      "KGg": 78464
+    },
+    "host_clock_offset_drift_ns": -82,
+    "phases": {
+      "baseline": [
+        {
+          "host_start_ns": 62238149154754,
+          "host_end_ns": 62286080104754,
+          "modes": {
+            "G": 18797,
+            "KGg": 18219,
+            "K": 613
+          },
+          "qemu_pids": {
+            "382600": 37629
+          },
+          "guest_kernel_samples": 18797,
+          "sampled_cycles": 356815125742,
+          "root_symbols": {
+            "trie_lookup_elem": 3912,
+            "copy_from_user_nofault": 3194,
+            "bpf_prog_1600221a15411be1_perf_unwind_native": 2085,
+            "asm_sysvec_apic_timer_interrupt": 909,
+            "lookup_nulls_elem_raw": 760,
+            "asm_exc_page_fault": 665,
+            "htab_map_hash": 592,
+            "pvclock_clocksource_read_nowd": 523,
+            "lapic_next_deadline": 437,
+            "__check_object_size": 319,
+            "array_map_lookup_elem": 276,
+            "native_apic_msr_eoi": 265,
+            "bpf_map_lookup_elem": 230,
+            "bpf_prog_ee37ab900524f2f1_perf_unwind_v8": 208,
+            "its_return_thunk": 186,
+            "__htab_map_lookup_elem": 179,
+            "bpf_probe_read_user": 173,
+            "bpf_prog_1e32ec934f932167_native_tracer_entry": 166,
+            "memcmp": 134,
+            "check_heap_object": 131
+          },
+          "root_symbol_cycles": {
+            "trie_lookup_elem": 75807539957,
+            "copy_from_user_nofault": 61775667656,
+            "bpf_prog_1600221a15411be1_perf_unwind_native": 40353089951,
+            "asm_sysvec_apic_timer_interrupt": 16833676044,
+            "lookup_nulls_elem_raw": 14720587600,
+            "asm_exc_page_fault": 12822422081,
+            "htab_map_hash": 11309305999,
+            "pvclock_clocksource_read_nowd": 9593868096,
+            "lapic_next_deadline": 7980881839,
+            "__check_object_size": 6185657902,
+            "array_map_lookup_elem": 5290244704,
+            "native_apic_msr_eoi": 4836637205,
+            "bpf_map_lookup_elem": 4426849946,
+            "bpf_prog_ee37ab900524f2f1_perf_unwind_v8": 3999864918,
+            "its_return_thunk": 3584785137,
+            "__htab_map_lookup_elem": 3491696888,
+            "bpf_probe_read_user": 3345321044,
+            "bpf_prog_1e32ec934f932167_native_tracer_entry": 3124924651,
+            "memcmp": 2628460305,
+            "check_heap_object": 2532823033
+          },
+          "root_categories": {
+            "other_guest_kernel": 6776,
+            "program_text": 2615,
+            "user_nofault_copy": 3194,
+            "lpm_lookup": 3912,
+            "hash_lookup": 1611,
+            "array_lookup": 276,
+            "probe_read_user_entry": 173,
+            "generic_lookup_dispatch": 230,
+            "kernel_nofault_copy": 9,
+            "probe_read_kernel_entry": 1
+          },
+          "root_category_cycles": {
+            "other_guest_kernel": 124416453927,
+            "program_text": 50506320319,
+            "user_nofault_copy": 61775667656,
+            "lpm_lookup": 75807539957,
+            "hash_lookup": 31060251975,
+            "array_lookup": 5290244704,
+            "probe_read_user_entry": 3345321044,
+            "generic_lookup_dispatch": 4426849946,
+            "kernel_nofault_copy": 166313593,
+            "probe_read_kernel_entry": 20162621
+          },
+          "interval": {
+            "phase": "baseline",
+            "pid": "1819",
+            "start_seconds": 116.991552,
+            "end_seconds": 164.922502
+          },
+          "guest_clock_offset_drift_ns": 2480
+        }
+      ],
+      "post_rejit": [
+        {
+          "host_start_ns": 62340737617245,
+          "host_end_ns": 62388591707245,
+          "modes": {
+            "KGg": 18036,
+            "G": 19386,
+            "K": 586
+          },
+          "qemu_pids": {
+            "382600": 38008
+          },
+          "guest_kernel_samples": 19386,
+          "sampled_cycles": 365284632484,
+          "root_symbols": {
+            "bpf_prog_26449268576adffc_perf_unwind_nat": 9741,
+            "bpf_prog_26449268576adffc_perf_unwind_v8": 1716,
+            "asm_sysvec_apic_timer_interrupt": 885,
+            "bpf_prog_26449268576adffc_native_tracer_e": 710,
+            "asm_exc_page_fault": 506,
+            "pvclock_clocksource_read_nowd": 470,
+            "lapic_next_deadline": 416,
+            "native_apic_msr_eoi": 277,
+            "mod_find": 267,
+            "bpf_prog_26449268576adffc_perf_unwind_pyt": 163,
+            "lookup_nulls_elem_raw": 163,
+            "bpf_prog_26449268576adffc_perf_unwind_rub": 161,
+            "bpf_prog_26449268576adffc_perf_unwind_php": 147,
+            "bpf_prog_26449268576adffc_perf_unwind_per": 144,
+            "its_return_thunk": 133,
+            "sync_regs": 131,
+            "htab_map_hash": 125,
+            "perf_swevent_hrtimer": 109,
+            "nmi_uaccess_okay": 106,
+            "htab_of_map_lookup_elem": 105
+          },
+          "root_symbol_cycles": {
+            "bpf_prog_26449268576adffc_perf_unwind_nat": 185690630577,
+            "bpf_prog_26449268576adffc_perf_unwind_v8": 32949540935,
+            "asm_sysvec_apic_timer_interrupt": 16464612418,
+            "bpf_prog_26449268576adffc_native_tracer_e": 13384327832,
+            "asm_exc_page_fault": 9546207715,
+            "pvclock_clocksource_read_nowd": 8670555891,
+            "lapic_next_deadline": 7715247548,
+            "native_apic_msr_eoi": 5108058505,
+            "mod_find": 5029249230,
+            "lookup_nulls_elem_raw": 3146487022,
+            "bpf_prog_26449268576adffc_perf_unwind_pyt": 3075369333,
+            "bpf_prog_26449268576adffc_perf_unwind_rub": 3025218147,
+            "bpf_prog_26449268576adffc_perf_unwind_php": 2783624681,
+            "bpf_prog_26449268576adffc_perf_unwind_per": 2730563516,
+            "its_return_thunk": 2503964579,
+            "sync_regs": 2446220849,
+            "htab_map_hash": 2365048830,
+            "perf_swevent_hrtimer": 2047396382,
+            "nmi_uaccess_okay": 2045200248,
+            "htab_of_map_lookup_elem": 2002613121
+          },
+          "root_categories": {
+            "program_text": 12883,
+            "other_guest_kernel": 6095,
+            "hash_lookup": 393,
+            "generic_lookup_dispatch": 14,
+            "kernel_nofault_copy": 1
+          },
+          "root_category_cycles": {
+            "program_text": 245545584738,
+            "other_guest_kernel": 111937915405,
+            "hash_lookup": 7514148973,
+            "generic_lookup_dispatch": 267084979,
+            "kernel_nofault_copy": 19898389
+          },
+          "interval": {
+            "phase": "post_rejit",
+            "pid": "3791",
+            "start_seconds": 219.580013,
+            "end_seconds": 267.434103
+          },
+          "guest_clock_offset_drift_ns": 923
+        }
+      ]
+    }
+  },
+  "instruction_summary": {
+    "baseline": {
+      "entry": {
+        "bytes_jited": 3815,
+        "bytes_xlated": 5904,
+        "id": 17,
+        "name": "native_tracer_e",
+        "run_cnt_delta": 17878058,
+        "run_time_ns_delta": 62502248093,
+        "type": "perf_event"
+      },
+      "programs": [
+        {
+          "id": 7,
+          "name": "perf_unwind_native",
+          "sha256": "b43de8dd13df5da34e61be3a543aa26c379365bfdd282971bacd54f9d90ab0c4",
+          "bytes": 21868,
+          "samples": 2085,
+          "cycles": 40353089951,
+          "cycles_per_entry": 2257.1293789851225,
+          "category_cycles": {
+            "other": 22989565135,
+            "stack_frame": 198926230,
+            "control": 4654471949,
+            "rbp_address_operand": 7149040953,
+            "other_memory_operand": 4573784378,
+            "call": 787301306
+          },
+          "top_instructions": [
+            {
+              "offset": "0x54d0",
+              "samples": 47,
+              "cycles": 913680268,
+              "instruction": "add    $0xc,%rcx",
+              "previous": "mov    0x48(%rcx),%rcx"
+            },
+            {
+              "offset": "0x462",
+              "samples": 44,
+              "cycles": 860785841,
+              "instruction": "mov    -0x60(%rbp),%ebx",
+              "previous": "movzwq 0x0(%rax),%rsi"
+            },
+            {
+              "offset": "0x703",
+              "samples": 18,
+              "cycles": 353793654,
+              "instruction": "mov    -0x60(%rbp),%r15d",
+              "previous": "movzwq 0x0(%rax),%rsi"
+            },
+            {
+              "offset": "0x4715",
+              "samples": 13,
+              "cycles": 247227319,
+              "instruction": "movzbq 0x2(%rax),%rdi",
+              "previous": "mov    0x4(%rax),%r14d"
+            },
+            {
+              "offset": "0x2817",
+              "samples": 12,
+              "cycles": 236796602,
+              "instruction": "mov    -0x60(%rbp),%ebx",
+              "previous": "movzwq 0x0(%rax),%rsi"
+            },
+            {
+              "offset": "0x2236",
+              "samples": 12,
+              "cycles": 227385777,
+              "instruction": "mov    %rbp,%rsi",
+              "previous": "mov    %edi,-0x20(%rbp)"
+            },
+            {
+              "offset": "0x789",
+              "samples": 11,
+              "cycles": 200875456,
+              "instruction": "mov    -0x60(%rbp),%r13d",
+              "previous": "movzwq 0x0(%rax),%rsi"
+            },
+            {
+              "offset": "0x3667",
+              "samples": 10,
+              "cycles": 199543256,
+              "instruction": "mov    %rbp,%rsi",
+              "previous": "mov    %edi,-0x20(%rbp)"
+            },
+            {
+              "offset": "0x4fb2",
+              "samples": 10,
+              "cycles": 198865462,
+              "instruction": "mov    %rbp,%rsi",
+              "previous": "mov    %edi,-0x20(%rbp)"
+            },
+            {
+              "offset": "0x3c70",
+              "samples": 10,
+              "cycles": 193354988,
+              "instruction": "mov    -0x60(%rbp),%ebx",
+              "previous": "movzwq 0x0(%rax),%rsi"
+            }
+          ]
+        },
+        {
+          "id": 13,
+          "name": "perf_unwind_v8",
+          "sha256": "c9e7d11347db409c6cc41681fed12fac635474bf1544cf3903f525c368232dcb",
+          "bytes": 20215,
+          "samples": 208,
+          "cycles": 3999864918,
+          "cycles_per_entry": 223.73039163425915,
+          "category_cycles": {
+            "other": 2474976008,
+            "stack_frame": 19282794,
+            "control": 315678841,
+            "rbp_address_operand": 519070533,
+            "other_memory_operand": 610104515,
+            "call": 60752227
+          },
+          "top_instructions": [
+            {
+              "offset": "0x804",
+              "samples": 7,
+              "cycles": 133953917,
+              "instruction": "mov    $0x8,%edi",
+              "previous": "mov    %bl,0x2e1(%rsi)"
+            },
+            {
+              "offset": "0x1b04",
+              "samples": 4,
+              "cycles": 79057191,
+              "instruction": "movabs $0xffff8cfd00cff758,%rdi",
+              "previous": "mov    %rdi,0x0(%rax)"
+            },
+            {
+              "offset": "0x4841",
+              "samples": 3,
+              "cycles": 59920367,
+              "instruction": "mov    $0x8,%edi",
+              "previous": "mov    %bl,0x2e1(%rsi)"
+            },
+            {
+              "offset": "0x4e66",
+              "samples": 2,
+              "cycles": 40535679,
+              "instruction": "add    $0xc,%rcx",
+              "previous": "mov    0x48(%rcx),%rcx"
+            },
+            {
+              "offset": "0x15be",
+              "samples": 2,
+              "cycles": 40464743,
+              "instruction": "mov    -0x88(%rbp),%r8",
+              "previous": "xor    %ecx,%ecx"
+            },
+            {
+              "offset": "0xcae",
+              "samples": 2,
+              "cycles": 40436924,
+              "instruction": "mov    %rcx,%rdi",
+              "previous": "movzwq 0x4(%r8),%rdx"
+            },
+            {
+              "offset": "0x8e4",
+              "samples": 2,
+              "cycles": 40432793,
+              "instruction": "movabs $0xffff8cfd00cff758,%rdi",
+              "previous": "mov    %rdi,0x0(%rax)"
+            },
+            {
+              "offset": "0x1a24",
+              "samples": 2,
+              "cycles": 40146933,
+              "instruction": "mov    $0x8,%edi",
+              "previous": "mov    %bl,0x2e1(%rsi)"
+            },
+            {
+              "offset": "0x235",
+              "samples": 2,
+              "cycles": 40095848,
+              "instruction": "mov    %r15,%rdx",
+              "previous": "mov    0x0(%rdi),%edi"
+            },
+            {
+              "offset": "0x1afc",
+              "samples": 2,
+              "cycles": 39958867,
+              "instruction": "add    $0x1,%rdi",
+              "previous": "mov    0x0(%rax),%rdi"
+            }
+          ]
+        },
+        {
+          "id": 17,
+          "name": "native_tracer_entry",
+          "sha256": "9deda7a2f0e45c588e4a74c26da872c2297abd3167f40f38f9c8c56c861148fe",
+          "bytes": 3815,
+          "samples": 166,
+          "cycles": 3124924651,
+          "cycles_per_entry": 174.79105678032815,
+          "category_cycles": {
+            "other": 1428620572,
+            "stack_frame": 60321189,
+            "control": 119608236,
+            "rbp_address_operand": 96069914,
+            "call": 135130570,
+            "other_memory_operand": 1285174170
+          },
+          "top_instructions": [
+            {
+              "offset": "0x0",
+              "samples": 19,
+              "cycles": 354804117,
+              "instruction": "nopl   0x0(%rax,%rax,1)",
+              "previous": null
+            },
+            {
+              "offset": "0x6ea",
+              "samples": 15,
+              "cycles": 298990200,
+              "instruction": "add    $0xc,%rcx",
+              "previous": "mov    0x48(%rcx),%rcx"
+            },
+            {
+              "offset": "0xde",
+              "samples": 7,
+              "cycles": 124893590,
+              "instruction": "mov    $0xffffffff,%edi",
+              "previous": "mov    %di,0x1384(%r13)"
+            },
+            {
+              "offset": "0xb3",
+              "samples": 5,
+              "cycles": 99866313,
+              "instruction": "add    %gs:0xffffffffa62b0028,%rax",
+              "previous": "mov    0x0(%rax),%rax"
+            },
+            {
+              "offset": "0x3b1",
+              "samples": 3,
+              "cycles": 57542942,
+              "instruction": "call   0xffffffffa34b8f70",
+              "previous": "mov    $0x10,%esi"
+            },
+            {
+              "offset": "0x2a7",
+              "samples": 3,
+              "cycles": 56396513,
+              "instruction": "mov    %r15,0x1c4(%r13)",
+              "previous": "mov    %r15,0x1bc(%r13)"
+            },
+            {
+              "offset": "0x7a",
+              "samples": 3,
+              "cycles": 55486191,
+              "instruction": "xor    %r15d,%r15d",
+              "previous": "mov    0x0(%rdi),%edi"
+            },
+            {
+              "offset": "0x130",
+              "samples": 3,
+              "cycles": 55429422,
+              "instruction": "mov    %r15,0xf58(%r13)",
+              "previous": "mov    %r15,0xf60(%r13)"
+            },
+            {
+              "offset": "0x26",
+              "samples": 2,
+              "cycles": 40438020,
+              "instruction": "push   %r15",
+              "previous": "push   %r14"
+            },
+            {
+              "offset": "0xc8",
+              "samples": 2,
+              "cycles": 40254565,
+              "instruction": "test   %r13,%r13",
+              "previous": "mov    $0xffffffff,%ebx"
+            }
+          ]
+        }
+      ]
+    },
+    "post_rejit": {
+      "entry": {
+        "bytes_jited": 9315,
+        "bytes_xlated": 24,
+        "id": 48,
+        "name": "native_tracer_e",
+        "run_cnt_delta": 17889258,
+        "run_time_ns_delta": 64617807243,
+        "type": "perf_event"
+      },
+      "programs": [
+        {
+          "id": 28,
+          "name": "perf_unwind_nat",
+          "sha256": "f1bc37d422e3dd0a146cabce9ed1a79e60588b8ef163bb25d2d93e9ae7a2b2c2",
+          "bytes": 33144,
+          "samples": 9741,
+          "cycles": 185690630577,
+          "cycles_per_entry": 10380.007408747753,
+          "category_cycles": {
+            "other": 98872006439,
+            "stack_frame": 1575235497,
+            "control": 29947500604,
+            "rsp_address_operand": 11127491066,
+            "other_memory_operand": 42266854560,
+            "rbp_address_operand": 470336875,
+            "call": 1431205536
+          },
+          "top_instructions": [
+            {
+              "offset": "0x8078",
+              "samples": 644,
+              "cycles": 12269946612,
+              "instruction": "mov    %r11d,%r9d",
+              "previous": "mov    0x10(%rdx),%r11d"
+            },
+            {
+              "offset": "0x787e",
+              "samples": 382,
+              "cycles": 7370577277,
+              "instruction": "decl   0x24ac(%rbx)",
+              "previous": "clac"
+            },
+            {
+              "offset": "0x7802",
+              "samples": 330,
+              "cycles": 6232168647,
+              "instruction": "lfence",
+              "previous": "stac"
+            },
+            {
+              "offset": "0x80fa",
+              "samples": 269,
+              "cycles": 5227765828,
+              "instruction": "cmp    %r11d,%ecx",
+              "previous": "je     0xffffffffc0613aaa"
+            },
+            {
+              "offset": "0x80ed",
+              "samples": 259,
+              "cycles": 4887038210,
+              "instruction": "cmp    0x180(%rdi),%rcx",
+              "previous": "cmova  %r9d,%ecx"
+            },
+            {
+              "offset": "0x775e",
+              "samples": 223,
+              "cycles": 4244792384,
+              "instruction": "cmp    0x44(%rdi),%eax",
+              "previous": "mov    (%rsi),%eax"
+            },
+            {
+              "offset": "0x8082",
+              "samples": 214,
+              "cycles": 4032390109,
+              "instruction": "mov    0x18(%rdx),%rax",
+              "previous": "cmova  %r10d,%r9d"
+            },
+            {
+              "offset": "0x7805",
+              "samples": 212,
+              "cycles": 4027466004,
+              "instruction": "mov    %r12,%rdi",
+              "previous": "lfence"
+            },
+            {
+              "offset": "0x7884",
+              "samples": 187,
+              "cycles": 3613094621,
+              "instruction": "test   %rax,%rax",
+              "previous": "decl   0x24ac(%rbx)"
+            },
+            {
+              "offset": "0x777e",
+              "samples": 177,
+              "cycles": 3391550552,
+              "instruction": "jmp    0xffffffffc06130e8",
+              "previous": "lea    0x130(%rdi,%rax,1),%rax"
+            }
+          ]
+        },
+        {
+          "id": 40,
+          "name": "perf_unwind_v8",
+          "sha256": "3958eaebefbad42ad4bd62347e27499f9460b29e64646e86cf9f06058c1c3be3",
+          "bytes": 36681,
+          "samples": 1716,
+          "cycles": 32949540935,
+          "cycles_per_entry": 1841.861799690071,
+          "category_cycles": {
+            "other": 19738050448,
+            "stack_frame": 511694262,
+            "control": 3996988944,
+            "rsp_address_operand": 348082054,
+            "other_memory_operand": 8208507495,
+            "rbp_address_operand": 20094064,
+            "call": 126123668
+          },
+          "top_instructions": [
+            {
+              "offset": "0x864f",
+              "samples": 181,
+              "cycles": 3427097745,
+              "instruction": "decl   0x24ac(%rbx)",
+              "previous": "clac"
+            },
+            {
+              "offset": "0x85d3",
+              "samples": 176,
+              "cycles": 3407791655,
+              "instruction": "lfence",
+              "previous": "stac"
+            },
+            {
+              "offset": "0x85d6",
+              "samples": 111,
+              "cycles": 2152045386,
+              "instruction": "mov    %r12,%rdi",
+              "previous": "lfence"
+            },
+            {
+              "offset": "0x8655",
+              "samples": 105,
+              "cycles": 2045335163,
+              "instruction": "test   %rax,%rax",
+              "previous": "decl   0x24ac(%rbx)"
+            },
+            {
+              "offset": "0x85f1",
+              "samples": 78,
+              "cycles": 1499215144,
+              "instruction": "test   %r11d,%r11d",
+              "previous": "mov    (%rsi),%rax"
+            },
+            {
+              "offset": "0x8ecb",
+              "samples": 59,
+              "cycles": 1130408177,
+              "instruction": "cmp    %r11d,%ecx",
+              "previous": "je     0xffffffffc06766ab"
+            },
+            {
+              "offset": "0x8ebe",
+              "samples": 47,
+              "cycles": 897529309,
+              "instruction": "cmp    0x180(%rdi),%rcx",
+              "previous": "cmova  %r9d,%ecx"
+            },
+            {
+              "offset": "0x8e53",
+              "samples": 42,
+              "cycles": 797742073,
+              "instruction": "mov    0x18(%rdx),%rax",
+              "previous": "cmova  %r10d,%r9d"
+            },
+            {
+              "offset": "0x8ec5",
+              "samples": 39,
+              "cycles": 759560121,
+              "instruction": "je     0xffffffffc06766ab",
+              "previous": "cmp    0x180(%rdi),%rcx"
+            },
+            {
+              "offset": "0x8e49",
+              "samples": 40,
+              "cycles": 754768495,
+              "instruction": "mov    %r11d,%r9d",
+              "previous": "mov    0x10(%rdx),%r11d"
+            }
+          ]
+        },
+        {
+          "id": 48,
+          "name": "native_tracer_e",
+          "sha256": "f344830b34297075f04b6e8954c57bdf307706e2fe9238c3b750b064eef06662",
+          "bytes": 9315,
+          "samples": 710,
+          "cycles": 13384327832,
+          "cycles_per_entry": 748.1768015196606,
+          "category_cycles": {
+            "other": 7774020992,
+            "stack_frame": 199043812,
+            "control": 1861042281,
+            "call": 111373650,
+            "other_memory_operand": 3281975166,
+            "rbp_address_operand": 117964968,
+            "rsp_address_operand": 38906963
+          },
+          "top_instructions": [
+            {
+              "offset": "0x2363",
+              "samples": 161,
+              "cycles": 3020691087,
+              "instruction": "mov    %r11d,%r9d",
+              "previous": "mov    0x10(%rdx),%r11d"
+            },
+            {
+              "offset": "0x23e5",
+              "samples": 33,
+              "cycles": 643360704,
+              "instruction": "cmp    %r11d,%ecx",
+              "previous": "je     0xffffffffc0693e85"
+            },
+            {
+              "offset": "0x23d8",
+              "samples": 22,
+              "cycles": 411527841,
+              "instruction": "cmp    0x180(%rdi),%rcx",
+              "previous": "cmova  %r9d,%ecx"
+            },
+            {
+              "offset": "0x236d",
+              "samples": 20,
+              "cycles": 364921591,
+              "instruction": "mov    0x18(%rdx),%rax",
+              "previous": "cmova  %r10d,%r9d"
+            },
+            {
+              "offset": "0x23df",
+              "samples": 16,
+              "cycles": 309555689,
+              "instruction": "je     0xffffffffc0693e85",
+              "previous": "cmp    0x180(%rdi),%rcx"
+            },
+            {
+              "offset": "0x23ee",
+              "samples": 15,
+              "cycles": 295352574,
+              "instruction": "testl  $0x1,0x14(%rdx)",
+              "previous": "jb     0xffffffffc0693e88"
+            },
+            {
+              "offset": "0x0",
+              "samples": 14,
+              "cycles": 252187319,
+              "instruction": "nopl   0x0(%rax,%rax,1)",
+              "previous": null
+            },
+            {
+              "offset": "0x242c",
+              "samples": 13,
+              "cycles": 251221888,
+              "instruction": "jmp    0xffffffffc0693da7",
+              "previous": "mov    0x0(%rdx,%rax,1),%rdx"
+            },
+            {
+              "offset": "0x2395",
+              "samples": 12,
+              "cycles": 225868028,
+              "instruction": "cmp    $0x40,%r9d",
+              "previous": "jmp    0xffffffffc0693e25"
+            },
+            {
+              "offset": "0x235c",
+              "samples": 11,
+              "cycles": 212035076,
+              "instruction": "mov    0x10(%rdx),%r11d",
+              "previous": "je     0xffffffffc0693e88"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "scope": "Bind measured guest hardware root IPs to captured program bytes and instructions.\n\nThis is sampled root attribution, with hardware skid; a sample after a call is\nnot proof that the following instruction consumed those cycles. Address-operand\ncategories describe syntax, not load latency or proven spills. Period sums are\nnormalized by the measured entry count, never the inlined tail program count.\n",
+  "caveats": "Single 45s diagnostic per arm, CPU16-19/4vCPU; overlaps CPU0-7 timing/CPU8-15 checked guests. Root cycle attribution and skid, not causal latency or acceptance throughput.",
+  "hotspot_observation": "Native main root sites include shared LPM node prefix/child traversal and user-read STAC/LFENCE/CLAC/pagefault nesting. Kernel copy_user_generic uses STAC/copy/CLAC without LFENCE; existing LTO adds an extra LFENCE, a generic profile-motivated candidate for correction after preserving policy/SMAP/exception behavior."
+}

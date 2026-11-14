@@ -1,0 +1,16 @@
+{
+  "same_resource_load": true,
+  "wrong_resource_return": -22,
+  "wrong_resource_errno": 22,
+  "verifier_log_bytes": 270,
+  "recorded_at": "2026-11-14T11:17:30.966071+00:00",
+  "exit_code": 0,
+  "raw": "/workspaces/kprog-raw/perf/20261114-map-type-owner",
+  "scope": "Stock-kernel retained fd_array program-array ownership conformance. Actual KPROBE map succeeds, distinct PERF_EVENT-owned map returns EINVAL. Reproduces a possible mechanism only; app native stub had empty verifier log, this diagnostic has 270 bytes, so original app root cause remains unproven.",
+  "failed_launches": [
+    "initial C++ output string compile failure",
+    "retry1 guest /var/tmp build binary not exported, exit127; retry2 uses exported kernel/build"
+  ],
+  "timing_lock": false,
+  "host_cpus": "16-19"
+}
