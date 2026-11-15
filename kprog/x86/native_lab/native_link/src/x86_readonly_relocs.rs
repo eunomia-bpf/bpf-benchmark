@@ -85,14 +85,79 @@ fn relative_table_bases(
     Ok((bases, sites))
 }
 
+fn absolute_table_bases(
+    elf: &object::File, symbols: &[&SymInfo], data_section: object::SectionIndex,
+) -> Result<(Vec<u64>, HashSet<LocalSiteKey>)> {
+    let mut bases = Vec::new();
+    let mut sites = HashSet::new();
+    let data = elf.section_by_index(data_section)?;
+    for sym in symbols {
+        let section = elf.section_by_index(sym.section_index)?;
+        let bytes = read_symbol_bytes(elf, sym)?;
+        let instructions: Vec<_> = Decoder::with_ip(64, &bytes, sym.address,
+            DecoderOptions::NONE).into_iter().collect();
+        for window in instructions.windows(2) {
+            let [lea, jump] = window else { unreachable!() };
+            if lea.mnemonic() != Mnemonic::Lea || !lea.is_ip_rel_memory_operand() ||
+                lea.op0_kind() != OpKind::Register ||
+                x86_gpr64_family(lea.op0_register()) != Some(lea.op0_register()) ||
+                jump.flow_control() != FlowControl::IndirectBranch ||
+                jump.op0_kind() != OpKind::Memory || jump.memory_base() != lea.op0_register() ||
+                jump.memory_index() == Register::None || jump.memory_index_scale() != 8 ||
+                jump.memory_displacement64() != 0 || jump.segment_prefix() != Register::None
+            { continue; }
+            for (at, relocation) in section.relocations().filter(|(at, _)|
+                *at >= lea.ip() && *at < lea.next_ip()) {
+                if !matches!(relocation.flags(), RelocationFlags::Elf { r_type: 2 }) { continue; }
+                let RelocationTarget::Symbol(index) = relocation.target() else { continue; };
+                let target = elf.symbol_by_index(index)?;
+                if target.section_index() != Some(data_section) { continue; }
+                let mut decoder = Decoder::with_ip(64, &bytes[(lea.ip()-sym.address) as usize..],
+                    lea.ip(), DecoderOptions::NONE);
+                let decoded = decoder.decode();
+                let offsets = decoder.get_constant_offsets(&decoded);
+                if offsets.displacement_size() != 4 ||
+                    at != lea.ip() + offsets.displacement_offset() as u64 || relocation.has_implicit_addend()
+                { bail!("absolute table base lacks an explicit PC32 displacement"); }
+                let base = i128::from(target.address()) + i128::from(relocation.addend()) +
+                    i128::from(lea.next_ip()-at) - i128::from(data.address());
+                let base = u64::try_from(base).map_err(|_| anyhow!("absolute table base out of range"))?;
+                let mut code_entry = false;
+                for (_, entry) in data.relocations().filter(|(at, _)| *at == base) {
+                    if !matches!(entry.flags(), RelocationFlags::Elf { r_type: 1 }) { continue; }
+                    let RelocationTarget::Symbol(index) = entry.target() else { continue; };
+                    if let Some(section) = elf.symbol_by_index(index)?.section_index() {
+                        code_entry |= elf.section_by_index(section)?.kind() == SectionKind::Text;
+                    }
+                }
+                if !code_entry { bail!("absolute jump-table base has no full-pointer code entry"); }
+                bases.push(base);
+                sites.insert(local_site_key(sym, jump.ip()-sym.address));
+            }
+        }
+    }
+    bases.sort_unstable(); bases.dedup();
+    Ok((bases, sites))
+}
+
+fn code_table_bases(elf: &object::File, symbols: &[&SymInfo], section: object::SectionIndex)
+    -> Result<(Vec<(u64, u32)>, HashSet<LocalSiteKey>)> {
+    let (relative, mut sites) = relative_table_bases(elf, symbols, section)?;
+    let (absolute, absolute_sites) = absolute_table_bases(elf, symbols, section)?;
+    sites.extend(absolute_sites);
+    let mut bases: Vec<_> = relative.into_iter().map(|base| (base, 2))
+        .chain(absolute.into_iter().map(|base| (base, 1))).collect();
+    bases.sort_unstable(); bases.dedup();
+    Ok((bases, sites))
+}
+
 pub(super) fn indirect_sites(elf: &object::File, included: &[SymInfo])
     -> Result<HashSet<LocalSiteKey>> {
     let symbols: Vec<_> = included.iter().collect();
     let mut sites = HashSet::new();
-    for section in elf.sections().filter(|section|
-        section.kind() == SectionKind::ReadOnlyData && section.relocations().next().is_some())
-    {
-        sites.extend(relative_table_bases(elf, &symbols, section.index())?.1);
+    for section in elf.sections() {
+        if !immutable_section(section.kind(), section.name()?) || section.relocations().next().is_none() { continue; }
+        sites.extend(code_table_bases(elf, &symbols, section.index())?.1);
     }
     Ok(sites)
 }
@@ -102,20 +167,21 @@ pub(super) fn indirect_sites(elf: &object::File, included: &[SymInfo])
 pub(super) fn control_targets(elf: &object::File, sym: &SymInfo)
     -> Result<HashMap<u64, Vec<u64>>> {
     let mut result = HashMap::new();
-    for section in elf.sections().filter(|section|
-        section.kind() == SectionKind::ReadOnlyData && section.relocations().next().is_some()) {
-        let (bases, sites) = relative_table_bases(elf, &[sym], section.index())?;
+    for section in elf.sections() {
+        if !immutable_section(section.kind(), section.name()?) || section.relocations().next().is_none() { continue; }
+        let (bases, sites) = code_table_bases(elf, &[sym], section.index())?;
         if sites.is_empty() { continue; }
         let mut targets = Vec::new();
         for (at, relocation) in section.relocations() {
-            let Some(base) = bases.iter().rev().find(|base| **base <= at) else { continue; };
-            if !matches!(relocation.flags(), RelocationFlags::Elf { r_type: 2 }) ||
+            let Some((base, kind)) = bases.iter().rev().find(|(base, _)| *base <= at) else { continue; };
+            if !matches!(relocation.flags(), RelocationFlags::Elf { r_type } if r_type == *kind) ||
                 relocation.has_implicit_addend() { bail!("unsupported code-table CFG relocation"); }
             let RelocationTarget::Symbol(index) = relocation.target() else {
                 bail!("code-table CFG relocation lacks a symbol");
             };
             let target = elf.symbol_by_index(index)?;
-            let address = i128::from(target.address()) + i128::from(relocation.addend()) - i128::from(at-base);
+            let address = i128::from(target.address()) + i128::from(relocation.addend()) -
+                if *kind == 2 { i128::from(at-base) } else { 0 };
             if target.section_index() == Some(sym.section_index) && address >= i128::from(sym.address) &&
                 address < i128::from(sym.address+sym.size) {
                 targets.push(u64::try_from(address)?);
@@ -163,7 +229,9 @@ fn code_table_span(elf: &object::File, layouts: &[SymbolLayout],
     section_index: object::SectionIndex, address: i128) -> Result<Option<(u64, u64)>> {
     let Ok(base) = u64::try_from(address) else { return Ok(None); };
     let included: Vec<_> = layouts.iter().map(|layout| &layout.sym).collect();
-    if !relative_table_bases(elf, &included, section_index)?.0.contains(&base) { return Ok(None); }
+    let bases = code_table_bases(elf, &included, section_index)?.0;
+    let Some((_, kind)) = bases.iter().find(|(at, _)| *at == base) else { return Ok(None); };
+    let width = if *kind == 1 { 8 } else { 4 };
     let mut symbols = Vec::new();
     for symbol in elf.symbols().filter(|symbol|
         symbol.kind() == object::SymbolKind::Text && !symbol.is_undefined() && symbol.size() > 0) {
@@ -174,17 +242,17 @@ fn code_table_span(elf: &object::File, layouts: &[SymbolLayout],
     }
     let symbols: Vec<_> = symbols.iter().collect();
     let section = elf.section_by_index(section_index)?;
-    let next = relative_table_bases(elf, &symbols, section_index)?.0.into_iter()
-        .filter(|at| *at > base).min().unwrap_or(section.size());
+    let next = code_table_bases(elf, &symbols, section_index)?.0.into_iter()
+        .map(|(at, _)| at).filter(|at| *at > base).min().unwrap_or(section.size());
     let relocations: BTreeMap<_, _> = section.relocations().collect();
     let mut end = base;
-    while end.checked_add(4).is_some_and(|limit| limit <= next) {
+    while end.checked_add(width).is_some_and(|limit| limit <= next) {
         let Some(relocation) = relocations.get(&end) else { break; };
-        if !matches!(relocation.flags(), RelocationFlags::Elf { r_type: 2 }) || relocation.has_implicit_addend() { break; }
+        if !matches!(relocation.flags(), RelocationFlags::Elf { r_type } if r_type == *kind) || relocation.has_implicit_addend() { break; }
         let RelocationTarget::Symbol(index) = relocation.target() else { break; };
         let Some(index) = elf.symbol_by_index(index)?.section_index() else { break; };
         if elf.section_by_index(index)?.kind() != SectionKind::Text { break; }
-        end += 4;
+        end += width;
     }
     if end == base { bail!("referenced code table has no complete relocation slots"); }
     Ok(Some((base, end-base)))
@@ -192,12 +260,13 @@ fn code_table_span(elf: &object::File, layouts: &[SymbolLayout],
 
 pub(super) enum DataReloc {
     RelativeCode { proof: ProofDataReloc, target_offset: u64, table_offset: u64 },
+    AbsoluteCode { proof: ProofDataReloc, target_offset: u64 },
     MapPointer(ProofDataReloc),
 }
 
 impl DataReloc {
     pub fn proof(self) -> ProofDataReloc {
-        match self { Self::RelativeCode { proof, .. } | Self::MapPointer(proof) => proof }
+        match self { Self::RelativeCode { proof, .. } | Self::AbsoluteCode { proof, .. } | Self::MapPointer(proof) => proof }
     }
 }
 
@@ -218,6 +287,30 @@ pub(super) fn data_relocations(
                 bail!("nested map pointer requires a symbol target");
             };
             let target = elf.symbol_by_index(index)?;
+            if let Some(index) = target.section_index() {
+                if elf.section_by_index(index)?.kind() == SectionKind::Text {
+                    if relocation.has_implicit_addend() || at.checked_add(8).is_none_or(|limit| limit > end) {
+                        bail!("absolute code table needs an explicit full-pointer slot");
+                    }
+                    let address = i128::from(target.address()) + i128::from(relocation.addend());
+                    let destination = layouts.iter().find(|layout|
+                        layout.sym.section_index == index && address >= i128::from(layout.sym.address) &&
+                        address < i128::from(layout.sym.address + layout.sym.size))
+                        .ok_or_else(|| anyhow!("absolute code table targets code outside the included symbols"))?;
+                    let source_offset = u64::try_from(address-i128::from(destination.sym.address))?;
+                    let instruction = destination.insn_local_ip.iter().position(|offset| *offset == source_offset)
+                        .ok_or_else(|| anyhow!("absolute code table targets a removed or interior instruction"))?;
+                    let encoded = destination.new_offset_in_sym[instruction];
+                    if encoded == u32::MAX { bail!("absolute code-table target has no rewritten instruction"); }
+                    result.push(DataReloc::AbsoluteCode {
+                        proof: ProofDataReloc { owner: owner.to_owned(), offset: at-start, r_type: 1,
+                            symbol: destination.sym.name.clone(), addend: i64::from(encoded) },
+                        target_offset: u64::try_from(destination.base_in_blob)?.checked_add(u64::from(encoded))
+                            .ok_or_else(|| anyhow!("absolute table code offset overflow"))?,
+                    });
+                    continue;
+                }
+            }
             let name = target.name()?;
             let declared_data = match target.section_index() {
                 Some(index) => {
@@ -275,6 +368,65 @@ pub(super) fn data_relocations(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn full_pointer_code_table_keeps_rewritten_instruction_identities() -> Result<()> {
+        let build = std::path::Path::new("/var/tmp/kprog-tmp/perf/absolute-code-tables");
+        fs::create_dir_all(build)?;
+        let native = build.join("absolute.native.o");
+        let command = ["clang-18", "-target", "x86_64-linux-gnu", "-O3", "-march=native",
+            "-foptimize-sibling-calls", "-fomit-frame-pointer", "-mno-red-zone",
+            "-mgeneral-regs-only", "-fno-stack-protector", "-c",
+            "/workspaces/repository/kprog/test/native_absolute_code_table.c", "-o",
+            native.to_str().ok_or_else(|| anyhow!("absolute fixture path is not UTF-8"))?];
+        let output = std::process::Command::new(command[0]).args(&command[1..]).output()?;
+        if !output.status.success() { bail!("absolute fixture failed: {}", String::from_utf8_lossy(&output.stderr)); }
+        fs::write(build.join("compile-command.json"), serde_json::to_vec(&command)?)?;
+        let source = fs::read(native)?;
+        let original = object::File::parse(source.as_slice())?;
+        let entry = find_symbol_by_name(&original, "absolute_table")?;
+        assert_eq!(control_targets(&original, &entry)?.values().next().map(Vec::len), Some(8));
+        let proof = rewrite_x86(&original, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
+            &HashMap::new(), &[], true, true, None, None, None, None, false)?;
+        assert_eq!(proof.proof_data_relocs.len(), 8);
+        assert!(proof.proof_data_relocs.iter().all(|reloc| reloc.r_type == 1));
+        let path = build.join("absolute.proof.o");
+        write_proof_object(&path, object::Architecture::X86_64, "absolute_table", &proof.blob,
+            &proof.proof_symbols, &proof.proof_relocs, &proof.proof_data_relocs, proof.callee_saved_mask)?;
+        let bytes = fs::read(&path)?;
+        let elf = object::File::parse(bytes.as_slice())?;
+        let entry = find_symbol_by_name(&elf, "absolute_table")?;
+        let layout: KernelLayout = serde_json::from_slice(&fs::read(
+            "/var/tmp/kprog-tmp/perf/kernel-layout/kernel-layout.json")?)?;
+        let linked = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
+            &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read),
+            Some(&layout.hash), Some(&layout.lpm), false)?;
+        assert_eq!(linked.relocs.len(), 8);
+        assert!(linked.map_patches.is_empty());
+        for record in &linked.relocs {
+            assert_eq!(record.kind, NATIVE_LAB_RELOC_IMAGE_POINTER);
+            assert!((record.target as usize) < linked.blob.len());
+            assert_eq!(&linked.blob[record.offset as usize..record.offset as usize + 8], &[0;8]);
+        }
+        fs::write(build.join("absolute.bin"), &linked.blob)?;
+        fs::write(build.join("rust-result.json"), serde_json::to_vec_pretty(&serde_json::json!({
+            "proof_slots":8,"runtime_image_pointers":linked.relocs.iter().map(|r|
+                serde_json::json!({"offset":r.offset,"kind":r.kind,"target":r.target})).collect::<Vec<_>>()
+        }))?)?;
+        let data = elf.section_by_name(".rela.native_link_rodata").ok_or_else(|| anyhow!("missing nested relocations"))?;
+        let (start, _) = data.file_range().ok_or_else(|| anyhow!("missing nested relocation bytes"))?;
+        let mut malformed = bytes;
+        let at = start as usize + 16;
+        let addend = i64::from_le_bytes(malformed[at..at+8].try_into()?);
+        malformed[at..at+8].copy_from_slice(&(addend+1).to_le_bytes());
+        let elf = object::File::parse(malformed.as_slice())?;
+        let entry = find_symbol_by_name(&elf, "absolute_table")?;
+        let error = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
+            &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read),
+            Some(&layout.hash), Some(&layout.lpm), false).err().ok_or_else(|| anyhow!("interior target accepted"))?;
+        assert!(format!("{error:#}").contains("interior"));
+        Ok(())
+    }
 
     #[test]
     fn anonymous_section_data_reference_excludes_unrelated_code_tables() -> Result<()> {

@@ -49,6 +49,7 @@ const X86_TAIL_CALL_OFFSET_KEY: &str = "__native_x86_tail_call_offset";
 const X86_JMP_END_PLACEHOLDER_TARGET: u64 = 0x4000_0000;
 const NATIVE_LAB_RELOC_HELPER_CALL_REL32: u32 = 1;
 const NATIVE_LAB_RELOC_X86_TAIL_COUNT: u32 = 10;
+const NATIVE_LAB_RELOC_IMAGE_POINTER: u32 = 12;
 const X86_HELPER_CALL_REL32_SLOT: [u8; 5] = [0xE8, 0, 0, 0, 0];
 type SymbolKey = (object::SectionIndex, u64);
 type LocalSiteKey = (object::SectionIndex, u64, u64);
@@ -2244,7 +2245,7 @@ fn apply_elf_relocations(
     // satisfied by copying the symbol's bytes to the blob tail and
     // patching the rip-relative disp32 in the loading insn.
     let mut local_data_embed: HashMap<String, usize> = HashMap::new();
-    let out_relocs = Vec::new();
+    let mut out_relocs = Vec::new();
 
     for (section_index, layouts_in_sec) in &sections {
         let section = elf
@@ -2615,6 +2616,13 @@ fn apply_elf_relocations(
                                         .ok_or_else(|| anyhow!("immutable map-pointer patch offset overflow"))?;
                                     blob[field..field + 8].fill(0);
                                     map_patches.push(MapPatch { name: proof.symbol, offset: field });
+                                }
+                                readonly_relocs::DataReloc::AbsoluteCode { proof, target_offset } => {
+                                    let field = off.checked_add(usize::try_from(proof.offset)?)
+                                        .ok_or_else(|| anyhow!("absolute code-pointer patch offset overflow"))?;
+                                    blob[field..field + 8].fill(0);
+                                    out_relocs.push(RelocRecord { offset: u32::try_from(field)?,
+                                        kind: NATIVE_LAB_RELOC_IMAGE_POINTER, target: target_offset });
                                 }
                             }
                         }

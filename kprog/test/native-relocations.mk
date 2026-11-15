@@ -117,6 +117,10 @@ absolute-table-forms:
 	readelf -rW $(ABSOLUTE_TABLE_BUILD)/absolute.native.o > $(OUTPUT)/native.relocations
 	$(LINKER_BINARY) --input $(ABSOLUTE_TABLE_BUILD)/absolute.native.o --symbol absolute_table --mode proof --output $(ABSOLUTE_TABLE_BUILD)/absolute.proof.o > $(OUTPUT)/proof.stdout 2> $(OUTPUT)/proof.stderr
 
+.PHONY: absolute-table-source
+absolute-table-source: $(KERNEL_LAYOUT)
+	taskset -c 16-19 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
+
 .PHONY: jump-table-check
 jump-table-check: $(LINKER_BINARY) jump-table-forms $(KERNEL_LAYOUT)
 	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_native_jump_tables.py --build $(BUILD) --output $(OUTPUT)/jump-tables --linker $(LINKER_BINARY) --kernel-layout $(KERNEL_LAYOUT)
