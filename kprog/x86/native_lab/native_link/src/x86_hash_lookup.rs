@@ -158,7 +158,7 @@ mod tests {
         let mut relocs=vec![RelocRecord{offset:0,kind:1,target:0x1234},
             RelocRecord{offset:5,kind:1,target:0x1234},RelocRecord{offset:10,kind:1,target:0x5678}];
         let mut facts=HashMap::from([("unknown".into(),LookupSiteSpec{kind:LookupKind::Call,target_addr:0x5678,
-            key_offset:0,max_entries:0,elem_size:0,index_mask:0,value_offset:0,percpu_base_addr:0,map_name:Some("unknown".into())})]);
+            key_offset:0,max_entries:0,elem_size:0,index_mask:0,value_offset:0,percpu_base_addr:0})]);
         let unused=share(&mut blob,&mut relocs,&fixture(),&facts)?;
         assert!(unused.is_empty());assert_eq!(blob,original,"generic target must stay generic");
         let mut typed=facts["unknown"].clone();typed.kind=LookupKind::Hash;typed.target_addr=0x1234;facts.insert("known".into(),typed);

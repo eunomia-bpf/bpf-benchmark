@@ -60,7 +60,7 @@ fn local_site_key(sym: &SymInfo, local_ip: u64) -> LocalSiteKey {
     (sym.section_index, sym.address, local_ip)
 }
 
-fn generic_lookup_site(target_addr: u64, map_name: Option<&str>) -> Option<LookupSiteSpec> {
+fn generic_lookup_site(target_addr: u64) -> Option<LookupSiteSpec> {
     if target_addr == 0 {
         return None;
     }
@@ -73,7 +73,6 @@ fn generic_lookup_site(target_addr: u64, map_name: Option<&str>) -> Option<Looku
         index_mask: 0,
         value_offset: 0,
         percpu_base_addr: 0,
-        map_name: map_name.map(ToOwned::to_owned),
     })
 }
 
@@ -97,7 +96,7 @@ fn select_lookup_site(
     }
     // A dynamic map retains its actual pointer and generic helper semantics;
     // the shared runtime routines dispatch on the real map's type.
-    let spec = generic_lookup_site(generic_target_addr, native_map_name)
+    let spec = generic_lookup_site(generic_target_addr)
         .ok_or_else(|| anyhow!(
             "x86 runtime map lookup {native_call_index} in {sym_name} requires the bpf_map_lookup_elem helper target"
         ))?;
@@ -4428,7 +4427,6 @@ mod tests {
             assert_eq!(spec.kind, LookupKind::Call);
             assert_eq!(spec.target_addr, 0x1234);
             assert_eq!(spec.key_offset, 0);
-            assert_eq!(spec.map_name.as_deref(), name);
             assert!(select_lookup_site(&HashMap::new(), 0, name, "entry", 0).is_err(),
                 "a missing helper must not produce a guessed map type");
         }
@@ -4440,7 +4438,7 @@ mod tests {
         let array = LookupSiteSpec {
             kind: LookupKind::Array, target_addr: 0, key_offset: 0,
             max_entries: 8, elem_size: 8, index_mask: 7, value_offset: 32,
-            percpu_base_addr: 0, map_name: Some("known_map".into()),
+            percpu_base_addr: 0,
         };
         let mut maps = HashMap::from([("known_map".into(), array.clone())]);
         for kind in [LookupKind::Array, LookupKind::PerCpuArray, LookupKind::Hash,
@@ -4475,7 +4473,7 @@ mod tests {
         for kind in [LookupKind::Hash, LookupKind::LruHash, LookupKind::HashOfMaps] {
             let spec = LookupSiteSpec { kind, target_addr: 0x5678, key_offset: 24,
                 max_entries: 0, elem_size: 0, index_mask: 0, value_offset: 8,
-                percpu_base_addr: 0, map_name: Some("known_map".into()) };
+                percpu_base_addr: 0 };
             let instructions = build_x86_lookup_call_postprocess(&spec)?;
             let post = BlockEncoder::encode(64, InstructionBlock::new(&instructions, 0),
                                              BlockEncoderOptions::NONE)?.code_buffer;
@@ -4537,7 +4535,6 @@ mod tests {
         let facts = HashMap::from([("known_map".into(), LookupSiteSpec {
             kind: LookupKind::Array, target_addr: 0, key_offset: 0, max_entries: 3,
             elem_size: 8, index_mask: 3, value_offset: 32, percpu_base_addr: 0,
-            map_name: Some("known_map".into()),
         })]);
         {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps, &facts, &[], false, false, None, false, None, None, None, false, false, false)?;

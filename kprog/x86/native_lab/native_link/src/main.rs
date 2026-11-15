@@ -185,7 +185,6 @@ struct LookupSiteSpec {
     /// Optional BPF map name observed at the source helper call. The kernel
     /// truncates map names to BPF_OBJ_NAME_LEN - 1, so target-specific
     /// linkers must compare this field using kernel-visible truncation.
-    map_name: Option<String>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -282,7 +281,6 @@ struct LinkPlanLookupSite {
     index_mask: u32,
     value_offset: u32,
     percpu_base_addr: u64,
-    map_name: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -332,7 +330,6 @@ fn lookup_site_from_plan(site: LinkPlanLookupSite) -> Result<LookupSiteSpec> {
         index_mask: site.index_mask,
         value_offset: site.value_offset,
         percpu_base_addr: site.percpu_base_addr,
-        map_name: site.map_name,
     })
 }
 
@@ -352,7 +349,6 @@ fn lookup_map_from_plan(site: LinkPlanLookupMap) -> Result<(String, LookupSiteSp
             index_mask: site.index_mask,
             value_offset: site.value_offset,
             percpu_base_addr: site.percpu_base_addr,
-            map_name: Some(name),
         },
     ))
 }
