@@ -40,7 +40,11 @@ static void check(const std::filesystem::path &path, const char *entry,
 
 int main(int argc, char **argv)
 try {
-    if (argc != 5 && argc != 7) fail("usage: scheduled-stock ORIGINAL B ORIGINAL_LOG B_LOG [ORIGINAL_ENTRY B_ENTRY]");
+    if (argc == 4) {
+        check(argv[1], argv[2], argv[3]);
+        return 0;
+    }
+    if (argc != 5 && argc != 7) fail("usage: scheduled-stock OBJECT ENTRY LOG, or ORIGINAL B ORIGINAL_LOG B_LOG [ORIGINAL_ENTRY B_ENTRY]");
     check(argv[1], argc == 7 ? argv[5] : "scheduled_table", argv[3]);
     check(argv[2], argc == 7 ? argv[6] : "trusted_x86_x86_sim_xdp", argv[4]);
     return 0;
