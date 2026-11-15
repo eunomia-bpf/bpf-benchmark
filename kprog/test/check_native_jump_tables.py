@@ -120,10 +120,7 @@ def main():
         b_status = dict(status='generated', scope='Generation only; not compiled or stock verified')
     model_executions, refusal_cases = [], []
     if b_status['status'] == 'generated':
-        prelude = '''extern unsigned long long table_test_seed;
-#undef X86_SIM_L_UNSPECIFIED
-#define X86_SIM_L_UNSPECIFIED() table_test_seed
-extern void table_test_unresolved(void);
+        prelude = '''extern void table_test_unresolved(void);
 #define __x86_sim_unresolved_indirect_target table_test_unresolved
 '''
         model = args.build/'jump-table-model.c'
