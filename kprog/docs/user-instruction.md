@@ -96,6 +96,8 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
   run.sh 是什么? 为啥被改? benchmark 我觉得入口也不应该改动吧"
 - 2026-11-15 ~22:55 UTC: "你看看这一周的说有改动?"
 - 2026-11-15 ~22:56 UTC: "你加的莫名其妙的规定?"
+- 2026-11-15 ~22:58 UTC: "我们一开始的 benchmark setup 是什么?"
+- 2026-11-15 ~23:00 UTC: "有没有一些不该改动的地方一直在改? 看看这两周的. 停掉所有现在的."（协调者 22:53 起停掉 C、perf、formal 三个 lane 和 C 的 Tracee 计时队列）
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
