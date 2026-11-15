@@ -161,3 +161,11 @@ admission fraction. Correct raw profile denominators are208.42M eBPF/217.10M
 native; program-text samples73.174->71.620 per million do not establish the
 previously quoted6percent body slowdown. Inlined-helper work is included in
 that bucket. No new performance gain or serial45percent fraction is inferred.
+
+Katran profile scope follow-up (be28ce768): source proves measurement_start
+brackets warmup as well as sampling, but shim BPF deltas begin after warmup.
+The saved profile hasone60s warmup+one60s sample, and124/121s clock spans.
+Its samples divided by measured-only calls are not matched-window per-call
+costs. The8.86percent remains a global capture share, not a C4 serial bound.
+C receives the read-only start/end-counter observer change; no frozen runner,
+workload, profile-admission gate or new optimization is introduced here.

@@ -31,7 +31,9 @@ Using 8.8644% as a hypothetical serial-work fraction and the C4 per-call speedup
 
 The profile's start/stop log spans 124.0s baseline and 121.0s native, while its one workload sample is configured60s. Its global sample share must retain that capture-window scope; it is not a direct C4 critical-path fraction.
 
-| profile samples per million counted runs | eBPF | native |
+There is also a counter-window mismatch: profile details/result.json records one warmup and one measured60-second sample. corpus/driver.py emits measurement_start before measure_app_phase; runner/libs/rejit.py:440 runs warmups before the shim measure_start. The profile observer brackets the outer event, so its samples include warmup while run_cnt_delta excludes warmup. The table below is the literal raw quotient, not a matched-window per-call cost. No exact matching invocation denominator can be recovered from the retained C4/profile counter deltas.
+
+| full-capture samples per million measured-only runs (window mismatch) | eBPF | native |
 | --- | ---: | ---: |
 | program_text | 73.174 | 71.620 |
 | clock | 69.034 | 62.873 |
@@ -43,4 +45,4 @@ The program-text bucket includes logic moved into the program by helper inlining
 
 Next in the authorized order: after the remaining OTel app, use C's existing producer switches for the18:40 target-CPU/CMOV/sibling-call configuration and every LTO piece, then subset-time Katran. After that baseline, bind the clock helper directly to the same ktime_get_mono_fast_ns implementation. No new timing or improvement is claimed here.
 
-Source steps f64a1698e/b161e5508; make -f kprog/test/katran-accounting.mk analyze. This publication uses corrected-v2. The original first analysis/report is retained under /workspaces/kprog-raw/perf/20261114-katran-c4-accounting; all raw numeric inputs remain unchanged. Exact pktgen stdout, app BPF counters, metadata, profile app counters and attribution are included here as small raw evidence.
+Source f64a1698e/b161e5508/be28ce768; make -f kprog/test/katran-accounting.mk analyze. This publication uses warmup-corrected-v3; initial and corrected-v2 reports/raw inputs are retained in the persistent raw tree. No benchmark or profile result was discarded.

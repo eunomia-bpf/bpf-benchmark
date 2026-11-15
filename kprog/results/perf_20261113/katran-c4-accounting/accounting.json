@@ -711,6 +711,10 @@
       "total_samples": 475599,
       "bpf_samples": 42159,
       "bpf_share_of_capture": 0.08864400471826055,
+      "configured_warmups": 1,
+      "configured_samples": 1,
+      "configured_workload_seconds": 60.0,
+      "normalization_scope": "Full profile capture divided by measured-only run_cnt_delta; not a matched counter window.",
       "samples_per_million_runs": {
         "program_text": 73.17419375194582,
         "clock": 69.03352565097347,
@@ -727,6 +731,10 @@
       "total_samples": 435681,
       "bpf_samples": 34434,
       "bpf_share_of_capture": 0.07903489020636659,
+      "configured_warmups": 1,
+      "configured_samples": 1,
+      "configured_workload_seconds": 60.0,
+      "normalization_scope": "Full profile capture divided by measured-only run_cnt_delta; not a matched counter window.",
       "samples_per_million_runs": {
         "program_text": 71.61985315042095,
         "clock": 62.87291758333308,
