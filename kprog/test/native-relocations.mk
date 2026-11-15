@@ -227,3 +227,7 @@ guest-scheduled-table-checked:
 	mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf
 	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
 	CLANG=$(ROOT)/kprog/stock-path/bin/clang python3 $(ROOT)/kprog/test/verify_retained_proof.py --native $(OUTPUT)/inputs/scheduled.native.o --metadata $(ROOT)/kprog/test/table_context_metadata.json --context $(ROOT)/kprog/test/table_context_load_context.json --source $(OUTPUT)/inputs/scheduled.original.bpf.o --proof $(OUTPUT)/inputs/scheduled.bpf.o --symbol scheduled_table --linker $(LINKER_BINARY) --checked-source $(OUTPUT)/inputs/scheduled.bpf.i --checked-frontend $(OUTPUT)/inputs/scheduled.bpf.bounds-input.bc --checked-compiler /workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir --output $(OUTPUT)/replay
+
+.PHONY: current-otel-preprocess
+current-otel-preprocess:
+	taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/profile_current_otel.py --build /var/tmp/kprog-tmp/perf/otel-whole-word-checked --output $(OUTPUT) --metadata /workspaces/kprog-raw/perf/20261115-otel-hotspot-spills/replay/request__generation.metadata.json --entry /workspaces/kprog-raw/perf/20261115-otel-hotspot-spills/replay/request__kernel.entry
