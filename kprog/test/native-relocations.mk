@@ -11,7 +11,7 @@ CONTEXT_TOOL := /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds
 KERNEL_LAYOUT_BUILD := /var/tmp/kprog-tmp/perf/kernel-layout
 KERNEL_LAYOUT := $(KERNEL_LAYOUT_BUILD)/kernel-layout.json
 KDIR := /workspaces/.agent-state/kprog-ck/build-x86
-BOOT_CAPTURE ?= /workspaces/kprog-raw/perf/20261115-normal-layout-plan/boot-fixed
+BOOT_CAPTURE ?= /workspaces/kprog-raw/perf/20261115-normal-layout-plan/boot-ready
 LIBBPF_PREFIX := $(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix
 LIBBPF_LIBRARY := $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a
 
@@ -39,8 +39,8 @@ restore-boot-metadata:
 	flock -s /workspaces/.agent-state/kprog-lanes/locks/image python3 $(ROOT)/kprog/test/restore_boot_elf.py --kernel $(KDIR) --extractor $(ROOT)/vendor/linux-framework/scripts/extract-vmlinux --output $(OUTPUT)/boot-recovery
 
 kernel-layout-boot: $(KERNEL_LAYOUT_BUILD)/facts
-	install -d $(OUTPUT)
-	taskset -c 16-17 prlimit --as=17179869184 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rodir $(KERNEL_LAYOUT_BUILD) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-kernel-layout OUTPUT=$(OUTPUT)'
+	install -d $(OUTPUT) $(OUTPUT)/inputs
+	taskset -c 16-17 prlimit --as=17179869184 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rodir $(OUTPUT)/inputs=$(KERNEL_LAYOUT_BUILD) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-kernel-layout OUTPUT=$(OUTPUT) KERNEL_LAYOUT_BUILD=$(OUTPUT)/inputs'
 
 guest-kernel-layout:
 	uname -r > $(OUTPUT)/kernel.release

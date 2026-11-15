@@ -581,10 +581,10 @@ probe-read-kernel-inputs:
 		$(HERE)/probe-read-kernel.cpp -Wl,--gc-sections $(dir $(PROBE_KERNEL_LOADER))libnative_loader.a $(PROBE_LIBBPF)/pic-obj/libbpf.a -lelf -lz -ldl -pthread -o $(PROBE_KERNEL_BUILD)/client
 
 probe-read-kernel: probe-read-kernel-inputs
-	install -d $(PROBE_KERNEL_OUTPUT)
-	taskset -c 16-19 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(PROBE_KERNEL_OUTPUT) --rodir $(PROBE_KERNEL_BUILD) --overlay-rwdir /tmp \
+	install -d $(PROBE_KERNEL_OUTPUT) $(PROBE_KERNEL_OUTPUT)/inputs
+	taskset -c 16-19 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(PROBE_KERNEL_OUTPUT) --rodir $(PROBE_KERNEL_OUTPUT)/inputs=$(PROBE_KERNEL_BUILD) --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -f kprog/build/Makefile guest-probe-read PROBE_KERNEL_OUTPUT=$(PROBE_KERNEL_OUTPUT)'
+		--exec 'make -f kprog/build/Makefile guest-probe-read PROBE_KERNEL_OUTPUT=$(PROBE_KERNEL_OUTPUT) PROBE_KERNEL_BUILD=$(PROBE_KERNEL_OUTPUT)/inputs'
 
 guest-probe-read:
 	cat /proc/cpuinfo > $(PROBE_KERNEL_OUTPUT)/cpuinfo
@@ -615,10 +615,10 @@ hash-lookup-kernel-inputs:
 		$(HERE)/hash-lookup-kernel.cpp -Wl,--gc-sections $(dir $(PROBE_KERNEL_LOADER))libnative_loader.a $(PROBE_LIBBPF)/pic-obj/libbpf.a -lelf -lz -ldl -pthread -o $(HASH_KERNEL_BUILD)/client
 
 hash-lookup-kernel: hash-lookup-kernel-inputs
-	install -d $(HASH_KERNEL_OUTPUT)
-	taskset -c 16-19 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(HASH_KERNEL_OUTPUT) --rodir $(HASH_KERNEL_BUILD) --overlay-rwdir /tmp \
+	install -d $(HASH_KERNEL_OUTPUT) $(HASH_KERNEL_OUTPUT)/inputs
+	taskset -c 16-19 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(HASH_KERNEL_OUTPUT) --rodir $(HASH_KERNEL_OUTPUT)/inputs=$(HASH_KERNEL_BUILD) --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -f kprog/build/Makefile guest-hash-lookup HASH_KERNEL_OUTPUT=$(HASH_KERNEL_OUTPUT) HASH_KERNEL_CASES="$(HASH_KERNEL_CASES)"'
+		--exec 'make -f kprog/build/Makefile guest-hash-lookup HASH_KERNEL_OUTPUT=$(HASH_KERNEL_OUTPUT) HASH_KERNEL_BUILD=$(HASH_KERNEL_OUTPUT)/inputs HASH_KERNEL_CASES="$(HASH_KERNEL_CASES)"'
 
 guest-hash-lookup:
 	cat /proc/cpuinfo > $(HASH_KERNEL_OUTPUT)/cpuinfo
@@ -651,11 +651,11 @@ array-shared-kernel:
 	flock -s /workspaces/.agent-state/kprog-lanes/locks/image make -f $(HERE)/Makefile array-shared-kernel-run ARRAY_KERNEL_BUILD=$(ARRAY_KERNEL_BUILD) ARRAY_KERNEL_OUTPUT=$(ARRAY_KERNEL_OUTPUT)
 
 array-shared-kernel-run: array-shared-kernel-inputs
-	install -d $(ARRAY_KERNEL_OUTPUT)
+	install -d $(ARRAY_KERNEL_OUTPUT) $(ARRAY_KERNEL_OUTPUT)/inputs
 	sha256sum $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link $(ROOT)/kprog/libnativeloader/src/native_loader_lto.hpp $(PROBE_KERNEL_LOADER) > $(ARRAY_KERNEL_OUTPUT)/input-sha256
-	taskset -c 16-19 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(ARRAY_KERNEL_OUTPUT) --rodir $(ARRAY_KERNEL_BUILD) --overlay-rwdir /tmp \
+	taskset -c 16-19 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(ARRAY_KERNEL_OUTPUT) --rodir $(ARRAY_KERNEL_OUTPUT)/inputs=$(ARRAY_KERNEL_BUILD) --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -f kprog/build/Makefile guest-array-shared ARRAY_KERNEL_OUTPUT=$(ARRAY_KERNEL_OUTPUT)'
+		--exec 'make -f kprog/build/Makefile guest-array-shared ARRAY_KERNEL_OUTPUT=$(ARRAY_KERNEL_OUTPUT) ARRAY_KERNEL_BUILD=$(ARRAY_KERNEL_OUTPUT)/inputs'
 
 guest-array-shared:
 	uname -r > $(ARRAY_KERNEL_OUTPUT)/kernel.release
