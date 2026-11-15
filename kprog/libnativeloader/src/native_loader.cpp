@@ -386,6 +386,7 @@ constexpr const char *kTypedHelperSymbols[] = {
 
 constexpr const char *kX86CpuNumberHelperKey = "__native_x86_cpu_number";
 constexpr const char *kX86ThisCpuOffHelperKey = "__native_x86_this_cpu_off";
+constexpr const char *kX86MonoFastHelperKey = "__native_x86_ktime_get_mono_fast_ns";
 constexpr const char *kX86BpfMapMaxEntriesOffsetKey =
     "__native_x86_bpf_map_max_entries_offset";
 constexpr const char *kX86BpfArrayPtrsOffsetKey = "__native_x86_bpf_array_ptrs_offset";
@@ -395,7 +396,7 @@ constexpr const char *kX86TailCallOffsetKey = "__native_x86_tail_call_offset";
 constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v40";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v41";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
 constexpr const char *kNativeStubBtfCacheVersion = "native-stub-btf-cache-v1";
 constexpr const char *kHtabLookupElemSymbol = "__htab_map_lookup_elem";

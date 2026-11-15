@@ -8,6 +8,19 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 
 use crate::*;
 
+const MONO_FAST_HELPER_KEY: &str = "__native_x86_ktime_get_mono_fast_ns";
+
+fn runtime_call_target(name: &str, helpers: &HashMap<String, u64>, context: &str) -> Result<u64> {
+    if name == "bpf_ktime_get_ns" {
+        // The one kernel's helper body returns this same NMI-safe monotonic
+        // implementation. Change call linkage only, never observable IDs or
+        // materialized helper addresses used by the original native program.
+        let target = resolve_helper_target(MONO_FAST_HELPER_KEY, helpers, context)?;
+        return require_call_target(target, "x86 monotonic fast clock");
+    }
+    resolve_helper_target(name, helpers, context)
+}
+
 #[path = "x86_writable_data.rs"]
 mod writable_data;
 
@@ -1160,8 +1173,8 @@ pub(super) fn rewrite_x86(
                 let kind = if let Some(callee) = &tail.defined {
                     Some(PatchKind::DirectBranch { target_symbol_key: symbol_key(callee), opcode: 0xe9 })
                 } else if !proof_mode {
-                    let target_addr = *helper_addrs.get(&tail.symbol)
-                        .ok_or_else(|| anyhow!("missing helper target for tail branch {}", tail.symbol))?;
+                    let target_addr = runtime_call_target(&tail.symbol, helper_addrs,
+                        &format!("x86 helper tail branch {}", tail.symbol))?;
                     Some(PatchKind::HelperBranchRel32 { target_addr, opcode: 0xe9 })
                 } else { None };
                 let index = local.len();
@@ -1376,6 +1389,13 @@ pub(super) fn rewrite_x86(
                 let helper_call_name = helper_call_sites.get(&site_key).cloned()
                     .or_else(|| proven_helpers.get(&local_ip).cloned());
                 if let Some(name) = helper_call_name {
+                    if show {
+                        eprintln!("native-link-helper-site {}", serde_json::json!({
+                            "symbol": sym.name, "input_offset": sym.address+local_ip,
+                            "helper": name, "map": proven_maps.get(&local_ip),
+                            "proof_mode": proof_mode,
+                        }));
+                    }
                     if let Some(routine) = memory::Routine::at_call(&name, memory_constants.get(&local_ip))
                     {
                         push_x86_replacement(&mut local, &mut kinds, &mut insn_local_ip,
@@ -1530,7 +1550,7 @@ pub(super) fn rewrite_x86(
                         }
                     }
 
-                    let helper_addr = resolve_helper_target(
+                    let helper_addr = runtime_call_target(
                         &name,
                         helper_addrs,
                         &format!("x86 helper call {name}"),
@@ -4101,6 +4121,66 @@ fn build_x86_array_update(spec: &UpdateSiteSpec) -> Result<Vec<Instruction>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn clock_calls_bind_fast_target_without_changing_observed_helper_identity() -> Result<()> {
+        // Cover ELF PLT/GOT calls, a hoisted GOT pointer, numeric helper5 and
+        // a sibling tail jump. Address/ID observations must keep their value.
+        for form in [4, 9, 41, 42, 100, 101, 102] {
+            let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::X86_64, Endianness::Little);
+            let text = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
+            let (mut bytes, relocation, observed) = match form {
+                4 => (vec![0xe8,0,0,0,0,0xc3], Some((1,4)), None),
+                102 => (vec![0xe9,0,0,0,0], Some((1,4)), None),
+                100 => (vec![0x48,0x8b,0x05,0,0,0,0,0x48,0x89,0x07,0xff,0xd0,0xc3], Some((3,9)), Some(0x1234u64)),
+                101 => (vec![0xb8,5,0,0,0,0x48,0x89,0x07,0xff,0xd0,0xc3], None, Some(5u64)),
+                r => (vec![0xff,0x15,0,0,0,0,0xc3], Some((2,r)), None),
+            };
+            object.append_section_data(text, &bytes, 1);
+            object.add_symbol(WriteSymbol { name:b"entry".to_vec(), value:0, size:bytes.len() as u64,
+                kind:SymbolKind::Text, scope:SymbolScope::Linkage, weak:false,
+                section:WriteSymbolSection::Section(text), flags:SymbolFlags::None });
+            if let Some((offset,r_type)) = relocation {
+                let symbol = object.add_symbol(WriteSymbol { name:b"bpf_ktime_get_ns".to_vec(), value:0, size:0,
+                    kind:SymbolKind::Text, scope:SymbolScope::Linkage, weak:false,
+                    section:WriteSymbolSection::Undefined, flags:SymbolFlags::None });
+                object.add_relocation(text, WriteRelocation { offset, symbol, addend:-4,
+                    flags:RelocationFlags::Elf { r_type } })?;
+            }
+            bytes = object.write()?;
+            let elf = object::File::parse(bytes.as_slice())?;
+            let entry = find_symbol_by_name(&elf, "entry")?;
+            let helpers = HashMap::from([("bpf_ktime_get_ns".into(),0x1234),
+                (MONO_FAST_HELPER_KEY.into(),0x5678)]);
+            let rewrite = |facts| rewrite_x86(&elf,&entry,&[entry.clone()],facts,&HashMap::new(),
+                &HashMap::new(),&[],false,true,None,None,None,None,false);
+            assert!(rewrite(&HashMap::from([("bpf_ktime_get_ns".into(),0x1234)])).is_err(),
+                "missing clock fact cannot silently use the old wrapper");
+            let mut zero = helpers.clone();zero.insert(MONO_FAST_HELPER_KEY.into(),0);
+            assert!(rewrite(&zero).is_err());
+            let result = rewrite(&helpers)?;
+            assert_eq!(result.relocs.len(),1,"form={form}");
+            assert_eq!(result.relocs[0].target,0x5678,"form={form}");
+            #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+            {
+                let mut code = result.blob;
+                code.push(0xc3); // BPF's native-image return epilogue.
+                let fast = code.len();code.extend_from_slice(&[0xb8,99,0,0,0,0xc3]);
+                for relocation in result.relocs {
+                    let at=relocation.offset as usize;
+                    assert!(matches!(code[at],0xe8|0xe9));
+                    let displacement=i32::try_from(fast as i64-at as i64-5)?;
+                    code[at+1..at+5].copy_from_slice(&displacement.to_le_bytes());
+                }
+                let mut identity=[0u8;8];
+                assert_eq!(memory::call_blob(&code,identity.as_mut_ptr(),0,0) as usize,99,"form={form}");
+                if let Some(expected) = observed {
+                    assert_eq!(u64::from_ne_bytes(identity),expected,"helper identity form={form}");
+                }
+            }
+        }
+        Ok(())
+    }
 
     #[test]
     fn memory_relocations_roundtrip_proof_kernel_and_deduplicate_lengths() -> Result<()> {

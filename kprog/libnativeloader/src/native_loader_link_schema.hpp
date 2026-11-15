@@ -108,6 +108,9 @@ NativeLinkArgs build_native_link_args(
         add_name_addr(out.helpers, kX86BpfProgBpfFuncOffsetKey,
                       K_BPF_PROG_BPF_FUNC_OFFSET);
         add_name_addr(out.helpers, kX86TailCallOffsetKey, 12);
+        uint64_t mono_fast = kallsyms_lookup("ktime_get_mono_fast_ns");
+        if (!mono_fast) fail("ktime_get_mono_fast_ns not in boot kernel kallsyms");
+        add_name_addr(out.helpers, kX86MonoFastHelperKey, mono_fast);
     }
 #elif defined(__aarch64__)
     {

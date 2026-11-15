@@ -14,6 +14,7 @@ namespace native_lto {
 inline constexpr const char *kernel_symbols[] = {
     "bpf_probe_read_user", "bpf_probe_read_kernel", "nmi_uaccess_okay",
     "copy_from_kernel_nofault_allowed", "const_current_task", "USER_PTR_MAX", "boot_cpu_data",
+    "ktime_get_mono_fast_ns",
 };
 
 inline const btf_type *type(const btf *types, uint32_t id)
