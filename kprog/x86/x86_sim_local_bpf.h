@@ -666,6 +666,11 @@ X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
 			  ? X86_SIM_L_READ_REG(X86_MEM_AUX_INDEX(AUX))          \
 			  : 0),                                                 \
 		KPROG_X86_MEM_INDEX_PRESENT(X86_MEM_AUX_INDEX(AUX)))
+#define X86_SIM_L_MEM_OFFSET_INTO(OUTPUT, AUX, DISP) \
+    KPROG_X86_MEM_OFFSET_INTO(OUTPUT, (AUX), (DISP), \
+        (KPROG_X86_MEM_INDEX_PRESENT(X86_MEM_AUX_INDEX(AUX)) \
+            ? X86_SIM_L_READ_REG(X86_MEM_AUX_INDEX(AUX)) : 0), \
+        KPROG_X86_MEM_INDEX_PRESENT(X86_MEM_AUX_INDEX(AUX)))
 
 /* INDEX_VALUE is already read and HAS_INDEX is an integer presence flag; the
  * generated contract decodes the scale from AUX itself. */
@@ -1347,22 +1352,34 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
  * exception outcome. The successful arm retains the ordinary memory access;
  * recovery clears the exception table GPR and resumes the following step.
  * Typed context/stack/map/packet/readonly routes retain their lifetime premise. */
+#define X86_SIM_L_READ_RECOVERY_AT_INTO(OUTPUT, BASE, DST, ADDRESS) \
+    do { int __x86_read_recovered = 0; \
+         if (KPROG_X86_REG_PRESENT(BASE) && (BASE) != X86_RSP) { \
+             __u8 __x86_read_tag; \
+             X86_SIM_L_REG_TAG_INTO(__x86_read_tag, BASE); \
+             if (__x86_read_tag == X86_SIM_TAG_SCALAR && \
+                 ((__u64)(ADDRESS) < 4096U || (X86_SIM_L_UNSPECIFIED() & 1U))) { \
+                 if ((DST)==X86_RSP) X86_SIM_L_ARCHITECTURAL_FAULT(); \
+                 else X86_SIM_L_WRITE_REG_WIDTH((DST), 0, X86_WIDTH_64); \
+                 __x86_read_recovered = 1; \
+             } \
+         } \
+         (OUTPUT)=__x86_read_recovered; } while (0)
 #define X86_SIM_L_READ_RECOVERY_AT(BASE, DST, ADDRESS) \
-    ({ int __x86_read_recovered = 0; \
-       if (KPROG_X86_REG_PRESENT(BASE) && (BASE) != X86_RSP && \
-           X86_SIM_L_REG_TAG(BASE) == X86_SIM_TAG_SCALAR && \
-           ((__u64)(ADDRESS) < 4096U || (X86_SIM_L_UNSPECIFIED() & 1U))) { \
-           if ((DST)==X86_RSP) X86_SIM_L_ARCHITECTURAL_FAULT(); \
-           else X86_SIM_L_WRITE_REG_WIDTH((DST), 0, X86_WIDTH_64); \
-           __x86_read_recovered = 1; \
-       } \
-       __x86_read_recovered; })
+    ({ int __x86_read_result; \
+       X86_SIM_L_READ_RECOVERY_AT_INTO(__x86_read_result, BASE, DST, ADDRESS); \
+       __x86_read_result; })
 
 /* Effective addresses include the decoded index, scale and displacement. */
 #define X86_SIM_L_READ_RECOVERY(BASE, DST) \
     X86_SIM_L_READ_RECOVERY_AT((BASE), (DST), X86_SIM_L_READ_REG(BASE))
 #define X86_SIM_L_READ_RECOVERY_MEM(BASE, DST, AUX, DISP) \
     X86_SIM_L_READ_RECOVERY_AT((BASE), (DST), \
+        X86_SIM_L_READ_REG(BASE) + (__u64)X86_SIM_L_MEM_OFFSET((AUX), (DISP)))
+#define X86_SIM_L_READ_RECOVERY_INTO(OUTPUT, BASE, DST) \
+    X86_SIM_L_READ_RECOVERY_AT_INTO(OUTPUT, (BASE), (DST), X86_SIM_L_READ_REG(BASE))
+#define X86_SIM_L_READ_RECOVERY_MEM_INTO(OUTPUT, BASE, DST, AUX, DISP) \
+    X86_SIM_L_READ_RECOVERY_AT_INTO(OUTPUT, (BASE), (DST), \
         X86_SIM_L_READ_REG(BASE) + (__u64)X86_SIM_L_MEM_OFFSET((AUX), (DISP)))
 
 #define X86_SIM_L_EXEC_MOV_LOAD(OP, DST, SRC, FLAGS, AUX, IMM)              \
@@ -2292,7 +2309,10 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 		__u64 __x86_l_i;                                         \
 		for (__x86_l_i = 0; __x86_l_i < __x86_l_count; \
 			__x86_l_i++) {                                           \
-            if (X86_SIM_L_READ_RECOVERY_AT(X86_RSI, X86_RCX, (__u64)(unsigned long)__x86_l_src_ptr + __x86_l_i * __x86_l_width)) { \
+            int __x86_l_recovered; \
+            X86_SIM_L_READ_RECOVERY_AT_INTO(__x86_l_recovered, X86_RSI, X86_RCX, \
+                (__u64)(unsigned long)__x86_l_src_ptr + __x86_l_i * __x86_l_width); \
+            if (__x86_l_recovered) { \
                 __x86_l_count = __x86_l_i; break; \
             } \
 			X86_SIM_L_REP_MOVS_ONE(__x86_l_width, __x86_l_i); \

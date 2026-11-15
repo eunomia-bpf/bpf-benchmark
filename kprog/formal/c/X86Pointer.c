@@ -99,3 +99,58 @@ __u64 kprog_x86_native_load_tagged(struct x86_sim_register_state *state,
 	X86_SIM_L_NATIVE_DATA_LOAD_TAGGED_INTO(result, base, offset, width, tag);
 	return result;
 }
+
+__s64 kprog_x86_mem_offset_indexed(__u64 aux, __s64 displacement, __u64 index, int present)
+{
+	__s64 offset;
+	KPROG_X86_MEM_OFFSET_INTO(offset, aux, displacement, index, present);
+	return offset;
+}
+
+/* Expression adapters call the already exported read/offset bodies. Arguments
+ * are scalar fields; address evaluation stays behind the recovery gates. */
+#undef X86_SIM_L_READ_REG_WIDTH_SHIFT
+#define X86_SIM_L_READ_REG_WIDTH_SHIFT(REG, WIDTH, SHIFT) \
+    kprog_x86_read_reg(state, arena, capacity, (REG), (WIDTH), (SHIFT))
+__s64 kprog_x86_mem_offset(struct x86_sim_register_state *state,
+                           struct kprog_x86_arena *arena, __u32 capacity,
+                           __u64 aux, __s64 displacement)
+{
+	__s64 offset;
+	X86_SIM_L_MEM_OFFSET_INTO(offset, aux, displacement);
+	return offset;
+}
+#undef X86_SIM_L_MEM_OFFSET
+#define X86_SIM_L_MEM_OFFSET(AUX, DISP) \
+    kprog_x86_mem_offset(state, arena, capacity, (AUX), (DISP))
+
+int kprog_x86_read_recovery_at(struct x86_sim_register_state *state,
+                               struct kprog_x86_arena *arena,
+                               struct kprog_x86_stack_fact *facts, __u32 capacity,
+                               __u64 base, __u64 dst, __u64 address)
+{
+	struct x86_sim_register_state *__x86_state = state;
+	int recovered;
+	X86_SIM_L_READ_RECOVERY_AT_INTO(recovered, base, dst, address);
+	return recovered;
+}
+int kprog_x86_read_recovery(struct x86_sim_register_state *state,
+                            struct kprog_x86_arena *arena,
+                            struct kprog_x86_stack_fact *facts, __u32 capacity,
+                            __u64 base, __u64 dst)
+{
+	struct x86_sim_register_state *__x86_state = state;
+	int recovered;
+	X86_SIM_L_READ_RECOVERY_INTO(recovered, base, dst);
+	return recovered;
+}
+int kprog_x86_read_recovery_mem(struct x86_sim_register_state *state,
+                                struct kprog_x86_arena *arena,
+                                struct kprog_x86_stack_fact *facts, __u32 capacity,
+                                __u64 base, __u64 dst, __u64 aux, __s64 displacement)
+{
+	struct x86_sim_register_state *__x86_state = state;
+	int recovered;
+	X86_SIM_L_READ_RECOVERY_MEM_INTO(recovered, base, dst, aux, displacement);
+	return recovered;
+}

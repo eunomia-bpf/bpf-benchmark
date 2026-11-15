@@ -1319,10 +1319,29 @@ standard-axiom queries pass. The expanded producer-interface fixture exercises
 indexed scalar/XMM loads, memcpy and REP MOVS: socket1448B and11 allocated
 relocations match the historical headers exactly, and replay equals normal
 compilation. The extraction TU expands to2,870,798 bytes at its explicit profile;
-this is not a whole-app scale result. Full inline extraction now stops at
+this is not a whole-app scale result. At that checkpoint, full inline extraction stopped at
 `READ_RECOVERY_AT` and its lazy effective-address expression. No full-I export,
 M4 completion or migrated theorem is accepted. Raw evidence:
 `/workspaces/kprog-raw/formal/m4-x86-tagged` and the completed inline receipts.
+
+Recovery and effective-address kernels now also use shared statement outputs.
+Five new roots bring `X86Pointer` to19 functions. CompCert-only inline adapters
+capture decoded scalar fields and keep state-derived address/index reads inside
+the original gates; REP MOVS uses the actual recovery output directly. Full
+operand comparisons, low-address short circuit, low-bit input selection and
+RSP fault-before-write behavior remain unchanged. Historical/current native
+and host-adapter runs pass68,400 offset cases and36,288 recovery/frame cases,
+plus32 lazy capture probes. Inline bindings also compare normal and fault paths
+without initializing unused flags or ghost references. Five mutations catch
+wrong input bits, a changed address boundary, a pre-fault SP write, eager index
+evaluation and a shift by64. `make clight`,38 targeted Lean jobs, deterministic
+875,320B regeneration and five standard-axiom queries pass. The same fixture
+retains socket1448B and11 allocated relocations; replay equals normal build.
+The extraction TU is2,676,777B at its explicit profile. Full inline export now
+stops at the MOV-load width selectors; no full-I export or migrated theorem is
+accepted. Small [run receipts](results/m4-x86-recovery/README.md) are committed;
+large logs and exact replay recipes stay in
+`/workspaces/kprog-raw/formal/m4-x86-recovery`.
 
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight

@@ -1,0 +1,14 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/formal/m4-x86-recovery",
+  "historical_reference": "f4367dcd2",
+  "validation_head": "e8c0f32cfeb3cb88fbcbb6a09a59a817f744a471",
+  "source_patch": "raw_directory/input.patch",
+  "native_fixture": "oracles/x86_inline_compile.bpf.c",
+  "compiler": "stock-path clang LLVM18; clean clightgen3.17",
+  "lean": "4.35.0",
+  "cpu": 15,
+  "address_space_limit_gib": 32,
+  "lean_threads": 1,
+  "scope": "real C bodies and exported AST; finite host checks, not Clight refinement proofs",
+  "timing": "Run used previous shared work lease; coordinator16:41 withdrew global pause rule. No timing run or VM was launched."
+}

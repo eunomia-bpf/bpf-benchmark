@@ -1,0 +1,61 @@
+{
+  "status": "component checks passed; M4 incomplete",
+  "clight_functions": 19,
+  "new_roots": [
+    "mem_offset_indexed",
+    "mem_offset",
+    "read_recovery_at",
+    "read_recovery",
+    "read_recovery_mem"
+  ],
+  "offset_cases_per_mode": 68400,
+  "recovery_cases_per_mode": 36288,
+  "lazy_capture_probes_per_mode": 32,
+  "inline_returning_observations": 45785,
+  "inline_fault_paths_compared": true,
+  "modes": [
+    "historical native bodies",
+    "current native",
+    "current CompCert host adapter"
+  ],
+  "mutation_checks": {
+    "input_lowbit": 1,
+    "low_address_boundary": 1,
+    "write_before_sp_fault": 1,
+    "eager_index": 1,
+    "shift_by_64": 1
+  },
+  "make_clight_exit": 0,
+  "targeted_lean_jobs": 38,
+  "deterministic": {
+    "equal": true,
+    "bytes": 875320
+  },
+  "standard_axiom_queries": 5,
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "fidelity": {
+    "allocated_sections_equal": true,
+    "allocated_relocations_equal": true,
+    "current_stream_equals_normal_build": true,
+    "allocated_section_bytes": {
+      ".text": 0,
+      "socket": 1448,
+      "license": 4
+    },
+    "allocated_relocations": 11
+  },
+  "preprocess": {
+    "exit": 0,
+    "bytes": 2676777,
+    "product": "/workspaces/repository/kprog/formal/build/X86Inline.i",
+    "scope": "actual extraction TU, fixed profile, not full app"
+  },
+  "full_inline_export_exit": 2,
+  "next_blocker": "KPROG_X86_MOV_LOAD_WRITE_WIDTH GNU expression (then memory-width selector)",
+  "migrated_theorems": 0,
+  "whole_library_acceptance": false
+}
