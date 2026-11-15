@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+    "--input",
+    "/workspaces/repository/corpus/results/katran-c-hdr-20261115/objects/balancer.native.o",
+    "--symbol",
+    "balancer_ingress",
+    "--mode",
+    "proof",
+    "--show",
+    "--output",
+    "/proc/self/fd/3"
+  ],
+  "returncode": 0
+}

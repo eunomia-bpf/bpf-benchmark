@@ -1,0 +1,606 @@
+{
+  "native": "/workspaces/repository/corpus/results/katran-c-hdr-20261115/objects/balancer.native.o",
+  "symbol": "balancer_ingress",
+  "native_sha256": "c0dc65fc746d7027c94969df1239b2eb603ecef541e9ab333a7186ce636eb13e",
+  "linker_sha256": "4af1f80508464063bef2169a9ff6e8d2f39d7495f3b70ebca942108525e68679",
+  "proof_bytes": 272952,
+  "proof_sha256": "876861294109de6de1daad67a8753519fa235bc3a101fc0810a2a3a31f8a2943",
+  "helper_sites": [
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 77,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 1604,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 1804,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 1876,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_get_smp_processor_id",
+      "input_offset": 1937,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 1966,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 2000,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 2078,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 2250,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 2389,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 2524,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 2698,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 2772,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_get_smp_processor_id",
+      "input_offset": 2833,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 2862,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 2896,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 2974,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3136,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3198,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3344,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3407,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3493,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3559,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3750,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "input_offset": 3772,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3834,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3888,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "input_offset": 3907,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3979,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3995,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 4025,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 4074,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 4115,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 4157,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_xdp_adjust_head",
+      "input_offset": 4218,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 4433,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 4500,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "input_offset": 4518,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 4706,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 4756,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_update_elem",
+      "input_offset": 4836,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 4860,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_xdp_adjust_head",
+      "input_offset": 4949,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5175,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5251,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5290,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5311,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5523,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "input_offset": 5542,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5611,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5681,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5720,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5750,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5838,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "input_offset": 5860,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5931,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5985,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "input_offset": 6004,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6076,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6092,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6122,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6178,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6213,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6264,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_xdp_adjust_head",
+      "input_offset": 6327,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6359,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6407,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6474,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "input_offset": 6492,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6680,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6727,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_update_elem",
+      "input_offset": 6815,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6839,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6918,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6969,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 7002,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 7103,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_xdp_adjust_head",
+      "input_offset": 7152,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 7184,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_update_elem",
+      "input_offset": 7735,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 7784,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "input_offset": 7803,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 7865,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_update_elem",
+      "input_offset": 7941,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    }
+  ],
+  "helper_counts": {
+    "bpf_map_lookup_elem": 66,
+    "bpf_get_smp_processor_id": 2,
+    "bpf_ktime_get_ns": 8,
+    "bpf_xdp_adjust_head": 4,
+    "bpf_map_update_elem": 4
+  },
+  "scope": "Actual current native object and normal proof CFG recognition; no timed-image/map-LTO/kernel execution certification"
+}

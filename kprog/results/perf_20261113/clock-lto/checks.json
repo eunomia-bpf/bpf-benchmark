@@ -1,0 +1,32 @@
+{
+  "check": {
+    "exit_code": 2,
+    "started": "2026-11-15T17:18:16Z",
+    "finished": "2026-11-15T17:18:19Z",
+    "command": "taskset -c 8-23 make -r -f kprog/test/native-relocations.mk check loader-syntax OUTPUT=/workspaces/kprog-raw/perf/20261115-clock-lto/check"
+  },
+  "check-v2": {
+    "exit_code": 2,
+    "started": "2026-11-15T17:20:58Z",
+    "finished": "2026-11-15T17:21:14Z",
+    "command": "taskset -c 8-23 make -r -f kprog/test/native-relocations.mk check loader-syntax OUTPUT=/workspaces/kprog-raw/perf/20261115-clock-lto/check-v2"
+  },
+  "check-v3": {
+    "exit_code": 0,
+    "started": "2026-11-15T17:26:36Z",
+    "finished": "2026-11-15T17:27:06Z",
+    "command": "taskset -c 8-23 make -r -f kprog/test/native-relocations.mk check loader-syntax katran-helper-audit OUTPUT=/workspaces/kprog-raw/perf/20261115-clock-lto/check-v3"
+  },
+  "kernel-facts": {
+    "exit_code": 0,
+    "started": "2026-11-15T17:34:48Z",
+    "finished": "2026-11-15T17:35:16Z",
+    "command": "taskset -c 8-23 make -r -f kprog/test/native-relocations.mk check loader-syntax clock-kernel-facts OUTPUT=/workspaces/kprog-raw/perf/20261115-clock-lto/kernel-facts"
+  },
+  "publish": {
+    "exit_code": 0,
+    "started": "2026-11-15T17:41:39Z",
+    "finished": "2026-11-15T17:42:02Z",
+    "command": "taskset -c 8-19 make -r -f kprog/test/native-relocations.mk publish-normal-pair OUTPUT=/workspaces/kprog-raw/perf/20261115-clock-lto/publish"
+  }
+}
