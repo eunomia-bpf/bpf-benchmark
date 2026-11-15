@@ -444,3 +444,7 @@ resume-owned-compiler:
 inline-scale-stock:
 	taskset -c 16-19 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/prepare_inline_scale_checks.py --profiles $(SCALE_PROFILES) --build /var/tmp/kprog-tmp/perf/scale --output $(OUTPUT)/records
 	$(MAKE) -r -C $(ROOT)/kprog/fidelity scale-kvm SCALE_BUILD=/var/tmp/kprog-tmp/perf/scale SCALE_RECORDS=$(OUTPUT)/records SCALE_OUT=$(OUTPUT)/guest
+
+.PHONY: ir-debug-census
+ir-debug-census:
+	taskset -c 16-19 prlimit --as=4294967296 -- python3 $(ROOT)/kprog/test/observe_inline_debug.py --bitcode $(BITCODE) --output $(OUTPUT)/result.json
