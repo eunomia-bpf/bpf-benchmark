@@ -39,10 +39,38 @@ ret i32 %result
 }}
 '''
     before = build/'before.ll'
+    # Catch folding an untied output, a pointer or a memory-clobbering asm just
+    # because its input is constant. Only the three exact scalar identities
+    # are removable; preserve their full32/full64-bit patterns.
+    for name, ty, value, constraints in [
+        ('constant64', 'i64', '-1', '=r,0'),
+        ('constant32', 'i32', '-1', '=r,0'),
+        ('constant_zero', 'i64', '0', '=r,0'),
+        ('constant_memory', 'i64', '7', '=r,0,~{memory}'),
+        ('constant_pointer', 'ptr', 'null', '=r,0'),
+    ]:
+        source += f'''define {ty} @{name}() {{
+%value = call {ty} asm sideeffect "", "{constraints}"({ty} {value})
+ret {ty} %value
+}}
+'''
+    source += '''define i32 @constant_untied(ptr %ctx) {
+%value = call i32 asm sideeffect "", "={r12},{rdi}"(i32 17)
+ret i32 %value
+}
+'''
     before.write_text(source)
     active = run([tool, before, '-o', build/'strict.bc'])
     if 'packet length predicates lowered=1' not in active.stderr:
         raise ValueError('Normal lowering must recognize the tied field only')
+    if 'tied integer constant identities folded=3' not in active.stderr:
+        raise ValueError('Expected exactly three tied scalar constants to fold')
+    lowered = run(['llvm-dis-18', build/'strict.bc', '-o', '-']).stdout
+    for name, removable in [('constant64', True), ('constant32', True), ('constant_zero', True),
+                             ('constant_memory', False), ('constant_pointer', False), ('constant_untied', False)]:
+        body = lowered.split('@'+name+'(', 1)[1].split('}', 1)[0]
+        if ('asm sideeffect' not in body) != removable:
+            raise ValueError('Constant identity eligibility changed: '+name)
     libraries = {}
     for name, ir in [('before', before), ('strict', build/'strict.bc')]:
         library = build/(name+'.so')
@@ -68,6 +96,24 @@ ret i32 %result
                                          expected=expected, **values))
     counterexample = next(row for row in observations if row['function']=='untied' and
                           row['start']==100 and row['end']==200 and row['seed']==0)
+    constant_cases = []
+    for label, library in libraries.items():
+        for name, restype, expected in [('constant64', c.c_uint64, (1<<64)-1),
+                                        ('constant32', c.c_uint32, (1<<32)-1),
+                                        ('constant_zero', c.c_uint64, 0),
+                                        ('constant_memory', c.c_uint64, 7),
+                                        ('constant_pointer', c.c_void_p, None)]:
+            fn = getattr(library, name);fn.argtypes = [];fn.restype = restype
+            actual = fn()
+            if actual != expected:
+                raise ValueError('Constant identity bits changed: '+name)
+            constant_cases.append(dict(pipeline=label, function=name, value=actual))
+        for seed in (0, 17, 63, 0xffffffff):
+            actual = library.run_packet_choice(c.cast(library.constant_untied, c.c_void_p), None, seed)
+            if actual != seed:
+                raise ValueError('An untied constant input was treated as the output')
+            constant_cases.append(dict(pipeline=label, function='constant_untied', seed=seed, value=actual))
+    (output/'constant-execution.json').write_text(json.dumps(constant_cases, indent=2)+'\n')
     (output/'execution.json').write_text(json.dumps(observations, indent=2)+'\n')
     # The native fixture pins a register to make the permitted untied output
     # reproducible. Exercise the matching rule in BPF's own register domain too.
@@ -106,7 +152,8 @@ char LICENSE[] SEC("license") = "GPL";
         raise ValueError('Normal service compiler omitted packet identity lowering')
     result = dict(counterexample=counterexample,
                   execution_cases=len(observations), retained=replay, normal_service_path=True,
-                  bpf_untied_output_preserved=True)
+                  bpf_untied_output_preserved=True,
+                  constant_identity_execution_cases=len(constant_cases))
     # Nullable map results can feed a preserved sign flag through the NULL
     # edge. Catch eager sign arithmetic while retaining the other edge and
     # branches whose two successors coincide. Test nonzero equalities too.

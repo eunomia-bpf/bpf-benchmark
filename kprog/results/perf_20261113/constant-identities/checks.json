@@ -1,0 +1,38 @@
+{
+  "scope": "B compiler host/value/IR-shape subset only; no base/image publication, actual OTel stock/checked acceptance, frame improvement or runtime gain claimed",
+  "constant_execution_cases": 18,
+  "identity": {
+    "counterexample": {
+      "function": "untied",
+      "start": 100,
+      "end": 200,
+      "seed": 0,
+      "expected": 0,
+      "before": 0,
+      "strict": 0
+    },
+    "execution_cases": 60,
+    "retained": [],
+    "normal_service_path": true,
+    "bpf_untied_output_preserved": true,
+    "equality_edge_execution_cases": 30
+  },
+  "context": {
+    "normal_path": true,
+    "tracing_load_widths": [
+      8,
+      16,
+      32,
+      64
+    ],
+    "base_register": 1,
+    "instruction_offset": 80,
+    "other_section_and_dynamic_preserved": true,
+    "untied_asm_output_preserved": true
+  },
+  "backend": {
+    "normal_pipeline_allocations_equal_direct": true,
+    "normal_llc_executed": true
+  },
+  "raw_directory": "/workspaces/kprog-raw/perf/20261115-constant-identities"
+}

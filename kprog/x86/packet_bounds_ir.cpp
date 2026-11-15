@@ -23,6 +23,25 @@ static bool tied_identity(CallInst *call,InlineAsm *assembly) {
   return assembly->getAsmString().empty() && assembly->getConstraintString()=="=r,0" &&
       call->arg_size()==1 && call->getType()==call->getArgOperand(0)->getType();
 }
+// A tied empty asm with an integer constant emits no operation and returns
+// exactly those bits. Keep live operands, pointer identities, clobbers and
+// real assembly opaque; exposing only constants lets LLVM fold private-stack
+// offsets without inventing a value or pointer provenance.
+static unsigned fold_constant_identities(Module &module) {
+  SmallVector<CallInst *,16> identities;
+  for (auto &function:module) for (auto &instruction:instructions(function)) {
+    auto *call=dyn_cast<CallInst>(&instruction);
+    if (!call) continue;
+    auto *assembly=dyn_cast<InlineAsm>(call->getCalledOperand());
+    if (assembly && tied_identity(call,assembly) && !assembly->isAlignStack() &&
+        !assembly->canThrow() && isa<ConstantInt>(call->getArgOperand(0)))
+      identities.push_back(call);
+  }
+  for (auto *call:identities) {
+    call->replaceAllUsesWith(call->getArgOperand(0));call->eraseFromParent();
+  }
+  return identities.size();
+}
 static Value *origin(Value *value) {
   while (true) {
     if (auto *extension=dyn_cast<ZExtInst>(value)) { value=extension->getOperand(0); continue; }
@@ -151,6 +170,7 @@ int main(int argc,char **argv) {
   cl::ParseCommandLineOptions(argc,argv);
   LLVMContext context;SMDiagnostic error;auto module=parseIRFile(Input,error,context);
   if (!module) { error.print(argv[0],errs());return 1; }
+  unsigned constants=fold_constant_identities(*module);
   unsigned unused=remove_unused_private_inputs(*module);
   unsigned contexts=canonical_context_loads(*module);
   unsigned debug_variables=remove_debug_variable_intrinsics(*module);
@@ -202,4 +222,5 @@ int main(int argc,char **argv) {
   errs()<<"constant context loads canonicalized="<<contexts<<'\n';
   errs()<<"debug variable intrinsics removed="<<debug_variables<<'\n';
   errs()<<"equality-edge PHI expressions folded="<<equality_edges<<'\n';
+  errs()<<"tied integer constant identities folded="<<constants<<'\n';
 }
