@@ -14,7 +14,7 @@ handlers remain the interpreter; formal extraction of the adapter is open.
 | Current shared helper effects |5,729,367|
 
 Current source1,090,696B gives5.25x expansion,98.07% smaller than the macro
-control. Actual Clang-E:0.275s CPU host wall,90,980KiB peak RSS. Streamed C/CPP
+control. Actual Clang-E:0.275s wall,90,980KiB peak RSS. Streamed C/CPP
 are build intermediates in memory, not a second canonical build. Commands,
 hashes and input identities in result.json/raw permit reconstruction. Source
 header hashes include FORMAL's announced CompCert-only adapters; those working
