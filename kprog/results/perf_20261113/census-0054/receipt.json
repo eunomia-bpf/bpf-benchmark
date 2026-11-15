@@ -1,0 +1,80 @@
+{
+  "recorded": "2026-11-15T00:53:39Z",
+  "journal": "/workspaces/kprog-raw/perf/20261114-census-resume/control/outcomes.jsonl",
+  "journal_bytes": 14195159,
+  "journal_sha256": "c7415f04c1633c8f4db1ccd00bd1a5f199d3937bf55f4a47f15830ac4d157049",
+  "completed_resume_rows": 31,
+  "new_rows": [
+    {
+      "body_group": 81,
+      "application": "tracee/monitor",
+      "name": "vfs_write_magic_return",
+      "source_prog_id": 537,
+      "native_sha256": "489a7a69184baae011350d4c7632faf0f5539d9df8417aa2892246cc49be777f",
+      "stage": "verifier_rejected",
+      "status": -5,
+      "native_prog_id": 0,
+      "request_id": 27,
+      "finished": "2026-11-15T00:19:17.751479+00:00",
+      "archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/27.failure.tar.gz",
+      "diagnostic_tail": "ue(map=event_data_map,ks=4,vs=32536) R5=map_value(map=event_data_map,ks=4,vs=32536)\n42351: (79) r5 = *(u64 *)(r10 -392)   ; R5=1 R10=fp0 fp-392=1\n42352: (16) if w5 == 0x1 goto pc+1    ; R5=1\n42354: (0f) r6 += r1                  ; R1=map_value(map=event_data_map,ks=4,vs=32536) R6=map_value(map=event_data_map,ks=4,vs=32536,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n42355: (07) r6 += 142                 ; R6=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n42356: (bf) r1 = r6                   ; R1=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R6=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n42357: (85) call bpf_probe_read_str#45\ninvalid access to map value, value_size=32536 off=65677 size=4096\nR1 max value is outside of the allowed memory range\nprocessed 7013 insns (limit 1000000) max_states_per_insn 0 total_states 499 peak_states 499 mark_read 0\n\n"
+    },
+    {
+      "body_group": 82,
+      "application": "tracee/monitor",
+      "name": "trace_vfs_write",
+      "source_prog_id": 534,
+      "native_sha256": "489a7a69184baae011350d4c7632faf0f5539d9df8417aa2892246cc49be777f",
+      "stage": "installed",
+      "status": 0,
+      "native_prog_id": 103,
+      "request_id": 28,
+      "finished": "2026-11-15T00:22:21.751741+00:00",
+      "archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/28.success.tar.gz",
+      "diagnostic_tail": ""
+    },
+    {
+      "body_group": 83,
+      "application": "tracee/monitor",
+      "name": "trace_vfs_writev",
+      "source_prog_id": 539,
+      "native_sha256": "489a7a69184baae011350d4c7632faf0f5539d9df8417aa2892246cc49be777f",
+      "stage": "installed",
+      "status": 0,
+      "native_prog_id": 107,
+      "request_id": 29,
+      "finished": "2026-11-15T00:25:23.322580+00:00",
+      "archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/29.success.tar.gz",
+      "diagnostic_tail": ""
+    },
+    {
+      "body_group": 84,
+      "application": "tracee/monitor",
+      "name": "trace_filldir64",
+      "source_prog_id": 507,
+      "native_sha256": "489a7a69184baae011350d4c7632faf0f5539d9df8417aa2892246cc49be777f",
+      "stage": "verifier_rejected",
+      "status": -5,
+      "native_prog_id": 0,
+      "request_id": 30,
+      "finished": "2026-11-15T00:31:45.892064+00:00",
+      "archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/30.failure.tar.gz",
+      "diagnostic_tail": "    ; R1=45\n12226: (56) if w6 != 0x1 goto pc+1    ; R6=1\n12227: (bf) r4 = r9                   ; R4=map_value(map=event_data_map,ks=4,vs=32536) R9=map_value(map=event_data_map,ks=4,vs=32536)\n12228: (0f) r7 += r4                  ; R4=map_value(map=event_data_map,ks=4,vs=32536) R7=map_value(map=event_data_map,ks=4,vs=32536,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n12229: (07) r7 += 142                 ; R7=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n12230: (bf) r1 = r7                   ; R1=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R7=map_value(map=event_data_map,ks=4,vs=32536,off=142,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n12231: (85) call bpf_probe_read_str#45\ninvalid access to map value, value_size=32536 off=65677 size=4096\nR1 max value is outside of the allowed memory range\nprocessed 3305 insns (limit 1000000) max_states_per_insn 0 total_states 230 peak_states 230 mark_read 0\n\n"
+    },
+    {
+      "body_group": 85,
+      "application": "tracee/monitor",
+      "name": "sched_process_exit_signal",
+      "source_prog_id": 503,
+      "native_sha256": "489a7a69184baae011350d4c7632faf0f5539d9df8417aa2892246cc49be777f",
+      "stage": "installed",
+      "status": 0,
+      "native_prog_id": 114,
+      "request_id": 31,
+      "finished": "2026-11-15T00:34:53.897351+00:00",
+      "archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/31.success.tar.gz",
+      "diagnostic_tail": ""
+    }
+  ],
+  "scope": "Retained prior producer, submitted-native, stock load-only; no execution or equal-work claim"
+}
