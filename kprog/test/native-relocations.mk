@@ -94,6 +94,10 @@ hold-existing-guest-image:
 base-consistency-smoke:
 	bash $(ROOT)/kprog/test/run_base_consistency_smoke.sh $(OUTPUT)
 
+.PHONY: base-consistency-inventory
+base-consistency-inventory:
+	python3 $(ROOT)/kprog/test/image_module_inventory.py --image $(ROOT)/.cache/container-images/x86_64-runner-runtime.image.tar --kernel $(KDIR) --output $(OUTPUT)
+
 # The queued run_verified_make caller holds image EX before Make starts.
 .PHONY: publish-normal-pair
 publish-normal-pair: $(CONTEXT_TOOL) $(CHECKED_TOOL)

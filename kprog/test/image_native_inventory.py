@@ -17,15 +17,10 @@ def digest(stream):
     return value.hexdigest()
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--image', type=Path, required=True)
-    parser.add_argument('--stage', type=Path, required=True)
-    parser.add_argument('--output', type=Path, required=True)
-    args = parser.parse_args()
-    prefix = PurePosixPath('artifacts/user/native-bpf/x86_64')
+def image_files(image_path, prefix):
+    """Read final layer contents without creating a second image filesystem."""
     files = {}
-    with tarfile.open(args.image) as image:
+    with tarfile.open(image_path) as image:
         manifest, = json.load(image.extractfile('manifest.json'))
         for name in manifest['Layers']:
             with image.extractfile(name) as content, tarfile.open(fileobj=content, mode='r|*') as layer:
@@ -43,6 +38,16 @@ def main():
                             files[str(relative)] = dict(bytes=member.size, sha256=digest(stream))
                     elif member.issym():
                         files[str(relative)] = dict(symlink=member.linkname)
+    return manifest, files
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--image', type=Path, required=True)
+    parser.add_argument('--stage', type=Path, required=True)
+    parser.add_argument('--output', type=Path, required=True)
+    args = parser.parse_args()
+    manifest, files = image_files(args.image, PurePosixPath('artifacts/user/native-bpf/x86_64'))
     stage = {}
     for path in sorted(args.stage.rglob('*')):
         relative = str(path.relative_to(args.stage))
