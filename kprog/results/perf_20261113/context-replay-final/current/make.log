@@ -1,0 +1,2 @@
+install -d /workspaces/kprog-raw/perf/20261115-context-body-replay /var/tmp/kprog-tmp/perf/context-body-replay
+taskset -c 19 prlimit --as=25769803776 -- python3 /workspaces/repository/kprog/test/replay_context_compiler.py --archive /workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/16.failure.tar.gz --build /var/tmp/kprog-tmp/perf/context-body-replay --output /workspaces/kprog-raw/perf/20261115-context-body-replay --tool /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds

@@ -1,0 +1,53 @@
+taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/workspaces/repository/kprog/x86/native_lab/native_link/target cargo test --release --manifest-path /workspaces/repository/kprog/x86/native_lab/native_link/Cargo.toml
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+    Finished `release` profile [optimized] target(s) in 12.03s
+     Running unittests src/main.rs (kprog/x86/native_lab/native_link/target/release/deps/native_link-62ccb5c6f5eda54e)
+
+running 34 tests
+test tests::arm64_entry_abi_strip_allows_multiple_epilogues ... ok
+test x86::hash_lookup::tests::hash_sharing_uses_only_typed_raw_targets_and_keeps_call_postprocessing ... ok
+test x86::effects::tests::effect_masks_preserve_partial_and_conditional_writes_and_flag_dependencies ... ok
+test x86::known_maps::tests::joins_partial_writes_and_arithmetic_erase_provenance ... ok
+test x86::memory::tests::execution::memory_host_microbenchmark ... ignored, opt-in host timing evidence, not a correctness or workload gate
+test x86::known_maps::tests::actual_pointer_moves_survive_but_inner_results_do_not ... ok
+test x86::memory::tests::execution::memory_routines_do_not_read_or_write_past_guard_page ... ok
+test x86::memory::tests::memory_constants_join_branches_clobbers_and_loops ... ok
+test x86::non_pic::tests::non_pic_maps_preserve_high_pointer_bits_and_existing_proof_abi ... ok
+test x86::non_pic::tests::non_pic_maps_reject_interior_addresses_and_mismatched_relocation_fields ... ok
+test x86::non_pic::tests::pc32_datasec_member_keeps_existing_live_value_lowering ... ok
+test x86::memory::tests::execution::memory_routines_execute_unaligned_boundaries_fill_and_return ... ok
+test x86::probe_read::tests::shared_probe_calls_keep_other_helpers_and_source_status_metadata ... ok
+test x86::readonly_relocs::tests::relative_tables_use_rewritten_target_offsets_and_preserve_slot_bias ... ok
+test x86::readonly_relocs::tests::table_shape_does_not_authorize_unbound_code_or_another_jump_register ... ok
+test x86::runtime_array::tests::runtime_array_executes_key_bounds_mask_wide_product_and_other_type_dispatch ... ok
+test x86::runtime_array::tests::shared_calls_target_one_routine_and_keep_unrelated_relocations ... ok
+test x86::tests::dynamic_map_lookup_requires_the_actual_helper ... ok
+test x86::tests::frame_pointer_tail_cleanup_recovers_original_bpf_frame_and_restores_stack ... ok
+test x86::tests::helper_call_reloc_slot_encodes_only_call_rel32 ... ok
+test x86::tests::kernel_tail_calls_always_relocate_the_counter_frame ... ok
+test x86::tests::load_sites_exclude_stores_and_literal_pool_bytes ... ok
+test x86::tests::memory_relocations_roundtrip_proof_kernel_and_deduplicate_lengths ... ok
+test x86::tests::proof_entry_abi_preserves_native_saves_only_when_requested ... ok
+test x86::tests::runtime_known_array_executes_real_keys_and_bounds ... ok
+test x86::tests::runtime_known_maps_use_only_exact_named_map_facts ... ok
+test x86::tests::runtime_map_lookup_rewrites_immediate_got_and_plt_calls ... ok
+test x86::tests::tail_call_frame_keeps_imm8_stack_adjust ... ok
+test x86::tests::tail_count_field_maps_to_its_chunk_in_the_stub ... ok
+test x86::tests::tail_count_patch_preserves_target_entry ... ok
+test x86::tests::typed_hash_postprocess_preserves_null_value_pointer_and_lru_reference ... ok
+test x86::hash_lookup::tests::emitted_hash_lookup_matches_kernel_jhash_and_nulls_semantics ... ok
+test x86::lpm_lookup::tests::emitted_lpm_lookup_matches_bitwise_reference_and_preserves_other_types ... ok
+test x86::probe_read::tests::emitted_probe_reads_execute_success_fault_partial_zero_policy_and_nesting ... ok
+
+test result: ok. 33 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/workspaces/repository/kprog/x86/native_lab/native_link/target cargo build --release --manifest-path /workspaces/repository/kprog/x86/native_lab/native_link/Cargo.toml
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+    Finished `release` profile [optimized] target(s) in 13.09s
+install -d /var/tmp/kprog-tmp/perf/kernel-layout
+taskset -c 8-11 prlimit --as=8589934592 -- clang++-18 -std=c++20 -O2 -Wall -Wextra -Werror -I/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include /workspaces/repository/kprog/test/kernel_lto_layout.cpp /workspaces/repository/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o /var/tmp/kprog-tmp/perf/kernel-layout/facts
+cc   /workspaces/.agent-state/kprog-ck/build-x86/vmlinux.o   -o /workspaces/.agent-state/kprog-ck/build-x86/vmlinux
+/usr/bin/ld: /workspaces/.agent-state/kprog-ck/build-x86/vmlinux.o: relocation R_X86_64_32S against `.rodata.str1.8' can not be used when making a PIE object; recompile with -fPIE
+/usr/bin/ld: failed to set dynamic section sizes: bad value
+collect2: error: ld returned 1 exit status
+make: *** [<builtin>: /workspaces/.agent-state/kprog-ck/build-x86/vmlinux] Error 1

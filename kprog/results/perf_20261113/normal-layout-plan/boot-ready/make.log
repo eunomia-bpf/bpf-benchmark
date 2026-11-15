@@ -1,0 +1,6 @@
+install -d /workspaces/kprog-raw/perf/20261115-normal-layout-plan/boot-ready /workspaces/kprog-raw/perf/20261115-normal-layout-plan/boot-ready/inputs
+taskset -c 16-17 prlimit --as=17179869184 -- vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage --cwd /workspaces/repository --rwdir /workspaces/repository --rwdir /workspaces/kprog-raw/perf/20261115-normal-layout-plan/boot-ready --rodir /workspaces/kprog-raw/perf/20261115-normal-layout-plan/boot-ready/inputs=/var/tmp/kprog-tmp/perf/kernel-layout --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-kernel-layout OUTPUT=/workspaces/kprog-raw/perf/20261115-normal-layout-plan/boot-ready KERNEL_LAYOUT_BUILD=/workspaces/kprog-raw/perf/20261115-normal-layout-plan/boot-ready/inputs'
+uname -r > /workspaces/kprog-raw/perf/20261115-normal-layout-plan/boot-ready/kernel.release
+cat /proc/kallsyms > /workspaces/kprog-raw/perf/20261115-normal-layout-plan/boot-ready/kernel.kallsyms
+cat /sys/kernel/btf/vmlinux > /workspaces/kprog-raw/perf/20261115-normal-layout-plan/boot-ready/kernel.btf
+/workspaces/kprog-raw/perf/20261115-normal-layout-plan/boot-ready/inputs/facts /sys/kernel/btf/vmlinux /proc/kallsyms > /workspaces/kprog-raw/perf/20261115-normal-layout-plan/boot-ready/kernel-layout.json
