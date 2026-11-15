@@ -66,6 +66,83 @@ def readonly_code_relocations(elf, section_index, symbol):
     return tuple(sorted(result))
 
 
+def private_results_dead(insns, starts, scratch, flags, decode, exit_addr, call_targets, table_targets):
+    """Check the bit masks of private definitions across the actual native CFG."""
+    by_addr = {i.addr: i for i in insns}
+    following = {a.addr: b.addr for a, b in zip(insns, insns[1:])}
+    full, all_flags = (1 << 64) - 1, (1 << 32) - 1
+    caller_saved = ('X86_RAX', 'X86_RCX', 'X86_RDX', 'X86_RSI', 'X86_RDI',
+                    'X86_R8', 'X86_R9', 'X86_R10', 'X86_R11')
+    arguments = ('X86_RDI', 'X86_RSI', 'X86_RDX', 'X86_RCX', 'X86_R8', 'X86_R9')
+    initial = (full,) * len(scratch) + (flags,)
+    pending = deque((target, initial) for target in starts)
+    visited = {}
+    while pending:
+        addr, live = pending.popleft()
+        old = visited.get(addr)
+        merged = live if old is None else tuple(a | b for a, b in zip(old, live))
+        if old == merged:
+            continue
+        visited[addr] = merged
+        live = merged
+        if addr == exit_addr:
+            if any(reg == 'X86_RAX' and mask for reg, mask in zip(scratch, live[:-1])):
+                return False
+            continue
+        insn = by_addr[addr]
+        if insn.effects is None:
+            raise ValueError('table liveness lacks image-bound instruction effects')
+        reads, writes = dict(insn.effects.reads), dict(insn.effects.writes)
+        flags_read, flags_written = insn.effects.flags_read, insn.effects.flags_written
+        if insn.mnemonic == 'call':
+            prototype = helper_prototypes().get(insn.reloc_symbol)
+            prototypes = [prototype] if prototype is not None else []
+            if not prototypes:
+                for kind, target in call_targets.get(insn.addr, ()):
+                    if kind != 'scalar' or target not in decode.helper_idents():
+                        prototypes = []
+                        break
+                    prototypes.append(helper_prototypes()[decode.helper_idents()[target]])
+            if prototypes:
+                argc = max(0 if p.arguments == 'void' else len(p.arguments.split(',')) for p in prototypes)
+                flags_read = 0  # The helper ABI has no arithmetic-flag input.
+            else:
+                argc, flags_read = 6, all_flags
+            for reg in arguments[:argc]:
+                reads[reg] = full
+            for reg in caller_saved:
+                writes[reg] = full
+            flags_written = all_flags
+        if (any(reads.get(reg, 0) & mask for reg, mask in zip(scratch, live[:-1])) or
+                flags_read & live[-1]):
+            return False
+        live = tuple(mask & ~writes.get(reg, 0) for reg, mask in zip(scratch, live[:-1])) + (
+            live[-1] & ~flags_written,)
+        if insn.mnemonic == 'ret':
+            if any(reg == 'X86_RAX' and mask for reg, mask in zip(scratch, live[:-1])):
+                return False
+            continue
+        if not any(live):
+            continue
+        if insn.addr in table_targets:
+            children = table_targets[insn.addr]
+        elif insn.mnemonic == 'jmp':
+            if not decode.has_direct_branch_target(insn.operands[0]):
+                return False
+            children = (insn.reloc_target if insn.reloc_target is not None
+                        else decode.branch_target(insn.operands[0]),)
+        elif insn.mnemonic in decode.CC_AUX and insn.mnemonic.startswith('j'):
+            children = (following[addr], insn.reloc_target if insn.reloc_target is not None
+                        else decode.branch_target(insn.operands[0]))
+        else:
+            children = (following.get(addr, exit_addr),)
+        for child in children:
+            if child != exit_addr and child not in by_addr:
+                raise ValueError('table liveness has an unknown CFG successor')
+            pending.append((child, live))
+    return True
+
+
 def lower_relative_tables(insns, rodata, decode, exit_addr, function_starts):
     """Lower a table's control flow only after its temporary state is dead.
 
@@ -152,83 +229,12 @@ def lower_relative_tables(insns, rodata, decode, exit_addr, function_starts):
     provisional_insns = [provisional.get(i.addr, i) for i in insns if i.addr not in interiors]
     call_targets = decode.indirect_targets(provisional_insns, exit_addr, function_starts)
 
-    all_flags = (1 << 32) - 1
-    caller_saved = ('X86_RAX', 'X86_RCX', 'X86_RDX', 'X86_RSI', 'X86_RDI',
-                    'X86_R8', 'X86_R9', 'X86_R10', 'X86_R11')
-    arguments = ('X86_RDI', 'X86_RSI', 'X86_RDX', 'X86_RCX', 'X86_R8', 'X86_R9')
-
     def dead(candidate):
-        scratch = candidate['scratch']
         add = candidate['window'][2]
         if add.effects is None:
             raise ValueError('relative table lowering requires native instruction effects')
-        initial = (full, full, add.effects.flags_written)
-        pending = deque((target, initial) for _, target in candidate['choices'])
-        visited = {}
-        while pending:
-            addr, live = pending.popleft()
-            old = visited.get(addr)
-            merged = live if old is None else tuple(a | b for a, b in zip(old, live))
-            if old == merged:
-                continue
-            visited[addr] = merged
-            live = merged
-            if addr == exit_addr:
-                if any(reg == 'X86_RAX' and mask for reg, mask in zip(scratch, live[:2])):
-                    return False
-                continue
-            insn = by_addr[addr]
-            if insn.effects is None:
-                raise ValueError('relative table liveness lacks image-bound instruction effects')
-            reads, writes = dict(insn.effects.reads), dict(insn.effects.writes)
-            flags_read, flags_written = insn.effects.flags_read, insn.effects.flags_written
-            if insn.mnemonic == 'call':
-                prototype = helper_prototypes().get(insn.reloc_symbol)
-                prototypes = [prototype] if prototype is not None else []
-                if not prototypes:
-                    for kind, target in call_targets.get(insn.addr, ()):
-                        if kind != 'scalar' or target not in decode.helper_idents():
-                            prototypes = []
-                            break
-                        prototypes.append(helper_prototypes()[decode.helper_idents()[target]])
-                if prototypes:
-                    argc = max(0 if p.arguments == 'void' else len(p.arguments.split(',')) for p in prototypes)
-                    flags_read = 0  # The helper ABI has no arithmetic-flag input.
-                else:
-                    argc, flags_read = 6, all_flags
-                for reg in arguments[:argc]:
-                    reads[reg] = full
-                for reg in caller_saved:
-                    writes[reg] = full
-                flags_written = all_flags
-            if (any(reads.get(reg, 0) & mask for reg, mask in zip(scratch, live[:2])) or
-                    flags_read & live[2]):
-                return False
-            live = tuple(mask & ~writes.get(reg, 0) for reg, mask in zip(scratch, live[:2])) + (
-                live[2] & ~flags_written,)
-            if insn.mnemonic == 'ret':
-                if any(reg == 'X86_RAX' and mask for reg, mask in zip(scratch, live[:2])):
-                    return False
-                continue
-            if not any(live):
-                continue
-            if insn.addr in table_targets:
-                children = table_targets[insn.addr]
-            elif insn.mnemonic == 'jmp':
-                if not decode.has_direct_branch_target(insn.operands[0]):
-                    return False
-                children = (insn.reloc_target if insn.reloc_target is not None
-                            else decode.branch_target(insn.operands[0]),)
-            elif insn.mnemonic in decode.CC_AUX and insn.mnemonic.startswith('j'):
-                children = (following[addr], insn.reloc_target if insn.reloc_target is not None
-                            else decode.branch_target(insn.operands[0]))
-            else:
-                children = (following.get(addr, exit_addr),)
-            for child in children:
-                if child != exit_addr and child not in by_addr:
-                    raise ValueError('relative table liveness has an unknown CFG successor')
-                pending.append((child, live))
-        return True
+        return private_results_dead(insns, [target for _, target in candidate['choices']],
+            candidate['scratch'], add.effects.flags_written, decode, exit_addr, call_targets, table_targets)
 
     replacements, removed = {}, set()
     for candidate in candidates:
