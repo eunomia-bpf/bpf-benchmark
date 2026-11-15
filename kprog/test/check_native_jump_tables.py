@@ -127,8 +127,15 @@ extern void table_test_unresolved(void);
             rodata16=data, source_prelude=prelude))
         adapter = args.build/'jump-table-model-input.c'
         adapter.write_text('''#include <stdlib.h>
+#include <stdio.h>
 unsigned long long table_test_seed;
 void table_test_unresolved(void) { abort(); }
+unsigned long native_lab_entry_input(unsigned int kind) {
+    if (kind == 1) return 0; /* Explicit zero-origin host stack fixture. */
+    if (kind == 6) return table_test_seed;
+    fprintf(stderr, "unexpected table input kind %u\\n", kind);
+    abort();
+}
 ''')
         library = args.build/'jump-table-model.so'
         run(['clang-18', '-shared', '-fPIC', '-O2', '-w', '-I', ROOT/'kprog/x86/micro-prog',
