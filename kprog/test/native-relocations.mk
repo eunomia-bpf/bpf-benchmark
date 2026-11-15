@@ -252,3 +252,7 @@ bmi2-contract-host:
 .PHONY: bmi2-contract-lean
 bmi2-contract-lean:
 	cd $(ROOT)/kprog/formal && taskset -c 8-11 prlimit --as=17179869184 -- env LEAN_NUM_THREADS=2 lake build KProgFormal.X86Specialization
+
+.PHONY: load-oracles
+load-oracles:
+	taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_load_oracles.py --build /var/tmp/kprog-tmp/perf/load-writeback --output $(OUTPUT)
