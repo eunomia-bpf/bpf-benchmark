@@ -28,7 +28,7 @@
  */
 #define KPROG_X86_STORE_WIDTH(FLAGS_WIDTH)                                 \
 	({                                                                \
-		__u8 __kprog_x86_st_width = (FLAGS_WIDTH) ?                    \
+		const __u8 __kprog_x86_st_width = (FLAGS_WIDTH) ?              \
 			(FLAGS_WIDTH) : X86_WIDTH_64;                          \
 		__kprog_x86_st_width;                                      \
 	})

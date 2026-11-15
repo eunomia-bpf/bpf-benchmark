@@ -343,3 +343,10 @@ state-struct execution path retains its runtime selector. Real store graph
 probes and current native/B/checked-C subsets provide the validation below;
 the active OTel frontend keeps its previously captured input. No flag or LTO
 selection changes and no runtime speed claim.
+
+The store width contract and tagged-store width/tag captures are also immutable
+at their existing initialization points. Their evaluation count, byte conversion,
+branch selection and volatile store order are unchanged. The generated store
+header and its generator change together; the shared body still handles runtime
+width/tag inputs. This extends early constant propagation through the nested
+store macros, without a second compiler path or a flag change.

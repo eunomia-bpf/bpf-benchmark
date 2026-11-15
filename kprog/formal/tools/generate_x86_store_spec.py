@@ -255,7 +255,7 @@ def render_c(width_rows: list[dict], disp_rows: list[dict],
  */
 #define KPROG_X86_STORE_WIDTH(FLAGS_WIDTH)                                 \\
 \t({{                                                                \\
-\t\t__u8 __kprog_x86_st_width = (FLAGS_WIDTH) ?                    \\
+\t\tconst __u8 __kprog_x86_st_width = (FLAGS_WIDTH) ?              \\
 \t\t\t(FLAGS_WIDTH) : X86_WIDTH_64;                          \\
 \t\t__kprog_x86_st_width;                                      \\
 \t}})

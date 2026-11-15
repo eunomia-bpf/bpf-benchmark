@@ -910,7 +910,7 @@ typedef void *x86_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
          KPROG_X86_MEM_STORE((ADDR), (WIDTH), (VALUE)); } while (0)
 #define X86_SIM_L_STORE_ADDR_TAGGED(ADDR, WIDTH, VALUE, TAG) \
     do { \
-        void *__x86_st_addr=(ADDR); __u8 __x86_st_width=(WIDTH),__x86_st_tag=(TAG); \
+        void *__x86_st_addr=(ADDR); const __u8 __x86_st_width=(WIDTH),__x86_st_tag=(TAG); \
         __u64 __x86_st_value=(VALUE); \
         if (__x86_st_tag==X86_SIM_TAG_STACK) \
             X86_SIM_L_STACK_VALUES_ERASE((__u64)(long)__x86_st_addr-(__u64)(long)&__x86_stack_mem.b[0],__x86_st_width); \
