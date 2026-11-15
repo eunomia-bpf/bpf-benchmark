@@ -425,3 +425,9 @@ inline-otel-measure:
 .PHONY: inline-table-debug
 inline-table-debug:
 	taskset -c 16-19 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/observe_inline_debug.py --bitcode $(ABSOLUTE_TABLE_BUILD)/absolute.bpf.bounds-input.bc --object $(ABSOLUTE_TABLE_BUILD)/absolute.bpf.o --output $(OUTPUT)/debug.json
+
+.PHONY: inline-helper-host
+inline-helper-host:
+	install -d /var/tmp/kprog-tmp/perf/inline-helper-host $(OUTPUT)
+	taskset -c 16-19 prlimit --as=8589934592 -- clang-18 -O2 -g -w -I$(ROOT)/vendor/libbpf/src $(ROOT)/kprog/test/inline_helper_host.c -o /var/tmp/kprog-tmp/perf/inline-helper-host/check
+	taskset -c 16-19 /var/tmp/kprog-tmp/perf/inline-helper-host/check > $(OUTPUT)/helper.json
