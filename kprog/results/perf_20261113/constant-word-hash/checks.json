@@ -1,0 +1,26 @@
+{
+  "recorded_at": "2026-11-15T22:52:58Z",
+  "raw": "/workspaces/kprog-raw/perf/20261115-constant-word-hash/check",
+  "rust_tests": {
+    "passed": 45,
+    "failed": 0,
+    "ignored": 1
+  },
+  "host_execution": "hash host: 49178 kernel-jhash2/table/guard/collision/null/retry/ABI vectors PASS",
+  "vectors": 49178,
+  "key_sizes": {
+    "first": 4,
+    "last": 128,
+    "step": 4
+  },
+  "constant_key_paths": [
+    4,
+    8,
+    12,
+    16,
+    20
+  ],
+  "routine_bytes": 2480,
+  "routine_sha256": "a37c16f3b349010a931bd099aa0ee1722490bc5f71cc6e96ad69b1be412311ef",
+  "scope": "Actual emitted x86 execution against sole-kernel jhash2, guard pages/collision/null/retry/ABI; constant hash blocks contain no runtime chunk/tail branch. App publication and performance remain pending."
+}
