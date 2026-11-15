@@ -1,0 +1,1 @@
+taskset -c 16-19 make -r -f kprog/test/scalar-spill-precision.mk checked-corpus OUTPUT=/workspaces/kprog-raw/perf/20261115-otel-current-app CHECKED_HOST_CPUS=16-19 CHECKED_VM_MEMORY=16G CHECKED_VM_ADDRESS_SPACE=34359738368 

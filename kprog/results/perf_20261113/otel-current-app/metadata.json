@@ -1,0 +1,48 @@
+{
+  "started": "2026-11-15T18:01:09Z",
+  "source_head": "612c9fc187537dfeb674336d88d4b74962f3f8a2",
+  "image": "sha256:d4b19c9fab0bb1ff41b7478084f968c7a66cf1f950b8230771251523de1438ef",
+  "inputs": [
+    {
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "bytes": 2341976,
+      "sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915"
+    },
+    {
+      "path": "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "bytes": 2867032,
+      "sha256": "64eb98aa10c5e8b117278d77a7abf006bcf83dbc61d8ec3dc12ebcc5574a064d"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+      "bytes": 2007368,
+      "sha256": "87393c5d106a64b8eecaed88e37e95e17f816281d953862dc6fed41d69f97834"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+      "bytes": 225464,
+      "sha256": "1965e868939e48b724ad6674cef65de867c459ccd88d46da5fc6e92afe00b2b6"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+      "bytes": 255280,
+      "sha256": "907b671d1a921c7ccd4bcd4ede69f72d23766511093bbb2069f619045802937e"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage",
+      "bytes": 15233536,
+      "sha256": "8cafa600239c364c665106397b182f9c3a89b70333aa3c5d7c9afdaba99f7812"
+    },
+    {
+      "path": "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h",
+      "bytes": 224966,
+      "sha256": "234f4843704d701c20b1b37050d0669b1b9262a68827b85f21324890fb728de5"
+    },
+    {
+      "path": "/workspaces/repository/kprog/x86/x86_sim_inline.h",
+      "bytes": 17908,
+      "sha256": "762c95cdccf6935f486240eb25b2216fcc822723d4c66c712a297f1b09d0b23f"
+    }
+  ],
+  "scope": "Functional whole-app checked-C attempt, one10s sample/stats1, not performance measurement; interpreter headers include current FORMAL working changes."
+}
