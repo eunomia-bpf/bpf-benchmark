@@ -13,6 +13,13 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def main(a):
     manifest, image = image_files(a.image, PurePosixPath('artifacts/lib/modules'))
+    _, image_kernel = image_files(a.image, PurePosixPath('artifacts/kernel'))
+    _, image_native = image_files(a.image, PurePosixPath('artifacts/kinsn'))
+    built = {}
+    for name, path in [('boot', a.kernel/'arch/x86/boot/bzImage'),
+                       ('native_module', ROOT/'kinsn/module/x86/build/bpf_x86_native_lab.ko')]:
+        with path.open('rb') as stream:
+            built[name] = dict(bytes=path.stat().st_size, sha256=digest(stream))
     installed = {}
     for path in sorted((a.kernel/'modules-install/lib/modules').rglob('*')):
         name = str(path.relative_to(a.kernel/'modules-install/lib/modules'))
@@ -32,6 +39,9 @@ def main(a):
     differences = [dict(path=name, image=image.get(name), installed=installed.get(name))
                    for name in sorted(image.keys() | installed.keys()) if image.get(name) != installed.get(name)]
     result = dict(image=str(a.image), image_config=manifest['Config'], kernel=str(a.kernel),
+        image_kernel=image_kernel, image_native_module=image_native.get('bpf_x86_native_lab.ko'),
+        built=built, boot_matches=image_kernel.get('bzImage') == built['boot'],
+        native_module_matches=image_native.get('bpf_x86_native_lab.ko') == built['native_module'],
         core_btf_sha256=btf_sha256, settings_diff_command=command, settings_diff=settings.stdout,
         image_files=image, installed_files=installed,
         module_differences=[row for row in differences if row['path'].endswith('.ko')],
@@ -42,6 +52,7 @@ def main(a):
     print(json.dumps(dict(image_modules=sum(name.endswith('.ko') for name in image),
         installed_modules=sum(name.endswith('.ko') for name in installed),
         module_differences=len(result['module_differences']), metadata_differences=len(result['metadata_differences']),
+        boot_matches=result['boot_matches'], native_module_matches=result['native_module_matches'],
         core_btf_sha256=btf_sha256, settings_diff=settings.stdout)))
 
 
