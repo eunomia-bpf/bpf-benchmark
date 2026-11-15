@@ -466,3 +466,8 @@ memory-b-continuation-check: $(CONTEXT_TOOL)
 .PHONY: katran-helper-audit
 katran-helper-audit: build
 	taskset -c 16-19 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/audit_native_helper_sites.py --native $(ROOT)/corpus/results/katran-c-hdr-20261115/objects/balancer.native.o --symbol balancer_ingress --linker $(LINKER_BINARY) --output $(OUTPUT)
+
+.PHONY: clock-kernel-facts
+clock-kernel-facts:
+	$(MAKE) -r -C $(ROOT)/kprog/libnativeloader helper-context-kernel-input HELPER_BUILD=/var/tmp/kprog-tmp/perf/helper-context
+	$(MAKE) -r -C $(ROOT)/kprog/libnativeloader helper-context-kernel-kvm HELPER_BUILD=/var/tmp/kprog-tmp/perf/helper-context HELPER_KERNEL_OUTPUT=$(OUTPUT)

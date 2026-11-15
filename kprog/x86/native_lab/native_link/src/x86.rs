@@ -15,6 +15,7 @@ fn runtime_call_target(name: &str, helpers: &HashMap<String, u64>, context: &str
         // The one kernel's helper body returns this same NMI-safe monotonic
         // implementation. Change call linkage only, never observable IDs or
         // materialized helper addresses used by the original native program.
+        require_call_target(resolve_helper_target(name, helpers, context)?, context)?;
         let target = resolve_helper_target(MONO_FAST_HELPER_KEY, helpers, context)?;
         return require_call_target(target, "x86 monotonic fast clock");
     }
@@ -4159,6 +4160,10 @@ mod tests {
                 "missing clock fact cannot silently use the old wrapper");
             let mut zero = helpers.clone();zero.insert(MONO_FAST_HELPER_KEY.into(),0);
             assert!(rewrite(&zero).is_err());
+            let mut unavailable = helpers.clone();unavailable.insert("bpf_ktime_get_ns".into(),0);
+            assert!(rewrite(&unavailable).is_err(),"fast linkage must preserve original helper availability");
+            unavailable.remove("bpf_ktime_get_ns");
+            assert!(rewrite(&unavailable).is_err());
             let result = rewrite(&helpers)?;
             assert_eq!(result.relocs.len(),1,"form={form}");
             assert_eq!(result.relocs[0].target,0x5678,"form={form}");

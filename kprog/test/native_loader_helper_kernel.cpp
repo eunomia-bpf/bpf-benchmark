@@ -143,6 +143,30 @@ try {
             passed &= match;
         }
         output << ']';
+#if defined(__x86_64__)
+        if (test.type == BPF_PROG_TYPE_XDP) {
+            CompanionLoad companion{};
+            companion.prog_type = info.type;
+            companion.context_helpers = targets;
+            const auto plan = build_native_link_args(
+                "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+                {}, companion);
+            auto address = [&](const char *name) {
+                const auto found = std::find_if(plan.helpers.begin(), plan.helpers.end(),
+                    [&](const auto &item) { return item.name == name; });
+                if (found == plan.helpers.end()) fail(std::string("missing clock link fact: ") + name);
+                return found->addr;
+            };
+            const uint64_t wrapper = address("bpf_ktime_get_ns");
+            const uint64_t fast = address(kX86MonoFastHelperKey);
+            const bool match = matches(symbols, "bpf_ktime_get_ns", wrapper) &&
+                matches(symbols, "ktime_get_mono_fast_ns", fast) && wrapper != fast;
+            passed &= match;
+            write_native_link_plan(plan, root / "clock");
+            output << ",\"clock_wrapper\":" << wrapper << ",\"clock_fast\":" << fast
+                   << ",\"clock_link_facts_match\":" << (match ? "true" : "false");
+        }
+#endif
         if (test.type == BPF_PROG_TYPE_CGROUP_SOCK_ADDR) {
             const uint64_t address = query_bind(program.get(), info.type);
             const char *expected = test.attach == BPF_CGROUP_INET4_CONNECT ? "bpf_bind" : "";
