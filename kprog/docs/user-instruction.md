@@ -66,6 +66,7 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-15 ~23:59 UTC（前半句引用协调者的话）: "11-13 你定了"不改源码"之后，C 把这一步挪到了编译过程里。 不允许放进编译过程, 不是用头文件兼容吗"
 - 2026-11-15 ~00:00 UTC（前半句引用协调者的话）: "native 快 50%、代码量少一半： 有记录，在论文第 3 节。同一个程序走 eBPF 比原生慢 1.57x（x86），原生代码大小是 JIT 的 0.54x。所有优化参数必须打开, 重新测试. [粘贴协调者的表：-march 打开 / 尾部调用优化 打开 / -fno-jump-tables 保留] -fPIC 保留编译参数，多出的读取在链接时去掉 它让每次 map 访问多一次 GOT 读取，链接器绑定 map 时去掉这次读取 是不是都得想办法关掉, 也得通过调优编译参数做到native 快 50%、代码量少一半. 必须要确保这样, 硬性要求"
 - 2026-11-15 ~00:03 UTC（前半句引用协调者的话）: "遇到这种，lane 会逐条记下来，我再拿来问你。禁止问我"
+- 2026-11-15 ~00:04 UTC: "所有都不能问我"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
