@@ -3975,17 +3975,11 @@ where
             );
         }
     }
-    /* Indirect branches (jump tables) are still rejected: clang's
-     * `-fno-jump-tables` flag eliminates them, so any that show up
-     * here are something else and likely unsafe to splat.
-     *
-     * Indirect calls are ALLOWED -- with `-fno-plt`, clang emits
-     * `call *[rip+disp32]` against a R_X86_64_GOTPCREL reloc for every
-     * external function call. The relocation handler points the disp32
-     * at an in-blob literal pool entry holding the kernel address. */
+    // Resolved relative code-table sites bypass this generic check. An
+    // unmatched indirect branch still has no image-bound target description.
     if matches!(fc, FlowControl::IndirectBranch) {
         bail!(
-            "instruction at IP {:#x} is an indirect branch; rebuild with -fno-jump-tables",
+            "indirect branch at IP {:#x} has no resolved code-table relocation",
             insn.ip()
         );
     }

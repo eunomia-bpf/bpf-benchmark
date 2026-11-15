@@ -171,4 +171,31 @@ mod tests {
         }
         Ok(())
     }
+
+    #[test]
+    fn table_shape_does_not_authorize_unbound_code_or_another_jump_register() -> Result<()> {
+        for wrong_register in [false, true] {
+            let mut bytes = fixture(false, 0)?;
+            let elf = object::File::parse(bytes.as_slice())?;
+            if wrong_register {
+                let (offset, _) = elf.section_by_name(".text").unwrap().file_range().unwrap();
+                bytes[offset as usize + 15] = 0xe1; // JMP RCX instead of table result RAX.
+            } else {
+                let (offset, _) = elf.section_by_name(".rela.rodata").unwrap().file_range().unwrap();
+                let field = offset as usize + 8;
+                let info = u64::from_le_bytes(bytes[field..field + 8].try_into()?);
+                bytes[field..field + 8].copy_from_slice(&((info & !0xffff_ffff) | 1).to_le_bytes());
+            }
+            let elf = object::File::parse(bytes.as_slice())?;
+            let entry = find_symbol_by_name(&elf, "entry")?;
+            let sites = indirect_sites(&elf, &[entry.clone()]);
+            if !wrong_register { assert!(sites.is_err()); continue; }
+            assert!(sites?.is_empty());
+            let code = read_symbol_bytes(&elf, &entry)?;
+            let jump = Decoder::new(64, &code, DecoderOptions::NONE).into_iter()
+                .find(|i| i.flow_control() == FlowControl::IndirectBranch).unwrap();
+            assert!(validate_no_external_refs(&jump, &[(0, 28)], |_| false).is_err());
+        }
+        Ok(())
+    }
 }
