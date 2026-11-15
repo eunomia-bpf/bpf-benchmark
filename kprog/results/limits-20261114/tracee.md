@@ -104,17 +104,40 @@ single bad site.
 **What this is and is not.** It is a real, measured cost, and removing it is worth about
 `1/(1 - 0.0665*0.304*0.4025)` ≈ **1.03x** end to end if the failed reads also stop
 faulting — small, not the 1.20x. But it means the 31.8% "program text" bucket is not
-purely codegen: part of it is a native-arm defect, so codegen work measured against this
-profile has a smaller ceiling than the table above implies.
+purely codegen: part of it is `probe_read` calls that fault, so codegen work measured
+against this profile has a smaller ceiling than the table above implies.
 
-**Not yet identified:** which read faults. The two arms' `trace_sys_exit` machine code is
-identical instruction for instruction (2 129 instructions, differing only in relocated map
-pointers and helper target addresses), so the difference is in the data or in the
-argument registers at the call, not in the emitted code. The failing call sites resolve to
-`common/filtering.h:144-146` (`bpf_map_lookup_elem(filter_map, key)` and the
-`equality->` reads) on the native arm's line table. Confirming it needs a guest-side
-comparison of the `bpf_probe_read_kernel` argument triple at one site between arms; do not
-treat "the native arm's `probe_read` fails 22% more" as a syntax for a known cause.
+**Which read faults, and an earlier claim in this note that was wrong.** An earlier version
+of this section said the two arms' `trace_sys_exit` code was identical instruction for
+instruction. It is not, and the comparison that produced that claim compared the wrong
+pair: the post arm's `jit-lines.json` carries **two** programs named `trace_sys_exit`,
+
+| arm | id | tag | bytes | instructions | source lines |
+|---|---:|---|---:|---:|---:|
+| baseline | 25 | `4dc9dfab1040a032` | 8 227 | 2 087 | 651 |
+| post | 216 | `4dc9dfab1040a032` | 8 227 | 2 087 | 651 |
+| post | 217 | `59f4a931744dcdc6` | 6 359 | 1 399 | 0 |
+
+216 is a leftover JIT copy sharing the baseline's tag, and it **never ran**: the post arm's
+counters show `trace_sys_exit` id 217 with 110 623 904 invocations and no entry for 216.
+So the comparison was baseline 25 against post 216 — the same JIT code with and without the
+other arm alongside it — which says nothing about the native body. The code that matters is
+217, and it is 1 399 instructions against the baseline's 2 087, a genuinely different body.
+
+Its zero-fill reads are real and located. `217+0x143b` is the return of a
+`bpf_probe_read_kernel` with `size=8` from `%rsp` (the native build's out-parameter), and
+`217+0x143f` immediately adds `0x28` to the loaded value; `217+0x17d0` sits between a
+65-byte read and a 16-byte read in the same output block. What is missing is which source
+field those offsets correspond to: 217 carries **no line table**
+(`source_status: "Missing or unequal line arrays; no pairing inferred"`, `btf_id: 0`),
+where baseline 25 has 651 lines. So PERF's source attribution
+(`../perf_20261113/tracee-read-sites/report.md`) is an inference from the baseline's line
+table standing in for the native program, and cannot be confirmed without a native line
+table or a guest-side read of the argument triple at one site.
+
+Note the shape of the finding: the native body is 33% smaller and spends more of its time
+in failed reads. That is a real native-arm cost, and it is a *code* difference now, not a
+data-only difference.
 
 ## Timing, recomputed
 
