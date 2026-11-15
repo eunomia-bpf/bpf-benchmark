@@ -1,0 +1,231 @@
+{
+  "archive": "/workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/service.tar.gz",
+  "member": "service/requests/3.failure.tar.gz",
+  "entry": "perf_unwind_native",
+  "retained_ir_member": "request/generated/trusted_x86.bpf.bounds-input.bc",
+  "input_bytes": 7980988,
+  "input_sha256": "b82b7613186277602d529ed9416872745ece8f9ccc2ca44647c380b57cb35d09",
+  "bounds_compiler": "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+  "bounds_compiler_sha256": "9560b22ec6177d77a75328417822cbe7b7a74e1c4d99ecc6e524600a4f35213f",
+  "compile_flags": [
+    "-w",
+    "-g",
+    "-O3",
+    "-mcpu=v4",
+    "-target",
+    "bpf",
+    "-mllvm",
+    "-bpf-stack-size=4096",
+    "-D__TARGET_ARCH_x86",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/include/uapi",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/src",
+    "-I",
+    "/usr/include/x86_64-linux-gnu"
+  ],
+  "scope": "Diagnose stack pressure on one retained optimized B IR, with ephemeral outputs.\n\nEach choice resumes the same retained IR. A selected B IR compiler starts\nfrom the completed frontend; otherwise the completed bounds IR is used.\nThis diagnostic never repeats the C frontend or publishes production tools.\n",
+  "cases": [
+    {
+      "name": "normal",
+      "flags": [],
+      "completed": true,
+      "commands": [
+        {
+          "command": [
+            "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+            "/proc/self/fd/3",
+            "-o",
+            "/proc/self/fd/5"
+          ],
+          "returncode": 0,
+          "wall_seconds": 0.7225692310021259,
+          "user_seconds": 0.6621889999999999,
+          "system_seconds": 0.060016999999999994,
+          "max_rss_kib": 162788
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-x",
+            "ir",
+            "-w",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-c",
+            "/proc/self/fd/5",
+            "-mllvm",
+            "-stop-before=prologepilog",
+            "-o",
+            "/proc/self/fd/6"
+          ],
+          "returncode": 0,
+          "wall_seconds": 2.446142700006021,
+          "user_seconds": 2.394443,
+          "system_seconds": 0.050975,
+          "max_rss_kib": 174604
+        },
+        {
+          "command": [
+            "/opt/virtme-ng/bin/python3",
+            "/workspaces/repository/kprog/x86/whole_word_spills.py",
+            "/proc/self/fd/6",
+            "/proc/self/fd/7",
+            "--report",
+            "/workspaces/kprog-raw/perf/20261115-constant-identities/main-closure/normal/lowering.json"
+          ],
+          "returncode": 0,
+          "wall_seconds": 0.30050802999176085,
+          "user_seconds": 0.270164,
+          "system_seconds": 0.030018,
+          "max_rss_kib": 76912
+        },
+        {
+          "command": [
+            "llc-18",
+            "-x=mir",
+            "-O3",
+            "-march=bpf",
+            "-mcpu=v4",
+            "-bpf-stack-size=4096",
+            "-start-before=prologepilog",
+            "-filetype=obj",
+            "/proc/self/fd/7",
+            "-o",
+            "/proc/self/fd/4"
+          ],
+          "returncode": 0,
+          "wall_seconds": 0.4695506379939616,
+          "user_seconds": 0.435162,
+          "system_seconds": 0.034012,
+          "max_rss_kib": 127416
+        },
+        {
+          "command": [
+            "llc-18",
+            "-x=mir",
+            "-O3",
+            "-march=bpf",
+            "-mcpu=v4",
+            "-bpf-stack-size=4096",
+            "-start-before=prologepilog",
+            "-stop-after=prologepilog",
+            "/proc/self/fd/7",
+            "-o",
+            "/proc/self/fd/8"
+          ],
+          "returncode": 0,
+          "wall_seconds": 0.45602930698078126,
+          "user_seconds": 0.411614,
+          "system_seconds": 0.043958,
+          "max_rss_kib": 127180
+        }
+      ],
+      "ir_storage": {
+        "command": [
+          "llvm-dis-18",
+          "/proc/self/fd/5",
+          "-o",
+          "-"
+        ],
+        "allocas": [
+          {
+            "name": "%2",
+            "declaration": "%2 = alloca %union.x86_sim_stack_mem, align 8, !DIAssignID !15607",
+            "direct_uses": 10501,
+            "examples": [
+              "call void @llvm.lifetime.start.p0(i64 408, ptr nonnull %2) #4, !dbg !15628",
+              "%12 = getelementptr inbounds [51 x i64], ptr %2, i64 0, i64 50, !dbg !15632",
+              "%13 = getelementptr inbounds [51 x i64], ptr %2, i64 0, i64 49, !dbg !15634",
+              "%14 = getelementptr inbounds [51 x i64], ptr %2, i64 0, i64 48, !dbg !15635",
+              "%15 = getelementptr inbounds [51 x i64], ptr %2, i64 0, i64 47, !dbg !15636",
+              "%16 = getelementptr inbounds [51 x i64], ptr %2, i64 0, i64 46, !dbg !15637",
+              "%17 = getelementptr inbounds [51 x i64], ptr %2, i64 0, i64 45, !dbg !15638",
+              "%20 = getelementptr inbounds [102 x i32], ptr %2, i64 0, i64 40, !dbg !15643",
+              "%22 = getelementptr inbounds [408 x i8], ptr %2, i64 0, i64 160, !dbg !15643",
+              "%28 = getelementptr inbounds [408 x i8], ptr %2, i64 0, i64 160, !dbg !15643",
+              "%32 = getelementptr inbounds [408 x i8], ptr %2, i64 0, i64 161, !dbg !15643",
+              "%36 = getelementptr inbounds [408 x i8], ptr %2, i64 0, i64 162, !dbg !15643"
+            ]
+          }
+        ],
+        "scope": "Direct textual operand observations, not alias/escape proofs or a transformation."
+      },
+      "spill_slots_before_packing": 47,
+      "object_bytes": 1123368,
+      "code_bytes": 305376,
+      "spill_liveness": {
+        "input": "/proc/self/fd/6",
+        "blocks": 7737,
+        "slots": {
+          "1": 8,
+          "2": 8,
+          "3": 8,
+          "4": 8,
+          "5": 8,
+          "6": 8,
+          "7": 8,
+          "8": 8,
+          "9": 8,
+          "10": 8,
+          "11": 8,
+          "12": 8,
+          "13": 8,
+          "14": 8,
+          "15": 8,
+          "16": 4,
+          "17": 8,
+          "18": 8,
+          "19": 8,
+          "20": 8,
+          "21": 8,
+          "22": 8,
+          "23": 8,
+          "24": 8,
+          "25": 8,
+          "26": 8,
+          "27": 8,
+          "28": 8,
+          "29": 8,
+          "30": 8,
+          "31": 8,
+          "32": 8,
+          "33": 8,
+          "34": 8,
+          "35": 8,
+          "36": 8,
+          "37": 8,
+          "38": 8,
+          "39": 8,
+          "40": 8,
+          "41": 8,
+          "42": 8,
+          "43": 8,
+          "44": 4,
+          "45": 8,
+          "46": 8,
+          "47": 8
+        },
+        "rounds": 4,
+        "conservative_maximum_live_slots": 44,
+        "noninterfering_pairs": [],
+        "scope": "Direct spill CFG diagnostic; partial stores keep the whole old slot live. No rewrite, verifier acceptance or execution."
+      },
+      "post_pei_stack_bytes": {
+        "trusted_x86_x86_sim_xdp": 784
+      }
+    }
+  ]
+}

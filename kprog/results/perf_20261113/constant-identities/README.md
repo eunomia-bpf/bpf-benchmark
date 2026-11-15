@@ -27,3 +27,10 @@ CFG blocks and conservative maximum45 live spill slots, with zero proven
 noninterfering pairs. Spill coloring has no demonstrated opportunity here.
 The smaller B still exceeds512 bytes; stock/checked main and whole-app remain
 open. Production base compiler remainsa7d9ab49; candidate publication is pending.
+
+Constant closure cf084c84c also completes on this same frontend:305376 code
+bytes,1123368 object bytes,47 spill slots,44 conservative live slots and the
+same784-byte frame;2225 identities fold. Thus propagating pure constants
+reduces code further but exposes no additional foldable identity in this
+main. The frame remains the phase1 issue. No base/image publication or
+stock acceptance follows from these compiler measurements.

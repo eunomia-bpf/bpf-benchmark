@@ -1,0 +1,120 @@
+{
+  "recorded_at": "2026-11-15T22:45:12Z",
+  "processes": [
+    {
+      "pid": 928246,
+      "command": "bash kprog/test/run_verified_make.sh /workspaces/kprog-raw/perf/20261115-otel-backend -r -f kprog/test/native-relocations.mk current-otel-backend OUTPUT=/workspaces/kprog-raw/perf/20261115-otel-backend ",
+      "status": "Name:\tbash\nUmask:\t0022\nState:\tS (sleeping)\nTgid:\t928246\nNgid:\t0\nPid:\t928246\nPPid:\t1\nTracerPid:\t0\nUid:\t0\t0\t0\t0\nGid:\t0\t0\t0\t0\nFDSize:\t256\nGroups:\t0 \nNStgid:\t928246\nNSpid:\t928246\nNSpgid:\t928246\nNSsid:\t928246\nKthread:\t0\nVmPeak:\t    7756 kB\nVmSize:\t    7756 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t    3540 kB\nVmRSS:\t    3540 kB\nRssAnon:\t     320 kB\nRssFile:\t    3220 kB\nRssShmem:\t       0 kB\nVmData:\t     304 kB\nVmStk:\t     136 kB\nVmExe:\t     956 kB\nVmLib:\t    1828 kB\nVmPTE:\t      56 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t8/476275\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000010000\nSigIgn:\t0000000200000007\nSigCgt:\t0000000000010000\nCapInh:\t0000000000000000\nCapPrm:\t000001ffffffffff\nCapEff:\t000001ffffffffff\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tffffff\nCpus_allowed_list:\t0-23\nMems_allowed:\t1\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t3\nnonvoluntary_ctxt_switches:\t1\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+      "stat": "928246 (bash) S 1 928246 928246 0 -1 4194304 517 274 0 0 0 0 0 0 20 0 1 0 14864547 7942144 837 18446744073709551615 94629617254400 94629618230061 140730647942800 0 0 0 65536 7 65536 1 0 0 17 17 0 0 0 0 0 94629618452912 94629618501552 94630592499712 140730647951898 140730647952100 140730647952100 140730647957482 0\n",
+      "fd_targets": {
+        "0": "/dev/null",
+        "1": "/workspaces/kprog-raw/perf/20261115-otel-backend/launcher.log",
+        "2": "/workspaces/kprog-raw/perf/20261115-otel-backend/launcher.log",
+        "255": "/workspaces/repository/kprog/test/run_verified_make.sh"
+      },
+      "action": "SIGKILL",
+      "reason": "Obsolete paused pre-specialization control, replaced by completed current route; coordinator22:42 explicitly requests settlement. Queued old followers cancelled first to preserve canonical inputs."
+    },
+    {
+      "pid": 921682,
+      "command": "bash kprog/test/run_verified_make.sh /workspaces/kprog-raw/perf/20261115-store-constants/otel-frontend -r -f kprog/test/native-relocations.mk current-otel-frontend OUTPUT=/workspaces/kprog-raw/perf/20261115-store-constants/otel-frontend ",
+      "status": "Name:\tbash\nUmask:\t0022\nState:\tS (sleeping)\nTgid:\t921682\nNgid:\t0\nPid:\t921682\nPPid:\t1\nTracerPid:\t0\nUid:\t0\t0\t0\t0\nGid:\t0\t0\t0\t0\nFDSize:\t256\nGroups:\t0 \nNStgid:\t921682\nNSpid:\t921682\nNSpgid:\t921682\nNSsid:\t921682\nKthread:\t0\nVmPeak:\t    7756 kB\nVmSize:\t    7756 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t    3520 kB\nVmRSS:\t    3520 kB\nRssAnon:\t     320 kB\nRssFile:\t    3200 kB\nRssShmem:\t       0 kB\nVmData:\t     304 kB\nVmStk:\t     136 kB\nVmExe:\t     956 kB\nVmLib:\t    1828 kB\nVmPTE:\t      60 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t8/476275\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000010000\nSigIgn:\t0000000200000007\nSigCgt:\t0000000000010000\nCapInh:\t0000000000000000\nCapPrm:\t000001ffffffffff\nCapEff:\t000001ffffffffff\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tffffff\nCpus_allowed_list:\t0-23\nMems_allowed:\t1\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t3\nnonvoluntary_ctxt_switches:\t0\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+      "stat": "921682 (bash) S 1 921682 921682 0 -1 4194304 523 275 0 0 0 0 0 0 20 0 1 0 14769628 7942144 848 18446744073709551615 105768366796800 105768367772461 140732071195424 0 0 0 65536 7 65536 1 0 0 17 21 0 0 0 0 0 105768367995312 105768368043952 105768940945408 140732071197175 140732071197412 140732071197412 140732071202794 0\n",
+      "fd_targets": {
+        "0": "/dev/null",
+        "1": "/workspaces/kprog-raw/perf/20261115-store-constants/otel-frontend/launcher.log",
+        "2": "/workspaces/kprog-raw/perf/20261115-store-constants/otel-frontend/launcher.log",
+        "255": "/workspaces/repository/kprog/test/run_verified_make.sh"
+      },
+      "action": "SIGKILL",
+      "reason": "Obsolete paused pre-specialization control, replaced by completed current route; coordinator22:42 explicitly requests settlement. Queued old followers cancelled first to preserve canonical inputs."
+    },
+    {
+      "pid": 928249,
+      "command": "tail --pid=921682 -f /dev/null ",
+      "status": "Name:\ttail\nUmask:\t0022\nState:\tS (sleeping)\nTgid:\t928249\nNgid:\t0\nPid:\t928249\nPPid:\t928246\nTracerPid:\t0\nUid:\t0\t0\t0\t0\nGid:\t0\t0\t0\t0\nFDSize:\t256\nGroups:\t0 \nNStgid:\t928249\nNSpid:\t928249\nNSpgid:\t928246\nNSsid:\t928246\nKthread:\t0\nVmPeak:\t    6160 kB\nVmSize:\t    6160 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t    2108 kB\nVmRSS:\t    2108 kB\nRssAnon:\t     132 kB\nRssFile:\t    1976 kB\nRssShmem:\t       0 kB\nVmData:\t     224 kB\nVmStk:\t     136 kB\nVmExe:\t      40 kB\nVmLib:\t    1752 kB\nVmPTE:\t      52 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t8/476275\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000200000007\nSigCgt:\t0000000000000000\nCapInh:\t0000000000000000\nCapPrm:\t000001ffffffffff\nCapEff:\t000001ffffffffff\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tffffff\nCpus_allowed_list:\t0-23\nMems_allowed:\t1\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t42810\nnonvoluntary_ctxt_switches:\t33\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+      "stat": "928249 (tail) S 928246 928246 928246 0 -1 4194304 113 0 0 0 40 67 0 0 20 0 1 0 14864548 6307840 494 18446744073709551615 107437108359168 107437108398769 140728749122272 0 0 0 0 7 0 1 0 0 17 21 0 0 0 0 0 107437108414736 107437108416688 107437606875136 140728749128391 140728749128422 140728749128422 140728749133802 0\n",
+      "fd_targets": {
+        "0": "/dev/null",
+        "1": "/workspaces/kprog-raw/perf/20261115-otel-backend/launcher.log",
+        "2": "/workspaces/kprog-raw/perf/20261115-otel-backend/launcher.log",
+        "3": "/dev/null"
+      },
+      "action": "SIGKILL",
+      "reason": "Obsolete paused pre-specialization control, replaced by completed current route; coordinator22:42 explicitly requests settlement. Queued old followers cancelled first to preserve canonical inputs."
+    },
+    {
+      "pid": 921685,
+      "command": "tail --pid=910213 -f /dev/null ",
+      "status": "Name:\ttail\nUmask:\t0022\nState:\tS (sleeping)\nTgid:\t921685\nNgid:\t0\nPid:\t921685\nPPid:\t921682\nTracerPid:\t0\nUid:\t0\t0\t0\t0\nGid:\t0\t0\t0\t0\nFDSize:\t256\nGroups:\t0 \nNStgid:\t921685\nNSpid:\t921685\nNSpgid:\t921682\nNSsid:\t921682\nKthread:\t0\nVmPeak:\t    6160 kB\nVmSize:\t    6160 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t    2160 kB\nVmRSS:\t    2160 kB\nRssAnon:\t     128 kB\nRssFile:\t    2032 kB\nRssShmem:\t       0 kB\nVmData:\t     224 kB\nVmStk:\t     136 kB\nVmExe:\t      40 kB\nVmLib:\t    1752 kB\nVmPTE:\t      52 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t8/476275\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000200000007\nSigCgt:\t0000000000000000\nCapInh:\t0000000000000000\nCapPrm:\t000001ffffffffff\nCapEff:\t000001ffffffffff\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tffffff\nCpus_allowed_list:\t0-23\nMems_allowed:\t1\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t43749\nnonvoluntary_ctxt_switches:\t23\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+      "stat": "921685 (tail) S 921682 921682 921682 0 -1 4194304 112 0 0 0 40 69 0 0 20 0 1 0 14769629 6307840 494 18446744073709551615 109089256968192 109089257007793 140726165530016 0 0 0 0 7 0 1 0 0 17 14 0 0 0 0 0 109089257023760 109089257025712 109089362272256 140726165539527 140726165539558 140726165539558 140726165544938 0\n",
+      "fd_targets": {
+        "0": "/dev/null",
+        "1": "/workspaces/kprog-raw/perf/20261115-store-constants/otel-frontend/launcher.log",
+        "2": "/workspaces/kprog-raw/perf/20261115-store-constants/otel-frontend/launcher.log",
+        "3": "/dev/null"
+      },
+      "action": "SIGKILL",
+      "reason": "Obsolete paused pre-specialization control, replaced by completed current route; coordinator22:42 explicitly requests settlement. Queued old followers cancelled first to preserve canonical inputs."
+    },
+    {
+      "pid": 911032,
+      "command": "/usr/lib/llvm-18/bin/clang -include /workspaces/repository/kprog/stock-path/bin/../include/stock_native_input.h -w -g -O3 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I /workspaces/repository/vendor/libbpf/include/uapi -I /workspaces/repository/vendor/libbpf/src -I /usr/include/x86_64-linux-gnu -emit-llvm -c /var/tmp/kprog-tmp/perf/otel-whole-word-checked/trusted_x86.bpf.i -o /var/tmp/kprog-tmp/perf/otel-whole-word-checked/trusted_x86.bpf.bounds-input.bc ",
+      "status": "Name:\tclang\nUmask:\t0022\nState:\tT (stopped)\nTgid:\t911032\nNgid:\t0\nPid:\t911032\nPPid:\t910988\nTracerPid:\t0\nUid:\t0\t0\t0\t0\nGid:\t0\t0\t0\t0\nFDSize:\t64\nGroups:\t0 \nNStgid:\t911032\nNSpid:\t911032\nNSpgid:\t910213\nNSsid:\t910213\nKthread:\t0\nVmPeak:\t11744160 kB\nVmSize:\t11208984 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t11589976 kB\nVmRSS:\t10695760 kB\nRssAnon:\t10690196 kB\nRssFile:\t    5564 kB\nRssShmem:\t       0 kB\nVmData:\t10693200 kB\nVmStk:\t     492 kB\nVmExe:\t     132 kB\nVmLib:\t  182896 kB\nVmPTE:\t   21860 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t8/476275\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000200000000\nSigCgt:\t0000000041805eff\nCapInh:\t0000000000000000\nCapPrm:\t000001ffffffffff\nCapEff:\t000001ffffffffff\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\t000f00\nCpus_allowed_list:\t8-11\nMems_allowed:\t1\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t109\nnonvoluntary_ctxt_switches:\t457115\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+      "stat": "911032 (clang) T 910988 910213 910213 0 -1 4194560 12424093 107 0 0 1515339 1590 0 0 20 0 1 0 14565613 11477999616 2674089 18446744073709551615 107288040996864 107288041128032 140724169195056 0 0 0 0 0 1098931967 1 0 0 17 10 0 0 0 0 0 107288041135176 107288041139168 107288651026432 140724169197587 140724169198071 140724169198071 140724169203677 19\n",
+      "fd_targets": {
+        "0": "/dev/null",
+        "1": "/workspaces/kprog-raw/perf/20261115-width-constants/otel-frontend/command-005.log",
+        "2": "/workspaces/kprog-raw/perf/20261115-width-constants/otel-frontend/command-005.log",
+        "3": "/var/tmp/kprog-tmp/perf/otel-whole-word-checked/trusted_x86.bpf.bounds-input-ba97d359.bc.tmp"
+      },
+      "action": "SIGKILL",
+      "reason": "Obsolete paused pre-specialization control, replaced by completed current route; coordinator22:42 explicitly requests settlement. Queued old followers cancelled first to preserve canonical inputs."
+    },
+    {
+      "pid": 1038827,
+      "command": "/usr/lib/llvm-18/bin/clang -include /workspaces/repository/kprog/stock-path/bin/../include/stock_native_input.h -w -g -O3 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I /workspaces/repository/vendor/libbpf/include/uapi -I /workspaces/repository/vendor/libbpf/src -I /usr/include/x86_64-linux-gnu -x cpp-output - -emit-llvm -c -o /dev/null ",
+      "status": "Name:\tclang\nUmask:\t0022\nState:\tT (stopped)\nTgid:\t1038827\nNgid:\t0\nPid:\t1038827\nPPid:\t1038816\nTracerPid:\t0\nUid:\t0\t0\t0\t0\nGid:\t0\t0\t0\t0\nFDSize:\t64\nGroups:\t0 \nNStgid:\t1038827\nNSpid:\t1038827\nNSpgid:\t1038810\nNSsid:\t1038810\nKthread:\t0\nVmPeak:\t12374696 kB\nVmSize:\t12138384 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t12166776 kB\nVmRSS:\t11860036 kB\nRssAnon:\t11854720 kB\nRssFile:\t    5316 kB\nRssShmem:\t       0 kB\nVmData:\t11912656 kB\nVmStk:\t     644 kB\nVmExe:\t     132 kB\nVmLib:\t  182896 kB\nVmPTE:\t   23564 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t8/476275\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000200000000\nSigCgt:\t0000000041805eff\nCapInh:\t0000000000000000\nCapPrm:\t000001ffffffffff\nCapEff:\t000001ffffffffff\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\t000f00\nCpus_allowed_list:\t8-11\nMems_allowed:\t1\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t11\nnonvoluntary_ctxt_switches:\t20493\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+      "stat": "1038827 (clang) T 1038816 1038810 1038810 0 -1 4194304 6164189 108 0 0 120650 638 0 0 20 0 1 0 16218162 12429705216 2965102 18446744073709551615 107312352587776 107312352718944 140724593866384 0 0 0 0 0 1098931967 1 0 0 17 11 0 0 0 0 0 107312352726088 107312352730080 107312661540864 140724593870830 140724593871194 140724593871194 140724593876957 19\n",
+      "fd_targets": {
+        "0": "pipe:[79747363]",
+        "1": "pipe:[79747364]",
+        "2": "/workspaces/kprog-raw/perf/20261115-inline-interpreter/frontend/otel/frontend.stderr",
+        "3": "/dev/null"
+      },
+      "action": "SIGKILL",
+      "reason": "Obsolete paused pre-specialization control, replaced by completed current route; coordinator22:42 explicitly requests settlement. Queued old followers cancelled first to preserve canonical inputs."
+    },
+    {
+      "pid": 1041837,
+      "command": "/usr/lib/llvm-18/bin/clang -include /workspaces/repository/kprog/stock-path/bin/../include/stock_native_input.h -w -g -O3 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I /workspaces/repository/vendor/libbpf/include/uapi -I /workspaces/repository/vendor/libbpf/src -I /usr/include/x86_64-linux-gnu -x cpp-output - -emit-llvm -c -o /dev/null ",
+      "status": "Name:\tclang\nUmask:\t0022\nState:\tT (stopped)\nTgid:\t1041837\nNgid:\t0\nPid:\t1041837\nPPid:\t1041827\nTracerPid:\t0\nUid:\t0\t0\t0\t0\nGid:\t0\t0\t0\t0\nFDSize:\t64\nGroups:\t0 \nNStgid:\t1041837\nNSpid:\t1041837\nNSpgid:\t1041822\nNSsid:\t1041822\nKthread:\t0\nVmPeak:\t 9840844 kB\nVmSize:\t 9840844 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t 9636468 kB\nVmRSS:\t 9565912 kB\nRssAnon:\t 9560288 kB\nRssFile:\t    5624 kB\nRssShmem:\t       0 kB\nVmData:\t 9615120 kB\nVmStk:\t     640 kB\nVmExe:\t     132 kB\nVmLib:\t  182896 kB\nVmPTE:\t   19064 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t8/476275\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000200000000\nSigCgt:\t0000000041805eff\nCapInh:\t0000000000000000\nCapPrm:\t000001ffffffffff\nCapEff:\t000001ffffffffff\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\t000f00\nCpus_allowed_list:\t8-11\nMems_allowed:\t1\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t7\nnonvoluntary_ctxt_switches:\t6973\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+      "stat": "1041837 (clang) T 1041827 1041822 1041822 0 -1 4194304 5354441 108 0 0 52503 584 0 0 20 0 1 0 16286860 10077024256 2391534 18446744073709551615 111193835257856 111193835389024 140736587611872 0 0 0 0 0 1098931967 1 0 0 17 8 0 0 0 0 0 111193835396168 111193835400160 111194311118848 140736587614271 140736587614635 140736587614635 140736587620317 19\n",
+      "fd_targets": {
+        "0": "pipe:[79973108]",
+        "1": "pipe:[79973109]",
+        "2": "/workspaces/kprog-raw/perf/20261115-inline-interpreter/nodebug-frontend/otel/frontend.stderr",
+        "3": "/dev/null"
+      },
+      "action": "SIGKILL",
+      "reason": "Obsolete paused pre-specialization control, replaced by completed current route; coordinator22:42 explicitly requests settlement. Queued old followers cancelled first to preserve canonical inputs."
+    },
+    {
+      "pid": 1046429,
+      "command": "/usr/lib/llvm-18/bin/clang -include /workspaces/repository/kprog/stock-path/bin/../include/stock_native_input.h -w -g -O3 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I /workspaces/repository/vendor/libbpf/include/uapi -I /workspaces/repository/vendor/libbpf/src -I /usr/include/x86_64-linux-gnu -x cpp-output - -emit-llvm -c -o /dev/null ",
+      "status": "Name:\tclang\nUmask:\t0022\nState:\tT (stopped)\nTgid:\t1046429\nNgid:\t0\nPid:\t1046429\nPPid:\t1046418\nTracerPid:\t0\nUid:\t0\t0\t0\t0\nGid:\t0\t0\t0\t0\nFDSize:\t64\nGroups:\t0 \nNStgid:\t1046429\nNSpid:\t1046429\nNSpgid:\t1046412\nNSsid:\t1046412\nKthread:\t0\nVmPeak:\t 9626544 kB\nVmSize:\t 9503088 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t 9422612 kB\nVmRSS:\t 9240320 kB\nRssAnon:\t 9235044 kB\nRssFile:\t    5276 kB\nRssShmem:\t       0 kB\nVmData:\t 9277360 kB\nVmStk:\t     644 kB\nVmExe:\t     132 kB\nVmLib:\t  182896 kB\nVmPTE:\t   18428 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t8/476275\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000200000000\nSigCgt:\t0000000041805eff\nCapInh:\t0000000000000000\nCapPrm:\t000001ffffffffff\nCapEff:\t000001ffffffffff\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\t000f00\nCpus_allowed_list:\t8-11\nMems_allowed:\t1\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t266\nnonvoluntary_ctxt_switches:\t53701\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+      "stat": "1046429 (clang) T 1046418 1046412 1046412 0 -1 4194304 5391401 107 0 0 143391 577 0 0 20 0 1 0 16408875 9731162112 2310148 18446744073709551615 109779558670336 109779558801504 140721184110688 0 0 0 0 0 1098931967 1 0 0 17 10 0 0 0 0 0 109779558808648 109779558812640 109779866324992 140721184118750 140721184119114 140721184119114 140721184124893 19\n",
+      "fd_targets": {
+        "0": "pipe:[80450953]",
+        "1": "pipe:[80450954]",
+        "2": "/workspaces/kprog-raw/perf/20261115-inline-interpreter/current-frontend/otel/frontend.stderr",
+        "3": "/dev/null"
+      },
+      "action": "SIGKILL",
+      "reason": "Obsolete paused pre-specialization control, replaced by completed current route; coordinator22:42 explicitly requests settlement. Queued old followers cancelled first to preserve canonical inputs."
+    }
+  ],
+  "inputs_deleted": false,
+  "raw_deleted": false,
+  "source_of_ownership": "/workspaces/.agent-state/kprog-lanes/perf/state.md entries3054..3181"
+}
