@@ -15,6 +15,7 @@
 - [x] P-SPECIALIZE-10K（9fc382606、cc83b5d48；本提交结果）：四种 10K 形状正常 B/实际栈帧完成，前端 11.6–26.3s、峰值 399–920MiB；B 328–200624B、帧 0–40B，详见 `perf_20261113/inline-families/scale-10k/`。旧同名 scalar/direct 70.47GiB/SIGKILL 的实际失败已能完成；不跨不同编译管线宣称独立加速比。100K 继续。
 
 **协调者 2026-11-15T16:41:05Z（审核 15Z 已核实）**：
+- [x] P-HOST-CPU（2636bec14；本提交实测）：one-image 在原 vng 前调用冻结 `kvm-host-cpu`，批后恢复 governor/turbo/min/max；成功、命令失败、准备部分失败、SIGTERM 四例通过，真实探针 73 控制值全部恢复，计时中 P-core min=max3.7GHz。`perf_20261113/host-cpu-control/`。C 已通知重跑固定频率 A/A+A/B；未据此宣称新性能数。
 - 计时少了冻结 benchmark 里的一步：顶层 Makefile 的 corpus-kvm-x86 依赖 kvm-host-cpu（performance 调速器、关 turbo、最低频率等于最高频率），kprog/perf/one-image 直接调 vng，把这一步跳过了；主机现在是 powersave、turbo 开、CPU0 1.6 GHz。这是 benchmark 设置本身，按“benchmark 设置保持原样”补回：每批计时前执行 kvm-host-cpu，批结束后把调速器、turbo、最低频率恢复成执行前的值（lab 上还有别的 Workspace 和 CI）。PERF 在 one-image 计时入口做这一处窄改动并告诉 C；然后 Katran 在固定频率下重跑 A/A、A/B 各一次。
 - 协调者 14:14 的“暂停整个 Workspace、被别的负载碰到的样本重跑”收回（那是从运营者问句推出来的规则）；保留计时锁本来的作用，/proc/stat 只作为记录。
 - Katran 头文件路线第一组数（C，kprog/results/katran-c-hdr-20261115）：代码 7 965 对 JIT 13 641 字节，0.584x；每次调用 A/B 1.032 ÷ A/A 0.974 = 1.060x（未固定频率、主机负载 32，待重跑）。离“每次调用至少 20%”“本体快 50%”都远；PERF 查这次 Katran 原生对象里 LTO 的 map 查找内联和 helper 是否都生效（C4 旧路线有 1.187x），并接着做时钟 helper 的 LTO。

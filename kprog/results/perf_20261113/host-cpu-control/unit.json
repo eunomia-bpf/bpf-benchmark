@@ -1,0 +1,22 @@
+[
+  {
+    "case": "success",
+    "returncode": 0,
+    "restored": true
+  },
+  {
+    "case": "command-failure",
+    "returncode": 7,
+    "restored": true
+  },
+  {
+    "case": "prepare-failure",
+    "returncode": 5,
+    "restored": true
+  },
+  {
+    "case": "signal",
+    "returncode": 143,
+    "restored": true
+  }
+]
