@@ -6,6 +6,7 @@ use super::*;
 
 pub(super) fn arguments(
     bytes: &[u8], sym: &SymInfo, got: &HashMap<LocalSiteKey, String>,
+    absolute: &HashMap<LocalSiteKey, non_pic::Reference>,
     maps: &HashMap<String, u64>,
 ) -> Result<HashMap<u64, String>> {
     let mut decoder = Decoder::with_ip(64, bytes, sym.address, DecoderOptions::NONE);
@@ -41,6 +42,9 @@ pub(super) fn arguments(
             }
         }
         let mut assigned = None;
+        if let Some(reference) = absolute.get(&local_site_key(sym, local_ip)) {
+            assigned = Some((reference.register, reference.name.clone()));
+        }
         if insn.mnemonic() == Mnemonic::Mov && insn.op0_kind() == OpKind::Register
             && x86_gpr64_family(insn.op0_register()) == Some(insn.op0_register())
         {
@@ -75,7 +79,7 @@ mod tests {
     fn track(bytes: &[u8]) -> Result<HashMap<u64, String>> {
         let sym = SymInfo { name: "entry".into(), section_index: object::SectionIndex(1),
                             address: 0, size: bytes.len() as u64 };
-        arguments(bytes, &sym, &HashMap::from([((sym.section_index, 0, 3), "map".into())]),
+        arguments(bytes, &sym, &HashMap::from([((sym.section_index, 0, 3), "map".into())]), &HashMap::new(),
                   &HashMap::from([("map".into(), 0x1000)]))
     }
 
