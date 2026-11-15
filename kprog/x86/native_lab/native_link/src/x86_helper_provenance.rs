@@ -79,7 +79,7 @@ fn analyze(bytes: &[u8], base: u64, tables: &HashMap<u64, Vec<u64>>,
         }
         for target in successors {
             let Some(&j) = indices.get(&target) else {
-                if target >= base && target < base+bytes.len() as u64 { bail!("helper CFG branch targets an interior byte"); }
+                if target >= base && target < base+bytes.len() as u64 { bail!("helper CFG branch to {:#x} from {:#x} targets an interior byte", target, insn.ip()); }
                 continue;
             };
             let changed = if let Some(previous) = &mut states[j] {

@@ -784,6 +784,151 @@ extern int bpf_copy_from_user_str(void *dst, unsigned int dst__sz, const void *u
 extern int bpf_iter_num_new(struct bpf_iter_num *it, int start, int end) __attribute__((weak)) __attribute__((section(".ksyms")));
 extern int *bpf_iter_num_next(struct bpf_iter_num *it) __attribute__((weak)) __attribute__((section(".ksyms")));
 extern void bpf_iter_num_destroy(struct bpf_iter_num *it) __attribute__((weak)) __attribute__((section(".ksyms")));
+
+/* Tetragon reaches its helpers under the bare names bpf/include/api.h declares
+ * as function-pointer variables (`probe_read`, not `bpf_probe_read`). A pointer
+ * loaded into a register is a call the compiler is free to merge: when both arms
+ * of a conditional call different helpers, clang emits one `call *%r8` whose id
+ * joins two values, and the native linker, which needs the id it reads from the
+ * register to be a singleton, binds neither. An asm-emitted call keeps one site
+ * per helper because the compiler cannot move the call across the asm.
+ *
+ * Conventions: id in RAX, args in RDI/RSI/RDX/RCX/R8, result in RAX, as the
+ * one kernel's eBPF helper-call ABI defines. */
+#define __KPROG_TG_HELPER0(rettype, id) \
+    (__extension__({ rettype __r; \
+       asm volatile("call *%%rax" : "=a"(__r) : "a"((unsigned long)(id)) \
+                    : "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11", \
+                      "memory", "cc"); __r; }))
+#define __KPROG_TG_HELPER1(rettype, id, a0) \
+    (__extension__({ rettype __r; \
+       asm volatile("call *%%rax" : "=a"(__r) \
+                    : "a"((unsigned long)(id)), "D"((unsigned long)(a0)) \
+                    : "rcx", "rdx", "rsi", "r8", "r9", "r10", "r11", \
+                      "memory", "cc"); __r; }))
+#define __KPROG_TG_HELPER2(rettype, id, a0, a1) \
+    (__extension__({ rettype __r; \
+       asm volatile("call *%%rax" : "=a"(__r) \
+                    : "a"((unsigned long)(id)), "D"((unsigned long)(a0)), \
+                      "S"((unsigned long)(a1)) \
+                    : "rcx", "rdx", "r8", "r9", "r10", "r11", \
+                      "memory", "cc"); __r; }))
+#define __KPROG_TG_HELPER3(rettype, id, a0, a1, a2) \
+    (__extension__({ rettype __r; \
+       asm volatile("call *%%rax" : "=a"(__r) \
+                    : "a"((unsigned long)(id)), "D"((unsigned long)(a0)), \
+                      "S"((unsigned long)(a1)), "d"((unsigned long)(a2)) \
+                    : "rcx", "r8", "r9", "r10", "r11", "memory", "cc"); __r; }))
+#define __KPROG_TG_HELPER4(rettype, id, a0, a1, a2, a3) \
+    (__extension__({ register unsigned long __a3 __asm__("rcx") = (unsigned long)(a3); \
+       rettype __r; \
+       asm volatile("call *%%rax" : "=a"(__r) \
+                    : "a"((unsigned long)(id)), "D"((unsigned long)(a0)), \
+                      "S"((unsigned long)(a1)), "d"((unsigned long)(a2)), \
+                      "r"(__a3) \
+                    : "r8", "r9", "r10", "r11", "memory", "cc"); __r; }))
+#define __KPROG_TG_HELPER5(rettype, id, a0, a1, a2, a3, a4) \
+    (__extension__({ register unsigned long __a3 __asm__("rcx") = (unsigned long)(a3); \
+       register unsigned long __a4 __asm__("r8") = (unsigned long)(a4); \
+       rettype __r; \
+       asm volatile("call *%%rax" : "=a"(__r) \
+                    : "a"((unsigned long)(id)), "D"((unsigned long)(a0)), \
+                      "S"((unsigned long)(a1)), "d"((unsigned long)(a2)), \
+                      "r"(__a3), "r"(__a4) \
+                    : "r9", "r10", "r11", "memory", "cc"); __r; }))
+
+#undef map_lookup_elem
+#define map_lookup_elem(map, key) \
+    __KPROG_TG_HELPER2(void *, NATIVE_BPF_FUNC_map_lookup_elem, (map), (key))
+#undef map_update_elem
+#define map_update_elem(map, key, value, flags) \
+    __KPROG_TG_HELPER4(int, NATIVE_BPF_FUNC_map_update_elem, (map), (key), (value), (flags))
+#undef map_delete_elem
+#define map_delete_elem(map, key) \
+    __KPROG_TG_HELPER2(int, NATIVE_BPF_FUNC_map_delete_elem, (map), (key))
+#undef probe_read
+#define probe_read(dst, size, src) \
+    __KPROG_TG_HELPER3(int, NATIVE_BPF_FUNC_probe_read, (dst), (size), (src))
+#undef probe_read_str
+#define probe_read_str(dst, size, src) \
+    __KPROG_TG_HELPER3(int, NATIVE_BPF_FUNC_probe_read_str, (dst), (size), (src))
+#undef probe_read_kernel
+#define probe_read_kernel(dst, size, src) \
+    __KPROG_TG_HELPER3(int, NATIVE_BPF_FUNC_probe_read_kernel, (dst), (size), (src))
+#undef probe_read_user
+#define probe_read_user(dst, size, src) \
+    __KPROG_TG_HELPER3(int, NATIVE_BPF_FUNC_probe_read_user, (dst), (size), (src))
+#undef probe_write_user
+#define probe_write_user(dst, src, len) \
+    __KPROG_TG_HELPER3(int, NATIVE_BPF_FUNC_probe_write_user, (dst), (src), (len))
+#undef copy_from_user
+#define copy_from_user(dst, size, src) \
+    __KPROG_TG_HELPER3(int, NATIVE_BPF_FUNC_copy_from_user, (dst), (size), (src))
+#undef ktime_get_ns
+#define ktime_get_ns() \
+    __KPROG_TG_HELPER0(unsigned long long, NATIVE_BPF_FUNC_ktime_get_ns)
+#undef ktime_get_boot_ns
+#define ktime_get_boot_ns() \
+    __KPROG_TG_HELPER0(unsigned long long, NATIVE_BPF_FUNC_ktime_get_boot_ns)
+#undef get_smp_processor_id
+#define get_smp_processor_id() \
+    __KPROG_TG_HELPER0(unsigned int, NATIVE_BPF_FUNC_get_smp_processor_id)
+#undef get_current_pid_tgid
+#define get_current_pid_tgid() \
+    __KPROG_TG_HELPER0(unsigned long long, NATIVE_BPF_FUNC_get_current_pid_tgid)
+#undef get_current_cgroup_id
+#define get_current_cgroup_id() \
+    __KPROG_TG_HELPER0(unsigned long long, NATIVE_BPF_FUNC_get_current_cgroup_id)
+#undef get_current_task
+#define get_current_task() \
+    __KPROG_TG_HELPER0(unsigned long long, NATIVE_BPF_FUNC_get_current_task)
+#undef get_stackid
+#define get_stackid(ctx, map, flags) \
+    __KPROG_TG_HELPER3(long, NATIVE_BPF_FUNC_get_stackid, (ctx), (map), (flags))
+#undef perf_event_output
+#define perf_event_output(ctx, map, flags, data, size) \
+    __KPROG_TG_HELPER5(int, NATIVE_BPF_FUNC_perf_event_output, \
+                       (ctx), (map), (flags), (data), (size))
+#define __KPROG_TG_HELPER3V(id, a0, a1, a2) \
+    __extension__({ asm volatile("call *%%rax" \
+                    : : "a"((unsigned long)(id)), "D"((unsigned long)(a0)), \
+                        "S"((unsigned long)(a1)), "d"((unsigned long)(a2)) \
+                    : "rcx", "r8", "r9", "r10", "r11", "memory", "cc"); })
+#undef tail_call
+#define tail_call(ctx, map, index) \
+    (__KPROG_TG_HELPER3V(NATIVE_BPF_FUNC_tail_call, (ctx), (map), (index)), (void)0)
+#undef send_signal
+#define send_signal(sig) \
+    __KPROG_TG_HELPER1(int, NATIVE_BPF_FUNC_send_signal, (sig))
+#undef seq_write
+#define seq_write(seq, data, len) \
+    __KPROG_TG_HELPER3(int, NATIVE_BPF_FUNC_seq_write, (seq), (data), (len))
+#undef ringbuf_output
+#define ringbuf_output(ringbuf, data, size, flags) \
+    __KPROG_TG_HELPER4(long, NATIVE_BPF_FUNC_ringbuf_output, \
+                       (ringbuf), (data), (size), (flags))
+#undef loop
+#define loop(nr_loops, callback_fn, ctx, flags) \
+    __KPROG_TG_HELPER4(long, NATIVE_BPF_FUNC_loop, \
+                       (nr_loops), (callback_fn), (ctx), (flags))
+#undef get_func_ret
+#define get_func_ret(ctx, value) \
+    __KPROG_TG_HELPER2(int, NATIVE_BPF_FUNC_get_func_ret, (ctx), (value))
+#undef get_func_arg
+#define get_func_arg(ctx, n, value) \
+    __KPROG_TG_HELPER3(int, NATIVE_BPF_FUNC_get_func_arg, (ctx), (n), (value))
+#undef get_attach_cookie
+#define get_attach_cookie(ctx) \
+    __KPROG_TG_HELPER1(unsigned long long, NATIVE_BPF_FUNC_get_attach_cookie, (ctx))
+#undef ima_inode_hash
+#define ima_inode_hash(inode, dst, size) \
+    __KPROG_TG_HELPER3(long, NATIVE_BPF_FUNC_ima_inode_hash, (inode), (dst), (size))
+#undef ima_file_hash
+#define ima_file_hash(file, dst, size) \
+    __KPROG_TG_HELPER3(long, NATIVE_BPF_FUNC_ima_file_hash, (file), (dst), (size))
+#undef override_return
+#define override_return(ctx, rc) \
+    __KPROG_TG_HELPER2(int, NATIVE_BPF_FUNC_override_return, (ctx), (rc))
 #endif
 
 /* access.h keeps a BPF-register asm arm under `__bpf__` and a plain C arm

@@ -17,37 +17,17 @@ fn relative_table_bases(
         let bytes = read_symbol_bytes(elf, sym)?;
         let instructions: Vec<_> = Decoder::with_ip(64, &bytes, sym.address,
             DecoderOptions::NONE).into_iter().collect();
-        for (start, window) in instructions.windows(3).enumerate() {
-            let [lea, load, add] = window else { unreachable!() };
+        for (start, lea) in instructions.iter().enumerate() {
             if lea.mnemonic() != Mnemonic::Lea || !lea.is_ip_rel_memory_operand() ||
                 lea.op0_kind() != OpKind::Register ||
-                x86_gpr64_family(lea.op0_register()) != Some(lea.op0_register()) ||
-                load.mnemonic() != Mnemonic::Movsxd || load.op0_kind() != OpKind::Register ||
-                load.op1_kind() != OpKind::Memory || load.memory_base() != lea.op0_register() ||
-                load.memory_index() == Register::None || load.memory_index_scale() != 4 ||
-                load.memory_displacement64() != 0 || load.segment_prefix() != Register::None ||
-                load.op0_register() == lea.op0_register() ||
-                add.mnemonic() != Mnemonic::Add || add.op0_kind() != OpKind::Register ||
-                add.op1_kind() != OpKind::Register || add.op0_register() != load.op0_register() ||
-                add.op1_register() != lea.op0_register()
+                x86_gpr64_family(lea.op0_register()) != Some(lea.op0_register())
             { continue; }
-            // Scheduling may overwrite the index after the target address
-            // has been formed. Follow that address, not the current index.
-            let mut factory = InstructionInfoFactory::new();
-            let mut dispatch = None;
-            for next in &instructions[start + 3..] {
-                if next.flow_control() == FlowControl::IndirectBranch {
-                    if next.op0_kind() == OpKind::Register &&
-                        next.op0_register() == load.op0_register() { dispatch = Some(next); }
-                    break;
-                }
-                if next.flow_control() != FlowControl::Next { break; }
-                if factory.info(next).used_registers().iter().any(|used|
-                    x86_gpr64_family(used.register()) == Some(load.op0_register()) &&
-                    matches!(used.access(), OpAccess::Write | OpAccess::CondWrite |
-                        OpAccess::ReadWrite | OpAccess::ReadCondWrite)) { break; }
-            }
-            let Some(jump) = dispatch else { continue; };
+            // The dispatch of this base is emitted after its `lea`, sometimes
+            // several switches later, so follow the fact forward over the
+            // emitted stream instead of walking the CFG.
+            let dispatches = base_dispatches(&instructions, start,
+                InstructionInfoFactory::new());
+            if dispatches.is_empty() { continue; }
             for (at, relocation) in section.relocations().filter(|(at, _)|
                 *at >= lea.ip() && *at < lea.next_ip())
             {
@@ -76,13 +56,88 @@ fn relative_table_bases(
                 }
                 if !code_entry { bail!("relative jump-table base has no PC32 code entry"); }
                 bases.push(base);
-                sites.insert(local_site_key(sym, jump.ip() - sym.address));
+                for dispatch in &dispatches {
+                    sites.insert(local_site_key(sym, *dispatch - sym.address));
+                }
             }
         }
     }
     bases.sort_unstable();
     bases.dedup();
     Ok((bases, sites))
+}
+
+// Facts about where a table base and a formed table target live. The compiler
+// copies the base before use, overwrites it with the loaded slot, and reuses
+// the loaded register as the target, so identity must follow the data, not the
+// register names the form happened to use.
+#[derive(Clone, PartialEq, Eq)]
+struct TableState {
+    base: HashSet<Register>,
+    loaded: Option<Register>,
+    formed: HashSet<Register>,
+}
+
+
+fn table_transfer(insn: &Instruction, state: &mut TableState,
+    factory: &mut InstructionInfoFactory) {
+    if insn.mnemonic() == Mnemonic::Movsxd && insn.op0_kind() == OpKind::Register &&
+        insn.op1_kind() == OpKind::Memory && state.base.contains(&insn.memory_base()) &&
+        insn.memory_index() != Register::None && insn.memory_index_scale() == 4 &&
+        insn.memory_displacement64() == 0 && insn.segment_prefix() == Register::None
+    {
+        let dst = insn.op0_register();
+        state.base.remove(&dst);
+        state.formed.remove(&dst);
+        state.loaded = Some(dst);
+        return;
+    }
+    if let Some((dst, src)) = x86_mov_gpr64_to_gpr64(insn) {
+        if state.base.contains(&src) { state.base.insert(dst); } else { state.base.remove(&dst); }
+        if state.formed.contains(&src) { state.formed.insert(dst); } else { state.formed.remove(&dst); }
+        if state.loaded == Some(src) { state.loaded = Some(dst); }
+        else if state.loaded == Some(dst) { state.loaded = None; }
+        return;
+    }
+    if insn.mnemonic() == Mnemonic::Add && insn.op0_kind() == OpKind::Register &&
+        insn.op1_kind() == OpKind::Register && insn.op0_register().size() == 8 &&
+        state.base.contains(&insn.op1_register()) && state.loaded == Some(insn.op0_register())
+    {
+        let dst = insn.op0_register();
+        state.base.remove(&dst);
+        state.formed.insert(dst);
+        state.loaded = None;
+        return;
+    }
+    for used in factory.info(insn).used_registers() {
+        if !matches!(used.access(), OpAccess::Write | OpAccess::CondWrite |
+            OpAccess::ReadWrite | OpAccess::ReadCondWrite) { continue; }
+        let reg = used.register();
+        state.base.remove(&reg);
+        state.formed.remove(&reg);
+        if state.loaded == Some(reg) { state.loaded = None; }
+    }
+}
+
+// The indirect branch that dispatches on an address formed from this `lea`.
+// The base is emitted once and consumed after the switch bodies it selects, so
+// the fact is followed over the emitted stream; it dies when the register that
+// holds it is written.
+fn base_dispatches(instructions: &[Instruction], start: usize,
+    mut factory: InstructionInfoFactory) -> HashSet<u64> {
+    let mut dispatches = HashSet::new();
+    let mut state = TableState { base: HashSet::from([instructions[start].op0_register()]),
+        loaded: None, formed: HashSet::new() };
+    for insn in &instructions[start+1..] {
+        if insn.flow_control() == FlowControl::IndirectBranch && insn.op0_kind() == OpKind::Register
+            && state.formed.contains(&insn.op0_register()) {
+            dispatches.insert(insn.ip());
+            break;
+        }
+        table_transfer(insn, &mut state, &mut factory);
+        if state.base.is_empty() && state.formed.is_empty() && state.loaded.is_none() { break; }
+    }
+    dispatches
 }
 
 fn absolute_table_bases(
@@ -162,6 +217,22 @@ pub(super) fn indirect_sites(elf: &object::File, included: &[SymInfo])
     Ok(sites)
 }
 
+// Every code table in the object, keyed by its base, so one function's table
+// ends where the next function's table begins.
+fn text_table_bases(elf: &object::File, section: object::SectionIndex)
+    -> Result<Vec<(u64, u32)>> {
+    let mut symbols = Vec::new();
+    for symbol in elf.symbols().filter(|symbol|
+        symbol.kind() == object::SymbolKind::Text && !symbol.is_undefined() && symbol.size() > 0) {
+        if let Some(index) = symbol.section_index() {
+            symbols.push(SymInfo { name: symbol.name()?.to_owned(), section_index: index,
+                address: symbol.address(), size: symbol.size() });
+        }
+    }
+    let symbols: Vec<_> = symbols.iter().collect();
+    Ok(code_table_bases(elf, &symbols, section)?.0)
+}
+
 // Conservative union of the actual relative-table destinations of this
 // function. A shared successor set may lose precision, never add a helper fact.
 pub(super) fn control_targets(elf: &object::File, sym: &SymInfo)
@@ -171,20 +242,31 @@ pub(super) fn control_targets(elf: &object::File, sym: &SymInfo)
         if !immutable_section(section.kind(), section.name()?) || section.relocations().next().is_none() { continue; }
         let (bases, sites) = code_table_bases(elf, &[sym], section.index())?;
         if sites.is_empty() { continue; }
+        // Slots of one table are contiguous from its base to the next table in
+        // the object. Reading the whole section under this symbol's bases would
+        // reinterpret a neighbouring table's addends against the wrong base and
+        // invent targets inside this function.
+        let limits = text_table_bases(elf, section.index())?;
+        let relocations: BTreeMap<_, _> = section.relocations().collect();
         let mut targets = Vec::new();
-        for (at, relocation) in section.relocations() {
-            let Some((base, kind)) = bases.iter().rev().find(|(base, _)| *base <= at) else { continue; };
-            if !matches!(relocation.flags(), RelocationFlags::Elf { r_type } if r_type == *kind) ||
-                relocation.has_implicit_addend() { bail!("unsupported code-table CFG relocation"); }
-            let RelocationTarget::Symbol(index) = relocation.target() else {
-                bail!("code-table CFG relocation lacks a symbol");
-            };
-            let target = elf.symbol_by_index(index)?;
-            let address = i128::from(target.address()) + i128::from(relocation.addend()) -
-                if *kind == 2 { i128::from(at-base) } else { 0 };
-            if target.section_index() == Some(sym.section_index) && address >= i128::from(sym.address) &&
-                address < i128::from(sym.address+sym.size) {
-                targets.push(u64::try_from(address)?);
+        for (base, kind) in &bases {
+            let width = if *kind == 1 { 8 } else { 4 };
+            let limit = limits.iter().map(|(at, _)| *at).filter(|at| at > base)
+                .min().unwrap_or(section.size());
+            let mut at = *base;
+            while at.checked_add(width).is_some_and(|end| end <= limit) {
+                let Some(relocation) = relocations.get(&at) else { break; };
+                if !matches!(relocation.flags(), RelocationFlags::Elf { r_type } if r_type == *kind) ||
+                    relocation.has_implicit_addend() { break; }
+                let RelocationTarget::Symbol(index) = relocation.target() else { break; };
+                let target = elf.symbol_by_index(index)?;
+                if target.section_index() != Some(sym.section_index) { break; }
+                let address = i128::from(target.address()) + i128::from(relocation.addend()) -
+                    if *kind == 2 { i128::from(at-base) } else { 0 };
+                if address >= i128::from(sym.address) && address < i128::from(sym.address+sym.size) {
+                    targets.push(u64::try_from(address)?);
+                }
+                at += width;
             }
         }
         targets.sort_unstable(); targets.dedup();
@@ -232,17 +314,8 @@ fn code_table_span(elf: &object::File, layouts: &[SymbolLayout],
     let bases = code_table_bases(elf, &included, section_index)?.0;
     let Some((_, kind)) = bases.iter().find(|(at, _)| *at == base) else { return Ok(None); };
     let width = if *kind == 1 { 8 } else { 4 };
-    let mut symbols = Vec::new();
-    for symbol in elf.symbols().filter(|symbol|
-        symbol.kind() == object::SymbolKind::Text && !symbol.is_undefined() && symbol.size() > 0) {
-        if let Some(index) = symbol.section_index() {
-            symbols.push(SymInfo { name: symbol.name()?.to_owned(), section_index: index,
-                address: symbol.address(), size: symbol.size() });
-        }
-    }
-    let symbols: Vec<_> = symbols.iter().collect();
     let section = elf.section_by_index(section_index)?;
-    let next = code_table_bases(elf, &symbols, section_index)?.0.into_iter()
+    let next = text_table_bases(elf, section_index)?.into_iter()
         .map(|(at, _)| at).filter(|at| *at > base).min().unwrap_or(section.size());
     let relocations: BTreeMap<_, _> = section.relocations().collect();
     let mut end = base;
