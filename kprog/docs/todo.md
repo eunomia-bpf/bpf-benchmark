@@ -14,6 +14,14 @@
 
 - [x] P-SPECIALIZE-10K（9fc382606、cc83b5d48；本提交结果）：四种 10K 形状正常 B/实际栈帧完成，前端 11.6–26.3s、峰值 399–920MiB；B 328–200624B、帧 0–40B，详见 `perf_20261113/inline-families/scale-10k/`。旧同名 scalar/direct 70.47GiB/SIGKILL 的实际失败已能完成；不跨不同编译管线宣称独立加速比。100K 继续。
 
+**协调者 2026-11-15T16:41:05Z（审核 15Z 已核实）**：
+- 计时少了冻结 benchmark 里的一步：顶层 Makefile 的 corpus-kvm-x86 依赖 kvm-host-cpu（performance 调速器、关 turbo、最低频率等于最高频率），kprog/perf/one-image 直接调 vng，把这一步跳过了；主机现在是 powersave、turbo 开、CPU0 1.6 GHz。这是 benchmark 设置本身，按“benchmark 设置保持原样”补回：每批计时前执行 kvm-host-cpu，批结束后把调速器、turbo、最低频率恢复成执行前的值（lab 上还有别的 Workspace 和 CI）。PERF 在 one-image 计时入口做这一处窄改动并告诉 C；然后 Katran 在固定频率下重跑 A/A、A/B 各一次。
+- 协调者 14:14 的“暂停整个 Workspace、被别的负载碰到的样本重跑”收回（那是从运营者问句推出来的规则）；保留计时锁本来的作用，/proc/stat 只作为记录。
+- Katran 头文件路线第一组数（C，kprog/results/katran-c-hdr-20261115）：代码 7 965 对 JIT 13 641 字节，0.584x；每次调用 A/B 1.032 ÷ A/A 0.974 = 1.060x（未固定频率、主机负载 32，待重跑）。离“每次调用至少 20%”“本体快 50%”都远；PERF 查这次 Katran 原生对象里 LTO 的 map 查找内联和 helper 是否都生效（C4 旧路线有 1.187x），并接着做时钟 helper 的 LTO。
+- 规模（P-SPECIALIZE）：OTel hotspot 整条 B 编译跑通，预处理后 6.0 MB（之前 431.7 MB），前端 254.6 CPU 秒、峰值 5.5 GB，栈帧 448 字节（之前 576 被拒）；10K 四个用例完成；100K 还在后端；stock 装载批次排队（6948938fb、720d49f02）。
+- vendor/bpf/Makefile 的 KERNEL_RELEASE 默认值改成唯一内核（此前取主机 uname，15:18 又编出一份 7.3.0 的原生对象，已删）。
+- corpus/results 下 469 个未提交的运行目录共 7.3 GB：各 lane 提交自己运行的小文件（metadata、result、README），大的明细留在 /workspaces 原处。
+
 **协调者 2026-11-15T14:18:54Z（运营者 14:12–14:18 的话）**：
 - 源码改动：运营者说“必要的话改一点是可以接受的, 不需要过于严格, 但尽可能不改”。协调者此前把 11-13 的“尽可能禁止改源代码”收紧成“一字不改”，删掉了 C 的兼容分支（a01ef4879、57a19c5f2），还因此重启了 C，这是收紧，已纠正：C 在 Tetragon、Tracee、Cilium 里按 __bpf__ 分开的原生兼容分支按 C 停时的最新版本恢复（本提交，来自 0f16b77f1 和 /workspaces/kprog-raw/C/stop-20261115T0649Z/worktree.patch，eBPF 一侧文本不变）。规则：头文件、编译参数、链接器能做的放那里；做不到的，在源码里加最小的兼容分支。
 - formal 继续证明迁移（运营者：“证明迁移停着。干嘛不做? 继续.”）。“每个 workspace 一个 omp 一个 codex?”是问句，按 11-13 的“可以两个 codex lane”，本 Workspace 是 C（omp）+ perf、formal（两个 Codex）；M4–M6 回到 formal，PERF 的待办里去掉。

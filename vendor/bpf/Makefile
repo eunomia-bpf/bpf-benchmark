@@ -6,7 +6,8 @@ SHELL := /bin/bash
 ROOT := $(abspath ../..)
 VENDOR := $(ROOT)/vendor
 BUILD := $(VENDOR)/build/native-bpf
-KERNEL_RELEASE ?= $(shell uname -r)
+# The one kernel (AGENTS.md first section), never the host uname.
+KERNEL_RELEASE ?= $(shell cat /workspaces/.agent-state/kprog-ck/build-x86/include/config/kernel.release)
 ARCH := x86
 GOARCH := amd64
 
