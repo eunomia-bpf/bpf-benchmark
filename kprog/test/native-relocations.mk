@@ -290,9 +290,9 @@ scalar-rodata-b: $(CONTEXT_TOOL)
 scalar-rodata-reference:
 	taskset -c 16-19 prlimit --as=8589934592 -- clang-18 -target bpf -O2 -g -I/usr/include/x86_64-linux-gnu -I$(ROOT)/vendor/libbpf/src -c $(ROOT)/kprog/test/scalar_rodata_reference.bpf.c -o /var/tmp/kprog-tmp/perf/scalar-rodata/scalar.original.bpf.o
 
-scalar-rodata-stock: $(TABLE_CONTEXT_BUILD)/stock-client
+scalar-rodata-stock: /var/tmp/kprog-tmp/perf/scheduled-table/stock-client
 	install -d $(OUTPUT) $(OUTPUT)/inputs
-	taskset -c 16-17 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rodir $(OUTPUT)/inputs=/var/tmp/kprog-tmp/perf/scalar-rodata --rodir $(OUTPUT)/client=$(TABLE_CONTEXT_BUILD) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-scalar-rodata-stock OUTPUT=$(OUTPUT)'
+	taskset -c 16-17 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rodir $(OUTPUT)/inputs=/var/tmp/kprog-tmp/perf/scalar-rodata --rodir $(OUTPUT)/client=/var/tmp/kprog-tmp/perf/scheduled-table --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-scalar-rodata-stock OUTPUT=$(OUTPUT)'
 
 guest-scalar-rodata-stock:
 	uname -r > $(OUTPUT)/kernel.release
