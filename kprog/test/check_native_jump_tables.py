@@ -81,7 +81,7 @@ def main():
                 '--link-plan', plan, '--output-abi', args.build/'jump-table.abi']
 
     failure = run(kernel_command(bad, args.build/'jump-table-invalid.bin'), check=False)
-    if failure.returncode == 0 or 'interior instruction' not in failure.stderr:
+    if failure.returncode == 0 or 'helper CFG branch targets an interior byte' not in failure.stderr:
         raise ValueError('Interior table target was not rejected at its source boundary')
     binary = args.build/'jump-table.bin'
     run(kernel_command(proof, binary))
