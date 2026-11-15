@@ -50,6 +50,7 @@ def main(a):
             linker=ROOT/'kprog/x86/native_lab/native_link/target/release/native-link'
             record.update(native=str(native),native_sha256=digest(native),linker_sha256=digest(linker))
             record.update(simulator_header_sha256=digest(ROOT/'kprog/x86/x86_sim_local_bpf.h'),
+                          inline_header_sha256=digest(ROOT/'kprog/x86/x86_sim_inline.h'),
                           specializer_sha256=digest(ROOT/'kprog/x86/trusted_specializer.py'),
                           source_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip())
             proof=a.build/'trusted_x86.proof.o'

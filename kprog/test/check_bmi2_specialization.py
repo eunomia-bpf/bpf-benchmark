@@ -12,14 +12,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-from elftools.elf.elffile import ELFFile
-
 ROOT = Path(__file__).resolve().parents[2]
-
-
-def allocated(path):
-    with path.open('rb') as stream:
-        return {s.name: s.data() for s in ELFFile(stream).iter_sections() if s['sh_flags'] & 2}
 
 
 def main(a):

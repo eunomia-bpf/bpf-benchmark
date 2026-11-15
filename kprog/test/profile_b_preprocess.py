@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import struct
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -73,6 +74,22 @@ def main(args):
                         record['allocated_sections'] = {section.name: dict(bytes=section.data_size,
                             sha256=hashlib.sha256(section.data()).hexdigest())
                             for section in elf.iter_sections() if section['sh_flags'] & 2}
+                        depths, code_bytes = [], 0
+                        for section in elf.iter_sections():
+                            if not section['sh_flags'] & 4:
+                                continue
+                            code = section.data()
+                            code_bytes += len(code)
+                            for opcode, registers, offset, immediate in struct.iter_unpack('<BBhi', code):
+                                kind = opcode & 7
+                                if kind in (1, 2, 3) and opcode & 0xe0 in (0x60, 0xc0):
+                                    base = registers >> 4 if kind == 1 else registers & 15
+                                    if base == 10 and offset < 0:
+                                        depths.append(-offset)
+                        record['bpf_code_bytes'] = code_bytes
+                        record['deepest_direct_fp_access'] = max(depths, default=0)
+                        # This observes direct R10 accesses, not every derived
+                        # stack address; it is a lower bound on frame size.
                     record['scope'] += '; normal production B backend compiled, not submitted to kernel'
                 records.append(record)
                 (args.output/'result.json').write_text(json.dumps(records, indent=2)+'\n')
