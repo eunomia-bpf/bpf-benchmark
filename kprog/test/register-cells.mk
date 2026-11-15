@@ -18,3 +18,11 @@ host:
 .PHONY: parse
 parse:
 	$(FORMAL)/external/clean/clightgen -lean -normalize -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -o /dev/null $(FORMAL)/c/X86Pointer.c
+
+HARDWARE_BUILD := /var/tmp/kprog-tmp/perf/mul-oracle
+OUTPUT ?= /workspaces/kprog-raw/perf/20261115-preprocess-growth/cells-hardware
+.PHONY: hardware
+hardware:
+	install -d $(OUTPUT)
+	python3 $(ROOT)/kprog/test/check_x86_mul.py $(HARDWARE_BUILD)
+	cp $(HARDWARE_BUILD)/result.json $(HARDWARE_BUILD)/compile.stdout $(HARDWARE_BUILD)/compile.stderr $(OUTPUT)/
