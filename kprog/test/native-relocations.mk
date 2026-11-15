@@ -269,8 +269,9 @@ control-input-comparison:
 	taskset -c 16-19 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/compare_control_inputs.py --before /workspaces/kprog-raw/perf/20261115-preprocess-growth/cells-control/mismatches.jsonl --after /workspaces/kprog-raw/perf/20261115-host-input-route/control-after/mismatches.jsonl --output $(OUTPUT)
 
 .PHONY: control-hardware-witness
+CONTROL_WITNESS_RUN ?= /workspaces/kprog-raw/perf/20261115-control-witness/full
 control-hardware-witness:
-	taskset -c 16-19 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/analyze_control_witness.py --run /workspaces/kprog-raw/perf/20261115-control-witness/full --before /workspaces/kprog-raw/perf/20261115-host-input-route/control-after --output $(OUTPUT)
+	taskset -c 16-19 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/analyze_control_witness.py --run $(CONTROL_WITNESS_RUN) --before /workspaces/kprog-raw/perf/20261115-host-input-route/control-after --output $(OUTPUT)
 
 .PHONY: native-stores
 native-stores: $(CONTEXT_TOOL)
