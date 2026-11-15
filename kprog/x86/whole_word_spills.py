@@ -62,7 +62,7 @@ def lower_text(text, low, high, *, require_final=True, reuse_dead_source=False, 
                 continue
             after = set(live)
             read_text, definitions = line, set()
-            match = re.match(r'\s*\$[rw](\d+) =', read_text)
+            match = re.match(r'\s*(?:dead )?\$[rw](\d+) =', read_text)
             if match:
                 definitions.add(int(match[1]))
                 read_text = read_text[match.end():]
@@ -76,7 +76,7 @@ def lower_text(text, low, high, *, require_final=True, reuse_dead_source=False, 
                 rewritten.append(line)
                 continue
             store = re.fullmatch(r'\s*STW32 (?:killed )?\$w(\d+), %stack\.(\d+), 0(?:, debug-location !\d+)?', line)
-            load = re.fullmatch(r'\s*\$w(\d+) = LDW32 %stack\.(\d+), 0(?:, debug-location !\d+)?', line)
+            load = re.fullmatch(r'\s*(?:dead )?\$w(\d+) = LDW32 %stack\.(\d+), 0(?:, debug-location !\d+)?', line)
             if not (store or load) or len(selected) != 1:
                 raise ValueError(f'Unsupported selected spill access: {line}')
             replacement = []

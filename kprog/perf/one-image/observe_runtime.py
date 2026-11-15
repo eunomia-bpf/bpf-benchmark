@@ -14,11 +14,16 @@ root=pathlib.Path('/tmp/native_kernel_link_cache')
 rows=[]
 for plan in sorted(root.glob('*.link-plan.json')):
  stem=plan.name.removesuffix('.link-plan.json')
+ key=stem.partition('.tmp.')[0]
  files=[]
- for path in sorted(root.glob(stem+'.*')):
+ diagnostics={}
+ for path in sorted(root.glob(key+'.*')):
   if path.is_file():
-   files.append(dict(name=path.name,bytes=path.stat().st_size,sha256=hashlib.file_digest(path.open('rb'),'sha256').hexdigest()))
- rows.append(dict(name=plan.name,plan=json.loads(plan.read_text()),files=files))
+   with path.open('rb') as source: digest=hashlib.file_digest(source,'sha256').hexdigest()
+   files.append(dict(name=path.name,bytes=path.stat().st_size,sha256=digest))
+   if path.name.endswith('.stderr.txt'): diagnostics[path.name]=path.read_text()
+ rows.append(dict(name=plan.name,cache_key=key,plan=json.loads(plan.read_text()),
+  cache_template_files=files,diagnostics=diagnostics))
 print(json.dumps(rows))
 '''
 

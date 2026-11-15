@@ -131,6 +131,25 @@ def check(args):
                 row.update(execution)
             cases.append(row)
             (args.output/'cases.json').write_text(json.dumps(cases, indent=2)+'\n')
+    # Real OTel MIR annotates a scalar reload's unused definition with `dead`.
+    # It is still a definition for scratch liveness, and a supported reload.
+    mir = args.build/'fixture.mir'
+    mir.write_text(base.replace('    RET implicit $r0',
+        '    dead $w2 = LDW32 %stack.7, 0\n    RET implicit $r0'))
+    lowered, pairs = spills.automatic(mir)
+    if not any('dead $w2 = LDW32' in change['original'] for pair in pairs for change in pair['changes']):
+        raise ValueError('Dead-marked scalar reload was omitted from spill lowering')
+    mir.write_text(lowered)
+    obj = args.build/'fixture.o'
+    run(['llc-18', '-O3', '-march=bpf', '-mcpu=v4', '-verify-machineinstrs',
+         '-start-before=prologepilog', '-filetype=obj', mir, '-o', obj])
+    row = dict(phase='dead-reload', frame_access_depth=depth(obj))
+    if not args.compile_only:
+        execution = json.loads(run([args.build/'values-client', '--groups', 'dead-reload', obj]).stdout)
+        if execution['failed'] or execution['executions'] != 1060:
+            raise ValueError('Dead-marked reload changed the packed-word result')
+        row.update(execution)
+    cases.append(row)
     (args.output/'result.json').write_text(json.dumps(dict(compile_only=args.compile_only,
         cases=cases), indent=2)+'\n')
     print(json.dumps(cases))

@@ -1,0 +1,163 @@
+{
+  "application": "otelcol-ebpf-profiler/profiling",
+  "application_status": "error",
+  "application_error": "shim socket /var/run/bpfrejit/shim-1771.sock returned empty response",
+  "service_summary": {
+    "started": "2026-11-15T18:34:48.283209+00:00",
+    "command": [
+      "python3",
+      "/workspaces/repository/kprog/test/verified_corpus.py",
+      "otelcol-ebpf-profiler/profiling",
+      "1",
+      "10",
+      "1"
+    ],
+    "service": {
+      "ready": true,
+      "arch": 1,
+      "endpoint": "/sys/kernel/debug/bpf_x86_native_lab/specializer"
+    },
+    "returncode": 0,
+    "service_returncode": -15,
+    "finished": "2026-11-15T18:42:51.228881+00:00"
+  },
+  "attempts": 4,
+  "loaded": 4,
+  "verified": 2,
+  "installed": 2,
+  "run": 0,
+  "installed_without_counter": [
+    27,
+    34
+  ],
+  "native_counter_ids_without_install": [],
+  "baseline_counter_programs": 13,
+  "native_counter_programs": 0,
+  "programs": [
+    {
+      "request_id": 1,
+      "source_prog_id": 21,
+      "native_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-15T18:36:00.269414+00:00",
+      "prog_id": 27,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/state/session-93op90jv/requests/1.success.tar.gz",
+      "finished": "2026-11-15T18:36:04.537441+00:00",
+      "stock_load": {
+        "request_id": 1,
+        "prog_id": 27,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 1,
+        "prog_id": 24,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 28,
+      "native_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-15T18:36:04.554652+00:00",
+      "prog_id": 34,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/state/session-93op90jv/requests/2.success.tar.gz",
+      "finished": "2026-11-15T18:36:33.210883+00:00",
+      "stock_load": {
+        "request_id": 2,
+        "prog_id": 34,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 2,
+        "prog_id": 31,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 35,
+      "native_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-15T18:36:33.231694+00:00",
+      "status": -5,
+      "error": "Command '['/bin/python3', '/workspaces/repository/kprog/x86/whole_word_spills.py', '/workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/state/session-93op90jv/requests/request-w7jkq5dn/generated/trusted_x86.bpf.before.mir', '/workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/state/session-93op90jv/requests/request-w7jkq5dn/generated/trusted_x86.bpf.packed.mir']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 239, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link,**generation_options)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 147, in specialize\n    compile_simulator(clang, source, obj, run, bounds_compiler=bounds_compiler)\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 80, in compile_simulator\n    compile_simulator_from_frontend(clang, source, obj, run,\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 91, in compile_simulator_from_frontend\n    _compile_simulator_backend(clang, source, obj, run, compiled_input=lowered)\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 98, in _compile_simulator_backend\n    run([sys.executable, ROOT / 'kprog/x86/whole_word_spills.py', before, packed])\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 121, in run\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/bin/python3', '/workspaces/repository/kprog/x86/whole_word_spills.py', '/workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/state/session-93op90jv/requests/request-w7jkq5dn/generated/trusted_x86.bpf.before.mir', '/workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/state/session-93op90jv/requests/request-w7jkq5dn/generated/trusted_x86.bpf.packed.mir']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/state/session-93op90jv/requests/3.failure.tar.gz",
+      "finished": "2026-11-15T18:39:37.182164+00:00",
+      "stock_load": null,
+      "stock_verification": null,
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 36,
+      "native_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-15T18:39:39.838149+00:00",
+      "status": -5,
+      "error": "Command '['/bin/python3', '/workspaces/repository/kprog/x86/whole_word_spills.py', '/workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/state/session-93op90jv/requests/request-8mefrmxh/generated/trusted_x86.bpf.before.mir', '/workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/state/session-93op90jv/requests/request-8mefrmxh/generated/trusted_x86.bpf.packed.mir']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 239, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link,**generation_options)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 147, in specialize\n    compile_simulator(clang, source, obj, run, bounds_compiler=bounds_compiler)\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 80, in compile_simulator\n    compile_simulator_from_frontend(clang, source, obj, run,\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 91, in compile_simulator_from_frontend\n    _compile_simulator_backend(clang, source, obj, run, compiled_input=lowered)\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 98, in _compile_simulator_backend\n    run([sys.executable, ROOT / 'kprog/x86/whole_word_spills.py', before, packed])\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 121, in run\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/bin/python3', '/workspaces/repository/kprog/x86/whole_word_spills.py', '/workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/state/session-93op90jv/requests/request-8mefrmxh/generated/trusted_x86.bpf.before.mir', '/workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/state/session-93op90jv/requests/request-8mefrmxh/generated/trusted_x86.bpf.packed.mir']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/state/session-93op90jv/requests/4.failure.tar.gz",
+      "finished": "2026-11-15T18:42:49.032392+00:00",
+      "stock_load": null,
+      "stock_verification": null,
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "counters": null
+    }
+  ],
+  "observed": "2026-11-15T18:48:47Z",
+  "raw_directory": "/workspaces/kprog-raw/perf/20261115-otel-current-app-retry2",
+  "corpus_directory": "corpus/results/x86_kvm_corpus_20261115_183533_054191",
+  "make_exit": 0,
+  "scope": "Actual checked OTel startup: completed stock/checked installations and failed MIR lowering attempts retained separately from app status"
+}
