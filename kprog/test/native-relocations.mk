@@ -431,3 +431,7 @@ inline-helper-host:
 	install -d /var/tmp/kprog-tmp/perf/inline-helper-host $(OUTPUT)
 	taskset -c 16-19 prlimit --as=8589934592 -- clang-18 -O2 -g -w -I$(ROOT)/vendor/libbpf/src $(ROOT)/kprog/test/inline_helper_host.c -o /var/tmp/kprog-tmp/perf/inline-helper-host/check
 	taskset -c 16-19 /var/tmp/kprog-tmp/perf/inline-helper-host/check > $(OUTPUT)/helper.json
+
+.PHONY: memory-b-pipeline-check
+memory-b-pipeline-check:
+	taskset -c 16-19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_memory_b_pipeline.py --frontend $(ABSOLUTE_TABLE_BUILD)/absolute.bpf.bounds-input.bc --object $(ABSOLUTE_TABLE_BUILD)/absolute.bpf.o --bounds $(CONTEXT_TOOL) --output $(OUTPUT)

@@ -16,6 +16,7 @@ import time
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT/'kprog/x86'), str(ROOT/'kprog/test')]
 import trusted_specializer as worker
+from memory_b_pipeline import MemoryPipeline
 
 
 def main(a):
@@ -47,15 +48,15 @@ def main(a):
         native_instructions=len(instructions), generated_bytes=len(source), source_sha256=sha(source),
         inline_header_sha256=sha((ROOT/'kprog/x86/x86_sim_inline.h').read_bytes()),
         simulator_header_sha256=sha((ROOT/'kprog/x86/x86_sim_local_bpf.h').read_bytes()),
-        commands=[], completed=False, frontend_requested=a.frontend,
+        commands=[], completed=False, frontend_requested=a.frontend or a.backend,
         scope='Same captured OTel proof/map metadata; streamed current C/CPP with optional normal-O3 frontend to null; no B/stack/kernel/application result')
     result = a.output/'result.json'
 
-    def run(command, data, name):
+    def run(command, data, name, fds=()):
         command = list(map(str, command))
         start = time.monotonic()
         with (a.output/(name+'.stderr')).open('wb') as errors, ThreadPoolExecutor(max_workers=1) as writer:
-            process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=errors)
+            process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=errors, pass_fds=fds)
 
             def send():
                 try:
@@ -75,6 +76,8 @@ def main(a):
         if process.returncode:
             raise subprocess.CalledProcessError(process.returncode, command)
         sent.result()
+        if name.startswith('backend-'):
+            (a.output/(name+'.stdout')).write_bytes(stdout)
         return stdout
 
     flags = [str(x) for x in worker.COMPILE_FLAGS]
@@ -83,10 +86,21 @@ def main(a):
     record.update(preprocessed_bytes=len(expanded), preprocessed_sha256=sha(expanded),
                   expansion=len(expanded)/len(source))
     result.write_text(json.dumps(record, indent=2)+'\n')
-    if a.frontend:
-        run([clang, *flags, '-x', 'cpp-output', '-', '-emit-llvm', '-c', '-o', '/dev/null'],
-            expanded, 'frontend')
-        record['frontend_completed'] = True
+    if a.frontend or a.backend:
+        frontend = run([clang, *flags, '-x', 'cpp-output', '-', '-emit-llvm', '-c', '-o', '-'],
+                       expanded, 'frontend')
+        record.update(frontend_completed=True, frontend_bytes=len(frontend),
+                      frontend_sha256=sha(frontend))
+        result.write_text(json.dumps(record, indent=2)+'\n')
+        if a.backend:
+            pipeline = MemoryPipeline()
+            try:
+                record['bpf'] = pipeline.compile(worker, frontend,
+                    Path('/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds'), run)
+                record['bpf_compiled'] = True
+            finally:
+                pipeline.close()
+            record['scope'] = 'Same captured OTel proof/map metadata; normal bounds/MIR/all-pairs/llc via anonymous stage files and post-PEI frame observation; no kernel/application acceptance'
     record['completed'] = True
     result.write_text(json.dumps(record, indent=2)+'\n')
     print(json.dumps(record), flush=True)
@@ -97,6 +111,7 @@ if __name__ == '__main__':
     for name in ('build', 'metadata', 'previous', 'output'):
         parser.add_argument('--'+name, type=Path, required=True)
     parser.add_argument('--frontend', action='store_true')
+    parser.add_argument('--backend', action='store_true')
     args = parser.parse_args()
     args.output = args.output/'otel'
     main(args)
