@@ -231,3 +231,20 @@ guest-scheduled-table-checked:
 .PHONY: current-otel-preprocess
 current-otel-preprocess:
 	taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/profile_current_otel.py --build /var/tmp/kprog-tmp/perf/otel-whole-word-checked --output $(OUTPUT) --metadata /workspaces/kprog-raw/perf/20261115-otel-hotspot-spills/replay/request__generation.metadata.json --entry /workspaces/kprog-raw/perf/20261115-otel-hotspot-spills/replay/request__kernel.entry
+
+.PHONY: bmi2-specialization bmi2-contract
+bmi2-specialization: $(CONTEXT_TOOL)
+	taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_bmi2_specialization.py --build /var/tmp/kprog-tmp/perf/bmi2-specialization --output $(OUTPUT) --bounds $(CONTEXT_TOOL) --linker $(LINKER_BINARY)
+
+bmi2-contract:
+	python3 $(ROOT)/kprog/formal/tools/generate_x86_specialization_spec.py --check
+	install -d /var/tmp/kprog-tmp/perf/bmi2-specialization
+	taskset -c 8-11 prlimit --as=8589934592 -- $(MAKE) -C $(ROOT)/kprog/formal -f $(ROOT)/kprog/test/native-relocations.mk bmi2-contract-host ROOT=$(ROOT)
+
+.PHONY: bmi2-contract-host
+bmi2-contract-host:
+	clang-18 -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_specialization_chain_host.c -o /var/tmp/kprog-tmp/perf/bmi2-specialization/chain
+	/var/tmp/kprog-tmp/perf/bmi2-specialization/chain
+	clang-18 -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_specialization_host.c -o /var/tmp/kprog-tmp/perf/bmi2-specialization/specialization
+	/var/tmp/kprog-tmp/perf/bmi2-specialization/specialization
+	lake build KProgFormal.X86Specialization

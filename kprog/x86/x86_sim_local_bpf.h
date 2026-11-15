@@ -2030,6 +2030,31 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 		}                                                         \
 	} while (0)
 
+/* BMI2 variable shifts preserve every modeled flag. Both the generic
+ * dispatcher and constant-opcode specialization call these same bodies. */
+#define X86_SIM_L_EXEC_SHIFTX(DST, SRC, FLAGS, AUX, IMM) \
+	do { \
+		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+		__u64 __x86_l_src = X86_SIM_L_READ_REG(SRC); \
+		__u64 __x86_l_count = X86_SIM_L_READ_REG(AUX); \
+		__u64 __x86_l_result = x86_alu_result( \
+			__x86_l_src, __x86_l_count, (IMM), __x86_l_width); \
+		X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result, __x86_l_width); \
+	} while (0)
+
+#define X86_SIM_L_EXEC_SHIFTX_MEM(DST, SRC, FLAGS, AUX, IMM) \
+	do { \
+		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+		if (X86_SIM_L_READ_RECOVERY_MEM(SRC, DST, (AUX), x86_store_imm_disp(IMM))) break; \
+		__u64 __x86_l_src = X86_SIM_L_READ_MEM_VALUE( \
+			(SRC), (AUX), (IMM), (FLAGS), 1); \
+		__u64 __x86_l_count = X86_SIM_L_READ_REG( \
+			X86_REG_AUX_GET_SRC_SHIFT(AUX)); \
+		__u64 __x86_l_result = x86_alu_result( \
+			__x86_l_src, __x86_l_count, (__u8)(IMM), __x86_l_width); \
+		X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result, __x86_l_width); \
+	} while (0)
+
 /*
  * `BZHI` (register value and count) and `BZHI_MEM` (memory value, AUX-named
  * count) share one composition whose value source, count source, byte mask,
@@ -2928,24 +2953,9 @@ x86_sim_divmod128(__u64 high, __u64 low, __u64 divisor)
 				X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
 					__x86_l_width);                          \
 			} else if (KPROG_X86_DISP_SHIFTX_HANDLED(OP)) {         \
-				__u64 __x86_l_src = X86_SIM_L_READ_REG(SRC);      \
-				__u64 __x86_l_count = X86_SIM_L_READ_REG(AUX);    \
-				__u64 __x86_l_result = x86_alu_result(            \
-					__x86_l_src, __x86_l_count, (IMM),        \
-					__x86_l_width);                          \
-				X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
-							  __x86_l_width);        \
+				X86_SIM_L_EXEC_SHIFTX((DST), (SRC), (FLAGS), (AUX), (IMM)); \
 			} else if (KPROG_X86_DISP_SHIFTX_MEM_HANDLED(OP)) { \
-                if (X86_SIM_L_READ_RECOVERY_MEM(SRC, DST, (AUX), x86_store_imm_disp(IMM))) break; \
-				__u64 __x86_l_src = X86_SIM_L_READ_MEM_VALUE(     \
-					(SRC), (AUX), (IMM), (FLAGS), 1);         \
-				__u64 __x86_l_count = X86_SIM_L_READ_REG(         \
-					X86_REG_AUX_GET_SRC_SHIFT(AUX));          \
-				__u64 __x86_l_result = x86_alu_result(            \
-					__x86_l_src, __x86_l_count,              \
-					(__u8)(IMM), __x86_l_width);             \
-				X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
-							  __x86_l_width);        \
+				X86_SIM_L_EXEC_SHIFTX_MEM((DST), (SRC), (FLAGS), (AUX), (IMM)); \
 			} else if (KPROG_X86_DISP_ROR_HANDLED(OP)) { \
 				X86_SIM_L_EXEC_ROR((DST), (FLAGS), (AUX), (IMM)); \
 			} else if (KPROG_X86_DISP_ROR_MEM_HANDLED(OP)) { \

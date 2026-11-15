@@ -226,3 +226,14 @@ compiles checked native and installs program11 (status0). Both earlier fixture
 binding/path failures are retained. This completes the fixture's load path,
 not KPROBE execution, OTel acceptance or a measured runtime optimization.
 All LTO stays together; actual app and body/size targets remain open.
+
+2026-11-15 BMI2 B preprocessing specialization: constant SHIFTX,
+SHIFTX_MEM, BZHI and BZHI_MEM now select their shared handler directly in
+the generated specialization contract. The generic dispatcher uses the same
+extracted shift bodies; BMI2 shifts preserve flags and memory forms retain
+the packed displacement/count encoding and recovery behavior. This changes
+B generation only. Native CPU/shared-simulator and normal B compilation
+checks are in `kprog/test/check_bmi2_specialization.py`; measured preprocessing
+reduction and completed checks will be recorded with the result receipt.
+Full OTel B acceptance and application behavior remain open; all native LTO
+remains on together.

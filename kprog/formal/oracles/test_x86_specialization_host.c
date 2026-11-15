@@ -155,11 +155,11 @@ static const struct spec_row SPEC[] = {
 	{ X86_OP_ALU_MEM, D },
 	{ X86_OP_CMP_REG_MEM, D },
 	{ X86_OP_MOV_LOAD_SCALAR, D },
-	{ X86_OP_SHIFTX, G },
+	{ X86_OP_SHIFTX, D },
 	{ X86_OP_RORX, D },
 	{ X86_OP_MOVBE_LOAD, G },
 	{ X86_OP_MOVBE_STORE, D },
-	{ X86_OP_SHIFTX_MEM, G },
+	{ X86_OP_SHIFTX_MEM, D },
 	{ X86_OP_RORX_MEM, G },
 	{ X86_OP_MOV_LOAD_MAP_PTR, D },
 	{ X86_OP_MOV_LOAD_HELPER_ID, D },
@@ -169,8 +169,8 @@ static const struct spec_row SPEC[] = {
 	{ X86_OP_STORE_XMM0, G },
 	{ X86_OP_ALU_MEM_UNARY, D },
 	{ X86_OP_ALU_MEM_IMM, D },
-	{ X86_OP_BZHI, G },
-	{ X86_OP_BZHI_MEM, G },
+	{ X86_OP_BZHI, D },
+	{ X86_OP_BZHI_MEM, D },
 	{ X86_OP_ALU_MEM_REG, D },
 	{ X86_OP_BT, D },
 	{ X86_OP_IMUL_IMM, D },
@@ -291,6 +291,8 @@ static int snap_eq(const struct snap *a, const struct snap *b)
 		    (OP) == X86_OP_CMP_REG_MEM ||                         \
 		    (OP) == X86_OP_ALU_MEM ||                             \
 		    (OP) == X86_OP_CMOV_MEM ||                            \
+		    (OP) == X86_OP_SHIFTX_MEM ||                          \
+		    (OP) == X86_OP_BZHI_MEM ||                            \
 		    (OP) == X86_OP_IMUL_MEM_IMM)                          \
 			SETBASE(SRC);                                     \
 		else if ((OP) == X86_OP_MOV_STORE_IMM ||                  \
@@ -357,6 +359,10 @@ static int snap_eq(const struct snap *a, const struct snap *b)
 static __u64 imm_for(__u8 op)
 {
 	switch (op) {
+	case X86_OP_SHIFTX:
+		return X86_ALU_SHL;
+	case X86_OP_SHIFTX_MEM:
+		return X86_ALU_SHL; /* low byte operation, high word displacement 0 */
 	case X86_OP_CALL_MEMSET:
 	case X86_OP_CALL_MEMCPY:
 	case X86_OP_CALL_MEMSET_REG:
@@ -414,6 +420,14 @@ static void check_token(__u8 op, unsigned dst, unsigned src, unsigned flags,
 	/* ---- side B: the encoder's emitted body, restated by hand ---- */
 	PLANT(op, dst, src);
 	switch (op) {
+	case X86_OP_SHIFTX:
+		X86_SIM_L_EXEC_SHIFTX(dst, src, flags, aux, imm); break;
+	case X86_OP_SHIFTX_MEM:
+		X86_SIM_L_EXEC_SHIFTX_MEM(dst, src, flags, aux, imm); break;
+	case X86_OP_BZHI:
+		X86_SIM_L_EXEC_BZHI(dst, src, aux, flags); break;
+	case X86_OP_BZHI_MEM:
+		X86_SIM_L_EXEC_BZHI_MEM(dst, src, flags, aux, imm); break;
 	case X86_OP_MOV_LOAD_MAP_PTR:
 	case X86_OP_MOV_LOAD_HELPER_ID:
 		X86_SIM_L_EXEC_PTR_LOAD(op,dst,aux,imm);break;
