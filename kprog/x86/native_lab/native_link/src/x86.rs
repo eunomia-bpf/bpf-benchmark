@@ -32,6 +32,13 @@ mod non_pic;
 #[path = "x86_readonly_relocs.rs"]
 mod readonly_relocs;
 
+#[path = "x86_effects.rs"]
+mod effects;
+
+pub(super) fn proof_effects(bytes: &[u8]) -> Result<serde_json::Value> {
+    effects::describe(bytes)
+}
+
 const X86_CPU_NUMBER_HELPER_KEY: &str = "__native_x86_cpu_number";
 const X86_THIS_CPU_OFF_HELPER_KEY: &str = "__native_x86_this_cpu_off";
 const X86_BPF_MAP_MAX_ENTRIES_OFFSET_KEY: &str = "__native_x86_bpf_map_max_entries_offset";

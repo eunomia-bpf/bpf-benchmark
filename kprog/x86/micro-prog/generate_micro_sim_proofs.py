@@ -20,6 +20,8 @@ from helper_abi import helper_idents, is_helper_symbol
 
 from x86_abi import check_definedness
 import kfunc_codegen
+from x86_relative_tables import (NativeEffects, ReadonlyBytes, instruction_effects,
+                                 readonly_code_relocations)
 
 from generated_x86_alu_decode import ALU_AUX
 from generated_x86_full_condition import CC_AUX
@@ -101,6 +103,7 @@ class NativeInsn:
     symbol_offset: int = 0
     source_pointer: tuple[bool, str] | None = None
     kernel_function: dict | None = None
+    effects: NativeEffects | None = None
 
 
 @dataclass(frozen=True)
@@ -237,7 +240,8 @@ def load_rodata_blobs(obj: Path) -> dict[str, bytes]:
             offset, size, name = symbol["st_value"], symbol["st_size"], symbol.name
             if size <= 0 or offset + size > len(data):
                 raise ValueError(f"native readonly extent exceeds its section: {name} offset={offset} size={size}")
-            out[name] = data[offset:offset + size]
+            out[name] = ReadonlyBytes(data[offset:offset + size],
+                readonly_code_relocations(elf, index, symbol))
         return out
 
 
@@ -269,6 +273,16 @@ def parse_native_link_blob(
         if insn.reloc_symbol in symbols else insn
         for insn in parse_asm_text(disasm.stdout)
     ]
+    from elftools.elf.elffile import ELFFile
+    with proof_obj.open('rb') as stream:
+        effects = instruction_effects(ELFFile(stream))
+    if effects:
+        annotated = []
+        for insn in insns:
+            if insn.addr not in effects or effects[insn.addr][0] != insn.end_addr-insn.addr:
+                raise ValueError('native effect metadata does not cover decoded instruction')
+            annotated.append(replace(insn, effects=effects[insn.addr][1]))
+        insns = annotated
     return insns, section_size(proof_obj, ".text"), rodata16
 
 
