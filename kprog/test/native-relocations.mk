@@ -260,3 +260,7 @@ load-oracles:
 .PHONY: native-stores
 native-stores: $(CONTEXT_TOOL)
 	taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_native_stores.py --build /var/tmp/kprog-tmp/perf/store-writeback --output $(OUTPUT) --bounds $(CONTEXT_TOOL) --linker $(LINKER_BINARY)
+
+.PHONY: current-otel-frontend
+current-otel-frontend:
+	taskset -c 8-11 prlimit --as=17179869184 -- python3 $(ROOT)/kprog/test/profile_current_otel.py --frontend --build /var/tmp/kprog-tmp/perf/otel-whole-word-checked --output $(OUTPUT) --metadata /workspaces/kprog-raw/perf/20261115-otel-hotspot-spills/replay/request__generation.metadata.json --entry /workspaces/kprog-raw/perf/20261115-otel-hotspot-spills/replay/request__kernel.entry

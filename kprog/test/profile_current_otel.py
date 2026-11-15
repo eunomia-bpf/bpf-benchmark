@@ -1,4 +1,4 @@
-"""Measure current OTel proof/render/production CPP with captured matching metadata."""
+"""Measure current OTel production frontend stages with matching captured metadata."""
 import argparse
 import hashlib
 import json
@@ -55,6 +55,19 @@ def main(a):
         expanded=worker.preprocess_simulator(str(ROOT/'kprog/stock-path/bin/clang'),source,run)
         with expanded.open('rb') as stream:record.update(measure_stream(source,stream,expanded.stat().st_size))
         record.update(preprocessed_sha256=digest(expanded),completed=True)
+        if a.frontend:
+            # This is the exact first LLVM stage of compile_simulator, with
+            # the same flags/product path. Stop here to isolate its resource
+            # cost before bounds/MIR/packing, rather than running a huge B
+            # backend without knowing which stage still grows.
+            initial=source.with_suffix('.bounds-input.bc')
+            record.update(frontend_completed=False,
+                scope='Production proof/render/chunk CPP and normal optimized LLVM frontend; no bounds, MIR, B backend or kernel submission')
+            (a.output/'result.json').write_text(json.dumps(record,indent=2)+'\n')
+            run([ROOT/'kprog/stock-path/bin/clang',*worker.COMPILE_FLAGS,
+                 '-emit-llvm','-c',expanded,'-o',initial])
+            record.update(frontend_completed=True,frontend_bytes=initial.stat().st_size,
+                          frontend_sha256=digest(initial))
     except (ValueError,RuntimeError,subprocess.CalledProcessError) as error:
         record.update(completed=False,error=str(error));raise
     finally:
@@ -65,4 +78,5 @@ def main(a):
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     for n in ('build','output','metadata','entry'):p.add_argument('--'+n,type=Path,required=True)
+    p.add_argument('--frontend',action='store_true',help='Also measure the exact normal optimized LLVM frontend stage')
     main(p.parse_args())
