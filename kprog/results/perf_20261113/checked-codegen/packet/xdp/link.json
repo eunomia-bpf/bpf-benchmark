@@ -1,0 +1,15 @@
+{
+  "command": [
+    "clang-18",
+    "-shared",
+    "-fPIC",
+    "/var/tmp/kprog-tmp/perf/checked-packet/packet.native.o",
+    "/var/tmp/kprog-tmp/perf/checked-packet/host/xdp/generated/checked-simulator.native.o",
+    "/var/tmp/kprog-tmp/perf/checked-packet/host/xdp/harness.c",
+    "-o",
+    "/var/tmp/kprog-tmp/perf/checked-packet/host/xdp/simulator.so"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": ""
+}

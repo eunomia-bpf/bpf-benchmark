@@ -1,0 +1,29 @@
+CLANG=/workspaces/repository/kprog/stock-path/bin/clang taskset -c 19 prlimit --as=17179869184 -- python3 /workspaces/repository/kprog/test/check_checked_codegen.py --build /var/tmp/kprog-tmp/perf/table-context --output /workspaces/kprog-raw/perf/20261115-checked-codegen/subsets/table --linker /workspaces/repository/kprog/x86/native_lab/native_link/target/release/deps/native_link-89e6cdf9b2bb753e --compiler /var/tmp/kprog-tmp/perf/checked-compiler/compile-sim-ir --accepted /workspaces/kprog-raw/perf/20261115-table-context/final/result.json
+install -d /workspaces/kprog-raw/perf/20261115-checked-codegen/subsets/fault
+install -d /var/tmp/kprog-tmp/perf/checked-packet
+status=0; taskset -c 8-11 prlimit --as=8589934592 -- python3 /workspaces/repository/kprog/test/check_lto_fault.py /var/tmp/kprog-tmp/perf/checked-compiler/compile-sim-ir /var/tmp/kprog-tmp/perf/checked-compiler//fault || status=$?; cp /var/tmp/kprog-tmp/perf/checked-compiler//fault/*.json /workspaces/kprog-raw/perf/20261115-checked-codegen/subsets/fault/; exit $status
+clang-18 -O3 -march=native -foptimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-asynchronous-unwind-tables -I/workspaces/repository/vendor/bpf/targets/x86/$(cat /workspaces/.agent-state/kprog-ck/build-x86/include/config/kernel.release) -c /workspaces/repository/kprog/test/checked_packet_native.c -o /var/tmp/kprog-tmp/perf/checked-packet/packet.native.o
+In file included from /workspaces/repository/kprog/test/checked_packet_native.c:3:
+/workspaces/repository/vendor/bpf/targets/x86/7.0.0-rc2+/vmlinux.h:33936:2: warning: declaration does not declare anything [-Wmissing-declarations]
+ 33936 |         struct aes_enckey;
+       |         ^
+/workspaces/repository/vendor/bpf/targets/x86/7.0.0-rc2+/vmlinux.h:48425:3: warning: declaration does not declare anything [-Wmissing-declarations]
+ 48425 |                 struct ns_tree;
+       |                 ^
+/workspaces/repository/vendor/bpf/targets/x86/7.0.0-rc2+/vmlinux.h:64466:2: warning: declaration does not declare anything [-Wmissing-declarations]
+ 64466 |         struct __filename_head;
+       |         ^
+/workspaces/repository/vendor/bpf/targets/x86/7.0.0-rc2+/vmlinux.h:93550:2: warning: declaration does not declare anything [-Wmissing-declarations]
+ 93550 |         struct renamedata;
+       |         ^
+/workspaces/repository/vendor/bpf/targets/x86/7.0.0-rc2+/vmlinux.h:97027:2: warning: declaration does not declare anything [-Wmissing-declarations]
+ 97027 |         union pipe_index;
+       |         ^
+/workspaces/repository/vendor/bpf/targets/x86/7.0.0-rc2+/vmlinux.h:106672:4: warning: declaration does not declare anything [-Wmissing-declarations]
+ 106672 |                         struct freelist_counters;
+        |                         ^
+6 warnings generated.
+install -d /workspaces/kprog-raw/perf/20261115-checked-codegen/subsets/packet
+status=0; CLANG=/workspaces/repository/kprog/stock-path/bin/clang taskset -c 16-17 prlimit --as=17179869184 -- python3 /workspaces/repository/kprog/test/check_checked_packet.py /var/tmp/kprog-tmp/perf/checked-compiler/compile-sim-ir /workspaces/repository/kprog/x86/native_lab/native_link/target/release/deps/native_link-89e6cdf9b2bb753e /workspaces/.agent-state/kprog-ck/verified-compiler/context-lower /workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json /workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json /var/tmp/kprog-tmp/perf/checked-packet/packet.native.o /var/tmp/kprog-tmp/perf/checked-packet/host /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds || status=$?; if test -d /var/tmp/kprog-tmp/perf/checked-packet/host; then cd /var/tmp/kprog-tmp/perf/checked-packet/host; find . -type f -name '*.json' -exec cp --parents '{}' /workspaces/kprog-raw/perf/20261115-checked-codegen/subsets/packet/ \;; fi; exit $status
+{"safe_vectors": 8, "faulting_children": 2, "unknown_asm_rejected": true}
+{"vectors": 25, "kinds": ["xdp", "tc", "cgroup_skb"], "physical_cb_offset": 48, "scope": "actual native input vs checked-C native compiler host execution, no kernel acceptance"}

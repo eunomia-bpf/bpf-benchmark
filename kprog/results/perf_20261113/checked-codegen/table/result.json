@@ -1,0 +1,18 @@
+{
+  "bpf_sha256": "83a9115bcab21b519842e63fc5dcafbd85d875af7e15367112001545da050499",
+  "checked_native_sha256": "7855a155d1b57e53ee3ba873f3054134d1088aa758f2c48a842343e614af7eee",
+  "checked_kernel_image_sha256": "ed6cb70f49f6bfdf25cee79552099e50d4591dae181da076b6b198ba0f1321cf",
+  "compiler_sha256": "907b671d1a921c7ccd4bcd4ede69f72d23766511093bbb2069f619045802937e",
+  "checked_native_code_bytes": 191,
+  "source_frontend_reused": true,
+  "private_input_capability": {
+    "name": "kprog_unspecified_input",
+    "addr": 129540407996576
+  },
+  "private_input_patch_offset": 2,
+  "scope": "Host execution of checked native after real prior B stock acceptance; no checked-native kernel installation or timing",
+  "cases": 512,
+  "equal": 512,
+  "raw_result": "/workspaces/kprog-raw/perf/20261115-checked-codegen/subsets/table/result.json",
+  "raw_sha256": "355885b348b5bb3b5e0ab2c90c5c050804c2c3101e7ca240799e2251c1b6c52b"
+}

@@ -1,0 +1,47 @@
+{
+  "safe_vectors": [
+    {
+      "function": "architectural_fault",
+      "value": 1,
+      "actual": 4
+    },
+    {
+      "function": "architectural_fault",
+      "value": 7,
+      "actual": 10
+    },
+    {
+      "function": "architectural_fault",
+      "value": 2147483647,
+      "actual": 2147483650
+    },
+    {
+      "function": "architectural_fault",
+      "value": 4294967295,
+      "actual": 2
+    },
+    {
+      "function": "dispatch_fault",
+      "value": 1,
+      "actual": 4
+    },
+    {
+      "function": "dispatch_fault",
+      "value": 7,
+      "actual": 10
+    },
+    {
+      "function": "dispatch_fault",
+      "value": 2147483647,
+      "actual": 2147483650
+    },
+    {
+      "function": "dispatch_fault",
+      "value": 4294967295,
+      "actual": 2
+    }
+  ],
+  "faulting_children": 2,
+  "unknown_asm_rejected": true,
+  "scope": "Native LTO compiler host regression, not application execution or verifier acceptance"
+}

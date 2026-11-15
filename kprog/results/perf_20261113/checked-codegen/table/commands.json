@@ -1,0 +1,37 @@
+[
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/deps/native_link-89e6cdf9b2bb753e",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/table-context/checked-simulator.proof.o",
+      "--symbol",
+      "trusted_x86_x86_sim_xdp",
+      "--mode",
+      "kernel",
+      "--link-plan",
+      "/var/tmp/kprog-tmp/perf/table-context/checked-table-plan.json",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/table-context/checked-table.bin",
+      "--output-relocs",
+      "/var/tmp/kprog-tmp/perf/table-context/checked-table.relocs",
+      "--output-map-patches",
+      "/var/tmp/kprog-tmp/perf/table-context/checked-table.maps",
+      "--output-abi",
+      "/var/tmp/kprog-tmp/perf/table-context/checked-table.abi"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=trusted_x86_x86_sim_xdp (227 bytes), 1 reachable symbol(s) total\n  - trusted_x86_x86_sim_xdp (vaddr 0x0, 227 bytes) [entry]\nnative-link: wrote 262 bytes -> /var/tmp/kprog-tmp/perf/table-context/checked-table.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/table-context/checked-table.relocs\nnative-link: wrote 1 map patch site(s) -> /var/tmp/kprog-tmp/perf/table-context/checked-table.maps\nnative-link: wrote ABI metadata -> /var/tmp/kprog-tmp/perf/table-context/checked-table.abi\n"
+  },
+  {
+    "command": [
+      "objdump",
+      "-dr",
+      "-Mintel",
+      "/var/tmp/kprog-tmp/perf/table-context/checked-simulator.native.o"
+    ],
+    "returncode": 0,
+    "stdout": "\n/var/tmp/kprog-tmp/perf/table-context/checked-simulator.native.o:     file format elf64-x86-64\n\n\nDisassembly of section kprobe/jump_table:\n\n0000000000000000 <trusted_x86_x86_sim_xdp>:\n   0:\t48 8b 05 00 00 00 00 \tmov    rax,QWORD PTR [rip+0x0]        # 7 <trusted_x86_x86_sim_xdp+0x7>\n\t\t\t3: R_X86_64_REX_GOTPCRELX\tkprog_unspecified_input-0x4\n   7:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n   a:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n   d:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  10:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  13:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  16:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  19:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  1c:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  1f:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  22:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  25:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  28:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  2b:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  2e:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  31:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  34:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  37:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  3a:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  3d:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  40:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  43:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  46:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  49:\t48 8b 08             \tmov    rcx,QWORD PTR [rax]\n  4c:\t48 8b 00             \tmov    rax,QWORD PTR [rax]\n  4f:\t48 8b 4f 50          \tmov    rcx,QWORD PTR [rdi+0x50]\n  53:\t83 e1 0f             \tand    ecx,0xf\n  56:\t31 c0                \txor    eax,eax\n  58:\t83 f9 07             \tcmp    ecx,0x7\n  5b:\t76 01                \tjbe    5e <trusted_x86_x86_sim_xdp+0x5e>\n  5d:\tc3                   \tret\n  5e:\t89 c8                \tmov    eax,ecx\n  60:\t48 8d 0d 00 00 00 00 \tlea    rcx,[rip+0x0]        # 67 <trusted_x86_x86_sim_xdp+0x67>\n\t\t\t63: R_X86_64_PC32\t.rodata-0x4\n  67:\t48 63 04 81          \tmovsxd rax,DWORD PTR [rcx+rax*4]\n  6b:\t48 01 c8             \tadd    rax,rcx\n  6e:\tff e0                \tjmp    rax\n  70:\t48 8b 07             \tmov    rax,QWORD PTR [rdi]\n  73:\t83 c0 11             \tadd    eax,0x11\n  76:\tc3                   \tret\n  77:\t48 8b 47 20          \tmov    rax,QWORD PTR [rdi+0x20]\n  7b:\t0d 00 80 00 00       \tor     eax,0x8000\n  80:\tc3                   \tret\n  81:\t48 8b 47 10          \tmov    rax,QWORD PTR [rdi+0x10]\n  85:\t35 34 12 00 00       \txor    eax,0x1234\n  8a:\tc3                   \tret\n  8b:\t48 8b 47 18          \tmov    rax,QWORD PTR [rdi+0x18]\n  8f:\t83 c0 e3             \tadd    eax,0xffffffe3\n  92:\tc3                   \tret\n  93:\t48 8b 4f 38          \tmov    rcx,QWORD PTR [rdi+0x38]\n  97:\t48 8d 04 8d 00 00 00 \tlea    rax,[rcx*4+0x0]\n  9e:\t00 \n  9f:\t01 c8                \tadd    eax,ecx\n  a1:\tc3                   \tret\n  a2:\t48 8b 4f 08          \tmov    rcx,QWORD PTR [rdi+0x8]\n  a6:\t48 8d 04 09          \tlea    rax,[rcx+rcx*1]\n  aa:\t01 c8                \tadd    eax,ecx\n  ac:\tc3                   \tret\n  ad:\t48 8b 47 28          \tmov    rax,QWORD PTR [rdi+0x28]\n  b1:\t25 ff 7f 00 00       \tand    eax,0x7fff\n  b6:\tc3                   \tret\n  b7:\t48 8b 47 30          \tmov    rax,QWORD PTR [rdi+0x30]\n  bb:\t83 c0 47             \tadd    eax,0x47\n  be:\tc3                   \tret\n",
+    "stderr": ""
+  }
+]

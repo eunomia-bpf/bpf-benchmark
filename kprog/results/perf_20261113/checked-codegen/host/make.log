@@ -1,0 +1,12 @@
+CLANG=/workspaces/repository/kprog/stock-path/bin/clang taskset -c 19 prlimit --as=17179869184 -- python3 /workspaces/repository/kprog/test/check_checked_codegen.py --build /var/tmp/kprog-tmp/perf/table-context --output /workspaces/kprog-raw/perf/20261115-checked-codegen/host/table --linker /workspaces/repository/kprog/x86/native_lab/native_link/target/release/deps/native_link-89e6cdf9b2bb753e --compiler /var/tmp/kprog-tmp/perf/checked-compiler/compile-sim-ir --accepted /workspaces/kprog-raw/perf/20261115-table-context/final/result.json
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/test/check_checked_codegen.py", line 84, in <module>
+    main(parser.parse_args())
+  File "/workspaces/repository/kprog/test/check_checked_codegen.py", line 45, in main
+    run([args.linker, '--input', compiled['native_proof_object'], '--symbol', compiled['symbol'],
+  File "/workspaces/repository/kprog/test/check_checked_codegen.py", line 41, in run
+    result.check_returncode()
+  File "/usr/lib/python3.12/subprocess.py", line 502, in check_returncode
+    raise CalledProcessError(self.returncode, self.args, self.stdout,
+subprocess.CalledProcessError: Command '['/workspaces/repository/kprog/x86/native_lab/native_link/target/release/deps/native_link-89e6cdf9b2bb753e', '--input', '/var/tmp/kprog-tmp/perf/table-context/checked-simulator.proof.o', '--symbol', 'trusted_x86_x86_sim_xdp', '--mode', 'kernel', '--link-plan', '/var/tmp/kprog-tmp/perf/table-context/plan.json', '--output', '/var/tmp/kprog-tmp/perf/table-context/checked-table.bin', '--output-relocs', '/var/tmp/kprog-tmp/perf/table-context/checked-table.relocs', '--output-map-patches', '/var/tmp/kprog-tmp/perf/table-context/checked-table.maps', '--output-abi', '/var/tmp/kprog-tmp/perf/table-context/checked-table.abi']' returned non-zero exit status 1.
+make: *** [kprog/test/native-relocations.mk:109: checked-table-host] Error 1

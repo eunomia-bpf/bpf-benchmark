@@ -1,0 +1,115 @@
+[
+  {
+    "command": [
+      "clang-18",
+      "-target",
+      "bpf",
+      "-mcpu=v4",
+      "-O2",
+      "-emit-llvm",
+      "-I/workspaces/repository",
+      "-I/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include/bpf",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/workspaces/repository/kprog/test/lto_fault.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/checked-compiler/fault/source.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/checked-compiler/compile-sim-ir",
+      "/var/tmp/kprog-tmp/perf/checked-compiler/fault/source.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/checked-compiler/fault/native.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native simulator operations lowered=2\n"
+  },
+  {
+    "command": [
+      "llvm-dis-18",
+      "/var/tmp/kprog-tmp/perf/checked-compiler/fault/native.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/checked-compiler/fault/native.ll"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-O3",
+      "-shared",
+      "-fPIC",
+      "-mgeneral-regs-only",
+      "/var/tmp/kprog-tmp/perf/checked-compiler/fault/native.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/checked-compiler/fault/fixture.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "warning: overriding the module target triple with x86_64-pc-linux-gnu [-Woverride-module]\n1 warning generated.\n"
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/test/check_lto_fault.py",
+      "--fault-child",
+      "/var/tmp/kprog-tmp/perf/checked-compiler/fault/fixture.so",
+      "architectural_fault"
+    ],
+    "returncode": -4,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/test/check_lto_fault.py",
+      "--fault-child",
+      "/var/tmp/kprog-tmp/perf/checked-compiler/fault/fixture.so",
+      "dispatch_fault"
+    ],
+    "returncode": -4,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-target",
+      "bpf",
+      "-mcpu=v4",
+      "-O2",
+      "-emit-llvm",
+      "-I/workspaces/repository",
+      "-I/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include/bpf",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/workspaces/repository/kprog/test/lto_fault.c",
+      "-DUNKNOWN_ASM",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/checked-compiler/fault/unknown.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/checked-compiler/compile-sim-ir",
+      "/var/tmp/kprog-tmp/perf/checked-compiler/fault/unknown.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/checked-compiler/fault/unknown.native.bc"
+    ],
+    "returncode": 1,
+    "stdout": "",
+    "stderr": "untranslated simulator BPF assembly: unsupported simulator fault marker\n"
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "source": "/var/tmp/kprog-tmp/perf/table-context/trusted_x86.bpf.i",
+  "copied_source": "/var/tmp/kprog-tmp/perf/table-context/checked-simulator.i",
+  "source_sha256": "151ffd070aa754682699d365d1fcad2142aa1a779af5ab938f34645dadef1a45",
+  "copied_source_sha256": "151ffd070aa754682699d365d1fcad2142aa1a779af5ab938f34645dadef1a45",
+  "executable_sha256": "7855a155d1b57e53ee3ba873f3054134d1088aa758f2c48a842343e614af7eee",
+  "context_layouts": {},
+  "artifacts": {
+    "simulator_preprocessed": "/var/tmp/kprog-tmp/perf/table-context/trusted_x86.bpf.i",
+    "simulator_program": "trusted_x86_x86_sim_xdp",
+    "native_object": "/var/tmp/kprog-tmp/perf/table-context/checked-simulator.native.o",
+    "symbol": "trusted_x86_x86_sim_xdp",
+    "context_kind": "raw",
+    "simulator_frontend": {
+      "path": "/var/tmp/kprog-tmp/perf/table-context/trusted_x86.bpf.bounds-input.bc",
+      "source_sha256": "151ffd070aa754682699d365d1fcad2142aa1a779af5ab938f34645dadef1a45",
+      "ir_sha256": "834cbf81d175398a89b12851077246ee1e1479b8dbb94759612b4cd665024622"
+    },
+    "native_proof_object": "/var/tmp/kprog-tmp/perf/table-context/checked-simulator.proof.o"
+  }
+}
