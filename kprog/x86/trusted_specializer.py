@@ -42,14 +42,9 @@ PIECE_MARK = "#pragma kprog_preprocessed_piece"
 
 
 def compile_simulator(clang, source: Path, obj: Path, run, *, bounds_compiler=None) -> None:
-    spills = os.environ.get('KPROG_BPF_WHOLE_WORD_SPILLS', '0')
-    if spills not in {'0', '1'}:
-        raise ValueError('KPROG_BPF_WHOLE_WORD_SPILLS must be 0 or 1')
     all_spills = os.environ.get('KPROG_BPF_WHOLE_WORD_SPILLS_ALL', '0')
     if all_spills not in {'0', '1'}:
         raise ValueError('KPROG_BPF_WHOLE_WORD_SPILLS_ALL must be 0 or 1')
-    if all_spills == '1' and spills != '1':
-        raise ValueError('KPROG_BPF_WHOLE_WORD_SPILLS_ALL requires KPROG_BPF_WHOLE_WORD_SPILLS')
     lines = source.read_text().split("\n")
     first = next(i for i, line in enumerate(lines) if INSTRUCTION_LABEL.fullmatch(line))
     bounds, start, size = [], first, 0
@@ -78,33 +73,18 @@ def compile_simulator(clang, source: Path, obj: Path, run, *, bounds_compiler=No
             expanded.unlink()
             piece.unlink()
     compiled_input = preprocessed
-    context_loads = os.environ.get('KPROG_BPF_CONTEXT_LOADS', '0')
-    if context_loads not in {'0', '1'}:
-        raise ValueError('KPROG_BPF_CONTEXT_LOADS must be 0 or 1')
-    if context_loads == '1' and not bounds_compiler:
-        raise ValueError('KPROG_BPF_CONTEXT_LOADS requires the B IR compiler')
-    strict_identities = os.environ.get('KPROG_BPF_STRICT_IDENTITIES', '0')
-    if strict_identities not in {'0', '1'}:
-        raise ValueError('KPROG_BPF_STRICT_IDENTITIES must be 0 or 1')
-    if strict_identities == '1' and not bounds_compiler:
-        raise ValueError('KPROG_BPF_STRICT_IDENTITIES requires the B IR compiler')
     if bounds_compiler:
         initial, lowered = source.with_suffix('.bounds-input.bc'), source.with_suffix('.bounds.bc')
         run([clang, *COMPILE_FLAGS, '-emit-llvm', '-c', preprocessed, '-o', initial])
-        run([bounds_compiler, initial, '-o', lowered,
-             *(['--canonical-ctx-loads'] if context_loads == '1' else []),
-             *(['--strict-identities'] if strict_identities == '1' else [])])
+        run([bounds_compiler, initial, '-o', lowered, '--canonical-ctx-loads', '--strict-identities'])
         compiled_input = lowered
-    if spills == '1':
-        before, packed = source.with_suffix('.before.mir'), source.with_suffix('.packed.mir')
-        run([clang, *COMPILE_FLAGS, '-c', compiled_input, '-mllvm',
-             '-stop-before=prologepilog', '-o', before])
-        run([sys.executable, ROOT / 'kprog/x86/whole_word_spills.py', before, packed,
-             *(['--all-scalar-pairs'] if all_spills == '1' else [])])
-        run(['llc-18', '-O3', '-march=bpf', '-mcpu=v4', '-bpf-stack-size=4096',
-             '-start-before=prologepilog', '-filetype=obj', packed, '-o', obj])
-    else:
-        run([clang, *COMPILE_FLAGS, "-c", compiled_input, "-o", obj])
+    before, packed = source.with_suffix('.before.mir'), source.with_suffix('.packed.mir')
+    run([clang, *COMPILE_FLAGS, '-c', compiled_input, '-mllvm',
+         '-stop-before=prologepilog', '-o', before])
+    run([sys.executable, ROOT / 'kprog/x86/whole_word_spills.py', before, packed,
+         *(['--all-scalar-pairs'] if all_spills == '1' else [])])
+    run(['llc-18', '-O3', '-march=bpf', '-mcpu=v4', '-bpf-stack-size=4096',
+         '-start-before=prologepilog', '-filetype=obj', packed, '-o', obj])
 
 
 def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
