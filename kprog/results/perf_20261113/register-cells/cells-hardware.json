@@ -1,0 +1,24 @@
+{
+  "vectors": {
+    "rax": 10121,
+    "rdx": 10121,
+    "rcx": 10121,
+    "r10": 10121,
+    "r11": 10121
+  },
+  "total": 50605,
+  "compiler": [
+    "clang-18",
+    "-O2",
+    "-shared",
+    "-fPIC",
+    "-mno-red-zone",
+    "-I/workspaces/repository/vendor/libbpf/src",
+    "-I/workspaces/repository/vendor/libbpf/include/uapi",
+    "/var/tmp/kprog-tmp/perf/mul-oracle/oracle.c",
+    "-o",
+    "/var/tmp/kprog-tmp/perf/mul-oracle/oracle.so"
+  ],
+  "generated_c_sha256": "fa7f304ff6dbc760bcd80484d0c79108f2cac5fdc129f1279320ee7b968cf849",
+  "scope": "Generated C lowering, hardware MUL and independent Python128-bit product; CF/OF and all other registers/undefined-flag preservation; kernel verifier acceptance is separate."
+}

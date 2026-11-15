@@ -240,9 +240,8 @@ union x86_sim_stack_mem {
  * `rax rcx rdx rbx rsp rbp rsi rdi r8 .. r15` order. The generated
  * `x86_reg_dispatch.h` already pins each `X86_R<n>` to its number and
  * `KProgFormal/X86RegDispatch.lean` proves the same order, but the read path
- * resolves registers through the independent `X86_SIM_L_REG_VALUE` ternary
- * chain; these asserts bind the cell selector itself to the dispatched order,
- * so the two hand-written orders cannot drift apart from the generated table.
+ * uses the same index for the named and indexed views. These asserts bind
+ * the selector to the generated register-number contract.
  */
 _Static_assert(KPROG_X86_GPR_CELL(X86_RAX) == 0U,
 	       "x86 gpr dispatch cell drift");
@@ -313,18 +312,25 @@ struct x86_sim_stack_value { void *pointer; __u8 tag; };
     do { __s64 __x86_sv_sp=(__s64)(long)__x86_rsp.ptr; \
          X86_SIM_L_SV_EACH(X86_SIM_L_SV_BELOW_SP_ONE) } while(0)
 
-#define X86_SIM_L_DECLARE_REG(REG, NAME)                                    \
-	union x86_sim_gpr __x86_##NAME = { .ptr = (REG) == X86_RSP ? (void *)0 : (void *)X86_SIM_L_UNSPECIFIED() };              \
-	__u8 __x86_##NAME##_tag = X86_SIM_TAG_SCALAR;
+/* Named fields retain the extraction ABI; the indexed view avoids expanding
+ * a sixteen-arm dispatch every time an instruction reads or writes a GPR.
+ * Both views occupy the same cells, including each value's provenance tag. */
+struct x86_sim_gpr_cell { union x86_sim_gpr value; __u8 tag; };
+#define X86_SIM_L_STATE_REG_FIELD(REG, NAME) \
+    union x86_sim_gpr NAME; __u8 NAME##_tag;
+#define X86_SIM_L_REGISTER_VIEWS \
+    struct { X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_STATE_REG_FIELD) }; \
+    struct x86_sim_gpr_cell gpr_cells[KPROG_X86_GPR_COUNT];
+union x86_sim_register_cells { X86_SIM_L_REGISTER_VIEWS };
 
-#define X86_SIM_L_STATE_REG_FIELD(REG, NAME)                                \
-	union x86_sim_gpr NAME;                                             \
-	__u8 NAME##_tag;
+#define X86_SIM_L_DECLARE_REG(REG, NAME) \
+    __x86_##NAME.ptr = (REG) == X86_RSP ? (void *)0 : (void *)X86_SIM_L_UNSPECIFIED(); \
+    __x86_##NAME##_tag = X86_SIM_TAG_SCALAR;
 
 /* Scalar fields are shared with profile-independent extraction bindings.
  * The legacy state retains its embedded arena and original field order. */
 #define X86_SIM_L_SCALAR_STATE_FIELDS \
-	X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_STATE_REG_FIELD) \
+	union { X86_SIM_L_REGISTER_VIEWS }; \
 	__u64 native_stack_base; \
 	__u8 cf; \
 	__u8 zf; \
@@ -358,43 +364,49 @@ struct x86_sim_state {
 };
 
 #ifdef X86_SIM_USE_STATE_STRUCT
-#define X86_SIM_L_BIND_COMMON_STATE(STATE_PTR)                              \
-	struct x86_sim_state *__x86_state = (STATE_PTR);                    \
-	X86_SIM_L_DECLARE_STACK_VALUES();                                  \
-	(void)__x86_state
+#define X86_SIM_L_BIND_COMMON_STATE(STATE_PTR) \
+    struct x86_sim_state *__x86_state = (STATE_PTR); \
+    X86_SIM_L_DECLARE_STACK_VALUES(); \
+    (void)__x86_state
+#define X86_SIM_L_REGISTER_STORAGE (*__x86_state)
+#else
+#define X86_SIM_L_REGISTER_STORAGE __x86_local_gprs
+#endif
+#define __x86_gpr_cells (X86_SIM_L_REGISTER_STORAGE.gpr_cells)
+#define __x86_rax (X86_SIM_L_REGISTER_STORAGE.rax)
+#define __x86_rcx (X86_SIM_L_REGISTER_STORAGE.rcx)
+#define __x86_rdx (X86_SIM_L_REGISTER_STORAGE.rdx)
+#define __x86_rbx (X86_SIM_L_REGISTER_STORAGE.rbx)
+#define __x86_rsp (X86_SIM_L_REGISTER_STORAGE.rsp)
+#define __x86_rbp (X86_SIM_L_REGISTER_STORAGE.rbp)
+#define __x86_rsi (X86_SIM_L_REGISTER_STORAGE.rsi)
+#define __x86_rdi (X86_SIM_L_REGISTER_STORAGE.rdi)
+#define __x86_r8 (X86_SIM_L_REGISTER_STORAGE.r8)
+#define __x86_r9 (X86_SIM_L_REGISTER_STORAGE.r9)
+#define __x86_r10 (X86_SIM_L_REGISTER_STORAGE.r10)
+#define __x86_r11 (X86_SIM_L_REGISTER_STORAGE.r11)
+#define __x86_r12 (X86_SIM_L_REGISTER_STORAGE.r12)
+#define __x86_r13 (X86_SIM_L_REGISTER_STORAGE.r13)
+#define __x86_r14 (X86_SIM_L_REGISTER_STORAGE.r14)
+#define __x86_r15 (X86_SIM_L_REGISTER_STORAGE.r15)
+#define __x86_rax_tag (X86_SIM_L_REGISTER_STORAGE.rax_tag)
+#define __x86_rcx_tag (X86_SIM_L_REGISTER_STORAGE.rcx_tag)
+#define __x86_rdx_tag (X86_SIM_L_REGISTER_STORAGE.rdx_tag)
+#define __x86_rbx_tag (X86_SIM_L_REGISTER_STORAGE.rbx_tag)
+#define __x86_rsp_tag (X86_SIM_L_REGISTER_STORAGE.rsp_tag)
+#define __x86_rbp_tag (X86_SIM_L_REGISTER_STORAGE.rbp_tag)
+#define __x86_rsi_tag (X86_SIM_L_REGISTER_STORAGE.rsi_tag)
+#define __x86_rdi_tag (X86_SIM_L_REGISTER_STORAGE.rdi_tag)
+#define __x86_r8_tag (X86_SIM_L_REGISTER_STORAGE.r8_tag)
+#define __x86_r9_tag (X86_SIM_L_REGISTER_STORAGE.r9_tag)
+#define __x86_r10_tag (X86_SIM_L_REGISTER_STORAGE.r10_tag)
+#define __x86_r11_tag (X86_SIM_L_REGISTER_STORAGE.r11_tag)
+#define __x86_r12_tag (X86_SIM_L_REGISTER_STORAGE.r12_tag)
+#define __x86_r13_tag (X86_SIM_L_REGISTER_STORAGE.r13_tag)
+#define __x86_r14_tag (X86_SIM_L_REGISTER_STORAGE.r14_tag)
+#define __x86_r15_tag (X86_SIM_L_REGISTER_STORAGE.r15_tag)
 
-#define __x86_rax (__x86_state->rax)
-#define __x86_rcx (__x86_state->rcx)
-#define __x86_rdx (__x86_state->rdx)
-#define __x86_rbx (__x86_state->rbx)
-#define __x86_rsp (__x86_state->rsp)
-#define __x86_rbp (__x86_state->rbp)
-#define __x86_rsi (__x86_state->rsi)
-#define __x86_rdi (__x86_state->rdi)
-#define __x86_r8 (__x86_state->r8)
-#define __x86_r9 (__x86_state->r9)
-#define __x86_r10 (__x86_state->r10)
-#define __x86_r11 (__x86_state->r11)
-#define __x86_r12 (__x86_state->r12)
-#define __x86_r13 (__x86_state->r13)
-#define __x86_r14 (__x86_state->r14)
-#define __x86_r15 (__x86_state->r15)
-#define __x86_rax_tag (__x86_state->rax_tag)
-#define __x86_rcx_tag (__x86_state->rcx_tag)
-#define __x86_rdx_tag (__x86_state->rdx_tag)
-#define __x86_rbx_tag (__x86_state->rbx_tag)
-#define __x86_rsp_tag (__x86_state->rsp_tag)
-#define __x86_rbp_tag (__x86_state->rbp_tag)
-#define __x86_rsi_tag (__x86_state->rsi_tag)
-#define __x86_rdi_tag (__x86_state->rdi_tag)
-#define __x86_r8_tag (__x86_state->r8_tag)
-#define __x86_r9_tag (__x86_state->r9_tag)
-#define __x86_r10_tag (__x86_state->r10_tag)
-#define __x86_r11_tag (__x86_state->r11_tag)
-#define __x86_r12_tag (__x86_state->r12_tag)
-#define __x86_r13_tag (__x86_state->r13_tag)
-#define __x86_r14_tag (__x86_state->r14_tag)
-#define __x86_r15_tag (__x86_state->r15_tag)
+#ifdef X86_SIM_USE_STATE_STRUCT
 #define __x86_native_stack_base (__x86_state->native_stack_base)
 #define __x86_cf (__x86_state->cf)
 #define __x86_zf (__x86_state->zf)
@@ -421,6 +433,7 @@ struct x86_sim_state {
 #endif
 
 #define X86_SIM_L_DECLARE_STATE()                                           \
+    union x86_sim_register_cells __x86_local_gprs; \
 	X86_SIM_L_DECLARE_STACK_VALUES();                                  \
 	__u8 __x86_sim_is_xdp = 0;                 \
 	void *__x86_sim_helper_ctx = (void *)0;                            \
@@ -456,23 +469,11 @@ struct x86_sim_state {
 	} __x86_stack_mem
 #endif
 
-#define X86_SIM_L_REG_VALUE(REG)                                            \
-	((REG) == X86_RAX ? __x86_rax.ptr :                                  \
-	 (REG) == X86_RCX ? __x86_rcx.ptr :                                  \
-	 (REG) == X86_RDX ? __x86_rdx.ptr :                                  \
-	 (REG) == X86_RBX ? __x86_rbx.ptr :                                  \
-	 (REG) == X86_RSP ? __x86_rsp.ptr :                                  \
-	 (REG) == X86_RBP ? __x86_rbp.ptr :                                  \
-	 (REG) == X86_RSI ? __x86_rsi.ptr :                                  \
-	 (REG) == X86_RDI ? __x86_rdi.ptr :                                  \
-	 (REG) == X86_R8 ? __x86_r8.ptr :                                    \
-	 (REG) == X86_R9 ? __x86_r9.ptr :                                    \
-	 (REG) == X86_R10 ? __x86_r10.ptr :                                  \
-	 (REG) == X86_R11 ? __x86_r11.ptr :                                  \
-	 (REG) == X86_R12 ? __x86_r12.ptr :                                  \
-	 (REG) == X86_R13 ? __x86_r13.ptr :                                  \
-	 (REG) == X86_R14 ? __x86_r14.ptr :                                  \
-	 (REG) == X86_R15 ? __x86_r15.ptr : (void *)0)
+/* Check the full operand before narrowing to the generated byte index:
+ * negative values and e.g. 0x100000008 must not alias a valid register. */
+#define X86_SIM_L_REG_VALUE(REG) \
+    ((__u64)(REG) < KPROG_X86_GPR_COUNT \
+        ? __x86_gpr_cells[KPROG_X86_GPR_CELL(REG)].value.ptr : (void *)0)
 
 /* Numeric entry address is distinct from the private arena's offset zero.
  * Both BPF and host use the existing explicit ABI2 entry input. Routing
@@ -523,11 +524,6 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 	__x86_rdi.ptr = (void *)(CTX);                                   \
 	__x86_rdi_tag = X86_SIM_TAG_ABI
 
-#define X86_SIM_L_READ_REG_CASE(REG, NAME)                                  \
-	case REG:                                                          \
-		__x86_l_value = __x86_##NAME.ptr;                         \
-		break;
-
 #define X86_SIM_L_READ_REG_PTR(REG)                                         \
 	X86_SIM_L_REG_VALUE(REG)
 
@@ -577,42 +573,30 @@ X86_SIM_L_READ_REG_WIDTH_SHIFT_INTO(OUTPUT, (REG), X86_WIDTH_64, 0U)
 #define X86_SIM_L_READ_REG(REG) \
 X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
 
-#define X86_SIM_L_REG_TAG_CASE(REG, NAME)                                  \
-	case REG:                                                          \
-		__x86_l_tag = __x86_##NAME##_tag;                       \
-		break;
-
-#define X86_SIM_L_REG_TAG_INTO(OUTPUT, REG)                                             \
-	do {                                                                 \
-		__u8 __x86_l_tag = X86_SIM_TAG_SCALAR;                  \
-		switch (REG) {                                           \
-		X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_REG_TAG_CASE)           \
-		default:                                                 \
-			break;                                           \
-		}                                                        \
-		(OUTPUT) = __x86_l_tag;                                             \
-	} while (0)
+#define X86_SIM_L_REG_TAG_INTO(OUTPUT, REG) \
+    do { __u64 __x86_tag_reg = (REG); \
+         (OUTPUT) = __x86_tag_reg < KPROG_X86_GPR_COUNT \
+             ? __x86_gpr_cells[KPROG_X86_GPR_CELL(__x86_tag_reg)].tag : X86_SIM_TAG_SCALAR; \
+    } while (0)
 
 #define X86_SIM_L_REG_TAG(REG) \
 	({ __u8 __x86_reg_tag_result; \
 	   X86_SIM_L_REG_TAG_INTO(__x86_reg_tag_result, REG); \
 	   __x86_reg_tag_result; })
 
-#define X86_SIM_L_WRITE_REG_PTR_VALUE_CASE(REG, NAME)                       \
-	case REG:                                                          \
-		__x86_##NAME.ptr = __x86_wr_next_ptr;                    \
-		__x86_##NAME##_tag = __x86_wr_next_tag;                  \
-		break;
+#define X86_SIM_L_STORE_REG_CELL(REG, POINTER, TAG) \
+    do { __u64 __x86_store_reg = (REG); \
+         if (__x86_store_reg < KPROG_X86_GPR_COUNT) { \
+             __x86_gpr_cells[KPROG_X86_GPR_CELL(__x86_store_reg)].value.ptr = (POINTER); \
+             __x86_gpr_cells[KPROG_X86_GPR_CELL(__x86_store_reg)].tag = (TAG); \
+         } \
+    } while (0)
 
 #define X86_SIM_L_WRITE_REG_PTR_TAG(REG, VALUE, TAG)                         \
 	do { __s64 __x86_write_old_sp=(__s64)(long)__x86_rsp.ptr;                                                                \
 		void *__x86_wr_next_ptr = (void *)(VALUE);                \
 		__u8 __x86_wr_next_tag = (TAG);                           \
-		switch (REG) {                                            \
-		X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_REG_PTR_VALUE_CASE)\
-		default:                                                  \
-			break;                                            \
-		}                                                         \
+        X86_SIM_L_STORE_REG_CELL(REG, __x86_wr_next_ptr, __x86_wr_next_tag); \
 	if ((REG)==X86_RSP) X86_SIM_L_STACK_RELEASE(__x86_write_old_sp); \
 	} while (0)
 
@@ -672,11 +656,7 @@ X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
 		if ((REG) == X86_RSP) __x86_wr_cell.ptr = (void *)(long)((__u64)(long)__x86_wr_cell.ptr - __x86_native_stack_base); \
 		void *__x86_wr_next_ptr = __x86_wr_cell.ptr;              \
 		__u8 __x86_wr_next_tag = __x86_wr_cell_tag;               \
-		switch (REG) {                                            \
-		X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_REG_PTR_VALUE_CASE)\
-		default:                                                  \
-			break;                                            \
-		}                                                         \
+        X86_SIM_L_STORE_REG_CELL(REG, __x86_wr_next_ptr, __x86_wr_next_tag); \
 	if ((REG)==X86_RSP) X86_SIM_L_STACK_RELEASE(__x86_write_old_sp); \
 	} while (0)
 

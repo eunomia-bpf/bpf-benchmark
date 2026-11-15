@@ -1,0 +1,758 @@
+[
+  {
+    "preprocessed_bytes": 2930876,
+    "generated_c_bytes": 12266,
+    "expansion_ratio": 238.94309473340942,
+    "line_directive_bytes": 123171,
+    "macro_expanded_bytes": {
+      "X86_SIM_L_EXEC_ALU_IMM": 1692945,
+      "X86_SIM_L_EXEC_IMUL_IMM": 381350,
+      "X86_SIM_L_EXEC_MOV_LOAD": 237120,
+      "X86_SIM_L_EXEC_ALU_REG": 37833,
+      "X86_SIM_L_EXEC_CMP_IMM_OP": 30814,
+      "X86_SIM_L_EXEC_CMP_REG_OP": 30772,
+      "X86_SIM_L_EXEC_LEA": 26845,
+      "X86_SIM_L_EXEC_STORE": 24208,
+      "X86_SIM_L_EXEC_MOV_IMM": 11270,
+      "X86_SIM_ENTRY_XDP": 4835,
+      "X86_SIM_X86_JCC": 3524,
+      "X86_SIM_X86_RET": 2882,
+      "generated-C-other": 1520,
+      "X86_SIM_LICENSE": 177,
+      "X86_SIM_STACK_VALUE_WORDS": 1
+    },
+    "expanded_line_counts": {
+      "X86_SIM_STACK_VALUE_WORDS": 1,
+      "generated-C-other": 239,
+      "X86_SIM_ENTRY_XDP": 1,
+      "X86_SIM_L_EXEC_MOV_LOAD": 159,
+      "X86_SIM_L_EXEC_LEA": 17,
+      "X86_SIM_L_EXEC_CMP_REG_OP": 5,
+      "X86_SIM_X86_JCC": 2,
+      "X86_SIM_L_EXEC_MOV_IMM": 10,
+      "X86_SIM_L_EXEC_IMUL_IMM": 250,
+      "X86_SIM_L_EXEC_ALU_IMM": 1071,
+      "X86_SIM_L_EXEC_CMP_IMM_OP": 5,
+      "X86_SIM_L_EXEC_STORE": 7,
+      "X86_SIM_X86_RET": 2,
+      "X86_SIM_L_EXEC_ALU_REG": 25,
+      "X86_SIM_LICENSE": 6
+    },
+    "header_bytes": {
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_helper_dispatch.h": 188620,
+      "/workspaces/repository/vendor/libbpf/include/uapi/linux/bpf.h": 39314,
+      "/workspaces/repository/vendor/libbpf/src/bpf_helper_defs.h": 22145,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_alu_flag_arm.h": 10621,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_stack_write_lanes.h": 6957,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_dispatch_singleton.h": 6620,
+      "/workspaces/repository/kprog/x86/x86_sim.h": 5650,
+      "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": 5306,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_opcode.h": 4845,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_dispatch_family.h": 4190,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_mem_access.h": 3311,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_shift_result.h": 2625,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_movx_shape.h": 1778,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_doubleshift.h": 1357,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_doubleshift_arm.h": 1172,
+      "/usr/include/asm-generic/posix_types.h": 1032,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_reg_dispatch.h": 1024,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_signed.h": 987,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_div.h": 985,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_mov_reg_arm.h": 956,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_write_width_arm.h": 956,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_bitops.h": 915,
+      "/workspaces/repository/vendor/libbpf/src/bpf_helpers.h": 899,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_setcc.h": 841,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_stack_arm.h": 781,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_cond.h": 768,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_bswap.h": 670,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_mulx_arm.h": 606,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_xchg.h": 603,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_cmpop.h": 591,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_ptr_write.h": 415,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_popcount.h": 347,
+      "/usr/include/linux/types.h": 342,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_xmm0.h": 319,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_callmem.h": 294,
+      "/usr/include/asm-generic/int-ll64.h": 287,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_setcc_mem.h": 279,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_bt.h": 238,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_width.h": 203,
+      "/usr/include/linux/posix_types.h": 197,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_pushpop.h": 190,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_movbe.h": 187,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_andn.h": 182,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_bzhi.h": 182,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_cmov.h": 168,
+      "/usr/include/x86_64-linux-gnu/asm/posix_types_64.h": 132,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_bzhi_flags.h": 126,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_rep_movs.h": 116,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_full_condition.h": 115,
+      "/workspaces/repository/kprog/stock-path/bin/../include/stock_native_input.h": 88,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_popcnt_flags.h": 65,
+      "/usr/include/asm-generic/types.h": 6,
+      "/usr/include/x86_64-linux-gnu/asm/posix_types.h": 6
+    },
+    "largest_source_lines": [
+      {
+        "line": 25,
+        "expanded_bytes": 79056,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R9, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 8ULL);"
+      },
+      {
+        "line": 10,
+        "expanded_bytes": 79032,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RSI, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);"
+      },
+      {
+        "line": 13,
+        "expanded_bytes": 79032,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RDX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);"
+      },
+      {
+        "line": 349,
+        "expanded_bytes": 37833,
+        "source": "\tX86_SIM_L_EXEC_ALU_REG(X86_RAX, X86_RAX, X86_WIDTH_32, X86_ALU_XOR);"
+      },
+      {
+        "line": 34,
+        "expanded_bytes": 33195,
+        "source": "\tX86_SIM_L_EXEC_ALU_IMM(X86_R8, X86_WIDTH_64, X86_ALU_ADD, 1ULL);"
+      },
+      {
+        "line": 40,
+        "expanded_bytes": 33195,
+        "source": "\tX86_SIM_L_EXEC_ALU_IMM(X86_R8, X86_WIDTH_64, X86_ALU_ADD, 1ULL);"
+      },
+      {
+        "line": 46,
+        "expanded_bytes": 33195,
+        "source": "\tX86_SIM_L_EXEC_ALU_IMM(X86_R8, X86_WIDTH_64, X86_ALU_ADD, 1ULL);"
+      },
+      {
+        "line": 52,
+        "expanded_bytes": 33195,
+        "source": "\tX86_SIM_L_EXEC_ALU_IMM(X86_R8, X86_WIDTH_64, X86_ALU_ADD, 1ULL);"
+      },
+      {
+        "line": 58,
+        "expanded_bytes": 33195,
+        "source": "\tX86_SIM_L_EXEC_ALU_IMM(X86_R8, X86_WIDTH_64, X86_ALU_ADD, 1ULL);"
+      },
+      {
+        "line": 64,
+        "expanded_bytes": 33195,
+        "source": "\tX86_SIM_L_EXEC_ALU_IMM(X86_R8, X86_WIDTH_64, X86_ALU_ADD, 1ULL);"
+      },
+      {
+        "line": 70,
+        "expanded_bytes": 33195,
+        "source": "\tX86_SIM_L_EXEC_ALU_IMM(X86_R8, X86_WIDTH_64, X86_ALU_ADD, 1ULL);"
+      },
+      {
+        "line": 76,
+        "expanded_bytes": 33195,
+        "source": "\tX86_SIM_L_EXEC_ALU_IMM(X86_R8, X86_WIDTH_64, X86_ALU_ADD, 1ULL);"
+      }
+    ],
+    "name": "n100_scalar_direct",
+    "requested_native_instructions": 100,
+    "native_instructions": 115,
+    "native_sha256": "017cecd00600a574627897e817a8370dbbe5e66d5372f71df79fbfe61047aedc",
+    "generated_sha256": "738aafdfd03e35f158a752a7a5a0e9026e0c80126c4e3c8f84bbbeb3ff854cb7",
+    "preprocessed_sha256": "9876c8ea8e68f65c6b35db557415d0a1dd2b67bc7f1e56e242de456a9ccc453a",
+    "helper_call_like_tokens": {
+      "bpf_tail_call_static(": 1,
+      "bpf_iter_num_new(": 1,
+      "bpf_iter_num_next(": 1,
+      "bpf_iter_num_destroy(": 1,
+      "bpf_cast_to_kern_ctx(": 2
+    },
+    "switch_tokens": 62,
+    "scope": "Current generator and real one-piece Clang -E only; no new B compilation or kernel acceptance; normal production B backend compiled, not submitted to kernel",
+    "allocated_sections": {
+      ".text": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "xdp": {
+        "bytes": 248,
+        "sha256": "eb19fb05d42b83017053845da3a9fcd26a6e8fdcd1f2f068e63c68b064f23367"
+      },
+      "license": {
+        "bytes": 4,
+        "sha256": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a"
+      }
+    }
+  },
+  {
+    "preprocessed_bytes": 2974229,
+    "generated_c_bytes": 13479,
+    "expansion_ratio": 220.65650270791602,
+    "line_directive_bytes": 127920,
+    "macro_expanded_bytes": {
+      "X86_SIM_L_EXEC_ALU_IMM": 1726140,
+      "X86_SIM_L_EXEC_IMUL_IMM": 381350,
+      "X86_SIM_L_EXEC_MOV_LOAD": 237120,
+      "X86_SIM_L_EXEC_ALU_REG": 37833,
+      "X86_SIM_L_EXEC_CMP_IMM_OP": 30814,
+      "X86_SIM_L_EXEC_CMP_REG_OP": 30772,
+      "X86_SIM_L_EXEC_LEA": 26845,
+      "X86_SIM_L_EXEC_STORE": 24208,
+      "X86_SIM_L_EXEC_MOV_IMM": 11270,
+      "X86_SIM_ENTRY_XDP": 4835,
+      "X86_SIM_X86_JCC": 3524,
+      "X86_SIM_X86_CODE_ADDRESS": 3298,
+      "X86_SIM_X86_RET": 2882,
+      "generated-C-other": 2006,
+      "X86_SIM_L_READ_REG": 1267,
+      "X86_SIM_L_REG_TAG": 228,
+      "X86_SIM_LICENSE": 177,
+      "X86_SIM_X86_JMP": 130,
+      "X86_SIM_STACK_VALUE_WORDS": 1
+    },
+    "expanded_line_counts": {
+      "X86_SIM_STACK_VALUE_WORDS": 1,
+      "generated-C-other": 272,
+      "X86_SIM_ENTRY_XDP": 1,
+      "X86_SIM_L_EXEC_MOV_LOAD": 159,
+      "X86_SIM_L_EXEC_LEA": 17,
+      "X86_SIM_L_EXEC_CMP_REG_OP": 5,
+      "X86_SIM_X86_JCC": 2,
+      "X86_SIM_L_EXEC_MOV_IMM": 10,
+      "X86_SIM_L_EXEC_IMUL_IMM": 250,
+      "X86_SIM_L_EXEC_ALU_IMM": 1092,
+      "X86_SIM_L_EXEC_CMP_IMM_OP": 5,
+      "X86_SIM_X86_CODE_ADDRESS": 10,
+      "X86_SIM_X86_JMP": 2,
+      "X86_SIM_L_READ_REG": 1,
+      "X86_SIM_L_REG_TAG": 1,
+      "X86_SIM_L_EXEC_STORE": 7,
+      "X86_SIM_X86_RET": 2,
+      "X86_SIM_L_EXEC_ALU_REG": 25,
+      "X86_SIM_LICENSE": 6
+    },
+    "header_bytes": {
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_helper_dispatch.h": 188620,
+      "/workspaces/repository/vendor/libbpf/include/uapi/linux/bpf.h": 39314,
+      "/workspaces/repository/vendor/libbpf/src/bpf_helper_defs.h": 22145,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_alu_flag_arm.h": 10621,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_stack_write_lanes.h": 6957,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_dispatch_singleton.h": 6620,
+      "/workspaces/repository/kprog/x86/x86_sim.h": 5650,
+      "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": 5306,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_opcode.h": 4845,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_dispatch_family.h": 4190,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_mem_access.h": 3311,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_shift_result.h": 2625,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_movx_shape.h": 1778,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_doubleshift.h": 1357,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_doubleshift_arm.h": 1172,
+      "/usr/include/asm-generic/posix_types.h": 1032,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_reg_dispatch.h": 1024,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_signed.h": 987,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_div.h": 985,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_mov_reg_arm.h": 956,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_write_width_arm.h": 956,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_bitops.h": 915,
+      "/workspaces/repository/vendor/libbpf/src/bpf_helpers.h": 899,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_setcc.h": 841,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_stack_arm.h": 781,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_cond.h": 768,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_bswap.h": 670,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_mulx_arm.h": 606,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_xchg.h": 603,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_cmpop.h": 591,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_ptr_write.h": 415,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_popcount.h": 347,
+      "/usr/include/linux/types.h": 342,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_xmm0.h": 319,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_callmem.h": 294,
+      "/usr/include/asm-generic/int-ll64.h": 287,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_setcc_mem.h": 279,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_bt.h": 238,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_width.h": 203,
+      "/usr/include/linux/posix_types.h": 197,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_pushpop.h": 190,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_movbe.h": 187,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_andn.h": 182,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_bzhi.h": 182,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_cmov.h": 168,
+      "/usr/include/x86_64-linux-gnu/asm/posix_types_64.h": 132,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_bzhi_flags.h": 126,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_rep_movs.h": 116,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_full_condition.h": 115,
+      "/workspaces/repository/kprog/stock-path/bin/../include/stock_native_input.h": 88,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_popcnt_flags.h": 65,
+      "/usr/include/asm-generic/types.h": 6,
+      "/usr/include/x86_64-linux-gnu/asm/posix_types.h": 6
+    },
+    "largest_source_lines": [
+      {
+        "line": 35,
+        "expanded_bytes": 79056,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R9, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 8ULL);"
+      },
+      {
+        "line": 20,
+        "expanded_bytes": 79032,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RSI, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);"
+      },
+      {
+        "line": 23,
+        "expanded_bytes": 79032,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RDX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);"
+      },
+      {
+        "line": 389,
+        "expanded_bytes": 37833,
+        "source": "\tX86_SIM_L_EXEC_ALU_REG(X86_RAX, X86_RAX, X86_WIDTH_32, X86_ALU_XOR);"
+      },
+      {
+        "line": 44,
+        "expanded_bytes": 33195,
+        "source": "\tX86_SIM_L_EXEC_ALU_IMM(X86_R8, X86_WIDTH_64, X86_ALU_ADD, 1ULL);"
+      },
+      {
+        "line": 50,
+        "expanded_bytes": 33195,
+        "source": "\tX86_SIM_L_EXEC_ALU_IMM(X86_R8, X86_WIDTH_64, X86_ALU_ADD, 1ULL);"
+      },
+      {
+        "line": 56,
+        "expanded_bytes": 33195,
+        "source": "\tX86_SIM_L_EXEC_ALU_IMM(X86_R8, X86_WIDTH_64, X86_ALU_ADD, 1ULL);"
+      },
+      {
+        "line": 62,
+        "expanded_bytes": 33195,
+        "source": "\tX86_SIM_L_EXEC_ALU_IMM(X86_R8, X86_WIDTH_64, X86_ALU_ADD, 1ULL);"
+      },
+      {
+        "line": 68,
+        "expanded_bytes": 33195,
+        "source": "\tX86_SIM_L_EXEC_ALU_IMM(X86_R8, X86_WIDTH_64, X86_ALU_ADD, 1ULL);"
+      },
+      {
+        "line": 74,
+        "expanded_bytes": 33195,
+        "source": "\tX86_SIM_L_EXEC_ALU_IMM(X86_R8, X86_WIDTH_64, X86_ALU_ADD, 1ULL);"
+      },
+      {
+        "line": 80,
+        "expanded_bytes": 33195,
+        "source": "\tX86_SIM_L_EXEC_ALU_IMM(X86_R8, X86_WIDTH_64, X86_ALU_ADD, 1ULL);"
+      },
+      {
+        "line": 86,
+        "expanded_bytes": 33195,
+        "source": "\tX86_SIM_L_EXEC_ALU_IMM(X86_R8, X86_WIDTH_64, X86_ALU_ADD, 1ULL);"
+      }
+    ],
+    "name": "n100_scalar_indirect",
+    "requested_native_instructions": 100,
+    "native_instructions": 121,
+    "native_sha256": "968ca2a1626c578d1885823eaa14dab0df2005317d7085b08a76d8adcf020742",
+    "generated_sha256": "82328a1864eea4d93c0e39680615ae53a934dda55b2198432959a40313258686",
+    "preprocessed_sha256": "e10a4d5f5ed7ade3acab6da439c36cf730778c12e4fb16de24e2468b6aebb3af",
+    "helper_call_like_tokens": {
+      "bpf_tail_call_static(": 1,
+      "bpf_iter_num_new(": 1,
+      "bpf_iter_num_next(": 1,
+      "bpf_iter_num_destroy(": 1,
+      "bpf_cast_to_kern_ctx(": 2
+    },
+    "switch_tokens": 65,
+    "scope": "Current generator and real one-piece Clang -E only; no new B compilation or kernel acceptance; normal production B backend compiled, not submitted to kernel",
+    "allocated_sections": {
+      ".text": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "xdp": {
+        "bytes": 256,
+        "sha256": "06979dfd34da614f8a362096c0b2009b6c81b8375a37cf124d64575d56958118"
+      },
+      "license": {
+        "bytes": 4,
+        "sha256": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a"
+      }
+    }
+  },
+  {
+    "preprocessed_bytes": 6889886,
+    "generated_c_bytes": 16499,
+    "expansion_ratio": 417.5941572216498,
+    "line_directive_bytes": 274204,
+    "macro_expanded_bytes": {
+      "X86_SIM_L_EXEC_MOV_LOAD": 4194100,
+      "X86_SIM_L_EXEC_ALU_REG": 1929933,
+      "X86_SIM_L_EXEC_ALU_IMM": 33195,
+      "X86_SIM_L_EXEC_CMP_IMM_OP": 30814,
+      "X86_SIM_L_EXEC_CMP_REG_OP": 30772,
+      "X86_SIM_L_EXEC_LEA": 26845,
+      "X86_SIM_L_EXEC_STORE": 24208,
+      "X86_SIM_L_EXEC_MOV_IMM": 11270,
+      "X86_SIM_ENTRY_XDP": 4835,
+      "X86_SIM_X86_JCC": 3524,
+      "X86_SIM_X86_RET": 2882,
+      "generated-C-other": 1517,
+      "X86_SIM_LICENSE": 177,
+      "X86_SIM_STACK_VALUE_WORDS": 1
+    },
+    "expanded_line_counts": {
+      "X86_SIM_STACK_VALUE_WORDS": 1,
+      "generated-C-other": 239,
+      "X86_SIM_ENTRY_XDP": 1,
+      "X86_SIM_L_EXEC_MOV_LOAD": 2809,
+      "X86_SIM_L_EXEC_LEA": 17,
+      "X86_SIM_L_EXEC_CMP_REG_OP": 5,
+      "X86_SIM_X86_JCC": 2,
+      "X86_SIM_L_EXEC_MOV_IMM": 10,
+      "X86_SIM_L_EXEC_ALU_REG": 1275,
+      "X86_SIM_L_EXEC_CMP_IMM_OP": 5,
+      "X86_SIM_L_EXEC_ALU_IMM": 21,
+      "X86_SIM_L_EXEC_STORE": 7,
+      "X86_SIM_X86_RET": 2,
+      "X86_SIM_LICENSE": 6
+    },
+    "header_bytes": {
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_helper_dispatch.h": 188620,
+      "/workspaces/repository/vendor/libbpf/include/uapi/linux/bpf.h": 39314,
+      "/workspaces/repository/vendor/libbpf/src/bpf_helper_defs.h": 22145,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_alu_flag_arm.h": 10621,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_stack_write_lanes.h": 6957,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_dispatch_singleton.h": 6620,
+      "/workspaces/repository/kprog/x86/x86_sim.h": 5650,
+      "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": 5306,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_opcode.h": 4845,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_dispatch_family.h": 4190,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_mem_access.h": 3311,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_shift_result.h": 2625,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_movx_shape.h": 1778,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_doubleshift.h": 1357,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_doubleshift_arm.h": 1172,
+      "/usr/include/asm-generic/posix_types.h": 1032,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_reg_dispatch.h": 1024,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_signed.h": 987,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_div.h": 985,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_mov_reg_arm.h": 956,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_write_width_arm.h": 956,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_bitops.h": 915,
+      "/workspaces/repository/vendor/libbpf/src/bpf_helpers.h": 899,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_setcc.h": 841,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_stack_arm.h": 781,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_cond.h": 768,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_bswap.h": 670,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_mulx_arm.h": 606,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_xchg.h": 603,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_cmpop.h": 591,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_ptr_write.h": 415,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_popcount.h": 347,
+      "/usr/include/linux/types.h": 342,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_xmm0.h": 319,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_callmem.h": 294,
+      "/usr/include/asm-generic/int-ll64.h": 287,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_setcc_mem.h": 279,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_bt.h": 238,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_width.h": 203,
+      "/usr/include/linux/posix_types.h": 197,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_pushpop.h": 190,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_movbe.h": 187,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_andn.h": 182,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_bzhi.h": 182,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_cmov.h": 168,
+      "/usr/include/x86_64-linux-gnu/asm/posix_types_64.h": 132,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_bzhi_flags.h": 126,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_rep_movs.h": 116,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_full_condition.h": 115,
+      "/workspaces/repository/kprog/stock-path/bin/../include/stock_native_input.h": 88,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_popcnt_flags.h": 65,
+      "/usr/include/asm-generic/types.h": 6,
+      "/usr/include/x86_64-linux-gnu/asm/posix_types.h": 6
+    },
+    "largest_source_lines": [
+      {
+        "line": 43,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 10ULL);"
+      },
+      {
+        "line": 49,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 11ULL);"
+      },
+      {
+        "line": 55,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 12ULL);"
+      },
+      {
+        "line": 61,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 13ULL);"
+      },
+      {
+        "line": 67,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 14ULL);"
+      },
+      {
+        "line": 73,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 15ULL);"
+      },
+      {
+        "line": 91,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 10ULL);"
+      },
+      {
+        "line": 97,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 11ULL);"
+      },
+      {
+        "line": 103,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 12ULL);"
+      },
+      {
+        "line": 109,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 13ULL);"
+      },
+      {
+        "line": 115,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 14ULL);"
+      },
+      {
+        "line": 121,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 15ULL);"
+      }
+    ],
+    "name": "n100_ptr_direct",
+    "requested_native_instructions": 100,
+    "native_instructions": 115,
+    "native_sha256": "196d5277d23f88b71b80f750d11b4a881d9d11808c5372bb08af40d4dfd56a7a",
+    "generated_sha256": "d27d75a2b6f4ed7f9de924f2134b03c68387ee80e0366ca2e8d76f7ec96b461c",
+    "preprocessed_sha256": "38c39c3c8a5a49e9b359c37ca19f5b0c5622e78ac8759ec4ec78f32b4eabf9c9",
+    "helper_call_like_tokens": {
+      "bpf_tail_call_static(": 1,
+      "bpf_iter_num_new(": 1,
+      "bpf_iter_num_next(": 1,
+      "bpf_iter_num_destroy(": 1,
+      "bpf_cast_to_kern_ctx(": 2
+    },
+    "switch_tokens": 112,
+    "scope": "Current generator and real one-piece Clang -E only; no new B compilation or kernel acceptance; normal production B backend compiled, not submitted to kernel",
+    "allocated_sections": {
+      ".text": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "xdp": {
+        "bytes": 2232,
+        "sha256": "5d8735c090593748cb6abe6efd709c0593b22b52ea6d3a881568ed56552657bf"
+      },
+      "license": {
+        "bytes": 4,
+        "sha256": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a"
+      }
+    }
+  },
+  {
+    "preprocessed_bytes": 6938455,
+    "generated_c_bytes": 17712,
+    "expansion_ratio": 391.73752258355916,
+    "line_directive_bytes": 284169,
+    "macro_expanded_bytes": {
+      "X86_SIM_L_EXEC_MOV_LOAD": 4194100,
+      "X86_SIM_L_EXEC_ALU_REG": 1929933,
+      "X86_SIM_L_EXEC_ALU_IMM": 66390,
+      "X86_SIM_L_EXEC_CMP_IMM_OP": 30814,
+      "X86_SIM_L_EXEC_CMP_REG_OP": 30772,
+      "X86_SIM_L_EXEC_LEA": 26845,
+      "X86_SIM_L_EXEC_STORE": 24208,
+      "X86_SIM_L_EXEC_MOV_IMM": 11270,
+      "X86_SIM_ENTRY_XDP": 4835,
+      "X86_SIM_X86_JCC": 3524,
+      "X86_SIM_X86_CODE_ADDRESS": 3298,
+      "X86_SIM_X86_RET": 2882,
+      "generated-C-other": 2003,
+      "X86_SIM_L_READ_REG": 1267,
+      "X86_SIM_L_REG_TAG": 228,
+      "X86_SIM_LICENSE": 177,
+      "X86_SIM_X86_JMP": 130,
+      "X86_SIM_STACK_VALUE_WORDS": 1
+    },
+    "expanded_line_counts": {
+      "X86_SIM_STACK_VALUE_WORDS": 1,
+      "generated-C-other": 272,
+      "X86_SIM_ENTRY_XDP": 1,
+      "X86_SIM_L_EXEC_MOV_LOAD": 2809,
+      "X86_SIM_L_EXEC_LEA": 17,
+      "X86_SIM_L_EXEC_CMP_REG_OP": 5,
+      "X86_SIM_X86_JCC": 2,
+      "X86_SIM_L_EXEC_MOV_IMM": 10,
+      "X86_SIM_L_EXEC_ALU_REG": 1275,
+      "X86_SIM_L_EXEC_CMP_IMM_OP": 5,
+      "X86_SIM_X86_CODE_ADDRESS": 10,
+      "X86_SIM_X86_JMP": 2,
+      "X86_SIM_L_READ_REG": 1,
+      "X86_SIM_L_REG_TAG": 1,
+      "X86_SIM_L_EXEC_ALU_IMM": 42,
+      "X86_SIM_L_EXEC_STORE": 7,
+      "X86_SIM_X86_RET": 2,
+      "X86_SIM_LICENSE": 6
+    },
+    "header_bytes": {
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_helper_dispatch.h": 188620,
+      "/workspaces/repository/vendor/libbpf/include/uapi/linux/bpf.h": 39314,
+      "/workspaces/repository/vendor/libbpf/src/bpf_helper_defs.h": 22145,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_alu_flag_arm.h": 10621,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_stack_write_lanes.h": 6957,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_dispatch_singleton.h": 6620,
+      "/workspaces/repository/kprog/x86/x86_sim.h": 5650,
+      "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": 5306,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_opcode.h": 4845,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_dispatch_family.h": 4190,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_mem_access.h": 3311,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_shift_result.h": 2625,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_movx_shape.h": 1778,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_doubleshift.h": 1357,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_doubleshift_arm.h": 1172,
+      "/usr/include/asm-generic/posix_types.h": 1032,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_reg_dispatch.h": 1024,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_signed.h": 987,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_div.h": 985,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_mov_reg_arm.h": 956,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_write_width_arm.h": 956,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_bitops.h": 915,
+      "/workspaces/repository/vendor/libbpf/src/bpf_helpers.h": 899,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_setcc.h": 841,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_stack_arm.h": 781,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_cond.h": 768,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_bswap.h": 670,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_mulx_arm.h": 606,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_xchg.h": 603,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_cmpop.h": 591,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_ptr_write.h": 415,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_popcount.h": 347,
+      "/usr/include/linux/types.h": 342,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_xmm0.h": 319,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_callmem.h": 294,
+      "/usr/include/asm-generic/int-ll64.h": 287,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_setcc_mem.h": 279,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_bt.h": 238,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_width.h": 203,
+      "/usr/include/linux/posix_types.h": 197,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_pushpop.h": 190,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_movbe.h": 187,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_andn.h": 182,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_bzhi.h": 182,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_cmov.h": 168,
+      "/usr/include/x86_64-linux-gnu/asm/posix_types_64.h": 132,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_bzhi_flags.h": 126,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_rep_movs.h": 116,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_full_condition.h": 115,
+      "/workspaces/repository/kprog/stock-path/bin/../include/stock_native_input.h": 88,
+      "/workspaces/repository/kprog/x86/../formal/generated/x86_popcnt_flags.h": 65,
+      "/usr/include/asm-generic/types.h": 6,
+      "/usr/include/x86_64-linux-gnu/asm/posix_types.h": 6
+    },
+    "largest_source_lines": [
+      {
+        "line": 53,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 10ULL);"
+      },
+      {
+        "line": 59,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 11ULL);"
+      },
+      {
+        "line": 65,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 12ULL);"
+      },
+      {
+        "line": 71,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 13ULL);"
+      },
+      {
+        "line": 77,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 14ULL);"
+      },
+      {
+        "line": 83,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 15ULL);"
+      },
+      {
+        "line": 101,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 10ULL);"
+      },
+      {
+        "line": 107,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 11ULL);"
+      },
+      {
+        "line": 113,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 12ULL);"
+      },
+      {
+        "line": 119,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 13ULL);"
+      },
+      {
+        "line": 125,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 14ULL);"
+      },
+      {
+        "line": 131,
+        "expanded_bytes": 79141,
+        "source": "\tX86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R10, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 15ULL);"
+      }
+    ],
+    "name": "n100_ptr_indirect",
+    "requested_native_instructions": 100,
+    "native_instructions": 121,
+    "native_sha256": "8d14e405b1478565191bf9d84857e8ef50ce5c4df29779b15b1202854a461845",
+    "generated_sha256": "86046c93a00d78f2006ad1fc89aa356c03002bd386eb98b817d46e6469489c61",
+    "preprocessed_sha256": "eb329a96fdd0f50964aee2e24d927e49a46315bc831f552693bd2c1dc033ebdd",
+    "helper_call_like_tokens": {
+      "bpf_tail_call_static(": 1,
+      "bpf_iter_num_new(": 1,
+      "bpf_iter_num_next(": 1,
+      "bpf_iter_num_destroy(": 1,
+      "bpf_cast_to_kern_ctx(": 2
+    },
+    "switch_tokens": 115,
+    "scope": "Current generator and real one-piece Clang -E only; no new B compilation or kernel acceptance; normal production B backend compiled, not submitted to kernel",
+    "allocated_sections": {
+      ".text": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "xdp": {
+        "bytes": 2248,
+        "sha256": "acf8f81b1902e07c3476f5af673ba46f2cea6d4df07a672c54b2ccccb108e43b"
+      },
+      "license": {
+        "bytes": 4,
+        "sha256": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a"
+      }
+    }
+  }
+]

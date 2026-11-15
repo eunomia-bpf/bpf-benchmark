@@ -227,6 +227,34 @@ static void check_wide_invalid(__u64 reg)
     }
 }
 
+/* A local storage rewrite must preserve independent entry words and their
+ * draw order, rather than zeroing the union or sharing one unspecified word. */
+static unsigned entry_draws;
+static __u64 next_entry_word(void) { return 0x1000ULL + ++entry_draws; }
+#undef X86_SIM_L_UNSPECIFIED
+#define X86_SIM_L_UNSPECIFIED() next_entry_word()
+static void check_entry_initialization(void)
+{
+    entry_draws = 0;
+    X86_SIM_L_DECLARE_STATE();
+    unsigned expected_draw = 0;
+    for (unsigned r=0; r<16; r++) {
+        __u64 expected = r == X86_RSP ? 0 : 0x1000ULL + ++expected_draw;
+        cases++;
+        if ((__u64)(long)X86_SIM_L_READ_REG_PTR(r) != expected || X86_SIM_L_REG_TAG(r) != X86_SIM_TAG_SCALAR)
+            failures++;
+    }
+    cases++;
+    if (entry_draws != 23 || __x86_native_stack_base != 0 ||
+        __x86_cf != (16U&1) || __x86_zf != (17U&1) ||
+        __x86_sf != (18U&1) || __x86_of != (19U&1) ||
+        __x86_pf != (20U&1) || __x86_af != (21U&1) ||
+        __x86_xmm0_lo != 0x1016ULL || __x86_xmm0_hi != 0x1017ULL || __x86_sim_ret_addr != 0) {
+        puts("MISMATCH independent entry initialization/order");
+        failures++;
+    }
+}
+
 int main(void)
 {
 	static const __u64 values[] = {
@@ -265,6 +293,7 @@ int main(void)
 	const __u64 invalid[] = {16, 255, 256, 0x100000008ULL, ~0ULL};
 	for (unsigned i=0; i<sizeof(invalid)/sizeof(invalid[0]); i++) check_wide_invalid(invalid[i]);
 
+	check_entry_initialization();
 	if (failures != 0) {
 		printf("x86 reg dispatch route host cross-check: FAIL (%d)\n",
 		       failures);

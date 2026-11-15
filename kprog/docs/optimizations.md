@@ -194,3 +194,15 @@ Its samples divided by measured-only calls are not matched-window per-call
 costs. The8.86percent remains a global capture share, not a C4 serial bound.
 C receives the read-only start/end-counter observer change; no frozen runner,
 workload, profile-admission gate or new optimization is introduced here.
+
+2026-11-15 PERF: simulator frontend GPR cells (this commit; report
+`results/perf_20261113/register-cells/report.md`). One indexed value/tag view
+replaces repeated sixteen-way reads/tag dispatch/writes, with the named state
+ABI and independent entry-input draws preserved. Real preprocessing shrinks
+26–31% over eight 100/1K scalar/pointer direct/indirect cases. Four freshly
+compiled small normal-B variants have byte-identical allocated sections;
+6423 dispatch/7057 route/102816 storage comparisons, 50605 hardware MUL vectors
+and full CompCert pointer-binding parsing pass. Wider CPU suite still fails
+its unsupported movups case; raw failures retained. This reduces compiler
+input, not native execution time; 1K pointer CPP remains 61.7MB and 10K/100K
+stay stopped. No base/image/kernel change; all native LTO pieces stay combined.

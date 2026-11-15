@@ -1,0 +1,3 @@
+make: Entering directory '/workspaces/repository/kprog/fidelity'
+taskset -c 8-11 prlimit --as=8589934592 -- python3 /workspaces/repository/kprog/test/profile_b_preprocess.py --sizes 100 --compile --build /var/tmp/kprog-tmp/perf/scale --output /workspaces/kprog-raw/perf/20261115-preprocess-growth/baseline-compile
+make: Leaving directory '/workspaces/repository/kprog/fidelity'

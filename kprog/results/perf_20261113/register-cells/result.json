@@ -1,0 +1,82 @@
+{
+  "header_sha256": "f33b246fd613fc49aa8d8a5e4117afdf7ba2aa22204e1994806f4fe297b8809a",
+  "preprocessing": [
+    {
+      "name": "n100_scalar_direct",
+      "before_bytes": 3965651,
+      "after_bytes": 2930876,
+      "reduction": 0.2609344594367986,
+      "before_switches": 1055,
+      "after_switches": 62
+    },
+    {
+      "name": "n100_scalar_indirect",
+      "before_bytes": 4026273,
+      "after_bytes": 2974229,
+      "reduction": 0.26129475075336417,
+      "before_switches": 1075,
+      "after_switches": 65
+    },
+    {
+      "name": "n100_ptr_direct",
+      "before_bytes": 9859911,
+      "after_bytes": 6889886,
+      "reduction": 0.30122229298012937,
+      "before_switches": 3005,
+      "after_switches": 112
+    },
+    {
+      "name": "n100_ptr_indirect",
+      "before_bytes": 9925749,
+      "after_bytes": 6938455,
+      "reduction": 0.3009640884531737,
+      "before_switches": 3025,
+      "after_switches": 115
+    },
+    {
+      "name": "n1000_scalar_direct",
+      "before_bytes": 30517198,
+      "after_bytes": 22012423,
+      "reduction": 0.2786879385191262,
+      "before_switches": 8705,
+      "after_switches": 512
+    },
+    {
+      "name": "n1000_scalar_indirect",
+      "before_bytes": 30599504,
+      "after_bytes": 22077460,
+      "reduction": 0.2785026842265156,
+      "before_switches": 8725,
+      "after_switches": 515
+    },
+    {
+      "name": "n1000_ptr_direct",
+      "before_bytes": 89515778,
+      "after_bytes": 61658503,
+      "reduction": 0.3111996077384257,
+      "before_switches": 28205,
+      "after_switches": 1012
+    },
+    {
+      "name": "n1000_ptr_indirect",
+      "before_bytes": 89650200,
+      "after_bytes": 61775656,
+      "reduction": 0.3109256197978365,
+      "before_switches": 28225,
+      "after_switches": 1015
+    }
+  ],
+  "normal_B_allocated_sections_equal": {
+    "n100_scalar_direct": true,
+    "n100_scalar_indirect": true,
+    "n100_ptr_direct": true,
+    "n100_ptr_indirect": true
+  },
+  "dispatch_cases": 6423,
+  "route_cases": 7057,
+  "storage_comparisons": 102816,
+  "hardware_vectors": 50605,
+  "compcert_actual_pointer_binding_parsed": true,
+  "full_cpu_suite": "failed on pre-existing unsupported movups before execution",
+  "scope": "Internal simulator frontend expansion reduction, not native speedup or 10K/100K capacity proof"
+}
