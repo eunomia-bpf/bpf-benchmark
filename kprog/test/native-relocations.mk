@@ -53,7 +53,7 @@ check:
 	taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
 
 build:
-	flock -x /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
+	flock -x /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) bash -eu -c 'if test -L "$(LINKER_TARGET)/release/native-link"; then unlink "$(LINKER_TARGET)/release/native-link"; fi; exec cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml'
 
 .PHONY: preserve-running-linker
 preserve-running-linker:
