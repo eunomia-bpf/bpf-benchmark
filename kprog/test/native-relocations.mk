@@ -14,7 +14,7 @@ build:
 
 .PHONY: evidence
 evidence:
-	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_non_pic_maps.py --build $(BUILD) --output $(OUTPUT) --linker $(LINKER_TARGET)/release/native-link
+	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_non_pic_maps.py --build $(BUILD) --output $(OUTPUT)/maps --linker $(LINKER_TARGET)/release/native-link
 
 .PHONY: jump-table-forms
 jump-table-forms:
@@ -25,4 +25,4 @@ jump-table-forms:
 
 .PHONY: jump-table-check
 jump-table-check: build jump-table-forms
-	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_native_jump_tables.py --build $(BUILD) --output $(OUTPUT) --linker $(LINKER_TARGET)/release/native-link
+	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_native_jump_tables.py --build $(BUILD) --output $(OUTPUT)/jump-tables --linker $(LINKER_TARGET)/release/native-link
