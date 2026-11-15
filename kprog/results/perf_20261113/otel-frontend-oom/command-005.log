@@ -1,0 +1,53 @@
+LLVM ERROR: out of memory
+Allocation failed
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace, preprocessed source, and associated run script.
+Stack dump:
+0.	Program arguments: /usr/lib/llvm-18/bin/clang -include /workspaces/repository/kprog/stock-path/bin/../include/stock_native_input.h -w -g -O3 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I /workspaces/repository/vendor/libbpf/include/uapi -I /workspaces/repository/vendor/libbpf/src -I /usr/include/x86_64-linux-gnu -emit-llvm -c /var/tmp/kprog-tmp/perf/otel-whole-word-checked/trusted_x86.bpf.i -o /var/tmp/kprog-tmp/perf/otel-whole-word-checked/trusted_x86.bpf.bounds-input.bc
+1.	<eof> parser at end of file
+2.	Optimizer
+ #0 0x000075d75ccb13bf llvm::sys::PrintStackTrace(llvm::raw_ostream&, int) (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0xda63bf)
+ #1 0x000075d75ccaf4f9 llvm::sys::RunSignalHandlers() (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0xda44f9)
+ #2 0x000075d75cbfb227 (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0xcf0227)
+ #3 0x000075d75babb330 (/lib/x86_64-linux-gnu/libc.so.6+0x45330)
+ #4 0x000075d75bb14b2c pthread_kill (/lib/x86_64-linux-gnu/libc.so.6+0x9eb2c)
+ #5 0x000075d75babb27e raise (/lib/x86_64-linux-gnu/libc.so.6+0x4527e)
+ #6 0x000075d75ba9e8ff abort (/lib/x86_64-linux-gnu/libc.so.6+0x288ff)
+ #7 0x000075d75cc0922d llvm::report_bad_alloc_error(char const*, bool) (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0xcfe22d)
+ #8 0x000075d75cc09289 (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0xcfe289)
+ #9 0x000075d75bd4391f operator new(unsigned long) (/lib/x86_64-linux-gnu/libstdc++.so.6+0xbb91f)
+#10 0x000075d75d90dfe2 (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0x1a02fe2)
+#11 0x000075d75d90affa llvm::PromoteMemToReg(llvm::ArrayRef<llvm::AllocaInst*>, llvm::DominatorTree&, llvm::AssumptionCache*) (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0x19ffffa)
+#12 0x000075d75dcc7499 (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0x1dbc499)
+#13 0x000075d75dcc630e llvm::SROAPass::run(llvm::Function&, llvm::AnalysisManager<llvm::Function>&) (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0x1dbb30e)
+#14 0x000075d75fe52096 (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0x3f47096)
+#15 0x000075d75ce3a551 llvm::PassManager<llvm::Function, llvm::AnalysisManager<llvm::Function>>::run(llvm::Function&, llvm::AnalysisManager<llvm::Function>&) (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0xf2f551)
+#16 0x000075d75ed9edb6 (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0x2e93db6)
+#17 0x000075d75ce3dd30 llvm::ModuleToFunctionPassAdaptor::run(llvm::Module&, llvm::AnalysisManager<llvm::Module>&) (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0xf32d30)
+#18 0x000075d75ed9eba6 (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0x2e93ba6)
+#19 0x000075d75ce39261 llvm::PassManager<llvm::Module, llvm::AnalysisManager<llvm::Module>>::run(llvm::Module&, llvm::AnalysisManager<llvm::Module>&) (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0xf2e261)
+#20 0x000075d765135590 (/usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1+0x1c1f590)
+#21 0x000075d76512cef3 clang::EmitBackendOutput(clang::DiagnosticsEngine&, clang::HeaderSearchOptions const&, clang::CodeGenOptions const&, clang::TargetOptions const&, clang::LangOptions const&, llvm::StringRef, llvm::Module*, clang::BackendAction, llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem>, std::unique_ptr<llvm::raw_pwrite_stream, std::default_delete<llvm::raw_pwrite_stream>>, clang::BackendConsumer*) (/usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1+0x1c16ef3)
+#22 0x000075d7654b5a07 clang::BackendConsumer::HandleTranslationUnit(clang::ASTContext&) (/usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1+0x1f9fa07)
+#23 0x000075d7640ad3d6 clang::ParseAST(clang::Sema&, bool, bool) (/usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1+0xb973d6)
+#24 0x000075d765f1c62c clang::FrontendAction::Execute() (/usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1+0x2a0662c)
+#25 0x000075d765e990b4 clang::CompilerInstance::ExecuteAction(clang::FrontendAction&) (/usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1+0x29830b4)
+#26 0x000075d765f9863d clang::ExecuteCompilerInvocation(clang::CompilerInstance*) (/usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1+0x2a8263d)
+#27 0x00005fc215d3d42e cc1_main(llvm::ArrayRef<char const*>, char const*, void*) (/usr/lib/llvm-18/bin/clang+0x1442e)
+#28 0x00005fc215d3a894 (/usr/lib/llvm-18/bin/clang+0x11894)
+#29 0x000075d765b49972 (/usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1+0x2633972)
+#30 0x000075d75cbfaf77 llvm::CrashRecoveryContext::RunSafely(llvm::function_ref<void ()>) (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0xceff77)
+#31 0x000075d765b49237 clang::driver::CC1Command::Execute(llvm::ArrayRef<std::optional<llvm::StringRef>>, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*, bool*) const (/usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1+0x2633237)
+#32 0x000075d765b11518 clang::driver::Compilation::ExecuteCommand(clang::driver::Command const&, clang::driver::Command const*&, bool) const (/usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1+0x25fb518)
+#33 0x000075d765b1177f clang::driver::Compilation::ExecuteJobs(clang::driver::JobList const&, llvm::SmallVectorImpl<std::pair<int, clang::driver::Command const*>>&, bool) const (/usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1+0x25fb77f)
+#34 0x000075d765b2dc20 clang::driver::Driver::ExecuteCompilation(clang::driver::Compilation&, llvm::SmallVectorImpl<std::pair<int, clang::driver::Command const*>>&) (/usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1+0x2617c20)
+#35 0x00005fc215d3a1ec clang_main(int, char**, llvm::ToolContext const&) (/usr/lib/llvm-18/bin/clang+0x111ec)
+#36 0x00005fc215d47383 main (/usr/lib/llvm-18/bin/clang+0x1e383)
+#37 0x000075d75baa01ca (/lib/x86_64-linux-gnu/libc.so.6+0x2a1ca)
+#38 0x000075d75baa028b __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2a28b)
+#39 0x00005fc215d37255 _start (/usr/lib/llvm-18/bin/clang+0xe255)
+clang: error: clang frontend command failed with exit code 134 (use -v to see invocation)
+Ubuntu clang version 18.1.3 (1ubuntu1)
+Target: bpf
+Thread model: posix
+InstalledDir: /usr/lib/llvm-18/bin
+clang: note: diagnostic msg: Error generating preprocessed source(s) - no preprocessable inputs.

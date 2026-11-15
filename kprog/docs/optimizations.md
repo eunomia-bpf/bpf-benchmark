@@ -326,3 +326,11 @@ proof and metadata; CPP grows289,568,784→297,172,962B (+2.63%). At10:25UTC
 it remains running, so the isolated graph reduction is not yet a full compile
 improvement. Raw command/error/resources: `../results/perf_20261113/otel-frontend-oom/report.md`.
 All LTO and normal optimization flags remain together; no runtime gain claimed.
+
+Current checked-C packet regression also passes25 host native/reference
+executions after the width/selector change (XDP/TC/cgroup_skb, complete context
+bytes and qdisc prefix). The canonical test build now replaces its own known
+products while preserving previous raw metadata/logs; production fresh input
+generation is unchanged. Earlier directory/cross-filesystem failures remain
+in `../results/perf_20261113/checked-packet-constants/report.md`. This adds host
+checked-C coverage, not changed-B kernel execution or application acceptance.

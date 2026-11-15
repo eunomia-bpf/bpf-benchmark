@@ -1,0 +1,27 @@
+{
+  "source": "/var/tmp/kprog-tmp/perf/checked-packet/host/xdp/generated/trusted_x86.bpf.i",
+  "copied_source": "/var/tmp/kprog-tmp/perf/checked-packet/host/xdp/generated/checked-simulator.i",
+  "source_sha256": "85268eae584b46b10955c794c1848851807400f1276e31417ec6c9e98f1f5baf",
+  "copied_source_sha256": "85268eae584b46b10955c794c1848851807400f1276e31417ec6c9e98f1f5baf",
+  "executable_sha256": "1ed4aebe77e34d48738d179236807bb10a31c9ff7031dfc2cc932c899088ce8a",
+  "context_layouts": {
+    "/workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json": "4994d101ae57abe7477ff941ec3c5e9b30d4f4b16281bfcad7aa6c96ad32f754",
+    "/workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json": "f5bc8aca1efb449a446f4789f49edebd27025bdc624df709a98fe509334c85f9"
+  },
+  "artifacts": {
+    "native_object": "/var/tmp/kprog-tmp/perf/checked-packet/host/xdp/generated/checked-simulator.native.o",
+    "native_proof_object": "/var/tmp/kprog-tmp/perf/checked-packet/host/xdp/generated/checked-simulator.proof.o",
+    "simulator_object": "/var/tmp/kprog-tmp/perf/checked-packet/host/xdp/generated/trusted_x86.bpf.o",
+    "simulator_program": "trusted_x86_x86_sim_xdp",
+    "simulator_source": "/var/tmp/kprog-tmp/perf/checked-packet/host/xdp/generated/trusted_x86.bpf.c",
+    "simulator_preprocessed": "/var/tmp/kprog-tmp/perf/checked-packet/host/xdp/generated/trusted_x86.bpf.i",
+    "context_kind": "xdp",
+    "symbol": "trusted_x86_x86_sim_xdp",
+    "native_sha256": "89e87f603de48891fbc9f0258b97788e84f8cd1caf9aedac79ef1a02d4fff6a4",
+    "simulator_frontend": {
+      "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/xdp/generated/trusted_x86.bpf.bounds-input.bc",
+      "source_sha256": "85268eae584b46b10955c794c1848851807400f1276e31417ec6c9e98f1f5baf",
+      "ir_sha256": "064b41cb4ba0de18805156990a59c7acd27fa557189d2a57c1506e2209c2fe9b"
+    }
+  }
+}
