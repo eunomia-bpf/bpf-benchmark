@@ -1,0 +1,34 @@
+{
+  "scope": "Load-only checked compiler replay; stock verification precedes native compilation.",
+  "native": "/workspaces/kprog-raw/perf/20261115-scheduled-table/checked-bound/inputs/scheduled.native.o",
+  "proof": "/workspaces/kprog-raw/perf/20261115-scheduled-table/checked-bound/inputs/scheduled.bpf.o",
+  "context": "/workspaces/repository/kprog/test/table_context_load_context.json",
+  "verify_exit": 0,
+  "stock_accepted": true,
+  "context_and_map_shapes_equal": true,
+  "checked_artifacts": {
+    "native_object": "/workspaces/kprog-raw/perf/20261115-scheduled-table/checked-bound/inputs/checked-simulator.native.o",
+    "native_proof_object": "/workspaces/kprog-raw/perf/20261115-scheduled-table/checked-bound/inputs/checked-simulator.proof.o",
+    "symbol": "trusted_x86_x86_sim_xdp",
+    "simulator_object": "/workspaces/kprog-raw/perf/20261115-scheduled-table/checked-bound/inputs/scheduled.bpf.o",
+    "simulator_program": "trusted_x86_x86_sim_xdp",
+    "simulator_preprocessed": "/workspaces/kprog-raw/perf/20261115-scheduled-table/checked-bound/inputs/scheduled.bpf.i",
+    "context_kind": "raw",
+    "simulator_frontend": {
+      "path": "/workspaces/kprog-raw/perf/20261115-scheduled-table/checked-bound/inputs/scheduled.bpf.bounds-input.bc",
+      "source_sha256": "307ac7db0b907867432e4e66ae9c274f9bf7a4090f699bf15b9a90dbfdfe2d7e",
+      "ir_sha256": "ed1a3b4fd1d219e7ea9b66642e5448785d06579706160709ffbd8558e63ba7dd"
+    }
+  },
+  "checked_load_exit": 0,
+  "checked_installed": true,
+  "submission_cancelled": false,
+  "replies": [
+    {
+      "request_id": 1,
+      "status": 0,
+      "prog_id": 11
+    }
+  ],
+  "wait_errors": []
+}

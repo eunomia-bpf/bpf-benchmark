@@ -39,11 +39,44 @@ no second CLI/object tree or raw intermediate archive was created. Source
 scripts/fixture live in kprog/test. Tests use bounded host CPUs outside0–7
 while Katran's isolated A/A runs; no functional guest runs alongside it.
 
-The published normal CLI remains906f5b70 until the image writer lock can be
-acquired after A/A. The production release update and actual stock-kernel
-subset must follow under the existing locks. Real OTel B backend compilation,
-source-context binding, stack acceptance and whole-application execution
-remain open; generating shared C is not completing them. No runtime speedup,
-code-size target, equal-work certification or final six-app result is claimed.
-All native LTO remains combined. M4–M6 obligations for this existing CODE
-selection still need the full compiler/semantics proof, not just host tests.
+Normal publication finished after A/A released imageSH. The initial new CLI
+was6b0fa6f7; removing the unused pre-CFG register-write guess (af7b72e03)
+and rebuilding under imageEX gives final CLI45c33e7e. Final Rust run remains
+41 passing / one existing ignored, and the release builds without that dead
+code warning. Loader4e1a3af7, bounds5236d0ea and checked compiler907b671d are
+unchanged. Exact source/tool SHA records are retained. Same base/kernel/image.
+
+Actual sole-kernel subsets:
+
+- First plain-libbpf fixture attempt loaded referenceID5, then stopped before
+  the B verifier because kprog_unspecified_input was treated as a kernel BTF
+  symbol. This is a fixture resource-binding error, not verifier rejection.
+- 1408eb095 uses the production relocate_trusted_proof implementation and an
+  actual mutable ARRAY-map ID, as the loader does. The corrected pure-stock
+  run returns sourceID3 (72 translated /48 JIT bytes) and B ID4
+  (288 translated /119 JIT bytes), both stock_accepted=true. MapIDs1/2 are in
+  the raw result. No native installation or KPROBE execution in this run.
+- For the registered checked replay, c24fee460 aligns the synthetic source
+  and model entry names with the production interface. Its first attempt
+  failed before verification because the canonical build directory was not
+  mapped into the guest. b3b2cbfbf adds the same explicit mapping as the
+  existing replay target, preserving one physical build product.
+- Corrected replay870892 exits0 with actual stock_accepted=true,
+  context_and_map_shapes_equal=true, checked_installed=true, reply status0
+  and native prog_id11. It verifies B before compiling and loading the
+  checked native image. The source/IR hashes are bound in the replay result;
+  all current input/product identities and the guest-to-host path mapping
+  are recorded. This is load-only, not KPROBE execution or an application run.
+
+All failed and corrected logs remain under the raw directory and here. No
+compiled object/image copies were archived into this result. The first
+corrected pure-stock run predates the fixture-name alignment; its old full
+ELF SHA was not captured, so do not attribute the later object SHA to it.
+The checked replay records its own frontend identities and source context.
+
+The scheduled-table fixture pipeline is now stock-verified and checked-native
+installed. Actual OTel full B compilation/source-context binding, stack
+acceptance and whole-app execution remain open. Generating its proof/shared
+C does not complete them. No runtime speedup, code-size target, equal-work
+certification or six-app result is claimed. All LTO remains combined;
+M4–M6 obligations still require the compiler/semantics proof.

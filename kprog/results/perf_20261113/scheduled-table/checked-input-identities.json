@@ -1,0 +1,15 @@
+{
+  "recorded_at": "2026-11-15T08:09:46Z",
+  "host_canonical": "/var/tmp/kprog-tmp/perf/scheduled-table",
+  "guest_alias": "/workspaces/kprog-raw/perf/20261115-scheduled-table/checked-bound/inputs",
+  "files": {
+    "scheduled.native.o": "305d7990105f7c45924d019847a2783d31b7d14fd53310afe1bc36016692fac8",
+    "scheduled.original.bpf.o": "4ba551d6f1d12537fecc013e52f53216c057ea95e6615c4b8ee32364819c65ff",
+    "scheduled.bpf.o": "729ad680c08cea44ff9f2a82ed0e650a3b4b6313e4db8ab7e47e60194dbd0c86",
+    "scheduled.bpf.i": "307ac7db0b907867432e4e66ae9c274f9bf7a4090f699bf15b9a90dbfdfe2d7e",
+    "scheduled.bpf.bounds-input.bc": "ed1a3b4fd1d219e7ea9b66642e5448785d06579706160709ffbd8558e63ba7dd",
+    "checked-simulator.native.o": "1b555dd48d64d9ea02fa0eb60a24a17f46dad04ad05ce806bdaa7bbd9628c651",
+    "checked-simulator.proof.o": "d3c51c95f0b088ace986bede9d16c186e9580110cb285025561e3840ec09e2a4"
+  },
+  "scope": "Post-replay identities of unchanged input files and generated checked products; frontend source/IR identities are also bound in the actual replay result"
+}

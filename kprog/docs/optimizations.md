@@ -217,3 +217,12 @@ shared-table64 and map-capability20/3 regressions pass. Actual OTel hotspot
 full proof39127B/28 nested relocs and shared C6945 instructions now generate;
 full B/stock/app remain open. This enables unified jump-table codegen without
 changing upstream source. No execution speedup measured; all LTO stays on.
+
+Scheduled-table follow-up (1408eb095,c24fee460,b3b2cbfbf; this result commit):
+normal CLI published in the same base, final45c33e7e after removing unused
+pre-CFG register-write code. Actual stock source/B loads pass with the
+production mutable input-map binding; actual registered replay verifies B,
+compiles checked native and installs program11 (status0). Both earlier fixture
+binding/path failures are retained. This completes the fixture's load path,
+not KPROBE execution, OTel acceptance or a measured runtime optimization.
+All LTO stays together; actual app and body/size targets remain open.
