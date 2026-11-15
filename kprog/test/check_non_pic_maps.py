@@ -133,7 +133,9 @@ def main():
     if encoded.op != 'X86_OP_MOV_LOAD_MAP_PTR':
         raise ValueError('Non-PIC proof map does not use the existing map-pointer simulator operation')
     results = []
-    for label, source in [('direct', native), ('proof-roundtrip', proof)]:
+    # The production CLI requires a proof object for kernel mode. Direct
+    # rewriting of the four source forms is covered by the Rust emitter tests.
+    for label, source in [('proof-roundtrip', proof)]:
         blob, maps, relocs = [args.build/(label+suffix) for suffix in ['.bin', '.maps', '.relocs']]
         run([args.linker, '--input', source, '--symbol', 'entry', '--mode', 'kernel',
              '--output', blob, '--output-map-patches', maps, '--output-relocs', relocs,
