@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from dataclasses import replace
 from collections import deque
 import json
+import re
 from helper_abi import helper_prototypes
 
 
@@ -89,9 +90,12 @@ def lower_relative_tables(insns, rodata, decode, exit_addr, function_starts):
         if base is None or destination is None or base[1] != 64 or destination[1] != 64:
             continue
         memory_base, index, scale, displacement = decode.parse_mem_terms(load.operands[1])
+        address_registers = [decode.reg_info(token) for token in re.findall(r'[a-z][a-z0-9]*', load.operands[1].lower())
+                             if decode.reg_info(token) is not None]
         index_info = next((name for name, info in decode.REGS.items()
                            if info == (index, 64, 0)), None)
-        if (memory_base != base[0] or index_info is None or index == base[0] or scale != 2 or
+        if (any(info[1] != 64 for info in address_registers) or
+                memory_base != base[0] or index_info is None or index == base[0] or scale != 2 or
                 displacement != 0 or destination[0] == base[0] or
                 base[0] == 'X86_RSP' or destination[0] == 'X86_RSP' or
                 decode.reg_info(add.operands[0]) != destination or

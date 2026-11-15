@@ -305,11 +305,11 @@ def normalize_native_link_entry_returns(
             and branch_target(insn.operands[0]) == blob_len
         ):
             out.append(
-                NativeInsn(
-                    addr=insn.addr,
+                replace(insn,
                     raw=f"{insn.raw} ; native-link entry RET",
                     mnemonic="ret",
                     operands=(),
+                    reloc_symbol=None, reloc_target=None, reloc_type=None, symbol_offset=0,
                 )
             )
         else:
