@@ -5,6 +5,11 @@
 #include <stdio.h>
 #include <string.h>
 
+/* Exercise the production environment draws explicitly. The legacy host
+ * header selects zero; a draw-count assertion cannot test that shortcut. */
+#undef X86_SIM_L_UNSPECIFIED
+#define X86_SIM_L_UNSPECIFIED() NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_UNSPECIFIED)
+
 static unsigned long choice;
 static unsigned draws;
 static const unsigned long origin = 0x12340000UL;
