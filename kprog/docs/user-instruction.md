@@ -69,6 +69,7 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-15 ~00:04 UTC: "所有都不能问我"
 - 2026-11-15 ~00:06 UTC: "你原话里要你同意的东西（benchmark 设置、论文、故事、设计）保持原样是吧? 确认一下."
 - 2026-11-15 ~00:06 UTC: "强调一下, 通知其他人"
+- 2026-11-15 ~00:21 UTC: "编译参数所有 app 统一."
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
