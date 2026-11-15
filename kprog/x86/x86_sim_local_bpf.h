@@ -489,7 +489,7 @@ struct x86_sim_state {
 #define X86_SIM_ENTRY_XDP(CTX)                                               \
 	struct x86_sim_xdp_abi __x86_sim_abi = {0};                                                               \
 	struct __sk_buff *__x86_sim_skb_ctx = (struct __sk_buff *)0;      \
-	__u8 __x86_sim_abi_kind = KPROG_ABI_KIND_XDP;                    \
+	const __u8 __x86_sim_abi_kind = KPROG_ABI_KIND_XDP;              \
 	X86_SIM_L_DECLARE_STATE();                                           \
 	X86_SIM_L_DECLARE_STACK();                                           \
 	__x86_native_stack_base = X86_SIM_L_ENTRY_STACK_BASE();             \
@@ -502,7 +502,7 @@ struct x86_sim_state {
 #define X86_SIM_ENTRY_SKB(CTX)                                               \
 	struct x86_sim_skb_abi __x86_sim_abi = {0};                 \
 	struct __sk_buff *__x86_sim_skb_ctx = (CTX);                      \
-	__u8 __x86_sim_abi_kind = KPROG_ABI_KIND_SKB;                    \
+	const __u8 __x86_sim_abi_kind = KPROG_ABI_KIND_SKB;              \
 	X86_SIM_L_DECLARE_STATE();                                           \
 	X86_SIM_L_DECLARE_STACK();                                           \
 	__x86_native_stack_base = X86_SIM_L_ENTRY_STACK_BASE();             \
@@ -519,7 +519,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 #define X86_SIM_ENTRY_RAW(CTX)                                               \
 	struct x86_sim_skb_abi __x86_sim_abi = {0};                       \
 	struct __sk_buff *__x86_sim_skb_ctx = (struct __sk_buff *)0;      \
-	__u8 __x86_sim_abi_kind = X86_SIM_ABI_KIND_RAW;                                     \
+	const __u8 __x86_sim_abi_kind = X86_SIM_ABI_KIND_RAW;            \
 	X86_SIM_L_DECLARE_STATE();                                       \
 	X86_SIM_L_DECLARE_STACK();                                       \
 	__x86_native_stack_base = X86_SIM_L_ENTRY_STACK_BASE();             \

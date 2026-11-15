@@ -334,3 +334,12 @@ products while preserving previous raw metadata/logs; production fresh input
 generation is unchanged. Earlier directory/cross-filesystem failures remain
 in `../results/perf_20261113/checked-packet-constants/report.md`. This adds host
 checked-C coverage, not changed-B kernel execution or application acceptance.
+
+2026-11-15 immutable entry ABI: RAW/XDP/SKB entry macros now declare their
+fixed ABI kind constant, so Clang can remove other-context load/store routes
+before SROA. The selector is never assigned after entry; context translation,
+helper arguments and all state transitions remain the existing bodies. The
+state-struct execution path retains its runtime selector. Real store graph
+probes and current native/B/checked-C subsets provide the validation below;
+the active OTel frontend keeps its previously captured input. No flag or LTO
+selection changes and no runtime speed claim.
