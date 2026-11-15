@@ -1,0 +1,12 @@
+bcc: objects code-identical=7 differ=1 only-0529=0 only-now=0 code-bytes 0529=8001 now=8015
+   changed: biosnoop.native.o(1293->1307)
+cilium: objects code-identical=5 differ=2 only-0529=0 only-now=0 code-bytes 0529=275813 now=276063
+   changed: bpf_lxc.native.o(81225->81225) bpf_xdp.native.o(23964->24214)
+katran: objects code-identical=3 differ=1 only-0529=0 only-now=0 code-bytes 0529=9887 now=9830
+   changed: healthchecking.native.o(1154->1097)
+otelcol-ebpf-profiler: objects code-identical=1 differ=0 only-0529=0 only-now=15 code-bytes 0529=575240 now=575240
+tracee: objects code-identical=0 differ=3 only-0529=0 only-now=0 code-bytes 0529=1615175 now=1457903
+   changed: kprobe_check.native.o(48->44) lsm_check.native.o(48->44) tracee.native.o(1615079->1457815)
+tetragon: only now, 88 objects
+katran balancer: 05-29 vs header route identical: True {'.text': 319, 'xdp': 7965} {'.text': 319, 'xdp': 7965}
+katran balancer: 05-29 vs 11-14 map-sink route identical: False {'.text': 252, 'xdp': 7535}
