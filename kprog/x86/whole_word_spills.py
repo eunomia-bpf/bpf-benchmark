@@ -1,4 +1,4 @@
-"""Optional MIR lowering for independent scalar u32 pairs into whole words.
+"""MIR lowering for all eligible independent scalar u32 pairs into whole words.
 
 Inputs must be pre-PEI physical MIR;
 all selected slot accesses must be direct STW32/LDW32 at offset zero.
@@ -156,7 +156,7 @@ def lower_text(text, low, high, *, require_final=True, reuse_dead_source=False, 
     return output, changes
 
 
-def automatic(path, all_scalar_pairs=False):
+def automatic(path):
     documents = path.read_text().split('\n---\n')
     records = []
     for index, document in enumerate(documents):
@@ -166,19 +166,11 @@ def automatic(path, all_scalar_pairs=False):
         slots = {int(i): (int(n), int(a)) for i, n, a in re.findall(
             r'  - \{ id: (\d+),[^\n]*type: spill-slot,[^\n]*size: (\d+), alignment: (\d+),', head)}
         eligible = sorted(slot for slot, shape in slots.items() if shape == (4, 8))
-        if all_scalar_pairs:
-            for low, high in zip(eligible[-2::-2], eligible[::-2]):
-                document, changes = lower_text(document, low, high, require_final=False,
-                                              reuse_dead_source=True, save_live_scratch=True)
-                records.append(dict(document=index, low=low, high=high, changes=changes))
-            documents[index] = document
-            continue
-        # Other frame shapes keep their existing compiler representation.
-        if len(eligible) < 2 or eligible[-1] != max(slots):
-            continue
-        low, high = eligible[-2:]
-        documents[index], changes = lower_text(document, low, high)
-        records.append(dict(document=index, low=low, high=high, changes=changes))
+        for low, high in zip(eligible[-2::-2], eligible[::-2]):
+            document, changes = lower_text(document, low, high, require_final=False,
+                                          reuse_dead_source=True, save_live_scratch=True)
+            records.append(dict(document=index, low=low, high=high, changes=changes))
+        documents[index] = document
     return '\n---\n'.join(documents), records
 
 
@@ -188,14 +180,11 @@ if __name__ == '__main__':
     parser.add_argument('output', type=Path)
     parser.add_argument('--low', type=int)
     parser.add_argument('--high', type=int)
-    parser.add_argument('--all-scalar-pairs', action='store_true')
     args = parser.parse_args()
     if (args.low is None) != (args.high is None):
         parser.error('--low and --high are supplied together')
-    if args.all_scalar_pairs and args.low is not None:
-        parser.error('--all-scalar-pairs selects pairs automatically')
     if args.low is None:
-        output, changes = automatic(args.mir, args.all_scalar_pairs)
+        output, changes = automatic(args.mir)
     else:
         output, changes = lower(args.mir, args.low, args.high)
     args.output.write_text(output)

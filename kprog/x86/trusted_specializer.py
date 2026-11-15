@@ -73,9 +73,6 @@ def preprocess_simulator(clang, source: Path, run) -> Path:
 
 
 def compile_simulator(clang, source: Path, obj: Path, run, *, bounds_compiler=None) -> None:
-    all_spills = os.environ.get('KPROG_BPF_WHOLE_WORD_SPILLS_ALL', '0')
-    if all_spills not in {'0', '1'}:
-        raise ValueError('KPROG_BPF_WHOLE_WORD_SPILLS_ALL must be 0 or 1')
     preprocessed = preprocess_simulator(clang, source, run)
     compiled_input = preprocessed
     if bounds_compiler:
@@ -86,8 +83,7 @@ def compile_simulator(clang, source: Path, obj: Path, run, *, bounds_compiler=No
     before, packed = source.with_suffix('.before.mir'), source.with_suffix('.packed.mir')
     run([clang, *COMPILE_FLAGS, '-c', compiled_input, '-mllvm',
          '-stop-before=prologepilog', '-o', before])
-    run([sys.executable, ROOT / 'kprog/x86/whole_word_spills.py', before, packed,
-         *(['--all-scalar-pairs'] if all_spills == '1' else [])])
+    run([sys.executable, ROOT / 'kprog/x86/whole_word_spills.py', before, packed])
     run(['llc-18', '-O3', '-march=bpf', '-mcpu=v4', '-bpf-stack-size=4096',
          '-start-before=prologepilog', '-filetype=obj', packed, '-o', obj])
 

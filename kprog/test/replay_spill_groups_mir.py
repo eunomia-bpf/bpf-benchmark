@@ -40,7 +40,7 @@ def replay(args):
     if default.encode() != data['accepted']:
         raise ValueError('Default single-pair MIR differs from actual accepted main')
     del default
-    grouped, groups = spills.automatic(before, all_scalar_pairs=True)
+    grouped, groups = spills.automatic(before)
     same_mir = grouped.encode() == data['accepted']
     output = args.build/'main.groups.mir'
     output.write_text(grouped)

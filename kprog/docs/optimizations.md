@@ -254,3 +254,11 @@ bookkeeping once per branch. Address calculation, volatile reads, saved facts,
 memory-recovery early exit and RSP scalarization keep their original order.
 Validation/reprofile receipts follow; no runtime performance claim. All native
 LTO remains on together.
+
+2026-11-15 all-pairs spill lowering is the single normal B backend policy
+(coordinator08:48): the environment switch and CLI selection are removed,
+as is the old last-pair-only automatic path. Every eligible scalar pair uses
+the existing dead-source reuse/live-scratch preservation implementation.
+Diagnostic explicit-pair inputs remain callers of the same lowering body.
+Retired switch/old-path comparison tests are replaced by current multi-pair,
+register-pressure and normal-backend checks. No full OTel acceptance claim.

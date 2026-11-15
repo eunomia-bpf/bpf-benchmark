@@ -65,7 +65,7 @@ def main(args):
         definitions = re.findall(r'  - \{ id: (\d+),[^\n]*type: spill-slot,[^\n]*size: (\d+), alignment: (\d+),', text)
         result['original_spill_slots'] = [dict(id=int(i), size=int(s), alignment=int(a)) for i, s, a in definitions]
         del text
-        grouped, pairs = spills.automatic(before, all_scalar_pairs=True)
+        grouped, pairs = spills.automatic(before)
         packed = args.build/'trusted_x86.bpf.packed.mir'
         packed.write_text(grouped)
         del grouped

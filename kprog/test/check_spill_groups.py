@@ -17,18 +17,6 @@ def check(args):
     spec = importlib.util.spec_from_file_location('spill_groups', ROOT/'kprog/x86/whole_word_spills.py')
     spills = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(spills)
-    prior = subprocess.run(['git', 'show', 'b9dc82ceb:kprog/x86/whole_word_spills.py'],
-                           cwd=ROOT, text=True, capture_output=True, check=True).stdout
-    namespace = dict(__name__='prior_spills')
-    exec(compile(prior, str(ROOT/'kprog/x86/whole_word_spills.py'), 'exec'), namespace)
-    parity = []
-    for name in ('scalar_spill_values.mir', 'scalar_spill_groups.mir'):
-        fixture = ROOT/'kprog/test'/name
-        old, old_changes = namespace['automatic'](fixture)
-        new, new_changes = spills.automatic(fixture)
-        if old != new or old_changes != new_changes:
-            raise ValueError('Existing single-pair mode changed: '+name)
-        parity.append(dict(fixture=name, default_equals_prior=True))
     commands, cases = [], []
 
     def run(command, expected=True):
@@ -65,7 +53,7 @@ def check(args):
             mir.write_text(source)
             pairs = []
             if packed:
-                source, pairs = spills.automatic(mir, all_scalar_pairs=True)
+                source, pairs = spills.automatic(mir)
                 if [(r['low'],r['high']) for r in pairs] != [(6,7),(4,5),(2,3),(0,1)]:
                     raise ValueError('Four independent scalar pairs were not selected')
                 mir.write_text(source)
@@ -95,7 +83,7 @@ def check(args):
         label = 'pressure-packed' if packed else 'pressure-original'
         source = pressure.read_text()
         if packed:
-            source, pairs = spills.automatic(pressure, all_scalar_pairs=True)
+            source, pairs = spills.automatic(pressure)
             if not any(c.get('reuses_dead_source') for p in pairs for c in p['changes']):
                 raise ValueError('Pressure fixture did not exercise dead-source reuse')
         mir = args.build/'fixture.mir'
@@ -122,7 +110,7 @@ def check(args):
             label = option[2:]+('-packed' if packed else '-original')
             source = fixture.read_text()
             if packed:
-                source, pairs = spills.automatic(fixture, all_scalar_pairs=True)
+                source, pairs = spills.automatic(fixture)
                 if max(len(c.get('saved_live_registers', [])) for p in pairs for c in p['changes']) != saved_count:
                     raise ValueError('Live scratch preservation was not exercised')
             mir = args.build/'fixture.mir'
@@ -144,7 +132,7 @@ def check(args):
             cases.append(row)
             (args.output/'cases.json').write_text(json.dumps(cases, indent=2)+'\n')
     (args.output/'result.json').write_text(json.dumps(dict(compile_only=args.compile_only,
-        default_parity=parity, cases=cases), indent=2)+'\n')
+        cases=cases), indent=2)+'\n')
     print(json.dumps(cases))
 
 
