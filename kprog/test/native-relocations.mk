@@ -264,6 +264,10 @@ host-input-x86-profiles:
 host-input-arm64-profiles:
 	taskset -c 16-19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_host_input_profiles.py --arch arm64 --output $(OUTPUT)
 
+.PHONY: control-input-comparison
+control-input-comparison:
+	taskset -c 16-19 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/compare_control_inputs.py --before /workspaces/kprog-raw/perf/20261115-preprocess-growth/cells-control/mismatches.jsonl --after /workspaces/kprog-raw/perf/20261115-host-input-route/control-after/mismatches.jsonl --output $(OUTPUT)
+
 .PHONY: native-stores
 native-stores: $(CONTEXT_TOOL)
 	python3 $(ROOT)/kprog/formal/tools/generate_x86_store_spec.py --check
