@@ -485,3 +485,18 @@ clock-plan-audit:
 	install -d $(HELPER_AUDIT_BUILD) $(OUTPUT)
 	clang-18 -target x86_64-linux-gnu -O3 -march=native -fPIC -foptimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -c $(ROOT)/kprog/test/native_clock_audit.c -o $(HELPER_AUDIT_BUILD)/clock.native.o
 	taskset -c 16-19 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/audit_native_helper_sites.py --native $(HELPER_AUDIT_BUILD)/clock.native.o --symbol clock_audit --linker $(LINKER_BINARY) --link-plan $(HELPER_AUDIT_PLAN) --output $(OUTPUT)
+
+$(BUILD)/native-map-relocs: $(ROOT)/kprog/test/native_image_map_reloc.c
+	install -d $(BUILD)
+	$(CC) -O2 -Wall -Wextra -Werror -D__EXPORTED_HEADERS__ -I$(ROOT)/vendor/linux-framework/include/uapi -I$(LIBBPF_PREFIX)/include $< $(LIBBPF_LIBRARY) -lelf -lz -o $@
+
+.PHONY: native-map-relocs guest-native-map-relocs
+native-map-relocs: $(BUILD)/native-map-relocs
+	install -d $(OUTPUT)
+	sha256sum $(KDIR)/arch/x86/boot/bzImage $(ROOT)/kinsn/module/x86/build/bpf_x86_native_lab.ko $(BUILD)/native-map-relocs $(KERNEL_LAYOUT) > $(OUTPUT)/input-sha256.txt
+	taskset -c 16-17 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rodir $(OUTPUT)/inputs=$(BUILD) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-native-map-relocs OUTPUT=$(OUTPUT)'
+
+guest-native-map-relocs:
+	mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod $(ROOT)/kinsn/module/x86/build/bpf_x86_native_lab.ko
+	$(OUTPUT)/inputs/native-map-relocs $$(python3 -c 'import json; print(json.load(open("$(KERNEL_LAYOUT)"))["array"]["value"])') > $(OUTPUT)/result.jsonl 2> $(OUTPUT)/verifier.log
