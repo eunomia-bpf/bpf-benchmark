@@ -29,6 +29,9 @@ mod lpm_lookup;
 #[path = "x86_non_pic.rs"]
 mod non_pic;
 
+#[path = "x86_readonly_relocs.rs"]
+mod readonly_relocs;
+
 const X86_CPU_NUMBER_HELPER_KEY: &str = "__native_x86_cpu_number";
 const X86_THIS_CPU_OFF_HELPER_KEY: &str = "__native_x86_this_cpu_off";
 const X86_BPF_MAP_MAX_ENTRIES_OFFSET_KEY: &str = "__native_x86_bpf_map_max_entries_offset";
@@ -2093,8 +2096,10 @@ pub(super) fn rewrite_x86(
     // Stage 2: resolve ELF relocations. GOT helper calls keep their original
     // RIP-relative indirect-call form and point at in-blob literal-pool entries;
     // PLT32 helper calls use in-blob absolute trampolines.
+    let mut proof_data_relocs = Vec::new();
     let mut proof_relocs = if proof_mode {
-        let mut collected = collect_x86_proof_relocs(elf, &layouts, &canonicalized_relocations, &writable_references)?;
+        let (mut collected, nested) = collect_x86_proof_relocs(elf, &layouts, &canonicalized_relocations, &writable_references)?;
+        proof_data_relocs = nested;
         collected.extend(tail_proof_relocs);
         collected
     } else {
@@ -2232,6 +2237,7 @@ pub(super) fn rewrite_x86(
         map_patches,
         callee_saved_mask,
         proof_relocs,
+        proof_data_relocs,
         proof_symbols,
         load_sites,
     })
@@ -2286,8 +2292,9 @@ fn collect_x86_proof_relocs(
     layouts: &[SymbolLayout],
     resolved_relocations: &HashSet<LocalSiteKey>,
     writable_references: &HashMap<LocalSiteKey,writable_data::Reference>,
-) -> Result<Vec<ProofReloc>> {
+) -> Result<(Vec<ProofReloc>, Vec<ProofDataReloc>)> {
     let mut relocs = Vec::new();
+    let mut nested = BTreeMap::new();
     let mut sections: HashMap<object::SectionIndex, Vec<&SymbolLayout>> = HashMap::new();
     for layout in layouts {
         sections
@@ -2533,6 +2540,14 @@ fn collect_x86_proof_relocs(
                         layout.base_in_blob + layout.new_offset_in_sym[insn_idx] as usize;
                     let off_within_insn =
                         (local_patch_off - layout.insn_local_ip[insn_idx]) as usize;
+                    for reloc in readonly_relocs::proof_relocations(elf, layouts,
+                        target_section_idx, if sym_size == 0 { 0 } else { sym_off_in_sec },
+                        sym_bytes.len() as u64, &data_symbol_name)? {
+                        let key = (reloc.owner.clone(), reloc.offset);
+                        if let Some(previous) = nested.insert(key, reloc.clone()) {
+                            if previous != reloc { bail!("conflicting nested read-only relocations"); }
+                        }
+                    }
                     relocs.push(ProofReloc {
                         offset: (new_insn_off + off_within_insn) as u64,
                         r_type,
@@ -2551,7 +2566,7 @@ fn collect_x86_proof_relocs(
         }
     }
     relocs.sort_by_key(|reloc| reloc.offset);
-    Ok(relocs)
+    Ok((relocs, nested.into_values().collect()))
 }
 
 /// Resolve ELF .text relocations attached to the bytes we just encoded.
@@ -4543,7 +4558,7 @@ mod tests {
                 assert!(proof.proof_symbols[1].name.starts_with("__native_link_local_"));
                 let path = std::env::temp_dir().join(format!("native-link-memory-{}-{name}-{form}.proof.o", std::process::id()));
                 write_proof_object(&path, object::Architecture::X86_64, "entry", &proof.blob,
-                    &proof.proof_symbols, &proof.proof_relocs, proof.callee_saved_mask)?;
+                    &proof.proof_symbols, &proof.proof_relocs, &proof.proof_data_relocs, proof.callee_saved_mask)?;
                 let roundtrip = fs::read(&path)?;
                 fs::remove_file(&path)?;
                 let elf = object::File::parse(roundtrip.as_slice())?;

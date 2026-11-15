@@ -570,6 +570,7 @@ fn main() -> Result<()> {
         map_patches,
         callee_saved_mask,
         proof_relocs,
+        proof_data_relocs,
         proof_symbols,
         load_sites,
     } = match elf.architecture() {
@@ -670,6 +671,7 @@ fn main() -> Result<()> {
             &blob,
             &proof_symbols,
             &proof_relocs,
+            &proof_data_relocs,
             callee_saved_mask,
         )?;
         eprintln!(
@@ -751,6 +753,7 @@ fn write_proof_object(
     text: &[u8],
     proof_symbols: &[ProofSymbol],
     proof_relocs: &[ProofReloc],
+    proof_data_relocs: &[ProofDataReloc],
     callee_saved_mask: u8,
 ) -> Result<()> {
     let mut object = WriteObject::new(BinaryFormat::Elf, arch, Endianness::Little);
@@ -818,6 +821,7 @@ fn write_proof_object(
         SectionKind::ReadOnlyData,
     );
     let mut rodata_ids: HashMap<String, WriteSymbolId> = HashMap::new();
+    let mut rodata_offsets = HashMap::new();
     for reloc in proof_relocs.iter().filter(|reloc| reloc.data.is_some()) {
         if rodata_ids.contains_key(&reloc.symbol) {
             continue;
@@ -836,6 +840,21 @@ fn write_proof_object(
         });
         symbol_ids.insert(reloc.symbol.clone(), id);
         rodata_ids.insert(reloc.symbol.clone(), id);
+        rodata_offsets.insert(reloc.symbol.clone(), (offset, data.len() as u64));
+    }
+
+    for reloc in proof_data_relocs {
+        let &(base, size) = rodata_offsets.get(&reloc.owner)
+            .ok_or_else(|| anyhow!("nested proof relocation has no data owner {}", reloc.owner))?;
+        if reloc.offset.checked_add(4).is_none_or(|end| end > size) || reloc.r_type != 2 {
+            bail!("nested proof relocation exceeds {} or has unsupported type", reloc.owner);
+        }
+        let symbol = *symbol_ids.get(&reloc.symbol)
+            .ok_or_else(|| anyhow!("nested proof relocation has no text target {}", reloc.symbol))?;
+        object.add_relocation(data_section, WriteRelocation {
+            offset: base + reloc.offset, symbol, addend: reloc.addend,
+            flags: RelocationFlags::Elf { r_type: reloc.r_type },
+        })?;
     }
 
     for reloc in proof_relocs {
@@ -1004,6 +1023,7 @@ struct RewriteResult {
     map_patches: Vec<MapPatch>,
     callee_saved_mask: u8,
     proof_relocs: Vec<ProofReloc>,
+    proof_data_relocs: Vec<ProofDataReloc>,
     proof_symbols: Vec<ProofSymbol>,
     load_sites: Vec<LoadSite>,
 }
@@ -1022,6 +1042,15 @@ struct ProofReloc {
     symbol: String,
     addend: i64,
     data: Option<Vec<u8>>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct ProofDataReloc {
+    owner: String,
+    offset: u64,
+    r_type: u32,
+    symbol: String,
+    addend: i64,
 }
 
 #[derive(Clone, Debug)]
@@ -2608,6 +2637,7 @@ fn rewrite_arm64(
         map_patches,
         callee_saved_mask,
         proof_relocs,
+        proof_data_relocs: Vec::new(),
         proof_symbols,
         load_sites: Vec::new(),
     })
