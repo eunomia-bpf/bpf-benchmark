@@ -8,6 +8,7 @@ LINKER_BINARY ?= $(LINKER_TARGET)/release/native-link
 OUTPUT ?= /workspaces/kprog-raw/perf/20261115-native-relocations
 BUILD := /var/tmp/kprog-tmp/perf/native-relocations
 TABLE_CONTEXT_BUILD := /var/tmp/kprog-tmp/perf/table-context
+MAP_LOOKUP_BUILD := /var/tmp/kprog-tmp/perf/map-table-lookup
 CONTEXT_TOOL := /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds
 CHECKED_TOOL := /var/tmp/kprog-tmp/perf/checked-compiler/compile-sim-ir
 CHECKED_PACKET_BUILD := /var/tmp/kprog-tmp/perf/checked-packet
@@ -58,6 +59,10 @@ check: $(KERNEL_LAYOUT)
 .PHONY: map-table-b
 map-table-b: check
 	taskset -c 19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_map_table_b.py --build /var/tmp/kprog-tmp/perf/map-pointer-tables --output $(OUTPUT)/map-table-b
+
+.PHONY: map-table-lookup
+map-table-lookup: check $(CONTEXT_TOOL)
+	taskset -c 19 prlimit --as=17179869184 -- python3 $(ROOT)/kprog/test/build_map_table_lookup.py --build $(MAP_LOOKUP_BUILD) --output $(OUTPUT) --kernel-layout $(KERNEL_LAYOUT) --bounds $(CONTEXT_TOOL)
 
 build:
 	flock -x /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) bash -eu -c 'if test -L "$(LINKER_TARGET)/release/native-link"; then unlink "$(LINKER_TARGET)/release/native-link"; fi; exec cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml'
@@ -160,3 +165,17 @@ guest-table-context-checked:
 	mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf
 	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
 	CLANG=$(ROOT)/kprog/stock-path/bin/clang python3 $(ROOT)/kprog/test/verify_retained_proof.py --native $(TABLE_CONTEXT_BUILD)/table.native.o --metadata $(ROOT)/kprog/test/table_context_metadata.json --context $(ROOT)/kprog/test/table_context_load_context.json --source $(TABLE_CONTEXT_BUILD)/original.bpf.o --proof $(TABLE_CONTEXT_BUILD)/trusted_x86.bpf.o --symbol jump_table --linker $(LINKER_BINARY) --checked-source $(TABLE_CONTEXT_BUILD)/trusted_x86.bpf.i --checked-frontend $(TABLE_CONTEXT_BUILD)/trusted_x86.bpf.bounds-input.bc --checked-compiler /workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir --output $(OUTPUT)/replay
+
+.PHONY: map-table-lookup-checked guest-map-table-lookup-checked
+map-table-lookup-checked:
+	install -d $(OUTPUT) $(OUTPUT)/inputs
+	git -C $(ROOT) rev-parse HEAD > $(OUTPUT)/source-head.txt
+	sha256sum $(KDIR)/arch/x86/boot/bzImage $(LINKER_BINARY) /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader /workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir $(MAP_LOOKUP_BUILD)/lookup.native.o $(MAP_LOOKUP_BUILD)/trusted_x86.bpf.o > $(OUTPUT)/inputs.sha256
+	taskset -c 16-17 prlimit --as=17179869184 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rwdir $(OUTPUT)/inputs=$(MAP_LOOKUP_BUILD) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-map-table-lookup-checked OUTPUT=$(OUTPUT) MAP_LOOKUP_BUILD=$(OUTPUT)/inputs'
+
+guest-map-table-lookup-checked:
+	uname -r > $(OUTPUT)/kernel.release
+	mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf
+	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
+	CLANG=$(ROOT)/kprog/stock-path/bin/clang python3 $(ROOT)/kprog/test/verify_retained_proof.py --native $(MAP_LOOKUP_BUILD)/lookup.native.o --metadata $(ROOT)/kprog/test/map_table_lookup_metadata.json --context $(ROOT)/kprog/test/table_context_load_context.json --source $(MAP_LOOKUP_BUILD)/original.bpf.o --proof $(MAP_LOOKUP_BUILD)/trusted_x86.bpf.o --symbol map_lookup_table --linker $(LINKER_BINARY) --checked-source $(MAP_LOOKUP_BUILD)/trusted_x86.bpf.i --checked-frontend $(MAP_LOOKUP_BUILD)/trusted_x86.bpf.bounds-input.bc --checked-compiler /workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir --output $(OUTPUT)/replay

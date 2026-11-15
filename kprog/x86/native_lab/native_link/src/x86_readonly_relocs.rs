@@ -168,6 +168,61 @@ mod tests {
     use super::*;
 
     #[test]
+    fn compiler_relro_lookup_keeps_map_choices_and_helper_in_proof() -> Result<()> {
+        // Bug: pointer-table support must also survive a real helper consumer,
+        // not merely a pointer-valued component return that BPF cannot accept.
+        let build = std::path::Path::new("/var/tmp/kprog-tmp/perf/map-table-lookup");
+        fs::create_dir_all(build)?;
+        let native = build.join("lookup.native.o");
+        let command = ["clang-18", "-target", "x86_64-linux-gnu", "-O3", "-march=native",
+            "-foptimize-sibling-calls", "-fomit-frame-pointer", "-mno-red-zone", "-mgeneral-regs-only",
+            "-fno-stack-protector", "-g", "-I/workspaces/repository/vendor/libbpf/src",
+            "-c", "/workspaces/repository/kprog/test/native_map_lookup_table.c",
+            "-o", native.to_str().ok_or_else(|| anyhow!("lookup fixture path is not UTF-8"))?];
+        fs::write(build.join("compile-command.json"), serde_json::to_vec(&command)?)?;
+        let compiled = std::process::Command::new(command[0]).args(&command[1..]).output()?;
+        if !compiled.status.success() { bail!("clang lookup fixture failed: {}", String::from_utf8_lossy(&compiled.stderr)); }
+        let bytes = fs::read(&native)?;
+        let elf = object::File::parse(bytes.as_slice())?;
+        let entry = find_symbol_by_name(&elf, "map_lookup_table")?;
+        let maps: HashMap<_, _> = (0..8).map(|index| (format!("map{index}"), 0x100000000u64 + index * 32)).collect();
+        let proof = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(), &maps,
+            &HashMap::new(), &[], true, true, None, None, None, None, false)?;
+        assert_eq!(proof.proof_data_relocs.len(), 8);
+        assert!(proof.proof_data_relocs.iter().all(|item|
+            item.r_type == 1 && item.addend == 0 && maps.contains_key(&item.symbol)));
+        // Libbpf's numeric helper ABI remains MOV EAX,1; CALL RAX in proof
+        // mode. It does not acquire a named ELF helper relocation.
+        assert!(proof.blob.windows(7).any(|bytes| bytes == [0xb8, 1, 0, 0, 0, 0xff, 0xd0]));
+        let path = build.join("trusted_x86.proof.o");
+        write_proof_object(&path, object::Architecture::X86_64,
+            "map_lookup_table", &proof.blob, &proof.proof_symbols, &proof.proof_relocs,
+            &proof.proof_data_relocs, proof.callee_saved_mask)?;
+        let bytes = fs::read(path)?;
+        let elf = object::File::parse(bytes.as_slice())?;
+        let entry = find_symbol_by_name(&elf, "map_lookup_table")?;
+        let layout: KernelLayout = serde_json::from_slice(&fs::read(
+            "/var/tmp/kprog-tmp/perf/kernel-layout/kernel-layout.json")?)?;
+        let helpers = HashMap::from([("bpf_map_lookup_elem".to_owned(), 0x1234)]);
+        let linked = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps,
+            &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read),
+            Some(&layout.hash), Some(&layout.lpm), false)?;
+        assert_eq!(linked.map_patches.len(), 8);
+        assert!(linked.relocs.iter().all(|item|
+            item.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32 && item.target == 0x1234));
+        fs::write(build.join("lookup.kernel.bin"), &linked.blob)?;
+        fs::write(build.join("lookup.map-patches.tsv"), linked.map_patches.iter()
+            .map(|patch| format!("{}\t{}\n", patch.name, patch.offset)).collect::<String>())?;
+        fs::write(build.join("lookup.helper-slots.json"), serde_json::to_vec(
+            &linked.relocs.iter().map(|item| item.offset).collect::<Vec<_>>())?)?;
+        fs::write(build.join("proof-result.json"), serde_json::to_vec_pretty(&serde_json::json!({
+            "map_slots": 8, "helper": "bpf_map_lookup_elem",
+            "scope": "Actual clang lookup consumer through production proof writer; not BPF acceptance"
+        }))?)?;
+        Ok(())
+    }
+
+    #[test]
     fn compiler_relro_map_table_keeps_live_pointer_slots_through_proof() -> Result<()> {
         // Bug: treating the anonymous RELRO table as mutable DATASEC either
         // rejects valid clang output or freezes zero placeholders as pointers.
