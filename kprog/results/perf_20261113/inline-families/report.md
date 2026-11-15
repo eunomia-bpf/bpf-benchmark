@@ -174,3 +174,11 @@ records. The follow-up checks the unchanged BTF function-info payload and
 ordinary instruction-location count separately, while retaining the exact
 code/maps/types comparison and reporting both line-section hashes. Original
 failure/commands persist in raw b-debug-check; corrected check pending.
+
+2026-11-15T16:43Z corrected debug fixture PASS:2055→0 debug variable
+updates, identical128B code/32B map/1062B BTF types, exact BTF function-info
+payload and20ordinary instruction locations. One diagnostic line record
+removed (BTF.ext240→224), not whole-object equality. Sixty untied/tied
+provenance cases, four context load widths and normal all-pairs backend
+also PASS. Source cab373d96/e8c0f32cf, result b-debug/. Base tool not yet
+published while captured100K control uses it. Real100K effect still open.
