@@ -101,7 +101,8 @@ def main(a):
                 record['bpf_compiled'] = True
             finally:
                 if pipeline.result is not None:
-                    record.update(bpf=pipeline.result, bpf_compiled=True)
+                    record.update(bpf=pipeline.result, bpf_compiled=True,
+                        scope='Same captured OTel proof/map metadata; normal B compiled through anonymous stage files; frame observation may be incomplete; no kernel/application acceptance')
                     result.write_text(json.dumps(record, indent=2)+'\n')
                 pipeline.close()
             record['scope'] = 'Same captured OTel proof/map metadata; normal bounds/MIR/all-pairs/llc via anonymous stage files and post-PEI frame observation; no kernel/application acceptance'
