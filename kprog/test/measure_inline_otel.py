@@ -47,8 +47,8 @@ def main(a):
         native_instructions=len(instructions), generated_bytes=len(source), source_sha256=sha(source),
         inline_header_sha256=sha((ROOT/'kprog/x86/x86_sim_inline.h').read_bytes()),
         simulator_header_sha256=sha((ROOT/'kprog/x86/x86_sim_local_bpf.h').read_bytes()),
-        commands=[], completed=False,
-        scope='Same captured OTel proof/map metadata; streamed current C/CPP and normal-O3 frontend to null, no B/stack/kernel/application result')
+        commands=[], completed=False, frontend_requested=a.frontend,
+        scope='Same captured OTel proof/map metadata; streamed current C/CPP with optional normal-O3 frontend to null; no B/stack/kernel/application result')
     result = a.output/'result.json'
 
     def run(command, data, name):

@@ -3,7 +3,9 @@
 
 /* Include after the program's readonly-load hooks. Instruction constants enter
  * this one C body as arguments; preprocessing never clones it per instruction.
- * Bind existing cells by reference: no state copy, new input or input reorder. */
+ * Bind existing cells by reference: no state copy, new input or input reorder.
+ * Internal temporaries have no debugger identity: keep -g and program BTF,
+ * without cloning thousands of interpreter variable descriptions per step. */
 #include "x86_sim_local_bpf.h"
 
 struct x86_sim_inline_value { __u8 *tag; void **pointer; };
@@ -219,37 +221,37 @@ struct x86_sim_inline_bindings {
 #undef X86_SIM_L_SV_PTR
 #define X86_SIM_L_SV_PTR(I) (*__x86_bind->values[(I)].pointer)
 
-static __always_inline void
+static __always_inline __attribute__((nodebug)) void
 x86_sim_inline_execute(const struct x86_sim_inline_bindings *__x86_bind,
     __u8 op, __u8 dst, __u8 src, __u8 flags, __u32 aux, __u64 imm)
 {
     X86_SIM_L_EXEC(op, dst, src, flags, aux, imm);
 }
 
-static __always_inline void
+static __always_inline __attribute__((nodebug)) void
 x86_sim_inline_mul(const struct x86_sim_inline_bindings *__x86_bind, __u8 src)
 { X86_SIM_L_EXEC_MUL_U64(src); }
 
-static __always_inline void
+static __always_inline __attribute__((nodebug)) void
 x86_sim_inline_stos(const struct x86_sim_inline_bindings *__x86_bind, __u8 width)
 { X86_SIM_L_EXEC_REP_STOS(width); }
 
-static __always_inline void
+static __always_inline __attribute__((nodebug)) void
 x86_sim_inline_code(const struct x86_sim_inline_bindings *__x86_bind, __u8 dst, __u64 address)
 { X86_SIM_X86_CODE_ADDRESS(dst, address); }
 
-static __always_inline int
+static __always_inline __attribute__((nodebug)) int
 x86_sim_inline_condition(const struct x86_sim_inline_bindings *__x86_bind, __u8 cc)
 { return X86_SIM_L_EVAL_CC(cc); }
 
-static __always_inline void
+static __always_inline __attribute__((nodebug)) void
 x86_sim_inline_call(const struct x86_sim_inline_bindings *__x86_bind, __u64 address)
 {
     __x86_rsp.ptr = KPROG_PTR_ADD64_BITS(__x86_rsp.ptr, -8);
     X86_SIM_L_STACK_WRITE((__s64)(long)__x86_rsp.ptr, X86_WIDTH_64, address);
 }
 
-static __always_inline void
+static __always_inline __attribute__((nodebug)) void
 x86_sim_inline_subret(const struct x86_sim_inline_bindings *__x86_bind)
 {
     __x86_sim_ret_addr = X86_SIM_L_STACK_READ((__s64)(long)__x86_rsp.ptr, X86_WIDTH_64);
@@ -257,11 +259,11 @@ x86_sim_inline_subret(const struct x86_sim_inline_bindings *__x86_bind)
     X86_SIM_L_STACK_RELEASE((__s64)(long)__x86_rsp.ptr - 8);
 }
 
-static __always_inline __u32
+static __always_inline __attribute__((nodebug)) __u32
 x86_sim_inline_return(const struct x86_sim_inline_bindings *__x86_bind)
 { X86_SIM_X86_RET(); }
 
-static __always_inline int
+static __always_inline __attribute__((nodebug)) int
 x86_sim_inline_recover(const struct x86_sim_inline_bindings *__x86_bind,
     __u8 base, __u8 dst, __u32 aux, __s64 displacement)
 { return X86_SIM_L_READ_RECOVERY_MEM(base, dst, aux, displacement); }
