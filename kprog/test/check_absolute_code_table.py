@@ -69,7 +69,13 @@ unsigned long native_lab_entry_input(unsigned int kind) {
                 values[0] = index
                 ctx = (c.c_uint64*9)(*values)
                 oracle = (expected[index] if index < 8 else 0)&((1<<64)-1)
-                actual, simulated = native(ctx), model(ctx)
+                before = bytes(ctx)
+                actual = native(ctx)
+                if bytes(ctx) != before:
+                    raise ValueError(f'native table changed readonly context {seed}/{index}')
+                simulated = model(ctx)
+                if bytes(ctx) != before:
+                    raise ValueError(f'simulator table changed readonly context {seed}/{index}')
                 if actual != oracle or simulated != oracle&0xffffffff:
                     raise ValueError(f'absolute table {seed}/{index}: {actual}/{simulated} != {oracle}')
                 rows.append(dict(seed=seed, index=index, native=actual, simulator_u32=simulated, expected=oracle))
