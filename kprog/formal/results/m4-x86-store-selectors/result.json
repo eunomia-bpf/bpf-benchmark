@@ -97,5 +97,36 @@
   "full_inline_export_exit": 2,
   "next_blocker": "declaration directly after default label in MOV_STORE",
   "migrated_theorems": 0,
-  "whole_library_acceptance": false
+  "whole_library_acceptance": false,
+  "label_syntax_followup": {
+    "raw_directory": "/workspaces/kprog-raw/formal/m4-x86-store-labels",
+    "source_change": "empty statements before two default-label declarations; scope unchanged",
+    "native_fidelity": {
+      "store": {
+        "allocated_sections_equal": true,
+        "allocated_relocations_equal": true,
+        "current_stream_equals_normal_build": true,
+        "allocated_section_bytes": {
+          ".text": 0,
+          "socket": 2272,
+          "license": 4
+        },
+        "allocated_relocations": 13
+      },
+      "memory": {
+        "allocated_sections_equal": true,
+        "allocated_relocations_equal": true,
+        "current_stream_equals_normal_build": true,
+        "allocated_section_bytes": {
+          ".text": 0,
+          "socket": 1680,
+          "license": 4
+        },
+        "allocated_relocations": 5
+      }
+    },
+    "full_inline_export_exit": 2,
+    "next_blocker": "DISP_LOAD_XMM0 KPROG_X86_XMM0_ARM GNU expression",
+    "preprocess_bytes": 2443382
+  }
 }

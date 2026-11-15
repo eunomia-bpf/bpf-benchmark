@@ -1453,11 +1453,17 @@ usual axioms only. Context export changes only printer-generated names.
 Store2272B/13relocs, memory1680B/5, ordinary1448B/11 and contextXDP360B/TC760B/4
 are exact against historical replay and normal compilation. The timing queue
 acquired SH at19:44:34 UTC after Katran released EX; both workers are terminal.
-Full inline export now stops at a declaration after a default label, with
-profile CPP2,443,378B. These are component checks, not migrated refinements or
+At that checkpoint full inline export stopped at a declaration after a default
+label, with profile CPP2,443,378B. These are component checks, not migrated refinements or
 whole-default identity. [Selector receipts](results/m4-x86-store-selectors/README.md)
 and [physical-store receipts](results/m4-x86-physical-store/README.md) record the
 results; full raw evidence stays in their linked directories.
+
+Two empty statements now make the MOV-store/MOVBE-store default-label
+declarations standard C without changing scope. Focused historical comparisons
+retain2272B/13relocs and1680B/5, equal to normal compilation. Full export now
+reaches the XMM0 arm selector's GNU expression. No existing rooted AST changes
+for this syntax-only follow-up; raw: `/workspaces/kprog-raw/formal/m4-x86-store-labels`.
 
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight

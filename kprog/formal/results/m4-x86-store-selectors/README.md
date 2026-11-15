@@ -27,3 +27,11 @@ Full inline export still exits2, now at a declaration directly after a default
 label. CPP2,443,378B is extraction-profile size only. M4/full handlers/default
 coverage, all2,065 Clight refinements/recounts, M6 and whole-library acceptance
 remain pending.
+
+The syntax follow-up adds an empty statement before each declaration after the
+default label in MOV-store and MOVBE-store, preserving the original scope.
+Both affected fixture comparisons remain exact (2272B/13 and1680B/5), equal to
+normal compilation. Full export advances to the XMM0 arm selector's GNU
+expression. The earlier label-error receipt remains above and in raw; no full
+suite was repeated for the two null statements. Follow-up raw directory:
+`/workspaces/kprog-raw/formal/m4-x86-store-labels`.

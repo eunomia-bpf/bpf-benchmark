@@ -1651,7 +1651,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
                     __x86_l_width,(SRC)==X86_RSP ? X86_SIM_L_STACK_PTR((__s64)(long)X86_SIM_L_READ_REG_PTR(SRC)) : X86_SIM_L_READ_REG_PTR(SRC), \
                     (SRC)==X86_RSP ? X86_SIM_TAG_STACK : X86_SIM_L_REG_TAG(SRC)); \
             break;                                           \
-		default:                                                 \
+		default: ;                                               \
 			void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \
             /* Tagged store invalidates this range before writing it; \
              * the source value has already been captured above. */ \
@@ -1694,7 +1694,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 				(__s64)(long)__x86_l_base_ptr + __x86_l_disp,\
 				__x86_l_width, __x86_l_value);             \
 			break;                                            \
-		default:                                                  \
+		default: ;                                                \
 			void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \
 			X86_SIM_L_STORE_ADDR_TAGGED(__x86_l_addr, __x86_l_width, \
 					     __x86_l_value, X86_SIM_L_REG_TAG(DST));              \
