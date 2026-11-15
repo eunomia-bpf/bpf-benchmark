@@ -1,0 +1,41 @@
+
+/var/tmp/kprog-tmp/perf/native-relocations/jump-table.native.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <jump_table>:
+   0:	83 fe 07             	cmp    esi,0x7
+   3:	77 5c                	ja     61 <jump_table+0x61>
+   5:	89 f0                	mov    eax,esi
+   7:	48 8d 0d 00 00 00 00 	lea    rcx,[rip+0x0]        # e <jump_table+0xe>
+			a: R_X86_64_PC32	.rodata-0x4
+   e:	48 63 04 81          	movsxd rax,DWORD PTR [rcx+rax*4]
+  12:	48 01 c8             	add    rax,rcx
+  15:	ff e0                	jmp    rax
+  17:	48 8b 07             	mov    rax,QWORD PTR [rdi]
+  1a:	48 83 c0 11          	add    rax,0x11
+  1e:	c3                   	ret
+  1f:	b8 00 80 00 00       	mov    eax,0x8000
+  24:	48 0b 47 20          	or     rax,QWORD PTR [rdi+0x20]
+  28:	c3                   	ret
+  29:	b8 34 12 00 00       	mov    eax,0x1234
+  2e:	48 33 47 10          	xor    rax,QWORD PTR [rdi+0x10]
+  32:	c3                   	ret
+  33:	48 8b 47 18          	mov    rax,QWORD PTR [rdi+0x18]
+  37:	48 83 c0 e3          	add    rax,0xffffffffffffffe3
+  3b:	c3                   	ret
+  3c:	48 8b 47 38          	mov    rax,QWORD PTR [rdi+0x38]
+  40:	48 8d 04 80          	lea    rax,[rax+rax*4]
+  44:	c3                   	ret
+  45:	48 8b 47 08          	mov    rax,QWORD PTR [rdi+0x8]
+  49:	48 8d 04 40          	lea    rax,[rax+rax*2]
+  4d:	c3                   	ret
+  4e:	48 8b 47 28          	mov    rax,QWORD PTR [rdi+0x28]
+  52:	25 ff 7f 00 00       	and    eax,0x7fff
+  57:	c3                   	ret
+  58:	48 8b 47 30          	mov    rax,QWORD PTR [rdi+0x30]
+  5c:	48 83 c0 47          	add    rax,0x47
+  60:	c3                   	ret
+  61:	31 c0                	xor    eax,eax
+  63:	c3                   	ret
