@@ -1,0 +1,11 @@
+{
+  "recorded": "2026-11-15T03:00:19Z",
+  "canonical": "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+  "previous_sha256": "31806730e4d268e89b51806d2e0207812dc5e1b869e974d6f3304e5f90169955",
+  "retained": "/workspaces/repository/corpus/results/perf-corrected-all-lto-linker-20261114/native-link-on",
+  "retained_sha256": "22fe25bd11b0e1c13058439cd0f1722143eb01a8918662b35681a99bd2dab804",
+  "retained_binary_sha256": "e248347b074c5445b288ac621da1cedb4bf2d721cb8f3e1082ee655dcb818ab2",
+  "loader": "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+  "loader_sha256": "0bdcbe743aca12b5afed11ae40116e0d6437657f3068ef722056ef09e0061bb5",
+  "scope": "Artifact pairing for the pre-existing census; normal source remains unchanged. Paired normal loader/linker publication requires image EX after existing users finish."
+}

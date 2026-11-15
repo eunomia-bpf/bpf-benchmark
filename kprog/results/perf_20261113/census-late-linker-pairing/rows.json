@@ -1,0 +1,4526 @@
+[
+  {
+    "application": "tracee/monitor",
+    "source_prog_id": 509,
+    "name": "trace_do_exit",
+    "priority": {
+      "measured_name": "trace_do_exit",
+      "baseline_time_ns": 160411250,
+      "application_time_ns": 2500427708222,
+      "application_time_share": 6.415352440405685e-05,
+      "matching_census_instances": 1,
+      "retained_instance_time_ns": 948626,
+      "scope": "Measured name family; matching instances share priority"
+    },
+    "body_group": 92,
+    "submission": {
+      "source_prog_id": 0,
+      "stage": "installed",
+      "native_sha256": "489a7a69184baae011350d4c7632faf0f5539d9df8417aa2892246cc49be777f",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 90,
+          "source_func_type_id": 741,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "sys_32_to_64_map",
+            "map_id": 3427,
+            "value_offset": null
+          },
+          {
+            "name": "sys_enter_init_tail",
+            "map_id": 3428,
+            "value_offset": null
+          },
+          {
+            "name": "task_info_map",
+            "map_id": 3429,
+            "value_offset": null
+          },
+          {
+            "name": "config_map",
+            "map_id": 3430,
+            "value_offset": null
+          },
+          {
+            "name": "sys_enter_submit_tail",
+            "map_id": 3431,
+            "value_offset": null
+          },
+          {
+            "name": "sys_enter_tails",
+            "map_id": 3432,
+            "value_offset": null
+          },
+          {
+            "name": "fd_arg_path_map",
+            "map_id": 3433,
+            "value_offset": null
+          },
+          {
+            "name": "sys_exit_init_tail",
+            "map_id": 3434,
+            "value_offset": null
+          },
+          {
+            "name": "sys_exit_submit_tail",
+            "map_id": 3435,
+            "value_offset": null
+          },
+          {
+            "name": "sys_exit_tails",
+            "map_id": 3436,
+            "value_offset": null
+          },
+          {
+            "name": "generic_sys_enter_tails",
+            "map_id": 3437,
+            "value_offset": null
+          },
+          {
+            "name": "generic_sys_exit_tails",
+            "map_id": 3438,
+            "value_offset": null
+          },
+          {
+            "name": "proc_info_map",
+            "map_id": 3439,
+            "value_offset": null
+          },
+          {
+            "name": "process_tree_map",
+            "map_id": 3440,
+            "value_offset": null
+          },
+          {
+            "name": "process_tree_map_version",
+            "map_id": 3442,
+            "value_offset": null
+          },
+          {
+            "name": "module_context_map",
+            "map_id": 3443,
+            "value_offset": null
+          },
+          {
+            "name": "walk_mod_tree_queue",
+            "map_id": 3444,
+            "value_offset": null
+          },
+          {
+            "name": "prog_array",
+            "map_id": 3445,
+            "value_offset": null
+          },
+          {
+            "name": "containers_map",
+            "map_id": 3446,
+            "value_offset": null
+          },
+          {
+            "name": "prog_array_tp",
+            "map_id": 3447,
+            "value_offset": null
+          },
+          {
+            "name": "new_module_map",
+            "map_id": 3448,
+            "value_offset": null
+          },
+          {
+            "name": "recent_deleted_module_map",
+            "map_id": 3449,
+            "value_offset": null
+          },
+          {
+            "name": "cgrpctxmap_in",
+            "map_id": 3450,
+            "value_offset": null
+          },
+          {
+            "name": "cgrpctxmap_eg",
+            "map_id": 3451,
+            "value_offset": null
+          },
+          {
+            "name": "features_test_arena",
+            "map_id": 3452,
+            "value_offset": null
+          },
+          {
+            "name": "kconfig_map",
+            "map_id": 3453,
+            "value_offset": null
+          },
+          {
+            "name": "args_map",
+            "map_id": 3454,
+            "value_offset": null
+          },
+          {
+            "name": "ksymbols_map",
+            "map_id": 3455,
+            "value_offset": null
+          },
+          {
+            "name": "file_write_path_filter",
+            "map_id": 3456,
+            "value_offset": null
+          },
+          {
+            "name": "file_read_path_filter",
+            "map_id": 3457,
+            "value_offset": null
+          },
+          {
+            "name": "file_type_filter",
+            "map_id": 3458,
+            "value_offset": null
+          },
+          {
+            "name": "netconfig_map",
+            "map_id": 3459,
+            "value_offset": null
+          },
+          {
+            "name": "expected_sys_call_table",
+            "map_id": 3460,
+            "value_offset": null
+          },
+          {
+            "name": "bufs",
+            "map_id": 3461,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_bufs",
+            "map_id": 3462,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_lpm_bufs",
+            "map_id": 3463,
+            "value_offset": null
+          },
+          {
+            "name": "syscall_source_map",
+            "map_id": 3464,
+            "value_offset": null
+          },
+          {
+            "name": "stack_addresses",
+            "map_id": 3465,
+            "value_offset": null
+          },
+          {
+            "name": "bpf_attach_map",
+            "map_id": 3466,
+            "value_offset": null
+          },
+          {
+            "name": "bpf_attach_tmp_map",
+            "map_id": 3467,
+            "value_offset": null
+          },
+          {
+            "name": "bpf_prog_load_map",
+            "map_id": 3468,
+            "value_offset": null
+          },
+          {
+            "name": "event_data_map",
+            "map_id": 3469,
+            "value_offset": null
+          },
+          {
+            "name": "signal_data_map",
+            "map_id": 3470,
+            "value_offset": null
+          },
+          {
+            "name": "logs_count",
+            "map_id": 3471,
+            "value_offset": null
+          },
+          {
+            "name": "scratch_map",
+            "map_id": 3472,
+            "value_offset": null
+          },
+          {
+            "name": "file_modification_map",
+            "map_id": 3473,
+            "value_offset": null
+          },
+          {
+            "name": "io_file_path_cache_map",
+            "map_id": 3474,
+            "value_offset": null
+          },
+          {
+            "name": "elf_files_map",
+            "map_id": 3475,
+            "value_offset": null
+          },
+          {
+            "name": "policies_config_map",
+            "map_id": 3476,
+            "value_offset": null
+          },
+          {
+            "name": "policies_config_version",
+            "map_id": 3478,
+            "value_offset": null
+          },
+          {
+            "name": "uid_filter",
+            "map_id": 3479,
+            "value_offset": null
+          },
+          {
+            "name": "uid_filter_version",
+            "map_id": 3481,
+            "value_offset": null
+          },
+          {
+            "name": "pid_filter",
+            "map_id": 3482,
+            "value_offset": null
+          },
+          {
+            "name": "pid_filter_version",
+            "map_id": 3484,
+            "value_offset": null
+          },
+          {
+            "name": "mnt_ns_filter",
+            "map_id": 3485,
+            "value_offset": null
+          },
+          {
+            "name": "mnt_ns_filter_version",
+            "map_id": 3487,
+            "value_offset": null
+          },
+          {
+            "name": "pid_ns_filter",
+            "map_id": 3488,
+            "value_offset": null
+          },
+          {
+            "name": "pid_ns_filter_version",
+            "map_id": 3490,
+            "value_offset": null
+          },
+          {
+            "name": "uts_ns_filter",
+            "map_id": 3491,
+            "value_offset": null
+          },
+          {
+            "name": "uts_ns_filter_version",
+            "map_id": 3493,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_exact",
+            "map_id": 3494,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_exact_version",
+            "map_id": 3496,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_suffix",
+            "map_id": 3497,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_suffix_version",
+            "map_id": 3499,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_prefix",
+            "map_id": 3500,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_prefix_version",
+            "map_id": 3502,
+            "value_offset": null
+          },
+          {
+            "name": "comm_filter",
+            "map_id": 3503,
+            "value_offset": null
+          },
+          {
+            "name": "comm_filter_version",
+            "map_id": 3505,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_id_filter",
+            "map_id": 3506,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_id_filter_version",
+            "map_id": 3508,
+            "value_offset": null
+          },
+          {
+            "name": "binary_filter",
+            "map_id": 3509,
+            "value_offset": null
+          },
+          {
+            "name": "binary_filter_version",
+            "map_id": 3511,
+            "value_offset": null
+          },
+          {
+            "name": "events_map",
+            "map_id": 3512,
+            "value_offset": null
+          },
+          {
+            "name": "events_map_version",
+            "map_id": 3514,
+            "value_offset": null
+          },
+          {
+            "name": "logs",
+            "map_id": 3515,
+            "value_offset": null
+          },
+          {
+            "name": "events",
+            "map_id": 3516,
+            "value_offset": null
+          },
+          {
+            "name": "file_writes",
+            "map_id": 3517,
+            "value_offset": null
+          },
+          {
+            "name": "signals",
+            "map_id": 3518,
+            "value_offset": null
+          },
+          {
+            "name": "netflowmap",
+            "map_id": 3519,
+            "value_offset": null
+          },
+          {
+            "name": "inodemap",
+            "map_id": 3520,
+            "value_offset": null
+          },
+          {
+            "name": "sockmap",
+            "map_id": 3521,
+            "value_offset": null
+          },
+          {
+            "name": "entrymap",
+            "map_id": 3522,
+            "value_offset": null
+          },
+          {
+            "name": "net_cap_events",
+            "map_id": 3523,
+            "value_offset": null
+          },
+          {
+            "name": "net_heap_event",
+            "map_id": 3524,
+            "value_offset": null
+          },
+          {
+            "name": "modules_map",
+            "map_id": 3525,
+            "value_offset": null
+          },
+          {
+            "name": "suspicious_syscall_source_syscalls",
+            "map_id": 3526,
+            "value_offset": null
+          },
+          {
+            "name": "stack_pivot_syscalls",
+            "map_id": 3527,
+            "value_offset": null
+          },
+          {
+            "name": "f3628a47.rodata",
+            "map_id": 3528,
+            "value_offset": null
+          },
+          {
+            "name": "TRACE_EVENT_FL_TRACEPOINT_BIT",
+            "map_id": 3528,
+            "value_offset": 0
+          },
+          {
+            "name": "TRACE_EVENT_FL_TRACEPOINT",
+            "map_id": 3528,
+            "value_offset": 4
+          },
+          {
+            "name": "type_size_table",
+            "map_id": 3528,
+            "value_offset": 8
+          },
+          {
+            "name": ".rodata.str1.1",
+            "map_id": 3529,
+            "value_offset": null
+          },
+          {
+            "name": "f3628a47.bss",
+            "map_id": 3530,
+            "value_offset": null
+          },
+          {
+            "name": "start_scan_time_init_shown_mods",
+            "map_id": 3530,
+            "value_offset": 0
+          },
+          {
+            "name": "last_module_insert_time",
+            "map_id": 3530,
+            "value_offset": 8
+          },
+          {
+            "name": "hidden_old_mod_scan_done",
+            "map_id": 3530,
+            "value_offset": 16
+          },
+          {
+            "name": "use_security_bprm_creds_for_exec",
+            "map_id": 3530,
+            "value_offset": 17
+          },
+          {
+            "name": "alerted_find_vma_unsupported",
+            "map_id": 3530,
+            "value_offset": 18
+          }
+        ]
+      },
+      "resources": {
+        "section": "kprobe/do_exit",
+        "maps": [
+          {
+            "name": "sys_32_to_64_map",
+            "map_id": 3427
+          },
+          {
+            "name": "sys_enter_init_tail",
+            "map_id": 3428
+          },
+          {
+            "name": "task_info_map",
+            "map_id": 3429
+          },
+          {
+            "name": "config_map",
+            "map_id": 3430
+          },
+          {
+            "name": "sys_enter_submit_tail",
+            "map_id": 3431
+          },
+          {
+            "name": "sys_enter_tails",
+            "map_id": 3432
+          },
+          {
+            "name": "fd_arg_path_map",
+            "map_id": 3433
+          },
+          {
+            "name": "sys_exit_init_tail",
+            "map_id": 3434
+          },
+          {
+            "name": "sys_exit_submit_tail",
+            "map_id": 3435
+          },
+          {
+            "name": "sys_exit_tails",
+            "map_id": 3436
+          },
+          {
+            "name": "generic_sys_enter_tails",
+            "map_id": 3437
+          },
+          {
+            "name": "generic_sys_exit_tails",
+            "map_id": 3438
+          },
+          {
+            "name": "proc_info_map",
+            "map_id": 3439
+          },
+          {
+            "name": "process_tree_map",
+            "map_id": 3440
+          },
+          {
+            "name": "process_tree_map_version",
+            "map_id": 3442
+          },
+          {
+            "name": "module_context_map",
+            "map_id": 3443
+          },
+          {
+            "name": "walk_mod_tree_queue",
+            "map_id": 3444
+          },
+          {
+            "name": "prog_array",
+            "map_id": 3445
+          },
+          {
+            "name": "containers_map",
+            "map_id": 3446
+          },
+          {
+            "name": "prog_array_tp",
+            "map_id": 3447
+          },
+          {
+            "name": "new_module_map",
+            "map_id": 3448
+          },
+          {
+            "name": "recent_deleted_module_map",
+            "map_id": 3449
+          },
+          {
+            "name": "cgrpctxmap_in",
+            "map_id": 3450
+          },
+          {
+            "name": "cgrpctxmap_eg",
+            "map_id": 3451
+          },
+          {
+            "name": "features_test_arena",
+            "map_id": 3452
+          },
+          {
+            "name": "kconfig_map",
+            "map_id": 3453
+          },
+          {
+            "name": "args_map",
+            "map_id": 3454
+          },
+          {
+            "name": "ksymbols_map",
+            "map_id": 3455
+          },
+          {
+            "name": "file_write_path_filter",
+            "map_id": 3456
+          },
+          {
+            "name": "file_read_path_filter",
+            "map_id": 3457
+          },
+          {
+            "name": "file_type_filter",
+            "map_id": 3458
+          },
+          {
+            "name": "netconfig_map",
+            "map_id": 3459
+          },
+          {
+            "name": "expected_sys_call_table",
+            "map_id": 3460
+          },
+          {
+            "name": "bufs",
+            "map_id": 3461
+          },
+          {
+            "name": "data_filter_bufs",
+            "map_id": 3462
+          },
+          {
+            "name": "data_filter_lpm_bufs",
+            "map_id": 3463
+          },
+          {
+            "name": "syscall_source_map",
+            "map_id": 3464
+          },
+          {
+            "name": "stack_addresses",
+            "map_id": 3465
+          },
+          {
+            "name": "bpf_attach_map",
+            "map_id": 3466
+          },
+          {
+            "name": "bpf_attach_tmp_map",
+            "map_id": 3467
+          },
+          {
+            "name": "bpf_prog_load_map",
+            "map_id": 3468
+          },
+          {
+            "name": "event_data_map",
+            "map_id": 3469
+          },
+          {
+            "name": "signal_data_map",
+            "map_id": 3470
+          },
+          {
+            "name": "logs_count",
+            "map_id": 3471
+          },
+          {
+            "name": "scratch_map",
+            "map_id": 3472
+          },
+          {
+            "name": "file_modification_map",
+            "map_id": 3473
+          },
+          {
+            "name": "io_file_path_cache_map",
+            "map_id": 3474
+          },
+          {
+            "name": "elf_files_map",
+            "map_id": 3475
+          },
+          {
+            "name": "policies_config_map",
+            "map_id": 3476
+          },
+          {
+            "name": "policies_config_version",
+            "map_id": 3478
+          },
+          {
+            "name": "uid_filter",
+            "map_id": 3479
+          },
+          {
+            "name": "uid_filter_version",
+            "map_id": 3481
+          },
+          {
+            "name": "pid_filter",
+            "map_id": 3482
+          },
+          {
+            "name": "pid_filter_version",
+            "map_id": 3484
+          },
+          {
+            "name": "mnt_ns_filter",
+            "map_id": 3485
+          },
+          {
+            "name": "mnt_ns_filter_version",
+            "map_id": 3487
+          },
+          {
+            "name": "pid_ns_filter",
+            "map_id": 3488
+          },
+          {
+            "name": "pid_ns_filter_version",
+            "map_id": 3490
+          },
+          {
+            "name": "uts_ns_filter",
+            "map_id": 3491
+          },
+          {
+            "name": "uts_ns_filter_version",
+            "map_id": 3493
+          },
+          {
+            "name": "data_filter_exact",
+            "map_id": 3494
+          },
+          {
+            "name": "data_filter_exact_version",
+            "map_id": 3496
+          },
+          {
+            "name": "data_filter_suffix",
+            "map_id": 3497
+          },
+          {
+            "name": "data_filter_suffix_version",
+            "map_id": 3499
+          },
+          {
+            "name": "data_filter_prefix",
+            "map_id": 3500
+          },
+          {
+            "name": "data_filter_prefix_version",
+            "map_id": 3502
+          },
+          {
+            "name": "comm_filter",
+            "map_id": 3503
+          },
+          {
+            "name": "comm_filter_version",
+            "map_id": 3505
+          },
+          {
+            "name": "cgroup_id_filter",
+            "map_id": 3506
+          },
+          {
+            "name": "cgroup_id_filter_version",
+            "map_id": 3508
+          },
+          {
+            "name": "binary_filter",
+            "map_id": 3509
+          },
+          {
+            "name": "binary_filter_version",
+            "map_id": 3511
+          },
+          {
+            "name": "events_map",
+            "map_id": 3512
+          },
+          {
+            "name": "events_map_version",
+            "map_id": 3514
+          },
+          {
+            "name": "logs",
+            "map_id": 3515
+          },
+          {
+            "name": "events",
+            "map_id": 3516
+          },
+          {
+            "name": "file_writes",
+            "map_id": 3517
+          },
+          {
+            "name": "signals",
+            "map_id": 3518
+          },
+          {
+            "name": "netflowmap",
+            "map_id": 3519
+          },
+          {
+            "name": "inodemap",
+            "map_id": 3520
+          },
+          {
+            "name": "sockmap",
+            "map_id": 3521
+          },
+          {
+            "name": "entrymap",
+            "map_id": 3522
+          },
+          {
+            "name": "net_cap_events",
+            "map_id": 3523
+          },
+          {
+            "name": "net_heap_event",
+            "map_id": 3524
+          },
+          {
+            "name": "modules_map",
+            "map_id": 3525
+          },
+          {
+            "name": "suspicious_syscall_source_syscalls",
+            "map_id": 3526
+          },
+          {
+            "name": "stack_pivot_syscalls",
+            "map_id": 3527
+          },
+          {
+            "name": "f3628a47.rodata",
+            "map_id": 3528
+          },
+          {
+            "name": ".rodata.str1.1",
+            "map_id": 3529
+          },
+          {
+            "name": "f3628a47.bss",
+            "map_id": 3530
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-o844ntvw",
+        "attach_target_resolution": null,
+        "resource_globalized_entries": [],
+        "resource_view": "maps-and-btf",
+        "resource_pinning": [],
+        "resource_configured_maps": []
+      },
+      "request_id": 38,
+      "status": 0,
+      "prog_id": 140,
+      "service": {
+        "request_id": 38,
+        "source_prog_id": 0,
+        "native_sha256": "489a7a69184baae011350d4c7632faf0f5539d9df8417aa2892246cc49be777f",
+        "execution_mode": "submitted-native",
+        "started": "2026-11-15T02:26:01.461840+00:00",
+        "prog_id": 140,
+        "phase": "load",
+        "status": 0,
+        "artifact_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/38.success.tar.gz",
+        "finished": "2026-11-15T02:33:52.098384+00:00"
+      },
+      "diagnostic": ""
+    },
+    "stage": "installed",
+    "diagnostic": "",
+    "compiler_failures": [],
+    "class": "installed"
+  },
+  {
+    "application": "tracee/monitor",
+    "source_prog_id": 577,
+    "name": "tracepoint__task__task_rename",
+    "priority": {
+      "measured_name": "tracepoint__tas",
+      "baseline_time_ns": 157936764,
+      "application_time_ns": 2500427708222,
+      "application_time_share": 6.31638993123722e-05,
+      "matching_census_instances": 1,
+      "retained_instance_time_ns": 1054999,
+      "scope": "Measured name family; matching instances share priority"
+    },
+    "body_group": 93,
+    "submission": {
+      "source_prog_id": 0,
+      "stage": "generation_failed",
+      "native_sha256": "489a7a69184baae011350d4c7632faf0f5539d9df8417aa2892246cc49be777f",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 17,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 91,
+          "source_func_type_id": 997,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "sys_32_to_64_map",
+            "map_id": 3532,
+            "value_offset": null
+          },
+          {
+            "name": "sys_enter_init_tail",
+            "map_id": 3533,
+            "value_offset": null
+          },
+          {
+            "name": "task_info_map",
+            "map_id": 3534,
+            "value_offset": null
+          },
+          {
+            "name": "config_map",
+            "map_id": 3535,
+            "value_offset": null
+          },
+          {
+            "name": "sys_enter_submit_tail",
+            "map_id": 3536,
+            "value_offset": null
+          },
+          {
+            "name": "sys_enter_tails",
+            "map_id": 3537,
+            "value_offset": null
+          },
+          {
+            "name": "fd_arg_path_map",
+            "map_id": 3538,
+            "value_offset": null
+          },
+          {
+            "name": "sys_exit_init_tail",
+            "map_id": 3539,
+            "value_offset": null
+          },
+          {
+            "name": "sys_exit_submit_tail",
+            "map_id": 3540,
+            "value_offset": null
+          },
+          {
+            "name": "sys_exit_tails",
+            "map_id": 3541,
+            "value_offset": null
+          },
+          {
+            "name": "generic_sys_enter_tails",
+            "map_id": 3542,
+            "value_offset": null
+          },
+          {
+            "name": "generic_sys_exit_tails",
+            "map_id": 3543,
+            "value_offset": null
+          },
+          {
+            "name": "proc_info_map",
+            "map_id": 3544,
+            "value_offset": null
+          },
+          {
+            "name": "process_tree_map",
+            "map_id": 3545,
+            "value_offset": null
+          },
+          {
+            "name": "process_tree_map_version",
+            "map_id": 3547,
+            "value_offset": null
+          },
+          {
+            "name": "module_context_map",
+            "map_id": 3548,
+            "value_offset": null
+          },
+          {
+            "name": "walk_mod_tree_queue",
+            "map_id": 3549,
+            "value_offset": null
+          },
+          {
+            "name": "prog_array",
+            "map_id": 3550,
+            "value_offset": null
+          },
+          {
+            "name": "containers_map",
+            "map_id": 3551,
+            "value_offset": null
+          },
+          {
+            "name": "prog_array_tp",
+            "map_id": 3552,
+            "value_offset": null
+          },
+          {
+            "name": "new_module_map",
+            "map_id": 3553,
+            "value_offset": null
+          },
+          {
+            "name": "recent_deleted_module_map",
+            "map_id": 3554,
+            "value_offset": null
+          },
+          {
+            "name": "cgrpctxmap_in",
+            "map_id": 3555,
+            "value_offset": null
+          },
+          {
+            "name": "cgrpctxmap_eg",
+            "map_id": 3556,
+            "value_offset": null
+          },
+          {
+            "name": "features_test_arena",
+            "map_id": 3557,
+            "value_offset": null
+          },
+          {
+            "name": "kconfig_map",
+            "map_id": 3558,
+            "value_offset": null
+          },
+          {
+            "name": "args_map",
+            "map_id": 3559,
+            "value_offset": null
+          },
+          {
+            "name": "ksymbols_map",
+            "map_id": 3560,
+            "value_offset": null
+          },
+          {
+            "name": "file_write_path_filter",
+            "map_id": 3561,
+            "value_offset": null
+          },
+          {
+            "name": "file_read_path_filter",
+            "map_id": 3562,
+            "value_offset": null
+          },
+          {
+            "name": "file_type_filter",
+            "map_id": 3563,
+            "value_offset": null
+          },
+          {
+            "name": "netconfig_map",
+            "map_id": 3564,
+            "value_offset": null
+          },
+          {
+            "name": "expected_sys_call_table",
+            "map_id": 3565,
+            "value_offset": null
+          },
+          {
+            "name": "bufs",
+            "map_id": 3566,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_bufs",
+            "map_id": 3567,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_lpm_bufs",
+            "map_id": 3568,
+            "value_offset": null
+          },
+          {
+            "name": "syscall_source_map",
+            "map_id": 3569,
+            "value_offset": null
+          },
+          {
+            "name": "stack_addresses",
+            "map_id": 3570,
+            "value_offset": null
+          },
+          {
+            "name": "bpf_attach_map",
+            "map_id": 3571,
+            "value_offset": null
+          },
+          {
+            "name": "bpf_attach_tmp_map",
+            "map_id": 3572,
+            "value_offset": null
+          },
+          {
+            "name": "bpf_prog_load_map",
+            "map_id": 3573,
+            "value_offset": null
+          },
+          {
+            "name": "event_data_map",
+            "map_id": 3574,
+            "value_offset": null
+          },
+          {
+            "name": "signal_data_map",
+            "map_id": 3575,
+            "value_offset": null
+          },
+          {
+            "name": "logs_count",
+            "map_id": 3576,
+            "value_offset": null
+          },
+          {
+            "name": "scratch_map",
+            "map_id": 3577,
+            "value_offset": null
+          },
+          {
+            "name": "file_modification_map",
+            "map_id": 3578,
+            "value_offset": null
+          },
+          {
+            "name": "io_file_path_cache_map",
+            "map_id": 3579,
+            "value_offset": null
+          },
+          {
+            "name": "elf_files_map",
+            "map_id": 3580,
+            "value_offset": null
+          },
+          {
+            "name": "policies_config_map",
+            "map_id": 3581,
+            "value_offset": null
+          },
+          {
+            "name": "policies_config_version",
+            "map_id": 3583,
+            "value_offset": null
+          },
+          {
+            "name": "uid_filter",
+            "map_id": 3584,
+            "value_offset": null
+          },
+          {
+            "name": "uid_filter_version",
+            "map_id": 3586,
+            "value_offset": null
+          },
+          {
+            "name": "pid_filter",
+            "map_id": 3587,
+            "value_offset": null
+          },
+          {
+            "name": "pid_filter_version",
+            "map_id": 3589,
+            "value_offset": null
+          },
+          {
+            "name": "mnt_ns_filter",
+            "map_id": 3590,
+            "value_offset": null
+          },
+          {
+            "name": "mnt_ns_filter_version",
+            "map_id": 3592,
+            "value_offset": null
+          },
+          {
+            "name": "pid_ns_filter",
+            "map_id": 3593,
+            "value_offset": null
+          },
+          {
+            "name": "pid_ns_filter_version",
+            "map_id": 3595,
+            "value_offset": null
+          },
+          {
+            "name": "uts_ns_filter",
+            "map_id": 3596,
+            "value_offset": null
+          },
+          {
+            "name": "uts_ns_filter_version",
+            "map_id": 3598,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_exact",
+            "map_id": 3599,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_exact_version",
+            "map_id": 3601,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_suffix",
+            "map_id": 3602,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_suffix_version",
+            "map_id": 3604,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_prefix",
+            "map_id": 3605,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_prefix_version",
+            "map_id": 3607,
+            "value_offset": null
+          },
+          {
+            "name": "comm_filter",
+            "map_id": 3608,
+            "value_offset": null
+          },
+          {
+            "name": "comm_filter_version",
+            "map_id": 3610,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_id_filter",
+            "map_id": 3611,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_id_filter_version",
+            "map_id": 3613,
+            "value_offset": null
+          },
+          {
+            "name": "binary_filter",
+            "map_id": 3614,
+            "value_offset": null
+          },
+          {
+            "name": "binary_filter_version",
+            "map_id": 3616,
+            "value_offset": null
+          },
+          {
+            "name": "events_map",
+            "map_id": 3617,
+            "value_offset": null
+          },
+          {
+            "name": "events_map_version",
+            "map_id": 3619,
+            "value_offset": null
+          },
+          {
+            "name": "logs",
+            "map_id": 3620,
+            "value_offset": null
+          },
+          {
+            "name": "events",
+            "map_id": 3621,
+            "value_offset": null
+          },
+          {
+            "name": "file_writes",
+            "map_id": 3622,
+            "value_offset": null
+          },
+          {
+            "name": "signals",
+            "map_id": 3623,
+            "value_offset": null
+          },
+          {
+            "name": "netflowmap",
+            "map_id": 3624,
+            "value_offset": null
+          },
+          {
+            "name": "inodemap",
+            "map_id": 3625,
+            "value_offset": null
+          },
+          {
+            "name": "sockmap",
+            "map_id": 3626,
+            "value_offset": null
+          },
+          {
+            "name": "entrymap",
+            "map_id": 3627,
+            "value_offset": null
+          },
+          {
+            "name": "net_cap_events",
+            "map_id": 3628,
+            "value_offset": null
+          },
+          {
+            "name": "net_heap_event",
+            "map_id": 3629,
+            "value_offset": null
+          },
+          {
+            "name": "modules_map",
+            "map_id": 3630,
+            "value_offset": null
+          },
+          {
+            "name": "suspicious_syscall_source_syscalls",
+            "map_id": 3631,
+            "value_offset": null
+          },
+          {
+            "name": "stack_pivot_syscalls",
+            "map_id": 3632,
+            "value_offset": null
+          },
+          {
+            "name": "f3628a47.rodata",
+            "map_id": 3633,
+            "value_offset": null
+          },
+          {
+            "name": "TRACE_EVENT_FL_TRACEPOINT_BIT",
+            "map_id": 3633,
+            "value_offset": 0
+          },
+          {
+            "name": "TRACE_EVENT_FL_TRACEPOINT",
+            "map_id": 3633,
+            "value_offset": 4
+          },
+          {
+            "name": "type_size_table",
+            "map_id": 3633,
+            "value_offset": 8
+          },
+          {
+            "name": ".rodata.str1.1",
+            "map_id": 3634,
+            "value_offset": null
+          },
+          {
+            "name": "f3628a47.bss",
+            "map_id": 3635,
+            "value_offset": null
+          },
+          {
+            "name": "start_scan_time_init_shown_mods",
+            "map_id": 3635,
+            "value_offset": 0
+          },
+          {
+            "name": "last_module_insert_time",
+            "map_id": 3635,
+            "value_offset": 8
+          },
+          {
+            "name": "hidden_old_mod_scan_done",
+            "map_id": 3635,
+            "value_offset": 16
+          },
+          {
+            "name": "use_security_bprm_creds_for_exec",
+            "map_id": 3635,
+            "value_offset": 17
+          },
+          {
+            "name": "alerted_find_vma_unsupported",
+            "map_id": 3635,
+            "value_offset": 18
+          }
+        ]
+      },
+      "resources": {
+        "section": "raw_tracepoint/task_rename",
+        "maps": [
+          {
+            "name": "sys_32_to_64_map",
+            "map_id": 3532
+          },
+          {
+            "name": "sys_enter_init_tail",
+            "map_id": 3533
+          },
+          {
+            "name": "task_info_map",
+            "map_id": 3534
+          },
+          {
+            "name": "config_map",
+            "map_id": 3535
+          },
+          {
+            "name": "sys_enter_submit_tail",
+            "map_id": 3536
+          },
+          {
+            "name": "sys_enter_tails",
+            "map_id": 3537
+          },
+          {
+            "name": "fd_arg_path_map",
+            "map_id": 3538
+          },
+          {
+            "name": "sys_exit_init_tail",
+            "map_id": 3539
+          },
+          {
+            "name": "sys_exit_submit_tail",
+            "map_id": 3540
+          },
+          {
+            "name": "sys_exit_tails",
+            "map_id": 3541
+          },
+          {
+            "name": "generic_sys_enter_tails",
+            "map_id": 3542
+          },
+          {
+            "name": "generic_sys_exit_tails",
+            "map_id": 3543
+          },
+          {
+            "name": "proc_info_map",
+            "map_id": 3544
+          },
+          {
+            "name": "process_tree_map",
+            "map_id": 3545
+          },
+          {
+            "name": "process_tree_map_version",
+            "map_id": 3547
+          },
+          {
+            "name": "module_context_map",
+            "map_id": 3548
+          },
+          {
+            "name": "walk_mod_tree_queue",
+            "map_id": 3549
+          },
+          {
+            "name": "prog_array",
+            "map_id": 3550
+          },
+          {
+            "name": "containers_map",
+            "map_id": 3551
+          },
+          {
+            "name": "prog_array_tp",
+            "map_id": 3552
+          },
+          {
+            "name": "new_module_map",
+            "map_id": 3553
+          },
+          {
+            "name": "recent_deleted_module_map",
+            "map_id": 3554
+          },
+          {
+            "name": "cgrpctxmap_in",
+            "map_id": 3555
+          },
+          {
+            "name": "cgrpctxmap_eg",
+            "map_id": 3556
+          },
+          {
+            "name": "features_test_arena",
+            "map_id": 3557
+          },
+          {
+            "name": "kconfig_map",
+            "map_id": 3558
+          },
+          {
+            "name": "args_map",
+            "map_id": 3559
+          },
+          {
+            "name": "ksymbols_map",
+            "map_id": 3560
+          },
+          {
+            "name": "file_write_path_filter",
+            "map_id": 3561
+          },
+          {
+            "name": "file_read_path_filter",
+            "map_id": 3562
+          },
+          {
+            "name": "file_type_filter",
+            "map_id": 3563
+          },
+          {
+            "name": "netconfig_map",
+            "map_id": 3564
+          },
+          {
+            "name": "expected_sys_call_table",
+            "map_id": 3565
+          },
+          {
+            "name": "bufs",
+            "map_id": 3566
+          },
+          {
+            "name": "data_filter_bufs",
+            "map_id": 3567
+          },
+          {
+            "name": "data_filter_lpm_bufs",
+            "map_id": 3568
+          },
+          {
+            "name": "syscall_source_map",
+            "map_id": 3569
+          },
+          {
+            "name": "stack_addresses",
+            "map_id": 3570
+          },
+          {
+            "name": "bpf_attach_map",
+            "map_id": 3571
+          },
+          {
+            "name": "bpf_attach_tmp_map",
+            "map_id": 3572
+          },
+          {
+            "name": "bpf_prog_load_map",
+            "map_id": 3573
+          },
+          {
+            "name": "event_data_map",
+            "map_id": 3574
+          },
+          {
+            "name": "signal_data_map",
+            "map_id": 3575
+          },
+          {
+            "name": "logs_count",
+            "map_id": 3576
+          },
+          {
+            "name": "scratch_map",
+            "map_id": 3577
+          },
+          {
+            "name": "file_modification_map",
+            "map_id": 3578
+          },
+          {
+            "name": "io_file_path_cache_map",
+            "map_id": 3579
+          },
+          {
+            "name": "elf_files_map",
+            "map_id": 3580
+          },
+          {
+            "name": "policies_config_map",
+            "map_id": 3581
+          },
+          {
+            "name": "policies_config_version",
+            "map_id": 3583
+          },
+          {
+            "name": "uid_filter",
+            "map_id": 3584
+          },
+          {
+            "name": "uid_filter_version",
+            "map_id": 3586
+          },
+          {
+            "name": "pid_filter",
+            "map_id": 3587
+          },
+          {
+            "name": "pid_filter_version",
+            "map_id": 3589
+          },
+          {
+            "name": "mnt_ns_filter",
+            "map_id": 3590
+          },
+          {
+            "name": "mnt_ns_filter_version",
+            "map_id": 3592
+          },
+          {
+            "name": "pid_ns_filter",
+            "map_id": 3593
+          },
+          {
+            "name": "pid_ns_filter_version",
+            "map_id": 3595
+          },
+          {
+            "name": "uts_ns_filter",
+            "map_id": 3596
+          },
+          {
+            "name": "uts_ns_filter_version",
+            "map_id": 3598
+          },
+          {
+            "name": "data_filter_exact",
+            "map_id": 3599
+          },
+          {
+            "name": "data_filter_exact_version",
+            "map_id": 3601
+          },
+          {
+            "name": "data_filter_suffix",
+            "map_id": 3602
+          },
+          {
+            "name": "data_filter_suffix_version",
+            "map_id": 3604
+          },
+          {
+            "name": "data_filter_prefix",
+            "map_id": 3605
+          },
+          {
+            "name": "data_filter_prefix_version",
+            "map_id": 3607
+          },
+          {
+            "name": "comm_filter",
+            "map_id": 3608
+          },
+          {
+            "name": "comm_filter_version",
+            "map_id": 3610
+          },
+          {
+            "name": "cgroup_id_filter",
+            "map_id": 3611
+          },
+          {
+            "name": "cgroup_id_filter_version",
+            "map_id": 3613
+          },
+          {
+            "name": "binary_filter",
+            "map_id": 3614
+          },
+          {
+            "name": "binary_filter_version",
+            "map_id": 3616
+          },
+          {
+            "name": "events_map",
+            "map_id": 3617
+          },
+          {
+            "name": "events_map_version",
+            "map_id": 3619
+          },
+          {
+            "name": "logs",
+            "map_id": 3620
+          },
+          {
+            "name": "events",
+            "map_id": 3621
+          },
+          {
+            "name": "file_writes",
+            "map_id": 3622
+          },
+          {
+            "name": "signals",
+            "map_id": 3623
+          },
+          {
+            "name": "netflowmap",
+            "map_id": 3624
+          },
+          {
+            "name": "inodemap",
+            "map_id": 3625
+          },
+          {
+            "name": "sockmap",
+            "map_id": 3626
+          },
+          {
+            "name": "entrymap",
+            "map_id": 3627
+          },
+          {
+            "name": "net_cap_events",
+            "map_id": 3628
+          },
+          {
+            "name": "net_heap_event",
+            "map_id": 3629
+          },
+          {
+            "name": "modules_map",
+            "map_id": 3630
+          },
+          {
+            "name": "suspicious_syscall_source_syscalls",
+            "map_id": 3631
+          },
+          {
+            "name": "stack_pivot_syscalls",
+            "map_id": 3632
+          },
+          {
+            "name": "f3628a47.rodata",
+            "map_id": 3633
+          },
+          {
+            "name": ".rodata.str1.1",
+            "map_id": 3634
+          },
+          {
+            "name": "f3628a47.bss",
+            "map_id": 3635
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-yw5x6bxt",
+        "attach_target_resolution": null,
+        "resource_globalized_entries": [],
+        "resource_view": "maps-and-btf",
+        "resource_pinning": [],
+        "resource_configured_maps": []
+      },
+      "request_id": 39,
+      "status": -5,
+      "prog_id": 0,
+      "service": {
+        "request_id": 39,
+        "source_prog_id": 0,
+        "native_sha256": "489a7a69184baae011350d4c7632faf0f5539d9df8417aa2892246cc49be777f",
+        "execution_mode": "submitted-native",
+        "started": "2026-11-15T02:37:16.333005+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '39', '0', '/workspaces/kprog-raw/perf/20261114-census-resume/control/state/session-eji1_le_/requests/request-1kzgi3bg/generated/request.native.o', 'tracepoint__task__task_rename', '/workspaces/kprog-raw/perf/20261114-census-resume/control/state/session-eji1_le_/requests/request-1kzgi3bg/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261114-census-resume/control/state/session-eji1_le_/requests/request-1kzgi3bg/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '17', '1', '91', '997', 'sys_32_to_64_map', '3532', 'null', 'sys_enter_init_tail', '3533', 'null', 'task_info_map', '3534', 'null', 'config_map', '3535', 'null', 'sys_enter_submit_tail', '3536', 'null', 'sys_enter_tails', '3537', 'null', 'fd_arg_path_map', '3538', 'null', 'sys_exit_init_tail', '3539', 'null', 'sys_exit_submit_tail', '3540', 'null', 'sys_exit_tails', '3541', 'null', 'generic_sys_enter_tails', '3542', 'null', 'generic_sys_exit_tails', '3543', 'null', 'proc_info_map', '3544', 'null', 'process_tree_map', '3545', 'null', 'process_tree_map_version', '3547', 'null', 'module_context_map', '3548', 'null', 'walk_mod_tree_queue', '3549', 'null', 'prog_array', '3550', 'null', 'containers_map', '3551', 'null', 'prog_array_tp', '3552', 'null', 'new_module_map', '3553', 'null', 'recent_deleted_module_map', '3554', 'null', 'cgrpctxmap_in', '3555', 'null', 'cgrpctxmap_eg', '3556', 'null', 'features_test_arena', '3557', 'null', 'kconfig_map', '3558', 'null', 'args_map', '3559', 'null', 'ksymbols_map', '3560', 'null', 'file_write_path_filter', '3561', 'null', 'file_read_path_filter', '3562', 'null', 'file_type_filter', '3563', 'null', 'netconfig_map', '3564', 'null', 'expected_sys_call_table', '3565', 'null', 'bufs', '3566', 'null', 'data_filter_bufs', '3567', 'null', 'data_filter_lpm_bufs', '3568', 'null', 'syscall_source_map', '3569', 'null', 'stack_addresses', '3570', 'null', 'bpf_attach_map', '3571', 'null', 'bpf_attach_tmp_map', '3572', 'null', 'bpf_prog_load_map', '3573', 'null', 'event_data_map', '3574', 'null', 'signal_data_map', '3575', 'null', 'logs_count', '3576', 'null', 'scratch_map', '3577', 'null', 'file_modification_map', '3578', 'null', 'io_file_path_cache_map', '3579', 'null', 'elf_files_map', '3580', 'null', 'policies_config_map', '3581', 'null', 'policies_config_version', '3583', 'null', 'uid_filter', '3584', 'null', 'uid_filter_version', '3586', 'null', 'pid_filter', '3587', 'null', 'pid_filter_version', '3589', 'null', 'mnt_ns_filter', '3590', 'null', 'mnt_ns_filter_version', '3592', 'null', 'pid_ns_filter', '3593', 'null', 'pid_ns_filter_version', '3595', 'null', 'uts_ns_filter', '3596', 'null', 'uts_ns_filter_version', '3598', 'null', 'data_filter_exact', '3599', 'null', 'data_filter_exact_version', '3601', 'null', 'data_filter_suffix', '3602', 'null', 'data_filter_suffix_version', '3604', 'null', 'data_filter_prefix', '3605', 'null', 'data_filter_prefix_version', '3607', 'null', 'comm_filter', '3608', 'null', 'comm_filter_version', '3610', 'null', 'cgroup_id_filter', '3611', 'null', 'cgroup_id_filter_version', '3613', 'null', 'binary_filter', '3614', 'null', 'binary_filter_version', '3616', 'null', 'events_map', '3617', 'null', 'events_map_version', '3619', 'null', 'logs', '3620', 'null', 'events', '3621', 'null', 'file_writes', '3622', 'null', 'signals', '3623', 'null', 'netflowmap', '3624', 'null', 'inodemap', '3625', 'null', 'sockmap', '3626', 'null', 'entrymap', '3627', 'null', 'net_cap_events', '3628', 'null', 'net_heap_event', '3629', 'null', 'modules_map', '3630', 'null', 'suspicious_syscall_source_syscalls', '3631', 'null', 'stack_pivot_syscalls', '3632', 'null', 'f3628a47.rodata', '3633', 'null', 'TRACE_EVENT_FL_TRACEPOINT_BIT', '3633', '0', 'TRACE_EVENT_FL_TRACEPOINT', '3633', '4', 'type_size_table', '3633', '8', '.rodata.str1.1', '3634', 'null', 'f3628a47.bss', '3635', 'null', 'start_scan_time_init_shown_mods', '3635', '0', 'last_module_insert_time', '3635', '8', 'hidden_old_mod_scan_done', '3635', '16', 'use_security_bprm_creds_for_exec', '3635', '17', 'alerted_find_vma_unsupported', '3635', '18']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 240, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 186, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '39', '0', '/workspaces/kprog-raw/perf/20261114-census-resume/control/state/session-eji1_le_/requests/request-1kzgi3bg/generated/request.native.o', 'tracepoint__task__task_rename', '/workspaces/kprog-raw/perf/20261114-census-resume/control/state/session-eji1_le_/requests/request-1kzgi3bg/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261114-census-resume/control/state/session-eji1_le_/requests/request-1kzgi3bg/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '17', '1', '91', '997', 'sys_32_to_64_map', '3532', 'null', 'sys_enter_init_tail', '3533', 'null', 'task_info_map', '3534', 'null', 'config_map', '3535', 'null', 'sys_enter_submit_tail', '3536', 'null', 'sys_enter_tails', '3537', 'null', 'fd_arg_path_map', '3538', 'null', 'sys_exit_init_tail', '3539', 'null', 'sys_exit_submit_tail', '3540', 'null', 'sys_exit_tails', '3541', 'null', 'generic_sys_enter_tails', '3542', 'null', 'generic_sys_exit_tails', '3543', 'null', 'proc_info_map', '3544', 'null', 'process_tree_map', '3545', 'null', 'process_tree_map_version', '3547', 'null', 'module_context_map', '3548', 'null', 'walk_mod_tree_queue', '3549', 'null', 'prog_array', '3550', 'null', 'containers_map', '3551', 'null', 'prog_array_tp', '3552', 'null', 'new_module_map', '3553', 'null', 'recent_deleted_module_map', '3554', 'null', 'cgrpctxmap_in', '3555', 'null', 'cgrpctxmap_eg', '3556', 'null', 'features_test_arena', '3557', 'null', 'kconfig_map', '3558', 'null', 'args_map', '3559', 'null', 'ksymbols_map', '3560', 'null', 'file_write_path_filter', '3561', 'null', 'file_read_path_filter', '3562', 'null', 'file_type_filter', '3563', 'null', 'netconfig_map', '3564', 'null', 'expected_sys_call_table', '3565', 'null', 'bufs', '3566', 'null', 'data_filter_bufs', '3567', 'null', 'data_filter_lpm_bufs', '3568', 'null', 'syscall_source_map', '3569', 'null', 'stack_addresses', '3570', 'null', 'bpf_attach_map', '3571', 'null', 'bpf_attach_tmp_map', '3572', 'null', 'bpf_prog_load_map', '3573', 'null', 'event_data_map', '3574', 'null', 'signal_data_map', '3575', 'null', 'logs_count', '3576', 'null', 'scratch_map', '3577', 'null', 'file_modification_map', '3578', 'null', 'io_file_path_cache_map', '3579', 'null', 'elf_files_map', '3580', 'null', 'policies_config_map', '3581', 'null', 'policies_config_version', '3583', 'null', 'uid_filter', '3584', 'null', 'uid_filter_version', '3586', 'null', 'pid_filter', '3587', 'null', 'pid_filter_version', '3589', 'null', 'mnt_ns_filter', '3590', 'null', 'mnt_ns_filter_version', '3592', 'null', 'pid_ns_filter', '3593', 'null', 'pid_ns_filter_version', '3595', 'null', 'uts_ns_filter', '3596', 'null', 'uts_ns_filter_version', '3598', 'null', 'data_filter_exact', '3599', 'null', 'data_filter_exact_version', '3601', 'null', 'data_filter_suffix', '3602', 'null', 'data_filter_suffix_version', '3604', 'null', 'data_filter_prefix', '3605', 'null', 'data_filter_prefix_version', '3607', 'null', 'comm_filter', '3608', 'null', 'comm_filter_version', '3610', 'null', 'cgroup_id_filter', '3611', 'null', 'cgroup_id_filter_version', '3613', 'null', 'binary_filter', '3614', 'null', 'binary_filter_version', '3616', 'null', 'events_map', '3617', 'null', 'events_map_version', '3619', 'null', 'logs', '3620', 'null', 'events', '3621', 'null', 'file_writes', '3622', 'null', 'signals', '3623', 'null', 'netflowmap', '3624', 'null', 'inodemap', '3625', 'null', 'sockmap', '3626', 'null', 'entrymap', '3627', 'null', 'net_cap_events', '3628', 'null', 'net_heap_event', '3629', 'null', 'modules_map', '3630', 'null', 'suspicious_syscall_source_syscalls', '3631', 'null', 'stack_pivot_syscalls', '3632', 'null', 'f3628a47.rodata', '3633', 'null', 'TRACE_EVENT_FL_TRACEPOINT_BIT', '3633', '0', 'TRACE_EVENT_FL_TRACEPOINT', '3633', '4', 'type_size_table', '3633', '8', '.rodata.str1.1', '3634', 'null', 'f3628a47.bss', '3635', 'null', 'start_scan_time_init_shown_mods', '3635', '0', 'last_module_insert_time', '3635', '8', 'hidden_old_mod_scan_done', '3635', '16', 'use_security_bprm_creds_for_exec', '3635', '17', 'alerted_find_vma_unsupported', '3635', '18']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/39.failure.tar.gz",
+        "finished": "2026-11-15T02:45:12.291496+00:00"
+      },
+      "diagnostic": "trusted-native-loader: native-link kernel failed (rc=2)\nstderr:\nerror: unexpected argument '--abi-load-sites' found\n\nUsage: native-link --input <INPUT> --symbol <SYMBOL> --output <OUTPUT> --mode <MODE> --output-relocs <OUTPUT_RELOCS> --output-map-patches <OUTPUT_MAP_PATCHES> --output-abi <OUTPUT_ABI>\n\nFor more information, try '--help'.\n\ncommand: /workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link --input /workspaces/kprog-raw/perf/20261114-census-resume/control/state/session-eji1_le_/requests/request-1kzgi3bg/generated/kernel-link/f9427d2e6596a8b6.tmp.2194.proof.o --symbol tracepoint__task__task_rename --mode kernel --output /workspaces/kprog-raw/perf/20261114-census-resume/control/state/session-eji1_le_/requests/request-1kzgi3bg/generated/kernel-link/f9427d2e6596a8b6.tmp.2194.blob.bin --output-relocs /workspaces/kprog-raw/perf/20261114-census-resume/control/state/session-eji1_le_/requests/request-1kzgi3bg/generated/kernel-link/f9427d2e6596a8b6.tmp.2194.relocs.bin --output-map-patches /workspaces/kprog-raw/perf/20261114-census-resume/control/state/session-eji1_le_/requests/request-1kzgi3bg/generated/kernel-link/f9427d2e6596a8b6.tmp.2194.map-patches.tsv --output-abi /workspaces/kprog-raw/perf/20261114-census-resume/control/state/session-eji1_le_/requests/request-1kzgi3bg/generated/kernel-link/f9427d2e6596a8b6.tmp.2194.abi.tsv --abi-load-sites true --link-plan /workspaces/kprog-raw/perf/20261114-census-resume/control/state/session-eji1_le_/requests/request-1kzgi3bg/generated/kernel-link/f9427d2e6596a8b6.tmp.2194.link-plan.json\n"
+    },
+    "stage": "generation_failed",
+    "diagnostic": "trusted-native-loader: native-link kernel failed (rc=2)\nstderr:\nerror: unexpected argument '--abi-load-sites' found\n\nUsage: native-link --input <INPUT> --symbol <SYMBOL> --output <OUTPUT> --mode <MODE> --output-relocs <OUTPUT_RELOCS> --output-map-patches <OUTPUT_MAP_PATCHES> --output-abi <OUTPUT_ABI>\n\nFor more information, try '--help'.\n\ncommand: /workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link --input /workspaces/kprog-raw/perf/20261114-census-resume/control/state/session-eji1_le_/requests/request-1kzgi3bg/generated/kernel-link/f9427d2e6596a8b6.tmp.2194.proof.o --symbol tracepoint__task__task_rename --mode kernel --output /workspaces/kprog-raw/perf/20261114-census-resume/control/state/session-eji1_le_/requests/request-1kzgi3bg/generated/kernel-link/f9427d2e6596a8b6.tmp.2194.blob.bin --output-relocs /workspaces/kprog-raw/perf/20261114-census-resume/control/state/session-eji1_le_/requests/request-1kzgi3bg/generated/kernel-link/f9427d2e6596a8b6.tmp.2194.relocs.bin --output-map-patches /workspaces/kprog-raw/perf/20261114-census-resume/control/state/session-eji1_le_/requests/request-1kzgi3bg/generated/kernel-link/f9427d2e6596a8b6.tmp.2194.map-patches.tsv --output-abi /workspaces/kprog-raw/perf/20261114-census-resume/control/state/session-eji1_le_/requests/request-1kzgi3bg/generated/kernel-link/f9427d2e6596a8b6.tmp.2194.abi.tsv --abi-load-sites true --link-plan /workspaces/kprog-raw/perf/20261114-census-resume/control/state/session-eji1_le_/requests/request-1kzgi3bg/generated/kernel-link/f9427d2e6596a8b6.tmp.2194.link-plan.json\n",
+    "compiler_failures": [],
+    "class": "generation_failed"
+  },
+  {
+    "application": "tracee/monitor",
+    "source_prog_id": 520,
+    "name": "trace_switch_task_namespaces",
+    "priority": {
+      "measured_name": "trace_switch_ta",
+      "baseline_time_ns": 85715964,
+      "application_time_ns": 2500427708222,
+      "application_time_share": 3.4280520775763906e-05,
+      "matching_census_instances": 1,
+      "retained_instance_time_ns": 1403647,
+      "scope": "Measured name family; matching instances share priority"
+    },
+    "body_group": 94,
+    "submission": {
+      "source_prog_id": 0,
+      "stage": "installed",
+      "native_sha256": "489a7a69184baae011350d4c7632faf0f5539d9df8417aa2892246cc49be777f",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 92,
+          "source_func_type_id": 825,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "sys_32_to_64_map",
+            "map_id": 3637,
+            "value_offset": null
+          },
+          {
+            "name": "sys_enter_init_tail",
+            "map_id": 3638,
+            "value_offset": null
+          },
+          {
+            "name": "task_info_map",
+            "map_id": 3639,
+            "value_offset": null
+          },
+          {
+            "name": "config_map",
+            "map_id": 3640,
+            "value_offset": null
+          },
+          {
+            "name": "sys_enter_submit_tail",
+            "map_id": 3641,
+            "value_offset": null
+          },
+          {
+            "name": "sys_enter_tails",
+            "map_id": 3642,
+            "value_offset": null
+          },
+          {
+            "name": "fd_arg_path_map",
+            "map_id": 3643,
+            "value_offset": null
+          },
+          {
+            "name": "sys_exit_init_tail",
+            "map_id": 3644,
+            "value_offset": null
+          },
+          {
+            "name": "sys_exit_submit_tail",
+            "map_id": 3645,
+            "value_offset": null
+          },
+          {
+            "name": "sys_exit_tails",
+            "map_id": 3646,
+            "value_offset": null
+          },
+          {
+            "name": "generic_sys_enter_tails",
+            "map_id": 3647,
+            "value_offset": null
+          },
+          {
+            "name": "generic_sys_exit_tails",
+            "map_id": 3648,
+            "value_offset": null
+          },
+          {
+            "name": "proc_info_map",
+            "map_id": 3649,
+            "value_offset": null
+          },
+          {
+            "name": "process_tree_map",
+            "map_id": 3650,
+            "value_offset": null
+          },
+          {
+            "name": "process_tree_map_version",
+            "map_id": 3652,
+            "value_offset": null
+          },
+          {
+            "name": "module_context_map",
+            "map_id": 3653,
+            "value_offset": null
+          },
+          {
+            "name": "walk_mod_tree_queue",
+            "map_id": 3654,
+            "value_offset": null
+          },
+          {
+            "name": "prog_array",
+            "map_id": 3655,
+            "value_offset": null
+          },
+          {
+            "name": "containers_map",
+            "map_id": 3656,
+            "value_offset": null
+          },
+          {
+            "name": "prog_array_tp",
+            "map_id": 3657,
+            "value_offset": null
+          },
+          {
+            "name": "new_module_map",
+            "map_id": 3658,
+            "value_offset": null
+          },
+          {
+            "name": "recent_deleted_module_map",
+            "map_id": 3659,
+            "value_offset": null
+          },
+          {
+            "name": "cgrpctxmap_in",
+            "map_id": 3660,
+            "value_offset": null
+          },
+          {
+            "name": "cgrpctxmap_eg",
+            "map_id": 3661,
+            "value_offset": null
+          },
+          {
+            "name": "features_test_arena",
+            "map_id": 3662,
+            "value_offset": null
+          },
+          {
+            "name": "kconfig_map",
+            "map_id": 3663,
+            "value_offset": null
+          },
+          {
+            "name": "args_map",
+            "map_id": 3664,
+            "value_offset": null
+          },
+          {
+            "name": "ksymbols_map",
+            "map_id": 3665,
+            "value_offset": null
+          },
+          {
+            "name": "file_write_path_filter",
+            "map_id": 3666,
+            "value_offset": null
+          },
+          {
+            "name": "file_read_path_filter",
+            "map_id": 3667,
+            "value_offset": null
+          },
+          {
+            "name": "file_type_filter",
+            "map_id": 3668,
+            "value_offset": null
+          },
+          {
+            "name": "netconfig_map",
+            "map_id": 3669,
+            "value_offset": null
+          },
+          {
+            "name": "expected_sys_call_table",
+            "map_id": 3670,
+            "value_offset": null
+          },
+          {
+            "name": "bufs",
+            "map_id": 3671,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_bufs",
+            "map_id": 3672,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_lpm_bufs",
+            "map_id": 3673,
+            "value_offset": null
+          },
+          {
+            "name": "syscall_source_map",
+            "map_id": 3674,
+            "value_offset": null
+          },
+          {
+            "name": "stack_addresses",
+            "map_id": 3675,
+            "value_offset": null
+          },
+          {
+            "name": "bpf_attach_map",
+            "map_id": 3676,
+            "value_offset": null
+          },
+          {
+            "name": "bpf_attach_tmp_map",
+            "map_id": 3677,
+            "value_offset": null
+          },
+          {
+            "name": "bpf_prog_load_map",
+            "map_id": 3678,
+            "value_offset": null
+          },
+          {
+            "name": "event_data_map",
+            "map_id": 3679,
+            "value_offset": null
+          },
+          {
+            "name": "signal_data_map",
+            "map_id": 3680,
+            "value_offset": null
+          },
+          {
+            "name": "logs_count",
+            "map_id": 3681,
+            "value_offset": null
+          },
+          {
+            "name": "scratch_map",
+            "map_id": 3682,
+            "value_offset": null
+          },
+          {
+            "name": "file_modification_map",
+            "map_id": 3683,
+            "value_offset": null
+          },
+          {
+            "name": "io_file_path_cache_map",
+            "map_id": 3684,
+            "value_offset": null
+          },
+          {
+            "name": "elf_files_map",
+            "map_id": 3685,
+            "value_offset": null
+          },
+          {
+            "name": "policies_config_map",
+            "map_id": 3686,
+            "value_offset": null
+          },
+          {
+            "name": "policies_config_version",
+            "map_id": 3688,
+            "value_offset": null
+          },
+          {
+            "name": "uid_filter",
+            "map_id": 3689,
+            "value_offset": null
+          },
+          {
+            "name": "uid_filter_version",
+            "map_id": 3691,
+            "value_offset": null
+          },
+          {
+            "name": "pid_filter",
+            "map_id": 3692,
+            "value_offset": null
+          },
+          {
+            "name": "pid_filter_version",
+            "map_id": 3694,
+            "value_offset": null
+          },
+          {
+            "name": "mnt_ns_filter",
+            "map_id": 3695,
+            "value_offset": null
+          },
+          {
+            "name": "mnt_ns_filter_version",
+            "map_id": 3697,
+            "value_offset": null
+          },
+          {
+            "name": "pid_ns_filter",
+            "map_id": 3698,
+            "value_offset": null
+          },
+          {
+            "name": "pid_ns_filter_version",
+            "map_id": 3700,
+            "value_offset": null
+          },
+          {
+            "name": "uts_ns_filter",
+            "map_id": 3701,
+            "value_offset": null
+          },
+          {
+            "name": "uts_ns_filter_version",
+            "map_id": 3703,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_exact",
+            "map_id": 3704,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_exact_version",
+            "map_id": 3706,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_suffix",
+            "map_id": 3707,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_suffix_version",
+            "map_id": 3709,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_prefix",
+            "map_id": 3710,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_prefix_version",
+            "map_id": 3712,
+            "value_offset": null
+          },
+          {
+            "name": "comm_filter",
+            "map_id": 3713,
+            "value_offset": null
+          },
+          {
+            "name": "comm_filter_version",
+            "map_id": 3715,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_id_filter",
+            "map_id": 3716,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_id_filter_version",
+            "map_id": 3718,
+            "value_offset": null
+          },
+          {
+            "name": "binary_filter",
+            "map_id": 3719,
+            "value_offset": null
+          },
+          {
+            "name": "binary_filter_version",
+            "map_id": 3721,
+            "value_offset": null
+          },
+          {
+            "name": "events_map",
+            "map_id": 3722,
+            "value_offset": null
+          },
+          {
+            "name": "events_map_version",
+            "map_id": 3724,
+            "value_offset": null
+          },
+          {
+            "name": "logs",
+            "map_id": 3725,
+            "value_offset": null
+          },
+          {
+            "name": "events",
+            "map_id": 3726,
+            "value_offset": null
+          },
+          {
+            "name": "file_writes",
+            "map_id": 3727,
+            "value_offset": null
+          },
+          {
+            "name": "signals",
+            "map_id": 3728,
+            "value_offset": null
+          },
+          {
+            "name": "netflowmap",
+            "map_id": 3729,
+            "value_offset": null
+          },
+          {
+            "name": "inodemap",
+            "map_id": 3730,
+            "value_offset": null
+          },
+          {
+            "name": "sockmap",
+            "map_id": 3731,
+            "value_offset": null
+          },
+          {
+            "name": "entrymap",
+            "map_id": 3732,
+            "value_offset": null
+          },
+          {
+            "name": "net_cap_events",
+            "map_id": 3733,
+            "value_offset": null
+          },
+          {
+            "name": "net_heap_event",
+            "map_id": 3734,
+            "value_offset": null
+          },
+          {
+            "name": "modules_map",
+            "map_id": 3735,
+            "value_offset": null
+          },
+          {
+            "name": "suspicious_syscall_source_syscalls",
+            "map_id": 3736,
+            "value_offset": null
+          },
+          {
+            "name": "stack_pivot_syscalls",
+            "map_id": 3737,
+            "value_offset": null
+          },
+          {
+            "name": "f3628a47.rodata",
+            "map_id": 3738,
+            "value_offset": null
+          },
+          {
+            "name": "TRACE_EVENT_FL_TRACEPOINT_BIT",
+            "map_id": 3738,
+            "value_offset": 0
+          },
+          {
+            "name": "TRACE_EVENT_FL_TRACEPOINT",
+            "map_id": 3738,
+            "value_offset": 4
+          },
+          {
+            "name": "type_size_table",
+            "map_id": 3738,
+            "value_offset": 8
+          },
+          {
+            "name": ".rodata.str1.1",
+            "map_id": 3739,
+            "value_offset": null
+          },
+          {
+            "name": "f3628a47.bss",
+            "map_id": 3740,
+            "value_offset": null
+          },
+          {
+            "name": "start_scan_time_init_shown_mods",
+            "map_id": 3740,
+            "value_offset": 0
+          },
+          {
+            "name": "last_module_insert_time",
+            "map_id": 3740,
+            "value_offset": 8
+          },
+          {
+            "name": "hidden_old_mod_scan_done",
+            "map_id": 3740,
+            "value_offset": 16
+          },
+          {
+            "name": "use_security_bprm_creds_for_exec",
+            "map_id": 3740,
+            "value_offset": 17
+          },
+          {
+            "name": "alerted_find_vma_unsupported",
+            "map_id": 3740,
+            "value_offset": 18
+          }
+        ]
+      },
+      "resources": {
+        "section": "kprobe/switch_task_namespaces",
+        "maps": [
+          {
+            "name": "sys_32_to_64_map",
+            "map_id": 3637
+          },
+          {
+            "name": "sys_enter_init_tail",
+            "map_id": 3638
+          },
+          {
+            "name": "task_info_map",
+            "map_id": 3639
+          },
+          {
+            "name": "config_map",
+            "map_id": 3640
+          },
+          {
+            "name": "sys_enter_submit_tail",
+            "map_id": 3641
+          },
+          {
+            "name": "sys_enter_tails",
+            "map_id": 3642
+          },
+          {
+            "name": "fd_arg_path_map",
+            "map_id": 3643
+          },
+          {
+            "name": "sys_exit_init_tail",
+            "map_id": 3644
+          },
+          {
+            "name": "sys_exit_submit_tail",
+            "map_id": 3645
+          },
+          {
+            "name": "sys_exit_tails",
+            "map_id": 3646
+          },
+          {
+            "name": "generic_sys_enter_tails",
+            "map_id": 3647
+          },
+          {
+            "name": "generic_sys_exit_tails",
+            "map_id": 3648
+          },
+          {
+            "name": "proc_info_map",
+            "map_id": 3649
+          },
+          {
+            "name": "process_tree_map",
+            "map_id": 3650
+          },
+          {
+            "name": "process_tree_map_version",
+            "map_id": 3652
+          },
+          {
+            "name": "module_context_map",
+            "map_id": 3653
+          },
+          {
+            "name": "walk_mod_tree_queue",
+            "map_id": 3654
+          },
+          {
+            "name": "prog_array",
+            "map_id": 3655
+          },
+          {
+            "name": "containers_map",
+            "map_id": 3656
+          },
+          {
+            "name": "prog_array_tp",
+            "map_id": 3657
+          },
+          {
+            "name": "new_module_map",
+            "map_id": 3658
+          },
+          {
+            "name": "recent_deleted_module_map",
+            "map_id": 3659
+          },
+          {
+            "name": "cgrpctxmap_in",
+            "map_id": 3660
+          },
+          {
+            "name": "cgrpctxmap_eg",
+            "map_id": 3661
+          },
+          {
+            "name": "features_test_arena",
+            "map_id": 3662
+          },
+          {
+            "name": "kconfig_map",
+            "map_id": 3663
+          },
+          {
+            "name": "args_map",
+            "map_id": 3664
+          },
+          {
+            "name": "ksymbols_map",
+            "map_id": 3665
+          },
+          {
+            "name": "file_write_path_filter",
+            "map_id": 3666
+          },
+          {
+            "name": "file_read_path_filter",
+            "map_id": 3667
+          },
+          {
+            "name": "file_type_filter",
+            "map_id": 3668
+          },
+          {
+            "name": "netconfig_map",
+            "map_id": 3669
+          },
+          {
+            "name": "expected_sys_call_table",
+            "map_id": 3670
+          },
+          {
+            "name": "bufs",
+            "map_id": 3671
+          },
+          {
+            "name": "data_filter_bufs",
+            "map_id": 3672
+          },
+          {
+            "name": "data_filter_lpm_bufs",
+            "map_id": 3673
+          },
+          {
+            "name": "syscall_source_map",
+            "map_id": 3674
+          },
+          {
+            "name": "stack_addresses",
+            "map_id": 3675
+          },
+          {
+            "name": "bpf_attach_map",
+            "map_id": 3676
+          },
+          {
+            "name": "bpf_attach_tmp_map",
+            "map_id": 3677
+          },
+          {
+            "name": "bpf_prog_load_map",
+            "map_id": 3678
+          },
+          {
+            "name": "event_data_map",
+            "map_id": 3679
+          },
+          {
+            "name": "signal_data_map",
+            "map_id": 3680
+          },
+          {
+            "name": "logs_count",
+            "map_id": 3681
+          },
+          {
+            "name": "scratch_map",
+            "map_id": 3682
+          },
+          {
+            "name": "file_modification_map",
+            "map_id": 3683
+          },
+          {
+            "name": "io_file_path_cache_map",
+            "map_id": 3684
+          },
+          {
+            "name": "elf_files_map",
+            "map_id": 3685
+          },
+          {
+            "name": "policies_config_map",
+            "map_id": 3686
+          },
+          {
+            "name": "policies_config_version",
+            "map_id": 3688
+          },
+          {
+            "name": "uid_filter",
+            "map_id": 3689
+          },
+          {
+            "name": "uid_filter_version",
+            "map_id": 3691
+          },
+          {
+            "name": "pid_filter",
+            "map_id": 3692
+          },
+          {
+            "name": "pid_filter_version",
+            "map_id": 3694
+          },
+          {
+            "name": "mnt_ns_filter",
+            "map_id": 3695
+          },
+          {
+            "name": "mnt_ns_filter_version",
+            "map_id": 3697
+          },
+          {
+            "name": "pid_ns_filter",
+            "map_id": 3698
+          },
+          {
+            "name": "pid_ns_filter_version",
+            "map_id": 3700
+          },
+          {
+            "name": "uts_ns_filter",
+            "map_id": 3701
+          },
+          {
+            "name": "uts_ns_filter_version",
+            "map_id": 3703
+          },
+          {
+            "name": "data_filter_exact",
+            "map_id": 3704
+          },
+          {
+            "name": "data_filter_exact_version",
+            "map_id": 3706
+          },
+          {
+            "name": "data_filter_suffix",
+            "map_id": 3707
+          },
+          {
+            "name": "data_filter_suffix_version",
+            "map_id": 3709
+          },
+          {
+            "name": "data_filter_prefix",
+            "map_id": 3710
+          },
+          {
+            "name": "data_filter_prefix_version",
+            "map_id": 3712
+          },
+          {
+            "name": "comm_filter",
+            "map_id": 3713
+          },
+          {
+            "name": "comm_filter_version",
+            "map_id": 3715
+          },
+          {
+            "name": "cgroup_id_filter",
+            "map_id": 3716
+          },
+          {
+            "name": "cgroup_id_filter_version",
+            "map_id": 3718
+          },
+          {
+            "name": "binary_filter",
+            "map_id": 3719
+          },
+          {
+            "name": "binary_filter_version",
+            "map_id": 3721
+          },
+          {
+            "name": "events_map",
+            "map_id": 3722
+          },
+          {
+            "name": "events_map_version",
+            "map_id": 3724
+          },
+          {
+            "name": "logs",
+            "map_id": 3725
+          },
+          {
+            "name": "events",
+            "map_id": 3726
+          },
+          {
+            "name": "file_writes",
+            "map_id": 3727
+          },
+          {
+            "name": "signals",
+            "map_id": 3728
+          },
+          {
+            "name": "netflowmap",
+            "map_id": 3729
+          },
+          {
+            "name": "inodemap",
+            "map_id": 3730
+          },
+          {
+            "name": "sockmap",
+            "map_id": 3731
+          },
+          {
+            "name": "entrymap",
+            "map_id": 3732
+          },
+          {
+            "name": "net_cap_events",
+            "map_id": 3733
+          },
+          {
+            "name": "net_heap_event",
+            "map_id": 3734
+          },
+          {
+            "name": "modules_map",
+            "map_id": 3735
+          },
+          {
+            "name": "suspicious_syscall_source_syscalls",
+            "map_id": 3736
+          },
+          {
+            "name": "stack_pivot_syscalls",
+            "map_id": 3737
+          },
+          {
+            "name": "f3628a47.rodata",
+            "map_id": 3738
+          },
+          {
+            "name": ".rodata.str1.1",
+            "map_id": 3739
+          },
+          {
+            "name": "f3628a47.bss",
+            "map_id": 3740
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-kuwj3qo7",
+        "attach_target_resolution": null,
+        "resource_globalized_entries": [],
+        "resource_view": "maps-and-btf",
+        "resource_pinning": [],
+        "resource_configured_maps": []
+      },
+      "request_id": 40,
+      "status": 0,
+      "prog_id": 147,
+      "service": {
+        "request_id": 40,
+        "source_prog_id": 0,
+        "native_sha256": "489a7a69184baae011350d4c7632faf0f5539d9df8417aa2892246cc49be777f",
+        "execution_mode": "submitted-native",
+        "started": "2026-11-15T02:48:29.896025+00:00",
+        "prog_id": 147,
+        "phase": "load",
+        "status": 0,
+        "artifact_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/40.success.tar.gz",
+        "finished": "2026-11-15T03:04:12.306309+00:00"
+      },
+      "diagnostic": ""
+    },
+    "stage": "installed",
+    "diagnostic": "",
+    "compiler_failures": [],
+    "class": "installed"
+  },
+  {
+    "application": "bcc/set",
+    "source_prog_id": 44,
+    "name": "block_rq_complete",
+    "priority": {
+      "measured_name": "block_rq_comple",
+      "baseline_time_ns": 3573672,
+      "application_time_ns": 786004305671,
+      "application_time_share": 4.546631582315838e-06,
+      "matching_census_instances": 1,
+      "retained_instance_time_ns": 355120,
+      "scope": "Measured name family; matching instances share priority"
+    },
+    "body_group": 95,
+    "submission": {
+      "source_prog_id": 0,
+      "stage": "installed",
+      "native_sha256": "a07dfa5e538b540cfb5991ed6892cb303dbda7ecf31b03f4d0d0650bc44eb7b0",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 26,
+          "expected_attach_type": 23,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 73504,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 93,
+          "source_func_type_id": 140,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "cgroup_map",
+            "map_id": 3742,
+            "value_offset": null
+          },
+          {
+            "name": "infobyreq",
+            "map_id": 3743,
+            "value_offset": null
+          },
+          {
+            "name": "start",
+            "map_id": 3744,
+            "value_offset": null
+          },
+          {
+            "name": "events",
+            "map_id": 3745,
+            "value_offset": null
+          },
+          {
+            "name": "86e13806.rodata",
+            "map_id": 3746,
+            "value_offset": null
+          },
+          {
+            "name": "filter_cg",
+            "map_id": 3746,
+            "value_offset": 0
+          },
+          {
+            "name": "targ_queued",
+            "map_id": 3746,
+            "value_offset": 1
+          },
+          {
+            "name": "filter_dev",
+            "map_id": 3746,
+            "value_offset": 2
+          },
+          {
+            "name": "targ_dev",
+            "map_id": 3746,
+            "value_offset": 4
+          },
+          {
+            "name": "86e1380.kconfig",
+            "map_id": 3747,
+            "value_offset": null
+          },
+          {
+            "name": "LINUX_KERNEL_VERSION",
+            "map_id": 3747,
+            "value_offset": 0
+          }
+        ]
+      },
+      "resources": {
+        "section": "tp_btf/block_rq_complete",
+        "maps": [
+          {
+            "name": "cgroup_map",
+            "map_id": 3742
+          },
+          {
+            "name": "infobyreq",
+            "map_id": 3743
+          },
+          {
+            "name": "start",
+            "map_id": 3744
+          },
+          {
+            "name": "events",
+            "map_id": 3745
+          },
+          {
+            "name": "86e13806.rodata",
+            "map_id": 3746
+          },
+          {
+            "name": "86e1380.kconfig",
+            "map_id": 3747
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-vfpawbvc",
+        "attach_target_resolution": null,
+        "resource_globalized_entries": [],
+        "resource_view": "maps-and-btf",
+        "resource_pinning": [],
+        "resource_configured_maps": [
+          {
+            "name": "events",
+            "field": "max_entries",
+            "value": 4
+          }
+        ]
+      },
+      "request_id": 41,
+      "status": 0,
+      "prog_id": 151,
+      "service": {
+        "request_id": 41,
+        "source_prog_id": 0,
+        "native_sha256": "a07dfa5e538b540cfb5991ed6892cb303dbda7ecf31b03f4d0d0650bc44eb7b0",
+        "execution_mode": "submitted-native",
+        "started": "2026-11-15T03:04:12.942247+00:00",
+        "prog_id": 151,
+        "phase": "load",
+        "status": 0,
+        "artifact_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/41.success.tar.gz",
+        "finished": "2026-11-15T03:04:23.228168+00:00"
+      },
+      "diagnostic": ""
+    },
+    "stage": "installed",
+    "diagnostic": "",
+    "compiler_failures": [],
+    "class": "installed"
+  },
+  {
+    "application": "bcc/set",
+    "source_prog_id": 43,
+    "name": "block_rq_issue",
+    "priority": {
+      "measured_name": "block_rq_issue",
+      "baseline_time_ns": 974685,
+      "application_time_ns": 786004305671,
+      "application_time_share": 1.2400504589703566e-06,
+      "matching_census_instances": 1,
+      "retained_instance_time_ns": 53609,
+      "scope": "Measured name family; matching instances share priority"
+    },
+    "body_group": 96,
+    "submission": {
+      "source_prog_id": 0,
+      "stage": "installed",
+      "native_sha256": "a07dfa5e538b540cfb5991ed6892cb303dbda7ecf31b03f4d0d0650bc44eb7b0",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 26,
+          "expected_attach_type": 23,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 73507,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 94,
+          "source_func_type_id": 138,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "cgroup_map",
+            "map_id": 3749,
+            "value_offset": null
+          },
+          {
+            "name": "infobyreq",
+            "map_id": 3750,
+            "value_offset": null
+          },
+          {
+            "name": "start",
+            "map_id": 3751,
+            "value_offset": null
+          },
+          {
+            "name": "events",
+            "map_id": 3752,
+            "value_offset": null
+          },
+          {
+            "name": "86e13806.rodata",
+            "map_id": 3753,
+            "value_offset": null
+          },
+          {
+            "name": "filter_cg",
+            "map_id": 3753,
+            "value_offset": 0
+          },
+          {
+            "name": "targ_queued",
+            "map_id": 3753,
+            "value_offset": 1
+          },
+          {
+            "name": "filter_dev",
+            "map_id": 3753,
+            "value_offset": 2
+          },
+          {
+            "name": "targ_dev",
+            "map_id": 3753,
+            "value_offset": 4
+          },
+          {
+            "name": "86e1380.kconfig",
+            "map_id": 3754,
+            "value_offset": null
+          },
+          {
+            "name": "LINUX_KERNEL_VERSION",
+            "map_id": 3754,
+            "value_offset": 0
+          }
+        ]
+      },
+      "resources": {
+        "section": "tp_btf/block_rq_issue",
+        "maps": [
+          {
+            "name": "cgroup_map",
+            "map_id": 3749
+          },
+          {
+            "name": "infobyreq",
+            "map_id": 3750
+          },
+          {
+            "name": "start",
+            "map_id": 3751
+          },
+          {
+            "name": "events",
+            "map_id": 3752
+          },
+          {
+            "name": "86e13806.rodata",
+            "map_id": 3753
+          },
+          {
+            "name": "86e1380.kconfig",
+            "map_id": 3754
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-y33686tn",
+        "attach_target_resolution": null,
+        "resource_globalized_entries": [],
+        "resource_view": "maps-and-btf",
+        "resource_pinning": [],
+        "resource_configured_maps": []
+      },
+      "request_id": 42,
+      "status": 0,
+      "prog_id": 155,
+      "service": {
+        "request_id": 42,
+        "source_prog_id": 0,
+        "native_sha256": "a07dfa5e538b540cfb5991ed6892cb303dbda7ecf31b03f4d0d0650bc44eb7b0",
+        "execution_mode": "submitted-native",
+        "started": "2026-11-15T03:04:23.399516+00:00",
+        "prog_id": 155,
+        "phase": "load",
+        "status": 0,
+        "artifact_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/42.success.tar.gz",
+        "finished": "2026-11-15T03:04:31.949108+00:00"
+      },
+      "diagnostic": ""
+    },
+    "stage": "installed",
+    "diagnostic": "",
+    "compiler_failures": [],
+    "class": "installed"
+  },
+  {
+    "application": "tracee/monitor",
+    "source_prog_id": 492,
+    "name": "heartbeat_capture",
+    "priority": {
+      "measured_name": "heartbeat_captu",
+      "baseline_time_ns": 1940954,
+      "application_time_ns": 2500427708222,
+      "application_time_share": 7.762487968029159e-07,
+      "matching_census_instances": 1,
+      "retained_instance_time_ns": 8464,
+      "scope": "Measured name family; matching instances share priority"
+    },
+    "body_group": 97,
+    "submission": {
+      "source_prog_id": 0,
+      "stage": "installed",
+      "native_sha256": "489a7a69184baae011350d4c7632faf0f5539d9df8417aa2892246cc49be777f",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 95,
+          "source_func_type_id": 689,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "sys_32_to_64_map",
+            "map_id": 3756,
+            "value_offset": null
+          },
+          {
+            "name": "sys_enter_init_tail",
+            "map_id": 3757,
+            "value_offset": null
+          },
+          {
+            "name": "task_info_map",
+            "map_id": 3758,
+            "value_offset": null
+          },
+          {
+            "name": "config_map",
+            "map_id": 3759,
+            "value_offset": null
+          },
+          {
+            "name": "sys_enter_submit_tail",
+            "map_id": 3760,
+            "value_offset": null
+          },
+          {
+            "name": "sys_enter_tails",
+            "map_id": 3761,
+            "value_offset": null
+          },
+          {
+            "name": "fd_arg_path_map",
+            "map_id": 3762,
+            "value_offset": null
+          },
+          {
+            "name": "sys_exit_init_tail",
+            "map_id": 3763,
+            "value_offset": null
+          },
+          {
+            "name": "sys_exit_submit_tail",
+            "map_id": 3764,
+            "value_offset": null
+          },
+          {
+            "name": "sys_exit_tails",
+            "map_id": 3765,
+            "value_offset": null
+          },
+          {
+            "name": "generic_sys_enter_tails",
+            "map_id": 3766,
+            "value_offset": null
+          },
+          {
+            "name": "generic_sys_exit_tails",
+            "map_id": 3767,
+            "value_offset": null
+          },
+          {
+            "name": "proc_info_map",
+            "map_id": 3768,
+            "value_offset": null
+          },
+          {
+            "name": "process_tree_map",
+            "map_id": 3769,
+            "value_offset": null
+          },
+          {
+            "name": "process_tree_map_version",
+            "map_id": 3771,
+            "value_offset": null
+          },
+          {
+            "name": "module_context_map",
+            "map_id": 3772,
+            "value_offset": null
+          },
+          {
+            "name": "walk_mod_tree_queue",
+            "map_id": 3773,
+            "value_offset": null
+          },
+          {
+            "name": "prog_array",
+            "map_id": 3774,
+            "value_offset": null
+          },
+          {
+            "name": "containers_map",
+            "map_id": 3775,
+            "value_offset": null
+          },
+          {
+            "name": "prog_array_tp",
+            "map_id": 3776,
+            "value_offset": null
+          },
+          {
+            "name": "new_module_map",
+            "map_id": 3777,
+            "value_offset": null
+          },
+          {
+            "name": "recent_deleted_module_map",
+            "map_id": 3778,
+            "value_offset": null
+          },
+          {
+            "name": "cgrpctxmap_in",
+            "map_id": 3779,
+            "value_offset": null
+          },
+          {
+            "name": "cgrpctxmap_eg",
+            "map_id": 3780,
+            "value_offset": null
+          },
+          {
+            "name": "features_test_arena",
+            "map_id": 3781,
+            "value_offset": null
+          },
+          {
+            "name": "kconfig_map",
+            "map_id": 3782,
+            "value_offset": null
+          },
+          {
+            "name": "args_map",
+            "map_id": 3783,
+            "value_offset": null
+          },
+          {
+            "name": "ksymbols_map",
+            "map_id": 3784,
+            "value_offset": null
+          },
+          {
+            "name": "file_write_path_filter",
+            "map_id": 3785,
+            "value_offset": null
+          },
+          {
+            "name": "file_read_path_filter",
+            "map_id": 3786,
+            "value_offset": null
+          },
+          {
+            "name": "file_type_filter",
+            "map_id": 3787,
+            "value_offset": null
+          },
+          {
+            "name": "netconfig_map",
+            "map_id": 3788,
+            "value_offset": null
+          },
+          {
+            "name": "expected_sys_call_table",
+            "map_id": 3789,
+            "value_offset": null
+          },
+          {
+            "name": "bufs",
+            "map_id": 3790,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_bufs",
+            "map_id": 3791,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_lpm_bufs",
+            "map_id": 3792,
+            "value_offset": null
+          },
+          {
+            "name": "syscall_source_map",
+            "map_id": 3793,
+            "value_offset": null
+          },
+          {
+            "name": "stack_addresses",
+            "map_id": 3794,
+            "value_offset": null
+          },
+          {
+            "name": "bpf_attach_map",
+            "map_id": 3795,
+            "value_offset": null
+          },
+          {
+            "name": "bpf_attach_tmp_map",
+            "map_id": 3796,
+            "value_offset": null
+          },
+          {
+            "name": "bpf_prog_load_map",
+            "map_id": 3797,
+            "value_offset": null
+          },
+          {
+            "name": "event_data_map",
+            "map_id": 3798,
+            "value_offset": null
+          },
+          {
+            "name": "signal_data_map",
+            "map_id": 3799,
+            "value_offset": null
+          },
+          {
+            "name": "logs_count",
+            "map_id": 3800,
+            "value_offset": null
+          },
+          {
+            "name": "scratch_map",
+            "map_id": 3801,
+            "value_offset": null
+          },
+          {
+            "name": "file_modification_map",
+            "map_id": 3802,
+            "value_offset": null
+          },
+          {
+            "name": "io_file_path_cache_map",
+            "map_id": 3803,
+            "value_offset": null
+          },
+          {
+            "name": "elf_files_map",
+            "map_id": 3804,
+            "value_offset": null
+          },
+          {
+            "name": "policies_config_map",
+            "map_id": 3805,
+            "value_offset": null
+          },
+          {
+            "name": "policies_config_version",
+            "map_id": 3807,
+            "value_offset": null
+          },
+          {
+            "name": "uid_filter",
+            "map_id": 3808,
+            "value_offset": null
+          },
+          {
+            "name": "uid_filter_version",
+            "map_id": 3810,
+            "value_offset": null
+          },
+          {
+            "name": "pid_filter",
+            "map_id": 3811,
+            "value_offset": null
+          },
+          {
+            "name": "pid_filter_version",
+            "map_id": 3813,
+            "value_offset": null
+          },
+          {
+            "name": "mnt_ns_filter",
+            "map_id": 3814,
+            "value_offset": null
+          },
+          {
+            "name": "mnt_ns_filter_version",
+            "map_id": 3816,
+            "value_offset": null
+          },
+          {
+            "name": "pid_ns_filter",
+            "map_id": 3817,
+            "value_offset": null
+          },
+          {
+            "name": "pid_ns_filter_version",
+            "map_id": 3819,
+            "value_offset": null
+          },
+          {
+            "name": "uts_ns_filter",
+            "map_id": 3820,
+            "value_offset": null
+          },
+          {
+            "name": "uts_ns_filter_version",
+            "map_id": 3822,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_exact",
+            "map_id": 3823,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_exact_version",
+            "map_id": 3825,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_suffix",
+            "map_id": 3826,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_suffix_version",
+            "map_id": 3828,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_prefix",
+            "map_id": 3829,
+            "value_offset": null
+          },
+          {
+            "name": "data_filter_prefix_version",
+            "map_id": 3831,
+            "value_offset": null
+          },
+          {
+            "name": "comm_filter",
+            "map_id": 3832,
+            "value_offset": null
+          },
+          {
+            "name": "comm_filter_version",
+            "map_id": 3834,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_id_filter",
+            "map_id": 3835,
+            "value_offset": null
+          },
+          {
+            "name": "cgroup_id_filter_version",
+            "map_id": 3837,
+            "value_offset": null
+          },
+          {
+            "name": "binary_filter",
+            "map_id": 3838,
+            "value_offset": null
+          },
+          {
+            "name": "binary_filter_version",
+            "map_id": 3840,
+            "value_offset": null
+          },
+          {
+            "name": "events_map",
+            "map_id": 3841,
+            "value_offset": null
+          },
+          {
+            "name": "events_map_version",
+            "map_id": 3843,
+            "value_offset": null
+          },
+          {
+            "name": "logs",
+            "map_id": 3844,
+            "value_offset": null
+          },
+          {
+            "name": "events",
+            "map_id": 3845,
+            "value_offset": null
+          },
+          {
+            "name": "file_writes",
+            "map_id": 3846,
+            "value_offset": null
+          },
+          {
+            "name": "signals",
+            "map_id": 3847,
+            "value_offset": null
+          },
+          {
+            "name": "netflowmap",
+            "map_id": 3848,
+            "value_offset": null
+          },
+          {
+            "name": "inodemap",
+            "map_id": 3849,
+            "value_offset": null
+          },
+          {
+            "name": "sockmap",
+            "map_id": 3850,
+            "value_offset": null
+          },
+          {
+            "name": "entrymap",
+            "map_id": 3851,
+            "value_offset": null
+          },
+          {
+            "name": "net_cap_events",
+            "map_id": 3852,
+            "value_offset": null
+          },
+          {
+            "name": "net_heap_event",
+            "map_id": 3853,
+            "value_offset": null
+          },
+          {
+            "name": "modules_map",
+            "map_id": 3854,
+            "value_offset": null
+          },
+          {
+            "name": "suspicious_syscall_source_syscalls",
+            "map_id": 3855,
+            "value_offset": null
+          },
+          {
+            "name": "stack_pivot_syscalls",
+            "map_id": 3856,
+            "value_offset": null
+          },
+          {
+            "name": "f3628a47.rodata",
+            "map_id": 3857,
+            "value_offset": null
+          },
+          {
+            "name": "TRACE_EVENT_FL_TRACEPOINT_BIT",
+            "map_id": 3857,
+            "value_offset": 0
+          },
+          {
+            "name": "TRACE_EVENT_FL_TRACEPOINT",
+            "map_id": 3857,
+            "value_offset": 4
+          },
+          {
+            "name": "type_size_table",
+            "map_id": 3857,
+            "value_offset": 8
+          },
+          {
+            "name": ".rodata.str1.1",
+            "map_id": 3858,
+            "value_offset": null
+          },
+          {
+            "name": "f3628a47.bss",
+            "map_id": 3859,
+            "value_offset": null
+          },
+          {
+            "name": "start_scan_time_init_shown_mods",
+            "map_id": 3859,
+            "value_offset": 0
+          },
+          {
+            "name": "last_module_insert_time",
+            "map_id": 3859,
+            "value_offset": 8
+          },
+          {
+            "name": "hidden_old_mod_scan_done",
+            "map_id": 3859,
+            "value_offset": 16
+          },
+          {
+            "name": "use_security_bprm_creds_for_exec",
+            "map_id": 3859,
+            "value_offset": 17
+          },
+          {
+            "name": "alerted_find_vma_unsupported",
+            "map_id": 3859,
+            "value_offset": 18
+          }
+        ]
+      },
+      "resources": {
+        "section": "uprobe/capture_heartbeat",
+        "maps": [
+          {
+            "name": "sys_32_to_64_map",
+            "map_id": 3756
+          },
+          {
+            "name": "sys_enter_init_tail",
+            "map_id": 3757
+          },
+          {
+            "name": "task_info_map",
+            "map_id": 3758
+          },
+          {
+            "name": "config_map",
+            "map_id": 3759
+          },
+          {
+            "name": "sys_enter_submit_tail",
+            "map_id": 3760
+          },
+          {
+            "name": "sys_enter_tails",
+            "map_id": 3761
+          },
+          {
+            "name": "fd_arg_path_map",
+            "map_id": 3762
+          },
+          {
+            "name": "sys_exit_init_tail",
+            "map_id": 3763
+          },
+          {
+            "name": "sys_exit_submit_tail",
+            "map_id": 3764
+          },
+          {
+            "name": "sys_exit_tails",
+            "map_id": 3765
+          },
+          {
+            "name": "generic_sys_enter_tails",
+            "map_id": 3766
+          },
+          {
+            "name": "generic_sys_exit_tails",
+            "map_id": 3767
+          },
+          {
+            "name": "proc_info_map",
+            "map_id": 3768
+          },
+          {
+            "name": "process_tree_map",
+            "map_id": 3769
+          },
+          {
+            "name": "process_tree_map_version",
+            "map_id": 3771
+          },
+          {
+            "name": "module_context_map",
+            "map_id": 3772
+          },
+          {
+            "name": "walk_mod_tree_queue",
+            "map_id": 3773
+          },
+          {
+            "name": "prog_array",
+            "map_id": 3774
+          },
+          {
+            "name": "containers_map",
+            "map_id": 3775
+          },
+          {
+            "name": "prog_array_tp",
+            "map_id": 3776
+          },
+          {
+            "name": "new_module_map",
+            "map_id": 3777
+          },
+          {
+            "name": "recent_deleted_module_map",
+            "map_id": 3778
+          },
+          {
+            "name": "cgrpctxmap_in",
+            "map_id": 3779
+          },
+          {
+            "name": "cgrpctxmap_eg",
+            "map_id": 3780
+          },
+          {
+            "name": "features_test_arena",
+            "map_id": 3781
+          },
+          {
+            "name": "kconfig_map",
+            "map_id": 3782
+          },
+          {
+            "name": "args_map",
+            "map_id": 3783
+          },
+          {
+            "name": "ksymbols_map",
+            "map_id": 3784
+          },
+          {
+            "name": "file_write_path_filter",
+            "map_id": 3785
+          },
+          {
+            "name": "file_read_path_filter",
+            "map_id": 3786
+          },
+          {
+            "name": "file_type_filter",
+            "map_id": 3787
+          },
+          {
+            "name": "netconfig_map",
+            "map_id": 3788
+          },
+          {
+            "name": "expected_sys_call_table",
+            "map_id": 3789
+          },
+          {
+            "name": "bufs",
+            "map_id": 3790
+          },
+          {
+            "name": "data_filter_bufs",
+            "map_id": 3791
+          },
+          {
+            "name": "data_filter_lpm_bufs",
+            "map_id": 3792
+          },
+          {
+            "name": "syscall_source_map",
+            "map_id": 3793
+          },
+          {
+            "name": "stack_addresses",
+            "map_id": 3794
+          },
+          {
+            "name": "bpf_attach_map",
+            "map_id": 3795
+          },
+          {
+            "name": "bpf_attach_tmp_map",
+            "map_id": 3796
+          },
+          {
+            "name": "bpf_prog_load_map",
+            "map_id": 3797
+          },
+          {
+            "name": "event_data_map",
+            "map_id": 3798
+          },
+          {
+            "name": "signal_data_map",
+            "map_id": 3799
+          },
+          {
+            "name": "logs_count",
+            "map_id": 3800
+          },
+          {
+            "name": "scratch_map",
+            "map_id": 3801
+          },
+          {
+            "name": "file_modification_map",
+            "map_id": 3802
+          },
+          {
+            "name": "io_file_path_cache_map",
+            "map_id": 3803
+          },
+          {
+            "name": "elf_files_map",
+            "map_id": 3804
+          },
+          {
+            "name": "policies_config_map",
+            "map_id": 3805
+          },
+          {
+            "name": "policies_config_version",
+            "map_id": 3807
+          },
+          {
+            "name": "uid_filter",
+            "map_id": 3808
+          },
+          {
+            "name": "uid_filter_version",
+            "map_id": 3810
+          },
+          {
+            "name": "pid_filter",
+            "map_id": 3811
+          },
+          {
+            "name": "pid_filter_version",
+            "map_id": 3813
+          },
+          {
+            "name": "mnt_ns_filter",
+            "map_id": 3814
+          },
+          {
+            "name": "mnt_ns_filter_version",
+            "map_id": 3816
+          },
+          {
+            "name": "pid_ns_filter",
+            "map_id": 3817
+          },
+          {
+            "name": "pid_ns_filter_version",
+            "map_id": 3819
+          },
+          {
+            "name": "uts_ns_filter",
+            "map_id": 3820
+          },
+          {
+            "name": "uts_ns_filter_version",
+            "map_id": 3822
+          },
+          {
+            "name": "data_filter_exact",
+            "map_id": 3823
+          },
+          {
+            "name": "data_filter_exact_version",
+            "map_id": 3825
+          },
+          {
+            "name": "data_filter_suffix",
+            "map_id": 3826
+          },
+          {
+            "name": "data_filter_suffix_version",
+            "map_id": 3828
+          },
+          {
+            "name": "data_filter_prefix",
+            "map_id": 3829
+          },
+          {
+            "name": "data_filter_prefix_version",
+            "map_id": 3831
+          },
+          {
+            "name": "comm_filter",
+            "map_id": 3832
+          },
+          {
+            "name": "comm_filter_version",
+            "map_id": 3834
+          },
+          {
+            "name": "cgroup_id_filter",
+            "map_id": 3835
+          },
+          {
+            "name": "cgroup_id_filter_version",
+            "map_id": 3837
+          },
+          {
+            "name": "binary_filter",
+            "map_id": 3838
+          },
+          {
+            "name": "binary_filter_version",
+            "map_id": 3840
+          },
+          {
+            "name": "events_map",
+            "map_id": 3841
+          },
+          {
+            "name": "events_map_version",
+            "map_id": 3843
+          },
+          {
+            "name": "logs",
+            "map_id": 3844
+          },
+          {
+            "name": "events",
+            "map_id": 3845
+          },
+          {
+            "name": "file_writes",
+            "map_id": 3846
+          },
+          {
+            "name": "signals",
+            "map_id": 3847
+          },
+          {
+            "name": "netflowmap",
+            "map_id": 3848
+          },
+          {
+            "name": "inodemap",
+            "map_id": 3849
+          },
+          {
+            "name": "sockmap",
+            "map_id": 3850
+          },
+          {
+            "name": "entrymap",
+            "map_id": 3851
+          },
+          {
+            "name": "net_cap_events",
+            "map_id": 3852
+          },
+          {
+            "name": "net_heap_event",
+            "map_id": 3853
+          },
+          {
+            "name": "modules_map",
+            "map_id": 3854
+          },
+          {
+            "name": "suspicious_syscall_source_syscalls",
+            "map_id": 3855
+          },
+          {
+            "name": "stack_pivot_syscalls",
+            "map_id": 3856
+          },
+          {
+            "name": "f3628a47.rodata",
+            "map_id": 3857
+          },
+          {
+            "name": ".rodata.str1.1",
+            "map_id": 3858
+          },
+          {
+            "name": "f3628a47.bss",
+            "map_id": 3859
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-5q2vpfk5",
+        "attach_target_resolution": null,
+        "resource_globalized_entries": [],
+        "resource_view": "maps-and-btf",
+        "resource_pinning": [],
+        "resource_configured_maps": []
+      },
+      "request_id": 43,
+      "status": 0,
+      "prog_id": 159,
+      "service": {
+        "request_id": 43,
+        "source_prog_id": 0,
+        "native_sha256": "489a7a69184baae011350d4c7632faf0f5539d9df8417aa2892246cc49be777f",
+        "execution_mode": "submitted-native",
+        "started": "2026-11-15T03:08:01.632002+00:00",
+        "prog_id": 159,
+        "phase": "load",
+        "status": 0,
+        "artifact_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/43.success.tar.gz",
+        "finished": "2026-11-15T03:08:07.171598+00:00"
+      },
+      "diagnostic": ""
+    },
+    "stage": "installed",
+    "diagnostic": "",
+    "compiler_failures": [],
+    "class": "installed"
+  },
+  {
+    "application": "otelcol-ebpf-profiler/profiling",
+    "source_prog_id": 159,
+    "name": "tracepoint__sched_process_free",
+    "priority": {
+      "measured_name": "tracepoint__sch",
+      "baseline_time_ns": 215114,
+      "application_time_ns": 1344585911932,
+      "application_time_share": 1.599853145054215e-07,
+      "matching_census_instances": 1,
+      "retained_instance_time_ns": 113268,
+      "scope": "Measured name family; matching instances share priority"
+    },
+    "body_group": 98,
+    "submission": {
+      "source_prog_id": 0,
+      "stage": "installed",
+      "native_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915",
+      "context": {
+        "version": 1,
+        "load_context": {
+          "prog_type": 5,
+          "expected_attach_type": 0,
+          "prog_flags": 0,
+          "prog_ifindex": 0,
+          "attach_btf_id": 0,
+          "attach_btf_obj_id": 0,
+          "attach_prog_id": 0,
+          "gpl_compatible": 1,
+          "source_btf_id": 96,
+          "source_func_type_id": 418,
+          "token_present": 0
+        },
+        "maps": [
+          {
+            "name": "custom_context_map",
+            "map_id": 3861,
+            "value_offset": null
+          },
+          {
+            "name": "dotnet_procs",
+            "map_id": 3862,
+            "value_offset": null
+          },
+          {
+            "name": "hotspot_procs",
+            "map_id": 3863,
+            "value_offset": null
+          },
+          {
+            "name": "trace_events",
+            "map_id": 3864,
+            "value_offset": null
+          },
+          {
+            "name": "apm_int_procs",
+            "map_id": 3865,
+            "value_offset": null
+          },
+          {
+            "name": "go_labels_procs",
+            "map_id": 3866,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_8_stack_deltas",
+            "map_id": 3868,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_9_stack_deltas",
+            "map_id": 3870,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_10_stack_deltas",
+            "map_id": 3872,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_11_stack_deltas",
+            "map_id": 3874,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_12_stack_deltas",
+            "map_id": 3876,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_13_stack_deltas",
+            "map_id": 3878,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_14_stack_deltas",
+            "map_id": 3880,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_15_stack_deltas",
+            "map_id": 3882,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_16_stack_deltas",
+            "map_id": 3884,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_17_stack_deltas",
+            "map_id": 3886,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_18_stack_deltas",
+            "map_id": 3888,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_19_stack_deltas",
+            "map_id": 3890,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_20_stack_deltas",
+            "map_id": 3892,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_21_stack_deltas",
+            "map_id": 3894,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_22_stack_deltas",
+            "map_id": 3896,
+            "value_offset": null
+          },
+          {
+            "name": "exe_id_to_23_stack_deltas",
+            "map_id": 3898,
+            "value_offset": null
+          },
+          {
+            "name": "unwind_info_array",
+            "map_id": 3899,
+            "value_offset": null
+          },
+          {
+            "name": "stack_delta_page_to_info",
+            "map_id": 3900,
+            "value_offset": null
+          },
+          {
+            "name": "sched_times",
+            "map_id": 3901,
+            "value_offset": null
+          },
+          {
+            "name": "kprobe_progs",
+            "map_id": 3902,
+            "value_offset": null
+          },
+          {
+            "name": "perl_procs",
+            "map_id": 3903,
+            "value_offset": null
+          },
+          {
+            "name": "php_procs",
+            "map_id": 3904,
+            "value_offset": null
+          },
+          {
+            "name": "py_procs",
+            "map_id": 3905,
+            "value_offset": null
+          },
+          {
+            "name": "ruby_procs",
+            "map_id": 3906,
+            "value_offset": null
+          },
+          {
+            "name": "system_analysis",
+            "map_id": 3907,
+            "value_offset": null
+          },
+          {
+            "name": "kernel_stackmap",
+            "map_id": 3908,
+            "value_offset": null
+          },
+          {
+            "name": "pid_events",
+            "map_id": 3909,
+            "value_offset": null
+          },
+          {
+            "name": "reported_pids",
+            "map_id": 3910,
+            "value_offset": null
+          },
+          {
+            "name": "inhibit_events",
+            "map_id": 3911,
+            "value_offset": null
+          },
+          {
+            "name": "report_events",
+            "map_id": 3912,
+            "value_offset": null
+          },
+          {
+            "name": "v8_procs",
+            "map_id": 3913,
+            "value_offset": null
+          },
+          {
+            "name": "per_cpu_records",
+            "map_id": 3914,
+            "value_offset": null
+          },
+          {
+            "name": "metrics",
+            "map_id": 3915,
+            "value_offset": null
+          },
+          {
+            "name": "pid_page_to_mapping_info",
+            "map_id": 3916,
+            "value_offset": null
+          },
+          {
+            "name": "interpreter_offsets",
+            "map_id": 3917,
+            "value_offset": null
+          },
+          {
+            "name": "perf_progs",
+            "map_id": 3918,
+            "value_offset": null
+          },
+          {
+            "name": ".rodata.str1.16",
+            "map_id": 3919,
+            "value_offset": null
+          },
+          {
+            "name": ".rodata.str1.1",
+            "map_id": 3920,
+            "value_offset": null
+          },
+          {
+            "name": ".rodata.var",
+            "map_id": 3921,
+            "value_offset": null
+          },
+          {
+            "name": "filter_error_frames",
+            "map_id": 3921,
+            "value_offset": 0
+          },
+          {
+            "name": "filter_idle_frames",
+            "map_id": 3921,
+            "value_offset": 1
+          },
+          {
+            "name": "inverse_pac_mask",
+            "map_id": 3921,
+            "value_offset": 8
+          },
+          {
+            "name": "off_cpu_threshold",
+            "map_id": 3921,
+            "value_offset": 16
+          },
+          {
+            "name": "tpbase_offset",
+            "map_id": 3921,
+            "value_offset": 24
+          },
+          {
+            "name": "task_stack_offset",
+            "map_id": 3921,
+            "value_offset": 32
+          },
+          {
+            "name": "stack_ptregs_offset",
+            "map_id": 3921,
+            "value_offset": 36
+          },
+          {
+            "name": "with_debug_output",
+            "map_id": 3921,
+            "value_offset": 40
+          }
+        ]
+      },
+      "resources": {
+        "section": "tracepoint/sched/sched_process_free/v2",
+        "maps": [
+          {
+            "name": "custom_context_map",
+            "map_id": 3861
+          },
+          {
+            "name": "dotnet_procs",
+            "map_id": 3862
+          },
+          {
+            "name": "hotspot_procs",
+            "map_id": 3863
+          },
+          {
+            "name": "trace_events",
+            "map_id": 3864
+          },
+          {
+            "name": "apm_int_procs",
+            "map_id": 3865
+          },
+          {
+            "name": "go_labels_procs",
+            "map_id": 3866
+          },
+          {
+            "name": "exe_id_to_8_stack_deltas",
+            "map_id": 3868
+          },
+          {
+            "name": "exe_id_to_9_stack_deltas",
+            "map_id": 3870
+          },
+          {
+            "name": "exe_id_to_10_stack_deltas",
+            "map_id": 3872
+          },
+          {
+            "name": "exe_id_to_11_stack_deltas",
+            "map_id": 3874
+          },
+          {
+            "name": "exe_id_to_12_stack_deltas",
+            "map_id": 3876
+          },
+          {
+            "name": "exe_id_to_13_stack_deltas",
+            "map_id": 3878
+          },
+          {
+            "name": "exe_id_to_14_stack_deltas",
+            "map_id": 3880
+          },
+          {
+            "name": "exe_id_to_15_stack_deltas",
+            "map_id": 3882
+          },
+          {
+            "name": "exe_id_to_16_stack_deltas",
+            "map_id": 3884
+          },
+          {
+            "name": "exe_id_to_17_stack_deltas",
+            "map_id": 3886
+          },
+          {
+            "name": "exe_id_to_18_stack_deltas",
+            "map_id": 3888
+          },
+          {
+            "name": "exe_id_to_19_stack_deltas",
+            "map_id": 3890
+          },
+          {
+            "name": "exe_id_to_20_stack_deltas",
+            "map_id": 3892
+          },
+          {
+            "name": "exe_id_to_21_stack_deltas",
+            "map_id": 3894
+          },
+          {
+            "name": "exe_id_to_22_stack_deltas",
+            "map_id": 3896
+          },
+          {
+            "name": "exe_id_to_23_stack_deltas",
+            "map_id": 3898
+          },
+          {
+            "name": "unwind_info_array",
+            "map_id": 3899
+          },
+          {
+            "name": "stack_delta_page_to_info",
+            "map_id": 3900
+          },
+          {
+            "name": "sched_times",
+            "map_id": 3901
+          },
+          {
+            "name": "kprobe_progs",
+            "map_id": 3902
+          },
+          {
+            "name": "perl_procs",
+            "map_id": 3903
+          },
+          {
+            "name": "php_procs",
+            "map_id": 3904
+          },
+          {
+            "name": "py_procs",
+            "map_id": 3905
+          },
+          {
+            "name": "ruby_procs",
+            "map_id": 3906
+          },
+          {
+            "name": "system_analysis",
+            "map_id": 3907
+          },
+          {
+            "name": "kernel_stackmap",
+            "map_id": 3908
+          },
+          {
+            "name": "pid_events",
+            "map_id": 3909
+          },
+          {
+            "name": "reported_pids",
+            "map_id": 3910
+          },
+          {
+            "name": "inhibit_events",
+            "map_id": 3911
+          },
+          {
+            "name": "report_events",
+            "map_id": 3912
+          },
+          {
+            "name": "v8_procs",
+            "map_id": 3913
+          },
+          {
+            "name": "per_cpu_records",
+            "map_id": 3914
+          },
+          {
+            "name": "metrics",
+            "map_id": 3915
+          },
+          {
+            "name": "pid_page_to_mapping_info",
+            "map_id": 3916
+          },
+          {
+            "name": "interpreter_offsets",
+            "map_id": 3917
+          },
+          {
+            "name": "perf_progs",
+            "map_id": 3918
+          },
+          {
+            "name": ".rodata.str1.16",
+            "map_id": 3919
+          },
+          {
+            "name": ".rodata.str1.1",
+            "map_id": 3920
+          },
+          {
+            "name": ".rodata.var",
+            "map_id": 3921
+          }
+        ],
+        "pin_root": "/sys/fs/bpf/kprog-selftest-fdvdj0d0",
+        "attach_target_resolution": null,
+        "resource_globalized_entries": [
+          "kprobe_unwind_dotnet",
+          "perf_unwind_dotnet",
+          "kprobe_go_labels",
+          "perf_go_labels",
+          "kprobe_unwind_hotspot",
+          "perf_unwind_hotspot",
+          "kprobe_unwind_stop",
+          "perf_unwind_stop",
+          "kprobe_unwind_native",
+          "perf_unwind_native",
+          "kprobe_unwind_perl",
+          "perf_unwind_perl",
+          "kprobe_unwind_php",
+          "perf_unwind_php",
+          "kprobe_unwind_python",
+          "perf_unwind_python",
+          "kprobe_unwind_ruby",
+          "perf_unwind_ruby",
+          "kprobe_unwind_v8",
+          "perf_unwind_v8"
+        ],
+        "resource_view": "maps-and-btf",
+        "resource_pinning": [],
+        "resource_configured_maps": [
+          {
+            "name": "trace_events",
+            "field": "max_entries",
+            "value": 4
+          },
+          {
+            "name": "report_events",
+            "field": "max_entries",
+            "value": 4
+          }
+        ]
+      },
+      "request_id": 44,
+      "status": 0,
+      "prog_id": 163,
+      "service": {
+        "request_id": 44,
+        "source_prog_id": 0,
+        "native_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915",
+        "execution_mode": "submitted-native",
+        "started": "2026-11-15T03:08:51.783416+00:00",
+        "prog_id": 163,
+        "phase": "load",
+        "status": 0,
+        "artifact_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/44.success.tar.gz",
+        "finished": "2026-11-15T03:09:00.810526+00:00"
+      },
+      "diagnostic": ""
+    },
+    "stage": "installed",
+    "diagnostic": "",
+    "compiler_failures": [],
+    "class": "installed"
+  }
+]

@@ -1,0 +1,247 @@
+{
+  "current_linker_sha256": "31806730e4d268e89b51806d2e0207812dc5e1b869e974d6f3304e5f90169955",
+  "kernel_layout_sha256": "494916a1d41b4c4982d2dc047839549ceed176f4e5ab03a24914581b86a67054",
+  "fixture_flags": [
+    "-target",
+    "x86_64-linux-gnu",
+    "-O3",
+    "-march=native",
+    "-foptimize-sibling-calls",
+    "-fomit-frame-pointer",
+    "-mno-red-zone",
+    "-mgeneral-regs-only",
+    "-fno-stack-protector"
+  ],
+  "fixture_sha256": "fddc616f76c295d15a95a6dac170d18260f84aff60f768692d3c81728cc5af9e",
+  "proof_sha256": "4d0f221b5d37a9eda340943275f110af89b987555eb7b842ef95fb2512c52334",
+  "proof_map_operation": "X86_OP_MOV_LOAD_MAP_PTR",
+  "plans": {
+    "known-map": {
+      "version": 1,
+      "kernel_layout": {
+        "array": {
+          "map_type": 56,
+          "max_entries": 68,
+          "elem_size": 288,
+          "index_mask": 292,
+          "value": 304,
+          "array_type": 2
+        },
+        "hash": {
+          "key_size": 60,
+          "buckets": 448,
+          "n_buckets": 824,
+          "hashrnd": 832,
+          "bucket_size": 16,
+          "head": 0,
+          "first": 0,
+          "node": 0,
+          "next": 0,
+          "hash": 40,
+          "key": 48
+        },
+        "lpm": {
+          "map_type": 56,
+          "lpm_type": 11,
+          "root": 288,
+          "max_prefixlen": 384,
+          "data_size": 392,
+          "child": 0,
+          "child_stride": 8,
+          "node_prefixlen": 16,
+          "node_flags": 20,
+          "node_data": 24,
+          "key_prefixlen": 0,
+          "key_data": 4
+        },
+        "probe_read": {
+          "user_helper": 18446744071600224448,
+          "kernel_helper": 18446744071600224640,
+          "nmi_uaccess_okay": 18446744071598346672,
+          "kernel_allowed": 18446744071598346880,
+          "current_task": 18446744071648772120,
+          "user_ptr_max": 18446744071648986720,
+          "boot_cpu_data": 18446744071639042656,
+          "pagefault_disabled": 9388,
+          "x86_capability": 48
+        }
+      },
+      "helpers": [
+        {
+          "name": "bpf_map_lookup_elem",
+          "addr": 124893528891408
+        }
+      ],
+      "maps": [
+        {
+          "name": "test_map",
+          "addr": 124893510780848
+        }
+      ],
+      "lookup_maps": [
+        {
+          "name": "test_map",
+          "kind": "array",
+          "target_addr": 0,
+          "key_offset": 0,
+          "max_entries": 3,
+          "elem_size": 8,
+          "index_mask": 3,
+          "value_offset": 32,
+          "percpu_base_addr": 0
+        }
+      ]
+    },
+    "runtime-map": {
+      "version": 1,
+      "kernel_layout": {
+        "array": {
+          "map_type": 56,
+          "max_entries": 68,
+          "elem_size": 288,
+          "index_mask": 292,
+          "value": 304,
+          "array_type": 2
+        },
+        "hash": {
+          "key_size": 60,
+          "buckets": 448,
+          "n_buckets": 824,
+          "hashrnd": 832,
+          "bucket_size": 16,
+          "head": 0,
+          "first": 0,
+          "node": 0,
+          "next": 0,
+          "hash": 40,
+          "key": 48
+        },
+        "lpm": {
+          "map_type": 56,
+          "lpm_type": 11,
+          "root": 288,
+          "max_prefixlen": 384,
+          "data_size": 392,
+          "child": 0,
+          "child_stride": 8,
+          "node_prefixlen": 16,
+          "node_flags": 20,
+          "node_data": 24,
+          "key_prefixlen": 0,
+          "key_data": 4
+        },
+        "probe_read": {
+          "user_helper": 18446744071600224448,
+          "kernel_helper": 18446744071600224640,
+          "nmi_uaccess_okay": 18446744071598346672,
+          "kernel_allowed": 18446744071598346880,
+          "current_task": 18446744071648772120,
+          "user_ptr_max": 18446744071648986720,
+          "boot_cpu_data": 18446744071639042656,
+          "pagefault_disabled": 9388,
+          "x86_capability": 48
+        }
+      },
+      "helpers": [
+        {
+          "name": "bpf_map_lookup_elem",
+          "addr": 124893528891408
+        }
+      ],
+      "maps": [
+        {
+          "name": "test_map",
+          "addr": 124893511101984
+        }
+      ],
+      "lookup_maps": []
+    }
+  },
+  "host_executions": [
+    {
+      "path": "known-map",
+      "key": 0,
+      "actual": 101,
+      "expected": 101
+    },
+    {
+      "path": "known-map",
+      "key": 1,
+      "actual": 202,
+      "expected": 202
+    },
+    {
+      "path": "known-map",
+      "key": 2,
+      "actual": 303,
+      "expected": 303
+    },
+    {
+      "path": "known-map",
+      "key": 3,
+      "actual": 0,
+      "expected": 0
+    },
+    {
+      "path": "known-map",
+      "key": 4,
+      "actual": 0,
+      "expected": 0
+    },
+    {
+      "path": "known-map",
+      "key": 4294967295,
+      "actual": 0,
+      "expected": 0
+    },
+    {
+      "path": "runtime-map",
+      "key": 0,
+      "actual": 101,
+      "expected": 101
+    },
+    {
+      "path": "runtime-map",
+      "key": 1,
+      "actual": 202,
+      "expected": 202
+    },
+    {
+      "path": "runtime-map",
+      "key": 2,
+      "actual": 303,
+      "expected": 303
+    },
+    {
+      "path": "runtime-map",
+      "key": 3,
+      "actual": 0,
+      "expected": 0
+    },
+    {
+      "path": "runtime-map",
+      "key": 4,
+      "actual": 0,
+      "expected": 0
+    },
+    {
+      "path": "runtime-map",
+      "key": 4294967295,
+      "actual": 0,
+      "expected": 0
+    },
+    {
+      "path": "runtime-other-type",
+      "key": 7,
+      "actual": 0,
+      "expected": 0,
+      "helper_calls": [
+        [
+          124893511101984,
+          7
+        ]
+      ]
+    }
+  ],
+  "scope": "Host code/metadata checks; no kernel or app timing"
+}

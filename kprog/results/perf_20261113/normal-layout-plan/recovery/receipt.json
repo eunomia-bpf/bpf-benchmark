@@ -1,0 +1,31 @@
+{
+  "recorded": "2026-11-15T02:43:12Z",
+  "scope": "Restore the missing canonical ELF using its same-build official intermediate and recorded objcopy transforms; no kernel compilation",
+  "inputs": [
+    {
+      "path": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux.unstripped",
+      "bytes": 884981944,
+      "sections": {
+        ".text": "1387d3114d32794c098eb9f90c628a99c8ce615e9e90af38d00926625da37741",
+        ".BTF": "e14b053e5bf46412befe4bffffba6ed870db238a6b07460803757db803c4367f"
+      },
+      "build_ids": [
+        "aaef85918c784ee10e001d7aef9f043ec555d226"
+      ]
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+      "bytes": 408902160,
+      "sections": {
+        ".text": "1387d3114d32794c098eb9f90c628a99c8ce615e9e90af38d00926625da37741",
+        ".BTF": "e14b053e5bf46412befe4bffffba6ed870db238a6b07460803757db803c4367f"
+      },
+      "build_ids": [
+        "aaef85918c784ee10e001d7aef9f043ec555d226"
+      ]
+    }
+  ],
+  "same_text_btf": true,
+  "same_build_ids": true,
+  "recorded_objcopy": "savedcmd_vmlinux := objcopy --set-section-flags .modinfo=noload --set-section-flags '.rel*'=noload --set-section-flags '!.rel*.dyn'=noload --set-section-flags '.rel.*'=noload vmlinux.unstripped vmlinux; objcopy --remove-section=.modinfo --remove-section='.rel*' --remove-section='!.rel*.dyn' --remove-section='.rel.*' -w --strip-unneeded-symbol='__mod_device_table__*' vmlinux\n"
+}

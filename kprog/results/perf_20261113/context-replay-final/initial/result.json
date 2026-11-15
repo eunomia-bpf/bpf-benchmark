@@ -1,0 +1,14 @@
+{
+  "started": "2026-11-15T02:49:21.644172+00:00",
+  "archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/16.failure.tar.gz",
+  "build": "/var/tmp/kprog-tmp/perf/context-body-replay",
+  "compiler": "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+  "compiler_sha256": "5236d0ea94daf23da9e89a98d00bcb8f6c18c389388f1bf76da4d2592e5987b0",
+  "scope": "Archived generated-C compiler replay through current single B pipeline",
+  "generated_c_bytes": 573663,
+  "compiled": false,
+  "error": "'Popen' object has no attribute 'check_returncode'",
+  "finished": "2026-11-15T02:49:28.464607+00:00",
+  "wall_seconds": 6.820457797002746,
+  "address_space_limit_bytes": 25769803776
+}

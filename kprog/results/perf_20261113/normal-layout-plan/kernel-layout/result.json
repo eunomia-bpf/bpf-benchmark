@@ -1,0 +1,242 @@
+{
+  "layout": {
+    "array": {
+      "map_type": 56,
+      "max_entries": 68,
+      "elem_size": 288,
+      "index_mask": 292,
+      "value": 304,
+      "array_type": 2
+    },
+    "hash": {
+      "key_size": 60,
+      "buckets": 448,
+      "n_buckets": 824,
+      "hashrnd": 832,
+      "bucket_size": 16,
+      "head": 0,
+      "first": 0,
+      "node": 0,
+      "next": 0,
+      "hash": 40,
+      "key": 48
+    },
+    "lpm": {
+      "map_type": 56,
+      "lpm_type": 11,
+      "root": 288,
+      "max_prefixlen": 384,
+      "data_size": 392,
+      "child": 0,
+      "child_stride": 8,
+      "node_prefixlen": 16,
+      "node_flags": 20,
+      "node_data": 24,
+      "key_prefixlen": 0,
+      "key_data": 4
+    },
+    "probe_read": {
+      "user_helper": 18446744071600224448,
+      "kernel_helper": 18446744071600224640,
+      "nmi_uaccess_okay": 18446744071598346672,
+      "kernel_allowed": 18446744071598346880,
+      "current_task": 18446744071648772120,
+      "user_ptr_max": 18446744071648986720,
+      "boot_cpu_data": 18446744071639042656,
+      "pagefault_disabled": 9388,
+      "x86_capability": 48
+    }
+  },
+  "groups": [
+    {
+      "group": "array",
+      "expected": {
+        "map_type": 56,
+        "max_entries": 68,
+        "elem_size": 288,
+        "index_mask": 292,
+        "value": 304,
+        "array_type": 2
+      },
+      "actual": {
+        "map_type": 56,
+        "max_entries": 68,
+        "elem_size": 288,
+        "index_mask": 292,
+        "value": 304,
+        "array_type": 2
+      },
+      "equal": true
+    },
+    {
+      "group": "hash",
+      "expected": {
+        "key_size": 60,
+        "buckets": 448,
+        "n_buckets": 824,
+        "hashrnd": 832,
+        "bucket_size": 16,
+        "head": 0,
+        "first": 0,
+        "node": 0,
+        "next": 0,
+        "hash": 40,
+        "key": 48
+      },
+      "actual": {
+        "key_size": 60,
+        "buckets": 448,
+        "n_buckets": 824,
+        "hashrnd": 832,
+        "bucket_size": 16,
+        "head": 0,
+        "first": 0,
+        "node": 0,
+        "next": 0,
+        "hash": 40,
+        "key": 48
+      },
+      "equal": true
+    },
+    {
+      "group": "lpm",
+      "expected": {
+        "map_type": 56,
+        "lpm_type": 11,
+        "root": 288,
+        "max_prefixlen": 384,
+        "data_size": 392,
+        "child": 0,
+        "child_stride": 8,
+        "node_prefixlen": 16,
+        "node_flags": 20,
+        "node_data": 24,
+        "key_prefixlen": 0,
+        "key_data": 4
+      },
+      "actual": {
+        "map_type": 56,
+        "lpm_type": 11,
+        "root": 288,
+        "max_prefixlen": 384,
+        "data_size": 392,
+        "child": 0,
+        "child_stride": 8,
+        "node_prefixlen": 16,
+        "node_flags": 20,
+        "node_data": 24,
+        "key_prefixlen": 0,
+        "key_data": 4
+      },
+      "equal": true
+    },
+    {
+      "group": "probe_read",
+      "expected": {
+        "user_helper": 18446744071600224448,
+        "kernel_helper": 18446744071600224640,
+        "nmi_uaccess_okay": 18446744071598346672,
+        "kernel_allowed": 18446744071598346880,
+        "current_task": 18446744071648772120,
+        "user_ptr_max": 18446744071648986720,
+        "boot_cpu_data": 18446744071639042656,
+        "pagefault_disabled": 9388,
+        "x86_capability": 48
+      },
+      "actual": {
+        "user_helper": 18446744071600224448,
+        "kernel_helper": 18446744071600224640,
+        "nmi_uaccess_okay": 18446744071598346672,
+        "kernel_allowed": 18446744071598346880,
+        "current_task": 18446744071648772120,
+        "user_ptr_max": 18446744071648986720,
+        "boot_cpu_data": 18446744071639042656,
+        "pagefault_disabled": 9388,
+        "x86_capability": 48
+      },
+      "equal": true
+    }
+  ],
+  "kernel": "/workspaces/.agent-state/kprog-ck/build-x86",
+  "historical": [
+    {
+      "group": "array",
+      "reference": "/workspaces/repository/corpus/results/perf-corrected-all-lto-linker-20261114/runtime-array-layout.json",
+      "previous": {
+        "map_type": 56,
+        "max_entries": 68,
+        "elem_size": 288,
+        "index_mask": 292,
+        "value": 304,
+        "array_type": 2
+      },
+      "different_fields": []
+    },
+    {
+      "group": "hash",
+      "reference": "/workspaces/repository/corpus/results/perf-corrected-all-lto-linker-20261114/runtime-hash-layout.json",
+      "previous": {
+        "key_size": 60,
+        "buckets": 448,
+        "n_buckets": 824,
+        "hashrnd": 832,
+        "bucket_size": 16,
+        "head": 0,
+        "first": 0,
+        "node": 0,
+        "next": 0,
+        "hash": 40,
+        "key": 48
+      },
+      "different_fields": []
+    },
+    {
+      "group": "lpm",
+      "reference": "/workspaces/repository/corpus/results/perf-corrected-all-lto-linker-20261114/runtime-lpm-layout.json",
+      "previous": {
+        "map_type": 56,
+        "lpm_type": 11,
+        "root": 288,
+        "max_prefixlen": 384,
+        "data_size": 392,
+        "child": 0,
+        "child_stride": 8,
+        "node_prefixlen": 16,
+        "node_flags": 20,
+        "node_data": 24,
+        "key_prefixlen": 0,
+        "key_data": 4
+      },
+      "different_fields": []
+    },
+    {
+      "group": "probe_read",
+      "reference": "/workspaces/repository/corpus/results/perf-corrected-all-lto-linker-20261114/runtime-probe-read-layout.json",
+      "previous": {
+        "user_helper": 18446744071583447232,
+        "kernel_helper": 18446744071583447424,
+        "nmi_uaccess_okay": 18446744071581569456,
+        "kernel_allowed": 18446744071581569664,
+        "current_task": 18446744071631994904,
+        "user_ptr_max": 18446744071632209504,
+        "boot_cpu_data": 18446744071622265440,
+        "pagefault_disabled": 9388,
+        "x86_capability": 48
+      },
+      "different_fields": [
+        "user_helper",
+        "kernel_helper",
+        "nmi_uaccess_okay",
+        "kernel_allowed",
+        "current_task",
+        "user_ptr_max",
+        "boot_cpu_data"
+      ]
+    }
+  ],
+  "kernel_btf_sha256": "87b89a9770178d2b4e290b2a00f8bbdd681be60e3817de657af0b035eeb71f90",
+  "live_btf_sha256": "87b89a9770178d2b4e290b2a00f8bbdd681be60e3817de657af0b035eeb71f90",
+  "kallsyms_sha256": "d6c7805548a05e91e3f2b253edf12812a0ca520746fe3706cba644f1cc503130",
+  "fields": 38,
+  "scope": "Live boot BTF/kallsyms against canonical boot ELF and independent C field resolver; no application execution"
+}

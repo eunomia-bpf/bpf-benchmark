@@ -1,0 +1,109 @@
+[
+  {
+    "command": [
+      "clang-18",
+      "-target",
+      "x86_64-linux-gnu",
+      "-O3",
+      "-march=native",
+      "-foptimize-sibling-calls",
+      "-fomit-frame-pointer",
+      "-mno-red-zone",
+      "-mgeneral-regs-only",
+      "-fno-stack-protector",
+      "-c",
+      "/workspaces/repository/kprog/test/non_pic_map.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/native-relocations/non-pic.native.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "objdump",
+      "-dr",
+      "-Mintel",
+      "/var/tmp/kprog-tmp/perf/native-relocations/non-pic.native.o"
+    ],
+    "returncode": 0,
+    "stdout": "\n/var/tmp/kprog-tmp/perf/native-relocations/non-pic.native.o:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000000000 <entry>:\n   0:\t50                   \tpush   rax\n   1:\t48 89 fe             \tmov    rsi,rdi\n   4:\t48 8d 3d 00 00 00 00 \tlea    rdi,[rip+0x0]        # b <entry+0xb>\n\t\t\t7: R_X86_64_PC32\ttest_map-0x4\n   b:\tb8 01 00 00 00       \tmov    eax,0x1\n  10:\tff d0                \tcall   rax\n  12:\t48 85 c0             \ttest   rax,rax\n  15:\t74 05                \tje     1c <entry+0x1c>\n  17:\t48 8b 00             \tmov    rax,QWORD PTR [rax]\n  1a:\t59                   \tpop    rcx\n  1b:\tc3                   \tret\n  1c:\t31 c0                \txor    eax,eax\n  1e:\t59                   \tpop    rcx\n  1f:\tc3                   \tret\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/deps/native_link-89e6cdf9b2bb753e",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/native-relocations/non-pic.native.o",
+      "--symbol",
+      "entry",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/non-pic.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=entry (32 bytes), 1 reachable symbol(s) total\n  - entry (vaddr 0x0, 32 bytes) [entry]\nnative-link: wrote proof object 40 bytes, 1 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/non-pic.proof.o\n"
+  },
+  {
+    "command": [
+      "objdump",
+      "-dr",
+      "-Mintel",
+      "/var/tmp/kprog-tmp/perf/native-relocations/non-pic.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "\n/var/tmp/kprog-tmp/perf/native-relocations/non-pic.proof.o:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000000000 <entry>:\n   0:\t50                   \tpush   rax\n   1:\t48 89 fe             \tmov    rsi,rdi\n   4:\t48 8b 3d 00 00 00 00 \tmov    rdi,QWORD PTR [rip+0x0]        # b <entry+0xb>\n\t\t\t7: R_X86_64_GOTPCREL\ttest_map-0x4\n   b:\tb8 01 00 00 00       \tmov    eax,0x1\n  10:\tff d0                \tcall   rax\n  12:\t48 85 c0             \ttest   rax,rax\n  15:\t74 09                \tje     20 <entry+0x20>\n  17:\t48 8b 00             \tmov    rax,QWORD PTR [rax]\n  1a:\t59                   \tpop    rcx\n  1b:\te9 08 00 00 00       \tjmp    28 <entry+0x28>\n  20:\t31 c0                \txor    eax,eax\n  22:\t59                   \tpop    rcx\n  23:\te9 00 00 00 00       \tjmp    28 <entry+0x28>\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/deps/native_link-89e6cdf9b2bb753e",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/native-relocations/non-pic.proof.o",
+      "--symbol",
+      "entry",
+      "--mode",
+      "kernel",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/image.bin",
+      "--output-map-patches",
+      "/var/tmp/kprog-tmp/perf/native-relocations/image.maps",
+      "--output-relocs",
+      "/var/tmp/kprog-tmp/perf/native-relocations/image.relocs",
+      "--output-abi",
+      "/var/tmp/kprog-tmp/perf/native-relocations/native.abi",
+      "--link-plan",
+      "/var/tmp/kprog-tmp/perf/native-relocations/plan.json"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=entry (40 bytes), 1 reachable symbol(s) total\n  - entry (vaddr 0x0, 40 bytes) [entry]\nnative-link: wrote 50 bytes -> /var/tmp/kprog-tmp/perf/native-relocations/image.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/native-relocations/image.relocs\nnative-link: wrote 1 map patch site(s) -> /var/tmp/kprog-tmp/perf/native-relocations/image.maps\nnative-link: wrote ABI metadata -> /var/tmp/kprog-tmp/perf/native-relocations/native.abi\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/deps/native_link-89e6cdf9b2bb753e",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/native-relocations/non-pic.proof.o",
+      "--symbol",
+      "entry",
+      "--mode",
+      "kernel",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/image.bin",
+      "--output-map-patches",
+      "/var/tmp/kprog-tmp/perf/native-relocations/image.maps",
+      "--output-relocs",
+      "/var/tmp/kprog-tmp/perf/native-relocations/image.relocs",
+      "--output-abi",
+      "/var/tmp/kprog-tmp/perf/native-relocations/native.abi",
+      "--link-plan",
+      "/var/tmp/kprog-tmp/perf/native-relocations/plan.json"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=entry (40 bytes), 1 reachable symbol(s) total\n  - entry (vaddr 0x0, 40 bytes) [entry]\nnative-link: wrote 438 bytes -> /var/tmp/kprog-tmp/perf/native-relocations/image.bin (1 relocs)\nnative-link: wrote 1 relocs -> /var/tmp/kprog-tmp/perf/native-relocations/image.relocs\nnative-link: wrote 1 map patch site(s) -> /var/tmp/kprog-tmp/perf/native-relocations/image.maps\nnative-link: wrote ABI metadata -> /var/tmp/kprog-tmp/perf/native-relocations/native.abi\n"
+  }
+]

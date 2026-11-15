@@ -1,0 +1,39 @@
+{
+  "recorded": "2026-11-15T03:12:18Z",
+  "before": {
+    "path": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+    "bytes": 408902160,
+    "sections": {
+      ".text": "1387d3114d32794c098eb9f90c628a99c8ce615e9e90af38d00926625da37741",
+      ".BTF": "e14b053e5bf46412befe4bffffba6ed870db238a6b07460803757db803c4367f"
+    },
+    "build_ids": [
+      "aaef85918c784ee10e001d7aef9f043ec555d226"
+    ]
+  },
+  "authoritative": {
+    "path": "/workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/compressed/vmlinux.bin",
+    "bytes": 69209480,
+    "sections": {
+      ".text": "bfb140ed0ca0a4caf826384c0fb4ec6ffed64224b7667106da4f193e59c0eba9",
+      ".BTF": "87b89a9770178d2b4e290b2a00f8bbdd681be60e3817de657af0b035eeb71f90"
+    },
+    "build_ids": [
+      "d5f06faf5af883d24ba16a9687f8fadb4de81b98"
+    ]
+  },
+  "boot_image_sha256": "2667103e0fbb3fc54467f59bb15ef0cdc128e54ca7c30d7718e66d0199c4e1ec",
+  "extracted": {
+    "path": "/workspaces/.agent-state/kprog-ck/build-x86/.vmlinux.perf-boot-repair",
+    "bytes": 70229804,
+    "sections": {
+      ".text": "bfb140ed0ca0a4caf826384c0fb4ec6ffed64224b7667106da4f193e59c0eba9",
+      ".BTF": "87b89a9770178d2b4e290b2a00f8bbdd681be60e3817de657af0b035eeb71f90"
+    },
+    "build_ids": [
+      "d5f06faf5af883d24ba16a9687f8fadb4de81b98"
+    ]
+  },
+  "canonical_sha256": "f3743c05960fc700e29f31e0035a23cdd4b2500d5e6e7542984d5f6fba75babe",
+  "scope": "Metadata repair only; boot image/source/guests unchanged. Earlier module-build ELF was not authoritative."
+}

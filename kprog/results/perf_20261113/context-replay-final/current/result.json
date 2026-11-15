@@ -1,0 +1,17 @@
+{
+  "started": "2026-11-15T02:52:33.683654+00:00",
+  "archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/16.failure.tar.gz",
+  "build": "/var/tmp/kprog-tmp/perf/context-body-replay",
+  "compiler": "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+  "compiler_sha256": "5236d0ea94daf23da9e89a98d00bcb8f6c18c389388f1bf76da4d2592e5987b0",
+  "scope": "Archived generated-C compiler replay through current single B pipeline",
+  "generated_c_bytes": 573663,
+  "native_input": "/var/tmp/kprog-tmp/perf/context-body-replay/kernel.native.o",
+  "native_input_sha256": "489a7a69184baae011350d4c7632faf0f5539d9df8417aa2892246cc49be777f",
+  "compiled": true,
+  "object": "/var/tmp/kprog-tmp/perf/context-body-replay/trusted_x86.bpf.o",
+  "frontend_ir": "/var/tmp/kprog-tmp/perf/context-body-replay/trusted_x86.bpf.bounds-input.bc",
+  "finished": "2026-11-15T03:26:49.216466+00:00",
+  "wall_seconds": 2055.5328317280073,
+  "address_space_limit_bytes": 25769803776
+}
