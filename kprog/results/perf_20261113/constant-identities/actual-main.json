@@ -1,0 +1,419 @@
+{
+  "observations": {
+    "main-control": {
+      "raw": "/workspaces/kprog-raw/perf/20261115-constant-identities/main-control",
+      "input_sha256": "b82b7613186277602d529ed9416872745ece8f9ccc2ca44647c380b57cb35d09",
+      "bounds_compiler_sha256": "a7d9ab49cc3a2e8a6edd3fa73e184fbe7af2d8a7aab6fabf74563e4105690690",
+      "case": {
+        "name": "normal",
+        "flags": [],
+        "completed": true,
+        "commands": [
+          {
+            "command": [
+              "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+              "/proc/self/fd/3",
+              "-o",
+              "/proc/self/fd/5"
+            ],
+            "returncode": 0,
+            "wall_seconds": 0.8407479299930856,
+            "user_seconds": 0.780326,
+            "system_seconds": 0.060024999999999995,
+            "max_rss_kib": 162680
+          },
+          {
+            "command": [
+              "/workspaces/repository/kprog/stock-path/bin/clang",
+              "-x",
+              "ir",
+              "-w",
+              "-g",
+              "-O3",
+              "-mcpu=v4",
+              "-target",
+              "bpf",
+              "-mllvm",
+              "-bpf-stack-size=4096",
+              "-D__TARGET_ARCH_x86",
+              "-I",
+              "/workspaces/repository/vendor/libbpf/include/uapi",
+              "-I",
+              "/workspaces/repository/vendor/libbpf/src",
+              "-I",
+              "/usr/include/x86_64-linux-gnu",
+              "-c",
+              "/proc/self/fd/5",
+              "-mllvm",
+              "-stop-before=prologepilog",
+              "-o",
+              "/proc/self/fd/6"
+            ],
+            "returncode": 0,
+            "wall_seconds": 7.269096806005109,
+            "user_seconds": 7.134149,
+            "system_seconds": 0.133987,
+            "max_rss_kib": 297116
+          },
+          {
+            "command": [
+              "/opt/virtme-ng/bin/python3",
+              "/workspaces/repository/kprog/x86/whole_word_spills.py",
+              "/proc/self/fd/6",
+              "/proc/self/fd/7",
+              "--report",
+              "/workspaces/kprog-raw/perf/20261115-constant-identities/main-control/normal/lowering.json"
+            ],
+            "returncode": 0,
+            "wall_seconds": 5.905439119989751,
+            "user_seconds": 5.770688,
+            "system_seconds": 0.133992,
+            "max_rss_kib": 167504
+          },
+          {
+            "command": [
+              "llc-18",
+              "-x=mir",
+              "-O3",
+              "-march=bpf",
+              "-mcpu=v4",
+              "-bpf-stack-size=4096",
+              "-start-before=prologepilog",
+              "-filetype=obj",
+              "/proc/self/fd/7",
+              "-o",
+              "/proc/self/fd/4"
+            ],
+            "returncode": 0,
+            "wall_seconds": 1.3048245829995722,
+            "user_seconds": 1.223284,
+            "system_seconds": 0.08101799999999999,
+            "max_rss_kib": 214704
+          },
+          {
+            "command": [
+              "llc-18",
+              "-x=mir",
+              "-O3",
+              "-march=bpf",
+              "-mcpu=v4",
+              "-bpf-stack-size=4096",
+              "-start-before=prologepilog",
+              "-stop-after=prologepilog",
+              "/proc/self/fd/7",
+              "-o",
+              "/proc/self/fd/8"
+            ],
+            "returncode": 0,
+            "wall_seconds": 1.2760651650023647,
+            "user_seconds": 1.179437,
+            "system_seconds": 0.096035,
+            "max_rss_kib": 231108
+          }
+        ],
+        "spill_slots_before_packing": 52,
+        "object_bytes": 2176496,
+        "post_pei_stack_bytes": {
+          "trusted_x86_x86_sim_xdp": 784
+        }
+      }
+    },
+    "main-candidate": {
+      "raw": "/workspaces/kprog-raw/perf/20261115-constant-identities/main-candidate",
+      "input_sha256": "b82b7613186277602d529ed9416872745ece8f9ccc2ca44647c380b57cb35d09",
+      "bounds_compiler_sha256": "654ecd48ab5733774a1be51cdab29f2a106a5ec6b9ab3ffeb217f24ec9842890",
+      "case": {
+        "name": "normal",
+        "flags": [],
+        "completed": true,
+        "commands": [
+          {
+            "command": [
+              "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+              "/proc/self/fd/3",
+              "-o",
+              "/proc/self/fd/5"
+            ],
+            "returncode": 0,
+            "wall_seconds": 0.8665105359978043,
+            "user_seconds": 0.7960969999999999,
+            "system_seconds": 0.070008,
+            "max_rss_kib": 162952
+          },
+          {
+            "command": [
+              "/workspaces/repository/kprog/stock-path/bin/clang",
+              "-x",
+              "ir",
+              "-w",
+              "-g",
+              "-O3",
+              "-mcpu=v4",
+              "-target",
+              "bpf",
+              "-mllvm",
+              "-bpf-stack-size=4096",
+              "-D__TARGET_ARCH_x86",
+              "-I",
+              "/workspaces/repository/vendor/libbpf/include/uapi",
+              "-I",
+              "/workspaces/repository/vendor/libbpf/src",
+              "-I",
+              "/usr/include/x86_64-linux-gnu",
+              "-c",
+              "/proc/self/fd/5",
+              "-mllvm",
+              "-stop-before=prologepilog",
+              "-o",
+              "/proc/self/fd/6"
+            ],
+            "returncode": 0,
+            "wall_seconds": 3.5003386760072317,
+            "user_seconds": 3.33041,
+            "system_seconds": 0.07280299999999999,
+            "max_rss_kib": 174132
+          },
+          {
+            "command": [
+              "/opt/virtme-ng/bin/python3",
+              "/workspaces/repository/kprog/x86/whole_word_spills.py",
+              "/proc/self/fd/6",
+              "/proc/self/fd/7",
+              "--report",
+              "/workspaces/kprog-raw/perf/20261115-constant-identities/main-candidate/normal/lowering.json"
+            ],
+            "returncode": 0,
+            "wall_seconds": 0.4336152120085899,
+            "user_seconds": 0.387245,
+            "system_seconds": 0.046029,
+            "max_rss_kib": 64156
+          },
+          {
+            "command": [
+              "llc-18",
+              "-x=mir",
+              "-O3",
+              "-march=bpf",
+              "-mcpu=v4",
+              "-bpf-stack-size=4096",
+              "-start-before=prologepilog",
+              "-filetype=obj",
+              "/proc/self/fd/7",
+              "-o",
+              "/proc/self/fd/4"
+            ],
+            "returncode": 0,
+            "wall_seconds": 0.6149790549825411,
+            "user_seconds": 0.571507,
+            "system_seconds": 0.043038,
+            "max_rss_kib": 127828
+          },
+          {
+            "command": [
+              "llc-18",
+              "-x=mir",
+              "-O3",
+              "-march=bpf",
+              "-mcpu=v4",
+              "-bpf-stack-size=4096",
+              "-start-before=prologepilog",
+              "-stop-after=prologepilog",
+              "/proc/self/fd/7",
+              "-o",
+              "/proc/self/fd/8"
+            ],
+            "returncode": 0,
+            "wall_seconds": 0.5847778859897517,
+            "user_seconds": 0.532335,
+            "system_seconds": 0.052031999999999995,
+            "max_rss_kib": 127184
+          }
+        ],
+        "spill_slots_before_packing": 47,
+        "object_bytes": 1132336,
+        "post_pei_stack_bytes": {
+          "trusted_x86_x86_sim_xdp": 784
+        }
+      }
+    },
+    "main-liveness": {
+      "raw": "/workspaces/kprog-raw/perf/20261115-constant-identities/main-liveness",
+      "input_sha256": "b82b7613186277602d529ed9416872745ece8f9ccc2ca44647c380b57cb35d09",
+      "bounds_compiler_sha256": "654ecd48ab5733774a1be51cdab29f2a106a5ec6b9ab3ffeb217f24ec9842890",
+      "case": {
+        "name": "normal",
+        "flags": [],
+        "completed": true,
+        "commands": [
+          {
+            "command": [
+              "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+              "/proc/self/fd/3",
+              "-o",
+              "/proc/self/fd/5"
+            ],
+            "returncode": 0,
+            "wall_seconds": 0.8534955399809405,
+            "user_seconds": 0.791173,
+            "system_seconds": 0.061935,
+            "max_rss_kib": 163116
+          },
+          {
+            "command": [
+              "/workspaces/repository/kprog/stock-path/bin/clang",
+              "-x",
+              "ir",
+              "-w",
+              "-g",
+              "-O3",
+              "-mcpu=v4",
+              "-target",
+              "bpf",
+              "-mllvm",
+              "-bpf-stack-size=4096",
+              "-D__TARGET_ARCH_x86",
+              "-I",
+              "/workspaces/repository/vendor/libbpf/include/uapi",
+              "-I",
+              "/workspaces/repository/vendor/libbpf/src",
+              "-I",
+              "/usr/include/x86_64-linux-gnu",
+              "-c",
+              "/proc/self/fd/5",
+              "-mllvm",
+              "-stop-before=prologepilog",
+              "-o",
+              "/proc/self/fd/6"
+            ],
+            "returncode": 0,
+            "wall_seconds": 3.115427996002836,
+            "user_seconds": 3.044972,
+            "system_seconds": 0.070002,
+            "max_rss_kib": 175436
+          },
+          {
+            "command": [
+              "/opt/virtme-ng/bin/python3",
+              "/workspaces/repository/kprog/x86/whole_word_spills.py",
+              "/proc/self/fd/6",
+              "/proc/self/fd/7",
+              "--report",
+              "/workspaces/kprog-raw/perf/20261115-constant-identities/main-liveness/normal/lowering.json"
+            ],
+            "returncode": 0,
+            "wall_seconds": 0.4239162340236362,
+            "user_seconds": 0.385695,
+            "system_seconds": 0.03797,
+            "max_rss_kib": 64224
+          },
+          {
+            "command": [
+              "llc-18",
+              "-x=mir",
+              "-O3",
+              "-march=bpf",
+              "-mcpu=v4",
+              "-bpf-stack-size=4096",
+              "-start-before=prologepilog",
+              "-filetype=obj",
+              "/proc/self/fd/7",
+              "-o",
+              "/proc/self/fd/4"
+            ],
+            "returncode": 0,
+            "wall_seconds": 0.5811532119987532,
+            "user_seconds": 0.534861,
+            "system_seconds": 0.045988,
+            "max_rss_kib": 128016
+          },
+          {
+            "command": [
+              "llc-18",
+              "-x=mir",
+              "-O3",
+              "-march=bpf",
+              "-mcpu=v4",
+              "-bpf-stack-size=4096",
+              "-start-before=prologepilog",
+              "-stop-after=prologepilog",
+              "/proc/self/fd/7",
+              "-o",
+              "/proc/self/fd/8"
+            ],
+            "returncode": 0,
+            "wall_seconds": 0.5805885849986225,
+            "user_seconds": 0.540138,
+            "system_seconds": 0.04001,
+            "max_rss_kib": 127864
+          }
+        ],
+        "spill_slots_before_packing": 47,
+        "object_bytes": 1132336,
+        "code_bytes": 314528,
+        "spill_liveness": {
+          "input": "/proc/self/fd/6",
+          "blocks": 7739,
+          "slots": {
+            "1": 8,
+            "2": 8,
+            "3": 8,
+            "4": 8,
+            "5": 8,
+            "6": 8,
+            "7": 4,
+            "8": 8,
+            "9": 8,
+            "10": 8,
+            "11": 8,
+            "12": 8,
+            "13": 8,
+            "14": 8,
+            "15": 8,
+            "16": 8,
+            "17": 8,
+            "18": 8,
+            "19": 8,
+            "20": 8,
+            "21": 8,
+            "22": 8,
+            "23": 8,
+            "24": 8,
+            "25": 8,
+            "26": 8,
+            "27": 8,
+            "28": 8,
+            "29": 8,
+            "30": 8,
+            "31": 8,
+            "32": 8,
+            "33": 8,
+            "34": 8,
+            "35": 8,
+            "36": 8,
+            "37": 8,
+            "38": 8,
+            "39": 8,
+            "40": 8,
+            "41": 8,
+            "42": 8,
+            "43": 8,
+            "44": 4,
+            "45": 8,
+            "46": 8,
+            "47": 8
+          },
+          "rounds": 4,
+          "conservative_maximum_live_slots": 45,
+          "noninterfering_pairs": [],
+          "scope": "Direct spill CFG diagnostic; partial stores keep the whole old slot live. No rewrite, verifier acceptance or execution."
+        },
+        "post_pei_stack_bytes": {
+          "trusted_x86_x86_sim_xdp": 784
+        }
+      }
+    }
+  },
+  "reference_code_bytes": 991592,
+  "reference_raw": "/workspaces/kprog-raw/perf/20261115-dead-spill/actual-main",
+  "scope": "Retained same frontend through published/candidate B compiler. No native producer rerun, base publication or stock/app acceptance. Anonymous stage outputs closed each case."
+}

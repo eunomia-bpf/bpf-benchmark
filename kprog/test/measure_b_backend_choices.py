@@ -1,10 +1,12 @@
 """Diagnose stack pressure on one retained optimized B IR, with ephemeral outputs.
 
-Each backend choice consumes the same completed bounds IR. Native P, the C
-frontend, bounds transformation and production defaults remain unchanged.
+Each choice resumes the same retained IR. A selected B IR compiler starts
+from the completed frontend; otherwise the completed bounds IR is used.
+This diagnostic never repeats the C frontend or publishes production tools.
 """
 import argparse
 import hashlib
+import io
 import json
 import os
 from pathlib import Path
@@ -18,6 +20,8 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT/'kprog/x86'), str(ROOT/'kprog/test')]
 import trusted_specializer as worker
 from memory_b_pipeline import MemoryPipeline, post_pei_frames
+from analyze_spill_lifetimes import analyze as spill_liveness
+from elftools.elf.elffile import ELFFile
 
 CHOICES = {'normal': [], 'basic': ['-regalloc=basic'], 'pbqp': ['-regalloc=pbqp'],
            'source': ['-misched=source'], 'no-machine-licm': ['-disable-machine-licm'],
@@ -35,6 +39,7 @@ def main(a):
         retained_ir_member=retained_member, input_bytes=len(lowered),
         input_sha256=hashlib.sha256(lowered).hexdigest(),
         bounds_compiler=str(a.bounds) if a.bounds else None,
+        bounds_compiler_sha256=hashlib.sha256(a.bounds.read_bytes()).hexdigest() if a.bounds else None,
         compile_flags=list(map(str, worker.COMPILE_FLAGS)), scope=__doc__, cases=[])
     for name in a.case or CHOICES:
         pipe = MemoryPipeline()
@@ -74,7 +79,11 @@ def main(a):
             before = pipe.stage('.before.mir').read_text()
             slots = re.findall(r'  - \{ id: (\d+),[^\n]*type: spill-slot,[^\n]*size: (\d+),', before)
             case['spill_slots_before_packing'] = len(slots)
-            case['object_bytes'] = len(obj.read_bytes())
+            code = obj.read_bytes()
+            case['object_bytes'] = len(code)
+            elf = ELFFile(io.BytesIO(code))
+            case['code_bytes'] = sum(s['sh_size'] for s in elf.iter_sections() if s['sh_flags'] & 4)
+            case['spill_liveness'] = spill_liveness(pipe.stage('.before.mir'))
             frame = pipe.stage('.after.mir')
             run(['llc-18', '-O3', '-march=bpf', '-mcpu=v4', '-bpf-stack-size=4096',
                  '-start-before=prologepilog', '-stop-after=prologepilog',
