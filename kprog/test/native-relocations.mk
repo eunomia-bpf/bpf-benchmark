@@ -108,6 +108,15 @@ jump-table-forms:
 	objdump -dr -Mintel $(BUILD)/jump-table.native.o > $(OUTPUT)/jump-table.disassembly
 	readelf -rW $(BUILD)/jump-table.native.o > $(OUTPUT)/jump-table.relocations
 
+ABSOLUTE_TABLE_BUILD := /var/tmp/kprog-tmp/perf/absolute-code-tables
+.PHONY: absolute-table-forms
+absolute-table-forms:
+	install -d $(ABSOLUTE_TABLE_BUILD) $(OUTPUT)
+	clang-18 -target x86_64-linux-gnu -O3 -march=native -foptimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -c $(ROOT)/kprog/test/native_absolute_code_table.c -o $(ABSOLUTE_TABLE_BUILD)/absolute.native.o
+	objdump -dr -Mintel $(ABSOLUTE_TABLE_BUILD)/absolute.native.o > $(OUTPUT)/native.disassembly
+	readelf -rW $(ABSOLUTE_TABLE_BUILD)/absolute.native.o > $(OUTPUT)/native.relocations
+	$(LINKER_BINARY) --input $(ABSOLUTE_TABLE_BUILD)/absolute.native.o --symbol absolute_table --mode proof --output $(ABSOLUTE_TABLE_BUILD)/absolute.proof.o > $(OUTPUT)/proof.stdout 2> $(OUTPUT)/proof.stderr
+
 .PHONY: jump-table-check
 jump-table-check: $(LINKER_BINARY) jump-table-forms $(KERNEL_LAYOUT)
 	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_native_jump_tables.py --build $(BUILD) --output $(OUTPUT)/jump-tables --linker $(LINKER_BINARY) --kernel-layout $(KERNEL_LAYOUT)
