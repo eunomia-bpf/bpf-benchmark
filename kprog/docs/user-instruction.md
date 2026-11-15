@@ -67,6 +67,8 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-15 ~00:00 UTC（前半句引用协调者的话）: "native 快 50%、代码量少一半： 有记录，在论文第 3 节。同一个程序走 eBPF 比原生慢 1.57x（x86），原生代码大小是 JIT 的 0.54x。所有优化参数必须打开, 重新测试. [粘贴协调者的表：-march 打开 / 尾部调用优化 打开 / -fno-jump-tables 保留] -fPIC 保留编译参数，多出的读取在链接时去掉 它让每次 map 访问多一次 GOT 读取，链接器绑定 map 时去掉这次读取 是不是都得想办法关掉, 也得通过调优编译参数做到native 快 50%、代码量少一半. 必须要确保这样, 硬性要求"
 - 2026-11-15 ~00:03 UTC（前半句引用协调者的话）: "遇到这种，lane 会逐条记下来，我再拿来问你。禁止问我"
 - 2026-11-15 ~00:04 UTC: "所有都不能问我"
+- 2026-11-15 ~00:06 UTC: "你原话里要你同意的东西（benchmark 设置、论文、故事、设计）保持原样是吧? 确认一下."
+- 2026-11-15 ~00:06 UTC: "强调一下, 通知其他人"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
@@ -75,6 +77,7 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - "不能有多个编译产物"
 - "结果一出来就提交, 有更改就提交 git, 但不能改论文"
 - "不许 revert 提交"
+- "所有都不能问我"；要他同意的东西（benchmark 设置、论文、故事、设计）保持原样（2026-11-15 确认并“强调一下, 通知其他人”）
 
 
 ## Rules relaxed earlier, and why each stays relaxed
