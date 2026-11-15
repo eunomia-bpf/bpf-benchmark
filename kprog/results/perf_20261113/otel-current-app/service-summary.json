@@ -1,0 +1,19 @@
+{
+  "started": "2026-11-15T18:00:48.403202+00:00",
+  "command": [
+    "python3",
+    "/workspaces/repository/kprog/test/verified_corpus.py",
+    "otelcol-ebpf-profiler/profiling",
+    "1",
+    "10",
+    "1"
+  ],
+  "service": {
+    "ready": true,
+    "arch": 1,
+    "endpoint": "/sys/kernel/debug/bpf_x86_native_lab/specializer"
+  },
+  "returncode": 0,
+  "service_returncode": -15,
+  "finished": "2026-11-15T18:02:34.213890+00:00"
+}

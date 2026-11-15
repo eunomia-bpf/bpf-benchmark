@@ -1,6 +1,6 @@
 # Current-image OTel checked-C application attempt
 
-2026-11-15, source612c9fc18. Running; no result claimed.
+2026-11-15, source612c9fc18. Completed18:02:35Z. Make status0, application status error.
 
 The existing checked-corpus entry previously selected a manifest from the
 removed 2026-11-14 producer route. It now uses verified_corpus.py's normal
@@ -34,3 +34,23 @@ and both-arm outputs; isolate any real rejection. P-SPECIALIZE-app remains
 open. A448B historical frame and16/16scale stock passes do not establish this
 whole-app result. Katran fixed-frequency A/A+A/B and live-plan capture remain
 C's independent task on CPUs0-7.
+
+Actual outcome: the baseline finished OK. Both fresh read_task_struct requests
+(type17 RAW_TRACEPOINT, native590aa121) passed stock B verification (programs24
+and30), completed the normal checked-native compiler, then failed installation
+with error524 after165 verifier instructions. The application subsequently
+reported the refused shim socket. This is a phase1 failure, not whole-app
+acceptance despite Make0. Raw corpus metadata/result are committed at
+corpus/results/x86_kvm_corpus_20261115_180139_894113/.
+
+The kernel relocation switch in bdfa49b694e1 lets MAP_POINTER/MAP_VALUE fall
+through IMAGE_POINTER. For a packed map-value offset, it range-rejects the
+large64bit target as a code offset; a smaller target can be misrebased as a
+code address. Kernel099357174783 (parent5c3c95a4d) jumps map cases directly to
+the64bit literal write, leaving image-relative rebasing only for kind12.
+The real old-kernel regression independently reproduces map-value-offset
+load=-524 with a valid four-instruction B, expected42. See map-image-relocs/.
+The in-place kernel/image rebuild and corrected executions remain pending.
+
+All service archives and logs stay under the raw root. The completed scratch
+Docker disk was removed (removed-build-copies.txt); no result data was removed.
