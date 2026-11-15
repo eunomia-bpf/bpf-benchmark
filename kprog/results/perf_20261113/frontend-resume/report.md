@@ -37,3 +37,10 @@ job, build, image or base was created; all LTO stays on together.
 Raw: `/workspaces/kprog-raw/perf/20261115-frontend-resume` (launcher927027,
 Make0). Only logs/results/identity records are archived here; all compiled
 fixture products remain in their existing canonical `store-writeback` build.
+
+10:51UTC follow-up: one `current-otel-backend` job is queued behind frontend
+launcher921682 ending. Raw continuation logs will be under
+`/workspaces/kprog-raw/perf/20261115-otel-backend`; it uses the completed
+matching current frontend record or reports the missing/incomplete input as
+an error. No extra frontend work, product build, guest or image lock. This
+queue is not an actual OTel B compilation or acceptance result.
