@@ -1,0 +1,14 @@
+taskset -c 8-11 prlimit --as=8589934592 -- python3 /workspaces/repository/kprog/test/check_load_oracles.py --build /var/tmp/kprog-tmp/perf/load-writeback --output /workspaces/kprog-raw/perf/20261115-width-constants/oracles
+x86 mov-load route host cross-check: OK (713 cases)
+x86 stack arm route host cross-check: OK (117782 cases)
+stack output lifetime: 200 pointer/memset/memcpy/helper cases pass
+load writeback: 14 saved-pointer/overlap/RSP/recovery cases pass
+width capture: 65538 single-evaluation/narrowing/promotion cases pass
+stack output lifetime: 200 pointer/memset/memcpy/helper cases pass
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/test/check_load_oracles.py", line 62, in <module>
+    main(p.parse_args())
+  File "/workspaces/repository/kprog/test/check_load_oracles.py", line 55, in main
+    raise RuntimeError(f'Load/stack oracle failures: {failures}')
+RuntimeError: Load/stack oracle failures: [{'name': 'test_x86_store_route_host', 'returncode': 1}]
+make: *** [kprog/test/native-relocations.mk:258: load-oracles] Error 1

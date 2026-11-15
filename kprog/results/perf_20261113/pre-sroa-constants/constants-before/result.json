@@ -1,0 +1,47 @@
+{
+  "observations": [
+    {
+      "function": "probe_function",
+      "ir_bytes": 5726,
+      "branches": 25,
+      "allocas": 4,
+      "selected_calls": 4
+    },
+    {
+      "function": "probe_const_function",
+      "ir_bytes": 5667,
+      "branches": 25,
+      "allocas": 4,
+      "selected_calls": 4
+    },
+    {
+      "function": "probe_contract",
+      "ir_bytes": 6211,
+      "branches": 28,
+      "allocas": 4,
+      "selected_calls": 4
+    },
+    {
+      "function": "probe_const_contract",
+      "ir_bytes": 688,
+      "branches": 0,
+      "allocas": 2,
+      "selected_calls": 1
+    },
+    {
+      "function": "probe_const_capture",
+      "ir_bytes": 1129,
+      "branches": 0,
+      "allocas": 4,
+      "selected_calls": 1
+    },
+    {
+      "function": "probe_real_write",
+      "ir_bytes": 44473,
+      "branches": 78,
+      "allocas": 68,
+      "selected_calls": 0
+    }
+  ],
+  "scope": "Small width-gate diagnostic before LLVM passes; no production change or actual OTel result"
+}

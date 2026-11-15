@@ -1,0 +1,18 @@
+{
+  "pid": 898093,
+  "fd": 9,
+  "lock": "/workspaces/.agent-state/kprog-lanes/locks/image",
+  "command": [
+    "bash",
+    "kprog/test/run_verified_make.sh",
+    "/workspaces/kprog-raw/perf/20261115-current-otel-frontend",
+    "-r",
+    "-f",
+    "kprog/test/native-relocations.mk",
+    "current-otel-frontend",
+    "OUTPUT=/workspaces/kprog-raw/perf/20261115-current-otel-frontend",
+    ""
+  ],
+  "before": "pos:\t0\nflags:\t0102001\nmnt_id:\t13717\nino:\t263463\nlock:\t1: FLOCK  ADVISORY  READ 0 08:50:263463 0 EOF\n",
+  "after": "pos:\t0\nflags:\t0102001\nmnt_id:\t13717\nino:\t263463\n"
+}

@@ -1,0 +1,3 @@
+install -d /workspaces/kprog-raw/perf/20261115-current-otel-frontend/debug-tools
+apt-get --simulate --no-install-recommends install gdb > /workspaces/kprog-raw/perf/20261115-current-otel-frontend/debug-tools/package-plan.log 2>&1
+taskset -c 8-11 prlimit --as=2147483648 -- env DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install gdb > /workspaces/kprog-raw/perf/20261115-current-otel-frontend/debug-tools/package-install.log 2>&1

@@ -1,0 +1,98 @@
+[
+  {
+    "command": [
+      "clang-18",
+      "-c",
+      "/workspaces/repository/kprog/test/native_bmi2.S",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o",
+      "--symbol",
+      "shlx32reg",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=shlx32reg (79 bytes), 1 reachable symbol(s) total\n  - shlx32reg (vaddr 0xa1, 79 bytes) [entry]\nnative-link: wrote proof object 87 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.bpf.bounds-input.bc"
+    ],
+    "returncode": 1,
+    "stdout": "",
+    "stderr": "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.bpf.c:19:976: error: cannot assign to variable '__x86_l_mem_width' with const-qualified type 'const __u8' (aka 'const unsigned char')\n/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.bpf.c:19:878: note: variable '__x86_l_mem_width' declared const here\n1 error generated.\n"
+  }
+]

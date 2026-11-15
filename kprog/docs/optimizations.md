@@ -308,3 +308,13 @@ frontend. No optimizer flag/pass is disabled. A diagnostic width gate had25–28
 pre-optimizer branches via ordinary/function locals and0 through captured
 constant contract locals. Actual handler/normal-B validation follows; this
 does not yet claim a full OTel compile or runtime improvement. All LTO stays on.
+
+Pre-SROA receipt (3f27add92/c25ed3354/a7b399a9a): actual write probe78→12
+branches before LLVM passes,65,538 width semantic cases and scoped suite pass,
+CPU/shared-C512 store+4,032 BMI2 cases pass with normal B compilation. Actual
+B instruction sections change in16 store/six32-bit shift fixtures; ten BMI2
+allocated sets match prior output, and generic/direct matches16/16. Full
+changed-B stock execution and OTel improvement remain unmeasured. Revised
+actual frontend queued910213 behind preserved original898093, same one
+build; input locks now release before optimizer work. Initial compile failure
+and all diagnostics: `../results/perf_20261113/pre-sroa-constants/report.md`.

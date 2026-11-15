@@ -1,0 +1,104 @@
+taskset -c 8-11 prlimit --as=2147483648 -- python3 /workspaces/repository/kprog/test/sample_compiler_stack.py --pid 898194 --output /workspaces/kprog-raw/perf/20261115-current-otel-frontend/stacks-late
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+0x000075d75d90cdf1 in ?? () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+
+Thread 1 (Thread 0x75d75965e780 (LWP 898194) "clang"):
+#0  0x000075d75d90cdf1 in ?? () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#1  0x000075d75d90affa in llvm::PromoteMemToReg(llvm::ArrayRef<llvm::AllocaInst*>, llvm::DominatorTree&, llvm::AssumptionCache*) () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#2  0x000075d75dcc7499 in ?? () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#3  0x000075d75dcc630e in llvm::SROAPass::run(llvm::Function&, llvm::AnalysisManager<llvm::Function>&) () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#4  0x000075d75fe52096 in ?? () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#5  0x000075d75ce3a551 in llvm::PassManager<llvm::Function, llvm::AnalysisManager<llvm::Function>>::run(llvm::Function&, llvm::AnalysisManager<llvm::Function>&) () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#6  0x000075d75ed9edb6 in ?? () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#7  0x000075d75ce3dd30 in llvm::ModuleToFunctionPassAdaptor::run(llvm::Module&, llvm::AnalysisManager<llvm::Module>&) () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#8  0x000075d75ed9eba6 in ?? () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#9  0x000075d75ce39261 in llvm::PassManager<llvm::Module, llvm::AnalysisManager<llvm::Module>>::run(llvm::Module&, llvm::AnalysisManager<llvm::Module>&) () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#10 0x000075d765135590 in ?? () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#11 0x000075d76512cef3 in clang::EmitBackendOutput(clang::DiagnosticsEngine&, clang::HeaderSearchOptions const&, clang::CodeGenOptions const&, clang::TargetOptions const&, clang::LangOptions const&, llvm::StringRef, llvm::Module*, clang::BackendAction, llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem>, std::unique_ptr<llvm::raw_pwrite_stream, std::default_delete<llvm::raw_pwrite_stream> >, clang::BackendConsumer*) () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#12 0x000075d7654b5a07 in clang::BackendConsumer::HandleTranslationUnit(clang::ASTContext&) () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#13 0x000075d7640ad3d6 in clang::ParseAST(clang::Sema&, bool, bool) () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#14 0x000075d765f1c62c in clang::FrontendAction::Execute() () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#15 0x000075d765e990b4 in clang::CompilerInstance::ExecuteAction(clang::FrontendAction&) () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#16 0x000075d765f9863d in clang::ExecuteCompilerInvocation(clang::CompilerInstance*) () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#17 0x00005fc215d3d42e in cc1_main(llvm::ArrayRef<char const*>, char const*, void*) ()
+#18 0x00005fc215d3a894 in ?? ()
+#19 0x000075d765b49972 in ?? () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#20 0x000075d75cbfaf77 in llvm::CrashRecoveryContext::RunSafely(llvm::function_ref<void ()>) () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#21 0x000075d765b49237 in clang::driver::CC1Command::Execute(llvm::ArrayRef<std::optional<llvm::StringRef> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, bool*) const () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#22 0x000075d765b11518 in clang::driver::Compilation::ExecuteCommand(clang::driver::Command const&, clang::driver::Command const*&, bool) const () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#23 0x000075d765b1177f in clang::driver::Compilation::ExecuteJobs(clang::driver::JobList const&, llvm::SmallVectorImpl<std::pair<int, clang::driver::Command const*> >&, bool) const () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#24 0x000075d765b2dc20 in clang::driver::Driver::ExecuteCompilation(clang::driver::Compilation&, llvm::SmallVectorImpl<std::pair<int, clang::driver::Command const*> >&) () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#25 0x00005fc215d3a1ec in clang_main(int, char**, llvm::ToolContext const&) ()
+#26 0x00005fc215d47383 in main ()
+[Inferior 1 (process 898194) detached]
+
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+0x000075d75d90cdd5 in ?? () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+
+Thread 1 (Thread 0x75d75965e780 (LWP 898194) "clang"):
+#0  0x000075d75d90cdd5 in ?? () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#1  0x000075d75d90affa in llvm::PromoteMemToReg(llvm::ArrayRef<llvm::AllocaInst*>, llvm::DominatorTree&, llvm::AssumptionCache*) () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#2  0x000075d75dcc7499 in ?? () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#3  0x000075d75dcc630e in llvm::SROAPass::run(llvm::Function&, llvm::AnalysisManager<llvm::Function>&) () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#4  0x000075d75fe52096 in ?? () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#5  0x000075d75ce3a551 in llvm::PassManager<llvm::Function, llvm::AnalysisManager<llvm::Function>>::run(llvm::Function&, llvm::AnalysisManager<llvm::Function>&) () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#6  0x000075d75ed9edb6 in ?? () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#7  0x000075d75ce3dd30 in llvm::ModuleToFunctionPassAdaptor::run(llvm::Module&, llvm::AnalysisManager<llvm::Module>&) () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#8  0x000075d75ed9eba6 in ?? () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#9  0x000075d75ce39261 in llvm::PassManager<llvm::Module, llvm::AnalysisManager<llvm::Module>>::run(llvm::Module&, llvm::AnalysisManager<llvm::Module>&) () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#10 0x000075d765135590 in ?? () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#11 0x000075d76512cef3 in clang::EmitBackendOutput(clang::DiagnosticsEngine&, clang::HeaderSearchOptions const&, clang::CodeGenOptions const&, clang::TargetOptions const&, clang::LangOptions const&, llvm::StringRef, llvm::Module*, clang::BackendAction, llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem>, std::unique_ptr<llvm::raw_pwrite_stream, std::default_delete<llvm::raw_pwrite_stream> >, clang::BackendConsumer*) () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#12 0x000075d7654b5a07 in clang::BackendConsumer::HandleTranslationUnit(clang::ASTContext&) () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#13 0x000075d7640ad3d6 in clang::ParseAST(clang::Sema&, bool, bool) () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#14 0x000075d765f1c62c in clang::FrontendAction::Execute() () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#15 0x000075d765e990b4 in clang::CompilerInstance::ExecuteAction(clang::FrontendAction&) () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#16 0x000075d765f9863d in clang::ExecuteCompilerInvocation(clang::CompilerInstance*) () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#17 0x00005fc215d3d42e in cc1_main(llvm::ArrayRef<char const*>, char const*, void*) ()
+#18 0x00005fc215d3a894 in ?? ()
+#19 0x000075d765b49972 in ?? () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#20 0x000075d75cbfaf77 in llvm::CrashRecoveryContext::RunSafely(llvm::function_ref<void ()>) () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#21 0x000075d765b49237 in clang::driver::CC1Command::Execute(llvm::ArrayRef<std::optional<llvm::StringRef> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, bool*) const () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#22 0x000075d765b11518 in clang::driver::Compilation::ExecuteCommand(clang::driver::Command const&, clang::driver::Command const*&, bool) const () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#23 0x000075d765b1177f in clang::driver::Compilation::ExecuteJobs(clang::driver::JobList const&, llvm::SmallVectorImpl<std::pair<int, clang::driver::Command const*> >&, bool) const () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#24 0x000075d765b2dc20 in clang::driver::Driver::ExecuteCompilation(clang::driver::Compilation&, llvm::SmallVectorImpl<std::pair<int, clang::driver::Command const*> >&) () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#25 0x00005fc215d3a1ec in clang_main(int, char**, llvm::ToolContext const&) ()
+#26 0x00005fc215d47383 in main ()
+[Inferior 1 (process 898194) detached]
+
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+0x000075d75cc47d66 in llvm::SmallPtrSetImplBase::insert_imp_big(void const*) () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+
+Thread 1 (Thread 0x75d75965e780 (LWP 898194) "clang"):
+#0  0x000075d75cc47d66 in llvm::SmallPtrSetImplBase::insert_imp_big(void const*) () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#1  0x000075d75d90cdc9 in ?? () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#2  0x000075d75d90affa in llvm::PromoteMemToReg(llvm::ArrayRef<llvm::AllocaInst*>, llvm::DominatorTree&, llvm::AssumptionCache*) () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#3  0x000075d75dcc7499 in ?? () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#4  0x000075d75dcc630e in llvm::SROAPass::run(llvm::Function&, llvm::AnalysisManager<llvm::Function>&) () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#5  0x000075d75fe52096 in ?? () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#6  0x000075d75ce3a551 in llvm::PassManager<llvm::Function, llvm::AnalysisManager<llvm::Function>>::run(llvm::Function&, llvm::AnalysisManager<llvm::Function>&) () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#7  0x000075d75ed9edb6 in ?? () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#8  0x000075d75ce3dd30 in llvm::ModuleToFunctionPassAdaptor::run(llvm::Module&, llvm::AnalysisManager<llvm::Module>&) () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#9  0x000075d75ed9eba6 in ?? () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#10 0x000075d75ce39261 in llvm::PassManager<llvm::Module, llvm::AnalysisManager<llvm::Module>>::run(llvm::Module&, llvm::AnalysisManager<llvm::Module>&) () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#11 0x000075d765135590 in ?? () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#12 0x000075d76512cef3 in clang::EmitBackendOutput(clang::DiagnosticsEngine&, clang::HeaderSearchOptions const&, clang::CodeGenOptions const&, clang::TargetOptions const&, clang::LangOptions const&, llvm::StringRef, llvm::Module*, clang::BackendAction, llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem>, std::unique_ptr<llvm::raw_pwrite_stream, std::default_delete<llvm::raw_pwrite_stream> >, clang::BackendConsumer*) () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#13 0x000075d7654b5a07 in clang::BackendConsumer::HandleTranslationUnit(clang::ASTContext&) () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#14 0x000075d7640ad3d6 in clang::ParseAST(clang::Sema&, bool, bool) () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#15 0x000075d765f1c62c in clang::FrontendAction::Execute() () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#16 0x000075d765e990b4 in clang::CompilerInstance::ExecuteAction(clang::FrontendAction&) () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#17 0x000075d765f9863d in clang::ExecuteCompilerInvocation(clang::CompilerInstance*) () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#18 0x00005fc215d3d42e in cc1_main(llvm::ArrayRef<char const*>, char const*, void*) ()
+#19 0x00005fc215d3a894 in ?? ()
+#20 0x000075d765b49972 in ?? () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#21 0x000075d75cbfaf77 in llvm::CrashRecoveryContext::RunSafely(llvm::function_ref<void ()>) () from /usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1
+#22 0x000075d765b49237 in clang::driver::CC1Command::Execute(llvm::ArrayRef<std::optional<llvm::StringRef> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, bool*) const () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#23 0x000075d765b11518 in clang::driver::Compilation::ExecuteCommand(clang::driver::Command const&, clang::driver::Command const*&, bool) const () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#24 0x000075d765b1177f in clang::driver::Compilation::ExecuteJobs(clang::driver::JobList const&, llvm::SmallVectorImpl<std::pair<int, clang::driver::Command const*> >&, bool) const () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#25 0x000075d765b2dc20 in clang::driver::Driver::ExecuteCompilation(clang::driver::Compilation&, llvm::SmallVectorImpl<std::pair<int, clang::driver::Command const*> >&) () from /usr/lib/llvm-18/bin/../lib/libclang-cpp.so.18.1
+#26 0x00005fc215d3a1ec in clang_main(int, char**, llvm::ToolContext const&) ()
+#27 0x00005fc215d47383 in main ()
+[Inferior 1 (process 898194) detached]
+

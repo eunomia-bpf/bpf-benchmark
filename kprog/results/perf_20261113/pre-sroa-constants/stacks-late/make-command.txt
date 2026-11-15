@@ -1,0 +1,1 @@
+taskset -c 8-11 make -r -f kprog/test/native-relocations.mk frontend-stacks COMPILER_PID=898194 OUTPUT=/workspaces/kprog-raw/perf/20261115-current-otel-frontend/stacks-late 
