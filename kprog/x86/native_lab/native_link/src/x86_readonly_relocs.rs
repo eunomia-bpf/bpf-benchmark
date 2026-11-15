@@ -132,6 +132,35 @@ pub(super) fn control_targets(elf: &object::File, sym: &SymInfo)
 // by the next table of any entry point in the source object.
 pub(super) fn table_span(elf: &object::File, layouts: &[SymbolLayout],
     section_index: object::SectionIndex, address: i128) -> Result<Option<(u64, u64)>> {
+    if let Some(span) = code_table_span(elf, layouts, section_index, address)? {
+        return Ok(Some(span));
+    }
+    let section = elf.section_by_index(section_index)?;
+    if !immutable_section(section.kind(), section.name()?) { return Ok(None); }
+    let Ok(address) = u64::try_from(address) else { return Ok(None); };
+    // A section-symbol relocation can point into a named scalar object. Its
+    // ELF extent is the same boundary used for a direct symbol relocation;
+    // copying the container would pull in unrelated roots' code tables.
+    // Overlapping aliases retain the union of the containing object extents.
+    let mut extent: Option<(u64, u64)> = None;
+    for symbol in elf.symbols().filter(|symbol| symbol.kind() == SymbolKind::Data &&
+        symbol.section_index() == Some(section_index) && symbol.size() > 0) {
+        let start = symbol.address().checked_sub(section.address())
+            .ok_or_else(|| anyhow!("read-only object is below its section base"))?;
+        let end = start.checked_add(symbol.size())
+            .ok_or_else(|| anyhow!("read-only object extent overflow"))?;
+        if start <= address && address < end {
+            extent = Some(match extent {
+                Some((first, last)) => (first.min(start), last.max(end)),
+                None => (start, end),
+            });
+        }
+    }
+    Ok(extent.map(|(start, end)| (start, end - start)))
+}
+
+fn code_table_span(elf: &object::File, layouts: &[SymbolLayout],
+    section_index: object::SectionIndex, address: i128) -> Result<Option<(u64, u64)>> {
     let Ok(base) = u64::try_from(address) else { return Ok(None); };
     let included: Vec<_> = layouts.iter().map(|layout| &layout.sym).collect();
     if !relative_table_bases(elf, &included, section_index)?.0.contains(&base) { return Ok(None); }

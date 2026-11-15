@@ -388,3 +388,11 @@ bytes, two actual frontend continuations match normal B, six stale/incomplete
 identity cases stop before compilation. This avoids repeated frontend work
 when diagnosing the pipeline, not native runtime work; actual OTel completion
 is still pending. `../results/perf_20261113/frontend-resume/report.md`.
+
+2026-11-15 read-only scalar object spans: section-symbol PC32 references now
+retain the containing immutable ELF data object's extent, including interior
+addresses and overlapping aliases. Direct symbol references already use that
+boundary. This avoids copying unrelated jump tables from the same container;
+code-table spans keep their existing handling. Actual Tracee seven failures
+and the new start/interior regression reproduce the old whole-section error.
+Validation follows; this is linker correctness, not a measured runtime gain.
