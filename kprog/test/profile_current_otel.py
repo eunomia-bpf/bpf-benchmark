@@ -1,5 +1,6 @@
 """Measure current OTel production frontend stages with matching captured metadata."""
 import argparse
+import fcntl
 import hashlib
 import json
 from pathlib import Path
@@ -26,11 +27,7 @@ def main(a):
     if metadata['kernel_kfunc_context']:
         raise ValueError('This captured measurement requires a kernel-function ABI inventory')
     worker.declarations(metadata)
-    release=(Path('/workspaces/.agent-state/kprog-ck/build-x86/include/config/kernel.release')).read_text().strip()
-    native=ROOT/f'vendor/build/native-bpf/x86/{release}/native/otel/otelcol-ebpf-profiler.native.o'
-    linker=ROOT/'kprog/x86/native_lab/native_link/target/release/native-link'
     record=dict(entry=entry,metadata=str(a.metadata),metadata_sha256=digest(a.metadata),prog_type=metadata['prog_type'],
-        native=str(native),native_sha256=digest(native),linker_sha256=digest(linker),
         provenance='Current unified-flag native object plus historical matching perf-entry map/type metadata; no fresh application capture or equal-work claim',
         scope='Production proof, render and chunk preprocessing only; no LLVM B backend or kernel submission')
     commands=[];started=time.monotonic()
@@ -41,20 +38,32 @@ def main(a):
         (a.output/'commands.json').write_text(json.dumps(commands,indent=2)+'\n')
         if code:raise subprocess.CalledProcessError(code,list(map(str,command)))
     try:
-        proof=a.build/'trusted_x86.proof.o'
-        run([linker,'--input',native,'--symbol',entry,'--mode','proof','--preserve-entry-abi','--output',proof])
-        record['proof_sha256']=digest(proof)
-        insns,functions,exit_addr,data=worker.gen.parse_native_linked_program('trusted_x86',a.build)
-        record.update(native_instructions=len(insns),maps=len(metadata['maps']))
-        source=a.build/'trusted_x86.bpf.c'
-        text=worker.gen.render_program('trusted_x86',insns,functions,kind=worker.context_kind(metadata['prog_type']),
-            exit_addr=exit_addr,rodata16=data,program_section=metadata['section'],
-            trusted_map_bindings=[dict(native_symbol=m['name'],value_offset=m.get('value_offset')) for m in metadata['maps']])
-        source.write_text(text.replace('#include "../x86_sim_local_bpf.h"','#include '+json.dumps(str(ROOT/'kprog/x86/x86_sim_local_bpf.h'))))
-        record['source_sha256']=digest(source)
-        expanded=worker.preprocess_simulator(str(ROOT/'kprog/stock-path/bin/clang'),source,run)
-        with expanded.open('rb') as stream:record.update(measure_stream(source,stream,expanded.stat().st_size))
-        record.update(preprocessed_sha256=digest(expanded),completed=True)
+        # Shared kernel/native/linker inputs are consumed only in this block.
+        # The expensive optimized LLVM stage below uses our canonical CPP and
+        # system toolchain, so it must not hold up another lane's image writer.
+        lock_path=Path('/workspaces/.agent-state/kprog-lanes/locks/image')
+        with lock_path.open('a') as capture_lock:
+            fcntl.flock(capture_lock.fileno(),fcntl.LOCK_SH)
+            record['input_lock_wait_seconds']=time.monotonic()-started
+            release=Path('/workspaces/.agent-state/kprog-ck/build-x86/include/config/kernel.release').read_text().strip()
+            native=ROOT/f'vendor/build/native-bpf/x86/{release}/native/otel/otelcol-ebpf-profiler.native.o'
+            linker=ROOT/'kprog/x86/native_lab/native_link/target/release/native-link'
+            record.update(native=str(native),native_sha256=digest(native),linker_sha256=digest(linker))
+            proof=a.build/'trusted_x86.proof.o'
+            run([linker,'--input',native,'--symbol',entry,'--mode','proof','--preserve-entry-abi','--output',proof])
+            record['proof_sha256']=digest(proof)
+            insns,functions,exit_addr,data=worker.gen.parse_native_linked_program('trusted_x86',a.build)
+            record.update(native_instructions=len(insns),maps=len(metadata['maps']))
+            source=a.build/'trusted_x86.bpf.c'
+            text=worker.gen.render_program('trusted_x86',insns,functions,kind=worker.context_kind(metadata['prog_type']),
+                exit_addr=exit_addr,rodata16=data,program_section=metadata['section'],
+                trusted_map_bindings=[dict(native_symbol=m['name'],value_offset=m.get('value_offset')) for m in metadata['maps']])
+            source.write_text(text.replace('#include "../x86_sim_local_bpf.h"','#include '+json.dumps(str(ROOT/'kprog/x86/x86_sim_local_bpf.h'))))
+            record['source_sha256']=digest(source)
+            expanded=worker.preprocess_simulator(str(ROOT/'kprog/stock-path/bin/clang'),source,run)
+            with expanded.open('rb') as stream:record.update(measure_stream(source,stream,expanded.stat().st_size))
+            record.update(preprocessed_sha256=digest(expanded),completed=True)
+        record['input_lock_released_before_frontend']=True
         if a.frontend:
             # This is the exact first LLVM stage of compile_simulator, with
             # the same flags/product path. Stop here to isolate its resource
