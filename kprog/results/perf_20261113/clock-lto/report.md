@@ -69,3 +69,20 @@ rebuild in this step. The shipped Katran balancer is c0dc65fc, matching the
 84-site inventory above. This establishes which artifacts the next run uses,
 not their whole-app output equivalence. C was notified to run one fixed-
 frequency A/A and one A/B and retain the actual native plans/blob metadata.
+
+2026-11-15 runtime-plan replay support (86a95222e): the helper audit can now
+consume the saved runtime plan. It runs the same native -> proof -> kernel
+sequence as the loader, retaining only hashes, lengths, helper sites,
+relocation targets, ABI and map-patch observations. All compiled outputs live
+in memfds and close at completion. The native input, plan and linker hashes
+are checked for changes during analysis; this adds no application load gate.
+The Katran audit uses the already-published canonical linker and accepts
+`KATRAN_LINK_PLAN=/actual/saved.link-plan.json`, without an implicit rebuild.
+
+The clock-only fixture compiled with the unified x86 flags and replayed using
+the actual boot plan: proof1704B, runtime blob10B, one16B relocation whose
+kind1 target is18446744072220283792, the actual fast-clock symbol. Both linker
+invocations returned0. This validates the replay tool and normal call binding,
+not a timed Katran arm. See runtime-audit.json/runtime-audit-commands.json;
+full logs remain in the raw runtime-audit directory. No image/CLI rebuild was
+needed for this analysis-only tooling.

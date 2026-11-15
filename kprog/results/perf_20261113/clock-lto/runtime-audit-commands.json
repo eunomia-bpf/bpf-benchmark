@@ -1,0 +1,40 @@
+[
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/helper-audit/clock.native.o",
+      "--symbol",
+      "clock_audit",
+      "--mode",
+      "proof",
+      "--show",
+      "--output",
+      "/proc/self/fd/4"
+    ],
+    "returncode": 0
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/proc/self/fd/4",
+      "--symbol",
+      "clock_audit",
+      "--mode",
+      "kernel",
+      "--link-plan",
+      "/workspaces/kprog-raw/perf/20261115-clock-lto/kernel-facts/clock.link-plan.json",
+      "--show",
+      "--output",
+      "/proc/self/fd/5",
+      "--output-relocs",
+      "/proc/self/fd/6",
+      "--output-map-patches",
+      "/proc/self/fd/7",
+      "--output-abi",
+      "/proc/self/fd/8"
+    ],
+    "returncode": 0
+  }
+]

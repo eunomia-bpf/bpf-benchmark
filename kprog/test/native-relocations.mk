@@ -463,9 +463,11 @@ host-cpu-check:
 memory-b-continuation-check: $(CONTEXT_TOOL)
 	taskset -c 16-19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_memory_b_pipeline.py --frontend $(FRONTEND) --object $(REFERENCE_OBJECT) --bounds $(CONTEXT_TOOL) --output $(OUTPUT)
 
+# Audit the published canonical linker; do not rebuild it during artifact analysis.
+KATRAN_LINK_PLAN ?=
 .PHONY: katran-helper-audit
-katran-helper-audit: build
-	taskset -c 16-19 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/audit_native_helper_sites.py --native $(ROOT)/corpus/results/katran-c-hdr-20261115/objects/balancer.native.o --symbol balancer_ingress --linker $(LINKER_BINARY) --output $(OUTPUT)
+katran-helper-audit:
+	taskset -c 16-19 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/audit_native_helper_sites.py --native $(ROOT)/corpus/results/katran-c-hdr-20261115/objects/balancer.native.o --symbol balancer_ingress --linker $(LINKER_BINARY) $(if $(KATRAN_LINK_PLAN),--link-plan $(KATRAN_LINK_PLAN),) --output $(OUTPUT)
 
 .PHONY: clock-kernel-facts
 clock-kernel-facts:

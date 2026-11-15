@@ -1,0 +1,55 @@
+{
+  "native": "/var/tmp/kprog-tmp/perf/helper-audit/clock.native.o",
+  "symbol": "clock_audit",
+  "native_sha256": "fb9ca63c91639196ea6dcc97717bf853add8bc79ee1aa415e23d261128596c47",
+  "linker_sha256": "64eb98aa10c5e8b117278d77a7abf006bcf83dbc61d8ec3dc12ebcc5574a064d",
+  "proof_bytes": 1704,
+  "proof_sha256": "31689d5ce37e5a6bc7b1c28e405170ed063ef79d9ab31f0fd50c7b4f652c0003",
+  "helper_sites": [
+    {
+      "helper": "bpf_ktime_get_ns",
+      "input_offset": 1,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "clock_audit"
+    }
+  ],
+  "helper_counts": {
+    "bpf_ktime_get_ns": 1
+  },
+  "scope": "Current object/proof CFG; no timed-image/map-LTO/kernel execution certification",
+  "runtime": {
+    "link_plan": "/workspaces/kprog-raw/perf/20261115-clock-lto/kernel-facts/clock.link-plan.json",
+    "link_plan_sha256": "e1084b0f32d4fef6fd7800ce4abe0ff1eca374c1c2d9918af61a74596d747dd6",
+    "blob_bytes": 10,
+    "blob_sha256": "cfb9b7fdfa469570a7cec05d908422f325a179b47e3906c769bb594311843b63",
+    "relocs_bytes": 16,
+    "relocs_sha256": "4ce20c094fe7e23c19a0cd347e7b67eefbfb154c188f457c76fe9097179b8b12",
+    "relocations": [
+      {
+        "offset": 1,
+        "kind": 1,
+        "target": 18446744072220283792,
+        "helper_names": [
+          "__native_x86_ktime_get_mono_fast_ns"
+        ]
+      }
+    ],
+    "map_patches": "",
+    "abi": "version\tnative-link-abi-v2\ncallee_saved_mask\t0\nload_site\t9,1,1\n",
+    "helper_sites": [
+      {
+        "helper": "bpf_ktime_get_ns",
+        "input_offset": 1,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "clock_audit"
+      }
+    ],
+    "helper_counts": {
+      "bpf_ktime_get_ns": 1
+    },
+    "lookup_maps": [],
+    "scope": "Normal proof-to-kernel replay of supplied facts; compare hashes with captured run to establish identity; no kernel execution"
+  }
+}
