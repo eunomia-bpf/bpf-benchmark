@@ -275,6 +275,10 @@ current-otel-backend: $(CONTEXT_TOOL)
 frontend-resume-host: $(CONTEXT_TOOL)
 	taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_frontend_resume.py --build /var/tmp/kprog-tmp/perf/store-writeback --bounds $(CONTEXT_TOOL) --output $(OUTPUT)/resume
 
+.PHONY: tracee-proof-survey
+tracee-proof-survey:
+	taskset -c 16-19 prlimit --as=4294967296 -- python3 $(ROOT)/kprog/test/survey_native_proofs.py --native $(ROOT)/vendor/build/native-bpf/x86/$$(cat $(KDIR)/include/config/kernel.release)/native/tracee/tracee.native.o --linker $(LINKER_BINARY) --build /var/tmp/kprog-tmp/perf/native-proof-survey --output $(OUTPUT)
+
 .PHONY: frontend-debugger frontend-stacks
 frontend-debugger:
 	install -d $(OUTPUT)
