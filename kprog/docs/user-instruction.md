@@ -78,6 +78,8 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-15 ~01:0x UTC: "现在的设计是什么"
 - 2026-11-15 ~05:55 UTC: "? qutonkk11"
 - 2026-11-15 ~08:55 UTC: "???"
+- 2026-11-15 ~09:1x UTC: "你说过 -fPIC 一定要要去掉吗"
+- 2026-11-15 ~09:1x UTC: "干嘛这么久? 你是不是要求太多了>"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 

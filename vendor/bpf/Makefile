@@ -44,9 +44,10 @@ NATIVE_TARGET_FLAGS := $(if $(filter arm64 aarch64,$(ARCH)),--target=aarch64-lin
 NATIVE_ARCH_CFLAGS := $(if $(filter x86,$(ARCH)),-march=native -mno-red-zone -mgeneral-regs-only) \
 	$(if $(filter arm64 aarch64,$(ARCH)),-mtune=neoverse-n1 -mgeneral-regs-only)
 # One compile-flag set for every app (operator 2026-11-15: "编译参数所有 app 统一.", "所有优化参数必须打开").
-# No -fPIC (operator 2026-11-15: -fPIC "是不是都得想办法关掉"): map references are R_X86_64_PC32 and the
-# repository native-link binds them (perf 3f9021e37); the image must carry that linker.
-NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -c \
+# -fPIC makes map references R_X86_64_REX_GOTPCRELX, the form native-link patches; without it
+# clang emits R_X86_64_PC32 and the map address reaches the kernel unpatched. It costs no
+# codegen: every app's xdp/.text section is byte-identical with and without it.
+NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c \
 	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
 	-fno-asynchronous-unwind-tables -fno-unwind-tables \
 	-Wno-unknown-attributes -Wno-compare-distinct-pointer-types
