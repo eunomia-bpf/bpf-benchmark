@@ -8,12 +8,15 @@
 # events. This runs the same tools, with the same environment the runner gives
 # them (runner/libs/app_runners/bcc_set.py:_spawn_child), and keeps everything.
 #
-# Usage: bcc-tool-output-inner.sh <baseline|post> <out-dir> [seconds]
+# Usage: bcc-tool-output-inner.sh <baseline|post> <out-dir> [seconds] [manifest]
+#   manifest defaults to the image's own object set; pass a directory to run the
+#   post arm against objects built from the current tree instead.
 set -euo pipefail
 
 ARM=${1:?baseline or post}
 OUT=${2:?output directory}
 SECONDS_N=${3:-20}
+MANIFEST=${4:-/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json}
 ROOT=/workspaces/repository
 # BCC_SET_TOOL_SPECS, runner/libs/app_runners/bcc_set.py:33-42.
 TOOLS="capable biosnoop vfsstat opensnoop syscount tcpconnect tcplife runqlat"
@@ -33,7 +36,7 @@ SHIM_ENV=(
 if [ "$ARM" = post ]; then
   SHIM_ENV+=(
     BPFREJIT_SHIM_NATIVE_LOADER=1
-    BPFREJIT_SHIM_NATIVE_MANIFEST=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json
+    BPFREJIT_SHIM_NATIVE_MANIFEST="$MANIFEST"
     BPFREJIT_NATIVE_LOADER_SO=/usr/local/lib/bpfrejit/libnative_loader.so
   )
 fi

@@ -104,3 +104,97 @@ flock -w 5400 /workspaces/.agent-state/kprog-lanes/locks/timing sh -c \
    kprog/perf/one-image/scripts/specialized-timing.sh bcc/set \
    corpus/results/bcc-maps-20261114 <state> 3 180 0-7'
 ```
+
+## Tool output: what the two arms make the tools print
+
+Throughput does not test meaning. A replacement that drops, duplicates or
+misreads events keeps the same invocation count and the same instruction count
+per invocation. This application has a check for that: run the eight tools
+against the frozen workload on both arms and keep their full stdout and
+stderr. `kprog/perf/one-image/scripts/bcc-tool-output.sh` does exactly that,
+and `tool-output-compare.py` diffs the two event streams by event identity
+(kind, not timestamp), so per-arm timing noise does not count as a difference.
+
+### The image's objects misread `struct request`
+
+`biosnoop` prints `Unknown` in the DISK column on the native arm and the
+device name (`loop0`, `sr0`) on the baseline arm. Every row, every run:
+
+| run | objects | baseline DISK | native DISK |
+|---|---|---|---|
+| `bcc-tools-20261114` | image manifest | `loop0` (360), `sr0` (11) | `Unknown` (372) |
+| `bcc-tools-ab-20261115` | this directory's manifest | `loop0` (139), `sr0` (12) | `loop0` (141), `sr0` (11) |
+
+The same source, two object sets, opposite results. So the defect is in the
+image's object, not in the current pipeline.
+
+The mechanism is a compile-time `bpf_core_field_exists` fold. `get_disk()`
+(`bcc/libbpf-tools/core_fixes.bpf.h:103-110`) picks a field by existence:
+```c
+if (bpf_core_field_exists(r->rq_disk))
+        return BPF_CORE_READ(r, rq_disk);     /* request + 8  */
+return BPF_CORE_READ(r, q, disk);             /* *(request) + 96 */
+```
+
+One kernel serves every lane, and that kernel (`7.0.0-rc2+`) has no
+`rq_disk` in `struct request` — commit `f3fa33acca9f` removed it — so only the
+second branch is right. The image's object takes the first:
+
+| object | `tp_btf/block_rq_issue` | `tp_btf/block_rq_insert` | reads |
+|---|---|---|---|
+| image (`a07dfa5e…`) | `movq 0x10(%rsp),%rdx; addq $0x8,%rdx` | `addq $0x8,%rdx` | `request+8` = `mq_ctx` |
+| this directory (`d8e5ab93…`) | `movq 0x28(%rsp),%rdx; addq $0x60,%rdx` | `addq $0x60,%rdx` | `*(request)+96` = `disk` |
+
+`+8` is `struct request`'s `mq_ctx`, not a `gendisk`. `biosnoop` reads
+`major`/`first_minor` from there, `MKDEV` produces a device number no partition
+has, `partitions__get_by_dev` returns nothing, and the tool prints `Unknown`.
+
+The image's object also carries both branches — `cmpl $0x50b00` (5.11) and
+`setb %cl` on a `LINUX_KERNEL_VERSION` read — where this directory's object
+folds the version test away entirely, and it keeps a
+`R_X86_64_REX_GOTPCRELX LINUX_KERNEL_VERSION` relocation inside
+`tp_btf/block_rq_issue` that the current object does not have. Both facts
+point the same way: the image was built with `bpf_core_field_exists(...)`
+defined as the constant `1` (`vendor/bpf/native_compat.h`, deleted in
+`2f83ebd4b`), which folds the existence test to "the field exists" and
+hard-codes the `rq_disk` branch. The current tree compiles against the target
+`vmlinux.h`, where the field is
+genuinely absent and the test folds to `0`.
+
+Six of the eight objects are instruction-for-instruction identical between the
+two sets once branch targets are normalised: `capable`, `opensnoop`, `runqlat`,
+`syscount`, `tcpconnect`, `vfsstat`. `tcplife` differs only in stack-frame
+addressing (`leaq 0x8(%rsp),%rdi` against `movq %rsp,%rdi`, same address).
+`biosnoop` is the one object whose code reads a different field.
+
+### The other seven tools
+
+| tool | result | reading |
+|---|---|---|
+| `capable` | 15 kinds shared; post adds `21 CAP_SYS_ADMIN`, `6 CAP_SETGID`, `7 CAP_SETUID` | the workload's own stressors differ run to run; the dominant `21 CAP_SYS_ADMIN 1 allow` appears in both |
+| `opensnoop` | 405 kinds shared; post-only keys are `stress-ng-sockf` on `/dev/zero` plus the harness's own child tools opening `/sys/kernel/debug/bpf_x86_native_lab/map_ptr` | workload arrival, plus the post arm starting tools that read lab debugfs |
+| `syscount` | per-syscall table, both arms | counts follow the same workload drift |
+| `runqlat` | 15 rows both arms, **0 kinds exclusive to either arm** | identical |
+| `tcpconnect`, `tcplife`, `vfsstat` | header only, both arms | the stress workload opens no TCP connection and no vfs call the tools trace; weak evidence, kept for completeness |
+
+So `biosnoop` is the only tool whose streams differ in **meaning**. It is also
+the only tool that reads a struct field through `bpf_core_field_exists`, which
+is why it is the only one that catches the stale fold.
+
+### Reproducing
+
+```sh
+# the image's own objects (the third argument is the manifest's directory)
+flock -w 5400 /workspaces/.agent-state/kprog-lanes/locks/timing \
+  kprog/perf/one-image/scripts/bcc-tool-output.sh \
+  /workspaces/kprog-raw/C/bcc-tools-<date> 20 0-7
+
+# this directory's objects: pass the manifest itself
+flock -w 5400 /workspaces/.agent-state/kprog-lanes/locks/timing \
+  kprog/perf/one-image/scripts/bcc-tool-output.sh \
+  /workspaces/kprog-raw/C/bcc-tools-ab-<date> 20 0-7 \
+  corpus/results/bcc-samesource-20261114/manifest.json
+
+python3 kprog/results/bcc-samesource-20261114/tool-output-compare.py \
+  /workspaces/kprog-raw/C/bcc-tools-ab-<date>
+```

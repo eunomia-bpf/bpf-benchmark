@@ -4,11 +4,19 @@
 # arm. Mirrors `make -f kprog/perf/one-image/Makefile guest` for the parts a
 # comparison needs (kernel module, debugfs, image load) and nothing else.
 #
-# Usage: bcc-tool-output-guest.sh <out-dir> [seconds]
+# Usage: bcc-tool-output-guest.sh <out-dir> [seconds] [manifest-dir]
 set -euo pipefail
 
 OUT=${1:?output directory}
 SECONDS_N=${2:-20}
+MANIFEST=${3:-/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json}
+# The default manifest lives inside the runtime image, so it needs no mount; a
+# manifest passed for an A/B run lives in the guest filesystem and must be
+# handed to the container, together with the objects that sit beside it.
+MANIFEST_MOUNT=()
+if [ "$MANIFEST" != /opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json ]; then
+  MANIFEST_MOUNT=(-v "$(dirname "$MANIFEST"):$(dirname "$MANIFEST"):ro")
+fi
 ROOT=/workspaces/repository
 HERE=$ROOT/kprog/perf/one-image/scripts
 IMAGE=bpf-benchmark/kprog:current
@@ -38,9 +46,9 @@ for arm in baseline post; do
     -v /sys:/sys -v /sys/fs/bpf:/sys/fs/bpf -v /sys/kernel/debug:/sys/kernel/debug \
     -v /lib/modules:/lib/modules:ro -v /boot:/boot:ro \
     -v "$OUT:$OUT" \
-    "$IMAGE" bash "$OUT/bcc-tool-output-inner.sh" "$arm" "$OUT" "$SECONDS_N"
+    "${MANIFEST_MOUNT[@]}" \
+    "$IMAGE" bash "$OUT/bcc-tool-output-inner.sh" "$arm" "$OUT" "$SECONDS_N" "$MANIFEST"
 done
-echo "=== bcc tool output comparison written under $OUT"
 for arm in baseline post; do
   echo "--- $arm"
   for tool in capable biosnoop vfsstat opensnoop syscount tcpconnect tcplife runqlat; do
