@@ -227,39 +227,6 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 					break;
 				}
 
-				case NATIVE_LAB_RELOC_IMAGE_POINTER: {
-					u64 slot_va;
-
-					if ((size_t)r->offset + 8 >
-					    snapshot_len) {
-						err = -ERANGE;
-						native_lab_emit_error("reloc_bounds", err,
-								      payload, blob_id,
-								      snapshot_len,
-								      blob->reloc_count,
-								      i, r->offset,
-								      r->kind, r->target);
-						break;
-					}
-					if (!final_emit_at) {
-						err = -EINVAL;
-						native_lab_emit_error("missing_final_ip",
-								      err, payload,
-								      blob_id,
-								      snapshot_len,
-								      blob->reloc_count,
-								      i, r->offset,
-								      r->kind, r->target);
-						break;
-					}
-					/* target is a whole-image offset, so the base is
-					 * final_ip, not this chunk's address.
-					 */
-					slot_va = (u64)final_ip + r->target;
-					memcpy(emit_at + r->offset, &slot_va, sizeof(slot_va));
-					break;
-				}
-
 				case NATIVE_LAB_RELOC_HELPER_CALL_REL32: {
 					u64 slot_va;
 					u64 rip_after;

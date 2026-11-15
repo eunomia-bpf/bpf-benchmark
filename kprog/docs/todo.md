@@ -28,6 +28,13 @@
 
 - [x] P-SPECIALIZE-10K（9fc382606、cc83b5d48；本提交结果）：四种 10K 形状正常 B/实际栈帧完成，前端 11.6–26.3s、峰值 399–920MiB；B 328–200624B、帧 0–40B，详见 `perf_20261113/inline-families/scale-10k/`。旧同名 scalar/direct 70.47GiB/SIGKILL 的实际失败已能完成；不跨不同编译管线宣称独立加速比。100K 继续。
 
+**协调者 2026-11-15T22:57:20Z（运营者 2026-11-15 22:50–23:00 的话，见 user-instruction.md）**：
+- 运营者“停掉所有现在的.”：C、perf、formal 三个 lane 和 C 的 Tracee 计时队列 22:53 停下，三个 STOP 文件写着这句原话；主机 CPU 设置回到 powersave、turbo 开、最低 800 MHz。6 小时审核循环照常。
+- 可信模块 kinsn/module/x86/bpf_x86_native_lab.c 回到 66c32c4bc 之前的内容（本提交）：那次为第 12 类重定位加了两处出错返回（reloc_bounds 的 -ERANGE、missing_final_ip 的 -EINVAL）。计时镜像装的是 kprog/perf/direct-native 编出的模块，Tracee 的装载错误在这次改动前后一样；按运营者 2026-11-09“不允许增加新的 check”拿掉。
+- 计时顺序按运营者 2026-11-11 原话“每个应用跑3次之后换下一个应用这样, 广度优先”：六个应用先各跑一轮，再深入单个应用。协调者此前定的“先 Katran 再其余五个”收回。
+- 计时入口用 2026-11-10 复现 05-29 数字的那一套（冻结 framework 在来宾里跑 __runtime-vm-corpus，宿主 CPU 0-7，SAMPLES=3、WORKLOAD_DURATION=180、VM_MEM=64G），加上冻结 Makefile 的 kvm-host-cpu；原生一侧只加清单和 loader 的环境变量。run.sh、queue-under-timing.sh、来宾里的 observe_runtime 包装从计时路径上拿掉。
+- 协调者在运营者原话之外加的计时规定收回：A/A+A/B 协议、计时窗口里整个 Workspace 只跑计时、每个样本前后记 /proc/stat、计时对象保留链接计划和镜像元数据、LTO 全部做完才计时。数字和 05-29 底线（stats 关）按同样设置对照。
+
 **协调者 2026-11-15T16:41:05Z（审核 15Z 已核实）**：
 - [x] P-HOST-CPU（2636bec14；本提交实测）：one-image 在原 vng 前调用冻结 `kvm-host-cpu`，批后恢复 governor/turbo/min/max；成功、命令失败、准备部分失败、SIGTERM 四例通过，真实探针 73 控制值全部恢复，计时中 P-core min=max3.7GHz。`perf_20261113/host-cpu-control/`。C 已通知重跑固定频率 A/A+A/B；未据此宣称新性能数。
 - 计时少了冻结 benchmark 里的一步：顶层 Makefile 的 corpus-kvm-x86 依赖 kvm-host-cpu（performance 调速器、关 turbo、最低频率等于最高频率），kprog/perf/one-image 直接调 vng，把这一步跳过了；主机现在是 powersave、turbo 开、CPU0 1.6 GHz。这是 benchmark 设置本身，按“benchmark 设置保持原样”补回：每批计时前执行 kvm-host-cpu，批结束后把调速器、turbo、最低频率恢复成执行前的值（lab 上还有别的 Workspace 和 CI）。PERF 在 one-image 计时入口做这一处窄改动并告诉 C；然后 Katran 在固定频率下重跑 A/A、A/B 各一次。
