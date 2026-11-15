@@ -12,6 +12,10 @@ static __u64 entropy, expected_entropy;
 static const void *copy_source;
 static void *copy_destination;
 static size_t copy_size, copy_alignment;
+static const void *copy_sources[4];
+static void *copy_destinations[4];
+static size_t copy_sizes[4];
+static unsigned copy_reject_at;
 static jmp_buf rejected;
 static int allow_reject, force_draw;
 static __u64 draw_value;
@@ -40,7 +44,10 @@ void *kprog_c_context_pointer(const void *ctx, __u8 kind, __u32 off)
 __u64 kprog_c_pointer_bits(const void *p) { (void)p; check(0, "unselected projection"); abort(); }
 void __builtin_memcpy_aligned(void *dst, const void *src, size_t size, size_t alignment)
 {
+	check(copies < 4, "too many memory operations");
+	copy_sources[copies] = src; copy_destinations[copies] = dst; copy_sizes[copies] = size;
 	copies++; copy_source = src; copy_destination = dst; copy_size = size; copy_alignment = alignment;
+	if (copy_reject_at && copies == copy_reject_at) { check(allow_reject, "unexpected copy rejection"); longjmp(rejected, 2); }
 	memcpy(dst, src, size);
 }
 static __u64 coordinate(struct kprog_arm64_coordinates *c, unsigned kind)
@@ -50,7 +57,7 @@ static __u64 coordinate(struct kprog_arm64_coordinates *c, unsigned kind)
 	if (!*valid) { *value = kind == 1 ? 2 : 3; *valid = 1; wanted[wanted_count++] = kind; }
 	return *value;
 }
-static __u64 free_value(void) { wanted[wanted_count++] = 6; return fresh(&expected_entropy); }
+static __u64 free_value(void) { wanted[wanted_count++] = 6; return force_draw ? draw_value : fresh(&expected_entropy); }
 static __u64 mask(unsigned width) { return width == 8 ? ~0ULL : (1ULL << (width * 8)) - 1; }
 static __u64 little(const __u8 *bytes, unsigned width)
 {
@@ -62,6 +69,40 @@ static void inputs_equal(struct kprog_arm64_coordinates *actual, struct kprog_ar
 {
 	check(actual->sp_base == expected->sp_base && actual->return_base == expected->return_base && actual->stack_offset == expected->stack_offset && actual->sp_valid == expected->sp_valid && actual->return_valid == expected->return_valid, "coordinate state/cache frame");
 	check(count == wanted_count && !memcmp(requests, wanted, count * sizeof(*requests)) && entropy == expected_entropy, "exact input order/identity/laziness");
+}
+/* Independent register effects used by the two-destination tests. */
+static void expected_write(struct kprog_arm64_coordinates *c, union arm64_sim_gpr *r,
+                           __u8 *t, __u8 *bytes, __u8 *packed, unsigned capacity,
+                           __s64 bias, __u64 dst, __u64 value, unsigned width,
+                           unsigned tag, int preserve)
+{
+	if (!preserve) value &= mask(width);
+	if (dst < 31) { r[dst].x = value; t[dst] = preserve ? tag : 0; }
+	else if (dst == 32) {
+		__s64 old = c->stack_offset;
+		if (preserve && tag == 4) c->stack_offset = (__s64)value;
+		else {
+			if (preserve && tag == 10) value += coordinate(c, 3);
+			c->stack_offset = (__s64)(value - coordinate(c, 1));
+		}
+		if (c->stack_offset > old) {
+			for (unsigned i = 0; i < capacity; i++) if ((__s64)i - bias >= old && (__s64)i - bias < c->stack_offset) bytes[i] = (__u8)free_value();
+			for (unsigned i = 0; i < (capacity + 7) / 8; i++) if ((__s64)(i * 8) - bias < c->stack_offset && (__s64)(i * 8 + 8) - bias > old) packed[i] = 0;
+		}
+	}
+}
+static void expected_stack_store(struct kprog_arm64_coordinates *c, __u8 *bytes,
+                                 __u8 *packed, __u64 *payload, __s64 bias,
+                                 __s64 off, unsigned width, __u64 value, unsigned tag)
+{
+	unsigned at = (unsigned)(off + bias);
+	value &= mask(width);
+	for (unsigned i = 0; i < width; i++) bytes[at + i] = (__u8)(value >> (i * 8));
+	if (width == 8 && !(at & 7)) {
+		if (tag == 4 || tag == 10) payload[at / 8] = value - coordinate(c, tag == 4 ? 1 : 3);
+		packed[at / 8] = tag;
+	} else { packed[at / 8] = 0; packed[(at + width - 1) / 8] = 0; }
+	for (unsigned i = 0; i < width && off + i < c->stack_offset; i++) { bytes[at + i] = (__u8)free_value(); packed[(at + i) / 8] = 0; }
 }
 /* The native instruction front must retain an after-include caller hook. */
 static unsigned override_visits;
@@ -270,6 +311,145 @@ int main(void)
 		cases++;
 	}
 	printf("ARM indexed store adapter %u: %lu source/index cold-input order cases\n", ADAPTER, cases - start);
+	start = cases;
+	static __u64 vectors[64], expected_vectors[64];
+	const unsigned transfers[] = {ARM64_OP_LDP, ARM64_OP_STP, ARM64_OP_LOAD_D0, ARM64_OP_LOAD_Q0, ARM64_OP_STORE_D0, ARM64_OP_STORE_Q0};
+	const __u64 fields[][2] = {{0,1},{15,0},{0,15},{30,31},{31,30},{32,0},{0,32},{255,1},{1,255},{1,1},{32,32},{0x100000020ULL,1}};
+	for (unsigned oi = 0; oi < 6; oi++) for (unsigned ri = 0; ri < (oi < 2 ? 12 : 1); ri++)
+	for (unsigned fi = 0; fi < (oi < 2 ? 5 : 1); fi++) for (unsigned mode = 0; mode < 4; mode++)
+	for (unsigned di = 0; di < 4; di++) {
+		unsigned pair = oi < 2, load = oi == 0 || oi == 2 || oi == 3;
+		unsigned width = pair && flags[fi] ? flags[fi] : 8, lanes = oi == 2 || oi == 4 ? 1 : 2;
+		__u64 first = fields[ri][0], second = fields[ri][1];
+		int rejects = pair && ((load && first == second) || (mode && (first == 15 || second == 15)));
+		int fault = load && di && !rejects;
+		c = (struct kprog_arm64_coordinates){5, 7, -80, 0, 0}; expected_c = c;
+		a = (struct kprog_arm64_addressing){&c, regs, tags, (__u8 *)arena, (__u8 *)packed, payload, 160, 96, NULL, NULL, 0, 255, arena}; before_a = a;
+		for (unsigned i = 0; i < 31; i++) { regs[i].x = 0xfedcba9876543210ULL ^ i; tags[i] = i == 0 ? 10 : i == 1 ? 4 : 0; }
+		regs[15].ptr = raw + 200; tags[15] = 6;
+		for (unsigned i = 0; i < sizeof(raw); i++) raw[i] = (__u8)(cases + i * 31);
+		for (unsigned i = 0; i < 64; i++) vectors[i] = 0x123456789abcdef0ULL ^ ((__u64)i * 0x11223344556677ULL);
+		memcpy(expected_vectors, vectors, sizeof(vectors)); memcpy(expected_raw, raw, sizeof(raw)); memcpy(before_arena, arena, sizeof(arena)); memcpy(before_packed, packed, sizeof(packed)); memcpy(expected_payload, payload, sizeof(payload)); memcpy(before_regs, regs, sizeof(regs)); memcpy(before_tags, tags, sizeof(tags));
+		count = wanted_count = copies = 0; expected_entropy = entropy; draw_value = draws[di];
+		if (load && !rejects) wanted[wanted_count++] = 6;
+		if (!rejects) {
+			if (!fault && mode & 1) before_regs[15].ptr = raw + 208;
+			if (fault && pair) {
+				expected_write(&expected_c, before_regs, before_tags, (__u8 *)before_arena, (__u8 *)before_packed, a.capacity, a.bias, first, 0, 8, 0, 0);
+				expected_write(&expected_c, before_regs, before_tags, (__u8 *)before_arena, (__u8 *)before_packed, a.capacity, a.bias, second, 0, 8, 0, 0);
+			} else if (!fault) {
+				unsigned address = mode == 2 ? 200 : 208;
+				__u64 loaded[2] = {little(raw + address, width), lanes > 1 ? little(raw + address + width, width) : 0};
+				if (pair && load) {
+					expected_write(&expected_c, before_regs, before_tags, (__u8 *)before_arena, (__u8 *)before_packed, a.capacity, a.bias, first, loaded[0], width, 0, 0);
+					expected_write(&expected_c, before_regs, before_tags, (__u8 *)before_arena, (__u8 *)before_packed, a.capacity, a.bias, second, loaded[1], width, 0, 0);
+				} else if (load) { expected_vectors[0] = loaded[0]; expected_vectors[1] = lanes > 1 ? loaded[1] : 0; }
+				else for (unsigned slot = 0; slot < lanes; slot++) {
+					__u64 reg = slot ? second : first, value = pair ? reg == 32 ? (__u64)expected_c.stack_offset + coordinate(&expected_c, 1) : reg < 31 ? before_regs[reg].x + (before_tags[reg] == 4 ? coordinate(&expected_c, 1) : before_tags[reg] == 10 ? coordinate(&expected_c, 3) : 0) : 0 : vectors[slot];
+					for (unsigned i = 0; i < width; i++) expected_raw[address + slot * width + i] = (__u8)(value >> (i * 8));
+				}
+				if (mode & 2) before_regs[15].ptr = raw + (mode == 3 ? 216 : 208);
+			}
+		}
+		allow_reject = rejects;
+		if (setjmp(rejected) == 0) {
+			if (pair) kprog_arm64_pair_step(&a, transfers[oi], load ? first : 255, load ? second : first, load ? 255 : second, 15, 255, mode << 24, 8, flags[fi]);
+			else kprog_arm64_vector_step(&a, &vectors[0], &vectors[1], transfers[oi], 15, 255, mode << 24, 8);
+			check(!rejects, "missing pair duplicate/overlap rejection");
+		}
+		allow_reject = 0; inputs_equal(&c, &expected_c);
+		check(copies == (unsigned)(ADAPTER && !fault && !rejects ? lanes : 0), "pair/vector fault/rejection/slot access count");
+		for (unsigned slot = 0; slot < copies; slot++) check(copy_sizes[slot] == width && (load ? copy_sources[slot] : copy_destinations[slot]) == raw + (mode == 2 ? 200 : 208) + slot * width && copy_alignment == 1, "pair/vector ordered complete memory windows");
+		check(!memcmp(&a, &before_a, sizeof(a)) && !memcmp(regs, before_regs, sizeof(regs)) && !memcmp(tags, before_tags, sizeof(tags)) && !memcmp(vectors, expected_vectors, sizeof(vectors)), "pair/vector GPR/tag/SIMD/profile/writeback frame");
+		check(!memcmp(arena, before_arena, sizeof(arena)) && !memcmp(raw, expected_raw, sizeof(raw)) && !memcmp(packed, before_packed, sizeof(packed)) && !memcmp(payload, expected_payload, sizeof(payload)), "pair/vector whole memory frame");
+		cases++;
+	}
+	printf("ARM pair/vector adapter %u: %lu transfer/recovery/overlap/writeback/frame cases\n", ADAPTER, cases - start);
+	start = cases;
+	const unsigned slot_tags[][2] = {{0,0},{2,3},{4,10},{10,4},{255,1},{0,4},{4,0}};
+	const __u64 private_fields[][2] = {{0,1},{32,1},{0,32},{31,30},{15,1}};
+	force_draw = 0;
+	for (unsigned oi = 0; oi < 6; oi++) for (unsigned ti = 0; ti < 7; ti++) for (unsigned ii = 0; ii < 4; ii++)
+	for (unsigned ri = 0; ri < (oi < 2 ? 5 : 1); ri++) for (unsigned fi = 0; fi < (oi < 2 ? 5 : 1); fi++) for (unsigned released = 0; released < 2; released++) {
+		unsigned pair = oi < 2, load = oi == 0 || oi == 2 || oi == 3;
+		unsigned width = pair && flags[fi] ? flags[fi] : 8, lanes = oi == 2 || oi == 4 ? 1 : 2, index = ii == 0 ? 255 : 10;
+		__u64 first = private_fields[ri][0], second = private_fields[ri][1];
+		c = (struct kprog_arm64_coordinates){5, 7, released ? -56 : -80, 0, 0}; expected_c = c;
+		a = (struct kprog_arm64_addressing){&c, regs, tags, (__u8 *)arena, (__u8 *)packed, payload, 160, 96, NULL, NULL, 0, 255, arena}; before_a = a;
+		for (unsigned i = 0; i < 31; i++) { regs[i].x = 0xfedcba9876543210ULL ^ i; tags[i] = i == 0 ? 10 : i == 1 ? 4 : 0; }
+		regs[15].ptr = (void *)(intptr_t)-80; tags[15] = 4; regs[10].x = 0; tags[10] = ii < 2 ? 0 : ii == 2 ? 4 : 10;
+		for (unsigned i = 0; i < sizeof(arena); i++) ((__u8 *)arena)[i] = (__u8)(cases + i * 17);
+		for (unsigned i = 0; i < sizeof(packed); i++) ((__u8 *)packed)[i] = (__u8)(cases + i * 13);
+		((__u8 *)packed)[2] = slot_tags[ti][0]; ((__u8 *)packed)[3] = slot_tags[ti][1];
+		for (unsigned i = 0; i < 48; i++) payload[i] = (__u64)(-64 + (__s64)i * 8);
+		for (unsigned i = 0; i < 64; i++) vectors[i] = 0x123456789abcdef0ULL ^ ((__u64)i * 0x11223344556677ULL);
+		memcpy(expected_vectors, vectors, sizeof(vectors)); memcpy(expected_raw, raw, sizeof(raw)); memcpy(before_arena, arena, sizeof(arena)); memcpy(before_packed, packed, sizeof(packed)); memcpy(expected_payload, payload, sizeof(payload)); memcpy(before_regs, regs, sizeof(regs)); memcpy(before_tags, tags, sizeof(tags));
+		count = wanted_count = copies = 0; expected_entropy = entropy = cases + 0x9e3779b97f4a7c15ULL;
+		__u64 loaded[2] = {0}, loaded_tags[2] = {0};
+		if (load) {
+			for (unsigned slot = 0; slot < lanes; slot++) {
+				__u64 part = index == 255 ? 0 : tags[10] == 4 ? coordinate(&expected_c, 1) : tags[10] == 10 ? coordinate(&expected_c, 3) : 0;
+				__s64 off = -80 + part + slot * width;
+				loaded[slot] = off < expected_c.stack_offset ? free_value() & mask(width) : little((__u8 *)arena + off + a.bias, width);
+			}
+			for (unsigned slot = 0; slot < lanes; slot++) {
+				__u64 part = index == 255 ? 0 : tags[10] == 4 ? coordinate(&expected_c, 1) : tags[10] == 10 ? coordinate(&expected_c, 3) : 0;
+				__s64 off = -80 + part + slot * width; unsigned at = off + a.bias;
+				loaded_tags[slot] = width == 8 && !(at & 7) && off >= expected_c.stack_offset ? ((__u8 *)packed)[at / 8] : 0;
+				if (pair && (loaded_tags[slot] == 4 || loaded_tags[slot] == 10)) loaded[slot] = payload[at / 8];
+			}
+			if (pair) {
+				expected_write(&expected_c, before_regs, before_tags, (__u8 *)before_arena, (__u8 *)before_packed, a.capacity, a.bias, first, loaded[0], width, loaded_tags[0], width == 8 && loaded_tags[0]);
+				expected_write(&expected_c, before_regs, before_tags, (__u8 *)before_arena, (__u8 *)before_packed, a.capacity, a.bias, second, loaded[1], width, loaded_tags[1], width == 8 && loaded_tags[1]);
+			} else { expected_vectors[0] = loaded[0]; expected_vectors[1] = lanes > 1 ? loaded[1] : 0; }
+		} else for (unsigned slot = 0; slot < lanes; slot++) {
+			__u64 part = index == 255 ? 0 : tags[10] == 4 ? coordinate(&expected_c, 1) : tags[10] == 10 ? coordinate(&expected_c, 3) : 0;
+			__u64 reg = slot ? second : first;
+			unsigned tag = pair ? reg == 32 ? 4 : reg < 31 ? tags[reg] : 0 : 0;
+			__u64 value = pair ? reg == 32 ? (__u64)expected_c.stack_offset + coordinate(&expected_c, 1) : reg < 31 ? regs[reg].x + (tag == 4 ? coordinate(&expected_c, 1) : tag == 10 ? coordinate(&expected_c, 3) : 0) : 0 : vectors[slot];
+			expected_stack_store(&expected_c, (__u8 *)before_arena, (__u8 *)before_packed, expected_payload, a.bias, -80 + part + slot * width, width, value, tag);
+		}
+		if (pair) kprog_arm64_pair_step(&a, transfers[oi], load ? first : 255, load ? second : first, load ? 255 : second, 15, index, 0, 0, flags[fi]);
+		else kprog_arm64_vector_step(&a, &vectors[0], &vectors[1], transfers[oi], 15, index, 0, 0);
+		inputs_equal(&c, &expected_c);
+		check(!copies && !memcmp(&a, &before_a, sizeof(a)) && !memcmp(regs, before_regs, sizeof(regs)) && !memcmp(tags, before_tags, sizeof(tags)) && !memcmp(vectors, expected_vectors, sizeof(vectors)), "private pair/vector live GPR/SIMD/tag/payload writeback");
+		check(!memcmp(arena, before_arena, sizeof(arena)) && !memcmp(raw, expected_raw, sizeof(raw)) && !memcmp(packed, before_packed, sizeof(packed)) && !memcmp(payload, expected_payload, sizeof(payload)), "private pair/vector byte/tag/payload frame");
+		cases++;
+	}
+	printf("ARM private pair/vector adapter %u: %lu provenance/released/coordinate/order/frame cases\n", ADAPTER, cases - start);
+#if ADAPTER
+	/* Failure of the second adapter copy checks C's actual partial prefix;
+	 * it is not an assertion of native exception recovery semantics. */
+	start = cases;
+	const unsigned partial_ops[] = {ARM64_OP_LDP, ARM64_OP_STP, ARM64_OP_LOAD_Q0, ARM64_OP_STORE_Q0};
+	force_draw = 1; draw_value = 0;
+	for (unsigned oi = 0; oi < 4; oi++) for (unsigned mode = 0; mode < 4; mode++) {
+		unsigned pair = oi < 2, load = oi == 0 || oi == 2;
+		c = (struct kprog_arm64_coordinates){5, 7, -80, 0, 0}; expected_c = c;
+		a = (struct kprog_arm64_addressing){&c, regs, tags, (__u8 *)arena, (__u8 *)packed, payload, 160, 96, NULL, NULL, 0, 255, arena}; before_a = a;
+		regs[15].ptr = raw + 200; tags[15] = 6; regs[0].x = 0x12345678ffffffffULL; regs[1].x = 0xfedcba9876543210ULL; tags[0] = tags[1] = 0;
+		vectors[0] = regs[0].x; vectors[1] = regs[1].x;
+		memcpy(before_regs, regs, sizeof(regs)); memcpy(before_tags, tags, sizeof(tags)); memcpy(expected_vectors, vectors, sizeof(vectors)); memcpy(expected_raw, raw, sizeof(raw)); memcpy(before_arena, arena, sizeof(arena)); memcpy(before_packed, packed, sizeof(packed)); memcpy(expected_payload, payload, sizeof(payload));
+		unsigned address = mode == 2 ? 200 : 208;
+		if (mode & 1) before_regs[15].ptr = raw + 208;
+		if (!pair && load) expected_vectors[0] = little(raw + address, 8);
+		if (!load) for (unsigned i = 0; i < 8; i++) expected_raw[address + i] = (__u8)((pair ? regs[0].x : vectors[0]) >> (i * 8));
+		count = wanted_count = copies = 0; expected_entropy = entropy; if (load) wanted[wanted_count++] = 6;
+		copy_reject_at = 2; allow_reject = 1;
+		int result = setjmp(rejected);
+		if (!result) {
+			if (pair) kprog_arm64_pair_step(&a, partial_ops[oi], load ? 0 : 255, load ? 1 : 0, load ? 255 : 1, 15, 255, mode << 24, 8, 8);
+			else kprog_arm64_vector_step(&a, &vectors[0], &vectors[1], partial_ops[oi], 15, 255, mode << 24, 8);
+			check(0, "second copy unexpectedly returned");
+		}
+		check(result == 2 && copies == 2, "second adapter failure class/count"); copy_reject_at = 0; allow_reject = 0;
+		inputs_equal(&c, &expected_c);
+		check(!memcmp(&a, &before_a, sizeof(a)) && !memcmp(regs, before_regs, sizeof(regs)) && !memcmp(tags, before_tags, sizeof(tags)) && !memcmp(vectors, expected_vectors, sizeof(vectors)), "pair/vector read-commit/pre/post failure prefix");
+		check(!memcmp(arena, before_arena, sizeof(arena)) && !memcmp(raw, expected_raw, sizeof(raw)) && !memcmp(packed, before_packed, sizeof(packed)) && !memcmp(payload, expected_payload, sizeof(payload)), "pair/vector partial-store memory prefix");
+		cases++;
+	}
+	printf("ARM pair/vector adapter failure: %lu second-operation prefix cases\n", cases - start);
+#endif
 	check_native_hook();
 	return 0;
 }

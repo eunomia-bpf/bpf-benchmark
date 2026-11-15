@@ -1431,6 +1431,25 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
         ARM64_SIM_L_MEM_WRITE_AT((BASE), __a64_mws_off, (WIDTH), (VALUE), (TAG)); \
     } while (0)
 
+/* Observe each source after its slot's index and before the next slot.
+ * Clight requires a statement output; retain the native expression operand
+ * at the write site because moving it changes LLVM's stack-slot assignment.
+ * Both forms use the same read, tag and resolved memory-write bodies. */
+#if defined(__COMPCERT__)
+#define ARM64_SIM_L_MEM_WRITE_REG(BASE, INDEX, AUX, IMM, EXTRA, WIDTH, SRC) \
+    do { __s64 __a64_mwg_off; __u64 __a64_mwg_value; __u8 __a64_mwg_tag; \
+        ARM64_SIM_L_MEM_BASE_OFF_INTO(__a64_mwg_off, (AUX), (INDEX), (IMM)); \
+        __a64_mwg_off += (EXTRA); \
+        ARM64_SIM_L_READ_REG_INTO(__a64_mwg_value, (SRC)); \
+        ARM64_SIM_L_REG_TAG_INTO(__a64_mwg_tag, (SRC)); \
+        ARM64_SIM_L_MEM_WRITE_AT((BASE), __a64_mwg_off, (WIDTH), __a64_mwg_value, __a64_mwg_tag); \
+    } while (0)
+#else
+#define ARM64_SIM_L_MEM_WRITE_REG(BASE, INDEX, AUX, IMM, EXTRA, WIDTH, SRC) \
+    ARM64_SIM_L_MEM_WRITE((BASE), (INDEX), (AUX), (IMM), (EXTRA), (WIDTH), \
+        ARM64_SIM_L_READ_REG(SRC), ARM64_SIM_L_REG_TAG(SRC))
+#endif
+
 /* The `LOAD_D0` / `LOAD_Q0` / `STORE_D0` / `STORE_Q0` vector memory-transfer
  * contract fixes, per opcode, the access direction (load into / store from the
  * SIMD register), the number of 64-bit lanes moved, and the lane offset plan
@@ -1446,7 +1465,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
  * four C bodies can drift. */
 #define ARM64_SIM_L_DQ_MEM_STEP(OP, BASE, INDEX, AUX, IMM)                  \
 	do {                                                               \
-		__u32 __a64_dq_idx = KPROG_ARM64_DQ_MEM_INDEX(OP);         \
+		__u32 __a64_dq_idx; KPROG_ARM64_DQ_MEM_INDEX_INTO(__a64_dq_idx, (OP));         \
 		__u32 __a64_dq_access = __a64_dq_idx ==               \
 				KPROG_ARM64_DQ_MEM_OP_LOAD_D0_INDEX ?   \
 			KPROG_ARM64_DQ_MEM_OP_LOAD_D0_ACCESS :          \
@@ -1457,8 +1476,9 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			KPROG_ARM64_DQ_MEM_OP_STORE_Q0_ACCESS;          \
 		int __a64_dq_load =                                   \
 			__a64_dq_access == KPROG_ARM64_DQ_MEM_ACCESS_LOAD;\
-		if (__a64_dq_load && ARM64_SIM_L_READ_FAULT((BASE), (INDEX), (AUX), (IMM)))        \
-			break;                                             \
+		if (__a64_dq_load) { int __a64_dq_fault; \
+            ARM64_SIM_L_READ_FAULT_CALL_INTO(__a64_dq_fault, (BASE), (INDEX), (AUX), (IMM)); \
+            if (__a64_dq_fault) break; }                                             \
 		unsigned __a64_dq_lanes = __a64_dq_idx ==             \
 				KPROG_ARM64_DQ_MEM_OP_LOAD_D0_INDEX ?   \
 			KPROG_ARM64_DQ_MEM_OP_LOAD_D0_LANES :           \
@@ -1467,7 +1487,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			__a64_dq_idx == KPROG_ARM64_DQ_MEM_OP_STORE_D0_INDEX ?\
 			KPROG_ARM64_DQ_MEM_OP_STORE_D0_LANES :          \
 			KPROG_ARM64_DQ_MEM_OP_STORE_Q0_LANES;           \
-		__u32 __a64_vreg_idx = KPROG_ARM64_VREG_INDEX(OP);         \
+		__u32 __a64_vreg_idx; KPROG_ARM64_VREG_INDEX_INTO(__a64_vreg_idx, (OP));         \
 		unsigned __a64_vreg_plan = __a64_vreg_idx ==          \
 				KPROG_ARM64_VREG_OP_LOAD_D0_INDEX ?     \
 			KPROG_ARM64_VREG_OP_LOAD_D0_HALVES :            \
@@ -1496,11 +1516,9 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			__s64 __a64_dq_extra = KPROG_ARM64_DQ_MEM_EXTRA(   \
 				__a64_vreg_p == 0U, __a64_dq_lanes > 1U);\
 			if (__a64_dq_load) {                          \
-				__u64 __a64_dq_value =                \
-					ARM64_SIM_L_MEM_READ((BASE), (INDEX),\
-						(AUX), (IMM),         \
-						__a64_dq_extra,       \
-						KPROG_ARM64_DQ_MEM_LANE_STRIDE);\
+				__u64 __a64_dq_value; \
+                ARM64_SIM_L_MEM_READ_INTO(__a64_dq_value, (BASE), (INDEX), (AUX), (IMM), \
+                    __a64_dq_extra, KPROG_ARM64_DQ_MEM_LANE_STRIDE);\
 				if (__a64_vreg_field ==               \
 						KPROG_ARM64_VREG_HIGH_FIELD)\
 					__a64_v0_hi = __a64_dq_value; \
@@ -1547,7 +1565,8 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
  * so a 32-bit `LDP`/`STP` keeps its 4-byte slot stride. */
 #define ARM64_SIM_L_PAIR_MEM_STEP(OP, DST, SRC, SRC2, BASE, INDEX, AUX, IMM, WIDTH)\
 	do {                                                               \
-		__u32 __a64_pm_access = KPROG_ARM64_PAIR_MEM_INDEX(OP) ==  \
+		__u32 __a64_pm_index; KPROG_ARM64_PAIR_MEM_INDEX_INTO(__a64_pm_index, (OP)); \
+        __u32 __a64_pm_access = __a64_pm_index ==  \
 				KPROG_ARM64_PAIR_MEM_OP_LDP_INDEX ?        \
 			KPROG_ARM64_PAIR_MEM_OP_LDP_ACCESS :               \
 			KPROG_ARM64_PAIR_MEM_OP_STP_ACCESS;                \
@@ -1562,30 +1581,30 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
             (__a64_pm_load ? (DST) : (SRC)), (AUX));                      \
         ARM64_SIM_L_WRITEBACK_OVERLAP((BASE),                             \
             (__a64_pm_load ? (SRC) : (SRC2)), (AUX));                     \
-        if (__a64_pm_load && ARM64_SIM_L_READ_FAULT((BASE), (INDEX), (AUX), (IMM))) {               \
-            ARM64_SIM_L_CLEAR_READ_DEST(DST);                             \
-            ARM64_SIM_L_CLEAR_READ_DEST(SRC);                             \
-            break;                                                       \
-        }                                                                \
+        if (__a64_pm_load) { int __a64_pm_fault; \
+            ARM64_SIM_L_READ_FAULT_CALL_INTO(__a64_pm_fault, (BASE), (INDEX), (AUX), (IMM)); \
+            if (__a64_pm_fault) { \
+                ARM64_SIM_L_CLEAR_READ_DEST(DST); \
+                ARM64_SIM_L_CLEAR_READ_DEST(SRC); \
+                break; \
+            } \
+        } \
 		ARM64_SIM_L_MEM_PRE((BASE), (AUX), (IMM));             \
 		if (__a64_pm_load) {                                   \
-			__u64 __a64_pm_v0 = ARM64_SIM_L_MEM_READ((BASE),\
-				(INDEX), (AUX), (IMM), 0, (WIDTH));        \
-			__u64 __a64_pm_v1 = __a64_pm_slots > 1U ?      \
-				ARM64_SIM_L_MEM_READ((BASE), (INDEX),      \
-					(AUX), (IMM), __a64_pm_hi,         \
-					(WIDTH)) : 0;                  \
-			__u8 __a64_pm_t0 = ARM64_SIM_L_MEM_READ_TAG((BASE),\
-				(INDEX), (AUX), (IMM), 0, (WIDTH));        \
-			__u8 __a64_pm_t1 = __a64_pm_slots > 1U ?       \
-				ARM64_SIM_L_MEM_READ_TAG((BASE), (INDEX),  \
-					(AUX), (IMM), __a64_pm_hi,         \
-					(WIDTH)) : 0;                  \
-			__u64 __a64_pm_mask =                          \
-				ARM64_SIM_L_PAIR_LOAD_TAG_ROUTE((OP),      \
-					__a64_pm_t0, __a64_pm_t1, (WIDTH));\
-			__a64_pm_v0 = ARM64_SIM_L_MEM_PAYLOAD((BASE), (INDEX), (AUX), (IMM), 0, __a64_pm_v0, __a64_pm_t0);\
-			__a64_pm_v1 = ARM64_SIM_L_MEM_PAYLOAD((BASE), (INDEX), (AUX), (IMM), __a64_pm_hi, __a64_pm_v1, __a64_pm_t1);\
+            __u64 __a64_pm_v0; \
+            ARM64_SIM_L_MEM_READ_INTO(__a64_pm_v0, (BASE), (INDEX), (AUX), (IMM), 0, (WIDTH)); \
+            __u64 __a64_pm_v1 = 0; \
+            if (__a64_pm_slots > 1U) \
+                ARM64_SIM_L_MEM_READ_INTO(__a64_pm_v1, (BASE), (INDEX), (AUX), (IMM), __a64_pm_hi, (WIDTH)); \
+            __u8 __a64_pm_t0; \
+            ARM64_SIM_L_MEM_READ_TAG_INTO(__a64_pm_t0, (BASE), (INDEX), (AUX), (IMM), 0, (WIDTH)); \
+            __u8 __a64_pm_t1 = 0; \
+            if (__a64_pm_slots > 1U) \
+                ARM64_SIM_L_MEM_READ_TAG_INTO(__a64_pm_t1, (BASE), (INDEX), (AUX), (IMM), __a64_pm_hi, (WIDTH)); \
+            __u64 __a64_pm_mask; \
+            KPROG_ARM64_PAIR_LOAD_TAG_ROUTE_INTO(__a64_pm_mask, (OP), __a64_pm_t0, __a64_pm_t1, (WIDTH), ARM64_SIM_L_UNSUPPORTED_OPCODE()); \
+            ARM64_SIM_L_MEM_PAYLOAD_INTO(__a64_pm_v0, (BASE), (INDEX), (AUX), (IMM), 0, __a64_pm_v0, __a64_pm_t0); \
+            ARM64_SIM_L_MEM_PAYLOAD_INTO(__a64_pm_v1, (BASE), (INDEX), (AUX), (IMM), __a64_pm_hi, __a64_pm_v1, __a64_pm_t1); \
 			if (KPROG_ARM64_PAIR_LOAD_TAG_ROUTE_LOW(__a64_pm_mask))\
 				ARM64_SIM_L_WRITE_REG_PTR_TAG((DST),   \
 					(void *)(long)__a64_pm_v0, \
@@ -1601,16 +1620,9 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 				ARM64_SIM_L_WRITE_REG_WIDTH((SRC),     \
 					__a64_pm_v1, (WIDTH));         \
 		} else {                                               \
-			ARM64_SIM_L_MEM_WRITE((BASE), (INDEX), (AUX),  \
-				(IMM), 0, (WIDTH),                     \
-				ARM64_SIM_L_READ_REG(SRC),             \
-				ARM64_SIM_L_REG_TAG(SRC));             \
-			if (__a64_pm_slots > 1U)                       \
-				ARM64_SIM_L_MEM_WRITE((BASE), (INDEX), \
-					(AUX), (IMM), __a64_pm_hi,     \
-					(WIDTH),                       \
-					ARM64_SIM_L_READ_REG(SRC2),    \
-					ARM64_SIM_L_REG_TAG(SRC2));    \
+            ARM64_SIM_L_MEM_WRITE_REG((BASE), (INDEX), (AUX), (IMM), 0, (WIDTH), (SRC)); \
+            if (__a64_pm_slots > 1U) \
+                ARM64_SIM_L_MEM_WRITE_REG((BASE), (INDEX), (AUX), (IMM), __a64_pm_hi, (WIDTH), (SRC2)); \
 		}                                                      \
 		ARM64_SIM_L_MEM_POST((BASE), (AUX), (IMM));            \
 	} while (0)

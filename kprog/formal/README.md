@@ -1213,6 +1213,29 @@ The protected-read recovery regression passes. The separate read-follow-up
 oracle retains ten memcpy discrepancies, with byte-identical diagnostics against
 the preceding commit; its original assertions and inputs remain unresolved.
 
+Two further roots export the shared LDP/STP and D/Q vector memory bodies
+(21 functions total). Pair duplicate/overlap checks precede fault selection;
+recovery clears both GPR destinations. Pair values are read before either GPR
+commit; vector halves commit in transfer order, with D loads clearing the high
+half. Each store resolves its index and observes its source before that slot's
+write/free inputs, then proceeds to the next slot. Native expression operands
+are retained at paired store sites to preserve LLVM stack allocation; Clight
+uses statement outputs through the same read/tag/write bodies. Their memory,
+source-observation and native exception correspondence remains an M5 obligation.
+
+The existing consumer oracle adds1,984 raw pair/vector and3,024 private-memory
+profiles, passing against the previous header and on current x86 and AArch64
+user mode in native/adapter forms. It checks whole GPR/SIMD, byte/tag/payload,
+coordinate/input-order and writeback frames. Sixteen adapter-only second-copy
+failures check actual partial C effects; they do not establish native recovery.
+Wrong stride, missing second recovery/payload and omitted D high clearing are
+caught by mutations. `make clight`,133 targeted Lean jobs, deterministic export
+and standard-axiom checks pass. The expanded same-source BPF fixture retains
+socket10872B and27 relocations exactly; current replay equals normal compilation.
+Raw evidence: `/workspaces/kprog-raw/formal/m4-arm64-pair-vector`.
+Atomic/exclusive/control/helper and remaining full dispatcher conversion,
+full default-byte coverage and the previously recorded failures remain open.
+
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight
 handler exports and full default compiled-byte coverage remain to do. Preserve
