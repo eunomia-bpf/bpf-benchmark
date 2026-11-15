@@ -30,7 +30,7 @@ def main(args):
         failures.append(str(error))
     else: raise ValueError('Scheduled flag consumer survived removal of its defining ADD')
     body,functions,exit_addr,data=gen.parse_proof_object_program('scheduled',args.build)
-    source=gen.render_program('scheduled_model',body,functions,kind='raw',program_section='kprobe/scheduled',exit_addr=exit_addr,rodata16=data,
+    source=gen.render_program('trusted_x86',body,functions,kind='raw',program_section='kprobe/scheduled',exit_addr=exit_addr,rodata16=data,
         source_prelude='''#if !defined(__bpf__) && !defined(__BPF__)
 extern void scheduled_unresolved(void);
 #define __x86_sim_unresolved_indirect_target scheduled_unresolved
@@ -46,7 +46,7 @@ unsigned long native_lab_entry_input(unsigned int kind) { if (kind == 1) return 
 ''')
     library=args.build/'scheduled-model.so'
     run(['clang-18','-shared','-fPIC','-O2','-w','-I'+str(ROOT/'vendor/libbpf/src'),generated,adapter,'-o',library])
-    model=c.CDLL(str(library)).scheduled_model_x86_sim_xdp
+    model=c.CDLL(str(library)).trusted_x86_x86_sim_xdp
     model.argtypes,model.restype=[c.c_void_p],c.c_uint32
     observations=[]
     for index in range(64):
