@@ -114,7 +114,7 @@ mod tests {
         let bytes = [0x74,7, 0x48,0x8b,0x3d,0,0,0,0, 0xe8,0,0,0,0];
         let sym = SymInfo { name: "entry".into(), section_index: object::SectionIndex(1),
                             address: 0, size: bytes.len() as u64 };
-        assert!(arguments(&bytes, &sym, &HashMap::from([((sym.section_index,0,5),"map".into())]),
+        assert!(arguments(&bytes, &sym, &HashMap::from([((sym.section_index,0,5),"map".into())]), &HashMap::new(),
                           &HashMap::from([("map".into(),0x1000)]))?.is_empty());
         // Unknown jump-table successors cannot reuse any linear-flow fact.
         assert!(track(&[load.as_slice(), &[0xe8,0,0,0,0, 0xff,0xe0]].concat())?.is_empty());
