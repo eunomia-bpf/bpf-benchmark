@@ -10,6 +10,7 @@
 #include "native_loader_helper_query.hpp"
 #include "native_loader_data_layout.hpp"
 #include "native_loader_kfunc.hpp"
+#include "native_loader_lto.hpp"
 
 #include <bpf/bpf.h>
 #include <bpf/btf.h>
@@ -1474,6 +1475,13 @@ const std::unordered_map<std::string, uint64_t> &kallsyms_table()
     wanted.push_back(kArrayOfMapLookupElemSymbol);
     wanted.push_back(kHtabLruPercpuMapLookupElemSymbol);
     wanted.push_back("bpf_verifier_ops");
+#if defined(__x86_64__)
+    for (const char *symbol : native_lto::kernel_symbols) {
+        if (std::none_of(wanted.begin(), wanted.end(), [symbol](const char *name) {
+                return std::strcmp(name, symbol) == 0;
+            })) wanted.push_back(symbol);
+    }
+#endif
     const size_t wanted_count = wanted.size();
 
     FILE *f = std::fopen("/proc/kallsyms", "re");

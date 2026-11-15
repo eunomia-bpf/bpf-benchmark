@@ -11,6 +11,11 @@
 // They describe layout and symbol identity, never application source changes.
 namespace native_lto {
 
+inline constexpr const char *kernel_symbols[] = {
+    "bpf_probe_read_user", "bpf_probe_read_kernel", "nmi_uaccess_okay",
+    "copy_from_kernel_nofault_allowed", "const_current_task", "USER_PTR_MAX", "boot_cpu_data",
+};
+
 inline const btf_type *type(const btf *types, uint32_t id)
 {
     const auto *result = btf__type_by_id(types, id);
