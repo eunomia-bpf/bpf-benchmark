@@ -1,0 +1,83 @@
+{
+  "rows": [
+    {
+      "name": "n100000_ptr_direct",
+      "stage": "proof_compile_failed",
+      "returncode": 1
+    },
+    {
+      "name": "n100000_scalar_direct",
+      "stage": "passed",
+      "returncode": 0
+    },
+    {
+      "name": "n100000_scalar_indirect",
+      "stage": "passed",
+      "returncode": 0
+    },
+    {
+      "name": "n10000_ptr_direct",
+      "stage": "passed",
+      "returncode": 0
+    },
+    {
+      "name": "n10000_ptr_indirect",
+      "stage": "passed",
+      "returncode": 0
+    },
+    {
+      "name": "n10000_scalar_direct",
+      "stage": "passed",
+      "returncode": 0
+    },
+    {
+      "name": "n10000_scalar_indirect",
+      "stage": "passed",
+      "returncode": 0
+    },
+    {
+      "name": "n1000_ptr_direct",
+      "stage": "passed",
+      "returncode": 0
+    },
+    {
+      "name": "n1000_ptr_indirect",
+      "stage": "passed",
+      "returncode": 0
+    },
+    {
+      "name": "n1000_scalar_direct",
+      "stage": "passed",
+      "returncode": 0
+    },
+    {
+      "name": "n1000_scalar_indirect",
+      "stage": "passed",
+      "returncode": 0
+    },
+    {
+      "name": "n100_ptr_direct",
+      "stage": "passed",
+      "returncode": 0
+    },
+    {
+      "name": "n100_ptr_indirect",
+      "stage": "passed",
+      "returncode": 0
+    },
+    {
+      "name": "n100_scalar_direct",
+      "stage": "passed",
+      "returncode": 0
+    },
+    {
+      "name": "n100_scalar_indirect",
+      "stage": "passed",
+      "returncode": 0
+    }
+  ],
+  "not_attempted": [
+    "n100000_ptr_indirect"
+  ],
+  "scope": "14 actual stock loads and test-run outputs pass; pointer/direct frontend failed under8GiB AS, pointer/indirect not attempted in aborted compile group"
+}

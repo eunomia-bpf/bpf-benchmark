@@ -1,0 +1,30 @@
+{
+  "command": [
+    "/workspaces/repository/kprog/stock-path/bin/clang",
+    "-w",
+    "-g",
+    "-O3",
+    "-mcpu=v4",
+    "-target",
+    "bpf",
+    "-mllvm",
+    "-bpf-stack-size=4096",
+    "-D__TARGET_ARCH_x86",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/include/uapi",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/src",
+    "-I",
+    "/usr/include/x86_64-linux-gnu",
+    "-emit-llvm",
+    "-c",
+    "/var/tmp/kprog-tmp/perf/scale/n100000_ptr_direct.bpf.i",
+    "-o",
+    "/var/tmp/kprog-tmp/perf/scale/n100000_ptr_direct.bpf.bounds-input.bc"
+  ],
+  "returncode": 1,
+  "wall_seconds": 337.60805040001287,
+  "user_seconds": 312.432242,
+  "system_seconds": 10.075085,
+  "max_rss_kib": 8153024
+}

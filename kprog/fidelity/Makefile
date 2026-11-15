@@ -308,6 +308,8 @@ x86-control-run: x86-control-build
 
 PREPROCESS_SIZES ?= 100 1000
 PREPROCESS_ARGS ?=
+PREPROCESS_AS ?= 8589934592
+PREPROCESS_CPUS ?= 8-11
 .PHONY: preprocess-profile
 preprocess-profile:
-	taskset -c 8-11 prlimit --as=8589934592 -- python3 /workspaces/repository/kprog/test/profile_b_preprocess.py --sizes $(PREPROCESS_SIZES) $(PREPROCESS_ARGS) --build $(SCALE_BUILD) --output $(SCALE_OUT)
+	taskset -c $(PREPROCESS_CPUS) prlimit --as=$(PREPROCESS_AS) -- python3 /workspaces/repository/kprog/test/profile_b_preprocess.py --sizes $(PREPROCESS_SIZES) $(PREPROCESS_ARGS) --build $(SCALE_BUILD) --output $(SCALE_OUT)

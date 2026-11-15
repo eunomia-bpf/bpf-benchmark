@@ -1,0 +1,10 @@
+{
+  "name": "n100000_ptr_direct",
+  "target_native_instructions": 100000,
+  "native_instructions": 100036,
+  "expected_result": 50007,
+  "pipeline": "stock",
+  "profile": "/workspaces/kprog-raw/perf/20261115-inline-families/scale-100k/result.json",
+  "stage": "proof_compile_failed",
+  "returncode": 1
+}

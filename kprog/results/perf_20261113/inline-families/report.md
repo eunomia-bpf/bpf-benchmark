@@ -202,3 +202,19 @@ The old second scalar/indirect compile continues unchanged; pointer cases
 and actual stock outcomes remain pending. Source/current bounds tool has
 this one metadata-cleanup path; installed base tool still awaits its safe
 publication while the captured group uses the old binary.
+
+2026-11-15T17:07Z stock batch terminal: all14 completed objects (8small,
+4tenK and both100K scalar shapes) actually load and execute correctly on
+the sole kernel. Every executed probe returns its expected fixture output
+and XDP_PASS; recorded trace status0. The overall suite exits nonzero
+because100K pointer/direct failed its FRONTEND under8GiB AS (LLVM out of
+memory,322.507CPU s,8,153,024KiB RSS). Pointer/indirect was not attempted
+when that compile group aborted. That is not a kernel rejection. All15
+present rows, the missing case and original failure log/resources are in
+stock-subset/; bulky verifier/allocation traces remain raw, never deleted.
+
+Resource knobs now allow the two remaining pointer shapes to run independently
+under16GiB AS, on distinct host CPU sets, after retaining the8GiB failure.
+Default8GiB/all-shapes behavior is unchanged. These are fixture resource
+controls, not benchmark settings or program exclusions. Parent P-SPECIALIZE
+remains open; the14 actual passes do not establish OTel whole-app acceptance.

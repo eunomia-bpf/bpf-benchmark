@@ -1,0 +1,60 @@
+{
+  "name": "n10000_ptr_indirect",
+  "target_native_instructions": 10000,
+  "native_instructions": 10084,
+  "expected_result": 5023,
+  "pipeline": "stock",
+  "profile": "/workspaces/kprog-raw/perf/20261115-inline-families/scale-10k/result.json",
+  "stage": "passed",
+  "returncode": 0,
+  "object_sha256": "1c18a926d67b3c346e3e52ffaa7b7fd745114e7e2585e0e884dd54a43b96c206",
+  "bpf_code_bytes": 200624,
+  "post_pei_stack_bytes": {
+    "n10000_ptr_indirect_x86_sim_xdp": 40
+  },
+  "trace_returncode": 0,
+  "probe_counters": [
+    {
+      "program_id": 24,
+      "proof_bpf_instructions": 25078,
+      "verified_instructions": 46987,
+      "bytes_jited": 112792,
+      "program_memlock_bytes": 204800,
+      "loader_maxrss_kib": 9424,
+      "result": 5023,
+      "expected_result": 5023,
+      "retval": 2
+    }
+  ],
+  "verifier_allocation_intervals": [
+    {
+      "slab_peak_bytes": 39632,
+      "vmap_reserved_peak_bytes": 16384
+    },
+    {
+      "slab_peak_bytes": 39616,
+      "vmap_reserved_peak_bytes": 16384
+    },
+    {
+      "slab_peak_bytes": 39616,
+      "vmap_reserved_peak_bytes": 16384
+    },
+    {
+      "slab_peak_bytes": 42472,
+      "vmap_reserved_peak_bytes": 32768
+    },
+    {
+      "slab_peak_bytes": 39616,
+      "vmap_reserved_peak_bytes": 16384
+    },
+    {
+      "slab_peak_bytes": 2350376,
+      "vmap_reserved_peak_bytes": 2629632
+    }
+  ],
+  "verifier_slab_peak_bytes": 2350376,
+  "verifier_vmap_reserved_peak_bytes": 2629632,
+  "trace_lost_events": 0,
+  "verification_time_us": 6186,
+  "peak_states": 10
+}

@@ -36,6 +36,9 @@ def main(args):
     for size in args.sizes:
         for pointer in (False, True):
             for indirect in (False, True):
+                shape = f'{"ptr" if pointer else "scalar"}_{"indirect" if indirect else "direct"}'
+                if shape not in args.shapes:
+                    continue
                 name = f'n{size}_{"ptr" if pointer else "scalar"}_{"indirect" if indirect else "direct"}'
                 commands = []
 
@@ -134,6 +137,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--compile', action='store_true', help='Also compile through the normal production B pipeline')
     parser.add_argument('--sizes', nargs='+', type=int, required=True)
+    parser.add_argument('--shapes', nargs='+', choices=('scalar_direct', 'scalar_indirect', 'ptr_direct', 'ptr_indirect'),
+                        default=('scalar_direct', 'scalar_indirect', 'ptr_direct', 'ptr_indirect'))
     for name in ('build', 'output'):
         parser.add_argument('--'+name, type=Path, required=True)
     main(parser.parse_args())
