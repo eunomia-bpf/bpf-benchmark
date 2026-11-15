@@ -1,3 +1,0 @@
-#!/bin/bash
-set -euo pipefail
-exec python3 /workspaces/repository/kprog/perf/one-image/observe_runtime.py vng "$@"
