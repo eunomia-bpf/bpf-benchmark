@@ -1210,7 +1210,6 @@ pub(super) fn rewrite_x86(
     show: bool,
     runtime_probe_read_strings: bool,
     runtime_percpu_loads: bool,
-    non_pic_map_addresses: bool,
 ) -> Result<RewriteResult> {
     let included_ranges: Vec<(u64, u64)> = included
         .iter()
@@ -1219,9 +1218,7 @@ pub(super) fn rewrite_x86(
 
     let helper_call_sites = scan_helper_calls(elf, included)?;
     let got_relocations = scan_x86_got_relocations(elf, included)?;
-    let absolute_maps = if non_pic_map_addresses {
-        non_pic::references(elf, included, map_addrs)?
-    } else { HashMap::new() };
+    let absolute_maps = non_pic::references(elf, included, map_addrs)?;
     let pc_relative_relocations = scan_x86_pc_relative_relocations(elf, included)?;
     let writable_references = writable_data::references(elf, included)?;
     let proof_input = elf.section_by_name(".native_link_abi").is_some();
@@ -4537,10 +4534,10 @@ mod tests {
                 let empty = HashMap::new();
                 let helpers = HashMap::from([(name.to_owned(), 0x1234)]);
                 let plain = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &empty, &[],
-                    &HashMap::new(), &[], true, true, false, false, false, None, false, None, None, None, false, false, false, false, false)?;
+                    &HashMap::new(), &[], true, true, false, false, false, None, false, None, None, None, false, false, false, false)?;
                 assert_eq!(plain.proof_relocs.len(), 2, "default remains symbolic");
                 let proof = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &empty, &[],
-                    &HashMap::new(), &[], true, true, false, false, false, None, false, None, None, None, true, false, false, false, false)?;
+                    &HashMap::new(), &[], true, true, false, false, false, None, false, None, None, None, true, false, false, false)?;
                 assert!(proof.proof_relocs.is_empty(), "{name}, form={form}");
                 assert_eq!(proof.proof_symbols.len(), 2, "same length shares one routine");
                 assert!(proof.proof_symbols[1].name.starts_with("__native_link_local_"));
@@ -4554,7 +4551,7 @@ mod tests {
                 let included = discover_reachable(&elf, &entry)?;
                 assert_eq!(included.len(), 2);
                 let result = rewrite_x86(&elf, &entry, &included, &empty, &empty, &[],
-                    &HashMap::new(), &[], false, true, false, false, false, None, false, None, None, None, true, false, false, false, false)?;
+                    &HashMap::new(), &[], false, true, false, false, false, None, false, None, None, None, true, false, false, false)?;
                 assert!(result.relocs.is_empty());
                 #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
                 {
@@ -4614,7 +4611,7 @@ mod tests {
                 (true, Some(&array), false), (true, Some(&array), true)] {
                 let result = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers,
                     &HashMap::new(), &[site.clone()], &HashMap::new(), &[],
-                    false, false, false, enabled, false, layout, shared, None, None, None, false, false, false, false, false)?;
+                    false, false, false, enabled, false, layout, shared, None, None, None, false, false, false, false)?;
                 let expected = if enabled { 0x1234 } else { 0x5678 };
                 assert!(result.relocs.iter().any(|r| r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32
                     && r.target == expected), "form={form}, enabled={enabled}: actual helper target");
@@ -4785,7 +4782,7 @@ mod tests {
         })]);
         for enabled in [false, true] {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps,
-                &[], &facts, &[], false, false, false, true, enabled, None, false, None, None, None, false, false, false, false, false)?;
+                &[], &facts, &[], false, false, false, true, enabled, None, false, None, None, None, false, false, false, false)?;
             if !enabled {
                 assert!(output.relocs.iter().any(|r| r.target == 0x1234));
                 continue;
@@ -4925,7 +4922,7 @@ mod tests {
         let entry = find_symbol_by_name(&elf, "entry")?;
         for preserve in [false, true] {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(),
-                &HashMap::new(), &[], &HashMap::new(), &[], true, preserve, false, false, false, None, false, None, None, None, false, false, false, false, false)?;
+                &HashMap::new(), &[], &HashMap::new(), &[], true, preserve, false, false, false, None, false, None, None, None, false, false, false, false)?;
             let mut expected = if preserve { vec![0x53, 0x31, 0xc0, 0x5b] } else { vec![0x31, 0xc0] };
             expected.extend_from_slice(&[0xe9, 0, 0, 0, 0]); // Canonical entry exit in proof mode.
             assert_eq!(output.blob, expected);

@@ -108,12 +108,12 @@ mod tests {
         Ok(object.write()?)
     }
 
-    fn link(data: &[u8], proof: bool, enabled: bool, maps: &HashMap<String, u64>) -> Result<RewriteResult> {
+    fn link(data: &[u8], proof: bool, maps: &HashMap<String, u64>) -> Result<RewriteResult> {
         let elf = object::File::parse(data)?;
         let entry = find_symbol_by_name(&elf, "entry")?;
         rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(), maps,
             &[], &HashMap::new(), &[], proof, false, false, false, false, None,
-            false, None, None, None, false, false, false, false, enabled)
+            false, None, None, None, false, false, false, false)
     }
 
     #[test]
@@ -128,16 +128,13 @@ mod tests {
         ] {
             let data = fixture(kind, &bytes, offset, addend)?;
             let maps = HashMap::from([("map".to_owned(), 0xffff_8880_1234_5678)]);
-            if kind != 2 {
-                assert!(link(&data, false, false, &maps).is_err(), "default path must stay unchanged");
-            }
-            let kernel = link(&data, false, true, &maps)?;
+            let kernel = link(&data, false, &maps)?;
             assert_eq!(kernel.map_patches.len(), 1);
             let patch = &kernel.map_patches[0];
             assert_eq!((&patch.name, patch.offset), (&"map".to_owned(), 2));
             assert_eq!(&kernel.blob[..2], &[0x48, 0xb8]);
             assert!(kernel.relocs.is_empty());
-            let proof = link(&data, true, true, &HashMap::new())?;
+            let proof = link(&data, true, &HashMap::new())?;
             assert_eq!(&proof.blob[..3], &[0x48, 0x8b, 0x05]);
             assert_eq!(proof.proof_relocs.len(), 1);
             let reloc = &proof.proof_relocs[0];
@@ -167,7 +164,7 @@ mod tests {
             (vec![0x48, 0x8b, 0x04, 0x25, 0, 0, 0, 0, 0xc3], 4, 0),
         ] {
             let data = fixture(10, &bytes, offset, addend)?;
-            assert!(link(&data, false, true, &maps).is_err());
+            assert!(link(&data, false, &maps).is_err());
         }
         Ok(())
     }

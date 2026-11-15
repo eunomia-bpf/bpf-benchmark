@@ -85,7 +85,7 @@ def main():
     before = capture([])
     run(['make', '-f', ROOT/'kprog/test/native-relocations.mk', 'build'])
     after = capture([])
-    # clap's Boolean flag defaults off; an absent flag must match the old path.
+    # Existing PIC objects retain their allocated bytes and relocations.
     if before != after:
         (args.output/'default-before.json').write_text(json.dumps(before, indent=2)+'\n')
         (args.output/'default-after.json').write_text(json.dumps(after, indent=2)+'\n')
@@ -114,7 +114,7 @@ def main():
     plan_path.write_text(json.dumps(plan, indent=2)+'\n')
     proof = args.build/'non-pic.proof.o'
     run([args.linker, '--input', native, '--symbol', 'entry', '--mode', 'proof',
-         '--output', proof, '--non-pic-map-addresses'])
+         '--output', proof])
     body = run(['objdump', '-dr', '-Mintel', proof]).stdout
     (args.output/'proof.disassembly').write_text(body)
     # Exercise the actual B decoder with the same source-map annotation used by
@@ -139,7 +139,7 @@ def main():
         blob, maps, relocs = [args.build/(label+suffix) for suffix in ['.bin', '.maps', '.relocs']]
         run([args.linker, '--input', source, '--symbol', 'entry', '--mode', 'kernel',
              '--output', blob, '--output-map-patches', maps, '--output-relocs', relocs,
-             '--link-plan', plan_path, '--non-pic-map-addresses', '--runtime-map-lookups',
+             '--link-plan', plan_path, '--runtime-map-lookups',
              '--runtime-known-map-lookups'])
         if relocs.read_bytes():
             raise ValueError('Named array lookup was not inlined')

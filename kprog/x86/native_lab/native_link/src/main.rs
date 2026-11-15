@@ -149,9 +149,6 @@ struct Args {
     #[arg(long)]
     runtime_percpu_loads: bool,
 
-    /// Bind non-PIC map-address immediates through the full-width map ABI.
-    #[arg(long)]
-    non_pic_map_addresses: bool,
 
     /// Specialize proven raw hash lookups using the sole target's field layout.
     #[arg(long)]
@@ -620,8 +617,7 @@ fn main() -> Result<()> {
                 runtime_hash_layout.as_ref(),
                 runtime_lpm_layout.as_ref(),
                 args.local_memory_routines,
-                args.show, args.runtime_probe_read_strings && !proof_mode, args.runtime_percpu_loads && !proof_mode,
-                args.non_pic_map_addresses)?
+                args.show, args.runtime_probe_read_strings && !proof_mode, args.runtime_percpu_loads && !proof_mode)?
         }
         object::Architecture::Aarch64 => {
             let entry = find_symbol_by_name(&elf, &args.symbol)?;
