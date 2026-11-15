@@ -2,20 +2,11 @@
  * Host cross-check for the x86-64 simulator's routing of the decoded register
  * number through the generated dispatch-cell contract (STEP 0112).
  *
- * The writeback body `X86_SIM_L_WRITE_REG_WIDTH_SHIFT` (and the tag/pointer
- * dispatch macros) dispatch on the register number through the hand-written
- * `X86_SIM_L_FOR_EACH_GPR` order, and the read body `X86_SIM_L_READ_REG`
- * resolves the register through the independent hand-written
- * `X86_SIM_L_REG_VALUE` ternary chain; the generated `KPROG_X86_GPR_CELL(REG)`
- * names the dispatch cell that number binds to. This oracle drives the real
- * simulator state over the full register-number range, observes which of its
- * own 16 GPR cells each write changes (via the cell tag, so a same-byte write
- * is still observed), and checks that the changed cell is exactly the cell the
- * generated contract names, against an independent model that maps the number
- * to the literal `r<n>` cell itself. It also checks the routed read body,
- * which resolves through the *second* hand-written order. The generated
- * `_Static_assert`s additionally pin the hand-written `X86_R<n>` decode to the
- * generated table at compile time. Exit 1 on mismatch.
+ * The named extraction fields and the indexed local register cells must bind
+ * the same 16 register numbers and provenance tags. Exercise all byte-sized
+ * selectors, all write widths, and wider invalid selectors that would alias a
+ * register if narrowed before bounds checking. Pin the named ABI field offsets
+ * so a cell layout change cannot silently corrupt extraction state.
  *
  * Build/run:
  *   cd kprog/formal
@@ -203,6 +194,39 @@ static void check_read(unsigned reg)
 	}
 }
 
+/* The public named register fields keep their previous 16-byte stride. */
+#define CHECK_FIELD_LAYOUT(REG, NAME) \
+    _Static_assert(__builtin_offsetof(struct x86_sim_state, NAME) == (REG)*16U, "GPR value ABI changed"); \
+    _Static_assert(__builtin_offsetof(struct x86_sim_state, NAME##_tag) == (REG)*16U+8U, "GPR tag ABI changed"); \
+    _Static_assert(__builtin_offsetof(struct x86_sim_register_state, NAME) == (REG)*16U, "extracted GPR ABI changed"); \
+    _Static_assert(__builtin_offsetof(struct x86_sim_register_state, NAME##_tag) == (REG)*16U+8U, "extracted tag ABI changed");
+X86_SIM_L_FOR_EACH_GPR(CHECK_FIELD_LAYOUT)
+#undef CHECK_FIELD_LAYOUT
+_Static_assert(__builtin_offsetof(struct x86_sim_state, native_stack_base) == 256U, "state tail ABI changed");
+_Static_assert(__builtin_offsetof(struct x86_sim_register_state, native_stack_base) == 256U, "extracted state tail ABI changed");
+
+static void check_wide_invalid(__u64 reg)
+{
+    X86_SIM_L_DECLARE_STATE();
+    X86_SIM_L_DECLARE_STACK();
+    void *before[16], *after[16];
+    __u8 btag[16], atag[16];
+    ORA_SEED_ALL();
+    ORA_SNAPSHOT(before, btag);
+    cases++;
+    if (X86_SIM_L_READ_REG_PTR(reg) != 0 || X86_SIM_L_REG_TAG(reg) != X86_SIM_TAG_SCALAR) {
+        printf("MISMATCH wide invalid read reg=%llx\n", reg);
+        failures++;
+    }
+    X86_SIM_L_WRITE_REG_PTR_TAG(reg, (void *)1234, X86_SIM_TAG_SCALAR);
+    X86_SIM_L_WRITE_REG_WIDTH(reg, 5678, X86_WIDTH_64);
+    ORA_SNAPSHOT(after, atag);
+    for (unsigned i=0; i<16; i++) if (before[i] != after[i] || btag[i] != atag[i]) {
+        printf("MISMATCH wide invalid write reg=%llx cell=%u\n", reg, i);
+        failures++;
+    }
+}
+
 int main(void)
 {
 	static const __u64 values[] = {
@@ -237,6 +261,9 @@ int main(void)
 		}
 		check_read(reg);
 	}
+
+	const __u64 invalid[] = {16, 255, 256, 0x100000008ULL, ~0ULL};
+	for (unsigned i=0; i<sizeof(invalid)/sizeof(invalid[0]); i++) check_wide_invalid(invalid[i]);
 
 	if (failures != 0) {
 		printf("x86 reg dispatch route host cross-check: FAIL (%d)\n",
