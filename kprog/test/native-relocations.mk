@@ -132,10 +132,10 @@ absolute-table-b: $(CONTEXT_TOOL)
 	taskset -c 16-19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_absolute_code_table.py --build $(ABSOLUTE_TABLE_BUILD) --output $(OUTPUT) --bounds $(CONTEXT_TOOL)
 
 .PHONY: absolute-table-stock guest-absolute-table-stock
-absolute-table-stock: $(TABLE_CONTEXT_BUILD)/stock-client
+absolute-table-stock: /var/tmp/kprog-tmp/perf/scheduled-table/stock-client
 	install -d $(OUTPUT)
 	sha256sum $(KDIR)/arch/x86/boot/bzImage $(ABSOLUTE_TABLE_BUILD)/absolute.bpf.o $(ABSOLUTE_TABLE_BUILD)/absolute.proof.o > $(OUTPUT)/input-sha256.txt
-	taskset -c 16-17 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rodir $(OUTPUT)/inputs=$(ABSOLUTE_TABLE_BUILD) --rodir $(OUTPUT)/client=$(TABLE_CONTEXT_BUILD) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-absolute-table-stock OUTPUT=$(OUTPUT)'
+	taskset -c 16-17 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rodir $(OUTPUT)/inputs=$(ABSOLUTE_TABLE_BUILD) --rodir $(OUTPUT)/client=/var/tmp/kprog-tmp/perf/scheduled-table --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-absolute-table-stock OUTPUT=$(OUTPUT)'
 
 guest-absolute-table-stock:
 	$(OUTPUT)/client/stock-client $(OUTPUT)/inputs/absolute.bpf.o absolute_model_x86_sim_xdp $(OUTPUT)/verifier.log > $(OUTPUT)/result.json
