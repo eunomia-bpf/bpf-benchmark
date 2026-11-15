@@ -58,16 +58,23 @@ ret {ty} %value
 %value = call i32 asm sideeffect "", "={r12},{rdi}"(i32 17)
 ret i32 %value
 }
+define i64 @constant_chain() {
+%first = call i64 asm sideeffect "", "=r,0"(i64 -8)
+%offset = add i64 %first, 20
+%second = call i64 asm sideeffect "", "=r,0"(i64 %offset)
+ret i64 %second
+}
 '''
     before.write_text(source)
     active = run([tool, before, '-o', build/'strict.bc'])
     if 'packet length predicates lowered=1' not in active.stderr:
         raise ValueError('Normal lowering must recognize the tied field only')
-    if 'tied integer constant identities folded=3' not in active.stderr:
-        raise ValueError('Expected exactly three tied scalar constants to fold')
+    if 'tied integer constant identities folded=5' not in active.stderr:
+        raise ValueError('Expected three constants plus both chained identities to fold')
     lowered = run(['llvm-dis-18', build/'strict.bc', '-o', '-']).stdout
     for name, removable in [('constant64', True), ('constant32', True), ('constant_zero', True),
-                             ('constant_memory', False), ('constant_pointer', False), ('constant_untied', False)]:
+                             ('constant_memory', False), ('constant_pointer', False), ('constant_untied', False),
+                             ('constant_chain', True)]:
         body = lowered.split('@'+name+'(', 1)[1].split('}', 1)[0]
         if ('asm sideeffect' not in body) != removable:
             raise ValueError('Constant identity eligibility changed: '+name)
@@ -102,6 +109,7 @@ ret i32 %value
                                         ('constant32', c.c_uint32, (1<<32)-1),
                                         ('constant_zero', c.c_uint64, 0),
                                         ('constant_memory', c.c_uint64, 7),
+                                        ('constant_chain', c.c_uint64, 12),
                                         ('constant_pointer', c.c_void_p, None)]:
             fn = getattr(library, name);fn.argtypes = [];fn.restype = restype
             actual = fn()

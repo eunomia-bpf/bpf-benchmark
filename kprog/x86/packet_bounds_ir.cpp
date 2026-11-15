@@ -2,6 +2,8 @@
 // for the stock BPF backend/verifier. This changes no application predicate.
 #include "llvm/Analysis/ValueTracking.h"
 #include "llvm/Analysis/InstructionSimplify.h"
+#include "llvm/Analysis/ConstantFolding.h"
+#include "llvm/ADT/SetVector.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/InlineAsm.h"
@@ -24,23 +26,35 @@ static bool tied_identity(CallInst *call,InlineAsm *assembly) {
       call->arg_size()==1 && call->getType()==call->getArgOperand(0)->getType();
 }
 // A tied empty asm with an integer constant emits no operation and returns
-// exactly those bits. Keep live operands, pointer identities, clobbers and
-// real assembly opaque; exposing only constants lets LLVM fold private-stack
-// offsets without inventing a value or pointer provenance.
+// exactly those bits. Propagate newly exposed integer constants through pure
+// constant expressions to their next identity, so chains reach a fixed point.
+// Live operands, pointer identities, clobbers and real assembly stay opaque.
 static unsigned fold_constant_identities(Module &module) {
-  SmallVector<CallInst *,16> identities;
+  SmallSetVector<Instruction *,32> pending;
   for (auto &function:module) for (auto &instruction:instructions(function)) {
-    auto *call=dyn_cast<CallInst>(&instruction);
-    if (!call) continue;
-    auto *assembly=dyn_cast<InlineAsm>(call->getCalledOperand());
-    if (assembly && tied_identity(call,assembly) && !assembly->isAlignStack() &&
-        !assembly->canThrow() && isa<ConstantInt>(call->getArgOperand(0)))
-      identities.push_back(call);
+    if (instruction.getType()->isIntegerTy()) pending.insert(&instruction);
   }
-  for (auto *call:identities) {
-    call->replaceAllUsesWith(call->getArgOperand(0));call->eraseFromParent();
+  unsigned identities=0;
+  while (!pending.empty()) {
+    auto *instruction=pending.pop_back_val();
+    ConstantInt *constant=nullptr;
+    if (auto *call=dyn_cast<CallInst>(instruction)) {
+      auto *assembly=dyn_cast<InlineAsm>(call->getCalledOperand());
+      if (assembly && tied_identity(call,assembly) && !assembly->isAlignStack() &&
+          !assembly->canThrow())
+        constant=dyn_cast<ConstantInt>(call->getArgOperand(0));
+      if (constant) ++identities;
+    } else if (isa<BinaryOperator,CastInst,CmpInst,SelectInst,PHINode>(instruction)) {
+      constant=dyn_cast_or_null<ConstantInt>(
+          ConstantFoldInstruction(instruction,module.getDataLayout()));
+    }
+    if (!constant) continue;
+    for (auto *user:instruction->users())
+      if (auto *next=dyn_cast<Instruction>(user))
+        if (next!=instruction && next->getType()->isIntegerTy()) pending.insert(next);
+    instruction->replaceAllUsesWith(constant);instruction->eraseFromParent();
   }
-  return identities.size();
+  return identities;
 }
 static Value *origin(Value *value) {
   while (true) {
