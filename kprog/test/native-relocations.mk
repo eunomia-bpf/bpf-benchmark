@@ -271,6 +271,10 @@ FRONTEND_PROFILE ?= /workspaces/kprog-raw/perf/20261115-store-constants/otel-fro
 current-otel-backend: $(CONTEXT_TOOL)
 	taskset -c 8-11 prlimit --as=17179869184 -- python3 $(ROOT)/kprog/test/resume_simulator_frontend.py --profile $(FRONTEND_PROFILE) --source /var/tmp/kprog-tmp/perf/otel-whole-word-checked/trusted_x86.bpf.c --object /var/tmp/kprog-tmp/perf/otel-whole-word-checked/trusted_x86.bpf.o --bounds $(CONTEXT_TOOL) --output $(OUTPUT)
 
+.PHONY: frontend-resume-host
+frontend-resume-host: $(CONTEXT_TOOL)
+	taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_frontend_resume.py --build /var/tmp/kprog-tmp/perf/store-writeback --bounds $(CONTEXT_TOOL) --output $(OUTPUT)/resume
+
 .PHONY: frontend-debugger frontend-stacks
 frontend-debugger:
 	install -d $(OUTPUT)
