@@ -1,6 +1,43 @@
 /* Clight roots for the same canonical numeric bodies used by the simulator. */
 #include "../../arm64/arm64_sim_local_bpf.h"
 
+__u64 kprog_arm64_mov_path(__u64 op, __u64 width)
+{
+	__u64 result;
+	KPROG_ARM64_MOV_PTR_TAG_PATH_INTO(result, op, width, ARM64_SIM_L_UNSUPPORTED_OPCODE());
+	return result;
+}
+__u64 kprog_arm64_csel_path(__u64 op, __u64 width)
+{
+	__u64 result;
+	KPROG_ARM64_CSEL_PTR_TAG_PATH_INTO(result, op, width, ARM64_SIM_L_UNSUPPORTED_OPCODE());
+	return result;
+}
+__u8 kprog_arm64_alu_source(__u64 op)
+{
+	__u8 result;
+	KPROG_ARM64_ALU_OPERAND_SELECT_INTO(result, op);
+	return result;
+}
+__u64 kprog_arm64_flag_rhs(__u64 op, __u64 imm, __u64 reg)
+{
+	__u64 result;
+	KPROG_ARM64_FLAG_RHS_INTO(result, op, imm, reg);
+	return result;
+}
+__u64 kprog_arm64_movk(__u64 dst, __u64 imm, __u64 shift)
+{
+	__u64 result;
+	KPROG_ARM64_MOVK_INSERT_INTO(result, dst, imm, shift, ARM64_SIM_L_UNSUPPORTED_OPCODE());
+	return result;
+}
+__u64 kprog_arm64_reduction(__u64 op, __u64 value)
+{
+	__u64 result;
+	KPROG_ARM64_REDUCTION_VALUE_INTO(result, op, value, ARM64_SIM_L_UNSUPPORTED_OPCODE());
+	return result;
+}
+
 __u64 kprog_arm64_alu_result(__u64 op, __u64 lhs, __u64 rhs)
 {
 	__u64 result;

@@ -6,4 +6,8 @@
 	((IS_IMMEDIATE) ? (__u64)(IMM) :                                    \
 	 KPROG_ARM64_MOD_VALUE((MOD), (VALUE), (SHIFT), (WIDTH)))
 
+#define KPROG_ARM64_ALU_RHS_INTO(OUTPUT, IS_IMMEDIATE, IMM, MOD, VALUE, SHIFT, WIDTH) \
+    do { if (IS_IMMEDIATE) (OUTPUT)=(__u64)(IMM); \
+         else KPROG_ARM64_MOD_VALUE_INTO((OUTPUT), (MOD), (VALUE), (SHIFT), (WIDTH)); } while (0)
+
 #endif

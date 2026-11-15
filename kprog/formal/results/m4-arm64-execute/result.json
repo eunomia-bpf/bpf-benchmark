@@ -1,0 +1,116 @@
+{
+  "status": "ARM instruction dispatcher AST and Clight subset pass; M4 incomplete",
+  "entry": "ARM64_SIM_L_EXEC through kprog_arm64_execute",
+  "addressing": {
+    "exit": 0,
+    "seconds": 7.0814729630074,
+    "equal": true,
+    "bytes": 18806455,
+    "functions": 31
+  },
+  "numeric": {
+    "exit": 0,
+    "seconds": 0.07319049097714014,
+    "equal": true,
+    "bytes": 167556,
+    "functions": 20
+  },
+  "frames": {
+    "historical": {
+      "capture_bytes": 7827228,
+      "summary": "ARM execute: 4320 complete frames, frame_bytes=1776; selectors/CNT lanes pass"
+    },
+    "native": {
+      "capture_bytes": 7827228,
+      "summary": "ARM execute: 4320 complete frames, frame_bytes=1776; selectors/CNT lanes pass"
+    },
+    "adapter": {
+      "capture_bytes": 7827228,
+      "summary": "ARM execute: 4320 complete frames, frame_bytes=1776; selectors/CNT lanes pass"
+    },
+    "comparison": "all capture bytes identical; no masks",
+    "before": "4a2b31f48347c9e970aa5a11ebbf5196de80173d"
+  },
+  "mutations": [
+    {
+      "mutation": "mov-width-truncation",
+      "exit": 1,
+      "assertion": "ARM execute: MOV raw capture/selection"
+    },
+    {
+      "mutation": "flag-register-not-observed",
+      "exit": 1,
+      "assertion": "ARM execute: flag operand eager register/lazy immediate"
+    },
+    {
+      "mutation": "condition-raw-flag-booleanized",
+      "exit": 1,
+      "assertion": "ARM execute: condition raw flags/repeated selection"
+    },
+    {
+      "mutation": "movk-wrong-column",
+      "exit": 1,
+      "assertion": "ARM execute: MOVK capture/column/unsupported"
+    },
+    {
+      "mutation": "cnt-high-byte-lost",
+      "exit": 1,
+      "assertion": "ARM execute: every byte/lane CNT"
+    }
+  ],
+  "native_fidelity": {
+    "allocated_sections_equal": true,
+    "allocated_relocations_equal": true,
+    "current_stream_equals_normal_build": true,
+    "allocated_section_bytes": {
+      ".text": 0,
+      "socket": 5288,
+      "license": 4
+    },
+    "allocated_relocations": 1
+  },
+  "confirmation": {
+    "make-clight": {
+      "exit": 0,
+      "seconds": 95.24374860202079
+    },
+    "all-clight-lean": {
+      "exit": 0,
+      "seconds": 3.2753264069906436
+    },
+    "deterministic-Arm64Addressing": {
+      "exit": 0,
+      "seconds": 7.0814729630074,
+      "equal": true,
+      "bytes": 18806455,
+      "functions": 31
+    },
+    "deterministic-Arm64Numeric": {
+      "exit": 0,
+      "seconds": 0.07319049097714014,
+      "equal": true,
+      "bytes": 167556,
+      "functions": 20
+    },
+    "preprocess": {
+      "exit": 0,
+      "seconds": 0.10206383501645178,
+      "bytes": 2046516,
+      "artifact": "preprocess.log (frontend stdout)"
+    },
+    "initial_receipt_error": "finish.py expected an -E output file; actual stdout retained; no C/Lean command failed",
+    "axioms": {
+      "exit": 0,
+      "seconds": 1.1021509190031793
+    }
+  },
+  "initial_full_root_lean": "21,339,760-byte export hit 32GiB virtual OOM; prior write primitives now reused",
+  "resource_limits": {
+    "cpu": 15,
+    "address_space_gib": 32,
+    "lean_workers": 1
+  },
+  "refinements_migrated": 0,
+  "full_library_lake_build": "not run in this M4 step",
+  "make_check": "pending ordered M5/M6 completion"
+}

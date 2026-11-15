@@ -75,6 +75,7 @@ def ___compcert_va_int32 : Ident := identOfString "__compcert_va_int32"
 def ___compcert_va_int64 : Ident := identOfString "__compcert_va_int64"
 def ___kprog_a64_adrp_op : Ident := identOfString "__kprog_a64_adrp_op"
 def ___kprog_a64_adrp_tag : Ident := identOfString "__kprog_a64_adrp_tag"
+def ___kprog_a64_aso_select : Ident := identOfString "__kprog_a64_aso_select"
 def ___kprog_a64_bf_bits : Ident := identOfString "__kprog_a64_bf_bits"
 def ___kprog_a64_bf_dst : Ident := identOfString "__kprog_a64_bf_dst"
 def ___kprog_a64_bf_field : Ident := identOfString "__kprog_a64_bf_field"
@@ -92,6 +93,9 @@ def ___kprog_a64_cneg_taken : Ident := identOfString "__kprog_a64_cneg_taken"
 def ___kprog_a64_cneg_value : Ident := identOfString "__kprog_a64_cneg_value"
 def ___kprog_a64_cneg_width : Ident := identOfString "__kprog_a64_cneg_width"
 def ___kprog_a64_cneg_wmask : Ident := identOfString "__kprog_a64_cneg_wmask"
+def ___kprog_a64_cp_op : Ident := identOfString "__kprog_a64_cp_op"
+def ___kprog_a64_cp_path : Ident := identOfString "__kprog_a64_cp_path"
+def ___kprog_a64_cp_width : Ident := identOfString "__kprog_a64_cp_width"
 def ___kprog_a64_csel_op : Ident := identOfString "__kprog_a64_csel_op"
 def ___kprog_a64_csel_result : Ident := identOfString "__kprog_a64_csel_result"
 def ___kprog_a64_csel_src : Ident := identOfString "__kprog_a64_csel_src"
@@ -111,12 +115,21 @@ def ___kprog_a64_fmov_dir : Ident := identOfString "__kprog_a64_fmov_dir"
 def ___kprog_a64_fmov_result : Ident := identOfString "__kprog_a64_fmov_result"
 def ___kprog_a64_fmov_src : Ident := identOfString "__kprog_a64_fmov_src"
 def ___kprog_a64_fmov_v0 : Ident := identOfString "__kprog_a64_fmov_v0"
+def ___kprog_a64_fo_rhs : Ident := identOfString "__kprog_a64_fo_rhs"
 def ___kprog_a64_io_operand : Ident := identOfString "__kprog_a64_io_operand"
 def ___kprog_a64_mod : Ident := identOfString "__kprog_a64_mod"
 def ___kprog_a64_mod_amount : Ident := identOfString "__kprog_a64_mod_amount"
 def ___kprog_a64_mod_shift : Ident := identOfString "__kprog_a64_mod_shift"
 def ___kprog_a64_mod_value : Ident := identOfString "__kprog_a64_mod_value"
 def ___kprog_a64_mod_w32 : Ident := identOfString "__kprog_a64_mod_w32"
+def ___kprog_a64_mov_op : Ident := identOfString "__kprog_a64_mov_op"
+def ___kprog_a64_mov_path : Ident := identOfString "__kprog_a64_mov_path"
+def ___kprog_a64_mov_width : Ident := identOfString "__kprog_a64_mov_width"
+def ___kprog_a64_movk_dst : Ident := identOfString "__kprog_a64_movk_dst"
+def ___kprog_a64_movk_imm : Ident := identOfString "__kprog_a64_movk_imm"
+def ___kprog_a64_movk_mask : Ident := identOfString "__kprog_a64_movk_mask"
+def ___kprog_a64_movk_result : Ident := identOfString "__kprog_a64_movk_result"
+def ___kprog_a64_movk_shift : Ident := identOfString "__kprog_a64_movk_shift"
 def ___kprog_a64_mul_addend : Ident := identOfString "__kprog_a64_mul_addend"
 def ___kprog_a64_mul_carry : Ident := identOfString "__kprog_a64_mul_carry"
 def ___kprog_a64_mul_hi : Ident := identOfString "__kprog_a64_mul_hi"
@@ -127,6 +140,10 @@ def ___kprog_a64_mul_mid2 : Ident := identOfString "__kprog_a64_mul_mid2"
 def ___kprog_a64_mul_op : Ident := identOfString "__kprog_a64_mul_op"
 def ___kprog_a64_mul_result : Ident := identOfString "__kprog_a64_mul_result"
 def ___kprog_a64_mul_rhs : Ident := identOfString "__kprog_a64_mul_rhs"
+def ___kprog_a64_red_op : Ident := identOfString "__kprog_a64_red_op"
+def ___kprog_a64_red_out : Ident := identOfString "__kprog_a64_red_out"
+def ___kprog_a64_red_result : Ident := identOfString "__kprog_a64_red_result"
+def ___kprog_a64_red_value : Ident := identOfString "__kprog_a64_red_value"
 def ___kprog_a64_shift_32 : Ident := identOfString "__kprog_a64_shift_32"
 def ___kprog_a64_shift_amount : Ident := identOfString "__kprog_a64_shift_amount"
 def ___kprog_a64_shift_k : Ident := identOfString "__kprog_a64_shift_k"
@@ -152,17 +169,24 @@ def _imm : Ident := identOfString "imm"
 def _kind : Ident := identOfString "kind"
 def _kprog_arm64_adrp : Ident := identOfString "kprog_arm64_adrp"
 def _kprog_arm64_alu_result : Ident := identOfString "kprog_arm64_alu_result"
+def _kprog_arm64_alu_source : Ident := identOfString "kprog_arm64_alu_source"
 def _kprog_arm64_bitfield : Ident := identOfString "kprog_arm64_bitfield"
 def _kprog_arm64_cneg : Ident := identOfString "kprog_arm64_cneg"
 def _kprog_arm64_csel : Ident := identOfString "kprog_arm64_csel"
+def _kprog_arm64_csel_path : Ident := identOfString "kprog_arm64_csel_path"
 def _kprog_arm64_extrev : Ident := identOfString "kprog_arm64_extrev"
+def _kprog_arm64_flag_rhs : Ident := identOfString "kprog_arm64_flag_rhs"
 def _kprog_arm64_fmov : Ident := identOfString "kprog_arm64_fmov"
 def _kprog_arm64_fmov_dest : Ident := identOfString "kprog_arm64_fmov_dest"
 def _kprog_arm64_imm_operand : Ident := identOfString "kprog_arm64_imm_operand"
 def _kprog_arm64_mod : Ident := identOfString "kprog_arm64_mod"
+def _kprog_arm64_mov_path : Ident := identOfString "kprog_arm64_mov_path"
+def _kprog_arm64_movk : Ident := identOfString "kprog_arm64_movk"
 def _kprog_arm64_mul : Ident := identOfString "kprog_arm64_mul"
+def _kprog_arm64_reduction : Ident := identOfString "kprog_arm64_reduction"
 def _kprog_arm64_shift : Ident := identOfString "kprog_arm64_shift"
 def _kprog_arm64_unary : Ident := identOfString "kprog_arm64_unary"
+def _kprog_x86_popcount_value : Ident := identOfString "kprog_x86_popcount_value"
 def _lhs : Ident := identOfString "lhs"
 def _lsb : Ident := identOfString "lsb"
 def _main : Ident := identOfString "main"
@@ -187,6 +211,663 @@ def _t'6 : Ident := (Positive.ofNat 133)
 def _t'7 : Ident := (Positive.ofNat 134)
 def _t'8 : Ident := (Positive.ofNat 135)
 def _t'9 : Ident := (Positive.ofNat 136)
+
+def f_kprog_x86_popcount_value : Function := {
+  fn_return := tulong,
+  fn_callconv := cc_default,
+  fn_params := [(_value, tulong)],
+  fn_vars := [],
+  fn_temps := [],
+  fn_body :=
+(Stmt.Ssequence
+  (Stmt.Sset _value
+    (Expr.Ebinop Binop.Osub (Expr.Etempvar _value tulong)
+      (Expr.Ebinop Binop.Oand
+        (Expr.Ebinop Binop.Oshr (Expr.Etempvar _value tulong)
+          (Expr.Econst_int (Integers.Int.repr 1) tint) tulong)
+        (Expr.Econst_long (Integers.Int64.repr 6148914691236517205) tulong)
+        tulong) tulong))
+  (Stmt.Ssequence
+    (Stmt.Sset _value
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Ebinop Binop.Oand (Expr.Etempvar _value tulong)
+          (Expr.Econst_long (Integers.Int64.repr 3689348814741910323) tulong)
+          tulong)
+        (Expr.Ebinop Binop.Oand
+          (Expr.Ebinop Binop.Oshr (Expr.Etempvar _value tulong)
+            (Expr.Econst_int (Integers.Int.repr 2) tint) tulong)
+          (Expr.Econst_long (Integers.Int64.repr 3689348814741910323) tulong)
+          tulong) tulong))
+    (Stmt.Ssequence
+      (Stmt.Sset _value
+        (Expr.Ebinop Binop.Oand
+          (Expr.Ebinop Binop.Oadd (Expr.Etempvar _value tulong)
+            (Expr.Ebinop Binop.Oshr (Expr.Etempvar _value tulong)
+              (Expr.Econst_int (Integers.Int.repr 4) tint) tulong) tulong)
+          (Expr.Econst_long (Integers.Int64.repr 1085102592571150095) tulong)
+          tulong))
+      (Stmt.Sreturn (some (Expr.Ebinop Binop.Oshr
+                            (Expr.Ebinop Binop.Omul
+                              (Expr.Etempvar _value tulong)
+                              (Expr.Econst_long (Integers.Int64.repr 72340172838076673) tulong)
+                              tulong)
+                            (Expr.Econst_int (Integers.Int.repr 56) tint)
+                            tulong))))))
+}
+
+def f_kprog_arm64_mov_path : Function := {
+  fn_return := tulong,
+  fn_callconv := cc_default,
+  fn_params := [(_op, tulong), (_width, tulong)],
+  fn_vars := [],
+  fn_temps := [(_result, tulong), (___kprog_a64_mov_op, tulong),
+               (___kprog_a64_mov_width, tulong),
+               (___kprog_a64_mov_path, tulong)],
+  fn_body :=
+(Stmt.Ssequence
+  (Stmt.Sloop
+    (Stmt.Ssequence
+      (Stmt.Sset ___kprog_a64_mov_op (Expr.Etempvar _op tulong))
+      (Stmt.Ssequence
+        (Stmt.Sset ___kprog_a64_mov_width (Expr.Etempvar _width tulong))
+        (Stmt.Ssequence
+          (Stmt.Sset ___kprog_a64_mov_path
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+          (Stmt.Ssequence
+            (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_mov_op tulong)
+              (LStmts.LScons (some 1)
+                Stmt.Sbreak
+                (LStmts.LScons (some 2)
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___kprog_a64_mov_path
+                      (Expr.Ecast
+                        (Expr.Ebinop Binop.Oeq
+                          (Expr.Etempvar ___kprog_a64_mov_width tulong)
+                          (Expr.Econst_int (Integers.Int.repr 8) tuint) tint)
+                        tulong))
+                    Stmt.Sbreak)
+                  (LStmts.LScons none
+                    (Stmt.Ssequence
+                      (Stmt.Sloop
+                        (Stmt.Scall none
+                          (Expr.Evar _arm64_sim_unsupported_opcode (Ty.Tfunction
+                                                                    [] tvoid
+                                                                    cc_default))
+                          [])
+                        Stmt.Sbreak)
+                      Stmt.Sbreak)
+                    LStmts.LSnil))))
+            (Stmt.Sset _result (Expr.Etempvar ___kprog_a64_mov_path tulong))))))
+    Stmt.Sbreak)
+  (Stmt.Sreturn (some (Expr.Etempvar _result tulong))))
+}
+
+def f_kprog_arm64_csel_path : Function := {
+  fn_return := tulong,
+  fn_callconv := cc_default,
+  fn_params := [(_op, tulong), (_width, tulong)],
+  fn_vars := [],
+  fn_temps := [(_result, tulong), (___kprog_a64_cp_op, tulong),
+               (___kprog_a64_cp_width, tulong),
+               (___kprog_a64_cp_path, tulong)],
+  fn_body :=
+(Stmt.Ssequence
+  (Stmt.Sloop
+    (Stmt.Ssequence
+      (Stmt.Sset ___kprog_a64_cp_op (Expr.Etempvar _op tulong))
+      (Stmt.Ssequence
+        (Stmt.Sset ___kprog_a64_cp_width (Expr.Etempvar _width tulong))
+        (Stmt.Ssequence
+          (Stmt.Sset ___kprog_a64_cp_path
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+          (Stmt.Ssequence
+            (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_cp_op tulong)
+              (LStmts.LScons (some 28)
+                (Stmt.Ssequence
+                  (Stmt.Sset ___kprog_a64_cp_path
+                    (Expr.Ecast
+                      (Expr.Ebinop Binop.Oeq
+                        (Expr.Etempvar ___kprog_a64_cp_width tulong)
+                        (Expr.Econst_int (Integers.Int.repr 8) tuint) tint)
+                      tulong))
+                  Stmt.Sbreak)
+                (LStmts.LScons (some 29)
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___kprog_a64_cp_path
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+                    Stmt.Sbreak)
+                  (LStmts.LScons (some 30)
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___kprog_a64_cp_path
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 0) tint)
+                          tulong))
+                      Stmt.Sbreak)
+                    (LStmts.LScons (some 52)
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___kprog_a64_cp_path
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 0) tint)
+                            tulong))
+                        Stmt.Sbreak)
+                      (LStmts.LScons (some 61)
+                        (Stmt.Ssequence
+                          (Stmt.Sset ___kprog_a64_cp_path
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 0) tint)
+                              tulong))
+                          Stmt.Sbreak)
+                        (LStmts.LScons (some 62)
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___kprog_a64_cp_path
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                tulong))
+                            Stmt.Sbreak)
+                          (LStmts.LScons (some 68)
+                            (Stmt.Ssequence
+                              (Stmt.Sset ___kprog_a64_cp_path
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                  tulong))
+                              Stmt.Sbreak)
+                            (LStmts.LScons (some 69)
+                              (Stmt.Ssequence
+                                (Stmt.Sset ___kprog_a64_cp_path
+                                  (Expr.Ecast
+                                    (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                    tulong))
+                                Stmt.Sbreak)
+                              (LStmts.LScons none
+                                (Stmt.Ssequence
+                                  (Stmt.Sloop
+                                    (Stmt.Scall none
+                                      (Expr.Evar _arm64_sim_unsupported_opcode 
+                                      (Ty.Tfunction [] tvoid cc_default)) [])
+                                    Stmt.Sbreak)
+                                  Stmt.Sbreak)
+                                LStmts.LSnil))))))))))
+            (Stmt.Sset _result (Expr.Etempvar ___kprog_a64_cp_path tulong))))))
+    Stmt.Sbreak)
+  (Stmt.Sreturn (some (Expr.Etempvar _result tulong))))
+}
+
+def f_kprog_arm64_alu_source : Function := {
+  fn_return := tuchar,
+  fn_callconv := cc_default,
+  fn_params := [(_op, tulong)],
+  fn_vars := [],
+  fn_temps := [(_result, tuchar), (___kprog_a64_aso_select, tuchar)],
+  fn_body :=
+(Stmt.Ssequence
+  (Stmt.Sloop
+    (Stmt.Ssequence
+      (Stmt.Sset ___kprog_a64_aso_select
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar))
+      (Stmt.Ssequence
+        (Stmt.Sswitch (Expr.Etempvar _op tulong)
+          (LStmts.LScons (some 3)
+            (Stmt.Ssequence
+              (Stmt.Sset ___kprog_a64_aso_select
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                  tuchar))
+              Stmt.Sbreak)
+            (LStmts.LScons (some 4)
+              (Stmt.Ssequence
+                (Stmt.Sset ___kprog_a64_aso_select
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                    tuchar))
+                Stmt.Sbreak)
+              (LStmts.LScons (some 6)
+                (Stmt.Ssequence
+                  (Stmt.Sset ___kprog_a64_aso_select
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                      tuchar))
+                  Stmt.Sbreak)
+                (LStmts.LScons none Stmt.Sbreak LStmts.LSnil)))))
+        (Stmt.Sset _result
+          (Expr.Ecast (Expr.Etempvar ___kprog_a64_aso_select tuchar) tuchar))))
+    Stmt.Sbreak)
+  (Stmt.Sreturn (some (Expr.Etempvar _result tuchar))))
+}
+
+def f_kprog_arm64_flag_rhs : Function := {
+  fn_return := tulong,
+  fn_callconv := cc_default,
+  fn_params := [(_op, tulong), (_imm, tulong), (_reg, tulong)],
+  fn_vars := [],
+  fn_temps := [(_result, tulong), (___kprog_a64_fo_rhs, tulong)],
+  fn_body :=
+(Stmt.Ssequence
+  (Stmt.Sloop
+    (Stmt.Ssequence
+      (Stmt.Sset ___kprog_a64_fo_rhs (Expr.Etempvar _reg tulong))
+      (Stmt.Ssequence
+        (Stmt.Sswitch (Expr.Etempvar _op tulong)
+          (LStmts.LScons (some 48)
+            (Stmt.Ssequence
+              (Stmt.Sset ___kprog_a64_fo_rhs (Expr.Etempvar _imm tulong))
+              Stmt.Sbreak)
+            (LStmts.LScons (some 49)
+              (Stmt.Ssequence
+                (Stmt.Sset ___kprog_a64_fo_rhs (Expr.Etempvar _imm tulong))
+                Stmt.Sbreak)
+              (LStmts.LScons (some 22)
+                (Stmt.Ssequence
+                  (Stmt.Sset ___kprog_a64_fo_rhs (Expr.Etempvar _imm tulong))
+                  Stmt.Sbreak)
+                (LStmts.LScons (some 24)
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___kprog_a64_fo_rhs
+                      (Expr.Etempvar _imm tulong))
+                    Stmt.Sbreak)
+                  (LStmts.LScons (some 55)
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___kprog_a64_fo_rhs
+                        (Expr.Etempvar _imm tulong))
+                      Stmt.Sbreak)
+                    (LStmts.LScons (some 26)
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___kprog_a64_fo_rhs
+                          (Expr.Etempvar _imm tulong))
+                        Stmt.Sbreak)
+                      (LStmts.LScons none Stmt.Sbreak LStmts.LSnil))))))))
+        (Stmt.Sset _result (Expr.Etempvar ___kprog_a64_fo_rhs tulong))))
+    Stmt.Sbreak)
+  (Stmt.Sreturn (some (Expr.Etempvar _result tulong))))
+}
+
+def f_kprog_arm64_movk : Function := {
+  fn_return := tulong,
+  fn_callconv := cc_default,
+  fn_params := [(_dst, tulong), (_imm, tulong), (_shift, tulong)],
+  fn_vars := [],
+  fn_temps := [(_result, tulong), (___kprog_a64_movk_dst, tulong),
+               (___kprog_a64_movk_imm, tulong),
+               (___kprog_a64_movk_shift, tulong),
+               (___kprog_a64_movk_mask, tulong),
+               (___kprog_a64_movk_result, tulong)],
+  fn_body :=
+(Stmt.Ssequence
+  (Stmt.Sloop
+    (Stmt.Ssequence
+      (Stmt.Sset ___kprog_a64_movk_dst (Expr.Etempvar _dst tulong))
+      (Stmt.Ssequence
+        (Stmt.Sset ___kprog_a64_movk_imm (Expr.Etempvar _imm tulong))
+        (Stmt.Ssequence
+          (Stmt.Sset ___kprog_a64_movk_shift (Expr.Etempvar _shift tulong))
+          (Stmt.Ssequence
+            (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_movk_shift tulong)
+              (LStmts.LScons (some 0)
+                (Stmt.Ssequence
+                  (Stmt.Sset ___kprog_a64_movk_mask
+                    (Expr.Ebinop Binop.Oshl
+                      (Expr.Econst_long (Integers.Int64.repr 65535) tulong)
+                      (Expr.Econst_int (Integers.Int.repr 0) tuint) tulong))
+                  Stmt.Sbreak)
+                (LStmts.LScons (some 16)
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___kprog_a64_movk_mask
+                      (Expr.Ebinop Binop.Oshl
+                        (Expr.Econst_long (Integers.Int64.repr 65535) tulong)
+                        (Expr.Econst_int (Integers.Int.repr 16) tuint)
+                        tulong))
+                    Stmt.Sbreak)
+                  (LStmts.LScons (some 32)
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___kprog_a64_movk_mask
+                        (Expr.Ebinop Binop.Oshl
+                          (Expr.Econst_long (Integers.Int64.repr 65535) tulong)
+                          (Expr.Econst_int (Integers.Int.repr 32) tuint)
+                          tulong))
+                      Stmt.Sbreak)
+                    (LStmts.LScons (some 48)
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___kprog_a64_movk_mask
+                          (Expr.Ebinop Binop.Oshl
+                            (Expr.Econst_long (Integers.Int64.repr 65535) tulong)
+                            (Expr.Econst_int (Integers.Int.repr 48) tuint)
+                            tulong))
+                        Stmt.Sbreak)
+                      (LStmts.LScons none
+                        (Stmt.Ssequence
+                          (Stmt.Sloop
+                            (Stmt.Scall none
+                              (Expr.Evar _arm64_sim_unsupported_opcode 
+                              (Ty.Tfunction [] tvoid cc_default)) [])
+                            Stmt.Sbreak)
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___kprog_a64_movk_mask
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                tulong))
+                            Stmt.Sbreak))
+                        LStmts.LSnil))))))
+            (Stmt.Ssequence
+              (Stmt.Sset ___kprog_a64_movk_result
+                (Expr.Ebinop Binop.Oor
+                  (Expr.Ebinop Binop.Oand
+                    (Expr.Etempvar ___kprog_a64_movk_dst tulong)
+                    (Expr.Eunop Unop.Onotint
+                      (Expr.Etempvar ___kprog_a64_movk_mask tulong) tulong)
+                    tulong)
+                  (Expr.Ebinop Binop.Oand
+                    (Expr.Ebinop Binop.Oshl
+                      (Expr.Etempvar ___kprog_a64_movk_imm tulong)
+                      (Expr.Etempvar ___kprog_a64_movk_shift tulong) tulong)
+                    (Expr.Etempvar ___kprog_a64_movk_mask tulong) tulong)
+                  tulong))
+              (Stmt.Sset _result
+                (Expr.Etempvar ___kprog_a64_movk_result tulong)))))))
+    Stmt.Sbreak)
+  (Stmt.Sreturn (some (Expr.Etempvar _result tulong))))
+}
+
+@[noinline] def s_kprog_arm64_reduction_0 : Stmt :=
+(Stmt.Scall (some _t'6)
+  (Expr.Evar _kprog_x86_popcount_value (Ty.Tfunction [tulong] tulong
+                                         cc_default))
+  [(Expr.Ebinop Binop.Oand
+     (Expr.Ebinop Binop.Oshr (Expr.Etempvar ___kprog_a64_red_value tulong)
+       (Expr.Econst_int (Integers.Int.repr 40) tint) tulong)
+     (Expr.Econst_long (Integers.Int64.repr 255) tulong) tulong)])
+
+@[noinline] def s_kprog_arm64_reduction_1 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Scall (some _t'7)
+    (Expr.Evar _kprog_x86_popcount_value (Ty.Tfunction [tulong] tulong
+                                           cc_default))
+    [(Expr.Ebinop Binop.Oand
+       (Expr.Ebinop Binop.Oshr (Expr.Etempvar ___kprog_a64_red_value tulong)
+         (Expr.Econst_int (Integers.Int.repr 48) tint) tulong)
+       (Expr.Econst_long (Integers.Int64.repr 255) tulong) tulong)])
+  (Stmt.Sset ___kprog_a64_red_out
+    (Expr.Ebinop Binop.Oor (Expr.Etempvar ___kprog_a64_red_out tulong)
+      (Expr.Ebinop Binop.Oshl (Expr.Ecast (Expr.Etempvar _t'7 tulong) tulong)
+        (Expr.Econst_int (Integers.Int.repr 48) tint) tulong) tulong)))
+
+@[noinline] def s_kprog_arm64_reduction_2 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Scall (some _t'8)
+      (Expr.Evar _kprog_x86_popcount_value (Ty.Tfunction [tulong] tulong
+                                             cc_default))
+      [(Expr.Ebinop Binop.Oand
+         (Expr.Ebinop Binop.Oshr
+           (Expr.Etempvar ___kprog_a64_red_value tulong)
+           (Expr.Econst_int (Integers.Int.repr 56) tint) tulong)
+         (Expr.Econst_long (Integers.Int64.repr 255) tulong) tulong)])
+    (Stmt.Sset ___kprog_a64_red_out
+      (Expr.Ebinop Binop.Oor (Expr.Etempvar ___kprog_a64_red_out tulong)
+        (Expr.Ebinop Binop.Oshl
+          (Expr.Ecast (Expr.Etempvar _t'8 tulong) tulong)
+          (Expr.Econst_int (Integers.Int.repr 56) tint) tulong) tulong)))
+  (Stmt.Ssequence
+    (Stmt.Sset ___kprog_a64_red_result
+      (Expr.Etempvar ___kprog_a64_red_out tulong))
+    (Stmt.Ssequence
+      (Stmt.Sset ___kprog_a64_red_out
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+      Stmt.Sbreak)))
+
+@[noinline] def s_kprog_arm64_reduction_3 : Stmt :=
+(Stmt.Sset ___kprog_a64_red_out
+  (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___kprog_a64_red_out tulong)
+    (Expr.Ebinop Binop.Oand
+      (Expr.Ebinop Binop.Oshr (Expr.Etempvar ___kprog_a64_red_value tulong)
+        (Expr.Econst_int (Integers.Int.repr 48) tint) tulong)
+      (Expr.Econst_long (Integers.Int64.repr 255) tulong) tulong) tulong))
+
+@[noinline] def s_kprog_arm64_reduction_4 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___kprog_a64_red_out
+    (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___kprog_a64_red_out tulong)
+      (Expr.Ebinop Binop.Oand
+        (Expr.Ebinop Binop.Oshr (Expr.Etempvar ___kprog_a64_red_value tulong)
+          (Expr.Econst_int (Integers.Int.repr 56) tint) tulong)
+        (Expr.Econst_long (Integers.Int64.repr 255) tulong) tulong) tulong))
+  (Stmt.Ssequence
+    (Stmt.Sset ___kprog_a64_red_result
+      (Expr.Etempvar ___kprog_a64_red_out tulong))
+    (Stmt.Ssequence
+      (Stmt.Sset ___kprog_a64_red_out
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+      Stmt.Sbreak)))
+
+def f_kprog_arm64_reduction : Function := {
+  fn_return := tulong,
+  fn_callconv := cc_default,
+  fn_params := [(_op, tulong), (_value, tulong)],
+  fn_vars := [],
+  fn_temps := [(_result, tulong), (___kprog_a64_red_op, tulong),
+               (___kprog_a64_red_value, tulong),
+               (___kprog_a64_red_out, tulong),
+               (___kprog_a64_red_result, tulong), (_t'8, tulong),
+               (_t'7, tulong), (_t'6, tulong), (_t'5, tulong),
+               (_t'4, tulong), (_t'3, tulong), (_t'2, tulong),
+               (_t'1, tulong)],
+  fn_body :=
+(Stmt.Ssequence
+  (Stmt.Sloop
+    (Stmt.Ssequence
+      (Stmt.Sset ___kprog_a64_red_op (Expr.Etempvar _op tulong))
+      (Stmt.Ssequence
+        (Stmt.Sset ___kprog_a64_red_value (Expr.Etempvar _value tulong))
+        (Stmt.Ssequence
+          (Stmt.Sset ___kprog_a64_red_out
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
+          (Stmt.Ssequence
+            (Stmt.Sset ___kprog_a64_red_result
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+                tulong))
+            (Stmt.Ssequence
+              (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_red_op tulong)
+                (LStmts.LScons (some 36)
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Scall (some _t'1)
+                        (Expr.Evar _kprog_x86_popcount_value (Ty.Tfunction
+                                                               [tulong]
+                                                               tulong
+                                                               cc_default))
+                        [(Expr.Ebinop Binop.Oand
+                           (Expr.Ebinop Binop.Oshr
+                             (Expr.Etempvar ___kprog_a64_red_value tulong)
+                             (Expr.Econst_int (Integers.Int.repr 0) tint)
+                             tulong)
+                           (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+                           tulong)])
+                      (Stmt.Sset ___kprog_a64_red_out
+                        (Expr.Ebinop Binop.Oor
+                          (Expr.Etempvar ___kprog_a64_red_out tulong)
+                          (Expr.Ebinop Binop.Oshl
+                            (Expr.Ecast (Expr.Etempvar _t'1 tulong) tulong)
+                            (Expr.Econst_int (Integers.Int.repr 0) tint)
+                            tulong) tulong)))
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Scall (some _t'2)
+                          (Expr.Evar _kprog_x86_popcount_value (Ty.Tfunction
+                                                                 [tulong]
+                                                                 tulong
+                                                                 cc_default))
+                          [(Expr.Ebinop Binop.Oand
+                             (Expr.Ebinop Binop.Oshr
+                               (Expr.Etempvar ___kprog_a64_red_value tulong)
+                               (Expr.Econst_int (Integers.Int.repr 8) tint)
+                               tulong)
+                             (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+                             tulong)])
+                        (Stmt.Sset ___kprog_a64_red_out
+                          (Expr.Ebinop Binop.Oor
+                            (Expr.Etempvar ___kprog_a64_red_out tulong)
+                            (Expr.Ebinop Binop.Oshl
+                              (Expr.Ecast (Expr.Etempvar _t'2 tulong) tulong)
+                              (Expr.Econst_int (Integers.Int.repr 8) tint)
+                              tulong) tulong)))
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Scall (some _t'3)
+                            (Expr.Evar _kprog_x86_popcount_value (Ty.Tfunction
+                                                                   [tulong]
+                                                                   tulong
+                                                                   cc_default))
+                            [(Expr.Ebinop Binop.Oand
+                               (Expr.Ebinop Binop.Oshr
+                                 (Expr.Etempvar ___kprog_a64_red_value tulong)
+                                 (Expr.Econst_int (Integers.Int.repr 16) tint)
+                                 tulong)
+                               (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+                               tulong)])
+                          (Stmt.Sset ___kprog_a64_red_out
+                            (Expr.Ebinop Binop.Oor
+                              (Expr.Etempvar ___kprog_a64_red_out tulong)
+                              (Expr.Ebinop Binop.Oshl
+                                (Expr.Ecast (Expr.Etempvar _t'3 tulong)
+                                  tulong)
+                                (Expr.Econst_int (Integers.Int.repr 16) tint)
+                                tulong) tulong)))
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            (Stmt.Scall (some _t'4)
+                              (Expr.Evar _kprog_x86_popcount_value (Ty.Tfunction
+                                                                    [tulong]
+                                                                    tulong
+                                                                    cc_default))
+                              [(Expr.Ebinop Binop.Oand
+                                 (Expr.Ebinop Binop.Oshr
+                                   (Expr.Etempvar ___kprog_a64_red_value tulong)
+                                   (Expr.Econst_int (Integers.Int.repr 24) tint)
+                                   tulong)
+                                 (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+                                 tulong)])
+                            (Stmt.Sset ___kprog_a64_red_out
+                              (Expr.Ebinop Binop.Oor
+                                (Expr.Etempvar ___kprog_a64_red_out tulong)
+                                (Expr.Ebinop Binop.Oshl
+                                  (Expr.Ecast (Expr.Etempvar _t'4 tulong)
+                                    tulong)
+                                  (Expr.Econst_int (Integers.Int.repr 24) tint)
+                                  tulong) tulong)))
+                          (Stmt.Ssequence
+                            (Stmt.Ssequence
+                              (Stmt.Scall (some _t'5)
+                                (Expr.Evar _kprog_x86_popcount_value 
+                                (Ty.Tfunction [tulong] tulong cc_default))
+                                [(Expr.Ebinop Binop.Oand
+                                   (Expr.Ebinop Binop.Oshr
+                                     (Expr.Etempvar ___kprog_a64_red_value tulong)
+                                     (Expr.Econst_int (Integers.Int.repr 32) tint)
+                                     tulong)
+                                   (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+                                   tulong)])
+                              (Stmt.Sset ___kprog_a64_red_out
+                                (Expr.Ebinop Binop.Oor
+                                  (Expr.Etempvar ___kprog_a64_red_out tulong)
+                                  (Expr.Ebinop Binop.Oshl
+                                    (Expr.Ecast (Expr.Etempvar _t'5 tulong)
+                                      tulong)
+                                    (Expr.Econst_int (Integers.Int.repr 32) tint)
+                                    tulong) tulong)))
+                            (Stmt.Ssequence
+                              (Stmt.Ssequence
+                                s_kprog_arm64_reduction_0
+                                (Stmt.Sset ___kprog_a64_red_out
+                                  (Expr.Ebinop Binop.Oor
+                                    (Expr.Etempvar ___kprog_a64_red_out tulong)
+                                    (Expr.Ebinop Binop.Oshl
+                                      (Expr.Ecast (Expr.Etempvar _t'6 tulong)
+                                        tulong)
+                                      (Expr.Econst_int (Integers.Int.repr 40) tint)
+                                      tulong) tulong)))
+                              (Stmt.Ssequence
+                                s_kprog_arm64_reduction_1
+                                s_kprog_arm64_reduction_2)))))))
+                  (LStmts.LScons (some 37)
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___kprog_a64_red_out
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Etempvar ___kprog_a64_red_out tulong)
+                          (Expr.Ebinop Binop.Oand
+                            (Expr.Ebinop Binop.Oshr
+                              (Expr.Etempvar ___kprog_a64_red_value tulong)
+                              (Expr.Econst_int (Integers.Int.repr 0) tint)
+                              tulong)
+                            (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+                            tulong) tulong))
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___kprog_a64_red_out
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Etempvar ___kprog_a64_red_out tulong)
+                            (Expr.Ebinop Binop.Oand
+                              (Expr.Ebinop Binop.Oshr
+                                (Expr.Etempvar ___kprog_a64_red_value tulong)
+                                (Expr.Econst_int (Integers.Int.repr 8) tint)
+                                tulong)
+                              (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+                              tulong) tulong))
+                        (Stmt.Ssequence
+                          (Stmt.Sset ___kprog_a64_red_out
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Etempvar ___kprog_a64_red_out tulong)
+                              (Expr.Ebinop Binop.Oand
+                                (Expr.Ebinop Binop.Oshr
+                                  (Expr.Etempvar ___kprog_a64_red_value tulong)
+                                  (Expr.Econst_int (Integers.Int.repr 16) tint)
+                                  tulong)
+                                (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+                                tulong) tulong))
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___kprog_a64_red_out
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Etempvar ___kprog_a64_red_out tulong)
+                                (Expr.Ebinop Binop.Oand
+                                  (Expr.Ebinop Binop.Oshr
+                                    (Expr.Etempvar ___kprog_a64_red_value tulong)
+                                    (Expr.Econst_int (Integers.Int.repr 24) tint)
+                                    tulong)
+                                  (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+                                  tulong) tulong))
+                            (Stmt.Ssequence
+                              (Stmt.Sset ___kprog_a64_red_out
+                                (Expr.Ebinop Binop.Oadd
+                                  (Expr.Etempvar ___kprog_a64_red_out tulong)
+                                  (Expr.Ebinop Binop.Oand
+                                    (Expr.Ebinop Binop.Oshr
+                                      (Expr.Etempvar ___kprog_a64_red_value tulong)
+                                      (Expr.Econst_int (Integers.Int.repr 32) tint)
+                                      tulong)
+                                    (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+                                    tulong) tulong))
+                              (Stmt.Ssequence
+                                (Stmt.Sset ___kprog_a64_red_out
+                                  (Expr.Ebinop Binop.Oadd
+                                    (Expr.Etempvar ___kprog_a64_red_out tulong)
+                                    (Expr.Ebinop Binop.Oand
+                                      (Expr.Ebinop Binop.Oshr
+                                        (Expr.Etempvar ___kprog_a64_red_value tulong)
+                                        (Expr.Econst_int (Integers.Int.repr 40) tint)
+                                        tulong)
+                                      (Expr.Econst_long (Integers.Int64.repr 255) tulong)
+                                      tulong) tulong))
+                                (Stmt.Ssequence
+                                  s_kprog_arm64_reduction_3
+                                  s_kprog_arm64_reduction_4)))))))
+                    (LStmts.LScons none
+                      (Stmt.Ssequence
+                        (Stmt.Sloop
+                          (Stmt.Scall none
+                            (Expr.Evar _arm64_sim_unsupported_opcode 
+                            (Ty.Tfunction [] tvoid cc_default)) [])
+                          Stmt.Sbreak)
+                        Stmt.Sbreak)
+                      LStmts.LSnil))))
+              (Stmt.Sset _result
+                (Expr.Etempvar ___kprog_a64_red_result tulong)))))))
+    Stmt.Sbreak)
+  (Stmt.Sreturn (some (Expr.Etempvar _result tulong))))
+}
 
 def f_kprog_arm64_alu_result : Function := {
   fn_return := tulong,
@@ -2468,6 +3149,13 @@ def global_definitions : List (Ident × GlobDef FunDef Ty) :=
                                      { cc_vararg := (some 1), cc_unproto := false, cc_structret := false }))
      [tint] tvoid
      { cc_vararg := (some 1), cc_unproto := false, cc_structret := false })),
+ (_kprog_x86_popcount_value, GlobDef.Gfun (FunDef.Internal f_kprog_x86_popcount_value)),
+ (_kprog_arm64_mov_path, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_mov_path)),
+ (_kprog_arm64_csel_path, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_csel_path)),
+ (_kprog_arm64_alu_source, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_alu_source)),
+ (_kprog_arm64_flag_rhs, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_flag_rhs)),
+ (_kprog_arm64_movk, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_movk)),
+ (_kprog_arm64_reduction, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_reduction)),
  (_kprog_arm64_alu_result, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_alu_result)),
  (_kprog_arm64_mod, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_mod)),
  (_kprog_arm64_shift, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_shift)),
@@ -2491,7 +3179,9 @@ def public_idents : List Ident :=
  _kprog_arm64_fmov_dest, _kprog_arm64_fmov, _kprog_arm64_cneg,
  _kprog_arm64_csel, _kprog_arm64_unary, _kprog_arm64_extrev,
  _kprog_arm64_mul, _kprog_arm64_bitfield, _kprog_arm64_shift,
- _kprog_arm64_mod, _kprog_arm64_alu_result, ___builtin_debug,
+ _kprog_arm64_mod, _kprog_arm64_alu_result, _kprog_arm64_reduction,
+ _kprog_arm64_movk, _kprog_arm64_flag_rhs, _kprog_arm64_alu_source,
+ _kprog_arm64_csel_path, _kprog_arm64_mov_path, ___builtin_debug,
  ___builtin_write32_reversed, ___builtin_write16_reversed,
  ___builtin_read32_reversed, ___builtin_read16_reversed, ___builtin_fnmsub,
  ___builtin_fnmadd, ___builtin_fmsub, ___builtin_fmadd, ___builtin_fmin,

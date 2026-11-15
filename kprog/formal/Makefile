@@ -734,17 +734,27 @@ clight: clightgen
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Address.lean c/Arm64Address.c
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Stack.lean c/Arm64Stack.c
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Access.lean c/Arm64Access.c
-	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Addressing.lean c/Arm64Addressing.c
+	external/clean/clightgen -fstruct-passing -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Addressing.lean c/Arm64Addressing.c
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -D__COMPCERT__ -include oracles/compcert_memory_host.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -c c/Arm64Address.c -o build/arm64_address_binding.o
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -D__COMPCERT__ -include oracles/compcert_memory_host.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -c c/Arm64Numeric.c -o build/arm64_numeric_binding.o
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -D__COMPCERT__ -include oracles/compcert_memory_host.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -c c/Arm64Addressing.c -o build/arm64_addressing_binding.o
-	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_context_host.c build/arm64_addressing_binding.o -o build/test_arm64_context_host
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_context_host.c build/arm64_addressing_binding.o build/arm64_address_binding.o build/arm64_numeric_binding.o -o build/test_arm64_context_host
 	./build/test_arm64_context_host
-	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -DADAPTER=1 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_memory_binding_host.c build/arm64_addressing_binding.o -o build/test_arm64_memory_binding_host
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -DADAPTER=1 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_memory_binding_host.c build/arm64_addressing_binding.o build/arm64_address_binding.o build/arm64_numeric_binding.o -o build/test_arm64_memory_binding_host
 	./build/test_arm64_memory_binding_host
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -DADAPTER=1 -DDISPATCH=1 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_memory_binding_host.c build/arm64_addressing_binding.o build/arm64_address_binding.o build/arm64_numeric_binding.o -o build/test_arm64_memory_binding_host
+	./build/test_arm64_memory_binding_host
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_execute_host.c build/arm64_addressing_binding.o build/arm64_address_binding.o build/arm64_numeric_binding.o -o build/test_arm64_execute_host
+	./build/test_arm64_execute_host
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -c c/Arm64Addressing.c -o build/arm64_addressing_binding.o
-	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_addressing_host.c build/arm64_addressing_binding.o -o build/test_arm64_addressing_host
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_addressing_host.c build/arm64_addressing_binding.o build/arm64_address_binding.o build/arm64_numeric_binding.o -o build/test_arm64_addressing_host
 	./build/test_arm64_addressing_host
-	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -DADAPTER=0 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_memory_binding_host.c build/arm64_addressing_binding.o -o build/test_arm64_memory_binding_host
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -DADAPTER=0 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_memory_binding_host.c build/arm64_addressing_binding.o build/arm64_address_binding.o build/arm64_numeric_binding.o -o build/test_arm64_memory_binding_host
 	./build/test_arm64_memory_binding_host
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -DADAPTER=0 -DDISPATCH=1 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_memory_binding_host.c build/arm64_addressing_binding.o build/arm64_address_binding.o build/arm64_numeric_binding.o -o build/test_arm64_memory_binding_host
+	./build/test_arm64_memory_binding_host
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_execute_host.c build/arm64_addressing_binding.o build/arm64_address_binding.o build/arm64_numeric_binding.o -o build/test_arm64_execute_host
+	./build/test_arm64_execute_host
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -D__COMPCERT__ -include oracles/compcert_memory_host.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -c c/Arm64Access.c -o build/arm64_access_binding.o
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -DADAPTER=1 -I../../vendor/libbpf/include/uapi oracles/test_arm64_access_host.c build/arm64_access_binding.o -o build/test_arm64_access_host
 	./build/test_arm64_access_host
@@ -818,4 +828,5 @@ clight: clightgen
 	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_arm64 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c oracles/arm64_stack_compile.bpf.c -o build/arm64_stack_compile.bpf.o
 	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_arm64 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c oracles/arm64_access_compile.bpf.c -o build/arm64_access_compile.bpf.o
 	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_arm64 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c oracles/arm64_addressing_compile.bpf.c -o build/arm64_addressing_compile.bpf.o
+	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_arm64 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c oracles/arm64_execute_compile.bpf.c -o build/arm64_execute_compile.bpf.o
 	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_arm64 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c oracles/arm64_context_compile.bpf.c -o build/arm64_context_compile.bpf.o

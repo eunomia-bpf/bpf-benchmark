@@ -8,6 +8,29 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include "../c/Arm64Addressing.h"
+#if defined(DISPATCH)
+/* Run the independent memory oracle through the real complete dispatcher. */
+static struct kprog_arm64_vector dispatch_vectors[32];
+static __u8 dispatch_flags[4];
+static void execute_memory(struct kprog_arm64_addressing *a, __u32 op,
+                           __u64 dst, __u64 src, __u64 src2, __u64 src3,
+                           __u8 flags, __u32 aux, __u64 imm)
+{
+	kprog_arm64_execute(a,dispatch_vectors,&dispatch_flags[0],&dispatch_flags[1],
+	                    &dispatch_flags[2],&dispatch_flags[3],op,dst,src,src2,src3,flags,aux,imm);
+	for (unsigned i=0;i<4;i++) if (dispatch_flags[i]) abort();
+	for (unsigned i=0;i<32;i++) if (dispatch_vectors[i].lo || dispatch_vectors[i].hi) abort();
+}
+#define kprog_arm64_load(A,D,B,I,X,M,F) execute_memory(A,ARM64_OP_LOAD,D,B,I,255,F,X,M)
+#define kprog_arm64_signed_load(A,O,D,B,I,X,M,F) execute_memory(A,O,D,B,I,255,F,X,M)
+#define kprog_arm64_store(A,B,S,I,X,M,F) execute_memory(A,ARM64_OP_STORE,B,S,I,255,F,X,M)
+#define kprog_arm64_pair_step(A,O,D,S,S2,B,I,X,M,F) \
+    execute_memory(A,O,(O)==ARM64_OP_LDP?(D):(B),(S),(O)==ARM64_OP_LDP?(B):(S2),I,F,X,M)
+#define kprog_arm64_exclusive_store(A,D,S,B,X,M,F) execute_memory(A,ARM64_OP_STLXR,D,S,B,255,F,X,M)
+#define kprog_arm64_atomic_add(A,D,S,B,X,F) execute_memory(A,ARM64_OP_LDADD,D,S,B,255,F,X,0)
+#define kprog_arm64_atomic_set(A,D,S,B,X,F) execute_memory(A,ARM64_OP_LDSET,D,S,B,255,F,X,0)
+#define kprog_arm64_atomic_clear(A,D,S,B,X,F) execute_memory(A,ARM64_OP_LDCLR,D,S,B,255,F,X,0)
+#endif
 #ifndef ATOMIC_IMPORT
 #define ATOMIC_IMPORT ADAPTER
 #endif

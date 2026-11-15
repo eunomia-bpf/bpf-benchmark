@@ -1514,9 +1514,27 @@ The successful build keeps that same memory limit. This is the explicit64-byte
 inline profile, not all producer capacities or a Clight refinement theorem.
 [Full export receipts](results/m4-x86-inline-export/README.md) record the scope.
 
-M4 remains open for the full ARM interpreter, remaining producer/storage
-profiles and full default compiled-byte coverage. The stated x86 inline
-profile now clears its earlier syntax/code-generation obstructions. Preserve
+The actual ARM instruction dispatcher `ARM64_SIM_L_EXEC` now exports through
+`kprog_arm64_execute`, with caller-owned capacity/bias/storage and flags/vector
+references. `Arm64Addressing` exports31 functions/18,806,455B and `Arm64Numeric`
+20 functions/167,556B. Shared declaration/output kernels retain native numeric
+initializers; existing exported register primitives remove duplicated write
+expansion. The same32GiB/`-j1` Lean build passes after the initial larger export
+exhausted that limit. Historical/current-native/adapter modes each agree on
+4,320 whole numeric/vector frames and ordered callbacks (7,827,228B each).
+The independent memory oracle also runs scalar/signed/pair/exclusive/atomic
+consumers through the dispatcher, retaining primitive tests as primitive scope.
+Five mutations, `make clight`, all ten Clight modules/47 jobs, deterministic
+re-exports and six standard-axiom queries pass. The native numeric/vector/live
+condition fixture is exact:5,288B/one allocated relocation. Entry initialization,
+helper/libc calls and program control wrappers remain separate; these results
+are extraction checks, not migrated refinements.
+[ARM receipts](results/m4-arm64-execute/README.md) retain complete scope and failures.
+
+M4 remains open for ARM helper/control wrappers, remaining producer/storage
+profiles, platform correspondence and full default compiled-byte coverage. The
+stated x86 inline profile and ARM instruction dispatcher clear their earlier
+syntax/code-generation obstructions. Preserve
 unaligned memory and real context-pointer domains when binding the Clight
 memory/ABI semantics; header parsing does not establish those relations.
 The old generator's `--check` still expects its historical C rendering and

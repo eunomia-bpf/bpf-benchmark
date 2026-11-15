@@ -16,6 +16,19 @@ struct kprog_arm64_addressing {
 	/* q and b name the same live private arena, as in Arm64Stack.h. */
 	volatile __u64 *q;
 };
+/* The production state holds32 anonymous {lo,hi} vector cells. */
+struct kprog_arm64_vector { __u64 lo, hi; };
+__u64 kprog_arm64_mov_path(__u64, __u64);
+__u64 kprog_arm64_csel_path(__u64, __u64);
+__u8 kprog_arm64_alu_source(__u64);
+__u64 kprog_arm64_flag_rhs(__u64, __u64, __u64);
+__u64 kprog_arm64_movk(__u64, __u64, __u64);
+__u64 kprog_arm64_alu_result(__u64, __u64, __u64);
+__u64 kprog_arm64_reduction(__u64, __u64);
+__u64 kprog_arm64_fmov_dest(__u64);
+void kprog_arm64_execute(struct kprog_arm64_addressing *, struct kprog_arm64_vector *,
+                         __u8 *, __u8 *, __u8 *, __u8 *, __u32, __u64, __u64,
+                         __u64, __u64, __u8, __u32, __u64);
 __u64 kprog_arm64_modified_reg(struct kprog_arm64_addressing *, __u64, __u8, __u8, __u8);
 __s64 kprog_arm64_memory_offset(struct kprog_arm64_addressing *, __u32, __u64, __u64);
 void *kprog_arm64_helper_argument(struct kprog_arm64_addressing *, __u64);

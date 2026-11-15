@@ -217,3 +217,69 @@ void kprog_arm64_vector_step(struct kprog_arm64_addressing *addressing,
 	REGISTERS();
 	ARM64_SIM_L_DQ_MEM_STEP(op, base, index, aux, imm);
 }
+
+#undef __a64_v0
+#undef __a64_v0_hi
+#define __a64_vectors vectors
+#define __a64_v0 (__a64_vectors[0].lo)
+#define __a64_v0_hi (__a64_vectors[0].hi)
+#define __a64_n (*n)
+#define __a64_z (*z)
+#define __a64_c (*c)
+#define __a64_v (*v)
+#if defined(__COMPCERT__)
+/* Decoded register numbers are passed by value; all state observations stay
+ * inside the same primitive and at the original dispatch expression site. */
+static void *execute_pointer(struct kprog_arm64_addressing *addressing, __u64 reg)
+{
+	REGISTERS();
+	void *result; ARM64_SIM_L_READ_REG_PTR_INTO(result, reg); return result;
+}
+static __u32 execute_tag(struct kprog_arm64_addressing *addressing, __u64 reg)
+{
+	REGISTERS();
+	__u32 result; ARM64_SIM_L_REG_TAG_INTO(result, reg); return result;
+}
+static int execute_condition(__u64 cond, const __u8 *n, const __u8 *z,
+                              const __u8 *c, const __u8 *v)
+{
+	int result;
+	KPROG_ARM64_EVAL_COND_INTO(result, cond, *n, *z, *c, *v, ARM64_SIM_L_UNSUPPORTED_OPCODE());
+	return result;
+}
+#undef ARM64_SIM_L_READ_REG_PTR
+#define ARM64_SIM_L_READ_REG_PTR(REG) execute_pointer(addressing, (REG))
+#undef ARM64_SIM_L_REG_TAG
+#define ARM64_SIM_L_REG_TAG(REG) execute_tag(addressing, (REG))
+#undef ARM64_SIM_L_READ_REG
+#define ARM64_SIM_L_READ_REG(REG) kprog_arm64_read_reg(addressing->coordinates, addressing->registers, addressing->tags, (REG))
+#undef ARM64_SIM_L_MOD_VALUE
+#define ARM64_SIM_L_MOD_VALUE(REG, MOD, SHIFT, WIDTH) kprog_arm64_modified_reg(addressing, (REG), (MOD), (SHIFT), (WIDTH))
+#undef ARM64_SIM_L_WRITE_REG_WIDTH
+#define ARM64_SIM_L_WRITE_REG_WIDTH(REG, VALUE, WIDTH) kprog_arm64_write_reg(addressing->coordinates, addressing->registers, addressing->tags, addressing->b, addressing->stack_tags, addressing->capacity, addressing->bias, (REG), (VALUE), (WIDTH))
+#undef ARM64_SIM_L_WRITE_REG_PTR_TAG
+#define ARM64_SIM_L_WRITE_REG_PTR_TAG(REG, VALUE, TAG) kprog_arm64_write_ptr(addressing->coordinates, addressing->registers, addressing->tags, addressing->b, addressing->stack_tags, addressing->capacity, addressing->bias, (REG), (VALUE), (TAG))
+#undef ARM64_SIM_L_MOV_PTR_TAG_PATH
+#define ARM64_SIM_L_MOV_PTR_TAG_PATH(OP, WIDTH) kprog_arm64_mov_path((OP), (WIDTH))
+#undef KPROG_ARM64_CSEL_PTR_TAG_PATH
+#define KPROG_ARM64_CSEL_PTR_TAG_PATH(OP, WIDTH, UNSUPPORTED) kprog_arm64_csel_path((OP), (WIDTH))
+#undef KPROG_ARM64_ALU_OPERAND_SELECT
+#define KPROG_ARM64_ALU_OPERAND_SELECT(OP) kprog_arm64_alu_source(OP)
+#undef KPROG_ARM64_EVAL_COND
+#define KPROG_ARM64_EVAL_COND(COND, N, Z, C, V, UNSUPPORTED) execute_condition((COND), &(N), &(Z), &(C), &(V))
+#undef KPROG_ALU64_RESULT
+#define KPROG_ALU64_RESULT(OP, LHS, RHS, UNSUPPORTED) kprog_arm64_alu_result((OP), (LHS), (RHS))
+#undef ARM64_SIM_L_REDUCTION_VALUE
+#define ARM64_SIM_L_REDUCTION_VALUE(OP, VALUE) kprog_arm64_reduction((OP), (VALUE))
+#undef KPROG_ARM64_FMOV_DEST_VECTOR
+#define KPROG_ARM64_FMOV_DEST_VECTOR(DIR, UNSUPPORTED) kprog_arm64_fmov_dest(DIR)
+#endif
+void kprog_arm64_execute(struct kprog_arm64_addressing *addressing,
+                         struct kprog_arm64_vector *vectors,
+                         __u8 *n, __u8 *z, __u8 *c, __u8 *v, __u32 op,
+                         __u64 dst, __u64 src, __u64 src2, __u64 src3,
+                         __u8 flags, __u32 aux, __u64 imm)
+{
+	REGISTERS();
+	ARM64_SIM_L_EXEC(op, dst, src, src2, src3, flags, aux, imm);
+}

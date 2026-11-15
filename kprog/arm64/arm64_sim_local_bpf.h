@@ -561,6 +561,10 @@ do { \
 	KPROG_ARM64_BITFIELD_VALUE((KIND), (SRC), (DST), (LSB), (BITS),    \
 				   ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
+#define ARM64_SIM_L_BITFIELD_VALUE_INTO(OUTPUT, KIND, SRC, DST, LSB, BITS) \
+	KPROG_ARM64_BITFIELD_VALUE_INTO((OUTPUT), (KIND), (SRC), (DST), (LSB), (BITS),    \
+				   ARM64_SIM_L_UNSUPPORTED_OPCODE())
+
 /*
  * Source-modifier (shift/rotate/extend) value. The numeric modifier arms,
  * their shift-amount masking, and the rotate guards are the generated
@@ -596,6 +600,14 @@ do { \
 			      ARM64_SIM_L_READ_REG(SRC3),                  \
 			      ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
+#define ARM64_SIM_L_MUL_VALUE_INTO(OUTPUT, OP, SRC, SRC2, SRC3, WIDTH) \
+	KPROG_ARM64_MUL_VALUE_INTO((OUTPUT), (OP), KPROG_ARM64_APPLY_WIDTH(              \
+		ARM64_SIM_L_READ_REG(SRC), (OP) == ARM64_OP_UDIV ? (WIDTH) : ARM64_WIDTH_64), \
+		KPROG_ARM64_APPLY_WIDTH(ARM64_SIM_L_READ_REG(SRC2),        \
+			(OP) == ARM64_OP_UDIV ? (WIDTH) : ARM64_WIDTH_64), \
+			      ARM64_SIM_L_READ_REG(SRC3),                  \
+			      ARM64_SIM_L_UNSUPPORTED_OPCODE())
+
 /*
  * Extract/reverse/extend value (EXTR/REV/REV16/SXTH/SXTW/SXTB). The six
  * opcode labels, the EXTR masked-shift composition, the width-selected byte
@@ -614,6 +626,13 @@ do { \
 			(OP) == ARM64_OP_EXTR ? (WIDTH) : ARM64_WIDTH_64), (SHIFT), \
 				 (WIDTH), ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
+#define ARM64_SIM_L_EXTREV_VALUE_INTO(OUTPUT, OP, SRC, SRC2, SHIFT, WIDTH) \
+	KPROG_ARM64_EXTREV_VALUE_INTO((OUTPUT), (OP), KPROG_ARM64_APPLY_WIDTH(           \
+		ARM64_SIM_L_READ_REG(SRC), (OP) == ARM64_OP_EXTR ? (WIDTH) : ARM64_WIDTH_64), \
+		KPROG_ARM64_APPLY_WIDTH(ARM64_SIM_L_READ_REG(SRC2),        \
+			(OP) == ARM64_OP_EXTR ? (WIDTH) : ARM64_WIDTH_64), (SHIFT), \
+				 (WIDTH), ARM64_SIM_L_UNSUPPORTED_OPCODE())
+
 /*
  * Conditional-select value (CSEL/CINC/CSET/CSETM/CINV/CSINV/CSINC/CSNEG). The
  * eight opcode labels and the two candidate values per arm are the generated
@@ -626,6 +645,11 @@ do { \
  */
 #define ARM64_SIM_L_CSEL_VALUE(OP, SRC, SRC2, TAKEN)                        \
 	KPROG_ARM64_CSEL_VALUE((OP), ARM64_SIM_L_READ_REG(SRC),            \
+			       ARM64_SIM_L_READ_REG(SRC2), (TAKEN),         \
+			       ARM64_SIM_L_UNSUPPORTED_OPCODE())
+
+#define ARM64_SIM_L_CSEL_VALUE_INTO(OUTPUT, OP, SRC, SRC2, TAKEN) \
+	KPROG_ARM64_CSEL_VALUE_INTO((OUTPUT), (OP), ARM64_SIM_L_READ_REG(SRC),            \
 			       ARM64_SIM_L_READ_REG(SRC2), (TAKEN),         \
 			       ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
@@ -658,6 +682,10 @@ do { \
 	KPROG_ARM64_MOVK_INSERT(ARM64_SIM_L_READ_REG(DST), (IMM), (SHIFT), \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
+#define ARM64_SIM_L_MOVK_VALUE_INTO(OUTPUT, DST, IMM, SHIFT) \
+	KPROG_ARM64_MOVK_INSERT_INTO((OUTPUT), ARM64_SIM_L_READ_REG(DST), (IMM), (SHIFT), \
+				ARM64_SIM_L_UNSUPPORTED_OPCODE())
+
 /*
  * Shift-by-kind (LSL/LSR/ASR/ROR) applied to an already read value. The four
  * shift kinds, the width-masked amount and the width narrowing are the
@@ -669,6 +697,10 @@ do { \
  */
 #define ARM64_SIM_L_SHIFT_VALUE(KIND, VALUE, AMOUNT, WIDTH)                 \
 	KPROG_ARM64_SHIFT_VALUE((KIND), (VALUE), (AMOUNT), (WIDTH),        \
+				ARM64_SIM_L_UNSUPPORTED_OPCODE())
+
+#define ARM64_SIM_L_SHIFT_VALUE_INTO(OUTPUT, KIND, VALUE, AMOUNT, WIDTH) \
+	KPROG_ARM64_SHIFT_VALUE_INTO((OUTPUT), (KIND), (VALUE), (AMOUNT), (WIDTH),        \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
 /*
@@ -683,6 +715,10 @@ do { \
 	KPROG_ARM64_REDUCTION_VALUE((OP), (VALUE),                         \
 				    ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
+#define ARM64_SIM_L_REDUCTION_VALUE_INTO(OUTPUT, OP, VALUE) \
+	KPROG_ARM64_REDUCTION_VALUE_INTO((OUTPUT), (OP), (VALUE),                         \
+				    ARM64_SIM_L_UNSUPPORTED_OPCODE())
+
 /*
  * Unary value (MVN/NEG) applied to a source register. The two opcode labels and
  * the width-narrowed complement/negation are the generated AArch64 unary
@@ -693,6 +729,10 @@ do { \
  */
 #define ARM64_SIM_L_UNARY_VALUE(OP, SRC, WIDTH)                             \
 	KPROG_ARM64_UNARY_VALUE((OP), ARM64_SIM_L_READ_REG(SRC), (WIDTH),  \
+				ARM64_SIM_L_UNSUPPORTED_OPCODE())
+
+#define ARM64_SIM_L_UNARY_VALUE_INTO(OUTPUT, OP, SRC, WIDTH) \
+	KPROG_ARM64_UNARY_VALUE_INTO((OUTPUT), (OP), ARM64_SIM_L_READ_REG(SRC), (WIDTH),  \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
 /*
@@ -707,6 +747,10 @@ do { \
 	KPROG_ARM64_CNEG_VALUE((OP), ARM64_SIM_L_READ_REG(SRC), (TAKEN),   \
 			       (WIDTH), ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
+#define ARM64_SIM_L_CNEG_VALUE_INTO(OUTPUT, OP, SRC, TAKEN, WIDTH) \
+	KPROG_ARM64_CNEG_VALUE_INTO((OUTPUT), (OP), ARM64_SIM_L_READ_REG(SRC), (TAKEN),   \
+			       (WIDTH), ARM64_SIM_L_UNSUPPORTED_OPCODE())
+
 /*
  * Complemented logical OR (ORN_REG) applied to two source registers. The opcode
  * label and the width-narrowed OR with a complemented second source are the
@@ -717,6 +761,10 @@ do { \
  */
 #define ARM64_SIM_L_ORN_VALUE(OP, LHS, RHS, WIDTH)                          \
 	KPROG_ARM64_ORN_VALUE((OP), (LHS), (RHS), (WIDTH),                 \
+			      ARM64_SIM_L_UNSUPPORTED_OPCODE())
+
+#define ARM64_SIM_L_ORN_VALUE_INTO(OUTPUT, OP, LHS, RHS, WIDTH) \
+	KPROG_ARM64_ORN_VALUE_INTO((OUTPUT), (OP), (LHS), (RHS), (WIDTH),                 \
 			      ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
 #define ARM64_SIM_L_STACK_INDEX(OFF)                                       \
@@ -1657,18 +1705,27 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 #endif
 #define ARM64_SIM_L_REJECT_PC() ARM64_SIM_L_UNSUPPORTED_OPCODE()
 
+/* Decoded values retain native initializer ordering; only extraction uses
+ * the corresponding standard-C output kernel with the same operands. */
+#if defined(__COMPCERT__)
+#define ARM64_SIM_L_VALUE(TYPE, NAME, KERNEL, ...) \
+    TYPE NAME; KERNEL##_INTO(NAME, __VA_ARGS__)
+#else
+#define ARM64_SIM_L_VALUE(TYPE, NAME, KERNEL, ...) \
+    TYPE NAME = KERNEL(__VA_ARGS__)
+#endif
+
 #define ARM64_SIM_L_EXEC_ALU(OP, DST, SRC, SRC2, FLAGS, AUX, IMM)           \
 	do {                                                               \
 		__u8 __a64_alu_width = (FLAGS);                           \
 		__u64 __a64_alu_lhs = ARM64_SIM_L_READ_REG(SRC);          \
-		__u64 __a64_alu_rhs = KPROG_ARM64_ALU_RHS(              \
+		ARM64_SIM_L_VALUE(__u64, __a64_alu_rhs, KPROG_ARM64_ALU_RHS,               \
 			KPROG_ARM64_ALU_OPERAND_SELECT((OP)), (IMM), ARM64_SIM_L_MOD(AUX),\
 			ARM64_SIM_L_READ_REG(SRC2), ARM64_SIM_L_SHIFT(AUX),\
 			__a64_alu_width);                                  \
 		__u8 __a64_alu_op = (AUX) & 0xffU;                        \
 		__u8 __a64_alu_src_tag = ARM64_SIM_L_REG_TAG(SRC);        \
-		__u64 __a64_alu_result =                                  \
-			KPROG_ALU64_RESULT(__a64_alu_op, __a64_alu_lhs,   \
+		ARM64_SIM_L_VALUE(__u64, __a64_alu_result, KPROG_ALU64_RESULT, __a64_alu_op, __a64_alu_lhs,   \
 				__a64_alu_rhs,                            \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE());        \
         /* SP keeps its arena-relative coordinate through full-width ADD/SUB. */ \
@@ -1890,44 +1947,38 @@ do { \
 					ARM64_SIM_L_READ_REG_PTR(SRC),     \
 					ARM64_SIM_L_REG_TAG(SRC));         \
 			} else {                                           \
-				__u64 __a64_l_value =                      \
-					KPROG_ARM64_IMM_RHS((OP), (IMM),   \
+				ARM64_SIM_L_VALUE(__u64, __a64_l_value, KPROG_ARM64_IMM_RHS, (OP), (IMM),   \
 						ARM64_SIM_L_READ_REG(SRC));\
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
 			}                                                  \
 		} else if (KPROG_ARM64_DISP_MOVK_HANDLED(OP)) {            \
-			__u64 __a64_l_value =                              \
-				ARM64_SIM_L_MOVK_VALUE((DST), (IMM), ARM64_SIM_L_SHIFT(AUX));\
+			ARM64_SIM_L_VALUE(__u64, __a64_l_value, ARM64_SIM_L_MOVK_VALUE, (DST), (IMM), ARM64_SIM_L_SHIFT(AUX));\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
 		} else if (KPROG_ARM64_ALU_HANDLED(OP)) {                         \
 			ARM64_SIM_L_EXEC_ALU((OP), (DST), (SRC), (SRC2), __a64_l_width, (AUX), (IMM));\
 		} else if (KPROG_ARM64_SHIFT_OP_HANDLED(OP)) {                        \
-			__u64 __a64_l_amount = KPROG_ARM64_IMM_RHS((OP), (IMM),\
+			ARM64_SIM_L_VALUE(__u64, __a64_l_amount, KPROG_ARM64_IMM_RHS, (OP), (IMM),\
 				ARM64_SIM_L_READ_REG(SRC2));\
-			__u64 __a64_l_result = ARM64_SIM_L_SHIFT_VALUE((AUX), ARM64_SIM_L_READ_REG(SRC), __a64_l_amount, __a64_l_width);\
+			ARM64_SIM_L_VALUE(__u64, __a64_l_result, ARM64_SIM_L_SHIFT_VALUE, (AUX), ARM64_SIM_L_READ_REG(SRC), __a64_l_amount, __a64_l_width);\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 		} else if (KPROG_ARM64_MUL_HANDLED(OP)) {                    \
-			__u64 __a64_l_result = ARM64_SIM_L_MUL_VALUE((OP), (SRC), (SRC2), (SRC3), __a64_l_width);\
+			ARM64_SIM_L_VALUE(__u64, __a64_l_result, ARM64_SIM_L_MUL_VALUE, (OP), (SRC), (SRC2), (SRC3), __a64_l_width);\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 		} else if (KPROG_ARM64_UNARY_HANDLED(OP)) {                 \
-			__u64 __a64_l_result =                              \
-				KPROG_ARM64_UNARY_VALUE((OP),                       \
+			ARM64_SIM_L_VALUE(__u64, __a64_l_result, KPROG_ARM64_UNARY_VALUE, (OP),                       \
 					ARM64_SIM_L_MOD_VALUE((SRC), ARM64_SIM_L_MOD(AUX), \
 						ARM64_SIM_L_SHIFT(AUX), __a64_l_width),        \
 					__a64_l_width, ARM64_SIM_L_UNSUPPORTED_OPCODE());\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 		} else if (KPROG_ARM64_CNEG_HANDLED(OP)) {                   \
-			__u64 __a64_l_result =                              \
-				ARM64_SIM_L_CNEG_VALUE((OP), (SRC),          \
+			ARM64_SIM_L_VALUE(__u64, __a64_l_result, ARM64_SIM_L_CNEG_VALUE, (OP), (SRC),          \
 					ARM64_SIM_L_EVAL_COND(AUX), __a64_l_width);\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 		} else if (KPROG_ARM64_EXTREV_HANDLED(OP)) {                 \
-			__u64 __a64_l_result =                              \
-				ARM64_SIM_L_EXTREV_VALUE((OP), (SRC), (SRC2), (IMM), __a64_l_width);\
+			ARM64_SIM_L_VALUE(__u64, __a64_l_result, ARM64_SIM_L_EXTREV_VALUE, (OP), (SRC), (SRC2), (IMM), __a64_l_width);\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 		} else if (KPROG_ARM64_DISP_BITFIELD_HANDLED(OP)) {           \
-			__u64 __a64_bf_result =                              \
-				ARM64_SIM_L_BITFIELD_VALUE((AUX) & 0xffU,    \
+			ARM64_SIM_L_VALUE(__u64, __a64_bf_result, ARM64_SIM_L_BITFIELD_VALUE, (AUX) & 0xffU,    \
 					ARM64_SIM_L_READ_REG(SRC),           \
 					ARM64_SIM_L_READ_REG(DST),           \
 					ARM64_SIM_L_BITFIELD_LSB(AUX),       \
@@ -1935,7 +1986,7 @@ do { \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_bf_result, __a64_l_width);\
 		} else if (KPROG_ARM64_SUBS_HANDLED(OP)) {                          \
 			__u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(SRC);      \
-			__u64 __a64_l_rhs = KPROG_ARM64_FLAG_RHS((OP), (IMM),\
+			ARM64_SIM_L_VALUE(__u64, __a64_l_rhs, KPROG_ARM64_FLAG_RHS, (OP), (IMM),\
 				ARM64_SIM_L_MOD_VALUE((SRC2), ARM64_SIM_L_MOD(AUX), ARM64_SIM_L_SHIFT(AUX), __a64_l_width));\
 			__u64 __a64_l_result = 0;                         \
 			KPROG_ARM64_EXEC_ARITH_WRITEBACK(                 \
@@ -1946,7 +1997,7 @@ do { \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 		} else if (KPROG_ARM64_ADDS_HANDLED(OP)) {                          \
 			__u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(SRC);      \
-			__u64 __a64_l_rhs = KPROG_ARM64_FLAG_RHS((OP), (IMM),\
+			ARM64_SIM_L_VALUE(__u64, __a64_l_rhs, KPROG_ARM64_FLAG_RHS, (OP), (IMM),\
 				ARM64_SIM_L_MOD_VALUE((SRC2), ARM64_SIM_L_MOD(AUX), ARM64_SIM_L_SHIFT(AUX), __a64_l_width));\
 			__u64 __a64_l_result = 0;                         \
 			KPROG_ARM64_EXEC_ARITH_WRITEBACK(                 \
@@ -1975,7 +2026,7 @@ do { \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE());            \
 		} else if (KPROG_ARM64_CMP_HANDLED(OP)) {                         \
 			__u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST);      \
-			__u64 __a64_l_rhs = KPROG_ARM64_FLAG_RHS((OP), (IMM),\
+			ARM64_SIM_L_VALUE(__u64, __a64_l_rhs, KPROG_ARM64_FLAG_RHS, (OP), (IMM),\
 				ARM64_SIM_L_MOD_VALUE((SRC), ARM64_SIM_L_MOD(AUX), ARM64_SIM_L_SHIFT(AUX), __a64_l_width));\
 			KPROG_ARM64_EXEC_ARITH_COMPARE(                     \
 				KPROG_ARM64_ARITH_FAMILY_SUB,                 \
@@ -1984,7 +2035,7 @@ do { \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE());            \
 		} else if (KPROG_ARM64_TST_HANDLED(OP)) {                         \
 			__u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST);      \
-			__u64 __a64_l_rhs = KPROG_ARM64_FLAG_RHS((OP), (IMM),\
+			ARM64_SIM_L_VALUE(__u64, __a64_l_rhs, KPROG_ARM64_FLAG_RHS, (OP), (IMM),\
 				ARM64_SIM_L_MOD_VALUE((SRC), ARM64_SIM_L_MOD(AUX), ARM64_SIM_L_SHIFT(AUX), __a64_l_width));\
 			__u64 __a64_l_value = 0;                          \
 			KPROG_ARM64_EXEC_LOGIC_FLAGS(                     \
@@ -2017,7 +2068,7 @@ do { \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
 		} else if (KPROG_ARM64_ANDS_HANDLED(OP)) {                          \
 			__u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(SRC);      \
-			__u64 __a64_l_rhs = KPROG_ARM64_FLAG_RHS((OP), (IMM),\
+			ARM64_SIM_L_VALUE(__u64, __a64_l_rhs, KPROG_ARM64_FLAG_RHS, (OP), (IMM),\
 				ARM64_SIM_L_MOD_VALUE((SRC2), ARM64_SIM_L_MOD(AUX), ARM64_SIM_L_SHIFT(AUX), __a64_l_width));\
 			__u64 __a64_l_value = 0;                          \
 			KPROG_ARM64_EXEC_LOGIC_FLAGS(                     \
@@ -2027,15 +2078,14 @@ do { \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE());           \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
 		} else if (KPROG_ARM64_ORN_HANDLED(OP)) {                    \
-			__u64 __a64_l_result =                              \
-				ARM64_SIM_L_ORN_VALUE((OP), ARM64_SIM_L_READ_REG(SRC),\
+			ARM64_SIM_L_VALUE(__u64, __a64_l_result, ARM64_SIM_L_ORN_VALUE, (OP), ARM64_SIM_L_READ_REG(SRC),\
 					ARM64_SIM_L_MOD_VALUE((SRC2), ARM64_SIM_L_MOD(AUX),\
 						ARM64_SIM_L_SHIFT(AUX), __a64_l_width),\
 					__a64_l_width);                     \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 		} else if (KPROG_ARM64_CCMP_HANDLED(OP)) {                          \
 			__u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST);      \
-			__u64 __a64_l_rhs = KPROG_ARM64_FLAG_RHS((OP), (IMM),\
+			ARM64_SIM_L_VALUE(__u64, __a64_l_rhs, KPROG_ARM64_FLAG_RHS, (OP), (IMM),\
 				ARM64_SIM_L_READ_REG(SRC));                 \
 			__u8 __a64_l_cond = ARM64_SIM_L_CCMP_COND(AUX); \
 			__u8 __a64_l_nzcv = ARM64_SIM_L_CCMP_NZCV(AUX); \
@@ -2055,8 +2105,7 @@ do { \
 						ARM64_SIM_L_READ_REG_PTR(SRC2),\
 						ARM64_SIM_L_REG_TAG(SRC2));\
 			} else {                                          \
-				__u64 __a64_l_result =                    \
-					ARM64_SIM_L_CSEL_VALUE((OP), (SRC), (SRC2), __a64_l_taken);\
+				ARM64_SIM_L_VALUE(__u64, __a64_l_result, ARM64_SIM_L_CSEL_VALUE, (OP), (SRC), (SRC2), __a64_l_taken);\
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 			}                                                 \
 		} else if (KPROG_ARM64_DISP_LOAD_HANDLED(OP)) { \
@@ -2092,8 +2141,7 @@ do { \
 			if (__a64_fmov_index >= 32U) {                     \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE();           \
 			} else {                                           \
-			__u64 __a64_fmov_result =                          \
-				KPROG_ARM64_FMOV_VALUE((AUX), __a64_vectors[__a64_fmov_index].lo, \
+			ARM64_SIM_L_VALUE(__u64, __a64_fmov_result, KPROG_ARM64_FMOV_VALUE, (AUX), __a64_vectors[__a64_fmov_index].lo, \
 					ARM64_SIM_L_READ_REG(SRC),         \
 					ARM64_SIM_L_UNSUPPORTED_OPCODE()); \
 			if (KPROG_ARM64_FMOV_DEST_VECTOR((AUX),           \
