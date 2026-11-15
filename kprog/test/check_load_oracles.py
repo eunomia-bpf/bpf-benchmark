@@ -27,10 +27,13 @@ unsigned long native_lab_entry_input(unsigned int kind) {
                                      ('test_stack_output_lifetime_host', True)]]
     tests.append((ROOT / 'kprog/test/load_writeback_host.c', True))
     tests.append((ROOT / 'kprog/formal/oracles/test_x86_store_route_host.c', False))
-    for source, own_input in tests:
-        name = source.stem
+    variants = [(source, own_input, []) for source, own_input in tests]
+    variants.append((ROOT / 'kprog/formal/oracles/test_stack_output_lifetime_host.c',
+                     True, ['-DTEST_ARM64']))
+    for source, own_input, options in variants:
+        name = source.stem + ('_arm64' if options else '')
         executable = a.build / name
-        commands = [['cc', '-std=gnu2x', '-O2', '-Wall', '-Wextra',
+        commands = [['cc', '-std=gnu2x', '-O2', '-Wall', '-Wextra', *options,
                      '-I' + str(ROOT), '-I' + str(ROOT / 'kprog/formal'),
                      '-I' + str(ROOT / 'kprog'), '-I' + str(ROOT / 'kprog/x86'),
                      '-I' + str(ROOT / 'vendor/libbpf/src'), source,
