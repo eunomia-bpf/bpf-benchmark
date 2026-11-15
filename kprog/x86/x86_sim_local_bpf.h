@@ -430,11 +430,7 @@ struct x86_sim_state {
 #define __x86_sim_abi_kind (__x86_state->abi_kind)
 #endif
 
-#if defined(__bpf__) || defined(__BPF__) || defined(__COMPCERT__)
 #define X86_SIM_L_UNSPECIFIED() NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_UNSPECIFIED)
-#else
-#define X86_SIM_L_UNSPECIFIED() 0ULL
-#endif
 
 #define X86_SIM_L_DECLARE_STATE()                                           \
     union x86_sim_register_cells __x86_local_gprs; \

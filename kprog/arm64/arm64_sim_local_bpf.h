@@ -192,11 +192,7 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	       KPROG_ABI_SKB_DATA_END_OFF,
 	       "skb data_end offset disagrees with ABI spec");
 
-#if defined(__bpf__) || defined(__BPF__) || defined(__COMPCERT__)
 #define ARM64_SIM_L_UNSPECIFIED() NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_UNSPECIFIED)
-#else
-#define ARM64_SIM_L_UNSPECIFIED() 0ULL
-#endif
 
 /* Each potentially faulting native read has a fresh environment outcome.
  * The fault arm precedes writeback and all data effects. Its fallthrough is

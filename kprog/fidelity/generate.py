@@ -254,7 +254,7 @@ def main():
     if arch == "x86":
         c += ['extern uint64_t native_stack_base;']
     if arch == "arm64":
-        c += ['extern uint64_t native_stack_base;', 'static void arm64_sim_unsupported_opcode(void) { abort(); }', 'unsigned long native_lab_entry_input(unsigned int kind) { if (kind == NATIVE_LAB_INPUT_SP) return native_stack_base; fputs("unexpected numeric observer environment input\\n", stderr); exit(1); }']
+        c += ['extern uint64_t native_stack_base;', 'static void arm64_sim_unsupported_opcode(void) { abort(); }', 'unsigned long native_lab_entry_input(unsigned int kind) { if (kind == NATIVE_LAB_INPUT_SP) return native_stack_base; if (kind == NATIVE_LAB_INPUT_UNSPECIFIED) return 0; /* Explicit existing observer test choice; hardware matching remains open. */ fputs("unexpected numeric observer environment input\\n", stderr); exit(1); }']
     entries, coverage = [], []
     pairs = [(assembly, encoder.encode(insn, {}) if arch == "x86" else encoder.encode(insn, {}, {}), None, assembly, insn.raw) for assembly, insn in zip(forms, insns)]
     if arch == "x86":

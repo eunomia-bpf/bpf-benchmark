@@ -405,3 +405,12 @@ reference+generated KPROBE accepted after using production private input-map
 binding; original plain-libbpf binding failure is retained. Whole app/native
 installation/equal-work performance remain open. Exact scope/results:
 `../results/perf_20261113/scalar-rodata/report.md`.
+
+2026-11-15 host input fidelity: x86/ARM64 shared headers now use the same
+explicit unspecified-input entry on host as B/CompCert. The host-only zero
+shortcut is removed. Lifetime/alias/RSP oracles exercise that real route,
+with zero and nonzero choices and exact draw counts, rather than replacing
+its macro in tests. Small native host fixtures explicitly choose their input
+environment; B/CompCert expressions, P and all LTO are unchanged. Existing
+CPU observer zero choices remain a limited test domain, with hardware input
+matching and full AST/formal work still open. Validation follows; no speed claim.

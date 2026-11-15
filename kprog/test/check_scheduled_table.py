@@ -42,7 +42,8 @@ extern void scheduled_unresolved(void);
     adapter=args.build/'host-input.c'
     adapter.write_text('''#include <stdlib.h>
 void scheduled_unresolved(void) { abort(); }
-unsigned long native_lab_entry_input(unsigned int kind) { if (kind == 1) return 0; abort(); }
+/* Fixture choices: zero native SP origin and zero free-input words. */
+unsigned long native_lab_entry_input(unsigned int kind) { if (kind == 1 || kind == 6) return 0; abort(); }
 ''')
     library=args.build/'scheduled-model.so'
     run(['clang-18','-shared','-fPIC','-O2','-w','-I'+str(ROOT/'vendor/libbpf/src'),generated,adapter,'-o',library])

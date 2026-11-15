@@ -93,7 +93,7 @@ extern void context_table_unresolved(void);
         adapter.write_text('''#include <stdlib.h>
 void context_table_unresolved(void) { abort(); }
 unsigned long native_lab_entry_input(unsigned int kind) {
-    if (kind == 1) return 0; /* Explicit zero-origin host stack fixture. */
+    if (kind == 1 || kind == 6) return 0; /* This fixture chooses zero origin and free inputs. */
     abort();
 }
 ''')

@@ -42,7 +42,8 @@ extern unsigned int observed_tag;
         adapter.write_text('''#include <stdlib.h>
 unsigned long long observed_pointer;
 unsigned int observed_tag;
-unsigned long native_lab_entry_input(unsigned int kind) { if (kind == 1) return 0; abort(); }
+/* Fixture choices: zero native SP origin and zero free-input words. */
+unsigned long native_lab_entry_input(unsigned int kind) { if (kind == 1 || kind == 6) return 0; abort(); }
 '''+''.join('unsigned char map'+str(n)+'[32];\n' for n in range(8)))
         shared = args.build/'map-table-model.so'
         command = ['clang-18', '-shared', '-fPIC', '-O2', '-w', '-I'+str(ROOT/'vendor/libbpf/src'),

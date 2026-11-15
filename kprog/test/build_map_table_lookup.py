@@ -61,7 +61,8 @@ extern void *map_table_host_lookup(void *, const void *);
 #include <stdint.h>
 #include <string.h>
 unsigned int helper_calls;
-unsigned long native_lab_entry_input(unsigned int kind) { if (kind == 1) return 0; abort(); }
+/* Fixture choices: zero native SP origin and zero free-input words. */
+unsigned long native_lab_entry_input(unsigned int kind) { if (kind == 1 || kind == 6) return 0; abort(); }
 '''+''.join(f'unsigned char map{n}[{size}];\n' for n in range(8))+'''
 void *map_table_host_lookup(void *map, const void *key) {
     unsigned int index;

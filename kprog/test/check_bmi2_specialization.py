@@ -43,7 +43,8 @@ def main(a):
     native = c.CDLL(str(a.build / 'native.so'))
     adapter = a.build / 'input.c'
     adapter.write_text('''#include <stdlib.h>
-unsigned long native_lab_entry_input(unsigned int kind) { if (kind == 1) return 0; abort(); }
+/* Fixture choices: zero native SP origin and zero free-input words. */
+unsigned long native_lab_entry_input(unsigned int kind) { if (kind == 1 || kind == 6) return 0; abort(); }
 ''')
     values = [0, 1, 0x80000000, 0xffffffff, 0x8000000000000000,
               0xffffffffffffffff, 0x1234567887654321]

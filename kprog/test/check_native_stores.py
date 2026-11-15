@@ -38,7 +38,8 @@ def main(a):
     native = c.CDLL(str(a.build / 'native.so'))
     adapter = a.build / 'input.c'
     adapter.write_text('''#include <stdlib.h>
-unsigned long native_lab_entry_input(unsigned int kind) { if (kind == 1) return 0; abort(); }
+/* Fixture choices: zero native SP origin and zero free-input words. */
+unsigned long native_lab_entry_input(unsigned int kind) { if (kind == 1 || kind == 6) return 0; abort(); }
 ''')
     identity = dict(native_sha256=digest(a.build / 'native.o'), linker_sha256=digest(a.linker),
                     header_sha256=digest(ROOT / 'kprog/x86/x86_sim_local_bpf.h'))

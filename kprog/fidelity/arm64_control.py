@@ -153,7 +153,7 @@ def main():
         f'#include "{snapshot}/kprog/arm64/arm64_sim_local_bpf.h"',
         'static void arm64_sim_unsupported_opcode(void) { abort(); }',
         'extern uint64_t native_stack_base; static uint64_t entry_return_bits;',
-        'unsigned long native_lab_entry_input(unsigned int kind) { if (kind == NATIVE_LAB_INPUT_SP) return native_stack_base; if (kind == NATIVE_LAB_INPUT_RETURN) return entry_return_bits; fputs("unknown control entry environment\\n",stderr); exit(1); }',
+        'unsigned long native_lab_entry_input(unsigned int kind) { if (kind == NATIVE_LAB_INPUT_SP) return native_stack_base; if (kind == NATIVE_LAB_INPUT_UNSPECIFIED) return 0; /* Explicit existing observer test choice; hardware matching remains open. */ if (kind == NATIVE_LAB_INPUT_RETURN) return entry_return_bits; fputs("unknown control entry environment\\n",stderr); exit(1); }',
         '#undef ARM64_SIM_RET','#define ARM64_SIM_RET() goto observed']
     (out/'generated.c').write_text('\n'.join(prelude+functions+['const struct form forms[]={',',\n'.join(entries),'};','const unsigned form_count=sizeof(forms)/sizeof(forms[0]);'])+'\n')
     (out/'coverage.json').write_text(json.dumps(coverage,indent=2)+'\n')
