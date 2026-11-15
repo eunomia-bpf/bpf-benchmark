@@ -1,4 +1,4 @@
-"""Release an owned launcher's image flock after its shared inputs are captured.
+"""Release an explicitly identified resource flock held by an owned launcher.
 
 The caller must establish that the remaining compiler stage consumes only its
 canonical preprocessed input and system toolchain. pidfd_getfd duplicates the
@@ -31,7 +31,7 @@ def main(a):
         try:
             actual, expected = os.fstat(fd), a.lock.stat()
             if (actual.st_dev, actual.st_ino) != (expected.st_dev, expected.st_ino):
-                raise ValueError('The supplied descriptor does not refer to the image lock')
+                raise ValueError('The supplied descriptor does not refer to the requested resource lock')
             fcntl.flock(fd, fcntl.LOCK_UN)
         finally:
             os.close(fd)

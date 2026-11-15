@@ -411,8 +411,10 @@ frontend-stacks:
 	taskset -c 8-11 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/sample_compiler_stack.py --pid $(COMPILER_PID) --output $(OUTPUT)
 
 .PHONY: frontend-release-image
+COMPILER_LOCK_FD ?= 9
+COMPILER_LOCK ?= /workspaces/.agent-state/kprog-lanes/locks/image
 frontend-release-image:
-	taskset -c 8-11 prlimit --as=536870912 -- python3 $(ROOT)/kprog/test/release_compiler_image_lock.py --pid $(COMPILER_LAUNCHER) --fd 9 --lock /workspaces/.agent-state/kprog-lanes/locks/image --output $(OUTPUT)
+	taskset -c 8-11 prlimit --as=536870912 -- python3 $(ROOT)/kprog/test/release_compiler_image_lock.py --pid $(COMPILER_LAUNCHER) --fd $(COMPILER_LOCK_FD) --lock $(COMPILER_LOCK) --output $(OUTPUT)
 
 .PHONY: frontend-constants
 frontend-constants:
@@ -452,3 +454,7 @@ ir-debug-census:
 .PHONY: b-debug-variables-check
 b-debug-variables-check: $(CONTEXT_TOOL)
 	taskset -c 16-19 prlimit --as=4294967296 -- python3 $(ROOT)/kprog/test/check_b_debug_variables.py --tool $(CONTEXT_TOOL) --previous /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds --build /var/tmp/kprog-tmp/perf/b-debug-variables --output $(OUTPUT)
+
+.PHONY: host-cpu-check
+host-cpu-check:
+	taskset -c 16-19 prlimit --as=536870912 -- python3 $(ROOT)/kprog/test/check_host_cpu.py --build /var/tmp/kprog-tmp/perf/host-cpu-check --output $(OUTPUT)
