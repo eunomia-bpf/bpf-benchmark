@@ -1236,6 +1236,26 @@ Raw evidence: `/workspaces/kprog-raw/formal/m4-arm64-pair-vector`.
 Atomic/exclusive/control/helper and remaining full dispatcher conversion,
 full default-byte coverage and the previously recorded failures remain open.
 
+The exclusive-store root now exports the shared STLXR dispatcher/direct body
+(22 functions). It retains overlap rejection, SP alignment, one explicit failure
+choice at the truncated32-bit site and success-only transfer before32-bit status
+writeback, including the original SP/ignored-field and release behavior.
+The CompCert statement adapter retains the existing host input protocol's exact
+non-Boolean error and exit1; the native private instruction/header is unchanged.
+Its choice, stdio/nonreturning exit, monitor, memory and native-fault bindings
+remain M5 obligations.
+
+The existing oracle adds7,200 whole-state/input-order cases and four invalid
+choice exit/message cases. Previous direct-body replay and current x86/AArch64
+user mode pass in native and adapter forms. Four mutations are caught: querying
+before rejection, writing after failure, omitted SP alignment and accepting an
+invalid choice. `make clight`,133 targeted Lean jobs, deterministic export and
+standard-axiom checks pass. The expanded BPF fixture retains socket12448B and
+30 relocations exactly, with all three changed headers replayed together and
+current replay equal to normal compilation. Raw evidence:
+`/workspaces/kprog-raw/formal/m4-arm64-exclusive`. Remaining atomic/control/helper
+and full dispatcher/default-byte coverage still keep M4 open.
+
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight
 handler exports and full default compiled-byte coverage remain to do. Preserve

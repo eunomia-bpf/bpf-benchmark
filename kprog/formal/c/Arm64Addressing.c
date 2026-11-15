@@ -171,6 +171,14 @@ void kprog_arm64_pair_step(struct kprog_arm64_addressing *addressing, __u32 op,
 	__u8 width = ARM64_SIM_L_EFFECTIVE_WIDTH(flags);
 	ARM64_SIM_L_PAIR_MEM_STEP(op, dst, src, src2, base, index, aux, imm, width);
 }
+void kprog_arm64_exclusive_store(struct kprog_arm64_addressing *addressing,
+                                  __u64 dst, __u64 src, __u64 base, __u32 aux,
+                                  __u64 site, __u8 flags)
+{
+	REGISTERS();
+	__u8 width = ARM64_SIM_L_EFFECTIVE_WIDTH(flags);
+	ARM64_SIM_L_STLXR_STEP(ARM64_OP_STLXR, dst, src, base, aux, site, width);
+}
 #undef __a64_v0
 #undef __a64_v0_hi
 #define __a64_v0 (*v0_lo)

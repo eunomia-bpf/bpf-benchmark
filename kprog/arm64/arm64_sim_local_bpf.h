@@ -1766,6 +1766,40 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
         ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_la_old, (WIDTH) == ARM64_WIDTH_64 ? ARM64_WIDTH_64 : ARM64_WIDTH_32); \
  } while (0)
 
+/* The native input ABI supplies an explicit Boolean per dynamic visit.
+ * Its shared header is outside this extraction layer; spell its host protocol
+ * as standard statements for Clight, including the exact invalid-choice exit.
+ * Native callers keep the original macro and BPF private instruction. */
+#if defined(__COMPCERT__)
+#define ARM64_SIM_L_EXCLUSIVE_FAILURE_INTO(OUTPUT, SITE) \
+    do { unsigned long __a64_exclusive_choice = native_lab_exclusive_failure_choice((unsigned int)(SITE)); \
+        if (__a64_exclusive_choice > 1) { \
+            fputs("native exclusive failure choice must be 0 or 1\n", stderr); \
+            exit(1); \
+        } \
+        (OUTPUT) = __a64_exclusive_choice; \
+    } while (0)
+#else
+#define ARM64_SIM_L_EXCLUSIVE_FAILURE_INTO(OUTPUT, SITE) \
+    do { (OUTPUT) = NATIVE_LAB_EXCLUSIVE_FAILURE(SITE); } while (0)
+#endif
+
+/* The actual exclusive-store body: rejection precedes the environment query;
+ * a failed reservation observes no source or memory, then writes W status. */
+#define ARM64_SIM_L_STLXR_STEP(OP, DST, SRC, BASE, AUX, SITE, WIDTH) \
+    do { \
+        if ((DST) == (SRC) || ((BASE) != ARM64_SP && (DST) == (BASE))) \
+            ARM64_SIM_L_UNSUPPORTED_OPCODE(); \
+        ARM64_SIM_L_SP_ALIGNMENT(BASE); \
+        __u64 __a64_stlxr_failure; \
+        ARM64_SIM_L_EXCLUSIVE_FAILURE_INTO(__a64_stlxr_failure, (SITE)); \
+        if (!__a64_stlxr_failure) \
+            ARM64_SIM_L_MEM_WRITE_REG((BASE), ARM64_REG_NONE, (AUX), 0, 0, (WIDTH), (SRC)); \
+        __u64 __a64_stlxr_status; \
+        KPROG_ARM64_STLXR_VALUE_INTO(__a64_stlxr_status, (OP), ARM64_WIDTH_32, __a64_stlxr_failure, ARM64_SIM_L_UNSUPPORTED_OPCODE()); \
+        ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_stlxr_status, ARM64_WIDTH_32); \
+    } while (0)
+
 /* The dispatcher and direct path share these complete scalar memory bodies.
  * Fault recovery precedes overlap checks and writeback exactly as before. */
 #define ARM64_SIM_L_LOAD_STEP(OP, DST, BASE, INDEX, AUX, IMM, WIDTH) \
@@ -2014,17 +2048,7 @@ do { \
         } else if ((OP) == ARM64_OP_LDCLR) { \
             ARM64_SIM_L_ATOMIC_RMW(__atomic_fetch_and, 1, (DST), (SRC), (SRC2), __a64_l_width, (AUX)); \
 		} else if (KPROG_ARM64_STLXR_HANDLED(OP)) {                \
-			/* Arm DATAOVERLAP and BASEOVERLAP for STXR/STLXR. */ \
-            if ((DST) == (SRC) || ((SRC2) != ARM64_SP && (DST) == (SRC2))) \
-                ARM64_SIM_L_UNSUPPORTED_OPCODE();                        \
-            ARM64_SIM_L_SP_ALIGNMENT(SRC2);                              \
-            __u64 __a64_l_failure = NATIVE_LAB_EXCLUSIVE_FAILURE(IMM); \
-			if (!__a64_l_failure)                              \
-				ARM64_SIM_L_MEM_WRITE((SRC2), ARM64_REG_NONE, \
-				(AUX), 0, 0, __a64_l_width,                 \
-				ARM64_SIM_L_READ_REG(SRC),                  \
-				ARM64_SIM_L_REG_TAG(SRC));                  \
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_STLXR_VALUE((OP), __a64_l_failure), ARM64_WIDTH_32);\
+            ARM64_SIM_L_STLXR_STEP((OP), (DST), (SRC), (SRC2), (AUX), (IMM), __a64_l_width); \
 		} else if (KPROG_ARM64_DISP_LDP_HANDLED(OP)) {                 \
 			ARM64_SIM_L_LDP((DST), (SRC), (SRC2), (SRC3),          \
 				(AUX), (IMM), __a64_l_width);                  \

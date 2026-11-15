@@ -310,17 +310,7 @@ ARM64_SIM_L_ATOMIC_RMW(__atomic_fetch_and, 1, (DST), (SRC), (SRC2), __a64_l_widt
 do { \
 __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
-/* Arm DATAOVERLAP and BASEOVERLAP for STXR/STLXR. */ \
-            if ((DST) == (SRC) || ((SRC2) != ARM64_SP && (DST) == (SRC2))) \
-                ARM64_SIM_L_UNSUPPORTED_OPCODE(); \
-            ARM64_SIM_L_SP_ALIGNMENT(SRC2); \
-            __u64 __a64_l_failure = NATIVE_LAB_EXCLUSIVE_FAILURE(IMM); \
-			if (!__a64_l_failure) \
-				ARM64_SIM_L_MEM_WRITE((SRC2), ARM64_REG_NONE, \
-				(AUX), 0, 0, __a64_l_width, \
-				ARM64_SIM_L_READ_REG(SRC), \
-				ARM64_SIM_L_REG_TAG(SRC)); \
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_STLXR_VALUE((OP), __a64_l_failure), ARM64_WIDTH_32); \
+ARM64_SIM_L_STLXR_STEP((OP), (DST), (SRC), (SRC2), (AUX), (IMM), __a64_l_width); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_30(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \

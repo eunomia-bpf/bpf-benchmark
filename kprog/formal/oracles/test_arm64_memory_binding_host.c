@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <setjmp.h>
+#include <sys/wait.h>
+#include <unistd.h>
 #include "../c/Arm64Addressing.h"
 static unsigned long cases;
 static unsigned requests[512], wanted[512], count, wanted_count, copies;
@@ -18,7 +20,8 @@ static size_t copy_sizes[4];
 static unsigned copy_reject_at;
 static jmp_buf rejected;
 static int allow_reject, force_draw;
-static __u64 draw_value;
+static __u64 draw_value, exclusive_choice;
+static unsigned exclusive_site, exclusive_visits;
 static void check(int ok, const char *what)
 {
 	if (!ok) { fprintf(stderr, "ARM memory adapter=%u case=%lu: %s\n", ADAPTER, cases, what); exit(1); }
@@ -30,6 +33,13 @@ unsigned long native_lab_entry_input(unsigned kind)
 	if (kind == 1) return 2;
 	if (kind == 3) return 3;
 	check(kind == 6, "unexpected input kind"); return force_draw ? draw_value : fresh(&entropy);
+}
+unsigned long native_lab_exclusive_failure_choice(unsigned site)
+{
+	check(site == exclusive_site && !exclusive_visits, "exclusive visit/site identity");
+	check(count < 512, "exclusive input overflow");
+	exclusive_visits++; requests[count++] = 5;
+	return exclusive_choice;
 }
 void arm64_sim_unsupported_opcode(void)
 {
@@ -450,6 +460,66 @@ int main(void)
 	}
 	printf("ARM pair/vector adapter failure: %lu second-operation prefix cases\n", cases - start);
 #endif
+	start = cases;
+	const __u64 exclusive_fields[][2] = {{0,1},{0,0},{15,0},{32,0},{31,0},{255,0},{0,15},{1,32},{1,255},{0x100000000ULL,255}};
+	const __u64 sites[] = {0, 0xfedcba9887654321ULL, ~0ULL};
+	const unsigned exclusive_tags[] = {0,4,10,255};
+	force_draw = 0;
+	for (unsigned failure = 0; failure < 2; failure++) for (unsigned profile = 0; profile < 6; profile++)
+	for (unsigned ri = 0; ri < 10; ri++) for (unsigned fi = 0; fi < 5; fi++) for (unsigned si = 0; si < 3; si++) for (unsigned ti = 0; ti < 4; ti++) {
+		__u64 dst = exclusive_fields[ri][0], src = exclusive_fields[ri][1], base = profile >= 4 ? 32 : 15;
+		unsigned width = flags[fi] ? flags[fi] : 8;
+		__u32 aux = (cases % 4) << 24;
+		c = (struct kprog_arm64_coordinates){5,7,profile == 3 ? -56 : profile == 5 ? -79 : -80,0,0}; expected_c = c;
+		a = (struct kprog_arm64_addressing){&c,regs,tags,(__u8 *)arena,(__u8 *)packed,payload,160,96,NULL,NULL,0,255,arena}; before_a = a;
+		for (unsigned i = 0; i < 31; i++) { regs[i].x = values[(cases+i)%6]; tags[i] = exclusive_tags[ti]; }
+		if (base == 15) { regs[15].ptr = profile >= 2 ? (void *)(intptr_t)-80 : raw+200; tags[15] = profile == 0 ? 0 : profile == 1 ? 6 : 4; }
+		for (unsigned i = 0; i < sizeof(arena); i++) ((__u8 *)arena)[i] = (__u8)(cases+i*17);
+		for (unsigned i = 0; i < sizeof(raw); i++) raw[i] = (__u8)(cases+i*31);
+		for (unsigned i = 0; i < sizeof(packed); i++) ((__u8 *)packed)[i] = (__u8)(cases+i*13);
+		for (unsigned i = 0; i < 48; i++) payload[i] = 0x123456789abcdef0ULL ^ i;
+		for (unsigned i = 0; i < 64; i++) vectors[i] = 0xfedcba9876543210ULL ^ i;
+		memcpy(before_regs,regs,sizeof(regs)); memcpy(before_tags,tags,sizeof(tags)); memcpy(before_arena,arena,sizeof(arena)); memcpy(before_packed,packed,sizeof(packed)); memcpy(expected_payload,payload,sizeof(payload)); memcpy(expected_raw,raw,sizeof(raw)); memcpy(expected_vectors,vectors,sizeof(vectors));
+		count = wanted_count = copies = exclusive_visits = 0; expected_entropy = entropy;
+		exclusive_choice = failure; exclusive_site = (unsigned)sites[si];
+		int rejects = dst == src || (base != 32 && dst == base) || (base == 32 && ((__u64)c.stack_offset & 15));
+		if (!rejects) {
+			wanted[wanted_count++] = 5;
+			if (!failure) {
+				unsigned tag = src == 32 ? 4 : src < 31 ? tags[src] : 0;
+				__u64 value = src == 32 ? (__u64)expected_c.stack_offset + coordinate(&expected_c,1) : src < 31 ? regs[src].x + (tag == 4 ? coordinate(&expected_c,1) : tag == 10 ? coordinate(&expected_c,3) : 0) : 0;
+				if (profile >= 2) expected_stack_store(&expected_c,(__u8 *)before_arena,(__u8 *)before_packed,expected_payload,a.bias,-80,width,value,tag);
+				else for (unsigned i = 0; i < width; i++) expected_raw[200+i] = (__u8)(value >> (8*i));
+			}
+			expected_write(&expected_c,before_regs,before_tags,(__u8 *)before_arena,(__u8 *)before_packed,a.capacity,a.bias,dst,failure,4,0,0);
+		}
+		allow_reject = rejects;
+		if (setjmp(rejected) == 0) { kprog_arm64_exclusive_store(&a,dst,src,base,aux,sites[si],flags[fi]); check(!rejects,"missing exclusive overlap/alignment rejection"); }
+		allow_reject = 0; inputs_equal(&c,&expected_c);
+		check(exclusive_visits == (unsigned)!rejects && copies == (unsigned)(ADAPTER && !rejects && !failure && profile < 2),"exclusive rejection/choice/source/memory order");
+		check(!memcmp(&a,&before_a,sizeof(a)) && !memcmp(regs,before_regs,sizeof(regs)) && !memcmp(tags,before_tags,sizeof(tags)) && !memcmp(vectors,expected_vectors,sizeof(vectors)),"exclusive status/source/GPR/SIMD/profile frame");
+		check(!memcmp(arena,before_arena,sizeof(arena)) && !memcmp(raw,expected_raw,sizeof(raw)) && !memcmp(packed,before_packed,sizeof(packed)) && !memcmp(payload,expected_payload,sizeof(payload)),"exclusive byte/tag/payload/failure frame");
+		cases++;
+	}
+	printf("ARM exclusive store adapter %u: %lu choice/overlap/alignment/status/source/memory cases\n",ADAPTER,cases-start);
+	const __u64 bad_choices[] = {2,0x100000000ULL,0x8000000000000000ULL,~0ULL};
+	for (unsigned bi = 0; bi < 4; bi++) {
+		int pipefd[2]; check(pipe(pipefd) == 0,"exclusive error pipe");
+		pid_t pid = fork(); check(pid >= 0,"exclusive protocol fork");
+		if (!pid) {
+			check(close(pipefd[0]) == 0 && dup2(pipefd[1],STDERR_FILENO) >= 0 && close(pipefd[1]) == 0,"exclusive child stderr");
+			exclusive_choice = bad_choices[bi]; exclusive_site = 0x87654321; exclusive_visits = count = copies = 0;
+			regs[15].ptr = raw+200; tags[15] = 6;
+			kprog_arm64_exclusive_store(&a,0,1,15,0,0xfedcba9887654321ULL,8);
+			_exit(99);
+		}
+		check(close(pipefd[1]) == 0,"exclusive parent pipe");
+		int status; check(waitpid(pid,&status,0) == pid,"exclusive wait");
+		char message[128] = {0}; ssize_t n = read(pipefd[0],message,sizeof(message)-1);
+		check(n >= 0 && close(pipefd[0]) == 0,"exclusive error read");
+		check(WIFEXITED(status) && WEXITSTATUS(status) == 1 && !strcmp(message,"native exclusive failure choice must be 0 or 1\n"),"invalid exclusive choice must report and exit1");
+	}
+	printf("ARM exclusive protocol adapter %u: 4 invalid-choice exit/message cases\n",ADAPTER);
 	check_native_hook();
 	return 0;
 }

@@ -20,6 +20,10 @@ unsigned long native_lab_entry_input(unsigned kind)
 	if(kind==1) return sp_input;if(kind==3) return ret_input;
 	if(kind!=6) abort();return fresh(&entropy);
 }
+unsigned long native_lab_exclusive_failure_choice(unsigned site)
+{
+	(void)site; fputs("unexpected exclusive choice in nonexclusive fixture\n", stderr); abort();
+}
 void arm64_sim_unsupported_opcode(void){if(allow_reject) longjmp(rejected,1);abort();}
 static void check(int ok,const char *what)
 {

@@ -26,6 +26,10 @@ unsigned long native_lab_entry_input(unsigned kind)
 {
 	(void)kind; check(0, "unexpected coordinate/free input"); abort();
 }
+unsigned long native_lab_exclusive_failure_choice(unsigned site)
+{
+	(void)site; fputs("unexpected exclusive choice in nonexclusive fixture\n", stderr); abort();
+}
 void arm64_sim_unsupported_opcode(void) { check(0, "unexpected opcode rejection"); abort(); }
 void kprog_c_trap(void) { check(0, "unexpected platform trap"); abort(); }
 void *kprog_c_context_pointer(const void *context, __u8 kind, __u32 offset)
