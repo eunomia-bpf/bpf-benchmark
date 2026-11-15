@@ -13,8 +13,6 @@
 #undef X86_SIM_STACK_BYTES
 #define X86_SIM_STACK_BYTES capacity
 /* Bind the production free-input interface on host extraction executions too. */
-#undef X86_SIM_L_UNSPECIFIED
-#define X86_SIM_L_UNSPECIFIED() NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_UNSPECIFIED)
 
 void kprog_x86_ptr_load(struct x86_sim_register_state *state,
                       struct kprog_x86_arena *arena,

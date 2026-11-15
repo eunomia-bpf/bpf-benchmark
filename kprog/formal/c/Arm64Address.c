@@ -7,8 +7,6 @@
 #define ARM64_SIM_STACK_BYTES capacity
 #undef ARM64_SIM_STACK_BIAS
 #define ARM64_SIM_STACK_BIAS bias
-#undef ARM64_SIM_L_UNSPECIFIED
-#define ARM64_SIM_L_UNSPECIFIED() NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_UNSPECIFIED)
 
 #define __a64_numeric_sp (coordinates->sp_base)
 #define __a64_numeric_return (coordinates->return_base)

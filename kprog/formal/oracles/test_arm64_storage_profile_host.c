@@ -14,8 +14,6 @@
 #define ARM64_SIM_STACK_BYTES PROFILE
 #define ARM64_SIM_STACK_BIAS BIAS
 #include "../c/Arm64Address.h"
-#undef ARM64_SIM_L_UNSPECIFIED
-#define ARM64_SIM_L_UNSPECIFIED() NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_UNSPECIFIED)
 
 static unsigned requests[512], count;
 static __u64 entropy;

@@ -257,6 +257,13 @@ bmi2-contract-lean:
 load-oracles:
 	taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_load_oracles.py --build /var/tmp/kprog-tmp/perf/load-writeback --output $(OUTPUT)
 
+.PHONY: host-input-x86-profiles host-input-arm64-profiles
+host-input-x86-profiles:
+	taskset -c 16-19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_host_input_profiles.py --arch x86 --output $(OUTPUT)
+
+host-input-arm64-profiles:
+	taskset -c 16-19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_host_input_profiles.py --arch arm64 --output $(OUTPUT)
+
 .PHONY: native-stores
 native-stores: $(CONTEXT_TOOL)
 	python3 $(ROOT)/kprog/formal/tools/generate_x86_store_spec.py --check

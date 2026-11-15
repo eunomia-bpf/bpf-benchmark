@@ -29,8 +29,6 @@
 #include "../c/X86Pointer.h"
 #undef __x86_stack_mem
 #define __x86_stack_mem (*native_arena)
-#undef X86_SIM_L_UNSPECIFIED
-#define X86_SIM_L_UNSPECIFIED() NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_UNSPECIFIED)
 
 static unsigned draws;
 static __u64 entropy;
