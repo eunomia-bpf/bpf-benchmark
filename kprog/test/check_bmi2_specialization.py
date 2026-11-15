@@ -92,7 +92,10 @@ unsigned long native_lab_entry_input(unsigned int kind) { if (kind == 1) return 
                 for value in values:
                     for count in counts:
                         for mode in (0, 1, 2):
-                            input_data = (c.c_uint64 * 3)(value, count, mode)
+                            # Memory operands intentionally differ from the
+                            # base slot: dropping the packed displacement
+                            # must fail even when count/width are right.
+                            input_data = (c.c_uint64 * 4)(value, count, mode, value ^ 0xa55a1234deadbeef)
                             expected, observed = actual(input_data), model(input_data)
                             if expected != observed:
                                 raise ValueError(f'{name} value={value:#x} count={count:#x} mode={mode}: '

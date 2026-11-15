@@ -10,14 +10,14 @@
 .if \width == 64
     cmp rdx,1
 .if \memory
-    \op rax,QWORD PTR [rdi],rcx
+    \op rax,QWORD PTR [rdi+24],rcx
 .else
     \op rax,rdx,rcx
 .endif
 .else
     cmp edx,1
 .if \memory
-    \op eax,DWORD PTR [rdi],ecx
+    \op eax,DWORD PTR [rdi+24],ecx
 .else
     \op eax,edx,ecx
 .endif
