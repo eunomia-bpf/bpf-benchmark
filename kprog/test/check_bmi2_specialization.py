@@ -12,7 +12,14 @@ from pathlib import Path
 import subprocess
 import sys
 
+from elftools.elf.elffile import ELFFile
+
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def allocated(path):
+    with path.open('rb') as stream:
+        return {s.name: s.data() for s in ELFFile(stream).iter_sections() if s['sh_flags'] & 2}
 
 
 def main(a):
@@ -49,12 +56,29 @@ unsigned long native_lab_entry_input(unsigned int kind) { if (kind == 1) return 
                 run([a.linker, '--input', a.build / 'native.o', '--symbol', name,
                      '--mode', 'proof', '--preserve-entry-abi', '--output', a.build / f'{name}.proof.o'])
                 body, functions, exit_addr, data = gen.parse_proof_object_program(name, a.build)
+                # The generic dispatcher remains a real runtime-opcode route.
+                # Compile it to the same canonical product before replacing it
+                # with the specialized result; retain hashes, not build copies.
+                direct_steps = gen.DIRECT_STEP_MACROS.copy()
+                try:
+                    for token in ('X86_OP_SHIFTX', 'X86_OP_SHIFTX_MEM', 'X86_OP_BZHI', 'X86_OP_BZHI_MEM'):
+                        del gen.DIRECT_STEP_MACROS[token]
+                    generic = gen.render_program(name, body, functions, kind='raw',
+                        program_section='kprobe/bmi2', exit_addr=exit_addr, rodata16=data)
+                finally:
+                    gen.DIRECT_STEP_MACROS.clear()
+                    gen.DIRECT_STEP_MACROS.update(direct_steps)
                 source = gen.render_program(name, body, functions, kind='raw',
                                             program_section='kprobe/bmi2', exit_addr=exit_addr, rodata16=data)
                 src = a.build / f'{name}.bpf.c'
-                src.write_text(source.replace('#include "../x86_sim_local_bpf.h"',
-                    '#include ' + json.dumps(str(ROOT / 'kprog/x86/x86_sim_local_bpf.h'))))
                 bpf = a.build / f'{name}.bpf.o'
+                include = '#include ' + json.dumps(str(ROOT / 'kprog/x86/x86_sim_local_bpf.h'))
+                src.write_text(generic.replace('#include "../x86_sim_local_bpf.h"', include))
+                worker.compile_simulator(str(ROOT / 'kprog/stock-path/bin/clang'), src, bpf, run,
+                                         bounds_compiler=a.bounds)
+                generic_allocated = allocated(bpf)
+                generic_digest = hashlib.sha256(bpf.read_bytes()).hexdigest()
+                src.write_text(source.replace('#include "../x86_sim_local_bpf.h"', include))
                 worker.compile_simulator(str(ROOT / 'kprog/stock-path/bin/clang'), src, bpf, run,
                                          bounds_compiler=a.bounds)
                 library = a.build / f'{name}.so'
@@ -75,6 +99,10 @@ unsigned long native_lab_entry_input(unsigned int kind) { if (kind == 1) return 
                                                  f'native={expected:#x}, simulator={observed:#x}')
                             cases.append(dict(value=value, count=count, mode=mode, result=observed))
                 observations.append(dict(symbol=name, cases=cases, b_compiled=True,
+                    generic_bpf_sha256=generic_digest,
+                    allocated_sections_equal=generic_allocated == allocated(bpf),
+                    generic_allocated_sha256={n: hashlib.sha256(v).hexdigest() for n, v in generic_allocated.items()},
+                    direct_allocated_sha256={n: hashlib.sha256(v).hexdigest() for n, v in allocated(bpf).items()},
                     bpf_sha256=hashlib.sha256(bpf.read_bytes()).hexdigest()))
                 (a.output / 'result.json').write_text(json.dumps(dict(fixtures=observations,
                     scope='Native CPU/shared simulator equivalence and normal B compilation; no kernel acceptance'),

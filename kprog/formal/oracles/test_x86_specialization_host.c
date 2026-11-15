@@ -616,8 +616,8 @@ static void check_dispatch(void)
 	}
 
 	cases++;
-	if (direct != 55U) {
-		printf("MISMATCH direct count %u want 55\n", direct);
+	if (direct != 59U) {
+		printf("MISMATCH direct count %u want 59\n", direct);
 		failures++;
 	}
 }
