@@ -90,6 +90,9 @@ def main():
         (args.output/'default-before.json').write_text(json.dumps(before, indent=2)+'\n')
         (args.output/'default-after.json').write_text(json.dumps(after, indent=2)+'\n')
         raise ValueError('Default real-object proof allocations/relocations changed')
+    (args.output/'default-parity.json').write_text(json.dumps(dict(
+        old_linker_sha256=old_binary, current_linker_sha256=digest(args.linker),
+        entries=len(before), equal=True, rows=before), indent=2)+'\n')
 
     native = args.build/'non-pic.native.o'
     flags = ['-target', 'x86_64-linux-gnu', '-O3', '-march=native', '-foptimize-sibling-calls',
@@ -117,6 +120,7 @@ def main():
     # Exercise the actual B decoder with the same source-map annotation used by
     # generation. No new simulator opcode or synthetic map identity is needed.
     sys.path.insert(0, str(ROOT/'kprog'))
+    sys.path.insert(0, str(ROOT/'kprog/x86/micro-prog'))
     spec = importlib.util.spec_from_file_location('non_pic_generator',
         ROOT/'kprog/x86/micro-prog/generate_micro_sim_proofs.py')
     generator = importlib.util.module_from_spec(spec)
