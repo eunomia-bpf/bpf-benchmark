@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+    "--input",
+    "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/otelcol-ebpf-profiler.native.o",
+    "--symbol",
+    "perf_unwind_hotspot",
+    "--mode",
+    "proof",
+    "--preserve-entry-abi",
+    "--output",
+    "/var/tmp/kprog-tmp/perf/otel-whole-word-checked/trusted_x86.proof.o"
+  ],
+  "returncode": 0,
+  "wall_seconds": 0.038224706979235634,
+  "user_seconds": 0.025887999999999998,
+  "system_seconds": 0.011948,
+  "max_rss_kib": 32092
+}

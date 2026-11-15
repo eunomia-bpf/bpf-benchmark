@@ -1,0 +1,3 @@
+cd /workspaces/repository/kprog/formal && taskset -c 8-11 prlimit --as=17179869184 -- env LEAN_NUM_THREADS=2 lake build KProgFormal.X86Specialization
+✔ [3/3] Built KProgFormal.X86Specialization (852ms)
+Build completed successfully (3 jobs).

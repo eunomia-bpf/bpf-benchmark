@@ -237,3 +237,12 @@ checks are in `kprog/test/check_bmi2_specialization.py`; measured preprocessing
 reduction and completed checks will be recorded with the result receipt.
 Full OTel B acceptance and application behavior remain open; all native LTO
 remains on together.
+
+BMI2 receipt (bd07827e3/d1044c7fb/1c2518cf7/027cce145): chain207,
+whole-state566 and Lean dispatch proofs pass; 16 native/shared-C fixtures
+cover4,032 cases, including nonzero memory displacement, and generic/direct
+normal B has identical allocated sections for16/16. Same-input OTel CPP is
+431,680,679→384,511,544 bytes (-10.93%); render/proof/CPP18.98s, no runtime
+speed claim. Full B/stack/app acceptance remains open. Exact identities,
+commands and retained initial failures: `../results/perf_20261113/bmi2-specialization/report.md`.
+MOV_LOAD/STORE remain242.8MB; shared load writeback is the next candidate.

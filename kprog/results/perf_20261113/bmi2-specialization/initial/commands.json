@@ -1,0 +1,2570 @@
+[
+  {
+    "command": [
+      "clang-18",
+      "-c",
+      "/workspaces/repository/kprog/test/native_bmi2.S",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o",
+      "--symbol",
+      "shlx32reg",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=shlx32reg (79 bytes), 1 reachable symbol(s) total\n  - shlx32reg (vaddr 0xa0, 79 bytes) [entry]\nnative-link: wrote proof object 87 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.bpf.c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32reg.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o",
+      "--symbol",
+      "shlx32mem",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32mem.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=shlx32mem (79 bytes), 1 reachable symbol(s) total\n  - shlx32mem (vaddr 0xef, 79 bytes) [entry]\nnative-link: wrote proof object 87 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32mem.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32mem.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32mem.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32mem.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32mem.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32mem.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32mem.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32mem.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32mem.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32mem.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32mem.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32mem.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32mem.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32mem.bpf.c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx32mem.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o",
+      "--symbol",
+      "shlx64reg",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64reg.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=shlx64reg (80 bytes), 1 reachable symbol(s) total\n  - shlx64reg (vaddr 0x0, 80 bytes) [entry]\nnative-link: wrote proof object 88 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64reg.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64reg.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64reg.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64reg.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64reg.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64reg.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64reg.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64reg.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64reg.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64reg.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64reg.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64reg.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64reg.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64reg.bpf.c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64reg.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o",
+      "--symbol",
+      "shlx64mem",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64mem.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=shlx64mem (80 bytes), 1 reachable symbol(s) total\n  - shlx64mem (vaddr 0x50, 80 bytes) [entry]\nnative-link: wrote proof object 88 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64mem.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64mem.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64mem.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64mem.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64mem.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64mem.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64mem.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64mem.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64mem.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64mem.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64mem.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64mem.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64mem.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64mem.bpf.c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shlx64mem.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o",
+      "--symbol",
+      "shrx32reg",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32reg.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=shrx32reg (79 bytes), 1 reachable symbol(s) total\n  - shrx32reg (vaddr 0x1de, 79 bytes) [entry]\nnative-link: wrote proof object 87 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32reg.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32reg.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32reg.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32reg.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32reg.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32reg.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32reg.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32reg.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32reg.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32reg.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32reg.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32reg.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32reg.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32reg.bpf.c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32reg.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o",
+      "--symbol",
+      "shrx32mem",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32mem.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=shrx32mem (79 bytes), 1 reachable symbol(s) total\n  - shrx32mem (vaddr 0x22d, 79 bytes) [entry]\nnative-link: wrote proof object 87 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32mem.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32mem.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32mem.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32mem.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32mem.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32mem.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32mem.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32mem.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32mem.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32mem.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32mem.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32mem.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32mem.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32mem.bpf.c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx32mem.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o",
+      "--symbol",
+      "shrx64reg",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64reg.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=shrx64reg (80 bytes), 1 reachable symbol(s) total\n  - shrx64reg (vaddr 0x13e, 80 bytes) [entry]\nnative-link: wrote proof object 88 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64reg.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64reg.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64reg.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64reg.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64reg.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64reg.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64reg.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64reg.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64reg.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64reg.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64reg.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64reg.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64reg.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64reg.bpf.c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64reg.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o",
+      "--symbol",
+      "shrx64mem",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64mem.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=shrx64mem (80 bytes), 1 reachable symbol(s) total\n  - shrx64mem (vaddr 0x18e, 80 bytes) [entry]\nnative-link: wrote proof object 88 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64mem.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64mem.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64mem.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64mem.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64mem.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64mem.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64mem.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64mem.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64mem.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64mem.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64mem.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64mem.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64mem.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64mem.bpf.c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/shrx64mem.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o",
+      "--symbol",
+      "sarx32reg",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32reg.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=sarx32reg (79 bytes), 1 reachable symbol(s) total\n  - sarx32reg (vaddr 0x31c, 79 bytes) [entry]\nnative-link: wrote proof object 87 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32reg.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32reg.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32reg.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32reg.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32reg.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32reg.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32reg.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32reg.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32reg.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32reg.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32reg.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32reg.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32reg.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32reg.bpf.c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32reg.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o",
+      "--symbol",
+      "sarx32mem",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32mem.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=sarx32mem (79 bytes), 1 reachable symbol(s) total\n  - sarx32mem (vaddr 0x36b, 79 bytes) [entry]\nnative-link: wrote proof object 87 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32mem.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32mem.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32mem.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32mem.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32mem.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32mem.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32mem.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32mem.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32mem.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32mem.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32mem.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32mem.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32mem.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32mem.bpf.c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx32mem.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o",
+      "--symbol",
+      "sarx64reg",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64reg.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=sarx64reg (80 bytes), 1 reachable symbol(s) total\n  - sarx64reg (vaddr 0x27c, 80 bytes) [entry]\nnative-link: wrote proof object 88 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64reg.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64reg.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64reg.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64reg.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64reg.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64reg.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64reg.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64reg.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64reg.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64reg.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64reg.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64reg.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64reg.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64reg.bpf.c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64reg.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o",
+      "--symbol",
+      "sarx64mem",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64mem.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=sarx64mem (80 bytes), 1 reachable symbol(s) total\n  - sarx64mem (vaddr 0x2cc, 80 bytes) [entry]\nnative-link: wrote proof object 88 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64mem.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64mem.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64mem.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64mem.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64mem.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64mem.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64mem.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64mem.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64mem.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64mem.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64mem.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64mem.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64mem.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64mem.bpf.c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/sarx64mem.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o",
+      "--symbol",
+      "bzhi32reg",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32reg.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=bzhi32reg (79 bytes), 1 reachable symbol(s) total\n  - bzhi32reg (vaddr 0x45a, 79 bytes) [entry]\nnative-link: wrote proof object 87 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32reg.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32reg.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32reg.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32reg.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32reg.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32reg.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32reg.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=26\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32reg.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32reg.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32reg.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32reg.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32reg.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32reg.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32reg.bpf.c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32reg.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o",
+      "--symbol",
+      "bzhi32mem",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32mem.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=bzhi32mem (79 bytes), 1 reachable symbol(s) total\n  - bzhi32mem (vaddr 0x4a9, 79 bytes) [entry]\nnative-link: wrote proof object 87 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32mem.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32mem.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32mem.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32mem.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32mem.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32mem.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32mem.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=26\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32mem.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32mem.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32mem.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32mem.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32mem.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32mem.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32mem.bpf.c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi32mem.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o",
+      "--symbol",
+      "bzhi64reg",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64reg.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=bzhi64reg (80 bytes), 1 reachable symbol(s) total\n  - bzhi64reg (vaddr 0x3ba, 80 bytes) [entry]\nnative-link: wrote proof object 88 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64reg.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64reg.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64reg.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64reg.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64reg.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64reg.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64reg.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=26\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64reg.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64reg.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64reg.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64reg.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64reg.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64reg.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64reg.bpf.c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64reg.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/native.o",
+      "--symbol",
+      "bzhi64mem",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64mem.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=bzhi64mem (80 bytes), 1 reachable symbol(s) total\n  - bzhi64mem (vaddr 0x40a, 80 bytes) [entry]\nnative-link: wrote proof object 88 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64mem.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64mem.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64mem.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64mem.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64mem.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64mem.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64mem.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=26\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64mem.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64mem.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64mem.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64mem.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64mem.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64mem.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64mem.bpf.c",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/bmi2-specialization/bzhi64mem.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

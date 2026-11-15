@@ -1,0 +1,110 @@
+python3 /workspaces/repository/kprog/formal/tools/generate_x86_specialization_spec.py --check
+install -d /var/tmp/kprog-tmp/perf/bmi2-specialization
+taskset -c 8-11 prlimit --as=8589934592 -- make -C /workspaces/repository/kprog/formal -f /workspaces/repository/kprog/test/native-relocations.mk bmi2-contract-host ROOT=/workspaces/repository
+make[1]: Entering directory '/workspaces/repository/kprog/formal'
+clang-18 -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_specialization_chain_host.c -o /var/tmp/kprog-tmp/perf/bmi2-specialization/chain
+/var/tmp/kprog-tmp/perf/bmi2-specialization/chain
+x86 specialization chain host cross-check: OK (207 cases)
+clang-18 -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_specialization_host.c -o /var/tmp/kprog-tmp/perf/bmi2-specialization/specialization
+oracles/test_x86_specialization_host.c:413:2: warning: passing 'volatile __u8[64]' (aka 'volatile unsigned char[64]') to parameter of type 'void *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  413 |         PLANT(op, dst, src);
+      |         ^~~~~~~~~~~~~~~~~~~
+oracles/test_x86_specialization_host.c:270:10: note: expanded from macro 'PLANT'
+  270 |                 memcpy(__x86_stack_mem.b, stack_img, X86_SIM_STACK_BYTES);\
+      |                        ^~~~~~~~~~~~~~~~~
+/usr/include/string.h:43:39: note: passing argument to parameter '__dest' here
+   43 | extern void *memcpy (void *__restrict __dest, const void *__restrict __src,
+      |                                       ^
+oracles/test_x86_specialization_host.c:413:2: warning: passing 'volatile __u8[64]' (aka 'volatile unsigned char[64]') to parameter of type 'void *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  413 |         PLANT(op, dst, src);
+      |         ^~~~~~~~~~~~~~~~~~~
+oracles/test_x86_specialization_host.c:335:16: note: expanded from macro 'PLANT'
+  335 |         memcpy(__x86_stack_mem.b, stack_img, X86_SIM_STACK_BYTES);          \
+      |                ^~~~~~~~~~~~~~~~~
+/usr/include/string.h:43:39: note: passing argument to parameter '__dest' here
+   43 | extern void *memcpy (void *__restrict __dest, const void *__restrict __src,
+      |                                       ^
+oracles/test_x86_specialization_host.c:417:9: warning: label followed by a declaration is a C23 extension [-Wc23-extensions]
+  417 |         X86_SIM_RUN_OP(op, dst, src, flags, aux, imm);
+      |         ^
+./../x86/x86_sim_local_bpf.h:3143:3: note: expanded from macro 'X86_SIM_RUN_OP'
+ 3143 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^
+./../x86/x86_sim_local_bpf.h:2888:5: note: expanded from macro 'X86_SIM_L_EXEC'
+ 2888 |                                 X86_SIM_L_EXEC_STORE((OP), (DST), (SRC), (FLAGS),  \
+      |                                 ^
+./../x86/x86_sim_local_bpf.h:1514:4: note: expanded from macro 'X86_SIM_L_EXEC_STORE'
+ 1514 |                         void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \
+      |                         ^
+oracles/test_x86_specialization_host.c:417:9: warning: label followed by a declaration is a C23 extension [-Wc23-extensions]
+./../x86/x86_sim_local_bpf.h:3143:3: note: expanded from macro 'X86_SIM_RUN_OP'
+ 3143 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^
+./../x86/x86_sim_local_bpf.h:2891:4: note: expanded from macro 'X86_SIM_L_EXEC'
+ 2891 |                         X86_SIM_L_EXEC_MOVBE_STORE((DST), (SRC), (FLAGS),\
+      |                         ^
+./../x86/x86_sim_local_bpf.h:1564:4: note: expanded from macro 'X86_SIM_L_EXEC_MOVBE_STORE'
+ 1564 |                         void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \
+      |                         ^
+oracles/test_x86_specialization_host.c:418:2: warning: passing 'volatile __u8[64]' (aka 'volatile unsigned char[64]') to parameter of type 'const void *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  418 |         TAKE_SNAP(sa);
+      |         ^~~~~~~~~~~~~
+oracles/test_x86_specialization_host.c:346:24: note: expanded from macro 'TAKE_SNAP'
+  346 |                 memcpy((S).stack_sb, __x86_stack_mem.b,                   \
+      |                                      ^~~~~~~~~~~~~~~~~
+/usr/include/string.h:43:70: note: passing argument to parameter '__src' here
+   43 | extern void *memcpy (void *__restrict __dest, const void *__restrict __src,
+      |                                                                      ^
+oracles/test_x86_specialization_host.c:421:2: warning: passing 'volatile __u8[64]' (aka 'volatile unsigned char[64]') to parameter of type 'void *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  421 |         PLANT(op, dst, src);
+      |         ^~~~~~~~~~~~~~~~~~~
+oracles/test_x86_specialization_host.c:270:10: note: expanded from macro 'PLANT'
+  270 |                 memcpy(__x86_stack_mem.b, stack_img, X86_SIM_STACK_BYTES);\
+      |                        ^~~~~~~~~~~~~~~~~
+/usr/include/string.h:43:39: note: passing argument to parameter '__dest' here
+   43 | extern void *memcpy (void *__restrict __dest, const void *__restrict __src,
+      |                                       ^
+oracles/test_x86_specialization_host.c:421:2: warning: passing 'volatile __u8[64]' (aka 'volatile unsigned char[64]') to parameter of type 'void *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  421 |         PLANT(op, dst, src);
+      |         ^~~~~~~~~~~~~~~~~~~
+oracles/test_x86_specialization_host.c:335:16: note: expanded from macro 'PLANT'
+  335 |         memcpy(__x86_stack_mem.b, stack_img, X86_SIM_STACK_BYTES);          \
+      |                ^~~~~~~~~~~~~~~~~
+/usr/include/string.h:43:39: note: passing argument to parameter '__dest' here
+   43 | extern void *memcpy (void *__restrict __dest, const void *__restrict __src,
+      |                                       ^
+oracles/test_x86_specialization_host.c:439:3: warning: label followed by a declaration is a C23 extension [-Wc23-extensions]
+  439 |                 X86_SIM_L_EXEC_MOVBE_STORE(dst,src,flags,aux,imm);break;
+      |                 ^
+./../x86/x86_sim_local_bpf.h:1564:4: note: expanded from macro 'X86_SIM_L_EXEC_MOVBE_STORE'
+ 1564 |                         void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \
+      |                         ^
+oracles/test_x86_specialization_host.c:475:3: warning: label followed by a declaration is a C23 extension [-Wc23-extensions]
+  475 |                 X86_SIM_L_EXEC_STORE(op, dst, src, flags, aux, imm);
+      |                 ^
+./../x86/x86_sim_local_bpf.h:1514:4: note: expanded from macro 'X86_SIM_L_EXEC_STORE'
+ 1514 |                         void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \
+      |                         ^
+oracles/test_x86_specialization_host.c:582:2: warning: passing 'volatile __u8[64]' (aka 'volatile unsigned char[64]') to parameter of type 'const void *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+  582 |         TAKE_SNAP(sb);
+      |         ^~~~~~~~~~~~~
+oracles/test_x86_specialization_host.c:346:24: note: expanded from macro 'TAKE_SNAP'
+  346 |                 memcpy((S).stack_sb, __x86_stack_mem.b,                   \
+      |                                      ^~~~~~~~~~~~~~~~~
+/usr/include/string.h:43:70: note: passing argument to parameter '__src' here
+   43 | extern void *memcpy (void *__restrict __dest, const void *__restrict __src,
+      |                                                                      ^
+oracles/test_x86_specialization_host.c:400:2: warning: variable '__x86_af' set but not used [-Wunused-but-set-variable]
+  400 |         X86_SIM_L_DECLARE_STATE();
+      |         ^
+./../x86/x86_sim_local_bpf.h:448:7: note: expanded from macro 'X86_SIM_L_DECLARE_STATE'
+  448 |         __u8 __x86_af = X86_SIM_L_UNSPECIFIED() & 1;                                                  \
+      |              ^
+11 warnings generated.
+/var/tmp/kprog-tmp/perf/bmi2-specialization/specialization
+x86 specialization host cross-check: OK (566 cases)
+lake build KProgFormal.X86Specialization
+libc++abi: terminating due to uncaught exception of type lean::exception: failed to create thread: Resource temporarily unavailable
+make[1]: *** [/workspaces/repository/kprog/test/native-relocations.mk:250: bmi2-contract-host] Aborted (core dumped)
+make[1]: Leaving directory '/workspaces/repository/kprog/formal'
+make: *** [kprog/test/native-relocations.mk:242: bmi2-contract] Error 2

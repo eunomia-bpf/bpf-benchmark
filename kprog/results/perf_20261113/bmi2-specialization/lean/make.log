@@ -1,0 +1,3 @@
+cd /workspaces/repository/kprog/formal && taskset -c 8-11 prlimit --as=8589934592 -- env LEAN_NUM_THREADS=2 lake build KProgFormal.X86Specialization
+libc++abi: terminating due to uncaught exception of type lean::exception: failed to create thread: Resource temporarily unavailable
+make: *** [kprog/test/native-relocations.mk:254: bmi2-contract-lean] Aborted (core dumped)
