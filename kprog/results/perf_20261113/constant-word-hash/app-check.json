@@ -1,0 +1,31 @@
+{
+  "run": "corpus/results/x86_kvm_corpus_20261115_232350_572949",
+  "app_status": "ok",
+  "app_error": "",
+  "scope": "Direct simplified one-image corpus, one10s sample per arm/stats1; functional subset, not official speed measurement. No A/A, observer or private timing script.",
+  "programs": {
+    "baseline": {
+      "9": {
+        "bytes_jited": 13641,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 24179949,
+        "run_time_ns_delta": 4237434464,
+        "type": "xdp"
+      }
+    },
+    "post_rejit": {
+      "16": {
+        "bytes_jited": 12990,
+        "bytes_xlated": 16,
+        "id": 16,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 24241421,
+        "run_time_ns_delta": 4105881593,
+        "type": "xdp"
+      }
+    }
+  },
+  "timing_setting_deviation": "Started23:22:11 with SAMPLES1/WORKLOAD_DURATION10; coordinator23:21:43 notice freezes defaults3/180, read23:28. This was a lane mistake. Diagnostic/raw outputs retained; subsequent timings use unchanged corpus defaults and permitted APPS/stats selections."
+}

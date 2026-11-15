@@ -1,0 +1,157 @@
+{
+  "recorded_at": "2026-11-15T23:26:51Z",
+  "source": "72a2c1d37",
+  "old_image": "sha256:5f60e756277cb12514ca87b3e3e294bc0bc71f403e5b6f07f76d29b5b436c227",
+  "new_image": "sha256:741f82276311e4fe6f219a7bc26120f80c2596c7cf396e2cbfca81164f6872d3",
+  "started": "2026-11-15T23:18:51Z",
+  "finished": "2026-11-15T23:20:14Z",
+  "stable_kernel_and_modules": true,
+  "native_stage_files": 1252,
+  "native_inventory_differences": [],
+  "native_image_files_unchanged": true,
+  "tools": [
+    {
+      "path": "/usr/local/bin/native-link",
+      "shipped": {
+        "bytes": 2875176,
+        "sha256": "f7de4bfc240bfe9eac1adf2ef8c848d1b9adf321798a9a3b50a41702ae9aff81"
+      },
+      "built": "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "current": {
+        "bytes": 2875176,
+        "sha256": "f7de4bfc240bfe9eac1adf2ef8c848d1b9adf321798a9a3b50a41702ae9aff81"
+      },
+      "equal": true
+    },
+    {
+      "path": "/usr/local/lib/bpfrejit/libnative_loader.so",
+      "shipped": {
+        "bytes": 801360,
+        "sha256": "ca037dc98f4c91c31e5c693e507a79fe31adcd9741b383d0a82e5fffe4dfe68e"
+      },
+      "built": "/workspaces/repository/runner/build-llvmbpf/native_loader/libnative_loader.so",
+      "current": {
+        "bytes": 801360,
+        "sha256": "ca037dc98f4c91c31e5c693e507a79fe31adcd9741b383d0a82e5fffe4dfe68e"
+      },
+      "equal": true
+    },
+    {
+      "path": "/usr/local/lib/bpfrejit/libbpfrejit_shim.so",
+      "shipped": {
+        "bytes": 463696,
+        "sha256": "19f2f67ad127424b1356e8913eb9114299f4ea250ca2750511129af0b2a51ab0"
+      },
+      "built": "/workspaces/repository/bpfopt/shim/build-x86/libbpfrejit_shim.so",
+      "current": {
+        "bytes": 463696,
+        "sha256": "19f2f67ad127424b1356e8913eb9114299f4ea250ca2750511129af0b2a51ab0"
+      },
+      "equal": true
+    }
+  ],
+  "runtime_replay": {
+    "raw": "/workspaces/kprog-raw/perf/20261115-may-linker-comparison/constant-current",
+    "linker_sha256": "f7de4bfc240bfe9eac1adf2ef8c848d1b9adf321798a9a3b50a41702ae9aff81",
+    "native_sha256": "c0dc65fc746d7027c94969df1239b2eb603ecef541e9ab333a7186ce636eb13e",
+    "payload_bytes": 12958,
+    "payload_sha256": "698dc3143d45aef1df784ce8d4d3ecf3e49a68cbbd2feedee4c309cede81e11a",
+    "relocation_bytes": 288,
+    "instructions": 2945,
+    "mnemonics": {
+      "push": 2,
+      "sub": 99,
+      "mov": 963,
+      "lea": 138,
+      "cmp": 230,
+      "ja": 37,
+      "jae": 58,
+      "add": 188,
+      "jmp": 145,
+      "xor": 169,
+      "test": 138,
+      "je": 124,
+      "inc": 67,
+      "movzx": 158,
+      "jne": 111,
+      "and": 16,
+      "shl": 24,
+      "shr": 29,
+      "or": 24,
+      "movbe": 6,
+      "dec": 7,
+      "cmovb": 6,
+      "not": 2,
+      "cmove": 6,
+      "jbe": 7,
+      "call": 36,
+      "jg": 2,
+      "js": 2,
+      "jle": 2,
+      "imul": 18,
+      "jb": 9,
+      "rol": 65,
+      "sete": 3,
+      "pop": 2,
+      "rorx": 20,
+      "ret": 24,
+      "cmova": 2,
+      "bswap": 2,
+      "bsr": 2,
+      "neg": 2
+    },
+    "entry_instructions": [
+      "push rbp",
+      "push r12",
+      "sub rsp,0B8h",
+      "mov r12,[rdi]",
+      "mov r15,[rdi+8]",
+      "lea rax,[r12+0Eh]",
+      "mov ebx,1",
+      "cmp rax,r15"
+    ],
+    "external_calls": [
+      {
+        "target": "0xffffffff833b9390",
+        "count": 8,
+        "names": [
+          "__native_x86_ktime_get_mono_fast_ns"
+        ]
+      },
+      {
+        "target": "0xffffffff834b8a00",
+        "count": 1,
+        "names": [
+          "bpf_map_lookup_elem",
+          "lookup:array",
+          "lookup:percpu_array"
+        ]
+      },
+      {
+        "target": "0xffffffff834b8a30",
+        "count": 4,
+        "names": [
+          "bpf_map_update_elem"
+        ]
+      },
+      {
+        "target": "0xffffffff834c69d0",
+        "count": 1,
+        "names": [
+          "lookup:hash",
+          "lookup:hash_of_maps",
+          "lookup:lru_hash"
+        ]
+      },
+      {
+        "target": "0xffffffff83d63ab0",
+        "count": 4,
+        "names": [
+          "bpf_xdp_adjust_head"
+        ]
+      }
+    ],
+    "scope": "Reference/current linker replay on identical P and the same recent kernel/map facts. This is not a May live capture or a timed comparison."
+  },
+  "scope": "Packaging and offline replay; application check separately recorded."
+}

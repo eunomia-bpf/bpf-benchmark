@@ -18,3 +18,15 @@ fixture passes49178 kernel-reference/table/page-end/unaligned/hash/collision/
 null/retry/ABI vectors. A new decoder regression verifies constant hash blocks
 execute no chunk loop or tail dispatch. Whole-app counters and body samples
 follow on the sole image; host vectors alone establish no speed gain.
+
+Published23:20:14Z in sole image741f8227/CLIf7de4bfc; kernel/modules and1252
+native image files unchanged. Actual-plan replay gives12958-byte payload.
+Direct one-image corpus1x10s/stats1 completes both armsOK in run232350_572949.
+This is a functional subset; C's breadth-first stats-off/on round supplies
+full measurements. No removed timing wrapper or observer is used.
+
+Timing-setting correction: the short check starts23:22:11 with1x10s; the
+23:21:43 notice freezes3x180 defaults, read23:28. That launch was a lane
+mistake. All diagnostic outputs remain; future timings use unchanged corpus
+defaults with the permitted app and stats selections. Installed native12990B,
+JIT13641B; no full-duration speed claim is made here.
