@@ -200,3 +200,15 @@ scheduled-table-b: $(CONTEXT_TOOL)
 .PHONY: scheduled-otel-source
 scheduled-otel-source:
 	taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/render_scheduled_otel.py --build /var/tmp/kprog-tmp/perf/scheduled-table --output $(OUTPUT)/otel-source
+
+.PHONY: scheduled-table-reference scheduled-table-stock guest-scheduled-table-stock
+scheduled-table-reference:
+	taskset -c 8-11 prlimit --as=8589934592 -- clang-18 -target bpf -O2 -g -I/usr/include/x86_64-linux-gnu -I$(ROOT)/vendor/libbpf/src -c $(ROOT)/kprog/test/scheduled_table_reference.bpf.c -o /var/tmp/kprog-tmp/perf/scheduled-table/scheduled.original.bpf.o
+
+scheduled-table-stock: $(TABLE_CONTEXT_BUILD)/stock-client
+	install -d $(OUTPUT) $(OUTPUT)/inputs $(OUTPUT)/client
+	taskset -c 16-17 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rodir $(OUTPUT)/inputs=/var/tmp/kprog-tmp/perf/scheduled-table --rodir $(OUTPUT)/client=$(TABLE_CONTEXT_BUILD) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-scheduled-table-stock OUTPUT=$(OUTPUT)'
+
+guest-scheduled-table-stock:
+	uname -r > $(OUTPUT)/kernel.release
+	$(OUTPUT)/client/stock-client $(OUTPUT)/inputs/scheduled.original.bpf.o $(OUTPUT)/inputs/scheduled.bpf.o $(OUTPUT)/original.verifier.log $(OUTPUT)/generated.verifier.log scheduled_reference scheduled_model_x86_sim_xdp > $(OUTPUT)/stock.jsonl
