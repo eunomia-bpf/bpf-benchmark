@@ -107,6 +107,58 @@ char LICENSE[] SEC("license") = "GPL";
     result = dict(counterexample=counterexample,
                   execution_cases=len(observations), retained=replay, normal_service_path=True,
                   bpf_untied_output_preserved=True)
+    # Nullable map results can feed a preserved sign flag through the NULL
+    # edge. Catch eager sign arithmetic while retaining the other edge and
+    # branches whose two successors coincide. Test nonzero equalities too.
+    edges = 'target triple = "x86_64-unknown-linux-gnu"\n'
+    for name, predicate, branch, operands, setup, compare in [
+        ('null_eq', 'eq', '%join, label %other', 'ptr %p',
+         '%bits = ptrtoint ptr %p to i64\n%sign = lshr i64 %bits, 63', 'ptr %p, null'),
+        ('null_ne', 'ne', '%other, label %join', 'ptr %p',
+         '%bits = ptrtoint ptr %p to i64\n%sign = lshr i64 %bits, 63', 'ptr %p, null'),
+        ('nonnull', 'eq', '%other, label %join', 'ptr %p',
+         '%bits = ptrtoint ptr %p to i64\n%sign = lshr i64 %bits, 63', 'ptr %p, null'),
+        ('integer', 'eq', '%join, label %other', 'i64 %p',
+         '%sign = lshr i64 %p, 2', 'i64 %p, 9'),
+    ]:
+        edges += f'''define i64 @{name}({operands}) {{
+entry:
+{setup}
+%equal = icmp {predicate} {compare}
+br i1 %equal, label {branch}
+other:
+br label %join
+join:
+%value = phi i64 [ %sign, %entry ], [ 7, %other ]
+ret i64 %value
+}}
+'''
+    edges += '''define i64 @same_successor(ptr %p) {
+entry:
+%bits = ptrtoint ptr %p to i64
+%sign = lshr i64 %bits, 63
+%equal = icmp eq ptr %p, null
+br i1 %equal, label %join, label %join
+join:
+%value = phi i64 [ %sign, %entry ], [ %sign, %entry ]
+ret i64 %value
+}
+'''
+    (build/'edges.ll').write_text(edges)
+    transformed = run([tool, build/'edges.ll', '-o', build/'edges.bc'])
+    if 'equality-edge PHI expressions folded=3' not in transformed.stderr:
+        raise ValueError('Equality-edge folding lost a NULL/nonzero fact or guessed another edge')
+    for variant in ('ll', 'bc'):
+        run(['clang-18', '-shared', '-fPIC', '-O2', build/('edges.'+variant), '-o', build/('edges-'+variant+'.so')])
+    reference, candidate = [c.CDLL(str(build/('edges-'+v+'.so'))) for v in ('ll', 'bc')]
+    for name in ('null_eq', 'null_ne', 'nonnull', 'integer', 'same_successor'):
+        for value in (0, 1, 9, 1 << 31, 1 << 63, (1 << 64)-1):
+            functions = [getattr(lib, name) for lib in (reference, candidate)]
+            for fn in functions:
+                fn.argtypes, fn.restype = [c.c_uint64], c.c_uint64
+            if functions[0](value) != functions[1](value):
+                raise ValueError(f'Equality edge semantics changed: {name}/{value}')
+    result['equality_edge_execution_cases'] = 30
     (output/'result.json').write_text(json.dumps(result, indent=2)+'\n')
     print(json.dumps(result))
 

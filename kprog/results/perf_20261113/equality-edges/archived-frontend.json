@@ -1,0 +1,14 @@
+{
+  "archive": "/workspaces/kprog-raw/perf/20261115-otel-current-app-retry1/service.tar.gz",
+  "request": "service/requests/2.failure.tar.gz",
+  "input": "request/generated/trusted_x86.bpf.bounds-input.bc",
+  "command": [
+    "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+    "-",
+    "-o",
+    "-"
+  ],
+  "returncode": 0,
+  "stderr": "packet length predicates lowered=0\nunused private inputs removed=1044\nconstant context loads canonicalized=0\ndebug variable intrinsics removed=27115\nequality-edge PHI expressions folded=1\n",
+  "scope": "Actual archived optimized frontend through new equality-edge folding; backend and real stock replay pending"
+}

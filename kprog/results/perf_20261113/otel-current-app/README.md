@@ -55,7 +55,7 @@ The in-place kernel/image rebuild and corrected executions remain pending.
 All service archives and logs stay under the raw root. The completed scratch
 Docker disk was removed (removed-build-copies.txt); no result data was removed.
 
-Retry1 on kernel099357174783/imagefc5336c2 completed18:24:27Z, Make0 and
+Retry1 on kernel099357174783/imagefc5336c2 completed18:24:28Z, Make0 and
 application error "no tracked BPF programs". read_task_struct stock24 and
 checked-native27 install both succeed. Startup next reaches perf_unwind_stop;
 both attempts fail stock verification at a right shift by63 of a nullable

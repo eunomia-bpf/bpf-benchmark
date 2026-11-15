@@ -1,6 +1,7 @@
 // Express the simulator's existing packet length predicates as pointer bounds
 // for the stock BPF backend/verifier. This changes no application predicate.
 #include "llvm/Analysis/ValueTracking.h"
+#include "llvm/Analysis/InstructionSimplify.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/InlineAsm.h"
@@ -118,6 +119,34 @@ static unsigned remove_debug_variable_intrinsics(Module &module) {
     }
   return count;
 }
+// A PHI incoming value is observed on its own edge. For example, a preserved
+// sign flag on a pointer==NULL edge is exactly zero. Fold that expression at
+// the PHI so the BPF backend can discard arithmetic on the nullable pointer.
+// Other edges retain their original expression and the comparison stays live.
+static unsigned fold_equality_edges(Module &module) {
+  unsigned count=0;
+  const SimplifyQuery query(module.getDataLayout());
+  for (auto &function:module) for (auto &block:function) for (auto &phi:block.phis()) {
+    for (unsigned index=0;index<phi.getNumIncomingValues();++index) {
+      auto *branch=dyn_cast<BranchInst>(phi.getIncomingBlock(index)->getTerminator());
+      if (!branch || !branch->isConditional() ||
+          branch->getSuccessor(0)==branch->getSuccessor(1)) continue;
+      auto *compare=dyn_cast<ICmpInst>(branch->getCondition());
+      if (!compare || !compare->isEquality()) continue;
+      unsigned edge=compare->getPredicate()==ICmpInst::ICMP_EQ?0:1;
+      if (branch->getSuccessor(edge)!=&block) continue;
+      Value *value=compare->getOperand(0),*constant=compare->getOperand(1);
+      if (isa<Constant>(value)) std::swap(value,constant);
+      if (!isa<ConstantInt>(constant) && !isa<ConstantPointerNull>(constant)) continue;
+      auto *incoming=phi.getIncomingValue(index);
+      auto *folded=simplifyWithOpReplaced(incoming,value,constant,query,false);
+      if (folded && isa<Constant>(folded) && folded!=incoming) {
+        phi.setIncomingValue(index,folded);++count;
+      }
+    }
+  }
+  return count;
+}
 int main(int argc,char **argv) {
   cl::ParseCommandLineOptions(argc,argv);
   LLVMContext context;SMDiagnostic error;auto module=parseIRFile(Input,error,context);
@@ -125,6 +154,7 @@ int main(int argc,char **argv) {
   unsigned unused=remove_unused_private_inputs(*module);
   unsigned contexts=canonical_context_loads(*module);
   unsigned debug_variables=remove_debug_variable_intrinsics(*module);
+  unsigned equality_edges=fold_equality_edges(*module);
   unsigned count=0;
   for (auto &function:*module) {
     if (function.isDeclaration() || function.arg_empty()) continue;
@@ -171,4 +201,5 @@ int main(int argc,char **argv) {
   errs()<<"unused private inputs removed="<<unused<<'\n';
   errs()<<"constant context loads canonicalized="<<contexts<<'\n';
   errs()<<"debug variable intrinsics removed="<<debug_variables<<'\n';
+  errs()<<"equality-edge PHI expressions folded="<<equality_edges<<'\n';
 }

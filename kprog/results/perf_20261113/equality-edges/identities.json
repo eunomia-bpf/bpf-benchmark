@@ -1,0 +1,16 @@
+{
+  "counterexample": {
+    "function": "untied",
+    "start": 100,
+    "end": 200,
+    "seed": 0,
+    "expected": 0,
+    "before": 0,
+    "strict": 0
+  },
+  "execution_cases": 60,
+  "retained": [],
+  "normal_service_path": true,
+  "bpf_untied_output_preserved": true,
+  "equality_edge_execution_cases": 30
+}
