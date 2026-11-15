@@ -1259,8 +1259,12 @@ FUNC_INLINE int generic_retprobe(void *ctx, struct bpf_map_def *calls, unsigned 
 	 * 0x1000 should be maximum argument length, so masking
 	 * with 0x1fff is safe and verifier will be happy.
 	 */
+#ifdef __bpf__
 	asm volatile("%[size] &= 0x1fff;\n"
 		     : [size] "+r"(size));
+#else
+	size &= 0x1fff;
+#endif
 
 	switch (do_copy) {
 	case char_buf:

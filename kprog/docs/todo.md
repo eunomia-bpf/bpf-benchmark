@@ -8,6 +8,12 @@
 
 ## 0. Lane 目标与待办
 
+**协调者 2026-11-15T14:18:54Z（运营者 14:12–14:18 的话）**：
+- 源码改动：运营者说“必要的话改一点是可以接受的, 不需要过于严格, 但尽可能不改”。协调者此前把 11-13 的“尽可能禁止改源代码”收紧成“一字不改”，删掉了 C 的兼容分支（a01ef4879、57a19c5f2），还因此重启了 C，这是收紧，已纠正：C 在 Tetragon、Tracee、Cilium 里按 __bpf__ 分开的原生兼容分支按 C 停时的最新版本恢复（本提交，来自 0f16b77f1 和 /workspaces/kprog-raw/C/stop-20261115T0649Z/worktree.patch，eBPF 一侧文本不变）。规则：头文件、编译参数、链接器能做的放那里；做不到的，在源码里加最小的兼容分支。
+- formal 继续证明迁移（运营者：“证明迁移停着。干嘛不做? 继续.”）。“每个 workspace 一个 omp 一个 codex?”是问句，按 11-13 的“可以两个 codex lane”，本 Workspace 是 C（omp）+ perf、formal（两个 Codex）；M4–M6 回到 formal，PERF 的待办里去掉。
+- 6 小时审核每次都对照运营者原话（kprog/docs/user-instruction.md）查不符合的地方，审核提示词已加这一节（两份 md5 430c34531927b54074fe6703e5423a58）。
+- 继续：(1) 六个应用的原生对象按现在的路线建完，镜像只放新对象（C）；(2) 生成 B 的工具里 packet_bounds_ir 的 --canonical-ctx-loads、--strict-identities 两个选项和整字溢出的 ALL 选项收成唯一做法，和 trusted_specializer 的调用、已发布的 packet-bounds 二进制一起换（PERF）；(3) 时钟 helper 的 LTO 和 LTO 配置跑完整应用（PERF）。
+
 **协调者 2026-11-15T14:03:43Z，减要求（运营者：“干嘛这么久? 你是不是要求太多了”）**：协调者在运营者原话之外加的要求撤掉：(1) -fPIC 回到 C 的做法（运营者原话是问句“是不是都得想办法关掉”，目的在性能，-fPIC 对代码零影响）；(2) 测量回到运营者原话“A/A 一次”：每个应用 A/A 一次、A/B 一次（各 3×180 秒），每次调用为主，撤掉 08:48 定的“各 3 次”；(3) lane 只做三件事：用头文件路线把应用建出来、两侧输出对上、计时；其余记录、表格、交接从简。先 Katran，今天出第一个数。
 
 **协调者 2026-11-15T08:48:57Z（依据 PERF 54cb04925 的每次调用 A/A）**：同一份对象两臂，前一臂 155.09 ns/次，后一臂 193.53 ns/次（后一臂慢 24.8%），吞吐在这次反而后一臂低（均值 0.849x、中位 0.909x），和 06:47 那次吞吐 A/A 的 1.17x 方向相反。两臂之间的漂移在每次调用和吞吐上都远大于要测的效果，单次 A/A 定不出校正系数。决定测量方法：每个应用按“同位置比较”，A/A（两臂都是 eBPF）和 A/B（前一臂 eBPF、后一臂原生）各跑 3 次，原生的效果 = A/B 后一臂 ÷ A/A 后一臂，每次调用和吞吐都这样算，报均值和三次的范围；冻结的 driver 和 benchmark 设置保持原样。先在 Katran 上做（新路线的 Katran 对象出来后），再推到其他应用。
@@ -25,7 +31,7 @@
 **协调者 2026-11-15T00:33:09Z 的决定（运营者 2026-11-15 原话见 user-instruction.md）**
 - **旧的拆掉丢掉**：不符合设计、会误导的东西直接删除，不留默认关闭的开关；新做法替换旧做法，旧的删掉（替代此前“新行为放在默认关闭的开关后、默认路径字节不变”的写法）。协调者已拆：2f83ebd4b（应用源码里全部 MICRO_NATIVE 条件编译、native_compat.h、生产一侧的 IR 改写工具和配方、05-29 第二镜像配方、统一编译参数），本提交（规模扫描旧编译路径、按采集值在构建时特化 .rodata 的脚本）。可信 LTO 里的上下文转换（socket-context-lower 及其布局表）属于设计，保留。编译暂时会失败，由 lane 在设计路线上重建。
 - **lane 结构**：每个 Workspace 一个 omp、一个 Codex。本 Workspace：C（omp）+ perf（Codex）。formal 在当前一轮结束后停（formal/STOP），M3 已完成、M4 部分完成的状态保留在 formal/state.md 和提交里；M4–M6 排进 perf 的待办，在 HARD-native、C-HDR 相关的链接器工作之后。
-- **PERF 现在的顺序**：(1) 链接器、装载器、checked 编译接受统一参数产出的目标文件（跳转表、非 PIC 重定位）；(2) 自己的 B 编译开关（KPROG_BPF_STRICT_IDENTITIES、WHOLE_WORD_SPILLS、WHOLE_WORD_SPILLS_ALL、CONTEXT_LOADS、--widen-zero-compare）各自定成唯一做法或删掉，删掉旧路径；(3) core-audit 改成直接用 libbpf 算答案，去掉对 core-ir-lower 的依赖；(4) 计时隔离与 A/A（审核 21Z 第 2 条）；(5) P-Katran；(6) formal M4–M6。
+- **PERF 现在的顺序**：(1) 链接器、装载器、checked 编译接受统一参数产出的目标文件（跳转表、非 PIC 重定位）；(2) 自己的 B 编译开关（KPROG_BPF_STRICT_IDENTITIES、WHOLE_WORD_SPILLS、WHOLE_WORD_SPILLS_ALL、CONTEXT_LOADS、--widen-zero-compare）各自定成唯一做法或删掉，删掉旧路径；(3) core-audit 改成直接用 libbpf 算答案，去掉对 core-ir-lower 的依赖；(4) 计时隔离与 A/A（审核 21Z 第 2 条）；(5) P-Katran。
 - **C 现在的顺序**：每个应用的兼容头文件（Katran 上下文布局、CO-RE 按唯一内核 BTF、LINUX_KERNEL_VERSION 和 __kconfig 值）和 vendor/bpf/Makefile 里的配方，全部用统一参数；先 Katran、BCC，再 Tracee、Tetragon、Cilium、OTel；每个应用两侧输出对照，再测本体和代码大小。
 - **审核 21Z（已核实）**：Cilium 1.285x、Tetragon 1.275x 记为第 1 阶段“两边应用输出一致”未通过（Cilium host 程序次数 C fe1bc6c52；Tetragon CO-RE 108 个答案不同 d92e5d43e），两项从结果里撤下；OTel 引用 stats 开的每次调用 1.129x 并列出三个样本，1.161x 撤下；计时期间其他 guest 停在 locks/timing 外，A/A 一次约 20 分钟；规模扫描“问题坐实”一句撤回（那是旧编译路径的数字）；包处理类应用的份额按瓶颈 CPU 算（Katran 约 43–44%，审核 detour-20261109T21Z 已核实），23:41 写的“5–9%、吞吐到不了 30%”撤回。
 

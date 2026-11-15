@@ -32,11 +32,60 @@
 /* This must be a mask and all offsets guaranteed to be less than that. */
 #define __CTX_OFF_MAX			0xff
 
+#ifndef __bpf__
+static __always_inline void *
+micro_native_xdp_data(const struct xdp_md *ctx)
+{
+	return *(void * const *)((const char *)ctx + 0);
+}
+
+static __always_inline void *
+micro_native_xdp_data_end(const struct xdp_md *ctx)
+{
+	return *(void * const *)((const char *)ctx + 8);
+}
+
+static __always_inline void *
+micro_native_xdp_data_meta(const struct xdp_md *ctx)
+{
+	return *(void * const *)((const char *)ctx + 16);
+}
+
+/* The real entry context is struct xdp_buff: rxq at +32, xdp_rxq_info.dev at
+ * +0, net_device.ifindex at +224. The kernel lowers a read of
+ * xdp_md.ingress_ifindex to exactly that chain (net/core/filter.c,
+ * "rxq->dev->ifindex"), so this reads the same word the verifier would. */
+static __always_inline __u32
+micro_native_xdp_ingress_ifindex(const struct xdp_md *ctx)
+{
+	const void *rxq = *(const void * const *)((const char *)ctx + 32);
+	const void *dev;
+
+	if (unlikely(!rxq))
+		return 0;
+	dev = *(const void * const *)rxq;
+	if (unlikely(!dev))
+		return 0;
+	return *(const __u32 *)((const char *)dev + 224);
+}
+#endif
 
 #ifndef HAVE_XDP_LOAD_BYTES
 static __always_inline __maybe_unused int
 xdp_load_bytes(const struct xdp_md *ctx, __u64 off, void *to, const __u64 len)
 {
+#ifndef __bpf__
+	char *data = micro_native_xdp_data(ctx);
+	char *data_end = micro_native_xdp_data_end(ctx);
+	char *from;
+
+	off &= __CTX_OFF_MAX;
+	from = data + off;
+	if (from + len > data_end)
+		return -EINVAL;
+	memcpy(to, from, len);
+	return 0;
+#else
 	void *from;
 	int ret;
 	/* LLVM tends to generate code that verifier doesn't understand,
@@ -60,6 +109,7 @@ xdp_load_bytes(const struct xdp_md *ctx, __u64 off, void *to, const __u64 len)
 	if (!ret)
 		memcpy(to, from, len);
 	return ret;
+#endif
 }
 #endif
 
@@ -68,6 +118,18 @@ static __always_inline __maybe_unused int
 xdp_store_bytes(const struct xdp_md *ctx, __u64 off, const void *from,
 		const __u64 len, __u64 flags __maybe_unused)
 {
+#ifndef __bpf__
+	char *data = micro_native_xdp_data(ctx);
+	char *data_end = micro_native_xdp_data_end(ctx);
+	char *to;
+
+	off &= __CTX_OFF_MAX;
+	to = data + off;
+	if (to + len > data_end)
+		return -EINVAL;
+	memcpy(to, from, len);
+	return 0;
+#else
 	void *to;
 	int ret;
 	/* See xdp_load_bytes(). */
@@ -88,6 +150,7 @@ xdp_store_bytes(const struct xdp_md *ctx, __u64 off, const void *from,
 	if (!ret)
 		memcpy(to, from, len);
 	return ret;
+#endif
 }
 #endif
 
@@ -115,6 +178,14 @@ xdp_store_bytes(const struct xdp_md *ctx, __u64 off, const void *from,
 #define get_hash(ctx)			({ 0; })
 #define get_hash_recalc(ctx)		get_hash(ctx)
 
+#ifndef __bpf__
+#define DEFINE_FUNC_CTX_POINTER(FIELD)						\
+static __always_inline void *							\
+ctx_ ## FIELD(const struct xdp_md *ctx)						\
+{										\
+	return micro_native_xdp_ ## FIELD(ctx);					\
+}
+#else
 #define DEFINE_FUNC_CTX_POINTER(FIELD)						\
 static __always_inline void *							\
 ctx_ ## FIELD(const struct xdp_md *ctx)						\
@@ -130,6 +201,7 @@ ctx_ ## FIELD(const struct xdp_md *ctx)						\
 		     : "r"(ctx), "i"(offsetof(struct xdp_md, FIELD)));		\
 	return ptr;								\
 }
+#endif
 /* This defines ctx_data(). */
 DEFINE_FUNC_CTX_POINTER(data)
 /* This defines ctx_data_end(). */
@@ -157,12 +229,26 @@ l3_csum_replace(const struct xdp_md *ctx, __u64 off, const __u32 from,
 {
 	__u32 size = flags & BPF_F_HDR_FIELD_MASK;
 	__sum16 *sum;
+#ifndef __bpf__
+	char *data = micro_native_xdp_data(ctx);
+	char *data_end = micro_native_xdp_data_end(ctx);
+#else
 	int ret;
+#endif
 
 	if (unlikely(flags & ~(BPF_F_HDR_FIELD_MASK)))
 		return -EINVAL;
 	if (unlikely(size != 0 && size != 2))
 		return -EINVAL;
+#ifndef __bpf__
+	off &= __CTX_OFF_MAX;
+	sum = (__sum16 *)(data + off);
+	if ((char *)sum + 2 > data_end)
+		return -EINVAL;
+	from ? __csum_replace_by_4(sum, from, to) :
+	       __csum_replace_by_diff(sum, to);
+	return 0;
+#else
 	/* See xdp_load_bytes(). */
 	asm volatile("r1 = *(u32 *)(%[ctx] +0)\n\t"
 		     "r2 = *(u32 *)(%[ctx] +4)\n\t"
@@ -182,6 +268,7 @@ l3_csum_replace(const struct xdp_md *ctx, __u64 off, const __u32 from,
 		from ? __csum_replace_by_4(sum, from, to) :
 		       __csum_replace_by_diff(sum, to);
 	return ret;
+#endif
 }
 
 #define CSUM_MANGLED_0		((__sum16)0xffff)
@@ -193,13 +280,31 @@ l4_csum_replace(const struct xdp_md *ctx, __u64 off, __u32 from, __u32 to,
 	bool is_mmzero = flags & BPF_F_MARK_MANGLED_0;
 	__u32 size = flags & BPF_F_HDR_FIELD_MASK;
 	__sum16 *sum;
+#ifndef __bpf__
+	char *data = micro_native_xdp_data(ctx);
+	char *data_end = micro_native_xdp_data_end(ctx);
+#else
 	int ret;
+#endif
 
 	if (unlikely(flags & ~(BPF_F_MARK_MANGLED_0 | BPF_F_PSEUDO_HDR |
 			       BPF_F_HDR_FIELD_MASK | BPF_F_IPV6)))
 		return -EINVAL;
 	if (unlikely(size != 0 && size != 2))
 		return -EINVAL;
+#ifndef __bpf__
+	off &= __CTX_OFF_MAX;
+	sum = (__sum16 *)(data + off);
+	if ((char *)sum + 2 > data_end)
+		return -EINVAL;
+	if (is_mmzero && !*sum)
+		return 0;
+	from ? __csum_replace_by_4(sum, from, to) :
+	       __csum_replace_by_diff(sum, to);
+	if (is_mmzero && !*sum)
+		*sum = CSUM_MANGLED_0;
+	return 0;
+#else
 	/* See xdp_load_bytes(). */
 	asm volatile("r1 = *(u32 *)(%[ctx] +0)\n\t"
 		     "r2 = *(u32 *)(%[ctx] +4)\n\t"
@@ -224,6 +329,7 @@ l4_csum_replace(const struct xdp_md *ctx, __u64 off, __u32 from, __u32 to,
 			*sum = CSUM_MANGLED_0;
 	}
 	return ret;
+#endif
 }
 
 static __always_inline __maybe_unused int
@@ -343,13 +449,21 @@ ctx_adjust_hroom(struct xdp_md *ctx, const __s32 len_diff, const __u32 mode,
 static __always_inline __maybe_unused __u32
 ctx_get_ifindex(const struct xdp_md *ctx)
 {
+#ifndef __bpf__
+	return micro_native_xdp_ingress_ifindex(ctx);
+#else
 	return ctx->ingress_ifindex;
+#endif
 }
 
 static __always_inline __maybe_unused __u32
 ctx_get_ingress_ifindex(const struct xdp_md *ctx)
 {
+#ifndef __bpf__
+	return micro_native_xdp_ingress_ifindex(ctx);
+#else
 	return ctx->ingress_ifindex;
+#endif
 }
 
 static __always_inline __maybe_unused int
@@ -380,6 +494,10 @@ ctx_full_len(const struct xdp_md *ctx)
 static __always_inline __maybe_unused __u64
 ctx_full_len(const struct xdp_md *ctx)
 {
+#ifndef __bpf__
+	return (__u64)((unsigned long)micro_native_xdp_data_end(ctx) -
+		       (unsigned long)micro_native_xdp_data(ctx));
+#else
 	__u64 len;
 	/* Compute the length using inline assembly as clang
 	 * sometimes reorganizes expressions involving this,
@@ -393,6 +511,7 @@ ctx_full_len(const struct xdp_md *ctx)
 		     : [ctx]"r"(ctx)
 		     : "r1", "r2");
 	return len;
+#endif
 }
 #endif
 
