@@ -157,9 +157,16 @@ folds the version test away entirely, and it keeps a
 point the same way: the image was built with `bpf_core_field_exists(...)`
 defined as the constant `1` (`vendor/bpf/native_compat.h`, deleted in
 `2f83ebd4b`), which folds the existence test to "the field exists" and
-hard-codes the `rq_disk` branch. The current tree compiles against the target
-`vmlinux.h`, where the field is
-genuinely absent and the test folds to `0`.
+hard-codes the `rq_disk` branch. That header was force-included (`clang
+-include native_compat.h`, the old `$(NATIVE_OUT)/bcc/%.native.o` rule), so its
+`#ifndef bpf_core_field_exists` beat libbpf's own definition at
+`/usr/include/bpf/bpf_core_read.h:131` and the constant reached the compiler.
+With the header gone the same call resolves to that libbpf macro,
+`__builtin_preserve_field_info(…, BPF_FIELD_EXISTS)`, which the current build
+evaluates against the target `vmlinux.h`; there the field is genuinely absent,
+so the test folds to `0` and `get_disk()` compiles `q->disk`. Verified by
+preprocessing the current tree: the `rq_disk` branch emits
+`__builtin_preserve_field_info((r->rq_disk), BPF_FIELD_EXISTS)`, not `1`.
 
 Six of the eight objects are instruction-for-instruction identical between the
 two sets once branch targets are normalised: `capable`, `opensnoop`, `runqlat`,
