@@ -9,7 +9,7 @@ sys.path.insert(0,str(ROOT/'kprog'))
 from trusted_service import adapter
 from kernel_function_abi import KernelTypes, Type
 compiler,linker,context,public,physical,native,output,bounds=map(Path,sys.argv[1:])
-output.mkdir(parents=True)
+output.mkdir(parents=True,exist_ok=True)
 rules=json.loads(physical.read_text())
 def offset(kind,field):
     rule=next(r for r in rules if r['kind']==kind and r['field']==field)
