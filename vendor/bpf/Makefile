@@ -17,7 +17,9 @@ LLVM_NM ?= llvm-nm-18
 LLVM_STRIP ?= llvm-strip-18
 LLVM_DIS ?= llvm-dis-18
 BPFTOOL ?= $(VENDOR)/build/x86/bpftool/bin/bpftool
-VMLINUX_BTF ?= /sys/kernel/btf/vmlinux
+# The one kernel the guests boot, not the host's running kernel: the two BTFs differ, and a
+# header generated from the host silently compiles BCC against a different kernel.
+VMLINUX_BTF ?= /workspaces/.agent-state/kprog-ck/build-x86/vmlinux
 NATIVE_LINK ?= $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link
 
 OUT := $(BUILD)/$(ARCH)/$(KERNEL_RELEASE)
