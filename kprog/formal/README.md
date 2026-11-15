@@ -1439,21 +1439,25 @@ now stops at MOV-store width/displacement/value GNU selectors. Profile CPP is
 commands/failed harness attempts remain under
 `/workspaces/kprog-raw/formal/m4-x86-memory-read`.
 
-The next source checkpoint shares six store-selector declaration/output bodies
-and adds seven C roots for later export. Its native declaration/initializer
-sequence is retained; the CompCert prefix keeps the register source lazy.
-Checks are queued behind the active18:52 Katran timing window. No new Clight
-AST, tests or byte identity is accepted at this source checkpoint; the current
-Lean exports remain those of the preceding validated step. Inspect the pending
-[receipt](results/m4-x86-store-selectors/README.md) and raw waiter results before
-publishing the new exports. M4 and all later milestones remain open.
-
-An independent physical-store source checkpoint reuses Platform's existing
-alignment-one copy adapter in the CompCert branch of the shared x86 store.
-Native volatile/BPF bodies remain, and one C root plus byte-frame/guard/refusal
-checks await the same queued confirmation. The follow-up validator waits for
-the selector job before reusing its outputs. No new AST, tests or byte identity
-are accepted yet; [pending receipt](results/m4-x86-physical-store/README.md).
+The store-selector and physical-store checkpoints are now validated. Seven
+selector/prefix roots bring `X86Pointer` to33 functions, preserving native const
+initializers, raw truth/second capture, signed immediate slices and lazy
+register/AUX reads. Historical/current native/adapter modes pass260 width/
+320 scalar-capture/336,960 prefix-frame cases each; nine mutations are caught.
+The physical store reuses Platform's alignment-one copy on CompCert and retains
+native volatile/BPF bodies. Its actual root and store callee bring `X86Memory`
+to17 functions;896 byte-frame cases, seven guard/fault/refusal probes and three
+mutations pass. `make clight`/40 targeted Lean jobs pass, followed by the small
+38-job physical subset. Genuine exports repeat987,949B and194,324B with the
+usual axioms only. Context export changes only printer-generated names.
+Store2272B/13relocs, memory1680B/5, ordinary1448B/11 and contextXDP360B/TC760B/4
+are exact against historical replay and normal compilation. The timing queue
+acquired SH at19:44:34 UTC after Katran released EX; both workers are terminal.
+Full inline export now stops at a declaration after a default label, with
+profile CPP2,443,378B. These are component checks, not migrated refinements or
+whole-default identity. [Selector receipts](results/m4-x86-store-selectors/README.md)
+and [physical-store receipts](results/m4-x86-physical-store/README.md) record the
+results; full raw evidence stays in their linked directories.
 
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight

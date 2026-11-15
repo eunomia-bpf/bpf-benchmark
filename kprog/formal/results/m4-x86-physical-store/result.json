@@ -1,10 +1,59 @@
 {
-  "status": "source checkpoint; validation pending",
-  "source_root_awaiting_export": "X86Memory.kprog_x86_store_memory",
-  "mutations_run": 0,
-  "make_clight_exit": null,
-  "targeted_lean_jobs": null,
-  "native_fidelity": null,
+  "status": "component checks passed; M4 incomplete",
+  "clight_module": "X86Memory",
+  "clight_functions": 17,
+  "new_roots": [
+    "store_memory"
+  ],
+  "store_frame_cases_per_mode": 896,
+  "store_guard_fault_refusal_probes": 7,
+  "modes": [
+    "historical0cb2020fc native memory helper",
+    "current native in combined suite",
+    "current CompCert host adapter"
+  ],
+  "negative_checks": {
+    "short_store": 1,
+    "wrong_destination": 1,
+    "aligned_copy": 1
+  },
+  "combined_make_clight_exit": 0,
+  "combined_targeted_lean_jobs": 40,
+  "physical_subset_lean_jobs": 38,
+  "deterministic": {
+    "equal_to_parent_export": true,
+    "bytes": 194324
+  },
+  "axiom_queries": 1,
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "native_fidelity": {
+    "store": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "socket": 2272,
+        "license": 4
+      },
+      "allocated_relocations": 13
+    },
+    "memory": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "socket": 1680,
+        "license": 4
+      },
+      "allocated_relocations": 5
+    }
+  },
   "migrated_theorems": 0,
   "whole_library_acceptance": false
 }

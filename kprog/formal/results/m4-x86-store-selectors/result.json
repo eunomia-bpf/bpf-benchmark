@@ -1,6 +1,8 @@
 {
-  "status": "source checkpoint; validation pending behind Katran timing EX",
-  "source_roots_awaiting_export": [
+  "status": "component checks passed; M4 incomplete",
+  "clight_module": "X86Pointer",
+  "clight_functions": 33,
+  "new_roots": [
     "store_width",
     "store_disp",
     "store_value",
@@ -9,12 +11,91 @@
     "store_arm",
     "store_selectors"
   ],
-  "make_clight_exit": null,
-  "targeted_lean_jobs": null,
-  "native_fidelity": null,
-  "mutations_run": 0,
+  "width_cases_per_mode": 260,
+  "scalar_capture_groups_per_mode": 320,
+  "lazy_prefix_frame_cases_per_mode": 336960,
+  "modes": [
+    "historical b9b2d8c3f native bodies",
+    "current native",
+    "current CompCert host bodies"
+  ],
+  "negative_checks": {
+    "width_byte": 1,
+    "disp_whole": 1,
+    "unsigned_immediate": 1,
+    "eager_register": 1,
+    "eager_aux": 1,
+    "wrong_shift_byte": 1,
+    "left_shift": 1,
+    "arm_byte": 1,
+    "opcode_byte": 1
+  },
+  "make_clight_exit": 0,
+  "targeted_lean_jobs": 40,
+  "deterministic": {
+    "equal": true,
+    "bytes": 987949
+  },
+  "axiom_queries": 7,
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "native_fidelity": {
+    "store": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "socket": 2272,
+        "license": 4
+      },
+      "allocated_relocations": 13
+    },
+    "memory": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "socket": 1680,
+        "license": 4
+      },
+      "allocated_relocations": 5
+    },
+    "ordinary": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "socket": 1448,
+        "license": 4
+      },
+      "allocated_relocations": 11
+    },
+    "context": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "xdp": 360,
+        "tc": 760,
+        "license": 4
+      },
+      "allocated_relocations": 4
+    }
+  },
+  "preprocess": {
+    "exit": 0,
+    "bytes": 2443378,
+    "scope": "extraction TU only, not full app"
+  },
+  "full_inline_export_exit": 2,
+  "next_blocker": "declaration directly after default label in MOV_STORE",
   "migrated_theorems": 0,
-  "whole_library_acceptance": false,
-  "last_confirmed_full_inline_blocker": "MOV_STORE width/displacement/value selectors at b9b2d8c3f",
-  "queue_recipe": "/workspaces/kprog-raw/formal/m4-x86-store-selectors/validate.py"
+  "whole_library_acceptance": false
 }

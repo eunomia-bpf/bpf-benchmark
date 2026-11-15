@@ -1,22 +1,26 @@
-# x86 physical-store source checkpoint
+# x86 physical-store C-subset checks
 
-Status: prepared during the dedicated Katran quiet window; validation pending.
 The CompCert branch of the existing shared scalar store reuses Platform's
 upstream alignment-one copy adapter for widths1/2/4/8. Native volatile and BPF
-asm bodies stay unchanged. A single X86Memory root calls that actual helper.
-No new platform import, width mask or unsupported-width fallback is added.
+asm bodies stay unchanged. One actual root calls that helper; X86Memory now
+exports17 functions, including the newly referenced store callee.
 
-The existing memory oracle gains complete byte-frame checks across offsets,
-wide/raw width capture, four guard windows, a permission fault and unsupported
-width nonreturn. These are prepared tests, not measured results. The original
-selector validator's queued `make clight` will run the combined suite after
-Katran releases timing EX. A follow-up validator waits for that process to end
-before reusing the same build outputs for historical comparison, three store
-mutations, the restored adapter, targeted Lean and native-byte comparisons.
-Its raw directory is `m4-x86-store-selectors/physical-store` under
-`/workspaces/kprog-raw/formal`; no test success or new Lean AST is claimed yet.
+Historical/native/host-adapter checks pass896 complete byte-frame cases per
+mode, covering unaligned offsets, full values and byte width capture/defaults.
+Four guard windows, a permission fault and two unsupported-width nonreturn
+cases pass. Native traps remain SIGILL; the CompCert platform fixture exits77.
+Three semantic mutations detect a short64-bit copy, wrong destination and
+alignment8. No width mask or unsupported-width fallback is added.
 
-The source change removes the C-chunk alignment obstruction without declaring
-native volatile, permission, pointer-fragment or fault correspondence proved.
-Those remain M5 obligations. M4/full handlers/default coverage, all2,065
-refinements/recounts, M6 and whole-library acceptance remain open.
+The combined `make clight`/40-job targeted Lean build passes; the follow-up
+physical subset passes its38-job targeted build and one standard-axiom query.
+Memory re-export matches the parent's genuine194,324B export. Both sequential
+workers reuse the same objects/executable/AST and are terminal. Historical
+header replay retains store2272B/13 allocated relocations and memory1680B/5,
+with current replay equal to normal compilation. Fixtures were not loaded or
+timed. All raw inputs, commands, old queue records and results remain.
+
+This removes the C-chunk alignment obstruction without proving native
+volatile, permission, pointer-fragment or fault correspondence. Those remain
+M5 obligations. M4/full handlers/default coverage, all2,065 refinements/recounts,
+M6 and whole-library acceptance remain open.

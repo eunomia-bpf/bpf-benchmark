@@ -19,8 +19,8 @@ end Info
 
 def __150 : Ident := identOfString "_150"
 def __151 : Ident := identOfString "_151"
-def __3115 : Ident := identOfString "_3115"
-def __3116 : Ident := identOfString "_3116"
+def __3119 : Ident := identOfString "_3119"
+def __3120 : Ident := identOfString "_3120"
 def ___builtin_ais_annot : Ident := identOfString "__builtin_ais_annot"
 def ___builtin_annot : Ident := identOfString "__builtin_annot"
 def ___builtin_annot_intval : Ident := identOfString "__builtin_annot_intval"
@@ -604,7 +604,7 @@ def s_kprog_x86_skb_read_7 : Stmt :=
                         (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
                         (Ty.Tstruct _x86_sim_register_state noattr))
                       (Positive.ofNat 18727075383868559167)
-                      (Ty.Tunion __3115 noattr)) _gpr_cells
+                      (Ty.Tunion __3119 noattr)) _gpr_cells
                     (tarray (Ty.Tstruct _x86_sim_gpr_cell noattr) 16))
                   (Expr.Ecast (Expr.Etempvar _base tulong) tuchar)
                   (tptr (Ty.Tstruct _x86_sim_gpr_cell noattr)))
@@ -684,7 +684,7 @@ def f_kprog_x86_skb_read : Function := {
                                 (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
                                 (Ty.Tstruct _x86_sim_register_state noattr))
                               (Positive.ofNat 18727075383868559167)
-                              (Ty.Tunion __3115 noattr)) _gpr_cells
+                              (Ty.Tunion __3119 noattr)) _gpr_cells
                             (tarray (Ty.Tstruct _x86_sim_gpr_cell noattr) 16))
                           (Expr.Ecast (Expr.Etempvar _base tulong) tuchar)
                           (tptr (Ty.Tstruct _x86_sim_gpr_cell noattr)))
@@ -1533,7 +1533,7 @@ def composites : List CompositeDef :=
    [(Member.Member_plain _value (Ty.Tunion _x86_sim_gpr noattr)),
     (Member.Member_plain _tag tuchar)]
    noattr),
- (CompositeDef.Composite __3116 SU.Struct
+ (CompositeDef.Composite __3120 SU.Struct
    [(Member.Member_plain _rax (Ty.Tunion _x86_sim_gpr noattr)),
     (Member.Member_plain _rax_tag tuchar),
     (Member.Member_plain _rcx (Ty.Tunion _x86_sim_gpr noattr)),
@@ -1567,15 +1567,15 @@ def composites : List CompositeDef :=
     (Member.Member_plain _r15 (Ty.Tunion _x86_sim_gpr noattr)),
     (Member.Member_plain _r15_tag tuchar)]
    noattr),
- (CompositeDef.Composite __3115 SU.Union
+ (CompositeDef.Composite __3119 SU.Union
    [(Member.Member_plain (Positive.ofNat 18727075383868559167)
-      (Ty.Tstruct __3116 noattr)),
+      (Ty.Tstruct __3120 noattr)),
     (Member.Member_plain _gpr_cells
       (tarray (Ty.Tstruct _x86_sim_gpr_cell noattr) 16))]
    noattr),
  (CompositeDef.Composite _x86_sim_register_state SU.Struct
    [(Member.Member_plain (Positive.ofNat 18727075383868559167)
-      (Ty.Tunion __3115 noattr)),
+      (Ty.Tunion __3119 noattr)),
     (Member.Member_plain _native_stack_base tulong),
     (Member.Member_plain _cf tuchar), (Member.Member_plain _zf tuchar),
     (Member.Member_plain _sf tuchar), (Member.Member_plain _of tuchar),

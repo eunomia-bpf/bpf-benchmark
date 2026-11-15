@@ -5,5 +5,8 @@
   "address_space_limit_gib": 32,
   "lean_threads": 1,
   "resource_constraint": "PERF18:52 Katran timing EX; no compiler/test before shared timing lease acquisition",
-  "scope": "source shared kernels and queued validation; no new Lean export/byte-parity/refinement claim"
+  "scope": "actual source exports/finite checks; no native Clight refinements",
+  "validation_head": "24486bbeae613ea7686fa748d7198555d10acbd5",
+  "source_patch": "raw_directory/input.patch",
+  "timing_acquired_utc": "2026-11-15T19:44:34.993290+00:00"
 }
