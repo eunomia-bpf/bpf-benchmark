@@ -31,6 +31,8 @@ C's rebuilt Tetragon `event_execve` now completes production proof rewriting
 in the source-level test: **12,003 proof blob bytes and 81 nested relocations**.
 Input SHA256 is
 `d307c102c4a14cfe44995e9d697a2192d05a39ea53a8edf10ae439381305df35`.
+That retained product predates the vendor-source split removal in `a01ef4879`;
+it tests the linker shape, rather than certifying the new header-only producer.
 This is a proof-stage result, not application B compilation, stock acceptance
 or checked installation. Its 252 helper facts and 39 R13 call identities are
 recorded in `tetragon.json`.

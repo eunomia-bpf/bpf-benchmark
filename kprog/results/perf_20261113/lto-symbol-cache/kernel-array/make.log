@@ -1,0 +1,30 @@
+flock -s /workspaces/.agent-state/kprog-lanes/locks/image make -f /workspaces/repository/kprog/build/Makefile array-shared-kernel-run ARRAY_KERNEL_BUILD=/var/tmp/kprog-tmp/perf/array-shared-kernel ARRAY_KERNEL_OUTPUT=/workspaces/kprog-raw/perf/20261115-lto-symbol-cache/kernel-array
+make[1]: Entering directory '/workspaces/repository'
+make -C /workspaces/repository/kprog/libnativeloader source-maps-check SOURCE_MAP_BUILD=/var/tmp/kprog-tmp/perf/array-shared-kernel SOURCE_MAP_OUTPUT=/var/tmp/kprog-tmp/perf/array-shared-kernel/host
+make[2]: Entering directory '/workspaces/repository/kprog/libnativeloader'
+install -d "/var/tmp/kprog-tmp/perf/array-shared-kernel" "/var/tmp/kprog-tmp/perf/array-shared-kernel/host"
+clang-18 -O2 -g -target bpf -I/usr/include/x86_64-linux-gnu -I"/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include/bpf" \
+	-c ../test/source_maps_fixture.c -o "/var/tmp/kprog-tmp/perf/array-shared-kernel/fixture.bpf.o"
+clang-18 -O2 -fPIC -mno-red-zone -mgeneral-regs-only -fomit-frame-pointer -I"/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include/bpf" \
+	-c ../test/source_maps_fixture.c -o "/var/tmp/kprog-tmp/perf/array-shared-kernel/fixture.native.o"
+g++ -std=gnu++20 -O1 -g -ffunction-sections -fdata-sections \
+	-Iinclude -I"/workspaces/repository/micro/programs/build-x86" -I"/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include" \
+	-I"/workspaces/repository/vendor/libbpf/include" -I"/workspaces/repository/vendor/libbpf/include/uapi" \
+	../test/native_loader_source_maps.cpp -Wl,--gc-sections "/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a" -lelf -lz -ldl -pthread \
+	-o "/var/tmp/kprog-tmp/perf/array-shared-kernel/source-maps"
+install -m 0644 "/var/tmp/kprog-tmp/perf/array-shared-kernel/fixture.bpf.o" "/var/tmp/kprog-tmp/perf/array-shared-kernel/fixture.native.o" "/var/tmp/kprog-tmp/perf/array-shared-kernel/host/"
+"/var/tmp/kprog-tmp/perf/array-shared-kernel/source-maps" "/var/tmp/kprog-tmp/perf/array-shared-kernel/host/fixture.bpf.o" \
+	"/var/tmp/kprog-tmp/perf/array-shared-kernel/host/fixture.native.o" "/var/tmp/kprog-tmp/perf/array-shared-kernel/host"
+original ELF/final FD binding, subprogram layout, resource-ID lookup, conflicts, default-off manifest: PASS
+make[2]: Leaving directory '/workspaces/repository/kprog/libnativeloader'
+install -d /workspaces/kprog-raw/perf/20261115-lto-symbol-cache/kernel-array /workspaces/kprog-raw/perf/20261115-lto-symbol-cache/kernel-array/inputs
+sha256sum /workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link /workspaces/repository/kprog/libnativeloader/src/native_loader_lto.hpp /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader > /workspaces/kprog-raw/perf/20261115-lto-symbol-cache/kernel-array/input-sha256
+taskset -c 16-19 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage --cwd /workspaces/repository --rwdir /workspaces/repository --rwdir /workspaces/kprog-raw/perf/20261115-lto-symbol-cache/kernel-array --rodir /workspaces/kprog-raw/perf/20261115-lto-symbol-cache/kernel-array/inputs=/var/tmp/kprog-tmp/perf/array-shared-kernel --overlay-rwdir /tmp \
+	--disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' \
+	--exec 'make -f kprog/build/Makefile guest-array-shared ARRAY_KERNEL_OUTPUT=/workspaces/kprog-raw/perf/20261115-lto-symbol-cache/kernel-array ARRAY_KERNEL_BUILD=/workspaces/kprog-raw/perf/20261115-lto-symbol-cache/kernel-array/inputs'
+uname -r > /workspaces/kprog-raw/perf/20261115-lto-symbol-cache/kernel-array/kernel.release
+kernel original-load resource substitution, subprogram references and mutable live values: PASS
+{"trusted_service_archive": "/workspaces/kprog-raw/perf/20261115-lto-symbol-cache/kernel-array/submitted-native/service.tar.gz"}
+kernel original-load resource substitution, subprogram references and mutable live values: PASS
+{"trusted_service_archive": "/workspaces/kprog-raw/perf/20261115-lto-symbol-cache/kernel-array/checked-sim-c/service.tar.gz"}
+make[1]: Leaving directory '/workspaces/repository'

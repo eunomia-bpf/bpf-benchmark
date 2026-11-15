@@ -18,6 +18,10 @@ later scalar observation still reads the numeric helper value 4.
 
 C's rebuilt Tetragon `event_execve` object has SHA256
 `d307c102c4a14cfe44995e9d697a2192d05a39ea53a8edf10ae439381305df35`.
+This retained product predates `a01ef4879`, which removes the vendor-source
+splits used by that build. Its machine-code shape is a linker regression
+input; it does not certify the subsequently required untouched-source/header
+producer route. Fresh products still need their application checks.
 The analysis resolves **252 helper sites**, including **39 R13 calls**.
 R13 at 0x1629 is compatibility read (ID 4); at 0x1f57 it is kernel read
 (ID 113). The initial test incorrectly expected all R13 sites to be helper 4;

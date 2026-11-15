@@ -1,0 +1,38 @@
+{
+  "time": "2026-11-15T06:11:47.902103+00:00",
+  "reason": "Stop remaining owned scale loop and descendants so it cannot advance to another case/kernel batch",
+  "processes": [
+    {
+      "pid": 668153,
+      "parent": 668146,
+      "start_ticks": 10172754,
+      "command": "python3 scale.py build --build /var/tmp/kprog-tmp/perf/scale --records /workspaces/kprog-raw/perf/20261114-scale-stock/compile --sizes 10000 100000 --stock-pipeline ",
+      "signal": "SIGTERM",
+      "outcome": "signal_sent"
+    },
+    {
+      "pid": 668146,
+      "parent": 666040,
+      "start_ticks": 10172747,
+      "command": "make -C /workspaces/repository/kprog/fidelity SCALE_BUILD=/var/tmp/kprog-tmp/perf/scale SCALE_RECORDS=/workspaces/kprog-raw/perf/20261114-scale-stock/compile scale-build SCALE_SIZES=10000 100000 SCALE_ARGS=--stock-pipeline ",
+      "signal": "SIGTERM",
+      "outcome": "signal_sent"
+    },
+    {
+      "pid": 666040,
+      "parent": 666038,
+      "start_ticks": 10118221,
+      "command": "python3 scale_batch.py --build /var/tmp/kprog-tmp/perf/scale --records /workspaces/kprog-raw/perf/20261114-scale-stock/compile --out /workspaces/kprog-raw/perf/20261114-scale-stock/batch --wait-pid 662651 ",
+      "signal": "SIGTERM",
+      "outcome": "signal_sent"
+    },
+    {
+      "pid": 666038,
+      "parent": 1,
+      "start_ticks": 10118220,
+      "command": "make -C kprog/fidelity scale-stock-batch SCALE_BUILD=/var/tmp/kprog-tmp/perf/scale SCALE_RECORDS=/workspaces/kprog-raw/perf/20261114-scale-stock/compile SCALE_OUT=/workspaces/kprog-raw/perf/20261114-scale-stock/batch SCALE_WAIT_PID=662651 ",
+      "signal": "SIGTERM",
+      "outcome": "signal_sent"
+    }
+  ]
+}

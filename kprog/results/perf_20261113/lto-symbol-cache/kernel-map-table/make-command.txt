@@ -1,0 +1,1 @@
+taskset -c 16-19 make -r -f kprog/test/native-relocations.mk map-table-lookup-checked OUTPUT=/workspaces/kprog-raw/perf/20261115-lto-symbol-cache/kernel-map-table 

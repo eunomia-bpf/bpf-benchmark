@@ -1,0 +1,1 @@
+taskset -c 16-19 make -r -f kprog/build/Makefile array-shared-kernel ARRAY_KERNEL_OUTPUT=/workspaces/kprog-raw/perf/20261115-lto-symbol-cache/kernel-array 

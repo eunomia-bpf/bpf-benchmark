@@ -1,0 +1,34 @@
+{
+  "scope": "Load-only checked compiler replay; stock verification precedes native compilation.",
+  "native": "/workspaces/kprog-raw/perf/20261115-lto-symbol-cache/kernel-table/inputs/table.native.o",
+  "proof": "/workspaces/kprog-raw/perf/20261115-lto-symbol-cache/kernel-table/inputs/trusted_x86.bpf.o",
+  "context": "/workspaces/repository/kprog/test/table_context_load_context.json",
+  "verify_exit": 0,
+  "stock_accepted": true,
+  "context_and_map_shapes_equal": true,
+  "checked_artifacts": {
+    "native_object": "/workspaces/kprog-raw/perf/20261115-lto-symbol-cache/kernel-table/inputs/checked-simulator.native.o",
+    "native_proof_object": "/workspaces/kprog-raw/perf/20261115-lto-symbol-cache/kernel-table/inputs/checked-simulator.proof.o",
+    "symbol": "trusted_x86_x86_sim_xdp",
+    "simulator_object": "/workspaces/kprog-raw/perf/20261115-lto-symbol-cache/kernel-table/inputs/trusted_x86.bpf.o",
+    "simulator_program": "trusted_x86_x86_sim_xdp",
+    "simulator_preprocessed": "/workspaces/kprog-raw/perf/20261115-lto-symbol-cache/kernel-table/inputs/trusted_x86.bpf.i",
+    "context_kind": "raw",
+    "simulator_frontend": {
+      "path": "/workspaces/kprog-raw/perf/20261115-lto-symbol-cache/kernel-table/inputs/trusted_x86.bpf.bounds-input.bc",
+      "source_sha256": "151ffd070aa754682699d365d1fcad2142aa1a779af5ab938f34645dadef1a45",
+      "ir_sha256": "834cbf81d175398a89b12851077246ee1e1479b8dbb94759612b4cd665024622"
+    }
+  },
+  "checked_load_exit": 0,
+  "checked_installed": true,
+  "submission_cancelled": false,
+  "replies": [
+    {
+      "request_id": 1,
+      "status": 0,
+      "prog_id": 11
+    }
+  ],
+  "wait_errors": []
+}

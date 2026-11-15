@@ -1,0 +1,35 @@
+{
+  "scope": "Load-only checked compiler replay; stock verification precedes native compilation.",
+  "native": "/workspaces/kprog-raw/perf/20261115-map-table-lookup/kernel/inputs/lookup.native.o",
+  "proof": "/workspaces/kprog-raw/perf/20261115-map-table-lookup/kernel/inputs/trusted_x86.bpf.o",
+  "context": "/workspaces/repository/kprog/test/table_context_load_context.json",
+  "verify_exit": 0,
+  "stock_accepted": true,
+  "context_and_map_shapes_equal": true,
+  "checked_artifacts": {
+    "native_object": "/workspaces/kprog-raw/perf/20261115-map-table-lookup/kernel/inputs/checked-simulator.native.o",
+    "native_proof_object": "/workspaces/kprog-raw/perf/20261115-map-table-lookup/kernel/inputs/checked-simulator.proof.o",
+    "symbol": "trusted_x86_x86_sim_xdp",
+    "simulator_object": "/workspaces/kprog-raw/perf/20261115-map-table-lookup/kernel/inputs/trusted_x86.bpf.o",
+    "simulator_program": "trusted_x86_x86_sim_xdp",
+    "simulator_preprocessed": "/workspaces/kprog-raw/perf/20261115-map-table-lookup/kernel/inputs/trusted_x86.bpf.i",
+    "context_kind": "raw",
+    "simulator_frontend": {
+      "path": "/workspaces/kprog-raw/perf/20261115-map-table-lookup/kernel/inputs/trusted_x86.bpf.bounds-input.bc",
+      "source_sha256": "c967abb4de199a2120ed19bab237fcd580cf9b0b87e16d3f720d3f600065341c",
+      "ir_sha256": "f3f1bf4c198dddb9358efa122b6d87f7763f6a99fe41edb740ea0c3540777376"
+    }
+  },
+  "checked_load_exit": 1,
+  "checked_installed": false,
+  "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '15', '1', '0', '/workspaces/kprog-raw/perf/20261115-map-table-lookup/kernel/inputs/checked-simulator.native.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/perf/20261115-map-table-lookup/kernel/inputs/checked-simulator.proof.o', '/workspaces/kprog-raw/perf/20261115-map-table-lookup/kernel/inputs/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '2', '1', '39', '30', 'map0', '3', 'null', 'map1', '4', 'null', 'map2', '5', 'null', 'map3', '6', 'null', 'map4', '7', 'null', 'map5', '8', 'null', 'map6', '9', 'null', 'map7', '10', 'null']' returned non-zero exit status 1.",
+  "submission_cancelled": true,
+  "replies": [
+    {
+      "request_id": 1,
+      "status": -125,
+      "prog_id": 0
+    }
+  ],
+  "wait_errors": []
+}
