@@ -98,6 +98,12 @@ base-consistency-smoke:
 base-consistency-inventory:
 	python3 $(ROOT)/kprog/test/image_module_inventory.py --image $(ROOT)/.cache/container-images/x86_64-runner-runtime.image.tar --kernel $(KDIR) --output $(OUTPUT)
 
+.PHONY: base-stock-module-smoke
+base-stock-module-smoke:
+	install -d $(OUTPUT)
+	sha256sum $(KDIR)/arch/x86/boot/bzImage /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko > $(OUTPUT)/input-sha256.txt
+	taskset -c 16-17 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'bash kprog/test/guest_base_stock_module.sh $(OUTPUT)'
+
 # The queued run_verified_make caller holds image EX before Make starts.
 .PHONY: publish-normal-pair
 publish-normal-pair: $(CONTEXT_TOOL) $(CHECKED_TOOL)
