@@ -6,6 +6,9 @@
 #include <ostream>
 #include <string>
 #include <vector>
+#include <memory>
+#include <sstream>
+#include "native_loader_lto.hpp"
 
 inline void write_json_string(std::ostream &out, const std::string &value)
 {
@@ -121,6 +124,25 @@ inline void write_json_array(std::ostream &out,
     out << "]";
 }
 
+#if defined(__x86_64__)
+inline const std::string &native_kernel_lto_layout()
+{
+    static const std::string kernel_layout = [] {
+        std::unique_ptr<btf, decltype(&btf__free)> types(btf__load_vmlinux_btf(), btf__free);
+        if (!types || libbpf_get_error(types.get())) {
+            types.release(); // libbpf encoded error pointers are not allocations.
+            fail("load running kernel BTF for native LTO");
+        }
+        std::ostringstream facts;
+        native_lto::write_layout(facts, types.get(), [](const char *name) {
+            return kallsyms_lookup(name);
+        });
+        return facts.str();
+    }();
+    return kernel_layout;
+}
+#endif
+
 inline std::filesystem::path write_native_link_plan(
     const NativeLinkArgs &link_args,
     const std::filesystem::path &base)
@@ -141,6 +163,9 @@ inline std::filesystem::path write_native_link_plan(
     write_json_array(out, link_args.lookup_maps, write_json_lookup_map);
     out << ",\"update_sites\":";
     write_json_array(out, link_args.update_sites, write_json_update_site);
+#if defined(__x86_64__)
+    out << ",\"kernel_layout\":" << native_kernel_lto_layout();
+#endif
     out << "}\n";
     out.close();
     if (!out) {

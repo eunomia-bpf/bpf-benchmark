@@ -100,10 +100,6 @@ struct Args {
     #[arg(long)]
     output_abi: Option<PathBuf>,
 
-    /// Include exception-recovery load sites for the registered service.
-    #[arg(long, action = clap::ArgAction::Set, default_value_t = false)]
-    abi_load_sites: bool,
-
     /// Versioned structured link plan containing helper/map/callsite facts.
     /// This is the stable loader/native-link boundary for kernel mode.
     #[arg(long)]
@@ -116,23 +112,6 @@ struct Args {
     /// Keep the compiler's entry-function saves in the verifier's proof input.
     #[arg(long)]
     preserve_entry_abi: bool,
-
-    /// Inline runtime ARRAY lookups using this target-kernel field layout.
-    #[arg(long)]
-    runtime_array_layout: Option<PathBuf>,
-
-    /// Inline fault-recovering probe reads using the sole target's ABI/symbols.
-    #[arg(long)]
-    runtime_probe_read_layout: Option<PathBuf>,
-
-    /// Specialize proven raw hash lookups using the sole target's field layout.
-    #[arg(long)]
-    runtime_hash_layout: Option<PathBuf>,
-
-    /// Specialize LPM lookups after actual map-type/data-size dispatch.
-    #[arg(long)]
-    runtime_lpm_layout: Option<PathBuf>,
-
 
     /// Link mode. `proof` applies canonical ABI/link edits but leaves
     /// verifier-after helper/map lowering symbolic and emits a relocatable
@@ -196,9 +175,10 @@ struct LinkSideInputs {
     lookup_sites: Vec<LookupSiteSpec>,
     lookup_maps: HashMap<String, LookupSiteSpec>,
     update_sites: Vec<UpdateSiteSpec>,
+    kernel_layout: Option<KernelLayout>,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 struct RuntimeArrayLayout {
     map_type: u32,
     max_entries: u32,
@@ -208,20 +188,20 @@ struct RuntimeArrayLayout {
     array_type: u32,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 struct RuntimeLpmLayout {
     map_type:u32,lpm_type:u32,root:u32,max_prefixlen:u32,data_size:u32,
     child:u32,child_stride:u32,node_prefixlen:u32,node_flags:u32,node_data:u32,
     key_prefixlen:u32,key_data:u32,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 struct RuntimeHashLayout {
     key_size:u32, buckets:u32, n_buckets:u32, hashrnd:u32,
     bucket_size:u32, head:u32, first:u32, node:u32, next:u32, hash:u32, key:u32,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 struct RuntimeProbeReadLayout {
     user_helper: u64,
     kernel_helper: u64,
@@ -232,6 +212,14 @@ struct RuntimeProbeReadLayout {
     boot_cpu_data: u64,
     pagefault_disabled: u32,
     x86_capability: u32,
+}
+
+#[derive(Debug, Deserialize)]
+struct KernelLayout {
+    array: RuntimeArrayLayout,
+    hash: RuntimeHashLayout,
+    lpm: RuntimeLpmLayout,
+    probe_read: RuntimeProbeReadLayout,
 }
 
 #[derive(Deserialize)]
@@ -247,6 +235,8 @@ struct LinkPlan {
     lookup_maps: Vec<LinkPlanLookupMap>,
     #[serde(default)]
     update_sites: Vec<LinkPlanUpdateSite>,
+    #[serde(default)]
+    kernel_layout: Option<KernelLayout>,
 }
 
 #[derive(Deserialize)]
@@ -372,6 +362,7 @@ fn load_link_plan(path: &PathBuf) -> Result<LinkSideInputs> {
             .map(lookup_site_from_plan)
             .collect::<Result<Vec<_>>>()?,
         lookup_maps,
+        kernel_layout: plan.kernel_layout,
         update_sites: plan
             .update_sites
             .into_iter()
@@ -390,6 +381,7 @@ fn load_link_side_inputs(args: &Args) -> Result<LinkSideInputs> {
         lookup_sites: Vec::new(),
         lookup_maps: HashMap::new(),
         update_sites: Vec::new(),
+        kernel_layout: None,
     })
 }
 
@@ -476,45 +468,9 @@ struct SymInfo {
 fn main() -> Result<()> {
     let args = Args::parse();
     let proof_mode = args.mode == LinkMode::Proof;
-    let runtime_array_layout: Option<RuntimeArrayLayout> = args.runtime_array_layout.as_ref()
-        .map(|path| -> Result<_> {
-            let bytes = fs::read(path).with_context(|| format!("read {}", path.display()))?;
-            Ok(serde_json::from_slice(&bytes)
-                .with_context(|| format!("parse runtime ARRAY layout {}", path.display()))?)
-        }).transpose()?;
-    let runtime_probe_read_layout: Option<RuntimeProbeReadLayout> = if proof_mode { None } else {
-        args.runtime_probe_read_layout.as_ref().map(|path| -> Result<_> {
-            if !args.abi_load_sites || args.output_abi.is_none() {
-                bail!("--runtime-probe-read-layout requires --abi-load-sites true and --output-abi: source faults need recovery metadata");
-            }
-            Ok(serde_json::from_slice(&fs::read(path)?)?)
-        }).transpose()?
-    };
-    let runtime_hash_layout:Option<RuntimeHashLayout> = if proof_mode {None} else {
-        args.runtime_hash_layout.as_ref().map(|path| -> Result<_> {
-            Ok(serde_json::from_slice(&fs::read(path)?)?)
-        }).transpose()?
-    };
-    let runtime_lpm_layout:Option<RuntimeLpmLayout> = if proof_mode {None} else {
-        args.runtime_lpm_layout.as_ref().map(|path| -> Result<_> {
-            Ok(serde_json::from_slice(&fs::read(path)?)?)
-        }).transpose()?
-    };
     let bytes = fs::read(&args.input).with_context(|| format!("read {}", args.input.display()))?;
     let elf = object::File::parse(&*bytes)
         .with_context(|| format!("parse ELF {}", args.input.display()))?;
-    if runtime_lpm_layout.is_some() && elf.architecture()!=object::Architecture::X86_64 {
-        bail!("--runtime-lpm-layout requires x86-64 input");
-    }
-    if runtime_hash_layout.is_some() && elf.architecture()!=object::Architecture::X86_64 {
-        bail!("--runtime-hash-layout requires x86-64 input");
-    }
-    if runtime_probe_read_layout.is_some() && elf.architecture() != object::Architecture::X86_64 {
-        bail!("--runtime-probe-read-layout requires x86-64 input");
-    }
-    if runtime_array_layout.is_some() && elf.architecture() != object::Architecture::X86_64 {
-        bail!("--runtime-array-layout requires x86-64 input");
-    }
     let proof_input = elf.section_by_name(".native_link_abi").is_some();
     if !proof_mode && !proof_input {
         bail!("--mode kernel requires a .proof.o produced by --mode proof");
@@ -525,7 +481,13 @@ fn main() -> Result<()> {
         lookup_sites,
         lookup_maps,
         update_sites,
+        kernel_layout,
     } = load_link_side_inputs(&args)?;
+    let kernel_layout = if !proof_mode && elf.architecture() == object::Architecture::X86_64 {
+        Some(kernel_layout.as_ref().ok_or_else(|| anyhow!(
+            "x86 kernel link plan has no boot-kernel layout facts"
+        ))?)
+    } else { None };
     let RewriteResult {
         blob,
         relocs,
@@ -570,10 +532,10 @@ fn main() -> Result<()> {
                 &update_sites,
                 proof_mode,
                 args.preserve_entry_abi,
-                if proof_mode { None } else { runtime_array_layout.as_ref() },
-                runtime_probe_read_layout.as_ref(),
-                runtime_hash_layout.as_ref(),
-                runtime_lpm_layout.as_ref(),
+                kernel_layout.map(|k| &k.array),
+                kernel_layout.map(|k| &k.probe_read),
+                kernel_layout.map(|k| &k.hash),
+                kernel_layout.map(|k| &k.lpm),
                 args.show,)?
         }
         object::Architecture::Aarch64 => {
@@ -691,13 +653,13 @@ fn main() -> Result<()> {
             "version\tnative-link-abi-v2\ncallee_saved_mask\t{}\n",
             output_callee_saved_mask
         );
-        if args.abi_load_sites {
-            for site in &load_sites {
-                text.push_str(&format!("load_site\t{},{},{}\n", site.offset, site.insn_len, site.destination));
-            }
+        for site in &load_sites {
+            text.push_str(&format!("load_site\t{},{},{}\n", site.offset, site.insn_len, site.destination));
         }
         fs::write(path, text).with_context(|| format!("write {}", path.display()))?;
         eprintln!("native-link: wrote ABI metadata -> {}", path.display());
+    } else if !load_sites.is_empty() {
+        bail!("exception-recovery load sites require --output-abi");
     }
     Ok(())
 }

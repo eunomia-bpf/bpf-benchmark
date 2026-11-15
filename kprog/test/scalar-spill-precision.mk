@@ -38,7 +38,8 @@ tracee-probe-sites:
 
 .PHONY: helper-shapes
 helper-shapes:
-	taskset -c 19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_helper_call_shapes.py --linker $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --layouts $(ROOT)/corpus/results/perf-corrected-all-lto-linker-20261114 --build $(HELPER_SHAPE_BUILD) --output $(OUTPUT)
+	$(MAKE) -f $(ROOT)/kprog/test/native-relocations.mk kernel-layout
+	taskset -c 19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_helper_call_shapes.py --linker $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --kernel-layout /var/tmp/kprog-tmp/perf/kernel-layout/kernel-layout.json --build $(HELPER_SHAPE_BUILD) --output $(OUTPUT)
 
 .PHONY: build run analyze codegen whole-word replay values-build values-run backend-check checked-corpus context-build context-run context-replay identity-check
 identity-check:

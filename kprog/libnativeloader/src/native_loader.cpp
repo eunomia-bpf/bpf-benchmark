@@ -3160,6 +3160,10 @@ std::string native_link_cache_key(const std::filesystem::path &native_elf,
     hash_file_contents(hash, native_elf, "native_elf");
     hash.add_string("loaded_prog");
     hash_file_identity(hash, link_args.linker, "native_linker");
+#if defined(__x86_64__)
+    hash.add_string("kernel_layout");
+    hash.add_string(native_kernel_lto_layout());
+#endif
     hash.add_string(symbol_name);
     for (const auto &arg : link_args.helpers) {
         hash.add_string("helper");
@@ -3276,9 +3280,6 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     argv.push_back(out.map_patches.string());
     argv.push_back("--output-abi");
     argv.push_back(out.abi.string());
-    if (!trusted_proof.empty()) {
-        argv.push_back("--abi-load-sites"); argv.push_back("true");
-    }
     const std::filesystem::path link_plan =
         write_native_link_plan(link_args, base);
     argv.push_back("--link-plan");

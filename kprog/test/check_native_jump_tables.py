@@ -24,6 +24,7 @@ def main():
     parser.add_argument('--build', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--linker', type=Path, required=True)
+    parser.add_argument('--kernel-layout', type=Path, required=True)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     commands = []
@@ -70,10 +71,14 @@ def main():
     bad = args.build/'jump-table-interior.proof.o'
     bad.write_bytes(malformed)
 
+    plan = args.build/'jump-table-plan.json'
+    plan.write_text(json.dumps(dict(version=1, kernel_layout=json.loads(args.kernel_layout.read_text()))))
+
     def kernel_command(source, destination):
         return [args.linker, '--input', source, '--symbol', 'jump_table', '--mode', 'kernel',
                 '--output', destination, '--output-relocs', args.build/'jump-table.relocs',
-                '--output-map-patches', args.build/'jump-table.maps']
+                '--output-map-patches', args.build/'jump-table.maps',
+                '--link-plan', plan, '--output-abi', args.build/'jump-table.abi']
 
     failure = run(kernel_command(bad, args.build/'jump-table-invalid.bin'), check=False)
     if failure.returncode == 0 or 'interior instruction' not in failure.stderr:

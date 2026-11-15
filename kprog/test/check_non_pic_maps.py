@@ -22,6 +22,7 @@ def main():
     parser.add_argument('--build', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--linker', type=Path, required=True)
+    parser.add_argument('--kernel-layout', type=Path, required=True)
     args = parser.parse_args()
     args.build.mkdir(parents=True, exist_ok=True)
     args.output.mkdir(parents=True, exist_ok=True)
@@ -52,7 +53,7 @@ def main():
     address = ctypes.addressof(values)
     if address <= 0xffffffff:
         raise ValueError('Host map address does not exercise high pointer bits')
-    plan = dict(version=1, helpers=[dict(name='bpf_map_lookup_elem', addr=0x1234)],
+    plan = dict(version=1, kernel_layout=json.loads(args.kernel_layout.read_text()), helpers=[dict(name='bpf_map_lookup_elem', addr=0x1234)],
                 maps=[dict(name='test_map', addr=address)], lookup_maps=[dict(name='test_map',
                 kind='array', target_addr=0, key_offset=0, max_entries=3, elem_size=8,
                 index_mask=3, value_offset=32, percpu_base_addr=0)])
@@ -85,6 +86,7 @@ def main():
         blob, maps, relocs = [args.build/(label+suffix) for suffix in ['.bin', '.maps', '.relocs']]
         run([args.linker, '--input', source, '--symbol', 'entry', '--mode', 'kernel',
              '--output', blob, '--output-map-patches', maps, '--output-relocs', relocs,
+             '--output-abi', args.build/'native.abi',
              '--link-plan', plan_path])
         if relocs.read_bytes():
             raise ValueError('Named array lookup was not inlined')
@@ -108,7 +110,7 @@ def main():
                 if actual != expected:
                     raise ValueError(f'{label}: key {key} returned {actual}, expected {expected}')
                 results.append(dict(path=label, key=key, actual=actual, expected=expected))
-    report = dict(current_linker_sha256=digest(args.linker),
+    report = dict(current_linker_sha256=digest(args.linker), kernel_layout_sha256=digest(args.kernel_layout),
                   fixture_flags=flags, fixture_sha256=digest(native),
                   proof_sha256=digest(proof), proof_map_operation=encoded.op,
                   host_executions=results, scope='Host code/metadata checks; no kernel or app timing')

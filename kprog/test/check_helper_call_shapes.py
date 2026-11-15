@@ -22,13 +22,7 @@ def check(args):
     callback = signature(helper)
     target = ctypes.cast(callback, ctypes.c_void_p).value
     plan = args.build/'plan.json'
-    plan.write_text(json.dumps(dict(version=1, helpers=[dict(name='bpf_get_prandom_u32', addr=target)])))
-    flags = ['--abi-load-sites', 'true',
-             '--runtime-probe-read-layout', args.layouts/'runtime-probe-read-layout.json',
-             '--runtime-hash-layout', args.layouts/'runtime-hash-layout.json',
-             '--runtime-lpm-layout', args.layouts/'runtime-lpm-layout.json',
-             '--runtime-array-layout', args.layouts/'runtime-array-layout.json']
-
+    plan.write_text(json.dumps(dict(version=1, kernel_layout=json.loads(args.kernel_layout.read_text()), helpers=[dict(name='bpf_get_prandom_u32', addr=target)])))
     def run(command):
         command = list(map(str, command))
         result = subprocess.run(command, text=True, capture_output=True)
@@ -53,9 +47,9 @@ def check(args):
             assembly.write_text(source)
             obj, proof = args.build/'fixture.o', args.build/'fixture.proof.o'
             run(['cc', '-c', assembly, '-o', obj])
-            run([args.linker, *flags, '--input', obj, '--symbol', 'entry', '--mode', 'proof',
+            run([args.linker, '--input', obj, '--symbol', 'entry', '--mode', 'proof',
                  '--preserve-entry-abi', '--output', proof])
-            run([args.linker, *flags, '--input', proof, '--symbol', 'entry', '--mode', 'kernel',
+            run([args.linker, '--input', proof, '--symbol', 'entry', '--mode', 'kernel',
                  '--link-plan', plan, '--output', args.build/'image.bin',
                  '--output-relocs', args.build/'image.relocs',
                  '--output-map-patches', args.build/'image.maps', '--output-abi', args.build/'image.abi'])
@@ -83,7 +77,7 @@ def check(args):
         if outputs[0] != outputs[1]:
             raise ValueError(f'Named and numeric runtime output differs for {label}')
     result = dict(cases=results, runtime_image_relocations_maps_abi_equal=True,
-                  combined_lto_options=True, linker=str(args.linker))
+                  normal_lto=True, linker=str(args.linker))
     (args.output/'result.json').write_text(json.dumps(result, indent=2)+'\n')
     print(json.dumps(result))
 

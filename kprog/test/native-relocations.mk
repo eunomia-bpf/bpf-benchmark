@@ -5,6 +5,27 @@ LINKER_TARGET := $(ROOT)/kprog/x86/native_lab/native_link/target
 OUTPUT ?= /workspaces/kprog-raw/perf/20261115-native-relocations
 BUILD := /var/tmp/kprog-tmp/perf/native-relocations
 CONTEXT_TOOL := /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds
+KERNEL_LAYOUT_BUILD := /var/tmp/kprog-tmp/perf/kernel-layout
+KERNEL_LAYOUT := $(KERNEL_LAYOUT_BUILD)/kernel-layout.json
+KDIR := /workspaces/.agent-state/kprog-ck/build-x86
+LIBBPF_PREFIX := $(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix
+LIBBPF_LIBRARY := $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a
+
+$(KERNEL_LAYOUT_BUILD)/facts: $(ROOT)/kprog/test/kernel_lto_layout.cpp $(ROOT)/kprog/libnativeloader/src/native_loader_lto.hpp
+	install -d $(KERNEL_LAYOUT_BUILD)
+	taskset -c 8-11 prlimit --as=8589934592 -- clang++-18 -std=c++20 -O2 -Wall -Wextra -Werror -I$(LIBBPF_PREFIX)/include $< $(LIBBPF_LIBRARY) -lelf -lz -o $@
+
+$(KERNEL_LAYOUT): $(KERNEL_LAYOUT_BUILD)/facts $(KDIR)/vmlinux $(KDIR)/System.map
+	taskset -c 8-11 prlimit --as=8589934592 -- $(KERNEL_LAYOUT_BUILD)/facts $(KDIR)/vmlinux $(KDIR)/System.map > $@
+
+.PHONY: kernel-layout kernel-layout-check loader-syntax
+kernel-layout: $(KERNEL_LAYOUT)
+
+kernel-layout-check: $(KERNEL_LAYOUT)
+	taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_kernel_lto_layout.py --layout $(KERNEL_LAYOUT) --kernel $(KDIR) --reference $(ROOT)/corpus/results/perf-corrected-all-lto-linker-20261114 --output $(OUTPUT)/kernel-layout
+
+loader-syntax:
+	taskset -c 8-11 prlimit --as=12884901888 -- clang++-18 -std=gnu++20 -fsyntax-only -I$(ROOT)/kprog/libnativeloader/include -I$(ROOT)/micro/programs/build-x86 -I$(LIBBPF_PREFIX)/include -I$(ROOT)/vendor/libbpf/include -I$(ROOT)/vendor/libbpf/include/uapi $(ROOT)/kprog/libnativeloader/src/native_loader.cpp
 
 .PHONY: check build
 check:
@@ -14,8 +35,8 @@ build:
 	taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
 
 .PHONY: evidence
-evidence:
-	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_non_pic_maps.py --build $(BUILD) --output $(OUTPUT)/maps --linker $(LINKER_TARGET)/release/native-link
+evidence: $(KERNEL_LAYOUT)
+	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_non_pic_maps.py --build $(BUILD) --output $(OUTPUT)/maps --linker $(LINKER_TARGET)/release/native-link --kernel-layout $(KERNEL_LAYOUT)
 
 .PHONY: jump-table-forms
 jump-table-forms:
@@ -25,8 +46,8 @@ jump-table-forms:
 	readelf -rW $(BUILD)/jump-table.native.o > $(OUTPUT)/jump-table.relocations
 
 .PHONY: jump-table-check
-jump-table-check: build jump-table-forms
-	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_native_jump_tables.py --build $(BUILD) --output $(OUTPUT)/jump-tables --linker $(LINKER_TARGET)/release/native-link
+jump-table-check: build jump-table-forms $(KERNEL_LAYOUT)
+	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_native_jump_tables.py --build $(BUILD) --output $(OUTPUT)/jump-tables --linker $(LINKER_TARGET)/release/native-link --kernel-layout $(KERNEL_LAYOUT)
 
 .PHONY: compiler-cleanup-check
 compiler-cleanup-check:
