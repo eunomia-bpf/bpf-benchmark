@@ -103,7 +103,7 @@ memory-link-check:
 	CARGO_TARGET_DIR=$(LINK_MEMORY_TARGET) cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
 
 memory-link-build:
-	CARGO_TARGET_DIR=$(LINK_MEMORY_TARGET) cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
+	flock -x /workspaces/.agent-state/kprog-lanes/locks/image env CARGO_TARGET_DIR=$(LINK_MEMORY_TARGET) cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
 
 KNOWN_MAP_TARGET ?= $(ROOT)/kprog/x86/native_lab/native_link/target
 .PHONY: known-map-link-check known-map-link-build
@@ -111,7 +111,7 @@ known-map-link-check:
 	taskset -c 8-15 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(KNOWN_MAP_TARGET) cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
 
 known-map-link-build:
-	taskset -c 8-15 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(KNOWN_MAP_TARGET) cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
+	flock -x /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 8-15 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(KNOWN_MAP_TARGET) cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
 
 .PHONY: link-audit-payload link-audit-check link-audit-otel
 LINK_AUDIT_PAYLOAD ?= $(ROOT)/corpus/results/perf-link-audit-20261114

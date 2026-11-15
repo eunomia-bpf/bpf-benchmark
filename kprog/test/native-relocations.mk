@@ -34,7 +34,11 @@ check:
 	taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
 
 build:
-	taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
+	flock -x /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
+
+.PHONY: preserve-running-linker
+preserve-running-linker:
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image python3 $(ROOT)/kprog/test/preserve_running_linker.py --canonical $(LINKER_TARGET)/release/native-link --retained $(ROOT)/corpus/results/perf-corrected-all-lto-linker-20261114/native-link-on --loader /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader --output $(OUTPUT)/pairing
 
 .PHONY: evidence
 evidence: $(KERNEL_LAYOUT)

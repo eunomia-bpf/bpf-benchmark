@@ -93,7 +93,7 @@ build/cmov-block.bpf.o: cmov_block.bpf.c $(wildcard ../x86/*.h ../formal/generat
 
 .PHONY: linker-build
 linker-build:
-	cargo build --release --manifest-path ../x86/native_lab/native_link/Cargo.toml
+	flock -x /workspaces/.agent-state/kprog-lanes/locks/image cargo build --release --manifest-path ../x86/native_lab/native_link/Cargo.toml
 
 STACK_ALIAS_BUILD ?= /var/tmp/kprog-tmp/verified/stack-alias
 WORD32_COPY_BUILD ?= /var/tmp/kprog-tmp/verified/word32-copy
