@@ -90,6 +90,7 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-15 ~14:35 UTC: "也通知所有人, 每 6h 巡检也必须检查有没有和我的原话不符合的."
 - 2026-11-15 ~14:40 UTC（前面贴的是协调者列的四项，最后一行“计时环境没有隔离，所以到现在还没有一个可信的数”是协调者的话）: "证明迁移停着。干嘛不做? 继续. ... 这个不是我的原话."
 - 2026-11-15 ~14:18 UTC（前两句引用协调者的话）: "Tracee、Tetragon 里的 BPF 汇编还没找到头文件的写法，现在不改源码就编不过。Cilium、OTel 还没用新路线建出来。必要的话改一点是可以接受的, 不需要过于严格, 但尽可能不改. 我们之前就把兼容的做好了吧? 这个改动不困难?"
+- 2026-11-15 ~14:20 UTC（前半句引用协调者的话）: "规模问题：大程序的 sim C 预处理后膨胀约 400 倍。有些程序因为栈帧太大被 stock 拒绝（例如 OTel 的 hotspot）为啥? 是不是要想办法处理? 是不是产量传播和展开的不对? 预处理不是尽可能要类似元编程一样编译器展开?"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
