@@ -1,0 +1,67 @@
+[
+  {
+    "path": "runner/libs/rejit.py",
+    "sha256": "7147b74fc2c407f64f92f153d6a5bf0bd0edf3aa027078bde53dd97d00bf73ef",
+    "excerpts": [
+      {
+        "first": 27,
+        "last": 43,
+        "text": "def skip_rejit_mode(raw: str | None = None) -> str:\n    value = (os.environ.get(_SKIP_REJIT_ENV, \"\") if raw is None else str(raw)).strip().lower()\n    if value in (\"\", \"0\", \"false\", \"no\", \"off\"):\n        return \"off\"\n    if value == \"norejit\":\n        return \"norejit\"\n    if value == \"all\":\n        return \"all\"\n    raise ValueError(\"SKIP_REJIT must be empty, 0, norejit, or all\")\n\n\ndef skip_rejit_enabled(raw: str | None = None) -> bool:\n    return skip_rejit_mode(raw) != \"off\"\n\n\ndef skip_rejit_disables_shim(raw: str | None = None) -> bool:\n    return skip_rejit_mode(raw) == \"all\""
+      },
+      {
+        "first": 440,
+        "last": 490,
+        "text": "def measure_app_phase(\n    *,\n    app_pid: int | None = None,\n    app_pids: Sequence[int] | None = None,\n    runner: object,\n    workload_seconds: float,\n    samples: int,\n    warmups: int = 0,\n) -> dict[str, object]:\n    if skip_rejit_disables_shim():\n        for _ in range(max(0, int(warmups))):\n            runner.run_workload(workload_seconds)\n        workloads = [\n            runner.run_workload(workload_seconds).to_dict()\n            for _ in range(samples)\n        ]\n        return {\"workloads\": workloads, \"bpf\": {}}\n\n    pids = _normalize_app_pids(app_pid=app_pid, app_pids=app_pids)\n    for _ in range(max(0, int(warmups))):\n        runner.run_workload(workload_seconds)\n    for pid in pids:\n        start = _shim_request(_shim_socket_for_pid(pid), {\"cmd\": \"measure_start\"})\n        if str(start.get(\"status\") or \"error\") != \"ok\":\n            raise RuntimeError(str(start.get(\"error\") or \"measure_start failed\"))\n    workloads: list[dict[str, object]] = []\n    for _ in range(samples):\n        workloads.append(runner.run_workload(workload_seconds).to_dict())\n    bpf: dict[str, object] = {}\n    for pid in pids:\n        finish = _shim_request(_shim_socket_for_pid(pid), {\"cmd\": \"measure_finish\"})\n        if str(finish.get(\"status\") or \"error\") != \"ok\":\n            raise RuntimeError(str(finish.get(\"error\") or \"measure_finish failed\"))\n        if isinstance(finish.get(\"bpf\"), Mapping):\n            bpf.update(dict(finish[\"bpf\"]))  # type: ignore[index]\n    return {\n        \"workloads\": workloads,\n        \"bpf\": bpf,\n    }"
+      }
+    ]
+  },
+  {
+    "path": "runner/libs/agent.py",
+    "sha256": "3e0f2a3d212abb4386d9f325f1e490b83281b97b8e839a3249e28880e8354f42",
+    "excerpts": [
+      {
+        "first": 17,
+        "last": 30,
+        "text": "def _shim_env_for(binary: str) -> dict[str, str]:\n    \"\"\"Build the LD_PRELOAD environment that attaches the bpfrejit shim to\n    `binary`. The shim looks for BPFREJIT_SHIM_SOCK_DIR to know where to place\n    its per-pid socket (matching the runner's apply_rejit lookup).\"\"\"\n    del binary\n    if skip_rejit_disables_shim():\n        return {}\n    if not os.path.exists(_SHIM_PATH):\n        # Outside the runtime image (unit tests, host scripts), the shim\n        # may not be installed. Run without it and let downstream rejit fail\n        # at socket connect with a clear error.\n        return {}\n    return {\"LD_PRELOAD\": _SHIM_PATH, \"BPFREJIT_SHIM_SOCK_DIR\": _SHIM_SOCK_DIR}\n"
+      }
+    ]
+  },
+  {
+    "path": "corpus/driver.py",
+    "sha256": "dcfcf4f4eb5eed197c8dcb294428749d937bf871de407eeef2838b038d8285c9",
+    "excerpts": [
+      {
+        "first": 143,
+        "last": 151,
+        "text": "def _native_loader_post_only_enabled() -> bool:\n    raw = _env_str(\"BPFREJIT_SHIM_NATIVE_LOADER\").lower()\n    if not raw or raw in {\"0\", \"false\", \"no\", \"off\", \"1\", \"true\", \"yes\", \"on\"}:\n        return False\n    if raw in {\"post\", \"post_only\", \"post-only\", \"post_rejit\"}:\n        return True\n    raise SystemExit(\n        \"BPFREJIT_SHIM_NATIVE_LOADER must be empty, 0/1, true/false, or post\"\n    )"
+      },
+      {
+        "first": 685,
+        "last": 709,
+        "text": "                    except Exception as stop_exc:\n                        raise RuntimeError(f\"baseline app stop failed: {stop_exc}\") from stop_exc\n\n                    phase = \"loadtime_plan\"\n                    loadtime_env: dict[str, str] = {\n                        \"BPFREJIT_SHIM_LOADTIME_PLAN\": \"\",\n                        \"BPFREJIT_SHIM_LOG\": str(_shim_log_path(\n                            app,\n                            \"post_rejit\",\n                            artifact_session=artifact_session,\n                        )),\n                    }\n                    if native_loader_post_only:\n                        loadtime_env[\"BPFREJIT_SHIM_NATIVE_LOADER\"] = \"1\"\n                    if skip_rejit:\n                        _print_progress(\"rejit_skipped\", app=app.name, runner=app.runner)\n                        lifecycle.rejit_result = {\"status\": \"skipped\", \"mode\": \"loadtime\"}\n                    else:\n                        _print_progress(\"loadtime_plan_start\", app=app.name, runner=app.runner)\n                        plan_path, _plan_payload = _write_loadtime_plan(\n                            app,\n                            apply_enabled_passes,\n                            artifact_session=artifact_session,\n                        )\n                        loadtime_env[\"BPFREJIT_SHIM_LOADTIME_PLAN\"] = str(plan_path)"
+      }
+    ]
+  },
+  {
+    "path": "bpfopt/shim/shim_native_loader.h",
+    "sha256": "b72761ac4debc16a0bb9d67b372168080a6c2125af5b9bf511af057c6f5dc260",
+    "excerpts": [
+      {
+        "first": 29,
+        "last": 34,
+        "text": "\nstatic int shim_native_loader_enabled(void) {\n    const char *e = getenv(\"BPFREJIT_SHIM_NATIVE_LOADER\");\n    return e && strcmp(e, \"1\") == 0;\n}\n"
+      }
+    ]
+  },
+  {
+    "path": "kprog/perf/one-image/Makefile",
+    "sha256": "7bb482df89dea7d91ff8991b48858cab85c8272425c4b85306598c6371b81d6e",
+    "excerpts": [
+      {
+        "first": 99,
+        "last": 119,
+        "text": "corpus:\n\tinstall -d $(STATE)/var-tmp $(LOGS)\n\tln -f $(IMAGE_TAR) $(STATE)/var-tmp/runtime.image.tar 2>/dev/null || cp $(IMAGE_TAR) $(STATE)/var-tmp/runtime.image.tar\n\tcp $(KINSN_OUT)/bpf_x86_native_lab.ko $(STATE)/var-tmp/bpf_x86_native_lab.ko\n\ttaskset -c $(CPUS) vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir /var/tmp=$(STATE)/var-tmp --overlay-rwdir /tmp --overlay-rwdir /run --overlay-rwdir /usr/local --disable-monitor $(VNG_FLAGS) --cpus $(VM_CPUS) --memory $(VM_MEM) --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile guest APPS=$(APPS) SAMPLES=$(SAMPLES) WORKLOAD_DURATION=$(WORKLOAD_DURATION) BPFREJIT_CORPUS_BPF_STATS=$(BPFREJIT_CORPUS_BPF_STATS) NATIVE_MANIFEST=$(NATIVE_MANIFEST) BENCH_PASSES=$(BENCH_PASSES) SKIP_REJIT_MODE=$(SKIP_REJIT_MODE)'\n\trm -f $(STATE)/var-tmp/bpf-benchmark-docker.img\n\nguest:\n\t@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug\n\tinsmod /var/tmp/bpf_x86_native_lab.ko\n\techo $(if $(filter 0,$(BPFREJIT_CORPUS_BPF_STATS)),0,1) > /proc/sys/kernel/bpf_stats_enabled\n\tenv -u BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF PATH=/usr/lib/llvm-18/bin:$$PATH \\\n\t  BPFREJIT_CORPUS_APPS=$(APPS) BPFREJIT_CORPUS_BPF_STATS=$(BPFREJIT_CORPUS_BPF_STATS) \\\n\t  BPFREJIT_SHIM_NATIVE_LOADER=post \\\n\t  BPFREJIT_SHIM_NATIVE_MANIFEST=$(NATIVE_MANIFEST) \\\n\t  BPFREJIT_BENCH_PASSES=$(BENCH_PASSES) \\\n\t  BPFREJIT_NATIVE_LOADER_SO=/usr/local/lib/bpfrejit/libnative_loader.so \\\n\t  KEEP_WORKDIRS=all BPFREJIT_KEEP_ALL_WORKDIRS=1 SKIP_REJIT=$(SKIP_REJIT_MODE) \\\n\t  $(MAKE) -C $(ROOT) __runtime-vm-corpus PLATFORM=kvm ARCH=x86 \\\n\t  X86_RUNNER_RUNTIME_IMAGE=$(IMAGE) X86_RUNNER_RUNTIME_IMAGE_TAR=$(GUEST_IMAGE_TAR) \\\n\t  SAMPLES=$(SAMPLES) WORKLOAD_DURATION=$(WORKLOAD_DURATION)"
+      }
+    ]
+  }
+]
