@@ -517,3 +517,7 @@ profile-input-smoke:
 	ln -sfn $(ROOT)/kinsn/module/x86/build/bpf_x86_native_lab.ko /var/tmp/kprog-tmp/perf/profile-input-smoke/bpf_x86_native_lab.ko
 	ln -sfn $(ROOT)/.cache/container-images/x86_64-runner-runtime.image.tar /var/tmp/kprog-tmp/perf/profile-input-smoke/runtime.image.tar
 	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16-17 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir /var/tmp=/var/tmp/kprog-tmp/perf/profile-input-smoke --rodir /var/tmp/perf-input=/var/tmp/kprog-tmp/C/perf-build --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'set -eu; test -x /var/tmp/perf; test -r /var/tmp/runtime.image.tar; test -r /var/tmp/bpf_x86_native_lab.ko; /var/tmp/perf --version > $(OUTPUT)/perf-version.txt; stat -Lc "%F %s %n" /var/tmp/perf /var/tmp/runtime.image.tar /var/tmp/bpf_x86_native_lab.ko > $(OUTPUT)/guest-inputs.txt'
+
+.PHONY: katran-profile-analysis
+katran-profile-analysis:
+	taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/perf/profile/jit-window-costs.py --directory /workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/profile --run $(ROOT)/corpus/results/x86_kvm_corpus_20261115_201355_537645 --perf /var/tmp/kprog-tmp/C/perf-build/perf --app katran --output $(OUTPUT)
