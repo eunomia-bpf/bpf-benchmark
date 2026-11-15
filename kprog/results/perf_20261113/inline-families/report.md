@@ -71,3 +71,28 @@ allocated sections. Result: frame-observer-check.json; full commands/logs
 remain under raw inline-families/frame-observer-check. The pidfd guardian
 acquired timingSH/imageSH and resumed exact OTel1054890 at16:20:06Z.
 Actual OTel frontend+B/frame remain running, not inferred from this test.
+
+2026-11-15T16:22Z: all eight100/1000 scale cases complete through the normal
+bounds/all-pairs B pipeline and actual post-PEI frame observation (exit0,
+8GiB address-space cap each). Current shared primitive WIP was present;
+per-input generated/CPP/native hashes and all stage commands are retained
+in scale-small/. Frontend below is the actual optimized LLVM stage, not
+preprocessing; RSS is that child's peak. No kernel acceptance or runtime
+gain is inferred. Scalar loops mostly fold constants and are not evidence
+that arbitrary1000-instruction programs cost the same.
+
+| Native case | Actual insns | CPP bytes | Frontend seconds | Peak KiB | B code bytes | Frame bytes |
+|---|---:|---:|---:|---:|---:|---:|
+|100 scalar direct|115|3671901|0.491|119004|248|0|
+|100 scalar indirect|121|3674412|0.478|118980|256|0|
+|100 pointer direct|115|3669597|0.549|117844|2232|32|
+|100 pointer indirect|121|3672108|0.548|118400|2248|32|
+|1000 scalar direct|1015|3772271|0.901|122480|248|0|
+|1000 scalar indirect|1021|3774782|0.822|125212|256|0|
+|1000 pointer direct|1015|3824755|2.081|183276|20224|24|
+|1000 pointer indirect|1021|3827266|2.146|184004|20240|24|
+
+The one-time handler definitions account for most small-case CPP bytes;
+increasing100→1000 adds approximately100–158KiB rather than cloning each
+handler per instruction. These are different scale inputs, not a paired
+runtime comparison. Full6945-instruction OTel frontend still running.

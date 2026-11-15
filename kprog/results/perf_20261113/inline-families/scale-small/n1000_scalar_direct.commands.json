@@ -1,0 +1,215 @@
+[
+  {
+    "command": [
+      "cc",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/scale/n1000_scalar_direct.S",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/scale/n1000_scalar_direct.native.o"
+    ],
+    "returncode": 0,
+    "wall_seconds": 0.007262875005835667,
+    "user_seconds": 0.005663,
+    "system_seconds": 0.001241,
+    "max_rss_kib": 34856
+  },
+  {
+    "command": [
+      "objdump",
+      "-dr",
+      "-Mintel",
+      "--insn-width=16",
+      "/var/tmp/kprog-tmp/perf/scale/n1000_scalar_direct.native.o"
+    ],
+    "returncode": 0,
+    "wall_seconds": 0.0022425010101869702,
+    "user_seconds": 0.001052,
+    "system_seconds": 0.001052,
+    "max_rss_kib": 34856
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/scale/n1000_scalar_direct.bpf.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/scale/n1000_scalar_direct.bpf.i"
+    ],
+    "returncode": 0,
+    "wall_seconds": 0.18004292401019484,
+    "user_seconds": 0.163495,
+    "system_seconds": 0.015621999999999999,
+    "max_rss_kib": 82864
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/scale/n1000_scalar_direct.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/scale/n1000_scalar_direct.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "wall_seconds": 0.18950480499188416,
+    "user_seconds": 0.16083699999999998,
+    "system_seconds": 0.018900999999999998,
+    "max_rss_kib": 83284
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/scale/n1000_scalar_direct.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/scale/n1000_scalar_direct.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "wall_seconds": 0.9012958579987753,
+    "user_seconds": 0.8592679999999999,
+    "system_seconds": 0.032637,
+    "max_rss_kib": 122480
+  },
+  {
+    "command": [
+      "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/scale/n1000_scalar_direct.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/scale/n1000_scalar_direct.bpf.bounds.bc"
+    ],
+    "returncode": 0,
+    "wall_seconds": 0.03710870200302452,
+    "user_seconds": 0.028926999999999998,
+    "system_seconds": 0.00798,
+    "max_rss_kib": 52304
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/scale/n1000_scalar_direct.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/scale/n1000_scalar_direct.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "wall_seconds": 0.12390045300708152,
+    "user_seconds": 0.101658,
+    "system_seconds": 0.021922999999999998,
+    "max_rss_kib": 92900
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/scale/n1000_scalar_direct.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/scale/n1000_scalar_direct.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "wall_seconds": 0.03239608398871496,
+    "user_seconds": 0.025124,
+    "system_seconds": 0.0070339999999999995,
+    "max_rss_kib": 37008
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/scale/n1000_scalar_direct.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/scale/n1000_scalar_direct.bpf.o"
+    ],
+    "returncode": 0,
+    "wall_seconds": 0.0884239170118235,
+    "user_seconds": 0.073576,
+    "system_seconds": 0.01411,
+    "max_rss_kib": 73388
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-stop-after=prologepilog",
+      "/var/tmp/kprog-tmp/perf/scale/n1000_scalar_direct.bpf.packed.mir",
+      "-o",
+      "-"
+    ],
+    "returncode": 0,
+    "wall_seconds": 0.11000221900758334,
+    "user_seconds": 0.093707,
+    "system_seconds": 0.01595,
+    "max_rss_kib": 77480,
+    "stdout_bytes": 3361368,
+    "stdout_sha256": "4963885dfe04307f9c668c0f91c8d06f1933b8bfc5b982bd36675d0f7da0bbcd"
+  }
+]
