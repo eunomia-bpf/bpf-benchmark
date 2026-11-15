@@ -103,3 +103,6 @@ canonical perf executes, and image666575872B/module689680B are readable.
 profile-transport/ retains both startup failures' host-restoration outcomes,
 the owned-copy cleanup inventory and this smoke. Raw directories for the
 failed attempts remain intact; a fresh profile attempt uses the corrected map.
+Corrected retry2 launcher1185536/QEMU1185714 started20:12:15Z and booted with
+the canonical links; its raw directory is
+/workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/.
