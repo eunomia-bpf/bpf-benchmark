@@ -11,7 +11,21 @@ from elftools.elf.elffile import ELFFile
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'kprog/x86'))
 import trusted_specializer as worker
-from memory_b_pipeline import MemoryPipeline
+from memory_b_pipeline import MemoryPipeline, post_pei_frames
+
+
+def check_frame_observer():
+    # A nonzero subprogram frame must survive even when another frame is zero;
+    # direct R10 offsets cannot substitute for the allocated stackSize field.
+    mir = "---\nname: 'hotspot'\nframeInfo:\n  stackSize: 576\n...\n---\nname: leaf\nframeInfo:\n  stackSize: 0\n...\n"
+    if post_pei_frames(mir) != {'hotspot': 576, 'leaf': 0}:
+        raise ValueError('Lost a post-PEI subprogram frame')
+    for malformed in ('---\nname: missing\nframeInfo: {}\n', '---\n', mir+mir):
+        try:
+            post_pei_frames(malformed)
+        except ValueError:
+            continue
+        raise ValueError('Incomplete or duplicate MIR frames silently accepted')
 
 
 def allocated(data):
@@ -20,6 +34,7 @@ def allocated(data):
 
 
 def main(a):
+    check_frame_observer()
     a.output.mkdir(parents=True,exist_ok=True)
     commands=[]
     def run(command,data,name,fds):

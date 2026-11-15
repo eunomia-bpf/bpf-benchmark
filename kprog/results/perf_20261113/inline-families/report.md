@@ -49,3 +49,15 @@ Raw `/workspaces/kprog-raw/perf/20261115-inline-families` includes full
 process/lease ancestry, release fdinfo, pause/lease events, commands, failures
 and numerical observations. Prior controls/raw data are retained. No new
 worktree/source copy/kernel/image/base, nor paper changes.
+
+2026-11-15T16:18Z measurement continuation: current all-family OTel CPP is
+6,019,192 bytes (5.506x generated C), not the earlier generic dispatch's
+5,729,367 bytes. Its normal frontend is still paused behind C timing.
+The queued scale observer now reads actual post-PEI machine stackSize for
+all subprograms, through a pipe, in addition to direct R10-access depth.
+Completed preprocessing and B observations are saved before later stages,
+so a frame-observer failure preserves them. No extra frontend or retained
+MIR build is added. Parser and real normal-B transport checks are queued
+behind shared timing/image leases; validation of this observer extension
+is pending. Scale100/1000 uses the updated observer when its existing job
+starts after OTel. P-SPECIALIZE remains open.

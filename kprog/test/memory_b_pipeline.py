@@ -12,6 +12,24 @@ import re
 from elftools.elf.elffile import ELFFile
 
 
+def post_pei_frames(mir):
+    """Read allocated frames, including spill slots without direct R10 loads."""
+    frames = {}
+    for document in mir.split('\n---\n'):
+        name = re.search(r'^name:\s+([^\n]+)', document, re.M)
+        size = re.search(r'^  stackSize:\s+(\d+)', document, re.M)
+        if name:
+            function = name[1].strip().strip('\'"')
+            if size is None:
+                raise ValueError('Post-PEI frame lacks stackSize: '+function)
+            if function in frames:
+                raise ValueError('Duplicate post-PEI machine frame: '+function)
+            frames[function] = int(size[1])
+    if not frames:
+        raise ValueError('No post-PEI machine frame found')
+    return frames
+
+
 class MemoryPipeline:
     def __init__(self):
         self.fds = []
@@ -66,15 +84,5 @@ class MemoryPipeline:
         mir = run(['llc-18','-O3','-march=bpf','-mcpu=v4','-bpf-stack-size=4096',
             '-x=mir','-start-before=prologepilog','-stop-after=prologepilog',
             self.stage('.packed.mir'),'-o','-'],b'','frame',tuple(self.fds)).decode()
-        frames = {}
-        for document in mir.split('\n---\n'):
-            name = re.search(r'^name:\s+(\S+)', document, re.M)
-            size = re.search(r'^  stackSize:\s+(\d+)', document, re.M)
-            if name:
-                if size is None:
-                    raise ValueError('Post-PEI frame lacks stackSize: '+name[1])
-                frames[name[1].strip('\'"')] = int(size[1])
-        if not frames:
-            raise ValueError('No post-PEI machine frame found')
-        result['post_pei_stack_bytes'] = frames
+        result['post_pei_stack_bytes'] = post_pei_frames(mir)
         return result

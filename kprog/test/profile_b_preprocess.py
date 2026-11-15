@@ -3,16 +3,20 @@ import argparse
 from collections import Counter
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import struct
+import subprocess
 import sys
+import time
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT/'kprog/fidelity'), str(ROOT/'kprog/x86'), str(ROOT/'kprog/test')]
 import scale
 import trusted_specializer as worker
 from measure_preprocessor_expansion import measure_stream
+from memory_b_pipeline import post_pei_frames
 from elftools.elf.elffile import ELFFile
 
 
@@ -25,19 +29,40 @@ def main(args):
     args.output.mkdir(parents=True, exist_ok=True)
     args.build.mkdir(parents=True, exist_ok=True)
     records = []
+
+    def save():
+        (args.output/'result.json').write_text(json.dumps(records, indent=2)+'\n')
+
     for size in args.sizes:
         for pointer in (False, True):
             for indirect in (False, True):
                 name = f'n{size}_{"ptr" if pointer else "scalar"}_{"indirect" if indirect else "direct"}'
                 commands = []
 
-                def run(command, stage):
+                def run(command, stage, *, capture=False):
                     log = args.output/(name+'.'+stage+'.log')
-                    status = scale.run(command, log)
-                    command_record = json.loads(log.with_suffix(log.suffix+'.resources.json').read_text())
+                    if capture:
+                        command = list(map(str, command))
+                        start = time.monotonic()
+                        with log.open('wb') as errors:
+                            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=errors)
+                            output = process.stdout.read()
+                            _, wait_status, usage = os.wait4(process.pid, 0)
+                            status = process.returncode = os.waitstatus_to_exitcode(wait_status)
+                        command_record = dict(command=command, returncode=status,
+                            wall_seconds=time.monotonic()-start, user_seconds=usage.ru_utime,
+                            system_seconds=usage.ru_stime, max_rss_kib=usage.ru_maxrss,
+                            stdout_bytes=len(output), stdout_sha256=hashlib.sha256(output).hexdigest())
+                        log.with_suffix(log.suffix+'.resources.json').write_text(
+                            json.dumps(command_record, indent=2)+'\n')
+                    else:
+                        status = scale.run(command, log)
+                        command_record = json.loads(log.with_suffix(log.suffix+'.resources.json').read_text())
                     commands.append(command_record)
                     (args.output/(name+'.commands.json')).write_text(json.dumps(commands, indent=2)+'\n')
                     if status: raise RuntimeError(f'{name}/{stage} exited {status}; see {log}')
+                    if capture:
+                        return output
 
                 assembly, _ = scale.assembly(size, pointer, indirect)
                 native_source, native = args.build/(name+'.S'), args.build/(name+'.native.o')
@@ -49,8 +74,7 @@ def main(args):
                 source, expanded = args.build/(name+'.bpf.c'), args.build/(name+'.bpf.i')
                 source.write_text(text.replace('#include "../x86_sim_local_bpf.h"',
                     '#include '+json.dumps(str(ROOT/'kprog/x86/x86_sim_local_bpf.h'))))
-                # These small inputs fit one normal production piece. This
-                # measures the same frontend flags/macros; no backend is run.
+                # These small inputs fit one normal production piece.
                 run([ROOT/'kprog/stock-path/bin/clang', *worker.COMPILE_FLAGS, '-E', source, '-o', expanded], 'preprocess')
                 with expanded.open('rb') as stream:
                     record = measure_stream(source, stream, expanded.stat().st_size)
@@ -64,6 +88,8 @@ def main(args):
                     native_sha256=digest(native), generated_sha256=digest(source), preprocessed_sha256=digest(expanded),
                     helper_call_like_tokens=dict(calls), switch_tokens=switches,
                     scope='Current generator and real one-piece Clang -E only; no new B compilation or kernel acceptance')
+                records.append(record)
+                save()
                 if args.compile:
                     compiled = args.build/(name+'.bpf.o')
                     worker.compile_simulator(str(ROOT/'kprog/stock-path/bin/clang'), source, compiled,
@@ -90,9 +116,16 @@ def main(args):
                         record['deepest_direct_fp_access'] = max(depths, default=0)
                         # This observes direct R10 accesses, not every derived
                         # stack address; it is a lower bound on frame size.
-                    record['scope'] += '; normal production B backend compiled, not submitted to kernel'
-                records.append(record)
-                (args.output/'result.json').write_text(json.dumps(records, indent=2)+'\n')
+                    record.update(bpf_compiled=True,
+                        scope='Current generator, real Clang -E and normal production B backend; no kernel acceptance')
+                    # Preserve the completed B observation if the subsequent
+                    # frame observation fails. MIR travels only through a pipe.
+                    save()
+                    mir = run(['llc-18', '-O3', '-march=bpf', '-mcpu=v4', '-bpf-stack-size=4096',
+                        '-start-before=prologepilog', '-stop-after=prologepilog',
+                        source.with_suffix('.packed.mir'), '-o', '-'], 'frame', capture=True)
+                    record['post_pei_stack_bytes'] = post_pei_frames(mir.decode())
+                    save()
                 print(json.dumps(dict(name=name, expanded=record['preprocessed_bytes'],
                     source=record['generated_c_bytes'], helpers=dict(calls), switches=switches)), flush=True)
 
