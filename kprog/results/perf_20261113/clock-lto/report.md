@@ -48,3 +48,24 @@ was disabled. `checks.json` records all statuses, commands and times.
 Raw logs, diagnostics and commands remain at
 `/workspaces/kprog-raw/perf/20261115-clock-lto/` (check, check-v2, check-v3,
 kernel-facts, publish, image). No paper, workload or benchmark setting changed.
+
+The image publisher completed at **17:47:36Z**, status 0, under image EX with
+no live QEMU observed before launch. Current image is **d4b19c9fab0b**;
+config is **3404250f5e68**. The superseded af3 image was already absent at
+final cleanup. Boot 8cafa600, configuration and both external modules match
+before/after. The existing publisher restores vmlinux from that unchanged
+boot; its ELF-container hash is now 30f48c23 (the boot is authoritative).
+
+`image-tools.json` streams the sole saved tar without extracting a filesystem:
+shipped linker64eb98aa, stripped runtime loader928a1558 and shim19f2f67a all
+match the exact canonical packaging inputs. The unstripped base loadera92b
+has a different expected hash. The checked/B compilers remain in the sole
+base; the frozen Dockerfile does not package those service tools.
+
+All **1193** staged native files match the new image. The old image had1174;
+34 paths differ from current stage (Katran/Tetragon/Tracee), recorded in
+`image-publication.json`. These are C's existing staged outputs, not a producer
+rebuild in this step. The shipped Katran balancer is c0dc65fc, matching the
+84-site inventory above. This establishes which artifacts the next run uses,
+not their whole-app output equivalence. C was notified to run one fixed-
+frequency A/A and one A/B and retain the actual native plans/blob metadata.

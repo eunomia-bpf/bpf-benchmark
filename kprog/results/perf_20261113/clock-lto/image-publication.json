@@ -1,0 +1,366 @@
+{
+  "command": "taskset -c 8-19 make -r -C kprog/libnativeloader shared-base-refresh REFRESH_OPERATION=--loader-only REFRESH_OUTPUT=/workspaces/kprog-raw/perf/20261115-clock-lto/image",
+  "exit_code": 0,
+  "started": "2026-11-15T17:46:36Z",
+  "finished": "2026-11-15T17:47:36Z",
+  "old_image": "sha256:af3f9d4ed9375023bfad59fadf0c2245b8379ab6c3f52f928ca92f30fcb5e30a",
+  "new_image": "sha256:d4b19c9fab0bb1ff41b7478084f968c7a66cf1f950b8230771251523de1438ef",
+  "cleanup": "already-absent",
+  "config": "blobs/sha256/3404250f5e686c0b2ee7954d8c1cbc5e13ef97fcdd09897f3711a20658b1c8e7",
+  "native_files_before": 1174,
+  "native_files_after": 1193,
+  "stage_files": 1193,
+  "stage_differences": [],
+  "previous_image_differences": [
+    {
+      "path": "katran/balancer.native.o",
+      "image": {
+        "bytes": 67824,
+        "sha256": "9089604a4f05055111b71b375b43cdfba07d5cfe01f4eb8716d571901ff710b1"
+      },
+      "stage": {
+        "bytes": 67824,
+        "sha256": "c0dc65fc746d7027c94969df1239b2eb603ecef541e9ab333a7186ce636eb13e"
+      }
+    },
+    {
+      "path": "katran/healthchecking.native.o",
+      "image": {
+        "bytes": 19296,
+        "sha256": "5ef928f34f2e7d3213258eaa9ab7c7819c59518e215a0df1b42765a3d05a2410"
+      },
+      "stage": {
+        "bytes": 19304,
+        "sha256": "dff5cf67937c9c046ff59592c640221b9937d767bd8864833b75aa7186a57827"
+      }
+    },
+    {
+      "path": "katran/healthchecking_ipip.native.o",
+      "image": {
+        "bytes": 8856,
+        "sha256": "3957cb8848c0d0b1fd4697954afada7e7b75469f89bd9604b3c518e5d6a73510"
+      },
+      "stage": {
+        "bytes": 8856,
+        "sha256": "2476122bbb9f345cbc8e76c795d67ebbdfcb159b2072df24cd68c38609267f82"
+      }
+    },
+    {
+      "path": "katran/xdp_root.native.o",
+      "image": {
+        "bytes": 5608,
+        "sha256": "1f451473c7c4de695a30c2d806a65508edc508b4902191ea4214701cc6f49d26"
+      },
+      "stage": {
+        "bytes": 5608,
+        "sha256": "c548e6de64f4a2fd7aaf3c5b28a6ec0beb1c2aea7e495445b19eac19c09d5629"
+      }
+    },
+    {
+      "path": "tetragon/bpf_cgroup.native.o",
+      "image": {
+        "bytes": 920072,
+        "sha256": "ada291114d932af46f608ab3109db957a2906c048a6e77f613a8a03fe9baaf18"
+      },
+      "stage": {
+        "bytes": 920608,
+        "sha256": "f9da6a824ad623cd6c6583f837b6da2cd58d8dc5acfc666ae55f47edf8c633fa"
+      }
+    },
+    {
+      "path": "tetragon/bpf_cgroup_mkdir.native.o",
+      "image": {
+        "bytes": 931336,
+        "sha256": "55552d39ab904a36edde8d09d39429be0a41594bcefe85cd60bcfe266989eeb4"
+      },
+      "stage": {
+        "bytes": 933760,
+        "sha256": "8ad413e5ccb9d8b90ae15ae6cf1fa0f176258802e917f55947111988ea033ea9"
+      }
+    },
+    {
+      "path": "tetragon/bpf_cgroup_mkdir_v511.native.o",
+      "image": {
+        "bytes": 934112,
+        "sha256": "c29687724682bc453253e9597e3b3cfc792708c41a33671b2dc23467b9af6083"
+      },
+      "stage": {
+        "bytes": 936896,
+        "sha256": "6e19ab811d95a8c35f367473c2c8a647aeac15d38590c4973c346107d34d27b4"
+      }
+    },
+    {
+      "path": "tetragon/bpf_cgroup_release.native.o",
+      "image": {
+        "bytes": 930144,
+        "sha256": "33032916d21c4ba2bdff3d9ba43ac1f5962326e9d446187ba852c7fd8c1642a1"
+      },
+      "stage": {
+        "bytes": 932056,
+        "sha256": "60b9c76c7f4be46dd5e721166e114eba9ec75754a974c746e7528c0c9067e56a"
+      }
+    },
+    {
+      "path": "tetragon/bpf_cgroup_release_v511.native.o",
+      "image": {
+        "bytes": 932744,
+        "sha256": "8df76a2e6070b6f2fd7d88f13d230af2f0b99b92dd1e24dd7704f3873be49eb4"
+      },
+      "stage": {
+        "bytes": 935032,
+        "sha256": "3c7beedab27a0b350d04118f07a383e8123c01dcb6e1c751845330b5412f65a7"
+      }
+    },
+    {
+      "path": "tetragon/bpf_cgroup_rmdir.native.o",
+      "image": {
+        "bytes": 930120,
+        "sha256": "4149ae0f628df47e4dee8027c1b9f12b7680fd45d59bfc4c4fff27bd8f875f99"
+      },
+      "stage": {
+        "bytes": 932040,
+        "sha256": "1907b047944b8099b042e435093ae2886acaf2cca2790a0f93604496cc442d81"
+      }
+    },
+    {
+      "path": "tetragon/bpf_cgroup_rmdir_v511.native.o",
+      "image": {
+        "bytes": 932736,
+        "sha256": "396c2d1208bb48c0f4ab2926f25f8186d1c90ff47e13b4aa51cbb3514382e3a4"
+      },
+      "stage": {
+        "bytes": 935032,
+        "sha256": "0572649a6517b5f4115a3b3b31bac5e256cc63f44e97451c2708623d47f1c5c2"
+      }
+    },
+    {
+      "path": "tetragon/bpf_cgtracker.native.o",
+      "image": {
+        "bytes": 923944,
+        "sha256": "b9d1feeec98dd138ffdf60a694fbbf21378cf1044ab213de147e7c8c2a26809c"
+      },
+      "stage": {
+        "bytes": 925464,
+        "sha256": "48999d212c3a26eb7a9141c60affbf3359afd176d93fd8408b36f1acf5e5500d"
+      }
+    },
+    {
+      "path": "tetragon/bpf_enforcer.native.o",
+      "image": {
+        "bytes": 7536,
+        "sha256": "f842b68a2b924dd3fdd7267a7d55ab9de97ee333e233eed703015a201817cc6a"
+      },
+      "stage": {
+        "bytes": 7888,
+        "sha256": "60920bbde7733387732a32190898b86942e5e1435e166cad24a5f2de66d713be"
+      }
+    },
+    {
+      "path": "tetragon/bpf_execve_bprm_commit_creds.native.o",
+      "image": {
+        "bytes": 925792,
+        "sha256": "107d863c22edb089ddb61fa970c1e2a0c4f51a479b7a11fee2e8e05b026bbce7"
+      },
+      "stage": {
+        "bytes": 926840,
+        "sha256": "4830e7ab09b8bd2459858280b5e51016dda1a75b34a5cb9d55f336b0b0e95ed9"
+      }
+    },
+    {
+      "path": "tetragon/bpf_execve_event.native.o",
+      "image": null,
+      "stage": {
+        "bytes": 1020792,
+        "sha256": "5499ce57460c97b3d228bd7d06e392c7c6618669a9185a0b688b878bb7885ac5"
+      }
+    },
+    {
+      "path": "tetragon/bpf_execve_event_v310.native.o",
+      "image": null,
+      "stage": {
+        "bytes": 1013248,
+        "sha256": "ba4c4e58f8f121165588a24b6eb0f1b1c72f3224dfbb77edf703d1e4d0966fe1"
+      }
+    },
+    {
+      "path": "tetragon/bpf_execve_event_v511.native.o",
+      "image": null,
+      "stage": {
+        "bytes": 1447576,
+        "sha256": "0f53b92a4fb1c42468ffaabfae846a1b74c0752948d873b14346768c10c937a5"
+      }
+    },
+    {
+      "path": "tetragon/bpf_execve_event_v53.native.o",
+      "image": null,
+      "stage": {
+        "bytes": 1434112,
+        "sha256": "02b4eb76f1516d72ba13b976f233f9cff0339f3397435b0ab59e059d698b130f"
+      }
+    },
+    {
+      "path": "tetragon/bpf_execve_event_v61.native.o",
+      "image": null,
+      "stage": {
+        "bytes": 1032688,
+        "sha256": "675c82c13a8c254f2a1eb23b1fd975cfad33954c92bd72bbe36f2c3c5e861f80"
+      }
+    },
+    {
+      "path": "tetragon/bpf_execve_map_update.native.o",
+      "image": null,
+      "stage": {
+        "bytes": 18968,
+        "sha256": "a7b76d55490e95131ccd3005cb10807ab0f371e099ae91b590639575cf8d27bb"
+      }
+    },
+    {
+      "path": "tetragon/bpf_execve_map_update_v511.native.o",
+      "image": null,
+      "stage": {
+        "bytes": 22192,
+        "sha256": "af96f7645f4346d7bff2f95c92904d0756771524b1b805967f07e1f72958e724"
+      }
+    },
+    {
+      "path": "tetragon/bpf_execve_map_update_v53.native.o",
+      "image": null,
+      "stage": {
+        "bytes": 20184,
+        "sha256": "73c83dded8ca6fe7a5b8ed42cd523d87d4cd315a4cb547fc81c03de82db0e1c1"
+      }
+    },
+    {
+      "path": "tetragon/bpf_execve_map_update_v61.native.o",
+      "image": null,
+      "stage": {
+        "bytes": 22192,
+        "sha256": "af96f7645f4346d7bff2f95c92904d0756771524b1b805967f07e1f72958e724"
+      }
+    },
+    {
+      "path": "tetragon/bpf_exit.native.o",
+      "image": null,
+      "stage": {
+        "bytes": 932848,
+        "sha256": "b7cffdf70a723ab6a17b6f3c9cfc4c7eb9c2e7d51fab6d3726b13b57f5a41e84"
+      }
+    },
+    {
+      "path": "tetragon/bpf_exit_v310.native.o",
+      "image": null,
+      "stage": {
+        "bytes": 932848,
+        "sha256": "b7cffdf70a723ab6a17b6f3c9cfc4c7eb9c2e7d51fab6d3726b13b57f5a41e84"
+      }
+    },
+    {
+      "path": "tetragon/bpf_exit_v511.native.o",
+      "image": null,
+      "stage": {
+        "bytes": 938240,
+        "sha256": "4c5e788eb7cc06c8988cb574f9e7be282337d800f5bb75ea7160cfd7bd123cc0"
+      }
+    },
+    {
+      "path": "tetragon/bpf_fmodret_enforcer.native.o",
+      "image": null,
+      "stage": {
+        "bytes": 7600,
+        "sha256": "067c23eeeb10551e76145fdc2d794a659fab15d8fc72a2fff56f08b8d183d4a6"
+      }
+    },
+    {
+      "path": "tetragon/bpf_fork.native.o",
+      "image": null,
+      "stage": {
+        "bytes": 947536,
+        "sha256": "59c22839e5440356d3ec11b77eb6459377470ef4220798d8ef1da577c6951be6"
+      }
+    },
+    {
+      "path": "tetragon/bpf_fork_v310.native.o",
+      "image": null,
+      "stage": {
+        "bytes": 937888,
+        "sha256": "77e214ad8b07dee80a40a1d779c59c840ce72b8a9294bf9d0d80f31d62c6359b"
+      }
+    },
+    {
+      "path": "tetragon/bpf_fork_v511.native.o",
+      "image": null,
+      "stage": {
+        "bytes": 952752,
+        "sha256": "fc6b7c0c4e2d8b72ed1d62363bfcac85696dec854e188ededf476fa2085966cb"
+      }
+    },
+    {
+      "path": "tetragon/bpf_generic_fentry.native.o",
+      "image": null,
+      "stage": {
+        "bytes": 1280832,
+        "sha256": "dc8e60e035313a1f3c5fbd202bf5e2cd2b3ff3e0b8ac1aba49427da7b21ac907"
+      }
+    },
+    {
+      "path": "tetragon/bpf_generic_fentry_v511.native.o",
+      "image": null,
+      "stage": {
+        "bytes": 1912088,
+        "sha256": "6d5d3d01d0ae5b310cb5b6de8d99e040f4a55cd7adcac7803839b1b63c78b9ff"
+      }
+    },
+    {
+      "path": "tetragon/bpf_generic_fentry_v53.native.o",
+      "image": null,
+      "stage": {
+        "bytes": 1887064,
+        "sha256": "38d5baf784a9961620903d7c27bef42bd0623841d6b54546f8a7d1d17b88cc03"
+      }
+    },
+    {
+      "path": "tracee/tracee.native.o",
+      "image": {
+        "bytes": 8143048,
+        "sha256": "8174db3401effe9a29373d084e028b723abe6f62d296f99be0792c04e1a8b556"
+      },
+      "stage": {
+        "bytes": 8143632,
+        "sha256": "0c91b97d9b7b45d0eed165ac1c95ad54a4aeb5fbda616f5cb26de7578c48b334"
+      }
+    }
+  ],
+  "katran": {
+    "katran/balancer.native.o": {
+      "bytes": 67824,
+      "sha256": "c0dc65fc746d7027c94969df1239b2eb603ecef541e9ab333a7186ce636eb13e"
+    },
+    "katran/healthchecking.native.o": {
+      "bytes": 19304,
+      "sha256": "dff5cf67937c9c046ff59592c640221b9937d767bd8864833b75aa7186a57827"
+    },
+    "katran/healthchecking_ipip.native.o": {
+      "bytes": 8856,
+      "sha256": "2476122bbb9f345cbc8e76c795d67ebbdfcb159b2072df24cd68c38609267f82"
+    },
+    "katran/xdp_root.native.o": {
+      "bytes": 5608,
+      "sha256": "c548e6de64f4a2fd7aaf3c5b28a6ec0beb1c2aea7e495445b19eac19c09d5629"
+    }
+  },
+  "stable_before": [
+    "8cafa600239c364c665106397b182f9c3a89b70333aa3c5d7c9afdaba99f7812  /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage",
+    "30f48c230f6b1e47eb1faf801cf655c37f1b4d2b4aa02a4eb1faf942482190e9  /workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+    "0b75fe318542db6698950f2b2ce5163e867118317fe61c538c4e7de7a1357163  /workspaces/.agent-state/kprog-ck/build-x86/.config",
+    "c3d739a4916b8821376246f088ffdb57d3d871b769b7d97d0f52abc5b8b96270  /workspaces/repository/kinsn/module/x86/build/bpf_x86_native_lab.ko",
+    "da7139d1e793409befa0cb3f8f31593253d8b977c313ffe10a7d72b07c63b293  /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko"
+  ],
+  "stable_after": [
+    "8cafa600239c364c665106397b182f9c3a89b70333aa3c5d7c9afdaba99f7812  /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage",
+    "30f48c230f6b1e47eb1faf801cf655c37f1b4d2b4aa02a4eb1faf942482190e9  /workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+    "0b75fe318542db6698950f2b2ce5163e867118317fe61c538c4e7de7a1357163  /workspaces/.agent-state/kprog-ck/build-x86/.config",
+    "c3d739a4916b8821376246f088ffdb57d3d871b769b7d97d0f52abc5b8b96270  /workspaces/repository/kinsn/module/x86/build/bpf_x86_native_lab.ko",
+    "da7139d1e793409befa0cb3f8f31593253d8b977c313ffe10a7d72b07c63b293  /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko"
+  ],
+  "scope": "Published image and artifact identities; no whole-app acceptance or runtime speed claim."
+}
