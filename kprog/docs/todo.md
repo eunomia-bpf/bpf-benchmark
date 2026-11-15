@@ -28,14 +28,14 @@
 
 - [x] P-SPECIALIZE-10K（9fc382606、cc83b5d48；本提交结果）：四种 10K 形状正常 B/实际栈帧完成，前端 11.6–26.3s、峰值 399–920MiB；B 328–200624B、帧 0–40B，详见 `perf_20261113/inline-families/scale-10k/`。旧同名 scalar/direct 70.47GiB/SIGKILL 的实际失败已能完成；不跨不同编译管线宣称独立加速比。100K 继续。
 
-**协调者 2026-11-15T23:11:08Z（运营者 2026-11-15 23:20–23:35 的话）**：
+**协调者 2026-11-15T23:11:08Z（运营者 2026-11-15 约 22:59–23:08 的话）**：
 - 已删（运营者“你去删掉. 立刻删掉.”）：host_cpu.py、observe_runtime.py 和 observe-bin、三个 run.sh、queue-under-timing.sh、scripts/queue-timing.sh、check_host_cpu.py、run_katran_fixed_frequency.sh（c257337d0）。one-image 的 corpus 先执行冻结 Makefile 的 kvm-host-cpu，再直接起 vng（f1338ad13）。
 - 和之前的版本对比（运营者“你要不要对比之前的版本?”）：镜像里的原生对象和 05-29 构建（/workspaces/kprog-raw/paper-tree-untracked）逐段比较可执行代码。Katran 的 balancer 和 05-29 逐字节相同（xdp 段 7 965 字节），4 个对象 3 个相同；BCC 8 个 7 个相同；Cilium 7 个 5 个相同；OTel 相同；Tracee 3 个全变（1 615 175 → 1 457 903 字节）；Tetragon 88 个是 05-29 之后新加的。11-14 编译中改写 IR 的旧路线，Katran 是 7 535 字节，和 05-29 不同。Katran 现在和 05-29 的差别全在 P 之后：链接器 LTO、装载器、内核、计时方法。
 - 计时广度优先（运营者 2026-11-11 “每个应用跑3次之后换下一个应用这样, 广度优先”）：C 按 one-image 的 ORDER 六个应用各跑一次（SAMPLES=3、WORKLOAD_DURATION=180，stats 关一次、开一次），每个应用对照 05-29 底线（stats 关：OTel 1.849、BCC 0.985、Tracee 0.948、Katran 1.113、Tetragon 1.009、Cilium 1.319）。哪个应用出错，记下错误接着跑下一个，一轮之后再修。CPU 0-7 同一时间只跑一个计时，照旧用 locks/timing 商量。
 - Katran 掉下来的原因（P 和 05-29 相同，05-29 底线 1.113x，现在约 1.03x）：PERF 对比 05-29 链接器装上的代码和现在 LTO 装上的代码，逐项找差别并用同一入口验证；紧凑哈希让本体变慢，按固定长度展开的写法用新提交找回来。
 - Tracee 装载失败：C 用出错程序的 libbpf 日志和来宾内核日志找到失败的程序和源码里的原因，再按整类修。
 
-**协调者 2026-11-15T22:57:20Z（运营者 2026-11-15 22:50–23:00 的话，见 user-instruction.md）**：
+**协调者 2026-11-15T22:57:20Z（运营者 2026-11-15 约 22:45–22:52 的话，见 user-instruction.md）**：
 - 运营者“停掉所有现在的.”：C、perf、formal 三个 lane 和 C 的 Tracee 计时队列 22:53 停下，三个 STOP 文件写着这句原话；主机 CPU 设置回到 powersave、turbo 开、最低 800 MHz。6 小时审核循环照常。
 - 可信模块 kinsn/module/x86/bpf_x86_native_lab.c 回到 66c32c4bc 之前的内容（本提交）：那次为第 12 类重定位加了两处出错返回（reloc_bounds 的 -ERANGE、missing_final_ip 的 -EINVAL）。计时镜像装的是 kprog/perf/direct-native 编出的模块，Tracee 的装载错误在这次改动前后一样；按运营者 2026-11-09“不允许增加新的 check”拿掉。
 - 计时顺序按运营者 2026-11-11 原话“每个应用跑3次之后换下一个应用这样, 广度优先”：六个应用先各跑一轮，再深入单个应用。协调者此前定的“先 Katran 再其余五个”收回。

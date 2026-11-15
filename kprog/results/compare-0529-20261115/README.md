@@ -1,6 +1,6 @@
 # Native code now against the 2026-05-29 build
 
-Operator 2026-11-15 ~23:20 UTC: "旧路线（编译过程里改写 IR，你后来禁止了）头文件路线 应该性能是一样的.  你要不要对比之前的版本?"
+Operator 2026-11-15 ~22:59 UTC: "旧路线（编译过程里改写 IR，你后来禁止了）头文件路线 应该性能是一样的.  你要不要对比之前的版本?"
 
 `compare_code.py` compares the executable sections (SHF_EXECINSTR PROGBITS, relocations unapplied) of every
 `*.native.o` in the image payload `vendor/build/native-bpf/x86/stage/<app>` with the 2026-05-29 build kept at
