@@ -5,6 +5,7 @@ import hashlib
 import json
 import mmap
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 from elftools.elf.elffile import ELFFile
@@ -30,6 +31,8 @@ def main(args):
         native_object=str(args.build/'table.native.o'), symbol='jump_table', context_kind='raw',
         simulator_frontend=dict(path=str(frontend), source_sha256=digest(source), ir_sha256=digest(frontend)))
     compiled = worker.compile_checked_simulator(artifacts, args.linker, args.compiler)
+    for name in ('native-commands.jsonl', 'checked-simulator.json', 'frontend-ir-reuse.json'):
+        shutil.copyfile(args.build/name, args.output/name)
     commands = []
 
     def run(command):
