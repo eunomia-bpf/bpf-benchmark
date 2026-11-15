@@ -10,6 +10,7 @@ BUILD := /var/tmp/kprog-tmp/perf/native-relocations
 TABLE_CONTEXT_BUILD := /var/tmp/kprog-tmp/perf/table-context
 CONTEXT_TOOL := /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds
 CHECKED_TOOL := /var/tmp/kprog-tmp/perf/checked-compiler/compile-sim-ir
+CHECKED_PACKET_BUILD := /var/tmp/kprog-tmp/perf/checked-packet
 KERNEL_LAYOUT_BUILD := /var/tmp/kprog-tmp/perf/kernel-layout
 KERNEL_LAYOUT := $(KERNEL_LAYOUT_BUILD)/kernel-layout.json
 KDIR := /workspaces/.agent-state/kprog-ck/build-x86
@@ -103,6 +104,23 @@ $(CHECKED_TOOL): $(ROOT)/kprog/x86/compile_sim_ir.cpp
 
 .PHONY: checked-compiler-build
 checked-compiler-build: $(CHECKED_TOOL)
+
+.PHONY: checked-table-host checked-fault-host
+checked-table-host: $(CHECKED_TOOL)
+	CLANG=$(ROOT)/kprog/stock-path/bin/clang taskset -c 19 prlimit --as=17179869184 -- python3 $(ROOT)/kprog/test/check_checked_codegen.py --build $(TABLE_CONTEXT_BUILD) --output $(OUTPUT)/table --linker $(LINKER_BINARY) --compiler $(CHECKED_TOOL) --accepted /workspaces/kprog-raw/perf/20261115-table-context/final/result.json
+
+checked-fault-host: $(CHECKED_TOOL)
+	install -d $(OUTPUT)/fault
+	status=0; taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_lto_fault.py $(CHECKED_TOOL) $(dir $(CHECKED_TOOL))/fault || status=$$?; cp $(dir $(CHECKED_TOOL))/fault/*.json $(OUTPUT)/fault/; exit $$status
+
+$(CHECKED_PACKET_BUILD)/packet.native.o: $(ROOT)/kprog/test/checked_packet_native.c
+	install -d $(CHECKED_PACKET_BUILD)
+	clang-18 -O3 -march=native -foptimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-asynchronous-unwind-tables -I$(ROOT)/vendor/bpf/targets/x86/$$(cat $(KDIR)/include/config/kernel.release) -c $< -o $@
+
+.PHONY: checked-packet-host
+checked-packet-host: $(CHECKED_TOOL) $(CHECKED_PACKET_BUILD)/packet.native.o
+	install -d $(OUTPUT)/packet
+	status=0; CLANG=$(ROOT)/kprog/stock-path/bin/clang taskset -c 16-17 prlimit --as=17179869184 -- python3 $(ROOT)/kprog/test/check_checked_packet.py $(CHECKED_TOOL) $(LINKER_BINARY) /workspaces/.agent-state/kprog-ck/verified-compiler/context-lower /workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json /workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json $(CHECKED_PACKET_BUILD)/packet.native.o $(CHECKED_PACKET_BUILD)/host $(CONTEXT_TOOL) || status=$$?; if test -d $(CHECKED_PACKET_BUILD)/host; then cd $(CHECKED_PACKET_BUILD)/host; find . -type f -name '*.json' -exec cp --parents '{}' $(OUTPUT)/packet/ \;; fi; exit $$status
 
 .PHONY: identity-normal-check
 identity-normal-check: $(CONTEXT_TOOL)
