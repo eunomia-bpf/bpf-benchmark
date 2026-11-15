@@ -4,6 +4,8 @@
 # VERIFIED_WAIT_JOB propagates the completed dependency's recorded Make status.
 # VERIFIED_IMAGE_LOCK takes its shared image lock after the dependency exits.
 # VERIFIED_IMAGE_LOCK_MODE=-x selects a base writer; the default remains -s.
+# VERIFIED_TIMING_LOCK holds a shared work lease, excluding timing EX.
+# Acquire timing before image so an image rebuild cannot deadlock a timing job.
 set -euo pipefail
 run_dir=$1
 shift
@@ -26,6 +28,11 @@ if [[ -n ${VERIFIED_WAIT_JOB:-} ]]; then
         date -u +%FT%TZ > "$run_dir/finished"
         exit "$dependency_status"
     fi
+fi
+if [[ -n ${VERIFIED_TIMING_LOCK:-} ]]; then
+    printf '%s\n' "$VERIFIED_TIMING_LOCK" > "$run_dir/timing-work-lock"
+    exec 8>>"$VERIFIED_TIMING_LOCK"
+    flock -s 8
 fi
 if [[ -n ${VERIFIED_IMAGE_LOCK:-} ]]; then
     printf '%s\n' "$VERIFIED_IMAGE_LOCK" > "$run_dir/image-lock"

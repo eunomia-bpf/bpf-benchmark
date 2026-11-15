@@ -435,3 +435,7 @@ inline-helper-host:
 .PHONY: memory-b-pipeline-check
 memory-b-pipeline-check:
 	taskset -c 16-19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_memory_b_pipeline.py --frontend $(ABSOLUTE_TABLE_BUILD)/absolute.bpf.bounds-input.bc --object $(ABSOLUTE_TABLE_BUILD)/absolute.bpf.o --bounds $(CONTEXT_TOOL) --output $(OUTPUT)
+
+.PHONY: resume-owned-compiler
+resume-owned-compiler:
+	taskset -c 16 prlimit --as=536870912 -- python3 $(ROOT)/kprog/test/resume_owned_compiler.py --compiler $(RESUME_COMPILER) --launcher $(RESUME_LAUNCHER) --timing /workspaces/.agent-state/kprog-lanes/locks/timing --image /workspaces/.agent-state/kprog-lanes/locks/image --output $(OUTPUT)
