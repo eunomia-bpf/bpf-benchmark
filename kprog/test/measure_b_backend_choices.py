@@ -28,10 +28,13 @@ def main(a):
     a.output.mkdir(parents=True, exist_ok=True)
     with tarfile.open(a.archive) as outer:
         with tarfile.open(fileobj=outer.extractfile(a.member)) as request:
-            lowered = request.extractfile('request/generated/trusted_x86.bpf.bounds.bc').read()
+            retained_member = 'request/generated/trusted_x86.bpf.bounds-input.bc' if a.bounds else 'request/generated/trusted_x86.bpf.bounds.bc'
+            lowered = request.extractfile(retained_member).read()
             entry = request.extractfile('request/kernel.entry').read().decode().strip()
     observation = dict(archive=str(a.archive), member=a.member, entry=entry,
-        bounds_bytes=len(lowered), bounds_sha256=hashlib.sha256(lowered).hexdigest(),
+        retained_ir_member=retained_member, input_bytes=len(lowered),
+        input_sha256=hashlib.sha256(lowered).hexdigest(),
+        bounds_compiler=str(a.bounds) if a.bounds else None,
         compile_flags=list(map(str, worker.COMPILE_FLAGS)), scope=__doc__, cases=[])
     for name in a.case or CHOICES:
         pipe = MemoryPipeline()
@@ -39,7 +42,7 @@ def main(a):
         directory = a.output/name
         directory.mkdir(exist_ok=True)
         try:
-            initial = pipe.stage('.bounds.bc')
+            initial = pipe.stage('.bounds-input.bc' if a.bounds else '.bounds.bc')
             initial.write_bytes(lowered)
             def run(command):
                 command = list(map(str, command))
@@ -62,6 +65,10 @@ def main(a):
                 if child.returncode:
                     raise subprocess.CalledProcessError(child.returncode, command)
             obj = pipe.stage('.o')
+            if a.bounds:
+                prepared = pipe.stage('.bounds.bc')
+                run([a.bounds, initial, '-o', prepared])
+                initial = prepared
             worker._compile_simulator_backend(str(ROOT/'kprog/stock-path/bin/clang'),
                 pipe, obj, run, compiled_input=initial)
             before = pipe.stage('.before.mir').read_text()
@@ -91,5 +98,7 @@ if __name__ == '__main__':
     for name in ('archive', 'output'):
         parser.add_argument('--'+name, type=Path, required=True)
     parser.add_argument('--member', required=True)
+    parser.add_argument('--bounds', type=Path,
+                        help='Resume from retained frontend IR through this B IR compiler first')
     parser.add_argument('--case', action='append', choices=CHOICES)
     main(parser.parse_args())
