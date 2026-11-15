@@ -331,3 +331,5 @@ KEPT incremental kprog_stock.o and source; raw run archives and logs retained.
 - 2026-11-15T14:06:00Z PERF guest image PC32 check: removed scratch image copies in /var/tmp/kprog-tmp/perf/image-pc32-state; raw retained /workspaces/kprog-raw/perf/20261115-image-pc32/retry.
 
 2026-11-15T14:22:20Z PERF: canonical context-loads-v2/packet-bounds and base installed packet-bounds replaced in place (4827e435), same canonical packet-identities/backend fixture products rebuilt; no old compiler binary copy retained. Prior/new hashes and raw control/check logs kept under /workspaces/kprog-raw/perf/20261115-bounds-single. New context fixture compiler outputs stay in canonical context-loads-v2/cases, no compiled output in raw.
+
+2026-11-15T14:57Z PERF inline-I: rebuilt canonical absolute-code-tables and bmi2-specialization fixture products in place; added single inline-helper-host check executable. Raw old/new hashes/logs/debug observations retained under /workspaces/kprog-raw/perf/20261115-inline-interpreter. OTel stream measurements keep no second C/CPP/LLVM/B product; captured old canonical inputs/jobs untouched. No image/kernel/source tree copies or raw deletions.

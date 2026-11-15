@@ -1,0 +1,7731 @@
+{
+  "table": {
+    "native_cases": 1024,
+    "shared_simulator_cases": 1024,
+    "normal_b_compiled": true,
+    "image_pointers": [
+      {
+        "offset": 133,
+        "kind": 12,
+        "target": 26
+      },
+      {
+        "offset": 141,
+        "kind": 12,
+        "target": 93
+      },
+      {
+        "offset": 149,
+        "kind": 12,
+        "target": 53
+      },
+      {
+        "offset": 157,
+        "kind": 12,
+        "target": 67
+      },
+      {
+        "offset": 165,
+        "kind": 12,
+        "target": 39
+      },
+      {
+        "offset": 173,
+        "kind": 12,
+        "target": 106
+      },
+      {
+        "offset": 181,
+        "kind": 12,
+        "target": 120
+      },
+      {
+        "offset": 189,
+        "kind": 12,
+        "target": 80
+      }
+    ],
+    "cases": [
+      {
+        "seed": 0,
+        "index": 0,
+        "native": 15111065706836454676,
+        "simulator_u32": 3516067092,
+        "expected": 15111065706836454676
+      },
+      {
+        "seed": 0,
+        "index": 1,
+        "native": 16879417946180521490,
+        "simulator_u32": 3916533266,
+        "expected": 16879417946180521490
+      },
+      {
+        "seed": 0,
+        "index": 2,
+        "native": 8439708973090264381,
+        "simulator_u32": 1958270269,
+        "expected": 8439708973090264381
+      },
+      {
+        "seed": 0,
+        "index": 3,
+        "native": 5104030606217163759,
+        "simulator_u32": 1179366383,
+        "expected": 5104030606217163759
+      },
+      {
+        "seed": 0,
+        "index": 4,
+        "native": 1768352239344066831,
+        "simulator_u32": 400466191,
+        "expected": 1768352239344066831
+      },
+      {
+        "seed": 0,
+        "index": 5,
+        "native": 3602,
+        "simulator_u32": 3602,
+        "expected": 3602
+      },
+      {
+        "seed": 0,
+        "index": 6,
+        "native": 13543739579307424604,
+        "simulator_u32": 3137633116,
+        "expected": 13543739579307424604
+      },
+      {
+        "seed": 0,
+        "index": 7,
+        "native": 14146817914752534648,
+        "simulator_u32": 3203729528,
+        "expected": 14146817914752534648
+      },
+      {
+        "seed": 0,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 0,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 0,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 0,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 0,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 0,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 0,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 0,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 1,
+        "index": 0,
+        "native": 8065036452450101545,
+        "simulator_u32": 1356687657,
+        "expected": 8065036452450101545
+      },
+      {
+        "seed": 1,
+        "index": 1,
+        "native": 14188074256731013713,
+        "simulator_u32": 1733362257,
+        "expected": 14188074256731013713
+      },
+      {
+        "seed": 1,
+        "index": 2,
+        "native": 1393679718703911210,
+        "simulator_u32": 4093858090,
+        "expected": 1393679718703911210
+      },
+      {
+        "seed": 1,
+        "index": 3,
+        "native": 16504745425540362244,
+        "simulator_u32": 3314954244,
+        "expected": 16504745425540362244
+      },
+      {
+        "seed": 1,
+        "index": 4,
+        "native": 13169067058667298084,
+        "simulator_u32": 2536086820,
+        "expected": 13169067058667298084
+      },
+      {
+        "seed": 1,
+        "index": 5,
+        "native": 2599,
+        "simulator_u32": 2599,
+        "expected": 2599
+      },
+      {
+        "seed": 1,
+        "index": 6,
+        "native": 6497710324921071473,
+        "simulator_u32": 978253681,
+        "expected": 6497710324921071473
+      },
+      {
+        "seed": 1,
+        "index": 7,
+        "native": 15810159790239872225,
+        "simulator_u32": 996766945,
+        "expected": 15810159790239872225
+      },
+      {
+        "seed": 1,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 1,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 1,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 1,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 1,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 1,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 1,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 1,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 2,
+        "index": 0,
+        "native": 1019007198063748414,
+        "simulator_u32": 3492275518,
+        "expected": 1019007198063748414
+      },
+      {
+        "seed": 2,
+        "index": 1,
+        "native": 11496730567281505936,
+        "simulator_u32": 3845158544,
+        "expected": 11496730567281505936
+      },
+      {
+        "seed": 2,
+        "index": 2,
+        "native": 12794394538027101447,
+        "simulator_u32": 1934470407,
+        "expected": 12794394538027101447
+      },
+      {
+        "seed": 2,
+        "index": 3,
+        "native": 9458716171154009113,
+        "simulator_u32": 1155574809,
+        "expected": 9458716171154009113
+      },
+      {
+        "seed": 2,
+        "index": 4,
+        "native": 6123037804280912185,
+        "simulator_u32": 376674617,
+        "expected": 6123037804280912185
+      },
+      {
+        "seed": 2,
+        "index": 5,
+        "native": 1596,
+        "simulator_u32": 1596,
+        "expected": 1596
+      },
+      {
+        "seed": 2,
+        "index": 6,
+        "native": 17898425144244269958,
+        "simulator_u32": 3113841542,
+        "expected": 17898425144244269958
+      },
+      {
+        "seed": 2,
+        "index": 7,
+        "native": 17473501665727209802,
+        "simulator_u32": 3084771658,
+        "expected": 17473501665727209802
+      },
+      {
+        "seed": 2,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 2,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 2,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 2,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 2,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 2,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 2,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 2,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 3,
+        "index": 0,
+        "native": 12419722017386946899,
+        "simulator_u32": 1332896083,
+        "expected": 12419722017386946899
+      },
+      {
+        "seed": 3,
+        "index": 1,
+        "native": 8805386877831998159,
+        "simulator_u32": 1661987535,
+        "expected": 8805386877831998159
+      },
+      {
+        "seed": 3,
+        "index": 2,
+        "native": 5748365283640748412,
+        "simulator_u32": 4070058364,
+        "expected": 5748365283640748412
+      },
+      {
+        "seed": 3,
+        "index": 3,
+        "native": 2412686916767655982,
+        "simulator_u32": 3291162670,
+        "expected": 2412686916767655982
+      },
+      {
+        "seed": 3,
+        "index": 4,
+        "native": 17523752623604143438,
+        "simulator_u32": 2512295246,
+        "expected": 17523752623604143438
+      },
+      {
+        "seed": 3,
+        "index": 5,
+        "native": 593,
+        "simulator_u32": 593,
+        "expected": 593
+      },
+      {
+        "seed": 3,
+        "index": 6,
+        "native": 10852395889857916827,
+        "simulator_u32": 954462107,
+        "expected": 10852395889857916827
+      },
+      {
+        "seed": 3,
+        "index": 7,
+        "native": 690099467504995763,
+        "simulator_u32": 877809075,
+        "expected": 690099467504995763
+      },
+      {
+        "seed": 3,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 3,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 3,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 3,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 3,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 3,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 3,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 3,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 4,
+        "index": 0,
+        "native": 5373692763000593768,
+        "simulator_u32": 3468483944,
+        "expected": 5373692763000593768
+      },
+      {
+        "seed": 4,
+        "index": 1,
+        "native": 6114043188382490382,
+        "simulator_u32": 3773783822,
+        "expected": 6114043188382490382
+      },
+      {
+        "seed": 4,
+        "index": 2,
+        "native": 17149080102963946857,
+        "simulator_u32": 1910678889,
+        "expected": 17149080102963946857
+      },
+      {
+        "seed": 4,
+        "index": 3,
+        "native": 13813401736090854467,
+        "simulator_u32": 1131783235,
+        "expected": 13813401736090854467
+      },
+      {
+        "seed": 4,
+        "index": 4,
+        "native": 10477723369217757539,
+        "simulator_u32": 352883043,
+        "expected": 10477723369217757539
+      },
+      {
+        "seed": 4,
+        "index": 5,
+        "native": 32358,
+        "simulator_u32": 32358,
+        "expected": 32358
+      },
+      {
+        "seed": 4,
+        "index": 6,
+        "native": 3806366635471563696,
+        "simulator_u32": 3090049968,
+        "expected": 3806366635471563696
+      },
+      {
+        "seed": 4,
+        "index": 7,
+        "native": 2353441342992333340,
+        "simulator_u32": 2965813788,
+        "expected": 2353441342992333340
+      },
+      {
+        "seed": 4,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 4,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 4,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 4,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 4,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 4,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 4,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 4,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 5,
+        "index": 0,
+        "native": 16774407582323792253,
+        "simulator_u32": 1309104509,
+        "expected": 16774407582323792253
+      },
+      {
+        "seed": 5,
+        "index": 1,
+        "native": 3422699498932982605,
+        "simulator_u32": 1590612813,
+        "expected": 3422699498932982605
+      },
+      {
+        "seed": 5,
+        "index": 2,
+        "native": 10103050848577593670,
+        "simulator_u32": 4046266694,
+        "expected": 10103050848577593670
+      },
+      {
+        "seed": 5,
+        "index": 3,
+        "native": 6767372481704501336,
+        "simulator_u32": 3267371096,
+        "expected": 6767372481704501336
+      },
+      {
+        "seed": 5,
+        "index": 4,
+        "native": 3431694114831437176,
+        "simulator_u32": 2488503672,
+        "expected": 3431694114831437176
+      },
+      {
+        "seed": 5,
+        "index": 5,
+        "native": 31355,
+        "simulator_u32": 31355,
+        "expected": 31355
+      },
+      {
+        "seed": 5,
+        "index": 6,
+        "native": 15207081454794762181,
+        "simulator_u32": 930670533,
+        "expected": 15207081454794762181
+      },
+      {
+        "seed": 5,
+        "index": 7,
+        "native": 4016783218479670917,
+        "simulator_u32": 758851205,
+        "expected": 4016783218479670917
+      },
+      {
+        "seed": 5,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 5,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 5,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 5,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 5,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 5,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 5,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 5,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 6,
+        "index": 0,
+        "native": 9728378327937439122,
+        "simulator_u32": 3444692370,
+        "expected": 9728378327937439122
+      },
+      {
+        "seed": 6,
+        "index": 1,
+        "native": 731355809483474828,
+        "simulator_u32": 3702409100,
+        "expected": 731355809483474828
+      },
+      {
+        "seed": 6,
+        "index": 2,
+        "native": 3057021594191248819,
+        "simulator_u32": 1886895539,
+        "expected": 3057021594191248819
+      },
+      {
+        "seed": 6,
+        "index": 3,
+        "native": 18168087301027699821,
+        "simulator_u32": 1107991661,
+        "expected": 18168087301027699821
+      },
+      {
+        "seed": 6,
+        "index": 4,
+        "native": 14832408934154602893,
+        "simulator_u32": 329091469,
+        "expected": 14832408934154602893
+      },
+      {
+        "seed": 6,
+        "index": 5,
+        "native": 30352,
+        "simulator_u32": 30352,
+        "expected": 30352
+      },
+      {
+        "seed": 6,
+        "index": 6,
+        "native": 8161052200408409050,
+        "simulator_u32": 3066258394,
+        "expected": 8161052200408409050
+      },
+      {
+        "seed": 6,
+        "index": 7,
+        "native": 5680125093967008494,
+        "simulator_u32": 2846855918,
+        "expected": 5680125093967008494
+      },
+      {
+        "seed": 6,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 6,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 6,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 6,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 6,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 6,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 6,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 6,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 7,
+        "index": 0,
+        "native": 2682349073551085991,
+        "simulator_u32": 1285312935,
+        "expected": 2682349073551085991
+      },
+      {
+        "seed": 7,
+        "index": 1,
+        "native": 16486756193743518667,
+        "simulator_u32": 1519238091,
+        "expected": 16486756193743518667
+      },
+      {
+        "seed": 7,
+        "index": 2,
+        "native": 14457736413514447272,
+        "simulator_u32": 4022483368,
+        "expected": 14457736413514447272
+      },
+      {
+        "seed": 7,
+        "index": 3,
+        "native": 11122058046641346690,
+        "simulator_u32": 3243579522,
+        "expected": 11122058046641346690
+      },
+      {
+        "seed": 7,
+        "index": 4,
+        "native": 7786379679768282530,
+        "simulator_u32": 2464712098,
+        "expected": 7786379679768282530
+      },
+      {
+        "seed": 7,
+        "index": 5,
+        "native": 29349,
+        "simulator_u32": 29349,
+        "expected": 29349
+      },
+      {
+        "seed": 7,
+        "index": 6,
+        "native": 1115022946022055919,
+        "simulator_u32": 906878959,
+        "expected": 1115022946022055919
+      },
+      {
+        "seed": 7,
+        "index": 7,
+        "native": 7343466969454346071,
+        "simulator_u32": 639893335,
+        "expected": 7343466969454346071
+      },
+      {
+        "seed": 7,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 7,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 7,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 7,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 7,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 7,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 7,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 7,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 8,
+        "index": 0,
+        "native": 14083063892874284476,
+        "simulator_u32": 3420900796,
+        "expected": 14083063892874284476
+      },
+      {
+        "seed": 8,
+        "index": 1,
+        "native": 13795412504294010890,
+        "simulator_u32": 3631034378,
+        "expected": 13795412504294010890
+      },
+      {
+        "seed": 8,
+        "index": 2,
+        "native": 7411707159128094085,
+        "simulator_u32": 1863103877,
+        "expected": 7411707159128094085
+      },
+      {
+        "seed": 8,
+        "index": 3,
+        "native": 4076028792254993559,
+        "simulator_u32": 1084200087,
+        "expected": 4076028792254993559
+      },
+      {
+        "seed": 8,
+        "index": 4,
+        "native": 740350425381896631,
+        "simulator_u32": 305299895,
+        "expected": 740350425381896631
+      },
+      {
+        "seed": 8,
+        "index": 5,
+        "native": 28346,
+        "simulator_u32": 28346,
+        "expected": 28346
+      },
+      {
+        "seed": 8,
+        "index": 6,
+        "native": 12515737765345254404,
+        "simulator_u32": 3042466820,
+        "expected": 12515737765345254404
+      },
+      {
+        "seed": 8,
+        "index": 7,
+        "native": 9006808844941683648,
+        "simulator_u32": 2727898048,
+        "expected": 9006808844941683648
+      },
+      {
+        "seed": 8,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 8,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 8,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 8,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 8,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 8,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 8,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 8,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 9,
+        "index": 0,
+        "native": 7037034638487931345,
+        "simulator_u32": 1261521361,
+        "expected": 7037034638487931345
+      },
+      {
+        "seed": 9,
+        "index": 1,
+        "native": 11104068814844503113,
+        "simulator_u32": 1447863369,
+        "expected": 11104068814844503113
+      },
+      {
+        "seed": 9,
+        "index": 2,
+        "native": 365677904741741042,
+        "simulator_u32": 3998691826,
+        "expected": 365677904741741042
+      },
+      {
+        "seed": 9,
+        "index": 3,
+        "native": 15476743611578192044,
+        "simulator_u32": 3219787948,
+        "expected": 15476743611578192044
+      },
+      {
+        "seed": 9,
+        "index": 4,
+        "native": 12141065244705095116,
+        "simulator_u32": 2440887756,
+        "expected": 12141065244705095116
+      },
+      {
+        "seed": 9,
+        "index": 5,
+        "native": 27343,
+        "simulator_u32": 27343,
+        "expected": 27343
+      },
+      {
+        "seed": 9,
+        "index": 6,
+        "native": 5469708510958901273,
+        "simulator_u32": 883087385,
+        "expected": 5469708510958901273
+      },
+      {
+        "seed": 9,
+        "index": 7,
+        "native": 10670150720429021225,
+        "simulator_u32": 520935465,
+        "expected": 10670150720429021225
+      },
+      {
+        "seed": 9,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 9,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 9,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 9,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 9,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 9,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 9,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 9,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 10,
+        "index": 0,
+        "native": 18437749457811129830,
+        "simulator_u32": 3397109222,
+        "expected": 18437749457811129830
+      },
+      {
+        "seed": 10,
+        "index": 1,
+        "native": 8412725125394995336,
+        "simulator_u32": 3559659656,
+        "expected": 8412725125394995336
+      },
+      {
+        "seed": 10,
+        "index": 2,
+        "native": 11766392724064931311,
+        "simulator_u32": 1839304175,
+        "expected": 11766392724064931311
+      },
+      {
+        "seed": 10,
+        "index": 3,
+        "native": 8430714357191838913,
+        "simulator_u32": 1060408513,
+        "expected": 8430714357191838913
+      },
+      {
+        "seed": 10,
+        "index": 4,
+        "native": 5095035990318774753,
+        "simulator_u32": 281541089,
+        "expected": 5095035990318774753
+      },
+      {
+        "seed": 10,
+        "index": 5,
+        "native": 26340,
+        "simulator_u32": 26340,
+        "expected": 26340
+      },
+      {
+        "seed": 10,
+        "index": 6,
+        "native": 16870423330282099758,
+        "simulator_u32": 3018675246,
+        "expected": 16870423330282099758
+      },
+      {
+        "seed": 10,
+        "index": 7,
+        "native": 12333492595916358802,
+        "simulator_u32": 2608940178,
+        "expected": 12333492595916358802
+      },
+      {
+        "seed": 10,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 10,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 10,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 10,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 10,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 10,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 10,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 10,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 11,
+        "index": 0,
+        "native": 11391720203424776699,
+        "simulator_u32": 1237729787,
+        "expected": 11391720203424776699
+      },
+      {
+        "seed": 11,
+        "index": 1,
+        "native": 5721381435945487559,
+        "simulator_u32": 1376488647,
+        "expected": 5721381435945487559
+      },
+      {
+        "seed": 11,
+        "index": 2,
+        "native": 4720363469678578116,
+        "simulator_u32": 3974891972,
+        "expected": 4720363469678578116
+      },
+      {
+        "seed": 11,
+        "index": 3,
+        "native": 1384685102805485782,
+        "simulator_u32": 3195996374,
+        "expected": 1384685102805485782
+      },
+      {
+        "seed": 11,
+        "index": 4,
+        "native": 16495750809641940470,
+        "simulator_u32": 2417096182,
+        "expected": 16495750809641940470
+      },
+      {
+        "seed": 11,
+        "index": 5,
+        "native": 25337,
+        "simulator_u32": 25337,
+        "expected": 25337
+      },
+      {
+        "seed": 11,
+        "index": 6,
+        "native": 9824394075895746627,
+        "simulator_u32": 859295811,
+        "expected": 9824394075895746627
+      },
+      {
+        "seed": 11,
+        "index": 7,
+        "native": 13996834471403696379,
+        "simulator_u32": 401977595,
+        "expected": 13996834471403696379
+      },
+      {
+        "seed": 11,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 11,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 11,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 11,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 11,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 11,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 11,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 11,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 12,
+        "index": 0,
+        "native": 4345690949038423568,
+        "simulator_u32": 3373317648,
+        "expected": 4345690949038423568
+      },
+      {
+        "seed": 12,
+        "index": 1,
+        "native": 3030037746495979782,
+        "simulator_u32": 3488284934,
+        "expected": 3030037746495979782
+      },
+      {
+        "seed": 12,
+        "index": 2,
+        "native": 16121078289001777713,
+        "simulator_u32": 1815513649,
+        "expected": 16121078289001777713
+      },
+      {
+        "seed": 12,
+        "index": 3,
+        "native": 12785399922128684267,
+        "simulator_u32": 1036616939,
+        "expected": 12785399922128684267
+      },
+      {
+        "seed": 12,
+        "index": 4,
+        "native": 9449721555255620107,
+        "simulator_u32": 257749515,
+        "expected": 9449721555255620107
+      },
+      {
+        "seed": 12,
+        "index": 5,
+        "native": 24334,
+        "simulator_u32": 24334,
+        "expected": 24334
+      },
+      {
+        "seed": 12,
+        "index": 6,
+        "native": 2778364821509393496,
+        "simulator_u32": 2994883672,
+        "expected": 2778364821509393496
+      },
+      {
+        "seed": 12,
+        "index": 7,
+        "native": 15660176346891033956,
+        "simulator_u32": 2489982308,
+        "expected": 15660176346891033956
+      },
+      {
+        "seed": 12,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 12,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 12,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 12,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 12,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 12,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 12,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 12,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 13,
+        "index": 0,
+        "native": 15746405768361622053,
+        "simulator_u32": 1213938213,
+        "expected": 15746405768361622053
+      },
+      {
+        "seed": 13,
+        "index": 1,
+        "native": 338694057046472005,
+        "simulator_u32": 1305113925,
+        "expected": 338694057046472005
+      },
+      {
+        "seed": 13,
+        "index": 2,
+        "native": 9075049034615424558,
+        "simulator_u32": 3951101486,
+        "expected": 9075049034615424558
+      },
+      {
+        "seed": 13,
+        "index": 3,
+        "native": 5739370667742331136,
+        "simulator_u32": 3172204800,
+        "expected": 5739370667742331136
+      },
+      {
+        "seed": 13,
+        "index": 4,
+        "native": 2403692300869234208,
+        "simulator_u32": 2393304608,
+        "expected": 2403692300869234208
+      },
+      {
+        "seed": 13,
+        "index": 5,
+        "native": 23331,
+        "simulator_u32": 23331,
+        "expected": 23331
+      },
+      {
+        "seed": 13,
+        "index": 6,
+        "native": 14179079640832591981,
+        "simulator_u32": 835504237,
+        "expected": 14179079640832591981
+      },
+      {
+        "seed": 13,
+        "index": 7,
+        "native": 17323518222378371533,
+        "simulator_u32": 283019725,
+        "expected": 17323518222378371533
+      },
+      {
+        "seed": 13,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 13,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 13,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 13,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 13,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 13,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 13,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 13,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 14,
+        "index": 0,
+        "native": 8700376513975268922,
+        "simulator_u32": 3349526074,
+        "expected": 8700376513975268922
+      },
+      {
+        "seed": 14,
+        "index": 1,
+        "native": 16094094441306515844,
+        "simulator_u32": 3416910212,
+        "expected": 16094094441306515844
+      },
+      {
+        "seed": 14,
+        "index": 2,
+        "native": 2029019780229071387,
+        "simulator_u32": 1791722011,
+        "expected": 2029019780229071387
+      },
+      {
+        "seed": 14,
+        "index": 3,
+        "native": 17140085487065529621,
+        "simulator_u32": 1012825365,
+        "expected": 17140085487065529621
+      },
+      {
+        "seed": 14,
+        "index": 4,
+        "native": 13804407120192465461,
+        "simulator_u32": 233957941,
+        "expected": 13804407120192465461
+      },
+      {
+        "seed": 14,
+        "index": 5,
+        "native": 22328,
+        "simulator_u32": 22328,
+        "expected": 22328
+      },
+      {
+        "seed": 14,
+        "index": 6,
+        "native": 7133050386446238850,
+        "simulator_u32": 2971092098,
+        "expected": 7133050386446238850
+      },
+      {
+        "seed": 14,
+        "index": 7,
+        "native": 540116024156157494,
+        "simulator_u32": 2371024438,
+        "expected": 540116024156157494
+      },
+      {
+        "seed": 14,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 14,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 14,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 14,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 14,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 14,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 14,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 14,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 15,
+        "index": 0,
+        "native": 1654347259588915791,
+        "simulator_u32": 1190146639,
+        "expected": 1654347259588915791
+      },
+      {
+        "seed": 15,
+        "index": 1,
+        "native": 13402750751857008067,
+        "simulator_u32": 1233739203,
+        "expected": 13402750751857008067
+      },
+      {
+        "seed": 15,
+        "index": 2,
+        "native": 13429734599552278128,
+        "simulator_u32": 3927318128,
+        "expected": 13429734599552278128
+      },
+      {
+        "seed": 15,
+        "index": 3,
+        "native": 10094056232679176490,
+        "simulator_u32": 3148413226,
+        "expected": 10094056232679176490
+      },
+      {
+        "seed": 15,
+        "index": 4,
+        "native": 6758377865806079562,
+        "simulator_u32": 2369513034,
+        "expected": 6758377865806079562
+      },
+      {
+        "seed": 15,
+        "index": 5,
+        "native": 21325,
+        "simulator_u32": 21325,
+        "expected": 21325
+      },
+      {
+        "seed": 15,
+        "index": 6,
+        "native": 87021132059885719,
+        "simulator_u32": 811712663,
+        "expected": 87021132059885719
+      },
+      {
+        "seed": 15,
+        "index": 7,
+        "native": 2203457899643495071,
+        "simulator_u32": 164061855,
+        "expected": 2203457899643495071
+      },
+      {
+        "seed": 15,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 15,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 15,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 15,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 15,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 15,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 15,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 15,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 16,
+        "index": 0,
+        "native": 13055062078912114276,
+        "simulator_u32": 3325734500,
+        "expected": 13055062078912114276
+      },
+      {
+        "seed": 16,
+        "index": 1,
+        "native": 10711407062407500290,
+        "simulator_u32": 3345535490,
+        "expected": 10711407062407500290
+      },
+      {
+        "seed": 16,
+        "index": 2,
+        "native": 6383705345165924973,
+        "simulator_u32": 1767938669,
+        "expected": 6383705345165924973
+      },
+      {
+        "seed": 16,
+        "index": 3,
+        "native": 3048026978292823359,
+        "simulator_u32": 989033791,
+        "expected": 3048026978292823359
+      },
+      {
+        "seed": 16,
+        "index": 4,
+        "native": 18159092685129310815,
+        "simulator_u32": 210166367,
+        "expected": 18159092685129310815
+      },
+      {
+        "seed": 16,
+        "index": 5,
+        "native": 20322,
+        "simulator_u32": 20322,
+        "expected": 20322
+      },
+      {
+        "seed": 16,
+        "index": 6,
+        "native": 11487735951383084204,
+        "simulator_u32": 2947300524,
+        "expected": 11487735951383084204
+      },
+      {
+        "seed": 16,
+        "index": 7,
+        "native": 3866799775130832648,
+        "simulator_u32": 2252066568,
+        "expected": 3866799775130832648
+      },
+      {
+        "seed": 16,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 16,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 16,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 16,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 16,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 16,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 16,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 16,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 17,
+        "index": 0,
+        "native": 6009032824525761145,
+        "simulator_u32": 1166355065,
+        "expected": 6009032824525761145
+      },
+      {
+        "seed": 17,
+        "index": 1,
+        "native": 8020063372957992513,
+        "simulator_u32": 1162364481,
+        "expected": 8020063372957992513
+      },
+      {
+        "seed": 17,
+        "index": 2,
+        "native": 17784420164489123418,
+        "simulator_u32": 3903526490,
+        "expected": 17784420164489123418
+      },
+      {
+        "seed": 17,
+        "index": 3,
+        "native": 14448741797616021844,
+        "simulator_u32": 3124621652,
+        "expected": 14448741797616021844
+      },
+      {
+        "seed": 17,
+        "index": 4,
+        "native": 11113063430742924916,
+        "simulator_u32": 2345721460,
+        "expected": 11113063430742924916
+      },
+      {
+        "seed": 17,
+        "index": 5,
+        "native": 19319,
+        "simulator_u32": 19319,
+        "expected": 19319
+      },
+      {
+        "seed": 17,
+        "index": 6,
+        "native": 4441706696996731073,
+        "simulator_u32": 787921089,
+        "expected": 4441706696996731073
+      },
+      {
+        "seed": 17,
+        "index": 7,
+        "native": 5530141650618170225,
+        "simulator_u32": 45103985,
+        "expected": 5530141650618170225
+      },
+      {
+        "seed": 17,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 17,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 17,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 17,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 17,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 17,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 17,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 17,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 18,
+        "index": 0,
+        "native": 17409747643848959630,
+        "simulator_u32": 3301942926,
+        "expected": 17409747643848959630
+      },
+      {
+        "seed": 18,
+        "index": 1,
+        "native": 5328719683508484736,
+        "simulator_u32": 3274160768,
+        "expected": 5328719683508484736
+      },
+      {
+        "seed": 18,
+        "index": 2,
+        "native": 10738390910102770359,
+        "simulator_u32": 1744147127,
+        "expected": 10738390910102770359
+      },
+      {
+        "seed": 18,
+        "index": 3,
+        "native": 7402712543229668713,
+        "simulator_u32": 965242217,
+        "expected": 7402712543229668713
+      },
+      {
+        "seed": 18,
+        "index": 4,
+        "native": 4067034176356604553,
+        "simulator_u32": 186374793,
+        "expected": 4067034176356604553
+      },
+      {
+        "seed": 18,
+        "index": 5,
+        "native": 18316,
+        "simulator_u32": 18316,
+        "expected": 18316
+      },
+      {
+        "seed": 18,
+        "index": 6,
+        "native": 15842421516319929558,
+        "simulator_u32": 2923508950,
+        "expected": 15842421516319929558
+      },
+      {
+        "seed": 18,
+        "index": 7,
+        "native": 7193483526105507802,
+        "simulator_u32": 2133108698,
+        "expected": 7193483526105507802
+      },
+      {
+        "seed": 18,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 18,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 18,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 18,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 18,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 18,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 18,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 18,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 19,
+        "index": 0,
+        "native": 10363718389462606499,
+        "simulator_u32": 1142563491,
+        "expected": 10363718389462606499
+      },
+      {
+        "seed": 19,
+        "index": 1,
+        "native": 2637375994058976959,
+        "simulator_u32": 1090989759,
+        "expected": 2637375994058976959
+      },
+      {
+        "seed": 19,
+        "index": 2,
+        "native": 3692361655716409004,
+        "simulator_u32": 3879726764,
+        "expected": 3692361655716409004
+      },
+      {
+        "seed": 19,
+        "index": 3,
+        "native": 356683288843315582,
+        "simulator_u32": 3100830078,
+        "expected": 356683288843315582
+      },
+      {
+        "seed": 19,
+        "index": 4,
+        "native": 15467748995679770270,
+        "simulator_u32": 2321929886,
+        "expected": 15467748995679770270
+      },
+      {
+        "seed": 19,
+        "index": 5,
+        "native": 17313,
+        "simulator_u32": 17313,
+        "expected": 17313
+      },
+      {
+        "seed": 19,
+        "index": 6,
+        "native": 8796392261933576427,
+        "simulator_u32": 764129515,
+        "expected": 8796392261933576427
+      },
+      {
+        "seed": 19,
+        "index": 7,
+        "native": 8856825401592845379,
+        "simulator_u32": 4221113411,
+        "expected": 8856825401592845379
+      },
+      {
+        "seed": 19,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 19,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 19,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 19,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 19,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 19,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 19,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 19,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 20,
+        "index": 0,
+        "native": 3317689135076253368,
+        "simulator_u32": 3278151352,
+        "expected": 3317689135076253368
+      },
+      {
+        "seed": 20,
+        "index": 1,
+        "native": 18392776378319020798,
+        "simulator_u32": 3202786046,
+        "expected": 18392776378319020798
+      },
+      {
+        "seed": 20,
+        "index": 2,
+        "native": 15093076475039607449,
+        "simulator_u32": 1720347289,
+        "expected": 15093076475039607449
+      },
+      {
+        "seed": 20,
+        "index": 3,
+        "native": 11757398108166514067,
+        "simulator_u32": 941450643,
+        "expected": 11757398108166514067
+      },
+      {
+        "seed": 20,
+        "index": 4,
+        "native": 8421719741293449907,
+        "simulator_u32": 162583219,
+        "expected": 8421719741293449907
+      },
+      {
+        "seed": 20,
+        "index": 5,
+        "native": 16310,
+        "simulator_u32": 16310,
+        "expected": 16310
+      },
+      {
+        "seed": 20,
+        "index": 6,
+        "native": 1750363007547223296,
+        "simulator_u32": 2899717376,
+        "expected": 1750363007547223296
+      },
+      {
+        "seed": 20,
+        "index": 7,
+        "native": 10520167277080182956,
+        "simulator_u32": 2014150828,
+        "expected": 10520167277080182956
+      },
+      {
+        "seed": 20,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 20,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 20,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 20,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 20,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 20,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 20,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 20,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 21,
+        "index": 0,
+        "native": 14718403954399451853,
+        "simulator_u32": 1118771917,
+        "expected": 14718403954399451853
+      },
+      {
+        "seed": 21,
+        "index": 1,
+        "native": 15701432688869513021,
+        "simulator_u32": 1019615037,
+        "expected": 15701432688869513021
+      },
+      {
+        "seed": 21,
+        "index": 2,
+        "native": 8047047220653254390,
+        "simulator_u32": 3855935222,
+        "expected": 8047047220653254390
+      },
+      {
+        "seed": 21,
+        "index": 3,
+        "native": 4711368853780160936,
+        "simulator_u32": 3077038504,
+        "expected": 4711368853780160936
+      },
+      {
+        "seed": 21,
+        "index": 4,
+        "native": 1375690486907064008,
+        "simulator_u32": 2298138312,
+        "expected": 1375690486907064008
+      },
+      {
+        "seed": 21,
+        "index": 5,
+        "native": 15307,
+        "simulator_u32": 15307,
+        "expected": 15307
+      },
+      {
+        "seed": 21,
+        "index": 6,
+        "native": 13151077826870421781,
+        "simulator_u32": 740337941,
+        "expected": 13151077826870421781
+      },
+      {
+        "seed": 21,
+        "index": 7,
+        "native": 12183509152567520533,
+        "simulator_u32": 4102155541,
+        "expected": 12183509152567520533
+      },
+      {
+        "seed": 21,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 21,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 21,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 21,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 21,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 21,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 21,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 21,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 22,
+        "index": 0,
+        "native": 7672374700013098722,
+        "simulator_u32": 3254359778,
+        "expected": 7672374700013098722
+      },
+      {
+        "seed": 22,
+        "index": 1,
+        "native": 13010088999420005244,
+        "simulator_u32": 3131411324,
+        "expected": 13010088999420005244
+      },
+      {
+        "seed": 22,
+        "index": 2,
+        "native": 1001017966266901219,
+        "simulator_u32": 1696555747,
+        "expected": 1001017966266901219
+      },
+      {
+        "seed": 22,
+        "index": 3,
+        "native": 16112083673103359421,
+        "simulator_u32": 917659069,
+        "expected": 16112083673103359421
+      },
+      {
+        "seed": 22,
+        "index": 4,
+        "native": 12776405306230295261,
+        "simulator_u32": 138791645,
+        "expected": 12776405306230295261
+      },
+      {
+        "seed": 22,
+        "index": 5,
+        "native": 14304,
+        "simulator_u32": 14304,
+        "expected": 14304
+      },
+      {
+        "seed": 22,
+        "index": 6,
+        "native": 6105048572484068650,
+        "simulator_u32": 2875925802,
+        "expected": 6105048572484068650
+      },
+      {
+        "seed": 22,
+        "index": 7,
+        "native": 13846851028054858110,
+        "simulator_u32": 1895192958,
+        "expected": 13846851028054858110
+      },
+      {
+        "seed": 22,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 22,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 22,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 22,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 22,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 22,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 22,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 22,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 23,
+        "index": 0,
+        "native": 626345445626745591,
+        "simulator_u32": 1094980343,
+        "expected": 626345445626745591
+      },
+      {
+        "seed": 23,
+        "index": 1,
+        "native": 10318745309970497467,
+        "simulator_u32": 948240315,
+        "expected": 10318745309970497467
+      },
+      {
+        "seed": 23,
+        "index": 2,
+        "native": 12401732785590107864,
+        "simulator_u32": 3832151768,
+        "expected": 12401732785590107864
+      },
+      {
+        "seed": 23,
+        "index": 3,
+        "native": 9066054418717006290,
+        "simulator_u32": 3053246930,
+        "expected": 9066054418717006290
+      },
+      {
+        "seed": 23,
+        "index": 4,
+        "native": 5730376051843909362,
+        "simulator_u32": 2274346738,
+        "expected": 5730376051843909362
+      },
+      {
+        "seed": 23,
+        "index": 5,
+        "native": 13301,
+        "simulator_u32": 13301,
+        "expected": 13301
+      },
+      {
+        "seed": 23,
+        "index": 6,
+        "native": 17505763391807267135,
+        "simulator_u32": 716546367,
+        "expected": 17505763391807267135
+      },
+      {
+        "seed": 23,
+        "index": 7,
+        "native": 15510192903542195687,
+        "simulator_u32": 3983197671,
+        "expected": 15510192903542195687
+      },
+      {
+        "seed": 23,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 23,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 23,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 23,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 23,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 23,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 23,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 23,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 24,
+        "index": 0,
+        "native": 12027060264949944076,
+        "simulator_u32": 3230568204,
+        "expected": 12027060264949944076
+      },
+      {
+        "seed": 24,
+        "index": 1,
+        "native": 7627401620520989690,
+        "simulator_u32": 3060036602,
+        "expected": 7627401620520989690
+      },
+      {
+        "seed": 24,
+        "index": 2,
+        "native": 5355703531203754805,
+        "simulator_u32": 1672772405,
+        "expected": 5355703531203754805
+      },
+      {
+        "seed": 24,
+        "index": 3,
+        "native": 2020025164330653159,
+        "simulator_u32": 893867495,
+        "expected": 2020025164330653159
+      },
+      {
+        "seed": 24,
+        "index": 4,
+        "native": 17131090871167140615,
+        "simulator_u32": 115000071,
+        "expected": 17131090871167140615
+      },
+      {
+        "seed": 24,
+        "index": 5,
+        "native": 12298,
+        "simulator_u32": 12298,
+        "expected": 12298
+      },
+      {
+        "seed": 24,
+        "index": 6,
+        "native": 10459734137420914004,
+        "simulator_u32": 2852134228,
+        "expected": 10459734137420914004
+      },
+      {
+        "seed": 24,
+        "index": 7,
+        "native": 17173534779029533264,
+        "simulator_u32": 1776235088,
+        "expected": 17173534779029533264
+      },
+      {
+        "seed": 24,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 24,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 24,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 24,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 24,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 24,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 24,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 24,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 25,
+        "index": 0,
+        "native": 4981031010563590945,
+        "simulator_u32": 1071188769,
+        "expected": 4981031010563590945
+      },
+      {
+        "seed": 25,
+        "index": 1,
+        "native": 4936057931071481913,
+        "simulator_u32": 876865593,
+        "expected": 4936057931071481913
+      },
+      {
+        "seed": 25,
+        "index": 2,
+        "native": 16756418350526953250,
+        "simulator_u32": 3808360226,
+        "expected": 16756418350526953250
+      },
+      {
+        "seed": 25,
+        "index": 3,
+        "native": 13420739983653851644,
+        "simulator_u32": 3029455356,
+        "expected": 13420739983653851644
+      },
+      {
+        "seed": 25,
+        "index": 4,
+        "native": 10085061616780754716,
+        "simulator_u32": 2250555164,
+        "expected": 10085061616780754716
+      },
+      {
+        "seed": 25,
+        "index": 5,
+        "native": 11295,
+        "simulator_u32": 11295,
+        "expected": 11295
+      },
+      {
+        "seed": 25,
+        "index": 6,
+        "native": 3413704883034560873,
+        "simulator_u32": 692754793,
+        "expected": 3413704883034560873
+      },
+      {
+        "seed": 25,
+        "index": 7,
+        "native": 390132580807319225,
+        "simulator_u32": 3864239801,
+        "expected": 390132580807319225
+      },
+      {
+        "seed": 25,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 25,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 25,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 25,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 25,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 25,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 25,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 25,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 26,
+        "index": 0,
+        "native": 16381745829886789430,
+        "simulator_u32": 3206776630,
+        "expected": 16381745829886789430
+      },
+      {
+        "seed": 26,
+        "index": 1,
+        "native": 2244714241621974136,
+        "simulator_u32": 2988661880,
+        "expected": 2244714241621974136
+      },
+      {
+        "seed": 26,
+        "index": 2,
+        "native": 9710389096140600095,
+        "simulator_u32": 1648980767,
+        "expected": 9710389096140600095
+      },
+      {
+        "seed": 26,
+        "index": 3,
+        "native": 6374710729267498513,
+        "simulator_u32": 870075921,
+        "expected": 6374710729267498513
+      },
+      {
+        "seed": 26,
+        "index": 4,
+        "native": 3039032362394434353,
+        "simulator_u32": 91208497,
+        "expected": 3039032362394434353
+      },
+      {
+        "seed": 26,
+        "index": 5,
+        "native": 10292,
+        "simulator_u32": 10292,
+        "expected": 10292
+      },
+      {
+        "seed": 26,
+        "index": 6,
+        "native": 14814419702357759358,
+        "simulator_u32": 2828342654,
+        "expected": 14814419702357759358
+      },
+      {
+        "seed": 26,
+        "index": 7,
+        "native": 2053474456294656802,
+        "simulator_u32": 1657277218,
+        "expected": 2053474456294656802
+      },
+      {
+        "seed": 26,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 26,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 26,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 26,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 26,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 26,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 26,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 26,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 27,
+        "index": 0,
+        "native": 9335716575500436299,
+        "simulator_u32": 1047397195,
+        "expected": 9335716575500436299
+      },
+      {
+        "seed": 27,
+        "index": 1,
+        "native": 18000114625882017975,
+        "simulator_u32": 805490871,
+        "expected": 18000114625882017975
+      },
+      {
+        "seed": 27,
+        "index": 2,
+        "native": 2664359841754238836,
+        "simulator_u32": 3784560500,
+        "expected": 2664359841754238836
+      },
+      {
+        "seed": 27,
+        "index": 3,
+        "native": 17775425548590696998,
+        "simulator_u32": 3005663782,
+        "expected": 17775425548590696998
+      },
+      {
+        "seed": 27,
+        "index": 4,
+        "native": 14439747181717600070,
+        "simulator_u32": 2226763590,
+        "expected": 14439747181717600070
+      },
+      {
+        "seed": 27,
+        "index": 5,
+        "native": 9289,
+        "simulator_u32": 9289,
+        "expected": 9289
+      },
+      {
+        "seed": 27,
+        "index": 6,
+        "native": 7768390447971406227,
+        "simulator_u32": 668963219,
+        "expected": 7768390447971406227
+      },
+      {
+        "seed": 27,
+        "index": 7,
+        "native": 3716816331781994379,
+        "simulator_u32": 3745281931,
+        "expected": 3716816331781994379
+      },
+      {
+        "seed": 27,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 27,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 27,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 27,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 27,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 27,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 27,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 27,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 28,
+        "index": 0,
+        "native": 2289687321114083168,
+        "simulator_u32": 3182985056,
+        "expected": 2289687321114083168
+      },
+      {
+        "seed": 28,
+        "index": 1,
+        "native": 15308770936432510198,
+        "simulator_u32": 2917287158,
+        "expected": 15308770936432510198
+      },
+      {
+        "seed": 28,
+        "index": 2,
+        "native": 14065074661077437281,
+        "simulator_u32": 1625181025,
+        "expected": 14065074661077437281
+      },
+      {
+        "seed": 28,
+        "index": 3,
+        "native": 10729396294204343867,
+        "simulator_u32": 846284347,
+        "expected": 10729396294204343867
+      },
+      {
+        "seed": 28,
+        "index": 4,
+        "native": 7393717927331279707,
+        "simulator_u32": 67416923,
+        "expected": 7393717927331279707
+      },
+      {
+        "seed": 28,
+        "index": 5,
+        "native": 8286,
+        "simulator_u32": 8286,
+        "expected": 8286
+      },
+      {
+        "seed": 28,
+        "index": 6,
+        "native": 722361193585053096,
+        "simulator_u32": 2804551080,
+        "expected": 722361193585053096
+      },
+      {
+        "seed": 28,
+        "index": 7,
+        "native": 5380158207269331956,
+        "simulator_u32": 1538319348,
+        "expected": 5380158207269331956
+      },
+      {
+        "seed": 28,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 28,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 28,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 28,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 28,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 28,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 28,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 28,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 29,
+        "index": 0,
+        "native": 13690402140437281653,
+        "simulator_u32": 1023605621,
+        "expected": 13690402140437281653
+      },
+      {
+        "seed": 29,
+        "index": 1,
+        "native": 12617427246983002421,
+        "simulator_u32": 734116149,
+        "expected": 12617427246983002421
+      },
+      {
+        "seed": 29,
+        "index": 2,
+        "native": 7019045406691084126,
+        "simulator_u32": 3760768862,
+        "expected": 7019045406691084126
+      },
+      {
+        "seed": 29,
+        "index": 3,
+        "native": 3683367039817990736,
+        "simulator_u32": 2981872208,
+        "expected": 3683367039817990736
+      },
+      {
+        "seed": 29,
+        "index": 4,
+        "native": 347688672944893808,
+        "simulator_u32": 2202972016,
+        "expected": 347688672944893808
+      },
+      {
+        "seed": 29,
+        "index": 5,
+        "native": 7283,
+        "simulator_u32": 7283,
+        "expected": 7283
+      },
+      {
+        "seed": 29,
+        "index": 6,
+        "native": 12123076012908251581,
+        "simulator_u32": 645171645,
+        "expected": 12123076012908251581
+      },
+      {
+        "seed": 29,
+        "index": 7,
+        "native": 7043500082756669533,
+        "simulator_u32": 3626324061,
+        "expected": 7043500082756669533
+      },
+      {
+        "seed": 29,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 29,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 29,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 29,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 29,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 29,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 29,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 29,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 30,
+        "index": 0,
+        "native": 6644372886050928522,
+        "simulator_u32": 3159193482,
+        "expected": 6644372886050928522
+      },
+      {
+        "seed": 30,
+        "index": 1,
+        "native": 9926083557533494644,
+        "simulator_u32": 2845912436,
+        "expected": 9926083557533494644
+      },
+      {
+        "seed": 30,
+        "index": 2,
+        "native": 18419760226014282571,
+        "simulator_u32": 1601389387,
+        "expected": 18419760226014282571
+      },
+      {
+        "seed": 30,
+        "index": 3,
+        "native": 15084081859141189221,
+        "simulator_u32": 822492773,
+        "expected": 15084081859141189221
+      },
+      {
+        "seed": 30,
+        "index": 4,
+        "native": 11748403492268125061,
+        "simulator_u32": 43625349,
+        "expected": 11748403492268125061
+      },
+      {
+        "seed": 30,
+        "index": 5,
+        "native": 6280,
+        "simulator_u32": 6280,
+        "expected": 6280
+      },
+      {
+        "seed": 30,
+        "index": 6,
+        "native": 5077046758521898450,
+        "simulator_u32": 2780759506,
+        "expected": 5077046758521898450
+      },
+      {
+        "seed": 30,
+        "index": 7,
+        "native": 8706841958244007110,
+        "simulator_u32": 1419361478,
+        "expected": 8706841958244007110
+      },
+      {
+        "seed": 30,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 30,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 30,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 30,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 30,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 30,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 30,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 30,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 31,
+        "index": 0,
+        "native": 18045087705374127007,
+        "simulator_u32": 999814047,
+        "expected": 18045087705374127007
+      },
+      {
+        "seed": 31,
+        "index": 1,
+        "native": 7234739868083986867,
+        "simulator_u32": 662741427,
+        "expected": 7234739868083986867
+      },
+      {
+        "seed": 31,
+        "index": 2,
+        "native": 11373730971627937696,
+        "simulator_u32": 3736985504,
+        "expected": 11373730971627937696
+      },
+      {
+        "seed": 31,
+        "index": 3,
+        "native": 8038052604754836090,
+        "simulator_u32": 2958080634,
+        "expected": 8038052604754836090
+      },
+      {
+        "seed": 31,
+        "index": 4,
+        "native": 4702374237881739162,
+        "simulator_u32": 2179180442,
+        "expected": 4702374237881739162
+      },
+      {
+        "seed": 31,
+        "index": 5,
+        "native": 5277,
+        "simulator_u32": 5277,
+        "expected": 5277
+      },
+      {
+        "seed": 31,
+        "index": 6,
+        "native": 16477761577845096935,
+        "simulator_u32": 621380071,
+        "expected": 16477761577845096935
+      },
+      {
+        "seed": 31,
+        "index": 7,
+        "native": 10370183833731344687,
+        "simulator_u32": 3507366191,
+        "expected": 10370183833731344687
+      },
+      {
+        "seed": 31,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 31,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 31,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 31,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 31,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 31,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 31,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 31,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 32,
+        "index": 0,
+        "native": 10999058450987773876,
+        "simulator_u32": 3135401908,
+        "expected": 10999058450987773876
+      },
+      {
+        "seed": 32,
+        "index": 1,
+        "native": 4543396178634479090,
+        "simulator_u32": 2774537714,
+        "expected": 4543396178634479090
+      },
+      {
+        "seed": 32,
+        "index": 2,
+        "native": 4327701717241584541,
+        "simulator_u32": 1577606045,
+        "expected": 4327701717241584541
+      },
+      {
+        "seed": 32,
+        "index": 3,
+        "native": 992023350368482959,
+        "simulator_u32": 798701199,
+        "expected": 992023350368482959
+      },
+      {
+        "seed": 32,
+        "index": 4,
+        "native": 16103089057204970415,
+        "simulator_u32": 19833775,
+        "expected": 16103089057204970415
+      },
+      {
+        "seed": 32,
+        "index": 5,
+        "native": 4274,
+        "simulator_u32": 4274,
+        "expected": 4274
+      },
+      {
+        "seed": 32,
+        "index": 6,
+        "native": 9431732323458743804,
+        "simulator_u32": 2756967932,
+        "expected": 9431732323458743804
+      },
+      {
+        "seed": 32,
+        "index": 7,
+        "native": 12033525709218682264,
+        "simulator_u32": 1300403608,
+        "expected": 12033525709218682264
+      },
+      {
+        "seed": 32,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 32,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 32,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 32,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 32,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 32,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 32,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 32,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 33,
+        "index": 0,
+        "native": 3953029196601420745,
+        "simulator_u32": 976022473,
+        "expected": 3953029196601420745
+      },
+      {
+        "seed": 33,
+        "index": 1,
+        "native": 1852052489184971313,
+        "simulator_u32": 591366705,
+        "expected": 1852052489184971313
+      },
+      {
+        "seed": 33,
+        "index": 2,
+        "native": 15728416536564782986,
+        "simulator_u32": 3713193866,
+        "expected": 15728416536564782986
+      },
+      {
+        "seed": 33,
+        "index": 3,
+        "native": 12392738169691681444,
+        "simulator_u32": 2934289060,
+        "expected": 12392738169691681444
+      },
+      {
+        "seed": 33,
+        "index": 4,
+        "native": 9057059802818584516,
+        "simulator_u32": 2155388868,
+        "expected": 9057059802818584516
+      },
+      {
+        "seed": 33,
+        "index": 5,
+        "native": 3271,
+        "simulator_u32": 3271,
+        "expected": 3271
+      },
+      {
+        "seed": 33,
+        "index": 6,
+        "native": 2385703069072390673,
+        "simulator_u32": 597588497,
+        "expected": 2385703069072390673
+      },
+      {
+        "seed": 33,
+        "index": 7,
+        "native": 13696867584706019841,
+        "simulator_u32": 3388408321,
+        "expected": 13696867584706019841
+      },
+      {
+        "seed": 33,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 33,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 33,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 33,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 33,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 33,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 33,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 33,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 34,
+        "index": 0,
+        "native": 15353744015924619230,
+        "simulator_u32": 3111610334,
+        "expected": 15353744015924619230
+      },
+      {
+        "seed": 34,
+        "index": 1,
+        "native": 17607452873445015152,
+        "simulator_u32": 2703162992,
+        "expected": 17607452873445015152
+      },
+      {
+        "seed": 34,
+        "index": 2,
+        "native": 8682387282178429927,
+        "simulator_u32": 1553814503,
+        "expected": 8682387282178429927
+      },
+      {
+        "seed": 34,
+        "index": 3,
+        "native": 5346708915305328313,
+        "simulator_u32": 774909625,
+        "expected": 5346708915305328313
+      },
+      {
+        "seed": 34,
+        "index": 4,
+        "native": 2011030548432264153,
+        "simulator_u32": 4291009497,
+        "expected": 2011030548432264153
+      },
+      {
+        "seed": 34,
+        "index": 5,
+        "native": 2268,
+        "simulator_u32": 2268,
+        "expected": 2268
+      },
+      {
+        "seed": 34,
+        "index": 6,
+        "native": 13786417888395589158,
+        "simulator_u32": 2733176358,
+        "expected": 13786417888395589158
+      },
+      {
+        "seed": 34,
+        "index": 7,
+        "native": 15360209460193357418,
+        "simulator_u32": 1181445738,
+        "expected": 15360209460193357418
+      },
+      {
+        "seed": 34,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 34,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 34,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 34,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 34,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 34,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 34,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 34,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 35,
+        "index": 0,
+        "native": 8307714761538266099,
+        "simulator_u32": 952230899,
+        "expected": 8307714761538266099
+      },
+      {
+        "seed": 35,
+        "index": 1,
+        "native": 14916109183995507375,
+        "simulator_u32": 519991983,
+        "expected": 14916109183995507375
+      },
+      {
+        "seed": 35,
+        "index": 2,
+        "native": 1636358027792068572,
+        "simulator_u32": 3689394140,
+        "expected": 1636358027792068572
+      },
+      {
+        "seed": 35,
+        "index": 3,
+        "native": 16747423734628526798,
+        "simulator_u32": 2910497486,
+        "expected": 16747423734628526798
+      },
+      {
+        "seed": 35,
+        "index": 4,
+        "native": 13411745367755429870,
+        "simulator_u32": 2131597294,
+        "expected": 13411745367755429870
+      },
+      {
+        "seed": 35,
+        "index": 5,
+        "native": 1265,
+        "simulator_u32": 1265,
+        "expected": 1265
+      },
+      {
+        "seed": 35,
+        "index": 6,
+        "native": 6740388634009236027,
+        "simulator_u32": 573796923,
+        "expected": 6740388634009236027
+      },
+      {
+        "seed": 35,
+        "index": 7,
+        "native": 17023551335680694995,
+        "simulator_u32": 3269450451,
+        "expected": 17023551335680694995
+      },
+      {
+        "seed": 35,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 35,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 35,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 35,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 35,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 35,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 35,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 35,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 36,
+        "index": 0,
+        "native": 1261685507151912968,
+        "simulator_u32": 3087818760,
+        "expected": 1261685507151912968
+      },
+      {
+        "seed": 36,
+        "index": 1,
+        "native": 12224765494545999598,
+        "simulator_u32": 2631788270,
+        "expected": 12224765494545999598
+      },
+      {
+        "seed": 36,
+        "index": 2,
+        "native": 13037072847115267017,
+        "simulator_u32": 1530014665,
+        "expected": 13037072847115267017
+      },
+      {
+        "seed": 36,
+        "index": 3,
+        "native": 9701394480242173667,
+        "simulator_u32": 751118051,
+        "expected": 9701394480242173667
+      },
+      {
+        "seed": 36,
+        "index": 4,
+        "native": 6365716113369109507,
+        "simulator_u32": 4267217923,
+        "expected": 6365716113369109507
+      },
+      {
+        "seed": 36,
+        "index": 5,
+        "native": 262,
+        "simulator_u32": 262,
+        "expected": 262
+      },
+      {
+        "seed": 36,
+        "index": 6,
+        "native": 18141103453332434512,
+        "simulator_u32": 2709384784,
+        "expected": 18141103453332434512
+      },
+      {
+        "seed": 36,
+        "index": 7,
+        "native": 240149137458480956,
+        "simulator_u32": 1062487868,
+        "expected": 240149137458480956
+      },
+      {
+        "seed": 36,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 36,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 36,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 36,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 36,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 36,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 36,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 36,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 37,
+        "index": 0,
+        "native": 12662400326475111453,
+        "simulator_u32": 928439325,
+        "expected": 12662400326475111453
+      },
+      {
+        "seed": 37,
+        "index": 1,
+        "native": 9533421805096491821,
+        "simulator_u32": 448617261,
+        "expected": 9533421805096491821
+      },
+      {
+        "seed": 37,
+        "index": 2,
+        "native": 5991043592728912934,
+        "simulator_u32": 3665601574,
+        "expected": 5991043592728912934
+      },
+      {
+        "seed": 37,
+        "index": 3,
+        "native": 2655365225855820536,
+        "simulator_u32": 2886705912,
+        "expected": 2655365225855820536
+      },
+      {
+        "seed": 37,
+        "index": 4,
+        "native": 17766430932692275224,
+        "simulator_u32": 2107805720,
+        "expected": 17766430932692275224
+      },
+      {
+        "seed": 37,
+        "index": 5,
+        "native": 32027,
+        "simulator_u32": 32027,
+        "expected": 32027
+      },
+      {
+        "seed": 37,
+        "index": 6,
+        "native": 11095074198946081381,
+        "simulator_u32": 550005349,
+        "expected": 11095074198946081381
+      },
+      {
+        "seed": 37,
+        "index": 7,
+        "native": 1903491012945818533,
+        "simulator_u32": 3150492581,
+        "expected": 1903491012945818533
+      },
+      {
+        "seed": 37,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 37,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 37,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 37,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 37,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 37,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 37,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 37,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 38,
+        "index": 0,
+        "native": 5616371072088758322,
+        "simulator_u32": 3064027186,
+        "expected": 5616371072088758322
+      },
+      {
+        "seed": 38,
+        "index": 1,
+        "native": 6842078115646984044,
+        "simulator_u32": 2560413548,
+        "expected": 6842078115646984044
+      },
+      {
+        "seed": 38,
+        "index": 2,
+        "native": 17391758412052111379,
+        "simulator_u32": 1506222099,
+        "expected": 17391758412052111379
+      },
+      {
+        "seed": 38,
+        "index": 3,
+        "native": 14056080045179019021,
+        "simulator_u32": 727326477,
+        "expected": 14056080045179019021
+      },
+      {
+        "seed": 38,
+        "index": 4,
+        "native": 10720401678305954861,
+        "simulator_u32": 4243426349,
+        "expected": 10720401678305954861
+      },
+      {
+        "seed": 38,
+        "index": 5,
+        "native": 31024,
+        "simulator_u32": 31024,
+        "expected": 31024
+      },
+      {
+        "seed": 38,
+        "index": 6,
+        "native": 4049044944559728250,
+        "simulator_u32": 2685593210,
+        "expected": 4049044944559728250
+      },
+      {
+        "seed": 38,
+        "index": 7,
+        "native": 3566832888433156110,
+        "simulator_u32": 943529998,
+        "expected": 3566832888433156110
+      },
+      {
+        "seed": 38,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 38,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 38,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 38,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 38,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 38,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 38,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 38,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 39,
+        "index": 0,
+        "native": 17017085891411956807,
+        "simulator_u32": 904647751,
+        "expected": 17017085891411956807
+      },
+      {
+        "seed": 39,
+        "index": 1,
+        "native": 4150734426197476267,
+        "simulator_u32": 377242539,
+        "expected": 4150734426197476267
+      },
+      {
+        "seed": 39,
+        "index": 2,
+        "native": 10345729157665766408,
+        "simulator_u32": 3641818120,
+        "expected": 10345729157665766408
+      },
+      {
+        "seed": 39,
+        "index": 3,
+        "native": 7010050790792665890,
+        "simulator_u32": 2862914338,
+        "expected": 7010050790792665890
+      },
+      {
+        "seed": 39,
+        "index": 4,
+        "native": 3674372423919568962,
+        "simulator_u32": 2084014146,
+        "expected": 3674372423919568962
+      },
+      {
+        "seed": 39,
+        "index": 5,
+        "native": 30021,
+        "simulator_u32": 30021,
+        "expected": 30021
+      },
+      {
+        "seed": 39,
+        "index": 6,
+        "native": 15449759763882926735,
+        "simulator_u32": 526213775,
+        "expected": 15449759763882926735
+      },
+      {
+        "seed": 39,
+        "index": 7,
+        "native": 5230174763920493687,
+        "simulator_u32": 3031534711,
+        "expected": 5230174763920493687
+      },
+      {
+        "seed": 39,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 39,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 39,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 39,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 39,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 39,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 39,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 39,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 40,
+        "index": 0,
+        "native": 9971056637025603676,
+        "simulator_u32": 3040235612,
+        "expected": 9971056637025603676
+      },
+      {
+        "seed": 40,
+        "index": 1,
+        "native": 1459390736747968490,
+        "simulator_u32": 2489038826,
+        "expected": 1459390736747968490
+      },
+      {
+        "seed": 40,
+        "index": 2,
+        "native": 3299699903279413349,
+        "simulator_u32": 1482438757,
+        "expected": 3299699903279413349
+      },
+      {
+        "seed": 40,
+        "index": 3,
+        "native": 18410765610115864375,
+        "simulator_u32": 703534903,
+        "expected": 18410765610115864375
+      },
+      {
+        "seed": 40,
+        "index": 4,
+        "native": 15075087243242800215,
+        "simulator_u32": 4219634775,
+        "expected": 15075087243242800215
+      },
+      {
+        "seed": 40,
+        "index": 5,
+        "native": 29018,
+        "simulator_u32": 29018,
+        "expected": 29018
+      },
+      {
+        "seed": 40,
+        "index": 6,
+        "native": 8403730509496573604,
+        "simulator_u32": 2661801636,
+        "expected": 8403730509496573604
+      },
+      {
+        "seed": 40,
+        "index": 7,
+        "native": 6893516639407831264,
+        "simulator_u32": 824572128,
+        "expected": 6893516639407831264
+      },
+      {
+        "seed": 40,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 40,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 40,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 40,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 40,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 40,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 40,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 40,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 41,
+        "index": 0,
+        "native": 2925027382639250545,
+        "simulator_u32": 880856177,
+        "expected": 2925027382639250545
+      },
+      {
+        "seed": 41,
+        "index": 1,
+        "native": 17214791121008012329,
+        "simulator_u32": 305867817,
+        "expected": 17214791121008012329
+      },
+      {
+        "seed": 41,
+        "index": 2,
+        "native": 14700414722602611794,
+        "simulator_u32": 3618026578,
+        "expected": 14700414722602611794
+      },
+      {
+        "seed": 41,
+        "index": 3,
+        "native": 11364736355729511244,
+        "simulator_u32": 2839122764,
+        "expected": 11364736355729511244
+      },
+      {
+        "seed": 41,
+        "index": 4,
+        "native": 8029057988856414316,
+        "simulator_u32": 2060222572,
+        "expected": 8029057988856414316
+      },
+      {
+        "seed": 41,
+        "index": 5,
+        "native": 28015,
+        "simulator_u32": 28015,
+        "expected": 28015
+      },
+      {
+        "seed": 41,
+        "index": 6,
+        "native": 1357701255110220473,
+        "simulator_u32": 502422201,
+        "expected": 1357701255110220473
+      },
+      {
+        "seed": 41,
+        "index": 7,
+        "native": 8556858514895168841,
+        "simulator_u32": 2912576841,
+        "expected": 8556858514895168841
+      },
+      {
+        "seed": 41,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 41,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 41,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 41,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 41,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 41,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 41,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 41,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 42,
+        "index": 0,
+        "native": 14325742201962449030,
+        "simulator_u32": 3016444038,
+        "expected": 14325742201962449030
+      },
+      {
+        "seed": 42,
+        "index": 1,
+        "native": 14523447431558504552,
+        "simulator_u32": 2417664104,
+        "expected": 14523447431558504552
+      },
+      {
+        "seed": 42,
+        "index": 2,
+        "native": 7654385468216258639,
+        "simulator_u32": 1458647119,
+        "expected": 7654385468216258639
+      },
+      {
+        "seed": 42,
+        "index": 3,
+        "native": 4318707101343158113,
+        "simulator_u32": 679743329,
+        "expected": 4318707101343158113
+      },
+      {
+        "seed": 42,
+        "index": 4,
+        "native": 983028734470061185,
+        "simulator_u32": 4195810433,
+        "expected": 983028734470061185
+      },
+      {
+        "seed": 42,
+        "index": 5,
+        "native": 27012,
+        "simulator_u32": 27012,
+        "expected": 27012
+      },
+      {
+        "seed": 42,
+        "index": 6,
+        "native": 12758416074433418958,
+        "simulator_u32": 2638010062,
+        "expected": 12758416074433418958
+      },
+      {
+        "seed": 42,
+        "index": 7,
+        "native": 10220200390382506418,
+        "simulator_u32": 705614258,
+        "expected": 10220200390382506418
+      },
+      {
+        "seed": 42,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 42,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 42,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 42,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 42,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 42,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 42,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 42,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 43,
+        "index": 0,
+        "native": 7279712947576095899,
+        "simulator_u32": 857064603,
+        "expected": 7279712947576095899
+      },
+      {
+        "seed": 43,
+        "index": 1,
+        "native": 11832103742108996775,
+        "simulator_u32": 234493095,
+        "expected": 11832103742108996775
+      },
+      {
+        "seed": 43,
+        "index": 2,
+        "native": 608356213829897380,
+        "simulator_u32": 3594226852,
+        "expected": 608356213829897380
+      },
+      {
+        "seed": 43,
+        "index": 3,
+        "native": 15719421920666356598,
+        "simulator_u32": 2815331190,
+        "expected": 15719421920666356598
+      },
+      {
+        "seed": 43,
+        "index": 4,
+        "native": 12383743553793292438,
+        "simulator_u32": 2036463766,
+        "expected": 12383743553793292438
+      },
+      {
+        "seed": 43,
+        "index": 5,
+        "native": 26009,
+        "simulator_u32": 26009,
+        "expected": 26009
+      },
+      {
+        "seed": 43,
+        "index": 6,
+        "native": 5712386820047065827,
+        "simulator_u32": 478630627,
+        "expected": 5712386820047065827
+      },
+      {
+        "seed": 43,
+        "index": 7,
+        "native": 11883542265869843995,
+        "simulator_u32": 2793618971,
+        "expected": 11883542265869843995
+      },
+      {
+        "seed": 43,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 43,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 43,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 43,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 43,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 43,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 43,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 43,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 44,
+        "index": 0,
+        "native": 233683693189742768,
+        "simulator_u32": 2992652464,
+        "expected": 233683693189742768
+      },
+      {
+        "seed": 44,
+        "index": 1,
+        "native": 9140760052659488998,
+        "simulator_u32": 2346289382,
+        "expected": 9140760052659488998
+      },
+      {
+        "seed": 44,
+        "index": 2,
+        "native": 12009071033153095825,
+        "simulator_u32": 1434847377,
+        "expected": 12009071033153095825
+      },
+      {
+        "seed": 44,
+        "index": 3,
+        "native": 8673392666280003467,
+        "simulator_u32": 655951755,
+        "expected": 8673392666280003467
+      },
+      {
+        "seed": 44,
+        "index": 4,
+        "native": 5337714299406906539,
+        "simulator_u32": 4172018859,
+        "expected": 5337714299406906539
+      },
+      {
+        "seed": 44,
+        "index": 5,
+        "native": 25006,
+        "simulator_u32": 25006,
+        "expected": 25006
+      },
+      {
+        "seed": 44,
+        "index": 6,
+        "native": 17113101639370264312,
+        "simulator_u32": 2614218488,
+        "expected": 17113101639370264312
+      },
+      {
+        "seed": 44,
+        "index": 7,
+        "native": 13546884141357181572,
+        "simulator_u32": 586656388,
+        "expected": 13546884141357181572
+      },
+      {
+        "seed": 44,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 44,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 44,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 44,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 44,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 44,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 44,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 44,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 45,
+        "index": 0,
+        "native": 11634398512512941253,
+        "simulator_u32": 833273029,
+        "expected": 11634398512512941253
+      },
+      {
+        "seed": 45,
+        "index": 1,
+        "native": 6449416363209981221,
+        "simulator_u32": 163118373,
+        "expected": 6449416363209981221
+      },
+      {
+        "seed": 45,
+        "index": 2,
+        "native": 4963041778766742670,
+        "simulator_u32": 3570435214,
+        "expected": 4963041778766742670
+      },
+      {
+        "seed": 45,
+        "index": 3,
+        "native": 1627363411893650336,
+        "simulator_u32": 2791539616,
+        "expected": 1627363411893650336
+      },
+      {
+        "seed": 45,
+        "index": 4,
+        "native": 16738429118730137792,
+        "simulator_u32": 2012672192,
+        "expected": 16738429118730137792
+      },
+      {
+        "seed": 45,
+        "index": 5,
+        "native": 24003,
+        "simulator_u32": 24003,
+        "expected": 24003
+      },
+      {
+        "seed": 45,
+        "index": 6,
+        "native": 10067072384983911181,
+        "simulator_u32": 454839053,
+        "expected": 10067072384983911181
+      },
+      {
+        "seed": 45,
+        "index": 7,
+        "native": 15210226016844519149,
+        "simulator_u32": 2674661101,
+        "expected": 15210226016844519149
+      },
+      {
+        "seed": 45,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 45,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 45,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 45,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 45,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 45,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 45,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 45,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 46,
+        "index": 0,
+        "native": 4588369258126588122,
+        "simulator_u32": 2968860890,
+        "expected": 4588369258126588122
+      },
+      {
+        "seed": 46,
+        "index": 1,
+        "native": 3758072673760473444,
+        "simulator_u32": 2274914660,
+        "expected": 3758072673760473444
+      },
+      {
+        "seed": 46,
+        "index": 2,
+        "native": 16363756598089941243,
+        "simulator_u32": 1411055867,
+        "expected": 16363756598089941243
+      },
+      {
+        "seed": 46,
+        "index": 3,
+        "native": 13028078231216848821,
+        "simulator_u32": 632160181,
+        "expected": 13028078231216848821
+      },
+      {
+        "seed": 46,
+        "index": 4,
+        "native": 9692399864343751893,
+        "simulator_u32": 4148227285,
+        "expected": 9692399864343751893
+      },
+      {
+        "seed": 46,
+        "index": 5,
+        "native": 23000,
+        "simulator_u32": 23000,
+        "expected": 23000
+      },
+      {
+        "seed": 46,
+        "index": 6,
+        "native": 3021043130597558050,
+        "simulator_u32": 2590426914,
+        "expected": 3021043130597558050
+      },
+      {
+        "seed": 46,
+        "index": 7,
+        "native": 16873567892331856726,
+        "simulator_u32": 467698518,
+        "expected": 16873567892331856726
+      },
+      {
+        "seed": 46,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 46,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 46,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 46,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 46,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 46,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 46,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 46,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 47,
+        "index": 0,
+        "native": 15989084077449786607,
+        "simulator_u32": 809481455,
+        "expected": 15989084077449786607
+      },
+      {
+        "seed": 47,
+        "index": 1,
+        "native": 1066728984310965667,
+        "simulator_u32": 91743651,
+        "expected": 1066728984310965667
+      },
+      {
+        "seed": 47,
+        "index": 2,
+        "native": 9317727343703596240,
+        "simulator_u32": 3546651856,
+        "expected": 9317727343703596240
+      },
+      {
+        "seed": 47,
+        "index": 3,
+        "native": 5982048976830495690,
+        "simulator_u32": 2767748042,
+        "expected": 5982048976830495690
+      },
+      {
+        "seed": 47,
+        "index": 4,
+        "native": 2646370609957431530,
+        "simulator_u32": 1988880618,
+        "expected": 2646370609957431530
+      },
+      {
+        "seed": 47,
+        "index": 5,
+        "native": 21997,
+        "simulator_u32": 21997,
+        "expected": 21997
+      },
+      {
+        "seed": 47,
+        "index": 6,
+        "native": 14421757949920756535,
+        "simulator_u32": 431047479,
+        "expected": 14421757949920756535
+      },
+      {
+        "seed": 47,
+        "index": 7,
+        "native": 90165694109642687,
+        "simulator_u32": 2555703231,
+        "expected": 90165694109642687
+      },
+      {
+        "seed": 47,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 47,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 47,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 47,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 47,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 47,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 47,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 47,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 48,
+        "index": 0,
+        "native": 8943054823063433476,
+        "simulator_u32": 2945069316,
+        "expected": 8943054823063433476
+      },
+      {
+        "seed": 48,
+        "index": 1,
+        "native": 16822129368571009506,
+        "simulator_u32": 2203539938,
+        "expected": 16822129368571009506
+      },
+      {
+        "seed": 48,
+        "index": 2,
+        "native": 2271698089317243085,
+        "simulator_u32": 1387272397,
+        "expected": 2271698089317243085
+      },
+      {
+        "seed": 48,
+        "index": 3,
+        "native": 17382763796153694175,
+        "simulator_u32": 608368607,
+        "expected": 17382763796153694175
+      },
+      {
+        "seed": 48,
+        "index": 4,
+        "native": 14047085429280597247,
+        "simulator_u32": 4124435711,
+        "expected": 14047085429280597247
+      },
+      {
+        "seed": 48,
+        "index": 5,
+        "native": 20994,
+        "simulator_u32": 20994,
+        "expected": 20994
+      },
+      {
+        "seed": 48,
+        "index": 6,
+        "native": 7375728695534403404,
+        "simulator_u32": 2566635340,
+        "expected": 7375728695534403404
+      },
+      {
+        "seed": 48,
+        "index": 7,
+        "native": 1753507569596980264,
+        "simulator_u32": 348740648,
+        "expected": 1753507569596980264
+      },
+      {
+        "seed": 48,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 48,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 48,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 48,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 48,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 48,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 48,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 48,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 49,
+        "index": 0,
+        "native": 1897025568677080345,
+        "simulator_u32": 785689881,
+        "expected": 1897025568677080345
+      },
+      {
+        "seed": 49,
+        "index": 1,
+        "native": 14130785679121501729,
+        "simulator_u32": 20368929,
+        "expected": 14130785679121501729
+      },
+      {
+        "seed": 49,
+        "index": 2,
+        "native": 13672412908640441658,
+        "simulator_u32": 3522860346,
+        "expected": 13672412908640441658
+      },
+      {
+        "seed": 49,
+        "index": 3,
+        "native": 10336734541767341044,
+        "simulator_u32": 2743956468,
+        "expected": 10336734541767341044
+      },
+      {
+        "seed": 49,
+        "index": 4,
+        "native": 7001056174894276884,
+        "simulator_u32": 1965089044,
+        "expected": 7001056174894276884
+      },
+      {
+        "seed": 49,
+        "index": 5,
+        "native": 19991,
+        "simulator_u32": 19991,
+        "expected": 19991
+      },
+      {
+        "seed": 49,
+        "index": 6,
+        "native": 329699441148050273,
+        "simulator_u32": 407255905,
+        "expected": 329699441148050273
+      },
+      {
+        "seed": 49,
+        "index": 7,
+        "native": 3416849445084317841,
+        "simulator_u32": 2436745361,
+        "expected": 3416849445084317841
+      },
+      {
+        "seed": 49,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 49,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 49,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 49,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 49,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 49,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 49,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 49,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 50,
+        "index": 0,
+        "native": 13297740388000278830,
+        "simulator_u32": 2921277742,
+        "expected": 13297740388000278830
+      },
+      {
+        "seed": 50,
+        "index": 1,
+        "native": 11439441989671993952,
+        "simulator_u32": 2132165216,
+        "expected": 11439441989671993952
+      },
+      {
+        "seed": 50,
+        "index": 2,
+        "native": 6626383654254088471,
+        "simulator_u32": 1363480855,
+        "expected": 6626383654254088471
+      },
+      {
+        "seed": 50,
+        "index": 3,
+        "native": 3290705287380987913,
+        "simulator_u32": 584577033,
+        "expected": 3290705287380987913
+      },
+      {
+        "seed": 50,
+        "index": 4,
+        "native": 18401770994217442601,
+        "simulator_u32": 4100644137,
+        "expected": 18401770994217442601
+      },
+      {
+        "seed": 50,
+        "index": 5,
+        "native": 18988,
+        "simulator_u32": 18988,
+        "expected": 18988
+      },
+      {
+        "seed": 50,
+        "index": 6,
+        "native": 11730414260471248758,
+        "simulator_u32": 2542843766,
+        "expected": 11730414260471248758
+      },
+      {
+        "seed": 50,
+        "index": 7,
+        "native": 5080191320571655418,
+        "simulator_u32": 229782778,
+        "expected": 5080191320571655418
+      },
+      {
+        "seed": 50,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 50,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 50,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 50,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 50,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 50,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 50,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 50,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 51,
+        "index": 0,
+        "native": 6251711133613925699,
+        "simulator_u32": 761898307,
+        "expected": 6251711133613925699
+      },
+      {
+        "seed": 51,
+        "index": 1,
+        "native": 8748098300222486175,
+        "simulator_u32": 4243961503,
+        "expected": 8748098300222486175
+      },
+      {
+        "seed": 51,
+        "index": 2,
+        "native": 18027098473577278732,
+        "simulator_u32": 3499060492,
+        "expected": 18027098473577278732
+      },
+      {
+        "seed": 51,
+        "index": 3,
+        "native": 14691420106704186398,
+        "simulator_u32": 2720164894,
+        "expected": 14691420106704186398
+      },
+      {
+        "seed": 51,
+        "index": 4,
+        "native": 11355741739831122238,
+        "simulator_u32": 1941297470,
+        "expected": 11355741739831122238
+      },
+      {
+        "seed": 51,
+        "index": 5,
+        "native": 17985,
+        "simulator_u32": 17985,
+        "expected": 17985
+      },
+      {
+        "seed": 51,
+        "index": 6,
+        "native": 4684385006084895627,
+        "simulator_u32": 383464331,
+        "expected": 4684385006084895627
+      },
+      {
+        "seed": 51,
+        "index": 7,
+        "native": 6743533196058992995,
+        "simulator_u32": 2317787491,
+        "expected": 6743533196058992995
+      },
+      {
+        "seed": 51,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 51,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 51,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 51,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 51,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 51,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 51,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 51,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 52,
+        "index": 0,
+        "native": 17652425952937124184,
+        "simulator_u32": 2897486168,
+        "expected": 17652425952937124184
+      },
+      {
+        "seed": 52,
+        "index": 1,
+        "native": 6056754610772978398,
+        "simulator_u32": 2060790494,
+        "expected": 6056754610772978398
+      },
+      {
+        "seed": 52,
+        "index": 2,
+        "native": 10981069219190925689,
+        "simulator_u32": 1339681145,
+        "expected": 10981069219190925689
+      },
+      {
+        "seed": 52,
+        "index": 3,
+        "native": 7645390852317833267,
+        "simulator_u32": 560785459,
+        "expected": 7645390852317833267
+      },
+      {
+        "seed": 52,
+        "index": 4,
+        "native": 4309712485444736339,
+        "simulator_u32": 4076852563,
+        "expected": 4309712485444736339
+      },
+      {
+        "seed": 52,
+        "index": 5,
+        "native": 16982,
+        "simulator_u32": 16982,
+        "expected": 16982
+      },
+      {
+        "seed": 52,
+        "index": 6,
+        "native": 16085099825408094112,
+        "simulator_u32": 2519052192,
+        "expected": 16085099825408094112
+      },
+      {
+        "seed": 52,
+        "index": 7,
+        "native": 8406875071546330572,
+        "simulator_u32": 110824908,
+        "expected": 8406875071546330572
+      },
+      {
+        "seed": 52,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 52,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 52,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 52,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 52,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 52,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 52,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 52,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 53,
+        "index": 0,
+        "native": 10606396698550771053,
+        "simulator_u32": 738106733,
+        "expected": 10606396698550771053
+      },
+      {
+        "seed": 53,
+        "index": 1,
+        "native": 3365410921323470621,
+        "simulator_u32": 4172586781,
+        "expected": 3365410921323470621
+      },
+      {
+        "seed": 53,
+        "index": 2,
+        "native": 3935039964804572502,
+        "simulator_u32": 3475268950,
+        "expected": 3935039964804572502
+      },
+      {
+        "seed": 53,
+        "index": 3,
+        "native": 599361597931480136,
+        "simulator_u32": 2696373320,
+        "expected": 599361597931480136
+      },
+      {
+        "seed": 53,
+        "index": 4,
+        "native": 15710427304767967592,
+        "simulator_u32": 1917505896,
+        "expected": 15710427304767967592
+      },
+      {
+        "seed": 53,
+        "index": 5,
+        "native": 15979,
+        "simulator_u32": 15979,
+        "expected": 15979
+      },
+      {
+        "seed": 53,
+        "index": 6,
+        "native": 9039070571021740981,
+        "simulator_u32": 359672757,
+        "expected": 9039070571021740981
+      },
+      {
+        "seed": 53,
+        "index": 7,
+        "native": 10070216947033668149,
+        "simulator_u32": 2198829621,
+        "expected": 10070216947033668149
+      },
+      {
+        "seed": 53,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 53,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 53,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 53,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 53,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 53,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 53,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 53,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 54,
+        "index": 0,
+        "native": 3560367444164417922,
+        "simulator_u32": 2873694594,
+        "expected": 3560367444164417922
+      },
+      {
+        "seed": 54,
+        "index": 1,
+        "native": 674067231873962844,
+        "simulator_u32": 1989415772,
+        "expected": 674067231873962844
+      },
+      {
+        "seed": 54,
+        "index": 2,
+        "native": 15335754784127770947,
+        "simulator_u32": 1315889475,
+        "expected": 15335754784127770947
+      },
+      {
+        "seed": 54,
+        "index": 3,
+        "native": 12000076417254678621,
+        "simulator_u32": 536993885,
+        "expected": 12000076417254678621
+      },
+      {
+        "seed": 54,
+        "index": 4,
+        "native": 8664398050381581693,
+        "simulator_u32": 4053060989,
+        "expected": 8664398050381581693
+      },
+      {
+        "seed": 54,
+        "index": 5,
+        "native": 14976,
+        "simulator_u32": 14976,
+        "expected": 14976
+      },
+      {
+        "seed": 54,
+        "index": 6,
+        "native": 1993041316635387850,
+        "simulator_u32": 2495260618,
+        "expected": 1993041316635387850
+      },
+      {
+        "seed": 54,
+        "index": 7,
+        "native": 11733558822521005726,
+        "simulator_u32": 4286834334,
+        "expected": 11733558822521005726
+      },
+      {
+        "seed": 54,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 54,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 54,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 54,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 54,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 54,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 54,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 54,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 55,
+        "index": 0,
+        "native": 14961082263487616407,
+        "simulator_u32": 714315159,
+        "expected": 14961082263487616407
+      },
+      {
+        "seed": 55,
+        "index": 1,
+        "native": 16429467616134006683,
+        "simulator_u32": 4101212059,
+        "expected": 16429467616134006683
+      },
+      {
+        "seed": 55,
+        "index": 2,
+        "native": 8289725529741426104,
+        "simulator_u32": 3451485624,
+        "expected": 8289725529741426104
+      },
+      {
+        "seed": 55,
+        "index": 3,
+        "native": 4954047162868325490,
+        "simulator_u32": 2672581746,
+        "expected": 4954047162868325490
+      },
+      {
+        "seed": 55,
+        "index": 4,
+        "native": 1618368795995261330,
+        "simulator_u32": 1893714322,
+        "expected": 1618368795995261330
+      },
+      {
+        "seed": 55,
+        "index": 5,
+        "native": 13973,
+        "simulator_u32": 13973,
+        "expected": 13973
+      },
+      {
+        "seed": 55,
+        "index": 6,
+        "native": 13393756135958586335,
+        "simulator_u32": 335881183,
+        "expected": 13393756135958586335
+      },
+      {
+        "seed": 55,
+        "index": 7,
+        "native": 13396900698008343303,
+        "simulator_u32": 2079871751,
+        "expected": 13396900698008343303
+      },
+      {
+        "seed": 55,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 55,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 55,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 55,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 55,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 55,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 55,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 55,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 56,
+        "index": 0,
+        "native": 7915053009101263276,
+        "simulator_u32": 2849903020,
+        "expected": 7915053009101263276
+      },
+      {
+        "seed": 56,
+        "index": 1,
+        "native": 13738123926684498906,
+        "simulator_u32": 1918041050,
+        "expected": 13738123926684498906
+      },
+      {
+        "seed": 56,
+        "index": 2,
+        "native": 1243696275355072917,
+        "simulator_u32": 1292106133,
+        "expected": 1243696275355072917
+      },
+      {
+        "seed": 56,
+        "index": 3,
+        "native": 16354761982191523975,
+        "simulator_u32": 513202311,
+        "expected": 16354761982191523975
+      },
+      {
+        "seed": 56,
+        "index": 4,
+        "native": 13019083615318427047,
+        "simulator_u32": 4029269415,
+        "expected": 13019083615318427047
+      },
+      {
+        "seed": 56,
+        "index": 5,
+        "native": 12970,
+        "simulator_u32": 12970,
+        "expected": 12970
+      },
+      {
+        "seed": 56,
+        "index": 6,
+        "native": 6347726881572233204,
+        "simulator_u32": 2471469044,
+        "expected": 6347726881572233204
+      },
+      {
+        "seed": 56,
+        "index": 7,
+        "native": 15060242573495680880,
+        "simulator_u32": 4167876464,
+        "expected": 15060242573495680880
+      },
+      {
+        "seed": 56,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 56,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 56,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 56,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 56,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 56,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 56,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 56,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 57,
+        "index": 0,
+        "native": 869023754714910145,
+        "simulator_u32": 690523585,
+        "expected": 869023754714910145
+      },
+      {
+        "seed": 57,
+        "index": 1,
+        "native": 11046780237234991129,
+        "simulator_u32": 4029837337,
+        "expected": 11046780237234991129
+      },
+      {
+        "seed": 57,
+        "index": 2,
+        "native": 12644411094678271362,
+        "simulator_u32": 3427693954,
+        "expected": 12644411094678271362
+      },
+      {
+        "seed": 57,
+        "index": 3,
+        "native": 9308732727805170844,
+        "simulator_u32": 2648790172,
+        "expected": 9308732727805170844
+      },
+      {
+        "seed": 57,
+        "index": 4,
+        "native": 5973054360932106684,
+        "simulator_u32": 1869922748,
+        "expected": 5973054360932106684
+      },
+      {
+        "seed": 57,
+        "index": 5,
+        "native": 11967,
+        "simulator_u32": 11967,
+        "expected": 11967
+      },
+      {
+        "seed": 57,
+        "index": 6,
+        "native": 17748441700895431689,
+        "simulator_u32": 312089609,
+        "expected": 17748441700895431689
+      },
+      {
+        "seed": 57,
+        "index": 7,
+        "native": 16723584448983018457,
+        "simulator_u32": 1960913881,
+        "expected": 16723584448983018457
+      },
+      {
+        "seed": 57,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 57,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 57,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 57,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 57,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 57,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 57,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 57,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 58,
+        "index": 0,
+        "native": 12269738574038108630,
+        "simulator_u32": 2826111446,
+        "expected": 12269738574038108630
+      },
+      {
+        "seed": 58,
+        "index": 1,
+        "native": 8355436547785483352,
+        "simulator_u32": 1846666328,
+        "expected": 8355436547785483352
+      },
+      {
+        "seed": 58,
+        "index": 2,
+        "native": 5598381840291918335,
+        "simulator_u32": 1268314623,
+        "expected": 5598381840291918335
+      },
+      {
+        "seed": 58,
+        "index": 3,
+        "native": 2262703473418817713,
+        "simulator_u32": 489410737,
+        "expected": 2262703473418817713
+      },
+      {
+        "seed": 58,
+        "index": 4,
+        "native": 17373769180255272401,
+        "simulator_u32": 4005477841,
+        "expected": 17373769180255272401
+      },
+      {
+        "seed": 58,
+        "index": 5,
+        "native": 10964,
+        "simulator_u32": 10964,
+        "expected": 10964
+      },
+      {
+        "seed": 58,
+        "index": 6,
+        "native": 10702412446509078558,
+        "simulator_u32": 2447677470,
+        "expected": 10702412446509078558
+      },
+      {
+        "seed": 58,
+        "index": 7,
+        "native": 18386926324470356034,
+        "simulator_u32": 4048918594,
+        "expected": 18386926324470356034
+      },
+      {
+        "seed": 58,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 58,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 58,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 58,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 58,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 58,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 58,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 58,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 59,
+        "index": 0,
+        "native": 5223709319651755499,
+        "simulator_u32": 666732011,
+        "expected": 5223709319651755499
+      },
+      {
+        "seed": 59,
+        "index": 1,
+        "native": 5664092858335975575,
+        "simulator_u32": 3958462615,
+        "expected": 5664092858335975575
+      },
+      {
+        "seed": 59,
+        "index": 2,
+        "native": 16999096659615108564,
+        "simulator_u32": 3403894228,
+        "expected": 16999096659615108564
+      },
+      {
+        "seed": 59,
+        "index": 3,
+        "native": 13663418292742016198,
+        "simulator_u32": 2624998598,
+        "expected": 13663418292742016198
+      },
+      {
+        "seed": 59,
+        "index": 4,
+        "native": 10327739925868952038,
+        "simulator_u32": 1846131174,
+        "expected": 10327739925868952038
+      },
+      {
+        "seed": 59,
+        "index": 5,
+        "native": 9961,
+        "simulator_u32": 9961,
+        "expected": 9961
+      },
+      {
+        "seed": 59,
+        "index": 6,
+        "native": 3656383192122725427,
+        "simulator_u32": 288298035,
+        "expected": 3656383192122725427
+      },
+      {
+        "seed": 59,
+        "index": 7,
+        "native": 1603524126248141995,
+        "simulator_u32": 1841956011,
+        "expected": 1603524126248141995
+      },
+      {
+        "seed": 59,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 59,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 59,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 59,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 59,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 59,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 59,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 59,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 60,
+        "index": 0,
+        "native": 16624424138974953984,
+        "simulator_u32": 2802319872,
+        "expected": 16624424138974953984
+      },
+      {
+        "seed": 60,
+        "index": 1,
+        "native": 2972749168886467798,
+        "simulator_u32": 1775291606,
+        "expected": 2972749168886467798
+      },
+      {
+        "seed": 60,
+        "index": 2,
+        "native": 9953067405228755393,
+        "simulator_u32": 1244514753,
+        "expected": 9953067405228755393
+      },
+      {
+        "seed": 60,
+        "index": 3,
+        "native": 6617389038355663067,
+        "simulator_u32": 465619163,
+        "expected": 6617389038355663067
+      },
+      {
+        "seed": 60,
+        "index": 4,
+        "native": 3281710671482566139,
+        "simulator_u32": 3981686267,
+        "expected": 3281710671482566139
+      },
+      {
+        "seed": 60,
+        "index": 5,
+        "native": 8958,
+        "simulator_u32": 8958,
+        "expected": 8958
+      },
+      {
+        "seed": 60,
+        "index": 6,
+        "native": 15057098011445923912,
+        "simulator_u32": 2423885896,
+        "expected": 15057098011445923912
+      },
+      {
+        "seed": 60,
+        "index": 7,
+        "native": 3266866001735479572,
+        "simulator_u32": 3929960724,
+        "expected": 3266866001735479572
+      },
+      {
+        "seed": 60,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 60,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 60,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 60,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 60,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 60,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 60,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 60,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 61,
+        "index": 0,
+        "native": 9578394884588600853,
+        "simulator_u32": 642940437,
+        "expected": 9578394884588600853
+      },
+      {
+        "seed": 61,
+        "index": 1,
+        "native": 281405479436960021,
+        "simulator_u32": 3887087893,
+        "expected": 281405479436960021
+      },
+      {
+        "seed": 61,
+        "index": 2,
+        "native": 2907038150842403390,
+        "simulator_u32": 3380103742,
+        "expected": 2907038150842403390
+      },
+      {
+        "seed": 61,
+        "index": 3,
+        "native": 18018103857678861552,
+        "simulator_u32": 2601207024,
+        "expected": 18018103857678861552
+      },
+      {
+        "seed": 61,
+        "index": 4,
+        "native": 14682425490805797392,
+        "simulator_u32": 1822339600,
+        "expected": 14682425490805797392
+      },
+      {
+        "seed": 61,
+        "index": 5,
+        "native": 7955,
+        "simulator_u32": 7955,
+        "expected": 7955
+      },
+      {
+        "seed": 61,
+        "index": 6,
+        "native": 8011068757059570781,
+        "simulator_u32": 264506461,
+        "expected": 8011068757059570781
+      },
+      {
+        "seed": 61,
+        "index": 7,
+        "native": 4930207877222817149,
+        "simulator_u32": 1722998141,
+        "expected": 4930207877222817149
+      },
+      {
+        "seed": 61,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 61,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 61,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 61,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 61,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 61,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 61,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 61,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 62,
+        "index": 0,
+        "native": 2532365630202247722,
+        "simulator_u32": 2778528298,
+        "expected": 2532365630202247722
+      },
+      {
+        "seed": 62,
+        "index": 1,
+        "native": 16036805863697003860,
+        "simulator_u32": 1703916884,
+        "expected": 16036805863697003860
+      },
+      {
+        "seed": 62,
+        "index": 2,
+        "native": 14307752970165601835,
+        "simulator_u32": 1220724267,
+        "expected": 14307752970165601835
+      },
+      {
+        "seed": 62,
+        "index": 3,
+        "native": 10972074603292508421,
+        "simulator_u32": 441827589,
+        "expected": 10972074603292508421
+      },
+      {
+        "seed": 62,
+        "index": 4,
+        "native": 7636396236419411493,
+        "simulator_u32": 3957894693,
+        "expected": 7636396236419411493
+      },
+      {
+        "seed": 62,
+        "index": 5,
+        "native": 6952,
+        "simulator_u32": 6952,
+        "expected": 6952
+      },
+      {
+        "seed": 62,
+        "index": 6,
+        "native": 965039502673217650,
+        "simulator_u32": 2400094322,
+        "expected": 965039502673217650
+      },
+      {
+        "seed": 62,
+        "index": 7,
+        "native": 6593549752710154726,
+        "simulator_u32": 3811002854,
+        "expected": 6593549752710154726
+      },
+      {
+        "seed": 62,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 62,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 62,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 62,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 62,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 62,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 62,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 62,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 63,
+        "index": 0,
+        "native": 13933080449525446207,
+        "simulator_u32": 619148863,
+        "expected": 13933080449525446207
+      },
+      {
+        "seed": 63,
+        "index": 1,
+        "native": 13345462174247496083,
+        "simulator_u32": 3815713171,
+        "expected": 13345462174247496083
+      },
+      {
+        "seed": 63,
+        "index": 2,
+        "native": 7261723715779248640,
+        "simulator_u32": 3356312064,
+        "expected": 7261723715779248640
+      },
+      {
+        "seed": 63,
+        "index": 3,
+        "native": 3926045348906155290,
+        "simulator_u32": 2577415450,
+        "expected": 3926045348906155290
+      },
+      {
+        "seed": 63,
+        "index": 4,
+        "native": 590366982033091130,
+        "simulator_u32": 1798548026,
+        "expected": 590366982033091130
+      },
+      {
+        "seed": 63,
+        "index": 5,
+        "native": 5949,
+        "simulator_u32": 5949,
+        "expected": 5949
+      },
+      {
+        "seed": 63,
+        "index": 6,
+        "native": 12365754321996416135,
+        "simulator_u32": 240714887,
+        "expected": 12365754321996416135
+      },
+      {
+        "seed": 63,
+        "index": 7,
+        "native": 8256891628197492303,
+        "simulator_u32": 1604040271,
+        "expected": 8256891628197492303
+      },
+      {
+        "seed": 63,
+        "index": 8,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 63,
+        "index": 9,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 63,
+        "index": 10,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 63,
+        "index": 11,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 63,
+        "index": 12,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 63,
+        "index": 13,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 63,
+        "index": 14,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      },
+      {
+        "seed": 63,
+        "index": 18446744073709551615,
+        "native": 0,
+        "simulator_u32": 0,
+        "expected": 0
+      }
+    ],
+    "sha256": {
+      "absolute.native.o": "fdf385277f03666abb9cb8598638ad4c479c68574482f52ba8ba37679d4d56d1",
+      "absolute.proof.o": "f89c6349f311e3a0377d9931296014a98fec0d63622633757f235428b81b771a",
+      "absolute.bin": "99285a968da59232def9122f0a8be5804cd7fbcb9e3f723581c6d6ab0e8f0470",
+      "absolute.bpf.o": "4eea5046f29485833451e4a3e7dcb8ce58e0de13815c1ab000e1cd1fd3fcd40e"
+    },
+    "scope": "Native host image-relative binding and shared-C/normal-B compilation; no kernel installation or application claim."
+  },
+  "bmi": {
+    "fixtures": 16,
+    "cases": 4032,
+    "normal_b_all": true,
+    "scope": "Native CPU/shared simulator equivalence and normal B compilation; no kernel acceptance"
+  },
+  "helper": {
+    "clock_calls": 1,
+    "unspecified_choices": 24,
+    "stack_bytes": 64,
+    "full_clobber_checks": true
+  },
+  "cpp": {
+    "source_head": "02fb4e1398d16f84b115cf6b7959584d6f2d0530",
+    "entry": "perf_unwind_hotspot",
+    "native_sha256": "c50a8df99505eead7881bbd9bebb8eb9357fd53106feb7ff58a8f7781e393150",
+    "proof_sha256": "717ece2934366ecfd4b61c0118e460153048cdce657a66d416df29ca5d823452",
+    "metadata_sha256": "e5c8459b6798aa812ef24253a87a143593ad28148499c3752076f1c4603e6e4a",
+    "native_instructions": 6945,
+    "generated_bytes": 1090696,
+    "source_sha256": "05cf341028dc13f6dc7df6e282c8bffb65fe7244e80a5845af90a9c4fb723fc7",
+    "inline_header_sha256": "28a25b88f6e5ff86d4c831ab37df8f85d439acf6352430ba8086393bde65bb4a",
+    "simulator_header_sha256": "c3c5e4517c63fd921978b2d4cb61c496e5c3f90fd99bb3783147b22a7be611df",
+    "commands": [
+      {
+        "command": [
+          "/workspaces/repository/kprog/stock-path/bin/clang",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/src",
+          "-I",
+          "/usr/include/x86_64-linux-gnu",
+          "-x",
+          "c",
+          "-E",
+          "-",
+          "-o",
+          "-"
+        ],
+        "returncode": 0,
+        "seconds": 0.27514047498698346,
+        "stdin_bytes": 1090696,
+        "stdin_sha256": "05cf341028dc13f6dc7df6e282c8bffb65fe7244e80a5845af90a9c4fb723fc7",
+        "stdout_bytes": 5729367,
+        "stdout_sha256": "ca8271cadbb17ddc83201990c037b937e88d461e09b2a20f929f6e68fc84cb34",
+        "user_seconds": 0.249245,
+        "system_seconds": 0.024777999999999998,
+        "max_rss_kib": 90980
+      }
+    ],
+    "completed": true,
+    "frontend_requested": false,
+    "scope": "Same captured OTel proof/map metadata; streamed current C/CPP with optional normal-O3 frontend to null; no B/stack/kernel/application result",
+    "preprocessed_bytes": 5729367,
+    "preprocessed_sha256": "ca8271cadbb17ddc83201990c037b937e88d461e09b2a20f929f6e68fc84cb34",
+    "expansion": 5.252945825417898
+  },
+  "debug_before": {
+    "command": [
+      "llvm-dis-18",
+      "/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.bpf.bounds-input.bc",
+      "-o",
+      "-"
+    ],
+    "bitcode_sha256": "c092157bc087b618a618fe4e122429343117102a879775475a4e8aebaf58bbf1",
+    "object_sha256": "590c38097343ae5c0482822159bedf6b7b066ec9e7e3c783744d755a26dc2ed5",
+    "local_variables": 12075,
+    "names": {
+      "ctx": 1,
+      "__x86_sim_abi": 1,
+      "__x86_sim_skb_ctx": 1,
+      "__x86_sim_abi_kind": 1,
+      "__x86_local_gprs": 1,
+      "__x86_stack_value_tag_0": 1,
+      "__x86_stack_value_ptr_0": 1,
+      "__x86_sim_is_xdp": 1,
+      "__x86_sim_helper_ctx": 1,
+      "__x86_sim_helper_abi_base": 1,
+      "__x86_native_stack_base": 1,
+      "__x86_cf": 1,
+      "__x86_zf": 1,
+      "__x86_sf": 1,
+      "__x86_of": 1,
+      "__x86_pf": 1,
+      "__x86_af": 1,
+      "__x86_xmm0_lo": 1,
+      "__x86_xmm0_hi": 1,
+      "__x86_sim_ret_addr": 1,
+      "__x86_stack_mem": 1,
+      "__x86_inline_bindings": 1,
+      "__x86_rd_result": 387,
+      "__x86_rd_reg": 392,
+      "__x86_rd_raw_width": 392,
+      "__x86_rd_width": 392,
+      "__x86_effective_width_code": 978,
+      "__x86_rd_shift": 392,
+      "__x86_rd_ptr": 392,
+      "__x86_rd_value": 392,
+      "__x86_rd_tag": 392,
+      "__x86_tag_reg": 790,
+      "__x86_stack_delta": 479,
+      "__x86_target": 1,
+      "__x86_reg_tag_result": 185,
+      "__x86_bind": 3,
+      "op": 1,
+      "dst": 3,
+      "src": 3,
+      "flags": 1,
+      "aux": 1,
+      "imm": 1,
+      "__x86_l_width": 32,
+      "__x86_l_pw_tag": 1,
+      "__kprog_x86_source_tag": 1,
+      "__kprog_x86_pw_tag": 1,
+      "__x86_write_old_sp": 244,
+      "__x86_wr_raw_width": 212,
+      "__x86_wr_width": 212,
+      "__x86_wr_shift": 212,
+      "__x86_wr_next": 212,
+      "__x86_wr_cell": 212,
+      "__x86_wr_cell_tag": 212,
+      "__x86_wr_next_ptr": 244,
+      "__x86_wr_next_tag": 244,
+      "__x86_store_reg": 244,
+      "__x86_release_old": 221,
+      "__x86_release_new": 221,
+      "__x86_release_i": 221,
+      "__x86_release_off": 221,
+      "__x86_release_lane": 221,
+      "__x86_sv_sp": 273,
+      "__x86_l_dst_ptr": 6,
+      "__x86_l_src_ptr": 7,
+      "__x86_l_value": 30,
+      "__x86_l_count": 9,
+      "__x86_l_i": 5,
+      "__x86_l_byte": 4,
+      "__x86_alias_observed": 24,
+      "__x86_alias_result": 39,
+      "__x86_alias_delta": 42,
+      "__x86_st_addr": 15,
+      "__x86_st_width": 15,
+      "__x86_st_tag": 15,
+      "__x86_st_value": 15,
+      "__x86_sv_index": 44,
+      "__x86_sv_width": 44,
+      "__x86_sv_start": 44,
+      "__x86_st_off": 15,
+      "__x86_st_i": 15,
+      "__x86_hr": 36,
+      "__x86_hw_dst": 16,
+      "__x86_hw_size": 16,
+      "__x86_hw_tag": 16,
+      "__x86_hw_result": 16,
+      "__x86_helper_result": 88,
+      "__x86_wr_stack_bits": 87,
+      "__kprog_x86_lane": 87,
+      "__kprog_x86_partial": 87,
+      "__kprog_x86_bits": 87,
+      "__x86_word": 46,
+      "__x86_mov_stack_offset": 3,
+      "__x86_mov_numeric": 3,
+      "__x86_mov_source_tag": 1,
+      "__x86_l_src_width": 1,
+      "__x86_l_shape": 1,
+      "__x86_l_lane32": 1,
+      "__x86_read_recovered": 22,
+      "__kprog_x86_mo_disp": 49,
+      "__kprog_x86_mo_has_index": 49,
+      "__kprog_x86_mo_result": 49,
+      "__kprog_x86_mo_scale": 49,
+      "__kprog_x86_mo_index": 49,
+      "__x86_l_write_width": 1,
+      "__kprog_x86_ml_write": 2,
+      "__x86_l_mem_width": 2,
+      "__kprog_x86_ml_mem": 1,
+      "__x86_l_arm": 4,
+      "__kprog_x86_ml_arm": 1,
+      "__x86_l_disp": 25,
+      "__x86_l_meta_disp": 2,
+      "__x86_l_base_ptr": 26,
+      "__x86_mv_write": 1,
+      "__x86_mv_write_pointer": 1,
+      "__x86_l_addr": 25,
+      "__x86_sr_width": 18,
+      "__x86_sr_off": 18,
+      "__x86_sr_ctx": 18,
+      "__x86_sr_value": 18,
+      "__x86_sr_lane": 18,
+      "__x86_sf_value": 102,
+      "__x86_cbr_value": 36,
+      "__x86_cbr_temp": 18,
+      "__x86_cbr_addr": 18,
+      "__x86_snr_value": 36,
+      "__x86_skb_tag": 1,
+      "__kprog_address_result": 3,
+      "__kprog_abi_kind": 3,
+      "__kprog_abi_offset": 3,
+      "__kprog_abi_tag": 3,
+      "__x86_xdp_value": 19,
+      "__x86_xdp_off": 18,
+      "__x86_xdp_ctx": 18,
+      "__x86_xdp_tag": 1,
+      "__kprog_x86_md_src": 18,
+      "__x86_observed": 23,
+      "__x86_str_index": 23,
+      "__x86_str_value": 23,
+      "__x86_str_bytes": 23,
+      "__x86_str_width": 23,
+      "__x86_mv_saved": 1,
+      "__x86_sv_result": 2,
+      "__x86_sv_at": 4,
+      "__x86_l_ptr_tag": 1,
+      "__x86_l_ptr_value": 1,
+      "__x86_mv_alias": 1,
+      "__kprog_x86_mb_width": 2,
+      "__x86_l_read_mem_width": 17,
+      "__kprog_x86_st_width": 1,
+      "__kprog_x86_st_disp": 1,
+      "__kprog_x86_st_value": 1,
+      "__kprog_x86_st_shifted": 1,
+      "__kprog_x86_st_shift": 3,
+      "__x86_sw_width": 4,
+      "__x86_sw_off": 4,
+      "__x86_sw_value": 4,
+      "__x86_sw_ctx_off": 4,
+      "__x86_cbw_temp": 4,
+      "__x86_cbw_addr": 4,
+      "__x86_cbw_value": 4,
+      "__x86_ss_old": 12,
+      "__x86_ss_shift": 12,
+      "__x86_ss_mask": 12,
+      "__x86_ss_new": 12,
+      "__x86_ss_value": 12,
+      "__kprog_x86_st_arm": 1,
+      "__x86_loss_off": 13,
+      "__x86_loss_width": 13,
+      "__x86_loss_value": 13,
+      "__x86_stw_index": 26,
+      "__x86_stw_bytes": 26,
+      "__x86_stw_width": 26,
+      "__x86_stw_narrowed": 26,
+      "__x86_loss_i": 13,
+      "__x86_sv_tag": 2,
+      "__x86_sv_pointer": 2,
+      "__kprog_x86_mb_arm": 1,
+      "__kprog_x86_xmm0_arm": 2,
+      "__x86_l_base_none": 2,
+      "__x86_l_base_form": 2,
+      "__x86_l_off": 1,
+      "__x86_l_src_tag": 3,
+      "__x86_l_result": 19,
+      "__x86_l_dst_tag": 3,
+      "__x86_l_stack_off": 1,
+      "__x86_l_numeric": 1,
+      "__x86_l_aux": 5,
+      "__x86_l_alu": 7,
+      "__x86_l_dst_shift": 2,
+      "__x86_l_lhs": 13,
+      "__x86_l_rhs": 12,
+      "__x86_l_borrow": 5,
+      "__x86_sbb_width": 11,
+      "__x86_sbb_mask": 11,
+      "__x86_sbb_a": 11,
+      "__x86_sbb_b": 11,
+      "__x86_sbb_r": 11,
+      "__x86_sbb_sign": 11,
+      "__x86_l_carry": 5,
+      "__x86_adc_width": 5,
+      "__x86_adc_mask": 5,
+      "__x86_adc_a": 5,
+      "__x86_adc_b": 5,
+      "__x86_adc_r": 5,
+      "__x86_adc_sign": 5,
+      "__x86_l_old_cf": 6,
+      "__x86_add_width": 12,
+      "__x86_add_mask": 12,
+      "__x86_add_a": 12,
+      "__x86_add_b": 12,
+      "__x86_add_r": 12,
+      "__x86_add_sign": 12,
+      "__x86_sub_width": 22,
+      "__x86_sub_mask": 22,
+      "__x86_sub_a": 22,
+      "__x86_sub_b": 22,
+      "__x86_sub_r": 22,
+      "__x86_sub_sign": 22,
+      "__x86_sh_raw_width": 8,
+      "__x86_sh_width": 8,
+      "__x86_sh_bits": 8,
+      "__x86_sh_mask": 8,
+      "__x86_sh_a": 8,
+      "__x86_sh_r": 8,
+      "__x86_sh_count": 8,
+      "__x86_sh_sign": 8,
+      "__x86_sh_alu": 8,
+      "__x86_imul_width": 8,
+      "__x86_imul_a_abs": 8,
+      "__x86_imul_b_abs": 8,
+      "__x86_imul_sign": 8,
+      "__x86_imul_limit": 8,
+      "__kprog_imul_overflow": 8,
+      "__x86_fl_width": 11,
+      "__x86_fl_value": 11,
+      "__x86_fl_bits": 11,
+      "__x86_l_src_shift": 1,
+      "__x86_l_cc": 2,
+      "__x86_l_cmw": 2,
+      "__x86_l_wb": 2,
+      "__kprog_x86_cmov_wb": 2,
+      "__x86_l_mem_value": 1,
+      "__x86_l_sc_shift": 1,
+      "__x86_l_sc_lane": 1,
+      "__kprog_x86_sc_lane": 1,
+      "__x86_l_scm_cc": 1,
+      "__x86_l_scm_value": 1,
+      "__x86_l_scm_disp": 1,
+      "__x86_l_scm_base": 1,
+      "__kprog_x86_scm_base": 1,
+      "__kprog_x86_scm_arm": 1,
+      "__x86_l_src": 8,
+      "__x86_pc_width": 2,
+      "__x86_ror_width": 2,
+      "__x86_ror_count": 2,
+      "__x86_ror_lane": 1,
+      "__x86_ror_result": 2,
+      "__x86_ror_n": 2,
+      "__x86_ror_bits": 2,
+      "__x86_ror_aux": 1,
+      "__x86_ror_address": 1,
+      "__x86_ror_disp": 1,
+      "__x86_ror_base": 1,
+      "__x86_ror_addr": 1,
+      "__x86_rorx_width": 1,
+      "__x86_rorx_src": 1,
+      "__x86_l_bits": 2,
+      "__x86_l_base": 3,
+      "__x86_l_index_source": 3,
+      "__x86_l_index": 3,
+      "__x86_l_raw_mem_width": 1,
+      "__x86_l_low": 1,
+      "__x86_l_high": 1,
+      "__x86_l_product": 1,
+      "__x86_l_a0": 1,
+      "__x86_l_a1": 1,
+      "__x86_l_b0": 1,
+      "__x86_l_b1": 1,
+      "__x86_l_p0": 1,
+      "__x86_l_p1": 1,
+      "__x86_l_p2": 1,
+      "__x86_l_p3": 1,
+      "__x86_l_mid": 1,
+      "__x86_l_src_addr": 1,
+      "__x86_l_dst_addr": 1,
+      "__x86_l_src1": 2,
+      "__x86_l_src2": 2,
+      "__x86_l_andn_mem_width": 1,
+      "__x86_l_dst_bits": 1,
+      "__x86_l_src_bits": 1,
+      "__x86_l_dst_value": 1,
+      "__x86_l_src_value": 1,
+      "__x86_l_divisor": 1,
+      "__x86_l_rax": 1,
+      "__x86_l_rdx": 1,
+      "__x86_id_bits": 1,
+      "__x86_id_mask": 1,
+      "__x86_id_sign": 1,
+      "__x86_id_hi": 1,
+      "__x86_id_lo": 1,
+      "__x86_id_div": 1,
+      "__x86_id_negative": 1,
+      "__x86_id_qnegative": 1,
+      "__x86_id_result": 1,
+      "__x86_id_dividend": 1,
+      "__x86_l_dividend": 3,
+      "__x86_l_div": 3,
+      "__x86_l_q": 1,
+      "__x86_l_rem": 1,
+      "__x86_l_dst": 1,
+      "__x86_l_pp_dir": 2,
+      "__x86_l_pp_flags_width": 2,
+      "__x86_l_pp_width": 2,
+      "__x86_l_pp_step": 2,
+      "__x86_l_pp_value": 4,
+      "__x86_pp_width": 2,
+      "__x86_pp_value": 2,
+      "__x86_pp_disp": 1,
+      "base": 1,
+      "displacement": 1,
+      "width": 6,
+      "value": 3,
+      "address": 2,
+      "lhs": 1,
+      "rhs": 1,
+      "alu": 1,
+      "result": 1,
+      "__kprog_x86_alu_res": 1,
+      "shift": 1,
+      "shift_count": 1,
+      "bits": 1,
+      "mask": 1,
+      "k": 1,
+      "d": 1,
+      "s": 1,
+      "cc": 1
+    },
+    "executor_debug_subprograms": 1,
+    "sections": {
+      ".BTF": {
+        "bytes": 1089,
+        "sha256": "2a7e3a77af10922f8f3d27c1941c45dcba71ce8ba17b2ca38eb28931b96f58c4"
+      },
+      ".BTF.ext": {
+        "bytes": 656,
+        "sha256": "987c348f5c7e83269c441b3c941bac622b722f86459fd5c56439992f82a1e227"
+      }
+    }
+  },
+  "debug_after": {
+    "command": [
+      "llvm-dis-18",
+      "/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.bpf.bounds-input.bc",
+      "-o",
+      "-"
+    ],
+    "bitcode_sha256": "cec8a3f2f608985cd2910f2d81422d450bd55a151a1ccd5c5ce36fdaf2b16a64",
+    "object_sha256": "e1ea7300bfca27409aed64fa78576d7d4c919d2e4f503da567b4f99053b3c429",
+    "local_variables": 76,
+    "names": {
+      "ctx": 1,
+      "__x86_sim_abi": 1,
+      "__x86_sim_skb_ctx": 1,
+      "__x86_sim_abi_kind": 1,
+      "__x86_local_gprs": 1,
+      "__x86_stack_value_tag_0": 1,
+      "__x86_stack_value_ptr_0": 1,
+      "__x86_sim_is_xdp": 1,
+      "__x86_sim_helper_ctx": 1,
+      "__x86_sim_helper_abi_base": 1,
+      "__x86_native_stack_base": 1,
+      "__x86_cf": 1,
+      "__x86_zf": 1,
+      "__x86_sf": 1,
+      "__x86_of": 1,
+      "__x86_pf": 1,
+      "__x86_af": 1,
+      "__x86_xmm0_lo": 1,
+      "__x86_xmm0_hi": 1,
+      "__x86_sim_ret_addr": 1,
+      "__x86_stack_mem": 1,
+      "__x86_inline_bindings": 1,
+      "__x86_rd_result": 2,
+      "__x86_rd_reg": 2,
+      "__x86_rd_raw_width": 2,
+      "__x86_rd_width": 2,
+      "__x86_effective_width_code": 2,
+      "__x86_rd_shift": 2,
+      "__x86_rd_ptr": 2,
+      "__x86_rd_value": 2,
+      "__x86_rd_tag": 2,
+      "__x86_tag_reg": 3,
+      "__x86_stack_delta": 2,
+      "__x86_target": 1,
+      "__x86_reg_tag_result": 1,
+      "base": 1,
+      "displacement": 1,
+      "width": 6,
+      "value": 3,
+      "address": 2,
+      "lhs": 1,
+      "rhs": 1,
+      "alu": 1,
+      "result": 1,
+      "__kprog_x86_alu_res": 1,
+      "dst": 2,
+      "src": 2,
+      "shift": 1,
+      "shift_count": 1,
+      "bits": 1,
+      "mask": 1,
+      "k": 1,
+      "d": 1,
+      "s": 1
+    },
+    "executor_debug_subprograms": 0,
+    "sections": {
+      ".BTF": {
+        "bytes": 1556,
+        "sha256": "4cd465ec8e8608d90439bacfc63aaa3c9442fa8c30075589781d24865cb96f78"
+      },
+      ".BTF.ext": {
+        "bytes": 640,
+        "sha256": "e3b35fb934a131a1cd3ac062f12ec4a33244740932e52ae1fdfd7047de368cf6"
+      }
+    }
+  }
+}
