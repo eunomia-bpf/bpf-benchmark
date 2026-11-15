@@ -3,11 +3,10 @@
 import importlib.util
 import json
 from pathlib import Path
-import shutil
 import subprocess
 import sys
 from generate import native_wrapper
-from tcb import includes, imports
+from tcb import includes, imports, source_identities
 
 ROOT=Path(__file__).resolve().parents[2]
 BASE=0x1000000
@@ -36,9 +35,9 @@ def main():
     sys.path.insert(0,str(ROOT/'kprog/x86/micro-prog'))
     spec=importlib.util.spec_from_file_location('encoder',ROOT/'kprog/x86/micro-prog/generate_micro_sim_proofs.py')
     enc=importlib.util.module_from_spec(spec);sys.modules[spec.name]=enc;spec.loader.exec_module(enc)
-    snapshot=out/'snapshot'
-    for p in includes(ROOT/'kprog/x86/x86_sim_local_bpf.h')|imports(Path(enc.__file__)):
-        target=snapshot/p.relative_to(ROOT);target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(p,target)
+    identities=source_identities(includes(ROOT/'kprog/x86/x86_sim_local_bpf.h') |
+                                 imports(Path(enc.__file__)) | imports(Path(__file__)))
+    (out/'source-identities.json').write_text(json.dumps(identities,indent=2)+'\n')
     assembly=['.intel_syntax noprefix','.section .kprog_native,"ax",@progbits']
     matrix=forms()
     for i,(_,body) in enumerate(matrix):
@@ -86,7 +85,7 @@ def main():
         functions += [f'extern void native_{i}(struct state *);',f'extern unsigned char native_pc_{i},native_next_{i};',f'static void sim_{i}(struct state *s) {{',*init,*emitted,*finish,'}']
         entries.append(f'{{{json.dumps(name)},"X86_CONTROL",native_{i},sim_{i},0x8d5U,64,0,6,&native_pc_{i},&native_next_{i}}}')
         coverage.append(dict(assembly=name,opcode='X86_CONTROL',native_instructions=len(code)))
-    prelude=['#include "../driver.h"','#include <stdlib.h>','#define X86_SIM_ENABLE_STACK 1',f'#include "{snapshot}/kprog/x86/x86_sim_local_bpf.h"','extern uint64_t native_stack_base;', 'extern void __x86_sim_unresolved_indirect_target(void) __attribute__((error("indirect target was not eliminated by specialization")));']
+    prelude=['#include "../driver.h"','#include <stdlib.h>','#define X86_SIM_ENABLE_STACK 1',f'#include "{ROOT}/kprog/x86/x86_sim_local_bpf.h"','extern uint64_t native_stack_base;', 'extern void __x86_sim_unresolved_indirect_target(void) __attribute__((error("indirect target was not eliminated by specialization")));']
     (out/'generated.c').write_text('\n'.join(prelude+functions+['const struct form forms[]={',',\n'.join(entries),'};','const unsigned form_count=sizeof(forms)/sizeof(forms[0]);'])+'\n')
     (out/'coverage.json').write_text(json.dumps(coverage,indent=2)+'\n')
     print(f'generated {len(matrix)} real x86 finite-control observers')

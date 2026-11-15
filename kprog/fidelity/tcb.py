@@ -52,6 +52,12 @@ def imports(path, seen=None):
     return seen
 
 
+def source_identities(paths):
+    """Record exact checkout inputs without exporting a second source tree."""
+    return {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
+            for path in sorted(paths)}
+
+
 def function_spans(path, names, text):
     scrub=re.sub(r'/\*[\s\S]*?\*/|//[^\n]*|"(?:\\.|[^"\\])*"', lambda m: ''.join('\n' if c=='\n' else ' ' for c in m.group()), text)
     rows=[]

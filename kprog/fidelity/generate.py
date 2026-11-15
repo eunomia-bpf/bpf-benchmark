@@ -5,8 +5,7 @@ import importlib.util
 import json
 from pathlib import Path
 import subprocess
-import shutil
-from tcb import includes, imports
+from tcb import includes, imports, source_identities
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -237,11 +236,9 @@ def main():
     spec.loader.exec_module(encoder)
     forms = x86_forms(encoder.CC_AUX) if arch == "x86" else arm64_forms()
     out.mkdir(parents=True, exist_ok=True)
-    snapshot = out.resolve()/'snapshot'
-    for path in includes(ROOT/f'kprog/{arch}/{arch}_sim_local_bpf.h') | imports(Path(encoder.__file__)):
-        target = snapshot/path.relative_to(ROOT)
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(path,target)
+    identities = source_identities(includes(ROOT/f'kprog/{arch}/{arch}_sim_local_bpf.h') |
+                                   imports(Path(encoder.__file__)) | imports(Path(__file__)))
+    (out/'source-identities.json').write_text(json.dumps(identities, indent=2)+'\n')
     # One object is decoded in bulk; the wrapper assembly is assembled separately.
     source = (".intel_syntax noprefix\n" if arch == "x86" else "") + ".text\n" + "\n".join(forms) + "\n"
     (out / "instructions.S").write_text(source)
@@ -253,7 +250,7 @@ def main():
     insns = encoder.parse_asm_text(disassembly) if arch == "x86" else encoder.parse_flat_instructions(disassembly)
     if len(insns) != len(forms):
         raise RuntimeError(f"decoded {len(insns)} instructions for {len(forms)} forms")
-    c = ['#include "../driver.h"', '#include <stdlib.h>', '#include <string.h>', '#define X86_SIM_ENABLE_STACK 1', f'#include "{snapshot}/kprog/{arch}/{arch}_sim_local_bpf.h"']
+    c = [f'#include "{ROOT}/kprog/fidelity/driver.h"', '#include <stdlib.h>', '#include <string.h>', '#define X86_SIM_ENABLE_STACK 1', f'#include "{ROOT}/kprog/{arch}/{arch}_sim_local_bpf.h"']
     if arch == "x86":
         c += ['extern uint64_t native_stack_base;']
     if arch == "arm64":
