@@ -1,0 +1,800 @@
+[
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/balancer.native.o",
+      "--symbol",
+      "balancer_ingress",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=balancer_ingress (7857 bytes), 3 reachable symbol(s) total\n  - balancer_ingress (vaddr 0x0, 7857 bytes) [entry]\n  - jhash (vaddr 0x50, 172 bytes)\n  - jhash_2words (vaddr 0x0, 77 bytes) [entry]\nnative-link: wrote proof object 8096 bytes, 65 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/biosnoop.native.o",
+      "--symbol",
+      "blk_account_io_merge_bio",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=blk_account_io_merge_bio (121 bytes), 1 reachable symbol(s) total\n  - blk_account_io_merge_bio (vaddr 0x0, 121 bytes) [entry]\nnative-link: wrote proof object 123 bytes, 7 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "--symbol",
+      "cgroup_bpf_run_filter_skb",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=cgroup_bpf_run_filter_skb (3949 bytes), 1 reachable symbol(s) total\n  - cgroup_bpf_run_filter_skb (vaddr 0x0, 3949 bytes) [entry]\nnative-link: wrote proof object 4352 bytes, 18 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "--symbol",
+      "__do_bytes",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=__do_bytes (182 bytes), 1 reachable symbol(s) total\n  - __do_bytes (vaddr 0x580, 182 bytes) [entry]\nnative-link: wrote proof object 172 bytes, 3 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "--symbol",
+      "cil_from_container",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=cil_from_container (1268 bytes), 1 reachable symbol(s) total\n  - cil_from_container (vaddr 0x0, 1268 bytes) [entry]\nnative-link: wrote proof object 1258 bytes, 14 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "--symbol",
+      "custom__generic",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=custom__generic (5700 bytes), 1 reachable symbol(s) total\n  - custom__generic (vaddr 0x0, 5700 bytes) [entry]\nnative-link: wrote proof object 5816 bytes, 32 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/healthchecking_ipip.native.o",
+      "--symbol",
+      "healthcheck_encap",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=healthcheck_encap (381 bytes), 1 reachable symbol(s) total\n  - healthcheck_encap (vaddr 0x0, 381 bytes) [entry]\nnative-link: wrote proof object 371 bytes, 4 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/biosnoop.native.o",
+      "--symbol",
+      "block_rq_complete",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=block_rq_complete (459 bytes), 1 reachable symbol(s) total\n  - block_rq_complete (vaddr 0x0, 459 bytes) [entry]\nnative-link: wrote proof object 449 bytes, 18 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "--symbol",
+      "cgroup_mkdir_signal",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=cgroup_mkdir_signal (741 bytes), 1 reachable symbol(s) total\n  - cgroup_mkdir_signal (vaddr 0x0, 741 bytes) [entry]\nnative-link: wrote proof object 735 bytes, 4 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_execve_event_v61.native.o",
+      "--symbol",
+      "__do_str",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=__do_str (447 bytes), 1 reachable symbol(s) total\n  - __do_str (vaddr 0x120, 447 bytes) [entry]\nnative-link: wrote proof object 441 bytes, 5 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "--symbol",
+      "cil_from_host",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=cil_from_host (3048 bytes), 1 reachable symbol(s) total\n  - cil_from_host (vaddr 0xb40, 3048 bytes) [entry]\nnative-link: wrote proof object 3038 bytes, 34 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "--symbol",
+      "finish_task_switch",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=finish_task_switch (5800 bytes), 1 reachable symbol(s) total\n  - finish_task_switch (vaddr 0x0, 5800 bytes) [entry]\nnative-link: wrote proof object 5916 bytes, 29 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/xdp_root.native.o",
+      "--symbol",
+      "xdp_root",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=xdp_root (68 bytes), 1 reachable symbol(s) total\n  - xdp_root (vaddr 0x0, 68 bytes) [entry]\nnative-link: wrote proof object 62 bytes, 1 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/biosnoop.native.o",
+      "--symbol",
+      "block_rq_insert",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=block_rq_insert (328 bytes), 1 reachable symbol(s) total\n  - block_rq_insert (vaddr 0x0, 328 bytes) [entry]\nnative-link: wrote proof object 331 bytes, 15 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "--symbol",
+      "cgroup_rmdir_signal",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=cgroup_rmdir_signal (708 bytes), 1 reachable symbol(s) total\n  - cgroup_rmdir_signal (vaddr 0x0, 708 bytes) [entry]\nnative-link: wrote proof object 702 bytes, 4 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v511.native.o",
+      "--symbol",
+      "bpf_strncasestr",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=bpf_strncasestr (117 bytes), 1 reachable symbol(s) total\n  - bpf_strncasestr (vaddr 0x0, 117 bytes) [entry]\nnative-link: wrote proof object 118 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "--symbol",
+      "cil_from_host",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=cil_from_host (3048 bytes), 1 reachable symbol(s) total\n  - cil_from_host (vaddr 0xb40, 3048 bytes) [entry]\nnative-link: wrote proof object 3038 bytes, 34 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "--symbol",
+      "kprobe__dummy",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=kprobe__dummy (23 bytes), 1 reachable symbol(s) total\n  - kprobe__dummy (vaddr 0x0, 23 bytes) [entry]\nnative-link: wrote proof object 27 bytes, 1 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/biosnoop.native.o",
+      "--symbol",
+      "block_rq_issue",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=block_rq_issue (385 bytes), 1 reachable symbol(s) total\n  - block_rq_issue (vaddr 0x0, 385 bytes) [entry]\nnative-link: wrote proof object 379 bytes, 18 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "--symbol",
+      "cgroup_skb_egress",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=cgroup_skb_egress (7760 bytes), 1 reachable symbol(s) total\n  - cgroup_skb_egress (vaddr 0x0, 7760 bytes) [entry]\nnative-link: wrote proof object 7750 bytes, 74 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "--symbol",
+      "cwd_read_v61",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=cwd_read_v61 (431 bytes), 1 reachable symbol(s) total\n  - cwd_read_v61 (vaddr 0x90, 431 bytes) [entry]\nnative-link: wrote proof object 421 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "--symbol",
+      "cil_from_netdev",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=cil_from_netdev (2876 bytes), 1 reachable symbol(s) total\n  - cil_from_netdev (vaddr 0x0, 2876 bytes) [entry]\nnative-link: wrote proof object 2866 bytes, 32 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "make",
+      "-f",
+      "/workspaces/repository/kprog/test/native-relocations.mk",
+      "build"
+    ],
+    "returncode": 0,
+    "stdout": "make[1]: Entering directory '/workspaces/repository'\ntaskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/workspaces/repository/kprog/x86/native_lab/native_link/target cargo build --release --manifest-path /workspaces/repository/kprog/x86/native_lab/native_link/Cargo.toml\nmake[1]: Leaving directory '/workspaces/repository'\n",
+    "stderr": "    Finished `release` profile [optimized] target(s) in 0.01s\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/balancer.native.o",
+      "--symbol",
+      "balancer_ingress",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=balancer_ingress (7857 bytes), 3 reachable symbol(s) total\n  - balancer_ingress (vaddr 0x0, 7857 bytes) [entry]\n  - jhash (vaddr 0x50, 172 bytes)\n  - jhash_2words (vaddr 0x0, 77 bytes) [entry]\nnative-link: wrote proof object 8096 bytes, 65 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/biosnoop.native.o",
+      "--symbol",
+      "blk_account_io_merge_bio",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=blk_account_io_merge_bio (121 bytes), 1 reachable symbol(s) total\n  - blk_account_io_merge_bio (vaddr 0x0, 121 bytes) [entry]\nnative-link: wrote proof object 123 bytes, 7 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "--symbol",
+      "cgroup_bpf_run_filter_skb",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=cgroup_bpf_run_filter_skb (3949 bytes), 1 reachable symbol(s) total\n  - cgroup_bpf_run_filter_skb (vaddr 0x0, 3949 bytes) [entry]\nnative-link: wrote proof object 4352 bytes, 18 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "--symbol",
+      "__do_bytes",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=__do_bytes (182 bytes), 1 reachable symbol(s) total\n  - __do_bytes (vaddr 0x580, 182 bytes) [entry]\nnative-link: wrote proof object 172 bytes, 3 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "--symbol",
+      "cil_from_container",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=cil_from_container (1268 bytes), 1 reachable symbol(s) total\n  - cil_from_container (vaddr 0x0, 1268 bytes) [entry]\nnative-link: wrote proof object 1258 bytes, 14 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "--symbol",
+      "custom__generic",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=custom__generic (5700 bytes), 1 reachable symbol(s) total\n  - custom__generic (vaddr 0x0, 5700 bytes) [entry]\nnative-link: wrote proof object 5816 bytes, 32 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/healthchecking_ipip.native.o",
+      "--symbol",
+      "healthcheck_encap",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=healthcheck_encap (381 bytes), 1 reachable symbol(s) total\n  - healthcheck_encap (vaddr 0x0, 381 bytes) [entry]\nnative-link: wrote proof object 371 bytes, 4 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/biosnoop.native.o",
+      "--symbol",
+      "block_rq_complete",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=block_rq_complete (459 bytes), 1 reachable symbol(s) total\n  - block_rq_complete (vaddr 0x0, 459 bytes) [entry]\nnative-link: wrote proof object 449 bytes, 18 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "--symbol",
+      "cgroup_mkdir_signal",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=cgroup_mkdir_signal (741 bytes), 1 reachable symbol(s) total\n  - cgroup_mkdir_signal (vaddr 0x0, 741 bytes) [entry]\nnative-link: wrote proof object 735 bytes, 4 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_execve_event_v61.native.o",
+      "--symbol",
+      "__do_str",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=__do_str (447 bytes), 1 reachable symbol(s) total\n  - __do_str (vaddr 0x120, 447 bytes) [entry]\nnative-link: wrote proof object 441 bytes, 5 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "--symbol",
+      "cil_from_host",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=cil_from_host (3048 bytes), 1 reachable symbol(s) total\n  - cil_from_host (vaddr 0xb40, 3048 bytes) [entry]\nnative-link: wrote proof object 3038 bytes, 34 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "--symbol",
+      "finish_task_switch",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=finish_task_switch (5800 bytes), 1 reachable symbol(s) total\n  - finish_task_switch (vaddr 0x0, 5800 bytes) [entry]\nnative-link: wrote proof object 5916 bytes, 29 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/xdp_root.native.o",
+      "--symbol",
+      "xdp_root",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=xdp_root (68 bytes), 1 reachable symbol(s) total\n  - xdp_root (vaddr 0x0, 68 bytes) [entry]\nnative-link: wrote proof object 62 bytes, 1 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/biosnoop.native.o",
+      "--symbol",
+      "block_rq_insert",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=block_rq_insert (328 bytes), 1 reachable symbol(s) total\n  - block_rq_insert (vaddr 0x0, 328 bytes) [entry]\nnative-link: wrote proof object 331 bytes, 15 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "--symbol",
+      "cgroup_rmdir_signal",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=cgroup_rmdir_signal (708 bytes), 1 reachable symbol(s) total\n  - cgroup_rmdir_signal (vaddr 0x0, 708 bytes) [entry]\nnative-link: wrote proof object 702 bytes, 4 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v511.native.o",
+      "--symbol",
+      "bpf_strncasestr",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=bpf_strncasestr (117 bytes), 1 reachable symbol(s) total\n  - bpf_strncasestr (vaddr 0x0, 117 bytes) [entry]\nnative-link: wrote proof object 118 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "--symbol",
+      "cil_from_host",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=cil_from_host (3048 bytes), 1 reachable symbol(s) total\n  - cil_from_host (vaddr 0xb40, 3048 bytes) [entry]\nnative-link: wrote proof object 3038 bytes, 34 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "--symbol",
+      "kprobe__dummy",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=kprobe__dummy (23 bytes), 1 reachable symbol(s) total\n  - kprobe__dummy (vaddr 0x0, 23 bytes) [entry]\nnative-link: wrote proof object 27 bytes, 1 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/biosnoop.native.o",
+      "--symbol",
+      "block_rq_issue",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=block_rq_issue (385 bytes), 1 reachable symbol(s) total\n  - block_rq_issue (vaddr 0x0, 385 bytes) [entry]\nnative-link: wrote proof object 379 bytes, 18 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "--symbol",
+      "cgroup_skb_egress",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=cgroup_skb_egress (7760 bytes), 1 reachable symbol(s) total\n  - cgroup_skb_egress (vaddr 0x0, 7760 bytes) [entry]\nnative-link: wrote proof object 7750 bytes, 74 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "--symbol",
+      "cwd_read_v61",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=cwd_read_v61 (431 bytes), 1 reachable symbol(s) total\n  - cwd_read_v61 (vaddr 0x90, 431 bytes) [entry]\nnative-link: wrote proof object 421 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "--symbol",
+      "cil_from_netdev",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=cil_from_netdev (2876 bytes), 1 reachable symbol(s) total\n  - cil_from_netdev (vaddr 0x0, 2876 bytes) [entry]\nnative-link: wrote proof object 2866 bytes, 32 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/parity.proof.o\n"
+  },
+  {
+    "command": [
+      "clang-18",
+      "-target",
+      "x86_64-linux-gnu",
+      "-O3",
+      "-march=native",
+      "-foptimize-sibling-calls",
+      "-fomit-frame-pointer",
+      "-mno-red-zone",
+      "-mgeneral-regs-only",
+      "-fno-stack-protector",
+      "-c",
+      "/workspaces/repository/kprog/test/non_pic_map.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/native-relocations/non-pic.native.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "objdump",
+      "-dr",
+      "-Mintel",
+      "/var/tmp/kprog-tmp/perf/native-relocations/non-pic.native.o"
+    ],
+    "returncode": 0,
+    "stdout": "\n/var/tmp/kprog-tmp/perf/native-relocations/non-pic.native.o:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000000000 <entry>:\n   0:\t50                   \tpush   rax\n   1:\t48 89 fe             \tmov    rsi,rdi\n   4:\t48 8d 3d 00 00 00 00 \tlea    rdi,[rip+0x0]        # b <entry+0xb>\n\t\t\t7: R_X86_64_PC32\ttest_map-0x4\n   b:\tb8 01 00 00 00       \tmov    eax,0x1\n  10:\tff d0                \tcall   rax\n  12:\t48 85 c0             \ttest   rax,rax\n  15:\t74 05                \tje     1c <entry+0x1c>\n  17:\t48 8b 00             \tmov    rax,QWORD PTR [rax]\n  1a:\t59                   \tpop    rcx\n  1b:\tc3                   \tret\n  1c:\t31 c0                \txor    eax,eax\n  1e:\t59                   \tpop    rcx\n  1f:\tc3                   \tret\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/native-relocations/non-pic.native.o",
+      "--symbol",
+      "entry",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/non-pic.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=entry (32 bytes), 1 reachable symbol(s) total\n  - entry (vaddr 0x0, 32 bytes) [entry]\nnative-link: wrote proof object 40 bytes, 1 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/non-pic.proof.o\n"
+  },
+  {
+    "command": [
+      "objdump",
+      "-dr",
+      "-Mintel",
+      "/var/tmp/kprog-tmp/perf/native-relocations/non-pic.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "\n/var/tmp/kprog-tmp/perf/native-relocations/non-pic.proof.o:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000000000 <entry>:\n   0:\t50                   \tpush   rax\n   1:\t48 89 fe             \tmov    rsi,rdi\n   4:\t48 8b 3d 00 00 00 00 \tmov    rdi,QWORD PTR [rip+0x0]        # b <entry+0xb>\n\t\t\t7: R_X86_64_GOTPCREL\ttest_map-0x4\n   b:\tb8 01 00 00 00       \tmov    eax,0x1\n  10:\tff d0                \tcall   rax\n  12:\t48 85 c0             \ttest   rax,rax\n  15:\t74 09                \tje     20 <entry+0x20>\n  17:\t48 8b 00             \tmov    rax,QWORD PTR [rax]\n  1a:\t59                   \tpop    rcx\n  1b:\te9 08 00 00 00       \tjmp    28 <entry+0x28>\n  20:\t31 c0                \txor    eax,eax\n  22:\t59                   \tpop    rcx\n  23:\te9 00 00 00 00       \tjmp    28 <entry+0x28>\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/native-relocations/non-pic.proof.o",
+      "--symbol",
+      "entry",
+      "--mode",
+      "kernel",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/proof-roundtrip.bin",
+      "--output-map-patches",
+      "/var/tmp/kprog-tmp/perf/native-relocations/proof-roundtrip.maps",
+      "--output-relocs",
+      "/var/tmp/kprog-tmp/perf/native-relocations/proof-roundtrip.relocs",
+      "--link-plan",
+      "/var/tmp/kprog-tmp/perf/native-relocations/plan.json",
+      "--runtime-map-lookups",
+      "--runtime-known-map-lookups"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=entry (40 bytes), 1 reachable symbol(s) total\n  - entry (vaddr 0x0, 40 bytes) [entry]\nnative-link: wrote 50 bytes -> /var/tmp/kprog-tmp/perf/native-relocations/proof-roundtrip.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/native-relocations/proof-roundtrip.relocs\nnative-link: wrote 1 map patch site(s) -> /var/tmp/kprog-tmp/perf/native-relocations/proof-roundtrip.maps\n"
+  }
+]

@@ -1,0 +1,7 @@
+# Normal local-memory LTO
+
+2026-11-15T02:07:26Z. Source42139fe36 removes --local-memory-routines and its off branch from the normal x86 proof/kernel linker. Existing GPR memset/memcpy routines now bind by default. The local-memory on/off source wrapper, historical comparison script and corresponding on/off payload/profile/evidence recipes are deleted; other functional producer references use the canonical repository release linker. The existing two build entry points share that one target/profile. Historical raw artifacts and the live OTel payload remain preserved.
+
+38 Rust tests pass (one existing ignored), including actual memory routine execution/proof/kernel roundtrips; the count excludes the removed opt-in parser test.22 real-object allocated proof outputs/relocations repeat identically after building the new normal binary;6 real clang/proof/kernel map cases pass. These are normal-path regression checks, not a historical off-path comparison or an application performance result. The same run passes320 native switch cases and generates the new finite-table B source; the full shared-simulator follow-up is reported separately.
+
+Raw: `/workspaces/kprog-raw/perf/20261115-normal-memory-lto`. No base/image/kernel publication, running guest restart or timing run. Remaining map, named-map, array-sharing/layout, tail-count and hash/LPM/probe/per-CPU selections and their wrappers still need consolidation per coordinator01:23. All runtime LTO pieces will be measured together after that work.
