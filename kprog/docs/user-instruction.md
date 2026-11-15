@@ -99,6 +99,9 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-15 ~22:58 UTC: "我们一开始的 benchmark setup 是什么?"
 - 2026-11-15 ~23:00 UTC: "有没有一些不该改动的地方一直在改? 看看这两周的. 停掉所有现在的."（协调者 22:53 起停掉 C、perf、formal 三个 lane 和 C 的 Tracee 计时队列）
 - 2026-11-15 ~23:20 UTC（前三行引用协调者列的计时入口外层：host_cpu.py、run.sh 和 queue-under-timing.sh、observe_runtime.py）: "你去删掉. 立刻删掉. 旧路线（编译过程里改写 IR，你后来禁止了）头文件路线 应该性能是一样的.  你要不要对比之前的版本?"
+- 2026-11-15 ~23:25 UTC: "然后继续做.
+  在之前最好的数据的版本上我们改进了什么?"
+- 2026-11-15 ~23:28 UTC: "整体框架从 5 月份之后改进了什么?"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
