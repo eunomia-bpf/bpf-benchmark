@@ -32,3 +32,11 @@ generation. The image's bundled compiler remains its recorded1965 version.
 Fresh checked OTel retry2 launcher1155245 started18:34:45Z on16-19/imageSH,
 2vCPU16GiB/32GiBAS, using the existing checked-corpus target. Full raw evidence
 is /workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/.
+
+Actual retry2 perf_unwind_stop now verifies as program31 and checked-installs34
+at18:36:33Z. Its B has202088 executable bytes, and the real compiler folds one
+incoming expression. read_task_struct verifies24/installs27. Startup advances
+to perf_unwind_native; both attempts stop at MIR spill lowering's handling of
+`dead $w2 = LDW32 %stack.35, 0`. The full run then completes Make0/app error.
+Closed-request observations are in otel-current-app/retry2-progress.json;
+application output/equal-work/performance remain open.

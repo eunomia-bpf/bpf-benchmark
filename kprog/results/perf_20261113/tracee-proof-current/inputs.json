@@ -1,0 +1,8 @@
+{
+  "native": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+  "native_sha256": "0c91b97d9b7b45d0eed165ac1c95ad54a4aeb5fbda616f5cb26de7578c48b334",
+  "linker": "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+  "linker_sha256": "677175ed113ec99d509048dd5aa16b9c42404da5aa31b20d102c17b090d295c0",
+  "source_head": "59605f56084452aa92b8e6c6ad0190e49795dd76",
+  "scope": "Actual native ELF functions, service --preserve-entry-abi proof route only; no source fidelity, B or kernel acceptance"
+}

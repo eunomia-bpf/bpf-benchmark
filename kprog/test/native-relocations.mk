@@ -500,3 +500,7 @@ guest-native-map-relocs:
 	mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod $(ROOT)/kinsn/module/x86/build/bpf_x86_native_lab.ko
 	$(OUTPUT)/inputs/native-map-relocs $$(python3 -c 'import json; print(json.load(open("$(OUTPUT)/layout/kernel-layout.json"))["array"]["value"])') > $(OUTPUT)/result.jsonl 2> $(OUTPUT)/verifier.log
+
+.PHONY: katran-fixed-frequency
+katran-fixed-frequency:
+	prlimit --as=103079215104 -- bash $(ROOT)/kprog/test/run_katran_fixed_frequency.sh $(OUTPUT)
