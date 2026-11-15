@@ -35,6 +35,10 @@ one() {  # one <mode> <tag> <samples> <seconds>
 
 if [ "$stage" = check ]; then
   one post check 1 10
+elif [ "$stage" = ab1 ]; then
+  # A/A is already measured (batch x86_kvm_corpus_20261115_203638_295992, 1.007 drift),
+  # so the loader fix needs only the A/B half re-run.
+  one post ab1 3 180
 else
   one 0 aa1 3 180
   one post ab1 3 180
