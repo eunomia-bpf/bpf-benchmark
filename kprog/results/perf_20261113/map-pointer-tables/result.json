@@ -1,0 +1,10 @@
+{
+  "host_executions": 10,
+  "interior_map_handle_rejected": true,
+  "kernel_map_patches": 8,
+  "missing_map_rejected": true,
+  "native_relro_slots": 8,
+  "normal_boot_facts": true,
+  "proof_map_relocations": 8,
+  "scope": "Actual clang output/proof/kernel rewrite and host pointer identity only; no B or app acceptance"
+}

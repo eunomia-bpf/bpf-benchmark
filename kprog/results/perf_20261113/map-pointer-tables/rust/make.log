@@ -1,0 +1,39 @@
+taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/workspaces/repository/kprog/x86/native_lab/native_link/target cargo test --release --manifest-path /workspaces/repository/kprog/x86/native_lab/native_link/Cargo.toml
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+error[E0308]: mismatched types
+    --> src/x86_readonly_relocs.rs:193:80
+     |
+ 193 |         let proof = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &maps, &empty,
+     |                     ----------- arguments to this function are incorrect       ^^^^^^ expected `&HashMap<String, LookupSiteSpec>`, found `&HashMap<String, u64>`
+     |
+     = note: expected reference `&std::collections::HashMap<_, LookupSiteSpec>`
+                found reference `&std::collections::HashMap<_, u64>`
+note: function defined here
+    --> src/x86.rs:1099:15
+     |
+1099 | pub(super) fn rewrite_x86(
+     |               ^^^^^^^^^^^
+...
+1105 |     lookup_maps: &HashMap<String, LookupSiteSpec>,
+     |     ---------------------------------------------
+
+error[E0308]: mismatched types
+    --> src/x86_readonly_relocs.rs:208:81
+     |
+ 208 |         let linked = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &maps, &empty,
+     |                      ----------- arguments to this function are incorrect       ^^^^^^ expected `&HashMap<String, LookupSiteSpec>`, found `&HashMap<String, u64>`
+     |
+     = note: expected reference `&std::collections::HashMap<_, LookupSiteSpec>`
+                found reference `&std::collections::HashMap<_, u64>`
+note: function defined here
+    --> src/x86.rs:1099:15
+     |
+1099 | pub(super) fn rewrite_x86(
+     |               ^^^^^^^^^^^
+...
+1105 |     lookup_maps: &HashMap<String, LookupSiteSpec>,
+     |     ---------------------------------------------
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `native-link` (bin "native-link" test) due to 2 previous errors
+make: *** [kprog/test/native-relocations.mk:56: check] Error 101

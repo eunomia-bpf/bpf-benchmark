@@ -1,0 +1,186 @@
+[
+  {
+    "label": "historical-otel-shape",
+    "path": "/workspaces/kprog-raw/perf/20261114-otel-combined-codegen/all-flags-build/tracer.native.o",
+    "sha256": "e85ca663791963a1477adac751b52e7df7e20a0575482aea7ff9ec42ccd8c51a",
+    "bytes": 128,
+    "slots": [
+      {
+        "offset": 0,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "exe_id_to_8_stack_deltas",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 8,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "exe_id_to_9_stack_deltas",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 16,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "exe_id_to_10_stack_deltas",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 24,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "exe_id_to_11_stack_deltas",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 32,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "exe_id_to_12_stack_deltas",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 40,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "exe_id_to_13_stack_deltas",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 48,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "exe_id_to_14_stack_deltas",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 56,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "exe_id_to_15_stack_deltas",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 64,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "exe_id_to_16_stack_deltas",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 72,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "exe_id_to_17_stack_deltas",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 80,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "exe_id_to_18_stack_deltas",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 88,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "exe_id_to_19_stack_deltas",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 96,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "exe_id_to_20_stack_deltas",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 104,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "exe_id_to_21_stack_deltas",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 112,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "exe_id_to_22_stack_deltas",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 120,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "exe_id_to_23_stack_deltas",
+        "target_section": ".maps"
+      }
+    ]
+  },
+  {
+    "label": "clang-fixture",
+    "path": "/var/tmp/kprog-tmp/perf/map-pointer-tables/fixture.native.o",
+    "sha256": "e074325d49e8a422b31f86d21d97260f38fb23ed3d53cd9eab43771e8e76cf5a",
+    "bytes": 64,
+    "slots": [
+      {
+        "offset": 0,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "map0",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 8,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "map1",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 16,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "map2",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 24,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "map3",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 32,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "map4",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 40,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "map5",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 48,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "map6",
+        "target_section": ".maps"
+      },
+      {
+        "offset": 56,
+        "kind": 1,
+        "addend": 0,
+        "symbol": "map7",
+        "target_section": ".maps"
+      }
+    ]
+  }
+]
