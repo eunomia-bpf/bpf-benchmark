@@ -24,6 +24,8 @@
 /* x86 JIT frame immediates, resolved from the final physical stack depth. */
 #define NATIVE_LAB_RELOC_X86_TAIL_COUNT 10U
 #define NATIVE_LAB_RELOC_X86_TAIL_STACK 11U
+/* Full pointer into this native image: target is a global image byte offset. */
+#define NATIVE_LAB_RELOC_IMAGE_POINTER 12U
 
 static inline int native_lab_reloc_patch_size(__u32 kind)
 {
@@ -31,7 +33,7 @@ static inline int native_lab_reloc_patch_size(__u32 kind)
 	case 1: return 5;
 	case 2: return 16;
 	case 3: case 4: case 10: case 11: return 4;
-	case 5: case 6: case 7: return 8;
+	case 5: case 6: case 7: case 12: return 8;
 	case 8: case 9: return 0;
 	default: return -EINVAL;
 	}
