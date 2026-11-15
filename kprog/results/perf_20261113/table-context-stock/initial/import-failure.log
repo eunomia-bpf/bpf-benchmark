@@ -1,0 +1,8 @@
+taskset -c 19 prlimit --as=17179869184 -- python3 /workspaces/repository/kprog/test/build_context_table.py --build /var/tmp/kprog-tmp/perf/table-context --output /workspaces/kprog-raw/perf/20261115-table-context --linker /workspaces/repository/kprog/x86/native_lab/native_link/target/release/deps/native_link-89e6cdf9b2bb753e --kernel-layout /var/tmp/kprog-tmp/perf/kernel-layout/kernel-layout.json --bounds /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/test/build_context_table.py", line 107, in <module>
+    main(parser.parse_args())
+  File "/workspaces/repository/kprog/test/build_context_table.py", line 77, in main
+    import trusted_specializer as worker
+ModuleNotFoundError: No module named 'trusted_specializer'
+make: *** [kprog/test/native-relocations.mk:104: table-context-build] Error 1

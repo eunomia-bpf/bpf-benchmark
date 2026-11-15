@@ -1,0 +1,171 @@
+func#0 @0
+Live regs before insn:
+      0: .1........ (79) r2 = *(u64 *)(r1 +80)
+      1: .12....... (54) w2 &= 15
+      2: .12....... (bc) w2 = w2
+      3: .12....... (26) if w2 > 0x7 goto pc+9
+      4: .12....... (66) if w2 s> 0x3 goto pc+11
+      5: .12....... (66) if w2 s> 0x1 goto pc+16
+      6: .12....... (16) if w2 == 0x0 goto pc+27
+      7: .1........ (79) r1 = *(u64 *)(r1 +8)
+      8: .1........ (bf) r0 = r1
+      9: 01........ (67) r0 <<= 1
+     10: 01........ (0c) w0 += w1
+     11: 0......... (bc) w0 = w0
+     12: 0......... (05) goto pc+2
+     13: .......... (b4) w0 = 0
+     14: 0......... (bc) w0 = w0
+     15: 0......... (95) exit
+     16: .12....... (66) if w2 s> 0x5 goto pc+10
+     17: .12....... (16) if w2 == 0x4 goto pc+20
+     18: .1........ (79) r0 = *(u64 *)(r1 +40)
+     19: 0......... (54) w0 &= 32767
+     20: 0......... (bc) w0 = w0
+     21: 0......... (05) goto pc-7
+     22: .12....... (16) if w2 == 0x2 goto pc+19
+     23: .1........ (79) r0 = *(u64 *)(r1 +24)
+     24: 0......... (04) w0 += -29
+     25: 0......... (bc) w0 = w0
+     26: 0......... (05) goto pc-12
+     27: .12....... (16) if w2 == 0x6 goto pc+18
+     28: .1........ (79) r1 = *(u64 *)(r1 +56)
+     29: .1........ (bf) r0 = r1
+     30: 01........ (67) r0 <<= 2
+     31: 01........ (0c) w0 += w1
+     32: 0......... (bc) w0 = w0
+     33: 0......... (05) goto pc-19
+     34: .1........ (79) r0 = *(u64 *)(r1 +0)
+     35: 0......... (04) w0 += 17
+     36: 0......... (bc) w0 = w0
+     37: 0......... (05) goto pc-23
+     38: .1........ (79) r0 = *(u64 *)(r1 +32)
+     39: 0......... (44) w0 |= 32768
+     40: 0......... (bc) w0 = w0
+     41: 0......... (05) goto pc-27
+     42: .1........ (79) r0 = *(u64 *)(r1 +16)
+     43: 0......... (a4) w0 ^= 4660
+     44: 0......... (bc) w0 = w0
+     45: 0......... (05) goto pc-31
+     46: .1........ (79) r0 = *(u64 *)(r1 +48)
+     47: 0......... (04) w0 += 71
+     48: 0......... (bc) w0 = w0
+     49: 0......... (05) goto pc-35
+arg#0 reference type('UNKNOWN ') size cannot be determined: -22
+0: R1=ctx() R10=fp0
+; asm volatile("%0 = *(u64 *)(%1 + %2)" : "=r"(value) : "r"(base), "i"(displacement) : "memory"); @ x86_mem_access.h:83
+0: (79) r2 = *(u64 *)(r1 +80)         ; R1=ctx() R2=scalar()
+; X86_SIM_L_EXEC_ALU_IMM(X86_RAX, X86_WIDTH_32, X86_ALU_AND, 15ULL); @ trusted_x86.bpf.c:29
+1: (54) w2 &= 15                      ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=15,var_off=(0x0; 0xf))
+2: (bc) w2 = w2                       ; R2=scalar(id=1,smin=smin32=0,smax=umax=smax32=umax32=15,var_off=(0x0; 0xf))
+; X86_SIM_X86_JCC(X86_CC_A, 0xa, 0x81, x86_l_81); @ trusted_x86.bpf.c:35
+3: (26) if w2 > 0x7 goto pc+9         ; R2=scalar(id=1,smin=smin32=0,smax=umax=smax32=umax32=7,var_off=(0x0; 0x7))
+; switch (X86_SIM_L_READ_REG(X86_RAX) << 2) { @ trusted_x86.bpf.c:37
+4: (66) if w2 s> 0x3 goto pc+11       ; R2=scalar(id=1,smin=smin32=0,smax=umax=smax32=umax32=3,var_off=(0x0; 0x3))
+5: (66) if w2 s> 0x1 goto pc+16       ; R2=scalar(id=1,smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))
+6: (16) if w2 == 0x0 goto pc+27       ; R2=1
+; asm volatile("%0 = *(u64 *)(%1 + %2)" : "=r"(value) : "r"(base), "i"(displacement) : "memory"); @ x86_mem_access.h:83
+7: (79) r1 = *(u64 *)(r1 +8)          ; R1=scalar()
+; X86_SIM_L_EXEC_LEA(X86_RAX, X86_RAX, X86_WIDTH_32, X86_MEM_AUX(X86_RAX, 1), 0ULL); @ trusted_x86.bpf.c:99
+8: (bf) r0 = r1                       ; R0=scalar(id=2) R1=scalar(id=2)
+9: (67) r0 <<= 1                      ; R0=scalar(smax=0x7ffffffffffffffe,umax=0xfffffffffffffffe,smax32=0x7ffffffe,umax32=0xfffffffe,var_off=(0x0; 0xfffffffffffffffe))
+10: (0c) w0 += w1                     ; R0=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R1=scalar(id=2)
+; X86_SIM_L_EXEC_LEA(X86_RAX, X86_RAX, X86_WIDTH_32, X86_MEM_AUX(X86_RAX, 1), 0ULL); @ trusted_x86.bpf.c:103
+11: (bc) w0 = w0                      ; R0=scalar(id=3,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+12: (05) goto pc+2
+; } @ trusted_x86.bpf.c:129
+15: (95) exit
+
+from 6 to 34: R1=ctx() R2=0 R10=fp0
+34: R1=ctx() R2=0 R10=fp0
+; asm volatile("%0 = *(u64 *)(%1 + %2)" : "=r"(value) : "r"(base), "i"(displacement) : "memory"); @ x86_mem_access.h:83
+34: (79) r0 = *(u64 *)(r1 +0)         ; R0=scalar() R1=ctx()
+;  @ trusted_x86.bpf.c:0
+35: (04) w0 += 17                     ; R0=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+; X86_SIM_L_EXEC_ALU_IMM(X86_RAX, X86_WIDTH_32, X86_ALU_ADD, 17ULL); @ trusted_x86.bpf.c:53
+36: (bc) w0 = w0                      ; R0=scalar(id=4,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+37: (05) goto pc-23
+15: safe
+
+from 5 to 22: R1=ctx() R2=scalar(id=1,smin=umin=smin32=umin32=2,smax=umax=smax32=umax32=3,var_off=(0x2; 0x1)) R10=fp0
+22: R1=ctx() R2=scalar(id=1,smin=umin=smin32=umin32=2,smax=umax=smax32=umax32=3,var_off=(0x2; 0x1)) R10=fp0
+; switch (X86_SIM_L_READ_REG(X86_RAX) << 2) { @ trusted_x86.bpf.c:37
+22: (16) if w2 == 0x2 goto pc+19      ; R2=3
+; asm volatile("%0 = *(u64 *)(%1 + %2)" : "=r"(value) : "r"(base), "i"(displacement) : "memory"); @ x86_mem_access.h:83
+23: (79) r0 = *(u64 *)(r1 +24)        ; R0=scalar() R1=ctx()
+;  @ trusted_x86.bpf.c:0
+24: (04) w0 += -29                    ; R0=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+; X86_SIM_L_EXEC_ALU_IMM(X86_RAX, X86_WIDTH_32, X86_ALU_ADD, 4294967267ULL); @ trusted_x86.bpf.c:85
+25: (bc) w0 = w0                      ; R0=scalar(id=5,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+26: (05) goto pc-12
+15: safe
+
+from 22 to 42: R1=ctx() R2=2 R10=fp0
+42: R1=ctx() R2=2 R10=fp0
+; asm volatile("%0 = *(u64 *)(%1 + %2)" : "=r"(value) : "r"(base), "i"(displacement) : "memory"); @ x86_mem_access.h:83
+42: (79) r0 = *(u64 *)(r1 +16)        ; R0=scalar() R1=ctx()
+;  @ trusted_x86.bpf.c:0
+43: (a4) w0 ^= 4660                   ; R0=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+; X86_SIM_L_EXEC_ALU_IMM(X86_RAX, X86_WIDTH_32, X86_ALU_XOR, 4660ULL); @ trusted_x86.bpf.c:71
+44: (bc) w0 = w0                      ; R0=scalar(id=6,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+45: (05) goto pc-31
+15: safe
+
+from 4 to 16: R1=ctx() R2=scalar(id=1,smin=umin=smin32=umin32=4,smax=umax=smax32=umax32=7,var_off=(0x4; 0x3)) R10=fp0
+16: R1=ctx() R2=scalar(id=1,smin=umin=smin32=umin32=4,smax=umax=smax32=umax32=7,var_off=(0x4; 0x3)) R10=fp0
+; switch (X86_SIM_L_READ_REG(X86_RAX) << 2) { @ trusted_x86.bpf.c:37
+16: (66) if w2 s> 0x5 goto pc+10      ; R2=scalar(id=1,smin=umin=smin32=umin32=4,smax=umax=smax32=umax32=5,var_off=(0x4; 0x1))
+17: (16) if w2 == 0x4 goto pc+20      ; R2=5
+; asm volatile("%0 = *(u64 *)(%1 + %2)" : "=r"(value) : "r"(base), "i"(displacement) : "memory"); @ x86_mem_access.h:83
+18: (79) r0 = *(u64 *)(r1 +40)        ; R0=scalar() R1=ctx()
+;  @ trusted_x86.bpf.c:0
+19: (54) w0 &= 32767                  ; R0=scalar(smin=smin32=0,smax=umax=smax32=umax32=32767,var_off=(0x0; 0x7fff))
+; X86_SIM_L_EXEC_ALU_IMM(X86_RAX, X86_WIDTH_32, X86_ALU_AND, 32767ULL); @ trusted_x86.bpf.c:111
+20: (bc) w0 = w0                      ; R0=scalar(id=7,smin=smin32=0,smax=umax=smax32=umax32=32767,var_off=(0x0; 0x7fff))
+21: (05) goto pc-7
+15: safe
+
+from 17 to 38: R1=ctx() R2=4 R10=fp0
+38: R1=ctx() R2=4 R10=fp0
+; asm volatile("%0 = *(u64 *)(%1 + %2)" : "=r"(value) : "r"(base), "i"(displacement) : "memory"); @ x86_mem_access.h:83
+38: (79) r0 = *(u64 *)(r1 +32)        ; R0=scalar() R1=ctx()
+;  @ trusted_x86.bpf.c:0
+39: (44) w0 |= 32768                  ; R0=scalar(smin=umin=umin32=0x8000,smax=umax=0xffffffff,smin32=0x80008000,var_off=(0x8000; 0xffff7fff))
+; X86_SIM_L_EXEC_ALU_IMM(X86_RAX, X86_WIDTH_32, X86_ALU_OR, 32768ULL); @ trusted_x86.bpf.c:63
+40: (bc) w0 = w0                      ; R0=scalar(id=8,smin=umin=umin32=0x8000,smax=umax=0xffffffff,smin32=0x80008000,var_off=(0x8000; 0xffff7fff))
+41: (05) goto pc-27
+15: safe
+
+from 16 to 27: R1=ctx() R2=scalar(id=1,smin=umin=smin32=umin32=6,smax=umax=smax32=umax32=7,var_off=(0x6; 0x1)) R10=fp0
+27: R1=ctx() R2=scalar(id=1,smin=umin=smin32=umin32=6,smax=umax=smax32=umax32=7,var_off=(0x6; 0x1)) R10=fp0
+; switch (X86_SIM_L_READ_REG(X86_RAX) << 2) { @ trusted_x86.bpf.c:37
+27: (16) if w2 == 0x6 goto pc+18      ; R2=7
+; asm volatile("%0 = *(u64 *)(%1 + %2)" : "=r"(value) : "r"(base), "i"(displacement) : "memory"); @ x86_mem_access.h:83
+28: (79) r1 = *(u64 *)(r1 +56)        ; R1=scalar()
+; X86_SIM_L_EXEC_LEA(X86_RAX, X86_RAX, X86_WIDTH_32, X86_MEM_AUX(X86_RAX, 2), 0ULL); @ trusted_x86.bpf.c:91
+29: (bf) r0 = r1                      ; R0=scalar(id=9) R1=scalar(id=9)
+30: (67) r0 <<= 2                     ; R0=scalar(smax=0x7ffffffffffffffc,umax=0xfffffffffffffffc,smax32=0x7ffffffc,umax32=0xfffffffc,var_off=(0x0; 0xfffffffffffffffc))
+31: (0c) w0 += w1                     ; R0=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R1=scalar(id=9)
+; X86_SIM_L_EXEC_LEA(X86_RAX, X86_RAX, X86_WIDTH_32, X86_MEM_AUX(X86_RAX, 2), 0ULL); @ trusted_x86.bpf.c:95
+32: (bc) w0 = w0                      ; R0=scalar(id=10,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+33: (05) goto pc-19
+15: safe
+
+from 27 to 46: R1=ctx() R2=6 R10=fp0
+46: R1=ctx() R2=6 R10=fp0
+; asm volatile("%0 = *(u64 *)(%1 + %2)" : "=r"(value) : "r"(base), "i"(displacement) : "memory"); @ x86_mem_access.h:83
+46: (79) r0 = *(u64 *)(r1 +48)        ; R0=scalar() R1=ctx()
+;  @ trusted_x86.bpf.c:0
+47: (04) w0 += 71                     ; R0=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+; X86_SIM_L_EXEC_ALU_IMM(X86_RAX, X86_WIDTH_32, X86_ALU_ADD, 71ULL); @ trusted_x86.bpf.c:117
+48: (bc) w0 = w0                      ; R0=scalar(id=11,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+49: (05) goto pc-35
+15: safe
+
+from 3 to 13: R1=ctx() R2=scalar(id=1,smin=umin=smin32=umin32=8,smax=umax=smax32=umax32=15,var_off=(0x8; 0x7)) R10=fp0
+13: R1=ctx() R2=scalar(id=1,smin=umin=smin32=umin32=8,smax=umax=smax32=umax32=15,var_off=(0x8; 0x7)) R10=fp0
+; X86_SIM_L_EXEC_LEA(X86_RAX, X86_RAX, X86_WIDTH_32, X86_MEM_AUX(X86_RAX, 1), 0ULL); @ trusted_x86.bpf.c:103
+13: (b4) w0 = 0                       ; R0=0
+; X86_SIM_L_EXEC_ALU_REG(X86_RAX, X86_RAX, X86_WIDTH_32, X86_ALU_XOR); @ trusted_x86.bpf.c:127
+14: (bc) w0 = w0
+15: safe
+processed 58 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0

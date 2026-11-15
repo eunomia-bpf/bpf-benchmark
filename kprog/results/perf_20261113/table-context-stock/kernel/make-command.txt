@@ -1,0 +1,1 @@
+taskset -c 16-17 make -f kprog/test/native-relocations.mk table-context-stock OUTPUT=/workspaces/kprog-raw/perf/20261115-table-context/final-stock 

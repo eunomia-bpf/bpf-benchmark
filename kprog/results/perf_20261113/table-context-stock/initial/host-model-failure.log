@@ -1,0 +1,12 @@
+taskset -c 19 prlimit --as=17179869184 -- python3 /workspaces/repository/kprog/test/build_context_table.py --build /var/tmp/kprog-tmp/perf/table-context --output /workspaces/kprog-raw/perf/20261115-table-context/shared --linker /workspaces/repository/kprog/x86/native_lab/native_link/target/release/deps/native_link-89e6cdf9b2bb753e --kernel-layout /var/tmp/kprog-tmp/perf/kernel-layout/kernel-layout.json --bounds /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/test/build_context_table.py", line 128, in <module>
+    main(parser.parse_args())
+  File "/workspaces/repository/kprog/test/build_context_table.py", line 95, in main
+    run(['clang-18', '-shared', '-fPIC', '-O2', '-w', '-I'+str(ROOT/'vendor/libbpf/src'),
+  File "/workspaces/repository/kprog/test/build_context_table.py", line 30, in run
+    completed.check_returncode()
+  File "/usr/lib/python3.12/subprocess.py", line 502, in check_returncode
+    raise CalledProcessError(self.returncode, self.args, self.stdout,
+subprocess.CalledProcessError: Command '['clang-18', '-shared', '-fPIC', '-O2', '-w', '-I/workspaces/repository/vendor/libbpf/src', '/var/tmp/kprog-tmp/perf/table-context/trusted_x86.bpf.c', '/var/tmp/kprog-tmp/perf/table-context/host-input.c', '-o', '/var/tmp/kprog-tmp/perf/table-context/shared-simulator.so']' returned non-zero exit status 1.
+make: *** [kprog/test/native-relocations.mk:104: table-context-build] Error 1
