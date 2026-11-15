@@ -26,3 +26,8 @@ jump-table-forms:
 .PHONY: jump-table-check
 jump-table-check: build jump-table-forms
 	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_native_jump_tables.py --build $(BUILD) --output $(OUTPUT)/jump-tables --linker $(LINKER_TARGET)/release/native-link
+
+.PHONY: compiler-cleanup-check
+compiler-cleanup-check:
+	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_whole_word_backend.py --output $(OUTPUT)/backend --clang $(ROOT)/kprog/stock-path/bin/clang
+	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_packet_identities.py --tool /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds --output $(OUTPUT)/identities
