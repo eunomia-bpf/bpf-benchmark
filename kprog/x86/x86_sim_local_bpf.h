@@ -1123,6 +1123,9 @@ typedef void *x86_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
 #define X86_SIM_L_MEM_READ_SRC(BASE_REG, MEM_WIDTH)                         \
 	KPROG_X86_MEM_READ_SRC(((BASE_REG) == X86_RSP),                     \
 		X86_SIM_L_REG_TAG(BASE_REG), (MEM_WIDTH))
+#define X86_SIM_L_MEM_READ_SRC_INTO(OUTPUT, BASE_REG, MEM_WIDTH) \
+    KPROG_X86_MEM_READ_SRC_INTO(OUTPUT, ((BASE_REG) == X86_RSP), \
+        X86_SIM_L_REG_TAG(BASE_REG), (MEM_WIDTH))
 /* The store-target classification (stack write vs. ordinary little-endian
  * store) is the machine-checked KPROG_X86_STORE_ARM contract, so the store
  * body no longer restates the stack-pointer branch inline. */

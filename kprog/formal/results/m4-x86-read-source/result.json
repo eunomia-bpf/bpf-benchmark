@@ -1,0 +1,67 @@
+{
+  "status": "component checks passed; M4 incomplete",
+  "clight_module": "X86Pointer",
+  "clight_functions": 23,
+  "new_roots": [
+    "mem_read_src"
+  ],
+  "selector_cases_per_mode": 338000,
+  "selector_modes": [
+    "historical761399b91 native body",
+    "current native",
+    "current CompCert host body"
+  ],
+  "inline_binding_frame_cases": 48384,
+  "prior_inline_binding_cases": 580608,
+  "negative_checks": {
+    "tag_byte_truncation": 1,
+    "width_byte_truncation": 1,
+    "lost_stack_priority": 1,
+    "width_before_tag": 1,
+    "eager_cell_read": -11
+  },
+  "make_clight_exit": 0,
+  "targeted_lean_jobs": 38,
+  "deterministic": {
+    "equal": true,
+    "bytes": 883116
+  },
+  "axiom_queries": 1,
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "ordinary_fidelity": {
+    "allocated_sections_equal": true,
+    "allocated_relocations_equal": true,
+    "current_stream_equals_normal_build": true,
+    "allocated_section_bytes": {
+      ".text": 0,
+      "socket": 1448,
+      "license": 4
+    },
+    "allocated_relocations": 11
+  },
+  "context_fidelity": {
+    "allocated_sections_equal": true,
+    "allocated_relocations_equal": true,
+    "current_stream_equals_normal_build": true,
+    "allocated_section_bytes": {
+      ".text": 0,
+      "xdp": 360,
+      "tc": 760,
+      "license": 4
+    },
+    "allocated_relocations": 4
+  },
+  "preprocess": {
+    "exit": 0,
+    "bytes": 2674873,
+    "scope": "extraction TU only, not full app"
+  },
+  "full_inline_export_exit": 2,
+  "next_blocker": "X86_SIM_L_STACK_READ / STACK_READ_OWNED GNU expressions",
+  "migrated_theorems": 0,
+  "whole_library_acceptance": false
+}

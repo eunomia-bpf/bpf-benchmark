@@ -251,6 +251,19 @@ x86_sim_inline_reg_tag(const struct x86_sim_inline_bindings *__x86_bind,
 #undef X86_SIM_L_REG_TAG
 #define X86_SIM_L_REG_TAG(REG) x86_sim_inline_reg_tag(__x86_bind, (REG))
 
+static __always_inline __u8
+x86_sim_inline_mem_read_src(const struct x86_sim_inline_bindings *__x86_bind,
+    __u64 base, __u64 width)
+{
+    __u8 source;
+    X86_SIM_L_MEM_READ_SRC_INTO(source, base, width);
+    return source;
+}
+#pragma push_macro("X86_SIM_L_MEM_READ_SRC")
+#undef X86_SIM_L_MEM_READ_SRC
+#define X86_SIM_L_MEM_READ_SRC(BASE, WIDTH) \
+    x86_sim_inline_mem_read_src(__x86_bind, (BASE), (WIDTH))
+
 static __always_inline __s64
 x86_sim_inline_mem_offset(const struct x86_sim_inline_bindings *__x86_bind,
     __u64 aux, __s64 displacement)
@@ -386,6 +399,7 @@ x86_sim_inline_recover(const struct x86_sim_inline_bindings *__x86_bind,
 #pragma pop_macro("X86_SIM_L_READ_RECOVERY_MEM")
 #pragma pop_macro("X86_SIM_L_READ_RECOVERY")
 #pragma pop_macro("X86_SIM_L_MEM_OFFSET")
+#pragma pop_macro("X86_SIM_L_MEM_READ_SRC")
 #pragma pop_macro("X86_SIM_L_REG_TAG")
 #pragma pop_macro("X86_SIM_L_READ_REG_WIDTH_SHIFT")
 #endif

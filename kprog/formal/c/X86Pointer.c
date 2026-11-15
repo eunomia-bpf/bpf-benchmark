@@ -173,3 +173,10 @@ __u8 kprog_x86_mov_load_arm(__u64 stack, __u64 plain, __u64 memory, __u64 write,
 	KPROG_X86_MOV_LOAD_ARM_INTO(arm, stack, plain, memory, write, tag);
 	return arm;
 }
+
+__u8 kprog_x86_mem_read_src(__u64 stack, __u64 tag, __u64 width)
+{
+	__u8 source;
+	KPROG_X86_MEM_READ_SRC_INTO(source, stack, tag, width);
+	return source;
+}

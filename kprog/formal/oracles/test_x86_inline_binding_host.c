@@ -70,6 +70,23 @@ int main(void)
 		__u8 expected=(__u8)old ? (__u8)old : 8;
 		check(X86_SIM_L_EFFECTIVE_WIDTH(probe++)==expected && probe==old+1,"single evaluation before byte defaulting");
 	}
+	unsigned source_cases=0;
+	for (unsigned t=0;t<256;t++) for (unsigned ri=0;ri<sizeof(registers)/sizeof(registers[0]);ri++)
+	for (unsigned wi=0;wi<sizeof(widths)/sizeof(widths[0]);wi++) {
+		__u64 reg=registers[ri], width=widths[wi];
+		for (unsigned r=0;r<16;r++) state.gpr_cells[r].tag=t;
+		memcpy(&before,&state,sizeof(state));
+		/* The stack arm and out-of-range operands must not touch cells.
+		 * Other binding references are deliberately absent throughout. */
+		binding=(struct x86_sim_inline_bindings){0};
+		binding.cells=reg<16 && reg!=X86_RSP ? state.gpr_cells : NULL;
+		__u8 expected=reg==X86_RSP ? 0 : reg<16 && t==1 && width==8 ? 1 : 2;
+		check(x86_sim_inline_mem_read_src(&binding,reg,width)==expected,"lazy memory-source binding/full operands");
+		check(X86_SIM_L_MEM_READ_SRC(reg,width)==expected,"memory-source macro scope restoration");
+		check(!memcmp(&state,&before,sizeof(state)),"memory-source complete frame");
+		source_cases++;
+	}
+	printf("x86 inline memory-source: %u lazy binding/frame cases\n",source_cases);
 	printf("x86 inline binding: %lu defined-lane/register/profile/frame cases\n",cases);
 	return 0;
 }

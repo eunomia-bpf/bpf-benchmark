@@ -1,0 +1,12 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/formal/m4-x86-read-source",
+  "historical_reference": "761399b91",
+  "validation_head": "2f412ed0950a438b49292f6b6f53389a4ec51d33",
+  "source_patch": "raw_directory/final-input.patch",
+  "cpu": 15,
+  "address_space_limit_gib": 32,
+  "lean_threads": 1,
+  "timing": "CPU15 checks without work timing lease",
+  "scope": "actual selector C body/AST and inline binding; finite checks, not Clight refinements",
+  "replay_correction": "First fidelity recipe stopped before compilation because x86_sim.h was omitted; v2 includes all four headers. Original failure retained."
+}

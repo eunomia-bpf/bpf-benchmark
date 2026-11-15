@@ -1377,12 +1377,29 @@ fallback and swapped packet/end tags. `make clight`,39 Lean jobs, deterministic
 100,519B regeneration and four standard-axiom queries pass. New BPF consumers
 retain XDP360B/TC760B+4 allocated relocations; the ordinary fixture remains
 1448B+11. Both historical replays equal normal compilation. Extraction CPP is
-2,678,818B at its explicit profile. Full inline export now stops at the memory
-read-source selector. Logical/native context view coherence, actual entry
+2,678,818B at its explicit profile. At that checkpoint full inline export stopped
+at the memory read-source selector. Logical/native context view coherence, actual entry
 bindings and memory/volatile/fault interpretation remain M5 obligations, not
 results of these declarations or finite fixtures. No full-I export or migrated
 theorem is accepted. [Small receipts](results/m4-x86-context/README.md) are
 committed; full logs/recipes stay under `/workspaces/kprog-raw/formal/m4-x86-context`.
+
+The memory-read source selector now shares its original declaration body
+between the native expression facade and standard statement output. A CompCert
+inline adapter takes the binding by reference, preserving stack-first selection
+and lazy tag-before-width reads. One actual scalar root brings `X86Pointer`
+to23 functions. Historical/current native/adapter runs pass338,000 full-operand
+and ordered-evaluation cases each; the real inline adapter passes48,384 lazy
+binding/frame cases with unused references absent. Five semantic mutations are
+caught. `make clight`,38 targeted Lean jobs, deterministic883,116B export and a
+standard-axiom query pass. Four-header replay retains ordinary1448B/11relocs and
+XDP360B/TC760B/4relocs, equal to normal compilation. The first replay recipe
+omitted an intermediate header and stopped before compilation; its failed
+receipt stays in raw. Profile extraction CPP is2,674,873B. Full inline export
+now stops at `STACK_READ`/`STACK_READ_OWNED` GNU expressions. These checks do
+not establish Clight/native-memory refinements. [Small receipts](results/m4-x86-read-source/README.md)
+are committed; raw commands and observations stay under
+`/workspaces/kprog-raw/formal/m4-x86-read-source`.
 
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight

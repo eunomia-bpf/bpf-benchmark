@@ -770,6 +770,8 @@ clight: clightgen
 	./build/test_x86_recovery_host
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_x86_mov_selectors_host.c build/x86_pointer_binding.o -o build/test_x86_mov_selectors_host
 	./build/test_x86_mov_selectors_host
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_x86_read_src_host.c build/x86_pointer_binding.o -o build/test_x86_read_src_host
+	./build/test_x86_read_src_host
 	$(CC) -D__COMPCERT__ -include oracles/compcert_memory_host.h -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -c c/X86Pointer.c -o build/x86_pointer_binding.o
 	$(CC) -D__COMPCERT__ -include oracles/compcert_memory_host.h -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_x86_tagged_load_host.c build/x86_pointer_binding.o -o build/test_x86_tagged_load_host
 	./build/test_x86_tagged_load_host
@@ -777,6 +779,8 @@ clight: clightgen
 	./build/test_x86_recovery_host
 	$(CC) -D__COMPCERT__ -include oracles/compcert_memory_host.h -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_x86_mov_selectors_host.c build/x86_pointer_binding.o -o build/test_x86_mov_selectors_host
 	./build/test_x86_mov_selectors_host
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_x86_read_src_host.c build/x86_pointer_binding.o -o build/test_x86_read_src_host
+	./build/test_x86_read_src_host
 	$(CC) -D__COMPCERT__ -include oracles/compcert_memory_host.h -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_x86_inline_binding_host.c -o build/test_x86_inline_binding_host
 	./build/test_x86_inline_binding_host
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -c c/X86Context.c -o build/x86_context_binding.o
