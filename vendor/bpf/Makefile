@@ -98,6 +98,49 @@ clean:
 	$(MAKE) -C "$(CURDIR)/cilium/bpf" clean >/dev/null
 	$(MAKE) -C "$(CURDIR)/otel/support/ebpf" clean >/dev/null
 
+# CO-RE answers, from the sole kernel's BTF, before the compile that uses them.
+# A flavor type's members have the target's offsets only in the target's BTF,
+# so the C type system alone cannot answer; core-compat.h looks each query up
+# in this table and fails the compile on a query it does not hold.
+CORE_ANSWERS := $(OUT)/answers
+CORE_ANSWERS_PY := $(CURDIR)/core-answers.py
+BCC_CORE_CFLAGS := -Ibcc/libbpf-tools -Ibcc/libbpf-tools/x86 \
+	-Ibcc/src/cc/libbpf/include/uapi -I. -I/usr/include -I/usr/include/x86_64-linux-gnu
+TRACEE_CORE_CFLAGS := -D__TARGET_ARCH_x86 -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD -I. \
+	-Itracee/pkg/ebpf/c -I/usr/include -I/usr/include/x86_64-linux-gnu
+# Tetragon compiles each object under several variant defines; a query can exist
+# in one variant only, so the scan carries every variant the compile uses.
+TETRAGON_CORE_CFLAGS := -D__TARGET_ARCH_x86 -fms-extensions \
+	-DMICRO_NATIVE_HELPER_MACROS -DMICRO_NATIVE_TETRAGON \
+	-D__LARGE_BPF_PROG -D__V511_BPF_PROG -D__V61_BPF_PROG \
+	-D__MULTI_KPROBE -D__RHEL7_BPF_PROG -D__BPF_OVERRIDE_RETURN -I. \
+	-Itetragon/bpf -Itetragon/bpf/include -Itetragon/bpf/lib -Itetragon/bpf/libbpf \
+	-Itetragon/bpf/process -Itetragon/bpf/errmetrics \
+	-I/usr/include -I/usr/include/x86_64-linux-gnu
+
+$(CORE_ANSWERS)/bcc.h: $(CORE_ANSWERS_PY) $(wildcard bcc/libbpf-tools/*.h) bcc/libbpf-tools/x86/vmlinux.h
+	install -d "$(CORE_ANSWERS)"
+	python3 "$(CORE_ANSWERS_PY)" --btf "$(VMLINUX_BTF)" --bpftool "$(BPFTOOL)" --clang "$(CLANG)" \
+		--cflags "$(BCC_CORE_CFLAGS)" --out "$@" --report "$(CORE_ANSWERS)/bcc.json" bcc/libbpf-tools
+
+$(CORE_ANSWERS)/tracee.h: $(CORE_ANSWERS_PY) $(wildcard tracee/pkg/ebpf/c/*.h) tracee/pkg/ebpf/c/vmlinux.h
+	install -d "$(CORE_ANSWERS)"
+	python3 "$(CORE_ANSWERS_PY)" --btf "$(VMLINUX_BTF)" --bpftool "$(BPFTOOL)" --clang "$(CLANG)" \
+		--cflags "$(TRACEE_CORE_CFLAGS)" --out "$@" --report "$(CORE_ANSWERS)/tracee.json" tracee
+
+$(CORE_ANSWERS)/tetragon.h: $(CORE_ANSWERS_PY) $(wildcard tetragon/bpf/lib/*.h) tetragon/bpf/include/vmlinux_generated_x86.h
+	install -d "$(CORE_ANSWERS)"
+	python3 "$(CORE_ANSWERS_PY)" --btf "$(VMLINUX_BTF)" --bpftool "$(BPFTOOL)" --clang "$(CLANG)" \
+		--cflags "$(TETRAGON_CORE_CFLAGS)" --out "$@" --report "$(CORE_ANSWERS)/tetragon.json" \
+		tetragon/bpf/process tetragon/bpf/lib tetragon/bpf/errmetrics tetragon/bpf/cgroup
+
+CORE_ANSWER_TABLES := $(CORE_ANSWERS)/bcc.h $(CORE_ANSWERS)/tracee.h $(CORE_ANSWERS)/tetragon.h
+# Everything a CO-RE app's native objects need: the compat scaffolding and the
+# app's own answer table.
+core_flags = -include "$(CURDIR)/core-compat.h" -D__KPROG_CORE_ANSWERS='"$(1)"'
+
+core-answers: $(CORE_ANSWER_TABLES)
+
 vmlinux: $(VMLINUX_H) bcc/libbpf-tools/x86/vmlinux.h tetragon/bpf/include/vmlinux_generated_x86.h
 
 $(VMLINUX_H): $(VMLINUX_BTF)
@@ -176,9 +219,10 @@ $(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c
 		-I/usr/include -I/usr/include/x86_64-linux-gnu \
 		-o "$@" "$<"
 
-$(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/x86/vmlinux.h
+$(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/x86/vmlinux.h \
+		core-compat.h $(CORE_ANSWERS)/bcc.h
 	install -d "$(dir $@)"
-	"$(CLANG)" $(NATIVE_CFLAGS) \
+	"$(CLANG)" $(NATIVE_CFLAGS) $(call core_flags,$(CORE_ANSWERS)/bcc.h) \
 		-I"$(CURDIR)/bcc/libbpf-tools" -I"$(CURDIR)/bcc/libbpf-tools/x86" \
 		-I"$(CURDIR)/bcc/src/cc/libbpf/include/uapi" \
 		-I/usr/include -I/usr/include/x86_64-linux-gnu \
@@ -216,9 +260,10 @@ $(OTEL_NATIVE_OBJECT): $(OTEL_NATIVE_UNIT_OBJS)
 	install -d "$(dir $@)"
 	"$(CLANG)" -r -o "$@" $(OTEL_NATIVE_UNIT_OBJS)
 
-$(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinux.h
+$(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinux.h \
+		core-compat.h $(CORE_ANSWERS)/tracee.h
 	install -d "$(dir $@)"
-	"$(CLANG)" $(NATIVE_CFLAGS) \
+	"$(CLANG)" $(NATIVE_CFLAGS) $(call core_flags,$(CORE_ANSWERS)/tracee.h) \
 		-D__TARGET_ARCH_x86 -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD \
 		-I"$(CURDIR)/tracee/pkg/ebpf/c" \
 		-I/usr/include -I/usr/include/x86_64-linux-gnu \
@@ -386,14 +431,15 @@ native-tracee: $(TRACEE_NATIVE_OBJS) $(TRACEE_NATIVE_PROOF_MARKERS)
 		--object "$(TRACEE_NATIVE_STAGE_OUT)/tracee.native.o" \
 		$(foreach src,$(TRACEE_LSM_SUPPORT_SRCS),--object "$(TRACEE_NATIVE_STAGE_OUT)/$(src).native.o")
 
-native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h $(NATIVE_LINK)
+native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h core-compat.h $(CORE_ANSWERS)/tetragon.h $(NATIVE_LINK)
 	install -d "$(NATIVE_OUT)/tetragon"
 	install -d "$(TETRAGON_NATIVE_STAGE_OUT)"
 	rm -f "$(NATIVE_OUT)/tetragon"/*.native.o "$(NATIVE_OUT)/tetragon"/*.proof.o "$(NATIVE_OUT)/tetragon"/*.proof.ok
 	rm -f "$(TETRAGON_NATIVE_STAGE_OUT)"/*.native.o
 	native_out="$(NATIVE_OUT)/tetragon"; \
 	stage_out="$(TETRAGON_NATIVE_STAGE_OUT)"; \
-	common_flags=($(NATIVE_CFLAGS) -fms-extensions \
+	common_flags=($(NATIVE_CFLAGS) -fms-extensions -DMICRO_NATIVE_HELPER_MACROS -DMICRO_NATIVE_TETRAGON \
+		$(call core_flags,$(CORE_ANSWERS)/tetragon.h) \
 		-D__TARGET_ARCH_x86 \
 		-I"$(CURDIR)/tetragon/bpf" \
 		-I"$(CURDIR)/tetragon/bpf/include" \

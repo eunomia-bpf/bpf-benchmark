@@ -69,6 +69,7 @@ statfunc int strncmp(char *str1, char *str2, int n)
     // update_min sets __value as __max_value if __value is greater than __max_value.
     // It forces the check to be done via a register, which is sometimes necessary
     // to satisfy the eBPF verifier.
+#ifdef __bpf__
     #define update_min(__value, __max_value)                                                       \
         ({                                                                                         \
             asm volatile("if %[size] <= %[max_size] goto +1;\n"                                    \
@@ -76,6 +77,13 @@ statfunc int strncmp(char *str1, char *str2, int n)
                          : [size] "+r"(__value)                                                    \
                          : [max_size] "r"(__max_value));                                           \
         })
+#else
+    #define update_min(__value, __max_value)                                                       \
+        ({                                                                                         \
+            if ((__value) > (__max_value))                                                         \
+                (__value) = (__max_value);                                                         \
+        })
+#endif
 #endif
 
 #ifndef min

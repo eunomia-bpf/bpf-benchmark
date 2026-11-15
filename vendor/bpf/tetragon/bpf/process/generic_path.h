@@ -22,7 +22,11 @@ FUNC_INLINE int get_off(char *buffer, char *buf)
 
 FUNC_INLINE char *get_buf(char *buffer, int off)
 {
+#ifdef __bpf__
 	asm volatile("%[off] &= 0xfff;\n" : [off] "+r"(off));
+#else
+	off &= 0xfff;
+#endif
 	return buffer + off;
 }
 

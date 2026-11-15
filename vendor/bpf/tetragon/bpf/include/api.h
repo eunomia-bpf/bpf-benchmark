@@ -332,8 +332,53 @@ enum {
 	__FILTER_ARG_ALL,
 };
 
+#ifdef __bpf__
 // kfuncs
 extern int bpf_strnstr(const char *s1__ign, const char *s2__ign, size_t len) __weak __ksym;
 extern int bpf_strncasestr(const char *s1__ign, const char *s2__ign, size_t len) __weak __ksym;
+#else
+static __attribute__((unused)) int native_ascii_tolower(int c)
+{
+	if (c >= 'A' && c <= 'Z')
+		return c + ('a' - 'A');
+	return c;
+}
+
+static __attribute__((unused)) int bpf_strnstr(const char *s1__ign, const char *s2__ign,
+					       size_t len)
+{
+	for (size_t i = 0; i < len; i++) {
+		size_t j = 0;
+
+		for (; j < 100 && i + j < len; j++) {
+			char c2 = s2__ign[j];
+
+			if (!c2)
+				return (int)i;
+			if (s1__ign[i + j] != c2)
+				break;
+		}
+	}
+	return -1;
+}
+
+static __attribute__((unused)) int bpf_strncasestr(const char *s1__ign,
+						   const char *s2__ign, size_t len)
+{
+	for (size_t i = 0; i < len; i++) {
+		size_t j = 0;
+
+		for (; j < 100 && i + j < len; j++) {
+			char c2 = s2__ign[j];
+
+			if (!c2)
+				return (int)i;
+			if (native_ascii_tolower(s1__ign[i + j]) != native_ascii_tolower(c2))
+				break;
+		}
+	}
+	return -1;
+}
+#endif
 
 #endif /* __BPF_API__ */
