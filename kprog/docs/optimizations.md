@@ -380,3 +380,11 @@ checks pass,16 normal B allocated outputs unchanged. Memory-store preSSA
 branches331→309/298→276, stack probes unchanged. No full compile/runtime
 claim; queued921682 captures current source after preserved910213 ends.
 Commands/results: `../results/perf_20261113/store-erase/report.md`.
+
+2026-11-15 compiler continuation06a15fa2f/f05269a4a reuses the same normal
+bounds/MIR/all-pairs/llc body after a completed optimized frontend. It changes
+no optimization policy or emitted B:16 normal fixtures retain their allocated
+bytes, two actual frontend continuations match normal B, six stale/incomplete
+identity cases stop before compilation. This avoids repeated frontend work
+when diagnosing the pipeline, not native runtime work; actual OTel completion
+is still pending. `../results/perf_20261113/frontend-resume/report.md`.

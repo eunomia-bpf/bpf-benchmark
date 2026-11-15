@@ -1,0 +1,10 @@
+{
+  "completed": false,
+  "profile": "/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store1immindex-pending.json",
+  "source": "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.c",
+  "object": "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.o",
+  "scope": "Normal bounds/MIR/all-pairs/llc continuation; no kernel submission",
+  "profile_sha256": "33c031a1b1d8a53fb195dbd1a21fe1b12790afbcb7ac5addd0b4f0acdb0d9e63",
+  "error": "Frontend did not complete; there is no completed LLVM input to resume",
+  "wall_seconds": 0.00018468700000084937
+}

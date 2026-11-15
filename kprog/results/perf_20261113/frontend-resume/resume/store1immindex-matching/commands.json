@@ -1,0 +1,80 @@
+[
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "wall_seconds": 0.018235021008877084,
+    "user_seconds": 0.008919,
+    "system_seconds": 0.008919,
+    "max_rss_kib": 49048
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "wall_seconds": 0.08923476000200026,
+    "user_seconds": 0.022588,
+    "system_seconds": 0.015854999999999998,
+    "max_rss_kib": 80296
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "wall_seconds": 0.07436785701429471,
+    "user_seconds": 0.029800999999999998,
+    "system_seconds": 0.004415,
+    "max_rss_kib": 26440
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.o"
+    ],
+    "returncode": 0,
+    "wall_seconds": 0.07698777201585472,
+    "user_seconds": 0.021162999999999998,
+    "system_seconds": 0.012093,
+    "max_rss_kib": 59028
+  }
+]

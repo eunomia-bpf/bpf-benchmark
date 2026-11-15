@@ -1,0 +1,154 @@
+[
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/test/resume_simulator_frontend.py",
+      "--profile",
+      "/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store1immindex-matching.json",
+      "--source",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.c",
+      "--object",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.o",
+      "--bounds",
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "--output",
+      "/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store1immindex-matching"
+    ],
+    "returncode": 0,
+    "stdout": "{\"completed\": true, \"profile\": \"/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store1immindex-matching.json\", \"source\": \"/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.c\", \"object\": \"/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.o\", \"scope\": \"Normal bounds/MIR/all-pairs/llc continuation; no kernel submission\", \"profile_sha256\": \"e6d14200b9ea9b6e4a1dc875e43e2d078af464b582ccff05b1b2e2ede2a08a60\", \"frontend_sha256\": \"f8ad104e2c9a07f7274ebf0ce8f78916094baca8502d288f4b6116d045454e4f\", \"source_sha256\": \"0ce7883e5731af4baa39efd633c6ce6ba7157cf6a9a042bf20eaafe2acddbd7d\", \"bounds_sha256\": \"5236d0ea94daf23da9e89a98d00bcb8f6c18c389388f1bf76da4d2592e5987b0\", \"source_head\": \"f05269a4aedda74e3a104fdfa0fc9c6643997e1b\", \"object_sha256\": \"f58e6962793d3341ffd8c27b0819a2c1394d39454e6a6e9878824ebb12e37f7b\", \"object_bytes\": 25736, \"wall_seconds\": 0.2648170280153863}\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/test/resume_simulator_frontend.py",
+      "--profile",
+      "/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store1immindex-pending.json",
+      "--source",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.c",
+      "--object",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.o",
+      "--bounds",
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "--output",
+      "/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store1immindex-pending"
+    ],
+    "returncode": 1,
+    "stdout": "{\"completed\": false, \"profile\": \"/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store1immindex-pending.json\", \"source\": \"/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.c\", \"object\": \"/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.o\", \"scope\": \"Normal bounds/MIR/all-pairs/llc continuation; no kernel submission\", \"profile_sha256\": \"33c031a1b1d8a53fb195dbd1a21fe1b12790afbcb7ac5addd0b4f0acdb0d9e63\", \"error\": \"Frontend did not complete; there is no completed LLVM input to resume\", \"wall_seconds\": 0.00018468700000084937}\n",
+    "stderr": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/test/resume_simulator_frontend.py\", line 65, in <module>\n    main(parser.parse_args())\n  File \"/workspaces/repository/kprog/test/resume_simulator_frontend.py\", line 40, in main\n    raise ValueError('Frontend did not complete; there is no completed LLVM input to resume')\nValueError: Frontend did not complete; there is no completed LLVM input to resume\n"
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/test/resume_simulator_frontend.py",
+      "--profile",
+      "/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store1immindex-wrong-llvm.json",
+      "--source",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.c",
+      "--object",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.o",
+      "--bounds",
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "--output",
+      "/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store1immindex-wrong-llvm"
+    ],
+    "returncode": 1,
+    "stdout": "{\"completed\": false, \"profile\": \"/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store1immindex-wrong-llvm.json\", \"source\": \"/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.c\", \"object\": \"/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.o\", \"scope\": \"Normal bounds/MIR/all-pairs/llc continuation; no kernel submission\", \"profile_sha256\": \"d4069c63d900663f0931627d6f37b5664e61393cbe92b480f40310e4000c4592\", \"error\": \"Canonical LLVM input differs from the completed frontend record\", \"wall_seconds\": 0.00025658999220468104}\n",
+    "stderr": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/test/resume_simulator_frontend.py\", line 65, in <module>\n    main(parser.parse_args())\n  File \"/workspaces/repository/kprog/test/resume_simulator_frontend.py\", line 43, in main\n    raise ValueError('Canonical LLVM input differs from the completed frontend record')\nValueError: Canonical LLVM input differs from the completed frontend record\n"
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/test/resume_simulator_frontend.py",
+      "--profile",
+      "/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store1immindex-wrong-source.json",
+      "--source",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.c",
+      "--object",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.o",
+      "--bounds",
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "--output",
+      "/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store1immindex-wrong-source"
+    ],
+    "returncode": 1,
+    "stdout": "{\"completed\": false, \"profile\": \"/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store1immindex-wrong-source.json\", \"source\": \"/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.c\", \"object\": \"/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.o\", \"scope\": \"Normal bounds/MIR/all-pairs/llc continuation; no kernel submission\", \"profile_sha256\": \"764aed3fe23781b6c9bd8038ea134181dc82cc64707e397912fc3f2b895cd148\", \"error\": \"Canonical simulator source differs from the completed frontend record\", \"wall_seconds\": 0.00036824701237492263}\n",
+    "stderr": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/test/resume_simulator_frontend.py\", line 65, in <module>\n    main(parser.parse_args())\n  File \"/workspaces/repository/kprog/test/resume_simulator_frontend.py\", line 45, in main\n    raise ValueError('Canonical simulator source differs from the completed frontend record')\nValueError: Canonical simulator source differs from the completed frontend record\n"
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/test/resume_simulator_frontend.py",
+      "--profile",
+      "/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store8regindex-matching.json",
+      "--source",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.c",
+      "--object",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.o",
+      "--bounds",
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "--output",
+      "/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store8regindex-matching"
+    ],
+    "returncode": 0,
+    "stdout": "{\"completed\": true, \"profile\": \"/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store8regindex-matching.json\", \"source\": \"/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.c\", \"object\": \"/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.o\", \"scope\": \"Normal bounds/MIR/all-pairs/llc continuation; no kernel submission\", \"profile_sha256\": \"8ad35924ba4a334b992c331e64edc394f587eaa6cef34b69fad1d4c1672ed2bd\", \"frontend_sha256\": \"e71eb7ecd8bf582d4ec7fe638c4fae3b5f3e237f65abe8935af4be08e7b1221a\", \"source_sha256\": \"b394ad26dfc4c79097a3ff48bec1b836cef2793b0ae447f16edb0aac979ab021\", \"bounds_sha256\": \"5236d0ea94daf23da9e89a98d00bcb8f6c18c389388f1bf76da4d2592e5987b0\", \"source_head\": \"f05269a4aedda74e3a104fdfa0fc9c6643997e1b\", \"object_sha256\": \"a70632c681346d28d165bef84a131f234ec284151c3e1e8fdc750dd9c0be826b\", \"object_bytes\": 25712, \"wall_seconds\": 0.15804487699642777}\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/test/resume_simulator_frontend.py",
+      "--profile",
+      "/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store8regindex-pending.json",
+      "--source",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.c",
+      "--object",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.o",
+      "--bounds",
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "--output",
+      "/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store8regindex-pending"
+    ],
+    "returncode": 1,
+    "stdout": "{\"completed\": false, \"profile\": \"/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store8regindex-pending.json\", \"source\": \"/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.c\", \"object\": \"/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.o\", \"scope\": \"Normal bounds/MIR/all-pairs/llc continuation; no kernel submission\", \"profile_sha256\": \"b2fe9e45428c29210fe1edfa201e1bce4b1b55df9afc596c87088be4b3914f70\", \"error\": \"Frontend did not complete; there is no completed LLVM input to resume\", \"wall_seconds\": 0.0003809420159086585}\n",
+    "stderr": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/test/resume_simulator_frontend.py\", line 65, in <module>\n    main(parser.parse_args())\n  File \"/workspaces/repository/kprog/test/resume_simulator_frontend.py\", line 40, in main\n    raise ValueError('Frontend did not complete; there is no completed LLVM input to resume')\nValueError: Frontend did not complete; there is no completed LLVM input to resume\n"
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/test/resume_simulator_frontend.py",
+      "--profile",
+      "/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store8regindex-wrong-llvm.json",
+      "--source",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.c",
+      "--object",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.o",
+      "--bounds",
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "--output",
+      "/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store8regindex-wrong-llvm"
+    ],
+    "returncode": 1,
+    "stdout": "{\"completed\": false, \"profile\": \"/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store8regindex-wrong-llvm.json\", \"source\": \"/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.c\", \"object\": \"/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.o\", \"scope\": \"Normal bounds/MIR/all-pairs/llc continuation; no kernel submission\", \"profile_sha256\": \"31b46903d4f3708be801929fe82cb364653134e1823588acb81ab9aedb561b78\", \"error\": \"Canonical LLVM input differs from the completed frontend record\", \"wall_seconds\": 0.0002631499955896288}\n",
+    "stderr": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/test/resume_simulator_frontend.py\", line 65, in <module>\n    main(parser.parse_args())\n  File \"/workspaces/repository/kprog/test/resume_simulator_frontend.py\", line 43, in main\n    raise ValueError('Canonical LLVM input differs from the completed frontend record')\nValueError: Canonical LLVM input differs from the completed frontend record\n"
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/test/resume_simulator_frontend.py",
+      "--profile",
+      "/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store8regindex-wrong-source.json",
+      "--source",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.c",
+      "--object",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.o",
+      "--bounds",
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "--output",
+      "/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store8regindex-wrong-source"
+    ],
+    "returncode": 1,
+    "stdout": "{\"completed\": false, \"profile\": \"/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store8regindex-wrong-source.json\", \"source\": \"/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.c\", \"object\": \"/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.o\", \"scope\": \"Normal bounds/MIR/all-pairs/llc continuation; no kernel submission\", \"profile_sha256\": \"5a606c166d7bea5eea030d76f08e7bf7229cc9691d9e494f02185725a6c4b211\", \"error\": \"Canonical simulator source differs from the completed frontend record\", \"wall_seconds\": 0.0002772440202534199}\n",
+    "stderr": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/test/resume_simulator_frontend.py\", line 65, in <module>\n    main(parser.parse_args())\n  File \"/workspaces/repository/kprog/test/resume_simulator_frontend.py\", line 45, in main\n    raise ValueError('Canonical simulator source differs from the completed frontend record')\nValueError: Canonical simulator source differs from the completed frontend record\n"
+  }
+]

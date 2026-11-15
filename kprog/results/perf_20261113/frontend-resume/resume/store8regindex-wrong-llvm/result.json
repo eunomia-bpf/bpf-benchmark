@@ -1,0 +1,10 @@
+{
+  "completed": false,
+  "profile": "/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store8regindex-wrong-llvm.json",
+  "source": "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.c",
+  "object": "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.o",
+  "scope": "Normal bounds/MIR/all-pairs/llc continuation; no kernel submission",
+  "profile_sha256": "31b46903d4f3708be801929fe82cb364653134e1823588acb81ab9aedb561b78",
+  "error": "Canonical LLVM input differs from the completed frontend record",
+  "wall_seconds": 0.0002631499955896288
+}

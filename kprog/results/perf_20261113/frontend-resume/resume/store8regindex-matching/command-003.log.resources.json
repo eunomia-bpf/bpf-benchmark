@@ -1,0 +1,19 @@
+{
+  "command": [
+    "llc-18",
+    "-O3",
+    "-march=bpf",
+    "-mcpu=v4",
+    "-bpf-stack-size=4096",
+    "-start-before=prologepilog",
+    "-filetype=obj",
+    "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.packed.mir",
+    "-o",
+    "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.o"
+  ],
+  "returncode": 0,
+  "wall_seconds": 0.03394371600006707,
+  "user_seconds": 0.019658,
+  "system_seconds": 0.011793999999999999,
+  "max_rss_kib": 59228
+}

@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/opt/virtme-ng/bin/python3",
+    "/workspaces/repository/kprog/x86/whole_word_spills.py",
+    "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.before.mir",
+    "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.packed.mir"
+  ],
+  "returncode": 0,
+  "wall_seconds": 0.07436785701429471,
+  "user_seconds": 0.029800999999999998,
+  "system_seconds": 0.004415,
+  "max_rss_kib": 26440
+}

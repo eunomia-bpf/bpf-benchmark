@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+    "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.bounds-input.bc",
+    "-o",
+    "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.bounds.bc",
+    "--canonical-ctx-loads",
+    "--strict-identities"
+  ],
+  "returncode": 0,
+  "wall_seconds": 0.018235021008877084,
+  "user_seconds": 0.008919,
+  "system_seconds": 0.008919,
+  "max_rss_kib": 49048
+}

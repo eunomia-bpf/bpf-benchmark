@@ -1,0 +1,31 @@
+{
+  "command": [
+    "/workspaces/repository/kprog/stock-path/bin/clang",
+    "-w",
+    "-g",
+    "-O3",
+    "-mcpu=v4",
+    "-target",
+    "bpf",
+    "-mllvm",
+    "-bpf-stack-size=4096",
+    "-D__TARGET_ARCH_x86",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/include/uapi",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/src",
+    "-I",
+    "/usr/include/x86_64-linux-gnu",
+    "-c",
+    "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.bounds.bc",
+    "-mllvm",
+    "-stop-before=prologepilog",
+    "-o",
+    "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.before.mir"
+  ],
+  "returncode": 0,
+  "wall_seconds": 0.08923476000200026,
+  "user_seconds": 0.022588,
+  "system_seconds": 0.015854999999999998,
+  "max_rss_kib": 80296
+}

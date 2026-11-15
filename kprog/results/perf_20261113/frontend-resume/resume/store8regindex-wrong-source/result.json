@@ -1,0 +1,10 @@
+{
+  "completed": false,
+  "profile": "/workspaces/kprog-raw/perf/20261115-frontend-resume/resume/store8regindex-wrong-source.json",
+  "source": "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.c",
+  "object": "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.o",
+  "scope": "Normal bounds/MIR/all-pairs/llc continuation; no kernel submission",
+  "profile_sha256": "5a606c166d7bea5eea030d76f08e7bf7229cc9691d9e494f02185725a6c4b211",
+  "error": "Canonical simulator source differs from the completed frontend record",
+  "wall_seconds": 0.0002772440202534199
+}

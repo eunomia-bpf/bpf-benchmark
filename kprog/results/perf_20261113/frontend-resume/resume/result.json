@@ -1,0 +1,85 @@
+{
+  "cases": [
+    {
+      "symbol": "store1immindex",
+      "variant": "matching",
+      "expected_outcome": true,
+      "allocated_sha256": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "kprobe/stores": "77b92bd2d3f106344c801f9a71aeabc584c76734290ed4ce7472e284286023d2",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a"
+      }
+    },
+    {
+      "symbol": "store1immindex",
+      "variant": "pending",
+      "expected_outcome": true,
+      "allocated_sha256": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "kprobe/stores": "77b92bd2d3f106344c801f9a71aeabc584c76734290ed4ce7472e284286023d2",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a"
+      }
+    },
+    {
+      "symbol": "store1immindex",
+      "variant": "wrong-llvm",
+      "expected_outcome": true,
+      "allocated_sha256": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "kprobe/stores": "77b92bd2d3f106344c801f9a71aeabc584c76734290ed4ce7472e284286023d2",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a"
+      }
+    },
+    {
+      "symbol": "store1immindex",
+      "variant": "wrong-source",
+      "expected_outcome": true,
+      "allocated_sha256": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "kprobe/stores": "77b92bd2d3f106344c801f9a71aeabc584c76734290ed4ce7472e284286023d2",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a"
+      }
+    },
+    {
+      "symbol": "store8regindex",
+      "variant": "matching",
+      "expected_outcome": true,
+      "allocated_sha256": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "kprobe/stores": "505f599be102b3490852fa54965bed42d6526f92965bdca675446db35bcb404e",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a"
+      }
+    },
+    {
+      "symbol": "store8regindex",
+      "variant": "pending",
+      "expected_outcome": true,
+      "allocated_sha256": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "kprobe/stores": "505f599be102b3490852fa54965bed42d6526f92965bdca675446db35bcb404e",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a"
+      }
+    },
+    {
+      "symbol": "store8regindex",
+      "variant": "wrong-llvm",
+      "expected_outcome": true,
+      "allocated_sha256": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "kprobe/stores": "505f599be102b3490852fa54965bed42d6526f92965bdca675446db35bcb404e",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a"
+      }
+    },
+    {
+      "symbol": "store8regindex",
+      "variant": "wrong-source",
+      "expected_outcome": true,
+      "allocated_sha256": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "kprobe/stores": "505f599be102b3490852fa54965bed42d6526f92965bdca675446db35bcb404e",
+        "license": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a"
+      }
+    }
+  ],
+  "scope": "Two actual normal frontend continuations and six stale/incomplete identity failures; no kernel"
+}
