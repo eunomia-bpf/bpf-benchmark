@@ -46,6 +46,15 @@ fn relative_table_bases(
                     i128::from(lea.next_ip() - at) - i128::from(data.address());
                 let base = u64::try_from(address).map_err(|_| anyhow!("relative table base out of range"))?;
                 if base >= data.size() { bail!("relative table base exceeds data section"); }
+                let mut code_entry = false;
+                for (_, entry) in data.relocations().filter(|(at, _)| *at == base) {
+                    if !matches!(entry.flags(), RelocationFlags::Elf { r_type: 2 }) { continue; }
+                    let RelocationTarget::Symbol(index) = entry.target() else { continue; };
+                    if let Some(section) = elf.symbol_by_index(index)?.section_index() {
+                        code_entry |= elf.section_by_index(section)?.kind() == SectionKind::Text;
+                    }
+                }
+                if !code_entry { bail!("relative jump-table base has no PC32 code entry"); }
                 bases.push(base);
                 sites.insert(local_site_key(sym, jump.ip() - sym.address));
             }
