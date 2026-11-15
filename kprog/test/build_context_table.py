@@ -78,12 +78,40 @@ def main(args):
         body, functions, exit_address, data = generator.parse_proof_object_program('trusted_x86', args.build)
         generated = args.build/'trusted_x86.bpf.c'
         text = generator.render_program('trusted_x86', body, functions, kind='raw',
-            program_section='kprobe/jump_table', exit_addr=exit_address, rodata16=data)
+            program_section='kprobe/jump_table', exit_addr=exit_address, rodata16=data,
+            source_prelude='''#if !defined(__bpf__) && !defined(__BPF__)
+extern void context_table_unresolved(void);
+#define __x86_sim_unresolved_indirect_target context_table_unresolved
+#endif''')
         text = text.replace('#include "../x86_sim_local_bpf.h"',
                             '#include '+json.dumps(str(ROOT/'kprog/x86/x86_sim_local_bpf.h')))
         generated.write_text(text)
         worker.compile_simulator(str(ROOT/'kprog/stock-path/bin/clang'), generated,
                                  args.build/'trusted_x86.bpf.o', run, bounds_compiler=args.bounds)
+        result['b_compiled'] = True
+        adapter = args.build/'host-input.c'
+        adapter.write_text('''#include <stdlib.h>
+void context_table_unresolved(void) { abort(); }
+unsigned long native_lab_entry_input(unsigned int kind) {
+    if (kind == 1) return 0; /* Explicit zero-origin host stack fixture. */
+    abort();
+}
+''')
+        shared = args.build/'shared-simulator.so'
+        run(['clang-18', '-shared', '-fPIC', '-O2', '-w', '-I'+str(ROOT/'vendor/libbpf/src'),
+             generated, adapter, '-o', shared])
+        model = ctypes.CDLL(str(shared)).trusted_x86_x86_sim_xdp
+        model.argtypes = [ctypes.POINTER(ctypes.c_uint64)]
+        model.restype = ctypes.c_uint32
+        model_executions = []
+        for row in executions:
+            values = [(row['seed']*0x9e3779b97f4a7c15+i*0xd1b54a32d192ed03) & ((1<<64)-1) for i in range(11)]
+            values[10] = row['index']
+            actual = model((ctypes.c_uint64*11)(*values))
+            if actual != row['expected']:
+                raise ValueError('Shared single-context simulator mismatch: '+str(row))
+            model_executions.append(dict(seed=row['seed'], index=row['index'], actual=actual, expected=row['expected']))
+        result['shared_simulator_executions'] = model_executions
         result.update(compiled=True, entry='trusted_x86_x86_sim_xdp', source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
             native_sha256=hashlib.sha256(native.read_bytes()).hexdigest(),
             proof_sha256=hashlib.sha256(proof.read_bytes()).hexdigest(),
