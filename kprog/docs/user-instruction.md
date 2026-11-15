@@ -80,6 +80,9 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-15 ~08:55 UTC: "???"
 - 2026-11-15 ~14:00 UTC: "你说过 -fPIC 一定要要去掉吗"
 - 2026-11-15 ~14:00 UTC: "干嘛这么久? 你是不是要求太多了>"
+- 2026-11-15 ~14:10 UTC: "每个应用 A/A 一次、A/B 一次，以每次调用为主。我说过吗（前半句引用协调者的话）"
+- 2026-11-15 ~14:10 UTC: "现在还差啥? 干嘛改了这么多? 全部看看?"
+- 2026-11-15 ~14:10 UTC: "看看过去5 天时间线"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
