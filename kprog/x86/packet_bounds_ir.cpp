@@ -25,6 +25,36 @@ static bool tied_identity(CallInst *call,InlineAsm *assembly) {
   return assembly->getAsmString().empty() && assembly->getConstraintString()=="=r,0" &&
       call->arg_size()==1 && call->getType()==call->getArgOperand(0)->getType();
 }
+// The interpreter's private arena is a local memory block. Clight volatile
+// accesses to this block have ordinary Mem load/store semantics and trace E0;
+// volatile global/context accesses remain externally observable. Expose only
+// the private arena to LLVM's normal scalar replacement and dead-store passes.
+static unsigned normalize_private_stack_accesses(Module &module) {
+  unsigned count=0;
+  for (auto &function:module) for (auto &instruction:instructions(function)) {
+    Value *pointer=nullptr;
+    auto *load=dyn_cast<LoadInst>(&instruction);
+    auto *store=dyn_cast<StoreInst>(&instruction);
+    if (load && load->isVolatile() && !load->isAtomic()) pointer=load->getPointerOperand();
+    if (store && store->isVolatile() && !store->isAtomic()) pointer=store->getPointerOperand();
+    if (!pointer) continue;
+    SmallVector<const Value *,4> objects;
+    getUnderlyingObjects(pointer,objects);
+    if (objects.empty()) continue;
+    bool private_stack=true;
+    for (auto *object:objects) {
+      auto *local=dyn_cast<AllocaInst>(object);
+      auto *type=local?dyn_cast<StructType>(local->getAllocatedType()):nullptr;
+      if (!type || type->getName()!="union.x86_sim_stack_mem") {
+        private_stack=false;break;
+      }
+    }
+    if (!private_stack) continue;
+    if (load) load->setVolatile(false);else store->setVolatile(false);
+    ++count;
+  }
+  return count;
+}
 // A tied empty asm with an integer constant emits no operation and returns
 // exactly those bits. Propagate newly exposed integer constants through pure
 // constant expressions to their next identity, so chains reach a fixed point.
@@ -185,6 +215,7 @@ int main(int argc,char **argv) {
   LLVMContext context;SMDiagnostic error;auto module=parseIRFile(Input,error,context);
   if (!module) { error.print(argv[0],errs());return 1; }
   unsigned constants=fold_constant_identities(*module);
+  unsigned private_stack=normalize_private_stack_accesses(*module);
   unsigned unused=remove_unused_private_inputs(*module);
   unsigned contexts=canonical_context_loads(*module);
   unsigned debug_variables=remove_debug_variable_intrinsics(*module);
@@ -237,4 +268,5 @@ int main(int argc,char **argv) {
   errs()<<"debug variable intrinsics removed="<<debug_variables<<'\n';
   errs()<<"equality-edge PHI expressions folded="<<equality_edges<<'\n';
   errs()<<"tied integer constant identities folded="<<constants<<'\n';
+  errs()<<"private stack accesses normalized="<<private_stack<<'\n';
 }
