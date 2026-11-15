@@ -32,11 +32,11 @@ pub(super) fn references(
             let RelocationTarget::Symbol(index) = reloc.target() else { continue; };
             let target = elf.symbol_by_index(index)?;
             let name = target.name()?;
-            let is_map = maps.contains_key(name) || target.section_index()
+            let declared_map = target.section_index()
                 .map(|i| elf.section_by_index(i)).transpose()?
                 .map(|s| s.name().map(|n| n == ".maps" || n == "maps"))
                 .transpose()?.unwrap_or(false);
-            if !is_map { continue; }
+            if !declared_map && !maps.contains_key(name) { continue; }
             let (insn, offsets) = decoded.iter().find(|(i, _)| i.ip() <= at && at < i.next_ip())
                 .ok_or_else(|| anyhow!("non-PIC map relocation outside {}", sym.name))?;
             // PC-relative data reads/writes keep their existing DATASEC path.
@@ -44,6 +44,10 @@ pub(super) fn references(
             let addend = i128::from(reloc.addend()) + if kind == 2 {
                 i128::from(insn.next_ip() - at)
             } else { 0 };
+            // The loader's address namespace also contains DATASEC variables.
+            // Their indexed PC32 addresses already have a live-value lowering;
+            // do not mistake such a member address for an interior map handle.
+            if kind == 2 && addend != 0 && !declared_map { continue; }
             if addend != 0 || reloc.has_implicit_addend() {
                 bail!("non-PIC map address {name} requires an explicit zero address addend");
             }
@@ -166,6 +170,23 @@ mod tests {
             let data = fixture(10, &bytes, offset, addend)?;
             assert!(link(&data, false, &maps).is_err());
         }
+        Ok(())
+    }
+
+    #[test]
+    fn pc32_datasec_member_keeps_existing_live_value_lowering() -> Result<()> {
+        let mut data = fixture(2, &[0x48, 0x8d, 0x05, 0, 0, 0, 0, 0xc3], 3, 4)?;
+        let name = data.windows(6).position(|bytes| bytes == b".maps\0")
+            .ok_or_else(|| anyhow!("fixture lacks map section name"))?;
+        data[name..name + 5].copy_from_slice(b".data");
+        let elf = object::File::parse(data.as_slice())?;
+        let entry = find_symbol_by_name(&elf, "entry")?;
+        let maps = HashMap::from([("map".to_owned(), 0xffff_8880_0000_0000)]);
+        assert!(references(&elf, &[entry.clone()], &maps)?.is_empty());
+        let writable = writable_data::references(&elf, &[entry.clone()])?;
+        let value = writable.get(&local_site_key(&entry, 3))
+            .ok_or_else(|| anyhow!("live DATASEC member lost its binding"))?;
+        assert_eq!((value.name.as_str(), value.offset), ("map", 8));
         Ok(())
     }
 }
