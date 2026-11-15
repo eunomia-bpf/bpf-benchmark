@@ -1,0 +1,177 @@
+[
+  {
+    "assembly": "CALL rax / RET",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 6
+  },
+  {
+    "assembly": "JMP rax",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 5
+  },
+  {
+    "assembly": "CALL rcx / RET",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 6
+  },
+  {
+    "assembly": "JMP rcx",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 5
+  },
+  {
+    "assembly": "CALL rdx / RET",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 6
+  },
+  {
+    "assembly": "JMP rdx",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 5
+  },
+  {
+    "assembly": "CALL rbx / RET",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 6
+  },
+  {
+    "assembly": "JMP rbx",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 5
+  },
+  {
+    "assembly": "CALL rbp / RET",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 6
+  },
+  {
+    "assembly": "JMP rbp",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 5
+  },
+  {
+    "assembly": "CALL rsi / RET",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 6
+  },
+  {
+    "assembly": "JMP rsi",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 5
+  },
+  {
+    "assembly": "CALL rdi / RET",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 6
+  },
+  {
+    "assembly": "JMP rdi",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 5
+  },
+  {
+    "assembly": "CALL r8 / RET",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 6
+  },
+  {
+    "assembly": "JMP r8",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 5
+  },
+  {
+    "assembly": "CALL r9 / RET",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 6
+  },
+  {
+    "assembly": "JMP r9",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 5
+  },
+  {
+    "assembly": "CALL r10 / RET",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 6
+  },
+  {
+    "assembly": "JMP r10",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 5
+  },
+  {
+    "assembly": "CALL r11 / RET",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 6
+  },
+  {
+    "assembly": "JMP r11",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 5
+  },
+  {
+    "assembly": "CALL r12 / RET",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 6
+  },
+  {
+    "assembly": "JMP r12",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 5
+  },
+  {
+    "assembly": "CALL r13 / RET",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 6
+  },
+  {
+    "assembly": "JMP r13",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 5
+  },
+  {
+    "assembly": "CALL r14 / RET",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 6
+  },
+  {
+    "assembly": "JMP r14",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 5
+  },
+  {
+    "assembly": "CALL r15 / RET",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 6
+  },
+  {
+    "assembly": "JMP r15",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 5
+  },
+  {
+    "assembly": "CALL finite choice",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 12
+  },
+  {
+    "assembly": "JMP finite copied choice",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 12
+  },
+  {
+    "assembly": "nested direct CALL",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 8
+  },
+  {
+    "assembly": "nested indirect CALL",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 10
+  },
+  {
+    "assembly": "CALL stack return address",
+    "opcode": "X86_CONTROL",
+    "native_instructions": 5
+  }
+]

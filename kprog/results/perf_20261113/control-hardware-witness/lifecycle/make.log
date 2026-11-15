@@ -1,0 +1,10 @@
+make: Entering directory '/workspaces/repository/kprog/fidelity'
+python3 x86_control.py build-x86-control
+generated 35 real x86 finite-control observers
+cc -O1 -g -std=gnu11 -static -I../../vendor/libbpf/src \
+	driver.c control_inputs.c build-x86-control/generated.c build-x86-control/native.o \
+	-Wl,--section-start=.kprog_native=0x1000000 -o build-x86-control/cpu-differential
+install -d /workspaces/kprog-raw/perf/20261115-control-witness/lifecycle
+./build-x86-control/control-trace ./build-x86-control/cpu-differential 256 /workspaces/kprog-raw/perf/20261115-control-witness/lifecycle /workspaces/kprog-raw/perf/20261115-control-witness/lifecycle/cpu-states.bin
+forms=35 cases=8960 mismatches=0
+make: Leaving directory '/workspaces/repository/kprog/fidelity'

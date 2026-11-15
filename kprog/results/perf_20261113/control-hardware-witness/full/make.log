@@ -1,0 +1,5 @@
+make: Entering directory '/workspaces/repository/kprog/fidelity'
+install -d /workspaces/kprog-raw/perf/20261115-control-witness/full
+./build-x86-control/control-trace ./build-x86-control/cpu-differential 256 /workspaces/kprog-raw/perf/20261115-control-witness/full /workspaces/kprog-raw/perf/20261115-control-witness/full/cpu-states.bin
+forms=35 cases=8960 mismatches=0
+make: Leaving directory '/workspaces/repository/kprog/fidelity'

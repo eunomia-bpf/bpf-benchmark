@@ -1,0 +1,258 @@
+{
+  "forms": 35,
+  "cases_per_form": 256,
+  "cases": 8960,
+  "mismatches": 0,
+  "hardware_release_events": 5376,
+  "hardware_input_words": 5376,
+  "prior_counterexamples_exercised": 4864,
+  "native_code_spans_unchanged": 35,
+  "raw_flag_xor_histogram": {
+    "0x202": 8960
+  },
+  "per_form": [
+    {
+      "form": 0,
+      "cases": 256,
+      "releases": 256,
+      "words": 256
+    },
+    {
+      "form": 1,
+      "cases": 256,
+      "releases": 0,
+      "words": 0
+    },
+    {
+      "form": 2,
+      "cases": 256,
+      "releases": 256,
+      "words": 256
+    },
+    {
+      "form": 3,
+      "cases": 256,
+      "releases": 0,
+      "words": 0
+    },
+    {
+      "form": 4,
+      "cases": 256,
+      "releases": 256,
+      "words": 256
+    },
+    {
+      "form": 5,
+      "cases": 256,
+      "releases": 0,
+      "words": 0
+    },
+    {
+      "form": 6,
+      "cases": 256,
+      "releases": 256,
+      "words": 256
+    },
+    {
+      "form": 7,
+      "cases": 256,
+      "releases": 0,
+      "words": 0
+    },
+    {
+      "form": 8,
+      "cases": 256,
+      "releases": 256,
+      "words": 256
+    },
+    {
+      "form": 9,
+      "cases": 256,
+      "releases": 0,
+      "words": 0
+    },
+    {
+      "form": 10,
+      "cases": 256,
+      "releases": 256,
+      "words": 256
+    },
+    {
+      "form": 11,
+      "cases": 256,
+      "releases": 0,
+      "words": 0
+    },
+    {
+      "form": 12,
+      "cases": 256,
+      "releases": 256,
+      "words": 256
+    },
+    {
+      "form": 13,
+      "cases": 256,
+      "releases": 0,
+      "words": 0
+    },
+    {
+      "form": 14,
+      "cases": 256,
+      "releases": 256,
+      "words": 256
+    },
+    {
+      "form": 15,
+      "cases": 256,
+      "releases": 0,
+      "words": 0
+    },
+    {
+      "form": 16,
+      "cases": 256,
+      "releases": 256,
+      "words": 256
+    },
+    {
+      "form": 17,
+      "cases": 256,
+      "releases": 0,
+      "words": 0
+    },
+    {
+      "form": 18,
+      "cases": 256,
+      "releases": 256,
+      "words": 256
+    },
+    {
+      "form": 19,
+      "cases": 256,
+      "releases": 0,
+      "words": 0
+    },
+    {
+      "form": 20,
+      "cases": 256,
+      "releases": 256,
+      "words": 256
+    },
+    {
+      "form": 21,
+      "cases": 256,
+      "releases": 0,
+      "words": 0
+    },
+    {
+      "form": 22,
+      "cases": 256,
+      "releases": 256,
+      "words": 256
+    },
+    {
+      "form": 23,
+      "cases": 256,
+      "releases": 0,
+      "words": 0
+    },
+    {
+      "form": 24,
+      "cases": 256,
+      "releases": 256,
+      "words": 256
+    },
+    {
+      "form": 25,
+      "cases": 256,
+      "releases": 0,
+      "words": 0
+    },
+    {
+      "form": 26,
+      "cases": 256,
+      "releases": 256,
+      "words": 256
+    },
+    {
+      "form": 27,
+      "cases": 256,
+      "releases": 0,
+      "words": 0
+    },
+    {
+      "form": 28,
+      "cases": 256,
+      "releases": 256,
+      "words": 256
+    },
+    {
+      "form": 29,
+      "cases": 256,
+      "releases": 0,
+      "words": 0
+    },
+    {
+      "form": 30,
+      "cases": 256,
+      "releases": 256,
+      "words": 256
+    },
+    {
+      "form": 31,
+      "cases": 256,
+      "releases": 0,
+      "words": 0
+    },
+    {
+      "form": 32,
+      "cases": 256,
+      "releases": 512,
+      "words": 512
+    },
+    {
+      "form": 33,
+      "cases": 256,
+      "releases": 512,
+      "words": 512
+    },
+    {
+      "form": 34,
+      "cases": 256,
+      "releases": 256,
+      "words": 256
+    }
+  ],
+  "scope": "Finite x86 control corpus. Explicit hardware input witness; no complete ISA/AST/formal claim.",
+  "files": [
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-control-witness/full/native-code.json",
+      "bytes": 3806,
+      "sha256": "d94ee1e98d89f23c467997d2a52ce074e1216c55d5f11a63f4b4cdc8928d57c4"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-control-witness/full/input-witnesses.jsonl",
+      "bytes": 1807606,
+      "sha256": "9a5733b77b4f5fd01e418746a93f2ee3c9c76f7b558931e30ac034b2bf52444f"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-control-witness/full/cpu-states.bin",
+      "bytes": 16271384,
+      "sha256": "a70dbb8248a6327f179272866258e1634170c787cc4cb97f5c1fa27dfd2ca7d2"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-host-input-route/control-after/native-code.json",
+      "bytes": 3806,
+      "sha256": "9c3c952f9a00aa27232a97e5352aa0d6aee563728b3d4b418e6da4b90914a137"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-host-input-route/control-after/mismatches.jsonl",
+      "bytes": 20732886,
+      "sha256": "c50764dc01f19c7d58b1d25f70e049c56b36f5fa38ff2f3f79c8a9a9734fc8b6"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-control-witness/full/mismatches.jsonl",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

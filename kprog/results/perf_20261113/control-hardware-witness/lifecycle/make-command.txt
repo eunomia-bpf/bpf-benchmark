@@ -1,0 +1,1 @@
+taskset -c 16-19 make -r -C kprog/fidelity x86-control-run CASES=256 X86_CONTROL_OUT=/workspaces/kprog-raw/perf/20261115-control-witness/lifecycle 
