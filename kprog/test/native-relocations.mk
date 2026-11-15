@@ -29,6 +29,20 @@ kernel-layout-check: $(KERNEL_LAYOUT)
 loader-syntax:
 	taskset -c 8-11 prlimit --as=12884901888 -- clang++-18 -std=gnu++20 -fsyntax-only -I$(ROOT)/kprog/libnativeloader/include -I$(ROOT)/micro/programs/build-x86 -I$(LIBBPF_PREFIX)/include -I$(ROOT)/vendor/libbpf/include -I$(ROOT)/vendor/libbpf/include/uapi $(ROOT)/kprog/libnativeloader/src/native_loader.cpp
 
+.PHONY: restore-boot-metadata kernel-layout-boot guest-kernel-layout
+restore-boot-metadata:
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image python3 $(ROOT)/kprog/test/restore_boot_elf.py --kernel $(KDIR) --extractor $(ROOT)/vendor/linux-framework/scripts/extract-vmlinux --output $(OUTPUT)/boot-recovery
+
+kernel-layout-boot: $(KERNEL_LAYOUT_BUILD)/facts
+	install -d $(OUTPUT)
+	taskset -c 16-17 prlimit --as=17179869184 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-kernel-layout OUTPUT=$(OUTPUT)'
+
+guest-kernel-layout:
+	uname -r > $(OUTPUT)/kernel.release
+	cat /proc/kallsyms > $(OUTPUT)/kernel.kallsyms
+	cat /sys/kernel/btf/vmlinux > $(OUTPUT)/kernel.btf
+	$(KERNEL_LAYOUT_BUILD)/facts /sys/kernel/btf/vmlinux /proc/kallsyms > $(OUTPUT)/kernel-layout.json
+
 .PHONY: check build
 check:
 	taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
