@@ -85,9 +85,15 @@ their metadata never substitutes one for the other.
 
 The pure-body question continues in a separate1x60s two-arm profile, using the
 existing phase-profile tool under the same fixed-frequency envelope and
-timingEX/imageSH. Its perf/module/image inputs are hardlinks to the canonical
+timingEX/imageSH. Its perf/module/image inputs are symbolic links to the canonical
 artifacts; the completed profile stage records cleanup paths while retaining
 raw profiles in persistent storage. It supplies samples for attribution and
 keeps the completed A/A–A/B counters above as the official timing observation.
 Launcher1180023 started20:00:21Z; raw data and eventual profile results stay
 under /workspaces/kprog-raw/perf/20261115-katran-body-profile/.
+That attempt stops before boot with cross-device hardlink error; source inputs
+span the repository and /var/tmp filesystems. Staging now uses symbolic links,
+with a read-only mount for the canonical perf directory hidden by guest
+/var/tmp. The existing one-image copy fallback also becomes symbolic links.
+The first attempt's logs and restored host controls stay in its raw directory;
+the official completed comparison and its measured inputs keep their scope.

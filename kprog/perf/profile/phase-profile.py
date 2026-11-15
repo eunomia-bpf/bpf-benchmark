@@ -156,9 +156,9 @@ def run(args: argparse.Namespace) -> int:
         raise SystemExit(f"output directory exists: {out}")
     out.mkdir(parents=True)
     var_tmp.mkdir(parents=True)
-    os.link(PERF, var_tmp / "perf")
-    os.link(KINSN, var_tmp / "bpf_x86_native_lab.ko")
-    os.link(IMAGE_TAR, var_tmp / "runtime.image.tar")
+    (var_tmp / "perf").symlink_to(pathlib.Path("/var/tmp/perf-input") / PERF.name)
+    (var_tmp / "bpf_x86_native_lab.ko").symlink_to(KINSN)
+    (var_tmp / "runtime.image.tar").symlink_to(IMAGE_TAR)
     guest = var_tmp / "phase-profile-guest.sh"
     manifest = args.manifest or (
         f"/opt/bpf-benchmark/native-bpf/x86_64/{args.app.split('/')[0]}/manifest.json")
@@ -167,6 +167,7 @@ def run(args: argparse.Namespace) -> int:
     command = [
         "taskset", "-c", args.cpus, "vng", "--run", str(KERNEL),
         "--cwd", str(ROOT), "--rwdir", str(ROOT), "--rwdir", f"/var/tmp={var_tmp}",
+        "--rodir", f"{PERF.parent}=/var/tmp/perf-input",
         "--overlay-rwdir", "/tmp", "--overlay-rwdir", "/run", "--overlay-rwdir", "/usr/local",
         "--disable-monitor", "--cpus", str(args.vcpus), "--memory", args.memory,
         "--append", "loglevel=4 panic=30 oops=panic",
