@@ -1,0 +1,1 @@
+["clang-18","-target","x86_64-linux-gnu","-O3","-march=native","-foptimize-sibling-calls","-fomit-frame-pointer","-mno-red-zone","-mgeneral-regs-only","-fno-stack-protector","-g","-I/workspaces/repository/vendor/libbpf/src","-c","/workspaces/repository/kprog/test/native_map_lookup_table.c","-o","/var/tmp/kprog-tmp/perf/map-table-lookup/lookup.native.o"]

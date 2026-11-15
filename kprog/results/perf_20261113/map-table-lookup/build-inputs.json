@@ -1,0 +1,30 @@
+{
+  "lookup.native.o": {
+    "path": "/var/tmp/kprog-tmp/perf/map-table-lookup/lookup.native.o",
+    "sha256": "082d57e0d0793cb25e001ce82d753c1538983cd7159bf7cec76e3a7aa826f7c6"
+  },
+  "trusted_x86.proof.o": {
+    "path": "/var/tmp/kprog-tmp/perf/map-table-lookup/trusted_x86.proof.o",
+    "sha256": "b3c2ae7d75af3f4fbca680963a363d19f476a10261d03888a1dc89f9b2034e36"
+  },
+  "lookup.kernel.bin": {
+    "path": "/var/tmp/kprog-tmp/perf/map-table-lookup/lookup.kernel.bin",
+    "sha256": "eebe14e701b45847538e40f5ec1e2bb7cd44f199897ccd1292216bc536403ca9"
+  },
+  "original.bpf.o": {
+    "path": "/var/tmp/kprog-tmp/perf/map-table-lookup/original.bpf.o",
+    "sha256": "38f82ee342dba04c1a3da00c2e00c19ef9594d5416495eb2a5b283026ecc0eaf"
+  },
+  "trusted_x86.bpf.o": {
+    "path": "/var/tmp/kprog-tmp/perf/map-table-lookup/trusted_x86.bpf.o",
+    "sha256": "7a098f989b6b6f325f0fe538f411758bd7919fce3ee2d72bb969ff2193c612c0"
+  },
+  "trusted_x86.bpf.i": {
+    "path": "/var/tmp/kprog-tmp/perf/map-table-lookup/trusted_x86.bpf.i",
+    "sha256": "c967abb4de199a2120ed19bab237fcd580cf9b0b87e16d3f720d3f600065341c"
+  },
+  "trusted_x86.bpf.bounds-input.bc": {
+    "path": "/var/tmp/kprog-tmp/perf/map-table-lookup/trusted_x86.bpf.bounds-input.bc",
+    "sha256": "f3f1bf4c198dddb9358efa122b6d87f7763f6a99fe41edb740ea0c3540777376"
+  }
+}

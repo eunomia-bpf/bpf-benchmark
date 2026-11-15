@@ -1,0 +1,28 @@
+
+/var/tmp/kprog-tmp/perf/map-table-lookup/trusted_x86.proof.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <map_lookup_table>:
+   0:	48 8b 4f 50          	mov    rcx,QWORD PTR [rdi+0x50]
+   4:	31 c0                	xor    eax,eax
+   6:	f6 c1 08             	test   cl,0x8
+   9:	75 32                	jne    3d <map_lookup_table+0x3d>
+   b:	50                   	push   rax
+   c:	83 e1 07             	and    ecx,0x7
+   f:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 16 <map_lookup_table+0x16>
+			12: R_X86_64_PC32	section:SectionIndex(7):.data.rel.ro-0x4
+  16:	48 8b 3c c8          	mov    rdi,QWORD PTR [rax+rcx*8]
+  1a:	c7 44 24 04 00 00 00 	mov    DWORD PTR [rsp+0x4],0x0
+  21:	00 
+  22:	48 8d 74 24 04       	lea    rsi,[rsp+0x4]
+  27:	b8 01 00 00 00       	mov    eax,0x1
+  2c:	ff d0                	call   rax
+  2e:	48 85 c0             	test   rax,rax
+  31:	74 04                	je     37 <map_lookup_table+0x37>
+  33:	8b 00                	mov    eax,DWORD PTR [rax]
+  35:	eb 02                	jmp    39 <map_lookup_table+0x39>
+  37:	31 c0                	xor    eax,eax
+  39:	48 83 c4 08          	add    rsp,0x8
+  3d:	e9 00 00 00 00       	jmp    42 <map_lookup_table+0x42>
