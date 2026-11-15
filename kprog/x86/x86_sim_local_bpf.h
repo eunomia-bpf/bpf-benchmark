@@ -1369,6 +1369,8 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
         __s64 __x86_l_meta_disp=__x86_l_disp; \
 		void *__x86_l_base_ptr = (void *)0;                      \
 		__u64 __x86_l_value = 0;                                 \
+		struct x86_sim_stack_value __x86_mv_write = {0};         \
+		__u8 __x86_mv_write_pointer = 0;                        \
 		if (KPROG_X86_REG_PRESENT(SRC))                          \
 			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(SRC);   \
 		if (X86_SIM_L_REG_TAG(SRC) != X86_SIM_TAG_ABI)           \
@@ -1384,12 +1386,13 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 				__u8 __x86_skb_tag=KPROG_ABI_LOAD_TAG(        \
 				 KPROG_ABI_KIND_SKB,X86_SIM_L_SKB_OFFSET((SRC),__x86_l_disp), \
 				 X86_SIM_TAG_SCALAR,X86_SIM_TAG_PACKET,X86_SIM_TAG_PACKET_END); \
-				if ((DST)==X86_RSP) X86_SIM_L_WRITE_REG_WIDTH((DST),__x86_l_value,X86_WIDTH_64); \
-				else X86_SIM_L_WRITE_REG_PTR_TAG((DST),(void *)(long)__x86_l_value,__x86_skb_tag); \
+				__x86_l_write_width = X86_WIDTH_64;       \
+				__x86_mv_write_pointer = (DST) != X86_RSP; \
+				__x86_mv_write.pointer = (void *)(long)__x86_l_value; \
+				__x86_mv_write.tag = __x86_skb_tag;      \
 			} else {                                            \
 				if ((OP)==X86_OP_MOVSX_LOAD)                  \
 				 __x86_l_value=x86_sign_extend(__x86_l_value,__x86_l_mem_width); \
-				X86_SIM_L_WRITE_REG_WIDTH((DST),__x86_l_value,__x86_l_write_width); \
 			}                                                  \
 		} else if (X86_SIM_L_LIVE_XDP() &&                               \
 		    X86_SIM_L_REG_TAG(SRC) == X86_SIM_TAG_ABI) {          \
@@ -1401,12 +1404,11 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 					__x86_l_base_ptr, __x86_l_disp),    \
 				X86_SIM_TAG_SCALAR, X86_SIM_TAG_PACKET,     \
 				X86_SIM_TAG_PACKET_END);                   \
-			if ((DST) == X86_RSP)                            \
-				X86_SIM_L_WRITE_REG_WIDTH((DST),         \
-					__x86_xdp_value, X86_WIDTH_64);    \
-			else                                             \
-				X86_SIM_L_WRITE_REG_PTR_TAG((DST),       \
-					(void *)(long)__x86_xdp_value, __x86_xdp_tag); \
+			__x86_l_value = __x86_xdp_value;                 \
+			__x86_l_write_width = X86_WIDTH_64;              \
+			__x86_mv_write_pointer = (DST) != X86_RSP;       \
+			__x86_mv_write.pointer = (void *)(long)__x86_xdp_value; \
+			__x86_mv_write.tag = __x86_xdp_tag;              \
 		} else switch (X86_SIM_L_MEM_READ_SRC(SRC, __x86_l_mem_width)) {\
 		case KPROG_X86_MEM_SRC_STACK:                            \
 			__x86_l_value = X86_SIM_L_STACK_READ(             \
@@ -1418,9 +1420,12 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
             struct x86_sim_stack_value __x86_mv_saved=X86_SIM_L_STACK_VALUES_READ( \
                 X86_SIM_L_STACK_INDEX((__s64)(long)__x86_l_base_ptr+__x86_l_meta_disp),__x86_l_mem_width); \
             if ((OP)==X86_OP_MOV_LOAD && __x86_l_write_width==X86_WIDTH_64 && \
-                __x86_mv_saved.tag!=X86_SIM_TAG_SCALAR && (DST)!=X86_RSP) \
-                X86_SIM_L_WRITE_REG_PTR_TAG((DST),__x86_mv_saved.tag==X86_SIM_TAG_STACK ? __x86_mv_saved.pointer : (void *)(long)__x86_l_value,__x86_mv_saved.tag); \
-            else X86_SIM_L_WRITE_REG_WIDTH((DST),__x86_l_value,__x86_l_write_width); \
+                __x86_mv_saved.tag!=X86_SIM_TAG_SCALAR && (DST)!=X86_RSP) { \
+                __x86_mv_write_pointer = 1; \
+                __x86_mv_write = __x86_mv_saved; \
+                if (__x86_mv_write.tag != X86_SIM_TAG_STACK) \
+                    __x86_mv_write.pointer = (void *)(long)__x86_l_value; \
+            } \
             break;                                           \
 		case KPROG_X86_MEM_SRC_ABI_PTR_LOAD:                     \
 			if (__x86_l_arm != KPROG_X86_MOV_LOAD_ARM_ABI_PTR) {\
@@ -1430,8 +1435,6 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 				else                                      \
 					__x86_l_value = X86_SIM_L_NATIVE_DATA_LOAD_TAGGED( \
 					__x86_l_base_ptr, __x86_l_disp, __x86_l_mem_width, X86_SIM_L_REG_TAG(SRC)); \
-				X86_SIM_L_WRITE_REG_WIDTH((DST),          \
-					__x86_l_value, __x86_l_write_width);\
 				break;                                    \
 			}                                                 \
 			__u8 __x86_l_ptr_tag = KPROG_ABI_LOAD_TAG(       \
@@ -1443,13 +1446,11 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 				__x86_l_ptr_value = (void *)(long)KPROG_X86_MEM_LOAD_FIXED( \
 					__x86_l_base_ptr, x86_simm(IMM), __x86_l_mem_width); \
 			else __x86_l_ptr_value = X86_SIM_L_LOAD_PTR_ADDR(__x86_l_addr); \
-			if ((DST) == X86_RSP)                             \
-				X86_SIM_L_WRITE_REG_WIDTH((DST),          \
-					(__u64)(long)__x86_l_ptr_value, X86_WIDTH_64); \
-			else                                              \
-				X86_SIM_L_WRITE_REG_PTR_TAG((DST),         \
-					__x86_l_ptr_value,                     \
-					__x86_l_ptr_tag);                  \
+			__x86_l_value = (__u64)(long)__x86_l_ptr_value; \
+			__x86_l_write_width = X86_WIDTH_64;              \
+			__x86_mv_write_pointer = (DST) != X86_RSP;       \
+			__x86_mv_write.pointer = __x86_l_ptr_value;      \
+			__x86_mv_write.tag = __x86_l_ptr_tag;            \
 			break;                                           \
 		default:                                                 \
 			if (X86_MEM_AUX_INDEX(AUX) == X86_REG_NONE)       \
@@ -1466,11 +1467,20 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
                 __x86_mv_alias=X86_SIM_L_STACK_VALUES_READ( \
                     (__u64)(long)__x86_l_addr-(__u64)(long)&__x86_stack_mem.b[0],__x86_l_mem_width); \
             if ((OP)==X86_OP_MOV_LOAD && __x86_l_write_width==X86_WIDTH_64 && \
-                __x86_mv_alias.tag!=X86_SIM_TAG_SCALAR && (DST)!=X86_RSP) \
-                X86_SIM_L_WRITE_REG_PTR_TAG((DST),__x86_mv_alias.tag==X86_SIM_TAG_STACK ? __x86_mv_alias.pointer : (void *)(long)__x86_l_value,__x86_mv_alias.tag); \
-            else X86_SIM_L_WRITE_REG_WIDTH((DST),__x86_l_value,__x86_l_write_width); \
+                __x86_mv_alias.tag!=X86_SIM_TAG_SCALAR && (DST)!=X86_RSP) { \
+                __x86_mv_write_pointer = 1; \
+                __x86_mv_write = __x86_mv_alias; \
+                if (__x86_mv_write.tag != X86_SIM_TAG_STACK) \
+                    __x86_mv_write.pointer = (void *)(long)__x86_l_value; \
+            } \
             break;                                           \
 		}                                                         \
+		/* Resolve all addresses and saved facts before a possibly \
+		 * overlapping destination (or RSP release) is changed. */ \
+		if (__x86_mv_write_pointer)                             \
+			X86_SIM_L_WRITE_REG_PTR_TAG((DST), __x86_mv_write.pointer, __x86_mv_write.tag); \
+		else                                                     \
+			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value, __x86_l_write_width); \
 	} while (0)
 
 #define X86_SIM_L_EXEC_STORE(OP, DST, SRC, FLAGS, AUX, IMM)                 \

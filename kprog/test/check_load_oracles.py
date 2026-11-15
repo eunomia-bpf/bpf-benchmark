@@ -21,10 +21,13 @@ unsigned long native_lab_entry_input(unsigned int kind) {
 ''')
     records = []
     failures = []
-    for name, own_input in [('test_x86_mov_load_route_host', False),
-                            ('test_x86_stack_arm_route_host', False),
-                            ('test_stack_output_lifetime_host', True)]:
-        source = ROOT / 'kprog/formal/oracles' / (name + '.c')
+    tests = [(ROOT / 'kprog/formal/oracles' / (name + '.c'), own_input)
+             for name, own_input in [('test_x86_mov_load_route_host', False),
+                                     ('test_x86_stack_arm_route_host', False),
+                                     ('test_stack_output_lifetime_host', True)]]
+    tests.append((ROOT / 'kprog/test/load_writeback_host.c', True))
+    for source, own_input in tests:
+        name = source.stem
         executable = a.build / name
         commands = [['cc', '-std=gnu2x', '-O2', '-Wall', '-Wextra',
                      '-I' + str(ROOT), '-I' + str(ROOT / 'kprog/formal'),

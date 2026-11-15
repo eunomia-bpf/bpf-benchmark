@@ -246,3 +246,11 @@ normal B has identical allocated sections for16/16. Same-input OTel CPP is
 speed claim. Full B/stack/app acceptance remains open. Exact identities,
 commands and retained initial failures: `../results/perf_20261113/bmi2-specialization/report.md`.
 MOV_LOAD/STORE remain242.8MB; shared load writeback is the next candidate.
+
+2026-11-15 shared MOV_LOAD writeback: memory/context/stack branches now
+compute the existing value, width and optional pointer/tag before a single
+destination write. This avoids expanding register-write and stack-release
+bookkeeping once per branch. Address calculation, volatile reads, saved facts,
+memory-recovery early exit and RSP scalarization keep their original order.
+Validation/reprofile receipts follow; no runtime performance claim. All native
+LTO remains on together.
