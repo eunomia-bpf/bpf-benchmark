@@ -14,3 +14,7 @@ host:
 	$(CC) $(CFLAGS) $(INCLUDES) -c $(FORMAL)/c/X86Pointer.c -o $(BUILD)/x86_pointer_binding.o
 	$(CC) $(CFLAGS) $(INCLUDES) -DPROFILE=64 -DSCALAR_FACTS=1 $(FORMAL)/oracles/test_x86_storage_profile_host.c $(BUILD)/x86_pointer_binding.o -o $(BUILD)/test_x86_storage_profile_host
 	$(BUILD)/test_x86_storage_profile_host
+
+.PHONY: parse
+parse:
+	$(FORMAL)/external/clean/clightgen -lean -normalize -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -o /dev/null $(FORMAL)/c/X86Pointer.c
