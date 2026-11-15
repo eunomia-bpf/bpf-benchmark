@@ -252,7 +252,7 @@ def main():
         raise RuntimeError(f"decoded {len(insns)} instructions for {len(forms)} forms")
     c = [f'#include "{ROOT}/kprog/fidelity/driver.h"', '#include <stdlib.h>', '#include <string.h>', '#define X86_SIM_ENABLE_STACK 1', f'#include "{ROOT}/kprog/{arch}/{arch}_sim_local_bpf.h"']
     if arch == "x86":
-        c += ['extern uint64_t native_stack_base;']
+        c += ['extern uint64_t native_stack_base;', 'unsigned long native_lab_entry_input(unsigned int kind) { if (kind == NATIVE_LAB_INPUT_SP) return native_stack_base; if (kind == NATIVE_LAB_INPUT_UNSPECIFIED) return 0; /* Explicit existing observer test choice; hardware matching remains open. */ fputs("unexpected numeric observer environment input\\n", stderr); exit(1); }']
     if arch == "arm64":
         c += ['extern uint64_t native_stack_base;', 'static void arm64_sim_unsupported_opcode(void) { abort(); }', 'unsigned long native_lab_entry_input(unsigned int kind) { if (kind == NATIVE_LAB_INPUT_SP) return native_stack_base; if (kind == NATIVE_LAB_INPUT_UNSPECIFIED) return 0; /* Explicit existing observer test choice; hardware matching remains open. */ fputs("unexpected numeric observer environment input\\n", stderr); exit(1); }']
     entries, coverage = [], []

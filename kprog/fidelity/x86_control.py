@@ -86,6 +86,7 @@ def main():
         entries.append(f'{{{json.dumps(name)},"X86_CONTROL",native_{i},sim_{i},0x8d5U,64,0,6,&native_pc_{i},&native_next_{i}}}')
         coverage.append(dict(assembly=name,opcode='X86_CONTROL',native_instructions=len(code)))
     prelude=['#include "../driver.h"','#include <stdlib.h>','#define X86_SIM_ENABLE_STACK 1',f'#include "{ROOT}/kprog/x86/x86_sim_local_bpf.h"','extern uint64_t native_stack_base;', 'extern void __x86_sim_unresolved_indirect_target(void) __attribute__((error("indirect target was not eliminated by specialization")));']
+    prelude += ['unsigned long native_lab_entry_input(unsigned int kind) { if (kind == NATIVE_LAB_INPUT_SP) return native_stack_base; if (kind == NATIVE_LAB_INPUT_UNSPECIFIED) return 0; /* Explicit observer choice; not a hardware-input witness. */ fputs("unexpected control observer input\\n", stderr); exit(1); }']
     (out/'generated.c').write_text('\n'.join(prelude+functions+['const struct form forms[]={',',\n'.join(entries),'};','const unsigned form_count=sizeof(forms)/sizeof(forms[0]);'])+'\n')
     (out/'coverage.json').write_text(json.dumps(coverage,indent=2)+'\n')
     print(f'generated {len(matrix)} real x86 finite-control observers')
