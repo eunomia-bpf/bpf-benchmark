@@ -84,11 +84,8 @@
  */
 #define KPROG_X86_STORE_ARM(BASE_IS_RSP)                                   \
 	({                                                                \
-		__u8 __kprog_x86_st_arm;                                   \
-		if (BASE_IS_RSP)                                           \
-			__kprog_x86_st_arm = KPROG_X86_STORE_ARM_STACK;    \
-		else                                                       \
-			__kprog_x86_st_arm = KPROG_X86_STORE_ARM_MEMORY;   \
+		const __u8 __kprog_x86_st_arm = (BASE_IS_RSP) ?             \
+			KPROG_X86_STORE_ARM_STACK : KPROG_X86_STORE_ARM_MEMORY; \
 		__kprog_x86_st_arm;                                        \
 	})
 #endif

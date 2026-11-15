@@ -311,11 +311,8 @@ def render_c(width_rows: list[dict], disp_rows: list[dict],
  */
 #define KPROG_X86_STORE_ARM(BASE_IS_RSP)                                   \\
 \t({{                                                                \\
-\t\t__u8 __kprog_x86_st_arm;                                   \\
-\t\tif (BASE_IS_RSP)                                           \\
-\t\t\t__kprog_x86_st_arm = KPROG_X86_STORE_ARM_STACK;    \\
-\t\telse                                                       \\
-\t\t\t__kprog_x86_st_arm = KPROG_X86_STORE_ARM_MEMORY;   \\
+\t\tconst __u8 __kprog_x86_st_arm = (BASE_IS_RSP) ?             \\
+\t\t\tKPROG_X86_STORE_ARM_STACK : KPROG_X86_STORE_ARM_MEMORY; \\
 \t\t__kprog_x86_st_arm;                                        \\
 \t}})
 #endif

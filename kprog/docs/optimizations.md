@@ -350,3 +350,8 @@ branch selection and volatile store order are unchanged. The generated store
 header and its generator change together; the shared body still handles runtime
 width/tag inputs. This extends early constant propagation through the nested
 store macros, without a second compiler path or a flag change.
+
+Store-arm selection now initializes its immutable byte with the same conditional
+expression instead of assigning it in an if/else. The condition still executes
+once, with the same two arm constants. This keeps a fixed decoded register's
+arm visible to Clang before SSA; runtime register dispatch remains supported.
