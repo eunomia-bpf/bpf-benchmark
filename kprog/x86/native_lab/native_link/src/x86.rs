@@ -40,7 +40,6 @@ pub(super) fn proof_effects(bytes: &[u8]) -> Result<serde_json::Value> {
 }
 
 const X86_CPU_NUMBER_HELPER_KEY: &str = "__native_x86_cpu_number";
-const X86_THIS_CPU_OFF_HELPER_KEY: &str = "__native_x86_this_cpu_off";
 const X86_BPF_MAP_MAX_ENTRIES_OFFSET_KEY: &str = "__native_x86_bpf_map_max_entries_offset";
 const X86_BPF_ARRAY_PTRS_OFFSET_KEY: &str = "__native_x86_bpf_array_ptrs_offset";
 const X86_BPF_PROG_BPF_FUNC_OFFSET_KEY: &str = "__native_x86_bpf_prog_bpf_func_offset";
@@ -207,24 +206,6 @@ pub(super) fn bpf_helper_name_from_id(helper_id: u64) -> Option<&'static str> {
         195 => Some("bpf_map_lookup_percpu_elem"),
         _ => None,
     }
-}
-
-fn build_x86_get_smp_processor_id_inline(
-    helper_addrs: &HashMap<String, u64>,
-) -> Result<Option<Vec<Instruction>>> {
-    let (Some(&cpu_number), Some(&this_cpu_off)) = (
-        helper_addrs.get(X86_CPU_NUMBER_HELPER_KEY),
-        helper_addrs.get(X86_THIS_CPU_OFF_HELPER_KEY),
-    ) else {
-        return Ok(None);
-    };
-    let mut bytes = Vec::new();
-    bytes.extend_from_slice(&[0x48, 0xC7, 0xC0]); // mov rax, sign_extend32(&cpu_number)
-    bytes.extend_from_slice(&(cpu_number as u32).to_le_bytes());
-    bytes.extend_from_slice(&[0x65, 0x48, 0x03, 0x04, 0x25]); // add rax, gs:[this_cpu_off]
-    bytes.extend_from_slice(&(this_cpu_off as u32).to_le_bytes());
-    bytes.extend_from_slice(&[0x8B, 0x40, 0x00]); // mov eax, [rax]
-    Ok(Some(declared_byte_chunks(&bytes)?))
 }
 
 fn find_symbol_in_section_at_address(
@@ -1126,13 +1107,10 @@ pub(super) fn rewrite_x86(
     proof_mode: bool,
     preserve_entry_abi: bool,
     runtime_array_layout: Option<&RuntimeArrayLayout>,
-    runtime_array_shared: bool,
     runtime_probe_read_layout: Option<&RuntimeProbeReadLayout>,
     runtime_hash_layout: Option<&RuntimeHashLayout>,
     runtime_lpm_layout: Option<&RuntimeLpmLayout>,
     show: bool,
-    runtime_probe_read_strings: bool,
-    runtime_percpu_loads: bool,
 ) -> Result<RewriteResult> {
     let included_ranges: Vec<(u64, u64)> = included
         .iter()
@@ -1588,29 +1566,12 @@ pub(super) fn rewrite_x86(
                         resolved_helper_call_sites.insert(site_key);
                         continue;
                     }
-                    if runtime_percpu_loads {
-                        if let Some(inline)=probe_read::percpu(runtime_probe_read_layout,helper_addrs,&name)? {
-                            for ib in inline {
-                                push_x86_synthetic(&mut local,&mut kinds,&mut insn_local_ip,&mut next_synthetic_ip,ib)?;
-                            }
-                            resolved_helper_call_sites.insert(site_key);
-                            continue;
+                    if let Some(inline)=probe_read::percpu(runtime_probe_read_layout,helper_addrs,&name)? {
+                        for ib in inline {
+                            push_x86_synthetic(&mut local,&mut kinds,&mut insn_local_ip,&mut next_synthetic_ip,ib)?;
                         }
-                    }
-                    if name == "bpf_get_smp_processor_id" {
-                        if let Some(inline) = build_x86_get_smp_processor_id_inline(helper_addrs)? {
-                            for ib in inline {
-                                push_x86_synthetic(
-                                    &mut local,
-                                    &mut kinds,
-                                    &mut insn_local_ip,
-                                    &mut next_synthetic_ip,
-                                    ib,
-                                )?;
-                            }
-                            resolved_helper_call_sites.insert(site_key);
-                            continue;
-                        }
+                        resolved_helper_call_sites.insert(site_key);
+                        continue;
                     }
 
                     if name == "bpf_map_lookup_elem" {
@@ -1621,28 +1582,6 @@ pub(super) fn rewrite_x86(
                             proven_maps.get(&local_ip).map(String::as_str),
                             &sym.name, map_lookup_helper_addr,
                         )?;
-                        if let Some(layout) = runtime_array_layout.filter(|_| !runtime_array_shared && matches!(spec.kind, LookupKind::Call)) {
-                            // Prefix-local branches skip exactly this five-byte helper
-                            // slot for ARRAY and NULL results. Other types use the
-                            // unmodified helper and original RDI/RSI arguments.
-                            for (index, ib) in declared_byte_chunks(&runtime_array::prefix(layout)?)?.into_iter().enumerate() {
-                                if index == 0 {
-                                    push_x86_replacement(&mut local, &mut kinds, &mut insn_local_ip,
-                                        local_ip, ib, None);
-                                } else {
-                                    push_x86_synthetic(&mut local, &mut kinds, &mut insn_local_ip,
-                                        &mut next_synthetic_ip, ib)?;
-                                }
-                            }
-                            push_x86_synthetic(&mut local, &mut kinds, &mut insn_local_ip,
-                                &mut next_synthetic_ip, build_x86_helper_call_rel32_slot()?)?;
-                            *kinds.last_mut().expect("helper slot") = Some(PatchKind::HelperBranchRel32 {
-                                target_addr: resolve_lookup_site_target(&spec, "runtime ARRAY generic dispatch")?,
-                                opcode: 0xe8,
-                            });
-                            resolved_helper_call_sites.insert(site_key);
-                            continue;
-                        }
                         match spec.kind {
                             LookupKind::Array | LookupKind::PerCpuArray => {
                                 for ib in build_x86_array_lookup(&spec)? {
@@ -1951,15 +1890,14 @@ pub(super) fn rewrite_x86(
         Vec::new()
     };
 
-    if runtime_array_shared && !proof_mode {
-        let layout = runtime_array_layout.ok_or_else(|| anyhow!("shared ARRAY dispatch needs a runtime layout"))?;
+    if let Some(layout) = runtime_array_layout.filter(|_| !proof_mode) {
         if let Some(range) = runtime_array::share(&mut blob, &mut relocs, layout, map_lookup_helper_addr)? {
             code_ranges.push(range);
         }
     }
 
     let read_sites = if let Some(layout) = runtime_probe_read_layout.filter(|_| !proof_mode) {
-        let (ranges,sites) = probe_read::share(&mut blob, &mut relocs, layout, helper_addrs, runtime_probe_read_strings)?;
+        let (ranges,sites) = probe_read::share(&mut blob, &mut relocs, layout, helper_addrs)?;
         code_ranges.extend(ranges);
         sites
     } else { Vec::new() };
@@ -4325,7 +4263,7 @@ mod tests {
                 let entry = find_symbol_by_name(&elf, "entry")?;
                 let empty = HashMap::new();
                 let proof = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &empty,
-                    &HashMap::new(), &[], true, true, None, false, None, None, None, false, false, false)?;
+                    &HashMap::new(), &[], true, true, None, None, None, None, false,)?;
                 assert!(proof.proof_relocs.is_empty(), "{name}, form={form}");
                 assert_eq!(proof.proof_symbols.len(), 2, "same length shares one routine");
                 assert!(proof.proof_symbols[1].name.starts_with("__native_link_local_"));
@@ -4339,7 +4277,7 @@ mod tests {
                 let included = discover_reachable(&elf, &entry)?;
                 assert_eq!(included.len(), 2);
                 let result = rewrite_x86(&elf, &entry, &included, &empty, &empty,
-                    &HashMap::new(), &[], false, true, None, false, None, None, None, false, false, false)?;
+                    &HashMap::new(), &[], false, true, None, None, None, None, false,)?;
                 assert!(result.relocs.is_empty());
                 #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
                 {
@@ -4394,10 +4332,10 @@ mod tests {
             let helpers = HashMap::from([("bpf_map_lookup_elem".to_owned(), 0x1234)]);
             let array = RuntimeArrayLayout { map_type: 12, max_entries: 24, elem_size: 32,
                 index_mask: 36, value: 64, array_type: 2 };
-            for (layout, shared) in [(None, false), (Some(&array), false), (Some(&array), true)] {
+            for layout in [None, Some(&array)] {
                 let result = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers,
                     &HashMap::new(), &HashMap::new(), &[],
-                    false, false, layout, shared, None, None, None, false, false, false)?;
+                    false, false, layout, None, None, None, false,)?;
                 assert!(result.relocs.iter().any(|r| r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32
                     && r.target == 0x1234), "form={form}: actual helper target");
                 assert!(!result.relocs.iter().any(|r| r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32
@@ -4537,7 +4475,7 @@ mod tests {
             elem_size: 8, index_mask: 3, value_offset: 32, percpu_base_addr: 0,
         })]);
         {
-            let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps, &facts, &[], false, false, None, false, None, None, None, false, false, false)?;
+            let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps, &facts, &[], false, false, None, None, None, None, false,)?;
             assert!(output.relocs.is_empty(), "known array must avoid generic helper");
             assert_eq!(output.map_patches.len(), 1);
             let mut code = output.blob;
@@ -4640,7 +4578,7 @@ mod tests {
                 (X86_TAIL_CALL_OFFSET_KEY.to_owned(), 12),
             ]);
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers,
-                &HashMap::new(), &HashMap::new(), &[], false, false, None, false, None, None, None, false, false, false)?;
+                &HashMap::new(), &HashMap::new(), &[], false, false, None, None, None, None, false,)?;
             assert_eq!(output.relocs.len(), 1, "immediate={immediate}");
             let relocation = output.relocs[0];
             assert_eq!(relocation.kind, NATIVE_LAB_RELOC_X86_TAIL_COUNT);
@@ -4705,7 +4643,7 @@ mod tests {
         let entry = find_symbol_by_name(&elf, "entry")?;
         for preserve in [false, true] {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(),
-                &HashMap::new(), &HashMap::new(), &[], true, preserve, None, false, None, None, None, false, false, false)?;
+                &HashMap::new(), &HashMap::new(), &[], true, preserve, None, None, None, None, false,)?;
             let mut expected = if preserve { vec![0x53, 0x31, 0xc0, 0x5b] } else { vec![0x31, 0xc0] };
             expected.extend_from_slice(&[0xe9, 0, 0, 0, 0]); // Canonical entry exit in proof mode.
             assert_eq!(output.blob, expected);
@@ -4723,7 +4661,7 @@ mod tests {
         // a sentinel at the same negative offset used by tail-count recovery.
         unsafe extern "C" {
             fn mmap(address: *mut std::ffi::c_void, length: usize, protection: i32,
-                flags: i32, fd: i32, offset: isize) -> *mut std::ffi::c_void;
+                flags: i32, fd: i32, offset: i64) -> *mut std::ffi::c_void;
             fn mprotect(address: *mut std::ffi::c_void, length: usize, protection: i32) -> i32;
             fn munmap(address: *mut std::ffi::c_void, length: usize) -> i32;
         }

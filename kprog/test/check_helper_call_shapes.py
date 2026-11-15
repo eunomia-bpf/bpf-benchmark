@@ -25,10 +25,9 @@ def check(args):
     plan.write_text(json.dumps(dict(version=1, helpers=[dict(name='bpf_get_prandom_u32', addr=target)])))
     flags = ['--abi-load-sites', 'true',
              '--runtime-probe-read-layout', args.layouts/'runtime-probe-read-layout.json',
-             '--runtime-probe-read-strings', '--runtime-percpu-loads',
              '--runtime-hash-layout', args.layouts/'runtime-hash-layout.json',
              '--runtime-lpm-layout', args.layouts/'runtime-lpm-layout.json',
-             '--runtime-array-layout', args.layouts/'runtime-array-layout.json', '--runtime-array-shared']
+             '--runtime-array-layout', args.layouts/'runtime-array-layout.json']
 
     def run(command):
         command = list(map(str, command))

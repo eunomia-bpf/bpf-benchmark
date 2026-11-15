@@ -148,12 +148,11 @@ fn routine_kind(layout: &RuntimeProbeReadLayout, user: bool, actual: u64, string
 }
 
 pub(super) fn share(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>,
-                    layout: &RuntimeProbeReadLayout, helpers: &HashMap<String,u64>, strings: bool)
+                    layout: &RuntimeProbeReadLayout, helpers: &HashMap<String,u64>)
     -> Result<(Vec<(usize,usize)>,Vec<LoadSite>)> {
     let mut ranges = Vec::new();
     let mut loads = Vec::new();
     for (name,user,string) in [("bpf_probe_read_user",true,false),("bpf_probe_read_kernel",false,false),("bpf_probe_read_kernel_str",false,true)] {
-        if string && !strings {continue;}
         let Some(&helper) = helpers.get(name) else { continue; };
         let calls: Vec<_> = relocs.iter().filter(|r| r.kind == 1 && r.target == helper)
             .map(|r| r.offset as usize).collect();
@@ -239,10 +238,9 @@ mod tests {
             println!("{}",String::from_utf8_lossy(&run.stdout));
         }
         let helpers=HashMap::from([("bpf_probe_read_kernel".into(),layout.kernel_helper),
-            (X86_CPU_NUMBER_HELPER_KEY.into(),8),(X86_THIS_CPU_OFF_HELPER_KEY.into(),16)]);
+            (X86_CPU_NUMBER_HELPER_KEY.into(),8)]);
         for (mode,name,inline) in [(3,"current-task",percpu(Some(&layout),&helpers,"bpf_get_current_task")?.unwrap()),
-            (4,"cpu",percpu(Some(&layout),&helpers,"bpf_get_smp_processor_id")?.unwrap()),
-            (4,"cpu-legacy",build_x86_get_smp_processor_id_inline(&helpers)?.unwrap())] {
+            (4,"cpu",percpu(Some(&layout),&helpers,"bpf_get_smp_processor_id")?.unwrap())] {
             let mut bytes=BlockEncoder::encode(64,InstructionBlock::new(&inline,0),BlockEncoderOptions::NONE)?.code_buffer;
             bytes.push(0xc3);let path=output.join(format!("{name}.bin"));fs::write(&path,bytes)?;
             let run=std::process::Command::new(&driver).arg(path).arg("unused").arg(mode.to_string()).output()?;
@@ -260,7 +258,7 @@ mod tests {
             RelocRecord{offset:5,kind:1,target:0x1000},RelocRecord{offset:10,kind:1,target:0x2000},
             RelocRecord{offset:15,kind:1,target:0x9999}];
         let helpers = HashMap::from([("bpf_probe_read_user".into(),0x1000),("bpf_probe_read_kernel".into(),0x2000)]);
-        let (ranges,sites) = share(&mut blob,&mut relocs,&layout,&helpers,false)?;
+        let (ranges,sites) = share(&mut blob,&mut relocs,&layout,&helpers)?;
         assert_eq!(ranges.len(),2); assert_eq!(sites.len(),4);
         for (offset,range) in [(0,ranges[0]),(5,ranges[0]),(10,ranges[1])] {
             let disp = i32::from_le_bytes(blob[offset+1..offset+5].try_into()?);
@@ -269,13 +267,10 @@ mod tests {
         assert!(relocs.iter().any(|r| r.offset==15 && r.target==0x9999));
         assert_eq!(relocs.len(),3,"one policy callback per shared routine");
         let mut strings=X86_HELPER_CALL_REL32_SLOT.repeat(2);
-        let original=strings.clone();
         let mut calls=vec![RelocRecord{offset:0,kind:1,target:0x5000},RelocRecord{offset:5,kind:1,target:0x6000}];
         let names=HashMap::from([("bpf_probe_read_kernel".into(),0x2000),
             ("bpf_probe_read_kernel_str".into(),0x5000),("bpf_probe_read_user_str".into(),0x6000)]);
-        let (off,loads)=share(&mut strings,&mut calls,&layout,&names,false)?;
-        assert!(off.is_empty() && loads.is_empty());assert_eq!(strings,original);
-        let (on,loads)=share(&mut strings,&mut calls,&layout,&names,true)?;
+        let (on,loads)=share(&mut strings,&mut calls,&layout,&names)?;
         assert_eq!(on.len(),1);assert_eq!(loads.len(),1);assert_eq!(loads[0].destination,11);
         assert!(calls.iter().any(|r|r.offset==5 && r.target==0x6000),"user strings retain original helper");
         assert!(calls.iter().any(|r|r.target==layout.kernel_allowed),"rebase policy from regular helper, not string helper");

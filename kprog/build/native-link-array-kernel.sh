@@ -8,4 +8,4 @@ for arg in "$@"; do
 done
 (( present )) || abi=(--abi-load-sites true)
 exec "${KPROG_ARRAY_LINKER:?}" --runtime-array-layout "${KPROG_ARRAY_LAYOUT:?}" \
-    --runtime-array-shared "${abi[@]}" "$@"
+    "${abi[@]}" "$@"

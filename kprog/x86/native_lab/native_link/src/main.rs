@@ -121,22 +121,9 @@ struct Args {
     #[arg(long)]
     runtime_array_layout: Option<PathBuf>,
 
-    /// Share one runtime ARRAY routine instead of expanding every lookup site.
-    #[arg(long, requires = "runtime_array_layout")]
-    runtime_array_shared: bool,
-
     /// Inline fault-recovering probe reads using the sole target's ABI/symbols.
     #[arg(long)]
     runtime_probe_read_layout: Option<PathBuf>,
-
-    /// Inline kernel string reads using the existing fault-recovering read ABI.
-    #[arg(long, requires = "runtime_probe_read_layout")]
-    runtime_probe_read_strings: bool,
-
-    /// Inline CPU/current-task helpers when sole-target per-CPU facts exist.
-    #[arg(long)]
-    runtime_percpu_loads: bool,
-
 
     /// Specialize proven raw hash lookups using the sole target's field layout.
     #[arg(long)]
@@ -584,11 +571,10 @@ fn main() -> Result<()> {
                 proof_mode,
                 args.preserve_entry_abi,
                 if proof_mode { None } else { runtime_array_layout.as_ref() },
-                args.runtime_array_shared && !proof_mode,
                 runtime_probe_read_layout.as_ref(),
                 runtime_hash_layout.as_ref(),
                 runtime_lpm_layout.as_ref(),
-                args.show, args.runtime_probe_read_strings && !proof_mode, args.runtime_percpu_loads && !proof_mode)?
+                args.show,)?
         }
         object::Architecture::Aarch64 => {
             let entry = find_symbol_by_name(&elf, &args.symbol)?;
@@ -2683,20 +2669,6 @@ fn disasm_arm64_words(blob: &[u8]) {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn runtime_array_layout_and_sharing_cli_contract() {
-        let argv = ["native-link", "--input", "p.o", "--symbol", "entry", "--output", "p.bin"];
-        assert!(Args::try_parse_from(argv).unwrap().runtime_array_layout.is_none());
-        assert!(!Args::try_parse_from(argv).unwrap().runtime_array_shared);
-        assert!(Args::try_parse_from(argv.into_iter().chain(["--runtime-array-shared"])).is_err());
-        assert_eq!(Args::try_parse_from(argv.into_iter().chain([
-            "--runtime-array-layout", "layout.json"]))
-            .unwrap().runtime_array_layout, Some(PathBuf::from("layout.json")));
-        assert!(Args::try_parse_from(argv.into_iter().chain([
-            "--runtime-array-layout", "layout.json", "--runtime-array-shared"]))
-            .unwrap().runtime_array_shared);
-    }
 
     #[test]
     fn arm64_entry_abi_strip_allows_multiple_epilogues() {
