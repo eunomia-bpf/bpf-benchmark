@@ -24,3 +24,9 @@ Real host execution passes20 private helper mutations,20 mixed aliases and
 boundaries. Existing20 constant/60identity/30equality and normal B backend
 checks pass. Actual retained main frame and stock/whole-app acceptance follow.
 Production base compiler/image remain unchanged during these checks.
+
+Actual retained main completes:18581 private accesses normalize; executable
+B305376→295336 bytes,7690 CFG blocks,47 spill slots (46x8B+1x4B) and the same
+784-byte frame. Private volatility was a code-size issue but does not explain
+the remaining frame by itself. Basea7d/image741 stay unchanged; next inspect
+optimized arena address uses and spill origins rather than rerun the frontend.
