@@ -1,4 +1,4 @@
-//! Opt-in helper LTO: preserve access policy, fault nesting, errors and full
+//! Helper LTO: preserve access policy, fault nesting, errors and full
 //! destination zeroing. Recover source loads through existing EX_TYPE_BPF by
 //! clearing R11 status, not by pretending a fault was a successful zero load.
 use super::*;

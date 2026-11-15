@@ -4,11 +4,7 @@
 //! existing BPF map lifetime/RCU protection; it introduces no pointer cache.
 use super::*;
 
-pub(super) fn prefix(layout: &RuntimeArrayLayout) -> Result<Vec<u8>> {
-    build_prefix(layout, 5, 0)
-}
-
-fn build_prefix(layout: &RuntimeArrayLayout, skip: u8, generic_offset: u8) -> Result<Vec<u8>> {
+fn build_prefix(layout: &RuntimeArrayLayout) -> Result<Vec<u8>> {
     let mut bytes = vec![0x81, 0xbf]; // cmp dword [rdi+map_type], ARRAY
     bytes.extend_from_slice(&i32::try_from(layout.map_type)?.to_le_bytes());
     bytes.extend_from_slice(&layout.array_type.to_le_bytes());
@@ -26,16 +22,16 @@ fn build_prefix(layout: &RuntimeArrayLayout, skip: u8, generic_offset: u8) -> Re
     bytes.extend_from_slice(&[0x48, 0x0f, 0xaf, 0xc2]); // imul rax,rdx: u64 product
     bytes.extend_from_slice(&[0x48, 0x8d, 0x84, 0x07]); // lea rax,[rdi+rax+value]
     bytes.extend_from_slice(&i32::try_from(layout.value)?.to_le_bytes());
-    bytes.extend_from_slice(&[0xeb, 4 + skip]); // skip NULL body and generic slot
+    bytes.extend_from_slice(&[0xeb, 4]); // Skip NULL body to the shared return.
     let null = bytes.len();
-    bytes.extend_from_slice(&[0x31, 0xc0, 0xeb, skip]); // NULL; skip generic slot
-    bytes[generic_branch] = u8::try_from(bytes.len() - generic_branch - 1)? + generic_offset;
+    bytes.extend_from_slice(&[0x31, 0xc0, 0xeb, 0]); // NULL, then shared return.
+    bytes[generic_branch] = u8::try_from(bytes.len() - generic_branch - 1)? + 1; // Other types skip the shared RET.
     bytes[null_branch] = u8::try_from(null - null_branch - 1)?;
     Ok(bytes)
 }
 
 fn routine(layout: &RuntimeArrayLayout) -> Result<(Vec<u8>, usize)> {
-    let mut bytes = build_prefix(layout, 0, 1)?;
+    let mut bytes = build_prefix(layout)?;
     bytes.push(0xc3); // ARRAY/NULL return; other types branch past this RET.
     bytes.extend_from_slice(&[0x48, 0x83, 0xec, 8]); // Align nested SysV call.
     let call = bytes.len();
@@ -77,16 +73,11 @@ mod tests {
         // Deliberately non-kernel fixture offsets catch hard-coded layout use.
         let layout = RuntimeArrayLayout { map_type: 12, max_entries: 24, elem_size: 32,
             index_mask: 36, value: 64, array_type: 2 };
-        for shared in [false, true] {
-            let (mut code, call) = if shared { routine(&layout)? } else {
-                let mut code = prefix(&layout)?;
-                let call = code.len();
-                code.extend_from_slice(&[0xe8,0,0,0,0,0xc3]);
-                (code, call)
-            };
+        {
+            let (mut code, call) = routine(&layout)?;
             let disp = i32::try_from(code.len() as i64 - (call + 5) as i64)?;
             code[call+1..call+5].copy_from_slice(&disp.to_le_bytes());
-            if shared {
+            {
                 // The nested generic helper must see SysV RSP%16==8.
                 code.extend_from_slice(&[0x48,0x89,0xe0,0x83,0xe0,15,0x83,0xf8,8,
                     0x74,6,0xb8,0xfe,0xca,0xad,0xde,0xc3]);
