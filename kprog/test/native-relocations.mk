@@ -84,6 +84,12 @@ build:
 preserve-running-linker:
 	flock -s /workspaces/.agent-state/kprog-lanes/locks/image python3 $(ROOT)/kprog/test/preserve_running_linker.py --canonical $(LINKER_TARGET)/release/native-link --retained $(ROOT)/corpus/results/perf-corrected-all-lto-linker-20261114/native-link-on --loader /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader --output $(OUTPUT)/pairing
 
+# Caller holds image SH on behalf of this already-running guest batch. It
+# releases naturally when that exact owner exits; it never signals the owner.
+.PHONY: hold-existing-guest-image
+hold-existing-guest-image:
+	tail --pid=$(PERF_GUEST_OWNER_PID) -f /dev/null
+
 # The queued run_verified_make caller holds image EX before Make starts.
 .PHONY: publish-normal-pair
 publish-normal-pair: $(CONTEXT_TOOL) $(CHECKED_TOOL)
