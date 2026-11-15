@@ -21,7 +21,7 @@ static void host(const std::filesystem::path &output)
     require(encoded[0].empty() && encoded[1].size() == 16, "wrong site chunk");
     const std::vector<uint8_t> expected{0,0,0,0,3,0,11,0,123,0,0,0,4,0,255,255};
     require(encoded[1] == expected, "wire offsets/length/destination changed");
-    const auto moved = plan_blob_chunks(384, {{126, 0}}, sites);
+    const auto moved = plan_blob_chunks(384, {{126, 1, 0}}, sites);
     const auto moved_sites = encode_load_sites(sites, moved);
     require(moved[0].len == 126 && read_u32_le(moved_sites[1].data()) == 1 &&
         read_u32_le(moved_sites[1].data()+8) == 124, "relocation/site rebasing changed");
@@ -32,7 +32,29 @@ static void host(const std::filesystem::path &output)
     { std::ofstream f(abi); f << "version\tnative-link-abi-v2\ncallee_saved_mask\t0\n"; }
     sites.clear();
     require(read_link_abi_file(abi, &sites) == 0 && sites.empty(), "empty/default ABI changed");
-    std::cout << "direct recovery host PASS: ABI, wire, chunk edge, call relocation, bounds, default\n";
+
+    /* Reloc kinds the module patches at different widths must survive parsing,
+     * chunk planning and re-encoding with their own kind and width. */
+    const std::vector<uint8_t> records{
+        10,0,0,0,  1,0,0,0,  0,0,0,0,0,0,0,0,     /* kind 1 call rel32, 5 B */
+        20,0,0,0, 10,0,0,0,  0,0,0,0,0,0,0,0,     /* kind 10 tail count, 4 B */
+        30,0,0,0, 12,0,0,0,  8,0,0,0,0,0,0,0,     /* kind 12 image pointer, 8 B */
+    };
+    const auto relocs = parse_native_lab_relocs(records, 384);
+    require(relocs.size() == 3 && relocs[1].kind == 10 && relocs[2].kind == 12,
+        "reloc kind dropped in parsing");
+    const auto reloc_chunks = plan_blob_chunks(384, relocs);
+    const auto encoded_relocs = encode_relocs(relocs, reloc_chunks);
+    require(encoded_relocs[0] == records, "reloc kind or width re-encoded wrongly");
+    /* An 8-byte image-pointer slot may not straddle a chunk boundary. */
+    const auto split = plan_blob_chunks(384, {{127, 12, 0}});
+    require(split[0].len == 127 && encode_relocs({{127, 12, 0}}, split)[1].size() == 16,
+        "image-pointer slot split across chunks");
+    bool unknown_kind = false;
+    try { parse_native_lab_relocs({0,0,0,0, 99,0,0,0, 0,0,0,0,0,0,0,0}, 384); }
+    catch (const std::runtime_error &) { unknown_kind = true; }
+    require(unknown_kind, "unknown reloc kind accepted");
+    std::cout << "direct recovery host PASS: ABI, wire, chunk edge, call relocation, bounds, default, reloc kinds\n";
 }
 
 static void kernel(const std::filesystem::path &output)

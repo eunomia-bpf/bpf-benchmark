@@ -494,11 +494,16 @@ uint64_t lookup_kernel_map_value_ptr_by_fd(int map_fd)
 }
 
 constexpr size_t kRelocRecordBytes = 16;
-constexpr size_t kNativeLabRelocBytes = 5;
-constexpr uint32_t kNativeLabRelocHelperCallRel32 = 1;
+
+size_t reloc_patch_bytes(uint32_t kind)
+{
+    const int size = native_lab_reloc_patch_size(kind);
+    return size > 0 ? static_cast<size_t>(size) : 0;
+}
 
 struct NativeLabReloc {
     uint32_t global_offset;
+    uint32_t kind;
     uint64_t target;
 };
 
@@ -555,14 +560,16 @@ std::vector<NativeLabReloc> parse_native_lab_relocs(const std::vector<uint8_t> &
         const uint32_t global_offset = read_u32_le(relocs.data() + off);
         const uint32_t kind = read_u32_le(relocs.data() + off + 4);
         const uint64_t target = read_u64_le(relocs.data() + off + 8);
-        if (kind != kNativeLabRelocHelperCallRel32) {
+        const int patch = native_lab_reloc_patch_size(kind);
+        if (patch < 0) {
             fail("native_lab reloc has unknown kind " + std::to_string(kind));
         }
-        if (static_cast<size_t>(global_offset) + kNativeLabRelocBytes > blob_size) {
-            fail("native_lab reloc call offset exceeds blob bounds");
+        if (static_cast<size_t>(global_offset) + patch > blob_size) {
+            fail("native_lab reloc patch exceeds blob bounds");
         }
         out.push_back(NativeLabReloc{
             global_offset,
+            kind,
             target,
         });
     }
@@ -584,7 +591,7 @@ std::vector<NativeBlobChunk> plan_blob_chunks(size_t blob_size,
         /* A helper-call reloc slot must fit inside one kinsn emit chunk. */
         for (const NativeLabReloc &reloc : relocs) {
             const size_t reloc_start = reloc.global_offset;
-            const size_t reloc_end = reloc_start + kNativeLabRelocBytes;
+            const size_t reloc_end = reloc_start + reloc_patch_bytes(reloc.kind);
             if (offset < reloc_start && reloc_start < end && end < reloc_end) {
                 end = reloc_start;
             }
@@ -630,6 +637,37 @@ void upload_reloc_chunk(const std::vector<uint8_t> &relocs, uint32_t chunk_id)
 #endif
 }
 
+std::vector<std::vector<uint8_t>> encode_relocs(const std::vector<NativeLabReloc> &relocs,
+                                                const std::vector<NativeBlobChunk> &chunks)
+{
+    std::vector<std::vector<uint8_t>> by_chunk(chunks.size());
+    for (const NativeLabReloc &reloc : relocs) {
+        bool assigned = false;
+        for (size_t chunk_id = 0; chunk_id < chunks.size(); chunk_id++) {
+            const NativeBlobChunk &chunk = chunks[chunk_id];
+            const size_t chunk_end = chunk.offset + chunk.len;
+            const size_t reloc_start = reloc.global_offset;
+            const size_t reloc_end = reloc_start + reloc_patch_bytes(reloc.kind);
+            if (reloc_start < chunk.offset || reloc_end > chunk_end) {
+                continue;
+            }
+            const uint32_t local_offset =
+                static_cast<uint32_t>(reloc_start - chunk.offset);
+            append_u32_le(by_chunk[chunk_id], local_offset);
+            append_u32_le(by_chunk[chunk_id], reloc.kind);
+            append_u64_le(by_chunk[chunk_id], reloc.target);
+            assigned = true;
+            break;
+        }
+        if (!assigned) {
+            fail("native_lab reloc at offset " +
+                 std::to_string(reloc.global_offset) +
+                 " crosses planned blob chunks");
+        }
+    }
+    return by_chunk;
+}
+
 void upload_relocs(const std::vector<NativeLabReloc> &relocs,
                    const std::vector<NativeBlobChunk> &chunks)
 {
@@ -641,32 +679,7 @@ void upload_relocs(const std::vector<NativeLabReloc> &relocs,
              + kNativeLabTarget.module_name);
     }
 
-    std::vector<std::vector<uint8_t>> by_chunk(chunks.size());
-    for (const NativeLabReloc &reloc : relocs) {
-        bool assigned = false;
-        for (size_t chunk_id = 0; chunk_id < chunks.size(); chunk_id++) {
-            const NativeBlobChunk &chunk = chunks[chunk_id];
-            const size_t chunk_end = chunk.offset + chunk.len;
-            const size_t reloc_start = reloc.global_offset;
-            const size_t reloc_end = reloc_start + kNativeLabRelocBytes;
-            if (reloc_start < chunk.offset || reloc_end > chunk_end) {
-                continue;
-            }
-            const uint32_t local_offset =
-                static_cast<uint32_t>(reloc_start - chunk.offset);
-            append_u32_le(by_chunk[chunk_id], local_offset);
-            append_u32_le(by_chunk[chunk_id], kNativeLabRelocHelperCallRel32);
-            append_u64_le(by_chunk[chunk_id], reloc.target);
-            assigned = true;
-            break;
-        }
-        if (!assigned) {
-            fail("native_lab reloc at offset " +
-                 std::to_string(reloc.global_offset) +
-                 " crosses planned blob chunks");
-        }
-    }
-
+    const auto by_chunk = encode_relocs(relocs, chunks);
     for (uint32_t i = 0; i < chunks.size(); i++) {
         if (!by_chunk[i].empty()) {
             upload_reloc_chunk(by_chunk[i], i);
